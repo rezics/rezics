@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import type { Prisma } from "../../../prisma/generated/client.js";
+import { ScoreAggregate, ScoreEntry, ScoreRealmField } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomInt } from "./utils.js";
@@ -39,12 +40,12 @@ export async function seedScores(
   const storyRealm = realms.length > 1 ? realms[1] : null;
 
   if (storyRealm) {
-    await ctx.prisma.scoreRealmField.createMany({
-      data: STORY_REALM_FIELDS.map((f) => ({
+    await ctx.db.insert(ScoreRealmField).values(
+      STORY_REALM_FIELDS.map((f) => ({
         realm: storyRealm.id,
         ...f,
       })),
-    });
+    );
     console.log(
       `[Seed]   Created ${STORY_REALM_FIELDS.length} realm fields for story realm`,
     );
@@ -100,8 +101,8 @@ export async function seedScores(
     }
 
     if (entries.length > 0) {
-      await ctx.prisma.scoreEntry.createMany({
-        data: entries.map((e) => ({
+      await ctx.db.insert(ScoreEntry).values(
+        entries.map((e) => ({
           id: e.id,
           userId: e.userId,
           unitId: e.unitId,
@@ -109,7 +110,7 @@ export async function seedScores(
           value: e.value,
           fields: e.fields,
         })),
-      });
+      );
     }
 
     const byRealm = new Map<
@@ -164,7 +165,7 @@ export async function seedScores(
     }));
 
     if (aggregateData.length > 0) {
-      await ctx.prisma.scoreAggregate.createMany({ data: aggregateData });
+      await ctx.db.insert(ScoreAggregate).values(aggregateData);
     }
   });
 

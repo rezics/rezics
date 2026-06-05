@@ -539,6 +539,9 @@ databases may be reset and reseeded.
   - Applied progress: factory follow/subscription seeding now inserts
     `Subscription` rows and updates `User`/`Unit` counters through Drizzle; the
     favorites shelf branch remains on the legacy factory Prisma path.
+  - Applied progress: factory score seeding now inserts `ScoreRealmField`,
+    `ScoreEntry`, and `ScoreAggregate` rows through Drizzle instead of Prisma
+    `createMany`.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
