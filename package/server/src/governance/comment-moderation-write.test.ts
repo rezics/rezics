@@ -1,10 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
-
-installPrismaClientMock();
+import { Comment, Unit, UnitCollaborator } from "../db/schema";
 
 const enqueueMock = mock(async () => ({ status: "created" }));
 const broadcastMock = mock(async () => ({ ok: true }));
@@ -17,6 +12,10 @@ mock.module("@/job/job-boundary", () => ({
 
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
   broadcast: broadcastMock,
+}));
+
+mock.module("../realm/realm.mapper", () => ({
+  mapUnitRealmToDTO: mock(() => ({})),
 }));
 
 const identity = {
@@ -35,6 +34,19 @@ const baseComment = {
     collaborators: [],
   },
 };
+
+let activeTx: ReturnType<typeof installTx>["tx"] | null = null;
+
+const dbTransactionMock = mock(async (fn: any) => {
+  if (!activeTx) throw new Error("Test transaction not installed");
+  return fn(activeTx);
+});
+
+mock.module("../db/client", () => ({
+  db: {
+    transaction: dbTransactionMock,
+  },
+}));
 
 function capabilities(input: { realm?: boolean } = {}) {
   return {
@@ -67,23 +79,70 @@ function actions(input: { latestRemove?: any } = {}) {
 }
 
 function installTx(comment: any) {
-  const queryRaw = mock(async () => []);
-  const findUniqueOrThrow = mock(async () => comment);
-  const update = mock(async ({ data }: any) => ({ ...comment, ...data }));
+  const execute = mock(async () => []);
+  const updateReturning = mock(async (data: Record<string, unknown>) => [
+    { ...comment, ...data },
+  ]);
+  const updateSet = mock((data: Record<string, unknown>) => ({
+    where: mock(() => ({
+      returning: mock(() => updateReturning(data)),
+    })),
+  }));
+  const update = mock(() => ({
+    set: updateSet,
+  }));
+  const select = mock((selection?: Record<string, unknown>) => {
+    let table: unknown;
+    const query = {
+      from: mock((nextTable: unknown) => {
+        table = nextTable;
+        return query;
+      }),
+      where: mock(() => query),
+      limit: mock(() => query),
+      then(
+        resolve: (value: unknown[]) => void,
+        reject?: (reason: unknown) => void,
+      ) {
+        try {
+          if (table === Comment) {
+            resolve([comment]);
+            return;
+          }
+          if (table === Unit) {
+            resolve(
+              comment.rootUnit
+                ? [{ userId: comment.rootUnit.userId ?? null }]
+                : [],
+            );
+            return;
+          }
+          if (table === UnitCollaborator) {
+            resolve(comment.rootUnit?.collaborators ?? []);
+            return;
+          }
+          resolve(selection ? [{}] : []);
+        } catch (error) {
+          reject?.(error);
+        }
+      },
+    };
+    return query;
+  });
   const tx = {
-    $queryRaw: queryRaw,
-    comment: { findUniqueOrThrow, update },
-    moderationAction: {},
+    execute,
+    select,
+    update,
   };
-  const transaction = mock(async (fn: any) => fn(tx));
-  prismaMock.$transaction = transaction;
-  return { transaction, queryRaw, findUniqueOrThrow, update, tx };
+  activeTx = tx;
+  return { execute, update, updateReturning, updateSet, tx };
 }
 
 describe("GovernanceModerationService.moderateComment", () => {
   beforeEach(() => {
     enqueueMock.mockClear();
-    delete prismaMock.$transaction;
+    dbTransactionMock.mockClear();
+    activeTx = null;
   });
 
   test("owner removal updates the snapshot and appends one comment ledger action", async () => {
@@ -108,10 +167,10 @@ describe("GovernanceModerationService.moderateComment", () => {
       idempotencyKey: "request-1:comment-1:remove",
     });
 
-    expect(tx.queryRaw).toHaveBeenCalled();
-    expect(tx.update).toHaveBeenCalledWith({
-      where: { id: "comment-1" },
-      data: { moderationStatus: "REMOVED" },
+    expect(tx.execute).toHaveBeenCalled();
+    expect(tx.updateSet).toHaveBeenCalledWith({
+      moderationStatus: "REMOVED",
+      updatedAt: expect.any(Date),
     });
     expect(actionService.appendModerationAction).toHaveBeenCalledWith(tx.tx, {
       authority: "OWNER",
@@ -157,7 +216,7 @@ describe("GovernanceModerationService.moderateComment", () => {
         reasonCode: "comment.abuse",
       }),
     ).rejects.toThrow(/actor must match identity/);
-    expect(prismaMock.$transaction).toBeUndefined();
+    expect(dbTransactionMock).not.toHaveBeenCalled();
   });
 
   test("realm lock writes locked snapshot state and a realm authority action", async () => {
@@ -183,9 +242,9 @@ describe("GovernanceModerationService.moderateComment", () => {
       reasonCode: "comment.locked",
     });
 
-    expect(tx.update).toHaveBeenCalledWith({
-      where: { id: "comment-1" },
-      data: { isLocked: true },
+    expect(tx.updateSet).toHaveBeenCalledWith({
+      isLocked: true,
+      updatedAt: expect.any(Date),
     });
     expect(actionService.appendModerationAction).toHaveBeenCalledWith(
       tx.tx,
@@ -223,7 +282,7 @@ describe("GovernanceModerationService.moderateComment", () => {
         reasonCode: "comment.restore",
       }),
     ).rejects.toThrow(/higher authority/);
-    expect(tx.update).not.toHaveBeenCalled();
+    expect(tx.updateSet).not.toHaveBeenCalled();
     expect(actionService.appendModerationAction).not.toHaveBeenCalled();
     expect(enqueueMock).not.toHaveBeenCalled();
   });
