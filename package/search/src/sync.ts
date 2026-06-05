@@ -21,6 +21,7 @@ import {
   Unit,
   User,
   UserUnitCollection,
+  UserUnitProgress,
 } from "@rezics/server/db/schema";
 import { and, asc, eq, gt, sql } from "drizzle-orm";
 import type { SearchClient } from "./client";
@@ -790,19 +791,60 @@ export async function syncProgress(
   });
 }
 
+type UserUnitProgressSyncRow = typeof UserUnitProgress.$inferSelect;
+
+async function findUserUnitProgressSyncRow(
+  userId: string,
+  unitId: string,
+): Promise<UserUnitProgressSyncRow | null> {
+  const [row] = await getSearchDb()
+    .select()
+    .from(UserUnitProgress)
+    .where(
+      and(
+        eq(UserUnitProgress.userId, userId),
+        eq(UserUnitProgress.unitId, unitId),
+      ),
+    )
+    .limit(1);
+  return (row as UserUnitProgressSyncRow | undefined) ?? null;
+}
+
+async function listUserUnitProgressSyncRows(input: {
+  limit: number;
+  cursor?: string;
+}): Promise<UserUnitProgressSyncRow[]> {
+  const db = getSearchDb();
+  const query = db.select().from(UserUnitProgress);
+  const cursor = input.cursor ? parseCompositeCursor(input.cursor) : null;
+  const rows = cursor
+    ? await query
+        .where(
+          and(
+            eq(UserUnitProgress.isDeleted, false),
+            sql`(${UserUnitProgress.userId}, ${UserUnitProgress.unitId}) > (${cursor.userId}, ${cursor.unitId})`,
+          ),
+        )
+        .orderBy(asc(UserUnitProgress.userId), asc(UserUnitProgress.unitId))
+        .limit(input.limit)
+    : await query
+        .where(eq(UserUnitProgress.isDeleted, false))
+        .orderBy(asc(UserUnitProgress.userId), asc(UserUnitProgress.unitId))
+        .limit(input.limit);
+  return rows as UserUnitProgressSyncRow[];
+}
+
 export async function syncSingleProgress(
   client: SearchClient,
   userId: string,
   unitId: string,
 ): Promise<void> {
-  const row = await getSearchPrismaClient().userUnitProgress.findUnique({
-    where: { userId_unitId: { userId, unitId } },
-  });
-  if (!row) {
+  const row = await findUserUnitProgressSyncRow(userId, unitId);
+  if (!row || row.isDeleted) {
     await removeProgress(client, userId, unitId);
     return;
   }
-  await syncProgress(client, row as UserUnitProgressRow);
+  await syncProgress(client, row);
 }
 
 export async function removeProgress(
@@ -821,19 +863,9 @@ export async function syncProgressSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const rows: any[] = await getSearchPrismaClient().userUnitProgress.findMany({
-    where: { isDeleted: false },
-    orderBy: [{ userId: "asc" }, { unitId: "asc" }],
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor
-      ? {
-          userId_unitId: {
-            userId: options.cursor.split(":")[0] ?? "",
-            unitId: options.cursor.split(":").slice(1).join(":"),
-          },
-        }
-      : undefined,
+  const rows = await listUserUnitProgressSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const current = rows.slice(0, limit);
   const hasMore = rows.length > limit && current.length > 0;
