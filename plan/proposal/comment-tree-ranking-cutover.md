@@ -1,218 +1,252 @@
 ---
-title: Comment Tree Refactor + Reddit-Style Ranking Cutover
+title: Comment Slice Ranking + Ltree Removal Cutover
 status: active
 created: 2026-06-05
 completed:
 supersededBy:
-tags: [comment, ranking, reaction, cache, tree, meili]
+tags: [comment, ranking, reaction, tree, meili]
 ---
 
 ## Why
 
-Comment sibling ordering is currently the ltree `path` lexicographic order
-(`sortTreeComments` in `comment.service.ts`), but the product wants comments
-ranked by **score**, like Reddit. We already have the ranking infrastructure
-(`package/ranking`: `UnitRankProjection`, per-comment scores patched into the
-Meili `comments` index), but two gaps remain:
+Comment reads currently depend on the `Comment.path` ltree materialized path and
+whole-tree assembly. That makes ranked comment ordering expensive and brittle:
+the backend has to reason about a "true tree", subtree reads depend on path
+prefixes, and ranking changes imply complex tree-wide cache invalidation.
 
-1. The ranking math in `formulas.ts` (`computeV1RankingScores`) is an ad-hoc
-   weighted engagement sum that overranks low-vote items and uses one formula
-   for posts and comments alike. We want Reddit's published algorithms: the
-   time-biased **hot** sort for posts/content and the time-independent
-   **Wilson "best"** sort for comments.
-2. The comment read path assembles and sorts whole trees in Postgres by `path`.
-   We want a Reddit-style **precomputed, score-ordered, progressively-served**
-   comment tree that keeps backend pressure bounded to the visible page,
-   exploiting the fact that the tree structure is append-only (hard deletes are
-   forbidden; moderation is a tombstone).
-
-**Dependency / sequencing:** this plan depends on
-`plan/proposal/reaction-upvote-downvote.md` landing **first**. That cutover
-renames the binary reaction kinds to `upvote`/`downvote`, fixes
-`score = upvote − downvote`, and changes `formulas.ts` to read those keys — but
-it intentionally keeps the old `ranking-v1` *math*. This plan replaces the math
-(Part A) and refactors the comment tree read/cache path (Part B). Do not start
-Part A until the reaction kinds are `upvote`/`downvote`, or the Wilson inputs
-will read stale keys.
+Cut comments over to a lighter Reddit-style model: comments are immutable
+adjacency rows scoped to one `(rootUnitId, realmUnitId)` partition, ranking is
+precomputed from upvote/downvote signals, and reads return ranked slices plus
+local context. The app may render a best-effort fake tree from the slices it has,
+but the backend no longer serves or caches a complete tree.
+`reaction-upvote-downvote` has already landed, so this plan assumes `upvote` and
+`downvote` are the canonical binary vote inputs.
 
 ## Durable constraints & decisions
 
-### Part A — ranking formula
+### Comment topology
 
-- `(comment)` The ranking formulas are a direct port of Reddit's published
-  algorithms; cite the sources at the formula site: Salihefendic, "How Reddit
-  ranking algorithms work"; Evan Miller, "How Not To Sort By Average Rating"
-  (Wilson lower bound).
-- `(type)` Keep `RANKING_FORMULA_VERSION = "ranking-v1"`. This is a dev-stage
-  in-place replacement — **no new version string, no `active`-flag gradual
-  rollout, no dual formula**. The version string is unchanged on purpose so the
-  cutover is a clean swap of the math behind the same identifier.
-- `(comment)` The formula branches on `snapshot.rankKind` (already present on
-  the snapshot — see `service.ts` building it before `computeV1RankingScores`).
-  Do **not** add a separate `rankKind` parameter; read it off the snapshot.
-- `(test)` `rankKind === "comment"` → `qualityScore` is the Wilson score lower
-  bound with `z = 1.281551565545`, `ups = reactionCounts.upvote`,
-  `downs = reactionCounts.downvote`, and is **independent of submission time**
-  (two comments with identical up/down counts get identical `qualityScore`
-  regardless of `createdAt`).
-- `(test)` `rankKind === "post" | "content"` → `hotScore` is Reddit hot:
-  `sign(s)·log10(max(|s|,1)) + (epoch_seconds − 1134028003)/45000` where
-  `s = upvote − downvote`. Constant `1134028003` (Reddit's first-post epoch) and
-  `45000` (seconds per order of magnitude) are part of the contract; pin them in
-  the test.
-- `(test)` `topScore = upvote − downvote` (net score) for all rank kinds;
-  `trendingScore` keeps the existing view/read velocity computation.
-- `(decision)` Hot decay style: **Reddit additive-log** (older items never decay
-  to zero; new items get a fixed time bonus) — chosen over the v1 multiplicative
-  decay for fidelity to "replicate Reddit". Recorded as the default; revisit only
-  if post feeds feel wrong.
-- `(comment)` Wilson `ups/downs` come from the binary vote surface only
-  (`upvote`/`downvote`). Non-vote reaction kinds (`heart`, `funny`, `award`,
-  etc., per the reaction plan) must **not** enter `ups/downs`.
-- `(comment)` Changing the math invalidates every stored projection. A single
-  full recompute/backfill is required after the swap (no migration of old
-  scores); there is no formula-version gate to fall back on.
+- `(type)` A comment belongs to exactly one discussion partition:
+  `(rootUnitId, realmUnitId)`. `rootUnitId` is the post/review/remark discussion
+  root; `realmUnitId` is nullable but immutable after create.
+- `(test)` `UpdateCommentInput` must not include `realmUnitId`. Replies inherit
+  the parent's `realmUnitId`; creating a reply with a different realm is rejected.
+- `(comment)` Comment deletes are tombstones. Hard delete, reparenting, and moving
+  a comment between realms are out of scope because they invalidate parent-child
+  serving cursors and ranked slices.
+- `(type)` Backend comment contracts use `rootCommentId` only to mean "the id of
+  the comment used as a local discussion entry point." Do not introduce
+  `familyRootCommentId`; that implies a heavier backend family model. If the UI
+  needs to focus or scroll to a specific row, keep `anchorCommentId` as frontend
+  route/local state only.
+- `(comment)` `Comment.path` / ltree is not a fallback. This cutover removes
+  ltree from comment serving rather than repairing its ordering bugs.
 
-### Part B — comment tree
+### Ranking formulas
 
-- `(type)` The tree partition key is `(rootUnitId, realmUnitId)`. Realm is a
-  **hard partition** (`realmPartitionCondition`: `realmUnitId = R` or
-  `IS NULL`); partitions are disjoint and reads are **always single-partition**.
-  There is no cross-realm aggregate view.
-- `(comment)` A comment's score is intrinsic to its own votes (Wilson is
-  realm-independent); realm only determines **which comments are siblings**.
-  Comment projections are `scope: { kind: "parent" }`, not realm-scoped — that is
-  correct and sufficient, because all children of a parent share the parent's
-  realm partition.
-- `(comment)` Volatility is split into three layers, and cache invalidation has
-  exactly two triggers, **neither on the read path**:
-  - Layer 1 — skeleton: `(id, parentId, depth, orderKey)`, append-only
-    structure.
-  - Layer 2 — scores: ranking projection, **minute-level batch** recompute.
-  - Layer 3 — content hydration: fetched only for the visible page
-    (content/author/vote counts/redaction).
-  - Trigger 1: a new comment insert → incremental patch into the parent's
-    ordered children at the scored position (one entry per sort mode).
-  - Trigger 2: ranking recompute (minute-level batch) → re-sort affected sibling
-    groups.
-- `(test)` Soft-delete / moderation is a **tombstone**: the node stays in the
-  tree (as `includeRedactedAncestors` already keeps redacted ancestors),
-  structure is unchanged, only Layer 3 flips to redacted. A soft-delete must
-  **not** invalidate the skeleton/order cache. This is load-bearing on the
-  project rule that hard deletes are forbidden.
-- `(type)` Sort modes and their order keys: `best` → `qualityScore` (Wilson);
-  `top` → net `upvote − downvote`; `new` → `createdAt`. `path` is **structure +
-  subtree (`<@`) only**, never the default display sort.
-- `(decision)` Skeleton/serve store: **reuse the Meili `comments` index for
-  per-parent ordered serving, with a Postgres rebuild path as fallback**
-  (recommended) over Redis or pure Postgres. Grounding: ranking already patches
-  per-comment `hotScore/topScore/qualityScore` into the Meili `comments` index,
-  and the index carries `(rootUnitId, realmUnitId, parentCommentId,
-  moderationStatus)` filterable fields — so Meili can already filter a partition
-  and sort a parent's children by score. The Reddit-style "precomputed CommentTree
-  blob" is the heavier alternative and is **not** required when Meili can serve
-  per-parent pages directly.
-- `(comment)` Cold-cache / rebuild reads use a Postgres index
-  `(rootUnitId, realmUnitId, parentCommentId, <scoreKey>, id)` so a partition's
-  per-parent ordered children can be reconstructed without a full-tree scan.
-- `(comment)` Serving is progressive (Reddit model): return a top chunk plus
-  `MoreChildren`-style "load more / continue thread" stubs; the client expands
-  stubs on demand and threads the flat slice. The backend never materializes a
-  whole thread for a read.
-- `(comment)` The ltree `path` base36 labels have a latent ordering bug:
-  variable-width base36 breaks lexicographic order at digit-width boundaries
-  (seq 35=`z` vs 36=`10` inverts) — the same bug class as the old `sortPath`
-  9999-cliff in `plan/report/post-tree-sortpath-report.md`. After this refactor
-  the impact is limited to the `new`-sort tiebreak, so the fix is optional/low
-  priority (task 3.x).
+- `(comment)` Source formulas should cite Reddit's archived `_sorts.pyx` for
+  `hot`, `confidence`, and `controversy`, plus Evan Miller for Wilson lower
+  bound background where useful.
+- `(type)` Keep `RANKING_FORMULA_VERSION = "ranking-v1"` for this dev-stage
+  replacement. There is no dual formula rollout.
+- `(test)` Vote-only scores read `ups = reactionCounts.upvote ?? 0` and
+  `downs = reactionCounts.downvote ?? 0`. Non-vote reaction kinds must not affect
+  `best`, `top`, `rising`, or `controversial`.
+- `(test)` `qualityScore` is pure Wilson lower bound with
+  `z = 1.281551565545`. It is time-independent and is not the UI `Best` score.
+- `(test)` `topScore = upvote - downvote`.
+- `(test)` `controversyScore` follows Reddit controversy semantics:
+  `0` when either side has zero votes; otherwise
+  `(ups + downs) ** (min(ups, downs) / max(ups, downs))`.
+- `(type)` Add `risingScore` and `bestScore` to ranking projections and serving
+  documents. `risingScore` captures recent positive momentum; `bestScore` is the
+  UI `Best` order key and combines durable quality with controlled rising boost.
+- `(test)` `bestScore` must allow promising new comments to surface without
+  turning `Best` into pure `Hot`: old high-quality comments remain strong, while
+  the rising boost fades as total vote count grows.
+- `(test)` `hotScore` keeps Reddit hot semantics for post/content feeds:
+  `sign(s) * log10(max(abs(s), 1)) + (epoch_seconds - 1134028003) / 45000`,
+  where `s = upvote - downvote`.
 
-## 1. Ranking formula cutover (Part A)
+### Serving model
 
-- [ ] 1.1 Rewrite the math in
-  `package/ranking/src/ranking/formulas.ts:computeV1RankingScores` in place,
-  branching on `snapshot.rankKind`. Keep the exported
-  `RANKING_FORMULA_VERSION = "ranking-v1"`. Add the source-citing comment block.
-- [ ] 1.2 Implement pure helpers: `redditHot(ups, downs, createdAt)`,
-  `wilsonLowerBound(ups, downs)` (z = 1.281551565545), `netScore(ups, downs)`.
-  Read `ups/downs` from `snapshot.reactionCounts.upvote / .downvote`.
-- [ ] 1.3 Map outputs: comment → `qualityScore = wilson`, `topScore = net`,
-  `hotScore = redditHot` (kept for an optional "hot comments" tab),
-  `trendingScore` unchanged; post/content → `hotScore = redditHot`,
-  `topScore = net`, `qualityScore = wilson`, `trendingScore` unchanged.
-- [ ] 1.4 (Optional) Add `controversyScore = magnitude^balance` — requires
-  extending `RankingScores` (`types.ts`), the `UnitRankProjection` column
-  (`db/schema/ranking.ts`), the upsert/patch in `ranking.repository.ts` /
-  `service.ts`, and the Meili patch payload. Skip if no controversial tab ships.
-- [ ] 1.5 Update `package/ranking/src/ranking/formulas` tests (and any
-  ranking-formula test referenced by `reaction-upvote-downvote` task 5.1) to lock
-  the Wilson time-independence, the hot constants, and the net `topScore`.
-- [ ] 1.6 Run one full recompute/backfill via the job-runner fullsync
-  (`package/job-runner/scripts/enqueue-ranking-fullsync.ts` →
-  `RANKING_COMMAND_KINDS.fullSync` → `recomputeUnit`) so every projection and its
-  Meili patch reflect the new math.
+- `(type)` Comment reads are slice-based, not whole-tree based:
+  `discovery`, `root`, and `children`.
+- `(type)` `discovery` returns ranked comments for `(rootUnitId, realmUnitId)`
+  with local parent preview/context when available. It does not promise a
+  complete tree or ancestor chain.
+- `(type)` `root` returns one `rootCommentId` plus a first direct-children page.
+  It is the backend entry point for a local comment discussion.
+- `(type)` `children` returns one direct-children page for a `parentCommentId`.
+- `(comment)` Discovery pagination appends to the ranked list only. It must not
+  insert loaded rows into arbitrary middle positions to complete a tree.
+- `(comment)` Tree-like expansion happens only in root/children mode, where
+  "load more" is attached to one parent.
+- `(type)` Sort modes and order keys:
+  `best -> bestScore`, `top -> topScore`, `rising -> risingScore`,
+  `controversial -> controversyScore`, `new -> createdAt desc`,
+  `old -> createdAt asc`.
+- `(comment)` V1 serving uses the Meili `comments` index for slice queries
+  because it already carries comment partition filters and ranking patches.
+  A future `CommentRankServing` table is the fallback if stable cursors,
+  moderation freshness, or Meili consistency become insufficient.
 
-## 2. Comment tree refactor (Part B)
+### Data ownership
 
-- [ ] 2.1 Decide the serve path concretely (Meili per-parent, per the decision):
-  confirm/extend the Meili `comments` query contract
-  (`package/contract/src/meili/comment.ts`) to support
-  filter `(rootUnitId, realmUnitId, parentCommentId)` + sort by the chosen
-  `scoreKey` + paginate, including the `realmUnitId IS NULL` partition.
-- [ ] 2.2 Refactor `package/server/src/comment/comment.service.ts` read path so
-  sibling order comes from ranking `scoreKey` (best=`qualityScore`,
-  top=`topScore`, new=`createdAt`) instead of `sortTreeComments` over `path`.
-  `path` stays only for `mode: "subtree"` (`<@`) and as a stable `new`-sort
-  tiebreak.
-- [ ] 2.3 Implement progressive serving: top chunk + `MoreChildren` stubs per
-  parent; an endpoint/branch that resolves a stub into the next ordered page of a
-  parent's children within the partition.
-- [ ] 2.4 Add the Postgres rebuild index
-  `(rootUnitId, realmUnitId, parentCommentId, <scoreKey>, id)` on `Comment`
-  (`package/server/src/db/schema/comment.ts`) for cold-cache/fallback reads, plus
-  the migration.
-- [ ] 2.5 Wire the two invalidation triggers: comment `create()` patches the
-  parent's ordered children (incremental); ranking recompute (minute-level batch)
-  re-sorts affected sibling groups. Confirm soft-delete/moderation does **not**
-  invalidate skeleton/order (tombstone only flips Layer 3).
-- [ ] 2.6 Hydrate only the visible page (Layer 3): content, author, vote counts,
-  redaction overlay (`attachPaths`/`attachPinOverlays` reuse where applicable).
-- [ ] 2.7 Update `@rezics/api` frontend access + app comment feature consumers to
-  the new sort-mode + paginated/stub-expanding shape. Keep front-end tree
-  assembly from the returned flat ordered slice.
+- `(type)` Reaction DB owns source votes:
+  `Reaction` and `ReactionSummary`.
+- `(type)` Ranking DB owns derived rank state:
+  `UnitRankProjection`, `RankingSignalBucket`, and a new reaction-bucket table
+  for recent upvote/downvote windows.
+- `(type)` Server DB owns comment topology and content:
+  `Comment` adjacency fields and tombstone/moderation state.
+- `(comment)` Comment API reads must not call the reaction service to calculate
+  sort order. The ranking service materializes sort fields into the serving
+  index before reads.
 
-## 3. Optional cleanups
+## 1. Ranking Formula And Projection Cutover
 
-- [ ] 3.1 (Low priority) Fixed-width zero-padded base36 in `rezics_to_base36`
-  (and a one-shot path re-encode) so `new`-sort tiebreak ordering is correct at
-  digit-width boundaries. Only needed if `new` sort relies on `path` rather than
-  `createdAt`.
-- [ ] 3.2 (Optional) Rename sequence `post_path_label_seq` →
-  `comment_path_label_seq` (consumed only by `Comment`, never `Post`). Clean
-  cutover: `pgSequence` in `db/schema/columns.ts`, the two `nextval(...)` sites in
-  `comment.service.ts`, `schema-exports.test.ts`, `db-migration-artifacts.test.ts`
-  assertion, and regenerate the baseline `CREATE SEQUENCE`.
+- [ ] 1.1 Update `package/ranking/src/ranking/types.ts` so `RankingScores` and
+  `ZERO_RANKING_SCORES` include `bestScore`, `risingScore`, and
+  `controversyScore`.
+- [ ] 1.2 Add `bestScore`, `risingScore`, and `controversyScore` columns and
+  indexes to `package/ranking/src/db/schema/ranking.ts`, then generate the
+  ranking DB migration.
+- [ ] 1.3 Rewrite `package/ranking/src/ranking/formulas.ts` in place:
+  implement `wilsonLowerBound`, `redditHot`, `netScore`,
+  `redditControversy`, `risingScore`, and `bestScore` helpers.
+- [ ] 1.4 Add formula tests in `package/ranking/src/ranking/formulas.test.ts`
+  for Wilson time-independence, Reddit hot constants, net top score,
+  controversy edge cases, and best/rising behavior for promising new comments.
+- [ ] 1.5 Update `package/ranking/src/ranking/ranking.repository.ts` and
+  `package/ranking/src/ranking/service.ts` to persist and patch the new score
+  fields.
+- [ ] 1.6 Verify comment identity in `package/ranking/src/ranking/main-state.ts`
+  against the current `Comment` schema (`Comment.id` is the comment target id);
+  fix any stale `"unitId"` comment lookup before relying on comment projections.
 
-## 4. Verification
+## 2. Rising Vote Buckets
 
-- [ ] 4.1 Ranking formula tests (Wilson, hot constants, net topScore) pass.
-- [ ] 4.2 Comment list/serve tests cover best/top/new ordering within a single
-  `(root, realm)` partition, the `realmUnitId IS NULL` partition, and progressive
-  stub expansion.
-- [ ] 4.3 Soft-delete/moderation test confirms the node remains in the tree and
-  the skeleton/order cache is not invalidated.
-- [ ] 4.4 Full recompute backfill verified (projections + Meili comment docs hold
-  new scores).
-- [ ] 4.5 Run `bun run check:convention` if touched files include cross-package
-  exports or route-facing contracts.
+- [ ] 2.1 Add a ranking DB table such as `RankingReactionBucket` with
+  `targetId`, `scopeKey`, `reaction`, `bucketStart`, `bucketEnd`, and `count`.
+- [ ] 2.2 Route reaction CDC/job events from `package/job-runner` into ranking
+  bucket updates for `upvote` and `downvote`.
+- [ ] 2.3 Extend ranking repository reads so `computeV1RankingScores` receives
+  recent vote windows, for example 1h/6h/24h upvote/downvote counts.
+- [ ] 2.4 Add repository/service tests proving old total votes affect
+  `qualityScore`, while recent vote buckets affect `risingScore` and the
+  controlled boost inside `bestScore`.
+
+## 3. Serving Index Fields
+
+- [ ] 3.1 Extend `package/search/src/sync.ts` ranking patch types and document
+  builders for content, posts, and comments with `bestScore`, `risingScore`, and
+  `controversyScore`.
+- [ ] 3.2 Extend `package/search/src/schema.ts` sortable attributes for
+  `content`, `posts`, and `comments` with the new ranking fields.
+- [ ] 3.3 Extend `package/contract/src/meili/comment.ts`,
+  `package/contract/src/meili/post.ts`, and `package/contract/src/meili/content.ts`
+  sort schemas/document schemas with the new fields.
+- [ ] 3.4 Update Meili/search tests that assert default ranking fields,
+  sortable attributes, and patch payloads.
+- [ ] 3.5 Run a ranking full sync/backfill after the formula and schema cutover
+  so existing projections and Meili documents hold the new fields.
+
+## 4. Comment Topology Lock
+
+- [ ] 4.1 Remove `realmUnitId` from `updateCommentSchema` in
+  `package/contract/src/comment/comment.ts` and update exported types.
+- [ ] 4.2 Remove realm updates from `package/server/src/comment/comment.service.ts`
+  and tests. Keep `isLocked`, `state`, and content updates.
+- [ ] 4.3 Strengthen create tests so a reply always inherits/validates the
+  parent's `(rootUnitId, realmUnitId)` partition.
+- [ ] 4.4 Keep soft-delete behavior as the only delete path and add tests that a
+  deleted parent can remain as context in root/children mode while disappearing
+  from discovery slices.
+
+## 5. Slice Contract And API
+
+- [ ] 5.1 Replace the current threaded/subtree comment list contract in
+  `package/contract/src/comment/comment.ts` with slice query/response shapes for
+  `discovery`, `root`, and `children`.
+- [ ] 5.2 Define comment sort literals:
+  `best`, `top`, `rising`, `controversial`, `new`, and `old`.
+- [ ] 5.3 Add cursor types that match the selected sort key plus `id`; avoid
+  offset paging for ranked comment slices.
+- [ ] 5.4 Update `package/server/src/comment/comment.api.ts` to expose the new
+  slice reads while preserving create/update/moderation routes.
+- [ ] 5.5 Update `package/api/src/comment/` query helpers and keys for
+  discovery/root/children reads.
+
+## 6. Remove Ltree From Comment Reads
+
+- [ ] 6.1 Remove `path` from `commentDTOSchema`, `mapCommentToDTO`, and search
+  comment documents unless a transitional test proves it is still required.
+- [ ] 6.2 Remove `Comment.path`, `Comment_path_gist_idx`, and ltree path writes
+  from `package/server/src/db/schema/comment.ts` and
+  `package/server/src/comment/comment.service.ts`, then generate the server DB
+  migration.
+- [ ] 6.3 Remove `attachPaths`, `sortTreeComments`, `getSubtreeAnchor`,
+  `listSubtreeDescendantIds`, and all `<@` subtree SQL from the comment service.
+- [ ] 6.4 Replace Postgres fallback indexes with adjacency indexes only:
+  `(rootUnitId, realmUnitId, parentCommentId, createdAt, id)` for chronological
+  reads and any required moderation/filter indexes.
+- [ ] 6.5 Add service tests proving reads are direct-child or ranked discovery
+  slices and never depend on ltree/path ordering.
+
+## 7. Meili Slice Serving
+
+- [ ] 7.1 Implement a comment serving helper that maps each sort mode to its
+  Meili sort field and filter:
+  `rootUnitId`, `realmUnitId` including null partition semantics,
+  `parentCommentId` where applicable, and moderation visibility.
+- [ ] 7.2 Implement discovery slice reads:
+  ranked comments in a root/realm partition plus bounded direct-parent context.
+- [ ] 7.3 Implement root slice reads:
+  fetch `rootCommentId`, validate its partition, and return its first
+  direct-children page.
+- [ ] 7.4 Implement children slice reads:
+  fetch direct children for `parentCommentId` with sort/cursor/limit.
+- [ ] 7.5 Add a service seam or TODO comment for a future `CommentRankServing`
+  table only where Meili consistency/cursor stability would be swapped out.
+
+## 8. Frontend Slice Rendering
+
+- [ ] 8.1 Update `package/app/src/post/sections/PostTreeSection.tsx` and related
+  query usage to consume root/children slices instead of a full threaded list.
+- [ ] 8.2 Remove path-prefix tree assumptions from
+  `package/app/src/post/models/postTreeRails.ts` and
+  `package/app/src/post/hooks/usePostTreeCollapse.ts`; compose only from
+  available slice rows.
+- [ ] 8.3 Add a discovery renderer for ranked comment slices that shows focused
+  comments with parent preview/context and an "open thread" style action.
+- [ ] 8.4 Keep `anchorCommentId` as frontend-only route/local state for highlight
+  and scroll behavior; do not send it as backend topology.
+- [ ] 8.5 Ensure discovery pagination appends list rows, while root/children
+  pagination attaches "load more replies" to one parent.
+- [ ] 8.6 Update stories/tests for discovery rows, root comment entry, direct
+  child expansion, redacted parent context, and sort switching.
+
+## 9. Verification
+
+- [ ] 9.1 Run targeted ranking tests for formula/projection changes.
+- [ ] 9.2 Run targeted reaction/job-runner tests for vote bucket routing.
+- [ ] 9.3 Run targeted search/Meili tests for ranking document fields and sort
+  schemas.
+- [ ] 9.4 Run targeted server comment tests for realm immutability, soft delete,
+  slice reads, sort mapping, and ltree removal.
+- [ ] 9.5 Run targeted app tests/stories for fake-tree slice rendering.
+- [ ] 9.6 Run `bun run check:convention` because this changes route-facing
+  contracts and cross-package exports.
 
 ## Out of scope
 
-- Renaming the `reaction` domain to `vote`, or any reaction-kind value changes
-  (owned by `reaction-upvote-downvote`).
-- Cross-realm aggregate comment views (single-partition is a durable decision).
-- Reparenting / moving comments across parents or realms beyond the existing
-  per-comment `realmUnitId` clear behavior.
-- A standalone precomputed "CommentTree blob" store (Redis/dedicated table) — the
-  Meili-served per-parent path is the chosen default; revisit only if Meili
-  serving proves insufficient.
-- Backward compatibility with the old `path`-lexicographic display ordering.
+- Renaming the reaction domain to vote.
+- Moving comments between realms or parents.
+- A backend-maintained full comment tree, subtree cache, or
+  `familyRootCommentId` model.
+- Using `anchorCommentId` as a backend contract field.
+- Full personalized ranking. `bestScore` gets a controlled rising boost only.
+- Building `CommentRankServing` in v1 unless Meili serving proves insufficient
+  during implementation.
+- Backward compatibility with ltree/path or threaded/subtree comment list reads.
