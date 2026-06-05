@@ -528,6 +528,8 @@ databases may be reset and reseeded.
   - Applied progress: auth seed/reset/factory orchestration now uses the
     Drizzle-named `createAuthDbClient()`/`AuthDbClient` helper; the remaining
     `prisma-factory.ts` helper is isolated to the legacy server factory client.
+  - Applied progress: full factory `EchoKV` seeding now runs through the Drizzle
+    server db on `SeedCtx`; the legacy Prisma `seedEchoKV()` wrapper was removed.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

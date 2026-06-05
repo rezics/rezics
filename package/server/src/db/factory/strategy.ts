@@ -2,6 +2,7 @@ import type { createAuthDb } from "@rezics/auth/db/factory";
 import type { SlugScopeName } from "@rezics/contract";
 import * as v from "valibot";
 import type { PrismaClient } from "../../../prisma/generated/client.js";
+import type { ServerDb } from "../client.js";
 import type { SeedSyncHooks } from "./types.js";
 import { powerLaw, randomInt } from "./utils.js";
 
@@ -24,6 +25,7 @@ export type SlugScopesMap = Record<SlugScopeName, string>;
 
 export interface SeedCtx {
   prisma: PrismaClient;
+  db: ServerDb;
   authDb: AuthDbClient;
   slugScopes: SlugScopesMap;
   sync: SeedSyncHooks;
@@ -75,6 +77,7 @@ function randInt(min: number, max: number): number {
 
 export function makeSeedCtx(
   prisma: PrismaClient,
+  db: ServerDb,
   authDb: AuthDbClient,
   slugScopes: SlugScopesMap,
   mode: Mode,
@@ -83,6 +86,7 @@ export function makeSeedCtx(
   const provider = makeCountProvider(mode);
   return {
     prisma,
+    db,
     authDb,
     slugScopes,
     sync,

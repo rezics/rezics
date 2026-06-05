@@ -1,6 +1,6 @@
 import { PostKind } from "../../../prisma/generated/client.js";
 import { seedBooks, seedChaptersForBook } from "./books.js";
-import { seedEchoKV } from "./echokv.js";
+import { seedEchoKVWithDb } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
 import {
   seedOrganizations,
@@ -192,7 +192,7 @@ export async function runFactorySeed(
   done();
 
   done = stepTimer("Step 13: EchoKV");
-  await seedEchoKV(ctx.prisma);
+  await seedEchoKVWithDb(ctx.db);
   done();
 
   console.log("[Seed] Complete!", {

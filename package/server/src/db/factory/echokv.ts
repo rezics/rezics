@@ -1,4 +1,3 @@
-import type { PrismaClient } from "../../../prisma/generated/client.js";
 import type { ServerDb } from "../client";
 import { EchoKV } from "../schema";
 import { products } from "./data/home/homeCarousel";
@@ -30,15 +29,5 @@ export const seedEchoKVWithDb = async (db: EchoKvDb) => {
         target: EchoKV.key,
         set: { value: row.value },
       });
-  }
-};
-
-export const seedEchoKV = async (prisma: PrismaClient) => {
-  for (const row of echoKvSeedRows()) {
-    await prisma.echoKV.upsert({
-      where: { key: row.key },
-      create: row,
-      update: { value: row.value },
-    });
   }
 };

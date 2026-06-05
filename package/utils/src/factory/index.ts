@@ -322,6 +322,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
     });
     const ctx = makeSeedCtx(
       prisma,
+      serverDb.db,
       authDb,
       slugScopes as never,
       preset.mode,
