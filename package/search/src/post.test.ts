@@ -1521,4 +1521,66 @@ describe("search sync global moderation projection", () => {
     ]);
     expect(deletePosts).toHaveBeenCalledWith(["post-removed"]);
   });
+
+  test("post realm id segment patches read UnitRealm through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncPostRealmIdsSegment } = await import("./sync");
+    const patchPosts = mock(async (_docs: any[]) => undefined);
+    setSearchDb(
+      createDb([
+        [{ unitId: "post-1" }, { unitId: "post-2" }],
+        [
+          {
+            unitId: "post-1",
+            realmUnitId: "realm-public",
+            moderationStatus: "APPROVED",
+            isLocked: false,
+            realm: { realm: { isPublic: true } },
+          },
+          {
+            unitId: "post-1",
+            realmUnitId: "realm-private",
+            moderationStatus: "APPROVED",
+            isLocked: false,
+            realm: { realm: { isPublic: false } },
+          },
+        ],
+      ]) as never,
+    );
+
+    const result = await syncPostRealmIdsSegment({ patchPosts } as any, {
+      limit: 1,
+    });
+
+    expect(result).toEqual({ processed: 1, nextCursor: "post-1" });
+    expect(patchPosts).toHaveBeenCalledWith([
+      { id: "post-1", realmIds: ["realm-public"] },
+    ]);
+  });
+
+  test("contained unit full sync reads ShelfUnit rows through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncAllContainedUnitIds } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    setSearchDb(
+      createDb([
+        [{ id: "shelf-1" }],
+        [
+          { shelfId: "shelf-1", unitId: "book-a" },
+          { shelfId: "shelf-1", unitId: "book-b" },
+        ],
+        [],
+      ]) as never,
+    );
+
+    const result = await syncAllContainedUnitIds({ patchContent } as any);
+
+    expect(result).toEqual({
+      message: "syncAllContainedUnitIds success",
+      totalSynced: 1,
+    });
+    expect(patchContent).toHaveBeenCalledWith([
+      { id: "shelf-1", containedUnitIds: ["book-a", "book-b"] },
+    ]);
+  });
 });

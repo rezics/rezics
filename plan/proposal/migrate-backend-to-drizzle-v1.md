@@ -467,6 +467,9 @@ databases may be reset and reseeded.
     `syncGameMediaContentSegment`) to Drizzle reads and explicit hydration
     across server content, tagging, attribution, realm, series, shelf, post,
     link, game, media, and book tables.
+  - Applied progress: moved post realm-id patch segments and contained-unit
+    full sync to Drizzle reads against server `Post`, `Unit`, `UnitRealm`,
+    `Realm`, and `ShelfUnit`.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and

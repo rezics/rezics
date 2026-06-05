@@ -2613,27 +2613,98 @@ export async function syncAllComments(client: SearchClient) {
   return { message: "syncAllComments success", totalSynced: total };
 }
 
+async function listPublicPostRealmRows(input: {
+  limit: number;
+  cursor?: string;
+}) {
+  const posts = await (input.cursor
+    ? getSearchDb()
+        .select({ unitId: Post.unitId })
+        .from(Post)
+        .leftJoin(Unit, eq(Unit.id, Post.unitId))
+        .where(and(publicPostUnitConditions(), gt(Post.unitId, input.cursor)))
+        .orderBy(asc(Post.unitId))
+        .limit(input.limit)
+    : getSearchDb()
+        .select({ unitId: Post.unitId })
+        .from(Post)
+        .leftJoin(Unit, eq(Unit.id, Post.unitId))
+        .where(publicPostUnitConditions())
+        .orderBy(asc(Post.unitId))
+        .limit(input.limit));
+  const postIds = posts.map((post) => post.unitId);
+  if (postIds.length === 0) return [];
+
+  const inRealms = await getSearchDb()
+    .select({
+      unitId: UnitRealm.unitId,
+      realmUnitId: UnitRealm.realmUnitId,
+      moderationStatus: UnitRealm.moderationStatus,
+      isLocked: UnitRealm.isLocked,
+      realm: {
+        realm: {
+          isPublic: Realm.isPublic,
+        },
+      },
+    })
+    .from(UnitRealm)
+    .leftJoin(Realm, eq(Realm.unitId, UnitRealm.realmUnitId))
+    .where(inArray(UnitRealm.unitId, postIds));
+  const inRealmsByUnitId = groupRowsByKey(inRealms as any[], "unitId");
+  return posts.map((post) => ({
+    unitId: post.unitId,
+    unit: { inRealms: inRealmsByUnitId.get(post.unitId) ?? [] },
+  }));
+}
+
+async function listPublicShelfContainedUnitRows(input: {
+  limit: number;
+  cursor?: string;
+}) {
+  const shelves = await (input.cursor
+    ? getSearchDb()
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(
+          and(
+            eq(Unit.type, "SHELF"),
+            publicContentUnitConditions("single"),
+            gt(Unit.id, input.cursor),
+          ),
+        )
+        .orderBy(asc(Unit.id))
+        .limit(input.limit)
+    : getSearchDb()
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(
+          and(eq(Unit.type, "SHELF"), publicContentUnitConditions("single")),
+        )
+        .orderBy(asc(Unit.id))
+        .limit(input.limit));
+  const shelfIds = shelves.map((shelf) => shelf.id);
+  if (shelfIds.length === 0) return [];
+
+  const shelfUnits = await getSearchDb()
+    .select({ shelfId: ShelfUnit.shelfId, unitId: ShelfUnit.unitId })
+    .from(ShelfUnit)
+    .where(inArray(ShelfUnit.shelfId, shelfIds))
+    .orderBy(asc(ShelfUnit.position));
+  const unitsByShelfId = groupRowsByKey(shelfUnits as any[], "shelfId");
+  return shelves.map((shelf) => ({
+    id: shelf.id,
+    shelf: { units: unitsByShelfId.get(shelf.id) ?? [] },
+  }));
+}
+
 export async function syncAllPostRealmIds(client: SearchClient) {
   let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    const posts: any[] = await getSearchPrismaClient().post.findMany({
-      where: {
-        unit: publicSearchableUnitWhere(),
-      },
-      select: {
-        unitId: true,
-        unit: {
-          select: {
-            ...realmSearchProjectionSelect,
-          },
-        },
-      },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
+    const posts = await listPublicPostRealmRows({
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (posts.length === 0) break;
@@ -2657,22 +2728,9 @@ export async function syncPostRealmIdsSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const rows: any[] = await getSearchPrismaClient().post.findMany({
-    where: {
-      unit: publicSearchableUnitWhere(),
-    },
-    select: {
-      unitId: true,
-      unit: {
-        select: {
-          ...realmSearchProjectionSelect,
-        },
-      },
-    },
-    orderBy: { unitId: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  const rows = await listPublicPostRealmRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(rows, limit, "unitId");
   if (current.length > 0) {
@@ -2691,25 +2749,9 @@ export async function syncAllContainedUnitIds(client: SearchClient) {
   let total = 0;
 
   while (true) {
-    const shelves: any[] = await getSearchPrismaClient().unit.findMany({
-      where: {
-        type: "SHELF",
-        ...publicSearchableUnitWhere(),
-      },
-      select: {
-        id: true,
-        shelf: {
-          select: {
-            units: {
-              select: { unitId: true },
-            },
-          },
-        },
-      },
-      orderBy: { id: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { id: cursor } : undefined,
+    const shelves = await listPublicShelfContainedUnitRows({
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (shelves.length === 0) break;
