@@ -1293,4 +1293,90 @@ describe("search sync global moderation projection", () => {
     ]);
     expect(deleteContent).not.toHaveBeenCalled();
   });
+
+  test("post author patches read public Post ids through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchPostsAuthor, setSearchDb } = await import("./sync");
+    const patchPosts = mock(async (_docs: any[]) => undefined);
+    setSearchDb(
+      createDb([[{ unitId: "post-a" }, { unitId: "post-b" }], []]) as never,
+    );
+
+    await patchPostsAuthor({ patchPosts } as any, "user-1", {
+      authorName: "Alice",
+    });
+
+    expect(patchPosts).toHaveBeenCalledWith([
+      { id: "post-a", authorName: "Alice" },
+      { id: "post-b", authorName: "Alice" },
+    ]);
+  });
+
+  test("post target segment patches read target Unit and Post ids through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchPostsTargetSegment, setSearchDb } = await import("./sync");
+    const patchPosts = mock(async (_docs: any[]) => undefined);
+    setSearchDb(
+      createDb([
+        [{ id: "book-1", type: "BOOK", defaultLanguage: "en" }],
+        [{ unitId: "book-1", language: "en", title: "Target book" }],
+        [{ unitId: "post-a" }, { unitId: "post-b" }],
+      ]) as never,
+    );
+
+    const result = await patchPostsTargetSegment(
+      { patchPosts } as any,
+      "book-1",
+      { limit: 1 },
+    );
+
+    expect(result).toEqual({ processed: 1, nextCursor: "post-a" });
+    expect(patchPosts).toHaveBeenCalledWith([
+      {
+        id: "post-a",
+        targetTitles: ["Target book"],
+        targetType: "BOOK",
+        targetCoverUrl: null,
+      },
+    ]);
+  });
+
+  test("post field patches delete stale posts and normalize content through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchPostFields, setSearchDb } = await import("./sync");
+    const patchPosts = mock(async (_docs: any[]) => undefined);
+    const deletePosts = mock(async (_ids: string[]) => undefined);
+    setSearchDb(
+      createDb([
+        [
+          {
+            unitId: "post-1",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            moderationStatus: "APPROVED",
+          },
+        ],
+        [
+          {
+            unitId: "post-removed",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            moderationStatus: "REMOVED",
+          },
+        ],
+      ]) as never,
+    );
+
+    await patchPostFields({ patchPosts, deletePosts } as any, "post-1", {
+      content: markdownContentDoc("Updated body"),
+    });
+    await patchPostFields({ patchPosts, deletePosts } as any, "post-removed", {
+      title: "Removed",
+    });
+
+    expect(patchPosts).toHaveBeenCalledWith([
+      { id: "post-1", contentText: "Updated body" },
+    ]);
+    expect(deletePosts).toHaveBeenCalledWith(["post-removed"]);
+  });
 });

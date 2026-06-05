@@ -22,6 +22,7 @@ import {
   Feedback,
   Poll,
   PollOption,
+  Post,
   Realm,
   RealmTagApplication,
   ShelfUnit,
@@ -1386,6 +1387,107 @@ export async function patchCommentRankingFields(
 
 // ANCHOR: Post partial sync functions
 
+function publicPostUnitConditions() {
+  return and(
+    eq(Unit.status, PUBLIC_ELIGIBLE_UNIT_WHERE.status),
+    eq(Unit.visibility, PUBLIC_ELIGIBLE_UNIT_WHERE.visibility),
+    eq(Unit.moderationStatus, PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus),
+  );
+}
+
+async function listPublicPostIdsByAuthor(input: {
+  userId: string;
+  limit: number;
+  cursor?: string;
+}) {
+  const query = getSearchDb()
+    .select({ unitId: Post.unitId })
+    .from(Post)
+    .leftJoin(Unit, eq(Unit.id, Post.unitId));
+  return input.cursor
+    ? query
+        .where(
+          and(
+            eq(Post.authorUserId, input.userId),
+            publicPostUnitConditions(),
+            gt(Post.unitId, input.cursor),
+          ),
+        )
+        .orderBy(asc(Post.unitId))
+        .limit(input.limit)
+    : query
+        .where(
+          and(eq(Post.authorUserId, input.userId), publicPostUnitConditions()),
+        )
+        .orderBy(asc(Post.unitId))
+        .limit(input.limit);
+}
+
+async function listPublicPostIdsByTarget(input: {
+  targetUnitId: string;
+  limit: number;
+  cursor?: string;
+}) {
+  const query = getSearchDb()
+    .select({ unitId: Post.unitId })
+    .from(Post)
+    .leftJoin(Unit, eq(Unit.id, Post.unitId));
+  return input.cursor
+    ? query
+        .where(
+          and(
+            eq(Unit.targetUnitId, input.targetUnitId),
+            publicPostUnitConditions(),
+            gt(Post.unitId, input.cursor),
+          ),
+        )
+        .orderBy(asc(Post.unitId))
+        .limit(input.limit)
+    : query
+        .where(
+          and(
+            eq(Unit.targetUnitId, input.targetUnitId),
+            publicPostUnitConditions(),
+          ),
+        )
+        .orderBy(asc(Post.unitId))
+        .limit(input.limit);
+}
+
+async function targetPostPatchFields(targetUnitId: string) {
+  const [targetUnit] = await getSearchDb()
+    .select({
+      id: Unit.id,
+      type: Unit.type,
+      defaultLanguage: Unit.defaultLanguage,
+    })
+    .from(Unit)
+    .where(eq(Unit.id, targetUnitId))
+    .limit(1);
+
+  if (!targetUnit) {
+    return {
+      targetTitles: null,
+      targetType: null,
+      targetCoverUrl: null,
+    };
+  }
+
+  const translations = await getSearchDb()
+    .select()
+    .from(UnitTranslation)
+    .where(eq(UnitTranslation.unitId, targetUnitId));
+
+  return {
+    targetTitles: translations.map((t: any) => t.title).filter(Boolean),
+    targetType: targetUnit.type ?? null,
+    targetCoverUrl: pickCoverUrlFromTranslations(
+      targetUnit.defaultLanguage,
+      translations,
+    ),
+  };
+}
+
 export async function patchPostsAuthor(
   client: SearchClient,
   userId: string,
@@ -1394,16 +1496,10 @@ export async function patchPostsAuthor(
   let cursor: string | undefined;
 
   while (true) {
-    const posts = await getSearchPrismaClient().post.findMany({
-      where: {
-        authorUserId: userId,
-        unit: publicSearchableUnitWhere(),
-      },
-      select: { unitId: true },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
+    const posts = await listPublicPostIdsByAuthor({
+      userId,
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (posts.length === 0) break;
@@ -1455,55 +1551,22 @@ export async function patchPostsTarget(
   client: SearchClient,
   targetUnitId: string,
 ) {
-  // Fetch target unit data once
-  const targetUnit = await getSearchPrismaClient().unit.findUnique({
-    where: { id: targetUnitId },
-    include: {
-      translations: true,
-      book: true,
-      game: true,
-      media: true,
-    },
-  });
-
-  let targetTitles: string[] | null = null;
-  let targetType: string | null = null;
-  let targetCoverUrl: string | null = null;
-
-  if (targetUnit) {
-    const translations: any[] = targetUnit.translations ?? [];
-    targetTitles = translations.map((t: any) => t.title).filter(Boolean);
-    targetType = targetUnit.type ?? null;
-    targetCoverUrl = pickCoverUrlFromTranslations(
-      (targetUnit as any).defaultLanguage,
-      translations,
-    );
-  }
+  const targetFields = await targetPostPatchFields(targetUnitId);
 
   let cursor: string | undefined;
 
   while (true) {
-    const posts = await getSearchPrismaClient().post.findMany({
-      where: {
-        unit: {
-          ...publicSearchableUnitWhere(),
-          targetUnitId,
-        },
-      },
-      select: { unitId: true },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
+    const posts = await listPublicPostIdsByTarget({
+      targetUnitId,
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (posts.length === 0) break;
 
     const docs = posts.map((p: any) => ({
       id: p.unitId,
-      targetTitles,
-      targetType,
-      targetCoverUrl,
+      ...targetFields,
     }));
     await client.patchPosts(docs);
 
@@ -1516,52 +1579,20 @@ export async function patchPostsTargetSegment(
   targetUnitId: string,
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
-  const targetUnit = await getSearchPrismaClient().unit.findUnique({
-    where: { id: targetUnitId },
-    include: {
-      translations: true,
-      book: true,
-      game: true,
-      media: true,
-    },
-  });
-
-  let targetTitles: string[] | null = null;
-  let targetType: string | null = null;
-  let targetCoverUrl: string | null = null;
-
-  if (targetUnit) {
-    const translations: any[] = targetUnit.translations ?? [];
-    targetTitles = translations.map((t: any) => t.title).filter(Boolean);
-    targetType = targetUnit.type ?? null;
-    targetCoverUrl = pickCoverUrlFromTranslations(
-      (targetUnit as any).defaultLanguage,
-      translations,
-    );
-  }
+  const targetFields = await targetPostPatchFields(targetUnitId);
 
   const limit = segmentLimit(options);
-  const rows: any[] = await getSearchPrismaClient().post.findMany({
-    where: {
-      unit: {
-        ...publicSearchableUnitWhere(),
-        targetUnitId,
-      },
-    },
-    select: { unitId: true },
-    orderBy: { unitId: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  const rows = await listPublicPostIdsByTarget({
+    targetUnitId,
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(rows, limit, "unitId");
   if (current.length > 0) {
     await client.patchPosts(
       current.map((post) => ({
         id: post.unitId,
-        targetTitles,
-        targetType,
-        targetCoverUrl,
+        ...targetFields,
       })),
     );
   }
@@ -1573,19 +1604,18 @@ export async function patchPostFields(
   unitId: string,
   fields: Record<string, any>,
 ) {
-  const post = await getSearchPrismaClient().post.findUnique({
-    where: { unitId },
-    select: {
-      unit: {
-        select: {
-          status: true,
-          visibility: true,
-          moderationStatus: true,
-        },
-      },
-    },
-  });
-  if (!post || !isPublicIndexablePostUnit(post.unit)) {
+  const [post] = await getSearchDb()
+    .select({
+      unitId: Post.unitId,
+      status: Unit.status,
+      visibility: Unit.visibility,
+      moderationStatus: Unit.moderationStatus,
+    })
+    .from(Post)
+    .leftJoin(Unit, eq(Unit.id, Post.unitId))
+    .where(eq(Post.unitId, unitId))
+    .limit(1);
+  if (!post || !isPublicIndexablePostUnit(post)) {
     await client.deletePosts([unitId]);
     return;
   }

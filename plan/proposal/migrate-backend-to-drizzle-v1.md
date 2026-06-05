@@ -459,6 +459,9 @@ databases may be reset and reseeded.
   - Applied progress: moved realm search sync (`syncSingleRealm`,
     `syncAllRealms`, and `syncRealmSegment`) to Drizzle reads against server
     `Realm`, `Unit`, `UnitTranslation`, `UnitSupportLanguage`, and `UnitAlias`.
+  - Applied progress: moved post partial patching for author, target metadata,
+    target segments, and generic post fields to Drizzle reads against server
+    `Post`, `Unit`, and `UnitTranslation`.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
