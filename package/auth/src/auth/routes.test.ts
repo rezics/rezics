@@ -18,6 +18,7 @@ process.env.SMTP_PASSWORD ??= "smtp-password";
 process.env.SMTP_USER_NAME ??= "Rezics Auth";
 process.env.AUTH_PASSWORD_RESET_FROM_EMAIL ??= "reset@example.com";
 process.env.AUTH_VERIFICATION_FROM_EMAIL ??= "verify@example.com";
+process.env.TURNSTILE_SECRET ??= "turnstile-secret";
 process.env.GOOGLE_CLIENT_ID ??= "google-client";
 process.env.GOOGLE_CLIENT_SECRET ??= "google-secret";
 process.env.MICROSOFT_CLIENT_ID ??= "microsoft-client";

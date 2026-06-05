@@ -16,6 +16,16 @@ process.env.SMTP_HOST ??= "smtp.test";
 process.env.SMTP_USER ??= "smtp-user";
 process.env.SMTP_PASSWORD ??= "smtp-password";
 process.env.TURNSTILE_SECRET ??= "turnstile-secret";
+delete process.env.GOOGLE_CLIENT_ID;
+delete process.env.GOOGLE_CLIENT_SECRET;
+delete process.env.MICROSOFT_CLIENT_ID;
+delete process.env.MICROSOFT_CLIENT_SECRET;
+delete process.env.GITHUB_CLIENT_ID;
+delete process.env.GITHUB_CLIENT_SECRET;
+delete process.env.TWITTER_CLIENT_ID;
+delete process.env.TWITTER_CLIENT_SECRET;
+delete process.env.TELEGRAM_CLIENT_ID;
+delete process.env.TELEGRAM_CLIENT_SECRET;
 
 const handleAuthRequest = mock((request: Request) => {
   const url = new URL(request.url);
@@ -51,6 +61,13 @@ mock.module("../auth/routes", () => ({
     Response.json({ issuer: "http://localhost:35003" }),
   handleOAuthAuthorizationServerRequest: () =>
     Response.json({ issuer: "http://localhost:35003" }),
+}));
+
+mock.module("../auth/providers", () => ({
+  buildSocialProviderOptions: () => ({}),
+  getConfiguredSocialProviders: () => [],
+  getTelegramGenericOAuthConfig: () => undefined,
+  listEnabledSocialProviderIds: () => [],
 }));
 
 mock.module("../auth/storage", () => ({

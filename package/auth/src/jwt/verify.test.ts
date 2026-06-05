@@ -11,12 +11,18 @@ process.env.DATABASE_URL =
   process.env.DATABASE_URL ??
   "postgresql://postgres:postgres@localhost:5432/rezics_auth";
 process.env.BETTER_AUTH_URL = "http://localhost:35003";
+process.env.AUTH_PUBLIC_BASE_URL = "http://localhost:35003";
+process.env.AUTH_PUBLIC_ISSUER_URL = "http://localhost:35003";
 process.env.BETTER_AUTH_SECRET =
   process.env.BETTER_AUTH_SECRET ??
   "better-auth-secret-for-tests-abcdefghijklmnopqrstuvwxyz";
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET =
   process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??
   "internal-auth-gateway-test";
+process.env.SMTP_HOST ??= "smtp.test";
+process.env.SMTP_USER ??= "smtp-user";
+process.env.SMTP_PASSWORD ??= "smtp-password";
+process.env.TURNSTILE_SECRET ??= "turnstile-secret";
 process.env.AUTH_JWT_ISSUER = "http://localhost:35003";
 process.env.AUTH_JWT_AUDIENCE = "rezics";
 

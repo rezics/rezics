@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 process.env.NODE_ENV ??= "test";
 process.env.BETTER_AUTH_URL ??= "http://localhost:35003";
+process.env.AUTH_PUBLIC_BASE_URL ??= "http://localhost:35003";
+process.env.AUTH_PUBLIC_ISSUER_URL ??= "http://localhost:35003";
 process.env.BETTER_AUTH_SECRET ??=
   "this-is-a-long-auth-secret-for-tests-123456";
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
@@ -10,6 +12,7 @@ process.env.DATABASE_URL ??=
 process.env.SMTP_HOST ??= "smtp.test";
 process.env.SMTP_USER ??= "smtp-user";
 process.env.SMTP_PASSWORD ??= "smtp-password";
+process.env.TURNSTILE_SECRET ??= "turnstile-secret";
 
 import { AUTH_PRESENCE_COOKIE_NAME } from "@rezics/contract";
 
