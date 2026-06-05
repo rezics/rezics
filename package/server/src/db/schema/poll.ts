@@ -1,9 +1,14 @@
+import {
+  pollResultVisibilityValues,
+  pollVoteModeValues,
+} from "@rezics/contract";
 import { sql } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -11,7 +16,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import {
   createdAt,
   nullableTimestamp,
@@ -20,7 +24,14 @@ import {
   uuidv7,
   uuidv7PrimaryKey,
 } from "./columns";
-import { PollResultVisibility, PollVoteMode } from "./enums";
+import { Unit } from "./unit";
+
+export const PollVoteMode = pgEnum("PollVoteMode", pollVoteModeValues);
+
+export const PollResultVisibility = pgEnum(
+  "PollResultVisibility",
+  pollResultVisibilityValues,
+);
 
 export const Poll = pgTable("Poll", {
   unitId: uuid()

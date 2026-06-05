@@ -6,9 +6,9 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import { createdAt, jsonData, updatedAt } from "./columns";
 import { ContentStructureNode } from "./content-structure";
+import { Unit } from "./unit";
 
 export const Series = pgTable(
   "Series",

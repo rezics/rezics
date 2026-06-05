@@ -1,7 +1,9 @@
+import { unitAliasKindValues, unitAliasStatusValues } from "@rezics/contract";
 import {
   boolean,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -9,10 +11,13 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import { createdAt, updatedAt, uuidv7PrimaryKey } from "./columns";
-import { UnitAliasKind, UnitAliasStatus } from "./enums";
 import { User } from "./identity";
+import { Unit } from "./unit";
+
+export const UnitAliasKind = pgEnum("UnitAliasKind", unitAliasKindValues);
+
+export const UnitAliasStatus = pgEnum("UnitAliasStatus", unitAliasStatusValues);
 
 export const SlugScope = pgTable(
   "SlugScope",

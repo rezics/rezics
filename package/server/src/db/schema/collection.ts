@@ -1,20 +1,26 @@
 import { sql } from "drizzle-orm";
+import { userUnitProgressStatusValues } from "@rezics/contract";
 import {
   bigint,
   boolean,
   doublePrecision,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
   uuid,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import { createdAt, jsonData, timestampMs, updatedAt } from "./columns";
 import { ContentStructureNode } from "./content-structure";
-import { UserUnitProgressStatus } from "./enums";
 import { User } from "./identity";
+import { Unit } from "./unit";
+
+export const UserUnitProgressStatus = pgEnum(
+  "UserUnitProgressStatus",
+  userUnitProgressStatusValues,
+);
 
 export const UserUnitCollection = pgTable(
   "UserUnitCollection",

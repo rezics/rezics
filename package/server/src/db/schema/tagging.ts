@@ -8,10 +8,10 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import { createdAt, updatedAt } from "./columns";
 import { User } from "./identity";
 import { Realm } from "./realm";
+import { Unit } from "./unit";
 
 export const UnitTag = pgTable(
   "UnitTag",

@@ -1,16 +1,22 @@
+import { contentTranslationStatusValues } from "@rezics/contract";
 import {
   boolean,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import { createdAt, jsonData, updatedAt } from "./columns";
-import { ContentTranslationStatus } from "./enums";
+import { Unit } from "./unit";
+
+export const ContentTranslationStatus = pgEnum(
+  "ContentTranslationStatus",
+  contentTranslationStatusValues,
+);
 
 export const UnitTranslation = pgTable(
   "UnitTranslation",

@@ -4,13 +4,13 @@ import {
   foreignKey,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import {
   createdAt,
   jsonData,
@@ -19,12 +19,26 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
-import {
-  GovernanceGrantState,
-  ModerationStatus,
-  RealmMemberState,
-} from "./enums";
+import { GovernanceGrantState } from "./governance";
 import { User } from "./identity";
+import { ModerationStatus } from "./moderation";
+import { Unit } from "./unit";
+
+export const realmMemberStateStorageValues = [
+  "ACTIVE",
+  "PENDING",
+  "MUTED",
+  "REMOVED",
+  "BANNED",
+] as const;
+
+export type RealmMemberStateStorage =
+  (typeof realmMemberStateStorageValues)[number];
+
+export const RealmMemberState = pgEnum(
+  "RealmMemberState",
+  realmMemberStateStorageValues,
+);
 
 export const Realm = pgTable("Realm", {
   unitId: uuid()

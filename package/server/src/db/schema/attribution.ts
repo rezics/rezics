@@ -10,8 +10,9 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit, UnitExternalRef } from "./catalog";
 import { createdAt, timestampMs, updatedAt, uuidv7PrimaryKey } from "./columns";
+import { UnitExternalRef } from "./source";
+import { Unit } from "./unit";
 
 export const CreditAttribution = pgTable(
   "CreditAttribution",

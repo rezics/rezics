@@ -9,7 +9,6 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import {
   createdAt,
   jsonData,
@@ -18,8 +17,8 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
-import { ContentRating } from "./enums";
 import { User } from "./identity";
+import { ContentRating, Unit } from "./unit";
 
 export const ContentStructure = pgTable(
   "ContentStructure",

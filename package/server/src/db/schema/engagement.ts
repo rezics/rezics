@@ -1,13 +1,14 @@
+import { feedbackTypeValues } from "@rezics/contract";
 import {
   boolean,
   index,
+  pgEnum,
   pgTable,
   text,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import {
   createdAt,
   nullableTimestamp,
@@ -16,7 +17,10 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
-import { FeedbackType, ModerationTargetKind } from "./enums";
+import { ModerationTargetKind } from "./moderation";
+import { Unit } from "./unit";
+
+export const FeedbackType = pgEnum("FeedbackType", feedbackTypeValues);
 
 export const Feedback = pgTable(
   "Feedback",

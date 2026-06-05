@@ -1,7 +1,9 @@
+import { mainEmailVerificationContractStatusValues } from "@rezics/contract";
 import {
   bigint,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -9,7 +11,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import {
   createdAt,
   jsonData,
@@ -18,8 +19,13 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
-import { EmailVerificationContractStatus } from "./enums";
 import { User } from "./identity";
+import { Unit } from "./unit";
+
+export const EmailVerificationContractStatus = pgEnum(
+  "EmailVerificationContractStatus",
+  mainEmailVerificationContractStatusValues,
+);
 
 export const EchoKV = pgTable("EchoKV", {
   key: text().primaryKey(),

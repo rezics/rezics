@@ -3,6 +3,7 @@ import {
   boolean,
   foreignKey,
   index,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -10,7 +11,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import {
   createdAt,
   jsonData,
@@ -21,9 +21,6 @@ import {
 } from "./columns";
 import { Feedback } from "./engagement";
 import {
-  AccountEnforcementKind,
-  AccountEnforcementState,
-  GovernanceGrantState,
   ModerationActionKind,
   ModerationActorKind,
   ModerationAuthority,
@@ -31,8 +28,54 @@ import {
   ModerationScope,
   ModerationStatus,
   ModerationTargetKind,
-} from "./enums";
+} from "./moderation";
 import { User } from "./identity";
+import { Unit } from "./unit";
+
+export const governanceGrantStateStorageValues = [
+  "ACTIVE",
+  "EXPIRED",
+  "REVOKED",
+] as const;
+
+export type GovernanceGrantStateStorage =
+  (typeof governanceGrantStateStorageValues)[number];
+
+export const GovernanceGrantState = pgEnum(
+  "GovernanceGrantState",
+  governanceGrantStateStorageValues,
+);
+
+export const accountEnforcementKindStorageValues = [
+  "WARNING",
+  "SILENCE",
+  "SUSPENSION",
+  "BAN",
+  "RATE_LIMIT",
+  "TRUST_RESTRICTION",
+] as const;
+
+export type AccountEnforcementKindStorage =
+  (typeof accountEnforcementKindStorageValues)[number];
+
+export const AccountEnforcementKind = pgEnum(
+  "AccountEnforcementKind",
+  accountEnforcementKindStorageValues,
+);
+
+export const accountEnforcementStateStorageValues = [
+  "ACTIVE",
+  "EXPIRED",
+  "REVOKED",
+] as const;
+
+export type AccountEnforcementStateStorage =
+  (typeof accountEnforcementStateStorageValues)[number];
+
+export const AccountEnforcementState = pgEnum(
+  "AccountEnforcementState",
+  accountEnforcementStateStorageValues,
+);
 
 export const AccountEnforcement = pgTable(
   "AccountEnforcement",

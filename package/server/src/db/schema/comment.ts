@@ -9,87 +9,18 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Unit } from "./catalog";
 import {
   createdAt,
   jsonData,
   nullableTimestamp,
-  timestampMs,
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
 import { ltree } from "./custom-types";
-import { ModerationStatus, PinKind, PostKind } from "./enums";
 import { User } from "./identity";
-import { ScoreEntry } from "./score";
-
-export const Post = pgTable(
-  "Post",
-  {
-    unitId: uuid()
-      .primaryKey()
-      .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    authorUserId: uuid().notNull(),
-    scoreEntryId: uuid().references(() => ScoreEntry.id, {
-      onDelete: "restrict",
-      onUpdate: "cascade",
-    }),
-    kind: PostKind(),
-    replyCount: integer().default(0).notNull(),
-    directReplyCount: integer().default(0).notNull(),
-    lastReplyAt: nullableTimestamp(),
-    isLocked: boolean().default(false).notNull(),
-    extra: jsonData(),
-    createdAt: createdAt(),
-    updatedAt: updatedAt(),
-    state: text(),
-    variantUnitId: uuid(),
-  },
-  (table) => [
-    index("Post_authorUserId_createdAt_idx").using(
-      "btree",
-      table.authorUserId.asc().nullsLast(),
-      table.createdAt.asc().nullsLast(),
-    ),
-    index("Post_kind_createdAt_idx").using(
-      "btree",
-      table.kind.asc().nullsLast(),
-      table.createdAt.asc().nullsLast(),
-    ),
-    index("Post_scoreEntryId_idx").using(
-      "btree",
-      table.scoreEntryId.asc().nullsLast(),
-    ),
-    index("Post_variantUnitId_idx").using(
-      "btree",
-      table.variantUnitId.asc().nullsLast(),
-    ),
-  ],
-);
-
-export const PostPollReference = pgTable(
-  "PostPollReference",
-  {
-    postUnitId: uuid().notNull(),
-    pollUnitId: uuid().notNull(),
-    createdAt: createdAt(),
-    updatedAt: updatedAt(),
-  },
-  (table) => [
-    primaryKey({
-      columns: [table.postUnitId, table.pollUnitId],
-      name: "PostPollReference_pkey",
-    }),
-    index("PostPollReference_pollUnitId_idx").using(
-      "btree",
-      table.pollUnitId.asc().nullsLast(),
-    ),
-    index("PostPollReference_postUnitId_idx").using(
-      "btree",
-      table.postUnitId.asc().nullsLast(),
-    ),
-  ],
-);
+import { ModerationStatus } from "./moderation";
+import { PinKind } from "./post";
+import { Unit } from "./unit";
 
 export const Comment = pgTable(
   "Comment",
