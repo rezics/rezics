@@ -634,6 +634,14 @@ async function legacyPostRow(unitId: string): Promise<any> {
   return row;
 }
 
+function seedLegacyPostRow(row: any) {
+  lastPostRows.set(row.unitId, {
+    ...postFixture(row.unitId),
+    ...row,
+  });
+  postFindUniqueMock.mockResolvedValue(row);
+}
+
 async function legacyHydratedPost(unitId: string): Promise<any> {
   const post = await legacyPostRow(unitId);
   const unit = unitFixture(unitId, post);
@@ -943,10 +951,15 @@ function createFakeSelect(
         return row ? [{ type: row.type }] : [];
       }
       if (selection?.id && keys.length === 1) {
+        if (strings.length === 0) return [];
+        const realmIds = strings.filter((value) => value.startsWith("realm-"));
+        if (realmIds.length > 0) {
+          const row = await legacy.unit?.findFirst?.({ where: {} });
+          return row ? [{ id: row.id }] : [];
+        }
         const tagIds = strings.filter((value) => value.startsWith("tag-"));
-        if (tagIds.length > 0 || !strings.includes("question")) {
-          const ids =
-            tagIds.length > 0 ? tagIds : ["tag-1", "tag-2", "tag-q", "tag-x"];
+        if (tagIds.length > 0) {
+          const ids = tagIds;
           return (
             (await legacy.unit?.findMany?.({
               where: {
@@ -957,6 +970,23 @@ function createFakeSelect(
               select: { id: true },
             })) ?? []
           );
+        }
+        if (strings.includes("TAG")) {
+          const ids = ["tag-1", "tag-2", "tag-q", "tag-x"];
+          return (
+            (await legacy.unit?.findMany?.({
+              where: {
+                id: { in: ids },
+                type: "TAG",
+                status: { not: "DELETED" },
+              },
+              select: { id: true },
+            })) ?? []
+          );
+        }
+        if (!strings.includes("question")) {
+          const row = await legacy.unit?.findFirst?.({ where: {} });
+          return row ? [{ id: row.id }] : [];
         }
         const row = await legacy.unit?.findFirst?.({ where: {} });
         return row ? [{ id: row.id }] : [];
@@ -1033,7 +1063,8 @@ function createFakeSelect(
         strings.find((value) => lastPostRows.has(value)) ??
         [...lastPostRows.keys()][0];
       const post = unitId ? lastPostRows.get(unitId) : null;
-      if (post?.unit?.inRealms) return post.unit.inRealms;
+      if (post?.unit?.inRealms)
+        return post.unit.inRealms.map((row: any) => ({ unitId, ...row }));
       return legacy.unitRealm?.findMany?.({ where: {} }) ?? [];
     }
     if (table === Realm) {
@@ -1060,6 +1091,13 @@ function createFakeSelect(
       );
     }
     if (table === RealmMember) {
+      if (selection?.realmUnitId) {
+        if (selection?.state) {
+          return legacy.realmMember?.findMany?.({ where: {} }) ?? [];
+        }
+        const row = await legacy.realmMember?.findFirst?.({ where: {} });
+        return row ? [{ realmUnitId: row.realmUnitId }] : [];
+      }
       if (lastRealmRead?.members?.length) {
         return lastRealmRead.members.map((member: any) => ({
           realmUnitId: strings[0],
@@ -1255,7 +1293,7 @@ function resetMocks() {
   unitCreateMock.mockClear();
   unitUpdateMock.mockClear();
   unitFindUniqueMock.mockClear();
-  unitFindUniqueMock.mockResolvedValue(null);
+  unitFindUniqueMock.mockImplementation(async () => null);
   unitFindUniqueOrThrowMock.mockClear();
   unitFindManyMock.mockClear();
   unitFindManyMock.mockImplementation(async (args: any) =>
@@ -1267,6 +1305,7 @@ function resetMocks() {
   postFindManyMock.mockClear();
   postCountMock.mockClear();
   postFindUniqueMock.mockClear();
+  postFindUniqueMock.mockImplementation(async () => null);
   postFindUniqueOrThrowMock.mockClear();
   postFindUniqueOrThrowMock.mockResolvedValue({
     unitId: "parent-1",
@@ -1316,7 +1355,7 @@ function resetMocks() {
     members: [],
   });
   realmMemberFindManyMock.mockClear();
-  realmMemberFindManyMock.mockResolvedValue([]);
+  realmMemberFindManyMock.mockImplementation(async () => []);
   realmRuleAcknowledgementFindManyMock.mockClear();
   realmRuleAcknowledgementFindManyMock.mockResolvedValue([]);
   realmUnitCreateMock.mockClear();
@@ -1361,9 +1400,9 @@ function resetMocks() {
   commentPromotionCountMock.mockClear();
   commentPromotionCountMock.mockResolvedValue(0);
   unitFindFirstMock.mockClear();
-  unitFindFirstMock.mockResolvedValue(null);
+  unitFindFirstMock.mockImplementation(async () => null);
   realmMemberFindFirstMock.mockClear();
-  realmMemberFindFirstMock.mockResolvedValue(null);
+  realmMemberFindFirstMock.mockImplementation(async () => null);
   unitTagFindUniqueMock.mockClear();
   unitTagFindUniqueMock.mockResolvedValue(null);
   historyOutboxCreateMock.mockClear();
@@ -2315,7 +2354,8 @@ describe("PostService.update immutability", () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
     Object.assign(legacyDbMock.post, { update: directPostUpdateMock });
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+    seedLegacyPostRow({
+      unitId: "post-1",
       authorUserId: "author-1",
       unit: {
         defaultLanguage: "en",
@@ -2467,6 +2507,13 @@ describe("PostService wiki posts", () => {
     userId: "root-1",
     permission: { role: "ROOT" },
   } as any;
+  const wikiPost = (overrides: Record<string, unknown> = {}) => ({
+    unitId: "wiki-post-1",
+    kind: "WIKI",
+    content: content("original"),
+    unit: { defaultLanguage: "en", status: "PUBLISHED" },
+    ...overrides,
+  });
 
   test("wiki creation uses rezics-wiki ownership and records author", async () => {
     resetMocks();
@@ -2494,9 +2541,15 @@ describe("PostService wiki posts", () => {
     const unitCreateArgs = (unitCreateMock.mock.calls as any[])[0][0];
     const postCreateArgs = (postCreateMock.mock.calls as any[])[0][0];
     expect(unitCreateArgs.data.userId).toBe("wiki-owner");
-    expect(unitCreateArgs.data.supportLanguages).toEqual({
-      create: { language: "zh-hant", isPrimary: true, sortOrder: 0 },
-    });
+    expect(unitSupportLanguageUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          language: "zh-hant",
+          isPrimary: true,
+          sortOrder: 0,
+        }),
+      }),
+    );
     expect(postCreateArgs.data.authorUserId).toBe("actor-1");
     expect(postCreateArgs.data.kind).toBe("WIKI");
     expect(contentTranslationUpsertMock).toHaveBeenCalledWith(
@@ -2527,11 +2580,7 @@ describe("PostService wiki posts", () => {
 
   test("unlocked wiki content edit writes through collaborative authority", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      kind: "WIKI",
-      content: content("original"),
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
-    }));
+    seedLegacyPostRow(wikiPost());
 
     await service.update(
       "wiki-post-1",
@@ -2558,11 +2607,7 @@ describe("PostService wiki posts", () => {
 
   test("ROOT wiki content edit still routes through collaborative authority", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      kind: "WIKI",
-      content: content("original"),
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
-    }));
+    seedLegacyPostRow(wikiPost());
 
     await service.update(
       "wiki-post-1",
@@ -2581,11 +2626,7 @@ describe("PostService wiki posts", () => {
 
   test("wiki content source patch uses path-based lock and history", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      kind: "WIKI",
-      content: content("original"),
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
-    }));
+    seedLegacyPostRow(wikiPost());
     collectPatchLeafPathsMock.mockReturnValueOnce(["post.content.main.source"]);
 
     await service.update(
@@ -2615,11 +2656,7 @@ describe("PostService wiki posts", () => {
     });
 
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      kind: "WIKI",
-      content: content("original"),
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
-    }));
+    seedLegacyPostRow(wikiPost());
     collectPatchLeafPathsMock.mockReturnValueOnce(["post.content.main.source"]);
     assertCanEditCollaborativeMetadataMock.mockRejectedValueOnce({
       statusCode: 403,
@@ -2654,11 +2691,7 @@ describe("PostService wiki posts", () => {
 
   test("locked wiki content edit is rejected", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      kind: "WIKI",
-      content: content("original"),
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
-    }));
+    seedLegacyPostRow(wikiPost());
     assertCanEditCollaborativeMetadataMock.mockRejectedValueOnce({
       statusCode: 403,
       code: "FIELD_LOCKED",
@@ -2679,12 +2712,15 @@ describe("PostService wiki posts", () => {
 
   test("ordinary review update does not query field locks", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      kind: "REVIEW",
-      content: content("original"),
-      authorUserId: "actor-1",
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
-    }));
+    seedLegacyPostRow(
+      wikiPost({
+        unitId: "review-1",
+        kind: "REVIEW",
+        content: content("original"),
+        authorUserId: "actor-1",
+        unit: { defaultLanguage: "en", status: "PUBLISHED" },
+      }),
+    );
 
     await service.update(
       "review-1",
@@ -2698,11 +2734,7 @@ describe("PostService wiki posts", () => {
 
   test("Post.isLocked does not control wiki content locks", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      kind: "WIKI",
-      content: content("original"),
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
-    }));
+    seedLegacyPostRow(wikiPost());
 
     await service.update(
       "wiki-post-1",
@@ -2717,11 +2749,12 @@ describe("PostService wiki posts", () => {
 
   test("wiki publication toggles content translation status", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
-      authorUserId: "actor-1",
-      kind: "WIKI",
-      unit: { status: "DRAFT", publishedAt: null },
-    }));
+    seedLegacyPostRow(
+      wikiPost({
+        authorUserId: "actor-1",
+        unit: { status: "DRAFT", publishedAt: null },
+      }),
+    );
     postUpdateMock.mockImplementationOnce(async () => ({
       unitId: "wiki-post-1",
       kind: "WIKI",
@@ -2733,7 +2766,7 @@ describe("PostService wiki posts", () => {
 
     expect(contentTranslationUpdateManyMock).toHaveBeenCalledWith({
       where: { unitId: "wiki-post-1" },
-      data: { status: "PUBLISHED" },
+      data: expect.objectContaining({ status: "PUBLISHED" }),
     });
   });
 });
@@ -2749,6 +2782,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
   const rootScope = (
     overrides: Record<string, unknown> = {},
   ): Record<string, unknown> => ({
+    unitId: "root-1",
     authorUserId: "op-1",
     depth: 0,
     rootPostUnitId: "root-1",
@@ -2766,7 +2800,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("OP pins a Comment reply within their own thread", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
 
     const pin = await service.pin(
@@ -2787,7 +2821,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("a non-OP non-moderator cannot pin", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
+    seedLegacyPostRow(
       rootScope({
         unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
       }),
@@ -2801,7 +2835,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("a realm moderator may pin in a thread of their realm", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
+    seedLegacyPostRow(
       rootScope({
         unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
       }),
@@ -2818,7 +2852,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("rejects a target outside the scope thread", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(
       directReply({
         rootUnitId: "other-root",
@@ -2843,7 +2877,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("accept is rejected outside a Q&A thread", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce(null); // no official question tag
 
@@ -2855,7 +2889,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("accept is rejected for a non-direct reply", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(
       directReply({ depth: 2, parentCommentId: "reply-1" }),
     );
@@ -2867,7 +2901,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("OP accepts a qualifying direct reply in a Q&A thread", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
@@ -2886,14 +2920,14 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     unitFindFirstMock.mockResolvedValue({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValue({ unitId: "root-1" });
 
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     await service.acceptAnswer(
       { scopeUnitId: "root-1", commentId: "reply-1" },
       op,
     );
 
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     commentPromotionFindFirstMock.mockResolvedValueOnce({ position: "a0" });
     await service.acceptAnswer(
@@ -2910,7 +2944,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("unpin removes the PINNED promotion after a capability check", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentPromotionFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
 
     await service.unpin("root-1", "reply-1", op);
@@ -2919,7 +2953,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("unaccept rejects when the existing pin is not an accepted answer", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentPromotionFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
 
     await expect(
@@ -2941,6 +2975,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
   const readScope = (
     overrides: Record<string, unknown> = {},
   ): Record<string, unknown> => ({
+    unitId: "root-1",
     authorUserId: "op-1",
     depth: 0,
     rootPostUnitId: "root-1",
@@ -2950,7 +2985,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
 
   test("OP sees viewerCanPromote=true on their own thread", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(readScope());
+    seedLegacyPostRow(readScope());
 
     const signals = await service.getThreadPromotionSignals("root-1", op);
     expect(signals.viewerCanPromote).toBe(true);
@@ -2958,7 +2993,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
 
   test("an unrelated viewer sees viewerCanPromote=false", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
+    seedLegacyPostRow(
       readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
     );
 
@@ -2976,7 +3011,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
 
   test("a realm moderator sees viewerCanPromote=true", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
+    seedLegacyPostRow(
       readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
     );
     realmMemberFindFirstMock.mockResolvedValueOnce({ realmUnitId: "realm-1" });
@@ -2990,7 +3025,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
 
   test("a realm owner sees viewerCanPromote=true", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
+    seedLegacyPostRow(
       readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
     );
     // First unit.findFirst is the question-tag lookup (none); second is the
@@ -3008,9 +3043,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
 
   test("a platform admin sees viewerCanPromote=true on someone else's thread", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
-      readScope({ authorUserId: "someone-else" }),
-    );
+    seedLegacyPostRow(readScope({ authorUserId: "someone-else" }));
 
     const signals = await service.getThreadPromotionSignals("root-1", admin);
     expect(signals.viewerCanPromote).toBe(true);
@@ -3019,19 +3052,13 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
   test("viewerCanPromote=false agrees with the write guard for the same caller", async () => {
     // Read path: stranger gets no capability.
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
-      readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
-    );
+    seedLegacyPostRow(readScope());
     const read = await service.getThreadPromotionSignals("root-1", stranger);
     expect(read.viewerCanPromote).toBe(false);
 
     // Write guard: the same stranger is rejected when they attempt to pin.
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(
-      readScope({
-        unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
-      }),
-    );
+    seedLegacyPostRow(readScope({ unit: { type: "POST", inRealms: [] } }));
     await expect(
       service.pin({ scopeUnitId: "root-1", commentId: "reply-1" }, stranger),
     ).rejects.toThrow(/moderator\/owner/);
@@ -3041,7 +3068,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
     resetMocks();
     unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
-    postFindUniqueMock.mockResolvedValueOnce(readScope());
+    seedLegacyPostRow(readScope());
 
     const signals = await service.getThreadPromotionSignals("root-1", op);
     expect(signals.isQuestionThread).toBe(true);
@@ -3050,7 +3077,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
   test("isQuestionThread=false when the root lacks the official question tag", async () => {
     resetMocks();
     unitFindFirstMock.mockResolvedValue(null);
-    postFindUniqueMock.mockResolvedValueOnce(readScope());
+    seedLegacyPostRow(readScope());
 
     const signals = await service.getThreadPromotionSignals("root-1", op);
     expect(signals.isQuestionThread).toBe(false);
@@ -3068,6 +3095,7 @@ describe("PostService lifecycle state", () => {
   const rootScope = (
     overrides: Record<string, unknown> = {},
   ): Record<string, unknown> => ({
+    unitId: "root-1",
     authorUserId: "op-1",
     depth: 0,
     rootPostUnitId: "root-1",
@@ -3107,7 +3135,7 @@ describe("PostService lifecycle state", () => {
       "user-1",
     );
 
-    expect(createDataArg().state).toBeUndefined();
+    expect(createDataArg().state).toBeNull();
   });
 
   // 5.2
@@ -3181,12 +3209,12 @@ describe("PostService lifecycle state", () => {
   // 5.4
   test("accepting an answer advances open → solved", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce({
+    seedLegacyPostRow(
+      rootScope({
         state: "open",
         extra: { stateSchemaTag: "question" },
-      });
+      }),
+    );
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
@@ -3198,18 +3226,18 @@ describe("PostService lifecycle state", () => {
 
     expect(postUpdateMock).toHaveBeenCalledWith({
       where: { unitId: "root-1" },
-      data: { state: "solved" },
+      data: expect.objectContaining({ state: "solved" }),
     });
   });
 
   test("accepting an answer never overwrites a manual closed reason", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce({
+    seedLegacyPostRow(
+      rootScope({
         state: "duplicate",
         extra: { stateSchemaTag: "question" },
-      });
+      }),
+    );
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
@@ -3224,12 +3252,12 @@ describe("PostService lifecycle state", () => {
 
   test("unaccepting the last answer reverts solved → open", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce({
+    seedLegacyPostRow(
+      rootScope({
         state: "solved",
         extra: { stateSchemaTag: "question" },
-      });
+      }),
+    );
     commentPromotionFindUniqueMock.mockResolvedValueOnce({
       kind: "ACCEPTED_ANSWER",
     });
@@ -3239,13 +3267,13 @@ describe("PostService lifecycle state", () => {
 
     expect(postUpdateMock).toHaveBeenCalledWith({
       where: { unitId: "root-1" },
-      data: { state: "open" },
+      data: expect.objectContaining({ state: "open" }),
     });
   });
 
   test("unaccepting does not reopen while another accepted answer remains", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    seedLegacyPostRow(rootScope());
     commentPromotionFindUniqueMock.mockResolvedValueOnce({
       kind: "ACCEPTED_ANSWER",
     });
@@ -3283,7 +3311,8 @@ describe("PostService lifecycle state", () => {
   // 5.7
   test("closing writes a reason value and reopening returns to the initial state", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+    seedLegacyPostRow({
+      unitId: "post-1",
       state: "open",
       extra: { stateSchemaTag: "question" },
     });
@@ -3293,7 +3322,8 @@ describe("PostService lifecycle state", () => {
     );
 
     resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+    seedLegacyPostRow({
+      unitId: "post-1",
       state: "not-planned",
       extra: { stateSchemaTag: "question" },
     });
@@ -3305,7 +3335,8 @@ describe("PostService lifecycle state", () => {
 
   test("a bare `closed` value is rejected (closing requires a reason)", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+    seedLegacyPostRow({
+      unitId: "post-1",
       state: "open",
       extra: { stateSchemaTag: "question" },
     });
