@@ -25,6 +25,10 @@ mock.module("@/meili/meili.service", () => ({
   },
 }));
 
+mock.module("@/unit/collaborative-metadata", () => ({
+  assertEditorialPatchAllowed: () => undefined,
+}));
+
 const userStub = {
   userId: "user-1",
   slug: "alice01",
@@ -41,7 +45,7 @@ mock.module("../service/user.service", () => ({
       userSlug === "alice01" ? userStub : null,
     getByUserId: async (userId: string) => {
       if (userId === "user-1") return userStub;
-      throw { code: "P2025" };
+      throw new Error(`User not found: ${userId}`);
     },
     update: async () => userStub,
     delete: async () => undefined,

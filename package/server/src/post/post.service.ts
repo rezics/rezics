@@ -1976,7 +1976,7 @@ export class PostService {
       if (
         error &&
         typeof error === "object" &&
-        (error as { code?: string }).code === "P2002"
+        (error as { code?: string }).code === "23505"
       ) {
         throw new AppError(
           409,

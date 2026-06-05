@@ -322,14 +322,17 @@ databases may be reset and reseeded.
 
 ## 4. Runtime database clients
 
-- [ ] 4.1 Replace each `package/*/prisma/client.ts` with a Drizzle db client
+- [x] 4.1 Replace each `package/*/prisma/client.ts` with a Drizzle db client
   module under `src/db/client.ts` or `src/db/index.ts`, preserving existing pool
   limits, timeouts, graceful shutdown, and development query logging where
   useful.
+  - Verification on 2026-06-05: no `package/*/prisma/client.ts`,
+    `schema.prisma`, or `prisma.config.ts` files remain; schema-owning packages
+    expose `src/db/client.ts` / `src/db/index.ts` Drizzle db modules.
 - [x] 4.2 Expose stable package exports for db clients and schema types, for
   example `@rezics/server/db`, `@rezics/server/db/schema`, and
   `@rezics/server/db/relations`.
-- [ ] 4.3 Convert runtime code in `package/server/src` from Prisma method calls
+- [x] 4.3 Convert runtime code in `package/server/src` from Prisma method calls
   to Drizzle queries. Use domain-by-domain passes so tests stay meaningful:
   unit/catalog, content structure, comments/posts, realm/tagging, poll,
   attribution, user/profile, subscriptions/notify boundary, governance,
@@ -360,29 +363,36 @@ databases may be reset and reseeded.
     imported `#/prisma/client`; post realm/content-contained resync scripts now
     inject the server Drizzle db into search sync, and the wiki-shaped rows
     script reads `Unit`/`User`/`UnitTranslation` through Drizzle.
-- [ ] 4.4 Replace dynamic `Prisma.*WhereInput`, `Include`, `Select`, and payload
+- [x] 4.4 Replace dynamic `Prisma.*WhereInput`, `Include`, `Select`, and payload
   type composition with domain-local Drizzle query builders, explicit
   projections, RQB v2 `with`, joins, and mappers. Prioritize heavily dynamic
   search/catalog/unit/book/realm/post/listing queries before small CRUD paths.
+  - Verification on 2026-06-05: runtime grep across migrated backend packages
+    has no `Prisma.*` helper type or generated Prisma payload/type references.
 - [x] 4.5 Convert `package/auth/src` to Drizzle db access, including internal
   APIs, JWT service persistence, admin user/session operations, and tests.
 - [x] 4.6 Convert `notify`, `reaction`, `history`, and `ranking` services to
   Drizzle clients and query helpers.
-- [ ] 4.7 Replace Prisma transaction usage with Drizzle transaction helpers.
+- [x] 4.7 Replace Prisma transaction usage with Drizzle transaction helpers.
   Preserve atomicity around multi-table domain writes, especially moderation,
   seed, factory, reaction summary updates, history outbox, and ranking flushes.
-- [ ] 4.8 Introduce package-local `DbLike`/`TxLike` or equivalent minimal
+- [x] 4.8 Introduce package-local `DbLike`/`TxLike` or equivalent minimal
   interfaces, then update helpers that currently thread
   `Prisma.TransactionClient` so each can run against either root db or a Drizzle
   transaction handle.
-- [ ] 4.9 Replace Prisma raw SQL helpers (`Prisma.sql`, `Prisma.join`,
+- [x] 4.9 Replace Prisma raw SQL helpers (`Prisma.sql`, `Prisma.join`,
   `$queryRaw`) with Drizzle `sql` and parameterized helpers. Add local helpers
   for UUID array interpolation and `ltree` casts.
-- [ ] 4.10 Triage every `$queryRaw` site before rewriting: keep true special SQL
+- [x] 4.10 Triage every `$queryRaw` site before rewriting: keep true special SQL
   raw, wrap reusable SQL in typed Drizzle helpers, and replace Prisma-workaround
   raw queries with Drizzle builders/RQB where practical.
-- [ ] 4.11 Replace Prisma-specific duplicate/error handling with database error
+- [x] 4.11 Replace Prisma-specific duplicate/error handling with database error
   mapping based on PostgreSQL SQLSTATE codes.
+  - Verification on 2026-06-05: runtime grep across migrated backend packages
+    has no `Prisma.TransactionClient`, `$queryRaw`, `$executeRaw`,
+    `Prisma.sql`, `Prisma.join`, `PrismaClientKnownRequestError`, `P2002`, or
+    `P2025` references. Remaining duplicate/race branches use PostgreSQL
+    SQLSTATE `23505`; explicit not-found API mapping uses service-level errors.
 - [x] 4.12 Replace Prisma mock helpers in server tests with either focused
   repository mocks or a Drizzle test db abstraction. Do not keep a
   Prisma-shaped mock just to minimize test edits.
@@ -694,10 +704,14 @@ databases may be reset and reseeded.
   `job-runner`, and `utils`.
 - [ ] 8.6 Run repo checks: `bun run check:convention`, `bun run check:tokens`,
   `bun run format:check`, and `bun run knip`.
-- [ ] 8.7 Grep verification must find no surviving runtime references to
+- [x] 8.7 Grep verification must find no surviving runtime references to
   `#/prisma/client`, `@rezics/*/prisma`, `@prisma`, `schema.prisma`,
   `prisma migrate`, `PrismaClient`, or `_prisma_migrations`, except historical
   references explicitly left in old reports/graveyard material.
+  - Verification on 2026-06-05: package runtime/test grep only finds negative
+    guard assertions that intentionally reject `@prisma` imports; broad repo
+    grep otherwise finds Prisma terms only in this migration plan or historical
+    planning/report material.
 - [ ] 8.8 Smoke-run backend dev processes that touch the databases:
   `server`, `auth`, `notify`, `reaction`, `history`, `ranking`, and
   `job-runner` in the roles used by local development.

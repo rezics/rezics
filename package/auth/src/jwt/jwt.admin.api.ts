@@ -19,6 +19,21 @@ async function requireOwnerSession(request: Request) {
   return session;
 }
 
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: string }).code === "23505"
+  );
+}
+
+function isRecordNotFoundError(error: unknown): boolean {
+  return (
+    error instanceof Error && error.message.startsWith("JwtService not found:")
+  );
+}
+
 export const jwtServiceAdminRouter = new Elysia({
   prefix: "/admin/jwt-services",
 })
@@ -66,12 +81,7 @@ export const jwtServiceAdminRouter = new Elysia({
         set.status = 201;
         return service;
       } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2002"
-        ) {
+        if (isUniqueViolation(error)) {
           set.status = 409;
           throw new Error(
             `JwtService with serviceKey '${body.serviceKey}' already exists`,
@@ -104,12 +114,7 @@ export const jwtServiceAdminRouter = new Elysia({
       try {
         return await authJwtServiceAdminService.update(params.serviceKey, body);
       } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2025"
-        ) {
+        if (isRecordNotFoundError(error)) {
           set.status = 404;
           throw new Error(`JwtService not found: ${params.serviceKey}`);
         }
@@ -133,12 +138,7 @@ export const jwtServiceAdminRouter = new Elysia({
       try {
         return await authJwtServiceAdminService.activate(params.serviceKey);
       } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2025"
-        ) {
+        if (isRecordNotFoundError(error)) {
           set.status = 404;
           throw new Error(`JwtService not found: ${params.serviceKey}`);
         }
@@ -161,12 +161,7 @@ export const jwtServiceAdminRouter = new Elysia({
       try {
         return await authJwtServiceAdminService.deactivate(params.serviceKey);
       } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2025"
-        ) {
+        if (isRecordNotFoundError(error)) {
           set.status = 404;
           throw new Error(`JwtService not found: ${params.serviceKey}`);
         }
@@ -189,12 +184,7 @@ export const jwtServiceAdminRouter = new Elysia({
       try {
         return await authJwtServiceAdminService.rotate(params.serviceKey);
       } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2025"
-        ) {
+        if (isRecordNotFoundError(error)) {
           set.status = 404;
           throw new Error(`JwtService not found: ${params.serviceKey}`);
         }

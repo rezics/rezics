@@ -153,8 +153,7 @@ function isUniqueConstraintError(error: unknown): boolean {
     error !== null &&
     typeof error === "object" &&
     "code" in error &&
-    ((error as { code?: string }).code === "P2002" ||
-      (error as { code?: string }).code === "23505")
+    (error as { code?: string }).code === "23505"
   );
 }
 

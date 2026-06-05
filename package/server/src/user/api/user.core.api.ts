@@ -17,12 +17,7 @@ import { userService } from "../service/user.service";
 import { userPatchToUpdateUser } from "./user.patch";
 
 function isRecordNotFoundError(error: unknown): boolean {
-  return (
-    error !== null &&
-    typeof error === "object" &&
-    "code" in error &&
-    (error as { code?: string }).code === "P2025"
-  );
+  return error instanceof Error && error.message.startsWith("User not found:");
 }
 
 export const coreRoute = new Elysia()

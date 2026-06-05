@@ -135,13 +135,13 @@ describe("system shelves", () => {
     expect(created.data.translations.create.title).toBe("bob's Favorites");
   });
 
-  test("ensure create branch recovers from P2002 race and returns created: false", async () => {
+  test("ensure create branch recovers from unique constraint race and returns created: false", async () => {
     const { ensureSystemShelf } = await import("./system-shelves");
     const mocks = makeClient();
 
     mocks.unitFindFirst.mockResolvedValueOnce(null);
     mocks.unitCreate.mockImplementationOnce(async () => {
-      throw Object.assign(new Error("unique violation"), { code: "P2002" });
+      throw Object.assign(new Error("unique violation"), { code: "23505" });
     });
     mocks.unitFindFirst.mockResolvedValueOnce({ id: "raced-completed" });
 
