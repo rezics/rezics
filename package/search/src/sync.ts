@@ -2765,28 +2765,132 @@ export async function syncAllPolls(client: SearchClient) {
 
 // ANCHOR: Realm sync functions
 
-export async function syncSingleRealm(client: SearchClient, unitId: string) {
-  const realm = await getSearchPrismaClient().realm.findUnique({
-    where: { unitId },
-    include: {
-      unit: {
-        include: {
-          translations: true,
-          supportLanguages: true,
-          aliases: {
-            where: {
-              status: "ACTIVE",
-              OR: [
-                { score: { gt: VISIBILITY_THRESHOLD } },
-                { pinned: true },
-              ] as any,
-            },
-            orderBy: [{ pinned: "desc" }, { score: "desc" }],
-          } as any,
-        },
-      },
+type RealmBaseRow = {
+  unitId: string;
+  isPublic: boolean;
+  isOfficial: boolean;
+  memberCount: number;
+  extra: unknown;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  unitStatus: string | null;
+  userId: string | null;
+  isLanguageNeutral: boolean | null;
+};
+
+const realmBaseSelect = {
+  unitId: Realm.unitId,
+  isPublic: Realm.isPublic,
+  isOfficial: Realm.isOfficial,
+  memberCount: Realm.memberCount,
+  extra: Realm.extra,
+  createdAt: Realm.createdAt,
+  updatedAt: Realm.updatedAt,
+  unitStatus: Unit.status,
+  userId: Unit.userId,
+  isLanguageNeutral: Unit.isLanguageNeutral,
+} as const;
+
+function realmFromRows(
+  row: RealmBaseRow,
+  translationsByUnitId: Map<string, any[]>,
+  supportLanguagesByUnitId: Map<string, any[]>,
+  aliasesByUnitId: Map<string, any[]>,
+) {
+  return {
+    unitId: row.unitId,
+    isPublic: row.isPublic,
+    isOfficial: row.isOfficial,
+    memberCount: row.memberCount,
+    extra: row.extra,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    unit: {
+      status: row.unitStatus,
+      userId: row.userId,
+      isLanguageNeutral: row.isLanguageNeutral,
+      translations: translationsByUnitId.get(row.unitId) ?? [],
+      supportLanguages: supportLanguagesByUnitId.get(row.unitId) ?? [],
+      aliases: aliasesByUnitId.get(row.unitId) ?? [],
     },
-  });
+  };
+}
+
+async function hydrateRealmRows(rows: RealmBaseRow[]) {
+  if (rows.length === 0) return [];
+  const unitIds = rows.map((row) => row.unitId);
+  const [translations, supportLanguages, aliases] = await Promise.all([
+    getSearchDb()
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitAlias)
+      .where(
+        and(
+          inArray(UnitAlias.unitId, unitIds),
+          eq(UnitAlias.status, "ACTIVE"),
+          or(
+            gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+            eq(UnitAlias.pinned, true),
+          ),
+        ),
+      )
+      .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score)),
+  ]);
+  const translationsByUnitId = groupRowsByKey(translations as any[], "unitId");
+  const supportLanguagesByUnitId = groupRowsByKey(
+    supportLanguages as any[],
+    "unitId",
+  );
+  const aliasesByUnitId = groupRowsByKey(aliases as any[], "unitId");
+  return rows.map((row) =>
+    realmFromRows(
+      row,
+      translationsByUnitId,
+      supportLanguagesByUnitId,
+      aliasesByUnitId,
+    ),
+  );
+}
+
+async function findRealmSyncRow(unitId: string) {
+  const [row] = await getSearchDb()
+    .select(realmBaseSelect)
+    .from(Realm)
+    .leftJoin(Unit, eq(Unit.id, Realm.unitId))
+    .where(eq(Realm.unitId, unitId))
+    .limit(1);
+  const [realm] = await hydrateRealmRows(row ? ([row] as RealmBaseRow[]) : []);
+  return realm ?? null;
+}
+
+async function listRealmSyncRows(input: { limit: number; cursor?: string }) {
+  const query = getSearchDb()
+    .select(realmBaseSelect)
+    .from(Realm)
+    .leftJoin(Unit, eq(Unit.id, Realm.unitId));
+  const rows = input.cursor
+    ? await query
+        .where(
+          and(eq(Unit.status, "PUBLISHED"), gt(Realm.unitId, input.cursor)),
+        )
+        .orderBy(asc(Realm.unitId))
+        .limit(input.limit)
+    : await query
+        .where(eq(Unit.status, "PUBLISHED"))
+        .orderBy(asc(Realm.unitId))
+        .limit(input.limit);
+  return hydrateRealmRows(rows as RealmBaseRow[]);
+}
+
+export async function syncSingleRealm(client: SearchClient, unitId: string) {
+  const realm = await findRealmSyncRow(unitId);
 
   if (!realm || realm.unit.status !== "PUBLISHED") {
     await client.deleteRealms([unitId]);
@@ -2807,33 +2911,7 @@ export async function syncAllRealms(client: SearchClient) {
   while (true) {
     console.log("syncAllRealms: cursor", cursor, "total", total);
 
-    const realms: any[] = await getSearchPrismaClient().realm.findMany({
-      where: {
-        unit: { status: "PUBLISHED" },
-      },
-      include: {
-        unit: {
-          include: {
-            translations: true,
-            supportLanguages: true,
-            aliases: {
-              where: {
-                status: "ACTIVE",
-                OR: [
-                  { score: { gt: VISIBILITY_THRESHOLD } },
-                  { pinned: true },
-                ] as any,
-              },
-              orderBy: [{ pinned: "desc" }, { score: "desc" }],
-            } as any,
-          },
-        },
-      },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-    });
+    const realms = await listRealmSyncRows({ limit: BATCH_SIZE, cursor });
 
     if (realms.length === 0) break;
 
@@ -2853,31 +2931,9 @@ export async function syncRealmSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const realms: any[] = await getSearchPrismaClient().realm.findMany({
-    where: {
-      unit: { status: "PUBLISHED" },
-    },
-    include: {
-      unit: {
-        include: {
-          translations: true,
-          aliases: {
-            where: {
-              status: "ACTIVE",
-              OR: [
-                { score: { gt: VISIBILITY_THRESHOLD } },
-                { pinned: true },
-              ] as any,
-            },
-            orderBy: [{ pinned: "desc" }, { score: "desc" }],
-          } as any,
-        },
-      },
-    },
-    orderBy: { unitId: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  const realms = await listRealmSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(realms, limit, "unitId");
   if (current.length > 0) {

@@ -50,6 +50,19 @@ function setServerEnvForSearchTests() {
   process.env.REACTION_INTERNAL_SECRET ??= "test-secret";
 }
 
+const realmBaseRow = {
+  unitId: "realm-1",
+  isPublic: true,
+  isOfficial: false,
+  memberCount: 7,
+  extra: null,
+  createdAt: new Date("2026-06-01T00:00:00.000Z"),
+  updatedAt: new Date("2026-06-02T00:00:00.000Z"),
+  unitStatus: "PUBLISHED",
+  userId: "user-1",
+  isLanguageNeutral: false,
+};
+
 describe("realm search patch sync", () => {
   test("patchRealmMemberCountFromDb reads Realm through Drizzle", async () => {
     setServerEnvForSearchTests();
@@ -146,5 +159,121 @@ describe("realm search patch sync", () => {
 
     expect(deleteRealms).toHaveBeenCalledWith(["realm-1"]);
     expect(patchRealms).not.toHaveBeenCalled();
+  });
+});
+
+describe("realm search full sync", () => {
+  test("syncSingleRealm reads Realm graph through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncSingleRealm } = await import("./sync");
+    const addOrUpdateRealms = mock(async (_docs: unknown[]) => undefined);
+    const deleteRealms = mock(async (_ids: string[]) => undefined);
+    setSearchDb(
+      createDb([
+        [realmBaseRow],
+        [
+          {
+            unitId: "realm-1",
+            language: "en",
+            title: "Readers",
+            description: markdownContentDoc("Book club"),
+          },
+        ],
+        [{ unitId: "realm-1", language: "en", isPrimary: true, sortOrder: 0 }],
+        [
+          {
+            unitId: "realm-1",
+            value: "Book friends",
+            score: 4,
+            pinned: false,
+            status: "ACTIVE",
+          },
+        ],
+      ]) as never,
+    );
+
+    await syncSingleRealm(
+      { addOrUpdateRealms, deleteRealms } as never,
+      "realm-1",
+    );
+
+    expect(addOrUpdateRealms).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: "realm-1",
+        titles: ["Readers"],
+        descriptions: ["Book club"],
+        aliasValues: ["Book friends"],
+        languages: ["en"],
+      }),
+    ]);
+    expect(deleteRealms).not.toHaveBeenCalled();
+  });
+
+  test("syncSingleRealm deletes missing or unpublished realms", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncSingleRealm } = await import("./sync");
+    const addOrUpdateRealms = mock(async (_docs: unknown[]) => undefined);
+    const deleteRealms = mock(async (_ids: string[]) => undefined);
+    setSearchDb(
+      createDb([
+        [{ ...realmBaseRow, unitStatus: "DRAFT" }],
+        [],
+        [],
+        [],
+        [],
+      ]) as never,
+    );
+
+    await syncSingleRealm(
+      { addOrUpdateRealms, deleteRealms } as never,
+      "realm-draft",
+    );
+    await syncSingleRealm(
+      { addOrUpdateRealms, deleteRealms } as never,
+      "realm-missing",
+    );
+
+    expect(deleteRealms).toHaveBeenCalledWith(["realm-draft"]);
+    expect(deleteRealms).toHaveBeenCalledWith(["realm-missing"]);
+    expect(addOrUpdateRealms).not.toHaveBeenCalled();
+  });
+
+  test("syncAllRealms reads published realm batches through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncAllRealms } = await import("./sync");
+    const addOrUpdateRealms = mock(async (_docs: unknown[]) => undefined);
+    setSearchDb(createDb([[realmBaseRow], [], [], [], []]) as never);
+
+    const result = await syncAllRealms({
+      deleteAllRealms: async () => ({}),
+      addOrUpdateRealms,
+    } as never);
+
+    expect(result).toEqual({
+      message: "syncAllRealms success",
+      totalSynced: 1,
+    });
+    expect(addOrUpdateRealms).toHaveBeenCalledTimes(1);
+  });
+
+  test("syncRealmSegment returns cursor from Drizzle rows", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncRealmSegment } = await import("./sync");
+    const addOrUpdateRealms = mock(async (_docs: unknown[]) => undefined);
+    setSearchDb(
+      createDb([
+        [realmBaseRow, { ...realmBaseRow, unitId: "realm-2" }],
+        [],
+        [],
+        [],
+      ]) as never,
+    );
+
+    const result = await syncRealmSegment({ addOrUpdateRealms } as never, {
+      limit: 1,
+    });
+
+    expect(result).toEqual({ processed: 1, nextCursor: "realm-1" });
+    expect(addOrUpdateRealms).toHaveBeenCalledTimes(1);
   });
 });
