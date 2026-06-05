@@ -1,9 +1,18 @@
+import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
 import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import {
+  Realm,
+  RealmMember,
+  Unit,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../schema";
 import { REALM_ROLE_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
@@ -29,40 +38,7 @@ export async function seedRealms(
       const translations = generateTranslations(UnitType.REALM);
       const isPublic = randomBoolean(0.8);
 
-      const unit = await ctx.prisma.unit.create({
-        data: {
-          type: UnitType.REALM,
-          userId: owner.userId,
-          slugScope: ctx.slugScopes.realm,
-          status: UnitStatus.PUBLISHED,
-          defaultLanguage: DEFAULT_LANGUAGE,
-          publishedAt: faker.date.past({ years: 2 }),
-          realm: {
-            create: {
-              isPublic,
-              isOfficial: false,
-              extra: {
-                defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-              },
-            },
-          },
-          translations: {
-            create: translations.map((t) => ({
-              language: t.language,
-              title: t.title,
-              description: t.description,
-            })),
-          },
-          supportLanguages: {
-            create: translations.map((t, i) => ({
-              language: t.language,
-              isPrimary: i === 0,
-              sortOrder: i,
-            })),
-          },
-        },
-        select: { id: true, type: true },
-      });
+      const unit = { id: randomUUID(), type: UnitType.REALM };
 
       const memberCount = randomInt(3, 20);
       const memberUsers = pickN(
@@ -85,22 +61,51 @@ export async function seedRealms(
         })),
       ];
 
-      await ctx.prisma.realmMember.createMany({ data: members });
-
-      await ctx.prisma.realm.update({
-        where: { unitId: unit.id },
-        data: { memberCount: members.length },
+      await ctx.db.insert(Unit).values({
+        id: unit.id,
+        type: UnitType.REALM,
+        userId: owner.userId,
+        slugScope: ctx.slugScopes.realm,
+        status: UnitStatus.PUBLISHED,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: faker.date.past({ years: 2 }),
       });
+      await ctx.db.insert(Realm).values({
+        unitId: unit.id,
+        isPublic,
+        isOfficial: false,
+        memberCount: members.length,
+        extra: {
+          defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        },
+      });
+      await ctx.db.insert(UnitTranslation).values(
+        translations.map((t) => ({
+          unitId: unit.id,
+          language: t.language,
+          title: t.title,
+          description: t.description,
+        })),
+      );
+      await ctx.db.insert(UnitSupportLanguage).values(
+        translations.map((t, i) => ({
+          unitId: unit.id,
+          language: t.language,
+          isPrimary: i === 0,
+          sortOrder: i,
+        })),
+      );
+      await ctx.db.insert(RealmMember).values(members);
 
       if (workIds.length > 0) {
         const realmWorkCount = randomInt(2, Math.min(15, workIds.length));
         const selectedWorks = pickN(workIds, realmWorkCount);
-        await ctx.prisma.unitRealm.createMany({
-          data: selectedWorks.map((workId) => ({
+        await ctx.db.insert(UnitRealm).values(
+          selectedWorks.map((workId) => ({
             realmUnitId: unit.id,
             unitId: workId,
           })),
-        });
+        );
       }
 
       await ctx.sync.realm(unit.id);

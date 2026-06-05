@@ -559,6 +559,9 @@ databases may be reset and reseeded.
   - Applied progress: factory media seeding now inserts `Unit`, `Media`,
     translations, and support languages through Drizzle; shared attribution/tag
     flushing already uses Drizzle.
+  - Applied progress: factory realm seeding now inserts `Unit`, `Realm`,
+    translations, support languages, members, and UnitRealm links through
+    Drizzle instead of nested Prisma creates/createMany/update.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
