@@ -402,6 +402,9 @@ databases may be reset and reseeded.
     focused collaborative metadata behavior instead of installing the legacy
     Prisma client mock; repository and Drizzle behavior remains covered by
     entity service tests.
+  - Applied progress: shelf system ensure/list API tests no longer install the
+    legacy Prisma client mock; they rely on focused auth, shelf, user, and
+    system shelf boundary mocks.
 
 ## 5. Auth and Better Auth
 

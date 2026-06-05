@@ -1,14 +1,11 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-import { AppError } from "@/utils/errors";
+import { AppError } from "../utils/errors";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 process.env.AUTH_BASE_URL ??= "http://localhost:3001";
-
-installPrismaClientMock();
 
 let currentIdentity: {
   sub: string;
@@ -19,6 +16,10 @@ let currentIdentity: {
   userId: "alice",
   permission: { role: "USER" },
 };
+
+mock.module("@/utils/errors", () => ({
+  AppError,
+}));
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -121,10 +122,6 @@ beforeEach(() => {
     created: true,
   });
   userGetByUserIdMock.mockClear();
-});
-
-afterEach(() => {
-  Object.assign(prismaMock, {});
 });
 
 describe("POST /shelf/system/ensure", () => {
