@@ -728,11 +728,12 @@ databases may be reset and reseeded.
 - [ ] 8.6 Run repo checks: `bun run check:convention`, `bun run check:tokens`,
   `bun run format:check`, and `bun run knip`.
   - Verification on 2026-06-05: `bun run check:convention` and
-    `bun run check:tokens` pass. `bun run format:check` fails before checking
-    files because `package/about/biome.json` is a nested root config under the
-    repo root config. `bun run knip` still reports the existing broad unused
-    files/dependencies/exports/unlisted dependencies inventory, so this item
-    remains open.
+    `bun run check:tokens` pass. `bun run format:check` now passes after
+    removing the nested `package/about/biome.json` config. `bun run knip` still
+    reports the existing broad unused files/dependencies/exports/unlisted
+    dependencies inventory; the Drizzle DB tooling workspace/files/deps are now
+    configured so they are no longer part of that Knip failure. This item
+    remains open until the broader repository Knip inventory is resolved.
 - [x] 8.7 Grep verification must find no surviving runtime references to
   `#/prisma/client`, `@rezics/*/prisma`, `@prisma`, `schema.prisma`,
   `prisma migrate`, `PrismaClient`, or `_prisma_migrations`, except historical
