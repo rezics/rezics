@@ -565,6 +565,9 @@ databases may be reset and reseeded.
   - Applied progress: factory shelf seeding now inserts `Unit`, `Shelf`,
     translations, support languages, shelf items, and shelf item relations
     through Drizzle instead of nested Prisma creates/createMany/update.
+  - Applied progress: factory engagement favorites now create favorite shelf
+    `Unit`/`Shelf`/translation rows, shelf items, and item counts through
+    Drizzle; follow/subscription seeding was already on Drizzle.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

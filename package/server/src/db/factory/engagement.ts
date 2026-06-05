@@ -10,7 +10,14 @@ import {
   UnitType,
   UnitVisibility,
 } from "../../../prisma/generated/client.js";
-import { Subscription, Unit, User } from "../schema";
+import {
+  Shelf,
+  ShelfUnit,
+  Subscription,
+  Unit,
+  UnitTranslation,
+  User,
+} from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 import { pickN, unitTypeToShelfKind } from "./utils.js";
@@ -59,21 +66,24 @@ async function seedFavorites(
     const targets = pickN(units, Math.min(favCount, units.length));
     const shelfId = randomUUID();
 
-    await ctx.prisma.unit.create({
-      data: {
-        id: shelfId,
-        type: UnitType.SHELF,
-        userId: user.userId,
-        slugScope: user.userId,
-        status: UnitStatus.PUBLISHED,
-        visibility: UnitVisibility.PRIVATE,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        publishedAt: new Date(),
-        shelf: { create: { kindKey: "favorites" } },
-        translations: {
-          create: { language: DEFAULT_LANGUAGE, title: "Favorites" },
-        },
-      },
+    await ctx.db.insert(Unit).values({
+      id: shelfId,
+      type: UnitType.SHELF,
+      userId: user.userId,
+      slugScope: user.userId,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PRIVATE,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+      publishedAt: new Date(),
+    });
+    await ctx.db.insert(Shelf).values({
+      unitId: shelfId,
+      kindKey: "favorites",
+    });
+    await ctx.db.insert(UnitTranslation).values({
+      unitId: shelfId,
+      language: DEFAULT_LANGUAGE,
+      title: "Favorites",
     });
 
     const seen = new Set<string>();
@@ -96,14 +106,14 @@ async function seedFavorites(
     });
 
     if (shelfUnitRows.length > 0) {
-      await ctx.prisma.shelfUnit.createMany({
-        data: shelfUnitRows,
-        skipDuplicates: true,
-      });
-      await ctx.prisma.shelf.update({
-        where: { unitId: shelfId },
-        data: { itemCount: shelfUnitRows.length },
-      });
+      await ctx.db
+        .insert(ShelfUnit)
+        .values(shelfUnitRows)
+        .onConflictDoNothing();
+      await ctx.db
+        .update(Shelf)
+        .set({ itemCount: shelfUnitRows.length })
+        .where(eq(Shelf.unitId, shelfId));
     }
   }
 }
