@@ -28,18 +28,31 @@ mock.module("@/utils/sanitizeUser", () => ({
   publicUserSelect: {},
   mapPublicUser: (user: unknown) => user,
 }));
-mock.module("@/utils/errors", () => ({
-  AppError: class AppError extends Error {
-    status: number;
+class MockAppError extends Error {
+  statusCode: number;
+  code?: string;
+  details?: Record<string, unknown>;
 
-    constructor(status: number, message: string) {
-      super(message);
-      this.status = status;
-    }
-  },
-  forbidden: (message: string) => new Error(`Forbidden: ${message}`),
-  notFound: (message: string) => new Error(`${message} not found`),
-  unauthorized: (message: string) => new Error(`Unauthorized: ${message}`),
+  constructor(
+    statusCode: number,
+    message: string,
+    options?: { code?: string; details?: Record<string, unknown> },
+  ) {
+    super(message);
+    this.name = "AppError";
+    this.statusCode = statusCode;
+    this.code = options?.code;
+    this.details = options?.details;
+  }
+}
+
+mock.module("@/utils/errors", () => ({
+  AppError: MockAppError,
+  forbidden: (message: string) =>
+    new MockAppError(403, `Forbidden: ${message}`),
+  notFound: (message: string) => new MockAppError(404, `${message} not found`),
+  unauthorized: (message: string) =>
+    new MockAppError(401, `Unauthorized: ${message}`),
 }));
 
 const { buildUnitWhereClause } = await import("./unit.service");
