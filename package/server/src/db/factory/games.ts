@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
   DEFAULT_LANGUAGE,
@@ -9,6 +10,7 @@ import {
   type FactoryUnitTagInsert,
   flushCreditAttributionsAndTags,
 } from "./books.js";
+import { Game, Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
 import { generateGameExtra, generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
@@ -40,46 +42,44 @@ export async function seedGames(
       const author = faker.helpers.arrayElement(users);
       const translations = generateTranslations(UnitType.GAME);
 
-      const unit = await ctx.prisma.unit.create({
-        data: {
-          type: UnitType.GAME,
-          userId: author.userId,
-          slugScope: author.userId,
-          status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-          defaultLanguage: DEFAULT_LANGUAGE,
-          publishedAt: randomBoolean(0.8)
-            ? faker.date.past({ years: 5 })
-            : null,
-          game: {
-            create: {
-              releaseDate: randomBoolean(0.7)
-                ? faker.date.past({ years: 10 })
-                : null,
-              versionLabel: randomBoolean(0.5)
-                ? `v${randomInt(1, 5)}.${randomInt(0, 9)}`
-                : null,
-              extra: generateGameExtra(),
-            },
-          },
-          translations: {
-            create: translations.map((t) => ({
-              language: t.language,
-              title: t.title,
-              summary: t.summary,
-              description: t.description,
-            })),
-          },
-          supportLanguages: {
-            create: translations.map((t, i) => ({
-              language: t.language,
-              isPrimary: i === 0,
-              sortOrder: i,
-            })),
-          },
-        },
-        select: { id: true, type: true },
+      const unit = { id: randomUUID(), type: UnitType.GAME };
+      await ctx.db.insert(Unit).values({
+        id: unit.id,
+        type: UnitType.GAME,
+        userId: author.userId,
+        slugScope: author.userId,
+        status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: randomBoolean(0.8) ? faker.date.past({ years: 5 }) : null,
       });
+      await ctx.db.insert(Game).values({
+        unitId: unit.id,
+        releaseDate: randomBoolean(0.7)
+          ? faker.date.past({ years: 10 })
+          : null,
+        versionLabel: randomBoolean(0.5)
+          ? `v${randomInt(1, 5)}.${randomInt(0, 9)}`
+          : null,
+        extra: generateGameExtra(),
+      });
+      await ctx.db.insert(UnitTranslation).values(
+        translations.map((t) => ({
+          unitId: unit.id,
+          language: t.language,
+          title: t.title,
+          summary: t.summary,
+          description: t.description,
+        })),
+      );
+      await ctx.db.insert(UnitSupportLanguage).values(
+        translations.map((t, i) => ({
+          unitId: unit.id,
+          language: t.language,
+          isPrimary: i === 0,
+          sortOrder: i,
+        })),
+      );
 
       for (const [i, p] of pickN(people, randomInt(1, 3)).entries()) {
         allCreditAttributions.push({

@@ -553,6 +553,9 @@ databases may be reset and reseeded.
   - Applied progress: factory zone seeding now inserts `Unit`, `Zone`,
     translations, and support languages through Drizzle instead of nested
     Prisma creates.
+  - Applied progress: factory game seeding now inserts `Unit`, `Game`,
+    translations, and support languages through Drizzle; shared attribution/tag
+    flushing already uses Drizzle.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
