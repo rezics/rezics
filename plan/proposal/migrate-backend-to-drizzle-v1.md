@@ -435,6 +435,10 @@ databases may be reset and reseeded.
     `syncEntitySegment`, `syncAllEntities`, and `patchEntityAliases`) to
     Drizzle reads against server `Entity`, `Unit`, `UnitTranslation`, and
     `UnitAlias`.
+  - Applied progress: moved poll search sync (`syncSinglePoll` and
+    `syncAllPolls`) to Drizzle reads against server `Poll`, `PollOption`,
+    `Unit`, `UnitTranslation`, and `UnitSupportLanguage`, preserving published
+    Unit filtering and stale/unpublished single-row deletion.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and

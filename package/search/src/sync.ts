@@ -19,8 +19,11 @@ import type { ServerDb } from "@rezics/server/db";
 import {
   Entity,
   Feedback,
+  Poll,
+  PollOption,
   Unit,
   UnitAlias,
+  UnitSupportLanguage,
   UnitTranslation,
   User,
   UserUnitCollection,
@@ -2546,21 +2549,134 @@ export function buildPollDocument(poll: any): PollSearchDocument {
 
 // ANCHOR: Poll sync functions
 
-const pollIncludeForSync = {
-  options: true,
-  unit: {
-    include: {
-      translations: true,
-      supportLanguages: true,
-    },
-  },
+type PollBaseRow = {
+  unitId: string;
+  voteMode: string;
+  resultVisibility: string;
+  anonymous: boolean;
+  closesAt: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  usageCount: number;
+  unitStatus: string | null;
+  userId: string | null;
+  isLanguageNeutral: boolean | null;
+};
+
+const pollBaseSelect = {
+  unitId: Poll.unitId,
+  voteMode: Poll.voteMode,
+  resultVisibility: Poll.resultVisibility,
+  anonymous: Poll.anonymous,
+  closesAt: Poll.closesAt,
+  createdAt: Poll.createdAt,
+  updatedAt: Poll.updatedAt,
+  usageCount: Poll.usageCount,
+  unitStatus: Unit.status,
+  userId: Unit.userId,
+  isLanguageNeutral: Unit.isLanguageNeutral,
 } as const;
 
+function groupRowsByKey<T extends Record<string, any>>(
+  rows: T[],
+  key: keyof T,
+): Map<string, T[]> {
+  const grouped = new Map<string, T[]>();
+  for (const row of rows) {
+    const id = row[key];
+    if (typeof id !== "string") continue;
+    const bucket = grouped.get(id) ?? [];
+    bucket.push(row);
+    grouped.set(id, bucket);
+  }
+  return grouped;
+}
+
+function pollFromRows(
+  row: PollBaseRow,
+  optionsByPollUnitId: Map<string, any[]>,
+  translationsByUnitId: Map<string, any[]>,
+  supportLanguagesByUnitId: Map<string, any[]>,
+) {
+  return {
+    unitId: row.unitId,
+    voteMode: row.voteMode,
+    resultVisibility: row.resultVisibility,
+    anonymous: row.anonymous,
+    closesAt: row.closesAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    usageCount: row.usageCount,
+    options: optionsByPollUnitId.get(row.unitId) ?? [],
+    unit: {
+      status: row.unitStatus,
+      userId: row.userId,
+      isLanguageNeutral: row.isLanguageNeutral,
+      translations: translationsByUnitId.get(row.unitId) ?? [],
+      supportLanguages: supportLanguagesByUnitId.get(row.unitId) ?? [],
+    },
+  };
+}
+
+async function hydratePollRows(rows: PollBaseRow[]) {
+  if (rows.length === 0) return [];
+  const unitIds = rows.map((row) => row.unitId);
+  const [options, translations, supportLanguages] = await Promise.all([
+    getSearchDb()
+      .select()
+      .from(PollOption)
+      .where(inArray(PollOption.pollUnitId, unitIds))
+      .orderBy(asc(PollOption.pollUnitId), asc(PollOption.position)),
+    getSearchDb()
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, unitIds)),
+  ]);
+  return rows.map((row) =>
+    pollFromRows(
+      row,
+      groupRowsByKey(options as any[], "pollUnitId"),
+      groupRowsByKey(translations as any[], "unitId"),
+      groupRowsByKey(supportLanguages as any[], "unitId"),
+    ),
+  );
+}
+
+async function findPollSyncRow(unitId: string) {
+  const [row] = await getSearchDb()
+    .select(pollBaseSelect)
+    .from(Poll)
+    .leftJoin(Unit, eq(Unit.id, Poll.unitId))
+    .where(eq(Poll.unitId, unitId))
+    .limit(1);
+  const [poll] = await hydratePollRows(row ? ([row] as PollBaseRow[]) : []);
+  return poll ?? null;
+}
+
+async function listPollSyncRows(input: { limit: number; cursor?: string }) {
+  const db = getSearchDb();
+  const query = db
+    .select(pollBaseSelect)
+    .from(Poll)
+    .leftJoin(Unit, eq(Unit.id, Poll.unitId));
+  const rows = input.cursor
+    ? await query
+        .where(and(eq(Unit.status, "PUBLISHED"), gt(Poll.unitId, input.cursor)))
+        .orderBy(asc(Poll.unitId))
+        .limit(input.limit)
+    : await query
+        .where(eq(Unit.status, "PUBLISHED"))
+        .orderBy(asc(Poll.unitId))
+        .limit(input.limit);
+  return hydratePollRows(rows as PollBaseRow[]);
+}
+
 export async function syncSinglePoll(client: SearchClient, unitId: string) {
-  const poll = await getSearchPrismaClient().poll.findUnique({
-    where: { unitId },
-    include: pollIncludeForSync,
-  });
+  const poll = await findPollSyncRow(unitId);
 
   if (!poll || poll.unit.status !== "PUBLISHED") {
     await client.deletePolls([unitId]);
@@ -2580,14 +2696,7 @@ export async function syncAllPolls(client: SearchClient) {
   while (true) {
     console.log("syncAllPolls: cursor", cursor, "total", total);
 
-    const polls: any[] = await getSearchPrismaClient().poll.findMany({
-      where: { unit: { status: "PUBLISHED" } },
-      include: pollIncludeForSync,
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-    });
+    const polls = await listPollSyncRows({ limit: BATCH_SIZE, cursor });
 
     if (polls.length === 0) break;
 
