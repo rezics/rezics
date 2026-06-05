@@ -18,6 +18,7 @@ import {
 import type { ServerDb } from "@rezics/server/db";
 import {
   Book,
+  Comment,
   ContentStructure,
   ContentTranslation,
   CreditAttribution,
@@ -60,27 +61,12 @@ import {
   type UserUnitProgressRow,
 } from "./progress";
 
-type SearchDatabaseClient = any;
 type SearchServerDb = Pick<ServerDb, "select">;
 
-let searchPrismaClient: SearchDatabaseClient | null = null;
 let searchServerDb: SearchServerDb | null = null;
-
-export function setSearchPrismaClient(prisma: SearchDatabaseClient): void {
-  searchPrismaClient = prisma;
-}
 
 export function setSearchDb(db: SearchServerDb): void {
   searchServerDb = db;
-}
-
-function getSearchPrismaClient(): SearchDatabaseClient {
-  if (!searchPrismaClient) {
-    throw new Error(
-      "Search database client is not configured. Call setSearchPrismaClient() before running search sync.",
-    );
-  }
-  return searchPrismaClient;
 }
 
 function getSearchDb(): SearchServerDb {
@@ -2263,10 +2249,6 @@ function resolvePostContent(post: any): unknown {
   return null;
 }
 
-const commentIncludeForSync = {
-  author: true,
-} as const;
-
 function isPublicIndexableComment(comment: any): boolean {
   return (
     comment?.moderationStatus === "APPROVED" &&
@@ -2679,31 +2661,96 @@ export async function syncPostSegment(
 
 // ANCHOR: Comment sync functions
 
+const commentSyncSelect = {
+  id: Comment.id,
+  content: Comment.content,
+  rootUnitId: Comment.rootUnitId,
+  realmUnitId: Comment.realmUnitId,
+  parentCommentId: Comment.parentCommentId,
+  authorUserId: Comment.authorUserId,
+  depth: Comment.depth,
+  path: sql<string | null>`${Comment.path}::text`,
+  replyCount: Comment.replyCount,
+  directReplyCount: Comment.directReplyCount,
+  lastReplyAt: Comment.lastReplyAt,
+  isLocked: Comment.isLocked,
+  state: Comment.state,
+  createdAt: Comment.createdAt,
+  updatedAt: Comment.updatedAt,
+  deletedAt: Comment.deletedAt,
+  moderationStatus: Comment.moderationStatus,
+  authorName: User.name,
+  authorSlug: Unit.slug,
+  authorAvatar: User.avatar,
+} as const;
+
+function commentFromRow(row: any) {
+  return {
+    id: row.id,
+    content: row.content,
+    rootUnitId: row.rootUnitId,
+    realmUnitId: row.realmUnitId,
+    parentCommentId: row.parentCommentId,
+    authorUserId: row.authorUserId,
+    depth: row.depth,
+    path: row.path,
+    replyCount: row.replyCount,
+    directReplyCount: row.directReplyCount,
+    lastReplyAt: row.lastReplyAt,
+    isLocked: row.isLocked,
+    state: row.state,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+    moderationStatus: row.moderationStatus,
+    author: {
+      name: row.authorName,
+      slug: row.authorSlug,
+      avatar: row.authorAvatar,
+    },
+  };
+}
+
+async function findCommentSyncRow(commentId: string) {
+  const [row] = await getSearchDb()
+    .select(commentSyncSelect)
+    .from(Comment)
+    .leftJoin(User, eq(User.unitId, Comment.authorUserId))
+    .leftJoin(Unit, eq(Unit.id, Comment.authorUserId))
+    .where(eq(Comment.id, commentId))
+    .limit(1);
+  return row ? commentFromRow(row) : null;
+}
+
+async function listCommentSyncRows(input: { limit: number; cursor?: string }) {
+  const conditions = [
+    eq(Comment.moderationStatus, "APPROVED"),
+    isNull(Comment.deletedAt),
+  ];
+  if (input.cursor) conditions.push(gt(Comment.id, input.cursor));
+  const rows = await getSearchDb()
+    .select(commentSyncSelect)
+    .from(Comment)
+    .leftJoin(User, eq(User.unitId, Comment.authorUserId))
+    .leftJoin(Unit, eq(Unit.id, Comment.authorUserId))
+    .where(and(...conditions))
+    .orderBy(asc(Comment.id))
+    .limit(input.limit);
+  return (rows as any[]).map(commentFromRow);
+}
+
 export async function syncSingleComment(
   client: SearchClient,
   commentId: string,
 ) {
-  const comment = await getSearchPrismaClient().comment.findUnique({
-    where: { id: commentId },
-    include: commentIncludeForSync,
-  });
+  const comment = await findCommentSyncRow(commentId);
 
   if (!comment || !isPublicIndexableComment(comment)) {
     await client.deleteComments([commentId]);
     return;
   }
 
-  const [pathRow] = await getSearchPrismaClient().$queryRaw<
-    { id: string; path: string | null }[]
-  >`
-    SELECT "id", "path"::text AS path
-    FROM "Comment"
-    WHERE "id" = ${comment.id}::uuid
-  `;
-
-  await client.addOrUpdateComments([
-    buildCommentDocument({ ...comment, path: pathRow?.path ?? null }),
-  ]);
+  await client.addOrUpdateComments([buildCommentDocument(comment)]);
 }
 
 export async function syncCommentSegment(
@@ -2711,38 +2758,14 @@ export async function syncCommentSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const comments: any[] = await getSearchPrismaClient().comment.findMany({
-    where: { moderationStatus: "APPROVED", deletedAt: null },
-    include: commentIncludeForSync,
-    orderBy: { id: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { id: options.cursor } : undefined,
+  const comments = await listCommentSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(comments, limit, "id");
   if (current.length > 0) {
-    const paths = (
-      await Promise.all(
-        current.map(
-          (comment) =>
-            getSearchPrismaClient().$queryRaw<
-              { id: string; path: string | null }[]
-            >`
-            SELECT "id", "path"::text AS path
-            FROM "Comment"
-            WHERE "id" = ${comment.id}::uuid
-          `,
-        ),
-      )
-    ).flat();
-    const pathById = new Map(paths.map((row) => [row.id, row.path]));
     await client.addOrUpdateComments(
-      current.map((comment) =>
-        buildCommentDocument({
-          ...comment,
-          path: pathById.get(comment.id) ?? null,
-        }),
-      ),
+      current.map((comment) => buildCommentDocument(comment)),
     );
   }
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };

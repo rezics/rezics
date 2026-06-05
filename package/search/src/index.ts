@@ -64,7 +64,6 @@ export {
   type SearchSegmentOptions,
   type SearchSegmentResult,
   setSearchDb,
-  setSearchPrismaClient,
   syncAllComments,
   syncAllContainedUnitIds,
   syncAllContent,

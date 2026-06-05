@@ -3,9 +3,41 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 
 async function loadSearchHarness() {
   mock.restore();
-  const [{ setSearchPrismaClient }, { createSearchHandlers }] =
-    await Promise.all([import("@rezics/search/sync"), import("./handlers")]);
-  return { createSearchHandlers, setSearchPrismaClient };
+  const [{ setSearchDb }, { createSearchHandlers }] = await Promise.all([
+    import("@rezics/search/sync"),
+    import("./handlers"),
+  ]);
+  return { createSearchHandlers, setSearchDb };
+}
+
+function createDb(rowSets: unknown[][]) {
+  const createChain = () => ({
+    then(resolve: (value: unknown[]) => unknown) {
+      return Promise.resolve(resolve(rowSets.shift() ?? []));
+    },
+    leftJoin() {
+      return createChain();
+    },
+    where() {
+      return createChain();
+    },
+    orderBy() {
+      return createChain();
+    },
+    async limit() {
+      return rowSets.shift() ?? [];
+    },
+  });
+
+  return {
+    select() {
+      return {
+        from() {
+          return createChain();
+        },
+      };
+    },
+  };
 }
 
 describe("search handlers", () => {
@@ -29,30 +61,37 @@ describe("search handlers", () => {
   });
 
   test("patch handlers read current DB state instead of CDC event values", async () => {
-    const { createSearchHandlers, setSearchPrismaClient } =
-      await loadSearchHarness();
+    const { createSearchHandlers, setSearchDb } = await loadSearchHarness();
     const patches: Array<Record<string, unknown>> = [];
-    setSearchPrismaClient({
-      unit: {
-        findUnique: async () => ({
-          type: "BOOK",
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-          moderationStatus: "APPROVED",
-          catalogEntryKind: null,
-        }),
-      },
-      unitTag: {
-        findMany: async () => [
+    setSearchDb(
+      createDb([
+        [
+          {
+            type: "BOOK",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            moderationStatus: "APPROVED",
+            catalogEntryKind: null,
+          },
+        ],
+        [
           {
             tagUnitId: "tag-current",
             score: 12,
-            pinned: false,
-            tag: { translations: [{ title: "Current tag" }] },
+            title: "Current tag",
           },
         ],
-      },
-    } as never);
+        [
+          {
+            type: "BOOK",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            moderationStatus: "APPROVED",
+            catalogEntryKind: null,
+          },
+        ],
+      ]) as never,
+    );
 
     const handlers = createSearchHandlers({
       patchContent: async (documents: Array<Record<string, unknown>>) => {
@@ -85,28 +124,23 @@ describe("search handlers", () => {
   });
 
   test("full sync rebuilds one segment and enqueues continuation", async () => {
-    const { createSearchHandlers, setSearchPrismaClient } =
-      await loadSearchHarness();
+    const { createSearchHandlers, setSearchDb } = await loadSearchHarness();
     const deleted: string[] = [];
     const added: Array<Record<string, unknown>> = [];
     const enqueued: string[] = [];
-    setSearchPrismaClient({
-      entity: {
-        findMany: async () => [
+    setSearchDb(
+      createDb([
+        [
           {
             unitId: "entity-1",
             kind: "person",
             verified: true,
             eligibleCreditRoles: [],
             eligibleSubjectRoles: [],
-            unit: {
-              slug: "entity-1",
-              userId: "user-1",
-              createdAt: new Date("2026-01-01T00:00:00.000Z"),
-              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-              translations: [{ language: "en", title: "Entity One" }],
-              aliases: [],
-            },
+            slug: "entity-1",
+            userId: "user-1",
+            createdAt: new Date("2026-01-01T00:00:00.000Z"),
+            updatedAt: new Date("2026-01-01T00:00:00.000Z"),
           },
           {
             unitId: "entity-2",
@@ -114,18 +148,16 @@ describe("search handlers", () => {
             verified: true,
             eligibleCreditRoles: [],
             eligibleSubjectRoles: [],
-            unit: {
-              slug: "entity-2",
-              userId: "user-1",
-              createdAt: new Date("2026-01-01T00:00:00.000Z"),
-              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-              translations: [{ language: "en", title: "Entity Two" }],
-              aliases: [],
-            },
+            slug: "entity-2",
+            userId: "user-1",
+            createdAt: new Date("2026-01-01T00:00:00.000Z"),
+            updatedAt: new Date("2026-01-01T00:00:00.000Z"),
           },
         ],
-      },
-    } as never);
+        [{ unitId: "entity-1", language: "en", title: "Entity One" }],
+        [],
+      ]) as never,
+    );
 
     const handlers = createSearchHandlers({
       deleteAllEntities: async () => {
@@ -153,57 +185,63 @@ describe("search handlers", () => {
   });
 
   test("variant full repair continues by variant cursor", async () => {
-    const { createSearchHandlers, setSearchPrismaClient } =
-      await loadSearchHarness();
+    const { createSearchHandlers, setSearchDb } = await loadSearchHarness();
     const added: Array<Record<string, unknown>> = [];
     const enqueued: string[] = [];
-    setSearchPrismaClient({
-      unit: {
-        findMany: async (args: any) => {
-          expect(args.where.catalogEntryKind).toBe("VARIANT");
-          return [
-            {
-              id: "release-1",
-              type: "BOOK",
-              defaultLanguage: "en",
-              visibility: "PUBLIC",
-              rating: "GENERAL",
-              userId: "user-1",
-              createdAt: new Date("2026-01-01T00:00:00.000Z"),
-              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-              publishedAt: null,
-              translations: [{ language: "en", title: "Release One" }],
-              unitTags: [],
-              catalogEntryKind: "VARIANT",
-              targetUnitId: "main-1",
-              inRealms: [],
-              realmTagApplicationsAsTargetUnit: [],
-              creditAttributions: [],
-              book: { textLength: 100, isLicensed: false },
-            },
-            {
-              id: "release-2",
-              type: "BOOK",
-              defaultLanguage: "en",
-              visibility: "PUBLIC",
-              rating: "GENERAL",
-              userId: "user-1",
-              createdAt: new Date("2026-01-01T00:00:00.000Z"),
-              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-              publishedAt: null,
-              translations: [{ language: "en", title: "Release Two" }],
-              unitTags: [],
-              catalogEntryKind: "VARIANT",
-              targetUnitId: "main-1",
-              inRealms: [],
-              realmTagApplicationsAsTargetUnit: [],
-              creditAttributions: [],
-              book: { textLength: 100, isLicensed: false },
-            },
-          ];
-        },
-      },
-    } as never);
+    setSearchDb(
+      createDb([
+        [
+          {
+            id: "release-1",
+            type: "BOOK",
+            status: "PUBLISHED",
+            moderationStatus: "APPROVED",
+            defaultLanguage: "en",
+            visibility: "PUBLIC",
+            rating: "GENERAL",
+            userId: "user-1",
+            createdAt: new Date("2026-01-01T00:00:00.000Z"),
+            updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+            publishedAt: null,
+            catalogEntryKind: "VARIANT",
+            targetUnitId: "main-1",
+          },
+          {
+            id: "release-2",
+            type: "BOOK",
+            status: "PUBLISHED",
+            moderationStatus: "APPROVED",
+            defaultLanguage: "en",
+            visibility: "PUBLIC",
+            rating: "GENERAL",
+            userId: "user-1",
+            createdAt: new Date("2026-01-01T00:00:00.000Z"),
+            updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+            publishedAt: null,
+            catalogEntryKind: "VARIANT",
+            targetUnitId: "main-1",
+          },
+        ],
+        [{ unitId: "release-1", language: "en", title: "Release One" }],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [{ unitId: "release-1", textLength: 100, isLicensed: false }],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ]) as never,
+    );
 
     const handlers = createSearchHandlers({
       addOrUpdateContent: async (documents: Array<Record<string, unknown>>) => {

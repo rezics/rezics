@@ -411,14 +411,12 @@ databases may be reset and reseeded.
 
 ## 6. Cross-package consumers and data workflows
 
-- [ ] 6.1 Convert `package/search` from `setSearchPrismaClient` to an explicit
+- [x] 6.1 Convert `package/search` from `setSearchPrismaClient` to an explicit
   Drizzle-backed main DB dependency. Update sync functions, row mappers, raw
   path queries, and tests.
   - Applied progress: added an explicit `setSearchDb(db)` dependency and moved
     user search sync (`syncSingleUser`, `syncAllUsers`, `syncUserSegment`) to
-    Drizzle reads against server `User` + `Unit.slug`; the remaining content,
-    post, realm, entity, feedback, poll, collection/progress, and raw path sync
-    paths still use the legacy Prisma client injection.
+    Drizzle reads against server `User` + `Unit.slug`.
   - Applied progress: moved feedback search sync (`syncSingleFeedback`,
     `syncAllFeedbacks`, `syncFeedbackSegment`, and
     `patchFeedbackResolutionFromDb`) to Drizzle reads against server
@@ -475,14 +473,20 @@ databases may be reset and reseeded.
     `syncPostsByAuthorSegment`, and `syncPostsByTarget`) to Drizzle reads
     against server `Post`, `Unit`, `User`, `ScoreEntry`, translation, support
     language, target Unit, and realm tables.
+  - Applied progress: moved comment search sync (`syncSingleComment`,
+    `syncCommentSegment`, and `syncAllComments`) to Drizzle reads against server
+    `Comment`, `User`, and `Unit`, preserving `ltree` path text projection
+    through Drizzle `sql`.
+  - Applied progress: removed the legacy `setSearchPrismaClient` search API and
+    updated job-runner search runtime plus seed sync runtime to inject only the
+    server Drizzle db for search.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
   maintenance from Prisma clients to Drizzle db clients. Keep pg-boss DB ensure
   separate.
   - Applied progress: search runtime now creates and injects a server Drizzle db
-    for the migrated user search sync path while temporarily retaining the
-    server Prisma client for the remaining search sync paths.
+    for all search sync paths and no longer creates a server Prisma client.
 - [x] 6.4 Move `package/server/prisma/seed` to a Drizzle-appropriate path such as
   `package/server/src/db/seed` or `package/server/db/seed`, then update package
   exports and seed CLI imports.

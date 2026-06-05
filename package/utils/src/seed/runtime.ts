@@ -2,7 +2,6 @@ import type { SearchClient } from "@rezics/search/client";
 import {
   patchContentContainedUnitIds,
   setSearchDb,
-  setSearchPrismaClient,
   syncSingleContent,
   syncSingleEntity,
   syncSinglePost,
@@ -86,9 +85,8 @@ function createActiveSyncHooks(input: {
   searchClient: SearchClient;
   summary: SeedSyncSummary;
 }): SeedSyncHooks {
-  const { prisma, searchClient, summary } = input;
+  const { searchClient, summary } = input;
   setSearchDb(input.db);
-  setSearchPrismaClient(prisma);
 
   return {
     async content(unitId) {
