@@ -41,18 +41,25 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 
-mock.module("@/unit/collaborative-metadata", () => ({
-  assertEditorialPatchAllowed: (patch: Record<string, unknown>) => {
-    if (patch.realmTagApplications) {
-      throw new AppError(400, "Externally governed patch path", {
-        details: {
-          offendingPath: "realmTagApplications.featured",
-          useApi: "/realm-tag-application",
-        },
-      });
-    }
-  },
-}));
+mock.module("@/unit/collaborative-metadata", async () => {
+  const actual = await import(
+    "../unit/collaborative-metadata.ts?entity-api-test-actual"
+  );
+
+  return {
+    ...actual,
+    assertEditorialPatchAllowed: (patch: Record<string, unknown>) => {
+      if (patch.realmTagApplications) {
+        throw new AppError(400, "Externally governed patch path", {
+          details: {
+            offendingPath: "realmTagApplications.featured",
+            useApi: "/realm-tag-application",
+          },
+        });
+      }
+    },
+  };
+});
 
 const entityServiceMock = {
   getBySlug: mock(async () => entityRow()),

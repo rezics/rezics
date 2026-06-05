@@ -126,7 +126,7 @@ function createRepositoryStub(
 }
 
 async function createService(repository: EntityRepository) {
-  const module = await import("./entity.service");
+  const module = await import("./entity.service.ts?entity-service-test-actual");
   return new module.EntityService(repository) as EntityService;
 }
 
@@ -311,7 +311,7 @@ describe("EntityService.create", () => {
 
   test("create and edit projections produce identical editorial leaf paths", async () => {
     const { buildEntityCreatePatch, mapEntityUpdatePatchPaths } = await import(
-      "./entity.service"
+      "./entity.service.ts?entity-service-test-actual"
     );
     const translation = { language: "en", title: "Same State" };
 
@@ -408,7 +408,9 @@ describe("EntityService.update", () => {
   test("non-admin: avatar update succeeds and records avatar field key", async () => {
     const repository = createRepositoryStub();
     const service = await createService(repository);
-    const { mapEntityUpdatePatchPaths } = await import("./entity.service");
+    const { mapEntityUpdatePatchPaths } = await import(
+      "./entity.service.ts?entity-service-test-actual"
+    );
 
     await expect(
       service.update(
@@ -429,7 +431,9 @@ describe("EntityService.update", () => {
   test("non-admin: eligibility update succeeds and records eligibility field keys", async () => {
     const repository = createRepositoryStub();
     const service = await createService(repository);
-    const { mapEntityUpdatePatchPaths } = await import("./entity.service");
+    const { mapEntityUpdatePatchPaths } = await import(
+      "./entity.service.ts?entity-service-test-actual"
+    );
 
     await expect(
       service.update(
