@@ -10,16 +10,19 @@ Goal: Complete every actionable proposal currently in `plan/proposal/` using the
   Implementation order:
   1. `extract-comment-feature.md`
   2. `comment-tree-ranking-cutover.md`
-  3. `feed-row-system.md`
-  4. `share-reference-counts.md`
-  5. `sequin-cdc-admin-ops.md`
-  6. `crawler-preview-edge-routing.md`
+  3. `shelf-item-collection-cutover.md`
+  4. `feed-row-system.md`
+  5. `share-reference-counts.md`
+  6. `sequin-cdc-admin-ops.md`
+  7. `crawler-preview-edge-routing.md`
 
   Dependency rules:
   - `extract-comment-feature` goes first because it is a localized frontend refactor that clarifies the app-side `comment` / `post`
   boundary.
   - `comment-tree-ranking-cutover` goes before `feed-row-system` because feed sorting depends on ranking fields such as `bestScore`,
   `hotScore`, `topScore`, and `risingScore`.
+  - `shelf-item-collection-cutover` goes after the comment cutover because shelf items need the settled comment identity/model, and
+  before feed/share work because it replaces collection semantics with shelf-item membership and search projection.
   - `feed-row-system` goes before `share-reference-counts` so feed contracts/renderers stabilize before engagement count surfaces are
   expanded.
   - `sequin-cdc-admin-ops` and `crawler-preview-edge-routing` are mostly independent; do them after the core app/server/ranking/feed/
@@ -66,7 +69,7 @@ Goal: Complete every actionable proposal currently in `plan/proposal/` using the
   - Treat this prompt as authorization to commit automatically once the generated message is appropriate.
   - Commit the staged task-owned changes.
 
-We are currently in the development stage, so there is no need to consider compatibility with old code. Feel free to use the local Docker environment as needed, and feel free to reset the database.
+We are currently in the development stage, so there is no need to preserve compatibility with old code, old API shapes, old database schemas, or old data. Prefer clear internal cutovers over compatibility layers, dual writes, legacy fallbacks, or data-preserving migrations. Feel free to use the local Docker environment as needed, and feel free to reset the database.
 
 When debugging, you may freely create test data if needed.
 
