@@ -124,6 +124,55 @@ function contentHydrationRows() {
   ];
 }
 
+const postBaseRow = {
+  unitId: "post-1",
+  authorUserId: "user-1",
+  scoreEntryId: "score-1",
+  kind: "POST",
+  replyCount: 1,
+  directReplyCount: 1,
+  lastReplyAt: null,
+  isLocked: false,
+  extra: null,
+  createdAt: new Date("2026-06-01T00:00:00.000Z"),
+  updatedAt: new Date("2026-06-02T00:00:00.000Z"),
+  variantUnitId: null,
+  targetUnitId: "book-1",
+  unitStatus: "PUBLISHED",
+  unitVisibility: "PUBLIC",
+  unitModerationStatus: "APPROVED",
+  unitDefaultLanguage: "en",
+  unitIsLanguageNeutral: false,
+  unitUserId: "user-1",
+};
+
+function postHydrationRows() {
+  return [
+    [{ unitId: "user-1", name: "Alice", slug: "alice", avatar: "avatar.png" }],
+    [{ unitId: "post-1", language: "en", title: "Post title" }],
+    [
+      {
+        unitId: "post-1",
+        language: "en",
+        content: markdownContentDoc("Post body"),
+      },
+    ],
+    [{ unitId: "post-1", language: "en", isPrimary: true, sortOrder: 0 }],
+    [
+      {
+        unitId: "post-1",
+        realmUnitId: "realm-1",
+        moderationStatus: "APPROVED",
+        isLocked: false,
+        realm: { realm: { isPublic: true } },
+      },
+    ],
+    [{ id: "book-1", type: "BOOK", defaultLanguage: "en" }],
+    [{ unitId: "book-1", language: "en", title: "Target book" }],
+    [{ id: "score-1", value: 5, fields: { story: 5 } }],
+  ];
+}
+
 function setServerEnvForSearchTests() {
   process.env.DATABASE_URL ??=
     "postgresql://postgres:postgres@localhost:5432/rezics_book";
@@ -1052,24 +1101,68 @@ describe("search sync global moderation projection", () => {
     expect(addOrUpdateContent).not.toHaveBeenCalled();
   });
 
+  test("syncSinglePost reads post graph through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncSinglePost } = await import("./sync");
+    const deletePosts = mock(async (_ids: string[]) => undefined);
+    const addOrUpdatePosts = mock(async (_docs: any[]) => undefined);
+    setSearchDb(createDb([[postBaseRow], ...postHydrationRows()]) as never);
+
+    await syncSinglePost({ deletePosts, addOrUpdatePosts } as any, "post-1");
+
+    expect(addOrUpdatePosts).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: "post-1",
+        titleText: "Post title",
+        contentText: "Post body",
+        authorName: "Alice",
+        authorSlug: "alice",
+        targetTitles: ["Target book"],
+        scoreValue: 5,
+        realmIds: ["realm-1"],
+        languages: ["en"],
+      }),
+    ]);
+    expect(deletePosts).not.toHaveBeenCalled();
+  });
+
+  test("syncPostsByAuthorSegment returns cursor from Drizzle rows", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncPostsByAuthorSegment } = await import("./sync");
+    const addOrUpdatePosts = mock(async (_docs: any[]) => undefined);
+    setSearchDb(
+      createDb([
+        [postBaseRow, { ...postBaseRow, unitId: "post-2" }],
+        ...postHydrationRows(),
+      ]) as never,
+    );
+
+    const result = await syncPostsByAuthorSegment(
+      { addOrUpdatePosts } as any,
+      "user-1",
+      { limit: 1 },
+    );
+
+    expect(result).toEqual({ processed: 1, nextCursor: "post-1" });
+    expect(addOrUpdatePosts).toHaveBeenCalledTimes(1);
+  });
+
   test("syncSinglePost deletes globally removed posts", async () => {
     setServerEnvForSearchTests();
-    const { setSearchPrismaClient, syncSinglePost } = await import("./sync");
+    const { setSearchDb, syncSinglePost } = await import("./sync");
     const deletePosts = mock(async (_ids: string[]) => undefined);
     const addOrUpdatePosts = mock(async (_docs: any[]) => undefined);
 
-    setSearchPrismaClient({
-      post: {
-        findUnique: mock(async () => ({
-          unitId: "post-1",
-          unit: {
-            status: "PUBLISHED",
-            visibility: "PUBLIC",
-            moderationStatus: "REMOVED",
+    setSearchDb(
+      createDb([
+        [
+          {
+            ...postBaseRow,
+            unitModerationStatus: "REMOVED",
           },
-        })),
-      },
-    } as any);
+        ],
+      ]) as never,
+    );
 
     await syncSinglePost({ deletePosts, addOrUpdatePosts } as any, "post-1");
 

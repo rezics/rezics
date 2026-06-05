@@ -32,6 +32,7 @@ import {
   Post,
   Realm,
   RealmTagApplication,
+  ScoreEntry,
   Series,
   SeriesContentIndex,
   ShelfUnit,
@@ -1787,28 +1788,10 @@ export async function syncPostsByAuthorSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const rows: any[] = await getSearchPrismaClient().post.findMany({
-    where: {
-      authorUserId: userId,
-      unit: publicSearchableUnitWhere(),
-    },
-    include: {
-      ...postIncludeForSync,
-      unit: {
-        include: {
-          user: true,
-          targetUnit: { include: targetUnitSearchInclude },
-          translations: true,
-          contentTranslations: true,
-          supportLanguages: true,
-          ...realmSearchProjectionSelect,
-        },
-      },
-    },
-    orderBy: { unitId: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  const rows = await listPostSyncRows({
+    authorUserId: userId,
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(rows, limit, "unitId");
   if (current.length > 0) {
@@ -2236,36 +2219,6 @@ export async function syncFeedbackSegment(
 
 // ANCHOR: Post document builder
 
-const targetUnitSearchInclude = {
-  translations: true,
-  book: true,
-  game: true,
-  media: true,
-} as const;
-
-const postIncludeForSync = {
-  unit: {
-    include: {
-      user: true,
-      targetUnit: { include: targetUnitSearchInclude },
-      translations: true,
-      contentTranslations: true,
-      supportLanguages: true,
-      ...realmSearchProjectionSelect,
-    },
-  },
-  scoreEntry: true,
-} as const;
-
-const postUnitIncludeForSync = {
-  user: true,
-  targetUnit: { include: targetUnitSearchInclude },
-  translations: true,
-  contentTranslations: true,
-  supportLanguages: true,
-  ...realmSearchProjectionSelect,
-} as const;
-
 function languageOrder(unit: any, rows: any[]): string[] {
   const supportLanguages = unit?.supportLanguages ?? [];
   return [
@@ -2437,24 +2390,245 @@ export function buildPostDocument(post: any): PostSearchDocument {
   };
 }
 
+type PostSyncRow = {
+  unitId: string;
+  authorUserId: string;
+  scoreEntryId: string | null;
+  kind: string | null;
+  replyCount: number;
+  directReplyCount: number;
+  lastReplyAt: Date | string | null;
+  isLocked: boolean;
+  extra: unknown;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  variantUnitId: string | null;
+  targetUnitId: string | null;
+  unitStatus: string | null;
+  unitVisibility: string | null;
+  unitModerationStatus: string | null;
+  unitDefaultLanguage: string | null;
+  unitIsLanguageNeutral: boolean | null;
+  unitUserId: string | null;
+};
+
+const postSyncSelect = {
+  unitId: Post.unitId,
+  authorUserId: Post.authorUserId,
+  scoreEntryId: Post.scoreEntryId,
+  kind: Post.kind,
+  replyCount: Post.replyCount,
+  directReplyCount: Post.directReplyCount,
+  lastReplyAt: Post.lastReplyAt,
+  isLocked: Post.isLocked,
+  extra: Post.extra,
+  createdAt: Post.createdAt,
+  updatedAt: Post.updatedAt,
+  variantUnitId: Post.variantUnitId,
+  targetUnitId: Unit.targetUnitId,
+  unitStatus: Unit.status,
+  unitVisibility: Unit.visibility,
+  unitModerationStatus: Unit.moderationStatus,
+  unitDefaultLanguage: Unit.defaultLanguage,
+  unitIsLanguageNeutral: Unit.isLanguageNeutral,
+  unitUserId: Unit.userId,
+} as const;
+
+async function listPostBaseRows(input: {
+  limit: number;
+  cursor?: string;
+  authorUserId?: string;
+  targetUnitId?: string;
+}) {
+  const conditions = [publicPostUnitConditions()];
+  if (input.cursor) conditions.push(gt(Post.unitId, input.cursor));
+  if (input.authorUserId)
+    conditions.push(eq(Post.authorUserId, input.authorUserId));
+  if (input.targetUnitId)
+    conditions.push(eq(Unit.targetUnitId, input.targetUnitId));
+  return getSearchDb()
+    .select(postSyncSelect)
+    .from(Post)
+    .leftJoin(Unit, eq(Unit.id, Post.unitId))
+    .where(and(...conditions))
+    .orderBy(asc(Post.unitId))
+    .limit(input.limit);
+}
+
+async function findPostBaseRow(unitId: string) {
+  const [row] = await getSearchDb()
+    .select(postSyncSelect)
+    .from(Post)
+    .leftJoin(Unit, eq(Unit.id, Post.unitId))
+    .where(eq(Post.unitId, unitId))
+    .limit(1);
+  return (row as PostSyncRow | undefined) ?? null;
+}
+
+async function hydratePostRows(rows: PostSyncRow[]) {
+  if (rows.length === 0) return [];
+  const unitIds = rows.map((row) => row.unitId);
+  const authorUserIds = [...new Set(rows.map((row) => row.authorUserId))];
+  const targetUnitIds = [
+    ...new Set(rows.map((row) => row.targetUnitId).filter(isNonEmptyString)),
+  ];
+  const scoreEntryIds = [
+    ...new Set(rows.map((row) => row.scoreEntryId).filter(isNonEmptyString)),
+  ];
+
+  const [
+    authors,
+    translations,
+    contentTranslations,
+    supportLanguages,
+    unitRealms,
+    targetUnits,
+    targetTranslations,
+    scoreEntries,
+  ] = await Promise.all([
+    getSearchDb()
+      .select()
+      .from(User)
+      .where(inArray(User.unitId, authorUserIds)),
+    getSearchDb()
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(ContentTranslation)
+      .where(inArray(ContentTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, unitIds)),
+    getSearchDb()
+      .select({
+        unitId: UnitRealm.unitId,
+        realmUnitId: UnitRealm.realmUnitId,
+        moderationStatus: UnitRealm.moderationStatus,
+        isLocked: UnitRealm.isLocked,
+        realm: {
+          realm: {
+            isPublic: Realm.isPublic,
+          },
+        },
+      })
+      .from(UnitRealm)
+      .leftJoin(Realm, eq(Realm.unitId, UnitRealm.realmUnitId))
+      .where(inArray(UnitRealm.unitId, unitIds)),
+    targetUnitIds.length > 0
+      ? getSearchDb().select().from(Unit).where(inArray(Unit.id, targetUnitIds))
+      : Promise.resolve([]),
+    targetUnitIds.length > 0
+      ? getSearchDb()
+          .select()
+          .from(UnitTranslation)
+          .where(inArray(UnitTranslation.unitId, targetUnitIds))
+      : Promise.resolve([]),
+    scoreEntryIds.length > 0
+      ? getSearchDb()
+          .select()
+          .from(ScoreEntry)
+          .where(inArray(ScoreEntry.id, scoreEntryIds))
+      : Promise.resolve([]),
+  ]);
+
+  const authorsByUnitId = new Map(
+    (authors as any[]).map((author) => [author.unitId, author]),
+  );
+  const translationsByUnitId = groupRowsByKey(translations as any[], "unitId");
+  const contentTranslationsByUnitId = groupRowsByKey(
+    contentTranslations as any[],
+    "unitId",
+  );
+  const supportLanguagesByUnitId = groupRowsByKey(
+    supportLanguages as any[],
+    "unitId",
+  );
+  const unitRealmsByUnitId = groupRowsByKey(unitRealms as any[], "unitId");
+  const targetUnitsById = new Map(
+    (targetUnits as any[]).map((unit) => [unit.id, unit]),
+  );
+  const targetTranslationsByUnitId = groupRowsByKey(
+    targetTranslations as any[],
+    "unitId",
+  );
+  const scoreEntriesById = new Map(
+    (scoreEntries as any[]).map((entry) => [entry.id, entry]),
+  );
+
+  return rows.map((row) => {
+    const targetUnit = row.targetUnitId
+      ? targetUnitsById.get(row.targetUnitId)
+      : null;
+    if (targetUnit) {
+      targetUnit.translations =
+        targetTranslationsByUnitId.get(row.targetUnitId ?? "") ?? [];
+    }
+    return {
+      unitId: row.unitId,
+      authorUserId: row.authorUserId,
+      scoreEntryId: row.scoreEntryId,
+      kind: row.kind,
+      replyCount: row.replyCount,
+      directReplyCount: row.directReplyCount,
+      lastReplyAt: row.lastReplyAt,
+      isLocked: row.isLocked,
+      extra: row.extra,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      variantUnitId: row.variantUnitId,
+      scoreEntry: row.scoreEntryId
+        ? (scoreEntriesById.get(row.scoreEntryId) ?? null)
+        : null,
+      unit: {
+        id: row.unitId,
+        status: row.unitStatus,
+        visibility: row.unitVisibility,
+        moderationStatus: row.unitModerationStatus,
+        targetUnitId: row.targetUnitId,
+        defaultLanguage: row.unitDefaultLanguage,
+        isLanguageNeutral: row.unitIsLanguageNeutral,
+        userId: row.unitUserId,
+        user: authorsByUnitId.get(row.authorUserId) ?? null,
+        targetUnit: targetUnit ?? null,
+        translations: translationsByUnitId.get(row.unitId) ?? [],
+        contentTranslations: contentTranslationsByUnitId.get(row.unitId) ?? [],
+        supportLanguages: supportLanguagesByUnitId.get(row.unitId) ?? [],
+        inRealms: unitRealmsByUnitId.get(row.unitId) ?? [],
+      },
+    };
+  });
+}
+
+async function listPostSyncRows(input: {
+  limit: number;
+  cursor?: string;
+  authorUserId?: string;
+  targetUnitId?: string;
+}) {
+  return hydratePostRows((await listPostBaseRows(input)) as PostSyncRow[]);
+}
+
 // ANCHOR: Post sync functions
 
 export async function syncSinglePost(client: SearchClient, unitId: string) {
-  const post = await getSearchPrismaClient().post.findUnique({
-    where: { unitId },
-    include: {
-      ...postIncludeForSync,
-      unit: {
-        include: postUnitIncludeForSync,
-      },
-    },
-  });
+  const postBase = await findPostBaseRow(unitId);
 
-  if (!post || !isPublicIndexablePostUnit(post.unit)) {
+  if (
+    !postBase ||
+    !isPublicIndexablePostUnit({
+      status: postBase.unitStatus ?? "",
+      visibility: postBase.unitVisibility ?? "",
+      moderationStatus: postBase.unitModerationStatus,
+    })
+  ) {
     await client.deletePosts([unitId]);
     return;
   }
 
+  const [post] = await hydratePostRows([postBase]);
   const doc = buildPostDocument(post);
   await client.addOrUpdatePosts([doc]);
 }
@@ -2469,20 +2643,9 @@ export async function syncAllPosts(client: SearchClient) {
   while (true) {
     console.log("syncAllPosts: cursor", cursor, "total", total);
 
-    const posts: any[] = await getSearchPrismaClient().post.findMany({
-      where: {
-        unit: publicSearchableUnitWhere(),
-      },
-      include: {
-        ...postIncludeForSync,
-        unit: {
-          include: postUnitIncludeForSync,
-        },
-      },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
+    const posts = await listPostSyncRows({
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (posts.length === 0) break;
@@ -2503,20 +2666,9 @@ export async function syncPostSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const posts: any[] = await getSearchPrismaClient().post.findMany({
-    where: {
-      unit: publicSearchableUnitWhere(),
-    },
-    include: {
-      ...postIncludeForSync,
-      unit: {
-        include: postUnitIncludeForSync,
-      },
-    },
-    orderBy: { unitId: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  const posts = await listPostSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(posts, limit, "unitId");
   if (current.length > 0) {
@@ -2777,25 +2929,10 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
   let total = 0;
 
   while (true) {
-    const posts: any[] = await getSearchPrismaClient().post.findMany({
-      where: {
-        authorUserId: userId,
-        unit: publicSearchableUnitWhere(),
-      },
-      include: {
-        ...postIncludeForSync,
-        unit: {
-          include: {
-            user: true,
-            targetUnit: { include: targetUnitSearchInclude },
-            ...realmSearchProjectionSelect,
-          },
-        },
-      },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
+    const posts = await listPostSyncRows({
+      authorUserId: userId,
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (posts.length === 0) break;
@@ -2818,27 +2955,10 @@ export async function syncPostsByTarget(
   let total = 0;
 
   while (true) {
-    const posts: any[] = await getSearchPrismaClient().post.findMany({
-      where: {
-        unit: {
-          ...publicSearchableUnitWhere(),
-          targetUnitId,
-        },
-      },
-      include: {
-        ...postIncludeForSync,
-        unit: {
-          include: {
-            user: true,
-            targetUnit: { include: targetUnitSearchInclude },
-            ...realmSearchProjectionSelect,
-          },
-        },
-      },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
+    const posts = await listPostSyncRows({
+      targetUnitId,
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (posts.length === 0) break;
