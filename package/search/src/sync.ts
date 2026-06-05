@@ -16,8 +16,13 @@ import {
   type Language,
 } from "@rezics/contract";
 import type { ServerDb } from "@rezics/server/db";
-import { Feedback, Unit, User } from "@rezics/server/db/schema";
-import { asc, eq, gt } from "drizzle-orm";
+import {
+  Feedback,
+  Unit,
+  User,
+  UserUnitCollection,
+} from "@rezics/server/db/schema";
+import { and, asc, eq, gt, sql } from "drizzle-orm";
 import type { SearchClient } from "./client";
 import {
   buildUserUnitCollectionDocument,
@@ -868,19 +873,66 @@ export async function syncUserUnitCollection(
   await client.addOrUpdateCollections([buildUserUnitCollectionDocument(row)]);
 }
 
+type UserUnitCollectionSyncRow = typeof UserUnitCollection.$inferSelect;
+
+function parseCompositeCursor(cursor: string): {
+  userId: string;
+  unitId: string;
+} {
+  return {
+    userId: cursor.split(":")[0] ?? "",
+    unitId: cursor.split(":").slice(1).join(":"),
+  };
+}
+
+async function findUserUnitCollectionSyncRow(
+  userId: string,
+  unitId: string,
+): Promise<UserUnitCollectionSyncRow | null> {
+  const [row] = await getSearchDb()
+    .select()
+    .from(UserUnitCollection)
+    .where(
+      and(
+        eq(UserUnitCollection.userId, userId),
+        eq(UserUnitCollection.unitId, unitId),
+      ),
+    )
+    .limit(1);
+  return (row as UserUnitCollectionSyncRow | undefined) ?? null;
+}
+
+async function listUserUnitCollectionSyncRows(input: {
+  limit: number;
+  cursor?: string;
+}): Promise<UserUnitCollectionSyncRow[]> {
+  const db = getSearchDb();
+  const query = db.select().from(UserUnitCollection);
+  const cursor = input.cursor ? parseCompositeCursor(input.cursor) : null;
+  const rows = cursor
+    ? await query
+        .where(
+          sql`(${UserUnitCollection.userId}, ${UserUnitCollection.unitId}) > (${cursor.userId}, ${cursor.unitId})`,
+        )
+        .orderBy(asc(UserUnitCollection.userId), asc(UserUnitCollection.unitId))
+        .limit(input.limit)
+    : await query
+        .orderBy(asc(UserUnitCollection.userId), asc(UserUnitCollection.unitId))
+        .limit(input.limit);
+  return rows as UserUnitCollectionSyncRow[];
+}
+
 export async function syncSingleUserUnitCollection(
   client: SearchClient,
   userId: string,
   unitId: string,
 ): Promise<void> {
-  const row = await getSearchPrismaClient().userUnitCollection.findUnique({
-    where: { userId_unitId: { userId, unitId } },
-  });
+  const row = await findUserUnitCollectionSyncRow(userId, unitId);
   if (!row) {
     await removeUserUnitCollection(client, userId, unitId);
     return;
   }
-  await syncUserUnitCollection(client, row as UserUnitCollectionRow);
+  await syncUserUnitCollection(client, row);
 }
 
 export async function removeUserUnitCollection(
@@ -896,21 +948,10 @@ export async function syncUserUnitCollectionSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const rows: any[] = await getSearchPrismaClient().userUnitCollection.findMany(
-    {
-      orderBy: [{ userId: "asc" }, { unitId: "asc" }],
-      take: limit + 1,
-      skip: options.cursor ? 1 : 0,
-      cursor: options.cursor
-        ? {
-            userId_unitId: {
-              userId: options.cursor.split(":")[0] ?? "",
-              unitId: options.cursor.split(":").slice(1).join(":"),
-            },
-          }
-        : undefined,
-    },
-  );
+  const rows = await listUserUnitCollectionSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
+  });
   const current = rows.slice(0, limit);
   const hasMore = rows.length > limit && current.length > 0;
   if (current.length > 0) {
