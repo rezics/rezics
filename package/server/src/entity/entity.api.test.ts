@@ -1,14 +1,11 @@
 import { describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-import { AppError } from "@/utils/errors";
+import { AppError } from "../utils/errors";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 process.env.AUTH_BASE_URL ??= "http://localhost:3001";
-
-installPrismaClientMock();
 
 let currentIdentity: {
   sub: string;
@@ -42,6 +39,32 @@ mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: async () => ({ status: "created" }),
   },
+}));
+
+mock.module("@/unit/collaborative-metadata", () => ({
+  assertEditorialPatchAllowed: (patch: Record<string, unknown>) => {
+    if (patch.realmTagApplications) {
+      throw new AppError(400, "Externally governed patch path", {
+        details: {
+          offendingPath: "realmTagApplications.featured",
+          useApi: "/realm-tag-application",
+        },
+      });
+    }
+  },
+}));
+
+const entityServiceMock = {
+  getBySlug: mock(async () => entityRow()),
+  getByUnitId: mock(async () => entityRow()),
+  list: mock(async () => ({ rows: [entityRow()], total: 1 })),
+  create: mock(async () => entityRow()),
+  update: mock(async () => entityRow()),
+  delete: mock(async () => undefined),
+};
+
+mock.module("./entity.service", () => ({
+  entityService: entityServiceMock,
 }));
 
 async function makeApp() {
@@ -102,44 +125,29 @@ function entityRow(unitId = "entity-1", slug: string | null = null) {
   };
 }
 
-function resetPrisma() {
-  const row = entityRow();
-  const txClient = {
-    unit: {
-      create: mock(async () => ({ id: "entity-1" })),
-      update: mock(async () => ({ id: "entity-1" })),
-    },
-    entity: {
-      update: mock(async () => row),
-      findUniqueOrThrow: mock(async () => row),
-    },
-    unitTranslation: {
-      upsert: mock(async () => ({})),
-    },
-  };
-  Object.assign(prismaMock, {
-    $transaction: mock(async (cb: any) => cb(txClient)),
-    entity: {
-      findUnique: mock(async () => row),
-      findUniqueOrThrow: mock(async () => row),
-      findMany: mock(async () => [row]),
-      count: mock(async () => 1),
-    },
-    unit: {
-      findUnique: mock(async ({ where }: any) => {
-        if (where?.slugScope_slug?.slug === "liu-cixin") {
-          return { id: "entity-1", type: "ENTITY" };
-        }
-        return null;
-      }),
-      delete: mock(async () => ({ id: "entity-1" })),
-    },
+function resetEntityService() {
+  entityServiceMock.getBySlug.mockReset();
+  entityServiceMock.getBySlug.mockResolvedValue(entityRow());
+  entityServiceMock.getByUnitId.mockReset();
+  entityServiceMock.getByUnitId.mockResolvedValue(entityRow());
+  entityServiceMock.list.mockReset();
+  entityServiceMock.list.mockResolvedValue({ rows: [entityRow()], total: 1 });
+  entityServiceMock.create.mockReset();
+  entityServiceMock.create.mockImplementation(async (input: any, ctx: any) => {
+    if (!ctx?.isAdmin && input?.slug) {
+      throw new AppError(403, "entity_slug_admin_only");
+    }
+    return entityRow();
   });
+  entityServiceMock.update.mockReset();
+  entityServiceMock.update.mockResolvedValue(entityRow());
+  entityServiceMock.delete.mockReset();
+  entityServiceMock.delete.mockResolvedValue(undefined);
 }
 
 describe("GET /entity/by-slug/:slug", () => {
   test("returns 200 when slug resolves", async () => {
-    resetPrisma();
+    resetEntityService();
     const app = await makeApp();
     const res = await app.handle(
       new Request("http://localhost/entity/by-slug/liu-cixin"),
@@ -150,7 +158,8 @@ describe("GET /entity/by-slug/:slug", () => {
   });
 
   test("returns 404 for unknown slug", async () => {
-    resetPrisma();
+    resetEntityService();
+    entityServiceMock.getBySlug.mockResolvedValueOnce(null);
     const app = await makeApp();
     const res = await app.handle(
       new Request("http://localhost/entity/by-slug/does-not-exist"),
@@ -161,7 +170,7 @@ describe("GET /entity/by-slug/:slug", () => {
 
 describe("GET /entity/:unitId", () => {
   test("returns the DTO when the unit exists", async () => {
-    resetPrisma();
+    resetEntityService();
     const app = await makeApp();
     const res = await app.handle(
       new Request(
@@ -172,10 +181,8 @@ describe("GET /entity/:unitId", () => {
   });
 
   test("returns 404 when the unit is missing", async () => {
-    resetPrisma();
-    (prismaMock.entity.findUnique as any).mockImplementationOnce(
-      async () => null,
-    );
+    resetEntityService();
+    entityServiceMock.getByUnitId.mockResolvedValueOnce(null);
     const app = await makeApp();
     const res = await app.handle(
       new Request(
@@ -188,7 +195,7 @@ describe("GET /entity/:unitId", () => {
 
 describe("POST /entity body validation", () => {
   test("rejects a body that is missing translations", async () => {
-    resetPrisma();
+    resetEntityService();
     currentIdentity = {
       sub: "user-1",
       userId: "user-1",
@@ -209,7 +216,7 @@ describe("POST /entity body validation", () => {
   });
 
   test("non-admin: slug in payload is rejected with 403", async () => {
-    resetPrisma();
+    resetEntityService();
     currentIdentity = {
       sub: "user-1",
       userId: "user-1",
@@ -235,7 +242,7 @@ describe("POST /entity body validation", () => {
   });
 
   test("rejects unregistered kind before service writes", async () => {
-    resetPrisma();
+    resetEntityService();
     currentIdentity = {
       sub: "user-1",
       userId: "user-1",
@@ -258,13 +265,13 @@ describe("POST /entity body validation", () => {
     );
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
-    expect((prismaMock.$transaction as any).mock.calls.length).toBe(0);
+    expect(entityServiceMock.create).not.toHaveBeenCalled();
   });
 });
 
 describe("PATCH /entity/:unitId editorial governance", () => {
   test("rejects externally governed paths with API hint", async () => {
-    resetPrisma();
+    resetEntityService();
     currentIdentity = {
       sub: "user-1",
       userId: "user-1",
@@ -294,13 +301,13 @@ describe("PATCH /entity/:unitId editorial governance", () => {
       offendingPath: "realmTagApplications.featured",
       useApi: "/realm-tag-application",
     });
-    expect((prismaMock.$transaction as any).mock.calls.length).toBe(0);
+    expect(entityServiceMock.update).not.toHaveBeenCalled();
   });
 });
 
 describe("DELETE /entity/:unitId", () => {
   test("non-admin returns 403", async () => {
-    resetPrisma();
+    resetEntityService();
     currentIdentity = {
       sub: "user-1",
       userId: "user-1",
@@ -318,7 +325,7 @@ describe("DELETE /entity/:unitId", () => {
   });
 
   test("admin via role claim returns 200", async () => {
-    resetPrisma();
+    resetEntityService();
     currentIdentity = {
       sub: "admin-1",
       userId: "admin-1",

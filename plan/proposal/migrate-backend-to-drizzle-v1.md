@@ -398,6 +398,10 @@ databases may be reset and reseeded.
   - Applied progress: UnitRealm search sync tests now mock the Drizzle insert/
     delete client surface and focused import boundaries instead of installing
     the legacy Prisma client mock.
+  - Applied progress: entity API tests now mock the entity service boundary and
+    focused collaborative metadata behavior instead of installing the legacy
+    Prisma client mock; repository and Drizzle behavior remains covered by
+    entity service tests.
 
 ## 5. Auth and Better Auth
 
