@@ -717,16 +717,14 @@ databases may be reset and reseeded.
     fails before containers start because Docker cannot access
     `/var/run/docker.sock` (`permission denied while trying to connect to the
     docker API`). The destructive reset/seed/factory flow was not run.
-- [ ] 8.5 Run package tests most likely to catch query regressions:
+- [x] 8.5 Run package tests most likely to catch query regressions:
   `server`, `auth`, `notify`, `reaction`, `history`, `ranking`, `search`,
   `job-runner`, and `utils`.
   - Verification on 2026-06-05: `bun test package/auth`, `package/notify`,
     `package/reaction`, `package/history`, `package/ranking`,
     `package/search`, `package/job-runner`, and `package/utils` pass when run
-    as package-scoped suites. Server focused tests used during the migration
-    pass, but `cd package/server && bun test` is still blocked by broad
-    cross-file mock pollution and the remaining post/service harness failures,
-    so this item remains open.
+    as package-scoped suites. `cd package/server && bun test` now exits 0 after
+    aligning the Drizzle post/dispatch test harnesses.
 - [ ] 8.6 Run repo checks: `bun run check:convention`, `bun run check:tokens`,
   `bun run format:check`, and `bun run knip`.
   - Verification on 2026-06-05: `bun run check:convention` and
