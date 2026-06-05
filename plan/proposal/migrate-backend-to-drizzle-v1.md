@@ -444,13 +444,19 @@ databases may be reset and reseeded.
     Prisma before creating the factory seed context.
   - Applied progress: baseline server user seed, infra user seed, and
     `reset-root` now upsert server `Unit`/`User` rows through Drizzle and use
-    the Drizzle system-shelf adapter. Full infra taxonomy seed and factory
-    scenarios still use the legacy Prisma-shaped seed context.
+    the Drizzle system-shelf adapter.
   - Applied progress: `seedContentTypeTags()` and `seedSearchTagIds()` now use
     Drizzle schema tables for `Unit`, translations, support languages,
-    self-tagging, and `EchoKV`; `seedInfra()` temporarily threads both Drizzle db
-    and the remaining Prisma client until realm and game-media taxonomy seeds
-    are migrated.
+    self-tagging, and `EchoKV`.
+  - Applied progress: `seedDefaultRealm()` now uses Drizzle for slug lookup,
+    official realm fallback, `Unit`/translation/support-language/`Realm`/
+    `RealmMember` creation, and contract slug backfill.
+  - Applied progress: `seedRealmTaxonomy()` and `seedGameMediaTaxonomy()` now use
+    Drizzle for shared tags, POST Units/content translations, realm context,
+    feed membership, realm/global tag applications, platform entities, and
+    rating tags. `seedInfra()` and `seedBaseline()` no longer accept or create a
+    server Prisma client; full factory scenarios and search sync still use the
+    legacy Prisma-shaped runtime path.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

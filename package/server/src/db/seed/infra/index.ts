@@ -1,5 +1,4 @@
 import type { SeedTagName, TagGroupIds } from "@rezics/contract";
-import type { PrismaClient } from "../../../../prisma/generated/client.js";
 import type { ServerDb } from "../../client";
 import { seedDefaultRealm } from "./seed-default-realm";
 import {
@@ -47,7 +46,6 @@ export interface SeedInfraOptions {
  * on inserted Units. Each step is idempotent.
  */
 export async function seedInfra(
-  prisma: PrismaClient,
   rootUserId: string,
   opts?: SeedInfraOptions,
 ): Promise<SeedInfraResult> {
@@ -58,14 +56,14 @@ export async function seedInfra(
   }
   const { db, slugScopes } = opts;
   const tagMap = await seedContentTypeTags(db, slugScopes);
-  const defaultRealmId = await seedDefaultRealm(prisma, rootUserId, slugScopes);
+  const defaultRealmId = await seedDefaultRealm(db, rootUserId, slugScopes);
   const realmTaxonomy = await seedRealmTaxonomy(
-    prisma,
+    db,
     rootUserId,
     defaultRealmId,
     slugScopes,
   );
-  const gameMediaTaxonomy = await seedGameMediaTaxonomy(prisma, slugScopes);
+  const gameMediaTaxonomy = await seedGameMediaTaxonomy(db, slugScopes);
   const searchTagIds = await seedSearchTagIds(db, slugScopes);
   return {
     slugScopes,

@@ -315,7 +315,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       const { initMeiliSearch } = await import("@rezics/server/db/seed");
       await initMeiliSearch(searchClient, { clean: true });
     }
-    const { credentials, slugScopes } = await seedBaseline(authPrisma, prisma, {
+    const { credentials, slugScopes } = await seedBaseline(authPrisma, {
       serverSeedDb: serverDb.db,
     });
     const ctx = makeSeedCtx(

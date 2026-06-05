@@ -2,12 +2,7 @@ import * as p from "@clack/prompts";
 import { resetAuthDatabase } from "@rezics/auth/seed";
 import { resetDatabase } from "@rezics/server/db/seed/database";
 import { getEnv } from "../lib/env";
-import {
-  type AuthPrismaClient,
-  createAuthPrisma,
-  createServerPrisma,
-  type ServerPrismaClient,
-} from "../lib/prisma-factory";
+import { type AuthPrismaClient, createAuthPrisma } from "../lib/prisma-factory";
 import { type ServerSeedDb, seedInfra, seedSlugScopes } from "./infra";
 import {
   type CrossSeedUserResult,
@@ -59,7 +54,6 @@ export function printSeedCredentials(
 
 export async function seedBaseline(
   authPrisma: AuthPrismaClient,
-  serverPrisma: ServerPrismaClient,
   opts: RunSeedOptions = {},
 ): Promise<SeedBaselineResult> {
   const resetDatabases = opts.resetDatabases ?? false;
@@ -98,7 +92,7 @@ export async function seedBaseline(
 
   const infraSpinner = p.spinner();
   infraSpinner.start("Seeding infrastructure...");
-  await seedInfra(serverPrisma, rootUserId, {
+  await seedInfra(rootUserId, {
     db: opts.serverSeedDb,
     slugScopes,
   });
@@ -111,13 +105,10 @@ export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
   const env = getEnv();
   const { createServerDb } = await import("@rezics/server/db/factory");
   const authPrisma: AuthPrismaClient = createAuthPrisma(env.AUTH_DATABASE_URL);
-  const serverPrisma: ServerPrismaClient = createServerPrisma(
-    env.SERVER_DATABASE_URL,
-  );
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
 
   try {
-    const { credentials } = await seedBaseline(authPrisma, serverPrisma, {
+    const { credentials } = await seedBaseline(authPrisma, {
       ...opts,
       serverSeedDb: serverDb.db,
       ...(opts.resetDatabases ? { serverResetDb: serverDb.db } : {}),
@@ -126,7 +117,6 @@ export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
   } finally {
     await Promise.all([
       authPrisma.disconnect().catch(() => {}),
-      serverPrisma.$disconnect().catch(() => {}),
       serverDb.disconnect().catch(() => {}),
     ]);
   }

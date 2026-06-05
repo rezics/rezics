@@ -4,7 +4,14 @@ import {
   RATING_TAGS,
   type RatingTagSlug,
 } from "@rezics/contract";
-import type { PrismaClient } from "../../../../prisma/generated/client.js";
+import { and, eq } from "drizzle-orm";
+import type { ServerDb } from "../../client";
+import {
+  Entity,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../../schema";
 import type { SlugScopesMap } from "./seed-slug-scopes";
 
 const GAME_PLATFORMS = [
@@ -52,47 +59,74 @@ const RATING_TAG_TITLES = {
   "tv-ma": "TV-MA",
 } as const satisfies Record<RatingTagSlug, string>;
 
-async function syncUnitTranslations(
-  prisma: PrismaClient,
-  unitId: string,
-  title: string,
-): Promise<void> {
-  await Promise.all(
-    [DEFAULT_LANGUAGE, FALLBACK_LANGUAGE].map((language, sortOrder) =>
-      Promise.all([
-        prisma.unitTranslation.upsert({
-          where: { unitId_language: { unitId, language } },
-          update: { title },
-          create: { unitId, language, title },
-        }),
-        prisma.unitSupportLanguage.upsert({
-          where: { unitId_language: { unitId, language } },
-          update: {
-            isPrimary: language === DEFAULT_LANGUAGE,
-            sortOrder,
-          },
-          create: {
-            unitId,
-            language,
-            isPrimary: language === DEFAULT_LANGUAGE,
-            sortOrder,
-          },
-        }),
-      ]),
-    ),
+type GameMediaSeedDb = Pick<
+  ServerDb,
+  "insert" | "select" | "transaction" | "update"
+>;
+type GameMediaWriteDb = Pick<ServerDb, "insert">;
+
+async function findUnitByScopedSlug(
+  db: GameMediaSeedDb,
+  slugScope: string,
+  slug: string,
+): Promise<{ id: string; type: string } | null> {
+  return (
+    (
+      await db
+        .select({ id: Unit.id, type: Unit.type })
+        .from(Unit)
+        .where(and(eq(Unit.slugScope, slugScope), eq(Unit.slug, slug)))
+        .limit(1)
+    )[0] ?? null
   );
 }
 
+async function syncUnitTranslations(
+  db: GameMediaWriteDb,
+  unitId: string,
+  title: string,
+): Promise<void> {
+  for (const [sortOrder, language] of [
+    DEFAULT_LANGUAGE,
+    FALLBACK_LANGUAGE,
+  ].entries()) {
+    await db
+      .insert(UnitTranslation)
+      .values({
+        unitId,
+        language,
+        title,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [UnitTranslation.unitId, UnitTranslation.language],
+        set: { title, updatedAt: new Date() },
+      });
+    await db
+      .insert(UnitSupportLanguage)
+      .values({
+        unitId,
+        language,
+        isPrimary: language === DEFAULT_LANGUAGE,
+        sortOrder,
+      })
+      .onConflictDoUpdate({
+        target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
+        set: {
+          isPrimary: language === DEFAULT_LANGUAGE,
+          sortOrder,
+        },
+      });
+  }
+}
+
 async function ensurePlatformEntity(
-  prisma: PrismaClient,
+  db: GameMediaSeedDb,
   entityScope: string,
   slug: string,
   title: string,
 ): Promise<string> {
-  const existing = await prisma.unit.findUnique({
-    where: { slugScope_slug: { slugScope: entityScope, slug } },
-    select: { id: true, type: true },
-  });
+  const existing = await findUnitByScopedSlug(db, entityScope, slug);
 
   if (existing) {
     if (existing.type !== "ENTITY") {
@@ -101,72 +135,64 @@ async function ensurePlatformEntity(
       );
     }
 
-    await prisma.entity.upsert({
-      where: { unitId: existing.id },
-      update: {
-        kind: "game_platform",
-        verified: true,
-        eligibleSubjectRoles: ["available_on"],
-      },
-      create: {
+    await db
+      .insert(Entity)
+      .values({
         unitId: existing.id,
         kind: "game_platform",
         verified: true,
         eligibleSubjectRoles: ["available_on"],
         eligibleCreditRoles: [],
-      },
-    });
-    await syncUnitTranslations(prisma, existing.id, title);
-    return existing.id;
-  }
-
-  const unit = await prisma.unit.create({
-    data: {
-      type: "ENTITY",
-      slug,
-      slugScope: entityScope,
-      status: "PUBLISHED",
-      visibility: "PUBLIC",
-      isLanguageNeutral: true,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      entity: {
-        create: {
+      })
+      .onConflictDoUpdate({
+        target: Entity.unitId,
+        set: {
           kind: "game_platform",
           verified: true,
           eligibleSubjectRoles: ["available_on"],
-          eligibleCreditRoles: [],
         },
-      },
-      translations: {
-        create: [
-          { language: DEFAULT_LANGUAGE, title },
-          { language: FALLBACK_LANGUAGE, title },
-        ],
-      },
-      supportLanguages: {
-        create: [
-          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
-          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
-        ],
-      },
-    },
-    select: { id: true },
-  });
+      });
+    await syncUnitTranslations(db, existing.id, title);
+    return existing.id;
+  }
 
-  return unit.id;
+  return db.transaction(async (tx) => {
+    const now = new Date();
+    const [unit] = await tx
+      .insert(Unit)
+      .values({
+        type: "ENTITY",
+        slug,
+        slugScope: entityScope,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: now,
+        updatedAt: now,
+      })
+      .returning({ id: Unit.id });
+    if (!unit) throw new Error(`Failed to create platform entity "${slug}"`);
+
+    await tx.insert(Entity).values({
+      unitId: unit.id,
+      kind: "game_platform",
+      verified: true,
+      eligibleSubjectRoles: ["available_on"],
+      eligibleCreditRoles: [],
+    });
+    await syncUnitTranslations(tx, unit.id, title);
+    return unit.id;
+  });
 }
 
 async function ensureRatingTag(
-  prisma: PrismaClient,
+  db: GameMediaSeedDb,
   tagScope: string,
   slug: RatingTagSlug,
 ): Promise<string> {
   const title = RATING_TAG_TITLES[slug];
-  const existing = await prisma.unit.findUnique({
-    where: { slugScope_slug: { slugScope: tagScope, slug } },
-    select: { id: true, type: true },
-  });
+  const existing = await findUnitByScopedSlug(db, tagScope, slug);
 
   if (existing) {
     if (existing.type !== "TAG") {
@@ -175,46 +201,41 @@ async function ensureRatingTag(
       );
     }
 
-    await prisma.unit.update({
-      where: { id: existing.id },
-      data: {
+    await db
+      .update(Unit)
+      .set({
         status: "PUBLISHED",
         visibility: "PUBLIC",
         isLanguageNeutral: true,
         defaultLanguage: DEFAULT_LANGUAGE,
-      },
-    });
-    await syncUnitTranslations(prisma, existing.id, title);
+        updatedAt: new Date(),
+      })
+      .where(eq(Unit.id, existing.id));
+    await syncUnitTranslations(db, existing.id, title);
     return existing.id;
   }
 
-  const tag = await prisma.unit.create({
-    data: {
-      type: "TAG",
-      slug,
-      slugScope: tagScope,
-      status: "PUBLISHED",
-      visibility: "PUBLIC",
-      isLanguageNeutral: true,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      translations: {
-        create: [
-          { language: DEFAULT_LANGUAGE, title },
-          { language: FALLBACK_LANGUAGE, title },
-        ],
-      },
-      supportLanguages: {
-        create: [
-          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
-          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
-        ],
-      },
-    },
-    select: { id: true },
-  });
+  return db.transaction(async (tx) => {
+    const now = new Date();
+    const [tag] = await tx
+      .insert(Unit)
+      .values({
+        type: "TAG",
+        slug,
+        slugScope: tagScope,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: now,
+        updatedAt: now,
+      })
+      .returning({ id: Unit.id });
+    if (!tag) throw new Error(`Failed to create rating tag "${slug}"`);
 
-  return tag.id;
+    await syncUnitTranslations(tx, tag.id, title);
+    return tag.id;
+  });
 }
 
 export interface GameMediaTaxonomySeedResult {
@@ -223,7 +244,7 @@ export interface GameMediaTaxonomySeedResult {
 }
 
 export async function seedGameMediaTaxonomy(
-  prisma: PrismaClient,
+  db: GameMediaSeedDb,
   slugScopes: SlugScopesMap,
 ): Promise<GameMediaTaxonomySeedResult> {
   console.log("[Seed] Seeding GAME/MEDIA taxonomy...");
@@ -232,7 +253,7 @@ export async function seedGameMediaTaxonomy(
     {} as GameMediaTaxonomySeedResult["platformEntityIds"];
   for (const platform of GAME_PLATFORMS) {
     platformEntityIds[platform.slug] = await ensurePlatformEntity(
-      prisma,
+      db,
       slugScopes.entity,
       platform.slug,
       platform.title,
@@ -241,7 +262,7 @@ export async function seedGameMediaTaxonomy(
 
   const ratingTagIds = {} as Record<RatingTagSlug, string>;
   for (const slug of RATING_TAGS) {
-    ratingTagIds[slug] = await ensureRatingTag(prisma, slugScopes.tag, slug);
+    ratingTagIds[slug] = await ensureRatingTag(db, slugScopes.tag, slug);
   }
 
   return { platformEntityIds, ratingTagIds };

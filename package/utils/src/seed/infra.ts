@@ -1,7 +1,9 @@
 import type { ServerDb } from "@rezics/server/db";
-import type { ServerPrismaClient } from "../lib/prisma-factory";
 
-export type ServerSeedDb = Pick<ServerDb, "select" | "transaction">;
+export type ServerSeedDb = Pick<
+  ServerDb,
+  "insert" | "select" | "transaction" | "update"
+>;
 
 export async function seedSlugScopes(db: ServerSeedDb) {
   const { seedSlugScopes: seedServerSlugScopes } = await import(
@@ -11,7 +13,6 @@ export async function seedSlugScopes(db: ServerSeedDb) {
 }
 
 export async function seedInfra(
-  prisma: ServerPrismaClient,
   rootUserId: string,
   opts: {
     db: ServerSeedDb;
@@ -21,7 +22,7 @@ export async function seedInfra(
   const { seedInfra: seedServerInfra } = await import(
     "@rezics/server/db/seed/infra/index"
   );
-  await seedServerInfra(prisma, rootUserId, {
+  await seedServerInfra(rootUserId, {
     db: opts.db,
     slugScopes: opts.slugScopes,
   });

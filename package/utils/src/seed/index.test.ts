@@ -50,7 +50,7 @@ describe("seedBaseline", () => {
   test("does not reset databases by default", async () => {
     const { seedBaseline } = await import("./index");
 
-    await seedBaseline({} as never, {} as never, { serverSeedDb: {} as never });
+    await seedBaseline({} as never, { serverSeedDb: {} as never });
 
     expect(calls.resetDatabase).toBe(0);
     expect(calls.resetAuthDatabase).toBe(0);
@@ -59,7 +59,7 @@ describe("seedBaseline", () => {
   test("can still reset databases when explicitly requested", async () => {
     const { seedBaseline } = await import("./index");
 
-    await seedBaseline({} as never, {} as never, {
+    await seedBaseline({} as never, {
       resetDatabases: true,
       serverSeedDb: {} as never,
       serverResetDb: {} as never,
@@ -72,7 +72,7 @@ describe("seedBaseline", () => {
   test("requires a Drizzle server db for slug scopes", async () => {
     const { seedBaseline } = await import("./index");
 
-    await expect(seedBaseline({} as never, {} as never)).rejects.toThrow(
+    await expect(seedBaseline({} as never)).rejects.toThrow(
       /Drizzle server database client/,
     );
   });

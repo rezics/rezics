@@ -1,38 +1,73 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { readFileSync } from "node:fs";
+import {
+  Entity,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../../schema";
 import { seedGameMediaTaxonomy } from "./seed-game-media-taxonomy";
 
-function makePrismaMock() {
+function makeDb() {
   let nextId = 1;
-  const createdUnits: unknown[] = [];
-
-  return {
-    prisma: {
-      unit: {
-        findUnique: async () => null,
-        create: async ({ data }: { data: Record<string, unknown> }) => {
-          const id = `unit-${nextId++}`;
-          createdUnits.push({ id, data });
-          return { id };
-        },
-      },
-      unitTranslation: {
-        upsert: async () => ({}),
-      },
-      unitSupportLanguage: {
-        upsert: async () => ({}),
-      },
-    },
-    createdUnits,
+  const calls = {
+    inserts: [] as Array<{ table: unknown; value: any }>,
+    conflicts: [] as Array<{ table: unknown; input: any }>,
   };
+
+  const createInsert = () =>
+    mock((table: unknown) => ({
+      values(value: any) {
+        calls.inserts.push({ table, value });
+        return {
+          async returning() {
+            return [{ id: `unit-${nextId++}` }];
+          },
+          async onConflictDoUpdate(input: any) {
+            calls.conflicts.push({ table, input });
+          },
+        };
+      },
+    }));
+
+  const db: any = {
+    select: mock(() => ({
+      from() {
+        return {
+          where() {
+            return {
+              async limit(value: number) {
+                expect(value).toBe(1);
+                return [];
+              },
+            };
+          },
+        };
+      },
+    })),
+    insert: createInsert(),
+    update: mock(() => ({
+      set() {
+        return { async where() {} };
+      },
+    })),
+    transaction: mock(async (callback: (tx: unknown) => Promise<string>) =>
+      callback({
+        insert: createInsert(),
+      }),
+    ),
+    calls,
+  };
+
+  return db;
 }
 
 describe("seedGameMediaTaxonomy", () => {
-  test("seeds platform entities and rating tags", async () => {
-    const mock = makePrismaMock();
+  test("seeds platform entities and rating tags through Drizzle", async () => {
+    const db = makeDb();
 
     const result = await seedGameMediaTaxonomy(
-      mock.prisma as never,
+      db as never,
       {
         entity: "entity-scope",
         tag: "tag-scope",
@@ -45,30 +80,51 @@ describe("seedGameMediaTaxonomy", () => {
     expect(result.ratingTagIds["esrb-teen"]).toBeDefined();
     expect(result.ratingTagIds["esrb-mature"]).toBeDefined();
 
-    expect(mock.createdUnits).toContainEqual(
+    expect(db.calls.inserts).toContainEqual(
       expect.objectContaining({
-        data: expect.objectContaining({
+        table: Unit,
+        value: expect.objectContaining({
           type: "ENTITY",
           slug: "windows",
           slugScope: "entity-scope",
-          entity: {
-            create: expect.objectContaining({
-              kind: "game_platform",
-              eligibleSubjectRoles: ["available_on"],
-            }),
-          },
         }),
       }),
     );
-    expect(mock.createdUnits).toContainEqual(
+    expect(db.calls.inserts).toContainEqual(
       expect.objectContaining({
-        data: expect.objectContaining({
+        table: Entity,
+        value: expect.objectContaining({
+          kind: "game_platform",
+          eligibleSubjectRoles: ["available_on"],
+        }),
+      }),
+    );
+    expect(db.calls.inserts).toContainEqual(
+      expect.objectContaining({
+        table: Unit,
+        value: expect.objectContaining({
           type: "TAG",
           slug: "esrb-teen",
           slugScope: "tag-scope",
         }),
       }),
     );
+    expect(
+      db.calls.inserts.some((call: any) => call.table === UnitTranslation),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some((call: any) => call.table === UnitSupportLanguage),
+    ).toBe(true);
+  });
+
+  test("does not import Prisma runtime or generated clients", async () => {
+    const source = await Bun.file(
+      new URL("./seed-game-media-taxonomy.ts", import.meta.url),
+    ).text();
+
+    expect(source).not.toContain("@prisma/");
+    expect(source).not.toContain("/prisma/");
+    expect(source).not.toContain("generated/client");
   });
 });
 
@@ -76,17 +132,17 @@ describe("GameSystemRequirement migration", () => {
   test("creates source-aware platform/tier requirement storage", () => {
     const migration = readFileSync(
       new URL(
-        "../../migrations/20260528110000_add_game_system_requirement/migration.sql",
+        "../../../../drizzle/20260604061845_server_baseline/migration.sql",
         import.meta.url,
       ),
       "utf8",
     );
 
     expect(migration).toContain('CREATE TABLE "GameSystemRequirement"');
-    expect(migration).toContain('"gameUnitId" UUID NOT NULL');
-    expect(migration).toContain('"platformEntityId" UUID');
-    expect(migration).toContain('"sourceRefId" UUID');
-    expect(migration).toContain('"hardware" JSONB NOT NULL');
+    expect(migration).toContain('"gameUnitId" uuid NOT NULL');
+    expect(migration).toContain('"platformEntityId" uuid');
+    expect(migration).toContain('"sourceRefId" uuid');
+    expect(migration).toContain('"hardware" jsonb NOT NULL');
     expect(migration).toContain(
       'CREATE INDEX "GameSystemRequirement_gameUnitId_idx"',
     );
