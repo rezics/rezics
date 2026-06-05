@@ -20,6 +20,17 @@ process.env.SERVER_DATABASE_URL ??=
 const config: KnipConfig = {
   ignore: ["@tanstack/router-plugin"],
   ignoreWorkspaces: ["@rezics/admin"],
+  workspaces: {
+    tool: {
+      entry: [
+        "bin/*.ts",
+        "dev-script/*.ts",
+        "src/commands/**/*.ts",
+        "tests/**/*.test.ts",
+      ],
+      project: ["**/*.ts"],
+    },
+  },
 };
 
 export default config;
