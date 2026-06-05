@@ -17,13 +17,16 @@ import {
 } from "@rezics/contract";
 import type { ServerDb } from "@rezics/server/db";
 import {
+  Entity,
   Feedback,
   Unit,
+  UnitAlias,
+  UnitTranslation,
   User,
   UserUnitCollection,
   UserUnitProgress,
 } from "@rezics/server/db/schema";
-import { and, asc, eq, gt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, or, sql } from "drizzle-orm";
 import type { SearchClient } from "./client";
 import {
   buildUserUnitCollectionDocument,
@@ -2724,23 +2727,142 @@ export async function syncRealmSegment(
 
 // ANCHOR: Entity document builder + sync
 
-const entityIncludeForSync = {
-  unit: {
-    include: {
-      translations: true,
-      aliases: {
-        where: {
-          status: "ACTIVE" as const,
-          OR: [
-            { score: { gt: VISIBILITY_THRESHOLD } },
-            { pinned: true },
-          ] as any,
-        },
-        orderBy: [{ pinned: "desc" as const }, { score: "desc" as const }],
-      } as any,
-    },
-  },
+type EntityBaseRow = {
+  unitId: string;
+  kind: string | null;
+  verified: boolean;
+  avatar: string | null;
+  eligibleCreditRoles: string[];
+  eligibleSubjectRoles: string[];
+  slug: string | null;
+  userId: string | null;
+  createdAt: Date | string | null;
+  updatedAt: Date | string | null;
+};
+
+const entityBaseSelect = {
+  unitId: Entity.unitId,
+  kind: Entity.kind,
+  verified: Entity.verified,
+  avatar: Entity.avatar,
+  eligibleCreditRoles: Entity.eligibleCreditRoles,
+  eligibleSubjectRoles: Entity.eligibleSubjectRoles,
+  slug: Unit.slug,
+  userId: Unit.userId,
+  createdAt: Unit.createdAt,
+  updatedAt: Unit.updatedAt,
 } as const;
+
+function entityFromRows(
+  row: EntityBaseRow,
+  translationsByUnitId: Map<string, unknown[]>,
+  aliasesByUnitId: Map<string, unknown[]>,
+) {
+  return {
+    unitId: row.unitId,
+    kind: row.kind,
+    verified: row.verified,
+    avatar: row.avatar,
+    eligibleCreditRoles: row.eligibleCreditRoles ?? [],
+    eligibleSubjectRoles: row.eligibleSubjectRoles ?? [],
+    unit: {
+      slug: row.slug,
+      userId: row.userId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      translations: translationsByUnitId.get(row.unitId) ?? [],
+      aliases: aliasesByUnitId.get(row.unitId) ?? [],
+    },
+  };
+}
+
+function groupRowsByUnitId(
+  rows: Array<{ unitId: string }>,
+): Map<string, any[]> {
+  const grouped = new Map<string, any[]>();
+  for (const row of rows) {
+    const bucket = grouped.get(row.unitId) ?? [];
+    bucket.push(row);
+    grouped.set(row.unitId, bucket);
+  }
+  return grouped;
+}
+
+async function hydrateEntityRows(rows: EntityBaseRow[]) {
+  if (rows.length === 0) return [];
+  const unitIds = rows.map((row) => row.unitId);
+  const [translations, aliases] = await Promise.all([
+    getSearchDb()
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitAlias)
+      .where(
+        and(
+          inArray(UnitAlias.unitId, unitIds),
+          eq(UnitAlias.status, "ACTIVE"),
+          or(
+            gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+            eq(UnitAlias.pinned, true),
+          ),
+        ),
+      )
+      .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score)),
+  ]);
+  const translationsByUnitId = groupRowsByUnitId(translations as any[]);
+  const aliasesByUnitId = groupRowsByUnitId(aliases as any[]);
+  return rows.map((row) =>
+    entityFromRows(row, translationsByUnitId, aliasesByUnitId),
+  );
+}
+
+async function findEntitySyncRow(unitId: string) {
+  const [row] = await getSearchDb()
+    .select(entityBaseSelect)
+    .from(Entity)
+    .leftJoin(Unit, eq(Unit.id, Entity.unitId))
+    .where(eq(Entity.unitId, unitId))
+    .limit(1);
+  const [entity] = await hydrateEntityRows(
+    row ? ([row] as EntityBaseRow[]) : [],
+  );
+  return entity ?? null;
+}
+
+async function listEntitySyncRows(input: { limit: number; cursor?: string }) {
+  const db = getSearchDb();
+  const query = db
+    .select(entityBaseSelect)
+    .from(Entity)
+    .leftJoin(Unit, eq(Unit.id, Entity.unitId));
+  const rows = input.cursor
+    ? await query
+        .where(gt(Entity.unitId, input.cursor))
+        .orderBy(asc(Entity.unitId))
+        .limit(input.limit)
+    : await query.orderBy(asc(Entity.unitId)).limit(input.limit);
+  return hydrateEntityRows(rows as EntityBaseRow[]);
+}
+
+async function listVisibleEntityAliasValues(unitId: string): Promise<string[]> {
+  const rows = await getSearchDb()
+    .select({ value: UnitAlias.value })
+    .from(UnitAlias)
+    .where(
+      and(
+        eq(UnitAlias.unitId, unitId),
+        eq(UnitAlias.status, "ACTIVE"),
+        or(
+          gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+          eq(UnitAlias.pinned, true),
+        ),
+      ),
+    )
+    .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score));
+  return rows.map((alias) => alias.value).filter(isNonEmptyString);
+}
 
 export function buildEntityDocument(entity: any): EntitySearchDocument {
   const unit = entity.unit;
@@ -2782,10 +2904,7 @@ export function buildEntityDocument(entity: any): EntitySearchDocument {
 }
 
 export async function syncSingleEntity(client: SearchClient, unitId: string) {
-  const entity = await getSearchPrismaClient().entity.findUnique({
-    where: { unitId },
-    include: entityIncludeForSync,
-  });
+  const entity = await findEntitySyncRow(unitId);
 
   if (!entity) {
     await client.deleteEntities([unitId]);
@@ -2797,28 +2916,16 @@ export async function syncSingleEntity(client: SearchClient, unitId: string) {
 }
 
 export async function patchEntityAliases(client: SearchClient, unitId: string) {
-  const entity = await getSearchPrismaClient().entity.findUnique({
-    where: { unitId },
-    select: { unitId: true },
-  });
+  const entity = await findEntitySyncRow(unitId);
   if (!entity) {
     await client.deleteEntities([unitId]);
     return;
   }
 
-  const aliases = await getSearchPrismaClient().unitAlias.findMany({
-    where: {
-      unitId,
-      status: "ACTIVE",
-      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
-    },
-    orderBy: [{ pinned: "desc" }, { score: "desc" }],
-  });
-
   await client.patchEntities([
     {
       id: unitId,
-      aliasValues: aliases.map((alias: any) => alias.value).filter(Boolean),
+      aliasValues: await listVisibleEntityAliasValues(unitId),
     },
   ]);
 }
@@ -2833,13 +2940,7 @@ export async function syncAllEntities(client: SearchClient) {
   while (true) {
     console.log("syncAllEntities: cursor", cursor, "total", total);
 
-    const entities: any[] = await getSearchPrismaClient().entity.findMany({
-      include: entityIncludeForSync,
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-    });
+    const entities = await listEntitySyncRows({ limit: BATCH_SIZE, cursor });
 
     if (entities.length === 0) break;
 
@@ -2859,12 +2960,9 @@ export async function syncEntitySegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const entities: any[] = await getSearchPrismaClient().entity.findMany({
-    include: entityIncludeForSync,
-    orderBy: { unitId: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  const entities = await listEntitySyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(entities, limit, "unitId");
   if (current.length > 0) {

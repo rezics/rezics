@@ -431,6 +431,10 @@ databases may be reset and reseeded.
     `syncProgressSegment`, and `syncAllProgress`) to Drizzle reads against
     server `UserUnitProgress`, preserving the `isDeleted = false` segment
     filter and removing stale/deleted single-row documents.
+  - Applied progress: moved entity search sync (`syncSingleEntity`,
+    `syncEntitySegment`, `syncAllEntities`, and `patchEntityAliases`) to
+    Drizzle reads against server `Entity`, `Unit`, `UnitTranslation`, and
+    `UnitAlias`.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
