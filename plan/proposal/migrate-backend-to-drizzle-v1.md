@@ -550,6 +550,9 @@ databases may be reset and reseeded.
   - Applied progress: factory subject attribution flushing now uses Drizzle
     `SubjectAttribution` inserts with conflict ignores instead of Prisma
     `createMany`.
+  - Applied progress: factory zone seeding now inserts `Unit`, `Zone`,
+    translations, and support languages through Drizzle instead of nested
+    Prisma creates.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { Prisma } from "../../../prisma/generated/client.js";
 import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../schema";
 import { generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit } from "./types.js";
@@ -128,40 +129,38 @@ export async function seedZones(
     const filters = buildFilters(template, workIds, tagIds);
 
     const id = randomUUID();
-    await ctx.prisma.unit.create({
-      data: {
-        id,
-        type: UnitType.ZONE,
-        slugScope: ctx.slugScopes.zone,
-        status: UnitStatus.PUBLISHED,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: faker.date.past({ years: 1 }),
-        zone: {
-          create: {
-            template,
-            filters,
-            styling: styling ?? undefined,
-            startsAt,
-            endsAt,
-          },
-        },
-        translations: {
-          create: translations.map((t) => ({
-            language: t.language,
-            title: t.title,
-            description: t.description,
-          })),
-        },
-        supportLanguages: {
-          create: translations.map((t, idx) => ({
-            language: t.language,
-            isPrimary: idx === 0,
-            sortOrder: idx,
-          })),
-        },
-      },
-      select: { id: true, type: true },
+    await ctx.db.insert(Unit).values({
+      id,
+      type: UnitType.ZONE,
+      slugScope: ctx.slugScopes.zone,
+      status: UnitStatus.PUBLISHED,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      publishedAt: faker.date.past({ years: 1 }),
     });
+    await ctx.db.insert(Zone).values({
+      unitId: id,
+      template,
+      filters,
+      styling,
+      startsAt,
+      endsAt,
+    });
+    await ctx.db.insert(UnitTranslation).values(
+      translations.map((t) => ({
+        unitId: id,
+        language: t.language,
+        title: t.title,
+        description: t.description,
+      })),
+    );
+    await ctx.db.insert(UnitSupportLanguage).values(
+      translations.map((t, idx) => ({
+        unitId: id,
+        language: t.language,
+        isPrimary: idx === 0,
+        sortOrder: idx,
+      })),
+    );
 
     results.push({ id, type: UnitType.ZONE });
   }
