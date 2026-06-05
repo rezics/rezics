@@ -395,6 +395,9 @@ databases may be reset and reseeded.
     and governance permission projection directly instead of installing the
     legacy Prisma client mock; stale admin slug endpoint coverage was removed
     after that route no longer existed.
+  - Applied progress: UnitRealm search sync tests now mock the Drizzle insert/
+    delete client surface and focused import boundaries instead of installing
+    the legacy Prisma client mock.
 
 ## 5. Auth and Better Auth
 
