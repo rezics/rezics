@@ -1011,6 +1011,7 @@ mock.module("@/unit/variant-context", () => ({
 mock.module("@/utils/userSlugHydration", () => ({
   hydrateUnitOwnerUserSlugRow: mock((row: unknown) => row),
   hydrateUnitOwnerUserSlugs: mock((rows: unknown) => rows),
+  loadUserSlugMap: mock(async () => new Map()),
 }));
 
 mock.module("@/meili/post/sync", () => ({

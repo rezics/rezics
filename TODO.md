@@ -1,7 +1,7 @@
 ## Section 1
 
 - [ ] 新書建立頁沒有 bookUnitId，不能立即 link author；我會先只在既有書籍編輯頁顯示 Add author。如果你想新書也能先選作者，需要把 author 暫存進 create payload 
-- [ ] 定製 elysia + prisma 的 console 輸出主題，可以做成獨立 package，包括信息輸出的中間件，可能需要討論一下，dev 和 production 都要支持，不過 production 是 log，然後要計入性能分析工具
+- [ ] 定製 elysia + db 的 console 輸出主題，可以做成獨立 package，包括信息輸出的中間件，可能需要討論一下，dev 和 production 都要支持，不過 production 是 log，然後要計入性能分析工具
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
 - [ ] 可能的通用性能問題，如果 lazy import 同一個 @/entity index，可能會讓detail/edit/self-claim 被打進同一個 lazy chunk。 如果feature很小，這不一定是問題；但如果想保留 route-level split，可以在合併目錄使用薄 entry point，或者在整理 TanStack Router code splitting 策略時一起整理。

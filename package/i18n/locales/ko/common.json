@@ -70,7 +70,7 @@
   "pinned": "고정됨",
   "prev": "이전",
   "previous_page": "이전 페이지",
-  "prisma_error": "Prisma {code}",
+  "database_error": "Database {code}",
   "realm": "왕국",
   "remove": "제거하다",
   "reply": "회신하다",

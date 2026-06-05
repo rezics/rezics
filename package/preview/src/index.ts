@@ -41,7 +41,6 @@ await initializeOpenTelemetry(
 );
 
 const app = new Elysia()
-  // .decorate('prisma', prisma)
   .use(elysiaObservability(observability))
   .use(bookApi)
   .get("/health", () => ({ status: "ok" }));

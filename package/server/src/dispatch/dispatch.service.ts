@@ -1,7 +1,7 @@
 import type { DispatchResult } from "@rezics/contract";
 import { DispatchType, withCoverUrl } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
-import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { nullableContentDocJson } from "@/content-doc/json-write";
 import { env } from "@/env";
 import { gameMediaLibraryService } from "@/game-media-library";
 import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";

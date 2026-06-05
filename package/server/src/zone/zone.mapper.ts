@@ -7,7 +7,7 @@ import {
 import type { ZoneWithRelations } from "./zone.service";
 
 /**
- * Map Prisma Zone + Unit to ZoneDTO.
+ * Map Zone + Unit storage rows to ZoneDTO.
  * Resolves translations using the first available translation.
  */
 export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {

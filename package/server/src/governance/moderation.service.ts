@@ -501,11 +501,11 @@ export class GovernanceModerationService {
     const ids = [...new Set(input.targetIds)].slice(0, 200);
     if (ids.length === 0) return [];
 
-    const prismaTargetKind = upper<ModerationTargetKindValue>(input.targetKind);
+    const dbTargetKind = upper<ModerationTargetKindValue>(input.targetKind);
     const [snapshots, latestActions] = await Promise.all([
       this.overlaySnapshots(input.targetKind, ids, input.realmUnitId),
       this.actions.latestActionsFor({
-        targetKind: prismaTargetKind,
+        targetKind: dbTargetKind,
         targetIds: ids,
         realmUnitId:
           input.targetKind === "unit_realm" ? input.realmUnitId : null,

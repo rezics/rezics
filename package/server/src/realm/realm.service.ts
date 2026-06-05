@@ -40,7 +40,7 @@ import {
   sql,
   type SQL,
 } from "drizzle-orm";
-import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { nullableContentDocJson } from "@/content-doc/json-write";
 import { realmPolicyActions } from "@/governance/action/realm";
 import { governanceAuditService } from "@/governance/audit.service";
 import { governanceCapabilityService } from "@/governance/capability.service";

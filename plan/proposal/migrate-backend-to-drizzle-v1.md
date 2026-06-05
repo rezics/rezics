@@ -537,11 +537,14 @@ databases may be reset and reseeded.
     server Drizzle db for search.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
-- [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
+- [x] 6.3 Convert `package/job-runner` runtime factories for search, history, and
   maintenance from Prisma clients to Drizzle db clients. Keep pg-boss DB ensure
   separate.
   - Applied progress: search runtime now creates and injects a server Drizzle db
     for all search sync paths and no longer creates a server Prisma client.
+  - Verification on 2026-06-05: search, history, and maintenance runtime
+    factories create server Drizzle db clients/repositories; pg-boss remains
+    separate through the job db ensure path.
 - [x] 6.4 Move `package/server/prisma/seed` to a Drizzle-appropriate path such as
   `package/server/src/db/seed` or `package/server/db/seed`, then update package
   exports and seed CLI imports.
@@ -681,16 +684,23 @@ databases may be reset and reseeded.
 - [x] 7.7 Update `.github` instructions only where they carry repo-specific
   Prisma guidance; avoid changing third-party copied docs unless they are
   actively misleading.
-- [ ] 7.8 Add or update `knip`/convention expectations so removed Prisma exports
+- [x] 7.8 Add or update `knip`/convention expectations so removed Prisma exports
   and generated folders are not treated as package public surfaces.
+  - Applied progress: `knip.config.ts` now carries only Drizzle/runtime env
+    loading context and no longer ignores a package-level `prisma` surface;
+    public schema module tests assert Drizzle schema exports and reject Prisma
+    import paths.
 
 ## 8. Cleanup and verification
 
 - [x] 8.1 Remove `package/*/prisma.config.ts`, `schema.prisma`, generated Prisma
   directories, Prisma migration directories, and Prisma client wrappers after
   all callsites are migrated.
-- [ ] 8.2 Remove or rewrite docs that explain Prisma development commands,
+- [x] 8.2 Remove or rewrite docs that explain Prisma development commands,
   including `package/server/DEVELOPMENT.md` if it remains relevant.
+  - Verification on 2026-06-05: active README/DEVELOPMENT docs now explain
+    Drizzle `db:*` commands; Prisma command wording remains only in negative
+    guard tests, third-party dependency docs, or historical planning material.
 - [x] 8.3 Run `bun install` and verify the lockfile has no Prisma packages unless
   an unrelated third-party dependency still pulls one transitively.
   - Verification on 2026-06-05: package manifests no longer declare Prisma

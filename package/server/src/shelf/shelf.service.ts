@@ -33,7 +33,7 @@ import {
   sql,
   type SQL,
 } from "drizzle-orm";
-import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { nullableContentDocJson } from "@/content-doc/json-write";
 import { getSeedTagId } from "@/infra/seed-tags";
 import { serverJobProducer } from "@/job/job-boundary";
 import { searchClient } from "@/meili/search-client";

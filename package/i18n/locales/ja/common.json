@@ -70,7 +70,7 @@
   "pinned": "固定された",
   "prev": "前へ",
   "previous_page": "前のページへ",
-  "prisma_error": "プリズマ{code}",
+  "database_error": "データベース{code}",
   "realm": "レルム",
   "remove": "削除",
   "reply": "返信",

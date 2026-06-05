@@ -1,10 +1,10 @@
 import type { LockedFieldRejection } from "@rezics/contract";
 
 export interface ApiErrorDetail {
-  prisma?: {
+  database?: {
     code: string;
-    model?: string;
-    target?: string[];
+    table?: string;
+    constraint?: string;
   };
   /** Set when `code === "system_shelf_missing"`. */
   kindKey?: string;

@@ -9,7 +9,7 @@ import type {
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
-import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { nullableContentDocJson } from "@/content-doc/json-write";
 import { contentStructureService } from "@/content-structure";
 import { pickSlugScope } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";

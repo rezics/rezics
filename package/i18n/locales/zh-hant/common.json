@@ -70,7 +70,7 @@
   "pinned": "置頂",
   "prev": "上一步",
   "previous_page": "上一頁",
-  "prisma_error": "稜鏡{code}",
+  "database_error": "資料庫{code}",
   "realm": "領域",
   "remove": "移除",
   "reply": "回覆",

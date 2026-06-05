@@ -10,7 +10,7 @@ import type {
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, asc, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
-import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { nullableContentDocJson } from "@/content-doc/json-write";
 import { contentStructureService } from "@/content-structure";
 import { countReadableContentStructureItems } from "@/content-structure/types";
 import {

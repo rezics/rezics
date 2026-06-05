@@ -20,7 +20,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
-import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { nullableContentDocJson } from "@/content-doc/json-write";
 import { pickSlugScope } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
 import { cleanupReactions } from "@/reaction-boundary/reaction-boundary.client";

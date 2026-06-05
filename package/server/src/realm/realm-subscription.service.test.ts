@@ -54,7 +54,7 @@ mock.module("@/governance/audit.service", () => ({
     appendPrivilegedMutation: auditPrivilegedMutationMock,
   },
 }));
-mock.module("@/content-doc/prisma-json", () => ({
+mock.module("@/content-doc/json-write", () => ({
   nullableContentDocJson: (value: unknown) => value ?? null,
 }));
 mock.module("@/governance/action/realm", () => ({

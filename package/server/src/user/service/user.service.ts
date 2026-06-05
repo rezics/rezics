@@ -660,7 +660,7 @@ export class UserService {
    * to `userId`.
    * Two-query pattern (subscription ids, then user rows) — `User` is
    * keyed by `unitId`, not by `Unit.userId`, so we cannot rely on
-   * Prisma's relation include to walk Unit→User for USER-type units.
+   * relation hydration to walk Unit→User for USER-type units.
    */
   async getFollowers(
     userId: string,

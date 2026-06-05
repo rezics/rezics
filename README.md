@@ -59,7 +59,7 @@ co-location.
 ## Stack
 
 A service-oriented backend — an Elysia API (`@rezics/server`) plus standalone
-auth, history, job-runner, and preview services, with Prisma/PostgreSQL,
+auth, history, job-runner, and preview services, with Drizzle/PostgreSQL,
 Meilisearch search, and a React + Vite frontend (`@rezics/app`).
 
 Runtime and package manager: **Bun**. Workspaces live under `package/*`. See

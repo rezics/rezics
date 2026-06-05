@@ -27,7 +27,7 @@ mock.module("@/infra/seed-tags", () => ({
   initSeedTagsCache: async () => undefined,
   getSeedTagsSnapshot: () => ({ ...SEED_TAG_ID_BY_NAME }),
 }));
-mock.module("@/content-doc/prisma-json", () => ({
+mock.module("@/content-doc/json-write", () => ({
   nullableContentDocJson: (value: unknown) => value ?? null,
 }));
 mock.module("@/unit/publication-policy", () => ({
@@ -54,6 +54,7 @@ mock.module("@/utils/errors", () => ({
 mock.module("@/utils/userSlugHydration", () => ({
   hydrateUnitOwnerUserSlugRow: async (row: unknown) => row,
   hydrateUnitOwnerUserSlugs: async (rows: unknown) => rows,
+  loadUserSlugMap: async () => new Map(),
 }));
 mock.module("@/utils/sanitizeUser", () => ({
   publicUserSelect: {},

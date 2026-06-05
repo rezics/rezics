@@ -70,7 +70,7 @@
   "pinned": "已固定",
   "prev": "上一篇",
   "previous_page": "上一页",
-  "prisma_error": "棱镜{code}",
+  "database_error": "数据库{code}",
   "realm": "领域",
   "remove": "移除",
   "reply": "回復",

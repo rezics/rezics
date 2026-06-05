@@ -19,8 +19,8 @@ export function QueryErrorDisplay({
 
   const isApiError = error instanceof ApiError;
   const message = error.message || t("common:unexpected_error");
-  const prismaDetail = isApiError ? error.detail?.prisma : undefined;
-  const hasDetail = isApiError && (prismaDetail || error.status);
+  const databaseDetail = isApiError ? error.detail?.database : undefined;
+  const hasDetail = isApiError && (databaseDetail || error.status);
 
   return (
     <Alert variant="destructive" className={className}>
@@ -37,20 +37,24 @@ export function QueryErrorDisplay({
             </button>
             {detailOpen && (
               <div className="text-xs mt-1 font-mono text-text-secondary">
-                {prismaDetail && (
+                {databaseDetail && (
                   <>
                     <div>
-                      {t("common:prisma_error", { code: prismaDetail.code })}
+                      {t("common:database_error", {
+                        code: databaseDetail.code,
+                      })}
                     </div>
-                    {prismaDetail.model && (
+                    {databaseDetail.table && (
                       <div>
-                        {t("common:error_model", { model: prismaDetail.model })}
+                        {t("common:error_model", {
+                          model: databaseDetail.table,
+                        })}
                       </div>
                     )}
-                    {prismaDetail.target && (
+                    {databaseDetail.constraint && (
                       <div>
                         {t("common:error_target", {
-                          target: prismaDetail.target.join(", "),
+                          target: databaseDetail.constraint,
                         })}
                       </div>
                     )}

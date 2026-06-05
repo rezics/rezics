@@ -355,7 +355,7 @@ mock.module("@/job/job-boundary", () => ({
     enqueue: enqueueMock,
   },
 }));
-mock.module("@/content-doc/prisma-json", () => ({
+mock.module("@/content-doc/json-write", () => ({
   nullableContentDocJson: (value: unknown) => value ?? null,
 }));
 mock.module("@/governance/action/realm", () => ({

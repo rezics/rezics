@@ -25,7 +25,7 @@ mock.module("../db/client", () => ({
   },
 }));
 
-mock.module("@/content-doc/prisma-json", () => ({
+mock.module("@/content-doc/json-write", () => ({
   nullableContentDocJson: (value: unknown) => value ?? null,
 }));
 

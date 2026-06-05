@@ -254,7 +254,7 @@ export type RealmMembershipMeDTO =
  *
  * Future card-presentation hints such as realm-scoped `spoiler` belong on this
  * junction as typed `extra`, not on Unit.extra and not in the open tag system.
- * Keep this dormant until the Prisma field and write API are enabled.
+ * Keep this dormant until the storage field and write API are enabled.
  */
 export const unitRealmDTOSchema = t.Object({
   realmUnitId: t.String(),

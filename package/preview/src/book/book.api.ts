@@ -9,7 +9,7 @@ import { BookShareDocument } from "../components/BookShareDocument";
 import { coreInstance } from "../core";
 import { withDoctype } from "../utils/htmlStream";
 
-// 之后全部走 MeiliSearch API，不要走 prisma，太慢了
+// 之后全部走 MeiliSearch API，不要直接查主库，太慢了
 
 function getRequestOrigin(request: Request): string {
   const xfProto = request.headers.get("x-forwarded-proto");

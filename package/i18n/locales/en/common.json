@@ -70,7 +70,7 @@
   "pinned": "Pinned",
   "prev": "Prev",
   "previous_page": "Previous page",
-  "prisma_error": "Prisma {code}",
+  "database_error": "Database {code}",
   "realm": "Realm",
   "remove": "Remove",
   "reply": "Reply",
