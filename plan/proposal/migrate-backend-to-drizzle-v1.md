@@ -523,8 +523,8 @@ databases may be reset and reseeded.
     Drizzle for shared tags, POST Units/content translations, realm context,
     feed membership, realm/global tag applications, platform entities, and
     rating tags. `seedInfra()` and `seedBaseline()` no longer accept or create a
-    server Prisma client; full factory scenarios and search sync still use the
-    legacy Prisma-shaped runtime path.
+    server Prisma client; search sync uses Drizzle db injection, while full
+    factory scenarios still use the legacy Prisma-shaped runtime path.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

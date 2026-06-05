@@ -80,7 +80,6 @@ function createNoopSyncHooks(): SeedSyncHooks {
 }
 
 function createActiveSyncHooks(input: {
-  prisma: ServerPrismaClient;
   db: Pick<ServerDb, "select">;
   searchClient: SearchClient;
   summary: SeedSyncSummary;
@@ -134,7 +133,6 @@ export function createSeedRuntime(input: {
   const sync =
     input.config.meiliMode === "init-and-sync" && input.searchClient
       ? createActiveSyncHooks({
-          prisma: input.serverPrisma,
           db: input.serverDb ?? missingServerDbForSearchSync(),
           searchClient: input.searchClient,
           summary: state.syncSummary,
