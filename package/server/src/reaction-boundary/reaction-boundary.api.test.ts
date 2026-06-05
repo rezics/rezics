@@ -16,10 +16,11 @@ const createReactionMock = mock(async () => ({
   id: "reaction-1",
   userId: "user-1",
   targetId: "post-1",
-  reaction: "like",
+  reaction: "upvote",
   createdAt: "2026-05-28T00:00:00.000Z",
   created: true,
 }));
+const broadcastMock = mock(async () => undefined);
 type PolicyRealm = {
   id: string;
   type: string;
@@ -56,7 +57,7 @@ mock.module("@/governance", () => ({
 }));
 
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
-  broadcast: mock(async () => undefined),
+  broadcast: broadcastMock,
   filterRecipientsByPreference: mock(async (recipients: unknown) => recipients),
   notifySystemAndEmail: mock(async () => ({ ok: true })),
   resolveRecipients: mock(
@@ -78,6 +79,15 @@ describe("reactionBoundaryApi", () => {
     policyAllowed = false;
     decideForIdentityMock.mockClear();
     createReactionMock.mockClear();
+    createReactionMock.mockImplementation(async () => ({
+      id: "reaction-1",
+      userId: "user-1",
+      targetId: "post-1",
+      reaction: "upvote",
+      createdAt: "2026-05-28T00:00:00.000Z",
+      created: true,
+    }));
+    broadcastMock.mockClear();
     findPolicyRealm.mockReset();
     findPolicyRealm.mockResolvedValue(undefined);
     findTargetOwner.mockReset();
@@ -96,7 +106,7 @@ describe("reactionBoundaryApi", () => {
       new Request("http://localhost/reaction/", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ targetId: "post-1", reaction: "like" }),
+        body: JSON.stringify({ targetId: "post-1", reaction: "upvote" }),
       }),
     );
 
@@ -125,7 +135,7 @@ describe("reactionBoundaryApi", () => {
       new Request("http://localhost/reaction/", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ targetId: "post-1", reaction: "like" }),
+        body: JSON.stringify({ targetId: "post-1", reaction: "upvote" }),
       }),
     );
 
@@ -133,10 +143,49 @@ describe("reactionBoundaryApi", () => {
     expect(createReactionMock).toHaveBeenCalledWith(
       currentIdentity.userId,
       "post-1",
-      "like",
+      "upvote",
       "direct",
     );
     expect(findTargetOwner).toHaveBeenCalledWith("post-1");
+  });
+
+  test("does not broadcast notifications for downvotes", async () => {
+    policyAllowed = true;
+    findTargetOwner.mockResolvedValue("owner-1");
+    createReactionMock.mockImplementation(async () => ({
+      id: "reaction-1",
+      userId: "user-1",
+      targetId: "post-1",
+      reaction: "downvote",
+      createdAt: "2026-05-28T00:00:00.000Z",
+      created: true,
+    }));
+    const { createReactionBoundaryApi } = await import(
+      "./reaction-boundary.api"
+    );
+    const reactionBoundaryApi = createReactionBoundaryApi({
+      findPolicyRealm,
+      findTargetOwner,
+    });
+
+    const response = await reactionBoundaryApi.handle(
+      new Request("http://localhost/reaction/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ targetId: "post-1", reaction: "downvote" }),
+      }),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(response.status).toBe(201);
+    expect(createReactionMock).toHaveBeenCalledWith(
+      currentIdentity.userId,
+      "post-1",
+      "downvote",
+      "direct",
+    );
+    expect(findTargetOwner).not.toHaveBeenCalled();
+    expect(broadcastMock).not.toHaveBeenCalled();
   });
 
   test("rejects private realm-scoped reactions without membership", async () => {
@@ -160,7 +209,7 @@ describe("reactionBoundaryApi", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           targetId: "post-1",
-          reaction: "like",
+          reaction: "upvote",
           scopeKey: "realm:realm-1",
         }),
       }),

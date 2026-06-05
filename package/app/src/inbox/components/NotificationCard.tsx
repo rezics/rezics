@@ -16,8 +16,8 @@ type Translate = ReturnType<typeof useTranslation>["t"];
 /** Map a notification kind to its (literal) community message, i18n-resolved. */
 function kindLabel(t: Translate, kind: string): string {
   switch (kind) {
-    case "reaction.like":
-      return t("community:notification_kind_reaction_like");
+    case "reaction.upvote":
+      return t("community:notification_kind_reaction_upvote");
     case "reaction.favorite":
       return t("community:notification_kind_reaction_favorite");
     case "follow.new":

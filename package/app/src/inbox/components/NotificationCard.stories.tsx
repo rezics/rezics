@@ -4,9 +4,9 @@ import {
   notificationComment,
   notificationFavorite,
   notificationFollow,
-  notificationLike,
   notificationMention,
   notificationSystem,
+  notificationUpvote,
 } from "../../stories/fixtures/notification";
 import { NotificationCard } from "./NotificationCard";
 
@@ -17,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Renders one notification item. The component owns the per-kind copy mapping (`liked`, `followed you`, etc.) and shows an unread dot for `read=false` rows.",
+          "Renders one notification item. The component owns the per-kind copy mapping (`upvoted`, `followed you`, etc.) and shows an unread dot for `read=false` rows.",
       },
     },
   },
@@ -26,7 +26,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Like: Story = { args: { item: notificationLike } };
+export const Upvote: Story = { args: { item: notificationUpvote } };
 export const Comment: Story = { args: { item: notificationComment } };
 export const Follow: Story = { args: { item: notificationFollow } };
 export const Mention: Story = { args: { item: notificationMention } };

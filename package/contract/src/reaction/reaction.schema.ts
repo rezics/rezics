@@ -5,15 +5,19 @@ import {
   type ReactionScopeKey,
 } from "./reaction.scope";
 
+/**
+ * Development cutover: no `like`/`dislike` aliases are accepted. Existing rows
+ * are migrated in place, and stale clients fail contract validation.
+ */
 export const allowedReactionKindSchema = t.Union([
-  t.Literal("like"),
-  t.Literal("dislike"),
+  t.Literal("upvote"),
+  t.Literal("downvote"),
 ]);
 export type AllowedReactionKind = (typeof allowedReactionKindSchema)["static"];
 
 export const knownReactionKindSchema = t.Union([
-  t.Literal("like"),
-  t.Literal("dislike"),
+  t.Literal("upvote"),
+  t.Literal("downvote"),
   t.Literal("heart"),
   t.Literal("funny"),
   t.Literal("award"),

@@ -10,7 +10,7 @@ function ageHours(value?: string | null) {
 }
 
 function reactionWeight(counts: Record<string, number> = {}) {
-  return (counts.like ?? 0) + (counts.love ?? 0) * 1.5 - (counts.dislike ?? 0);
+  return (counts.upvote ?? 0) - (counts.downvote ?? 0);
 }
 
 function safeNumber(value: number | undefined) {

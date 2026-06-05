@@ -60,11 +60,13 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
     summaryScopeKey,
     userScopeKey,
   });
-  const score = (summary.like ?? 0) - (summary.dislike ?? 0);
-  const userVote: "like" | "dislike" | null = userReactions.includes("like")
-    ? "like"
-    : userReactions.includes("dislike")
-      ? "dislike"
+  const score = (summary.upvote ?? 0) - (summary.downvote ?? 0);
+  const userVote: "upvote" | "downvote" | null = userReactions.includes(
+    "upvote",
+  )
+    ? "upvote"
+    : userReactions.includes("downvote")
+      ? "downvote"
       : null;
   const { toggleUp, toggleDown, auth } = useVoteController({
     targetUnitId,
@@ -86,8 +88,8 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
   const textClass = sizeToTextClass(size);
   const buttonSizeClass = size === "sm" ? "p-0.5" : "p-1";
 
-  const upActive = isHydrated && userVote === "like";
-  const downActive = isHydrated && userVote === "dislike";
+  const upActive = isHydrated && userVote === "upvote";
+  const downActive = isHydrated && userVote === "downvote";
 
   const groupClass =
     variant === "pill"
@@ -96,9 +98,9 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
 
   const scoreLabelClass = !isHydrated
     ? "text-text-secondary"
-    : userVote === "like"
+    : userVote === "upvote"
       ? "font-semibold text-sentiment-positive-text"
-      : userVote === "dislike"
+      : userVote === "downvote"
         ? "font-semibold text-sentiment-negative-text"
         : "text-text-secondary";
 

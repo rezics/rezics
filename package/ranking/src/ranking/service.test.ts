@@ -109,7 +109,7 @@ mock.module("./main-state", () => ({
 mock.module("./reaction-client", () => ({
   ReactionSummaryClient: class {
     async getSummaries() {
-      return { "unit-1": { like: 3 } };
+      return { "unit-1": { upvote: 3 } };
     }
   },
 }));

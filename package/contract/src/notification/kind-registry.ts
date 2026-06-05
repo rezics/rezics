@@ -15,7 +15,7 @@ import type { NotificationPreferenceKey } from "../user/user";
  * pick up new kinds automatically.
  */
 export const KIND_REGISTRY = {
-  "reaction.like": { aggregatable: true, category: "reaction" },
+  "reaction.upvote": { aggregatable: true, category: "reaction" },
   "reaction.favorite": { aggregatable: true, category: "reaction" },
   "follow.new": { aggregatable: true, category: "follow" },
   "comment.new": { aggregatable: false, category: "comment" },

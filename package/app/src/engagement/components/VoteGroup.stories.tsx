@@ -64,8 +64,8 @@ export const MdPositiveUpvoted: Story = {
     <HydratedVoteGroup
       size="md"
       targetUnitId="fixture-vote-2"
-      summary={{ like: 42 }}
-      userReactions={["like"]}
+      summary={{ upvote: 42 }}
+      userReactions={["upvote"]}
     />
   ),
 };
@@ -75,8 +75,8 @@ export const MdNegativeDownvoted: Story = {
     <HydratedVoteGroup
       size="md"
       targetUnitId="fixture-vote-3"
-      summary={{ dislike: 7 }}
-      userReactions={["dislike"]}
+      summary={{ downvote: 7 }}
+      userReactions={["downvote"]}
     />
   ),
 };
@@ -86,7 +86,7 @@ export const LgAbbreviated3Point1K: Story = {
     <HydratedVoteGroup
       size="lg"
       targetUnitId="fixture-vote-4"
-      summary={{ like: 3147 }}
+      summary={{ upvote: 3147 }}
       userReactions={[]}
     />
   ),

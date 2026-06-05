@@ -70,7 +70,7 @@ describe("Sequin payload routing", () => {
     const messages = parseSequinPayload({
       table: "ReactionSummary",
       action: "delete",
-      record: { targetId: "unit-1", reaction: "like" },
+      record: { targetId: "unit-1", reaction: "upvote" },
     });
 
     expect(routeSequinMessages(messages)).toMatchObject([

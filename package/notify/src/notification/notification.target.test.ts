@@ -19,7 +19,7 @@ describe("buildNotificationTarget", () => {
 
   test("uses chapter-only route when no book/node context", () => {
     expect(
-      buildNotificationTarget("reaction.like", { contentUnitId: "u9" }),
+      buildNotificationTarget("reaction.upvote", { contentUnitId: "u9" }),
     ).toEqual({
       route: "/chapter/:contentUnitId",
       params: { contentUnitId: "u9" },

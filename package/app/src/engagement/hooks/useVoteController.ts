@@ -89,8 +89,8 @@ export function useVoteController({
   };
 
   return {
-    toggleUp: () => apply(userVote === "like" ? null : "like"),
-    toggleDown: () => apply(userVote === "dislike" ? null : "dislike"),
+    toggleUp: () => apply(userVote === "upvote" ? null : "upvote"),
+    toggleDown: () => apply(userVote === "downvote" ? null : "downvote"),
     auth,
   };
 }

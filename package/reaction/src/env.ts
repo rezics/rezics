@@ -24,7 +24,7 @@ export const env = createEnv({
     SERVER_ISSUER: v.fallback(v.string(), "rezics-server"),
 
     /** Comma-separated list of allowed reaction types. */
-    REACTION_TYPES: v.fallback(v.string(), "like,dislike"),
+    REACTION_TYPES: v.fallback(v.string(), "upvote,downvote"),
 
     /** Server HTTP listen port. */
     PORT: v.optional(v.string()),

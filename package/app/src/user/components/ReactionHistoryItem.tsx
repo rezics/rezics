@@ -17,8 +17,8 @@ import type { FC } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 const REACTION_ICONS: Record<string, LucideIcon> = {
-  like: ThumbsUp,
-  dislike: ThumbsDown,
+  upvote: ThumbsUp,
+  downvote: ThumbsDown,
   heart: Heart,
   funny: Laugh,
   award: Award,

@@ -265,7 +265,7 @@ function row(
     id: `00000000-0000-0000-0000-${String(i).padStart(12, "0")}`,
     userId: "u-actor",
     targetId: "t-1",
-    reaction: "like",
+    reaction: "upvote",
     scopeKey: "direct",
     createdAt: new Date(2026, 0, 1, 0, 0, i),
     ...partial,
@@ -328,14 +328,14 @@ describe("reactionService.listGiven", () => {
 
   test("filters by reaction type allowlist", async () => {
     seed([
-      row(1, { id: "id-a", userId: "u", reaction: "like" }),
-      row(2, { id: "id-b", userId: "u", reaction: "dislike" }),
+      row(1, { id: "id-a", userId: "u", reaction: "upvote" }),
+      row(2, { id: "id-b", userId: "u", reaction: "downvote" }),
     ]);
     const result = await service.listGiven({
       userId: "u",
-      reactions: ["like"],
+      reactions: ["upvote"],
     });
-    expect(result.items.map((r: any) => r.reaction)).toEqual(["like"]);
+    expect(result.items.map((r: any) => r.reaction)).toEqual(["upvote"]);
   });
 
   test("clamps oversized limit to MAX_LIMIT", async () => {
@@ -370,25 +370,25 @@ describe("reactionService.listByUser", () => {
         id: "id-a",
         userId: "owner",
         targetId: "t-1",
-        reaction: "like",
+        reaction: "upvote",
       }),
       row(2, {
         id: "id-b",
         userId: "alice",
         targetId: "t-1",
-        reaction: "like",
+        reaction: "upvote",
       }),
       row(3, {
         id: "id-c",
         userId: "bob",
         targetId: "t-1",
-        reaction: "dislike",
+        reaction: "downvote",
       }),
     ]);
     const result = await service.listByUser({
       targetIds: ["t-1"],
       excludeUserId: "owner",
-      reactions: ["like"],
+      reactions: ["upvote"],
     });
     expect(result.items.map((r: any) => r.userId)).toEqual(["alice"]);
   });
@@ -425,22 +425,22 @@ describe("reactionService scoped reactions", () => {
   test("allows the same reaction in direct and realm scopes and aggregates globally", async () => {
     seed([]);
 
-    await service.create("u", "t-1", "like");
-    await service.create("u", "t-1", "like", "realm:realm-1");
-    await service.create("u", "t-1", "like", "realm:realm-2");
+    await service.create("u", "t-1", "upvote");
+    await service.create("u", "t-1", "upvote", "realm:realm-1");
+    await service.create("u", "t-1", "upvote", "realm:realm-2");
 
     await expect(service.getUserReactions("u", ["t-1"])).resolves.toEqual({
-      "t-1": ["like"],
+      "t-1": ["upvote"],
     });
     await expect(
       service.getUserReactions("u", ["t-1"], "realm:realm-1"),
-    ).resolves.toEqual({ "t-1": ["like"] });
+    ).resolves.toEqual({ "t-1": ["upvote"] });
     await expect(service.getSummary(["t-1"])).resolves.toEqual({
-      "t-1": { like: 3 },
+      "t-1": { upvote: 3 },
     });
     await expect(service.getSummary(["t-1"], "realm:realm-2")).resolves.toEqual(
       {
-        "t-1": { like: 1 },
+        "t-1": { upvote: 1 },
       },
     );
   });
@@ -448,17 +448,17 @@ describe("reactionService scoped reactions", () => {
   test("rejects active quota overflow across scopes and releases quota on delete", async () => {
     seed([]);
 
-    await service.create("u", "t-1", "like");
-    await service.create("u", "t-1", "dislike", "realm:realm-1");
-    await service.create("u", "t-1", "like", "realm:realm-2");
+    await service.create("u", "t-1", "upvote");
+    await service.create("u", "t-1", "downvote", "realm:realm-1");
+    await service.create("u", "t-1", "upvote", "realm:realm-2");
 
     await expect(
-      service.create("u", "t-1", "dislike", "realm:realm-3"),
+      service.create("u", "t-1", "downvote", "realm:realm-3"),
     ).rejects.toBeInstanceOf(ReactionQuotaExceededError);
 
-    await service.remove("u", "t-1", "like", "realm:realm-2");
+    await service.remove("u", "t-1", "upvote", "realm:realm-2");
     await expect(
-      service.create("u", "t-1", "dislike", "realm:realm-3"),
+      service.create("u", "t-1", "downvote", "realm:realm-3"),
     ).resolves.toMatchObject({ created: true });
   });
 

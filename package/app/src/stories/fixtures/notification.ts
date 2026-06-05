@@ -1,9 +1,9 @@
 // MOCK: Storybook notification fixtures, hand-authored against `NotificationItem`.
 import type { NotificationItem } from "@rezics/contract";
 
-export const notificationLike: NotificationItem = {
-  id: "reaction.like:post-1",
-  kind: "reaction.like",
+export const notificationUpvote: NotificationItem = {
+  id: "reaction.upvote:post-1",
+  kind: "reaction.upvote",
   sourceUnitId: "post-1",
   actorIds: ["user-ben", "user-cora", "user-dean"],
   count: 3,
@@ -67,7 +67,7 @@ export const notificationFavorite: NotificationItem = {
 };
 
 export const notificationList: NotificationItem[] = [
-  notificationLike,
+  notificationUpvote,
   notificationComment,
   notificationMention,
   notificationFollow,

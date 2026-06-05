@@ -8,13 +8,13 @@ import {
 
 describe("reaction contract", () => {
   test("allows only currently writable reaction kinds", () => {
-    expect(Value.Check(allowedReactionKindSchema, "like")).toBe(true);
-    expect(Value.Check(allowedReactionKindSchema, "dislike")).toBe(true);
+    expect(Value.Check(allowedReactionKindSchema, "upvote")).toBe(true);
+    expect(Value.Check(allowedReactionKindSchema, "downvote")).toBe(true);
     expect(Value.Check(allowedReactionKindSchema, "heart")).toBe(false);
   });
 
   test("tracks known future reaction vocabulary separately", () => {
-    for (const reaction of ["like", "dislike", "heart", "funny", "award"]) {
+    for (const reaction of ["upvote", "downvote", "heart", "funny", "award"]) {
       expect(Value.Check(knownReactionKindSchema, reaction)).toBe(true);
     }
 
@@ -27,7 +27,7 @@ describe("reaction contract", () => {
     expect(
       Value.Check(createSchema, {
         targetId: "unit-1",
-        reaction: "like",
+        reaction: "upvote",
       }),
     ).toBe(true);
 

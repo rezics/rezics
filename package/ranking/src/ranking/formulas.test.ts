@@ -31,7 +31,7 @@ describe("ranking formulas", () => {
       replyCount: 3,
       scoreTotal: 8,
       scoreCount: 2,
-      reactionCounts: { like: 5 },
+      reactionCounts: { upvote: 5 },
       bucketSignals: { views: 100, reads: 10 },
     });
 

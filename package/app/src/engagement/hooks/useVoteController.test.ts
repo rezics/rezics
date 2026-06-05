@@ -7,14 +7,14 @@ describe("decideVoteAction", () => {
       decideVoteAction({
         isAuthenticated: false,
         userVote: null,
-        next: "like",
+        next: "upvote",
       }),
     ).toEqual({ kind: "auth-required" });
 
     expect(
       decideVoteAction({
         isAuthenticated: false,
-        userVote: "like",
+        userVote: "upvote",
         next: null,
       }),
     ).toEqual({ kind: "auth-required" });
@@ -24,8 +24,8 @@ describe("decideVoteAction", () => {
     expect(
       decideVoteAction({
         isAuthenticated: true,
-        userVote: "like",
-        next: "like",
+        userVote: "upvote",
+        next: "upvote",
       }),
     ).toEqual({ kind: "noop" });
   });
@@ -35,52 +35,52 @@ describe("decideVoteAction", () => {
       decideVoteAction({
         isAuthenticated: true,
         userVote: null,
-        next: "like",
+        next: "upvote",
       }),
-    ).toEqual({ kind: "create", reaction: "like" });
+    ).toEqual({ kind: "create", reaction: "upvote" });
 
     expect(
       decideVoteAction({
         isAuthenticated: true,
         userVote: null,
-        next: "dislike",
+        next: "downvote",
       }),
-    ).toEqual({ kind: "create", reaction: "dislike" });
+    ).toEqual({ kind: "create", reaction: "downvote" });
   });
 
   it("deletes a reaction when authenticated user untoggles", () => {
     expect(
       decideVoteAction({
         isAuthenticated: true,
-        userVote: "like",
+        userVote: "upvote",
         next: null,
       }),
-    ).toEqual({ kind: "delete", reaction: "like" });
+    ).toEqual({ kind: "delete", reaction: "upvote" });
 
     expect(
       decideVoteAction({
         isAuthenticated: true,
-        userVote: "dislike",
+        userVote: "downvote",
         next: null,
       }),
-    ).toEqual({ kind: "delete", reaction: "dislike" });
+    ).toEqual({ kind: "delete", reaction: "downvote" });
   });
 
-  it("swaps reactions when authenticated user flips between like and dislike", () => {
+  it("swaps reactions when authenticated user flips between upvote and downvote", () => {
     expect(
       decideVoteAction({
         isAuthenticated: true,
-        userVote: "like",
-        next: "dislike",
+        userVote: "upvote",
+        next: "downvote",
       }),
-    ).toEqual({ kind: "swap", remove: "like", add: "dislike" });
+    ).toEqual({ kind: "swap", remove: "upvote", add: "downvote" });
 
     expect(
       decideVoteAction({
         isAuthenticated: true,
-        userVote: "dislike",
-        next: "like",
+        userVote: "downvote",
+        next: "upvote",
       }),
-    ).toEqual({ kind: "swap", remove: "dislike", add: "like" });
+    ).toEqual({ kind: "swap", remove: "downvote", add: "upvote" });
   });
 });

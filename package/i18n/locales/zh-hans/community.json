@@ -218,7 +218,7 @@
   "dm_you_blocked_peer": "你已屏蔽此用户",
   "dm_blocked_by_peer": "此用户已屏蔽你",
   "dm_blocked_composer_placeholder": "你无法给此用户发消息",
-  "notification_kind_reaction_like": "赞了",
+  "notification_kind_reaction_upvote": "顶了",
   "notification_kind_reaction_favorite": "收藏了",
   "notification_kind_follow": "关注了你",
   "notification_kind_reply": "评论了",

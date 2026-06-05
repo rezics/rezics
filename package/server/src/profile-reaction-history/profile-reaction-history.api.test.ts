@@ -195,7 +195,7 @@ function row(
     id: `r${String(i).padStart(4, "0")}`,
     userId: "u-actor",
     targetId: "t-1",
-    reaction: "like",
+    reaction: "upvote",
     scopeKey: "direct",
     createdAt: `2026-01-01T00:00:${String(i).padStart(2, "0")}.000Z`,
     ...partial,

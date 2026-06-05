@@ -54,8 +54,8 @@ const HydratedReactionBar: React.FC<
 > = (props) => {
   useHydrateDemoReactions(
     [samplePost.unitId],
-    { [samplePost.unitId]: { like: 42, dislike: 5 } },
-    { [samplePost.unitId]: ["like"] },
+    { [samplePost.unitId]: { upvote: 42, downvote: 5 } },
+    { [samplePost.unitId]: ["upvote"] },
   );
   return <ReactionBar {...props} />;
 };

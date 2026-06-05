@@ -135,12 +135,13 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
 
         set.status = result.created ? 201 : 200;
 
-        if (result.created) {
+        // Downvotes are private ranking signals; only upvotes notify target owners.
+        if (result.created && body.reaction === "upvote") {
           findTargetOwner(body.targetId)
             .then((ownerUserId) => {
               if (ownerUserId && ownerUserId !== userId) {
                 broadcast({
-                  kind: "reaction.like",
+                  kind: "reaction.upvote",
                   sourceUnitId: body.targetId,
                   directRecipients: [ownerUserId],
                   actorId: userId,

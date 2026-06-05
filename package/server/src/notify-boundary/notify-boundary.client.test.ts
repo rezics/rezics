@@ -137,7 +137,7 @@ describe("filterRecipientsByPreference", () => {
     let called = false;
     const result = await filterRecipientsByPreference(
       ["a", "b"],
-      "reaction.like",
+      "reaction.upvote",
       async (ids) => {
         called = true;
         return new Map(ids.map((id) => [id, {}]));

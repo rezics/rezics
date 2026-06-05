@@ -255,7 +255,7 @@
   "dm_you_blocked_peer": "You blocked this person",
   "dm_blocked_by_peer": "This person blocked you",
   "dm_blocked_composer_placeholder": "You can't message this person",
-  "notification_kind_reaction_like": "liked",
+  "notification_kind_reaction_upvote": "upvoted",
   "notification_kind_reaction_favorite": "favorited",
   "notification_kind_follow": "followed you",
   "notification_kind_reply": "commented",

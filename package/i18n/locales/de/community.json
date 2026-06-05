@@ -218,7 +218,7 @@
   "dm_you_blocked_peer": "Du hast diese Person blockiert",
   "dm_blocked_by_peer": "Diese Person hat dich blockiert",
   "dm_blocked_composer_placeholder": "Du kannst dieser Person nicht schreiben",
-  "notification_kind_reaction_like": "hat geliket",
+  "notification_kind_reaction_upvote": "hat upgevotet",
   "notification_kind_reaction_favorite": "hat favorisiert",
   "notification_kind_follow": "folgt dir",
   "notification_kind_reply": "hat kommentiert",

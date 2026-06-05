@@ -1,11 +1,11 @@
-export type VoteValue = "like" | "dislike" | null;
+export type VoteValue = "upvote" | "downvote" | null;
 
 export type VoteAction =
   | { kind: "auth-required" }
   | { kind: "noop" }
-  | { kind: "create"; reaction: "like" | "dislike" }
-  | { kind: "delete"; reaction: "like" | "dislike" }
-  | { kind: "swap"; remove: "like" | "dislike"; add: "like" | "dislike" };
+  | { kind: "create"; reaction: "upvote" | "downvote" }
+  | { kind: "delete"; reaction: "upvote" | "downvote" }
+  | { kind: "swap"; remove: "upvote" | "downvote"; add: "upvote" | "downvote" };
 
 export function decideVoteAction(args: {
   isAuthenticated: boolean;

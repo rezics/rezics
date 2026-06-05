@@ -9,7 +9,7 @@ import { ReactionList } from "./ReactionList";
 const sampleGiven: ReactionHistoryGivenItem[] = [
   {
     id: "g1",
-    reaction: "like",
+    reaction: "upvote",
     createdAt: "2026-04-29T10:00:00.000Z",
     target: {
       unitId: "unit-1",
@@ -45,7 +45,7 @@ const sampleGiven: ReactionHistoryGivenItem[] = [
 const sampleReceived: ReactionHistoryReceivedItem[] = [
   {
     id: "r1",
-    reaction: "like",
+    reaction: "upvote",
     createdAt: "2026-05-02T14:11:00.000Z",
     target: {
       unitId: "unit-7",
@@ -81,7 +81,7 @@ const sampleReceived: ReactionHistoryReceivedItem[] = [
 const sampleGivenDeleted: ReactionHistoryGivenItem[] = [
   {
     id: "gd1",
-    reaction: "like",
+    reaction: "upvote",
     createdAt: "2026-04-12T11:00:00.000Z",
     target: null,
   },

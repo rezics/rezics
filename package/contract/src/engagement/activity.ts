@@ -30,7 +30,7 @@ export const activityItemSchema = t.Object({
   href: t.String(),
   /** ISO timestamp the activity occurred, used for ordering. */
   at: t.String(),
-  /** For `kind: "reaction"`, the reaction key (e.g. "like"). */
+  /** For `kind: "reaction"`, the reaction key (e.g. "upvote"). */
   reaction: t.Optional(t.String()),
 });
 

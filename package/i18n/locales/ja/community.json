@@ -218,7 +218,7 @@
   "dm_you_blocked_peer": "このユーザーをブロックしています",
   "dm_blocked_by_peer": "このユーザーにブロックされています",
   "dm_blocked_composer_placeholder": "このユーザーにメッセージを送れません",
-  "notification_kind_reaction_like": "いいねしました",
+  "notification_kind_reaction_upvote": "高く評価しました",
   "notification_kind_reaction_favorite": "お気に入りに追加しました",
   "notification_kind_follow": "あなたをフォローしました",
   "notification_kind_reply": "コメントしました",

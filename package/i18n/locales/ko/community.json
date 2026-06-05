@@ -218,7 +218,7 @@
   "dm_you_blocked_peer": "이 사용자를 차단했습니다",
   "dm_blocked_by_peer": "이 사용자가 당신을 차단했습니다",
   "dm_blocked_composer_placeholder": "이 사용자에게 메시지를 보낼 수 없습니다",
-  "notification_kind_reaction_like": "좋아합니다",
+  "notification_kind_reaction_upvote": "추천했습니다",
   "notification_kind_reaction_favorite": "즐겨찾기에 추가했습니다",
   "notification_kind_follow": "회원님을 팔로우했습니다",
   "notification_kind_reply": "댓글을 남겼습니다",
