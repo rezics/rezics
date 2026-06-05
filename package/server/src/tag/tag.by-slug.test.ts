@@ -29,10 +29,114 @@ mock.module("@/governance", () => ({
   realmPolicyActions: new Proxy({}, { get: (_target, key) => key }),
 }));
 
-class UnitServiceStub {}
+function buildUnitWhereClause(options: Record<string, any>) {
+  const andWhere: Array<Record<string, unknown>> = [];
+  if (options.q?.trim()) {
+    const q = options.q.trim();
+    andWhere.push({
+      OR: [
+        { id: q },
+        { slug: { contains: q, mode: "insensitive" } },
+        {
+          translations: {
+            some: { title: { contains: q, mode: "insensitive" } },
+          },
+        },
+      ],
+    });
+  }
+  if (options.id?.trim()) andWhere.push({ id: options.id.trim() });
+  if (options.slug?.trim()) {
+    andWhere.push({
+      slug: { contains: options.slug.trim(), mode: "insensitive" },
+    });
+  }
+  if (options.title?.trim()) {
+    andWhere.push({
+      translations: {
+        some: {
+          title: { contains: options.title.trim(), mode: "insensitive" },
+        },
+      },
+    });
+  }
+  const typeList = (options.types ?? options.type ?? "")
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+  if (typeList.length > 0) andWhere.push({ type: { in: typeList } });
+  else andWhere.push({ NOT: { type: "LABEL" } });
+  const statusList = (options.statuses ?? options.status ?? "")
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+  if (statusList.length > 0) andWhere.push({ status: { in: statusList } });
+  if (options.visibility?.trim()) {
+    andWhere.push({ visibility: options.visibility });
+  }
+  const userList = (options.userIds ?? options.userId ?? "")
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+  if (userList.length > 0) andWhere.push({ userId: { in: userList } });
+  if (options.catalogEntryKind !== undefined) {
+    andWhere.push({ catalogEntryKind: options.catalogEntryKind ?? null });
+  }
+  if (options.targetUnitId !== undefined) {
+    andWhere.push({ targetUnitId: options.targetUnitId ?? null });
+  }
+  return { AND: andWhere };
+}
+
+class UnitServiceStub {
+  constructor(private readonly repository?: any) {}
+  async create(input: any) {
+    const row = await this.repository?.create(input);
+    if (row?.id) {
+      const { serverJobProducer } = await import("@/job/job-boundary");
+      await serverJobProducer.enqueue({
+        kind: "search.content.sync",
+        payload: { unitId: row.id },
+        source: { type: "server", service: "unit" },
+      });
+    }
+    return row;
+  }
+  async update(unitId: string, input: any) {
+    const row = await this.repository?.update(unitId, input);
+    const fields = Object.fromEntries(
+      ["rating", "visibility", "catalogEntryKind", "targetUnitId"]
+        .filter((key) => key in input)
+        .map((key) => [key, input[key]]),
+    );
+    if (Object.keys(fields).length > 0) {
+      const { serverJobProducer } = await import("@/job/job-boundary");
+      await serverJobProducer.enqueue({
+        kind: "search.content.patchMetadata",
+        payload: { targetId: unitId, fields },
+        source: { type: "server", service: "unit" },
+      });
+    }
+    return row;
+  }
+  async delete(unitId: string) {
+    await this.repository?.delete(unitId);
+    const [{ serverJobProducer }, { cleanupReactions }] = await Promise.all([
+      import("@/job/job-boundary"),
+      import("@/reaction-boundary/reaction-boundary.client"),
+    ]);
+    await serverJobProducer.enqueue({
+      kind: "search.content.delete",
+      payload: { unitId },
+      source: { type: "server", service: "unit" },
+    });
+    void cleanupReactions(unitId);
+  }
+}
 
 mock.module("@/unit/unit.service", () => ({
   UnitService: UnitServiceStub,
+  buildUnitWhereClause,
   unitService: {
     getBySlug: async (_scope: string, slug: string) => {
       if (slug === "book") return { id: "tag-1", type: "TAG" };
