@@ -2,8 +2,9 @@ import { describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
 
 process.env.NODE_ENV = "test";
-process.env.DATABASE_URL ??=
+process.env.REACTION_DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_reaction";
+process.env.REACTION_INTERNAL_SECRET ??= "test-secret";
 process.env.SERVER_JWKS_URL = "http://localhost:3000/.well-known/jwks.json";
 process.env.SERVER_ISSUER = "rezics-server";
 
