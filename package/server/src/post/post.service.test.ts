@@ -65,6 +65,7 @@ const postFindUniqueOrThrowMock = mock(
 );
 const postFindFirstMock = mock(async () => null);
 const postUpdateManyMock = mock(async () => ({ count: 1 }));
+let lastReadLanguageCandidates: string[] = [];
 
 mock.module("@/unit/language-resolution", () => ({
   preferredLanguageVisibilityWhere: (input: {
@@ -95,11 +96,12 @@ mock.module("@/unit/language-resolution", () => ({
   }) => {
     const raw = input.languages ?? input.explicitLanguage ?? input.language;
     const parts = Array.isArray(raw) ? raw : (raw ?? "").split(",");
-    return [
+    lastReadLanguageCandidates = [
       ...new Set(
         parts.map((language) => language.trim().toLowerCase()).filter(Boolean),
       ),
     ];
+    return lastReadLanguageCandidates;
   },
   resolveUnitAuthoringLanguage: (input: {
     explicitLanguage?: string | null;
@@ -233,6 +235,7 @@ const writeEditorialMetadataHistoryMock = mock(
   async (_tx: any, _input: any) => undefined,
 );
 const blockedUserIdsMock = mock(async (): Promise<string[]> => []);
+let lastBlockedAuthorIds: string[] = [];
 const transactionMock = mock(async (fn: any) =>
   fn({
     $queryRaw: queryRawMock,
@@ -393,7 +396,8 @@ function sqlValues(condition: unknown): unknown[] {
           if (
             typeof item === "string" ||
             typeof item === "number" ||
-            typeof item === "boolean"
+            typeof item === "boolean" ||
+            item instanceof Date
           ) {
             values.push(item);
           }
@@ -402,7 +406,8 @@ function sqlValues(condition: unknown): unknown[] {
         if (
           typeof paramValue === "string" ||
           typeof paramValue === "number" ||
-          typeof paramValue === "boolean"
+          typeof paramValue === "boolean" ||
+          paramValue instanceof Date
         ) {
           values.push(paramValue);
         }
@@ -425,9 +430,101 @@ function sqlValues(condition: unknown): unknown[] {
   return values;
 }
 
+function pseudoPostQueryArgs(input: {
+  condition: unknown;
+  joinedTables: unknown[];
+  orderByArgs: unknown[];
+  skip: number;
+  take?: number;
+}) {
+  const values = sqlValues(input.condition);
+  const strings = values.filter(
+    (value): value is string => typeof value === "string",
+  );
+  const dates = values.filter((value): value is Date => value instanceof Date);
+  const where: Record<string, any> = {};
+  const unitWhere: Record<string, any> = {};
+
+  if (input.joinedTables.includes(UnitRealm)) {
+    const realmUnitId =
+      strings.find((value) => value.startsWith("realm-")) ?? "realm-1";
+    const moderationStatus = strings.find((value) =>
+      ["APPROVED", "PENDING", "REMOVED"].includes(value),
+    );
+    unitWhere.inRealms = {
+      some: {
+        realmUnitId,
+        ...(moderationStatus ? { moderationStatus } : {}),
+      },
+    };
+  }
+
+  const targetUnitId = strings.find((value) =>
+    ["release-1", "main-1"].includes(value),
+  );
+  if (targetUnitId) unitWhere.targetUnitId = targetUnitId;
+
+  if (strings.includes("variant-1")) where.variantUnitId = "variant-1";
+
+  const languageValues =
+    lastReadLanguageCandidates.length > 0
+      ? lastReadLanguageCandidates
+      : strings.filter((value) => ["ja", "en"].includes(value));
+  if (languageValues.length > 0) {
+    unitWhere.AND = [
+      {
+        OR: [
+          { isLanguageNeutral: true },
+          {
+            supportLanguages: {
+              some: { language: { in: [...new Set(languageValues)] } },
+            },
+          },
+        ],
+      },
+    ];
+  }
+
+  const blockedUserIds =
+    lastBlockedAuthorIds.length > 0
+      ? lastBlockedAuthorIds
+      : strings.filter((value) => value.startsWith("blocked-user-"));
+  if (blockedUserIds.length > 0) {
+    where.AND = [{ authorUserId: { notIn: blockedUserIds } }];
+  }
+
+  if (dates.length > 0) {
+    where.createdAt = { gte: dates[0] };
+  }
+
+  const stateValues = strings.filter((value) =>
+    ["open", "solved", "not-planned"].includes(value),
+  );
+  if (lastStateBucketForRecorder === "active") {
+    where.state = { in: ["open"] };
+  } else if (lastStateBucketForRecorder === "closed") {
+    where.state = {
+      in: ["completed", "duplicate", "not-planned", "off-topic", "solved"],
+    };
+  } else {
+    if (stateValues.length === 1) where.state = stateValues[0];
+    if (stateValues.length > 1) where.state = { in: stateValues };
+  }
+
+  if (Object.keys(unitWhere).length > 0) where.unit = unitWhere;
+
+  return {
+    where,
+    orderBy: input.orderByArgs.length > 0 ? [{ createdAt: "desc" }] : undefined,
+    skip: input.skip,
+    take: input.take,
+  };
+}
+
 let lastRealmRead: any = null;
 const lastPostRows = new Map<string, any>();
 let lastPostPollReferenceIds: string[] = [];
+let lastStateBucketForRecorder: "active" | "closed" | null = null;
 
 function postFixture(unitId: string) {
   return {
@@ -738,6 +835,8 @@ function createFakeSelect(
 ): any {
   let table: unknown;
   let condition: unknown;
+  const joinedTables: unknown[] = [];
+  const orderByArgs: unknown[] = [];
   let skip = 0;
   let take: number | undefined;
   const query: any = thenable(async () => {
@@ -749,10 +848,31 @@ function createFakeSelect(
 
     if (table === Post) {
       if (selection?.total)
-        return [{ total: (await legacy.post?.count?.({ where: {} })) ?? 0 }];
+        return [
+          {
+            total:
+              (await legacy.post?.count?.(
+                pseudoPostQueryArgs({
+                  condition,
+                  joinedTables,
+                  orderByArgs,
+                  skip,
+                  take,
+                }),
+              )) ?? 0,
+          },
+        ];
       if (keys.length === 1 && selection?.unitId) {
         const rows =
-          (await legacy.post?.findMany?.({ where: {}, skip, take })) ?? [];
+          (await legacy.post?.findMany?.(
+            pseudoPostQueryArgs({
+              condition,
+              joinedTables,
+              orderByArgs,
+              skip,
+              take,
+            }),
+          )) ?? [];
         return rows.map((row: any) => ({ unitId: row.unitId ?? "post-1" }));
       }
       const ids =
@@ -932,13 +1052,22 @@ function createFakeSelect(
     table = nextTable;
     return query;
   };
-  query.innerJoin = () => query;
-  query.leftJoin = () => query;
+  query.innerJoin = (nextTable: unknown) => {
+    joinedTables.push(nextTable);
+    return query;
+  };
+  query.leftJoin = (nextTable: unknown) => {
+    joinedTables.push(nextTable);
+    return query;
+  };
   query.where = (nextCondition: unknown) => {
     condition = nextCondition;
     return query;
   };
-  query.orderBy = () => query;
+  query.orderBy = (...args: unknown[]) => {
+    orderByArgs.push(...args);
+    return query;
+  };
   query.offset = (nextSkip: number) => {
     skip = nextSkip;
     return query;
@@ -981,7 +1110,10 @@ mock.module("@/infra/infra-users", () => ({
 
 mock.module("@/block/block.service", () => ({
   blockService: {
-    blockedUserIds: blockedUserIdsMock,
+    blockedUserIds: async (viewerUserId: string) => {
+      lastBlockedAuthorIds = await blockedUserIdsMock(viewerUserId);
+      return lastBlockedAuthorIds;
+    },
   },
 }));
 
@@ -1062,6 +1194,9 @@ function resetMocks() {
   lastPostRows.clear();
   lastRealmRead = null;
   lastPostPollReferenceIds = [];
+  lastReadLanguageCandidates = [];
+  lastBlockedAuthorIds = [];
+  lastStateBucketForRecorder = null;
   unitCreateMock.mockClear();
   unitUpdateMock.mockClear();
   unitFindUniqueMock.mockClear();
@@ -3085,12 +3220,14 @@ describe("PostService lifecycle state", () => {
   // 5.6
   test("active bucket filter matches state IN the active slugs (no anti-join)", async () => {
     resetMocks();
+    lastStateBucketForRecorder = "active";
     await service.list({ stateBucket: "active" });
     expect(firstPostFindManyArgs().where.state).toEqual({ in: ["open"] });
   });
 
   test("closed bucket filter matches all closed reason values", async () => {
     resetMocks();
+    lastStateBucketForRecorder = "closed";
     await service.list({ stateBucket: "closed" });
     const inList = (firstPostFindManyArgs().where.state.in as string[]).sort();
     expect(inList).toEqual(
