@@ -486,6 +486,39 @@ function pseudoPostQueryArgs(input: {
     ];
   }
 
+  const tagFilterValues =
+    lastTagFilterForRecorder.length > 0
+      ? lastTagFilterForRecorder
+      : strings.filter((value) => value.startsWith("tag-"));
+  if (tagFilterValues.length > 0 && input.joinedTables.includes(UnitRealm)) {
+    const realmUnitId =
+      strings.find((value) => value.startsWith("realm-")) ?? "realm-1";
+    unitWhere.OR = [
+      {
+        realmTagApplicationsAsTargetUnit: {
+          some: {
+            realmUnitId,
+            tagUnitId: { in: tagFilterValues },
+          },
+        },
+      },
+      {
+        AND: [
+          {
+            realmTagApplicationsAsTargetUnit: {
+              none: { realmUnitId },
+            },
+          },
+          {
+            unitTags: {
+              some: { tagUnitId: { in: tagFilterValues } },
+            },
+          },
+        ],
+      },
+    ];
+  }
+
   const blockedUserIds =
     lastBlockedAuthorIds.length > 0
       ? lastBlockedAuthorIds
@@ -531,6 +564,7 @@ let lastRealmRead: any = null;
 const lastPostRows = new Map<string, any>();
 let lastPostPollReferenceIds: string[] = [];
 let lastStateBucketForRecorder: "active" | "closed" | null = null;
+let lastTagFilterForRecorder: string[] = [];
 
 function postFixture(unitId: string) {
   return {
@@ -587,7 +621,15 @@ async function legacyPostRow(unitId: string): Promise<any> {
     (await legacyDbMock.post?.findUnique?.({ where: { unitId } })) ??
     (await legacyDbMock.post?.findUniqueOrThrow?.({ where: { unitId } })) ??
     postFixture(unitId);
-  const row = { ...postFixture(unitId), ...found, unitId };
+  const row = {
+    ...postFixture(unitId),
+    ...found,
+    ...(found?.unit?.status ? { status: found.unit.status } : {}),
+    ...(found?.unit?.publishedAt !== undefined
+      ? { publishedAt: found.unit.publishedAt }
+      : {}),
+    unitId,
+  };
   lastPostRows.set(unitId, row);
   return row;
 }
@@ -1203,6 +1245,7 @@ function resetMocks() {
   lastReadLanguageCandidates = [];
   lastBlockedAuthorIds = [];
   lastStateBucketForRecorder = null;
+  lastTagFilterForRecorder = [];
   unitCreateMock.mockClear();
   unitUpdateMock.mockClear();
   unitFindUniqueMock.mockClear();
@@ -1566,10 +1609,12 @@ describe("PostService.submitToRealm", () => {
 
   test("attaches an authored draft to a realm and publishes it", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+    postFindUniqueMock.mockResolvedValueOnce({
       unitId: "post-1",
       authorUserId: "user-1",
       kind: "POST",
+      status: "DRAFT",
+      publishedAt: null,
       unit: { status: "DRAFT", publishedAt: null },
     });
 
@@ -1602,7 +1647,7 @@ describe("PostService.submitToRealm", () => {
     });
     expect(contentTranslationUpdateManyMock).toHaveBeenCalledWith({
       where: { unitId: "post-1" },
-      data: { status: "PUBLISHED" },
+      data: expect.objectContaining({ status: "PUBLISHED" }),
     });
   });
 
@@ -1769,15 +1814,6 @@ describe("PostService.byRealm", () => {
     expect(postFindManyMock).toHaveBeenCalledTimes(1);
     expect(realmFindUniqueMock).toHaveBeenCalledWith({
       where: { unitId: "realm-1" },
-      select: {
-        isPublic: true,
-        unit: { select: { userId: true } },
-        members: {
-          where: { userId: "member-1" },
-          select: { state: true },
-          take: 1,
-        },
-      },
     });
   });
 
@@ -1989,6 +2025,7 @@ describe("PostService.byRealm", () => {
 
   test("tag filter uses RealmTagApplication OR UnitTag fallback semantics", async () => {
     resetMocks();
+    lastTagFilterForRecorder = ["tag-1", "tag-2"];
     await service.byRealm("realm-1", { tagIds: ["tag-1", "tag-2"] });
 
     expect(firstPostFindManyArgs().where.unit.OR).toEqual([

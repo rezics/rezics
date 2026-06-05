@@ -1300,7 +1300,7 @@ export class PostService {
           .onConflictDoNothing();
       }
 
-      if (input.publish && existing.unit.status === "DRAFT") {
+      if (input.publish) {
         await tx
           .update(Unit)
           .set({
