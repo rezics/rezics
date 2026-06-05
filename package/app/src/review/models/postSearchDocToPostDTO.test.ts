@@ -68,6 +68,7 @@ describe("mapPostSearchDocToPostDTO", () => {
     );
 
     expect(dto.title).toBeUndefined();
-    expect(dto.content.main.source).toBe("");
+    expect(dto.content).toBeDefined();
+    expect(dto.content?.main.source).toBe("");
   });
 });

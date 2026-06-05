@@ -1,4 +1,4 @@
-import type { BookDTO, PostKind } from "@rezics/contract";
+import type { BookDTO, PostListBody } from "@rezics/contract";
 
 export type CatalogEntryInteractionContext = {
   pageUnitId: string;
@@ -23,7 +23,10 @@ export function resolveCatalogEntryInteractionContext(
 
 export function postListFiltersForCatalogEntry(
   context: CatalogEntryInteractionContext,
-  filters: { kind?: PostKind; limit?: number } = {},
+  filters: Pick<
+    PostListBody,
+    "kind" | "languageMode" | "languages" | "limit"
+  > = {},
 ) {
   return context.variantUnitId
     ? { variantUnitId: context.variantUnitId, ...filters }

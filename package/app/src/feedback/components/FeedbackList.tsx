@@ -233,11 +233,11 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                           id: item.id,
                         })}
                       </p>
-                      {item.unitId && (
+                      {item.addressedUnitId && (
                         <Badge variant="outline">
                           {getI18nRuntime().i18n.t(
                             "community:feedback_unit_id",
-                            { id: item.unitId },
+                            { id: item.addressedUnitId },
                           )}
                         </Badge>
                       )}

@@ -96,7 +96,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
     }
     if (isComment) {
       updateCommentMutation.mutate({
-        unitId: post.unitId,
+        id: post.unitId,
         input: { content },
       });
       return;

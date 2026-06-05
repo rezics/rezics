@@ -202,7 +202,7 @@ function RealmEscalationsTable({ items }: { items: ModerationCaseDTO[] }) {
                 </TableCell>
                 <TableCell className="max-w-[180px]">
                   <span className="truncate font-mono text-xs">
-                    {item.realmUnitId}
+                    {item.target.realmUnitId ?? "-"}
                   </span>
                 </TableCell>
                 <TableCell className="max-w-[220px]">

@@ -192,7 +192,6 @@ export function shelfUnitToUnitCardSummary(
         type: "book",
         user: data.user,
         resolvedLanguage: data.resolvedLanguage,
-        supportLanguages: data.supportLanguages,
         title: data.title,
         subtitle: data.subtitle,
         summary: data.summary,
