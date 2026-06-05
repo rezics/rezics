@@ -530,6 +530,9 @@ databases may be reset and reseeded.
     `prisma-factory.ts` helper is isolated to the legacy server factory client.
   - Applied progress: full factory `EchoKV` seeding now runs through the Drizzle
     server db on `SeedCtx`; the legacy Prisma `seedEchoKV()` wrapper was removed.
+  - Applied progress: factory tag seeding now uses Drizzle bulk inserts for
+    `Unit`, `UnitTranslation`, and `UnitSupportLanguage` rows instead of
+    `ctx.prisma.*.createMany`.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

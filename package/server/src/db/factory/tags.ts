@@ -2,13 +2,14 @@ import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
 import { generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 
 /**
  * Seed tags as Unit(type=TAG) + UnitTranslation + UnitSupportLanguage.
- * Uses two-phase createMany for maximum throughput.
+ * Uses three-phase bulk inserts for maximum throughput.
  */
 export async function seedTags(
   ctx: SeedCtx,
@@ -25,9 +26,11 @@ export async function seedTags(
     return { id, userId: user.userId, translations };
   });
 
+  if (tags.length === 0) return [];
+
   // Phase 1: Create Unit rows
-  await ctx.prisma.unit.createMany({
-    data: tags.map((t) => ({
+  await ctx.db.insert(Unit).values(
+    tags.map((t) => ({
       id: t.id,
       type: UnitType.TAG,
       userId: t.userId,
@@ -37,11 +40,11 @@ export async function seedTags(
       defaultLanguage: DEFAULT_LANGUAGE,
       publishedAt: faker.date.past({ years: 1 }),
     })),
-  });
+  );
 
   // Phase 2: Create UnitTranslation rows (all languages)
-  await ctx.prisma.unitTranslation.createMany({
-    data: tags.flatMap((t) =>
+  await ctx.db.insert(UnitTranslation).values(
+    tags.flatMap((t) =>
       t.translations.map((tr) => ({
         unitId: t.id,
         language: tr.language,
@@ -49,11 +52,11 @@ export async function seedTags(
         description: tr.description,
       })),
     ),
-  });
+  );
 
   // Phase 3: Create UnitSupportLanguage rows
-  await ctx.prisma.unitSupportLanguage.createMany({
-    data: tags.flatMap((t) =>
+  await ctx.db.insert(UnitSupportLanguage).values(
+    tags.flatMap((t) =>
       t.translations.map((tr, i) => ({
         unitId: t.id,
         language: tr.language,
@@ -61,7 +64,7 @@ export async function seedTags(
         sortOrder: i,
       })),
     ),
-  });
+  );
 
   return tags.map((t) => ({ id: t.id, type: UnitType.TAG }));
 }
