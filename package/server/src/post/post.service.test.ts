@@ -17,6 +17,7 @@ import {
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
+  ScoreEntry,
   Unit,
   UnitRealm,
   UnitSupportLanguage,
@@ -515,7 +516,12 @@ function pseudoPostQueryArgs(input: {
 
   return {
     where,
-    orderBy: input.orderByArgs.length > 0 ? [{ createdAt: "desc" }] : undefined,
+    orderBy:
+      input.orderByArgs.length > 0
+        ? input.joinedTables.includes(ScoreEntry)
+          ? [{ scoreEntry: { value: "desc" } }, { createdAt: "desc" }]
+          : [{ createdAt: "desc" }]
+        : undefined,
     skip: input.skip,
     take: input.take,
   };

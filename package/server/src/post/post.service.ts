@@ -71,6 +71,7 @@ import {
   UnitTag,
   UnitTranslation,
   User,
+  ScoreEntry,
 } from "../db/schema";
 import { moderationActionService } from "../governance/moderation-action.service";
 import { AppError } from "../utils/errors";
@@ -749,16 +750,30 @@ export class PostService {
 
     const db = await getServerDb();
     const where = whereAnd(conditions);
+    let rowQuery = db
+      .select({ unitId: Post.unitId })
+      .from(Post)
+      .innerJoin(Unit, eq(Unit.id, Post.unitId))
+      .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId));
+    if (sort === "top" || sort === "hot") {
+      rowQuery = rowQuery.leftJoin(
+        ScoreEntry,
+        eq(ScoreEntry.id, Post.scoreEntryId),
+      );
+    }
+    const orderedRowQuery = rowQuery
+      .where(where)
+      .orderBy(
+        sort === "top" || sort === "hot"
+          ? desc(ScoreEntry.value)
+          : desc(Post.createdAt),
+        desc(Post.createdAt),
+      )
+      .offset(skipNum)
+      .limit(limitNum);
+
     const [rows, totalRows] = await Promise.all([
-      db
-        .select({ unitId: Post.unitId })
-        .from(Post)
-        .innerJoin(Unit, eq(Unit.id, Post.unitId))
-        .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId))
-        .where(where)
-        .orderBy(desc(Post.createdAt))
-        .offset(skipNum)
-        .limit(limitNum),
+      orderedRowQuery,
       db
         .select({ total: count() })
         .from(Post)
