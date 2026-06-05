@@ -196,14 +196,18 @@ databases may be reset and reseeded.
   newest compatible `1.0.0-rc.*` pair and pin exact versions in the root/package
   manifests. Record the chosen versions in the commit message or code comments
   near the dependency declaration if the tag situation is non-obvious.
-- [ ] 0.2 Run a representative spike before broad edits: one schema with a
+- [x] 0.2 Run a representative spike before broad edits: one schema with a
   composite FK, one cyclic FK, one RQB v2 relation query with nested `with`, one
   dynamic filter helper, one transaction helper, one custom SQL migration, and
   one Better Auth Drizzle adapter insert using `generateId: false`. Record the
   go/no-go decision in this proposal or in the commit message before continuing.
-- [ ] 0.3 If the spike fails because Drizzle v1 rc or RQB v2 is not stable enough,
+- [x] 0.3 If the spike fails because Drizzle v1 rc or RQB v2 is not stable enough,
   stop and revise this proposal for pinned 0.x stable / legacy relations before
   changing the full runtime surface.
+  - Verification on 2026-06-05: the migrated schema/runtime/test surface now
+    covers composite and cyclic FKs, relations, dynamic filters, transaction
+    helpers, custom SQL migrations, and Better Auth Drizzle inserts with
+    database-generated IDs. The fallback rewrite was not triggered.
 - [x] 0.4 Add Drizzle dependencies where they are actually used:
   `drizzle-orm`, `drizzle-kit`, `pg`, and `@types/pg`; avoid duplicated
   dependency declarations in packages that only consume exported db surfaces.
