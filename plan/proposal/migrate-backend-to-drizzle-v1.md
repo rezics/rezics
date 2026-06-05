@@ -583,6 +583,10 @@ databases may be reset and reseeded.
   - Applied progress: factory ContentStructure helpers now accept Drizzle db
     operations, upsert structures with conflict ignores, rebuild anchors through
     Drizzle selects/deletes/inserts, and test the Drizzle query chain.
+  - Applied progress: factory book and chapter seeding now inserts `Unit`,
+    `Book`, chapter `Post`, translations, support languages, content
+    translations, content structure nodes, multi-link nodes, and chapter counts
+    through Drizzle instead of nested Prisma creates/createMany/update.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

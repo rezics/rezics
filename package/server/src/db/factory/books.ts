@@ -7,18 +7,31 @@ import {
   markdownContentDoc,
   withCoverUrl,
 } from "@rezics/contract";
-import type { Prisma, PrismaClient } from "../../../prisma/generated/client.js";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import {
   PostKind,
   UnitStatus,
   UnitType,
 } from "../../../prisma/generated/client.js";
-import { rebuildFactoryContentStructureAnchors } from "./content-structure.js";
+import {
+  ensureFactoryContentStructure,
+  rebuildFactoryContentStructureAnchors,
+} from "./content-structure.js";
 import { getRandomBookCover } from "./data.js";
 import { generateBookExtra, generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { ServerDb } from "../client.js";
-import { CreditAttribution, UnitTag } from "../schema";
+import {
+  Book,
+  ContentStructureNode,
+  ContentTranslation,
+  CreditAttribution,
+  Post,
+  Unit,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+} from "../schema";
 import type {
   ChapterPlan,
   CreatedEntity,
@@ -65,8 +78,10 @@ export async function seedBooks(
       const translations = generateTranslations(UnitType.BOOK);
       const coverUrl = getRandomBookCover();
 
-      const unit = await ctx.prisma.unit.create({
-        data: {
+      const [unit] = await ctx.db
+        .insert(Unit)
+        .values({
+          id: randomUUID(),
           type: UnitType.BOOK,
           userId: author.userId,
           slugScope: author.userId,
@@ -76,49 +91,49 @@ export async function seedBooks(
           publishedAt: randomBoolean(0.9)
             ? faker.date.past({ years: 3 })
             : null,
-          book: {
-            create: {
-              isbn13: randomBoolean(0.8) ? faker.commerce.isbn() : null,
-              publicationDate: randomBoolean(0.7)
-                ? faker.date.past({ years: 20 })
-                : null,
-              pageCount: randomInt(80, 1200),
-              textLength: randomInt(20000, 500000),
-              chapterCount: 0,
-              formatKey: faker.helpers.arrayElement([
-                "paperback",
-                "hardcover",
-                "ebook",
-              ]),
-              extra: generateBookExtra(),
-            },
-          },
-          translations: {
-            create: translations.map((t) => ({
-              language: t.language,
-              title: t.title,
-              subtitle: t.subtitle,
-              summary: t.summary,
-              description: t.description,
-              extra:
-                t.language === DEFAULT_LANGUAGE
-                  ? (withCoverUrl(undefined, coverUrl) as Prisma.InputJsonValue)
-                  : undefined,
-            })),
-          },
-          supportLanguages: {
-            create: translations.map((t, i) => ({
-              language: t.language,
-              isPrimary: i === 0,
-              sortOrder: i,
-            })),
-          },
-        },
-        select: { id: true, type: true },
+        })
+        .returning({ id: Unit.id, type: Unit.type });
+      if (!unit) throw new Error("Failed to create seeded book unit.");
+
+      await ctx.db.insert(Book).values({
+        unitId: unit.id,
+        isbn13: randomBoolean(0.8) ? faker.commerce.isbn() : null,
+        publicationDate: randomBoolean(0.7)
+          ? faker.date.past({ years: 20 })
+          : null,
+        pageCount: randomInt(80, 1200),
+        textLength: randomInt(20000, 500000),
+        chapterCount: 0,
+        formatKey: faker.helpers.arrayElement([
+          "paperback",
+          "hardcover",
+          "ebook",
+        ]),
+        extra: generateBookExtra(),
       });
-      await ctx.prisma.contentStructure.create({
-        data: { ownerUnitId: unit.id },
-      });
+      await ctx.db.insert(UnitTranslation).values(
+        translations.map((t) => ({
+          unitId: unit.id,
+          language: t.language,
+          title: t.title,
+          subtitle: t.subtitle,
+          summary: t.summary,
+          description: t.description,
+          extra:
+            t.language === DEFAULT_LANGUAGE
+              ? (withCoverUrl(undefined, coverUrl) as never)
+              : undefined,
+        })),
+      );
+      await ctx.db.insert(UnitSupportLanguage).values(
+        translations.map((t, i) => ({
+          unitId: unit.id,
+          language: t.language,
+          isPrimary: i === 0,
+          sortOrder: i,
+        })),
+      );
+      await ensureFactoryContentStructure(ctx.db, unit.id);
 
       for (const [i, p] of pickN(people, randomInt(1, 3)).entries()) {
         allCreditAttributions.push({
@@ -162,18 +177,12 @@ async function flushCreditAttributionsAndTags(
   for (let i = 0; i < creditAttributions.length; i += BATCH) {
     const batch = creditAttributions.slice(i, i + BATCH);
     if (batch.length === 0) continue;
-    await db
-      .insert(CreditAttribution)
-      .values(batch)
-      .onConflictDoNothing();
+    await db.insert(CreditAttribution).values(batch).onConflictDoNothing();
   }
   for (let i = 0; i < tagLinks.length; i += BATCH) {
     const batch = tagLinks.slice(i, i + BATCH);
     if (batch.length === 0) continue;
-    await db
-      .insert(UnitTag)
-      .values(batch)
-      .onConflictDoNothing();
+    await db.insert(UnitTag).values(batch).onConflictDoNothing();
   }
 }
 
@@ -265,23 +274,23 @@ export async function seedChaptersForBook(
 
   if (materializedRows.length === 0) {
     chapterCount = await insertNodeRows(
-      ctx.prisma,
+      ctx.db,
       bookUnitId,
       tree,
       materializedRows,
     );
-    await ctx.prisma.book.update({
-      where: { unitId: bookUnitId },
-      data: { chapterCount },
-    });
+    await ctx.db
+      .update(Book)
+      .set({ chapterCount })
+      .where(eq(Book.unitId, bookUnitId));
     return serializeTree(tree);
   }
 
   if (useBatch) {
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
       const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
-      await ctx.prisma.unit.createMany({
-        data: chunk.map((r) => ({
+      await ctx.db.insert(Unit).values(
+        chunk.map((r) => ({
           id: r.id,
           userId: bookUserId,
           slugScope: bookUserId,
@@ -291,98 +300,93 @@ export async function seedChaptersForBook(
           licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
         })),
-      });
+      );
     }
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
       const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
-      await ctx.prisma.unitTranslation.createMany({
-        data: chunk.map((r) => ({
+      await ctx.db.insert(UnitTranslation).values(
+        chunk.map((r) => ({
           unitId: r.id,
           language: DEFAULT_LANGUAGE,
           title: r.title,
         })),
-      });
+      );
     }
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
       const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
-      await ctx.prisma.unitSupportLanguage.createMany({
-        data: chunk.map((r) => ({
+      await ctx.db.insert(UnitSupportLanguage).values(
+        chunk.map((r) => ({
           unitId: r.id,
           language: DEFAULT_LANGUAGE,
           isPrimary: true,
           sortOrder: 0,
         })),
-      });
+      );
     }
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
       const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
-      await ctx.prisma.post.createMany({
-        data: chunk.map((r) => ({
+      await ctx.db.insert(Post).values(
+        chunk.map((r) => ({
           unitId: r.id,
           authorUserId: bookUserId,
           kind: PostKind.CHAPTER,
         })),
-      });
+      );
     }
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
       const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
-      await ctx.prisma.contentTranslation.createMany({
-        data: chunk.map((r) => ({
+      await ctx.db.insert(ContentTranslation).values(
+        chunk.map((r) => ({
           unitId: r.id,
           language: DEFAULT_LANGUAGE,
-          content: markdownContentDoc(r.body ?? "") as Prisma.InputJsonValue,
+          content: markdownContentDoc(r.body ?? "") as never,
           status: "PUBLISHED",
           authorUserId: bookUserId,
           provenance: { importedFrom: "factory-book-chapter-seed" },
         })),
-      });
+      );
     }
   } else {
     await chunkedParallel(materializedRows, CHUNK_SIZE, async (row) => {
-      await ctx.prisma.unit.create({
-        data: {
-          id: row.id,
-          userId: bookUserId,
-          slugScope: bookUserId,
-          type: UnitType.POST,
-          targetUnitId: bookUnitId,
-          status: UnitStatus.PUBLISHED,
-          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-          defaultLanguage: DEFAULT_LANGUAGE,
-          translations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              title: row.title,
-            },
-          },
-          supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-          },
-          post: {
-            create: {
-              authorUserId: bookUserId,
-              kind: PostKind.CHAPTER,
-            },
-          },
-          contentTranslations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              content: markdownContentDoc(
-                row.body ?? "",
-              ) as Prisma.InputJsonValue,
-              status: "PUBLISHED",
-              authorUserId: bookUserId,
-              provenance: { importedFrom: "factory-book-chapter-seed" },
-            },
-          },
-        },
+      await ctx.db.insert(Unit).values({
+        id: row.id,
+        userId: bookUserId,
+        slugScope: bookUserId,
+        type: UnitType.POST,
+        targetUnitId: bookUnitId,
+        status: UnitStatus.PUBLISHED,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: DEFAULT_LANGUAGE,
+      });
+      await ctx.db.insert(UnitTranslation).values({
+        unitId: row.id,
+        language: DEFAULT_LANGUAGE,
+        title: row.title,
+      });
+      await ctx.db.insert(UnitSupportLanguage).values({
+        unitId: row.id,
+        language: DEFAULT_LANGUAGE,
+        isPrimary: true,
+      });
+      await ctx.db.insert(Post).values({
+        unitId: row.id,
+        authorUserId: bookUserId,
+        kind: PostKind.CHAPTER,
+      });
+      await ctx.db.insert(ContentTranslation).values({
+        unitId: row.id,
+        language: DEFAULT_LANGUAGE,
+        content: markdownContentDoc(row.body ?? "") as never,
+        status: "PUBLISHED",
+        authorUserId: bookUserId,
+        provenance: { importedFrom: "factory-book-chapter-seed" },
       });
     });
   }
 
   // Chapter Units now exist; insert ContentStructureNode rows referencing them.
   chapterCount = await insertNodeRows(
-    ctx.prisma,
+    ctx.db,
     bookUnitId,
     tree,
     materializedRows,
@@ -390,17 +394,17 @@ export async function seedChaptersForBook(
 
   if ((chapterPlan.multiLinkChapterProbability ?? 0) > 0) {
     chapterCount += await insertMultiLinkNodes(
-      ctx.prisma,
+      ctx.db,
       bookUnitId,
       materializedRows,
       chapterPlan.multiLinkChapterProbability ?? 0,
     );
   }
 
-  await ctx.prisma.book.update({
-    where: { unitId: bookUnitId },
-    data: { chapterCount },
-  });
+  await ctx.db
+    .update(Book)
+    .set({ chapterCount })
+    .where(eq(Book.unitId, bookUnitId));
 
   for (const row of materializedRows) {
     await ctx.sync.post(row.id);
@@ -475,7 +479,7 @@ interface TreeNode {
  * keyed off its left neighbour.
  */
 async function insertNodeRows(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "delete" | "insert" | "select">,
   bookUnitId: string,
   tree: TreeNode[],
   materializedRows: Array<{ id: string }>,
@@ -507,11 +511,11 @@ async function insertNodeRows(
   visit(tree, null);
 
   for (let i = 0; i < rows.length; i += NODE_BATCH_SIZE) {
-    await prisma.contentStructureNode.createMany({
-      data: rows.slice(i, i + NODE_BATCH_SIZE),
-    });
+    await db
+      .insert(ContentStructureNode)
+      .values(rows.slice(i, i + NODE_BATCH_SIZE));
   }
-  await rebuildFactoryContentStructureAnchors(prisma, bookUnitId);
+  await rebuildFactoryContentStructureAnchors(db, bookUnitId);
 
   return rows.filter((row) => !row.noContent).length;
 }
@@ -523,7 +527,7 @@ async function insertNodeRows(
  * exercising the multi-link contract end-to-end.
  */
 export async function insertMultiLinkNodes(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "delete" | "insert" | "select">,
   bookUnitId: string,
   materializedRows: Array<{ id: string; title: string }>,
   multiLinkProbability: number,
@@ -531,12 +535,17 @@ export async function insertMultiLinkNodes(
   if (multiLinkProbability <= 0 || materializedRows.length === 0) return 0;
 
   // Fetch root positions for this book so we can append after the last root.
-  const roots = await prisma.contentStructureNode.findMany({
-    where: { ownerUnitId: bookUnitId, parentId: null },
-    select: { position: true },
-    orderBy: { position: "desc" },
-    take: 1,
-  });
+  const roots = await db
+    .select({ position: ContentStructureNode.position })
+    .from(ContentStructureNode)
+    .where(
+      and(
+        eq(ContentStructureNode.ownerUnitId, bookUnitId),
+        isNull(ContentStructureNode.parentId),
+      ),
+    )
+    .orderBy(desc(ContentStructureNode.position))
+    .limit(1);
   let lastPosition = roots[0]?.position ?? null;
 
   const extras: NodeRowInput[] = [];
@@ -556,12 +565,12 @@ export async function insertMultiLinkNodes(
   }
 
   for (let i = 0; i < extras.length; i += NODE_BATCH_SIZE) {
-    await prisma.contentStructureNode.createMany({
-      data: extras.slice(i, i + NODE_BATCH_SIZE),
-    });
+    await db
+      .insert(ContentStructureNode)
+      .values(extras.slice(i, i + NODE_BATCH_SIZE));
   }
   if (extras.length > 0) {
-    await rebuildFactoryContentStructureAnchors(prisma, bookUnitId);
+    await rebuildFactoryContentStructureAnchors(db, bookUnitId);
   }
   return extras.length;
 }
