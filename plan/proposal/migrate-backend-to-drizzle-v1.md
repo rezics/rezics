@@ -562,6 +562,9 @@ databases may be reset and reseeded.
   - Applied progress: factory realm seeding now inserts `Unit`, `Realm`,
     translations, support languages, members, and UnitRealm links through
     Drizzle instead of nested Prisma creates/createMany/update.
+  - Applied progress: factory shelf seeding now inserts `Unit`, `Shelf`,
+    translations, support languages, shelf items, and shelf item relations
+    through Drizzle instead of nested Prisma creates/createMany/update.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
