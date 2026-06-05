@@ -356,6 +356,10 @@ databases may be reset and reseeded.
     deletes from Prisma delegates to Drizzle table deletes; the reset test now
     derives coverage from Drizzle `pgTable` exports instead of
     `schema.prisma`.
+  - Applied progress: converted remaining server maintenance scripts that still
+    imported `#/prisma/client`; post realm/content-contained resync scripts now
+    inject the server Drizzle db into search sync, and the wiki-shaped rows
+    script reads `Unit`/`User`/`UnitTranslation` through Drizzle.
 - [ ] 4.4 Replace dynamic `Prisma.*WhereInput`, `Include`, `Select`, and payload
   type composition with domain-local Drizzle query builders, explicit
   projections, RQB v2 `with`, joins, and mappers. Prioritize heavily dynamic
