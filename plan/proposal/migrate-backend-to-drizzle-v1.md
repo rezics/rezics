@@ -207,7 +207,7 @@ databases may be reset and reseeded.
 - [x] 0.4 Add Drizzle dependencies where they are actually used:
   `drizzle-orm`, `drizzle-kit`, `pg`, and `@types/pg`; avoid duplicated
   dependency declarations in packages that only consume exported db surfaces.
-- [ ] 0.5 Remove Prisma dependencies from `server`, `auth`, `notify`,
+- [x] 0.5 Remove Prisma dependencies from `server`, `auth`, `notify`,
   `reaction`, `history`, `ranking`, `job-runner`, `utils`, `search`, and `tool`
   once their runtime/tooling imports are gone.
 - [x] 0.6 Update root scripts from `prisma:*` to `db:*`, keeping command names
@@ -637,13 +637,16 @@ databases may be reset and reseeded.
 
 ## 8. Cleanup and verification
 
-- [ ] 8.1 Remove `package/*/prisma.config.ts`, `schema.prisma`, generated Prisma
+- [x] 8.1 Remove `package/*/prisma.config.ts`, `schema.prisma`, generated Prisma
   directories, Prisma migration directories, and Prisma client wrappers after
   all callsites are migrated.
 - [ ] 8.2 Remove or rewrite docs that explain Prisma development commands,
   including `package/server/DEVELOPMENT.md` if it remains relevant.
-- [ ] 8.3 Run `bun install` and verify the lockfile has no Prisma packages unless
+- [x] 8.3 Run `bun install` and verify the lockfile has no Prisma packages unless
   an unrelated third-party dependency still pulls one transitively.
+  - Verification on 2026-06-05: package manifests no longer declare Prisma
+    dependencies; `bun.lock` retains Prisma entries only through Better Auth's
+    third-party Prisma adapter/optional peer dependency surface.
 - [ ] 8.4 Run database reset/migrate from a fresh managed Postgres volume:
   `bun run service up`, `bun run db:reset` or equivalent, then `bun run seed`
   and `bun run seed:factory:fast`.
