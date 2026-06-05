@@ -17,7 +17,11 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 mock.module("@/reaction-boundary/reaction-boundary.client", () => ({
+  createReaction: mock(async () => ({})),
   cleanupReactions: mock(async () => undefined),
+  listByUser: mock(async () => ({ items: [], nextCursor: null })),
+  listGivenReactions: mock(async () => ({ items: [], nextCursor: null })),
+  removeReaction: mock(async () => undefined),
 }));
 mock.module("@/utils/userSlugHydration", () => ({
   hydrateUnitOwnerUserSlugRow: async (row: unknown) => row,

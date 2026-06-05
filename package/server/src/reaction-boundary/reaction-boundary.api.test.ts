@@ -37,6 +37,10 @@ mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
     resolve: () => ({ identity: currentIdentity }),
   }),
+  isAdminRole: () => false,
+  tryResolveIdentity: mock(async () => currentIdentity),
+  verifyAdminFromDb: mock(async () => false),
+  verifyRootFromDb: mock(async () => false),
 }));
 
 mock.module("@/governance", () => ({
