@@ -43,7 +43,7 @@ mock.module("@/unit/unit.service", () => ({
 }));
 
 const tagStub = { id: "tag-1", slug: "book", type: "TAG", translations: [] };
-const prismaMock = {
+const legacyDbMock = {
   unitTag: {
     findMany: async () => [],
   },
@@ -61,7 +61,7 @@ mock.module("./tag.service", () => ({
       unitId: string,
       opts?: { includeBelowThreshold?: boolean },
     ) {
-      return prismaMock.unitTag.findMany({
+      return legacyDbMock.unitTag.findMany({
         where: opts?.includeBelowThreshold
           ? { unitId }
           : { unitId, score: { gt: -100 } },
@@ -74,7 +74,7 @@ mock.module("./tag.service", () => ({
       });
     }
     async listLowScoreUnitTags(threshold: number, limit: number) {
-      return prismaMock.unitTag.findMany({
+      return legacyDbMock.unitTag.findMany({
         where: { score: { lte: threshold } },
         orderBy: [{ score: "asc" }, { unitId: "asc" }, { tagUnitId: "asc" }],
         take: Math.max(1, Math.min(limit, 200)),

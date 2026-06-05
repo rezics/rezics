@@ -41,7 +41,7 @@ const realmDTOStub = {
   isOfficial: true,
   memberCount: 1,
 };
-const prismaMock = {
+const legacyDbMock = {
   unitRealm: {
     findMany: async () => [],
     create: async (input: { data: unknown }) => input.data,
@@ -74,7 +74,7 @@ mock.module("./realm.service", () => ({
   RealmService: class {
     private async patchPostRealmIds(unitId: string) {
       const { patchPostFieldsToMeili } = await import("@/meili/post/sync");
-      const rows = await prismaMock.unitRealm.findMany({
+      const rows = await legacyDbMock.unitRealm.findMany({
         where: { unitId },
         select: { realmUnitId: true },
         orderBy: { realmUnitId: "asc" },
@@ -84,14 +84,14 @@ mock.module("./realm.service", () => ({
       });
     }
     async addUnitRealm(realmUnitId: string, unitId: string) {
-      const row = await prismaMock.unitRealm.create({
+      const row = await legacyDbMock.unitRealm.create({
         data: { realmUnitId, unitId },
       });
       this.patchPostRealmIds(unitId).catch(() => {});
       return row;
     }
     async removeUnitRealm(realmUnitId: string, unitId: string) {
-      await prismaMock.unitRealm.delete({
+      await legacyDbMock.unitRealm.delete({
         where: { realmUnitId_unitId: { realmUnitId, unitId } },
       });
       this.patchPostRealmIds(unitId).catch(() => {});
@@ -101,7 +101,7 @@ mock.module("./realm.service", () => ({
       unitId: string,
       opts?: { includeBelowThreshold?: boolean },
     ) {
-      return prismaMock.realmTagApplication.findMany({
+      return legacyDbMock.realmTagApplication.findMany({
         where: opts?.includeBelowThreshold
           ? { realmUnitId, unitId }
           : { realmUnitId, unitId, score: { gt: -100 } },
@@ -118,7 +118,7 @@ mock.module("./realm.service", () => ({
       limit: number,
       realmUnitId?: string,
     ) {
-      return prismaMock.realmTagApplication.findMany({
+      return legacyDbMock.realmTagApplication.findMany({
         where: {
           score: { lte: threshold },
           ...(realmUnitId ? { realmUnitId } : {}),

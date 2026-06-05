@@ -383,7 +383,7 @@ databases may be reset and reseeded.
   raw queries with Drizzle builders/RQB where practical.
 - [ ] 4.11 Replace Prisma-specific duplicate/error handling with database error
   mapping based on PostgreSQL SQLSTATE codes.
-- [ ] 4.12 Replace Prisma mock helpers in server tests with either focused
+- [x] 4.12 Replace Prisma mock helpers in server tests with either focused
   repository mocks or a Drizzle test db abstraction. Do not keep a
   Prisma-shaped mock just to minimize test edits.
   - Applied progress: Meili status service/API tests no longer install the
@@ -404,6 +404,12 @@ databases may be reset and reseeded.
     community list tests no longer install the shared legacy Prisma client mock;
     their fake Drizzle db now uses a package-local fixture object plus focused
     realm/external boundary mocks.
+  - Applied progress: post service tests no longer install the shared legacy
+    Prisma client mock; their fake Drizzle db now uses a package-local fixture
+    object, and the obsolete shared `prisma-client-mock.ts` helper was deleted.
+    Verification note: this file's behavior assertions were already failing
+    before this removal pass, so post behavior repair remains separate from the
+    Prisma mock cleanup.
   - Applied progress: auth public boundary tests now mock the Drizzle db client
     and governance permission projection directly instead of installing the
     legacy Prisma client mock; stale admin slug endpoint coverage was removed

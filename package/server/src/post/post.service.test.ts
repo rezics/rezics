@@ -6,10 +6,6 @@ import {
   markdownContentDoc,
 } from "@rezics/contract";
 import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
-import {
   Comment,
   CommentPromotion,
   ContentTranslation,
@@ -32,6 +28,8 @@ import {
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
+
+const legacyDbMock: Record<string, any> = {};
 
 const unitCreateMock = mock(async (): Promise<any> => ({ id: "post-1" }));
 const unitUpdateMock = mock(async (args: any): Promise<any> => args.data);
@@ -301,8 +299,7 @@ const transactionMock = mock(async (fn: any) =>
   }),
 );
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
+Object.assign(legacyDbMock, {
   $transaction: transactionMock,
   $queryRaw: queryRawMock,
   $executeRaw: executeRawMock,
@@ -482,8 +479,8 @@ async function legacyPostRow(unitId: string): Promise<any> {
   const cached = lastPostRows.get(unitId);
   if (cached) return cached;
   const found =
-    (await prismaMock.post?.findUnique?.({ where: { unitId } })) ??
-    (await prismaMock.post?.findUniqueOrThrow?.({ where: { unitId } })) ??
+    (await legacyDbMock.post?.findUnique?.({ where: { unitId } })) ??
+    (await legacyDbMock.post?.findUniqueOrThrow?.({ where: { unitId } })) ??
     postFixture(unitId);
   const row = { ...postFixture(unitId), ...found, unitId };
   lastPostRows.set(unitId, row);
@@ -952,7 +949,7 @@ function createFakeSelect(
 }
 
 function createFakeDrizzleDb(oldTx?: any): any {
-  const legacy = oldTx ?? prismaMock;
+  const legacy = oldTx ?? legacyDbMock;
   return {
     select(selection?: Record<string, unknown>) {
       return createFakeSelect(selection, legacy);
@@ -2133,7 +2130,7 @@ describe("PostService.update immutability", () => {
   test("update writes body to ContentTranslation and only row fields to Post", async () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
-    Object.assign(prismaMock.post, { update: directPostUpdateMock });
+    Object.assign(legacyDbMock.post, { update: directPostUpdateMock });
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       authorUserId: "author-1",
       unit: {
@@ -2180,13 +2177,13 @@ describe("PostService.update immutability", () => {
     ]);
 
     // Restore the shared mock so subsequent tests see the standard behavior.
-    Object.assign(prismaMock.post, { update: postUpdateMock });
+    Object.assign(legacyDbMock.post, { update: postUpdateMock });
   });
 
   test("update writes title to UnitTranslation instead of Post.extra", async () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
-    Object.assign(prismaMock.post, { update: directPostUpdateMock });
+    Object.assign(legacyDbMock.post, { update: directPostUpdateMock });
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "post-1",
       authorUserId: "author-1",
@@ -2224,7 +2221,7 @@ describe("PostService.update immutability", () => {
       }),
     );
 
-    Object.assign(prismaMock.post, { update: postUpdateMock });
+    Object.assign(legacyDbMock.post, { update: postUpdateMock });
   });
 
   test("content update applies poll reference set diffs", async () => {
