@@ -22,11 +22,13 @@ import {
   Poll,
   PollOption,
   Realm,
+  RealmTagApplication,
   ShelfUnit,
   Unit,
   UnitAlias,
   UnitRealm,
   UnitSupportLanguage,
+  UnitTag,
   UnitTranslation,
   User,
   UserUnitCollection,
@@ -1064,24 +1066,28 @@ export async function patchContentTags(client: SearchClient, unitId: string) {
     await client.deleteContent([unitId]);
     return;
   }
-  const unitTags = await getSearchPrismaClient().unitTag.findMany({
-    where: {
-      unitId,
-      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
-    },
-    include: { tag: { include: { translations: true } } },
-    orderBy: { score: "desc" },
-  });
+  const unitTags = await getSearchDb()
+    .select({
+      tagUnitId: UnitTag.tagUnitId,
+      score: UnitTag.score,
+      title: UnitTranslation.title,
+    })
+    .from(UnitTag)
+    .leftJoin(UnitTranslation, eq(UnitTranslation.unitId, UnitTag.tagUnitId))
+    .where(
+      and(
+        eq(UnitTag.unitId, unitId),
+        or(gt(UnitTag.score, VISIBILITY_THRESHOLD), eq(UnitTag.pinned, true)),
+      ),
+    )
+    .orderBy(desc(UnitTag.score));
 
-  const tagIds = unitTags.map((ut: any) => ut.tagUnitId);
+  const tagIds = [...new Set(unitTags.map((ut: any) => ut.tagUnitId))];
   const tagScores: Record<string, number> = {};
   const tagLabels: string[] = [];
   for (const ut of unitTags) {
     tagScores[ut.tagUnitId] = ut.score;
-    const labels: string[] = ((ut as any).tag?.translations ?? [])
-      .map((t: any) => t.title)
-      .filter(Boolean);
-    tagLabels.push(...labels);
+    if (ut.title) tagLabels.push(ut.title);
   }
 
   await patchContentIfEligible(client, unitId, {
@@ -1277,10 +1283,13 @@ export async function patchContentRealmTagKeys(
     await client.deleteContent([unitId]);
     return;
   }
-  const realmTagApplicationsAsTargetUnit =
-    await getSearchPrismaClient().realmTagApplication.findMany({
-      where: { unitId },
-    });
+  const realmTagApplicationsAsTargetUnit = await getSearchDb()
+    .select({
+      realmUnitId: RealmTagApplication.realmUnitId,
+      tagUnitId: RealmTagApplication.tagUnitId,
+    })
+    .from(RealmTagApplication)
+    .where(eq(RealmTagApplication.unitId, unitId));
 
   const realmTagKeys = realmTagApplicationsAsTargetUnit.map(
     (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,

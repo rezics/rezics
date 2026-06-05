@@ -1051,6 +1051,43 @@ describe("search sync global moderation projection", () => {
     expect(deleteContent).not.toHaveBeenCalled();
   });
 
+  test("tag patches read UnitTag labels through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentTags, setSearchDb } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const eligibleUnit = {
+      type: "BOOK",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      catalogEntryKind: null,
+    };
+    setSearchDb(
+      createDb([
+        [eligibleUnit],
+        [
+          { tagUnitId: "tag-a", score: 12, title: "Science fiction" },
+          { tagUnitId: "tag-a", score: 12, title: "SF" },
+          { tagUnitId: "tag-b", score: 3, title: "Adventure" },
+        ],
+        [eligibleUnit],
+      ]) as never,
+    );
+
+    await patchContentTags({ patchContent, deleteContent } as any, "book-1");
+
+    expect(patchContent).toHaveBeenCalledWith([
+      {
+        id: "book-1",
+        tagIds: ["tag-a", "tag-b"],
+        tagScores: { "tag-a": 12, "tag-b": 3 },
+        tagLabels: ["Science fiction", "SF", "Adventure"],
+      },
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
+
   test("translation patches read translations and support languages through Drizzle", async () => {
     setServerEnvForSearchTests();
     const { patchContentTranslations, setSearchDb } = await import("./sync");
@@ -1128,6 +1165,43 @@ describe("search sync global moderation projection", () => {
 
     expect(patchContent).toHaveBeenCalledWith([
       { id: "shelf-1", containedUnitIds: ["book-a", "book-b"] },
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
+
+  test("realm tag key patches read RealmTagApplication rows through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentRealmTagKeys, setSearchDb } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const eligibleUnit = {
+      type: "BOOK",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      catalogEntryKind: null,
+    };
+    setSearchDb(
+      createDb([
+        [eligibleUnit],
+        [
+          { realmUnitId: "realm-a", tagUnitId: "tag-a" },
+          { realmUnitId: "realm-b", tagUnitId: "tag-b" },
+        ],
+        [eligibleUnit],
+      ]) as never,
+    );
+
+    await patchContentRealmTagKeys(
+      { patchContent, deleteContent } as any,
+      "book-1",
+    );
+
+    expect(patchContent).toHaveBeenCalledWith([
+      {
+        id: "book-1",
+        realmTagKeys: ["realm-a:tag-a", "realm-b:tag-b"],
+      },
     ]);
     expect(deleteContent).not.toHaveBeenCalled();
   });
