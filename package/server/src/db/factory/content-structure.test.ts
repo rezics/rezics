@@ -3,6 +3,7 @@ import {
   buildFactoryContentStructureAnchorRows,
   rebuildFactoryContentStructureAnchors,
 } from "./content-structure";
+import { ContentStructureAnchor, ContentStructureNode } from "../schema";
 
 describe("buildFactoryContentStructureAnchorRows", () => {
   test("projects materialized nodes with path and title ancestry", () => {
@@ -61,9 +62,7 @@ describe("buildFactoryContentStructureAnchorRows", () => {
 
 describe("rebuildFactoryContentStructureAnchors", () => {
   test("replaces existing anchors for the owner unit", async () => {
-    const deleteMany = mock(async () => ({ count: 0 }));
-    const createMany = mock(async () => ({ count: 1 }));
-    const findMany = mock(async () => [
+    const nodeRows = [
       {
         id: "node-1",
         parentId: null,
@@ -71,44 +70,81 @@ describe("rebuildFactoryContentStructureAnchors", () => {
         contentUnitId: "chapter-1",
         title: "Chapter 1",
       },
-    ]);
+    ];
+    const selectWhere = mock(async () => nodeRows);
+    const selectFrom = mock(() => ({ where: selectWhere }));
+    const select = mock(() => ({ from: selectFrom }));
+    const deleteWhere = mock(async () => undefined);
+    const deleteFrom = mock(() => ({ where: deleteWhere }));
+    const insertValues = mock(async () => undefined);
+    const insertInto = mock(() => ({ values: insertValues }));
 
     await rebuildFactoryContentStructureAnchors(
       {
-        contentStructureNode: { findMany },
-        contentStructureAnchor: { deleteMany, createMany },
+        select,
+        delete: deleteFrom,
+        insert: insertInto,
       } as never,
       "book-1",
     );
 
-    expect(findMany).toHaveBeenCalledWith({
-      where: { ownerUnitId: "book-1", isDeleted: false },
-      select: {
-        id: true,
-        parentId: true,
-        position: true,
-        contentUnitId: true,
-        title: true,
+    expect(select).toHaveBeenCalledWith({
+      id: ContentStructureNode.id,
+      parentId: ContentStructureNode.parentId,
+      position: ContentStructureNode.position,
+      contentUnitId: ContentStructureNode.contentUnitId,
+      title: ContentStructureNode.title,
+    });
+    expect(selectFrom).toHaveBeenCalledWith(ContentStructureNode);
+    expect(selectWhere).toHaveBeenCalledTimes(1);
+    expect(deleteFrom).toHaveBeenCalledWith(ContentStructureAnchor);
+    expect(deleteWhere).toHaveBeenCalledTimes(1);
+    expect(insertInto).toHaveBeenCalledWith(ContentStructureAnchor);
+    expect(insertValues).toHaveBeenCalledWith([
+      {
+        nodeId: "node-1",
+        ownerUnitId: "book-1",
+        contentUnitId: "chapter-1",
+        parentNodeId: null,
+        ancestorNodeIds: [],
+        path: ["node-1"],
+        depth: 0,
+        position: "h",
+        positionPath: "h",
+        titlePath: ["Chapter 1"],
       },
-    });
-    expect(deleteMany).toHaveBeenCalledWith({
-      where: { ownerUnitId: "book-1" },
-    });
-    expect(createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          nodeId: "node-1",
-          ownerUnitId: "book-1",
-          contentUnitId: "chapter-1",
-          parentNodeId: null,
-          ancestorNodeIds: [],
-          path: ["node-1"],
-          depth: 0,
-          position: "h",
-          positionPath: "h",
-          titlePath: ["Chapter 1"],
-        },
-      ],
-    });
+    ]);
+  });
+
+  test("deletes anchors without inserting when no materialized nodes exist", async () => {
+    const selectWhere = mock(async () => [
+      {
+        id: "node-1",
+        parentId: null,
+        position: "h",
+        contentUnitId: null,
+        title: "Chapter 1",
+      },
+    ]);
+    const selectFrom = mock(() => ({ where: selectWhere }));
+    const select = mock(() => ({ from: selectFrom }));
+    const deleteWhere = mock(async () => undefined);
+    const deleteFrom = mock(() => ({ where: deleteWhere }));
+    const insertValues = mock(async () => undefined);
+    const insertInto = mock(() => ({ values: insertValues }));
+
+    await rebuildFactoryContentStructureAnchors(
+      {
+        select,
+        delete: deleteFrom,
+        insert: insertInto,
+      } as never,
+      "book-1",
+    );
+
+    expect(deleteFrom).toHaveBeenCalledWith(ContentStructureAnchor);
+    expect(deleteWhere).toHaveBeenCalledTimes(1);
+    expect(insertInto).not.toHaveBeenCalled();
+    expect(insertValues).not.toHaveBeenCalled();
   });
 });

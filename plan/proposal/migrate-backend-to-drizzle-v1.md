@@ -580,6 +580,9 @@ databases may be reset and reseeded.
     post creation.
   - Applied progress: factory orchestrator now reads chapter seed book authors
     through Drizzle `Unit` selects instead of `ctx.prisma.unit.findUnique`.
+  - Applied progress: factory ContentStructure helpers now accept Drizzle db
+    operations, upsert structures with conflict ignores, rebuild anchors through
+    Drizzle selects/deletes/inserts, and test the Drizzle query chain.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { ContentRating } from "@rezics/contract";
-import type { Prisma, PrismaClient } from "../../../prisma/generated/client.js";
+import { and, eq } from "drizzle-orm";
+import type { ServerDb } from "../client.js";
+import {
+  ContentStructure,
+  ContentStructureAnchor,
+  ContentStructureNode,
+} from "../schema";
 
 const LEXO_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 const LEXO_FIRST = "0";
@@ -50,23 +56,22 @@ export interface FactoryContentStructureNodeInput {
 }
 
 export async function ensureFactoryContentStructure(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "insert">,
   ownerUnitId: string,
 ) {
-  await prisma.contentStructure.upsert({
-    where: { ownerUnitId },
-    create: { ownerUnitId },
-    update: {},
-  });
+  await db
+    .insert(ContentStructure)
+    .values({ ownerUnitId })
+    .onConflictDoNothing();
 }
 
 export async function createFactoryContentStructureNodes(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "delete" | "insert" | "select">,
   ownerUnitId: string,
   nodes: FactoryContentStructureNodeInput[],
 ) {
-  await ensureFactoryContentStructure(prisma, ownerUnitId);
-  const rows: Prisma.ContentStructureNodeCreateManyInput[] = [];
+  await ensureFactoryContentStructure(db, ownerUnitId);
+  const rows: Array<typeof ContentStructureNode.$inferInsert> = [];
 
   function visit(
     siblings: FactoryContentStructureNodeInput[],
@@ -95,8 +100,8 @@ export async function createFactoryContentStructureNodes(
 
   visit(nodes, null);
   if (rows.length > 0) {
-    await prisma.contentStructureNode.createMany({ data: rows });
-    await rebuildFactoryContentStructureAnchors(prisma, ownerUnitId);
+    await db.insert(ContentStructureNode).values(rows);
+    await rebuildFactoryContentStructureAnchors(db, ownerUnitId);
   }
   return rows;
 }
@@ -180,26 +185,33 @@ export function buildFactoryContentStructureAnchorRows(
 }
 
 export async function rebuildFactoryContentStructureAnchors(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "delete" | "insert" | "select">,
   ownerUnitId: string,
 ): Promise<void> {
-  const rows = await prisma.contentStructureNode.findMany({
-    where: { ownerUnitId, isDeleted: false },
-    select: {
-      id: true,
-      parentId: true,
-      position: true,
-      contentUnitId: true,
-      title: true,
-    },
-  });
+  const rows = await db
+    .select({
+      id: ContentStructureNode.id,
+      parentId: ContentStructureNode.parentId,
+      position: ContentStructureNode.position,
+      contentUnitId: ContentStructureNode.contentUnitId,
+      title: ContentStructureNode.title,
+    })
+    .from(ContentStructureNode)
+    .where(
+      and(
+        eq(ContentStructureNode.ownerUnitId, ownerUnitId),
+        eq(ContentStructureNode.isDeleted, false),
+      ),
+    );
   const anchors = buildFactoryContentStructureAnchorRows(ownerUnitId, rows);
 
-  await prisma.contentStructureAnchor.deleteMany({ where: { ownerUnitId } });
+  await db
+    .delete(ContentStructureAnchor)
+    .where(eq(ContentStructureAnchor.ownerUnitId, ownerUnitId));
   if (anchors.length === 0) return;
 
-  await prisma.contentStructureAnchor.createMany({
-    data: anchors.map((anchor) => ({
+  await db.insert(ContentStructureAnchor).values(
+    anchors.map((anchor) => ({
       nodeId: anchor.nodeId,
       ownerUnitId: anchor.ownerUnitId,
       contentUnitId: anchor.contentUnitId,
@@ -211,16 +223,16 @@ export async function rebuildFactoryContentStructureAnchors(
       positionPath: anchor.positionPath,
       titlePath: anchor.titlePath,
     })),
-  });
+  );
 }
 
 export async function createFactoryReleasePartStructure(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "delete" | "insert" | "select">,
   ownerUnitId: string,
   parts: Array<{ unitId: string; title: string }>,
 ) {
   return createFactoryContentStructureNodes(
-    prisma,
+    db,
     ownerUnitId,
     parts.map((part) => ({
       title: part.title,
@@ -230,9 +242,9 @@ export async function createFactoryReleasePartStructure(
 }
 
 export async function createFactorySeriesMemberStructure(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "delete" | "insert" | "select">,
   seriesUnitId: string,
   members: Array<{ unitId: string; title: string }>,
 ) {
-  return createFactoryReleasePartStructure(prisma, seriesUnitId, members);
+  return createFactoryReleasePartStructure(db, seriesUnitId, members);
 }
