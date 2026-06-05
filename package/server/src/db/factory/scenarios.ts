@@ -5,14 +5,36 @@ import {
   LANGUAGES,
   markdownContentDoc,
 } from "@rezics/contract";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { generateBetween } from "../../shelf/fractional-index";
-import type { Prisma } from "../../../prisma/generated/client.js";
 import {
   PostKind,
   UnitStatus,
   UnitType,
   UnitVisibility,
 } from "../../../prisma/generated/client.js";
+import {
+  Book,
+  ContentStructure,
+  ContentTranslation,
+  Entity,
+  HistoryOutbox,
+  Post,
+  Realm,
+  RealmMember,
+  Shelf,
+  ShelfUnit,
+  ShelfUnitRelation,
+  SubjectAttribution,
+  Unit,
+  UnitHistoryClock,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+  User,
+  Zone,
+} from "../schema";
 import { seedChaptersForBook } from "./books.js";
 import { addSpecialSeedTarget, createSeedResult } from "./result.js";
 import type { SeedCtx } from "./strategy.js";
@@ -36,10 +58,11 @@ export interface FactoryScenario {
 }
 
 async function getScenarioUser(ctx: SeedCtx): Promise<CreatedUser> {
-  const user = await ctx.prisma.user.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: { unitId: true, name: true },
-  });
+  const [user] = await ctx.db
+    .select({ unitId: User.unitId, name: User.name })
+    .from(User)
+    .orderBy(asc(User.createdAt))
+    .limit(1);
   if (!user) {
     throw new Error("Factory scenario requires at least one seeded user.");
   }
@@ -56,40 +79,46 @@ async function createNamedBook(
   title: string,
 ): Promise<string> {
   const id = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id,
-      type: UnitType.BOOK,
-      userId,
-      slugScope: userId,
-      status: UnitStatus.PUBLISHED,
-      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      book: { create: { textLength: 120000 } },
-      translations: { create: { language: DEFAULT_LANGUAGE, title } },
-      supportLanguages: {
-        create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-      },
-    },
+  await ctx.db.insert(Unit).values({
+    id,
+    type: UnitType.BOOK,
+    userId,
+    slugScope: userId,
+    status: UnitStatus.PUBLISHED,
+    licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+    defaultLanguage: DEFAULT_LANGUAGE,
+    publishedAt: new Date(),
   });
-  await ctx.prisma.contentStructure.create({ data: { ownerUnitId: id } });
+  await ctx.db.insert(Book).values({ unitId: id, textLength: 120000 });
+  await ctx.db.insert(UnitTranslation).values({
+    unitId: id,
+    language: DEFAULT_LANGUAGE,
+    title,
+  });
+  await ctx.db.insert(UnitSupportLanguage).values({
+    unitId: id,
+    language: DEFAULT_LANGUAGE,
+    isPrimary: true,
+  });
+  await ctx.db.insert(ContentStructure).values({ ownerUnitId: id });
   return id;
 }
 
 async function createScenarioTag(ctx: SeedCtx, title: string): Promise<string> {
   const id = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id,
-      type: UnitType.TAG,
-      slugScope: ctx.slugScopes.tag,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      isLanguageNeutral: true,
-      translations: { create: { language: DEFAULT_LANGUAGE, title } },
-    },
+  await ctx.db.insert(Unit).values({
+    id,
+    type: UnitType.TAG,
+    slugScope: ctx.slugScopes.tag,
+    status: UnitStatus.PUBLISHED,
+    visibility: UnitVisibility.PUBLIC,
+    defaultLanguage: DEFAULT_LANGUAGE,
+    isLanguageNeutral: true,
+  });
+  await ctx.db.insert(UnitTranslation).values({
+    unitId: id,
+    language: DEFAULT_LANGUAGE,
+    title,
   });
   return id;
 }
@@ -99,20 +128,24 @@ async function createScenarioLabel(
   title: string,
 ): Promise<string> {
   const id = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id,
-      type: UnitType.LABEL,
-      slugScope: ctx.slugScopes.zone,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      isLanguageNeutral: true,
-      translations: { create: { language: DEFAULT_LANGUAGE, title } },
-      supportLanguages: {
-        create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-      },
-    },
+  await ctx.db.insert(Unit).values({
+    id,
+    type: UnitType.LABEL,
+    slugScope: ctx.slugScopes.zone,
+    status: UnitStatus.PUBLISHED,
+    visibility: UnitVisibility.PUBLIC,
+    defaultLanguage: DEFAULT_LANGUAGE,
+    isLanguageNeutral: true,
+  });
+  await ctx.db.insert(UnitTranslation).values({
+    unitId: id,
+    language: DEFAULT_LANGUAGE,
+    title,
+  });
+  await ctx.db.insert(UnitSupportLanguage).values({
+    unitId: id,
+    language: DEFAULT_LANGUAGE,
+    isPrimary: true,
   });
   return id;
 }
@@ -126,32 +159,30 @@ async function createScenarioEntity(
   },
 ): Promise<string> {
   const id = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id,
-      type: UnitType.ENTITY,
-      slugScope: ctx.slugScopes.entity,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      translations: {
-        create: {
-          language: DEFAULT_LANGUAGE,
-          title: input.title,
-          summary: `${input.title} fixture entity for wiki Zone sections.`,
-        },
-      },
-      supportLanguages: {
-        create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-      },
-      entity: {
-        create: {
-          kind: input.kind,
-          verified: true,
-          eligibleSubjectRoles: input.subjectRoles,
-        },
-      },
-    },
+  await ctx.db.insert(Unit).values({
+    id,
+    type: UnitType.ENTITY,
+    slugScope: ctx.slugScopes.entity,
+    status: UnitStatus.PUBLISHED,
+    visibility: UnitVisibility.PUBLIC,
+    defaultLanguage: DEFAULT_LANGUAGE,
+  });
+  await ctx.db.insert(UnitTranslation).values({
+    unitId: id,
+    language: DEFAULT_LANGUAGE,
+    title: input.title,
+    summary: `${input.title} fixture entity for wiki Zone sections.`,
+  });
+  await ctx.db.insert(UnitSupportLanguage).values({
+    unitId: id,
+    language: DEFAULT_LANGUAGE,
+    isPrimary: true,
+  });
+  await ctx.db.insert(Entity).values({
+    unitId: id,
+    kind: input.kind,
+    verified: true,
+    eligibleSubjectRoles: input.subjectRoles,
   });
   await ctx.sync.entity(id);
   return id;
@@ -169,54 +200,51 @@ async function createScenarioBookUnit(
   },
 ): Promise<string> {
   const unitId = randomUUID();
-  await ctx.prisma.book.create({
-    data: {
-      unit: {
-        create: {
-          id: unitId,
-          type: UnitType.BOOK,
-          userId: input.userId,
-          slugScope: input.userId,
-          status: UnitStatus.PUBLISHED,
-          visibility: input.visibility ?? UnitVisibility.PUBLIC,
-          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-          defaultLanguage: input.language,
-          publishedAt: new Date(),
-          translations: {
-            create: {
-              language: input.language,
-              title: input.title,
-              summary: `${input.title} factory fixture.`,
-            },
-          },
-          supportLanguages: {
-            create: {
-              language: input.language,
-              isPrimary: true,
-              sortOrder: 0,
-            },
-          },
-        },
-      },
-      pageCount: input.pageCount ?? 320,
-      textLength: input.textLength ?? 90000,
-      chapterCount: 0,
-      formatKey: "ebook",
-    },
+  await ctx.db.insert(Unit).values({
+    id: unitId,
+    type: UnitType.BOOK,
+    userId: input.userId,
+    slugScope: input.userId,
+    status: UnitStatus.PUBLISHED,
+    visibility: input.visibility ?? UnitVisibility.PUBLIC,
+    licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+    defaultLanguage: input.language,
+    publishedAt: new Date(),
   });
-  await ctx.prisma.contentStructure.create({ data: { ownerUnitId: unitId } });
+  await ctx.db.insert(UnitTranslation).values({
+    unitId,
+    language: input.language,
+    title: input.title,
+    summary: `${input.title} factory fixture.`,
+  });
+  await ctx.db.insert(UnitSupportLanguage).values({
+    unitId,
+    language: input.language,
+    isPrimary: true,
+    sortOrder: 0,
+  });
+  await ctx.db.insert(Book).values({
+    unitId,
+    pageCount: input.pageCount ?? 320,
+    textLength: input.textLength ?? 90000,
+    chapterCount: 0,
+    formatKey: "ebook",
+  });
+  await ctx.db.insert(ContentStructure).values({ ownerUnitId: unitId });
   return unitId;
 }
 
 async function getWorkIds(ctx: SeedCtx): Promise<string[]> {
-  const rows = await ctx.prisma.unit.findMany({
-    where: {
-      type: { in: [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA] },
-      status: UnitStatus.PUBLISHED,
-    },
-    select: { id: true },
-    take: 80,
-  });
+  const rows = await ctx.db
+    .select({ id: Unit.id })
+    .from(Unit)
+    .where(
+      and(
+        inArray(Unit.type, [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA]),
+        eq(Unit.status, UnitStatus.PUBLISHED),
+      ),
+    )
+    .limit(80);
   return rows.map((row) => row.id);
 }
 
@@ -268,10 +296,10 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
   const contentRows: Array<{
     unitId: string;
     language: string;
-    content: Prisma.InputJsonValue;
+    content: unknown;
     status: "PUBLISHED";
     authorUserId: string;
-    provenance: Prisma.InputJsonValue;
+    provenance: unknown;
   }> = [];
   const supportRows: Array<{
     unitId: string;
@@ -301,7 +329,7 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
       language: DEFAULT_LANGUAGE,
       content: markdownContentDoc(
         `Root ${planned.rootIndex + 1} for the large post tree scenario.`,
-      ) as Prisma.InputJsonValue,
+      ),
       status: "PUBLISHED",
       authorUserId: user.userId,
       provenance: { importedFrom: "factory-large-post-tree-scenario" },
@@ -313,10 +341,10 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     });
   }
 
-  await ctx.prisma.unit.createMany({ data: unitRows });
-  await ctx.prisma.post.createMany({ data: postRows });
-  await ctx.prisma.unitSupportLanguage.createMany({ data: supportRows });
-  await ctx.prisma.contentTranslation.createMany({ data: contentRows });
+  await ctx.db.insert(Unit).values(unitRows);
+  await ctx.db.insert(Post).values(postRows);
+  await ctx.db.insert(UnitSupportLanguage).values(supportRows);
+  await ctx.db.insert(ContentTranslation).values(contentRows as never);
   for (const post of rootPosts) {
     await ctx.sync.post(post.id);
   }
@@ -459,13 +487,14 @@ async function runLargeHistory(ctx: SeedCtx): Promise<SeedResult> {
     "Factory Scenario: Large History",
   );
 
-  await ctx.prisma.unitHistoryClock.create({
-    data: { unitId, nextSequence: BigInt(121) },
+  await ctx.db.insert(UnitHistoryClock).values({
+    unitId,
+    nextSequence: 121,
   });
-  await ctx.prisma.historyOutbox.createMany({
-    data: Array.from({ length: 120 }, (_, index) => ({
+  await ctx.db.insert(HistoryOutbox).values(
+    Array.from({ length: 120 }, (_, index) => ({
       unitId,
-      sequence: BigInt(index + 1),
+      sequence: index + 1,
       actorUserId: user.userId,
       category: index % 2 === 0 ? "revision" : "structure",
       payload: {
@@ -475,7 +504,7 @@ async function runLargeHistory(ctx: SeedCtx): Promise<SeedResult> {
       },
       status: "pending",
     })),
-  });
+  );
 
   await ctx.sync.content(unitId);
   addSpecialSeedTarget(result, {
@@ -500,32 +529,30 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
   }
 
   const shelfId = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id: shelfId,
-      type: UnitType.SHELF,
-      userId: user.userId,
-      slugScope: user.userId,
-      status: UnitStatus.PUBLISHED,
-      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      shelf: {
-        create: {
-          kindKey: "factory-complex",
-          extra: { viewMode: "nested", sortBy: "manual" },
-        },
-      },
-      translations: {
-        create: {
-          language: DEFAULT_LANGUAGE,
-          title: "Factory Scenario: Complex Shelf",
-        },
-      },
-      supportLanguages: {
-        create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-      },
-    },
+  await ctx.db.insert(Unit).values({
+    id: shelfId,
+    type: UnitType.SHELF,
+    userId: user.userId,
+    slugScope: user.userId,
+    status: UnitStatus.PUBLISHED,
+    licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+    defaultLanguage: DEFAULT_LANGUAGE,
+    publishedAt: new Date(),
+  });
+  await ctx.db.insert(Shelf).values({
+    unitId: shelfId,
+    kindKey: "factory-complex",
+    extra: { viewMode: "nested", sortBy: "manual" },
+  });
+  await ctx.db.insert(UnitTranslation).values({
+    unitId: shelfId,
+    language: DEFAULT_LANGUAGE,
+    title: "Factory Scenario: Complex Shelf",
+  });
+  await ctx.db.insert(UnitSupportLanguage).values({
+    unitId: shelfId,
+    language: DEFAULT_LANGUAGE,
+    isPrimary: true,
   });
 
   let prev: string | undefined;
@@ -540,23 +567,22 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
       position,
     };
   });
-  await ctx.prisma.shelfUnit.createMany({
-    data: shelfRows,
-    skipDuplicates: true,
-  });
-  await ctx.prisma.shelfUnitRelation.createMany({
-    data: selected.slice(1, 20).map((childUnitId, index) => ({
-      shelfId,
-      parentUnitId: selected[index]!,
-      childUnitId,
-      role: index % 2 === 0 ? "sequel" : "related",
-    })),
-    skipDuplicates: true,
-  });
-  await ctx.prisma.shelf.update({
-    where: { unitId: shelfId },
-    data: { itemCount: shelfRows.length },
-  });
+  await ctx.db.insert(ShelfUnit).values(shelfRows).onConflictDoNothing();
+  await ctx.db
+    .insert(ShelfUnitRelation)
+    .values(
+      selected.slice(1, 20).map((childUnitId, index) => ({
+        shelfId,
+        parentUnitId: selected[index]!,
+        childUnitId,
+        role: index % 2 === 0 ? "sequel" : "related",
+      })),
+    )
+    .onConflictDoNothing();
+  await ctx.db
+    .update(Shelf)
+    .set({ itemCount: shelfRows.length })
+    .where(eq(Shelf.unitId, shelfId));
 
   await ctx.sync.content(shelfId);
   await ctx.sync.contentContainedUnits(shelfId);
@@ -582,57 +608,55 @@ async function createWikiScenarioPost(
   },
 ): Promise<string> {
   const postUnitId = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id: postUnitId,
-      type: UnitType.POST,
-      userId: input.userId,
-      slugScope: input.userId,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      defaultLanguage: input.defaultLanguage,
-      targetUnitId: input.targetUnitId,
-      publishedAt: input.publishedAt,
-      updatedAt: input.publishedAt,
-      translations: {
-        create: input.translations.map((item) => ({
-          language: item.language,
-          title: item.title,
-          summary: `${item.title} wiki fixture.`,
-        })),
-      },
-      supportLanguages: {
-        create: input.translations.map((item, index) => ({
-          language: item.language,
-          isPrimary: item.language === input.defaultLanguage,
-          sortOrder: index,
-        })),
-      },
-      contentTranslations: {
-        create: input.translations.map((item) => ({
-          language: item.language,
-          content: markdownContentDoc(item.body) as Prisma.InputJsonValue,
-          status: "PUBLISHED",
-          authorUserId: input.userId,
-          provenance: { importedFrom: "factory-wiki-zone-scenario" },
-        })),
-      },
-      post: {
-        create: {
-          authorUserId: input.userId,
-          kind: PostKind.WIKI,
-          createdAt: input.publishedAt,
-          updatedAt: input.publishedAt,
-        },
-      },
-    },
+  await ctx.db.insert(Unit).values({
+    id: postUnitId,
+    type: UnitType.POST,
+    userId: input.userId,
+    slugScope: input.userId,
+    status: UnitStatus.PUBLISHED,
+    visibility: UnitVisibility.PUBLIC,
+    licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+    defaultLanguage: input.defaultLanguage,
+    targetUnitId: input.targetUnitId,
+    publishedAt: input.publishedAt,
+    updatedAt: input.publishedAt,
   });
-  await ctx.prisma.unitRealm.create({
-    data: {
-      realmUnitId: input.realmUnitId,
+  await ctx.db.insert(UnitTranslation).values(
+    input.translations.map((item) => ({
       unitId: postUnitId,
-    },
+      language: item.language,
+      title: item.title,
+      summary: `${item.title} wiki fixture.`,
+    })),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    input.translations.map((item, index) => ({
+      unitId: postUnitId,
+      language: item.language,
+      isPrimary: item.language === input.defaultLanguage,
+      sortOrder: index,
+    })),
+  );
+  await ctx.db.insert(ContentTranslation).values(
+    input.translations.map((item) => ({
+      unitId: postUnitId,
+      language: item.language,
+      content: markdownContentDoc(item.body) as never,
+      status: "PUBLISHED",
+      authorUserId: input.userId,
+      provenance: { importedFrom: "factory-wiki-zone-scenario" },
+    })),
+  );
+  await ctx.db.insert(Post).values({
+    unitId: postUnitId,
+    authorUserId: input.userId,
+    kind: PostKind.WIKI,
+    createdAt: input.publishedAt,
+    updatedAt: input.publishedAt,
+  });
+  await ctx.db.insert(UnitRealm).values({
+    realmUnitId: input.realmUnitId,
+    unitId: postUnitId,
   });
   await ctx.sync.post(postUnitId);
   return postUnitId;
@@ -666,137 +690,135 @@ async function createWikiScenarioZone(
     type: "POST",
     postKind: "WIKI",
   };
-  await ctx.prisma.unit.create({
-    data: {
-      id: zoneUnitId,
-      type: UnitType.ZONE,
-      slug: input.slug,
-      slugScope: ctx.slugScopes.zone,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      translations: {
-        create: {
-          language: DEFAULT_LANGUAGE,
-          title: input.title,
-          description: markdownContentDoc(
-            `${input.title} fixture portal for wiki Zone verification.`,
-          ) as Prisma.InputJsonValue,
-        },
-      },
-      supportLanguages: {
-        create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-      },
-      zone: {
-        create: {
-          template: input.template,
-          filters: wikiFilters,
-          wiki: {
-            filters: wikiFilters,
-            navigation: {
-              sections: [
-                {
-                  id: "main",
-                  labelUnitId: input.labelUnitIds.overview,
-                  items: [
-                    {
-                      kind: "labelHeading",
-                      labelUnitId: input.labelUnitIds.overview,
-                    },
-                    { kind: "entity", entityId: input.entityIds[0] },
-                    { kind: "tag", tagUnitId: input.tagUnitIds[0] },
-                    {
-                      kind: "wikiUnit",
-                      unitId: input.wikiUnitIds[0],
-                    },
-                    {
-                      kind: "manualLink",
-                      href: "/realm",
-                      label: {
-                        translations: { en: "Realm index" },
-                        fallbackLanguage: DEFAULT_LANGUAGE,
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-            homepage: {
-              template: input.homepageTemplate,
-              sections: [
-                {
-                  id: "characters",
-                  kind: "entityCollection",
-                  titleLabelUnitId: input.labelUnitIds.characters,
-                  entityKinds: ["character", "location", "faction"],
-                  subjectRoles: ["primary_character", "setting", "about"],
-                  realmUnitId: input.realmUnitId,
-                  limit: 6,
-                  sort: "title",
-                  emptyState: "show-empty",
-                },
-                {
-                  id: "tags",
-                  kind: "tagCollection",
-                  title: {
-                    translations: { en: "Wiki tags" },
-                    fallbackLanguage: DEFAULT_LANGUAGE,
-                  },
-                  tagUnitIds: input.tagUnitIds,
-                  limit: 6,
-                  sort: "title",
-                },
-                {
-                  id: "wiki-units",
-                  kind: "wikiUnitCollection",
-                  title: {
-                    translations: { en: "Translated entries" },
-                    fallbackLanguage: DEFAULT_LANGUAGE,
-                  },
-                  unitIds: input.wikiUnitIds,
-                  limit: 6,
-                },
-                { id: "recent", kind: "recentWiki", limit: 4 },
-                { id: "updated", kind: "updatedWiki", limit: 4 },
-                {
-                  id: "stub",
-                  kind: "stubWiki",
-                  predicate: "short",
-                  limit: 4,
-                  emptyState: "show-empty",
-                },
-                {
-                  id: "manual",
-                  kind: "manualLinks",
-                  titleLabelUnitId: input.labelUnitIds.places,
-                  links: [
-                    {
-                      kind: "manualLink",
-                      href: "/realm/search",
-                      label: {
-                        translations: { en: "Search wiki posts" },
-                        fallbackLanguage: DEFAULT_LANGUAGE,
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-            theme: {
-              template: input.template,
-              homepageTemplate: input.homepageTemplate,
-              palette: {
-                background: "#f8fafc",
-                surface: "#ffffff",
-                text: "#1f2937",
-                accent: "#2563eb",
+  await ctx.db.insert(Unit).values({
+    id: zoneUnitId,
+    type: UnitType.ZONE,
+    slug: input.slug,
+    slugScope: ctx.slugScopes.zone,
+    status: UnitStatus.PUBLISHED,
+    visibility: UnitVisibility.PUBLIC,
+    defaultLanguage: DEFAULT_LANGUAGE,
+    publishedAt: new Date(),
+  });
+  await ctx.db.insert(UnitTranslation).values({
+    unitId: zoneUnitId,
+    language: DEFAULT_LANGUAGE,
+    title: input.title,
+    description: markdownContentDoc(
+      `${input.title} fixture portal for wiki Zone verification.`,
+    ) as never,
+  });
+  await ctx.db.insert(UnitSupportLanguage).values({
+    unitId: zoneUnitId,
+    language: DEFAULT_LANGUAGE,
+    isPrimary: true,
+  });
+  await ctx.db.insert(Zone).values({
+    unitId: zoneUnitId,
+    template: input.template,
+    filters: wikiFilters,
+    wiki: {
+      filters: wikiFilters,
+      navigation: {
+        sections: [
+          {
+            id: "main",
+            labelUnitId: input.labelUnitIds.overview,
+            items: [
+              {
+                kind: "labelHeading",
+                labelUnitId: input.labelUnitIds.overview,
               },
-              chrome: { density: "comfortable", navPosition: "side" },
-              layout: { contentWidth: "wide", infoboxPosition: "right" },
+              { kind: "entity", entityId: input.entityIds[0] },
+              { kind: "tag", tagUnitId: input.tagUnitIds[0] },
+              {
+                kind: "wikiUnit",
+                unitId: input.wikiUnitIds[0],
+              },
+              {
+                kind: "manualLink",
+                href: "/realm",
+                label: {
+                  translations: { en: "Realm index" },
+                  fallbackLanguage: DEFAULT_LANGUAGE,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      homepage: {
+        template: input.homepageTemplate,
+        sections: [
+          {
+            id: "characters",
+            kind: "entityCollection",
+            titleLabelUnitId: input.labelUnitIds.characters,
+            entityKinds: ["character", "location", "faction"],
+            subjectRoles: ["primary_character", "setting", "about"],
+            realmUnitId: input.realmUnitId,
+            limit: 6,
+            sort: "title",
+            emptyState: "show-empty",
+          },
+          {
+            id: "tags",
+            kind: "tagCollection",
+            title: {
+              translations: { en: "Wiki tags" },
+              fallbackLanguage: DEFAULT_LANGUAGE,
             },
-          } satisfies Prisma.InputJsonValue,
+            tagUnitIds: input.tagUnitIds,
+            limit: 6,
+            sort: "title",
+          },
+          {
+            id: "wiki-units",
+            kind: "wikiUnitCollection",
+            title: {
+              translations: { en: "Translated entries" },
+              fallbackLanguage: DEFAULT_LANGUAGE,
+            },
+            unitIds: input.wikiUnitIds,
+            limit: 6,
+          },
+          { id: "recent", kind: "recentWiki", limit: 4 },
+          { id: "updated", kind: "updatedWiki", limit: 4 },
+          {
+            id: "stub",
+            kind: "stubWiki",
+            predicate: "short",
+            limit: 4,
+            emptyState: "show-empty",
+          },
+          {
+            id: "manual",
+            kind: "manualLinks",
+            titleLabelUnitId: input.labelUnitIds.places,
+            links: [
+              {
+                kind: "manualLink",
+                href: "/realm/search",
+                label: {
+                  translations: { en: "Search wiki posts" },
+                  fallbackLanguage: DEFAULT_LANGUAGE,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      theme: {
+        template: input.template,
+        homepageTemplate: input.homepageTemplate,
+        palette: {
+          background: "#f8fafc",
+          surface: "#ffffff",
+          text: "#1f2937",
+          accent: "#2563eb",
         },
+        chrome: { density: "comfortable", navPosition: "side" },
+        layout: { contentWidth: "wide", infoboxPosition: "right" },
       },
     },
   });
@@ -818,36 +840,36 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   });
 
   const realmUnitId = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id: realmUnitId,
-      type: UnitType.REALM,
-      userId: user.userId,
-      slugScope: ctx.slugScopes.realm,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      translations: {
-        create: {
-          language: DEFAULT_LANGUAGE,
-          title: "Factory Scenario: Wiki Realm",
-        },
-      },
-      supportLanguages: {
-        create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-      },
-      realm: {
-        create: {
-          isPublic: true,
-          isOfficial: true,
-          extra: { scenario: "wiki-zone-experience" },
-        },
-      },
-    },
+  await ctx.db.insert(Unit).values({
+    id: realmUnitId,
+    type: UnitType.REALM,
+    userId: user.userId,
+    slugScope: ctx.slugScopes.realm,
+    status: UnitStatus.PUBLISHED,
+    visibility: UnitVisibility.PUBLIC,
+    defaultLanguage: DEFAULT_LANGUAGE,
+    publishedAt: new Date(),
   });
-  await ctx.prisma.realmMember.create({
-    data: { realmUnitId, userId: user.userId, roleKey: "owner" },
+  await ctx.db.insert(UnitTranslation).values({
+    unitId: realmUnitId,
+    language: DEFAULT_LANGUAGE,
+    title: "Factory Scenario: Wiki Realm",
+  });
+  await ctx.db.insert(UnitSupportLanguage).values({
+    unitId: realmUnitId,
+    language: DEFAULT_LANGUAGE,
+    isPrimary: true,
+  });
+  await ctx.db.insert(Realm).values({
+    unitId: realmUnitId,
+    isPublic: true,
+    isOfficial: true,
+    extra: { scenario: "wiki-zone-experience" },
+  });
+  await ctx.db.insert(RealmMember).values({
+    realmUnitId,
+    userId: user.userId,
+    roleKey: "owner",
   });
   const [characterId, locationId, factionId] = await Promise.all([
     createScenarioEntity(ctx, {
@@ -866,8 +888,9 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
       subjectRoles: ["about"],
     }),
   ]);
-  await ctx.prisma.subjectAttribution.createMany({
-    data: [
+  await ctx.db
+    .insert(SubjectAttribution)
+    .values([
       {
         unitId: wikiEntryUnitId,
         entityId: characterId,
@@ -875,9 +898,8 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
       },
       { unitId: wikiEntryUnitId, entityId: locationId, role: "setting" },
       { unitId: releaseUnitId, entityId: factionId, role: "about" },
-    ],
-    skipDuplicates: true,
-  });
+    ])
+    .onConflictDoNothing();
 
   const [overviewLabelId, charactersLabelId, placesLabelId] = await Promise.all(
     [
@@ -926,13 +948,13 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
       }),
     );
   }
-  await ctx.prisma.unitTag.createMany({
-    data: [
+  await ctx.db
+    .insert(UnitTag)
+    .values([
       ...postIds.map((unitId) => ({ unitId, tagUnitId: loreTagId })),
       { unitId: postIds.at(-1)!, tagUnitId: stubTagId },
-    ],
-    skipDuplicates: true,
-  });
+    ])
+    .onConflictDoNothing();
 
   const zoneInputs = [
     ["wiki-classic", "wiki-classic-home"],
@@ -960,15 +982,15 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
       }),
     );
   }
-  await ctx.prisma.realm.update({
-    where: { unitId: realmUnitId },
-    data: {
+  await ctx.db
+    .update(Realm)
+    .set({
       extra: {
         scenario: "wiki-zone-experience",
         wikiZoneUnitId: zoneIds[0],
       },
-    },
-  });
+    })
+    .where(eq(Realm.unitId, realmUnitId));
 
   await Promise.all([
     ctx.sync.content(wikiEntryUnitId),

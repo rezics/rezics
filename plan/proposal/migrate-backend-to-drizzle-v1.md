@@ -587,6 +587,11 @@ databases may be reset and reseeded.
     `Book`, chapter `Post`, translations, support languages, content
     translations, content structure nodes, multi-link nodes, and chapter counts
     through Drizzle instead of nested Prisma creates/createMany/update.
+  - Applied progress: factory scenario runners now create scenario users'
+    books, tags, labels, entities, post roots, history rows, shelves, wiki
+    posts, zones, realms, realm membership, subject attributions, and UnitTag
+    links through Drizzle; `package/server/src/db/factory` no longer calls
+    `ctx.prisma`.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
