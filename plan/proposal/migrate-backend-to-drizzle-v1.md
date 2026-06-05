@@ -533,6 +533,9 @@ databases may be reset and reseeded.
   - Applied progress: factory tag seeding now uses Drizzle bulk inserts for
     `Unit`, `UnitTranslation`, and `UnitSupportLanguage` rows instead of
     `ctx.prisma.*.createMany`.
+  - Applied progress: the shared factory credit-attribution/unit-tag flush used
+    by books, games, and media now uses Drizzle `insert(...).onConflictDoNothing()`
+    instead of Prisma `createMany({ skipDuplicates: true })`.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

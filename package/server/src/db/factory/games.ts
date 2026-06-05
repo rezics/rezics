@@ -3,9 +3,12 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
-import type { Prisma } from "../../../prisma/generated/client.js";
 import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
-import { flushCreditAttributionsAndTags } from "./books.js";
+import {
+  type FactoryCreditAttributionInsert,
+  type FactoryUnitTagInsert,
+  flushCreditAttributionsAndTags,
+} from "./books.js";
 import { generateGameExtra, generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
@@ -27,8 +30,8 @@ export async function seedGames(
   const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} games...`);
 
-  const allCreditAttributions: Prisma.CreditAttributionCreateManyInput[] = [];
-  const allTagLinks: Prisma.UnitTagCreateManyInput[] = [];
+  const allCreditAttributions: FactoryCreditAttributionInsert[] = [];
+  const allTagLinks: FactoryUnitTagInsert[] = [];
 
   const created = await chunkedParallel(
     Array.from({ length: total }),
@@ -103,7 +106,7 @@ export async function seedGames(
   );
 
   await flushCreditAttributionsAndTags(
-    ctx.prisma,
+    ctx.db,
     allCreditAttributions,
     allTagLinks,
   );

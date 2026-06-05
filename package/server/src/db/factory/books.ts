@@ -17,6 +17,8 @@ import { rebuildFactoryContentStructureAnchors } from "./content-structure.js";
 import { getRandomBookCover } from "./data.js";
 import { generateBookExtra, generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
+import type { ServerDb } from "../client.js";
+import { CreditAttribution, UnitTag } from "../schema";
 import type {
   ChapterPlan,
   CreatedEntity,
@@ -37,6 +39,10 @@ const CHUNK_SIZE = 10;
 const BOOK_PERSON_ROLES = ["author", "illustrator", "translator", "editor"];
 const BOOK_ORG_ROLES = ["publisher", "distributor"];
 
+export type FactoryCreditAttributionInsert =
+  typeof CreditAttribution.$inferInsert;
+export type FactoryUnitTagInsert = typeof UnitTag.$inferInsert;
+
 export async function seedBooks(
   ctx: SeedCtx,
   spec: CountSpec,
@@ -48,8 +54,8 @@ export async function seedBooks(
   const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} books...`);
 
-  const allCreditAttributions: Prisma.CreditAttributionCreateManyInput[] = [];
-  const allTagLinks: Prisma.UnitTagCreateManyInput[] = [];
+  const allCreditAttributions: FactoryCreditAttributionInsert[] = [];
+  const allTagLinks: FactoryUnitTagInsert[] = [];
 
   const created = await chunkedParallel(
     Array.from({ length: total }),
@@ -139,7 +145,7 @@ export async function seedBooks(
   );
 
   await flushCreditAttributionsAndTags(
-    ctx.prisma,
+    ctx.db,
     allCreditAttributions,
     allTagLinks,
   );
@@ -148,22 +154,26 @@ export async function seedBooks(
 }
 
 async function flushCreditAttributionsAndTags(
-  prisma: PrismaClient,
-  creditAttributions: Prisma.CreditAttributionCreateManyInput[],
-  tagLinks: Prisma.UnitTagCreateManyInput[],
+  db: Pick<ServerDb, "insert">,
+  creditAttributions: FactoryCreditAttributionInsert[],
+  tagLinks: FactoryUnitTagInsert[],
 ): Promise<void> {
   const BATCH = 500;
   for (let i = 0; i < creditAttributions.length; i += BATCH) {
-    await prisma.creditAttribution.createMany({
-      data: creditAttributions.slice(i, i + BATCH),
-      skipDuplicates: true,
-    });
+    const batch = creditAttributions.slice(i, i + BATCH);
+    if (batch.length === 0) continue;
+    await db
+      .insert(CreditAttribution)
+      .values(batch)
+      .onConflictDoNothing();
   }
   for (let i = 0; i < tagLinks.length; i += BATCH) {
-    await prisma.unitTag.createMany({
-      data: tagLinks.slice(i, i + BATCH),
-      skipDuplicates: true,
-    });
+    const batch = tagLinks.slice(i, i + BATCH);
+    if (batch.length === 0) continue;
+    await db
+      .insert(UnitTag)
+      .values(batch)
+      .onConflictDoNothing();
   }
 }
 
