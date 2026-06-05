@@ -17,6 +17,7 @@ import {
 } from "@rezics/contract";
 import type { ServerDb } from "@rezics/server/db";
 import {
+  CreditAttribution,
   Entity,
   Feedback,
   Poll,
@@ -30,6 +31,7 @@ import {
   UnitSupportLanguage,
   UnitTag,
   UnitTranslation,
+  SubjectAttribution,
   User,
   UserUnitCollection,
   UserUnitProgress,
@@ -1133,23 +1135,30 @@ export async function patchContentCredits(
     await client.deleteContent([unitId]);
     return;
   }
-  const creditAttributions =
-    await getSearchPrismaClient().creditAttribution.findMany({
-      where: { unitId },
-      include: {
-        entity: {
-          include: { translations: true },
-        },
-      },
-      orderBy: { sortOrder: "asc" },
-    });
-
-  const creditNames = creditAttributions
-    .map((a: any) => {
-      const translations = a.entity?.translations ?? [];
-      return translations[0]?.title;
+  const creditAttributions = await getSearchDb()
+    .select({
+      entityId: CreditAttribution.entityId,
+      role: CreditAttribution.role,
+      title: UnitTranslation.title,
     })
-    .filter(isNonEmptyString);
+    .from(CreditAttribution)
+    .leftJoin(
+      UnitTranslation,
+      eq(UnitTranslation.unitId, CreditAttribution.entityId),
+    )
+    .where(eq(CreditAttribution.unitId, unitId))
+    .orderBy(asc(CreditAttribution.sortOrder));
+
+  const seenCredits = new Set<string>();
+  const creditNames: string[] = [];
+  for (const attribution of creditAttributions as any[]) {
+    const key = `${attribution.entityId}:${attribution.role}`;
+    if (seenCredits.has(key)) continue;
+    seenCredits.add(key);
+    if (isNonEmptyString(attribution.title)) {
+      creditNames.push(attribution.title);
+    }
+  }
 
   await patchContentIfEligible(client, unitId, { creditNames });
 }
@@ -1162,34 +1171,42 @@ export async function patchContentSubjects(
     await client.deleteContent([unitId]);
     return;
   }
-  const subjectAttributions =
-    await getSearchPrismaClient().subjectAttribution.findMany({
-      where: { unitId },
-      include: {
-        entity: {
-          include: { entity: true, translations: true },
-        },
-      },
-      orderBy: { sortOrder: "asc" },
-    });
-
-  const subjectEntityIds = subjectAttributions.map((a: any) => a.entityId);
-  const subjectNames = subjectAttributions
-    .flatMap((a: any) =>
-      (a.entity?.translations ?? []).map(
-        (translation: any) => translation.title,
-      ),
+  const subjectAttributions = await getSearchDb()
+    .select({
+      entityId: SubjectAttribution.entityId,
+      role: SubjectAttribution.role,
+      kind: Entity.kind,
+      title: UnitTranslation.title,
+    })
+    .from(SubjectAttribution)
+    .leftJoin(Entity, eq(Entity.unitId, SubjectAttribution.entityId))
+    .leftJoin(
+      UnitTranslation,
+      eq(UnitTranslation.unitId, SubjectAttribution.entityId),
     )
+    .where(eq(SubjectAttribution.unitId, unitId))
+    .orderBy(asc(SubjectAttribution.sortOrder));
+
+  const subjectEntityIds: string[] = [];
+  const seenSubjects = new Set<string>();
+  for (const attribution of subjectAttributions as any[]) {
+    const key = `${attribution.entityId}:${attribution.role}`;
+    if (seenSubjects.has(key)) continue;
+    seenSubjects.add(key);
+    subjectEntityIds.push(attribution.entityId);
+  }
+  const subjectNames = (subjectAttributions as any[])
+    .map((a: any) => a.title)
     .filter(Boolean);
   const subjectKinds = [
     ...new Set(
-      subjectAttributions
-        .map((a: any) => a.entity?.entity?.kind)
-        .filter(Boolean),
+      (subjectAttributions as any[]).map((a: any) => a.kind).filter(Boolean),
     ),
   ];
   const subjectRoles = [
-    ...new Set(subjectAttributions.map((a: any) => a.role).filter(Boolean)),
+    ...new Set(
+      (subjectAttributions as any[]).map((a: any) => a.role).filter(Boolean),
+    ),
   ];
 
   await patchContentIfEligible(client, unitId, {

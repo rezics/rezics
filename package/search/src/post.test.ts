@@ -1088,6 +1088,94 @@ describe("search sync global moderation projection", () => {
     expect(deleteContent).not.toHaveBeenCalled();
   });
 
+  test("credit patches read attribution names through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentCredits, setSearchDb } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const eligibleUnit = {
+      type: "BOOK",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      catalogEntryKind: null,
+    };
+    setSearchDb(
+      createDb([
+        [eligibleUnit],
+        [
+          { entityId: "person-a", role: "author", title: "Alice" },
+          { entityId: "person-a", role: "author", title: "Alice JP" },
+          { entityId: "person-b", role: "illustrator", title: "Bob" },
+        ],
+        [eligibleUnit],
+      ]) as never,
+    );
+
+    await patchContentCredits({ patchContent, deleteContent } as any, "book-1");
+
+    expect(patchContent).toHaveBeenCalledWith([
+      { id: "book-1", creditNames: ["Alice", "Bob"] },
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
+
+  test("subject patches read attribution names, kinds, and roles through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentSubjects, setSearchDb } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const eligibleUnit = {
+      type: "BOOK",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      catalogEntryKind: null,
+    };
+    setSearchDb(
+      createDb([
+        [eligibleUnit],
+        [
+          {
+            entityId: "character-a",
+            role: "primary_character",
+            kind: "character",
+            title: "Aster",
+          },
+          {
+            entityId: "character-a",
+            role: "primary_character",
+            kind: "character",
+            title: "Aster JP",
+          },
+          {
+            entityId: "place-a",
+            role: "setting",
+            kind: "place",
+            title: "Moon City",
+          },
+        ],
+        [eligibleUnit],
+      ]) as never,
+    );
+
+    await patchContentSubjects(
+      { patchContent, deleteContent } as any,
+      "book-1",
+    );
+
+    expect(patchContent).toHaveBeenCalledWith([
+      {
+        id: "book-1",
+        subjectEntityIds: ["character-a", "place-a"],
+        subjectNames: ["Aster", "Aster JP", "Moon City"],
+        subjectKinds: ["character", "place"],
+        subjectRoles: ["primary_character", "setting"],
+      },
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
+
   test("translation patches read translations and support languages through Drizzle", async () => {
     setServerEnvForSearchTests();
     const { patchContentTranslations, setSearchDb } = await import("./sync");

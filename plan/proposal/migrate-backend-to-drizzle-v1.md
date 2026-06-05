@@ -449,6 +449,10 @@ databases may be reset and reseeded.
     reads against server `UnitTag`, `UnitTranslation`, and
     `RealmTagApplication`, preserving tag labels, scores, ids, and realm tag key
     payloads.
+  - Applied progress: moved content credit and subject patching to Drizzle reads
+    against server `CreditAttribution`, `SubjectAttribution`, `Entity`, and
+    `UnitTranslation`, preserving attribution names, subject ids, kinds, and
+    roles.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
