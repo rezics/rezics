@@ -22,6 +22,7 @@ import {
   Poll,
   PollOption,
   Realm,
+  ShelfUnit,
   Unit,
   UnitAlias,
   UnitRealm,
@@ -1098,14 +1099,20 @@ export async function patchContentAliases(
     await client.deleteContent([unitId]);
     return;
   }
-  const aliases = await getSearchPrismaClient().unitAlias.findMany({
-    where: {
-      unitId,
-      status: "ACTIVE",
-      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
-    },
-    orderBy: [{ pinned: "desc" }, { score: "desc" }],
-  });
+  const aliases = await getSearchDb()
+    .select()
+    .from(UnitAlias)
+    .where(
+      and(
+        eq(UnitAlias.unitId, unitId),
+        eq(UnitAlias.status, "ACTIVE"),
+        or(
+          gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+          eq(UnitAlias.pinned, true),
+        ),
+      ),
+    )
+    .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score));
 
   await patchContentIfEligible(client, unitId, {
     aliasValues: aliases.map((alias: any) => alias.value).filter(Boolean),
@@ -1195,13 +1202,16 @@ export async function patchContentTranslations(
     await client.deleteContent([unitId]);
     return;
   }
-  const translations = await getSearchPrismaClient().unitTranslation.findMany({
-    where: { unitId },
-  });
-  const supportLanguages =
-    await getSearchPrismaClient().unitSupportLanguage.findMany({
-      where: { unitId },
-    });
+  const [translations, supportLanguages] = await Promise.all([
+    getSearchDb()
+      .select()
+      .from(UnitTranslation)
+      .where(eq(UnitTranslation.unitId, unitId)),
+    getSearchDb()
+      .select()
+      .from(UnitSupportLanguage)
+      .where(eq(UnitSupportLanguage.unitId, unitId)),
+  ]);
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const subtitles = translations.map((t: any) => t.subtitle).filter(Boolean);
@@ -1303,10 +1313,11 @@ export async function patchContentContainedUnitIds(
     await client.deleteContent([shelfId]);
     return;
   }
-  const units = await getSearchPrismaClient().shelfUnit.findMany({
-    where: { shelfId },
-    select: { unitId: true },
-  });
+  const units = await getSearchDb()
+    .select({ unitId: ShelfUnit.unitId })
+    .from(ShelfUnit)
+    .where(eq(ShelfUnit.shelfId, shelfId))
+    .orderBy(asc(ShelfUnit.position));
   const containedUnitIds = units.map((u: any) => u.unitId);
   await patchContentIfEligible(client, shelfId, { containedUnitIds });
 }

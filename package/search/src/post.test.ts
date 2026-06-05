@@ -1014,4 +1014,121 @@ describe("search sync global moderation projection", () => {
     expect(deleteContent).toHaveBeenCalledWith(["post-1"]);
     expect(patchContent).not.toHaveBeenCalled();
   });
+
+  test("alias patches read visible aliases through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentAliases, setSearchDb } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const eligibleUnit = {
+      type: "BOOK",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      catalogEntryKind: null,
+    };
+    setSearchDb(
+      createDb([
+        [eligibleUnit],
+        [
+          { value: "Pinned title", score: 0, pinned: true, status: "ACTIVE" },
+          {
+            value: "Popular title",
+            score: 12,
+            pinned: false,
+            status: "ACTIVE",
+          },
+        ],
+        [eligibleUnit],
+      ]) as never,
+    );
+
+    await patchContentAliases({ patchContent, deleteContent } as any, "book-1");
+
+    expect(patchContent).toHaveBeenCalledWith([
+      { id: "book-1", aliasValues: ["Pinned title", "Popular title"] },
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
+
+  test("translation patches read translations and support languages through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentTranslations, setSearchDb } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const eligibleUnit = {
+      type: "BOOK",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      catalogEntryKind: null,
+    };
+    setSearchDb(
+      createDb([
+        [eligibleUnit],
+        [
+          {
+            language: "en",
+            title: "English title",
+            subtitle: "Subtitle",
+            summary: "Summary",
+            description: markdownContentDoc("Long description"),
+          },
+        ],
+        [{ language: "en", isPrimary: true, sortOrder: 0 }],
+        [eligibleUnit],
+      ]) as never,
+    );
+
+    await patchContentTranslations(
+      { patchContent, deleteContent } as any,
+      "book-1",
+    );
+
+    expect(patchContent).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: "book-1",
+        titles: ["English title"],
+        subtitles: ["Subtitle"],
+        summaries: ["Summary"],
+        descriptions: ["Long description"],
+        descriptionText: "Long description",
+        languages: ["en"],
+      }),
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
+
+  test("contained unit patches read ShelfUnit rows through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentContainedUnitIds, setSearchDb } = await import(
+      "./sync"
+    );
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const eligibleUnit = {
+      type: "SHELF",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
+      catalogEntryKind: null,
+    };
+    setSearchDb(
+      createDb([
+        [eligibleUnit],
+        [{ unitId: "book-a" }, { unitId: "book-b" }],
+        [eligibleUnit],
+      ]) as never,
+    );
+
+    await patchContentContainedUnitIds(
+      { patchContent, deleteContent } as any,
+      "shelf-1",
+    );
+
+    expect(patchContent).toHaveBeenCalledWith([
+      { id: "shelf-1", containedUnitIds: ["book-a", "book-b"] },
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
 });

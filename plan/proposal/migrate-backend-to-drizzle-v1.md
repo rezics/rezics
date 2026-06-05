@@ -442,6 +442,9 @@ databases may be reset and reseeded.
   - Applied progress: moved content patch eligibility and realm id patching to
     Drizzle reads against server `Unit`, `UnitRealm`, and `Realm`, preserving
     public/indexable Unit checks and private realm exclusion.
+  - Applied progress: moved content alias, translation/language, and contained
+    shelf-unit patching to Drizzle reads against server `UnitAlias`,
+    `UnitTranslation`, `UnitSupportLanguage`, and `ShelfUnit`.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
