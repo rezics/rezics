@@ -15,6 +15,9 @@ import {
   readCoverUrlFromExtra,
   type Language,
 } from "@rezics/contract";
+import type { ServerDb } from "@rezics/server/db";
+import { Unit, User } from "@rezics/server/db/schema";
+import { asc, eq, gt } from "drizzle-orm";
 import type { SearchClient } from "./client";
 import {
   buildUserUnitCollectionDocument,
@@ -28,11 +31,17 @@ import {
 } from "./progress";
 
 type SearchDatabaseClient = any;
+type SearchServerDb = Pick<ServerDb, "select">;
 
 let searchPrismaClient: SearchDatabaseClient | null = null;
+let searchServerDb: SearchServerDb | null = null;
 
 export function setSearchPrismaClient(prisma: SearchDatabaseClient): void {
   searchPrismaClient = prisma;
+}
+
+export function setSearchDb(db: SearchServerDb): void {
+  searchServerDb = db;
 }
 
 function getSearchPrismaClient(): SearchDatabaseClient {
@@ -42,6 +51,15 @@ function getSearchPrismaClient(): SearchDatabaseClient {
     );
   }
   return searchPrismaClient;
+}
+
+function getSearchDb(): SearchServerDb {
+  if (!searchServerDb) {
+    throw new Error(
+      "Search Drizzle db is not configured. Call setSearchDb() before running Drizzle-backed search sync.",
+    );
+  }
+  return searchServerDb;
 }
 
 function isNonEmptyString(value: string | null): value is string {
@@ -1549,40 +1567,93 @@ export async function patchRealmAliases(client: SearchClient, unitId: string) {
 
 // ANCHOR: User and feedback partial sync functions
 
+type UserSyncRow = {
+  unitId: string;
+  email: string | null;
+  name: string | null;
+  avatar: string | null;
+  bio: string | null;
+  description: unknown;
+  followersCount: number;
+  followingsCount: number;
+  joinDate: Date | string | null;
+  permission: unknown;
+  slug: string | null;
+};
+
+const userSyncSelect = {
+  unitId: User.unitId,
+  email: User.email,
+  name: User.name,
+  avatar: User.avatar,
+  bio: User.bio,
+  description: User.description,
+  followersCount: User.followersCount,
+  followingsCount: User.followingsCount,
+  joinDate: User.joinDate,
+  permission: User.permission,
+  slug: Unit.slug,
+} as const;
+
+function buildUserSearchDocument(row: UserSyncRow): UserSearchDocument {
+  return {
+    id: row.unitId,
+    unitId: row.unitId,
+    name: row.name,
+    email: row.email,
+    slug: row.slug ?? null,
+    avatar: row.avatar,
+    bio: row.bio,
+    description: row.description,
+    descriptionText: mainMarkdownSource(row.description),
+    followersCount: row.followersCount,
+    followingsCount: row.followingsCount,
+    joinDate:
+      row.joinDate instanceof Date
+        ? row.joinDate.toISOString()
+        : (row.joinDate ?? null),
+    permission: (row.permission ?? null) as any,
+  };
+}
+
+async function findUserSyncRow(unitId: string): Promise<UserSyncRow | null> {
+  const [row] = await getSearchDb()
+    .select(userSyncSelect)
+    .from(User)
+    .leftJoin(Unit, eq(Unit.id, User.unitId))
+    .where(eq(User.unitId, unitId))
+    .limit(1);
+  return (row as UserSyncRow | undefined) ?? null;
+}
+
+async function listUserSyncRows(input: {
+  limit: number;
+  cursor?: string;
+}): Promise<UserSyncRow[]> {
+  const db = getSearchDb();
+  const query = db
+    .select(userSyncSelect)
+    .from(User)
+    .leftJoin(Unit, eq(Unit.id, User.unitId));
+
+  const rows = input.cursor
+    ? await query
+        .where(gt(User.unitId, input.cursor))
+        .orderBy(asc(User.unitId))
+        .limit(input.limit)
+    : await query.orderBy(asc(User.unitId)).limit(input.limit);
+
+  return rows as UserSyncRow[];
+}
+
 export async function syncSingleUser(client: SearchClient, unitId: string) {
-  const user = await getSearchPrismaClient().user.findUnique({
-    where: { unitId },
-  });
+  const user = await findUserSyncRow(unitId);
   if (!user) {
     await client.deleteUsers([unitId]);
     return;
   }
 
-  const unit = await getSearchPrismaClient().unit.findUnique({
-    where: { id: unitId },
-    select: { slug: true },
-  });
-
-  await client.addOrUpdateUsers([
-    {
-      id: user.unitId,
-      unitId: user.unitId,
-      name: user.name,
-      email: user.email,
-      slug: unit?.slug ?? null,
-      avatar: user.avatar,
-      bio: user.bio,
-      description: user.description,
-      descriptionText: mainMarkdownSource(user.description),
-      followersCount: user.followersCount,
-      followingsCount: user.followingsCount,
-      joinDate:
-        user.joinDate instanceof Date
-          ? user.joinDate.toISOString()
-          : (user.joinDate ?? null),
-      permission: (user.permission ?? null) as any,
-    },
-  ]);
+  await client.addOrUpdateUsers([buildUserSearchDocument(user)]);
 }
 
 export async function patchUserFields(
@@ -2725,40 +2796,11 @@ export async function syncAllUsers(client: SearchClient) {
   while (true) {
     console.log("syncAllUsers: cursor", cursor, "total", total);
 
-    const users: any[] = await getSearchPrismaClient().user.findMany({
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-      orderBy: { unitId: "asc" },
-    });
+    const users = await listUserSyncRows({ limit: BATCH_SIZE, cursor });
 
     if (users.length === 0) break;
 
-    // Slug now lives on the USER Unit. Batch-fetch.
-    const unitSlugs: any[] = await getSearchPrismaClient().unit.findMany({
-      where: { id: { in: users.map((u: any) => u.unitId) } },
-      select: { id: true, slug: true },
-    });
-    const slugById = new Map(unitSlugs.map((u: any) => [u.id, u.slug ?? null]));
-
-    const formatted: UserSearchDocument[] = users.map((u) => ({
-      id: u.unitId,
-      unitId: u.unitId,
-      name: u.name,
-      email: u.email,
-      slug: slugById.get(u.unitId) ?? null,
-      avatar: u.avatar,
-      bio: u.bio,
-      description: u.description,
-      descriptionText: mainMarkdownSource(u.description),
-      followersCount: u.followersCount,
-      followingsCount: u.followingsCount,
-      joinDate:
-        u.joinDate instanceof Date
-          ? u.joinDate.toISOString()
-          : (u.joinDate ?? null),
-      permission: (u.permission ?? null) as any,
-    }));
+    const formatted: UserSearchDocument[] = users.map(buildUserSearchDocument);
 
     const addResult = await client.addOrUpdateUsers(formatted);
     console.log("syncAllUsers: added batch", addResult);
@@ -2775,40 +2817,13 @@ export async function syncUserSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const users: any[] = await getSearchPrismaClient().user.findMany({
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
-    orderBy: { unitId: "asc" },
+  const users = await listUserSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(users, limit, "unitId");
   if (current.length > 0) {
-    const unitSlugs: any[] = await getSearchPrismaClient().unit.findMany({
-      where: { id: { in: current.map((u: any) => u.unitId) } },
-      select: { id: true, slug: true },
-    });
-    const slugById = new Map(unitSlugs.map((u: any) => [u.id, u.slug ?? null]));
-
-    await client.addOrUpdateUsers(
-      current.map((u) => ({
-        id: u.unitId,
-        unitId: u.unitId,
-        name: u.name,
-        email: u.email,
-        slug: slugById.get(u.unitId) ?? null,
-        avatar: u.avatar,
-        bio: u.bio,
-        description: u.description,
-        descriptionText: mainMarkdownSource(u.description),
-        followersCount: u.followersCount,
-        followingsCount: u.followingsCount,
-        joinDate:
-          u.joinDate instanceof Date
-            ? u.joinDate.toISOString()
-            : (u.joinDate ?? null),
-        permission: (u.permission ?? null) as any,
-      })),
-    );
+    await client.addOrUpdateUsers(current.map(buildUserSearchDocument));
   }
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }

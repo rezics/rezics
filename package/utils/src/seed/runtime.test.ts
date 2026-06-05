@@ -1,6 +1,35 @@
 import { describe, expect, test } from "bun:test";
 import { createSeedRuntime } from "./runtime";
 
+function createUserSyncDb() {
+  return {
+    select: () => ({
+      from: () => ({
+        leftJoin: () => ({
+          where: () => ({
+            limit: async () => [
+              {
+                unitId: "user-1",
+                email: "seed@example.com",
+                name: "Seed User",
+                avatar: null,
+                bio: null,
+                description: null,
+                descriptionText: null,
+                followersCount: 0,
+                followingsCount: 0,
+                joinDate: null,
+                permission: "USER",
+                slug: "seed-user",
+              },
+            ],
+          }),
+        }),
+      }),
+    }),
+  };
+}
+
 describe("createSeedRuntime", () => {
   test("stores special targets separately from sync state", async () => {
     const runtime = createSeedRuntime({
@@ -46,6 +75,21 @@ describe("createSeedRuntime", () => {
     ).toThrow(/SearchClient/);
   });
 
+  test("requires a Drizzle server db when active sync is enabled", () => {
+    expect(() =>
+      createSeedRuntime({
+        config: {
+          meiliMode: "init-and-sync",
+          manifestFormat: "human",
+          scenarioNames: [],
+        },
+        authPrisma: { disconnect: async () => {} } as never,
+        serverPrisma: { $disconnect: async () => {} } as never,
+        searchClient: {} as never,
+      }),
+    ).toThrow(/Drizzle server db/);
+  });
+
   test("runs targeted factory sync without job-runner env", async () => {
     const previousJobRunnerBaseUrl = Bun.env.JOB_RUNNER_BASE_URL;
     const previousJobDatabaseUrl = Bun.env.JOB_DATABASE_URL;
@@ -65,27 +109,8 @@ describe("createSeedRuntime", () => {
         authPrisma: { disconnect: async () => {} } as never,
         serverPrisma: {
           $disconnect: async () => {},
-          user: {
-            findUnique: async () => ({
-              unitId: "user-1",
-              email: "seed@example.com",
-              name: "Seed User",
-              avatar: null,
-              bio: null,
-              description: null,
-              followersCount: 0,
-              followingsCount: 0,
-              joinDate: null,
-              permission: "USER",
-            }),
-          },
-          unit: {
-            findUnique: async () => ({
-              slug: "seed-user",
-              type: "USER",
-            }),
-          },
         } as never,
+        serverDb: createUserSyncDb() as never,
         searchClient: {
           addOrUpdateUsers: async (documents: unknown[]) => {
             syncedUsers.push(...documents);
@@ -108,6 +133,7 @@ describe("createSeedRuntime", () => {
           avatar: null,
           bio: null,
           description: null,
+          descriptionText: null,
           followersCount: 0,
           followingsCount: 0,
           joinDate: null,

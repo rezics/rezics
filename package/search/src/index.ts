@@ -63,6 +63,7 @@ export {
   removeUserUnitCollection,
   type SearchSegmentOptions,
   type SearchSegmentResult,
+  setSearchDb,
   setSearchPrismaClient,
   syncAllComments,
   syncAllContainedUnitIds,

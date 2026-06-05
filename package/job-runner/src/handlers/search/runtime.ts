@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { SearchClient } from "@rezics/search/client";
-import { setSearchPrismaClient } from "@rezics/search/sync";
+import { setSearchDb, setSearchPrismaClient } from "@rezics/search/sync";
+import { createServerDb } from "@rezics/server/db/factory";
 import { PrismaClient } from "@rezics/server/prisma/generated/client";
 
 export interface SearchRuntime {
@@ -21,6 +22,8 @@ export function createSearchRuntime(options: {
     connectionTimeoutMillis: 2_000,
   });
   const prisma = new PrismaClient({ adapter });
+  const serverDb = createServerDb(options.serverDatabaseUrl);
+  setSearchDb(serverDb.db);
   setSearchPrismaClient(prisma);
 
   return {
@@ -29,6 +32,11 @@ export function createSearchRuntime(options: {
       apiKey: options.meiliMasterKey,
     }),
     prisma,
-    disconnect: () => prisma.$disconnect(),
+    disconnect: async () => {
+      await Promise.all([
+        prisma.$disconnect().catch(() => {}),
+        serverDb.disconnect().catch(() => {}),
+      ]);
+    },
   };
 }

@@ -1,12 +1,15 @@
 import type { SearchClient } from "@rezics/search/client";
 import {
   patchContentContainedUnitIds,
+  setSearchDb,
   setSearchPrismaClient,
   syncSingleContent,
   syncSingleEntity,
   syncSinglePost,
   syncSingleRealm,
+  syncSingleUser,
 } from "@rezics/search/sync";
+import type { ServerDb } from "@rezics/server/db";
 import type {
   FactoryScenarioName,
   SeedSyncHooks,
@@ -77,61 +80,14 @@ function createNoopSyncHooks(): SeedSyncHooks {
   };
 }
 
-async function syncUser(
-  prisma: ServerPrismaClient,
-  client: SearchClient,
-  unitId: string,
-): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { unitId },
-    select: {
-      unitId: true,
-      email: true,
-      name: true,
-      avatar: true,
-      bio: true,
-      description: true,
-      followersCount: true,
-      followingsCount: true,
-      joinDate: true,
-      permission: true,
-    },
-  });
-  if (!user) return;
-
-  const unit = await prisma.unit.findUnique({
-    where: { id: unitId },
-    select: { slug: true, type: true },
-  });
-  if (unit?.type !== "USER") return;
-
-  await client.addOrUpdateUsers([
-    {
-      id: user.unitId,
-      unitId: user.unitId,
-      email: user.email,
-      name: user.name,
-      avatar: user.avatar,
-      bio: user.bio,
-      description: user.description,
-      followersCount: user.followersCount,
-      followingsCount: user.followingsCount,
-      joinDate:
-        user.joinDate instanceof Date
-          ? user.joinDate.toISOString()
-          : (user.joinDate ?? null),
-      permission: user.permission,
-      slug: unit.slug ?? null,
-    },
-  ]);
-}
-
 function createActiveSyncHooks(input: {
   prisma: ServerPrismaClient;
+  db: Pick<ServerDb, "select">;
   searchClient: SearchClient;
   summary: SeedSyncSummary;
 }): SeedSyncHooks {
   const { prisma, searchClient, summary } = input;
+  setSearchDb(input.db);
   setSearchPrismaClient(prisma);
 
   return {
@@ -148,7 +104,7 @@ function createActiveSyncHooks(input: {
       recordSync(summary, "realm");
     },
     async user(unitId) {
-      await syncUser(prisma, searchClient, unitId);
+      await syncSingleUser(searchClient, unitId);
       recordSync(summary, "user");
     },
     async entity(unitId) {
@@ -166,6 +122,7 @@ export function createSeedRuntime(input: {
   config: SeedRunConfig;
   authPrisma: AuthPrismaClient;
   serverPrisma: ServerPrismaClient;
+  serverDb?: Pick<ServerDb, "select">;
   searchClient?: SearchClient;
 }): SeedRuntime {
   if (input.config.meiliMode === "init-and-sync" && !input.searchClient) {
@@ -180,6 +137,7 @@ export function createSeedRuntime(input: {
     input.config.meiliMode === "init-and-sync" && input.searchClient
       ? createActiveSyncHooks({
           prisma: input.serverPrisma,
+          db: input.serverDb ?? missingServerDbForSearchSync(),
           searchClient: input.searchClient,
           summary: state.syncSummary,
         })
@@ -208,4 +166,10 @@ export function createSeedRuntime(input: {
       ]);
     },
   };
+}
+
+function missingServerDbForSearchSync(): never {
+  throw new Error(
+    "Seed runtime requires a Drizzle server db for init-and-sync.",
+  );
 }

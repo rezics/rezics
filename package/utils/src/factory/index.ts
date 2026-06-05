@@ -308,6 +308,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
     },
     authPrisma,
     serverPrisma: prisma,
+    serverDb: serverDb.db,
     searchClient,
   });
   try {

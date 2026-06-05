@@ -414,11 +414,19 @@ databases may be reset and reseeded.
 - [ ] 6.1 Convert `package/search` from `setSearchPrismaClient` to an explicit
   Drizzle-backed main DB dependency. Update sync functions, row mappers, raw
   path queries, and tests.
+  - Applied progress: added an explicit `setSearchDb(db)` dependency and moved
+    user search sync (`syncSingleUser`, `syncAllUsers`, `syncUserSegment`) to
+    Drizzle reads against server `User` + `Unit.slug`; the remaining content,
+    post, realm, entity, feedback, poll, collection/progress, and raw path sync
+    paths still use the legacy Prisma client injection.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
   maintenance from Prisma clients to Drizzle db clients. Keep pg-boss DB ensure
   separate.
+  - Applied progress: search runtime now creates and injects a server Drizzle db
+    for the migrated user search sync path while temporarily retaining the
+    server Prisma client for the remaining search sync paths.
 - [x] 6.4 Move `package/server/prisma/seed` to a Drizzle-appropriate path such as
   `package/server/src/db/seed` or `package/server/db/seed`, then update package
   exports and seed CLI imports.
