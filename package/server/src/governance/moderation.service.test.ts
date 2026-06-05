@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
-import {
   Comment,
   Feedback,
   ModerationAction,
@@ -13,8 +9,6 @@ import {
   UnitCollaborator,
   UnitRealm,
 } from "../db/schema";
-
-installPrismaClientMock();
 
 const now = new Date("2026-05-28T00:00:00.000Z");
 
@@ -330,40 +324,7 @@ const fakeDrizzleDb = {
   transaction: transactionMock,
 };
 
-Object.assign(prismaMock, {
-  $transaction: transactionMock,
-  moderationCase: {
-    findMany: moderationCaseFindMany,
-    findFirst: moderationCaseFindFirst,
-    findUniqueOrThrow: moderationCaseFindUniqueOrThrow,
-  },
-  moderationAction: {
-    findMany: moderationActionFindMany,
-  },
-  unit: {
-    findMany: unitFindMany,
-    findUnique: unitFindUnique,
-    update: unitUpdate,
-  },
-  unitRealm: {
-    findMany: unitRealmFindMany,
-    update: unitRealmUpdate,
-  },
-  post: {
-    update: postUpdate,
-  },
-  comment: {
-    findMany: commentFindMany,
-    findUniqueOrThrow: commentFindUniqueOrThrow,
-    update: commentUpdate,
-  },
-  feedback: {
-    findUniqueOrThrow: feedbackFindUniqueOrThrow,
-  },
-});
-
 function installServiceTestModuleMocks() {
-  installPrismaClientMock();
   mock.module("@/job/job-boundary", () => ({
     serverJobProducer: {
       enqueue: enqueueMock,

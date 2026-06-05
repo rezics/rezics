@@ -394,6 +394,9 @@ databases may be reset and reseeded.
   - Applied progress: comment moderation write tests now mock the Drizzle
     transaction/select/update surface directly instead of installing the legacy
     Prisma client mock.
+  - Applied progress: governance moderation service ledger tests no longer
+    install or populate the shared legacy Prisma client mock; they now rely only
+    on their existing fake Drizzle db and focused service boundary mocks.
   - Applied progress: auth public boundary tests now mock the Drizzle db client
     and governance permission projection directly instead of installing the
     legacy Prisma client mock; stale admin slug endpoint coverage was removed
