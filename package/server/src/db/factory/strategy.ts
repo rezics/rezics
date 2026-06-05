@@ -24,7 +24,7 @@ export type SlugScopesMap = Record<SlugScopeName, string>;
 
 export interface SeedCtx {
   prisma: PrismaClient;
-  authPrisma: AuthDbClient;
+  authDb: AuthDbClient;
   slugScopes: SlugScopesMap;
   sync: SeedSyncHooks;
   draw(spec: CountSpec): number;
@@ -75,7 +75,7 @@ function randInt(min: number, max: number): number {
 
 export function makeSeedCtx(
   prisma: PrismaClient,
-  authPrisma: AuthDbClient,
+  authDb: AuthDbClient,
   slugScopes: SlugScopesMap,
   mode: Mode,
   sync: SeedSyncHooks = createNoopSeedSyncHooks(),
@@ -83,7 +83,7 @@ export function makeSeedCtx(
   const provider = makeCountProvider(mode);
   return {
     prisma,
-    authPrisma,
+    authDb,
     slugScopes,
     sync,
     draw: (spec) => provider.draw(spec),

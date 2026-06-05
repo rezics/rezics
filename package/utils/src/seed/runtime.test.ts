@@ -38,7 +38,7 @@ describe("createSeedRuntime", () => {
         manifestFormat: "human",
         scenarioNames: [],
       },
-      authPrisma: { disconnect: async () => {} } as never,
+      authDb: { disconnect: async () => {} } as never,
       serverPrisma: { $disconnect: async () => {} } as never,
     });
 
@@ -69,7 +69,7 @@ describe("createSeedRuntime", () => {
           manifestFormat: "human",
           scenarioNames: [],
         },
-        authPrisma: { disconnect: async () => {} } as never,
+        authDb: { disconnect: async () => {} } as never,
         serverPrisma: { $disconnect: async () => {} } as never,
       }),
     ).toThrow(/SearchClient/);
@@ -83,7 +83,7 @@ describe("createSeedRuntime", () => {
           manifestFormat: "human",
           scenarioNames: [],
         },
-        authPrisma: { disconnect: async () => {} } as never,
+        authDb: { disconnect: async () => {} } as never,
         serverPrisma: { $disconnect: async () => {} } as never,
         searchClient: {} as never,
       }),
@@ -106,7 +106,7 @@ describe("createSeedRuntime", () => {
           manifestFormat: "human",
           scenarioNames: [],
         },
-        authPrisma: { disconnect: async () => {} } as never,
+        authDb: { disconnect: async () => {} } as never,
         serverPrisma: {
           $disconnect: async () => {},
         } as never,

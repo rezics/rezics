@@ -11,7 +11,7 @@ import {
   createDrizzleSystemShelfClient,
 } from "@rezics/server/shelf/system-shelves";
 import { and, eq, sql } from "drizzle-orm";
-import type { AuthPrismaClient } from "../lib/prisma-factory";
+import type { AuthDbClient } from "../lib/db-factory";
 import type { ServerSeedDb } from "./infra";
 
 export const ROOT_EMAIL = "root@rezics.com";
@@ -350,7 +350,7 @@ function resolveSeedUserSlug(input: CrossSeedUserInput): string {
 export type AuthSeedResults = Map<string, SeedAuthUserResult>;
 
 export async function seedAllAuthUsers(
-  authPrisma: AuthPrismaClient,
+  authDb: AuthDbClient,
 ): Promise<AuthSeedResults> {
   const results: AuthSeedResults = new Map();
   for (const input of SEED_USERS) {
@@ -361,7 +361,7 @@ export async function seedAllAuthUsers(
         role: input.role,
         password: input.password,
       },
-      authPrisma.db,
+      authDb.db,
     );
     results.set(input.email, authResult);
   }
@@ -380,7 +380,7 @@ export interface ResetRootUserResult {
 }
 
 export async function resetRootUser(
-  authPrisma: AuthPrismaClient,
+  authDb: AuthDbClient,
   serverDb: ServerUserSeedDb,
   slugScopes: SlugScopesMap,
 ): Promise<ResetRootUserResult> {
@@ -394,7 +394,7 @@ export async function resetRootUser(
       role: rootInput.role,
       password: rootInput.password,
     },
-    authPrisma.db,
+    authDb.db,
   );
 
   const userScope = slugScopes.user;

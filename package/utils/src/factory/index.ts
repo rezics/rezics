@@ -15,7 +15,8 @@ import {
 } from "@rezics/server/db/seed-factory";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
-import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
+import { createAuthDbClient } from "../lib/db-factory";
+import { createServerPrisma } from "../lib/prisma-factory";
 import { createSeedSearchClient } from "../lib/search";
 import { printSeedCredentials, seedBaseline } from "../seed/index";
 import {
@@ -295,7 +296,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   const { createServerDb } = await import("@rezics/server/db/factory");
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
-  const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
+  const authDb = createAuthDbClient(env.AUTH_DATABASE_URL);
   const searchClient = createSeedSearchClient({
     host: env.MEILI_HOST,
     apiKey: env.MEILI_MASTER_KEY,
@@ -306,7 +307,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       manifestFormat: resolveManifestFormat(opts.manifestFormat),
       scenarioNames,
     },
-    authPrisma,
+    authDb,
     serverPrisma: prisma,
     serverDb: serverDb.db,
     searchClient,
@@ -316,12 +317,12 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       const { initMeiliSearch } = await import("@rezics/server/db/seed");
       await initMeiliSearch(searchClient, { clean: true });
     }
-    const { credentials, slugScopes } = await seedBaseline(authPrisma, {
+    const { credentials, slugScopes } = await seedBaseline(authDb, {
       serverSeedDb: serverDb.db,
     });
     const ctx = makeSeedCtx(
       prisma,
-      authPrisma,
+      authDb,
       slugScopes as never,
       preset.mode,
       runtime.sync,

@@ -53,7 +53,7 @@ interface FactoryUserPlan {
 }
 
 async function deleteExistingFactoryAuthUsers(ctx: SeedCtx): Promise<void> {
-  const authUsers = await ctx.authPrisma.db
+  const authUsers = await ctx.authDb.db
     .select({ id: users.id })
     .from(users)
     .where(like(users.email, `%${FACTORY_AUTH_EMAIL_DOMAIN}`));
@@ -61,7 +61,7 @@ async function deleteExistingFactoryAuthUsers(ctx: SeedCtx): Promise<void> {
   if (authUsers.length === 0) return;
 
   const userIds = authUsers.map((user) => user.id);
-  await ctx.authPrisma.db.transaction(async (tx) => {
+  await ctx.authDb.db.transaction(async (tx) => {
     await tx.delete(sessions).where(inArray(sessions.userId, userIds));
     await tx.delete(accounts).where(inArray(accounts.userId, userIds));
     await tx
@@ -128,7 +128,7 @@ export async function seedUsers(
           name: plan.name,
           role: plan.permission?.role[0]?.toLowerCase() ?? "user",
         },
-        ctx.authPrisma.db,
+        ctx.authDb.db,
       );
 
       await ctx.prisma.unit.upsert({

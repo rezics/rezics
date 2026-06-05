@@ -525,6 +525,9 @@ databases may be reset and reseeded.
     rating tags. `seedInfra()` and `seedBaseline()` no longer accept or create a
     server Prisma client; search sync uses Drizzle db injection, while full
     factory scenarios still use the legacy Prisma-shaped runtime path.
+  - Applied progress: auth seed/reset/factory orchestration now uses the
+    Drizzle-named `createAuthDbClient()`/`AuthDbClient` helper; the remaining
+    `prisma-factory.ts` helper is isolated to the legacy server factory client.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

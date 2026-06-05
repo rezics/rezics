@@ -1,8 +1,8 @@
 import * as p from "@clack/prompts";
 import { resetAuthDatabase } from "@rezics/auth/seed";
 import { resetDatabase } from "@rezics/server/db/seed/database";
+import { type AuthDbClient, createAuthDbClient } from "../lib/db-factory";
 import { getEnv } from "../lib/env";
-import { type AuthPrismaClient, createAuthPrisma } from "../lib/prisma-factory";
 import { type ServerSeedDb, seedInfra, seedSlugScopes } from "./infra";
 import {
   type CrossSeedUserResult,
@@ -53,7 +53,7 @@ export function printSeedCredentials(
 }
 
 export async function seedBaseline(
-  authPrisma: AuthPrismaClient,
+  authDb: AuthDbClient,
   opts: RunSeedOptions = {},
 ): Promise<SeedBaselineResult> {
   const resetDatabases = opts.resetDatabases ?? false;
@@ -69,7 +69,7 @@ export async function seedBaseline(
     const s = p.spinner();
     s.start("Resetting auth and server databases...");
     await resetDatabase(opts.serverResetDb);
-    await resetAuthDatabase(authPrisma.db);
+    await resetAuthDatabase(authDb.db);
     s.stop("Databases reset.");
   }
 
@@ -81,7 +81,7 @@ export async function seedBaseline(
   const userSpinner = p.spinner();
   userSpinner.start("Seeding users...");
 
-  const authResults = await seedAllAuthUsers(authPrisma);
+  const authResults = await seedAllAuthUsers(authDb);
   const { rootUserId, results } = await seedAllMainUsers(
     opts.serverSeedDb,
     authResults,
@@ -104,11 +104,11 @@ export async function seedBaseline(
 export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
   const env = getEnv();
   const { createServerDb } = await import("@rezics/server/db/factory");
-  const authPrisma: AuthPrismaClient = createAuthPrisma(env.AUTH_DATABASE_URL);
+  const authDb: AuthDbClient = createAuthDbClient(env.AUTH_DATABASE_URL);
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
 
   try {
-    const { credentials } = await seedBaseline(authPrisma, {
+    const { credentials } = await seedBaseline(authDb, {
       ...opts,
       serverSeedDb: serverDb.db,
       ...(opts.resetDatabases ? { serverResetDb: serverDb.db } : {}),
@@ -116,7 +116,7 @@ export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
     printSeedCredentials(credentials);
   } finally {
     await Promise.all([
-      authPrisma.disconnect().catch(() => {}),
+      authDb.disconnect().catch(() => {}),
       serverDb.disconnect().catch(() => {}),
     ]);
   }
@@ -125,7 +125,7 @@ export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
 export async function runResetRoot(): Promise<void> {
   const env = getEnv();
   const { createServerDb } = await import("@rezics/server/db/factory");
-  const authPrisma: AuthPrismaClient = createAuthPrisma(env.AUTH_DATABASE_URL);
+  const authDb: AuthDbClient = createAuthDbClient(env.AUTH_DATABASE_URL);
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
 
   try {
@@ -137,7 +137,7 @@ export async function runResetRoot(): Promise<void> {
     const rootSpinner = p.spinner();
     rootSpinner.start("Resetting root user...");
     const { result, serverRole } = await resetRootUser(
-      authPrisma,
+      authDb,
       serverDb.db,
       slugScopes,
     );
@@ -146,7 +146,7 @@ export async function runResetRoot(): Promise<void> {
     printSeedCredentials([{ result, serverRole }], { singular: true });
   } finally {
     await Promise.all([
-      authPrisma.disconnect().catch(() => {}),
+      authDb.disconnect().catch(() => {}),
       serverDb.disconnect().catch(() => {}),
     ]);
   }

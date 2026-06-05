@@ -1,5 +1,5 @@
 import { getEnv } from "../lib/env";
-import { createAuthPrisma } from "../lib/prisma-factory";
+import { createAuthDbClient } from "../lib/db-factory";
 import { createSeedSearchClient } from "../lib/search";
 
 export async function runDbReset(): Promise<void> {
@@ -8,16 +8,16 @@ export async function runDbReset(): Promise<void> {
   const { resetAuthDatabase } = await import("@rezics/auth/seed");
   const env = getEnv();
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
-  const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
+  const authDb = createAuthDbClient(env.AUTH_DATABASE_URL);
 
   try {
     console.log("[Reset] Full wipe mode");
     await resetDatabase(serverDb.db);
-    await resetAuthDatabase(authPrisma.db);
+    await resetAuthDatabase(authDb.db);
   } finally {
     await Promise.all([
       serverDb.disconnect().catch(() => {}),
-      authPrisma.disconnect().catch(() => {}),
+      authDb.disconnect().catch(() => {}),
     ]);
   }
 }
