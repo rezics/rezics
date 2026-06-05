@@ -27,6 +27,8 @@ mock.module("@/middleware", () => ({
   }),
   isAdminRole: mock(() => false),
   tryResolveIdentity: mock(async () => null),
+  verifyAdminFromDb: mock(async () => false),
+  verifyRootFromDb: mock(async () => false),
 }));
 
 mock.module("@/governance", () => ({
@@ -44,11 +46,47 @@ mock.module("@/governance", () => ({
 }));
 
 mock.module("./tag.mapper", () => ({
+  mapTagUnitToDTO: mock((row: unknown) => row),
   mapUnitTagToDTO: mock((row: unknown) => row),
 }));
 
 mock.module("./tag.service", () => ({
   VISIBILITY_THRESHOLD: -100,
+  TagService: class {
+    constructor(private readonly repository?: any) {}
+    async castVote(...args: Parameters<typeof castVoteMock>) {
+      if (this.repository?.castVote) {
+        await this.repository.castVote(...args);
+      } else {
+        await castVoteMock(...args);
+      }
+      const { serverJobProducer } = await import("@/job/job-boundary");
+      await serverJobProducer.enqueue({
+        kind: "search.content.patchTags",
+        payload: { unitId: args[1] },
+        source: { type: "server", service: "tag" },
+      });
+      return undefined;
+    }
+    async createUnitTag(...args: Parameters<typeof createUnitTagMock>) {
+      return this.repository?.createUnitTag
+        ? this.repository.createUnitTag(...args)
+        : createUnitTagMock(...args);
+    }
+    async getTagsForUnit(
+      unitId: string,
+      opts?: { includeBelowThreshold?: boolean },
+    ) {
+      return this.repository?.getTagsForUnit
+        ? this.repository.getTagsForUnit(unitId, opts)
+        : [];
+    }
+    async listLowScoreUnitTags(threshold: number, limit: number) {
+      return this.repository?.listLowScoreUnitTags
+        ? this.repository.listLowScoreUnitTags(threshold, limit)
+        : [];
+    }
+  },
   tagService: {
     castVote: castVoteMock,
     createUnitTag: createUnitTagMock,
