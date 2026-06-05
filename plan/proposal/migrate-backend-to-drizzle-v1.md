@@ -713,6 +713,10 @@ databases may be reset and reseeded.
 - [ ] 8.4 Run database reset/migrate from a fresh managed Postgres volume:
   `bun run service up`, `bun run db:reset` or equivalent, then `bun run seed`
   and `bun run seed:factory:fast`.
+  - Blocked on 2026-06-05 in this agent environment: `bun run service up`
+    fails before containers start because Docker cannot access
+    `/var/run/docker.sock` (`permission denied while trying to connect to the
+    docker API`). The destructive reset/seed/factory flow was not run.
 - [ ] 8.5 Run package tests most likely to catch query regressions:
   `server`, `auth`, `notify`, `reaction`, `history`, `ranking`, `search`,
   `job-runner`, and `utils`.
@@ -742,6 +746,8 @@ databases may be reset and reseeded.
 - [ ] 8.8 Smoke-run backend dev processes that touch the databases:
   `server`, `auth`, `notify`, `reaction`, `history`, `ranking`, and
   `job-runner` in the roles used by local development.
+  - Blocked on 2026-06-05 by the same Docker socket permission failure that
+    prevents starting repo-managed Postgres/Meilisearch/Sequin services.
 
 ## Out of scope
 
