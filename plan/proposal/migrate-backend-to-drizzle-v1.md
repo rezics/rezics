@@ -571,6 +571,9 @@ databases may be reset and reseeded.
   - Applied progress: factory user server rows now upsert `Unit`, insert `User`,
     and bootstrap system shelves through Drizzle; the factory-local
     `system-shelves` copy no longer depends on Prisma.
+  - Applied progress: factory SourceSite fixtures now use Drizzle for source
+    site lookup/creation, publisher credit conflict insert, external ref upsert,
+    and attribution evidence insert.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
