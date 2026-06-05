@@ -716,7 +716,9 @@ databases may be reset and reseeded.
   - Blocked on 2026-06-05 in this agent environment: `bun run service up`
     fails before containers start because Docker cannot access
     `/var/run/docker.sock` (`permission denied while trying to connect to the
-    docker API`). The destructive reset/seed/factory flow was not run.
+    docker API`). Reconfirmed with sandbox-external `bun run service up` and
+    `docker ps`, which still cannot connect to the Docker API. The destructive
+    reset/seed/factory flow was not run.
 - [x] 8.5 Run package tests most likely to catch query regressions:
   `server`, `auth`, `notify`, `reaction`, `history`, `ranking`, `search`,
   `job-runner`, and `utils`.
@@ -746,7 +748,8 @@ databases may be reset and reseeded.
   `server`, `auth`, `notify`, `reaction`, `history`, `ranking`, and
   `job-runner` in the roles used by local development.
   - Blocked on 2026-06-05 by the same Docker socket permission failure that
-    prevents starting repo-managed Postgres/Meilisearch/Sequin services.
+    prevents starting repo-managed Postgres/Meilisearch/Sequin services; the
+    failure persists even when retried outside the sandbox.
 
 ## Out of scope
 
