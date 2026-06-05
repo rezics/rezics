@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import {
   Realm,
   RealmTagApplication as RealmTagApplicationTable,
@@ -332,35 +331,6 @@ const fakeDrizzleDb = {
 };
 const transactionMock = fakeDrizzleDb.transaction;
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  $transaction: transactionMock,
-  unit: { findUnique: unitFindUniqueMock },
-  unitRealm: {
-    create: realmUnitCreateMock,
-    delete: realmUnitDeleteMock,
-    findMany: realmUnitFindManyMock,
-  },
-  realmTagApplication: {
-    findMany: findManyMock,
-    upsert: realmTagApplicationUpsertMock,
-    update: realmTagApplicationUpdateMock,
-    delete: realmTagApplicationDeleteMock,
-  },
-  realmTagApplicationVote: {
-    findUnique: realmTagApplicationVoteFindUniqueMock,
-    create: realmTagApplicationVoteCreateMock,
-    deleteMany: realmTagApplicationVoteDeleteManyMock,
-    aggregate: realmTagApplicationVoteAggregateMock,
-  },
-  tagVote: {
-    findUnique: tagVoteFindUniqueMock,
-    create: tagVoteCreateMock,
-    aggregate: tagVoteAggregateMock,
-  },
-  unitTag: { upsert: unitTagUpsertMock, update: unitTagUpdateMock },
-});
-
 mock.module("@/meili/content/sync", () => ({
   deleteContentFromMeili: async () => undefined,
   patchContentCreditsToMeili: async () => undefined,
@@ -384,6 +354,66 @@ mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: enqueueMock,
   },
+}));
+mock.module("@/content-doc/prisma-json", () => ({
+  nullableContentDocJson: (value: unknown) => value ?? null,
+}));
+mock.module("@/governance/action/realm", () => ({
+  realmPolicyActions: new Proxy({}, { get: (_target, key) => key }),
+}));
+mock.module("@/governance/audit.service", () => ({
+  governanceAuditService: {
+    appendPrivilegedMutation: mock(async () => ({ id: "audit-1" })),
+  },
+}));
+mock.module("@/governance/capability.service", () => ({
+  governanceCapabilityService: {
+    realmMembershipForPolicy: mock(async () => null),
+    resolveHintsForIdentity: mock(async () => []),
+  },
+}));
+mock.module("@/governance/moderation-action.service", () => ({
+  moderationActionService: {
+    appendModerationAction: mock(async () => ({ id: "action-1" })),
+  },
+}));
+mock.module("@/notify-boundary/notify-boundary.client", () => ({
+  broadcast: mock(async () => ({ ok: true })),
+}));
+mock.module("@/post/post.mapper", () => ({
+  mapPostToDTO: (row: unknown) => row,
+}));
+mock.module("@/post/post.service", () => ({
+  postService: {
+    getByUnitId: mock(async () => null),
+  },
+}));
+mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageCandidates: () => ["ja", "en"],
+}));
+mock.module("@/unit/mapper", () => ({
+  mapTranslationToDTO: (row: unknown) => row,
+}));
+mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: (user: unknown) => user ?? null,
+}));
+mock.module("@/utils/userSlugHydration", () => ({
+  hydrateUnitOwnerUserSlugRow: async (row: unknown) => row,
+  hydrateUnitOwnerUserSlugs: async (rows: unknown) => rows,
+  loadUserSlugMap: async () => new Map(),
+}));
+mock.module("@/infra/slug-scopes", () => ({
+  requireSlugScopeId: () => "realm-scope",
+}));
+mock.module("./realm-extra.service", () => ({
+  appendToList: mock(async () => ({ unitIds: [] })),
+  clearSingleExtraKey: mock(async () => undefined),
+  filterRealmExtraPublic: mock(async (extra: unknown) => extra),
+  readListAdmin: mock(async () => ({ unitIds: [], staleIds: [] })),
+  readListPublic: mock(async () => []),
+  removeFromList: mock(async () => ({ unitIds: [] })),
+  reorderList: mock(async (_caller, _realmId, _key, unitIds) => ({ unitIds })),
+  setSingleExtraKey: mock(async () => undefined),
 }));
 mock.module("../db/client", () => ({
   db: fakeDrizzleDb,
