@@ -544,6 +544,9 @@ databases may be reset and reseeded.
     `createMany`.
   - Applied progress: factory pinboard/announcement JSON updates now update
     `Realm.extra` through Drizzle instead of Prisma.
+  - Applied progress: factory person/organization/subject entity creation now
+    bulk-inserts `Unit`, `Entity`, translations, and support languages through
+    Drizzle; subject attribution flushing remains on the legacy Prisma path.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

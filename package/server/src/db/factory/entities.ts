@@ -12,6 +12,8 @@ import {
 } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "../../../prisma/generated/client.js";
 import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import type { ServerDb } from "../client.js";
+import { Entity, Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
 import { generateTranslations, getFaker } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
@@ -124,35 +126,37 @@ function buildEntityRow(kind: EntityKind, verifiedRate: number): EntitySeedRow {
 }
 
 async function batchInsertEntities(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "insert">,
   entityScope: string,
   rows: EntitySeedRow[],
   kind: EntityKind,
 ): Promise<void> {
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
-    await prisma.unit.createMany({
-      data: chunk.map((r) => ({
+    if (chunk.length === 0) continue;
+    await db.insert(Unit).values(
+      chunk.map((r) => ({
         id: r.id,
         type: UnitType.ENTITY,
         slugScope: entityScope,
         status: UnitStatus.PUBLISHED,
         defaultLanguage: r.primaryLang,
       })),
-    });
+    );
   }
 
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
-    await prisma.entity.createMany({
-      data: chunk.map((r) => ({
+    if (chunk.length === 0) continue;
+    await db.insert(Entity).values(
+      chunk.map((r) => ({
         unitId: r.id,
         kind,
         verified: r.verified,
         eligibleCreditRoles: eligibleCreditRolesForKind(kind),
         eligibleSubjectRoles: eligibleSubjectRolesForKind(kind),
       })),
-    });
+    );
   }
 
   const allTranslations = rows.flatMap((r) =>
@@ -164,9 +168,9 @@ async function batchInsertEntities(
     })),
   );
   for (let i = 0; i < allTranslations.length; i += BATCH_SIZE) {
-    await prisma.unitTranslation.createMany({
-      data: allTranslations.slice(i, i + BATCH_SIZE),
-    });
+    const chunk = allTranslations.slice(i, i + BATCH_SIZE);
+    if (chunk.length === 0) continue;
+    await db.insert(UnitTranslation).values(chunk);
   }
 
   const allSupport = rows.flatMap((r) =>
@@ -178,9 +182,9 @@ async function batchInsertEntities(
     })),
   );
   for (let i = 0; i < allSupport.length; i += BATCH_SIZE) {
-    await prisma.unitSupportLanguage.createMany({
-      data: allSupport.slice(i, i + BATCH_SIZE),
-    });
+    const chunk = allSupport.slice(i, i + BATCH_SIZE);
+    if (chunk.length === 0) continue;
+    await db.insert(UnitSupportLanguage).values(chunk);
   }
 }
 
@@ -194,7 +198,7 @@ export async function seedPeople(
   const rows = Array.from({ length: total }, () =>
     buildEntityRow("person", 0.05),
   );
-  await batchInsertEntities(ctx.prisma, ctx.slugScopes.entity, rows, "person");
+  await batchInsertEntities(ctx.db, ctx.slugScopes.entity, rows, "person");
 
   return rows.map((r) => ({
     unitId: r.id,
@@ -216,7 +220,7 @@ export async function seedOrganizations(
     buildEntityRow("organization", 0.1),
   );
   await batchInsertEntities(
-    ctx.prisma,
+    ctx.db,
     ctx.slugScopes.entity,
     rows,
     "organization",
@@ -247,7 +251,7 @@ export async function seedSubjectEntities(
     const kindRows = rows.filter((entry) => entry.kind === kind);
     if (kindRows.length === 0) continue;
     await batchInsertEntities(
-      ctx.prisma,
+      ctx.db,
       ctx.slugScopes.entity,
       kindRows.map((entry) => entry.row),
       kind,
