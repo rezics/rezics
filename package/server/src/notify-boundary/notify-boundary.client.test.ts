@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import type { NotificationPreference } from "@rezics/contract";
-import {
-  type BroadcastEvent,
-  filterRecipientsByPreference,
-  resolveRecipients,
-} from "./notify-boundary.client";
+import type { BroadcastEvent } from "./notify-boundary.client";
+
+const { filterRecipientsByPreference, resolveRecipients } = await import(
+  "./notify-boundary.client.ts?notify-client-test-actual"
+);
 
 /**
  * Unit tests for the recipient resolver. The storage-backed

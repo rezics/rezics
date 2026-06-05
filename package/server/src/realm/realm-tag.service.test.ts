@@ -379,6 +379,13 @@ mock.module("@/governance/moderation-action.service", () => ({
 }));
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
   broadcast: mock(async () => ({ ok: true })),
+  filterRecipientsByPreference: mock(async (recipients: unknown) => recipients),
+  notifySystemAndEmail: mock(async () => ({ ok: true })),
+  resolveRecipients: mock(
+    async (event: { directRecipients?: string[] }) =>
+      event.directRecipients ?? [],
+  ),
+  sendDm: mock(async () => ({ ok: true })),
 }));
 mock.module("@/post/post.mapper", () => ({
   mapPostToDTO: (row: unknown) => row,

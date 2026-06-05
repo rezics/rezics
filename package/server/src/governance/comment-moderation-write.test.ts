@@ -12,10 +12,28 @@ mock.module("@/job/job-boundary", () => ({
 
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
   broadcast: broadcastMock,
+  filterRecipientsByPreference: mock(async (recipients: unknown) => recipients),
+  notifySystemAndEmail: mock(async () => ({ ok: true })),
+  resolveRecipients: mock(
+    async (event: { directRecipients?: string[] }) =>
+      event.directRecipients ?? [],
+  ),
+  sendDm: mock(async () => ({ ok: true })),
 }));
 
 mock.module("../realm/realm.mapper", () => ({
-  mapUnitRealmToDTO: mock(() => ({})),
+  mapRealmListRowToDTO: mock((row: unknown) => row),
+  mapRealmMemberToDTO: mock((row: unknown) => row),
+  mapRealmTagApplicationToDTO: mock((row: unknown) => row),
+  mapRealmTagContextToDTO: mock((row: unknown) => row),
+  mapRealmToDTO: mock((row: unknown) => row),
+  mapUnitRealmToDTO: mock((row: any) => ({
+    ...row,
+    moderationStatus:
+      typeof row?.moderationStatus === "string"
+        ? row.moderationStatus.toLowerCase()
+        : row?.moderationStatus,
+  })),
 }));
 
 const identity = {

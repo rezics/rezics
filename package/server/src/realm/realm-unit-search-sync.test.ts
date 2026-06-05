@@ -55,6 +55,13 @@ mock.module("@/job/job-boundary", () => ({
 
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
   broadcast: mock(async () => undefined),
+  filterRecipientsByPreference: mock(async (recipients: unknown) => recipients),
+  notifySystemAndEmail: mock(async () => ({ ok: true })),
+  resolveRecipients: mock(
+    async (event: { directRecipients?: string[] }) =>
+      event.directRecipients ?? [],
+  ),
+  sendDm: mock(async () => ({ ok: true })),
 }));
 
 mock.module("@/post/post.mapper", () => ({
