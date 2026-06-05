@@ -4,11 +4,13 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
 import { generateBetween } from "../../shelf/fractional-index";
+import { eq } from "drizzle-orm";
 import {
   UnitStatus,
   UnitType,
   UnitVisibility,
 } from "../../../prisma/generated/client.js";
+import { Subscription, Unit, User } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 import { pickN, unitTypeToShelfKind } from "./utils.js";
@@ -142,10 +144,9 @@ async function seedFollows(
 
   const BATCH_SIZE = 5000;
   for (let i = 0; i < data.length; i += BATCH_SIZE) {
-    await ctx.prisma.subscription.createMany({
-      data: data.slice(i, i + BATCH_SIZE),
-      skipDuplicates: true,
-    });
+    const batch = data.slice(i, i + BATCH_SIZE);
+    if (batch.length === 0) continue;
+    await ctx.db.insert(Subscription).values(batch).onConflictDoNothing();
   }
 
   const followerCounts = new Map<string, number>();
@@ -177,13 +178,13 @@ async function seedFollows(
     const slice = usersToUpdate.slice(i, i + UPDATE_BATCH);
     await Promise.all(
       slice.map((user) =>
-        ctx.prisma.user.update({
-          where: { unitId: user.userId },
-          data: {
+        ctx.db
+          .update(User)
+          .set({
             followersCount: followerCounts.get(user.userId) ?? 0,
             followingsCount: followingCounts.get(user.userId) ?? 0,
-          },
-        }),
+          })
+          .where(eq(User.unitId, user.userId)),
       ),
     );
   }
@@ -197,10 +198,10 @@ async function seedFollows(
     const slice = unitsToBump.slice(i, i + UPDATE_BATCH);
     await Promise.all(
       slice.map(([unitId, n]) =>
-        ctx.prisma.unit.update({
-          where: { id: unitId },
-          data: { subscriberCount: n },
-        }),
+        ctx.db
+          .update(Unit)
+          .set({ subscriberCount: n })
+          .where(eq(Unit.id, unitId)),
       ),
     );
   }

@@ -536,6 +536,9 @@ databases may be reset and reseeded.
   - Applied progress: the shared factory credit-attribution/unit-tag flush used
     by books, games, and media now uses Drizzle `insert(...).onConflictDoNothing()`
     instead of Prisma `createMany({ skipDuplicates: true })`.
+  - Applied progress: factory follow/subscription seeding now inserts
+    `Subscription` rows and updates `User`/`Unit` counters through Drizzle; the
+    favorites shelf branch remains on the legacy factory Prisma path.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
