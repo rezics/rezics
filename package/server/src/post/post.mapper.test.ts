@@ -7,6 +7,7 @@ mock.module("@/unit/publication-policy", () => ({
   resolveStoredLicenseSlug: (value: unknown) => value,
 }));
 mock.module("@/unit/variant-context", () => ({
+  hydrateVariantContextSummaries: mock(async () => new Map()),
   variantContextForRow: () => null,
 }));
 mock.module("@/utils/sanitizeUser", () => ({
