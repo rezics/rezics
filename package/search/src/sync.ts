@@ -16,7 +16,7 @@ import {
   type Language,
 } from "@rezics/contract";
 import type { ServerDb } from "@rezics/server/db";
-import { Unit, User } from "@rezics/server/db/schema";
+import { Feedback, Unit, User } from "@rezics/server/db/schema";
 import { asc, eq, gt } from "drizzle-orm";
 import type { SearchClient } from "./client";
 import {
@@ -1680,10 +1680,7 @@ export async function patchFeedbackResolutionFromDb(
   client: SearchClient,
   id: string,
 ) {
-  const feedback = await getSearchPrismaClient().feedback.findUnique({
-    where: { id },
-    select: { resolved: true, resolvedAt: true },
-  });
+  const feedback = await findFeedbackSyncRow(id);
   if (!feedback) {
     await client.deleteFeedbacks([id]);
     return;
@@ -1724,10 +1721,36 @@ export function buildFeedbackSearchDocument(
   };
 }
 
+type FeedbackSyncRow = typeof Feedback.$inferSelect;
+
+async function findFeedbackSyncRow(
+  id: string,
+): Promise<FeedbackSyncRow | null> {
+  const [row] = await getSearchDb()
+    .select()
+    .from(Feedback)
+    .where(eq(Feedback.id, id))
+    .limit(1);
+  return (row as FeedbackSyncRow | undefined) ?? null;
+}
+
+async function listFeedbackSyncRows(input: {
+  limit: number;
+  cursor?: string;
+}): Promise<FeedbackSyncRow[]> {
+  const db = getSearchDb();
+  const query = db.select().from(Feedback);
+  const rows = input.cursor
+    ? await query
+        .where(gt(Feedback.id, input.cursor))
+        .orderBy(asc(Feedback.id))
+        .limit(input.limit)
+    : await query.orderBy(asc(Feedback.id)).limit(input.limit);
+  return rows as FeedbackSyncRow[];
+}
+
 export async function syncSingleFeedback(client: SearchClient, id: string) {
-  const feedback = await getSearchPrismaClient().feedback.findUnique({
-    where: { id },
-  });
+  const feedback = await findFeedbackSyncRow(id);
   if (!feedback) {
     await client.deleteFeedbacks([id]);
     return;
@@ -1746,12 +1769,7 @@ export async function syncAllFeedbacks(client: SearchClient) {
   while (true) {
     console.log("syncAllFeedbacks: cursor", cursor, "total", total);
 
-    const feedbacks: any[] = await getSearchPrismaClient().feedback.findMany({
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { id: "asc" },
-    });
+    const feedbacks = await listFeedbackSyncRows({ limit: BATCH_SIZE, cursor });
 
     if (feedbacks.length === 0) break;
 
@@ -1774,11 +1792,9 @@ export async function syncFeedbackSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const feedbacks: any[] = await getSearchPrismaClient().feedback.findMany({
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { id: options.cursor } : undefined,
-    orderBy: { id: "asc" },
+  const feedbacks = await listFeedbackSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(feedbacks, limit, "id");
   if (current.length > 0) {

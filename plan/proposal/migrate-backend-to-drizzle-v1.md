@@ -419,6 +419,10 @@ databases may be reset and reseeded.
     Drizzle reads against server `User` + `Unit.slug`; the remaining content,
     post, realm, entity, feedback, poll, collection/progress, and raw path sync
     paths still use the legacy Prisma client injection.
+  - Applied progress: moved feedback search sync (`syncSingleFeedback`,
+    `syncAllFeedbacks`, `syncFeedbackSegment`, and
+    `patchFeedbackResolutionFromDb`) to Drizzle reads against server
+    `Feedback`.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
