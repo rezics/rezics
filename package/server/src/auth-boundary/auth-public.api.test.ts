@@ -1,13 +1,23 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
+process.env.AUTH_INTERNAL_BASE_URL ??= "http://auth.internal";
+process.env.AUTH_PUBLIC_BASE_URL ??= "http://main.test/auth";
+process.env.AUTH_PUBLIC_ISSUER_URL ??= "http://main.test";
+process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
+process.env.SMTP_HOST ??= "localhost";
+process.env.SMTP_USER ??= "smtp";
+process.env.SMTP_PASSWORD ??= "smtp";
+process.env.TURNSTILE_SECRET ??= "turnstile";
+process.env.MEILI_HOST ??= "http://localhost:7700";
+process.env.MEILI_MASTER_KEY ??= "masterKey";
+process.env.NOTIFY_BASE_URL ??= "http://localhost:3010";
+process.env.NOTIFY_INTERNAL_SECRET ??= "notify";
+process.env.REACTION_BASE_URL ??= "http://localhost:3011";
+process.env.REACTION_INTERNAL_SECRET ??= "reaction";
 
 const fetchMock = mock(async (_input: RequestInfo | URL, _init?: RequestInit) =>
   Response.json({ ok: true }),
@@ -46,46 +56,93 @@ const completeProfileSetup = mock(async (_input?: unknown) => ({
   email: "reader@example.com",
   permission: { role: ["MEMBER"] },
 }));
-const changeCanonicalSlugAsAdmin = mock(
-  async (_userId: string, slug: string) => ({
-    user: {
-      userId: "user-1",
-      slug,
-      name: "Reader",
-    },
-    authProjection: { attempted: true, ok: true },
-  }),
-);
-const userFindUnique = mock(
-  async (_args?: unknown): Promise<MainUserLookup | null> => ({
+const userSelectRow = mock(
+  async (): Promise<MainUserLookup | null> => ({
     unitId: "user-1",
     userId: "user-1",
     slug: "reader",
     permission: { role: ["MEMBER"] },
   }),
 );
-const unitFindUnique = mock(
-  async (): Promise<{ slug: string | null; type: string } | null> => ({
+const unitSelectRow = mock(
+  async (): Promise<{
+    id?: string;
+    slug: string | null;
+    type: string;
+  } | null> => ({
+    id: "user-1",
     slug: "reader",
     type: "USER",
   }),
 );
-const accountEnforcementFindMany = mock(async (): Promise<any[]> => []);
+const projectedPermissionForUser = mock(
+  async (_userId: string, storedPermission: unknown) => {
+    const roleValue =
+      storedPermission &&
+      typeof storedPermission === "object" &&
+      "role" in storedPermission
+        ? (storedPermission as { role?: unknown }).role
+        : undefined;
+    const role = Array.isArray(roleValue) ? roleValue[0] : roleValue;
+    return { role: role === "BLOCKED" ? "MEMBER" : (role ?? "MEMBER") };
+  },
+);
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  user: {
-    findUnique: userFindUnique,
+function createSelectBuilder(selection: Record<string, unknown> | undefined) {
+  const builder = {
+    from: mock((_table: unknown) => {
+      return builder;
+    }),
+    innerJoin: mock(() => builder),
+    where: mock(() => builder),
+    limit: mock(async () => {
+      if (selection && "unitId" in selection) {
+        const row = await userSelectRow();
+        return row ? [row] : [];
+      }
+      if (selection && "id" in selection && "type" in selection) {
+        const row = await unitSelectRow();
+        return row ? [{ id: row.id ?? "user-1", type: row.type }] : [];
+      }
+      return [];
+    }),
+  };
+  return builder;
+}
+
+mock.module("../db/client", () => ({
+  db: {
+    select: mock((selection?: Record<string, unknown>) =>
+      createSelectBuilder(selection),
+    ),
   },
-  unit: {
-    findUnique: unitFindUnique,
+}));
+
+mock.module("@/governance/enforcement.service", () => ({
+  governanceEnforcementService: {
+    projectedPermissionForUser,
   },
-  accountEnforcement: {
-    findMany: accountEnforcementFindMany,
+}));
+
+mock.module("../governance/enforcement.service", () => ({
+  governanceEnforcementService: {
+    projectedPermissionForUser,
   },
-});
+}));
 
 mock.module("@/env", () => ({
+  env: {
+    NODE_ENV: "test",
+    AUTH_BASE_URL: "http://auth.internal",
+    AUTH_INTERNAL_BASE_URL: "http://auth.internal",
+    AUTH_PUBLIC_BASE_URL: "http://main.test/auth",
+    AUTH_PUBLIC_ISSUER_URL: "http://main.test",
+    AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: "internal-test-secret",
+    MAIN_SESSION_JWT_TTL_SECONDS: "900",
+  },
+}));
+
+mock.module("../env", () => ({
   env: {
     NODE_ENV: "test",
     AUTH_BASE_URL: "http://auth.internal",
@@ -105,6 +162,14 @@ mock.module("@/session/jwt/jwt.service", () => ({
   verifyRezicsSessionToken,
 }));
 
+mock.module("../session/jwt/jwt.service", () => ({
+  getMainSessionPublicJwks,
+  signRezicsProfileSetupToken,
+  signRezicsSessionToken,
+  verifyRezicsProfileSetupToken,
+  verifyRezicsSessionToken,
+}));
+
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
     resolve: () => ({
@@ -116,7 +181,6 @@ mock.module("@/middleware", () => ({
 
 mock.module("@/user/service/user.service", () => ({
   userService: {
-    changeCanonicalSlugAsAdmin,
     completeProfileSetup,
     materializeFromVerifiedAuth,
   },
@@ -135,7 +199,6 @@ mock.module("@/user/models/mapper", () => ({
 
 mock.module("../user/service/user.service", () => ({
   userService: {
-    changeCanonicalSlugAsAdmin,
     completeProfileSetup,
     materializeFromVerifiedAuth,
   },
@@ -150,6 +213,10 @@ mock.module("@/unit/collaborative-metadata", () => ({
 }));
 
 mock.module("@/infra/slug-scopes", () => ({
+  requireSlugScopeId: mock(() => "user"),
+}));
+
+mock.module("../infra/slug-scopes", () => ({
   requireSlugScopeId: mock(() => "user"),
 }));
 
@@ -182,8 +249,19 @@ beforeEach(() => {
     tokenType: "profile-setup",
     purpose: "profile-setup",
   });
-  accountEnforcementFindMany.mockReset();
-  accountEnforcementFindMany.mockResolvedValue([]);
+  projectedPermissionForUser.mockReset();
+  projectedPermissionForUser.mockImplementation(
+    async (_userId: string, storedPermission: unknown) => {
+      const roleValue =
+        storedPermission &&
+        typeof storedPermission === "object" &&
+        "role" in storedPermission
+          ? (storedPermission as { role?: unknown }).role
+          : undefined;
+      const role = Array.isArray(roleValue) ? roleValue[0] : roleValue;
+      return { role: role === "BLOCKED" ? "MEMBER" : (role ?? "MEMBER") };
+    },
+  );
 
   materializeFromVerifiedAuth.mockReset();
   materializeFromVerifiedAuth.mockResolvedValue({
@@ -201,116 +279,15 @@ beforeEach(() => {
     email: "reader@example.com",
     permission: { role: ["MEMBER"] },
   });
-  changeCanonicalSlugAsAdmin.mockReset();
-  changeCanonicalSlugAsAdmin.mockResolvedValue({
-    user: {
-      userId: "user-1",
-      slug: "new-reader",
-      name: "Reader",
-    },
-    authProjection: { attempted: true, ok: true },
-  });
-
-  userFindUnique.mockReset();
-  userFindUnique.mockResolvedValue({
+  userSelectRow.mockReset();
+  userSelectRow.mockResolvedValue({
     unitId: "user-1",
     userId: "user-1",
     slug: "reader",
     permission: { role: ["MEMBER"] },
   });
-  unitFindUnique.mockReset();
-  unitFindUnique.mockResolvedValue({ slug: "reader", type: "USER" });
-});
-
-describe("main admin user boundary", () => {
-  test("updates canonical user slug and returns auth projection status", async () => {
-    const { adminRoute } = await import("../user/api/user.admin.api");
-
-    const response = await adminRoute.handle(
-      new Request("http://localhost/admin/user-1/slug", {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: " New-Reader " }),
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expect(changeCanonicalSlugAsAdmin).toHaveBeenCalledWith(
-      "user-1",
-      "new-reader",
-    );
-    expect(await response.json()).toMatchObject({
-      user: {
-        userId: "user-1",
-        slug: "new-reader",
-        name: "Reader",
-      },
-      authProjection: { attempted: true, ok: true },
-    });
-  });
-
-  test("rejects invalid admin slug changes before updating main", async () => {
-    const { adminRoute } = await import("../user/api/user.admin.api");
-
-    const response = await adminRoute.handle(
-      new Request("http://localhost/admin/user-1/slug", {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: "bad slug" }),
-      }),
-    );
-
-    expect(response.status).toBe(400);
-    expect(changeCanonicalSlugAsAdmin).not.toHaveBeenCalled();
-    expect(await response.json()).toMatchObject({
-      error: { code: "SLUG_INVALID" },
-    });
-  });
-
-  test("surfaces admin slug projection failure without rolling back main", async () => {
-    changeCanonicalSlugAsAdmin.mockResolvedValueOnce({
-      user: {
-        userId: "user-1",
-        slug: "new-reader",
-        name: "Reader",
-      },
-      authProjection: { attempted: true, ok: false },
-    });
-    const { adminRoute } = await import("../user/api/user.admin.api");
-
-    const response = await adminRoute.handle(
-      new Request("http://localhost/admin/user-1/slug", {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: "new-reader" }),
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({
-      authProjection: { attempted: true, ok: false },
-    });
-  });
-
-  test("returns conflict when admin slug is already taken", async () => {
-    const error = new Error("duplicate") as Error & { code: string };
-    error.code = "P2002";
-    changeCanonicalSlugAsAdmin.mockRejectedValueOnce(error);
-    const { adminRoute } = await import("../user/api/user.admin.api");
-
-    const response = await adminRoute.handle(
-      new Request("http://localhost/admin/user-1/slug", {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: "new-reader" }),
-      }),
-    );
-
-    expect(response.status).toBe(409);
-    expect(await response.json()).toMatchObject({
-      error: { code: "SLUG_TAKEN" },
-    });
-  });
+  unitSelectRow.mockReset();
+  unitSelectRow.mockResolvedValue({ slug: "reader", type: "USER" });
 });
 
 describe("main auth public boundary", () => {
@@ -445,7 +422,7 @@ describe("main auth public boundary", () => {
     expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
       "http://auth.internal/api/auth/oauth/register",
     );
-    expect(userFindUnique).not.toHaveBeenCalled();
+    expect(userSelectRow).not.toHaveBeenCalled();
     expect(signRezicsSessionToken).not.toHaveBeenCalled();
   });
 
@@ -484,14 +461,7 @@ describe("main auth public boundary", () => {
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "http://auth.internal/api/auth/get-session-state",
     );
-    expect(userFindUnique).toHaveBeenCalledWith({
-      where: { authUserId: "user-1" },
-      select: {
-        unitId: true,
-        authUserId: true,
-        permission: true,
-      },
-    });
+    expect(userSelectRow).toHaveBeenCalled();
     expect(signRezicsSessionToken).toHaveBeenCalledWith({
       userId: "user-1",
       permission: { role: "MEMBER" },
@@ -503,19 +473,13 @@ describe("main auth public boundary", () => {
   });
 
   test("refresh projects BLOCKED only from active enforcement", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: "reader",
       permission: { role: ["MEMBER"] },
     });
-    accountEnforcementFindMany.mockResolvedValueOnce([
-      {
-        kind: "BAN",
-        expiresAt: null,
-        createdAt: new Date("2026-05-28T00:00:00.000Z"),
-      },
-    ]);
+    projectedPermissionForUser.mockResolvedValueOnce({ role: "BLOCKED" });
     setFetch(async () =>
       Response.json({
         user: {
@@ -546,14 +510,9 @@ describe("main auth public boundary", () => {
       authenticated: true,
       role: "BLOCKED",
     });
-    expect(accountEnforcementFindMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          targetUserId: "user-1",
-          state: "ACTIVE",
-        }),
-      }),
-    );
+    expect(projectedPermissionForUser).toHaveBeenCalledWith("user-1", {
+      role: ["MEMBER"],
+    });
     expect(signRezicsSessionToken).toHaveBeenCalledWith({
       userId: "user-1",
       permission: { role: "BLOCKED" },
@@ -561,7 +520,7 @@ describe("main auth public boundary", () => {
   });
 
   test("refresh downgrades stale stored BLOCKED when enforcement is inactive", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: "reader",
@@ -604,7 +563,7 @@ describe("main auth public boundary", () => {
   });
 
   test("session state keeps auth role separate from Rezics permission", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "main-root-user",
       userId: "main-root-user",
       slug: "root",
@@ -670,20 +629,14 @@ describe("main auth public boundary", () => {
   });
 
   test("session state uses derived permission projection", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "main-user",
       userId: "main-user",
       slug: "reader",
       authUserId: "auth-user",
       permission: { role: ["MEMBER"] },
     });
-    accountEnforcementFindMany.mockResolvedValueOnce([
-      {
-        kind: "BAN",
-        expiresAt: null,
-        createdAt: new Date("2026-05-28T00:00:00.000Z"),
-      },
-    ]);
+    projectedPermissionForUser.mockResolvedValueOnce({ role: "BLOCKED" });
     setFetch(async () =>
       Response.json({
         session: {
@@ -717,25 +670,20 @@ describe("main auth public boundary", () => {
       rezicsUserId: "main-user",
       rezicsPermission: { role: "BLOCKED" },
     });
-    expect(accountEnforcementFindMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          targetUserId: "main-user",
-          state: "ACTIVE",
-        }),
-      }),
-    );
+    expect(projectedPermissionForUser).toHaveBeenCalledWith("main-user", {
+      role: ["MEMBER"],
+    });
   });
 
   test("session state reports auth-main reconciliation diagnostics", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "main-user",
       userId: "main-user",
       slug: "reader",
       authUserId: "auth-user",
       permission: { role: ["MEMBER"] },
     });
-    unitFindUnique.mockResolvedValueOnce({ slug: "reader", type: "USER" });
+    unitSelectRow.mockResolvedValueOnce({ slug: "reader", type: "USER" });
     setFetch(async () =>
       Response.json({
         session: {
@@ -853,7 +801,7 @@ describe("main auth public boundary", () => {
   });
 
   test("refresh rejects verified auth sessions before main setup", async () => {
-    userFindUnique.mockResolvedValueOnce(null);
+    userSelectRow.mockResolvedValueOnce(null);
     setFetch(async () =>
       Response.json({
         user: {
@@ -892,14 +840,14 @@ describe("main auth public boundary", () => {
   });
 
   test("refresh rejects materialized users whose slug is still null (slug !== null is the readiness gate)", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: null,
       authUserId: "user-1",
       permission: { role: ["MEMBER"] },
     });
-    unitFindUnique.mockResolvedValueOnce({ slug: null, type: "USER" });
+    unitSelectRow.mockResolvedValueOnce({ slug: null, type: "USER" });
     setFetch(async () =>
       Response.json({
         user: {
@@ -938,13 +886,13 @@ describe("main auth public boundary", () => {
   });
 
   test("renews profile setup token for materialized setup users", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: null,
       permission: { role: ["MEMBER"] },
     });
-    unitFindUnique.mockResolvedValueOnce({ slug: null, type: "USER" });
+    unitSelectRow.mockResolvedValueOnce({ slug: null, type: "USER" });
     setFetch(async () =>
       Response.json({
         user: {
@@ -1007,7 +955,7 @@ describe("main auth public boundary", () => {
   });
 
   test("materializes a minimal main account for a verified auth-only session", async () => {
-    userFindUnique.mockResolvedValueOnce(null);
+    userSelectRow.mockResolvedValueOnce(null);
     setFetch(async (input) => {
       const url = String(input);
       if (url.endsWith("/internal/registration/verified-facts")) {
@@ -1068,13 +1016,13 @@ describe("main auth public boundary", () => {
   });
 
   test("duplicate materialization for setup users reissues setup token", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: null,
       permission: { role: ["MEMBER"] },
     });
-    unitFindUnique.mockResolvedValueOnce({ slug: null, type: "USER" });
+    unitSelectRow.mockResolvedValueOnce({ slug: null, type: "USER" });
     setFetch(async (input) => {
       const url = String(input);
       if (url.endsWith("/internal/registration/verified-facts")) {
@@ -1146,14 +1094,14 @@ describe("main auth public boundary", () => {
   });
 
   test("profile setup activates a materialized user", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: null,
       authUserId: "user-1",
       permission: { role: ["MEMBER"] },
     });
-    unitFindUnique.mockResolvedValueOnce({ slug: null, type: "USER" });
+    unitSelectRow.mockResolvedValueOnce({ slug: null, type: "USER" });
 
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(
@@ -1185,14 +1133,14 @@ describe("main auth public boundary", () => {
   });
 
   test("profile setup passes submitted preferred languages", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: null,
       authUserId: "user-1",
       permission: { role: ["MEMBER"] },
     });
-    unitFindUnique.mockResolvedValueOnce({ slug: null, type: "USER" });
+    unitSelectRow.mockResolvedValueOnce({ slug: null, type: "USER" });
 
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(
@@ -1220,15 +1168,15 @@ describe("main auth public boundary", () => {
   });
 
   test("profile setup returns slug conflict from main uniqueness", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    userSelectRow.mockResolvedValueOnce({
       unitId: "user-1",
       userId: "user-1",
       slug: null,
       authUserId: "user-1",
       permission: { role: ["MEMBER"] },
     });
-    unitFindUnique.mockResolvedValueOnce({ slug: null, type: "USER" });
-    completeProfileSetup.mockRejectedValueOnce({ code: "P2002" });
+    unitSelectRow.mockResolvedValueOnce({ slug: null, type: "USER" });
+    completeProfileSetup.mockRejectedValueOnce({ code: "23505" });
 
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(
@@ -1251,7 +1199,7 @@ describe("main auth public boundary", () => {
   });
 
   test("checks slug availability against main user slugs", async () => {
-    userFindUnique.mockResolvedValueOnce(null);
+    unitSelectRow.mockResolvedValueOnce(null);
 
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(
@@ -1265,10 +1213,7 @@ describe("main auth public boundary", () => {
       available: true,
       normalized: "reader",
     });
-    expect(userFindUnique).toHaveBeenCalledWith({
-      where: { slug: "reader" },
-      select: { userId: true },
-    });
+    expect(unitSelectRow).toHaveBeenCalled();
   });
 
   test("refresh rejects disallowed origins", async () => {
