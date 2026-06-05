@@ -22,12 +22,19 @@ mock.module("@/middleware", () => ({
   verifyRootFromDb: async () => true,
 }));
 
+mock.module("@/governance", () => ({
+  governanceRoutePolicyService: {
+    decideForIdentity: async () => ({ allowed: true }),
+  },
+  realmPolicyActions: new Proxy({}, { get: (_target, key) => key }),
+}));
+
 class UnitServiceStub {}
 
 mock.module("@/unit/unit.service", () => ({
   UnitService: UnitServiceStub,
   unitService: {
-    getBySlug: async (slug: string) => {
+    getBySlug: async (_scope: string, slug: string) => {
       if (slug === "book") return { id: "tag-1", type: "TAG" };
       if (slug === "rezics") return { id: "realm-1", type: "REALM" };
       return null;
@@ -36,6 +43,11 @@ mock.module("@/unit/unit.service", () => ({
 }));
 
 const tagStub = { id: "tag-1", slug: "book", type: "TAG", translations: [] };
+const prismaMock = {
+  unitTag: {
+    findMany: async () => [],
+  },
+};
 
 mock.module("./tag.mapper", () => ({
   mapTagUnitToDTO: (unit: unknown) => unit,
@@ -49,8 +61,7 @@ mock.module("./tag.service", () => ({
       unitId: string,
       opts?: { includeBelowThreshold?: boolean },
     ) {
-      const { prisma } = await import("#/prisma/client");
-      return prisma.unitTag.findMany({
+      return prismaMock.unitTag.findMany({
         where: opts?.includeBelowThreshold
           ? { unitId }
           : { unitId, score: { gt: -100 } },
@@ -63,8 +74,7 @@ mock.module("./tag.service", () => ({
       });
     }
     async listLowScoreUnitTags(threshold: number, limit: number) {
-      const { prisma } = await import("#/prisma/client");
-      return prisma.unitTag.findMany({
+      return prismaMock.unitTag.findMany({
         where: { score: { lte: threshold } },
         orderBy: [{ score: "asc" }, { unitId: "asc" }, { tagUnitId: "asc" }],
         take: Math.max(1, Math.min(limit, 200)),

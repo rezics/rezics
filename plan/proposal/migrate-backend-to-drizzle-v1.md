@@ -495,7 +495,7 @@ databases may be reset and reseeded.
   `@rezics/utils` factory imports.
 - [x] 6.6 Move `package/auth/prisma/seed` to an auth db seed path and update
   `@rezics/auth` exports.
-- [ ] 6.7 Update `package/utils/src/lib/prisma-factory.ts` into a Drizzle db
+- [x] 6.7 Update `package/utils/src/lib/prisma-factory.ts` into a Drizzle db
   factory module, then convert seed/factory orchestration and tests.
   - Applied progress: `package/utils/src/db/command.ts` `runDbReset()` now
     creates a server Drizzle db via `@rezics/server/db` and no longer needs the
@@ -596,6 +596,10 @@ databases may be reset and reseeded.
     `Prisma.*` helper types; seed storage literals now live in the factory, and
     `makeSeedCtx`/`createSeedRuntime` no longer accept or construct a server
     Prisma client.
+  - Applied progress: server Prisma package exports, dependencies, generated
+    client wrapper, and `schema.prisma` were removed after factory/runtime
+    callers moved to Drizzle; target semantics tests now assert Drizzle schema
+    tables/source instead of Prisma schema text.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

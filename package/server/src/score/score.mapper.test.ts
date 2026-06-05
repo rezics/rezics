@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { ScoreEntry } from "#/prisma/client";
+import type { ScoreEntry } from "../db/schema";
 import {
   applyDistributionDelta,
   applyFieldsDelta,
@@ -123,9 +123,11 @@ describe("applyFieldsDelta", () => {
 });
 
 describe("computeAggregateFromEntries", () => {
+  type ScoreEntryRow = typeof ScoreEntry.$inferSelect;
+
   function makeEntry(
-    overrides: Partial<ScoreEntry> & { value: number },
-  ): ScoreEntry {
+    overrides: Partial<ScoreEntryRow> & { value: number },
+  ): ScoreEntryRow {
     return {
       id: "test-id",
       userId: "user-1",
@@ -135,7 +137,7 @@ describe("computeAggregateFromEntries", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       ...overrides,
-    } as ScoreEntry;
+    } as ScoreEntryRow;
   }
 
   test("computes from multiple entries", () => {

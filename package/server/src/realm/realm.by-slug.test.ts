@@ -22,12 +22,34 @@ mock.module("@/middleware", () => ({
   verifyRootFromDb: async () => true,
 }));
 
+mock.module("@/governance", () => ({
+  governanceRoutePolicyService: {
+    decideForIdentity: async () => ({ allowed: true }),
+  },
+  realmPolicyActions: new Proxy({}, { get: (_target, key) => key }),
+}));
+
+mock.module("@/utils/sanitizeUser", () => ({
+  sanitizeUser: (user: unknown) => user,
+  mapPublicUser: (user: unknown) => user,
+}));
+
 const realmDTOStub = {
   unitId: "realm-1",
   slug: "rezics",
   isPublic: true,
   isOfficial: true,
   memberCount: 1,
+};
+const prismaMock = {
+  unitRealm: {
+    findMany: async () => [],
+    create: async (input: { data: unknown }) => input.data,
+    delete: async () => undefined,
+  },
+  realmTagApplication: {
+    findMany: async () => [],
+  },
 };
 
 class UnitServiceStub {}
@@ -43,13 +65,16 @@ mock.module("@/unit/unit.service", () => ({
   },
 }));
 
+mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageCandidates: () => ["en"],
+}));
+
 mock.module("./realm.service", () => ({
   REALM_TAG_VISIBILITY_THRESHOLD: -100,
   RealmService: class {
     private async patchPostRealmIds(unitId: string) {
-      const { prisma } = await import("#/prisma/client");
       const { patchPostFieldsToMeili } = await import("@/meili/post/sync");
-      const rows = await prisma.unitRealm.findMany({
+      const rows = await prismaMock.unitRealm.findMany({
         where: { unitId },
         select: { realmUnitId: true },
         orderBy: { realmUnitId: "asc" },
@@ -59,16 +84,14 @@ mock.module("./realm.service", () => ({
       });
     }
     async addUnitRealm(realmUnitId: string, unitId: string) {
-      const { prisma } = await import("#/prisma/client");
-      const row = await prisma.unitRealm.create({
+      const row = await prismaMock.unitRealm.create({
         data: { realmUnitId, unitId },
       });
       this.patchPostRealmIds(unitId).catch(() => {});
       return row;
     }
     async removeUnitRealm(realmUnitId: string, unitId: string) {
-      const { prisma } = await import("#/prisma/client");
-      await prisma.unitRealm.delete({
+      await prismaMock.unitRealm.delete({
         where: { realmUnitId_unitId: { realmUnitId, unitId } },
       });
       this.patchPostRealmIds(unitId).catch(() => {});
@@ -78,8 +101,7 @@ mock.module("./realm.service", () => ({
       unitId: string,
       opts?: { includeBelowThreshold?: boolean },
     ) {
-      const { prisma } = await import("#/prisma/client");
-      return prisma.realmTagApplication.findMany({
+      return prismaMock.realmTagApplication.findMany({
         where: opts?.includeBelowThreshold
           ? { realmUnitId, unitId }
           : { realmUnitId, unitId, score: { gt: -100 } },
@@ -96,8 +118,7 @@ mock.module("./realm.service", () => ({
       limit: number,
       realmUnitId?: string,
     ) {
-      const { prisma } = await import("#/prisma/client");
-      return prisma.realmTagApplication.findMany({
+      return prismaMock.realmTagApplication.findMany({
         where: {
           score: { lte: threshold },
           ...(realmUnitId ? { realmUnitId } : {}),
