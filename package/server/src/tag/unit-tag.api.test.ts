@@ -12,7 +12,10 @@ const decideForIdentityMock = mock(async () => ({
   code: policyAllowed ? "ALLOWED" : "ENFORCEMENT_ACTIVE",
   safeMessage: policyAllowed ? "Allowed" : "Denied by policy",
 }));
-const castVoteMock = mock(async () => undefined);
+const castVoteMock = mock(
+  async (_userId: string, _unitId: string, _tagUnitId: string, _vote: number) =>
+    undefined,
+);
 const createUnitTagMock = mock(async () => ({
   unitId: "unit-1",
   tagUnitId: "tag-1",
@@ -64,8 +67,8 @@ mock.module("./tag.service", () => ({
       await serverJobProducer.enqueue({
         kind: "search.content.patchTags",
         payload: { unitId: args[1] },
-        source: { type: "server", service: "tag" },
-      });
+        source: { type: "server" as const, service: "tag" },
+      } as any);
       return undefined;
     }
     async createUnitTag(...args: Parameters<typeof createUnitTagMock>) {

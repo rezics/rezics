@@ -74,9 +74,9 @@ describe("adminRepairJobService", () => {
       internalSecret: "secret",
       auditService: auditService(),
     });
-    const repairableIndexUids = EXPECTED_MEILI_INDEX_SCHEMAS.filter(
-      (schema) => schema.supportsFullSync !== false,
-    ).map((schema) => schema.uid);
+    const repairableIndexUids = EXPECTED_MEILI_INDEX_SCHEMAS.map(
+      (schema) => schema.uid,
+    );
 
     const job = await service.start({
       scope: "search",

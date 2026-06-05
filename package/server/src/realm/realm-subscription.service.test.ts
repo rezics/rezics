@@ -284,7 +284,8 @@ function createFakeSelect(selection?: Record<string, unknown>) {
       if (table === User) return [];
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -330,7 +331,8 @@ function createFakeInsert(table: unknown) {
       }
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -373,7 +375,8 @@ function createFakeUpdate(table: unknown) {
       }
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -391,7 +394,8 @@ function createFakeDelete(table: unknown) {
       if (table === Subscription) await legacyDbMock.subscription.delete({});
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -462,7 +466,7 @@ mock.module("@/governance/capability.service", () => ({
 }));
 
 const { realmService } = await import(
-  "./realm.service.ts?realm-subscription-service-test-actual"
+  "./realm.service.ts?realm-subscription-service-test-actual" as string
 );
 
 const REALM = "realm-unit-id";

@@ -3,7 +3,7 @@ import type { NotificationPreference } from "@rezics/contract";
 import type { BroadcastEvent } from "./notify-boundary.client";
 
 const { filterRecipientsByPreference, resolveRecipients } = await import(
-  "./notify-boundary.client.ts?notify-client-test-actual"
+  "./notify-boundary.client.ts?notify-client-test-actual" as string
 );
 
 /**
@@ -86,7 +86,7 @@ describe("resolveRecipients", () => {
     await resolveRecipients(
       { kind: "review.updated", sourceUnitId: "book-42" },
       {
-        findSubscriptionMatches: async (target, kind) => {
+        findSubscriptionMatches: async (target: string, kind: string) => {
           seenTarget = target;
           seenKind = kind;
           return [];
@@ -138,9 +138,9 @@ describe("filterRecipientsByPreference", () => {
     const result = await filterRecipientsByPreference(
       ["a", "b"],
       "reaction.upvote",
-      async (ids) => {
+      async (ids: string[]) => {
         called = true;
-        return new Map(ids.map((id) => [id, {}]));
+        return new Map(ids.map((id: string) => [id, {}]));
       },
     );
     expect(result).toEqual(["a", "b"]);

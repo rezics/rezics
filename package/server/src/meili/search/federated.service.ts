@@ -239,7 +239,7 @@ async function federatedSingle(
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits.map((hit) => resolveRealmHitDisplay(hit, query as any));
+      items = resp.hits;
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;

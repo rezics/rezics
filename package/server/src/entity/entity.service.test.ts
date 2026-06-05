@@ -126,7 +126,9 @@ function createRepositoryStub(
 }
 
 async function createService(repository: EntityRepository) {
-  const module = await import("./entity.service.ts?entity-service-test-actual");
+  const module = await import(
+    "./entity.service.ts?entity-service-test-actual" as string
+  );
   return new module.EntityService(repository) as EntityService;
 }
 
@@ -311,7 +313,7 @@ describe("EntityService.create", () => {
 
   test("create and edit projections produce identical editorial leaf paths", async () => {
     const { buildEntityCreatePatch, mapEntityUpdatePatchPaths } = await import(
-      "./entity.service.ts?entity-service-test-actual"
+      "./entity.service.ts?entity-service-test-actual" as string
     );
     const translation = { language: "en", title: "Same State" };
 
@@ -409,7 +411,7 @@ describe("EntityService.update", () => {
     const repository = createRepositoryStub();
     const service = await createService(repository);
     const { mapEntityUpdatePatchPaths } = await import(
-      "./entity.service.ts?entity-service-test-actual"
+      "./entity.service.ts?entity-service-test-actual" as string
     );
 
     await expect(
@@ -432,7 +434,7 @@ describe("EntityService.update", () => {
     const repository = createRepositoryStub();
     const service = await createService(repository);
     const { mapEntityUpdatePatchPaths } = await import(
-      "./entity.service.ts?entity-service-test-actual"
+      "./entity.service.ts?entity-service-test-actual" as string
     );
 
     await expect(

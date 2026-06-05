@@ -97,8 +97,8 @@ class UnitServiceStub {
       await serverJobProducer.enqueue({
         kind: "search.content.sync",
         payload: { unitId: row.id },
-        source: { type: "server", service: "unit" },
-      });
+        source: { type: "server" as const, service: "unit" },
+      } as any);
     }
     return row;
   }
@@ -114,8 +114,8 @@ class UnitServiceStub {
       await serverJobProducer.enqueue({
         kind: "search.content.patchMetadata",
         payload: { targetId: unitId, fields },
-        source: { type: "server", service: "unit" },
-      });
+        source: { type: "server" as const, service: "unit" },
+      } as any);
     }
     return row;
   }
@@ -128,8 +128,8 @@ class UnitServiceStub {
     await serverJobProducer.enqueue({
       kind: "search.content.delete",
       payload: { unitId },
-      source: { type: "server", service: "unit" },
-    });
+      source: { type: "server" as const, service: "unit" },
+    } as any);
     void cleanupReactions(unitId);
   }
 }
@@ -149,7 +149,7 @@ mock.module("@/unit/unit.service", () => ({
 const tagStub = { id: "tag-1", slug: "book", type: "TAG", translations: [] };
 const legacyDbMock = {
   unitTag: {
-    findMany: async () => [],
+    findMany: async (_args?: unknown) => [],
   },
 };
 

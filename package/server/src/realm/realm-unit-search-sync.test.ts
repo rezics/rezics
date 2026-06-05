@@ -102,7 +102,7 @@ mock.module("./realm-extra.service", () => ({
 }));
 
 const { RealmService } = await import(
-  "./realm.service.ts?realm-unit-search-sync-test-actual"
+  "./realm.service.ts?realm-unit-search-sync-test-actual" as string
 );
 
 describe("UnitRealm post search sync", () => {

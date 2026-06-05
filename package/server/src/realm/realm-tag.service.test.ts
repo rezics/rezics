@@ -190,7 +190,8 @@ function createFakeSelect(selection?: Record<string, unknown>) {
       }
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -239,7 +240,8 @@ function createFakeInsert(table: unknown) {
       }
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -290,7 +292,8 @@ function createFakeUpdate(table: unknown) {
       if (table === UnitTag) await unitTagUpdateMock({ data });
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -310,7 +313,8 @@ function createFakeDelete(table: unknown) {
       if (table === UnitRealm) await realmUnitDeleteMock();
       return [];
     },
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -427,7 +431,7 @@ mock.module("../db/client", () => ({
 }));
 
 const { RealmService, REALM_TAG_VISIBILITY_THRESHOLD } = await import(
-  "./realm.service.ts?realm-tag-service-test-actual"
+  "./realm.service.ts?realm-tag-service-test-actual" as string
 );
 
 function resetWriteMocks() {

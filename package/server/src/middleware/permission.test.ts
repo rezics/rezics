@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { Elysia, status } from "elysia";
 
 const verifyRezicsSessionToken = mock(
-  async (): Promise<any> => ({
+  async (_token?: string): Promise<any> => ({
     tokenType: "member-session",
     userId: "user-1",
     permission: { role: "MEMBER" },
   }),
 );
 const verifyRezicsProfileSetupToken = mock(
-  async (): Promise<any> => ({
+  async (_token?: string): Promise<any> => ({
     tokenType: "profile-setup",
     purpose: "profile-setup",
     userId: "user-1",
@@ -18,7 +18,7 @@ const verifyRezicsProfileSetupToken = mock(
 const getMainSessionPublicJwks = mock(async () => ({ keys: [] }));
 const signRezicsSessionToken = mock(async () => "signed-session-token");
 const signRezicsProfileSetupToken = mock(
-  async () => "signed-profile-setup-token",
+  async (_payload?: unknown) => "signed-profile-setup-token",
 );
 
 mock.module("@/session/jwt/jwt.service", () => ({

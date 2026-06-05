@@ -43,7 +43,7 @@ mock.module("@/job/job-boundary", () => ({
 
 mock.module("@/unit/collaborative-metadata", async () => {
   const actual = await import(
-    "../unit/collaborative-metadata.ts?entity-api-test-actual"
+    "../unit/collaborative-metadata.ts?entity-api-test-actual" as string
   );
 
   return {
@@ -61,7 +61,7 @@ mock.module("@/unit/collaborative-metadata", async () => {
   };
 });
 
-const entityServiceMock = {
+const entityServiceMock: any = {
   getBySlug: mock(async () => entityRow()),
   getByUnitId: mock(async () => entityRow()),
   list: mock(async () => ({ rows: [entityRow()], total: 1 })),

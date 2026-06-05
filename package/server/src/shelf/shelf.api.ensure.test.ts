@@ -71,7 +71,9 @@ const ensureSystemShelfMock = mock(async () => ({
 }));
 
 mock.module("./system-shelves", async () => {
-  const actual = await import("./system-shelves.ts?shelf-api-test-actual");
+  const actual = await import(
+    "./system-shelves.ts?shelf-api-test-actual" as string
+  );
   return {
     ...actual,
     ensureSystemShelf: ensureSystemShelfMock,

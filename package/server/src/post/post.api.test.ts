@@ -15,23 +15,27 @@ const decideForIdentityMock = mock(async () => ({
 }));
 
 const getByUnitIdMock = mock(
-  async (): Promise<any> => ({
+  async (_unitId?: string, _opts?: unknown): Promise<any> => ({
     unitId: "post-1",
     unit: {
       user: { unitId: "owner-1" },
     },
   }),
 );
-const listMock = mock(async () => ({
+const listMock = mock(async (_opts?: unknown) => ({
   posts: [{ unitId: "post-1" }],
   total: 1,
 }));
-const byRealmMock = mock(async () => ({
-  posts: [{ unitId: "realm-post-1" }],
-  total: 1,
+const byRealmMock = mock(
+  async (_realmUnitId?: string, _opts?: unknown, _ctx?: unknown) => ({
+    posts: [{ unitId: "realm-post-1" }],
+    total: 1,
+  }),
+);
+const createMock = mock(async (_input?: unknown, _ctx?: unknown) => ({
+  unitId: "created-post-1",
 }));
-const createMock = mock(async () => ({ unitId: "created-post-1" }));
-const submitToRealmMock = mock(async () => ({
+const submitToRealmMock = mock(async (_input?: unknown, _ctx?: unknown) => ({
   unitId: "post-1",
   realmUnitId: "realm-1",
 }));
@@ -39,7 +43,7 @@ const updateMock = mock(async (_unitId: string, input: any) => ({
   unitId: "post-1",
   ...input,
 }));
-const deleteMock = mock(async () => undefined);
+const deleteMock = mock(async (_unitId?: string) => undefined);
 const listModerationOverlaysMock = mock(async () => [
   {
     id: "reply-1",
@@ -106,10 +110,12 @@ mock.module("@/unit/variant-context", () => ({
   hydrateVariantContextSummaries: mock(async () => new Map()),
 }));
 
-const mapPostToDTOMock = mock((post: any) => ({
-  unitId: post.unitId,
-  authorUserId: post.authorUserId ?? "owner-1",
-}));
+const mapPostToDTOMock = mock(
+  (post: any, _variantContexts?: unknown, _languages?: readonly string[]) => ({
+    unitId: post.unitId,
+    authorUserId: post.authorUserId ?? "owner-1",
+  }),
+);
 
 mock.module("./post.mapper", () => ({
   mapCommentPromotionToDTO: mock((promotion: unknown) => promotion),
@@ -117,7 +123,9 @@ mock.module("./post.mapper", () => ({
 }));
 
 mock.module("./post.service", async () => {
-  const actual = await import("./post.service.ts?post-api-test-actual");
+  const actual = await import(
+    "./post.service.ts?post-api-test-actual" as string
+  );
   return {
     ...actual,
     postService: {

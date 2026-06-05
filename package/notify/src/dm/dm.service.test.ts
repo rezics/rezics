@@ -51,7 +51,8 @@ function queryBuilder(fields?: Row) {
     limit() {
       return builder;
     },
-    then(resolve: (rows: Row[]) => void, reject: (error: unknown) => void) {
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](resolve: (rows: Row[]) => void, reject: (error: unknown) => void) {
       Promise.resolve(selectedRows(table, fields)).then(resolve, reject);
     },
   };
@@ -102,7 +103,8 @@ function insertBuilder(table: unknown) {
       }
       return Promise.resolve([]);
     },
-    then(resolve: (rows: Row[]) => void, reject: (error: unknown) => void) {
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](resolve: (rows: Row[]) => void, reject: (error: unknown) => void) {
       if (table === conversationBlocks && value) {
         state.blocks.push({ id: "block", ...value });
       }

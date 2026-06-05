@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
-type ContentSearchHit = {
-  id: string;
-  catalogEntryKind: string;
-  targetUnitId: string | null;
-};
+type ContentSearchHit = any;
 
 const contentSearchMock = mock(
   async (
@@ -147,7 +143,6 @@ describe("searchContent catalog behavior", () => {
           id: "book-1",
           catalogEntryKind: "MAIN",
           targetUnitId: null,
-          languages: ["ja", "en"],
           isLanguageNeutral: false,
           supportLanguages: [
             { language: "ja", isPrimary: true, sortOrder: 0 },

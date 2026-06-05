@@ -158,7 +158,14 @@ const PROGRESS_SYNC_ATTEMPTS = 3;
 const PROGRESS_SYNC_RETRY_BASE_MS = 100;
 const VISIBILITY_THRESHOLD = -100;
 
-const INDEXABLE_TYPES = ["BOOK", "GAME", "MEDIA", "SERIES", "SHELF", "LINK"];
+const INDEXABLE_TYPES = [
+  "BOOK",
+  "GAME",
+  "MEDIA",
+  "SERIES",
+  "SHELF",
+  "LINK",
+] as const satisfies ReadonlyArray<(typeof Unit.$inferSelect)["type"]>;
 
 const PUBLIC_ELIGIBLE_UNIT_WHERE = {
   status: "PUBLISHED",
@@ -214,8 +221,8 @@ export function isPublicIndexableContentUnit(
 export function isPublicIndexablePostUnit(
   unit:
     | {
-        status: string;
-        visibility: string;
+        status: string | null;
+        visibility: string | null;
         moderationStatus?: string | null;
       }
     | null
@@ -244,7 +251,7 @@ function realmIdsForSearch(unit: any): string[] {
       (realm: any) =>
         !realm.moderationStatus || realm.moderationStatus === "APPROVED",
     )
-    .filter((realm: any) => realm.realm?.realm?.isPublic !== false)
+    .filter((realm: any) => realm.realmIsPublic !== false)
     .map((realm: any) => realm.realmUnitId);
 }
 
@@ -792,11 +799,7 @@ async function hydrateContentRows(rows: any[]) {
         realmUnitId: UnitRealm.realmUnitId,
         moderationStatus: UnitRealm.moderationStatus,
         isLocked: UnitRealm.isLocked,
-        realm: {
-          realm: {
-            isPublic: Realm.isPublic,
-          },
-        },
+        realmIsPublic: Realm.isPublic,
       })
       .from(UnitRealm)
       .leftJoin(Realm, eq(Realm.unitId, UnitRealm.realmUnitId))
@@ -1999,12 +2002,12 @@ function buildUserSearchDocument(row: UserSyncRow): UserSearchDocument {
   return {
     id: row.unitId,
     unitId: row.unitId,
-    name: row.name,
-    email: row.email,
+    name: row.name ?? row.email ?? row.unitId,
+    email: row.email ?? undefined,
     slug: row.slug ?? null,
     avatar: row.avatar,
     bio: row.bio,
-    description: row.description,
+    description: row.description as UserSearchDocument["description"],
     descriptionText: mainMarkdownSource(row.description),
     followersCount: row.followersCount,
     followingsCount: row.followingsCount,
@@ -2490,11 +2493,7 @@ async function hydratePostRows(rows: PostSyncRow[]) {
         realmUnitId: UnitRealm.realmUnitId,
         moderationStatus: UnitRealm.moderationStatus,
         isLocked: UnitRealm.isLocked,
-        realm: {
-          realm: {
-            isPublic: Realm.isPublic,
-          },
-        },
+        realmIsPublic: Realm.isPublic,
       })
       .from(UnitRealm)
       .leftJoin(Realm, eq(Realm.unitId, UnitRealm.realmUnitId))
@@ -2816,11 +2815,7 @@ async function listPublicPostRealmRows(input: {
       realmUnitId: UnitRealm.realmUnitId,
       moderationStatus: UnitRealm.moderationStatus,
       isLocked: UnitRealm.isLocked,
-      realm: {
-        realm: {
-          isPublic: Realm.isPublic,
-        },
-      },
+      realmIsPublic: Realm.isPublic,
     })
     .from(UnitRealm)
     .leftJoin(Realm, eq(Realm.unitId, UnitRealm.realmUnitId))

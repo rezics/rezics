@@ -134,7 +134,9 @@ mock.module("@/unit/unit.service", () => ({
 }));
 
 mock.module("./realm.mapper", async () => {
-  const actual = await import("./realm.mapper.ts?realm-api-test-actual");
+  const actual = await import(
+    "./realm.mapper.ts?realm-api-test-actual" as string
+  );
   return {
     ...actual,
     mapRealmTagApplicationToDTO: mock((row: unknown) => row),

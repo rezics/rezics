@@ -1,5 +1,6 @@
 import type {
   ContentRating,
+  Language,
   ListLanguageMode,
   PostKind,
   SearchCategory,
@@ -79,7 +80,7 @@ export function readLanguageFilterCandidates(
         .map((language) =>
           typeof language === "string" ? normalizeLanguage(language) : null,
         )
-        .filter((language): language is string => !!language),
+        .filter((language): language is Language => !!language),
     ),
   ];
 }

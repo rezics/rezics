@@ -427,7 +427,8 @@ function createFakeDrizzleDb(oldTx?: any): any {
 
           return [];
         },
-        then(
+        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
         ) {
@@ -512,7 +513,8 @@ function createFakeDrizzleDb(oldTx?: any): any {
           }
           return [];
         },
-        then(
+        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
         ) {
@@ -563,7 +565,8 @@ function createFakeDrizzleDb(oldTx?: any): any {
           if (table === ShelfUnit) await query.returning();
           return [];
         },
-        then(
+        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
         ) {
@@ -621,7 +624,8 @@ function createFakeDrizzleDb(oldTx?: any): any {
           if (table === ShelfUnit) await query.returning();
           return [];
         },
-        then(
+        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
         ) {
@@ -698,7 +702,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.list({ containsUnitId: "book-1", limit: 10 });
 
@@ -728,7 +732,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.list({
       containsUnitId: "main-1",
@@ -776,7 +780,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const result = await shelfService.list({
       containsUnitId: "release-1",
@@ -818,7 +822,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const result = await shelfService.list({
       variantUnitId: "variant-1",
@@ -834,7 +838,7 @@ describe("ShelfService", () => {
 
   test("rejects reserved system shelf kind keys on create", async () => {
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
 
     await expect(
@@ -867,7 +871,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.addUnit("shelf-1", { unitId: "book-1", kind: "book" });
 
@@ -906,7 +910,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const dto = await shelfService.addUnit("shelf-1", {
       unitId: "book-1",
@@ -949,7 +953,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.addUnit(
       "shelf-1",
@@ -1003,7 +1007,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const result = await shelfService.getShelfUnits(
       "shelf-1",
@@ -1011,7 +1015,9 @@ describe("ShelfService", () => {
       { viewerUserId: "viewer-1" },
     );
 
-    expect(result.units.map((unit) => unit.unitId)).toEqual(["book-2"]);
+    expect(result.units.map((unit: { unitId: string }) => unit.unitId)).toEqual(
+      ["book-2"],
+    );
     expect(findManyArgs.where).toMatchObject({ shelfId: "shelf-1" });
     expect(collectionSearchMock).not.toHaveBeenCalled();
   });
@@ -1039,7 +1045,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.getShelfUnits(
       "shelf-1",
@@ -1087,7 +1093,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.getShelfUnits(
       "shelf-1",
@@ -1100,7 +1106,7 @@ describe("ShelfService", () => {
 
   test("addUnit rejects direct self-containment", async () => {
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
 
     await expect(
@@ -1110,7 +1116,7 @@ describe("ShelfService", () => {
 
   test("mapUnitToKind maps SHELF to shelf kind", async () => {
     const { mapUnitToKind } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
 
     expect(mapUnitToKind("SHELF" as any, null)).toBe("shelf");
@@ -1118,7 +1124,7 @@ describe("ShelfService", () => {
 
   test("applyBatch rejects payloads above the configured cap", async () => {
     const { shelfService, SHELF_ITEM_BATCH_OP_CAP } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
 
     const ops = Array.from({ length: SHELF_ITEM_BATCH_OP_CAP + 1 }, (_, i) => ({
@@ -1170,7 +1176,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const results = await shelfService.applyBatch("shelf-1", [
       { op: "delete", unitId: "old" },
@@ -1215,7 +1221,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const results = await shelfService.applyBatch("shelf-1", [
       { op: "delete", unitId: "x" },
@@ -1252,7 +1258,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const results = await shelfService.applyBatch("shelf-1", [
       {
@@ -1289,7 +1295,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const results = await shelfService.applyBatch("shelf-1", [
       {
@@ -1337,7 +1343,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.create(
       {
@@ -1357,7 +1363,7 @@ describe("ShelfService", () => {
     Object.assign(legacyDbMock, {});
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     let status = 0;
     let message = "";
@@ -1410,7 +1416,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const result = await shelfService.setPinnedTags(
       "shelf-1",
@@ -1455,7 +1461,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.setPinnedTags(
       "shelf-1",
@@ -1497,7 +1503,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.setPinnedTags(
       "shelf-1",
@@ -1541,7 +1547,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.setPinnedTags(
       "shelf-1",
@@ -1559,7 +1565,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     let status = 0;
     try {
@@ -1582,7 +1588,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     let status = 0;
     let message = "";
@@ -1649,7 +1655,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const result = await shelfService.getByOwnerAndSlug(
       "alice-unit",
@@ -1667,7 +1673,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const result = await shelfService.getByOwnerAndSlug(
       "alice-unit",
@@ -1682,7 +1688,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     const result = await shelfService.getByOwnerAndSlug(
       "ghost-user-unit",
@@ -1706,7 +1712,7 @@ describe("ShelfService", () => {
     });
 
     const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual"
+      "./shelf.service.ts?shelf-service-test-actual" as string
     );
     await shelfService.removeUnit("shelf-1", "book-1");
 

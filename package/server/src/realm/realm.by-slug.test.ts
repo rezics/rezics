@@ -43,12 +43,12 @@ const realmDTOStub = {
 };
 const legacyDbMock = {
   unitRealm: {
-    findMany: async () => [],
+    findMany: async (_args?: unknown) => [],
     create: async (input: { data: unknown }) => input.data,
-    delete: async () => undefined,
+    delete: async (_args?: unknown) => undefined,
   },
   realmTagApplication: {
-    findMany: async () => [],
+    findMany: async (_args?: unknown) => [],
   },
 };
 

@@ -8,7 +8,8 @@ import {
 
 function createDb(rowSets: unknown[][]) {
   const createChain = () => ({
-    then(resolve: (value: unknown[]) => unknown) {
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](resolve: (value: unknown[]) => unknown) {
       return Promise.resolve(resolve(rowSets.shift() ?? []));
     },
     leftJoin() {

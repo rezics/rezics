@@ -164,7 +164,7 @@ const moderationCaseRow = {
   state: "new",
   severity: "medium",
   reporterUserId: "reporter-1",
-  subjectUserId: null,
+  subjectUserId: "subject-1",
   target: { kind: "unit", id: "post-1", realmUnitId: null },
   sourceFeedbackId: "feedback-1",
   assignedToUserId: null,

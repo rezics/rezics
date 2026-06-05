@@ -239,7 +239,8 @@ function createFakeDrizzleSelectQuery() {
     orderBy: mock(() => query),
     offset: mock(() => query),
     limit: mock(() => query),
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {

@@ -28,6 +28,7 @@ describe("server Drizzle migration artifacts", () => {
       expect(migrationDirs).toHaveLength(1);
 
       const [baselineDir] = migrationDirs;
+      if (!baselineDir) throw new Error(`Missing baseline for ${packageName}`);
       expect(
         readFileSync(join(drizzleDir, baselineDir, "migration.sql"), "utf8"),
       ).toContain("CREATE");

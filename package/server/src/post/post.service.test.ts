@@ -96,7 +96,7 @@ mock.module("@/unit/language-resolution", () => ({
     languages?: string | readonly string[] | null;
   }) => {
     const raw = input.languages ?? input.explicitLanguage ?? input.language;
-    const parts = Array.isArray(raw) ? raw : (raw ?? "").split(",");
+    const parts = typeof raw === "string" ? raw.split(",") : [...(raw ?? [])];
     lastReadLanguageCandidates = [
       ...new Set(
         parts.map((language) => language.trim().toLowerCase()).filter(Boolean),
@@ -235,7 +235,9 @@ const collectPatchLeafPathsMock = mock((): string[] => []);
 const writeEditorialMetadataHistoryMock = mock(
   async (_tx: any, _input: any) => undefined,
 );
-const blockedUserIdsMock = mock(async (): Promise<string[]> => []);
+const blockedUserIdsMock = mock(
+  async (_viewerUserId?: string): Promise<string[]> => [],
+);
 let lastBlockedAuthorIds: string[] = [];
 const transactionMock = mock(async (fn: any) =>
   fn({
@@ -660,7 +662,8 @@ async function legacyHydratedPost(unitId: string): Promise<any> {
 
 function thenable<T>(resolve: () => Promise<T> | T): any {
   return {
-    then(
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    ["then"](
       onFulfilled: (value: T) => unknown,
       onRejected?: (reason: unknown) => unknown,
     ) {
@@ -1973,7 +1976,7 @@ describe("PostService.byRealm", () => {
 
     await service.byRealm("realm-1", {
       languageMode: "preferred",
-      languages: ["ja", "en"],
+      languages: ["ja", "en"] as any,
     });
 
     const unitWhere = firstPostFindManyArgs().where.unit;

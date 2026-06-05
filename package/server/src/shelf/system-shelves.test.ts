@@ -28,7 +28,7 @@ function firstArg(fn: { mock: { calls: unknown[][] } }) {
 }
 
 async function loadSystemShelves() {
-  return import("./system-shelves.ts?system-shelves-test-actual");
+  return import("./system-shelves.ts?system-shelves-test-actual" as string);
 }
 
 describe("system shelves", () => {

@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
-const postSearchMock = mock(async (_query: string, _params: any) => ({
-  hits: [],
-  estimatedTotalHits: 0,
-  processingTimeMs: 1,
-  query: _query,
-}));
+const postSearchMock = mock(
+  async (_query: string, _params: any): Promise<any> => ({
+    hits: [],
+    estimatedTotalHits: 0,
+    processingTimeMs: 1,
+    query: _query,
+  }),
+);
 
 mock.module("../search-client", () => ({
   searchClient: {

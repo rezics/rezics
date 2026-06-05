@@ -171,7 +171,7 @@ mock.module("@/job/job-boundary", () => ({
 }));
 
 const { ZoneService } = await import(
-  "./zone.service.ts?zone-service-test-actual"
+  "./zone.service.ts?zone-service-test-actual" as string
 );
 
 describe("ZoneService wiki config validation", () => {
@@ -287,13 +287,11 @@ describe("ZoneService wiki config validation", () => {
     });
 
     expect(data?.template).toBe("wiki-classic-home");
-    expect(data?.sections.map((section) => section.section.id)).toEqual([
-      "featured",
-      "tags",
-      "characters",
-      "recent",
-      "manual",
-    ]);
+    expect(
+      data?.sections.map(
+        (section: { section: { id: string } }) => section.section.id,
+      ),
+    ).toEqual(["featured", "tags", "characters", "recent", "manual"]);
     expect(data?.sections[0]?.items[0]).toMatchObject({
       kind: "wikiPost",
       unitId: "wiki-zh",

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { Comment, Unit, UnitCollaborator } from "../db/schema";
 
-const enqueueMock = mock(async () => ({ status: "created" }));
+const enqueueMock = mock(async (_command: unknown) => ({ status: "created" }));
 const broadcastMock = mock(async () => ({ ok: true }));
 
 mock.module("@/job/job-boundary", () => ({
@@ -118,7 +118,8 @@ function installTx(comment: any) {
       }),
       where: mock(() => query),
       limit: mock(() => query),
-      then(
+      // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+      ["then"](
         resolve: (value: unknown[]) => void,
         reject?: (reason: unknown) => void,
       ) {
