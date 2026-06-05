@@ -89,9 +89,11 @@ mock.module("@/unit/language-resolution", () => ({
     sortOrder: 0,
   }),
   resolveEffectiveReadLanguageCandidates: (input: {
+    explicitLanguage?: string | null;
+    language?: string | null;
     languages?: string | readonly string[] | null;
   }) => {
-    const raw = input.languages;
+    const raw = input.languages ?? input.explicitLanguage ?? input.language;
     const parts = Array.isArray(raw) ? raw : (raw ?? "").split(",");
     return [
       ...new Set(
