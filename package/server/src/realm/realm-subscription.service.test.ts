@@ -1,9 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
-import {
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
@@ -14,7 +10,7 @@ import {
   User,
 } from "../db/schema";
 
-installPrismaClientMock();
+const legacyDbMock: Record<string, any> = {};
 
 // Stub fire-and-forget meili sync so it doesn't reach into real env.
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
@@ -30,10 +26,10 @@ const clearSingleExtraKeyMock = mock(async () => undefined);
 const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
 const broadcastMock = mock(async (_event: any) => ({ ok: true }));
 const appendModerationActionMock = mock(async (_tx: any, input: any) =>
-  prismaMock.moderationAction?.create?.({ data: input }),
+  legacyDbMock.moderationAction?.create?.({ data: input }),
 );
 const postGetByUnitIdMock = mock(async (unitId: string) =>
-  prismaMock.post?.findUnique?.({ where: { unitId } }),
+  legacyDbMock.post?.findUnique?.({ where: { unitId } }),
 );
 mock.module("@/meili/realm/sync", () => ({
   patchRealmMemberCountToMeili: mock(async () => undefined),
@@ -58,6 +54,15 @@ mock.module("@/governance/audit.service", () => ({
     appendPrivilegedMutation: auditPrivilegedMutationMock,
   },
 }));
+mock.module("@/content-doc/prisma-json", () => ({
+  nullableContentDocJson: (value: unknown) => value ?? null,
+}));
+mock.module("@/governance/action/realm", () => ({
+  realmPolicyActions: {
+    contentPin: "content.pin",
+    rulesUpdate: "realm.rules.update",
+  },
+}));
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
   broadcast: broadcastMock,
 }));
@@ -70,6 +75,26 @@ mock.module("@/post/post.service", () => ({
   postService: {
     getByUnitId: postGetByUnitIdMock,
   },
+}));
+mock.module("@/post/post.mapper", () => ({
+  mapPostToDTO: (row: unknown) => row,
+}));
+mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageCandidates: () => ["ja", "en"],
+}));
+mock.module("@/unit/mapper", () => ({
+  mapTranslationToDTO: (row: unknown) => row,
+}));
+mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: (user: unknown) => user ?? null,
+}));
+mock.module("@/utils/userSlugHydration", () => ({
+  hydrateUnitOwnerUserSlugRow: async (row: unknown) => row,
+  hydrateUnitOwnerUserSlugs: async (rows: unknown) => rows,
+  loadUserSlugMap: async () => new Map(),
+}));
+mock.module("@/infra/slug-scopes", () => ({
+  requireSlugScopeId: () => "realm-scope",
 }));
 mock.module("./realm-extra.service", () => ({
   appendToList: appendToListMock,
@@ -188,27 +213,27 @@ function createFakeSelect(selection?: Record<string, unknown>) {
               }
             : {};
         if (selection?.total) {
-          return [{ total: await prismaMock.realm?.count?.({ where }) }];
+          return [{ total: await legacyDbMock.realm?.count?.({ where }) }];
         }
         if (selectionKeys.length === 1 && selection?.unitId) {
           return (
-            (await prismaMock.realm?.findMany?.({
+            (await legacyDbMock.realm?.findMany?.({
               where,
               skip,
               take,
             })) ?? []
           );
         }
-        const row = await prismaMock.realm?.findUnique?.({
+        const row = await legacyDbMock.realm?.findUnique?.({
           where: { unitId: values[0] },
         });
         return row ? [row] : [];
       }
       if (table === RealmMember) {
         if (selection?.userId && !selection?.realmUnitId) {
-          return prismaMock.realmMember?.findMany?.({ where: {} }) ?? [];
+          return legacyDbMock.realmMember?.findMany?.({ where: {} }) ?? [];
         }
-        const row = await prismaMock.realmMember?.findUnique?.({
+        const row = await legacyDbMock.realmMember?.findUnique?.({
           where: {
             realmUnitId_userId: {
               realmUnitId: values[0],
@@ -219,7 +244,7 @@ function createFakeSelect(selection?: Record<string, unknown>) {
         return row ? [row] : [];
       }
       if (table === Subscription) {
-        const row = await prismaMock.subscription?.findUnique?.({
+        const row = await legacyDbMock.subscription?.findUnique?.({
           where: {
             subscriberUnitId_subscribedUnitId: {
               subscriberUnitId: values[0],
@@ -231,13 +256,13 @@ function createFakeSelect(selection?: Record<string, unknown>) {
       }
       if (table === RealmRuleAcknowledgement) {
         const finder =
-          prismaMock.realmRuleAcknowledgement?.findUnique ??
-          prismaMock.realmRuleAcknowledgement?.findFirst;
+          legacyDbMock.realmRuleAcknowledgement?.findUnique ??
+          legacyDbMock.realmRuleAcknowledgement?.findFirst;
         const row = await finder?.({ where: {} });
         return row ? [row] : [];
       }
       if (table === Unit) {
-        const row = await prismaMock.unit?.findUnique?.({
+        const row = await legacyDbMock.unit?.findUnique?.({
           where: { id: values[0] },
         });
         latestRuleUnit = row;
@@ -272,11 +297,11 @@ function createFakeInsert(table: unknown) {
     onConflictDoUpdate: mock(() => query),
     returning: mock(async () => {
       if (table === RealmMember) {
-        return [await prismaMock.realmMember.create({ data })];
+        return [await legacyDbMock.realmMember.create({ data })];
       }
       if (table === RealmRuleAcknowledgement) {
         return [
-          await prismaMock.realmRuleAcknowledgement.upsert({
+          await legacyDbMock.realmRuleAcknowledgement.upsert({
             where: {
               realmUnitId_ruleUnitId_version_userId: {
                 realmUnitId: data.realmUnitId,
@@ -294,7 +319,7 @@ function createFakeInsert(table: unknown) {
     }),
     async execute() {
       if (table === Subscription) {
-        await prismaMock.subscription.create({ data });
+        await legacyDbMock.subscription.create({ data });
       }
       return [];
     },
@@ -319,7 +344,7 @@ function createFakeUpdate(table: unknown) {
     returning: mock(async () => {
       if (table === Realm) {
         return [
-          await prismaMock.realm.update({
+          await legacyDbMock.realm.update({
             where: { unitId: "realm-unit-id" },
             data,
           }),
@@ -327,7 +352,7 @@ function createFakeUpdate(table: unknown) {
       }
       if (table === RealmMember) {
         return [
-          await prismaMock.realmMember.update({
+          await legacyDbMock.realmMember.update({
             where: { realmUnitId_userId: {} },
             data,
           }),
@@ -337,7 +362,7 @@ function createFakeUpdate(table: unknown) {
     }),
     async execute() {
       if (table === Unit) {
-        await prismaMock.unit.update({ data: normalizeCounterData(data) });
+        await legacyDbMock.unit.update({ data: normalizeCounterData(data) });
       }
       return [];
     },
@@ -355,8 +380,8 @@ function createFakeDelete(table: unknown) {
   const query = {
     where: mock(() => query),
     async execute() {
-      if (table === RealmMember) await prismaMock.realmMember.delete({});
-      if (table === Subscription) await prismaMock.subscription.delete({});
+      if (table === RealmMember) await legacyDbMock.realmMember.delete({});
+      if (table === Subscription) await legacyDbMock.subscription.delete({});
       return [];
     },
     then(
@@ -377,8 +402,8 @@ const fakeDrizzleDb = {
   update: mock((table: unknown) => createFakeUpdate(table)),
   delete: mock((table: unknown) => createFakeDelete(table)),
   transaction: mock(async (fn: any) => {
-    if (prismaMock.$transaction) {
-      return prismaMock.$transaction(() => fn(fakeDrizzleDb));
+    if (legacyDbMock.$transaction) {
+      return legacyDbMock.$transaction(() => fn(fakeDrizzleDb));
     }
     return fn(fakeDrizzleDb);
   }),
@@ -391,7 +416,7 @@ mock.module("@/governance/capability.service", () => ({
   governanceCapabilityService: {
     realmMembershipForPolicy: mock(
       async (realmUnitId: string, userId: string) => {
-        const member = await prismaMock.realmMember?.findUnique?.({
+        const member = await legacyDbMock.realmMember?.findUnique?.({
           where: { realmUnitId_userId: { realmUnitId, userId } },
         });
         if (!member) return null;
@@ -409,8 +434,9 @@ mock.module("@/governance/capability.service", () => ({
             }))
           : [];
         const grants =
-          (await prismaMock.realmCapabilityGrant?.findMany?.({ where: {} })) ??
-          [];
+          (await legacyDbMock.realmCapabilityGrant?.findMany?.({
+            where: {},
+          })) ?? [];
         return {
           realmUnitId,
           role: member.roleKey,
@@ -459,10 +485,10 @@ interface TxOps {
 }
 
 function installTx(ops: TxOps) {
-  prismaMock.$transaction = mock(
-    async (fn: (tx: typeof prismaMock) => unknown) => fn(prismaMock),
+  legacyDbMock.$transaction = mock(
+    async (fn: (tx: typeof legacyDbMock) => unknown) => fn(legacyDbMock),
   );
-  prismaMock.realmMember = {
+  legacyDbMock.realmMember = {
     create:
       ops.memberCreate ??
       mock(async () => ({
@@ -476,22 +502,22 @@ function installTx(ops: TxOps) {
       ops.memberFindUnique ??
       mock(async () => ({ realmUnitId: REALM, userId: USER })),
   };
-  prismaMock.realm = {
+  legacyDbMock.realm = {
     update: ops.realmUpdate ?? mock(async () => ({ memberCount: 1 })),
     findUnique: ops.realmFindUnique ?? mock(async () => ({ memberCount: 0 })),
   };
-  prismaMock.realmRuleAcknowledgement = {
+  legacyDbMock.realmRuleAcknowledgement = {
     findUnique: ops.ruleAckFindUnique ?? mock(async () => null),
   };
-  prismaMock.subscription = {
+  legacyDbMock.subscription = {
     findUnique: ops.subFindUnique ?? mock(async () => null),
     create: ops.subCreate ?? mock(async () => ({ id: "sub-1" })),
     delete: ops.subDelete ?? mock(async () => ({})),
   };
-  prismaMock.unit = {
+  legacyDbMock.unit = {
     update: ops.unitUpdate ?? mock(async () => ({})),
   };
-  prismaMock.moderationAction = {
+  legacyDbMock.moderationAction = {
     create:
       ops.moderationActionCreate ??
       mock(async ({ data }: any) => ({
@@ -511,24 +537,24 @@ afterEach(() => {
   clearSingleExtraKeyMock.mockClear();
   auditPrivilegedMutationMock.mockClear();
   broadcastMock.mockClear();
-  delete prismaMock.$transaction;
-  delete prismaMock.realmMember;
-  delete prismaMock.realm;
-  delete prismaMock.subscription;
-  delete prismaMock.staffGrant;
-  delete prismaMock.realmCapabilityGrant;
-  delete prismaMock.realmRuleAcknowledgement;
-  delete prismaMock.unit;
-  delete prismaMock.moderationAction;
-  delete prismaMock.unitTranslation;
-  delete prismaMock.post;
+  delete legacyDbMock.$transaction;
+  delete legacyDbMock.realmMember;
+  delete legacyDbMock.realm;
+  delete legacyDbMock.subscription;
+  delete legacyDbMock.staffGrant;
+  delete legacyDbMock.realmCapabilityGrant;
+  delete legacyDbMock.realmRuleAcknowledgement;
+  delete legacyDbMock.unit;
+  delete legacyDbMock.moderationAction;
+  delete legacyDbMock.unitTranslation;
+  delete legacyDbMock.post;
 });
 
 describe("realmService.list", () => {
   test("preferred filtering uses support-language availability before pagination", async () => {
     const findMany = mock(async (_args?: any) => []);
     const count = mock(async (_args?: any) => 0);
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       findMany,
       count,
     };
@@ -570,12 +596,12 @@ describe("realmService.joinRealm", () => {
   test("writes RealmMember, Subscription, and bumps both counters atomically", async () => {
     installTx({});
     await realmService.joinRealm(REALM, USER);
-    expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
-    expect(prismaMock.realmMember.create).toHaveBeenCalledTimes(1);
-    expect(prismaMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++
-    expect(prismaMock.subscription.create).toHaveBeenCalledTimes(1);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount++
-    const subArgs = prismaMock.subscription.create.mock.calls[0]?.[0] as {
+    expect(legacyDbMock.$transaction).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.realmMember.create).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++
+    expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount++
+    const subArgs = legacyDbMock.subscription.create.mock.calls[0]?.[0] as {
       data: {
         channels: string[];
         subscriberUnitId: string;
@@ -592,10 +618,10 @@ describe("realmService.joinRealm", () => {
       subFindUnique: mock(async () => ({ id: "sub-existing" })),
     });
     await realmService.joinRealm(REALM, USER);
-    expect(prismaMock.realmMember.create).toHaveBeenCalledTimes(1);
-    expect(prismaMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++ still
-    expect(prismaMock.subscription.create).toHaveBeenCalledTimes(0); // no new sub
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(0); // subscriberCount NOT bumped
+    expect(legacyDbMock.realmMember.create).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++ still
+    expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(0); // no new sub
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0); // subscriberCount NOT bumped
   });
 
   test("requires current rule acknowledgement before joining when configured", async () => {
@@ -612,7 +638,7 @@ describe("realmService.joinRealm", () => {
     await expect(realmService.joinRealm(REALM, USER)).rejects.toThrow(
       "Realm rules must be acknowledged before joining",
     );
-    expect(prismaMock.realmMember.create).not.toHaveBeenCalled();
+    expect(legacyDbMock.realmMember.create).not.toHaveBeenCalled();
   });
 
   test("creates pending membership when join approval is required", async () => {
@@ -637,7 +663,7 @@ describe("realmService.joinRealm", () => {
 
     await realmService.joinRealm(REALM, USER);
 
-    expect(prismaMock.realmMember.create).toHaveBeenCalledWith(
+    expect(legacyDbMock.realmMember.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           state: "PENDING",
@@ -663,10 +689,10 @@ describe("realmService.removeMember", () => {
       realmUpdate: mock(async () => ({ memberCount: 0 })),
     });
     await realmService.removeMember(REALM, USER);
-    expect(prismaMock.realmMember.delete).toHaveBeenCalledTimes(1);
-    expect(prismaMock.realm.update).toHaveBeenCalledTimes(1); // memberCount--
-    expect(prismaMock.subscription.delete).toHaveBeenCalledTimes(1);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount--
+    expect(legacyDbMock.realmMember.delete).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount--
+    expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount--
   });
 
   test("idempotent for missing member — no decrement of memberCount", async () => {
@@ -676,10 +702,10 @@ describe("realmService.removeMember", () => {
       realmFindUnique: mock(async () => ({ memberCount: 3 })),
     });
     await realmService.removeMember(REALM, USER);
-    expect(prismaMock.realmMember.delete).toHaveBeenCalledTimes(0);
-    expect(prismaMock.realm.update).toHaveBeenCalledTimes(0);
-    expect(prismaMock.subscription.delete).toHaveBeenCalledTimes(0);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.realmMember.delete).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0);
   });
 
   test("idempotent for missing subscription (already muted) — only member side affected", async () => {
@@ -688,10 +714,10 @@ describe("realmService.removeMember", () => {
       realmUpdate: mock(async () => ({ memberCount: 0 })),
     });
     await realmService.removeMember(REALM, USER);
-    expect(prismaMock.realmMember.delete).toHaveBeenCalledTimes(1);
-    expect(prismaMock.realm.update).toHaveBeenCalledTimes(1);
-    expect(prismaMock.subscription.delete).toHaveBeenCalledTimes(0);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.realmMember.delete).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0);
   });
 
   test("records a realm-member moderation action when a moderator removes a member", async () => {
@@ -709,7 +735,7 @@ describe("realmService.removeMember", () => {
       },
     });
 
-    expect(prismaMock.moderationAction.create).toHaveBeenCalledWith({
+    expect(legacyDbMock.moderationAction.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         authority: "REALM",
         realmUnitId: REALM,
@@ -731,9 +757,9 @@ describe("realmService.muteRealm", () => {
       subFindUnique: mock(async () => ({ id: "sub-1" })),
     });
     await realmService.muteRealm(REALM, USER);
-    expect(prismaMock.subscription.delete).toHaveBeenCalledTimes(1);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(1);
-    const unitArgs = prismaMock.unit.update.mock.calls[0]?.[0] as {
+    expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(1);
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1);
+    const unitArgs = legacyDbMock.unit.update.mock.calls[0]?.[0] as {
       data: { subscriberCount: { decrement: number } };
     };
     expect(unitArgs.data.subscriberCount).toEqual({ decrement: 1 });
@@ -744,8 +770,8 @@ describe("realmService.muteRealm", () => {
       subFindUnique: mock(async () => null),
     });
     await realmService.muteRealm(REALM, USER);
-    expect(prismaMock.subscription.delete).toHaveBeenCalledTimes(0);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -755,13 +781,13 @@ describe("realmService.unmuteRealm", () => {
       subFindUnique: mock(async () => null),
     });
     await realmService.unmuteRealm(REALM, USER);
-    expect(prismaMock.subscription.create).toHaveBeenCalledTimes(1);
-    const subArgs = prismaMock.subscription.create.mock.calls[0]?.[0] as {
+    expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(1);
+    const subArgs = legacyDbMock.subscription.create.mock.calls[0]?.[0] as {
       data: { channels: string[] };
     };
     expect(subArgs.data.channels).toEqual(["*"]);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(1);
-    const unitArgs = prismaMock.unit.update.mock.calls[0]?.[0] as {
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1);
+    const unitArgs = legacyDbMock.unit.update.mock.calls[0]?.[0] as {
       data: { subscriberCount: { increment: number } };
     };
     expect(unitArgs.data.subscriberCount).toEqual({ increment: 1 });
@@ -772,14 +798,14 @@ describe("realmService.unmuteRealm", () => {
       subFindUnique: mock(async () => ({ id: "sub-1" })),
     });
     await realmService.unmuteRealm(REALM, USER);
-    expect(prismaMock.subscription.create).toHaveBeenCalledTimes(0);
-    expect(prismaMock.unit.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0);
   });
 });
 
 describe("realmService.getMember", () => {
   test("returns UI-only realm capability hints with membership", async () => {
-    prismaMock.realmMember = {
+    legacyDbMock.realmMember = {
       findUnique: mock(async () => ({
         realmUnitId: REALM,
         userId: USER,
@@ -788,10 +814,10 @@ describe("realmService.getMember", () => {
         updatedAt: new Date("2026-05-28T00:00:00.000Z"),
       })),
     };
-    prismaMock.staffGrant = {
+    legacyDbMock.staffGrant = {
       findMany: mock(async () => []),
     };
-    prismaMock.realmCapabilityGrant = {
+    legacyDbMock.realmCapabilityGrant = {
       findMany: mock(async () => [
         {
           capability: "tag.curate",
@@ -835,7 +861,7 @@ describe("realmService.getMember", () => {
 
 describe("realmService.getMembershipMe", () => {
   test("returns state, capability hints, and stale rule acknowledgement metadata", async () => {
-    prismaMock.realmMember = {
+    legacyDbMock.realmMember = {
       findUnique: mock(async () => ({
         realmUnitId: REALM,
         userId: USER,
@@ -845,13 +871,13 @@ describe("realmService.getMembershipMe", () => {
         updatedAt: new Date("2026-05-28T00:00:00.000Z"),
       })),
     };
-    prismaMock.staffGrant = {
+    legacyDbMock.staffGrant = {
       findMany: mock(async () => []),
     };
-    prismaMock.realmCapabilityGrant = {
+    legacyDbMock.realmCapabilityGrant = {
       findMany: mock(async () => []),
     };
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       findUnique: mock(async () => ({
         extra: { rule: "rule-unit-2" },
         ruleVersion: 1,
@@ -860,7 +886,7 @@ describe("realmService.getMembershipMe", () => {
         ruleRequireOnUpdate: true,
       })),
     };
-    prismaMock.realmRuleAcknowledgement = {
+    legacyDbMock.realmRuleAcknowledgement = {
       findFirst: mock(async () => ({
         realmUnitId: REALM,
         ruleUnitId: "rule-unit-1",
@@ -892,10 +918,10 @@ describe("realmService.getMembershipMe", () => {
   });
 
   test("returns non-member metadata without requiring acknowledgement when no rule is configured", async () => {
-    prismaMock.realmMember = {
+    legacyDbMock.realmMember = {
       findUnique: mock(async () => null),
     };
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       findUnique: mock(async () => ({
         extra: {},
         ruleVersion: 1,
@@ -904,7 +930,7 @@ describe("realmService.getMembershipMe", () => {
         ruleRequireOnUpdate: true,
       })),
     };
-    prismaMock.realmRuleAcknowledgement = {
+    legacyDbMock.realmRuleAcknowledgement = {
       findFirst: mock(async () => null),
     };
 
@@ -933,13 +959,13 @@ describe("realmService.getMembershipMe", () => {
 describe("realmService.acknowledgeCurrentRule", () => {
   test("upserts acknowledgement for current rule unit and version", async () => {
     const acceptedAt = new Date("2026-05-28T00:00:00.000Z");
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       findUnique: mock(async () => ({
         extra: { rule: "rule-unit-1" },
         ruleVersion: 3,
       })),
     };
-    prismaMock.realmRuleAcknowledgement = {
+    legacyDbMock.realmRuleAcknowledgement = {
       upsert: mock(async () => ({
         realmUnitId: REALM,
         ruleUnitId: "rule-unit-1",
@@ -963,7 +989,7 @@ describe("realmService.acknowledgeCurrentRule", () => {
       acceptedLanguage: "ja",
     });
 
-    expect(prismaMock.realmRuleAcknowledgement.upsert).toHaveBeenCalledWith(
+    expect(legacyDbMock.realmRuleAcknowledgement.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
           realmUnitId_ruleUnitId_version_userId: {
@@ -981,7 +1007,7 @@ describe("realmService.acknowledgeCurrentRule", () => {
 describe("realmService.getRulePolicy", () => {
   test("returns the current rule reference and gates", async () => {
     const updatedAt = new Date("2026-05-28T00:00:00.000Z");
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       findUnique: mock(async () => ({
         unitId: REALM,
         extra: { rule: "rule-unit-1" },
@@ -1008,7 +1034,7 @@ describe("realmService.getRulePolicy", () => {
 describe("realmService.resolveRule", () => {
   test("resolves the requested translation and source rule post", async () => {
     const now = new Date("2026-05-28T00:00:00.000Z");
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       findUnique: mock(async () => ({
         unitId: REALM,
         extra: { rule: "rule-unit-1" },
@@ -1019,7 +1045,7 @@ describe("realmService.resolveRule", () => {
         rulePolicyUpdatedAt: now,
       })),
     };
-    prismaMock.unit = {
+    legacyDbMock.unit = {
       findUnique: mock(async () => ({
         id: "rule-unit-1",
         type: "POST",
@@ -1053,7 +1079,7 @@ describe("realmService.resolveRule", () => {
         ],
       })),
     };
-    prismaMock.post = {
+    legacyDbMock.post = {
       findUnique: mock(async () => ({
         unitId: "rule-post-ja",
         authorUserId: USER,
@@ -1121,7 +1147,7 @@ describe("realmService.resolveRule", () => {
 describe("realmService.updateRulePolicy", () => {
   test("updates the rule reference and acknowledgement gates", async () => {
     const updatedAt = new Date("2026-05-28T00:00:00.000Z");
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       update: mock(async () => ({
         unitId: REALM,
         extra: { rule: "rule-unit-2" },
@@ -1157,7 +1183,7 @@ describe("realmService.updateRulePolicy", () => {
       "rule",
       "rule-unit-2",
     );
-    expect(prismaMock.realm.update).toHaveBeenCalledWith(
+    expect(legacyDbMock.realm.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { unitId: REALM },
         data: expect.objectContaining({
@@ -1196,7 +1222,7 @@ describe("realmService.updateRulePolicy", () => {
   });
 
   test("clears the rule reference when ruleUnitId is null", async () => {
-    prismaMock.realm = {
+    legacyDbMock.realm = {
       update: mock(async () => ({
         unitId: REALM,
         extra: {},

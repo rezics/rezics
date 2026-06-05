@@ -400,6 +400,10 @@ databases may be reset and reseeded.
   - Applied progress: realm tag service tests no longer install or populate the
     shared legacy Prisma client mock; the realm tag path now runs against its
     fake Drizzle db with focused realm/external boundary mocks.
+  - Applied progress: realm subscription, membership, rule policy, and
+    community list tests no longer install the shared legacy Prisma client mock;
+    their fake Drizzle db now uses a package-local fixture object plus focused
+    realm/external boundary mocks.
   - Applied progress: auth public boundary tests now mock the Drizzle db client
     and governance permission projection directly instead of installing the
     legacy Prisma client mock; stale admin slug endpoint coverage was removed
