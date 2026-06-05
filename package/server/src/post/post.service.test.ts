@@ -1005,6 +1005,7 @@ mock.module("@/unit/publication-policy", () => ({
 }));
 
 mock.module("@/unit/variant-context", () => ({
+  hydrateVariantContextSummaries: mock(async () => new Map()),
   variantContextForRow: mock(() => null),
 }));
 

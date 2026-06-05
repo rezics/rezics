@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
 import { Elysia } from "elysia";
 
@@ -80,10 +80,18 @@ mock.module("@/governance", () => ({
 
 mock.module("@/unit/collaborative-metadata", () => ({
   applySparsePatch: mock((_: unknown, patch: unknown) => patch),
+  assertCanEditCollaborativeMetadata: mock(() => undefined),
   assertEditorialPatchAllowed: mock(() => undefined),
+  collectPatchLeafPaths: mock(() => []),
+  writeEditorialMetadataHistory: mock(async () => undefined),
 }));
 
 mock.module("@/unit/language-resolution", () => ({
+  primarySupportLanguageCreate: mock((language: string) => ({
+    language,
+    isPrimary: true,
+    sortOrder: 0,
+  })),
   resolveEffectiveReadLanguageCandidates: mock((input: any) => {
     const languages = Array.isArray(input.languages)
       ? input.languages
@@ -104,22 +112,31 @@ const mapPostToDTOMock = mock((post: any) => ({
 }));
 
 mock.module("./post.mapper", () => ({
+  mapCommentPromotionToDTO: mock((promotion: unknown) => promotion),
   mapPostToDTO: mapPostToDTOMock,
 }));
 
-mock.module("./post.service", () => ({
-  postService: {
-    create: createMock,
-    submitToRealm: submitToRealmMock,
-    getByUnitId: getByUnitIdMock,
-    list: listMock,
-    byRealm: byRealmMock,
-    update: updateMock,
-    delete: deleteMock,
-  },
-}));
+mock.module("./post.service", async () => {
+  const actual = await import("./post.service.ts?post-api-test-actual");
+  return {
+    ...actual,
+    postService: {
+      create: createMock,
+      submitToRealm: submitToRealmMock,
+      getByUnitId: getByUnitIdMock,
+      list: listMock,
+      byRealm: byRealmMock,
+      update: updateMock,
+      delete: deleteMock,
+    },
+  };
+});
 
 describe("postApi", () => {
+  afterAll(() => {
+    mock.restore();
+  });
+
   beforeEach(() => {
     currentIdentity = {
       sub: "owner-1",
