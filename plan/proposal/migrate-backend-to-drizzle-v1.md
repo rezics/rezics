@@ -408,6 +408,9 @@ databases may be reset and reseeded.
   - Applied progress: shelf system ensure/list API tests no longer install the
     legacy Prisma client mock; they rely on focused auth, shelf, user, and
     system shelf boundary mocks.
+  - Applied progress: shelf service tests no longer import or install the
+    shared legacy Prisma client mock; their existing fake Drizzle db now uses a
+    package-local fixture object plus focused helper mocks for import isolation.
 
 ## 5. Auth and Better Auth
 

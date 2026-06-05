@@ -1,5 +1,4 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import {
   Post,
   Shelf,
@@ -13,7 +12,7 @@ import {
   UserUnitCollection,
 } from "../db/schema";
 
-installPrismaClientMock();
+const legacyDbMock: Record<string, any> = {};
 
 const SEED_TAG_ID_BY_NAME: Record<string, string> = {
   book: "11111111-1111-1111-1111-111111111111",
@@ -27,6 +26,38 @@ mock.module("@/infra/seed-tags", () => ({
   getSeedTagId: (name: string) => SEED_TAG_ID_BY_NAME[name] ?? null,
   initSeedTagsCache: async () => undefined,
   getSeedTagsSnapshot: () => ({ ...SEED_TAG_ID_BY_NAME }),
+}));
+mock.module("@/content-doc/prisma-json", () => ({
+  nullableContentDocJson: (value: unknown) => value ?? null,
+}));
+mock.module("@/unit/publication-policy", () => ({
+  assertLicenseSlug: (value: unknown) =>
+    typeof value === "string" ? value : null,
+  resolveStoredLicenseSlug: (value: unknown) =>
+    typeof value === "string" ? value : null,
+}));
+mock.module("@/unit/variant-context", () => ({
+  hydrateVariantContextSummaries: async (rows: unknown) => rows,
+  variantContextForRow: (row: { variantContext?: unknown }) =>
+    row.variantContext ?? null,
+}));
+mock.module("@/utils/errors", () => ({
+  AppError: class AppError extends Error {
+    statusCode: number;
+
+    constructor(statusCode: number, message: string) {
+      super(message);
+      this.statusCode = statusCode;
+    }
+  },
+}));
+mock.module("@/utils/userSlugHydration", () => ({
+  hydrateUnitOwnerUserSlugRow: async (row: unknown) => row,
+  hydrateUnitOwnerUserSlugs: async (rows: unknown) => rows,
+}));
+mock.module("@/utils/sanitizeUser", () => ({
+  publicUserSelect: {},
+  mapPublicUser: (user: unknown) => user,
 }));
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
@@ -65,7 +96,7 @@ mock.module("@/meili/search-client", () => ({
   },
 }));
 
-Object.assign(prismaMock, {});
+Object.assign(legacyDbMock, {});
 
 let lastShelfRows = new Map<string, any>();
 let lastUnitRows = new Map<string, any>();
@@ -162,7 +193,7 @@ function shelfUnitWhereFromValues(values: unknown[]) {
 }
 
 function createFakeDrizzleDb(oldTx?: any): any {
-  const legacy = oldTx ?? prismaMock;
+  const legacy = oldTx ?? legacyDbMock;
   const fakeDb: any = {
     select(selection?: Record<string, unknown>) {
       let table: unknown;
@@ -599,8 +630,8 @@ function createFakeDrizzleDb(oldTx?: any): any {
       return query;
     },
     transaction(fn: any) {
-      if (prismaMock.$transaction) {
-        return prismaMock.$transaction((tx: any) =>
+      if (legacyDbMock.$transaction) {
+        return legacyDbMock.$transaction((tx: any) =>
           fn(createFakeDrizzleDb(tx)),
         );
       }
@@ -655,7 +686,7 @@ function makeShelfListRow(overrides: Record<string, unknown> = {}) {
 describe("ShelfService", () => {
   test("list filters public discovery by published public shelves containing the target Unit", async () => {
     let findManyArgs: any;
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findMany: async (args: any) => {
           findManyArgs = args;
@@ -683,7 +714,7 @@ describe("ShelfService", () => {
 
   test("list keeps containsUnitId primary containment separate from variantUnitId context", async () => {
     let findManyArgs: any;
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findMany: async (args: any) => {
           findManyArgs = args;
@@ -714,7 +745,7 @@ describe("ShelfService", () => {
   });
 
   test("list hydrates the matched contained unit for exact results", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findMany: async () => [makeShelfListRow()],
         count: async () => 1,
@@ -753,7 +784,7 @@ describe("ShelfService", () => {
   });
 
   test("list hydrates the matched variant context when filtering by variantUnitId", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findMany: async () => [makeShelfListRow()],
         count: async () => 1,
@@ -806,7 +837,7 @@ describe("ShelfService", () => {
   test("addUnit enqueues containedUnitIds sync after the canonical write", async () => {
     enqueueMock.mockClear();
 
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       unit: {
         findUnique: async () => ({ type: "BOOK", post: null }),
       },
@@ -839,7 +870,7 @@ describe("ShelfService", () => {
     enqueueMock.mockClear();
     let createManyArgs: any;
 
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       unit: {
         findUnique: async () => ({ type: "BOOK", post: null }),
       },
@@ -882,7 +913,7 @@ describe("ShelfService", () => {
     const deleteMany = mock(async () => ({ count: 0 }));
     const createMany = mock(async () => ({ count: 1 }));
 
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       unit: {
         findUnique: async () => ({ type: "BOOK", post: null }),
       },
@@ -941,7 +972,7 @@ describe("ShelfService", () => {
     contentSearchMock.mockResolvedValueOnce({ hits: [{ id: "book-2" }] });
 
     let findManyArgs: any;
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "owner-1" } }),
       },
@@ -975,7 +1006,7 @@ describe("ShelfService", () => {
     });
 
     let findManyArgs: any;
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "owner-1" } }),
       },
@@ -1012,7 +1043,7 @@ describe("ShelfService", () => {
     collectionSearchMock.mockResolvedValueOnce({ hits: [] });
 
     let findManyArgs: any;
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "owner-1" } }),
       },
@@ -1083,7 +1114,7 @@ describe("ShelfService", () => {
     const applied: string[] = [];
     let createManyArgs: any;
 
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
           shelfUnit: {
@@ -1139,7 +1170,7 @@ describe("ShelfService", () => {
   test("applyBatch records per-op failure without rolling back successful ops", async () => {
     enqueueMock.mockClear();
 
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
           shelfUnit: {
@@ -1170,7 +1201,7 @@ describe("ShelfService", () => {
   test("applyBatch resolves reorderToPage server-side", async () => {
     enqueueMock.mockClear();
 
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
           shelfUnit: {
@@ -1216,7 +1247,7 @@ describe("ShelfService", () => {
   });
 
   test("applyBatch attach op rejects self-relation", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
           shelfUnit: { findUnique: async () => null },
@@ -1242,7 +1273,7 @@ describe("ShelfService", () => {
 
   test("create persists tagIds as pinned UnitTag rows", async () => {
     const captured: { unitTagsCreate?: any[] } = {};
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       unit: {
         create: async () => ({ id: "shelf-new" }),
       },
@@ -1286,7 +1317,7 @@ describe("ShelfService", () => {
   });
 
   test("create rejects non-seed tagIds", async () => {
-    Object.assign(prismaMock, {});
+    Object.assign(legacyDbMock, {});
 
     const { shelfService } = await import("./shelf.service");
     let status = 0;
@@ -1309,7 +1340,7 @@ describe("ShelfService", () => {
 
   test("setPinnedTags inserts added rows only (insert-only diff)", async () => {
     const calls: { op: string; payload?: any }[] = [];
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "u1" } }),
       },
@@ -1354,7 +1385,7 @@ describe("ShelfService", () => {
 
   test("setPinnedTags deletes removed rows only (delete-only diff)", async () => {
     const calls: { op: string; payload?: any }[] = [];
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "u1" } }),
       },
@@ -1397,7 +1428,7 @@ describe("ShelfService", () => {
 
   test("setPinnedTags performs mixed-diff insert + delete", async () => {
     const calls: { op: string; payload?: any }[] = [];
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "u1" } }),
       },
@@ -1439,7 +1470,7 @@ describe("ShelfService", () => {
 
   test("setPinnedTags is idempotent — same set yields no row churn", async () => {
     const calls: string[] = [];
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "u1" } }),
       },
@@ -1474,7 +1505,7 @@ describe("ShelfService", () => {
   });
 
   test("setPinnedTags rejects non-owner", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "owner" } }),
       },
@@ -1495,7 +1526,7 @@ describe("ShelfService", () => {
   });
 
   test("setPinnedTags rejects non-seed identifiers", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       shelf: {
         findUnique: async () => ({ unit: { userId: "u1" } }),
       },
@@ -1519,7 +1550,7 @@ describe("ShelfService", () => {
   });
 
   test("getByOwnerAndSlug returns 200-shaped payload for a system slug", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       unit: {
         findFirst: async ({ where }: any) => {
           if (
@@ -1576,7 +1607,7 @@ describe("ShelfService", () => {
   });
 
   test("getByOwnerAndSlug returns null for a non-system slug", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       unit: {
         findFirst: async () => ({ id: "should-not-be-read" }),
       },
@@ -1591,7 +1622,7 @@ describe("ShelfService", () => {
   });
 
   test("getByOwnerAndSlug returns null when no matching unit exists", async () => {
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       unit: { findFirst: async () => null },
     });
 
@@ -1606,7 +1637,7 @@ describe("ShelfService", () => {
   test("removeUnit enqueues containedUnitIds sync after the canonical delete", async () => {
     enqueueMock.mockClear();
 
-    Object.assign(prismaMock, {
+    Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
           shelfUnit: { deleteMany: async () => ({ count: 1 }) },
