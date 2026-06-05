@@ -23,6 +23,12 @@ model, while work and shelf recommendations appear as scheduled carousel rows.
 The first target is a user-usable Home feed and Realm feed; book/game/media
 library feeds should follow the same contract.
 
+**Dependency / sequencing:** this plan should run after the ranking field portion
+of `plan/proposal/comment-tree-ranking-cutover.md` lands
+(`bestScore`, `hotScore`, `topScore`, `risingScore`, serving sort fields, and
+sort-key cursors). It does **not** depend on the comment discovery/root/children
+slice UI landing; comment slice rendering remains owned by the comment cutover.
+
 ## Durable constraints & decisions
 
 - (type) Feed responses are row-based, not section-based: a response contains
@@ -37,6 +43,13 @@ library feeds should follow the same contract.
   `shelves` for v1), title i18n key/params, and bounded item summaries. Home,
   realm, and library feeds may use different row recipes while preserving the
   same shape.
+- (type) Feed sort surface is `best`, `hot`, `new`, `top`, and `rising` for
+  Home, Realm, and Library feeds. Sort semantics come from ranking projection
+  fields: `best -> bestScore`, `hot -> hotScore`, `top -> topScore`,
+  `rising -> risingScore`, and `new -> createdAt desc`.
+- (type) Feed cursors include the active sort key value plus a stable row id or
+  post unit id. The cursor shape is sort-aware; it is not a generic offset or
+  `PostListQuery.start` replacement with a different name.
 - (test) Review rows and ordinary post rows use the same whole-row click model:
   clicking the row opens the primary feed target; nested links such as reviewed
   work, realm, variant, author, rating, and actions do not trigger the row
@@ -57,6 +70,10 @@ library feeds should follow the same contract.
 - (comment) The feed service owns row scheduling. Frontend renderers must not
   randomly insert carousels or synthesize feed order, because pagination,
   debugging, and analytics need server-visible row decisions.
+- (comment) Feed rows do not render comment discovery/root/children slices in
+  v1. Comment discovery and fake-tree/family rendering are owned by
+  `comment-tree-ranking-cutover`; feed content rows link to comment surfaces but
+  do not merge comment slices into the feed.
 - (comment) Loading states are part of the feed experience: initial load uses
   feed-shaped skeleton rows, next-page load uses a bottom sentinel state, and
   retry keeps already loaded rows visible.
@@ -70,28 +87,30 @@ library feeds should follow the same contract.
   and root contract exports if needed by app/api/server packages.
 - [ ] 1.3 Add frontend API client, keys, and React Query helpers under
   `package/api/src/feed/`, matching existing package API conventions.
-- [ ] 1.4 Define cursor fields and page-size behavior in types rather than
-  relying on `PostListQuery.start`.
+- [ ] 1.4 Define feed sort literals (`best`, `hot`, `new`, `top`, `rising`) and
+  sort-aware cursor fields in types rather than relying on `PostListQuery.start`.
 
 ## 2. Server Feed Service
 
 - [ ] 2.1 Add a backend feed domain under `package/server/src/feed/` with
   `{feed}.api.ts`, `.service.ts`, `.mapper.ts`, and `.types.ts` files.
 - [ ] 2.2 Mount the feed API from `package/server/src/index.ts`.
-- [ ] 2.3 Implement Home feed row selection by combining recent/ranked post
-  rows with bounded work and shelf carousel rows.
+- [ ] 2.3 Implement Home feed row selection by combining ranked post rows
+  (`bestScore`/`hotScore`/`topScore`/`risingScore`/`createdAt`) with bounded work
+  and shelf carousel rows.
 - [ ] 2.4 Implement Realm feed row selection by reading realm-scoped post
   membership from `UnitRealm`, preserving moderation and language visibility
-  rules equivalent to the current `postService.byRealm`.
+  rules equivalent to the current `postService.byRealm`, and applying the same
+  feed sort surface as Home.
 - [ ] 2.5 Implement Library feed scope for at least book library, with the same
-  row contract and a path for game/media reuse.
+  row contract, ranking sort surface, and a path for game/media reuse.
 - [ ] 2.6 Hydrate content row context server-side: reviewed work target title/id,
   realm summary when relevant, variant context, and primary href.
 - [ ] 2.7 Implement deterministic row scheduling for carousels with no adjacent
   carousel rows and bounded carousel frequency.
 - [ ] 2.8 Add service/api tests for cursor pagination, scope filtering, review
-  target hydration, carousel scheduling, and insufficient-carousel-data skip
-  behavior.
+  target hydration, ranking sort mapping, carousel scheduling, and
+  insufficient-carousel-data skip behavior.
 
 ## 3. Frontend Feed Renderer
 
@@ -125,6 +144,9 @@ library feeds should follow the same contract.
   service explicitly returns them as rows.
 - [ ] 4.5 Ensure feed routes use the existing read-language context and do not
   duplicate DTOs in app code.
+- [ ] 4.6 Update realm feed route/search state and sort switcher to the feed sort
+  surface (`best`, `hot`, `new`, `top`, `rising`) rather than the current
+  `new`/`top`/`hot` subset.
 
 ## 5. Factory and Fixtures
 
@@ -152,6 +174,8 @@ library feeds should follow the same contract.
 ## Out of scope
 
 - Full personalized recommendation ranking beyond deterministic v1 row recipes.
+- Comment discovery/root/children slices and fake-tree rendering; that work is
+  owned by `comment-tree-ranking-cutover`.
 - Analytics event instrumentation for feed impressions and carousel engagement.
 - Major redesign of post thread/detail pages.
 - Backward compatibility for internal feed DTO names during development; this
