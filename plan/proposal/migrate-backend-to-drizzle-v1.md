@@ -439,6 +439,9 @@ databases may be reset and reseeded.
     `syncAllPolls`) to Drizzle reads against server `Poll`, `PollOption`,
     `Unit`, `UnitTranslation`, and `UnitSupportLanguage`, preserving published
     Unit filtering and stale/unpublished single-row deletion.
+  - Applied progress: moved content patch eligibility and realm id patching to
+    Drizzle reads against server `Unit`, `UnitRealm`, and `Realm`, preserving
+    public/indexable Unit checks and private realm exclusion.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and

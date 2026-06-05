@@ -1,6 +1,36 @@
 import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
 
+function createDb(rowSets: unknown[][]) {
+  const createChain = () => ({
+    then(resolve: (value: unknown[]) => unknown) {
+      return Promise.resolve(resolve(rowSets.shift() ?? []));
+    },
+    leftJoin() {
+      return createChain();
+    },
+    where() {
+      return createChain();
+    },
+    orderBy() {
+      return createChain();
+    },
+    async limit() {
+      return rowSets.shift() ?? [];
+    },
+  });
+
+  return {
+    select() {
+      return {
+        from() {
+          return createChain();
+        },
+      };
+    },
+  };
+}
+
 function setServerEnvForSearchTests() {
   process.env.DATABASE_URL ??=
     "postgresql://postgres:postgres@localhost:5432/rezics_book";
@@ -907,42 +937,44 @@ describe("search sync global moderation projection", () => {
 
   test("realm id patches exclude hidden UnitRealm rows while keeping locked rows", async () => {
     setServerEnvForSearchTests();
-    const { patchContentRealmIds, setSearchPrismaClient } = await import(
-      "./sync"
-    );
+    const { patchContentRealmIds, setSearchDb } = await import("./sync");
     const patchContent = mock(async (_docs: any[]) => undefined);
     const deleteContent = mock(async (_ids: string[]) => undefined);
-    setSearchPrismaClient({
-      unit: {
-        findUnique: mock(async () => ({
-          type: "BOOK",
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-          moderationStatus: "APPROVED",
-          catalogEntryKind: null,
-        })),
-      },
-      unitRealm: {
-        findMany: mock(async () => [
+    setSearchDb(
+      createDb([
+        [
+          {
+            type: "BOOK",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            moderationStatus: "APPROVED",
+            catalogEntryKind: null,
+          },
+        ],
+        [
           {
             realmUnitId: "realm-a",
             moderationStatus: "APPROVED",
             isLocked: true,
-            realm: { realm: { isPublic: true } },
-          },
-          {
-            realmUnitId: "realm-b",
-            moderationStatus: "REMOVED",
-            realm: { realm: { isPublic: true } },
+            realmIsPublic: true,
           },
           {
             realmUnitId: "realm-private",
             moderationStatus: "APPROVED",
-            realm: { realm: { isPublic: false } },
+            realmIsPublic: false,
           },
-        ]),
-      },
-    } as any);
+        ],
+        [
+          {
+            type: "BOOK",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            moderationStatus: "APPROVED",
+            catalogEntryKind: null,
+          },
+        ],
+      ]) as never,
+    );
 
     await patchContentRealmIds(
       { patchContent, deleteContent } as any,
@@ -953,5 +985,33 @@ describe("search sync global moderation projection", () => {
       { id: "post-1", realmIds: ["realm-a"] },
     ]);
     expect(deleteContent).not.toHaveBeenCalled();
+  });
+
+  test("realm id patches delete content when Unit is no longer indexable", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentRealmIds, setSearchDb } = await import("./sync");
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    setSearchDb(
+      createDb([
+        [
+          {
+            type: "BOOK",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            moderationStatus: "REMOVED",
+            catalogEntryKind: null,
+          },
+        ],
+      ]) as never,
+    );
+
+    await patchContentRealmIds(
+      { patchContent, deleteContent } as any,
+      "post-1",
+    );
+
+    expect(deleteContent).toHaveBeenCalledWith(["post-1"]);
+    expect(patchContent).not.toHaveBeenCalled();
   });
 });

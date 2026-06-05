@@ -21,8 +21,10 @@ import {
   Feedback,
   Poll,
   PollOption,
+  Realm,
   Unit,
   UnitAlias,
+  UnitRealm,
   UnitSupportLanguage,
   UnitTranslation,
   User,
@@ -186,16 +188,17 @@ const visibleUnitTagsInclude = {
 } as const;
 
 async function isContentPatchEligible(unitId: string): Promise<boolean> {
-  const unit = await getSearchPrismaClient().unit.findUnique({
-    where: { id: unitId },
-    select: {
-      type: true,
-      status: true,
-      visibility: true,
-      moderationStatus: true,
-      catalogEntryKind: true,
-    },
-  });
+  const [unit] = await getSearchDb()
+    .select({
+      type: Unit.type,
+      status: Unit.status,
+      visibility: Unit.visibility,
+      moderationStatus: Unit.moderationStatus,
+      catalogEntryKind: Unit.catalogEntryKind,
+    })
+    .from(Unit)
+    .where(eq(Unit.id, unitId))
+    .limit(1);
   return isPublicIndexableContentUnit(unit);
 }
 
@@ -1234,23 +1237,25 @@ export async function patchContentRealmIds(
     await client.deleteContent([unitId]);
     return;
   }
-  const inRealms = await getSearchPrismaClient().unitRealm.findMany({
-    where: {
-      unitId,
-      moderationStatus: "APPROVED",
-    },
-    include: {
-      realm: {
-        select: {
-          realm: {
-            select: { isPublic: true },
-          },
-        },
-      },
-    },
-  });
+  const inRealms = await getSearchDb()
+    .select({
+      realmUnitId: UnitRealm.realmUnitId,
+      moderationStatus: UnitRealm.moderationStatus,
+      isLocked: UnitRealm.isLocked,
+      realmIsPublic: Realm.isPublic,
+    })
+    .from(UnitRealm)
+    .leftJoin(Realm, eq(Realm.unitId, UnitRealm.realmUnitId))
+    .where(
+      and(
+        eq(UnitRealm.unitId, unitId),
+        eq(UnitRealm.moderationStatus, "APPROVED"),
+      ),
+    );
 
-  const realmIds = realmIdsForSearch({ inRealms });
+  const realmIds = (inRealms as any[])
+    .filter((realm) => realm.realmIsPublic !== false)
+    .map((realm) => realm.realmUnitId);
   await patchContentIfEligible(client, unitId, { realmIds });
 }
 
