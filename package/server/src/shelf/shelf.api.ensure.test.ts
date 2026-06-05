@@ -70,14 +70,13 @@ const ensureSystemShelfMock = mock(async () => ({
   created: true,
 }));
 
-mock.module("./system-shelves", () => ({
-  ensureSystemShelf: ensureSystemShelfMock,
-  bootstrapSystemShelves: async () => {},
-  findSystemShelf: async () => null,
-  isSystemKindKey: (k: string) =>
-    ["favorites", "backlog", "active", "completed"].includes(k),
-  SYSTEM_KIND_KEYS: ["favorites", "backlog", "active", "completed"],
-}));
+mock.module("./system-shelves", async () => {
+  const actual = await import("./system-shelves.ts?shelf-api-test-actual");
+  return {
+    ...actual,
+    ensureSystemShelf: ensureSystemShelfMock,
+  };
+});
 
 async function makeApp() {
   const { shelfApi } = await import("./shelf.api");

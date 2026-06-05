@@ -27,11 +27,13 @@ function firstArg(fn: { mock: { calls: unknown[][] } }) {
   return fn.mock.calls[0]?.[0] as any;
 }
 
+async function loadSystemShelves() {
+  return import("./system-shelves.ts?system-shelves-test-actual");
+}
+
 describe("system shelves", () => {
   test("recognizes reserved system kind keys", async () => {
-    const { isSystemKindKey, SYSTEM_KIND_KEYS } = await import(
-      "./system-shelves"
-    );
+    const { isSystemKindKey, SYSTEM_KIND_KEYS } = await loadSystemShelves();
 
     expect(SYSTEM_KIND_KEYS).toEqual([
       "favorites",
@@ -44,7 +46,7 @@ describe("system shelves", () => {
   });
 
   test("bootstrap creates four slug-bearing system shelves with formatted titles", async () => {
-    const { bootstrapSystemShelves } = await import("./system-shelves");
+    const { bootstrapSystemShelves } = await loadSystemShelves();
     const mocks = makeClient();
 
     await bootstrapSystemShelves("user-1", "alice", mocks.client as any);
@@ -95,7 +97,7 @@ describe("system shelves", () => {
   });
 
   test("ensure lookup resolves existing shelf via unit slug index without creating", async () => {
-    const { ensureSystemShelf } = await import("./system-shelves");
+    const { ensureSystemShelf } = await loadSystemShelves();
     const mocks = makeClient();
     mocks.unitFindFirst.mockResolvedValueOnce({ id: "existing-active" });
 
@@ -117,7 +119,7 @@ describe("system shelves", () => {
   });
 
   test("ensure safety-net create mints slug, scope, and formatted title", async () => {
-    const { ensureSystemShelf } = await import("./system-shelves");
+    const { ensureSystemShelf } = await loadSystemShelves();
     const mocks = makeClient();
 
     const result = await ensureSystemShelf(
@@ -136,7 +138,7 @@ describe("system shelves", () => {
   });
 
   test("ensure create branch recovers from unique constraint race and returns created: false", async () => {
-    const { ensureSystemShelf } = await import("./system-shelves");
+    const { ensureSystemShelf } = await loadSystemShelves();
     const mocks = makeClient();
 
     mocks.unitFindFirst.mockResolvedValueOnce(null);
@@ -159,7 +161,7 @@ describe("system shelves", () => {
   });
 
   test("findSystemShelf returns null when nothing exists", async () => {
-    const { findSystemShelf } = await import("./system-shelves");
+    const { findSystemShelf } = await loadSystemShelves();
     const mocks = makeClient();
 
     const result = await findSystemShelf(
@@ -173,7 +175,7 @@ describe("system shelves", () => {
   });
 
   test("findSystemShelf returns the unitId when shelf exists", async () => {
-    const { findSystemShelf } = await import("./system-shelves");
+    const { findSystemShelf } = await loadSystemShelves();
     const mocks = makeClient();
     mocks.unitFindFirst.mockResolvedValueOnce({ id: "fav-shelf-id" });
 
