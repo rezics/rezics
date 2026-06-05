@@ -578,6 +578,8 @@ databases may be reset and reseeded.
     tree posts, and wiki ContentTranslation fixtures through Drizzle; the
     orchestrator passes `SeedCtx` instead of the server Prisma client for wiki
     post creation.
+  - Applied progress: factory orchestrator now reads chapter seed book authors
+    through Drizzle `Unit` selects instead of `ctx.prisma.unit.findUnique`.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

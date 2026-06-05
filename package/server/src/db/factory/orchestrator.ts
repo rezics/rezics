@@ -1,4 +1,6 @@
+import { eq } from "drizzle-orm";
 import { PostKind } from "../../../prisma/generated/client.js";
+import { Unit } from "../schema";
 import { seedBooks, seedChaptersForBook } from "./books.js";
 import { seedEchoKVWithDb } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
@@ -146,10 +148,11 @@ export async function runFactorySeed(
   done = stepTimer("Step 10: Chapters + ContentStructureNode rows");
   const bookUnitMap = new Map<string, string>();
   for (const book of books) {
-    const unit = await ctx.prisma.unit.findUnique({
-      where: { id: book.id },
-      select: { userId: true },
-    });
+    const [unit] = await ctx.db
+      .select({ userId: Unit.userId })
+      .from(Unit)
+      .where(eq(Unit.id, book.id))
+      .limit(1);
     if (unit?.userId) bookUnitMap.set(book.id, unit.userId);
   }
 
