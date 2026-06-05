@@ -170,7 +170,9 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 
-const { ZoneService } = await import("./zone.service");
+const { ZoneService } = await import(
+  "./zone.service.ts?zone-service-test-actual"
+);
 
 describe("ZoneService wiki config validation", () => {
   const service = new ZoneService(repository);
