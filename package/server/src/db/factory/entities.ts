@@ -10,10 +10,16 @@ import {
   subjectAttributionRoleRegistry,
   subjectAttributionRoles,
 } from "@rezics/contract";
-import type { Prisma, PrismaClient } from "../../../prisma/generated/client.js";
+import type { Prisma } from "../../../prisma/generated/client.js";
 import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
 import type { ServerDb } from "../client.js";
-import { Entity, Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
+import {
+  Entity,
+  SubjectAttribution,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../schema";
 import { generateTranslations, getFaker } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
@@ -268,13 +274,13 @@ export async function seedSubjectEntities(
 }
 
 export async function seedSubjectAttributions(
-  prisma: PrismaClient,
+  db: Pick<ServerDb, "insert">,
   works: Array<{ id: string }>,
   subjects: CreatedEntity[],
 ): Promise<number> {
   if (works.length === 0 || subjects.length === 0) return 0;
 
-  const rows: Prisma.SubjectAttributionCreateManyInput[] = [];
+  const rows: (typeof SubjectAttribution.$inferInsert)[] = [];
   for (const work of works) {
     if (!randomBoolean(0.7)) continue;
     for (const [index, subject] of pickN(subjects, randomInt(1, 3)).entries()) {
@@ -299,10 +305,9 @@ export async function seedSubjectAttributions(
 
   const BATCH = 500;
   for (let i = 0; i < rows.length; i += BATCH) {
-    await prisma.subjectAttribution.createMany({
-      data: rows.slice(i, i + BATCH),
-      skipDuplicates: true,
-    });
+    const batch = rows.slice(i, i + BATCH);
+    if (batch.length === 0) continue;
+    await db.insert(SubjectAttribution).values(batch).onConflictDoNothing();
   }
 
   return rows.length;

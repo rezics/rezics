@@ -547,6 +547,9 @@ databases may be reset and reseeded.
   - Applied progress: factory person/organization/subject entity creation now
     bulk-inserts `Unit`, `Entity`, translations, and support languages through
     Drizzle; subject attribution flushing remains on the legacy Prisma path.
+  - Applied progress: factory subject attribution flushing now uses Drizzle
+    `SubjectAttribution` inserts with conflict ignores instead of Prisma
+    `createMany`.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

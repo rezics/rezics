@@ -73,7 +73,7 @@ export async function runFactorySeed(
   ];
   const allWorks = [...books, ...games, ...mediaItems];
   const subjectAttributionCount = await seedSubjectAttributions(
-    ctx.prisma,
+    ctx.db,
     allWorks,
     subjects,
   );
