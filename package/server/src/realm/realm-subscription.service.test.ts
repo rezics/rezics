@@ -454,7 +454,9 @@ mock.module("@/governance/capability.service", () => ({
   },
 }));
 
-const { realmService } = await import("./realm.service");
+const { realmService } = await import(
+  "./realm.service.ts?realm-subscription-service-test-actual"
+);
 
 const REALM = "realm-unit-id";
 const USER = "user-unit-id";

@@ -420,7 +420,7 @@ mock.module("../db/client", () => ({
 }));
 
 const { RealmService, REALM_TAG_VISIBILITY_THRESHOLD } = await import(
-  "./realm.service"
+  "./realm.service.ts?realm-tag-service-test-actual"
 );
 
 function resetWriteMocks() {

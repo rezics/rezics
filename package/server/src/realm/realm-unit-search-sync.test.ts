@@ -94,7 +94,9 @@ mock.module("./realm-extra.service", () => ({
   setSingleExtraKey: (value: unknown) => value,
 }));
 
-const { RealmService } = await import("./realm.service");
+const { RealmService } = await import(
+  "./realm.service.ts?realm-unit-search-sync-test-actual"
+);
 
 describe("UnitRealm post search sync", () => {
   const service = new RealmService();
