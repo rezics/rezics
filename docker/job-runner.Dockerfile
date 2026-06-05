@@ -1,19 +1,14 @@
 # Job-runner image. No schema of its own (pg-boss tables live in
-# JOB_DATABASE_URL). Search sync still imports the server Prisma generated
-# client until `@rezics/search` finishes its Drizzle cutover; history and
-# maintenance use exported Drizzle db helpers. One binary, role-switched at
-# runtime via JOB_RUNNER_ROLE (all | http | worker) — Kamal runs the HTTP and
-# worker roles off this same image.
+# JOB_DATABASE_URL). Search sync, history, and maintenance use exported
+# Drizzle db helpers. One binary, role-switched at runtime via
+# JOB_RUNNER_ROLE (all | http | worker) — Kamal runs the HTTP and worker
+# roles off this same image.
 #
 #   docker build -f docker/base.Dockerfile -t rezics-base:dev .
 #   docker build -f docker/job-runner.Dockerfile -t rezics-job-runner:dev .
 
 # --- build stage -----------------------------------------------------------
 FROM rezics-base:dev AS build
-
-WORKDIR /repo/package/server
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
-RUN bunx prisma generate
 
 WORKDIR /repo/package/job-runner
 RUN bun run build:linux

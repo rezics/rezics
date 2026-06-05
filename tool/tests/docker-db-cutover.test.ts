@@ -16,19 +16,13 @@ describe("Docker database cutover", () => {
       "reaction",
       "history",
       "ranking",
+      "server",
+      "job-runner",
     ]) {
       const source = readDockerfile(service);
       expect(source).not.toContain("bunx prisma generate");
       expect(source).not.toContain("generated Prisma client");
       expect(source).not.toContain("Prisma 7");
     }
-  });
-
-  test("server Prisma generation is isolated to services still blocked by runtime search/server cutover", () => {
-    expect(readDockerfile("server")).toContain("bunx prisma generate");
-    expect(readDockerfile("job-runner")).toContain("bunx prisma generate");
-    expect(readDockerfile("job-runner")).toContain(
-      "until `@rezics/search` finishes its Drizzle cutover",
-    );
   });
 });

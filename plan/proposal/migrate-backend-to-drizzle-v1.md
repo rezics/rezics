@@ -538,12 +538,11 @@ databases may be reset and reseeded.
   Postgres setup says Drizzle migrations run through repo db tooling.
 - [x] 7.3 Update `bin/deploy` to run `bun run --cwd package/<unit> db:deploy`
   or the repo `tool db deploy --package=<unit>` equivalent.
-- [ ] 7.4 Update Docker build comments and migrate images from "carry Prisma CLI
+- [x] 7.4 Update Docker build comments and migrate images from "carry Prisma CLI
   + schema" to "carry Bun + Drizzle Kit + migrations".
   - Applied progress: removed `bunx prisma generate` and Prisma-era Docker
-    comments from auth, notify, history, and ranking images; job-runner now only
-    documents the temporary server Prisma generation needed by search sync.
-    `server` and job-runner remain blocked by server/search runtime cutover.
+    comments from auth, notify, history, ranking, server, and job-runner images;
+    Docker cutover tests now assert all service images avoid Prisma generation.
 - [x] 7.5 Update production release, rollback, troubleshooting, runtime
   inventory, deployment guide, and env/secrets docs to reference Drizzle
   migration flow and Drizzle migration tables instead of Prisma.

@@ -1,5 +1,6 @@
 # Main API server image. Owns the primary schema; compiles the cluster
-# entrypoint (src/cluster.ts). Engineless Prisma 7 + pg adapter.
+# entrypoint (src/cluster.ts). Drizzle migrations run through db tooling,
+# not during image build.
 #
 #   docker build -f docker/base.Dockerfile -t rezics-base:dev .
 #   docker build -f docker/server.Dockerfile -t rezics-server:dev .
@@ -8,8 +9,6 @@
 FROM rezics-base:dev AS build
 WORKDIR /repo/package/server
 
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
-RUN bunx prisma generate
 RUN bun run build:linux
 
 # --- runtime stage ---------------------------------------------------------
