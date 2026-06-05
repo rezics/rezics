@@ -716,8 +716,21 @@ databases may be reset and reseeded.
 - [ ] 8.5 Run package tests most likely to catch query regressions:
   `server`, `auth`, `notify`, `reaction`, `history`, `ranking`, `search`,
   `job-runner`, and `utils`.
+  - Verification on 2026-06-05: `bun test package/auth`, `package/notify`,
+    `package/reaction`, `package/history`, `package/ranking`,
+    `package/search`, `package/job-runner`, and `package/utils` pass when run
+    as package-scoped suites. Server focused tests used during the migration
+    pass, but `cd package/server && bun test` is still blocked by broad
+    cross-file mock pollution and the remaining post/service harness failures,
+    so this item remains open.
 - [ ] 8.6 Run repo checks: `bun run check:convention`, `bun run check:tokens`,
   `bun run format:check`, and `bun run knip`.
+  - Verification on 2026-06-05: `bun run check:convention` and
+    `bun run check:tokens` pass. `bun run format:check` fails before checking
+    files because `package/about/biome.json` is a nested root config under the
+    repo root config. `bun run knip` still reports the existing broad unused
+    files/dependencies/exports/unlisted dependencies inventory, so this item
+    remains open.
 - [x] 8.7 Grep verification must find no surviving runtime references to
   `#/prisma/client`, `@rezics/*/prisma`, `@prisma`, `schema.prisma`,
   `prisma migrate`, `PrismaClient`, or `_prisma_migrations`, except historical
