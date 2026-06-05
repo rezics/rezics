@@ -542,6 +542,8 @@ databases may be reset and reseeded.
   - Applied progress: factory score seeding now inserts `ScoreRealmField`,
     `ScoreEntry`, and `ScoreAggregate` rows through Drizzle instead of Prisma
     `createMany`.
+  - Applied progress: factory pinboard/announcement JSON updates now update
+    `Realm.extra` through Drizzle instead of Prisma.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

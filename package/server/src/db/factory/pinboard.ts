@@ -1,4 +1,5 @@
-import type { Prisma } from "../../../prisma/generated/client.js";
+import { eq } from "drizzle-orm";
+import { Realm } from "../schema";
 import type { SeedCtx } from "./strategy.js";
 import type { CreatedPost, CreatedUnit } from "./types.js";
 import { pickN, randomInt } from "./utils.js";
@@ -32,9 +33,9 @@ export async function seedPinboard(
       extra.announcement = pickN(postIds, announcementCount);
     }
 
-    await ctx.prisma.realm.update({
-      where: { unitId: realm.id },
-      data: { extra: extra as Prisma.InputJsonValue },
-    });
+    await ctx.db
+      .update(Realm)
+      .set({ extra })
+      .where(eq(Realm.unitId, realm.id));
   }
 }
