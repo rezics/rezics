@@ -1,12 +1,4 @@
 import {
-  createdAt,
-  jsonData,
-  nullableTimestamp,
-  timestampMs,
-  updatedAt,
-  uuidv7PrimaryKey,
-} from "./columns";
-import {
   boolean,
   foreignKey,
   index,
@@ -18,6 +10,14 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 import { ltree } from "./custom-types";
 import { ModerationStatus, PinKind, PostKind } from "./enums";
 import { User } from "./identity";

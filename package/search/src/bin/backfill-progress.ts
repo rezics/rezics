@@ -9,8 +9,9 @@
  * source table in primary-key order with no global lock; interrupting it only
  * leaves later rows to be processed by the next run.
  */
-import { sql } from "drizzle-orm";
+
 import { createServerDb } from "@rezics/server/db/factory";
+import { sql } from "drizzle-orm";
 import { SearchClient, syncProgress, type UserUnitProgressRow } from "../index";
 
 const BATCH_SIZE = 1000;

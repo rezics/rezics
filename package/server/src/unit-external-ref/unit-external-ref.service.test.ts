@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
-  UnitExternalRefService,
   type UnitExternalRefRepository,
+  UnitExternalRefService,
 } from "./unit-external-ref.service";
 
 const refRules = [

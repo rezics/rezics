@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { ContentDoc, PostExtra } from "@rezics/contract";
-import { PostKind, UnitType } from "./storage-values.js";
 import { generatePostExtra, generateTranslations } from "./generators";
+import { PostKind, UnitType } from "./storage-values.js";
 
 function isContentDoc(value: unknown): value is ContentDoc {
   return (

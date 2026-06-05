@@ -3,9 +3,9 @@ import type {
   ContentSearchResult,
 } from "@rezics/contract";
 import { resolveSlugRefs } from "../../shared/slug-ref";
-import { searchClient } from "../search-client";
 import { buildPreferredLanguageFilter } from "../search/filters";
 import { resolveContentHitDisplay } from "../search/read-language";
+import { searchClient } from "../search-client";
 
 function displayRank(item: any): number {
   if (item.catalogEntryKind === "MAIN") return 0;

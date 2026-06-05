@@ -1,4 +1,4 @@
-import { eq, inArray, and } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { Unit } from "../db/schema";
 import type { PublicUserSelected } from "./sanitizeUser";
 

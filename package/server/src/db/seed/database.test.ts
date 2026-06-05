@@ -1,6 +1,6 @@
+import { describe, expect, mock, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, mock, test } from "bun:test";
 import { RESET_DATABASE_TABLES, resetDatabase } from "./database";
 
 const schemaDir = new URL("../schema", import.meta.url).pathname;

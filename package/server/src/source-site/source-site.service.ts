@@ -5,7 +5,7 @@ import type {
   UpdateSourceSiteInput,
 } from "@rezics/contract";
 import { isValidSourceRefRules } from "@rezics/contract";
-import { and, count, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
+import { and, count, eq, ilike, inArray, or, type SQL, sql } from "drizzle-orm";
 import { Entity, SourceSite, Unit, UnitTranslation } from "../db/schema";
 import { AppError } from "../utils/errors";
 import type { SourceSiteWithRelations } from "./source-site.types";

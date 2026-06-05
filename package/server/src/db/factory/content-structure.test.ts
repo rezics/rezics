@@ -1,9 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import { ContentStructureAnchor, ContentStructureNode } from "../schema";
 import {
   buildFactoryContentStructureAnchorRows,
   rebuildFactoryContentStructureAnchors,
 } from "./content-structure";
-import { ContentStructureAnchor, ContentStructureNode } from "../schema";
 
 describe("buildFactoryContentStructureAnchorRows", () => {
   test("projects materialized nodes with path and title ancestry", () => {

@@ -1,4 +1,3 @@
-import { createdAt, updatedAt, uuidv7PrimaryKey } from "./columns";
 import {
   boolean,
   index,
@@ -11,6 +10,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import { createdAt, updatedAt, uuidv7PrimaryKey } from "./columns";
 import { UnitAliasKind, UnitAliasStatus } from "./enums";
 import { User } from "./identity";
 

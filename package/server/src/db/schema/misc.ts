@@ -1,12 +1,4 @@
 import {
-  createdAt,
-  jsonData,
-  nullableTimestamp,
-  timestampMs,
-  updatedAt,
-  uuidv7PrimaryKey,
-} from "./columns";
-import {
   bigint,
   index,
   integer,
@@ -18,6 +10,14 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 import { EmailVerificationContractStatus } from "./enums";
 import { User } from "./identity";
 

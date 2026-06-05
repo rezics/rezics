@@ -1,7 +1,7 @@
 import type { RealmSearchOptions, RealmSearchResult } from "@rezics/contract";
-import { searchClient } from "../search-client";
 import { buildPreferredLanguageFilter } from "../search/filters";
 import { resolveRealmHitDisplay } from "../search/read-language";
+import { searchClient } from "../search-client";
 
 export async function searchRealms(
   opts: RealmSearchOptions,

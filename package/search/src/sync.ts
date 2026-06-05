@@ -9,11 +9,11 @@ import type {
   UserSearchDocument,
 } from "@rezics/contract";
 import {
+  type Language,
   mainMarkdownSource,
   normalizeLanguage,
   RATING_TAGS,
   readCoverUrlFromExtra,
-  type Language,
 } from "@rezics/contract";
 import type { ServerDb } from "@rezics/server/db";
 import {
@@ -37,13 +37,13 @@ import {
   Series,
   SeriesContentIndex,
   ShelfUnit,
+  SubjectAttribution,
   Unit,
   UnitAlias,
   UnitRealm,
   UnitSupportLanguage,
   UnitTag,
   UnitTranslation,
-  SubjectAttribution,
   User,
   UserUnitCollection,
   UserUnitProgress,

@@ -1,7 +1,7 @@
 import type { PostSearchOptions, PostSearchResult } from "@rezics/contract";
-import { searchClient } from "../search-client";
 import { buildPreferredLanguageFilter } from "../search/filters";
 import { resolvePostHitDisplay } from "../search/read-language";
+import { searchClient } from "../search-client";
 
 export async function searchPosts(
   opts: PostSearchOptions,

@@ -1,7 +1,7 @@
 import {
+  SYSTEM_SHELF_KIND_KEYS as CONTRACT_SYSTEM_SHELF_KIND_KEYS,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   formatSystemShelfTitle,
-  SYSTEM_SHELF_KIND_KEYS as CONTRACT_SYSTEM_SHELF_KIND_KEYS,
   type SystemShelfKindKey,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";

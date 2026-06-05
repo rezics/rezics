@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
-  SubscriptionService,
   type SubscriptionRepository,
+  SubscriptionService,
 } from "./subscription.service";
 
 const SUBSCRIBER = "subscriber-unit-id";

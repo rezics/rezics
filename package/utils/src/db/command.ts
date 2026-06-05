@@ -1,5 +1,5 @@
-import { getEnv } from "../lib/env";
 import { createAuthDbClient } from "../lib/db-factory";
+import { getEnv } from "../lib/env";
 import { createSeedSearchClient } from "../lib/search";
 
 export async function runDbReset(): Promise<void> {

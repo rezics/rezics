@@ -1,5 +1,5 @@
-import { oauthProvider } from "@better-auth/oauth-provider";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { oauthProvider } from "@better-auth/oauth-provider";
 import { betterAuth } from "better-auth";
 import { admin, genericOAuth, jwt } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins/email-otp";

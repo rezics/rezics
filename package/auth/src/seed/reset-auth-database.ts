@@ -1,4 +1,4 @@
-import { db, type AuthDb } from "../db/client";
+import { type AuthDb, db } from "../db/client";
 import {
   accounts,
   oauthAccessTokens,

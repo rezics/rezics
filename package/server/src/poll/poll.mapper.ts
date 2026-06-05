@@ -1,5 +1,5 @@
 import type { PollDTO, PollOptionDTO, PollResultsDTO } from "@rezics/contract";
-import { PollOption } from "../db/schema";
+import type { PollOption } from "../db/schema";
 import type { PollWithOptions } from "./poll.types";
 
 type PollOptionRow = typeof PollOption.$inferSelect;

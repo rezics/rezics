@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
-import type { UnitRepository, UnitService } from "./unit.service";
 import type { UnitWithRelations } from "./types";
+import type { UnitRepository, UnitService } from "./unit.service";
 
 mock.module("@/content-doc/json-write", () => ({
   nullableContentDocJson: (value: unknown) => value ?? null,

@@ -6,7 +6,6 @@ import {
   withCoverUrl,
 } from "@rezics/contract";
 import { generateBetween } from "../../shelf/fractional-index";
-import { UnitStatus, UnitType } from "./storage-values.js";
 import {
   Shelf,
   ShelfUnit,
@@ -17,6 +16,7 @@ import {
 } from "../schema";
 import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
 import {

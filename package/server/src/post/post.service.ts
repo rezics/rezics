@@ -34,8 +34,8 @@ import {
   ne,
   notInArray,
   or,
-  sql,
   type SQL,
+  sql,
 } from "drizzle-orm";
 import { blockService } from "@/block/block.service";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
@@ -65,13 +65,13 @@ import {
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
+  ScoreEntry,
   Unit,
   UnitRealm,
   UnitSupportLanguage,
   UnitTag,
   UnitTranslation,
   User,
-  ScoreEntry,
 } from "../db/schema";
 import { moderationActionService } from "../governance/moderation-action.service";
 import { AppError } from "../utils/errors";

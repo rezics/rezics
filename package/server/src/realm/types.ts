@@ -1,3 +1,7 @@
+import {
+  type PublicUserSelected,
+  publicUserSelect,
+} from "@/utils/sanitizeUser";
 import type {
   Realm,
   RealmMember,
@@ -5,10 +9,6 @@ import type {
   UnitSupportLanguage,
   UnitTranslation,
 } from "../db/schema";
-import {
-  publicUserSelect,
-  type PublicUserSelected,
-} from "@/utils/sanitizeUser";
 
 // Relation payload shape for realm metadata.
 export const realmInclude = {

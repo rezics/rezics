@@ -1,5 +1,5 @@
-import { createdAt, uuidv7PrimaryKey } from "./columns";
 import { index, pgTable, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { createdAt, uuidv7PrimaryKey } from "./columns";
 export const UserBlock = pgTable(
   "UserBlock",
   {

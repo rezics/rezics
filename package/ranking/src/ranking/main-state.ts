@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm";
 import { createServerDb } from "@rezics/server/db/factory";
+import { sql } from "drizzle-orm";
 
 export type MainStateReaderOptions = {
   serverDatabaseUrl: string;

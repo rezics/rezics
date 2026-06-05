@@ -1,6 +1,6 @@
 import type { PollSearchOptions, PollSearchResult } from "@rezics/contract";
-import { searchClient } from "../search-client";
 import { buildPreferredLanguageFilter } from "../search/filters";
+import { searchClient } from "../search-client";
 
 export async function searchPolls(
   opts: PollSearchOptions,

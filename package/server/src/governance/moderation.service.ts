@@ -21,16 +21,16 @@ import {
 } from "../db/schema";
 import { mapUnitRealmToDTO } from "../realm/realm.mapper";
 import {
-  governanceCapabilityService,
   type GovernanceCapabilityService,
+  governanceCapabilityService,
 } from "./capability.service";
 import {
   mapModerationActionToDTO,
   mapModerationCaseToDTO,
 } from "./governance.mapper";
 import {
-  moderationActionService,
   type ModerationActionService,
+  moderationActionService,
 } from "./moderation-action.service";
 import type { GovernanceListOptions } from "./types";
 

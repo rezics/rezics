@@ -1,6 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { UnitType } from "./storage-values.js";
 import {
   Shelf,
   ShelfUnit,
@@ -10,6 +9,7 @@ import {
   User,
 } from "../schema";
 import { seedEngagement } from "./engagement";
+import { UnitType } from "./storage-values.js";
 import type { SeedCtx } from "./strategy";
 
 type CountSpec = { target?: number; max: number };

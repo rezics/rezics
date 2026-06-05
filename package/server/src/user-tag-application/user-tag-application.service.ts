@@ -4,8 +4,8 @@ import type {
   UserSettings,
 } from "@rezics/contract";
 import { and, asc, eq } from "drizzle-orm";
-import { generateBetween } from "../shelf/fractional-index";
 import { Subscription, User, UserTagApplication } from "../db/schema";
+import { generateBetween } from "../shelf/fractional-index";
 import type { UserTagApplicationRow } from "./user-tag-application.types";
 
 type DirectUserTagVisibilityInput = {

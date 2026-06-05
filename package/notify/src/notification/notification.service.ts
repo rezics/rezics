@@ -1,7 +1,7 @@
 import { isAggregatable, KIND_REGISTRY } from "@rezics/contract";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
-import { notifications, type NotificationRow } from "../db/schema";
+import { type NotificationRow, notifications } from "../db/schema";
 import { mapToAggregatedItems } from "./notification.mapper";
 
 const AGGREGATABLE_KINDS: string[] = Object.entries(KIND_REGISTRY)

@@ -7,12 +7,6 @@ import type {
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
-import { serverJobProducer } from "../job/job-boundary";
-import {
-  assertCanEditCollaborativeMetadata,
-  createDrizzleCollaborativeMetadataTx,
-  writeEditorialMetadataHistory,
-} from "../unit/collaborative-metadata";
 import {
   Entity,
   SubjectAttribution,
@@ -20,6 +14,12 @@ import {
   UnitSupportLanguage,
   UnitTranslation,
 } from "../db/schema";
+import { serverJobProducer } from "../job/job-boundary";
+import {
+  assertCanEditCollaborativeMetadata,
+  createDrizzleCollaborativeMetadataTx,
+  writeEditorialMetadataHistory,
+} from "../unit/collaborative-metadata";
 import { AppError } from "../utils/errors";
 import { mapSubjectAttributionToDTO } from "./subject-attribution.mapper";
 import type { SubjectAttributionWithRelations } from "./types";

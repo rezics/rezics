@@ -6,6 +6,7 @@ import type {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useEffect, useMemo } from "react";
+import { useLocalizedFederatedSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import {
   AdvancedSearch,
   FederatedResultList,
@@ -17,7 +18,6 @@ import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchHistory } from "../hooks/useSearchHistory";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
-import { useLocalizedFederatedSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export { isSearchCategory } from "../models/category";
 

@@ -21,8 +21,8 @@ import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
 

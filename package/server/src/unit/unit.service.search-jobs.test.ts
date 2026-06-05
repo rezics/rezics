@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
-import type { UnitRepository, UnitService } from "./unit.service";
 import type { UnitWithRelations } from "./types";
+import type { UnitRepository, UnitService } from "./unit.service";
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const cleanupReactionsMock = mock(async () => undefined);

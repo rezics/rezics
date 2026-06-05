@@ -1,4 +1,3 @@
-import { createdAt, updatedAt } from "./columns";
 import {
   boolean,
   foreignKey,
@@ -10,6 +9,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import { createdAt, updatedAt } from "./columns";
 import { User } from "./identity";
 import { Realm } from "./realm";
 

@@ -2,16 +2,16 @@ import type {
   CreateUnitAliasInput,
   PatchUnitAliasPinInput,
   RezicsSessionClaims,
-  UnitAliasStatus,
   UnitAliasListQuery,
+  UnitAliasStatus,
   UpdateUnitAliasInput,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { and, asc, desc, eq, gt, ilike, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, ilike, or, type SQL, sql } from "drizzle-orm";
+import type { ServerDb } from "../db/client";
+import { Unit, UnitAlias, UnitAliasVote } from "../db/schema";
 import { serverJobProducer } from "../job/job-boundary";
 import { isAdminRole, verifyAdminFromDb } from "../middleware";
-import { Unit, UnitAlias, UnitAliasVote } from "../db/schema";
-import type { ServerDb } from "../db/client";
 import { hasAuthorityOver } from "../unit/authority";
 import { AppError, forbidden, notFound } from "../utils/errors";
 import { normalizeUnitAliasValue, trimUnitAliasValue } from "./normalizer";

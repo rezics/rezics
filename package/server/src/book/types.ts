@@ -1,5 +1,9 @@
 // Type only used in server, otherwise use contract
 
+import {
+  type PublicUserSelected,
+  publicUserSelect,
+} from "@/utils/sanitizeUser";
 import type {
   Book,
   CreditAttribution,
@@ -8,10 +12,6 @@ import type {
   UnitSupportLanguage,
   UnitTranslation,
 } from "../db/schema";
-import {
-  publicUserSelect,
-  type PublicUserSelected,
-} from "@/utils/sanitizeUser";
 
 /**
  * Relation shape mirrored by book hydration.

@@ -13,8 +13,8 @@ import type { BookLibSortKey } from "@/search/components/SearchFilter";
 import { useInjectedTags } from "@/search/hooks/useInjectedTags";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { parseSearchString } from "@/search/models/searchQuery";
-import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 
 import { BookLibSectionRef } from "../sections/BookLibSection";

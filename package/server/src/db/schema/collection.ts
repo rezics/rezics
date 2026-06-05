@@ -1,4 +1,4 @@
-import { createdAt, jsonData, timestampMs, updatedAt } from "./columns";
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -10,8 +10,8 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
+import { createdAt, jsonData, timestampMs, updatedAt } from "./columns";
 import { ContentStructureNode } from "./content-structure";
 import { UserUnitProgressStatus } from "./enums";
 import { User } from "./identity";

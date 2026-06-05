@@ -1,4 +1,3 @@
-import { createdAt, jsonData, updatedAt } from "./columns";
 import {
   index,
   pgTable,
@@ -8,6 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import { createdAt, jsonData, updatedAt } from "./columns";
 import { ContentStructureNode } from "./content-structure";
 
 export const Series = pgTable(

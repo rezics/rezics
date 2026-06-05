@@ -4,8 +4,8 @@ import type {
 } from "@rezics/contract";
 import { RATING_TAGS } from "@rezics/contract";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
-import { gameSystemRequirementService } from "../game-system-requirement/service";
 import { Entity, Unit, UnitTranslation } from "../db/schema";
+import { gameSystemRequirementService } from "../game-system-requirement/service";
 
 export const EXPECTED_GAME_PLATFORM_SLUGS = [
   "windows",

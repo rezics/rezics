@@ -1,5 +1,5 @@
 import type { UpsertContentTranslationInput } from "@rezics/contract";
-import { asc, and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { ContentTranslation, UnitSupportLanguage } from "../db/schema";
 import type { ContentTranslationRow } from "./types";
 

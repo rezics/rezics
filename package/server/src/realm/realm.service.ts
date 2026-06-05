@@ -37,8 +37,8 @@ import {
   lte,
   ne,
   or,
-  sql,
   type SQL,
+  sql,
 } from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/json-write";
 import { realmPolicyActions } from "@/governance/action/realm";
@@ -60,10 +60,10 @@ import {
 import type { ServerDb } from "../db/client";
 import {
   Realm,
-  RealmTagApplication as RealmTagApplicationTable,
-  RealmTagApplicationVote,
   RealmMember,
   RealmRuleAcknowledgement,
+  RealmTagApplication as RealmTagApplicationTable,
+  RealmTagApplicationVote,
   Subscription,
   TagVote,
   Unit,

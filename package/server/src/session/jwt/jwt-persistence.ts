@@ -7,9 +7,9 @@ import {
   type JwtPublicJwk,
 } from "@rezics/jwt";
 import { desc, eq } from "drizzle-orm";
-import type { CachedJwtService } from "../../jwt/jwtServiceRepository";
-import { getJwtService as getCachedJwtService } from "../../jwt/jwtServiceCache";
 import { Jwks } from "../../db/schema";
+import { getJwtService as getCachedJwtService } from "../../jwt/jwtServiceCache";
+import type { CachedJwtService } from "../../jwt/jwtServiceRepository";
 
 export type JwksRow = typeof Jwks.$inferSelect;
 

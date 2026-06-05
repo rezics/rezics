@@ -1,5 +1,5 @@
-import { collectEditorialPatchLeafPaths } from "@rezics/contract";
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { collectEditorialPatchLeafPaths } from "@rezics/contract";
 import { mapActualTranslationPatchPaths } from "@/unit/collaborative-metadata";
 import type { BookRepository } from "./book.service";
 import type { BookWithRelations } from "./types";

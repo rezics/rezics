@@ -1,3 +1,7 @@
+import {
+  type PublicUserSelected,
+  publicUserSelect,
+} from "@/utils/sanitizeUser";
 import type {
   Shelf,
   ShelfUnit,
@@ -6,10 +10,6 @@ import type {
   UnitTag,
   UnitTranslation,
 } from "../db/schema";
-import {
-  publicUserSelect,
-  type PublicUserSelected,
-} from "@/utils/sanitizeUser";
 
 // Relation payload shape for shelf metadata. Shelf items are paged separately through
 // `GET /shelf/:unitId/units`.

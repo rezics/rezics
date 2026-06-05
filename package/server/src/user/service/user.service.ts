@@ -2,10 +2,9 @@
  * Never send unHashed passwords to server
  */
 
-import type { UpdateUser } from "@rezics/contract";
-import type { Language, UserSettings } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { randomUUID } from "node:crypto";
+import type { Language, UpdateUser, UserSettings } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { getDefaultRealmId } from "@/infra/default-realm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";

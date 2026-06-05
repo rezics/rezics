@@ -1,11 +1,4 @@
-import {
-  createdAt,
-  jsonData,
-  nullableTimestamp,
-  timestampMs,
-  updatedAt,
-  uuidv7PrimaryKey,
-} from "./columns";
+import { sql } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
@@ -17,8 +10,15 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
+import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 import { Feedback } from "./engagement";
 import {
   AccountEnforcementKind,

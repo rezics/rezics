@@ -1,8 +1,8 @@
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type {
   ContentStructureItem,
   SeriesDiagnosticsDTO,
 } from "@rezics/contract";
-import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { SeriesRepository } from "./series.service";
 
 const enqueueMock = mock(async (_command: unknown) => ({ status: "created" }));

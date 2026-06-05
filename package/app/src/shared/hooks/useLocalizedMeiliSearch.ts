@@ -1,10 +1,3 @@
-import type {
-  ContentSearchOptions,
-  FederatedSearchOptions,
-  PollSearchOptions,
-  PostSearchOptions,
-  RealmSearchOptions,
-} from "@rezics/contract";
 import { federatedSearchQueryOptions } from "@rezics/api/meili/meili.federated";
 import {
   contentSearchQueryOptions,
@@ -12,6 +5,13 @@ import {
   postSearchQueryOptions,
   realmSearchQueryOptions,
 } from "@rezics/api/meili/meili.queries";
+import type {
+  ContentSearchOptions,
+  FederatedSearchOptions,
+  PollSearchOptions,
+  PostSearchOptions,
+  RealmSearchOptions,
+} from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useReadLanguageContext } from "./useReadLanguageCandidates";

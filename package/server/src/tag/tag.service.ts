@@ -25,8 +25,8 @@ import {
   lte,
   sql,
 } from "drizzle-orm";
-import { TagVote, Unit, UnitTag, UnitTranslation } from "../db/schema";
 import { serverJobProducer } from "@/job/job-boundary";
+import { TagVote, Unit, UnitTag, UnitTranslation } from "../db/schema";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
 
 /** Score at or below this threshold hides a UnitTag from regular users. */

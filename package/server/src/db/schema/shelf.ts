@@ -1,4 +1,3 @@
-import { createdAt, jsonData, updatedAt } from "./columns";
 import {
   foreignKey,
   index,
@@ -9,6 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import { createdAt, jsonData, updatedAt } from "./columns";
 
 export const Shelf = pgTable("Shelf", {
   unitId: uuid()

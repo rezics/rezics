@@ -5,7 +5,7 @@ import { repeatedCsv } from "../../cli/values";
 import { createToolConfig } from "../../env";
 import { renderResetDatabaseSql } from "../../env/repo-database-registry";
 import { DOCKER_COMPOSE_COMMAND } from "../service/runtime";
-import { resolveDbSchemaPackages, type DbSchemaPackage } from "./packages";
+import { type DbSchemaPackage, resolveDbSchemaPackages } from "./packages";
 import { runDbPreflight } from "./preflight";
 import { runDbPackageScript } from "./runner";
 

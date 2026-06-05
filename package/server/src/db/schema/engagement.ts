@@ -1,12 +1,4 @@
 import {
-  createdAt,
-  nullableTimestamp,
-  textArray,
-  timestampMs,
-  updatedAt,
-  uuidv7PrimaryKey,
-} from "./columns";
-import {
   boolean,
   index,
   pgTable,
@@ -16,6 +8,14 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import {
+  createdAt,
+  nullableTimestamp,
+  textArray,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 import { FeedbackType, ModerationTargetKind } from "./enums";
 
 export const Feedback = pgTable(

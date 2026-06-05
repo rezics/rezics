@@ -1,4 +1,3 @@
-import { resolveReadLanguage } from "@rezics/contract";
 import type {
   ContentSearchDocument,
   ContentSearchOptions,
@@ -7,6 +6,7 @@ import type {
   RealmSearchDocument,
   RealmSearchOptions,
 } from "@rezics/contract";
+import { resolveReadLanguage } from "@rezics/contract";
 
 type ReadOptions = {
   languages?: readonly string[] | null;

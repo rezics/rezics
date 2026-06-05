@@ -4,8 +4,8 @@ import {
   userBriefSchema,
   userParamsSchema,
 } from "@rezics/contract";
-import { Elysia } from "elysia";
 import { and, eq, inArray } from "drizzle-orm";
+import { Elysia } from "elysia";
 import { Unit, User } from "../../db/schema";
 import { requireSlugScopeId } from "../../infra/slug-scopes";
 import { notFound } from "../../utils/errors";

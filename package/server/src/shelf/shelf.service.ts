@@ -30,8 +30,8 @@ import {
   inArray,
   ne,
   or,
-  sql,
   type SQL,
+  sql,
 } from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/json-write";
 import { getSeedTagId } from "@/infra/seed-tags";

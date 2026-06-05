@@ -100,7 +100,7 @@ mock.module("@/meili/search-client", () => ({
 Object.assign(legacyDbMock, {});
 
 let lastShelfRows = new Map<string, any>();
-let lastUnitRows = new Map<string, any>();
+const lastUnitRows = new Map<string, any>();
 
 function isBoundValue(value: unknown): value is string | number | boolean {
   if (

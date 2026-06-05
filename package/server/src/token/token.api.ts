@@ -9,9 +9,9 @@ import {
 } from "@rezics/contract";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { User } from "../db/schema";
 import { authMacro } from "@/middleware";
 import { signRezicsSessionToken } from "@/session/jwt/jwt.service";
+import { User } from "../db/schema";
 import { bookRoute } from "./token.book.api";
 import { tokenService } from "./token.service";
 import { userRoute } from "./token.user.api";

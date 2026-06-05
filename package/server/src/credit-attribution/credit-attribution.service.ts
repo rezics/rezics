@@ -6,13 +6,6 @@ import type {
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
-import { serverJobProducer } from "../job/job-boundary";
-import {
-  assertCanEditCollaborativeMetadata,
-  createDrizzleCollaborativeMetadataTx,
-  creditRolePatchPath,
-  writeEditorialMetadataHistory,
-} from "../unit/collaborative-metadata";
 import {
   CreditAttribution,
   CreditAttributionEvidence,
@@ -22,6 +15,13 @@ import {
   UnitExternalRef,
   UnitTranslation,
 } from "../db/schema";
+import { serverJobProducer } from "../job/job-boundary";
+import {
+  assertCanEditCollaborativeMetadata,
+  createDrizzleCollaborativeMetadataTx,
+  creditRolePatchPath,
+  writeEditorialMetadataHistory,
+} from "../unit/collaborative-metadata";
 import { AppError } from "../utils/errors";
 import { mapCreditAttributionToDTO } from "./credit-attribution.mapper";
 import type { CreditAttributionWithRelations } from "./types";

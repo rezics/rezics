@@ -4,6 +4,8 @@ import {
   validateSlug,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
+import { Unit, User } from "../db/schema";
+import { env } from "../env";
 import {
   signRezicsProfileSetupToken,
   signRezicsSessionToken,
@@ -12,8 +14,6 @@ import {
 import { mapUserToDTO } from "../user/models/mapper";
 import { normalizePreferredLanguages } from "../user/service/settings.service";
 import { userService } from "../user/service/user.service";
-import { Unit, User } from "../db/schema";
-import { env } from "../env";
 import {
   fetchVerifiedRegistrationFacts,
   projectSlugToAuth,

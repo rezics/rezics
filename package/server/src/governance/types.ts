@@ -1,7 +1,7 @@
 import type {
   AccountEnforcement,
-  ModerationCase,
   ModerationAction,
+  ModerationCase,
   RealmCapabilityGrant,
   StaffAuditLog,
   StaffGrant,

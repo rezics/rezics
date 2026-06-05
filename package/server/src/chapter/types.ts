@@ -1,3 +1,5 @@
+import type { PublicUserSelected } from "@/utils/sanitizeUser";
+import { publicUserSelect } from "@/utils/sanitizeUser";
 import type {
   ContentTranslation,
   Post,
@@ -5,8 +7,6 @@ import type {
   UnitSupportLanguage,
   UnitTranslation,
 } from "../db/schema";
-import { publicUserSelect } from "@/utils/sanitizeUser";
-import type { PublicUserSelected } from "@/utils/sanitizeUser";
 
 /**
  * Chapter is a Post(kind=CHAPTER) backed by Unit(type=POST).

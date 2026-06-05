@@ -1,11 +1,11 @@
 import { and, desc, eq, isNotNull, isNull, lte, ne, or } from "drizzle-orm";
 import { db } from "../db";
 import {
+  type ConversationRow,
   conversationBlocks,
   conversations,
-  messages,
-  type ConversationRow,
   type MessageRow,
+  messages,
 } from "../db/schema";
 
 function orderedParticipants(a: string, b: string): [string, string] {

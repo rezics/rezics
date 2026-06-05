@@ -6,7 +6,6 @@ import {
 } from "@rezics/contract/reaction";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { Unit } from "../db/schema";
 import {
   contentPolicyActions,
   governanceCapabilityService,
@@ -14,6 +13,7 @@ import {
 } from "@/governance";
 import { authMacro } from "@/middleware";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
+import { Unit } from "../db/schema";
 import { createReaction, removeReaction } from "./reaction-boundary.client";
 
 type ReactionBoundaryDeps = {

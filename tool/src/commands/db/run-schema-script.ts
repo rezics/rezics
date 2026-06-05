@@ -1,7 +1,7 @@
 import { repeatedCsv } from "../../cli/values";
-import { resolveDbSchemaPackages, type DbSchemaPackage } from "./packages";
+import { type DbSchemaPackage, resolveDbSchemaPackages } from "./packages";
 import { runDbPreflight } from "./preflight";
-import { runDbPackageScript, type DbScript } from "./runner";
+import { type DbScript, runDbPackageScript } from "./runner";
 
 interface DbCliFlags {
   packages: string[];

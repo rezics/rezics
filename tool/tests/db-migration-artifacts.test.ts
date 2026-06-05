@@ -1,6 +1,6 @@
+import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { describe, expect, test } from "bun:test";
 import { DB_SCHEMA_PACKAGES } from "../src/commands/db/packages";
 
 const repoRoot = new URL("../..", import.meta.url).pathname;

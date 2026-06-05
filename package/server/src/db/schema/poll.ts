@@ -1,11 +1,4 @@
-import {
-  createdAt,
-  nullableTimestamp,
-  timestampMs,
-  updatedAt,
-  uuidv7,
-  uuidv7PrimaryKey,
-} from "./columns";
+import { sql } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
@@ -18,8 +11,15 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
+import {
+  createdAt,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7,
+  uuidv7PrimaryKey,
+} from "./columns";
 import { PollResultVisibility, PollVoteMode } from "./enums";
 
 export const Poll = pgTable("Poll", {

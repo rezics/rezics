@@ -9,13 +9,13 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
-import {
+import { mapPublicUser, type PublicUserSelected } from "@/utils/sanitizeUser";
+import type {
   RealmMember,
   RealmTagApplication,
   RealmTagContext,
   UnitRealm,
 } from "../db/schema";
-import { mapPublicUser, type PublicUserSelected } from "@/utils/sanitizeUser";
 import type { RealmListSelected, RealmWithRelations } from "./types";
 
 type RealmMemberRow = typeof RealmMember.$inferSelect;

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { FederatedSearchOptionsSchema } from "../search/federated";
+import { SearchQuerySchema } from "../search/search";
 import { ContentSearchOptionsSchema } from "./content";
 import { PollSearchOptionsSchema } from "./poll";
 import { PostSearchOptionsSchema } from "./post";
 import { RealmSearchOptionsSchema } from "./realm";
-import { FederatedSearchOptionsSchema } from "../search/federated";
-import { SearchQuerySchema } from "../search/search";
 
 const localizedQuery = {
   languages: ["ja", "en"],

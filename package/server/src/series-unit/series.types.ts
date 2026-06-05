@@ -1,11 +1,11 @@
+import type { PublicUserSelected } from "@/utils/sanitizeUser";
+import { publicUserSelect } from "@/utils/sanitizeUser";
 import type {
   Series,
   Unit,
   UnitSupportLanguage,
   UnitTranslation,
 } from "../db/schema";
-import { publicUserSelect } from "@/utils/sanitizeUser";
-import type { PublicUserSelected } from "@/utils/sanitizeUser";
 
 export const seriesInclude = {
   unit: {

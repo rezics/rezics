@@ -1,12 +1,4 @@
-import {
-  createdAt,
-  jsonData,
-  nullableTimestamp,
-  textArray,
-  timestampMs,
-  updatedAt,
-  uuidv7PrimaryKey,
-} from "./columns";
+import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
@@ -20,7 +12,15 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  textArray,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 import {
   AiDisclosureMode,
   CatalogEntryKind,

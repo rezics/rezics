@@ -1,5 +1,5 @@
 import { hashPassword } from "better-auth/crypto";
-import { db, type AuthDb } from "../db/client";
+import { type AuthDb, db } from "../db/client";
 import { accounts, users } from "../db/schema";
 import { generatePassword } from "./helpers";
 

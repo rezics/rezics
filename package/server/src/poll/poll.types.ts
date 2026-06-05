@@ -1,6 +1,6 @@
 // Server-only types for the Poll voting domain (Poll + PollOption + PollVote).
 
-import { Poll, PollOption, UnitTranslation } from "../db/schema";
+import type { Poll, PollOption, UnitTranslation } from "../db/schema";
 
 /** A poll extension row with its options resolved, ordered by position. */
 export type PollWithOptions = typeof Poll.$inferSelect & {

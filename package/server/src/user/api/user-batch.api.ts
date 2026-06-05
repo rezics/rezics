@@ -1,7 +1,7 @@
-import { Elysia, t } from "elysia";
 import { and, eq, inArray } from "drizzle-orm";
-import { requireSlugScopeId } from "../../infra/slug-scopes";
+import { Elysia, t } from "elysia";
 import { Unit, User } from "../../db/schema";
+import { requireSlugScopeId } from "../../infra/slug-scopes";
 
 async function getServerDb() {
   const { db } = await import("../../db/client");

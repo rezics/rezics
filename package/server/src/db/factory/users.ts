@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { seedAuthUser } from "@rezics/auth/seed/seed-auth-user";
 import {
   accounts,
   oauthAccessTokens,
@@ -10,6 +9,7 @@ import {
   sessions,
   users,
 } from "@rezics/auth/db/schema";
+import { seedAuthUser } from "@rezics/auth/seed/seed-auth-user";
 import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   markdownContentDoc,

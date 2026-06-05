@@ -1,4 +1,4 @@
-import { createdAt, timestampMs, updatedAt, uuidv7PrimaryKey } from "./columns";
+import { sql } from "drizzle-orm";
 import {
   doublePrecision,
   foreignKey,
@@ -10,8 +10,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit, UnitExternalRef } from "./catalog";
+import { createdAt, timestampMs, updatedAt, uuidv7PrimaryKey } from "./columns";
 
 export const CreditAttribution = pgTable(
   "CreditAttribution",

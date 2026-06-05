@@ -1,6 +1,6 @@
 import pg from "pg";
 import { repeatedCsv } from "../../cli/values";
-import { resolveDbSchemaPackages, type DbSchemaPackage } from "./packages";
+import { type DbSchemaPackage, resolveDbSchemaPackages } from "./packages";
 import {
   type DbPreflightClient,
   resolveDbConnectionUrl,

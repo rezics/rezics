@@ -1,5 +1,9 @@
 import type { PinKind } from "@rezics/contract";
 import {
+  type PublicUserSelected,
+  publicUserSelect,
+} from "@/utils/sanitizeUser";
+import type {
   ContentTranslation,
   Post,
   Unit,
@@ -7,10 +11,6 @@ import {
   UnitSupportLanguage,
   UnitTranslation,
 } from "../db/schema";
-import {
-  publicUserSelect,
-  type PublicUserSelected,
-} from "@/utils/sanitizeUser";
 
 /** Legacy include shape retained for tests while post service migrates. */
 export const postInclude = {

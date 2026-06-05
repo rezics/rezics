@@ -1,5 +1,5 @@
-import type { ListLanguageMode } from "@rezics/contract";
 import { userQueries } from "@rezics/api/user/user.queries";
+import type { ListLanguageMode } from "@rezics/contract";
 import { useLocale } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";

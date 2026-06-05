@@ -1,12 +1,4 @@
 import {
-  createdAt,
-  jsonData,
-  nullableTimestamp,
-  timestampMs,
-  updatedAt,
-  uuidv7PrimaryKey,
-} from "./columns";
-import {
   boolean,
   index,
   pgTable,
@@ -15,6 +7,14 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 export const Jwks = pgTable(
   "Jwks",
   {

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import {
-  type CreateReactionInput,
-  type ListReactionRowsInput,
-  type ReactionRepository,
-  type RemoveReactionInput,
+import type {
+  CreateReactionInput,
+  ListReactionRowsInput,
+  ReactionRepository,
+  RemoveReactionInput,
 } from "./reaction.repository";
 
 process.env.NODE_ENV = "test";

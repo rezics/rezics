@@ -1,6 +1,6 @@
 import type { RezicsSessionClaims } from "@rezics/contract";
-import { Elysia, status } from "elysia";
 import { eq } from "drizzle-orm";
+import { Elysia, status } from "elysia";
 import {
   verifyRezicsProfileSetupToken,
   verifyRezicsSessionToken,

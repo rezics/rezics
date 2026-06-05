@@ -14,8 +14,8 @@ import {
   type SeedResult,
 } from "@rezics/server/db/seed-factory";
 import * as v from "valibot";
-import { getEnv } from "../lib/env";
 import { createAuthDbClient } from "../lib/db-factory";
+import { getEnv } from "../lib/env";
 import { createSeedSearchClient } from "../lib/search";
 import { printSeedCredentials, seedBaseline } from "../seed/index";
 import {

@@ -1,14 +1,14 @@
 import { mainMarkdownSource } from "@rezics/contract";
 import { parseReactionScopeKey } from "@rezics/contract/reaction";
 import { and, asc, eq, inArray } from "drizzle-orm";
+import { Unit, UnitTranslation, User } from "../db/schema";
+import { requireSlugScopeId } from "../infra/slug-scopes";
 import {
   listByUser,
   listGivenReactions,
 } from "../reaction-boundary/reaction-boundary.client";
-import { requireSlugScopeId } from "../infra/slug-scopes";
 import { notFound } from "../utils/errors";
 import { mapPublicUser } from "../utils/sanitizeUser";
-import { Unit, UnitTranslation, User } from "../db/schema";
 
 const OWNERSHIP_CHUNK_SIZE = 1000;
 const SNIPPET_LENGTH = 160;

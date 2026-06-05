@@ -4,8 +4,8 @@ import {
   slugify,
 } from "@rezics/auth/seed";
 import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
-import type { SlugScopesMap } from "@rezics/server/db/seed/infra/seed-slug-scopes";
 import { Unit, User } from "@rezics/server/db/schema";
+import type { SlugScopesMap } from "@rezics/server/db/seed/infra/seed-slug-scopes";
 import {
   bootstrapSystemShelves,
   createDrizzleSystemShelfClient,

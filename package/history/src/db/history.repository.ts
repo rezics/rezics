@@ -3,12 +3,12 @@ import { db } from "./client";
 import {
   outboxProcessingFailures,
   revisionContents,
-  structureEvents,
   type StructureEventRow,
-  unitRevisionPaths,
+  structureEvents,
   type UnitRevisionPathRow,
-  unitRevisions,
   type UnitRevisionRow,
+  unitRevisionPaths,
+  unitRevisions,
 } from "./schema";
 
 type RevisionInclude = {

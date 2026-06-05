@@ -1,10 +1,10 @@
 // Type only used in server, otherwise use contract
 
-import type { Unit, UnitSupportLanguage, UnitTranslation } from "../db/schema";
 import {
-  publicUserSelect,
   type PublicUserSelected,
+  publicUserSelect,
 } from "@/utils/sanitizeUser";
+import type { Unit, UnitSupportLanguage, UnitTranslation } from "../db/schema";
 
 /**
  * Relation payload shape for unit reads.

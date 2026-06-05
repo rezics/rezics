@@ -10,7 +10,6 @@ import {
   subjectAttributionRoleRegistry,
   subjectAttributionRoles,
 } from "@rezics/contract";
-import { UnitStatus, UnitType } from "./storage-values.js";
 import type { ServerDb } from "../client.js";
 import {
   Entity,
@@ -20,6 +19,7 @@ import {
   UnitTranslation,
 } from "../schema";
 import { generateTranslations, getFaker } from "./generators.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
 import { pickN, randomBoolean, randomInt } from "./utils.js";

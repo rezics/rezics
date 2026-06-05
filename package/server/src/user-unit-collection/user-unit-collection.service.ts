@@ -3,8 +3,6 @@ import type {
   PatchUserUnitCollectionInput,
 } from "@rezics/contract";
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { searchClient } from "../meili/search-client";
-import { enqueueUserUnitCollectionSearchSync } from "../shelf/user-unit-collection.service";
 import {
   Shelf,
   ShelfUnit,
@@ -12,6 +10,8 @@ import {
   UserTagApplication,
   UserUnitCollection,
 } from "../db/schema";
+import { searchClient } from "../meili/search-client";
+import { enqueueUserUnitCollectionSearchSync } from "../shelf/user-unit-collection.service";
 import type {
   CollectionUnitRow,
   UserUnitCollectionRow,

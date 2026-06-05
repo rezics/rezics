@@ -3,8 +3,8 @@ import {
   slugResolvePayloadSchema,
   slugResolveResponseSchema,
 } from "@rezics/contract";
-import { Elysia, t } from "elysia";
 import { and, eq } from "drizzle-orm";
+import { Elysia, t } from "elysia";
 import { Unit } from "../db/schema";
 import { resolveScopeId } from "../shared/slug-ref";
 

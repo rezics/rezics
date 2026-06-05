@@ -8,7 +8,7 @@ import { resolveReadLanguage } from "@rezics/contract";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { variantContextForRow } from "@/unit/variant-context";
 import { mapPublicUser } from "@/utils/sanitizeUser";
-import { CommentPromotion } from "../db/schema";
+import type { CommentPromotion } from "../db/schema";
 import type { PostWithRelations } from "./types";
 
 type CommentPromotionRow = typeof CommentPromotion.$inferSelect;

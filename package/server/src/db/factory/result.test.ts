@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { UnitType } from "./storage-values";
 import { addSpecialSeedTarget, createSeedResult } from "./result";
+import { UnitType } from "./storage-values";
 
 describe("seed result", () => {
   test("stores special targets without a sync manifest", () => {

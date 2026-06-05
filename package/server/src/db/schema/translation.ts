@@ -1,4 +1,3 @@
-import { createdAt, jsonData, updatedAt } from "./columns";
 import {
   boolean,
   index,
@@ -10,6 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { Unit } from "./catalog";
+import { createdAt, jsonData, updatedAt } from "./columns";
 import { ContentTranslationStatus } from "./enums";
 
 export const UnitTranslation = pgTable(

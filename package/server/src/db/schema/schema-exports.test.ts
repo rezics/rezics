@@ -1,3 +1,4 @@
+import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -17,7 +18,6 @@ import {
   unitVisibilityValues,
   userUnitProgressStatusValues,
 } from "@rezics/contract";
-import { describe, expect, test } from "bun:test";
 import * as publicSchema from ".";
 import * as schema from "./schema";
 

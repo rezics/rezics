@@ -14,8 +14,8 @@ import {
 import { broadcast } from "../notify-boundary/notify-boundary.client";
 import { mapAccountEnforcementToDTO } from "./governance.mapper";
 import {
-  moderationActionService,
   type ModerationActionService,
+  moderationActionService,
 } from "./moderation-action.service";
 import type { AccountEnforcementRow, GovernanceListOptions } from "./types";
 

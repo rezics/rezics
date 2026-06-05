@@ -1,3 +1,5 @@
+import { authApi } from "@rezics/api/auth/auth.api";
+import { authQueries } from "@rezics/api/auth/auth.queries";
 import {
   FALLBACK_LANGUAGE,
   LANGUAGE_META,
@@ -5,8 +7,6 @@ import {
   type Language,
   normalizeLanguage,
 } from "@rezics/contract";
-import { authApi } from "@rezics/api/auth/auth.api";
-import { authQueries } from "@rezics/api/auth/auth.queries";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";

@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { UnitStatus, UnitType } from "./storage-values.js";
 import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../schema";
 import { generateTranslations } from "./generators.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit } from "./types.js";
 import { pickN, randomBoolean } from "./utils.js";

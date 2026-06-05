@@ -7,8 +7,8 @@ import type {
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, asc, eq } from "drizzle-orm";
-import { Unit, UnitTranslation } from "../db/schema";
 import { serverJobProducer } from "@/job/job-boundary";
+import { Unit, UnitTranslation } from "../db/schema";
 import {
   applySparsePatch,
   assertCanEditCollaborativeMetadata,

@@ -5,9 +5,9 @@ import type {
   SeriesKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import type { SeriesContentIndex, UnitTranslation } from "../db/schema";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
+import type { SeriesContentIndex, UnitTranslation } from "../db/schema";
 import type { SeriesWithRelations } from "./series.types";
 
 type SeriesContentIndexRow = typeof SeriesContentIndex.$inferSelect;

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  ContentTranslationService,
   type ContentTranslationRepository,
+  ContentTranslationService,
 } from "./service";
 import type { ContentTranslationRow } from "./types";
 

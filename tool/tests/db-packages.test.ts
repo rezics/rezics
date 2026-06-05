@@ -1,6 +1,6 @@
+import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, test } from "bun:test";
 import {
   DB_MIGRATION_ORDER,
   DB_SCHEMA_PACKAGES,

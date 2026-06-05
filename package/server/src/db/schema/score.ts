@@ -1,4 +1,3 @@
-import { createdAt, jsonData, updatedAt, uuidv7PrimaryKey } from "./columns";
 import {
   index,
   integer,
@@ -9,6 +8,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createdAt, jsonData, updatedAt, uuidv7PrimaryKey } from "./columns";
 export const ScoreAggregate = pgTable(
   "ScoreAggregate",
   {

@@ -1,12 +1,12 @@
 import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { db, disconnectRankingDb } from "../db/client";
 import {
-  rankingSignalBuckets,
-  servingPatchStatuses,
   type RankingSignalBucketRow,
+  rankingSignalBuckets,
   type ServingPatchStatusRow,
-  unitRankProjections,
+  servingPatchStatuses,
   type UnitRankProjectionRow,
+  unitRankProjections,
 } from "../db/schema";
 import type {
   RankingScores,
