@@ -2,6 +2,7 @@ import type { ServerDb } from "../client";
 import { EchoKV } from "../schema";
 import { products } from "./data/home/homeCarousel";
 import { generateQuickTags } from "./data/home/quick-tags";
+import { withUpdatedAt } from "./utils.js";
 
 type EchoKvDb = Pick<ServerDb, "insert">;
 
@@ -24,10 +25,10 @@ export const seedEchoKVWithDb = async (db: EchoKvDb) => {
   for (const row of echoKvSeedRows()) {
     await db
       .insert(EchoKV)
-      .values(row)
+      .values(withUpdatedAt(row))
       .onConflictDoUpdate({
         target: EchoKV.key,
-        set: { value: row.value },
+        set: { value: row.value, updatedAt: new Date() },
       });
   }
 };

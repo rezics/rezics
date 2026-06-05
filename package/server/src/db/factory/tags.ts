@@ -6,6 +6,7 @@ import { generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
+import { withUpdatedAtRows } from "./utils.js";
 
 /**
  * Seed tags as Unit(type=TAG) + UnitTranslation + UnitSupportLanguage.
@@ -30,39 +31,45 @@ export async function seedTags(
 
   // Phase 1: Create Unit rows
   await ctx.db.insert(Unit).values(
-    tags.map((t) => ({
-      id: t.id,
-      type: UnitType.TAG,
-      userId: t.userId,
-      slugScope: ctx.slugScopes.tag,
-      status: UnitStatus.PUBLISHED,
-      isLanguageNeutral: false,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: faker.date.past({ years: 1 }),
-    })),
+    withUpdatedAtRows(
+      tags.map((t) => ({
+        id: t.id,
+        type: UnitType.TAG,
+        userId: t.userId,
+        slugScope: ctx.slugScopes.tag,
+        status: UnitStatus.PUBLISHED,
+        isLanguageNeutral: false,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: faker.date.past({ years: 1 }),
+      })),
+    ),
   );
 
   // Phase 2: Create UnitTranslation rows (all languages)
   await ctx.db.insert(UnitTranslation).values(
-    tags.flatMap((t) =>
-      t.translations.map((tr) => ({
-        unitId: t.id,
-        language: tr.language,
-        title: tr.title,
-        description: tr.description,
-      })),
+    withUpdatedAtRows(
+      tags.flatMap((t) =>
+        t.translations.map((tr) => ({
+          unitId: t.id,
+          language: tr.language,
+          title: tr.title,
+          description: tr.description,
+        })),
+      ),
     ),
   );
 
   // Phase 3: Create UnitSupportLanguage rows
   await ctx.db.insert(UnitSupportLanguage).values(
-    tags.flatMap((t) =>
-      t.translations.map((tr, i) => ({
-        unitId: t.id,
-        language: tr.language,
-        isPrimary: i === 0,
-        sortOrder: i,
-      })),
+    withUpdatedAtRows(
+      tags.flatMap((t) =>
+        t.translations.map((tr, i) => ({
+          unitId: t.id,
+          language: tr.language,
+          isPrimary: i === 0,
+          sortOrder: i,
+        })),
+      ),
     ),
   );
 

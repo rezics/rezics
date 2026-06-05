@@ -33,6 +33,7 @@ import type {
   PostsPerWorkPlan,
   TreeShapePlan,
 } from "./types.js";
+import { withUpdatedAt, withUpdatedAtRows } from "./utils.js";
 import { chunkedParallel, randomBoolean } from "./utils.js";
 
 const CHUNK_SIZE = 10;
@@ -151,53 +152,71 @@ async function seedPostKindForTarget(
 
     const [unit] = await ctx.db
       .insert(Unit)
-      .values({
-        id: randomUUID(),
-        type: UnitType.POST,
-        userId: author.userId,
-        slugScope: author.userId,
-        targetUnitId,
-        status: published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
-      })
+      .values(
+        withUpdatedAt({
+          id: randomUUID(),
+          type: UnitType.POST,
+          userId: author.userId,
+          slugScope: author.userId,
+          targetUnitId,
+          status: published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          publishedAt: randomBoolean(0.85)
+            ? faker.date.past({ years: 2 })
+            : null,
+        }),
+      )
       .returning({ id: Unit.id, type: Unit.type });
     if (!unit) throw new Error("Failed to create seeded post unit.");
 
-    await ctx.db.insert(Post).values({
-      unitId: unit.id,
-      authorUserId: author.userId,
-      kind,
-      extra: extra ?? undefined,
-      scoreEntryId: scoreEntryId ?? undefined,
-    });
-    await ctx.db.insert(ContentTranslation).values({
-      unitId: unit.id,
-      language: DEFAULT_LANGUAGE,
-      content: markdownContentDoc(body) as never,
-      status: published ? "PUBLISHED" : "DRAFT",
-      authorUserId: author.userId,
-      provenance: { importedFrom: "factory-post-seed" },
-    });
+    await ctx.db.insert(Post).values(
+      withUpdatedAt({
+        unitId: unit.id,
+        authorUserId: author.userId,
+        kind,
+        extra: extra ?? undefined,
+        scoreEntryId: scoreEntryId ?? undefined,
+      }),
+    );
+    await ctx.db.insert(ContentTranslation).values(
+      withUpdatedAt({
+        unitId: unit.id,
+        language: DEFAULT_LANGUAGE,
+        content: markdownContentDoc(body) as never,
+        status: published ? "PUBLISHED" : "DRAFT",
+        authorUserId: author.userId,
+        provenance: { importedFrom: "factory-post-seed" },
+      }),
+    );
     if (needsTitle) {
       await ctx.db.insert(UnitTranslation).values(
-        translations.map((t) => ({
-          unitId: unit.id,
-          language: t.language,
-          title: t.title,
-        })),
+        withUpdatedAtRows(
+          translations.map((t) => ({
+            unitId: unit.id,
+            language: t.language,
+            title: t.title,
+          })),
+        ),
       );
     }
     await ctx.db.insert(UnitSupportLanguage).values(
       needsTitle
-        ? translations.map((t, i) => ({
-            unitId: unit.id,
-            language: t.language,
-            isPrimary: i === 0,
-            sortOrder: i,
-          }))
-        : { unitId: unit.id, language: DEFAULT_LANGUAGE, isPrimary: true },
+        ? withUpdatedAtRows(
+            translations.map((t, i) => ({
+              unitId: unit.id,
+              language: t.language,
+              isPrimary: i === 0,
+              sortOrder: i,
+            })),
+          )
+        : [
+            withUpdatedAt({
+              unitId: unit.id,
+              language: DEFAULT_LANGUAGE,
+              isPrimary: true,
+            }),
+          ],
     );
 
     posts.push({ ...unit, kind, targetUnitId });
@@ -260,30 +279,34 @@ async function seedPostKindBatch(
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
     await ctx.db.insert(Unit).values(
-      chunk.map((r) => ({
-        id: r.id,
-        type: UnitType.POST,
-        userId: r.author.userId,
-        slugScope: r.author.userId,
-        targetUnitId,
-        status: r.published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: r.publishedAt,
-      })),
+      withUpdatedAtRows(
+        chunk.map((r) => ({
+          id: r.id,
+          type: UnitType.POST,
+          userId: r.author.userId,
+          slugScope: r.author.userId,
+          targetUnitId,
+          status: r.published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          publishedAt: r.publishedAt,
+        })),
+      ),
     );
   }
 
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
     await ctx.db.insert(Post).values(
-      chunk.map((r) => ({
-        unitId: r.id,
-        authorUserId: r.author.userId,
-        kind,
-        extra: r.extra ?? undefined,
-        scoreEntryId: r.scoreEntryId ?? null,
-      })),
+      withUpdatedAtRows(
+        chunk.map((r) => ({
+          unitId: r.id,
+          authorUserId: r.author.userId,
+          kind,
+          extra: r.extra ?? undefined,
+          scoreEntryId: r.scoreEntryId ?? null,
+        })),
+      ),
     );
   }
 
@@ -300,7 +323,9 @@ async function seedPostKindBatch(
   for (let i = 0; i < allContentTranslations.length; i += BATCH_SIZE) {
     await ctx.db
       .insert(ContentTranslation)
-      .values(allContentTranslations.slice(i, i + BATCH_SIZE));
+      .values(
+        withUpdatedAtRows(allContentTranslations.slice(i, i + BATCH_SIZE)),
+      );
   }
 
   if (needsTitle) {
@@ -314,7 +339,7 @@ async function seedPostKindBatch(
     for (let i = 0; i < allTranslations.length; i += BATCH_SIZE) {
       await ctx.db
         .insert(UnitTranslation)
-        .values(allTranslations.slice(i, i + BATCH_SIZE));
+        .values(withUpdatedAtRows(allTranslations.slice(i, i + BATCH_SIZE)));
     }
   }
 
@@ -338,7 +363,7 @@ async function seedPostKindBatch(
   for (let i = 0; i < allSupport.length; i += BATCH_SIZE) {
     await ctx.db
       .insert(UnitSupportLanguage)
-      .values(allSupport.slice(i, i + BATCH_SIZE));
+      .values(withUpdatedAtRows(allSupport.slice(i, i + BATCH_SIZE)));
   }
 
   return rows.map((r) => ({
@@ -367,37 +392,45 @@ async function seedTreePostsForTarget(
 
     const [unit] = await ctx.db
       .insert(Unit)
-      .values({
-        id: rootId,
-        type: UnitType.POST,
-        userId: author.userId,
-        slugScope: author.userId,
-        targetUnitId,
-        status: UnitStatus.PUBLISHED,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: faker.date.past({ years: 1 }),
-      })
+      .values(
+        withUpdatedAt({
+          id: rootId,
+          type: UnitType.POST,
+          userId: author.userId,
+          slugScope: author.userId,
+          targetUnitId,
+          status: UnitStatus.PUBLISHED,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          publishedAt: faker.date.past({ years: 1 }),
+        }),
+      )
       .returning({ id: Unit.id, type: Unit.type });
     if (!unit) throw new Error("Failed to create seeded tree post unit.");
-    await ctx.db.insert(Post).values({
-      unitId: unit.id,
-      authorUserId: author.userId,
-      kind: PostKind.POST,
-    });
-    await ctx.db.insert(UnitSupportLanguage).values({
-      unitId: unit.id,
-      language: DEFAULT_LANGUAGE,
-      isPrimary: true,
-    });
-    await ctx.db.insert(ContentTranslation).values({
-      unitId: unit.id,
-      language: DEFAULT_LANGUAGE,
-      content: generatePostContent(PostKind.POST) as never,
-      status: "PUBLISHED",
-      authorUserId: author.userId,
-      provenance: { importedFrom: "factory-post-tree-seed" },
-    });
+    await ctx.db.insert(Post).values(
+      withUpdatedAt({
+        unitId: unit.id,
+        authorUserId: author.userId,
+        kind: PostKind.POST,
+      }),
+    );
+    await ctx.db.insert(UnitSupportLanguage).values(
+      withUpdatedAt({
+        unitId: unit.id,
+        language: DEFAULT_LANGUAGE,
+        isPrimary: true,
+      }),
+    );
+    await ctx.db.insert(ContentTranslation).values(
+      withUpdatedAt({
+        unitId: unit.id,
+        language: DEFAULT_LANGUAGE,
+        content: generatePostContent(PostKind.POST) as never,
+        status: "PUBLISHED",
+        authorUserId: author.userId,
+        provenance: { importedFrom: "factory-post-tree-seed" },
+      }),
+    );
 
     posts.push({
       ...unit,
@@ -464,45 +497,55 @@ export async function seedWikiContentTranslations(
 
   await ctx.db.transaction(async (tx) => {
     const primary = WIKI_POSTS[1] ?? WIKI_POSTS[0]!;
-    await tx.insert(Unit).values({
-      id: primary.id,
-      type: UnitType.POST,
-      userId: author.userId,
-      slugScope: author.userId,
-      status: UnitStatus.PUBLISHED,
-      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      defaultLanguage: primary.language,
-      publishedAt: new Date(),
-    });
-    await tx.insert(Post).values({
-      unitId: primary.id,
-      authorUserId: author.userId,
-      kind: PostKind.POST,
-    });
-    await tx.insert(UnitTranslation).values(
-      WIKI_POSTS.map((p) => ({
+    await tx.insert(Unit).values(
+      withUpdatedAt({
+        id: primary.id,
+        type: UnitType.POST,
+        userId: author.userId,
+        slugScope: author.userId,
+        status: UnitStatus.PUBLISHED,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: primary.language,
+        publishedAt: new Date(),
+      }),
+    );
+    await tx.insert(Post).values(
+      withUpdatedAt({
         unitId: primary.id,
-        language: p.language,
-        title: p.title,
-      })),
+        authorUserId: author.userId,
+        kind: PostKind.POST,
+      }),
+    );
+    await tx.insert(UnitTranslation).values(
+      withUpdatedAtRows(
+        WIKI_POSTS.map((p) => ({
+          unitId: primary.id,
+          language: p.language,
+          title: p.title,
+        })),
+      ),
     );
     await tx.insert(UnitSupportLanguage).values(
-      WIKI_POSTS.map((p, index) => ({
-        unitId: primary.id,
-        language: p.language,
-        isPrimary: p.language === primary.language,
-        sortOrder: index,
-      })),
+      withUpdatedAtRows(
+        WIKI_POSTS.map((p, index) => ({
+          unitId: primary.id,
+          language: p.language,
+          isPrimary: p.language === primary.language,
+          sortOrder: index,
+        })),
+      ),
     );
     await tx.insert(ContentTranslation).values(
-      WIKI_POSTS.map((p) => ({
-        unitId: primary.id,
-        language: p.language,
-        content: markdownContentDoc(p.contentSource) as never,
-        status: "PUBLISHED",
-        authorUserId: author.userId,
-        provenance: { importedFrom: "factory-wiki-seed" },
-      })),
+      withUpdatedAtRows(
+        WIKI_POSTS.map((p) => ({
+          unitId: primary.id,
+          language: p.language,
+          content: markdownContentDoc(p.contentSource) as never,
+          status: "PUBLISHED" as const,
+          authorUserId: author.userId,
+          provenance: { importedFrom: "factory-wiki-seed" },
+        })),
+      ),
     );
   });
 

@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { SLUG_SCOPES } from "@rezics/contract";
+import type { SlugScopesMap } from "./seed-slug-scopes";
 import { SlugScope, Unit } from "../../schema";
 import { seedSlugScopes } from "./seed-slug-scopes";
 
@@ -36,7 +37,9 @@ describe("seedSlugScopes", () => {
     const result = await seedSlugScopes(db as never);
 
     expect(result).toEqual(
-      Object.fromEntries(SLUG_SCOPES.map((name) => [name, `${name}-scope`])),
+      Object.fromEntries(
+        SLUG_SCOPES.map((name) => [name, `${name}-scope`]),
+      ) as SlugScopesMap,
     );
     expect(db.transaction).not.toHaveBeenCalled();
   });
@@ -75,7 +78,7 @@ describe("seedSlugScopes", () => {
     expect(result).toEqual(
       Object.fromEntries(
         SLUG_SCOPES.map((name, index) => [name, `generated-${index}`]),
-      ),
+      ) as SlugScopesMap,
     );
     for (const [index, unit] of insertedUnits.entries()) {
       expect(unit).toMatchObject({

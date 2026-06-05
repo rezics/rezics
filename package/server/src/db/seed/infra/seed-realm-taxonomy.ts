@@ -332,6 +332,7 @@ async function ensureCommunityRealm(
       realmUnitId: realm.id,
       userId: rootUserId,
       roleKey: "owner",
+      updatedAt: now,
     });
 
     return realm.id;

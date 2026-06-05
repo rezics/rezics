@@ -14,10 +14,12 @@ import {
 } from "../../schema";
 import { seedRealmTaxonomy } from "./seed-realm-taxonomy";
 
+type InsertCall = { table: unknown; value: any };
+
 function makeDb() {
   let nextId = 0;
   const calls = {
-    inserts: [] as Array<{ table: unknown; value: any }>,
+    inserts: [] as InsertCall[],
     conflicts: [] as Array<{ table: unknown; input: any; kind: string }>,
   };
 
@@ -99,28 +101,44 @@ describe("seedRealmTaxonomy", () => {
         }),
       }),
     );
-    expect(db.calls.inserts.some((call) => call.table === Realm)).toBe(true);
-    expect(db.calls.inserts.some((call) => call.table === RealmMember)).toBe(
-      true,
-    );
-    expect(db.calls.inserts.some((call) => call.table === Post)).toBe(true);
     expect(
-      db.calls.inserts.some((call) => call.table === ContentTranslation),
+      db.calls.inserts.some((call: InsertCall) => call.table === Realm),
     ).toBe(true);
     expect(
-      db.calls.inserts.some((call) => call.table === RealmTagContext),
-    ).toBe(true);
-    expect(db.calls.inserts.some((call) => call.table === UnitRealm)).toBe(
-      true,
-    );
-    expect(
-      db.calls.inserts.some((call) => call.table === RealmTagApplication),
+      db.calls.inserts.some((call: InsertCall) => call.table === RealmMember),
     ).toBe(true);
     expect(
-      db.calls.inserts.some((call) => call.table === RealmTagApplicationVote),
+      db.calls.inserts.some((call: InsertCall) => call.table === Post),
     ).toBe(true);
-    expect(db.calls.inserts.some((call) => call.table === TagVote)).toBe(true);
-    expect(db.calls.inserts.some((call) => call.table === UnitTag)).toBe(true);
+    expect(
+      db.calls.inserts.some(
+        (call: InsertCall) => call.table === ContentTranslation,
+      ),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some(
+        (call: InsertCall) => call.table === RealmTagContext,
+      ),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some((call: InsertCall) => call.table === UnitRealm),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some(
+        (call: InsertCall) => call.table === RealmTagApplication,
+      ),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some(
+        (call: InsertCall) => call.table === RealmTagApplicationVote,
+      ),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some((call: InsertCall) => call.table === TagVote),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some((call: InsertCall) => call.table === UnitTag),
+    ).toBe(true);
   });
 
   test("does not import Prisma runtime or generated clients", async () => {

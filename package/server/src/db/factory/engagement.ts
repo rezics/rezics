@@ -16,7 +16,7 @@ import {
 import { UnitStatus, UnitType, UnitVisibility } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
-import { pickN, unitTypeToShelfKind } from "./utils.js";
+import { pickN, unitTypeToShelfKind, withUpdatedAt } from "./utils.js";
 
 interface EngagementPlan {
   followsPerUser: CountSpec;
@@ -62,25 +62,31 @@ async function seedFavorites(
     const targets = pickN(units, Math.min(favCount, units.length));
     const shelfId = randomUUID();
 
-    await ctx.db.insert(Unit).values({
-      id: shelfId,
-      type: UnitType.SHELF,
-      userId: user.userId,
-      slugScope: user.userId,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PRIVATE,
-      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      publishedAt: new Date(),
-    });
-    await ctx.db.insert(Shelf).values({
-      unitId: shelfId,
-      kindKey: "favorites",
-    });
-    await ctx.db.insert(UnitTranslation).values({
-      unitId: shelfId,
-      language: DEFAULT_LANGUAGE,
-      title: "Favorites",
-    });
+    await ctx.db.insert(Unit).values(
+      withUpdatedAt({
+        id: shelfId,
+        type: UnitType.SHELF,
+        userId: user.userId,
+        slugScope: user.userId,
+        status: UnitStatus.PUBLISHED,
+        visibility: UnitVisibility.PRIVATE,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        publishedAt: new Date(),
+      }),
+    );
+    await ctx.db.insert(Shelf).values(
+      withUpdatedAt({
+        unitId: shelfId,
+        kindKey: "favorites",
+      }),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAt({
+        unitId: shelfId,
+        language: DEFAULT_LANGUAGE,
+        title: "Favorites",
+      }),
+    );
 
     const seen = new Set<string>();
     const unique = targets.filter((t) => {
@@ -98,6 +104,7 @@ async function seedFavorites(
         unitId: target.id,
         kind: unitTypeToShelfKind(target.type),
         position,
+        updatedAt: new Date(),
       };
     });
 
@@ -127,6 +134,7 @@ async function seedFollows(
     subscriberUnitId: string;
     subscribedUnitId: string;
     channels: string[];
+    updatedAt: Date;
   }[] = [];
 
   for (const user of users) {
@@ -144,6 +152,7 @@ async function seedFollows(
         subscriberUnitId: user.userId,
         subscribedUnitId: target.userId,
         channels: ["*"],
+        updatedAt: new Date(),
       });
     }
   }

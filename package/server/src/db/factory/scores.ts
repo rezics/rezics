@@ -3,7 +3,12 @@ import { faker } from "@faker-js/faker";
 import { ScoreAggregate, ScoreEntry, ScoreRealmField } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
-import { chunkedParallel, pickN, randomInt } from "./utils.js";
+import {
+  chunkedParallel,
+  pickN,
+  randomInt,
+  withUpdatedAtRows,
+} from "./utils.js";
 
 const CHUNK_SIZE = 10;
 
@@ -40,10 +45,12 @@ export async function seedScores(
 
   if (storyRealm) {
     await ctx.db.insert(ScoreRealmField).values(
-      STORY_REALM_FIELDS.map((f) => ({
-        realm: storyRealm.id,
-        ...f,
-      })),
+      withUpdatedAtRows(
+        STORY_REALM_FIELDS.map((f) => ({
+          realm: storyRealm.id,
+          ...f,
+        })),
+      ),
     );
     console.log(
       `[Seed]   Created ${STORY_REALM_FIELDS.length} realm fields for story realm`,
@@ -101,14 +108,16 @@ export async function seedScores(
 
     if (entries.length > 0) {
       await ctx.db.insert(ScoreEntry).values(
-        entries.map((e) => ({
-          id: e.id,
-          userId: e.userId,
-          unitId: e.unitId,
-          realm: e.realm,
-          value: e.value,
-          fields: e.fields,
-        })),
+        withUpdatedAtRows(
+          entries.map((e) => ({
+            id: e.id,
+            userId: e.userId,
+            unitId: e.unitId,
+            realm: e.realm,
+            value: e.value,
+            fields: e.fields,
+          })),
+        ),
       );
     }
 
@@ -164,7 +173,9 @@ export async function seedScores(
     }));
 
     if (aggregateData.length > 0) {
-      await ctx.db.insert(ScoreAggregate).values(aggregateData);
+      await ctx.db
+        .insert(ScoreAggregate)
+        .values(withUpdatedAtRows(aggregateData));
     }
   });
 

@@ -15,7 +15,14 @@ import { generateMediaExtra, generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
-import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
+import {
+  chunkedParallel,
+  pickN,
+  randomBoolean,
+  randomInt,
+  withUpdatedAt,
+  withUpdatedAtRows,
+} from "./utils.js";
 
 const CHUNK_SIZE = 10;
 
@@ -46,41 +53,53 @@ export async function seedMedia(
       const isTV = kindKey === "TV_SERIES" || kindKey === "ANIME";
 
       const unit = { id: randomUUID(), type: UnitType.MEDIA };
-      await ctx.db.insert(Unit).values({
-        id: unit.id,
-        type: UnitType.MEDIA,
-        userId: author.userId,
-        slugScope: author.userId,
-        status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: randomBoolean(0.8) ? faker.date.past({ years: 5 }) : null,
-      });
-      await ctx.db.insert(Media).values({
-        unitId: unit.id,
-        kindKey,
-        releaseDate: randomBoolean(0.7) ? faker.date.past({ years: 20 }) : null,
-        runtimeMinutes: isTV ? null : randomInt(80, 210),
-        episodeCount: isTV ? randomInt(6, 200) : null,
-        seasonCount: isTV ? randomInt(1, 10) : null,
-        extra: generateMediaExtra(),
-      });
-      await ctx.db.insert(UnitTranslation).values(
-        translations.map((t) => ({
+      await ctx.db.insert(Unit).values(
+        withUpdatedAt({
+          id: unit.id,
+          type: UnitType.MEDIA,
+          userId: author.userId,
+          slugScope: author.userId,
+          status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          publishedAt: randomBoolean(0.8)
+            ? faker.date.past({ years: 5 })
+            : null,
+        }),
+      );
+      await ctx.db.insert(Media).values(
+        withUpdatedAt({
           unitId: unit.id,
-          language: t.language,
-          title: t.title,
-          summary: t.summary,
-          description: t.description,
-        })),
+          kindKey,
+          releaseDate: randomBoolean(0.7)
+            ? faker.date.past({ years: 20 })
+            : null,
+          runtimeMinutes: isTV ? null : randomInt(80, 210),
+          episodeCount: isTV ? randomInt(6, 200) : null,
+          seasonCount: isTV ? randomInt(1, 10) : null,
+          extra: generateMediaExtra(),
+        }),
+      );
+      await ctx.db.insert(UnitTranslation).values(
+        withUpdatedAtRows(
+          translations.map((t) => ({
+            unitId: unit.id,
+            language: t.language,
+            title: t.title,
+            summary: t.summary,
+            description: t.description,
+          })),
+        ),
       );
       await ctx.db.insert(UnitSupportLanguage).values(
-        translations.map((t, i) => ({
-          unitId: unit.id,
-          language: t.language,
-          isPrimary: i === 0,
-          sortOrder: i,
-        })),
+        withUpdatedAtRows(
+          translations.map((t, i) => ({
+            unitId: unit.id,
+            language: t.language,
+            isPrimary: i === 0,
+            sortOrder: i,
+          })),
+        ),
       );
 
       for (const [i, p] of pickN(people, randomInt(1, 4)).entries()) {
@@ -100,7 +119,7 @@ export async function seedMedia(
         });
       }
       for (const t of pickN(tags, randomInt(1, 5))) {
-        allTagLinks.push({ unitId: unit.id, tagUnitId: t.id });
+        allTagLinks.push(withUpdatedAt({ unitId: unit.id, tagUnitId: t.id }));
       }
 
       return unit;

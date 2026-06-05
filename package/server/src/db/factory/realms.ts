@@ -17,7 +17,14 @@ import { generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
-import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
+import {
+  chunkedParallel,
+  pickN,
+  randomBoolean,
+  randomInt,
+  withUpdatedAt,
+  withUpdatedAtRows,
+} from "./utils.js";
 
 const CHUNK_SIZE = 10;
 
@@ -61,50 +68,60 @@ export async function seedRealms(
         })),
       ];
 
-      await ctx.db.insert(Unit).values({
-        id: unit.id,
-        type: UnitType.REALM,
-        userId: owner.userId,
-        slugScope: ctx.slugScopes.realm,
-        status: UnitStatus.PUBLISHED,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: faker.date.past({ years: 2 }),
-      });
-      await ctx.db.insert(Realm).values({
-        unitId: unit.id,
-        isPublic,
-        isOfficial: false,
-        memberCount: members.length,
-        extra: {
-          defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        },
-      });
-      await ctx.db.insert(UnitTranslation).values(
-        translations.map((t) => ({
+      await ctx.db.insert(Unit).values(
+        withUpdatedAt({
+          id: unit.id,
+          type: UnitType.REALM,
+          userId: owner.userId,
+          slugScope: ctx.slugScopes.realm,
+          status: UnitStatus.PUBLISHED,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          publishedAt: faker.date.past({ years: 2 }),
+        }),
+      );
+      await ctx.db.insert(Realm).values(
+        withUpdatedAt({
           unitId: unit.id,
-          language: t.language,
-          title: t.title,
-          description: t.description,
-        })),
+          isPublic,
+          isOfficial: false,
+          memberCount: members.length,
+          extra: {
+            defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+          },
+        }),
+      );
+      await ctx.db.insert(UnitTranslation).values(
+        withUpdatedAtRows(
+          translations.map((t) => ({
+            unitId: unit.id,
+            language: t.language,
+            title: t.title,
+            description: t.description,
+          })),
+        ),
       );
       await ctx.db.insert(UnitSupportLanguage).values(
-        translations.map((t, i) => ({
-          unitId: unit.id,
-          language: t.language,
-          isPrimary: i === 0,
-          sortOrder: i,
-        })),
+        withUpdatedAtRows(
+          translations.map((t, i) => ({
+            unitId: unit.id,
+            language: t.language,
+            isPrimary: i === 0,
+            sortOrder: i,
+          })),
+        ),
       );
-      await ctx.db.insert(RealmMember).values(members);
+      await ctx.db.insert(RealmMember).values(withUpdatedAtRows(members));
 
       if (workIds.length > 0) {
         const realmWorkCount = randomInt(2, Math.min(15, workIds.length));
         const selectedWorks = pickN(workIds, realmWorkCount);
         await ctx.db.insert(UnitRealm).values(
-          selectedWorks.map((workId) => ({
-            realmUnitId: unit.id,
-            unitId: workId,
-          })),
+          withUpdatedAtRows(
+            selectedWorks.map((workId) => ({
+              realmUnitId: unit.id,
+              unitId: workId,
+            })),
+          ),
         );
       }
 

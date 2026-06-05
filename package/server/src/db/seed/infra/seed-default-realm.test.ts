@@ -9,9 +9,11 @@ import {
 } from "../../schema";
 import { seedDefaultRealm } from "./seed-default-realm";
 
+type InsertCall = { table: unknown; value: any };
+
 function makeDb(selectRows: unknown[][] = []) {
   const calls = {
-    inserts: [] as Array<{ table: unknown; value: any }>,
+    inserts: [] as InsertCall[],
     updates: [] as Array<{ table: unknown; value: any }>,
   };
   let nextUnitId = 0;
@@ -106,20 +108,28 @@ describe("seedDefaultRealm", () => {
 
     expect(result).toBe("realm-0");
     expect(db.transaction).toHaveBeenCalledTimes(1);
-    expect(db.calls.inserts.some((call) => call.table === Unit)).toBe(true);
-    expect(db.calls.inserts.some((call) => call.table === Realm)).toBe(true);
-    expect(db.calls.inserts.some((call) => call.table === RealmMember)).toBe(
-      true,
-    );
     expect(
-      db.calls.inserts.filter((call) => call.table === UnitTranslation).length,
+      db.calls.inserts.some((call: InsertCall) => call.table === Unit),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some((call: InsertCall) => call.table === Realm),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.some((call: InsertCall) => call.table === RealmMember),
+    ).toBe(true);
+    expect(
+      db.calls.inserts.filter(
+        (call: InsertCall) => call.table === UnitTranslation,
+      ).length,
     ).toBe(Object.keys(DEFAULT_REALM.translations).length);
     expect(
-      db.calls.inserts.filter((call) => call.table === UnitSupportLanguage)
-        .length,
+      db.calls.inserts.filter(
+        (call: InsertCall) => call.table === UnitSupportLanguage,
+      ).length,
     ).toBe(Object.keys(DEFAULT_REALM.translations).length);
     expect(
-      db.calls.inserts.find((call) => call.table === RealmMember)?.value,
+      db.calls.inserts.find((call: InsertCall) => call.table === RealmMember)
+        ?.value,
     ).toMatchObject({
       realmUnitId: "realm-0",
       userId: "root-user",

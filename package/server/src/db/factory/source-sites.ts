@@ -13,6 +13,7 @@ import {
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { SeedCtx } from "./strategy.js";
 import type { CreatedEntity, CreatedUnit } from "./types.js";
+import { withUpdatedAt } from "./utils.js";
 
 const QIDIAN_REF_RULES = [
   {
@@ -43,43 +44,49 @@ async function ensureQidianSourceSite(ctx: SeedCtx) {
   if (existing) return existing.entityUnitId;
 
   const sourceUnit = { id: randomUUID() };
-  await ctx.db.insert(Unit).values({
-    id: sourceUnit.id,
-    type: UnitType.ENTITY,
-    slug: "qidian",
-    slugScope: ctx.slugScopes.entity,
-    status: UnitStatus.PUBLISHED,
-    defaultLanguage: DEFAULT_LANGUAGE,
-  });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: sourceUnit.id,
+      type: UnitType.ENTITY,
+      slug: "qidian",
+      slugScope: ctx.slugScopes.entity,
+      status: UnitStatus.PUBLISHED,
+      defaultLanguage: DEFAULT_LANGUAGE,
+    }),
+  );
   await ctx.db.insert(UnitTranslation).values([
-    {
+    withUpdatedAt({
       unitId: sourceUnit.id,
       language: LANGUAGES.ZH_HANT,
       title: "起點中文網",
       summary: "來源站點實體，用於示範外部來源規則。",
-    },
-    {
+    }),
+    withUpdatedAt({
       unitId: sourceUnit.id,
       language: LANGUAGES.EN,
       title: "Qidian",
       summary: "Source site Entity for external reference fixtures.",
-    },
+    }),
   ]);
-  await ctx.db.insert(Entity).values({
-    unitId: sourceUnit.id,
-    kind: "organization",
-    verified: true,
-    eligibleCreditRoles: ["publisher", "distributor"],
-    eligibleSubjectRoles: [],
-  });
-  await ctx.db.insert(SourceSite).values({
-    entityUnitId: sourceUnit.id,
-    key: "qidian",
-    crawlSupport: "supported",
-    crawlEnabled: false,
-    crawlerAdapterKey: "qidian",
-    refRules: QIDIAN_REF_RULES as any,
-  });
+  await ctx.db.insert(Entity).values(
+    withUpdatedAt({
+      unitId: sourceUnit.id,
+      kind: "organization",
+      verified: true,
+      eligibleCreditRoles: ["publisher", "distributor"],
+      eligibleSubjectRoles: [],
+    }),
+  );
+  await ctx.db.insert(SourceSite).values(
+    withUpdatedAt({
+      entityUnitId: sourceUnit.id,
+      key: "qidian",
+      crawlSupport: "supported",
+      crawlEnabled: false,
+      crawlerAdapterKey: "qidian",
+      refRules: QIDIAN_REF_RULES as any,
+    }),
+  );
 
   await ctx.sync.entity(sourceUnit.id);
   return sourceUnit.id;
@@ -120,14 +127,16 @@ export async function seedSourceSiteFixtures(
   const canonicalUrl = `https://book.qidian.com/info/${externalId}`;
   const [sourceRef] = await ctx.db
     .insert(UnitExternalRef)
-    .values({
-      unitId: book.id,
-      sourceSiteEntityUnitId: qidianEntityUnitId,
-      externalKind: "book",
-      externalId,
-      canonicalUrl,
-      originalUrl: `${canonicalUrl}?from=seed`,
-    })
+    .values(
+      withUpdatedAt({
+        unitId: book.id,
+        sourceSiteEntityUnitId: qidianEntityUnitId,
+        externalKind: "book",
+        externalId,
+        canonicalUrl,
+        originalUrl: `${canonicalUrl}?from=seed`,
+      }),
+    )
     .onConflictDoUpdate({
       target: [
         UnitExternalRef.sourceSiteEntityUnitId,
@@ -143,15 +152,17 @@ export async function seedSourceSiteFixtures(
     .returning({ id: UnitExternalRef.id });
   if (!sourceRef) throw new Error("Failed to upsert Qidian external ref.");
 
-  await ctx.db.insert(CreditAttributionEvidence).values({
-    unitId: book.id,
-    entityId: publisher.unitId,
-    role: "publisher",
-    sourceRefId: sourceRef.id,
-    claimPath: "$.bookInfo.publisher",
-    observedUrl: `${canonicalUrl}?from=seed`,
-    confidence: 0.9,
-  });
+  await ctx.db.insert(CreditAttributionEvidence).values(
+    withUpdatedAt({
+      unitId: book.id,
+      entityId: publisher.unitId,
+      role: "publisher",
+      sourceRefId: sourceRef.id,
+      claimPath: "$.bookInfo.publisher",
+      observedUrl: `${canonicalUrl}?from=seed`,
+      confidence: 0.9,
+    }),
+  );
 
   await ctx.sync.content(book.id);
   console.log("[Seed]   Qidian SourceSite + attribution evidence fixture");

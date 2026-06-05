@@ -7,6 +7,7 @@ import {
   ContentStructureAnchor,
   ContentStructureNode,
 } from "../schema";
+import { withUpdatedAt, withUpdatedAtRows } from "./utils.js";
 
 const LEXO_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 const LEXO_FIRST = "0";
@@ -61,7 +62,7 @@ export async function ensureFactoryContentStructure(
 ) {
   await db
     .insert(ContentStructure)
-    .values({ ownerUnitId })
+    .values(withUpdatedAt({ ownerUnitId }))
     .onConflictDoNothing();
 }
 
@@ -90,6 +91,7 @@ export async function createFactoryContentStructureNodes(
         title: node.title,
         noContent: node.noContent === true,
         rating: node.rating ?? null,
+        updatedAt: new Date(),
       });
       previousPosition = position;
       if (node.children?.length) {
@@ -211,18 +213,20 @@ export async function rebuildFactoryContentStructureAnchors(
   if (anchors.length === 0) return;
 
   await db.insert(ContentStructureAnchor).values(
-    anchors.map((anchor) => ({
-      nodeId: anchor.nodeId,
-      ownerUnitId: anchor.ownerUnitId,
-      contentUnitId: anchor.contentUnitId,
-      parentNodeId: anchor.parentNodeId,
-      ancestorNodeIds: anchor.ancestorNodeIds,
-      path: anchor.path,
-      depth: anchor.depth,
-      position: anchor.position,
-      positionPath: anchor.positionPath,
-      titlePath: anchor.titlePath,
-    })),
+    withUpdatedAtRows(
+      anchors.map((anchor) => ({
+        nodeId: anchor.nodeId,
+        ownerUnitId: anchor.ownerUnitId,
+        contentUnitId: anchor.contentUnitId,
+        parentNodeId: anchor.parentNodeId,
+        ancestorNodeIds: anchor.ancestorNodeIds,
+        path: anchor.path,
+        depth: anchor.depth,
+        position: anchor.position,
+        positionPath: anchor.positionPath,
+        titlePath: anchor.titlePath,
+      })),
+    ),
   );
 }
 

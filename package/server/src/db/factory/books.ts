@@ -41,6 +41,8 @@ import {
   pickN,
   randomBoolean,
   randomInt,
+  withUpdatedAt,
+  withUpdatedAtRows,
 } from "./utils.js";
 
 const CHUNK_SIZE = 10;
@@ -76,58 +78,68 @@ export async function seedBooks(
 
       const [unit] = await ctx.db
         .insert(Unit)
-        .values({
-          id: randomUUID(),
-          type: UnitType.BOOK,
-          userId: author.userId,
-          slugScope: author.userId,
-          status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-          defaultLanguage: DEFAULT_LANGUAGE,
-          publishedAt: randomBoolean(0.9)
-            ? faker.date.past({ years: 3 })
-            : null,
-        })
+        .values(
+          withUpdatedAt({
+            id: randomUUID(),
+            type: UnitType.BOOK,
+            userId: author.userId,
+            slugScope: author.userId,
+            status: randomBoolean(0.85)
+              ? UnitStatus.PUBLISHED
+              : UnitStatus.DRAFT,
+            licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+            defaultLanguage: DEFAULT_LANGUAGE,
+            publishedAt: randomBoolean(0.9)
+              ? faker.date.past({ years: 3 })
+              : null,
+          }),
+        )
         .returning({ id: Unit.id, type: Unit.type });
       if (!unit) throw new Error("Failed to create seeded book unit.");
 
-      await ctx.db.insert(Book).values({
-        unitId: unit.id,
-        isbn13: randomBoolean(0.8) ? faker.commerce.isbn() : null,
-        publicationDate: randomBoolean(0.7)
-          ? faker.date.past({ years: 20 })
-          : null,
-        pageCount: randomInt(80, 1200),
-        textLength: randomInt(20000, 500000),
-        chapterCount: 0,
-        formatKey: faker.helpers.arrayElement([
-          "paperback",
-          "hardcover",
-          "ebook",
-        ]),
-        extra: generateBookExtra(),
-      });
-      await ctx.db.insert(UnitTranslation).values(
-        translations.map((t) => ({
+      await ctx.db.insert(Book).values(
+        withUpdatedAt({
           unitId: unit.id,
-          language: t.language,
-          title: t.title,
-          subtitle: t.subtitle,
-          summary: t.summary,
-          description: t.description,
-          extra:
-            t.language === DEFAULT_LANGUAGE
-              ? (withCoverUrl(undefined, coverUrl) as never)
-              : undefined,
-        })),
+          isbn13: randomBoolean(0.8) ? faker.commerce.isbn() : null,
+          publicationDate: randomBoolean(0.7)
+            ? faker.date.past({ years: 20 })
+            : null,
+          pageCount: randomInt(80, 1200),
+          textLength: randomInt(20000, 500000),
+          chapterCount: 0,
+          formatKey: faker.helpers.arrayElement([
+            "paperback",
+            "hardcover",
+            "ebook",
+          ]),
+          extra: generateBookExtra(),
+        }),
+      );
+      await ctx.db.insert(UnitTranslation).values(
+        withUpdatedAtRows(
+          translations.map((t) => ({
+            unitId: unit.id,
+            language: t.language,
+            title: t.title,
+            subtitle: t.subtitle,
+            summary: t.summary,
+            description: t.description,
+            extra:
+              t.language === DEFAULT_LANGUAGE
+                ? (withCoverUrl(undefined, coverUrl) as never)
+                : undefined,
+          })),
+        ),
       );
       await ctx.db.insert(UnitSupportLanguage).values(
-        translations.map((t, i) => ({
-          unitId: unit.id,
-          language: t.language,
-          isPrimary: i === 0,
-          sortOrder: i,
-        })),
+        withUpdatedAtRows(
+          translations.map((t, i) => ({
+            unitId: unit.id,
+            language: t.language,
+            isPrimary: i === 0,
+            sortOrder: i,
+          })),
+        ),
       );
       await ensureFactoryContentStructure(ctx.db, unit.id);
 
@@ -148,7 +160,7 @@ export async function seedBooks(
         });
       }
       for (const t of pickN(tags, randomInt(1, 5))) {
-        allTagLinks.push({ unitId: unit.id, tagUnitId: t.id });
+        allTagLinks.push(withUpdatedAt({ unitId: unit.id, tagUnitId: t.id }));
       }
 
       return unit;
@@ -286,8 +298,77 @@ export async function seedChaptersForBook(
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
       const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await ctx.db.insert(Unit).values(
-        chunk.map((r) => ({
-          id: r.id,
+        withUpdatedAtRows(
+          chunk.map((r) => ({
+            id: r.id,
+            userId: bookUserId,
+            slugScope: bookUserId,
+            type: UnitType.POST,
+            targetUnitId: bookUnitId,
+            status: UnitStatus.PUBLISHED,
+            licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+            defaultLanguage: DEFAULT_LANGUAGE,
+          })),
+        ),
+      );
+    }
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await ctx.db.insert(UnitTranslation).values(
+        withUpdatedAtRows(
+          chunk.map((r) => ({
+            unitId: r.id,
+            language: DEFAULT_LANGUAGE,
+            title: r.title,
+          })),
+        ),
+      );
+    }
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await ctx.db.insert(UnitSupportLanguage).values(
+        withUpdatedAtRows(
+          chunk.map((r) => ({
+            unitId: r.id,
+            language: DEFAULT_LANGUAGE,
+            isPrimary: true,
+            sortOrder: 0,
+          })),
+        ),
+      );
+    }
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await ctx.db.insert(Post).values(
+        withUpdatedAtRows(
+          chunk.map((r) => ({
+            unitId: r.id,
+            authorUserId: bookUserId,
+            kind: PostKind.CHAPTER,
+          })),
+        ),
+      );
+    }
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await ctx.db.insert(ContentTranslation).values(
+        withUpdatedAtRows(
+          chunk.map((r) => ({
+            unitId: r.id,
+            language: DEFAULT_LANGUAGE,
+            content: markdownContentDoc(r.body ?? "") as never,
+            status: "PUBLISHED" as const,
+            authorUserId: bookUserId,
+            provenance: { importedFrom: "factory-book-chapter-seed" },
+          })),
+        ),
+      );
+    }
+  } else {
+    await chunkedParallel(materializedRows, CHUNK_SIZE, async (row) => {
+      await ctx.db.insert(Unit).values(
+        withUpdatedAt({
+          id: row.id,
           userId: bookUserId,
           slugScope: bookUserId,
           type: UnitType.POST,
@@ -295,88 +376,39 @@ export async function seedChaptersForBook(
           status: UnitStatus.PUBLISHED,
           licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
-        })),
+        }),
       );
-    }
-    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
-      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await ctx.db.insert(UnitTranslation).values(
-        chunk.map((r) => ({
-          unitId: r.id,
+        withUpdatedAt({
+          unitId: row.id,
           language: DEFAULT_LANGUAGE,
-          title: r.title,
-        })),
+          title: row.title,
+        }),
       );
-    }
-    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
-      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await ctx.db.insert(UnitSupportLanguage).values(
-        chunk.map((r) => ({
-          unitId: r.id,
+        withUpdatedAt({
+          unitId: row.id,
           language: DEFAULT_LANGUAGE,
           isPrimary: true,
-          sortOrder: 0,
-        })),
+        }),
       );
-    }
-    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
-      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await ctx.db.insert(Post).values(
-        chunk.map((r) => ({
-          unitId: r.id,
+        withUpdatedAt({
+          unitId: row.id,
           authorUserId: bookUserId,
           kind: PostKind.CHAPTER,
-        })),
+        }),
       );
-    }
-    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
-      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await ctx.db.insert(ContentTranslation).values(
-        chunk.map((r) => ({
-          unitId: r.id,
+        withUpdatedAt({
+          unitId: row.id,
           language: DEFAULT_LANGUAGE,
-          content: markdownContentDoc(r.body ?? "") as never,
-          status: "PUBLISHED",
+          content: markdownContentDoc(row.body ?? "") as never,
+          status: "PUBLISHED" as const,
           authorUserId: bookUserId,
           provenance: { importedFrom: "factory-book-chapter-seed" },
-        })),
+        }),
       );
-    }
-  } else {
-    await chunkedParallel(materializedRows, CHUNK_SIZE, async (row) => {
-      await ctx.db.insert(Unit).values({
-        id: row.id,
-        userId: bookUserId,
-        slugScope: bookUserId,
-        type: UnitType.POST,
-        targetUnitId: bookUnitId,
-        status: UnitStatus.PUBLISHED,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-      });
-      await ctx.db.insert(UnitTranslation).values({
-        unitId: row.id,
-        language: DEFAULT_LANGUAGE,
-        title: row.title,
-      });
-      await ctx.db.insert(UnitSupportLanguage).values({
-        unitId: row.id,
-        language: DEFAULT_LANGUAGE,
-        isPrimary: true,
-      });
-      await ctx.db.insert(Post).values({
-        unitId: row.id,
-        authorUserId: bookUserId,
-        kind: PostKind.CHAPTER,
-      });
-      await ctx.db.insert(ContentTranslation).values({
-        unitId: row.id,
-        language: DEFAULT_LANGUAGE,
-        content: markdownContentDoc(row.body ?? "") as never,
-        status: "PUBLISHED",
-        authorUserId: bookUserId,
-        provenance: { importedFrom: "factory-book-chapter-seed" },
-      });
     });
   }
 
@@ -460,6 +492,7 @@ interface NodeRowInput {
   contentUnitId: string | null;
   title: string;
   noContent: boolean;
+  updatedAt: Date;
 }
 
 interface TreeNode {
@@ -496,6 +529,7 @@ async function insertNodeRows(
         contentUnitId: materializedIds.has(id) ? id : null,
         title: node.title,
         noContent: node.noContent === true,
+        updatedAt: new Date(),
       });
       prevKey = key;
       if (node.children && node.children.length > 0) {
@@ -556,6 +590,7 @@ export async function insertMultiLinkNodes(
       contentUnitId: row.id,
       title: row.title,
       noContent: false,
+      updatedAt: new Date(),
     });
     lastPosition = key;
   }

@@ -26,6 +26,7 @@ import {
   chunkedParallel,
   createUsernameGenerator,
   generateParagraph,
+  withUpdatedAt,
 } from "./utils.js";
 
 const AUTH_CHUNK_SIZE = 8;
@@ -137,31 +138,39 @@ export async function seedUsers(
 
       await ctx.db
         .insert(Unit)
-        .values({
-          id: authResult.userId,
-          type: "USER",
-          slug: plan.slug,
-          slugScope: ctx.slugScopes.user,
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-          isLanguageNeutral: true,
-        })
+        .values(
+          withUpdatedAt({
+            id: authResult.userId,
+            type: "USER",
+            slug: plan.slug,
+            slugScope: ctx.slugScopes.user,
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            isLanguageNeutral: true,
+          }),
+        )
         .onConflictDoUpdate({
           target: Unit.id,
-          set: { slug: plan.slug, slugScope: ctx.slugScopes.user },
+          set: {
+            slug: plan.slug,
+            slugScope: ctx.slugScopes.user,
+            updatedAt: new Date(),
+          },
         });
-      await ctx.db.insert(User).values({
-        unitId: authResult.userId,
-        authUserId: authResult.userId,
-        email: plan.email,
-        name: plan.name,
-        avatar: plan.avatar,
-        bio: plan.bio,
-        description: markdownContentDoc(plan.description),
-        joinDate: plan.joinDate,
-        settings: plan.settings,
-        ...(plan.permission ? { permission: plan.permission } : {}),
-      });
+      await ctx.db.insert(User).values(
+        withUpdatedAt({
+          unitId: authResult.userId,
+          authUserId: authResult.userId,
+          email: plan.email,
+          name: plan.name,
+          avatar: plan.avatar,
+          bio: plan.bio,
+          description: markdownContentDoc(plan.description),
+          joinDate: plan.joinDate,
+          settings: plan.settings,
+          ...(plan.permission ? { permission: plan.permission } : {}),
+        }),
+      );
 
       await bootstrapSystemShelves(
         authResult.userId,

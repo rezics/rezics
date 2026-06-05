@@ -62,3 +62,17 @@ export async function chunkedParallel<T, R>(
   }
   return results;
 }
+
+export function withUpdatedAt<T extends object>(
+  row: T,
+  updatedAt = new Date(),
+): T & { updatedAt: Date } {
+  return { ...row, updatedAt };
+}
+
+export function withUpdatedAtRows<T extends object>(
+  rows: T[],
+  updatedAt = new Date(),
+): Array<T & { updatedAt: Date }> {
+  return rows.map((row) => withUpdatedAt(row, updatedAt));
+}

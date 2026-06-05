@@ -39,6 +39,7 @@ import {
 } from "./storage-values.js";
 import type { SeedCtx } from "./strategy.js";
 import type { CreatedUser, SeedResult } from "./types.js";
+import { withUpdatedAt, withUpdatedAtRows } from "./utils.js";
 
 export const FACTORY_SCENARIO_NAMES = [
   "large-post-tree",
@@ -79,47 +80,61 @@ async function createNamedBook(
   title: string,
 ): Promise<string> {
   const id = randomUUID();
-  await ctx.db.insert(Unit).values({
-    id,
-    type: UnitType.BOOK,
-    userId,
-    slugScope: userId,
-    status: UnitStatus.PUBLISHED,
-    licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-    defaultLanguage: DEFAULT_LANGUAGE,
-    publishedAt: new Date(),
-  });
-  await ctx.db.insert(Book).values({ unitId: id, textLength: 120000 });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId: id,
-    language: DEFAULT_LANGUAGE,
-    title,
-  });
-  await ctx.db.insert(UnitSupportLanguage).values({
-    unitId: id,
-    language: DEFAULT_LANGUAGE,
-    isPrimary: true,
-  });
-  await ctx.db.insert(ContentStructure).values({ ownerUnitId: id });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id,
+      type: UnitType.BOOK,
+      userId,
+      slugScope: userId,
+      status: UnitStatus.PUBLISHED,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      publishedAt: new Date(),
+    }),
+  );
+  await ctx.db
+    .insert(Book)
+    .values(withUpdatedAt({ unitId: id, textLength: 120000 }));
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: id,
+      language: DEFAULT_LANGUAGE,
+      title,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: id,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
+  await ctx.db
+    .insert(ContentStructure)
+    .values(withUpdatedAt({ ownerUnitId: id }));
   return id;
 }
 
 async function createScenarioTag(ctx: SeedCtx, title: string): Promise<string> {
   const id = randomUUID();
-  await ctx.db.insert(Unit).values({
-    id,
-    type: UnitType.TAG,
-    slugScope: ctx.slugScopes.tag,
-    status: UnitStatus.PUBLISHED,
-    visibility: UnitVisibility.PUBLIC,
-    defaultLanguage: DEFAULT_LANGUAGE,
-    isLanguageNeutral: true,
-  });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId: id,
-    language: DEFAULT_LANGUAGE,
-    title,
-  });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id,
+      type: UnitType.TAG,
+      slugScope: ctx.slugScopes.tag,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      isLanguageNeutral: true,
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: id,
+      language: DEFAULT_LANGUAGE,
+      title,
+    }),
+  );
   return id;
 }
 
@@ -128,25 +143,31 @@ async function createScenarioLabel(
   title: string,
 ): Promise<string> {
   const id = randomUUID();
-  await ctx.db.insert(Unit).values({
-    id,
-    type: UnitType.LABEL,
-    slugScope: ctx.slugScopes.zone,
-    status: UnitStatus.PUBLISHED,
-    visibility: UnitVisibility.PUBLIC,
-    defaultLanguage: DEFAULT_LANGUAGE,
-    isLanguageNeutral: true,
-  });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId: id,
-    language: DEFAULT_LANGUAGE,
-    title,
-  });
-  await ctx.db.insert(UnitSupportLanguage).values({
-    unitId: id,
-    language: DEFAULT_LANGUAGE,
-    isPrimary: true,
-  });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id,
+      type: UnitType.LABEL,
+      slugScope: ctx.slugScopes.zone,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      isLanguageNeutral: true,
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: id,
+      language: DEFAULT_LANGUAGE,
+      title,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: id,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
   return id;
 }
 
@@ -159,31 +180,39 @@ async function createScenarioEntity(
   },
 ): Promise<string> {
   const id = randomUUID();
-  await ctx.db.insert(Unit).values({
-    id,
-    type: UnitType.ENTITY,
-    slugScope: ctx.slugScopes.entity,
-    status: UnitStatus.PUBLISHED,
-    visibility: UnitVisibility.PUBLIC,
-    defaultLanguage: DEFAULT_LANGUAGE,
-  });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId: id,
-    language: DEFAULT_LANGUAGE,
-    title: input.title,
-    summary: `${input.title} fixture entity for wiki Zone sections.`,
-  });
-  await ctx.db.insert(UnitSupportLanguage).values({
-    unitId: id,
-    language: DEFAULT_LANGUAGE,
-    isPrimary: true,
-  });
-  await ctx.db.insert(Entity).values({
-    unitId: id,
-    kind: input.kind,
-    verified: true,
-    eligibleSubjectRoles: input.subjectRoles,
-  });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id,
+      type: UnitType.ENTITY,
+      slugScope: ctx.slugScopes.entity,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      defaultLanguage: DEFAULT_LANGUAGE,
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: id,
+      language: DEFAULT_LANGUAGE,
+      title: input.title,
+      summary: `${input.title} fixture entity for wiki Zone sections.`,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: id,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
+  await ctx.db.insert(Entity).values(
+    withUpdatedAt({
+      unitId: id,
+      kind: input.kind,
+      verified: true,
+      eligibleSubjectRoles: input.subjectRoles,
+    }),
+  );
   await ctx.sync.entity(id);
   return id;
 }
@@ -200,37 +229,47 @@ async function createScenarioBookUnit(
   },
 ): Promise<string> {
   const unitId = randomUUID();
-  await ctx.db.insert(Unit).values({
-    id: unitId,
-    type: UnitType.BOOK,
-    userId: input.userId,
-    slugScope: input.userId,
-    status: UnitStatus.PUBLISHED,
-    visibility: input.visibility ?? UnitVisibility.PUBLIC,
-    licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-    defaultLanguage: input.language,
-    publishedAt: new Date(),
-  });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId,
-    language: input.language,
-    title: input.title,
-    summary: `${input.title} factory fixture.`,
-  });
-  await ctx.db.insert(UnitSupportLanguage).values({
-    unitId,
-    language: input.language,
-    isPrimary: true,
-    sortOrder: 0,
-  });
-  await ctx.db.insert(Book).values({
-    unitId,
-    pageCount: input.pageCount ?? 320,
-    textLength: input.textLength ?? 90000,
-    chapterCount: 0,
-    formatKey: "ebook",
-  });
-  await ctx.db.insert(ContentStructure).values({ ownerUnitId: unitId });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: unitId,
+      type: UnitType.BOOK,
+      userId: input.userId,
+      slugScope: input.userId,
+      status: UnitStatus.PUBLISHED,
+      visibility: input.visibility ?? UnitVisibility.PUBLIC,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+      defaultLanguage: input.language,
+      publishedAt: new Date(),
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId,
+      language: input.language,
+      title: input.title,
+      summary: `${input.title} factory fixture.`,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId,
+      language: input.language,
+      isPrimary: true,
+      sortOrder: 0,
+    }),
+  );
+  await ctx.db.insert(Book).values(
+    withUpdatedAt({
+      unitId,
+      pageCount: input.pageCount ?? 320,
+      textLength: input.textLength ?? 90000,
+      chapterCount: 0,
+      formatKey: "ebook",
+    }),
+  );
+  await ctx.db
+    .insert(ContentStructure)
+    .values(withUpdatedAt({ ownerUnitId: unitId }));
   return unitId;
 }
 
@@ -341,10 +380,14 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     });
   }
 
-  await ctx.db.insert(Unit).values(unitRows);
-  await ctx.db.insert(Post).values(postRows);
-  await ctx.db.insert(UnitSupportLanguage).values(supportRows);
-  await ctx.db.insert(ContentTranslation).values(contentRows as never);
+  await ctx.db.insert(Unit).values(withUpdatedAtRows(unitRows));
+  await ctx.db.insert(Post).values(withUpdatedAtRows(postRows));
+  await ctx.db
+    .insert(UnitSupportLanguage)
+    .values(withUpdatedAtRows(supportRows));
+  await ctx.db
+    .insert(ContentTranslation)
+    .values(withUpdatedAtRows(contentRows) as never);
   for (const post of rootPosts) {
     await ctx.sync.post(post.id);
   }
@@ -487,23 +530,27 @@ async function runLargeHistory(ctx: SeedCtx): Promise<SeedResult> {
     "Factory Scenario: Large History",
   );
 
-  await ctx.db.insert(UnitHistoryClock).values({
-    unitId,
-    nextSequence: 121,
-  });
-  await ctx.db.insert(HistoryOutbox).values(
-    Array.from({ length: 120 }, (_, index) => ({
+  await ctx.db.insert(UnitHistoryClock).values(
+    withUpdatedAt({
       unitId,
-      sequence: index + 1,
-      actorUserId: user.userId,
-      category: index % 2 === 0 ? "revision" : "structure",
-      payload: {
-        source: "factory",
-        scenario: "large-history",
-        index,
-      },
-      status: "pending",
-    })),
+      nextSequence: 121,
+    }),
+  );
+  await ctx.db.insert(HistoryOutbox).values(
+    withUpdatedAtRows(
+      Array.from({ length: 120 }, (_, index) => ({
+        unitId,
+        sequence: index + 1,
+        actorUserId: user.userId,
+        category: index % 2 === 0 ? "revision" : "structure",
+        payload: {
+          source: "factory",
+          scenario: "large-history",
+          index,
+        },
+        status: "pending",
+      })),
+    ),
   );
 
   await ctx.sync.content(unitId);
@@ -529,31 +576,39 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
   }
 
   const shelfId = randomUUID();
-  await ctx.db.insert(Unit).values({
-    id: shelfId,
-    type: UnitType.SHELF,
-    userId: user.userId,
-    slugScope: user.userId,
-    status: UnitStatus.PUBLISHED,
-    licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-    defaultLanguage: DEFAULT_LANGUAGE,
-    publishedAt: new Date(),
-  });
-  await ctx.db.insert(Shelf).values({
-    unitId: shelfId,
-    kindKey: "factory-complex",
-    extra: { viewMode: "nested", sortBy: "manual" },
-  });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId: shelfId,
-    language: DEFAULT_LANGUAGE,
-    title: "Factory Scenario: Complex Shelf",
-  });
-  await ctx.db.insert(UnitSupportLanguage).values({
-    unitId: shelfId,
-    language: DEFAULT_LANGUAGE,
-    isPrimary: true,
-  });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: shelfId,
+      type: UnitType.SHELF,
+      userId: user.userId,
+      slugScope: user.userId,
+      status: UnitStatus.PUBLISHED,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      publishedAt: new Date(),
+    }),
+  );
+  await ctx.db.insert(Shelf).values(
+    withUpdatedAt({
+      unitId: shelfId,
+      kindKey: "factory-complex",
+      extra: { viewMode: "nested", sortBy: "manual" },
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: shelfId,
+      language: DEFAULT_LANGUAGE,
+      title: "Factory Scenario: Complex Shelf",
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: shelfId,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
 
   let prev: string | undefined;
   const selected = workIds.slice(0, Math.min(workIds.length, 48));
@@ -567,16 +622,22 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
       position,
     };
   });
-  await ctx.db.insert(ShelfUnit).values(shelfRows).onConflictDoNothing();
+  await ctx.db
+    .insert(ShelfUnit)
+    .values(withUpdatedAtRows(shelfRows))
+    .onConflictDoNothing();
   await ctx.db
     .insert(ShelfUnitRelation)
     .values(
-      selected.slice(1, 20).map((childUnitId, index) => ({
-        shelfId,
-        parentUnitId: selected[index]!,
-        childUnitId,
-        role: index % 2 === 0 ? "sequel" : "related",
-      })),
+      selected
+        .slice(1, 20)
+        .map((childUnitId, index) => ({
+          shelfId,
+          parentUnitId: selected[index]!,
+          childUnitId,
+          role: index % 2 === 0 ? "sequel" : "related",
+        }))
+        .map((row) => withUpdatedAt(row)),
     )
     .onConflictDoNothing();
   await ctx.db
@@ -622,30 +683,36 @@ async function createWikiScenarioPost(
     updatedAt: input.publishedAt,
   });
   await ctx.db.insert(UnitTranslation).values(
-    input.translations.map((item) => ({
-      unitId: postUnitId,
-      language: item.language,
-      title: item.title,
-      summary: `${item.title} wiki fixture.`,
-    })),
+    withUpdatedAtRows(
+      input.translations.map((item) => ({
+        unitId: postUnitId,
+        language: item.language,
+        title: item.title,
+        summary: `${item.title} wiki fixture.`,
+      })),
+    ),
   );
   await ctx.db.insert(UnitSupportLanguage).values(
-    input.translations.map((item, index) => ({
-      unitId: postUnitId,
-      language: item.language,
-      isPrimary: item.language === input.defaultLanguage,
-      sortOrder: index,
-    })),
+    withUpdatedAtRows(
+      input.translations.map((item, index) => ({
+        unitId: postUnitId,
+        language: item.language,
+        isPrimary: item.language === input.defaultLanguage,
+        sortOrder: index,
+      })),
+    ),
   );
   await ctx.db.insert(ContentTranslation).values(
-    input.translations.map((item) => ({
-      unitId: postUnitId,
-      language: item.language,
-      content: markdownContentDoc(item.body) as never,
-      status: "PUBLISHED",
-      authorUserId: input.userId,
-      provenance: { importedFrom: "factory-wiki-zone-scenario" },
-    })),
+    withUpdatedAtRows(
+      input.translations.map((item) => ({
+        unitId: postUnitId,
+        language: item.language,
+        content: markdownContentDoc(item.body) as never,
+        status: "PUBLISHED" as const,
+        authorUserId: input.userId,
+        provenance: { importedFrom: "factory-wiki-zone-scenario" },
+      })),
+    ),
   );
   await ctx.db.insert(Post).values({
     unitId: postUnitId,
@@ -654,10 +721,12 @@ async function createWikiScenarioPost(
     createdAt: input.publishedAt,
     updatedAt: input.publishedAt,
   });
-  await ctx.db.insert(UnitRealm).values({
-    realmUnitId: input.realmUnitId,
-    unitId: postUnitId,
-  });
+  await ctx.db.insert(UnitRealm).values(
+    withUpdatedAt({
+      realmUnitId: input.realmUnitId,
+      unitId: postUnitId,
+    }),
+  );
   await ctx.sync.post(postUnitId);
   return postUnitId;
 }
@@ -690,138 +759,146 @@ async function createWikiScenarioZone(
     type: "POST",
     postKind: "WIKI",
   };
-  await ctx.db.insert(Unit).values({
-    id: zoneUnitId,
-    type: UnitType.ZONE,
-    slug: input.slug,
-    slugScope: ctx.slugScopes.zone,
-    status: UnitStatus.PUBLISHED,
-    visibility: UnitVisibility.PUBLIC,
-    defaultLanguage: DEFAULT_LANGUAGE,
-    publishedAt: new Date(),
-  });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId: zoneUnitId,
-    language: DEFAULT_LANGUAGE,
-    title: input.title,
-    description: markdownContentDoc(
-      `${input.title} fixture portal for wiki Zone verification.`,
-    ) as never,
-  });
-  await ctx.db.insert(UnitSupportLanguage).values({
-    unitId: zoneUnitId,
-    language: DEFAULT_LANGUAGE,
-    isPrimary: true,
-  });
-  await ctx.db.insert(Zone).values({
-    unitId: zoneUnitId,
-    template: input.template,
-    filters: wikiFilters,
-    wiki: {
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: zoneUnitId,
+      type: UnitType.ZONE,
+      slug: input.slug,
+      slugScope: ctx.slugScopes.zone,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      publishedAt: new Date(),
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: zoneUnitId,
+      language: DEFAULT_LANGUAGE,
+      title: input.title,
+      description: markdownContentDoc(
+        `${input.title} fixture portal for wiki Zone verification.`,
+      ) as never,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: zoneUnitId,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
+  await ctx.db.insert(Zone).values(
+    withUpdatedAt({
+      unitId: zoneUnitId,
+      template: input.template,
       filters: wikiFilters,
-      navigation: {
-        sections: [
-          {
-            id: "main",
-            labelUnitId: input.labelUnitIds.overview,
-            items: [
-              {
-                kind: "labelHeading",
-                labelUnitId: input.labelUnitIds.overview,
-              },
-              { kind: "entity", entityId: input.entityIds[0] },
-              { kind: "tag", tagUnitId: input.tagUnitIds[0] },
-              {
-                kind: "wikiUnit",
-                unitId: input.wikiUnitIds[0],
-              },
-              {
-                kind: "manualLink",
-                href: "/realm",
-                label: {
-                  translations: { en: "Realm index" },
-                  fallbackLanguage: DEFAULT_LANGUAGE,
+      wiki: {
+        filters: wikiFilters,
+        navigation: {
+          sections: [
+            {
+              id: "main",
+              labelUnitId: input.labelUnitIds.overview,
+              items: [
+                {
+                  kind: "labelHeading",
+                  labelUnitId: input.labelUnitIds.overview,
                 },
-              },
-            ],
-          },
-        ],
-      },
-      homepage: {
-        template: input.homepageTemplate,
-        sections: [
-          {
-            id: "characters",
-            kind: "entityCollection",
-            titleLabelUnitId: input.labelUnitIds.characters,
-            entityKinds: ["character", "location", "faction"],
-            subjectRoles: ["primary_character", "setting", "about"],
-            realmUnitId: input.realmUnitId,
-            limit: 6,
-            sort: "title",
-            emptyState: "show-empty",
-          },
-          {
-            id: "tags",
-            kind: "tagCollection",
-            title: {
-              translations: { en: "Wiki tags" },
-              fallbackLanguage: DEFAULT_LANGUAGE,
-            },
-            tagUnitIds: input.tagUnitIds,
-            limit: 6,
-            sort: "title",
-          },
-          {
-            id: "wiki-units",
-            kind: "wikiUnitCollection",
-            title: {
-              translations: { en: "Translated entries" },
-              fallbackLanguage: DEFAULT_LANGUAGE,
-            },
-            unitIds: input.wikiUnitIds,
-            limit: 6,
-          },
-          { id: "recent", kind: "recentWiki", limit: 4 },
-          { id: "updated", kind: "updatedWiki", limit: 4 },
-          {
-            id: "stub",
-            kind: "stubWiki",
-            predicate: "short",
-            limit: 4,
-            emptyState: "show-empty",
-          },
-          {
-            id: "manual",
-            kind: "manualLinks",
-            titleLabelUnitId: input.labelUnitIds.places,
-            links: [
-              {
-                kind: "manualLink",
-                href: "/realm/search",
-                label: {
-                  translations: { en: "Search wiki posts" },
-                  fallbackLanguage: DEFAULT_LANGUAGE,
+                { kind: "entity", entityId: input.entityIds[0] },
+                { kind: "tag", tagUnitId: input.tagUnitIds[0] },
+                {
+                  kind: "wikiUnit",
+                  unitId: input.wikiUnitIds[0],
                 },
-              },
-            ],
-          },
-        ],
-      },
-      theme: {
-        template: input.template,
-        homepageTemplate: input.homepageTemplate,
-        palette: {
-          background: "#f8fafc",
-          surface: "#ffffff",
-          text: "#1f2937",
-          accent: "#2563eb",
+                {
+                  kind: "manualLink",
+                  href: "/realm",
+                  label: {
+                    translations: { en: "Realm index" },
+                    fallbackLanguage: DEFAULT_LANGUAGE,
+                  },
+                },
+              ],
+            },
+          ],
         },
-        chrome: { density: "comfortable", navPosition: "side" },
-        layout: { contentWidth: "wide", infoboxPosition: "right" },
+        homepage: {
+          template: input.homepageTemplate,
+          sections: [
+            {
+              id: "characters",
+              kind: "entityCollection",
+              titleLabelUnitId: input.labelUnitIds.characters,
+              entityKinds: ["character", "location", "faction"],
+              subjectRoles: ["primary_character", "setting", "about"],
+              realmUnitId: input.realmUnitId,
+              limit: 6,
+              sort: "title",
+              emptyState: "show-empty",
+            },
+            {
+              id: "tags",
+              kind: "tagCollection",
+              title: {
+                translations: { en: "Wiki tags" },
+                fallbackLanguage: DEFAULT_LANGUAGE,
+              },
+              tagUnitIds: input.tagUnitIds,
+              limit: 6,
+              sort: "title",
+            },
+            {
+              id: "wiki-units",
+              kind: "wikiUnitCollection",
+              title: {
+                translations: { en: "Translated entries" },
+                fallbackLanguage: DEFAULT_LANGUAGE,
+              },
+              unitIds: input.wikiUnitIds,
+              limit: 6,
+            },
+            { id: "recent", kind: "recentWiki", limit: 4 },
+            { id: "updated", kind: "updatedWiki", limit: 4 },
+            {
+              id: "stub",
+              kind: "stubWiki",
+              predicate: "short",
+              limit: 4,
+              emptyState: "show-empty",
+            },
+            {
+              id: "manual",
+              kind: "manualLinks",
+              titleLabelUnitId: input.labelUnitIds.places,
+              links: [
+                {
+                  kind: "manualLink",
+                  href: "/realm/search",
+                  label: {
+                    translations: { en: "Search wiki posts" },
+                    fallbackLanguage: DEFAULT_LANGUAGE,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        theme: {
+          template: input.template,
+          homepageTemplate: input.homepageTemplate,
+          palette: {
+            background: "#f8fafc",
+            surface: "#ffffff",
+            text: "#1f2937",
+            accent: "#2563eb",
+          },
+          chrome: { density: "comfortable", navPosition: "side" },
+          layout: { contentWidth: "wide", infoboxPosition: "right" },
+        },
       },
-    },
-  });
+    }),
+  );
   return zoneUnitId;
 }
 
@@ -840,37 +917,47 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   });
 
   const realmUnitId = randomUUID();
-  await ctx.db.insert(Unit).values({
-    id: realmUnitId,
-    type: UnitType.REALM,
-    userId: user.userId,
-    slugScope: ctx.slugScopes.realm,
-    status: UnitStatus.PUBLISHED,
-    visibility: UnitVisibility.PUBLIC,
-    defaultLanguage: DEFAULT_LANGUAGE,
-    publishedAt: new Date(),
-  });
-  await ctx.db.insert(UnitTranslation).values({
-    unitId: realmUnitId,
-    language: DEFAULT_LANGUAGE,
-    title: "Factory Scenario: Wiki Realm",
-  });
-  await ctx.db.insert(UnitSupportLanguage).values({
-    unitId: realmUnitId,
-    language: DEFAULT_LANGUAGE,
-    isPrimary: true,
-  });
-  await ctx.db.insert(Realm).values({
-    unitId: realmUnitId,
-    isPublic: true,
-    isOfficial: true,
-    extra: { scenario: "wiki-zone-experience" },
-  });
-  await ctx.db.insert(RealmMember).values({
-    realmUnitId,
-    userId: user.userId,
-    roleKey: "owner",
-  });
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: realmUnitId,
+      type: UnitType.REALM,
+      userId: user.userId,
+      slugScope: ctx.slugScopes.realm,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      publishedAt: new Date(),
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: realmUnitId,
+      language: DEFAULT_LANGUAGE,
+      title: "Factory Scenario: Wiki Realm",
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: realmUnitId,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
+  await ctx.db.insert(Realm).values(
+    withUpdatedAt({
+      unitId: realmUnitId,
+      isPublic: true,
+      isOfficial: true,
+      extra: { scenario: "wiki-zone-experience" },
+    }),
+  );
+  await ctx.db.insert(RealmMember).values(
+    withUpdatedAt({
+      realmUnitId,
+      userId: user.userId,
+      roleKey: "owner",
+    }),
+  );
   const [characterId, locationId, factionId] = await Promise.all([
     createScenarioEntity(ctx, {
       title: "Factory Wiki Character",
@@ -950,10 +1037,12 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   }
   await ctx.db
     .insert(UnitTag)
-    .values([
-      ...postIds.map((unitId) => ({ unitId, tagUnitId: loreTagId })),
-      { unitId: postIds.at(-1)!, tagUnitId: stubTagId },
-    ])
+    .values(
+      withUpdatedAtRows([
+        ...postIds.map((unitId) => ({ unitId, tagUnitId: loreTagId })),
+        { unitId: postIds.at(-1)!, tagUnitId: stubTagId },
+      ]),
+    )
     .onConflictDoNothing();
 
   const zoneInputs = [

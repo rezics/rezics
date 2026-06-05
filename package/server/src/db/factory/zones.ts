@@ -6,7 +6,12 @@ import { generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit } from "./types.js";
-import { pickN, randomBoolean } from "./utils.js";
+import {
+  pickN,
+  randomBoolean,
+  withUpdatedAt,
+  withUpdatedAtRows,
+} from "./utils.js";
 
 const ZONE_TEMPLATES = [
   "featured-carousel",
@@ -128,37 +133,45 @@ export async function seedZones(
     const filters = buildFilters(template, workIds, tagIds);
 
     const id = randomUUID();
-    await ctx.db.insert(Unit).values({
-      id,
-      type: UnitType.ZONE,
-      slugScope: ctx.slugScopes.zone,
-      status: UnitStatus.PUBLISHED,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: faker.date.past({ years: 1 }),
-    });
-    await ctx.db.insert(Zone).values({
-      unitId: id,
-      template,
-      filters,
-      styling,
-      startsAt,
-      endsAt,
-    });
-    await ctx.db.insert(UnitTranslation).values(
-      translations.map((t) => ({
+    await ctx.db.insert(Unit).values(
+      withUpdatedAt({
+        id,
+        type: UnitType.ZONE,
+        slugScope: ctx.slugScopes.zone,
+        status: UnitStatus.PUBLISHED,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: faker.date.past({ years: 1 }),
+      }),
+    );
+    await ctx.db.insert(Zone).values(
+      withUpdatedAt({
         unitId: id,
-        language: t.language,
-        title: t.title,
-        description: t.description,
-      })),
+        template,
+        filters,
+        styling,
+        startsAt,
+        endsAt,
+      }),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAtRows(
+        translations.map((t) => ({
+          unitId: id,
+          language: t.language,
+          title: t.title,
+          description: t.description,
+        })),
+      ),
     );
     await ctx.db.insert(UnitSupportLanguage).values(
-      translations.map((t, idx) => ({
-        unitId: id,
-        language: t.language,
-        isPrimary: idx === 0,
-        sortOrder: idx,
-      })),
+      withUpdatedAtRows(
+        translations.map((t, idx) => ({
+          unitId: id,
+          language: t.language,
+          isPrimary: idx === 0,
+          sortOrder: idx,
+        })),
+      ),
     );
 
     results.push({ id, type: UnitType.ZONE });

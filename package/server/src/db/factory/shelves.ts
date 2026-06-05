@@ -25,6 +25,8 @@ import {
   randomBoolean,
   randomInt,
   unitTypeToShelfKind,
+  withUpdatedAt,
+  withUpdatedAtRows,
 } from "./utils.js";
 
 const CHUNK_SIZE = 10;
@@ -136,51 +138,61 @@ export async function seedShelves(
         }
       }
 
-      await ctx.db.insert(Unit).values({
-        id: unit.id,
-        type: UnitType.SHELF,
-        userId: author.userId,
-        slugScope: author.userId,
-        status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
-      });
-      await ctx.db.insert(Shelf).values({
-        unitId: unit.id,
-        kindKey,
-        extra,
-        itemCount: shelfUnitRows.length,
-      });
-      await ctx.db.insert(UnitTranslation).values(
-        translations.map((t) => ({
+      await ctx.db.insert(Unit).values(
+        withUpdatedAt({
+          id: unit.id,
+          type: UnitType.SHELF,
+          userId: author.userId,
+          slugScope: author.userId,
+          status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          publishedAt: randomBoolean(0.85)
+            ? faker.date.past({ years: 2 })
+            : null,
+        }),
+      );
+      await ctx.db.insert(Shelf).values(
+        withUpdatedAt({
           unitId: unit.id,
-          language: t.language,
-          title: t.title,
-          description: t.description,
-          extra:
-            coverUrl && t.language === DEFAULT_LANGUAGE
-              ? (withCoverUrl(undefined, coverUrl) as unknown)
-              : undefined,
-        })),
+          kindKey,
+          extra,
+          itemCount: shelfUnitRows.length,
+        }),
+      );
+      await ctx.db.insert(UnitTranslation).values(
+        withUpdatedAtRows(
+          translations.map((t) => ({
+            unitId: unit.id,
+            language: t.language,
+            title: t.title,
+            description: t.description,
+            extra:
+              coverUrl && t.language === DEFAULT_LANGUAGE
+                ? (withCoverUrl(undefined, coverUrl) as unknown)
+                : undefined,
+          })),
+        ),
       );
       await ctx.db.insert(UnitSupportLanguage).values(
-        translations.map((t, i) => ({
-          unitId: unit.id,
-          language: t.language,
-          isPrimary: i === 0,
-          sortOrder: i,
-        })),
+        withUpdatedAtRows(
+          translations.map((t, i) => ({
+            unitId: unit.id,
+            language: t.language,
+            isPrimary: i === 0,
+            sortOrder: i,
+          })),
+        ),
       );
       if (shelfUnitRows.length > 0) {
         await ctx.db
           .insert(ShelfUnit)
-          .values(shelfUnitRows)
+          .values(withUpdatedAtRows(shelfUnitRows))
           .onConflictDoNothing();
         if (shelfUnitRelationRows.length > 0) {
           await ctx.db
             .insert(ShelfUnitRelation)
-            .values(shelfUnitRelationRows)
+            .values(withUpdatedAtRows(shelfUnitRelationRows))
             .onConflictDoNothing();
         }
       }

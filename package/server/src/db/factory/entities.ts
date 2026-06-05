@@ -20,6 +20,7 @@ import {
 } from "../schema";
 import { generateTranslations, getFaker } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
+import { withUpdatedAtRows } from "./utils.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
 import { pickN, randomBoolean, randomInt } from "./utils.js";
@@ -140,13 +141,15 @@ async function batchInsertEntities(
     const chunk = rows.slice(i, i + BATCH_SIZE);
     if (chunk.length === 0) continue;
     await db.insert(Unit).values(
-      chunk.map((r) => ({
-        id: r.id,
-        type: UnitType.ENTITY,
-        slugScope: entityScope,
-        status: UnitStatus.PUBLISHED,
-        defaultLanguage: r.primaryLang,
-      })),
+      withUpdatedAtRows(
+        chunk.map((r) => ({
+          id: r.id,
+          type: UnitType.ENTITY,
+          slugScope: entityScope,
+          status: UnitStatus.PUBLISHED,
+          defaultLanguage: r.primaryLang,
+        })),
+      ),
     );
   }
 
@@ -154,13 +157,15 @@ async function batchInsertEntities(
     const chunk = rows.slice(i, i + BATCH_SIZE);
     if (chunk.length === 0) continue;
     await db.insert(Entity).values(
-      chunk.map((r) => ({
-        unitId: r.id,
-        kind,
-        verified: r.verified,
-        eligibleCreditRoles: eligibleCreditRolesForKind(kind),
-        eligibleSubjectRoles: eligibleSubjectRolesForKind(kind),
-      })),
+      withUpdatedAtRows(
+        chunk.map((r) => ({
+          unitId: r.id,
+          kind,
+          verified: r.verified,
+          eligibleCreditRoles: eligibleCreditRolesForKind(kind),
+          eligibleSubjectRoles: eligibleSubjectRolesForKind(kind),
+        })),
+      ),
     );
   }
 
@@ -175,7 +180,7 @@ async function batchInsertEntities(
   for (let i = 0; i < allTranslations.length; i += BATCH_SIZE) {
     const chunk = allTranslations.slice(i, i + BATCH_SIZE);
     if (chunk.length === 0) continue;
-    await db.insert(UnitTranslation).values(chunk);
+    await db.insert(UnitTranslation).values(withUpdatedAtRows(chunk));
   }
 
   const allSupport = rows.flatMap((r) =>
@@ -189,7 +194,7 @@ async function batchInsertEntities(
   for (let i = 0; i < allSupport.length; i += BATCH_SIZE) {
     const chunk = allSupport.slice(i, i + BATCH_SIZE);
     if (chunk.length === 0) continue;
-    await db.insert(UnitSupportLanguage).values(chunk);
+    await db.insert(UnitSupportLanguage).values(withUpdatedAtRows(chunk));
   }
 }
 
