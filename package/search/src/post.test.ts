@@ -31,6 +31,99 @@ function createDb(rowSets: unknown[][]) {
   };
 }
 
+const contentUnitRow = {
+  id: "book-1",
+  type: "BOOK",
+  status: "PUBLISHED",
+  visibility: "PUBLIC",
+  moderationStatus: "APPROVED",
+  catalogEntryKind: null,
+  defaultLanguage: "en",
+  isLanguageNeutral: false,
+  rating: "GENERAL",
+  aiDisclosureMode: "UNKNOWN",
+  userId: "user-1",
+  targetUnitId: null,
+  createdAt: new Date("2026-06-01T00:00:00.000Z"),
+  updatedAt: new Date("2026-06-02T00:00:00.000Z"),
+  publishedAt: new Date("2026-06-03T00:00:00.000Z"),
+};
+
+function contentHydrationRows() {
+  return [
+    [
+      {
+        unitId: "book-1",
+        language: "en",
+        title: "Drizzle Book",
+        subtitle: null,
+        summary: "Book summary",
+        description: markdownContentDoc("Book description"),
+      },
+    ],
+    [],
+    [{ unitId: "book-1", language: "en", isPrimary: true, sortOrder: 0 }],
+    [
+      {
+        unitId: "book-1",
+        value: "Alias",
+        score: 3,
+        pinned: false,
+        status: "ACTIVE",
+      },
+    ],
+    [
+      {
+        unitId: "book-1",
+        tagUnitId: "tag-1",
+        score: 5,
+        pinned: false,
+        tagSlug: "tag",
+        title: "Tag",
+      },
+    ],
+    [
+      {
+        unitId: "book-1",
+        realmUnitId: "realm-1",
+        moderationStatus: "APPROVED",
+        isLocked: false,
+        realm: { realm: { isPublic: true } },
+      },
+    ],
+    [{ unitId: "book-1", realmUnitId: "realm-1", tagUnitId: "tag-1" }],
+    [
+      {
+        unitId: "book-1",
+        entityId: "person-1",
+        role: "author",
+        sortOrder: 0,
+        kind: "person",
+        title: "Alice",
+      },
+    ],
+    [
+      {
+        unitId: "book-1",
+        entityId: "subject-1",
+        role: "topic",
+        sortOrder: 0,
+        kind: "concept",
+        title: "Topic",
+      },
+    ],
+    [{ unitId: "book-1", isLicensed: true, textLength: 123 }],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+  ];
+}
+
 function setServerEnvForSearchTests() {
   process.env.DATABASE_URL ??=
     "postgresql://postgres:postgres@localhost:5432/rezics_book";
@@ -882,24 +975,73 @@ describe("public content indexing eligibility", () => {
 });
 
 describe("search sync global moderation projection", () => {
+  test("syncSingleContent reads content graph through Drizzle", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncSingleContent } = await import("./sync");
+    const addOrUpdateContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    setSearchDb(
+      createDb([[contentUnitRow], ...contentHydrationRows()]) as never,
+    );
+
+    await syncSingleContent(
+      { addOrUpdateContent, deleteContent } as any,
+      "book-1",
+    );
+
+    expect(addOrUpdateContent).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: "book-1",
+        titles: ["Drizzle Book"],
+        descriptions: ["Book description"],
+        aliasValues: ["Alias"],
+        tagIds: ["tag-1"],
+        realmIds: ["realm-1"],
+        realmTagKeys: ["realm-1:tag-1"],
+        creditNames: ["Alice"],
+        subjectNames: ["Topic"],
+        textLength: 123,
+        isLicensed: true,
+      }),
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+  });
+
+  test("syncContentSegment returns cursor from Drizzle rows", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchDb, syncContentSegment } = await import("./sync");
+    const addOrUpdateContent = mock(async (_docs: any[]) => undefined);
+    setSearchDb(
+      createDb([
+        [contentUnitRow, { ...contentUnitRow, id: "book-2" }],
+        ...contentHydrationRows(),
+      ]) as never,
+    );
+
+    const result = await syncContentSegment({ addOrUpdateContent } as any, {
+      limit: 1,
+    });
+
+    expect(result).toEqual({ processed: 1, nextCursor: "book-1" });
+    expect(addOrUpdateContent).toHaveBeenCalledTimes(1);
+  });
+
   test("syncSingleContent deletes globally removed content", async () => {
     setServerEnvForSearchTests();
-    const { setSearchPrismaClient, syncSingleContent } = await import("./sync");
+    const { setSearchDb, syncSingleContent } = await import("./sync");
     const deleteContent = mock(async (_ids: string[]) => undefined);
     const addOrUpdateContent = mock(async (_docs: any[]) => undefined);
 
-    setSearchPrismaClient({
-      unit: {
-        findUnique: mock(async () => ({
-          id: "book-1",
-          type: "BOOK",
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-          moderationStatus: "REMOVED",
-          catalogEntryKind: null,
-        })),
-      },
-    } as any);
+    setSearchDb(
+      createDb([
+        [
+          {
+            ...contentUnitRow,
+            moderationStatus: "REMOVED",
+          },
+        ],
+      ]) as never,
+    );
 
     await syncSingleContent(
       { deleteContent, addOrUpdateContent } as any,

@@ -1,5 +1,35 @@
 import { describe, expect, mock, test } from "bun:test";
 
+function createDb(rowSets: unknown[][]) {
+  const createChain = () => ({
+    then(resolve: (value: unknown[]) => unknown) {
+      return Promise.resolve(resolve(rowSets.shift() ?? []));
+    },
+    leftJoin() {
+      return createChain();
+    },
+    where() {
+      return createChain();
+    },
+    orderBy() {
+      return createChain();
+    },
+    async limit() {
+      return rowSets.shift() ?? [];
+    },
+  });
+
+  return {
+    select() {
+      return {
+        from() {
+          return createChain();
+        },
+      };
+    },
+  };
+}
+
 function setServerEnvForSearchTests() {
   process.env.DATABASE_URL ??=
     "postgresql://postgres:postgres@localhost:5432/rezics_book";
@@ -208,41 +238,62 @@ describe("ranking search projections", () => {
 
   test("GAME/MEDIA segment sync only rebuilds game and media documents", async () => {
     setServerEnvForSearchTests();
-    const { setSearchPrismaClient, syncGameMediaContentSegment } = await import(
-      "./sync"
-    );
+    const { setSearchDb, syncGameMediaContentSegment } = await import("./sync");
     const rows = [
       {
         id: "game-1",
         type: "GAME",
-        translations: [],
-        aliases: [],
-        unitTags: [],
-        inRealms: [],
-        realmTagApplicationsAsTargetUnit: [],
-        creditAttributions: [],
-        subjectAttributions: [],
-        game: {},
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
+        catalogEntryKind: null,
         createdAt: "2026-01-01T00:00:00.000Z",
         updatedAt: "2026-01-01T00:00:00.000Z",
         publishedAt: null,
         defaultLanguage: null,
       },
-      { id: "media-1", type: "MEDIA" },
+      {
+        id: "media-1",
+        type: "MEDIA",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
+        catalogEntryKind: null,
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+        publishedAt: null,
+        defaultLanguage: null,
+      },
     ];
-    const findMany = mock(async () => rows);
     const addOrUpdateContent = mock(async (_docs: unknown[]) => undefined);
-    setSearchPrismaClient({ unit: { findMany } } as never);
+    setSearchDb(
+      createDb([
+        rows,
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [{ unitId: "game-1" }],
+        [{ unitId: "media-1", kindKey: "anime" }],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ]) as never,
+    );
 
     const result = await syncGameMediaContentSegment(
       { addOrUpdateContent } as never,
       { limit: 1 },
     );
 
-    const findManyArgs = (findMany as any).mock.calls[0]?.[0];
-    expect(findManyArgs.where.type).toEqual({
-      in: ["GAME", "MEDIA"],
-    });
     expect(addOrUpdateContent.mock.calls[0]?.[0]).toEqual([
       expect.objectContaining({ id: "game-1", type: "GAME" }),
     ]);

@@ -17,14 +17,23 @@ import {
 } from "@rezics/contract";
 import type { ServerDb } from "@rezics/server/db";
 import {
+  Book,
+  ContentStructure,
+  ContentTranslation,
   CreditAttribution,
   Entity,
   Feedback,
+  Game,
+  GameSystemRequirement,
+  Link,
+  Media,
   Poll,
   PollOption,
   Post,
   Realm,
   RealmTagApplication,
+  Series,
+  SeriesContentIndex,
   ShelfUnit,
   Unit,
   UnitAlias,
@@ -37,7 +46,7 @@ import {
   UserUnitCollection,
   UserUnitProgress,
 } from "@rezics/server/db/schema";
-import { and, asc, desc, eq, gt, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import type { SearchClient } from "./client";
 import {
   buildUserUnitCollectionDocument,
@@ -175,23 +184,6 @@ const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);
 function publicSearchableUnitWhere(): Record<string, unknown> {
   return { ...PUBLIC_ELIGIBLE_UNIT_WHERE };
 }
-
-function publicCatalogContentWhere(): Record<string, unknown> {
-  return {
-    ...publicSearchableUnitWhere(),
-    OR: [{ catalogEntryKind: null }, { catalogEntryKind: "MAIN" }],
-  };
-}
-
-const visibleUnitTagsInclude = {
-  where: {
-    OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
-  },
-  include: {
-    tag: { include: { translations: true } },
-  },
-  orderBy: { score: "desc" as const },
-} as const;
 
 async function isContentPatchEligible(unitId: string): Promise<boolean> {
   const [unit] = await getSearchDb()
@@ -386,71 +378,8 @@ async function runProgressSyncWithRetry(
   }
 }
 
-const contentInclude: any = {
-  translations: true,
-  contentTranslations: true,
-  supportLanguages: true,
-  aliases: {
-    where: {
-      status: "ACTIVE" as const,
-      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
-    },
-    orderBy: [{ pinned: "desc" as const }, { score: "desc" as const }],
-  } as any,
-  unitTags: visibleUnitTagsInclude,
-  ...realmSearchProjectionSelect,
-  realmTagApplicationsAsTargetUnit: true,
-  creditAttributions: {
-    include: {
-      entity: {
-        include: { entity: true, translations: true },
-      },
-    },
-    orderBy: { sortOrder: "asc" as const },
-  },
-  subjectAttributions: {
-    include: {
-      entity: {
-        include: { entity: true, translations: true },
-      },
-    },
-    orderBy: { sortOrder: "asc" as const },
-  },
-  book: true,
-  game: {
-    include: {
-      systemRequirements: {
-        orderBy: [
-          { platformEntityId: "asc" as const },
-          { tier: "asc" as const },
-        ],
-      },
-    },
-  },
-  media: true,
-  ownedContentStructure: {
-    select: { ownerUnitId: true },
-  },
-  shelf: { include: { units: { select: { unitId: true } } } },
-  seriesContentIndexesAsRelease: {
-    include: {
-      series: {
-        include: {
-          unit: {
-            include: {
-              translations: true,
-            },
-          },
-        },
-      },
-    },
-  },
-  link: true,
-  post: true,
-};
-
 /**
- * Build a ContentSearchDocument from a Prisma unit with all relations included.
+ * Build a ContentSearchDocument from a Unit row with all search relations attached.
  */
 export function buildContentDocument(unit: any): ContentSearchDocument {
   const translations: any[] = unit.translations ?? [];
@@ -685,6 +614,374 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   };
 }
 
+type ContentSyncMode = "main" | "release" | "game-media" | "single";
+
+function publicContentUnitConditions(mode: ContentSyncMode) {
+  const base = [
+    eq(Unit.status, PUBLIC_ELIGIBLE_UNIT_WHERE.status),
+    eq(Unit.visibility, PUBLIC_ELIGIBLE_UNIT_WHERE.visibility),
+    eq(Unit.moderationStatus, PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus),
+  ];
+
+  if (mode === "single") return and(...base);
+  if (mode === "release") {
+    return and(
+      ...base,
+      inArray(Unit.type, INDEXABLE_TYPES),
+      eq(Unit.catalogEntryKind, "VARIANT"),
+    );
+  }
+  if (mode === "game-media") {
+    return and(
+      ...base,
+      inArray(Unit.type, ["GAME", "MEDIA"]),
+      or(isNull(Unit.catalogEntryKind), eq(Unit.catalogEntryKind, "MAIN")),
+    );
+  }
+  return and(
+    ...base,
+    inArray(Unit.type, INDEXABLE_TYPES),
+    or(isNull(Unit.catalogEntryKind), eq(Unit.catalogEntryKind, "MAIN")),
+  );
+}
+
+async function listContentBaseRows(input: {
+  limit: number;
+  mode: ContentSyncMode;
+  cursor?: string;
+}) {
+  const query = getSearchDb().select().from(Unit);
+  const conditions = input.cursor
+    ? and(publicContentUnitConditions(input.mode), gt(Unit.id, input.cursor))
+    : publicContentUnitConditions(input.mode);
+  return query.where(conditions).orderBy(asc(Unit.id)).limit(input.limit);
+}
+
+async function findContentBaseRow(unitId: string) {
+  const [unit] = await getSearchDb()
+    .select()
+    .from(Unit)
+    .where(eq(Unit.id, unitId))
+    .limit(1);
+  return unit ?? null;
+}
+
+function unitTagRowsFromJoinRows(rows: any[]) {
+  const grouped = new Map<string, any>();
+  for (const row of rows) {
+    const unitTag = grouped.get(row.tagUnitId) ?? {
+      unitId: row.unitId,
+      tagUnitId: row.tagUnitId,
+      score: row.score,
+      pinned: row.pinned,
+      status: "ACTIVE",
+      tag: {
+        slug: row.tagSlug,
+        translations: [],
+      },
+    };
+    if (row.title) {
+      unitTag.tag.translations.push({ title: row.title });
+    }
+    grouped.set(row.tagUnitId, unitTag);
+  }
+  return [...grouped.values()];
+}
+
+function attributionRowsFromJoinRows(rows: any[]) {
+  const grouped = new Map<string, any>();
+  for (const row of rows) {
+    const key = `${row.unitId}:${row.entityId}:${row.role}`;
+    const attribution = grouped.get(key) ?? {
+      unitId: row.unitId,
+      entityId: row.entityId,
+      role: row.role,
+      sortOrder: row.sortOrder,
+      entity: {
+        entity: row.kind ? { kind: row.kind } : null,
+        translations: [],
+      },
+    };
+    if (row.title) {
+      attribution.entity.translations.push({ title: row.title });
+    }
+    grouped.set(key, attribution);
+  }
+  return [...grouped.values()];
+}
+
+function seriesRowsFromJoinRows(rows: any[]) {
+  const grouped = new Map<string, any>();
+  for (const row of rows) {
+    const key = `${row.releaseUnitId}:${row.seriesUnitId}:${row.contentNodeId}`;
+    const seriesRow = grouped.get(key) ?? {
+      releaseUnitId: row.releaseUnitId,
+      seriesUnitId: row.seriesUnitId,
+      contentNodeId: row.contentNodeId,
+      series: {
+        kindKey: row.kindKey,
+        unit: { translations: [] },
+      },
+    };
+    if (row.title) {
+      seriesRow.series.unit.translations.push({ title: row.title });
+    }
+    grouped.set(key, seriesRow);
+  }
+  return [...grouped.values()];
+}
+
+async function hydrateContentRows(rows: any[]) {
+  if (rows.length === 0) return [];
+  const unitIds = rows.map((row) => row.id);
+  const [
+    translations,
+    contentTranslations,
+    supportLanguages,
+    aliases,
+    unitTagRows,
+    unitRealms,
+    realmTagApplications,
+    creditRows,
+    subjectRows,
+    books,
+    games,
+    mediaRows,
+    links,
+    posts,
+    shelfUnits,
+    contentStructures,
+    gameSystemRequirements,
+    seriesRows,
+  ] = await Promise.all([
+    getSearchDb()
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(ContentTranslation)
+      .where(inArray(ContentTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitAlias)
+      .where(
+        and(
+          inArray(UnitAlias.unitId, unitIds),
+          eq(UnitAlias.status, "ACTIVE"),
+          or(
+            gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+            eq(UnitAlias.pinned, true),
+          ),
+        ),
+      )
+      .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score)),
+    getSearchDb()
+      .select({
+        unitId: UnitTag.unitId,
+        tagUnitId: UnitTag.tagUnitId,
+        score: UnitTag.score,
+        pinned: UnitTag.pinned,
+        tagSlug: Unit.slug,
+        title: UnitTranslation.title,
+      })
+      .from(UnitTag)
+      .leftJoin(Unit, eq(Unit.id, UnitTag.tagUnitId))
+      .leftJoin(UnitTranslation, eq(UnitTranslation.unitId, UnitTag.tagUnitId))
+      .where(
+        and(
+          inArray(UnitTag.unitId, unitIds),
+          or(gt(UnitTag.score, VISIBILITY_THRESHOLD), eq(UnitTag.pinned, true)),
+        ),
+      )
+      .orderBy(desc(UnitTag.score)),
+    getSearchDb()
+      .select({
+        unitId: UnitRealm.unitId,
+        realmUnitId: UnitRealm.realmUnitId,
+        moderationStatus: UnitRealm.moderationStatus,
+        isLocked: UnitRealm.isLocked,
+        realm: {
+          realm: {
+            isPublic: Realm.isPublic,
+          },
+        },
+      })
+      .from(UnitRealm)
+      .leftJoin(Realm, eq(Realm.unitId, UnitRealm.realmUnitId))
+      .where(inArray(UnitRealm.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(RealmTagApplication)
+      .where(inArray(RealmTagApplication.unitId, unitIds)),
+    getSearchDb()
+      .select({
+        unitId: CreditAttribution.unitId,
+        entityId: CreditAttribution.entityId,
+        role: CreditAttribution.role,
+        sortOrder: CreditAttribution.sortOrder,
+        kind: Entity.kind,
+        title: UnitTranslation.title,
+      })
+      .from(CreditAttribution)
+      .leftJoin(Entity, eq(Entity.unitId, CreditAttribution.entityId))
+      .leftJoin(
+        UnitTranslation,
+        eq(UnitTranslation.unitId, CreditAttribution.entityId),
+      )
+      .where(inArray(CreditAttribution.unitId, unitIds))
+      .orderBy(asc(CreditAttribution.sortOrder)),
+    getSearchDb()
+      .select({
+        unitId: SubjectAttribution.unitId,
+        entityId: SubjectAttribution.entityId,
+        role: SubjectAttribution.role,
+        sortOrder: SubjectAttribution.sortOrder,
+        kind: Entity.kind,
+        title: UnitTranslation.title,
+      })
+      .from(SubjectAttribution)
+      .leftJoin(Entity, eq(Entity.unitId, SubjectAttribution.entityId))
+      .leftJoin(
+        UnitTranslation,
+        eq(UnitTranslation.unitId, SubjectAttribution.entityId),
+      )
+      .where(inArray(SubjectAttribution.unitId, unitIds))
+      .orderBy(asc(SubjectAttribution.sortOrder)),
+    getSearchDb().select().from(Book).where(inArray(Book.unitId, unitIds)),
+    getSearchDb().select().from(Game).where(inArray(Game.unitId, unitIds)),
+    getSearchDb().select().from(Media).where(inArray(Media.unitId, unitIds)),
+    getSearchDb().select().from(Link).where(inArray(Link.unitId, unitIds)),
+    getSearchDb().select().from(Post).where(inArray(Post.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(ShelfUnit)
+      .where(inArray(ShelfUnit.shelfId, unitIds))
+      .orderBy(asc(ShelfUnit.position)),
+    getSearchDb()
+      .select()
+      .from(ContentStructure)
+      .where(inArray(ContentStructure.ownerUnitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(GameSystemRequirement)
+      .where(inArray(GameSystemRequirement.gameUnitId, unitIds))
+      .orderBy(
+        asc(GameSystemRequirement.platformEntityId),
+        asc(GameSystemRequirement.tier),
+      ),
+    getSearchDb()
+      .select({
+        releaseUnitId: SeriesContentIndex.releaseUnitId,
+        seriesUnitId: SeriesContentIndex.seriesUnitId,
+        contentNodeId: SeriesContentIndex.contentNodeId,
+        kindKey: Series.kindKey,
+        title: UnitTranslation.title,
+      })
+      .from(SeriesContentIndex)
+      .leftJoin(Series, eq(Series.unitId, SeriesContentIndex.seriesUnitId))
+      .leftJoin(
+        UnitTranslation,
+        eq(UnitTranslation.unitId, SeriesContentIndex.seriesUnitId),
+      )
+      .where(inArray(SeriesContentIndex.releaseUnitId, unitIds)),
+  ]);
+
+  const translationsByUnitId = groupRowsByKey(translations as any[], "unitId");
+  const contentTranslationsByUnitId = groupRowsByKey(
+    contentTranslations as any[],
+    "unitId",
+  );
+  const supportLanguagesByUnitId = groupRowsByKey(
+    supportLanguages as any[],
+    "unitId",
+  );
+  const aliasesByUnitId = groupRowsByKey(aliases as any[], "unitId");
+  const unitTagsByUnitId = groupRowsByKey(
+    unitTagRowsFromJoinRows(unitTagRows as any[]),
+    "unitId",
+  );
+  const unitRealmsByUnitId = groupRowsByKey(unitRealms as any[], "unitId");
+  const realmTagsByUnitId = groupRowsByKey(
+    realmTagApplications as any[],
+    "unitId",
+  );
+  const creditsByUnitId = groupRowsByKey(
+    attributionRowsFromJoinRows(creditRows as any[]),
+    "unitId",
+  );
+  const subjectsByUnitId = groupRowsByKey(
+    attributionRowsFromJoinRows(subjectRows as any[]),
+    "unitId",
+  );
+  const booksByUnitId = new Map(
+    (books as any[]).map((row) => [row.unitId, row]),
+  );
+  const gamesByUnitId = new Map(
+    (games as any[]).map((row) => [row.unitId, row]),
+  );
+  const mediaByUnitId = new Map(
+    (mediaRows as any[]).map((row) => [row.unitId, row]),
+  );
+  const linksByUnitId = new Map(
+    (links as any[]).map((row) => [row.unitId, row]),
+  );
+  const postsByUnitId = new Map(
+    (posts as any[]).map((row) => [row.unitId, row]),
+  );
+  const shelfUnitsByUnitId = groupRowsByKey(shelfUnits as any[], "shelfId");
+  const contentStructuresByUnitId = new Map(
+    (contentStructures as any[]).map((row) => [row.ownerUnitId, row]),
+  );
+  const systemRequirementsByUnitId = groupRowsByKey(
+    gameSystemRequirements as any[],
+    "gameUnitId",
+  );
+  const seriesByReleaseUnitId = groupRowsByKey(
+    seriesRowsFromJoinRows(seriesRows as any[]),
+    "releaseUnitId",
+  );
+
+  return rows.map((unit) => {
+    const game = gamesByUnitId.get(unit.id);
+    if (game) {
+      game.systemRequirements = systemRequirementsByUnitId.get(unit.id) ?? [];
+    }
+    return {
+      ...unit,
+      translations: translationsByUnitId.get(unit.id) ?? [],
+      contentTranslations: contentTranslationsByUnitId.get(unit.id) ?? [],
+      supportLanguages: supportLanguagesByUnitId.get(unit.id) ?? [],
+      aliases: aliasesByUnitId.get(unit.id) ?? [],
+      unitTags: unitTagsByUnitId.get(unit.id) ?? [],
+      inRealms: unitRealmsByUnitId.get(unit.id) ?? [],
+      realmTagApplicationsAsTargetUnit: realmTagsByUnitId.get(unit.id) ?? [],
+      creditAttributions: creditsByUnitId.get(unit.id) ?? [],
+      subjectAttributions: subjectsByUnitId.get(unit.id) ?? [],
+      book: booksByUnitId.get(unit.id) ?? null,
+      game: game ?? null,
+      media: mediaByUnitId.get(unit.id) ?? null,
+      link: linksByUnitId.get(unit.id) ?? null,
+      post: postsByUnitId.get(unit.id) ?? null,
+      shelf: { units: shelfUnitsByUnitId.get(unit.id) ?? [] },
+      ownedContentStructure: contentStructuresByUnitId.get(unit.id) ?? null,
+      seriesContentIndexesAsRelease: seriesByReleaseUnitId.get(unit.id) ?? [],
+    };
+  });
+}
+
+async function listContentSyncRows(input: {
+  limit: number;
+  mode: ContentSyncMode;
+  cursor?: string;
+}) {
+  return hydrateContentRows(await listContentBaseRows(input));
+}
+
 // ANCHOR: Full content reindex
 
 export async function syncAllContent(client: SearchClient) {
@@ -697,16 +994,10 @@ export async function syncAllContent(client: SearchClient) {
   while (true) {
     console.log("syncAllContent: cursor", cursor, "total", total);
 
-    const units: any[] = await getSearchPrismaClient().unit.findMany({
-      where: {
-        type: { in: INDEXABLE_TYPES },
-        ...publicCatalogContentWhere(),
-      },
-      include: contentInclude,
-      orderBy: { id: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { id: cursor } : undefined,
+    const units = await listContentSyncRows({
+      mode: "main",
+      limit: BATCH_SIZE,
+      cursor,
     });
 
     if (units.length === 0) break;
@@ -727,16 +1018,10 @@ export async function syncContentSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const units: any[] = await getSearchPrismaClient().unit.findMany({
-    where: {
-      type: { in: INDEXABLE_TYPES },
-      ...publicCatalogContentWhere(),
-    },
-    include: contentInclude,
-    orderBy: { id: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { id: options.cursor } : undefined,
+  const units = await listContentSyncRows({
+    mode: "main",
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(units, limit, "id");
   if (current.length > 0) {
@@ -750,17 +1035,10 @@ export async function syncReleaseContentSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const units: any[] = await getSearchPrismaClient().unit.findMany({
-    where: {
-      type: { in: INDEXABLE_TYPES },
-      ...publicSearchableUnitWhere(),
-      catalogEntryKind: "VARIANT",
-    },
-    include: contentInclude,
-    orderBy: { id: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { id: options.cursor } : undefined,
+  const units = await listContentSyncRows({
+    mode: "release",
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(units, limit, "id");
   if (current.length > 0) {
@@ -774,16 +1052,10 @@ export async function syncGameMediaContentSegment(
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const units: any[] = await getSearchPrismaClient().unit.findMany({
-    where: {
-      type: { in: ["GAME", "MEDIA"] },
-      ...publicCatalogContentWhere(),
-    },
-    include: contentInclude,
-    orderBy: { id: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { id: options.cursor } : undefined,
+  const units = await listContentSyncRows({
+    mode: "game-media",
+    limit: limit + 1,
+    cursor: options.cursor,
   });
   const { current, nextCursor } = segmentRows(units, limit, "id");
   if (current.length > 0) {
@@ -1036,28 +1308,26 @@ export async function syncAllUserUnitCollections(client: SearchClient) {
 // ANCHOR: Incremental single-unit sync
 
 export async function syncSingleContent(client: SearchClient, unitId: string) {
-  const unit = await getSearchPrismaClient().unit.findUnique({
-    where: { id: unitId },
-    include: contentInclude,
-  });
+  const unitBase = await findContentBaseRow(unitId);
 
   // If unit doesn't exist or doesn't qualify, remove from index
   if (
-    !unit ||
-    !INDEXABLE_TYPES.includes(unit.type as any) ||
-    unit.status !== PUBLIC_ELIGIBLE_UNIT_WHERE.status ||
-    unit.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility ||
-    unit.moderationStatus !== PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus ||
+    !unitBase ||
+    !INDEXABLE_TYPES.includes(unitBase.type as any) ||
+    unitBase.status !== PUBLIC_ELIGIBLE_UNIT_WHERE.status ||
+    unitBase.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility ||
+    unitBase.moderationStatus !== PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus ||
     !(
-      unit.catalogEntryKind === null ||
-      unit.catalogEntryKind === undefined ||
-      unit.catalogEntryKind === "MAIN"
+      unitBase.catalogEntryKind === null ||
+      unitBase.catalogEntryKind === undefined ||
+      unitBase.catalogEntryKind === "MAIN"
     )
   ) {
     await client.deleteContent([unitId]);
     return;
   }
 
+  const [unit] = await hydrateContentRows([unitBase]);
   const doc = buildContentDocument(unit);
   await client.addOrUpdateContent([doc]);
 }
