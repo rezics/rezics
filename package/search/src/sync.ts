@@ -1611,10 +1611,11 @@ export async function patchRealmMemberCountFromDb(
   client: SearchClient,
   unitId: string,
 ) {
-  const realm = await getSearchPrismaClient().realm.findUnique({
-    where: { unitId },
-    select: { memberCount: true },
-  });
+  const [realm] = await getSearchDb()
+    .select({ memberCount: Realm.memberCount })
+    .from(Realm)
+    .where(eq(Realm.unitId, unitId))
+    .limit(1);
   if (!realm) {
     await client.deleteRealms([unitId]);
     return;
@@ -1634,9 +1635,10 @@ export async function patchRealmTranslations(
   client: SearchClient,
   unitId: string,
 ) {
-  const translations = await getSearchPrismaClient().unitTranslation.findMany({
-    where: { unitId },
-  });
+  const translations = await getSearchDb()
+    .select()
+    .from(UnitTranslation)
+    .where(eq(UnitTranslation.unitId, unitId));
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const descriptions = translations
@@ -1660,23 +1662,31 @@ export async function patchRealmTranslations(
 }
 
 export async function patchRealmAliases(client: SearchClient, unitId: string) {
-  const realm = await getSearchPrismaClient().realm.findUnique({
-    where: { unitId },
-    select: { unitId: true, unit: { select: { status: true } } },
-  });
-  if (!realm || realm.unit.status !== "PUBLISHED") {
+  const [realm] = await getSearchDb()
+    .select({ unitId: Realm.unitId, unitStatus: Unit.status })
+    .from(Realm)
+    .leftJoin(Unit, eq(Unit.id, Realm.unitId))
+    .where(eq(Realm.unitId, unitId))
+    .limit(1);
+  if (!realm || realm.unitStatus !== "PUBLISHED") {
     await client.deleteRealms([unitId]);
     return;
   }
 
-  const aliases = await getSearchPrismaClient().unitAlias.findMany({
-    where: {
-      unitId,
-      status: "ACTIVE",
-      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
-    },
-    orderBy: [{ pinned: "desc" }, { score: "desc" }],
-  });
+  const aliases = await getSearchDb()
+    .select()
+    .from(UnitAlias)
+    .where(
+      and(
+        eq(UnitAlias.unitId, unitId),
+        eq(UnitAlias.status, "ACTIVE"),
+        or(
+          gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+          eq(UnitAlias.pinned, true),
+        ),
+      ),
+    )
+    .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score));
 
   await client.patchRealms([
     {

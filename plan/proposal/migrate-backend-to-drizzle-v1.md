@@ -453,6 +453,9 @@ databases may be reset and reseeded.
     against server `CreditAttribution`, `SubjectAttribution`, `Entity`, and
     `UnitTranslation`, preserving attribution names, subject ids, kinds, and
     roles.
+  - Applied progress: moved realm member-count, translation, and alias patching
+    to Drizzle reads against server `Realm`, `Unit`, `UnitTranslation`, and
+    `UnitAlias`.
 - [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
