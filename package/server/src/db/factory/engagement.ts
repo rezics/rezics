@@ -5,11 +5,7 @@ import {
 } from "@rezics/contract";
 import { generateBetween } from "../../shelf/fractional-index";
 import { eq } from "drizzle-orm";
-import {
-  UnitStatus,
-  UnitType,
-  UnitVisibility,
-} from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType, UnitVisibility } from "./storage-values.js";
 import {
   Shelf,
   ShelfUnit,

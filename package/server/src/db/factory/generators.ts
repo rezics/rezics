@@ -8,8 +8,7 @@ import {
   getTitlePool,
   LANG_DISTRIBUTION,
 } from "@rezics/shared/text";
-import type { Prisma } from "../../../prisma/generated/client.js";
-import { PostKind, UnitType } from "../../../prisma/generated/client.js";
+import { PostKind, UnitType } from "./storage-values.js";
 import { randomBoolean, randomFloat } from "./utils.js";
 
 export { getFaker };
@@ -21,15 +20,15 @@ export interface TranslationData {
   title: string;
   subtitle?: string;
   summary?: string;
-  description?: Prisma.InputJsonValue;
-  extra?: Prisma.InputJsonValue;
+  description?: unknown;
+  extra?: unknown;
 }
 
 export function generatedDescription(
   source: string | undefined,
-): Prisma.InputJsonValue | undefined {
+): unknown | undefined {
   if (source === undefined) return undefined;
-  return markdownContentDoc(source) as Prisma.InputJsonValue;
+  return markdownContentDoc(source) as unknown;
 }
 
 /**
@@ -165,7 +164,7 @@ export function generateTranslations(type: UnitType): TranslationData[] {
 
 // ── Book ───────────────────────────────────────────────
 
-export function generateBookExtra(): Prisma.InputJsonValue {
+export function generateBookExtra(): unknown {
   return {
     publisher: faker.company.name(),
     year: faker.date.past({ years: 45 }).getFullYear(),
@@ -176,7 +175,7 @@ export function generateBookExtra(): Prisma.InputJsonValue {
 
 // ── Game ────────────────────────────────────────────
 
-export function generateGameExtra(): Prisma.InputJsonValue {
+export function generateGameExtra(): unknown {
   return {
     developer: faker.company.name(),
     engine: faker.helpers.arrayElement([
@@ -192,7 +191,7 @@ export function generateGameExtra(): Prisma.InputJsonValue {
 
 // ── Media ───────────────────────────────────────────
 
-export function generateMediaExtra(): Prisma.InputJsonValue {
+export function generateMediaExtra(): unknown {
   return {
     studio: faker.company.name(),
     director: faker.person.fullName(),
@@ -219,15 +218,13 @@ export function generatePostBody(kind: PostKind): string {
   }
 }
 
-export function generatePostContent(kind: PostKind): Prisma.InputJsonValue {
-  return markdownContentDoc(generatePostBody(kind)) as Prisma.InputJsonValue;
+export function generatePostContent(kind: PostKind): unknown {
+  return markdownContentDoc(generatePostBody(kind)) as unknown;
 }
 
 // ── Post extra ──────────────────────────────────────
 
-export function generatePostExtra(
-  kind: PostKind,
-): Prisma.InputJsonValue | null {
+export function generatePostExtra(kind: PostKind): unknown | null {
   switch (kind) {
     case PostKind.REVIEW:
       return { rating: Math.round(randomFloat(1, 5) * 10) / 10 };

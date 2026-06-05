@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "@rezics/contract";
 import { eq } from "drizzle-orm";
-import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import {
   CreditAttribution,
   CreditAttributionEvidence,

@@ -39,7 +39,6 @@ describe("createSeedRuntime", () => {
         scenarioNames: [],
       },
       authDb: { disconnect: async () => {} } as never,
-      serverPrisma: { $disconnect: async () => {} } as never,
     });
 
     await runtime.sync.entity("entity-1");
@@ -70,7 +69,6 @@ describe("createSeedRuntime", () => {
           scenarioNames: [],
         },
         authDb: { disconnect: async () => {} } as never,
-        serverPrisma: { $disconnect: async () => {} } as never,
       }),
     ).toThrow(/SearchClient/);
   });
@@ -84,7 +82,6 @@ describe("createSeedRuntime", () => {
           scenarioNames: [],
         },
         authDb: { disconnect: async () => {} } as never,
-        serverPrisma: { $disconnect: async () => {} } as never,
         searchClient: {} as never,
       }),
     ).toThrow(/Drizzle server db/);
@@ -107,9 +104,6 @@ describe("createSeedRuntime", () => {
           scenarioNames: [],
         },
         authDb: { disconnect: async () => {} } as never,
-        serverPrisma: {
-          $disconnect: async () => {},
-        } as never,
         serverDb: createUserSyncDb() as never,
         searchClient: {
           addOrUpdateUsers: async (documents: unknown[]) => {

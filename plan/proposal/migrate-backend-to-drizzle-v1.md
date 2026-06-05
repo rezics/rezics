@@ -592,6 +592,10 @@ databases may be reset and reseeded.
     posts, zones, realms, realm membership, subject attributions, and UnitTag
     links through Drizzle; `package/server/src/db/factory` no longer calls
     `ctx.prisma`.
+  - Applied progress: factory code no longer imports Prisma generated clients or
+    `Prisma.*` helper types; seed storage literals now live in the factory, and
+    `makeSeedCtx`/`createSeedRuntime` no longer accept or construct a server
+    Prisma client.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

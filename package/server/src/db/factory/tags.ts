@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import { Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
 import { generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";

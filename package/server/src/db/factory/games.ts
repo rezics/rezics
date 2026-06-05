@@ -4,7 +4,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
-import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import {
   type FactoryCreditAttributionInsert,
   type FactoryUnitTagInsert,
@@ -55,9 +55,7 @@ export async function seedGames(
       });
       await ctx.db.insert(Game).values({
         unitId: unit.id,
-        releaseDate: randomBoolean(0.7)
-          ? faker.date.past({ years: 10 })
-          : null,
+        releaseDate: randomBoolean(0.7) ? faker.date.past({ years: 10 }) : null,
         versionLabel: randomBoolean(0.5)
           ? `v${randomInt(1, 5)}.${randomInt(0, 9)}`
           : null,

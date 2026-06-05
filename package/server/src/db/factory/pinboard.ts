@@ -33,9 +33,6 @@ export async function seedPinboard(
       extra.announcement = pickN(postIds, announcementCount);
     }
 
-    await ctx.db
-      .update(Realm)
-      .set({ extra })
-      .where(eq(Realm.unitId, realm.id));
+    await ctx.db.update(Realm).set({ extra }).where(eq(Realm.unitId, realm.id));
   }
 }

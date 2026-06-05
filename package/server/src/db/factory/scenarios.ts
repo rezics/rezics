@@ -12,7 +12,7 @@ import {
   UnitStatus,
   UnitType,
   UnitVisibility,
-} from "../../../prisma/generated/client.js";
+} from "./storage-values.js";
 import {
   Book,
   ContentStructure,

@@ -16,7 +16,6 @@ import {
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createAuthDbClient } from "../lib/db-factory";
-import { createServerPrisma } from "../lib/prisma-factory";
 import { createSeedSearchClient } from "../lib/search";
 import { printSeedCredentials, seedBaseline } from "../seed/index";
 import {
@@ -294,7 +293,6 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
 
   const env = getEnv();
   const { createServerDb } = await import("@rezics/server/db/factory");
-  const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
   const authDb = createAuthDbClient(env.AUTH_DATABASE_URL);
   const searchClient = createSeedSearchClient({
@@ -308,7 +306,6 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       scenarioNames,
     },
     authDb,
-    serverPrisma: prisma,
     serverDb: serverDb.db,
     searchClient,
   });
@@ -321,7 +318,6 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       serverSeedDb: serverDb.db,
     });
     const ctx = makeSeedCtx(
-      prisma,
       serverDb.db,
       authDb,
       slugScopes as never,

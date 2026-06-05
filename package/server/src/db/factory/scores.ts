@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import type { Prisma } from "../../../prisma/generated/client.js";
 import { ScoreAggregate, ScoreEntry, ScoreRealmField } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
@@ -61,7 +60,7 @@ export async function seedScores(
       unitId: string;
       realm: string;
       value: number;
-      fields: Prisma.InputJsonValue | undefined;
+      fields: unknown | undefined;
     }[] = [];
 
     for (const user of scoringUsers) {
@@ -94,7 +93,7 @@ export async function seedScores(
           unitId: work.id,
           realm: storyRealm.id,
           value: storyValue,
-          fields: fields as Prisma.InputJsonValue,
+          fields: fields as unknown,
         });
         scoreEntries.set(`${user.userId}:${work.id}:${storyRealm.id}`, storyId);
       }
@@ -157,10 +156,10 @@ export async function seedScores(
       realm,
       totalScore: agg.totalScore,
       totalCount: agg.totalCount,
-      distribution: agg.distribution as Prisma.InputJsonValue,
+      distribution: agg.distribution as unknown,
       fields:
         Object.keys(agg.fields).length > 0
-          ? (agg.fields as Prisma.InputJsonValue)
+          ? (agg.fields as unknown)
           : undefined,
     }));
 

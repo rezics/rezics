@@ -11,7 +11,7 @@ import {
   PostKind,
   UnitStatus,
   UnitType,
-} from "../../../prisma/generated/client.js";
+} from "./storage-values.js";
 import {
   ContentTranslation,
   Post,

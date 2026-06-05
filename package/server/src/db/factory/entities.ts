@@ -10,8 +10,7 @@ import {
   subjectAttributionRoleRegistry,
   subjectAttributionRoles,
 } from "@rezics/contract";
-import type { Prisma } from "../../../prisma/generated/client.js";
-import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import type { ServerDb } from "../client.js";
 import {
   Entity,
@@ -64,7 +63,7 @@ interface EntitySeedRow {
   translations: {
     language: string;
     title: string;
-    description?: Prisma.InputJsonValue;
+    description?: unknown;
   }[];
 }
 

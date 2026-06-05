@@ -17,7 +17,6 @@ import type {
   SpecialSeedTarget,
 } from "@rezics/server/db/seed-factory";
 import type { AuthDbClient } from "../lib/db-factory";
-import type { ServerPrismaClient } from "../lib/prisma-factory";
 
 export type MeiliMode = "init-and-sync" | "skip";
 export type ManifestFormat = "human" | "json" | "both" | "none";
@@ -38,7 +37,6 @@ export interface SeedRuntime {
   state: SeedRunState;
   clients: {
     authDb: AuthDbClient;
-    serverPrisma: ServerPrismaClient;
     searchClient?: SearchClient;
   };
   sync: SeedSyncHooks;
@@ -116,7 +114,6 @@ function createActiveSyncHooks(input: {
 export function createSeedRuntime(input: {
   config: SeedRunConfig;
   authDb: AuthDbClient;
-  serverPrisma: ServerPrismaClient;
   serverDb?: Pick<ServerDb, "select">;
   searchClient?: SearchClient;
 }): SeedRuntime {
@@ -142,7 +139,6 @@ export function createSeedRuntime(input: {
     state,
     clients: {
       authDb: input.authDb,
-      serverPrisma: input.serverPrisma,
       ...(input.searchClient ? { searchClient: input.searchClient } : {}),
     },
     sync,
@@ -154,10 +150,7 @@ export function createSeedRuntime(input: {
       if (!existing) state.specialTargets.push(target);
     },
     async dispose() {
-      await Promise.all([
-        input.authDb.disconnect().catch(() => {}),
-        input.serverPrisma.$disconnect().catch(() => {}),
-      ]);
+      await input.authDb.disconnect().catch(() => {});
     },
   };
 }

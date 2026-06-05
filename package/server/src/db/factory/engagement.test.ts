@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { UnitType } from "../../../prisma/generated/client.js";
+import { UnitType } from "./storage-values.js";
 import {
   Shelf,
   ShelfUnit,

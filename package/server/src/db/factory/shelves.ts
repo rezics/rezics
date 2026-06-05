@@ -6,8 +6,7 @@ import {
   withCoverUrl,
 } from "@rezics/contract";
 import { generateBetween } from "../../shelf/fractional-index";
-import type { Prisma } from "../../../prisma/generated/client.js";
-import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import {
   Shelf,
   ShelfUnit,
@@ -161,7 +160,7 @@ export async function seedShelves(
           description: t.description,
           extra:
             coverUrl && t.language === DEFAULT_LANGUAGE
-              ? (withCoverUrl(undefined, coverUrl) as Prisma.InputJsonValue)
+              ? (withCoverUrl(undefined, coverUrl) as unknown)
               : undefined,
         })),
       );

@@ -8,11 +8,7 @@ import {
   withCoverUrl,
 } from "@rezics/contract";
 import { and, desc, eq, isNull } from "drizzle-orm";
-import {
-  PostKind,
-  UnitStatus,
-  UnitType,
-} from "../../../prisma/generated/client.js";
+import { PostKind, UnitStatus, UnitType } from "./storage-values.js";
 import {
   ensureFactoryContentStructure,
   rebuildFactoryContentStructureAnchors,

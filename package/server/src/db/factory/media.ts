@@ -4,7 +4,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
-import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import {
   type FactoryCreditAttributionInsert,
   type FactoryUnitTagInsert,
@@ -59,9 +59,7 @@ export async function seedMedia(
       await ctx.db.insert(Media).values({
         unitId: unit.id,
         kindKey,
-        releaseDate: randomBoolean(0.7)
-          ? faker.date.past({ years: 20 })
-          : null,
+        releaseDate: randomBoolean(0.7) ? faker.date.past({ years: 20 }) : null,
         runtimeMinutes: isTV ? null : randomInt(80, 210),
         episodeCount: isTV ? randomInt(6, 200) : null,
         seasonCount: isTV ? randomInt(1, 10) : null,

@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { Prisma } from "../../../prisma/generated/client.js";
-import { UnitStatus, UnitType } from "../../../prisma/generated/client.js";
+import { UnitStatus, UnitType } from "./storage-values.js";
 import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../schema";
 import { generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
@@ -17,7 +16,7 @@ const ZONE_TEMPLATES = [
   "new-releases",
 ] as const;
 
-const ZONE_STYLING_PRESETS: Prisma.InputJsonValue[] = [
+const ZONE_STYLING_PRESETS: unknown[] = [
   { layout: "hero", backgroundColor: "#0f172a", textColor: "#f8fafc" },
   { layout: "grid", columns: 4 },
   { layout: "carousel", autoplay: true, interval: 5000 },
@@ -59,7 +58,7 @@ function buildFilters(
   template: (typeof ZONE_TEMPLATES)[number],
   workIds: string[],
   tagIds: string[],
-): Prisma.InputJsonValue {
+): unknown {
   const contentType = faker.helpers.arrayElement(WORK_TYPE_FILTERS);
 
   switch (template) {

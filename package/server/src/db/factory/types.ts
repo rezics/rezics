@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import type { PostKind, UnitType } from "../../../prisma/generated/client.js";
+import type { PostKind, UnitType } from "./storage-values.js";
 import type { CountSpec, Mode } from "./strategy.js";
 import { CountSpecSchema, ModeSchema } from "./strategy.js";
 

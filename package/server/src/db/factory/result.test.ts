@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { UnitType } from "../../../prisma/generated/client";
+import { UnitType } from "./storage-values";
 import { addSpecialSeedTarget, createSeedResult } from "./result";
 
 describe("seed result", () => {

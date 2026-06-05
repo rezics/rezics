@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { PostKind } from "../../../prisma/generated/client.js";
+import { PostKind } from "./storage-values.js";
 import { Unit } from "../schema";
 import { seedBooks, seedChaptersForBook } from "./books.js";
 import { seedEchoKVWithDb } from "./echokv.js";

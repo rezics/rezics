@@ -1,4 +1,4 @@
-import { UnitType } from "../../../prisma/generated/client.js";
+import { UnitType } from "./storage-values.js";
 
 export {
   createUsernameGenerator,
