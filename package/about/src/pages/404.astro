@@ -1,5 +1,4 @@
 ---
-import RezicsArchitectureGraph from "../components/RezicsArchitectureGraph.astro";
 import { DEFAULT_LOCALE, getCanonicalUrl, getPagePath } from "../i18n/locales";
 import { uiDictionaries } from "../i18n/ui";
 import "../styles/site.css";
@@ -18,7 +17,7 @@ const ui = uiDictionaries[DEFAULT_LOCALE];
   </head>
   <body>
     <main>
-      <section class="hero compact">
+      <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">404</p>
           <h1>{ui.notFound.title}</h1>
@@ -29,7 +28,6 @@ const ui = uiDictionaries[DEFAULT_LOCALE];
             </a>
           </div>
         </div>
-        <RezicsArchitectureGraph />
       </section>
     </main>
   </body>

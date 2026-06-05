@@ -1,5 +1,4 @@
 ---
-import RezicsArchitectureGraph from "../components/RezicsArchitectureGraph.astro";
 import type { AboutPageFrontmatter } from "../content/types";
 import {
   ABOUT_LOCALE_META,
@@ -63,7 +62,10 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href={getPagePath(locale, "home")}>Rezics</a>
+      <a class="brand" href={getPagePath(locale, "home")}>
+        <img class="brand-mark" src="/logo.svg" alt="" width="40" height="28" />
+        <span class="brand-wordmark">REZICS</span>
+      </a>
       <nav aria-label="Primary navigation">
         <a aria-current={page === "home" ? "page" : undefined} href={getPagePath(locale, "home")}>
           {ui.nav.home}
@@ -109,7 +111,6 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
             }
           </div>
         </div>
-        <RezicsArchitectureGraph />
       </section>
       <div class="section-grid">
         {
