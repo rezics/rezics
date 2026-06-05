@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { cors } from "@elysiajs/cors";
-import { Elysia } from "elysia";
+import { Elysia, status } from "elysia";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -8,16 +8,67 @@ process.env.DATABASE_URL ??=
 process.env.AUTH_BASE_URL ??= "http://localhost:3001";
 
 mock.module("@/middleware/permission", () => ({
-  authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
-    resolve: () => ({
-      identity: {
-        sub: "test",
-        userId: "test",
-        permission: { role: "MEMBER" },
+  authMacro: new Elysia({ name: "macro/auth" })
+    .macro("requireLogin", {
+      async resolve(ctx) {
+        const headers = (ctx as any).headers as Record<
+          string,
+          string | undefined
+        >;
+        const token =
+          headers.authorization ??
+          headers.cookie
+            ?.split(";")
+            .map((part) => part.trim())
+            .find((part) => part.startsWith("rezics-session-token="))
+            ?.slice("rezics-session-token=".length);
+        if (!token) return status(401, "Unauthorized");
+        const { verifyRezicsSessionToken } = await import(
+          "@/session/jwt/jwt.service"
+        );
+        const identity = await verifyRezicsSessionToken(
+          decodeURIComponent(token),
+        );
+        if (!identity) return status(401, "Unauthorized");
+        return { identity };
+      },
+    })
+    .macro("requireProfileSetup", {
+      async resolve(ctx) {
+        const headers = (ctx as any).headers as Record<
+          string,
+          string | undefined
+        >;
+        const token = headers.cookie
+          ?.split(";")
+          .map((part) => part.trim())
+          .find((part) => part.startsWith("rezics-profile-setup-token="))
+          ?.slice("rezics-profile-setup-token=".length);
+        if (!token) return status(401, "Unauthorized");
+        const { verifyRezicsProfileSetupToken } = await import(
+          "@/session/jwt/jwt.service"
+        );
+        const setupIdentity = await verifyRezicsProfileSetupToken(
+          decodeURIComponent(token),
+        );
+        if (!setupIdentity) return status(401, "Unauthorized");
+        return { setupIdentity };
       },
     }),
-  }),
-  tryResolveIdentity: async () => null,
+  tryResolveIdentity: async (authorization?: string, cookieHeader?: string) => {
+    const token =
+      authorization ??
+      cookieHeader
+        ?.split(";")
+        .map((part) => part.trim())
+        .find((part) => part.startsWith("rezics-session-token="))
+        ?.slice("rezics-session-token=".length);
+    if (!token) return null;
+    const { verifyRezicsSessionToken } = await import(
+      "@/session/jwt/jwt.service"
+    );
+    return verifyRezicsSessionToken(decodeURIComponent(token));
+  },
   isAdminRole: () => false,
   verifyAdminFromDb: async () => true,
   verifyRootFromDb: async () => true,
