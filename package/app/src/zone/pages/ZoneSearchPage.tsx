@@ -1,4 +1,9 @@
-import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
+import type {
+  ContentSearchOptions,
+  Language,
+  SearchQuery,
+} from "@rezics/contract";
+import { normalizeLanguage } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useMemo, useState } from "react";
@@ -29,7 +34,12 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
     if (types.length) out.type = types;
     if (z.tags?.length) out.tags = z.tags;
     if (z.realmId) out.realm = { scope: "realm", slug: z.realmId };
-    if (z.languages?.length) out.languages = z.languages;
+    if (z.languages?.length) {
+      const languages = z.languages
+        .map((language) => normalizeLanguage(language))
+        .filter((language): language is Language => !!language);
+      if (languages.length) out.languages = languages;
+    }
     if (z.ratings?.length) {
       out.ratings = z.ratings.filter((r) => allowed.includes(r));
     }

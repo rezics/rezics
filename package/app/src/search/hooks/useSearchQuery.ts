@@ -1,5 +1,6 @@
 import type {
   ContentSearchOptions,
+  Language,
   SearchCategory,
   SearchQuery,
   SearchScope,
@@ -73,6 +74,10 @@ export function unionStrings(a: string[], b: string[]): string[] {
   return [...new Set([...a, ...b])];
 }
 
+function unionLanguages(a: Language[], b: Language[]): Language[] {
+  return [...new Set([...a, ...b])];
+}
+
 export function mergeAppend(
   prev: SearchQuery,
   patch: Partial<SearchQuery>,
@@ -97,7 +102,7 @@ export function mergeAppend(
   }
 
   if (patch.languages !== undefined) {
-    next.languages = unionStrings(prev.languages ?? [], patch.languages);
+    next.languages = unionLanguages(prev.languages ?? [], patch.languages);
   }
 
   if (patch.ratings !== undefined) next.ratings = patch.ratings;
@@ -153,8 +158,15 @@ export function mergeEffective(
     delete out.postKind;
   }
 
-  out.languages = unionStrings(implicit.languages ?? [], user.languages ?? []);
-  if (out.languages.length === 0) delete out.languages;
+  const languages = unionLanguages(
+    implicit.languages ?? [],
+    user.languages ?? [],
+  );
+  if (languages.length > 0) {
+    out.languages = languages;
+  } else {
+    delete out.languages;
+  }
 
   if (user.ratings !== undefined) out.ratings = user.ratings;
   if (user.aiDisclosureModes !== undefined)

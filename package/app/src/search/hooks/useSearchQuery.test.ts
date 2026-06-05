@@ -60,11 +60,11 @@ describe("mergeAppend", () => {
     const next = mergeAppend(prev, {
       type: ["GAME"],
       postKind: ["REMARK"],
-      languages: ["zh"],
+      languages: ["zh-hant"],
     });
     expect(next.type).toEqual(["BOOK", "GAME"]);
     expect(next.postKind).toEqual(["REVIEW", "REMARK"]);
-    expect(next.languages).toEqual(["en", "zh"]);
+    expect(next.languages).toEqual(["en", "zh-hant"]);
   });
 
   it("replaces keyword", () => {

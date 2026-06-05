@@ -18,7 +18,12 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
-import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
+import {
+  LANGUAGE_META,
+  LANGUAGES,
+  type Language,
+  normalizeLanguage,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
@@ -39,15 +44,15 @@ import { ContentRatingPreferences } from "@/user/components/ContentRatingPrefere
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
-const SUPPORTED_LANGUAGES = Object.values(LANGUAGES);
+const SUPPORTED_LANGUAGES: Language[] = Object.values(LANGUAGES);
 
-function getLanguageLabel(code: string): string {
-  return LANGUAGE_META[code as Language]?.nativeName ?? code;
+function getLanguageLabel(code: Language): string {
+  return LANGUAGE_META[code].nativeName;
 }
 
 type SortableLangItemProps = {
-  code: string;
-  onRemove: (code: string) => void;
+  code: Language;
+  onRemove: (code: Language) => void;
   disabled?: boolean;
 };
 
@@ -119,11 +124,11 @@ export const SettingsPreferencesSection: FC = () => {
   const [langSuccess, setLangSuccess] = useState(false);
   const [moderationSuccess, setModerationSuccess] = useState(false);
 
-  const preferredLangs: string[] = settings?.preferredLanguages ?? [];
+  const preferredLangs: Language[] = settings?.preferredLanguages ?? [];
   const availableToAdd = SUPPORTED_LANGUAGES.filter(
     (language) => !preferredLangs.includes(language),
   );
-  const [addPick, setAddPick] = useState<string>("");
+  const [addPick, setAddPick] = useState<Language | "">("");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -132,7 +137,7 @@ export const SettingsPreferencesSection: FC = () => {
     }),
   );
 
-  const persistOrder = (next: string[]) => {
+  const persistOrder = (next: Language[]) => {
     updateSettings.mutate(
       { preferredLanguages: next },
       {
@@ -144,21 +149,24 @@ export const SettingsPreferencesSection: FC = () => {
     );
   };
 
-  const handleAddLang = (code: string) => {
+  const handleAddLang = (code: Language | "") => {
     if (!code || preferredLangs.includes(code)) return;
     persistOrder([...preferredLangs, code]);
     setAddPick("");
   };
 
-  const handleRemoveLang = (code: string) => {
+  const handleRemoveLang = (code: Language) => {
     persistOrder(preferredLangs.filter((c) => c !== code));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = preferredLangs.indexOf(String(active.id));
-    const newIndex = preferredLangs.indexOf(String(over.id));
+    const activeLanguage = normalizeLanguage(String(active.id));
+    const overLanguage = normalizeLanguage(String(over.id));
+    if (!activeLanguage || !overLanguage) return;
+    const oldIndex = preferredLangs.indexOf(activeLanguage);
+    const newIndex = preferredLangs.indexOf(overLanguage);
     if (oldIndex < 0 || newIndex < 0) return;
     persistOrder(arrayMove(preferredLangs, oldIndex, newIndex));
   };
@@ -228,7 +236,12 @@ export const SettingsPreferencesSection: FC = () => {
 
         {availableToAdd.length > 0 && (
           <div className="flex flex-row items-center gap-2">
-            <Select value={addPick} onValueChange={setAddPick}>
+            <Select
+              value={addPick}
+              onValueChange={(value) =>
+                setAddPick(normalizeLanguage(value) ?? "")
+              }
+            >
               <SelectTrigger className="min-w-[220px] h-9">
                 <SelectValue
                   placeholder={t("settings:preferences_add_language")}

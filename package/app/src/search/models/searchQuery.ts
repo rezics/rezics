@@ -4,6 +4,7 @@ import type {
   PostKind,
   SearchQuery,
 } from "@rezics/contract";
+import { normalizeLanguage } from "@rezics/contract";
 
 const KIND_TOKENS: Record<string, PostKind> = {
   review: "REVIEW",
@@ -99,7 +100,12 @@ export function parseSearchString(input: string): SearchQuery {
         result.type = [...(result.type ?? []), rawValue];
         break;
       case "lang":
-        result.languages = [...(result.languages ?? []), rawValue];
+        {
+          const language = normalizeLanguage(rawValue);
+          if (language) {
+            result.languages = [...(result.languages ?? []), language];
+          }
+        }
         break;
       case "rating": {
         const tier = RATING_TOKENS[rawValue.toLowerCase()];
