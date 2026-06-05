@@ -1,7 +1,4 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock } from "../test/prisma-client-mock";
-
-installPrismaClientMock();
 
 const enqueueMock = mock(async () => ({ status: "created" }));
 const broadcastMock = mock(async () => ({ ok: true }));
@@ -14,6 +11,10 @@ mock.module("@/job/job-boundary", () => ({
 
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
   broadcast: broadcastMock,
+}));
+
+mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: (user: unknown) => user ?? null,
 }));
 
 function capabilities(input: {

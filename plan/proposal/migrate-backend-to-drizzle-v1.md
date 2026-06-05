@@ -388,6 +388,9 @@ databases may be reset and reseeded.
   Prisma-shaped mock just to minimize test edits.
   - Applied progress: Meili status service/API tests no longer install the
     legacy Prisma client mock; they rely on focused Meili and middleware mocks.
+  - Applied progress: comment moderation authority tests no longer install the
+    legacy Prisma client mock; the remaining dependency is a focused public user
+    mapper mock for import isolation.
 
 ## 5. Auth and Better Auth
 
