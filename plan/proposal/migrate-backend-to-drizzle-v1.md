@@ -386,6 +386,8 @@ databases may be reset and reseeded.
 - [ ] 4.12 Replace Prisma mock helpers in server tests with either focused
   repository mocks or a Drizzle test db abstraction. Do not keep a
   Prisma-shaped mock just to minimize test edits.
+  - Applied progress: Meili status service/API tests no longer install the
+    legacy Prisma client mock; they rely on focused Meili and middleware mocks.
 
 ## 5. Auth and Better Auth
 

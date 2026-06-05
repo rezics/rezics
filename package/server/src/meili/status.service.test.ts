@@ -1,6 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
 import { EXPECTED_MEILI_INDEX_SCHEMAS } from "@rezics/search";
-import { installPrismaClientMock } from "../test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -20,7 +19,6 @@ process.env.NOTIFY_INTERNAL_SECRET ??= "notify";
 process.env.REACTION_BASE_URL ??= "http://localhost:3011";
 process.env.REACTION_INTERNAL_SECRET ??= "reaction";
 
-installPrismaClientMock();
 mock.module("./search-client", () => ({
   searchClient: {
     meili: {},

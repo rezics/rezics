@@ -1,6 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import { installPrismaClientMock } from "../test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -19,8 +18,6 @@ process.env.NOTIFY_BASE_URL ??= "http://localhost:3010";
 process.env.NOTIFY_INTERNAL_SECRET ??= "notify";
 process.env.REACTION_BASE_URL ??= "http://localhost:3011";
 process.env.REACTION_INTERNAL_SECRET ??= "reaction";
-
-installPrismaClientMock();
 
 let currentIdentity = {
   sub: "user-1",
