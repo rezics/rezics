@@ -574,6 +574,10 @@ databases may be reset and reseeded.
   - Applied progress: factory SourceSite fixtures now use Drizzle for source
     site lookup/creation, publisher credit conflict insert, external ref upsert,
     and attribution evidence insert.
+  - Applied progress: factory post seeding now writes review/excerpt/remark,
+    tree posts, and wiki ContentTranslation fixtures through Drizzle; the
+    orchestrator passes `SeedCtx` instead of the server Prisma client for wiki
+    post creation.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

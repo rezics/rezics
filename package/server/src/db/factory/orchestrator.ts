@@ -118,7 +118,7 @@ export async function runFactorySeed(
   done();
 
   done = stepTimer("Step 7: Wiki content translations");
-  const wikiEntry = await seedWikiContentTranslations(ctx.prisma, users);
+  const wikiEntry = await seedWikiContentTranslations(ctx, users);
   if (wikiEntry) {
     await ctx.sync.post(wikiEntry.unitId);
     console.log("[Seed]   1 wiki post with ContentTranslation bodies");

@@ -5,13 +5,20 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   markdownContentDoc,
 } from "@rezics/contract";
-import type { PrismaClient } from "../../../prisma/generated/client.js";
+import { eq } from "drizzle-orm";
 import {
   ContentTranslationStatus,
   PostKind,
   UnitStatus,
   UnitType,
 } from "../../../prisma/generated/client.js";
+import {
+  ContentTranslation,
+  Post,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../schema";
 import {
   generatePostBody,
   generatePostContent,
@@ -56,7 +63,7 @@ export async function seedPostsForWorks(
     const treeCount = ctx.draw(postsPerWork.tree);
 
     const reviews = await seedPostKindForTarget(
-      ctx.prisma,
+      ctx,
       PostKind.REVIEW,
       work.id,
       users,
@@ -66,7 +73,7 @@ export async function seedPostsForWorks(
     allPosts.push(...reviews);
 
     const excerpts = await seedPostKindForTarget(
-      ctx.prisma,
+      ctx,
       PostKind.EXCERPT,
       work.id,
       users,
@@ -75,7 +82,7 @@ export async function seedPostsForWorks(
     allPosts.push(...excerpts);
 
     const remarks = await seedPostKindForTarget(
-      ctx.prisma,
+      ctx,
       PostKind.REMARK,
       work.id,
       users,
@@ -102,7 +109,7 @@ export async function seedPostsForWorks(
 }
 
 async function seedPostKindForTarget(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
   kind: PostKind,
   targetUnitId: string,
   users: CreatedUser[],
@@ -112,7 +119,7 @@ async function seedPostKindForTarget(
   if (count === 0) return [];
   if (count > BATCH_THRESHOLD) {
     return seedPostKindBatch(
-      prisma,
+      ctx,
       kind,
       targetUnitId,
       users,
@@ -142,8 +149,10 @@ async function seedPostKindForTarget(
       }
     }
 
-    const unit = await prisma.unit.create({
-      data: {
+    const [unit] = await ctx.db
+      .insert(Unit)
+      .values({
+        id: randomUUID(),
         type: UnitType.POST,
         userId: author.userId,
         slugScope: author.userId,
@@ -152,43 +161,44 @@ async function seedPostKindForTarget(
         licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
-        post: {
-          create: {
-            authorUserId: author.userId,
-            kind,
-            extra: extra ?? undefined,
-            scoreEntryId: scoreEntryId ?? undefined,
-          },
-        },
-        contentTranslations: {
-          create: {
-            language: DEFAULT_LANGUAGE,
-            content: markdownContentDoc(body) as never,
-            status: published ? "PUBLISHED" : "DRAFT",
-            authorUserId: author.userId,
-            provenance: { importedFrom: "factory-post-seed" },
-          },
-        },
-        translations: needsTitle
-          ? {
-              create: translations.map((t) => ({
-                language: t.language,
-                title: t.title,
-              })),
-            }
-          : undefined,
-        supportLanguages: {
-          create: needsTitle
-            ? translations.map((t, i) => ({
-                language: t.language,
-                isPrimary: i === 0,
-                sortOrder: i,
-              }))
-            : { language: DEFAULT_LANGUAGE, isPrimary: true },
-        },
-      },
-      select: { id: true, type: true },
+      })
+      .returning({ id: Unit.id, type: Unit.type });
+    if (!unit) throw new Error("Failed to create seeded post unit.");
+
+    await ctx.db.insert(Post).values({
+      unitId: unit.id,
+      authorUserId: author.userId,
+      kind,
+      extra: extra ?? undefined,
+      scoreEntryId: scoreEntryId ?? undefined,
     });
+    await ctx.db.insert(ContentTranslation).values({
+      unitId: unit.id,
+      language: DEFAULT_LANGUAGE,
+      content: markdownContentDoc(body) as never,
+      status: published ? "PUBLISHED" : "DRAFT",
+      authorUserId: author.userId,
+      provenance: { importedFrom: "factory-post-seed" },
+    });
+    if (needsTitle) {
+      await ctx.db.insert(UnitTranslation).values(
+        translations.map((t) => ({
+          unitId: unit.id,
+          language: t.language,
+          title: t.title,
+        })),
+      );
+    }
+    await ctx.db.insert(UnitSupportLanguage).values(
+      needsTitle
+        ? translations.map((t, i) => ({
+            unitId: unit.id,
+            language: t.language,
+            isPrimary: i === 0,
+            sortOrder: i,
+          }))
+        : { unitId: unit.id, language: DEFAULT_LANGUAGE, isPrimary: true },
+    );
 
     posts.push({ ...unit, kind, targetUnitId });
   });
@@ -197,7 +207,7 @@ async function seedPostKindForTarget(
 }
 
 async function seedPostKindBatch(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
   kind: PostKind,
   targetUnitId: string,
   users: CreatedUser[],
@@ -249,8 +259,8 @@ async function seedPostKindBatch(
 
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
-    await prisma.unit.createMany({
-      data: chunk.map((r) => ({
+    await ctx.db.insert(Unit).values(
+      chunk.map((r) => ({
         id: r.id,
         type: UnitType.POST,
         userId: r.author.userId,
@@ -261,20 +271,20 @@ async function seedPostKindBatch(
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: r.publishedAt,
       })),
-    });
+    );
   }
 
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
-    await prisma.post.createMany({
-      data: chunk.map((r) => ({
+    await ctx.db.insert(Post).values(
+      chunk.map((r) => ({
         unitId: r.id,
         authorUserId: r.author.userId,
         kind,
         extra: r.extra ?? undefined,
         scoreEntryId: r.scoreEntryId ?? null,
       })),
-    });
+    );
   }
 
   const allContentTranslations = rows.map((r) => ({
@@ -288,9 +298,9 @@ async function seedPostKindBatch(
     provenance: { importedFrom: "factory-post-seed" },
   }));
   for (let i = 0; i < allContentTranslations.length; i += BATCH_SIZE) {
-    await prisma.contentTranslation.createMany({
-      data: allContentTranslations.slice(i, i + BATCH_SIZE),
-    });
+    await ctx.db
+      .insert(ContentTranslation)
+      .values(allContentTranslations.slice(i, i + BATCH_SIZE));
   }
 
   if (needsTitle) {
@@ -302,9 +312,9 @@ async function seedPostKindBatch(
       })),
     );
     for (let i = 0; i < allTranslations.length; i += BATCH_SIZE) {
-      await prisma.unitTranslation.createMany({
-        data: allTranslations.slice(i, i + BATCH_SIZE),
-      });
+      await ctx.db
+        .insert(UnitTranslation)
+        .values(allTranslations.slice(i, i + BATCH_SIZE));
     }
   }
 
@@ -326,9 +336,9 @@ async function seedPostKindBatch(
         ],
   );
   for (let i = 0; i < allSupport.length; i += BATCH_SIZE) {
-    await prisma.unitSupportLanguage.createMany({
-      data: allSupport.slice(i, i + BATCH_SIZE),
-    });
+    await ctx.db
+      .insert(UnitSupportLanguage)
+      .values(allSupport.slice(i, i + BATCH_SIZE));
   }
 
   return rows.map((r) => ({
@@ -355,8 +365,9 @@ async function seedTreePostsForTarget(
   await chunkedParallel(rootIds, CHUNK_SIZE, async (rootId) => {
     const author = faker.helpers.arrayElement(users);
 
-    const unit = await ctx.prisma.unit.create({
-      data: {
+    const [unit] = await ctx.db
+      .insert(Unit)
+      .values({
         id: rootId,
         type: UnitType.POST,
         userId: author.userId,
@@ -366,26 +377,26 @@ async function seedTreePostsForTarget(
         licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: faker.date.past({ years: 1 }),
-        post: {
-          create: {
-            authorUserId: author.userId,
-            kind: PostKind.POST,
-          },
-        },
-        supportLanguages: {
-          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-        },
-        contentTranslations: {
-          create: {
-            language: DEFAULT_LANGUAGE,
-            content: generatePostContent(PostKind.POST) as never,
-            status: "PUBLISHED",
-            authorUserId: author.userId,
-            provenance: { importedFrom: "factory-post-tree-seed" },
-          },
-        },
-      },
-      select: { id: true, type: true },
+      })
+      .returning({ id: Unit.id, type: Unit.type });
+    if (!unit) throw new Error("Failed to create seeded tree post unit.");
+    await ctx.db.insert(Post).values({
+      unitId: unit.id,
+      authorUserId: author.userId,
+      kind: PostKind.POST,
+    });
+    await ctx.db.insert(UnitSupportLanguage).values({
+      unitId: unit.id,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    });
+    await ctx.db.insert(ContentTranslation).values({
+      unitId: unit.id,
+      language: DEFAULT_LANGUAGE,
+      content: generatePostContent(PostKind.POST) as never,
+      status: "PUBLISHED",
+      authorUserId: author.userId,
+      provenance: { importedFrom: "factory-post-tree-seed" },
     });
 
     posts.push({
@@ -435,63 +446,64 @@ const WIKI_POSTS: {
 ];
 
 export async function seedWikiContentTranslations(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
   users: CreatedUser[],
 ): Promise<{ unitId: string } | null> {
   if (users.length === 0) return null;
 
-  const existing = await prisma.unit.findUnique({
-    where: { id: WIKI_POST_EN_ID },
-    select: { id: true },
-  });
+  const [existing] = await ctx.db
+    .select({ id: Unit.id })
+    .from(Unit)
+    .where(eq(Unit.id, WIKI_POST_EN_ID))
+    .limit(1);
   if (existing) {
     return { unitId: WIKI_POST_EN_ID };
   }
 
   const author = users[0]!;
 
-  await prisma.$transaction(async (tx) => {
+  await ctx.db.transaction(async (tx) => {
     const primary = WIKI_POSTS[1] ?? WIKI_POSTS[0]!;
-    await tx.unit.create({
-      data: {
-        id: primary.id,
-        type: UnitType.POST,
-        userId: author.userId,
-        slugScope: author.userId,
-        status: UnitStatus.PUBLISHED,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: primary.language,
-        publishedAt: new Date(),
-        post: {
-          create: {
-            authorUserId: author.userId,
-            kind: PostKind.POST,
-          },
-        },
-        translations: {
-          create: WIKI_POSTS.map((p) => ({
-            language: p.language,
-            title: p.title,
-          })),
-        },
-        supportLanguages: {
-          create: WIKI_POSTS.map((p, index) => ({
-            language: p.language,
-            isPrimary: p.language === primary.language,
-            sortOrder: index,
-          })),
-        },
-        contentTranslations: {
-          create: WIKI_POSTS.map((p) => ({
-            language: p.language,
-            content: markdownContentDoc(p.contentSource) as never,
-            status: "PUBLISHED",
-            authorUserId: author.userId,
-            provenance: { importedFrom: "factory-wiki-seed" },
-          })),
-        },
-      },
+    await tx.insert(Unit).values({
+      id: primary.id,
+      type: UnitType.POST,
+      userId: author.userId,
+      slugScope: author.userId,
+      status: UnitStatus.PUBLISHED,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+      defaultLanguage: primary.language,
+      publishedAt: new Date(),
     });
+    await tx.insert(Post).values({
+      unitId: primary.id,
+      authorUserId: author.userId,
+      kind: PostKind.POST,
+    });
+    await tx.insert(UnitTranslation).values(
+      WIKI_POSTS.map((p) => ({
+        unitId: primary.id,
+        language: p.language,
+        title: p.title,
+      })),
+    );
+    await tx.insert(UnitSupportLanguage).values(
+      WIKI_POSTS.map((p, index) => ({
+        unitId: primary.id,
+        language: p.language,
+        isPrimary: p.language === primary.language,
+        sortOrder: index,
+      })),
+    );
+    await tx.insert(ContentTranslation).values(
+      WIKI_POSTS.map((p) => ({
+        unitId: primary.id,
+        language: p.language,
+        content: markdownContentDoc(p.contentSource) as never,
+        status: "PUBLISHED",
+        authorUserId: author.userId,
+        provenance: { importedFrom: "factory-wiki-seed" },
+      })),
+    );
   });
 
   return { unitId: WIKI_POST_EN_ID };
