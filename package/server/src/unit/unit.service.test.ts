@@ -9,7 +9,9 @@ mock.module("@/content-translation/mapper", () => ({
   mapContentTranslationToDTO: (row: unknown) => row,
 }));
 mock.module("@/infra/slug-scopes", () => ({
+  getSlugScopeId: () => "global",
   pickSlugScope: () => "global",
+  requireSlugScopeId: () => "global",
 }));
 mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {

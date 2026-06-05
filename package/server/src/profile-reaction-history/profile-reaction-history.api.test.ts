@@ -111,6 +111,29 @@ mock.module("../infra/slug-scopes", () => ({
   requireSlugScopeId: () => "user-scope",
 }));
 
+class TestAppError extends Error {
+  statusCode: number;
+  code?: string;
+  details?: Record<string, unknown>;
+
+  constructor(
+    statusCode: number,
+    message: string,
+    options?: { code?: string; details?: Record<string, unknown> },
+  ) {
+    super(message);
+    this.name = "AppError";
+    this.statusCode = statusCode;
+    this.code = options?.code;
+    this.details = options?.details;
+  }
+}
+
+mock.module("../utils/errors", () => ({
+  AppError: TestAppError,
+  notFound: (message: string) => new TestAppError(404, `${message} not found`),
+}));
+
 mock.module("../reaction-boundary/reaction-boundary.client", () => ({
   listGivenReactions: async (q: {
     userId: string;
