@@ -1,5 +1,5 @@
 import { hashPassword } from "better-auth/crypto";
-import { type AuthDb, db } from "../db/client";
+import type { AuthDb } from "../db/client";
 import { accounts, users } from "../db/schema";
 import { generatePassword } from "./helpers";
 
@@ -18,16 +18,23 @@ export interface SeedAuthUserResult {
   password: string;
 }
 
+async function resolveAuthDb(database?: AuthDb): Promise<AuthDb> {
+  if (database) return database;
+  const { db } = await import("../db/client");
+  return db;
+}
+
 export async function seedAuthUser(
   input: SeedAuthUserInput,
-  database: AuthDb = db,
+  database?: AuthDb,
 ): Promise<SeedAuthUserResult> {
+  const targetDb = await resolveAuthDb(database);
   const role = input.role ?? "user";
   const password = input.password ?? generatePassword();
   const passwordHash = await hashPassword(password);
   const now = new Date();
 
-  const [user] = await database
+  const [user] = await targetDb
     .insert(users)
     .values({
       name: input.name,
@@ -52,7 +59,7 @@ export async function seedAuthUser(
     });
   if (!user) throw new Error(`Failed to seed auth user ${input.email}`);
 
-  await database
+  await targetDb
     .insert(accounts)
     .values({
       userId: user.id,

@@ -13,6 +13,8 @@ export default defineConfig({
         text: "Guide",
         items: [
           { text: "Deployment", link: "/guide/deployment" },
+          { text: "Database Workflow", link: "/guide/database-workflow" },
+          { text: "Git Workflow", link: "/guide/git-workflow" },
           { text: "Monorepo", link: "/guide/monorepo" },
         ],
       },

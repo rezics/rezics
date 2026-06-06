@@ -55,156 +55,20 @@ The local dev layout keeps `@rezics/job-runner` eligible to auto-start. If its
 
 ## Git Workflow
 
-### Mainline
-
 `main` is the only integration baseline for current work. Feature, fix, and
-refactor branches start from `main`, and completed work enters `main` as one
-coherent commit unless a maintainer explicitly chooses a different merge
+refactor branches start from `main`; completed work enters `main` as one
+coherent squash commit unless a maintainer explicitly chooses another merge
 strategy.
 
-`main` keeps product-level history: one completed feature, fix, refactor, or
-maintenance change per commit. `archive/*` keeps development-level history: the
-smaller commits, iterations, and review fixes that produced that result.
+Use task branches such as `feat/<topic>`, `fix/<topic>`, `refactor/<topic>`, or
+`<owner>/<topic>` for active work. Preserve detailed task history under
+`archive/YYMMDD-type-topic` before landing the squash commit on `main`.
 
-### Branch Roles
+`main` should answer which completed feature, fix, or refactor introduced a
+line. `archive/*` should answer which internal task commit introduced it.
 
-- `main` — current integration branch and source of truth.
-- `release/*` — release freeze, release candidates, and patch lines.
-- `stable/*` — long-lived maintenance lines for old versions only.
-- `<owner>/<topic>` — personal or agent-owned work lines. The owner must be
-  clear, for example `edge/crawler-preview-routing` or
-  `codex/share-reference-counts`.
-- `feat/<topic>` / `fix/<topic>` / `refactor/<topic>` — shared task branches
-  intended to merge into `main`. Keep their number low and status clear.
-- `spike/<topic>` — exploration or experiments with no promise of integration.
-- `archive/<date>-<type>-<topic>` — historical snapshots no longer used for
-  daily development. Use `YYMMDD-type-topic`, for example
-  `archive/260606-feat-crawler-preview-routing`.
-- `backup/*` — emergency insurance only, not a normal workflow.
-
-### Feature Lifecycle
-
-Create task branches from the current mainline:
-
-```bash
-git switch main
-git pull --ff-only
-git switch -c feat/<topic>
-```
-
-Keep feature history local to the task branch while developing. Before
-integration, rebase onto the current mainline unless the maintainer asks for a
-merge-based update:
-
-```bash
-git fetch origin
-git rebase origin/main
-```
-
-When the feature is complete:
-
-1. Record the feature base SHA and final feature tip SHA.
-2. Create the archive branch at the feature tip and push it.
-3. Squash the feature into one commit on `main`.
-4. Include archive metadata in the squash commit trailers.
-5. Delete the active `feat/*`, `fix/*`, or `refactor/*` branch after the archive
-   branch exists remotely.
-
-An archive ref may be created by renaming a local branch or by pushing the same
-tip to a new remote ref. Remote Git only needs the final archive ref to point at
-the preserved history; it does not preserve a portable branch-rename event.
-
-### Squash Commit Messages
-
-Use `.agents/skills/git-mainline-squash` when generating a mainline squash
-message. The message has three parts:
-
-```text
-<type>(<optional scope>): <subject>
-
-<body>
-
-Archive-ref: archive/YYMMDD-type-topic
-Archive-tip: <feature-tip-sha>
-Feature-base: <feature-base-sha>
-Original-branch: <original-branch>
-Pull-request: #123
-```
-
-The subject is the Conventional Commit first line. The body is the GitHub squash
-UI's commit description: one concise integration summary, with optional bullets
-for major surfaces such as contract, server, app, migrations, tests, or tooling.
-Do not put routine process work in the body.
-
-Archive trailers are custom Git trailers. Use full SHAs for final metadata when
-available. Omit `Pull-request` only when there is no PR.
-
-Example:
-
-```text
-feat(crawler): add preview routing
-
-Route crawler preview units through the shared app and server surfaces so
-catalog preview flows resolve consistently.
-
-- Adds preview route contract and server handling
-- Wires frontend access through the shared API layer
-- Covers routing behavior with focused tests
-
-Archive-ref: archive/260606-feat-crawler-preview-routing
-Archive-tip: <feature-tip-sha>
-Feature-base: <feature-base-sha>
-Original-branch: feat/crawler-preview-routing
-Pull-request: #123
-```
-
-### Mainline Cutovers
-
-Repository baseline cutovers use `archive/<date>-mainline-<topic>` and
-mainline-reset trailers instead of feature trailers. The 2026-06-06 `dev` to
-`main` cutover archive is:
-
-```text
-archive/260606-mainline-dev-before-main
-```
-
-The main snapshot commit should use:
-
-```text
-chore: establish mainline snapshot
-
-Create the new main integration baseline from the current repository state.
-
-Archive-ref: archive/260606-mainline-dev-before-main
-Archive-tip: <archived-dev-tip-sha>
-Original-branch: dev
-Mainline-reset: 2026-06-06
-```
-
-### Tracing Blame Through Archives
-
-A normal blame on `main` answers which integrated change introduced a line:
-
-```bash
-git blame -- path/to/file
-```
-
-If the blamed commit is a squash commit, inspect its archive trailers:
-
-```bash
-git show <squash-sha>
-```
-
-Then use the archived branch to inspect feature-level history:
-
-```bash
-git blame archive/260606-feat-crawler-preview-routing -- path/to/file
-git log --oneline <feature-base-sha>..<feature-tip-sha>
-```
-
-This workflow intentionally separates two questions: `main` blame answers which
-completed feature, fix, or refactor introduced a line; `archive/*` blame answers
-which internal feature commit introduced it.
+See `docs/guide/git-workflow.md` for branch roles, task lifecycle, archive
+trailers, mainline cutovers, and blame tracing.
 
 ## Conventions
 
@@ -262,12 +126,12 @@ and `ranking` also own package-specific Drizzle schemas. `job-runner` is the
 exception: its database is pg-boss-owned, so it uses `db:ensure` rather than
 Drizzle schema migrations.
 
-Use the Drizzle v1 rc line intentionally. Pin `drizzle-orm` and `drizzle-kit`
-to exact compatible `1.0.0-rc.*` versions where they are declared; do not
-switch to broad `latest`/`^` ranges during this migration.
-As of 2026-06-04, npm's `rc` dist-tag for both packages resolves to
-`1.0.0-rc.3`; newer `rc4` tags are branch prereleases, not the selected exact
-pair.
+Schema migrations are Drizzle-first: edit the owning package's Drizzle schema,
+generate migrations with the repo `db:generate` workflow, then validate with
+`db:migrate` or `db:reset`. Do not hand-author ordinary table, column, index, or
+foreign-key migrations. Hand-written SQL is only for database features Drizzle
+cannot express, or for correcting a documented Drizzle-generated SQL defect
+while keeping the schema source in sync.
 
 ```bash
 bun run db:generate
@@ -282,16 +146,14 @@ bun run db:smoke
 `auth -> server -> notify -> reaction -> history -> ranking`. The tool preflight
 requires a reachable PostgreSQL 18+ database with built-in `uuidv7()`. Each
 schema owner keeps migrations in its package-local `drizzle/` folder and uses
-Drizzle Kit's default migration journal table; do not introduce a second Rezics
-ledger unless custom SQL ordering proves Drizzle's journal insufficient. New
-database capabilities that cannot be expressed in Drizzle schema, including
-extensions such as `ltree`, helper SQL, partial indexes, and special GiST/GIN
-indexes, must be represented as ordered Drizzle custom SQL migrations before
-dependent baseline or schema migrations.
+Drizzle Kit's default migration journal table.
 
 Resetting local databases is destructive and development-only. After a reset,
 run the required seed and optional factory workflows explicitly; never depend on
 application startup to backfill seed/factory data.
+
+See `docs/guide/database-workflow.md` for the full migration policy, custom SQL
+rules, and Drizzle rc caveats.
 
 ## Seeding
 

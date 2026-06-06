@@ -65,6 +65,7 @@ export function createDrizzleSystemShelfClient(
         return row ?? null;
       },
       async create(input) {
+        const now = new Date();
         const [unit] = await database
           .insert(Unit)
           .values({
@@ -75,6 +76,7 @@ export function createDrizzleSystemShelfClient(
             status: input.data.status,
             visibility: input.data.visibility,
             licenseSlug: input.data.licenseSlug,
+            updatedAt: now,
           })
           .returning({ id: Unit.id });
         if (!unit) throw new Error("Failed to create system shelf Unit");
@@ -83,6 +85,7 @@ export function createDrizzleSystemShelfClient(
           unitId: unit.id,
           language: input.data.translations.create.language,
           title: input.data.translations.create.title,
+          updatedAt: now,
         });
         return unit;
       },
@@ -92,6 +95,7 @@ export function createDrizzleSystemShelfClient(
         await database.insert(Shelf).values({
           unitId: input.data.unitId,
           kindKey: input.data.kindKey,
+          updatedAt: new Date(),
         });
       },
     },

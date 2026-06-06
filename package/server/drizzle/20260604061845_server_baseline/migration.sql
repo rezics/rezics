@@ -205,8 +205,8 @@ CREATE TABLE "Entity" (
 	"kind" varchar(32),
 	"verified" boolean DEFAULT false NOT NULL,
 	"avatar" text,
-	"eligibleCreditRoles" text[] DEFAULT ARRAY::text[] NOT NULL,
-	"eligibleSubjectRoles" text[] DEFAULT ARRAY::text[] NOT NULL
+	"eligibleCreditRoles" text[] DEFAULT ARRAY[]::text[] NOT NULL,
+	"eligibleSubjectRoles" text[] DEFAULT ARRAY[]::text[] NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "Feedback" (

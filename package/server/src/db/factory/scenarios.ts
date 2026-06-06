@@ -795,7 +795,8 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
     prev = position;
     return {
       shelfId,
-      unitId,
+      itemType: "unit",
+      itemId: unitId,
       kind: index % 3 === 0 ? "book" : index % 3 === 1 ? "game" : "media",
       position,
       parentItemType: index > 0 && index < 20 ? "unit" : null,
@@ -1145,7 +1146,8 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
       previousPosition = position;
       return {
         shelfId: shelf.unitId,
-        unitId,
+        itemType: "unit",
+        itemId: unitId,
         kind: work
           ? "book"
           : post?.kind === PostKind.REVIEW

@@ -61,6 +61,10 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
   otherwise.
 - Main branch is `main`. See `CONTRIBUTING.md` for the mainline/archive Git
   workflow.
+- Database migrations are Drizzle-first. See
+  `docs/guide/database-workflow.md`; do not hand-author ordinary schema
+  migrations. Edit migration SQL only for custom SQL or documented
+  Drizzle-generated SQL defects while keeping schema source in sync.
 - Dirty working trees are normal. The maintainer may be editing in parallel, so
 ignore unrelated unstaged/untracked changes and never revert, stash, clean, or
 flag them.

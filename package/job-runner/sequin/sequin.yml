@@ -29,12 +29,14 @@ databases:
           public."SubjectAttribution",
           public."UnitRealm",
           public."RealmTagApplication",
-          public."ShelfUnit",
+          public."ShelfItem",
+          public."ContentStructureNode",
           public."Post",
-          public."ScoreEntry",
-          public."ScoreAggregate",
           public."User",
           public."UserUnitProgress",
+          public."Comment",
+          public."ScoreEntry",
+          public."ScoreAggregate",
           public."Feedback";
     await_database:
       timeout_ms: 30000
@@ -83,7 +85,6 @@ sinks:
         - public.SubjectAttribution
         - public.UnitRealm
         - public.RealmTagApplication
-        - public.RealmTagUnit
         - public.ShelfItem
         - public.ContentStructureNode
         - public.Post

@@ -1,4 +1,4 @@
-import { type AuthDb, db } from "../db/client";
+import type { AuthDb } from "../db/client";
 import {
   accounts,
   oauthAccessTokens,
@@ -10,10 +10,17 @@ import {
   verifications,
 } from "../db/schema";
 
-export async function resetAuthDatabase(database: AuthDb = db): Promise<void> {
+async function resolveAuthDb(database?: AuthDb): Promise<AuthDb> {
+  if (database) return database;
+  const { db } = await import("../db/client");
+  return db;
+}
+
+export async function resetAuthDatabase(database?: AuthDb): Promise<void> {
+  const targetDb = await resolveAuthDb(database);
   console.log("[Reset] Resetting auth database...");
 
-  await database.transaction(async (tx) => {
+  await targetDb.transaction(async (tx) => {
     await tx.delete(sessions);
     await tx.delete(accounts);
     await tx.delete(verifications);

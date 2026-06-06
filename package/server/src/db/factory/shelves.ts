@@ -89,7 +89,8 @@ export async function seedShelves(
       let prevPos: string | undefined;
       const shelfItemRows: Array<{
         shelfId: string;
-        unitId: string;
+        itemType: string;
+        itemId: string;
         kind: string;
         position: string;
         parentItemType?: string;
@@ -101,7 +102,8 @@ export async function seedShelves(
         prevPos = position;
         shelfItemRows.push({
           shelfId: unit.id,
-          unitId: work.id,
+          itemType: "unit",
+          itemId: work.id,
           kind: unitTypeToShelfKind(work.type),
           position,
         });
@@ -118,7 +120,8 @@ export async function seedShelves(
               prevPos = reviewPosition;
               shelfItemRows.push({
                 shelfId: unit.id,
-                unitId: review.id,
+                itemType: "unit",
+                itemId: review.id,
                 kind: "review",
                 position: reviewPosition,
                 parentItemId: work.id,
