@@ -5,7 +5,7 @@ import { StateLayerDemo, Compare, Do, Dont } from "../tokens/_gallery";
 
 # State Layer
 
-rezics communicates interactive state through **quiet rectangular tints** at fixed opacity tiers. The overlay color is `currentColor` so contrast tracks the element's text role; the overlay shape is the element's own bounding box, not an organic ripple. The aesthetic is borderless parchment, not Material brand.
+rezics communicates interactive state through **quiet rectangular tints** at fixed opacity tiers. The overlay color is `currentColor` so contrast tracks the element's text role; the overlay shape is the element's own bounding box, not an organic ripple. The aesthetic is borderless and quiet, not Material brand.
 
 ## Live preview
 
@@ -22,7 +22,7 @@ rezics communicates interactive state through **quiet rectangular tints** at fix
 | Pressed | `0.12` | `--state-pressed-opacity` | `:active` press in progress |
 | Dragged | `0.16` | `--state-dragged-opacity` | Element under drag |
 
-The values come from MD3's overlay system (`08/12/12/16`). They scale gently across the parchment canvas in light mode and the dim canvas in dark mode without re-tuning per role.
+The values come from MD3's overlay system (`08/12/12/16`). They scale gently across the light canvas and dark canvas without re-tuning per role.
 
 ## How to apply
 
@@ -40,10 +40,10 @@ The shortcuts emit a `::before` pseudo-element with `bg-current`, opacity 0 in r
 
 <Compare>
   <Do caption="Quiet rectangular tint">
-    The overlay is the element's own bounding box. The visual signature is "this surface lit up slightly," not "something happened *at* a point." Reads consistently against parchment without shouting.
+    The overlay is the element's own bounding box. The visual signature is "this surface lit up slightly," not "something happened *at* a point." Reads consistently against plain canvas without shouting.
   </Do>
   <Dont caption="MD3 full-bleed circular ripple">
-    The ripple's organic-spread visual signature reads as Material brand against any canvas. It also pulls attention to the touch point, which competes with the parchment-quiet aesthetic. rezics uses a flat tint instead.
+    The ripple's organic-spread visual signature reads as Material brand against any canvas. It also pulls attention to the touch point, which competes with the quiet archive aesthetic. rezics uses a flat tint instead.
   </Dont>
 </Compare>
 

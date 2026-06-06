@@ -68,14 +68,14 @@ export const TagDetailCard: React.FC<{
               unitId: tag.tagUnitId,
               slug: null,
             })}
-            className="text-sm text-text-brand hover:underline"
+            className="text-sm text-link hover:underline"
           >
             查看详情 →
           </TextLink>
           <TextLink
             to={"/book"}
             search={{ tags: label }}
-            className="text-sm text-text-brand hover:underline !ml-12"
+            className="text-sm text-link hover:underline !ml-12"
           >
             搜索标签 →
           </TextLink>

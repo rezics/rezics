@@ -34,7 +34,7 @@ const TINT_CYCLE = ["bg-white/5"] as const;
 
 const BRAND_TINT_STYLE: React.CSSProperties = {
   backgroundColor:
-    "color-mix(in srgb, var(--colors-brand-fill, #f4606c) 18%, transparent)",
+    "color-mix(in srgb, var(--colors-brand-fill, #DB515C) 18%, transparent)",
 };
 
 export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({

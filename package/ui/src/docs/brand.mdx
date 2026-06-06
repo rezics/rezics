@@ -51,7 +51,7 @@ Two strokes inspired by 轮回 (cyclic return). Always rendered as a single colo
 
 ### Color variants
 
-The default fill is `--colors-brand-fill` (轮回红 `#f4606c`). For surfaces where the logo must blend with surrounding text or sit on a colored background, pass `color="currentColor"` and let the parent decide.
+The default fill is `--colors-brand-fill` (轮回红 `#DB515C`). For surfaces where the logo must blend with surrounding text or sit on a colored background, pass `color="currentColor"` and let the parent decide.
 
 <Unstyled>
   <Grid cols={3}>
@@ -147,7 +147,7 @@ Reserve at least `½ × logo height` of empty space on every side. Don't crowd t
 
 ## Brand color
 
-**轮回红** `#f4606c` — the only branded accent in the system. Resolved through `--colors-brand-fill`. The text-safe counterpart `--colors-text-brand` auto-resolves to AA-safe values: `#C4433A` in light mode, `#fa7882` in dark mode.
+**轮回红** `#DB515C` — the branded accent in the system. Resolved through `--colors-brand-fill`. The same hue may be used for short, stable brand text through `--colors-text-brand`; ordinary textual navigation uses `--colors-link`.
 
 <Unstyled>
   <Grid cols={2}>
@@ -162,7 +162,7 @@ Reserve at least `½ × logo height` of empty space on every side. Don't crowd t
       name="text-brand"
       cssVar="--colors-text-brand"
       value="var(--colors-text-brand)"
-      description="The only token allowed for brand-colored text. Auto AA-safe."
+      description="Short stable brand text, not long-form content."
     />
   </Grid>
 </Unstyled>
@@ -174,7 +174,7 @@ The full color system, including surfaces, borders, and semantic tokens, is docu
 ## Do / Don't
 
 <Compare>
-  <Do caption="Logo on parchment, default brand fill">
+  <Do caption="Logo on canvas, default brand fill">
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 96 }}>
       <Logo size={48} />
     </div>

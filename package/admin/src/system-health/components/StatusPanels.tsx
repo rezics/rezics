@@ -157,7 +157,7 @@ export function ServiceLinksPanel({ links }: { links: StatusLink[] }) {
               {link.url ? (
                 <AdminSafeLink
                   href={link.url}
-                  className="mt-2 block truncate text-xs text-text-brand"
+                  className="mt-2 block truncate text-xs text-link"
                 >
                   {link.url}
                 </AdminSafeLink>
@@ -603,7 +603,7 @@ export function CdcPanel({
         {sequin.url ? (
           <AdminSafeLink
             href={sequin.url}
-            className="mt-2 inline-block text-xs text-text-brand"
+            className="mt-2 inline-block text-xs text-link"
           >
             Open Sequin UI
           </AdminSafeLink>

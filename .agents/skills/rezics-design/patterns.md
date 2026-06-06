@@ -137,7 +137,7 @@ The shadcn `Button` is token-aligned via the flat `--colors-*` cascade and alrea
 
 ```tsx
 {/* WRONG — bypasses tokens */}
-<button style={{ background: '#f4606c', color: 'white', padding: '8px 16px', borderRadius: 8 }}>
+<button style={{ background: '#DB515C', color: 'white', padding: '8px 16px', borderRadius: 8 }}>
   Save
 </button>
 ```
@@ -284,18 +284,18 @@ Use the icon libraries; they integrate with `currentColor` and UnoCSS sizing cla
 
 Hex literals lock you out of dark mode and break the token contract.
 
-### ❌ DON'T — `#f4606c` as text color
+### ❌ DON'T — brand red for ordinary reading text
 
 ```tsx
-{/* WRONG — fails AA contrast */}
-<p style={{ color: '#f4606c' }}>Brand label</p>
-<span className="text-[#f4606c]">Brand label</span>
+{/* WRONG — brand red is not ordinary content/link color */}
+<p style={{ color: '#DB515C' }}>A long paragraph...</p>
+<span className="text-[#DB515C]">Ordinary link</span>
 ```
 
 ```tsx
-{/* RIGHT — auto-resolves to #C4433A light / #fa7882 dark */}
-<p style={{ color: 'var(--colors-text-brand)' }}>Brand label</p>
-<span className="text-text-brand">Brand label</span>
+{/* RIGHT — brand for short chrome, link blue for navigation */}
+<p style={{ color: 'var(--colors-text-brand)' }}>REZICS</p>
+<span className="text-link hover:underline">Read more</span>
 ```
 
 ---

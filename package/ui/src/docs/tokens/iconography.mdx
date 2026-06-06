@@ -25,7 +25,7 @@ import {
 
 # Iconography
 
-rezics' default icon library is **lucide-react** — a community fork of Feather, with a stroke style that reads on the warm parchment canvas without the geometric stiffness that MUI's filled defaults imposed. When lucide lacks a glyph, fall back to **`@tabler/icons-react`** with clear naming that makes the fallback obvious in code. Apple SF Symbols is the deeper reference for stroke weight + scale sensibility; we adopt the philosophy at lower fidelity.
+rezics' default icon library is **lucide-react** — a community fork of Feather, with a stroke style that reads on the plain canvas without the geometric stiffness that MUI's filled defaults imposed. When lucide lacks a glyph, fall back to **`@tabler/icons-react`** with clear naming that makes the fallback obvious in code. Apple SF Symbols is the deeper reference for stroke weight + scale sensibility; we adopt the philosophy at lower fidelity.
 
 ## Standard sizes
 
@@ -131,4 +131,4 @@ Avoid mixing libraries inside a single feature folder if a lucide-only solution 
 
 ## Reference
 
-> Apple's SF Symbols ships **9 weights × 3 scales × 4 rendering modes** with glyph-level inflection points across the entire library — the deepest icon system in any platform UI kit. rezics adopts the underlying sensibility (consistent stroke, three sizes, color follows text role) at lucide's lower fidelity (2px stroke, single rendering mode). MD3 ships Material Symbols at 5 weights × 3 sizes; we don't use them because the geometric Roman style reads as Material brand against parchment. Apple source: developer.apple.com/sf-symbols. lucide source: lucide.dev. Tabler source: tabler-icons.io.
+> Apple's SF Symbols ships **9 weights × 3 scales × 4 rendering modes** with glyph-level inflection points across the entire library — the deepest icon system in any platform UI kit. rezics adopts the underlying sensibility (consistent stroke, three sizes, color follows text role) at lucide's lower fidelity (2px stroke, single rendering mode). MD3 ships Material Symbols at 5 weights × 3 sizes; we don't use them because the geometric Roman style reads as Material brand against rezics chrome. Apple source: developer.apple.com/sf-symbols. lucide source: lucide.dev. Tabler source: tabler-icons.io.

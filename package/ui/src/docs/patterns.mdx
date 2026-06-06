@@ -221,7 +221,7 @@ Use `<Button>` from `@/shadcn/button`. Default `variant="default"` is the brand-
   </Do>
   <Dont caption="Hand-rolled brand button + emoji label">
     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-      <button style={{ background: "#f4606c", color: "white", padding: "8px 16px", borderRadius: 8, border: "none" }}>
+      <button style={{ background: "#DB515C", color: "white", padding: "8px 16px", borderRadius: 8, border: "none" }}>
         ✨ Get started
       </button>
     </div>
@@ -241,7 +241,7 @@ import { Plus } from 'lucide-react';
 <Button><Plus size={16} /> Add book</Button>
 
 // Don't
-<button style={{ background: '#f4606c', color: 'white', padding: '8px 16px', borderRadius: 8 }}>
+<button style={{ background: '#DB515C', color: 'white', padding: '8px 16px', borderRadius: 8 }}>
   Save
 </button>
 <Button>✨ Get started</Button>
@@ -364,19 +364,19 @@ Tokens flow from `tokens.ts` → CSS vars + UnoCSS theme. The two call sites res
       </div>
     </div>
   </Do>
-  <Dont caption="Hex literals + brand-fill as text">
+  <Dont caption="Hex literals + brand used as body text">
     <div
       style={{
         fontFamily: fontFamilies.sans,
-        background: "#faf9f5",
-        color: "#1d1d1f",
+        background: "#ffffff",
+        color: "#111111",
         padding: 16,
         borderRadius: 8,
       }}
     >
       <div style={{ fontWeight: 500 }}>Catalog header</div>
-      <div style={{ color: "#f4606c", marginTop: 4, fontSize: 13 }}>
-        Brand label (fails AA contrast)
+      <div style={{ color: "#DB515C", marginTop: 4, fontSize: 13 }}>
+        Brand color used as ordinary reading text
       </div>
     </div>
   </Dont>
@@ -388,12 +388,13 @@ Tokens flow from `tokens.ts` → CSS vars + UnoCSS theme. The two call sites res
 <div style={{ background: 'var(--colors-surface-base)' }} />
 
 // Don't
-<div className="bg-[#faf9f5] text-[#1d1d1f]" />
+<div className="bg-[#ffffff] text-[#111111]" />
 
-// Don't — #f4606c as text fails AA
-<p style={{ color: '#f4606c' }}>Brand label</p>
-// Do — auto-resolves to AA-safe text-brand (#C4433A light / #fa7882 dark)
-<p className="text-text-brand">Brand label</p>
+// Don't — brand red for ordinary reading text
+<p style={{ color: '#DB515C' }}>A long paragraph...</p>
+// Do — brand for short stable chrome, link blue for navigation
+<p className="text-text-brand">REZICS</p>
+<SafeLink href={url} className="text-link hover:underline">Read more</SafeLink>
 ```
 
 ---

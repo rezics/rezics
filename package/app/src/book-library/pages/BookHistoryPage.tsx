@@ -218,7 +218,7 @@ export function RevisionTimeline({
                 <Link
                   to="/book/$bookId/edit/history/$sequence"
                   params={{ bookId, sequence: String(revision.sequence) }}
-                  className="text-sm font-medium leading-ui text-text-primary hover:text-text-brand"
+                  className="text-sm font-medium leading-ui text-text-primary hover:text-link"
                 >
                   {getI18nRuntime().i18n.t("search:history_revision_title", {
                     sequence: revision.sequence,

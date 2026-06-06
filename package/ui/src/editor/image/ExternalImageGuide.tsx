@@ -41,7 +41,7 @@ export function ExternalImageGuide({
     <div className="flex flex-col gap-3 p-1">
       <p className="text-sm font-medium">
         Upload your image to{" "}
-        <SafeLink href={url} className="text-brand underline">
+        <SafeLink href={url} className="text-link underline">
           {name}
         </SafeLink>
         , then paste the direct image URL below.

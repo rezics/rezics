@@ -35,15 +35,15 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
 
-  const primary = readCssVar("--rezics-sys-color-primary", "#f4606c");
-  const secondary = readCssVar("--rezics-sys-color-tertiary", "#9aa0a6");
+  const primary = readCssVar("--colors-brand-fill", "#DB515C");
+  const secondary = readCssVar("--colors-chart-2", "#1a73e8");
   const fg = readCssVar(
-    "--rezics-sys-color-text-primary",
-    isDark ? "#f5f5f5" : "#1a1a1a",
+    "--colors-text-primary",
+    isDark ? "#f5f5f5" : "#111111",
   );
   const fgMuted = readCssVar(
-    "--rezics-sys-color-text-secondary",
-    isDark ? "#aaaaaa" : "#666666",
+    "--colors-text-secondary",
+    isDark ? "#b6b6b6" : "#5f6368",
   );
 
   const data = useMemo(

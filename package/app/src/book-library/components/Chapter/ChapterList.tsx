@@ -63,7 +63,7 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
         bookId,
         nodeId: node.nodeId ?? "",
       }}
-      className="block hover:text-brand"
+      className="block hover:text-link"
     >
       <p className="truncate p-2 rounded-md transition-colors duration-200">
         {displayName}

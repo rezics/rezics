@@ -18,10 +18,10 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   BookmarkPlus as BookmarkAddOutlined,
   Copy,
-  FilePenLine,
   Pencil as EditOutlined,
-  Send,
+  FilePenLine,
   Share as IosShareOutlined,
+  Send,
 } from "lucide-react";
 import type React from "react";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
@@ -70,7 +70,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
         onClick={handleAddToShelf}
         className="rounded-full font-medium"
         style={{
-          backgroundColor: "var(--colors-brand-fill, #f4606c)",
+          backgroundColor: "var(--colors-brand-fill, #DB515C)",
           color: "var(--colors-text-on-brand, #fff)",
         }}
       >

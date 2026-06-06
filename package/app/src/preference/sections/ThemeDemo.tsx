@@ -22,7 +22,7 @@ import { useAppStore } from "@/app/states/appStore";
 
 // MOCK: local preview palette for demo cards (used to be PRESET_COLORS from ui).
 const DEMO_COLORS: Array<{ name: string; color: string }> = [
-  { name: "Brand", color: "#f4606c" },
+  { name: "Brand", color: "#DB515C" },
   { name: "Blue", color: "#3b82f6" },
   { name: "Green", color: "#10b981" },
   { name: "Amber", color: "#f59e0b" },

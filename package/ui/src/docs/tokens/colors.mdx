@@ -79,7 +79,8 @@ dark mode is black-led.
 
 ## Text
 
-Text roles describe reading load first. Brand and link are separate text roles.
+Text roles describe reading load first. Brand text is for short, stable product
+chrome. Ordinary textual navigation lives in the separate link role.
 
 <Unstyled>
   <Grid cols={4}>
@@ -89,7 +90,6 @@ Text roles describe reading load first. Brand and link are separate text roles.
     <DesignSwatch name="disabled" cssVar="--colors-text-disabled" light="#b8b8b8" dark="#5c5c5c" description="Disabled labels and decorative inactive text." contrastLight="#ffffff" contrastDark="#000000" />
     <DesignSwatch name="on-brand" cssVar="--colors-text-on-brand" light="#ffffff" dark="#ffffff" description="Text on brand-filled controls." contrastLight="#DB515C" contrastDark="#DB515C" />
     <DesignSwatch name="brand" cssVar="--colors-text-brand" light="#DB515C" dark="#DB515C" description="Short brand text: REZICS, hero labels, stable brand chrome." contrastLight="#ffffff" contrastDark="#000000" />
-    <DesignSwatch name="link" cssVar="--colors-text-link" light="#1a73e8" dark="#1a73e8" description="Ordinary text links, URLs, metadata links, textual navigation." contrastLight="#ffffff" contrastDark="#000000" />
   </Grid>
 </Unstyled>
 
@@ -115,9 +115,8 @@ instead of changing the blue.
 
 <Unstyled>
   <Grid cols={3}>
-    <DesignSwatch name="text" cssVar="--colors-link-text" light="#1a73e8" dark="#1a73e8" description="Default text link color." contrastLight="#ffffff" contrastDark="#000000" />
+    <DesignSwatch name="default" cssVar="--colors-link" light="#1a73e8" dark="#1a73e8" description="Ordinary text links, URLs, metadata links, textual navigation." contrastLight="#ffffff" contrastDark="#000000" />
     <DesignSwatch name="hover" cssVar="--colors-link-hover" light="#1a73e8" dark="#1a73e8" description="Same color; hover adds underline." contrastLight="#ffffff" contrastDark="#000000" />
-    <DesignSwatch name="visited" cssVar="--colors-link-visited" light="#681da8" dark="#b68cff" description="Optional visited link color; only use where visited state matters." contrastLight="#ffffff" contrastDark="#000000" />
   </Grid>
 </Unstyled>
 

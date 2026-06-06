@@ -20,7 +20,7 @@ function LinkPreview({ to, label }: LinkPreviewProps) {
     const rootRoute = createRootRoute({
       component: () => (
         <div className="space-y-3">
-          <Link to={to} className="text-rose-600 hover:underline">
+          <Link to={to} className="text-link hover:underline">
             {label}
           </Link>
           <Outlet />

@@ -108,7 +108,11 @@ const SURFACE_TEXT_PAIRS: Pair[] = [
   { fg: "text.primary", bg: "surface.container-high", min: 4.5 },
   { fg: "text.primary", bg: "surface.container-highest", min: 4.5 },
   { fg: "text.secondary", bg: "surface.canvas", min: 4.5 },
-  { fg: "text.brand", bg: "surface.canvas", min: 4.5 },
+  // Brand text is reserved for short stable chrome (wordmark, hero labels,
+  // accent labels), not reading content. Keep it above AA-large instead of
+  // treating it like paragraph text.
+  { fg: "text.brand", bg: "surface.canvas", min: 3.0 },
+  { fg: "link.DEFAULT", bg: "surface.canvas", min: 4.5 },
   { fg: "inverse.on-surface", bg: "inverse.surface", min: 4.5 },
 ];
 
@@ -150,8 +154,8 @@ const BORDER_PAIRS: Pair[] = [
 ];
 
 const ALL_PAIRS: { group: string; pairs: Pair[] }[] = [
-  { group: "surface ↔ text (4.5:1)", pairs: SURFACE_TEXT_PAIRS },
-  { group: "shadcn role ↔ foreground (4.5:1)", pairs: ROLE_PAIRS },
+  { group: "surface ↔ text/link", pairs: SURFACE_TEXT_PAIRS },
+  { group: "shadcn role ↔ foreground", pairs: ROLE_PAIRS },
   { group: "container ↔ on-container (4.5:1)", pairs: CONTAINER_PAIRS },
   {
     group: "border ↔ surface (≥1.2:1, whisper composited)",
