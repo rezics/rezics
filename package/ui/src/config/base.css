@@ -1,0 +1,93 @@
+/* ============================================================================
+ * rezics baseline globals
+ *
+ * App-shell-owned globals (separate from design tokens):
+ *  - page baseline (html/body background + foreground)
+ *  - :lang() font routing for CJK fallbacks
+ *  - prefers-reduced-motion
+ *
+ * Imported by app shells (App.tsx). Storybook does NOT import this — it
+ * supplies its own preview-level resets.
+ * ============================================================================ */
+
+/* Page baseline — paint html/body so unspecified regions don't fall through
+ * to the UA default. The index.html files set
+ * `<meta name="color-scheme" content="light dark">`, which makes the UA
+ * apply a dark grey when the OS is in dark mode; without this rule any gap
+ * between rendered surfaces (route transitions, layout edges, loading
+ * states) shows that grey. Bind directly to the flat `--colors-*` tokens
+ * emitted by the uno-config preflight. */
+html,
+body {
+  background-color: var(--colors-background);
+  color: var(--colors-foreground);
+}
+
+* {
+  scrollbar-color: color-mix(in srgb, var(--colors-foreground) 24%, transparent)
+    transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-clip: content-box;
+  background-color: color-mix(
+    in srgb,
+    var(--colors-foreground) 20%,
+    transparent
+  );
+  border: 3px solid transparent;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--colors-foreground) 32%,
+    transparent
+  );
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Per-language CJK routing — overrides the default TC fallback baked into the
+ * font stacks emitted by uno-config.ts when the document advertises a different
+ * CJK language. The font stacks reference `var(--font-sans-cjk, ...)`. */
+:lang(zh-Hans),
+:lang(zh-CN) {
+  --font-sans-cjk: "Source Han Sans SC", "Noto Sans SC";
+  --font-serif-cjk: "Source Han Serif SC", "Noto Serif SC";
+}
+
+:lang(ja) {
+  --font-sans-cjk: "Source Han Sans JP", "Noto Sans JP";
+  --font-serif-cjk: "Source Han Serif JP", "Noto Serif JP";
+}
+
+:lang(ko) {
+  --font-sans-cjk: "Source Han Sans KR", "Noto Sans KR";
+  --font-serif-cjk: "Source Han Serif KR", "Noto Serif KR";
+}
+
+/* Reduced motion — strip all transitions and animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

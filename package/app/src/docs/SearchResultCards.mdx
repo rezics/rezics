@@ -1,0 +1,64 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+import * as SearchResultCardsStories from "../components/card/SearchResultCards.stories";
+
+<Meta title="App/Components/Search Result Cards" />
+
+# Search Result Cards
+
+Search result cards are preview surfaces. They always clamp long content and do
+not provide document-flow behavior such as expansion, replies, or reactions.
+
+These app components are intentionally separate from post flow cards: search has
+no stable host flow, while realm/book/shelf discussions have post semantics and
+reaction controls.
+
+## Library unit result
+
+Use `SearchLibraryUnitCard` for book-like library units where the cover is a
+stable left-side anchor.
+
+<div className="max-w-[45.75rem] space-y-3 bg-surface-canvas p-4 text-text-primary">
+  <Canvas of={SearchResultCardsStories.LibraryUnit} />
+</div>
+
+## Content result
+
+Use `SearchContentResultCard` for reviews, remarks, quotes, shelves, realms,
+users, and entities. The optional thumbnail sits on the right so text remains
+the primary signal. Content results can use a two-line identity header: reader
+and time first, then result type and source. When a `user` is provided, both the
+avatar and name are profile links with the shared user hover preview.
+
+<div className="max-w-[45.75rem] space-y-3 bg-surface-canvas p-4 text-text-primary">
+  <Canvas of={SearchResultCardsStories.ContentSmallMedia} />
+  <Canvas of={SearchResultCardsStories.ContentTextOnly} />
+  <Canvas of={SearchResultCardsStories.ShelfResult} />
+  <Canvas of={SearchResultCardsStories.RealmResult} />
+  <Canvas of={SearchResultCardsStories.UserResult} />
+  <Canvas of={SearchResultCardsStories.EntityResult} />
+  <Canvas of={SearchResultCardsStories.LongTextClamp} />
+</div>
+
+```tsx
+<SearchLibraryUnitCard
+  title={title}
+  titleHref={titleHref}
+  subtitle={authorLine}
+  description={summary}
+  meta={stats}
+  image={{ src: coverUrl, alt: title }}
+/>
+
+<SearchContentResultCard
+  user={reader}
+  time={createdAtLabel}
+  kind={resultTypeLabel}
+  source={sourceTitle}
+  sourceHref={sourceHref}
+  title={title}
+  titleHref={titleHref}
+  body={preview}
+  meta={stats}
+  thumbnail={{ src: imageUrl, alt: "" }}
+/>
+```

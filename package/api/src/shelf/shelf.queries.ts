@@ -1,0 +1,173 @@
+import {
+  infiniteQueryOptions,
+  queryOptions,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useEffect } from "react";
+import { collectionApi, shelfApi } from "./shelf.api";
+import {
+  collectionKeys,
+  normalizeCollectionIds,
+  type ShelfContainmentFilters,
+  type ShelfVariantFilters,
+  shelfKeys,
+} from "./shelf.keys";
+import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
+
+const COLLECTION_STATUS_BATCH_LIMIT = 100;
+
+export const shelfListQuery = (filters?: ShelfFilters) =>
+  queryOptions({
+    queryKey: shelfKeys.list(filters),
+    queryFn: () => shelfApi.list(filters),
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const shelvesContainingUnitQuery = (
+  unitId: string,
+  filters?: ShelfContainmentFilters,
+) =>
+  queryOptions({
+    queryKey: shelfKeys.containingUnit(unitId, filters),
+    queryFn: () => shelfApi.list({ ...filters, containsUnitId: unitId }),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const shelvesByVariantContextQuery = (
+  variantUnitId: string,
+  filters?: ShelfVariantFilters,
+) =>
+  queryOptions({
+    queryKey: shelfKeys.variantContext(variantUnitId, filters),
+    queryFn: () => shelfApi.list({ ...filters, variantUnitId }),
+    enabled: !!variantUnitId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const shelfDetailQuery = (unitId: string) =>
+  queryOptions({
+    queryKey: shelfKeys.detail(unitId),
+    queryFn: () => shelfApi.get(unitId),
+    staleTime: 1000 * 60 * 10,
+  });
+
+export const shelvesByUserQuery = (userId: string, filters?: ShelfFilters) =>
+  queryOptions({
+    queryKey: shelfKeys.byUser(userId, filters),
+    queryFn: () => shelfApi.getByUserId(userId, filters),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const userShelvesQuery = () =>
+  queryOptions({
+    queryKey: shelfKeys.mine(),
+    queryFn: () => shelfApi.mine(),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export const shelfItemsQuery = (unitId: string, query?: ShelfItemsQuery) =>
+  queryOptions({
+    queryKey: shelfKeys.itemsPage(unitId, query),
+    queryFn: () => shelfApi.listItems(unitId, query),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+export const shelfItemsInfiniteQuery = (
+  unitId: string,
+  query?: Omit<ShelfItemsQuery, "cursor">,
+) =>
+  infiniteQueryOptions({
+    queryKey: shelfKeys.itemsPage(unitId, query),
+    queryFn: ({ pageParam }) =>
+      shelfApi.listItems(unitId, { ...query, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.hasMore) return undefined;
+      return lastPage.items.at(-1)?.itemId;
+    },
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+export const shelfInfiniteListQuery = (filters?: Omit<ShelfFilters, "start">) =>
+  infiniteQueryOptions({
+    queryKey: shelfKeys.list(filters),
+    queryFn: ({ pageParam = 0 }) =>
+      shelfApi.list({ ...filters, start: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      const { shelves } = lastPage;
+      const limit = filters?.limit || 20;
+      const hasMore = shelves.length === limit;
+      return hasMore ? lastPageParam + limit : undefined;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const collectionStatusQuery = (targetId: string) =>
+  queryOptions({
+    queryKey: collectionKeys.status(targetId),
+    queryFn: () => collectionApi.status(targetId),
+    enabled: !!targetId,
+    staleTime: 1000 * 60 * 1,
+  });
+
+export const collectionStatusBatchQuery = (targetIds: readonly string[]) => {
+  const normalized = normalizeCollectionIds(targetIds).slice(
+    0,
+    COLLECTION_STATUS_BATCH_LIMIT,
+  );
+  return queryOptions({
+    queryKey: collectionKeys.statusBatch(normalized),
+    queryFn: () => collectionApi.statusBatch(normalized),
+    enabled: normalized.length > 0,
+    staleTime: 1000 * 60 * 1,
+  });
+};
+
+export function useCollectionStatusHydration(
+  targetIds: readonly string[],
+  options?: { enabled?: boolean },
+) {
+  const queryClient = useQueryClient();
+  const normalized = normalizeCollectionIds(targetIds).slice(
+    0,
+    COLLECTION_STATUS_BATCH_LIMIT,
+  );
+  const query = useQuery({
+    ...collectionStatusBatchQuery(normalized),
+    enabled: (options?.enabled ?? true) && normalized.length > 0,
+  });
+
+  useEffect(() => {
+    if (!query.data) return;
+    for (const [targetId, status] of Object.entries(
+      query.data.statusesByTarget,
+    )) {
+      queryClient.setQueryData(collectionKeys.status(targetId), status);
+    }
+  }, [query.data, queryClient]);
+
+  return query;
+}
+
+export const shelfQueries = {
+  list: shelfListQuery,
+  containingUnit: shelvesContainingUnitQuery,
+  variantContext: shelvesByVariantContextQuery,
+  detail: shelfDetailQuery,
+  byUser: shelvesByUserQuery,
+  mine: userShelvesQuery,
+  items: shelfItemsQuery,
+  infiniteItems: shelfItemsInfiniteQuery,
+  infiniteList: shelfInfiniteListQuery,
+};
+
+export const collectionQueries = {
+  status: collectionStatusQuery,
+  statusBatch: collectionStatusBatchQuery,
+};

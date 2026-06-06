@@ -1,0 +1,12 @@
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
+
+const TagDomainPage = lazyRouteComponent(
+  () => import("@/tag/pages/TagDomain"),
+  "TagDomainPage",
+);
+
+export const Route = createFileRoute(
+  "/_mainLayout/tag/domain/$unitId/title/$title",
+)({
+  component: TagDomainPage,
+});

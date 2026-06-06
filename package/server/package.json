@@ -1,0 +1,104 @@
+{
+  "name": "@rezics/server",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "module": "src/export.ts",
+  "exports": {
+    ".": {
+      "types": "./src/export.ts",
+      "default": "./src/export.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    },
+    "./db": {
+      "types": "./src/db/index.ts",
+      "default": "./src/db/index.ts"
+    },
+    "./db/factory": {
+      "types": "./src/db/factory.ts",
+      "default": "./src/db/factory.ts"
+    },
+    "./db/history-outbox.repository": {
+      "types": "./src/db/history-outbox.repository.ts",
+      "default": "./src/db/history-outbox.repository.ts"
+    },
+    "./db/maintenance.repository": {
+      "types": "./src/db/maintenance.repository.ts",
+      "default": "./src/db/maintenance.repository.ts"
+    },
+    "./db/relations": {
+      "types": "./src/db/relations/index.ts",
+      "default": "./src/db/relations/index.ts"
+    },
+    "./db/schema": {
+      "types": "./src/db/schema/index.ts",
+      "default": "./src/db/schema/index.ts"
+    },
+    "./db/seed": {
+      "types": "./src/db/seed/index.ts",
+      "default": "./src/db/seed/index.ts"
+    },
+    "./db/seed/*": {
+      "types": "./src/db/seed/*.ts",
+      "default": "./src/db/seed/*.ts"
+    },
+    "./db/seed-factory": {
+      "types": "./src/db/factory/index.ts",
+      "default": "./src/db/factory/index.ts"
+    },
+    "./db/seed-factory/*": {
+      "types": "./src/db/factory/*.ts",
+      "default": "./src/db/factory/*.ts"
+    }
+  },
+  "scripts": {
+    "dev": "NODE_ENV=development bun run --watch --no-cache src/index.ts",
+    "dev:cluster": "NODE_ENV=development bun run --watch --no-cache src/cluster.ts",
+    "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile server",
+    "build:linux": "bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile server",
+    "db:generate": "bunx drizzle-kit generate --config drizzle.config.ts",
+    "db:migrate": "bunx drizzle-kit migrate --config drizzle.config.ts",
+    "db:deploy": "bunx drizzle-kit migrate --config drizzle.config.ts",
+    "db:studio": "bunx drizzle-kit studio --config drizzle.config.ts",
+    "seed": "bun run ../../tool/bin/tool.ts seed",
+    "seed:all": "bun run ../../tool/bin/tool.ts seed --no-interactive",
+    "seed:factory": "bun run ../../tool/bin/tool.ts factory --preset=realistic --no-interactive",
+    "seed:factory:fast": "bun run ../../tool/bin/tool.ts factory --preset=fast --no-interactive",
+    "seed:factory:medium": "bun run ../../tool/bin/tool.ts factory --preset=medium --no-interactive",
+    "seed:factory:echokv": "bun run ../../tool/bin/tool.ts factory --only=echokv --no-interactive",
+    "seed:reset-root": "bun run ../../tool/bin/tool.ts seed reset-root",
+    "seed:database-reset": "bun run ../../tool/bin/tool.ts seed database-reset",
+    "seed:init-meili-search": "bun run ../../tool/bin/tool.ts seed init-meili-search"
+  },
+  "devDependencies": {
+    "@rezics/auth": "workspace:*",
+    "@types/bun": "^1.3.0",
+    "@types/pg": "^8.15.5",
+    "drizzle-kit": "1.0.0-rc.3"
+  },
+  "peerDependencies": {
+    "typescript": "^6"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/openapi": "^1.4.14",
+    "@faker-js/faker": "^10.1.0",
+    "@rezics/contract": "workspace:*",
+    "@rezics/email": "workspace:*",
+    "@rezics/job": "workspace:*",
+    "@rezics/jwt": "workspace:*",
+    "@rezics/search": "workspace:*",
+    "@rezics/shared": "workspace:*",
+    "@sinclair/typebox": "^0.34.41",
+    "chalk": "^5.6.2",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "1.0.0-rc.3",
+    "elysia": "^1.4.22",
+    "jose": "^6.2.0",
+    "pg": "^8.16.3"
+  }
+}

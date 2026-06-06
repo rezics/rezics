@@ -1,0 +1,1 @@
+- [ ] Add support for page-turn mode animations and gestures.

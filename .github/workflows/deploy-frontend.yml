@@ -1,0 +1,63 @@
+# Build and deploy the static frontends to Cloudflare Pages.
+#
+# package/app and package/admin are static Vite SPAs — no Docker, no SSR. VITE_*
+# values are build-time public config (never secrets). Deploy backends BEFORE
+# frontends so the API contract a new bundle expects already exists.
+name: Deploy Frontend
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Which frontend(s) to deploy
+        required: true
+        default: both
+        type: choice
+        options: [both, app, admin]
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & deploy
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      matrix:
+        app: [app, admin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+
+      - name: Skip unselected app
+        id: gate
+        run: |
+          if [ "${{ inputs.target }}" != "both" ] && \
+             [ "${{ inputs.target }}" != "${{ matrix.app }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # VITE_* are public build-time config provided as Cloudflare/Actions vars.
+      - name: Build ${{ matrix.app }}
+        if: steps.gate.outputs.skip != 'true'
+        run: bun --filter=@rezics/${{ matrix.app }} run build
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_NOTIFY_BASE_URL: ${{ vars.VITE_NOTIFY_BASE_URL }}
+          VITE_REACTION_SERVICE_URL: ${{ vars.VITE_REACTION_SERVICE_URL }}
+          VITE_AUTH_ADMIN_URL: ${{ vars.VITE_AUTH_ADMIN_URL }}
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
+
+      - name: Deploy ${{ matrix.app }} to Cloudflare Pages
+        if: steps.gate.outputs.skip != 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: package/${{ matrix.app }}
+          command: pages deploy dist --project-name=rezics-${{ matrix.app }}

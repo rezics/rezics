@@ -1,0 +1,68 @@
+{
+  "name": "rezics",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "bun run --no-env-file tool/dev-script/dev.ts",
+    "tool": "bun run tool/bin/tool.ts",
+    "db:generate": "bun run tool/bin/tool.ts db generate",
+    "db:migrate": "bun run tool/bin/tool.ts db migrate",
+    "db:deploy": "bun run tool/bin/tool.ts db deploy",
+    "db:reset": "bun run tool/bin/tool.ts db reset",
+    "db:ensure": "bun run tool/bin/tool.ts db ensure",
+    "db:smoke": "bun run tool/bin/tool.ts db smoke",
+    "db:ensure:job-runner": "bun --filter=@rezics/job-runner run db:ensure",
+    "check:runtime-env": "node tool/src/commands/check-no-runtime-env.mjs",
+    "service": "bun run tool/bin/service.ts",
+    "seed": "bun run tool/bin/tool.ts seed",
+    "factory": "bun run tool/bin/tool.ts factory",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint:fix": "biome check --write .",
+    "check": "biome check --write .",
+    "check:convention": "bun run tool/src/commands/convention/check.ts",
+    "check:tokens": "bun run tool/src/commands/tokens/check.ts",
+    "knip": "knip",
+    "check:i18n": "bun run tool/bin/tool.ts i18n check",
+    "storybook:host": "storybook dev -p 6006 --no-open",
+    "storybook:host:quiet": "storybook dev -p 6006 --no-open --quiet --loglevel error",
+    "storybook:banner": "bun run tool/src/commands/storybook/banner.ts",
+    "storybook:all": "concurrently -k -n host,ui,editor,folio,admin,app,info -c blue,cyan,magenta,green,yellow,red,greenBright \"bun run storybook:host:quiet\" \"bun --filter=@rezics/ui run storybook -- --quiet --loglevel error\" \"bun --filter=@rezics/editor run storybook -- --quiet --loglevel error\" \"bun --filter=@rezics/folio run storybook -- --quiet --loglevel error\" \"bun --filter=@rezics/admin run storybook -- --quiet --loglevel error\" \"bun --filter=@rezics/app run storybook -- --quiet --loglevel error\" \"bun run storybook:banner\"",
+    "storybook": "bun run storybook:all",
+    "build-storybook:host": "storybook build -o storybook-static",
+    "build-storybook:all": "concurrently -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run build-storybook:host\" \"bun --filter=@rezics/ui run build-storybook\" \"bun --filter=@rezics/editor run build-storybook\" \"bun --filter=@rezics/folio run build-storybook\" \"bun --filter=@rezics/admin run build-storybook\" \"bun --filter=@rezics/app run build-storybook\"",
+    "build-storybook": "bun run build-storybook:all",
+    "postinstall": "lefthook install || true"
+  },
+  "workspaces": [
+    "package/*"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
+    "@playwright/test": "^1.59.1",
+    "@rezics/storybook-config": "workspace:*",
+    "@rezics/ui": "workspace:*",
+    "@storybook/addon-docs": "10.3.6",
+    "@storybook/react-vite": "^10.3.6",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "concurrently": "^9",
+    "knip": "^5.85.0",
+    "lefthook": "^2.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "storybook": "^10.3.6",
+    "ts-morph": "^28.0.0",
+    "vite": "^8.0.10"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.10",
+    "@vitejs/plugin-react": "^5.1.4",
+    "valibot": "^1.2.0",
+    "better-result": "^2.7.0"
+  },
+  "patchedDependencies": {
+    "storybook@10.3.6": "patches/storybook@10.3.6.patch"
+  }
+}

@@ -1,0 +1,274 @@
+import { describe, expect, test } from "bun:test";
+import type { SearchQuery, SearchScope } from "@rezics/contract";
+import {
+  buildCommentFilter,
+  buildContentFilter,
+  buildPostFilter,
+  buildRealmFilter,
+  buildShelfItemFilter,
+  buildUserFilter,
+} from "./filters";
+
+const emptyQuery: SearchQuery = {};
+
+describe("buildContentFilter", () => {
+  test("global scope with bare query yields visibility default", () => {
+    const filter = buildContentFilter(emptyQuery, { kind: "global" });
+    expect(filter).toEqual(['visibility = "PUBLIC"']);
+  });
+
+  test("book scope with shelves subtype emits SHELF type + containedUnitIds", () => {
+    const scope: SearchScope = { kind: "book", unitId: "b-1" };
+    const filter = buildContentFilter(
+      emptyQuery,
+      scope,
+      {},
+      {
+        contentSubtype: "shelves",
+      },
+    );
+    expect(filter).toContain('type = "SHELF"');
+    expect(filter).toContain('containedUnitIds = "b-1"');
+  });
+
+  test("realm scope emits realmIds filter", () => {
+    const scope: SearchScope = { kind: "realm", realmId: "r-7" };
+    const filter = buildContentFilter(emptyQuery, scope);
+    expect(filter).toContain('realmIds = "r-7"');
+  });
+
+  test("user scope emits userId filter", () => {
+    const scope: SearchScope = { kind: "user", userId: "u-3" };
+    const filter = buildContentFilter(emptyQuery, scope);
+    expect(filter).toContain('userId = "u-3"');
+  });
+
+  test("ratings: requested intersected with allowed", () => {
+    const filter = buildContentFilter(
+      { ratings: ["GENERAL", "R_18"] },
+      { kind: "global" },
+      { allowedRatings: ["GENERAL", "R_15"] },
+    );
+    expect(filter).toContain('rating IN ["GENERAL"]');
+  });
+
+  test("AI disclosure filter is independent from allowed rating derivation", () => {
+    const filter = buildContentFilter(
+      { aiDisclosureModes: ["AI_ASSISTED"] },
+      { kind: "global" },
+      { allowedRatings: ["GENERAL", "R_15"] },
+    );
+
+    expect(filter).toContain('aiDisclosureMode IN ["AI_ASSISTED"]');
+    expect(filter).toContain('rating IN ["GENERAL", "R_15"]');
+  });
+
+  test("languages list emits any-of filter", () => {
+    const filter = buildContentFilter(
+      { languages: ["en", "ja"] },
+      { kind: "global" },
+    );
+    expect(filter).toContain(
+      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
+    );
+    expect(filter).not.toContain('languages = "en"');
+    expect(filter).not.toContain('languages = "ja"');
+  });
+
+  test("languageMode all skips preferred filtering", () => {
+    const filter = buildContentFilter(
+      { languages: ["en"], languageMode: "all" },
+      { kind: "global" },
+    );
+    expect(filter).not.toContain(
+      '(isLanguageNeutral = true OR languages IN ["en"])',
+    );
+  });
+
+  test("textLength range emits min and max bounds", () => {
+    const filter = buildContentFilter(
+      { textLength: { min: 1000, max: 50000 } },
+      { kind: "global" },
+    );
+    expect(filter).toContain("textLength >= 1000");
+    expect(filter).toContain("textLength <= 50000");
+  });
+
+  test("isLicensed=true emits the license filter", () => {
+    const filter = buildContentFilter({ isLicensed: true }, { kind: "global" });
+    expect(filter).toContain("isLicensed = true");
+  });
+
+  test("type list emits IN clause when contentSubtype is absent", () => {
+    const filter = buildContentFilter(
+      { type: ["BOOK", "GAME"] },
+      { kind: "global" },
+    );
+    expect(filter).toContain('type IN ["BOOK", "GAME"]');
+  });
+
+  test("books subtype includes main catalog entries plus non-edition content", () => {
+    const filter = buildContentFilter(
+      emptyQuery,
+      { kind: "global" },
+      {},
+      { contentSubtype: "books" },
+    );
+
+    expect(filter).toContain(
+      'type IN ["BOOK", "GAME", "MEDIA", "LINK", "SERIES"]',
+    );
+    expect(filter).toContain(
+      '((type = "BOOK" AND catalogEntryKind = "MAIN") OR (type = "GAME" AND catalogEntryKind = "MAIN") OR (type = "MEDIA" AND catalogEntryKind = "MAIN") OR type = "LINK" OR type = "SERIES")',
+    );
+  });
+});
+
+describe("buildPostFilter", () => {
+  test("postCategory wins over query.kind", () => {
+    const filter = buildPostFilter(
+      { kind: "POST" },
+      { kind: "global" },
+      {},
+      { postCategory: "reviews" },
+    );
+    expect(filter).toContain('kind = "REVIEW"');
+    expect(filter).not.toContain('kind = "POST"');
+  });
+
+  test("book scope emits targetUnitId", () => {
+    const filter = buildPostFilter(emptyQuery, { kind: "book", unitId: "b-2" });
+    expect(filter).toContain('targetUnitId = "b-2"');
+  });
+
+  test("realm scope emits realmIds", () => {
+    const filter = buildPostFilter(emptyQuery, {
+      kind: "realm",
+      realmId: "r-9",
+    });
+    expect(filter).toContain('realmIds = "r-9"');
+  });
+
+  test("user scope emits authorUserId", () => {
+    const filter = buildPostFilter(emptyQuery, { kind: "user", userId: "u-5" });
+    expect(filter).toContain('authorUserId = "u-5"');
+  });
+
+  test("isLocked=false default is always present", () => {
+    const filter = buildPostFilter(emptyQuery, { kind: "global" });
+    expect(filter).toContain("isLocked = false");
+  });
+
+  test("preferred language filter includes neutral posts", () => {
+    const filter = buildPostFilter(
+      { languages: ["ja"], appLocale: "en" },
+      { kind: "global" },
+    );
+    expect(filter).toContain(
+      '(isLanguageNeutral = true OR languages IN ["ja", "en"])',
+    );
+  });
+
+  test("query.postKind list emits IN clause when no postCategory hint", () => {
+    const filter = buildPostFilter(
+      { postKind: ["REVIEW", "REMARK"] },
+      { kind: "global" },
+    );
+    expect(filter).toContain('kind IN ["REVIEW", "REMARK"]');
+  });
+});
+
+describe("buildCommentFilter", () => {
+  test("book exact scope emits rootUnitId", () => {
+    const filter = buildCommentFilter(emptyQuery, {
+      kind: "book",
+      unitId: "book-1",
+    });
+    expect(filter).toContain('rootUnitId = "book-1"');
+    expect(filter).toContain("isLocked = false");
+  });
+
+  test("realm and user scopes map to comment partition fields", () => {
+    expect(
+      buildCommentFilter(emptyQuery, { kind: "realm", realmId: "realm-1" }),
+    ).toContain('realmUnitId = "realm-1"');
+    expect(
+      buildCommentFilter(emptyQuery, { kind: "user", userId: "user-1" }),
+    ).toContain('authorUserId = "user-1"');
+  });
+});
+
+describe("buildRealmFilter", () => {
+  test("emits isPublic=true regardless of scope", () => {
+    expect(buildRealmFilter(emptyQuery, { kind: "global" })).toEqual([
+      "isPublic = true",
+    ]);
+  });
+
+  test("preferred language filter includes neutral realms", () => {
+    expect(buildRealmFilter({ languages: ["ko"] }, { kind: "global" })).toEqual(
+      ["isPublic = true", '(isLanguageNeutral = true OR languages IN ["ko"])'],
+    );
+  });
+});
+
+describe("buildUserFilter", () => {
+  test("emits no filter for global scope", () => {
+    expect(buildUserFilter(emptyQuery, { kind: "global" })).toEqual([]);
+  });
+});
+
+describe("buildShelfItemFilter", () => {
+  test("anonymous global search is public shelves only", () => {
+    expect(buildShelfItemFilter(emptyQuery, { kind: "global" })).toEqual([
+      '(shelfVisibility = "PUBLIC" AND shelfStatus = "PUBLISHED")',
+    ]);
+  });
+
+  test("owner user scope includes private shelves", () => {
+    expect(
+      buildShelfItemFilter(
+        emptyQuery,
+        { kind: "user", userId: "owner-1" },
+        { viewerUserId: "owner-1" },
+      ),
+    ).toEqual(['shelfOwnerUserId = "owner-1"']);
+  });
+
+  test("book scope constrains item identity", () => {
+    const filter = buildShelfItemFilter(emptyQuery, {
+      kind: "book",
+      unitId: "book-1",
+    });
+
+    expect(filter).toContain('itemType = "unit"');
+    expect(filter).toContain('itemId = "book-1"');
+  });
+
+  test("saved scope constrains to the user's saved shelf items", () => {
+    const filter = buildShelfItemFilter(
+      emptyQuery,
+      { kind: "saved", shelfId: "saved-shelf-1", userId: "user-1" },
+      { viewerUserId: "user-1" },
+    );
+
+    expect(filter).toEqual([
+      'shelfId = "saved-shelf-1"',
+      'shelfOwnerUserId = "user-1"',
+      'itemType = "unit"',
+      'kind = "shelf"',
+    ]);
+  });
+
+  test("public saved scope cannot search a private saved shelf", () => {
+    const filter = buildShelfItemFilter(emptyQuery, {
+      kind: "saved",
+      shelfId: "saved-shelf-1",
+      userId: "user-1",
+    });
+
+    expect(filter).toContain(
+      '(shelfVisibility = "PUBLIC" AND shelfStatus = "PUBLISHED")',
+    );
+  });
+});

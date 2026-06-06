@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev]
+
+jobs:
+  check:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Check convention (routes & folders)
+        run: bun run check:convention
+
+      - name: Check i18n keys & namespaces
+        run: bun run check:i18n
+
+      - name: Check unused exports & dependencies
+        run: bun run knip
+
+      - name: Check env isolation
+        run: bun run check:runtime-env

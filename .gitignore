@@ -1,0 +1,67 @@
+# Claude Code
+.claude/worktrees/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# Dependencies
+node_modules/
+
+# Bun
+.bun-cache
+.bun-tmp
+
+# Build output
+dist/
+out/
+*.tgz
+*.exe
+storybook-static/
+**/storybook-static/
+
+# Prisma generated clients
+**/prisma/generated/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+*.lcov
+
+# Caches
+.vite/
+.tanstack/
+.eslintcache
+.cache/
+*.tsbuildinfo
+
+# IDE / OS
+.idea/
+.DS_Store
+*.suo
+*.sw?
+.vscode/mcp.json
+
+# VitePress
+**/.vitepress/dist/
+**/.vitepress/cache/
+
+# Secrets — commit only SOPS-encrypted *.enc.env (never plaintext) and never the
+# age PRIVATE key. Encrypt in place with `sops -e -i config/secrets/<unit>.enc.env`.
+config/secrets/*.dec.env
+config/secrets/*.plain.env
+*.agekey
+age-key.txt
+sops-age.key
+
+# Project-specific
+.VSCodeCounter/
+example-gitignore/
+install/
+tailwind.config.js
+git-staged.txt

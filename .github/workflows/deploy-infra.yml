@@ -1,0 +1,57 @@
+# Infrastructure changes — a SEPARATE, manually-approved target from app
+# deploys (task 7.5). Boots/reboots the self-hosted accessories (infra-db,
+# infra-search, infra-cdc) and the opt-in infra-observability unit. Kept apart
+# from deploy-production.yml because infra changes are higher-risk and are not
+# part of a routine app rollout.
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      accessory:
+        description: Accessory to boot/reboot
+        required: true
+        type: choice
+        options:
+          - postgres
+          - meilisearch
+          - sequin-postgres
+          - sequin-redis
+          - sequin
+          - otel-collector
+      action:
+        description: Action
+        required: true
+        default: reboot
+        type: choice
+        options: [boot, reboot]
+
+concurrency:
+  group: deploy-infra
+  cancel-in-progress: false
+
+jobs:
+  accessory:
+    name: ${{ inputs.action }} ${{ inputs.accessory }}
+    runs-on: ubuntu-latest
+    environment: production-infra
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Kamal + SOPS + age
+        run: |
+          gem install kamal -v '~> 2.0'
+          sudo apt-get update && sudo apt-get install -y age
+          curl -fsSL -o /usr/local/bin/sops \
+            https://github.com/getsops/sops/releases/latest/download/sops-linux-amd64
+          sudo chmod +x /usr/local/bin/sops
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ vars.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+      - name: Run accessory action
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: kamal accessory ${{ inputs.action }} ${{ inputs.accessory }}

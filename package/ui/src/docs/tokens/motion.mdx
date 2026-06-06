@@ -1,0 +1,67 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import { MotionSample } from "./_gallery";
+
+<Meta title="Foundation/Tokens/Motion" />
+
+# Motion
+
+Four-step duration scale, three-easing-curve set. Source: `package/ui/src/config/tokens/motion.ts`. All transitions respect `prefers-reduced-motion: reduce` (`layers.css` strips animation-duration and transition-duration to `0ms`).
+
+## Duration
+
+<Unstyled>
+  <MotionSample name="fast" cssVar="duration-fast · 120ms" duration="120ms" />
+  <MotionSample name="base" cssVar="duration-base · 200ms" duration="200ms" />
+  <MotionSample name="slow" cssVar="duration-slow · 350ms" duration="350ms" />
+  <MotionSample name="page" cssVar="duration-page · 500ms" duration="500ms" easing="cubic-bezier(0.4, 0, 0.2, 1)" />
+</Unstyled>
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `fast` | 120ms | Hover, focus ring, micro-interactions |
+| `base` | 200ms | Default UI transitions |
+| `slow` | 350ms | Drawers, sheets, expand/collapse |
+| `page` | 500ms | Route transitions (rare) |
+
+## Easing
+
+| Token | Curve | Use |
+| --- | --- | --- |
+| `out` | `cubic-bezier(0, 0, 0.2, 1)` | Enter, reveal — ease into rest |
+| `inOut` | `cubic-bezier(0.4, 0, 0.2, 1)` | Position changes, reflow |
+| `spring` | `cubic-bezier(0.4, 1.4, 0.5, 1)` | Press, satisfying click |
+
+## Press scale
+
+For tactile press affordance on buttons / interactive cards (`pressScale` from `tokens/motion.ts`):
+
+```tsx
+import { pressScale, duration, easing } from "@rezics/ui/config/tokens/motion";
+
+<Box sx={{
+  transform: pressScale.resting,
+  transition: `transform ${duration.fast} ${easing.spring}`,
+  "&:active": { transform: pressScale.active },  // scale(0.98)
+}}>
+```
+
+## Usage
+
+```tsx
+// MUI sx — use the MUI transitions theme (already wired to the same scale)
+<Box sx={(theme) => ({
+  transition: theme.transitions.create("background", {
+    duration: theme.transitions.duration.shortest,  // === duration.fast (120ms)
+    easing: theme.transitions.easing.easeOut,
+  }),
+})}>
+
+// UnoCSS — utilities resolve through theme.transitionDuration / Function
+<div className="transition-colors duration-fast ease-out hover:bg-surface-subtle">
+```
+
+Respect reduced-motion automatically — every token-based transition is wiped to instant by the global `@media (prefers-reduced-motion: reduce)` rule. Don't hand-roll `transition-duration` outside the scale; you'll bypass the wipe.
+
+## Reference
+
+> **MD3 motion easing and duration**: m3.material.io/styles/motion/easing-and-duration — rezics adopts the duration/easing discipline, then adds a spring-like curve for tactile feedback in the Apple HIG spirit.

@@ -1,0 +1,241 @@
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+
+process.env.NODE_ENV = "test";
+process.env.PORT = "35003";
+process.env.DATABASE_URL ??=
+  "postgresql://postgres:postgres@localhost:5432/rezics_auth";
+process.env.BETTER_AUTH_URL = "http://localhost:35003";
+process.env.AUTH_PUBLIC_BASE_URL = "http://localhost:3000/auth";
+process.env.AUTH_PUBLIC_ISSUER_URL = "http://localhost:3000";
+process.env.BETTER_AUTH_SECRET ??=
+  "this-is-a-long-auth-secret-for-tests-123456";
+process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
+process.env.AUTH_JWT_AUDIENCE ??= "rezics";
+process.env.AUTH_JWT_ISSUER ??= "http://localhost:35003";
+process.env.SMTP_HOST ??= "smtp.example.com";
+process.env.SMTP_USER ??= "smtp-user";
+process.env.SMTP_PASSWORD ??= "smtp-password";
+process.env.SMTP_USER_NAME ??= "Rezics Auth";
+process.env.AUTH_PASSWORD_RESET_FROM_EMAIL ??= "reset@example.com";
+process.env.AUTH_VERIFICATION_FROM_EMAIL ??= "verify@example.com";
+process.env.TURNSTILE_SECRET ??= "turnstile-secret";
+process.env.GOOGLE_CLIENT_ID ??= "google-client";
+process.env.GOOGLE_CLIENT_SECRET ??= "google-secret";
+process.env.MICROSOFT_CLIENT_ID ??= "microsoft-client";
+process.env.MICROSOFT_CLIENT_SECRET ??= "microsoft-secret";
+process.env.GITHUB_CLIENT_ID ??= "github-client";
+process.env.GITHUB_CLIENT_SECRET ??= "github-secret";
+process.env.TWITTER_CLIENT_ID ??= "twitter-client";
+process.env.TWITTER_CLIENT_SECRET ??= "twitter-secret";
+process.env.TELEGRAM_CLIENT_ID ??= "telegram-client";
+process.env.TELEGRAM_CLIENT_SECRET ??= "telegram-secret";
+
+const authHandler = mock(async () => new Response(null, { status: 204 }));
+const verifyTurnstileToken = mock(async () => ({ success: true }));
+
+mock.module("./instance", () => ({
+  auth: {
+    handler: authHandler,
+    options: {
+      socialProviders: {
+        google: {},
+        microsoft: {},
+        github: {},
+        twitter: {},
+      },
+      plugins: [{ id: "generic-oauth" }],
+      emailAndPassword: {
+        sendResetPassword: async () => {},
+      },
+      emailVerification: {
+        sendVerificationEmail: async () => {},
+      },
+      user: {
+        changeEmail: {
+          sendChangeEmailConfirmation: async () => {},
+        },
+      },
+    },
+  },
+}));
+
+mock.module("../utils/turnstileUtils", () => ({
+  verifyTurnstileToken,
+}));
+
+mock.module("@better-auth/oauth-provider", () => ({
+  oauthProviderOpenIdConfigMetadata: () => async () =>
+    Response.json({
+      issuer: "http://localhost:35003",
+      userinfo_endpoint: "http://localhost:35003/api/auth/oauth/userinfo",
+      id_token_signing_alg_values_supported: ["ES256"],
+    }),
+  oauthProviderAuthServerMetadata: () => async () =>
+    Response.json({
+      issuer: "http://localhost:35003",
+      authorization_endpoint: "http://localhost:35003/api/auth/oauth/authorize",
+      token_endpoint: "http://localhost:35003/api/auth/oauth/token",
+    }),
+}));
+
+describe("Auth discovery routes", () => {
+  beforeEach(() => {
+    authHandler.mockReset();
+    authHandler.mockResolvedValue(new Response(null, { status: 204 }));
+    verifyTurnstileToken.mockReset();
+    verifyTurnstileToken.mockResolvedValue({ success: true });
+  });
+
+  test("serves openid and oauth metadata", async () => {
+    const { handleOpenIdConfigRequest, handleOAuthAuthorizationServerRequest } =
+      await import("./routes");
+
+    const openIdResponse = await handleOpenIdConfigRequest(
+      new Request("http://localhost:35003/.well-known/openid-configuration"),
+    );
+
+    expect(openIdResponse.status).toBe(200);
+
+    const openIdJson = await openIdResponse.json();
+    expect(openIdJson.issuer).toBe("http://localhost:3000");
+    expect(openIdJson.userinfo_endpoint).toBe(
+      "http://localhost:3000/auth/oauth/userinfo",
+    );
+    expect(openIdJson.jwks_uri).toBe("http://localhost:3000/auth/session/jwks");
+    expect(JSON.stringify(openIdJson)).not.toContain("localhost:35003");
+    expect(JSON.stringify(openIdJson)).not.toContain("/api/auth");
+    expect(openIdJson.id_token_signing_alg_values_supported).toContain("ES256");
+
+    const oauthResponse = await handleOAuthAuthorizationServerRequest(
+      new Request(
+        "http://localhost:35003/.well-known/oauth-authorization-server",
+      ),
+    );
+
+    expect(oauthResponse.status).toBe(200);
+
+    const oauthJson = await oauthResponse.json();
+    expect(oauthJson.issuer).toBe("http://localhost:3000");
+    expect(oauthJson.authorization_endpoint).toBe(
+      "http://localhost:3000/auth/oauth/authorize",
+    );
+    expect(oauthJson.token_endpoint).toBe(
+      "http://localhost:3000/auth/oauth/token",
+    );
+    expect(oauthJson.jwks_uri).toBe("http://localhost:3000/auth/session/jwks");
+    expect(JSON.stringify(oauthJson)).not.toContain("localhost:35003");
+    expect(JSON.stringify(oauthJson)).not.toContain("/api/auth");
+  });
+
+  test("configures required external providers", async () => {
+    const { auth } = await import("./instance");
+    const options = (auth as any).options;
+
+    const providers = options?.socialProviders;
+    const pluginIds = options?.plugins?.map(
+      (plugin: { id: string }) => plugin.id,
+    );
+
+    expect(providers.google).toBeDefined();
+    expect(providers.microsoft).toBeDefined();
+    expect(providers.github).toBeDefined();
+    expect(providers.twitter).toBeDefined();
+    expect(pluginIds).toContain("generic-oauth");
+  });
+
+  test("configures notification-backed auth email handlers", async () => {
+    const { auth } = await import("./instance");
+    const options = (auth as any).options;
+
+    expect(options.emailAndPassword.sendResetPassword).toBeDefined();
+    expect(options.emailVerification.sendVerificationEmail).toBeDefined();
+    expect(options.user.changeEmail.sendChangeEmailConfirmation).toBeDefined();
+  });
+
+  test("requires turnstile for verification OTP sends", async () => {
+    const { handleAuthRequest } = await import("./routes");
+
+    const response = await handleAuthRequest(
+      new Request(
+        "http://localhost:35003/api/auth/email-otp/send-verification-otp",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email: "reader@example.com",
+            type: "email-verification",
+          }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "TURNSTILE_FAILED",
+        message: "Turnstile verification is required",
+      },
+    });
+    expect(authHandler).not.toHaveBeenCalled();
+  });
+
+  test("normalizes verification delivery failures", async () => {
+    authHandler.mockImplementationOnce(async () => {
+      throw new Error("smtp rejected");
+    });
+
+    const { handleAuthRequest } = await import("./routes");
+    const response = await handleAuthRequest(
+      new Request("http://localhost:35003/api/auth/send-verification-email", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: "reader@example.com",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "DELIVERY_FAILED",
+        message: "Verification message could not be delivered",
+      },
+    });
+  });
+
+  test("normalizes OTP cooldown responses", async () => {
+    authHandler.mockResolvedValueOnce(
+      Response.json(
+        { message: "Please wait before requesting another code" },
+        { status: 429, headers: { "retry-after": "30" } },
+      ),
+    );
+
+    const { handleAuthRequest } = await import("./routes");
+    const response = await handleAuthRequest(
+      new Request(
+        "http://localhost:35003/api/auth/email-otp/send-verification-otp",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email: "reader@example.com",
+            type: "email-verification",
+            turnstileToken: "token",
+          }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(429);
+    expect(verifyTurnstileToken).toHaveBeenCalledWith("token");
+    expect(await response.json()).toEqual({
+      error: {
+        code: "COOLDOWN",
+        message: "Please wait before requesting another code",
+        retryAfterSeconds: 30,
+      },
+    });
+  });
+});

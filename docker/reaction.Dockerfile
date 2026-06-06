@@ -1,0 +1,36 @@
+# Reaction service image.
+#
+# Build (repo root context), after building the shared base:
+#   docker build -f docker/base.Dockerfile -t rezics-base:dev .
+#   docker build -f docker/reaction.Dockerfile -t rezics-reaction:dev .
+#
+# Drizzle queries run through the pure-JS `pg` driver, so the `bun --compile`
+# binary is fully self-contained — no external query engine is copied into the
+# runtime stage.
+
+# --- build stage -----------------------------------------------------------
+FROM rezics-base:dev AS build
+WORKDIR /repo/package/reaction
+
+# Compile the standalone Linux amd64 binary.
+RUN bun run build:linux
+
+# --- runtime stage ---------------------------------------------------------
+# Slim glibc runtime (the bun-linux-x64 binary links glibc, not musl).
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd --system --uid 10001 --no-create-home rezics
+WORKDIR /app
+
+COPY --from=build /repo/package/reaction/reaction /app/reaction
+
+USER rezics
+ENV PORT=3000
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS "http://127.0.0.1:${PORT}/health" || exit 1
+
+ENTRYPOINT ["/app/reaction"]

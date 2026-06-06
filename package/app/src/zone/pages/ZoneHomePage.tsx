@@ -1,0 +1,80 @@
+import { zoneHomepageByUnitIdQueryOptions } from "@rezics/api/zone/zone";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useZone } from "../hooks/useZone";
+import { BookZoneTemplate } from "../templates/book";
+import { DefaultZoneTemplate } from "../templates/default";
+import {
+  WikiClassicZoneTemplate,
+  WikiDatabaseZoneTemplate,
+  WikiMediaZoneTemplate,
+  WikiMinimalZoneTemplate,
+} from "../templates/wiki";
+
+const templates: Record<string, React.FC<any>> = {
+  default: DefaultZoneTemplate,
+  book: BookZoneTemplate,
+  "wiki-classic": WikiClassicZoneTemplate,
+  "wiki-media": WikiMediaZoneTemplate,
+  "wiki-database": WikiDatabaseZoneTemplate,
+  "wiki-minimal": WikiMinimalZoneTemplate,
+};
+
+export type ZoneHomePageProps = {
+  slug: string;
+};
+
+export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
+  const { t } = useTranslation(["search"]);
+  const locale = useLocale();
+  const { zone, isLoading, error } = useZone(slug);
+  const navigate = useNavigate();
+  const homepageQuery = useQuery(
+    zoneHomepageByUnitIdQueryOptions(zone?.unitId ?? "", [locale]),
+  );
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center">
+        <p className="text-text-secondary">{t("search:zone_loading")}</p>
+      </div>
+    );
+  }
+
+  if (error || !zone) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center">
+        <h2 className="text-2xl font-semibold mb-2">
+          {t("search:zone_not_found")}
+        </h2>
+        <p className="text-text-secondary">
+          {t("search:zone_not_found_description")}
+        </p>
+      </div>
+    );
+  }
+
+  const templateKey = zone.wiki?.theme?.template ?? zone.template;
+  const Template = templates[templateKey] ?? templates.default!;
+
+  const handleSearch = (keyword: string) => {
+    navigate({
+      to: "/z/$slug/search",
+      params: { slug },
+      search: { keyword },
+    });
+  };
+
+  return (
+    <div className="max-w-8xl mx-auto px-4 py-8">
+      <Template
+        zone={zone}
+        homepageData={homepageQuery.data}
+        homepageLoading={homepageQuery.isLoading}
+        onSearch={handleSearch}
+      />
+    </div>
+  );
+};

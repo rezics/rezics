@@ -1,0 +1,88 @@
+import type {
+  CreateTagInput,
+  UnitTagDTO,
+  UpdateTagInput,
+} from "@rezics/api/tag/tag";
+import {
+  useCreateTagMutation,
+  useUpdateTagMutation,
+} from "@rezics/api/tag/tag";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
+import type React from "react";
+import { useState } from "react";
+
+/**
+ * TagEdit - now creates/updates tags using the new translation-based model.
+ * Tags are Units with type=TAG. CreateTagInput requires translations[].
+ */
+export type TagEditProps = {
+  tag?: UnitTagDTO | null;
+  initialName?: string;
+  onSaved?: (tag: UnitTagDTO) => void;
+  className?: string;
+};
+
+export const TagEdit: React.FC<TagEditProps> = ({
+  tag,
+  initialName,
+  onSaved,
+  className,
+}) => {
+  const { t } = useTranslation(["common", "community"]);
+  const isUpdate = !!tag;
+  const [name, setName] = useState(initialName ?? "");
+
+  const createMutation = useCreateTagMutation({
+    onSuccess: (data) => onSaved?.(data as UnitTagDTO),
+  });
+  const updateMutation = useUpdateTagMutation({
+    onSuccess: (data) => onSaved?.(data as UnitTagDTO),
+  });
+
+  const busy = createMutation.isPending || updateMutation.isPending;
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const translations = [{ language: DEFAULT_LANGUAGE, title: name.trim() }];
+    if (isUpdate && tag) {
+      const payload: UpdateTagInput = { translations };
+      await updateMutation.mutateAsync({
+        unitId: tag.tagUnitId,
+        input: payload,
+      });
+    } else {
+      const payload: CreateTagInput = { translations };
+      await createMutation.mutateAsync(payload);
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className={className}>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="tag-name" className="text-sm text-text-secondary">
+            {t("common:name")}
+          </Label>
+          <Input
+            id="tag-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button type="submit" size="sm" disabled={busy}>
+            {isUpdate ? t("common:save_changes") : t("community:tag_create")}
+          </Button>
+          {busy && <Spinner size="sm" />}
+        </div>
+      </div>
+    </form>
+  );
+};
+
+export default TagEdit;

@@ -1,0 +1,27 @@
+# ranking — internal-only ranking service. NOT routed through the public proxy
+# and receives no public CORS; reachable only via the container network
+# (http://rezics-ranking:3006) from the ranking-worker job-runner role.
+#   kamal deploy -d ranking --version <sha> --skip-push
+service: rezics-ranking
+image: rezics/rezics-ranking
+
+builder:
+  dockerfile: docker/ranking.Dockerfile
+
+servers:
+  web:
+    hosts:
+      - 203.0.113.10
+    # No proxy: internal service, addressed by container DNS only.
+    proxy: false
+
+env:
+  clear:
+    PORT: "3006"
+    REACTION_BASE_URL: http://rezics-reaction:3003
+    MEILI_HOST: http://rezics-meilisearch:7700
+  secret:
+    - RANKING_DATABASE_URL
+    - SERVER_DATABASE_URL
+    - REACTION_INTERNAL_SECRET
+    - MEILI_MASTER_KEY

@@ -1,0 +1,69 @@
+import type { UnitProgressListQuery } from "@rezics/contract";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { progressApi } from "./progress.api";
+import { progressKeys } from "./progress.keys";
+
+export const unitProgressQuery = (unitId: string) =>
+  queryOptions({
+    queryKey: progressKeys.unit(unitId),
+    queryFn: () => progressApi.getUnitProgress(unitId),
+    enabled: !!unitId,
+    staleTime: 1000 * 60,
+  });
+
+export const myProgressListQuery = (query?: UnitProgressListQuery) =>
+  queryOptions({
+    queryKey: progressKeys.list(query),
+    queryFn: () => progressApi.listMyProgress(query),
+    staleTime: 1000 * 30,
+  });
+
+export const myProgressLibraryQuery = (query?: UnitProgressListQuery) =>
+  queryOptions({
+    queryKey: progressKeys.libraryList(query),
+    queryFn: () => progressApi.listMyProgressLibrary(query),
+    staleTime: 1000 * 30,
+  });
+
+export const myProgressPageQuery = (query?: UnitProgressListQuery) =>
+  queryOptions({
+    queryKey: progressKeys.pageList(query),
+    queryFn: () => progressApi.listMyProgressPage(query),
+    staleTime: 1000 * 30,
+  });
+
+export const unitProgressStatsQuery = (unitId: string) =>
+  queryOptions({
+    queryKey: progressKeys.stats(unitId),
+    queryFn: () => progressApi.getUnitProgressStats(unitId),
+    enabled: !!unitId,
+    staleTime: 1000 * 30,
+  });
+
+export function useUnitProgress(unitId: string) {
+  return useQuery(unitProgressQuery(unitId));
+}
+
+export function useUnitProgressStats(unitId: string) {
+  return useQuery(unitProgressStatsQuery(unitId));
+}
+
+export function useMyProgressList(query?: UnitProgressListQuery) {
+  return useQuery(myProgressListQuery(query));
+}
+
+export function useMyProgressLibrary(query?: UnitProgressListQuery) {
+  return useQuery(myProgressLibraryQuery(query));
+}
+
+export function useMyProgressPage(query?: UnitProgressListQuery) {
+  return useQuery(myProgressPageQuery(query));
+}
+
+export const progressQueries = {
+  unit: unitProgressQuery,
+  stats: unitProgressStatsQuery,
+  list: myProgressListQuery,
+  library: myProgressLibraryQuery,
+  page: myProgressPageQuery,
+};

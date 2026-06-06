@@ -1,0 +1,184 @@
+import { createEnv } from "@t3-oss/env-core";
+import * as v from "valibot";
+
+export const env = createEnv({
+  server: {
+    /*
+     * Server Runtime & Infrastructure
+     */
+
+    /**
+     * Auth service runtime mode. Non-production modes log notifications instead of sending emails.
+     */
+    NODE_ENV: v.optional(
+      v.union([
+        v.literal("development"),
+        v.literal("test"),
+        v.literal("production"),
+      ]),
+    ),
+
+    /**
+     * HTTP listen port. Defaults to '3001'.
+     */
+    PORT: v.fallback(v.string(), "3001"),
+
+    /** Observability log output mode: local text or newline-delimited JSON. */
+    OBSERVABILITY_LOG_FORMAT: v.optional(
+      v.union([v.literal("local"), v.literal("json")]),
+    ),
+    /** Enables ANSI color for local observability output. */
+    OBSERVABILITY_COLOR: v.optional(v.string()),
+    /** Slow HTTP request threshold in milliseconds. */
+    OBSERVABILITY_SLOW_REQUEST_MS: v.optional(v.string()),
+    /** OpenTelemetry mode: auto, disabled, enabled, or required. */
+    OBSERVABILITY_TELEMETRY: v.optional(
+      v.union([
+        v.literal("auto"),
+        v.literal("disabled"),
+        v.literal("enabled"),
+        v.literal("required"),
+      ]),
+    ),
+    /** OTLP HTTP traces endpoint. When omitted, telemetry export is disabled. */
+    OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.string()),
+
+    /** PostgreSQL connection string for auth data persistence. */
+    DATABASE_URL: v.string(),
+
+    /*
+     * Better Auth Core Configuration
+     */
+
+    /**
+     * Internal/native base URL for the auth service. Public product flows use
+     * AUTH_PUBLIC_BASE_URL through the main server boundary.
+     */
+    BETTER_AUTH_URL: v.string(),
+
+    /**
+     * Browser-facing auth base URL exposed by main, e.g. https://rezics.com/auth.
+     */
+    AUTH_PUBLIC_BASE_URL: v.string(),
+
+    /**
+     * Public OAuth/OIDC issuer URL, e.g. https://rezics.com.
+     */
+    AUTH_PUBLIC_ISSUER_URL: v.string(),
+
+    /**
+     * Primary secret for session and internal crypto. Must be high-entropy and unique.
+     */
+    BETTER_AUTH_SECRET: v.string(),
+
+    /**
+     * Supplemental secrets for planned secret rotation.
+     */
+    BETTER_AUTH_SECRETS: v.optional(v.string()),
+
+    /*
+     * Internal Security & Routing
+     */
+
+    /**
+     * API route prefix for auth endpoints. Defaults to '/api/auth'.
+     */
+    AUTH_OPENAPI_ROUTER_PREFIX: v.fallback(v.string(), "/api/auth"),
+
+    /**
+     * Shared secret for service-to-service calls across internal boundaries.
+     */
+    AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: v.string(),
+
+    /**
+     * Supplemental list of trusted origins for auth flows.
+     */
+    AUTH_TRUSTED_ORIGINS: v.optional(v.string()),
+
+    /*
+     * JWT & JWKS Management
+     * Settings for token issuance and signing key rotation.
+     */
+
+    /**
+     * Bootstrap-only override for the auth-local JWT audience.
+     * Steady-state runtime metadata is persisted in the auth JWT service registry.
+     */
+    AUTH_JWT_AUDIENCE: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for the auth-local JWT issuer.
+     * Steady-state runtime metadata is persisted in the auth JWT service registry.
+     */
+    AUTH_JWT_ISSUER: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for auth-issued JWT lifetime.
+     * Use only for migration or emergency rotation tuning.
+     */
+    AUTH_JWT_TTL_SECONDS: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for auth signing-key rotation cadence.
+     */
+    AUTH_JWKS_ROTATION_INTERVAL_SECONDS: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for auth JWKS grace-period publication.
+     */
+    AUTH_JWKS_GRACE_PERIOD_SECONDS: v.optional(v.string()),
+
+    /*
+     * Mail Transport (SMTP)
+     * Configures the delivery mechanism for outbound emails.
+     */
+
+    SMTP_HOST: v.string(),
+    SMTP_PORT: v.fallback(v.string(), "465"),
+    SMTP_SECURE: v.fallback(v.string(), "true"),
+    SMTP_USER: v.string(),
+    SMTP_PASSWORD: v.string(),
+    SMTP_USER_NAME: v.optional(v.string()),
+
+    /*
+     * Email Templates & Senders
+     * Defines the 'From' address for different notification types.
+     */
+
+    AUTH_PASSWORD_RESET_FROM_EMAIL: v.fallback(
+      v.string(),
+      "noreply@rezics.com",
+    ),
+    AUTH_VERIFICATION_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
+
+    /*
+     * OAuth Provider Credentials
+     * Client IDs and Secrets for external identity providers.
+     * Only required if the respective provider is enabled.
+     */
+
+    // Google
+    GOOGLE_CLIENT_ID: v.optional(v.string()),
+    GOOGLE_CLIENT_SECRET: v.optional(v.string()),
+
+    // Microsoft
+    MICROSOFT_CLIENT_ID: v.optional(v.string()),
+    MICROSOFT_CLIENT_SECRET: v.optional(v.string()),
+
+    // GitHub
+    GITHUB_CLIENT_ID: v.optional(v.string()),
+    GITHUB_CLIENT_SECRET: v.optional(v.string()),
+
+    // Twitter
+    TWITTER_CLIENT_ID: v.optional(v.string()),
+    TWITTER_CLIENT_SECRET: v.optional(v.string()),
+
+    // Telegram
+    TELEGRAM_CLIENT_ID: v.optional(v.string()),
+    TELEGRAM_CLIENT_SECRET: v.optional(v.string()),
+
+    /*
+     * Turnstile (Cloudflare CAPTCHA)
+     */
+
+    TURNSTILE_SECRET: v.string(),
+  },
+  runtimeEnv: process.env,
+  emptyStringAsUndefined: true,
+});

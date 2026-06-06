@@ -1,0 +1,2310 @@
+{
+  "summary": {
+    "generatedAt": "2026-05-28T16:30:24.551Z",
+    "totalKeys": 1940,
+    "duplicateGroupCount": 200,
+    "duplicateKeyCount": 493,
+    "semanticGroups": 170,
+    "accidentalGroups": 30
+  },
+  "groups": [
+    {
+      "value": "Tags",
+      "keys": [
+        "admin_nav_tags",
+        "book_edit_sidebar_tags",
+        "book_fields_tags",
+        "book_hero_stat_tags",
+        "book_tags",
+        "realm_tab_tags",
+        "realm_tags",
+        "search_input_tags_label",
+        "tag_title"
+      ],
+      "prefixes": ["admin", "book", "realm", "search", "tag"],
+      "callSites": {
+        "app": 8
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Shelves",
+      "keys": [
+        "admin_nav_shelves",
+        "admin_shelf_title",
+        "book_hero_stat_shelves",
+        "layout_footer_product_shelves",
+        "profile_tab_shelves",
+        "search_category_shelves",
+        "shelf_list_title"
+      ],
+      "prefixes": ["admin", "book", "layout", "profile", "search", "shelf"],
+      "callSites": {
+        "app": 7
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Title",
+      "keys": [
+        "book_fields_title",
+        "common_title",
+        "entity_title_label",
+        "excerpt_form_title",
+        "pinboard_editor_fields_title",
+        "review_form_title",
+        "shelf_title_label"
+      ],
+      "prefixes": [
+        "book",
+        "common",
+        "entity",
+        "excerpt",
+        "pinboard",
+        "review",
+        "shelf"
+      ],
+      "callSites": {
+        "app": 8,
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Description",
+      "keys": [
+        "admin_user_description_label",
+        "book_author_info_description_label",
+        "book_description",
+        "common_description",
+        "entity_description_label",
+        "shelf_description_label"
+      ],
+      "prefixes": ["admin", "book", "common", "entity", "shelf"],
+      "callSites": {
+        "admin": 2,
+        "app": 9
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Realms",
+      "keys": [
+        "admin_nav_realms",
+        "admin_realm_title",
+        "profile_tab_realms",
+        "realm_list_title",
+        "realm_title",
+        "search_category_realms"
+      ],
+      "prefixes": ["admin", "profile", "realm", "search"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Search",
+      "keys": [
+        "accessibility_search",
+        "admin_unit_search_label",
+        "common_search",
+        "layout_footer_product_search",
+        "page_shelf_search_button",
+        "unit_picker_search_tab"
+      ],
+      "prefixes": [
+        "accessibility",
+        "admin",
+        "common",
+        "layout",
+        "page",
+        "unit"
+      ],
+      "callSites": {
+        "app": 11,
+        "admin": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Add",
+      "keys": [
+        "common_add",
+        "page_book_edit_info_translation_add_dialog_submit",
+        "page_shelf_add_button",
+        "shelf_edit_add",
+        "unit_picker_add"
+      ],
+      "prefixes": ["common", "page", "shelf", "unit"],
+      "callSites": {
+        "app": 8,
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Books",
+      "keys": [
+        "admin_book_list_title",
+        "admin_nav_books",
+        "navigation_books",
+        "search_category_books",
+        "zone_books_title"
+      ],
+      "prefixes": ["admin", "navigation", "search", "zone"],
+      "callSites": {
+        "admin": 2,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Complete Registration",
+      "keys": [
+        "auth_flow_complete_registration_action",
+        "auth_flow_complete_registration_title",
+        "auth_flow_onboarding_submit",
+        "auth_flow_onboarding_title",
+        "auth_flow_verify_banner_action"
+      ],
+      "prefixes": ["auth"],
+      "callSites": {
+        "app": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Add translation",
+      "keys": [
+        "common_add_translation",
+        "page_book_edit_info_translation_add_button",
+        "page_book_edit_info_translation_add_dialog_title",
+        "post_add_translation"
+      ],
+      "prefixes": ["common", "page", "post"],
+      "callSites": {
+        "app": 7,
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "All",
+      "keys": [
+        "admin_entity_verified_filter_all",
+        "common_all",
+        "entity_picker_filters_all",
+        "search_category_all"
+      ],
+      "prefixes": ["admin", "common", "entity", "search"],
+      "callSites": {
+        "app": 8
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Comments",
+      "keys": [
+        "accessibility_comments",
+        "admin_dashboard_comments",
+        "page_shelf_comments",
+        "review_comments"
+      ],
+      "prefixes": ["accessibility", "admin", "page", "review"],
+      "callSites": {
+        "admin": 3,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Content rating",
+      "keys": [
+        "book_fields_rating",
+        "book_flags_rating",
+        "settings_content_rating_section_title",
+        "settings_preferences_content_rating_title"
+      ],
+      "prefixes": ["book", "settings"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Entities",
+      "keys": [
+        "admin_entity_list_title",
+        "admin_nav_entities",
+        "search_category_entities",
+        "settings_nav_entities"
+      ],
+      "prefixes": ["admin", "search", "settings"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Excerpts",
+      "keys": [
+        "book_excerpts",
+        "excerpt_excerpts_title",
+        "excerpt_title",
+        "search_category_excerpts"
+      ],
+      "prefixes": ["book", "excerpt", "search"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Language",
+      "keys": [
+        "admin_setting_language_title",
+        "common_language",
+        "page_book_edit_info_translation_add_dialog_language",
+        "page_book_edit_info_translation_language_label"
+      ],
+      "prefixes": ["admin", "common", "page"],
+      "callSites": {
+        "admin": 2,
+        "app": 8
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Reason",
+      "keys": [
+        "admin_unit_locked_reason",
+        "authority_reason_label",
+        "work_link_claim_inbox_reason",
+        "work_link_claim_modal_reject_reason_label"
+      ],
+      "prefixes": ["admin", "authority", "work"],
+      "callSites": {
+        "admin": 1,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Reviews",
+      "keys": [
+        "book_hero_stat_reviews",
+        "book_reviews",
+        "page_book_tabs_reviews",
+        "search_category_reviews"
+      ],
+      "prefixes": ["book", "page", "search"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Saving...",
+      "keys": [
+        "admin_jwt_saving",
+        "book_read_chapter_actions_saving",
+        "common_saving",
+        "settings_security_saving"
+      ],
+      "prefixes": ["admin", "book", "common", "settings"],
+      "callSites": {
+        "admin": 4,
+        "app": 10
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Settings",
+      "keys": [
+        "admin_nav_settings",
+        "admin_setting_title",
+        "navigation_settings",
+        "settings_title"
+      ],
+      "prefixes": ["admin", "navigation", "settings"],
+      "callSites": {
+        "admin": 1,
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Slug",
+      "keys": [
+        "admin_user_slug",
+        "authority_path_slug",
+        "common_slug",
+        "entity_slug_label"
+      ],
+      "prefixes": ["admin", "authority", "common", "entity"],
+      "callSites": {
+        "admin": 3,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Subtitle",
+      "keys": [
+        "common_subtitle",
+        "entity_subtitle_label",
+        "page_book_edit_info_translation_fields_subtitle",
+        "pinboard_editor_fields_subtitle"
+      ],
+      "prefixes": ["common", "entity", "page", "pinboard"],
+      "callSites": {
+        "admin": 1,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Summary",
+      "keys": [
+        "common_summary",
+        "entity_summary_label",
+        "page_book_edit_info_translation_fields_summary",
+        "pinboard_editor_fields_summary"
+      ],
+      "prefixes": ["common", "entity", "page", "pinboard"],
+      "callSites": {
+        "admin": 2,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Update failed",
+      "keys": [
+        "admin_jwt_update_failed",
+        "admin_token_update_failed",
+        "admin_unit_update_failed",
+        "admin_user_update_failed"
+      ],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 6
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Users",
+      "keys": [
+        "admin_nav_users",
+        "admin_user_list_title",
+        "search_category_users",
+        "user_list_title"
+      ],
+      "prefixes": ["admin", "search", "user"],
+      "callSites": {
+        "admin": 2,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "About",
+      "keys": [
+        "attribution_subject_role_about",
+        "entity_subject_attribution_role_about",
+        "entity_tab_about"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Actions",
+      "keys": [
+        "admin_auth_actions_title",
+        "admin_user_actions",
+        "common_actions"
+      ],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 12
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "API Tokens",
+      "keys": [
+        "admin_token_title",
+        "settings_nav_tokens",
+        "settings_tokens_title"
+      ],
+      "prefixes": ["admin", "settings"],
+      "callSites": {
+        "admin": 1,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Author",
+      "keys": [
+        "attribution_credit_role_author",
+        "book_fields_author",
+        "book_hero_meta_author"
+      ],
+      "prefixes": ["attribution", "book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Avatar URL",
+      "keys": [
+        "admin_entity_avatar_url",
+        "admin_user_avatar_url_label",
+        "entity_avatar_url"
+      ],
+      "prefixes": ["admin", "entity"],
+      "callSites": {
+        "admin": 3,
+        "app": 5
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Bio",
+      "keys": [
+        "admin_user_bio_label",
+        "book_author_info_bio_label",
+        "settings_profile_bio"
+      ],
+      "prefixes": ["admin", "book", "settings"],
+      "callSites": {
+        "admin": 2,
+        "app": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Book",
+      "keys": ["book_hero_kind_book", "navigation_book", "search_origin_book"],
+      "prefixes": ["book", "navigation", "search"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Chapters",
+      "keys": [
+        "book_chapters",
+        "book_edit_sidebar_chapters",
+        "book_fields_chapter_count"
+      ],
+      "prefixes": ["book"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Create failed",
+      "keys": [
+        "admin_token_create_failed",
+        "admin_unit_create_failed",
+        "admin_user_create_failed"
+      ],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Home",
+      "keys": ["common_home", "navigation_home", "page_home_name"],
+      "prefixes": ["common", "navigation", "page"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Loading...",
+      "keys": [
+        "common_loading",
+        "page_home_sections_trending_book_loading",
+        "page_shelf_loading"
+      ],
+      "prefixes": ["common", "page"],
+      "callSites": {
+        "app": 50
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "More \u2192",
+      "keys": [
+        "page_home_sections_new_book_more",
+        "page_home_sections_trending_book_more",
+        "page_home_sections_trending_excerpt_more"
+      ],
+      "prefixes": ["page"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Overview",
+      "keys": [
+        "entity_tab_overview",
+        "page_book_tabs_overview",
+        "profile_tab_overview"
+      ],
+      "prefixes": ["entity", "page", "profile"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Producer",
+      "keys": [
+        "attribution_credit_role_producer",
+        "book_fields_producer",
+        "book_hero_meta_producer"
+      ],
+      "prefixes": ["attribution", "book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Publisher",
+      "keys": [
+        "attribution_credit_role_publisher",
+        "book_fields_press",
+        "book_hero_meta_publisher"
+      ],
+      "prefixes": ["attribution", "book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Rating",
+      "keys": [
+        "remark_form_rating",
+        "review_form_rating",
+        "search_filters_rating"
+      ],
+      "prefixes": ["remark", "review", "search"],
+      "callSites": {
+        "app": 6
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Retry",
+      "keys": ["auth_flow_retry", "common_retry", "shelf_system_recoveryRetry"],
+      "prefixes": ["auth", "common", "shelf"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Sign in",
+      "keys": ["auth_flow_sign_in_instead", "auth_login", "navigation_login"],
+      "prefixes": ["auth", "navigation"],
+      "callSites": {
+        "app": 8,
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Translations",
+      "keys": [
+        "admin_unit_translations",
+        "authority_group_translations",
+        "page_book_edit_info_translation_section_title"
+      ],
+      "prefixes": ["admin", "authority", "page"],
+      "callSites": {
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Unit",
+      "keys": ["common_unit", "history_references_unit", "pages_unit_page"],
+      "prefixes": ["common", "history", "pages"],
+      "callSites": {
+        "admin": 2,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "User ID",
+      "keys": ["admin_auth_user_id", "admin_user_user_id", "user_id_label"],
+      "prefixes": ["admin", "user"],
+      "callSites": {
+        "admin": 5,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Verify",
+      "keys": [
+        "auth_flow_verify_intro_prefix",
+        "auth_flow_verify_submit_code",
+        "settings_account_verify"
+      ],
+      "prefixes": ["auth", "settings"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Word Count",
+      "keys": [
+        "search_filter_word_count",
+        "search_filters_wordCount",
+        "search_input_word_count_label"
+      ],
+      "prefixes": ["search"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "{count} entries are stale.",
+      "keys": [
+        "pinboard_stale_description",
+        "pinboard_stale_description_other"
+      ],
+      "prefixes": ["pinboard"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "{count} items",
+      "keys": ["page_shelf_items_count", "shelf_items_count"],
+      "prefixes": ["page", "shelf"],
+      "callSites": {
+        "app": 7
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "{count} members",
+      "keys": ["realm_member_count", "search_realm_members"],
+      "prefixes": ["realm", "search"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "{count} ratings",
+      "keys": ["book_hero_score_count", "score_ratings_count"],
+      "prefixes": ["book", "score"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "{count} reviews",
+      "keys": ["book_hero_count_links_reviews", "page_shelf_reviews_count"],
+      "prefixes": ["book", "page"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Active",
+      "keys": ["common_active", "shelf_system_active"],
+      "prefixes": ["common", "shelf"],
+      "callSites": {
+        "admin": 5
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Add language",
+      "keys": [
+        "pinboard_editor_add_language",
+        "settings_preferences_add_language"
+      ],
+      "prefixes": ["pinboard", "settings"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "All conversations",
+      "keys": ["dm_back_to_list", "inbox_all_conversations"],
+      "prefixes": ["dm", "inbox"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "All editable fields",
+      "keys": ["authority_all_fields_label", "authority_all_fields_title"],
+      "prefixes": ["authority"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "All rights reserved",
+      "keys": [
+        "license_all_rights_reserved",
+        "review_license_all_rights_reserved"
+      ],
+      "prefixes": ["license", "review"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Anonymous",
+      "keys": ["common_anonymous", "post_anonymous_author"],
+      "prefixes": ["common", "post"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Appears",
+      "keys": [
+        "attribution_subject_role_appears",
+        "entity_subject_attribution_role_appears"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Auth",
+      "keys": ["admin_nav_auth", "navigation_auth"],
+      "prefixes": ["admin", "navigation"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Auth JWT Services",
+      "keys": ["admin_jwt_auth_title", "admin_nav_auth_jwt_services"],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Auth Status",
+      "keys": ["admin_auth_status_title", "admin_nav_auth_status"],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Authority",
+      "keys": ["admin_nav_authority", "history_tabs_authority"],
+      "prefixes": ["admin", "history"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Back",
+      "keys": ["common_back", "page_shelf_back"],
+      "prefixes": ["common", "page"],
+      "callSites": {
+        "app": 3,
+        "admin": 5
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Back to book",
+      "keys": ["book_edit_sidebar_back_to_book", "book_read_back_to_book"],
+      "prefixes": ["book"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Baseline ratings are always on. Opt in to age-restricted tiers to see them in search and listings.",
+      "keys": [
+        "settings_content_rating_section_description",
+        "settings_preferences_content_rating_description"
+      ],
+      "prefixes": ["settings"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Book Library",
+      "keys": [
+        "page_book_home_hero_kicker",
+        "page_home_sections_library_cards_book_library"
+      ],
+      "prefixes": ["page"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Canonical wiki page",
+      "keys": [
+        "attribution_subject_role_canonical_wiki_page",
+        "entity_subject_attribution_role_canonical_wiki_page"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "CC0 1.0 Universal",
+      "keys": ["license_cc0_1_0", "review_license_cc0_1_0"],
+      "prefixes": ["license", "review"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Change Password",
+      "keys": [
+        "settings_security_change_password",
+        "settings_security_change_password_title"
+      ],
+      "prefixes": ["settings"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Chapter",
+      "keys": ["book_chapter_chapter_label", "book_chapter_label"],
+      "prefixes": ["book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Clean up",
+      "keys": ["pinboard_stale_cleanup", "shelf_cleanup_orphans"],
+      "prefixes": ["pinboard", "shelf"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Clear",
+      "keys": ["common_clear", "tag_clear"],
+      "prefixes": ["common", "tag"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Close",
+      "keys": ["accessibility_close", "common_close"],
+      "prefixes": ["accessibility", "common"],
+      "callSites": {
+        "app": 3,
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Co-author",
+      "keys": ["attribution_credit_role_co_author", "book_hero_meta_co_author"],
+      "prefixes": ["attribution", "book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Collapse",
+      "keys": ["chapters_collapse", "common_collapse"],
+      "prefixes": ["chapters", "common"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Completed",
+      "keys": ["admin_auth_email_completed", "shelf_system_completed"],
+      "prefixes": ["admin", "shelf"],
+      "callSites": {
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Connected Accounts",
+      "keys": ["settings_connections_title", "settings_nav_connections"],
+      "prefixes": ["settings"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Content",
+      "keys": ["page_book_tabs_content", "profile_tab_content"],
+      "prefixes": ["page", "profile"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Contents",
+      "keys": ["book_toc", "page_book_tabs_toc"],
+      "prefixes": ["book", "page"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Could not load conversations.",
+      "keys": ["dm_conversation_list_error", "inbox_conversations_load_failed"],
+      "prefixes": ["dm", "inbox"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Could not load messages.",
+      "keys": ["dm_thread_error", "inbox_messages_load_failed"],
+      "prefixes": ["dm", "inbox"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Cover URL",
+      "keys": ["book_fields_cover_url", "page_shelf_cover_label"],
+      "prefixes": ["book", "page"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Create",
+      "keys": ["admin_nav_create", "common_create"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "app": 7,
+        "admin": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Creating...",
+      "keys": ["admin_meili_creating", "common_creating"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 1,
+        "app": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Creating\u2026",
+      "keys": ["admin_token_creating", "admin_user_creating"],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Creative Commons Attribution 4.0",
+      "keys": ["license_cc_by_4_0", "review_license_cc_by_4_0"],
+      "prefixes": ["license", "review"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Creative Commons Attribution-NonCommercial 4.0",
+      "keys": ["license_cc_by_nc_4_0", "review_license_cc_by_nc_4_0"],
+      "prefixes": ["license", "review"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0",
+      "keys": ["license_cc_by_nc_sa_4_0", "review_license_cc_by_nc_sa_4_0"],
+      "prefixes": ["license", "review"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Creative Commons Attribution-ShareAlike 4.0",
+      "keys": ["license_cc_by_sa_4_0", "review_license_cc_by_sa_4_0"],
+      "prefixes": ["license", "review"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Credits",
+      "keys": ["admin_book_credits", "authority_group_credits"],
+      "prefixes": ["admin", "authority"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Current chapter",
+      "keys": [
+        "edit_console_chapter_context_label",
+        "progress_status_active_modal_chapter_label"
+      ],
+      "prefixes": ["edit", "progress"],
+      "callSites": {
+        "app": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Custom path",
+      "keys": ["authority_custom_path_label", "authority_custom_path_option"],
+      "prefixes": ["authority"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Dashboard",
+      "keys": ["admin_dashboard_title", "admin_nav_dashboard"],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Delete",
+      "keys": ["common_delete", "page_shelf_delete"],
+      "prefixes": ["common", "page"],
+      "callSites": {
+        "app": 4,
+        "admin": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Deleting...",
+      "keys": ["admin_meili_deleting", "settings_account_deleting"],
+      "prefixes": ["admin", "settings"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Direct Messages",
+      "keys": ["dm_dm_tab", "dm_inbox_title"],
+      "prefixes": ["dm"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Edit",
+      "keys": ["common_edit", "shelf_edit_mode_edit"],
+      "prefixes": ["common", "shelf"],
+      "callSites": {
+        "app": 23,
+        "admin": 6
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Edit entity",
+      "keys": ["admin_entity_edit_title", "entity_edit"],
+      "prefixes": ["admin", "entity"],
+      "callSites": {
+        "admin": 3,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Edit shelf",
+      "keys": ["page_shelf_edit_shelf", "shelf_edit_action"],
+      "prefixes": ["page", "shelf"],
+      "callSites": {
+        "app": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Edit Unit",
+      "keys": ["admin_book_edit_unit", "admin_unit_edit_title"],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Editor",
+      "keys": ["attribution_credit_role_editor", "book_hero_meta_editor"],
+      "prefixes": ["attribution", "book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Email",
+      "keys": ["common_email", "layout_footer_newsletter_email_aria"],
+      "prefixes": ["common", "layout"],
+      "callSites": {
+        "app": 5,
+        "admin": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Email Templates",
+      "keys": [
+        "admin_auth_email_templates_title",
+        "admin_nav_auth_email_templates"
+      ],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "en",
+      "keys": ["common_language_code_placeholder", "language_code_placeholder"],
+      "prefixes": ["common", "language"],
+      "callSites": {
+        "admin": 2,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Enter search term",
+      "keys": [
+        "book_chapter_search_term_placeholder",
+        "placeholders_enter_search_term"
+      ],
+      "prefixes": ["book", "placeholders"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Entity",
+      "keys": ["entity_section_entity", "search_origin_entity"],
+      "prefixes": ["entity", "search"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Error",
+      "keys": ["admin_auth_email_status_error", "common_error"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 1,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Expand",
+      "keys": ["chapters_expand", "common_expand"],
+      "prefixes": ["chapters", "common"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Favorite",
+      "keys": ["accessibility_favorite", "page_shelf_favorite_tooltip"],
+      "prefixes": ["accessibility", "page"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Featured character",
+      "keys": [
+        "attribution_subject_role_featured_character",
+        "entity_subject_attribution_role_featured_character"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Feed",
+      "keys": ["realm_feed", "realm_tab_feed"],
+      "prefixes": ["realm"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Game Library",
+      "keys": [
+        "game_library_title",
+        "page_home_sections_library_cards_game_library"
+      ],
+      "prefixes": ["game", "page"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "GitHub",
+      "keys": ["auth_flow_providers_github", "layout_footer_social_github"],
+      "prefixes": ["auth", "layout"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "History",
+      "keys": ["book_edit_sidebar_history", "search_input_preset_tags_history"],
+      "prefixes": ["book", "search"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Hot",
+      "keys": ["accessibility_hot", "realm_feed_sort_hot"],
+      "prefixes": ["accessibility", "realm"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "https://cdn.example/entity.png",
+      "keys": ["admin_entity_avatar_placeholder", "entity_avatar_placeholder"],
+      "prefixes": ["admin", "entity"],
+      "callSites": {
+        "admin": 1,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Illustrator",
+      "keys": [
+        "attribution_credit_role_illustrator",
+        "book_hero_meta_illustrator"
+      ],
+      "prefixes": ["attribution", "book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Invalid slug: {reason}",
+      "keys": [
+        "admin_entity_slug_invalid_short",
+        "auth_flow_setup_slug_invalid"
+      ],
+      "prefixes": ["admin", "auth"],
+      "callSites": {
+        "admin": 1,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "JWT Services",
+      "keys": ["admin_jwt_title", "admin_nav_jwt_services"],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "List",
+      "keys": ["admin_nav_list", "shelf_view_list"],
+      "prefixes": ["admin", "shelf"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Lock",
+      "keys": ["authority_lock_action", "common_lock"],
+      "prefixes": ["authority", "common"],
+      "callSites": {
+        "app": 1,
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Media Library",
+      "keys": [
+        "media_library_title",
+        "page_home_sections_library_cards_media_library"
+      ],
+      "prefixes": ["media", "page"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Members",
+      "keys": ["realm_members", "realm_tab_members"],
+      "prefixes": ["realm"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "More",
+      "keys": ["common_more", "page_home_sections_active_realms_more"],
+      "prefixes": ["common", "page"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Name",
+      "keys": ["admin_user_name_label", "common_name"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 4,
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Never",
+      "keys": ["admin_token_never", "common_never"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "New",
+      "keys": ["common_new", "realm_feed_sort_new"],
+      "prefixes": ["common", "realm"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "New Password",
+      "keys": [
+        "admin_user_new_password_label",
+        "settings_security_new_password"
+      ],
+      "prefixes": ["admin", "settings"],
+      "callSites": {
+        "admin": 1,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "New Realm",
+      "keys": ["realm_new_realm", "realm_new_title"],
+      "prefixes": ["realm"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Newest",
+      "keys": ["search_sort_newest", "shelf_sort_newest"],
+      "prefixes": ["search", "shelf"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No conversations yet. Subscribe to someone to start a thread.",
+      "keys": ["dm_conversation_list_empty", "inbox_conversations_empty"],
+      "prefixes": ["dm", "inbox"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No description",
+      "keys": ["common_no_description", "shelf_no_description"],
+      "prefixes": ["common", "shelf"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No excerpts yet",
+      "keys": [
+        "excerpt_list_empty_title",
+        "page_home_sections_trending_excerpt_empty"
+      ],
+      "prefixes": ["excerpt", "page"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No field locks are active.",
+      "keys": ["admin_unit_field_locks_empty", "authority_no_locks"],
+      "prefixes": ["admin", "authority"],
+      "callSites": {
+        "admin": 2,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No matching tags",
+      "keys": ["post_tag_picker_no_matches", "tag_no_matching"],
+      "prefixes": ["post", "tag"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No ratings yet",
+      "keys": ["book_hero_score_empty", "score_no_ratings"],
+      "prefixes": ["book", "score"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No realms found",
+      "keys": ["realm_no_realms", "realm_none_found"],
+      "prefixes": ["realm"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No reviews",
+      "keys": ["page_shelf_no_reviews", "page_shelf_no_reviews_small"],
+      "prefixes": ["page"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "No shelves found",
+      "keys": ["collection_no_shelves_found", "shelf_none_found"],
+      "prefixes": ["collection", "shelf"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Notifications",
+      "keys": ["dm_notifications_tab", "notifications_title"],
+      "prefixes": ["dm", "notifications"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Open review page",
+      "keys": ["review_a11y_open_review_page", "review_open_review_page"],
+      "prefixes": ["review"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Paused",
+      "keys": ["book_hero_actions_paused", "progress_status_overflow_paused"],
+      "prefixes": ["book", "progress"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Permissions & locks",
+      "keys": ["authority_page_title", "book_edit_sidebar_authority"],
+      "prefixes": ["authority", "book"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Pinned",
+      "keys": ["common_pinned", "pinboard_pinned_heading"],
+      "prefixes": ["common", "pinboard"],
+      "callSites": {
+        "app": 2,
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Post",
+      "keys": ["post_composer_post", "search_origin_post"],
+      "prefixes": ["post", "search"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Preview",
+      "keys": ["admin_auth_email_preview", "shelf_edit_mode_preview"],
+      "prefixes": ["admin", "shelf"],
+      "callSites": {
+        "admin": 1,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Primary character",
+      "keys": [
+        "attribution_subject_role_primary_character",
+        "entity_subject_attribution_role_primary_character"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Product",
+      "keys": ["layout_footer_product_aria", "layout_footer_product_title"],
+      "prefixes": ["layout"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Profile",
+      "keys": ["navigation_profile", "settings_nav_profile"],
+      "prefixes": ["navigation", "settings"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Reading",
+      "keys": ["book_content_reading", "book_hero_actions_reading"],
+      "prefixes": ["book"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Realm",
+      "keys": ["common_realm", "search_origin_realm"],
+      "prefixes": ["common", "search"],
+      "callSites": {
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Related subject",
+      "keys": [
+        "attribution_subject_role_related_subject",
+        "entity_subject_attribution_role_related_subject"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Release",
+      "keys": ["book_release_label", "work_link_claim_inbox_release"],
+      "prefixes": ["book", "work"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Relevance",
+      "keys": ["search_filter_relevance", "search_sort_relevance"],
+      "prefixes": ["search"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Remove",
+      "keys": ["authority_remove_lock_action", "common_remove"],
+      "prefixes": ["authority", "common"],
+      "callSites": {
+        "app": 1,
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Resources",
+      "keys": ["layout_footer_resources_aria", "layout_footer_resources_title"],
+      "prefixes": ["layout"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Restore revision {sequence}",
+      "keys": ["history_restore_title", "history_revision_restore_label"],
+      "prefixes": ["history"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Resync index overrides",
+      "keys": [
+        "book_chapter_resync_overrides",
+        "book_edit_resync_index_overrides"
+      ],
+      "prefixes": ["book"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Retry failed",
+      "keys": [
+        "admin_authority_retry_failed",
+        "admin_authority_retry_failed_button"
+      ],
+      "prefixes": ["admin"],
+      "callSites": {
+        "admin": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Review",
+      "keys": ["review_short_review", "work_link_claim_inbox_review"],
+      "prefixes": ["review", "work"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "REZICS",
+      "keys": ["page_home_hero_kicker", "title"],
+      "prefixes": ["page", "title"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Rezics Email",
+      "keys": [
+        "admin_user_rezics_email_label",
+        "settings_account_rezics_email_title"
+      ],
+      "prefixes": ["admin", "settings"],
+      "callSites": {
+        "admin": 3,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Scopes",
+      "keys": ["admin_token_scopes", "common_scopes"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 1,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Score",
+      "keys": ["common_score", "tag_score"],
+      "prefixes": ["common", "tag"],
+      "callSites": {
+        "admin": 2,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Search books",
+      "keys": ["placeholders_search_books", "search_placeholders_search_books"],
+      "prefixes": ["placeholders", "search"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Search content",
+      "keys": ["feedback_search_label", "unit_picker_search_label"],
+      "prefixes": ["feedback", "unit"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Search Realms",
+      "keys": ["realm_search", "realm_search_title"],
+      "prefixes": ["realm"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Search title, author, ISBN...",
+      "keys": [
+        "page_book_home_hero_search_placeholder",
+        "page_home_mobile_search_placeholder"
+      ],
+      "prefixes": ["page"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Send",
+      "keys": ["dm_composer_send", "inbox_send"],
+      "prefixes": ["dm", "inbox"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Send Code",
+      "keys": ["auth_flow_verify_send_code", "settings_account_send_code"],
+      "prefixes": ["auth", "settings"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Sending...",
+      "keys": ["settings_account_sending", "settings_security_sending"],
+      "prefixes": ["settings"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Set Password",
+      "keys": [
+        "settings_security_set_password",
+        "settings_security_set_password_title"
+      ],
+      "prefixes": ["settings"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Set rating for selected",
+      "keys": [
+        "book_chapter_bulk_rating_title",
+        "book_edit_set_rating_for_selected"
+      ],
+      "prefixes": ["book"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Setting",
+      "keys": [
+        "attribution_subject_role_setting",
+        "entity_subject_attribution_role_setting"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Sign out",
+      "keys": ["auth_logout", "navigation_logout"],
+      "prefixes": ["auth", "navigation"],
+      "callSites": {
+        "app": 3,
+        "admin": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Sign up",
+      "keys": ["auth_register", "navigation_register"],
+      "prefixes": ["auth", "navigation"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Source release",
+      "keys": [
+        "page_book_edit_info_translation_set_source_label",
+        "page_book_edit_info_translation_source_label"
+      ],
+      "prefixes": ["page"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Source work",
+      "keys": [
+        "attribution_subject_role_source_work",
+        "entity_subject_attribution_role_source_work"
+      ],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Status",
+      "keys": ["admin_auth_email_status", "common_status"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 5,
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Studio",
+      "keys": ["attribution_credit_role_studio", "entity_kind_studio"],
+      "prefixes": ["attribution", "entity"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Submit",
+      "keys": ["common_submit", "page_shelf_submit"],
+      "prefixes": ["common", "page"],
+      "callSites": {
+        "app": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Subscribe",
+      "keys": [
+        "layout_footer_newsletter_submit",
+        "page_home_sections_newsletter_submit"
+      ],
+      "prefixes": ["layout", "page"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Subscribe for updates",
+      "keys": [
+        "layout_footer_newsletter_title",
+        "page_home_sections_newsletter_title"
+      ],
+      "prefixes": ["layout", "page"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Telegram",
+      "keys": ["auth_flow_providers_telegram", "layout_footer_social_telegram"],
+      "prefixes": ["auth", "layout"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Toggle theme",
+      "keys": ["app_toggle_theme", "layout_header_toggle_theme"],
+      "prefixes": ["app", "layout"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Token",
+      "keys": ["admin_auth_sessions_token", "admin_nav_token"],
+      "prefixes": ["admin"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Translator",
+      "keys": [
+        "attribution_credit_role_translator",
+        "book_hero_meta_translator"
+      ],
+      "prefixes": ["attribution", "book"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Type",
+      "keys": ["admin_meili_reset_type_to_confirm_prefix", "common_type"],
+      "prefixes": ["admin", "common"],
+      "callSites": {
+        "admin": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Units",
+      "keys": ["admin_nav_units", "admin_unit_list_title"],
+      "prefixes": ["admin"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Unspecified",
+      "keys": [
+        "entity_kind_unspecified",
+        "progress_status_chapter_picker_none"
+      ],
+      "prefixes": ["entity", "progress"],
+      "callSites": {
+        "app": 2
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Untitled",
+      "keys": ["common_untitled", "pinboard_entry_untitled"],
+      "prefixes": ["common", "pinboard"],
+      "callSites": {
+        "app": 5
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Unverified",
+      "keys": ["common_unverified", "settings_account_unverified"],
+      "prefixes": ["common", "settings"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "User",
+      "keys": ["common_user", "search_origin_user"],
+      "prefixes": ["common", "search"],
+      "callSites": {},
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Verified",
+      "keys": ["admin_entity_verified", "settings_account_verified"],
+      "prefixes": ["admin", "settings"],
+      "callSites": {
+        "admin": 1,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Verified entity",
+      "keys": ["authority_path_entity_verified", "entity_verified"],
+      "prefixes": ["authority", "entity"],
+      "callSites": {
+        "app": 3
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "View",
+      "keys": ["common_view", "shelf_controls_view"],
+      "prefixes": ["common", "shelf"],
+      "callSites": {
+        "app": 4
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Votes",
+      "keys": ["common_votes", "tag_votes"],
+      "prefixes": ["common", "tag"],
+      "callSites": {
+        "admin": 2,
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    },
+    {
+      "value": "Write a message",
+      "keys": ["dm_composer_placeholder", "inbox_message_placeholder"],
+      "prefixes": ["dm", "inbox"],
+      "callSites": {
+        "app": 1
+      },
+      "classification": "accidental",
+      "reviewer": null
+    }
+  ]
+}

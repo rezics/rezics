@@ -1,0 +1,5 @@
+# Cloudflare Pages config for the public app SPA (static Vite output).
+# Deploy: build with VITE_* set, then `wrangler pages deploy dist`.
+name = "rezics-app"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-05-29"

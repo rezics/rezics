@@ -1,0 +1,50 @@
+# Build context for the Bun workspace images. The repo root is the build
+# context (services compile from workspace sources), so keep this aggressive:
+# only source + manifests + Prisma schemas need to reach the daemon.
+
+# Dependencies (reinstalled inside the image)
+**/node_modules
+
+# Compiled service binaries (produced by build:linux inside the image)
+package/server/server
+package/auth/server
+package/notify/notify
+package/reaction/reaction
+package/history/history
+package/ranking/ranking
+package/job-runner/job-runner
+
+# Frontend build output (built by the Cloudflare pipeline, not these images)
+package/app/dist
+package/admin/dist
+**/.vite
+docs/.vitepress/dist
+docs/.vitepress/cache
+
+# Tests, stories, and fixtures (not needed by the runtime build)
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.stories.tsx
+**/__tests__
+**/__mocks__
+**/storybook-static
+
+# Local env and secrets — never bake into an image layer
+**/.env
+**/.env.*
+!**/.env.example
+*.age
+*.key
+
+# VCS, editor, CI, and OS noise
+.git
+.github
+.vscode
+.idea
+**/.DS_Store
+
+# Local infra data and tooling output that is not part of any service runtime
+tool/external-services/**/data
+**/coverage
+**/*.log

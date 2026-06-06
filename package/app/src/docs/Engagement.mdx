@@ -1,0 +1,41 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Domain/Engagement" />
+
+# Engagement
+
+Engagement is the cluster of small interactive primitives that hang off any unit
+(post, review, excerpt, remark, shelf, book): **vote, react, reply, share,
+shelf-add, follow**. They share a visual rhythm but never collapse into one
+component — see the abstraction-vs-split rule in
+[`Foundation/Patterns`](?path=/docs/foundation-patterns--docs).
+
+## Reactions and votes
+
+`ReactionBar` is the canonical example of a **size-axis variant prop**: the
+`size` prop drives `Small`, `Medium`, `Large` stories. The layout, action set,
+and semantics never change — only spacing and icon size. That's a single
+component with a `size` prop, not three.
+
+- [`ReactionBar — Small / Medium / Large`](?path=/story/app-engagement-reactionbar--default)
+- [`VoteGroup — Default`](?path=/story/app-engagement-votegroup--default)
+
+## Action verbs
+
+Each verb stays its own component because the **layout test fires**: ReplyAction
+opens a composer, ShareAction copies a URL, ShelfAction opens a picker dialog,
+OverflowMenu fans out a menu. Same row, very different shapes.
+
+- [`ReplyAction`](?path=/story/app-engagement-replyaction--default) ·
+  [`ShareAction`](?path=/story/app-engagement-shareaction--default) ·
+  [`ShelfAction`](?path=/story/app-engagement-shelfaction--default) ·
+  [`OverflowMenu`](?path=/story/app-engagement-overflowmenu--default)
+
+## Follow & score
+
+`FollowButton` flips between *follow / following* via internal mutation state;
+the **Disabled** story shows the not-signed-in path. `ScoreOverview` aggregates
+score-per-user histogram into a single sparkline summary.
+
+- [`FollowButton — Default / Disabled`](?path=/story/domain-engagement-followbutton--default)
+- [`ScoreOverview — Default / Empty`](?path=/story/domain-engagement-scoreoverview--default)

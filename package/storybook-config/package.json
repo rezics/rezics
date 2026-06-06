@@ -1,0 +1,48 @@
+{
+  "name": "@rezics/storybook-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "module": "src/index.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./preview": {
+      "types": "./src/preview.tsx",
+      "import": "./src/preview.tsx"
+    },
+    "./i18n": {
+      "types": "./src/i18n.tsx",
+      "import": "./src/i18n.tsx"
+    }
+  },
+  "peerDependencies": {
+    "@storybook/addon-a11y": "^10",
+    "@storybook/addon-docs": "^10",
+    "@storybook/react-vite": "^10",
+    "@vitejs/plugin-react": "^5 || ^6",
+    "react": "^19",
+    "react-dom": "^19",
+    "unocss": "^66",
+    "vite": "^8"
+  },
+  "peerDependenciesMeta": {
+    "unocss": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.3.6",
+    "@storybook/react-vite": "^10.3.6",
+    "@types/react": "^19.2.14",
+    "@vitejs/plugin-react": "^5.1.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "unocss": "^66.5.10",
+    "vite": "^8.0.10"
+  }
+}

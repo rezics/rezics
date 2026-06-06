@@ -1,0 +1,28 @@
+{
+  "name": "@rezics/about",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --host 0.0.0.0 --port 4174",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 0.0.0.0 --port 4174",
+    "test": "bun test"
+  },
+  "exports": {
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    }
+  },
+  "devDependencies": {
+    "@astrojs/mdx": "^6.0.2",
+    "@types/bun": "^1.3.0",
+    "astro": "^6.4.4",
+    "typescript": "^6.0.3",
+    "vite": "^7"
+  },
+  "dependencies": {
+    "@viz-js/viz": "^3.28.0"
+  }
+}

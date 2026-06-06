@@ -1,0 +1,171 @@
+---
+import type { AboutPageFrontmatter } from "../content/types";
+import {
+  ABOUT_LOCALE_META,
+  ABOUT_LOCALES,
+  type AboutLocale,
+  type AboutPageId,
+  DEFAULT_LOCALE,
+  getAppEntryUrl,
+  getCanonicalUrl,
+  getPagePath,
+} from "../i18n/locales";
+import { uiDictionaries } from "../i18n/ui";
+import "../styles/site.css";
+
+type Props = {
+  locale: AboutLocale;
+  page: AboutPageId;
+  frontmatter: AboutPageFrontmatter;
+};
+
+const { locale, page, frontmatter } = Astro.props;
+const localeMeta = ABOUT_LOCALE_META[locale];
+const ui = uiDictionaries[locale];
+const primaryHref = frontmatter.primaryCtaPage
+  ? getPagePath(locale, frontmatter.primaryCtaPage)
+  : getAppEntryUrl(locale);
+const primaryLabel = frontmatter.primaryCtaPage
+  ? ui.cta.readProduct
+  : ui.cta.enterApp;
+const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
+  locale: alternateLocale,
+  href: getPagePath(alternateLocale, page),
+  canonical: getCanonicalUrl(alternateLocale, page),
+  meta: ABOUT_LOCALE_META[alternateLocale],
+}));
+---
+
+<!doctype html>
+<html lang={localeMeta.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{frontmatter.title}</title>
+    <meta name="description" content={frontmatter.description} />
+    {
+      alternateLinks.map((link) => (
+        <link rel="alternate" hreflang={link.meta.htmlLang} href={link.canonical} />
+      ))
+    }
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={getCanonicalUrl(DEFAULT_LOCALE, page)}
+    />
+    <link rel="canonical" href={getCanonicalUrl(locale, page)} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Rezics" />
+    <meta property="og:title" content={frontmatter.title} />
+    <meta property="og:description" content={frontmatter.description} />
+    <meta property="og:url" content={getCanonicalUrl(locale, page)} />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href={getPagePath(locale, "home")}>
+        <img class="brand-mark" src="/logo.svg" alt="" width="40" height="28" />
+        <span class="brand-wordmark">REZICS</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a aria-current={page === "home" ? "page" : undefined} href={getPagePath(locale, "home")}>
+          {ui.nav.home}
+        </a>
+        <a aria-current={page === "product" ? "page" : undefined} href={getPagePath(locale, "product")}>
+          {ui.nav.product}
+        </a>
+      </nav>
+      <div class="header-actions">
+        <a class="app-link" href={getAppEntryUrl(locale)}>{ui.nav.app}</a>
+        <details class="language-switcher">
+          <summary>{ui.nav.language}</summary>
+          <div>
+            {
+              alternateLinks.map((link) => (
+                <a
+                  aria-current={link.locale === locale ? "true" : undefined}
+                  lang={link.meta.htmlLang}
+                  href={link.href}
+                >
+                  {link.meta.nativeName}
+                </a>
+              ))
+            }
+          </div>
+        </details>
+      </div>
+    </header>
+    <main>
+      <section class={`hero hero-${page}`}>
+        <div class="hero-copy">
+          <p class="eyebrow">{frontmatter.hero.eyebrow}</p>
+          <h1>{frontmatter.hero.heading}</h1>
+          <p>{frontmatter.hero.body}</p>
+          <div class="hero-actions">
+            <a class="button primary" href={primaryHref}>{primaryLabel}</a>
+            {
+              frontmatter.primaryCtaPage ? (
+                <a class="button secondary" href={getAppEntryUrl(locale)}>
+                  {ui.cta.enterApp}
+                </a>
+              ) : null
+            }
+          </div>
+        </div>
+      </section>
+      <div class="section-grid">
+        {
+          frontmatter.sections.map((section) => (
+            <section class="narrative-section">
+              <p class="eyebrow">{section.eyebrow}</p>
+              <h2>{section.title}</h2>
+              <p>{section.body}</p>
+            </section>
+          ))
+        }
+      </div>
+      {
+        frontmatter.storySections?.length ? (
+          <div class="story-stack">
+            {frontmatter.storySections.map((section) => (
+              <section class="story-section">
+                <p class="eyebrow">{section.eyebrow}</p>
+                <h2>{section.title}</h2>
+                <p>{section.body}</p>
+              </section>
+            ))}
+          </div>
+        ) : null
+      }
+      {
+        frontmatter.products?.length ? (
+          <div class="product-stack">
+            {frontmatter.products.map((product) => (
+              <section class="product-section">
+                <p class="eyebrow">{product.eyebrow}</p>
+                <div class="product-section-header">
+                  <h2>{product.name}</h2>
+                  <p>{product.summary}</p>
+                </div>
+                <div class="product-feature-grid">
+                  {product.features.map((feature) => (
+                    <article class="product-feature">
+                      <h3>{feature.title}</h3>
+                      <p>{feature.body}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : null
+      }
+      <article class="mdx-prose">
+        <slot />
+      </article>
+    </main>
+    <footer class="site-footer">
+      <p>Rezics</p>
+      <p>{ui.footer.originNote}</p>
+    </footer>
+  </body>
+</html>

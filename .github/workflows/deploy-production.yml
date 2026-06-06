@@ -1,0 +1,69 @@
+# Production deploy via Kamal — manual, behind a GitHub Environment approval.
+#
+# Pulls the immutable git-SHA image tags built by build-images.yml and rolls
+# them out with kamal-proxy health-gated zero-downtime swaps. Never builds
+# images. Rollback is `kamal rollback` (previous image tag) per unit.
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Image tag to deploy (git SHA already pushed to GHCR)
+        required: true
+      phase:
+        description: Deploy phase
+        required: true
+        default: all
+        type: choice
+        options: [all, migrations, services, workers, backfill]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Kamal deploy (${{ inputs.phase }})
+    runs-on: ubuntu-latest
+    # Environment approval gate + holds DEPLOY_SSH_KEY / SOPS_AGE_KEY /
+    # KAMAL_REGISTRY_PASSWORD as protected secrets.
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+
+      - name: Install Kamal + SOPS + age
+        run: |
+          gem install kamal -v '~> 2.0'
+          sudo apt-get update && sudo apt-get install -y age
+          curl -fsSL -o /usr/local/bin/sops \
+            https://github.com/getsops/sops/releases/latest/download/sops-linux-amd64
+          sudo chmod +x /usr/local/bin/sops
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ vars.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          # age private key for SOPS decryption (held only by this runner).
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_SSH_USER: ${{ vars.DEPLOY_SSH_USER }}
+        run: bin/deploy "${{ inputs.version }}" "${{ inputs.phase }}"
+
+      # The deploy log already surfaces image tags, migration status, rollout
+      # targets, and healthcheck results (task 7.6). On a failed health-gated
+      # swap kamal keeps the previous container; roll back explicitly with:
+      #   kamal rollback -d <unit> --version <previous-sha>

@@ -1,0 +1,121 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import { Grid, Swatch, Compare, Do, Dont } from "./tokens/_gallery";
+import { fontFamilies } from "../config/tokens/typography";
+
+<Meta title="Foundation/Voice" />
+
+# Voice
+
+Rezics is a **library** — books, games, media, posts, reviews, quotes, threaded discussions. The interface should feel like a curated catalog, not a SaaS console.
+
+This page is the human-readable counterpart to the AI skill at `.claude/skills/rezics-design/voice.md`. Keep the two in sync when foundation voice rules change.
+
+---
+
+## Mood
+
+**Parchment archive, not glass dashboard.** The mood has four pillars:
+
+- **Editorial restraint** — pages breathe. Headings carry weight through size and spacing, not bold weight or borders. Reading-first surfaces (book content, 書評) use the serif family; UI surfaces use sans.
+- **Warm restraint** — parchment `#f5f4ed` and warm dark stone `#1a1a18` are the foundation. Pure white and pure black are forbidden as canvas. The brand color 轮回红 `#f4606c` punctuates without dominating.
+- **Density when warranted** — the app side (book browsing, reading) is generous; the admin side (operations) is dense and efficient. Each surface earns its rhythm.
+- **Quietly expressive** — small things are allowed to delight (press scale to 0.98, subtle hover transitions at 200ms), but never decorative shadows, gradients, or animation for its own sake.
+
+<Unstyled>
+  <Grid cols={3}>
+    <Swatch
+      name="Parchment canvas"
+      cssVar="--colors-surface-canvas"
+      value="var(--colors-surface-canvas)"
+      description="Warm, off-white. The foundation of every app surface."
+      invertText
+    />
+    <Swatch
+      name="Warm stone (dark)"
+      cssVar="--colors-surface-canvas (dark)"
+      value="#1a1a18"
+      description="The dark counterpart. Not pure black."
+    />
+    <Swatch
+      name="轮回红 brand"
+      cssVar="--colors-brand-fill"
+      value="var(--colors-brand-fill)"
+      description="Punctuates. Never dominates. Never used as text color."
+      invertText
+    />
+  </Grid>
+</Unstyled>
+
+---
+
+## Tone — by surface
+
+Every surface earns its own register. Don't paste landing-page voice into the admin; don't sprinkle marketing into the reader.
+
+| Surface                  | Tone                                                                |
+| ------------------------ | ------------------------------------------------------------------- |
+| Library / 書庫 / 媒體庫   | Catalog, neutral, scholarly. Let cover art and titles do the talking. |
+| Reader (book content)    | Disappear. The interface is a margin around the text.               |
+| 書評 (long-form reviews) | Editorial weekly — serif body, generous line-height, restrained chrome. |
+| Post forum               | Conversational but unornamented. No bubbles, no rounded chat balloons. |
+| Reddit-style threads     | Hierarchical, dense, scannable. Tree visible through indentation alone. |
+| Tag system               | Inline, small caps not allowed; pill-shaped for status, otherwise plain. |
+| Admin                    | Functional, terse, dense tables. No marketing tone.                 |
+| Auth / settings          | Plain forms, MUI standard variant inputs, no flourishes.            |
+
+---
+
+## Don't say
+
+<Compare>
+  <Dont caption="Playful chrome copy">
+    <div style={{ fontFamily: fontFamilies.sans, fontSize: 14, color: "var(--colors-text-primary)" }}>
+      Get started ✨ &nbsp;·&nbsp; Looks like you haven't added any books — let's fix that!
+    </div>
+  </Dont>
+  <Do caption="Verbs and informational copy">
+    <div style={{ fontFamily: fontFamilies.sans, fontSize: 14, color: "var(--colors-text-primary)" }}>
+      Save &nbsp;·&nbsp; Publish &nbsp;·&nbsp; No books yet
+    </div>
+  </Do>
+</Compare>
+
+- **Don't be playful in chrome copy.** Button labels are verbs ("Save", "Publish"), not phrases ("Get started ✨"). Microcopy is short and informational.
+- **Don't shout.** All-caps is reserved for the `overline` typography variant (small labels). Headings use sentence case.
+- **Don't moralize.** Empty states say "No books yet", not "Looks like you haven't added any books — let's fix that!". Match the catalog's voice, not a chatbot's.
+- **Don't decorate state with copy.** Errors say what happened, not what the user feels. Loading states show a spinner, not an inspirational quote.
+
+---
+
+## Reference systems we draw from
+
+| System    | What we borrow                                               |
+| --------- | ------------------------------------------------------------ |
+| Apple     | Borderless surfaces, weighty SF-style typography, restraint. |
+| Notion    | Whisper borders for containment, density, small chrome.      |
+| Claude    | Warm parchment foundation, calm chromatic restraint.         |
+| Mintlify  | Documentation-grade typography hierarchy, no decoration.     |
+| Cursor    | Editorial serif option for long-form reading surfaces.       |
+
+We do **not** draw from:
+
+- **Linear** — too cold and monochrome-blue for a content library.
+- **Stripe** — financial-blue chromatics conflict with our warm foundation.
+- **Material You / Google** — too playful and dynamic for an archive.
+- **Discord / Twitter** — too dense in the wrong way; chat-bubble vocabulary doesn't fit.
+
+---
+
+## The litmus test
+
+Each of these is a symptom of misreading rezics as a SaaS product when it's a library:
+
+- A hand-rolled bordered card with `shadow-md` chrome → wrong mood
+- An emoji in the chrome → wrong mood
+- A second chromatic accent → wrong mood
+- A gradient background → wrong mood
+- A heading in 700 weight or all-caps body → wrong mood
+- Raw white `#ffffff` as canvas → wrong mood
+- Aggressive copywriting → wrong mood
+
+If a design produces any of these, step back to the brief before iterating on the surface.

@@ -1,0 +1,98 @@
+/**
+ * Realm API - Main entry point
+ * Realms are community spaces with membership, content, and tag classification.
+ *
+ * File organization:
+ * - realm.types.ts: TypeScript types and interfaces
+ * - realm.keys.ts: React Query key factory
+ * - realm.api.ts: API client functions
+ * - realm.queries.ts: Query configurations
+ * - realm.mutations.ts: Mutation hooks
+ * - realm.ts: Main entry (this file) - unified exports
+ */
+
+// Re-export contract types used by new realm-tag mutations
+export type {
+  CastRealmTagApplicationVoteInput,
+  CreateRealmTagApplicationInput,
+  PatchRealmTagApplicationInput,
+  RealmTagApplicationVoteDTO,
+  RealmTagContextDTO,
+  RealmTagContextReadResponse,
+  RealmTagContextUpdateResponse,
+  UpdateRealmTagContextInput,
+} from "@rezics/contract";
+// API Client
+export { realmApi } from "./realm.api";
+// Query Keys
+export { realmKeys } from "./realm.keys";
+// Mutation Hooks
+export {
+  realmMutations,
+  useAddRealmTagApplicationMutation,
+  useAddUnitRealmMutation,
+  useAppendRealmPinboardMutation,
+  useCastRealmTagApplicationVoteMutation,
+  useCreateRealmMutation,
+  useCreateRealmTagApplicationMutation,
+  useDeleteRealmMutation,
+  useDeleteRealmTagApplicationMutation,
+  useJoinRealmMutation,
+  useLeaveRealmMutation,
+  useMaterializeRealmTagContextMutation,
+  useMuteRealmMutation,
+  usePatchRealmTagApplicationMutation,
+  useRemoveMemberMutation,
+  useRemoveRealmTagApplicationMutation,
+  useRemoveUnitRealmMutation,
+  useUnmuteRealmMutation,
+  useUpdateMemberRoleMutation,
+  useUpdateRealmMutation,
+  useUpdateRealmRulePolicyMutation,
+  useUpdateRealmTagContextMutation,
+} from "./realm.mutations";
+// Query Configurations
+export {
+  myRealmMembershipQuery,
+  myRealmsQuery,
+  realmDetailQuery,
+  realmInfiniteListQuery,
+  realmListQuery,
+  realmMembersQuery,
+  realmQueries,
+  realmRulePolicyQuery,
+  realmRuleResolvedQuery,
+  realmSearchQuery,
+  realmTagContextQuery,
+} from "./realm.queries";
+// Types
+export type {
+  AcknowledgeRealmRuleInput,
+  AddRealmTagApplicationInput,
+  AddUnitRealmInput,
+  CreateRealmInput,
+  JoinRealmInput,
+  ModerationStatus,
+  RealmDTO,
+  RealmExtraAdminReadResponse,
+  RealmExtraOkResponse,
+  RealmExtraReadResponse,
+  RealmFilters,
+  RealmFormData,
+  RealmListResponse,
+  RealmMemberDTO,
+  RealmMemberListQuery,
+  RealmMemberListResponse,
+  RealmMembershipMeDTO,
+  RealmResponse,
+  RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
+  RealmRuleResolvedDTO,
+  RealmSortOption,
+  RealmTagApplicationDTO,
+  RealmView,
+  UnitRealmDTO,
+  UpdateMemberRoleInput,
+  UpdateRealmInput,
+  UpdateRealmRulePolicyInput,
+} from "./realm.types";

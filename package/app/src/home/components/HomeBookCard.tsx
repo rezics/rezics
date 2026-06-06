@@ -1,0 +1,65 @@
+import type { BookDTO } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { Card, CardContent } from "@rezics/ui/shadcn";
+import { Link } from "@/shared/ui/link";
+import {
+  getBookAuthorName,
+  getBookCoverUrl,
+  getBookTitle,
+} from "@/shared/utils/translation-helpers";
+
+const BookCard = ({
+  book,
+  className = "",
+}: {
+  book: BookDTO;
+  className?: string;
+}) => {
+  const { t } = useTranslation(["book"]);
+  const title = getBookTitle(book);
+  const coverUrl = getBookCoverUrl(book);
+  const authorName = getBookAuthorName(book);
+
+  return (
+    <Card
+      key={book.unitId}
+      surface="elevated"
+      className={`group flex flex-col py-0 transition-shadow duration-300 ${className}`}
+    >
+      <Link
+        to={`/book/${book.unitId}` as any}
+        className="flex flex-col items-stretch justify-start"
+      >
+        {coverUrl ? (
+          <div className="relative w-full h-42 aspect-[3/4] overflow-hidden bg-surface-subtle">
+            <LazyLoadImage
+              src={coverUrl}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+            />
+          </div>
+        ) : (
+          <div className="w-full aspect-[3/4] h-42 bg-surface-subtle flex items-center justify-center text-text-tertiary">
+            {t("book:no_cover")}
+          </div>
+        )}
+
+        <CardContent className="flex flex-col flex-1 w-full gap-1 p-1">
+          <div
+            className="font-bold leading-tight line-clamp-2 min-h-[2.5em]"
+            title={title}
+          >
+            {title}
+          </div>
+
+          <p className="text-xs text-text-secondary truncate mt-auto pt-1 m-0">
+            {authorName || t("book:unknown_author")}
+          </p>
+        </CardContent>
+      </Link>
+    </Card>
+  );
+};
+
+export default BookCard;
