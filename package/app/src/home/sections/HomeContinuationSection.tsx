@@ -33,7 +33,7 @@ export const HomeContinuationSection: React.FC = () => {
         </h2>
         <Link
           to="/u/me/dashboard"
-          className="flex items-center gap-1 text-sm text-brand hover:underline"
+          className="flex items-center gap-1 text-sm text-link hover:underline"
         >
           {t("page:home_view_dashboard")}
           <ArrowRight className="h-4 w-4" />

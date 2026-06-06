@@ -6,7 +6,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Generous app-side density. Borderless sections, content-led cards, parchment surface.",
+          "Generous app-side density. Borderless sections, content-led cards, plain canvas.",
       },
     },
   },

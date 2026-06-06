@@ -125,7 +125,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             to="/review/$reviewId"
             params={{ reviewId: review.unitId }}
             underline="none"
-            className="w-fit max-w-full truncate text-base font-medium text-text-primary hover:text-text-brand"
+            className="w-fit max-w-full truncate text-base font-medium text-text-primary hover:text-link"
             onClick={(e) => e.stopPropagation()}
           >
             {reviewTitle}

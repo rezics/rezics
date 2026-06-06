@@ -7,7 +7,7 @@
 The mood is composed of:
 
 - **Editorial restraint** — pages breathe. Headings carry weight through size and spacing, not bold weight or borders. Reading-first surfaces (book content, 書評) use the serif family; UI surfaces use sans.
-- **Warm restraint** — parchment `#f5f4ed` and warm dark stone `#1a1a18` are the foundation. Pure white and pure black are forbidden as canvas. The brand color 轮回红 `#f4606c` punctuates without dominating.
+- **Plain restraint** — white `#ffffff` and black `#000000` are the page baselines. The brand color 轮回红 `#DB515C` punctuates without becoming every text color; ordinary textual navigation uses link blue.
 - **Density when warranted** — the app side (book browsing, reading) is generous; the admin side (operations) is dense and efficient. Each surface earns its rhythm.
 - **Quietly expressive** — small things are allowed to delight (press scale to 0.98, subtle hover transitions at 200ms), but never decorative shadows, gradients, or animation for its own sake.
 
@@ -37,7 +37,7 @@ The mood is composed of:
 | --------- | ------------------------------------------------------------ |
 | Apple     | Borderless surfaces, weighty SF-style typography, restraint. |
 | Notion    | Whisper borders for containment, density, small chrome.      |
-| Claude    | Warm parchment foundation, calm chromatic restraint.         |
+| Claude    | Plain canvas foundation, calm chromatic restraint.           |
 | Mintlify  | Documentation-grade typography hierarchy, no decoration.     |
 | Cursor    | Editorial serif option for long-form reading surfaces.       |
 

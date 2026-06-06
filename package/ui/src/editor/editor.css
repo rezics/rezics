@@ -51,7 +51,7 @@
   --editor-tab-hover-color: hsl(0 0% 90%);
   --editor-tab-active-color: hsl(0 0% 100%);
 
-  /* Toolbar — #f4606c accent */
+  /* Toolbar — brand accent */
   --editor-toolbar-color: hsl(0 0% 50%);
   --editor-toolbar-hover-color: hsl(0 0% 85%);
   --editor-toolbar-hover-bg: hsla(0, 0%, 100%, 0.08);

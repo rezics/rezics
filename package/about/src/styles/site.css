@@ -1,17 +1,18 @@
 :root {
-  --colors-surface-canvas: #f5f4ed;
-  --colors-surface-base: #fffdf7;
-  --colors-surface-subtle: #ece9dd;
-  --colors-surface-sunken: #e4dfd0;
-  --colors-text-primary: #23211d;
-  --colors-text-secondary: #5e5a50;
-  --colors-text-tertiary: #817b70;
-  --colors-text-brand: #c4433a;
-  --colors-brand-fill: #f4606c;
-  --colors-brand-fill-hover: #df5661;
-  --colors-text-on-brand: #fffdf7;
-  --colors-border-whisper: #ded9ca;
-  --colors-border-defined: #c7beaa;
+  --colors-surface-canvas: #ffffff;
+  --colors-surface-base: #ffffff;
+  --colors-surface-subtle: #f5f5f5;
+  --colors-surface-sunken: #eeeeee;
+  --colors-text-primary: #111111;
+  --colors-text-secondary: #5f6368;
+  --colors-text-tertiary: #7a7a7a;
+  --colors-text-brand: #db515c;
+  --colors-brand-fill: #db515c;
+  --colors-brand-fill-hover: #c94651;
+  --colors-link: #1a73e8;
+  --colors-text-on-brand: #ffffff;
+  --colors-border-whisper: #d9d9d9;
+  --colors-border-defined: #d9d9d9;
   --radius-md: 8px;
   --radius-lg: 12px;
   --shadow-soft: 0 18px 60px rgba(35, 33, 29, 0.12);
@@ -26,9 +27,7 @@
 
 body {
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 253, 247, 0.72), rgba(245, 244, 237, 0)),
-    var(--colors-surface-canvas);
+  background: var(--colors-surface-canvas);
   color: var(--colors-text-primary);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,

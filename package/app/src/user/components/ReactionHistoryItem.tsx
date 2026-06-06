@@ -84,7 +84,7 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
         {target ? (
           <SafeLink
             href={target.href}
-            className="text-sm text-text-primary hover:text-text-brand no-underline"
+            className="text-sm text-text-primary hover:text-link no-underline"
           >
             <span className="text-text-tertiary mr-1 capitalize">
               {target.kind}:
@@ -108,7 +108,7 @@ const ReceivedActor: FC<{
   return (
     <SafeLink
       href={actor.href}
-      className="inline-flex items-center gap-1.5 text-text-primary no-underline hover:text-text-brand"
+      className="inline-flex items-center gap-1.5 text-text-primary no-underline hover:text-link"
     >
       <Avatar className="w-5 h-5">
         <AvatarImage src={actor.avatarUrl} alt={actor.displayName} />

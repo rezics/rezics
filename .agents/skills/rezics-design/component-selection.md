@@ -2,7 +2,7 @@
 
 The component selection policy for rezics is **shadcn-or-custom**:
 
-1. **shadcn primitives** from `@rezics/ui/shadcn` are the default. They are vendored from the `base-luma` registry, base-ui-based, token-aligned via the flat `--colors-*` cascade, and already wired to the rezics aesthetic (borderless surfaces, parchment canvas, brand-fill). Path P keeps vendored source close to upstream.
+1. **shadcn primitives** from `@rezics/ui/shadcn` are the default. They are vendored from the `base-luma` registry, base-ui-based, token-aligned via the flat `--colors-*` cascade, and already wired to the rezics aesthetic (borderless surfaces, plain canvas, brand-fill). Path P keeps vendored source close to upstream.
 2. **Custom rezics primitives** in `@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local `components/` directories cover the gaps shadcn does not. Add a custom primitive only when there is an in-tree consumer that needs it.
 
 There is no third option. Introducing a third-party UI library requires a deliberate design decision (update the rezics-design rules).

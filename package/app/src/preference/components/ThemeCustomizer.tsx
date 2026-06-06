@@ -21,12 +21,12 @@ import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
 
-const BRAND_DEFAULT_COLOR = "#f4606c";
+const BRAND_DEFAULT_COLOR = "#DB515C";
 
 // MOCK: local preset palette until token-driven theme picker arrives.
 // First entry is the rezics brand red.
 const PRESET_COLORS: string[] = [
-  "#f4606c",
+  "#DB515C",
   "#3b82f6",
   "#10b981",
   "#f59e0b",
@@ -36,14 +36,9 @@ const PRESET_COLORS: string[] = [
 
 function applyAccentColor(color: string) {
   if (typeof document === "undefined") return;
-  document.documentElement.style.setProperty(
-    "--rezics-sys-color-brand-fill",
-    color,
-  );
-  document.documentElement.style.setProperty(
-    "--rezics-sys-color-primary",
-    color,
-  );
+  document.documentElement.style.setProperty("--colors-brand-fill", color);
+  document.documentElement.style.setProperty("--colors-primary", color);
+  document.documentElement.style.setProperty("--colors-primary-DEFAULT", color);
 }
 
 interface ThemeCustomizerProps {

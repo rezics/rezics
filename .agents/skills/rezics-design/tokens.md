@@ -7,10 +7,12 @@
 | Category | Where it lives | How to consume |
 | --- | --- | --- |
 | **Colors** (surface, text, brand, semantic, sentiment, border) | TS source + flat `--colors-*` CSS var emitted by `uno-config.ts` preflights | UnoCSS utility (`bg-brand-fill`, `text-text-primary`) |
-| **Shadows** | TS source + `--rezics-shadow-*` CSS var (light/dark variants in `layers.css`) | UnoCSS utility (`shadow-md`) |
+| **Shadows** | TS source + `--shadow-*` CSS var emitted by `uno-config.ts` | UnoCSS utility (`shadow-md`) |
 | **Spacing / radius / motion / font** | TS source ONLY — UnoCSS auto-emits `--spacing-*`/`--radius-*` etc. through preset-wind4's theme system | UnoCSS utility (`p-4`, `rounded-md`, `duration-fast`, `font-sans`) |
 
-**Hard rule — never hand-write `var(--rezics-space-*)`, `var(--rezics-radius-*)`, `var(--rezics-motion-*)`, `var(--rezics-ease-*)`, `var(--rezics-font-sans/serif/mono)` — they don't exist.** Use the utility class or import the token from `@rezics/ui/config/tokens/*` directly. The only `--rezics-*` vars that exist are colors, shadows, and the per-`:lang()` CJK font fallback (`--rezics-font-sans-cjk`, `--rezics-font-serif-cjk`).
+**Hard rule — never hand-write `var(--rezics-*)`; the namespace is retired.**
+Use the utility class or import the token from `@rezics/ui/config/tokens/*`
+directly. Color CSS vars use the flat `--colors-*` namespace.
 
 ---
 
@@ -18,35 +20,46 @@
 
 | Token              | Light      | Dark       | UnoCSS         | CSS var                          | When                                  |
 | ------------------ | ---------- | ---------- | -------------- | -------------------------------- | ------------------------------------- |
-| `surface-canvas`   | `#f5f4ed`  | `#1a1a18`  | `bg-surface-canvas`   | `--colors-surface-canvas`     | Page background. Default body.        |
-| `surface-base`     | `#faf9f5`  | `#26251e`  | `bg-surface-base` | `--colors-surface-base`    | Panels, inline content blocks.       |
-| `surface-elevated` | `#ffffff`  | `#30302e`  | `bg-surface-elevated` | `--colors-surface-elevated` | Modals, popovers, command palette. |
-| `surface-subtle`   | `#ebeae5`  | `#1f1e1c`  | `bg-surface-subtle` | `--colors-surface-subtle`  | Code blocks, table zebra, chip bg.    |
-| `surface-sunken`   | `#e6e5e0`  | `#141413`  | `bg-surface-sunken` | `--colors-surface-sunken`  | Inset panels (rare).                  |
+| `surface-canvas`   | `#ffffff`  | `#000000`  | `bg-surface-canvas`   | `--colors-surface-canvas`     | Page background. Default body.        |
+| `surface-base`     | `#ffffff`  | `#0b0b0b`  | `bg-surface-base` | `--colors-surface-base`    | Panels, inline content blocks.       |
+| `surface-elevated` | `#ffffff`  | `#161616`  | `bg-surface-elevated` | `--colors-surface-elevated` | Modals, popovers, command palette. |
+| `surface-subtle`   | `#f5f5f5`  | `#202020`  | `bg-surface-subtle` | `--colors-surface-subtle`  | Code blocks, table zebra, chip bg.    |
+| `surface-sunken`   | `#eeeeee`  | `#2a2a2a`  | `bg-surface-sunken` | `--colors-surface-sunken`  | Inset panels (rare).                  |
 
 ## Color — text
 
 | Token            | Light       | Dark      | UnoCSS              | CSS var                     | When                                |
 | ---------------- | ----------- | --------- | ------------------- | --------------------------- | ----------------------------------- |
-| `text-primary`   | `#1d1d1f`   | `#f0eee6` | `text-text-primary` | `--colors-text-primary`  | Body, headings. AAA on canvas.      |
-| `text-secondary` | `#6e6e73`   | `#a39e98` | `text-text-secondary` | `--colors-text-secondary` | Secondary copy, captions.        |
-| `text-tertiary`  | `#86868b`   | `#6e6c66` | `text-text-tertiary` | `--colors-text-tertiary` | Metadata, ≥18px only (AA-large). |
-| `text-disabled`  | `#c7c7cc`   | `#48484a` | `text-text-disabled` | `--colors-text-disabled` | Decorative disabled labels only. |
-| `text-on-brand`  | `#ffffff`   | `#ffffff` | `text-text-on-brand` | `--colors-text-on-brand` | White on `brand-fill` button (AA-large only — use ≥14px medium / ≥16px regular). |
-| `text-brand`     | `#C4433A`   | `#fa7882` | `text-text-brand`   | `--colors-text-brand`    | Brand-color text. **Use this, never `brand-fill` as text.** |
+| `text-primary`   | `#111111`   | `#f5f5f5` | `text-text-primary` | `--colors-text-primary`  | Body, headings, long-form content.      |
+| `text-secondary` | `#5f6368`   | `#b6b6b6` | `text-text-secondary` | `--colors-text-secondary` | Secondary copy, captions.        |
+| `text-tertiary`  | `#7a7a7a`   | `#8a8a8a` | `text-text-tertiary` | `--colors-text-tertiary` | Hints and low-emphasis metadata. |
+| `text-disabled`  | `#b8b8b8`   | `#5c5c5c` | `text-text-disabled` | `--colors-text-disabled` | Decorative disabled labels only. |
+| `text-on-brand`  | `#ffffff`   | `#ffffff` | `text-text-on-brand` | `--colors-text-on-brand` | Text on brand-filled controls. |
+| `text-brand`     | `#DB515C`   | `#DB515C` | `text-text-brand`   | `--colors-text-brand`    | Short stable brand chrome: REZICS, hero labels, accents. |
 
 ## Color — brand
 
-Brand fill is **mode-invariant**: `#f4606c` in both light and dark.
+Brand fill is **mode-invariant**: `#DB515C` in both light and dark.
 
 | Token               | Value      | UnoCSS         | CSS var                          | When                                              |
 | ------------------- | ---------- | -------------- | -------------------------------- | ------------------------------------------------- |
-| `brand-fill`        | `#f4606c`  | `bg-brand-fill`     | `--colors-brand-fill`         | Button bg, badge fill, focus ring, icon fill.    |
-| `brand-fill-hover`  | `#e85666`  | `bg-brand-fill-hover` | `--colors-brand-fill-hover` | Button `:hover`.                                  |
-| `brand-fill-active` | `#d94c5c`  | `bg-brand-fill-active` | `--colors-brand-fill-active` | Button `:active` / pressed.                  |
+| `brand-fill`        | `#DB515C`  | `bg-brand-fill`     | `--colors-brand-fill`         | Primary button bg, selected indicators, accent marks, logo fill.    |
+| `brand-fill-hover`  | `#C94651`  | `bg-brand-fill-hover` | `--colors-brand-fill-hover` | Primary filled control `:hover`.                                  |
+| `brand-fill-active` | `#B83F49`  | `bg-brand-fill-active` | `--colors-brand-fill-active` | Primary filled control `:active` / pressed.                  |
 | `text-brand`        | (see text) | `text-text-brand` | `--colors-text-brand`     | The ONLY brand-text token (above).               |
 
-**Hard rule**: `#f4606c` on parchment is 2.83:1 — fails AA-body (4.5:1), fails AA-large (3:1). Never use `brand-fill` (or its hex) as a text color.
+**Reading rule**: contrast numbers are diagnostics, not a blanket veto. Brand red
+is allowed in short, stable UI chrome and brand text, but long-form and
+frequently changing content stays neutral.
+
+## Color — link
+
+Link blue is **mode-invariant**: `#1a73e8` in both light and dark.
+
+| Token        | Value      | UnoCSS      | CSS var                 | When |
+| ------------ | ---------- | ----------- | ----------------------- | ---- |
+| `link`       | `#1a73e8`  | `text-link` | `--colors-link`         | Ordinary text links, URLs, metadata links, textual navigation. |
+| `link-hover` | `#1a73e8`  | `text-link-hover` | `--colors-link-hover` | Same color; hover adds underline. |
 
 ## Color — semantic
 
@@ -54,10 +67,10 @@ Each semantic has `*-fill` (UI element, 3:1) and `*-text` (AA-body, mode-aware).
 
 | Semantic   | `*-fill`  | `*-text` light | `*-text` dark | UnoCSS class       | When                              |
 | ---------- | --------- | -------------- | ------------- | ------------------ | --------------------------------- |
-| `success`  | `#1f8a65` | `#157352`      | `#3da884`     | `bg-success` / `text-success-text` | Confirmations, completed status. |
-| `warning`  | `#b8732e` | `#8a5520`      | `#d8943e`     | `bg-warning` / `text-warning-text` | Cautions, soft warnings.         |
+| `success`  | `#157352` / `#3da884` | `#157352`      | `#3da884`     | `bg-success` / `text-success-text` | Confirmations, completed status. |
+| `warning`  | `#9c5e22` / `#d8943e` | `#8a5520`      | `#d8943e`     | `bg-warning` / `text-warning-text` | Cautions, soft warnings.         |
 | `error`    | `#cf2d56` | `#cf2d56`      | `#e34c75`     | `bg-error` / `text-error-text`     | Form errors, destructive states. |
-| `info`     | `#3898ec` | `#1565c0`      | `#5aa9f0`     | `bg-info` / `text-info-text`       | Informational notices.           |
+| `info`     | `#1a73e8` | `#1a73e8`      | `#1a73e8`     | `bg-info` / `text-info-text`       | Informational notices.           |
 
 **Rule**: `*-fill` for icon-only or filled badges; `*-text` for any colored text. Mixing is a contrast bug.
 
@@ -65,10 +78,10 @@ Each semantic has `*-fill` (UI element, 3:1) and `*-text` (AA-body, mode-aware).
 
 | Token            | Light                    | Dark                       | UnoCSS         | When                                |
 | ---------------- | ------------------------ | -------------------------- | -------------- | ----------------------------------- |
-| `border-whisper` | `rgba(0,0,0,0.08)`       | `rgba(255,255,255,0.10)`   | `border-border-whisper` | Default surface containment.       |
-| `border-defined` | `#d2d2d7`                | `#3a3937`                  | `border-border-defined` | Stronger boundary (admin tables). |
-| `border-strong`  | `#86868b`                | `#5a5856`                  | `border-border-strong`  | Maximum visibility (rare).         |
-| `border-focus`   | `#f4606c`                | `#fa7882`                  | `border-border-focus`   | `:focus-visible` ring (brand).    |
+| `border-whisper` | `rgba(0,0,0,0.10)`       | `rgba(255,255,255,0.12)`   | `border-border-whisper` | Default surface containment.       |
+| `border-defined` | `#d9d9d9`                | `#3a3a3a`                  | `border-border-defined` | Stronger boundary (admin tables). |
+| `border-strong`  | `#8a8a8a`                | `#777777`                  | `border-border-strong`  | Maximum visibility (rare).         |
+| `border-focus`   | `#DB515C`                | `#DB515C`                  | `border-border-focus`   | `:focus-visible` ring (brand).    |
 | `border-error`   | `#cf2d56`                | `#e34c75`                  | `border-border-error`   | Form validation error.            |
 
 **Focus ring spec**: `outline: 2px solid var(--colors-border-focus); outline-offset: 2px;`
@@ -201,9 +214,9 @@ CJK regional routing (SC / JP / KR) is automatic via CSS `:lang()`. Don't overri
 
 | Wrong                                           | Right                                            |
 | ----------------------------------------------- | ------------------------------------------------ |
-| `bg-[#f4606c]`                                  | `bg-brand-fill`                                  |
-| `color: #f4606c` (text)                         | `text-text-brand` (uses `#C4433A` light)         |
-| `bg-white`                                      | `bg-surface-elevated`                            |
+| `bg-[#DB515C]`                                  | `bg-brand-fill`                                  |
+| `color: #DB515C`                                | `text-text-brand` for brand chrome, `text-link` for ordinary links |
+| `bg-white` for page/component roles             | `bg-surface-canvas` / `bg-surface-elevated`      |
 | `bg-gray-100`                                   | `bg-surface-subtle`                              |
 | `text-gray-500`                                 | `text-text-secondary`                            |
 | `font-size: 14px`                               | `text-sm` (gets clamp scaling)                   |

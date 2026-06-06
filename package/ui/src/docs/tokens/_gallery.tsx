@@ -1,4 +1,11 @@
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  Fragment,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { easing } from "../../config/tokens/motion";
 import { radius } from "../../config/tokens/radius";
 import { fontFamilies } from "../../config/tokens/typography";
@@ -97,26 +104,6 @@ function useResolvedColors(
     return () => observer.disconnect();
   }, [ref, contrastAgainstVar]);
   return state;
-}
-
-function useResolvedColor(ref: React.RefObject<HTMLElement | null>) {
-  const [hex, setHex] = useState<string>("");
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const read = () => {
-      const cs = getComputedStyle(el);
-      setHex(rgbToHex(cs.backgroundColor));
-    };
-    read();
-    const observer = new MutationObserver(read);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class", "style"],
-    });
-    return () => observer.disconnect();
-  }, [ref]);
-  return hex;
 }
 
 export function Grid({
@@ -251,6 +238,783 @@ export function Swatch({
             {description}
           </div>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+function useStorybookDarkMode(): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const compute = () => {
+      const root = document.documentElement;
+      setIsDark(
+        root.classList.contains("dark") || root.dataset.theme === "dark",
+      );
+    };
+    compute();
+    const observer = new MutationObserver(compute);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
+function readableTextColor(background: string): string {
+  const blackContrast = contrastRatio("#000000", background) ?? 0;
+  const whiteContrast = contrastRatio("#ffffff", background) ?? 0;
+  return blackContrast >= whiteContrast ? "#111111" : "#ffffff";
+}
+
+export function DesignSwatch({
+  name,
+  cssVar,
+  light,
+  dark,
+  description,
+  contrastLight,
+  contrastDark,
+  height = 64,
+  showContrast = true,
+}: {
+  name: string;
+  cssVar: string;
+  light: string;
+  dark: string;
+  description?: string;
+  contrastLight?: string;
+  contrastDark?: string;
+  height?: number;
+  showContrast?: boolean;
+}) {
+  const isDark = useStorybookDarkMode();
+  const value = isDark ? dark : light;
+  const contrastAgainst = isDark ? contrastDark : contrastLight;
+  const contrast = contrastAgainst
+    ? contrastRatio(value, contrastAgainst)
+    : null;
+  const ratio = contrast ?? 0;
+  const tier =
+    ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : ratio >= 3 ? "AA-L" : "diag";
+  const textColor = readableTextColor(value);
+
+  return (
+    <div
+      style={{
+        border: "1px solid var(--colors-border-whisper)",
+        borderRadius: radius.md,
+        overflow: "hidden",
+        background: "var(--colors-surface-elevated)",
+      }}
+    >
+      <div
+        style={{
+          height,
+          background: value,
+          color: textColor,
+          padding: "0 12px",
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          fontFamily: fontFamilies.mono,
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: "0.02em",
+        }}
+      >
+        <span>{value}</span>
+        {showContrast && contrast != null && contrastAgainst ? (
+          <span
+            style={{
+              padding: "2px 6px",
+              borderRadius: 999,
+              background:
+                textColor === "#ffffff"
+                  ? "rgba(0, 0, 0, 0.28)"
+                  : "rgba(255, 255, 255, 0.68)",
+              color: textColor === "#ffffff" ? "#ffffff" : "#111111",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+            }}
+            title={`Contrast vs ${contrastAgainst}: ${ratio.toFixed(2)}:1`}
+          >
+            vs {contrastAgainst} · {ratio.toFixed(1)} · {tier}
+          </span>
+        ) : null}
+      </div>
+      <div style={{ padding: "10px 12px" }}>
+        <div
+          style={{
+            fontFamily: fontFamilies.sans,
+            fontWeight: 500,
+            fontSize: 13,
+            color: "var(--colors-text-primary)",
+          }}
+        >
+          {name}
+        </div>
+        <div
+          style={{
+            fontFamily: fontFamilies.mono,
+            fontSize: 11,
+            color: "var(--colors-text-secondary)",
+            marginTop: 2,
+          }}
+        >
+          {cssVar}
+        </div>
+        <div
+          style={{
+            fontFamily: fontFamilies.mono,
+            fontSize: 11,
+            color: "var(--colors-text-secondary)",
+            marginTop: 2,
+          }}
+        >
+          light {light} · dark {dark}
+        </div>
+        {description ? (
+          <div
+            style={{
+              fontFamily: fontFamilies.sans,
+              fontSize: 12,
+              color: "var(--colors-text-secondary)",
+              marginTop: 4,
+            }}
+          >
+            {description}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+const futureLight = {
+  canvas: "#ffffff",
+  base: "#ffffff",
+  elevated: "#ffffff",
+  subtle: "#f5f5f5",
+  sunken: "#eeeeee",
+  text: "#111111",
+  textSecondary: "#5f6368",
+  border: "rgba(0, 0, 0, 0.12)",
+  brand: "#DB515C",
+  brandHover: "#C94651",
+  brandActive: "#B83F49",
+  link: "#1a73e8",
+  linkHover: "#1a73e8",
+};
+
+const futureDark = {
+  canvas: "#000000",
+  base: "#0b0b0b",
+  elevated: "#161616",
+  subtle: "#202020",
+  sunken: "#2a2a2a",
+  text: "#f5f5f5",
+  textSecondary: "#b6b6b6",
+  border: "rgba(255, 255, 255, 0.16)",
+  brand: "#DB515C",
+  brandHover: "#C94651",
+  brandActive: "#B83F49",
+  link: "#1a73e8",
+  linkHover: "#1a73e8",
+};
+
+type FuturePalette = typeof futureLight;
+
+function ratioLabel(fg: string, bg: string): string {
+  const ratio = contrastRatio(fg, bg);
+  return ratio == null ? "n/a" : `${ratio.toFixed(2)}:1`;
+}
+
+function FutureTokenPill({
+  label,
+  color,
+  background,
+}: {
+  label: string;
+  color: string;
+  background: string;
+}) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        border: "1px solid currentColor",
+        borderColor: "color-mix(in srgb, currentColor 30%, transparent)",
+        borderRadius: radius.pill,
+        padding: "5px 9px",
+        color,
+        background,
+        fontFamily: fontFamilies.mono,
+        fontSize: 11,
+        lineHeight: 1.3,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          width: 10,
+          height: 10,
+          borderRadius: radius.full,
+          background: color,
+          boxShadow: `0 0 0 1px ${background}`,
+        }}
+      />
+      {label}
+    </span>
+  );
+}
+
+function FutureButton({ label }: { label: string }) {
+  return (
+    <button
+      type="button"
+      className="rezics-color-demo-button rezics-color-demo-focus"
+      style={{
+        appearance: "none",
+        border: 0,
+        borderRadius: radius.md,
+        color: "#ffffff",
+        cursor: "pointer",
+        fontFamily: fontFamilies.sans,
+        fontSize: 13,
+        fontWeight: 650,
+        lineHeight: 1.4,
+        padding: "9px 14px",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function FuturePanel({
+  mode,
+  palette,
+}: {
+  mode: "Light" | "Dark";
+  palette: FuturePalette;
+}) {
+  const isDark = mode === "Dark";
+  const panelStyle: CSSProperties = {
+    "--demo-brand": palette.brand,
+    "--demo-brand-hover": palette.brandHover,
+    "--demo-brand-active": palette.brandActive,
+    "--demo-link": palette.link,
+    "--demo-link-hover": palette.linkHover,
+    border: `1px solid ${palette.border}`,
+    borderRadius: radius.md,
+    background: palette.canvas,
+    color: palette.text,
+    overflow: "hidden",
+    boxShadow: isDark ? "0 18px 50px rgba(0,0,0,0.45)" : "none",
+  };
+
+  return (
+    <section style={panelStyle}>
+      <div
+        style={{
+          display: "grid",
+          gap: 18,
+          padding: 22,
+          background: palette.base,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                color: palette.brand,
+                fontFamily: fontFamilies.mono,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+              }}
+            >
+              Rezics
+            </div>
+            <h3
+              style={{
+                margin: "8px 0 0",
+                color: palette.brand,
+                fontFamily: fontFamilies.mono,
+                fontSize: 24,
+                fontWeight: 750,
+                letterSpacing: 0,
+                lineHeight: 1.16,
+              }}
+            >
+              Discover your next great read
+            </h3>
+          </div>
+          <FutureTokenPill
+            label={mode}
+            color={palette.textSecondary}
+            background={palette.subtle}
+          />
+        </div>
+
+        <p
+          style={{
+            margin: 0,
+            color: palette.textSecondary,
+            fontFamily: fontFamilies.sans,
+            fontSize: 14,
+            lineHeight: 1.55,
+            maxWidth: 540,
+          }}
+        >
+          Long-form content stays neutral. Inline references use{" "}
+          <a
+            href="#future-link"
+            className="rezics-color-demo-link rezics-color-demo-focus"
+            style={{
+              fontWeight: 500,
+            }}
+          >
+            link blue
+          </a>
+          , while product identity and primary action remain brand red.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) minmax(210px, 0.7fr)",
+            gap: 16,
+          }}
+        >
+          <div
+            style={{
+              borderLeft: `4px solid ${palette.brand}`,
+              background: palette.subtle,
+              padding: "12px 14px",
+            }}
+          >
+            <div
+              style={{
+                color: palette.text,
+                fontFamily: fontFamilies.mono,
+                fontSize: 18,
+                fontWeight: 700,
+                lineHeight: 1.3,
+              }}
+            >
+              Description
+            </div>
+            <div
+              style={{
+                marginTop: 8,
+                color: palette.textSecondary,
+                fontSize: 13,
+                lineHeight: 1.5,
+              }}
+            >
+              Accent marks, selected rails, logo text, and primary controls keep
+              the brand color.
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 8,
+              alignContent: "start",
+            }}
+          >
+            <FutureButton label="Add to Library" />
+            <a
+              href="#future-action"
+              className="rezics-color-demo-link rezics-color-demo-focus"
+              style={{
+                fontFamily: fontFamilies.sans,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              View all editions
+            </a>
+            <button
+              type="button"
+              style={{
+                appearance: "none",
+                border: 0,
+                background: "transparent",
+                color: palette.brand,
+                cursor: "pointer",
+                fontFamily: fontFamilies.sans,
+                fontSize: 13,
+                fontWeight: 650,
+                padding: 0,
+                textAlign: "left",
+              }}
+            >
+              Disclosure trigger · closed
+            </button>
+            <button
+              type="button"
+              style={{
+                appearance: "none",
+                border: 0,
+                background: "transparent",
+                color: palette.link,
+                cursor: "pointer",
+                fontFamily: fontFamilies.sans,
+                fontSize: 13,
+                fontWeight: 650,
+                padding: 0,
+                textAlign: "left",
+              }}
+            >
+              Disclosure control · open
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          borderTop: `1px solid ${palette.border}`,
+        }}
+      >
+        {[
+          ["brand", palette.brand, palette.canvas],
+          ["brand hover", palette.brandHover, palette.canvas],
+          ["brand active", palette.brandActive, palette.canvas],
+          ["link", palette.link, palette.canvas],
+        ].map(([label, color, bg]) => (
+          <div
+            key={label}
+            style={{
+              padding: 12,
+              borderRight: `1px solid ${palette.border}`,
+            }}
+          >
+            <div
+              style={{
+                height: 28,
+                borderRadius: radius.sm,
+                background: color,
+                marginBottom: 8,
+              }}
+            />
+            <div
+              style={{
+                fontFamily: fontFamilies.mono,
+                fontSize: 11,
+                color: palette.text,
+              }}
+            >
+              {label}
+            </div>
+            <div
+              style={{
+                marginTop: 2,
+                fontFamily: fontFamilies.mono,
+                fontSize: 10,
+                color: palette.textSecondary,
+              }}
+            >
+              {color} · {ratioLabel(color, bg)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function FutureColorSystemPreview() {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+        gap: 16,
+        margin: "20px 0",
+      }}
+    >
+      <style>{`
+        .rezics-color-demo-button {
+          background: var(--demo-brand, ${futureLight.brand});
+          transition: background 150ms ${easing.out}, transform 150ms ${easing.out};
+        }
+        .rezics-color-demo-button:hover {
+          background: var(--demo-brand-hover, ${futureLight.brandHover});
+        }
+        .rezics-color-demo-button:active {
+          background: var(--demo-brand-active, ${futureLight.brandActive});
+          transform: translateY(1px);
+        }
+        .rezics-color-demo-link {
+          color: var(--demo-link, ${futureLight.link});
+          text-decoration: none;
+          transition: color 150ms ${easing.out};
+        }
+        .rezics-color-demo-link:hover {
+          color: var(--demo-link-hover, ${futureLight.linkHover});
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+        .rezics-color-demo-link:active {
+          color: var(--demo-link-hover, ${futureLight.linkHover});
+        }
+        .rezics-color-demo-focus:focus-visible {
+          outline: 2px solid var(--demo-brand, ${futureLight.brand});
+          outline-offset: 2px;
+        }
+      `}</style>
+      <FuturePanel mode="Light" palette={futureLight} />
+      <FuturePanel mode="Dark" palette={futureDark} />
+    </div>
+  );
+}
+
+export function FutureInteractionStates() {
+  const rows = [
+    {
+      role: "Primary button",
+      rest: futureLight.brand,
+      hover: futureLight.brandHover,
+      active: futureLight.brandActive,
+      note: "Brand red remains the default CTA/action fill.",
+    },
+    {
+      role: "Text link",
+      rest: futureLight.link,
+      hover: futureLight.linkHover,
+      active: futureLight.linkHover,
+      note: "Blue handles textual navigation; hover also underlines.",
+    },
+    {
+      role: "Focus ring",
+      rest: futureLight.brand,
+      hover: futureLight.brand,
+      active: futureLight.brand,
+      note: "Keyboard focus can stay brand-led even when the label is blue.",
+    },
+  ];
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gap: 12,
+        margin: "16px 0",
+      }}
+    >
+      <style>{`
+        .rezics-future-link:hover {
+          color: var(--demo-link-hover);
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+        .rezics-future-button:hover {
+          background: var(--demo-brand-hover);
+        }
+        .rezics-future-button:active {
+          background: var(--demo-brand-active);
+          transform: translateY(1px);
+        }
+        .rezics-future-focus:focus-visible {
+          outline: 2px solid var(--demo-brand);
+          outline-offset: 2px;
+        }
+      `}</style>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.1fr repeat(3, minmax(110px, 0.7fr)) 1.5fr",
+          gap: 0,
+          border: "1px solid var(--colors-border-whisper)",
+          borderRadius: radius.md,
+          overflow: "hidden",
+          background: "var(--colors-surface-elevated)",
+        }}
+      >
+        {["Role", "Rest", "Hover", "Active", "Rule"].map((header) => (
+          <div
+            key={header}
+            style={{
+              padding: "10px 12px",
+              borderBottom: "1px solid var(--colors-border-whisper)",
+              background: "var(--colors-surface-subtle)",
+              color: "var(--colors-text-secondary)",
+              fontFamily: fontFamilies.mono,
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+            }}
+          >
+            {header}
+          </div>
+        ))}
+        {rows.map((row) => (
+          <Fragment key={row.role}>
+            <div
+              key={`${row.role}-role`}
+              style={{
+                padding: 12,
+                borderTop: "1px solid var(--colors-border-whisper)",
+                color: "var(--colors-text-primary)",
+                fontWeight: 600,
+              }}
+            >
+              {row.role}
+            </div>
+            {[
+              { label: "rest", color: row.rest },
+              { label: "hover", color: row.hover },
+              { label: "active", color: row.active },
+            ].map(({ label, color }) => (
+              <div
+                key={`${row.role}-${label}`}
+                style={{
+                  padding: 12,
+                  borderTop: "1px solid var(--colors-border-whisper)",
+                }}
+              >
+                <div
+                  style={{
+                    height: 28,
+                    borderRadius: radius.sm,
+                    background: color,
+                  }}
+                />
+                <div
+                  style={{
+                    marginTop: 5,
+                    color: "var(--colors-text-secondary)",
+                    fontFamily: fontFamilies.mono,
+                    fontSize: 11,
+                  }}
+                >
+                  {color}
+                </div>
+              </div>
+            ))}
+            <div
+              key={`${row.role}-note`}
+              style={{
+                padding: 12,
+                borderTop: "1px solid var(--colors-border-whisper)",
+                color: "var(--colors-text-secondary)",
+                fontSize: 13,
+                lineHeight: 1.45,
+              }}
+            >
+              {row.note}
+            </div>
+          </Fragment>
+        ))}
+      </div>
+
+      <div
+        style={{
+          "--demo-brand": futureLight.brand,
+          "--demo-brand-hover": futureLight.brandHover,
+          "--demo-brand-active": futureLight.brandActive,
+          "--demo-link": futureLight.link,
+          "--demo-link-hover": futureLight.linkHover,
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 12,
+          padding: 16,
+          border: "1px solid var(--colors-border-whisper)",
+          borderRadius: radius.md,
+          background: "var(--colors-surface-base)",
+        }}
+      >
+        <button
+          type="button"
+          className="rezics-future-button rezics-future-focus"
+          style={{
+            appearance: "none",
+            border: 0,
+            borderRadius: radius.md,
+            background: "var(--demo-brand)",
+            color: "#ffffff",
+            cursor: "pointer",
+            fontFamily: fontFamilies.sans,
+            fontSize: 13,
+            fontWeight: 650,
+            lineHeight: 1.4,
+            padding: "9px 14px",
+            transition: `background 150ms ${easing.out}, transform 150ms ${easing.out}`,
+          }}
+        >
+          Hover primary action
+        </button>
+        <a
+          href="#future-hover-link"
+          className="rezics-future-link rezics-future-focus"
+          style={{
+            color: "var(--demo-link)",
+            fontFamily: fontFamilies.sans,
+            fontSize: 13,
+            fontWeight: 600,
+            textDecoration: "none",
+            transition: `color 150ms ${easing.out}`,
+          }}
+        >
+          Hover text link
+        </a>
+        <button
+          type="button"
+          className="rezics-future-focus"
+          style={{
+            appearance: "none",
+            border: 0,
+            background: "transparent",
+            color: futureLight.brand,
+            cursor: "pointer",
+            fontFamily: fontFamilies.sans,
+            fontSize: 13,
+            fontWeight: 650,
+            padding: 0,
+          }}
+        >
+          Closed disclosure affordance
+        </button>
+        <button
+          type="button"
+          className="rezics-future-link rezics-future-focus"
+          style={{
+            appearance: "none",
+            border: 0,
+            background: "transparent",
+            color: "var(--demo-link)",
+            cursor: "pointer",
+            fontFamily: fontFamilies.sans,
+            fontSize: 13,
+            fontWeight: 650,
+            padding: 0,
+          }}
+        >
+          Open disclosure control
+        </button>
       </div>
     </div>
   );

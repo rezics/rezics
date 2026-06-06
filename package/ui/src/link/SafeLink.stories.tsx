@@ -36,7 +36,7 @@ function SafeLinkPreview({ href, label }: SafeLinkPreviewProps) {
         <div className="space-y-3">
           <SafeLink
             href={href}
-            className="text-text-brand hover:underline"
+            className="text-link hover:underline"
             linkRenderer={({ href, children, className, title, ...rest }) => (
               <StoryRouterLink
                 to={href}

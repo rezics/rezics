@@ -44,7 +44,7 @@ const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
       <a
         ref={ref}
         className={clsx(
-          "text-brand transition-colors hover:opacity-80",
+          "text-link transition-colors",
           underlineClass,
           variantClass,
           className,

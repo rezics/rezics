@@ -76,7 +76,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                           variant="ghost"
                           size="icon"
                           aria-label={t("shell:layout_footer_social_github")}
-                          className="text-text-brand"
+                          className="text-link"
                           render={
                             <a
                               href="https://github.com/REZICS"
@@ -101,7 +101,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                           variant="ghost"
                           size="icon"
                           aria-label={t("shell:layout_footer_social_telegram")}
-                          className="text-text-brand"
+                          className="text-link"
                           render={
                             <a
                               href="https://t.me/REZICSofficial"
