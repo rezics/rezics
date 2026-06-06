@@ -9,7 +9,7 @@ afterEach(() => {
 
 describe("feedApi", () => {
   test("requests feed rows with scope and sort", async () => {
-    const fetchMock = mock(async () => {
+    const fetchMock = mock(async (_input: Parameters<typeof fetch>[0]) => {
       return new Response(
         JSON.stringify({
           scope: "home",
@@ -24,8 +24,9 @@ describe("feedApi", () => {
 
     await feedApi.rows({ scope: "home", sort: "best", limit: 10 });
 
-    expect(fetchMock.mock.calls[0]?.[0]?.toString()).toContain("/feed/rows");
-    expect(fetchMock.mock.calls[0]?.[0]?.toString()).toContain("scope=home");
-    expect(fetchMock.mock.calls[0]?.[0]?.toString()).toContain("sort=best");
+    const requestUrl = fetchMock.mock.calls[0]?.[0]?.toString() ?? "";
+    expect(requestUrl).toContain("/feed/rows");
+    expect(requestUrl).toContain("scope=home");
+    expect(requestUrl).toContain("sort=best");
   });
 });

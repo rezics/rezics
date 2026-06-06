@@ -950,14 +950,15 @@ export class PostService {
         .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId))
         .where(countWhere),
     ]);
-    const sortValues = new Map(
-      rows.map(
-        (row: { unitId: string; sortValue?: number | string | null }) => [
-          row.unitId,
-          row.sortValue ?? null,
-        ],
-      ),
-    );
+    const sortValues = new Map<string, number | string | null>();
+    for (const row of rows as Array<{ unitId: string; sortValue?: unknown }>) {
+      sortValues.set(
+        row.unitId,
+        typeof row.sortValue === "number" || typeof row.sortValue === "string"
+          ? row.sortValue
+          : null,
+      );
+    }
     const posts = (
       await hydratePostsByUnitIds(
         rows.map((row: { unitId: string }) => row.unitId),

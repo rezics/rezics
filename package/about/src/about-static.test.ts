@@ -155,9 +155,9 @@ describe("@rezics/about locale contract", () => {
 
   test("does not describe the product directory CTA as a story", () => {
     for (const locale of ABOUT_LOCALES) {
-      expect(uiDictionaries[locale].cta.readProduct.toLowerCase()).not.toContain(
-        "story",
-      );
+      expect(
+        uiDictionaries[locale].cta.readProduct.toLowerCase(),
+      ).not.toContain("story");
     }
   });
 });

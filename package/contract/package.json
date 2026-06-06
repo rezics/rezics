@@ -18,6 +18,10 @@
       "types": "./src/language-core.ts",
       "default": "./src/language-core.ts"
     },
+    "./meili": {
+      "types": "./src/meili/index.ts",
+      "default": "./src/meili/index.ts"
+    },
     "./reaction": {
       "types": "./src/reaction/index.ts",
       "default": "./src/reaction/index.ts"

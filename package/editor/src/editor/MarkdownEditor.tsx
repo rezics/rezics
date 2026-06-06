@@ -1,4 +1,5 @@
 import { languages } from "@codemirror/language-data";
+import { placeholder as placeholderExtension } from "@codemirror/view";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fixedHeightEditor } from "../core/fixedHeight";
 import { resolvePlugins } from "../core/plugin";
@@ -37,6 +38,7 @@ function createMarkdownRenderer(config?: PreviewConfig) {
 export function MarkdownEditor({
   value,
   onChange,
+  placeholder,
   theme,
   className,
   keybindings,
@@ -153,10 +155,12 @@ export function MarkdownEditor({
     return entries;
   }, [allPlugins, toolbar, preview, viewMode]);
 
-  const editorExtensions = useMemo(
-    () => (resize ? [fixedHeightEditor] : undefined),
-    [resize],
-  );
+  const editorExtensions = useMemo(() => {
+    const extensions = [];
+    if (resize) extensions.push(fixedHeightEditor);
+    if (placeholder) extensions.push(placeholderExtension(placeholder));
+    return extensions.length > 0 ? extensions : undefined;
+  }, [resize, placeholder]);
 
   const { containerRef, view } = useEditor({
     doc: value,

@@ -70,6 +70,7 @@ function bookRow(unitId = "book-1"): BookWithRelations {
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       publishedAt: null,
       subscriberCount: 0,
+      referenceCount: 0,
       licenseSlug: null,
       aiDisclosureMode: "UNKNOWN",
       aiDisclosureDetails: null,

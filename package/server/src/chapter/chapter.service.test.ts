@@ -37,6 +37,7 @@ function chapterRow(
       updatedAt: now,
       publishedAt: null,
       subscriberCount: 0,
+      referenceCount: 0,
       licenseSlug: null,
       aiDisclosureMode: "UNKNOWN",
       aiDisclosureDetails: null,

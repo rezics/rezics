@@ -1,4 +1,4 @@
-import type { Static } from "elysia";
+import type { Static, TSchema } from "elysia";
 import { t } from "elysia";
 import { CommentSearchDocumentSchema } from "../meili/comment";
 import { ContentSearchDocumentSchema } from "../meili/content";
@@ -30,9 +30,7 @@ export type FederatedSearchOptions = Static<
 //   - "ranked"   → category === "mixed": single hits[] from Meilisearch federation
 //   - "single"   → any one category: paginated items[] for that category
 
-const FederatedSectionSchema = <T extends ReturnType<typeof t.Object>>(
-  itemSchema: T,
-) =>
+const FederatedSectionSchema = <T extends TSchema>(itemSchema: T) =>
   t.Object({
     totalHits: t.Number(),
     items: t.Array(itemSchema),

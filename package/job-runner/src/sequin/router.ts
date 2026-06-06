@@ -386,6 +386,7 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       ? scopeKey.slice("realm:".length)
       : undefined;
     const voteBucketCommands =
+      unitId !== undefined &&
       (reaction === "upvote" || reaction === "downvote") &&
       voteDelta !== undefined &&
       voteDelta !== 0
