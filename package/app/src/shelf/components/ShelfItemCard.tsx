@@ -1,4 +1,5 @@
 import type { ShelfItemDTO } from "@rezics/api/shelf";
+import { shelfItemReference } from "@rezics/contract";
 import { Badge } from "@rezics/ui/shadcn";
 
 interface ShelfItemCardProps {
@@ -6,10 +7,9 @@ interface ShelfItemCardProps {
 }
 
 export function ShelfItemCard({ unit }: ShelfItemCardProps) {
+  const ref = shelfItemReference(unit);
   const shortRef =
-    unit.unitId.length > 12
-      ? `${unit.unitId.slice(0, 8)}…${unit.unitId.slice(-4)}`
-      : unit.unitId;
+    ref.length > 12 ? `${ref.slice(0, 8)}…${ref.slice(-4)}` : ref;
 
   return (
     <div className="flex flex-row items-center gap-2 px-2 py-1">

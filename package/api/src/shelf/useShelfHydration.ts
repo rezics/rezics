@@ -6,6 +6,7 @@ import type {
   ShelfItemDTO,
   ShelfItemKind,
 } from "@rezics/contract";
+import { shelfItemReference } from "@rezics/contract";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { bookApi } from "../book/book.api";
@@ -184,7 +185,7 @@ export function useShelfHydration(units: ShelfItemDTO[]): ShelfHydrationResult {
     for (const unit of units) {
       const bucket =
         unit.itemType === "comment" ? "comment" : KIND_TO_BUCKET[unit.kind];
-      const id = unit.itemType === "comment" ? unit.itemId : unit.unitId;
+      const id = shelfItemReference(unit);
       if (bucket) ensureIds(bucket).add(id);
     }
 
@@ -313,12 +314,13 @@ export function useHydratedShelfItems(
     return units.map((unit) => {
       const bucket =
         unit.itemType === "comment" ? "comment" : KIND_TO_BUCKET[unit.kind];
+      const id = shelfItemReference(unit);
       let data: ShelfPrimaryDTO | undefined;
-      if (bucket === "book") data = bookMap.get(unit.unitId);
-      else if (bucket === "post") data = postMap.get(unit.unitId);
-      else if (bucket === "shelf") data = shelfMap.get(unit.unitId);
-      else if (bucket === "tag") data = tagMap.get(unit.unitId);
-      else if (bucket === "comment") data = commentMap.get(unit.itemId);
+      if (bucket === "book") data = bookMap.get(id);
+      else if (bucket === "post") data = postMap.get(id);
+      else if (bucket === "shelf") data = shelfMap.get(id);
+      else if (bucket === "tag") data = tagMap.get(id);
+      else if (bucket === "comment") data = commentMap.get(id);
       return { unit, data };
     });
   }, [units, buckets]);

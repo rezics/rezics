@@ -5,7 +5,8 @@ import { titleOf } from "./titleOf";
 function makeUnit(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
   return {
     shelfId: "s1",
-    unitId: "ref-1",
+    itemType: "unit",
+    itemId: "ref-1",
     kind: "book",
     position: "a",
     ...overrides,
@@ -14,7 +15,7 @@ function makeUnit(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
 
 describe("titleOf", () => {
   test("book with resolved title returns title", () => {
-    const unit = makeUnit({ kind: "book", unitId: "book-1" });
+    const unit = makeUnit({ kind: "book", itemId: "book-1" });
     const cached = {
       unitId: "book-1",
       resolvedLanguage: "en",
@@ -25,7 +26,7 @@ describe("titleOf", () => {
   });
 
   test("review with resolved title returns title", () => {
-    const unit = makeUnit({ kind: "review", unitId: "rev-1" });
+    const unit = makeUnit({ kind: "review", itemId: "rev-1" });
     const cached = {
       unitId: "rev-1",
       authorUserId: "u1",
@@ -35,7 +36,7 @@ describe("titleOf", () => {
   });
 
   test("review falls back to unitId when resolved title is absent", () => {
-    const unit = makeUnit({ kind: "review", unitId: "rev-2" });
+    const unit = makeUnit({ kind: "review", itemId: "rev-2" });
     const cached = {
       unitId: "rev-2",
       authorUserId: "u1",
@@ -44,7 +45,7 @@ describe("titleOf", () => {
   });
 
   test("tag with translations returns translation title", () => {
-    const unit = makeUnit({ kind: "tag", unitId: "tag-1" });
+    const unit = makeUnit({ kind: "tag", itemId: "tag-1" });
     const cached = {
       unitId: "tag-1",
       translations: [{ language: "en", title: "fantasy" }],
@@ -53,18 +54,18 @@ describe("titleOf", () => {
   });
 
   test("tag with label only returns label", () => {
-    const unit = makeUnit({ kind: "tag", unitId: "tag-2" });
+    const unit = makeUnit({ kind: "tag", itemId: "tag-2" });
     const cached = { unitId: "tag-2", label: "sci-fi", translations: [] };
     expect(titleOf(unit, cached)).toBe("sci-fi");
   });
 
   test("unsupported kind returns unitId", () => {
-    const unit = makeUnit({ kind: "game", unitId: "game-1" });
+    const unit = makeUnit({ kind: "game", itemId: "game-1" });
     expect(titleOf(unit, undefined)).toBe("game-1");
   });
 
   test("missing cache returns unitId", () => {
-    const unit = makeUnit({ kind: "book", unitId: "book-x" });
+    const unit = makeUnit({ kind: "book", itemId: "book-x" });
     expect(titleOf(unit, undefined)).toBe("book-x");
   });
 });

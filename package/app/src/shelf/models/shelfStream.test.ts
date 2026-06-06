@@ -3,8 +3,8 @@ import type { EnrichedShelfItem } from "@rezics/api/shelf";
 import type {
   BookDTO,
   PostDTO,
-  ShelfItemDTO,
   ShelfItemChildDTO,
+  ShelfItemDTO,
 } from "@rezics/contract";
 import { deriveShelfStream, type ShelfStreamEntry } from "./shelfStream";
 
@@ -18,7 +18,8 @@ const titleDesc = { field: "title", order: "desc" } as const;
 function makeUnit(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
   return {
     shelfId: "s1",
-    unitId: "u-1",
+    itemType: "unit",
+    itemId: "u-1",
     kind: "book",
     position: "a",
     ...overrides,
@@ -61,7 +62,8 @@ function buildScene(roots: RootSpec[]): {
     units.push({
       unit: makeUnit({
         shelfId: "s1",
-        unitId: root.unitId,
+        itemType: "unit",
+        itemId: root.unitId,
         kind: "book",
         position: root.position ?? "a",
         ...(root.createdAt ? { createdAt: root.createdAt } : {}),
@@ -74,7 +76,8 @@ function buildScene(roots: RootSpec[]): {
       units.push({
         unit: makeUnit({
           shelfId: "s1",
-          unitId: review.unitId,
+          itemType: "unit",
+          itemId: review.unitId,
           kind: "review",
           position: reviewPosition,
           ...(root.createdAt ? { createdAt: root.createdAt } : {}),
@@ -83,8 +86,10 @@ function buildScene(roots: RootSpec[]): {
       });
       relations.push({
         shelfId: "s1",
-        parentUnitId: root.unitId,
-        childUnitId: review.unitId,
+        parentItemType: "unit",
+        parentItemId: root.unitId,
+        childItemType: "unit",
+        childItemId: review.unitId,
         role: "review",
       });
     }
@@ -94,7 +99,7 @@ function buildScene(roots: RootSpec[]): {
 }
 
 function idsOf(stream: ShelfStreamEntry[]): string[] {
-  return stream.map((entry) => entry.unit.unit.unitId);
+  return stream.map((entry) => entry.unit.unit.itemId);
 }
 
 describe("deriveShelfStream — nested mode", () => {
@@ -131,7 +136,7 @@ describe("deriveShelfStream — nested mode", () => {
     expect(idsOf(stream)).toEqual(["book-a", "book-b", "book-c"]);
     const first = stream[0]!;
     if (first.kind === "root") {
-      expect(first.children.map((c) => c.unit.unitId)).toEqual([
+      expect(first.children.map((c) => c.unit.itemId)).toEqual([
         "r-a1",
         "r-a2",
       ]);
@@ -146,7 +151,8 @@ describe("deriveShelfStream — nested mode", () => {
     units.push({
       unit: makeUnit({
         shelfId: "s1",
-        unitId: "r-shared",
+        itemType: "unit",
+        itemId: "r-shared",
         kind: "review",
         position: "a~00",
       }),
@@ -155,14 +161,18 @@ describe("deriveShelfStream — nested mode", () => {
     relations.push(
       {
         shelfId: "s1",
-        parentUnitId: "book-a",
-        childUnitId: "r-shared",
+        parentItemType: "unit",
+        parentItemId: "book-a",
+        childItemType: "unit",
+        childItemId: "r-shared",
         role: "review",
       },
       {
         shelfId: "s1",
-        parentUnitId: "book-b",
-        childUnitId: "r-shared",
+        parentItemType: "unit",
+        parentItemId: "book-b",
+        childItemType: "unit",
+        childItemId: "r-shared",
         role: "review",
       },
     );
@@ -178,33 +188,47 @@ describe("deriveShelfStream — nested mode", () => {
     expect(idsOf(stream)).toEqual(["book-a", "book-b"]);
     const [a, b] = stream;
     if (a?.kind === "root" && b?.kind === "root") {
-      expect(a.children.map((c) => c.unit.unitId)).toEqual(["r-shared"]);
-      expect(b.children.map((c) => c.unit.unitId)).toEqual(["r-shared"]);
+      expect(a.children.map((c) => c.unit.itemId)).toEqual(["r-shared"]);
+      expect(b.children.map((c) => c.unit.itemId)).toEqual(["r-shared"]);
     }
   });
 
   test("two-step cycle (A ↔ B as each other's children) renders no roots", () => {
     const units: EnrichedShelfItem[] = [
       {
-        unit: makeUnit({ unitId: "book-a", kind: "book", position: "a" }),
+        unit: makeUnit({
+          itemType: "unit",
+          itemId: "book-a",
+          kind: "book",
+          position: "a",
+        }),
         data: makeBook("book-a", "Apple"),
       },
       {
-        unit: makeUnit({ unitId: "book-b", kind: "book", position: "b" }),
+        unit: makeUnit({
+          itemType: "unit",
+          itemId: "book-b",
+          kind: "book",
+          position: "b",
+        }),
         data: makeBook("book-b", "Banana"),
       },
     ];
     const relations: ShelfItemChildDTO[] = [
       {
         shelfId: "s1",
-        parentUnitId: "book-a",
-        childUnitId: "book-b",
+        parentItemType: "unit",
+        parentItemId: "book-a",
+        childItemType: "unit",
+        childItemId: "book-b",
         role: "review",
       },
       {
         shelfId: "s1",
-        parentUnitId: "book-b",
-        childUnitId: "book-a",
+        parentItemType: "unit",
+        parentItemId: "book-b",
+        childItemType: "unit",
+        childItemId: "book-a",
         role: "review",
       },
     ];
@@ -293,7 +317,8 @@ describe("deriveShelfStream — flat emission", () => {
     ]);
     units.push({
       unit: makeUnit({
-        unitId: "r-shared",
+        itemType: "unit",
+        itemId: "r-shared",
         kind: "review",
         position: "a~00",
       }),
@@ -302,14 +327,18 @@ describe("deriveShelfStream — flat emission", () => {
     relations.push(
       {
         shelfId: "s1",
-        parentUnitId: "book-a",
-        childUnitId: "r-shared",
+        parentItemType: "unit",
+        parentItemId: "book-a",
+        childItemType: "unit",
+        childItemId: "r-shared",
         role: "review",
       },
       {
         shelfId: "s1",
-        parentUnitId: "book-b",
-        childUnitId: "r-shared",
+        parentItemType: "unit",
+        parentItemId: "book-b",
+        childItemType: "unit",
+        childItemId: "r-shared",
         role: "review",
       },
     );
@@ -323,7 +352,7 @@ describe("deriveShelfStream — flat emission", () => {
     );
 
     const sharedAppearances = stream.filter(
-      (entry) => entry.unit.unit.unitId === "r-shared",
+      (entry) => entry.unit.unit.itemId === "r-shared",
     );
     expect(sharedAppearances).toHaveLength(1);
     expect(stream).toHaveLength(3);
@@ -489,8 +518,8 @@ describe("deriveShelfStream — sort scope and invariants", () => {
     expect(child).toBeTruthy();
     if (child?.kind === "child") {
       expect(child.parentUnitId).toBe("book-a");
-      expect(child.parent?.unit.unitId).toBe("book-a");
-      expect(child.unit.unit.unitId).toBe("r-a1");
+      expect(child.parent?.unit.itemId).toBe("book-a");
+      expect(child.unit.unit.itemId).toBe("r-a1");
     }
   });
 });

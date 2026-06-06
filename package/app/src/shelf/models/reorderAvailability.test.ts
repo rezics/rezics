@@ -14,7 +14,8 @@ const title = { field: "title", order: "asc" } satisfies ShelfSortState;
 function makeEnriched(unitId: string): EnrichedShelfItem {
   const unit: ShelfItemDTO = {
     shelfId: "shelf-1",
-    unitId,
+    itemType: "unit",
+    itemId: unitId,
     kind: "book",
     position: "a",
   };

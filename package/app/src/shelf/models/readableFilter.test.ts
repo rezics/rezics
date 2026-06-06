@@ -8,7 +8,8 @@ function peerEntry(kind: string, isLicensed?: boolean): ShelfStreamEntry {
     unit: {
       unit: {
         shelfId: "shelf-1",
-        unitId: `unit-${kind}-${String(isLicensed)}`,
+        itemType: "unit",
+        itemId: `unit-${kind}-${String(isLicensed)}`,
         kind,
         position: "a",
       },

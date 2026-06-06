@@ -41,7 +41,18 @@ async function getServerDb() {
   return db;
 }
 
-type TrendRow = { date: Date; count: bigint };
+type TrendRow = { date: Date | string; count: bigint };
+
+function trendDateKey(value: Date | string): string {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Invalid trend date: ${value}`);
+  }
+  return date.toISOString().slice(0, 10);
+}
 
 async function loadContentTrendRows(
   tableName: "Book" | "Post",
@@ -157,20 +168,14 @@ export class StatsService {
 
   private buildContentTrend(
     startDate: Date,
-    bookTrend: { date: Date; count: bigint }[],
-    postTrend: { date: Date; count: bigint }[],
+    bookTrend: TrendRow[],
+    postTrend: TrendRow[],
   ): AdminStatsResponse["contentTrend"] {
     const bookMap = new Map(
-      bookTrend.map((r) => [
-        r.date.toISOString().slice(0, 10),
-        Number(r.count),
-      ]),
+      bookTrend.map((r) => [trendDateKey(r.date), Number(r.count)]),
     );
     const postMap = new Map(
-      postTrend.map((r) => [
-        r.date.toISOString().slice(0, 10),
-        Number(r.count),
-      ]),
+      postTrend.map((r) => [trendDateKey(r.date), Number(r.count)]),
     );
 
     const result: AdminStatsResponse["contentTrend"] = [];

@@ -1209,16 +1209,14 @@ describe("ShelfService", () => {
     );
     const result = await shelfService.getShelfItems("shelf-1", { limit: 20 });
 
-    expect(result.items.map((item) => item.itemId)).toEqual([
-      "book-a",
-      "book-b",
-      "review-b",
-      "review-a",
-    ]);
-    expect(result.relations.map((relation) => relation.parentItemId)).toEqual([
-      "book-b",
-      "book-a",
-    ]);
+    expect(result.items.map((item: { itemId: string }) => item.itemId)).toEqual(
+      ["book-a", "book-b", "review-b", "review-a"],
+    );
+    expect(
+      result.relations.map(
+        (relation: { parentItemId: string }) => relation.parentItemId,
+      ),
+    ).toEqual(["book-b", "book-a"]);
     expect(calls).toHaveLength(2);
   });
 

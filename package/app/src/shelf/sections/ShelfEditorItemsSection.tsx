@@ -33,7 +33,12 @@ import {
 } from "@dnd-kit/sortable";
 import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
 import { useHydratedShelfItems } from "@rezics/api/shelf";
-import type { ShelfDTO, ShelfItemKind } from "@rezics/contract";
+import {
+  type ShelfDTO,
+  type ShelfItemKind,
+  shelfItemIdentity,
+  shelfItemReference,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -120,14 +125,14 @@ function candidateKindToShelfItemKind(kind: string): ShelfItemKind {
 }
 
 function entryUnitId(entry: ShelfStreamEntry): string {
-  return entry.unit.unit.unitId;
+  return shelfItemReference(entry.unit.unit);
 }
 
 function streamEntryRowId(entry: ShelfStreamEntry): string {
   if (entry.kind === "child") {
-    return `${entry.parentUnitId}:${entry.unit.unit.unitId}`;
+    return `${entry.parentUnitId}:${shelfItemIdentity(entry.unit.unit)}`;
   }
-  return entry.unit.unit.unitId;
+  return shelfItemIdentity(entry.unit.unit);
 }
 
 function isEditorMode(value: string | undefined): value is EditorMode {

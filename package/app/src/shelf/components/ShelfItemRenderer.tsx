@@ -11,7 +11,13 @@ import type {
   UnitDTO,
   UnitTagDTO,
 } from "@rezics/contract";
-import { contentDocMarkdownFallback, isLibraryKind } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  isLibraryKind,
+  shelfItemIdentity,
+  shelfItemReference,
+  shelfItemUnitId,
+} from "@rezics/contract";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
@@ -63,12 +69,13 @@ function renderUnit(
   if (viewMode === "bookshelf") {
     if (!isLibraryKind(unit.kind)) return null;
     const book = data as BookDTO | undefined;
+    const unitId = shelfItemUnitId(unit) ?? shelfItemReference(unit);
     return (
       <BookCard
-        title={book?.title ?? unit.unitId}
+        title={book?.title ?? unitId}
         author={book ? getBookAuthorName(book) || undefined : undefined}
         coverUrl={book?.coverUrl ?? ""}
-        href={`/book/${unit.unitId}`}
+        href={`/book/${unitId}`}
         showTitle
         aspectRatio={aspectRatioForKind(unit.kind)}
       />
@@ -79,12 +86,13 @@ function renderUnit(
     case "book": {
       const book = data as BookDTO | undefined;
       if (!book) return <ShelfItemCard unit={unit} />;
-      const title = book.title ?? unit.unitId;
+      const unitId = shelfItemUnitId(unit) ?? shelfItemReference(unit);
+      const title = book.title ?? unitId;
       const description =
         contentDocMarkdownFallback(book.description) ?? undefined;
       const author = getBookAuthorName(book) || undefined;
       const coverUrl = book.coverUrl ?? "";
-      const href = `/book/${unit.unitId}`;
+      const href = `/book/${unitId}`;
       if (viewMode === "masonry") {
         return (
           <BookCard
@@ -162,7 +170,7 @@ function renderUnit(
 function getBookTitle(enriched: EnrichedShelfItem | undefined): string | null {
   if (!enriched || enriched.unit.kind !== "book") return null;
   const book = enriched.data as BookDTO | undefined;
-  return book?.title ?? enriched.unit.unitId;
+  return book?.title ?? shelfItemReference(enriched.unit);
 }
 
 function targetUnitFromParent(
@@ -171,7 +179,7 @@ function targetUnitFromParent(
   const title = getBookTitle(parent);
   if (!parent || !title) return undefined;
   return {
-    unitId: parent.unit.unitId,
+    unitId: shelfItemUnitId(parent.unit) ?? shelfItemReference(parent.unit),
     title,
   };
 }
@@ -221,7 +229,10 @@ function NestedRootCard({
             {reviewChildren.map((c, idx) => {
               const post = c.data as PostDTO | undefined;
               return (
-                <TabsTrigger key={c.unit.unitId} value={String(idx)}>
+                <TabsTrigger
+                  key={shelfItemIdentity(c.unit)}
+                  value={String(idx)}
+                >
                   {post?.title ?? `Review ${idx + 1}`}
                 </TabsTrigger>
               );
