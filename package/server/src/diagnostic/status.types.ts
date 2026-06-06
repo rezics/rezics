@@ -121,9 +121,18 @@ export interface CdcStatus {
   routedTables: string[];
   publicationTables: string[];
   missingTables: string[];
+  extraTables?: string[];
   slotName?: string | null;
   slotExists?: boolean;
   slotActive?: boolean | null;
+  slotActivePid?: number | null;
+  restartLsn?: string | null;
+  maxReplicationSlots?: number | null;
+  usedReplicationSlots?: number | null;
+  availableReplicationSlots?: number | null;
+  maxWalSenders?: number | null;
+  activeWalSenders?: number | null;
+  availableWalSenders?: number | null;
   confirmedFlushLsn?: string | null;
   lagBytes?: number | null;
 }
@@ -140,15 +149,38 @@ export interface HistoryOutboxFailedSummary {
   createdAt?: string | null;
 }
 
+export interface HistoryOutboxPendingSummary {
+  id: string;
+  unitId: string;
+  sequence: string;
+  category: string;
+  attempts: number;
+  nextAttemptAt?: string | null;
+  createdAt?: string | null;
+}
+
 export interface HistoryOutboxStatus {
   item: StatusItem;
   counts: Record<string, number>;
+  pendingAgeBuckets?: {
+    under5m: number;
+    under1h: number;
+    under24h: number;
+    over24h: number;
+  };
   pending: number;
   failed: number;
   processing: number;
   completed: number;
   retryReady: number;
+  oldestPendingCreatedAt?: string | null;
+  newestPendingCreatedAt?: string | null;
+  recentCreatedAt?: string | null;
+  recentProcessedAt?: string | null;
+  pendingWithoutIngestJob?: boolean;
+  recentPending: HistoryOutboxPendingSummary[];
   recentFailed: HistoryOutboxFailedSummary[];
+  retryReadyFailed: HistoryOutboxFailedSummary[];
 }
 
 export interface SystemStatusSummary {

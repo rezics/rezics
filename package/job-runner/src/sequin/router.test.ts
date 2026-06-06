@@ -70,16 +70,64 @@ describe("Sequin payload routing", () => {
     const messages = parseSequinPayload({
       table: "ReactionSummary",
       action: "delete",
-      record: { targetId: "unit-1", reaction: "upvote" },
+      record: { targetId: "unit-1", reaction: "upvote", count: 1 },
     });
 
     expect(routeSequinMessages(messages)).toMatchObject([
+      {
+        kind: "ranking.reactionBucket",
+        lane: "ranking",
+        payload: {
+          targetId: "unit-1",
+          scopeKey: "global",
+          reaction: "upvote",
+          count: -1,
+        },
+      },
       {
         kind: "ranking.invalidate",
         lane: "ranking",
         payload: { unitId: "unit-1", reason: "ReactionSummary CDC" },
       },
     ]);
+  });
+
+  test("routes ReactionSummary update deltas into ranking vote buckets", () => {
+    const messages = parseSequinPayload({
+      table: "ReactionSummary",
+      action: "update",
+      record: {
+        targetId: "unit-1",
+        scopeKey: "realm:realm-1",
+        reaction: "downvote",
+        count: 3,
+      },
+      changes: { count: 1 },
+      commit_timestamp: "2026-02-01T10:25:00.000Z",
+    });
+
+    expect(routeSequinMessages(messages)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "ranking.reactionBucket",
+          payload: {
+            targetId: "unit-1",
+            scopeKey: "realm:realm-1",
+            reaction: "downvote",
+            count: 2,
+            at: "2026-02-01T10:25:00.000Z",
+          },
+        }),
+        expect.objectContaining({
+          kind: "ranking.invalidate",
+          payload: {
+            unitId: "unit-1",
+            scope: { kind: "realm", id: "realm-1" },
+            reason: "ReactionSummary realm CDC",
+          },
+        }),
+      ]),
+    );
   });
 
   test("routes unit metadata changes to direct target fanouts", () => {
@@ -92,6 +140,29 @@ describe("Sequin payload routing", () => {
     expect(routeSequinMessages(messages)).toMatchObject([
       { kind: "search.content.patchTranslations" },
       { kind: "search.post.patchTargetFanout" },
+      {
+        kind: "search.shelfItem.sourceFanout",
+        payload: { itemType: "unit", itemId: "work-1" },
+      },
+    ]);
+  });
+
+  test("routes ShelfItem changes to shelf item sync and shelf contained-unit patch", () => {
+    const messages = parseSequinPayload({
+      table: "ShelfItem",
+      action: "insert",
+      record: { shelfId: "shelf-1", itemType: "unit", itemId: "unit-1" },
+    });
+
+    expect(routeSequinMessages(messages)).toMatchObject([
+      {
+        kind: "search.shelfItem.sync",
+        payload: { shelfId: "shelf-1", itemType: "unit", itemId: "unit-1" },
+      },
+      {
+        kind: "search.content.patchContainedUnitIds",
+        payload: { unitId: "shelf-1" },
+      },
     ]);
   });
 
@@ -125,6 +196,10 @@ describe("Sequin payload routing", () => {
       {
         kind: "search.comment.sync",
         payload: { commentId: "comment-1" },
+      },
+      {
+        kind: "search.shelfItem.sourceFanout",
+        payload: { itemType: "comment", itemId: "comment-1" },
       },
     ]);
   });

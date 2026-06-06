@@ -8,6 +8,7 @@ export type {
   AdminRepairJobScope,
   AdminRepairJobStartRequest,
   AdminRepairJobStatus,
+  HistoryOutboxRepairStatus,
 } from "@rezics/contract";
 export { adminRepairJobApi } from "./admin-repair-job.api";
 export { adminRepairJobKeys } from "./admin-repair-job.keys";

@@ -1,4 +1,5 @@
 import { type SQL, sql } from "drizzle-orm";
+import { ROUTED_SEQUIN_TABLES } from "@rezics/job";
 import { db } from "../db/client";
 import { env } from "../env";
 import type {
@@ -19,26 +20,6 @@ type MeiliStatusSummary = Awaited<
 
 const DEFAULT_TIMEOUT_MS = 2_500;
 const DEFAULT_LAG_WARNING_BYTES = 256 * 1024 * 1024;
-
-const ROUTED_SEQUIN_TABLES = [
-  "HistoryOutbox",
-  "Unit",
-  "UnitTranslation",
-  "UnitTag",
-  "TagVote",
-  "UnitAlias",
-  "CreditAttribution",
-  "SubjectAttribution",
-  "UnitRealm",
-  "RealmTagApplication",
-  "ShelfUnit",
-  "Post",
-  "ScoreEntry",
-  "ScoreAggregate",
-  "User",
-  "UserUnitProgress",
-  "Feedback",
-] as const;
 
 type FetchLike = typeof fetch;
 
@@ -298,11 +279,49 @@ async function getCdcStatus(options: {
   };
 
   try {
-    const [walRows, publicationRows, slotRows] = await Promise.all([
+    const [
+      walRows,
+      maxSlotRows,
+      usedSlotRows,
+      maxWalSenderRows,
+      activeWalSenderRows,
+      publicationRows,
+      slotRows,
+    ] = await Promise.all([
       timeout(
         queryRows<{ wal_level: string }>(
           options.queryClient,
           sql`SHOW wal_level`,
+        ),
+        options.timeoutMs,
+      ),
+      timeout(
+        queryRows<{ max_replication_slots: string }>(
+          options.queryClient,
+          sql`SHOW max_replication_slots`,
+        ),
+        options.timeoutMs,
+      ),
+      timeout(
+        queryRows<{ used_replication_slots: number }>(
+          options.queryClient,
+          sql`SELECT COUNT(*)::int AS used_replication_slots
+             FROM pg_replication_slots`,
+        ),
+        options.timeoutMs,
+      ),
+      timeout(
+        queryRows<{ max_wal_senders: string }>(
+          options.queryClient,
+          sql`SHOW max_wal_senders`,
+        ),
+        options.timeoutMs,
+      ),
+      timeout(
+        queryRows<{ active_wal_senders: number }>(
+          options.queryClient,
+          sql`SELECT COUNT(*)::int AS active_wal_senders
+             FROM pg_stat_replication`,
         ),
         options.timeoutMs,
       ),
@@ -321,11 +340,14 @@ async function getCdcStatus(options: {
         queryRows<{
           slot_name: string;
           active: boolean | null;
+          active_pid: number | null;
+          restart_lsn: string | null;
           confirmed_flush_lsn: string | null;
           lag_bytes: bigint | number | null;
         }>(
           options.queryClient,
-          sql`SELECT slot_name, active, confirmed_flush_lsn::text AS confirmed_flush_lsn,
+          sql`SELECT slot_name, active, active_pid, restart_lsn::text AS restart_lsn,
+                  confirmed_flush_lsn::text AS confirmed_flush_lsn,
                   pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)::bigint AS lag_bytes
            FROM pg_replication_slots
            WHERE slot_name = ${slotName}`,
@@ -339,19 +361,43 @@ async function getCdcStatus(options: {
     const missingTables = ROUTED_SEQUIN_TABLES.filter(
       (table) => !publicationTables.includes(table),
     );
+    const extraTables = publicationTables.filter(
+      (table) => !ROUTED_SEQUIN_TABLES.includes(table as any),
+    );
     const slot = slotRows[0];
     const lagBytes =
       typeof slot?.lag_bytes === "bigint"
         ? Number(slot.lag_bytes)
         : (slot?.lag_bytes ?? null);
+    const maxReplicationSlots = Number(
+      maxSlotRows[0]?.max_replication_slots ?? Number.NaN,
+    );
+    const usedReplicationSlots =
+      usedSlotRows[0]?.used_replication_slots ?? null;
+    const availableReplicationSlots =
+      Number.isFinite(maxReplicationSlots) && usedReplicationSlots !== null
+        ? Math.max(maxReplicationSlots - usedReplicationSlots, 0)
+        : null;
+    const maxWalSenders = Number(
+      maxWalSenderRows[0]?.max_wal_senders ?? Number.NaN,
+    );
+    const activeWalSenders = activeWalSenderRows[0]?.active_wal_senders ?? null;
+    const availableWalSenders =
+      Number.isFinite(maxWalSenders) && activeWalSenders !== null
+        ? Math.max(maxWalSenders - activeWalSenders, 0)
+        : null;
     const warnings = [
       walLevel !== "logical" ? "wal_level 不是 logical" : null,
       publicationRows.length === 0 ? "publication 不存在或沒有資料表" : null,
       missingTables.length > 0 ? "publication 缺少已路由資料表" : null,
+      extraTables.length > 0 ? "publication 包含未路由資料表" : null,
       !slot ? "replication slot 不存在" : null,
       slot && slot.active === false ? "replication slot 未啟用" : null,
       typeof lagBytes === "number" && lagBytes > lagWarningBytes
         ? "replication slot lag 過高"
+        : null,
+      availableWalSenders !== null && availableWalSenders <= 0
+        ? "walsender 已無可用容量"
         : null,
     ].filter(Boolean);
 
@@ -368,8 +414,19 @@ async function getCdcStatus(options: {
       publicationExists: publicationRows.length > 0,
       publicationTables,
       missingTables,
+      extraTables,
       slotExists: Boolean(slot),
       slotActive: slot?.active ?? null,
+      slotActivePid: slot?.active_pid ?? null,
+      restartLsn: slot?.restart_lsn ?? null,
+      maxReplicationSlots: Number.isFinite(maxReplicationSlots)
+        ? maxReplicationSlots
+        : null,
+      usedReplicationSlots,
+      availableReplicationSlots,
+      maxWalSenders: Number.isFinite(maxWalSenders) ? maxWalSenders : null,
+      activeWalSenders,
+      availableWalSenders,
       confirmedFlushLsn: slot?.confirmed_flush_lsn ?? null,
       lagBytes,
     };
@@ -407,12 +464,75 @@ function isoField(row: Record<string, unknown>, key: string) {
   return typeof value === "string" ? value : null;
 }
 
+function mapHistoryOutboxSummary(row: Record<string, unknown>) {
+  return {
+    id: stringField(row, "id"),
+    unitId: stringField(row, "unitId"),
+    sequence: stringField(row, "sequence"),
+    category: stringField(row, "category"),
+    attempts: numberField(row, "attempts"),
+    nextAttemptAt: isoField(row, "nextAttemptAt"),
+    processedAt: isoField(row, "processedAt"),
+    lastError:
+      typeof row.lastError === "string" ? row.lastError.slice(0, 240) : null,
+    createdAt: isoField(row, "createdAt"),
+  };
+}
+
+function hasHistoryIngestQueueActivity(queue: QueueStatus): boolean {
+  const hasQueuedOrActiveIngest = queue.counts.some(
+    (row) =>
+      row.lane === "history.ingest" && row.created + row.retry + row.active > 0,
+  );
+  if (hasQueuedOrActiveIngest) return true;
+  return queue.failedJobs.some(
+    (job) => job.commandKind === "history.outbox.ingest",
+  );
+}
+
+function correlateHistoryOutboxWithQueue(
+  historyOutbox: HistoryOutboxStatus,
+  queue: QueueStatus,
+): HistoryOutboxStatus {
+  if (
+    historyOutbox.pending === 0 ||
+    queue.item.status === "unknown" ||
+    queue.item.status === "unavailable" ||
+    hasHistoryIngestQueueActivity(queue)
+  ) {
+    return historyOutbox;
+  }
+
+  const reason = "HistoryOutbox has pending rows but no history.ingest work";
+  return {
+    ...historyOutbox,
+    pendingWithoutIngestJob: true,
+    item: {
+      ...historyOutbox.item,
+      status: "degraded",
+      reason: historyOutbox.item.reason
+        ? `${historyOutbox.item.reason}; ${reason}`
+        : reason,
+      remediation:
+        historyOutbox.item.remediation ??
+        "Check Sequin delivery and replay missed HistoryOutbox rows.",
+    },
+  };
+}
+
 async function getHistoryOutboxStatus(options: {
   queryClient: QueryClient;
   timeoutMs: number;
 }): Promise<HistoryOutboxStatus> {
   try {
-    const [countRows, recentRows] = await timeout(
+    const [
+      countRows,
+      ageRows,
+      activityRows,
+      recentPendingRows,
+      recentFailedRows,
+      retryReadyFailedRows,
+    ] = await timeout(
       Promise.all([
         queryRows<Record<string, unknown>>(
           options.queryClient,
@@ -423,11 +543,66 @@ async function getHistoryOutboxStatus(options: {
         ),
         queryRows<Record<string, unknown>>(
           options.queryClient,
+          sql`SELECT
+                  COUNT(*) FILTER (
+                    WHERE status = 'pending'
+                      AND "createdAt" >= now() - interval '5 minutes'
+                  )::int AS pending_under_5m,
+                  COUNT(*) FILTER (
+                    WHERE status = 'pending'
+                      AND "createdAt" >= now() - interval '1 hour'
+                      AND "createdAt" < now() - interval '5 minutes'
+                  )::int AS pending_under_1h,
+                  COUNT(*) FILTER (
+                    WHERE status = 'pending'
+                      AND "createdAt" >= now() - interval '24 hours'
+                      AND "createdAt" < now() - interval '1 hour'
+                  )::int AS pending_under_24h,
+                  COUNT(*) FILTER (
+                    WHERE status = 'pending'
+                      AND "createdAt" < now() - interval '24 hours'
+                  )::int AS pending_over_24h,
+                  MIN("createdAt") FILTER (WHERE status = 'pending') AS oldest_pending_created_at,
+                  MAX("createdAt") FILTER (WHERE status = 'pending') AS newest_pending_created_at,
+                  COUNT(*) FILTER (
+                    WHERE status IN ('pending', 'failed')
+                      AND ("nextAttemptAt" IS NULL OR "nextAttemptAt" <= now())
+                  )::int AS retry_ready
+           FROM "HistoryOutbox"`,
+        ),
+        queryRows<Record<string, unknown>>(
+          options.queryClient,
+          sql`SELECT
+                  MAX("createdAt") AS recent_created_at,
+                  MAX("processedAt") AS recent_processed_at
+           FROM "HistoryOutbox"`,
+        ),
+        queryRows<Record<string, unknown>>(
+          options.queryClient,
+          sql`SELECT id, "unitId", sequence::text AS sequence, category, status,
+                  attempts, "nextAttemptAt", "processedAt", "lastError", "createdAt"
+           FROM "HistoryOutbox"
+           WHERE status = 'pending'
+           ORDER BY "createdAt" DESC
+           LIMIT 10`,
+        ),
+        queryRows<Record<string, unknown>>(
+          options.queryClient,
           sql`SELECT id, "unitId", sequence::text AS sequence, category, status,
                   attempts, "nextAttemptAt", "processedAt", "lastError", "createdAt"
            FROM "HistoryOutbox"
            WHERE status = 'failed'
            ORDER BY "updatedAt" DESC
+           LIMIT 10`,
+        ),
+        queryRows<Record<string, unknown>>(
+          options.queryClient,
+          sql`SELECT id, "unitId", sequence::text AS sequence, category, status,
+                  attempts, "nextAttemptAt", "processedAt", "lastError", "createdAt"
+           FROM "HistoryOutbox"
+           WHERE status = 'failed'
+             AND ("nextAttemptAt" IS NULL OR "nextAttemptAt" <= now())
+           ORDER BY "createdAt" ASC
            LIMIT 10`,
         ),
       ]),
@@ -444,7 +619,9 @@ async function getHistoryOutboxStatus(options: {
     const failed = counts.failed ?? 0;
     const processing = counts.processing ?? 0;
     const completed = counts.completed ?? 0;
-    const retryReady = pending;
+    const age = ageRows[0] ?? {};
+    const activity = activityRows[0] ?? {};
+    const retryReady = numberField(age, "retry_ready");
 
     return {
       item: {
@@ -457,25 +634,35 @@ async function getHistoryOutboxStatus(options: {
           failed > 0 ? "使用修復工作重試 failed HistoryOutbox rows" : undefined,
       },
       counts,
+      pendingAgeBuckets: {
+        under5m: numberField(age, "pending_under_5m"),
+        under1h: numberField(age, "pending_under_1h"),
+        under24h: numberField(age, "pending_under_24h"),
+        over24h: numberField(age, "pending_over_24h"),
+      },
       pending,
       failed,
       processing,
       completed,
       retryReady,
-      recentFailed: recentRows.map((row) => ({
-        id: stringField(row, "id"),
-        unitId: stringField(row, "unitId"),
-        sequence: stringField(row, "sequence"),
-        category: stringField(row, "category"),
-        attempts: numberField(row, "attempts"),
-        nextAttemptAt: isoField(row, "nextAttemptAt"),
-        processedAt: isoField(row, "processedAt"),
-        lastError:
-          typeof row.lastError === "string"
-            ? row.lastError.slice(0, 240)
-            : null,
-        createdAt: isoField(row, "createdAt"),
-      })),
+      oldestPendingCreatedAt: isoField(age, "oldest_pending_created_at"),
+      newestPendingCreatedAt: isoField(age, "newest_pending_created_at"),
+      recentCreatedAt: isoField(activity, "recent_created_at"),
+      recentProcessedAt: isoField(activity, "recent_processed_at"),
+      recentPending: recentPendingRows.map((row) => {
+        const mapped = mapHistoryOutboxSummary(row);
+        return {
+          id: mapped.id,
+          unitId: mapped.unitId,
+          sequence: mapped.sequence,
+          category: mapped.category,
+          attempts: mapped.attempts,
+          nextAttemptAt: mapped.nextAttemptAt,
+          createdAt: mapped.createdAt,
+        };
+      }),
+      recentFailed: recentFailedRows.map(mapHistoryOutboxSummary),
+      retryReadyFailed: retryReadyFailedRows.map(mapHistoryOutboxSummary),
     };
   } catch (error) {
     return {
@@ -487,12 +674,24 @@ async function getHistoryOutboxStatus(options: {
         reason: safeFailureReason(error),
       },
       counts: {},
+      pendingAgeBuckets: {
+        under5m: 0,
+        under1h: 0,
+        under24h: 0,
+        over24h: 0,
+      },
       pending: 0,
       failed: 0,
       processing: 0,
       completed: 0,
       retryReady: 0,
+      oldestPendingCreatedAt: null,
+      newestPendingCreatedAt: null,
+      recentCreatedAt: null,
+      recentProcessedAt: null,
+      recentPending: [],
       recentFailed: [],
+      retryReadyFailed: [],
     };
   }
 }
@@ -594,6 +793,11 @@ export async function getSystemStatusSummary(options?: {
     }),
   ]);
 
+  const correlatedHistoryOutbox = correlateHistoryOutboxWithQueue(
+    historyOutbox,
+    queue,
+  );
+
   const services: StatusItem[] = [
     {
       id: "app",
@@ -641,7 +845,7 @@ export async function getSystemStatusSummary(options?: {
     status: statusFromParts([
       ...services.map((service) => service.status),
       cdc.item.status,
-      historyOutbox.item.status,
+      correlatedHistoryOutbox.item.status,
       queue.item.status,
     ]),
     checkedAt: checkedAt(),
@@ -649,7 +853,7 @@ export async function getSystemStatusSummary(options?: {
     links,
     databases: [cdc.item],
     cdc,
-    historyOutbox,
+    historyOutbox: correlatedHistoryOutbox,
     queue,
     meili,
     sequin: {

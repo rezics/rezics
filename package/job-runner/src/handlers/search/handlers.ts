@@ -26,7 +26,7 @@ import {
   patchRealmTranslations,
   patchUserFields,
   removeProgress,
-  removeUserUnitCollection,
+  removeShelfItem,
   type SearchSegmentOptions,
   type SearchSegmentResult,
   syncAllPolls,
@@ -48,10 +48,12 @@ import {
   syncSinglePost,
   syncSingleProgress,
   syncSingleRealm,
+  syncSingleShelfItem,
   syncSingleUser,
-  syncSingleUserUnitCollection,
+  syncShelfItemSegment,
+  syncShelfItemsByShelfSegment,
+  syncShelfItemsBySourceItemSegment,
   syncUserSegment,
-  syncUserUnitCollectionSegment,
 } from "@rezics/search/sync";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
@@ -127,6 +129,69 @@ async function runFanoutSegment(
     ...result,
     continued: Boolean(nextPayload),
   };
+}
+
+async function runShelfItemShelfFanoutSegment(
+  command: SearchCommand,
+  context: HandlerContext,
+  operation: (
+    shelfId: string,
+    options: SearchSegmentOptions,
+  ) => Promise<SearchSegmentResult>,
+) {
+  if (!("shelfId" in command.payload)) return undefined;
+  const result = await operation(command.payload.shelfId, {
+    cursor: "cursor" in command.payload ? command.payload.cursor : undefined,
+    limit:
+      "limit" in command.payload
+        ? command.payload.limit
+        : DEFAULT_FANOUT_SEGMENT_LIMIT,
+  });
+  if (result.nextCursor) {
+    await context.enqueue(
+      createSearchCommand(
+        command.kind,
+        { ...command.payload, cursor: result.nextCursor },
+        command.source,
+      ),
+    );
+  }
+  return { ...result, continued: Boolean(result.nextCursor) };
+}
+
+async function runShelfItemSourceFanoutSegment(
+  command: SearchCommand,
+  context: HandlerContext,
+  operation: (
+    itemType: string,
+    itemId: string,
+    options: SearchSegmentOptions,
+  ) => Promise<SearchSegmentResult>,
+) {
+  if (!("itemType" in command.payload) || !("itemId" in command.payload)) {
+    return undefined;
+  }
+  const result = await operation(
+    command.payload.itemType,
+    command.payload.itemId,
+    {
+      cursor: "cursor" in command.payload ? command.payload.cursor : undefined,
+      limit:
+        "limit" in command.payload
+          ? command.payload.limit
+          : DEFAULT_FANOUT_SEGMENT_LIMIT,
+    },
+  );
+  if (result.nextCursor) {
+    await context.enqueue(
+      createSearchCommand(
+        command.kind,
+        { ...command.payload, cursor: result.nextCursor },
+        command.source,
+      ),
+    );
+  }
+  return { ...result, continued: Boolean(result.nextCursor) };
 }
 
 function fullSyncPayloadFrom(command: SearchCommand): SearchSegmentOptions {
@@ -393,27 +458,43 @@ export function createSearchHandlers(client: SearchClient) {
         syncSegment: (options) => syncProgressSegment(client, options),
       }),
 
-    [SEARCH_COMMAND_KINDS.collectionSync]: async (command) =>
-      "userId" in command.payload && "unitId" in command.payload
-        ? syncSingleUserUnitCollection(
+    [SEARCH_COMMAND_KINDS.shelfItemSync]: async (command) =>
+      "shelfId" in command.payload &&
+      "itemType" in command.payload &&
+      "itemId" in command.payload
+        ? syncSingleShelfItem(
             client,
-            command.payload.userId,
-            command.payload.unitId,
+            command.payload.shelfId,
+            command.payload.itemType,
+            command.payload.itemId,
           )
         : undefined,
-    [SEARCH_COMMAND_KINDS.collectionRemove]: async (command) =>
-      "userId" in command.payload && "unitId" in command.payload
-        ? removeUserUnitCollection(
+    [SEARCH_COMMAND_KINDS.shelfItemRemove]: async (command) =>
+      "shelfId" in command.payload &&
+      "itemType" in command.payload &&
+      "itemId" in command.payload
+        ? removeShelfItem(
             client,
-            command.payload.userId,
-            command.payload.unitId,
+            command.payload.shelfId,
+            command.payload.itemType,
+            command.payload.itemId,
           )
         : undefined,
-    [SEARCH_COMMAND_KINDS.collectionFullSync]: async (command, context) =>
+    [SEARCH_COMMAND_KINDS.shelfItemShelfFanout]: async (command, context) =>
+      runShelfItemShelfFanoutSegment(command, context, (shelfId, options) =>
+        syncShelfItemsByShelfSegment(client, shelfId, options),
+      ),
+    [SEARCH_COMMAND_KINDS.shelfItemSourceFanout]: async (command, context) =>
+      runShelfItemSourceFanoutSegment(
+        command,
+        context,
+        (itemType, itemId, options) =>
+          syncShelfItemsBySourceItemSegment(client, itemType, itemId, options),
+      ),
+    [SEARCH_COMMAND_KINDS.shelfItemFullSync]: async (command, context) =>
       runFullSyncSegment(command, context, {
-        deleteAll: () => client.deleteAllCollections(),
-        syncSegment: (options) =>
-          syncUserUnitCollectionSegment(client, options),
+        deleteAll: () => client.deleteAllShelfItems(),
+        syncSegment: (options) => syncShelfItemSegment(client, options),
       }),
   };
 

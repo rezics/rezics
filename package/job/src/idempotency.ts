@@ -66,6 +66,19 @@ export const rankingIdempotency = {
     createIdempotencyKey("ranking.fullSync", cursor, rankKind),
   viewBucketFlush: (cursor?: string | null) =>
     createIdempotencyKey("ranking.viewBucketFlush", cursor),
+  reactionBucket: (
+    targetId: string,
+    scopeKey: string,
+    reaction: string,
+    at?: string | null,
+  ) =>
+    createIdempotencyKey(
+      "ranking.reactionBucket",
+      targetId,
+      scopeKey,
+      reaction,
+      at,
+    ),
 };
 
 export const maintenanceIdempotency = {

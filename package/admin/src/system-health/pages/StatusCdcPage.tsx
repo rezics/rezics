@@ -9,7 +9,14 @@ export function StatusCdcPage() {
       title={t("admin:status_cdc_title")}
       description={t("admin:status_cdc_description")}
     >
-      {(summary) => <CdcPanel cdc={summary.cdc} />}
+      {(summary) => (
+        <CdcPanel
+          cdc={summary.cdc}
+          historyOutbox={summary.historyOutbox}
+          queue={summary.queue}
+          sequin={summary.sequin}
+        />
+      )}
     </StatusSubPageShell>
   );
 }

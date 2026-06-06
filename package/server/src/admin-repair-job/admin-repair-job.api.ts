@@ -40,7 +40,10 @@ export const adminRepairJobApi = new Elysia({ prefix: "/admin/repair-job" })
     }): Promise<AdminRepairJobDryRun | string> => {
       const denied = await assertRepairPolicy({ identity, status });
       if (denied) return denied;
-      return adminRepairJobService.dryRun(body);
+      return adminRepairJobService.dryRun({
+        ...body,
+        actorUserId: identity.userId,
+      });
     },
     {
       requireLogin: true,

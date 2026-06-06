@@ -1,6 +1,7 @@
 import {
   type AdminRepairJobDryRun,
   type AdminRepairJobScope,
+  type HistoryOutboxRepairStatus,
   useAdminRepairJobDryRunMutation,
   useAdminRepairJobStartMutation,
 } from "@rezics/api";
@@ -12,19 +13,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Checkbox,
   Input,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Separator,
   Textarea,
 } from "@rezics/ui/shadcn";
 import { Loader2, Play, Search } from "lucide-react";
 import React from "react";
 import { Page } from "@/core/layouts/Page";
+import { Route } from "@/routes/_admin/repair";
 import { Link } from "@/shared/ui/link";
 
 type RepairScopeConfig = {
@@ -37,6 +35,11 @@ type RepairScopeConfig = {
   };
 };
 
+const HISTORY_OUTBOX_REPAIR_STATUSES: HistoryOutboxRepairStatus[] = [
+  "pending",
+  "failed",
+];
+
 const repairScopes: RepairScopeConfig[] = [
   {
     scope: "search",
@@ -46,11 +49,18 @@ const repairScopes: RepairScopeConfig[] = [
     link: { to: "/meili/observability", label: "Open Meili status" },
   },
   {
-    scope: "history-outbox",
-    title: "History outbox",
+    scope: "queue-failed-job",
+    title: "Failed queue jobs",
     description:
-      "Detects failed history/queue jobs that can be retried or repaired.",
+      "Detects failed pg-boss jobs that can be retried through job-runner admin endpoints.",
     link: { to: "/status", label: "Open queue status" },
+  },
+  {
+    scope: "history-outbox-replay",
+    title: "History outbox replay",
+    description:
+      "Finds pending or failed HistoryOutbox rows and queues idempotent history ingest jobs.",
+    link: { to: "/status", label: "Open system status" },
   },
   {
     scope: "slug",
@@ -153,6 +163,13 @@ function DryRunResult({
         </p>
       )}
 
+      {dryRun.sampleLimited ? (
+        <p className="text-xs leading-[1.4] text-text-secondary">
+          Showing the first {dryRun.sampleTargets.length} targets. Queueing uses
+          all {dryRun.targetIds.length} dry-run targets.
+        </p>
+      ) : null}
+
       <Button
         type="button"
         disabled={dryRun.affectedCount === 0 || isStarting}
@@ -169,10 +186,63 @@ function DryRunResult({
   );
 }
 
+function RepairScopePicker({
+  scope,
+  onChange,
+}: {
+  scope: AdminRepairJobScope;
+  onChange: (scope: AdminRepairJobScope) => void;
+}) {
+  return (
+    <div className="grid gap-2">
+      {repairScopes.map((item) => {
+        const selected = item.scope === scope;
+        return (
+          <button
+            key={item.scope}
+            type="button"
+            aria-pressed={selected}
+            className={`rounded-sm border p-3 text-left transition-colors ${
+              selected
+                ? "border-border-focus bg-surface-base"
+                : "border-border-whisper bg-surface-subtle hover:bg-surface-base"
+            }`}
+            onClick={() => onChange(item.scope)}
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline">{item.scope}</Badge>
+              <span className="text-sm font-medium leading-[1.4]">
+                {item.title}
+              </span>
+            </div>
+            <p className="mt-2 text-xs leading-[1.4] text-text-secondary">
+              {item.description}
+            </p>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function RepairJobsPage() {
-  const [scope, setScope] = React.useState<AdminRepairJobScope>("search");
-  const [targetIds, setTargetIds] = React.useState("");
-  const [reason, setReason] = React.useState("");
+  const search = Route.useSearch();
+  const [scope, setScope] = React.useState<AdminRepairJobScope>(
+    search.scope ?? "search",
+  );
+  const [targetIds, setTargetIds] = React.useState(search.targetIds ?? "");
+  const [historyOutboxStatuses, setHistoryOutboxStatuses] = React.useState<
+    HistoryOutboxRepairStatus[]
+  >(search.historyOutboxStatuses ?? ["pending", "failed"]);
+  const [historyOutboxUnitId, setHistoryOutboxUnitId] = React.useState(
+    search.unitId ?? "",
+  );
+  const [historyOutboxOlderThanMinutes, setHistoryOutboxOlderThanMinutes] =
+    React.useState(String(search.olderThanMinutes ?? 5));
+  const [historyOutboxLimit, setHistoryOutboxLimit] = React.useState(
+    String(search.limit ?? 50),
+  );
+  const [reason, setReason] = React.useState(search.reason ?? "");
   const [dryRun, setDryRun] = React.useState<AdminRepairJobDryRun | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
   const selectedScope = repairScopes.find((item) => item.scope === scope);
@@ -190,9 +260,21 @@ export default function RepairJobsPage() {
   });
 
   function runDryRun() {
+    const parsedOlderThan = Number(historyOutboxOlderThanMinutes);
+    const parsedLimit = Number(historyOutboxLimit);
     const input = {
       scope,
       targetIds: parseTargetIds(targetIds),
+      ...(scope === "history-outbox-replay"
+        ? {
+            historyOutboxStatuses,
+            unitId: historyOutboxUnitId.trim() || undefined,
+            olderThanMinutes: Number.isFinite(parsedOlderThan)
+              ? parsedOlderThan
+              : undefined,
+            limit: Number.isFinite(parsedLimit) ? parsedLimit : undefined,
+          }
+        : {}),
       reason: reason.trim() || null,
     };
     setDryRun(null);
@@ -200,11 +282,21 @@ export default function RepairJobsPage() {
     dryRunMutation.mutate(input);
   }
 
+  function toggleHistoryOutboxStatus(status: HistoryOutboxRepairStatus) {
+    setHistoryOutboxStatuses((current) => {
+      if (current.includes(status)) {
+        const next = current.filter((item) => item !== status);
+        return next.length ? next : current;
+      }
+      return [...current, status];
+    });
+  }
+
   function startRepair() {
     if (!dryRun) return;
     startMutation.mutate({
       scope: dryRun.scope,
-      targetIds: dryRun.sampleTargets,
+      targetIds: dryRun.targetIds,
       dryRunId: dryRun.id,
       reason: reason.trim() || "Repair drift from admin dry-run",
     });
@@ -224,27 +316,16 @@ export default function RepairJobsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="repair-scope">Scope</Label>
-              <Select
-                value={scope}
-                onValueChange={(value) => {
-                  setScope(value as AdminRepairJobScope);
+            <div className="space-y-2">
+              <Label>Scope</Label>
+              <RepairScopePicker
+                scope={scope}
+                onChange={(value) => {
+                  setScope(value);
                   setDryRun(null);
                   setMessage(null);
                 }}
-              >
-                <SelectTrigger id="repair-scope">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {repairScopes.map((item) => (
-                    <SelectItem key={item.scope} value={item.scope}>
-                      {item.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             {selectedScope ? (
@@ -278,6 +359,73 @@ export default function RepairJobsPage() {
                 rows={4}
               />
             </div>
+
+            {scope === "history-outbox-replay" ? (
+              <div className="space-y-3 rounded-sm bg-surface-subtle p-3">
+                <div>
+                  <p className="text-sm font-medium leading-[1.4]">
+                    HistoryOutbox filters
+                  </p>
+                  <p className="mt-1 text-xs leading-[1.4] text-text-secondary">
+                    Explicit target ids are treated as HistoryOutbox row ids.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {HISTORY_OUTBOX_REPAIR_STATUSES.map((status) => (
+                    <label
+                      key={status}
+                      className="flex items-center gap-2 text-sm leading-[1.4]"
+                    >
+                      <Checkbox
+                        checked={historyOutboxStatuses.includes(status)}
+                        onCheckedChange={() =>
+                          toggleHistoryOutboxStatus(status)
+                        }
+                      />
+                      {status}
+                    </label>
+                  ))}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="history-outbox-unit-id">Unit id</Label>
+                    <Input
+                      id="history-outbox-unit-id"
+                      value={historyOutboxUnitId}
+                      onChange={(event) =>
+                        setHistoryOutboxUnitId(event.target.value)
+                      }
+                      placeholder="optional unit id"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="history-outbox-age">Older than min</Label>
+                    <Input
+                      id="history-outbox-age"
+                      type="number"
+                      min={0}
+                      value={historyOutboxOlderThanMinutes}
+                      onChange={(event) =>
+                        setHistoryOutboxOlderThanMinutes(event.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="history-outbox-limit">Max enqueue</Label>
+                    <Input
+                      id="history-outbox-limit"
+                      type="number"
+                      min={1}
+                      max={500}
+                      value={historyOutboxLimit}
+                      onChange={(event) =>
+                        setHistoryOutboxLimit(event.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             <div className="flex flex-col gap-1">
               <Label htmlFor="repair-reason">Reason</Label>

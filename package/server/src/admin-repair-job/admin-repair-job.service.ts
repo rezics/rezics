@@ -6,12 +6,16 @@ import type {
   AdminRepairJobOperationResponse,
   AdminRepairJobQueuedOperation,
   AdminRepairJobStartRequest,
+  HistoryOutboxRepairStatus,
 } from "@rezics/contract";
 import {
+  createHistoryOutboxIngestCommand,
   createMaintenanceCommand,
   type EnqueueResult,
   MAINTENANCE_COMMAND_KINDS,
 } from "@rezics/job";
+import { and, asc, eq, inArray, lte } from "drizzle-orm";
+import { db, type ServerDb, HistoryOutbox } from "@/db";
 import { getSystemStatusSummary } from "@/diagnostic";
 import { env } from "@/env";
 import { governanceAuditService } from "@/governance/audit.service";
@@ -21,11 +25,21 @@ type RepairJobProducer = Pick<JobProducer, "enqueue">;
 
 type AdminRepairJobServiceOptions = {
   jobProducer: RepairJobProducer;
+  database: ServerDb;
   fetchImpl: typeof fetch;
   jobRunnerBaseUrl?: string;
   internalSecret?: string;
   auditService: Pick<typeof governanceAuditService, "appendPrivilegedMutation">;
 };
+
+type HistoryOutboxReplayTargetInput = Pick<
+  AdminRepairJobDryRunRequest,
+  | "historyOutboxStatuses"
+  | "limit"
+  | "olderThanMinutes"
+  | "targetIds"
+  | "unitId"
+>;
 
 const SEARCH_INDEX_REBUILD_TARGETS = {
   content: "content",
@@ -37,7 +51,7 @@ const SEARCH_INDEX_REBUILD_TARGETS = {
   realms: "realm",
   entities: "entity",
   user_unit_progress: "progress",
-  user_unit_collections: "collection",
+  shelf_items: "shelf-item",
 } as const;
 
 type SearchIndexUid = keyof typeof SEARCH_INDEX_REBUILD_TARGETS;
@@ -54,6 +68,11 @@ function filterTargets(targets: string[], requested?: string[]) {
   if (!requested?.length) return targets;
   const allowed = new Set(requested);
   return targets.filter((target) => allowed.has(target));
+}
+
+function boundedTargetLimit(limit?: number) {
+  if (!limit || !Number.isFinite(limit)) return 50;
+  return Math.min(Math.max(Math.floor(limit), 1), 500);
 }
 
 function safeFailureMessage(error: unknown) {
@@ -84,6 +103,38 @@ function parseFailedJobTarget(target: string) {
     lane: baseFailedJobLane(target.slice(0, separator)),
     id: target.slice(separator + 1),
   };
+}
+
+async function findHistoryOutboxReplayTargets(
+  database: ServerDb,
+  input: HistoryOutboxReplayTargetInput,
+) {
+  const statuses: HistoryOutboxRepairStatus[] = input.historyOutboxStatuses
+    ?.length
+    ? [...new Set(input.historyOutboxStatuses)]
+    : ["pending", "failed"];
+  const olderThan = input.olderThanMinutes
+    ? new Date(Date.now() - input.olderThanMinutes * 60 * 1000)
+    : null;
+  const rows = await database
+    .select({
+      id: HistoryOutbox.id,
+    })
+    .from(HistoryOutbox)
+    .where(
+      and(
+        inArray(HistoryOutbox.status, statuses),
+        input.targetIds?.length
+          ? inArray(HistoryOutbox.id, input.targetIds)
+          : undefined,
+        input.unitId ? eq(HistoryOutbox.unitId, input.unitId) : undefined,
+        olderThan ? lte(HistoryOutbox.createdAt, olderThan) : undefined,
+      ),
+    )
+    .orderBy(asc(HistoryOutbox.createdAt), asc(HistoryOutbox.id))
+    .limit(boundedTargetLimit(input.limit));
+
+  return rows.map((row) => row.id);
 }
 
 function jobRunnerUrl(baseUrl: string, path: string) {
@@ -188,7 +239,7 @@ async function appendRepairAudit(
 function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
   return {
     async dryRun(
-      input: AdminRepairJobDryRunRequest,
+      input: AdminRepairJobDryRunRequest & { actorUserId?: string },
     ): Promise<AdminRepairJobDryRun> {
       const system = await getSystemStatusSummary();
       const warnings: string[] = [];
@@ -202,10 +253,12 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
               (index.settingsDrift?.hasDrift || !index.exists),
           )
           .map((index) => index.uid);
-      } else if (input.scope === "history-outbox") {
+      } else if (input.scope === "queue-failed-job") {
         targets = system.queue.failedJobs
           .map((job) => (job.id && job.lane ? `${job.lane}:${job.id}` : null))
           .filter((target): target is string => Boolean(target));
+      } else if (input.scope === "history-outbox-replay") {
+        targets = await findHistoryOutboxReplayTargets(options.database, input);
       } else {
         warnings.push(
           `${input.scope} dry-run contract is available; detector implementation is pending.`,
@@ -215,13 +268,35 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
       const uniqueTargets = [
         ...new Set(filterTargets(targets, input.targetIds)),
       ];
+      const sampleTargets = uniqueTargets.slice(0, 20);
+      const correlationId = crypto.randomUUID();
+      const audit = await appendRepairAudit(options, {
+        actorUserId: input.actorUserId,
+        action: "repair.dry-run",
+        targetId: input.scope,
+        reason: input.reason ?? "Admin repair dry-run",
+        correlationId,
+        metadata: {
+          scope: input.scope,
+          targetCount: uniqueTargets.length,
+          sampleTargets,
+          filters: {
+            historyOutboxStatuses: input.historyOutboxStatuses ?? null,
+            unitId: input.unitId ?? null,
+            olderThanMinutes: input.olderThanMinutes ?? null,
+            limit: input.limit ?? null,
+          },
+        },
+      });
 
       return {
-        id: buildId("dryrun"),
+        id: audit?.id ?? buildId("dryrun"),
         dryRun: true,
         scope: input.scope,
         affectedCount: uniqueTargets.length,
-        sampleTargets: uniqueTargets.slice(0, 20),
+        targetIds: uniqueTargets,
+        sampleTargets,
+        sampleLimited: uniqueTargets.length > sampleTargets.length,
         warnings,
         generatedAt: nowIso(),
       };
@@ -265,7 +340,7 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
               operationFromEnqueue(await options.jobProducer.enqueue(command)),
             );
           }
-        } else if (input.scope === "history-outbox") {
+        } else if (input.scope === "queue-failed-job") {
           for (const target of targetIds) {
             const operation = await retryFailedJob(options, target);
             queuedOperations.push(operation);
@@ -281,6 +356,16 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
                 jobId: operation.jobId,
               },
             });
+          }
+        } else if (input.scope === "history-outbox-replay") {
+          for (const target of targetIds) {
+            const command = createHistoryOutboxIngestCommand(target, {
+              type: "server",
+              service: "admin-repair-job",
+            });
+            queuedOperations.push(
+              operationFromEnqueue(await options.jobProducer.enqueue(command)),
+            );
           }
         } else {
           const failureAudit = await appendRepairAudit(options, {
@@ -423,6 +508,7 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
 
 export const adminRepairJobService = createAdminRepairJobService({
   jobProducer: serverJobProducer,
+  database: db,
   fetchImpl: fetch,
   jobRunnerBaseUrl: env.JOB_RUNNER_BASE_URL,
   internalSecret: env.JOB_RUNNER_INTERNAL_SECRET,

@@ -55,7 +55,7 @@ describe("maintenance handlers", () => {
     ["user", "search.user.fullSync"],
     ["feedback", "search.feedback.fullSync"],
     ["progress", "search.progress.fullSync"],
-    ["collection", "search.collection.fullSync"],
+    ["shelf-item", "search.shelfItem.fullSync"],
   ] as const)("rebuild maps %s to %s", async (index, expectedKind) => {
     const enqueued: string[] = [];
     const handlers = createMaintenanceHandlers();

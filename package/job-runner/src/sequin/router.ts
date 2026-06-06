@@ -21,6 +21,28 @@ function targetId(message: SequinMessage, keys: string[] = ["id"]) {
   return undefined;
 }
 
+function numberValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function reactionSummaryDelta(message: SequinMessage): number | undefined {
+  const action = message.action.toLowerCase();
+  const count = numberValue(message.record.count);
+  const previousCount = numberValue(message.changes?.count);
+  if (action === "insert") return count ?? 1;
+  if (action === "delete") return count === undefined ? undefined : -count;
+  if (
+    action === "update" &&
+    count !== undefined &&
+    previousCount !== undefined
+  ) {
+    return count - previousCount;
+  }
+  return undefined;
+}
+
 function sequinSource(message: SequinMessage): CommandSource {
   return {
     type: "sequin",
@@ -61,6 +83,11 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
         { unitId },
         source,
       ),
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
+        { itemType: "unit", itemId: unitId },
+        source,
+      ),
     ];
   }
 
@@ -76,6 +103,11 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       createSearchCommand(
         SEARCH_COMMAND_KINDS.postPatchTargetFanout,
         { targetId: unitId },
+        source,
+      ),
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
+        { itemType: "unit", itemId: unitId },
         source,
       ),
     ];
@@ -186,10 +218,34 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       : [];
   }
 
-  if (table === "ShelfUnit") {
+  if (table === "ShelfItem") {
     const shelfId = targetId(message, ["shelfId", "shelf_id"]);
+    const itemType = targetId(message, ["itemType", "item_type"]) ?? "unit";
+    const itemId = targetId(message, [
+      "itemId",
+      "item_id",
+      "unitId",
+      "unit_id",
+    ]);
     return shelfId
       ? [
+          ...(itemId
+            ? [
+                createSearchCommand(
+                  isDelete
+                    ? SEARCH_COMMAND_KINDS.shelfItemRemove
+                    : SEARCH_COMMAND_KINDS.shelfItemSync,
+                  { shelfId, itemType, itemId },
+                  source,
+                ),
+              ]
+            : [
+                createSearchCommand(
+                  SEARCH_COMMAND_KINDS.shelfItemShelfFanout,
+                  { shelfId },
+                  source,
+                ),
+              ]),
           createSearchCommand(
             SEARCH_COMMAND_KINDS.contentPatchContainedUnitIds,
             { unitId: shelfId },
@@ -283,22 +339,6 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       : [];
   }
 
-  if (table === "UserUnitCollection") {
-    const userId = targetId(message, ["userId", "user_id"]);
-    const unitId = targetId(message, ["unitId", "unit_id"]);
-    return userId && unitId
-      ? [
-          createSearchCommand(
-            isDelete
-              ? SEARCH_COMMAND_KINDS.collectionRemove
-              : SEARCH_COMMAND_KINDS.collectionSync,
-            { userId, unitId },
-            source,
-          ),
-        ]
-      : [];
-  }
-
   if (table === "Comment") {
     const commentId = targetId(message);
     return commentId
@@ -308,6 +348,11 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
               ? SEARCH_COMMAND_KINDS.commentDelete
               : SEARCH_COMMAND_KINDS.commentSync,
             { commentId },
+            source,
+          ),
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
+            { itemType: "comment", itemId: commentId },
             source,
           ),
         ]
@@ -335,11 +380,32 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
   if (table === "ReactionSummary") {
     const unitId = targetId(message, ["targetId", "target_id"]);
     const scopeKey = targetId(message, ["scopeKey", "scope_key"]);
+    const reaction = targetId(message, ["reaction"]);
+    const voteDelta = reactionSummaryDelta(message);
     const realmUnitId = scopeKey?.startsWith("realm:")
       ? scopeKey.slice("realm:".length)
       : undefined;
+    const voteBucketCommands =
+      (reaction === "upvote" || reaction === "downvote") &&
+      voteDelta !== undefined &&
+      voteDelta !== 0
+        ? [
+            createRankingCommand(
+              RANKING_COMMAND_KINDS.reactionBucket,
+              {
+                targetId: unitId,
+                scopeKey: scopeKey ?? "global",
+                reaction,
+                count: voteDelta,
+                at: message.commitTimestamp,
+              },
+              source,
+            ),
+          ]
+        : [];
     return unitId
       ? [
+          ...voteBucketCommands,
           createRankingCommand(
             RANKING_COMMAND_KINDS.invalidate,
             { unitId, reason: "ReactionSummary CDC" },

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  adminRepairJobDryRunRequestSchema,
   adminRepairJobDryRunSchema,
   adminRepairJobOperationRequestSchema,
   adminRepairJobOperationResponseSchema,
@@ -16,7 +17,9 @@ describe("admin repair job contracts", () => {
         dryRun: true,
         scope: "search",
         affectedCount: 2,
+        targetIds: ["books", "users"],
         sampleTargets: ["books", "users"],
+        sampleLimited: false,
         warnings: [],
         generatedAt: "2026-05-28T00:00:00.000Z",
       }),
@@ -40,11 +43,32 @@ describe("admin repair job contracts", () => {
     ).toBe(false);
   });
 
+  test("accepts history outbox replay filters", () => {
+    expect(
+      Value.Check(adminRepairJobDryRunRequestSchema, {
+        scope: "history-outbox-replay",
+        historyOutboxStatuses: ["pending", "failed"],
+        unitId: "unit-1",
+        olderThanMinutes: 10,
+        limit: 100,
+        targetIds: ["outbox-1", "outbox-2"],
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(adminRepairJobStartRequestSchema, {
+        scope: "history-outbox-replay",
+        reason: "replay missed outbox rows",
+        targetIds: ["outbox-1", "outbox-2"],
+        dryRunId: "dryrun-1",
+      }),
+    ).toBe(true);
+  });
+
   test("accepts queued repair job status", () => {
     expect(
       Value.Check(adminRepairJobSchema, {
         id: "repair-1",
-        scope: "history-outbox",
+        scope: "history-outbox-replay",
         status: "pending",
         progress: { completed: 0, total: 3 },
         safeSummary: "Queued for repair.",

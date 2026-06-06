@@ -64,9 +64,11 @@ export const SEARCH_COMMAND_KINDS = {
   progressRemove: "search.progress.remove",
   progressFullSync: "search.progress.fullSync",
 
-  collectionSync: "search.collection.sync",
-  collectionRemove: "search.collection.remove",
-  collectionFullSync: "search.collection.fullSync",
+  shelfItemSync: "search.shelfItem.sync",
+  shelfItemRemove: "search.shelfItem.remove",
+  shelfItemShelfFanout: "search.shelfItem.shelfFanout",
+  shelfItemSourceFanout: "search.shelfItem.sourceFanout",
+  shelfItemFullSync: "search.shelfItem.fullSync",
 } as const;
 
 export type SearchCommandKind =
@@ -84,9 +86,21 @@ const ProgressTargetPayloadSchema = v.strictObject({
   userId: v.string(),
   unitId: v.string(),
 });
-const CollectionTargetPayloadSchema = v.strictObject({
-  userId: v.string(),
-  unitId: v.string(),
+const ShelfItemTargetPayloadSchema = v.strictObject({
+  shelfId: v.string(),
+  itemType: v.string(),
+  itemId: v.string(),
+});
+const ShelfItemShelfFanoutPayloadSchema = v.strictObject({
+  shelfId: v.string(),
+  cursor: v.optional(v.string()),
+  limit: v.optional(v.number()),
+});
+const ShelfItemSourceFanoutPayloadSchema = v.strictObject({
+  itemType: v.string(),
+  itemId: v.string(),
+  cursor: v.optional(v.string()),
+  limit: v.optional(v.number()),
 });
 const PatchPayloadSchema = v.strictObject({
   targetId: v.string(),
@@ -358,18 +372,28 @@ export const ProgressFullSyncCommandSchema = commandSchema(
   JOB_LANES.maintenance,
   FullSyncPayloadSchema,
 );
-export const CollectionSyncCommandSchema = commandSchema(
-  SEARCH_COMMAND_KINDS.collectionSync,
+export const ShelfItemSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.shelfItemSync,
   JOB_LANES.searchSyncFast,
-  CollectionTargetPayloadSchema,
+  ShelfItemTargetPayloadSchema,
 );
-export const CollectionRemoveCommandSchema = commandSchema(
-  SEARCH_COMMAND_KINDS.collectionRemove,
+export const ShelfItemRemoveCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.shelfItemRemove,
   JOB_LANES.searchSyncFast,
-  CollectionTargetPayloadSchema,
+  ShelfItemTargetPayloadSchema,
 );
-export const CollectionFullSyncCommandSchema = commandSchema(
-  SEARCH_COMMAND_KINDS.collectionFullSync,
+export const ShelfItemShelfFanoutCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.shelfItemShelfFanout,
+  JOB_LANES.searchSyncSlow,
+  ShelfItemShelfFanoutPayloadSchema,
+);
+export const ShelfItemSourceFanoutCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
+  JOB_LANES.searchSyncSlow,
+  ShelfItemSourceFanoutPayloadSchema,
+);
+export const ShelfItemFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.shelfItemFullSync,
   JOB_LANES.maintenance,
   FullSyncPayloadSchema,
 );
@@ -425,9 +449,11 @@ export const SearchCommandSchema = v.union([
   ProgressSyncCommandSchema,
   ProgressRemoveCommandSchema,
   ProgressFullSyncCommandSchema,
-  CollectionSyncCommandSchema,
-  CollectionRemoveCommandSchema,
-  CollectionFullSyncCommandSchema,
+  ShelfItemSyncCommandSchema,
+  ShelfItemRemoveCommandSchema,
+  ShelfItemShelfFanoutCommandSchema,
+  ShelfItemSourceFanoutCommandSchema,
+  ShelfItemFullSyncCommandSchema,
 ]);
 
 export type SearchCommand = v.InferOutput<typeof SearchCommandSchema>;
@@ -456,10 +482,16 @@ export function createSearchCommand(
     getStringPart("userId") && getStringPart("unitId")
       ? `${getStringPart("userId")}:${getStringPart("unitId")}`
       : targetPart;
+  const shelfItemTarget =
+    getStringPart("shelfId") && getStringPart("itemType")
+      ? `${getStringPart("shelfId")}:${getStringPart("itemType")}:${getStringPart("itemId") ?? "all"}`
+      : getStringPart("itemType") && getStringPart("itemId")
+        ? `${getStringPart("itemType")}:${getStringPart("itemId")}`
+        : progressTarget;
 
   const idempotencyKey = createIdempotencyKey(
     kind,
-    progressTarget,
+    shelfItemTarget,
     getStringPart("cursor"),
   );
   const lane =

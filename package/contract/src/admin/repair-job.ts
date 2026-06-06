@@ -2,7 +2,8 @@ import { t } from "elysia";
 
 export const adminRepairJobScopeSchema = t.Union([
   t.Literal("search"),
-  t.Literal("history-outbox"),
+  t.Literal("queue-failed-job"),
+  t.Literal("history-outbox-replay"),
   t.Literal("slug"),
   t.Literal("attribution"),
   t.Literal("source-site"),
@@ -10,6 +11,14 @@ export const adminRepairJobScopeSchema = t.Union([
 ]);
 
 export type AdminRepairJobScope = (typeof adminRepairJobScopeSchema)["static"];
+
+export const historyOutboxRepairStatusSchema = t.Union([
+  t.Literal("pending"),
+  t.Literal("failed"),
+]);
+
+export type HistoryOutboxRepairStatus =
+  (typeof historyOutboxRepairStatusSchema)["static"];
 
 export const adminRepairJobStatusSchema = t.Union([
   t.Literal("pending"),
@@ -25,6 +34,10 @@ export type AdminRepairJobStatus =
 export const adminRepairJobDryRunRequestSchema = t.Object({
   scope: adminRepairJobScopeSchema,
   targetIds: t.Optional(t.Array(t.String())),
+  historyOutboxStatuses: t.Optional(t.Array(historyOutboxRepairStatusSchema)),
+  unitId: t.Optional(t.String()),
+  olderThanMinutes: t.Optional(t.Number({ minimum: 0 })),
+  limit: t.Optional(t.Number({ minimum: 1, maximum: 500 })),
   reason: t.Optional(t.Nullable(t.String())),
 });
 
@@ -46,7 +59,9 @@ export const adminRepairJobDryRunSchema = t.Object({
   dryRun: t.Literal(true),
   scope: adminRepairJobScopeSchema,
   affectedCount: t.Number(),
+  targetIds: t.Array(t.String()),
   sampleTargets: t.Array(t.String()),
+  sampleLimited: t.Boolean(),
   warnings: t.Array(t.String()),
   generatedAt: t.String(),
 });

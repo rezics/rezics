@@ -51,6 +51,36 @@ describe("@rezics/job command contract", () => {
     );
   });
 
+  test("validates shelf item search commands", () => {
+    const syncCommand = createSearchCommand(
+      SEARCH_COMMAND_KINDS.shelfItemSync,
+      { shelfId: "shelf-1", itemType: "unit", itemId: "unit-1" },
+    );
+    const sourceFanoutCommand = createSearchCommand(
+      SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
+      { itemType: "comment", itemId: "comment-1", cursor: "shelf-1:comment:0" },
+    );
+    const fullSyncCommand = createSearchCommand(
+      SEARCH_COMMAND_KINDS.shelfItemFullSync,
+      { cursor: "shelf-1:unit:unit-1", limit: 50 },
+    );
+
+    expect(syncCommand.lane).toBe(JOB_LANES.searchSyncFast);
+    expect(syncCommand.idempotencyKey).toBe(
+      "search.shelfItem.sync:shelf-1_unit_unit-1",
+    );
+    expect(sourceFanoutCommand.lane).toBe(JOB_LANES.searchSyncSlow);
+    expect(sourceFanoutCommand.idempotencyKey).toBe(
+      "search.shelfItem.sourceFanout:comment_comment-1:shelf-1_comment_0",
+    );
+    expect(fullSyncCommand.lane).toBe(JOB_LANES.maintenance);
+    expect(v.parse(JobCommandSchema, syncCommand)).toEqual(syncCommand);
+    expect(v.parse(JobCommandSchema, sourceFanoutCommand)).toEqual(
+      sourceFanoutCommand,
+    );
+    expect(v.parse(JobCommandSchema, fullSyncCommand)).toEqual(fullSyncCommand);
+  });
+
   test("validates GAME/MEDIA search drift repair targets", () => {
     const platformCommand = createMaintenanceCommand(
       MAINTENANCE_COMMAND_KINDS.searchDriftRepair,
@@ -94,6 +124,10 @@ describe("@rezics/job command contract", () => {
       MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
       { index: "collection", cursor: "user-1:unit-1", limit: 100 },
     );
+    const shelfItemCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
+      { index: "shelf-item", cursor: "shelf-1:unit:unit-1", limit: 100 },
+    );
     const pollCommand = createMaintenanceCommand(
       MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
       { index: "poll", cursor: "poll-1", limit: 100 },
@@ -110,6 +144,9 @@ describe("@rezics/job command contract", () => {
     expect(collectionCommand.idempotencyKey).toBe(
       "maintenance.search.rebuildIndex:collection:user-1_unit-1",
     );
+    expect(shelfItemCommand.idempotencyKey).toBe(
+      "maintenance.search.rebuildIndex:shelf-item:shelf-1_unit_unit-1",
+    );
     expect(pollCommand.idempotencyKey).toBe(
       "maintenance.search.rebuildIndex:poll:poll-1",
     );
@@ -117,6 +154,9 @@ describe("@rezics/job command contract", () => {
     expect(v.parse(JobCommandSchema, commentCommand)).toEqual(commentCommand);
     expect(v.parse(JobCommandSchema, collectionCommand)).toEqual(
       collectionCommand,
+    );
+    expect(v.parse(JobCommandSchema, shelfItemCommand)).toEqual(
+      shelfItemCommand,
     );
     expect(v.parse(JobCommandSchema, pollCommand)).toEqual(pollCommand);
   });
@@ -146,6 +186,23 @@ describe("@rezics/job command contract", () => {
       "ranking.invalidate:unit-1:realm:realm-1:post",
     );
     expect(command.tags).toContain("domain:ranking");
+    expect(v.parse(JobCommandSchema, command)).toEqual(command);
+  });
+
+  test("validates ranking reaction bucket commands", () => {
+    const command = createRankingCommand(RANKING_COMMAND_KINDS.reactionBucket, {
+      targetId: "unit-1",
+      scopeKey: "realm:realm-1",
+      reaction: "upvote",
+      count: 1,
+      at: "2026-02-01T10:25:00.000Z",
+    });
+
+    expect(command.kind).toBe("ranking.reactionBucket");
+    expect(command.lane).toBe(JOB_LANES.ranking);
+    expect(command.idempotencyKey).toBe(
+      "ranking.reactionBucket:unit-1:realm_realm-1:upvote:2026-02-01T10_25_00.000Z",
+    );
     expect(v.parse(JobCommandSchema, command)).toEqual(command);
   });
 

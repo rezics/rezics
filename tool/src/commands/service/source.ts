@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadDotenv } from "dotenv";
 import { Client } from "pg";
+import { ROUTED_SEQUIN_TABLES } from "../../../../package/job/src/sequin/manifest";
 
 const TOOL_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -16,25 +17,7 @@ loadDotenv({
   quiet: true,
 });
 
-const TRACKED_TABLES = [
-  "HistoryOutbox",
-  "Unit",
-  "UnitTranslation",
-  "UnitTag",
-  "TagVote",
-  "UnitAlias",
-  "CreditAttribution",
-  "SubjectAttribution",
-  "UnitRealm",
-  "RealmTagApplication",
-  "ShelfUnit",
-  "Post",
-  "ScoreEntry",
-  "ScoreAggregate",
-  "User",
-  "UserUnitProgress",
-  "Feedback",
-] as const;
+const TRACKED_TABLES = ROUTED_SEQUIN_TABLES;
 
 type Args = {
   apply: boolean;

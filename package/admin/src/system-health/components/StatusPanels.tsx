@@ -183,7 +183,11 @@ export function ServicesPanel({
   databases: StatusItem[];
   sequin: StatusItem;
 }) {
-  const items = [...services, ...databases, sequin];
+  const items = [
+    ...services.filter((item) => item.id !== sequin.id),
+    ...databases,
+    sequin,
+  ];
   return (
     <StatusCard
       title="服務與資料庫"
@@ -287,6 +291,7 @@ function MeiliIndexRow({
       <div className="mt-3">
         <Link
           to="/repair"
+          search={{ scope: "search" }}
           className={buttonVariants({ variant: "outline", size: "xs" })}
         >
           <Wrench className="size-3" aria-hidden="true" />
@@ -379,29 +384,231 @@ export function MeiliSummaryPanel({ meili }: { meili: MeiliStatusSummary }) {
   );
 }
 
-export function CdcPanel({ cdc }: { cdc: CdcStatus }) {
+function formatBooleanState(value: boolean | null | undefined) {
+  if (value === true) return "是";
+  if (value === false) return "否";
+  return "未回報";
+}
+
+function MetricGrid({
+  items,
+}: {
+  items: Array<{
+    label: string;
+    value: React.ReactNode;
+    state?: StatusState;
+  }>;
+}) {
+  return (
+    <div className="grid gap-2 text-xs text-text-secondary sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="rounded-sm bg-surface-subtle p-3 leading-[1.4]"
+        >
+          <p className="text-text-tertiary">{item.label}</p>
+          <p
+            className={`mt-1 break-words font-medium ${
+              item.state ? statusTextClass(item.state) : "text-text-primary"
+            }`}
+          >
+            {item.value}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TableDriftList({
+  title,
+  tables,
+  state,
+}: {
+  title: string;
+  tables: string[];
+  state: StatusState;
+}) {
+  if (tables.length === 0) return null;
+  return (
+    <div className="rounded-sm border border-border-whisper bg-surface-subtle p-3">
+      <p
+        className={`text-sm font-medium leading-[1.4] ${statusTextClass(state)}`}
+      >
+        {title}
+      </p>
+      <p className="mt-1 break-words text-xs leading-[1.4] text-text-secondary">
+        {tables.join("、")}
+      </p>
+    </div>
+  );
+}
+
+function queueTotals(queue: QueueStatus) {
+  return queue.counts.reduce(
+    (acc, count) => ({
+      created: acc.created + count.created,
+      retry: acc.retry + count.retry,
+      active: acc.active + count.active,
+      failed: acc.failed + count.failed,
+      all: acc.all + count.all,
+    }),
+    { created: 0, retry: 0, active: 0, failed: 0, all: 0 },
+  );
+}
+
+export function CdcPanel({
+  cdc,
+  historyOutbox,
+  queue,
+  sequin,
+}: {
+  cdc: CdcStatus;
+  historyOutbox: HistoryOutboxStatus;
+  queue: QueueStatus;
+  sequin: StatusItem;
+}) {
+  const totals = queueTotals(queue);
+  const hasPublicationDrift =
+    cdc.missingTables.length > 0 || (cdc.extraTables?.length ?? 0) > 0;
   return (
     <StatusCard
       title="Sequin / CDC / Database"
-      description="Sequin 可達性與來源資料庫 CDC 支援分開呈現。"
+      description="來源資料庫、Sequin、job-runner 與 HistoryOutbox 的 CDC 鏈路狀態。"
       icon={<Database className="size-4" aria-hidden="true" />}
     >
-      <StatusItemRow item={cdc.item} />
-      <div className="grid gap-2 text-xs text-text-secondary sm:grid-cols-2">
-        <span>wal_level：{cdc.walLevel ?? "未回報"}</span>
-        <span>publication：{cdc.publicationName ?? "未設定"}</span>
-        <span>slot：{cdc.slotName ?? "未設定"}</span>
-        <span>lag bytes：{cdc.lagBytes ?? "未回報"}</span>
+      <div className="grid gap-2 lg:grid-cols-2">
+        <StatusItemRow item={cdc.item} />
+        <StatusItemRow item={sequin} />
+        <StatusItemRow item={queue.item} />
+        <StatusItemRow item={historyOutbox.item} />
       </div>
-      {cdc.missingTables.length > 0 ? (
-        <p className="text-xs leading-[1.4] text-warning-text">
-          publication 缺少資料表：{cdc.missingTables.join("、")}
-        </p>
-      ) : (
+      <MetricGrid
+        items={[
+          { label: "wal_level", value: cdc.walLevel ?? "未回報" },
+          {
+            label: "publication",
+            value: cdc.publicationName ?? "未設定",
+            state: cdc.publicationExists === false ? "degraded" : undefined,
+          },
+          {
+            label: "publication exists",
+            value: formatBooleanState(cdc.publicationExists),
+            state: cdc.publicationExists === false ? "degraded" : undefined,
+          },
+          {
+            label: "slot",
+            value: cdc.slotName ?? "未設定",
+            state: cdc.slotExists === false ? "degraded" : undefined,
+          },
+          {
+            label: "slot active",
+            value: `${formatBooleanState(cdc.slotActive)}${
+              cdc.slotActivePid ? ` · pid ${cdc.slotActivePid}` : ""
+            }`,
+            state: cdc.slotActive === false ? "degraded" : undefined,
+          },
+          {
+            label: "lag bytes",
+            value: cdc.lagBytes ?? "未回報",
+            state: cdc.lagBytes && cdc.lagBytes > 0 ? "degraded" : undefined,
+          },
+          { label: "restart LSN", value: cdc.restartLsn ?? "未回報" },
+          {
+            label: "confirmed flush LSN",
+            value: cdc.confirmedFlushLsn ?? "未回報",
+          },
+          {
+            label: "replication slots",
+            value:
+              cdc.maxReplicationSlots == null
+                ? "未回報"
+                : `${cdc.usedReplicationSlots ?? 0}/${cdc.maxReplicationSlots} used · ${cdc.availableReplicationSlots ?? 0} available`,
+            state: cdc.availableReplicationSlots === 0 ? "degraded" : undefined,
+          },
+          {
+            label: "WAL senders",
+            value:
+              cdc.maxWalSenders == null
+                ? "未回報"
+                : `${cdc.activeWalSenders ?? 0}/${cdc.maxWalSenders} active · ${cdc.availableWalSenders ?? 0} available`,
+            state: cdc.availableWalSenders === 0 ? "degraded" : undefined,
+          },
+          {
+            label: "HistoryOutbox pending",
+            value: `${historyOutbox.pending} pending · ${historyOutbox.retryReady} retry-ready`,
+            state:
+              historyOutbox.pendingWithoutIngestJob || historyOutbox.failed > 0
+                ? "degraded"
+                : undefined,
+          },
+          {
+            label: "job-runner queue",
+            value: `${totals.active} active · ${totals.retry} retry · ${totals.failed} failed`,
+            state: totals.failed > 0 ? "degraded" : undefined,
+          },
+        ]}
+      />
+      <TableDriftList
+        title="publication 缺少資料表"
+        tables={cdc.missingTables}
+        state="degraded"
+      />
+      <TableDriftList
+        title="publication 額外資料表"
+        tables={cdc.extraTables ?? []}
+        state="unknown"
+      />
+      {!hasPublicationDrift ? (
         <p className="text-xs leading-[1.4] text-success-text">
-          已路由資料表都有 publication 覆蓋。
+          已路由資料表都有 publication 覆蓋，未偵測到額外 publication 資料表。
         </p>
-      )}
+      ) : null}
+      {historyOutbox.pendingWithoutIngestJob ? (
+        <div className="rounded-sm border border-warning-border bg-warning-surface p-3">
+          <p className="text-sm font-medium leading-[1.4] text-warning-text">
+            HistoryOutbox pending 但沒有 history.ingest 佇列活動
+          </p>
+          <p className="mt-1 text-xs leading-[1.4] text-warning-text">
+            先確認 Sequin 與 job-runner 入口健康，再到修復頁對 HistoryOutbox
+            replay 做 dry-run。
+          </p>
+          <Link
+            to="/repair"
+            search={{
+              scope: "history-outbox-replay",
+              historyOutboxStatuses: ["pending", "failed"],
+              olderThanMinutes: 5,
+              limit: 50,
+            }}
+            className={`${buttonVariants({
+              variant: "outline",
+              size: "xs",
+            })} mt-3`}
+          >
+            <Wrench className="size-3" aria-hidden="true" />
+            開啟修復
+          </Link>
+        </div>
+      ) : null}
+      <div className="rounded-sm border border-border-whisper bg-surface-subtle p-3">
+        <p className="text-sm font-medium leading-[1.4]">
+          Slot recreation is a deployment operation
+        </p>
+        <p className="mt-1 text-xs leading-[1.4] text-text-secondary">
+          This admin surface only diagnoses CDC state and queues bounded repair
+          jobs. Replication slot drop/recreate, active slot termination, and
+          Sequin deployment changes stay in runbook-controlled operations.
+        </p>
+        {sequin.url ? (
+          <AdminSafeLink
+            href={sequin.url}
+            className="mt-2 inline-block text-xs text-text-brand"
+          >
+            Open Sequin UI
+          </AdminSafeLink>
+        ) : null}
+      </div>
     </StatusCard>
   );
 }
@@ -437,6 +644,12 @@ export function HistoryOutboxPanel({
             <p className="text-sm font-medium leading-[1.4]">最近失敗 outbox</p>
             <Link
               to="/repair"
+              search={{
+                scope: "history-outbox-replay",
+                historyOutboxStatuses: ["failed"],
+                olderThanMinutes: 0,
+                limit: 50,
+              }}
               className={buttonVariants({ variant: "outline", size: "xs" })}
             >
               <Wrench className="size-3" aria-hidden="true" />
@@ -578,6 +791,10 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
               {job.id && job.lane ? (
                 <Link
                   to="/repair"
+                  search={{
+                    scope: "queue-failed-job",
+                    targetIds: `${job.lane}:${job.id}`,
+                  }}
                   className={`${buttonVariants({
                     variant: "outline",
                     size: "xs",

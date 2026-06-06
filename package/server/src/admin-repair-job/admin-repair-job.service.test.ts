@@ -46,6 +46,20 @@ function auditService(calls: any[] = []) {
   } as unknown as Pick<GovernanceAuditService, "appendPrivilegedMutation">;
 }
 
+function historyOutboxDatabase(ids: string[] = []) {
+  return {
+    select: mock(() => ({
+      from: mock(() => ({
+        where: mock(() => ({
+          orderBy: mock(() => ({
+            limit: mock(async () => ids.map((id) => ({ id }))),
+          })),
+        })),
+      })),
+    })),
+  } as any;
+}
+
 describe("adminRepairJobService", () => {
   beforeEach(() => {
     mock.restore();
@@ -69,6 +83,7 @@ describe("adminRepairJobService", () => {
           };
         }),
       },
+      database: historyOutboxDatabase(),
       fetchImpl: fetch,
       jobRunnerBaseUrl: "http://jobs",
       internalSecret: "secret",
@@ -97,7 +112,7 @@ describe("adminRepairJobService", () => {
       "post",
       "comment",
       "poll",
-      "collection",
+      "shelf-item",
       "realm",
       "entity",
       "progress",
@@ -116,7 +131,7 @@ describe("adminRepairJobService", () => {
     ]);
   });
 
-  test("routes failed history outbox targets to job-runner retry", async () => {
+  test("routes queue failed-job targets to job-runner retry", async () => {
     const auditCalls: any[] = [];
     const fetchImpl = mock(async (url: string, init?: RequestInit) => {
       expect(url).toBe(
@@ -135,6 +150,7 @@ describe("adminRepairJobService", () => {
           throw new Error("unexpected enqueue");
         }),
       },
+      database: historyOutboxDatabase(),
       fetchImpl: fetchImpl as unknown as typeof fetch,
       jobRunnerBaseUrl: "http://jobs",
       internalSecret: "secret",
@@ -142,7 +158,7 @@ describe("adminRepairJobService", () => {
     });
 
     const job = await service.start({
-      scope: "history-outbox",
+      scope: "queue-failed-job",
       targetIds: ["search.sync.fast.dead:job-1"],
       reason: "retry failed job",
       actorUserId: "user-1",
@@ -165,6 +181,103 @@ describe("adminRepairJobService", () => {
     ]);
   });
 
+  test("dry-runs history outbox replay with exact targets and bounded sample", async () => {
+    const ids = Array.from({ length: 25 }, (_, index) => `outbox-${index + 1}`);
+    const auditCalls: any[] = [];
+    const { createAdminRepairJobService } = await import(
+      "./admin-repair-job.service"
+    );
+    const service = createAdminRepairJobService({
+      jobProducer: {
+        enqueue: mock(async () => {
+          throw new Error("unexpected enqueue");
+        }),
+      },
+      database: historyOutboxDatabase(ids),
+      fetchImpl: fetch,
+      auditService: auditService(auditCalls),
+    });
+
+    const dryRun = await service.dryRun({
+      scope: "history-outbox-replay",
+      historyOutboxStatuses: ["failed"],
+      unitId: "unit-1",
+      olderThanMinutes: 10,
+      limit: 25,
+      reason: "replay stuck outbox rows",
+      actorUserId: "user-1",
+    });
+
+    expect(dryRun.affectedCount).toBe(25);
+    expect(dryRun.targetIds).toEqual(ids);
+    expect(dryRun.sampleTargets).toEqual(ids.slice(0, 20));
+    expect(dryRun.sampleLimited).toBe(true);
+    expect(auditCalls[0]).toMatchObject({
+      action: "repair.dry-run",
+      targetId: "history-outbox-replay",
+      metadata: {
+        scope: "history-outbox-replay",
+        targetCount: 25,
+      },
+    });
+  });
+
+  test("queues history outbox replay through idempotent ingest commands", async () => {
+    const enqueued: any[] = [];
+    const { createAdminRepairJobService } = await import(
+      "./admin-repair-job.service"
+    );
+    const service = createAdminRepairJobService({
+      jobProducer: {
+        enqueue: mock(async (command: any): Promise<EnqueueResult> => {
+          enqueued.push(command);
+          return {
+            kind: command.kind,
+            idempotencyKey: command.idempotencyKey,
+            lane: command.lane,
+            status: enqueued.length === 1 ? "created" : "coalesced",
+            jobId: `job-${enqueued.length}`,
+          };
+        }),
+      },
+      database: historyOutboxDatabase(),
+      fetchImpl: fetch,
+      auditService: auditService(),
+    });
+
+    const job = await service.start({
+      scope: "history-outbox-replay",
+      targetIds: ["outbox-1", "outbox-2"],
+      dryRunId: "dryrun-1",
+      reason: "replay missed outbox rows",
+    });
+
+    expect(enqueued.map((command) => command.kind)).toEqual([
+      "history.outbox.ingest",
+      "history.outbox.ingest",
+    ]);
+    expect(enqueued.map((command) => command.idempotencyKey)).toEqual([
+      "history.outbox.ingest:outbox-1",
+      "history.outbox.ingest:outbox-2",
+    ]);
+    expect(job.queuedOperations).toEqual([
+      {
+        jobId: "job-1",
+        lane: "history.ingest",
+        kind: "history.outbox.ingest",
+        status: "created",
+        idempotencyKey: "history.outbox.ingest:outbox-1",
+      },
+      {
+        jobId: "job-2",
+        lane: "history.ingest",
+        kind: "history.outbox.ingest",
+        status: "coalesced",
+        idempotencyKey: "history.outbox.ingest:outbox-2",
+      },
+    ]);
+  });
+
   test("returns a safe failed status when a durable command is unavailable", async () => {
     const { createAdminRepairJobService } = await import(
       "./admin-repair-job.service"
@@ -175,6 +288,7 @@ describe("adminRepairJobService", () => {
           throw new Error("unexpected enqueue");
         }),
       },
+      database: historyOutboxDatabase(),
       fetchImpl: fetch,
       auditService: auditService(),
     });
@@ -206,6 +320,7 @@ describe("adminRepairJobService", () => {
           throw new Error("unexpected enqueue");
         }),
       },
+      database: historyOutboxDatabase(),
       fetchImpl: fetchImpl as unknown as typeof fetch,
       jobRunnerBaseUrl: "http://jobs",
       internalSecret: "secret",

@@ -114,6 +114,12 @@ ok    publication rezics_sequin_pub_development tracks exactly ... table(s)
 ok    replication slot rezics_sequin_slot_development exists
 ```
 
+The expected source table set is code-owned in
+`package/job/src/sequin/manifest.ts` (`ROUTED_SEQUIN_TABLES`). Treat that
+manifest as the source of truth for publication verification, local source
+repair, and Sequin YAML drift tests; do not hand-maintain a separate table list
+in this runbook.
+
 If only the replication slot is missing, Sequin restart may be enough only if
 Sequin can recreate it cleanly. If logs show repeated slot-not-found or
 `max_wal_senders` exhaustion, use the explicit repair flow below.
@@ -319,8 +325,9 @@ current row state, not necessarily every historical transition.
 
 Before merging or running migrations that affect CDC-routed tables:
 
+- Update `package/job/src/sequin/manifest.ts` first when a table becomes routed
+  or stops being routed.
 - Update `package/job-runner/sequin/sequin.yml`.
-- Update `tool/src/commands/service/source.ts` tracked tables.
 - Update `package/job-runner/src/sequin/router.ts` for routing behavior.
 - Add or update router tests for the table/action.
 - Apply `ALTER PUBLICATION ... ADD/DROP TABLE ...` in environments where the
@@ -423,4 +430,3 @@ SELECT pg_drop_replication_slot('rezics_sequin_slot_development');
   https://www.postgresql.org/docs/current/sql-alterpublication.html
 - PostgreSQL streaming replication protocol:
   https://www.postgresql.org/docs/current/protocol-replication.html
-
