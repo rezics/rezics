@@ -13,6 +13,7 @@ import {
   getCanonicalUrl,
   getPagePath,
 } from "./i18n/locales";
+import { uiDictionaries } from "./i18n/ui";
 
 const packageRoot = new URL("..", import.meta.url).pathname;
 
@@ -39,6 +40,16 @@ function frontmatterValue(source: string, key: string): string | null {
   return match?.groups?.value ?? null;
 }
 
+function heroBlock(source: string): string {
+  const match = frontmatterBlock(source).match(
+    /^hero:\n(?<hero>(?:  .+\n?)+)/m,
+  );
+  if (!match?.groups?.hero) {
+    throw new Error("MDX source is missing hero frontmatter");
+  }
+  return match.groups.hero;
+}
+
 describe("@rezics/about locale contract", () => {
   test("uses the canonical Rezics language codes", () => {
     expect(ABOUT_LOCALES).toEqual([
@@ -62,12 +73,36 @@ describe("@rezics/about locale contract", () => {
         expect(frontmatterBlock(source)).toContain("hero:");
         expect(frontmatterBlock(source)).toContain("sections:");
         expect(frontmatterBlock(source)).toContain("storySections:");
+        expect(heroBlock(source)).toContain("  body:\n    - ");
         expect(source).toContain("\n## ");
       }
     }
   });
 
-  test("keeps home pages wired to the product narrative", async () => {
+  test("preserves explicit hero paragraph and localized eyebrow decisions", async () => {
+    const expectedEyebrows: Record<AboutLocale, string> = {
+      "zh-hant": "與所愛的故事相遇",
+      "zh-hans": "与所爱的故事相遇",
+      en: "Encounter the stories you love.",
+      ja: "愛する物語と出会う",
+      de: "Begegne den Geschichten, die du liebst.",
+      ko: "사랑하는 이야기를 만나다",
+    };
+
+    for (const locale of ABOUT_LOCALES) {
+      const source = await readMdxSource(locale, "home");
+      expect(heroBlock(source)).toContain(
+        `  eyebrow: "${expectedEyebrows[locale]}"`,
+      );
+    }
+
+    for (const locale of ABOUT_LOCALES) {
+      const source = await readMdxSource(locale, "home");
+      expect(heroBlock(source).match(/^    - /gm)?.length).toBe(2);
+    }
+  });
+
+  test("keeps home pages wired to the product directory", async () => {
     for (const locale of ABOUT_LOCALES) {
       const source = await readMdxSource(locale, "home");
       expect(frontmatterBlock(source)).toContain('primaryCtaPage: "product"');
@@ -83,7 +118,10 @@ describe("@rezics/about locale contract", () => {
 
       expect(frontmatterBlock(homeSource)).not.toContain("products:");
       expect(frontmatterBlock(productSource)).toContain("products:");
-      expect(productSource).toContain('name: "Rezics"');
+      expect(productSource).toContain('name: "Rezics Catalog"');
+      expect(productSource).toContain("category:");
+      expect(productSource).toContain("status:");
+      expect(productSource).toContain("statusLabel:");
     }
   });
 
@@ -96,18 +134,30 @@ describe("@rezics/about locale contract", () => {
     expect(source).toContain("Tag-shelf discovery");
   });
 
-  test("keeps product narrative focused on Rezics product surfaces", async () => {
+  test("keeps product page focused on the Rezics product directory", async () => {
     const source = await readMdxSource("en", "product");
 
     for (const expected of [
-      "Catalog",
-      "Reviews",
-      "Shelves",
-      "Tags",
-      "Wiki",
-      "Realms",
+      "Rezics Catalog",
+      "Rezics Web",
+      "Rezics Realms",
+      "Rezics Wiki",
+      "Rezics Shelves",
+      "Rezics Graph",
     ]) {
-      expect(source).toContain(`title: "${expected}"`);
+      expect(source).toContain(`name: "${expected}"`);
+    }
+
+    expect(source).toContain('status: "available"');
+    expect(source).toContain('status: "preview"');
+    expect(source).toContain('status: "planned"');
+  });
+
+  test("does not describe the product directory CTA as a story", () => {
+    for (const locale of ABOUT_LOCALES) {
+      expect(uiDictionaries[locale].cta.readProduct.toLowerCase()).not.toContain(
+        "story",
+      );
     }
   });
 });

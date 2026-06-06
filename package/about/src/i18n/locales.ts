@@ -22,6 +22,7 @@ export const ABOUT_PAGE_PATHS = {
 } as const satisfies Record<AboutPageId, string>;
 
 export const ABOUT_SITE_ORIGIN = "https://about.rezics.com";
+// The about site is static; signed-in catalog workflows live at the product origin.
 export const REZICS_APP_ORIGIN = "https://book.rezics.com";
 
 // Keep these values aligned with package/contract/src/language-core.ts while

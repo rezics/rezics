@@ -6,16 +6,17 @@ export type ContentSection = {
   body: string;
 };
 
-export type ProductFeature = {
-  title: string;
-  body: string;
-};
+export type ProductStatus = "available" | "preview" | "planned";
 
 export type ProductEntry = {
-  eyebrow: string;
   name: string;
+  category: string;
+  status: ProductStatus;
+  statusLabel: string;
   summary: string;
-  features: ProductFeature[];
+  href?: string;
+  ctaLabel?: string;
+  features: string[];
 };
 
 export type AboutPageFrontmatter = {
@@ -24,7 +25,7 @@ export type AboutPageFrontmatter = {
   hero: {
     eyebrow: string;
     heading: string;
-    body: string;
+    body: string[];
   };
   primaryCtaPage?: AboutPageId;
   sections: ContentSection[];

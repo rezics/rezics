@@ -31,7 +31,7 @@ export const uiDictionaries: Record<AboutLocale, UiDictionary> = {
     },
     cta: {
       enterApp: "進入作品索引",
-      readProduct: "閱讀產品故事",
+      readProduct: "查看產品",
       backHome: "回到關於頁",
     },
     footer: {
@@ -51,7 +51,7 @@ export const uiDictionaries: Record<AboutLocale, UiDictionary> = {
     },
     cta: {
       enterApp: "进入作品索引",
-      readProduct: "阅读产品故事",
+      readProduct: "查看产品",
       backHome: "回到关于页",
     },
     footer: {
@@ -71,7 +71,7 @@ export const uiDictionaries: Record<AboutLocale, UiDictionary> = {
     },
     cta: {
       enterApp: "Open the catalog",
-      readProduct: "Read the product story",
+      readProduct: "Explore products",
       backHome: "Back to about",
     },
     footer: {
@@ -92,7 +92,7 @@ export const uiDictionaries: Record<AboutLocale, UiDictionary> = {
     },
     cta: {
       enterApp: "作品カタログを開く",
-      readProduct: "製品ストーリーを読む",
+      readProduct: "製品を見る",
       backHome: "概要へ戻る",
     },
     footer: {
@@ -113,7 +113,7 @@ export const uiDictionaries: Record<AboutLocale, UiDictionary> = {
     },
     cta: {
       enterApp: "Katalog öffnen",
-      readProduct: "Produktgeschichte lesen",
+      readProduct: "Produkte ansehen",
       backHome: "Zurück zur Übersicht",
     },
     footer: {
@@ -134,7 +134,7 @@ export const uiDictionaries: Record<AboutLocale, UiDictionary> = {
     },
     cta: {
       enterApp: "작품 카탈로그 열기",
-      readProduct: "제품 이야기 읽기",
+      readProduct: "제품 보기",
       backHome: "소개로 돌아가기",
     },
     footer: {

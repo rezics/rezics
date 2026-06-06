@@ -34,6 +34,7 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
   canonical: getCanonicalUrl(alternateLocale, page),
   meta: ABOUT_LOCALE_META[alternateLocale],
 }));
+const hasProducts = Boolean(frontmatter.products?.length);
 ---
 
 <!doctype html>
@@ -99,7 +100,9 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
         <div class="hero-copy">
           <p class="eyebrow">{frontmatter.hero.eyebrow}</p>
           <h1>{frontmatter.hero.heading}</h1>
-          <p>{frontmatter.hero.body}</p>
+          <div class="hero-body">
+            {frontmatter.hero.body.map((paragraph) => <p>{paragraph}</p>)}
+          </div>
           <div class="hero-actions">
             <a class="button primary" href={primaryHref}>{primaryLabel}</a>
             {
@@ -112,6 +115,37 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
           </div>
         </div>
       </section>
+      {
+        page === "product" && hasProducts ? (
+          <div class="product-directory">
+            {frontmatter.products?.map((product) => (
+              // Planned entries keep the directory shape visible before every surface is live.
+              <article class="product-card">
+                <div class="product-card-main">
+                  <div class="product-card-meta">
+                    <span>{product.category}</span>
+                    <span data-status={product.status}>{product.statusLabel}</span>
+                  </div>
+                  <h2>{product.name}</h2>
+                  <p>{product.summary}</p>
+                </div>
+                <div class="product-card-detail">
+                  <ul>
+                    {product.features.map((feature) => (
+                      <li>{feature}</li>
+                    ))}
+                  </ul>
+                  {product.href && product.ctaLabel ? (
+                    <a class="product-card-cta" href={product.href}>
+                      {product.ctaLabel}
+                    </a>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null
+      }
       <div class="section-grid">
         {
           frontmatter.sections.map((section) => (
@@ -137,11 +171,10 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
         ) : null
       }
       {
-        frontmatter.products?.length ? (
+        page !== "product" && hasProducts ? (
           <div class="product-stack">
             {frontmatter.products.map((product) => (
               <section class="product-section">
-                <p class="eyebrow">{product.eyebrow}</p>
                 <div class="product-section-header">
                   <h2>{product.name}</h2>
                   <p>{product.summary}</p>
@@ -149,8 +182,7 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
                 <div class="product-feature-grid">
                   {product.features.map((feature) => (
                     <article class="product-feature">
-                      <h3>{feature.title}</h3>
-                      <p>{feature.body}</p>
+                      <h3>{feature}</h3>
                     </article>
                   ))}
                 </div>

@@ -8,7 +8,7 @@ const pageCollection = defineCollection({
     hero: z.object({
       eyebrow: z.string(),
       heading: z.string(),
-      body: z.string(),
+      body: z.string().array().min(1),
     }),
     primaryCtaPage: z.enum(["home", "product"]).optional(),
     sections: z
@@ -29,16 +29,14 @@ const pageCollection = defineCollection({
       .optional(),
     products: z
       .object({
-        eyebrow: z.string(),
         name: z.string(),
+        category: z.string(),
+        status: z.enum(["available", "preview", "planned"]),
+        statusLabel: z.string(),
         summary: z.string(),
-        features: z
-          .object({
-            title: z.string(),
-            body: z.string(),
-          })
-          .array()
-          .min(1),
+        href: z.string().optional(),
+        ctaLabel: z.string().optional(),
+        features: z.string().array().min(1),
       })
       .array()
       .optional(),
