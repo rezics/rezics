@@ -1,8 +1,8 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  title: "Rezics Book Library",
-  description: "Documentation for the Rezics Book Library platform",
+  title: "Rezics",
+  description: "Documentation for Rezics",
   themeConfig: {
     nav: [
       { text: "Guide", link: "/guide/deployment" },

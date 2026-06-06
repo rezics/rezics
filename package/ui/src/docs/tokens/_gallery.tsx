@@ -550,7 +550,7 @@ function FuturePanel({
                 textTransform: "uppercase",
               }}
             >
-              Book Library
+              Rezics
             </div>
             <h3
               style={{
