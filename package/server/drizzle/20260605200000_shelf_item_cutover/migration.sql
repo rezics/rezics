@@ -10,15 +10,38 @@ ALTER TABLE "ShelfItem" ADD COLUMN IF NOT EXISTS "parentRole" varchar(32);
 ALTER TABLE "ShelfItem" ADD COLUMN IF NOT EXISTS "searchText" text;
 ALTER TABLE "ShelfItem" ADD COLUMN IF NOT EXISTS "createdByUserId" uuid;
 
-UPDATE "ShelfItem" si
-SET "searchText" = uuc."searchText"
-FROM "Shelf" s
-JOIN "UserUnitCollection" uuc
-  ON uuc."userId" = s."ownerUserId"
-WHERE si."shelfId" = s."unitId"
-  AND si."itemType" = 'unit'
-  AND si."itemId" = uuc."unitId"
-  AND uuc."searchText" IS NOT NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'Shelf'
+      AND column_name = 'ownerUserId'
+  ) THEN
+    UPDATE "ShelfItem" si
+    SET "searchText" = uuc."searchText"
+    FROM "Shelf" s
+    JOIN "UserUnitCollection" uuc
+      ON uuc."userId" = s."ownerUserId"
+    WHERE si."shelfId" = s."unitId"
+      AND si."itemType" = 'unit'
+      AND si."itemId" = uuc."unitId"
+      AND uuc."searchText" IS NOT NULL;
+  ELSE
+    UPDATE "ShelfItem" si
+    SET "searchText" = uuc."searchText"
+    FROM "Shelf" s
+    JOIN "Unit" shelf_unit
+      ON shelf_unit."id" = s."unitId"
+    JOIN "UserUnitCollection" uuc
+      ON uuc."userId" = shelf_unit."userId"
+    WHERE si."shelfId" = s."unitId"
+      AND si."itemType" = 'unit'
+      AND si."itemId" = uuc."unitId"
+      AND uuc."searchText" IS NOT NULL;
+  END IF;
+END $$;
 
 UPDATE "ShelfItem" si
 SET

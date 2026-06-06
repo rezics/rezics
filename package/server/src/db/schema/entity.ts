@@ -10,6 +10,6 @@ export const Entity = pgTable("Entity", {
   kind: varchar({ length: 32 }),
   verified: boolean().default(false).notNull(),
   avatar: text(),
-  eligibleCreditRoles: textArray().default(sql`ARRAY[]`).notNull(),
-  eligibleSubjectRoles: textArray().default(sql`ARRAY[]`).notNull(),
+  eligibleCreditRoles: textArray().default(sql`ARRAY[]::text[]`).notNull(),
+  eligibleSubjectRoles: textArray().default(sql`ARRAY[]::text[]`).notNull(),
 });

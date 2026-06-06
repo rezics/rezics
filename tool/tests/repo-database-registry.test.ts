@@ -12,6 +12,45 @@ function toolEnv(values: Partial<ToolEnv>): ToolEnv {
 }
 
 describe("repo database SQL renderer", () => {
+  function resetSqlFor(databaseName: string) {
+    const databaseLiteral = `'${databaseName.replaceAll("'", "''")}'`;
+    const databaseIdentifier = `"${databaseName.replaceAll('"', '""')}"`;
+
+    return [
+      "SELECT pg_terminate_backend(pid)",
+      "FROM pg_stat_activity",
+      `WHERE datname = ${databaseLiteral} AND pid <> pg_backend_pid();`,
+      "DO $$",
+      "DECLARE",
+      "  slot record;",
+      "  remaining_attempts integer;",
+      "BEGIN",
+      "  FOR slot IN",
+      "    SELECT slot_name, active_pid",
+      "    FROM pg_replication_slots",
+      `    WHERE database = ${databaseLiteral}`,
+      "  LOOP",
+      "    IF slot.active_pid IS NOT NULL THEN",
+      "      PERFORM pg_terminate_backend(slot.active_pid);",
+      "      remaining_attempts := 50;",
+      "      WHILE EXISTS (",
+      "        SELECT 1",
+      "        FROM pg_replication_slots",
+      "        WHERE slot_name = slot.slot_name AND active",
+      "      ) AND remaining_attempts > 0 LOOP",
+      "        PERFORM pg_sleep(0.1);",
+      "        remaining_attempts := remaining_attempts - 1;",
+      "      END LOOP;",
+      "    END IF;",
+      "",
+      "    PERFORM pg_drop_replication_slot(slot.slot_name);",
+      "  END LOOP;",
+      "END $$;",
+      `DROP DATABASE IF EXISTS ${databaseIdentifier};`,
+      `CREATE DATABASE ${databaseIdentifier};`,
+    ].join("\n");
+  }
+
   test("renders SQL from caller-provided database names", () => {
     expect(renderCreateDatabaseSql(["alpha", "beta"])).toBe(
       [
@@ -34,20 +73,9 @@ describe("repo database SQL renderer", () => {
 
   test("renders destructive reset SQL with quoted names", () => {
     expect(renderResetDatabaseSql(["alpha", 'quote"and\\apostrophe'])).toBe(
-      [
-        "SELECT pg_terminate_backend(pid)",
-        "FROM pg_stat_activity",
-        "WHERE datname = 'alpha' AND pid <> pg_backend_pid();",
-        'DROP DATABASE IF EXISTS "alpha";',
-        'CREATE DATABASE "alpha";',
-        "",
-        "SELECT pg_terminate_backend(pid)",
-        "FROM pg_stat_activity",
-        "WHERE datname = 'quote\"and\\apostrophe' AND pid <> pg_backend_pid();",
-        'DROP DATABASE IF EXISTS "quote""and\\apostrophe";',
-        'CREATE DATABASE "quote""and\\apostrophe";',
-        "",
-      ].join("\n"),
+      `${[resetSqlFor("alpha"), resetSqlFor('quote"and\\apostrophe')].join(
+        "\n\n",
+      )}\n`,
     );
   });
 
