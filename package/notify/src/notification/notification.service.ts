@@ -12,6 +12,11 @@ const NON_AGGREGATABLE_KINDS: string[] = Object.entries(KIND_REGISTRY)
   .filter(([, cfg]) => !cfg.aggregatable)
   .map(([kind]) => kind);
 
+const AGGREGATABLE_KIND_LIST = sql.join(
+  AGGREGATABLE_KINDS.map((kind) => sql`${kind}`),
+  sql`, `,
+);
+
 type AggregatedRow = {
   kind: string;
   sourceUnitId: string;
@@ -89,7 +94,7 @@ async function loadAggregatedRows(
       (array_agg(extra ORDER BY "createdAt" DESC))[1] AS extra
     FROM "Notification"
     WHERE "recipientId" = ${recipientId}::uuid
-      AND kind = ANY(${AGGREGATABLE_KINDS}::text[])
+      AND kind IN (${AGGREGATABLE_KIND_LIST})
     GROUP BY kind, "sourceUnitId"
     ORDER BY "latestAt" DESC
   `);
@@ -117,7 +122,7 @@ async function countAggregatedUnread(recipientId: string): Promise<number> {
       SELECT 1
       FROM "Notification"
       WHERE "recipientId" = ${recipientId}::uuid
-        AND kind = ANY(${AGGREGATABLE_KINDS}::text[])
+        AND kind IN (${AGGREGATABLE_KIND_LIST})
         AND read = false
       GROUP BY kind, "sourceUnitId"
     ) sub

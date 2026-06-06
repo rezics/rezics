@@ -86,7 +86,7 @@ describe("realm extra single-key service", () => {
     }
   });
 
-  test("sets and replaces rule/about/banner/wiki Zone keys", async () => {
+  test("sets and replaces rule/about/banner/tag view/wiki Zone keys", async () => {
     await setSingleExtraKey(caller, "realm-1", "rule", "post-rule");
     expect(storedExtra.rule).toBe("post-rule");
 
@@ -111,6 +111,15 @@ describe("realm extra single-key service", () => {
       unitId: "post-banner",
     });
 
+    await setSingleExtraKey(caller, "realm-1", "tagView", {
+      defaultStyle: "grouped",
+      allowViewerSwitch: false,
+    });
+    expect(storedExtra.tagView).toEqual({
+      defaultStyle: "grouped",
+      allowViewerSwitch: false,
+    });
+
     await setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "zone-wiki");
     expect(storedExtra.wikiZoneUnitId).toBe("zone-wiki");
   });
@@ -120,6 +129,7 @@ describe("realm extra single-key service", () => {
       rule: "post-rule",
       about: "post-about",
       banner: { kind: "url", url: "https://example.com/banner.png" },
+      tagView: { defaultStyle: "tree", allowViewerSwitch: true },
       tagTree: [{ tagId: "tag-action" }],
       wikiZoneUnitId: "zone-wiki",
     };
@@ -127,6 +137,7 @@ describe("realm extra single-key service", () => {
     await clearSingleExtraKey(caller, "realm-1", "rule");
     await clearSingleExtraKey(caller, "realm-1", "about");
     await clearSingleExtraKey(caller, "realm-1", "banner");
+    await clearSingleExtraKey(caller, "realm-1", "tagView");
     await clearSingleExtraKey(caller, "realm-1", "tagTree");
     await clearSingleExtraKey(caller, "realm-1", "wikiZoneUnitId");
 
@@ -145,6 +156,17 @@ describe("realm extra single-key service", () => {
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
       setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "missing-zone"),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "tagView", {
+        defaultStyle: "columns",
+        allowViewerSwitch: true,
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "tagView", {
+        defaultStyle: "flat",
+      }),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
       setTagTreeExtra(caller, "realm-1", [{ children: [{ tagId: "tag-a" }] }]),

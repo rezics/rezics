@@ -1146,7 +1146,10 @@ export class PostService {
     // feeds/search until published (see publication-policy
     // `publicUnitEligibilityWhere`).
     const asDraft = input.status === "DRAFT" && kind !== PostKindEnum.CHAPTER;
-    const targetUnitId = inputTargetUnitId;
+    const targetUnitId =
+      typeof inputTargetUnitId === "string" && inputTargetUnitId.trim()
+        ? inputTargetUnitId.trim()
+        : null;
     const realmIdsToWrite = [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
@@ -1182,7 +1185,7 @@ export class PostService {
           userId: ownerUserId,
           slugScope: ownerUserId,
           type: "POST",
-          targetUnitId: targetUnitId ?? null,
+          targetUnitId,
           status: asDraft ? "DRAFT" : "PUBLISHED",
           publishedAt: asDraft ? null : new Date(),
         })

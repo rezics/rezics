@@ -2235,6 +2235,19 @@ describe("PostService.create targetUnitId derivation", () => {
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
+  test("top-level POST treats blank targetUnitId as absent", async () => {
+    resetMocks();
+
+    await service.create(
+      postInput({ content: content("free-form"), targetUnitId: "" }),
+      "user-1",
+    );
+
+    expect(unitCreateDataArg().targetUnitId).toBeNull();
+    expect(createDataArg().targetUnitId).toBeUndefined();
+    expect(unitFindUniqueMock).not.toHaveBeenCalled();
+  });
+
   test("root post create writes UnitTranslation title and ContentTranslation body", async () => {
     resetMocks();
     postCreateMock.mockImplementationOnce(async (args: any) => ({

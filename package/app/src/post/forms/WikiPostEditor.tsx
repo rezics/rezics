@@ -73,12 +73,15 @@ export function WikiPostEditor({
     const trimmedTitle = title.trim();
     if (!trimmedTitle || !trimmed) return;
     setLockedError(null);
+    const normalizedTargetUnitId = targetUnitId?.trim();
     createMutation.mutate({
       title: trimmedTitle,
       content: markdownContentDoc(trimmed),
       language,
       realmUnitIds,
-      targetUnitId,
+      ...(normalizedTargetUnitId
+        ? { targetUnitId: normalizedTargetUnitId }
+        : {}),
       status,
     } as never);
   };

@@ -1,9 +1,10 @@
 import type {
   RealmBannerExtra,
+  RealmTagView,
   RezicsSessionClaims,
   TagTreeNode,
 } from "@rezics/contract";
-import { LICENSE_SLUGS } from "@rezics/contract";
+import { LICENSE_SLUGS, realmTagViewStyleValues } from "@rezics/contract";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { hasAuthorityOver } from "@/unit/authority";
 import { Realm, RealmMember, Unit, Zone } from "../db/schema";
@@ -32,6 +33,7 @@ type SingleExtraKey =
   | "about"
   | "banner"
   | "defaultLicenseSlug"
+  | "tagView"
   | "wikiZoneUnitId";
 type UnitReferenceExtraKey = "rule" | "about" | "banner";
 
@@ -40,6 +42,7 @@ const SINGLE_EXTRA_KEYS = new Set<string>([
   "about",
   "banner",
   "defaultLicenseSlug",
+  "tagView",
   "wikiZoneUnitId",
 ]);
 
@@ -488,6 +491,31 @@ async function validateSingleExtraValue(
     }
     await validateZoneUnit(value);
     return value;
+  }
+
+  if (key === "tagView") {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "tagView must be an object",
+        400,
+      );
+    }
+    const tagView = value as RealmTagView;
+    if (
+      !realmTagViewStyleValues.includes(tagView.defaultStyle) ||
+      typeof tagView.allowViewerSwitch !== "boolean"
+    ) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "tagView must include a valid defaultStyle and allowViewerSwitch boolean",
+        400,
+      );
+    }
+    return {
+      defaultStyle: tagView.defaultStyle,
+      allowViewerSwitch: tagView.allowViewerSwitch,
+    };
   }
 
   if (!value || typeof value !== "object" || Array.isArray(value)) {

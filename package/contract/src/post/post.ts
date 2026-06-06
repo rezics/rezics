@@ -369,12 +369,12 @@ export type PostResponse = (typeof postResponseSchema)["static"];
 // ============================================================
 
 export const createPostSchema = t.Object({
-  targetUnitId: t.Optional(t.String()),
+  targetUnitId: t.Optional(t.String({ minLength: 1 })),
   /**
    * Weak selected VARIANT context. Normal posts still aggregate on
    * `targetUnitId`; this value is not validated as existing or as a VARIANT.
    */
-  variantUnitId: t.Optional(t.String()),
+  variantUnitId: t.Optional(t.String({ minLength: 1 })),
   /**
    * Realm Unit IDs that create UnitRealm junction rows in the same transaction
    * as the Post.

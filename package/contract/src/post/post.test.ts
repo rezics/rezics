@@ -108,6 +108,22 @@ describe("post work-domain contract fields", () => {
       }),
     ).toBe(true);
     expect(
+      Value.Check(createPostSchema, {
+        targetUnitId: "",
+        language: "en",
+        title: "Resolved post title",
+        content: markdownContentDoc("body"),
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(createPostSchema, {
+        variantUnitId: "",
+        language: "en",
+        title: "Resolved post title",
+        content: markdownContentDoc("body"),
+      }),
+    ).toBe(false);
+    expect(
       Value.Check(postDTOSchema, {
         unitId: "post-1",
         authorUserId: "user-1",

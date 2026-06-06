@@ -24,6 +24,27 @@ import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { CreateRootPostInput, PostFilters } from "./post.types";
 
+function normalizeOptionalId(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function normalizeCreatePostInput(
+  input: CreateRootPostInput,
+): CreateRootPostInput {
+  const normalized = { ...input };
+  const targetUnitId = normalizeOptionalId(input.targetUnitId);
+  const variantUnitId = normalizeOptionalId(input.variantUnitId);
+
+  if (targetUnitId) normalized.targetUnitId = targetUnitId;
+  else delete normalized.targetUnitId;
+
+  if (variantUnitId) normalized.variantUnitId = variantUnitId;
+  else delete normalized.variantUnitId;
+
+  return normalized;
+}
+
 /**
  * Post API methods
  */
@@ -129,7 +150,7 @@ export const postApi = {
   create: async (input: CreateRootPostInput): Promise<PostResponse> => {
     return apiFetch<PostResponse>("/post", {
       method: "POST",
-      body: JSON.stringify(input),
+      body: JSON.stringify(normalizeCreatePostInput(input)),
     });
   },
 
