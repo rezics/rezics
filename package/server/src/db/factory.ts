@@ -1,13 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
+import { Pool } from "pg";
 import { relations } from "./schema";
-
-const Pool = (pg as any).Pool as new (options: {
-  connectionString: string;
-  max: number;
-  idleTimeoutMillis: number;
-  connectionTimeoutMillis: number;
-}) => any;
 
 const enableQueryLogging =
   (process.env.NODE_ENV ?? "development") !== "production" &&
@@ -22,7 +15,8 @@ export function createServerDb(connectionString: string, max = 20) {
     connectionTimeoutMillis: 2_000,
   });
   return {
-    db: drizzle(pool, {
+    db: drizzle({
+      client: pool,
       relations,
       logger: enableQueryLogging
         ? {

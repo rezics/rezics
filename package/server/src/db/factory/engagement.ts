@@ -101,7 +101,8 @@ async function seedFavorites(
       prevPos = position;
       return {
         shelfId,
-        unitId: target.id,
+        itemType: "unit",
+        itemId: target.id,
         kind: unitTypeToShelfKind(target.type),
         position,
         updatedAt: new Date(),

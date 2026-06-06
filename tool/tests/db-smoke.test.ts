@@ -60,7 +60,7 @@ describe("db migration smoke checks", () => {
       ).toBe(true);
     }
     for (const indexName of [
-      "Comment_path_gist_idx",
+      "Comment_rootUnitId_realmUnitId_parentCommentId_createdAt_id_idx",
       "PollVote_single_choice_uniq",
       "subscription_channels_gin",
     ]) {

@@ -32,7 +32,7 @@ const PACKAGE_TABLES = {
 } as const satisfies Record<DbSchemaPackage, readonly string[]>;
 
 const SERVER_INDEXES = [
-  "Comment_path_gist_idx",
+  "Comment_rootUnitId_realmUnitId_parentCommentId_createdAt_id_idx",
   "PollVote_single_choice_uniq",
   "subscription_channels_gin",
 ] as const;
