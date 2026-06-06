@@ -121,6 +121,7 @@ Body rules:
 
 - Omit the body for tiny obvious changes.
 - Use 1-4 bullets for non-trivial changes.
+- Keep body bullets contiguous; do not insert blank lines between list items.
 - Prefer why and durable outcome over line-by-line implementation detail.
 - Do not append archive trailers, co-authorship, attribution, or AI-generated
   trailers.
@@ -130,6 +131,11 @@ Body rules:
 Show the final message in a fenced block and ask whether to commit or modify it.
 
 Only run `git commit` after explicit user confirmation in this session.
+
+When using `git commit -m`, pass the entire multi-line body as one argument.
+Do not pass each bullet as a separate `-m`; Git treats each `-m` argument as a
+separate paragraph and inserts blank lines between them. Prefer a commit message
+file with `git commit -F <file>` for multi-line bodies when quoting is awkward.
 
 When committing from the CLI, stage only task-owned files by explicit path if
 staging is still needed. Never use `git add -A` or `git add .`.

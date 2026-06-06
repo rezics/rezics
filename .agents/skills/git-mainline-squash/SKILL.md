@@ -92,6 +92,7 @@ final integrated change, not from the archive metadata.
 - First paragraph: one sentence explaining the completed capability or outcome.
 - Optional bullets: 2-5 high-level surfaces such as contract, server, app,
   migration, tests, or tooling.
+- Keep body bullets contiguous; do not insert blank lines between list items.
 - Do not describe routine process work such as rebasing, lint cleanup, or review
   iteration.
 - Do not put archive details in the body; put them in trailers.
@@ -117,3 +118,7 @@ metadata; abbreviated SHAs are acceptable only in drafts.
 
 Show the final message in a fenced block. If the user asked to commit, still ask
 for explicit confirmation before running `git commit`.
+
+When committing from the CLI, use one body argument or a commit message file for
+multi-line bodies. Do not pass each body bullet as a separate `-m`; Git turns
+separate `-m` arguments into separate paragraphs.
