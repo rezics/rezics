@@ -28,6 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FeedLayout } from "@/feed";
 import { PinnedFeedSection } from "@/pinboard";
 import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
@@ -50,6 +51,7 @@ import { RuleSection } from "../sections/RuleSection";
 
 export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
 export type { RealmFeedSort };
+
 type RealmModerationFilter = NonNullable<
   PostListQuery["realmModerationStatus"]
 >;
@@ -272,16 +274,18 @@ export function RealmPage({
                   </div>
                 ) : null}
               </div>
-              <PinnedFeedSection realmUnitId={realmId} />
-              <RealmContentFeed
-                realmId={realmId}
-                sort={feedSort}
-                tagIds={feedTagIds}
-                manageMode={showManage && manageMode}
-                realmModerationStatus={
-                  showManage && manageMode ? realmModerationStatus : undefined
-                }
-              />
+              <FeedLayout className="space-y-4">
+                <PinnedFeedSection realmUnitId={realmId} />
+                <RealmContentFeed
+                  realmId={realmId}
+                  sort={feedSort}
+                  tagIds={feedTagIds}
+                  manageMode={showManage && manageMode}
+                  realmModerationStatus={
+                    showManage && manageMode ? realmModerationStatus : undefined
+                  }
+                />
+              </FeedLayout>
             </div>
             <aside className="min-w-0">
               <AboutSection postUnitId={realm.extra?.about ?? null} />

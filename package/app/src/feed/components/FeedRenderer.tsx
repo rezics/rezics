@@ -1,23 +1,25 @@
 import type { FeedContentRow, FeedRow } from "@rezics/api/feed/feed";
-import {
-  type FeedCarouselRow,
-  type FeedWorkSummary,
-  type ModerationActionDTO,
-  type ModerationStatus,
-  type ShelfDTO,
-  type ShelfSummaryDTO,
-  PostKind,
+import type {
+  FeedCarouselRow,
+  FeedWorkSummary,
+  ShelfDTO,
+  ShelfSummaryDTO,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel";
 import { EmptyState } from "@rezics/ui";
+import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { Card, CardContent, Skeleton } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { PostCard } from "@/post";
-import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { TextLink } from "@/shared/ui/link";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
+import { FeedContentCard } from "./FeedContentCard";
+
+const FEED_LOADING_ROW_KEYS = [
+  "feed-loading-1",
+  "feed-loading-2",
+  "feed-loading-3",
+  "feed-loading-4",
+];
 
 interface FeedRendererProps {
   rows: FeedRow[];
@@ -29,8 +31,8 @@ interface FeedRendererProps {
 function FeedLoadingRows() {
   return (
     <div className="space-y-4">
-      {Array.from({ length: 4 }, (_, index) => (
-        <div key={index} className="rounded-md bg-surface-subtle p-4">
+      {FEED_LOADING_ROW_KEYS.map((key) => (
+        <div key={key} className="rounded-md bg-surface-subtle p-4">
           <Skeleton className="mb-3 h-5 w-40" />
           <Skeleton className="mb-2 h-4 w-full" />
           <Skeleton className="h-4 w-2/3" />
@@ -139,71 +141,6 @@ function FeedCarousel({ row }: { row: FeedCarouselRow }) {
         />
       )}
     </section>
-  );
-}
-
-interface FeedContentCardProps {
-  row: FeedContentRow;
-  summaryScopeKey?: string;
-  reactionScopeKey?: string;
-  manageMode?: boolean;
-  realmModerationStatus?: ModerationStatus;
-  realmModerationAt?: string | Date | null;
-  moderationLatestAction?: ModerationActionDTO | null;
-  moderationMenuContent?: React.ReactNode;
-}
-
-export function FeedContentCard({
-  row,
-  summaryScopeKey,
-  reactionScopeKey,
-  manageMode,
-  realmModerationStatus,
-  realmModerationAt,
-  moderationLatestAction,
-  moderationMenuContent,
-}: FeedContentCardProps) {
-  const navigate = useNavigate();
-  const openRow = () => navigate({ to: row.href });
-
-  if (row.post.kind === PostKind.REVIEW) {
-    return (
-      // biome-ignore lint/a11y/noStaticElementInteractions: nested links and actions provide keyboard access; pointer row open mirrors content cards.
-      // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard users can use the nested review title/action links.
-      <div
-        className="cursor-pointer border-b border-border-whisper"
-        onClick={openRow}
-      >
-        <ReviewCard
-          review={row.post}
-          className="border-b-0"
-          targetUnit={
-            row.targetUnit?.unitId
-              ? {
-                  unitId: row.targetUnit.unitId,
-                  title: row.targetUnit.title ?? row.targetUnit.unitId,
-                }
-              : undefined
-          }
-        />
-      </div>
-    );
-  }
-
-  return (
-    <PostCard
-      post={row.post}
-      onOpen={openRow}
-      href={row.href}
-      summaryScopeKey={summaryScopeKey}
-      reactionScopeKey={reactionScopeKey}
-      variantContext={row.variantContext}
-      manageMode={manageMode}
-      realmModerationStatus={realmModerationStatus}
-      realmModerationAt={realmModerationAt}
-      moderationLatestAction={moderationLatestAction}
-      moderationMenuContent={moderationMenuContent}
-    />
   );
 }
 
