@@ -59,11 +59,25 @@ import {
 } from "../sections/RealmManageEditors";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 
+type RealmManageTab =
+  | "profile"
+  | "organization"
+  | "wiki"
+  | "moderation"
+  | "members"
+  | "danger";
+
 interface RealmManagePageProps {
   realmId: string;
+  activeTab?: RealmManageTab;
+  onTabChange?: (tab: RealmManageTab) => void;
 }
 
-export function RealmManagePage({ realmId }: RealmManagePageProps) {
+export function RealmManagePage({
+  realmId,
+  activeTab = "profile",
+  onTabChange,
+}: RealmManagePageProps) {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -231,7 +245,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
       <h1 className="mb-6 text-2xl font-semibold">
         {t("entity:realm_manage")}
       </h1>
-      <Tabs defaultValue="profile">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => onTabChange?.(value as RealmManageTab)}
+      >
         <TabsList className="mb-6 flex flex-wrap">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="organization">Organization</TabsTrigger>
