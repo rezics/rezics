@@ -27,6 +27,6 @@ export type {
 } from "./models/unitCardSummary";
 export {
   candidateToUnitCardSummary,
-  shelfUnitToUnitCardSummary,
+  shelfItemToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./models/unitCardSummary";

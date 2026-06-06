@@ -4,8 +4,8 @@ import type {
   BookDTO,
   PostDTO,
   ShelfDTO,
-  ShelfUnitDTO,
-  ShelfUnitRelationDTO,
+  ShelfItemDTO,
+  ShelfItemChildDTO,
 } from "@rezics/contract";
 import { markdownContentDoc } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -24,7 +24,7 @@ import { ShelfEditorItemsSection } from "./ShelfEditorItemsSection";
 const SHELF_ID = "fixture-shelf-1";
 
 // MOCK: story-only shelf + book fixtures so the section renders without
-// network. The real flow loads these via shelfUnitsQuery and the hydration
+// network. The real flow loads these via shelfItemsQuery and the hydration
 // useQueries cache; we pre-populate both.
 function makeBook(idx: number): BookDTO {
   const id = `fixture-book-${idx}`;
@@ -88,10 +88,10 @@ function makeTag() {
 
 function makeUnit(
   unitId: string,
-  kind: ShelfUnitDTO["kind"],
+  kind: ShelfItemDTO["kind"],
   position: string,
   createdAt?: string,
-): ShelfUnitDTO {
+): ShelfItemDTO {
   return {
     shelfId: SHELF_ID,
     unitId,
@@ -101,7 +101,7 @@ function makeUnit(
   };
 }
 
-function makeBookUnit(idx: number): ShelfUnitDTO {
+function makeBookUnit(idx: number): ShelfItemDTO {
   return makeUnit(`fixture-book-${idx}`, "book", String(idx).padStart(4, "0"));
 }
 
@@ -117,8 +117,8 @@ function makeShelf(): ShelfDTO {
 }
 
 interface SeedOptions {
-  units: ShelfUnitDTO[];
-  relations: ShelfUnitRelationDTO[];
+  units: ShelfItemDTO[];
+  relations: ShelfItemChildDTO[];
   books: BookDTO[];
   posts?: PostDTO[];
   shelves?: ShelfDTO[];
@@ -135,7 +135,7 @@ function useSeededShelf({
 }: SeedOptions) {
   const qc = useQueryClient();
   useEffect(() => {
-    qc.setQueryData(shelfKeys.unitsPage(SHELF_ID, undefined), {
+    qc.setQueryData(shelfKeys.itemsPage(SHELF_ID, undefined), {
       units,
       relations,
       hasMore: false,
@@ -171,7 +171,7 @@ interface StoryShellProps {
 }
 
 function StoryShell({ itemCount, viewMode, enqueue, mixed }: StoryShellProps) {
-  const units = useMemo<ShelfUnitDTO[]>(() => {
+  const units = useMemo<ShelfItemDTO[]>(() => {
     if (!mixed) {
       return Array.from({ length: itemCount }, (_, i) => makeBookUnit(i + 1));
     }
@@ -199,19 +199,19 @@ function StoryShell({ itemCount, viewMode, enqueue, mixed }: StoryShellProps) {
       ),
     ];
   }, [itemCount, mixed]);
-  const relations = useMemo<ShelfUnitRelationDTO[]>(() => {
+  const relations = useMemo<ShelfItemChildDTO[]>(() => {
     if (!mixed) return [];
     return [
       {
         shelfId: SHELF_ID,
-        parentUnitId: "fixture-book-5",
-        childUnitId: "fixture-review-attached",
+        parentItemId: "fixture-book-5",
+        childItemId: "fixture-review-attached",
         role: "review",
       },
       {
         shelfId: SHELF_ID,
-        parentUnitId: "fixture-book-5",
-        childUnitId: "fixture-tag-1",
+        parentItemId: "fixture-book-5",
+        childItemId: "fixture-tag-1",
         role: "tag",
       },
     ];

@@ -13,6 +13,7 @@ import {
   allBucketSlugs,
   BasicAdminPermission,
   extractPollUnitIdsFromContentDoc,
+  extractUnitRefIdsFromContentDoc,
   getStateSchema,
   isLegalStateValue,
   isLegalTransition,
@@ -31,6 +32,7 @@ import {
   eq,
   gt,
   inArray,
+  lt,
   ne,
   notInArray,
   or,
@@ -62,6 +64,7 @@ import {
   Poll,
   Post,
   PostPollReference,
+  PostUnitReference,
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
@@ -204,6 +207,7 @@ function assertExplicitLocalizedWriteLanguage(input: UpdatePostInput): string {
 }
 
 type PostPollReferenceTx = DbLike;
+type PostUnitReferenceTx = DbLike;
 
 function uniqueValues<T>(values: readonly T[]): T[] {
   return [...new Set(values)];
@@ -226,6 +230,52 @@ function publicUnitConditions(): SQL[] {
     eq(Unit.visibility, "PUBLIC"),
     eq(Unit.moderationStatus, "APPROVED"),
   ];
+}
+
+function cursorCreatedAt(cursor: PostListQuery["cursor"]): Date | null {
+  if (!cursor?.createdAt) return null;
+  const date = new Date(cursor.createdAt);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function chronologicalCursorCondition(
+  cursor: PostListQuery["cursor"],
+  order: "asc" | "desc",
+): SQL | undefined {
+  const createdAt = cursorCreatedAt(cursor);
+  if (!cursor?.unitId || !createdAt) return undefined;
+
+  return order === "asc"
+    ? or(
+        gt(Post.createdAt, createdAt),
+        and(eq(Post.createdAt, createdAt), gt(Post.unitId, cursor.unitId)),
+      )
+    : or(
+        lt(Post.createdAt, createdAt),
+        and(eq(Post.createdAt, createdAt), lt(Post.unitId, cursor.unitId)),
+      );
+}
+
+function rankedCursorCondition(
+  cursor: PostListQuery["cursor"],
+  scoreExpr: SQL,
+): SQL | undefined {
+  const createdAt = cursorCreatedAt(cursor);
+  const sortValue = Number(cursor?.sortValue);
+  if (!cursor?.unitId || !createdAt || !Number.isFinite(sortValue)) {
+    return undefined;
+  }
+
+  return or(
+    sql`${scoreExpr} < ${sortValue}`,
+    and(
+      sql`${scoreExpr} = ${sortValue}`,
+      or(
+        lt(Post.createdAt, createdAt),
+        and(eq(Post.createdAt, createdAt), lt(Post.unitId, cursor.unitId)),
+      ),
+    ),
+  );
 }
 
 function preferredLanguageCondition(
@@ -334,6 +384,20 @@ function groupRows<T extends Record<string, any>>(
   return grouped;
 }
 
+function contentTranslationContentsAfterWrite(
+  translations: Array<{ language?: string | null; content?: unknown }>,
+  input: { language: string; content: unknown },
+): unknown[] {
+  let replaced = false;
+  const contents = translations.map((translation) => {
+    if (translation.language !== input.language) return translation.content;
+    replaced = true;
+    return input.content;
+  });
+  if (!replaced) contents.push(input.content);
+  return contents;
+}
+
 async function getPostByUnitId(
   unitId: string,
   dbLike?: DbLike,
@@ -403,6 +467,90 @@ async function syncPostPollReferences(
       .set({ usageCount: sql`${Poll.usageCount} - 1` })
       .where(and(inArray(Poll.unitId, removedPollIds), gt(Poll.usageCount, 0)));
   }
+}
+
+async function syncPostUnitReferences(
+  tx: PostUnitReferenceTx,
+  input: {
+    postUnitId: string;
+    oldContents: readonly unknown[];
+    newContents: readonly unknown[];
+  },
+) {
+  const oldTargetIds = new Set(
+    input.oldContents.flatMap((content) =>
+      extractUnitRefIdsFromContentDoc(content),
+    ),
+  );
+  const newTargetIds = new Set(
+    input.newContents.flatMap((content) =>
+      extractUnitRefIdsFromContentDoc(content),
+    ),
+  );
+  oldTargetIds.delete(input.postUnitId);
+  newTargetIds.delete(input.postUnitId);
+
+  const addedTargetIds = [...newTargetIds].filter(
+    (id) => !oldTargetIds.has(id),
+  );
+  const removedTargetIds = [...oldTargetIds].filter(
+    (id) => !newTargetIds.has(id),
+  );
+
+  if (addedTargetIds.length > 0) {
+    await tx
+      .insert(PostUnitReference)
+      .values(
+        addedTargetIds.map((targetUnitId) => ({
+          sourcePostUnitId: input.postUnitId,
+          targetUnitId,
+        })),
+      )
+      .onConflictDoNothing();
+    await tx
+      .update(Unit)
+      .set({ referenceCount: sql`${Unit.referenceCount} + 1` })
+      .where(inArray(Unit.id, addedTargetIds));
+  }
+
+  if (removedTargetIds.length > 0) {
+    await tx
+      .delete(PostUnitReference)
+      .where(
+        and(
+          eq(PostUnitReference.sourcePostUnitId, input.postUnitId),
+          inArray(PostUnitReference.targetUnitId, removedTargetIds),
+        ),
+      );
+    await tx
+      .update(Unit)
+      .set({ referenceCount: sql`${Unit.referenceCount} - 1` })
+      .where(
+        and(inArray(Unit.id, removedTargetIds), gt(Unit.referenceCount, 0)),
+      );
+  }
+}
+
+async function clearPostUnitReferences(
+  tx: PostUnitReferenceTx,
+  postUnitId: string,
+) {
+  const rows = await tx
+    .select({ targetUnitId: PostUnitReference.targetUnitId })
+    .from(PostUnitReference)
+    .where(eq(PostUnitReference.sourcePostUnitId, postUnitId));
+  const targetIds = rows
+    .map((row: { targetUnitId: unknown }) => row.targetUnitId)
+    .filter((id: unknown): id is string => typeof id === "string");
+  if (targetIds.length === 0) return;
+
+  await tx
+    .delete(PostUnitReference)
+    .where(eq(PostUnitReference.sourcePostUnitId, postUnitId));
+  await tx
+    .update(Unit)
+    .set({ referenceCount: sql`${Unit.referenceCount} - 1` })
+    .where(and(inArray(Unit.id, targetIds), gt(Unit.referenceCount, 0)));
 }
 
 async function upsertPostContentTranslation(
@@ -644,16 +792,23 @@ export class PostService {
       (query.sort.order === "asc" || query.sort.order === "desc")
         ? query.sort.order
         : "desc";
+    const cursorCondition = chronologicalCursorCondition(
+      query.cursor,
+      sortOrder,
+    );
+    if (cursorCondition) conditions.push(cursorCondition);
+    const finalWhere = whereAnd(conditions);
     const [rows, totalRows] = await Promise.all([
       db
         .select({ unitId: Post.unitId })
         .from(Post)
         .innerJoin(Unit, eq(Unit.id, Post.unitId))
-        .where(where)
+        .where(finalWhere)
         .orderBy(
           sortOrder === "asc" ? asc(Post.createdAt) : desc(Post.createdAt),
+          sortOrder === "asc" ? asc(Post.unitId) : desc(Post.unitId),
         )
-        .offset(skipNum)
+        .offset(cursorCondition ? 0 : skipNum)
         .limit(limitNum),
       db
         .select({ total: count() })
@@ -749,9 +904,22 @@ export class PostService {
     }
 
     const db = await getServerDb();
+    const scoreExpr = sql<number>`coalesce(${ScoreEntry.value}, 0)`;
+    const countWhere = whereAnd(conditions);
+    if (sort === "top" || sort === "hot") {
+      const cursorCondition = rankedCursorCondition(opts.cursor, scoreExpr);
+      if (cursorCondition) conditions.push(cursorCondition);
+    } else {
+      const cursorCondition = chronologicalCursorCondition(opts.cursor, "desc");
+      if (cursorCondition) conditions.push(cursorCondition);
+    }
     const where = whereAnd(conditions);
     let rowQuery = db
-      .select({ unitId: Post.unitId })
+      .select({
+        unitId: Post.unitId,
+        sortValue:
+          sort === "top" || sort === "hot" ? scoreExpr : sql<number>`0`,
+      })
       .from(Post)
       .innerJoin(Unit, eq(Unit.id, Post.unitId))
       .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId));
@@ -765,11 +933,12 @@ export class PostService {
       .where(where)
       .orderBy(
         sort === "top" || sort === "hot"
-          ? desc(ScoreEntry.value)
+          ? desc(scoreExpr)
           : desc(Post.createdAt),
         desc(Post.createdAt),
+        desc(Post.unitId),
       )
-      .offset(skipNum)
+      .offset(opts.cursor ? 0 : skipNum)
       .limit(limitNum);
 
     const [rows, totalRows] = await Promise.all([
@@ -779,12 +948,25 @@ export class PostService {
         .from(Post)
         .innerJoin(Unit, eq(Unit.id, Post.unitId))
         .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId))
-        .where(where),
+        .where(countWhere),
     ]);
-    const posts = await hydratePostsByUnitIds(
-      rows.map((row: { unitId: string }) => row.unitId),
-      db,
+    const sortValues = new Map(
+      rows.map(
+        (row: { unitId: string; sortValue?: number | string | null }) => [
+          row.unitId,
+          row.sortValue ?? null,
+        ],
+      ),
     );
+    const posts = (
+      await hydratePostsByUnitIds(
+        rows.map((row: { unitId: string }) => row.unitId),
+        db,
+      )
+    ).map((post) => ({
+      ...post,
+      feedSortValue: sortValues.get(post.unitId) ?? null,
+    }));
 
     return {
       posts: await hydrateUnitOwnerUserSlugs(await attachPinKinds(posts)),
@@ -1125,6 +1307,11 @@ export class PostService {
         oldContent: null,
         newContent: content,
       });
+      await syncPostUnitReferences(tx, {
+        postUnitId: created.unitId,
+        oldContents: [],
+        newContents: [content],
+      });
 
       if (kind === "WIKI") {
         await writeEditorialMetadataHistory(tx as any, {
@@ -1356,6 +1543,9 @@ export class PostService {
         const oldContent = (existing.unit.contentTranslations ?? []).find(
           (translation) => translation.language === language,
         )?.content;
+        const oldContents = (existing.unit.contentTranslations ?? []).map(
+          (translation) => translation.content,
+        );
         const row =
           Object.keys(data).length > 0
             ? await updatePostRow(tx, unitId, data)
@@ -1382,6 +1572,14 @@ export class PostService {
             oldContent,
             newContent: input.content,
           });
+          await syncPostUnitReferences(tx, {
+            postUnitId: unitId,
+            oldContents,
+            newContents: contentTranslationContentsAfterWrite(
+              existing.unit.contentTranslations ?? [],
+              { language, content: input.content },
+            ),
+          });
         }
         return row;
       });
@@ -1404,6 +1602,9 @@ export class PostService {
       const currentContent = (existing.unit.contentTranslations ?? []).find(
         (translation) => translation.language === language,
       )?.content;
+      const currentContents = (existing.unit.contentTranslations ?? []).map(
+        (translation) => translation.content,
+      );
       const isWikiContentMainEdit =
         existing.kind === "WIKI" &&
         input.content !== undefined &&
@@ -1459,6 +1660,14 @@ export class PostService {
           oldContent: currentContent,
           newContent: input.content,
         });
+        await syncPostUnitReferences(tx, {
+          postUnitId: unitId,
+          oldContents: currentContents,
+          newContents: contentTranslationContentsAfterWrite(
+            existing.unit.contentTranslations ?? [],
+            { language, content: input.content },
+          ),
+        });
       }
 
       if (isWikiContentMainEdit && actor) {
@@ -1502,6 +1711,7 @@ export class PostService {
       await tx
         .delete(ContentTranslation)
         .where(eq(ContentTranslation.unitId, unitId));
+      await clearPostUnitReferences(tx, unitId);
     });
 
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);

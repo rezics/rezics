@@ -92,6 +92,7 @@ export const Unit = pgTable(
     updatedAt: updatedAt(),
     publishedAt: nullableTimestamp(),
     subscriberCount: integer().default(0).notNull(),
+    referenceCount: integer().default(0).notNull(),
     licenseSlug: text(),
     aiDisclosureMode: AiDisclosureMode().default("UNKNOWN").notNull(),
     aiDisclosureDetails: jsonData(),

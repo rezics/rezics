@@ -11,6 +11,7 @@ import { selectHasAuthIdentity } from "../states/authSessionModel";
 import { useAuthSessionStore } from "../states/authSessionStore";
 import {
   useBatchReactionSummary,
+  useBatchShareSummary,
   useBatchUserReactions,
 } from "./reaction.queries";
 
@@ -36,6 +37,7 @@ export function useReactionHydration(
   const summaryQuery = useBatchReactionSummary(targetIds, {
     scopeKey: options?.summaryScopeKey,
   });
+  const shareSummaryQuery = useBatchShareSummary(targetIds);
   const myQuery = useBatchUserReactions(targetIds, {
     enabled: isAuthenticated,
     scopeKey: options?.userScopeKey,
@@ -44,10 +46,14 @@ export function useReactionHydration(
   const hasIds = targetIds.length > 0;
 
   const summaryReady = !hasIds || summaryQuery.isSuccess;
+  const shareSummaryReady = !hasIds || shareSummaryQuery.isSuccess;
   const myReady = !hasIds || !isAuthenticated || myQuery.isSuccess;
 
   return {
-    isHydrated: summaryReady && myReady,
-    isLoading: summaryQuery.isLoading || (isAuthenticated && myQuery.isLoading),
+    isHydrated: summaryReady && shareSummaryReady && myReady,
+    isLoading:
+      summaryQuery.isLoading ||
+      shareSummaryQuery.isLoading ||
+      (isAuthenticated && myQuery.isLoading),
   };
 }

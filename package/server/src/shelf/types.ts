@@ -4,15 +4,14 @@ import {
 } from "@/utils/sanitizeUser";
 import type {
   Shelf,
-  ShelfUnit,
-  ShelfUnitRelation,
+  ShelfItem,
   Unit,
   UnitTag,
   UnitTranslation,
 } from "../db/schema";
 
 // Relation payload shape for shelf metadata. Shelf items are paged separately through
-// `GET /shelf/:unitId/units`.
+// `GET /shelf/:unitId/items`.
 export const shelfInclude = {
   unit: {
     include: {
@@ -36,6 +35,7 @@ export const shelfListSelect = {
   unitId: true,
   kindKey: true,
   extra: true,
+  rootItemCount: true,
   itemCount: true,
   createdAt: true,
   updatedAt: true,
@@ -59,7 +59,13 @@ export const shelfListSelect = {
 
 export type ShelfListSelected = Pick<
   typeof Shelf.$inferSelect,
-  "unitId" | "kindKey" | "extra" | "itemCount" | "createdAt" | "updatedAt"
+  | "unitId"
+  | "kindKey"
+  | "extra"
+  | "rootItemCount"
+  | "itemCount"
+  | "createdAt"
+  | "updatedAt"
 > & {
   unit: Pick<
     typeof Unit.$inferSelect,
@@ -79,5 +85,4 @@ export type ShelfListSelected = Pick<
   };
 };
 
-export type ShelfUnitRow = typeof ShelfUnit.$inferSelect;
-export type ShelfUnitRelationRow = typeof ShelfUnitRelation.$inferSelect;
+export type ShelfItemRow = typeof ShelfItem.$inferSelect;

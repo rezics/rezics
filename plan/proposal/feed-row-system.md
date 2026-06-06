@@ -1,8 +1,8 @@
 ---
 title: Feed Row System
-status: active
+status: done
 created: 2026-06-04
-completed:
+completed: 2026-06-06
 supersededBy:
 tags: [feed, home, realm, library, post, review, shelf, factory]
 ---
@@ -80,96 +80,100 @@ slice UI landing; comment slice rendering remains owned by the comment cutover.
 
 ## 1. Contract and API Shape
 
-- [ ] 1.1 Add feed row DTOs and query/response schemas under
+- [x] 1.1 Add feed row DTOs and query/response schemas under
   `package/contract/src/feed/`, extending or replacing the current
   `feed-context.ts` candidate-only model.
-- [ ] 1.2 Export the feed contract from `package/contract/src/feed/index.ts`
+- [x] 1.2 Export the feed contract from `package/contract/src/feed/index.ts`
   and root contract exports if needed by app/api/server packages.
-- [ ] 1.3 Add frontend API client, keys, and React Query helpers under
+- [x] 1.3 Add frontend API client, keys, and React Query helpers under
   `package/api/src/feed/`, matching existing package API conventions.
-- [ ] 1.4 Define feed sort literals (`best`, `hot`, `new`, `top`, `rising`) and
+- [x] 1.4 Define feed sort literals (`best`, `hot`, `new`, `top`, `rising`) and
   sort-aware cursor fields in types rather than relying on `PostListQuery.start`.
 
 ## 2. Server Feed Service
 
-- [ ] 2.1 Add a backend feed domain under `package/server/src/feed/` with
+- [x] 2.1 Add a backend feed domain under `package/server/src/feed/` with
   `{feed}.api.ts`, `.service.ts`, `.mapper.ts`, and `.types.ts` files.
-- [ ] 2.2 Mount the feed API from `package/server/src/index.ts`.
-- [ ] 2.3 Implement Home feed row selection by combining ranked post rows
+- [x] 2.2 Mount the feed API from `package/server/src/index.ts`.
+- [x] 2.3 Implement Home feed row selection by combining ranked post rows
   (`bestScore`/`hotScore`/`topScore`/`risingScore`/`createdAt`) with bounded work
   and shelf carousel rows.
-- [ ] 2.4 Implement Realm feed row selection by reading realm-scoped post
+- [x] 2.4 Implement Realm feed row selection by reading realm-scoped post
   membership from `UnitRealm`, preserving moderation and language visibility
   rules equivalent to the current `postService.byRealm`, and applying the same
   feed sort surface as Home.
-- [ ] 2.5 Implement Library feed scope for at least book library, with the same
+- [x] 2.5 Implement Library feed scope for at least book library, with the same
   row contract, ranking sort surface, and a path for game/media reuse.
-- [ ] 2.6 Hydrate content row context server-side: reviewed work target title/id,
+- [x] 2.6 Hydrate content row context server-side: reviewed work target title/id,
   realm summary when relevant, variant context, and primary href.
-- [ ] 2.7 Implement deterministic row scheduling for carousels with no adjacent
+- [x] 2.7 Implement deterministic row scheduling for carousels with no adjacent
   carousel rows and bounded carousel frequency.
-- [ ] 2.8 Add service/api tests for cursor pagination, scope filtering, review
+- [x] 2.8 Add service/api tests for cursor pagination, scope filtering, review
   target hydration, ranking sort mapping, carousel scheduling, and
   insufficient-carousel-data skip behavior.
 
 ## 3. Frontend Feed Renderer
 
-- [ ] 3.1 Add a shared feed renderer in `package/app/src/feed/` that renders
+- [x] 3.1 Add a shared feed renderer in `package/app/src/feed/` that renders
   `content` and `carousel` rows from the feed API.
-- [ ] 3.2 Add `FeedContentCard` by consolidating the durable interaction and
+- [x] 3.2 Add `FeedContentCard` by consolidating the durable interaction and
   layout behavior currently split across `PostCard` and `ReviewCard`.
-- [ ] 3.3 Ensure review content renders a target-work link line without
+- [x] 3.3 Ensure review content renders a target-work link line without
   disrupting whole-row navigation.
-- [ ] 3.4 Render work carousels through the existing domain carousel pattern so
+- [x] 3.4 Render work carousels through the existing domain carousel pattern so
   book/game/media share the same item vocabulary where possible.
-- [ ] 3.5 Render shelf carousels through existing shelf card/carousel components
+- [x] 3.5 Render shelf carousels through existing shelf card/carousel components
   after adapting props to the feed row summaries.
-- [ ] 3.6 Add feed-shaped loading, next-page, retry, empty, and end-of-list
+- [x] 3.6 Add feed-shaped loading, next-page, retry, empty, and end-of-list
   states using existing `Skeleton`, `Spinner`, `EmptyState`, and button
   patterns.
-- [ ] 3.7 Add focused component stories for content rows, review rows with target
+- [x] 3.7 Add focused component stories for content rows, review rows with target
   links, work carousel rows, shelf carousel rows, loading rows, and error retry.
 
 ## 4. Page Integration
 
-- [ ] 4.1 Replace the fixed post list in `RealmContentFeed` with the shared feed
+- [x] 4.1 Replace the fixed post list in `RealmContentFeed` with the shared feed
   renderer while keeping sort, tag filter, manage mode, and moderation filters.
-- [ ] 4.2 Replace the static lower Home sections in
+- [x] 4.2 Replace the static lower Home sections in
   `package/app/src/home/pages/Home.tsx` with the Home feed renderer while
   deciding which legacy hero/search content remains above the feed.
-- [ ] 4.3 Adapt book library/community surfaces to the library feed scope,
+- [x] 4.3 Adapt book library/community surfaces to the library feed scope,
   starting with book and keeping the contract ready for game/media.
-- [ ] 4.4 Preserve realm pinboard/rule/about placement around the feed; pinned
+- [x] 4.4 Preserve realm pinboard/rule/about placement around the feed; pinned
   items are not automatically mixed into the infinite feed unless the feed
   service explicitly returns them as rows.
-- [ ] 4.5 Ensure feed routes use the existing read-language context and do not
+- [x] 4.5 Ensure feed routes use the existing read-language context and do not
   duplicate DTOs in app code.
-- [ ] 4.6 Update realm feed route/search state and sort switcher to the feed sort
+- [x] 4.6 Update realm feed route/search state and sort switcher to the feed sort
   surface (`best`, `hot`, `new`, `top`, `rising`) rather than the current
   `new`/`top`/`hot` subset.
 
 ## 5. Factory and Fixtures
 
-- [ ] 5.1 Add a factory scenario or preset that creates a showcase realm with
-  realm-scoped posts, reviews, remarks/excerpts, shelves, reactions, and varied
-  timestamps.
-- [ ] 5.2 Ensure seeded review posts written for the showcase realm have
+- [x] 5.1 Add a factory scenario or preset that creates a showcase realm with
+  realm-scoped posts, reviews, remarks/excerpts, shelves, and varied
+  timestamps. Server factory reaction rows are not seeded here because
+  reactions live in the separate `@rezics/reaction` database.
+- [x] 5.2 Ensure seeded review posts written for the showcase realm have
   `UnitRealm` rows for that realm, not only target works in the realm.
-- [ ] 5.3 Add factory tests proving showcase realm feed membership includes
+- [x] 5.3 Add factory tests proving showcase realm feed membership includes
   content rows and that review target works are present for card context.
-- [ ] 5.4 Keep random factory behavior useful, but make the showcase deterministic
+- [x] 5.4 Keep random factory behavior useful, but make the showcase deterministic
   enough for visual QA and Storybook/mock fixtures.
+- [ ] 5.5 Add cross-service reaction DB fixture support if local visual QA needs
+  seeded reaction rows in addition to the server-owned showcase feed fixture.
 
 ## 6. Validation
 
-- [ ] 6.1 Run targeted contract/server/app tests for the new feed domain and
+- [x] 6.1 Run targeted contract/server/app tests for the new feed domain and
   renderer.
-- [ ] 6.2 Run `bun run check:convention` for folder/API/import conventions.
-- [ ] 6.3 Run `bun run check:tokens` if feed UI styling changes touch JSX/CSS
+- [x] 6.2 Run `bun run check:convention` for folder/API/import conventions.
+- [x] 6.3 Run `bun run check:tokens` if feed UI styling changes touch JSX/CSS
   classes.
 - [ ] 6.4 Manually verify after `bun run dev`: Home feed, Realm feed with
   content, review target links, infinite scroll, carousel insertion, loading,
-  retry, and end-of-list states.
+  retry, and end-of-list states. Left unchecked because it requires manual
+  runtime verification.
 
 ## Out of scope
 

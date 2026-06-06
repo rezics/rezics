@@ -1,10 +1,11 @@
 import type {
-  EnrichedShelfUnit,
+  EnrichedShelfItem,
   ShelfView,
   TagListEntryDTO,
 } from "@rezics/api/shelf";
 import type {
   BookDTO,
+  CommentDTO,
   PostDTO,
   ShelfDTO,
   UnitDTO,
@@ -16,12 +17,13 @@ import { useState } from "react";
 import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
 import { BookCard } from "@/book-library/components/item/VerticalBookCard";
 import { aspectRatioForKind } from "@/bookshelf-view";
+import { CommentReply } from "@/comment/components/item/CommentReply";
 import { ExcerptCard } from "@/excerpt/components/item/ExcerptCard";
 import { PostCard } from "@/post";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
 import { SingleTagChip } from "@/tag/components/TagList";
-import { shelfUnitToUnitCardSummary, UnitCard } from "@/unit";
+import { shelfItemToUnitCardSummary, UnitCard } from "@/unit";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
 import { ShelfItemCard } from "./ShelfItemCard";
@@ -46,7 +48,7 @@ interface ShelfItemRendererProps {
 }
 
 function renderUnit(
-  enriched: EnrichedShelfUnit,
+  enriched: EnrichedShelfItem,
   viewMode: ShelfView,
   options?: {
     targetUnit?: ReviewTargetUnit;
@@ -140,19 +142,31 @@ function renderUnit(
       if (!tag) return <ShelfItemCard unit={unit} />;
       return <SingleTagChip tag={tag as unknown as UnitTagDTO} />;
     }
+    case "comment": {
+      const comment = data as CommentDTO | undefined;
+      if (!comment) return <ShelfItemCard unit={unit} />;
+      return (
+        <CommentReply
+          post={comment}
+          showAvatar={viewMode !== "masonry"}
+          summaryScopeKey={`shelf-item:${unit.itemId}`}
+          reactionScopeKey={`shelf-item:${unit.itemId}`}
+        />
+      );
+    }
     default:
       return <ShelfItemCard unit={unit} />;
   }
 }
 
-function getBookTitle(enriched: EnrichedShelfUnit | undefined): string | null {
+function getBookTitle(enriched: EnrichedShelfItem | undefined): string | null {
   if (!enriched || enriched.unit.kind !== "book") return null;
   const book = enriched.data as BookDTO | undefined;
   return book?.title ?? enriched.unit.unitId;
 }
 
 function targetUnitFromParent(
-  parent: EnrichedShelfUnit | undefined,
+  parent: EnrichedShelfItem | undefined,
 ): ReviewTargetUnit | undefined {
   const title = getBookTitle(parent);
   if (!parent || !title) return undefined;
@@ -183,8 +197,8 @@ function NestedRootCard({
   root,
   attachedChildren,
 }: {
-  root: EnrichedShelfUnit;
-  attachedChildren: EnrichedShelfUnit[];
+  root: EnrichedShelfItem;
+  attachedChildren: EnrichedShelfItem[];
 }) {
   const [tab, setTab] = useState("0");
   const primary = renderUnit(root, "nested");
@@ -236,7 +250,7 @@ export function ShelfItemRenderer({
   if (editing) {
     content = (
       <UnitCard
-        summary={shelfUnitToUnitCardSummary(
+        summary={shelfItemToUnitCardSummary(
           entry.unit.unit,
           entry.unit.data,
           undefined,

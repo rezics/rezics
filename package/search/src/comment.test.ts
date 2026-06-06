@@ -46,7 +46,6 @@ const commentRow = {
   authorUserId: "user-1",
   content: markdownContentDoc("hello"),
   depth: 1,
-  path: "1",
   replyCount: 0,
   directReplyCount: 0,
   lastReplyAt: null,
@@ -71,7 +70,6 @@ describe("comment search sync", () => {
       authorUserId: "user-1",
       content: markdownContentDoc("hello"),
       depth: 1,
-      path: "1",
       isLocked: false,
       replyCount: 0,
       directReplyCount: 0,
@@ -108,7 +106,6 @@ describe("comment search sync", () => {
       expect.objectContaining({
         id: "comment-1",
         contentText: "hello",
-        path: "1",
         authorName: "Ada",
         authorSlug: "ada",
       }),

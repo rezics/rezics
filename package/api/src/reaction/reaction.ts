@@ -9,17 +9,21 @@ export { reactionKeys } from "./reaction.keys";
 // Mutation Hooks
 export {
   reactionMutations,
+  syncShareMutationCache,
   useCreateReactionMutation,
   useDeleteReactionMutation,
+  useRecordShareMutation,
 } from "./reaction.mutations";
 // Query Configurations
 export {
   batchReactionSummaryQuery,
+  batchShareSummaryQuery,
   batchUserReactionsQuery,
   reactionMyQuery,
   reactionQueries,
   reactionSummaryQuery,
   useBatchReactionSummary,
+  useBatchShareSummary,
   useBatchUserReactions,
   useGivenReactionsInfinite,
   useReceivedReactionsInfinite,
@@ -37,6 +41,9 @@ export type {
   ReactionHistoryTarget,
   ReactionMyResponse,
   ReactionSummaryResponse,
+  ShareCreateInput,
+  ShareCreateResponse,
+  ShareSummaryResponse,
 } from "./reaction.types";
 export {
   type UseReactionDataReturn,

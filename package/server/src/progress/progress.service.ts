@@ -16,7 +16,7 @@ import { searchClient } from "@/meili/search-client";
 import { AppError } from "@/utils/errors";
 import {
   ContentStructureNode,
-  ShelfUnit,
+  ShelfItem,
   Unit,
   UnitTranslation,
   UserContentNodeProgress,
@@ -449,29 +449,30 @@ function createDrizzleProgressRepository(): ProgressRepository {
       const db = await getServerDb();
       const rows = await db
         .select({
-          unitId: ShelfUnit.unitId,
-          variantUnitId: ShelfUnit.variantUnitId,
-          shelfId: ShelfUnit.shelfId,
+          unitId: ShelfItem.itemId,
+          variantUnitId: ShelfItem.variantUnitId,
+          shelfId: ShelfItem.shelfId,
           shelfDefaultLanguage: Unit.defaultLanguage,
           translationLanguage: UnitTranslation.language,
           translationTitle: UnitTranslation.title,
         })
-        .from(ShelfUnit)
-        .innerJoin(Unit, eq(ShelfUnit.shelfId, Unit.id))
+        .from(ShelfItem)
+        .innerJoin(Unit, eq(ShelfItem.shelfId, Unit.id))
         .leftJoin(
           UnitTranslation,
-          eq(UnitTranslation.unitId, ShelfUnit.shelfId),
+          eq(UnitTranslation.unitId, ShelfItem.shelfId),
         )
         .where(
           and(
             or(
-              inArray(ShelfUnit.unitId, unitIds),
-              inArray(ShelfUnit.variantUnitId, unitIds),
+              inArray(ShelfItem.itemId, unitIds),
+              inArray(ShelfItem.variantUnitId, unitIds),
             ),
+            eq(ShelfItem.itemType, "unit"),
             eq(Unit.userId, userId),
           ),
         )
-        .orderBy(asc(ShelfUnit.createdAt), asc(UnitTranslation.language));
+        .orderBy(asc(ShelfItem.createdAt), asc(UnitTranslation.language));
 
       const byShelfLink = new Map<string, ProgressShelfLinkRow>();
       for (const row of rows) {
@@ -708,7 +709,7 @@ export class ProgressService {
           : null,
       ].filter((unitId): unitId is string => Boolean(unitId));
       const link = {
-        shelfUnitId: shelfRow.shelfId,
+        shelfId: shelfRow.shelfId,
         title: pickTitle(shelfRow.shelf.unit) || shelfRow.shelfId,
       };
       for (const progressUnitId of new Set(linkedUnitIds)) {

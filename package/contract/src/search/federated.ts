@@ -5,6 +5,7 @@ import { ContentSearchDocumentSchema } from "../meili/content";
 import { EntitySearchDocumentSchema } from "../meili/entity";
 import { PostSearchDocumentSchema } from "../meili/post";
 import { RealmSearchDocumentSchema } from "../meili/realm";
+import { ShelfItemShelfGroupSchema } from "../meili/shelf-item";
 import { UserSearchDocumentSchema } from "../meili/user";
 import { SearchCategorySchema, SearchScopeSchema } from "./scope";
 import { SearchQuerySchema } from "./search";
@@ -38,6 +39,13 @@ const FederatedSectionSchema = <T extends ReturnType<typeof t.Object>>(
     processingTimeMs: t.Number(),
   });
 
+const ShelfSearchDocumentSchema = t.Intersect([
+  ContentSearchDocumentSchema,
+  t.Object({
+    matchedShelfItemGroup: t.Optional(ShelfItemShelfGroupSchema),
+  }),
+]);
+
 const FederatedGroupedSectionsSchema = t.Object({
   books: t.Optional(FederatedSectionSchema(ContentSearchDocumentSchema)),
   reviews: t.Optional(FederatedSectionSchema(PostSearchDocumentSchema)),
@@ -45,7 +53,7 @@ const FederatedGroupedSectionsSchema = t.Object({
   remarks: t.Optional(FederatedSectionSchema(PostSearchDocumentSchema)),
   posts: t.Optional(FederatedSectionSchema(PostSearchDocumentSchema)),
   comments: t.Optional(FederatedSectionSchema(CommentSearchDocumentSchema)),
-  shelves: t.Optional(FederatedSectionSchema(ContentSearchDocumentSchema)),
+  shelves: t.Optional(FederatedSectionSchema(ShelfSearchDocumentSchema)),
   realms: t.Optional(FederatedSectionSchema(RealmSearchDocumentSchema)),
   users: t.Optional(FederatedSectionSchema(UserSearchDocumentSchema)),
   entities: t.Optional(FederatedSectionSchema(EntitySearchDocumentSchema)),
@@ -67,6 +75,7 @@ export type FederatedOrigin = Static<typeof FederatedOriginSchema>;
 const FederatedRankedHitSchema = t.Intersect([
   t.Union([
     ContentSearchDocumentSchema,
+    ShelfSearchDocumentSchema,
     PostSearchDocumentSchema,
     CommentSearchDocumentSchema,
     RealmSearchDocumentSchema,

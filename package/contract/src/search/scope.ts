@@ -12,6 +12,11 @@ export const SearchScopeSchema = t.Union([
   }),
   t.Object({ kind: t.Literal("realm"), realmId: t.String() }),
   t.Object({ kind: t.Literal("user"), userId: t.String() }),
+  t.Object({
+    kind: t.Literal("saved"),
+    shelfId: t.String(),
+    userId: t.String(),
+  }),
 ]);
 
 export type SearchScope = Static<typeof SearchScopeSchema>;

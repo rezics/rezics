@@ -1,17 +1,18 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
-import { PostListSection, ReplyComposer } from "@/post";
+import { ReplyComposer } from "@/comment";
+import { PostListSection } from "@/post";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
 
 interface ShelfDiscussionSectionProps {
-  shelfUnitId: string;
+  shelfItemId: string;
   maxDepth?: number;
 }
 
 export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
-  shelfUnitId,
+  shelfItemId,
 }) => {
   const { t } = useTranslation(["auth", "entity"]);
   const { isAuthenticated } = useAuth();
@@ -22,7 +23,7 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
       {isAuthenticated ? (
         <ReplyComposer
           mode="progressive"
-          targetUnitId={shelfUnitId}
+          targetUnitId={shelfItemId}
           placeholder={t("entity:shelf_discussion_composer_placeholder")}
         />
       ) : (
@@ -42,7 +43,7 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
         </div>
       )}
 
-      <PostListSection targetUnitId={shelfUnitId} />
+      <PostListSection targetUnitId={shelfItemId} />
     </div>
   );
 };

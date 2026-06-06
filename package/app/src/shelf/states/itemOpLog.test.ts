@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type {
-  ShelfUnitBatchAddOp,
-  ShelfUnitBatchAttachOp,
-  ShelfUnitBatchDeleteOp,
-  ShelfUnitBatchDetachOp,
-  ShelfUnitBatchReorderOp,
-  ShelfUnitBatchReorderToPageOp,
-  ShelfUnitBatchSetChildrenOp,
+  ShelfItemBatchAddOp,
+  ShelfItemBatchAttachOp,
+  ShelfItemBatchDeleteOp,
+  ShelfItemBatchDetachOp,
+  ShelfItemBatchReorderOp,
+  ShelfItemBatchReorderToPageOp,
+  ShelfItemBatchSetChildrenOp,
 } from "@rezics/contract";
 import {
   clear,
@@ -19,9 +19,10 @@ import {
   pendingCount,
 } from "./itemOpLog";
 
-const addOp = (unitId: string, position = "a0"): ShelfUnitBatchAddOp => ({
+const addOp = (unitId: string, position = "a0"): ShelfItemBatchAddOp => ({
   op: "add",
-  unitId,
+  itemType: "unit",
+  itemId: unitId,
   kind: "post",
   position,
 });
@@ -29,56 +30,65 @@ const addOp = (unitId: string, position = "a0"): ShelfUnitBatchAddOp => ({
 const reorderOp = (
   unitId: string,
   position: string,
-): ShelfUnitBatchReorderOp => ({
+): ShelfItemBatchReorderOp => ({
   op: "reorder",
-  unitId,
+  itemType: "unit",
+  itemId: unitId,
   position,
 });
 
-const deleteOp = (unitId: string): ShelfUnitBatchDeleteOp => ({
+const deleteOp = (unitId: string): ShelfItemBatchDeleteOp => ({
   op: "delete",
-  unitId,
+  itemType: "unit",
+  itemId: unitId,
 });
 
 const reorderToPageOp = (
   unitId: string,
   toPage: number,
-): ShelfUnitBatchReorderToPageOp => ({
+): ShelfItemBatchReorderToPageOp => ({
   op: "reorderToPage",
-  unitId,
+  itemType: "unit",
+  itemId: unitId,
   toPage,
   edge: "first",
 });
 
 const attachOp = (
-  parentUnitId: string,
-  childUnitId: string,
-): ShelfUnitBatchAttachOp => ({
+  parentItemId: string,
+  childItemId: string,
+): ShelfItemBatchAttachOp => ({
   op: "attach",
-  parentUnitId,
-  childUnitId,
+  parentItemType: "unit",
+  parentItemId,
+  childItemType: "unit",
+  childItemId,
   childKind: "review",
   role: "review",
 });
 
 const detachOp = (
-  parentUnitId: string,
-  childUnitId: string,
-): ShelfUnitBatchDetachOp => ({
+  parentItemId: string,
+  childItemId: string,
+): ShelfItemBatchDetachOp => ({
   op: "detach",
-  parentUnitId,
-  childUnitId,
+  parentItemType: "unit",
+  parentItemId,
+  childItemType: "unit",
+  childItemId,
   role: "review",
 });
 
 const setChildrenOp = (
-  parentUnitId: string,
-  childUnitIds: string[],
-): ShelfUnitBatchSetChildrenOp => ({
+  parentItemId: string,
+  childItemIds: string[],
+): ShelfItemBatchSetChildrenOp => ({
   op: "setChildren",
-  parentUnitId,
+  parentItemType: "unit",
+  parentItemId,
   role: "tag",
-  childUnitIds,
+  childItemType: "unit",
+  childItemIds,
 });
 
 describe("itemOpLog", () => {
@@ -103,7 +113,7 @@ describe("itemOpLog", () => {
     log = enqueue(log, reorderOp("u1", "a1"));
     log = enqueue(log, reorderOp("u1", "a2"));
     expect(log.entries).toHaveLength(1);
-    expect((log.entries[0]!.op as ShelfUnitBatchReorderOp).position).toBe("a2");
+    expect((log.entries[0]!.op as ShelfItemBatchReorderOp).position).toBe("a2");
   });
 
   test("reorder variants on same unitId keep only the latest", () => {
@@ -128,7 +138,7 @@ describe("itemOpLog", () => {
     log = enqueue(log, setChildrenOp("p1", ["c2", "c3"]));
     expect(log.entries).toHaveLength(1);
     expect(
-      (log.entries[0]!.op as ShelfUnitBatchSetChildrenOp).childUnitIds,
+      (log.entries[0]!.op as ShelfItemBatchSetChildrenOp).childItemIds,
     ).toEqual(["c2", "c3"]);
   });
 

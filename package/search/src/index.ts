@@ -1,12 +1,11 @@
 export type { SearchResponse } from "meilisearch";
 export { type MeiliConfig, SearchClient } from "./client";
 export {
-  buildUserUnitCollectionDocument,
-  COLLECTION_INDEX_NAME,
-  collectionDocumentId,
-  type UserUnitCollectionDocument,
-  type UserUnitCollectionRow,
-} from "./collection";
+  buildShelfItemDocument,
+  SHELF_ITEM_INDEX_NAME,
+  shelfItemDocumentId,
+  type ShelfItemDocumentRow,
+} from "./shelf-item";
 export {
   bucketize,
   buildProgressDocument,
@@ -60,7 +59,7 @@ export {
   patchRealmTranslations,
   patchUserFields,
   removeProgress,
-  removeUserUnitCollection,
+  removeShelfItem,
   type SearchSegmentOptions,
   type SearchSegmentResult,
   setSearchDb,
@@ -74,8 +73,8 @@ export {
   syncAllPosts,
   syncAllProgress,
   syncAllRealms,
+  syncAllShelfItems,
   syncAllUsers,
-  syncAllUserUnitCollections,
   syncCommentSegment,
   syncContentSegment,
   syncEntitySegment,
@@ -98,9 +97,11 @@ export {
   syncSinglePost,
   syncSingleProgress,
   syncSingleRealm,
+  syncSingleShelfItem,
   syncSingleUser,
-  syncSingleUserUnitCollection,
+  syncShelfItem,
+  syncShelfItemSegment,
+  syncShelfItemsByShelfSegment,
+  syncShelfItemsBySourceItemSegment,
   syncUserSegment,
-  syncUserUnitCollection,
-  syncUserUnitCollectionSegment,
 } from "./sync";

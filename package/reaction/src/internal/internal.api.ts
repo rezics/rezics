@@ -2,6 +2,8 @@ import {
   cleanupBodySchema,
   internalByUserBodySchema,
   internalByUserResponseSchema,
+  internalCreateShareBodySchema,
+  internalCreateShareResponseSchema,
   internalCreateBodySchema,
   internalRemoveBodySchema,
   internalRemoveResponseSchema,
@@ -95,6 +97,28 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         summary: "Remove reaction (internal)",
         description:
           "Removes a reaction on behalf of a user. Idempotent — returns deleted: false if it did not exist.",
+        tags: ["Internal"],
+        security: [{ internalSecret: [] }],
+      },
+    },
+  )
+  .post(
+    "/share",
+    async ({ body, set }) => {
+      const result = await reactionService.recordShare(
+        body.userId,
+        body.targetId,
+      );
+      set.status = result.created ? 201 : 200;
+      return result;
+    },
+    {
+      body: internalCreateShareBodySchema,
+      response: internalCreateShareResponseSchema,
+      detail: {
+        summary: "Record share intent (internal)",
+        description:
+          "Records one authenticated share intent on behalf of a user. Idempotent by user and target.",
         tags: ["Internal"],
         security: [{ internalSecret: [] }],
       },

@@ -3,12 +3,12 @@ import {
   type BookDTO,
   markdownContentDoc,
   type PostDTO,
-  type ShelfUnitDTO,
+  type ShelfItemDTO,
   type UnitDTO,
 } from "@rezics/contract";
 import {
   candidateToUnitCardSummary,
-  shelfUnitToUnitCardSummary,
+  shelfItemToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./unitCardSummary";
 
@@ -109,10 +109,11 @@ describe("unitDtoToUnitCardSummary", () => {
   });
 });
 
-function makeShelfUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
+function makeShelfItem(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
   return {
     shelfId: "shelf-1",
-    unitId: "u-1",
+    itemType: "unit",
+    itemId: "u-1",
     kind: "book",
     position: "a",
     createdAt: "2026-02-01T00:00:00.000Z",
@@ -120,10 +121,10 @@ function makeShelfUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
   };
 }
 
-describe("shelfUnitToUnitCardSummary", () => {
+describe("shelfItemToUnitCardSummary", () => {
   test("maps a hydrated shelf book unit with shelf added time", () => {
-    const unit = makeShelfUnit({
-      unitId: "book-1",
+    const unit = makeShelfItem({
+      itemId: "book-1",
       kind: "book",
       variantContext: {
         unitId: "variant-1",
@@ -146,7 +147,7 @@ describe("shelfUnitToUnitCardSummary", () => {
       ],
     } as BookDTO;
 
-    const summary = shelfUnitToUnitCardSummary(unit, book);
+    const summary = shelfItemToUnitCardSummary(unit, book);
 
     expect(summary).toMatchObject({
       unitId: "book-1",
@@ -162,7 +163,7 @@ describe("shelfUnitToUnitCardSummary", () => {
   });
 
   test("attachmentCounts is forwarded when provided", () => {
-    const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
+    const unit = makeShelfItem({ itemId: "book-1", kind: "book" });
     const book = {
       unitId: "book-1",
       resolvedLanguage: "en",
@@ -171,7 +172,7 @@ describe("shelfUnitToUnitCardSummary", () => {
       translations: [{ unitId: "book-1", language: "en", title: "Shelf Book" }],
     } as BookDTO;
 
-    const summary = shelfUnitToUnitCardSummary(unit, book, undefined, {
+    const summary = shelfItemToUnitCardSummary(unit, book, undefined, {
       reviews: 3,
       tags: 2,
     });
@@ -180,7 +181,7 @@ describe("shelfUnitToUnitCardSummary", () => {
   });
 
   test("omits attachmentCounts when none provided", () => {
-    const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
+    const unit = makeShelfItem({ itemId: "book-1", kind: "book" });
     const book = {
       unitId: "book-1",
       resolvedLanguage: "en",
@@ -189,13 +190,13 @@ describe("shelfUnitToUnitCardSummary", () => {
       translations: [{ unitId: "book-1", language: "en", title: "Bare Book" }],
     } as BookDTO;
 
-    const summary = shelfUnitToUnitCardSummary(unit, book);
+    const summary = shelfItemToUnitCardSummary(unit, book);
 
     expect(summary.attachmentCounts).toBeUndefined();
   });
 
   test("maps a review shelf unit using resolved post title and content", () => {
-    const unit = makeShelfUnit({ unitId: "review-1", kind: "review" });
+    const unit = makeShelfItem({ itemId: "review-1", kind: "review" });
     const review: PostDTO = {
       unitId: "review-1",
       authorUserId: "user-1",
@@ -205,7 +206,7 @@ describe("shelfUnitToUnitCardSummary", () => {
       extra: {},
     };
 
-    const summary = shelfUnitToUnitCardSummary(unit, review);
+    const summary = shelfItemToUnitCardSummary(unit, review);
 
     expect(summary).toMatchObject({
       unitId: "review-1",
@@ -218,9 +219,9 @@ describe("shelfUnitToUnitCardSummary", () => {
   });
 
   test("unhydrated shelf unit falls back to unitId as title", () => {
-    const unit = makeShelfUnit({ unitId: "book-x", kind: "book" });
+    const unit = makeShelfItem({ itemId: "book-x", kind: "book" });
 
-    const summary = shelfUnitToUnitCardSummary(unit, undefined);
+    const summary = shelfItemToUnitCardSummary(unit, undefined);
 
     expect(summary).toMatchObject({
       unitId: "book-x",

@@ -1,5 +1,5 @@
-import { COLLECTION_INDEX_NAME } from "./collection";
 import { PROGRESS_INDEX_NAME } from "./progress";
+import { SHELF_ITEM_INDEX_NAME } from "./shelf-item";
 
 export type ExpectedMeiliIndexUid =
   | "content"
@@ -8,7 +8,7 @@ export type ExpectedMeiliIndexUid =
   | "posts"
   | "comments"
   | "polls"
-  | typeof COLLECTION_INDEX_NAME
+  | typeof SHELF_ITEM_INDEX_NAME
   | "realms"
   | "entities"
   | typeof PROGRESS_INDEX_NAME;
@@ -48,6 +48,7 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     ],
     filterableAttributes: [
       "type",
+      "id",
       "postKind",
       "tagIds",
       "catalogEntryKind",
@@ -80,10 +81,15 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "gameReleaseDate",
       "mediaReleaseDate",
       "mediaRuntimeMinutes",
+      "bestScore",
       "hotScore",
       "topScore",
+      "risingScore",
+      "controversyScore",
       "trendingScore",
       "qualityScore",
+      "referenceCount",
+      "shareCount",
     ],
     facetableSummaryFields: ["type", "postKind", "visibility"],
     supportsFullSync: true,
@@ -143,8 +149,11 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "createdAt",
       "updatedAt",
       "replyCount",
+      "bestScore",
       "hotScore",
       "topScore",
+      "risingScore",
+      "controversyScore",
       "trendingScore",
       "qualityScore",
     ],
@@ -171,8 +180,11 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "createdAt",
       "updatedAt",
       "replyCount",
+      "bestScore",
       "hotScore",
       "topScore",
+      "risingScore",
+      "controversyScore",
       "qualityScore",
     ],
     facetableSummaryFields: ["isLocked", "state", "moderationStatus"],
@@ -202,15 +214,49 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     description: "Reusable poll library records.",
   },
   {
-    uid: COLLECTION_INDEX_NAME,
+    uid: SHELF_ITEM_INDEX_NAME,
     primaryKey: "id",
-    searchableAttributes: ["searchText"],
-    filterableAttributes: ["ownerUserId", "unitId", "createdAt", "updatedAt"],
-    sortableAttributes: ["createdAt", "updatedAt"],
-    facetableSummaryFields: [],
+    searchableAttributes: [
+      "itemTitle",
+      "itemSummary",
+      "itemText",
+      "searchText",
+      "shelfTitle",
+    ],
+    filterableAttributes: [
+      "shelfId",
+      "shelfOwnerUserId",
+      "shelfVisibility",
+      "shelfStatus",
+      "itemType",
+      "itemId",
+      "kind",
+      "rootItemType",
+      "rootItemId",
+      "parentItemType",
+      "parentItemId",
+      "parentRole",
+      "rootUnitId",
+      "realmUnitId",
+      "parentCommentId",
+      "authorUserId",
+      "moderationStatus",
+      "isLocked",
+      "deletedAt",
+      "createdAt",
+      "updatedAt",
+    ],
+    sortableAttributes: ["position", "createdAt", "updatedAt"],
+    facetableSummaryFields: [
+      "shelfVisibility",
+      "shelfStatus",
+      "itemType",
+      "kind",
+      "parentRole",
+    ],
     supportsFullSync: true,
-    domain: "User unit collections",
-    description: "Private per-user collection search text only.",
+    domain: "Shelf items",
+    description: "Shelf item search records across units, comments, and notes.",
   },
   {
     uid: "realms",

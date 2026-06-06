@@ -31,6 +31,7 @@ export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
     );
     const allowed = await deriveAllowedRatings(identity?.userId ?? null);
     ctx.allowedRatings = intersectRatings(allowed, body.query.ratings);
+    ctx.viewerUserId = identity?.userId ?? null;
     return federatedSearch(searchClient, body, ctx);
   },
   {

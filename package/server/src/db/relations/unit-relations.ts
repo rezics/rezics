@@ -75,11 +75,6 @@ export function unitRelations(r: ServerRelationsBuilder) {
       UserTagApplications_unitId: r.many.UserTagApplication({
         alias: "UserTagApplication_unitId_Unit_id",
       }),
-      Users_via_UserUnitCollection: r.many.User({
-        from: r.Unit.id.through(r.UserUnitCollection.unitId),
-        to: r.User.unitId.through(r.UserUnitCollection.userId),
-        alias: "Unit_id_User_unitId_via_UserUnitCollection",
-      }),
       UserUnitProgresses: r.many.UserUnitProgress(),
       Zones: r.many.Zone(),
     },

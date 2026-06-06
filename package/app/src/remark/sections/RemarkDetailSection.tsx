@@ -5,9 +5,11 @@ import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import type React from "react";
-import { ReplyComposer } from "@/post/forms/ReplyComposer";
-import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
-import { PostTreeSection } from "@/post/sections/PostTreeSection";
+import {
+  CommentThreadSection,
+  ReplyComposer,
+  useFocusReplyFromQuery,
+} from "@/comment";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
@@ -63,7 +65,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
         realmUnitId={remark.realmUnitId}
         parentCommentId={remark.unitId}
       />
-      <PostTreeSection
+      <CommentThreadSection
         rootUnitId={remark.unitId}
         realmUnitId={remark.realmUnitId}
         rootAuthorUserId={remark.author?.unitId ?? remark.authorUserId}

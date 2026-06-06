@@ -18,6 +18,8 @@ function bookRow(overrides: Record<string, unknown> = {}) {
       isLanguageNeutral: false,
       catalogEntryKind: "MAIN",
       targetUnitId: null,
+      referenceCount: 0,
+      shareCount: 0,
       supportLanguages: [
         { unitId: "release-1", language: "en", isPrimary: true, sortOrder: 0 },
       ],
@@ -85,6 +87,21 @@ describe("mapBaseBookToDTO", () => {
 
     expect(dto.catalogEntryKind).toBe("VARIANT");
     expect(dto.targetUnitId).toBe("main-1");
+  });
+
+  test("projects materialized count fields from the owning Unit", () => {
+    const dto = mapBaseBookToDTO(
+      bookRow({
+        unit: {
+          ...bookRow().unit,
+          referenceCount: 6,
+          shareCount: 7,
+        },
+      }),
+    );
+
+    expect(dto.referenceCount).toBe(6);
+    expect(dto.shareCount).toBe(7);
   });
 
   test("does not fall back to another translation after resolving a supported language", () => {

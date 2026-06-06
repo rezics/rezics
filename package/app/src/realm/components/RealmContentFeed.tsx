@@ -1,4 +1,7 @@
-import { bookQueries } from "@rezics/api/book/book";
+import {
+  type FeedContentRow,
+  feedRowsInfiniteQuery,
+} from "@rezics/api/feed/feed";
 import { postQueries } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import {
@@ -8,21 +11,15 @@ import {
   type UnitRealmDTO,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { EmptyState, Spinner } from "@rezics/ui";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { PostCard } from "@/post";
-import {
-  ReviewCard,
-  type ReviewTargetUnit,
-} from "@/review/components/item/ReviewCard";
+import { FeedContentCard, FeedRenderer } from "@/feed/components/FeedRenderer";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import {
-  realmContextPostHref,
-  realmContextReactionScopeKey,
-} from "../models/realmPostContext";
+import { realmContextReactionScopeKey } from "../models/realmPostContext";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
 import { RealmContentModerationActions } from "./RealmContentModerationActions";
 
@@ -41,10 +38,21 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   realmModerationStatus,
   manageMode = false,
 }) => {
-  const { t } = useTranslation(["entity"]);
+  const { t } = useTranslation(["common", "entity"]);
   const readContext = useReadLanguageContext();
-  const { data, error, isError, isLoading } = useQuery({
-    ...postQueries.byRealm(realmId, {
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isFetchingNextPage,
+    isLoading,
+    refetch,
+  } = useInfiniteQuery({
+    ...feedRowsInfiniteQuery({
+      scope: "realm",
+      realmUnitId: realmId,
       sort,
       languages: readContext.languages,
       languageMode: readContext.languageMode,
@@ -53,14 +61,18 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     }),
     enabled: readContext.ready && Boolean(realmId),
   });
-  const posts = data?.posts ?? [];
+  const rows = data?.pages.flatMap((page) => page.rows) ?? [];
+  const contentRows = useMemo(
+    () => rows.filter((row): row is FeedContentRow => row.type === "content"),
+    [rows],
+  );
   const reactionScopeKey = realmContextReactionScopeKey(realmId);
   const postReactionTargetIds = useMemo(
     () =>
-      posts
-        .filter((post) => post.kind !== PostKind.REVIEW)
-        .map((post) => post.unitId),
-    [posts],
+      contentRows
+        .filter((row) => row.post.kind !== PostKind.REVIEW)
+        .map((row) => row.post.unitId),
+    [contentRows],
   );
   const moderationOverlayQuery = useQuery({
     ...postQueries.moderationOverlays(postReactionTargetIds, realmId),
@@ -86,117 +98,96 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     }
     return map;
   }, [moderationOverlayQuery.data]);
+
   useReactionHydration(postReactionTargetIds, {
     summaryScopeKey: reactionScopeKey,
     userScopeKey: reactionScopeKey,
   });
-  const reviewTargetIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          posts
-            .filter((post) => post.kind === PostKind.REVIEW)
-            .map((post) => post.targetUnitId)
-            .filter(Boolean) as string[],
-        ),
-      ),
-    [posts],
-  );
-  const targetBookQueries = useQueries({
-    queries: reviewTargetIds.map((unitId) => ({
-      ...bookQueries.detail(unitId, { languages: readContext.languages }),
-      enabled: readContext.ready && Boolean(unitId),
-    })),
-  });
-  const targetUnitByUnitId = useMemo(() => {
-    const map = new Map<string, ReviewTargetUnit>();
-    for (const result of targetBookQueries) {
-      const book = result.data;
-      if (!book) continue;
-      const title = book.title ?? book.unitId;
-      map.set(book.unitId, {
-        unitId: book.unitId,
-        title,
-      });
-    }
-    return map;
-  }, [targetBookQueries]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return <QueryErrorDisplay error={error} />;
-  }
-
-  if (posts.length === 0) {
-    return <EmptyState title={t("entity:realm_content_empty_title")} />;
-  }
+  if (isError && rows.length === 0) return <QueryErrorDisplay error={error} />;
 
   const fallbackModerationStatus =
     realmModerationStatus && realmModerationStatus !== "all"
       ? realmModerationStatus
       : "approved";
 
-  return (
-    <div>
-      {posts.map((post) => {
-        if (post.kind === PostKind.REVIEW) {
-          return (
-            <ReviewCard
-              key={post.unitId}
-              review={post}
-              targetUnit={
-                post.targetUnitId
-                  ? targetUnitByUnitId.get(post.targetUnitId)
-                  : undefined
-              }
-            />
-          );
+  const renderContentRow = (row: FeedContentRow) => {
+    const unitRealm =
+      unitRealmByUnitId.get(row.post.unitId) ??
+      ({
+        realmUnitId: realmId,
+        unitId: row.post.unitId,
+        moderationStatus: fallbackModerationStatus,
+        isLocked: false,
+      } satisfies UnitRealmDTO);
+
+    return (
+      <FeedContentCard
+        row={row}
+        summaryScopeKey={reactionScopeKey}
+        reactionScopeKey={reactionScopeKey}
+        manageMode={manageMode}
+        realmModerationStatus={
+          manageMode ? unitRealm.moderationStatus : undefined
         }
+        realmModerationAt={unitRealm.createdAt ?? null}
+        moderationLatestAction={latestActionByUnitId?.get(row.post.unitId)}
+        moderationMenuContent={
+          manageMode ? (
+            <RealmContentModerationActions
+              realmUnitId={realmId}
+              targetUnitId={row.post.unitId}
+              unitRealm={unitRealm}
+            />
+          ) : undefined
+        }
+      />
+    );
+  };
 
-        const unitRealm =
-          unitRealmByUnitId.get(post.unitId) ??
-          ({
-            realmUnitId: realmId,
-            unitId: post.unitId,
-            moderationStatus: fallbackModerationStatus,
-            isLocked: false,
-          } satisfies UnitRealmDTO);
-
-        return (
-          <PostCard
-            key={post.unitId}
-            post={post}
-            href={realmContextPostHref({
-              realmId,
-              postUnitId: post.unitId,
-            })}
-            summaryScopeKey={reactionScopeKey}
-            reactionScopeKey={reactionScopeKey}
-            manageMode={manageMode}
-            realmModerationStatus={
-              manageMode ? unitRealm.moderationStatus : undefined
-            }
-            realmModerationAt={unitRealm.createdAt ?? null}
-            moderationLatestAction={latestActionByUnitId?.get(post.unitId)}
-            moderationMenuContent={
-              manageMode ? (
-                <RealmContentModerationActions
-                  realmUnitId={realmId}
-                  targetUnitId={post.unitId}
-                  unitRealm={unitRealm}
-                />
-              ) : undefined
-            }
-          />
-        );
-      })}
+  return (
+    <div className="space-y-4">
+      <FeedRenderer
+        rows={rows}
+        loading={isLoading}
+        emptyTitle={t("entity:realm_content_empty_title")}
+        renderContentRow={renderContentRow}
+      />
+      {isError && rows.length > 0 ? (
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void refetch()}
+          >
+            {t("common:retry")}
+          </Button>
+        </div>
+      ) : null}
+      {!isLoading && !isError && hasNextPage ? (
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isFetchingNextPage}
+            onClick={() => void fetchNextPage()}
+          >
+            {isFetchingNextPage ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner size="sm" />
+                {t("common:loading")}
+              </span>
+            ) : (
+              t("common:load_more")
+            )}
+          </Button>
+        </div>
+      ) : null}
+      {!isLoading && !isError && rows.length > 0 && !hasNextPage ? (
+        <p className="text-center text-xs leading-dense text-text-tertiary">
+          {t("common:end_of_list")}
+        </p>
+      ) : null}
     </div>
   );
 };

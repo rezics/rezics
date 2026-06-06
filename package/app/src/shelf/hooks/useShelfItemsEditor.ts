@@ -1,13 +1,14 @@
 import type { ShelfSortOrder } from "@rezics/api/shelf";
-import { useBatchUpdateShelfUnitsMutation } from "@rezics/api/shelf/shelf.mutations";
-import { shelfUnitsInfiniteQuery } from "@rezics/api/shelf/shelf.queries";
+import { useBatchUpdateShelfItemsMutation } from "@rezics/api/shelf/shelf.mutations";
+import { shelfItemsInfiniteQuery } from "@rezics/api/shelf/shelf.queries";
 import type {
-  ShelfUnitBatchOp,
-  ShelfUnitBatchResult,
-  ShelfUnitDTO,
-  ShelfUnitKind,
-  ShelfUnitRelationDTO,
-  ShelfUnitRelationRole,
+  ShelfItemBatchOp,
+  ShelfItemBatchResult,
+  ShelfItemDTO,
+  ShelfItemKind,
+  ShelfItemChildDTO,
+  ShelfItemParentRole,
+  ShelfItemType,
 } from "@rezics/contract";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,22 +27,26 @@ import {
 
 export interface AddInput {
   unitId: string;
-  kind: ShelfUnitKind;
+  kind: ShelfItemKind;
 }
 
 export interface AttachInput {
-  parentUnitId: string;
-  childUnitId: string;
-  childKind: ShelfUnitKind;
-  role: ShelfUnitRelationRole;
+  parentItemType?: ShelfItemType;
+  parentItemId: string;
+  childItemType?: ShelfItemType;
+  childItemId: string;
+  childKind: ShelfItemKind;
+  role: ShelfItemParentRole;
   position?: string;
 }
 
 export interface SetChildrenInput {
-  parentUnitId: string;
-  role: ShelfUnitRelationRole;
-  childUnitIds: string[];
-  childKind?: ShelfUnitKind;
+  parentItemType?: ShelfItemType;
+  parentItemId: string;
+  role: ShelfItemParentRole;
+  childItemType?: ShelfItemType;
+  childItemIds: string[];
+  childKind?: ShelfItemKind;
 }
 
 export interface ReorderBetween {
@@ -50,15 +55,15 @@ export interface ReorderBetween {
 }
 
 export interface SaveResult {
-  results: ShelfUnitBatchResult[];
+  results: ShelfItemBatchResult[];
   okCount: number;
   failedCount: number;
 }
 
 export interface UseShelfItemsEditor {
   log: ItemOpLog;
-  units: ShelfUnitDTO[];
-  relations: ShelfUnitRelationDTO[];
+  units: ShelfItemDTO[];
+  relations: ShelfItemChildDTO[];
   isLoading: boolean;
   hasMoreUnits: boolean;
   isLoadingMoreUnits: boolean;
@@ -78,9 +83,9 @@ export interface UseShelfItemsEditor {
   enqueueDelete: (unitId: string) => void;
   enqueueAttach: (input: AttachInput) => void;
   enqueueDetach: (
-    parentUnitId: string,
-    childUnitId: string,
-    role: ShelfUnitRelationRole,
+    parentItemId: string,
+    childItemId: string,
+    role: ShelfItemParentRole,
   ) => void;
   enqueueSetChildren: (input: SetChildrenInput) => void;
   save: () => Promise<SaveResult>;
@@ -90,12 +95,12 @@ export interface UseShelfItemsEditor {
 
 export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   const unitsQuery = useInfiniteQuery(
-    shelfUnitsInfiniteQuery(shelfId, { limit: 100 }),
+    shelfItemsInfiniteQuery(shelfId, { limit: 100 }),
   );
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     unitsQuery;
   const serverUnits = useMemo(
-    () => data?.pages.flatMap((page) => page.units) ?? [],
+    () => data?.pages.flatMap((page) => page.items) ?? [],
     [data?.pages],
   );
   const serverRelations = useMemo(
@@ -105,7 +110,7 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
 
   const [log, setLog] = useState<ItemOpLog>(emptyLog);
   const [lastResult, setLastResult] = useState<SaveResult | null>(null);
-  const batchMutation = useBatchUpdateShelfUnitsMutation();
+  const batchMutation = useBatchUpdateShelfItemsMutation();
 
   // This is a compromise made to provide comprehensive background information for the editing environment; do not change it until a solution is found.
   useEffect(() => {
@@ -138,9 +143,10 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
       setLog((current) => {
         const pendingTop = lastPositionOfPendingAdds(current) ?? lastPosition;
         const position = appendAfter(pendingTop);
-        const op: ShelfUnitBatchOp = {
+        const op: ShelfItemBatchOp = {
           op: "add",
-          unitId: input.unitId,
+          itemType: "unit",
+          itemId: input.unitId,
           kind: input.kind,
           position,
         };
@@ -154,7 +160,12 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
     (unitId: string, between: ReorderBetween) => {
       const position = betweenNeighbors(between.before, between.after);
       setLog((current) =>
-        enqueue(current, { op: "reorder", unitId, position }),
+        enqueue(current, {
+          op: "reorder",
+          itemType: "unit",
+          itemId: unitId,
+          position,
+        }),
       );
     },
     [],
@@ -170,7 +181,8 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
       setLog((current) =>
         enqueue(current, {
           op: "reorderToPage",
-          unitId,
+          itemType: "unit",
+          itemId: unitId,
           toPage,
           edge: "first",
           pageSize,
@@ -182,15 +194,19 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   );
 
   const enqueueDelete = useCallback((unitId: string) => {
-    setLog((current) => enqueue(current, { op: "delete", unitId }));
+    setLog((current) =>
+      enqueue(current, { op: "delete", itemType: "unit", itemId: unitId }),
+    );
   }, []);
 
   const enqueueAttach = useCallback((input: AttachInput) => {
     setLog((current) =>
       enqueue(current, {
         op: "attach",
-        parentUnitId: input.parentUnitId,
-        childUnitId: input.childUnitId,
+        parentItemType: input.parentItemType ?? "unit",
+        parentItemId: input.parentItemId,
+        childItemType: input.childItemType ?? "unit",
+        childItemId: input.childItemId,
         childKind: input.childKind,
         role: input.role,
         ...(input.position !== undefined ? { position: input.position } : {}),
@@ -199,16 +215,14 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   }, []);
 
   const enqueueDetach = useCallback(
-    (
-      parentUnitId: string,
-      childUnitId: string,
-      role: ShelfUnitRelationRole,
-    ) => {
+    (parentItemId: string, childItemId: string, role: ShelfItemParentRole) => {
       setLog((current) =>
         enqueue(current, {
           op: "detach",
-          parentUnitId,
-          childUnitId,
+          parentItemType: "unit",
+          parentItemId,
+          childItemType: "unit",
+          childItemId,
           role,
         }),
       );
@@ -220,9 +234,11 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
     setLog((current) =>
       enqueue(current, {
         op: "setChildren",
-        parentUnitId: input.parentUnitId,
+        parentItemType: input.parentItemType ?? "unit",
+        parentItemId: input.parentItemId,
         role: input.role,
-        childUnitIds: input.childUnitIds,
+        childItemType: input.childItemType ?? "unit",
+        childItemIds: input.childItemIds,
         ...(input.childKind ? { childKind: input.childKind } : {}),
       }),
     );
@@ -313,13 +329,11 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   };
 }
 
-function dedupeRelations(
-  relations: ShelfUnitRelationDTO[],
-): ShelfUnitRelationDTO[] {
+function dedupeRelations(relations: ShelfItemChildDTO[]): ShelfItemChildDTO[] {
   const seen = new Set<string>();
-  const out: ShelfUnitRelationDTO[] = [];
+  const out: ShelfItemChildDTO[] = [];
   for (const relation of relations) {
-    const key = `${relation.parentUnitId}:${relation.childUnitId}:${relation.role}`;
+    const key = `${relation.parentItemType}:${relation.parentItemId}:${relation.childItemType}:${relation.childItemId}:${relation.role}`;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(relation);
@@ -339,19 +353,31 @@ function lastPositionOfPendingAdds(log: ItemOpLog): string | undefined {
 }
 
 function applyLiveOps(
-  serverUnits: ShelfUnitDTO[],
-  serverRelations: ShelfUnitRelationDTO[],
+  serverUnits: ShelfItemDTO[],
+  serverRelations: ShelfItemChildDTO[],
   log: ItemOpLog,
   shelfId: string,
-): { units: ShelfUnitDTO[]; relations: ShelfUnitRelationDTO[] } {
+): { units: ShelfItemDTO[]; relations: ShelfItemChildDTO[] } {
   let units = serverUnits.map((u) => ({ ...u }));
   let relations = serverRelations.map((r) => ({ ...r }));
 
-  function ensureUnit(unitId: string, kind: ShelfUnitKind, position?: string) {
-    const idx = units.findIndex((u) => u.unitId === unitId);
+  function ensureUnit(unitId: string, kind: ShelfItemKind, position?: string) {
+    const idx = units.findIndex(
+      (u) => u.itemType === "unit" && u.itemId === unitId,
+    );
     if (idx >= 0) return;
     const finalPosition = position ?? appendAfter(maxPositionOf(units));
-    units = [...units, { shelfId, unitId, kind, position: finalPosition }];
+    units = [
+      ...units,
+      {
+        shelfId,
+        itemType: "unit",
+        itemId: unitId,
+        unitId,
+        kind,
+        position: finalPosition,
+      },
+    ];
   }
 
   for (const entry of log.entries) {
@@ -359,12 +385,19 @@ function applyLiveOps(
     const { op } = entry;
 
     if (op.op === "add") {
-      const idx = units.findIndex((u) => u.unitId === op.unitId);
-      const next: ShelfUnitDTO = {
+      const idx = units.findIndex(
+        (u) => u.itemType === op.itemType && u.itemId === op.itemId,
+      );
+      const next: ShelfItemDTO = {
         shelfId,
-        unitId: op.unitId,
+        itemType: op.itemType,
+        itemId: op.itemId,
+        ...(op.itemType === "unit" ? { unitId: op.itemId } : {}),
         kind: op.kind,
         position: op.position,
+        parentItemType: op.parentItemType,
+        parentItemId: op.parentItemId,
+        parentRole: op.parentRole,
       };
       if (idx >= 0) units[idx] = { ...units[idx]!, ...next };
       else units = [...units, next];
@@ -372,9 +405,16 @@ function applyLiveOps(
     }
 
     if (op.op === "delete") {
-      units = units.filter((u) => u.unitId !== op.unitId);
+      units = units.filter(
+        (u) => !(u.itemType === op.itemType && u.itemId === op.itemId),
+      );
       relations = relations.filter(
-        (r) => r.parentUnitId !== op.unitId && r.childUnitId !== op.unitId,
+        (r) =>
+          !(
+            (r.parentItemType === op.itemType &&
+              r.parentItemId === op.itemId) ||
+            (r.childItemType === op.itemType && r.childItemId === op.itemId)
+          ),
       );
       continue;
     }
@@ -382,7 +422,9 @@ function applyLiveOps(
     if (op.op === "reorder" || op.op === "reorderToPage") {
       if (op.op === "reorder") {
         units = units.map((u) =>
-          u.unitId === op.unitId ? { ...u, position: op.position } : u,
+          u.itemType === op.itemType && u.itemId === op.itemId
+            ? { ...u, position: op.position }
+            : u,
         );
       }
       // reorderToPage: server-resolved; no optimistic position
@@ -390,11 +432,15 @@ function applyLiveOps(
     }
 
     if (op.op === "attach") {
-      ensureUnit(op.childUnitId, op.childKind, op.position);
+      if (op.childItemType === "unit") {
+        ensureUnit(op.childItemId, op.childKind, op.position);
+      }
       const exists = relations.some(
         (r) =>
-          r.parentUnitId === op.parentUnitId &&
-          r.childUnitId === op.childUnitId &&
+          r.parentItemType === op.parentItemType &&
+          r.parentItemId === op.parentItemId &&
+          r.childItemType === op.childItemType &&
+          r.childItemId === op.childItemId &&
           r.role === op.role,
       );
       if (!exists) {
@@ -402,8 +448,10 @@ function applyLiveOps(
           ...relations,
           {
             shelfId,
-            parentUnitId: op.parentUnitId,
-            childUnitId: op.childUnitId,
+            parentItemType: op.parentItemType,
+            parentItemId: op.parentItemId,
+            childItemType: op.childItemType,
+            childItemId: op.childItemId,
             role: op.role,
           },
         ];
@@ -415,8 +463,10 @@ function applyLiveOps(
       relations = relations.filter(
         (r) =>
           !(
-            r.parentUnitId === op.parentUnitId &&
-            r.childUnitId === op.childUnitId &&
+            r.parentItemType === op.parentItemType &&
+            r.parentItemId === op.parentItemId &&
+            r.childItemType === op.childItemType &&
+            r.childItemId === op.childItemId &&
             r.role === op.role
           ),
       );
@@ -424,19 +474,29 @@ function applyLiveOps(
     }
 
     if (op.op === "setChildren") {
-      for (const childId of op.childUnitIds) {
-        ensureUnit(childId, op.childKind ?? ("post" as ShelfUnitKind));
+      if (op.childItemType === "unit") {
+        for (const childId of op.childItemIds ?? []) {
+          ensureUnit(childId, op.childKind ?? ("post" as ShelfItemKind));
+        }
       }
       relations = relations.filter(
-        (r) => !(r.parentUnitId === op.parentUnitId && r.role === op.role),
+        (r) =>
+          !(
+            r.parentItemType === op.parentItemType &&
+            r.parentItemId === op.parentItemId &&
+            r.childItemType === op.childItemType &&
+            r.role === op.role
+          ),
       );
-      for (const childId of op.childUnitIds) {
+      for (const childId of op.childItemIds ?? []) {
         relations = [
           ...relations,
           {
             shelfId,
-            parentUnitId: op.parentUnitId,
-            childUnitId: childId,
+            parentItemType: op.parentItemType,
+            parentItemId: op.parentItemId,
+            childItemType: op.childItemType,
+            childItemId: childId,
             role: op.role,
           },
         ];
@@ -447,7 +507,7 @@ function applyLiveOps(
   return { units, relations };
 }
 
-function maxPositionOf(units: ShelfUnitDTO[]): string | undefined {
+function maxPositionOf(units: ShelfItemDTO[]): string | undefined {
   let last: string | undefined;
   for (const u of units) {
     if (!last || u.position > last) last = u.position;

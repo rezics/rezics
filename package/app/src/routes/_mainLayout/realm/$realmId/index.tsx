@@ -1,16 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RealmPage, type RealmPageTab } from "@/realm/pages/RealmPage";
+import {
+  RealmPage,
+  type RealmFeedSort,
+  type RealmPageTab,
+} from "@/realm/pages/RealmPage";
 
 type RealmSearch = {
-  sort?: "new" | "top" | "hot";
+  sort?: RealmFeedSort;
   tags?: string;
   tab?: RealmPageTab;
 };
 
+function isRealmFeedSort(value: unknown): value is RealmFeedSort {
+  return (
+    value === "best" ||
+    value === "hot" ||
+    value === "new" ||
+    value === "top" ||
+    value === "rising"
+  );
+}
+
 export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
   validateSearch: (search: Record<string, unknown>): RealmSearch => {
-    const sort =
-      search.sort === "top" || search.sort === "hot" ? search.sort : "new";
+    const sort = isRealmFeedSort(search.sort) ? search.sort : "best";
     const tab =
       search.tab === "wiki" ||
       search.tab === "tags" ||
@@ -34,7 +47,7 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
       <RealmPage
         realmId={realmId}
         tab={search.tab}
-        feedSort={search.sort ?? "new"}
+        feedSort={search.sort ?? "best"}
         feedTagIds={tagIds}
         onTabChange={(tab) =>
           navigate({ search: (prev) => ({ ...prev, tab }) })

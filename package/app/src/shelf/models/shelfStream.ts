@@ -1,28 +1,28 @@
 import type {
-  EnrichedShelfUnit,
+  EnrichedShelfItem,
   ShelfSortState,
   ShelfView,
 } from "@rezics/api/shelf";
-import type { ShelfUnitDTO, ShelfUnitRelationDTO } from "@rezics/contract";
+import type { ShelfItemDTO, ShelfItemChildDTO } from "@rezics/contract";
 import { titleOf } from "./titleOf";
 
 export interface ShelfStreamRootEntry {
   kind: "root";
-  unit: EnrichedShelfUnit;
+  unit: EnrichedShelfItem;
   /** Children grouped under this root (review/tag), pre-sorted. */
-  children: EnrichedShelfUnit[];
+  children: EnrichedShelfItem[];
 }
 
 export interface ShelfStreamChildEntry {
   kind: "child";
-  unit: EnrichedShelfUnit;
+  unit: EnrichedShelfItem;
   parentUnitId: string;
-  parent?: EnrichedShelfUnit;
+  parent?: EnrichedShelfItem;
 }
 
 export interface ShelfStreamPeerEntry {
   kind: "peer";
-  unit: EnrichedShelfUnit;
+  unit: EnrichedShelfItem;
 }
 
 export type ShelfStreamEntry =
@@ -44,7 +44,7 @@ function maybeReverse(value: number, order: ShelfSortState["order"]): number {
   return order === "desc" ? -value : value;
 }
 
-function tieBreak(a: EnrichedShelfUnit, b: EnrichedShelfUnit): number {
+function tieBreak(a: EnrichedShelfItem, b: EnrichedShelfItem): number {
   return (
     comparePosition(a.unit.position, b.unit.position) ||
     titleCollator.compare(a.unit.unitId, b.unit.unitId)
@@ -52,8 +52,8 @@ function tieBreak(a: EnrichedShelfUnit, b: EnrichedShelfUnit): number {
 }
 
 function compareByMode(
-  a: EnrichedShelfUnit,
-  b: EnrichedShelfUnit,
+  a: EnrichedShelfItem,
+  b: EnrichedShelfItem,
   sort: ShelfSortState,
 ): number {
   if (sort.field === "manual") {
@@ -77,48 +77,66 @@ function compareByMode(
   );
 }
 
-function titleOfUnit(e: EnrichedShelfUnit): string {
+function titleOfUnit(e: EnrichedShelfItem): string {
   return titleOf(e.unit, e.data);
 }
 
 function sortedClone(
-  units: EnrichedShelfUnit[],
+  units: EnrichedShelfItem[],
   sort: ShelfSortState,
-): EnrichedShelfUnit[] {
+): EnrichedShelfItem[] {
   const arr = [...units];
   arr.sort((a, b) => compareByMode(a, b, sort));
   return arr;
 }
 
 interface DerivationParts {
-  byId: Map<string, EnrichedShelfUnit>;
-  childByParent: Map<string, EnrichedShelfUnit[]>;
+  byId: Map<string, EnrichedShelfItem>;
+  childByParent: Map<string, EnrichedShelfItem[]>;
   childIds: Set<string>;
-  roots: EnrichedShelfUnit[];
+  roots: EnrichedShelfItem[];
 }
 
 function partition(
-  units: EnrichedShelfUnit[],
-  relations: ShelfUnitRelationDTO[],
+  units: EnrichedShelfItem[],
+  relations: ShelfItemChildDTO[],
 ): DerivationParts {
-  const byId = new Map<string, EnrichedShelfUnit>();
+  const byId = new Map<string, EnrichedShelfItem>();
   for (const e of units) byId.set(e.unit.unitId, e);
 
-  const childByParent = new Map<string, EnrichedShelfUnit[]>();
+  const childByParent = new Map<string, EnrichedShelfItem[]>();
   const childIds = new Set<string>();
-  for (const rel of relations) {
-    childIds.add(rel.childUnitId);
-    const child = byId.get(rel.childUnitId);
+  const normalizedRelations =
+    relations.length > 0
+      ? relations
+      : units
+          .map((entry) => entry.unit)
+          .filter((item) => item.parentItemId)
+          .map((item) => ({
+            shelfId: item.shelfId,
+            parentItemType: item.parentItemType ?? "unit",
+            parentItemId: item.parentItemId!,
+            parentUnitId: item.parentItemId!,
+            childItemType: item.itemType ?? "unit",
+            childItemId: item.itemId ?? item.unitId,
+            childUnitId: item.itemId ?? item.unitId,
+            role: item.parentRole ?? "review",
+          }));
+  for (const rel of normalizedRelations) {
+    const childUnitId = rel.childUnitId ?? rel.childItemId;
+    const parentUnitId = rel.parentUnitId ?? rel.parentItemId;
+    childIds.add(childUnitId);
+    const child = byId.get(childUnitId);
     if (!child) continue;
-    let bucket = childByParent.get(rel.parentUnitId);
+    let bucket = childByParent.get(parentUnitId);
     if (!bucket) {
       bucket = [];
-      childByParent.set(rel.parentUnitId, bucket);
+      childByParent.set(parentUnitId, bucket);
     }
     if (!bucket.includes(child)) bucket.push(child);
   }
 
-  const roots: EnrichedShelfUnit[] = [];
+  const roots: EnrichedShelfItem[] = [];
   for (const e of units) {
     if (!childIds.has(e.unit.unitId)) roots.push(e);
   }
@@ -127,14 +145,14 @@ function partition(
 }
 
 /**
- * Pure derivation of the rendered stream from ShelfUnit + ShelfUnitRelation.
+ * Pure derivation of the rendered stream from ShelfItem parent fields.
  *
- * - Roots = units that do not appear as `childUnitId` in any relation.
+ * - Roots = items that do not have a parent item.
  * - In nested mode: returns root entries; consumers render attached children
  *   inside each root via `entry.children`.
  * - In flat/masonry + `sortPrimeOnly=true`: roots sorted first, each root's
  *   children sorted by the same comparator, emitted immediately after the root.
- * - In flat/masonry + `sortPrimeOnly=false`: every ShelfUnit is emitted once as
+ * - In flat/masonry + `sortPrimeOnly=false`: every ShelfItem is emitted once as
  *   a peer, all participating in one comparator.
  *
  * Multi-step cycles in the relation graph cannot infinitely recurse because
@@ -142,8 +160,8 @@ function partition(
  * just render each affected unit under its parent(s) and not as a root.
  */
 export function deriveShelfStream(
-  units: EnrichedShelfUnit[],
-  relations: ShelfUnitRelationDTO[],
+  units: EnrichedShelfItem[],
+  relations: ShelfItemChildDTO[],
   mode: ShelfView,
   sort: ShelfSortState,
   sortPrimeOnly: boolean,
@@ -181,26 +199,43 @@ export function deriveShelfStream(
   }));
 }
 
-export function shelfUnitsById(
-  units: EnrichedShelfUnit[],
-): Map<string, EnrichedShelfUnit> {
-  const m = new Map<string, EnrichedShelfUnit>();
+export function shelfItemsById(
+  units: EnrichedShelfItem[],
+): Map<string, EnrichedShelfItem> {
+  const m = new Map<string, EnrichedShelfItem>();
   for (const e of units) m.set(e.unit.unitId, e);
   return m;
 }
 
 export function findChildren(
-  units: EnrichedShelfUnit[],
-  relations: ShelfUnitRelationDTO[],
+  units: EnrichedShelfItem[],
+  relations: ShelfItemChildDTO[],
   parentUnitId: string,
-  role?: ShelfUnitRelationDTO["role"],
-): EnrichedShelfUnit[] {
-  const byId = shelfUnitsById(units);
-  const out: EnrichedShelfUnit[] = [];
-  for (const rel of relations) {
-    if (rel.parentUnitId !== parentUnitId) continue;
+  role?: ShelfItemChildDTO["role"],
+): EnrichedShelfItem[] {
+  const byId = shelfItemsById(units);
+  const out: EnrichedShelfItem[] = [];
+  const normalizedRelations =
+    relations.length > 0
+      ? relations
+      : units
+          .map((entry) => entry.unit)
+          .filter((item) => item.parentItemId)
+          .map((item) => ({
+            shelfId: item.shelfId,
+            parentItemType: item.parentItemType ?? "unit",
+            parentItemId: item.parentItemId!,
+            parentUnitId: item.parentItemId!,
+            childItemType: item.itemType ?? "unit",
+            childItemId: item.itemId ?? item.unitId,
+            childUnitId: item.itemId ?? item.unitId,
+            role: item.parentRole ?? "review",
+          }));
+  for (const rel of normalizedRelations) {
+    const relParentUnitId = rel.parentUnitId ?? rel.parentItemId;
+    if (relParentUnitId !== parentUnitId) continue;
     if (role && rel.role !== role) continue;
-    const child = byId.get(rel.childUnitId);
+    const child = byId.get(rel.childUnitId ?? rel.childItemId);
     if (child && !out.includes(child)) out.push(child);
   }
   return out;
@@ -209,9 +244,9 @@ export function findChildren(
 // Lightweight rehydration helper for callsites that have a plain unit list and
 // need the partition utilities for tests.
 export function partitionForTest(
-  units: EnrichedShelfUnit[],
-  relations: ShelfUnitRelationDTO[],
-): { roots: ShelfUnitDTO[]; childIds: Set<string> } {
+  units: EnrichedShelfItem[],
+  relations: ShelfItemChildDTO[],
+): { roots: ShelfItemDTO[]; childIds: Set<string> } {
   const { roots, childIds } = partition(units, relations);
   return {
     roots: roots.map((r) => r.unit),

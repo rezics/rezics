@@ -8,11 +8,19 @@ import { federatedSearch } from "./federated.service";
 // is on the orchestrator's filter and index allowlist behavior.
 
 interface CapturedSearch {
-  index: "content" | "posts" | "comments" | "realms" | "users" | "entities";
+  index:
+    | "content"
+    | "posts"
+    | "comments"
+    | "realms"
+    | "users"
+    | "entities"
+    | "shelfItems";
   q: string;
   filter?: string;
   offset?: number;
   limit?: number;
+  attributesToSearchOn?: string[];
 }
 
 interface CapturedMultiSearch {
@@ -46,6 +54,7 @@ function makeFakeClient(opts?: {
         filter: params.filter,
         offset: params.offset,
         limit: params.limit,
+        attributesToSearchOn: params.attributesToSearchOn,
       });
       const fn = opts?.perIndex;
       return (
@@ -95,6 +104,7 @@ function makeFakeClient(opts?: {
     realmIndex: captureIndex("realms"),
     userIndex: captureIndex("users"),
     entityIndex: captureIndex("entities"),
+    shelfItemIndex: captureIndex("shelfItems"),
   } as unknown as SearchClient;
 
   return { client, calls, multi };
@@ -350,5 +360,290 @@ describe("federatedSearch", () => {
     for (const q of postsQueries) {
       expect(q.filter).toContain("isLocked = false");
     }
+  });
+
+  test("grouped shelves hydrate shelves from grouped shelf item matches", async () => {
+    const { client, calls } = makeFakeClient({
+      perIndex: (_q, params) => {
+        if (params.indexUid === "shelfItems") {
+          return {
+            hits: [
+              {
+                id: "shelf-1:unit:book-1",
+                shelfId: "shelf-1",
+                shelfOwnerUserId: "owner-1",
+                shelfVisibility: "PUBLIC",
+                shelfStatus: "PUBLISHED",
+                shelfTitle: "Favorites",
+                itemType: "unit",
+                itemId: "book-1",
+                kind: "root",
+                rootItemType: "unit",
+                rootItemId: "book-1",
+                parentItemType: null,
+                parentItemId: null,
+                parentRole: null,
+                position: "a0",
+                itemTitle: "Magic Book",
+                itemSummary: null,
+                itemText: null,
+                searchText: "private note",
+                rootUnitId: null,
+                realmUnitId: null,
+                parentCommentId: null,
+                authorUserId: null,
+                authorName: null,
+                moderationStatus: null,
+                isLocked: null,
+                deletedAt: null,
+                createdAt: 1,
+                updatedAt: 2,
+              },
+            ],
+            estimatedTotalHits: 1,
+            processingTimeMs: 2,
+          };
+        }
+        if (params.indexUid === "content" && params.filter?.includes("id IN")) {
+          return {
+            hits: [
+              {
+                id: "shelf-1",
+                type: "SHELF",
+                titles: ["Favorites"],
+                subtitles: [],
+                contentText: null,
+                descriptionText: null,
+                summaries: [],
+                descriptions: [],
+                creditNames: [],
+                subjectNames: [],
+                subjectEntityIds: [],
+                subjectKinds: [],
+                subjectRoles: [],
+                tagLabels: [],
+                aliasValues: [],
+                tagIds: [],
+                tagScores: {},
+                catalogEntryKind: null,
+                targetUnitId: null,
+                seriesUnitIds: [],
+                seriesKindKeys: [],
+                seriesTitles: [],
+                realmIds: [],
+                realmTagKeys: [],
+                containedUnitIds: ["book-1"],
+                languages: [],
+                isLanguageNeutral: true,
+                rating: "GENERAL",
+                aiDisclosureMode: "NONE",
+                visibility: "PUBLIC",
+                isLicensed: false,
+                postKind: null,
+                textLength: null,
+                createdAt: "2026-01-01T00:00:00.000Z",
+                updatedAt: "2026-01-01T00:00:00.000Z",
+                publishedAt: null,
+                bestScore: 0,
+                hotScore: 0,
+                topScore: 0,
+                risingScore: 0,
+                controversyScore: 0,
+                trendingScore: 0,
+                qualityScore: 0,
+                rankUpdatedAt: null,
+                referenceCount: 0,
+                shareCount: 0,
+                defaultLanguage: null,
+                coverUrl: null,
+                userId: "owner-1",
+              },
+            ],
+            estimatedTotalHits: 1,
+            processingTimeMs: 1,
+          };
+        }
+      },
+    });
+
+    const result = await federatedSearch(client, {
+      scope: { kind: "global" },
+      category: "all",
+      query: { keyword: "magic" },
+    });
+
+    expect(result.kind).toBe("grouped");
+    if (result.kind !== "grouped") throw new Error("expected grouped");
+    expect(result.sections.shelves?.items[0]?.id).toBe("shelf-1");
+    expect(
+      (result.sections.shelves?.items[0] as any).matchedShelfItemGroup
+        .matches[0].item.itemTitle,
+    ).toBe("Magic Book");
+    const shelfItemCall = calls.find((call) => call.index === "shelfItems");
+    expect(shelfItemCall?.attributesToSearchOn).not.toContain("searchText");
+  });
+
+  test("saved shelf search hydrates saved shelf units from shelf item matches", async () => {
+    const { client, calls, multi } = makeFakeClient({
+      perIndex: (_q, params) => {
+        if (params.indexUid === "shelfItems") {
+          return {
+            hits: [
+              {
+                id: "saved-system-shelf:unit:shared-shelf",
+                shelfId: "saved-system-shelf",
+                shelfOwnerUserId: "owner-1",
+                shelfVisibility: "PRIVATE",
+                shelfStatus: "PUBLISHED",
+                shelfTitle: "Saved",
+                itemType: "unit",
+                itemId: "shared-shelf",
+                kind: "shelf",
+                rootItemType: "unit",
+                rootItemId: "shared-shelf",
+                parentItemType: null,
+                parentItemId: null,
+                parentRole: null,
+                position: "a0",
+                itemTitle: "Shared Shelf",
+                itemSummary: null,
+                itemText: null,
+                searchText: "private saved note",
+                rootUnitId: "shared-shelf",
+                realmUnitId: null,
+                parentCommentId: null,
+                authorUserId: null,
+                authorName: null,
+                moderationStatus: null,
+                isLocked: null,
+                deletedAt: null,
+                createdAt: 1,
+                updatedAt: 2,
+              },
+            ],
+            estimatedTotalHits: 1,
+            processingTimeMs: 2,
+          };
+        }
+        if (params.indexUid === "content" && params.filter?.includes("id IN")) {
+          return {
+            hits: [
+              {
+                id: "shared-shelf",
+                type: "SHELF",
+                titles: ["Shared Shelf"],
+                subtitles: [],
+                contentText: null,
+                descriptionText: null,
+                summaries: [],
+                descriptions: [],
+                creditNames: [],
+                subjectNames: [],
+                subjectEntityIds: [],
+                subjectKinds: [],
+                subjectRoles: [],
+                tagLabels: [],
+                aliasValues: [],
+                tagIds: [],
+                tagScores: {},
+                catalogEntryKind: null,
+                targetUnitId: null,
+                seriesUnitIds: [],
+                seriesKindKeys: [],
+                seriesTitles: [],
+                realmIds: [],
+                realmTagKeys: [],
+                containedUnitIds: [],
+                languages: [],
+                isLanguageNeutral: true,
+                rating: "GENERAL",
+                aiDisclosureMode: "NONE",
+                visibility: "PUBLIC",
+                isLicensed: false,
+                postKind: null,
+                textLength: null,
+                createdAt: "2026-01-01T00:00:00.000Z",
+                updatedAt: "2026-01-01T00:00:00.000Z",
+                publishedAt: null,
+                bestScore: 0,
+                hotScore: 0,
+                topScore: 0,
+                risingScore: 0,
+                controversyScore: 0,
+                trendingScore: 0,
+                qualityScore: 0,
+                rankUpdatedAt: null,
+                referenceCount: 0,
+                shareCount: 0,
+                defaultLanguage: null,
+                coverUrl: null,
+                userId: "saved-owner",
+              },
+            ],
+            estimatedTotalHits: 1,
+            processingTimeMs: 1,
+          };
+        }
+      },
+    });
+
+    const result = await federatedSearch(
+      client,
+      {
+        scope: {
+          kind: "saved",
+          shelfId: "saved-system-shelf",
+          userId: "owner-1",
+        },
+        category: "all",
+        query: { keyword: "private saved note" },
+      },
+      { viewerUserId: "owner-1" },
+    );
+
+    expect(result.kind).toBe("grouped");
+    if (result.kind !== "grouped") throw new Error("expected grouped");
+    expect(multi.length).toBe(0);
+    expect(result.sections.shelves?.items[0]?.id).toBe("shared-shelf");
+    const shelfItemCall = calls.find((call) => call.index === "shelfItems");
+    expect(shelfItemCall?.filter).toContain('shelfId = "saved-system-shelf"');
+    expect(shelfItemCall?.filter).toContain('kind = "shelf"');
+    expect(shelfItemCall?.attributesToSearchOn).toContain("searchText");
+  });
+
+  test("owner shelf item search includes private searchText", async () => {
+    const { client, calls } = makeFakeClient();
+
+    await federatedSearch(
+      client,
+      {
+        scope: { kind: "user", userId: "owner-1" },
+        category: "shelves",
+        query: { keyword: "private note" },
+      },
+      { viewerUserId: "owner-1" },
+    );
+
+    const shelfItemCall = calls.find((call) => call.index === "shelfItems");
+    expect(shelfItemCall?.filter).toContain('shelfOwnerUserId = "owner-1"');
+    expect(shelfItemCall?.attributesToSearchOn).toContain("searchText");
+  });
+
+  test("logged-in global shelf item search still excludes private searchText", async () => {
+    const { client, calls } = makeFakeClient();
+
+    await federatedSearch(
+      client,
+      {
+        scope: { kind: "global" },
+        category: "shelves",
+        query: { keyword: "private note" },
+      },
+      { viewerUserId: "owner-1" },
+    );
+
+    const shelfItemCall = calls.find((call) => call.index === "shelfItems");
+    expect(shelfItemCall?.filter).toContain('shelfVisibility = "PUBLIC"');
+    expect(shelfItemCall?.attributesToSearchOn).not.toContain("searchText");
   });
 });

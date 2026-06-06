@@ -8,7 +8,6 @@ import {
   commentParamsSchema,
   commentResponseSchema,
   createCommentSchema,
-  parseIdsCsv,
   updateCommentSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -41,17 +40,24 @@ export const commentApi = new Elysia({ prefix: "/comment" })
         headers["authorization"],
         headers["cookie"],
       );
-      const { comments, total } = await commentService.list(
-        { ...query, ids: parseIdsCsv(query.ids) },
-        {
-          viewerUserId: identity?.userId,
-        },
-      );
+      const result = await commentService.list(query, {
+        viewerUserId: identity?.userId,
+      });
       const signals = await postService.getThreadPromotionSignals(
         query.rootUnitId,
         identity,
       );
-      return { comments: comments.map(mapCommentToDTO), total, ...signals };
+      return {
+        mode: query.mode,
+        comments: result.comments.map(mapCommentToDTO),
+        rootComment: result.rootComment
+          ? mapCommentToDTO(result.rootComment)
+          : null,
+        parentContexts: result.parentContexts?.map(mapCommentToDTO) ?? [],
+        nextCursor: result.nextCursor ?? null,
+        total: result.total,
+        ...signals,
+      };
     },
     {
       query: commentListQuerySchema,
@@ -69,14 +75,24 @@ export const commentApi = new Elysia({ prefix: "/comment" })
         headers["authorization"],
         headers["cookie"],
       );
-      const { comments, total } = await commentService.list(body, {
+      const result = await commentService.list(body, {
         viewerUserId: identity?.userId,
       });
       const signals = await postService.getThreadPromotionSignals(
         body.rootUnitId,
         identity,
       );
-      return { comments: comments.map(mapCommentToDTO), total, ...signals };
+      return {
+        mode: body.mode,
+        comments: result.comments.map(mapCommentToDTO),
+        rootComment: result.rootComment
+          ? mapCommentToDTO(result.rootComment)
+          : null,
+        parentContexts: result.parentContexts?.map(mapCommentToDTO) ?? [],
+        nextCursor: result.nextCursor ?? null,
+        total: result.total,
+        ...signals,
+      };
     },
     {
       body: commentListBodySchema,

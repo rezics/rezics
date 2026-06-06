@@ -29,6 +29,7 @@ import {
   PollVote,
   Post,
   PostPollReference,
+  PostUnitReference,
   Realm,
   RealmCapabilityGrant,
   RealmMember,
@@ -42,8 +43,7 @@ import {
   Series,
   SeriesContentIndex,
   Shelf,
-  ShelfUnit,
-  ShelfUnitRelation,
+  ShelfItem,
   SlugScope,
   SourceSite,
   StaffAuditLog,
@@ -66,7 +66,6 @@ import {
   UserBlock,
   UserContentNodeProgress,
   UserTagApplication,
-  UserUnitCollection,
   UserUnitProgress,
   Zone,
 } from "../schema";
@@ -88,7 +87,6 @@ export const RESET_DATABASE_TABLES = [
   ["Subscription", Subscription],
   ["UserContentNodeProgress", UserContentNodeProgress],
   ["UserUnitProgress", UserUnitProgress],
-  ["UserUnitCollection", UserUnitCollection],
   ["UserTagApplication", UserTagApplication],
   ["RealmTagApplicationVote", RealmTagApplicationVote],
   ["RealmRuleAcknowledgement", RealmRuleAcknowledgement],
@@ -113,15 +111,15 @@ export const RESET_DATABASE_TABLES = [
   ["ScoreRealmField", ScoreRealmField],
   ["ScoreAggregate", ScoreAggregate],
   ["PostPollReference", PostPollReference],
+  ["PostUnitReference", PostUnitReference],
   ["PollOption", PollOption],
 
   ["RealmTagApplication", RealmTagApplication],
   ["RealmTagContext", RealmTagContext],
 
-  ["ShelfUnitRelation", ShelfUnitRelation],
   ["UnitRealm", UnitRealm],
   ["RealmMember", RealmMember],
-  ["ShelfUnit", ShelfUnit],
+  ["ShelfItem", ShelfItem],
   ["UnitTag", UnitTag],
 
   ["SeriesContentIndex", SeriesContentIndex],
@@ -201,6 +199,7 @@ export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
     ["ScoreRealmField", ScoreRealmField],
     ["ScoreAggregate", ScoreAggregate],
     ["PostPollReference", PostPollReference],
+    ["PostUnitReference", PostUnitReference],
   ]);
   await db.delete(PollOption);
 
@@ -209,11 +208,10 @@ export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
   await db.delete(RealmTagContext);
 
   // Group 6: Realm + shelf + tag junctions.
-  await db.delete(ShelfUnitRelation);
   await deleteTables(db, [
     ["UnitRealm", UnitRealm],
     ["RealmMember", RealmMember],
-    ["ShelfUnit", ShelfUnit],
+    ["ShelfItem", ShelfItem],
     ["UnitTag", UnitTag],
   ]);
 

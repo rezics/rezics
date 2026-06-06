@@ -1,8 +1,28 @@
 import type {
   CommentSearchOptions,
   CommentSearchResult,
+  CommentSortMode,
 } from "@rezics/contract";
 import { searchClient } from "../search-client";
+
+export function commentSliceSort(sort: CommentSortMode = "best"): string {
+  // Future CommentRankServing table swaps in here if Meili consistency or
+  // cursor stability stops being sufficient for ranked comment slices.
+  switch (sort) {
+    case "best":
+      return "bestScore:desc";
+    case "top":
+      return "topScore:desc";
+    case "rising":
+      return "risingScore:desc";
+    case "controversial":
+      return "controversyScore:desc";
+    case "old":
+      return "createdAt:asc";
+    case "new":
+      return "createdAt:desc";
+  }
+}
 
 export function buildCommentSearchFilter(opts: CommentSearchOptions): string[] {
   const filter: string[] = [];
@@ -10,11 +30,19 @@ export function buildCommentSearchFilter(opts: CommentSearchOptions): string[] {
   if (opts.rootUnitId) {
     filter.push(`rootUnitId = "${opts.rootUnitId}"`);
   }
-  if (opts.realmUnitId) {
-    filter.push(`realmUnitId = "${opts.realmUnitId}"`);
+  if (opts.realmUnitId !== undefined) {
+    filter.push(
+      opts.realmUnitId === null
+        ? "realmUnitId IS NULL"
+        : `realmUnitId = "${opts.realmUnitId}"`,
+    );
   }
-  if (opts.parentCommentId) {
-    filter.push(`parentCommentId = "${opts.parentCommentId}"`);
+  if (opts.parentCommentId !== undefined) {
+    filter.push(
+      opts.parentCommentId === null
+        ? "parentCommentId IS NULL"
+        : `parentCommentId = "${opts.parentCommentId}"`,
+    );
   }
   if (opts.authorUserId) {
     filter.push(`authorUserId = "${opts.authorUserId}"`);
@@ -27,6 +55,9 @@ export function buildCommentSearchFilter(opts: CommentSearchOptions): string[] {
   }
   if (opts.state) {
     filter.push(`state = "${opts.state}"`);
+  }
+  if (opts.moderationStatus) {
+    filter.push(`moderationStatus = "${opts.moderationStatus}"`);
   }
 
   return filter;

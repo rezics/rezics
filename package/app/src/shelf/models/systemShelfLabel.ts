@@ -6,6 +6,7 @@ const SYSTEM_SHELF_KIND_LABEL = {
   backlog: () => getI18nRuntime().i18n.t("entity:shelf_system_backlog"),
   completed: () => getI18nRuntime().i18n.t("entity:shelf_system_completed"),
   favorites: () => getI18nRuntime().i18n.t("entity:shelf_system_favorites"),
+  saved: () => getI18nRuntime().i18n.t("entity:shelf_system_saved"),
 } as const satisfies Record<SystemShelfKindKey, () => string>;
 
 export function systemShelfKindLabel(kindKey: SystemShelfKindKey): string {

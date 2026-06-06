@@ -47,4 +47,14 @@ describe("permittedCategoriesForScope", () => {
     expect(out).toContain("comments");
     expect(out).toContain("shelves");
   });
+
+  test("saved scope only exposes shelf search categories", () => {
+    expect(
+      permittedCategoriesForScope({
+        kind: "saved",
+        shelfId: "saved-shelf-1",
+        userId: "user-1",
+      }),
+    ).toEqual(["all", "shelves"]);
+  });
 });

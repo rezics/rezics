@@ -72,9 +72,6 @@ export function identityRelations(r: ServerRelationsBuilder) {
       }),
       ContentStructureNodes: r.many.ContentStructureNode(),
       UserTagApplications: r.many.UserTagApplication(),
-      Units_via_UserUnitCollection: r.many.Unit({
-        alias: "Unit_id_User_unitId_via_UserUnitCollection",
-      }),
       UserUnitProgresses: r.many.UserUnitProgress(),
     },
     ApiToken: {

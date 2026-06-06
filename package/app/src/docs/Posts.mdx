@@ -10,11 +10,11 @@ top-level components is intentional:
 
 - **`PostCard`** — flat single-post surface (post detail page header, search
   results). 2 props.
-- **`PostReply`** — tree node with collapse/expand + threading rail + reply
+- **`CommentReply`** — tree node with collapse/expand + threading rail + reply
   composer slot. 6 props.
 
 Prop overlap is ~17 % (only `post` is shared). The **layout test fires** on
-PostReply (it renders the threading rail and a collapse toggle that PostCard
+CommentReply (it renders the threading rail and a collapse toggle that PostCard
 doesn't have), so they stay split. See [`Foundation/Patterns`](?path=/docs/foundation-patterns--docs).
 
 ## Composition parts
@@ -30,8 +30,8 @@ The thread is composed from small parts that compose freely:
 
 ## Tree section
 
-`PostTreeSection` orchestrates the whole tree from a `rootPostUnitId`. The
+`CommentThreadSection` orchestrates the whole tree from a `rootPostUnitId`. The
 data-shape stories cover the four interesting axes:
 
-- [`PostTreeSection — Default / Empty / Flat / Threaded3Deep / Threaded10Deep`](?path=/story/app-post-posttreesection--default)
-- [`ReplyComposer — Default / Compact / Empty / HappyPath`](?path=/story/app-post-replycomposer--default)
+- [`CommentThreadSection — Default / Empty / Flat / Threaded3Deep / Threaded10Deep`](?path=/story/app-comment-commentthreadsection--default)
+- [`ReplyComposer — Default / Compact / Empty / HappyPath`](?path=/story/app-comment-replycomposer--default)

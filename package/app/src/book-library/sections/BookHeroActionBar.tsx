@@ -6,6 +6,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
   Tooltip,
   TooltipContent,
@@ -15,7 +17,10 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import {
   BookmarkPlus as BookmarkAddOutlined,
+  Copy,
+  FilePenLine,
   Pencil as EditOutlined,
+  Send,
   Share as IosShareOutlined,
 } from "lucide-react";
 import type React from "react";
@@ -46,6 +51,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   const share = useShareMenu({
     href: bookId ? `/book/${bookId}` : "/",
     title: shareTitle,
+    targetId: bookId || undefined,
   });
 
   const handleAddToShelf = () => {
@@ -92,16 +98,35 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
             )}
           />
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuLabel>{t("common:share_to_rezics")}</DropdownMenuLabel>
+            <DropdownMenuItem
+              disabled={!share.canInternalShare || share.isInternalSharePending}
+              onClick={share.handleDirectShare}
+            >
+              <Send className="h-4 w-4" aria-hidden />
+              {t("common:share_direct")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!share.canInternalShare || share.isInternalSharePending}
+              onClick={share.handleWriteShare}
+            >
+              <FilePenLine className="h-4 w-4" aria-hidden />
+              {t("common:share_write")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={share.handleCopy}>
+              <Copy className="h-4 w-4" aria-hidden />
               {t("common:copy_link")}
             </DropdownMenuItem>
             {share.canWebShare && (
               <DropdownMenuItem onClick={share.handleWebShare}>
+                <IosShareOutlined className="h-4 w-4" aria-hidden />
                 {t("common:share_via")}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+        {share.authModal}
 
         {editorEntry.canEnter && (
           <TooltipProvider>

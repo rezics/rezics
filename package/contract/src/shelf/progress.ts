@@ -3,6 +3,7 @@ import { catalogEntryKindSchema, unitTypeSchema } from "../unit/unit";
 
 export const SYSTEM_SHELF_KIND_KEYS = [
   "favorites",
+  "saved",
   "backlog",
   "active",
   "completed",
@@ -10,6 +11,7 @@ export const SYSTEM_SHELF_KIND_KEYS = [
 
 export const systemShelfKindKeySchema = t.Union([
   t.Literal("favorites"),
+  t.Literal("saved"),
   t.Literal("backlog"),
   t.Literal("active"),
   t.Literal("completed"),
@@ -128,7 +130,7 @@ export type UnitProgressListResponse =
   (typeof unitProgressListResponseSchema)["static"];
 
 export const progressLibraryShelfLinkSchema = t.Object({
-  shelfUnitId: t.String(),
+  shelfId: t.String(),
   title: t.String(),
 });
 

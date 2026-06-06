@@ -340,7 +340,7 @@ async function loadShelves(
 ) {
   const shelves = await repository.listShelves(userId, SHELF_LIMIT);
   return shelves.map((shelf) => ({
-    shelfUnitId: shelf.unitId,
+    shelfId: shelf.unitId,
     title: pickTitle(shelf.unit),
     itemCount: shelf.itemCount,
     coverUrls: [] as string[],

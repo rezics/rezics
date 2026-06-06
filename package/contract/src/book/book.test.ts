@@ -134,6 +134,16 @@ describe("bookDTOSchema", () => {
     ).toBe(true);
   });
 
+  test("accepts singular engagement count fields", () => {
+    expect(
+      Value.Check(bookDTOSchema, {
+        unitId: "book-1",
+        referenceCount: 4,
+        shareCount: 5,
+      }),
+    ).toBe(true);
+  });
+
   test("accepts resolved preview fields", () => {
     expect(
       Value.Check(bookDTOSchema, {

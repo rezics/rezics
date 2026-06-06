@@ -1,5 +1,6 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { Card, CardContent } from "@rezics/ui/shadcn";
+import { useSearch } from "@tanstack/react-router";
 import {
   BarChart3,
   BookPlus,
@@ -9,6 +10,8 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
+import { SharePostCreateForm } from "../components/SharePostCreateForm";
+import type { CreatePageSearch } from "../models/shareCreateSearch";
 
 /**
  * Unified creation entry. Presents the standalone creation flows
@@ -24,7 +27,8 @@ import { Link } from "@/shared/ui/link";
  * `/book/:bookId/node/:nodeId`.
  */
 export const CreatePage: React.FC = () => {
-  const { t } = useTranslation(["page"]);
+  const { t } = useTranslation(["common", "page"]);
+  const search = useSearch({ strict: false }) as CreatePageSearch;
 
   const options: Array<{
     to: string;
@@ -41,6 +45,25 @@ export const CreatePage: React.FC = () => {
     },
     { to: "/poll/new", label: t("page:create_poll"), icon: BarChart3 },
   ];
+
+  if (search.shareTargetId) {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 md:p-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold text-text-primary">
+            {t("common:share_to_rezics")}
+          </h1>
+          <p className="text-sm text-text-secondary">
+            {t("common:share_to_rezics_description")}
+          </p>
+        </div>
+        <SharePostCreateForm
+          targetUnitId={search.shareTargetId}
+          initialTitle={search.shareTitle}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">

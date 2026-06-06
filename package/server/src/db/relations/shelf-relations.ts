@@ -7,37 +7,21 @@ export function shelfRelations(r: ServerRelationsBuilder) {
         from: r.Shelf.unitId,
         to: r.Unit.id,
       }),
-      ShelfUnits: r.many.ShelfUnit(),
-      ShelfUnitRelations: r.many.ShelfUnitRelation(),
+      ShelfItems: r.many.ShelfItem(),
     },
-    ShelfUnit: {
+    ShelfItem: {
       Shelf: r.one.Shelf({
-        from: r.ShelfUnit.shelfId,
+        from: r.ShelfItem.shelfId,
         to: r.Shelf.unitId,
       }),
-      ShelfUnitRelations_shelfId_childUnitId: r.many.ShelfUnitRelation({
-        alias: "ShelfUnitRelation_shelfId_childUnitId_ShelfUnit_shelfId_unitId",
-      }),
-      ShelfUnitRelations_shelfId_parentUnitId: r.many.ShelfUnitRelation({
-        alias:
-          "ShelfUnitRelation_shelfId_parentUnitId_ShelfUnit_shelfId_unitId",
-      }),
-    },
-    ShelfUnitRelation: {
-      ShelfUnit_shelfId_childUnitId: r.one.ShelfUnit({
-        from: [r.ShelfUnitRelation.shelfId, r.ShelfUnitRelation.childUnitId],
-        to: [r.ShelfUnit.shelfId, r.ShelfUnit.unitId],
-        alias: "ShelfUnitRelation_shelfId_childUnitId_ShelfUnit_shelfId_unitId",
-      }),
-      Shelf: r.one.Shelf({
-        from: r.ShelfUnitRelation.shelfId,
-        to: r.Shelf.unitId,
-      }),
-      ShelfUnit_shelfId_parentUnitId: r.one.ShelfUnit({
-        from: [r.ShelfUnitRelation.shelfId, r.ShelfUnitRelation.parentUnitId],
-        to: [r.ShelfUnit.shelfId, r.ShelfUnit.unitId],
-        alias:
-          "ShelfUnitRelation_shelfId_parentUnitId_ShelfUnit_shelfId_unitId",
+      ParentShelfItem: r.one.ShelfItem({
+        from: [
+          r.ShelfItem.shelfId,
+          r.ShelfItem.parentItemType,
+          r.ShelfItem.parentItemId,
+        ],
+        to: [r.ShelfItem.shelfId, r.ShelfItem.itemType, r.ShelfItem.itemId],
+        alias: "ShelfItem_parent",
       }),
     },
   };

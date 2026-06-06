@@ -1,8 +1,8 @@
 ---
 title: Comment Slice Ranking + Ltree Removal Cutover
-status: active
+status: done
 created: 2026-06-05
-completed:
+completed: 2026-06-06
 supersededBy:
 tags: [comment, ranking, reaction, tree, meili]
 ---
@@ -106,137 +106,139 @@ but the backend no longer serves or caches a complete tree.
 
 ## 1. Ranking Formula And Projection Cutover
 
-- [ ] 1.1 Update `package/ranking/src/ranking/types.ts` so `RankingScores` and
+- [x] 1.1 Update `package/ranking/src/ranking/types.ts` so `RankingScores` and
   `ZERO_RANKING_SCORES` include `bestScore`, `risingScore`, and
   `controversyScore`.
-- [ ] 1.2 Add `bestScore`, `risingScore`, and `controversyScore` columns and
+- [x] 1.2 Add `bestScore`, `risingScore`, and `controversyScore` columns and
   indexes to `package/ranking/src/db/schema/ranking.ts`, then generate the
   ranking DB migration.
-- [ ] 1.3 Rewrite `package/ranking/src/ranking/formulas.ts` in place:
+- [x] 1.3 Rewrite `package/ranking/src/ranking/formulas.ts` in place:
   implement `wilsonLowerBound`, `redditHot`, `netScore`,
   `redditControversy`, `risingScore`, and `bestScore` helpers.
-- [ ] 1.4 Add formula tests in `package/ranking/src/ranking/formulas.test.ts`
+- [x] 1.4 Add formula tests in `package/ranking/src/ranking/formulas.test.ts`
   for Wilson time-independence, Reddit hot constants, net top score,
   controversy edge cases, and best/rising behavior for promising new comments.
-- [ ] 1.5 Update `package/ranking/src/ranking/ranking.repository.ts` and
+- [x] 1.5 Update `package/ranking/src/ranking/ranking.repository.ts` and
   `package/ranking/src/ranking/service.ts` to persist and patch the new score
   fields.
-- [ ] 1.6 Verify comment identity in `package/ranking/src/ranking/main-state.ts`
+- [x] 1.6 Verify comment identity in `package/ranking/src/ranking/main-state.ts`
   against the current `Comment` schema (`Comment.id` is the comment target id);
   fix any stale `"unitId"` comment lookup before relying on comment projections.
 
 ## 2. Rising Vote Buckets
 
-- [ ] 2.1 Add a ranking DB table such as `RankingReactionBucket` with
+- [x] 2.1 Add a ranking DB table such as `RankingReactionBucket` with
   `targetId`, `scopeKey`, `reaction`, `bucketStart`, `bucketEnd`, and `count`.
-- [ ] 2.2 Route reaction CDC/job events from `package/job-runner` into ranking
+- [x] 2.2 Route reaction CDC/job events from `package/job-runner` into ranking
   bucket updates for `upvote` and `downvote`.
-- [ ] 2.3 Extend ranking repository reads so `computeV1RankingScores` receives
+- [x] 2.3 Extend ranking repository reads so `computeV1RankingScores` receives
   recent vote windows, for example 1h/6h/24h upvote/downvote counts.
-- [ ] 2.4 Add repository/service tests proving old total votes affect
+- [x] 2.4 Add repository/service tests proving old total votes affect
   `qualityScore`, while recent vote buckets affect `risingScore` and the
   controlled boost inside `bestScore`.
 
 ## 3. Serving Index Fields
 
-- [ ] 3.1 Extend `package/search/src/sync.ts` ranking patch types and document
+- [x] 3.1 Extend `package/search/src/sync.ts` ranking patch types and document
   builders for content, posts, and comments with `bestScore`, `risingScore`, and
   `controversyScore`.
-- [ ] 3.2 Extend `package/search/src/schema.ts` sortable attributes for
+- [x] 3.2 Extend `package/search/src/schema.ts` sortable attributes for
   `content`, `posts`, and `comments` with the new ranking fields.
-- [ ] 3.3 Extend `package/contract/src/meili/comment.ts`,
+- [x] 3.3 Extend `package/contract/src/meili/comment.ts`,
   `package/contract/src/meili/post.ts`, and `package/contract/src/meili/content.ts`
   sort schemas/document schemas with the new fields.
-- [ ] 3.4 Update Meili/search tests that assert default ranking fields,
+- [x] 3.4 Update Meili/search tests that assert default ranking fields,
   sortable attributes, and patch payloads.
 - [ ] 3.5 Run a ranking full sync/backfill after the formula and schema cutover
-  so existing projections and Meili documents hold the new fields.
+  so existing projections and Meili documents hold the new fields. Left
+  unchecked because this is an external runtime operation, not code-owned
+  implementation work.
 
 ## 4. Comment Topology Lock
 
-- [ ] 4.1 Remove `realmUnitId` from `updateCommentSchema` in
+- [x] 4.1 Remove `realmUnitId` from `updateCommentSchema` in
   `package/contract/src/comment/comment.ts` and update exported types.
-- [ ] 4.2 Remove realm updates from `package/server/src/comment/comment.service.ts`
+- [x] 4.2 Remove realm updates from `package/server/src/comment/comment.service.ts`
   and tests. Keep `isLocked`, `state`, and content updates.
-- [ ] 4.3 Strengthen create tests so a reply always inherits/validates the
+- [x] 4.3 Strengthen create tests so a reply always inherits/validates the
   parent's `(rootUnitId, realmUnitId)` partition.
-- [ ] 4.4 Keep soft-delete behavior as the only delete path and add tests that a
+- [x] 4.4 Keep soft-delete behavior as the only delete path and add tests that a
   deleted parent can remain as context in root/children mode while disappearing
   from discovery slices.
 
 ## 5. Slice Contract And API
 
-- [ ] 5.1 Replace the current threaded/subtree comment list contract in
+- [x] 5.1 Replace the current threaded/subtree comment list contract in
   `package/contract/src/comment/comment.ts` with slice query/response shapes for
   `discovery`, `root`, and `children`.
-- [ ] 5.2 Define comment sort literals:
+- [x] 5.2 Define comment sort literals:
   `best`, `top`, `rising`, `controversial`, `new`, and `old`.
-- [ ] 5.3 Add cursor types that match the selected sort key plus `id`; avoid
+- [x] 5.3 Add cursor types that match the selected sort key plus `id`; avoid
   offset paging for ranked comment slices.
-- [ ] 5.4 Update `package/server/src/comment/comment.api.ts` to expose the new
+- [x] 5.4 Update `package/server/src/comment/comment.api.ts` to expose the new
   slice reads while preserving create/update/moderation routes.
-- [ ] 5.5 Update `package/api/src/comment/` query helpers and keys for
+- [x] 5.5 Update `package/api/src/comment/` query helpers and keys for
   discovery/root/children reads.
 
 ## 6. Remove Ltree From Comment Reads
 
-- [ ] 6.1 Remove `path` from `commentDTOSchema`, `mapCommentToDTO`, and search
+- [x] 6.1 Remove `path` from `commentDTOSchema`, `mapCommentToDTO`, and search
   comment documents unless a transitional test proves it is still required.
-- [ ] 6.2 Remove `Comment.path`, `Comment_path_gist_idx`, and ltree path writes
+- [x] 6.2 Remove `Comment.path`, `Comment_path_gist_idx`, and ltree path writes
   from `package/server/src/db/schema/comment.ts` and
   `package/server/src/comment/comment.service.ts`, then generate the server DB
   migration.
-- [ ] 6.3 Remove `attachPaths`, `sortTreeComments`, `getSubtreeAnchor`,
+- [x] 6.3 Remove `attachPaths`, `sortTreeComments`, `getSubtreeAnchor`,
   `listSubtreeDescendantIds`, and all `<@` subtree SQL from the comment service.
-- [ ] 6.4 Replace Postgres fallback indexes with adjacency indexes only:
+- [x] 6.4 Replace Postgres fallback indexes with adjacency indexes only:
   `(rootUnitId, realmUnitId, parentCommentId, createdAt, id)` for chronological
   reads and any required moderation/filter indexes.
-- [ ] 6.5 Add service tests proving reads are direct-child or ranked discovery
+- [x] 6.5 Add service tests proving reads are direct-child or ranked discovery
   slices and never depend on ltree/path ordering.
 
 ## 7. Meili Slice Serving
 
-- [ ] 7.1 Implement a comment serving helper that maps each sort mode to its
+- [x] 7.1 Implement a comment serving helper that maps each sort mode to its
   Meili sort field and filter:
   `rootUnitId`, `realmUnitId` including null partition semantics,
   `parentCommentId` where applicable, and moderation visibility.
-- [ ] 7.2 Implement discovery slice reads:
+- [x] 7.2 Implement discovery slice reads:
   ranked comments in a root/realm partition plus bounded direct-parent context.
-- [ ] 7.3 Implement root slice reads:
+- [x] 7.3 Implement root slice reads:
   fetch `rootCommentId`, validate its partition, and return its first
   direct-children page.
-- [ ] 7.4 Implement children slice reads:
+- [x] 7.4 Implement children slice reads:
   fetch direct children for `parentCommentId` with sort/cursor/limit.
-- [ ] 7.5 Add a service seam or TODO comment for a future `CommentRankServing`
+- [x] 7.5 Add a service seam or TODO comment for a future `CommentRankServing`
   table only where Meili consistency/cursor stability would be swapped out.
 
 ## 8. Frontend Slice Rendering
 
-- [ ] 8.1 Update `package/app/src/post/sections/PostTreeSection.tsx` and related
+- [x] 8.1 Update `package/app/src/post/sections/PostTreeSection.tsx` and related
   query usage to consume root/children slices instead of a full threaded list.
-- [ ] 8.2 Remove path-prefix tree assumptions from
+- [x] 8.2 Remove path-prefix tree assumptions from
   `package/app/src/post/models/postTreeRails.ts` and
   `package/app/src/post/hooks/usePostTreeCollapse.ts`; compose only from
   available slice rows.
-- [ ] 8.3 Add a discovery renderer for ranked comment slices that shows focused
+- [x] 8.3 Add a discovery renderer for ranked comment slices that shows focused
   comments with parent preview/context and an "open thread" style action.
-- [ ] 8.4 Keep `anchorCommentId` as frontend-only route/local state for highlight
+- [x] 8.4 Keep `anchorCommentId` as frontend-only route/local state for highlight
   and scroll behavior; do not send it as backend topology.
-- [ ] 8.5 Ensure discovery pagination appends list rows, while root/children
+- [x] 8.5 Ensure discovery pagination appends list rows, while root/children
   pagination attaches "load more replies" to one parent.
-- [ ] 8.6 Update stories/tests for discovery rows, root comment entry, direct
+- [x] 8.6 Update stories/tests for discovery rows, root comment entry, direct
   child expansion, redacted parent context, and sort switching.
 
 ## 9. Verification
 
-- [ ] 9.1 Run targeted ranking tests for formula/projection changes.
-- [ ] 9.2 Run targeted reaction/job-runner tests for vote bucket routing.
-- [ ] 9.3 Run targeted search/Meili tests for ranking document fields and sort
+- [x] 9.1 Run targeted ranking tests for formula/projection changes.
+- [x] 9.2 Run targeted reaction/job-runner tests for vote bucket routing.
+- [x] 9.3 Run targeted search/Meili tests for ranking document fields and sort
   schemas.
-- [ ] 9.4 Run targeted server comment tests for realm immutability, soft delete,
+- [x] 9.4 Run targeted server comment tests for realm immutability, soft delete,
   slice reads, sort mapping, and ltree removal.
-- [ ] 9.5 Run targeted app tests/stories for fake-tree slice rendering.
-- [ ] 9.6 Run `bun run check:convention` because this changes route-facing
+- [x] 9.5 Run targeted app tests/stories for fake-tree slice rendering.
+- [x] 9.6 Run `bun run check:convention` because this changes route-facing
   contracts and cross-package exports.
 
 ## Out of scope

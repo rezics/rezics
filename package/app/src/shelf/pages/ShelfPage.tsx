@@ -17,16 +17,16 @@ const i18nMessages = {
 import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type {
-  EnrichedShelfUnit,
+  EnrichedShelfItem,
   ShelfSortState,
   ShelfView,
 } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
-  shelfUnitsInfiniteQuery,
+  shelfItemsInfiniteQuery,
   useCleanupOrphansMutation,
   useCollectionStatusHydration,
-  useHydratedShelfUnits,
+  useHydratedShelfItems,
 } from "@rezics/api/shelf";
 import { userQueries } from "@rezics/api/user/user.queries";
 import {
@@ -136,8 +136,8 @@ function isProgressShelfKind(
   return PROGRESS_SHELF_KIND_KEYS.has(kindKey as SystemShelfKindKey);
 }
 
-function shelfUnitToBookshelfItem(
-  enriched: EnrichedShelfUnit,
+function shelfItemToBookshelfItem(
+  enriched: EnrichedShelfItem,
 ): BookshelfItem | null {
   const kind = enriched.unit.kind;
   if (!isLibraryKind(kind)) return null;
@@ -187,7 +187,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const detailQuery = useQuery(shelfDetailQuery(unitId));
   const { data: settings } = useQuery(userQueries.settings());
   const normalizedItemSearchText = itemSearchText.trim();
-  const shelfUnitsQuery = useMemo(
+  const shelfItemsQuery = useMemo(
     () => ({
       limit: 100,
       ...(normalizedItemSearchText
@@ -197,7 +197,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     [normalizedItemSearchText],
   );
   const itemsQuery = useInfiniteQuery(
-    shelfUnitsInfiniteQuery(unitId, shelfUnitsQuery),
+    shelfItemsInfiniteQuery(unitId, shelfItemsQuery),
   );
   const {
     data: itemsData,
@@ -210,7 +210,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
   const shelf = detailQuery.data;
   const units = useMemo(
-    () => itemsData?.pages.flatMap((page) => page.units) ?? [],
+    () => itemsData?.pages.flatMap((page) => page.items) ?? [],
     [itemsData?.pages],
   );
   const relations = useMemo(
@@ -229,7 +229,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     viewModeOverride.unitId === unitId ? viewModeOverride.value : undefined;
   const effectiveViewMode = selectedViewMode ?? savedViewMode ?? "nested";
 
-  const hydration = useHydratedShelfUnits(units);
+  const hydration = useHydratedShelfItems(units);
   const currentUser = useUserProfileStore((s) => s.user);
   const isOwner = !!currentUser && currentUser.unitId === shelf?.userId;
   const canEditShelf = useCanEdit({ resource: "shelf", ownerUnit: shelf });
@@ -328,7 +328,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   );
   const bookshelfItems = useMemo(() => {
     const items = visibleStream.flatMap((entry) => {
-      const item = shelfUnitToBookshelfItem(entry.unit);
+      const item = shelfItemToBookshelfItem(entry.unit);
       return item ? [item] : [];
     });
     return applyReadableFilter(items, readableOnly);
@@ -568,7 +568,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                       onClick={() =>
                         cleanupMutation.mutate({
                           shelfId: unitId,
-                          input: { orphanUnitIds: hydration.orphanUnitIds },
+                          input: { orphanItemIds: hydration.orphanUnitIds },
                         })
                       }
                     >
@@ -669,7 +669,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         )}
 
-        {shelf?.unitId && <ShelfDiscussionSection shelfUnitId={shelf.unitId} />}
+        {shelf?.unitId && <ShelfDiscussionSection shelfItemId={shelf.unitId} />}
       </div>
     </div>
   );

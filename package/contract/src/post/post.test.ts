@@ -118,12 +118,19 @@ describe("post work-domain contract fields", () => {
           unitId: "variant-1",
           title: "Selected Edition",
         },
+        referenceCount: 2,
+        shareCount: 3,
       }),
     ).toBe(true);
     expect(
       Value.Check(postListQuerySchema, {
         targetUnitId: "main-1",
         variantUnitId: "variant-1",
+        cursor: {
+          unitId: "post-1",
+          sortValue: 10,
+          createdAt: "2026-06-05T00:00:00.000Z",
+        },
         limit: 20,
       }),
     ).toBe(true);

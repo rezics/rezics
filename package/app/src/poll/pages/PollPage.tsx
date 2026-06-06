@@ -3,10 +3,9 @@ import { useTranslation } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { ReplyComposer, useFocusReplyFromQuery } from "@/comment";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostListSection } from "@/post";
-import { ReplyComposer } from "@/post/forms/ReplyComposer";
-import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PollView } from "../components/PollView";
 
 /**

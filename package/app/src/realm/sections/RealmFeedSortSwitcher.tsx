@@ -1,18 +1,22 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 
 const i18nMessages = {
+  realm_feed_sort_best: () =>
+    getI18nRuntime().i18n.t("entity:realm_feed_sort_best"),
   realm_feed_sort_new: () =>
     getI18nRuntime().i18n.t("entity:realm_feed_sort_new"),
   realm_feed_sort_top: () =>
     getI18nRuntime().i18n.t("entity:realm_feed_sort_top"),
   realm_feed_sort_hot: () =>
     getI18nRuntime().i18n.t("entity:realm_feed_sort_hot"),
+  realm_feed_sort_rising: () =>
+    getI18nRuntime().i18n.t("entity:realm_feed_sort_rising"),
 } as const;
 
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 
-export type RealmFeedSort = "new" | "top" | "hot";
+export type RealmFeedSort = "best" | "hot" | "new" | "top" | "rising";
 
 export interface RealmFeedSortSwitcherProps {
   value: RealmFeedSort;
@@ -20,9 +24,11 @@ export interface RealmFeedSortSwitcherProps {
 }
 
 const OPTIONS = {
+  best: i18nMessages.realm_feed_sort_best,
+  hot: i18nMessages.realm_feed_sort_hot,
   new: i18nMessages.realm_feed_sort_new,
   top: i18nMessages.realm_feed_sort_top,
-  hot: i18nMessages.realm_feed_sort_hot,
+  rising: i18nMessages.realm_feed_sort_rising,
 } as const satisfies Record<RealmFeedSort, () => string>;
 
 export const RealmFeedSortSwitcher: React.FC<RealmFeedSortSwitcherProps> = ({

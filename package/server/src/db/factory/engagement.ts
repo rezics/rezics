@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { generateBetween } from "../../shelf/fractional-index";
 import {
   Shelf,
-  ShelfUnit,
+  ShelfItem,
   Subscription,
   Unit,
   UnitTranslation,
@@ -96,7 +96,7 @@ async function seedFavorites(
     });
 
     let prevPos: string | undefined;
-    const shelfUnitRows = unique.map((target) => {
+    const shelfItemRows = unique.map((target) => {
       const position = generateBetween(prevPos, undefined);
       prevPos = position;
       return {
@@ -108,14 +108,14 @@ async function seedFavorites(
       };
     });
 
-    if (shelfUnitRows.length > 0) {
+    if (shelfItemRows.length > 0) {
       await ctx.db
-        .insert(ShelfUnit)
-        .values(shelfUnitRows)
+        .insert(ShelfItem)
+        .values(shelfItemRows)
         .onConflictDoNothing();
       await ctx.db
         .update(Shelf)
-        .set({ itemCount: shelfUnitRows.length })
+        .set({ itemCount: shelfItemRows.length })
         .where(eq(Shelf.unitId, shelfId));
     }
   }

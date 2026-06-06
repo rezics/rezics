@@ -8,13 +8,6 @@ type CollectionMetadataPatch = Pick<
 >;
 
 type CollectionMetadataTx = {
-  userUnitCollection: {
-    upsert(input: {
-      where: { userId_unitId: { userId: string; unitId: string } };
-      create: { userId: string; unitId: string; searchText: string | null };
-      update: { searchText: string | null };
-    }): Promise<unknown>;
-  };
   userTagApplication: {
     deleteMany(input: {
       where: { userId: string; unitId: string };
@@ -32,9 +25,8 @@ type CollectionMetadataTx = {
 };
 
 /**
- * Applies shared per-user/per-unit collection metadata. ShelfUnit remains the
- * only containment source; these rows only enrich Units already selected by a
- * shelf/collection read path.
+ * Applies shared per-user/per-unit tag metadata. ShelfItem remains the only
+ * containment and private note source for collection reads.
  */
 export async function applyUserUnitCollectionMetadata(
   tx: CollectionMetadataTx,
@@ -42,14 +34,6 @@ export async function applyUserUnitCollectionMetadata(
   unitId: string,
   patch: CollectionMetadataPatch,
 ): Promise<void> {
-  if (patch.searchText !== undefined) {
-    await tx.userUnitCollection.upsert({
-      where: { userId_unitId: { userId, unitId } },
-      create: { userId, unitId, searchText: patch.searchText },
-      update: { searchText: patch.searchText },
-    });
-  }
-
   if (patch.tagUnitIds !== undefined) {
     await tx.userTagApplication.deleteMany({
       where: { userId, unitId },
@@ -72,15 +56,15 @@ export async function applyUserUnitCollectionMetadata(
   }
 }
 
-export function enqueueUserUnitCollectionSearchSync(
-  userId: string,
-  unitId: string,
+export function enqueueShelfItemSourceSearchSync(
+  itemType: string,
+  itemId: string,
 ) {
   return serverJobProducer.enqueue(
     createSearchCommand(
-      SEARCH_COMMAND_KINDS.collectionSync,
-      { userId, unitId },
-      { type: "server", service: "user-unit-collection" },
+      SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
+      { itemType, itemId },
+      { type: "server", service: "shelf-item" },
     ),
   );
 }

@@ -8,6 +8,7 @@
  */
 
 import {
+  type QueryClient,
   type QueryKey,
   type UseMutationOptions,
   useMutation,
@@ -22,14 +23,22 @@ import type {
   ReactionDTO,
   ReactionMyResponse,
   ReactionSummaryResponse,
+  ShareCreateInput,
+  ShareCreateResponse,
+  ShareSummaryResponse,
 } from "./reaction.types";
 
 type SummarySnapshot = { key: QueryKey; data: ReactionSummaryResponse };
 type MySnapshot = { key: QueryKey; data: ReactionMyResponse };
+type ShareSummarySnapshot = { key: QueryKey; data: ShareSummaryResponse };
 
 type MutationContext = {
   summarySnapshots: SummarySnapshot[];
   mySnapshots: MySnapshot[];
+};
+
+type ShareMutationContext = {
+  shareSummarySnapshots: ShareSummarySnapshot[];
 };
 
 function isBatchKey(key: QueryKey, prefix: readonly unknown[]): boolean {
@@ -164,6 +173,71 @@ function restoreSnapshots(
   }
 }
 
+function snapshotAffectedShareBatches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  targetId: string,
+): ShareMutationContext {
+  const prefix = [...reactionKeys.shareSummaries(), "batch"] as const;
+  const shareSummarySnapshots: ShareSummarySnapshot[] = [];
+  for (const [key, data] of queryClient.getQueriesData<ShareSummaryResponse>({
+    queryKey: reactionKeys.shareSummaries(),
+  })) {
+    if (!Array.isArray(key) || key.length !== prefix.length + 1) continue;
+    if (key[0] !== prefix[0] || key[1] !== prefix[1] || key[2] !== prefix[2]) {
+      continue;
+    }
+    const tail = key[key.length - 1];
+    if (!Array.isArray(tail) || !tail.includes(targetId)) continue;
+    if (data === undefined) continue;
+    shareSummarySnapshots.push({ key, data });
+  }
+  return { shareSummarySnapshots };
+}
+
+function restoreShareSnapshots(
+  queryClient: ReturnType<typeof useQueryClient>,
+  context: ShareMutationContext | undefined,
+) {
+  if (!context) return;
+  for (const snap of context.shareSummarySnapshots) {
+    queryClient.setQueryData(snap.key, snap.data);
+  }
+}
+
+function reconcileShareCount(
+  data: ShareSummaryResponse,
+  result: ShareCreateResponse,
+): ShareSummaryResponse {
+  return {
+    ...data,
+    summaries: {
+      ...data.summaries,
+      [result.targetId]: { shareCount: result.shareCount },
+    },
+  };
+}
+
+export async function syncShareMutationCache({
+  queryClient,
+  data,
+  context,
+}: {
+  queryClient: QueryClient;
+  data: ShareCreateResponse;
+  context?: ShareMutationContext;
+}) {
+  const snapshots =
+    context?.shareSummarySnapshots ??
+    snapshotAffectedShareBatches(queryClient, data.targetId)
+      .shareSummarySnapshots;
+
+  for (const snap of snapshots) {
+    queryClient.setQueryData(snap.key, reconcileShareCount(snap.data, data));
+  }
+
+  await invalidateForCacheDomain(queryClient, "reaction");
+}
+
 export function useCreateReactionMutation(
   options?: Omit<
     UseMutationOptions<
@@ -290,7 +364,48 @@ export function useDeleteReactionMutation(
   });
 }
 
+export function useRecordShareMutation(
+  options?: Omit<
+    UseMutationOptions<
+      ShareCreateResponse,
+      Error,
+      ShareCreateInput,
+      ShareMutationContext
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ShareCreateResponse,
+    Error,
+    ShareCreateInput,
+    ShareMutationContext
+  >({
+    mutationFn: (input: ShareCreateInput) => reactionApi.share(input),
+    ...options,
+    onMutate: async (variables, mutationCtx) => {
+      const userOnMutate = await options?.onMutate?.(variables, mutationCtx);
+      const context = snapshotAffectedShareBatches(
+        queryClient,
+        variables.targetId,
+      );
+      return userOnMutate ? { ...context, ...userOnMutate } : context;
+    },
+    onError: (error, variables, context, mutationCtx) => {
+      restoreShareSnapshots(queryClient, context);
+      options?.onError?.(error, variables, context, mutationCtx);
+    },
+    onSuccess: (data, variables, context, mutationCtx) => {
+      void syncShareMutationCache({ queryClient, data, context });
+      options?.onSuccess?.(data, variables, context, mutationCtx);
+    },
+  });
+}
+
 export const reactionMutations = {
   useCreate: useCreateReactionMutation,
   useDelete: useDeleteReactionMutation,
+  useShare: useRecordShareMutation,
 };

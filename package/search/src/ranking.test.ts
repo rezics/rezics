@@ -55,7 +55,7 @@ describe("ranking search projections", () => {
     const { getExpectedMeiliIndexSchema } = await import("./schema");
 
     expect(getExpectedMeiliIndexSchema("content").sortableAttributes).toContain(
-      "hotScore",
+      "bestScore",
     );
     expect(
       getExpectedMeiliIndexSchema("content").filterableAttributes,
@@ -64,11 +64,11 @@ describe("ranking search projections", () => {
       getExpectedMeiliIndexSchema("content").filterableAttributes,
     ).toContain("targetUnitId");
     expect(getExpectedMeiliIndexSchema("posts").sortableAttributes).toContain(
-      "hotScore",
+      "risingScore",
     );
     expect(
       getExpectedMeiliIndexSchema("comments").sortableAttributes,
-    ).toContain("hotScore");
+    ).toContain("controversyScore");
   });
 
   test("document builders emit numeric ranking defaults", async () => {
@@ -109,11 +109,17 @@ describe("ranking search projections", () => {
       scoreEntry: null,
     });
 
+    expect(content.bestScore).toBe(0);
     expect(content.hotScore).toBe(0);
+    expect(content.risingScore).toBe(0);
+    expect(content.controversyScore).toBe(0);
     expect(content.rankUpdatedAt).toBeNull();
     expect(content.catalogEntryKind).toBeNull();
     expect(content.targetUnitId).toBeNull();
+    expect(post.bestScore).toBe(0);
     expect(post.hotScore).toBe(0);
+    expect(post.risingScore).toBe(0);
+    expect(post.controversyScore).toBe(0);
     expect(post.rankUpdatedAt).toBeNull();
   });
 
@@ -127,8 +133,11 @@ describe("ranking search projections", () => {
       { patchComments, patchPosts } as never,
       "comment-1",
       {
+        bestScore: 11,
         hotScore: 10,
         topScore: 7,
+        risingScore: 6,
+        controversyScore: 4,
         qualityScore: 5,
         rankUpdatedAt: "2026-01-01T00:00:00.000Z",
       },
@@ -137,8 +146,11 @@ describe("ranking search projections", () => {
     expect(patchComments).toHaveBeenCalledWith([
       {
         id: "comment-1",
+        bestScore: 11,
         hotScore: 10,
         topScore: 7,
+        risingScore: 6,
+        controversyScore: 4,
         qualityScore: 5,
         rankUpdatedAt: "2026-01-01T00:00:00.000Z",
       },

@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  addShelfUnitSchema,
+  addShelfItemSchema,
   collectInputSchema,
   collectionSearchQuerySchema,
   collectionSearchResponseSchema,
   patchUserUnitCollectionSchema,
+  shelfItemsQuerySchema,
   setUserTagApplicationsSchema,
-  shelfUnitsQuerySchema,
   userTagApplicationDTOSchema,
   userUnitCollectionDTOSchema,
 } from "./shelf";
@@ -69,8 +69,9 @@ describe("user collection metadata contracts", () => {
       }),
     ).toBe(true);
     expect(
-      Value.Check(addShelfUnitSchema, {
-        unitId: "book-1",
+      Value.Check(addShelfItemSchema, {
+        itemType: "unit",
+        itemId: "book-1",
         kind: "book",
         tagUnitIds: [],
         searchText: null,
@@ -80,7 +81,7 @@ describe("user collection metadata contracts", () => {
 
   test("shelf and collection search accept query text plus user tag filters", () => {
     expect(
-      Value.Check(shelfUnitsQuerySchema, {
+      Value.Check(shelfItemsQuerySchema, {
         q: "alias",
         tagUnitIds: ["tag-1"],
         limit: 20,

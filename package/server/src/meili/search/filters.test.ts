@@ -5,6 +5,7 @@ import {
   buildContentFilter,
   buildPostFilter,
   buildRealmFilter,
+  buildShelfItemFilter,
   buildUserFilter,
 } from "./filters";
 
@@ -214,5 +215,60 @@ describe("buildRealmFilter", () => {
 describe("buildUserFilter", () => {
   test("emits no filter for global scope", () => {
     expect(buildUserFilter(emptyQuery, { kind: "global" })).toEqual([]);
+  });
+});
+
+describe("buildShelfItemFilter", () => {
+  test("anonymous global search is public shelves only", () => {
+    expect(buildShelfItemFilter(emptyQuery, { kind: "global" })).toEqual([
+      '(shelfVisibility = "PUBLIC" AND shelfStatus = "PUBLISHED")',
+    ]);
+  });
+
+  test("owner user scope includes private shelves", () => {
+    expect(
+      buildShelfItemFilter(
+        emptyQuery,
+        { kind: "user", userId: "owner-1" },
+        { viewerUserId: "owner-1" },
+      ),
+    ).toEqual(['shelfOwnerUserId = "owner-1"']);
+  });
+
+  test("book scope constrains item identity", () => {
+    const filter = buildShelfItemFilter(emptyQuery, {
+      kind: "book",
+      unitId: "book-1",
+    });
+
+    expect(filter).toContain('itemType = "unit"');
+    expect(filter).toContain('itemId = "book-1"');
+  });
+
+  test("saved scope constrains to the user's saved shelf items", () => {
+    const filter = buildShelfItemFilter(
+      emptyQuery,
+      { kind: "saved", shelfId: "saved-shelf-1", userId: "user-1" },
+      { viewerUserId: "user-1" },
+    );
+
+    expect(filter).toEqual([
+      'shelfId = "saved-shelf-1"',
+      'shelfOwnerUserId = "user-1"',
+      'itemType = "unit"',
+      'kind = "shelf"',
+    ]);
+  });
+
+  test("public saved scope cannot search a private saved shelf", () => {
+    const filter = buildShelfItemFilter(emptyQuery, {
+      kind: "saved",
+      shelfId: "saved-shelf-1",
+      userId: "user-1",
+    });
+
+    expect(filter).toContain(
+      '(shelfVisibility = "PUBLIC" AND shelfStatus = "PUBLISHED")',
+    );
   });
 });

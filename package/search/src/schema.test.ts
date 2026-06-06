@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { getExpectedMeiliIndexSchema } from "./schema";
+import {
+  buildShelfItemDocument,
+  shelfItemDocumentId,
+  SHELF_ITEM_INDEX_NAME,
+} from "./shelf-item";
 
 describe("expected Meilisearch index settings", () => {
   test("content index exposes catalog and media filter fields", () => {
@@ -50,15 +55,31 @@ describe("expected Meilisearch index settings", () => {
     );
   });
 
-  test("collection index stores only collection-side metadata", () => {
-    const collection = getExpectedMeiliIndexSchema("user_unit_collections");
+  test("shelf item index supports grouped shelf search", () => {
+    const shelfItems = getExpectedMeiliIndexSchema(SHELF_ITEM_INDEX_NAME);
 
-    expect(collection.searchableAttributes).toEqual(["searchText"]);
-    expect(collection.filterableAttributes).toEqual(
-      expect.arrayContaining(["ownerUserId", "unitId"]),
+    expect(shelfItems.searchableAttributes).toEqual(
+      expect.arrayContaining([
+        "itemTitle",
+        "itemSummary",
+        "itemText",
+        "searchText",
+        "shelfTitle",
+      ]),
     );
-    expect(collection.filterableAttributes).not.toContain("titles");
-    expect(collection.filterableAttributes).not.toContain("tagUnitIds");
+    expect(shelfItems.filterableAttributes).toEqual(
+      expect.arrayContaining([
+        "shelfId",
+        "shelfOwnerUserId",
+        "shelfVisibility",
+        "itemType",
+        "rootItemId",
+        "parentRole",
+      ]),
+    );
+    expect(shelfItems.sortableAttributes).toEqual(
+      expect.arrayContaining(["position", "createdAt", "updatedAt"]),
+    );
   });
 
   test("feedback index exposes polymorphic target filters", () => {
@@ -82,5 +103,89 @@ describe("expected Meilisearch index settings", () => {
     expect(polls.sortableAttributes).toEqual(
       expect.arrayContaining(["usageCount", "createdAt", "updatedAt"]),
     );
+  });
+});
+
+describe("shelf item search documents", () => {
+  test("use stable shelf-scoped ids and normalized timestamps", () => {
+    expect(
+      shelfItemDocumentId({
+        shelfId: "shelf-1",
+        itemType: "unit",
+        itemId: "unit-1",
+      }),
+    ).toBe("shelf-1:unit:unit-1");
+
+    expect(
+      buildShelfItemDocument({
+        shelfId: "shelf-1",
+        shelfOwnerUserId: "user-1",
+        shelfVisibility: "public",
+        shelfStatus: "active",
+        itemType: "unit",
+        itemId: "unit-1",
+        searchText: "note",
+        createdAt: new Date("2026-06-05T00:00:00Z"),
+        updatedAt: new Date("2026-06-05T00:00:01Z"),
+      }),
+    ).toMatchObject({
+      id: "shelf-1:unit:unit-1",
+      kind: "root",
+      rootItemType: "unit",
+      rootItemId: "unit-1",
+      createdAt: 1_780_617_600,
+      position: "",
+      updatedAt: 1_780_617_601,
+    });
+  });
+
+  test("preserves comment context fields for comment-backed shelf items", () => {
+    expect(
+      buildShelfItemDocument({
+        shelfId: "shelf-1",
+        shelfOwnerUserId: "user-1",
+        shelfVisibility: "PUBLIC",
+        shelfStatus: "PUBLISHED",
+        shelfTitle: "Comment saves",
+        itemType: "comment",
+        itemId: "comment-1",
+        kind: "comment",
+        rootItemType: "unit",
+        rootItemId: "book-1",
+        parentItemType: "unit",
+        parentItemId: "book-1",
+        parentRole: "comment",
+        itemText: "Saved reply body",
+        rootUnitId: "book-1",
+        realmUnitId: "realm-1",
+        parentCommentId: "comment-parent",
+        authorUserId: "author-1",
+        authorName: "Reviewer",
+        moderationStatus: "APPROVED",
+        isLocked: false,
+        deletedAt: null,
+        createdAt: "2026-06-05T00:00:00.000Z",
+        updatedAt: "2026-06-05T00:00:01.000Z",
+      }),
+    ).toMatchObject({
+      id: "shelf-1:comment:comment-1",
+      itemType: "comment",
+      itemId: "comment-1",
+      kind: "comment",
+      rootItemType: "unit",
+      rootItemId: "book-1",
+      parentItemType: "unit",
+      parentItemId: "book-1",
+      parentRole: "comment",
+      itemText: "Saved reply body",
+      rootUnitId: "book-1",
+      realmUnitId: "realm-1",
+      parentCommentId: "comment-parent",
+      authorUserId: "author-1",
+      authorName: "Reviewer",
+      moderationStatus: "APPROVED",
+      isLocked: false,
+      deletedAt: null,
+    });
   });
 });

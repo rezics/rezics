@@ -15,9 +15,8 @@ mock.module("../search-client", () => ({
   },
 }));
 
-const { buildCommentSearchFilter, searchComments } = await import(
-  "./comment.service"
-);
+const { buildCommentSearchFilter, commentSliceSort, searchComments } =
+  await import("./comment.service");
 
 describe("searchComments", () => {
   test("builds root and realm partition filters", async () => {
@@ -45,19 +44,44 @@ describe("searchComments", () => {
     });
   });
 
-  test("filter builder supports author, depth, lock, and state", () => {
+  test("filter builder supports author, depth, lock, state, and moderation", () => {
     expect(
       buildCommentSearchFilter({
         authorUserId: "user-1",
         depth: 2,
         isLocked: false,
         state: "open",
+        moderationStatus: "APPROVED",
       }),
     ).toEqual([
       'authorUserId = "user-1"',
       "depth = 2",
       "isLocked = false",
       'state = "open"',
+      'moderationStatus = "APPROVED"',
     ]);
+  });
+
+  test("filter builder preserves null partition semantics", () => {
+    expect(
+      buildCommentSearchFilter({
+        rootUnitId: "post-1",
+        realmUnitId: null,
+        parentCommentId: null,
+      }),
+    ).toEqual([
+      'rootUnitId = "post-1"',
+      "realmUnitId IS NULL",
+      "parentCommentId IS NULL",
+    ]);
+  });
+
+  test("maps comment slice sorts to serving document fields", () => {
+    expect(commentSliceSort("best")).toBe("bestScore:desc");
+    expect(commentSliceSort("top")).toBe("topScore:desc");
+    expect(commentSliceSort("rising")).toBe("risingScore:desc");
+    expect(commentSliceSort("controversial")).toBe("controversyScore:desc");
+    expect(commentSliceSort("new")).toBe("createdAt:desc");
+    expect(commentSliceSort("old")).toBe("createdAt:asc");
   });
 });

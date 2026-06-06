@@ -27,6 +27,7 @@ describe("commentApi", () => {
     await commentApi.list({
       rootUnitId: "post-1",
       realmUnitId: "realm-1",
+      mode: "discovery",
       limit: 20,
     });
     await commentApi.create({

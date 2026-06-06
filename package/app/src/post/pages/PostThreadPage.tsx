@@ -8,12 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { Pencil } from "lucide-react";
 import type React from "react";
+import {
+  CommentThreadSection,
+  ReplyComposer,
+  useFocusReplyFromQuery,
+} from "@/comment";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { PostCard } from "../components/item/PostCard";
-import { ReplyComposer } from "../forms/ReplyComposer";
-import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { resolvePostThreadContext } from "../models/postThreadContext";
-import { PostTreeSection } from "../sections/PostTreeSection";
 
 export type PostThreadPageProps = {
   realmUnitId?: string | null;
@@ -95,7 +97,7 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
           parentCommentId={root.unitId}
         />
       )}
-      <PostTreeSection
+      <CommentThreadSection
         rootUnitId={rootPostUnitId}
         realmUnitId={contextRealmUnitId}
         rootAuthorUserId={root?.author?.unitId ?? root?.authorUserId}

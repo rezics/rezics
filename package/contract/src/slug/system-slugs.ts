@@ -12,6 +12,7 @@
  */
 export const SYSTEM_SHELF_SLUGS = [
   "favorites",
+  "saved",
   "backlog",
   "active",
   "completed",

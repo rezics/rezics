@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import type { EnrichedShelfUnit } from "@rezics/api/shelf";
+import type { EnrichedShelfItem } from "@rezics/api/shelf";
 import type {
   BookDTO,
   PostDTO,
-  ShelfUnitDTO,
-  ShelfUnitRelationDTO,
+  ShelfItemDTO,
+  ShelfItemChildDTO,
 } from "@rezics/contract";
 import { deriveShelfStream, type ShelfStreamEntry } from "./shelfStream";
 
@@ -15,7 +15,7 @@ const addedAtDesc = { field: "addedAt", order: "desc" } as const;
 const titleAsc = { field: "title", order: "asc" } as const;
 const titleDesc = { field: "title", order: "desc" } as const;
 
-function makeUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
+function makeUnit(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
   return {
     shelfId: "s1",
     unitId: "u-1",
@@ -51,11 +51,11 @@ interface RootSpec {
 }
 
 function buildScene(roots: RootSpec[]): {
-  units: EnrichedShelfUnit[];
-  relations: ShelfUnitRelationDTO[];
+  units: EnrichedShelfItem[];
+  relations: ShelfItemChildDTO[];
 } {
-  const units: EnrichedShelfUnit[] = [];
-  const relations: ShelfUnitRelationDTO[] = [];
+  const units: EnrichedShelfItem[] = [];
+  const relations: ShelfItemChildDTO[] = [];
 
   for (const root of roots) {
     units.push({
@@ -184,7 +184,7 @@ describe("deriveShelfStream — nested mode", () => {
   });
 
   test("two-step cycle (A ↔ B as each other's children) renders no roots", () => {
-    const units: EnrichedShelfUnit[] = [
+    const units: EnrichedShelfItem[] = [
       {
         unit: makeUnit({ unitId: "book-a", kind: "book", position: "a" }),
         data: makeBook("book-a", "Apple"),
@@ -194,7 +194,7 @@ describe("deriveShelfStream — nested mode", () => {
         data: makeBook("book-b", "Banana"),
       },
     ];
-    const relations: ShelfUnitRelationDTO[] = [
+    const relations: ShelfItemChildDTO[] = [
       {
         shelfId: "s1",
         parentUnitId: "book-a",
@@ -332,8 +332,8 @@ describe("deriveShelfStream — flat emission", () => {
 
 describe("deriveShelfStream — sort scope and invariants", () => {
   function defaultScene(): {
-    units: EnrichedShelfUnit[];
-    relations: ShelfUnitRelationDTO[];
+    units: EnrichedShelfItem[];
+    relations: ShelfItemChildDTO[];
   } {
     return buildScene([
       {
@@ -438,7 +438,7 @@ describe("deriveShelfStream — sort scope and invariants", () => {
     ]);
   });
 
-  test("addedAt ascending and descending use shelf unit creation time", () => {
+  test("addedAt ascending and descending use shelf item creation time", () => {
     const { units, relations } = buildScene([
       {
         unitId: "book-a",

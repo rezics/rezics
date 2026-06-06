@@ -28,9 +28,9 @@ export const ShelvesSection: React.FC<ShelvesSectionProps> = ({
       {(shelves) => (
         <ul className="flex flex-col gap-2">
           {shelves.map((shelf) => {
-            const href: string = `/shelf/${shelf.shelfUnitId}`;
+            const href: string = `/shelf/${shelf.shelfId}`;
             return (
-              <li key={shelf.shelfUnitId}>
+              <li key={shelf.shelfId}>
                 <Link
                   to={href}
                   className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-surface-sunken"

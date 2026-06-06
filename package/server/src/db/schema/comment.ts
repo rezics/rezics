@@ -16,7 +16,6 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
-import { ltree } from "./custom-types";
 import { User } from "./identity";
 import { ModerationStatus } from "./moderation";
 import { PinKind } from "./post";
@@ -42,7 +41,6 @@ export const Comment = pgTable(
       }),
     content: jsonData(),
     depth: integer().default(1).notNull(),
-    path: ltree(),
     replyCount: integer().default(0).notNull(),
     directReplyCount: integer().default(0).notNull(),
     lastReplyAt: nullableTimestamp(),
@@ -79,7 +77,6 @@ export const Comment = pgTable(
       table.parentCommentId.asc().nullsLast(),
       table.createdAt.asc().nullsLast(),
     ),
-    index("Comment_path_gist_idx").using("gist", table.path.asc().nullsLast()),
     index("Comment_rootUnitId_realmUnitId_createdAt_idx").using(
       "btree",
       table.rootUnitId.asc().nullsLast(),
@@ -92,6 +89,7 @@ export const Comment = pgTable(
       table.realmUnitId.asc().nullsLast(),
       table.parentCommentId.asc().nullsLast(),
       table.createdAt.asc().nullsLast(),
+      table.id.asc().nullsLast(),
     ),
     index("Comment_state_idx").using("btree", table.state.asc().nullsLast()),
   ],

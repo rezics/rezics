@@ -71,6 +71,28 @@ export const reactionTargetUsages = p.pgTable(
   ],
 );
 
+export const unitShares = p.pgTable(
+  "UnitShare",
+  {
+    id: p.uuid("id").primaryKey().default(sql`uuidv7()`),
+    userId: p.uuid("userId").notNull(),
+    targetId: p.uuid("targetId").notNull(),
+    createdAt: p.timestamp("createdAt").notNull().defaultNow(),
+  },
+  (table) => [
+    p
+      .uniqueIndex("UnitShare_userId_targetId_key")
+      .on(table.userId, table.targetId),
+    p.index("UnitShare_targetId_idx").on(table.targetId),
+    p.index("UnitShare_userId_createdAt_idx").on(table.userId, table.createdAt),
+  ],
+);
+
+export const unitShareSummaries = p.pgTable("UnitShareSummary", {
+  targetId: p.uuid("targetId").primaryKey(),
+  shareCount: p.integer("shareCount").notNull().default(0),
+});
+
 export type ReactionRow = typeof reactions.$inferSelect;
 export type NewReactionRow = typeof reactions.$inferInsert;
 export type ReactionSummaryRow = typeof reactionSummaries.$inferSelect;
@@ -78,3 +100,7 @@ export type NewReactionSummaryRow = typeof reactionSummaries.$inferInsert;
 export type ReactionTargetUsageRow = typeof reactionTargetUsages.$inferSelect;
 export type NewReactionTargetUsageRow =
   typeof reactionTargetUsages.$inferInsert;
+export type UnitShareRow = typeof unitShares.$inferSelect;
+export type NewUnitShareRow = typeof unitShares.$inferInsert;
+export type UnitShareSummaryRow = typeof unitShareSummaries.$inferSelect;
+export type NewUnitShareSummaryRow = typeof unitShareSummaries.$inferInsert;

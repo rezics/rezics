@@ -1,6 +1,7 @@
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
+import { FeedSection } from "@/feed";
 import { HomeSearch } from "@/search";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { BookCarousel } from "../components/HomeCarousel";
@@ -9,7 +10,6 @@ import { AnnouncementBarSection } from "../sections/AnnouncementBarSection";
 import { HomeContinuationSection } from "../sections/HomeContinuationSection";
 import { LibraryCardsSection } from "../sections/LibraryCardsSection";
 import { NewBookSection } from "../sections/NewBookSection";
-import { TrendingReviews } from "../sections/TrendingReviewsSection";
 import { TrendingShelfSection } from "../sections/TrendingShelfSection";
 
 export type HomeProps = object;
@@ -42,11 +42,11 @@ export const Home: React.FC<HomeProps> = () => {
       </section>
 
       <HomeContinuationSection />
+      <FeedSection query={{ scope: "home", sort: "best", limit: 12 }} />
       <LibraryCardsSection />
       <ActiveRealmsSection />
       <AnnouncementBarSection />
       <TrendingShelfSection />
-      <TrendingReviews />
       <NewBookSection limit={12} />
     </MainContentContainer>
   );

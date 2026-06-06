@@ -5,28 +5,29 @@ import type {
   ShelfDTO,
   ShelfListResponse,
   ShelfSummaryDTO,
-  ShelfUnitBatchResponse,
-  ShelfUnitDTO,
-  ShelfUnitRelationDTO,
-  ShelfUnitsResponse,
+  ShelfItemBatchResponse,
+  ShelfItemDTO,
+  ShelfItemChildDTO,
+  ShelfItemsResponse,
 } from "@rezics/contract";
 import {
-  addShelfUnitSchema,
+  addShelfItemSchema,
   attachReviewSchema,
   cleanupShelfOrphansSchema,
   createShelfSchema,
   ensureSystemShelfBodySchema,
   hasPermissionToDeleteShelf,
   hasPermissionToUpdateShelf,
-  reorderShelfUnitSchema,
+  reorderShelfItemSchema,
   setPinnedTagsBodySchema,
-  setShelfUnitChildrenSchema,
+  setShelfItemChildrenSchema,
   shelfBySlugParamsSchema,
   shelfListBodySchema,
   shelfListQuerySchema,
   shelfParamsSchema,
-  shelfUnitBatchRequestSchema,
-  shelfUnitsQuerySchema,
+  shelfItemBatchRequestSchema,
+  shelfItemsQuerySchema,
+  shelfItemTypeSchema,
   updateShelfSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -37,20 +38,23 @@ import { AppError } from "@/utils/errors";
 import { shelfService } from "./shelf.service";
 import { ensureSystemShelf } from "./system-shelves";
 
-const shelfUnitRouteParamsSchema = t.Object({
+const shelfItemRouteParamsSchema = t.Object({
   unitId: t.String(),
-  shelfUnitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
 });
 
 const reviewDetachParamsSchema = t.Object({
   unitId: t.String(),
-  shelfUnitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
   reviewUnitId: t.String(),
 });
 
 const childrenRouteParamsSchema = t.Object({
   unitId: t.String(),
-  shelfUnitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
 });
 
 export const shelfApi = new Elysia({ prefix: "/shelf" })
@@ -321,32 +325,32 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       },
     },
   )
-  // --- Shelf unit routes ---
+  // --- Shelf item routes ---
   .get(
-    "/:unitId/units",
-    async ({ headers, params, query }): Promise<ShelfUnitsResponse> => {
+    "/:unitId/items",
+    async ({ headers, params, query }): Promise<ShelfItemsResponse> => {
       const identity = await tryResolveIdentity(
         headers["authorization"],
         headers["cookie"],
       );
-      return shelfService.getShelfUnits(params.unitId, query, {
+      return shelfService.getShelfItems(params.unitId, query, {
         viewerUserId: identity?.userId,
       });
     },
     {
       params: shelfParamsSchema,
-      query: shelfUnitsQuerySchema,
+      query: shelfItemsQuerySchema,
       detail: {
-        summary: "List shelf units",
+        summary: "List shelf items",
         description:
-          "List ShelfUnit rows in a shelf in position order with cursor pagination; includes relevant ShelfUnitRelation rows.",
+          "List ShelfItem rows in a shelf in position order with cursor pagination; includes relevant ShelfItemChild rows.",
         tags: ["Shelves"],
       },
     },
   )
   .post(
-    "/:unitId/units",
-    async ({ params, body, identity, set }): Promise<ShelfUnitDTO> => {
+    "/:unitId/items",
+    async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateShelf(
@@ -360,22 +364,22 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      return shelfService.addUnit(params.unitId, body, identity.userId);
+      return shelfService.addItem(params.unitId, body, identity.userId);
     },
     {
       requireLogin: true,
       params: shelfParamsSchema,
-      body: addShelfUnitSchema,
+      body: addShelfItemSchema,
       detail: {
-        summary: "Add unit to shelf",
-        description: "Create a ShelfUnit row in the shelf",
+        summary: "Add item to shelf",
+        description: "Create a ShelfItem row in the shelf",
         tags: ["Shelves"],
       },
     },
   )
   .patch(
-    "/:unitId/units/:shelfUnitId/position",
-    async ({ params, body, identity, set }): Promise<ShelfUnitDTO> => {
+    "/:unitId/items/:itemType/:itemId/position",
+    async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateShelf(
@@ -389,22 +393,27 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      return shelfService.reorderUnit(params.unitId, params.shelfUnitId, body);
+      return shelfService.reorderItem(
+        params.unitId,
+        params.itemId,
+        body,
+        params.itemType,
+      );
     },
     {
       requireLogin: true,
-      params: shelfUnitRouteParamsSchema,
-      body: reorderShelfUnitSchema,
+      params: shelfItemRouteParamsSchema,
+      body: reorderShelfItemSchema,
       detail: {
-        summary: "Reorder shelf unit",
+        summary: "Reorder shelf item",
         description:
-          "Move a shelf unit between neighbor unit ids; server computes a fractional-index position",
+          "Move a shelf item between neighbor unit ids; server computes a fractional-index position",
         tags: ["Shelves"],
       },
     },
   )
   .delete(
-    "/:unitId/units/:shelfUnitId",
+    "/:unitId/items/:itemType/:itemId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -419,22 +428,26 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      await shelfService.removeUnit(params.unitId, params.shelfUnitId);
-      return { message: "Unit removed from shelf" };
+      await shelfService.removeItem(
+        params.unitId,
+        params.itemId,
+        params.itemType,
+      );
+      return { message: "Item removed from shelf" };
     },
     {
       requireLogin: true,
-      params: shelfUnitRouteParamsSchema,
+      params: shelfItemRouteParamsSchema,
       detail: {
-        summary: "Remove unit from shelf",
-        description: "Delete a ShelfUnit row from a shelf",
+        summary: "Remove item from shelf",
+        description: "Delete a ShelfItem row from a shelf",
         tags: ["Shelves"],
       },
     },
   )
   .post(
-    "/:unitId/units/:shelfUnitId/reviews",
-    async ({ params, body, identity, set }): Promise<ShelfUnitRelationDTO> => {
+    "/:unitId/items/:itemType/:itemId/reviews",
+    async ({ params, body, identity, set }): Promise<ShelfItemChildDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateShelf(
@@ -450,7 +463,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       }
       return shelfService.attachReview(
         params.unitId,
-        params.shelfUnitId,
+        params.itemId,
         body.reviewUnitId,
       );
     },
@@ -459,15 +472,15 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       params: childrenRouteParamsSchema,
       body: attachReviewSchema,
       detail: {
-        summary: "Attach review to a shelf unit",
+        summary: "Attach review to a shelf item",
         description:
-          "Create role='review' ShelfUnitRelation; auto-creates the child ShelfUnit if missing.",
+          "Create role='review' ShelfItemChild; auto-creates the child ShelfItem if missing.",
         tags: ["Shelves"],
       },
     },
   )
   .delete(
-    "/:unitId/units/:shelfUnitId/reviews/:reviewUnitId",
+    "/:unitId/items/:itemType/:itemId/reviews/:reviewUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -484,7 +497,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       }
       await shelfService.detachReview(
         params.unitId,
-        params.shelfUnitId,
+        params.itemId,
         params.reviewUnitId,
       );
       return { message: "Review detached" };
@@ -493,14 +506,14 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       requireLogin: true,
       params: reviewDetachParamsSchema,
       detail: {
-        summary: "Detach review from a shelf unit",
-        description: "Delete a role='review' ShelfUnitRelation row.",
+        summary: "Detach review from a shelf item",
+        description: "Delete a role='review' ShelfItemChild row.",
         tags: ["Shelves"],
       },
     },
   )
   .put(
-    "/:unitId/units/:shelfUnitId/children",
+    "/:unitId/items/:itemType/:itemId/children",
     async ({ params, body, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -517,32 +530,32 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       }
       await shelfService.setChildren(
         params.unitId,
-        params.shelfUnitId,
+        params.itemId,
         body.role,
-        body.childUnitIds,
+        body.childItemIds,
       );
       return { message: "Children reconciled" };
     },
     {
       requireLogin: true,
       params: childrenRouteParamsSchema,
-      body: setShelfUnitChildrenSchema,
+      body: setShelfItemChildrenSchema,
       detail: {
         summary: "Reconcile children for a parent role",
         description:
-          "Replace the set of ShelfUnitRelation rows for (parent, role) to exactly the supplied child unit ids; auto-creates missing child ShelfUnit rows.",
+          "Replace the set of ShelfItemChild rows for (parent, role) to exactly the supplied child unit ids; auto-creates missing child ShelfItem rows.",
         tags: ["Shelves"],
       },
     },
   )
   .patch(
-    "/:unitId/units/batch",
+    "/:unitId/items/batch",
     async ({
       params,
       body,
       identity,
       set,
-    }): Promise<ShelfUnitBatchResponse> => {
+    }): Promise<ShelfItemBatchResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateShelf(
@@ -562,9 +575,9 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     {
       requireLogin: true,
       params: shelfParamsSchema,
-      body: shelfUnitBatchRequestSchema,
+      body: shelfItemBatchRequestSchema,
       detail: {
-        summary: "Apply a batch of shelf unit ops",
+        summary: "Apply a batch of shelf item ops",
         description:
           "Apply an ordered op log of add/reorder/reorderToPage/delete/attach/detach/setChildren ops in a single transaction. Returns per-op results.",
         tags: ["Shelves"],
@@ -587,16 +600,16 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      return shelfService.cleanupOrphans(params.unitId, body.orphanUnitIds);
+      return shelfService.cleanupOrphans(params.unitId, body.orphanItemIds);
     },
     {
       requireLogin: true,
       params: shelfParamsSchema,
       body: cleanupShelfOrphansSchema,
       detail: {
-        summary: "Cleanup orphan shelf units",
+        summary: "Cleanup orphan shelf items",
         description:
-          "Delete ShelfUnit rows whose target units no longer exist (author-driven)",
+          "Delete ShelfItem rows whose target units no longer exist (author-driven)",
         tags: ["Shelves"],
       },
     },

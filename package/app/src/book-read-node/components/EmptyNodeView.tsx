@@ -5,7 +5,8 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useState } from "react";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
-import { PostListSection, ReplyComposer } from "@/post";
+import { ReplyComposer } from "@/comment";
+import { PostListSection } from "@/post";
 
 type EmptyNodeViewProps = {
   bookUnitId: string;

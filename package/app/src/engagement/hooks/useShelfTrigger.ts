@@ -1,4 +1,5 @@
 import type React from "react";
+import type { ShelfItemKind, ShelfItemType } from "@rezics/api/shelf";
 import { useCollectionModal } from "@/collection/hooks/useCollectionModal";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
@@ -6,6 +7,8 @@ import { useAuth } from "@/user/pages/useAuth";
 export type UseShelfTriggerArgs = {
   targetUnitId: string;
   variantUnitId?: string;
+  targetItemType?: ShelfItemType;
+  targetKind?: ShelfItemKind;
 };
 
 export type UseShelfTriggerReturn = {
@@ -18,9 +21,15 @@ export type UseShelfTriggerReturn = {
 export function useShelfTrigger({
   targetUnitId,
   variantUnitId,
+  targetItemType,
+  targetKind,
 }: UseShelfTriggerArgs): UseShelfTriggerReturn {
   const { isAuthenticated } = useAuth();
-  const collection = useCollectionModal(targetUnitId, { variantUnitId });
+  const collection = useCollectionModal(targetUnitId, {
+    variantUnitId,
+    targetItemType,
+    targetKind,
+  });
   const auth = useAuthModal("login");
 
   const handleClick = (event: React.MouseEvent) => {

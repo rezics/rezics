@@ -82,6 +82,9 @@ export type NewPostRow = typeof schema.Post.$inferInsert;
 export type PostPollReferenceRow = typeof schema.PostPollReference.$inferSelect;
 export type NewPostPollReferenceRow =
   typeof schema.PostPollReference.$inferInsert;
+export type PostUnitReferenceRow = typeof schema.PostUnitReference.$inferSelect;
+export type NewPostUnitReferenceRow =
+  typeof schema.PostUnitReference.$inferInsert;
 export type RealmRow = typeof schema.Realm.$inferSelect;
 export type NewRealmRow = typeof schema.Realm.$inferInsert;
 export type RealmCapabilityGrantRow =
@@ -118,11 +121,8 @@ export type NewSeriesContentIndexRow =
   typeof schema.SeriesContentIndex.$inferInsert;
 export type ShelfRow = typeof schema.Shelf.$inferSelect;
 export type NewShelfRow = typeof schema.Shelf.$inferInsert;
-export type ShelfUnitRow = typeof schema.ShelfUnit.$inferSelect;
-export type NewShelfUnitRow = typeof schema.ShelfUnit.$inferInsert;
-export type ShelfUnitRelationRow = typeof schema.ShelfUnitRelation.$inferSelect;
-export type NewShelfUnitRelationRow =
-  typeof schema.ShelfUnitRelation.$inferInsert;
+export type ShelfItemRow = typeof schema.ShelfItem.$inferSelect;
+export type NewShelfItemRow = typeof schema.ShelfItem.$inferInsert;
 export type SlugScopeRow = typeof schema.SlugScope.$inferSelect;
 export type NewSlugScopeRow = typeof schema.SlugScope.$inferInsert;
 export type SourceSiteRow = typeof schema.SourceSite.$inferSelect;
@@ -177,10 +177,6 @@ export type UserTagApplicationRow =
   typeof schema.UserTagApplication.$inferSelect;
 export type NewUserTagApplicationRow =
   typeof schema.UserTagApplication.$inferInsert;
-export type UserUnitCollectionRow =
-  typeof schema.UserUnitCollection.$inferSelect;
-export type NewUserUnitCollectionRow =
-  typeof schema.UserUnitCollection.$inferInsert;
 export type UserUnitProgressRow = typeof schema.UserUnitProgress.$inferSelect;
 export type NewUserUnitProgressRow =
   typeof schema.UserUnitProgress.$inferInsert;

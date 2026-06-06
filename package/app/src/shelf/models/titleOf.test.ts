@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import type { ShelfUnitDTO } from "@rezics/contract";
+import type { ShelfItemDTO } from "@rezics/contract";
 import { titleOf } from "./titleOf";
 
-function makeUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
+function makeUnit(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
   return {
     shelfId: "s1",
     unitId: "ref-1",

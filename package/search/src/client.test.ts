@@ -1,12 +1,12 @@
 import { describe, expect, mock, test } from "bun:test";
 import { SearchClient } from "./client";
-import { COLLECTION_INDEX_NAME } from "./collection";
 import { PROGRESS_INDEX_NAME } from "./progress";
 import {
   EXPECTED_MEILI_INDEX_SCHEMAS,
   type ExpectedMeiliIndexUid,
   getExpectedMeiliIndexSettings,
 } from "./schema";
+import { SHELF_ITEM_INDEX_NAME } from "./shelf-item";
 
 describe("SearchClient", () => {
   test("waits longer than the MeiliSearch client default for init tasks", async () => {
@@ -71,7 +71,7 @@ describe("SearchClient", () => {
     ["posts", "postIndex", "initPostIndex"],
     ["comments", "commentIndex", "initCommentIndex"],
     ["polls", "pollIndex", "initPollIndex"],
-    [COLLECTION_INDEX_NAME, "collectionIndex", "initCollectionIndex"],
+    [SHELF_ITEM_INDEX_NAME, "shelfItemIndex", "initShelfItemIndex"],
     ["realms", "realmIndex", "initRealmIndex"],
     ["entities", "entityIndex", "initEntityIndex"],
     [PROGRESS_INDEX_NAME, "progressIndex", "initProgressIndex"],
@@ -116,7 +116,7 @@ describe("SearchClient", () => {
       "posts",
       "comments",
       "polls",
-      "user_unit_collections",
+      "shelf_items",
       "realms",
       "entities",
       "user_unit_progress",

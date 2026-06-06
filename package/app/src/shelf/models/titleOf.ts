@@ -1,11 +1,11 @@
-import type { BookDTO, PostDTO, ShelfUnitDTO } from "@rezics/contract";
+import type { BookDTO, PostDTO, ShelfItemDTO } from "@rezics/contract";
 
 interface TagLike {
   translations?: { language?: string; title?: string | null }[];
   label?: string;
 }
 
-export function titleOf(unit: ShelfUnitDTO, cached: unknown): string {
+export function titleOf(unit: ShelfItemDTO, cached: unknown): string {
   switch (unit.kind) {
     case "book": {
       const book = cached as BookDTO | undefined;

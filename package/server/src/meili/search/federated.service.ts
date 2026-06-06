@@ -8,6 +8,8 @@ import type {
   RealmSearchDocument,
   SearchCategory,
   SearchScope,
+  ShelfItemSearchDocument,
+  ShelfItemShelfGroup,
   UserSearchDocument,
 } from "@rezics/contract";
 import type { SearchClient } from "@rezics/search";
@@ -22,6 +24,7 @@ import {
   buildContentFilter,
   buildPostFilter,
   buildRealmFilter,
+  buildShelfItemFilter,
   buildUserFilter,
 } from "./filters";
 import {
@@ -100,6 +103,16 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         users: false,
         entities: true,
       };
+    case "saved":
+      return {
+        contentBooks: false,
+        contentShelves: true,
+        posts: false,
+        comments: false,
+        realms: false,
+        users: false,
+        entities: false,
+      };
   }
 }
 
@@ -128,8 +141,24 @@ interface BuiltQuery {
   weightKey?: keyof typeof federationWeights;
 }
 
+const SHELF_ITEM_PUBLIC_ATTRIBUTES = [
+  "itemTitle",
+  "itemSummary",
+  "itemText",
+  "shelfTitle",
+] as const;
+
+const SHELF_ITEM_OWNER_ATTRIBUTES = [
+  ...SHELF_ITEM_PUBLIC_ATTRIBUTES,
+  "searchText",
+] as const;
+
 function joinFilter(filters: string[]): string | undefined {
   return filters.length > 0 ? filters.join(" AND ") : undefined;
+}
+
+function idFilter(ids: string[]): string {
+  return `id IN [${ids.map((id) => `"${id}"`).join(", ")}]`;
 }
 
 export async function federatedSearch(
@@ -194,20 +223,17 @@ async function federatedSingle(
     }
     case "shelves": {
       if (!permitted.contentShelves) break;
-      const filter = buildContentFilter(query, scope, ctx, {
-        contentSubtype: "shelves",
-        categoryHint: category,
-      });
-      const resp = await client.contentIndex.search<ContentSearchDocument>(q, {
-        filter: joinFilter(filter),
+      const section = await searchShelfSection(client, {
+        query,
+        scope,
+        ctx,
+        q,
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits.map((hit) =>
-        resolveContentHitDisplay(hit, query as any),
-      );
-      totalHits = resp.estimatedTotalHits ?? resp.hits.length;
-      processingTimeMs = resp.processingTimeMs;
+      items = section.items;
+      totalHits = section.totalHits;
+      processingTimeMs = section.processingTimeMs;
       break;
     }
     case "reviews":
@@ -371,8 +397,20 @@ async function federatedGrouped(
   const { scope, query } = opts;
   const limit = DEFAULT_GROUPED_SECTION_LIMIT;
   const built = buildAllSubQueries(query, scope, ctx, "all");
+  const permitted = permittedFor(scope);
   if (built.length === 0) {
-    return { kind: "grouped", scope, sections: {} };
+    const sections: any = {};
+    if (permitted.contentShelves) {
+      sections.shelves = await searchShelfSection(client, {
+        query,
+        scope,
+        ctx,
+        q,
+        offset: 0,
+        limit,
+      });
+    }
+    return { kind: "grouped", scope, sections };
   }
 
   const resp = await client.meili.multiSearch({
@@ -399,7 +437,160 @@ async function federatedGrouped(
     };
   });
 
+  if (permitted.contentShelves) {
+    sections.shelves = await searchShelfSection(client, {
+      query,
+      scope,
+      ctx,
+      q,
+      offset: 0,
+      limit,
+    });
+  }
+
   return { kind: "grouped", scope, sections };
+}
+
+async function searchShelfSection(
+  client: SearchClient,
+  input: {
+    query: FederatedSearchOptions["query"];
+    scope: SearchScope;
+    ctx: FilterContext;
+    q: string;
+    offset: number;
+    limit: number;
+  },
+) {
+  const { query, scope, ctx, q, offset, limit } = input;
+  const isSavedScope = scope.kind === "saved";
+  const hydrateScope: SearchScope = isSavedScope ? { kind: "global" } : scope;
+  const contentFilter = buildContentFilter(query, hydrateScope, ctx, {
+    contentSubtype: "shelves",
+    categoryHint: "shelves",
+  });
+  const directResp = isSavedScope
+    ? {
+        hits: [] as ContentSearchDocument[],
+        estimatedTotalHits: 0,
+        processingTimeMs: 0,
+      }
+    : await client.contentIndex.search<ContentSearchDocument>(q, {
+        filter: joinFilter(contentFilter),
+        offset,
+        limit,
+      });
+  const directItems = directResp.hits.map((hit) =>
+    resolveContentHitDisplay(hit, query as any),
+  ) as Array<
+    ContentSearchDocument & { matchedShelfItemGroup?: ShelfItemShelfGroup }
+  >;
+
+  const groupResp = q
+    ? await searchShelfItemGroups(client, query, scope, ctx, q, offset, limit)
+    : {
+        groups: [] as ShelfItemShelfGroup[],
+        totalGroups: 0,
+        processingTimeMs: 0,
+      };
+  const groupByShelfId = new Map(
+    groupResp.groups.map((group) => [group.shelfId, group]),
+  );
+  for (const item of directItems) {
+    const group = groupByShelfId.get(item.id);
+    if (group) {
+      item.matchedShelfItemGroup = group;
+      groupByShelfId.delete(item.id);
+    }
+  }
+
+  const missingGroupIds = [...groupByShelfId.keys()];
+  const hydratedResp =
+    missingGroupIds.length > 0
+      ? await client.contentIndex.search<ContentSearchDocument>("", {
+          filter: joinFilter([
+            ...buildContentFilter(query, hydrateScope, ctx, {
+              contentSubtype: "shelves",
+              categoryHint: "shelves",
+            }),
+            idFilter(missingGroupIds),
+          ]),
+          limit: missingGroupIds.length,
+        })
+      : null;
+  const hydratedItems = (hydratedResp?.hits ?? []).map((hit) => {
+    const resolved = resolveContentHitDisplay(
+      hit,
+      query as any,
+    ) as ContentSearchDocument & {
+      matchedShelfItemGroup?: ShelfItemShelfGroup;
+    };
+    const group = groupByShelfId.get(resolved.id);
+    if (group) resolved.matchedShelfItemGroup = group;
+    return resolved;
+  });
+
+  const items = [...directItems, ...hydratedItems].slice(0, limit);
+  return {
+    totalHits: Math.max(
+      directResp.estimatedTotalHits ?? directResp.hits.length,
+      groupResp.totalGroups,
+    ),
+    items,
+    processingTimeMs:
+      directResp.processingTimeMs +
+      groupResp.processingTimeMs +
+      (hydratedResp?.processingTimeMs ?? 0),
+  };
+}
+
+async function searchShelfItemGroups(
+  client: SearchClient,
+  query: FederatedSearchOptions["query"],
+  scope: SearchScope,
+  ctx: FilterContext,
+  q: string,
+  offset: number,
+  limit: number,
+) {
+  const filter = buildShelfItemFilter(query, scope, ctx);
+  const includePrivate =
+    (scope.kind === "user" || scope.kind === "saved") &&
+    ctx.viewerUserId === scope.userId;
+  const resp = await client.shelfItemIndex.search<ShelfItemSearchDocument>(q, {
+    filter: joinFilter(filter),
+    offset,
+    limit: Math.max(limit * 4, limit),
+    attributesToSearchOn: includePrivate
+      ? [...SHELF_ITEM_OWNER_ATTRIBUTES]
+      : [...SHELF_ITEM_PUBLIC_ATTRIBUTES],
+  } as any);
+  const groupMap = new Map<string, ShelfItemShelfGroup>();
+  for (const hit of resp.hits) {
+    const groupId = scope.kind === "saved" ? hit.itemId : hit.shelfId;
+    let group = groupMap.get(groupId);
+    if (!group) {
+      group = {
+        shelfId: groupId,
+        shelfTitle: scope.kind === "saved" ? hit.itemTitle : hit.shelfTitle,
+        shelfOwnerUserId: hit.shelfOwnerUserId,
+        shelfVisibility: hit.shelfVisibility,
+        total: 0,
+        matches: [],
+      };
+      groupMap.set(groupId, group);
+    }
+    group.total += 1;
+    if (group.matches.length < 3) {
+      group.matches.push({ item: hit });
+    }
+  }
+  const groups = [...groupMap.values()].slice(0, limit);
+  return {
+    groups,
+    totalGroups: groupMap.size,
+    processingTimeMs: resp.processingTimeMs ?? 0,
+  };
 }
 
 // ANCHOR: buildAllSubQueries
@@ -487,7 +678,7 @@ function buildAllSubQueries(
     });
   }
 
-  if (permitted.contentShelves) {
+  if (permitted.contentShelves && scope.kind !== "saved") {
     const filter = buildContentFilter(query, scope, ctx, {
       contentSubtype: "shelves",
       categoryHint: mode === "all" ? "shelves" : "mixed",

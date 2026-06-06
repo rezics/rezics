@@ -10,6 +10,7 @@ export const RANKING_COMMAND_KINDS = {
   patchServing: "ranking.patchServing",
   fullSync: "ranking.fullSync",
   viewBucketFlush: "ranking.viewBucketFlush",
+  reactionBucket: "ranking.reactionBucket",
 } as const;
 
 export type RankingCommandKind =
@@ -58,6 +59,14 @@ const RankingViewBucketFlushPayloadSchema = v.strictObject({
   bucketBefore: v.optional(v.string()),
 });
 
+const RankingReactionBucketPayloadSchema = v.strictObject({
+  targetId: v.string(),
+  scopeKey: v.string(),
+  reaction: v.union([v.literal("upvote"), v.literal("downvote")]),
+  count: v.number(),
+  at: v.optional(v.string()),
+});
+
 export const RankingInvalidateCommandSchema = commandSchema(
   RANKING_COMMAND_KINDS.invalidate,
   JOB_LANES.ranking,
@@ -83,6 +92,11 @@ export const RankingViewBucketFlushCommandSchema = commandSchema(
   JOB_LANES.ranking,
   RankingViewBucketFlushPayloadSchema,
 );
+export const RankingReactionBucketCommandSchema = commandSchema(
+  RANKING_COMMAND_KINDS.reactionBucket,
+  JOB_LANES.ranking,
+  RankingReactionBucketPayloadSchema,
+);
 
 export const RankingCommandSchema = v.union([
   RankingInvalidateCommandSchema,
@@ -90,6 +104,7 @@ export const RankingCommandSchema = v.union([
   RankingPatchServingCommandSchema,
   RankingFullSyncCommandSchema,
   RankingViewBucketFlushCommandSchema,
+  RankingReactionBucketCommandSchema,
 ]);
 
 export type RankingCommand = v.InferOutput<typeof RankingCommandSchema>;
@@ -126,12 +141,19 @@ export function createRankingCommand(
             payloadRecord.projectionId ?? payloadRecord.unitId ?? "pending",
             payloadRecord.rankKind,
           )
-        : kind === RANKING_COMMAND_KINDS.viewBucketFlush
-          ? rankingIdempotency.viewBucketFlush(payloadRecord.cursor)
-          : rankingIdempotency.fullSync(
-              payloadRecord.cursor,
-              payloadRecord.rankKind,
-            );
+        : kind === RANKING_COMMAND_KINDS.reactionBucket
+          ? rankingIdempotency.reactionBucket(
+              payloadRecord.targetId,
+              payloadRecord.scopeKey,
+              payloadRecord.reaction,
+              payloadRecord.at,
+            )
+          : kind === RANKING_COMMAND_KINDS.viewBucketFlush
+            ? rankingIdempotency.viewBucketFlush(payloadRecord.cursor)
+            : rankingIdempotency.fullSync(
+                payloadRecord.cursor,
+                payloadRecord.rankKind,
+              );
 
   return v.parse(RankingCommandSchema, {
     kind,

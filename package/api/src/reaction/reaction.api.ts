@@ -15,6 +15,9 @@ import type {
   ReactionHistoryReceivedItem,
   ReactionMyResponse,
   ReactionSummaryResponse,
+  ShareCreateInput,
+  ShareCreateResponse,
+  ShareSummaryResponse,
 } from "./reaction.types";
 
 type ReactionScopeQuery = {
@@ -71,6 +74,15 @@ export const reactionApi = {
     );
   },
 
+  shareSummary: async (targetIds: string[]): Promise<ShareSummaryResponse> => {
+    const qs = new URLSearchParams();
+    for (const id of targetIds) qs.append("targetIds", id);
+    const queryString = qs.toString();
+    return reactionFetch<ShareSummaryResponse>(
+      `/reaction/share/summary${queryString ? `?${queryString}` : ""}`,
+    );
+  },
+
   /**
    * Get current user's reactions for one or many targets
    */
@@ -93,6 +105,13 @@ export const reactionApi = {
    */
   create: async (input: ReactionCreateInput): Promise<ReactionDTO> => {
     return apiFetch<ReactionDTO>("/reaction", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  share: async (input: ShareCreateInput): Promise<ShareCreateResponse> => {
+    return apiFetch<ShareCreateResponse>("/reaction/share", {
       method: "POST",
       body: JSON.stringify(input),
     });

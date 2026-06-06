@@ -6,6 +6,7 @@ import {
   commentListResponseSchema,
   commentModerationInputSchema,
   createCommentSchema,
+  updateCommentSchema,
 } from "./comment";
 
 describe("comment contract", () => {
@@ -21,7 +22,6 @@ describe("comment contract", () => {
         content: null,
         moderationStatus: "approved",
         depth: 1,
-        path: "1",
         pinKind: "ACCEPTED_ANSWER",
         pinPosition: "a0",
       }),
@@ -45,13 +45,29 @@ describe("comment contract", () => {
     ).toBe(false);
   });
 
+  test("updates do not accept realm reassignment", () => {
+    expect("realmUnitId" in updateCommentSchema.properties).toBe(false);
+
+    expect(
+      Value.Check(updateCommentSchema, {
+        isLocked: true,
+        state: "closed",
+      }),
+    ).toBe(true);
+  });
+
   test("lists comments by stable root and realm partition", () => {
     expect(
       Value.Check(commentListQuerySchema, {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
         parentCommentId: "comment-1",
-        mode: "threaded",
+        mode: "children",
+        sort: "best",
+        cursor: {
+          id: "comment-0",
+          sortValue: 10,
+        },
         limit: 20,
       }),
     ).toBe(true);
@@ -60,7 +76,10 @@ describe("comment contract", () => {
   test("list response carries thread promotion signals", () => {
     expect(
       Value.Check(commentListResponseSchema, {
+        mode: "discovery",
         comments: [],
+        parentContexts: [],
+        nextCursor: null,
         total: 0,
         viewerCanPromote: true,
         isQuestionThread: true,

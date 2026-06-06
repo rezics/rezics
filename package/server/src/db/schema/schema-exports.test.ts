@@ -71,6 +71,7 @@ const expectedSchemaExports = [
   "Post",
   "PostKind",
   "PostPollReference",
+  "PostUnitReference",
   "Realm",
   "RealmCapabilityGrant",
   "RealmMember",
@@ -85,8 +86,7 @@ const expectedSchemaExports = [
   "Series",
   "SeriesContentIndex",
   "Shelf",
-  "ShelfUnit",
-  "ShelfUnitRelation",
+  "ShelfItem",
   "SlugScope",
   "SourceSite",
   "StaffAuditLog",
@@ -114,7 +114,6 @@ const expectedSchemaExports = [
   "UserBlock",
   "UserContentNodeProgress",
   "UserTagApplication",
-  "UserUnitCollection",
   "UserUnitProgress",
   "UserUnitProgressStatus",
   "Zone",
@@ -148,11 +147,7 @@ const schemaDir = import.meta.dir;
 const compositeForeignKeys = [
   {
     file: "shelf.ts",
-    constraintName: "ShelfUnitRelation_shelfId_childUnitId_fkey",
-  },
-  {
-    file: "shelf.ts",
-    constraintName: "ShelfUnitRelation_shelfId_parentUnitId_fkey",
+    constraintName: "ShelfItem_parent_fkey",
   },
   {
     file: "realm.ts",

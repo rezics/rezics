@@ -1,7 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
-import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { pinKindLiterals } from "../post/post";
 import {
@@ -32,7 +31,6 @@ export const commentDTOSchema = t.Object({
     ),
   ),
   depth: t.Number(),
-  path: t.Optional(t.Nullable(t.String())),
   replyCount: t.Optional(t.Number()),
   directReplyCount: t.Optional(t.Number()),
   lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
@@ -48,84 +46,69 @@ export type CommentDTO = Static<typeof commentDTOSchema>;
 
 // ANCHOR: Comment List
 
+export const commentSliceModeSchema = t.Union([
+  t.Literal("discovery"),
+  t.Literal("root"),
+  t.Literal("children"),
+]);
+
+export type CommentSliceMode = Static<typeof commentSliceModeSchema>;
+
+export const commentSortModeSchema = t.Union([
+  t.Literal("best"),
+  t.Literal("top"),
+  t.Literal("rising"),
+  t.Literal("controversial"),
+  t.Literal("new"),
+  t.Literal("old"),
+]);
+
+export type CommentSortMode = Static<typeof commentSortModeSchema>;
+
+export const commentSliceCursorSchema = t.Object({
+  id: t.String(),
+  sortValue: t.Optional(t.Union([t.String(), t.Number()])),
+  createdAt: t.Optional(t.String()),
+});
+
+export type CommentSliceCursor = Static<typeof commentSliceCursorSchema>;
+
 export const commentListQuerySchema = t.Object({
-  ...listGetQueryBase.properties,
   rootUnitId: t.String(),
   realmUnitId: t.Optional(t.Nullable(t.String())),
-  parentCommentId: t.Optional(t.String()),
-  subtreeRootCommentId: t.Optional(t.String()),
+  mode: commentSliceModeSchema,
+  rootCommentId: t.Optional(t.String()),
+  parentCommentId: t.Optional(t.Nullable(t.String())),
   authorUserId: t.Optional(t.String()),
   state: t.Optional(t.String()),
-  mode: t.Optional(
-    t.Union([
-      t.Literal("children"),
-      t.Literal("threaded"),
-      t.Literal("subtree"),
-    ]),
-  ),
-  maxDepth: t.Optional(t.Number()),
-  sort: t.Optional(
-    t.Union([
-      t.Literal("new"),
-      t.Literal("top"),
-      t.Literal("hot"),
-      t.Object({
-        field: t.Optional(t.String()),
-        order: t.Optional(t.String()),
-      }),
-    ]),
-  ),
-  cursor: t.Optional(
-    t.Object({
-      id: t.Optional(t.String()),
-      createdAt: t.Optional(t.String()),
-    }),
-  ),
+  sort: t.Optional(commentSortModeSchema),
+  cursor: t.Optional(commentSliceCursorSchema),
   limit: paginationLimitSchema,
 });
 
 export type CommentListQuery = Static<typeof commentListQuerySchema>;
 
 export const commentListBodySchema = t.Object({
-  ...listPostBodyBase.properties,
   rootUnitId: t.String(),
   realmUnitId: t.Optional(t.Nullable(t.String())),
-  parentCommentId: t.Optional(t.String()),
-  subtreeRootCommentId: t.Optional(t.String()),
+  mode: commentSliceModeSchema,
+  rootCommentId: t.Optional(t.String()),
+  parentCommentId: t.Optional(t.Nullable(t.String())),
   authorUserId: t.Optional(t.String()),
   state: t.Optional(t.String()),
-  mode: t.Optional(
-    t.Union([
-      t.Literal("children"),
-      t.Literal("threaded"),
-      t.Literal("subtree"),
-    ]),
-  ),
-  maxDepth: t.Optional(t.Number()),
-  sort: t.Optional(
-    t.Union([
-      t.Literal("new"),
-      t.Literal("top"),
-      t.Literal("hot"),
-      t.Object({
-        field: t.Optional(t.String()),
-        order: t.Optional(t.String()),
-      }),
-    ]),
-  ),
-  cursor: t.Optional(
-    t.Object({
-      id: t.Optional(t.String()),
-      createdAt: t.Optional(t.String()),
-    }),
-  ),
+  sort: t.Optional(commentSortModeSchema),
+  cursor: t.Optional(commentSliceCursorSchema),
   limit: paginationLimitSchema,
 });
 
 export type CommentListBody = Static<typeof commentListBodySchema>;
 
 export const commentListResponseSchema = t.Object({
+  mode: commentSliceModeSchema,
   comments: t.Array(commentDTOSchema),
+  rootComment: t.Optional(t.Nullable(commentDTOSchema)),
+  parentContexts: t.Optional(t.Array(commentDTOSchema)),
+  nextCursor: t.Optional(t.Nullable(commentSliceCursorSchema)),
   total: t.Optional(t.Number()),
   /**
    * Thread read only: whether the current caller may pin/accept within this
@@ -154,7 +137,6 @@ export type CreateCommentInput = Static<typeof createCommentSchema>;
 
 export const updateCommentSchema = t.Object({
   content: t.Optional(contentDocWriteSchema),
-  realmUnitId: t.Optional(t.Nullable(t.String())),
   isLocked: t.Optional(t.Boolean()),
   state: t.Optional(t.Nullable(t.String())),
 });

@@ -4,7 +4,7 @@ import type {
   PostDTO,
   PublicUser,
   ShelfDTO,
-  ShelfUnitDTO,
+  ShelfItemDTO,
   UnitDTO,
   UnitTranslationDTO,
   VariantContextSummary,
@@ -168,24 +168,24 @@ export function candidateToUnitCardSummary(
 }
 
 /**
- * Map a ShelfUnit + its hydrated DTO into a UnitCardSummary.
+ * Map a ShelfItem + its hydrated DTO into a UnitCardSummary.
  */
-export function shelfUnitToUnitCardSummary(
-  shelfUnit: ShelfUnitDTO,
+export function shelfItemToUnitCardSummary(
+  shelfItem: ShelfItemDTO,
   data: unknown,
   options: UnitCardSummaryOptions = {},
   attachmentCounts?: UnitCardAttachmentCounts,
 ): UnitCardSummary {
   const baseOptions: UnitCardSummaryOptions = {
     ...options,
-    addedAt: options.addedAt ?? shelfUnit.createdAt ?? null,
-    fallbackKind: shelfUnit.kind,
-    fallbackTitle: shelfUnit.unitId,
+    addedAt: options.addedAt ?? shelfItem.createdAt ?? null,
+    fallbackKind: shelfItem.kind,
+    fallbackTitle: shelfItem.itemId,
   };
 
   let summary: UnitCardSummary;
 
-  if (shelfUnit.kind === "book" && isBook(data)) {
+  if (shelfItem.kind === "book" && isBook(data)) {
     summary = unitDtoToUnitCardSummary(
       {
         unitId: data.unitId,
@@ -204,13 +204,13 @@ export function shelfUnitToUnitCardSummary(
       baseOptions,
     );
   } else if (
-    (shelfUnit.kind === "review" ||
-      shelfUnit.kind === "quote" ||
-      shelfUnit.kind === "post") &&
+    (shelfItem.kind === "review" ||
+      shelfItem.kind === "quote" ||
+      shelfItem.kind === "post") &&
     isPost(data)
   ) {
     summary = postToSummary(data, baseOptions);
-  } else if (shelfUnit.kind === "shelf" && isShelf(data)) {
+  } else if (shelfItem.kind === "shelf" && isShelf(data)) {
     summary = unitDtoToUnitCardSummary(
       {
         unitId: data.unitId,
@@ -222,13 +222,13 @@ export function shelfUnitToUnitCardSummary(
       },
       baseOptions,
     );
-  } else if (shelfUnit.kind === "tag" && isTag(data)) {
+  } else if (shelfItem.kind === "tag" && isTag(data)) {
     summary = tagToSummary(data, baseOptions);
   } else {
     summary = {
-      unitId: shelfUnit.unitId,
-      kind: normalizeKind(shelfUnit.kind),
-      title: shelfUnit.unitId,
+      unitId: shelfItem.itemId,
+      kind: normalizeKind(shelfItem.kind),
+      title: shelfItem.itemId,
       imageUrl: null,
       addedAt: baseOptions.addedAt,
     };
@@ -236,7 +236,7 @@ export function shelfUnitToUnitCardSummary(
 
   return attachSummaryMetadata(
     summary,
-    shelfUnit.variantContext,
+    shelfItem.variantContext,
     attachmentCounts,
   );
 }

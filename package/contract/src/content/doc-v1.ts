@@ -98,6 +98,10 @@ export function pollContentBlock(pollUnitId: string): PollContentBlock {
   return { type: "poll", source: pollUnitId };
 }
 
+export function unitRefContentBlock(unitRef: UnitRef): UnitRefContentBlock {
+  return { type: "unit-ref", source: unitRef };
+}
+
 export function markdownContentDocWithPoll(
   source: string,
   pollUnitId: string,
@@ -123,6 +127,28 @@ export function extractPollUnitIdsFromContentDoc(value: unknown): string[] {
         block.source.length > 0
       ) {
         ids.add(block.source);
+      }
+    }
+  }
+  return [...ids];
+}
+
+export function extractUnitRefIdsFromContentDoc(value: unknown): string[] {
+  if (!isRecord(value)) return [];
+  const ids = new Set<string>();
+  for (const regionName of ["beforeMain", "afterMain"] as const) {
+    const region = value[regionName];
+    if (!Array.isArray(region)) continue;
+    for (const block of region) {
+      const source = isRecord(block) ? block.source : null;
+      if (
+        isRecord(block) &&
+        block.type === "unit-ref" &&
+        isRecord(source) &&
+        typeof source.unitId === "string" &&
+        source.unitId.length > 0
+      ) {
+        ids.add(source.unitId);
       }
     }
   }

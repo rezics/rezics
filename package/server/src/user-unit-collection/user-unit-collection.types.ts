@@ -1,6 +1,10 @@
-import type { UserUnitCollection } from "../db/schema";
-
-export type UserUnitCollectionRow = typeof UserUnitCollection.$inferSelect;
+export type UserUnitCollectionRow = {
+  userId: string;
+  unitId: string;
+  searchText: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type CollectionUnitRow = {
   userId: string;

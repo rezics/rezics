@@ -25,7 +25,6 @@ export function mapCommentToDTO(comment: CommentWithRelations): CommentDTO {
         ? "author_deleted"
         : null) as CommentDTO["redactionKind"],
     depth: comment.depth,
-    path: comment.path ?? null,
     createdAt: comment.createdAt.toISOString(),
     updatedAt: comment.updatedAt.toISOString(),
   };

@@ -84,7 +84,7 @@ export type ContinueReadingItem = (typeof continueReadingItemSchema)["static"];
 // ------------------------------------------------------------
 
 export const dashboardShelfSummarySchema = t.Object({
-  shelfUnitId: t.String(),
+  shelfId: t.String(),
   title: t.String(),
   itemCount: t.Integer({ minimum: 0 }),
   coverUrls: t.Array(t.String(), { maxItems: 4 }),

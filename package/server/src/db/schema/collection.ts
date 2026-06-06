@@ -9,7 +9,6 @@ import {
   pgEnum,
   pgTable,
   primaryKey,
-  text,
   uuid,
 } from "drizzle-orm/pg-core";
 import { createdAt, jsonData, timestampMs, updatedAt } from "./columns";
@@ -20,39 +19,6 @@ import { Unit } from "./unit";
 export const UserUnitProgressStatus = pgEnum(
   "UserUnitProgressStatus",
   userUnitProgressStatusValues,
-);
-
-export const UserUnitCollection = pgTable(
-  "UserUnitCollection",
-  {
-    userId: uuid()
-      .notNull()
-      .references(() => User.unitId, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
-      }),
-    unitId: uuid()
-      .notNull()
-      .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    searchText: text(),
-    createdAt: createdAt(),
-    updatedAt: updatedAt(),
-  },
-  (table) => [
-    primaryKey({
-      columns: [table.userId, table.unitId],
-      name: "UserUnitCollection_pkey",
-    }),
-    index("UserUnitCollection_unitId_idx").using(
-      "btree",
-      table.unitId.asc().nullsLast(),
-    ),
-    index("UserUnitCollection_userId_updatedAt_idx").using(
-      "btree",
-      table.userId.asc().nullsLast(),
-      table.updatedAt.asc().nullsLast(),
-    ),
-  ],
 );
 
 export const UserUnitProgress = pgTable(

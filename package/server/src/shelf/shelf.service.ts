@@ -1,7 +1,7 @@
 import type {
-  AddShelfUnitInput,
+  AddShelfItemInput,
   CreateShelfInput,
-  ReorderShelfUnitInput,
+  ReorderShelfItemInput,
   SeedTagName,
   SetPinnedTagsResponse,
   ShelfDetailDTO,
@@ -9,14 +9,15 @@ import type {
   ShelfListQuery,
   ShelfMatchedUnitDTO,
   ShelfSummaryDTO,
-  ShelfUnitBatchOp,
-  ShelfUnitBatchResult,
-  ShelfUnitDTO,
-  ShelfUnitKind,
-  ShelfUnitRelationDTO,
-  ShelfUnitRelationRole,
-  ShelfUnitsQuery,
-  ShelfUnitsResponse,
+  ShelfItemBatchOp,
+  ShelfItemBatchResult,
+  ShelfItemDTO,
+  ShelfItemKind,
+  ShelfItemType,
+  ShelfItemChildDTO,
+  ShelfItemParentRole,
+  ShelfItemsQuery,
+  ShelfItemsResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
 import { parseIdsCsv, SEED_TAG_NAMES, withCoverUrl } from "@rezics/contract";
@@ -47,21 +48,19 @@ import {
 import {
   Post,
   Shelf,
-  ShelfUnit,
-  ShelfUnitRelation,
+  ShelfItem as ShelfItem,
   Unit,
   UnitTag,
   UnitTranslation,
   User,
   UserTagApplication,
-  UserUnitCollection,
 } from "../db/schema";
 import {
   generateBetween,
   POSITION_LENGTH_THRESHOLD,
   rebalance,
 } from "./fractional-index";
-import { enqueueUserUnitCollectionSearchSync } from "./user-unit-collection.service";
+import { enqueueShelfItemSourceSearchSync } from "./user-unit-collection.service";
 
 export const SHELF_ITEM_BATCH_OP_CAP = 200;
 
@@ -70,9 +69,8 @@ import {
   mapShelfListRowToDTO,
   mapShelfSummaryToDTO,
   mapShelfToDTO,
-  mapShelfUnitRelationToDTO,
-  mapShelfUnitToDTO,
-  mapShelfUnitToDTOWithVariantContext,
+  mapShelfItemToDTO,
+  mapShelfItemToDTOWithVariantContext,
 } from "./shelf.mapper";
 import { isSystemKindKey } from "./system-shelves";
 
@@ -100,46 +98,72 @@ async function getServerDb() {
 
 async function nextShelfPosition(tx: DbLike, shelfId: string): Promise<string> {
   const [last] = await tx
-    .select({ position: ShelfUnit.position })
-    .from(ShelfUnit)
-    .where(eq(ShelfUnit.shelfId, shelfId))
-    .orderBy(desc(ShelfUnit.position))
+    .select({ position: ShelfItem.position })
+    .from(ShelfItem)
+    .where(eq(ShelfItem.shelfId, shelfId))
+    .orderBy(desc(ShelfItem.position))
     .limit(1);
   return generateBetween(last?.position, undefined);
 }
 
-async function ensureShelfUnit(
+async function ensureShelfItem(
   tx: DbLike,
   shelfId: string,
-  unitId: string,
-  kind: ShelfUnitKind,
+  itemId: string,
+  kind: ShelfItemKind,
+  itemType: ShelfItemType = "unit",
   variantUnitId?: string | null,
   explicitPosition?: string,
+  parentItemId?: string | null,
+  parentItemType?: ShelfItemType | null,
+  parentRole?: ShelfItemParentRole | null,
+  searchText?: string | null,
 ): Promise<{ created: boolean }> {
   const position = explicitPosition ?? (await nextShelfPosition(tx, shelfId));
   const created = await tx
-    .insert(ShelfUnit)
+    .insert(ShelfItem)
     .values({
       shelfId,
-      unitId,
+      itemType,
+      itemId,
       variantUnitId: variantUnitId ?? null,
       kind,
+      parentItemType: parentItemId ? (parentItemType ?? "unit") : null,
+      parentItemId: parentItemId ?? null,
+      parentRole: parentRole ?? null,
       position,
+      searchText: searchText ?? null,
       updatedAt: new Date(),
     })
     .onConflictDoNothing()
-    .returning({ unitId: ShelfUnit.unitId });
-  if (created.length === 0 && variantUnitId !== undefined) {
+    .returning({ itemId: ShelfItem.itemId });
+  if (
+    created.length === 0 &&
+    (variantUnitId !== undefined || searchText !== undefined)
+  ) {
     await tx
-      .update(ShelfUnit)
-      .set({ variantUnitId, updatedAt: new Date() })
-      .where(and(eq(ShelfUnit.shelfId, shelfId), eq(ShelfUnit.unitId, unitId)));
+      .update(ShelfItem)
+      .set({
+        ...(variantUnitId !== undefined ? { variantUnitId } : {}),
+        ...(searchText !== undefined ? { searchText } : {}),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(ShelfItem.shelfId, shelfId),
+          eq(ShelfItem.itemType, itemType),
+          eq(ShelfItem.itemId, itemId),
+        ),
+      );
   }
   if (created.length > 0) {
     await tx
       .update(Shelf)
       .set({
         itemCount: sql`${Shelf.itemCount} + ${created.length}`,
+        ...(parentItemId
+          ? {}
+          : { rootItemCount: sql`${Shelf.rootItemCount} + ${created.length}` }),
         updatedAt: new Date(),
       })
       .where(eq(Shelf.unitId, shelfId));
@@ -147,20 +171,34 @@ async function ensureShelfUnit(
   return { created: created.length > 0 };
 }
 
-async function deleteShelfUnit(
+async function deleteShelfItem(
   tx: DbLike,
   shelfId: string,
-  unitId: string,
+  itemId: string,
+  itemType: ShelfItemType = "unit",
 ): Promise<number> {
   const deleted = await tx
-    .delete(ShelfUnit)
-    .where(and(eq(ShelfUnit.shelfId, shelfId), eq(ShelfUnit.unitId, unitId)))
-    .returning({ unitId: ShelfUnit.unitId });
+    .delete(ShelfItem)
+    .where(
+      and(
+        eq(ShelfItem.shelfId, shelfId),
+        eq(ShelfItem.itemType, itemType),
+        eq(ShelfItem.itemId, itemId),
+      ),
+    )
+    .returning({
+      itemId: ShelfItem.itemId,
+      parentItemId: ShelfItem.parentItemId,
+    });
   if (deleted.length > 0) {
+    const deletedRootCount = deleted.filter((row) => !row.parentItemId).length;
     await tx
       .update(Shelf)
       .set({
         itemCount: sql`${Shelf.itemCount} - ${deleted.length}`,
+        ...(deletedRootCount > 0
+          ? { rootItemCount: sql`${Shelf.rootItemCount} - ${deletedRootCount}` }
+          : {}),
         updatedAt: new Date(),
       })
       .where(eq(Shelf.unitId, shelfId));
@@ -172,23 +210,8 @@ async function applyCollectionMetadataDrizzle(
   tx: DbLike,
   userId: string,
   unitId: string,
-  patch: Pick<AddShelfUnitInput, "tagUnitIds" | "searchText">,
+  patch: Pick<AddShelfItemInput, "tagUnitIds" | "searchText">,
 ): Promise<void> {
-  if (patch.searchText !== undefined) {
-    await tx
-      .insert(UserUnitCollection)
-      .values({
-        userId,
-        unitId,
-        searchText: patch.searchText,
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: [UserUnitCollection.userId, UserUnitCollection.unitId],
-        set: { searchText: patch.searchText, updatedAt: new Date() },
-      });
-  }
-
   if (patch.tagUnitIds !== undefined) {
     await tx
       .delete(UserTagApplication)
@@ -216,68 +239,134 @@ async function applyCollectionMetadataDrizzle(
   }
 }
 
-async function findShelfUnit(tx: DbLike, shelfId: string, unitId: string) {
+async function findShelfItem(
+  tx: DbLike,
+  shelfId: string,
+  itemId: string,
+  itemType: ShelfItemType = "unit",
+) {
   const [row] = await tx
     .select()
-    .from(ShelfUnit)
-    .where(and(eq(ShelfUnit.shelfId, shelfId), eq(ShelfUnit.unitId, unitId)))
+    .from(ShelfItem)
+    .where(
+      and(
+        eq(ShelfItem.shelfId, shelfId),
+        eq(ShelfItem.itemType, itemType),
+        eq(ShelfItem.itemId, itemId),
+      ),
+    )
     .limit(1);
   return row ?? null;
 }
 
-async function upsertShelfUnitRelation(
+async function upsertShelfItemChild(
   tx: DbLike,
   input: {
     shelfId: string;
-    parentUnitId: string;
-    childUnitId: string;
-    role: ShelfUnitRelationRole;
+    parentItemType?: ShelfItemType;
+    parentItemId: string;
+    childItemType?: ShelfItemType;
+    childItemId: string;
+    role: ShelfItemParentRole;
   },
 ) {
-  await tx.insert(ShelfUnitRelation).values(input).onConflictDoNothing();
-  const [row] = await tx
-    .select()
-    .from(ShelfUnitRelation)
+  const [before] = await tx
+    .select({ parentItemId: ShelfItem.parentItemId })
+    .from(ShelfItem)
     .where(
       and(
-        eq(ShelfUnitRelation.shelfId, input.shelfId),
-        eq(ShelfUnitRelation.parentUnitId, input.parentUnitId),
-        eq(ShelfUnitRelation.childUnitId, input.childUnitId),
-        eq(ShelfUnitRelation.role, input.role),
+        eq(ShelfItem.shelfId, input.shelfId),
+        eq(ShelfItem.itemType, input.childItemType ?? "unit"),
+        eq(ShelfItem.itemId, input.childItemId),
       ),
     )
     .limit(1);
-  if (!row) throw new Error("ShelfUnitRelation not found");
-  return row;
+  const [row] = await tx
+    .update(ShelfItem)
+    .set({
+      parentItemType: input.parentItemType ?? "unit",
+      parentItemId: input.parentItemId,
+      parentRole: input.role,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(ShelfItem.shelfId, input.shelfId),
+        eq(ShelfItem.itemType, input.childItemType ?? "unit"),
+        eq(ShelfItem.itemId, input.childItemId),
+      ),
+    )
+    .returning();
+  if (!row) throw new Error("ShelfItem child not found");
+  if (!before?.parentItemId && row.parentItemId) {
+    await tx
+      .update(Shelf)
+      .set({
+        rootItemCount: sql`${Shelf.rootItemCount} - 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(Shelf.unitId, input.shelfId));
+  }
+  return {
+    shelfId: row.shelfId,
+    parentItemType: (row.parentItemType ?? "unit") as ShelfItemType,
+    parentItemId: input.parentItemId,
+    childItemType: row.itemType as ShelfItemType,
+    childItemId: row.itemId,
+    role: row.parentRole as ShelfItemParentRole,
+  };
 }
 
-async function deleteShelfUnitRelations(
+async function deleteShelfItemChildren(
   tx: DbLike,
   input: {
     shelfId: string;
-    parentUnitId?: string;
-    childUnitId?: string;
-    childUnitIds?: string[];
-    role?: ShelfUnitRelationRole;
+    parentItemType?: ShelfItemType;
+    parentItemId?: string;
+    childItemType?: ShelfItemType;
+    childItemId?: string;
+    childItemIds?: string[];
+    role?: ShelfItemParentRole;
   },
 ) {
-  return tx
-    .delete(ShelfUnitRelation)
+  const updated = await tx
+    .update(ShelfItem)
+    .set({
+      parentItemType: null,
+      parentItemId: null,
+      parentRole: null,
+      updatedAt: new Date(),
+    })
     .where(
       and(
-        eq(ShelfUnitRelation.shelfId, input.shelfId),
-        input.parentUnitId
-          ? eq(ShelfUnitRelation.parentUnitId, input.parentUnitId)
+        eq(ShelfItem.shelfId, input.shelfId),
+        input.parentItemId
+          ? eq(ShelfItem.parentItemId, input.parentItemId)
           : undefined,
-        input.childUnitId
-          ? eq(ShelfUnitRelation.childUnitId, input.childUnitId)
+        input.parentItemId
+          ? eq(ShelfItem.parentItemType, input.parentItemType ?? "unit")
           : undefined,
-        input.childUnitIds?.length
-          ? inArray(ShelfUnitRelation.childUnitId, input.childUnitIds)
+        input.childItemType
+          ? eq(ShelfItem.itemType, input.childItemType)
           : undefined,
-        input.role ? eq(ShelfUnitRelation.role, input.role) : undefined,
+        input.childItemId ? eq(ShelfItem.itemId, input.childItemId) : undefined,
+        input.childItemIds?.length
+          ? inArray(ShelfItem.itemId, input.childItemIds)
+          : undefined,
+        input.role ? eq(ShelfItem.parentRole, input.role) : undefined,
       ),
-    );
+    )
+    .returning({ itemId: ShelfItem.itemId });
+  if (updated.length > 0) {
+    await tx
+      .update(Shelf)
+      .set({
+        rootItemCount: sql`${Shelf.rootItemCount} + ${updated.length}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(Shelf.unitId, input.shelfId));
+  }
+  return updated;
 }
 
 function getSeedTagIdSet(): Set<string> {
@@ -357,9 +446,9 @@ async function hydrateShelfRows(unitIds: readonly string[]): Promise<any[]> {
 }
 
 export class ShelfService {
-  private async resolveShelfUnitSearchIds(
+  private async resolveShelfItemSearchIds(
     shelfId: string,
-    query: ShelfUnitsQuery,
+    query: ShelfItemsQuery,
     viewerUserId?: string | null,
   ): Promise<Set<string> | null> {
     const q = query.q?.trim();
@@ -387,10 +476,10 @@ export class ShelfService {
           attributesToRetrieve: ["id"],
         }),
         viewerUserId === ownerUserId
-          ? searchClient.collectionIndex.search(q, {
+          ? searchClient.shelfItemIndex.search(q, {
               limit: SHELF_SEARCH_HIT_LIMIT,
-              filter: `ownerUserId = "${ownerUserId}"`,
-              attributesToRetrieve: ["unitId"],
+              filter: `shelfId = "${shelfId}" AND shelfOwnerUserId = "${ownerUserId}" AND itemType = "unit"`,
+              attributesToRetrieve: ["itemId"],
             })
           : Promise.resolve({ hits: [] as any[] }),
       ]);
@@ -400,7 +489,7 @@ export class ShelfService {
           .map((hit) => hit.id)
           .filter((id): id is string => typeof id === "string"),
         ...(collectionResp.hits as any[])
-          .map((hit) => hit.unitId)
+          .map((hit) => hit.itemId)
           .filter((id): id is string => typeof id === "string"),
       ]);
     }
@@ -456,16 +545,16 @@ export class ShelfService {
     const containsUnitId = options.containsUnitId?.trim();
     if (containsUnitId) {
       conditions.push(sql`exists (
-        select 1 from "ShelfUnit" su
+        select 1 from "ShelfItem" su
         where su."shelfId" = ${Shelf.unitId}
-          and su."unitId" = ${containsUnitId}
+          and su."itemId" = ${containsUnitId}
       )`);
     }
 
     const variantUnitId = options.variantUnitId?.trim();
     if (variantUnitId) {
       conditions.push(sql`exists (
-        select 1 from "ShelfUnit" su
+        select 1 from "ShelfItem" su
         where su."shelfId" = ${Shelf.unitId}
           and su."variantUnitId" = ${variantUnitId}
       )`);
@@ -548,27 +637,27 @@ export class ShelfService {
     if (!containsUnitId && !variantUnitId) return out;
 
     const db = await getServerDb();
-    const shelfUnits = await db
+    const shelfItems = await db
       .select({
-        shelfId: ShelfUnit.shelfId,
-        unitId: ShelfUnit.unitId,
-        variantUnitId: ShelfUnit.variantUnitId,
-        kind: ShelfUnit.kind,
+        shelfId: ShelfItem.shelfId,
+        unitId: ShelfItem.itemId,
+        variantUnitId: ShelfItem.variantUnitId,
+        kind: ShelfItem.kind,
       })
-      .from(ShelfUnit)
+      .from(ShelfItem)
       .where(
         and(
-          inArray(ShelfUnit.shelfId, shelfIds),
-          containsUnitId ? eq(ShelfUnit.unitId, containsUnitId) : undefined,
+          inArray(ShelfItem.shelfId, shelfIds),
+          containsUnitId ? eq(ShelfItem.itemId, containsUnitId) : undefined,
           variantUnitId
-            ? eq(ShelfUnit.variantUnitId, variantUnitId)
+            ? eq(ShelfItem.variantUnitId, variantUnitId)
             : undefined,
         ),
       )
-      .orderBy(asc(ShelfUnit.position));
+      .orderBy(asc(ShelfItem.position));
 
     const matchedUnitIds = [
-      ...new Set(shelfUnits.map((row) => row.variantUnitId ?? row.unitId)),
+      ...new Set(shelfItems.map((row) => row.variantUnitId ?? row.unitId)),
     ];
     const units =
       matchedUnitIds.length > 0
@@ -604,7 +693,7 @@ export class ShelfService {
       unitById.set(unit.id, current);
     }
 
-    for (const row of shelfUnits) {
+    for (const row of shelfItems) {
       if (out.has(row.shelfId)) continue;
       const matchedUnitId = row.variantUnitId ?? row.unitId;
       const unit = unitById.get(matchedUnitId);
@@ -649,7 +738,7 @@ export class ShelfService {
 
   /**
    * Resolve `{ ownerUserId, slug }` under the owner scope. Only system shelf
-   * slugs ('favorites' | 'backlog' | 'active' | 'completed') are accepted in
+   * slugs ('favorites' | 'saved' | 'backlog' | 'active' | 'completed') are accepted in
    * v1 — every other slug returns null per `SHELF_CUSTOM_SLUG_DISABLED`.
    *
    * Lookup goes through the Unit slug index `(slugScope = ownerUserId,
@@ -888,7 +977,7 @@ export class ShelfService {
   }
 
   async setPinnedTags(
-    shelfUnitId: string,
+    shelfItemId: string,
     pinnedTagIds: readonly string[],
     actorUserId: string,
   ): Promise<SetPinnedTagsResponse> {
@@ -897,10 +986,10 @@ export class ShelfService {
       .select({ userId: Unit.userId })
       .from(Shelf)
       .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
-      .where(eq(Shelf.unitId, shelfUnitId))
+      .where(eq(Shelf.unitId, shelfItemId))
       .limit(1);
     if (!shelf) {
-      throw new AppError(404, `Shelf not found: ${shelfUnitId}`);
+      throw new AppError(404, `Shelf not found: ${shelfItemId}`);
     }
     if (shelf.userId !== actorUserId) {
       throw new AppError(
@@ -917,7 +1006,7 @@ export class ShelfService {
       const existing = await tx
         .select({ tagUnitId: UnitTag.tagUnitId })
         .from(UnitTag)
-        .where(and(eq(UnitTag.unitId, shelfUnitId), eq(UnitTag.pinned, true)));
+        .where(and(eq(UnitTag.unitId, shelfItemId), eq(UnitTag.pinned, true)));
       const existingSet = new Set(existing.map((r) => r.tagUnitId));
 
       const toAdd = [...desired].filter((id) => !existingSet.has(id));
@@ -928,7 +1017,7 @@ export class ShelfService {
           .delete(UnitTag)
           .where(
             and(
-              eq(UnitTag.unitId, shelfUnitId),
+              eq(UnitTag.unitId, shelfItemId),
               inArray(UnitTag.tagUnitId, toRemove),
               eq(UnitTag.pinned, true),
             ),
@@ -939,7 +1028,7 @@ export class ShelfService {
           .insert(UnitTag)
           .values(
             toAdd.map((tagUnitId) => ({
-              unitId: shelfUnitId,
+              unitId: shelfItemId,
               tagUnitId,
               score: 0,
               voteCount: 0,
@@ -953,7 +1042,7 @@ export class ShelfService {
       const rows = await tx
         .select({ tagUnitId: UnitTag.tagUnitId, score: UnitTag.score })
         .from(UnitTag)
-        .where(and(eq(UnitTag.unitId, shelfUnitId), eq(UnitTag.pinned, true)))
+        .where(and(eq(UnitTag.unitId, shelfItemId), eq(UnitTag.pinned, true)))
         .orderBy(desc(UnitTag.score));
       return rows.map((r) => ({ tagUnitId: r.tagUnitId, score: r.score }));
     });
@@ -961,12 +1050,12 @@ export class ShelfService {
     return { tags };
   }
 
-  // --- Shelf unit operations ---
+  // --- Shelf item operations ---
 
   /**
-   * Derive the ShelfUnit kind for a unit at write time.
+   * Derive the ShelfItem kind for a unit at write time.
    */
-  async deriveKind(unitId: string): Promise<ShelfUnitKind> {
+  async deriveKind(unitId: string): Promise<ShelfItemKind> {
     const db = await getServerDb();
     const [unit] = await db
       .select({ type: Unit.type, postKind: Post.kind })
@@ -978,75 +1067,94 @@ export class ShelfService {
     return mapUnitToKind(unit.type, unit.postKind ?? null);
   }
 
-  async addUnit(
+  async addItem(
     shelfId: string,
-    req: AddShelfUnitInput,
+    req: AddShelfItemInput,
     userId?: string,
-  ): Promise<ShelfUnitDTO> {
-    if (shelfId === req.unitId) {
+  ): Promise<ShelfItemDTO> {
+    if (req.itemType === "unit" && shelfId === req.itemId) {
       throw new AppError(400, "A shelf cannot contain itself");
     }
 
-    const kind = req.kind ?? (await this.deriveKind(req.unitId));
+    const kind = req.kind ?? (await this.deriveKind(req.itemId));
 
     const db = await getServerDb();
     const row = await db.transaction(async (tx) => {
-      await ensureShelfUnit(tx, shelfId, req.unitId, kind, req.variantUnitId);
-      if (userId) {
-        await applyCollectionMetadataDrizzle(tx, userId, req.unitId, {
+      await ensureShelfItem(
+        tx,
+        shelfId,
+        req.itemId,
+        kind,
+        req.itemType,
+        req.variantUnitId,
+        undefined,
+        req.parentItemId,
+        req.parentItemType,
+        req.parentRole,
+        req.searchText,
+      );
+      if (userId && req.itemType === "unit") {
+        await applyCollectionMetadataDrizzle(tx, userId, req.itemId, {
           tagUnitIds: req.tagUnitIds,
           searchText: req.searchText,
         });
       }
-      const found = await findShelfUnit(tx, shelfId, req.unitId);
-      if (!found) throw new Error("ShelfUnit not found");
+      const found = await findShelfItem(tx, shelfId, req.itemId, req.itemType);
+      if (!found) throw new Error("ShelfItem not found");
       return found;
     });
 
-    if (userId && req.searchText !== undefined) {
-      await enqueueUserUnitCollectionSearchSync(userId, req.unitId);
+    if (userId && req.itemType === "unit" && req.searchText !== undefined) {
+      await enqueueShelfItemSourceSearchSync(req.itemType, req.itemId);
     }
 
     await enqueueContainedUnitIdsSync(shelfId);
-    return mapShelfUnitToDTO(row);
+    return mapShelfItemToDTO(row);
   }
 
-  async removeUnit(shelfId: string, unitId: string): Promise<void> {
+  async removeItem(
+    shelfId: string,
+    itemId: string,
+    itemType: ShelfItemType = "unit",
+  ): Promise<void> {
     const db = await getServerDb();
     await db.transaction(async (tx) => {
-      await deleteShelfUnit(tx, shelfId, unitId);
+      await deleteShelfItem(tx, shelfId, itemId, itemType);
     });
     await enqueueContainedUnitIdsSync(shelfId);
   }
 
-  async reorderUnit(
+  async reorderItem(
     shelfId: string,
-    unitId: string,
-    input: ReorderShelfUnitInput,
-  ): Promise<ShelfUnitDTO> {
+    itemId: string,
+    input: ReorderShelfItemInput,
+    itemType: ShelfItemType = "unit",
+  ): Promise<ShelfItemDTO> {
     const db = await getServerDb();
     const [before, after] = await Promise.all([
-      input.beforeUnitId
+      input.beforeItemId
         ? db
-            .select({ position: ShelfUnit.position })
-            .from(ShelfUnit)
+            .select({ position: ShelfItem.position })
+            .from(ShelfItem)
             .where(
               and(
-                eq(ShelfUnit.shelfId, shelfId),
-                eq(ShelfUnit.unitId, input.beforeUnitId),
+                eq(ShelfItem.shelfId, shelfId),
+                eq(ShelfItem.itemType, itemType),
+                eq(ShelfItem.itemId, input.beforeItemId),
               ),
             )
             .limit(1)
             .then((rows) => rows[0] ?? null)
         : Promise.resolve(null),
-      input.afterUnitId
+      input.afterItemId
         ? db
-            .select({ position: ShelfUnit.position })
-            .from(ShelfUnit)
+            .select({ position: ShelfItem.position })
+            .from(ShelfItem)
             .where(
               and(
-                eq(ShelfUnit.shelfId, shelfId),
-                eq(ShelfUnit.unitId, input.afterUnitId),
+                eq(ShelfItem.shelfId, shelfId),
+                eq(ShelfItem.itemType, itemType),
+                eq(ShelfItem.itemId, input.afterItemId),
               ),
             )
             .limit(1)
@@ -1059,248 +1167,304 @@ export class ShelfService {
     if (candidate.length > POSITION_LENGTH_THRESHOLD) {
       return await this.rebalanceWindow(
         shelfId,
-        unitId,
-        input.beforeUnitId,
-        input.afterUnitId,
+        itemId,
+        input.beforeItemId,
+        input.afterItemId,
+        itemType,
       );
     }
 
     const [row] = await db
-      .update(ShelfUnit)
+      .update(ShelfItem)
       .set({ position: candidate, updatedAt: new Date() })
-      .where(and(eq(ShelfUnit.shelfId, shelfId), eq(ShelfUnit.unitId, unitId)))
+      .where(
+        and(
+          eq(ShelfItem.shelfId, shelfId),
+          eq(ShelfItem.itemType, itemType),
+          eq(ShelfItem.itemId, itemId),
+        ),
+      )
       .returning();
-    if (!row) throw new Error("ShelfUnit not found");
-    return mapShelfUnitToDTO(row);
+    if (!row) throw new Error("ShelfItem not found");
+    return mapShelfItemToDTO(row);
   }
 
   private async rebalanceWindow(
     shelfId: string,
-    movedUnitId: string,
-    beforeUnitId: string | undefined,
-    afterUnitId: string | undefined,
-  ): Promise<ShelfUnitDTO> {
+    movedItemId: string,
+    beforeItemId: string | undefined,
+    afterItemId: string | undefined,
+    itemType: ShelfItemType = "unit",
+  ): Promise<ShelfItemDTO> {
     const db = await getServerDb();
     const rows = await db
-      .select({ unitId: ShelfUnit.unitId })
-      .from(ShelfUnit)
-      .where(eq(ShelfUnit.shelfId, shelfId))
-      .orderBy(asc(ShelfUnit.position))
+      .select({ itemId: ShelfItem.itemId })
+      .from(ShelfItem)
+      .where(
+        and(eq(ShelfItem.shelfId, shelfId), eq(ShelfItem.itemType, itemType)),
+      )
+      .orderBy(asc(ShelfItem.position))
       .limit(REBALANCE_WINDOW);
 
-    const ids = rows.map((r) => r.unitId).filter((r) => r !== movedUnitId);
+    const ids = rows.map((r) => r.itemId).filter((r) => r !== movedItemId);
     let insertAt = ids.length;
-    if (beforeUnitId) {
-      const idx = ids.indexOf(beforeUnitId);
+    if (beforeItemId) {
+      const idx = ids.indexOf(beforeItemId);
       if (idx >= 0) insertAt = idx + 1;
-    } else if (afterUnitId) {
-      const idx = ids.indexOf(afterUnitId);
+    } else if (afterItemId) {
+      const idx = ids.indexOf(afterItemId);
       if (idx >= 0) insertAt = idx;
       else insertAt = 0;
     } else {
       insertAt = ids.length;
     }
-    ids.splice(insertAt, 0, movedUnitId);
+    ids.splice(insertAt, 0, movedItemId);
 
     const newPositions = rebalance(ids.length);
 
     await db.transaction(async (tx) => {
       for (const [idx, id] of ids.entries()) {
         await tx
-          .update(ShelfUnit)
+          .update(ShelfItem)
           .set({ position: newPositions[idx]!, updatedAt: new Date() })
-          .where(and(eq(ShelfUnit.shelfId, shelfId), eq(ShelfUnit.unitId, id)));
+          .where(
+            and(
+              eq(ShelfItem.shelfId, shelfId),
+              eq(ShelfItem.itemType, itemType),
+              eq(ShelfItem.itemId, id),
+            ),
+          );
       }
     });
 
-    const moved = await findShelfUnit(db, shelfId, movedUnitId);
-    if (!moved) throw new Error("ShelfUnit not found");
-    return mapShelfUnitToDTO(moved);
+    const moved = await findShelfItem(db, shelfId, movedItemId, itemType);
+    if (!moved) throw new Error("ShelfItem not found");
+    return mapShelfItemToDTO(moved);
   }
 
-  async getShelfUnits(
+  async getShelfItems(
     shelfId: string,
-    query: ShelfUnitsQuery = {},
+    query: ShelfItemsQuery = {},
     options: { viewerUserId?: string | null } = {},
-  ): Promise<ShelfUnitsResponse> {
+  ): Promise<ShelfItemsResponse> {
     const limit = Math.max(1, Math.min(Number(query.limit ?? 100), 100));
-    const searchIds = await this.resolveShelfUnitSearchIds(
+    const searchIds = await this.resolveShelfItemSearchIds(
       shelfId,
       query,
       options.viewerUserId,
     );
 
     const db = await getServerDb();
-    const units = await db
+    const items = await db
       .select()
-      .from(ShelfUnit)
+      .from(ShelfItem)
       .where(
         and(
-          eq(ShelfUnit.shelfId, shelfId),
+          eq(ShelfItem.shelfId, shelfId),
+          sql`${ShelfItem.parentItemId} is null`,
+          query.itemType ? eq(ShelfItem.itemType, query.itemType) : undefined,
           query.variantUnitId?.trim()
-            ? eq(ShelfUnit.variantUnitId, query.variantUnitId.trim())
+            ? eq(ShelfItem.variantUnitId, query.variantUnitId.trim())
             : undefined,
-          searchIds ? inArray(ShelfUnit.unitId, [...searchIds]) : undefined,
+          searchIds ? inArray(ShelfItem.itemId, [...searchIds]) : undefined,
           query.cursor
-            ? sql`${ShelfUnit.position} > (
+            ? sql`${ShelfItem.position} > (
                 select su."position"
-                from "ShelfUnit" su
+                from "ShelfItem" su
                 where su."shelfId" = ${shelfId}
-                  and su."unitId" = ${query.cursor}
+                  and su."itemId" = ${query.cursor}
                 limit 1
               )`
             : undefined,
         ),
       )
-      .orderBy(asc(ShelfUnit.position))
+      .orderBy(asc(ShelfItem.position))
       .limit(limit + 1);
 
-    const hasMore = units.length > limit;
-    const page = hasMore ? units.slice(0, limit) : units;
-    const unitIds = page.map((p) => p.unitId);
+    const hasMore = items.length > limit;
+    const page = hasMore ? items.slice(0, limit) : items;
+    const pageItemIds = page.map((p) => p.itemId);
 
-    const relations =
-      unitIds.length > 0
+    const childRows =
+      pageItemIds.length > 0
         ? await db
             .select()
-            .from(ShelfUnitRelation)
+            .from(ShelfItem)
             .where(
               and(
-                eq(ShelfUnitRelation.shelfId, shelfId),
-                or(
-                  inArray(ShelfUnitRelation.parentUnitId, unitIds),
-                  inArray(ShelfUnitRelation.childUnitId, unitIds),
-                ),
+                eq(ShelfItem.shelfId, shelfId),
+                inArray(ShelfItem.parentItemId, pageItemIds),
               ),
             )
+            .orderBy(asc(ShelfItem.position))
         : [];
 
-    const variantContexts = await hydrateVariantContextSummaries(page);
+    const seenItems = new Set<string>();
+    const allItems = [...page, ...childRows].filter((row) => {
+      const key = `${row.itemType}:${row.itemId}`;
+      if (seenItems.has(key)) return false;
+      seenItems.add(key);
+      return true;
+    });
+    const variantContexts = await hydrateVariantContextSummaries(allItems);
+    const itemDTOs = allItems.map((item) =>
+      mapShelfItemToDTOWithVariantContext(item, variantContexts),
+    );
+    const relations = childRows
+      .filter((row) => row.parentItemId && row.parentRole)
+      .map((row) => ({
+        shelfId: row.shelfId,
+        parentItemType: (row.parentItemType ?? "unit") as ShelfItemType,
+        parentItemId: row.parentItemId!,
+        childItemType: row.itemType as ShelfItemType,
+        childItemId: row.itemId,
+        role: row.parentRole as ShelfItemParentRole,
+      }));
 
     return {
-      units: page.map((unit) =>
-        mapShelfUnitToDTOWithVariantContext(unit, variantContexts),
-      ),
-      relations: relations.map(mapShelfUnitRelationToDTO),
+      items: itemDTOs,
+      relations,
       hasMore,
     };
   }
 
-  // --- ShelfUnitRelation operations ---
+  // --- ShelfItemChild operations ---
 
   async attachReview(
     shelfId: string,
-    parentUnitId: string,
+    parentItemId: string,
     reviewUnitId: string,
-    reviewKind: ShelfUnitKind = "review",
-  ): Promise<ShelfUnitRelationDTO> {
-    if (parentUnitId === reviewUnitId) {
+    reviewKind: ShelfItemKind = "review",
+  ): Promise<ShelfItemChildDTO> {
+    if (parentItemId === reviewUnitId) {
       throw new AppError(400, "self_relation_forbidden");
     }
 
     let didCreateChild = false;
     const db = await getServerDb();
     const relation = await db.transaction(async (tx) => {
-      const parent = await findShelfUnit(tx, shelfId, parentUnitId);
+      const parent = await findShelfItem(tx, shelfId, parentItemId);
       if (!parent) {
-        const parentKind = await this.deriveKind(parentUnitId);
-        await ensureShelfUnit(tx, shelfId, parentUnitId, parentKind);
+        const parentKind = await this.deriveKind(parentItemId);
+        await ensureShelfItem(tx, shelfId, parentItemId, parentKind, "unit");
       }
 
-      const child = await findShelfUnit(tx, shelfId, reviewUnitId);
+      const child = await findShelfItem(tx, shelfId, reviewUnitId);
       if (!child) {
-        const r = await ensureShelfUnit(tx, shelfId, reviewUnitId, reviewKind);
+        const r = await ensureShelfItem(
+          tx,
+          shelfId,
+          reviewUnitId,
+          reviewKind,
+          "unit",
+          null,
+          undefined,
+          parentItemId,
+          "unit",
+          "review",
+        );
         didCreateChild = r.created;
       }
 
-      return upsertShelfUnitRelation(tx, {
+      return upsertShelfItemChild(tx, {
         shelfId,
-        parentUnitId,
-        childUnitId: reviewUnitId,
+        parentItemId,
+        childItemId: reviewUnitId,
         role: "review",
       });
     });
 
     if (didCreateChild) await enqueueContainedUnitIdsSync(shelfId);
-    return mapShelfUnitRelationToDTO(relation);
+    return relation;
   }
 
   async detachReview(
     shelfId: string,
-    parentUnitId: string,
+    parentItemId: string,
     reviewUnitId: string,
   ): Promise<void> {
     const db = await getServerDb();
-    await deleteShelfUnitRelations(db, {
+    await deleteShelfItemChildren(db, {
       shelfId,
-      parentUnitId,
-      childUnitId: reviewUnitId,
+      parentItemId,
+      childItemId: reviewUnitId,
       role: "review",
     });
   }
 
   /**
    * Reconcile the children of a parent for a single role to exactly the supplied list.
-   * Auto-creates child ShelfUnit rows if needed; end-of-shelf position rule.
+   * Auto-creates child ShelfItem rows if needed; end-of-shelf position rule.
    */
   async setChildren(
     shelfId: string,
-    parentUnitId: string,
-    role: ShelfUnitRelationRole,
-    childUnitIds: string[],
-    childKind?: ShelfUnitKind,
+    parentItemId: string,
+    role: ShelfItemParentRole,
+    childItemIds: string[],
+    childKind?: ShelfItemKind,
   ): Promise<void> {
-    if (childUnitIds.some((id) => id === parentUnitId)) {
+    if (childItemIds.some((id) => id === parentItemId)) {
       throw new AppError(400, "self_relation_forbidden");
     }
 
     let didCreate = false;
     const db = await getServerDb();
     await db.transaction(async (tx) => {
-      const parent = await findShelfUnit(tx, shelfId, parentUnitId);
+      const parent = await findShelfItem(tx, shelfId, parentItemId);
       if (!parent) {
-        const parentKind = await this.deriveKind(parentUnitId);
-        await ensureShelfUnit(tx, shelfId, parentUnitId, parentKind);
+        const parentKind = await this.deriveKind(parentItemId);
+        await ensureShelfItem(tx, shelfId, parentItemId, parentKind, "unit");
       }
 
-      for (const childId of childUnitIds) {
-        const existing = await findShelfUnit(tx, shelfId, childId);
+      for (const childId of childItemIds) {
+        const existing = await findShelfItem(tx, shelfId, childId);
         if (!existing) {
           const kind = childKind ?? (await this.deriveKind(childId));
-          const r = await ensureShelfUnit(tx, shelfId, childId, kind);
+          const r = await ensureShelfItem(
+            tx,
+            shelfId,
+            childId,
+            kind,
+            "unit",
+            null,
+            undefined,
+            parentItemId,
+            "unit",
+            role,
+          );
           didCreate = didCreate || r.created;
         }
       }
 
       const existingRelations = await tx
-        .select({ childUnitId: ShelfUnitRelation.childUnitId })
-        .from(ShelfUnitRelation)
+        .select({ childItemId: ShelfItem.itemId })
+        .from(ShelfItem)
         .where(
           and(
-            eq(ShelfUnitRelation.shelfId, shelfId),
-            eq(ShelfUnitRelation.parentUnitId, parentUnitId),
-            eq(ShelfUnitRelation.role, role),
+            eq(ShelfItem.shelfId, shelfId),
+            eq(ShelfItem.parentItemId, parentItemId),
+            eq(ShelfItem.parentRole, role),
           ),
         );
-      const existingSet = new Set(existingRelations.map((r) => r.childUnitId));
-      const nextSet = new Set(childUnitIds);
+      const existingSet = new Set(existingRelations.map((r) => r.childItemId));
+      const nextSet = new Set(childItemIds);
 
       const toAdd = [...nextSet].filter((id) => !existingSet.has(id));
       const toRemove = [...existingSet].filter((id) => !nextSet.has(id));
 
       if (toRemove.length > 0) {
-        await deleteShelfUnitRelations(tx, {
+        await deleteShelfItemChildren(tx, {
           shelfId,
-          parentUnitId,
+          parentItemId,
           role,
-          childUnitIds: toRemove,
+          childItemIds: toRemove,
         });
       }
       for (const childId of toAdd) {
-        await upsertShelfUnitRelation(tx, {
+        await upsertShelfItemChild(tx, {
           shelfId,
-          parentUnitId,
-          childUnitId: childId,
+          parentItemId,
+          childItemId: childId,
           role,
         });
       }
@@ -1311,8 +1475,8 @@ export class ShelfService {
 
   async applyBatch(
     shelfId: string,
-    ops: ShelfUnitBatchOp[],
-  ): Promise<ShelfUnitBatchResult[]> {
+    ops: ShelfItemBatchOp[],
+  ): Promise<ShelfItemBatchResult[]> {
     if (ops.length > SHELF_ITEM_BATCH_OP_CAP) {
       throw new AppError(
         413,
@@ -1320,8 +1484,8 @@ export class ShelfService {
       );
     }
 
-    const results: ShelfUnitBatchResult[] = [];
-    const touchedUnitIds = new Set<string>();
+    const results: ShelfItemBatchResult[] = [];
+    const touchedItems = new Map<string, ShelfItemType>();
     let mutated = false;
 
     const db = await getServerDb();
@@ -1330,7 +1494,7 @@ export class ShelfService {
         try {
           switch (op.op) {
             case "add": {
-              if (shelfId === op.unitId) {
+              if (op.itemType === "unit" && shelfId === op.itemId) {
                 results.push({
                   status: "failed",
                   op,
@@ -1338,44 +1502,54 @@ export class ShelfService {
                 });
                 continue;
               }
-              const created = await ensureShelfUnit(
+              const created = await ensureShelfItem(
                 tx,
                 shelfId,
-                op.unitId,
+                op.itemId,
                 op.kind,
+                op.itemType,
                 op.variantUnitId,
                 op.position,
+                op.parentItemId,
+                op.parentItemType,
+                op.parentRole,
               );
               if (created.created) {
                 mutated = true;
               }
-              const row = await findShelfUnit(tx, shelfId, op.unitId);
-              if (!row) throw new Error("ShelfUnit not found");
-              touchedUnitIds.add(op.unitId);
+              const row = await findShelfItem(
+                tx,
+                shelfId,
+                op.itemId,
+                op.itemType,
+              );
+              if (!row) throw new Error("ShelfItem not found");
+              touchedItems.set(op.itemId, op.itemType);
               results.push({
                 status: "ok",
                 op,
-                unit: mapShelfUnitToDTO(row),
+                item: mapShelfItemToDTO(row),
               });
               break;
             }
             case "reorder": {
               const [row] = await tx
-                .update(ShelfUnit)
+                .update(ShelfItem)
                 .set({ position: op.position, updatedAt: new Date() })
                 .where(
                   and(
-                    eq(ShelfUnit.shelfId, shelfId),
-                    eq(ShelfUnit.unitId, op.unitId),
+                    eq(ShelfItem.shelfId, shelfId),
+                    eq(ShelfItem.itemType, op.itemType),
+                    eq(ShelfItem.itemId, op.itemId),
                   ),
                 )
                 .returning();
-              if (!row) throw new Error("ShelfUnit not found");
-              touchedUnitIds.add(op.unitId);
+              if (!row) throw new Error("ShelfItem not found");
+              touchedItems.set(op.itemId, op.itemType);
               results.push({
                 status: "ok",
                 op,
-                unit: mapShelfUnitToDTO(row),
+                item: mapShelfItemToDTO(row),
               });
               break;
             }
@@ -1395,18 +1569,19 @@ export class ShelfService {
                 continue;
               }
               const rows = await tx
-                .select({ position: ShelfUnit.position })
-                .from(ShelfUnit)
+                .select({ position: ShelfItem.position })
+                .from(ShelfItem)
                 .where(
                   and(
-                    eq(ShelfUnit.shelfId, shelfId),
-                    ne(ShelfUnit.unitId, op.unitId),
+                    eq(ShelfItem.shelfId, shelfId),
+                    eq(ShelfItem.itemType, op.itemType),
+                    ne(ShelfItem.itemId, op.itemId),
                   ),
                 )
                 .orderBy(
                   order === "desc"
-                    ? desc(ShelfUnit.position)
-                    : asc(ShelfUnit.position),
+                    ? desc(ShelfItem.position)
+                    : asc(ShelfItem.position),
                 )
                 .offset(Math.max(0, skip - 1))
                 .limit(skip === 0 ? 1 : 2);
@@ -1425,26 +1600,32 @@ export class ShelfService {
                   ? generateBetween(first.position, previousVisual?.position)
                   : generateBetween(previousVisual?.position, first.position);
               const [row] = await tx
-                .update(ShelfUnit)
+                .update(ShelfItem)
                 .set({ position: newPosition, updatedAt: new Date() })
                 .where(
                   and(
-                    eq(ShelfUnit.shelfId, shelfId),
-                    eq(ShelfUnit.unitId, op.unitId),
+                    eq(ShelfItem.shelfId, shelfId),
+                    eq(ShelfItem.itemType, op.itemType),
+                    eq(ShelfItem.itemId, op.itemId),
                   ),
                 )
                 .returning();
-              if (!row) throw new Error("ShelfUnit not found");
-              touchedUnitIds.add(op.unitId);
+              if (!row) throw new Error("ShelfItem not found");
+              touchedItems.set(op.itemId, op.itemType);
               results.push({
                 status: "ok",
                 op,
-                unit: mapShelfUnitToDTO(row),
+                item: mapShelfItemToDTO(row),
               });
               break;
             }
             case "delete": {
-              const deleted = await deleteShelfUnit(tx, shelfId, op.unitId);
+              const deleted = await deleteShelfItem(
+                tx,
+                shelfId,
+                op.itemId,
+                op.itemType,
+              );
               if (deleted > 0) {
                 mutated = true;
               }
@@ -1452,7 +1633,7 @@ export class ShelfService {
               break;
             }
             case "attach": {
-              if (op.parentUnitId === op.childUnitId) {
+              if (op.parentItemId === op.childItemId) {
                 results.push({
                   status: "failed",
                   op,
@@ -1460,50 +1641,65 @@ export class ShelfService {
                 });
                 continue;
               }
-              const existingChild = await findShelfUnit(
+              const existingChild = await findShelfItem(
                 tx,
                 shelfId,
-                op.childUnitId,
+                op.childItemId,
+                op.childItemType,
               );
               if (!existingChild) {
-                const r = await ensureShelfUnit(
+                const r = await ensureShelfItem(
                   tx,
                   shelfId,
-                  op.childUnitId,
+                  op.childItemId,
                   op.childKind,
+                  op.childItemType,
                   op.childVariantUnitId,
                   op.position,
+                  op.parentItemId,
+                  op.parentItemType,
+                  op.role,
                 );
                 if (r.created) mutated = true;
               }
-              const relation = await upsertShelfUnitRelation(tx, {
+              const relation = await upsertShelfItemChild(tx, {
                 shelfId,
-                parentUnitId: op.parentUnitId,
-                childUnitId: op.childUnitId,
+                parentItemId: op.parentItemId,
+                parentItemType: op.parentItemType,
+                childItemId: op.childItemId,
+                childItemType: op.childItemType,
                 role: op.role,
               });
-              touchedUnitIds.add(op.childUnitId);
-              const childRow = await findShelfUnit(tx, shelfId, op.childUnitId);
+              touchedItems.set(op.childItemId, op.childItemType);
+              const childRow = await findShelfItem(
+                tx,
+                shelfId,
+                op.childItemId,
+                op.childItemType,
+              );
               results.push({
                 status: "ok",
                 op,
-                unit: childRow ? mapShelfUnitToDTO(childRow) : undefined,
-                relation: mapShelfUnitRelationToDTO(relation),
+                item: childRow ? mapShelfItemToDTO(childRow) : undefined,
+                relation,
               });
               break;
             }
             case "detach": {
-              await deleteShelfUnitRelations(tx, {
+              await deleteShelfItemChildren(tx, {
                 shelfId,
-                parentUnitId: op.parentUnitId,
-                childUnitId: op.childUnitId,
+                parentItemId: op.parentItemId,
+                parentItemType: op.parentItemType,
+                childItemId: op.childItemId,
+                childItemType: op.childItemType,
                 role: op.role,
               });
               results.push({ status: "ok", op });
               break;
             }
             case "setChildren": {
-              if (op.childUnitIds.some((id) => id === op.parentUnitId)) {
+              const childItemIds = op.childItemIds ?? [];
+              if (childItemIds.some((id) => id === op.parentItemId)) {
                 results.push({
                   status: "failed",
                   op,
@@ -1511,45 +1707,67 @@ export class ShelfService {
                 });
                 continue;
               }
-              for (const childId of op.childUnitIds) {
-                const existing = await findShelfUnit(tx, shelfId, childId);
+              for (const childId of childItemIds) {
+                const existing = await findShelfItem(
+                  tx,
+                  shelfId,
+                  childId,
+                  op.childItemType,
+                );
                 if (!existing) {
                   const kind = op.childKind ?? (await this.deriveKind(childId));
-                  const r = await ensureShelfUnit(tx, shelfId, childId, kind);
+                  const r = await ensureShelfItem(
+                    tx,
+                    shelfId,
+                    childId,
+                    kind,
+                    op.childItemType,
+                    null,
+                    undefined,
+                    op.parentItemId,
+                    op.parentItemType,
+                    op.role,
+                  );
                   if (r.created) mutated = true;
                 }
               }
               const existingRelations = await tx
-                .select({ childUnitId: ShelfUnitRelation.childUnitId })
-                .from(ShelfUnitRelation)
+                .select({ childItemId: ShelfItem.itemId })
+                .from(ShelfItem)
                 .where(
                   and(
-                    eq(ShelfUnitRelation.shelfId, shelfId),
-                    eq(ShelfUnitRelation.parentUnitId, op.parentUnitId),
-                    eq(ShelfUnitRelation.role, op.role),
+                    eq(ShelfItem.shelfId, shelfId),
+                    eq(ShelfItem.parentItemType, op.parentItemType),
+                    eq(ShelfItem.parentItemId, op.parentItemId),
+                    eq(ShelfItem.itemType, op.childItemType),
+                    eq(ShelfItem.parentRole, op.role),
                   ),
                 );
               const existingSet = new Set(
-                existingRelations.map((r) => r.childUnitId),
+                existingRelations.map((r) => r.childItemId),
               );
-              const nextSet = new Set(op.childUnitIds);
+              const nextSet = new Set(childItemIds);
               const toAdd = [...nextSet].filter((id) => !existingSet.has(id));
               const toRemove = [...existingSet].filter(
                 (id) => !nextSet.has(id),
               );
               if (toRemove.length > 0) {
-                await deleteShelfUnitRelations(tx, {
+                await deleteShelfItemChildren(tx, {
                   shelfId,
-                  parentUnitId: op.parentUnitId,
+                  parentItemId: op.parentItemId,
+                  parentItemType: op.parentItemType,
+                  childItemType: op.childItemType,
                   role: op.role,
-                  childUnitIds: toRemove,
+                  childItemIds: toRemove,
                 });
               }
               for (const childId of toAdd) {
-                await upsertShelfUnitRelation(tx, {
+                await upsertShelfItemChild(tx, {
                   shelfId,
-                  parentUnitId: op.parentUnitId,
-                  childUnitId: childId,
+                  parentItemId: op.parentItemId,
+                  parentItemType: op.parentItemType,
+                  childItemId: childId,
+                  childItemType: op.childItemType,
                   role: op.role,
                 });
               }
@@ -1575,7 +1793,7 @@ export class ShelfService {
       }
     });
 
-    if (touchedUnitIds.size > 0) {
+    if (touchedItems.size > 0) {
       for (let i = 0; i < results.length; i += 1) {
         const r = results[i]!;
         if (
@@ -1584,14 +1802,20 @@ export class ShelfService {
             r.op.op === "reorder" ||
             r.op.op === "reorderToPage")
         ) {
-          const opUnitId = r.op.unitId;
-          if (touchedUnitIds.has(opUnitId)) {
-            const fresh = await findShelfUnit(db, shelfId, opUnitId);
+          const opItemId = r.op.itemId;
+          const opItemType = touchedItems.get(opItemId);
+          if (opItemType) {
+            const fresh = await findShelfItem(
+              db,
+              shelfId,
+              opItemId,
+              opItemType,
+            );
             if (fresh) {
               results[i] = {
                 status: "ok",
                 op: r.op,
-                unit: mapShelfUnitToDTO(fresh),
+                item: mapShelfItemToDTO(fresh),
               };
             }
           }
@@ -1608,25 +1832,32 @@ export class ShelfService {
 
   async cleanupOrphans(
     shelfId: string,
-    orphanUnitIds: string[],
+    orphanItemIds: string[],
   ): Promise<{ deleted: number }> {
-    if (orphanUnitIds.length === 0) return { deleted: 0 };
+    if (orphanItemIds.length === 0) return { deleted: 0 };
     const db = await getServerDb();
     const deleted = await db.transaction(async (tx) => {
       const rows = await tx
-        .delete(ShelfUnit)
+        .delete(ShelfItem)
         .where(
           and(
-            eq(ShelfUnit.shelfId, shelfId),
-            inArray(ShelfUnit.unitId, orphanUnitIds),
+            eq(ShelfItem.shelfId, shelfId),
+            inArray(ShelfItem.itemId, orphanItemIds),
           ),
         )
-        .returning({ unitId: ShelfUnit.unitId });
+        .returning({
+          unitId: ShelfItem.itemId,
+          parentItemId: ShelfItem.parentItemId,
+        });
       if (rows.length > 0) {
+        const rootRows = rows.filter((row) => !row.parentItemId).length;
         await tx
           .update(Shelf)
           .set({
             itemCount: sql`${Shelf.itemCount} - ${rows.length}`,
+            ...(rootRows > 0
+              ? { rootItemCount: sql`${Shelf.rootItemCount} - ${rootRows}` }
+              : {}),
             updatedAt: new Date(),
           })
           .where(eq(Shelf.unitId, shelfId));
@@ -1643,7 +1874,7 @@ export class ShelfService {
 export function mapUnitToKind(
   type: typeof Unit.$inferSelect.type,
   postKind: typeof Post.$inferSelect.kind | null,
-): ShelfUnitKind {
+): ShelfItemKind {
   if (type === "POST") {
     if (postKind === "CHAPTER") return "chapter";
     if (postKind === "REVIEW") return "review";
@@ -1670,7 +1901,7 @@ export function mapUnitToKind(
     case "VIDEO":
       return "video";
     default:
-      return type.toString().toLowerCase() as ShelfUnitKind;
+      return type.toString().toLowerCase() as ShelfItemKind;
   }
 }
 

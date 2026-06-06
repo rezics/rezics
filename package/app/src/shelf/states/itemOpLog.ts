@@ -1,8 +1,8 @@
-import type { ShelfUnitBatchOp } from "@rezics/contract";
+import type { ShelfItemBatchOp } from "@rezics/contract";
 
 export interface ItemOpEntry {
   id: string;
-  op: ShelfUnitBatchOp;
+  op: ShelfItemBatchOp;
   failedReason?: string;
 }
 
@@ -15,26 +15,27 @@ export const emptyLog: ItemOpLog = { entries: [], nextSeq: 1 };
 
 /**
  * Coalescing key for an op: relation-shaped ops (`attach`/`detach`/`setChildren`)
- * key by `(parent, child, role)` or `(parent, role)`; unit-shaped ops key by `unitId`.
+ * key by `(parent, child, role)` or `(parent, role)`; item-shaped ops key by
+ * `(itemType, itemId)`.
  */
-function unitKeyOf(op: ShelfUnitBatchOp): string | null {
+function itemKeyOf(op: ShelfItemBatchOp): string | null {
   switch (op.op) {
     case "add":
     case "reorder":
     case "reorderToPage":
     case "delete":
-      return op.unitId;
+      return `${op.itemType}|${op.itemId}`;
     case "attach":
     case "detach":
-      return `${op.parentUnitId}|${op.childUnitId}|${op.role}`;
+      return `${op.parentItemType}|${op.parentItemId}|${op.childItemType}|${op.childItemId}|${op.role}`;
     case "setChildren":
-      return `${op.parentUnitId}|${op.role}`;
+      return `${op.parentItemType}|${op.parentItemId}|${op.childItemType}|${op.role}`;
     default:
       return null;
   }
 }
 
-export function enqueue(log: ItemOpLog, op: ShelfUnitBatchOp): ItemOpLog {
+export function enqueue(log: ItemOpLog, op: ShelfItemBatchOp): ItemOpLog {
   const id = `op-${log.nextSeq}`;
   const next: ItemOpLog = {
     entries: [...log.entries, { id, op }],
@@ -46,9 +47,9 @@ export function enqueue(log: ItemOpLog, op: ShelfUnitBatchOp): ItemOpLog {
 /**
  * Reduce the entry list (applied right-to-left so latest op wins):
  *
- * - `add` then `delete` on the same unitId → drop both
- * - `reorder` then later `reorder*` on same unitId → keep only the latest
- * - `reorderToPage` then later `reorder*` on same unitId → keep only the latest
+ * - `add` then `delete` on the same item → drop both
+ * - `reorder` then later `reorder*` on same item → keep only the latest
+ * - `reorderToPage` then later `reorder*` on same item → keep only the latest
  * - `setChildren` then later `setChildren` on same `(parent, role)` → latest only
  * - `attach` then later `detach` on same `(parent, child, role)` → drop both
  *
@@ -68,7 +69,7 @@ export function coalesce(log: ItemOpLog): ItemOpLog {
   const droppedDetachKey = new Set<string>();
 
   for (const entry of reversed) {
-    const key = unitKeyOf(entry.op);
+    const key = itemKeyOf(entry.op);
     if (key === null) continue;
     const kind = entry.op.op;
 
@@ -113,7 +114,7 @@ export function coalesce(log: ItemOpLog): ItemOpLog {
   }
 
   const cleaned = kept.reverse().filter((e) => {
-    const key = unitKeyOf(e.op);
+    const key = itemKeyOf(e.op);
     if (key === null) return true;
     if (e.op.op === "delete" && droppedAddRef.has(key)) return false;
     if (e.op.op === "detach" && droppedDetachKey.has(key)) return false;

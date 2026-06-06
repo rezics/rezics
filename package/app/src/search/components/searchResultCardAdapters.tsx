@@ -6,6 +6,7 @@ import type {
   PostSearchDocument,
   RealmSearchDocument,
   SearchCategory,
+  ShelfItemShelfGroup,
   UserSearchDocument,
 } from "@rezics/contract";
 import { contentDocMarkdownFallback } from "@rezics/contract";
@@ -18,10 +19,14 @@ import {
 } from "@/components/card";
 import { unitHref } from "@/shared/ui/link";
 import { contentHref } from "../models/contentDestination";
+import { shelfMatchedSource } from "../models/shelfMatchedSource";
 
 type ContentCategory = "books" | "shelves";
 type PostCategory = "reviews" | "excerpts" | "remarks" | "posts";
 type CardBadge = React.ReactNode;
+type ShelfSearchDocument = ContentSearchDocument & {
+  matchedShelfItemGroup?: ShelfItemShelfGroup;
+};
 
 export function pickSearchTitle(
   titles: readonly string[] | null | undefined,
@@ -143,6 +148,12 @@ export function renderContentSearchCard(
     formatDate(item.publishedAt ?? item.updatedAt),
   ]);
   const href = contentHref(item);
+  const source =
+    item.type === "SHELF"
+      ? (shelfMatchedSource(
+          (item as ShelfSearchDocument).matchedShelfItemGroup,
+        ) ?? subtitle)
+      : subtitle;
 
   if (item.type === "BOOK") {
     return (
@@ -165,7 +176,7 @@ export function renderContentSearchCard(
     <SearchContentResultCard
       badge={options.badge}
       kind={item.type}
-      source={subtitle || undefined}
+      source={source || undefined}
       title={title}
       titleHref={href}
       body={summary || undefined}

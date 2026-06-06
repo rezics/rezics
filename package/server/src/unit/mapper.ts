@@ -8,6 +8,11 @@ import { mapPublicUser } from "@/utils/sanitizeUser";
 import { resolveStoredLicenseSlug } from "./publication-policy";
 import type { UnitWithRelations } from "./types";
 
+function optionalCount(row: unknown, key: string): number | undefined {
+  const value = (row as Record<string, unknown> | null | undefined)?.[key];
+  return typeof value === "number" ? value : undefined;
+}
+
 /**
  * Map internal Unit model to UnitDTO
  */
@@ -41,6 +46,8 @@ export function mapUnitToDTO(
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,
     publishedAt: unit.publishedAt ?? undefined,
+    referenceCount: unit.referenceCount,
+    shareCount: optionalCount(unit, "shareCount"),
     resolvedLanguage: resolvedLanguage as UnitDTO["resolvedLanguage"],
     title: translation?.title ?? null,
     subtitle: translation?.subtitle ?? null,
@@ -95,6 +102,8 @@ export function mapUnitListItemToDTO(
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,
     publishedAt: unit.publishedAt ?? undefined,
+    referenceCount: unit.referenceCount,
+    shareCount: optionalCount(unit, "shareCount"),
     resolvedLanguage: resolvedLanguage as UnitDTO["resolvedLanguage"],
     title: translation?.title ?? null,
     subtitle: translation?.subtitle ?? null,

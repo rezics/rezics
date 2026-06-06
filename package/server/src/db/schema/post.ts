@@ -84,3 +84,27 @@ export const PostPollReference = pgTable(
     ),
   ],
 );
+
+export const PostUnitReference = pgTable(
+  "PostUnitReference",
+  {
+    sourcePostUnitId: uuid().notNull(),
+    targetUnitId: uuid().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.sourcePostUnitId, table.targetUnitId],
+      name: "PostUnitReference_pkey",
+    }),
+    index("PostUnitReference_sourcePostUnitId_idx").using(
+      "btree",
+      table.sourcePostUnitId.asc().nullsLast(),
+    ),
+    index("PostUnitReference_targetUnitId_idx").using(
+      "btree",
+      table.targetUnitId.asc().nullsLast(),
+    ),
+  ],
+);

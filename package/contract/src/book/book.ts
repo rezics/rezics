@@ -59,6 +59,8 @@ export const bookDTOSchema = t.Object({
   isLanguageNeutral: t.Optional(t.Boolean()),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
+  referenceCount: t.Optional(t.Number()),
+  shareCount: t.Optional(t.Number()),
 
   // Book extension fields
   isbn13: t.Optional(t.Nullable(t.String())),

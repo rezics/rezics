@@ -30,6 +30,20 @@ export type ReactionSummaryResponse = {
   summaries: Record<string, Record<string, number>>;
 };
 
+export type ShareSummaryResponse = {
+  summaries: Record<string, { shareCount: number }>;
+};
+
+export type ShareCreateInput = {
+  targetId: string;
+};
+
+export type ShareCreateResponse = {
+  targetId: string;
+  shareCount: number;
+  created: boolean;
+};
+
 /** Response shape for GET /reactions/my */
 export type ReactionMyResponse = {
   userId: string;

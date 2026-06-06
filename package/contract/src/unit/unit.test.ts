@@ -70,6 +70,8 @@ describe("Unit AI disclosure DTO/input schemas", () => {
         type: "BOOK",
         aiDisclosureMode: "AI_ASSISTED",
         aiDisclosureDetails: { sourceStandard: "C2PA" },
+        referenceCount: 2,
+        shareCount: 3,
       }),
     ).toBe(true);
     expect(

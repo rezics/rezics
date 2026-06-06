@@ -47,5 +47,7 @@ export function permittedCategoriesForScope(
         (c) =>
           c !== "books" && c !== "realms" && c !== "users" && c !== "entities",
       );
+    case "saved":
+      return ["all", "shelves"];
   }
 }

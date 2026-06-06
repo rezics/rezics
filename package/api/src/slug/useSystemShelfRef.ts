@@ -46,7 +46,7 @@ export function computeSystemShelfRefResult(args: {
 /**
  * Resolve the viewer's system-shelf `Unit.id` for a given `kindKey` via the
  * standard `(scope, slug)` slug index. The viewer's `User.unitId` is the
- * owner scope; the slug is the system `kindKey` (`favorites` | `backlog` |
+ * owner scope; the slug is the system `kindKey` (`favorites` | `saved` | `backlog` |
  * `active` | `completed`).
  *
  * This is the canonical client-side resolution for system shelves. There is

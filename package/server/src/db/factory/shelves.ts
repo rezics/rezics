@@ -8,8 +8,7 @@ import {
 import { generateBetween } from "../../shelf/fractional-index";
 import {
   Shelf,
-  ShelfUnit,
-  ShelfUnitRelation,
+  ShelfItem,
   Unit,
   UnitSupportLanguage,
   UnitTranslation,
@@ -88,23 +87,19 @@ export async function seedShelves(
       const selectedWorks = pickN(works, itemCount);
 
       let prevPos: string | undefined;
-      const shelfUnitRows: Array<{
+      const shelfItemRows: Array<{
         shelfId: string;
         unitId: string;
         kind: string;
         position: string;
+        parentItemType?: string;
+        parentItemId?: string;
+        parentRole?: string;
       }> = [];
-      const shelfUnitRelationRows: Array<{
-        shelfId: string;
-        parentUnitId: string;
-        childUnitId: string;
-        role: string;
-      }> = [];
-
       for (const work of selectedWorks) {
         const position = generateBetween(prevPos, undefined);
         prevPos = position;
-        shelfUnitRows.push({
+        shelfItemRows.push({
           shelfId: unit.id,
           unitId: work.id,
           kind: unitTypeToShelfKind(work.type),
@@ -121,17 +116,14 @@ export async function seedShelves(
             for (const review of pickN(candidateReviews, attachCount)) {
               const reviewPosition = generateBetween(prevPos, undefined);
               prevPos = reviewPosition;
-              shelfUnitRows.push({
+              shelfItemRows.push({
                 shelfId: unit.id,
                 unitId: review.id,
                 kind: "review",
                 position: reviewPosition,
-              });
-              shelfUnitRelationRows.push({
-                shelfId: unit.id,
-                parentUnitId: work.id,
-                childUnitId: review.id,
-                role: "review",
+                parentItemId: work.id,
+                parentItemType: "unit",
+                parentRole: "review",
               });
             }
           }
@@ -157,7 +149,8 @@ export async function seedShelves(
           unitId: unit.id,
           kindKey,
           extra,
-          itemCount: shelfUnitRows.length,
+          rootItemCount: selectedWorks.length,
+          itemCount: shelfItemRows.length,
         }),
       );
       await ctx.db.insert(UnitTranslation).values(
@@ -184,17 +177,11 @@ export async function seedShelves(
           })),
         ),
       );
-      if (shelfUnitRows.length > 0) {
+      if (shelfItemRows.length > 0) {
         await ctx.db
-          .insert(ShelfUnit)
-          .values(withUpdatedAtRows(shelfUnitRows))
+          .insert(ShelfItem)
+          .values(withUpdatedAtRows(shelfItemRows))
           .onConflictDoNothing();
-        if (shelfUnitRelationRows.length > 0) {
-          await ctx.db
-            .insert(ShelfUnitRelation)
-            .values(withUpdatedAtRows(shelfUnitRelationRows))
-            .onConflictDoNothing();
-        }
       }
 
       await ctx.sync.content(unit.id);

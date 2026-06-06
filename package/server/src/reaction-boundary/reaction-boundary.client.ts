@@ -3,6 +3,7 @@ import type {
   GivenResponse,
   InternalByUserBody,
   InternalByUserResponse,
+  InternalCreateShareResponse,
   InternalCreateResponse,
   InternalRemoveResponse,
 } from "@rezics/contract/reaction";
@@ -91,6 +92,16 @@ export async function removeReaction(
     targetId,
     reaction,
     scopeKey: normalizeReactionScopeKey(scopeKey),
+  });
+}
+
+export async function recordShare(
+  userId: string,
+  targetId: string,
+): Promise<InternalCreateShareResponse> {
+  return postInternal<InternalCreateShareResponse>("/internal/share", {
+    userId,
+    targetId,
   });
 }
 

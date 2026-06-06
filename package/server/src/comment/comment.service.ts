@@ -1,6 +1,7 @@
 import type {
   CommentListBody,
   CommentListQuery,
+  type CommentSearchOptions,
   CreateCommentInput,
   UpdateCommentInput,
 } from "@rezics/contract";
@@ -12,12 +13,9 @@ import {
   desc,
   eq,
   inArray,
-  isNotNull,
   isNull,
-  lte,
-  ne,
+  lt,
   notInArray,
-  or,
   sql,
 } from "drizzle-orm";
 import { blockService } from "@/block/block.service";
@@ -29,9 +27,7 @@ import type { CommentWithRelations } from "./comment.types";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
-type CommentListInput = Omit<CommentListQuery, "ids"> & {
-  ids?: CommentListQuery["ids"] | CommentListBody["ids"];
-};
+type CommentListInput = CommentListQuery | CommentListBody;
 
 type CommentRow = typeof Comment.$inferSelect;
 type CommentListRepositoryInput = {
@@ -39,11 +35,10 @@ type CommentListRepositoryInput = {
   realmUnitId: string | null;
   authorUserId?: string;
   state?: string;
-  ids?: string[];
-  maxDepth?: number;
   parentCommentId?: string | null;
   blockedAuthorIds?: string[];
   sort?: CommentListInput["sort"];
+  cursor?: CommentListInput["cursor"];
   limit: number;
 };
 type CommentParentRow = Pick<
@@ -56,21 +51,7 @@ export type CommentRepository = {
     input: CommentListRepositoryInput,
   ): Promise<{ comments: CommentWithRelations[]; total: number }>;
   getById(id: string): Promise<CommentWithRelations>;
-  getSubtreeAnchor(input: {
-    id: string;
-    rootUnitId: string;
-    realmUnitId: string | null;
-  }): Promise<{ id: string; depth: number; path: string | null } | null>;
-  listSubtreeDescendantIds(input: {
-    anchor: { id: string; depth: number; path: string };
-    rootUnitId: string;
-    realmUnitId: string | null;
-    maxDepth?: number;
-  }): Promise<string[]>;
-  findRedactedAncestors(ids: string[]): Promise<CommentWithRelations[]>;
-  attachPaths<T extends { id: string; path?: string | null }>(
-    comments: T[],
-  ): Promise<T[]>;
+  getByIdsIncludingRedacted(ids: string[]): Promise<CommentWithRelations[]>;
   attachPinOverlays<
     T extends {
       id: string;
@@ -89,9 +70,7 @@ export type CommentRepository = {
     depth: number;
     parentId?: string;
   }): Promise<CommentWithRelations>;
-  getUpdateIdentity(
-    id: string,
-  ): Promise<Pick<CommentRow, "authorUserId" | "realmUnitId">>;
+  getUpdateIdentity(id: string): Promise<Pick<CommentRow, "authorUserId">>;
   update(id: string, input: UpdateCommentInput): Promise<CommentWithRelations>;
   getDeleteIdentity(id: string): Promise<Pick<CommentRow, "authorUserId">>;
   softDelete(id: string): Promise<void>;
@@ -118,10 +97,8 @@ function mapCommentRow(row: {
   comment: CommentRow;
   author: PublicUserSelected | null;
 }): CommentWithRelations {
-  const path = row.comment.path;
   return {
     ...row.comment,
-    path: typeof path === "string" ? path : null,
     author: row.author,
   };
 }
@@ -132,13 +109,44 @@ function realmPartitionCondition(realmUnitId: string | null) {
     : isNull(Comment.realmUnitId);
 }
 
+function cursorDate(value?: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function commentCursorCondition(
+  sort: CommentListInput["sort"],
+  cursor?: CommentListInput["cursor"],
+) {
+  if (!cursor?.id) return undefined;
+  const createdAt = cursorDate(cursor.createdAt);
+  const id = cursor.id;
+
+  if (sort === "old") {
+    if (!createdAt) return sql`${Comment.id} > ${id}`;
+    return sql`(${Comment.createdAt}, ${Comment.id}) > (${createdAt}, ${id})`;
+  }
+
+  if (
+    sort === "top" ||
+    sort === "best" ||
+    sort === "rising" ||
+    sort === "controversial"
+  ) {
+    const sortValue =
+      typeof cursor.sortValue === "number" ? cursor.sortValue : undefined;
+    if (sortValue === undefined || !createdAt) return lt(Comment.id, id);
+    return sql`(${Comment.replyCount}, ${Comment.createdAt}, ${Comment.id}) < (${sortValue}, ${createdAt}, ${id})`;
+  }
+
+  if (!createdAt) return lt(Comment.id, id);
+  return sql`(${Comment.createdAt}, ${Comment.id}) < (${createdAt}, ${id})`;
+}
+
 function createDrizzleCommentRepository(): CommentRepository {
   return {
     async list(input) {
-      if (input.ids && input.ids.length === 0) {
-        return { comments: [], total: 0 };
-      }
-
       const db = await getServerDb();
       const conditions = [
         eq(Comment.rootUnitId, input.rootUnitId),
@@ -150,10 +158,6 @@ function createDrizzleCommentRepository(): CommentRepository {
         conditions.push(eq(Comment.authorUserId, input.authorUserId));
       }
       if (input.state) conditions.push(eq(Comment.state, input.state));
-      if (input.ids?.length) conditions.push(inArray(Comment.id, input.ids));
-      if (typeof input.maxDepth === "number") {
-        conditions.push(lte(Comment.depth, input.maxDepth));
-      }
       if ("parentCommentId" in input) {
         conditions.push(
           input.parentCommentId
@@ -167,20 +171,33 @@ function createDrizzleCommentRepository(): CommentRepository {
         );
       }
 
-      const where = and(...conditions);
+      const cursorCondition = commentCursorCondition(input.sort, input.cursor);
+      const rowWhere = cursorCondition
+        ? and(...conditions, cursorCondition)
+        : and(...conditions);
+      const totalWhere = and(...conditions);
       const orderBy =
-        input.sort === "top" || input.sort === "hot"
-          ? [desc(Comment.replyCount), desc(Comment.createdAt)]
-          : [asc(Comment.createdAt)];
+        input.sort === "old"
+          ? [asc(Comment.createdAt), asc(Comment.id)]
+          : input.sort === "top" ||
+              input.sort === "best" ||
+              input.sort === "rising" ||
+              input.sort === "controversial"
+            ? [
+                desc(Comment.replyCount),
+                desc(Comment.createdAt),
+                desc(Comment.id),
+              ]
+            : [desc(Comment.createdAt), desc(Comment.id)];
       const [rows, totalRows] = await Promise.all([
         db
           .select({ comment: Comment, author: publicAuthorColumns() })
           .from(Comment)
           .leftJoin(User, eq(Comment.authorUserId, User.unitId))
-          .where(where)
+          .where(rowWhere)
           .orderBy(...orderBy)
           .limit(input.limit),
-        db.select({ value: count() }).from(Comment).where(where),
+        db.select({ value: count() }).from(Comment).where(totalWhere),
       ]);
 
       return {
@@ -199,76 +216,15 @@ function createDrizzleCommentRepository(): CommentRepository {
       if (!row) throw new AppError(404, `Comment not found: ${id}`);
       return mapCommentRow(row);
     },
-    async getSubtreeAnchor(input) {
-      const db = await getServerDb();
-      const result = await db.execute<{
-        id: string;
-        depth: number;
-        path: string | null;
-      }>(sql`
-        SELECT "id", "depth", "path"::text AS path
-        FROM "Comment"
-        WHERE "id" = ${input.id}::uuid
-          AND "rootUnitId" = ${input.rootUnitId}::uuid
-          AND "realmUnitId" IS NOT DISTINCT FROM ${input.realmUnitId}::uuid
-        LIMIT 1
-      `);
-      return result.rows[0] ?? null;
-    },
-    async listSubtreeDescendantIds(input) {
-      const db = await getServerDb();
-      const result = await db.execute<{ id: string }>(sql`
-        SELECT "id" FROM "Comment"
-        WHERE "path" <@ ${input.anchor.path}::ltree
-          AND "rootUnitId" = ${input.rootUnitId}::uuid
-          AND "realmUnitId" IS NOT DISTINCT FROM ${input.realmUnitId}::uuid
-          AND "id" <> ${input.anchor.id}::uuid
-          ${
-            typeof input.maxDepth === "number"
-              ? sql`AND "depth" <= ${input.anchor.depth + input.maxDepth}`
-              : sql``
-          }
-      `);
-      return result.rows.map((row) => row.id);
-    },
-    async findRedactedAncestors(ids) {
+    async getByIdsIncludingRedacted(ids) {
       if (ids.length === 0) return [];
       const db = await getServerDb();
       const rows = await db
         .select({ comment: Comment, author: publicAuthorColumns() })
         .from(Comment)
         .leftJoin(User, eq(Comment.authorUserId, User.unitId))
-        .where(
-          and(
-            inArray(Comment.id, ids),
-            or(
-              ne(Comment.moderationStatus, "APPROVED"),
-              isNotNull(Comment.deletedAt),
-            ),
-          ),
-        );
+        .where(inArray(Comment.id, ids));
       return rows.map(mapCommentRow);
-    },
-    async attachPaths(comments) {
-      if (comments.length === 0) return comments;
-      const db = await getServerDb();
-      const rows = await db
-        .select({
-          id: Comment.id,
-          path: sql<string | null>`${Comment.path}::text`,
-        })
-        .from(Comment)
-        .where(
-          inArray(
-            Comment.id,
-            comments.map((comment) => comment.id),
-          ),
-        );
-      const pathById = new Map(rows.map((row) => [row.id, row.path]));
-      for (const comment of comments) {
-        comment.path = pathById.get(comment.id) ?? null;
-      }
-      return comments;
     },
     async attachPinOverlays(comments) {
       if (comments.length === 0) return comments;
@@ -344,13 +300,6 @@ function createDrizzleCommentRepository(): CommentRepository {
         if (!created) throw new Error("Failed to create Comment");
 
         if (input.parentId) {
-          await tx.execute(sql`
-            UPDATE "Comment" AS c
-            SET "path" = p."path" || text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
-            FROM "Comment" AS p
-            WHERE c."id" = ${created.id}::uuid
-              AND p."id" = ${input.parentId}::uuid
-          `);
           await tx
             .update(Comment)
             .set({
@@ -360,12 +309,6 @@ function createDrizzleCommentRepository(): CommentRepository {
               updatedAt: now,
             })
             .where(eq(Comment.id, input.parentId));
-        } else {
-          await tx.execute(sql`
-            UPDATE "Comment"
-            SET "path" = text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
-            WHERE "id" = ${created.id}::uuid
-          `);
         }
 
         await tx
@@ -389,7 +332,6 @@ function createDrizzleCommentRepository(): CommentRepository {
       const [existing] = await db
         .select({
           authorUserId: Comment.authorUserId,
-          realmUnitId: Comment.realmUnitId,
         })
         .from(Comment)
         .where(eq(Comment.id, id))
@@ -403,12 +345,6 @@ function createDrizzleCommentRepository(): CommentRepository {
         .update(Comment)
         .set({
           ...(input.content !== undefined ? { content: input.content } : {}),
-          ...(input.realmUnitId !== undefined
-            ? {
-                // Clearing realmUnitId removes the comment from that realm only.
-                realmUnitId: input.realmUnitId,
-              }
-            : {}),
           ...(input.isLocked !== undefined ? { isLocked: input.isLocked } : {}),
           ...(input.state !== undefined ? { state: input.state } : {}),
           updatedAt: new Date(),
@@ -442,6 +378,86 @@ function createDrizzleCommentRepository(): CommentRepository {
   };
 }
 
+function commentSearchSortField(
+  sort: CommentListInput["sort"],
+): NonNullable<CommentSearchOptions["sort"]>["field"] {
+  switch (sort) {
+    case "best":
+      return "bestScore";
+    case "top":
+      return "topScore";
+    case "rising":
+      return "risingScore";
+    case "controversial":
+      return "controversyScore";
+    case "old":
+    case "new":
+    default:
+      return "createdAt";
+  }
+}
+
+function orderedByIds(
+  comments: CommentWithRelations[],
+  ids: readonly string[],
+): CommentWithRelations[] {
+  const byId = new Map(comments.map((comment) => [comment.id, comment]));
+  return ids.flatMap((id) => {
+    const comment = byId.get(id);
+    return comment ? [comment] : [];
+  });
+}
+
+export function createSearchBackedCommentRepository(
+  delegate: CommentRepository,
+): CommentRepository {
+  return {
+    ...delegate,
+    async list(input) {
+      if (input.cursor || input.blockedAuthorIds?.length) {
+        return delegate.list(input);
+      }
+
+      try {
+        const { searchComments } = await import(
+          "../meili/comment/comment.service"
+        );
+        const result = await searchComments({
+          rootUnitId: input.rootUnitId,
+          realmUnitId: input.realmUnitId,
+          ...(input.parentCommentId !== undefined
+            ? { parentCommentId: input.parentCommentId }
+            : {}),
+          authorUserId: input.authorUserId,
+          state: input.state,
+          moderationStatus: "APPROVED",
+          sort: {
+            field: commentSearchSortField(input.sort),
+            order: input.sort === "old" ? "asc" : "desc",
+          },
+          limit: input.limit,
+        });
+        const ids = result.items.map((comment) => comment.id);
+        const hydrated = await delegate.getByIdsIncludingRedacted(ids);
+        const visible = orderedByIds(hydrated, ids).filter(
+          (comment) =>
+            comment.moderationStatus === "APPROVED" && !comment.deletedAt,
+        );
+        return {
+          comments: visible,
+          total: result.total,
+        };
+      } catch {
+        return delegate.list(input);
+      }
+    },
+  };
+}
+
+function createDefaultCommentRepository(): CommentRepository {
+  return createSearchBackedCommentRepository(createDrizzleCommentRepository());
+}
+
 function enqueueCommentSync(commentId: string) {
   return serverJobProducer.enqueue(
     createSearchCommand(
@@ -463,15 +479,6 @@ function firstCommentOrThrow(
   return comment;
 }
 
-function normalizeIds(ids: CommentListInput["ids"]): string[] | undefined {
-  if (!ids) return undefined;
-  if (Array.isArray(ids)) return ids;
-  return ids
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean);
-}
-
 async function blockedAuthorIds(options?: {
   viewerUserId?: string | null;
 }): Promise<string[]> {
@@ -479,7 +486,7 @@ async function blockedAuthorIds(options?: {
   return blockService.blockedUserIds(options.viewerUserId);
 }
 
-function missingParentIds(
+function directParentIds(
   comments: Pick<CommentWithRelations, "id" | "parentCommentId">[],
 ) {
   const commentIds = new Set(comments.map((comment) => comment.id));
@@ -494,73 +501,98 @@ function missingParentIds(
   ];
 }
 
-async function includeRedactedAncestors(
+function commentCursorFor(
+  comment: CommentWithRelations | undefined,
+  sort: CommentListInput["sort"],
+): CommentListInput["cursor"] | null {
+  if (!comment) return null;
+  const createdAt =
+    comment.createdAt instanceof Date
+      ? comment.createdAt.toISOString()
+      : comment.createdAt;
+  return {
+    id: comment.id,
+    createdAt,
+    ...(sort === "top" ||
+    sort === "best" ||
+    sort === "rising" ||
+    sort === "controversial"
+      ? { sortValue: comment.replyCount }
+      : {}),
+  };
+}
+
+async function directParentContexts(
   repository: CommentRepository,
   comments: CommentWithRelations[],
 ): Promise<CommentWithRelations[]> {
-  let parentIds = missingParentIds(comments);
-  if (parentIds.length === 0) return comments;
-
-  const byId = new Map(comments.map((comment) => [comment.id, comment]));
-  while (parentIds.length > 0) {
-    const ancestors = await repository.findRedactedAncestors(parentIds);
-    if (ancestors.length === 0) break;
-
-    for (const ancestor of ancestors) {
-      byId.set(ancestor.id, ancestor);
-    }
-    parentIds = missingParentIds([...byId.values()]);
-  }
-
-  return [...byId.values()];
+  const parentIds = directParentIds(comments);
+  if (parentIds.length === 0) return [];
+  return repository.getByIdsIncludingRedacted(parentIds);
 }
 
-function sortTreeComments(comments: CommentWithRelations[]) {
-  return comments.sort((left, right) => {
-    if (left.path && right.path && left.path !== right.path) {
-      return left.path.localeCompare(right.path);
-    }
-    return left.createdAt.getTime() - right.createdAt.getTime();
-  });
-}
+type CommentSliceResult = {
+  comments: CommentWithRelations[];
+  total: number;
+  rootComment?: CommentWithRelations | null;
+  parentContexts?: CommentWithRelations[];
+  nextCursor?: CommentListInput["cursor"] | null;
+};
 
 export class CommentService {
   constructor(
-    private readonly repository: CommentRepository = createDrizzleCommentRepository(),
+    private readonly repository: CommentRepository = createDefaultCommentRepository(),
   ) {}
 
   async list(
     query: CommentListInput,
     options?: { viewerUserId?: string | null },
-  ): Promise<{ comments: CommentWithRelations[]; total: number }> {
+  ): Promise<CommentSliceResult> {
     const limit = Math.max(
       1,
       Math.min(Number(query.limit ?? DEFAULT_LIMIT), MAX_LIMIT),
     );
     const realmUnitId = query.realmUnitId ?? null;
-    let ids = normalizeIds(query.ids);
-    let parentCommentId: string | null | undefined;
+    let parentCommentId: string | null | undefined =
+      query.mode === "discovery" ? undefined : (query.parentCommentId ?? null);
+    let rootComment: CommentWithRelations | null | undefined;
 
-    if (query.mode === "subtree" && query.subtreeRootCommentId) {
-      const anchor = await this.repository.getSubtreeAnchor({
-        id: query.subtreeRootCommentId,
-        rootUnitId: query.rootUnitId,
-        realmUnitId,
-      });
-      if (!anchor?.path) {
+    if (query.mode === "root") {
+      if (!query.rootCommentId) {
+        throw new AppError(400, "rootCommentId is required for root slices");
+      }
+      rootComment = await this.repository.getById(query.rootCommentId);
+      if (
+        rootComment.rootUnitId !== query.rootUnitId ||
+        rootComment.realmUnitId !== realmUnitId
+      ) {
         throw new AppError(
-          404,
-          `Comment not found: ${query.subtreeRootCommentId}`,
+          400,
+          "Root comment is outside the requested root/realm partition",
         );
       }
-      ids = await this.repository.listSubtreeDescendantIds({
-        anchor: { id: anchor.id, depth: anchor.depth, path: anchor.path },
-        rootUnitId: query.rootUnitId,
-        realmUnitId,
-        maxDepth: query.maxDepth,
-      });
-    } else if (query.mode !== "threaded") {
-      parentCommentId = query.parentCommentId ?? null;
+      parentCommentId = rootComment.id;
+    }
+
+    if (query.mode === "children") {
+      if (!query.parentCommentId) {
+        throw new AppError(
+          400,
+          "parentCommentId is required for children slices",
+        );
+      }
+      const parent = await this.repository.getById(query.parentCommentId);
+      if (
+        parent.rootUnitId !== query.rootUnitId ||
+        parent.realmUnitId !== realmUnitId
+      ) {
+        throw new AppError(
+          400,
+          "Parent comment is outside the requested root/realm partition",
+        );
+      }
+      parentCommentId = parent.id;
+      rootComment = parent;
     }
 
     const blockedIds = await blockedAuthorIds(options);
@@ -569,38 +601,37 @@ export class CommentService {
       realmUnitId,
       authorUserId: query.authorUserId,
       state: query.state,
-      ids,
-      maxDepth: query.maxDepth,
       ...(parentCommentId !== undefined ? { parentCommentId } : {}),
       blockedAuthorIds: blockedIds,
       sort: query.sort,
-      limit,
+      cursor: query.cursor,
+      limit: limit + 1,
     });
 
-    const listedComments = listed.comments;
-    const isTreeRead = query.mode === "threaded" || query.mode === "subtree";
-    const commentsWithAncestors = isTreeRead
-      ? await includeRedactedAncestors(this.repository, listedComments)
-      : listedComments;
-    const pathComments = await this.repository.attachPaths(
-      commentsWithAncestors,
-    );
-    if (commentsWithAncestors.length > listedComments.length) {
-      sortTreeComments(pathComments);
-    }
+    const pageComments = listed.comments.slice(0, limit);
+    const comments = await this.repository.attachPinOverlays(pageComments);
+    const parentContexts =
+      query.mode === "discovery"
+        ? await this.repository.attachPinOverlays(
+            await directParentContexts(this.repository, comments),
+          )
+        : [];
 
     return {
-      comments: await this.repository.attachPinOverlays(pathComments),
+      comments,
       total: listed.total,
+      rootComment,
+      parentContexts,
+      nextCursor:
+        listed.comments.length > limit
+          ? commentCursorFor(pageComments.at(-1), query.sort)
+          : null,
     };
   }
 
   async getById(id: string): Promise<CommentWithRelations> {
     const comment = await this.repository.getById(id);
-    const withPaths = await this.repository.attachPaths([comment]);
-    const withPins = await this.repository.attachPinOverlays([
-      firstCommentOrThrow(withPaths, id),
-    ]);
+    const withPins = await this.repository.attachPinOverlays([comment]);
     return firstCommentOrThrow(withPins, id);
   }
 
@@ -617,10 +648,15 @@ export class CommentService {
     if (parent) {
       if (parent.isLocked)
         throw new AppError(409, "Cannot reply to a locked comment");
-      if (
-        parent.rootUnitId !== input.rootUnitId ||
-        parent.realmUnitId !== (input.realmUnitId ?? null)
-      ) {
+      const requestedRealm = input.realmUnitId ?? null;
+      const hasExplicitRealm = input.realmUnitId !== undefined;
+      if (parent.rootUnitId !== input.rootUnitId) {
+        throw new AppError(
+          400,
+          "Parent comment is outside the requested root/realm partition",
+        );
+      }
+      if (hasExplicitRealm && parent.realmUnitId !== requestedRealm) {
         throw new AppError(
           400,
           "Parent comment is outside the requested root/realm partition",
@@ -628,10 +664,13 @@ export class CommentService {
       }
       depth = parent.depth + 1;
     }
+    const realmUnitId = parent
+      ? parent.realmUnitId
+      : (input.realmUnitId ?? null);
 
     const comment = await this.repository.create({
       rootUnitId: input.rootUnitId,
-      realmUnitId: input.realmUnitId ?? null,
+      realmUnitId,
       parentCommentId: input.parentCommentId,
       authorUserId,
       content: input.content,
@@ -640,8 +679,7 @@ export class CommentService {
     });
 
     await enqueueCommentSync(comment.id);
-    const withPaths = await this.repository.attachPaths([comment]);
-    return firstCommentOrThrow(withPaths, comment.id);
+    return comment;
   }
 
   async update(
@@ -656,8 +694,7 @@ export class CommentService {
 
     const updated = await this.repository.update(id, input);
     await enqueueCommentSync(id);
-    const withPaths = await this.repository.attachPaths([updated]);
-    return firstCommentOrThrow(withPaths, id);
+    return updated;
   }
 
   async delete(id: string, actorUserId: string): Promise<void> {

@@ -3,6 +3,7 @@ import type {
   FederatedSearchResult,
   PostSearchDocument,
   RealmSearchDocument,
+  ShelfItemShelfGroup,
   UserSearchDocument,
 } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -150,12 +151,70 @@ const sampleUser: UserSearchDocument = {
   followingsCount: 8,
 };
 
+const sampleShelfMatch: ShelfItemShelfGroup = {
+  shelfId: "shelf-magic",
+  shelfTitle: "Magic reading list",
+  shelfOwnerUserId: "user-1",
+  shelfVisibility: "PUBLIC",
+  total: 2,
+  matches: [
+    {
+      item: {
+        id: "shelf-magic:unit:u-book-1",
+        shelfId: "shelf-magic",
+        shelfOwnerUserId: "user-1",
+        shelfVisibility: "PUBLIC",
+        shelfStatus: "PUBLISHED",
+        shelfTitle: "Magic reading list",
+        itemType: "unit",
+        itemId: "u-book-1",
+        kind: "book",
+        rootItemType: "unit",
+        rootItemId: "u-book-1",
+        parentItemType: null,
+        parentItemId: null,
+        parentRole: null,
+        position: "a0",
+        itemTitle: "Great Saga",
+        itemSummary: "A tale of magic and adventure.",
+        itemText: null,
+        searchText: null,
+        rootUnitId: "u-book-1",
+        realmUnitId: null,
+        parentCommentId: null,
+        authorUserId: null,
+        authorName: null,
+        moderationStatus: null,
+        isLocked: null,
+        deletedAt: null,
+        createdAt: 1,
+        updatedAt: 2,
+      },
+    },
+  ],
+};
+
+const sampleShelf: ContentSearchDocument & {
+  matchedShelfItemGroup: ShelfItemShelfGroup;
+} = {
+  ...sampleBook,
+  id: "shelf-magic",
+  type: "SHELF",
+  titles: ["Magic reading list"],
+  title: "Magic reading list",
+  summaries: ["Books found because a saved shelf item matched."],
+  summary: "Books found because a saved shelf item matched.",
+  containedUnitIds: ["u-book-1"],
+  matchedShelfItemGroup: sampleShelfMatch,
+};
+
 const groupedResult: FederatedSearchResult = {
   kind: "grouped",
   scope: { kind: "global" },
   sections: {
     books: { totalHits: 42, items: [sampleBook], processingTimeMs: 4 },
     reviews: { totalHits: 18, items: [sampleReview], processingTimeMs: 3 },
+    shelves: { totalHits: 1, items: [sampleShelf], processingTimeMs: 2 },
     realms: { totalHits: 3, items: [sampleRealm], processingTimeMs: 2 },
     users: { totalHits: 0, items: [], processingTimeMs: 1 },
   },

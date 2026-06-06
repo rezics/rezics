@@ -1,16 +1,34 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { AppError } from "@/utils/errors";
 import type {
   CollectionRepository,
   CollectionService,
 } from "./collection.service";
 
 const enqueueMock = mock(async () => ({ status: "created" }));
+class TestAppError extends Error {
+  statusCode: number;
+  code?: string;
+  details?: unknown;
+
+  constructor(
+    statusCode: number,
+    message: string,
+    options?: { code?: string; details?: unknown },
+  ) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = options?.code;
+    this.details = options?.details;
+  }
+}
 
 mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: enqueueMock,
   },
+}));
+mock.module("@/utils/errors", () => ({
+  AppError: TestAppError,
 }));
 
 function createRepositoryStub(
@@ -33,7 +51,7 @@ function createRepositoryStub(
     ),
     applyCollectionMetadata: mock(async () => {}),
     collectToShelves: mock(async () => ({ savedTo: [], isNew: false })),
-    hasShelfUnit: mock(async () => false),
+    hasShelfItem: mock(async () => false),
     removeFavorite: mock(async () => {}),
     addFavorite: mock(async () => {}),
     listDirectShelfIds: mock(async () => []),
@@ -56,14 +74,14 @@ describe("CollectionService — missing favorites shelf", () => {
   test("toggleFavorite throws 404 with system_shelf_missing when shelf absent", async () => {
     const service = await createService(createRepositoryStub());
 
-    let captured: AppError | null = null;
+    let captured: TestAppError | null = null;
     try {
       await service.toggleFavorite("user-x", "unit-x");
     } catch (err) {
-      captured = err as AppError;
+      captured = err as TestAppError;
     }
 
-    expect(captured).toBeInstanceOf(AppError);
+    expect(captured).toBeInstanceOf(TestAppError);
     expect(captured?.statusCode).toBe(404);
     expect(captured?.code).toBe("system_shelf_missing");
     expect(captured?.details).toEqual({ kindKey: "favorites" });
@@ -72,21 +90,21 @@ describe("CollectionService — missing favorites shelf", () => {
   test("getCollectionStatus throws 404 when favorites shelf absent", async () => {
     const service = await createService(createRepositoryStub());
 
-    let captured: AppError | null = null;
+    let captured: TestAppError | null = null;
     try {
       await service.getCollectionStatus("user-y", "unit-y");
     } catch (err) {
-      captured = err as AppError;
+      captured = err as TestAppError;
     }
 
-    expect(captured).toBeInstanceOf(AppError);
+    expect(captured).toBeInstanceOf(TestAppError);
     expect(captured?.statusCode).toBe(404);
     expect(captured?.code).toBe("system_shelf_missing");
   });
 });
 
 describe("CollectionService — user collection metadata", () => {
-  test("collect writes metadata to the resolved interaction target", async () => {
+  test("collect writes tags to the resolved interaction target and note text to shelf items", async () => {
     const repository = createRepositoryStub();
     const service = await createService(repository);
 
@@ -102,7 +120,6 @@ describe("CollectionService — user collection metadata", () => {
       userId: "user-1",
       unitId: "book-1",
       tagUnitIds: ["tag-1"],
-      searchText: "private alias",
     });
     expect(repository.collectToShelves).toHaveBeenCalledWith({
       userId: "user-1",
@@ -111,11 +128,12 @@ describe("CollectionService — user collection metadata", () => {
         parentKind: "book",
       },
       variantUnitId: undefined,
+      searchText: "private alias",
       shelfIds: [],
     });
   });
 
-  test("collect stores variant context on the primary shelf unit", async () => {
+  test("collect stores variant context on the primary shelf item", async () => {
     const repository = createRepositoryStub({
       collectToShelves: mock(async () => ({
         savedTo: ["shelf-1"],
@@ -141,5 +159,71 @@ describe("CollectionService — user collection metadata", () => {
       shelfIds: ["shelf-1"],
     });
     expect(enqueueMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("collect attaches review posts under their target work by default", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "review-1") {
+          return {
+            type: "POST" as const,
+            targetUnitId: "book-1",
+            postKind: "REVIEW" as const,
+          };
+        }
+        return {
+          type: "BOOK" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
+    });
+    const service = await createService(repository);
+
+    await service.collect("user-1", {
+      targetId: "review-1",
+      shelfIds: ["shelf-1"],
+    });
+
+    expect(repository.collectToShelves).toHaveBeenCalledWith({
+      userId: "user-1",
+      resolved: {
+        parentUnitId: "book-1",
+        parentKind: "book",
+        reviewUnitId: "review-1",
+        reviewKind: "review",
+      },
+      variantUnitId: undefined,
+      searchText: undefined,
+      shelfIds: ["shelf-1"],
+    });
+  });
+
+  test("collect can save another shelf as a shelf item", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async () => ({
+        type: "SHELF" as const,
+        targetUnitId: null,
+        postKind: null,
+      })),
+    });
+    const service = await createService(repository);
+
+    await service.collect("user-1", {
+      targetId: "shelf-target",
+      shelfIds: ["saved-shelf"],
+      searchText: "reference shelf",
+    });
+
+    expect(repository.collectToShelves).toHaveBeenCalledWith({
+      userId: "user-1",
+      resolved: {
+        parentUnitId: "shelf-target",
+        parentKind: "shelf",
+      },
+      variantUnitId: undefined,
+      searchText: "reference shelf",
+      shelfIds: ["saved-shelf"],
+    });
   });
 });

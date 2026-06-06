@@ -1,4 +1,4 @@
-import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";
+import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
 export type ShelfContainmentFilters = Omit<ShelfFilters, "containsUnitId">;
 export type ShelfVariantFilters = Omit<ShelfFilters, "variantUnitId">;
@@ -19,9 +19,9 @@ export const shelfKeys = {
   byUser: (userId: string, filters?: ShelfFilters) =>
     [...shelfKeys.all(), "user", userId, filters] as const,
   mine: () => [...shelfKeys.all(), "mine"] as const,
-  units: (unitId: string) => [...shelfKeys.all(), "units", unitId] as const,
-  unitsPage: (unitId: string, query?: ShelfUnitsQuery) =>
-    [...shelfKeys.units(unitId), query] as const,
+  items: (unitId: string) => [...shelfKeys.all(), "items", unitId] as const,
+  itemsPage: (unitId: string, query?: ShelfItemsQuery) =>
+    [...shelfKeys.items(unitId), query] as const,
 } as const;
 
 export const collectionKeys = {

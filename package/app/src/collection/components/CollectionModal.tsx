@@ -29,8 +29,8 @@ import { useCallback, useMemo, useState } from "react";
 // Backlog/Active/Completed are reached only via progress-status side-effects
 // (`user-unit-progress` spec). Surfacing them as collectable targets in the
 // modal would let users mis-route a unit through the wrong write path, so
-// the modal filters them out entirely. Favorites stays as the one
-// system-shelf collectable target.
+// the modal filters them out entirely. Favorites and Saved stay as
+// system-shelf collectable targets.
 const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
   "backlog",
   "active",

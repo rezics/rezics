@@ -1,14 +1,18 @@
+import { sql } from "drizzle-orm";
 import {
+  check,
   foreignKey,
   index,
   integer,
   pgTable,
   primaryKey,
+  text,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createdAt, jsonData, updatedAt } from "./columns";
 import { Unit } from "./unit";
+import { User } from "./identity";
 
 export const Shelf = pgTable("Shelf", {
   unitId: uuid()
@@ -16,13 +20,14 @@ export const Shelf = pgTable("Shelf", {
     .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
   kindKey: varchar({ length: 64 }),
   extra: jsonData(),
+  rootItemCount: integer().default(0).notNull(),
   itemCount: integer().default(0).notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
 
-export const ShelfUnit = pgTable(
-  "ShelfUnit",
+export const ShelfItem = pgTable(
+  "ShelfItem",
   {
     shelfId: uuid()
       .notNull()
@@ -30,87 +35,60 @@ export const ShelfUnit = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    unitId: uuid().notNull(),
+    itemType: varchar({ length: 32 }).default("unit").notNull(),
+    itemId: uuid("itemId").notNull(),
     kind: varchar({ length: 32 }).notNull(),
+    parentItemType: varchar({ length: 32 }),
+    parentItemId: uuid("parentItemId"),
+    parentRole: varchar({ length: 32 }),
     position: varchar({ length: 64 }).notNull(),
+    variantUnitId: uuid(),
+    searchText: text(),
+    createdByUserId: uuid().references(() => User.unitId, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
-    variantUnitId: uuid(),
   },
   (table) => [
     primaryKey({
-      columns: [table.shelfId, table.unitId],
-      name: "ShelfUnit_pkey",
+      columns: [table.shelfId, table.itemType, table.itemId],
+      name: "ShelfItem_pkey",
     }),
-    index("ShelfUnit_shelfId_position_idx").using(
+    foreignKey({
+      columns: [table.shelfId, table.parentItemType, table.parentItemId],
+      foreignColumns: [table.shelfId, table.itemType, table.itemId],
+      name: "ShelfItem_parent_fkey",
+    })
+      .onUpdate("cascade")
+      .onDelete("set null"),
+    index("ShelfItem_shelfId_parent_position_idx").using(
+      "btree",
+      table.shelfId.asc().nullsLast(),
+      table.parentItemType.asc().nullsLast(),
+      table.parentItemId.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+    ),
+    index("ShelfItem_shelfId_position_idx").using(
       "btree",
       table.shelfId.asc().nullsLast(),
       table.position.asc().nullsLast(),
     ),
-    index("ShelfUnit_variantUnitId_idx").using(
+    index("ShelfItem_item_idx").using(
+      "btree",
+      table.itemType.asc().nullsLast(),
+      table.itemId.asc().nullsLast(),
+    ),
+    index("ShelfItem_variantUnitId_idx").using(
       "btree",
       table.variantUnitId.asc().nullsLast(),
     ),
-  ],
-);
-
-export const ShelfUnitRelation = pgTable(
-  "ShelfUnitRelation",
-  {
-    shelfId: uuid()
-      .notNull()
-      .references(() => Shelf.unitId, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
-      }),
-    parentUnitId: uuid().notNull(),
-    childUnitId: uuid().notNull(),
-    role: varchar({ length: 32 }).notNull(),
-  },
-  (table) => [
-    primaryKey({
-      columns: [
-        table.shelfId,
-        table.parentUnitId,
-        table.childUnitId,
-        table.role,
-      ],
-      name: "ShelfUnitRelation_pkey",
-    }),
-    foreignKey({
-      columns: [table.shelfId, table.childUnitId],
-      foreignColumns: [ShelfUnit.shelfId, ShelfUnit.unitId],
-      name: "ShelfUnitRelation_shelfId_childUnitId_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    foreignKey({
-      columns: [table.shelfId, table.parentUnitId],
-      foreignColumns: [ShelfUnit.shelfId, ShelfUnit.unitId],
-      name: "ShelfUnitRelation_shelfId_parentUnitId_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    index("ShelfUnitRelation_childUnitId_role_idx").using(
-      "btree",
-      table.childUnitId.asc().nullsLast(),
-      table.role.asc().nullsLast(),
-    ),
-    index("ShelfUnitRelation_parentUnitId_role_idx").using(
-      "btree",
-      table.parentUnitId.asc().nullsLast(),
-      table.role.asc().nullsLast(),
-    ),
-    index("ShelfUnitRelation_shelfId_childUnitId_idx").using(
-      "btree",
-      table.shelfId.asc().nullsLast(),
-      table.childUnitId.asc().nullsLast(),
-    ),
-    index("ShelfUnitRelation_shelfId_parentUnitId_role_idx").using(
-      "btree",
-      table.shelfId.asc().nullsLast(),
-      table.parentUnitId.asc().nullsLast(),
-      table.role.asc().nullsLast(),
+    check(
+      "ShelfItem_not_self_parent",
+      table.parentItemId
+        ? sql`${table.parentItemId} is null or ${table.parentItemId} <> ${table.itemId} or ${table.parentItemType} <> ${table.itemType}`
+        : sql`true`,
     ),
   ],
 );

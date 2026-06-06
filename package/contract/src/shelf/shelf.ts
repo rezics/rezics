@@ -27,12 +27,20 @@ export const shelfCoverImageSpec = {
 } as const;
 
 // ============================================================
-// SHELF UNIT KIND
+// SHELF ITEM KIND
 // ============================================================
 
-export const shelfUnitKindSchema = t.Union([
+export const shelfItemTypeSchema = t.Union([
+  t.Literal("unit"),
+  t.Literal("comment"),
+]);
+
+export type ShelfItemType = (typeof shelfItemTypeSchema)["static"];
+
+export const shelfItemKindSchema = t.Union([
   t.Literal("book"),
   t.Literal("review"),
+  t.Literal("comment"),
   t.Literal("quote"),
   t.Literal("post"),
   t.Literal("chapter"),
@@ -46,54 +54,70 @@ export const shelfUnitKindSchema = t.Union([
   t.Literal("link"),
 ]);
 
-export type ShelfUnitKind = (typeof shelfUnitKindSchema)["static"];
+export type ShelfItemKind = (typeof shelfItemKindSchema)["static"];
 
 // ============================================================
-// SHELF UNIT RELATION ROLE
+// SHELF ITEM PARENT ROLE
 // ============================================================
 
-export const shelfUnitRelationRoleSchema = t.Union([
+export const shelfItemParentRoleSchema = t.Union([
   t.Literal("review"),
+  t.Literal("comment"),
   t.Literal("tag"),
+  t.Literal("annotation"),
 ]);
 
-export type ShelfUnitRelationRole =
-  (typeof shelfUnitRelationRoleSchema)["static"];
+export type ShelfItemParentRole = (typeof shelfItemParentRoleSchema)["static"];
 
 // ============================================================
-// SHELF UNIT DTO
+// SHELF ITEM DTO
 // ============================================================
 
-export const shelfUnitDTOSchema = t.Object({
-  shelfId: t.String(),
-  unitId: t.String(),
-  variantUnitId: t.Optional(t.Nullable(t.String())),
-  variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
-  kind: shelfUnitKindSchema,
-  position: t.String(),
-  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
-  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
-});
+export const shelfItemDTOSchema = t.Object(
+  {
+    shelfId: t.String(),
+    itemType: shelfItemTypeSchema,
+    itemId: t.String(),
+    variantUnitId: t.Optional(t.Nullable(t.String())),
+    variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
+    kind: shelfItemKindSchema,
+    parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
+    parentItemId: t.Optional(t.Nullable(t.String())),
+    parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
+    position: t.String(),
+    searchText: t.Optional(t.Nullable(t.String())),
+    createdByUserId: t.Optional(t.Nullable(t.String())),
+    createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+    updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  },
+  { additionalProperties: false },
+);
 
-export type ShelfUnitDTO = (typeof shelfUnitDTOSchema)["static"];
+export type ShelfItemDTO = (typeof shelfItemDTOSchema)["static"];
 
 // ============================================================
-// SHELF UNIT RELATION DTO
+// SHELF ITEM CHILD CONTEXT DTO
 // ============================================================
 
-export const shelfUnitRelationDTOSchema = t.Object({
-  shelfId: t.String(),
-  parentUnitId: t.String(),
-  childUnitId: t.String(),
-  role: shelfUnitRelationRoleSchema,
-});
+export const shelfItemChildDTOSchema = t.Object(
+  {
+    shelfId: t.String(),
+    parentItemType: shelfItemTypeSchema,
+    parentItemId: t.String(),
+    childItemType: shelfItemTypeSchema,
+    childItemId: t.String(),
+    role: shelfItemParentRoleSchema,
+  },
+  { additionalProperties: false },
+);
 
-export type ShelfUnitRelationDTO =
-  (typeof shelfUnitRelationDTOSchema)["static"];
+export type ShelfItemChildDTO = (typeof shelfItemChildDTOSchema)["static"];
 
 export const shelfMatchedUnitDTOSchema = t.Object({
+  itemType: t.Optional(shelfItemTypeSchema),
+  itemId: t.Optional(t.String()),
   unitId: t.String(),
-  kind: shelfUnitKindSchema,
+  kind: shelfItemKindSchema,
   title: t.Optional(t.Nullable(t.String())),
 });
 
@@ -114,11 +138,11 @@ export const shelfDTOSchema = t.Object({
   kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(shelfExtraSchema)),
+  rootItemCount: t.Optional(t.Number()),
   itemCount: t.Optional(t.Number()),
   matchedUnit: t.Optional(t.Nullable(shelfMatchedUnitDTOSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
-  units: t.Optional(t.Array(shelfUnitDTOSchema)),
-  relations: t.Optional(t.Array(shelfUnitRelationDTOSchema)),
+  items: t.Optional(t.Array(shelfItemDTOSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -307,54 +331,62 @@ export type SetPinnedTagsResponse =
   (typeof setPinnedTagsResponseSchema)["static"];
 
 // ============================================================
-// SHELF UNIT CRUD
+// SHELF ITEM CRUD
 // ============================================================
 
-export const addShelfUnitSchema = t.Object({
-  unitId: t.String(),
+export const addShelfItemSchema = t.Object({
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
   /**
-   * Weak selected VARIANT context. The ShelfUnit row remains keyed by
-   * `(shelfId, unitId)` and this value is not validated as existing or VARIANT.
+   * Weak selected VARIANT context. The ShelfItem row remains keyed by
+   * `(shelfId, itemType, itemId)` and this value is not validated as existing
+   * or VARIANT.
    */
   variantUnitId: t.Optional(t.String()),
-  kind: shelfUnitKindSchema,
+  kind: shelfItemKindSchema,
+  parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
+  parentItemId: t.Optional(t.Nullable(t.String())),
+  parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
   tagUnitIds: t.Optional(t.Array(t.String())),
   searchText: t.Optional(t.Nullable(t.String())),
 });
 
-export type AddShelfUnitInput = (typeof addShelfUnitSchema)["static"];
+export type AddShelfItemInput = (typeof addShelfItemSchema)["static"];
 
-export const shelfUnitParamsSchema = t.Object({
+export const shelfItemParamsSchema = t.Object({
   shelfId: t.String(),
-  unitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
 });
 
-export type ShelfUnitParams = (typeof shelfUnitParamsSchema)["static"];
+export type ShelfItemParams = (typeof shelfItemParamsSchema)["static"];
 
-export const shelfUnitsQuerySchema = t.Object({
+export const shelfItemsQuerySchema = t.Object({
   q: t.Optional(t.String()),
+  itemType: t.Optional(shelfItemTypeSchema),
   variantUnitId: t.Optional(t.String()),
   tagUnitIds: t.Optional(t.Array(t.String())),
   cursor: t.Optional(t.String()),
   limit: paginationLimitSchema,
 });
 
-export type ShelfUnitsQuery = (typeof shelfUnitsQuerySchema)["static"];
+export type ShelfItemsQuery = (typeof shelfItemsQuerySchema)["static"];
 
-export const shelfUnitsResponseSchema = t.Object({
-  units: t.Array(shelfUnitDTOSchema),
-  relations: t.Array(shelfUnitRelationDTOSchema),
+export const shelfItemsResponseSchema = t.Object({
+  items: t.Array(shelfItemDTOSchema),
+  units: t.Optional(t.Array(shelfItemDTOSchema)),
+  relations: t.Optional(t.Array(shelfItemChildDTOSchema)),
   hasMore: t.Boolean(),
 });
 
-export type ShelfUnitsResponse = (typeof shelfUnitsResponseSchema)["static"];
+export type ShelfItemsResponse = (typeof shelfItemsResponseSchema)["static"];
 
-export const reorderShelfUnitSchema = t.Object({
-  beforeUnitId: t.Optional(t.String()),
-  afterUnitId: t.Optional(t.String()),
+export const reorderShelfItemSchema = t.Object({
+  beforeItemId: t.Optional(t.String()),
+  afterItemId: t.Optional(t.String()),
 });
 
-export type ReorderShelfUnitInput = (typeof reorderShelfUnitSchema)["static"];
+export type ReorderShelfItemInput = (typeof reorderShelfItemSchema)["static"];
 
 export const attachReviewSchema = t.Object({
   reviewUnitId: t.String(),
@@ -368,141 +400,156 @@ export const detachReviewSchema = t.Object({
 
 export type DetachReviewInput = (typeof detachReviewSchema)["static"];
 
-export const setShelfUnitChildrenSchema = t.Object({
-  role: shelfUnitRelationRoleSchema,
-  childUnitIds: t.Array(t.String()),
+export const setShelfItemChildrenSchema = t.Object({
+  role: shelfItemParentRoleSchema,
+  childItemType: t.Optional(shelfItemTypeSchema),
+  childItemIds: t.Optional(t.Array(t.String(), { uniqueItems: true })),
 });
 
-export type SetShelfUnitChildrenInput =
-  (typeof setShelfUnitChildrenSchema)["static"];
+export type SetShelfItemChildrenInput =
+  (typeof setShelfItemChildrenSchema)["static"];
 
 export const cleanupShelfOrphansSchema = t.Object({
-  orphanUnitIds: t.Array(t.String()),
+  orphanItemIds: t.Array(t.String()),
 });
 
 export type CleanupShelfOrphansInput =
   (typeof cleanupShelfOrphansSchema)["static"];
 
 // ============================================================
-// SHELF UNIT BATCH OPS
+// SHELF ITEM BATCH OPS
 // ============================================================
 
-export const shelfUnitBatchAddOpSchema = t.Object({
+export const shelfItemBatchAddOpSchema = t.Object({
   op: t.Literal("add"),
-  unitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
   variantUnitId: t.Optional(t.String()),
-  kind: shelfUnitKindSchema,
+  kind: shelfItemKindSchema,
+  parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
+  parentItemId: t.Optional(t.Nullable(t.String())),
+  parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
   position: t.String(),
 });
 
-export type ShelfUnitBatchAddOp = (typeof shelfUnitBatchAddOpSchema)["static"];
+export type ShelfItemBatchAddOp = (typeof shelfItemBatchAddOpSchema)["static"];
 
-export const shelfUnitBatchReorderOpSchema = t.Object({
+export const shelfItemBatchReorderOpSchema = t.Object({
   op: t.Literal("reorder"),
-  unitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
   position: t.String(),
 });
 
-export type ShelfUnitBatchReorderOp =
-  (typeof shelfUnitBatchReorderOpSchema)["static"];
+export type ShelfItemBatchReorderOp =
+  (typeof shelfItemBatchReorderOpSchema)["static"];
 
-export const shelfUnitBatchReorderToPageOpSchema = t.Object({
+export const shelfItemBatchReorderToPageOpSchema = t.Object({
   op: t.Literal("reorderToPage"),
-  unitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
   toPage: t.Number(),
   edge: t.Literal("first"),
   pageSize: t.Optional(t.Number()),
   order: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
 });
 
-export type ShelfUnitBatchReorderToPageOp =
-  (typeof shelfUnitBatchReorderToPageOpSchema)["static"];
+export type ShelfItemBatchReorderToPageOp =
+  (typeof shelfItemBatchReorderToPageOpSchema)["static"];
 
-export const shelfUnitBatchDeleteOpSchema = t.Object({
+export const shelfItemBatchDeleteOpSchema = t.Object({
   op: t.Literal("delete"),
-  unitId: t.String(),
+  itemType: shelfItemTypeSchema,
+  itemId: t.String(),
 });
 
-export type ShelfUnitBatchDeleteOp =
-  (typeof shelfUnitBatchDeleteOpSchema)["static"];
+export type ShelfItemBatchDeleteOp =
+  (typeof shelfItemBatchDeleteOpSchema)["static"];
 
-export const shelfUnitBatchAttachOpSchema = t.Object({
+export const shelfItemBatchAttachOpSchema = t.Object({
   op: t.Literal("attach"),
-  parentUnitId: t.String(),
-  childUnitId: t.String(),
+  parentItemType: shelfItemTypeSchema,
+  parentItemId: t.String(),
+  childItemType: shelfItemTypeSchema,
+  childItemId: t.String(),
   childVariantUnitId: t.Optional(t.String()),
-  childKind: shelfUnitKindSchema,
-  role: shelfUnitRelationRoleSchema,
+  childKind: shelfItemKindSchema,
+  role: shelfItemParentRoleSchema,
   position: t.Optional(t.String()),
 });
 
-export type ShelfUnitBatchAttachOp =
-  (typeof shelfUnitBatchAttachOpSchema)["static"];
+export type ShelfItemBatchAttachOp =
+  (typeof shelfItemBatchAttachOpSchema)["static"];
 
-export const shelfUnitBatchDetachOpSchema = t.Object({
+export const shelfItemBatchDetachOpSchema = t.Object({
   op: t.Literal("detach"),
-  parentUnitId: t.String(),
-  childUnitId: t.String(),
-  role: shelfUnitRelationRoleSchema,
+  parentItemType: shelfItemTypeSchema,
+  parentItemId: t.String(),
+  childItemType: shelfItemTypeSchema,
+  childItemId: t.String(),
+  role: shelfItemParentRoleSchema,
 });
 
-export type ShelfUnitBatchDetachOp =
-  (typeof shelfUnitBatchDetachOpSchema)["static"];
+export type ShelfItemBatchDetachOp =
+  (typeof shelfItemBatchDetachOpSchema)["static"];
 
-export const shelfUnitBatchSetChildrenOpSchema = t.Object({
+export const shelfItemBatchSetChildrenOpSchema = t.Object({
   op: t.Literal("setChildren"),
-  parentUnitId: t.String(),
-  role: shelfUnitRelationRoleSchema,
-  childUnitIds: t.Array(t.String()),
-  childKind: t.Optional(shelfUnitKindSchema),
+  parentItemType: shelfItemTypeSchema,
+  parentItemId: t.String(),
+  role: shelfItemParentRoleSchema,
+  childItemType: shelfItemTypeSchema,
+  childItemIds: t.Optional(t.Array(t.String(), { uniqueItems: true })),
+  childKind: t.Optional(shelfItemKindSchema),
 });
 
-export type ShelfUnitBatchSetChildrenOp =
-  (typeof shelfUnitBatchSetChildrenOpSchema)["static"];
+export type ShelfItemBatchSetChildrenOp =
+  (typeof shelfItemBatchSetChildrenOpSchema)["static"];
 
-export const shelfUnitBatchOpSchema = t.Union([
-  shelfUnitBatchAddOpSchema,
-  shelfUnitBatchReorderOpSchema,
-  shelfUnitBatchReorderToPageOpSchema,
-  shelfUnitBatchDeleteOpSchema,
-  shelfUnitBatchAttachOpSchema,
-  shelfUnitBatchDetachOpSchema,
-  shelfUnitBatchSetChildrenOpSchema,
+export const shelfItemBatchOpSchema = t.Union([
+  shelfItemBatchAddOpSchema,
+  shelfItemBatchReorderOpSchema,
+  shelfItemBatchReorderToPageOpSchema,
+  shelfItemBatchDeleteOpSchema,
+  shelfItemBatchAttachOpSchema,
+  shelfItemBatchDetachOpSchema,
+  shelfItemBatchSetChildrenOpSchema,
 ]);
 
-export type ShelfUnitBatchOp = (typeof shelfUnitBatchOpSchema)["static"];
+export type ShelfItemBatchOp = (typeof shelfItemBatchOpSchema)["static"];
 
-export const shelfUnitBatchRequestSchema = t.Object({
-  ops: t.Array(shelfUnitBatchOpSchema),
+export const shelfItemBatchRequestSchema = t.Object({
+  ops: t.Array(shelfItemBatchOpSchema),
   baseVersion: t.Optional(t.String()),
 });
 
-export type ShelfUnitBatchRequest =
-  (typeof shelfUnitBatchRequestSchema)["static"];
+export type ShelfItemBatchRequest =
+  (typeof shelfItemBatchRequestSchema)["static"];
 
-export const shelfUnitBatchResultSchema = t.Union([
+export const shelfItemBatchResultSchema = t.Union([
   t.Object({
     status: t.Literal("ok"),
-    op: shelfUnitBatchOpSchema,
-    unit: t.Optional(shelfUnitDTOSchema),
-    relation: t.Optional(shelfUnitRelationDTOSchema),
+    op: shelfItemBatchOpSchema,
+    item: t.Optional(shelfItemDTOSchema),
+    unit: t.Optional(shelfItemDTOSchema),
+    relation: t.Optional(shelfItemChildDTOSchema),
   }),
   t.Object({
     status: t.Literal("failed"),
-    op: shelfUnitBatchOpSchema,
+    op: shelfItemBatchOpSchema,
     reason: t.String(),
   }),
 ]);
 
-export type ShelfUnitBatchResult =
-  (typeof shelfUnitBatchResultSchema)["static"];
+export type ShelfItemBatchResult =
+  (typeof shelfItemBatchResultSchema)["static"];
 
-export const shelfUnitBatchResponseSchema = t.Object({
-  results: t.Array(shelfUnitBatchResultSchema),
+export const shelfItemBatchResponseSchema = t.Object({
+  results: t.Array(shelfItemBatchResultSchema),
 });
 
-export type ShelfUnitBatchResponse =
-  (typeof shelfUnitBatchResponseSchema)["static"];
+export type ShelfItemBatchResponse =
+  (typeof shelfItemBatchResponseSchema)["static"];
 
 // ============================================================
 // COLLECTION API

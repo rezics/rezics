@@ -3,6 +3,7 @@ import { type SystemShelfKindKey, systemShelfKindKeySchema } from "./progress";
 
 export const SYSTEM_SHELF_LABELS: Record<SystemShelfKindKey, string> = {
   favorites: "Favorites",
+  saved: "Saved",
   backlog: "Backlog",
   active: "Active",
   completed: "Completed",

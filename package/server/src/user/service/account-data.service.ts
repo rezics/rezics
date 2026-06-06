@@ -4,13 +4,13 @@ import { blockService } from "../../block/block.service";
 import {
   Post,
   Shelf,
+  ShelfItem,
   Subscription,
   Unit,
   UnitTranslation,
   User,
   UserBlock,
   UserTagApplication,
-  UserUnitCollection,
 } from "../../db/schema";
 import { requireSlugScopeId } from "../../infra/slug-scopes";
 import { subscriptionService } from "../../subscription/subscription.service";
@@ -180,19 +180,26 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
 
     async listUserUnitCollections(userId) {
       const db = await getServerDb();
-      return db
+      const rows = await db
         .select({
-          unitId: UserUnitCollection.unitId,
-          searchText: UserUnitCollection.searchText,
-          createdAt: UserUnitCollection.createdAt,
-          updatedAt: UserUnitCollection.updatedAt,
+          unitId: ShelfItem.itemId,
+          searchText: ShelfItem.searchText,
+          createdAt: ShelfItem.createdAt,
+          updatedAt: ShelfItem.updatedAt,
         })
-        .from(UserUnitCollection)
-        .where(eq(UserUnitCollection.userId, userId))
-        .orderBy(
-          desc(UserUnitCollection.updatedAt),
-          asc(UserUnitCollection.unitId),
-        );
+        .from(ShelfItem)
+        .innerJoin(Shelf, eq(Shelf.unitId, ShelfItem.shelfId))
+        .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
+        .where(and(eq(Unit.userId, userId), eq(ShelfItem.itemType, "unit")))
+        .orderBy(desc(ShelfItem.updatedAt), asc(ShelfItem.itemId));
+
+      const byUnitId = new Map<string, ExportCollectionRow>();
+      for (const row of rows) {
+        if (!byUnitId.has(row.unitId)) {
+          byUnitId.set(row.unitId, row);
+        }
+      }
+      return [...byUnitId.values()];
     },
 
     async listUserTagApplications(userId) {
@@ -272,9 +279,22 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
             updatedAt: deletedAt,
           })
           .where(eq(Unit.id, userId));
-        await tx
-          .delete(UserUnitCollection)
-          .where(eq(UserUnitCollection.userId, userId));
+        const shelfRows = await tx
+          .select({ shelfId: Shelf.unitId })
+          .from(Shelf)
+          .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
+          .where(eq(Unit.userId, userId));
+        if (shelfRows.length > 0) {
+          await tx
+            .update(ShelfItem)
+            .set({ searchText: null, updatedAt: deletedAt })
+            .where(
+              inArray(
+                ShelfItem.shelfId,
+                shelfRows.map((row) => row.shelfId),
+              ),
+            );
+        }
         await tx
           .delete(UserTagApplication)
           .where(eq(UserTagApplication.userId, userId));

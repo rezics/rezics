@@ -6,9 +6,8 @@ import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import type React from "react";
+import { ReplyComposer, useFocusReplyFromQuery } from "@/comment";
 import { PostListSection } from "@/post";
-import { ReplyComposer } from "@/post/forms/ReplyComposer";
-import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { Link } from "@/shared/ui/link";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
 

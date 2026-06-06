@@ -139,6 +139,8 @@ export const postDTOSchema = t.Object({
   variantUnitId: t.Optional(t.Nullable(t.String())),
   variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
   realmUnitId: t.Optional(t.Nullable(t.String())),
+  referenceCount: t.Optional(t.Number()),
+  shareCount: t.Optional(t.Number()),
   resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
   /** Resolved root-post display title for the selected/default language. */
   title: t.Optional(t.Nullable(t.String())),
@@ -266,6 +268,7 @@ export const postListQuerySchema = t.Object({
   cursor: t.Optional(
     t.Object({
       unitId: t.Optional(t.String()),
+      sortValue: t.Optional(t.Union([t.Number(), t.String()])),
       createdAt: t.Optional(t.String()),
     }),
   ),
@@ -311,6 +314,7 @@ export const postListBodySchema = t.Object({
   cursor: t.Optional(
     t.Object({
       unitId: t.Optional(t.String()),
+      sortValue: t.Optional(t.Union([t.Number(), t.String()])),
       createdAt: t.Optional(t.String()),
     }),
   ),

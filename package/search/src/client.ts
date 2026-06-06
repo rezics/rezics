@@ -1,5 +1,4 @@
 import { type Index, MeiliSearch } from "meilisearch";
-import { COLLECTION_INDEX_NAME } from "./collection";
 import { PROGRESS_INDEX_NAME } from "./progress";
 import {
   type ExpectedMeiliIndexSchema,
@@ -8,6 +7,7 @@ import {
   getExpectedMeiliIndexSettings,
   getExpectedMeiliIndexUids,
 } from "./schema";
+import { SHELF_ITEM_INDEX_NAME } from "./shelf-item";
 
 export interface MeiliConfig {
   host: string;
@@ -27,7 +27,7 @@ export class SearchClient {
   readonly postIndex: Index;
   readonly commentIndex: Index;
   readonly pollIndex: Index;
-  readonly collectionIndex: Index;
+  readonly shelfItemIndex: Index;
   readonly realmIndex: Index;
   readonly entityIndex: Index;
   readonly progressIndex: Index;
@@ -40,7 +40,7 @@ export class SearchClient {
     this.postIndex = this.meili.index("posts");
     this.commentIndex = this.meili.index("comments");
     this.pollIndex = this.meili.index("polls");
-    this.collectionIndex = this.meili.index(COLLECTION_INDEX_NAME);
+    this.shelfItemIndex = this.meili.index(SHELF_ITEM_INDEX_NAME);
     this.realmIndex = this.meili.index("realms");
     this.entityIndex = this.meili.index("entities");
     this.progressIndex = this.meili.index(PROGRESS_INDEX_NAME);
@@ -92,8 +92,8 @@ export class SearchClient {
         return this.commentIndex;
       case "polls":
         return this.pollIndex;
-      case COLLECTION_INDEX_NAME:
-        return this.collectionIndex;
+      case SHELF_ITEM_INDEX_NAME:
+        return this.shelfItemIndex;
       case "realms":
         return this.realmIndex;
       case "entities":
@@ -142,9 +142,9 @@ export class SearchClient {
     await this.initIndexFromSchema(getExpectedMeiliIndexSchema("polls"));
   }
 
-  async initCollectionIndex(): Promise<void> {
+  async initShelfItemIndex(): Promise<void> {
     await this.initIndexFromSchema(
-      getExpectedMeiliIndexSchema(COLLECTION_INDEX_NAME),
+      getExpectedMeiliIndexSchema(SHELF_ITEM_INDEX_NAME),
     );
   }
 
@@ -252,19 +252,19 @@ export class SearchClient {
     return this.pollIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: User collection document operations
+  // ANCHOR: Shelf item document operations
 
-  addOrUpdateCollections(docs: any[]) {
-    return this.collectionIndex.addDocuments(docs);
+  addOrUpdateShelfItems(docs: any[]) {
+    return this.shelfItemIndex.addDocuments(docs);
   }
-  patchCollections(docs: any[]) {
-    return this.collectionIndex.updateDocuments(docs);
+  patchShelfItems(docs: any[]) {
+    return this.shelfItemIndex.updateDocuments(docs);
   }
-  deleteCollections(ids: string[]) {
-    return this.collectionIndex.deleteDocuments(ids);
+  deleteShelfItems(ids: string[]) {
+    return this.shelfItemIndex.deleteDocuments(ids);
   }
-  deleteAllCollections() {
-    return this.collectionIndex.deleteAllDocuments();
+  deleteAllShelfItems() {
+    return this.shelfItemIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Realm document operations

@@ -9,6 +9,11 @@ import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { BookWithRelations } from "./types";
 
+function optionalCount(row: unknown, key: string): number | undefined {
+  const value = (row as Record<string, unknown> | null | undefined)?.[key];
+  return typeof value === "number" ? value : undefined;
+}
+
 function pickCoverUrl(
   book: BookWithRelations,
   resolvedLanguage?: string | null,
@@ -90,6 +95,8 @@ export function mapBaseBookToDTO(
     isLanguageNeutral: unit.isLanguageNeutral,
     catalogEntryKind: unit.catalogEntryKind,
     targetUnitId: unit.targetUnitId,
+    referenceCount: unit.referenceCount,
+    shareCount: optionalCount(unit, "shareCount"),
 
     // Book extension fields
     isbn13: book.isbn13 ?? undefined,

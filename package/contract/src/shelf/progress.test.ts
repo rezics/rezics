@@ -23,6 +23,7 @@ describe("progress contract schemas", () => {
     ]);
     expect(SYSTEM_SHELF_KIND_KEYS).toEqual([
       "favorites",
+      "saved",
       "backlog",
       "active",
       "completed",
@@ -154,7 +155,7 @@ describe("progress contract schemas", () => {
             },
             mainUnitContext: null,
             resumeRoute: { kind: "node", bookId: "book-1", nodeId: "node-1" },
-            shelves: [{ shelfUnitId: "shelf-1", title: "Reading" }],
+            shelves: [{ shelfId: "shelf-1", title: "Reading" }],
           },
         ],
         nextCursor: null,

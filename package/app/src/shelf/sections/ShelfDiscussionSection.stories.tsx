@@ -104,7 +104,7 @@ function SeededAuthedEmpty() {
   }, [qc]);
   return (
     <div className="p-4">
-      <ShelfDiscussionSection shelfUnitId={SHELF_ID} />
+      <ShelfDiscussionSection shelfItemId={SHELF_ID} />
     </div>
   );
 }
@@ -119,7 +119,7 @@ function SeededAuthedPopulated() {
   }, [qc]);
   return (
     <div className="p-4">
-      <ShelfDiscussionSection shelfUnitId={SHELF_ID} />
+      <ShelfDiscussionSection shelfItemId={SHELF_ID} />
     </div>
   );
 }
@@ -134,7 +134,7 @@ function SeededAuthedMany() {
   }, [qc]);
   return (
     <div className="p-4">
-      <ShelfDiscussionSection shelfUnitId={SHELF_ID} />
+      <ShelfDiscussionSection shelfItemId={SHELF_ID} />
     </div>
   );
 }
@@ -149,7 +149,7 @@ function SeededUnauthenticated() {
   }, [qc]);
   return (
     <div className="p-4">
-      <ShelfDiscussionSection shelfUnitId={SHELF_ID} />
+      <ShelfDiscussionSection shelfItemId={SHELF_ID} />
     </div>
   );
 }

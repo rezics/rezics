@@ -269,6 +269,27 @@ export class ReactionService {
   async cleanupTarget(targetId: string): Promise<{ count: number }> {
     return await this.repository.cleanupTarget(targetId);
   }
+
+  async recordShare(
+    userId: string,
+    targetId: string,
+  ): Promise<{ targetId: string; shareCount: number; created: boolean }> {
+    return await this.repository.recordShare({ userId, targetId });
+  }
+
+  async getShareSummary(
+    targetIds: string[],
+  ): Promise<Record<string, { shareCount: number }>> {
+    const result: Record<string, { shareCount: number }> = {};
+    for (const id of targetIds) {
+      result[id] = { shareCount: 0 };
+    }
+    const rows = await this.repository.getShareSummaryRows(targetIds);
+    for (const row of rows) {
+      result[row.targetId] = { shareCount: row.shareCount };
+    }
+    return result;
+  }
 }
 
 export const reactionService = new ReactionService();

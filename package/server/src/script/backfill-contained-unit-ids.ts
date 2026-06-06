@@ -13,9 +13,11 @@ async function fetchBatch(cursor: string | null): Promise<BackfillRow[]> {
   const result = cursor
     ? await db.execute<BackfillRow>(sql`
         SELECT u.id AS "shelfId",
-               ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
+               ARRAY_REMOVE(ARRAY_AGG(su."itemId"), NULL) AS "items"
         FROM "Unit" u
-        LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
+        LEFT JOIN "ShelfItem" su
+          ON su."shelfId" = u.id
+         AND su."itemType" = 'unit'
         WHERE u.type = 'SHELF'
           AND u.status = 'PUBLISHED'
           AND u.id > ${cursor}::uuid
@@ -25,9 +27,11 @@ async function fetchBatch(cursor: string | null): Promise<BackfillRow[]> {
       `)
     : await db.execute<BackfillRow>(sql`
         SELECT u.id AS "shelfId",
-               ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
+               ARRAY_REMOVE(ARRAY_AGG(su."itemId"), NULL) AS "items"
         FROM "Unit" u
-        LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
+        LEFT JOIN "ShelfItem" su
+          ON su."shelfId" = u.id
+         AND su."itemType" = 'unit'
         WHERE u.type = 'SHELF'
           AND u.status = 'PUBLISHED'
         GROUP BY u.id

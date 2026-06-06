@@ -1,8 +1,8 @@
 ---
 title: Shelf Item Collection Cutover
-status: active
+status: done
 created: 2026-06-06
-completed:
+completed: 2026-06-06
 supersededBy:
 tags: [shelf, collection, search, comment, meili]
 ---
@@ -149,144 +149,144 @@ found.
 
 ## 1. Database And Contract Shape
 
-- [ ] 1.1 Replace `ShelfUnit` and `ShelfUnitRelation` in
+- [x] 1.1 Replace `ShelfUnit` and `ShelfUnitRelation` in
   `package/server/src/db/schema/shelf.ts` with `ShelfItem`, item-type/role
   storage values, root/total counts, and the supporting indexes/constraints.
-- [ ] 1.2 Generate the server DB migration for the clear cutover. No backward
+- [x] 1.2 Generate the server DB migration for the clear cutover. No backward
   compatibility tables, views, triggers, or dual-write bridge are required.
-- [ ] 1.3 Update `package/server/src/db/relations/shelf-relations.ts` and any
+- [x] 1.3 Update `package/server/src/db/relations/shelf-relations.ts` and any
   schema barrel exports so the server imports `ShelfItem` instead of the old
   shelf unit/relation tables.
-- [ ] 1.4 Replace shelf unit/relation DTOs and input schemas in
+- [x] 1.4 Replace shelf unit/relation DTOs and input schemas in
   `package/contract/src/shelf/shelf.ts` with shelf item DTOs, item type,
   item kind, parent role, root item count, and item list query/response shapes.
-- [ ] 1.5 Update contract tests in `package/contract/src/shelf/` for item
+- [x] 1.5 Update contract tests in `package/contract/src/shelf/` for item
   identity, comment item support, one-level nesting, duplicate rejection, and
   root-vs-total count semantics.
-- [ ] 1.6 Update `package/server/src/shelf/types.ts` and
+- [x] 1.6 Update `package/server/src/shelf/types.ts` and
   `package/server/src/shelf/shelf.mapper.ts` to map `ShelfItem` rows and shelf
   counts into the new DTOs.
 
 ## 2. Shelf Write Model
 
-- [ ] 2.1 Rewrite `package/server/src/shelf/shelf.service.ts` item helpers around
+- [x] 2.1 Rewrite `package/server/src/shelf/shelf.service.ts` item helpers around
   `ShelfItem`: ensure item, delete item, attach child, set children, reorder,
   batch ops, count maintenance, and contained-item sync enqueueing.
-- [ ] 2.2 Replace graph-style relation operations with one-level parent fields.
+- [x] 2.2 Replace graph-style relation operations with one-level parent fields.
   Remove attach/detach/set-children code paths that depend on a separate
   relation table.
-- [ ] 2.3 Keep fractional-index ordering in
+- [x] 2.3 Keep fractional-index ordering in
   `package/server/src/shelf/fractional-index.ts`, but make service tests cover
   root ordering and child ordering separately.
-- [ ] 2.4 Rewrite `package/server/src/shelf/collection.service.ts` so collect and
+- [x] 2.4 Rewrite `package/server/src/shelf/collection.service.ts` so collect and
   favorite operations create `ShelfItem` rows in user-owned system shelves.
   Remove `UserUnitCollection` writes.
-- [ ] 2.5 Replace `package/server/src/shelf/user-unit-collection.service.ts`
+- [x] 2.5 Replace `package/server/src/shelf/user-unit-collection.service.ts`
   with shelf-item search sync enqueue helpers or delete it if all callers move
   into the shelf-item service.
-- [ ] 2.6 Update `package/server/src/shelf/system-shelves.ts` so system shelves
+- [x] 2.6 Update `package/server/src/shelf/system-shelves.ts` so system shelves
   cover favorites and saved shelves without introducing a collection table.
-- [ ] 2.7 Update `package/server/src/shelf/*.test.ts` for direct item collection,
+- [x] 2.7 Update `package/server/src/shelf/*.test.ts` for direct item collection,
   review child attachment under a target work, comment item collection, shelf
   item collection, duplicate rejection, self-parent rejection, and count updates.
 
 ## 3. API Cutover
 
-- [ ] 3.1 Update `package/server/src/shelf/shelf.api.ts` routes and route
+- [x] 3.1 Update `package/server/src/shelf/shelf.api.ts` routes and route
   descriptions from `/units` semantics to shelf item semantics while preserving
   the shelf resource boundary.
-- [ ] 3.2 Update `package/api/src/shelf/shelf.types.ts`,
+- [x] 3.2 Update `package/api/src/shelf/shelf.types.ts`,
   `package/api/src/shelf/shelf.api.ts`, `package/api/src/shelf/shelf.keys.ts`,
   `package/api/src/shelf/shelf.queries.ts`, and
   `package/api/src/shelf/shelf.mutations.ts` for shelf item DTOs and operations.
-- [ ] 3.3 Update collection client helpers under `package/api/src/shelf/` and
+- [x] 3.3 Update collection client helpers under `package/api/src/shelf/` and
   `package/app/src/collection/` so the collection UI calls the shelf-item-backed
   collect/favorite flows.
-- [ ] 3.4 Remove or rename public exports that expose `ShelfUnit`,
+- [x] 3.4 Remove or rename public exports that expose `ShelfUnit`,
   `ShelfUnitRelation`, or `UserUnitCollection` vocabulary.
-- [ ] 3.5 Update API-level tests in `package/api/src/shelf/` and
+- [x] 3.5 Update API-level tests in `package/api/src/shelf/` and
   `package/api/src/user-unit-collection/`; delete the latter package surface if
   it no longer has a domain to own.
 
 ## 4. Shelf Item Search Projection
 
-- [ ] 4.1 Add `package/contract/src/meili/shelf-item.ts` with
+- [x] 4.1 Add `package/contract/src/meili/shelf-item.ts` with
   `ShelfItemSearchDocument`, options, result schemas, and grouped shelf-match
   response shapes.
-- [ ] 4.2 Add `package/search/src/shelf-item.ts` document-id helpers and builders
+- [x] 4.2 Add `package/search/src/shelf-item.ts` document-id helpers and builders
   for Unit-backed items and comment-backed items.
-- [ ] 4.3 Extend `package/search/src/schema.ts` with the `shelf_items` index:
+- [x] 4.3 Extend `package/search/src/schema.ts` with the `shelf_items` index:
   searchable attributes, filterable attributes, sortable attributes, facetable
   fields, domain label, and full-sync support.
-- [ ] 4.4 Extend `package/search/src/client.ts` with shelf-item index
+- [x] 4.4 Extend `package/search/src/client.ts` with shelf-item index
   initialization and add/update/patch/delete/deleteAll operations.
-- [ ] 4.5 Extend `package/search/src/sync.ts` with single item sync, item remove,
+- [x] 4.5 Extend `package/search/src/sync.ts` with single item sync, item remove,
   shelf fanout sync, source item fanout sync, comment fanout sync, and segmented
   full sync for shelf items.
-- [ ] 4.6 Extend `package/job/src/command/search.ts`,
+- [x] 4.6 Extend `package/job/src/command/search.ts`,
   `package/job-runner/src/handlers/search/handlers.ts`, and Sequin routing so
   shelf-item writes and source metadata changes enqueue the correct projection
   updates.
-- [ ] 4.7 Replace the current `user_unit_collections` index and
+- [x] 4.7 Replace the current `user_unit_collections` index and
   `collectionSync` commands with shelf-item projection commands. Remove
   `package/search/src/collection.ts` once callers are gone.
-- [ ] 4.8 Add search tests in `package/search/src/` for document shape, private
+- [x] 4.8 Add search tests in `package/search/src/` for document shape, private
   `searchText`, comment context, grouped shelf matches, owner filtering, saved
   shelf filtering, and delete/moderation fanout.
 
 ## 5. Search API And Result Semantics
 
-- [ ] 5.1 Extend `package/contract/src/search/scope.ts` and
+- [x] 5.1 Extend `package/contract/src/search/scope.ts` and
   `package/contract/src/search/federated.ts` only as needed to express shelf
   item search and grouped shelf-match results without overloading content search
   categories.
-- [ ] 5.2 Update `package/server/src/meili/search/filters.ts` with shelf-item
+- [x] 5.2 Update `package/server/src/meili/search/filters.ts` with shelf-item
   filters for `shelfId`, owner/saved-shelf scope, visibility, item type/kind,
   and private `searchText` access.
-- [ ] 5.3 Update `package/server/src/meili/search/federated.service.ts` so
+- [x] 5.3 Update `package/server/src/meili/search/federated.service.ts` so
   searches for shelves can return shelves because contained shelf items matched,
   including matched item previews and match counts.
-- [ ] 5.4 Add a dedicated shelf-internal search/read path in the shelf service or
+- [x] 5.4 Add a dedicated shelf-internal search/read path in the shelf service or
   search service that filters `shelf_items` by `shelfId` and returns root context
   for child hits.
-- [ ] 5.5 Add tests proving public viewers cannot search another user's private
+- [x] 5.5 Add tests proving public viewers cannot search another user's private
   `searchText`, owners can search their own `searchText`, and saved-shelf
   searches include shelves the user saved as shelf items.
 
 ## 6. App Hydration And Rendering
 
-- [ ] 6.1 Update `package/api/src/shelf/useShelfHydration.ts` so hydration groups
+- [x] 6.1 Update `package/api/src/shelf/useShelfHydration.ts` so hydration groups
   by `itemType` and `kind`, hydrating Unit-backed items through existing APIs and
   comment-backed items through the comment API/search document context.
-- [ ] 6.2 Update `package/app/src/shelf/models/shelfStream.ts` to derive the
+- [x] 6.2 Update `package/app/src/shelf/models/shelfStream.ts` to derive the
   render stream from `ShelfItem` parent fields instead of relation rows.
-- [ ] 6.3 Update `package/app/src/shelf/components/ShelfItemRenderer.tsx` and
+- [x] 6.3 Update `package/app/src/shelf/components/ShelfItemRenderer.tsx` and
   related shelf components to render comment child items, review child items,
   tag children, shelf cards, and matched-child search context.
-- [ ] 6.4 Update editor state under `package/app/src/shelf/states/` and
+- [x] 6.4 Update editor state under `package/app/src/shelf/states/` and
   `package/app/src/shelf/hooks/` for shelf item op logs and one-level parent
   fields.
-- [ ] 6.5 Update collection UI under `package/app/src/collection/` so saving a
+- [x] 6.5 Update collection UI under `package/app/src/collection/` so saving a
   work, review, comment, or shelf writes shelf items and occurrence-level
   `searchText`.
-- [ ] 6.6 Update shelf/search stories and tests for nested root+child rendering,
+- [x] 6.6 Update shelf/search stories and tests for nested root+child rendering,
   comment item rendering, shelf-as-item rendering, and grouped shelf search
   matches.
 
 ## 7. Cleanup And Verification
 
-- [ ] 7.1 Remove `UserUnitCollection` from
+- [x] 7.1 Remove `UserUnitCollection` from
   `package/server/src/db/schema/collection.ts` if no other domain owns it after
   the cutover.
-- [ ] 7.2 Remove stale scripts such as
+- [x] 7.2 Remove stale scripts such as
   `package/server/src/script/backfill-contained-unit-ids.ts` or rewrite them for
   shelf-item projection if still useful.
-- [ ] 7.3 Update docs and route comments that still describe collection as a
+- [x] 7.3 Update docs and route comments that still describe collection as a
   separate model or `ShelfUnitRelation` as the nesting mechanism.
-- [ ] 7.4 Run focused server, contract, API, app model, and search tests covering
+- [x] 7.4 Run focused server, contract, API, app model, and search tests covering
   shelf item writes, collection flows, nested rendering, comment items, search
   permissions, and projection sync.
-- [ ] 7.5 Run `bun run check:convention`, `bun run check:tokens`, and targeted
+- [x] 7.5 Run `bun run check:convention`, `bun run check:tokens`, and targeted
   `bun run format:check`/Biome checks for touched packages.
 
 ## Out of scope

@@ -1,12 +1,12 @@
 import type {
   ShelfDetailDTO,
   ShelfDTO,
+  ShelfItemDTO,
+  ShelfItemKind,
+  ShelfItemParentRole,
+  ShelfItemType,
   ShelfMatchedUnitDTO,
   ShelfSummaryDTO,
-  ShelfUnitDTO,
-  ShelfUnitKind,
-  ShelfUnitRelationDTO,
-  ShelfUnitRelationRole,
   VariantContextSummary,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
@@ -14,9 +14,8 @@ import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { variantContextForRow } from "@/unit/variant-context";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type {
+  ShelfItemRow,
   ShelfListSelected,
-  ShelfUnitRelationRow,
-  ShelfUnitRow,
   ShelfWithMetadata,
 } from "./types";
 
@@ -45,37 +44,33 @@ function pickShelfCoverUrl(
   return undefined;
 }
 
-export function mapShelfUnitToDTO(row: ShelfUnitRow): ShelfUnitDTO {
+export function mapShelfItemToDTO(row: ShelfItemRow): ShelfItemDTO {
+  const itemType = row.itemType as ShelfItemType;
   return {
     shelfId: row.shelfId,
-    unitId: row.unitId,
+    itemType,
+    itemId: row.itemId,
     variantUnitId: row.variantUnitId ?? null,
     variantContext: variantContextForRow(row, undefined),
-    kind: row.kind as ShelfUnitKind,
+    kind: row.kind as ShelfItemKind,
+    parentItemType: (row.parentItemType as ShelfItemType | null) ?? null,
+    parentItemId: row.parentItemId ?? null,
+    parentRole: (row.parentRole as ShelfItemParentRole | null) ?? null,
     position: row.position,
+    searchText: row.searchText ?? null,
+    createdByUserId: row.createdByUserId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
 }
 
-export function mapShelfUnitToDTOWithVariantContext(
-  row: ShelfUnitRow,
+export function mapShelfItemToDTOWithVariantContext(
+  row: ShelfItemRow,
   variantContexts?: ReadonlyMap<string, VariantContextSummary>,
-): ShelfUnitDTO {
+): ShelfItemDTO {
   return {
-    ...mapShelfUnitToDTO(row),
+    ...mapShelfItemToDTO(row),
     variantContext: variantContextForRow(row, variantContexts),
-  };
-}
-
-export function mapShelfUnitRelationToDTO(
-  row: ShelfUnitRelationRow,
-): ShelfUnitRelationDTO {
-  return {
-    shelfId: row.shelfId,
-    parentUnitId: row.parentUnitId,
-    childUnitId: row.childUnitId,
-    role: row.role as ShelfUnitRelationRole,
   };
 }
 
@@ -94,6 +89,7 @@ export function mapShelfToDTO(row: ShelfWithMetadata): ShelfDTO {
       row.unit?.translations,
     ),
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    rootItemCount: row.rootItemCount,
     itemCount: row.itemCount,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
@@ -136,6 +132,7 @@ export function mapShelfListRowToDTO(
       row.unit?.translations,
     ),
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    rootItemCount: row.rootItemCount,
     itemCount: row.itemCount,
     matchedUnit: matchedUnit ?? undefined,
     translations: (row.unit?.translations ??

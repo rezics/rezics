@@ -25,8 +25,29 @@ const mockProgressSearch = mock(async () => ({
   facetDistribution: {},
 }));
 
+class TestAppError extends Error {
+  statusCode: number;
+  code?: string;
+  details?: unknown;
+
+  constructor(
+    statusCode: number,
+    message: string,
+    options?: { code?: string; details?: unknown },
+  ) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = options?.code;
+    this.details = options?.details;
+  }
+}
+
 mock.module("@rezics/search", () => ({
   PROGRESS_BUCKET_COUNT: 10,
+}));
+
+mock.module("@/utils/errors", () => ({
+  AppError: TestAppError,
 }));
 
 mock.module("@/job/job-boundary", () => ({
@@ -450,8 +471,8 @@ describe("ProgressService", () => {
     const result = await service.listLibrary("user-1", { limit: 10 });
 
     expect(result.rows[0]?.shelves).toEqual([
-      { shelfUnitId: "direct-shelf", title: "Direct Shelf" },
-      { shelfUnitId: "context-shelf", title: "Context Shelf" },
+      { shelfId: "direct-shelf", title: "Direct Shelf" },
+      { shelfId: "context-shelf", title: "Context Shelf" },
     ]);
   });
 

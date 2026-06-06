@@ -155,6 +155,8 @@ export class RankingService {
         return this.fullSyncSegment(command.payload);
       case RANKING_COMMAND_KINDS.viewBucketFlush:
         return this.flushViewBuckets(command.payload);
+      case RANKING_COMMAND_KINDS.reactionBucket:
+        return this.ingestReactionBucket(command.payload, command.source);
     }
   }
 
@@ -167,10 +169,13 @@ export class RankingService {
     } = {},
   ) {
     const state = await this.mainState.readUnitState(unitId);
-    if (!state.unit) return { unitId, skipped: "unit-not-found" };
+    if (!state.unit && !state.comment) {
+      return { unitId, skipped: "unit-not-found" };
+    }
 
     const reactionSummaries = await this.reactions.getSummaries([unitId]);
     const bucketSignals = await this.readBucketSignals(unitId);
+    const computedAt = new Date();
     const rankKinds = options.rankKind
       ? [options.rankKind]
       : rankKindsForState(state);
@@ -178,15 +183,16 @@ export class RankingService {
 
     for (const rankKind of rankKinds) {
       for (const scope of scopesForRankKind(rankKind, state, options.scope)) {
+        const scopeKeyValue = scopeKey(scope);
         const snapshot: RankingSignalSnapshot = {
           unitId,
           rankKind,
           scope,
-          publishedAt: toIso(state.unit.publishedAt),
+          publishedAt: toIso(state.unit?.publishedAt),
           createdAt: toIso(
             rankKind === "post" || rankKind === "comment"
               ? (rankKind === "comment" ? state.comment : state.post)?.createdAt
-              : state.unit.createdAt,
+              : state.unit?.createdAt,
           ),
           replyCount: toNumber(
             rankKind === "comment"
@@ -202,6 +208,11 @@ export class RankingService {
           scoreCount: toNumber(state.scoreAggregate?.totalCount),
           progressCount: state.progressCount,
           reactionCounts: reactionSummaries[unitId] ?? {},
+          recentVoteCounts: await this.repository.readRecentVoteWindows(
+            unitId,
+            scopeKeyValue,
+            computedAt,
+          ),
           bucketSignals,
         };
         const scores = computeV1RankingScores(snapshot);
@@ -210,7 +221,7 @@ export class RankingService {
           unitId,
           scopeKind: scope.kind,
           scopeId: scope.id ?? null,
-          scopeKey: scopeKey(scope),
+          scopeKey: scopeKeyValue,
           rankKind,
           ...scores,
           formulaVersion: RANKING_FORMULA_VERSION,
@@ -249,6 +260,38 @@ export class RankingService {
     });
 
     return { bucket, patchedServing: false };
+  }
+
+  async ingestReactionBucket(
+    input: {
+      targetId: string;
+      scopeKey: string;
+      reaction: "upvote" | "downvote";
+      count: number;
+      at?: string;
+    },
+    source: RankingCommand["source"] = { type: "server" },
+  ) {
+    const at = input.at ? new Date(input.at) : new Date();
+    const bucketStart = new Date(at);
+    bucketStart.setMinutes(0, 0, 0);
+    const bucketEnd = new Date(bucketStart.getTime() + 3_600_000);
+    const count = Number.isFinite(input.count) ? input.count : 0;
+
+    const bucket = await this.repository.upsertReactionBucket({
+      targetId: input.targetId,
+      scopeKey: input.scopeKey,
+      reaction: input.reaction,
+      bucketStart,
+      bucketEnd,
+      count,
+    });
+
+    const recompute = await this.recomputeUnit(input.targetId, {
+      source,
+    });
+
+    return { bucket, recompute };
   }
 
   private async readBucketSignals(unitId: string) {
@@ -293,8 +336,11 @@ export class RankingService {
           await this.search.patchContent([
             {
               id: projection.unitId,
+              bestScore: projection.bestScore,
               hotScore: projection.hotScore,
               topScore: projection.topScore,
+              risingScore: projection.risingScore,
+              controversyScore: projection.controversyScore,
               trendingScore: projection.trendingScore,
               qualityScore: projection.qualityScore,
               rankUpdatedAt,
@@ -311,8 +357,11 @@ export class RankingService {
           await this.search.patchPosts([
             {
               id: projection.unitId,
+              bestScore: projection.bestScore,
               hotScore: projection.hotScore,
               topScore: projection.topScore,
+              risingScore: projection.risingScore,
+              controversyScore: projection.controversyScore,
               trendingScore: projection.trendingScore,
               qualityScore: projection.qualityScore,
               rankUpdatedAt,
@@ -323,8 +372,11 @@ export class RankingService {
         await this.search.patchComments([
           {
             id: projection.unitId,
+            bestScore: projection.bestScore,
             hotScore: projection.hotScore,
             topScore: projection.topScore,
+            risingScore: projection.risingScore,
+            controversyScore: projection.controversyScore,
             qualityScore: projection.qualityScore,
             rankUpdatedAt,
           },

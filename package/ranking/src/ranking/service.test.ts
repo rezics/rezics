@@ -17,7 +17,9 @@ process.env.MEILI_MASTER_KEY ??= "masterKey";
 const patchCalls: any[] = [];
 const patchStatusCreates: any[] = [];
 const projectionUpserts: any[] = [];
+const reactionBucketUpserts: any[] = [];
 const stateOverrides = new Map<string, any>();
+const recentVoteWindows = new Map<string, any>();
 
 function defaultUnitState(unitId: string) {
   return {
@@ -130,8 +132,11 @@ class FakeRankingRepository implements RankingRepository {
       scopeId: input.scopeId,
       scopeKey: input.scopeKey,
       rankKind: input.rankKind,
+      bestScore: input.bestScore,
       hotScore: input.hotScore,
       topScore: input.topScore,
+      risingScore: input.risingScore,
+      controversyScore: input.controversyScore,
       trendingScore: input.trendingScore,
       qualityScore: input.qualityScore,
       formulaVersion: input.formulaVersion,
@@ -161,8 +166,39 @@ class FakeRankingRepository implements RankingRepository {
     };
   }
 
+  async upsertReactionBucket(
+    input: Parameters<RankingRepository["upsertReactionBucket"]>[0],
+  ) {
+    reactionBucketUpserts.push(input);
+    const now = new Date();
+    return {
+      id: "reaction-bucket-1",
+      targetId: input.targetId,
+      scopeKey: input.scopeKey,
+      reaction: input.reaction,
+      bucketStart: input.bucketStart,
+      bucketEnd: input.bucketEnd,
+      count: input.count,
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
   async readBucketSignals() {
     return { views: 0, reads: 0 };
+  }
+
+  async readRecentVoteWindows(targetId: string, scopeKey: string) {
+    return (
+      recentVoteWindows.get(`${targetId}:${scopeKey}`) ?? {
+        upvote1h: 0,
+        downvote1h: 0,
+        upvote6h: 0,
+        downvote6h: 0,
+        upvote24h: 0,
+        downvote24h: 0,
+      }
+    );
   }
 
   async findProjectionsForPatch() {
@@ -202,7 +238,9 @@ describe("RankingService", () => {
     patchCalls.length = 0;
     patchStatusCreates.length = 0;
     projectionUpserts.length = 0;
+    reactionBucketUpserts.length = 0;
     stateOverrides.clear();
+    recentVoteWindows.clear();
   });
 
   test("recomputes, stores, and patches a content projection", async () => {
@@ -270,8 +308,11 @@ describe("RankingService", () => {
         type: "comment",
         unitId: "comment-1",
         fields: {
+          bestScore: expect.any(Number),
           hotScore: expect.any(Number),
           topScore: expect.any(Number),
+          risingScore: expect.any(Number),
+          controversyScore: expect.any(Number),
           qualityScore: expect.any(Number),
           rankUpdatedAt: expect.any(String),
         },
@@ -282,5 +323,107 @@ describe("RankingService", () => {
       indexName: "comments",
       status: "patched",
     });
+  });
+
+  test("recomputes comments whose target id is Comment.id without a Unit row", async () => {
+    stateOverrides.set("comment-only-1", {
+      ...defaultUnitState("comment-only-1"),
+      unit: null,
+      comment: {
+        id: "comment-only-1",
+        unitId: "comment-only-1",
+        rootUnitId: "post-1",
+        realmUnitId: "realm-1",
+        parentCommentId: "parent-comment-1",
+        replyCount: 0,
+        directReplyCount: 0,
+        createdAt: new Date("2026-02-01T00:00:00.000Z"),
+      },
+    });
+
+    const { RankingService } = await import("./service");
+    const service = new RankingService({
+      repository: new FakeRankingRepository(),
+    });
+
+    const result = await service.recomputeUnit("comment-only-1");
+
+    expect(result).toEqual({ unitId: "comment-only-1", projections: 1 });
+    expect(projectionUpserts[0]).toMatchObject({
+      unitId: "comment-only-1",
+      rankKind: "comment",
+      scopeKind: "parent",
+      scopeId: "parent-comment-1",
+    });
+    expect(patchCalls).toMatchObject([
+      { type: "comment", unitId: "comment-only-1" },
+    ]);
+  });
+
+  test("uses recent vote buckets for rising and best while totals drive quality", async () => {
+    recentVoteWindows.set("comment-1:parent-comment-1", {
+      upvote1h: 5,
+      downvote1h: 0,
+      upvote6h: 7,
+      downvote6h: 1,
+      upvote24h: 10,
+      downvote24h: 2,
+    });
+    stateOverrides.set("comment-1", {
+      ...defaultUnitState("comment-1"),
+      unit: null,
+      comment: {
+        id: "comment-1",
+        unitId: "comment-1",
+        rootUnitId: "post-1",
+        realmUnitId: "realm-1",
+        parentCommentId: "parent-comment-1",
+        replyCount: 0,
+        directReplyCount: 0,
+        createdAt: new Date("2026-02-01T00:00:00.000Z"),
+      },
+    });
+
+    const { RankingService } = await import("./service");
+    const service = new RankingService({
+      repository: new FakeRankingRepository(),
+    });
+
+    await service.recomputeUnit("comment-1");
+
+    expect(projectionUpserts[0].signalSnapshot.recentVoteCounts).toEqual(
+      recentVoteWindows.get("comment-1:parent-comment-1"),
+    );
+    expect(projectionUpserts[0].qualityScore).toBe(0);
+    expect(projectionUpserts[0].risingScore).toBeGreaterThan(0);
+    expect(projectionUpserts[0].bestScore).toBeGreaterThan(
+      projectionUpserts[0].qualityScore,
+    );
+  });
+
+  test("ingests reaction bucket commands and recomputes the target", async () => {
+    const { RankingService } = await import("./service");
+    const service = new RankingService({
+      repository: new FakeRankingRepository(),
+    });
+
+    await service.ingestReactionBucket({
+      targetId: "unit-1",
+      scopeKey: "global",
+      reaction: "upvote",
+      count: 1,
+      at: "2026-02-01T10:25:00.000Z",
+    });
+
+    expect(reactionBucketUpserts).toMatchObject([
+      {
+        targetId: "unit-1",
+        scopeKey: "global",
+        reaction: "upvote",
+        count: 1,
+        bucketStart: new Date("2026-02-01T10:00:00.000Z"),
+      },
+    ]);
+    expect(projectionUpserts).toHaveLength(1);
   });
 });

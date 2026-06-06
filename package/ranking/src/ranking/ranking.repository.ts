@@ -1,6 +1,19 @@
-import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNull,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
 import { db, disconnectRankingDb } from "../db/client";
 import {
+  type RankingReactionBucketRow,
+  rankingReactionBuckets,
   type RankingSignalBucketRow,
   rankingSignalBuckets,
   type ServingPatchStatusRow,
@@ -16,6 +29,7 @@ import type {
 } from "./types";
 
 export type RankingSignalKind = "view" | "read";
+export type RankingReactionKind = "upvote" | "downvote";
 export type RankingPatchStatus = "pending" | "patched" | "failed" | "skipped";
 
 export type ProjectionUpsertInput = RankingScores & {
@@ -57,7 +71,27 @@ export interface RankingRepository {
     count: number;
     metadata?: unknown;
   }): Promise<RankingSignalBucketRow>;
+  upsertReactionBucket(input: {
+    targetId: string;
+    scopeKey: string;
+    reaction: RankingReactionKind;
+    bucketStart: Date;
+    bucketEnd: Date;
+    count: number;
+  }): Promise<RankingReactionBucketRow>;
   readBucketSignals(unitId: string): Promise<{ views: number; reads: number }>;
+  readRecentVoteWindows(
+    targetId: string,
+    scopeKey: string,
+    now: Date,
+  ): Promise<{
+    upvote1h: number;
+    downvote1h: number;
+    upvote6h: number;
+    downvote6h: number;
+    upvote24h: number;
+    downvote24h: number;
+  }>;
   findProjectionsForPatch(input: {
     unitId?: string;
     projectionId?: string;
@@ -113,8 +147,11 @@ export class DrizzleRankingRepository implements RankingRepository {
           unitRankProjections.rankKind,
         ],
         set: {
+          bestScore: input.bestScore,
           hotScore: input.hotScore,
           topScore: input.topScore,
+          risingScore: input.risingScore,
+          controversyScore: input.controversyScore,
           trendingScore: input.trendingScore,
           qualityScore: input.qualityScore,
           scopeId: input.scopeId,
@@ -175,6 +212,47 @@ export class DrizzleRankingRepository implements RankingRepository {
     return bucket;
   }
 
+  async upsertReactionBucket(input: {
+    targetId: string;
+    scopeKey: string;
+    reaction: RankingReactionKind;
+    bucketStart: Date;
+    bucketEnd: Date;
+    count: number;
+  }): Promise<RankingReactionBucketRow> {
+    const now = new Date();
+    const [bucket] = await db
+      .insert(rankingReactionBuckets)
+      .values({
+        targetId: input.targetId,
+        scopeKey: input.scopeKey,
+        reaction: input.reaction,
+        bucketStart: input.bucketStart,
+        bucketEnd: input.bucketEnd,
+        count: input.count,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: [
+          rankingReactionBuckets.targetId,
+          rankingReactionBuckets.scopeKey,
+          rankingReactionBuckets.reaction,
+          rankingReactionBuckets.bucketStart,
+        ],
+        set: {
+          count: sql`${rankingReactionBuckets.count} + ${input.count}`,
+          bucketEnd: input.bucketEnd,
+          updatedAt: now,
+        },
+      })
+      .returning();
+
+    if (!bucket) {
+      throw new Error("Failed to upsert ranking reaction bucket");
+    }
+    return bucket;
+  }
+
   async readBucketSignals(
     unitId: string,
   ): Promise<{ views: number; reads: number }> {
@@ -191,6 +269,64 @@ export class DrizzleRankingRepository implements RankingRepository {
       views: Number(rows.find((row) => row.signalKind === "view")?.count ?? 0),
       reads: Number(rows.find((row) => row.signalKind === "read")?.count ?? 0),
     };
+  }
+
+  async readRecentVoteWindows(
+    targetId: string,
+    scopeKey: string,
+    now: Date,
+  ): Promise<{
+    upvote1h: number;
+    downvote1h: number;
+    upvote6h: number;
+    downvote6h: number;
+    upvote24h: number;
+    downvote24h: number;
+  }> {
+    const dayStart = new Date(now.getTime() - 24 * 3_600_000);
+    const rows = await db
+      .select({
+        reaction: rankingReactionBuckets.reaction,
+        bucketStart: rankingReactionBuckets.bucketStart,
+        count: sql<number>`coalesce(sum(${rankingReactionBuckets.count}), 0)`,
+      })
+      .from(rankingReactionBuckets)
+      .where(
+        and(
+          eq(rankingReactionBuckets.targetId, targetId),
+          eq(rankingReactionBuckets.scopeKey, scopeKey),
+          gte(rankingReactionBuckets.bucketStart, dayStart),
+        ),
+      )
+      .groupBy(
+        rankingReactionBuckets.reaction,
+        rankingReactionBuckets.bucketStart,
+      );
+
+    const windows = {
+      upvote1h: 0,
+      downvote1h: 0,
+      upvote6h: 0,
+      downvote6h: 0,
+      upvote24h: 0,
+      downvote24h: 0,
+    };
+    const sixHourStart = new Date(now.getTime() - 6 * 3_600_000);
+    const hourStart = new Date(now.getTime() - 3_600_000);
+
+    for (const row of rows) {
+      const count = Number(row.count ?? 0);
+      const bucketStart =
+        row.bucketStart instanceof Date
+          ? row.bucketStart
+          : new Date(row.bucketStart);
+      const prefix = row.reaction === "upvote" ? "upvote" : "downvote";
+      windows[`${prefix}24h`] += count;
+      if (bucketStart >= sixHourStart) windows[`${prefix}6h`] += count;
+      if (bucketStart >= hourStart) windows[`${prefix}1h`] += count;
+    }
+
+    return windows;
   }
 
   async findProjectionsForPatch(input: {

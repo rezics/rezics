@@ -3,7 +3,7 @@ import type {
   CollectionStatusBatchResponse,
   CollectionStatusResponse,
   CollectResponse,
-  ShelfUnitKind,
+  ShelfItemKind,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
@@ -13,19 +13,17 @@ import { AppError } from "@/utils/errors";
 import {
   Post,
   Shelf,
-  ShelfUnit,
-  ShelfUnitRelation,
+  ShelfItem,
   Unit,
   UnitTranslation,
   UserTagApplication,
-  UserUnitCollection,
 } from "../db/schema";
 import { generateBetween } from "./fractional-index";
 import {
   createDrizzleSystemShelfClient,
   findSystemShelf,
 } from "./system-shelves";
-import { enqueueUserUnitCollectionSearchSync } from "./user-unit-collection.service";
+import { enqueueShelfItemSourceSearchSync } from "./user-unit-collection.service";
 
 const FAVORITES_KIND_KEY = "favorites" as const;
 const COLLECTION_STATUS_BATCH_CAP = 100;
@@ -39,13 +37,13 @@ type UnitTargetRow = {
 };
 
 interface ResolvedTarget {
-  /** Unit id of the parent shelf unit (the target work, or the target itself). */
+  /** Unit id of the parent shelf item (the target work, or the target itself). */
   parentUnitId: string;
-  /** Kind discriminator for the parent shelf unit. */
-  parentKind: ShelfUnitKind;
+  /** Kind discriminator for the parent shelf item. */
+  parentKind: ShelfItemKind;
   /** If the original targetId is a review post, its unit id and kind; else undefined. */
   reviewUnitId?: string;
-  reviewKind?: ShelfUnitKind;
+  reviewKind?: ShelfItemKind;
 }
 
 interface BatchResolvedTarget {
@@ -70,9 +68,10 @@ export type CollectionRepository = {
     userId: string;
     resolved: ResolvedTarget;
     variantUnitId?: string | null;
+    searchText?: string | null;
     shelfIds: string[];
   }): Promise<CollectResponse>;
-  hasShelfUnit(shelfId: string, unitId: string): Promise<boolean>;
+  hasShelfItem(shelfId: string, unitId: string): Promise<boolean>;
   removeFavorite(input: {
     shelfId: string;
     resolved: ResolvedTarget;
@@ -112,7 +111,7 @@ function enqueueContainedUnitIdsSync(shelfId: string): Promise<unknown> {
 function mapUnitToKind(
   type: UnitKind,
   postKind: PostKind | null,
-): ShelfUnitKind {
+): ShelfItemKind {
   if (type === "POST") {
     if (postKind === "CHAPTER") return "chapter";
     if (postKind === "REVIEW") return "review";
@@ -139,16 +138,16 @@ function mapUnitToKind(
     case "VIDEO":
       return "video";
     default:
-      return type.toString().toLowerCase() as ShelfUnitKind;
+      return type.toString().toLowerCase() as ShelfItemKind;
   }
 }
 
 async function nextShelfPosition(tx: any, shelfId: string): Promise<string> {
   const [last] = await tx
-    .select({ position: ShelfUnit.position })
-    .from(ShelfUnit)
-    .where(eq(ShelfUnit.shelfId, shelfId))
-    .orderBy(desc(ShelfUnit.position))
+    .select({ position: ShelfItem.position })
+    .from(ShelfItem)
+    .where(eq(ShelfItem.shelfId, shelfId))
+    .orderBy(desc(ShelfItem.position))
     .limit(1);
   return generateBetween(last?.position, undefined);
 }
@@ -163,33 +162,44 @@ async function findOwnedShelf(tx: any, shelfId: string, userId: string) {
   return shelf ?? null;
 }
 
-async function insertShelfUnit(
+async function insertShelfItem(
   tx: any,
   input: {
     shelfId: string;
     unitId: string;
-    kind: ShelfUnitKind;
+    kind: ShelfItemKind;
     variantUnitId?: string | null;
+    parentUnitId?: string | null;
+    parentRole?: string | null;
+    searchText?: string | null;
   },
 ): Promise<boolean> {
   const position = await nextShelfPosition(tx, input.shelfId);
   const rows = await tx
-    .insert(ShelfUnit)
+    .insert(ShelfItem)
     .values({
       shelfId: input.shelfId,
-      unitId: input.unitId,
+      itemType: "unit",
+      itemId: input.unitId,
       variantUnitId: input.variantUnitId ?? null,
       kind: input.kind,
+      parentItemType: input.parentUnitId ? "unit" : null,
+      parentItemId: input.parentUnitId ?? null,
+      parentRole: input.parentRole ?? null,
       position,
+      searchText: input.searchText ?? null,
       updatedAt: new Date(),
     })
     .onConflictDoNothing()
-    .returning({ unitId: ShelfUnit.unitId });
+    .returning({ itemId: ShelfItem.itemId });
   if (rows.length > 0) {
     await tx
       .update(Shelf)
       .set({
         itemCount: sql`${Shelf.itemCount} + 1`,
+        ...(input.parentUnitId
+          ? {}
+          : { rootItemCount: sql`${Shelf.rootItemCount} + 1` }),
         updatedAt: new Date(),
       })
       .where(eq(Shelf.unitId, input.shelfId));
@@ -206,15 +216,43 @@ async function upsertReviewRelation(
     childUnitId: string;
   },
 ): Promise<void> {
-  await tx
-    .insert(ShelfUnitRelation)
-    .values({
-      shelfId: input.shelfId,
-      parentUnitId: input.parentUnitId,
-      childUnitId: input.childUnitId,
-      role: "review",
+  const [before] = await tx
+    .select({ parentUnitId: ShelfItem.parentItemId })
+    .from(ShelfItem)
+    .where(
+      and(
+        eq(ShelfItem.shelfId, input.shelfId),
+        eq(ShelfItem.itemId, input.childUnitId),
+      ),
+    )
+    .limit(1);
+  const updated = await tx
+    .update(ShelfItem)
+    .set({
+      parentItemType: "unit",
+      parentItemId: input.parentUnitId,
+      parentRole: "review",
+      updatedAt: new Date(),
     })
-    .onConflictDoNothing();
+    .where(
+      and(
+        eq(ShelfItem.shelfId, input.shelfId),
+        eq(ShelfItem.itemId, input.childUnitId),
+      ),
+    )
+    .returning({
+      unitId: ShelfItem.itemId,
+      parentUnitId: ShelfItem.parentItemId,
+    });
+  if (!before?.parentUnitId && updated.length > 0) {
+    await tx
+      .update(Shelf)
+      .set({
+        rootItemCount: sql`${Shelf.rootItemCount} - 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(Shelf.unitId, input.shelfId));
+  }
 }
 
 function createDrizzleCollectionRepository(): CollectionRepository {
@@ -259,21 +297,6 @@ function createDrizzleCollectionRepository(): CollectionRepository {
     async applyCollectionMetadata(input) {
       const db = await getServerDb();
       await db.transaction(async (tx) => {
-        if (input.searchText !== undefined) {
-          await tx
-            .insert(UserUnitCollection)
-            .values({
-              userId: input.userId,
-              unitId: input.unitId,
-              searchText: input.searchText,
-              updatedAt: new Date(),
-            })
-            .onConflictDoUpdate({
-              target: [UserUnitCollection.userId, UserUnitCollection.unitId],
-              set: { searchText: input.searchText, updatedAt: new Date() },
-            });
-        }
-
         if (input.tagUnitIds !== undefined) {
           await tx
             .delete(UserTagApplication)
@@ -314,55 +337,66 @@ function createDrizzleCollectionRepository(): CollectionRepository {
           if (!shelf) continue;
 
           const [existingParent] = await tx
-            .select({ unitId: ShelfUnit.unitId })
-            .from(ShelfUnit)
+            .select({ unitId: ShelfItem.itemId })
+            .from(ShelfItem)
             .where(
               and(
-                eq(ShelfUnit.shelfId, shelfId),
-                eq(ShelfUnit.unitId, input.resolved.parentUnitId),
+                eq(ShelfItem.shelfId, shelfId),
+                eq(ShelfItem.itemId, input.resolved.parentUnitId),
               ),
             )
             .limit(1);
 
           if (!existingParent) {
-            const created = await insertShelfUnit(tx, {
+            const created = await insertShelfItem(tx, {
               shelfId,
               unitId: input.resolved.parentUnitId,
               variantUnitId: input.variantUnitId,
               kind: input.resolved.parentKind,
+              searchText: input.searchText,
             });
             if (created) isNew = true;
-          } else if (input.variantUnitId !== undefined) {
+          } else if (
+            input.variantUnitId !== undefined ||
+            input.searchText !== undefined
+          ) {
             await tx
-              .update(ShelfUnit)
+              .update(ShelfItem)
               .set({
-                variantUnitId: input.variantUnitId,
+                ...(input.variantUnitId !== undefined
+                  ? { variantUnitId: input.variantUnitId }
+                  : {}),
+                ...(input.searchText !== undefined
+                  ? { searchText: input.searchText }
+                  : {}),
                 updatedAt: new Date(),
               })
               .where(
                 and(
-                  eq(ShelfUnit.shelfId, shelfId),
-                  eq(ShelfUnit.unitId, input.resolved.parentUnitId),
+                  eq(ShelfItem.shelfId, shelfId),
+                  eq(ShelfItem.itemId, input.resolved.parentUnitId),
                 ),
               );
           }
 
           if (input.resolved.reviewUnitId && input.resolved.reviewKind) {
             const [existingReview] = await tx
-              .select({ unitId: ShelfUnit.unitId })
-              .from(ShelfUnit)
+              .select({ unitId: ShelfItem.itemId })
+              .from(ShelfItem)
               .where(
                 and(
-                  eq(ShelfUnit.shelfId, shelfId),
-                  eq(ShelfUnit.unitId, input.resolved.reviewUnitId),
+                  eq(ShelfItem.shelfId, shelfId),
+                  eq(ShelfItem.itemId, input.resolved.reviewUnitId),
                 ),
               )
               .limit(1);
             if (!existingReview) {
-              await insertShelfUnit(tx, {
+              await insertShelfItem(tx, {
                 shelfId,
                 unitId: input.resolved.reviewUnitId,
                 kind: input.resolved.reviewKind,
+                parentUnitId: input.resolved.parentUnitId,
+                parentRole: "review",
               });
             }
             await upsertReviewRelation(tx, {
@@ -377,13 +411,13 @@ function createDrizzleCollectionRepository(): CollectionRepository {
       });
       return { savedTo, isNew };
     },
-    async hasShelfUnit(shelfId, unitId) {
+    async hasShelfItem(shelfId, unitId) {
       const db = await getServerDb();
       const [row] = await db
-        .select({ unitId: ShelfUnit.unitId })
-        .from(ShelfUnit)
+        .select({ unitId: ShelfItem.itemId })
+        .from(ShelfItem)
         .where(
-          and(eq(ShelfUnit.shelfId, shelfId), eq(ShelfUnit.unitId, unitId)),
+          and(eq(ShelfItem.shelfId, shelfId), eq(ShelfItem.itemId, unitId)),
         )
         .limit(1);
       return Boolean(row);
@@ -392,38 +426,56 @@ function createDrizzleCollectionRepository(): CollectionRepository {
       const db = await getServerDb();
       await db.transaction(async (tx) => {
         const deleted = await tx
-          .delete(ShelfUnit)
+          .delete(ShelfItem)
           .where(
             and(
-              eq(ShelfUnit.shelfId, input.shelfId),
-              eq(ShelfUnit.unitId, input.resolved.parentUnitId),
+              eq(ShelfItem.shelfId, input.shelfId),
+              eq(ShelfItem.itemId, input.resolved.parentUnitId),
             ),
           )
-          .returning({ unitId: ShelfUnit.unitId });
+          .returning({
+            unitId: ShelfItem.itemId,
+            parentUnitId: ShelfItem.parentItemId,
+          });
         if (deleted.length > 0) {
+          const rootRows = deleted.filter((row) => !row.parentUnitId).length;
           await tx
             .update(Shelf)
             .set({
               itemCount: sql`${Shelf.itemCount} - ${deleted.length}`,
+              ...(rootRows > 0
+                ? { rootItemCount: sql`${Shelf.rootItemCount} - ${rootRows}` }
+                : {}),
               updatedAt: new Date(),
             })
             .where(eq(Shelf.unitId, input.shelfId));
         }
         if (input.resolved.reviewUnitId) {
           const reviewDeleted = await tx
-            .delete(ShelfUnit)
+            .delete(ShelfItem)
             .where(
               and(
-                eq(ShelfUnit.shelfId, input.shelfId),
-                eq(ShelfUnit.unitId, input.resolved.reviewUnitId),
+                eq(ShelfItem.shelfId, input.shelfId),
+                eq(ShelfItem.itemId, input.resolved.reviewUnitId),
               ),
             )
-            .returning({ unitId: ShelfUnit.unitId });
+            .returning({
+              unitId: ShelfItem.itemId,
+              parentUnitId: ShelfItem.parentItemId,
+            });
           if (reviewDeleted.length > 0) {
+            const rootRows = reviewDeleted.filter(
+              (row) => !row.parentUnitId,
+            ).length;
             await tx
               .update(Shelf)
               .set({
                 itemCount: sql`${Shelf.itemCount} - ${reviewDeleted.length}`,
+                ...(rootRows > 0
+                  ? {
+                      rootItemCount: sql`${Shelf.rootItemCount} - ${rootRows}`,
+                    }
+                  : {}),
                 updatedAt: new Date(),
               })
               .where(eq(Shelf.unitId, input.shelfId));
@@ -434,16 +486,18 @@ function createDrizzleCollectionRepository(): CollectionRepository {
     async addFavorite(input) {
       const db = await getServerDb();
       await db.transaction(async (tx) => {
-        await insertShelfUnit(tx, {
+        await insertShelfItem(tx, {
           shelfId: input.shelfId,
           unitId: input.resolved.parentUnitId,
           kind: input.resolved.parentKind,
         });
         if (input.resolved.reviewUnitId && input.resolved.reviewKind) {
-          await insertShelfUnit(tx, {
+          await insertShelfItem(tx, {
             shelfId: input.shelfId,
             unitId: input.resolved.reviewUnitId,
             kind: input.resolved.reviewKind,
+            parentUnitId: input.resolved.parentUnitId,
+            parentRole: "review",
           });
           await upsertReviewRelation(tx, {
             shelfId: input.shelfId,
@@ -457,13 +511,13 @@ function createDrizzleCollectionRepository(): CollectionRepository {
       if (input.unitIds.length === 0) return [];
       const db = await getServerDb();
       return db
-        .select({ unitId: ShelfUnit.unitId, shelfId: ShelfUnit.shelfId })
-        .from(ShelfUnit)
-        .innerJoin(Shelf, eq(ShelfUnit.shelfId, Shelf.unitId))
+        .select({ unitId: ShelfItem.itemId, shelfId: ShelfItem.shelfId })
+        .from(ShelfItem)
+        .innerJoin(Shelf, eq(ShelfItem.shelfId, Shelf.unitId))
         .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
         .where(
           and(
-            inArray(ShelfUnit.unitId, input.unitIds),
+            inArray(ShelfItem.itemId, input.unitIds),
             eq(Unit.userId, input.userId),
           ),
         );
@@ -473,16 +527,16 @@ function createDrizzleCollectionRepository(): CollectionRepository {
       const db = await getServerDb();
       return db
         .select({
-          childUnitId: ShelfUnitRelation.childUnitId,
-          shelfId: ShelfUnitRelation.shelfId,
+          childUnitId: ShelfItem.itemId,
+          shelfId: ShelfItem.shelfId,
         })
-        .from(ShelfUnitRelation)
-        .innerJoin(Shelf, eq(ShelfUnitRelation.shelfId, Shelf.unitId))
+        .from(ShelfItem)
+        .innerJoin(Shelf, eq(ShelfItem.shelfId, Shelf.unitId))
         .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
         .where(
           and(
-            inArray(ShelfUnitRelation.childUnitId, input.reviewUnitIds),
-            eq(ShelfUnitRelation.role, "review"),
+            inArray(ShelfItem.itemId, input.reviewUnitIds),
+            eq(ShelfItem.parentRole, "review"),
             eq(Unit.userId, input.userId),
           ),
         );
@@ -525,7 +579,7 @@ export class CollectionService {
   }
 
   /**
-   * Resolve the collect target to a parent shelf unit + optional review child.
+   * Resolve the collect target to a parent shelf item + optional review child.
    *
    * - If `targetId` is a REVIEW post whose Unit has a canonical target, the
    *   target work is the parent and the review itself is threaded back as a child.
@@ -576,18 +630,18 @@ export class CollectionService {
       userId,
       unitId: resolved.parentUnitId,
       tagUnitIds,
-      searchText,
     });
 
     const result = await this.repository.collectToShelves({
       userId,
       resolved,
       variantUnitId,
+      searchText,
       shelfIds,
     });
 
     if (searchText !== undefined) {
-      await enqueueUserUnitCollectionSearchSync(userId, resolved.parentUnitId);
+      await enqueueShelfItemSourceSearchSync("unit", resolved.parentUnitId);
     }
 
     await Promise.all(
@@ -608,7 +662,7 @@ export class CollectionService {
       throw new AppError(400, "A shelf cannot contain itself");
     }
 
-    const existing = await this.repository.hasShelfUnit(
+    const existing = await this.repository.hasShelfItem(
       favShelfId,
       resolved.parentUnitId,
     );

@@ -9,6 +9,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import { generateBetween } from "../../shelf/fractional-index";
 import {
   Book,
+  Comment,
   ContentStructure,
   ContentTranslation,
   Entity,
@@ -17,8 +18,7 @@ import {
   Realm,
   RealmMember,
   Shelf,
-  ShelfUnit,
-  ShelfUnitRelation,
+  ShelfItem,
   SubjectAttribution,
   Unit,
   UnitHistoryClock,
@@ -47,6 +47,7 @@ export const FACTORY_SCENARIO_NAMES = [
   "large-history",
   "complex-shelf",
   "wiki-zone-experience",
+  "showcase-feed",
 ] as const;
 
 export type FactoryScenarioName = (typeof FACTORY_SCENARIO_NAMES)[number];
@@ -285,6 +286,183 @@ async function getWorkIds(ctx: SeedCtx): Promise<string[]> {
     )
     .limit(80);
   return rows.map((row) => row.id);
+}
+
+interface ShowcaseFeedWorkPlan {
+  unitId: string;
+  title: string;
+  textLength: number;
+}
+
+interface ShowcaseFeedPostPlan {
+  unitId: string;
+  kind: PostKind;
+  title: string;
+  body: string;
+  targetUnitId?: string;
+  extra?: Record<string, unknown>;
+  publishedAt: Date;
+}
+
+interface ShowcaseFeedShelfPlan {
+  unitId: string;
+  title: string;
+  itemUnitIds: string[];
+}
+
+interface ShowcaseFeedCommentPlan {
+  id: string;
+  rootUnitId: string;
+  parentCommentId?: string;
+  body: string;
+  depth: number;
+  replyCount: number;
+  directReplyCount: number;
+  createdAt: Date;
+}
+
+export interface ShowcaseFeedPlan {
+  scenario: "showcase-feed";
+  userId: string;
+  realmUnitId: string;
+  works: ShowcaseFeedWorkPlan[];
+  posts: ShowcaseFeedPostPlan[];
+  shelves: ShowcaseFeedShelfPlan[];
+  comments: ShowcaseFeedCommentPlan[];
+  realmMembershipUnitIds: string[];
+}
+
+export function buildShowcaseFeedPlan(input: {
+  userId: string;
+  idFactory?: () => string;
+  now?: Date;
+}): ShowcaseFeedPlan {
+  const id = input.idFactory ?? randomUUID;
+  const now = input.now ?? new Date("2026-06-05T12:00:00.000Z");
+  const publishedAt = (hoursAgo: number) =>
+    new Date(now.getTime() - hoursAgo * 60 * 60 * 1000);
+  const realmUnitId = id();
+  const works: ShowcaseFeedWorkPlan[] = [
+    {
+      unitId: id(),
+      title: "Showcase Feed: The Long Harbor",
+      textLength: 132000,
+    },
+    {
+      unitId: id(),
+      title: "Showcase Feed: Signal Garden",
+      textLength: 88000,
+    },
+    {
+      unitId: id(),
+      title: "Showcase Feed: Index of Blue Cities",
+      textLength: 104000,
+    },
+  ];
+  const posts: ShowcaseFeedPostPlan[] = [
+    {
+      unitId: id(),
+      kind: PostKind.POST,
+      title: "Showcase dispatch: reading paths for new members",
+      body:
+        "A long-form realm post for feed layout verification.\n\n" +
+        "It has enough text to exercise card previews, wrapping, and scanner-friendly spacing in the realm feed.",
+      publishedAt: publishedAt(1),
+    },
+    {
+      unitId: id(),
+      kind: PostKind.POST,
+      title: "Showcase gallery: cover studies and archive screenshots",
+      body:
+        "Image-rich showcase post.\n\n" +
+        "![Archive wall](https://picsum.photos/seed/rezics-showcase-feed/960/540)\n\n" +
+        "The image markdown gives visual QA a media-heavy card inside the same feed.",
+      publishedAt: publishedAt(8),
+    },
+    {
+      unitId: id(),
+      kind: PostKind.REVIEW,
+      title: "Review: The Long Harbor rewards slow reading",
+      body: "A review post scoped to the showcase realm. It targets a work directly so the feed card can render the reviewed work link without client hydration.",
+      targetUnitId: works[0]!.unitId,
+      extra: {
+        rating: 4.5,
+        book: { id: works[0]!.unitId, title: works[0]!.title },
+      },
+      publishedAt: publishedAt(20),
+    },
+    {
+      unitId: id(),
+      kind: PostKind.REMARK,
+      title: "Remark: recurring signal motifs",
+      body: "A short remark post for mixed-kind feed verification. It keeps the row compact while still targeting a work.",
+      targetUnitId: works[1]!.unitId,
+      publishedAt: publishedAt(36),
+    },
+    {
+      unitId: id(),
+      kind: PostKind.EXCERPT,
+      title: "Excerpt: a city catalog note",
+      body: "> Every index is also a map.\n\nA compact excerpt row for feed kind coverage.",
+      targetUnitId: works[2]!.unitId,
+      extra: {
+        source: {
+          mode: "unit",
+          unitId: works[2]!.unitId,
+          title: works[2]!.title,
+        },
+      },
+      publishedAt: publishedAt(60),
+    },
+  ];
+  const shelves: ShowcaseFeedShelfPlan[] = [
+    {
+      unitId: id(),
+      title: "Showcase Feed: start here",
+      itemUnitIds: works.map((work) => work.unitId),
+    },
+    {
+      unitId: id(),
+      title: "Showcase Feed: review trail",
+      itemUnitIds: [works[0]!.unitId, posts[2]!.unitId, works[1]!.unitId],
+    },
+  ];
+  const rootCommentId = id();
+  const comments: ShowcaseFeedCommentPlan[] = [
+    {
+      id: rootCommentId,
+      rootUnitId: posts[0]!.unitId,
+      body: "This kickoff thread gives the showcase feed a visible comment count.",
+      depth: 1,
+      replyCount: 1,
+      directReplyCount: 1,
+      createdAt: publishedAt(0.75),
+    },
+    {
+      id: id(),
+      rootUnitId: posts[0]!.unitId,
+      parentCommentId: rootCommentId,
+      body: "A nested reply exercises comment tree rendering from the same fixture.",
+      depth: 2,
+      replyCount: 0,
+      directReplyCount: 0,
+      createdAt: publishedAt(0.5),
+    },
+  ];
+
+  return {
+    scenario: "showcase-feed",
+    userId: input.userId,
+    realmUnitId,
+    works,
+    posts,
+    shelves,
+    comments,
+    realmMembershipUnitIds: [
+      ...works.map((work) => work.unitId),
+      ...posts.map((post) => post.unitId),
+    ],
+  };
 }
 
 async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
@@ -620,29 +798,26 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
       unitId,
       kind: index % 3 === 0 ? "book" : index % 3 === 1 ? "game" : "media",
       position,
+      parentItemType: index > 0 && index < 20 ? "unit" : null,
+      parentItemId: index > 0 && index < 20 ? selected[index - 1]! : null,
+      parentRole:
+        index > 0 && index < 20
+          ? index % 2 === 0
+            ? "sequel"
+            : "related"
+          : null,
     };
   });
   await ctx.db
-    .insert(ShelfUnit)
+    .insert(ShelfItem)
     .values(withUpdatedAtRows(shelfRows))
     .onConflictDoNothing();
   await ctx.db
-    .insert(ShelfUnitRelation)
-    .values(
-      selected
-        .slice(1, 20)
-        .map((childUnitId, index) => ({
-          shelfId,
-          parentUnitId: selected[index]!,
-          childUnitId,
-          role: index % 2 === 0 ? "sequel" : "related",
-        }))
-        .map((row) => withUpdatedAt(row)),
-    )
-    .onConflictDoNothing();
-  await ctx.db
     .update(Shelf)
-    .set({ itemCount: shelfRows.length })
+    .set({
+      rootItemCount: shelfRows.filter((row) => !row.parentItemId).length,
+      itemCount: shelfRows.length,
+    })
     .where(eq(Shelf.unitId, shelfId));
 
   await ctx.sync.content(shelfId);
@@ -729,6 +904,293 @@ async function createWikiScenarioPost(
   );
   await ctx.sync.post(postUnitId);
   return postUnitId;
+}
+
+async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
+  const result = createSeedResult();
+  const user = await getScenarioUser(ctx);
+  const plan = buildShowcaseFeedPlan({ userId: user.userId });
+
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: plan.realmUnitId,
+      type: UnitType.REALM,
+      userId: user.userId,
+      slugScope: ctx.slugScopes.realm,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      publishedAt: new Date("2026-06-05T12:00:00.000Z"),
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: plan.realmUnitId,
+      language: DEFAULT_LANGUAGE,
+      title: "Factory Scenario: Showcase Feed Realm",
+      description: markdownContentDoc(
+        "Deterministic realm with mixed feed content, review targets, shelves, and varied timestamps.",
+      ) as never,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: plan.realmUnitId,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
+  await ctx.db.insert(Realm).values(
+    withUpdatedAt({
+      unitId: plan.realmUnitId,
+      isPublic: true,
+      isOfficial: true,
+      memberCount: 1,
+      extra: { scenario: "showcase-feed" },
+    }),
+  );
+  await ctx.db.insert(RealmMember).values(
+    withUpdatedAt({
+      realmUnitId: plan.realmUnitId,
+      userId: user.userId,
+      roleKey: "owner",
+    }),
+  );
+
+  for (const work of plan.works) {
+    await ctx.db.insert(Unit).values(
+      withUpdatedAt({
+        id: work.unitId,
+        type: UnitType.BOOK,
+        userId: user.userId,
+        slugScope: user.userId,
+        status: UnitStatus.PUBLISHED,
+        visibility: UnitVisibility.PUBLIC,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: new Date("2026-06-05T10:00:00.000Z"),
+      }),
+    );
+    await ctx.db.insert(Book).values(
+      withUpdatedAt({
+        unitId: work.unitId,
+        pageCount: 320,
+        textLength: work.textLength,
+        chapterCount: 0,
+        formatKey: "ebook",
+      }),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAt({
+        unitId: work.unitId,
+        language: DEFAULT_LANGUAGE,
+        title: work.title,
+        summary: `${work.title} deterministic showcase work.`,
+      }),
+    );
+    await ctx.db.insert(UnitSupportLanguage).values(
+      withUpdatedAt({
+        unitId: work.unitId,
+        language: DEFAULT_LANGUAGE,
+        isPrimary: true,
+      }),
+    );
+    await ctx.db
+      .insert(ContentStructure)
+      .values(withUpdatedAt({ ownerUnitId: work.unitId }));
+  }
+
+  await ctx.db.insert(Unit).values(
+    withUpdatedAtRows(
+      plan.posts.map((post) => ({
+        id: post.unitId,
+        type: UnitType.POST,
+        userId: user.userId,
+        slugScope: user.userId,
+        targetUnitId: post.targetUnitId,
+        status: UnitStatus.PUBLISHED,
+        visibility: UnitVisibility.PUBLIC,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: post.publishedAt,
+      })),
+    ),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAtRows(
+      plan.posts.map((post) => ({
+        unitId: post.unitId,
+        language: DEFAULT_LANGUAGE,
+        title: post.title,
+      })),
+    ),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAtRows(
+      plan.posts.map((post) => ({
+        unitId: post.unitId,
+        language: DEFAULT_LANGUAGE,
+        isPrimary: true,
+      })),
+    ),
+  );
+  await ctx.db.insert(ContentTranslation).values(
+    withUpdatedAtRows(
+      plan.posts.map((post) => ({
+        unitId: post.unitId,
+        language: DEFAULT_LANGUAGE,
+        content: markdownContentDoc(post.body) as never,
+        status: "PUBLISHED" as const,
+        authorUserId: user.userId,
+        provenance: { importedFrom: "factory-showcase-feed-scenario" },
+      })),
+    ),
+  );
+  await ctx.db.insert(Post).values(
+    withUpdatedAtRows(
+      plan.posts.map((post) => ({
+        unitId: post.unitId,
+        authorUserId: user.userId,
+        kind: post.kind,
+        replyCount:
+          plan.comments.filter((comment) => comment.rootUnitId === post.unitId)
+            .length ?? 0,
+        directReplyCount: plan.comments.filter(
+          (comment) =>
+            comment.rootUnitId === post.unitId && !comment.parentCommentId,
+        ).length,
+        lastReplyAt:
+          plan.comments
+            .filter((comment) => comment.rootUnitId === post.unitId)
+            .toSorted(
+              (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+            )[0]?.createdAt ?? null,
+        extra: post.extra,
+        createdAt: post.publishedAt,
+      })),
+    ),
+  );
+  await ctx.db.insert(Comment).values(
+    withUpdatedAtRows(
+      plan.comments.map((comment) => ({
+        id: comment.id,
+        rootUnitId: comment.rootUnitId,
+        realmUnitId: plan.realmUnitId,
+        parentCommentId: comment.parentCommentId,
+        authorUserId: user.userId,
+        content: markdownContentDoc(comment.body) as never,
+        depth: comment.depth,
+        replyCount: comment.replyCount,
+        directReplyCount: comment.directReplyCount,
+        createdAt: comment.createdAt,
+      })),
+    ),
+  );
+  await ctx.db
+    .insert(UnitRealm)
+    .values(
+      withUpdatedAtRows(
+        plan.realmMembershipUnitIds.map((unitId) => ({
+          realmUnitId: plan.realmUnitId,
+          unitId,
+          moderationStatus: "APPROVED" as const,
+          createdAt: new Date("2026-06-05T12:00:00.000Z"),
+        })),
+      ),
+    )
+    .onConflictDoNothing();
+
+  for (const shelf of plan.shelves) {
+    await ctx.db.insert(Unit).values(
+      withUpdatedAt({
+        id: shelf.unitId,
+        type: UnitType.SHELF,
+        userId: user.userId,
+        slugScope: user.userId,
+        status: UnitStatus.PUBLISHED,
+        visibility: UnitVisibility.PUBLIC,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: new Date("2026-06-05T09:00:00.000Z"),
+      }),
+    );
+    await ctx.db.insert(Shelf).values(
+      withUpdatedAt({
+        unitId: shelf.unitId,
+        kindKey: "showcase",
+        rootItemCount: shelf.itemUnitIds.length,
+        itemCount: shelf.itemUnitIds.length,
+        extra: { scenario: "showcase-feed" },
+      }),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAt({
+        unitId: shelf.unitId,
+        language: DEFAULT_LANGUAGE,
+        title: shelf.title,
+      }),
+    );
+    await ctx.db.insert(UnitSupportLanguage).values(
+      withUpdatedAt({
+        unitId: shelf.unitId,
+        language: DEFAULT_LANGUAGE,
+        isPrimary: true,
+      }),
+    );
+    let previousPosition: string | undefined;
+    const itemRows = shelf.itemUnitIds.map((unitId) => {
+      const work = plan.works.find((candidate) => candidate.unitId === unitId);
+      const post = plan.posts.find((candidate) => candidate.unitId === unitId);
+      const position = generateBetween(previousPosition, undefined);
+      previousPosition = position;
+      return {
+        shelfId: shelf.unitId,
+        unitId,
+        kind: work
+          ? "book"
+          : post?.kind === PostKind.REVIEW
+            ? "review"
+            : "post",
+        position,
+      };
+    });
+    await ctx.db
+      .insert(ShelfItem)
+      .values(withUpdatedAtRows(itemRows))
+      .onConflictDoNothing();
+  }
+
+  await Promise.all([
+    ctx.sync.realm(plan.realmUnitId),
+    ...plan.works.map((work) => ctx.sync.content(work.unitId)),
+    ...plan.posts.map((post) => ctx.sync.post(post.unitId)),
+    ...plan.shelves.flatMap((shelf) => [
+      ctx.sync.content(shelf.unitId),
+      ctx.sync.contentContainedUnits(shelf.unitId),
+    ]),
+  ]);
+
+  addSpecialSeedTarget(result, {
+    label: "Showcase feed realm",
+    scenario: "showcase-feed",
+    unitType: UnitType.REALM,
+    unitId: plan.realmUnitId,
+    notes: "Use this realm to verify mixed feed rows and review target links.",
+  });
+  addSpecialSeedTarget(result, {
+    label: "Showcase feed review",
+    scenario: "showcase-feed",
+    unitType: UnitType.POST,
+    unitId: plan.posts.find((post) => post.kind === PostKind.REVIEW)!.unitId,
+  });
+  addSpecialSeedTarget(result, {
+    label: "Showcase feed shelf",
+    scenario: "showcase-feed",
+    unitType: UnitType.SHELF,
+    unitId: plan.shelves[0]!.unitId,
+  });
+
+  return result;
 }
 
 async function createWikiScenarioZone(
@@ -1149,6 +1611,13 @@ export const FACTORY_SCENARIOS: Record<FactoryScenarioName, FactoryScenario> = {
       "Official wiki realm with translated WIKI posts, labels, entities, and all wiki Zone templates.",
     defaultSelected: true,
     run: runWikiZoneExperience,
+  },
+  "showcase-feed": {
+    name: "showcase-feed",
+    description:
+      "Deterministic realm feed showcase with mixed post kinds, review target context, shelves, and varied timestamps.",
+    defaultSelected: true,
+    run: runShowcaseFeed,
   },
 };
 

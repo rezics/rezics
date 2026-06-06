@@ -49,6 +49,7 @@ import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
 import { RuleSection } from "../sections/RuleSection";
 
 export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
+export type { RealmFeedSort };
 type RealmModerationFilter = NonNullable<
   PostListQuery["realmModerationStatus"]
 >;
@@ -86,7 +87,7 @@ interface RealmPageProps {
 export function RealmPage({
   realmId,
   tab,
-  feedSort = "new",
+  feedSort = "best",
   feedTagIds = [],
   onTabChange,
   onFeedSortChange,

@@ -2,15 +2,14 @@ import { describe, expect, mock, test } from "bun:test";
 import {
   Post,
   Shelf,
-  ShelfUnit,
-  ShelfUnitRelation,
+  ShelfItem,
   Unit,
   UnitTag,
   UnitTranslation,
   User,
   UserTagApplication,
-  UserUnitCollection,
 } from "../db/schema";
+import { SYSTEM_KIND_KEYS } from "./system-shelves";
 
 const legacyDbMock: Record<string, any> = {};
 
@@ -62,14 +61,14 @@ mock.module("@/utils/sanitizeUser", () => ({
 }));
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
-type SearchHit = { id?: string; unitId?: string };
+type SearchHit = { id?: string; itemId?: string; unitId?: string };
 
 const contentSearchMock = mock(
   async (_query: string, _options?: any): Promise<{ hits: SearchHit[] }> => ({
     hits: [],
   }),
 );
-const collectionSearchMock = mock(
+const shelfItemSearchMock = mock(
   async (_query: string, _options?: any): Promise<{ hits: SearchHit[] }> => ({
     hits: [],
   }),
@@ -93,7 +92,7 @@ mock.module("@/job/job-boundary", () => ({
 mock.module("@/meili/search-client", () => ({
   searchClient: {
     contentIndex: { search: contentSearchMock },
-    collectionIndex: { search: collectionSearchMock },
+    shelfItemIndex: { search: shelfItemSearchMock },
   },
 }));
 
@@ -176,7 +175,7 @@ function createLegacyWhere(values: unknown[]) {
   return { AND: and };
 }
 
-function shelfUnitWhereFromValues(values: unknown[]) {
+function shelfItemWhereFromValues(values: unknown[]) {
   const strings = values.filter(
     (value): value is string => typeof value === "string",
   );
@@ -363,25 +362,25 @@ function createFakeDrizzleDb(oldTx?: any): any {
 
           if (table === User) return [];
 
-          if (table === ShelfUnit) {
+          if (table === ShelfItem) {
             if (keys.length === 1 && selection?.position) {
-              const rows = await legacy.shelfUnit?.findMany?.({ skip, take });
+              const rows = await legacy.shelfItem?.findMany?.({ skip, take });
               if (rows) return rows;
-              const row = await legacy.shelfUnit?.findFirst?.();
+              const row = await legacy.shelfItem?.findFirst?.();
               return row ? [row] : [];
             }
             if (keys.length === 1 && selection?.unitId) {
               return (
-                (await legacy.shelfUnit?.findMany?.({
+                (await legacy.shelfItem?.findMany?.({
                   where: { shelfId: "shelf-1" },
                   take,
                 })) ?? []
               );
             }
-            const where = shelfUnitWhereFromValues(values);
+            const where = shelfItemWhereFromValues(values);
             if (take === 1 && where.unitId) {
               const row =
-                (await legacy.shelfUnit?.findUnique?.({
+                (await legacy.shelfItem?.findUnique?.({
                   where: {
                     shelfId_unitId: {
                       shelfId: where.shelfId,
@@ -389,7 +388,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
                     },
                   },
                 })) ??
-                (await legacy.shelfUnit
+                (await legacy.shelfItem
                   ?.findUniqueOrThrow?.({
                     where: {
                       shelfId_unitId: {
@@ -401,13 +400,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
                   .catch?.(() => null));
               return row ? [row] : [];
             }
-            return (await legacy.shelfUnit?.findMany?.({ where, take })) ?? [];
-          }
-
-          if (table === ShelfUnitRelation) {
-            return (
-              (await legacy.shelfUnitRelation?.findMany?.({ where: {} })) ?? []
-            );
+            return (await legacy.shelfItem?.findMany?.({ where, take })) ?? [];
           }
 
           if (table === UserTagApplication) {
@@ -455,9 +448,9 @@ function createFakeDrizzleDb(oldTx?: any): any {
             const row = await legacy.unit?.create?.({ data });
             return row ? [{ id: row.id }] : [{ id: "shelf-new" }];
           }
-          if (table === ShelfUnit) {
+          if (table === ShelfItem) {
             const row = Array.isArray(data) ? data[0] : data;
-            const result = await legacy.shelfUnit?.createMany?.({
+            const result = await legacy.shelfItem?.createMany?.({
               data: [row],
               skipDuplicates: true,
             });
@@ -465,13 +458,6 @@ function createFakeDrizzleDb(oldTx?: any): any {
             return Array.from({ length: count }, () => ({
               unitId: row.unitId,
             }));
-          }
-          if (table === ShelfUnitRelation) {
-            await legacy.shelfUnitRelation?.upsert?.({
-              create: data,
-              update: {},
-            });
-            return [data];
           }
           return [Array.isArray(data) ? data[0] : data];
         },
@@ -488,19 +474,6 @@ function createFakeDrizzleDb(oldTx?: any): any {
             await legacy.unitTag?.createMany?.({
               data: rows,
               skipDuplicates: true,
-            });
-          }
-          if (table === UserUnitCollection) {
-            await legacy.userUnitCollection?.upsert?.({
-              where: {
-                userId_unitId: { userId: data.userId, unitId: data.unitId },
-              },
-              create: {
-                userId: data.userId,
-                unitId: data.unitId,
-                searchText: data.searchText,
-              },
-              update: { searchText: data.searchText },
             });
           }
           if (table === UserTagApplication) {
@@ -537,9 +510,9 @@ function createFakeDrizzleDb(oldTx?: any): any {
         },
         async returning() {
           const values = sqlValues(condition);
-          const where = shelfUnitWhereFromValues(values);
-          if (table === ShelfUnit) {
-            const row = await legacy.shelfUnit?.update?.({
+          const where = shelfItemWhereFromValues(values);
+          if (table === ShelfItem) {
+            const row = await legacy.shelfItem?.update?.({
               where: {
                 shelfId_unitId: {
                   shelfId: where.shelfId,
@@ -562,7 +535,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
         async execute() {
           if (table === Shelf) await legacy.shelf?.update?.({ data });
           if (table === Unit) await legacy.unit?.update?.({ data });
-          if (table === ShelfUnit) await query.returning();
+          if (table === ShelfItem) await query.returning();
           return [];
         },
         // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
@@ -584,9 +557,9 @@ function createFakeDrizzleDb(oldTx?: any): any {
         },
         async returning() {
           const values = sqlValues(condition);
-          if (table === ShelfUnit) {
-            const where = shelfUnitWhereFromValues(values);
-            const result = await legacy.shelfUnit?.deleteMany?.({ where });
+          if (table === ShelfItem) {
+            const where = shelfItemWhereFromValues(values);
+            const result = await legacy.shelfItem?.deleteMany?.({ where });
             const count = result?.count ?? 0;
             return Array.from({ length: count }, () => ({
               unitId: where.unitId ?? "deleted",
@@ -618,10 +591,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
               where: { userId: "user-1", unitId: "book-1" },
             });
           }
-          if (table === ShelfUnitRelation) {
-            await legacy.shelfUnitRelation?.deleteMany?.({ where: {} });
-          }
-          if (table === ShelfUnit) await query.returning();
+          if (table === ShelfItem) await query.returning();
           return [];
         },
         // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
@@ -650,10 +620,13 @@ mock.module("../db/client", () => ({
   db: createFakeDrizzleDb(),
 }));
 
-function makeShelfUnitRow(overrides: Record<string, unknown> = {}) {
+function makeShelfItemRow(overrides: Record<string, unknown> = {}) {
+  const itemId = (overrides.itemId ?? overrides.unitId ?? "book-1") as string;
   return {
     shelfId: "shelf-1",
-    unitId: "book-1",
+    itemType: "unit",
+    itemId,
+    unitId: itemId,
     kind: "book",
     position: "a0",
     createdAt: new Date(),
@@ -759,7 +732,7 @@ describe("ShelfService", () => {
         findMany: async () => [makeShelfListRow()],
         count: async () => 1,
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async () => [
           {
             shelfId: "shelf-1",
@@ -800,7 +773,7 @@ describe("ShelfService", () => {
         findMany: async () => [makeShelfListRow()],
         count: async () => 1,
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async () => [
           {
             shelfId: "shelf-1",
@@ -841,30 +814,29 @@ describe("ShelfService", () => {
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
 
-    await expect(
-      shelfService.create({ title: "Favorites", kindKey: "favorites" }, "u1"),
-    ).rejects.toThrow(/reserved/);
-    await expect(
-      shelfService.create({ title: "Backlog", kindKey: "backlog" }, "u1"),
-    ).rejects.toThrow(/reserved/);
+    for (const kindKey of SYSTEM_KIND_KEYS) {
+      await expect(
+        shelfService.create({ title: kindKey, kindKey }, "u1"),
+      ).rejects.toThrow(/reserved/);
+    }
   });
 
-  test("addUnit enqueues containedUnitIds sync after the canonical write", async () => {
+  test("addItem enqueues containedUnitIds sync after the canonical write", async () => {
     enqueueMock.mockClear();
 
     Object.assign(legacyDbMock, {
       unit: {
         findUnique: async () => ({ type: "BOOK", post: null }),
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async () => [],
       },
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: {
+          shelfItem: {
             findFirst: async () => null,
             createMany: async () => ({ count: 1 }),
-            findUniqueOrThrow: async () => makeShelfUnitRow(),
+            findUniqueOrThrow: async () => makeShelfItemRow(),
           },
           shelf: { update: async () => ({}) },
         }),
@@ -873,7 +845,11 @@ describe("ShelfService", () => {
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
-    await shelfService.addUnit("shelf-1", { unitId: "book-1", kind: "book" });
+    await shelfService.addItem("shelf-1", {
+      itemType: "unit",
+      itemId: "book-1",
+      kind: "book",
+    });
 
     expect(enqueueMock).toHaveBeenCalledTimes(1);
     expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
@@ -883,7 +859,7 @@ describe("ShelfService", () => {
     });
   });
 
-  test("addUnit persists variantUnitId as weak context without validating it", async () => {
+  test("addItem persists variantUnitId as weak context without validating it", async () => {
     enqueueMock.mockClear();
     let createManyArgs: any;
 
@@ -891,19 +867,19 @@ describe("ShelfService", () => {
       unit: {
         findUnique: async () => ({ type: "BOOK", post: null }),
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async () => [],
       },
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: {
+          shelfItem: {
             findFirst: async () => null,
             createMany: async (args: any) => {
               createManyArgs = args;
               return { count: 1 };
             },
             findUniqueOrThrow: async () =>
-              makeShelfUnitRow({ variantUnitId: "missing-or-not-variant" }),
+              makeShelfItemRow({ variantUnitId: "missing-or-not-variant" }),
           },
           shelf: { update: async () => ({}) },
         }),
@@ -912,42 +888,45 @@ describe("ShelfService", () => {
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
-    const dto = await shelfService.addUnit("shelf-1", {
-      unitId: "book-1",
+    const dto = await shelfService.addItem("shelf-1", {
+      itemType: "unit",
+      itemId: "book-1",
       variantUnitId: "missing-or-not-variant",
       kind: "book",
     });
 
     expect(createManyArgs.data[0]).toMatchObject({
       shelfId: "shelf-1",
-      unitId: "book-1",
+      itemId: "book-1",
       variantUnitId: "missing-or-not-variant",
     });
     expect(dto.variantUnitId).toBe("missing-or-not-variant");
   });
 
-  test("addUnit writes optional user collection metadata", async () => {
+  test("addItem writes optional shelf item search text and user tags", async () => {
     enqueueMock.mockClear();
-    const upsert = mock(async () => ({}));
     const deleteMany = mock(async () => ({ count: 0 }));
     const createMany = mock(async () => ({ count: 1 }));
+    const createdShelfItems: any[] = [];
 
     Object.assign(legacyDbMock, {
       unit: {
         findUnique: async () => ({ type: "BOOK", post: null }),
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async () => [],
       },
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: {
+          shelfItem: {
             findFirst: async () => null,
-            createMany: async () => ({ count: 1 }),
-            findUniqueOrThrow: async () => makeShelfUnitRow(),
+            createMany: async ({ data }: any) => {
+              createdShelfItems.push(...data);
+              return { count: 1 };
+            },
+            findUniqueOrThrow: async () => makeShelfItemRow(),
           },
           shelf: { update: async () => ({}) },
-          userUnitCollection: { upsert },
           userTagApplication: { deleteMany, createMany },
         }),
     });
@@ -955,10 +934,11 @@ describe("ShelfService", () => {
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
-    await shelfService.addUnit(
+    await shelfService.addItem(
       "shelf-1",
       {
-        unitId: "book-1",
+        itemType: "unit",
+        itemId: "book-1",
         kind: "book",
         tagUnitIds: ["tag-1"],
         searchText: null,
@@ -966,11 +946,7 @@ describe("ShelfService", () => {
       "user-1",
     );
 
-    expect(upsert).toHaveBeenCalledWith({
-      where: { userId_unitId: { userId: "user-1", unitId: "book-1" } },
-      create: { userId: "user-1", unitId: "book-1", searchText: null },
-      update: { searchText: null },
-    });
+    expect(createdShelfItems[0]?.searchText).toBeNull();
     expect(deleteMany).toHaveBeenCalledWith({
       where: { userId: "user-1", unitId: "book-1" },
     });
@@ -987,9 +963,100 @@ describe("ShelfService", () => {
     });
   });
 
-  test("getShelfUnits filters q matches through public content search hits", async () => {
+  test("addItem does not increment counts for duplicate shelf items", async () => {
+    const shelfUpdates: any[] = [];
+
+    Object.assign(legacyDbMock, {
+      unit: {
+        findUnique: async () => ({ type: "BOOK", post: null }),
+      },
+      shelfItem: {
+        findMany: async () => [],
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          shelfItem: {
+            findFirst: async () => null,
+            createMany: async () => ({ count: 0 }),
+            findUniqueOrThrow: async () => makeShelfItemRow(),
+          },
+          shelf: {
+            update: async (args: any) => {
+              shelfUpdates.push(args);
+              return {};
+            },
+          },
+        }),
+    });
+
+    const { shelfService } = await import(
+      "./shelf.service.ts?shelf-service-test-actual" as string
+    );
+    const item = await shelfService.addItem("shelf-1", {
+      itemType: "unit",
+      itemId: "book-1",
+      kind: "book",
+    });
+
+    expect(item.itemId).toBe("book-1");
+    expect(shelfUpdates).toHaveLength(0);
+  });
+
+  test("addItem writes comment-backed shelf items without user-unit metadata", async () => {
+    const createdShelfItems: any[] = [];
+    const deleteMany = mock(async () => ({ count: 0 }));
+
+    Object.assign(legacyDbMock, {
+      shelfItem: {
+        findMany: async () => [],
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          shelfItem: {
+            findFirst: async () => null,
+            createMany: async ({ data }: any) => {
+              createdShelfItems.push(...data);
+              return { count: 1 };
+            },
+            findUniqueOrThrow: async () =>
+              makeShelfItemRow({
+                itemType: "comment",
+                itemId: "comment-1",
+                kind: "comment",
+              }),
+          },
+          shelf: { update: async () => ({}) },
+          userTagApplication: { deleteMany },
+        }),
+    });
+
+    const { shelfService } = await import(
+      "./shelf.service.ts?shelf-service-test-actual" as string
+    );
+    const item = await shelfService.addItem(
+      "shelf-1",
+      {
+        itemType: "comment",
+        itemId: "comment-1",
+        kind: "comment",
+        searchText: "saved reply",
+      },
+      "user-1",
+    );
+
+    expect(createdShelfItems[0]).toMatchObject({
+      itemType: "comment",
+      itemId: "comment-1",
+      kind: "comment",
+      searchText: "saved reply",
+    });
+    expect(item.itemType).toBe("comment");
+    expect(deleteMany).not.toHaveBeenCalled();
+  });
+
+  test("getShelfItems filters q matches through public content search hits", async () => {
     contentSearchMock.mockClear();
-    collectionSearchMock.mockClear();
+    shelfItemSearchMock.mockClear();
     contentSearchMock.mockResolvedValueOnce({ hits: [{ id: "book-2" }] });
 
     let findManyArgs: any;
@@ -997,37 +1064,37 @@ describe("ShelfService", () => {
       shelf: {
         findUnique: async () => ({ unit: { userId: "owner-1" } }),
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async (args: any) => {
           findManyArgs = args;
-          return [makeShelfUnitRow({ unitId: "book-2" })];
+          return [makeShelfItemRow({ unitId: "book-2" })];
         },
       },
-      shelfUnitRelation: { findMany: async () => [] },
+      shelfItemChild: { findMany: async () => [] },
     });
 
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
-    const result = await shelfService.getShelfUnits(
+    const result = await shelfService.getShelfItems(
       "shelf-1",
       { q: "translated title", limit: 20 },
       { viewerUserId: "viewer-1" },
     );
 
-    expect(result.units.map((unit: { unitId: string }) => unit.unitId)).toEqual(
+    expect(result.items.map((item: { itemId: string }) => item.itemId)).toEqual(
       ["book-2"],
     );
     expect(findManyArgs.where).toMatchObject({ shelfId: "shelf-1" });
-    expect(collectionSearchMock).not.toHaveBeenCalled();
+    expect(shelfItemSearchMock).not.toHaveBeenCalled();
   });
 
-  test("getShelfUnits includes owner-private collection q matches for the owner", async () => {
+  test("getShelfItems includes owner-private shelf item q matches for the owner", async () => {
     contentSearchMock.mockClear();
-    collectionSearchMock.mockClear();
+    shelfItemSearchMock.mockClear();
     contentSearchMock.mockResolvedValueOnce({ hits: [] });
-    collectionSearchMock.mockResolvedValueOnce({
-      hits: [{ unitId: "book-3" }],
+    shelfItemSearchMock.mockResolvedValueOnce({
+      hits: [{ itemId: "book-3" }],
     });
 
     let findManyArgs: any;
@@ -1035,39 +1102,40 @@ describe("ShelfService", () => {
       shelf: {
         findUnique: async () => ({ unit: { userId: "owner-1" } }),
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async (args: any) => {
           findManyArgs = args;
-          return [makeShelfUnitRow({ unitId: "book-3" })];
+          return [makeShelfItemRow({ unitId: "book-3" })];
         },
       },
-      shelfUnitRelation: { findMany: async () => [] },
+      shelfItemChild: { findMany: async () => [] },
     });
 
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
-    await shelfService.getShelfUnits(
+    await shelfService.getShelfItems(
       "shelf-1",
       { q: "private note" },
       { viewerUserId: "owner-1" },
     );
 
-    expect(collectionSearchMock).toHaveBeenCalledWith("private note", {
+    expect(shelfItemSearchMock).toHaveBeenCalledWith("private note", {
       limit: 1000,
-      filter: 'ownerUserId = "owner-1"',
-      attributesToRetrieve: ["unitId"],
+      filter:
+        'shelfId = "shelf-1" AND shelfOwnerUserId = "owner-1" AND itemType = "unit"',
+      attributesToRetrieve: ["itemId"],
     });
     expect(findManyArgs.where).toMatchObject({ shelfId: "shelf-1" });
   });
 
-  test("getShelfUnits intersects owner tag filters with q matches", async () => {
+  test("getShelfItems intersects owner tag filters with q matches", async () => {
     contentSearchMock.mockClear();
-    collectionSearchMock.mockClear();
+    shelfItemSearchMock.mockClear();
     contentSearchMock.mockResolvedValueOnce({
       hits: [{ id: "book-1" }, { id: "book-2" }],
     });
-    collectionSearchMock.mockResolvedValueOnce({ hits: [] });
+    shelfItemSearchMock.mockResolvedValueOnce({ hits: [] });
 
     let findManyArgs: any;
     Object.assign(legacyDbMock, {
@@ -1083,19 +1151,19 @@ describe("ShelfService", () => {
           ];
         },
       },
-      shelfUnit: {
+      shelfItem: {
         findMany: async (args: any) => {
           findManyArgs = args;
-          return [makeShelfUnitRow({ unitId: "book-1" })];
+          return [makeShelfItemRow({ unitId: "book-1" })];
         },
       },
-      shelfUnitRelation: { findMany: async () => [] },
+      shelfItemChild: { findMany: async () => [] },
     });
 
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
-    await shelfService.getShelfUnits(
+    await shelfService.getShelfItems(
       "shelf-1",
       { q: "space", tagUnitIds: ["tag-a", "tag-b", "tag-a"] },
       { viewerUserId: "owner-1" },
@@ -1104,13 +1172,67 @@ describe("ShelfService", () => {
     expect(findManyArgs.where).toMatchObject({ shelfId: "shelf-1" });
   });
 
-  test("addUnit rejects direct self-containment", async () => {
+  test("getShelfItems orders roots and fetched children independently", async () => {
+    const calls: any[] = [];
+    Object.assign(legacyDbMock, {
+      shelfItem: {
+        findMany: async (args: any) => {
+          calls.push(args);
+          if (calls.length === 1) {
+            return [
+              makeShelfItemRow({ unitId: "book-a", position: "a0" }),
+              makeShelfItemRow({ unitId: "book-b", position: "b0" }),
+            ];
+          }
+          return [
+            makeShelfItemRow({
+              unitId: "review-b",
+              kind: "review",
+              parentItemId: "book-b",
+              parentRole: "review",
+              position: "a0",
+            }),
+            makeShelfItemRow({
+              unitId: "review-a",
+              kind: "review",
+              parentItemId: "book-a",
+              parentRole: "review",
+              position: "z0",
+            }),
+          ];
+        },
+      },
+    });
+
+    const { shelfService } = await import(
+      "./shelf.service.ts?shelf-service-test-actual" as string
+    );
+    const result = await shelfService.getShelfItems("shelf-1", { limit: 20 });
+
+    expect(result.items.map((item) => item.itemId)).toEqual([
+      "book-a",
+      "book-b",
+      "review-b",
+      "review-a",
+    ]);
+    expect(result.relations.map((relation) => relation.parentItemId)).toEqual([
+      "book-b",
+      "book-a",
+    ]);
+    expect(calls).toHaveLength(2);
+  });
+
+  test("addItem rejects direct self-containment", async () => {
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
 
     await expect(
-      shelfService.addUnit("shelf-1", { unitId: "shelf-1", kind: "shelf" }),
+      shelfService.addItem("shelf-1", {
+        itemType: "unit",
+        itemId: "shelf-1",
+        kind: "shelf",
+      }),
     ).rejects.toThrow(/cannot contain itself/);
   });
 
@@ -1150,7 +1272,7 @@ describe("ShelfService", () => {
     Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: {
+          shelfItem: {
             createMany: async (args: any) => {
               createManyArgs = args;
               applied.push("createMany");
@@ -1162,16 +1284,16 @@ describe("ShelfService", () => {
             },
             update: async () => {
               applied.push("update");
-              return makeShelfUnitRow({ unitId: "b-1", position: "z0" });
+              return makeShelfItemRow({ unitId: "b-1", position: "z0" });
             },
-            findUniqueOrThrow: async () => makeShelfUnitRow({ unitId: "b-1" }),
+            findUniqueOrThrow: async () => makeShelfItemRow({ unitId: "b-1" }),
           },
           shelf: { update: async () => ({}) },
         }),
-      shelfUnit: {
+      shelfItem: {
         findMany: async () => [],
         findUnique: async () =>
-          makeShelfUnitRow({ unitId: "b-1", position: "z0" }),
+          makeShelfItemRow({ unitId: "b-1", position: "z0" }),
       },
     });
 
@@ -1208,16 +1330,16 @@ describe("ShelfService", () => {
     Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: {
+          shelfItem: {
             deleteMany: async () => ({ count: 1 }),
             update: async () => {
               throw new Error("Record to update not found");
             },
-            findUniqueOrThrow: async () => makeShelfUnitRow({ unitId: "x" }),
+            findUniqueOrThrow: async () => makeShelfItemRow({ unitId: "x" }),
           },
           shelf: { update: async () => ({}) },
         }),
-      shelfUnit: { findMany: async () => [], findUnique: async () => null },
+      shelfItem: { findMany: async () => [], findUnique: async () => null },
     });
 
     const { shelfService } = await import(
@@ -1241,19 +1363,19 @@ describe("ShelfService", () => {
     Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: {
+          shelfItem: {
             findMany: async ({ skip, take }: any) => {
               if (skip === 0 && take === 1) return [{ position: "m" }];
               return [];
             },
             update: async ({ data }: any) =>
-              makeShelfUnitRow({ unitId: "moved", position: data.position }),
+              makeShelfItemRow({ unitId: "moved", position: data.position }),
           },
           shelf: { update: async () => ({}) },
         }),
-      shelfUnit: {
+      shelfItem: {
         findUnique: async () =>
-          makeShelfUnitRow({ unitId: "moved", position: "a" }),
+          makeShelfItemRow({ unitId: "moved", position: "a" }),
       },
     });
 
@@ -1289,8 +1411,8 @@ describe("ShelfService", () => {
     Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: { findUnique: async () => null },
-          shelfUnitRelation: { upsert: async () => ({}) },
+          shelfItem: { findUnique: async () => null },
+          shelfItemChild: { upsert: async () => ({}) },
         }),
     });
 
@@ -1697,16 +1819,16 @@ describe("ShelfService", () => {
     expect(result).toBeNull();
   });
 
-  test("removeUnit enqueues containedUnitIds sync after the canonical delete", async () => {
+  test("removeItem enqueues containedUnitIds sync after the canonical delete", async () => {
     enqueueMock.mockClear();
 
     Object.assign(legacyDbMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfUnit: { deleteMany: async () => ({ count: 1 }) },
+          shelfItem: { deleteMany: async () => ({ count: 1 }) },
           shelf: { update: async () => ({}) },
         }),
-      shelfUnit: {
+      shelfItem: {
         findMany: async () => [],
       },
     });
@@ -1714,7 +1836,7 @@ describe("ShelfService", () => {
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string
     );
-    await shelfService.removeUnit("shelf-1", "book-1");
+    await shelfService.removeItem("shelf-1", "book-1");
 
     expect(enqueueMock).toHaveBeenCalledTimes(1);
     expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({

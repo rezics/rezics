@@ -23,9 +23,14 @@ interface FakeReactionRow {
 }
 
 let allRows: FakeReactionRow[] = [];
+const shareRows = new Set<string>();
 const summaries = new Map<
   string,
   { targetId: string; reaction: string; scopeKey: string; count: number }
+>();
+const shareSummaries = new Map<
+  string,
+  { targetId: string; shareCount: number }
 >();
 const usages = new Map<
   string,
@@ -50,6 +55,10 @@ function summaryKey(input: {
 }
 
 function usageKey(input: { userId: string; targetId: string }) {
+  return `${input.userId}|${input.targetId}`;
+}
+
+function shareKey(input: { userId: string; targetId: string }) {
   return `${input.userId}|${input.targetId}`;
 }
 
@@ -217,7 +226,35 @@ class InMemoryReactionRepository implements ReactionRepository {
     for (const [key, usage] of usages) {
       if (usage.targetId === targetId) usages.delete(key);
     }
+    for (const key of [...shareRows]) {
+      if (key.endsWith(`|${targetId}`)) shareRows.delete(key);
+    }
+    shareSummaries.delete(targetId);
     return { count: before - allRows.length };
+  }
+
+  async getShareSummaryRows(targetIds: string[]) {
+    const ids = new Set(targetIds);
+    return [...shareSummaries.values()].filter((row) => ids.has(row.targetId));
+  }
+
+  async recordShare(input: { userId: string; targetId: string }) {
+    const key = shareKey(input);
+    const created = !shareRows.has(key);
+    if (created) {
+      shareRows.add(key);
+      const summary = shareSummaries.get(input.targetId) ?? {
+        targetId: input.targetId,
+        shareCount: 0,
+      };
+      summary.shareCount += 1;
+      shareSummaries.set(input.targetId, summary);
+    }
+    return {
+      targetId: input.targetId,
+      shareCount: shareSummaries.get(input.targetId)?.shareCount ?? 0,
+      created,
+    };
   }
 }
 
@@ -233,7 +270,9 @@ const service = new ReactionService(new InMemoryReactionRepository());
 
 function seed(rows: FakeReactionRow[]) {
   allRows = rows;
+  shareRows.clear();
   summaries.clear();
+  shareSummaries.clear();
   usages.clear();
   for (const r of rows) {
     const sk = summaryKey(r);
@@ -489,4 +528,52 @@ test("encodeCursor produces a string consumable by listGiven", async () => {
   });
   const result = await service.listGiven({ userId: "u", cursor });
   expect(result.items.map((r: any) => r.id)).toEqual(["id-d"]);
+});
+
+describe("reactionService share intent", () => {
+  test("records one share per user and target", async () => {
+    seed([]);
+
+    await expect(service.recordShare("u-1", "target-1")).resolves.toEqual({
+      targetId: "target-1",
+      shareCount: 1,
+      created: true,
+    });
+    await expect(service.recordShare("u-1", "target-1")).resolves.toEqual({
+      targetId: "target-1",
+      shareCount: 1,
+      created: false,
+    });
+    await expect(service.recordShare("u-2", "target-1")).resolves.toEqual({
+      targetId: "target-1",
+      shareCount: 2,
+      created: true,
+    });
+  });
+
+  test("share recording does not consume active reaction quota", async () => {
+    seed([]);
+
+    await service.recordShare("u", "t-1");
+    await service.recordShare("u", "t-1");
+    await service.create("u", "t-1", "upvote");
+    await service.create("u", "t-1", "downvote", "realm:realm-1");
+    await expect(
+      service.create("u", "t-1", "upvote", "realm:realm-2"),
+    ).resolves.toMatchObject({ created: true });
+  });
+
+  test("reads batched share summaries with zero defaults", async () => {
+    seed([]);
+
+    await service.recordShare("u-1", "target-1");
+    await service.recordShare("u-2", "target-1");
+
+    await expect(
+      service.getShareSummary(["target-1", "target-2"]),
+    ).resolves.toEqual({
+      "target-1": { shareCount: 2 },
+      "target-2": { shareCount: 0 },
+    });
+  });
 });

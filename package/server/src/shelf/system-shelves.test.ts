@@ -37,6 +37,7 @@ describe("system shelves", () => {
 
     expect(SYSTEM_KIND_KEYS).toEqual([
       "favorites",
+      "saved",
       "backlog",
       "active",
       "completed",
@@ -45,15 +46,15 @@ describe("system shelves", () => {
     expect(isSystemKindKey("custom")).toBe(false);
   });
 
-  test("bootstrap creates four slug-bearing system shelves with formatted titles", async () => {
+  test("bootstrap creates slug-bearing system shelves with formatted titles", async () => {
     const { bootstrapSystemShelves } = await loadSystemShelves();
     const mocks = makeClient();
 
     await bootstrapSystemShelves("user-1", "alice", mocks.client as any);
 
-    expect(mocks.unitFindFirst).toHaveBeenCalledTimes(4);
-    expect(mocks.unitCreate).toHaveBeenCalledTimes(4);
-    expect(mocks.shelfCreate).toHaveBeenCalledTimes(4);
+    expect(mocks.unitFindFirst).toHaveBeenCalledTimes(5);
+    expect(mocks.unitCreate).toHaveBeenCalledTimes(5);
+    expect(mocks.shelfCreate).toHaveBeenCalledTimes(5);
 
     const unitCreateCalls = mocks.unitCreate.mock.calls as any[];
     const created = unitCreateCalls.map((call) => ({
@@ -68,6 +69,12 @@ describe("system shelves", () => {
         slugScope: "user-1",
         userId: "user-1",
         title: "alice's Favorites",
+      },
+      {
+        slug: "saved",
+        slugScope: "user-1",
+        userId: "user-1",
+        title: "alice's Saved",
       },
       {
         slug: "backlog",
@@ -93,7 +100,7 @@ describe("system shelves", () => {
       (mocks.shelfCreate.mock.calls as any[]).map(
         (call) => call[0].data.kindKey,
       ),
-    ).toEqual(["favorites", "backlog", "active", "completed"]);
+    ).toEqual(["favorites", "saved", "backlog", "active", "completed"]);
   });
 
   test("ensure lookup resolves existing shelf via unit slug index without creating", async () => {

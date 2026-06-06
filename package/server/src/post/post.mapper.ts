@@ -13,6 +13,11 @@ import type { PostWithRelations } from "./types";
 
 type CommentPromotionRow = typeof CommentPromotion.$inferSelect;
 
+function optionalCount(row: unknown, key: string): number | undefined {
+  const value = (row as Record<string, unknown> | null | undefined)?.[key];
+  return typeof value === "number" ? value : undefined;
+}
+
 function moderationStatus(post: PostWithRelations) {
   return post.unit.moderationStatus.toLowerCase() as
     | PostDTO["moderationStatus"]
@@ -96,6 +101,8 @@ export function mapPostToDTO(
     variantUnitId: post.variantUnitId ?? null,
     variantContext: variantContextForRow(post, variantContexts),
     realmUnitId: post.unit.inRealms?.[0]?.realmUnitId ?? null,
+    referenceCount: post.unit.referenceCount,
+    shareCount: optionalCount(post.unit, "shareCount"),
     resolvedLanguage,
     title: contentHidden ? null : previewTitle(post, resolvedLanguage),
     content: contentHidden ? null : previewContent(post, resolvedLanguage),

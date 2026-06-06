@@ -30,6 +30,8 @@ const baseUnit = {
   createdAt: new Date("2026-06-03T00:00:00.000Z"),
   updatedAt: new Date("2026-06-03T00:00:00.000Z"),
   publishedAt: null,
+  referenceCount: 7,
+  shareCount: 8,
   supportLanguages: [
     { unitId: "book-1", language: "ja", isPrimary: true, sortOrder: 0 },
     { unitId: "book-1", language: "en", isPrimary: false, sortOrder: 1 },
@@ -57,6 +59,8 @@ describe("mapUnitListItemToDTO", () => {
     expect(dto.resolvedLanguage).toBe("ja");
     expect(dto.title).toBeNull();
     expect(dto.description).toBeNull();
+    expect(dto.referenceCount).toBe(7);
+    expect(dto.shareCount).toBe(8);
     expect("translations" in dto).toBe(false);
     expect("supportLanguages" in dto).toBe(false);
   });

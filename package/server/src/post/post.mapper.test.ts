@@ -37,6 +37,8 @@ const basePost = {
     visibility: "PUBLIC",
     moderationStatus: "APPROVED",
     licenseSlug: null,
+    referenceCount: 0,
+    shareCount: 0,
     user: null,
     inRealms: [],
     supportLanguages: [
@@ -70,6 +72,20 @@ describe("mapPostToDTO", () => {
     expect(dto.resolvedLanguage).toBe("en");
     expect(dto.title).toBe("English title");
     expect(dto.content).toEqual(markdownContentDoc("translated body"));
+  });
+
+  test("projects materialized count fields from the owning Unit", () => {
+    const dto = mapPostToDTO({
+      ...basePost,
+      unit: {
+        ...basePost.unit,
+        referenceCount: 4,
+        shareCount: 5,
+      },
+    } as unknown as PostWithRelations);
+
+    expect(dto.referenceCount).toBe(4);
+    expect(dto.shareCount).toBe(5);
   });
 
   test("keeps resolved supported language even when fields are missing", () => {

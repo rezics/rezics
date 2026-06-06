@@ -43,13 +43,30 @@ mock.module("@/infra/slug-scopes", () => ({
 }));
 
 mock.module("@/unit/unit.service", () => ({
-  unitService: {},
+  unitService: {
+    getByUnitId: mock(async (unitId: string) => ({
+      unitId,
+      user: { unitId: "alice" },
+    })),
+  },
 }));
+
+const reorderItemMock = mock(async () => ({
+  shelfId: "shelf-1",
+  itemType: "comment",
+  itemId: "comment-1",
+  kind: "comment",
+  position: "a1",
+}));
+
+const removeItemMock = mock(async () => undefined);
 
 mock.module("./shelf.service", () => ({
   shelfService: {
     listUserShelves: async () => [],
     list: mock(async () => ({ shelves: [], total: 0 })),
+    reorderItem: reorderItemMock,
+    removeItem: removeItemMock,
   },
 }));
 
@@ -123,6 +140,8 @@ beforeEach(() => {
     created: true,
   });
   userGetByUserIdMock.mockClear();
+  reorderItemMock.mockClear();
+  removeItemMock.mockClear();
 });
 
 describe("POST /shelf/system/ensure", () => {
@@ -185,6 +204,48 @@ describe("POST /shelf/system/ensure", () => {
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
     expect(ensureSystemShelfMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("shelf item identity routes", () => {
+  test("PATCH /shelf/:unitId/items/:itemType/:itemId/position passes full identity", async () => {
+    const app = await makeApp();
+
+    const res = await app.handle(
+      new Request(
+        "http://localhost/shelf/shelf-1/items/comment/comment-1/position",
+        {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ afterItemId: "book-1" }),
+        },
+      ),
+    );
+
+    expect(res.status).toBe(200);
+    expect(reorderItemMock).toHaveBeenCalledWith(
+      "shelf-1",
+      "comment-1",
+      { afterItemId: "book-1" },
+      "comment",
+    );
+  });
+
+  test("DELETE /shelf/:unitId/items/:itemType/:itemId passes full identity", async () => {
+    const app = await makeApp();
+
+    const res = await app.handle(
+      new Request("http://localhost/shelf/shelf-1/items/comment/comment-1", {
+        method: "DELETE",
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(removeItemMock).toHaveBeenCalledWith(
+      "shelf-1",
+      "comment-1",
+      "comment",
+    );
   });
 });
 

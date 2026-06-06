@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import {
   Shelf,
-  ShelfUnit,
+  ShelfItem,
   Subscription,
   Unit,
   UnitTranslation,
@@ -90,7 +90,7 @@ describe("seedEngagement", () => {
         title: "Favorites",
       }),
     ]);
-    expect(dbMock.rowsFor(ShelfUnit)).toHaveLength(2);
+    expect(dbMock.rowsFor(ShelfItem)).toHaveLength(2);
     expect(dbMock.shelfUpdateSet).toHaveBeenCalledWith({ itemCount: 2 });
   });
 

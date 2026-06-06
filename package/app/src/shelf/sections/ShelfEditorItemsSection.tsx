@@ -32,8 +32,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
-import { useHydratedShelfUnits } from "@rezics/api/shelf";
-import type { ShelfDTO, ShelfUnitKind } from "@rezics/contract";
+import { useHydratedShelfItems } from "@rezics/api/shelf";
+import type { ShelfDTO, ShelfItemKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -50,7 +50,7 @@ import { Eye, ListChecks, Pencil } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
 import {
   type Candidate,
-  shelfUnitToUnitCardSummary,
+  shelfItemToUnitCardSummary,
   UnitAddPicker,
   UnitCard,
 } from "@/unit";
@@ -102,7 +102,7 @@ const VIEW_OPTIONS: ShelfViewChoice<"nested" | "flat">[] = [
   { value: "flat", label: i18nMessages.shelf_view_list },
 ];
 
-function candidateKindToShelfUnitKind(kind: string): ShelfUnitKind {
+function candidateKindToShelfItemKind(kind: string): ShelfItemKind {
   switch (kind) {
     case "book":
       return "book";
@@ -141,7 +141,7 @@ export function ShelfEditorItemsSection({
   editor,
 }: ShelfEditorItemsSectionProps) {
   const { t } = useTranslation(["common", "entity"]);
-  const hydration = useHydratedShelfUnits(editor.units);
+  const hydration = useHydratedShelfItems(editor.units);
   const [sortState, setSortState] = useState<ShelfSortState>({
     field: "manual",
     order: "desc",
@@ -198,7 +198,7 @@ export function ShelfEditorItemsSection({
   function handleAddCandidate(candidate: Candidate) {
     editor.enqueueAdd({
       unitId: candidate.identifier,
-      kind: candidateKindToShelfUnitKind(String(candidate.kind)),
+      kind: candidateKindToShelfItemKind(String(candidate.kind)),
     });
   }
 
@@ -479,7 +479,7 @@ export function ShelfEditorItemsSection({
           <DragOverlay dropAnimation={null}>
             {activeDragEntry ? (
               <UnitCard
-                summary={shelfUnitToUnitCardSummary(
+                summary={shelfItemToUnitCardSummary(
                   activeDragEntry.unit.unit,
                   activeDragEntry.unit.data,
                 )}

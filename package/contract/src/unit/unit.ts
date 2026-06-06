@@ -297,6 +297,8 @@ export const baseUnitSchema = t.Object({
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
   publishedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
+  referenceCount: t.Optional(t.Number()),
+  shareCount: t.Optional(t.Number()),
 });
 
 export type BaseUnit = (typeof baseUnitSchema)["static"];

@@ -47,4 +47,6 @@ export type PostWithRelations = typeof Post.$inferSelect & {
   };
   pinKind?: PinKind | null;
   pinPosition?: string | null;
+  /** Internal serving cursor value for the active list sort; not a DTO field. */
+  feedSortValue?: number | string | null;
 };

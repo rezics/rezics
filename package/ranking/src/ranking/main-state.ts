@@ -60,7 +60,8 @@ export class MainStateReader {
         `),
         db.execute(sql`
           select
-            "unitId",
+            "id",
+            "id" as "unitId",
             "rootUnitId",
             "realmUnitId",
             "parentCommentId",
@@ -71,7 +72,7 @@ export class MainStateReader {
             "createdAt",
             "updatedAt"
           from "Comment"
-          where "unitId" = ${unitId}
+          where "id" = ${unitId}
           limit 1
         `),
         db.execute(sql`

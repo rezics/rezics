@@ -20,6 +20,8 @@ function scopeToBasePath(scope: SearchScope): string {
       return `/user/${scope.userId}/search`;
     case "book":
       return `/book/${scope.unitId}/search`;
+    case "saved":
+      return "/shelf/search";
   }
 }
 

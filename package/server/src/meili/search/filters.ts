@@ -30,6 +30,9 @@ export interface FilterContext {
   // restriction" (e.g., admin contexts); pass an empty array for "no
   // ratings allowed" — the builder will reject all content.
   allowedRatings?: ContentRating[] | null;
+  // Authenticated viewer. Used only for viewer-private search affordances
+  // such as owner-only shelf item notes.
+  viewerUserId?: string | null;
 }
 
 export interface ContentBuildOpts {
@@ -49,6 +52,10 @@ export interface PostBuildOpts {
 
 export interface CommentBuildOpts {
   categoryHint?: SearchCategory;
+}
+
+export interface ShelfItemBuildOpts {
+  includePrivateSearchText?: boolean;
 }
 
 const POST_CATEGORY_TO_KIND: Record<
@@ -119,6 +126,7 @@ function resolveBookScope(scope: SearchScope): {
 //          → containedUnitIds = unitId AND type = "SHELF"
 //   realm  → realmIds = realmId
 //   user   → userId = userId
+//   saved  → handled by the shelf-item grouped path, not direct content search
 
 export function buildContentFilter(
   query: SearchQuery,
@@ -151,6 +159,8 @@ export function buildContentFilter(
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
     filter.push(`userId = "${scope.userId}"`);
+  } else if (scope.kind === "saved") {
+    filter.push('id = "__saved_shelf_scope_requires_shelf_items__"');
   }
 
   // 3. Resolved realm tag (from query.realm SlugRef)
@@ -246,6 +256,8 @@ export function buildPostFilter(
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
     filter.push(`authorUserId = "${scope.userId}"`);
+  } else if (scope.kind === "saved") {
+    filter.push('id = "__saved_shelf_scope_requires_shelf_items__"');
   }
 
   // 3. Locked posts excluded by default (per content-search-api default filters).
@@ -281,6 +293,8 @@ export function buildCommentFilter(
     filter.push(`realmUnitId = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
     filter.push(`authorUserId = "${scope.userId}"`);
+  } else if (scope.kind === "saved") {
+    filter.push('id = "__saved_shelf_scope_requires_shelf_items__"');
   }
 
   filter.push("isLocked = false");
@@ -313,4 +327,49 @@ export function buildUserFilter(
   _scope: SearchScope,
 ): string[] {
   return [];
+}
+
+// ANCHOR: buildShelfItemFilter
+// Shelf-item search is the grouped shelf-match path. Public viewers search only
+// public shelf/item text; owners may also search their occurrence-level
+// `ShelfItem.searchText` through attributesToSearchOn in the service.
+
+export function buildShelfItemFilter(
+  _query: SearchQuery,
+  scope: SearchScope,
+  ctx: FilterContext = {},
+  _opts: ShelfItemBuildOpts = {},
+): string[] {
+  const filter: string[] = [];
+  const publicShelf =
+    '(shelfVisibility = "PUBLIC" AND shelfStatus = "PUBLISHED")';
+  const ownerUserId = ctx.viewerUserId ?? null;
+
+  if (scope.kind === "user") {
+    filter.push(`shelfOwnerUserId = "${scope.userId}"`);
+    if (ownerUserId !== scope.userId) {
+      filter.push(publicShelf);
+    }
+  } else if (scope.kind === "saved") {
+    filter.push(`shelfId = "${scope.shelfId}"`);
+    filter.push(`shelfOwnerUserId = "${scope.userId}"`);
+    filter.push(`itemType = "unit"`);
+    filter.push(`kind = "shelf"`);
+    if (ownerUserId !== scope.userId) {
+      filter.push(publicShelf);
+    }
+  } else if (ownerUserId) {
+    filter.push(`(${publicShelf} OR shelfOwnerUserId = "${ownerUserId}")`);
+  } else {
+    filter.push(publicShelf);
+  }
+
+  if (scope.kind === "book") {
+    filter.push(`itemType = "unit"`);
+    filter.push(`itemId = "${scope.unitId}"`);
+  } else if (scope.kind === "realm") {
+    filter.push(`realmUnitId = "${scope.realmId}"`);
+  }
+
+  return filter;
 }

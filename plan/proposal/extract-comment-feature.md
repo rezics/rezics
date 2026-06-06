@@ -1,8 +1,8 @@
 ---
 title: Extract a standalone `comment` feature from `post`
-status: active
+status: done
 created: 2026-06-06
-completed:
+completed: 2026-06-06
 supersededBy:
 tags: [app, comment, post, refactor]
 ---
@@ -101,32 +101,35 @@ New:
 ## Tasks
 
 ### 1. Scaffold the comment feature
-- [ ] 1.1 Create `package/app/src/comment/` with `components/{item,parts}`, `sections`, `forms`, `hooks`, `models`, `pages` subfolders following `package/app/docs/feature standard.md`.
-- [ ] 1.2 Add `comment/index.ts` exporting the public surface: `CommentThreadSection`, `ReplyComposer` (+ `ReplyComposerHandle`, `ReplyComposerMode`, `ReplyComposerProps`, `useBlurRetain`), `useFocusReplyFromQuery`, `useCommentTreeCollapse` (+ `filterByPathPrefix`, `seedCollapsedIds`), `CommentReply`, and `commentRowActions` / `commentRowOverflow` if consumed externally.
+- [x] 1.1 Create `package/app/src/comment/` with `components/{item,parts}`, `sections`, `forms`, `hooks`, `models`, `pages` subfolders following `package/app/docs/feature standard.md`.
+- [x] 1.2 Add `comment/index.ts` exporting the public surface: `CommentThreadSection`, `ReplyComposer` (+ `ReplyComposerHandle`, `ReplyComposerMode`, `ReplyComposerProps`, `useBlurRetain`), `useFocusReplyFromQuery`, `useCommentTreeCollapse` (+ `filterByPathPrefix`, `seedCollapsedIds`), `CommentReply`, and `commentRowActions` / `commentRowOverflow` if consumed externally.
 
 ### 2. Move + rename the thread UI into comment
-- [ ] 2.1 Move and rename the section files (`PostTreeSection`→`CommentThreadSection`, `PostTreeList`→`CommentTreeList`, `PostTreeNode`→`CommentTreeNode`, `PostTreeRail`→`CommentTreeRail`, `postTreeLayout`→`commentTreeLayout`), updating intra-file symbol names and relative imports.
-- [ ] 2.2 Move `ThreadingRail`, `ThreadingContext`, `CollapseToggle`, `CommentPromotionBadge` as-is; move+rename `PostReply`→`CommentReply` and `PostPromotionControls`→`CommentPromotionControls`. `CommentReply` imports `PostAuthorHeader`/`PostBodyMarkdown` from `@/post` and `PollEmbed` from `@/poll`.
-- [ ] 2.3 Move `ReplyComposer` and `useFocusReplyFromQuery` as-is; move+rename `usePostTreeCollapse`→`useCommentTreeCollapse`.
-- [ ] 2.4 Move+rename `postTreeRails`→`commentTreeRails` and `postPromotionGate`→`commentPromotionGate` (with tests).
-- [ ] 2.5 Create `comment/models/commentPolicy.ts` with `commentRowActions`/`commentRowOverflow` (from `postReplyRowActions`/`postReplyRowOverflow`); reuse `getPostShareHref`/`postPolicy` from `@/post` for share behavior.
-- [ ] 2.6 Move `ContinueThreadPage.tsx` into `comment/pages/` (it is already pure comment); fix its relative imports to the moved siblings.
+- [x] 2.1 Move and rename the section files (`PostTreeSection`→`CommentThreadSection`, `PostTreeList`→`CommentTreeList`, `PostTreeNode`→`CommentTreeNode`, `PostTreeRail`→`CommentTreeRail`, `postTreeLayout`→`commentTreeLayout`), updating intra-file symbol names and relative imports.
+- [x] 2.2 Move `ThreadingRail`, `ThreadingContext`, `CollapseToggle`, `CommentPromotionBadge` as-is; move+rename `PostReply`→`CommentReply` and `PostPromotionControls`→`CommentPromotionControls`. `CommentReply` imports `PostAuthorHeader`/`PostBodyMarkdown` from `@/post` and `PollEmbed` from `@/poll`.
+- [x] 2.3 Move `ReplyComposer` and `useFocusReplyFromQuery` as-is; move+rename `usePostTreeCollapse`→`useCommentTreeCollapse`.
+- [x] 2.4 Move+rename `postTreeRails`→`commentTreeRails` and `postPromotionGate`→`commentPromotionGate` (with tests).
+- [x] 2.5 Create `comment/models/commentPolicy.ts` with `commentRowActions`/`commentRowOverflow` (from `postReplyRowActions`/`postReplyRowOverflow`); reuse `getPostShareHref`/`postPolicy` from `@/post` for share behavior.
+- [x] 2.6 Move `ContinueThreadPage.tsx` into `comment/pages/` (it is already pure comment); fix its relative imports to the moved siblings.
 
 ### 3. Trim the post feature
-- [ ] 3.1 Remove `postReplyRowActions`/`postReplyRowOverflow` from `post/models/postPolicy.ts`; keep post-card/detail sets, `getPostShareHref`, `postPolicy`. Update the file's header comment to drop the "discussion comments" framing.
-- [ ] 3.2 Update `post/index.ts` to drop the moved exports (`PostTreeSection`, `PostReply`, `ReplyComposer` + types, `useFocusReplyFromQuery`, `usePostTreeCollapse` + helpers, reply-row actions) and keep post-only exports (`PostCard`, `PostAuthorHeader`, `PostBodyMarkdown`, `PostEditDialog`, `RootPostTranslationEditor`, `WikiPostEditor`, `postPolicy` set, `PostListSection`).
-- [ ] 3.3 Rewrite `post/pages/PostThreadPage.tsx` to import `CommentThreadSection`, `ReplyComposer`, `useFocusReplyFromQuery` from `@/comment` (post content + `postThreadContext` stay).
+- [x] 3.1 Remove `postReplyRowActions`/`postReplyRowOverflow` from `post/models/postPolicy.ts`; keep post-card/detail sets, `getPostShareHref`, `postPolicy`. Update the file's header comment to drop the "discussion comments" framing.
+- [x] 3.2 Update `post/index.ts` to drop the moved exports (`PostTreeSection`, `PostReply`, `ReplyComposer` + types, `useFocusReplyFromQuery`, `usePostTreeCollapse` + helpers, reply-row actions) and keep post-only exports (`PostCard`, `PostAuthorHeader`, `PostBodyMarkdown`, `PostEditDialog`, `RootPostTranslationEditor`, `WikiPostEditor`, `postPolicy` set, `PostListSection`).
+- [x] 3.3 Rewrite `post/pages/PostThreadPage.tsx` to import `CommentThreadSection`, `ReplyComposer`, `useFocusReplyFromQuery` from `@/comment` (post content + `postThreadContext` stay).
 
 ### 4. Re-point consumers
-- [ ] 4.1 `review/sections/ReviewDetailSection.tsx`: `PostTreeSection`→`@/comment` `CommentThreadSection`; `ReplyComposer`, `useFocusReplyFromQuery`→`@/comment`. `PostAuthorHeader`/`PostBodyMarkdown` in review cards stay on `@/post`.
-- [ ] 4.2 `remark/sections/RemarkDetailSection.tsx`: same re-point as review.
-- [ ] 4.3 `excerpt/sections/ExcerptDetailSection.tsx`, `poll/pages/PollPage.tsx`, `book-library/pages/BookDiscussionPage.tsx`, `book-read-node/components/EmptyNodeView.tsx`, `shelf/sections/ShelfDiscussionSection.tsx`: keep `PostListSection` on `@/post`; move `ReplyComposer` / `useFocusReplyFromQuery` to `@/comment`.
-- [ ] 4.4 `routes/_mainLayout/post/$rootPostUnitId/continue.$unitId.tsx`: import `ContinueThreadPage` from `@/comment/pages/ContinueThreadPage`. (`PostThreadPage` routes stay on `@/post`.)
+- [x] 4.1 `review/sections/ReviewDetailSection.tsx`: `PostTreeSection`→`@/comment` `CommentThreadSection`; `ReplyComposer`, `useFocusReplyFromQuery`→`@/comment`. `PostAuthorHeader`/`PostBodyMarkdown` in review cards stay on `@/post`.
+- [x] 4.2 `remark/sections/RemarkDetailSection.tsx`: same re-point as review.
+- [x] 4.3 `excerpt/sections/ExcerptDetailSection.tsx`, `poll/pages/PollPage.tsx`, `book-library/pages/BookDiscussionPage.tsx`, `book-read-node/components/EmptyNodeView.tsx`, `shelf/sections/ShelfDiscussionSection.tsx`: keep `PostListSection` on `@/post`; move `ReplyComposer` / `useFocusReplyFromQuery` to `@/comment`.
+- [x] 4.4 `routes/_mainLayout/post/$rootPostUnitId/continue.$unitId.tsx`: import `ContinueThreadPage` from `@/comment/pages/ContinueThreadPage`. (`PostThreadPage` routes stay on `@/post`.)
 
 ### 5. Verify
 - [ ] 5.1 `bun run knip` (no dangling exports/deps), `bun run check:convention`, `bun run format:check`.
-- [ ] 5.2 `bun --filter=@rezics/app test` for the moved tests (`CommentThreadSection`, `useCommentTreeCollapse`, `commentPromotionGate`) and `postThreadContext`/`postMetadata` still in post.
-- [ ] 5.3 Confirm Storybook ids/titles for moved stories reflect the `comment` feature.
+  Left unchecked because `format:check` and `check:convention` pass, but
+  `bun run knip` still reports broad repo-wide unused exports/deps outside this
+  proposal.
+- [x] 5.2 `bun --filter=@rezics/app test` for the moved tests (`CommentThreadSection`, `useCommentTreeCollapse`, `commentPromotionGate`) and `postThreadContext`/`postMetadata` still in post.
+- [x] 5.3 Confirm Storybook ids/titles for moved stories reflect the `comment` feature.
 
 ## Out of scope
 

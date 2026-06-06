@@ -44,7 +44,7 @@ const READING_ITEM: ContinueReadingItem = {
 };
 
 const SHELF: DashboardShelfSummary = {
-  shelfUnitId: "shelf-1",
+  shelfId: "shelf-1",
   title: "To Read",
   itemCount: 12,
   coverUrls: [],

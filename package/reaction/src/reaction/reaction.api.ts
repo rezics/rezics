@@ -1,8 +1,12 @@
 import {
+  createShareResponseSchema,
+  createShareSchema,
   givenQuerySchema,
   givenResponseSchema,
   myQuerySchema,
   normalizeReactionScopeKey,
+  shareSummaryQuerySchema,
+  shareSummaryResponseSchema,
   summaryQuerySchema,
 } from "@rezics/contract/reaction";
 import { Elysia, t } from "elysia";
@@ -25,6 +29,42 @@ function parseReactionFilter(raw: string | undefined): string[] | undefined {
 
 export const reactionApi = new Elysia({ prefix: "/reaction" })
   .use(authMacro)
+  .get(
+    "/share/summary",
+    async ({ query }) => {
+      const targetIds = normalizeIds(query.targetIds);
+      const summaries = await reactionService.getShareSummary(targetIds);
+      return { summaries };
+    },
+    {
+      query: shareSummaryQuerySchema,
+      response: shareSummaryResponseSchema,
+      detail: {
+        summary: "Get share summaries",
+        description:
+          "Returns materialized authenticated share intent counts grouped by target ID.",
+        tags: ["Reactions"],
+      },
+    },
+  )
+  .post(
+    "/share",
+    async ({ body, userId }) => {
+      return await reactionService.recordShare(userId, body.targetId);
+    },
+    {
+      requireUser: true,
+      body: createShareSchema,
+      response: createShareResponseSchema,
+      detail: {
+        summary: "Record share intent",
+        description:
+          "Records one monotonic authenticated share intent per user and target.",
+        tags: ["Reactions"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
   .get(
     "/summary",
     async ({ query }) => {

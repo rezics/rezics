@@ -5,4 +5,5 @@ export * from "./feedback";
 export * from "./poll";
 export * from "./post";
 export * from "./realm";
+export * from "./shelf-item";
 export * from "./user";

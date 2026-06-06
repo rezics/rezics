@@ -10,6 +10,7 @@ export const rankingScopeKindValues = [
 ] as const;
 export const rankingRankKindValues = ["content", "post", "comment"] as const;
 export const rankingSignalKindValues = ["view", "read"] as const;
+export const rankingReactionKindValues = ["upvote", "downvote"] as const;
 export const rankingPatchStatusValues = [
   "pending",
   "patched",
@@ -29,6 +30,10 @@ export const rankingSignalKind = p.pgEnum(
   "RankingSignalKind",
   rankingSignalKindValues,
 );
+export const rankingReactionKind = p.pgEnum(
+  "RankingReactionKind",
+  rankingReactionKindValues,
+);
 export const rankingPatchStatus = p.pgEnum(
   "RankingPatchStatus",
   rankingPatchStatusValues,
@@ -43,8 +48,14 @@ export const unitRankProjections = p.pgTable(
     scopeId: p.uuid("scopeId"),
     scopeKey: p.varchar("scopeKey", { length: 64 }).notNull(),
     rankKind: rankingRankKind("rankKind").notNull(),
+    bestScore: p.doublePrecision("bestScore").notNull().default(0),
     hotScore: p.doublePrecision("hotScore").notNull().default(0),
     topScore: p.doublePrecision("topScore").notNull().default(0),
+    risingScore: p.doublePrecision("risingScore").notNull().default(0),
+    controversyScore: p
+      .doublePrecision("controversyScore")
+      .notNull()
+      .default(0),
     trendingScore: p.doublePrecision("trendingScore").notNull().default(0),
     qualityScore: p.doublePrecision("qualityScore").notNull().default(0),
     formulaVersion: p.text("formulaVersion").notNull(),
@@ -69,8 +80,17 @@ export const unitRankProjections = p.pgTable(
       .index("UnitRankProjection_scopeKind_scopeId_rankKind_idx")
       .on(table.scopeKind, table.scopeId, table.rankKind),
     p
+      .index("UnitRankProjection_rankKind_bestScore_idx")
+      .on(table.rankKind, table.bestScore),
+    p
       .index("UnitRankProjection_rankKind_hotScore_idx")
       .on(table.rankKind, table.hotScore),
+    p
+      .index("UnitRankProjection_rankKind_risingScore_idx")
+      .on(table.rankKind, table.risingScore),
+    p
+      .index("UnitRankProjection_rankKind_controversyScore_idx")
+      .on(table.rankKind, table.controversyScore),
     p
       .index("UnitRankProjection_rankKind_trendingScore_idx")
       .on(table.rankKind, table.trendingScore),
@@ -104,6 +124,37 @@ export const rankingSignalBuckets = p.pgTable(
     p
       .index("RankingSignalBucket_unitId_flushedAt_idx")
       .on(table.unitId, table.flushedAt),
+  ],
+);
+
+export const rankingReactionBuckets = p.pgTable(
+  "RankingReactionBucket",
+  {
+    id: p.uuid("id").primaryKey().default(sql`uuidv7()`),
+    targetId: p.uuid("targetId").notNull(),
+    scopeKey: p.varchar("scopeKey", { length: 128 }).notNull(),
+    reaction: rankingReactionKind("reaction").notNull(),
+    bucketStart: p.timestamp("bucketStart", { precision: 3 }).notNull(),
+    bucketEnd: p.timestamp("bucketEnd", { precision: 3 }).notNull(),
+    count: p.integer("count").notNull().default(0),
+    createdAt: p
+      .timestamp("createdAt", { precision: 3 })
+      .notNull()
+      .defaultNow(),
+    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+  },
+  (table) => [
+    p
+      .uniqueIndex(
+        "RankingReactionBucket_target_scope_reaction_bucketStart_key",
+      )
+      .on(table.targetId, table.scopeKey, table.reaction, table.bucketStart),
+    p
+      .index("RankingReactionBucket_target_scope_bucketStart_idx")
+      .on(table.targetId, table.scopeKey, table.bucketStart),
+    p
+      .index("RankingReactionBucket_reaction_bucketStart_idx")
+      .on(table.reaction, table.bucketStart),
   ],
 );
 
@@ -158,6 +209,10 @@ export type NewUnitRankProjectionRow = typeof unitRankProjections.$inferInsert;
 export type RankingSignalBucketRow = typeof rankingSignalBuckets.$inferSelect;
 export type NewRankingSignalBucketRow =
   typeof rankingSignalBuckets.$inferInsert;
+export type RankingReactionBucketRow =
+  typeof rankingReactionBuckets.$inferSelect;
+export type NewRankingReactionBucketRow =
+  typeof rankingReactionBuckets.$inferInsert;
 export type RankingFormulaVersionRow =
   typeof rankingFormulaVersions.$inferSelect;
 export type NewRankingFormulaVersionRow =

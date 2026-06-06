@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const ContinueThreadPage = lazyRouteComponent(
-  () => import("@/post/pages/ContinueThreadPage"),
+  () => import("@/comment/pages/ContinueThreadPage"),
   "ContinueThreadPage",
 );
 

@@ -1,4 +1,6 @@
 import {
+  createShareResponseSchema,
+  createShareSchema,
   createSchema,
   deleteQuerySchema,
   normalizeReactionScopeKey,
@@ -14,7 +16,11 @@ import {
 import { authMacro } from "@/middleware";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { Unit } from "../db/schema";
-import { createReaction, removeReaction } from "./reaction-boundary.client";
+import {
+  createReaction,
+  recordShare,
+  removeReaction,
+} from "./reaction-boundary.client";
 
 type ReactionBoundaryDeps = {
   findPolicyRealm?: (realmUnitId: string) => Promise<
@@ -168,6 +174,40 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
           summary: "Create reaction",
           description:
             "Adds a reaction to a unit. Triggers a notification to the unit owner.",
+          tags: ["Reactions"],
+        },
+      },
+    )
+    .post(
+      "/share",
+      async ({ body, identity, set, status }) => {
+        const decision = await governanceRoutePolicyService.decideForIdentity({
+          identity,
+          action: contentPolicyActions.reactionCreate,
+          target: {
+            kind: "reaction",
+            id: body.targetId,
+          },
+        });
+        if (!decision.allowed) {
+          return status(
+            403,
+            decision.safeMessage ?? "Forbidden: policy denied this action",
+          );
+        }
+
+        const result = await recordShare(identity.userId, body.targetId);
+        set.status = result.created ? 201 : 200;
+        return result;
+      },
+      {
+        requireLogin: true,
+        body: createShareSchema,
+        response: createShareResponseSchema,
+        detail: {
+          summary: "Record share intent",
+          description:
+            "Records one monotonic authenticated share intent for the target Unit.",
           tags: ["Reactions"],
         },
       },

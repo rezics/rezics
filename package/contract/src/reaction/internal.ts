@@ -37,6 +37,19 @@ export const internalRemoveResponseSchema = t.Object({
 export type InternalRemoveResponse =
   (typeof internalRemoveResponseSchema)["static"];
 
+export const internalCreateShareBodySchema = t.Object({
+  userId: t.String(),
+  targetId: t.String(),
+});
+
+export const internalCreateShareResponseSchema = t.Object({
+  targetId: t.String(),
+  shareCount: t.Number(),
+  created: t.Boolean(),
+});
+export type InternalCreateShareResponse =
+  (typeof internalCreateShareResponseSchema)["static"];
+
 /** POST /internal/by-user request body. */
 export const internalByUserBodySchema = t.Object({
   targetIds: t.Array(t.String()),

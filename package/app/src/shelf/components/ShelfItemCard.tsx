@@ -1,8 +1,8 @@
-import type { ShelfUnitDTO } from "@rezics/api/shelf";
+import type { ShelfItemDTO } from "@rezics/api/shelf";
 import { Badge } from "@rezics/ui/shadcn";
 
 interface ShelfItemCardProps {
-  unit: ShelfUnitDTO;
+  unit: ShelfItemDTO;
 }
 
 export function ShelfItemCard({ unit }: ShelfItemCardProps) {

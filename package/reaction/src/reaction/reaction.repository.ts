@@ -5,6 +5,8 @@ import {
   reactionSummaries,
   reactions,
   reactionTargetUsages,
+  unitShares,
+  unitShareSummaries,
 } from "../db/schema";
 import type { ReactionCursor } from "./cursor";
 
@@ -51,6 +53,13 @@ export interface ReactionRepository {
   }>;
   removeReaction(input: RemoveReactionInput): Promise<{ deleted: boolean }>;
   cleanupTarget(targetId: string): Promise<{ count: number }>;
+  getShareSummaryRows(
+    targetIds: string[],
+  ): Promise<Array<{ targetId: string; shareCount: number }>>;
+  recordShare(input: {
+    userId: string;
+    targetId: string;
+  }): Promise<{ targetId: string; shareCount: number; created: boolean }>;
 }
 
 function cursorPredicate(cursor: ReactionCursor | null): SQL | undefined {
@@ -305,7 +314,72 @@ export class DrizzleReactionRepository implements ReactionRepository {
       await tx
         .delete(reactionTargetUsages)
         .where(eq(reactionTargetUsages.targetId, targetId));
+      await tx.delete(unitShares).where(eq(unitShares.targetId, targetId));
+      await tx
+        .delete(unitShareSummaries)
+        .where(eq(unitShareSummaries.targetId, targetId));
       return { count: deleted.length };
+    });
+  }
+
+  async getShareSummaryRows(
+    targetIds: string[],
+  ): Promise<Array<{ targetId: string; shareCount: number }>> {
+    if (targetIds.length === 0) return [];
+    return await this.database
+      .select({
+        targetId: unitShareSummaries.targetId,
+        shareCount: unitShareSummaries.shareCount,
+      })
+      .from(unitShareSummaries)
+      .where(inArray(unitShareSummaries.targetId, targetIds));
+  }
+
+  async recordShare(input: {
+    userId: string;
+    targetId: string;
+  }): Promise<{ targetId: string; shareCount: number; created: boolean }> {
+    return await this.database.transaction(async (tx) => {
+      const [created] = await tx
+        .insert(unitShares)
+        .values(input)
+        .onConflictDoNothing({
+          target: [unitShares.userId, unitShares.targetId],
+        })
+        .returning({ targetId: unitShares.targetId });
+
+      if (created) {
+        const [summary] = await tx
+          .insert(unitShareSummaries)
+          .values({ targetId: input.targetId, shareCount: 1 })
+          .onConflictDoUpdate({
+            target: [unitShareSummaries.targetId],
+            set: {
+              shareCount: sql`${unitShareSummaries.shareCount} + 1`,
+            },
+          })
+          .returning({
+            targetId: unitShareSummaries.targetId,
+            shareCount: unitShareSummaries.shareCount,
+          });
+        if (!summary)
+          throw new Error("UnitShareSummary upsert returned no row");
+        return { ...summary, created: true };
+      }
+
+      const [summary] = await tx
+        .select({
+          targetId: unitShareSummaries.targetId,
+          shareCount: unitShareSummaries.shareCount,
+        })
+        .from(unitShareSummaries)
+        .where(eq(unitShareSummaries.targetId, input.targetId))
+        .limit(1);
+      return {
+        targetId: input.targetId,
+        shareCount: summary?.shareCount ?? 0,
+        created: false,
+      };
     });
   }
 }

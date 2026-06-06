@@ -17,10 +17,12 @@ import { reactionKeys } from "./reaction.keys";
 import type {
   ReactionMyResponse,
   ReactionSummaryResponse,
+  ShareSummaryResponse,
 } from "./reaction.types";
 
 export type UseReactionDataReturn = {
   summary: Record<string, number>;
+  shareCount: number;
   userReactions: string[];
   isHydrated: boolean;
 };
@@ -106,6 +108,7 @@ export function useReactionData(
     if (!unitId) {
       return {
         summary: EMPTY_SUMMARY,
+        shareCount: 0,
         userReactions: EMPTY_USER_REACTIONS,
         isHydrated: false,
       };
@@ -117,9 +120,13 @@ export function useReactionData(
     const myEntries = queryClient.getQueriesData<ReactionMyResponse>({
       queryKey: reactionKeys.mine(),
     });
+    const shareEntries = queryClient.getQueriesData<ShareSummaryResponse>({
+      queryKey: reactionKeys.shareSummaries(),
+    });
 
     const summaryPrefix = [...reactionKeys.summaries(), "batch"] as const;
     const myPrefix = [...reactionKeys.mine(), "batch"] as const;
+    const sharePrefix = [...reactionKeys.shareSummaries(), "batch"] as const;
 
     const summaryBatches = readBatchEntries<ReactionSummaryResponse>(
       summaryEntries,
@@ -131,17 +138,23 @@ export function useReactionData(
       myPrefix,
       options.userScopeKey,
     );
+    const shareBatches = readBatchEntries<ShareSummaryResponse>(
+      shareEntries,
+      sharePrefix,
+    );
 
     const summaryData = pickLargestContaining(summaryBatches, unitId);
     const myData = pickLargestContaining(myBatches, unitId);
+    const shareData = pickLargestContaining(shareBatches, unitId);
 
     const summary = summaryData?.summaries?.[unitId] ?? EMPTY_SUMMARY;
+    const shareCount = shareData?.summaries?.[unitId]?.shareCount ?? 0;
     const userReactions =
       myData?.reactionsByTarget?.[unitId] ?? EMPTY_USER_REACTIONS;
 
     const isHydrated = summaryData !== undefined;
 
-    return { summary, userReactions, isHydrated };
+    return { summary, shareCount, userReactions, isHydrated };
   }, [
     unitId,
     options.summaryScopeKey,

@@ -1460,7 +1460,7 @@ describe("search sync global moderation projection", () => {
     expect(deleteContent).not.toHaveBeenCalled();
   });
 
-  test("contained unit patches read ShelfUnit rows through Drizzle", async () => {
+  test("contained unit patches read ShelfItem rows through Drizzle", async () => {
     setServerEnvForSearchTests();
     const { patchContentContainedUnitIds, setSearchDb } = await import(
       "./sync"
@@ -1652,7 +1652,7 @@ describe("search sync global moderation projection", () => {
     ]);
   });
 
-  test("contained unit full sync reads ShelfUnit rows through Drizzle", async () => {
+  test("contained unit full sync reads ShelfItem rows through Drizzle", async () => {
     setServerEnvForSearchTests();
     const { setSearchDb, syncAllContainedUnitIds } = await import("./sync");
     const patchContent = mock(async (_docs: any[]) => undefined);

@@ -2,16 +2,10 @@ import type {
   CollectionSearchQuery,
   PatchUserUnitCollectionInput,
 } from "@rezics/contract";
-import { and, asc, eq, inArray } from "drizzle-orm";
-import {
-  Shelf,
-  ShelfUnit,
-  Unit,
-  UserTagApplication,
-  UserUnitCollection,
-} from "../db/schema";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { Shelf, ShelfItem, Unit, UserTagApplication } from "../db/schema";
 import { searchClient } from "../meili/search-client";
-import { enqueueUserUnitCollectionSearchSync } from "../shelf/user-unit-collection.service";
+import { enqueueShelfItemSourceSearchSync } from "../shelf/user-unit-collection.service";
 import type {
   CollectionUnitRow,
   UserUnitCollectionRow,
@@ -29,10 +23,10 @@ type UserTagApplicationLiteRow = Pick<
   "unitId" | "tagUnitId"
 >;
 
-type ShelfUnitLiteRow = Pick<
-  typeof ShelfUnit.$inferSelect,
-  "shelfId" | "unitId"
->;
+type ShelfItemLiteRow = {
+  shelfId: string;
+  unitId: string;
+};
 
 export interface UserUnitCollectionRepository {
   get(userId: string, unitId: string): Promise<UserUnitCollectionRow | null>;
@@ -47,11 +41,11 @@ export interface UserUnitCollectionRepository {
     userId: string,
     tagUnitIds: readonly string[],
   ): Promise<UserTagApplicationLiteRow[]>;
-  listShelfUnits(input: {
+  listShelfItems(input: {
     ownerUserId: string;
     unitIds?: readonly string[] | null;
     publicOnly?: boolean;
-  }): Promise<ShelfUnitLiteRow[]>;
+  }): Promise<ShelfItemLiteRow[]>;
   listMetadataRows(
     userId: string,
     unitIds: readonly string[],
@@ -72,14 +66,24 @@ function createDrizzleUserUnitCollectionRepository(): UserUnitCollectionReposito
     async get(userId, unitId) {
       const db = await getServerDb();
       const [row] = await db
-        .select()
-        .from(UserUnitCollection)
+        .select({
+          userId: Unit.userId,
+          unitId: ShelfItem.itemId,
+          searchText: ShelfItem.searchText,
+          createdAt: ShelfItem.createdAt,
+          updatedAt: ShelfItem.updatedAt,
+        })
+        .from(ShelfItem)
+        .innerJoin(Shelf, eq(Shelf.unitId, ShelfItem.shelfId))
+        .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
         .where(
           and(
-            eq(UserUnitCollection.userId, userId),
-            eq(UserUnitCollection.unitId, unitId),
+            eq(Unit.userId, userId),
+            eq(ShelfItem.itemType, "unit"),
+            eq(ShelfItem.itemId, unitId),
           ),
         )
+        .orderBy(desc(ShelfItem.updatedAt))
         .limit(1);
       return row ?? null;
     },
@@ -88,18 +92,34 @@ function createDrizzleUserUnitCollectionRepository(): UserUnitCollectionReposito
       const db = await getServerDb();
       await db.transaction(async (tx) => {
         if (input.searchText !== undefined) {
-          await tx
-            .insert(UserUnitCollection)
-            .values({
-              userId,
-              unitId: input.unitId,
-              searchText: input.searchText,
-              updatedAt: new Date(),
-            })
-            .onConflictDoUpdate({
-              target: [UserUnitCollection.userId, UserUnitCollection.unitId],
-              set: { searchText: input.searchText, updatedAt: new Date() },
-            });
+          const shelfRows = await tx
+            .select({ shelfId: ShelfItem.shelfId })
+            .from(ShelfItem)
+            .innerJoin(Shelf, eq(Shelf.unitId, ShelfItem.shelfId))
+            .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
+            .where(
+              and(
+                eq(Unit.userId, userId),
+                eq(ShelfItem.itemType, "unit"),
+                eq(ShelfItem.itemId, input.unitId),
+              ),
+            );
+
+          if (shelfRows.length > 0) {
+            await tx
+              .update(ShelfItem)
+              .set({ searchText: input.searchText, updatedAt: new Date() })
+              .where(
+                and(
+                  eq(ShelfItem.itemType, "unit"),
+                  eq(ShelfItem.itemId, input.unitId),
+                  inArray(
+                    ShelfItem.shelfId,
+                    shelfRows.map((row) => row.shelfId),
+                  ),
+                ),
+              );
+          }
         }
 
         if (input.tagUnitIds !== undefined) {
@@ -147,37 +167,48 @@ function createDrizzleUserUnitCollectionRepository(): UserUnitCollectionReposito
         );
     },
 
-    async listShelfUnits(input) {
+    async listShelfItems(input) {
       const db = await getServerDb();
       const conditions = [
         eq(Unit.userId, input.ownerUserId),
         input.unitIds?.length
-          ? inArray(ShelfUnit.unitId, [...input.unitIds])
+          ? inArray(ShelfItem.itemId, [...input.unitIds])
           : undefined,
+        eq(ShelfItem.itemType, "unit"),
         input.publicOnly ? eq(Unit.status, "PUBLISHED") : undefined,
         input.publicOnly ? eq(Unit.visibility, "PUBLIC") : undefined,
       ].filter(Boolean);
       return db
-        .select({ shelfId: ShelfUnit.shelfId, unitId: ShelfUnit.unitId })
-        .from(ShelfUnit)
-        .innerJoin(Shelf, eq(Shelf.unitId, ShelfUnit.shelfId))
+        .select({ shelfId: ShelfItem.shelfId, unitId: ShelfItem.itemId })
+        .from(ShelfItem)
+        .innerJoin(Shelf, eq(Shelf.unitId, ShelfItem.shelfId))
         .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
         .where(and(...conditions))
-        .orderBy(asc(ShelfUnit.unitId), asc(ShelfUnit.shelfId));
+        .orderBy(asc(ShelfItem.itemId), asc(ShelfItem.shelfId));
     },
 
     async listMetadataRows(userId, unitIds) {
       if (unitIds.length === 0) return [];
       const db = await getServerDb();
       return db
-        .select()
-        .from(UserUnitCollection)
+        .select({
+          userId: Unit.userId,
+          unitId: ShelfItem.itemId,
+          searchText: ShelfItem.searchText,
+          createdAt: ShelfItem.createdAt,
+          updatedAt: ShelfItem.updatedAt,
+        })
+        .from(ShelfItem)
+        .innerJoin(Shelf, eq(Shelf.unitId, ShelfItem.shelfId))
+        .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
         .where(
           and(
-            eq(UserUnitCollection.userId, userId),
-            inArray(UserUnitCollection.unitId, [...unitIds]),
+            eq(Unit.userId, userId),
+            eq(ShelfItem.itemType, "unit"),
+            inArray(ShelfItem.itemId, [...unitIds]),
           ),
-        );
+        )
+        .orderBy(asc(ShelfItem.itemId), desc(ShelfItem.updatedAt));
     },
 
     async listTagRows(userId, unitIds) {
@@ -241,7 +272,7 @@ export class UserUnitCollectionService {
     });
 
     if (input.searchText !== undefined) {
-      await enqueueUserUnitCollectionSearchSync(userId, input.unitId);
+      await enqueueShelfItemSourceSearchSync("unit", input.unitId);
     }
 
     return this.get(userId, input.unitId);
@@ -267,10 +298,10 @@ export class UserUnitCollectionService {
           attributesToRetrieve: ["id"],
         }),
         canSearchPrivateText
-          ? searchClient.collectionIndex.search(q, {
+          ? searchClient.shelfItemIndex.search(q, {
               limit: COLLECTION_SEARCH_HIT_LIMIT,
-              filter: `ownerUserId = "${ownerUserId}"`,
-              attributesToRetrieve: ["unitId"],
+              filter: `shelfOwnerUserId = "${ownerUserId}" AND itemType = "unit"`,
+              attributesToRetrieve: ["itemId"],
             })
           : Promise.resolve({ hits: [] as any[] }),
       ]);
@@ -279,7 +310,7 @@ export class UserUnitCollectionService {
           .map((hit) => hit.id)
           .filter((id): id is string => typeof id === "string"),
         ...(collectionResp.hits as any[])
-          .map((hit) => hit.unitId)
+          .map((hit) => hit.itemId)
           .filter((id): id is string => typeof id === "string"),
       ]);
     }
@@ -318,7 +349,7 @@ export class UserUnitCollectionService {
     const limit = Math.max(1, Math.min(Number(query.limit ?? 100), 100));
     const searchIds = await this.resolveSearchIds(ownerUserId, query, options);
 
-    const rows = await this.repository.listShelfUnits({
+    const rows = await this.repository.listShelfItems({
       ownerUserId,
       unitIds: searchIds ? [...searchIds] : null,
       publicOnly: options.publicOnly,
@@ -345,9 +376,12 @@ export class UserUnitCollectionService {
       this.repository.listTagRows(ownerUserId, pageIds),
     ]);
 
-    const metadataByUnitId = new Map(
-      metadataRows.map((row) => [row.unitId, row]),
-    );
+    const metadataByUnitId = new Map<string, UserUnitCollectionRow>();
+    for (const row of metadataRows) {
+      if (!metadataByUnitId.has(row.unitId)) {
+        metadataByUnitId.set(row.unitId, row);
+      }
+    }
     const tagsByUnitId = new Map<string, string[]>();
     for (const row of tagRows) {
       const tagUnitIds = tagsByUnitId.get(row.unitId) ?? [];

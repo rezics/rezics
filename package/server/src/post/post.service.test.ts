@@ -14,6 +14,7 @@ import {
   Poll,
   Post,
   PostPollReference,
+  PostUnitReference,
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
@@ -204,6 +205,9 @@ const contentTranslationUpdateManyMock = mock(async () => ({ count: 1 }));
 const contentTranslationDeleteManyMock = mock(async () => ({ count: 1 }));
 const postPollReferenceCreateManyMock = mock(async () => ({ count: 0 }));
 const postPollReferenceDeleteManyMock = mock(async () => ({ count: 0 }));
+const postUnitReferenceCreateManyMock = mock(async () => ({ count: 0 }));
+const postUnitReferenceDeleteManyMock = mock(async () => ({ count: 0 }));
+const postUnitReferenceFindManyMock = mock(async (): Promise<any[]> => []);
 const pollUpdateManyMock = mock(async () => ({ count: 0 }));
 const bookFindUniqueMock = mock(async (): Promise<any> => null);
 const entityFindUniqueMock = mock(async (): Promise<any> => null);
@@ -296,6 +300,11 @@ const transactionMock = mock(async (fn: any) =>
       createMany: postPollReferenceCreateManyMock,
       deleteMany: postPollReferenceDeleteManyMock,
     },
+    postUnitReference: {
+      createMany: postUnitReferenceCreateManyMock,
+      deleteMany: postUnitReferenceDeleteManyMock,
+      findMany: postUnitReferenceFindManyMock,
+    },
     poll: { updateMany: pollUpdateManyMock },
     book: { findUnique: bookFindUniqueMock },
     entity: { findUnique: entityFindUniqueMock },
@@ -322,6 +331,11 @@ Object.assign(legacyDbMock, {
   postPollReference: {
     createMany: postPollReferenceCreateManyMock,
     deleteMany: postPollReferenceDeleteManyMock,
+  },
+  postUnitReference: {
+    createMany: postUnitReferenceCreateManyMock,
+    deleteMany: postUnitReferenceDeleteManyMock,
+    findMany: postUnitReferenceFindManyMock,
   },
   poll: { updateMany: pollUpdateManyMock },
   post: {
@@ -607,6 +621,7 @@ function unitFixture(unitId: string, source?: any) {
       source?.unit?.publishedAt ??
       new Date("2026-05-31T00:00:00.000Z"),
     subscriberCount: source?.subscriberCount ?? 0,
+    referenceCount: source?.referenceCount ?? 0,
     licenseSlug: source?.licenseSlug ?? null,
     aiDisclosureMode: source?.aiDisclosureMode ?? "UNKNOWN",
     aiDisclosureDetails: source?.aiDisclosureDetails ?? null,
@@ -792,6 +807,14 @@ function createMutation(
           }),
         ];
       }
+      if (table === PostUnitReference) {
+        return [
+          await legacy.postUnitReference?.createMany?.({
+            data: Array.isArray(payload) ? payload : [payload],
+            skipDuplicates: true,
+          }),
+        ];
+      }
       if (table === ModerationCase) {
         return [await legacy.moderationCase?.create?.({ data: payload })];
       }
@@ -853,6 +876,9 @@ function createMutation(
       }
       if (table === PostPollReference) {
         return [await legacy.postPollReference?.deleteMany?.({ where: {} })];
+      }
+      if (table === PostUnitReference) {
+        return [await legacy.postUnitReference?.deleteMany?.({ where: {} })];
       }
       if (table === CommentPromotion) {
         return [
@@ -1141,6 +1167,9 @@ function createFakeSelect(
       const row = await legacy.unitTag?.findUnique?.({ where: {} });
       return row ? [row] : [];
     }
+    if (table === PostUnitReference) {
+      return legacy.postUnitReference?.findMany?.({ where: {} }) ?? [];
+    }
     return [];
   });
   query.from = (nextTable: unknown) => {
@@ -1382,6 +1411,10 @@ function resetMocks() {
   contentTranslationDeleteManyMock.mockClear();
   postPollReferenceCreateManyMock.mockClear();
   postPollReferenceDeleteManyMock.mockClear();
+  postUnitReferenceCreateManyMock.mockClear();
+  postUnitReferenceDeleteManyMock.mockClear();
+  postUnitReferenceFindManyMock.mockClear();
+  postUnitReferenceFindManyMock.mockResolvedValue([]);
   pollUpdateManyMock.mockClear();
   bookFindUniqueMock.mockClear();
   entityFindUniqueMock.mockClear();
@@ -2318,6 +2351,55 @@ describe("PostService.create targetUnitId derivation", () => {
     });
   });
 
+  test("root post create maintains distinct structured unit references", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      content: content("body"),
+      kind: "POST",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        inRealms: [],
+        realmModerationTargets: [],
+      },
+    });
+
+    await service.create(
+      {
+        kind: "POST",
+        language: "en",
+        title: "Thread title",
+        content: {
+          ...content("body with markdown link to /book/book-markdown"),
+          beforeMain: [
+            { type: "unit-ref", source: { unitId: "book-1" } },
+            { type: "unit-ref", source: { unitId: "book-2" } },
+          ],
+          afterMain: [
+            { type: "unit-ref", source: { unitId: "book-1" } },
+            { type: "unit-ref", source: { unitId: "post-1" } },
+          ],
+        },
+      },
+      "user-1",
+    );
+
+    expect(postUnitReferenceCreateManyMock).toHaveBeenCalledWith({
+      data: [
+        { sourcePostUnitId: "post-1", targetUnitId: "book-1" },
+        { sourcePostUnitId: "post-1", targetUnitId: "book-2" },
+      ],
+      skipDuplicates: true,
+    });
+    expect(unitUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ referenceCount: expect.anything() }),
+      }),
+    );
+  });
+
   test("CHAPTER kind validates the target is a BOOK", async () => {
     resetMocks();
     unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
@@ -2497,6 +2579,131 @@ describe("PostService.update immutability", () => {
       where: { unitId: { in: ["poll-keep", "poll-add"] } },
       data: { usageCount: { increment: 1 } },
     });
+  });
+
+  test("content update applies structured unit reference set diffs", async () => {
+    resetMocks();
+    seedLegacyPostRow({
+      unitId: "post-1",
+      authorUserId: "author-1",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        contentTranslations: [
+          {
+            unitId: "post-1",
+            language: "en",
+            content: {
+              ...content("old"),
+              afterMain: [
+                { type: "unit-ref", source: { unitId: "book-keep" } },
+                { type: "unit-ref", source: { unitId: "book-remove" } },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    await service.update("post-1", {
+      content: {
+        ...content("new markdown link to /book/book-ignore"),
+        beforeMain: [{ type: "unit-ref", source: { unitId: "book-keep" } }],
+        afterMain: [
+          { type: "unit-ref", source: { unitId: "book-add" } },
+          { type: "unit-ref", source: { unitId: "book-add" } },
+        ],
+      },
+      language: "en",
+    });
+
+    expect(postUnitReferenceCreateManyMock).toHaveBeenCalledWith({
+      data: [{ sourcePostUnitId: "post-1", targetUnitId: "book-add" }],
+      skipDuplicates: true,
+    });
+    expect(postUnitReferenceDeleteManyMock).toHaveBeenCalledTimes(1);
+    expect(unitUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ referenceCount: expect.anything() }),
+      }),
+    );
+  });
+
+  test("content update keeps references contributed by other languages", async () => {
+    resetMocks();
+    seedLegacyPostRow({
+      unitId: "post-1",
+      authorUserId: "author-1",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        contentTranslations: [
+          {
+            unitId: "post-1",
+            language: "en",
+            content: {
+              ...content("old en"),
+              afterMain: [{ type: "unit-ref", source: { unitId: "book-1" } }],
+            },
+          },
+          {
+            unitId: "post-1",
+            language: "ja",
+            content: {
+              ...content("old ja"),
+              afterMain: [{ type: "unit-ref", source: { unitId: "book-2" } }],
+            },
+          },
+        ],
+      },
+    });
+
+    await service.update("post-1", {
+      content: {
+        ...content("new en"),
+        afterMain: [
+          { type: "unit-ref", source: { unitId: "book-2" } },
+          { type: "unit-ref", source: { unitId: "book-3" } },
+        ],
+      },
+      language: "en",
+    });
+
+    expect(postUnitReferenceCreateManyMock).toHaveBeenCalledWith({
+      data: [{ sourcePostUnitId: "post-1", targetUnitId: "book-3" }],
+      skipDuplicates: true,
+    });
+    expect(postUnitReferenceDeleteManyMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("PostService.delete reference cleanup", () => {
+  const service = new PostService();
+
+  test("global delete removes structured unit references and decrements targets", async () => {
+    resetMocks();
+    seedLegacyPostRow({
+      unitId: "post-1",
+      authorUserId: "author-1",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        contentTranslations: [],
+      },
+    });
+    postUnitReferenceFindManyMock.mockResolvedValue([
+      { targetUnitId: "book-1" },
+      { targetUnitId: "book-2" },
+    ]);
+
+    await service.delete("post-1");
+
+    expect(postUnitReferenceDeleteManyMock).toHaveBeenCalledTimes(1);
+    expect(unitUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ referenceCount: expect.anything() }),
+      }),
+    );
   });
 });
 

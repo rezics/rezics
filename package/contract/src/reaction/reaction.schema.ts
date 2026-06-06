@@ -46,6 +46,33 @@ export const myQuerySchema = t.Object({
   scopeKey: t.Optional(t.String()),
 });
 
+export const createShareSchema = t.Object({
+  targetId: t.String(),
+});
+export type CreateShareInput = (typeof createShareSchema)["static"];
+
+export const shareSummaryQuerySchema = t.Object({
+  targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+});
+
+export const shareSummaryResponseSchema = t.Object({
+  summaries: t.Record(
+    t.String(),
+    t.Object({
+      shareCount: t.Number(),
+    }),
+  ),
+});
+export type ShareSummaryResponse =
+  (typeof shareSummaryResponseSchema)["static"];
+
+export const createShareResponseSchema = t.Object({
+  targetId: t.String(),
+  shareCount: t.Number(),
+  created: t.Boolean(),
+});
+export type CreateShareResponse = (typeof createShareResponseSchema)["static"];
+
 /** GET /reaction/given query parameters. */
 export const givenQuerySchema = t.Object({
   userId: t.String(),

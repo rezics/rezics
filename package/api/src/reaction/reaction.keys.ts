@@ -28,6 +28,14 @@ export const reactionKeys = {
       },
     ] as const,
 
+  shareSummaries: () => [...reactionKeys.all(), "share-summary"] as const,
+  shareSummaryBatch: (targetIds: readonly string[]) =>
+    [
+      ...reactionKeys.shareSummaries(),
+      "batch",
+      normalizeIds(targetIds),
+    ] as const,
+
   mine: () => [...reactionKeys.all(), "my"] as const,
   my: (targetId: string, scopeKey?: string | null) =>
     [

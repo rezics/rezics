@@ -5,14 +5,14 @@ import type {
 } from "./user-unit-collection.service";
 
 const enqueueMock = mock(async () => ({ status: "created" }));
-type SearchHit = { id?: string; unitId?: string };
+type SearchHit = { id?: string; itemId?: string; unitId?: string };
 
 const contentSearchMock = mock(
   async (_query: string, _options?: any): Promise<{ hits: SearchHit[] }> => ({
     hits: [],
   }),
 );
-const collectionSearchMock = mock(
+const shelfItemSearchMock = mock(
   async (_query: string, _options?: any): Promise<{ hits: SearchHit[] }> => ({
     hits: [],
   }),
@@ -26,7 +26,7 @@ mock.module("@/job/job-boundary", () => ({
 mock.module("../meili/search-client", () => ({
   searchClient: {
     contentIndex: { search: contentSearchMock },
-    collectionIndex: { search: collectionSearchMock },
+    shelfItemIndex: { search: shelfItemSearchMock },
   },
 }));
 
@@ -37,7 +37,7 @@ function createRepository(
     get: mock(async () => null),
     patchMetadata: mock(async () => {}),
     listTagApplicationsByTags: mock(async () => []),
-    listShelfUnits: mock(async () => []),
+    listShelfItems: mock(async () => []),
     listMetadataRows: mock(async () => []),
     listTagRows: mock(async () => []),
     ...overrides,
@@ -91,21 +91,21 @@ describe("UserUnitCollectionService", () => {
     expect(result?.searchText).toBe("keeper note");
   });
 
-  test("searches my collection with content and private collection index hits", async () => {
+  test("searches my collection with content and private shelf item hits", async () => {
     contentSearchMock.mockClear();
-    collectionSearchMock.mockClear();
+    shelfItemSearchMock.mockClear();
     contentSearchMock.mockResolvedValueOnce({ hits: [{ id: "unit-1" }] });
-    collectionSearchMock.mockResolvedValueOnce({
-      hits: [{ unitId: "unit-2" }],
+    shelfItemSearchMock.mockResolvedValueOnce({
+      hits: [{ itemId: "unit-2" }],
     });
 
-    const listShelfUnits = mock(async () => [
+    const listShelfItems = mock(async () => [
       { shelfId: "shelf-a", unitId: "unit-1" },
       { shelfId: "shelf-b", unitId: "unit-1" },
       { shelfId: "shelf-a", unitId: "unit-2" },
     ]);
     const repository = createRepository({
-      listShelfUnits,
+      listShelfItems,
       listMetadataRows: mock(async () => [
         {
           userId: "user-1",
@@ -124,12 +124,12 @@ describe("UserUnitCollectionService", () => {
       { viewerUserId: "user-1" },
     );
 
-    expect(collectionSearchMock).toHaveBeenCalledWith("space", {
+    expect(shelfItemSearchMock).toHaveBeenCalledWith("space", {
       limit: 1000,
-      filter: 'ownerUserId = "user-1"',
-      attributesToRetrieve: ["unitId"],
+      filter: 'shelfOwnerUserId = "user-1" AND itemType = "unit"',
+      attributesToRetrieve: ["itemId"],
     });
-    expect(listShelfUnits).toHaveBeenCalledWith({
+    expect(listShelfItems).toHaveBeenCalledWith({
       ownerUserId: "user-1",
       unitIds: ["unit-1", "unit-2"],
       publicOnly: undefined,
@@ -151,14 +151,14 @@ describe("UserUnitCollectionService", () => {
 
   test("public collection search excludes private search text", async () => {
     contentSearchMock.mockClear();
-    collectionSearchMock.mockClear();
+    shelfItemSearchMock.mockClear();
     contentSearchMock.mockResolvedValueOnce({ hits: [{ id: "unit-1" }] });
 
-    const listShelfUnits = mock(async () => [
+    const listShelfItems = mock(async () => [
       { shelfId: "public-shelf", unitId: "unit-1" },
     ]);
     const repository = createRepository({
-      listShelfUnits,
+      listShelfItems,
       listMetadataRows: mock(async () => [
         {
           userId: "owner-1",
@@ -176,8 +176,8 @@ describe("UserUnitCollectionService", () => {
       { viewerUserId: "viewer-1", publicOnly: true },
     );
 
-    expect(collectionSearchMock).not.toHaveBeenCalled();
-    expect(listShelfUnits).toHaveBeenCalledWith({
+    expect(shelfItemSearchMock).not.toHaveBeenCalled();
+    expect(listShelfItems).toHaveBeenCalledWith({
       ownerUserId: "owner-1",
       unitIds: ["unit-1"],
       publicOnly: true,

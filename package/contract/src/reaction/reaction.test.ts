@@ -2,8 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   allowedReactionKindSchema,
+  createShareResponseSchema,
+  createShareSchema,
   createSchema,
   knownReactionKindSchema,
+  shareSummaryResponseSchema,
 } from "./reaction.schema";
 
 describe("reaction contract", () => {
@@ -37,5 +40,23 @@ describe("reaction contract", () => {
         reaction: "heart",
       }),
     ).toBe(false);
+  });
+
+  test("share schemas use singular shareCount fields", () => {
+    expect(Value.Check(createShareSchema, { targetId: "unit-1" })).toBe(true);
+    expect(
+      Value.Check(createShareResponseSchema, {
+        targetId: "unit-1",
+        shareCount: 1,
+        created: true,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shareSummaryResponseSchema, {
+        summaries: {
+          "unit-1": { shareCount: 2 },
+        },
+      }),
+    ).toBe(true);
   });
 });

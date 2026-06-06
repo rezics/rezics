@@ -13,6 +13,7 @@ describe("SYSTEM_SHELF_LABELS", () => {
   test("uses the canonical capitalized English labels", () => {
     expect(SYSTEM_SHELF_LABELS).toEqual({
       favorites: "Favorites",
+      saved: "Saved",
       backlog: "Backlog",
       active: "Active",
       completed: "Completed",

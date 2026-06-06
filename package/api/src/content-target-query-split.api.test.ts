@@ -56,21 +56,21 @@ describe("target query split", () => {
     await commentApi.list({
       rootUnitId: "post-root-1",
       realmUnitId: "realm-1",
-      mode: "threaded",
+      mode: "discovery",
       limit: 50,
     });
     await commentApi.list({
       rootUnitId: "chapter-discussion-1",
       realmUnitId: "realm-1",
-      mode: "subtree",
-      subtreeRootCommentId: "comment-1",
+      mode: "root",
+      rootCommentId: "comment-1",
       limit: 50,
     });
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
       "http://api.example/chapter/list?targetUnitId=book-1&limit=20",
-      "http://api.example/comment/list?rootUnitId=post-root-1&realmUnitId=realm-1&mode=threaded&limit=50",
-      "http://api.example/comment/list?rootUnitId=chapter-discussion-1&realmUnitId=realm-1&mode=subtree&subtreeRootCommentId=comment-1&limit=50",
+      "http://api.example/comment/list?rootUnitId=post-root-1&realmUnitId=realm-1&mode=discovery&limit=50",
+      "http://api.example/comment/list?rootUnitId=chapter-discussion-1&realmUnitId=realm-1&mode=root&rootCommentId=comment-1&limit=50",
     ]);
   });
 });

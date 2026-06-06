@@ -40,6 +40,20 @@ describe("buildSearchPath", () => {
     ).toBe("/book/b-7/search?q=deep&category=reviews");
   });
 
+  test("saved scope uses the shelf search route", () => {
+    expect(
+      buildSearchPath({
+        scope: {
+          kind: "saved",
+          shelfId: "saved-shelf-1",
+          userId: "user-1",
+        },
+        category: "shelves",
+        keyword: "deep",
+      }),
+    ).toBe("/shelf/search?q=deep&category=shelves");
+  });
+
   test("category=all is omitted from URL", () => {
     expect(
       buildSearchPath({

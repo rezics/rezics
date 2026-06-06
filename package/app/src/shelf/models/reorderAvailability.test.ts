@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { EnrichedShelfUnit, ShelfSortState } from "@rezics/api/shelf";
-import type { ShelfUnitDTO } from "@rezics/contract";
+import type { EnrichedShelfItem, ShelfSortState } from "@rezics/api/shelf";
+import type { ShelfItemDTO } from "@rezics/contract";
 import {
   canReorderShelfStreamEntry,
   canUseShelfReorder,
@@ -11,8 +11,8 @@ const manual = { field: "manual", order: "desc" } satisfies ShelfSortState;
 const addedAt = { field: "addedAt", order: "desc" } satisfies ShelfSortState;
 const title = { field: "title", order: "asc" } satisfies ShelfSortState;
 
-function makeEnriched(unitId: string): EnrichedShelfUnit {
-  const unit: ShelfUnitDTO = {
+function makeEnriched(unitId: string): EnrichedShelfItem {
+  const unit: ShelfItemDTO = {
     shelfId: "shelf-1",
     unitId,
     kind: "book",
@@ -49,7 +49,7 @@ describe("canUseShelfReorder", () => {
 });
 
 describe("canReorderShelfStreamEntry", () => {
-  test("allows every flat-mode shelf unit entry to reorder", () => {
+  test("allows every flat-mode shelf item entry to reorder", () => {
     expect(canReorderShelfStreamEntry(true, manual, "flat", rootEntry)).toBe(
       true,
     );

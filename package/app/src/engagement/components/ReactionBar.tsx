@@ -28,6 +28,17 @@ export type ReactionBarPolicy = {
   getShareHref: (post: ReactionBarPost) => string;
   /** Optional hint so `ShelfAction` can render the review-specific dual-mode UI. */
   isReview?: boolean;
+  /** Optional shelf item target override for non-Unit-backed surfaces. */
+  shelfItemType?: "unit" | "comment";
+  shelfItemKind?:
+    | "book"
+    | "game"
+    | "media"
+    | "post"
+    | "review"
+    | "tag"
+    | "shelf"
+    | "comment";
   /** Optional title forwarded to the Web Share API. */
   getShareTitle?: (post: ReactionBarPost) => string | undefined;
 };
@@ -247,13 +258,20 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
               );
             case "share":
               return (
-                <ShareAction key="share" href={shareHref} title={shareTitle} />
+                <ShareAction
+                  key="share"
+                  href={shareHref}
+                  title={shareTitle}
+                  targetId={post.unitId}
+                />
               );
             case "shelf":
               return (
                 <ShelfAction
                   key="shelf"
                   targetUnitId={post.unitId}
+                  targetItemType={policy.shelfItemType}
+                  targetKind={policy.shelfItemKind}
                   isReview={policy.isReview}
                 />
               );

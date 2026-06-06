@@ -36,7 +36,7 @@ import {
   ScoreEntry,
   Series,
   SeriesContentIndex,
-  ShelfUnit,
+  ShelfItem,
   SubjectAttribution,
   Unit,
   UnitAlias,
@@ -45,21 +45,20 @@ import {
   UnitTag,
   UnitTranslation,
   User,
-  UserUnitCollection,
   UserUnitProgress,
 } from "@rezics/server/db/schema";
 import { and, asc, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import type { SearchClient } from "./client";
 import {
-  buildUserUnitCollectionDocument,
-  collectionDocumentId,
-  type UserUnitCollectionRow,
-} from "./collection";
-import {
   buildProgressDocument,
   progressDocumentId,
   type UserUnitProgressRow,
 } from "./progress";
+import {
+  buildShelfItemDocument,
+  shelfItemDocumentId,
+  type ShelfItemDocumentRow,
+} from "./shelf-item";
 
 type SearchServerDb = Pick<ServerDb, "select">;
 
@@ -251,7 +250,10 @@ function realmIdsForSearch(unit: any): string[] {
       (realm: any) =>
         !realm.moderationStatus || realm.moderationStatus === "APPROVED",
     )
-    .filter((realm: any) => realm.realmIsPublic !== false)
+    .filter(
+      (realm: any) =>
+        realm.realmIsPublic !== false && realm.realm?.realm?.isPublic !== false,
+    )
     .map((realm: any) => realm.realmUnitId);
 }
 
@@ -587,11 +589,16 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
         ? unit.publishedAt.toISOString()
         : unit.publishedAt
       : null,
+    bestScore: 0,
     hotScore: 0,
     topScore: 0,
+    risingScore: 0,
+    controversyScore: 0,
     trendingScore: 0,
     qualityScore: 0,
     rankUpdatedAt: null,
+    referenceCount: unit.referenceCount ?? 0,
+    shareCount: unit.shareCount ?? 0,
     defaultLanguage: unit.defaultLanguage ?? null,
     coverUrl,
     userId: unit.userId ?? null,
@@ -743,7 +750,7 @@ async function hydrateContentRows(rows: any[]) {
     mediaRows,
     links,
     posts,
-    shelfUnits,
+    shelfItems,
     contentStructures,
     gameSystemRequirements,
     seriesRows,
@@ -849,9 +856,14 @@ async function hydrateContentRows(rows: any[]) {
     getSearchDb().select().from(Post).where(inArray(Post.unitId, unitIds)),
     getSearchDb()
       .select()
-      .from(ShelfUnit)
-      .where(inArray(ShelfUnit.shelfId, unitIds))
-      .orderBy(asc(ShelfUnit.position)),
+      .from(ShelfItem)
+      .where(
+        and(
+          inArray(ShelfItem.shelfId, unitIds),
+          eq(ShelfItem.itemType, "unit"),
+        ),
+      )
+      .orderBy(asc(ShelfItem.position)),
     getSearchDb()
       .select()
       .from(ContentStructure)
@@ -923,7 +935,7 @@ async function hydrateContentRows(rows: any[]) {
   const postsByUnitId = new Map(
     (posts as any[]).map((row) => [row.unitId, row]),
   );
-  const shelfUnitsByUnitId = groupRowsByKey(shelfUnits as any[], "shelfId");
+  const shelfItemsByUnitId = groupRowsByKey(shelfItems as any[], "shelfId");
   const contentStructuresByUnitId = new Map(
     (contentStructures as any[]).map((row) => [row.ownerUnitId, row]),
   );
@@ -957,7 +969,7 @@ async function hydrateContentRows(rows: any[]) {
       media: mediaByUnitId.get(unit.id) ?? null,
       link: linksByUnitId.get(unit.id) ?? null,
       post: postsByUnitId.get(unit.id) ?? null,
-      shelf: { units: shelfUnitsByUnitId.get(unit.id) ?? [] },
+      shelf: { units: shelfItemsByUnitId.get(unit.id) ?? [] },
       ownedContentStructure: contentStructuresByUnitId.get(unit.id) ?? null,
       seriesContentIndexesAsRelease: seriesByReleaseUnitId.get(unit.id) ?? [],
     };
@@ -1070,6 +1082,16 @@ export async function syncProgress(
 
 type UserUnitProgressSyncRow = typeof UserUnitProgress.$inferSelect;
 
+function parseProgressCursor(cursor: string): {
+  userId: string;
+  unitId: string;
+} {
+  return {
+    userId: cursor.split(":")[0] ?? "",
+    unitId: cursor.split(":").slice(1).join(":"),
+  };
+}
+
 async function findUserUnitProgressSyncRow(
   userId: string,
   unitId: string,
@@ -1093,7 +1115,7 @@ async function listUserUnitProgressSyncRows(input: {
 }): Promise<UserUnitProgressSyncRow[]> {
   const db = getSearchDb();
   const query = db.select().from(UserUnitProgress);
-  const cursor = input.cursor ? parseCompositeCursor(input.cursor) : null;
+  const cursor = input.cursor ? parseProgressCursor(input.cursor) : null;
   const rows = cursor
     ? await query
         .where(
@@ -1173,126 +1195,307 @@ export async function syncAllProgress(client: SearchClient) {
   return { message: "syncAllProgress success", totalSynced: total };
 }
 
-// ANCHOR: User unit collection sync functions
+// ANCHOR: Shelf item sync functions
 
-export async function syncUserUnitCollection(
-  client: SearchClient,
-  row: UserUnitCollectionRow,
-): Promise<void> {
-  await client.addOrUpdateCollections([buildUserUnitCollectionDocument(row)]);
-}
+type ShelfItemSyncRow = typeof ShelfItem.$inferSelect & {
+  shelfOwnerUserId: string | null;
+  shelfVisibility: string | null;
+  shelfStatus: string | null;
+  shelfTitle: string | null;
+  itemTitle: string | null;
+  itemSummary: string | null;
+  itemText: string | null;
+  rootUnitId: string | null;
+  realmUnitId: string | null;
+  parentCommentId: string | null;
+  authorUserId: string | null;
+  authorName: string | null;
+  moderationStatus: string | null;
+  isLocked: boolean | null;
+  deletedAt: string | null;
+};
 
-type UserUnitCollectionSyncRow = typeof UserUnitCollection.$inferSelect;
-
-function parseCompositeCursor(cursor: string): {
-  userId: string;
-  unitId: string;
-} {
+function shelfItemSyncSelect() {
   return {
-    userId: cursor.split(":")[0] ?? "",
-    unitId: cursor.split(":").slice(1).join(":"),
+    shelfId: ShelfItem.shelfId,
+    itemType: ShelfItem.itemType,
+    unitId: ShelfItem.itemId,
+    kind: ShelfItem.kind,
+    parentItemType: ShelfItem.parentItemType,
+    parentUnitId: ShelfItem.parentItemId,
+    parentRole: ShelfItem.parentRole,
+    position: ShelfItem.position,
+    searchText: ShelfItem.searchText,
+    createdByUserId: ShelfItem.createdByUserId,
+    createdAt: ShelfItem.createdAt,
+    updatedAt: ShelfItem.updatedAt,
+    shelfOwnerUserId: sql<string | null>`(
+      select "userId" from "Unit" where "id" = ${ShelfItem.shelfId} limit 1
+    )`.as("shelfOwnerUserId"),
+    shelfVisibility: sql<string | null>`(
+      select "visibility"::text from "Unit" where "id" = ${ShelfItem.shelfId} limit 1
+    )`.as("shelfVisibility"),
+    shelfStatus: sql<string | null>`(
+      select "status"::text from "Unit" where "id" = ${ShelfItem.shelfId} limit 1
+    )`.as("shelfStatus"),
+    shelfTitle: sql<string | null>`(
+      select "title" from "UnitTranslation"
+      where "unitId" = ${ShelfItem.shelfId}
+      order by case when "language" = 'en' then 0 else 1 end, "language"
+      limit 1
+    )`.as("shelfTitle"),
+    itemTitle: sql<string | null>`(
+      select "title" from "UnitTranslation"
+      where "unitId" = ${ShelfItem.itemId}
+      order by case when "language" = 'en' then 0 else 1 end, "language"
+      limit 1
+    )`.as("itemTitle"),
+    itemSummary: sql<string | null>`(
+      select "summary" from "UnitTranslation"
+      where "unitId" = ${ShelfItem.itemId}
+      order by case when "language" = 'en' then 0 else 1 end, "language"
+      limit 1
+    )`.as("itemSummary"),
+    itemText: sql<string | null>`null`.as("itemText"),
+    rootUnitId: sql<
+      string | null
+    >`case when ${ShelfItem.itemType} = 'unit' then ${ShelfItem.itemId} else null end`.as(
+      "rootUnitId",
+    ),
+    realmUnitId: sql<string | null>`null`.as("realmUnitId"),
+    parentCommentId: sql<string | null>`null`.as("parentCommentId"),
+    authorUserId: ShelfItem.createdByUserId,
+    authorName: sql<string | null>`(
+      select "name" from "User" where "unitId" = ${ShelfItem.createdByUserId} limit 1
+    )`.as("authorName"),
+    moderationStatus: sql<string | null>`(
+      select "moderationStatus"::text from "Unit" where "id" = ${ShelfItem.itemId} limit 1
+    )`.as("moderationStatus"),
+    isLocked: sql<boolean | null>`null`.as("isLocked"),
+    deletedAt: sql<string | null>`null`.as("deletedAt"),
   };
 }
 
-async function findUserUnitCollectionSyncRow(
-  userId: string,
-  unitId: string,
-): Promise<UserUnitCollectionSyncRow | null> {
+function parseShelfItemCursor(cursor: string): {
+  shelfId: string;
+  itemType: string;
+  itemId: string;
+} {
+  const [shelfId = "", itemType = "", ...itemIdParts] = cursor.split(":");
+  return { shelfId, itemType, itemId: itemIdParts.join(":") };
+}
+
+function toShelfItemDocumentRow(row: ShelfItemSyncRow): ShelfItemDocumentRow {
+  return {
+    shelfId: row.shelfId,
+    shelfOwnerUserId: row.shelfOwnerUserId ?? "",
+    shelfVisibility: row.shelfVisibility ?? "PRIVATE",
+    shelfStatus: row.shelfStatus ?? "DRAFT",
+    shelfTitle: row.shelfTitle,
+    itemType: row.itemType,
+    itemId: row.unitId,
+    kind: row.kind,
+    rootItemType: row.parentUnitId
+      ? (row.parentItemType ?? row.itemType)
+      : row.itemType,
+    rootItemId: row.parentUnitId ?? row.unitId,
+    parentItemType: row.parentItemType,
+    parentItemId: row.parentUnitId,
+    parentRole: row.parentRole,
+    position: row.position,
+    itemTitle: row.itemTitle,
+    itemSummary: row.itemSummary,
+    itemText: row.itemText,
+    searchText: row.searchText,
+    rootUnitId: row.rootUnitId,
+    realmUnitId: row.realmUnitId,
+    parentCommentId: row.parentCommentId,
+    authorUserId: row.authorUserId,
+    authorName: row.authorName,
+    moderationStatus: row.moderationStatus,
+    isLocked: row.isLocked,
+    deletedAt: row.deletedAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+async function findShelfItemSyncRow(
+  shelfId: string,
+  itemType: string,
+  itemId: string,
+): Promise<ShelfItemSyncRow | null> {
   const [row] = await getSearchDb()
-    .select()
-    .from(UserUnitCollection)
+    .select(shelfItemSyncSelect())
+    .from(ShelfItem)
     .where(
       and(
-        eq(UserUnitCollection.userId, userId),
-        eq(UserUnitCollection.unitId, unitId),
+        eq(ShelfItem.shelfId, shelfId),
+        eq(ShelfItem.itemType, itemType),
+        eq(ShelfItem.itemId, itemId),
       ),
     )
     .limit(1);
-  return (row as UserUnitCollectionSyncRow | undefined) ?? null;
+  return (row as ShelfItemSyncRow | undefined) ?? null;
 }
 
-async function listUserUnitCollectionSyncRows(input: {
+async function listShelfItemSyncRows(input: {
   limit: number;
   cursor?: string;
-}): Promise<UserUnitCollectionSyncRow[]> {
-  const db = getSearchDb();
-  const query = db.select().from(UserUnitCollection);
-  const cursor = input.cursor ? parseCompositeCursor(input.cursor) : null;
-  const rows = cursor
-    ? await query
-        .where(
-          sql`(${UserUnitCollection.userId}, ${UserUnitCollection.unitId}) > (${cursor.userId}, ${cursor.unitId})`,
-        )
-        .orderBy(asc(UserUnitCollection.userId), asc(UserUnitCollection.unitId))
-        .limit(input.limit)
-    : await query
-        .orderBy(asc(UserUnitCollection.userId), asc(UserUnitCollection.unitId))
-        .limit(input.limit);
-  return rows as UserUnitCollectionSyncRow[];
+  shelfId?: string;
+  itemType?: string;
+  itemId?: string;
+}): Promise<ShelfItemSyncRow[]> {
+  const cursor = input.cursor ? parseShelfItemCursor(input.cursor) : null;
+  const filters = [
+    input.shelfId ? eq(ShelfItem.shelfId, input.shelfId) : undefined,
+    input.itemType ? eq(ShelfItem.itemType, input.itemType) : undefined,
+    input.itemId ? eq(ShelfItem.itemId, input.itemId) : undefined,
+    cursor
+      ? sql`(${ShelfItem.shelfId}, ${ShelfItem.itemType}, ${ShelfItem.itemId}) > (${cursor.shelfId}, ${cursor.itemType}, ${cursor.itemId})`
+      : undefined,
+  ].filter(Boolean);
+  const query = getSearchDb().select(shelfItemSyncSelect()).from(ShelfItem);
+  const ordered = filters.length
+    ? query.where(and(...(filters as Parameters<typeof and>)))
+    : query;
+  return (await ordered
+    .orderBy(
+      asc(ShelfItem.shelfId),
+      asc(ShelfItem.itemType),
+      asc(ShelfItem.itemId),
+    )
+    .limit(input.limit)) as ShelfItemSyncRow[];
 }
 
-export async function syncSingleUserUnitCollection(
+function shelfItemNextCursor(row: ShelfItemSyncRow): string {
+  return `${row.shelfId}:${row.itemType}:${row.unitId}`;
+}
+
+export async function syncShelfItem(
   client: SearchClient,
-  userId: string,
-  unitId: string,
+  row: ShelfItemSyncRow,
 ): Promise<void> {
-  const row = await findUserUnitCollectionSyncRow(userId, unitId);
+  await client.addOrUpdateShelfItems([
+    buildShelfItemDocument(toShelfItemDocumentRow(row)),
+  ]);
+}
+
+export async function syncSingleShelfItem(
+  client: SearchClient,
+  shelfId: string,
+  itemType: string,
+  itemId: string,
+): Promise<void> {
+  const row = await findShelfItemSyncRow(shelfId, itemType, itemId);
   if (!row) {
-    await removeUserUnitCollection(client, userId, unitId);
+    await removeShelfItem(client, shelfId, itemType, itemId);
     return;
   }
-  await syncUserUnitCollection(client, row);
+  await syncShelfItem(client, row);
 }
 
-export async function removeUserUnitCollection(
+export async function removeShelfItem(
   client: SearchClient,
-  userId: string,
-  unitId: string,
+  shelfId: string,
+  itemType: string,
+  itemId: string,
 ): Promise<void> {
-  await client.deleteCollections([collectionDocumentId(userId, unitId)]);
+  await client.deleteShelfItems([
+    shelfItemDocumentId({ shelfId, itemType, itemId }),
+  ]);
 }
 
-export async function syncUserUnitCollectionSegment(
+export async function syncShelfItemSegment(
   client: SearchClient,
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
-  const rows = await listUserUnitCollectionSyncRows({
+  const rows = await listShelfItemSyncRows({
     limit: limit + 1,
     cursor: options.cursor,
   });
   const current = rows.slice(0, limit);
   const hasMore = rows.length > limit && current.length > 0;
   if (current.length > 0) {
-    await client.addOrUpdateCollections(
-      current.map(buildUserUnitCollectionDocument),
+    await client.addOrUpdateShelfItems(
+      current.map((row) => buildShelfItemDocument(toShelfItemDocumentRow(row))),
     );
   }
   const last = current.at(-1);
   return {
     processed: current.length,
-    ...(hasMore && last ? { nextCursor: `${last.userId}:${last.unitId}` } : {}),
+    ...(hasMore && last ? { nextCursor: shelfItemNextCursor(last) } : {}),
   };
 }
 
-export async function syncAllUserUnitCollections(client: SearchClient) {
-  const deleteResult = await client.deleteAllCollections();
-  console.log(
-    "syncAllUserUnitCollections: deleted all documents",
-    deleteResult,
-  );
+export async function syncShelfItemsByShelfSegment(
+  client: SearchClient,
+  shelfId: string,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const rows = await listShelfItemSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
+    shelfId,
+  });
+  const current = rows.slice(0, limit);
+  const hasMore = rows.length > limit && current.length > 0;
+  if (current.length > 0) {
+    await client.addOrUpdateShelfItems(
+      current.map((row) => buildShelfItemDocument(toShelfItemDocumentRow(row))),
+    );
+  }
+  const last = current.at(-1);
+  return {
+    processed: current.length,
+    ...(hasMore && last ? { nextCursor: shelfItemNextCursor(last) } : {}),
+  };
+}
+
+export async function syncShelfItemsBySourceItemSegment(
+  client: SearchClient,
+  itemType: string,
+  itemId: string,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const rows = await listShelfItemSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
+    itemType,
+    itemId,
+  });
+  const current = rows.slice(0, limit);
+  const hasMore = rows.length > limit && current.length > 0;
+  if (current.length > 0) {
+    await client.addOrUpdateShelfItems(
+      current.map((row) => buildShelfItemDocument(toShelfItemDocumentRow(row))),
+    );
+  }
+  const last = current.at(-1);
+  return {
+    processed: current.length,
+    ...(hasMore && last ? { nextCursor: shelfItemNextCursor(last) } : {}),
+  };
+}
+
+export async function syncAllShelfItems(client: SearchClient) {
+  const deleteResult = await client.deleteAllShelfItems();
+  console.log("syncAllShelfItems: deleted all documents", deleteResult);
 
   let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    const result = await syncUserUnitCollectionSegment(client, { cursor });
+    const result = await syncShelfItemSegment(client, { cursor });
     total += result.processed;
     if (!result.nextCursor) break;
     cursor = result.nextCursor;
   }
 
-  return { message: "syncAllUserUnitCollections success", totalSynced: total };
+  return { message: "syncAllShelfItems success", totalSynced: total };
 }
 
 // ANCHOR: Incremental single-unit sync
@@ -1590,7 +1793,7 @@ export async function patchContentMetadata(
 /**
  * Recompute the post-state `containedUnitIds` for a SHELF unit and push a
  * partial update to Meilisearch. The caller is responsible for invoking this
- * after every ShelfUnit insert/delete on the shelf.
+ * after every ShelfItem insert/delete on the shelf.
  */
 export async function patchContentContainedUnitIds(
   client: SearchClient,
@@ -1601,17 +1804,20 @@ export async function patchContentContainedUnitIds(
     return;
   }
   const units = await getSearchDb()
-    .select({ unitId: ShelfUnit.unitId })
-    .from(ShelfUnit)
-    .where(eq(ShelfUnit.shelfId, shelfId))
-    .orderBy(asc(ShelfUnit.position));
+    .select({ unitId: ShelfItem.itemId })
+    .from(ShelfItem)
+    .where(and(eq(ShelfItem.shelfId, shelfId), eq(ShelfItem.itemType, "unit")))
+    .orderBy(asc(ShelfItem.position));
   const containedUnitIds = units.map((u: any) => u.unitId);
   await patchContentIfEligible(client, shelfId, { containedUnitIds });
 }
 
 export type ContentRankingPatch = {
+  bestScore: number;
   hotScore: number;
   topScore: number;
+  risingScore: number;
+  controversyScore: number;
   trendingScore: number;
   qualityScore: number;
   rankUpdatedAt: string | null;
@@ -2269,7 +2475,6 @@ export function buildCommentDocument(comment: any): CommentSearchDocument {
     parentCommentId: comment.parentCommentId ?? null,
     authorUserId: comment.authorUserId,
     depth: comment.depth,
-    path: comment.path ?? null,
     isLocked: comment.isLocked,
     replyCount: comment.replyCount,
     directReplyCount: comment.directReplyCount,
@@ -2288,8 +2493,11 @@ export function buildCommentDocument(comment: any): CommentSearchDocument {
       comment.updatedAt instanceof Date
         ? comment.updatedAt.toISOString()
         : comment.updatedAt,
+    bestScore: 0,
     hotScore: 0,
     topScore: 0,
+    risingScore: 0,
+    controversyScore: 0,
     qualityScore: 0,
     rankUpdatedAt: null,
     authorName: user?.name ?? null,
@@ -2341,8 +2549,11 @@ export function buildPostDocument(post: any): PostSearchDocument {
       post.updatedAt instanceof Date
         ? post.updatedAt.toISOString()
         : post.updatedAt,
+    bestScore: 0,
     hotScore: 0,
     topScore: 0,
+    risingScore: 0,
+    controversyScore: 0,
     trendingScore: 0,
     qualityScore: 0,
     rankUpdatedAt: null,
@@ -2668,7 +2879,6 @@ const commentSyncSelect = {
   parentCommentId: Comment.parentCommentId,
   authorUserId: Comment.authorUserId,
   depth: Comment.depth,
-  path: sql<string | null>`${Comment.path}::text`,
   replyCount: Comment.replyCount,
   directReplyCount: Comment.directReplyCount,
   lastReplyAt: Comment.lastReplyAt,
@@ -2692,7 +2902,6 @@ function commentFromRow(row: any) {
     parentCommentId: row.parentCommentId,
     authorUserId: row.authorUserId,
     depth: row.depth,
-    path: row.path,
     replyCount: row.replyCount,
     directReplyCount: row.directReplyCount,
     lastReplyAt: row.lastReplyAt,
@@ -2855,12 +3064,14 @@ async function listPublicShelfContainedUnitRows(input: {
   const shelfIds = shelves.map((shelf) => shelf.id);
   if (shelfIds.length === 0) return [];
 
-  const shelfUnits = await getSearchDb()
-    .select({ shelfId: ShelfUnit.shelfId, unitId: ShelfUnit.unitId })
-    .from(ShelfUnit)
-    .where(inArray(ShelfUnit.shelfId, shelfIds))
-    .orderBy(asc(ShelfUnit.position));
-  const unitsByShelfId = groupRowsByKey(shelfUnits as any[], "shelfId");
+  const shelfItems = await getSearchDb()
+    .select({ shelfId: ShelfItem.shelfId, unitId: ShelfItem.itemId })
+    .from(ShelfItem)
+    .where(
+      and(inArray(ShelfItem.shelfId, shelfIds), eq(ShelfItem.itemType, "unit")),
+    )
+    .orderBy(asc(ShelfItem.position));
+  const unitsByShelfId = groupRowsByKey(shelfItems as any[], "shelfId");
   return shelves.map((shelf) => ({
     id: shelf.id,
     shelf: { units: unitsByShelfId.get(shelf.id) ?? [] },

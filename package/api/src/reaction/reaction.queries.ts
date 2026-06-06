@@ -15,6 +15,7 @@ import type {
   ReactionHistoryReceivedItem,
   ReactionMyResponse,
   ReactionSummaryResponse,
+  ShareSummaryResponse,
 } from "./reaction.types";
 
 /**
@@ -72,6 +73,30 @@ export const useBatchReactionSummary = (
     queryKey: reactionKeys.summaryBatch(normalized, options?.scopeKey),
     queryFn: () =>
       reactionApi.summary(normalized, { scopeKey: options?.scopeKey }),
+    enabled,
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const batchShareSummaryQuery = (targetIds: readonly string[]) => {
+  const normalized = normalizeIds(targetIds);
+  return queryOptions({
+    queryKey: reactionKeys.shareSummaryBatch(normalized),
+    queryFn: () => reactionApi.shareSummary(normalized),
+    enabled: normalized.length > 0,
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useBatchShareSummary = (
+  targetIds: readonly string[],
+  options?: { enabled?: boolean },
+) => {
+  const normalized = normalizeIds(targetIds);
+  const enabled = (options?.enabled ?? true) && normalized.length > 0;
+  return useQuery<ShareSummaryResponse>({
+    queryKey: reactionKeys.shareSummaryBatch(normalized),
+    queryFn: () => reactionApi.shareSummary(normalized),
     enabled,
     staleTime: 1000 * 60 * 2,
   });
@@ -190,5 +215,6 @@ export const reactionQueries = {
   summary: reactionSummaryQuery,
   my: reactionMyQuery,
   summaryBatch: batchReactionSummaryQuery,
+  shareSummaryBatch: batchShareSummaryQuery,
   myBatch: batchUserReactionsQuery,
 };

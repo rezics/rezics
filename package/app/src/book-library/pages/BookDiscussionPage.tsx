@@ -6,7 +6,8 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useMemo } from "react";
-import { PostListSection, ReplyComposer } from "@/post";
+import { ReplyComposer } from "@/comment";
+import { FeedSection } from "@/feed";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { resolveCatalogEntryInteractionContext } from "../models/catalogEntryContext";
 import { resolveBookCommunityFeedQuery } from "../models/communityFeed";
@@ -64,12 +65,16 @@ export const BookCommunityPage: React.FC = () => {
 
       <Separator />
 
-      <PostListSection
-        targetUnitId={
-          context.variantUnitId ? undefined : feedQuery.targetUnitId
-        }
-        variantUnitId={context.variantUnitId}
-        currentCatalogEntryUnitId={context.pageUnitId}
+      <FeedSection
+        query={{
+          scope: "library",
+          libraryKind: "book",
+          ...(context.variantUnitId
+            ? { variantUnitId: context.variantUnitId }
+            : { targetUnitId: feedQuery.targetUnitId }),
+          languages: readContext.languages,
+          languageMode: readContext.languageMode,
+        }}
       />
     </div>
   );

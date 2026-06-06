@@ -8,13 +8,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import type React from "react";
 import { useRef } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { PostTreeSection } from "@/post";
 import {
+  CommentThreadSection,
   ReplyComposer,
   type ReplyComposerHandle,
-} from "@/post/forms/ReplyComposer";
-import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
+  useFocusReplyFromQuery,
+} from "@/comment";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
@@ -98,7 +98,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
           parentCommentId={review.unitId}
         />
 
-        <PostTreeSection
+        <CommentThreadSection
           rootUnitId={review.unitId}
           realmUnitId={review.realmUnitId}
           rootAuthorUserId={review.author?.unitId ?? review.authorUserId}

@@ -5,10 +5,12 @@ import {
   contentDocMarkdownFallback,
   contentDocSchema,
   extractPollUnitIdsFromContentDoc,
+  extractUnitRefIdsFromContentDoc,
   mainMarkdownSource,
   markdownContentDoc,
   markdownContentDocWithPoll,
   pollContentBlock,
+  unitRefContentBlock,
 } from "./doc-v1";
 
 const doc = (source = "Hello"): ContentDoc => ({
@@ -83,6 +85,23 @@ describe("content doc v1 helpers", () => {
         afterMain: [pollContentBlock("poll-1"), pollContentBlock("poll-3")],
       }),
     ).toEqual(["poll-1", "poll-2", "poll-3"]);
+  });
+
+  test("extracts distinct structured unit-ref ids and ignores markdown links", () => {
+    expect(
+      extractUnitRefIdsFromContentDoc({
+        ...doc("[Book](https://rezics.example/book/book-markdown)"),
+        beforeMain: [
+          unitRefContentBlock({ unitId: "book-1", unitType: "BOOK" }),
+          unitRefContentBlock({ unitId: "book-2" }),
+        ],
+        afterMain: [
+          unitRefContentBlock({ unitId: "book-1" }),
+          { type: "unit-ref", source: { unitId: "" } },
+          { type: "unit-ref", source: "book-3" },
+        ],
+      }),
+    ).toEqual(["book-1", "book-2"]);
   });
 
   test("ignores malformed poll blocks and legacy docs without regions", () => {

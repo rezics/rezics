@@ -28,6 +28,7 @@ import { entityApi } from "./entity";
 import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
+import { feedApi } from "./feed";
 import { gameSystemRequirementApi } from "./game-system-requirement";
 import { governanceApi } from "./governance";
 import { historyProxyApi, historyResolutionApi } from "./history";
@@ -226,6 +227,7 @@ routeApp
   .use(chapterApi)
   .use(pollApi)
   .use(postApi)
+  .use(feedApi)
   .use(progressApi)
   .use(dashboardApi)
   .use(draftApi)

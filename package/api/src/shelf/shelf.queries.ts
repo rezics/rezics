@@ -13,7 +13,7 @@ import {
   type ShelfVariantFilters,
   shelfKeys,
 } from "./shelf.keys";
-import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";
+import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
 const COLLECTION_STATUS_BATCH_LIMIT = 100;
 
@@ -68,26 +68,26 @@ export const userShelvesQuery = () =>
     staleTime: 1000 * 60 * 2,
   });
 
-export const shelfUnitsQuery = (unitId: string, query?: ShelfUnitsQuery) =>
+export const shelfItemsQuery = (unitId: string, query?: ShelfItemsQuery) =>
   queryOptions({
-    queryKey: shelfKeys.unitsPage(unitId, query),
-    queryFn: () => shelfApi.listUnits(unitId, query),
+    queryKey: shelfKeys.itemsPage(unitId, query),
+    queryFn: () => shelfApi.listItems(unitId, query),
     enabled: !!unitId,
     staleTime: 1000 * 60 * 2,
   });
 
-export const shelfUnitsInfiniteQuery = (
+export const shelfItemsInfiniteQuery = (
   unitId: string,
-  query?: Omit<ShelfUnitsQuery, "cursor">,
+  query?: Omit<ShelfItemsQuery, "cursor">,
 ) =>
   infiniteQueryOptions({
-    queryKey: shelfKeys.unitsPage(unitId, query),
+    queryKey: shelfKeys.itemsPage(unitId, query),
     queryFn: ({ pageParam }) =>
-      shelfApi.listUnits(unitId, { ...query, cursor: pageParam }),
+      shelfApi.listItems(unitId, { ...query, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
       if (!lastPage.hasMore) return undefined;
-      return lastPage.units.at(-1)?.unitId;
+      return lastPage.items.at(-1)?.itemId;
     },
     enabled: !!unitId,
     staleTime: 1000 * 60 * 2,
@@ -162,8 +162,8 @@ export const shelfQueries = {
   detail: shelfDetailQuery,
   byUser: shelvesByUserQuery,
   mine: userShelvesQuery,
-  units: shelfUnitsQuery,
-  infiniteUnits: shelfUnitsInfiniteQuery,
+  items: shelfItemsQuery,
+  infiniteItems: shelfItemsInfiniteQuery,
   infiniteList: shelfInfiniteListQuery,
 };
 
