@@ -1,163 +1,161 @@
 ---
 name: git-commit
-description: Create conventional git commits and commit messages for repo changes.
+description: Create ordinary task-branch commits; use git-mainline-squash for final archive squashes.
+metadata:
+  version: 0.1.0
+  license: AGPL-3.0-only
 ---
 
 # Git Commit Message Skill
 
+Use this skill for ordinary commits on task branches. It creates conventional
+commit messages from staged changes, while using fresh task context when the
+agent already knows what changed.
+
+## Routing
+
+Use this skill for:
+
+- Normal local commits on `feat/*`, `fix/*`, `refactor/*`, `spike/*`, or
+  owner-owned task branches
+- Intentional task-branch commits made before final integration
+- Documentation, tooling, test, and refactor commits that are not final mainline
+  archive squashes
+
+Do not use this skill for the final commit that lands a completed branch on
+`main` with `Archive-ref`, `Archive-tip`, or `Feature-base` trailers. Use
+`git-mainline-squash` for that.
+
 ## Workflow
 
-### Step 1 — Check for staged changes
+### Step 1 - Check staged changes
 
 Run:
+
 ```bash
+git status --short
 git diff --cached --stat
 ```
 
-- If nothing is staged → warn the user: *"No files are staged. Please use `git add` to stage your changes first."* Then stop.
-- If staged → proceed.
+- If nothing is staged, warn the user and stop.
+- If unrelated staged files are visible, stop and ask the user to stage only the
+  intended files or confirm the intended scope.
+- If staged files match the current task, proceed.
 
-### Step 2 — Inspect the diff
+### Step 2 - Choose inspection level
 
-Run both:
-```bash
-git diff --cached --stat
-git diff --cached
-```
+Pick the lightest inspection level that is still defensible.
 
-Use the stat for a high-level overview (files changed, insertions, deletions).
-Use the full diff to understand *what* and *why*.
+| Level | Use when | Commands |
+| --- | --- | --- |
+| 1 - staged file verification | The agent made the changes in this session and the staged files match the known task | `git diff --cached --stat` |
+| 2 - targeted diff | Some staged files are uncertain, user changed files in parallel, or only part of the change is known | `git diff --cached -- <path>...` |
+| 3 - full diff | No fresh context, many concerns, merge/rebase state, unexpected files, or any uncertainty about behavior | `git diff --cached` |
 
-### Step 3 — Check for merge commit
+Fresh context is valid only when the agent has just performed or reviewed the
+task in this conversation. Stale summaries are not enough.
 
-Run:
+Never skip staged file verification. A full diff is always acceptable when the
+change is risky or unclear.
+
+### Step 3 - Check in-progress Git operations
+
+Run lightweight checks as needed:
+
 ```bash
 cat .git/MERGE_HEAD 2>/dev/null
+cat .git/REBASE_HEAD 2>/dev/null
 ```
 
-If a merge is in progress, generate a merge commit message instead — see **Merge Commits** section below.
+If a merge is in progress, generate a merge commit message instead. If a rebase
+is in progress, do not commit unless the user explicitly asks to continue the
+rebase flow.
 
-### Step 4 — Assess commit scope
+### Step 4 - Assess commit scope
 
-If the diff touches **many unrelated concerns** (e.g., a bug fix + new feature + config change), suggest splitting:
+Use the staged files, selected diff inspection, and task context to decide
+whether the staged set is one coherent commit.
 
-> "This diff seems to cover multiple concerns: [X, Y, Z]. Would you like me to suggest how to split these into separate commits?"
+If the staged changes cover unrelated concerns, suggest a split and stop until
+the user confirms the single-commit scope or restages files.
 
-If the user says yes → list the proposed splits and stop. Let the user stage the first batch before proceeding.
+### Step 5 - Detect commit type
 
-Otherwise, continue with a single commit.
+Pick the type that best represents the primary intent:
 
-### Step 5 — Auto-detect commit type
+| Type | Signals |
+| --- | --- |
+| `feat` | New functions, routes, UI components, or capabilities |
+| `fix` | Corrects broken behavior, error handling, null checks, race fixes |
+| `refactor` | Renames, restructuring, extractions with no intended behavior change |
+| `test` | Test files, mocks, fixtures, coverage changes |
+| `docs` | Markdown, docs, comments, or copy that documents behavior |
+| `chore` | Dependencies, config, build scripts, repo tooling |
+| `style` | Formatting or whitespace only |
+| `perf` | Caching, query, or algorithm improvements |
+| `ci` | CI workflow and automation changes |
+| `build` | Build system or packaging changes |
 
-Use the table below to infer the type from filenames, content, and patterns. Pick the best fit.
+If uncertain between two types, pick the primary user-visible or maintainer
+intent. Invite a user override without blocking.
 
-| Type       | Signals                                                                |
-| ---------- | ---------------------------------------------------------------------- |
-| `feat`     | New functions, classes, routes, UI components, capabilities            |
-| `fix`      | Bug fixes, null checks, error handling, off-by-one corrections         |
-| `chore`    | Dependency updates, config files, build scripts, `.gitignore`, tooling |
-| `docs`     | `.md`, `.txt`, comments, docstrings, README changes                    |
-| `refactor` | Renames, restructures, extractions — no behavior change                |
-| `test`     | Test files, mocks, fixtures, coverage changes                          |
-| `style`    | Formatting, whitespace, linting — no logic change                      |
-| `perf`     | Caching, algorithm optimization, reduced complexity                    |
+### Step 6 - Generate the message
 
-If uncertain between two types, pick the one that best represents the *primary intent*.
+Format:
 
-Present the auto-detected type to the user and invite override:
-> "I've detected this as a `feat` commit. Let me know if you'd like a different type."
+```text
+<type>(<optional scope>): <subject>
 
-### Step 6 — Generate the commit message
-
-Follow the format:
-
+- <body bullet: high-level why or what changed>
+- <body bullet: ...>
 ```
-<type>(<optional scope>): <title>
 
-- <bullet: why or what changed, high-level>
-- <bullet: ...>
-```
+Subject rules:
 
-**Title rules:**
-- Lowercase, no period at end
-- Max 50 characters
-- Clear and specific — no vague titles like "update" or "fix stuff"
+- Lowercase after the type prefix
+- No trailing period
+- Prefer 50 characters or fewer
+- Specific enough to identify the change in history
 
-**Body rules (optional but recommended for non-trivial changes):**
-- Use when the diff needs context or reasoning
-- Bullet points: concise, high-level, explain *why* not just *what*
-- For large diffs: include a multi-line body summarizing each area of change
+Body rules:
 
-**Scope** (optional): a short noun indicating the area, e.g. `feat(auth):`, `fix(api):`.
+- Omit the body for tiny obvious changes.
+- Use 1-4 bullets for non-trivial changes.
+- Prefer why and durable outcome over line-by-line implementation detail.
+- Do not append archive trailers, co-authorship, attribution, or AI-generated
+  trailers.
 
-**Never** append any co-authorship, attribution, or AI-generated trailer to the commit message, regardless of the tool or environment.
+### Step 7 - Ask before committing
 
-### Step 7 — Present message and ask: commit or modify?
+Show the final message in a fenced block and ask whether to commit or modify it.
 
-After generating the commit message, always display it in a code block, then ask:
+Only run `git commit` after explicit user confirmation in this session.
 
-> "Commit with this message, or would you like to modify it?"
-
-**If user confirms (yes / lgtm / commit / ok / 好 / 確認 / etc.):**
-- In CLI / Claude Code (bash tools available) → run: `git commit -m "<title>" -m "<body>"`
-- In web / chat (no bash) → display the message again in a copyable block and instruct: *"Run: `git commit -m '...'`"*
-- Never run the commit before the user explicitly confirms.
-
-**If user wants to modify:**
-- Accept their feedback (e.g. "change the type to fix", "make the title shorter", "add a scope").
-- Regenerate the message incorporating their feedback.
-- Return to the top of Step 7 — show the updated message and ask again.
-- Repeat until the user confirms or abandons.
-- Never argue with the user's requested changes.
-
----
+When committing from the CLI, stage only task-owned files by explicit path if
+staging is still needed. Never use `git add -A` or `git add .`.
 
 ## Merge Commits
 
-If a merge is in progress:
+If a merge commit is required:
 
-```
+```text
 merge(<branch>): merge <source-branch> into <target-branch>
 
 - Resolved conflicts in: <files if any>
-- <any notable integration notes>
+- <notable integration note if any>
 ```
 
-Keep it factual. Don't over-explain standard merges.
+Keep it factual. Do not over-explain standard merges.
 
----
+## Edge Cases
 
-## Edge Case Reference
-
-| Situation                       | Action                                                        |
-| ------------------------------- | ------------------------------------------------------------- |
-| Nothing staged                  | Warn and stop. Do not proceed.                                |
-| Huge diff (many files/concerns) | Suggest splitting; ask user before generating one big message |
-| Only whitespace/formatting      | Use `style` type                                              |
-| Only comment/doc changes        | Use `docs` type                                               |
-| Ambiguous type                  | Auto-detect best guess, invite override                       |
-| Merge in progress               | Use merge commit format                                       |
-| User dislikes generated message | Regenerate with their feedback; never argue                   |
-
----
-
-## Format Quick Reference
-
-```
-feat(auth): add JWT login flow
-
-- Implemented token validation against the public key endpoint
-- Added middleware to attach decoded user to request context
-```
-
-```
-fix(ui): handle null pointer in sidebar
-
-- Sidebar crashed when user had no active org; added fallback to empty state
-```
-
-```
-chore: update dependencies
-
-- Bumped eslint, typescript, and vite to latest stable versions
-```
+| Situation | Action |
+| --- | --- |
+| Nothing staged | Warn and stop |
+| Staged files do not match known task | Stop and ask |
+| Agent has fresh context | Verify staged files, then use targeted or no diff as appropriate |
+| No fresh context | Inspect the full staged diff |
+| Huge or unrelated diff | Suggest splitting |
+| Only formatting | Use `style` |
+| Only comments/docs | Use `docs` |
+| Final archive squash | Use `git-mainline-squash` |

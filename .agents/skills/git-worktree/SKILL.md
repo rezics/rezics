@@ -1,288 +1,328 @@
 ---
 name: git-worktree
-description: Create, merge, list, or clean up git worktrees for parallel development.
+description: Create and integrate Rezics worktrees using the main/archive workflow.
+metadata:
+  version: 0.1.0
+  license: AGPL-3.0-only
 ---
 
 # Git Worktree Skill
 
+Use this skill for branch and worktree lifecycle in Rezics: create, list,
+integrate, and clean up linked worktrees while preserving completed branch
+history under `archive/*`.
+
+## Routing
+
+Use this skill for worktree lifecycle operations.
+
+When a worktree needs an ordinary task-branch commit, delegate message
+generation to `git-commit`. When a completed branch is ready to enter `main`,
+delegate the final squash message to `git-mainline-squash`.
+
 ## Modes
 
-Detect the user's intent from their phrasing + repo state, then enter the matching mode.
+Detect the user's intent from their phrasing and repo state.
 
-| Mode      | Triggers                                                                    |
-| --------- | --------------------------------------------------------------------------- |
-| `create`  | "create worktree", "spin up parallel branch", "new sibling checkout for X"  |
-| `merge`   | "merge the X worktree back", "integrate worktree", "I'm done with worktree" |
-| `list`    | "list worktrees", "what worktrees do I have", or ambiguous / no clear verb  |
+| Mode | Triggers |
+| --- | --- |
+| `create` | "create worktree", "new worktree", "spin up parallel branch" |
+| `integrate` | "merge worktree back", "integrate worktree", "archive and land this branch" |
+| `cleanup` | "remove worktree", "clean up worktree", "delete old worktree" |
+| `list` | "list worktrees", ambiguous requests, or no clear verb |
 
-If ambiguous → run `git worktree list` first, then ask the user which mode they want.
+If ambiguous, run `git worktree list` first and ask which mode the user wants.
 
----
+## Mode: create
 
-## Mode: `create`
+### Step 1 - Resolve the start point
 
-### Step 1 — Confirm the starting point is the local HEAD
+Default start point is the current `main` baseline:
 
-This is non-negotiable. The user must explicitly confirm the start commit before any worktree is created.
-
-Run:
 ```bash
-git rev-parse --is-inside-work-tree
-git rev-parse --git-common-dir
-git rev-parse --git-dir
+git fetch origin main
+git rev-parse origin/main
 git branch --show-current
-git log --oneline -3
 git status --short
+git log --oneline -3 origin/main
 ```
 
-Then present:
+Prefer `origin/main` as the start commit. Use local `main` only after confirming
+it is fast-forwarded to `origin/main`. If the user asks to branch from local
+`HEAD`, a SHA, or another branch, resolve it and ask for explicit confirmation.
 
-> "I'll branch the new worktree off your **local HEAD**:
-> - Current branch: `<branch>`
-> - HEAD commit:    `<short-hash>` — `<commit subject>`
-> - Working tree:   `<clean | N modified files>`
->
-> Confirm this is the start point you want? (yes / use a different branch or commit)"
+Warn, but do not block, if the current working tree is dirty. Uncommitted changes
+stay in the current worktree and will not appear in the new one.
 
-**Do not proceed until the user confirms.**
+If the current process is inside a linked worktree, say so and confirm whether
+the new worktree should start from `origin/main` or this linked worktree's HEAD.
 
-If the user picks a different start point (e.g. "use `dev`", "branch from `abc1234`"), echo the resolved start commit back and ask for one more confirmation before continuing.
+### Step 2 - Propose path and branch name
 
-If the working tree is **dirty**, warn but do not block — worktrees can still be created. Note that uncommitted changes stay in the current worktree and will not be visible in the new one.
+Suggest:
 
-If the current process is running inside a **linked** worktree (i.e. `--git-dir` differs from `--git-common-dir`), warn the user and ask whether they want to anchor the new worktree's start point at this linked worktree's HEAD or at the main worktree's HEAD.
+- Path: `../<repo-name>-<slug>`
+- Branch: one of `feat/<topic>`, `fix/<topic>`, `refactor/<topic>`,
+  `spike/<topic>`, or `<owner>/<topic>`
 
-### Step 2 — Propose path + branch name
+Do not suggest `feature/*` or `experiment/*`; Rezics uses `feat/*` and
+`spike/*`.
 
-Suggest a sibling directory and a conventional branch name. Show both and wait for approval.
+Example:
 
-- **Path:** `../<repo-name>-<slug>` — sibling of the main worktree.
-- **Branch:** `<type>/<slug>` — `feature/`, `fix/`, `chore/`, `refactor/`, `experiment/`. Pick `type` from context (the user's task description).
+```text
+Suggested:
+- Path:   ../rezics-crawler-preview-routing
+- Branch: feat/crawler-preview-routing
+- Start:  <short-sha> (origin/main)
+```
 
-Example presentation:
+Wait for approval before creating anything. If the path or branch already
+exists, surface that and offer a different name; never overwrite silently.
 
-> "Suggested:
-> - Path:   `../rezics-dark-mode`
-> - Branch: `feature/dark-mode`
-> - Start:  `<short-hash>` (your local HEAD on `dev`)
->
-> Approve, or give me a different path / branch name."
+### Step 3 - Create the worktree
 
-If the proposed branch already exists, surface that and offer a uniquified name (`feature/dark-mode-2`) — never silently overwrite.
-
-### Step 3 — Create the worktree
-
-After the user approves path + branch:
+After approval:
 
 ```bash
 git worktree add <path> -b <branch> <start-commit>
 ```
 
-Always pass the resolved start commit explicitly (not just `HEAD`) so the result is unambiguous in transcripts.
+Always pass the resolved start commit explicitly. If the command fails, surface
+the error and stop.
 
-If the command fails (e.g. branch already checked out elsewhere), surface the error verbatim and ask the user how to recover. Do not retry blindly.
+### Step 4 - Handoff
 
-### Step 4 — Guide the user into the new worktree
-
-Print absolute path + the exact commands the user should run **in a new terminal**:
-
-> "Worktree ready at:
-> ```
-> <absolute-path>
-> ```
->
-> To work on it in parallel, open a new terminal and run:
-> ```bash
-> cd <absolute-path>
-> claude
-> ```
->
-> Tip: this current Claude session stays on `<original-branch>` — anything I do here will not affect the new worktree, and vice versa."
-
-Run a final `git worktree list` to confirm registration and show the user.
-
-Do **not** attempt to `cd` into the new worktree from this session — Claude Code's working directory is fixed for the session, and pretending to switch causes confusion. The new worktree needs its own session.
-
----
-
-## Mode: `merge`
-
-### Step 1 — Identify the target worktree
-
-Run `git worktree list`. If the user named a worktree (e.g. "merge dark-mode"), match it against the list. Otherwise ask which one. Resolve to a `(path, branch)` pair before continuing.
-
-### Step 2 — Pre-merge sanity checks
-
-Inside the target worktree, run:
-```bash
-git -C <worktree-path> status --short
-git -C <worktree-path> log --oneline <trunk>..<branch>
-```
-
-- Working tree must be clean. If not, stop and suggest the `git-commit` skill or stashing.
-- Confirm there is at least one commit ahead of the trunk. If zero, the worktree has nothing to merge — stop and tell the user.
-
-Identify the **trunk** (target branch). Default heuristic:
-1. Project's documented main branch — check `CLAUDE.md` or `git symbolic-ref refs/remotes/origin/HEAD`.
-2. Fall back to `main` then `master`.
-3. Confirm with the user before proceeding: *"Merging into `<trunk>` — correct?"*
-
-### Step 3 — Choose the integration strategy
-
-**Default: Rebase + Fast-Forward.** This produces a linear history on the trunk while preserving every individual commit from the worktree (each commit is replayed onto the new base; only the hashes change). This is the strategy you should propose unless the user overrides.
-
-Present:
-
-> "Default strategy: **Rebase + Fast-Forward**
-> - Linear history on `<trunk>` — no merge commit, no branch divergence.
-> - All worktree commits preserved individually (rewritten on top of `<trunk>`).
->
-> Alternatives:
-> - `--no-ff` merge: adds a merge commit, history shows the branch existed.
-> - `--squash` merge: collapses all worktree commits into one new commit.
->
-> Use the default, or pick an alternative?"
-
-Strategy comparison:
-
-| Strategy           | History on trunk    | Merge commit | Individual commits preserved |
-| ------------------ | ------------------- | ------------ | ---------------------------- |
-| **Rebase + FF** ★  | Linear              | No           | Yes (replayed, new hashes)   |
-| `--no-ff` merge    | Diverge → converge  | Yes          | Yes (originals)              |
-| `--squash` merge   | Linear              | No           | No (collapsed into one)      |
-
-★ = default.
-
-> **Warning before rebasing:** if the worktree branch has been pushed and may be in use by other developers, rebasing rewrites shared history. Ask the user explicitly: *"Has `<branch>` been pushed and shared? If yes, rebase will force-push and disrupt collaborators — switch to `--no-ff` instead."*
-
-### Step 4 — Execute the chosen strategy
-
-Show every command before running it. Pause on any non-zero exit.
-
-#### Strategy A — Rebase + Fast-Forward (default)
-
-Inside the **worktree** directory:
-```bash
-git -C <worktree-path> fetch origin <trunk>
-git -C <worktree-path> rebase origin/<trunk>
-```
-
-If a conflict occurs, pause and surface:
-> "Rebase paused on commit `<hash>` — `<subject>`. Conflicting files: `<files>`.
->
-> Resolve in your editor, then run:
-> - `git add <files>` followed by `git rebase --continue`
-> - `git rebase --skip` (drop this commit — use only if intentional)
-> - `git rebase --abort` (back out entirely)
->
-> Tell me when you're ready to continue."
-
-Once the rebase completes, fast-forward the trunk in the **main worktree**:
-```bash
-git -C <main-worktree> checkout <trunk>
-git -C <main-worktree> pull --ff-only origin <trunk>
-git -C <main-worktree> merge --ff-only <branch>
-```
-
-If `--ff-only` fails, the trunk has moved since the rebase. Re-run `git fetch` + `git rebase origin/<trunk>` in the worktree, then retry.
-
-Push the trunk only if the user confirms:
-> "Rebased and fast-forwarded `<trunk>` locally. Push to `origin/<trunk>`?"
-
-#### Strategy B — `--no-ff` merge
+Print the absolute path and exact command for a new terminal:
 
 ```bash
-git -C <main-worktree> checkout <trunk>
-git -C <main-worktree> pull origin <trunk>
-git -C <main-worktree> merge --no-ff <branch> -m "Merge <branch> into <trunk>"
+cd <absolute-path>
+codex
 ```
 
-On conflict, pause with the same recovery options (`merge --continue` / `merge --abort`).
-
-#### Strategy C — `--squash` merge
-
-```bash
-git -C <main-worktree> checkout <trunk>
-git -C <main-worktree> pull origin <trunk>
-git -C <main-worktree> merge --squash <branch>
-```
-
-Then delegate the commit message to the **`git-commit`** skill — it will inspect the staged changes and propose a conventional commit message.
-
-### Step 5 — Cleanup (offer, don't auto-run)
-
-After successful integration, ask:
-
-> "Integration complete. Clean up?
-> - Remove worktree directory: `git worktree remove <worktree-path>`
-> - Delete local branch:        `git branch -d <branch>`
-> - Delete remote branch:       `git push origin --delete <branch>` (only if it was pushed)
->
-> Run all / pick / skip?"
-
-Run only what the user approves. Never use `--force` flags or `branch -D` without an explicit "force" from the user.
-
-If `git worktree remove` refuses because of untracked files, surface the message and ask before re-running with `--force`.
-
----
-
-## Mode: `list`
+Then run:
 
 ```bash
 git worktree list
-git worktree list --porcelain   # only if more detail is needed
 ```
 
-Annotate each entry with: branch state (clean/dirty), commits ahead of trunk, last commit subject. Use this output to help the user decide whether they want to create another worktree, merge an existing one, or clean up stale ones (`git worktree prune`).
+Do not pretend to move the current session into the new worktree.
 
----
+## Mode: integrate
 
-## Safety Rules (apply across all modes)
+This mode lands a completed task branch into `main` as one coherent squash commit
+and preserves detailed branch history under `archive/*`.
 
-- **Never** run `git worktree remove --force`, `git branch -D`, `git push --force`, or `git push origin --delete` without explicit user confirmation in this session. Approval to do it once does not extend to other branches.
-- **Never** rebase a branch the user has identified as shared/pushed-to-team without warning and re-confirmation.
-- **Never** silently switch the trunk target. Always show `<trunk>` and confirm.
-- **Always** show the exact command before running create / merge / remove / push operations.
-- **Always** prefer pausing and asking over auto-recovery when a git command fails.
-- If a `.git/MERGE_HEAD`, `.git/REBASE_HEAD`, or in-progress operation is detected in a worktree, refuse to start a new operation there until it's resolved.
+### Step 1 - Identify the worktree and branch
 
----
+Run:
 
-## Troubleshooting
+```bash
+git worktree list --porcelain
+```
 
-| Symptom                                                    | Recovery                                                               |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `'<branch>' is already checked out at '<path>'`            | Use a different branch name, or remove the existing worktree first.    |
-| Detached HEAD inside a worktree                            | `git -C <path> switch -c <new-branch>` to stabilise.                   |
-| `git worktree remove` refuses (untracked / dirty)          | Surface to user; ask before `--force`.                                 |
-| Rebase conflicts on many commits                           | Suggest interactive squash first: `git rebase -i HEAD~N`, then rebase. |
-| `merge --ff-only` fails after rebase                       | Trunk moved; re-fetch + re-rebase in the worktree, then retry FF.      |
-| Stale worktree directories deleted manually outside of git | `git worktree prune`                                                   |
+Resolve the target worktree path and branch. If the user named only a topic,
+match it against worktree paths and branch names. Ask if more than one match is
+possible.
 
----
+### Step 2 - Preflight
+
+Inside the target worktree, run:
+
+```bash
+git -C <worktree-path> fetch origin main
+git -C <worktree-path> status --short
+git -C <worktree-path> branch --show-current
+git -C <worktree-path> merge-base origin/main HEAD
+git -C <worktree-path> rev-parse HEAD
+git -C <worktree-path> log --oneline origin/main..HEAD
+```
+
+Requirements:
+
+- Working tree must be clean. If not, stop and suggest `git-commit` for staged
+  changes or ask the user to resolve unstaged changes.
+- Branch must have commits ahead of `origin/main`.
+- Branch must be a task branch or owner branch. If it is `main`, `release/*`,
+  `stable/*`, `archive/*`, or `backup/*`, stop unless the user explicitly
+  explains the unusual integration.
+
+Record:
+
+- `Feature-base`: merge-base with `origin/main`, unless the maintainer provides a
+  more precise recorded base
+- `Archive-tip`: final branch tip after any requested rebase
+- `Original-branch`: current task branch
+
+### Step 3 - Update against main
+
+Default strategy is rebase onto the current mainline before archiving:
+
+```bash
+git -C <worktree-path> fetch origin main
+git -C <worktree-path> rebase origin/main
+```
+
+Before rebasing a branch that has been pushed or shared, warn that rebase
+rewrites branch history and ask for confirmation. If the maintainer asks for a
+merge-based update instead, follow that explicit instruction and record the
+actual final tip.
+
+If conflicts occur, stop and report the conflicted files. Do not auto-resolve or
+continue until the user says the conflict is handled.
+
+After a successful rebase, refresh:
+
+```bash
+git -C <worktree-path> rev-parse HEAD
+```
+
+Use that SHA as `Archive-tip`.
+
+### Step 4 - Create and push the archive ref
+
+Derive the archive branch:
+
+```text
+archive/YYMMDD-<type>-<topic>
+```
+
+Examples:
+
+```text
+archive/260606-feat-crawler-preview-routing
+archive/260606-refactor-post-ranking
+```
+
+Show the proposed archive ref and ask for approval. Then create/push it:
+
+```bash
+git -C <worktree-path> branch <archive-ref> <archive-tip>
+git -C <worktree-path> push origin <archive-ref>
+```
+
+If the archive branch already exists, stop and ask whether to choose a different
+name or verify that it already points to the intended tip. Never force-update an
+archive branch without explicit force approval.
+
+Remote Git does not preserve a portable branch-rename event. What matters is
+that the remote archive ref points at the preserved history.
+
+### Step 5 - Squash onto main
+
+In the main worktree, or in a clean worktree where `main` can be checked out:
+
+```bash
+git switch main
+git pull --ff-only origin main
+git merge --squash <archive-tip>
+```
+
+Use `git-mainline-squash` to generate the commit message with:
+
+- `Archive-ref`
+- `Archive-tip`
+- `Feature-base`
+- `Original-branch`
+- optional `Pull-request`
+
+Ask for explicit confirmation before running `git commit`.
+
+If `git merge --squash` conflicts, stop and report conflicts. Do not create a
+partial commit until the user resolves or aborts the merge.
+
+### Step 6 - Push main and cleanup offer
+
+After the squash commit exists locally, ask before pushing:
+
+```bash
+git push origin main
+```
+
+After the archive ref exists remotely and `main` has the squash commit, offer
+cleanup. Do not auto-run cleanup:
+
+```bash
+git worktree remove <worktree-path>
+git branch -d <original-branch>
+git push origin --delete <original-branch>
+```
+
+Only delete the remote active branch if it was pushed and the user confirms.
+Never delete `archive/*`.
+
+## Mode: cleanup
+
+Run:
+
+```bash
+git worktree list --porcelain
+```
+
+Resolve the target worktree and branch. Before removal:
+
+```bash
+git -C <worktree-path> status --short
+```
+
+If dirty, stop and ask. If clean, ask which cleanup actions to run:
+
+```bash
+git worktree remove <worktree-path>
+git branch -d <branch>
+git push origin --delete <branch>
+git worktree prune
+```
+
+Never use `--force`, `branch -D`, or remote branch deletion without explicit
+confirmation for that exact branch in this session.
+
+## Mode: list
+
+Run:
+
+```bash
+git worktree list
+git worktree list --porcelain
+```
+
+Annotate entries with branch name, clean/dirty state, last commit subject, and
+whether the branch appears ahead of `origin/main`.
+
+## Safety Rules
+
+- Never delete or force-update `archive/*`.
+- Never run `git worktree remove --force`, `git branch -D`, `git push --force`,
+  or `git push origin --delete` without explicit confirmation.
+- Never silently switch the integration target away from `main`.
+- Always show the exact command before create, integrate, remove, push, or delete
+  operations.
+- If `.git/MERGE_HEAD`, `.git/REBASE_HEAD`, or another in-progress Git operation
+  is detected, stop until it is resolved.
+- Prefer pausing and asking over auto-recovery when a Git command fails.
 
 ## Quick Reference
 
 ```bash
 # Create
+git fetch origin main
 git worktree add <path> -b <branch> <start-commit>
 
-# Inspect
-git worktree list
-git worktree list --porcelain
+# Archive completed branch
+git -C <wt> fetch origin main
+git -C <wt> rebase origin/main
+git -C <wt> branch <archive-ref> <archive-tip>
+git -C <wt> push origin <archive-ref>
 
-# Integrate (default = rebase + FF)
-git -C <wt> fetch origin <trunk>
-git -C <wt> rebase origin/<trunk>
-git -C <main> merge --ff-only <branch>
-
-# Alternatives
-git -C <main> merge --no-ff <branch> -m "..."
-git -C <main> merge --squash <branch>      # then use git-commit skill
+# Squash onto main
+git switch main
+git pull --ff-only origin main
+git merge --squash <archive-tip>
+# use git-mainline-squash, then commit
+git push origin main
 
 # Cleanup
 git worktree remove <path>
 git branch -d <branch>
-git push origin --delete <branch>          # only if pushed + user confirms
-git worktree prune                          # only if directories were deleted manually
+git push origin --delete <branch>
 ```

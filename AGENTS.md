@@ -59,7 +59,8 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
 - In this development-stage project, internal renames are clear cutovers: update
   all internal callsites in the same change unless a plan explicitly says
   otherwise.
-- Main branch is `dev`.
+- Main branch is `main`. See `CONTRIBUTING.md` for the mainline/archive Git
+  workflow.
 - Dirty working trees are normal. The maintainer may be editing in parallel, so
 ignore unrelated unstaged/untracked changes and never revert, stash, clean, or
 flag them.
