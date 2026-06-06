@@ -98,10 +98,26 @@ After ranking-relevant schema or index-settings changes:
 bin/deploy <sha> backfill     # enqueues ranking.fullSync (idempotent)
 ```
 
-## 8. Frontends (Cloudflare)
+## 8. Preview and Edge
+
+Deploy `@rezics/preview` with the backend service wave before public edge
+routing points at it. Use read-only `DATABASE_URL`, Meilisearch access, and
+`PREVIEW_INTERNAL_SECRET`.
+
+After `@rezics/app` is built and deployed, deploy `@rezics/edge` with Wrangler:
+
+```bash
+bun --filter=@rezics/edge run deploy
+```
+
+The Worker needs `PREVIEW_BASE_URL` and `PREVIEW_INTERNAL_SECRET`. Route changes
+should happen after the preview origin is healthy so bot traffic can be proxied
+without affecting human SPA traffic.
+
+## 9. Frontends (Cloudflare)
 
 Run `deploy-frontend.yml` (or `wrangler pages deploy`) for `app` and `admin`
-**after** backends. `VITE_*` are build-time public config.
+**after** backends and preview. `VITE_*` are build-time public config.
 
 ## Release logs
 

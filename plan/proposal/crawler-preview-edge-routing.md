@@ -1,8 +1,8 @@
 ---
 title: Crawler preview edge routing
-status: active
+status: done
 created: 2026-06-04
-completed:
+completed: 2026-06-06
 supersededBy:
 tags: [preview, edge, seo, cloudflare]
 ---
@@ -60,65 +60,65 @@ helpers are duplicated across `edge` and `preview`.
 
 ## 1. Add the edge package
 
-- [ ] 1.1 Create `package/edge/package.json` with Worker build/deploy scripts
+- [x] 1.1 Create `package/edge/package.json` with Worker build/deploy scripts
   and workspace dependencies limited to edge-safe packages.
-- [ ] 1.2 Add `package/edge/wrangler.jsonc` with `src/index.ts` as the Worker
+- [x] 1.2 Add `package/edge/wrangler.jsonc` with `src/index.ts` as the Worker
   entrypoint and static assets configured from `package/app/dist`.
-- [ ] 1.3 Add `package/edge/src/index.ts` as the fetch handler that dispatches
+- [x] 1.3 Add `package/edge/src/index.ts` as the fetch handler that dispatches
   static assets, SPA fallback, and preview proxy requests.
-- [ ] 1.4 Add `package/edge/src/routes.ts` for the SEO preview allowlist,
+- [x] 1.4 Add `package/edge/src/routes.ts` for the SEO preview allowlist,
   including detail routes, sitemap routes, robots, and future OG/SVG route
   prefixes.
-- [ ] 1.5 Add `package/edge/src/bot.ts` for verified bot detection plus the
+- [x] 1.5 Add `package/edge/src/bot.ts` for verified bot detection plus the
   limited user-agent fallback.
-- [ ] 1.6 Add `package/edge/src/preview-proxy.ts` for origin fetch, internal
+- [x] 1.6 Add `package/edge/src/preview-proxy.ts` for origin fetch, internal
   secret header forwarding, preview response cache handling, and fallback
   response behavior.
-- [ ] 1.7 Add focused tests for `bot.ts`, `routes.ts`, and preview proxy
+- [x] 1.7 Add focused tests for `bot.ts`, `routes.ts`, and preview proxy
   fallback decisions.
 
 ## 2. Convert preview templates
 
-- [ ] 2.1 Update `package/preview/package.json` dependencies to add
+- [x] 2.1 Update `package/preview/package.json` dependencies to add
   `@elysiajs/html` and remove React SSR dependencies once no template uses them.
-- [ ] 2.2 Update `package/preview/tsconfig.json` for the Kita HTML JSX runtime
+- [x] 2.2 Update `package/preview/tsconfig.json` for the Kita HTML JSX runtime
   used by `@elysiajs/html`.
-- [ ] 2.3 Replace `package/preview/src/components/BookShareDocument.tsx` and
+- [x] 2.3 Replace `package/preview/src/components/BookShareDocument.tsx` and
   React stream utilities with `package/preview/src/templates/book-detail.tsx`.
-- [ ] 2.4 Register the Elysia HTML plugin in `package/preview/src/index.ts` and
+- [x] 2.4 Register the Elysia HTML plugin in `package/preview/src/index.ts` and
   return JSX/string template responses through the plugin.
-- [ ] 2.5 Keep preview route modules under existing domain folders such as
+- [x] 2.5 Keep preview route modules under existing domain folders such as
   `package/preview/src/book/`, but move reusable rendering helpers under
   `package/preview/src/templates/` and `package/preview/src/utils/`.
-- [ ] 2.6 Add tests for escaped titles, descriptions, canonical URLs, OG image
+- [x] 2.6 Add tests for escaped titles, descriptions, canonical URLs, OG image
   URLs, and 404 HTML output.
 
 ## 3. Add sitemap and preview data boundaries
 
-- [ ] 3.1 Add `package/preview/src/sitemap/` routes for `sitemap.xml` and
+- [x] 3.1 Add `package/preview/src/sitemap/` routes for `sitemap.xml` and
   sitemap index/shard responses.
-- [ ] 3.2 Add `package/preview/src/utils/xml.ts` with XML/SVG escaping helpers
+- [x] 3.2 Add `package/preview/src/utils/xml.ts` with XML/SVG escaping helpers
   and tests.
-- [ ] 3.3 Add bounded sitemap data queries using cursor/page inputs; avoid
+- [x] 3.3 Add bounded sitemap data queries using cursor/page inputs; avoid
   full-table catalog loads.
-- [ ] 3.4 Add or refactor preview read paths so item detail routes use
+- [x] 3.4 Add or refactor preview read paths so item detail routes use
   Postgres/Drizzle-backed reads and list/search routes use Meilisearch.
-- [ ] 3.5 Add route-specific cache headers for book detail HTML, sitemap XML,
+- [x] 3.5 Add route-specific cache headers for book detail HTML, sitemap XML,
   robots, and future SVG/OG responses.
 
 ## 4. Deploy and document
 
-- [ ] 4.1 Add production build/deploy documentation for `@rezics/edge` after
+- [x] 4.1 Add production build/deploy documentation for `@rezics/edge` after
   `@rezics/app` build and backend/preview service deployment.
-- [ ] 4.2 Add production runtime inventory updates that reclassify
+- [x] 4.2 Add production runtime inventory updates that reclassify
   `@rezics/preview` from non-production tooling to a read-only preview HTTP
   service.
-- [ ] 4.3 Add preview deployment configuration or Docker/Kamal wiring matching
+- [x] 4.3 Add preview deployment configuration or Docker/Kamal wiring matching
   existing backend service patterns.
-- [ ] 4.4 Add environment reference entries for preview and edge secrets,
+- [x] 4.4 Add environment reference entries for preview and edge secrets,
   including `PREVIEW_BASE_URL`, `PREVIEW_INTERNAL_SECRET`, preview port, database
   read URL, and Meilisearch access.
-- [ ] 4.5 Add convention or test coverage that prevents `@rezics/edge` from
+- [x] 4.5 Add convention or test coverage that prevents `@rezics/edge` from
   importing backend-only packages.
 
 ## Out of scope

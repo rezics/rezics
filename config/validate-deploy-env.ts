@@ -21,6 +21,7 @@ const UNITS = [
   "reaction",
   "history",
   "ranking",
+  "preview",
   "job-runner",
 ] as const;
 type Unit = (typeof UNITS)[number];

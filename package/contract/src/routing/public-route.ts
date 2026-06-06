@@ -127,7 +127,7 @@ export const publicUnitIdRouteParamsSchema = t.Object({
  *
  * Resolves the owner USER unit via `:userSlug`, then a SHELF Unit under
  * the owner scope by `:slug`. v1 resolves only contract-defined system
- * shelf slugs (`favorites` / `backlog` / `active` / `completed`).
+ * shelf slugs (`favorites` / `saved` / `backlog` / `active` / `completed`).
  */
 export const publicUserShelfSlugRouteParamsSchema = t.Object({
   userSlug: t.String({ minLength: 1 }),

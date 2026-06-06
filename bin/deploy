@@ -21,7 +21,7 @@ HOST="${DEPLOY_HOST:-203.0.113.10}"
 SSH_USER="${DEPLOY_SSH_USER:-deploy}"
 
 # Backend HTTP service units, in rollout order (server first: issues JWKS).
-SERVICES=(server auth notify reaction history ranking)
+SERVICES=(server auth notify reaction history ranking preview)
 # Schema-owning units whose migrations run before service rollout.
 MIGRATIONS=(auth server notify reaction history ranking)
 

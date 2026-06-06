@@ -20,7 +20,8 @@ service's `src/env.ts` before relying on a specific value.
 | `@rezics/history` | backend-http-service | Editorial revision history |
 | `@rezics/ranking` | backend-http-service | Ranking projections; **internal-only** |
 | `@rezics/job-runner` | worker + http (role-switched) | Single binary; role via `JOB_RUNNER_ROLE` |
-| `@rezics/preview` | tooling/non-production | SSR preview; **excluded** from the first production set (see below) |
+| `@rezics/preview` | preview-http-service | Read-only crawler/social preview HTTP service |
+| `@rezics/edge` | edge-router | Cloudflare Worker that routes bots to preview and humans to the SPA |
 | `@rezics/app` | static-frontend | Main SPA (Vite build) |
 | `@rezics/admin` | static-frontend | Admin SPA (Vite build) |
 | `@rezics/contract`, `@rezics/api`, `@rezics/shared`, `@rezics/job`, `@rezics/jwt`, `@rezics/search`, `@rezics/email`, `@rezics/i18n`, `@rezics/ui`, `@rezics/editor`, `@rezics/folio` | library-only | Built into consumers; no standalone runtime |
@@ -103,6 +104,26 @@ single-process (`src/index.ts`).
 - **External deps**: PostgreSQL (job queue) + reads on main and history DBs, Meilisearch, Sequin CDC, ranking service.
 - **Routing**: internal-only (HTTP role), workers have no inbound routing.
 
+### `@rezics/preview`
+
+- **Entrypoint**: `src/index.ts` (single-process Bun/Elysia service).
+- **Port**: `SERVER_PORT`, default `3003` in local examples.
+- **Health**: `/health` and `/ready` should be exposed by the preview service before it is promoted behind edge routing.
+- **Schema owner**: no. Reads the primary application DB only through read-only credentials.
+- **Key env**: `DATABASE_URL` (prefer a read-only database URL), `SERVER_PORT`, `MEILI_HOST`, `MEILI_MASTER_KEY`, `PREVIEW_INTERNAL_SECRET`.
+- **External deps**: PostgreSQL primary read replica/readonly role, Meilisearch for list/search preview pages.
+- **Routing**: proxied only through `@rezics/edge`; direct public access is not required.
+
+### `@rezics/edge`
+
+- **Entrypoint**: `package/edge/src/index.ts` via Wrangler.
+- **Port**: Cloudflare Worker runtime, no container port.
+- **Health**: Worker deploy/route health; no app DB readiness.
+- **Schema owner**: no.
+- **Key env**: `PREVIEW_BASE_URL`, `PREVIEW_INTERNAL_SECRET`.
+- **External deps**: Cloudflare Worker platform and the preview origin.
+- **Routing**: public. Human traffic falls through to the SPA/static assets; verified crawler traffic on allowlisted SEO paths is proxied to preview.
+
 ## Static Frontends
 
 - `@rezics/app` and `@rezics/admin` both build with `vite build` to static assets. Public runtime config is build-time `VITE_*` (Cloudflare build variables); **no secrets in static assets**. Served by the edge/proxy, not as containers in the backend service set.
@@ -126,12 +147,12 @@ Production guidance: set `OBSERVABILITY_LOG_FORMAT=json` on every service, and
 set `OTEL_EXPORTER_OTLP_ENDPOINT` (with `OBSERVABILITY_TELEMETRY=enabled` or
 `required`) only when the opt-in `infra-observability` unit is deployed.
 
-## `@rezics/preview` — Non-Production
+## Preview and Edge Notes
 
-`@rezics/preview` is SSR preview tooling: it has only a `dev` script (no
-`build`/`build:linux`), requires `SERVER_PORT` (no default) and read-only
-`DATABASE_URL`. It is **excluded from the first production service set** and is
-not given a Docker image, Kamal unit, or migration job in this foundation.
+`@rezics/preview` is promoted from local SSR tooling to a production read-only
+HTTP service when crawler routing is enabled. It must never run write-capable
+database credentials. `@rezics/edge` is a Worker router/proxy only and must not
+import server, preview template, Drizzle, or Elysia packages.
 
 ## Health/Readiness and Graceful-Shutdown Gaps
 

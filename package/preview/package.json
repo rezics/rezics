@@ -5,12 +5,16 @@
   "license": "AGPL-3.0-only",
   "module": "src/index.ts",
   "scripts": {
-    "dev": "NODE_ENV=development bun run --watch src/index.ts"
+    "dev": "NODE_ENV=development bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile preview",
+    "build:linux": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile preview"
   },
   "dependencies": {
     "@elysiajs/bearer": "^1.4.1",
     "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/html": "^1.4.2",
     "@elysiajs/openapi": "^1.4.14",
+    "@kitajs/html": "^4.2.13",
     "@rezics/server": "workspace:*",
     "@rezics/contract": "workspace:*",
     "@rezics/shared": "workspace:*",
@@ -19,13 +23,9 @@
     "chalk": "^5.6.2",
     "dotenv": "^17.2.3",
     "elysia": "^1.4.22",
-    "react": "^19",
-    "react-dom": "^19",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
     "bun-types": "latest",
     "@types/pg": "^8.15.5"
   }

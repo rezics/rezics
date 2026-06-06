@@ -19,6 +19,7 @@ Cloudflare and are not covered here.
 | `deploy.reaction.yml` | `reaction` — reactions (proxied; frontend endpoint) |
 | `deploy.history.yml` | `history` — reading history (internal-proxied) |
 | `deploy.ranking.yml` | `ranking` — internal-only (no proxy, no public CORS) |
+| `deploy.preview.yml` | `preview` — bot-friendly preview HTML/XML origin |
 | `deploy.job-runner.yml` | `job-runner` — HTTP intake (Sequin webhooks + enqueue API) |
 | `deploy.job-runner-worker.yml` | `job-runner-worker` — default lanes (search/history/maintenance) |
 | `deploy.ranking-worker.yml` | `ranking-worker` — dedicated ranking lane only |
@@ -34,7 +35,8 @@ database-per-service), `meilisearch` (infra-search), `sequin` + `sequin-postgres
 
 ## Routing
 
-- Public (kamal-proxy, TLS): `server`, `auth`, `notify`, `reaction`.
+- Public (kamal-proxy, TLS): `server`, `auth`, `notify`, `reaction`,
+  `preview`.
 - Internal-proxied: `history` (server-to-server only).
 - Internal (container DNS only, no proxy): `ranking`, all `job-runner` roles.
 
@@ -74,6 +76,7 @@ bin/deploy <git-sha> backfill    # ranking Meili full-sync
 
 # single unit:
 kamal deploy -d ranking --version <sha> --skip-push
+kamal deploy -d preview --version <sha> --skip-push
 kamal deploy -d ranking-worker --version <sha> --skip-push   # scale ranking lane alone
 ```
 

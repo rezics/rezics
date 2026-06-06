@@ -32,6 +32,7 @@ on each side of the call:
 | `JOB_RUNNER_INTERNAL_SECRET` | ✓ | server → job-runner |
 | `RANKING_INTERNAL_SECRET` | ✓ | job-runner → ranking |
 | `SEQUIN_WEBHOOK_SECRET` | ✓ | infra-cdc → job-runner |
+| `PREVIEW_INTERNAL_SECRET` | ✓ | edge → preview |
 | `MEILI_MASTER_KEY` | ✓ | infra-search → server, ranking, job-runner |
 | `BETTER_AUTH_SECRET` | ✓ | auth only |
 | `TURNSTILE_SECRET` | ✓ | server, auth |
@@ -149,6 +150,31 @@ All three units run the **same** `job-runner` image; they differ only by
 | `JOB_WORKER_LANES` | — | — | `all` (`default` / `ranking` per worker unit) |
 | `PORT` | — | — | `3005` |
 
+### `preview` (proxied, read-only)
+
+| Variable | Req | Secret | Default |
+|---|---|---|---|
+| `DATABASE_URL` | ✓ | ✓ | — |
+| `MEILI_HOST` | ✓ | — | — |
+| `MEILI_MASTER_KEY` | ✓ | ✓ | — |
+| `PREVIEW_INTERNAL_SECRET` | ✓ | ✓ | — |
+| `SERVER_PORT` | ✓ | — | `3003` in local examples |
+
+Use a read-only primary database role or read replica URL for `DATABASE_URL`.
+Preview renders crawler/social HTML and sitemap responses only; it must not own
+migrations or write to application tables.
+
+### `edge` (Cloudflare Worker)
+
+| Variable | Req | Secret | Default |
+|---|---|---|---|
+| `PREVIEW_BASE_URL` | ✓ | — | — |
+| `PREVIEW_INTERNAL_SECRET` | ✓ | ✓ | — |
+
+`PREVIEW_BASE_URL` points to the internal preview origin. The Worker forwards
+`PREVIEW_INTERNAL_SECRET` only to that origin and never exposes it to static
+frontend bundles.
+
 ## Shared Observability (all backend units)
 
 Non-secret except none. Defaults from `@rezics/shared`: see the
@@ -174,8 +200,10 @@ environment variables; rebuild to change them.
 | admin | `VITE_AUTH_ADMIN_URL` | `auth` admin surface |
 | admin | `VITE_REACTION_SERVICE_URL` | public `reaction` |
 
-`ranking` is internal-only and is never a frontend endpoint. Deploy backends
-before frontends so the API contract a new bundle expects already exists.
+`ranking` is internal-only and is never a frontend endpoint. `edge` is a public
+Worker runtime, not a Vite bundle; keep its secrets in Worker secrets/plain env
+according to the table above. Deploy backends and preview before frontends/edge
+so the API and crawler origin a new bundle expects already exist.
 
 ## Migration Jobs
 

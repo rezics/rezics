@@ -63,7 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           SHA="${{ github.sha }}"
-          for svc in server auth notify reaction history ranking job-runner; do
+          for svc in server auth notify reaction history ranking preview job-runner; do
             img="${IMAGE_PREFIX}-${svc}"
             docker build -f "docker/${svc}.Dockerfile" \
               -t "${img}:${SHA}" -t "${img}:dev" .
