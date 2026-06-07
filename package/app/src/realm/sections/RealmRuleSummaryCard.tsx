@@ -60,14 +60,23 @@ export function RealmRuleSummaryCard({
   const { t } = useTranslation(["common", "entity"]);
   const [open, setOpen] = useState(false);
   const readContext = useReadLanguageContext();
-  const resolvedQuery = useQuery(realmRuleResolvedQuery(realmUnitId));
+  const resolvedQuery = useQuery({
+    ...realmRuleResolvedQuery(realmUnitId, undefined, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
   const postUnitId =
     resolvedQuery.data?.sourceRulePostUnitId ??
     resolvedQuery.data?.ruleUnitId ??
     fallbackPostUnitId ??
     "";
   const fallbackPostQuery = useQuery({
-    ...postQueries.detail(postUnitId, { languages: readContext.languages }),
+    ...postQueries.detail(postUnitId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled:
       readContext.ready &&
       Boolean(postUnitId) &&

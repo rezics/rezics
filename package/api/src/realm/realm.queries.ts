@@ -8,6 +8,13 @@ import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
 import type { RealmFilters } from "./realm.types";
 
+type RealmReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 /**
  * Query options for listing realms
  */
@@ -21,10 +28,7 @@ export const realmListQuery = (filters?: RealmFilters) =>
 /**
  * Query options for getting a single realm
  */
-export const realmDetailQuery = (
-  unitId: string,
-  query?: { languages?: string | readonly string[] },
-) =>
+export const realmDetailQuery = (unitId: string, query?: RealmReadQuery) =>
   queryOptions({
     queryKey: realmKeys.detail(unitId, query),
     queryFn: () => realmApi.get(unitId, query),
@@ -90,27 +94,28 @@ export const realmRulePolicyQuery = (realmUnitId: string) =>
 export const realmRuleResolvedQuery = (
   realmUnitId: string,
   language?: string,
+  query?: { languages?: string | readonly string[]; appLocale?: string },
 ) =>
   queryOptions({
-    queryKey: realmKeys.ruleResolved(realmUnitId, language),
-    queryFn: () => realmApi.resolveRule(realmUnitId, language),
+    queryKey: realmKeys.ruleResolved(realmUnitId, language, query),
+    queryFn: () => realmApi.resolveRule(realmUnitId, language, query),
     staleTime: 1000 * 60 * 5,
   });
 
 /**
  * Combined query options export
  */
-export const myRealmsQuery = () =>
+export const myRealmsQuery = (query?: RealmReadQuery) =>
   queryOptions({
-    queryKey: realmKeys.mine(),
-    queryFn: () => realmApi.mine(),
+    queryKey: realmKeys.mine(query),
+    queryFn: () => realmApi.mine(query),
     staleTime: 1000 * 60 * 2,
   });
 
-export const realmsByMemberQuery = (userId: string) =>
+export const realmsByMemberQuery = (userId: string, query?: RealmReadQuery) =>
   queryOptions({
-    queryKey: realmKeys.byMember(userId),
-    queryFn: () => realmApi.byMember(userId),
+    queryKey: realmKeys.byMember(userId, query),
+    queryFn: () => realmApi.byMember(userId, query),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5,
   });

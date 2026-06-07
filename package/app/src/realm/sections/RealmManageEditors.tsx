@@ -2,11 +2,12 @@ import {
   useClearRealmExtraValueMutation,
   useSetRealmExtraValueMutation,
 } from "@rezics/api/realm/realm-extra.mutations";
-import { tagQueries } from "@rezics/api/tag/tag";
+import { tagApi } from "@rezics/api/tag/tag";
 import { unitApi, unitQueries } from "@rezics/api/unit/unit";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import type {
+  RealmAvatarExtra,
   RealmBannerExtra,
   RealmTagView,
   RealmTagViewStyle,
@@ -34,6 +35,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
   Input,
   Label,
   Select,
@@ -51,11 +57,12 @@ import {
   Download,
   GripVertical,
   ListTree,
+  MoreHorizontal,
   Plus,
   Save,
-  Search,
   Tag,
   Trash2,
+  Type,
   Upload,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -63,19 +70,20 @@ import type { MoveHandler, NodeRendererProps, TreeApi } from "react-arborist";
 import { Tree } from "react-arborist";
 import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
-type TagSearchResult = {
-  unitId?: string;
-  tagUnitId?: string;
-  label?: string;
-  slug?: string;
-};
-
 function nodeLabel(node: TagTreeNode) {
+  const translations = node.labelTranslations?.translations;
+  const fallbackLanguage = node.labelTranslations?.fallbackLanguage;
+  const language = getI18nRuntime().i18n.language;
+  const translated =
+    translations?.[language] ??
+    (fallbackLanguage ? translations?.[fallbackLanguage] : undefined);
   return (
+    translated?.trim() ||
     node.label?.trim() ||
+    node.labelUnitId?.slice(0, 8) ||
     node.tagId?.slice(0, 8) ||
     getI18nRuntime().i18n.t("common:untitled")
   );
@@ -390,11 +398,18 @@ export function WikiZoneConfigEditor({
     useState<LabelInsertTarget>("navigation");
   const [error, setError] = useState<string | null>(null);
   const authoringLanguage = useAuthoringLanguageDefault();
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
   const labelSearchTerm = labelSearch.trim();
-  const { data: labelSearchData } = useQuery(
-    unitQueries.search(labelSearchTerm, { type: "LABEL", languages, limit: 8 }),
-  );
+  const { data: labelSearchData } = useQuery({
+    ...unitQueries.search(labelSearchTerm, {
+      type: "LABEL",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(labelSearchTerm),
+  });
 
   useEffect(() => {
     setTemplate(theme?.template ?? "wiki-classic");
@@ -798,6 +813,10 @@ export function TagTreeEditor({
   initialValue?: TagTreeNode[];
 }) {
   type EditorNode = TagTreeNode & { id: string; children?: EditorNode[] };
+  type AddTreeNodeTarget =
+    | { kind: "root" }
+    | { kind: "siblingAfter"; nodeId: string }
+    | { kind: "child"; nodeId: string };
 
   const nextIdRef = useRef(0);
   const makeEditorId = useCallback(() => {
@@ -830,6 +849,11 @@ export function TagTreeEditor({
   );
   const [labelLanguage, setLabelLanguage] = useState(DEFAULT_LANGUAGE);
   const [search, setSearch] = useState("");
+  const [createTitle, setCreateTitle] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [addTarget, setAddTarget] = useState<AddTreeNodeTarget>({
+    kind: "root",
+  });
   const [error, setError] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const treeRef = useRef<TreeApi<EditorNode> | null>(null);
@@ -838,32 +862,62 @@ export function TagTreeEditor({
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [treeSize, setTreeSize] = useState({ width: 0, height: 360 });
   const setValue = useSetRealmExtraValueMutation();
+  const authoringLanguage = useAuthoringLanguageDefault();
+  const readContext = useReadLanguageContext();
   const searchTerm = search.trim();
-  const { data: searchData } = useQuery(tagQueries.search(searchTerm));
+  const { data: labelSearchData, isLoading: labelSearchLoading } = useQuery({
+    ...unitQueries.search(searchTerm, {
+      type: "LABEL",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(searchTerm),
+  });
+  const { data: tagSearchData, isLoading: tagSearchLoading } = useQuery({
+    ...unitQueries.search(searchTerm, {
+      type: "TAG",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(searchTerm),
+  });
   const serializedNodes = useMemo(
     () => toTagTreeNodes(nodes),
     [nodes, toTagTreeNodes],
   );
 
-  const existingTagIds = useMemo(() => {
-    const ids = new Set<string>();
+  const existingUnitRefs = useMemo(() => {
+    const tagIds = new Set<string>();
+    const labelUnitIds = new Set<string>();
     const visit = (items: EditorNode[]) => {
       for (const item of items) {
-        if (item.tagId) ids.add(item.tagId);
+        if (item.tagId) tagIds.add(item.tagId);
+        if (item.labelUnitId) labelUnitIds.add(item.labelUnitId);
         if (item.children?.length) visit(item.children);
       }
     };
     visit(nodes);
-    return ids;
+    return { tagIds, labelUnitIds };
   }, [nodes]);
 
-  const results = useMemo(() => {
-    return ((searchData?.tags ?? []) as TagSearchResult[]).flatMap((tag) => {
-      const tagId = tag.unitId ?? tag.tagUnitId;
-      if (!tagId || existingTagIds.has(tagId)) return [];
-      return [{ tagId, label: tag.label ?? tag.slug ?? tagId.slice(0, 8) }];
-    });
-  }, [existingTagIds, searchData?.tags]);
+  const labelResults = useMemo(
+    () =>
+      (labelSearchData?.units ?? []).filter(
+        (unit) => unit.id && !existingUnitRefs.labelUnitIds.has(unit.id),
+      ),
+    [existingUnitRefs.labelUnitIds, labelSearchData?.units],
+  );
+  const tagResults = useMemo(
+    () =>
+      (tagSearchData?.units ?? []).filter(
+        (unit) => unit.id && !existingUnitRefs.tagIds.has(unit.id),
+      ),
+    [existingUnitRefs.tagIds, tagSearchData?.units],
+  );
 
   useEffect(() => {
     setNodes(toEditorNodes(initialValue));
@@ -947,10 +1001,17 @@ export function TagTreeEditor({
     window.setTimeout(() => treeRef.current?.open(parentId), 0);
   };
 
-  const createLabelNode = (): EditorNode => ({
-    id: makeEditorId(),
-    label: "New group",
-  });
+  const insertAtTarget = (target: AddTreeNodeTarget, nextNode: EditorNode) => {
+    if (target.kind === "root") {
+      setNodes((current) => [...current, nextNode]);
+      return;
+    }
+    if (target.kind === "siblingAfter") {
+      insertSiblingAfter(target.nodeId, nextNode);
+      return;
+    }
+    addChild(target.nodeId, nextNode);
+  };
 
   const createTagNode = (tag: {
     tagId: string;
@@ -961,27 +1022,85 @@ export function TagTreeEditor({
     label: tag.label,
   });
 
-  const updateNodeLabelTranslation = (
-    id: string,
+  const createPublicLabelNode = (labelUnitId: string, label?: string) => ({
+    id: makeEditorId(),
+    labelUnitId,
+    label,
+  });
+
+  const createLocalHeadingNode = (
+    title: string,
     language: string,
-    value: string,
-  ) => {
+  ): EditorNode => {
     const normalized = normalizeLanguage(language) ?? DEFAULT_LANGUAGE;
-    updateNodeById(id, (node) => {
-      const translations = {
-        ...(node.labelTranslations?.translations ?? {}),
-      };
-      if (value.trim()) translations[normalized] = value;
-      else delete translations[normalized];
-      return {
-        ...node,
-        labelTranslations: {
-          translations,
-          fallbackLanguage:
-            node.labelTranslations?.fallbackLanguage ?? normalized,
-        },
-      };
-    });
+    return {
+      id: makeEditorId(),
+      labelTranslations: {
+        translations: { [normalized]: title },
+        fallbackLanguage: normalized,
+      },
+    };
+  };
+
+  const openAddDialog = (target: AddTreeNodeTarget = { kind: "root" }) => {
+    setAddTarget(target);
+    setSearch("");
+    setCreateTitle("");
+    setError(null);
+    setAddOpen(true);
+  };
+
+  const closeAddDialog = () => {
+    setAddOpen(false);
+    setSearch("");
+    setCreateTitle("");
+  };
+
+  const insertAndClose = (nextNode: EditorNode) => {
+    insertAtTarget(addTarget, nextNode);
+    closeAddDialog();
+  };
+
+  const createPublicLabel = async () => {
+    const title = createTitle.trim();
+    if (!title) return;
+    setError(null);
+    try {
+      const language = normalizeLanguage(labelLanguage) ?? authoringLanguage;
+      const created = await unitApi.create({
+        type: "LABEL",
+        isLanguageNeutral: true,
+        translations: [{ language, title }],
+      });
+      insertAndClose(createPublicLabelNode(created.id, title));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  const createPublicTag = async () => {
+    const title = createTitle.trim();
+    if (!title) return;
+    setError(null);
+    try {
+      const language = normalizeLanguage(labelLanguage) ?? authoringLanguage;
+      const created = await tagApi.create({
+        translations: [{ language, title }],
+      });
+      insertAndClose(createTagNode({ tagId: created.tagUnitId, label: title }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  const createLocalHeading = () => {
+    const title = createTitle.trim();
+    if (!title) return;
+    insertAndClose(createLocalHeadingNode(title, labelLanguage));
   };
 
   const onMove: MoveHandler<EditorNode> = useCallback(
@@ -1134,10 +1253,44 @@ export function TagTreeEditor({
   };
 
   function Node({ node, style, dragHandle }: NodeRendererProps<EditorNode>) {
-    const language = normalizeLanguage(labelLanguage) ?? DEFAULT_LANGUAGE;
-    const translation =
-      node.data.labelTranslations?.translations[language] ?? "";
     const hasChildren = (node.children?.length ?? 0) > 0;
+    const label = nodeLabel(node.data);
+    const kind = node.data.tagId
+      ? "Tag"
+      : node.data.labelUnitId
+        ? "Label"
+        : "Local";
+    const actionItems = (
+      <>
+        <DropdownMenuItem
+          onClick={() =>
+            openAddDialog({ kind: "siblingAfter", nodeId: node.data.id })
+          }
+        >
+          Add sibling
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => openAddDialog({ kind: "child", nodeId: node.data.id })}
+        >
+          Add child
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => moveDepth(node.data.id, "indent")}>
+          Indent
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => moveDepth(node.data.id, "outdent")}>
+          Outdent
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => setPendingDeleteId(node.data.id)}
+        >
+          Delete
+        </DropdownMenuItem>
+      </>
+    );
+
     return (
       <div
         style={style}
@@ -1168,51 +1321,29 @@ export function TagTreeEditor({
         <span className="flex size-7 items-center justify-center rounded-sm bg-surface-subtle text-text-tertiary">
           {node.data.tagId ? (
             <Tag className="size-4" aria-hidden />
+          ) : node.data.labelUnitId ? (
+            <Type className="size-4" aria-hidden />
           ) : (
             <ListTree className="size-4" aria-hidden />
           )}
         </span>
-        <Input
-          value={node.data.label ?? ""}
-          onChange={(event) =>
-            updateNodeById(node.data.id, (item) => ({
-              ...item,
-              label: event.target.value,
-            }))
-          }
-          placeholder={node.data.tagId ? "Tag display label" : "Group label"}
-          className="h-8 min-w-0 flex-1"
-        />
-        <Input
-          value={translation}
-          onChange={(event) =>
-            updateNodeLabelTranslation(
-              node.data.id,
-              labelLanguage,
-              event.target.value,
-            )
-          }
-          placeholder={`Label (${language})`}
-          className="hidden h-8 min-w-0 flex-1 lg:block"
-        />
-        <Input
-          value={node.data.tagId ?? ""}
-          onChange={(event) =>
-            updateNodeById(node.data.id, (item) => ({
-              ...item,
-              tagId: event.target.value.trim() || undefined,
-            }))
-          }
-          placeholder="Tag Unit ID"
-          className="hidden h-8 min-w-0 flex-1 xl:block"
-        />
-        <div className="ml-auto flex shrink-0 items-center gap-1">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate font-medium leading-ui text-text-primary">
+            {label}
+          </span>
+          <span className="truncate text-xs leading-dense text-text-tertiary">
+            {kind}
+          </span>
+        </div>
+        <div className="ml-auto hidden shrink-0 items-center gap-1 sm:flex">
           <Button
             type="button"
             size="icon"
             variant="ghost"
             className="size-8"
-            onClick={() => insertSiblingAfter(node.data.id, createLabelNode())}
+            onClick={() =>
+              openAddDialog({ kind: "siblingAfter", nodeId: node.data.id })
+            }
             aria-label="Add sibling"
           >
             <Plus className="size-4" aria-hidden />
@@ -1222,7 +1353,9 @@ export function TagTreeEditor({
             size="icon"
             variant="ghost"
             className="size-8"
-            onClick={() => addChild(node.data.id, createLabelNode())}
+            onClick={() =>
+              openAddDialog({ kind: "child", nodeId: node.data.id })
+            }
             aria-label="Add child"
           >
             <ListTree className="size-4" aria-hidden />
@@ -1258,6 +1391,24 @@ export function TagTreeEditor({
             <Trash2 className="size-4" aria-hidden />
           </Button>
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            nativeButton
+            render={(props) => (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="ml-auto size-8 shrink-0 sm:hidden"
+                aria-label="More actions"
+                {...props}
+              >
+                <MoreHorizontal className="size-4" aria-hidden />
+              </Button>
+            )}
+          />
+          <DropdownMenuContent align="end">{actionItems}</DropdownMenuContent>
+        </DropdownMenu>
       </div>
     );
   }
@@ -1290,24 +1441,10 @@ export function TagTreeEditor({
             }
           />
         </div>
-        <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor="realm-tag-tree-search">Bind tag</Label>
-          <Input
-            id="realm-tag-tree-search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={getI18nRuntime().i18n.t(
-              "community:tag_search_placeholder",
-            )}
-          />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setNodes((current) => [...current, createLabelNode()])}
-        >
+        <div className="hidden md:block" />
+        <Button type="button" variant="outline" onClick={() => openAddDialog()}>
           <Plus className="mr-2 size-4" aria-hidden />
-          Group
+          Add item
         </Button>
         <Button type="button" variant="outline" onClick={downloadJson}>
           <Download className="mr-2 size-4" aria-hidden />
@@ -1330,32 +1467,6 @@ export function TagTreeEditor({
         />
       </div>
 
-      {searchTerm && results.length > 0 ? (
-        <div className="flex shrink-0 flex-wrap gap-2">
-          {results.map((tagResult) => (
-            <Button
-              key={tagResult.tagId}
-              type="button"
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setNodes((current) => [
-                  ...current,
-                  createTagNode({
-                    tagId: tagResult.tagId,
-                    label: tagResult.label,
-                  }),
-                ]);
-                setSearch("");
-              }}
-            >
-              <Search className="mr-2 size-4" aria-hidden />
-              {tagResult.label}
-            </Button>
-          ))}
-        </div>
-      ) : null}
-
       <div
         ref={treeAreaCallbackRef}
         className="min-h-0 flex-1 overflow-hidden rounded-sm bg-surface-base"
@@ -1367,12 +1478,10 @@ export function TagTreeEditor({
               type="button"
               size="sm"
               variant="outline"
-              onClick={() =>
-                setNodes((current) => [...current, createLabelNode()])
-              }
+              onClick={() => openAddDialog()}
             >
               <Plus className="mr-2 size-4" aria-hidden />
-              Add first group
+              Add first item
             </Button>
           </div>
         ) : (
@@ -1402,6 +1511,151 @@ export function TagTreeEditor({
           {getI18nRuntime().i18n.t("entity:realm_save_tag_tree")}
         </Button>
       </div>
+
+      <Dialog
+        open={addOpen}
+        onOpenChange={(open) => (open ? null : closeAddDialog())}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add tag tree item</DialogTitle>
+            <DialogDescription>
+              Search existing labels or tags first. Create a new item only when
+              the catalog does not already have the term you need.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="realm-tag-tree-add-search">Search</Label>
+              <Input
+                id="realm-tag-tree-add-search"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setCreateTitle(event.target.value);
+                }}
+                placeholder="Search labels and tags"
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex min-h-32 flex-col gap-2 rounded-md bg-surface-subtle p-3">
+                <div className="flex items-center gap-2 text-sm font-medium leading-ui text-text-primary">
+                  <Type className="size-4 text-text-tertiary" aria-hidden />
+                  Labels
+                </div>
+                {labelSearchLoading && searchTerm ? (
+                  <p className="text-sm leading-body text-text-secondary">
+                    Searching labels...
+                  </p>
+                ) : null}
+                {!labelSearchLoading &&
+                searchTerm &&
+                labelResults.length === 0 ? (
+                  <p className="text-sm leading-body text-text-secondary">
+                    No matching labels.
+                  </p>
+                ) : null}
+                {labelResults.map((unit) => (
+                  <Button
+                    key={unit.id}
+                    type="button"
+                    variant="ghost"
+                    className="h-auto justify-start px-2 py-2 text-left"
+                    onClick={() =>
+                      insertAndClose(
+                        createPublicLabelNode(unit.id, unitLabel(unit)),
+                      )
+                    }
+                  >
+                    <span className="min-w-0 truncate">{unitLabel(unit)}</span>
+                  </Button>
+                ))}
+              </div>
+
+              <div className="flex min-h-32 flex-col gap-2 rounded-md bg-surface-subtle p-3">
+                <div className="flex items-center gap-2 text-sm font-medium leading-ui text-text-primary">
+                  <Tag className="size-4 text-text-tertiary" aria-hidden />
+                  Tags
+                </div>
+                {tagSearchLoading && searchTerm ? (
+                  <p className="text-sm leading-body text-text-secondary">
+                    Searching tags...
+                  </p>
+                ) : null}
+                {!tagSearchLoading && searchTerm && tagResults.length === 0 ? (
+                  <p className="text-sm leading-body text-text-secondary">
+                    No matching tags.
+                  </p>
+                ) : null}
+                {tagResults.map((unit) => (
+                  <Button
+                    key={unit.id}
+                    type="button"
+                    variant="ghost"
+                    className="h-auto justify-start px-2 py-2 text-left"
+                    onClick={() =>
+                      insertAndClose(
+                        createTagNode({
+                          tagId: unit.id,
+                          label: unitLabel(unit),
+                        }),
+                      )
+                    }
+                  >
+                    <span className="min-w-0 truncate">{unitLabel(unit)}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="realm-tag-tree-create-title">
+                Create fallback
+              </Label>
+              <Input
+                id="realm-tag-tree-create-title"
+                value={createTitle}
+                onChange={(event) => setCreateTitle(event.target.value)}
+                placeholder="Name"
+              />
+              <div className="grid gap-2 sm:grid-cols-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!createTitle.trim()}
+                  onClick={() => void createPublicLabel()}
+                >
+                  Create public label
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!createTitle.trim()}
+                  onClick={() => void createPublicTag()}
+                >
+                  Create tag
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!createTitle.trim()}
+                  onClick={createLocalHeading}
+                >
+                  Use local heading
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={closeAddDialog}>
+              {getI18nRuntime().i18n.t("common:cancel")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={pendingDeleteId !== null}
@@ -1446,11 +1700,18 @@ export function SlotPicker({
   const [error, setError] = useState<string | null>(null);
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
   const searchTerm = search.trim();
-  const { data } = useQuery(
-    unitQueries.search(searchTerm, { type: "POST", languages, limit: 8 }),
-  );
+  const { data } = useQuery({
+    ...unitQueries.search(searchTerm, {
+      type: "POST",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(searchTerm),
+  });
 
   useEffect(() => {
     setSelected(value ?? "");
@@ -1609,30 +1870,28 @@ function RealmSlotTranslationEditor({ unitId }: { unitId: string }) {
   );
 }
 
-export function BannerPicker({
+type RealmImageExtraKey = "avatar" | "banner";
+
+function RealmImagePicker({
   realmId,
+  extraKey,
+  label,
+  savedMessage,
   value,
 }: {
   realmId: string;
-  value?: RealmBannerExtra | null;
+  extraKey: RealmImageExtraKey;
+  label: string;
+  savedMessage: string;
+  value?: RealmBannerExtra | RealmAvatarExtra | null;
 }) {
   const [url, setUrl] = useState(value?.kind === "url" ? value.url : "");
-  const [postId, setPostId] = useState(
-    value?.kind === "post" ? value.unitId : "",
-  );
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const languages = useReadLanguageCandidates();
-  const searchTerm = search.trim();
-  const { data } = useQuery(
-    unitQueries.search(searchTerm, { type: "POST", languages, limit: 8 }),
-  );
 
   useEffect(() => {
     setUrl(value?.kind === "url" ? value.url : "");
-    setPostId(value?.kind === "post" ? value.unitId : "");
   }, [value]);
 
   const save = async () => {
@@ -1641,19 +1900,13 @@ export function BannerPicker({
       if (url.trim()) {
         await setValue.mutateAsync({
           realmId,
-          key: "banner",
+          key: extraKey,
           value: { kind: "url", url: url.trim() },
         });
-      } else if (postId) {
-        await setValue.mutateAsync({
-          realmId,
-          key: "banner",
-          value: { kind: "post", unitId: postId },
-        });
       } else {
-        await clearValue.mutateAsync({ realmId, key: "banner" });
+        await clearValue.mutateAsync({ realmId, key: extraKey });
       }
-      toast.success(getI18nRuntime().i18n.t("entity:realm_banner_saved"));
+      toast.success(savedMessage);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setError(message);
@@ -1663,62 +1916,19 @@ export function BannerPicker({
 
   return (
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
-      <Label>{getI18nRuntime().i18n.t("entity:realm_banner")}</Label>
+      <Label>{label}</Label>
       <Input
         value={url}
-        onChange={(event) => {
-          setUrl(event.target.value);
-          if (event.target.value.trim()) setPostId("");
-        }}
+        onChange={(event) => setUrl(event.target.value)}
         placeholder={getI18nRuntime().i18n.t(
           "entity:realm_direct_image_url_placeholder",
         )}
       />
-      <Input
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        placeholder={getI18nRuntime().i18n.t(
-          "community:post_search_placeholder",
-        )}
-      />
-      {searchTerm && data?.units?.length ? (
-        <div className="flex flex-col gap-2">
-          {data.units.map((unit) => (
-            <Button
-              key={unit.id}
-              type="button"
-              size="sm"
-              variant={postId === unit.id ? "default" : "secondary"}
-              className="justify-start"
-              onClick={() => {
-                setPostId(unit.id);
-                setUrl("");
-              }}
-            >
-              {unitLabel(unit)}
-            </Button>
-          ))}
-        </div>
-      ) : null}
-      {postId && (
-        <p className="text-sm leading-ui text-text-secondary">
-          {getI18nRuntime().i18n.t("entity:realm_selected_post", {
-            id: postId,
-          })}
-        </p>
-      )}
       <div className="flex justify-end gap-2">
         {error && (
           <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
         )}
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => {
-            setUrl("");
-            setPostId("");
-          }}
-        >
+        <Button type="button" variant="ghost" onClick={() => setUrl("")}>
           {getI18nRuntime().i18n.t("common:clear")}
         </Button>
         <Button
@@ -1730,5 +1940,41 @@ export function BannerPicker({
         </Button>
       </div>
     </div>
+  );
+}
+
+export function BannerPicker({
+  realmId,
+  value,
+}: {
+  realmId: string;
+  value?: RealmBannerExtra | null;
+}) {
+  return (
+    <RealmImagePicker
+      realmId={realmId}
+      extraKey="banner"
+      label={getI18nRuntime().i18n.t("entity:realm_banner")}
+      savedMessage={getI18nRuntime().i18n.t("entity:realm_banner_saved")}
+      value={value}
+    />
+  );
+}
+
+export function AvatarPicker({
+  realmId,
+  value,
+}: {
+  realmId: string;
+  value?: RealmAvatarExtra | null;
+}) {
+  return (
+    <RealmImagePicker
+      realmId={realmId}
+      extraKey="avatar"
+      label={getI18nRuntime().i18n.t("entity:realm_avatar")}
+      savedMessage={getI18nRuntime().i18n.t("entity:realm_avatar_saved")}
+      value={value}
+    />
   );
 }

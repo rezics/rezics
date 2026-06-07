@@ -32,6 +32,7 @@ function RealmMarkdownPanel({
   const postQuery = useQuery({
     ...postQueries.detail(postUnitId ?? "", {
       languages: readContext.languages,
+      appLocale: readContext.appLocale,
     }),
     enabled: readContext.ready && Boolean(postUnitId),
   });
@@ -70,7 +71,14 @@ function RealmMarkdownPanel({
 }
 
 function RealmRuleFullPanel({ realmUnitId }: { realmUnitId: string }) {
-  const ruleQuery = useQuery(realmRuleResolvedQuery(realmUnitId));
+  const readContext = useReadLanguageContext();
+  const ruleQuery = useQuery({
+    ...realmRuleResolvedQuery(realmUnitId, undefined, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
   const content =
     ruleQuery.data?.sourceRulePost?.content ??
     ruleQuery.data?.translation?.description ??

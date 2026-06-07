@@ -7,6 +7,7 @@ import type {
   RealmExtraOkResponse,
   RealmExtraReadResponse,
   RealmListQuery,
+  ListLanguageMode,
   RealmMemberDTO,
   RealmMemberListQuery,
   RealmMemberListResponse,
@@ -49,7 +50,11 @@ import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapPostToDTO } from "@/post/post.mapper";
 import { postService } from "@/post/post.service";
-import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
+import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
+import {
+  resolveEffectiveReadLanguageCandidates,
+  resolveEffectiveReadLanguageInput,
+} from "@/unit/language-resolution";
 import { mapTranslationToDTO } from "@/unit/mapper";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import {
@@ -341,6 +346,7 @@ export class RealmService {
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (options as { languages?: string | readonly string[] })
         .languages,
+      appLocale: (options as { appLocale?: string }).appLocale,
     });
     if (options.languageMode === "preferred" && readLanguages.length > 0) {
       conditions.push(
@@ -395,17 +401,16 @@ export class RealmService {
         rows.map((row) => hydrateRealmWithRelations(row.unitId)),
       ),
     );
+    const readLanguage = resolveEffectiveReadLanguageInput({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+      appLocale: (options as { appLocale?: string }).appLocale,
+    });
 
     return {
       realms: await Promise.all(
         hydratedRows.map(async (row) => {
-          const dto = mapRealmToDTO(
-            row,
-            resolveEffectiveReadLanguageCandidates({
-              languages: (options as { languages?: string | readonly string[] })
-                .languages,
-            }),
-          );
+          const dto = mapRealmToDTO(row, readLanguage);
           return {
             ...dto,
             extra: await filterRealmExtraPublic(dto.extra),
@@ -419,12 +424,12 @@ export class RealmService {
   async getByUnitId(
     unitId: string,
     viewerUserId?: string | null,
-    languages: readonly string[] = [],
+    readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
   ): Promise<RealmDTO> {
     const row = await hydrateRealmWithRelations(unitId);
     const dto = mapRealmToDTO(
       await hydrateUnitOwnerUserSlugRow(row),
-      languages,
+      readLanguage,
     );
     return {
       ...dto,
@@ -1743,7 +1748,10 @@ export class RealmService {
 
   async listByMember(
     userId: string,
-    options: { publicOnly?: boolean } = {},
+    options: {
+      publicOnly?: boolean;
+      languageMode?: ListLanguageMode | null;
+    } & EffectiveReadLanguageInput = {},
   ): Promise<{ realms: RealmDTO[]; total: number }> {
     const db = await getServerDb();
     const members = await db
@@ -1776,7 +1784,7 @@ export class RealmService {
     return {
       realms: await Promise.all(
         hydratedRealms.map(async (r) => {
-          const dto = mapRealmToDTO(r);
+          const dto = mapRealmToDTO(r, options);
           return {
             ...dto,
             extra: await filterRealmExtraPublic(dto.extra),

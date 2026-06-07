@@ -12,7 +12,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Input,
   Tabs,
   TabsContent,
   TabsList,
@@ -20,13 +19,13 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Link2, Vote, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { PollComposer, PollLibrarySurface } from "@/poll";
-import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import { isPostEditorSurfaceSubmittable, PostEditorSurface } from "@/post";
+import { useAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { buildRealmPostCreateInput } from "../models/realmCreateMode";
 import { RealmPostTagPicker } from "./RealmPostTagPicker";
 
@@ -43,20 +42,20 @@ export function RealmPostCreateForm({
 }: RealmPostCreateFormProps) {
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
-  const authoringLanguage = useAuthoringLanguageDefault();
+  const { defaultLanguage, language, setLanguage } =
+    useAuthoringLanguageState();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [pollDialogOpen, setPollDialogOpen] = useState(false);
   const [attachedPoll, setAttachedPoll] = useState<PollDTO | null>(null);
-  const resize = useMemo(
-    () => ({ height: 260, minHeight: 180, maxHeight: 560 }),
-    [],
-  );
   const createMutation = useCreatePostMutation();
   const denial = policyDenialFromError(createMutation.error);
-  const disabled = createMutation.isPending || !title.trim() || !body.trim();
+  const validationMessage = !isPostEditorSurfaceSubmittable({ title, body })
+    ? t("common:required")
+    : null;
+  const disabled = createMutation.isPending || Boolean(validationMessage);
 
   const handlePollCreated = (poll: PollDTO) => {
     setAttachedPoll(poll);
@@ -79,7 +78,7 @@ export function RealmPostCreateForm({
               realmId,
               title: trimmedTitle,
               content: trimmed,
-              language: authoringLanguage,
+              language,
               tagIds: selectedTagIds,
               status,
             }),
@@ -89,7 +88,7 @@ export function RealmPostCreateForm({
             realmId,
             title: trimmedTitle,
             content: trimmed,
-            language: authoringLanguage,
+            language,
             tagIds: selectedTagIds,
             status,
           }),
@@ -114,19 +113,26 @@ export function RealmPostCreateForm({
             });
           }
         },
+        onError: (error) => {
+          toast.error(error.message);
+        },
       },
     );
   };
 
   return (
     <div className="flex flex-col gap-4">
-      <Input
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder={tc("community:post_title_placeholder")}
+      <PostEditorSurface
+        language={language}
+        defaultLanguage={defaultLanguage}
+        title={title}
+        body={body}
+        onLanguageChange={setLanguage}
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
+        titlePlaceholder={tc("community:post_title_placeholder")}
         disabled={createMutation.isPending}
       />
-      <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
       <RealmPostTagPicker
         realmUnitIds={[realmId]}
         selectedTagIds={selectedTagIds}
@@ -186,6 +192,11 @@ export function RealmPostCreateForm({
         saveDraftLabel={t("common:save_draft")}
         publishLabel={t("common:publish")}
       />
+      {validationMessage ? (
+        <p className="m-0 self-end text-xs leading-dense text-error-text">
+          {validationMessage}
+        </p>
+      ) : null}
       <Dialog open={pollDialogOpen} onOpenChange={setPollDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>

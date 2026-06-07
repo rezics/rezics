@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  RealmPage,
   type RealmFeedSort,
+  RealmPage,
   type RealmPageTab,
 } from "@/realm/pages/RealmPage";
+import {
+  realmFeedSearchForSingleTag,
+  realmTagsTabSearch,
+} from "@/realm/models/realmTagFeedSearch";
 
 type RealmSearch = {
   sort?: RealmFeedSort;
@@ -61,6 +65,14 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
               ...prev,
               tags: nextTagIds.length ? nextTagIds.join(",") : undefined,
             }),
+          })
+        }
+        onOpenTagsTab={() =>
+          navigate({ search: (prev) => realmTagsTabSearch(prev) })
+        }
+        onTagSelect={(tagId) =>
+          navigate({
+            search: (prev) => realmFeedSearchForSingleTag(prev, tagId),
           })
         }
       />

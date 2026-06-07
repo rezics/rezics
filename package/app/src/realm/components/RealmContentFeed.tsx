@@ -17,7 +17,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { FeedContentCard, FeedRenderer } from "@/feed/components/FeedRenderer";
+import { FeedContentCard, FeedRenderer } from "@/feed";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { realmContextReactionScopeKey } from "../models/realmPostContext";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
@@ -55,6 +55,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
       realmUnitId: realmId,
       sort,
       languages: readContext.languages,
+      appLocale: readContext.appLocale,
       languageMode: readContext.languageMode,
       ...(tagIds.length > 0 ? { tagIds } : {}),
       ...(realmModerationStatus ? { realmModerationStatus } : {}),

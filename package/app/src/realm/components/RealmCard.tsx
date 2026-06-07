@@ -1,6 +1,13 @@
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+  Card,
+  CardContent,
+} from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { unitHref } from "@/shared/ui/link";
@@ -13,6 +20,8 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const { t } = useTranslation(["common", "entity"]);
   const title = realm.title ?? t("entity:realm_untitled");
   const description = contentDocMarkdownFallback(realm.description);
+  const avatarUrl =
+    realm.extra?.avatar?.kind === "url" ? realm.extra.avatar.url : undefined;
 
   return (
     <Card surface="plain" className="cursor-pointer">
@@ -25,7 +34,15 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
         className="block w-full text-left"
       >
         <CardContent>
-          <h3 className="truncate text-lg font-semibold">{title}</h3>
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar className="size-10 rounded-md bg-surface-subtle">
+              <AvatarImage src={avatarUrl} alt="" />
+              <AvatarFallback className="rounded-md leading-ui">
+                {title.trim().slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <h3 className="min-w-0 truncate text-lg font-semibold">{title}</h3>
+          </div>
           <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
             {description || t("common:no_description")}
           </p>

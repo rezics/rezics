@@ -13,6 +13,7 @@ interface RealmTagBrowserProps {
   realmId: string;
   tagTree?: TagTreeNode[];
   tagView?: RealmTagView | null;
+  onTagSelect?: (tagId: string) => void;
 }
 
 type TagEntry = {
@@ -79,11 +80,30 @@ function groupTags(entries: TagEntry[]) {
   return grouped;
 }
 
-function TagChip({ entry }: { entry: TagEntry }) {
+function TagChip({
+  entry,
+  onTagSelect,
+}: {
+  entry: TagEntry;
+  onTagSelect?: (tagId: string) => void;
+}) {
+  if (!onTagSelect) {
+    return (
+      <span className="rounded-sm bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary">
+        {entry.label}
+      </span>
+    );
+  }
+
   return (
-    <span className="rounded-sm bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary">
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      onClick={() => onTagSelect(entry.tagId)}
+    >
       {entry.label}
-    </span>
+    </Button>
   );
 }
 
@@ -91,6 +111,7 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
   realmId: _realmId,
   tagTree,
   tagView,
+  onTagSelect,
 }) => {
   const locale = useLocale();
   const entries = useMemo(
@@ -141,7 +162,11 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
               </h2>
               <div className="flex flex-wrap gap-2">
                 {items.map((entry) => (
-                  <TagChip key={entry.tagId} entry={entry} />
+                  <TagChip
+                    key={entry.tagId}
+                    entry={entry}
+                    onTagSelect={onTagSelect}
+                  />
                 ))}
               </div>
             </section>
@@ -155,14 +180,18 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
               className="flex"
               style={{ paddingInlineStart: `${entry.depth * 1.25}rem` }}
             >
-              <TagChip entry={entry} />
+              <TagChip entry={entry} onTagSelect={onTagSelect} />
             </div>
           ))}
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
           {entries.map((entry) => (
-            <TagChip key={entry.tagId} entry={entry} />
+            <TagChip
+              key={entry.tagId}
+              entry={entry}
+              onTagSelect={onTagSelect}
+            />
           ))}
         </div>
       )}

@@ -1,74 +1,20 @@
-import { postQueries } from "@rezics/api/post/post";
-import { mainMarkdownSource, type RealmBannerExtra } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
-import { useQuery } from "@tanstack/react-query";
+import type { RealmBannerExtra } from "@rezics/contract";
 import type React from "react";
-import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export interface BannerSectionProps {
   banner?: RealmBannerExtra | null;
 }
 
-function getPostBannerUrl(post: unknown): string | undefined {
-  const extra = (post as { extra?: Record<string, unknown> | null })?.extra;
-  const coverUrl = extra?.coverUrl;
-  if (typeof coverUrl === "string" && coverUrl.trim()) return coverUrl;
-
-  const body =
-    mainMarkdownSource((post as { content?: unknown })?.content) ?? "";
-  const markdownImage = body.match(/!\[[^\]]*]\(([^)]+)\)/);
-  return markdownImage?.[1];
-}
-
-function getPostBannerTitle(post: unknown, fallbackTitle: string): string {
-  const body =
-    mainMarkdownSource((post as { content?: unknown })?.content) ?? "";
-  return body.trim().split("\n").find(Boolean) ?? fallbackTitle;
-}
-
 export const BannerSection: React.FC<BannerSectionProps> = ({ banner }) => {
-  const { t } = useTranslation(["entity"]);
-  const readContext = useReadLanguageContext();
-  const postId = banner?.kind === "post" ? banner.unitId : undefined;
-  const { data: post, isError } = useQuery({
-    ...postQueries.detail(postId ?? "", { languages: readContext.languages }),
-    enabled: readContext.ready && Boolean(postId),
-  });
-
-  if (!banner || isError) return null;
-
-  if (banner.kind === "url") {
-    return (
-      <section className="overflow-hidden rounded-md bg-surface-subtle">
-        <img
-          src={banner.url}
-          alt=""
-          className="h-48 w-full object-cover md:h-64"
-        />
-      </section>
-    );
-  }
-
-  if (!post) return null;
-
-  const imageUrl = getPostBannerUrl(post);
-  if (imageUrl) {
-    return (
-      <section className="overflow-hidden rounded-md bg-surface-subtle">
-        <img
-          src={imageUrl}
-          alt=""
-          className="h-48 w-full object-cover md:h-64"
-        />
-      </section>
-    );
-  }
+  if (!banner?.url) return null;
 
   return (
-    <section className="rounded-md bg-surface-subtle p-6">
-      <p className="text-lg font-medium leading-ui text-text-primary">
-        {getPostBannerTitle(post, t("entity:realm_banner"))}
-      </p>
+    <section className="overflow-hidden rounded-md bg-surface-subtle">
+      <img
+        src={banner.url}
+        alt=""
+        className="h-48 w-full object-cover md:h-64"
+      />
     </section>
   );
 };

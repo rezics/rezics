@@ -26,6 +26,7 @@ import type {
   UpdateRealmTagContextInput,
 } from "@rezics/contract";
 import {
+  type QueryClient,
   type UseMutationOptions,
   useMutation,
   useQueryClient,
@@ -50,6 +51,27 @@ function invalidateRealmCommunityList(
   queryClient.invalidateQueries({
     queryKey: realmKeys.detail(realmUnitId),
   });
+}
+
+export async function syncRealmMembershipMutationCache({
+  queryClient,
+  realmUnitId,
+}: {
+  queryClient: QueryClient;
+  realmUnitId: string;
+}) {
+  await Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: realmKeys.members(realmUnitId),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: realmKeys.detail(realmUnitId),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: realmKeys.mine(),
+    }),
+    invalidateForCacheDomain(queryClient, "realm-membership"),
+  ]);
 }
 
 // ---- CRUD mutations ----
@@ -144,14 +166,11 @@ export function useJoinRealmMutation(
   return useMutation({
     mutationFn: ({ realmUnitId, input }) => realmApi.join(realmUnitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.members(variables.realmUnitId),
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await syncRealmMembershipMutationCache({
+        queryClient,
+        realmUnitId: variables.realmUnitId,
       });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(variables.realmUnitId),
-      });
-      void invalidateForCacheDomain(queryClient, "realm-membership");
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -171,14 +190,8 @@ export function useLeaveRealmMutation(
   return useMutation({
     mutationFn: (realmUnitId: string) => realmApi.leave(realmUnitId),
     ...options,
-    onSuccess: (data, realmUnitId, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.members(realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(realmUnitId),
-      });
-      void invalidateForCacheDomain(queryClient, "realm-membership");
+    onSuccess: async (data, realmUnitId, onMutateResult, context) => {
+      await syncRealmMembershipMutationCache({ queryClient, realmUnitId });
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
   });

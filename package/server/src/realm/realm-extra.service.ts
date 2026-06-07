@@ -1,9 +1,10 @@
 import type {
-  RealmBannerExtra,
+  RealmImageExtra,
+  RealmTagView,
   RezicsSessionClaims,
   TagTreeNode,
 } from "@rezics/contract";
-import { LICENSE_SLUGS } from "@rezics/contract";
+import { LICENSE_SLUGS, realmTagViewStyleValues } from "@rezics/contract";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { hasAuthorityOver } from "@/unit/authority";
 import { Realm, RealmMember, Unit, Zone } from "../db/schema";
@@ -31,15 +32,19 @@ type SingleExtraKey =
   | "rule"
   | "about"
   | "banner"
+  | "avatar"
   | "defaultLicenseSlug"
+  | "tagView"
   | "wikiZoneUnitId";
-type UnitReferenceExtraKey = "rule" | "about" | "banner";
+type UnitReferenceExtraKey = "rule" | "about";
 
 const SINGLE_EXTRA_KEYS = new Set<string>([
   "rule",
   "about",
   "banner",
+  "avatar",
   "defaultLicenseSlug",
+  "tagView",
   "wikiZoneUnitId",
 ]);
 
@@ -247,16 +252,6 @@ function readUnitReference(extra: unknown, key: string): string | null {
   if ((key === "rule" || key === "about") && typeof value === "string") {
     return value;
   }
-  if (
-    key === "banner" &&
-    value &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    (value as { kind?: unknown }).kind === "post" &&
-    typeof (value as { unitId?: unknown }).unitId === "string"
-  ) {
-    return (value as { unitId: string }).unitId;
-  }
   return null;
 }
 
@@ -275,7 +270,13 @@ export async function filterRealmExtraPublic(
   const next = { ...(extra as ExtraJson) };
   const refs = new Map<UnitReferenceExtraKey, string>();
 
-  for (const key of ["rule", "about", "banner"] as const) {
+  for (const key of ["banner", "avatar"] as const) {
+    if (key in next && !isValidImageExtra(next[key])) {
+      delete next[key];
+    }
+  }
+
+  for (const key of ["rule", "about"] as const) {
     const id = readUnitReference(next, key);
     if (id) refs.set(key, id);
   }
@@ -288,6 +289,13 @@ export async function filterRealmExtraPublic(
   }
 
   return next;
+}
+
+function isValidImageExtra(value: unknown): value is RealmImageExtra {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const image = value as RealmImageExtra;
+  if (image.kind !== "url" || typeof image.url !== "string") return false;
+  return isHttpUrl(image.url.trim());
 }
 
 function writeList(extra: unknown, key: string, list: string[]): ExtraJson {
@@ -490,29 +498,83 @@ async function validateSingleExtraValue(
     return value;
   }
 
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new RealmExtraError("INVALID_VALUE", "banner must be an object", 400);
-  }
-  const banner = value as RealmBannerExtra;
-  if (banner.kind === "post") {
-    if (typeof banner.unitId !== "string" || banner.unitId.length === 0) {
+  if (key === "tagView") {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
       throw new RealmExtraError(
         "INVALID_VALUE",
-        "banner.unitId must be a Post Unit ID string",
+        "tagView must be an object",
         400,
       );
     }
-    await validatePostUnit(banner.unitId, "banner");
-    return { kind: "post", unitId: banner.unitId };
+    const tagView = value as RealmTagView;
+    if (
+      !realmTagViewStyleValues.includes(tagView.defaultStyle) ||
+      typeof tagView.allowViewerSwitch !== "boolean"
+    ) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "tagView must include a valid defaultStyle and allowViewerSwitch boolean",
+        400,
+      );
+    }
+    return {
+      defaultStyle: tagView.defaultStyle,
+      allowViewerSwitch: tagView.allowViewerSwitch,
+    };
   }
-  if (banner.kind === "url" && typeof banner.url === "string") {
-    return { kind: "url", url: banner.url };
+
+  if (key === "banner" || key === "avatar") {
+    return validateImageExtraValue(key, value);
   }
+
   throw new RealmExtraError(
     "INVALID_VALUE",
-    'banner must be { kind: "post"; unitId } or { kind: "url"; url }',
+    "Unsupported single extra key",
     400,
   );
+}
+
+function validateImageExtraValue(key: "banner" | "avatar", value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new RealmExtraError("INVALID_VALUE", `${key} must be an object`, 400);
+  }
+
+  const image = value as RealmImageExtra;
+  if (image.kind !== "url" || typeof image.url !== "string") {
+    throw new RealmExtraError(
+      "INVALID_VALUE",
+      `${key} must be { kind: "url"; url }`,
+      400,
+    );
+  }
+
+  const url = image.url.trim();
+  if (!url) {
+    throw new RealmExtraError(
+      "INVALID_VALUE",
+      `${key}.url must be a non-empty URL string`,
+      400,
+    );
+  }
+
+  if (!isHttpUrl(url)) {
+    throw new RealmExtraError(
+      "INVALID_VALUE",
+      `${key}.url must be an HTTP(S) URL`,
+      400,
+    );
+  }
+
+  return { kind: "url", url };
+}
+
+function isHttpUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 async function updateExtraWithLock(

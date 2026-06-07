@@ -43,6 +43,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PinboardAdminSection } from "@/pinboard";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { unitHref } from "@/shared/ui/link";
 import {
   AddUnitTranslationLanguageDialog,
@@ -51,6 +52,7 @@ import {
 import { RealmMemberList } from "../components/RealmMemberList";
 import { canManageRealm } from "../models/canManageRealm";
 import {
+  AvatarPicker,
   BannerPicker,
   SlotPicker,
   TagTreeEditor,
@@ -59,20 +61,41 @@ import {
 } from "../sections/RealmManageEditors";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 
+type RealmManageTab =
+  | "profile"
+  | "organization"
+  | "wiki"
+  | "moderation"
+  | "members"
+  | "danger";
+
 interface RealmManagePageProps {
   realmId: string;
+  activeTab?: RealmManageTab;
+  onTabChange?: (tab: RealmManageTab) => void;
 }
 
-export function RealmManagePage({ realmId }: RealmManagePageProps) {
+export function RealmManagePage({
+  realmId,
+  activeTab = "profile",
+  onTabChange,
+}: RealmManagePageProps) {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const readContext = useReadLanguageContext();
   const {
     data: realm,
     error: realmError,
     isError: realmIsError,
     isLoading,
-  } = useQuery(realmDetailQuery(realmId));
+  } = useQuery({
+    ...realmDetailQuery(realmId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
   const { data: membership, isLoading: membershipLoading } = useQuery(
     myRealmMembershipQuery(realmId),
   );
@@ -231,7 +254,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
       <h1 className="mb-6 text-2xl font-semibold">
         {t("entity:realm_manage")}
       </h1>
-      <Tabs defaultValue="profile">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => onTabChange?.(value as RealmManageTab)}
+      >
         <TabsList className="mb-6 flex flex-wrap">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="organization">Organization</TabsTrigger>
@@ -280,6 +306,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
             slotKey="about"
             value={realm.extra?.about}
           />
+          <AvatarPicker realmId={realmId} value={realm.extra?.avatar ?? null} />
           <BannerPicker realmId={realmId} value={realm.extra?.banner ?? null} />
           <SlotPicker
             realmId={realmId}

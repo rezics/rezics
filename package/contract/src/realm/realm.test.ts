@@ -4,6 +4,7 @@ import {
   realmDTOSchema,
   realmListBodySchema,
   realmListQuerySchema,
+  realmReadQuerySchema,
   resolveRealmRuleQuerySchema,
 } from "./realm";
 
@@ -49,6 +50,7 @@ describe("Realm read language schemas", () => {
     expect(
       Value.Check(realmListQuerySchema, {
         languages: "ja,en",
+        appLocale: "zh-hant",
         languageMode: "preferred",
         limit: 20,
       }),
@@ -56,8 +58,19 @@ describe("Realm read language schemas", () => {
     expect(
       Value.Check(realmListBodySchema, {
         languages: ["ja", "en"],
+        appLocale: "zh-hant",
         languageMode: "all",
         limit: 20,
+      }),
+    ).toBe(true);
+  });
+
+  test("detail schema accepts app locale and explicit language", () => {
+    expect(
+      Value.Check(realmReadQuerySchema, {
+        explicitLanguage: "ja",
+        appLocale: "zh-hant",
+        languages: "en,de",
       }),
     ).toBe(true);
   });
@@ -66,6 +79,7 @@ describe("Realm read language schemas", () => {
     expect(
       Value.Check(resolveRealmRuleQuerySchema, {
         language: "ja",
+        appLocale: "zh-hant",
         languages: "ja,en",
       }),
     ).toBe(true);

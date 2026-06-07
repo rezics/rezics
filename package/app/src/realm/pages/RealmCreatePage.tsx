@@ -17,7 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, FileText, LibraryBig, ListPlus, Vote } from "lucide-react";
 import { useState } from "react";
 import { WikiPostEditor } from "@/post";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
 import { RealmExistingPostSubmitSection } from "../components/RealmExistingPostSubmitSection";
 import { RealmPollWorkspace } from "../components/RealmPollWorkspace";
@@ -49,10 +49,14 @@ export function RealmCreatePage({
   onModeChange,
 }: RealmCreatePageProps) {
   const { t } = useTranslation(["common", "entity"]);
-  const languages = useReadLanguageCandidates();
-  const { data: realm, isLoading: realmLoading } = useQuery(
-    realmDetailQuery(realmId, { languages }),
-  );
+  const readContext = useReadLanguageContext();
+  const { data: realm, isLoading: realmLoading } = useQuery({
+    ...realmDetailQuery(realmId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
   const { data: membership, isLoading: membershipLoading } = useQuery(
     myRealmMembershipQuery(realmId),
   );

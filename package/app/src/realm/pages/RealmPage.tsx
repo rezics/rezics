@@ -12,6 +12,9 @@ import {
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Button,
   Checkbox,
   Select,
@@ -28,8 +31,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FeedLayout } from "@/feed";
 import { PinnedFeedSection } from "@/pinboard";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
 import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
@@ -50,6 +54,7 @@ import { RuleSection } from "../sections/RuleSection";
 
 export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
 export type { RealmFeedSort };
+
 type RealmModerationFilter = NonNullable<
   PostListQuery["realmModerationStatus"]
 >;
@@ -82,6 +87,8 @@ interface RealmPageProps {
   onTabChange?: (tab: RealmPageTab) => void;
   onFeedSortChange?: (sort: RealmFeedSort) => void;
   onFeedTagIdsChange?: (tagIds: string[]) => void;
+  onOpenTagsTab?: () => void;
+  onTagSelect?: (tagId: string) => void;
 }
 
 export function RealmPage({
@@ -92,12 +99,18 @@ export function RealmPage({
   onTabChange,
   onFeedSortChange,
   onFeedTagIdsChange,
+  onOpenTagsTab,
+  onTagSelect,
 }: RealmPageProps) {
   const { t } = useTranslation(["common", "entity"]);
-  const languages = useReadLanguageCandidates();
-  const { data: realm, isLoading } = useQuery(
-    realmDetailQuery(realmId, { languages }),
-  );
+  const readContext = useReadLanguageContext();
+  const { data: realm, isLoading } = useQuery({
+    ...realmDetailQuery(realmId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const { data: settings } = useQuery({
     ...userQueries.settings(),
@@ -138,6 +151,8 @@ export function RealmPage({
 
   const title = realm.title ?? t("entity:realm_untitled");
   const description = contentDocMarkdownFallback(realm.description);
+  const avatarUrl =
+    realm.extra?.avatar?.kind === "url" ? realm.extra.avatar.url : undefined;
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
@@ -154,19 +169,27 @@ export function RealmPage({
       <BannerSection banner={realm.extra?.banner ?? null} />
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex flex-row items-center justify-between">
-          <div className="flex flex-row items-center gap-2">
-            <h1 className="text-2xl font-semibold">{title}</h1>
-            {showManage && (
-              <Link to="/realm/$realmId/manage" params={{ realmId }}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t("entity:realm_manage")}
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-            )}
+          <div className="flex min-w-0 flex-row items-center gap-3">
+            <Avatar className="size-14 rounded-md bg-surface-subtle">
+              <AvatarImage src={avatarUrl} alt="" />
+              <AvatarFallback className="rounded-md text-lg leading-ui">
+                {title.trim().slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-row items-center gap-2">
+              <h1 className="truncate text-2xl font-semibold">{title}</h1>
+              {showManage && (
+                <Link to="/realm/$realmId/manage" params={{ realmId }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t("entity:realm_manage")}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isMember ? (
@@ -224,14 +247,18 @@ export function RealmPage({
                 postUnitId={realm.extra?.rule ?? null}
               />
               <div className="flex flex-col gap-3">
-                <RealmFeedSortSwitcher
-                  value={feedSort}
-                  onChange={(sort) => onFeedSortChange?.(sort)}
-                />
                 <RealmFeedTagFilter
                   tagTree={tagTree}
                   selectedTagIds={feedTagIds}
                   onChange={(tagIds) => onFeedTagIdsChange?.(tagIds)}
+                  onOpenTagsTab={() => {
+                    if (onOpenTagsTab) onOpenTagsTab();
+                    else handleTabChange("tags");
+                  }}
+                />
+                <RealmFeedSortSwitcher
+                  value={feedSort}
+                  onChange={(sort) => onFeedSortChange?.(sort)}
                 />
                 {showManage ? (
                   <div className="flex flex-wrap items-center gap-2">
@@ -272,16 +299,18 @@ export function RealmPage({
                   </div>
                 ) : null}
               </div>
-              <PinnedFeedSection realmUnitId={realmId} />
-              <RealmContentFeed
-                realmId={realmId}
-                sort={feedSort}
-                tagIds={feedTagIds}
-                manageMode={showManage && manageMode}
-                realmModerationStatus={
-                  showManage && manageMode ? realmModerationStatus : undefined
-                }
-              />
+              <FeedLayout className="space-y-4">
+                <PinnedFeedSection realmUnitId={realmId} />
+                <RealmContentFeed
+                  realmId={realmId}
+                  sort={feedSort}
+                  tagIds={feedTagIds}
+                  manageMode={showManage && manageMode}
+                  realmModerationStatus={
+                    showManage && manageMode ? realmModerationStatus : undefined
+                  }
+                />
+              </FeedLayout>
             </div>
             <aside className="min-w-0">
               <AboutSection postUnitId={realm.extra?.about ?? null} />
@@ -308,6 +337,7 @@ export function RealmPage({
             realmId={realmId}
             tagTree={tagTree}
             tagView={realm.extra?.tagView ?? null}
+            onTagSelect={onTagSelect}
           />
         </TabsContent>
         <TabsContent value="members">

@@ -86,7 +86,7 @@ describe("realm extra single-key service", () => {
     }
   });
 
-  test("sets and replaces rule/about/banner/wiki Zone keys", async () => {
+  test("sets and replaces rule/about/banner/avatar/tag view/wiki Zone keys", async () => {
     await setSingleExtraKey(caller, "realm-1", "rule", "post-rule");
     expect(storedExtra.rule).toBe("post-rule");
 
@@ -102,13 +102,22 @@ describe("realm extra single-key service", () => {
       url: "https://example.com/banner.png",
     });
 
-    await setSingleExtraKey(caller, "realm-1", "banner", {
-      kind: "post",
-      unitId: "post-banner",
+    await setSingleExtraKey(caller, "realm-1", "avatar", {
+      kind: "url",
+      url: "https://example.com/avatar.png",
     });
-    expect(storedExtra.banner).toEqual({
-      kind: "post",
-      unitId: "post-banner",
+    expect(storedExtra.avatar).toEqual({
+      kind: "url",
+      url: "https://example.com/avatar.png",
+    });
+
+    await setSingleExtraKey(caller, "realm-1", "tagView", {
+      defaultStyle: "grouped",
+      allowViewerSwitch: false,
+    });
+    expect(storedExtra.tagView).toEqual({
+      defaultStyle: "grouped",
+      allowViewerSwitch: false,
     });
 
     await setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "zone-wiki");
@@ -119,14 +128,18 @@ describe("realm extra single-key service", () => {
     storedExtra = {
       rule: "post-rule",
       about: "post-about",
+      avatar: { kind: "url", url: "https://example.com/avatar.png" },
       banner: { kind: "url", url: "https://example.com/banner.png" },
+      tagView: { defaultStyle: "tree", allowViewerSwitch: true },
       tagTree: [{ tagId: "tag-action" }],
       wikiZoneUnitId: "zone-wiki",
     };
 
     await clearSingleExtraKey(caller, "realm-1", "rule");
     await clearSingleExtraKey(caller, "realm-1", "about");
+    await clearSingleExtraKey(caller, "realm-1", "avatar");
     await clearSingleExtraKey(caller, "realm-1", "banner");
+    await clearSingleExtraKey(caller, "realm-1", "tagView");
     await clearSingleExtraKey(caller, "realm-1", "tagTree");
     await clearSingleExtraKey(caller, "realm-1", "wikiZoneUnitId");
 
@@ -144,7 +157,24 @@ describe("realm extra single-key service", () => {
       setSingleExtraKey(caller, "realm-1", "banner", { kind: "post" }),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
+      setSingleExtraKey(caller, "realm-1", "avatar", {
+        kind: "url",
+        url: "file:///tmp/avatar.png",
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
       setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "missing-zone"),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "tagView", {
+        defaultStyle: "columns",
+        allowViewerSwitch: true,
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "tagView", {
+        defaultStyle: "flat",
+      }),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
       setTagTreeExtra(caller, "realm-1", [{ children: [{ tagId: "tag-a" }] }]),
@@ -216,30 +246,43 @@ describe("realm extra single-key service", () => {
     expect(updateExtraWithLockMock).toHaveBeenCalledTimes(2);
   });
 
-  test("public stale filtering removes stale rule/about/banner post references", async () => {
+  test("public stale filtering removes stale rule/about post references", async () => {
     const extra = await filterRealmExtraPublic({
       rule: "post-rule",
       about: "missing-post",
-      banner: { kind: "post", unitId: "deleted-post" },
+      banner: { kind: "url", url: "https://example.com/banner.png" },
       tagTree: [{ tagId: "tag-action" }],
     });
 
     expect(extra).toEqual({
       rule: "post-rule",
+      banner: { kind: "url", url: "https://example.com/banner.png" },
       tagTree: [{ tagId: "tag-action" }],
+    });
+  });
+
+  test("public stale filtering removes invalid banner and avatar shapes", async () => {
+    const extra = await filterRealmExtraPublic({
+      banner: { kind: "post", unitId: "post-banner" },
+      avatar: { kind: "url", url: "file:///tmp/avatar.png" },
+      tagView: { defaultStyle: "flat", allowViewerSwitch: true },
+    });
+
+    expect(extra).toEqual({
+      tagView: { defaultStyle: "flat", allowViewerSwitch: true },
     });
   });
 
   test("single-key public and admin reads surface stale markers", async () => {
     storedExtra = {
       rule: "missing-post",
-      banner: { kind: "post", unitId: "post-banner" },
+      banner: { kind: "url", url: "https://example.com/banner.png" },
     };
 
     await expect(readListPublic(null, "realm-1", "rule")).resolves.toEqual([]);
-    await expect(readListPublic(null, "realm-1", "banner")).resolves.toEqual([
-      "post-banner",
-    ]);
+    await expect(readListPublic(null, "realm-1", "banner")).resolves.toEqual(
+      [],
+    );
     await expect(readListAdmin(caller, "realm-1", "rule")).resolves.toEqual({
       unitIds: ["missing-post"],
       staleIds: ["missing-post"],

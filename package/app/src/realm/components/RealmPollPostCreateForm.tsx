@@ -4,6 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
 import { PollComposer } from "@/poll";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
@@ -33,6 +34,8 @@ export function RealmPollPostCreateForm({
   );
   const createMutation = useCreatePostMutation();
   const denial = policyDenialFromError(createMutation.error);
+  const validationMessage =
+    !title.trim() || !body.trim() ? t("common:required") : null;
 
   const createPostForPoll = (poll: PollDTO) => {
     const trimmed = body.trim();
@@ -52,11 +55,17 @@ export function RealmPollPostCreateForm({
         onSuccess: (post) => {
           onCreated?.(post);
           if (status === "PUBLISHED") {
+            toast.success("Post published.");
             navigate({
               to: "/realm/$realmId/post/$postUnitId",
               params: { realmId, postUnitId: post.unitId },
             });
+          } else {
+            toast.success(t("common:save_draft"));
           }
+        },
+        onError: (error) => {
+          toast.error(error.message);
         },
       },
     );
@@ -114,9 +123,16 @@ export function RealmPollPostCreateForm({
         </div>
       ) : (
         <div className="flex items-center justify-between gap-4 rounded-md bg-surface-subtle p-4">
-          <p className="text-sm leading-ui text-text-secondary">
-            {t("community:post_reply_placeholder")}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p className="m-0 text-sm leading-ui text-text-secondary">
+              {t("community:post_reply_placeholder")}
+            </p>
+            {validationMessage ? (
+              <p className="m-0 text-xs leading-dense text-error-text">
+                {validationMessage}
+              </p>
+            ) : null}
+          </div>
           <Button type="button" disabled>
             {t("community:poll_attach")}
           </Button>

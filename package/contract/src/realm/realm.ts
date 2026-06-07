@@ -3,8 +3,9 @@ import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { languageSchema } from "../language";
 import {
   listGetQueryBase,
-  listLanguageModeSchema,
   listPostBodyBase,
+  readLanguageBodyBase,
+  readLanguageGetQueryBase,
 } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { capabilityHintSchema } from "../permission/capability";
@@ -182,6 +183,7 @@ export type RealmRuleResolvedDTO =
 export const resolveRealmRuleQuerySchema = t.Object({
   language: t.Optional(languageSchema),
   languages: t.Optional(t.String()),
+  appLocale: t.Optional(languageSchema),
 });
 
 export const realmRuleAcknowledgementDTOSchema = t.Object({
@@ -469,12 +471,11 @@ export type LowScoreTagsResponse =
 
 export const realmListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
+  ...readLanguageGetQueryBase.properties,
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
-  languages: t.Optional(t.String()),
-  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -489,12 +490,11 @@ export type RealmListQuery = (typeof realmListQuerySchema)["static"];
 
 export const realmListBodySchema = t.Object({
   ...listPostBodyBase.properties,
+  ...readLanguageBodyBase.properties,
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
-  languages: t.Optional(t.Array(languageSchema)),
-  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -525,7 +525,8 @@ export const realmParamsSchema = t.Object({
 export type RealmParams = (typeof realmParamsSchema)["static"];
 
 export const realmReadQuerySchema = t.Object({
-  languages: t.Optional(t.String()),
+  ...readLanguageGetQueryBase.properties,
+  explicitLanguage: t.Optional(languageSchema),
 });
 
 export type RealmReadQuery = (typeof realmReadQuerySchema)["static"];

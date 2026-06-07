@@ -148,6 +148,7 @@ import { Route as MainLayoutTagBookBookIdTagIndexRouteImport } from './routes/_m
 import { Route as EditorBookBookIdEditHistoryIndexRouteImport } from './routes/_editor/book/$bookId/edit/history/index'
 import { Route as MainLayoutTagDomainUnitIdTitleTitleRouteImport } from './routes/_mainLayout/tag/domain/$unitId/title/$title'
 import { Route as MainLayoutTagBookBookIdTagDomainIdRouteImport } from './routes/_mainLayout/tag/book/$bookId/tag/$domainId'
+import { Route as EditorRealmRealmIdPostPostUnitIdEditRouteImport } from './routes/_editor/realm/$realmId/post/$postUnitId/edit'
 import { Route as EditorPostRootPostUnitIdContinueUnitIdEditRouteImport } from './routes/_editor/post/$rootPostUnitId/continue/$unitId/edit'
 import { Route as EditorBookBookIdEditHistorySequenceRouteImport } from './routes/_editor/book/$bookId/edit/history/$sequence'
 import { Route as EditorBookBookIdEditHistoryCompareTargetSequenceRouteImport } from './routes/_editor/book/$bookId/edit/history/compare/$targetSequence'
@@ -934,6 +935,12 @@ const MainLayoutTagBookBookIdTagDomainIdRoute =
     path: '/$domainId',
     getParentRoute: () => MainLayoutTagBookBookIdTagRouteRoute,
   } as any)
+const EditorRealmRealmIdPostPostUnitIdEditRoute =
+  EditorRealmRealmIdPostPostUnitIdEditRouteImport.update({
+    id: '/realm/$realmId/post/$postUnitId/edit',
+    path: '/realm/$realmId/post/$postUnitId/edit',
+    getParentRoute: () => EditorRoute,
+  } as any)
 const EditorPostRootPostUnitIdContinueUnitIdEditRoute =
   EditorPostRootPostUnitIdContinueUnitIdEditRouteImport.update({
     id: '/post/$rootPostUnitId/continue/$unitId/edit',
@@ -1089,6 +1096,7 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/node/$nodeId/': typeof BookBookIdNodeNodeIdIndexRoute
   '/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
+  '/realm/$realmId/post/$postUnitId/edit': typeof EditorRealmRealmIdPostPostUnitIdEditRoute
   '/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
   '/tag/domain/$unitId/title/$title': typeof MainLayoutTagDomainUnitIdTitleTitleRoute
   '/book/$bookId/edit/history/': typeof EditorBookBookIdEditHistoryIndexRoute
@@ -1221,6 +1229,7 @@ export interface FileRoutesByTo {
   '/book/$bookId/node/$nodeId': typeof BookBookIdNodeNodeIdIndexRoute
   '/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
+  '/realm/$realmId/post/$postUnitId/edit': typeof EditorRealmRealmIdPostPostUnitIdEditRoute
   '/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
   '/tag/domain/$unitId/title/$title': typeof MainLayoutTagDomainUnitIdTitleTitleRoute
   '/book/$bookId/edit/history': typeof EditorBookBookIdEditHistoryIndexRoute
@@ -1366,6 +1375,7 @@ export interface FileRoutesById {
   '/book_/$bookId/node/$nodeId/': typeof BookBookIdNodeNodeIdIndexRoute
   '/_editor/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/_editor/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
+  '/_editor/realm/$realmId/post/$postUnitId/edit': typeof EditorRealmRealmIdPostPostUnitIdEditRoute
   '/_mainLayout/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
   '/_mainLayout/tag/domain/$unitId/title/$title': typeof MainLayoutTagDomainUnitIdTitleTitleRoute
   '/_editor/book/$bookId/edit/history/': typeof EditorBookBookIdEditHistoryIndexRoute
@@ -1510,6 +1520,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/node/$nodeId/'
     | '/book/$bookId/edit/history/$sequence'
     | '/post/$rootPostUnitId/continue/$unitId/edit'
+    | '/realm/$realmId/post/$postUnitId/edit'
     | '/tag/book/$bookId/tag/$domainId'
     | '/tag/domain/$unitId/title/$title'
     | '/book/$bookId/edit/history/'
@@ -1642,6 +1653,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/node/$nodeId'
     | '/book/$bookId/edit/history/$sequence'
     | '/post/$rootPostUnitId/continue/$unitId/edit'
+    | '/realm/$realmId/post/$postUnitId/edit'
     | '/tag/book/$bookId/tag/$domainId'
     | '/tag/domain/$unitId/title/$title'
     | '/book/$bookId/edit/history'
@@ -1786,6 +1798,7 @@ export interface FileRouteTypes {
     | '/book_/$bookId/node/$nodeId/'
     | '/_editor/book/$bookId/edit/history/$sequence'
     | '/_editor/post/$rootPostUnitId/continue/$unitId/edit'
+    | '/_editor/realm/$realmId/post/$postUnitId/edit'
     | '/_mainLayout/tag/book/$bookId/tag/$domainId'
     | '/_mainLayout/tag/domain/$unitId/title/$title'
     | '/_editor/book/$bookId/edit/history/'
@@ -2774,6 +2787,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutTagBookBookIdTagDomainIdRouteImport
       parentRoute: typeof MainLayoutTagBookBookIdTagRouteRoute
     }
+    '/_editor/realm/$realmId/post/$postUnitId/edit': {
+      id: '/_editor/realm/$realmId/post/$postUnitId/edit'
+      path: '/realm/$realmId/post/$postUnitId/edit'
+      fullPath: '/realm/$realmId/post/$postUnitId/edit'
+      preLoaderRoute: typeof EditorRealmRealmIdPostPostUnitIdEditRouteImport
+      parentRoute: typeof EditorRoute
+    }
     '/_editor/post/$rootPostUnitId/continue/$unitId/edit': {
       id: '/_editor/post/$rootPostUnitId/continue/$unitId/edit'
       path: '/post/$rootPostUnitId/continue/$unitId/edit'
@@ -2853,6 +2873,7 @@ interface EditorRouteChildren {
   EditorReviewReviewIdEditRoute: typeof EditorReviewReviewIdEditRoute
   EditorShelfShelfIdEditRoute: typeof EditorShelfShelfIdEditRoute
   EditorPostRootPostUnitIdContinueUnitIdEditRoute: typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
+  EditorRealmRealmIdPostPostUnitIdEditRoute: typeof EditorRealmRealmIdPostPostUnitIdEditRoute
 }
 
 const EditorRouteChildren: EditorRouteChildren = {
@@ -2865,6 +2886,8 @@ const EditorRouteChildren: EditorRouteChildren = {
   EditorShelfShelfIdEditRoute: EditorShelfShelfIdEditRoute,
   EditorPostRootPostUnitIdContinueUnitIdEditRoute:
     EditorPostRootPostUnitIdContinueUnitIdEditRoute,
+  EditorRealmRealmIdPostPostUnitIdEditRoute:
+    EditorRealmRealmIdPostPostUnitIdEditRoute,
 }
 
 const EditorRouteWithChildren =
