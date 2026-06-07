@@ -1,12 +1,21 @@
+import type { PostDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { userEvent, within } from "storybook/test";
 
 import { type ReviewEditState, ReviewForm } from "./ReviewForm";
 
-const Wrapper = (args: { initial: ReviewEditState }) => {
+const Wrapper = (args: { initial: ReviewEditState; post?: PostDTO }) => {
   const [data, setData] = useState<ReviewEditState>(args.initial);
-  return <ReviewForm data={data} setData={setData} submitLabel="Publish" />;
+  return (
+    <ReviewForm
+      data={data}
+      setData={setData}
+      submitLabel="Publish"
+      defaultLanguage="en"
+      post={args.post}
+    />
+  );
 };
 
 const empty: ReviewEditState = {
@@ -36,6 +45,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
+export const UpdateMode: Story = {
+  args: {
+    initial: { ...filled, language: "en" },
+    post: {
+      unitId: "review-existing",
+      title: filled._editTitle,
+      content: { schema: "rezics.content", version: 1 },
+      resolvedLanguage: "en",
+      authorUserId: "user-1",
+      author: null,
+      extra: { rating: 8 },
+    } as PostDTO,
+  },
+};
+
 export const Empty: Story = {
   args: { initial: empty },
 };
@@ -50,7 +74,7 @@ export const HappyPath: Story = {
   args: { initial: empty },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const titleField = canvas.getByLabelText(/title/i);
+    const titleField = canvas.getByPlaceholderText(/title/i);
     await userEvent.type(titleField, "A worthy second read");
   },
 };

@@ -1,4 +1,8 @@
 export { PostCard } from "./components/item/PostCard";
+export {
+  PostDetail,
+  type PostDetailProps,
+} from "./components/detail/PostDetail";
 export { PostAuthorHeader } from "./components/parts/PostAuthorHeader";
 export { PostBodyMarkdown } from "./components/parts/PostBodyMarkdown";
 export { PostEditDialog } from "./forms/PostEditDialog";

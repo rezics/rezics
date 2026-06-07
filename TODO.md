@@ -34,16 +34,12 @@
 
 ## Before launch
 
+- [ ] SERVER_ISSUER: rezics-server 有沒有不符合 jwt 規範的問題或是安全問題？
 - [ ] server/src/env 的瘦身，看看有沒有好的位置去放
 - [ ] docker化，建立完善的部署脚本
 - [ ] 將所有app路由讓AI過一邊，實際上試試大併發的情況，分析請求上可能的任何性能問題，這是一個非常大的change，tasks集合，需要分段執行
 - [ ] deploy mode 的日誌和性能分析配置
 - [ ] podman 和 docker 的管理面板，看看 1panel的適配情況，以及討論到時候數據庫備份要怎麼做。
-
-## V2
-
-- [ ] introduce-api-unit-store
-- [ ] 一个 local 的数据库，基于indexdb 里面维护了 slugScope-slug-unitId 的对应关系 对于比如 /u/root-user/shelf/favorites 就要先查 slug-scope = u slug = root-user get unitId then, slug-scope = root-user-unitId slug = favorites get favorites shelf unitId  https://www.npmjs.com/package/dexie 
 
 ## Software related
 
