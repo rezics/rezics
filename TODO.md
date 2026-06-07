@@ -19,6 +19,7 @@
 - [ ] comment section sort by 旁邊添加 search comment , 樣式看 reddit
 
 ## Section 2
+- [ ] 允許用戶在 prefer 中按分類設定 只顯示偏好語言支持的內容，比如 post 只顯示這樣， 但是當前應當不做篩選的渲染。
 - [ ] award 支持兩種獎勵點數和現金獎勵
 - [ ] 支持轉發機制, 利用 targetUnit 添加一個 unit 類型，以及一個 post 模型，但是 post 不是必選的，然後 editor 區域也要擴展，允許用戶 以轉發/轉發批註的方式進行評論，通過 Model框選擇嗎？業界方案是？
 - [ ] https://www.usebruno.com/
