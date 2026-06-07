@@ -18,7 +18,17 @@ export function buildQueryString(
       continue;
     }
 
-    // 如果是对象或数组，序列化为 JSON 字符串
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (item === undefined || item === null || item === "") continue;
+        params.append(
+          key,
+          typeof item === "object" ? JSON.stringify(item) : String(item),
+        );
+      }
+      continue;
+    }
+
     if (typeof value === "object") {
       params.set(key, JSON.stringify(value));
     } else {

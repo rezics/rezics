@@ -2257,6 +2257,9 @@ export class PostService {
           (value): value is string => typeof value === "string",
         );
       }
+      if (typeof parsed === "string") {
+        return parsed.trim() ? [parsed.trim()] : [];
+      }
     } catch {
       // Fall back to comma-separated query values for hand-authored URLs.
     }
