@@ -9,6 +9,8 @@ import {
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import {
+  Alert,
+  AlertDescription,
   Button,
   Dialog,
   DialogContent,
@@ -18,6 +20,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { RootPostTranslationEditor } from "@/post";
 
 interface RemarkEditDialogProps {
@@ -40,16 +43,23 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   const [language, setLanguage] = useState(locale);
   const [title, setTitle] = useState(remark.title ?? "");
   const [text, setText] = useState(mainMarkdownSource(remark.content) ?? "");
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const updateMutation = useUpdatePostMutation({
     onSuccess: () => {
+      toast.success("Saved.");
       onClose();
+    },
+    onError: (error) => {
+      setSaveError(error.message);
+      toast.error(error.message);
     },
   });
 
   const handleSubmit = () => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle || !text.trim()) return;
+    setSaveError(null);
     const nextExtra = {
       ...(remark.extra ?? {}),
       ...(score !== null ? { rating: score } : {}),
@@ -68,6 +78,8 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
       },
     });
   };
+  const validationMessage =
+    !title.trim() || !text.trim() ? t("common:required") : null;
 
   return (
     <Dialog
@@ -82,6 +94,11 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
         </DialogHeader>
         <div className="pt-2">
           <div className="flex flex-col gap-4">
+            {saveError ? (
+              <Alert variant="destructive">
+                <AlertDescription>{saveError}</AlertDescription>
+              </Alert>
+            ) : null}
             <RatingInput
               value={score}
               onChange={setScore}
@@ -108,12 +125,19 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
           <Button variant="ghost" onClick={onClose}>
             {t("common:cancel")}
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={updateMutation.isPending || !title.trim() || !text.trim()}
-          >
-            {updateMutation.isPending ? t("common:saving") : t("common:save")}
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              onClick={handleSubmit}
+              disabled={updateMutation.isPending || Boolean(validationMessage)}
+            >
+              {updateMutation.isPending ? t("common:saving") : t("common:save")}
+            </Button>
+            {validationMessage ? (
+              <p className="m-0 text-xs leading-dense text-error-text">
+                {validationMessage}
+              </p>
+            ) : null}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

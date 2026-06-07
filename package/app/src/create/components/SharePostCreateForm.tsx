@@ -33,7 +33,8 @@ export function SharePostCreateForm({
   );
   const createMutation = useCreatePostMutation();
   const denial = policyDenialFromError(createMutation.error);
-  const disabled = createMutation.isPending || !title.trim();
+  const validationMessage = !title.trim() ? t("common:required") : null;
+  const disabled = createMutation.isPending || Boolean(validationMessage);
 
   const submit = (status: "DRAFT" | "PUBLISHED") => {
     if (!title.trim()) return;
@@ -56,6 +57,9 @@ export function SharePostCreateForm({
             to: "/post/$rootPostUnitId",
             params: { rootPostUnitId: post.unitId },
           });
+        },
+        onError: (error) => {
+          toast.error(error.message);
         },
       },
     );
@@ -92,6 +96,11 @@ export function SharePostCreateForm({
         saveDraftLabel={t("common:save_draft")}
         publishLabel={t("common:publish")}
       />
+      {validationMessage ? (
+        <p className="m-0 self-end text-xs leading-dense text-error-text">
+          {validationMessage}
+        </p>
+      ) : null}
     </div>
   );
 }

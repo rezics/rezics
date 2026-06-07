@@ -13,15 +13,110 @@ import type {
   UpdatePostInput,
 } from "@rezics/contract";
 import {
+  type QueryClient,
   type UseMutationOptions,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
 import { commentKeys } from "../comment/comment.keys";
 import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { unitKeys } from "../unit/unit.keys";
 import { postApi } from "./post.api";
 import { postKeys } from "./post.keys";
 import type { CreateRootPostInput } from "./post.types";
+
+type PostMutationCacheSyncInput = {
+  queryClient: QueryClient;
+  unitId: string;
+  data?: PostResponse;
+  removeDetail?: boolean;
+  targetUnitIds?: readonly (string | null | undefined)[];
+  variantUnitIds?: readonly (string | null | undefined)[];
+  realmUnitIds?: readonly (string | null | undefined)[];
+  authorUserIds?: readonly (string | null | undefined)[];
+};
+
+function compactIds(ids: readonly (string | null | undefined)[] = []) {
+  return [...new Set(ids.filter((id): id is string => Boolean(id)))];
+}
+
+/**
+ * Keeps post writes coherent across the split post/unit read surfaces.
+ * Scoped list prefixes are intentionally over-invalidated: latest ordering and
+ * membership depend on filters, moderation, language, realm, target, and time,
+ * so refetching is safer than per-sort cache surgery.
+ */
+export async function syncPostMutationCache({
+  queryClient,
+  unitId,
+  data,
+  removeDetail = false,
+  targetUnitIds = [],
+  variantUnitIds = [],
+  realmUnitIds = [],
+  authorUserIds = [],
+}: PostMutationCacheSyncInput) {
+  const resolvedUnitId = data?.unitId ?? unitId;
+
+  if (removeDetail) {
+    queryClient.removeQueries({ queryKey: postKeys.detail(resolvedUnitId) });
+  } else if (data) {
+    queryClient.setQueryData(postKeys.detail(resolvedUnitId), data);
+  }
+
+  const invalidations: Promise<unknown>[] = [
+    queryClient.invalidateQueries({
+      queryKey: postKeys.detail(resolvedUnitId),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: unitKeys.languages(resolvedUnitId),
+    }),
+    queryClient.invalidateQueries({ queryKey: postKeys.lists() }),
+  ];
+
+  for (const targetUnitId of compactIds([
+    data?.targetUnitId,
+    ...targetUnitIds,
+  ])) {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: postKeys.byTargets(targetUnitId),
+      }),
+    );
+  }
+
+  for (const variantUnitId of compactIds([
+    data?.variantUnitId,
+    ...variantUnitIds,
+  ])) {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: postKeys.byVariants(variantUnitId),
+      }),
+    );
+  }
+
+  for (const realmUnitId of compactIds([data?.realmUnitId, ...realmUnitIds])) {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: postKeys.byRealms(realmUnitId),
+      }),
+    );
+  }
+
+  for (const authorUserId of compactIds([
+    data?.authorUserId,
+    ...authorUserIds,
+  ])) {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: postKeys.byAuthors(authorUserId),
+      }),
+    );
+  }
+
+  await Promise.all(invalidations);
+}
 
 /**
  * Mutation for creating a post
@@ -37,34 +132,23 @@ export function useCreatePostMutation(
   return useMutation({
     mutationFn: (input: CreateRootPostInput) => postApi.create(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      // Invalidate lists broadly
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-
-      // Invalidate target-specific queries if post is attached to a unit
-      const targetUnitId = data.targetUnitId ?? variables.targetUnitId;
-      if (targetUnitId) {
-        queryClient.invalidateQueries({
-          queryKey: postKeys.byTargets(targetUnitId),
-        });
-      }
-
-      for (const realmUnitId of variables.realmUnitIds ?? []) {
-        queryClient.invalidateQueries({
-          queryKey: postKeys.byRealms(realmUnitId),
-        });
-      }
-
-      // Pre-populate detail cache
-      queryClient.setQueryData(postKeys.detail(data.unitId), data);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await syncPostMutationCache({
+        queryClient,
+        unitId: data.unitId,
+        data,
+        targetUnitIds: [variables.targetUnitId],
+        variantUnitIds: [variables.variantUnitId],
+        realmUnitIds: variables.realmUnitIds,
+      });
 
       // A draft create adds to the drafts list / dashboard; route through the
       // draft cache domain so both refresh.
       if (variables.status === "DRAFT") {
-        void invalidateForCacheDomain(queryClient, "draft");
+        await invalidateForCacheDomain(queryClient, "draft");
       }
 
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -84,24 +168,20 @@ export function useCreateWikiPostMutation(
   return useMutation({
     mutationFn: (input) => postApi.createWiki(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-      if (variables.targetUnitId) {
-        queryClient.invalidateQueries({
-          queryKey: postKeys.byTargets(variables.targetUnitId),
-        });
-      }
-      for (const realmUnitId of variables.realmUnitIds ?? []) {
-        queryClient.invalidateQueries({
-          queryKey: postKeys.byRealms(realmUnitId),
-        });
-      }
-      queryClient.setQueryData(postKeys.detail(data.unitId), data);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await syncPostMutationCache({
+        queryClient,
+        unitId: data.unitId,
+        data,
+        targetUnitIds: [variables.targetUnitId],
+        variantUnitIds: [variables.variantUnitId],
+        realmUnitIds: variables.realmUnitIds,
+      });
       // A draft wiki create surfaces in the drafts list / dashboard.
       if (variables.status === "DRAFT") {
-        void invalidateForCacheDomain(queryClient, "draft");
+        await invalidateForCacheDomain(queryClient, "draft");
       }
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -124,14 +204,13 @@ export function useUpdatePostMutation(
   return useMutation({
     mutationFn: ({ unitId, input }) => postApi.update(unitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      // Update the cache for this specific post
-      queryClient.setQueryData(postKeys.detail(variables.unitId), data);
-
-      // Invalidate lists to ensure they're refreshed
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await syncPostMutationCache({
+        queryClient,
+        unitId: variables.unitId,
+        data,
+      });
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -157,10 +236,13 @@ export function useUpdateWikiPostContentMutation(
     mutationFn: ({ unitId, title, content, language }) =>
       postApi.updateWikiContent(unitId, { title, content, language }),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(postKeys.detail(variables.unitId), data);
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await syncPostMutationCache({
+        queryClient,
+        unitId: variables.unitId,
+        data,
+      });
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -179,14 +261,13 @@ export function useDeletePostMutation(
   return useMutation({
     mutationFn: (unitId: string) => postApi.remove(unitId),
     ...options,
-    onSuccess: (data, unitId, onMutateResult, context) => {
-      // Remove from cache
-      queryClient.removeQueries({ queryKey: postKeys.detail(unitId) });
-
-      // Invalidate all lists
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-
-      options?.onSuccess?.(data, unitId, onMutateResult, context);
+    onSuccess: async (data, unitId, onMutateResult, context) => {
+      await syncPostMutationCache({
+        queryClient,
+        unitId,
+        removeDetail: true,
+      });
+      await options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });
 }
@@ -212,11 +293,16 @@ export function useSetPostPublicationMutation(
     mutationFn: ({ unitId, publish }) =>
       postApi.setPublication(unitId, { publish }),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      void invalidateForCacheDomain(queryClient, "draft");
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-      queryClient.setQueryData(postKeys.detail(data.unitId), data);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await Promise.all([
+        syncPostMutationCache({
+          queryClient,
+          unitId: variables.unitId,
+          data,
+        }),
+        invalidateForCacheDomain(queryClient, "draft"),
+      ]);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -236,17 +322,17 @@ export function useSubmitPostToRealmMutation(
   return useMutation({
     mutationFn: ({ unitId, input }) => postApi.submitToRealm(unitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(postKeys.detail(data.unitId), data);
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: postKeys.byRealms(variables.input.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: postKeys.byAuthors(data.authorUserId),
-      });
-      void invalidateForCacheDomain(queryClient, "draft");
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await Promise.all([
+        syncPostMutationCache({
+          queryClient,
+          unitId: variables.unitId,
+          data,
+          realmUnitIds: [variables.input.realmUnitId],
+        }),
+        invalidateForCacheDomain(queryClient, "draft"),
+      ]);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -272,13 +358,18 @@ export function useSetPostStateMutation(
   return useMutation({
     mutationFn: ({ unitId, input }) => postApi.setState(unitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(postKeys.detail(variables.unitId), data);
-      queryClient.invalidateQueries({
-        queryKey: commentKeys.all(),
-      });
-      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await Promise.all([
+        syncPostMutationCache({
+          queryClient,
+          unitId: variables.unitId,
+          data,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: commentKeys.all(),
+        }),
+      ]);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }

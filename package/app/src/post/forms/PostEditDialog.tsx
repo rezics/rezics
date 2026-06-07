@@ -24,7 +24,9 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import { RootPostTranslationEditor } from "./RootPostTranslationEditor";
+import { toast } from "sonner";
+import { isPostEditorSurfaceSubmittable } from "../models/postEditorSurface";
+import { PostEditorSurface } from "./PostEditorSurface";
 
 interface PostEditDialogProps {
   post: PostDTO | CommentDTO;
@@ -44,21 +46,18 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [language, setLanguage] = useState(locale);
   const [lockedError, setLockedError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const originalTitle = isComment ? "" : (post.title ?? "");
   const isWikiPost = !isComment && post.kind === PostKind.WIKI;
 
-  const updateMutation = useUpdatePostMutation({
-    onSuccess: () => {
-      onClose();
-    },
-  });
-  const updateWikiMutation = useUpdateWikiPostContentMutation({
-    onSuccess: () => {
-      onClose();
-    },
-    onError: (error) => {
-      const locked = getLockedFieldError(error);
-      if (!locked) return;
+  const handleSuccess = () => {
+    toast.success("Saved.");
+    onClose();
+  };
+
+  const handlePostError = (error: Error) => {
+    const locked = getLockedFieldError(error);
+    if (locked) {
       setLockedError(
         locked.offendingLockPath && locked.offendingPatchPath
           ? `Locked path: ${locked.offendingLockPath}; patch path: ${locked.offendingPatchPath}`
@@ -66,11 +65,25 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
             ? `Locked paths: ${locked.blockedPaths.join(", ")}`
             : locked.message,
       );
-    },
+      return;
+    }
+    setSaveError(error.message);
+    toast.error(error.message);
+  };
+
+  const updateMutation = useUpdatePostMutation({
+    onSuccess: handleSuccess,
+    onError: handlePostError,
+  });
+  const updateWikiMutation = useUpdateWikiPostContentMutation({
+    onSuccess: handleSuccess,
+    onError: handlePostError,
   });
   const updateCommentMutation = useUpdateCommentMutation({
-    onSuccess: () => {
-      onClose();
+    onSuccess: handleSuccess,
+    onError: (error) => {
+      setSaveError(error.message);
+      toast.error(error.message);
     },
   });
   const activeMutation = isComment
@@ -82,6 +95,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const handleSubmit = () => {
     if (!text.trim()) return;
     setLockedError(null);
+    setSaveError(null);
     const trimmedTitle = isComment ? undefined : title.trim();
     if (!isComment && !trimmedTitle) return;
     const content = markdownContentDoc(text.trim());
@@ -114,6 +128,13 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
       },
     });
   };
+  const validationMessage = (
+    isComment
+      ? !text.trim()
+      : !isPostEditorSurfaceSubmittable({ title, body: text })
+  )
+    ? t("common:required")
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -124,9 +145,9 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3 pt-2">
-          {lockedError ? (
+          {lockedError || saveError ? (
             <Alert variant="destructive">
-              <AlertDescription>{lockedError}</AlertDescription>
+              <AlertDescription>{lockedError ?? saveError}</AlertDescription>
             </Alert>
           ) : null}
           {isComment ? (
@@ -137,7 +158,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
               className="w-full min-h-[120px] max-h-[400px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             />
           ) : (
-            <RootPostTranslationEditor
+            <PostEditorSurface
               post={post}
               language={language}
               defaultLanguage={locale}
@@ -157,16 +178,19 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
           <Button variant="ghost" onClick={onClose}>
             {t("common:cancel")}
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              activeMutation.isPending ||
-              !text.trim() ||
-              (!isComment && !title.trim())
-            }
-          >
-            {activeMutation.isPending ? t("common:saving") : t("common:save")}
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              onClick={handleSubmit}
+              disabled={activeMutation.isPending || Boolean(validationMessage)}
+            >
+              {activeMutation.isPending ? t("common:saving") : t("common:save")}
+            </Button>
+            {validationMessage ? (
+              <p className="m-0 text-xs leading-dense text-error-text">
+                {validationMessage}
+              </p>
+            ) : null}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

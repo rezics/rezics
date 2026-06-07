@@ -12,10 +12,12 @@ import {
 import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { useAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
-import { RootPostTranslationEditor } from "./RootPostTranslationEditor";
+import { isPostEditorSurfaceSubmittable } from "../models/postEditorSurface";
+import { PostEditorSurface } from "./PostEditorSurface";
 
 export interface WikiPostEditorProps {
   targetUnitId?: string;
@@ -40,16 +42,31 @@ export function WikiPostEditor({
   const [title, setTitle] = useState(post?.title ?? "");
   const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const resize = useMemo(
     () => ({ height: 220, minHeight: 140, maxHeight: 520 }),
     [],
   );
-  const createMutation = useCreateWikiPostMutation({ onSuccess: onSaved });
+  const handleSaved = (savedPost: PostDTO) => {
+    toast.success("Saved.");
+    onSaved?.(savedPost);
+  };
+  const handleError = (error: Error) => {
+    setSaveError(error.message);
+    toast.error(error.message);
+  };
+  const createMutation = useCreateWikiPostMutation({
+    onSuccess: handleSaved,
+    onError: handleError,
+  });
   const updateMutation = useUpdateWikiPostContentMutation({
-    onSuccess: onSaved,
+    onSuccess: handleSaved,
     onError: (error) => {
       const locked = getLockedFieldError(error);
-      if (!locked) return;
+      if (!locked) {
+        handleError(error);
+        return;
+      }
       setLockedError(
         locked.offendingLockPath && locked.offendingPatchPath
           ? `Locked path: ${locked.offendingLockPath}; patch path: ${locked.offendingPatchPath}`
@@ -60,7 +77,8 @@ export function WikiPostEditor({
     },
   });
   const publicationMutation = useSetPostPublicationMutation({
-    onSuccess: onSaved,
+    onSuccess: handleSaved,
+    onError: handleError,
   });
   const activeMutation = post ? updateMutation : createMutation;
 
@@ -73,6 +91,7 @@ export function WikiPostEditor({
     const trimmedTitle = title.trim();
     if (!trimmedTitle || !trimmed) return;
     setLockedError(null);
+    setSaveError(null);
     const normalizedTargetUnitId = targetUnitId?.trim();
     createMutation.mutate({
       title: trimmedTitle,
@@ -91,6 +110,7 @@ export function WikiPostEditor({
     const trimmedTitle = title.trim();
     if (!trimmedTitle || !trimmed || !post) return;
     setLockedError(null);
+    setSaveError(null);
     updateMutation.mutate({
       unitId: post.unitId,
       title: trimmedTitle === post.title ? undefined : trimmedTitle,
@@ -98,15 +118,18 @@ export function WikiPostEditor({
       language,
     });
   };
+  const validationMessage = !isPostEditorSurfaceSubmittable({ title, body })
+    ? t("common:required")
+    : null;
 
   return (
     <div className="flex flex-col gap-3">
-      {lockedError ? (
+      {lockedError || saveError ? (
         <Alert variant="destructive">
-          <AlertDescription>{lockedError}</AlertDescription>
+          <AlertDescription>{lockedError ?? saveError}</AlertDescription>
         </Alert>
       ) : null}
-      <RootPostTranslationEditor
+      <PostEditorSurface
         post={post}
         language={language}
         defaultLanguage={defaultLanguage}
@@ -121,48 +144,64 @@ export function WikiPostEditor({
       />
 
       {post ? (
-        <div className="flex items-center justify-end gap-2">
-          {onCancel ? (
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center justify-end gap-2">
+            {onCancel ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onCancel}
+                disabled={activeMutation.isPending}
+              >
+                {t("common:cancel")}
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="ghost"
-              onClick={onCancel}
-              disabled={activeMutation.isPending}
+              onClick={() =>
+                publicationMutation.mutate({
+                  unitId: post.unitId,
+                  publish: !isPublished,
+                })
+              }
+              disabled={publicationMutation.isPending}
             >
-              {t("common:cancel")}
+              {isPublished ? t("common:revert_to_draft") : t("common:publish")}
             </Button>
+            <Button
+              type="button"
+              onClick={handleUpdate}
+              disabled={updateMutation.isPending || Boolean(validationMessage)}
+            >
+              {updateMutation.isPending
+                ? t("common:saving")
+                : t("common:update")}
+            </Button>
+          </div>
+          {validationMessage ? (
+            <p className="m-0 text-xs leading-dense text-error-text">
+              {validationMessage}
+            </p>
           ) : null}
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() =>
-              publicationMutation.mutate({
-                unitId: post.unitId,
-                publish: !isPublished,
-              })
-            }
-            disabled={publicationMutation.isPending}
-          >
-            {isPublished ? t("common:revert_to_draft") : t("common:publish")}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleUpdate}
-            disabled={updateMutation.isPending || !title.trim() || !body.trim()}
-          >
-            {updateMutation.isPending ? t("common:saving") : t("common:update")}
-          </Button>
         </div>
       ) : (
-        <DraftPublishActions
-          className="items-end"
-          onSaveDraft={() => handleCreate("DRAFT")}
-          onPublish={() => handleCreate("PUBLISHED")}
-          isPending={createMutation.isPending}
-          saveDraftDisabled={!title.trim() || !body.trim()}
-          publishDisabled={!title.trim() || !body.trim()}
-          denial={createDenial}
-        />
+        <div className="flex flex-col items-end gap-1">
+          <DraftPublishActions
+            className="items-end"
+            onSaveDraft={() => handleCreate("DRAFT")}
+            onPublish={() => handleCreate("PUBLISHED")}
+            isPending={createMutation.isPending}
+            saveDraftDisabled={Boolean(validationMessage)}
+            publishDisabled={Boolean(validationMessage)}
+            denial={createDenial}
+          />
+          {validationMessage ? (
+            <p className="m-0 text-xs leading-dense text-error-text">
+              {validationMessage}
+            </p>
+          ) : null}
+        </div>
       )}
     </div>
   );

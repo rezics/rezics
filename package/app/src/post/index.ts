@@ -3,6 +3,14 @@ export { PostAuthorHeader } from "./components/parts/PostAuthorHeader";
 export { PostBodyMarkdown } from "./components/parts/PostBodyMarkdown";
 export { PostEditDialog } from "./forms/PostEditDialog";
 export {
+  PostEditorSurface,
+  type PostEditorSurfaceProps,
+} from "./forms/PostEditorSurface";
+export {
+  isPostEditorSurfaceSubmittable,
+  type PostEditorSurfaceDraft,
+} from "./models/postEditorSurface";
+export {
   type RootPostTranslationDraft,
   RootPostTranslationEditor,
   type RootPostTranslationEditorProps,

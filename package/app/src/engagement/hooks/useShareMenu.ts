@@ -122,6 +122,9 @@ export function useShareMenu({
             params: { rootPostUnitId: post.unitId },
           });
         },
+        onError: (error) => {
+          toast.error(error.message);
+        },
       },
     );
   };
