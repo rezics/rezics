@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { SLUG_SCOPES } from "@rezics/contract";
-import type { SlugScopesMap } from "./seed-slug-scopes";
 import { SlugScope, Unit } from "../../schema";
+import type { SlugScopesMap } from "./seed-slug-scopes";
 import { seedSlugScopes } from "./seed-slug-scopes";
 
 function createSelectMock(existingIds: string[]) {

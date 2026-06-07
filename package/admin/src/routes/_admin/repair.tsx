@@ -1,8 +1,8 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import type {
   AdminRepairJobScope,
   HistoryOutboxRepairStatus,
 } from "@rezics/api";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const RepairJobsPage = lazyRouteComponent(
   () => import("@/repair/pages/RepairJobsPage"),

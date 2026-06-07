@@ -1,12 +1,6 @@
 export type { SearchResponse } from "meilisearch";
 export { type MeiliConfig, SearchClient } from "./client";
 export {
-  buildShelfItemDocument,
-  SHELF_ITEM_INDEX_NAME,
-  shelfItemDocumentId,
-  type ShelfItemDocumentRow,
-} from "./shelf-item";
-export {
   bucketize,
   buildProgressDocument,
   PROGRESS_BUCKET_COUNT,
@@ -25,6 +19,12 @@ export {
   getExpectedMeiliIndexSettings,
   getExpectedMeiliIndexUids,
 } from "./schema";
+export {
+  buildShelfItemDocument,
+  SHELF_ITEM_INDEX_NAME,
+  type ShelfItemDocumentRow,
+  shelfItemDocumentId,
+} from "./shelf-item";
 export {
   buildCommentDocument,
   buildContentDocument,
@@ -89,6 +89,10 @@ export {
   syncProgressSegment,
   syncRealmSegment,
   syncReleaseContentSegment,
+  syncShelfItem,
+  syncShelfItemSegment,
+  syncShelfItemsByShelfSegment,
+  syncShelfItemsBySourceItemSegment,
   syncSingleComment,
   syncSingleContent,
   syncSingleEntity,
@@ -99,9 +103,5 @@ export {
   syncSingleRealm,
   syncSingleShelfItem,
   syncSingleUser,
-  syncShelfItem,
-  syncShelfItemSegment,
-  syncShelfItemsByShelfSegment,
-  syncShelfItemsBySourceItemSegment,
   syncUserSegment,
 } from "./sync";

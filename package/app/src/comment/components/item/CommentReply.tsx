@@ -17,9 +17,9 @@ import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
 import { PostAuthorHeader, PostBodyMarkdown } from "@/post";
 import {
+  commentPolicy,
   commentRowActions,
   commentRowOverflow,
-  commentPolicy,
 } from "../../models/commentPolicy";
 import { CommentPromotionBadge } from "../parts/CommentPromotionBadge";
 

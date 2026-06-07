@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   allowedReactionKindSchema,
+  createSchema,
   createShareResponseSchema,
   createShareSchema,
-  createSchema,
   knownReactionKindSchema,
   shareSummaryResponseSchema,
 } from "./reaction.schema";

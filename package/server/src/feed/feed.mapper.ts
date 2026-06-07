@@ -1,8 +1,8 @@
 import type {
   FeedContentRow,
   FeedCursor,
-  FeedRow,
   FeedResponse,
+  FeedRow,
   FeedScope,
   FeedSort,
   FeedWorkSummary,

@@ -2,11 +2,11 @@ import { describe, expect, it } from "bun:test";
 import { type CommentDTO, markdownContentDoc } from "@rezics/contract";
 import {
   buildCommentTreeNodes,
+  type CommentTreeNodeModel,
   hasLaterSiblingBranch,
   mergeCommentChildSliceRows,
   mergeCommentDiscoveryRows,
   orderSiblingsByPromotion,
-  type CommentTreeNodeModel,
 } from "../models/commentTreeRails";
 
 function makePost(

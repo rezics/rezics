@@ -40,6 +40,9 @@ import {
   syncProgressSegment,
   syncRealmSegment,
   syncReleaseContentSegment,
+  syncShelfItemSegment,
+  syncShelfItemsByShelfSegment,
+  syncShelfItemsBySourceItemSegment,
   syncSingleComment,
   syncSingleContent,
   syncSingleEntity,
@@ -50,9 +53,6 @@ import {
   syncSingleRealm,
   syncSingleShelfItem,
   syncSingleUser,
-  syncShelfItemSegment,
-  syncShelfItemsByShelfSegment,
-  syncShelfItemsBySourceItemSegment,
   syncUserSegment,
 } from "@rezics/search/sync";
 import {

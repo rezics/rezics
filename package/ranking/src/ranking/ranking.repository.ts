@@ -13,8 +13,8 @@ import {
 import { db, disconnectRankingDb } from "../db/client";
 import {
   type RankingReactionBucketRow,
-  rankingReactionBuckets,
   type RankingSignalBucketRow,
+  rankingReactionBuckets,
   rankingSignalBuckets,
   type ServingPatchStatusRow,
   servingPatchStatuses,

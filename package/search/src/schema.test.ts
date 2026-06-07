@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { getExpectedMeiliIndexSchema } from "./schema";
 import {
   buildShelfItemDocument,
-  shelfItemDocumentId,
   SHELF_ITEM_INDEX_NAME,
+  shelfItemDocumentId,
 } from "./shelf-item";
 
 describe("expected Meilisearch index settings", () => {

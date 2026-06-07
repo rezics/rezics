@@ -33,8 +33,12 @@ import type {
   PostsPerWorkPlan,
   TreeShapePlan,
 } from "./types.js";
-import { withUpdatedAt, withUpdatedAtRows } from "./utils.js";
-import { chunkedParallel, randomBoolean } from "./utils.js";
+import {
+  chunkedParallel,
+  randomBoolean,
+  withUpdatedAt,
+  withUpdatedAtRows,
+} from "./utils.js";
 
 const CHUNK_SIZE = 10;
 const BATCH_THRESHOLD = 20;

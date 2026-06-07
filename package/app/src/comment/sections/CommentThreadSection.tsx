@@ -25,14 +25,14 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Pencil, RotateCcw, ShieldX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PostEditDialog } from "@/post";
 import {
   hasGovernanceCapabilityHint,
   useAuthSessionStore,
 } from "@/user/states";
 import { CommentPromotionControls } from "../components/parts/CommentPromotionControls";
-import { mergeCommentDiscoveryRows } from "../models/commentTreeRails";
-import { PostEditDialog } from "@/post";
 import { decidePromotionControls } from "../models/commentPromotionGate";
+import { mergeCommentDiscoveryRows } from "../models/commentTreeRails";
 import { CommentTreeList } from "./CommentTreeList";
 import {
   DEFAULT_MAX_DEPTH,

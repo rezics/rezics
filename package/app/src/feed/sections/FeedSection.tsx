@@ -1,7 +1,7 @@
 import {
   type FeedContentRow,
-  feedRowsInfiniteQuery,
   type FeedQuery,
+  feedRowsInfiniteQuery,
 } from "@rezics/api/feed/feed";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

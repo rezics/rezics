@@ -8,9 +8,8 @@ import { Button } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-
-import { CommentTreeList } from "./CommentTreeList";
 import { CommentThreadSection } from "./CommentThreadSection";
+import { CommentTreeList } from "./CommentTreeList";
 
 const ROOT_ID = "fixture-root-1";
 const REALM_ID = "fixture-realm-1";

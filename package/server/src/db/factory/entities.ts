@@ -20,10 +20,9 @@ import {
 } from "../schema";
 import { generateTranslations, getFaker } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
-import { withUpdatedAtRows } from "./utils.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
-import { pickN, randomBoolean, randomInt } from "./utils.js";
+import { pickN, randomBoolean, randomInt, withUpdatedAtRows } from "./utils.js";
 
 /** Locale distribution for entity names — diverse locale mix. */
 const LOCALE_WEIGHTS = [

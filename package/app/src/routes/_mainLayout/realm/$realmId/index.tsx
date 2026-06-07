@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  RealmPage,
   type RealmFeedSort,
+  RealmPage,
   type RealmPageTab,
 } from "@/realm/pages/RealmPage";
 
