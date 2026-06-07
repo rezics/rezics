@@ -13,7 +13,14 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("entity:realm_feed_sort_rising"),
 } as const;
 
-import { Button } from "@rezics/ui/shadcn";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import type React from "react";
 
 export type RealmFeedSort = "best" | "hot" | "new" | "top" | "rising";
@@ -36,18 +43,23 @@ export const RealmFeedSortSwitcher: React.FC<RealmFeedSortSwitcherProps> = ({
   onChange,
 }) => {
   return (
-    <div className="flex items-center gap-1">
-      {Object.entries(OPTIONS).map(([optionValue, label]) => (
-        <Button
-          key={optionValue}
-          type="button"
-          size="sm"
-          variant={value === optionValue ? "default" : "ghost"}
-          onClick={() => onChange(optionValue as RealmFeedSort)}
-        >
-          {label()}
-        </Button>
-      ))}
+    <div className="flex w-full">
+      <Select
+        value={value}
+        onValueChange={(next) => onChange(next as RealmFeedSort)}
+      >
+        <SelectTrigger className="w-full sm:w-52" aria-label="Sort by">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectLabel>Sort by</SelectLabel>
+          {Object.entries(OPTIONS).map(([optionValue, label]) => (
+            <SelectItem key={optionValue} value={optionValue}>
+              {label()}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import {
   RealmPage,
   type RealmPageTab,
 } from "@/realm/pages/RealmPage";
+import { realmFeedSearchForSingleTag } from "@/realm/models/realmTagFeedSearch";
 
 type RealmSearch = {
   sort?: RealmFeedSort;
@@ -61,6 +62,11 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
               ...prev,
               tags: nextTagIds.length ? nextTagIds.join(",") : undefined,
             }),
+          })
+        }
+        onTagSelect={(tagId) =>
+          navigate({
+            search: (prev) => realmFeedSearchForSingleTag(prev, tagId),
           })
         }
       />

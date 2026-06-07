@@ -87,6 +87,7 @@ interface RealmPageProps {
   onTabChange?: (tab: RealmPageTab) => void;
   onFeedSortChange?: (sort: RealmFeedSort) => void;
   onFeedTagIdsChange?: (tagIds: string[]) => void;
+  onTagSelect?: (tagId: string) => void;
 }
 
 export function RealmPage({
@@ -97,6 +98,7 @@ export function RealmPage({
   onTabChange,
   onFeedSortChange,
   onFeedTagIdsChange,
+  onTagSelect,
 }: RealmPageProps) {
   const { t } = useTranslation(["common", "entity"]);
   const languages = useReadLanguageCandidates();
@@ -239,14 +241,14 @@ export function RealmPage({
                 postUnitId={realm.extra?.rule ?? null}
               />
               <div className="flex flex-col gap-3">
-                <RealmFeedSortSwitcher
-                  value={feedSort}
-                  onChange={(sort) => onFeedSortChange?.(sort)}
-                />
                 <RealmFeedTagFilter
                   tagTree={tagTree}
                   selectedTagIds={feedTagIds}
                   onChange={(tagIds) => onFeedTagIdsChange?.(tagIds)}
+                />
+                <RealmFeedSortSwitcher
+                  value={feedSort}
+                  onChange={(sort) => onFeedSortChange?.(sort)}
                 />
                 {showManage ? (
                   <div className="flex flex-wrap items-center gap-2">
@@ -325,6 +327,7 @@ export function RealmPage({
             realmId={realmId}
             tagTree={tagTree}
             tagView={realm.extra?.tagView ?? null}
+            onTagSelect={onTagSelect}
           />
         </TabsContent>
         <TabsContent value="members">
