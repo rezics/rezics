@@ -20,7 +20,7 @@ interface LayoutState {
   toggleSidebar: () => void;
   closeSidebar: () => void;
   setSidebarHeightBelow: (h: number) => void;
-  toggleItem: (segment: string) => void;
+  toggleItem: (segment: string, defaultOpen?: boolean) => void;
 }
 
 export const useLayoutStore = create<LayoutState>()(
@@ -42,11 +42,11 @@ export const useLayoutStore = create<LayoutState>()(
 
       setSidebarHeightBelow: (h: number) => set({ sidebarHeightBelow: h }),
 
-      toggleItem: (segment: string) =>
+      toggleItem: (segment: string, defaultOpen = false) =>
         set((state: any) => ({
           openItems: {
             ...state.openItems,
-            [segment]: !state.openItems[segment],
+            [segment]: !(state.openItems[segment] ?? defaultOpen),
           },
         })),
     }),

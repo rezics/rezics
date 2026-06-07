@@ -21,17 +21,39 @@ export type NavigationVisibility =
   | "authenticated"
   | "unauthenticated";
 
+export const navigationRowClassName =
+  "flex h-10 min-h-10 items-center gap-3 w-full px-3 rounded-md text-left text-sm leading-ui transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus";
+
+export const navigationSectionHeaderClassName =
+  "flex h-10 min-h-10 items-center justify-start gap-2 w-full px-3 text-left text-xs font-medium uppercase leading-ui text-text-tertiary";
+
+export type NavigationEntry = {
+  kind: "item";
+  segment: string;
+  title: string;
+  icon?: NavigationIcon;
+  onlyMobile?: boolean;
+  activeMatch?: "exact" | "prefix";
+  isActive?: (pathname: string) => boolean;
+  visibility?: NavigationVisibility;
+  children?: NavigationItem[];
+};
+
 export type NavigationItem =
-  | {
-      kind: "item";
-      segment: string;
-      title: string;
-      icon?: NavigationIcon;
-      onlyMobile?: boolean;
-      activeMatch?: "exact" | "prefix";
-      isActive?: (pathname: string) => boolean;
-      visibility?: NavigationVisibility;
-      children?: NavigationItem[];
-    }
+  | NavigationEntry
   | { kind: "divider" }
-  | { kind: "section"; title: string };
+  | {
+      kind: "section";
+      id: string;
+      title?: string;
+      collapsible?: boolean;
+      defaultOpen?: boolean;
+      visibility?: NavigationVisibility;
+      children: NavigationItem[];
+    }
+  | {
+      kind: "status";
+      id: string;
+      title: string;
+      tone?: "muted" | "danger";
+    };

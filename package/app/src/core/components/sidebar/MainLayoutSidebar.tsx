@@ -45,11 +45,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     _event: any,
     segment: string | undefined,
     hasChildren: boolean,
+    defaultOpen = false,
   ) => {
     // console.log("handleItemClick", event);
     if (!segment) return;
     if (hasChildren) {
-      toggleItem(segment);
+      toggleItem(segment, defaultOpen);
     } else {
       // setLocation(`${segment}`);
       if (isMobile) {
