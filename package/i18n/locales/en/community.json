@@ -238,6 +238,7 @@
   "moderation_pin_action": "Pin to realm",
   "moderation_pin_confirm": "Pin this content to this realm?",
   "moderation_pin_success": "Post pinned.",
+  "moderation_previous_actions_title": "Previous actions",
   "moderation_realm_label": "Realm moderation",
   "moderation_remove_action": "Remove",
   "moderation_remove_confirm": "Remove this content from this realm?",
