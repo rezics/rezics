@@ -87,6 +87,7 @@ interface RealmPageProps {
   onTabChange?: (tab: RealmPageTab) => void;
   onFeedSortChange?: (sort: RealmFeedSort) => void;
   onFeedTagIdsChange?: (tagIds: string[]) => void;
+  onOpenTagsTab?: () => void;
   onTagSelect?: (tagId: string) => void;
 }
 
@@ -98,6 +99,7 @@ export function RealmPage({
   onTabChange,
   onFeedSortChange,
   onFeedTagIdsChange,
+  onOpenTagsTab,
   onTagSelect,
 }: RealmPageProps) {
   const { t } = useTranslation(["common", "entity"]);
@@ -245,6 +247,10 @@ export function RealmPage({
                   tagTree={tagTree}
                   selectedTagIds={feedTagIds}
                   onChange={(tagIds) => onFeedTagIdsChange?.(tagIds)}
+                  onOpenTagsTab={() => {
+                    if (onOpenTagsTab) onOpenTagsTab();
+                    else handleTabChange("tags");
+                  }}
                 />
                 <RealmFeedSortSwitcher
                   value={feedSort}

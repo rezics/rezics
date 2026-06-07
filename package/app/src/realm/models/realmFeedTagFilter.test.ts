@@ -3,6 +3,7 @@ import type { TagTreeNode } from "@rezics/contract";
 import {
   collectRealmFeedTagChips,
   orderRealmFeedTagChips,
+  REALM_FEED_TAG_SHORTCUT_LIMIT,
   toggleRealmFeedTagId,
 } from "./realmFeedTagFilter";
 
@@ -42,10 +43,32 @@ describe("realm feed tag filter helpers", () => {
     const chips = collectRealmFeedTagChips(tagTree, "en");
 
     expect(
-      orderRealmFeedTagChips(chips, ["tag-c", "tag-a"]).map(
+      orderRealmFeedTagChips(chips, ["tag-c", "tag-a"], 12).map(
         (chip) => chip.tagId,
       ),
     ).toEqual(["tag-a", "tag-c", "tag-b"]);
+  });
+
+  it("caps unselected shortcut tags while preserving selected tags", () => {
+    const chips = Array.from(
+      { length: REALM_FEED_TAG_SHORTCUT_LIMIT + 3 },
+      (_, index) => ({
+        tagId: `tag-${index + 1}`,
+        label: `Tag ${index + 1}`,
+      }),
+    );
+
+    expect(
+      orderRealmFeedTagChips(chips, [
+        `tag-${REALM_FEED_TAG_SHORTCUT_LIMIT + 3}`,
+      ]).map((chip) => chip.tagId),
+    ).toEqual([
+      `tag-${REALM_FEED_TAG_SHORTCUT_LIMIT + 3}`,
+      ...Array.from(
+        { length: REALM_FEED_TAG_SHORTCUT_LIMIT },
+        (_, index) => `tag-${index + 1}`,
+      ),
+    ]);
   });
 
   it("toggles feed tags as a multi-select set", () => {

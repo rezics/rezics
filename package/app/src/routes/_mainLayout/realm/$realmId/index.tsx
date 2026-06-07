@@ -4,7 +4,10 @@ import {
   RealmPage,
   type RealmPageTab,
 } from "@/realm/pages/RealmPage";
-import { realmFeedSearchForSingleTag } from "@/realm/models/realmTagFeedSearch";
+import {
+  realmFeedSearchForSingleTag,
+  realmTagsTabSearch,
+} from "@/realm/models/realmTagFeedSearch";
 
 type RealmSearch = {
   sort?: RealmFeedSort;
@@ -63,6 +66,9 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
               tags: nextTagIds.length ? nextTagIds.join(",") : undefined,
             }),
           })
+        }
+        onOpenTagsTab={() =>
+          navigate({ search: (prev) => realmTagsTabSearch(prev) })
         }
         onTagSelect={(tagId) =>
           navigate({

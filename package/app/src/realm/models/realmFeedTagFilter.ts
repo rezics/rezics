@@ -5,6 +5,8 @@ export type RealmFeedTagChip = {
   label: string;
 };
 
+export const REALM_FEED_TAG_SHORTCUT_LIMIT = 12;
+
 export function realmTagNodeLabel(node: TagTreeNode, language: string) {
   const translations = node.labelTranslations?.translations;
   const fallbackLanguage = node.labelTranslations?.fallbackLanguage;
@@ -42,12 +44,17 @@ export function collectRealmFeedTagChips(
 export function orderRealmFeedTagChips(
   chips: RealmFeedTagChip[],
   selectedTagIds: readonly string[],
+  shortcutLimit = REALM_FEED_TAG_SHORTCUT_LIMIT,
 ) {
   const selected = new Set(selectedTagIds);
-  return [
-    ...chips.filter((chip) => selected.has(chip.tagId)),
-    ...chips.filter((chip) => !selected.has(chip.tagId)),
-  ];
+  const selectedChips = chips.filter((chip) => selected.has(chip.tagId));
+  // The cap keeps this row a feed shortcut surface; complete browsing stays in
+  // the realm Tags tab, so selected chips are preserved outside the shortcut cap.
+  const shortcutChips = chips
+    .filter((chip) => !selected.has(chip.tagId))
+    .slice(0, shortcutLimit);
+
+  return [...selectedChips, ...shortcutChips];
 }
 
 export function toggleRealmFeedTagId(

@@ -14,3 +14,12 @@ export function realmFeedSearchForSingleTag(
     tags: tagId,
   };
 }
+
+export function realmTagsTabSearch(
+  previous: RealmRouteSearch,
+): RealmRouteSearch {
+  return {
+    ...previous,
+    tab: "tags",
+  };
+}
