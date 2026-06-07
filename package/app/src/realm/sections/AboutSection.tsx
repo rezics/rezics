@@ -14,6 +14,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ postUnitId }) => {
   const { data: post, isError } = useQuery({
     ...postQueries.detail(postUnitId ?? "", {
       languages: readContext.languages,
+      appLocale: readContext.appLocale,
     }),
     enabled: readContext.ready && Boolean(postUnitId),
   });

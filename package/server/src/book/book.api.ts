@@ -26,7 +26,7 @@ import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
 import { scoreService } from "@/score/score.service";
 import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
-import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
+import { resolveEffectiveReadLanguageInput } from "@/unit/language-resolution";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import { unitService } from "@/unit/unit.service";
 import { bookService } from "./book.service";
@@ -38,10 +38,12 @@ export const bookApi = new Elysia({ prefix: "/book" })
     "/:unitId",
     async ({ params, query }): Promise<BookResponse> => {
       const book = await bookService.getByUnitId(params.unitId);
-      const languages = resolveEffectiveReadLanguageCandidates({
+      const readLanguage = resolveEffectiveReadLanguageInput({
+        explicitLanguage: query.explicitLanguage,
         languages: query.languages,
+        appLocale: query.appLocale,
       });
-      return mapBookToDTO(book, languages);
+      return mapBookToDTO(book, readLanguage);
     },
     {
       params: bookParamsSchema,
@@ -121,11 +123,12 @@ export const bookApi = new Elysia({ prefix: "/book" })
           };
 
       const { books, total } = await bookService.list(effectiveQuery);
-      const languages = resolveEffectiveReadLanguageCandidates({
+      const readLanguage = resolveEffectiveReadLanguageInput({
         languages: query.languages,
+        appLocale: query.appLocale,
       });
       return {
-        books: books.map((book) => mapBookToDTO(book, languages)),
+        books: books.map((book) => mapBookToDTO(book, readLanguage)),
         total,
       };
     },
@@ -157,11 +160,12 @@ export const bookApi = new Elysia({ prefix: "/book" })
           };
 
       const { books, total } = await bookService.list(effectiveQuery);
-      const languages = resolveEffectiveReadLanguageCandidates({
+      const readLanguage = resolveEffectiveReadLanguageInput({
         languages: body.languages,
+        appLocale: body.appLocale,
       });
       return {
-        books: books.map((book) => mapBookToDTO(book, languages)),
+        books: books.map((book) => mapBookToDTO(book, readLanguage)),
         total,
       };
     },

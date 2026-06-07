@@ -143,6 +143,7 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
   const { data: realm } = useQuery({
     ...realmQueries.detail(firstRealmId ?? "", {
       languages: readContext.languages,
+      appLocale: readContext.appLocale,
     }),
     enabled: readContext.ready && Boolean(firstRealmId),
   });

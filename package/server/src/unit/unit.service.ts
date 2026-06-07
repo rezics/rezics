@@ -170,6 +170,7 @@ export function buildUnitWhereClause(options: UnitListQuery): UnitFilterShape {
   const readLanguages = resolveEffectiveReadLanguageCandidates({
     languages: (options as { languages?: string | readonly string[] })
       .languages,
+    appLocale: (options as { appLocale?: string }).appLocale,
   });
   if (options.languageMode === "preferred" && readLanguages.length > 0) {
     andWhere.push({
@@ -379,6 +380,7 @@ function createUnitListConditions(options: UnitListQuery) {
   const readLanguages = resolveEffectiveReadLanguageCandidates({
     languages: (options as { languages?: string | readonly string[] })
       .languages,
+    appLocale: (options as { appLocale?: string }).appLocale,
   });
   if (options.languageMode === "preferred" && readLanguages.length > 0) {
     conditions.push(

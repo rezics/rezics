@@ -112,6 +112,11 @@ export const BookLibPage: React.FC = () => {
       (data?.items ?? []).map((item: ContentSearchDocument) => ({
         unitId: item.id,
         defaultLanguage: item.defaultLanguage,
+        resolvedLanguage: item.resolvedLanguage,
+        title: item.title,
+        subtitle: item.subtitle,
+        summary: item.summary,
+        description: item.description,
         translations:
           item.translations ??
           (item.titles[0]

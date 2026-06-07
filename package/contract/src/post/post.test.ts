@@ -204,6 +204,7 @@ describe("post work-domain contract fields", () => {
     expect(
       Value.Check(postListQuerySchema, {
         languages: "ja,en",
+        appLocale: "zh-hant",
         languageMode: "preferred",
         limit: 20,
       }),
@@ -211,6 +212,7 @@ describe("post work-domain contract fields", () => {
     expect(
       Value.Check(postListBodySchema, {
         languages: ["ja", "en"],
+        appLocale: "zh-hant",
         languageMode: "all",
         limit: 20,
       }),

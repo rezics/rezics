@@ -7,6 +7,7 @@ import {
 } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export type SimpleQueryState<T> = {
@@ -17,13 +18,18 @@ export type SimpleQueryState<T> = {
 };
 
 export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
-  const { data, isLoading, error } = useQuery(
-    bookQueries.list({
+  const readContext = useReadLanguageContext();
+  const { data, isLoading, error } = useQuery({
+    ...bookQueries.list({
       start: 0,
       limit: Math.max(limit, 12),
       sort: { type: "createdAt", order: "desc" },
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
     }),
-  );
+    enabled: readContext.ready,
+  });
 
   const items = data?.books ?? [];
   const total: number | undefined = data?.total;

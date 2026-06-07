@@ -43,6 +43,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PinboardAdminSection } from "@/pinboard";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { unitHref } from "@/shared/ui/link";
 import {
   AddUnitTranslationLanguageDialog,
@@ -82,12 +83,19 @@ export function RealmManagePage({
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const readContext = useReadLanguageContext();
   const {
     data: realm,
     error: realmError,
     isError: realmIsError,
     isLoading,
-  } = useQuery(realmDetailQuery(realmId));
+  } = useQuery({
+    ...realmDetailQuery(realmId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
   const { data: membership, isLoading: membershipLoading } = useQuery(
     myRealmMembershipQuery(realmId),
   );

@@ -24,6 +24,13 @@ export type ActorLanguageSettings = {
   preferredLanguages?: readonly string[] | null;
 };
 
+export type EffectiveReadLanguageInput = {
+  explicitLanguage?: string | null;
+  languages?: readonly string[] | null;
+  preferredLanguages?: readonly string[] | null;
+  appLocale?: string | null;
+};
+
 export function resolveUnitAuthoringLanguage(input: {
   explicitLanguage?: string | null;
   actorSettings?: ActorLanguageSettings | null;
@@ -50,14 +57,29 @@ export function resolveEffectiveReadLanguageCandidates(input: {
   actorSettings?: ActorLanguageSettings | null;
   appLocale?: string | null;
 }): string[] {
+  const languages = parseReadLanguages(input.languages);
   return parseReadLanguages(
     [
       input.explicitLanguage,
-      ...parseReadLanguages(input.languages),
-      ...(input.actorSettings?.preferredLanguages ?? []),
       input.appLocale,
+      ...languages,
+      ...(input.actorSettings?.preferredLanguages ?? []),
     ].filter((language): language is string => !!language),
   );
+}
+
+export function resolveEffectiveReadLanguageInput(input: {
+  languages?: string | readonly string[] | null;
+  explicitLanguage?: string | null;
+  actorSettings?: ActorLanguageSettings | null;
+  appLocale?: string | null;
+}): EffectiveReadLanguageInput {
+  return {
+    explicitLanguage: input.explicitLanguage,
+    appLocale: input.appLocale,
+    languages: parseReadLanguages(input.languages),
+    preferredLanguages: input.actorSettings?.preferredLanguages,
+  };
 }
 
 export function preferredLanguageVisibilityWhere(input: {

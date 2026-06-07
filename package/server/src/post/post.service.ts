@@ -763,6 +763,7 @@ export class PostService {
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (query as { languages?: string | readonly string[] })
         .languages,
+      appLocale: (query as { appLocale?: string }).appLocale,
     });
     const languageVisibility = preferredLanguageCondition(
       query.languageMode,
@@ -842,6 +843,7 @@ export class PostService {
     );
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (opts as { languages?: string | readonly string[] }).languages,
+      appLocale: (opts as { appLocale?: string }).appLocale,
     });
     const languageVisibility = preferredLanguageCondition(
       opts.languageMode,

@@ -5,8 +5,9 @@ import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import {
   listGetQueryBase,
-  listLanguageModeSchema,
   listPostBodyBase,
+  readLanguageBodyBase,
+  readLanguageGetQueryBase,
 } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import {
@@ -229,6 +230,7 @@ export type AcceptAnswerInput = (typeof acceptAnswerSchema)["static"];
 
 export const postListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
+  ...readLanguageGetQueryBase.properties,
   /** Target Unit ID for root posts. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
   /** Exact VARIANT context lookup. Does not replace targetUnitId aggregation. */
@@ -251,8 +253,6 @@ export const postListQuerySchema = t.Object({
    * (`state IN (…)`, indexed; no anti-join). Buckets are never stored.
    */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
-  languages: t.Optional(t.String()),
-  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),
@@ -279,6 +279,7 @@ export type PostListQuery = (typeof postListQuerySchema)["static"];
 
 export const postListBodySchema = t.Object({
   ...listPostBodyBase.properties,
+  ...readLanguageBodyBase.properties,
   /** Target Unit ID for root posts. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
   /** Exact VARIANT context lookup. Does not replace targetUnitId aggregation. */
@@ -297,8 +298,6 @@ export const postListBodySchema = t.Object({
   state: t.Optional(t.String()),
   /** Derived lifecycle bucket filter: `active` or `closed`. See `postListQuerySchema`. */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
-  languages: t.Optional(t.Array(languageSchema)),
-  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),
@@ -356,7 +355,8 @@ export const postParamsSchema = t.Object({
 export type PostParams = (typeof postParamsSchema)["static"];
 
 export const postReadQuerySchema = t.Object({
-  languages: t.Optional(t.String()),
+  ...readLanguageGetQueryBase.properties,
+  explicitLanguage: t.Optional(languageSchema),
 });
 
 export type PostReadQuery = (typeof postReadQuerySchema)["static"];

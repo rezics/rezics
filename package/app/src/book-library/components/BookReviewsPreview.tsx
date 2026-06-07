@@ -6,7 +6,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 /** Props for BookReviews component. */
 interface BookReviewsProps {
@@ -28,16 +28,17 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   reviewNumber = 3,
 }) => {
   const { t } = useTranslation(["book"]);
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
   // Fetch posts with kind='review' for this book
   const { data } = useQuery({
     ...postQueries.byTarget(bookId, {
       kind: PostKind.REVIEW,
-      languages,
-      languageMode: "preferred",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
       limit: reviewNumber,
     }),
-    enabled: !!bookId,
+    enabled: readContext.ready && !!bookId,
   });
 
   const reviews: PostDTO[] = data?.posts?.slice(0, reviewNumber) ?? [];

@@ -42,16 +42,28 @@ import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { RealmFilters } from "./realm.types";
 
+type RealmReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 /**
  * Realm API methods
  */
 export const realmApi = {
-  mine: async (): Promise<RealmListResponse> => {
-    return apiFetch<RealmListResponse>("/realm/me");
+  mine: async (query?: RealmReadQuery): Promise<RealmListResponse> => {
+    return apiFetch<RealmListResponse>(`/realm/me${buildQueryString(query)}`);
   },
 
-  byMember: async (userId: string): Promise<RealmListResponse> => {
-    return apiFetch<RealmListResponse>(`/realm/member/${userId}`);
+  byMember: async (
+    userId: string,
+    query?: RealmReadQuery,
+  ): Promise<RealmListResponse> => {
+    return apiFetch<RealmListResponse>(
+      `/realm/member/${userId}${buildQueryString(query)}`,
+    );
   },
 
   // ---- CRUD ----
@@ -71,7 +83,7 @@ export const realmApi = {
    */
   get: async (
     unitId: string,
-    query?: { languages?: string | readonly string[] },
+    query?: RealmReadQuery,
   ): Promise<RealmResponse> => {
     return apiFetch<RealmResponse>(
       `/realm/${unitId}${buildQueryString(query)}`,
@@ -268,7 +280,7 @@ export const realmApi = {
   resolveRule: async (
     realmUnitId: string,
     language?: string,
-    query?: { languages?: string | readonly string[] },
+    query?: { languages?: string | readonly string[]; appLocale?: string },
   ): Promise<RealmRuleResolvedDTO> => {
     return apiFetch<RealmRuleResolvedDTO>(
       `/realm/${realmUnitId}/rules/resolved${buildQueryString({

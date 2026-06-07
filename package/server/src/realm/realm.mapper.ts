@@ -9,6 +9,7 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
+import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
 import { mapPublicUser, type PublicUserSelected } from "@/utils/sanitizeUser";
 import type {
   RealmMember,
@@ -31,10 +32,16 @@ function lower<T extends string>(
 
 function resolvedRealmTranslation(
   row: RealmWithRelations | RealmListSelected,
-  languages: readonly string[],
+  readLanguage: EffectiveReadLanguageInput | readonly string[],
 ) {
+  const readInput = Array.isArray(readLanguage)
+    ? { languages: readLanguage }
+    : readLanguage;
   const resolvedLanguage = resolveReadLanguage({
-    languages,
+    explicitLanguage: readInput.explicitLanguage,
+    languages: readInput.languages,
+    preferredLanguages: readInput.preferredLanguages,
+    appLocale: readInput.appLocale,
     supportLanguages: row.unit?.supportLanguages as SupportLanguageLike[],
   });
   const translation = resolvedLanguage
@@ -45,11 +52,11 @@ function resolvedRealmTranslation(
 
 export function mapRealmToDTO(
   row: RealmWithRelations,
-  languages: readonly string[] = [],
+  readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): RealmDTO {
   const { resolvedLanguage, translation } = resolvedRealmTranslation(
     row,
-    languages,
+    readLanguage,
   );
   return {
     unitId: row.unitId,
@@ -74,11 +81,11 @@ export function mapRealmToDTO(
 
 export function mapRealmListRowToDTO(
   row: RealmListSelected,
-  languages: readonly string[] = [],
+  readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): RealmDTO {
   const { resolvedLanguage, translation } = resolvedRealmTranslation(
     row,
-    languages,
+    readLanguage,
   );
   return {
     unitId: row.unitId,

@@ -7,56 +7,40 @@ const i18nMessages = {
 } as const;
 
 import { realmQueries } from "@rezics/api/realm/realm.queries";
-import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
 import { Link, unitHref } from "@/shared/ui/link";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import {
+  mapJoinedRealmToListItem,
+  type RealmListItemModel,
+} from "@/user/models/realmListItem";
 
 const FILTER_CHIP_LABEL = {
   joined: i18nMessages.profile_realms_joined,
   created: i18nMessages.common_created,
 } as const satisfies Record<string, () => string>;
 
-type RealmListItemModel = {
-  unitId: string;
-  slug: string | null;
-  title: string;
-  description: string;
-  memberCount: number;
-  isOfficial: boolean;
-  isPublic: boolean;
-};
-
-// TODO This mapping capability should be provided by the API; need to explore.
-function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
-  const primaryTranslation = realm.translations?.[0];
-
-  return {
-    unitId: realm.unitId,
-    slug: realm.slug ?? null,
-    title: primaryTranslation?.title ?? realm.unitId,
-    description: contentDocMarkdownFallback(primaryTranslation?.description),
-    memberCount: realm.memberCount,
-    isOfficial: realm.isOfficial,
-    isPublic: realm.isPublic,
-  };
-}
-
 export const RealmsTabSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "settings"]);
   const { userId } = useProfileContext();
   const [filter, setFilter] = useState("joined");
+  const readContext = useReadLanguageContext();
 
   const joinedQuery = useQuery({
-    ...realmQueries.byMember(userId),
-    enabled: filter === "joined",
+    ...realmQueries.byMember(userId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    }),
+    enabled: filter === "joined" && readContext.ready,
   });
 
   const createdQuery = useQuery({
@@ -64,8 +48,11 @@ export const RealmsTabSection: FC = () => {
       userId,
       sort: { field: "createdAt", order: "desc" },
       limit: 50,
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
     }),
-    enabled: filter === "created",
+    enabled: filter === "created" && readContext.ready,
   });
 
   const activeQuery = filter === "joined" ? joinedQuery : createdQuery;

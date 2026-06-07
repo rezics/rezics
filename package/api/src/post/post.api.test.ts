@@ -38,11 +38,12 @@ describe("post wiki API helpers", () => {
   test("serializes list read languages as comma-separated candidates", async () => {
     await postApi.list({
       languages: ["zh-Hant", "ja", "en"],
+      appLocale: "zh-hant",
       languageMode: "preferred",
     });
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/post/list?languages=zh-Hant%2Cja%2Cen&languageMode=preferred",
+      "http://api.example/post/list?languages=zh-Hant%2Cja%2Cen&appLocale=zh-hant&languageMode=preferred",
     );
   });
 

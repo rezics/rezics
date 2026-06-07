@@ -70,8 +70,9 @@ export function defaultSupportLanguage(
 /**
  * Build the ordered candidate list for localized reads.
  *
- * User content preferences outrank UI locale; support languages and the
- * platform fallback fill in only after request/user/app candidates.
+ * App locale is the user's local runtime choice and outranks account-level
+ * content preferences. Support languages and the platform fallback fill in only
+ * after request/app/user candidates.
  */
 export function readLanguageCandidates(input: {
   explicitLanguage?: string | null;
@@ -89,13 +90,11 @@ export function readLanguageCandidates(input: {
     .filter((item) => !item.isPrimary)
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
 
-  // App locale describes UI/runtime language. User content preferences are
-  // more specific and intentionally outrank it for content reads.
   return uniqueLanguages([
     input.explicitLanguage,
+    input.appLocale,
     ...(input.languages ?? []),
     ...(input.preferredLanguages ?? []),
-    input.appLocale,
     ...primary.map((item) => item.language),
     ...remaining.map((item) => item.language),
     input.fallbackLanguage ?? DEFAULT_LANGUAGE,

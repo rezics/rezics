@@ -70,7 +70,7 @@ import type { MoveHandler, NodeRendererProps, TreeApi } from "react-arborist";
 import { Tree } from "react-arborist";
 import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 function nodeLabel(node: TagTreeNode) {
@@ -398,11 +398,18 @@ export function WikiZoneConfigEditor({
     useState<LabelInsertTarget>("navigation");
   const [error, setError] = useState<string | null>(null);
   const authoringLanguage = useAuthoringLanguageDefault();
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
   const labelSearchTerm = labelSearch.trim();
-  const { data: labelSearchData } = useQuery(
-    unitQueries.search(labelSearchTerm, { type: "LABEL", languages, limit: 8 }),
-  );
+  const { data: labelSearchData } = useQuery({
+    ...unitQueries.search(labelSearchTerm, {
+      type: "LABEL",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(labelSearchTerm),
+  });
 
   useEffect(() => {
     setTemplate(theme?.template ?? "wiki-classic");
@@ -856,14 +863,28 @@ export function TagTreeEditor({
   const [treeSize, setTreeSize] = useState({ width: 0, height: 360 });
   const setValue = useSetRealmExtraValueMutation();
   const authoringLanguage = useAuthoringLanguageDefault();
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
   const searchTerm = search.trim();
-  const { data: labelSearchData, isLoading: labelSearchLoading } = useQuery(
-    unitQueries.search(searchTerm, { type: "LABEL", languages, limit: 8 }),
-  );
-  const { data: tagSearchData, isLoading: tagSearchLoading } = useQuery(
-    unitQueries.search(searchTerm, { type: "TAG", languages, limit: 8 }),
-  );
+  const { data: labelSearchData, isLoading: labelSearchLoading } = useQuery({
+    ...unitQueries.search(searchTerm, {
+      type: "LABEL",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(searchTerm),
+  });
+  const { data: tagSearchData, isLoading: tagSearchLoading } = useQuery({
+    ...unitQueries.search(searchTerm, {
+      type: "TAG",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(searchTerm),
+  });
   const serializedNodes = useMemo(
     () => toTagTreeNodes(nodes),
     [nodes, toTagTreeNodes],
@@ -1679,11 +1700,18 @@ export function SlotPicker({
   const [error, setError] = useState<string | null>(null);
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
   const searchTerm = search.trim();
-  const { data } = useQuery(
-    unitQueries.search(searchTerm, { type: "POST", languages, limit: 8 }),
-  );
+  const { data } = useQuery({
+    ...unitQueries.search(searchTerm, {
+      type: "POST",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+      limit: 8,
+    }),
+    enabled: readContext.ready && Boolean(searchTerm),
+  });
 
   useEffect(() => {
     setSelected(value ?? "");

@@ -19,6 +19,13 @@ import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { BookFilters } from "./book.types";
 
+type BookReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 /**
  * Book API methods
  */
@@ -35,10 +42,7 @@ export const bookApi = {
   /**
    * Get single book by unitId
    */
-  get: async (
-    unitId: string,
-    query?: { languages?: string | readonly string[] },
-  ): Promise<BookResponse> => {
+  get: async (unitId: string, query?: BookReadQuery): Promise<BookResponse> => {
     return apiFetch<BookResponse>(`/book/${unitId}${buildQueryString(query)}`);
   },
 

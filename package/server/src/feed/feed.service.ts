@@ -183,6 +183,7 @@ async function mapPostsToDTOs(
   const variantContexts = await hydrateVariantContextSummaries(posts);
   const languages = resolveEffectiveReadLanguageCandidates({
     languages: query.languages,
+    appLocale: query.appLocale,
   });
   return posts.map((post) => ({
     ...mapPostToDTO(post, variantContexts, languages),
@@ -198,11 +199,15 @@ async function hydrateRealmSummaries(
   if (uniqueIds.length === 0) return new Map();
   const languages = resolveEffectiveReadLanguageCandidates({
     languages: query.languages,
+    appLocale: query.appLocale,
   });
   const entries = await Promise.all(
     uniqueIds.map(async (unitId) => {
       try {
-        const realm = await realmService.getByUnitId(unitId, null, languages);
+        const realm = await realmService.getByUnitId(unitId, null, {
+          languages,
+          appLocale: query.appLocale,
+        });
         return [
           unitId,
           {

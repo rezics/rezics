@@ -116,6 +116,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       start: startBook,
       limit: EXTERNAL_PAGE_SIZE,
       languages: readContext.languages,
+      appLocale: readContext.appLocale,
     }),
   );
 
@@ -249,6 +250,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
             start,
             limit: EXTERNAL_PAGE_SIZE,
             languages: readContext.languages,
+            appLocale: readContext.appLocale,
           }),
         );
         return result?.books?.length ?? 0;

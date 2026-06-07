@@ -96,7 +96,7 @@ export function createI18nRuntime(
     detection: {
       order: ["localStorage", "cookie", "navigator"],
       lookupLocalStorage: LOCALE_STORAGE_KEY,
-      caches: ["localStorage"],
+      caches: [],
     },
     react: {
       useSuspense: true,

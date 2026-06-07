@@ -36,12 +36,18 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
     isLoading,
     error,
   } = useQuery({
-    ...postQueries.detail(reviewId, { languages: readContext.languages }),
+    ...postQueries.detail(reviewId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: readContext.ready && Boolean(reviewId),
   });
   const bookUnitId = review?.targetUnitId ?? "";
   const { data: book } = useQuery({
-    ...bookQueries.detail(bookUnitId, { languages: readContext.languages }),
+    ...bookQueries.detail(bookUnitId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: readContext.ready && !!bookUnitId,
   });
 

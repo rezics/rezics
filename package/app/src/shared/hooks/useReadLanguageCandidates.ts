@@ -4,9 +4,9 @@ import {
   type ListLanguageMode,
   normalizeLanguage,
 } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
+import { LOCALE_STORAGE_KEY, setLocale, useLocale } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
 export type ReadLanguageContext = {
@@ -27,6 +27,16 @@ function uniqueLanguages(languages: readonly (string | null | undefined)[]) {
   ];
 }
 
+export function appLocaleSeedFromPreferred(input: {
+  hasMemberSession: boolean;
+  preferredLanguages: readonly (string | null | undefined)[];
+  storedLocale: string | null;
+}): Language | null {
+  if (!input.hasMemberSession || input.storedLocale) return null;
+  const firstPreferred = input.preferredLanguages[0];
+  return firstPreferred ? (normalizeLanguage(firstPreferred) ?? null) : null;
+}
+
 export function useReadLanguageContext(): ReadLanguageContext {
   const locale = useLocale();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
@@ -37,10 +47,27 @@ export function useReadLanguageContext(): ReadLanguageContext {
   });
   const preferredLanguages = settings?.preferredLanguages ?? [];
 
+  useEffect(() => {
+    if (!hasMemberSession) return;
+    if (typeof localStorage === "undefined") return;
+    let storedLocale: string | null = null;
+    try {
+      storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
+    } catch {
+      return;
+    }
+    const nextLocale = appLocaleSeedFromPreferred({
+      hasMemberSession,
+      preferredLanguages,
+      storedLocale,
+    });
+    if (nextLocale) void setLocale(nextLocale);
+  }, [hasMemberSession, preferredLanguages]);
+
   return useMemo(() => {
     const languages = hasMemberSession
-      ? uniqueLanguages([...preferredLanguages, locale])
-      : uniqueLanguages([locale]);
+      ? uniqueLanguages(preferredLanguages)
+      : [];
     const normalizedLocale = normalizeLanguage(locale) ?? "zh-hant";
     return {
       languages,

@@ -19,6 +19,7 @@ export const ActiveRealmsSection: React.FC = () => {
       sort: { field: "memberCount", order: "desc" },
       limit: 5,
       languages: readLanguage.languages,
+      appLocale: readLanguage.appLocale,
       languageMode: readLanguage.languageMode,
     }),
     enabled: readLanguage.ready,

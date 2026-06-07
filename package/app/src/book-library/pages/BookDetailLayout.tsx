@@ -35,7 +35,10 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   const queriesEnabled = Boolean(bookId);
   const readContext = useReadLanguageContext();
   const { data, isLoading, error } = useQuery({
-    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    ...bookQueries.detail(bookId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: queriesEnabled && readContext.ready,
   });
   const { data: scoreAggregates } = useQuery({

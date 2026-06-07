@@ -32,7 +32,10 @@ export function useReasonPostHistory(
   const readContext = useReadLanguageContext();
   const queries = useQueries({
     queries: postUnitIds.map((id) => ({
-      ...postQueries.detail(id, { languages: readContext.languages }),
+      ...postQueries.detail(id, {
+        languages: readContext.languages,
+        appLocale: readContext.appLocale,
+      }),
       enabled: readContext.ready && Boolean(id),
     })),
   });

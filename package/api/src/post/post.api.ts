@@ -24,6 +24,13 @@ import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { CreateRootPostInput, PostFilters } from "./post.types";
 
+type PostReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 function normalizeOptionalId(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
@@ -59,10 +66,7 @@ export const postApi = {
   /**
    * Get single post by unitId
    */
-  get: async (
-    unitId: string,
-    query?: { languages?: string | readonly string[] },
-  ): Promise<PostResponse> => {
+  get: async (unitId: string, query?: PostReadQuery): Promise<PostResponse> => {
     return apiFetch<PostResponse>(`/post/${unitId}${buildQueryString(query)}`);
   },
 

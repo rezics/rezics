@@ -83,7 +83,7 @@ export function readLanguageFilterCandidates(
 ): string[] {
   return [
     ...new Set(
-      [...(input.languages ?? []), input.appLocale]
+      [input.appLocale, ...(input.languages ?? [])]
         .map((language) =>
           typeof language === "string" ? normalizeLanguage(language) : null,
         )

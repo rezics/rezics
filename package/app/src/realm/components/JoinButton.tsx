@@ -10,6 +10,7 @@ import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { RealmRuleDialog } from "../sections/RealmRuleDialog";
 
 interface JoinButtonProps {
@@ -18,8 +19,19 @@ interface JoinButtonProps {
 
 export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
   const [ruleOpen, setRuleOpen] = useState(false);
-  const { data: myRealms } = useQuery(myRealmsQuery());
-  const { data: realm } = useQuery(realmDetailQuery(realmId));
+  const readContext = useReadLanguageContext();
+  const readQuery = {
+    languages: readContext.languages,
+    appLocale: readContext.appLocale,
+  };
+  const { data: myRealms } = useQuery({
+    ...myRealmsQuery(readQuery),
+    enabled: readContext.ready,
+  });
+  const { data: realm } = useQuery({
+    ...realmDetailQuery(realmId, readQuery),
+    enabled: readContext.ready,
+  });
   const joinMutation = useJoinRealmMutation();
   const leaveMutation = useLeaveRealmMutation();
 
@@ -30,8 +42,8 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
     isLoading: ruleLoading,
     isError: ruleError,
   } = useQuery({
-    ...realmRuleResolvedQuery(realmId),
-    enabled: Boolean(rulePostId) && !isMember,
+    ...realmRuleResolvedQuery(realmId, undefined, readQuery),
+    enabled: readContext.ready && Boolean(rulePostId) && !isMember,
   });
   const ruleContent =
     rule?.sourceRulePost?.content ?? rule?.translation?.description ?? null;

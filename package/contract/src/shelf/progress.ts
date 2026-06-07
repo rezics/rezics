@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { readLanguageGetQueryBase } from "../list-query-base";
 import { catalogEntryKindSchema, unitTypeSchema } from "../unit/unit";
 
 export const SYSTEM_SHELF_KIND_KEYS = [
@@ -116,6 +117,7 @@ export type UnitProgressRowDTO = (typeof unitProgressRowDTOSchema)["static"];
 export const unitProgressListQuerySchema = t.Object({
   cursor: t.Optional(t.String()),
   limit: t.Optional(t.Integer({ minimum: 1, maximum: 100 })),
+  ...readLanguageGetQueryBase.properties,
 });
 
 export type UnitProgressListQuery =

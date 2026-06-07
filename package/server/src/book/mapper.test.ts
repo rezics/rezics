@@ -1,5 +1,14 @@
-import { describe, expect, test } from "bun:test";
-import { mapBaseBookToDTO } from "./mapper";
+import { describe, expect, mock, test } from "bun:test";
+
+mock.module("@/unit/publication-policy", () => ({
+  resolveStoredLicenseSlug: (value: unknown) => value,
+}));
+
+mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: (user: unknown) => user,
+}));
+
+const { mapBaseBookToDTO } = await import("./mapper");
 
 function bookRow(overrides: Record<string, unknown> = {}) {
   return {
@@ -184,5 +193,41 @@ describe("mapBaseBookToDTO", () => {
     expect(dto.resolvedLanguage).toBe("ja");
     expect(dto.title).toBeNull();
     expect(dto.coverUrl).toBe("https://cdn.example/ja.jpg");
+  });
+
+  test("app locale outranks read fallback candidates", () => {
+    const dto = mapBaseBookToDTO(
+      bookRow({
+        unit: {
+          ...bookRow().unit,
+          supportLanguages: [
+            {
+              unitId: "release-1",
+              language: "en",
+              isPrimary: true,
+              sortOrder: 0,
+            },
+            {
+              unitId: "release-1",
+              language: "zh-hant",
+              isPrimary: false,
+              sortOrder: 1,
+            },
+          ],
+          translations: [
+            { unitId: "release-1", language: "en", title: "English title" },
+            {
+              unitId: "release-1",
+              language: "zh-hant",
+              title: "中文標題",
+            },
+          ],
+        },
+      }),
+      { appLocale: "zh-hant", languages: ["en"] },
+    );
+
+    expect(dto.resolvedLanguage).toBe("zh-hant");
+    expect(dto.title).toBe("中文標題");
   });
 });

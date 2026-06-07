@@ -27,6 +27,7 @@ export const unitKeys = {
       explicitLanguage?: string;
       languages?: string | readonly string[];
       appLocale?: string;
+      languageMode?: "preferred" | "all";
     },
   ) =>
     query === undefined

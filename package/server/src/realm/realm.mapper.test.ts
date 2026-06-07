@@ -1,6 +1,12 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-import { mapRealmListRowToDTO, mapRealmToDTO } from "./realm.mapper";
+
+mock.module("@/unit/language-resolution", () => ({}));
+mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: (user: unknown) => user,
+}));
+
+const { mapRealmListRowToDTO, mapRealmToDTO } = await import("./realm.mapper");
 
 function realmRow(overrides: Record<string, unknown> = {}) {
   return {
@@ -65,5 +71,47 @@ describe("realm mappers", () => {
 
     expect(dto.resolvedLanguage).toBe("ja");
     expect(dto.title).toBeNull();
+  });
+
+  test("app locale outranks read fallback candidates", () => {
+    const dto = mapRealmToDTO(
+      realmRow({
+        unit: {
+          ...realmRow().unit,
+          supportLanguages: [
+            {
+              unitId: "realm-1",
+              language: "en",
+              isPrimary: true,
+              sortOrder: 0,
+            },
+            {
+              unitId: "realm-1",
+              language: "zh-hant",
+              isPrimary: false,
+              sortOrder: 1,
+            },
+          ],
+          translations: [
+            {
+              unitId: "realm-1",
+              language: "en",
+              title: "English realm",
+              description: markdownContentDoc("English description"),
+            },
+            {
+              unitId: "realm-1",
+              language: "zh-hant",
+              title: "中文領域",
+              description: markdownContentDoc("中文介紹"),
+            },
+          ],
+        },
+      }),
+      { appLocale: "zh-hant", languages: ["en"] },
+    );
+
+    expect(dto.resolvedLanguage).toBe("zh-hant");
+    expect(dto.title).toBe("中文領域");
   });
 });

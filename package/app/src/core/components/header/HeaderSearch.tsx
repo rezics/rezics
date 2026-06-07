@@ -13,6 +13,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import LogoIcon from "@/shared/assets/logo.svg?react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useIsMobile } from "@/shared/utils/use-media-query";
@@ -53,6 +54,7 @@ function resolveScope(pathname: string): HeaderSearchScope {
 function useHeaderSearchPresentation(pathname: string) {
   const scope = useMemo(() => resolveScope(pathname), [pathname]);
   const currentUser = useUserProfileStore((state) => state.user);
+  const readContext = useReadLanguageContext();
 
   const realmId = scope.kind === "realm" ? scope.realmId : "";
   const userId =
@@ -60,8 +62,11 @@ function useHeaderSearchPresentation(pathname: string) {
   const userSlug = scope.kind === "userSlug" ? scope.userSlug : "";
 
   const realmQuery = useQuery({
-    ...realmDetailQuery(realmId),
-    enabled: Boolean(realmId),
+    ...realmDetailQuery(realmId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && Boolean(realmId),
   });
   const userByIdQuery = useQuery({
     ...userQueries.detail(userId),

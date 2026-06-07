@@ -64,7 +64,8 @@ export const patchBookDetailAtomFamily = atomFamily((bookId: string) => {
 /**
  * Atom family storing the user-selected language for a given book detail page.
  * `null` means no explicit choice yet — `useBookLanguage` resolves an initial
- * value from user preferences and the book's available translations on read.
+ * value from app locale, user preferences, and the book's available
+ * translations on read.
  */
 export const bookLanguageAtom = atomFamily((_bookId: string) => {
   return atom<string | null>(null);

@@ -4,8 +4,9 @@ import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import {
   listGetQueryBase,
-  listLanguageModeSchema,
   listPostBodyBase,
+  readLanguageBodyBase,
+  readLanguageGetQueryBase,
 } from "../list-query-base";
 
 // ============================================================
@@ -322,6 +323,7 @@ export type UnitDTO = (typeof unitDTOSchema)["static"];
 
 export const unitListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
+  ...readLanguageGetQueryBase.properties,
   q: t.Optional(t.String()),
   id: t.Optional(t.String()),
   slug: t.Optional(t.String()),
@@ -335,8 +337,6 @@ export const unitListQuerySchema = t.Object({
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
   language: t.Optional(languageSchema),
-  languages: t.Optional(t.String()),
-  languageMode: t.Optional(listLanguageModeSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
@@ -364,6 +364,7 @@ export type UnitListQuery = (typeof unitListQuerySchema)["static"];
 
 export const unitListBodySchema = t.Object({
   ...listPostBodyBase.properties,
+  ...readLanguageBodyBase.properties,
   q: t.Optional(t.String()),
   id: t.Optional(t.String()),
   slug: t.Optional(t.String()),
@@ -377,8 +378,6 @@ export const unitListBodySchema = t.Object({
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
   language: t.Optional(languageSchema),
-  languages: t.Optional(t.Array(languageSchema)),
-  languageMode: t.Optional(listLanguageModeSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),

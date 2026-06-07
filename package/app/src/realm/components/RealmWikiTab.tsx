@@ -8,7 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink, Settings } from "lucide-react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostCard } from "@/post";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 interface RealmWikiTabProps {
   realmId: string;
@@ -22,15 +22,17 @@ export function RealmWikiTab({
   canManage,
 }: RealmWikiTabProps) {
   const { t } = useTranslation(["common", "entity"]);
-  const languages = useReadLanguageCandidates();
-  const wikiPostsQuery = useQuery(
-    postQueries.wikiByRealm(realmId, {
+  const readContext = useReadLanguageContext();
+  const wikiPostsQuery = useQuery({
+    ...postQueries.wikiByRealm(realmId, {
       sort: { field: "updatedAt", order: "desc" },
-      languages,
-      languageMode: "preferred",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
       limit: 24,
     }),
-  );
+    enabled: readContext.ready && Boolean(realmId),
+  });
   const zoneQuery = useQuery(zoneByUnitIdQueryOptions(wikiZoneUnitId ?? ""));
   const posts = wikiPostsQuery.data?.posts ?? [];
   const zoneSlug = zoneQuery.data?.slug ?? null;

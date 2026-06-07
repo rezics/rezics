@@ -47,12 +47,14 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
   const { data: root } = useQuery({
     ...postQueries.detail(rootPostUnitId, {
       languages: readContext.languages,
+      appLocale: readContext.appLocale,
     }),
     enabled: readContext.ready && Boolean(rootPostUnitId),
   });
   const { data: realm } = useQuery({
     ...realmDetailQuery(contextRealmUnitId ?? "", {
       languages: readContext.languages,
+      appLocale: readContext.appLocale,
     }),
     enabled:
       readContext.ready &&

@@ -30,7 +30,10 @@ export const BookReviewPage: React.FC = () => {
   const navigate = useNavigate();
   const readContext = useReadLanguageContext();
   const { data } = useQuery({
-    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    ...bookQueries.detail(bookId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: Boolean(bookId) && readContext.ready,
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
@@ -46,6 +49,7 @@ export const BookReviewPage: React.FC = () => {
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
             languages: readContext.languages,
+            appLocale: readContext.appLocale,
             languageMode: readContext.languageMode,
           })
         : {
@@ -53,6 +57,7 @@ export const BookReviewPage: React.FC = () => {
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
             languages: readContext.languages,
+            appLocale: readContext.appLocale,
             languageMode: readContext.languageMode,
           },
     ),

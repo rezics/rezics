@@ -33,7 +33,7 @@ import { Plus, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FeedLayout } from "@/feed";
 import { PinnedFeedSection } from "@/pinboard";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
 import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
@@ -103,10 +103,14 @@ export function RealmPage({
   onTagSelect,
 }: RealmPageProps) {
   const { t } = useTranslation(["common", "entity"]);
-  const languages = useReadLanguageCandidates();
-  const { data: realm, isLoading } = useQuery(
-    realmDetailQuery(realmId, { languages }),
-  );
+  const readContext = useReadLanguageContext();
+  const { data: realm, isLoading } = useQuery({
+    ...realmDetailQuery(realmId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const { data: settings } = useQuery({
     ...userQueries.settings(),

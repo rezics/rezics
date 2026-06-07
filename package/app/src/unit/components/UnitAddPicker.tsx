@@ -14,7 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as LinkIcon, Search } from "lucide-react";
 import { type ReactNode, useId, useState } from "react";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useUnitCandidates } from "../hooks/useUnitCandidates";
 import type { Candidate } from "../models/types";
 import { UnitCandidateRow } from "./UnitPicker/UnitCandidateRow";
@@ -109,14 +109,16 @@ export function UnitSearchSelect({
   const inputId = useId();
   const [query, setQuery] = useState(initialQuery ?? "");
   const trimmedQuery = query.trim();
-  const languages = useReadLanguageCandidates();
-  const { data, isLoading, error } = useQuery(
-    unitQueries.search(trimmedQuery, {
-      languages,
-      languageMode: "preferred",
+  const readContext = useReadLanguageContext();
+  const { data, isLoading, error } = useQuery({
+    ...unitQueries.search(trimmedQuery, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
       limit: 8,
     }),
-  );
+    enabled: readContext.ready && Boolean(trimmedQuery),
+  });
   const units = (data?.units ?? []) as UnitDTO[];
 
   return (

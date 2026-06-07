@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ExcerptList } from "@/excerpt";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export type ExcerptPreviewProps = {
   id: string;
@@ -17,15 +17,17 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   excerptNumber = 3,
 }) => {
   const { t } = useTranslation(["common"]);
-  const languages = useReadLanguageCandidates();
-  const { data, isLoading, error } = useQuery(
-    postQueries.byTarget(id, {
+  const readContext = useReadLanguageContext();
+  const { data, isLoading, error } = useQuery({
+    ...postQueries.byTarget(id, {
       kind: PostKind.EXCERPT,
-      languages,
-      languageMode: "preferred",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
       limit: excerptNumber,
     }),
-  );
+    enabled: readContext.ready && Boolean(id),
+  });
 
   if (isLoading) return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;

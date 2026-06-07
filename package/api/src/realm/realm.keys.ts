@@ -4,6 +4,13 @@
 
 import type { RealmFilters } from "./realm.types";
 
+type RealmReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 export const realmKeys = {
   /**
    * Base key for all realm queries
@@ -20,10 +27,7 @@ export const realmKeys = {
    * Keys for detail queries
    */
   details: () => [...realmKeys.all(), "detail"] as const,
-  detail: (
-    unitId: string,
-    query?: { languages?: string | readonly string[] },
-  ) =>
+  detail: (unitId: string, query?: RealmReadQuery) =>
     query === undefined
       ? ([...realmKeys.details(), unitId] as const)
       : ([...realmKeys.details(), unitId, query] as const),
@@ -50,8 +54,16 @@ export const realmKeys = {
     [...realmKeys.all(), "rules", realmUnitId] as const,
   ruleResolveds: (realmUnitId: string) =>
     [...realmKeys.rules(realmUnitId), "resolved"] as const,
-  ruleResolved: (realmUnitId: string, language?: string) =>
-    [...realmKeys.ruleResolveds(realmUnitId), language ?? null] as const,
+  ruleResolved: (
+    realmUnitId: string,
+    language?: string,
+    query?: { languages?: string | readonly string[]; appLocale?: string },
+  ) =>
+    [
+      ...realmKeys.ruleResolveds(realmUnitId),
+      language ?? null,
+      query ?? null,
+    ] as const,
 
   /**
    * Keys for realm content invalidation
@@ -68,6 +80,8 @@ export const realmKeys = {
   tagContext: (realmUnitId: string, tagUnitId: string) =>
     [...realmKeys.all(), "tagContexts", realmUnitId, tagUnitId] as const,
 
-  mine: () => [...realmKeys.all(), "mine"] as const,
-  byMember: (userId: string) => [...realmKeys.all(), "member", userId] as const,
+  mine: (query?: RealmReadQuery) =>
+    [...realmKeys.all(), "mine", query ?? null] as const,
+  byMember: (userId: string, query?: RealmReadQuery) =>
+    [...realmKeys.all(), "member", userId, query ?? null] as const,
 } as const;
