@@ -16,6 +16,7 @@ const i18nMessages = {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectLabel,
   SelectTrigger,
@@ -52,12 +53,14 @@ export const RealmFeedSortSwitcher: React.FC<RealmFeedSortSwitcherProps> = ({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectLabel>Sort by</SelectLabel>
-          {Object.entries(OPTIONS).map(([optionValue, label]) => (
-            <SelectItem key={optionValue} value={optionValue}>
-              {label()}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            <SelectLabel>Sort by</SelectLabel>
+            {Object.entries(OPTIONS).map(([optionValue, label]) => (
+              <SelectItem key={optionValue} value={optionValue}>
+                {label()}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
     </div>

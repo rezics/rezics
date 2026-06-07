@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectLabel,
   SelectTrigger,
@@ -302,12 +303,14 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectLabel>Sort by</SelectLabel>
-              {COMMENT_SORT_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {t(COMMENT_SORT_LABEL_KEYS[option])}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                <SelectLabel>Sort by</SelectLabel>
+                {COMMENT_SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {t(COMMENT_SORT_LABEL_KEYS[option])}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
