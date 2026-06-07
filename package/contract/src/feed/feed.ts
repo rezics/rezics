@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "../language";
-import { listLanguageModeSchema } from "../list-query-base";
+import { readLanguageGetQueryBase } from "../list-query-base";
 import { postDTOSchema } from "../post/post";
 import { moderationStatusSchema } from "../realm/governance";
 import { shelfSummaryDTOSchema } from "../shelf/shelf";
@@ -33,6 +33,7 @@ export const feedCursorSchema = t.Object({
 export type FeedCursor = (typeof feedCursorSchema)["static"];
 
 export const feedQuerySchema = t.Object({
+  ...readLanguageGetQueryBase.properties,
   scope: t.Optional(feedScopeSchema),
   realmUnitId: t.Optional(t.String()),
   libraryKind: t.Optional(t.String()),
@@ -43,7 +44,6 @@ export const feedQuerySchema = t.Object({
     t.Union([moderationStatusSchema, t.Literal("all")]),
   ),
   languages: t.Optional(t.Union([t.String(), t.Array(languageSchema)])),
-  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(feedSortSchema),
   cursor: t.Optional(feedCursorSchema),
   limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),

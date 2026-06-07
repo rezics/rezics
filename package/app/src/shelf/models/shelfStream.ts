@@ -3,7 +3,12 @@ import type {
   ShelfSortState,
   ShelfView,
 } from "@rezics/api/shelf";
-import type { ShelfItemDTO, ShelfItemChildDTO } from "@rezics/contract";
+import type { ShelfItemChildDTO, ShelfItemDTO } from "@rezics/contract";
+import {
+  shelfItemIdentity,
+  shelfItemIdentityFromParts,
+  shelfItemReference,
+} from "@rezics/contract";
 import { titleOf } from "./titleOf";
 
 export interface ShelfStreamRootEntry {
@@ -47,7 +52,7 @@ function maybeReverse(value: number, order: ShelfSortState["order"]): number {
 function tieBreak(a: EnrichedShelfItem, b: EnrichedShelfItem): number {
   return (
     comparePosition(a.unit.position, b.unit.position) ||
-    titleCollator.compare(a.unit.unitId, b.unit.unitId)
+    titleCollator.compare(shelfItemIdentity(a.unit), shelfItemIdentity(b.unit))
   );
 }
 
@@ -61,7 +66,11 @@ function compareByMode(
       maybeReverse(
         comparePosition(a.unit.position, b.unit.position),
         sort.order,
-      ) || titleCollator.compare(a.unit.unitId, b.unit.unitId)
+      ) ||
+      titleCollator.compare(
+        shelfItemIdentity(a.unit),
+        shelfItemIdentity(b.unit),
+      )
     );
   }
   if (sort.field === "addedAt") {
@@ -102,7 +111,7 @@ function partition(
   relations: ShelfItemChildDTO[],
 ): DerivationParts {
   const byId = new Map<string, EnrichedShelfItem>();
-  for (const e of units) byId.set(e.unit.unitId, e);
+  for (const e of units) byId.set(shelfItemIdentity(e.unit), e);
 
   const childByParent = new Map<string, EnrichedShelfItem[]>();
   const childIds = new Set<string>();
@@ -116,29 +125,33 @@ function partition(
             shelfId: item.shelfId,
             parentItemType: item.parentItemType ?? "unit",
             parentItemId: item.parentItemId!,
-            parentUnitId: item.parentItemId!,
             childItemType: item.itemType ?? "unit",
-            childItemId: item.itemId ?? item.unitId,
-            childUnitId: item.itemId ?? item.unitId,
+            childItemId: item.itemId,
             role: item.parentRole ?? "review",
           }));
   for (const rel of normalizedRelations) {
-    const childUnitId = rel.childUnitId ?? rel.childItemId;
-    const parentUnitId = rel.parentUnitId ?? rel.parentItemId;
-    childIds.add(childUnitId);
-    const child = byId.get(childUnitId);
+    const childKey = shelfItemIdentityFromParts(
+      rel.childItemType,
+      rel.childItemId,
+    );
+    const parentKey = shelfItemIdentityFromParts(
+      rel.parentItemType,
+      rel.parentItemId,
+    );
+    childIds.add(childKey);
+    const child = byId.get(childKey);
     if (!child) continue;
-    let bucket = childByParent.get(parentUnitId);
+    let bucket = childByParent.get(parentKey);
     if (!bucket) {
       bucket = [];
-      childByParent.set(parentUnitId, bucket);
+      childByParent.set(parentKey, bucket);
     }
     if (!bucket.includes(child)) bucket.push(child);
   }
 
   const roots: EnrichedShelfItem[] = [];
   for (const e of units) {
-    if (!childIds.has(e.unit.unitId)) roots.push(e);
+    if (!childIds.has(shelfItemIdentity(e.unit))) roots.push(e);
   }
 
   return { byId, childByParent, childIds, roots };
@@ -172,7 +185,10 @@ export function deriveShelfStream(
     return sortedClone(roots, sort).map((root) => ({
       kind: "root" as const,
       unit: root,
-      children: sortedClone(childByParent.get(root.unit.unitId) ?? [], sort),
+      children: sortedClone(
+        childByParent.get(shelfItemIdentity(root.unit)) ?? [],
+        sort,
+      ),
     }));
   }
 
@@ -180,12 +196,15 @@ export function deriveShelfStream(
     const out: ShelfStreamEntry[] = [];
     for (const root of sortedClone(roots, sort)) {
       out.push({ kind: "root", unit: root, children: [] });
-      const kids = sortedClone(childByParent.get(root.unit.unitId) ?? [], sort);
+      const kids = sortedClone(
+        childByParent.get(shelfItemIdentity(root.unit)) ?? [],
+        sort,
+      );
       for (const child of kids) {
         out.push({
           kind: "child",
           unit: child,
-          parentUnitId: root.unit.unitId,
+          parentUnitId: shelfItemReference(root.unit),
           parent: root,
         });
       }
@@ -203,7 +222,7 @@ export function shelfItemsById(
   units: EnrichedShelfItem[],
 ): Map<string, EnrichedShelfItem> {
   const m = new Map<string, EnrichedShelfItem>();
-  for (const e of units) m.set(e.unit.unitId, e);
+  for (const e of units) m.set(shelfItemIdentity(e.unit), e);
   return m;
 }
 
@@ -225,17 +244,18 @@ export function findChildren(
             shelfId: item.shelfId,
             parentItemType: item.parentItemType ?? "unit",
             parentItemId: item.parentItemId!,
-            parentUnitId: item.parentItemId!,
             childItemType: item.itemType ?? "unit",
-            childItemId: item.itemId ?? item.unitId,
-            childUnitId: item.itemId ?? item.unitId,
+            childItemId: item.itemId,
             role: item.parentRole ?? "review",
           }));
   for (const rel of normalizedRelations) {
-    const relParentUnitId = rel.parentUnitId ?? rel.parentItemId;
-    if (relParentUnitId !== parentUnitId) continue;
+    if (rel.parentItemType !== "unit" || rel.parentItemId !== parentUnitId) {
+      continue;
+    }
     if (role && rel.role !== role) continue;
-    const child = byId.get(rel.childUnitId ?? rel.childItemId);
+    const child = byId.get(
+      shelfItemIdentityFromParts(rel.childItemType, rel.childItemId),
+    );
     if (child && !out.includes(child)) out.push(child);
   }
   return out;

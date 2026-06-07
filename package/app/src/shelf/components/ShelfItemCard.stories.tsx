@@ -8,7 +8,8 @@ const meta = {
   args: {
     unit: {
       shelfId: "shelf-1",
-      unitId: "book-quiet-library",
+      itemType: "unit",
+      itemId: "book-quiet-library",
       kind: "book",
       position: "a0",
     },
@@ -24,7 +25,8 @@ export const LongContent: Story = {
   args: {
     unit: {
       shelfId: "shelf-1",
-      unitId: "review-with-a-very-long-identifier-string-to-truncate",
+      itemType: "unit",
+      itemId: "review-with-a-very-long-identifier-string-to-truncate",
       kind: "review",
       position: "a1",
     },
@@ -35,7 +37,8 @@ export const Compact: Story = {
   args: {
     unit: {
       shelfId: "shelf-1",
-      unitId: "fiction",
+      itemType: "unit",
+      itemId: "fiction",
       kind: "tag",
       position: "a2",
     },

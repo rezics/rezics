@@ -33,8 +33,12 @@ import {
   type BookDTO,
   contentDocMarkdownFallback,
   isLibraryKind,
+  type ShelfItemChildDTO,
   type SystemShelfKindKey,
   shelfCoverImageSpec,
+  shelfItemIdentity,
+  shelfItemReference,
+  shelfItemUnitId,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -124,10 +128,11 @@ const PROGRESS_SHELF_KIND_KEYS = new Set<SystemShelfKindKey>([
 ]);
 
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
-  if (entry.kind === "root") return `${prefix}:r:${entry.unit.unit.unitId}`;
+  if (entry.kind === "root")
+    return `${prefix}:r:${shelfItemIdentity(entry.unit.unit)}`;
   if (entry.kind === "child")
-    return `${prefix}:c:${entry.parentUnitId}:${entry.unit.unit.unitId}`;
-  return `${prefix}:p:${entry.unit.unit.unitId}`;
+    return `${prefix}:c:${entry.parentUnitId}:${shelfItemIdentity(entry.unit.unit)}`;
+  return `${prefix}:p:${shelfItemIdentity(entry.unit.unit)}`;
 }
 
 function isProgressShelfKind(
@@ -144,24 +149,28 @@ function shelfItemToBookshelfItem(
 
   if (kind === "book") {
     const book = enriched.data as BookDTO | undefined;
+    const unitId =
+      shelfItemUnitId(enriched.unit) ?? shelfItemReference(enriched.unit);
     return {
-      unitId: enriched.unit.unitId,
+      unitId,
       kind,
-      title: book?.title ?? enriched.unit.unitId,
+      title: book?.title ?? unitId,
       coverUrl: book?.coverUrl ?? "",
       author: book ? getBookAuthorName(book) || undefined : undefined,
       isLicensed: book?.isLicensed,
-      href: `/book/${enriched.unit.unitId}`,
+      href: `/book/${unitId}`,
     };
   }
 
+  const unitId =
+    shelfItemUnitId(enriched.unit) ?? shelfItemReference(enriched.unit);
   return {
-    unitId: enriched.unit.unitId,
+    unitId,
     kind,
-    title: enriched.unit.unitId,
+    title: unitId,
     coverUrl: "",
     isLicensed: true,
-    href: `/unit/${enriched.unit.unitId}`,
+    href: `/unit/${unitId}`,
   };
 }
 
@@ -259,7 +268,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   );
 
   const filteredStream = useMemo(
-    () => stream.filter((e) => !orphanIds.has(e.unit.unit.unitId)),
+    () => stream.filter((e) => !orphanIds.has(shelfItemReference(e.unit.unit))),
     [stream, orphanIds],
   );
   const readableStream = useMemo(
@@ -304,7 +313,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
       const data = entry.unit.data as
         | { unitId?: string; id?: string }
         | undefined;
-      const id = data?.unitId ?? data?.id ?? entry.unit.unit.unitId;
+      const id =
+        data?.unitId ?? data?.id ?? shelfItemReference(entry.unit.unit);
       if (id) ids.add(id);
     }
     return [...ids];
@@ -675,13 +685,14 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   );
 }
 
-function dedupeRelations<
-  T extends { parentUnitId: string; childUnitId: string; role: string },
->(relations: T[]): T[] {
+function dedupeRelations(
+  relations: readonly (ShelfItemChildDTO | undefined)[],
+): ShelfItemChildDTO[] {
   const seen = new Set<string>();
-  const out: T[] = [];
+  const out: ShelfItemChildDTO[] = [];
   for (const relation of relations) {
-    const key = `${relation.parentUnitId}:${relation.childUnitId}:${relation.role}`;
+    if (!relation) continue;
+    const key = `${relation.parentItemType}:${relation.parentItemId}:${relation.childItemType}:${relation.childItemId}:${relation.role}`;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(relation);

@@ -3,7 +3,9 @@ import {
   type ProgressLibraryListResponse,
   type ProgressLibraryRow,
   type ProgressLibraryUnitSummary,
+  parseReadLanguages,
   readCoverUrlFromExtra,
+  resolveReadLanguage,
   type UnitProgressListResponse,
   type UnitProgressStatsResponse,
   userUnitProgressStatusValues,
@@ -203,31 +205,42 @@ function enqueueProgressSearch(
   );
 }
 
-/** Resolve a display title: default-language -> en -> first non-empty. */
-function pickTitle(unit: TitleDisplay): string {
+function orderedTranslations(
+  unit: TitleDisplay,
+  readLanguage: ProgressListInput = {},
+): TranslationRow[] {
+  const resolvedLanguage = resolveReadLanguage({
+    explicitLanguage: readLanguage.explicitLanguage,
+    appLocale: readLanguage.appLocale,
+    languages: parseReadLanguages(readLanguage.languages),
+    availableLanguages: unit.translations.map((t) => t.language),
+    fallbackLanguage: unit.defaultLanguage,
+  });
   const ordered = [
+    resolvedLanguage
+      ? unit.translations.find((t) => t.language === resolvedLanguage)
+      : undefined,
     unit.defaultLanguage
       ? unit.translations.find((t) => t.language === unit.defaultLanguage)
       : undefined,
     unit.translations.find((t) => t.language === "en"),
     ...unit.translations,
   ];
-  for (const tr of ordered) {
+  return ordered.filter((tr): tr is TranslationRow => Boolean(tr));
+}
+
+function pickTitle(unit: TitleDisplay, readLanguage: ProgressListInput = {}) {
+  for (const tr of orderedTranslations(unit, readLanguage)) {
     if (tr?.title) return tr.title;
   }
   return "";
 }
 
-/** Resolve a cover URL from translation extra, same order as title. */
-function pickCover(unit: TitleDisplay): string | undefined {
-  const ordered = [
-    unit.defaultLanguage
-      ? unit.translations.find((t) => t.language === unit.defaultLanguage)
-      : undefined,
-    unit.translations.find((t) => t.language === "en"),
-    ...unit.translations,
-  ];
-  for (const tr of ordered) {
+function pickCover(
+  unit: TitleDisplay,
+  readLanguage: ProgressListInput = {},
+): string | undefined {
+  for (const tr of orderedTranslations(unit, readLanguage)) {
     const url = readCoverUrlFromExtra(tr?.extra);
     if (url) return url;
   }
@@ -237,11 +250,12 @@ function pickCover(unit: TitleDisplay): string | undefined {
 function unitSummary(
   unitId: string,
   unit: UnitDisplay,
+  readLanguage: ProgressListInput = {},
 ): ProgressLibraryUnitSummary {
   return {
     unitId,
-    title: pickTitle(unit) || unitId,
-    coverUrl: pickCover(unit),
+    title: pickTitle(unit, readLanguage) || unitId,
+    coverUrl: pickCover(unit, readLanguage),
     unitType: unit.type as ProgressLibraryUnitSummary["unitType"],
     catalogEntryKind: unit.catalogEntryKind,
     targetUnitId: unit.targetUnitId,
@@ -710,7 +724,7 @@ export class ProgressService {
       ].filter((unitId): unitId is string => Boolean(unitId));
       const link = {
         shelfId: shelfRow.shelfId,
-        title: pickTitle(shelfRow.shelf.unit) || shelfRow.shelfId,
+        title: pickTitle(shelfRow.shelf.unit, query) || shelfRow.shelfId,
       };
       for (const progressUnitId of new Set(linkedUnitIds)) {
         const shelves = shelvesByUnit.get(progressUnitId) ?? [];
@@ -733,12 +747,12 @@ export class ProgressService {
 
         return {
           progress: mapProgressToDTO(row),
-          progressUnit: unitSummary(row.unitId, unit),
+          progressUnit: unitSummary(row.unitId, unit, query),
           mainUnitContext:
             unit.catalogEntryKind === "VARIANT" &&
             unit.targetUnitId &&
             unit.targetUnit
-              ? unitSummary(unit.targetUnitId, unit.targetUnit)
+              ? unitSummary(unit.targetUnitId, unit.targetUnit, query)
               : null,
           // Progress rows are anchored to the exact unit the user touched.
           // Even when that unit is a VARIANT, resume routes keep that id.

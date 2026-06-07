@@ -2,7 +2,7 @@ import type {
   CollectionSearchQuery,
   PatchUserUnitCollectionInput,
 } from "@rezics/contract";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { Shelf, ShelfItem, Unit, UserTagApplication } from "../db/schema";
 import { searchClient } from "../meili/search-client";
 import { enqueueShelfItemSourceSearchSync } from "../shelf/user-unit-collection.service";
@@ -67,7 +67,7 @@ function createDrizzleUserUnitCollectionRepository(): UserUnitCollectionReposito
       const db = await getServerDb();
       const [row] = await db
         .select({
-          userId: Unit.userId,
+          userId: sql<string>`${userId}`,
           unitId: ShelfItem.itemId,
           searchText: ShelfItem.searchText,
           createdAt: ShelfItem.createdAt,
@@ -192,7 +192,7 @@ function createDrizzleUserUnitCollectionRepository(): UserUnitCollectionReposito
       const db = await getServerDb();
       return db
         .select({
-          userId: Unit.userId,
+          userId: sql<string>`${userId}`,
           unitId: ShelfItem.itemId,
           searchText: ShelfItem.searchText,
           createdAt: ShelfItem.createdAt,

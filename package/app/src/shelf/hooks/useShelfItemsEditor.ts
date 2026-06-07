@@ -4,9 +4,9 @@ import { shelfItemsInfiniteQuery } from "@rezics/api/shelf/shelf.queries";
 import type {
   ShelfItemBatchOp,
   ShelfItemBatchResult,
+  ShelfItemChildDTO,
   ShelfItemDTO,
   ShelfItemKind,
-  ShelfItemChildDTO,
   ShelfItemParentRole,
   ShelfItemType,
 } from "@rezics/contract";
@@ -329,10 +329,13 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   };
 }
 
-function dedupeRelations(relations: ShelfItemChildDTO[]): ShelfItemChildDTO[] {
+function dedupeRelations(
+  relations: readonly (ShelfItemChildDTO | undefined)[],
+): ShelfItemChildDTO[] {
   const seen = new Set<string>();
   const out: ShelfItemChildDTO[] = [];
   for (const relation of relations) {
+    if (!relation) continue;
     const key = `${relation.parentItemType}:${relation.parentItemId}:${relation.childItemType}:${relation.childItemId}:${relation.role}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -373,7 +376,6 @@ function applyLiveOps(
         shelfId,
         itemType: "unit",
         itemId: unitId,
-        unitId,
         kind,
         position: finalPosition,
       },
@@ -392,7 +394,6 @@ function applyLiveOps(
         shelfId,
         itemType: op.itemType,
         itemId: op.itemId,
-        ...(op.itemType === "unit" ? { unitId: op.itemId } : {}),
         kind: op.kind,
         position: op.position,
         parentItemType: op.parentItemType,

@@ -3,12 +3,12 @@ import type {
   SetPinnedTagsResponse,
   ShelfDetailDTO,
   ShelfDTO,
+  ShelfItemBatchResponse,
+  ShelfItemChildDTO,
+  ShelfItemDTO,
+  ShelfItemsResponse,
   ShelfListResponse,
   ShelfSummaryDTO,
-  ShelfItemBatchResponse,
-  ShelfItemDTO,
-  ShelfItemChildDTO,
-  ShelfItemsResponse,
 } from "@rezics/contract";
 import {
   addShelfItemSchema,
@@ -22,12 +22,12 @@ import {
   setPinnedTagsBodySchema,
   setShelfItemChildrenSchema,
   shelfBySlugParamsSchema,
-  shelfListBodySchema,
-  shelfListQuerySchema,
-  shelfParamsSchema,
   shelfItemBatchRequestSchema,
   shelfItemsQuerySchema,
   shelfItemTypeSchema,
+  shelfListBodySchema,
+  shelfListQuerySchema,
+  shelfParamsSchema,
   updateShelfSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -532,7 +532,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         params.unitId,
         params.itemId,
         body.role,
-        body.childItemIds,
+        body.childItemIds ?? [],
       );
       return { message: "Children reconciled" };
     },

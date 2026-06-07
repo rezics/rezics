@@ -6,18 +6,18 @@ import type {
   SetPinnedTagsResponse,
   ShelfDetailDTO,
   ShelfDTO,
-  ShelfListQuery,
-  ShelfMatchedUnitDTO,
-  ShelfSummaryDTO,
   ShelfItemBatchOp,
   ShelfItemBatchResult,
+  ShelfItemChildDTO,
   ShelfItemDTO,
   ShelfItemKind,
-  ShelfItemType,
-  ShelfItemChildDTO,
   ShelfItemParentRole,
   ShelfItemsQuery,
   ShelfItemsResponse,
+  ShelfItemType,
+  ShelfListQuery,
+  ShelfMatchedUnitDTO,
+  ShelfSummaryDTO,
   UpdateShelfInput,
 } from "@rezics/contract";
 import { parseIdsCsv, SEED_TAG_NAMES, withCoverUrl } from "@rezics/contract";
@@ -48,7 +48,7 @@ import {
 import {
   Post,
   Shelf,
-  ShelfItem as ShelfItem,
+  ShelfItem,
   Unit,
   UnitTag,
   UnitTranslation,
@@ -66,11 +66,11 @@ export const SHELF_ITEM_BATCH_OP_CAP = 200;
 
 import {
   mapShelfDetailToDTO,
+  mapShelfItemToDTO,
+  mapShelfItemToDTOWithVariantContext,
   mapShelfListRowToDTO,
   mapShelfSummaryToDTO,
   mapShelfToDTO,
-  mapShelfItemToDTO,
-  mapShelfItemToDTOWithVariantContext,
 } from "./shelf.mapper";
 import { isSystemKindKey } from "./system-shelves";
 
@@ -191,7 +191,9 @@ async function deleteShelfItem(
       parentItemId: ShelfItem.parentItemId,
     });
   if (deleted.length > 0) {
-    const deletedRootCount = deleted.filter((row) => !row.parentItemId).length;
+    const deletedRootCount = deleted.filter(
+      (row: { parentItemId: string | null }) => !row.parentItemId,
+    ).length;
     await tx
       .update(Shelf)
       .set({

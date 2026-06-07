@@ -1,13 +1,14 @@
-import { PostKind, type FeedRow } from "@rezics/contract";
+import { type FeedRow, PostKind } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type React from "react";
-import { FeedRenderer } from "./FeedRenderer";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { bookMany } from "@/stories/fixtures/book";
 import { postFlat } from "@/stories/fixtures/post";
 import { reviewShort } from "@/stories/fixtures/review";
 import { shelfList } from "@/stories/fixtures/shelf";
+import { FeedLayout } from "../layouts/FeedLayout";
+import { FeedRenderer } from "./FeedRenderer";
 
 const contentRow = {
   type: "content",
@@ -64,7 +65,7 @@ const shelfCarouselRow = {
 } satisfies FeedRow;
 
 function Frame({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-3xl px-4 py-6">{children}</div>;
+  return <FeedLayout className="px-4 py-6">{children}</FeedLayout>;
 }
 
 const meta = {

@@ -7,6 +7,7 @@ import {
   RealmsSection,
   ShelvesSection,
 } from "@/dashboard";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { useAuth } from "@/user/pages/useAuth";
 
@@ -21,7 +22,15 @@ import { useAuth } from "@/user/pages/useAuth";
 export const HomeContinuationSection: React.FC = () => {
   const { t } = useTranslation(["page"]);
   const { readyForApp } = useAuth();
-  const { data } = useDashboardSummary({ enabled: readyForApp });
+  const readContext = useReadLanguageContext();
+  const { data } = useDashboardSummary({
+    enabled: readyForApp && readContext.ready,
+    query: {
+      languages: readContext.languages.join(","),
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    },
+  });
 
   if (!readyForApp || !data) return null;
 

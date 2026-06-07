@@ -4,8 +4,8 @@ import type {
   BookDTO,
   PostDTO,
   ShelfDTO,
-  ShelfItemDTO,
   ShelfItemChildDTO,
+  ShelfItemDTO,
 } from "@rezics/contract";
 import { markdownContentDoc } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
@@ -94,7 +94,8 @@ function makeUnit(
 ): ShelfItemDTO {
   return {
     shelfId: SHELF_ID,
-    unitId,
+    itemType: "unit",
+    itemId: unitId,
     kind,
     position,
     ...(createdAt ? { createdAt } : {}),
@@ -250,21 +251,21 @@ function StoryShell({ itemCount, viewMode, enqueue, mixed }: StoryShellProps) {
     if (editor.units.length === 0) return;
     if (editor.pendingCount > 0) return;
     if (enqueue === "single") {
-      editor.enqueueDelete(editor.units[0]!.unitId);
+      editor.enqueueDelete(editor.units[0]!.itemId);
       return;
     }
     if (enqueue === "dirtyMany") {
-      editor.enqueueDelete(editor.units[0]!.unitId);
+      editor.enqueueDelete(editor.units[0]!.itemId);
       if (editor.units[1])
-        editor.enqueueReorder(editor.units[1].unitId, {
+        editor.enqueueReorder(editor.units[1].itemId, {
           before: editor.units[2]?.position,
           after: editor.units[3]?.position,
         });
-      if (editor.units[2]) editor.enqueueDelete(editor.units[2].unitId);
+      if (editor.units[2]) editor.enqueueDelete(editor.units[2].itemId);
       return;
     }
     if (enqueue === "failedRetry") {
-      editor.enqueueDelete(editor.units[0]!.unitId);
+      editor.enqueueDelete(editor.units[0]!.itemId);
     }
   }, [enqueue, editor]);
 
