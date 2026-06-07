@@ -1,13 +1,8 @@
 import type { FeedContentRow } from "@rezics/api/feed/feed";
-import {
-  type ModerationActionDTO,
-  type ModerationStatus,
-  PostKind,
-} from "@rezics/contract";
+import type { ModerationActionDTO, ModerationStatus } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { PostCard } from "@/post";
-import { ReviewCard } from "@/review/components/item/ReviewCard";
+import { FeedCard } from "./FeedCard";
 
 export interface FeedContentCardProps {
   row: FeedContentRow;
@@ -37,38 +32,27 @@ export function FeedContentCard({
   const navigate = useNavigate();
   const openRow = () => navigate({ to: row.href });
 
-  if (row.post.kind === PostKind.REVIEW) {
-    return (
-      // biome-ignore lint/a11y/noStaticElementInteractions: nested links and actions provide keyboard access; pointer row open mirrors content cards.
-      // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard users can use the nested review title/action links.
-      <div
-        className="cursor-pointer border-b border-border-whisper"
-        onClick={openRow}
-      >
-        <ReviewCard
-          review={row.post}
-          className="border-b-0"
-          targetUnit={
-            row.targetUnit?.unitId
-              ? {
-                  unitId: row.targetUnit.unitId,
-                  title: row.targetUnit.title ?? row.targetUnit.unitId,
-                }
-              : undefined
-          }
-        />
-      </div>
-    );
-  }
-
   return (
-    <PostCard
+    <FeedCard
       post={row.post}
       onOpen={openRow}
-      href={row.href}
+      onReplyInvoke={() =>
+        navigate({
+          to: row.href,
+          search: { focus: "reply" },
+        })
+      }
       summaryScopeKey={summaryScopeKey}
       reactionScopeKey={reactionScopeKey}
       variantContext={row.variantContext}
+      targetUnit={
+        row.targetUnit?.unitId
+          ? {
+              unitId: row.targetUnit.unitId,
+              title: row.targetUnit.title ?? row.targetUnit.unitId,
+            }
+          : undefined
+      }
       manageMode={manageMode}
       realmModerationStatus={realmModerationStatus}
       realmModerationAt={realmModerationAt}

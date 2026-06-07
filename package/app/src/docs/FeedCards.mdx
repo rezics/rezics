@@ -1,0 +1,51 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+import * as FeedCardStories from "@/feed/components/FeedCard.stories";
+
+<Meta title="App/Feed/Feed Cards" />
+
+# Feed Cards
+
+Feed cards are app-side feed preview surfaces. They are used by feed streams
+where a row opens a full post or review target, but the in-stream surface should
+stay compact, card-shaped, and non-expanding.
+
+Feed previews live in the feed feature because they own stream behavior: card
+navigation, truncation, row metadata, and engagement affordances. Full
+post/review surfaces keep their own richer detail behavior.
+
+## Default feed cards
+
+`FeedCard` is the default text-first card. Body content truncates in place; the
+card opens the target row rather than rendering expand/collapse controls.
+
+<div className="max-w-[45.75rem] space-y-3 bg-surface-canvas p-4 text-text-primary">
+  <Canvas of={FeedCardStories.Default} />
+  <Canvas of={FeedCardStories.LongBodyTruncation} />
+  <Canvas of={FeedCardStories.Review} />
+  <Canvas of={FeedCardStories.WithInlineMedia} />
+</div>
+
+## Media-forward feed card
+
+The same card supports a media-forward layout when the feed row is led by an
+image or embedded preview.
+
+<div className="max-w-[45.75rem] bg-surface-canvas p-4 text-text-primary">
+  <Canvas of={FeedCardStories.MediaForward} />
+</div>
+
+```tsx
+<FeedCard post={post} onOpen={openRow} />
+
+<FeedCard
+  post={review}
+  targetUnit={{ unitId: bookId, title }}
+  onOpen={openReview}
+/>
+
+<FeedCard
+  post={post}
+  mediaMode="forward"
+  media={{ src: imageUrl, alt: "" }}
+/>
+```

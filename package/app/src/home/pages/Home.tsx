@@ -1,7 +1,7 @@
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
-import { FeedSection } from "@/feed";
+import { FeedLayout, FeedSection } from "@/feed";
 import { HomeSearch } from "@/search";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { BookCarousel } from "../components/HomeCarousel";
@@ -42,12 +42,14 @@ export const Home: React.FC<HomeProps> = () => {
       </section>
 
       <HomeContinuationSection />
-      <FeedSection query={{ scope: "home", sort: "best", limit: 12 }} />
       <LibraryCardsSection />
       <ActiveRealmsSection />
       <AnnouncementBarSection />
       <TrendingShelfSection />
       <NewBookSection limit={12} />
+      <FeedLayout>
+        <FeedSection query={{ scope: "home", sort: "best", limit: 12 }} />
+      </FeedLayout>
     </MainContentContainer>
   );
 };
