@@ -21,7 +21,7 @@ describe("language resolution helpers", () => {
     expect(primaryLanguages(supportLanguages)).toEqual(["en", "ja"]);
   });
 
-  test("orders read candidates from explicit, preferences, app locale, support languages, then fallback", () => {
+  test("orders read candidates from explicit, app locale, preferences, support languages, then fallback", () => {
     expect(
       readLanguageCandidates({
         explicitLanguage: "ko",
@@ -31,7 +31,7 @@ describe("language resolution helpers", () => {
         supportLanguages,
         fallbackLanguage: "zh-hant",
       }),
-    ).toEqual(["ko", "zh-hant", "ja", "en", "de"]);
+    ).toEqual(["ko", "de", "zh-hant", "ja", "en"]);
   });
 
   test("resolves against support languages instead of translation availability", () => {
@@ -42,7 +42,17 @@ describe("language resolution helpers", () => {
         supportLanguages,
         availableLanguages: ["de"],
       }),
-    ).toBe("ja");
+    ).toBe("de");
+  });
+
+  test("app locale outranks preferred languages when both are supported", () => {
+    expect(
+      resolveReadLanguage({
+        preferredLanguages: ["ja", "en"],
+        appLocale: "de",
+        supportLanguages,
+      }),
+    ).toBe("de");
   });
 
   test("parses comma-separated read language candidates", () => {

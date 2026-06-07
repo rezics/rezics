@@ -1,18 +1,18 @@
-import { userQueries } from "@rezics/api/user/user.queries";
 import type { BookDTO } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useCallback, useMemo } from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 import { bookLanguageAtom } from "../states/bookDetailAtoms";
 
 /**
- * Resolve the initial language for a book detail page from the user's
- * ordered preference list, falling back to the unit's default language,
- * the platform fallback, then the first available translation.
+ * Resolve the initial language for a book detail page from the app locale,
+ * then the user's ordered preference list, falling back to the unit's default
+ * language, the platform fallback, then the first available translation.
  */
 export function resolveInitialBookLanguage(
+  appLocale: string | null | undefined,
   preferredLanguages: readonly string[],
   bookInfo: BookDTO | null | undefined,
 ): string {
@@ -25,6 +25,8 @@ export function resolveInitialBookLanguage(
       (bookInfo?.defaultLanguage as unknown as string) ?? FALLBACK_LANGUAGE
     );
   }
+
+  if (appLocale && available.includes(appLocale)) return appLocale;
 
   for (const lang of preferredLanguages) {
     if (available.includes(lang)) return lang;
@@ -51,6 +53,7 @@ function availableBookLanguages(
 }
 
 export function resolveSelectedBookLanguage(
+  appLocale: string | null | undefined,
   preferredLanguages: readonly string[],
   bookInfo: BookDTO | null | undefined,
   stored: string | null | undefined,
@@ -59,7 +62,7 @@ export function resolveSelectedBookLanguage(
   if (stored && (available.length === 0 || available.includes(stored))) {
     return stored;
   }
-  return resolveInitialBookLanguage(preferredLanguages, bookInfo);
+  return resolveInitialBookLanguage(appLocale, preferredLanguages, bookInfo);
 }
 
 /**
@@ -77,20 +80,17 @@ export function useBookLanguage(
   bookInfo: BookDTO | null | undefined,
 ): [string, (lang: string) => void] {
   const [stored, setStored] = useAtom(bookLanguageAtom(bookId));
-  const { data: settings } = useQuery({
-    ...userQueries.settings(),
-    // Anonymous users may 401; we'll fall through to defaults.
-    retry: false,
-  });
-
-  const preferredLanguages = useMemo(
-    () => settings?.preferredLanguages ?? [],
-    [settings?.preferredLanguages],
-  );
+  const readContext = useReadLanguageContext();
 
   const selectedLang = useMemo(
-    () => resolveSelectedBookLanguage(preferredLanguages, bookInfo, stored),
-    [preferredLanguages, bookInfo, stored],
+    () =>
+      resolveSelectedBookLanguage(
+        readContext.appLocale,
+        readContext.languages,
+        bookInfo,
+        stored,
+      ),
+    [readContext.appLocale, readContext.languages, bookInfo, stored],
   );
 
   const setSelectedLang = useCallback(

@@ -5,6 +5,7 @@ import type {
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
 import { mapPublicUser } from "@/utils/sanitizeUser";
+import type { EffectiveReadLanguageInput } from "./language-resolution";
 import { resolveStoredLicenseSlug } from "./publication-policy";
 import type { UnitWithRelations } from "./types";
 
@@ -18,10 +19,16 @@ function optionalCount(row: unknown, key: string): number | undefined {
  */
 export function mapUnitToDTO(
   unit: UnitWithRelations,
-  languages: readonly string[] = [],
+  readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): UnitDTO {
+  const readInput = Array.isArray(readLanguage)
+    ? { languages: readLanguage }
+    : readLanguage;
   const resolvedLanguage = resolveReadLanguage({
-    languages,
+    explicitLanguage: readInput.explicitLanguage,
+    languages: readInput.languages,
+    preferredLanguages: readInput.preferredLanguages,
+    appLocale: readInput.appLocale,
     supportLanguages: unit.supportLanguages as SupportLanguageLike[],
   });
   const translation = resolvedLanguage
@@ -74,10 +81,16 @@ export function mapUnitToDTO(
  */
 export function mapUnitListItemToDTO(
   unit: UnitWithRelations,
-  languages: readonly string[] = [],
+  readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): UnitDTO {
+  const readInput = Array.isArray(readLanguage)
+    ? { languages: readLanguage }
+    : readLanguage;
   const resolvedLanguage = resolveReadLanguage({
-    languages,
+    explicitLanguage: readInput.explicitLanguage,
+    languages: readInput.languages,
+    preferredLanguages: readInput.preferredLanguages,
+    appLocale: readInput.appLocale,
     supportLanguages: unit.supportLanguages as SupportLanguageLike[],
   });
   const translation = resolvedLanguage

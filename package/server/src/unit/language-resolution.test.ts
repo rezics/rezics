@@ -109,7 +109,7 @@ describe("UnitLanguageService.content", () => {
 });
 
 describe("read language visibility helpers", () => {
-  test("normalizes request, user, and app candidates without adding fallback", async () => {
+  test("normalizes app, request, and user candidates without adding fallback", async () => {
     const { resolveEffectiveReadLanguageCandidates } = await import(
       "./language-resolution"
     );
@@ -120,7 +120,7 @@ describe("read language visibility helpers", () => {
         actorSettings: { preferredLanguages: ["zh-Hant", "en"] },
         appLocale: "ko",
       }),
-    ).toEqual(["ja", "en", "zh-hant", "ko"]);
+    ).toEqual(["ko", "ja", "en", "zh-hant"]);
     expect(resolveEffectiveReadLanguageCandidates({})).toEqual([]);
   });
 

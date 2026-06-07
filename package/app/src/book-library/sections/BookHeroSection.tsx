@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import {
   type EntityTranslation,
   getBookCoverUrl,
@@ -85,7 +85,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   };
   const bookId = routeBookId ?? bookInfo?.unitId ?? "";
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
 
   const selectedTranslation = getTranslation(
     bookInfo?.translations,
@@ -113,11 +113,12 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     ...postQueries.list({
       targetUnitId: bookId,
       kind: PostKind.REVIEW,
-      languages,
-      languageMode: "preferred",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
       limit: 1,
     }),
-    enabled: Boolean(bookId),
+    enabled: readContext.ready && Boolean(bookId),
   });
   const hasReview = (reviewData?.posts?.length ?? 0) > 0;
 

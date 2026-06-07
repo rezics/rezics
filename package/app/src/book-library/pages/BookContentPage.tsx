@@ -38,7 +38,10 @@ export const BookContentPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const readContext = useReadLanguageContext();
   const { data } = useQuery({
-    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    ...bookQueries.detail(bookId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: Boolean(bookId) && readContext.ready,
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;

@@ -64,4 +64,40 @@ describe("mapUnitListItemToDTO", () => {
     expect("translations" in dto).toBe(false);
     expect("supportLanguages" in dto).toBe(false);
   });
+
+  test("app locale outranks read fallback candidates", () => {
+    const dto = mapUnitListItemToDTO(
+      {
+        ...baseUnit,
+        supportLanguages: [
+          { unitId: "book-1", language: "en", isPrimary: true, sortOrder: 0 },
+          {
+            unitId: "book-1",
+            language: "zh-hant",
+            isPrimary: false,
+            sortOrder: 1,
+          },
+        ],
+        translations: [
+          ...(baseUnit.translations ?? []),
+          {
+            unitId: "book-1",
+            language: "zh-hant",
+            title: "中文標題",
+            subtitle: null,
+            summary: null,
+            description: markdownContentDoc("中文介紹"),
+            extra: null,
+            sourceUnitId: null,
+            createdAt: new Date("2026-06-03T00:00:00.000Z"),
+            updatedAt: new Date("2026-06-03T00:00:00.000Z"),
+          },
+        ],
+      } as UnitWithRelations,
+      { appLocale: "zh-hant", languages: ["en"] },
+    );
+
+    expect(dto.resolvedLanguage).toBe("zh-hant");
+    expect(dto.title).toBe("中文標題");
+  });
 });

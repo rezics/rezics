@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RemarkList } from "@/remark";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 interface ShortBookReviewsProps {
   bookId: string;
@@ -13,15 +13,16 @@ interface ShortBookReviewsProps {
 
 export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
   const { t } = useTranslation(["common"]);
-  const languages = useReadLanguageCandidates();
+  const readContext = useReadLanguageContext();
   const { data, isLoading, error } = useQuery({
     ...postQueries.byTarget(bookId, {
       kind: PostKind.REMARK,
-      languages,
-      languageMode: "preferred",
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
       limit: 4,
     }),
-    enabled: !!bookId,
+    enabled: readContext.ready && !!bookId,
   });
 
   if (isLoading) {
