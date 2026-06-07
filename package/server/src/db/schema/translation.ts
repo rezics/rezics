@@ -28,8 +28,13 @@ export const UnitTranslation = pgTable(
     title: text(),
     subtitle: text(),
     summary: text(),
+    /**
+     * Rich ContentDoc JSON. Search projections such as descriptionText are
+     * Meilisearch-only and must not be added as PostgreSQL columns.
+     */
     description: jsonData(),
     extra: jsonData(),
+    /** Optional provenance Unit for the translation's display/content source. */
     sourceUnitId: uuid(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -79,6 +84,10 @@ export const ContentTranslation = pgTable(
     language: varchar({ length: 16 }).notNull(),
     content: jsonData().notNull(),
     status: ContentTranslationStatus().default("PUBLISHED").notNull(),
+    /**
+     * Optional hooks for source/provenance migration. These scalar ids do not
+     * imply ownership or source validation rules.
+     */
     sourceUnitId: uuid(),
     authorUserId: uuid(),
     provenance: jsonData(),

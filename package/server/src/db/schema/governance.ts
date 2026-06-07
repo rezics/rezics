@@ -180,6 +180,10 @@ export const ModerationAction = pgTable(
     }),
     reversesActionId: uuid(),
     requestId: varchar({ length: 128 }),
+    /**
+     * Request-scoped, not target-scoped. Repeated remove/restore cycles are
+     * separate moderation facts and must use distinct keys.
+     */
     idempotencyKey: varchar({ length: 256 }),
     importedFrom: varchar({ length: 128 }),
     createdAt: createdAt(),
@@ -258,6 +262,10 @@ export const ModerationCase = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
+    /**
+     * Immutable target address paired with targetKind. addressedUnitId is the
+     * optional resolved Unit for joins and queues; it is not Unit.targetUnitId.
+     */
     targetId: varchar({ length: 128 }).notNull(),
     addressedUnitId: uuid().references(() => Unit.id, {
       onDelete: "set null",

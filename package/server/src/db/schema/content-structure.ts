@@ -37,6 +37,14 @@ export const ContentStructure = pgTable(
   ],
 );
 
+/**
+ * Flattened projection of materialized ContentStructureNode rows.
+ *
+ * Source-of-truth hierarchy remains ContentStructureNode. This projection lets
+ * interaction and search reads ask where a content Unit appears by owner,
+ * ancestor, path, depth, and sibling position without rebuilding the whole
+ * tree on every query. Only nodes with contentUnitId are projected.
+ */
 export const ContentStructureAnchor = pgTable(
   "ContentStructureAnchor",
   {
@@ -59,6 +67,10 @@ export const ContentStructureAnchor = pgTable(
     ancestorNodeIds: jsonData().notNull(),
     path: jsonData().notNull(),
     depth: integer().notNull(),
+    /**
+     * Projected from ContentStructureNode Fractional Indexing values, not an
+     * independent placement state.
+     */
     position: text().notNull(),
     positionPath: text().notNull(),
     titlePath: jsonData().notNull(),
@@ -90,6 +102,12 @@ export const ContentStructureAnchor = pgTable(
   ],
 );
 
+/**
+ * One row per node in a ContentStructure tree. `contentUnitId` is not unique:
+ * the same Unit can be referenced by many nodes. Because of that reuse, the
+ * node id, not contentUnitId, is the canonical reading address; only the node
+ * id identifies the occurrence and remains stable under TOC reorder.
+ */
 export const ContentStructureNode = pgTable(
   "ContentStructureNode",
   {
@@ -101,6 +119,7 @@ export const ContentStructureNode = pgTable(
         onUpdate: "cascade",
       }),
     parentId: uuid(),
+    /** Fractional Indexing key ordering siblings within each parent group. */
     position: text().notNull(),
     contentUnitId: uuid().references(() => Unit.id, {
       onDelete: "set null",

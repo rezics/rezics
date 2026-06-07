@@ -10,12 +10,14 @@ import { createdAt, jsonData, updatedAt } from "./columns";
 import { ContentStructureNode } from "./content-structure";
 import { Unit } from "./unit";
 
+/** Series extension on a Unit. */
 export const Series = pgTable(
   "Series",
   {
     unitId: uuid()
       .primaryKey()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    /** Public-knowledge grouping kind; contract values come from SeriesKind. */
     kindKey: varchar({ length: 64 }).notNull(),
     extra: jsonData(),
     createdAt: createdAt(),
@@ -30,6 +32,11 @@ export const Series = pgTable(
   ],
 );
 
+/**
+ * Direct lookup projection from counted release member nodes in generic
+ * ContentStructure. It intentionally stores no path, depth, ordering,
+ * hierarchy, inherited membership, or source-domain fields.
+ */
 export const SeriesContentIndex = pgTable(
   "SeriesContentIndex",
   {

@@ -17,15 +17,27 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
+
+/** Main-owned user profile extension; unitId equals the matching USER Unit id. */
 export const User = pgTable(
   "User",
   {
+    /** Canonical user identifier. Equals Unit.id for the matching USER Unit. */
     unitId: uuid().primaryKey(),
     authUserId: uuid(),
+    /**
+     * Main-owned Rezics product email. It may be initialized from a verified
+     * auth login email during materialization, but is not synchronized with
+     * auth.User.email after that point.
+     */
     email: varchar({ length: 320 }),
     name: text(),
     avatar: text(),
     bio: text(),
+    /**
+     * Rich ContentDoc JSON. Search projections such as descriptionText are
+     * Meilisearch-only and must not be added as PostgreSQL columns.
+     */
     description: jsonData(),
     joinDate: nullableTimestamp(),
     permission: jsonData(),

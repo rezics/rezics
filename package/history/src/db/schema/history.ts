@@ -5,12 +5,22 @@ const timestamp = () => p.timestamp({ precision: 3 });
 const createdAt = () => timestamp().notNull().defaultNow();
 const updatedAt = () => timestamp().notNull().defaultNow();
 
+/**
+ * Content-addressed payload for canonical editorial revisions. It stores final
+ * revision content for history compare/restore and must not be used for draft
+ * snapshots or autosave recovery data.
+ */
 export const revisionContents = p.pgTable("RevisionContent", {
   hash: p.varchar("hash", { length: 64 }).primaryKey(),
   payload: p.jsonb("payload").notNull(),
   createdAt: createdAt(),
 });
 
+/**
+ * Canonical editorial commit ingested from main HistoryOutbox. A revision is a
+ * user-visible save of applied canonical state, not editor autosave, draft
+ * storage, or an uncommitted frontend operation log.
+ */
 export const unitRevisions = p.pgTable(
   "UnitRevision",
   {
@@ -48,6 +58,10 @@ export const unitRevisions = p.pgTable(
   ],
 );
 
+/**
+ * Derived per-path snapshot index for editorial revision compare. Rows are
+ * rebuilt from UnitRevision content and are not authoritative history state.
+ */
 export const unitRevisionPaths = p.pgTable(
   "UnitRevisionPath",
   {
@@ -75,6 +89,11 @@ export const unitRevisionPaths = p.pgTable(
   ],
 );
 
+/**
+ * Canonical high-change structure batch event ingested from main HistoryOutbox.
+ * It represents semantic structure saves such as table-of-contents batches,
+ * not every drag, click, or local editor operation.
+ */
 export const structureEvents = p.pgTable(
   "StructureEvent",
   {

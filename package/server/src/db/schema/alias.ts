@@ -19,10 +19,16 @@ export const UnitAliasKind = pgEnum("UnitAliasKind", unitAliasKindValues);
 
 export const UnitAliasStatus = pgEnum("UnitAliasStatus", unitAliasStatusValues);
 
+/**
+ * Maps named top-level slug scopes to placeholder SCOPE units. Owner-scoped
+ * sub-resources bypass this table and use the owner Unit id as `slugScope`.
+ */
 export const SlugScope = pgTable(
   "SlugScope",
   {
+    /** Named scope key seeded once during infra bootstrap. */
     slug: text().primaryKey(),
+    /** Placeholder Unit whose id is the slugScope value for this top-level scope. */
     unitId: uuid().notNull(),
   },
   (table) => [

@@ -14,6 +14,7 @@ import { createdAt, jsonData, updatedAt } from "./columns";
 import { User } from "./identity";
 import { Unit } from "./unit";
 
+/** General user-curated collections. Series is a separate first-class model. */
 export const Shelf = pgTable("Shelf", {
   unitId: uuid()
     .primaryKey()
@@ -42,7 +43,15 @@ export const ShelfItem = pgTable(
     parentItemId: uuid("parentItemId"),
     parentRole: varchar({ length: 32 }),
     position: varchar({ length: 64 }).notNull(),
+    /**
+     * Weak edition/source/package context for the selected shelf item. The row
+     * identity remains (shelfId, itemType, itemId); this is only a lookup hint.
+     */
     variantUnitId: uuid(),
+    /**
+     * User-authored indexing help only. Do not copy collected Unit content,
+     * metadata, tags, or shelf metadata into this field or its search index.
+     */
     searchText: text(),
     createdByUserId: uuid().references(() => User.unitId, {
       onDelete: "set null",

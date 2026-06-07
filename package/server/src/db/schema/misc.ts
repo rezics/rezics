@@ -74,6 +74,12 @@ export const EmailVerificationContract = pgTable(
   ],
 );
 
+/**
+ * Durable queue for canonical history commits emitted by main database
+ * mutations. Rows represent semantic editorial, structure, lock, or
+ * collaborator commits and must not be used for autosave, draft persistence, or
+ * per-click editor operation logs.
+ */
 export const HistoryOutbox = pgTable(
   "HistoryOutbox",
   {
@@ -132,6 +138,11 @@ export const HistoryOutbox = pgTable(
   ],
 );
 
+/**
+ * Per-Unit canonical history sequence allocator. This clock advances only for
+ * authorized commits applied to canonical state, not editor autosave, drafts,
+ * picker selections, drag gestures, or uncommitted frontend operation logs.
+ */
 export const UnitHistoryClock = pgTable("UnitHistoryClock", {
   unitId: uuid()
     .primaryKey()

@@ -74,6 +74,11 @@ export const messages = p.pgTable(
   ],
 );
 
+/**
+ * Directional DM block: `blockerId` has blocked `blockedId`. A pair may have
+ * two rows for mutual blocking. Sending is disabled in either direction when a
+ * row exists.
+ */
 export const conversationBlocks = p.pgTable(
   "ConversationBlock",
   {

@@ -50,12 +50,15 @@ export const Realm = pgTable("Realm", {
   extra: jsonData(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+  /** Versioned rule policy for the POST Unit referenced by Realm.extra.rule. */
   ruleVersion: integer().default(1).notNull(),
   ruleRequireOnJoin: boolean().default(false).notNull(),
   ruleRequireOnPost: boolean().default(false).notNull(),
   ruleRequireOnUpdate: boolean().default(true).notNull(),
   rulePolicyUpdatedAt: nullableTimestamp(),
+  /** New joins are stored as pending until a realm moderator approves them. */
   joinRequiresApproval: boolean().default(false).notNull(),
+  /** Author submissions enter the realm feed as pending review until approved. */
   contentRequiresApproval: boolean().default(false).notNull(),
 });
 
@@ -213,6 +216,11 @@ export const RealmRuleAcknowledgement = pgTable(
 export const RealmTagContext = pgTable(
   "RealmTagContext",
   {
+    /**
+     * Pair-level explanatory surface for (realmUnitId, tagUnitId). The pair is
+     * the identity; contextUnitId is only a materialized content carrier for
+     * explanation, examples, discussion, and history.
+     */
     realmUnitId: uuid()
       .notNull()
       .references(() => Realm.unitId, {
@@ -245,6 +253,11 @@ export const RealmTagContext = pgTable(
   ],
 );
 
+/**
+ * Community/feed membership for a target Unit in a realm. This junction is not
+ * semantic tagging and is not a prerequisite or owner relation for
+ * RealmTagApplication.
+ */
 export const UnitRealm = pgTable(
   "UnitRealm",
   {
@@ -256,6 +269,10 @@ export const UnitRealm = pgTable(
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     createdAt: createdAt(),
     isLocked: boolean().default(false).notNull(),
+    /**
+     * Realm-local moderation snapshot. REMOVED is soft deletion of this
+     * Unit-realm relation; hard deletion removes the row.
+     */
     moderationStatus: ModerationStatus().default("APPROVED").notNull(),
   },
   (table) => [

@@ -57,6 +57,10 @@ export const Feedback = pgTable(
   ],
 );
 
+/**
+ * Generic attention edge from a subscriber Unit to an explicitly subscribed
+ * Unit. This is a subscription endpoint, not Unit.targetUnitId.
+ */
 export const Subscription = pgTable(
   "Subscription",
   {
@@ -67,6 +71,11 @@ export const Subscription = pgTable(
     subscribedUnitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    /**
+     * Dot-namespaced event filter using wildcard tiers: "*", "<category>.*",
+     * and "<category>.<event>". Fan-out resolves these with GIN-indexable array
+     * containment checks.
+     */
     channels: textArray(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
