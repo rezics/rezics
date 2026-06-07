@@ -12,6 +12,9 @@ import {
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Button,
   Checkbox,
   Select,
@@ -140,6 +143,8 @@ export function RealmPage({
 
   const title = realm.title ?? t("entity:realm_untitled");
   const description = contentDocMarkdownFallback(realm.description);
+  const avatarUrl =
+    realm.extra?.avatar?.kind === "url" ? realm.extra.avatar.url : undefined;
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
@@ -156,19 +161,27 @@ export function RealmPage({
       <BannerSection banner={realm.extra?.banner ?? null} />
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex flex-row items-center justify-between">
-          <div className="flex flex-row items-center gap-2">
-            <h1 className="text-2xl font-semibold">{title}</h1>
-            {showManage && (
-              <Link to="/realm/$realmId/manage" params={{ realmId }}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t("entity:realm_manage")}
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-            )}
+          <div className="flex min-w-0 flex-row items-center gap-3">
+            <Avatar className="size-14 rounded-md bg-surface-subtle">
+              <AvatarImage src={avatarUrl} alt="" />
+              <AvatarFallback className="rounded-md text-lg leading-ui">
+                {title.trim().slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-row items-center gap-2">
+              <h1 className="truncate text-2xl font-semibold">{title}</h1>
+              {showManage && (
+                <Link to="/realm/$realmId/manage" params={{ realmId }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t("entity:realm_manage")}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isMember ? (

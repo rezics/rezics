@@ -7,7 +7,9 @@ export const realmRuleExtraNote =
 export const realmAboutExtraNote =
   "Single Post Unit ID that holds the realm's about or sidebar content.";
 export const realmBannerExtraNote =
-  "Banner source for the realm, either a Post Unit reference or a direct image URL.";
+  "Direct image URL used as the realm's banner.";
+export const realmAvatarExtraNote =
+  "Direct image URL used as the realm's avatar.";
 export const realmTagTreeExtraNote =
   "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.";
 
@@ -45,18 +47,23 @@ export type RealmTagTreeLabel = (typeof realmTagTreeLabelSchema)["static"];
 // REALM EXTRA — typed shape of `Realm.extra`
 // ============================================================
 
-export const realmBannerExtraSchema = t.Union([
-  t.Object({
-    kind: t.Literal("post"),
-    unitId: t.String(),
-  }),
-  t.Object({
+export const realmImageExtraSchema = t.Object(
+  {
     kind: t.Literal("url"),
     url: t.String(),
-  }),
-]);
+  },
+  { additionalProperties: false },
+);
+
+export type RealmImageExtra = (typeof realmImageExtraSchema)["static"];
+
+export const realmBannerExtraSchema = realmImageExtraSchema;
 
 export type RealmBannerExtra = (typeof realmBannerExtraSchema)["static"];
+
+export const realmAvatarExtraSchema = realmImageExtraSchema;
+
+export type RealmAvatarExtra = (typeof realmAvatarExtraSchema)["static"];
 
 export const tagTreeNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
   (self) =>
@@ -123,10 +130,14 @@ export const realmExtraSchema = t.Object(
     about: t.Optional(t.String()),
 
     /**
-     * Banner source for the realm, either a Post Unit reference or a direct
-     * image URL.
+     * Direct image URL used as the realm's banner.
      */
     banner: t.Optional(realmBannerExtraSchema),
+
+    /**
+     * Direct image URL used as the realm's avatar.
+     */
+    avatar: t.Optional(realmAvatarExtraSchema),
 
     /**
      * Ordered tag picker tree used as a realm posting UX hint; it does not

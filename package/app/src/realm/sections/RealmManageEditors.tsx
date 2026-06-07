@@ -7,6 +7,7 @@ import { unitApi, unitQueries } from "@rezics/api/unit/unit";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import type {
+  RealmAvatarExtra,
   RealmBannerExtra,
   RealmTagView,
   RealmTagViewStyle,
@@ -1841,30 +1842,28 @@ function RealmSlotTranslationEditor({ unitId }: { unitId: string }) {
   );
 }
 
-export function BannerPicker({
+type RealmImageExtraKey = "avatar" | "banner";
+
+function RealmImagePicker({
   realmId,
+  extraKey,
+  label,
+  savedMessage,
   value,
 }: {
   realmId: string;
-  value?: RealmBannerExtra | null;
+  extraKey: RealmImageExtraKey;
+  label: string;
+  savedMessage: string;
+  value?: RealmBannerExtra | RealmAvatarExtra | null;
 }) {
   const [url, setUrl] = useState(value?.kind === "url" ? value.url : "");
-  const [postId, setPostId] = useState(
-    value?.kind === "post" ? value.unitId : "",
-  );
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const languages = useReadLanguageCandidates();
-  const searchTerm = search.trim();
-  const { data } = useQuery(
-    unitQueries.search(searchTerm, { type: "POST", languages, limit: 8 }),
-  );
 
   useEffect(() => {
     setUrl(value?.kind === "url" ? value.url : "");
-    setPostId(value?.kind === "post" ? value.unitId : "");
   }, [value]);
 
   const save = async () => {
@@ -1873,19 +1872,13 @@ export function BannerPicker({
       if (url.trim()) {
         await setValue.mutateAsync({
           realmId,
-          key: "banner",
+          key: extraKey,
           value: { kind: "url", url: url.trim() },
         });
-      } else if (postId) {
-        await setValue.mutateAsync({
-          realmId,
-          key: "banner",
-          value: { kind: "post", unitId: postId },
-        });
       } else {
-        await clearValue.mutateAsync({ realmId, key: "banner" });
+        await clearValue.mutateAsync({ realmId, key: extraKey });
       }
-      toast.success(getI18nRuntime().i18n.t("entity:realm_banner_saved"));
+      toast.success(savedMessage);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setError(message);
@@ -1895,62 +1888,19 @@ export function BannerPicker({
 
   return (
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
-      <Label>{getI18nRuntime().i18n.t("entity:realm_banner")}</Label>
+      <Label>{label}</Label>
       <Input
         value={url}
-        onChange={(event) => {
-          setUrl(event.target.value);
-          if (event.target.value.trim()) setPostId("");
-        }}
+        onChange={(event) => setUrl(event.target.value)}
         placeholder={getI18nRuntime().i18n.t(
           "entity:realm_direct_image_url_placeholder",
         )}
       />
-      <Input
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        placeholder={getI18nRuntime().i18n.t(
-          "community:post_search_placeholder",
-        )}
-      />
-      {searchTerm && data?.units?.length ? (
-        <div className="flex flex-col gap-2">
-          {data.units.map((unit) => (
-            <Button
-              key={unit.id}
-              type="button"
-              size="sm"
-              variant={postId === unit.id ? "default" : "secondary"}
-              className="justify-start"
-              onClick={() => {
-                setPostId(unit.id);
-                setUrl("");
-              }}
-            >
-              {unitLabel(unit)}
-            </Button>
-          ))}
-        </div>
-      ) : null}
-      {postId && (
-        <p className="text-sm leading-ui text-text-secondary">
-          {getI18nRuntime().i18n.t("entity:realm_selected_post", {
-            id: postId,
-          })}
-        </p>
-      )}
       <div className="flex justify-end gap-2">
         {error && (
           <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
         )}
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => {
-            setUrl("");
-            setPostId("");
-          }}
-        >
+        <Button type="button" variant="ghost" onClick={() => setUrl("")}>
           {getI18nRuntime().i18n.t("common:clear")}
         </Button>
         <Button
@@ -1962,5 +1912,41 @@ export function BannerPicker({
         </Button>
       </div>
     </div>
+  );
+}
+
+export function BannerPicker({
+  realmId,
+  value,
+}: {
+  realmId: string;
+  value?: RealmBannerExtra | null;
+}) {
+  return (
+    <RealmImagePicker
+      realmId={realmId}
+      extraKey="banner"
+      label={getI18nRuntime().i18n.t("entity:realm_banner")}
+      savedMessage={getI18nRuntime().i18n.t("entity:realm_banner_saved")}
+      value={value}
+    />
+  );
+}
+
+export function AvatarPicker({
+  realmId,
+  value,
+}: {
+  realmId: string;
+  value?: RealmAvatarExtra | null;
+}) {
+  return (
+    <RealmImagePicker
+      realmId={realmId}
+      extraKey="avatar"
+      label={getI18nRuntime().i18n.t("entity:realm_avatar")}
+      savedMessage={getI18nRuntime().i18n.t("entity:realm_avatar_saved")}
+      value={value}
+    />
   );
 }

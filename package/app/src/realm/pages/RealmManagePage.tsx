@@ -51,6 +51,7 @@ import {
 import { RealmMemberList } from "../components/RealmMemberList";
 import { canManageRealm } from "../models/canManageRealm";
 import {
+  AvatarPicker,
   BannerPicker,
   SlotPicker,
   TagTreeEditor,
@@ -297,6 +298,7 @@ export function RealmManagePage({
             slotKey="about"
             value={realm.extra?.about}
           />
+          <AvatarPicker realmId={realmId} value={realm.extra?.avatar ?? null} />
           <BannerPicker realmId={realmId} value={realm.extra?.banner ?? null} />
           <SlotPicker
             realmId={realmId}
