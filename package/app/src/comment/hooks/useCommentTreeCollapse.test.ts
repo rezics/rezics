@@ -9,9 +9,10 @@ import {
 function makePost(
   overrides: Partial<CommentDTO> & { unitId: string },
 ): CommentDTO {
+  const { unitId, ...rest } = overrides;
   return {
-    id: overrides.unitId,
-    unitId: overrides.unitId,
+    id: unitId,
+    unitId,
     rootUnitId: "root-1",
     realmUnitId: "realm-1",
     parentCommentId: null,
@@ -21,7 +22,7 @@ function makePost(
     depth: 0,
     replyCount: 0,
     directReplyCount: 0,
-    ...overrides,
+    ...rest,
   } as CommentDTO;
 }
 

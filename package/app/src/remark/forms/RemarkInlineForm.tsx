@@ -5,6 +5,7 @@ import { RatingInput } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
@@ -55,8 +56,12 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
       },
       {
         onSuccess: () => {
+          toast.success("Saved.");
           reset();
           onSuccess?.();
+        },
+        onError: (error) => {
+          toast.error(error.message);
         },
       },
     );

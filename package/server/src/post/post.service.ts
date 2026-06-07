@@ -763,6 +763,7 @@ export class PostService {
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (query as { languages?: string | readonly string[] })
         .languages,
+      appLocale: (query as { appLocale?: string }).appLocale,
     });
     const languageVisibility = preferredLanguageCondition(
       query.languageMode,
@@ -842,6 +843,7 @@ export class PostService {
     );
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (opts as { languages?: string | readonly string[] }).languages,
+      appLocale: (opts as { appLocale?: string }).appLocale,
     });
     const languageVisibility = preferredLanguageCondition(
       opts.languageMode,
@@ -950,14 +952,15 @@ export class PostService {
         .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId))
         .where(countWhere),
     ]);
-    const sortValues = new Map(
-      rows.map(
-        (row: { unitId: string; sortValue?: number | string | null }) => [
-          row.unitId,
-          row.sortValue ?? null,
-        ],
-      ),
-    );
+    const sortValues = new Map<string, number | string | null>();
+    for (const row of rows as Array<{ unitId: string; sortValue?: unknown }>) {
+      sortValues.set(
+        row.unitId,
+        typeof row.sortValue === "number" || typeof row.sortValue === "string"
+          ? row.sortValue
+          : null,
+      );
+    }
     const posts = (
       await hydratePostsByUnitIds(
         rows.map((row: { unitId: string }) => row.unitId),
@@ -1145,7 +1148,10 @@ export class PostService {
     // feeds/search until published (see publication-policy
     // `publicUnitEligibilityWhere`).
     const asDraft = input.status === "DRAFT" && kind !== PostKindEnum.CHAPTER;
-    const targetUnitId = inputTargetUnitId;
+    const targetUnitId =
+      typeof inputTargetUnitId === "string" && inputTargetUnitId.trim()
+        ? inputTargetUnitId.trim()
+        : null;
     const realmIdsToWrite = [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
@@ -1181,7 +1187,7 @@ export class PostService {
           userId: ownerUserId,
           slugScope: ownerUserId,
           type: "POST",
-          targetUnitId: targetUnitId ?? null,
+          targetUnitId,
           status: asDraft ? "DRAFT" : "PUBLISHED",
           publishedAt: asDraft ? null : new Date(),
         })
@@ -2252,6 +2258,9 @@ export class PostService {
         return parsed.filter(
           (value): value is string => typeof value === "string",
         );
+      }
+      if (typeof parsed === "string") {
+        return parsed.trim() ? [parsed.trim()] : [];
       }
     } catch {
       // Fall back to comma-separated query values for hand-authored URLs.

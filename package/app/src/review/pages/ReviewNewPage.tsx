@@ -148,6 +148,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
               denial={denial}
             />
           }
+          defaultLanguage={authoringLanguage}
         />
       </div>
     </div>

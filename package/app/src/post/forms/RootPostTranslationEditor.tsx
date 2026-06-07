@@ -14,7 +14,12 @@ import {
   AddUnitTranslationLanguageDialog,
   UnitTranslationLanguageBar,
 } from "@/unit";
-import { rootPostEditorLanguages } from "../models/rootPostTranslationEditorLanguages";
+import {
+  type RootPostEditorDraftMap,
+  rootPostEditorLanguages,
+  seedRootPostEditorDrafts,
+  selectRootPostEditorLanguageDraft,
+} from "../models/rootPostTranslationEditorLanguages";
 
 export type RootPostTranslationDraft = {
   language: string;
@@ -43,8 +48,6 @@ export interface RootPostTranslationEditorProps {
   extraRight?: RezicsMarkdownEditorProps["extraRight"];
 }
 
-type DraftMap = Record<string, { title: string; body: string }>;
-
 function readBody(content: unknown): string {
   return mainMarkdownSource(content) ?? "";
 }
@@ -71,7 +74,7 @@ export function RootPostTranslationEditor({
   const { t } = useTranslation(["common", "community"]);
   const [addLanguageOpen, setAddLanguageOpen] = useState(false);
   const [draftLanguages, setDraftLanguages] = useState<string[]>([]);
-  const [drafts, setDrafts] = useState<DraftMap>(() => ({
+  const [drafts, setDrafts] = useState<RootPostEditorDraftMap>(() => ({
     [language]: { title, body },
   }));
   const contentQuery = useMemo(
@@ -140,23 +143,31 @@ export function RootPostTranslationEditor({
   useEffect(() => {
     if (!resolvedLanguage) return;
     setDrafts((current) => {
-      const seeded = { ...current };
-      seeded[resolvedLanguage] ??= { title: resolvedTitle, body: resolvedBody };
-      seeded[language] = { title, body };
-      return seeded;
+      return seedRootPostEditorDrafts({
+        drafts: current,
+        resolvedLanguage,
+        resolvedTitle,
+        resolvedBody,
+        currentLanguage: language,
+        currentTitle: title,
+        currentBody: body,
+      });
     });
   }, [body, language, resolvedBody, resolvedLanguage, resolvedTitle, title]);
 
   const selectLanguage = (nextLanguage: string) => {
-    setDrafts((current) => ({
-      ...current,
-      [language]: { title, body },
-    }));
-    const nextDraft =
-      drafts[nextLanguage] ??
-      (resolvedLanguage === nextLanguage
-        ? { title: resolvedTitle, body: resolvedBody }
-        : { title: "", body: "" });
+    const selection = selectRootPostEditorLanguageDraft({
+      drafts,
+      currentLanguage: language,
+      currentTitle: title,
+      currentBody: body,
+      nextLanguage,
+      resolvedLanguage,
+      resolvedTitle,
+      resolvedBody,
+    });
+    setDrafts(selection.drafts);
+    const nextDraft = selection.nextDraft;
     onLanguageChange(nextLanguage);
     onTitleChange(nextDraft.title);
     onBodyChange(nextDraft.body);

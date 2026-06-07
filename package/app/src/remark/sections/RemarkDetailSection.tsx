@@ -25,7 +25,10 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   const composerRef = useFocusReplyFromQuery();
   const readContext = useReadLanguageContext();
   const { data: remark, isLoading } = useQuery({
-    ...postQueries.detail(remarkId, { languages: readContext.languages }),
+    ...postQueries.detail(remarkId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: readContext.ready && Boolean(remarkId),
   });
   const editorEntry = useEditorEntry({

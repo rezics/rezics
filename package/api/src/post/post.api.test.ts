@@ -38,11 +38,12 @@ describe("post wiki API helpers", () => {
   test("serializes list read languages as comma-separated candidates", async () => {
     await postApi.list({
       languages: ["zh-Hant", "ja", "en"],
+      appLocale: "zh-hant",
       languageMode: "preferred",
     });
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/post/list?languages=zh-Hant%2Cja%2Cen&languageMode=preferred",
+      "http://api.example/post/list?languages=zh-Hant%2Cja%2Cen&appLocale=zh-hant&languageMode=preferred",
     );
   });
 
@@ -134,6 +135,27 @@ describe("post wiki API helpers", () => {
         },
       },
     });
+  });
+
+  test("omits blank optional target ids on create", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ unitId: "post-1" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await postApi.create({
+      title: "Post title",
+      content: { body: "hello" } as never,
+      language: "en",
+      targetUnitId: " ",
+      variantUnitId: "",
+    });
+
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(body).not.toHaveProperty("targetUnitId");
+    expect(body).not.toHaveProperty("variantUnitId");
   });
 
   test("submits an authored post to a realm through the post endpoint", async () => {

@@ -4,6 +4,13 @@
 
 import type { PostFilters } from "./post.types";
 
+type PostReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 export type PostByTargetFilters = Omit<PostFilters, "targetUnitId">;
 export type PostByVariantFilters = Omit<PostFilters, "variantUnitId">;
 
@@ -24,10 +31,7 @@ export const postKeys = {
    * Keys for detail queries
    */
   details: () => [...postKeys.all(), "detail"] as const,
-  detail: (
-    unitId: string,
-    query?: { languages?: string | readonly string[] },
-  ) =>
+  detail: (unitId: string, query?: PostReadQuery) =>
     query === undefined
       ? ([...postKeys.details(), unitId] as const)
       : ([...postKeys.details(), unitId, query] as const),

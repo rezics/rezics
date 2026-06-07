@@ -134,6 +134,7 @@ export function ReviewEditPageContainer() {
           }}
           secondaryActions={<DeleteButton onDelete={handleDelete} size="sm" />}
           post={data}
+          defaultLanguage={locale}
         />
       </div>
     </div>

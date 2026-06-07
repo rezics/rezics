@@ -57,12 +57,12 @@ function createRepositoryStub(
 ): CommentRepository {
   return {
     list: mock(async () => ({ comments: [], total: 0 })),
-    getById: mock(async (id) => commentRow({ id })),
-    getByIdsIncludingRedacted: mock(async (ids) =>
+    getById: mock(async (id: string) => commentRow({ id })),
+    getByIdsIncludingRedacted: mock(async (ids: string[]) =>
       ids.map((id) => commentRow({ id })),
     ),
     attachPinOverlays: mock(async (comments) => comments),
-    getParentForCreate: mock(async (id) => ({
+    getParentForCreate: mock(async (id: string) => ({
       id,
       rootUnitId: "root-1",
       realmUnitId: "realm-1",
@@ -83,7 +83,7 @@ function createRepositoryStub(
     getUpdateIdentity: mock(async () => ({
       authorUserId: "user-1",
     })),
-    update: mock(async (id, input) =>
+    update: mock(async (id: string, input) =>
       commentRow({ id, content: input.content ?? null }),
     ),
     getDeleteIdentity: mock(async () => ({ authorUserId: "user-1" })),
@@ -108,7 +108,7 @@ describe("CommentService", () => {
     }));
     const repository = createRepositoryStub({
       list: mock(async () => ({ comments: [], total: 0 })),
-      getByIdsIncludingRedacted: mock(async (ids) =>
+      getByIdsIncludingRedacted: mock(async (ids: string[]) =>
         ids.map((id) => commentRow({ id })),
       ),
     });

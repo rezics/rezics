@@ -11,6 +11,13 @@ import {
 } from "./post.keys";
 import type { PostFilters } from "./post.types";
 
+type PostReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 /**
  * Query options for listing posts
  */
@@ -24,10 +31,7 @@ export const postListQuery = (filters?: PostFilters) =>
 /**
  * Query options for getting a single post
  */
-export const postDetailQuery = (
-  unitId: string,
-  query?: { languages?: string | readonly string[] },
-) =>
+export const postDetailQuery = (unitId: string, query?: PostReadQuery) =>
   queryOptions({
     queryKey: postKeys.detail(unitId, query),
     queryFn: () => postApi.get(unitId, query),

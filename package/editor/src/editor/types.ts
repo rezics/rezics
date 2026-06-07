@@ -35,6 +35,7 @@ export interface ResizeConfig {
 export interface BaseEditorProps {
   value?: string;
   onChange?: (value: string) => void;
+  placeholder?: string;
   theme?: Extension;
   className?: string;
   keybindings?: KeyBinding[];

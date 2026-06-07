@@ -1,7 +1,7 @@
 import type {
   CommentListBody,
   CommentListQuery,
-  type CommentSearchOptions,
+  CommentSearchOptions,
   CreateCommentInput,
   UpdateCommentInput,
 } from "@rezics/contract";
@@ -390,8 +390,6 @@ function commentSearchSortField(
       return "risingScore";
     case "controversial":
       return "controversyScore";
-    case "old":
-    case "new":
     default:
       return "createdAt";
   }

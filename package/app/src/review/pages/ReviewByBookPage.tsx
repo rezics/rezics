@@ -16,7 +16,10 @@ export function ReviewByBookPage() {
   const navigate = useNavigate();
   const readContext = useReadLanguageContext();
   const { data: bookInfo } = useQuery({
-    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    ...bookQueries.detail(bookId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: Boolean(bookId) && readContext.ready,
   });
   const catalogContext = bookInfo

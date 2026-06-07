@@ -11,7 +11,6 @@ import {
   type PostListResponse,
   type PostModerationOverlayResponse,
   type PostResponse,
-  parseReadLanguages,
   pinCommentSchema,
   postListBodySchema,
   postListQuerySchema,
@@ -103,7 +102,9 @@ export const postApi = new Elysia({ prefix: "/post" })
         isAdmin: isAdminRole(identity),
       });
       const languages = resolveEffectiveReadLanguageCandidates({
+        explicitLanguage: query.explicitLanguage,
         languages: query.languages,
+        appLocale: query.appLocale,
       });
       return mapPostToDTO(post, undefined, languages);
     },
@@ -136,7 +137,10 @@ export const postApi = new Elysia({ prefix: "/post" })
             viewerUserId: identity?.userId,
           });
       const variantContexts = await hydrateVariantContextSummaries(posts);
-      const languages = parseReadLanguages(query.languages);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: query.languages,
+        appLocale: query.appLocale,
+      });
       const response: PostListResponse = {
         posts: posts.map((post) =>
           mapPostToDTO(post, variantContexts, languages),
@@ -202,9 +206,13 @@ export const postApi = new Elysia({ prefix: "/post" })
             viewerUserId: identity?.userId,
           });
       const variantContexts = await hydrateVariantContextSummaries(posts);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: body.languages,
+        appLocale: body.appLocale,
+      });
       const response: PostListResponse = {
         posts: posts.map((post) =>
-          mapPostToDTO(post, variantContexts, body.languages ?? []),
+          mapPostToDTO(post, variantContexts, languages),
         ),
         total,
       };

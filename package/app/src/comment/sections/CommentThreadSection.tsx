@@ -20,19 +20,29 @@ import {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
-import { Button, DropdownMenuItem } from "@rezics/ui/shadcn";
+import {
+  Button,
+  DropdownMenuItem,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Pencil, RotateCcw, ShieldX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PostEditDialog } from "@/post/forms/PostEditDialog";
 import {
   hasGovernanceCapabilityHint,
   useAuthSessionStore,
 } from "@/user/states";
 import { CommentPromotionControls } from "../components/parts/CommentPromotionControls";
-import { mergeCommentDiscoveryRows } from "../models/commentTreeRails";
-import { PostEditDialog } from "@/post";
 import { decidePromotionControls } from "../models/commentPromotionGate";
+import { mergeCommentDiscoveryRows } from "../models/commentTreeRails";
 import { CommentTreeList } from "./CommentTreeList";
 import {
   DEFAULT_MAX_DEPTH,
@@ -284,23 +294,25 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
   return (
     <>
       {hasCommentPartition ? (
-        <div
-          className="mb-3 flex flex-wrap items-center gap-1"
-          aria-label={t("community:comment_sort_label")}
-        >
-          {COMMENT_SORT_OPTIONS.map((option) => (
-            <Button
-              key={option}
-              type="button"
-              size="sm"
-              variant={sort === option ? "secondary" : "ghost"}
-              className="h-8 px-3 text-xs"
-              aria-pressed={sort === option}
-              onClick={() => setSort(option)}
-            >
-              {t(COMMENT_SORT_LABEL_KEYS[option])}
-            </Button>
-          ))}
+        <div className="mb-3 flex w-full">
+          <Select
+            value={sort}
+            onValueChange={(next) => setSort(next as CommentSortMode)}
+          >
+            <SelectTrigger className="w-full sm:w-52" aria-label="Sort by">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Sort by</SelectLabel>
+                {COMMENT_SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {t(COMMENT_SORT_LABEL_KEYS[option])}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
       ) : null}
       <CommentTreeList

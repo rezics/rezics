@@ -8,7 +8,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "../../shared/hooks/useAuthoringLanguageDefault";
 import { useAuthGuard } from "../../user/hooks/useAuthGuard";
+
 export { shouldRecordShareIntent } from "../models/shareIntent";
+
 import { shouldRecordShareIntent } from "../models/shareIntent";
 import { buildInternalSharePostCreateInput } from "../models/sharePost";
 
@@ -23,7 +25,7 @@ export type UseShareMenuReturn = {
   open: boolean;
   canWebShare: boolean;
   handleOpen: (event: React.MouseEvent<HTMLElement>) => void;
-  handleClose: (event?: React.MouseEvent | {}) => void;
+  handleClose: (event?: React.MouseEvent | object) => void;
   handleCopy: (event: React.MouseEvent) => Promise<void>;
   handleWebShare: (event: React.MouseEvent) => Promise<void>;
   handleDirectShare: (event: React.MouseEvent) => void;
@@ -56,6 +58,7 @@ export function useShareMenu({
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
     if (
+      targetId &&
       shouldRecordShareIntent({
         actorUserId,
         targetId,
@@ -67,7 +70,7 @@ export function useShareMenu({
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = (event?: React.MouseEvent | {}) => {
+  const handleClose = (event?: React.MouseEvent | object) => {
     if (event && "stopPropagation" in event) {
       (event as React.MouseEvent).stopPropagation();
     }
@@ -118,6 +121,9 @@ export function useShareMenu({
             to: "/post/$rootPostUnitId",
             params: { rootPostUnitId: post.unitId },
           });
+        },
+        onError: (error) => {
+          toast.error(error.message);
         },
       },
     );
