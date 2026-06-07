@@ -7,6 +7,13 @@ export function realmContextPostHref(input: {
   return `/realm/${input.realmId}/post/${input.postUnitId}`;
 }
 
+export function realmContextPostEditHref(input: {
+  realmId: string;
+  postUnitId: string;
+}): string {
+  return `${realmContextPostHref(input)}/edit`;
+}
+
 export function realmContextReactionScopeKey(realmId: string): string {
   return realmReactionScopeKey(realmId);
 }

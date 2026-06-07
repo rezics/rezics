@@ -97,10 +97,18 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
                 variant="ghost"
                 aria-label={t("common:edit")}
                 onClick={() =>
-                  navigate({
-                    to: "/post/$rootPostUnitId/edit",
-                    params: { rootPostUnitId },
-                  })
+                  context.kind === "realm"
+                    ? navigate({
+                        to: "/realm/$realmId/post/$postUnitId/edit",
+                        params: {
+                          realmId: context.realmUnitId,
+                          postUnitId: rootPostUnitId,
+                        },
+                      })
+                    : navigate({
+                        to: "/post/$rootPostUnitId/edit",
+                        params: { rootPostUnitId },
+                      })
                 }
               >
                 <Pencil className="h-4 w-4" />

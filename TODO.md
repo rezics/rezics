@@ -16,6 +16,7 @@
 
 - [ ] Suggest / autocomplete（header 下拉建議）：本身要新 endpoint、prefix 索引或快取層，與聯邦搜尋正交。建議獨立 search-suggest。
 - [ ] 空查詢的探索/熱門/最近（discovery state）：要 trending/recent 統計來源，跟搜尋管線無關。獨立做。
+- [ ] comment section sort by 旁邊添加 search comment , 樣式看 reddit
 
 ## Section 2
 - [ ] award 支持兩種獎勵點數和現金獎勵
