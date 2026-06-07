@@ -35,7 +35,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Pencil, RotateCcw, ShieldX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { PostEditDialog } from "@/post";
+import { PostEditDialog } from "@/post/forms/PostEditDialog";
 import {
   hasGovernanceCapabilityHint,
   useAuthSessionStore,

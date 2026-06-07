@@ -15,7 +15,8 @@ import type React from "react";
 import { RemovedContentPlaceholder } from "@/components/RemovedContentPlaceholder";
 import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
-import { PostAuthorHeader, PostBodyMarkdown } from "@/post";
+import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
+import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import {
   commentPolicy,
   commentRowActions,
