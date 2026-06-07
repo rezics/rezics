@@ -12,7 +12,8 @@ export const nullableTimestamp = () => timestampMs();
 export const createdAt = () =>
   timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull();
 
-export const updatedAt = () => timestampMs().notNull();
+export const updatedAt = () =>
+  timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull();
 
 export const timestamps = () => ({
   createdAt: createdAt(),

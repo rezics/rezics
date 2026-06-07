@@ -1,6 +1,10 @@
 import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 
+const timestamp = () => p.timestamp({ precision: 3 });
+const createdAt = () => timestamp().notNull().defaultNow();
+const updatedAt = () => timestamp().notNull().defaultNow();
+
 export const notifications = p.pgTable(
   "Notification",
   {
@@ -11,11 +15,8 @@ export const notifications = p.pgTable(
     sourceUnitId: p.uuid("sourceUnitId").notNull(),
     extra: p.jsonb("extra"),
     read: p.boolean("read").notNull().default(false),
-    readAt: p.timestamp("readAt", { precision: 3 }),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
+    readAt: timestamp(),
+    createdAt: createdAt(),
   },
   (table) => [
     p
@@ -36,11 +37,8 @@ export const conversations = p.pgTable(
     id: p.uuid("id").primaryKey().default(sql`uuidv7()`),
     participantA: p.uuid("participantA").notNull(),
     participantB: p.uuid("participantB").notNull(),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p
@@ -58,11 +56,8 @@ export const messages = p.pgTable(
     conversationId: p.uuid("conversationId").notNull(),
     senderId: p.uuid("senderId").notNull(),
     content: p.text("content").notNull(),
-    readAt: p.timestamp("readAt", { precision: 3 }),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
+    readAt: timestamp(),
+    createdAt: createdAt(),
   },
   (table) => [
     p
@@ -85,10 +80,7 @@ export const conversationBlocks = p.pgTable(
     id: p.uuid("id").primaryKey().default(sql`uuidv7()`),
     blockerId: p.uuid("blockerId").notNull(),
     blockedId: p.uuid("blockedId").notNull(),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
+    createdAt: createdAt(),
   },
   (table) => [
     p
