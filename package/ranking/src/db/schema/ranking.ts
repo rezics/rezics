@@ -1,6 +1,10 @@
 import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 
+const timestamp = () => p.timestamp({ precision: 3 });
+const createdAt = () => timestamp().notNull().defaultNow();
+const updatedAt = () => timestamp().notNull().defaultNow();
+
 export const rankingScopeKindValues = [
   "global",
   "realm",
@@ -60,16 +64,10 @@ export const unitRankProjections = p.pgTable(
     qualityScore: p.doublePrecision("qualityScore").notNull().default(0),
     formulaVersion: p.text("formulaVersion").notNull(),
     signalSnapshot: p.jsonb("signalSnapshot").notNull(),
-    computedAt: p
-      .timestamp("computedAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    rankUpdatedAt: p.timestamp("rankUpdatedAt", { precision: 3 }),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    computedAt: timestamp().notNull().defaultNow(),
+    rankUpdatedAt: timestamp(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p
@@ -103,16 +101,13 @@ export const rankingSignalBuckets = p.pgTable(
     id: p.uuid("id").primaryKey().default(sql`uuidv7()`),
     unitId: p.uuid("unitId").notNull(),
     signalKind: rankingSignalKind("signalKind").notNull(),
-    bucketStart: p.timestamp("bucketStart", { precision: 3 }).notNull(),
-    bucketEnd: p.timestamp("bucketEnd", { precision: 3 }).notNull(),
+    bucketStart: timestamp().notNull(),
+    bucketEnd: timestamp().notNull(),
     count: p.integer("count").notNull().default(0),
     metadata: p.jsonb("metadata"),
-    flushedAt: p.timestamp("flushedAt", { precision: 3 }),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    flushedAt: timestamp(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p
@@ -134,14 +129,11 @@ export const rankingReactionBuckets = p.pgTable(
     targetId: p.uuid("targetId").notNull(),
     scopeKey: p.varchar("scopeKey", { length: 128 }).notNull(),
     reaction: rankingReactionKind("reaction").notNull(),
-    bucketStart: p.timestamp("bucketStart", { precision: 3 }).notNull(),
-    bucketEnd: p.timestamp("bucketEnd", { precision: 3 }).notNull(),
+    bucketStart: timestamp().notNull(),
+    bucketEnd: timestamp().notNull(),
     count: p.integer("count").notNull().default(0),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p
@@ -164,7 +156,7 @@ export const rankingFormulaVersions = p.pgTable("RankingFormulaVersion", {
   description: p.text("description"),
   config: p.jsonb("config").notNull(),
   active: p.boolean("active").notNull().default(false),
-  createdAt: p.timestamp("createdAt", { precision: 3 }).notNull().defaultNow(),
+  createdAt: createdAt(),
 });
 
 export const servingPatchStatuses = p.pgTable(
@@ -182,16 +174,13 @@ export const servingPatchStatuses = p.pgTable(
     indexName: p.varchar("indexName", { length: 64 }).notNull(),
     documentId: p.uuid("documentId").notNull(),
     status: rankingPatchStatus("status").notNull().default("pending"),
-    patchedAt: p.timestamp("patchedAt", { precision: 3 }),
-    lastAttemptAt: p.timestamp("lastAttemptAt", { precision: 3 }),
+    patchedAt: timestamp(),
+    lastAttemptAt: timestamp(),
     retryCount: p.integer("retryCount").notNull().default(0),
     lastError: p.text("lastError"),
     source: p.jsonb("source"),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p.index("ServingPatchStatus_unitId_idx").on(table.unitId),

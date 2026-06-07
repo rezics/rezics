@@ -1,5 +1,5 @@
 import { isVerifiedBotRequest } from "./bot";
-import { proxyPreviewRequest, type PreviewProxyEnv } from "./preview-proxy";
+import { type PreviewProxyEnv, proxyPreviewRequest } from "./preview-proxy";
 import { isPreviewEligiblePath } from "./routes";
 
 export interface EdgeEnv extends PreviewProxyEnv {

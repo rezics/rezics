@@ -201,12 +201,14 @@ describe("Unit list filters", () => {
     expect(
       Value.Check(unitListQuerySchema, {
         languages: "ja,en",
+        appLocale: "zh-hant",
         languageMode: "preferred",
       }),
     ).toBe(true);
     expect(
       Value.Check(unitListBodySchema, {
         languages: ["ja", "en"],
+        appLocale: "zh-hant",
         languageMode: "all",
       }),
     ).toBe(true);

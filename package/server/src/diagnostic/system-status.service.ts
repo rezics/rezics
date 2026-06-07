@@ -1,5 +1,5 @@
-import { type SQL, sql } from "drizzle-orm";
 import { ROUTED_SEQUIN_TABLES } from "@rezics/job";
+import { type SQL, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { env } from "../env";
 import type {

@@ -1,6 +1,10 @@
 import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 
+const timestamp = () => p.timestamp({ precision: 3 });
+const createdAt = () => timestamp().notNull().defaultNow();
+const updatedAt = () => timestamp().notNull().defaultNow();
+
 export const users = p.pgTable(
   "User",
   {
@@ -12,12 +16,9 @@ export const users = p.pgTable(
     role: p.text("role").notNull().default("user"),
     banned: p.boolean("banned").notNull().default(false),
     banReason: p.text("banReason"),
-    banExpires: p.timestamp("banExpires", { precision: 3 }),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    banExpires: timestamp(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [p.index("User_email_idx").on(table.email)],
 );
@@ -34,15 +35,12 @@ export const sessions = p.pgTable(
         onUpdate: "cascade",
       }),
     token: p.text("token").notNull().unique(),
-    expiresAt: p.timestamp("expiresAt", { precision: 3 }).notNull(),
+    expiresAt: timestamp().notNull(),
     ipAddress: p.text("ipAddress"),
     userAgent: p.text("userAgent"),
     impersonatedBy: p.uuid("impersonatedBy"),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [p.index("Session_userId_idx").on(table.userId)],
 );
@@ -63,19 +61,12 @@ export const accounts = p.pgTable(
     accessToken: p.text("accessToken"),
     refreshToken: p.text("refreshToken"),
     idToken: p.text("idToken"),
-    accessTokenExpiresAt: p.timestamp("accessTokenExpiresAt", {
-      precision: 3,
-    }),
-    refreshTokenExpiresAt: p.timestamp("refreshTokenExpiresAt", {
-      precision: 3,
-    }),
+    accessTokenExpiresAt: timestamp(),
+    refreshTokenExpiresAt: timestamp(),
     scope: p.text("scope"),
     password: p.text("password"),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p
@@ -91,12 +82,9 @@ export const verifications = p.pgTable(
     id: p.uuid("id").primaryKey().default(sql`uuidv7()`),
     identifier: p.text("identifier").notNull(),
     value: p.text("value").notNull(),
-    expiresAt: p.timestamp("expiresAt", { precision: 3 }).notNull(),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    expiresAt: timestamp().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [p.index("Verification_identifier_idx").on(table.identifier)],
 );
@@ -112,11 +100,8 @@ export const jwtServices = p.pgTable(
     jwksPath: p.text("jwksPath").notNull(),
     isLocalIssuer: p.boolean("isLocalIssuer").notNull().default(false),
     isActive: p.boolean("isActive").notNull().default(true),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p
@@ -142,11 +127,8 @@ export const jwks = p.pgTable(
     publicJwk: p.jsonb("publicJwk").notNull(),
     privateJwk: p.jsonb("privateJwk").notNull(),
     alg: p.text("alg"),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    expiresAt: p.timestamp("expiresAt", { precision: 3 }),
+    createdAt: createdAt(),
+    expiresAt: timestamp(),
   },
   (table) => [
     p.index("Jwks_jwtServiceId_idx").on(table.jwtServiceId),
@@ -167,11 +149,8 @@ export const oauthClients = p.pgTable(
     scopes: p.text("scopes").array(),
     userId: p.uuid("userId"),
     referenceId: p.text("referenceId"),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     name: p.text("name"),
     uri: p.text("uri"),
     icon: p.text("icon"),
@@ -206,13 +185,10 @@ export const oauthRefreshTokens = p.pgTable(
     sessionId: p.text("sessionId"),
     userId: p.text("userId").notNull(),
     referenceId: p.text("referenceId"),
-    expiresAt: p.timestamp("expiresAt", { precision: 3 }).notNull(),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    revoked: p.timestamp("revoked", { precision: 3 }),
-    authTime: p.timestamp("authTime", { precision: 3 }),
+    expiresAt: timestamp().notNull(),
+    createdAt: createdAt(),
+    revoked: timestamp(),
+    authTime: timestamp(),
     scopes: p.text("scopes").array(),
   },
   (table) => [
@@ -232,11 +208,8 @@ export const oauthAccessTokens = p.pgTable(
     userId: p.text("userId"),
     referenceId: p.text("referenceId"),
     refreshId: p.text("refreshId"),
-    expiresAt: p.timestamp("expiresAt", { precision: 3 }).notNull(),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
+    expiresAt: timestamp().notNull(),
+    createdAt: createdAt(),
     scopes: p.text("scopes").array(),
   },
   (table) => [
@@ -255,11 +228,8 @@ export const oauthConsents = p.pgTable(
     userId: p.text("userId"),
     referenceId: p.text("referenceId"),
     scopes: p.text("scopes").array(),
-    createdAt: p
-      .timestamp("createdAt", { precision: 3 })
-      .notNull()
-      .defaultNow(),
-    updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     p.index("OAuthConsent_clientId_idx").on(table.clientId),

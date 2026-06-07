@@ -3,10 +3,12 @@ import {
   type DashboardSafety,
   type DashboardSummary,
   readCoverUrlFromExtra,
+  resolveReadLanguage,
 } from "@rezics/contract";
 import { and, count, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { governanceEnforcementService } from "@/governance/enforcement.service";
 import { progressService } from "@/progress";
+import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
 import {
   ContentStructureNode,
   RealmMember,
@@ -245,31 +247,46 @@ function createDrizzleDashboardRepository(): DashboardRepository {
 
 const defaultRepository = createDrizzleDashboardRepository();
 
-/** Resolve a display title: default-language → en → first non-empty. */
-function pickTitle(unit: UnitDisplay): string {
+function orderedTranslations(
+  unit: UnitDisplay,
+  readLanguage: EffectiveReadLanguageInput = {},
+): TranslationRow[] {
+  const resolvedLanguage = resolveReadLanguage({
+    explicitLanguage: readLanguage.explicitLanguage,
+    appLocale: readLanguage.appLocale,
+    languages: readLanguage.languages,
+    preferredLanguages: readLanguage.preferredLanguages,
+    availableLanguages: unit.translations.map((t) => t.language),
+    fallbackLanguage: unit.defaultLanguage,
+  });
   const ordered = [
+    resolvedLanguage
+      ? unit.translations.find((t) => t.language === resolvedLanguage)
+      : undefined,
     unit.defaultLanguage
       ? unit.translations.find((t) => t.language === unit.defaultLanguage)
       : undefined,
     unit.translations.find((t) => t.language === "en"),
     ...unit.translations,
   ];
-  for (const tr of ordered) {
+  return ordered.filter((tr): tr is TranslationRow => Boolean(tr));
+}
+
+function pickTitle(
+  unit: UnitDisplay,
+  readLanguage: EffectiveReadLanguageInput = {},
+): string {
+  for (const tr of orderedTranslations(unit, readLanguage)) {
     if (tr?.title) return tr.title;
   }
   return "";
 }
 
-/** Resolve a cover URL from translation extra, same order as title. */
-function pickCover(unit: UnitDisplay): string | undefined {
-  const ordered = [
-    unit.defaultLanguage
-      ? unit.translations.find((t) => t.language === unit.defaultLanguage)
-      : undefined,
-    unit.translations.find((t) => t.language === "en"),
-    ...unit.translations,
-  ];
-  for (const tr of ordered) {
+function pickCover(
+  unit: UnitDisplay,
+  readLanguage: EffectiveReadLanguageInput = {},
+): string | undefined {
+  for (const tr of orderedTranslations(unit, readLanguage)) {
     const url = readCoverUrlFromExtra(tr?.extra);
     if (url) return url;
   }
@@ -288,6 +305,7 @@ function pickAnchorText(anchor: unknown): string | undefined {
 
 async function loadContinueReading(
   userId: string,
+  readLanguage: EffectiveReadLanguageInput = {},
   repository: DashboardRepository = defaultRepository,
 ): Promise<ContinueReadingItem[]> {
   const rows = await repository.listContinueReading(
@@ -319,8 +337,8 @@ async function loadContinueReading(
     const nodeAlive = row.lastReadNode && !row.lastReadNode.isDeleted;
     return {
       bookUnitId: row.unitId,
-      bookTitle: pickTitle(row.unit),
-      bookCoverUrl: pickCover(row.unit),
+      bookTitle: pickTitle(row.unit, readLanguage),
+      bookCoverUrl: pickCover(row.unit, readLanguage),
       lastReadNodeId: row.lastReadNodeId,
       lastReadNodeTitle: nodeAlive ? (row.lastReadNode?.title ?? null) : null,
       lastReadAnchorText: pickAnchorText(row.lastReadAnchor),
@@ -336,12 +354,13 @@ async function loadContinueReading(
 
 async function loadShelves(
   userId: string,
+  readLanguage: EffectiveReadLanguageInput = {},
   repository: DashboardRepository = defaultRepository,
 ) {
   const shelves = await repository.listShelves(userId, SHELF_LIMIT);
   return shelves.map((shelf) => ({
     shelfId: shelf.unitId,
-    title: pickTitle(shelf.unit),
+    title: pickTitle(shelf.unit, readLanguage),
     itemCount: shelf.itemCount,
     coverUrls: [] as string[],
   }));
@@ -349,12 +368,13 @@ async function loadShelves(
 
 async function loadRealms(
   userId: string,
+  readLanguage: EffectiveReadLanguageInput = {},
   repository: DashboardRepository = defaultRepository,
 ) {
   const members = await repository.listRealms(userId, REALM_LIMIT);
   return members.map((member) => ({
     realmId: member.realmUnitId,
-    name: pickTitle(member.unit),
+    name: pickTitle(member.unit, readLanguage),
     slug: member.unit.slug ?? undefined,
   }));
 }
@@ -382,11 +402,14 @@ export const dashboardService = {
    * are reported as `NOT_AGGREGATED`; the client fetches those through their
    * dedicated hooks rather than scattering them here.
    */
-  async summary(userId: string): Promise<DashboardSummary> {
+  async summary(
+    userId: string,
+    readLanguage: EffectiveReadLanguageInput = {},
+  ): Promise<DashboardSummary> {
     const [continueReading, shelves, realms, safety] = await Promise.all([
-      section(() => loadContinueReading(userId, this.repository)),
-      section(() => loadShelves(userId, this.repository)),
-      section(() => loadRealms(userId, this.repository)),
+      section(() => loadContinueReading(userId, readLanguage, this.repository)),
+      section(() => loadShelves(userId, readLanguage, this.repository)),
+      section(() => loadRealms(userId, readLanguage, this.repository)),
       section(() => loadSafety(userId)),
     ]);
     // Progress library rows are progress-owned; shelf links are optional
@@ -394,6 +417,8 @@ export const dashboardService = {
     const libraryProgress = await section(async () => {
       const page = await progressService.listLibrary(userId, {
         limit: CONTINUE_READING_LIMIT,
+        ...readLanguage,
+        languages: readLanguage.languages?.join(","),
       });
       return page.rows;
     });

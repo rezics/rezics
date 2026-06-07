@@ -219,6 +219,7 @@ function bookListWhere(options: BookListOptions) {
 
   const readLanguages = resolveEffectiveReadLanguageCandidates({
     languages: options.languages,
+    appLocale: options.appLocale,
   });
   if (options.languageMode === "preferred" && readLanguages.length > 0) {
     const languages = sql.join(

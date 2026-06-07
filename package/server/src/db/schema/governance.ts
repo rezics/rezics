@@ -20,6 +20,7 @@ import {
   uuidv7PrimaryKey,
 } from "./columns";
 import { Feedback } from "./engagement";
+import { User } from "./identity";
 import {
   ModerationActionKind,
   ModerationActorKind,
@@ -29,7 +30,6 @@ import {
   ModerationStatus,
   ModerationTargetKind,
 } from "./moderation";
-import { User } from "./identity";
 import { Unit } from "./unit";
 
 export const governanceGrantStateStorageValues = [

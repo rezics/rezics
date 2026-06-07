@@ -7,6 +7,13 @@ import { bookApi } from "./book.api";
 import { bookKeys } from "./book.keys";
 import type { BookFilters } from "./book.types";
 
+type BookReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 /**
  * Query options for listing books
  */
@@ -20,10 +27,7 @@ export const bookListQuery = (filters?: BookFilters) =>
 /**
  * Query options for getting a single book
  */
-export const bookDetailQuery = (
-  unitId: string,
-  query?: { languages?: string | readonly string[] },
-) =>
+export const bookDetailQuery = (unitId: string, query?: BookReadQuery) =>
   queryOptions({
     queryKey: bookKeys.detail(unitId, query),
     queryFn: () => bookApi.get(unitId, query),

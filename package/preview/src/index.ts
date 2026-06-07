@@ -1,5 +1,5 @@
-import { openapi } from "@elysiajs/openapi";
 import { html } from "@elysiajs/html";
+import { openapi } from "@elysiajs/openapi";
 import {
   createObservabilityConfig,
   createTelemetryConfig,

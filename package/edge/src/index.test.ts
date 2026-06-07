@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { handleRequest, type EdgeEnv } from "./index";
+import { type EdgeEnv, handleRequest } from "./index";
 
 function env(fetchImpl: typeof fetch): EdgeEnv {
   return {

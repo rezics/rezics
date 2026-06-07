@@ -70,4 +70,58 @@ describe("dashboardService", () => {
     expect(summary.libraryProgress).toEqual({ ok: mockProgressRows });
     expect(Value.Check(dashboardSummarySchema, summary)).toBe(true);
   });
+
+  test("uses app locale before default language for dashboard-owned titles", async () => {
+    const { dashboardService } = await import("./dashboard.service");
+    const localizedUnit = {
+      defaultLanguage: "zh-hant",
+      translations: [
+        { language: "zh-hant", title: "中文標題" },
+        { language: "en", title: "English Title" },
+      ],
+    };
+    const repository = {
+      listContinueReading: mock(async () => [
+        {
+          unitId: "book-1",
+          lastReadNodeId: null,
+          lastReadAnchor: null,
+          unit: localizedUnit,
+          lastReadNode: null,
+        },
+      ]),
+      countChaptersTotal: mock(async () => new Map([["book-1", 3]])),
+      listCompletedChapterOwnerUnitIds: mock(async () => ["book-1"]),
+      listShelves: mock(async () => [
+        { unitId: "shelf-1", itemCount: 2, unit: localizedUnit },
+      ]),
+      listRealms: mock(async () => [
+        {
+          realmUnitId: "realm-1",
+          unit: { ...localizedUnit, slug: "realm-one" },
+        },
+      ]),
+    } satisfies DashboardRepository;
+    mockListLibrary.mockClear();
+    dashboardService.repository = repository;
+
+    const summary = await dashboardService.summary("user-1", {
+      appLocale: "en",
+      languages: ["zh-hant"],
+    });
+
+    expect(summary.continueReading).toMatchObject({
+      ok: [{ bookTitle: "English Title" }],
+    });
+    expect(summary.shelves).toMatchObject({
+      ok: [{ title: "English Title" }],
+    });
+    expect(summary.realms).toMatchObject({
+      ok: [{ name: "English Title" }],
+    });
+    expect(mockListLibrary.mock.calls[0]?.[1]).toMatchObject({
+      appLocale: "en",
+      languages: "zh-hant",
+    });
+  });
 });

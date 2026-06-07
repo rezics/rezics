@@ -1,4 +1,5 @@
 import { type TSchema, t } from "elysia";
+import { readLanguageGetQueryBase } from "../list-query-base";
 import { draftMetadataSchema } from "../post/draft";
 import { progressLibraryRowSchema } from "../shelf/progress";
 
@@ -176,3 +177,10 @@ export type DashboardDmSummary = (typeof dashboardDmSummarySchema)["static"];
 export type DashboardActivityItem =
   (typeof dashboardActivityItemSchema)["static"];
 export type DashboardSafety = (typeof dashboardSafetySchema)["static"];
+
+export const dashboardSummaryQuerySchema = t.Object({
+  ...readLanguageGetQueryBase.properties,
+});
+
+export type DashboardSummaryQuery =
+  (typeof dashboardSummaryQuerySchema)["static"];

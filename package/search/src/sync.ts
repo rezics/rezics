@@ -56,8 +56,8 @@ import {
 } from "./progress";
 import {
   buildShelfItemDocument,
-  shelfItemDocumentId,
   type ShelfItemDocumentRow,
+  shelfItemDocumentId,
 } from "./shelf-item";
 
 type SearchServerDb = Pick<ServerDb, "select">;
@@ -1219,10 +1219,10 @@ function shelfItemSyncSelect() {
   return {
     shelfId: ShelfItem.shelfId,
     itemType: ShelfItem.itemType,
-    unitId: ShelfItem.itemId,
+    itemId: ShelfItem.itemId,
     kind: ShelfItem.kind,
     parentItemType: ShelfItem.parentItemType,
-    parentUnitId: ShelfItem.parentItemId,
+    parentItemId: ShelfItem.parentItemId,
     parentRole: ShelfItem.parentRole,
     position: ShelfItem.position,
     searchText: ShelfItem.searchText,
@@ -1293,14 +1293,14 @@ function toShelfItemDocumentRow(row: ShelfItemSyncRow): ShelfItemDocumentRow {
     shelfStatus: row.shelfStatus ?? "DRAFT",
     shelfTitle: row.shelfTitle,
     itemType: row.itemType,
-    itemId: row.unitId,
+    itemId: row.itemId,
     kind: row.kind,
-    rootItemType: row.parentUnitId
+    rootItemType: row.parentItemId
       ? (row.parentItemType ?? row.itemType)
       : row.itemType,
-    rootItemId: row.parentUnitId ?? row.unitId,
+    rootItemId: row.parentItemId ?? row.itemId,
     parentItemType: row.parentItemType,
-    parentItemId: row.parentUnitId,
+    parentItemId: row.parentItemId,
     parentRole: row.parentRole,
     position: row.position,
     itemTitle: row.itemTitle,
@@ -1369,7 +1369,7 @@ async function listShelfItemSyncRows(input: {
 }
 
 function shelfItemNextCursor(row: ShelfItemSyncRow): string {
-  return `${row.shelfId}:${row.itemType}:${row.unitId}`;
+  return `${row.shelfId}:${row.itemType}:${row.itemId}`;
 }
 
 export async function syncShelfItem(

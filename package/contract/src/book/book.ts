@@ -13,8 +13,9 @@ import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import {
   listGetQueryBase,
-  listLanguageModeSchema,
   listPostBodyBase,
+  readLanguageBodyBase,
+  readLanguageGetQueryBase,
 } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import {
@@ -92,10 +93,9 @@ export type BookDTO = (typeof bookDTOSchema)["static"];
 
 export const bookListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
+  ...readLanguageGetQueryBase.properties,
   rating: t.Optional(contentRatingSchema),
   language: t.Optional(languageSchema),
-  languages: t.Optional(t.String()),
-  languageMode: t.Optional(listLanguageModeSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
@@ -123,10 +123,9 @@ export type BookListQuery = (typeof bookListQuerySchema)["static"];
 
 export const bookListBodySchema = t.Object({
   ...listPostBodyBase.properties,
+  ...readLanguageBodyBase.properties,
   rating: t.Optional(contentRatingSchema),
   language: t.Optional(languageSchema),
-  languages: t.Optional(t.Array(languageSchema)),
-  languageMode: t.Optional(listLanguageModeSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
@@ -170,7 +169,8 @@ export const bookParamsSchema = t.Object({
 export type BookParams = (typeof bookParamsSchema)["static"];
 
 export const bookReadQuerySchema = t.Object({
-  languages: t.Optional(t.String()),
+  ...readLanguageGetQueryBase.properties,
+  explicitLanguage: t.Optional(languageSchema),
 });
 
 export type BookReadQuery = (typeof bookReadQuerySchema)["static"];

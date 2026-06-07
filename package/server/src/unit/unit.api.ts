@@ -29,7 +29,7 @@ import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { assertEditorialPatchAllowed } from "./collaborative-metadata";
 import {
-  resolveEffectiveReadLanguageCandidates,
+  resolveEffectiveReadLanguageInput,
   unitLanguageService,
 } from "./language-resolution";
 import {
@@ -79,12 +79,12 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     "/:unitId",
     async ({ params, query }): Promise<UnitResponse> => {
       const unit = await unitService.getByUnitId(params.unitId);
-      const languages = resolveEffectiveReadLanguageCandidates({
+      const readLanguage = resolveEffectiveReadLanguageInput({
         explicitLanguage: query.explicitLanguage,
         languages: query.languages,
         appLocale: query.appLocale,
       });
-      return mapUnitToDTO(unit, languages);
+      return mapUnitToDTO(unit, readLanguage);
     },
     {
       params: unitParamsSchema,
@@ -129,11 +129,12 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         );
       }
       const { units, total } = await unitService.list(query as UnitListQuery);
-      const languages = resolveEffectiveReadLanguageCandidates({
+      const readLanguage = resolveEffectiveReadLanguageInput({
         languages: query.languages,
+        appLocale: query.appLocale,
       });
       return {
-        units: units.map((unit) => mapUnitListItemToDTO(unit, languages)),
+        units: units.map((unit) => mapUnitListItemToDTO(unit, readLanguage)),
         total,
       };
     },
@@ -162,11 +163,12 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         ...body,
         ids: body.ids?.join(","),
       } as UnitListQuery);
-      const languages = resolveEffectiveReadLanguageCandidates({
+      const readLanguage = resolveEffectiveReadLanguageInput({
         languages: body.languages,
+        appLocale: body.appLocale,
       });
       return {
-        units: units.map((unit) => mapUnitListItemToDTO(unit, languages)),
+        units: units.map((unit) => mapUnitListItemToDTO(unit, readLanguage)),
         total,
       };
     },

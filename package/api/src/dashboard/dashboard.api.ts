@@ -1,8 +1,13 @@
-import type { DashboardSummary } from "@rezics/contract";
+import type { DashboardSummary, DashboardSummaryQuery } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
 
 export const dashboardApi = {
-  getSummary: async (): Promise<DashboardSummary> => {
-    return apiFetch<DashboardSummary>("/me/dashboard");
+  getSummary: async (
+    query?: DashboardSummaryQuery,
+  ): Promise<DashboardSummary> => {
+    return apiFetch<DashboardSummary>(
+      `/me/dashboard${buildQueryString(query ?? {})}`,
+    );
   },
 };

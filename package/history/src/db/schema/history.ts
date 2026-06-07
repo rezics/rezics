@@ -1,10 +1,14 @@
 import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 
+const timestamp = () => p.timestamp({ precision: 3 });
+const createdAt = () => timestamp().notNull().defaultNow();
+const updatedAt = () => timestamp().notNull().defaultNow();
+
 export const revisionContents = p.pgTable("RevisionContent", {
   hash: p.varchar("hash", { length: 64 }).primaryKey(),
   payload: p.jsonb("payload").notNull(),
-  createdAt: p.timestamp("createdAt", { precision: 3 }).notNull().defaultNow(),
+  createdAt: createdAt(),
 });
 
 export const unitRevisions = p.pgTable(
@@ -23,7 +27,8 @@ export const unitRevisions = p.pgTable(
     actorUserId: p.uuid("actorUserId").notNull(),
     message: p.text("message"),
     restoreSource: p.jsonb("restoreSource"),
-    createdAt: p.timestamp("createdAt", { precision: 3 }).notNull(),
+    // Event time is supplied by the producer; ingestion time records arrival.
+    createdAt: timestamp().notNull(),
     ingestedAt: p
       .timestamp("ingestedAt", { precision: 3 })
       .notNull()
@@ -81,7 +86,8 @@ export const structureEvents = p.pgTable(
     changedFieldKeys: p.text("changedFieldKeys").array().notNull(),
     payload: p.jsonb("payload").notNull(),
     message: p.text("message"),
-    createdAt: p.timestamp("createdAt", { precision: 3 }).notNull(),
+    // Event time is supplied by the producer; ingestion time records arrival.
+    createdAt: timestamp().notNull(),
     ingestedAt: p
       .timestamp("ingestedAt", { precision: 3 })
       .notNull()
@@ -103,16 +109,16 @@ export const structureEvents = p.pgTable(
 export const ingestionCursors = p.pgTable("IngestionCursor", {
   source: p.varchar("source", { length: 64 }).primaryKey(),
   outboxId: p.uuid("outboxId"),
-  updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+  updatedAt: updatedAt(),
 });
 
 export const outboxProcessingFailures = p.pgTable("OutboxProcessingFailure", {
   outboxId: p.uuid("outboxId").primaryKey(),
   attempts: p.integer("attempts").notNull().default(0),
   lastError: p.text("lastError"),
-  retryAfter: p.timestamp("retryAfter", { precision: 3 }),
-  createdAt: p.timestamp("createdAt", { precision: 3 }).notNull().defaultNow(),
-  updatedAt: p.timestamp("updatedAt", { precision: 3 }).notNull(),
+  retryAfter: timestamp(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export type RevisionContentRow = typeof revisionContents.$inferSelect;

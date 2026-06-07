@@ -7,6 +7,7 @@ import {
   bookDTOSchema,
   bookListBodySchema,
   bookListQuerySchema,
+  bookReadQuerySchema,
   createBookSchema,
   updateBookSchema,
 } from "./book";
@@ -163,6 +164,7 @@ describe("book list schemas", () => {
     expect(
       Value.Check(bookListQuerySchema, {
         languages: "ja,en",
+        appLocale: "zh-hant",
         languageMode: "preferred",
         moderationStatus: "APPROVED",
         limit: 20,
@@ -171,9 +173,20 @@ describe("book list schemas", () => {
     expect(
       Value.Check(bookListBodySchema, {
         languages: ["ja", "en"],
+        appLocale: "zh-hant",
         languageMode: "all",
         moderationStatus: "APPROVED",
         limit: 20,
+      }),
+    ).toBe(true);
+  });
+
+  test("detail schema accepts app locale and explicit language", () => {
+    expect(
+      Value.Check(bookReadQuerySchema, {
+        explicitLanguage: "ja",
+        appLocale: "zh-hant",
+        languages: "en,de",
       }),
     ).toBe(true);
   });

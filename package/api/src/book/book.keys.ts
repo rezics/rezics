@@ -5,6 +5,13 @@
 
 import type { BookFilters } from "./book.types";
 
+type BookReadQuery = {
+  explicitLanguage?: string;
+  languages?: string | readonly string[];
+  appLocale?: string;
+  languageMode?: "preferred" | "all";
+};
+
 export const bookKeys = {
   /**
    * Base key for all book queries
@@ -21,10 +28,7 @@ export const bookKeys = {
    * Keys for detail queries
    */
   details: () => [...bookKeys.all(), "detail"] as const,
-  detail: (
-    unitId: string,
-    query?: { languages?: string | readonly string[] },
-  ) =>
+  detail: (unitId: string, query?: BookReadQuery) =>
     query === undefined
       ? ([...bookKeys.details(), unitId] as const)
       : ([...bookKeys.details(), unitId, query] as const),

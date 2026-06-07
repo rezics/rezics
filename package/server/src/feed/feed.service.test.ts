@@ -248,7 +248,7 @@ describe("FeedService", () => {
       total: 5,
     };
     bookListResult = {
-      books: [{ unitId: "book-1", title: "Book One" }],
+      books: [{ unitId: "book-1", title: "Book One", coverUrl: "" }],
       total: 1,
     };
     shelfListResult = { shelves: [], total: 0 };

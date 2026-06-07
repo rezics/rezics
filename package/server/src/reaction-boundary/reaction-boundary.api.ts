@@ -1,13 +1,13 @@
 import {
+  createSchema,
   createShareResponseSchema,
   createShareSchema,
-  createSchema,
   deleteQuerySchema,
   normalizeReactionScopeKey,
   parseReactionScopeKey,
 } from "@rezics/contract/reaction";
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import {
   contentPolicyActions,
   governanceCapabilityService,
@@ -126,10 +126,8 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
           },
         });
         if (!decision.allowed) {
-          return status(
-            403,
-            decision.safeMessage ?? "Forbidden: policy denied this action",
-          );
+          set.status = 403;
+          return decision.safeMessage ?? "Forbidden: policy denied this action";
         }
 
         const result = await createReaction(
@@ -203,7 +201,11 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
       {
         requireLogin: true,
         body: createShareSchema,
-        response: createShareResponseSchema,
+        response: {
+          200: createShareResponseSchema,
+          201: createShareResponseSchema,
+          403: t.String(),
+        },
         detail: {
           summary: "Record share intent",
           description:

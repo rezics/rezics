@@ -50,6 +50,17 @@ export const readLanguageBodyBase = t.Object({
 
 export type ReadLanguageBodyBase = (typeof readLanguageBodyBase)["static"];
 
+export const readLanguageGetQueryBase = t.Object({
+  // `languages` is a fallback/preference candidate list. Keep the local app
+  // language in `appLocale` so resolver priority stays contract-owned.
+  languages: t.Optional(t.String()),
+  appLocale: t.Optional(languageSchema),
+  languageMode: t.Optional(listLanguageModeSchema),
+});
+
+export type ReadLanguageGetQueryBase =
+  (typeof readLanguageGetQueryBase)["static"];
+
 /**
  * Parse the CSV `ids` querystring into a validated `string[]`.
  * Returns `undefined` when the field is absent or empty. Throws when the

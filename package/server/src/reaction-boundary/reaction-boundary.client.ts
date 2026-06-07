@@ -3,8 +3,8 @@ import type {
   GivenResponse,
   InternalByUserBody,
   InternalByUserResponse,
-  InternalCreateShareResponse,
   InternalCreateResponse,
+  InternalCreateShareResponse,
   InternalRemoveResponse,
 } from "@rezics/contract/reaction";
 import { normalizeReactionScopeKey } from "@rezics/contract/reaction";

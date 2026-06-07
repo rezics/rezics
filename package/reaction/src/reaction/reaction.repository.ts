@@ -5,8 +5,8 @@ import {
   reactionSummaries,
   reactions,
   reactionTargetUsages,
-  unitShares,
   unitShareSummaries,
+  unitShares,
 } from "../db/schema";
 import type { ReactionCursor } from "./cursor";
 

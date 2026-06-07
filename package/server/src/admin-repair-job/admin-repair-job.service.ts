@@ -15,7 +15,7 @@ import {
   MAINTENANCE_COMMAND_KINDS,
 } from "@rezics/job";
 import { and, asc, eq, inArray, lte } from "drizzle-orm";
-import { db, type ServerDb, HistoryOutbox } from "@/db";
+import { db, HistoryOutbox, type ServerDb } from "@/db";
 import { getSystemStatusSummary } from "@/diagnostic";
 import { env } from "@/env";
 import { governanceAuditService } from "@/governance/audit.service";

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  buildShowcaseFeedPlan,
   buildLargePostTreePlan,
+  buildShowcaseFeedPlan,
   FACTORY_SCENARIO_NAMES,
   FACTORY_SCENARIOS,
 } from "./scenarios";
@@ -45,12 +45,17 @@ describe("buildShowcaseFeedPlan", () => {
     ]);
 
     const review = plan.posts.find((post) => post.kind === PostKind.REVIEW);
-    expect(review?.targetUnitId).toBe(plan.works[0]?.unitId);
+    const work = plan.works[0];
+    expect(review).toBeDefined();
+    expect(work).toBeDefined();
+    if (!review || !work) throw new Error("Expected a review and a work");
+    if (!review.targetUnitId) throw new Error("Expected review target unit");
+    expect(review.targetUnitId).toBe(work.unitId);
     expect(review?.extra).toMatchObject({
-      book: { id: plan.works[0]?.unitId, title: plan.works[0]?.title },
+      book: { id: work.unitId, title: work.title },
     });
-    expect(plan.realmMembershipUnitIds).toContain(review?.unitId);
-    expect(plan.realmMembershipUnitIds).toContain(review?.targetUnitId);
+    expect(plan.realmMembershipUnitIds).toContain(review.unitId);
+    expect(plan.realmMembershipUnitIds).toContain(review.targetUnitId);
     expect(plan.shelves.length).toBeGreaterThanOrEqual(2);
     expect(plan.comments).toHaveLength(2);
     expect(plan.comments[0]).toMatchObject({

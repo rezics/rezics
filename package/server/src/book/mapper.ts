@@ -5,6 +5,7 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra, resolveReadLanguage } from "@rezics/contract";
+import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { BookWithRelations } from "./types";
@@ -63,11 +64,17 @@ function mapTranslation(
  */
 export function mapBaseBookToDTO(
   book: BookWithRelations,
-  languages: readonly string[] = [],
+  readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): BookDTO {
   const unit = book.unit;
+  const readInput = Array.isArray(readLanguage)
+    ? { languages: readLanguage }
+    : readLanguage;
   const resolvedLanguage = resolveReadLanguage({
-    languages,
+    explicitLanguage: readInput.explicitLanguage,
+    languages: readInput.languages,
+    preferredLanguages: readInput.preferredLanguages,
+    appLocale: readInput.appLocale,
     supportLanguages: unit.supportLanguages as SupportLanguageLike[],
   });
   const translation = resolvedLanguage
@@ -155,7 +162,7 @@ export function mapBaseBookToDTO(
  */
 export function mapBookToDTO(
   book: BookWithRelations,
-  languages: readonly string[] = [],
+  readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): BookDTO {
-  return mapBaseBookToDTO(book, languages);
+  return mapBaseBookToDTO(book, readLanguage);
 }
