@@ -10,6 +10,8 @@ import { easing } from "../../config/tokens/motion";
 import { radius } from "../../config/tokens/radius";
 import { fontFamilies } from "../../config/tokens/typography";
 
+type DemoPaletteStyle = CSSProperties & Record<`--demo-${string}`, string>;
+
 function rgbToHex(input: string): string {
   const trimmed = input.trim();
   if (trimmed.startsWith("#")) return trimmed.toLowerCase();
@@ -507,7 +509,7 @@ function FuturePanel({
   palette: FuturePalette;
 }) {
   const isDark = mode === "Dark";
-  const panelStyle: CSSProperties = {
+  const panelStyle: DemoPaletteStyle = {
     "--demo-brand": palette.brand,
     "--demo-brand-hover": palette.brandHover,
     "--demo-brand-active": palette.brandActive,
@@ -931,21 +933,23 @@ export function FutureInteractionStates() {
       </div>
 
       <div
-        style={{
-          "--demo-brand": futureLight.brand,
-          "--demo-brand-hover": futureLight.brandHover,
-          "--demo-brand-active": futureLight.brandActive,
-          "--demo-link": futureLight.link,
-          "--demo-link-hover": futureLight.linkHover,
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 12,
-          padding: 16,
-          border: "1px solid var(--colors-border-whisper)",
-          borderRadius: radius.md,
-          background: "var(--colors-surface-base)",
-        }}
+        style={
+          {
+            "--demo-brand": futureLight.brand,
+            "--demo-brand-hover": futureLight.brandHover,
+            "--demo-brand-active": futureLight.brandActive,
+            "--demo-link": futureLight.link,
+            "--demo-link-hover": futureLight.linkHover,
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 12,
+            padding: 16,
+            border: "1px solid var(--colors-border-whisper)",
+            borderRadius: radius.md,
+            background: "var(--colors-surface-base)",
+          } as DemoPaletteStyle
+        }
       >
         <button
           type="button"

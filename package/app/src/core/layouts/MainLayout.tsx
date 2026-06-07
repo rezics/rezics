@@ -1,4 +1,6 @@
+import { myRealmsQuery } from "@rezics/api/realm/realm.queries";
 import { useTranslation } from "@rezics/i18n/react";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
@@ -13,6 +15,8 @@ import {
   useAuthSessionStore,
   useUserProfileStore,
 } from "@/user/states";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { unitHref } from "@/shared/ui/link";
 import { MainLayoutFooter } from "../components/footer/MainLayoutFooter";
 import { HelpFab } from "../components/HelpWidget";
 import { Header } from "../components/header/MainLayoutHeader";
@@ -36,6 +40,16 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const registrationComplete = useAuthSessionStore(
     (state) => state.registration.complete,
   );
+  const readContext = useReadLanguageContext();
+  const realmReadQuery = {
+    languages: readContext.languages,
+    appLocale: readContext.appLocale,
+    languageMode: readContext.languageMode,
+  } as const;
+  const realmsQuery = useQuery({
+    ...myRealmsQuery(realmReadQuery),
+    enabled: hasMemberSession && readContext.ready,
+  });
   const canRenderChrome = shouldRenderNormalAppChrome({
     hasAuthIdentity,
     hasMemberSession,
@@ -46,6 +60,16 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     useUserProfileStore((state) =>
       state.user?.permission?.role?.includes("ADMIN"),
     ) ?? false;
+  const realmNavigationItems =
+    realmsQuery.data?.realms.map((realm) => ({
+      unitId: realm.unitId,
+      title: realm.title ?? realm.unitId,
+      href: unitHref({
+        type: "REALM",
+        unitId: realm.unitId,
+        slug: realm.slug ?? null,
+      }),
+    })) ?? [];
 
   useEffect(() => {
     if (pendingRegistration && location.pathname !== "/complete-registration") {
@@ -75,10 +99,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <div className="flex flex-1">
         <Sidebar
           sidebarHeaderClassName="mx-8"
-          NAVIGATION={NAVIGATION({
-            isAuthenticated: hasMemberSession,
-            isAdmin,
-          })}
+          NAVIGATION={NAVIGATION(
+            {
+              isAuthenticated: hasMemberSession,
+              isAdmin,
+            },
+            {
+              realms: {
+                items: realmNavigationItems,
+                isLoading: hasMemberSession && realmsQuery.isLoading,
+                errorMessage: realmsQuery.error
+                  ? "Failed to load realms"
+                  : null,
+              },
+            },
+          )}
         />
         <main className="flex flex-col flex-1 min-w-0 pt-[49px] md:pt-14 transition-all duration-300 h-screen w-full">
           <div className="flex-1 pb-4">{children}</div>

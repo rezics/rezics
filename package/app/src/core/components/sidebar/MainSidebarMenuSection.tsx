@@ -9,6 +9,7 @@ interface MainSidebarMenuSectionProps {
     event: any,
     segment: string | undefined,
     hasChildren: boolean,
+    defaultOpen?: boolean,
   ) => void;
   layoutType: "type-a" | "type-b";
   NAVIGATION: NavigationItem[];

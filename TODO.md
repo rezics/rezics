@@ -16,8 +16,11 @@
 
 - [ ] Suggest / autocomplete（header 下拉建議）：本身要新 endpoint、prefix 索引或快取層，與聯邦搜尋正交。建議獨立 search-suggest。
 - [ ] 空查詢的探索/熱門/最近（discovery state）：要 trending/recent 統計來源，跟搜尋管線無關。獨立做。
+- [ ] comment section sort by 旁邊添加 search comment , 樣式看 reddit
 
 ## Section 2
+- [ ] 翻譯 是一個獨立包，包括並行翻譯引擎，翻譯調度之類的，和內容獲取分開
+- [ ] 允許用戶在 prefer 中按分類設定 只顯示偏好語言支持的內容，比如 post 只顯示這樣， 但是當前應當不做篩選的渲染。
 - [ ] award 支持兩種獎勵點數和現金獎勵
 - [ ] 支持轉發機制, 利用 targetUnit 添加一個 unit 類型，以及一個 post 模型，但是 post 不是必選的，然後 editor 區域也要擴展，允許用戶 以轉發/轉發批註的方式進行評論，通過 Model框選擇嗎？業界方案是？
 - [ ] https://www.usebruno.com/
@@ -34,16 +37,12 @@
 
 ## Before launch
 
+- [ ] SERVER_ISSUER: rezics-server 有沒有不符合 jwt 規範的問題或是安全問題？
 - [ ] server/src/env 的瘦身，看看有沒有好的位置去放
 - [ ] docker化，建立完善的部署脚本
 - [ ] 將所有app路由讓AI過一邊，實際上試試大併發的情況，分析請求上可能的任何性能問題，這是一個非常大的change，tasks集合，需要分段執行
 - [ ] deploy mode 的日誌和性能分析配置
 - [ ] podman 和 docker 的管理面板，看看 1panel的適配情況，以及討論到時候數據庫備份要怎麼做。
-
-## V2
-
-- [ ] introduce-api-unit-store
-- [ ] 一个 local 的数据库，基于indexdb 里面维护了 slugScope-slug-unitId 的对应关系 对于比如 /u/root-user/shelf/favorites 就要先查 slug-scope = u slug = root-user get unitId then, slug-scope = root-user-unitId slug = favorites get favorites shelf unitId  https://www.npmjs.com/package/dexie 
 
 ## Software related
 

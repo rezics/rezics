@@ -5,7 +5,11 @@ import {
 } from "lucide-react";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import type { NavigationItem } from "./navigation";
+import {
+  navigationRowClassName,
+  navigationSectionHeaderClassName,
+  type NavigationItem,
+} from "./navigation";
 
 interface NavigationListProps {
   NAVIGATION: NavigationItem[];
@@ -16,11 +20,9 @@ interface NavigationListProps {
     event: any,
     segment: string | undefined,
     hasChildren: boolean,
+    defaultOpen?: boolean,
   ) => void;
 }
-
-const itemBaseClass =
-  "flex items-center gap-3 w-full px-3 py-1 rounded-md text-left text-sm transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus";
 
 function normalizePath(value: string) {
   const normalized = value.startsWith("/") ? value : `/${value}`;
@@ -49,6 +51,12 @@ function matchesNavigationItem(
   return normalizedPathname === itemPath;
 }
 
+function itemKey(item: NavigationItem, fallback: number) {
+  if (item.kind === "item") return item.segment;
+  if (item.kind === "section" || item.kind === "status") return item.id;
+  return `divider-${fallback}`;
+}
+
 export const NavigationList = ({
   NAVIGATION,
   isMobile,
@@ -56,9 +64,9 @@ export const NavigationList = ({
   openItems,
   handleItemClick,
 }: NavigationListProps) => {
-  return (
+  const renderItems = (items: NavigationItem[]) => (
     <ul className="list-none m-0 p-0">
-      {NAVIGATION.map((item, index) => {
+      {items.map((item, index) => {
         if (item.kind === "item" && item.onlyMobile && !isMobile) {
           return null;
         }
@@ -71,16 +79,64 @@ export const NavigationList = ({
             </li>
           );
 
-        if (item.kind === "section")
+        if (item.kind === "status") {
           return (
-            <li
-              // biome-ignore lint/suspicious/noArrayIndexKey: static list
-              key={index}
-              className="px-3 pt-2 pb-1 text-xs font-medium uppercase leading-ui text-text-tertiary"
-            >
-              {item.title}
+            <li key={item.id}>
+              <div
+                className={cn(
+                  navigationRowClassName,
+                  "pointer-events-none text-xs hover:bg-transparent",
+                  item.tone === "danger"
+                    ? "text-error-text"
+                    : "text-text-tertiary",
+                )}
+              >
+                <span className="min-w-0 flex-1 truncate">{item.title}</span>
+              </div>
             </li>
           );
+        }
+
+        if (item.kind === "section") {
+          const sectionOpen =
+            openItems[item.id] ?? item.defaultOpen ?? !item.collapsible;
+          const hasVisibleTitle = Boolean(item.title);
+          return (
+            <li key={item.id}>
+              {hasVisibleTitle ? (
+                item.collapsible ? (
+                  <button
+                    type="button"
+                    className={cn(
+                      navigationSectionHeaderClassName,
+                      "rounded-md hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus",
+                    )}
+                    aria-expanded={sectionOpen}
+                    onClick={(event: any) =>
+                      handleItemClick(event, item.id, true, item.defaultOpen)
+                    }
+                  >
+                    <span className="min-w-0 flex-1 truncate">
+                      {item.title}
+                    </span>
+                    <span className="text-text-tertiary">
+                      {sectionOpen ? (
+                        <ExpandLess className="h-4 w-4" aria-hidden="true" />
+                      ) : (
+                        <ExpandMore className="h-4 w-4" aria-hidden="true" />
+                      )}
+                    </span>
+                  </button>
+                ) : (
+                  <div className={navigationSectionHeaderClassName}>
+                    {item.title}
+                  </div>
+                )
+              ) : null}
+              {sectionOpen ? renderItems(item.children) : null}
+            </li>
+          );
+        }
 
         const normalizedPathname = normalizePath(pathname);
         const isActive = matchesNavigationItem(pathname, item);
@@ -89,29 +145,36 @@ export const NavigationList = ({
         const Icon = item.icon;
 
         return (
-          <li key={item.segment || index.toString()}>
+          <li key={itemKey(item, index)}>
             {hasChildren ? (
               <button
                 type="button"
-                className={cn(itemBaseClass, isActive && "bg-surface-subtle")}
+                className={cn(
+                  navigationRowClassName,
+                  isActive && "bg-surface-subtle",
+                )}
                 aria-current={isActive ? "page" : undefined}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
                 }
               >
                 {Icon ? <Icon className="w-4 h-4" aria-hidden="true" /> : null}
-                <span className="flex-1 dark:text-light text-dark">
+                <span className="min-w-0 flex-1 truncate text-text-primary">
                   {item.title}
                 </span>
-                <span className="dark:text-light text-dark">
-                  {isOpen ? <ExpandLess /> : <ExpandMore />}
+                <span className="text-text-primary">
+                  {isOpen ? (
+                    <ExpandLess className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <ExpandMore className="h-4 w-4" aria-hidden="true" />
+                  )}
                 </span>
               </button>
             ) : (
               <TextLink
                 to={`${item.segment}` as any}
                 className={cn(
-                  itemBaseClass,
+                  navigationRowClassName,
                   "no-underline",
                   isActive && "bg-surface-subtle",
                 )}
@@ -121,7 +184,7 @@ export const NavigationList = ({
                 }
               >
                 {Icon ? <Icon className="w-4 h-4" aria-hidden="true" /> : null}
-                <span className="flex-1 dark:text-light text-dark">
+                <span className="min-w-0 flex-1 truncate text-text-primary">
                   {item.title}
                 </span>
               </TextLink>
@@ -129,17 +192,18 @@ export const NavigationList = ({
 
             {hasChildren && item.segment && isOpen && (
               <ul className="list-none m-0 p-0">
-                {item.children?.map((child: any) => {
+                {item.children?.map((child: any, childIndex: number) => {
+                  if (child.kind !== "item") return null;
                   const isChildActive =
                     normalizedPathname === normalizePath(child.segment);
                   const ChildIcon = child.icon;
                   return (
-                    <li key={child.segment}>
+                    <li key={itemKey(child, childIndex)}>
                       <TextLink
                         to={`${child.segment}` as any}
                         className={cn(
-                          itemBaseClass,
-                          "pl-8 no-underline",
+                          navigationRowClassName,
+                          "no-underline",
                           isChildActive && "bg-surface-subtle",
                         )}
                         aria-current={isChildActive ? "page" : undefined}
@@ -150,7 +214,7 @@ export const NavigationList = ({
                         {ChildIcon ? (
                           <ChildIcon className="w-4 h-4" aria-hidden="true" />
                         ) : null}
-                        <span className="flex-1 dark:text-light text-dark">
+                        <span className="min-w-0 flex-1 truncate text-text-primary">
                           {child.title}
                         </span>
                       </TextLink>
@@ -164,4 +228,6 @@ export const NavigationList = ({
       })}
     </ul>
   );
+
+  return renderItems(NAVIGATION);
 };

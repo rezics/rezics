@@ -3,6 +3,7 @@ import type { BookshelfViewConfig } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import type React from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ContinueReadingSection } from "../sections/ContinueReadingSection";
 import { DashboardDraftsSection } from "../sections/DashboardDraftsSection";
 import { DashboardLibrarySection } from "../sections/DashboardLibrarySection";
@@ -22,7 +23,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onResetLibraryUrlConfig,
 }) => {
   const { t } = useTranslation(["page", "common"]);
-  const { data, isLoading, isError, refetch } = useDashboardSummary();
+  const readContext = useReadLanguageContext();
+  const { data, isLoading, isError, refetch } = useDashboardSummary({
+    enabled: readContext.ready,
+    query: {
+      languages: readContext.languages.join(","),
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    },
+  });
 
   if (isLoading) {
     return (

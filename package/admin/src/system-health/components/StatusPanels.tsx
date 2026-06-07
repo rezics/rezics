@@ -41,6 +41,41 @@ import {
 } from "../models/status";
 import { StatusIndicator } from "./StatusIndicator";
 
+function repairSearch({
+  scope,
+  targetIds,
+  historyOutboxStatuses,
+  unitId,
+  olderThanMinutes,
+  limit,
+  reason,
+}: {
+  scope:
+    | "search"
+    | "slug"
+    | "queue-failed-job"
+    | "history-outbox-replay"
+    | "attribution"
+    | "source-site"
+    | "counters";
+  targetIds?: string;
+  historyOutboxStatuses?: ("pending" | "failed")[];
+  unitId?: string;
+  olderThanMinutes?: number;
+  limit?: number;
+  reason?: string;
+}) {
+  return {
+    scope,
+    targetIds,
+    historyOutboxStatuses,
+    unitId,
+    olderThanMinutes,
+    limit,
+    reason,
+  };
+}
+
 function SectionState({
   isLoading,
   isError,
@@ -291,7 +326,7 @@ function MeiliIndexRow({
       <div className="mt-3">
         <Link
           to="/repair"
-          search={{ scope: "search" }}
+          search={repairSearch({ scope: "search" })}
           className={buttonVariants({ variant: "outline", size: "xs" })}
         >
           <Wrench className="size-3" aria-hidden="true" />
@@ -575,12 +610,12 @@ export function CdcPanel({
           </p>
           <Link
             to="/repair"
-            search={{
+            search={repairSearch({
               scope: "history-outbox-replay",
               historyOutboxStatuses: ["pending", "failed"],
               olderThanMinutes: 5,
               limit: 50,
-            }}
+            })}
             className={`${buttonVariants({
               variant: "outline",
               size: "xs",
@@ -644,12 +679,12 @@ export function HistoryOutboxPanel({
             <p className="text-sm font-medium leading-[1.4]">最近失敗 outbox</p>
             <Link
               to="/repair"
-              search={{
+              search={repairSearch({
                 scope: "history-outbox-replay",
                 historyOutboxStatuses: ["failed"],
                 olderThanMinutes: 0,
                 limit: 50,
-              }}
+              })}
               className={buttonVariants({ variant: "outline", size: "xs" })}
             >
               <Wrench className="size-3" aria-hidden="true" />
@@ -791,10 +826,10 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
               {job.id && job.lane ? (
                 <Link
                   to="/repair"
-                  search={{
+                  search={repairSearch({
                     scope: "queue-failed-job",
                     targetIds: `${job.lane}:${job.id}`,
-                  }}
+                  })}
                   className={`${buttonVariants({
                     variant: "outline",
                     size: "xs",

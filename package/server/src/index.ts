@@ -27,8 +27,8 @@ import { echoKvApi } from "./echokv";
 import { entityApi } from "./entity";
 import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
-import { feedbackApi } from "./feedback";
 import { feedApi } from "./feed";
+import { feedbackApi } from "./feedback";
 import { gameSystemRequirementApi } from "./game-system-requirement";
 import { governanceApi } from "./governance";
 import { historyProxyApi, historyResolutionApi } from "./history";
@@ -74,6 +74,7 @@ import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { userTagApplicationApi } from "./user-tag-application";
 import { userUnitCollectionApi } from "./user-unit-collection";
+import { readDatabaseErrorDetails } from "./utils/database-error";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
@@ -81,12 +82,6 @@ import { zoneApi } from "./zone/zone.api";
 import "dotenv/config";
 
 const { isDev } = getProdState();
-
-function readDatabaseErrorCode(error: unknown): string | null {
-  if (!error || typeof error !== "object") return null;
-  const code = (error as { code?: unknown }).code;
-  return typeof code === "string" ? code : null;
-}
 
 const app = new Elysia();
 const port = env.PORT ? Number(env.PORT) : 3000;
@@ -165,8 +160,8 @@ const configuredApp = app
       };
     }
 
-    const databaseCode = readDatabaseErrorCode(error);
-    if (databaseCode) {
+    const database = readDatabaseErrorDetails(error);
+    if (database) {
       const databaseStatusMap: Record<string, number> = {
         "23505": 409,
         "23503": 400,
@@ -174,12 +169,9 @@ const configuredApp = app
         "23514": 400,
         "22P02": 400,
       };
-      const status = databaseStatusMap[databaseCode];
+      const status = databaseStatusMap[database.code];
       if (status) {
         set.status = status;
-
-        const constraint = (error as { constraint?: unknown }).constraint;
-        const table = (error as { table?: unknown }).table;
 
         const humanMessages: Record<string, string> = {
           "23505": "Record already exists",
@@ -192,13 +184,9 @@ const configuredApp = app
         return {
           status: set.status,
           code,
-          message: humanMessages[databaseCode] ?? "Database error",
+          message: humanMessages[database.code] ?? "Database error",
           detail: {
-            database: {
-              code: databaseCode,
-              ...(typeof table === "string" && { table }),
-              ...(typeof constraint === "string" && { constraint }),
-            },
+            database,
           },
         };
       }

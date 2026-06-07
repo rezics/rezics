@@ -42,7 +42,7 @@ function frontmatterValue(source: string, key: string): string | null {
 
 function heroBlock(source: string): string {
   const match = frontmatterBlock(source).match(
-    /^hero:\n(?<hero>(?:  .+\n?)+)/m,
+    /^hero:\n(?<hero>(?: {2}.+\n?)+)/m,
   );
   if (!match?.groups?.hero) {
     throw new Error("MDX source is missing hero frontmatter");
@@ -98,7 +98,7 @@ describe("@rezics/about locale contract", () => {
 
     for (const locale of ABOUT_LOCALES) {
       const source = await readMdxSource(locale, "home");
-      expect(heroBlock(source).match(/^    - /gm)?.length).toBe(2);
+      expect(heroBlock(source).match(/^ {4}- /gm)?.length).toBe(2);
     }
   });
 
@@ -155,9 +155,9 @@ describe("@rezics/about locale contract", () => {
 
   test("does not describe the product directory CTA as a story", () => {
     for (const locale of ABOUT_LOCALES) {
-      expect(uiDictionaries[locale].cta.readProduct.toLowerCase()).not.toContain(
-        "story",
-      );
+      expect(
+        uiDictionaries[locale].cta.readProduct.toLowerCase(),
+      ).not.toContain("story");
     }
   });
 });
