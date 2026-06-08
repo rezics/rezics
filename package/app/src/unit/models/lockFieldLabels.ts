@@ -3,14 +3,14 @@ import { UNIT_FIELD_LOCK_ALL } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type LockFieldGroup = {
   id: string;
-  title: string;
+  titleKey: string;
   paths: readonly string[];
 };
 
 export const BOOK_LOCK_FIELD_GROUPS: readonly LockFieldGroup[] = [
   {
     id: "translations",
-    title: getI18nRuntime().i18n.t("editor:authority_group_translations"),
+    titleKey: "editor:authority_group_translations",
     paths: [
       "translations.en.title",
       "translations.en.description",
@@ -20,17 +20,17 @@ export const BOOK_LOCK_FIELD_GROUPS: readonly LockFieldGroup[] = [
   },
   {
     id: "metadata",
-    title: getI18nRuntime().i18n.t("editor:authority_group_metadata"),
+    titleKey: "editor:authority_group_metadata",
     paths: ["extension.isbn13", "extension.coverUrl"],
   },
   {
     id: "content",
-    title: getI18nRuntime().i18n.t("editor:authority_group_content"),
+    titleKey: "editor:authority_group_content",
     paths: ["post.content", "post.content.main", "post.content.main.source"],
   },
   {
     id: "credits",
-    title: getI18nRuntime().i18n.t("editor:authority_group_credits"),
+    titleKey: "editor:authority_group_credits",
     paths: ["credits.authors"],
   },
 ];

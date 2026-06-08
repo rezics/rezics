@@ -223,7 +223,7 @@ export function BookAuthorityPanel({
           {BOOK_LOCK_FIELD_GROUPS.map((group) => (
             <section key={group.id} className="grid gap-3">
               <h2 className="text-base font-medium leading-ui text-text-primary">
-                {group.title}
+                {t(group.titleKey)}
               </h2>
               <ul className="grid gap-2">
                 {group.paths.map((path) => {
