@@ -139,6 +139,11 @@ export const createBookTocEditorNode = ({
   }: NodeRendererProps<Chapter>) {
     const hasChildren = !!(node.children && node.children.length > 0);
     const isSectionNode = node.data.noContent === true;
+    const isSubtreeEnd = !!(
+      node.parent &&
+      !node.parent.isRoot &&
+      (!node.next || !node.parent.isAncestorOf(node.next))
+    );
     const wordCount = mockWordCount(node.data);
 
     const openContextMenuAt = (x: number, y: number) => {
@@ -301,6 +306,7 @@ export const createBookTocEditorNode = ({
             e?.stopPropagation();
             node.toggle();
           }}
+          subtreeEnd={isSubtreeEnd}
           className={isChecked ? "outline outline-2 outline-primary" : ""}
         />
       </div>

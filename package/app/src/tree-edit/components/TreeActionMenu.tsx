@@ -30,6 +30,11 @@ export function TreeActionMenu({
             className="size-8 shrink-0"
             aria-label={label}
             {...props}
+            onClick={(event) => {
+              event.stopPropagation();
+              props.onClick?.(event);
+            }}
+            onDoubleClick={(event) => event.stopPropagation()}
           >
             <MoreHorizontal className="size-4" aria-hidden />
           </Button>

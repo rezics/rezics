@@ -1350,6 +1350,11 @@ export function TagTreeEditor({
 
   function Node({ node, style, dragHandle }: NodeRendererProps<EditorNode>) {
     const hasChildren = (node.children?.length ?? 0) > 0;
+    const isSubtreeEnd = !!(
+      node.parent &&
+      !node.parent.isRoot &&
+      (!node.next || !node.parent.isAncestorOf(node.next))
+    );
     const label = nodeLabel(node.data);
     const kind = node.data.tagId
       ? "Tag"
@@ -1428,6 +1433,7 @@ export function TagTreeEditor({
           draggable
           dragHandle={dragHandle}
           onToggle={() => node.toggle()}
+          subtreeEnd={isSubtreeEnd}
         />
       </div>
     );
