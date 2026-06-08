@@ -12,6 +12,7 @@
     pkgs.go-task
     pkgs.fish
     pkgs.git
+    pkgs.zellij
     pkgs.postgresql_18
     pkgs.openssl
     pkgs.jq

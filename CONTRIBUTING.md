@@ -11,12 +11,13 @@ workspaces; packages live under `package/`.
 
 ## Development Setup
 
-**Prerequisites:** Bun, Docker Compose v2 for repo-managed local services
+**Prerequisites:** Bun, Zellij, Docker Compose v2 for repo-managed local services
 
 ```bash
 bun install              # install workspace deps (Bun is the package manager)
 task                     # list every task (task --list)
-task dev                 # Start all dev processes (devenv up; process-compose)
+task dev                 # Start all dev processes (zellij)
+task devenv:up           # Start all dev processes (devenv process-compose)
 task app:dev             # Frontend only (Vite, port 35001)
 task server:dev          # Backend only (Elysia with --watch)
 task history:dev         # History service only (Elysia, port 3004)

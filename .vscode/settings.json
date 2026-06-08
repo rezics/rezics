@@ -23,6 +23,7 @@
     "denoland",
     "Deoptimization",
     "Deutsch",
+    "devenv",
     "dotenv",
     "easyeditor",
     "easymde",
@@ -145,7 +146,7 @@
     "source.organizeImports.biome": "explicit",
     "source.fixAll.biome": "explicit"
   },
-  "typescript.experimental.useTsgo": true,
+  "js/ts.experimental.useTsgo": true,
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
   },

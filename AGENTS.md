@@ -24,7 +24,8 @@ list everything.
 
 ```bash
 task                     # list every task (task --list)
-task dev                 # start all dev processes (devenv up; process-compose)
+task dev                 # start all dev processes (zellij)
+task devenv:up           # start all dev processes (devenv process-compose)
 task app:dev             # frontend app, Vite
 task server:dev          # main Elysia API
 task auth:dev            # auth service

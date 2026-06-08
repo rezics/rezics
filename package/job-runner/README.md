@@ -86,7 +86,7 @@ task job-runner:dev
 ```
 
 Use `JOB_RUNNER_ROLE=all` for local development when Sequin is running. The root
-`task dev` (devenv `devenv up`) starts the `job-runner` process automatically
+`task dev` zellij session starts the `job-runner` process automatically
 because runtime server mutations enqueue queue-backed search and history
 synchronization work. If this service is not running, those runtime writes
 either fail while enqueueing or leave derived state stale.

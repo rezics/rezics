@@ -11,16 +11,13 @@ includes:
   edge: { taskfile: ./package/edge/Taskfile.yml, dir: ./package/edge }
   editor: { taskfile: ./package/editor/Taskfile.yml, dir: ./package/editor }
   folio: { taskfile: ./package/folio/Taskfile.yml, dir: ./package/folio }
-  history:
-    { taskfile: ./package/history/Taskfile.yml, dir: ./package/history }
+  history: { taskfile: ./package/history/Taskfile.yml, dir: ./package/history }
   job: { taskfile: ./package/job/Taskfile.yml, dir: ./package/job }
   job-runner:
     { taskfile: ./package/job-runner/Taskfile.yml, dir: ./package/job-runner }
   notify: { taskfile: ./package/notify/Taskfile.yml, dir: ./package/notify }
-  preview:
-    { taskfile: ./package/preview/Taskfile.yml, dir: ./package/preview }
-  ranking:
-    { taskfile: ./package/ranking/Taskfile.yml, dir: ./package/ranking }
+  preview: { taskfile: ./package/preview/Taskfile.yml, dir: ./package/preview }
+  ranking: { taskfile: ./package/ranking/Taskfile.yml, dir: ./package/ranking }
   reaction:
     { taskfile: ./package/reaction/Taskfile.yml, dir: ./package/reaction }
   search: { taskfile: ./package/search/Taskfile.yml, dir: ./package/search }
@@ -35,6 +32,9 @@ tasks:
 
   # ── Dev orchestration ──────────────────────────────────────────────────
   dev:
+    desc: Full local dev session (zellij; backend + frontend)
+    cmd: bun run --no-env-file tool/dev-script/dev.ts
+  devenv:up:
     desc: Full local dev session (devenv process-compose; backend + frontend)
     cmd: devenv up
 
