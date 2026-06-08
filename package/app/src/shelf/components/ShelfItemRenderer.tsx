@@ -44,11 +44,13 @@ interface ShelfItemRendererProps {
   viewMode: ShelfView;
   /**
    * Optional left-column controls (drag handle, move, delete) for editor use.
+   * 可选的左栏控件（拖拽手柄、移动、删除），供编辑器使用。
    */
   editControls?: React.ReactNode;
   /**
    * When true, all entries render as fixed-height `UnitCard`s regardless of
    * viewMode.
+   * 为 true 时，所有条目都渲染为固定高度的 `UnitCard`，与 viewMode 无关。
    */
   editing?: boolean;
 }
@@ -66,6 +68,9 @@ function renderUnit(
   // Bookshelf (cover grid) view: render library kinds as cover-only cards and
   // silently skip non-library kinds. Layout/columns are owned by the grid
   // container; each item just renders a kind-aspect cover.
+  // Bookshelf（封面网格）视图：将 library 类型渲染为仅含封面的卡片，并静默
+  // 跳过非 library 类型。布局/列数由网格容器掌控；每个条目只渲染按类型比例的
+  // 封面。
   if (viewMode === "bookshelf") {
     if (!isLibraryKind(unit.kind)) return null;
     const book = data as BookDTO | undefined;

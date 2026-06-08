@@ -88,11 +88,11 @@ The first admin is bootstrapped manually:
 ## Scripts
 
 ```bash
-bun run dev              # Start with --watch
-bun run build            # Compile to standalone binary
-bun run db:generate      # Generate Drizzle migration files
-bun run db:migrate       # Run Drizzle migrations
-bun run db:studio        # Open Drizzle Studio
+task auth:dev              # Start with --watch
+task auth:build            # Compile to standalone binary
+task auth:db:generate      # Generate Drizzle migration files
+task auth:db:migrate       # Run Drizzle migrations
+task auth:db:studio        # Open Drizzle Studio
 ```
 
 ## Tech Stack

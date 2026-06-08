@@ -8,6 +8,8 @@ import {
 /**
  * Development cutover: no `like`/`dislike` aliases are accepted. Existing rows
  * are migrated in place, and stale clients fail contract validation.
+ * 开发期切换：不接受 `like`/`dislike` 别名。现有行会就地迁移，
+ * 过时的客户端会因契约校验失败。
  */
 export const allowedReactionKindSchema = t.Union([
   t.Literal("upvote"),
@@ -73,7 +75,10 @@ export const createShareResponseSchema = t.Object({
 });
 export type CreateShareResponse = (typeof createShareResponseSchema)["static"];
 
-/** GET /reaction/given query parameters. */
+/**
+ * GET /reaction/given query parameters.
+ * GET /reaction/given 的查询参数。
+ */
 export const givenQuerySchema = t.Object({
   userId: t.String(),
   reactions: t.Optional(t.String()),

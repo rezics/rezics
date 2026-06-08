@@ -18,6 +18,9 @@ import { realmService } from "./realm.service";
  * Membership precondition for any realm-tag write.
  * Allowed: platform admin OR any current realm member (regardless of role).
  * Reject non-members with 403.
+ * 任意 realm-tag 写操作的成员资格前置条件。
+ * 允许：平台管理员或任意当前 realm 成员（不论角色）。
+ * 对非成员返回 403 拒绝。
  */
 async function ensureRealmMembership(
   actorPermission: { role: string },
@@ -33,6 +36,9 @@ async function ensureRealmMembership(
  * Pin/delete authorization for realm-tag-applications.
  * Allowed: platform admin OR `Realm.owner` (the user attached to the
  * underlying Realm Unit). Realm moderators and regular members are rejected.
+ * realm-tag-applications 的置顶/删除授权。
+ * 允许：平台管理员或 `Realm.owner`（关联到底层 Realm Unit 的用户）。
+ * realm 版主和普通成员将被拒绝。
  */
 async function canMutateRealmTagApplication(
   actorPermission: { role: string },
@@ -79,6 +85,7 @@ export const realmTagApplicationApi = new Elysia({
   .use(authMacro)
 
   // POST /realm-tag-application — creation-as-vote (any realm member)
+  // POST /realm-tag-application — 创建即投票（任意 realm 成员）。
   .post(
     "/",
     async ({ body, identity, set }): Promise<RealmTagApplicationDTO> => {
@@ -121,6 +128,7 @@ export const realmTagApplicationApi = new Elysia({
   )
 
   // PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId — pin / position (admin or realm owner)
+  // PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId — 置顶/排序（管理员或 realm 所有者）。
   .patch(
     "/:realmUnitId/:unitId/:tagUnitId",
     async ({
@@ -160,6 +168,7 @@ export const realmTagApplicationApi = new Elysia({
   )
 
   // DELETE /realm-tag-application/:realmUnitId/:unitId/:tagUnitId — delete (admin or realm owner)
+  // DELETE /realm-tag-application/:realmUnitId/:unitId/:tagUnitId — 删除（管理员或 realm 所有者）。
   .delete(
     "/:realmUnitId/:unitId/:tagUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
@@ -199,6 +208,7 @@ export const realmTagApplicationVoteApi = new Elysia({
   .use(authMacro)
 
   // POST /realm-tag-application-vote — explicit vote (membership-checked)
+  // POST /realm-tag-application-vote — 显式投票（已检查成员资格）。
   .post(
     "/",
     async ({ body, identity, set }): Promise<{ message: string }> => {

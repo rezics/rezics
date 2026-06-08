@@ -1,0 +1,16 @@
+# @rezics/folio — Elysia service + Storybook. Aggregated as `folio:*`.
+version: '3'
+
+tasks:
+  dev:
+    desc: Dev (watch)
+    cmd: bun run --watch src/index.ts
+  test:
+    desc: Run tests
+    cmd: bun test
+  storybook:
+    desc: Storybook (port 6009)
+    cmd: bun storybook dev -p 6009 --no-open {{.CLI_ARGS}}
+  build-storybook:
+    desc: Build the static Storybook
+    cmd: bun storybook build -o storybook-static

@@ -88,7 +88,10 @@ const realmModerationStoryAction = {
   createdAt: realmModerationStoryTime.toISOString(),
 } satisfies ModerationActionDTO;
 
-/** Seeds the embedded poll into the query cache, then renders the post card. */
+/**
+ * Seeds the embedded poll into the query cache, then renders the post card.
+ * 将内嵌投票预置到查询缓存中，然后渲染帖子卡片。
+ */
 function PostCardWithPoll() {
   const qc = useQueryClient();
   const [ready, setReady] = useState(false);

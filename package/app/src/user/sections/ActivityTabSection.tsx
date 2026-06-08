@@ -11,6 +11,8 @@ import { useProfileContext } from "@/user/components/ProfileLayout";
  * Profile activity tab: a time-ordered feed of the user's public posts,
  * reviews, remarks, reactions, and shelf updates. Privacy and lifecycle
  * filtering happen server-side, so the client just renders what it receives.
+ * 个人资料活动标签页：用户公开的帖子、评论、评注、反应和书架更新的按时间排序
+ * 信息流。隐私和生命周期过滤在服务端进行，因此客户端只渲染收到的内容。
  */
 export const ActivityTabSection: FC = () => {
   const { userId } = useProfileContext();
@@ -75,7 +77,10 @@ export const ActivityTabSection: FC = () => {
   );
 };
 
-/** Localized per-kind label. Literal `t` calls keep the R12 token check happy. */
+/**
+ * Localized per-kind label. Literal `t` calls keep the R12 token check happy.
+ * 按 kind 本地化的标签。字面量 `t` 调用可让 R12 token 检查通过。
+ */
 function activityKindLabel(
   t: (key: string) => string,
   kind: ActivityKind,

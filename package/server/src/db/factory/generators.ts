@@ -14,6 +14,7 @@ import { randomBoolean, randomFloat } from "./utils.js";
 export { getFaker };
 
 // ── Multilingual Translation ───────────────────────────
+// ── 多语言翻译 ───────────────────────────
 
 export interface TranslationData {
   language: Language;
@@ -34,6 +35,8 @@ export function generatedDescription(
 /**
  * Pick title/summary/description from the curated text corpus.
  * Falls back to faker lorem for descriptions if the corpus is exhausted.
+ * 从精选文本语料库中选取 title/summary/description。
+ * 当语料库耗尽时，description 回退到 faker lorem。
  */
 function pickFromCorpus(
   type: UnitType,
@@ -42,6 +45,7 @@ function pickFromCorpus(
   const f = getFaker(lang);
 
   // Map UnitType to text pool type
+  // 将 UnitType 映射到文本池类型
   const poolType =
     type === UnitType.TAG || type === UnitType.POST
       ? "BOOK"
@@ -139,17 +143,26 @@ function pickFromCorpus(
  * - zh-hans: ~40%
  * - ja: ~20%
  * - de: ~10%
+ *
+ * 为一个 unit 生成多语言翻译。
+ * 始终包含 zh-hant（平台默认）。其他语言按概率包含：
+ * - en: ~70%
+ * - zh-hans: ~40%
+ * - ja: ~20%
+ * - de: ~10%
  */
 export function generateTranslations(type: UnitType): TranslationData[] {
   const result: TranslationData[] = [];
 
   // zh-hant always included
+  // zh-hant 始终包含
   result.push({
     language: LANGUAGES.ZH_HANT,
     ...pickFromCorpus(type, LANGUAGES.ZH_HANT),
   });
 
   // Other languages by probability
+  // 其他语言按概率
   for (const [lang, prob] of LANG_DISTRIBUTION) {
     if (Math.random() < prob) {
       result.push({
@@ -163,6 +176,7 @@ export function generateTranslations(type: UnitType): TranslationData[] {
 }
 
 // ── Book ───────────────────────────────────────────────
+// ── 书籍 ───────────────────────────────────────────────
 
 export function generateBookExtra(): unknown {
   return {
@@ -174,6 +188,7 @@ export function generateBookExtra(): unknown {
 }
 
 // ── Game ────────────────────────────────────────────
+// ── 游戏 ────────────────────────────────────────────
 
 export function generateGameExtra(): unknown {
   return {
@@ -190,6 +205,7 @@ export function generateGameExtra(): unknown {
 }
 
 // ── Media ───────────────────────────────────────────
+// ── 媒体 ───────────────────────────────────────────
 
 export function generateMediaExtra(): unknown {
   return {
@@ -200,6 +216,7 @@ export function generateMediaExtra(): unknown {
 }
 
 // ── Post body ───────────────────────────────────────
+// ── 帖子正文 ───────────────────────────────────────
 
 export function generatePostBody(kind: PostKind): string {
   switch (kind) {
@@ -223,6 +240,7 @@ export function generatePostContent(kind: PostKind): unknown {
 }
 
 // ── Post extra ──────────────────────────────────────
+// ── 帖子附加信息 ──────────────────────────────────────
 
 export function generatePostExtra(kind: PostKind): unknown | null {
   switch (kind) {

@@ -11,6 +11,7 @@ import {
 
 // ============================================================
 // ENUMS
+// 枚举
 // ============================================================
 
 export const UnitType = {
@@ -73,6 +74,7 @@ export const unitTypeSchema = t.Union([
 
 /**
  * Unit types that participate in collaborative catalog/wiki editing.
+ * 参与协作式目录/wiki 编辑的 Unit 类型。
  */
 export const WIKI_TYPES = ["BOOK", "GAME", "MEDIA"] as const;
 
@@ -99,6 +101,7 @@ export const unitVisibilitySchema = t.Union([
 
 // ============================================================
 // CONTENT RATING
+// 内容分级
 // ============================================================
 
 export const ContentRating = {
@@ -126,6 +129,7 @@ export const contentRatingSchema = t.Union([
 
 // ============================================================
 // AI DISCLOSURE
+// AI 披露
 // ============================================================
 
 export const AiDisclosureMode = {
@@ -201,10 +205,11 @@ export type AiDisclosureDetails = (typeof aiDisclosureDetailsSchema)["static"];
 
 // ============================================================
 // PUBLIC USER (shared across contracts)
+// PUBLIC USER（跨各契约共享）
 // ============================================================
 
 export const publicUserSchema = t.Object({
-  /** Canonical user identifier — the USER `Unit.id`. */
+  /** Canonical user identifier — the USER `Unit.id`. 规范的用户标识符——即 USER 的 `Unit.id`。 */
   unitId: t.String(),
   slug: t.Optional(t.String()),
   name: t.Optional(t.String()),
@@ -219,6 +224,7 @@ export type PublicUser = (typeof publicUserSchema)["static"];
 
 // ============================================================
 // UNIT TRANSLATION DTO
+// UNIT 翻译 DTO
 // ============================================================
 
 export const unitTranslationDTOSchema = t.Object({
@@ -246,6 +252,7 @@ export type VariantContextSummary =
 
 // ============================================================
 // UNIT PUBLICATION METADATA
+// UNIT 发布元数据
 // ============================================================
 
 export const unitPublicationMetadataSchema = t.Object({
@@ -274,6 +281,7 @@ export type UnitSupportLanguageDTO =
 
 // ============================================================
 // UNIT DTO
+// UNIT DTO 数据传输对象
 // ============================================================
 
 export const baseUnitSchema = t.Object({
@@ -292,6 +300,8 @@ export const baseUnitSchema = t.Object({
   // Canonical weak target edge for the Unit's primary aggregation/about target.
   // Variants require it, but non-variant Unit extensions such as POST may also
   // project it when their interactions resolve to another Unit.
+  // Unit 主聚合/about 目标的规范弱目标边。Variant 必须有它，但 POST 这类
+  // 非 variant 的 Unit 扩展，在其交互解析到另一个 Unit 时也可能投影出它。
   targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -319,6 +329,7 @@ export type UnitDTO = (typeof unitDTOSchema)["static"];
 
 // ============================================================
 // UNIT LIST/QUERY
+// UNIT 列表/查询
 // ============================================================
 
 export const unitListQuerySchema = t.Object({
@@ -421,6 +432,7 @@ export type UnitResponse = (typeof unitResponseSchema)["static"];
 
 // ============================================================
 // CREATE/UPDATE UNIT
+// 创建/更新 UNIT
 // ============================================================
 
 export const createUnitSchema = t.Object({
@@ -435,6 +447,7 @@ export const createUnitSchema = t.Object({
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   // The owning Unit stores canonical target semantics; extension tables must
   // not duplicate this as their own persisted target column.
+  // 拥有方 Unit 存储规范的目标语义；扩展表不得将其作为自己持久化的目标列重复存储。
   targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -474,6 +487,7 @@ export type UpdateUnitInput = (typeof updateUnitSchema)["static"];
 
 // ============================================================
 // TRANSLATION CRUD
+// 翻译 CRUD
 // ============================================================
 
 export const createTranslationSchema = t.Object({

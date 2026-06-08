@@ -11,8 +11,17 @@ import type { QueryClient, QueryKey } from "@tanstack/react-query";
 // a write. Mutations route their `onSuccess` invalidation through
 // `invalidateForCacheDomain` instead of hand-listing keys, so adding a new
 // cross-cutting surface only requires editing this map.
+//
+// 单一事实来源，声明每个 mutation 域必须失效哪些 query-key 命名空间，
+// 以便写入后 detail、dashboard、profile、search、realm-feed 以及按书的
+// node-completion 列表保持一致。Mutations 通过 `invalidateForCacheDomain`
+// 路由其 `onSuccess` 失效，而非手工列举各 key，因此新增一个横切面只需
+// 编辑此 map。
 
-/** Root query-key prefix per logical surface. Invalidation is by prefix. */
+/**
+ * Root query-key prefix per logical surface. Invalidation is by prefix.
+ * 每个逻辑面的 query-key 根前缀。失效按前缀进行。
+ */
 export const CACHE_NAMESPACE_ROOTS = {
   detail: ["books"],
   dashboard: ["dashboard"],
@@ -33,7 +42,10 @@ export const CACHE_NAMESPACE_ROOTS = {
 
 export type CacheNamespace = keyof typeof CACHE_NAMESPACE_ROOTS;
 
-/** A mutation surface that triggers cross-cutting cache invalidation. */
+/**
+ * A mutation surface that triggers cross-cutting cache invalidation.
+ * 触发横切缓存失效的 mutation 面。
+ */
 export type CacheMutationDomain =
   | "collect"
   | "follow"
@@ -50,6 +62,9 @@ export type CacheMutationDomain =
  * invalidate. `progress` invalidates the same surfaces as `node-completion`
  * minus the per-book node-completion list (a `UserUnitProgress` write does
  * not change per-node rows).
+ * 每个 mutation 域映射到它必须失效的一组 query-key 命名空间。`progress`
+ * 失效的面与 `node-completion` 相同，但不含按书的 node-completion 列表
+ *（`UserUnitProgress` 写入不会改变按节点的行）。
  */
 export const CACHE_COHERENCE_MAP = {
   collect: [
@@ -80,6 +95,9 @@ export const CACHE_COHERENCE_MAP = {
  * Invalidate every query namespace declared for `domain`. Call from a
  * mutation's `onSuccess`. Over-invalidation by prefix is intentional: it
  * keeps the declared surfaces fresh without per-key bookkeeping.
+ * 失效 `domain` 声明的每个 query 命名空间。从 mutation 的 `onSuccess`
+ * 调用。按前缀的过度失效是有意为之：它在无需逐 key 记账的情况下保持
+ * 已声明的面新鲜。
  */
 export function invalidateForCacheDomain(
   queryClient: QueryClient,

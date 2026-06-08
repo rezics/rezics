@@ -3,12 +3,6 @@
   "version": "0.1.0",
   "type": "module",
   "license": "AGPL-3.0-only",
-  "scripts": {
-    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --host 0.0.0.0 --port 4174",
-    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
-    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 0.0.0.0 --port 4174",
-    "test": "bun test"
-  },
   "exports": {
     "./*": {
       "types": "./src/*.ts",

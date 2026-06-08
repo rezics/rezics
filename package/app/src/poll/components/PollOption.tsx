@@ -13,16 +13,28 @@ import type { PollOptionView } from "../models/pollView";
 interface PollOptionProps {
   option: PollOptionView;
   voteMode: PollVoteMode;
-  /** Whether the caller may cast/withdraw (false on a closed poll). */
+  /**
+   * Whether the caller may cast/withdraw (false on a closed poll).
+   * 调用方是否可投票/撤回（投票关闭时为 false）。
+   */
   votingEnabled: boolean;
-  /** Whether tallies are exposed (drives the count + bar). */
+  /**
+   * Whether tallies are exposed (drives the count + bar).
+   * 是否暴露计票结果（驱动计数 + 进度条）。
+   */
   countsVisible: boolean;
-  /** A vote/withdraw mutation is in flight. */
+  /**
+   * A vote/withdraw mutation is in flight.
+   * 一个投票/撤回 mutation 正在进行中。
+   */
   pending: boolean;
   onSelect: (optionId: string) => void;
 }
 
-/** Renders a referenced unit (the option's `unitId`) via the shared unit card. */
+/**
+ * Renders a referenced unit (the option's `unitId`) via the shared unit card.
+ * 通过共享的 unit card 渲染被引用的 unit（选项的 `unitId`）。
+ */
 function PollUnitOption({ unitId }: { unitId: string }) {
   const { t } = useTranslation(["common"]);
   const readContext = useReadLanguageContext();

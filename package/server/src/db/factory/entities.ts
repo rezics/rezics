@@ -25,6 +25,7 @@ import type { CreatedEntity } from "./types.js";
 import { pickN, randomBoolean, randomInt, withUpdatedAtRows } from "./utils.js";
 
 /** Locale distribution for entity names — diverse locale mix. */
+/** 实体名称的语言区域分布 —— 多样化的区域组合。 */
 const LOCALE_WEIGHTS = [
   { lang: LANGUAGES.ZH_HANT, weight: 0.35 },
   { lang: LANGUAGES.EN, weight: 0.25 },

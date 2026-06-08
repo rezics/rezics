@@ -2,6 +2,7 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 
 // ANCHOR: Shelf Item Search Document
+// ANCHOR: 书架条目搜索文档
 
 export const ShelfItemSearchDocumentSchema = t.Object({
   id: t.String(),
@@ -44,6 +45,7 @@ export type ShelfItemSearchDocument = Static<
 >;
 
 // ANCHOR: Shelf Item Search Options
+// ANCHOR: 书架条目搜索选项
 
 export const ShelfItemSearchOptionsSchema = t.Object({
   keyword: t.Optional(t.String()),
@@ -79,6 +81,7 @@ export type ShelfItemSearchOptions = Static<
 >;
 
 // ANCHOR: Shelf Item Search Result
+// ANCHOR: 书架条目搜索结果
 
 export const ShelfItemMatchSchema = t.Object({
   item: ShelfItemSearchDocumentSchema,

@@ -38,8 +38,8 @@ Meilisearch server settings are in `./bin/config.toml`.
 ## Scripts
 
 ```bash
-bun run meilisearch       # Start Meilisearch server
-bun run meilisearch:wsl   # Start Meilisearch (WSL, binds to 0.0.0.0:7700)
+task search:meilisearch       # Start Meilisearch server
+task search:meilisearch:wsl   # Start Meilisearch (WSL, binds to 0.0.0.0:7700)
 ```
 
 ## Tech Stack

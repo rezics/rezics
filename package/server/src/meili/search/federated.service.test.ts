@@ -6,6 +6,9 @@ import { federatedSearch } from "./federated.service";
 // Helper builds a fake SearchClient that records every per-index search and
 // every multi-search call. Each search resolves with empty hits so the focus
 // is on the orchestrator's filter and index allowlist behavior.
+// 辅助函数构造一个假的 SearchClient，记录每次按索引的 search 调用以及每次
+// multi-search 调用。每次 search 都返回空 hits，从而把关注点集中在编排器的
+// filter 与索引白名单行为上。
 
 interface CapturedSearch {
   index:
@@ -124,10 +127,13 @@ describe("federatedSearch", () => {
     expect(result.kind).toBe("grouped");
     if (result.kind !== "grouped") throw new Error("expected grouped");
     // The orchestrator issues one multiSearch with all permitted sub-queries.
+    // 编排器只发起一次 multiSearch，包含所有允许的子查询。
     expect(multi.length).toBe(1);
     const indexUids = multi[0]!.queries.map((q) => q.indexUid).sort();
     // Books + 4 post sections + comments + shelves + realms + users + entities = 10 sub-queries.
     // Books and shelves both target the "content" index.
+    // Books + 4 个 post 分区 + comments + shelves + realms + users + entities = 10 个子查询。
+    // Books 和 shelves 都指向 "content" 索引。
     expect(indexUids.filter((u) => u === "content")).toHaveLength(2);
     expect(indexUids.filter((u) => u === "posts")).toHaveLength(4);
     expect(indexUids.filter((u) => u === "comments")).toHaveLength(1);
@@ -151,17 +157,21 @@ describe("federatedSearch", () => {
     const queries = multi[0]!.queries;
     const indexUids = queries.map((q) => q.indexUid);
     // No realms, no users, no entities.
+    // 不含 realms、users、entities。
     expect(indexUids).not.toContain("realms");
     expect(indexUids).not.toContain("users");
     expect(indexUids).not.toContain("entities");
     // The shelves sub-query (one of the two `content` targets) must include
     // the containedUnitIds clause for the book scope.
+    // shelves 子查询（两个 `content` 目标之一）必须为 book 作用域包含
+    // containedUnitIds 子句。
     const shelfQuery = queries.find(
       (q) => q.indexUid === "content" && q.filter?.includes('type = "SHELF"'),
     );
     expect(shelfQuery).toBeDefined();
     expect(shelfQuery!.filter).toContain('containedUnitIds = "b-9"');
     // Posts sub-queries must include targetUnitId.
+    // posts 子查询必须包含 targetUnitId。
     const postsQueries = queries.filter((q) => q.indexUid === "posts");
     expect(postsQueries.length).toBeGreaterThan(0);
     for (const q of postsQueries) {
@@ -273,10 +283,12 @@ describe("federatedSearch", () => {
     expect(multi.length).toBe(1);
     expect(multi[0]!.federation).toEqual({ offset: 0, limit: 20 });
     // Every sub-query should carry a weight.
+    // 每个子查询都应带有 weight。
     for (const q of multi[0]!.queries) {
       expect(q.weight).toBeGreaterThan(0);
     }
     // Each ranked hit has an _origin discriminator.
+    // 每个 ranked 命中都带有 _origin 判别字段。
     for (const h of result.hits as any[]) {
       expect(h._origin?.indexUid).toBeDefined();
       expect(h._origin?.category).toBeDefined();

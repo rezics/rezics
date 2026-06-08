@@ -5,8 +5,8 @@ import { Button } from "#/shadcn/button";
 type ButtonProps = React.ComponentProps<typeof Button>;
 
 interface CooldownButtonProps extends ButtonProps {
-  cooldownMs: number; // 冷却时间，单位 ms，比如 5000 = 5 秒
-  onCooldownClick?: () => void; // 可选：在冷却时点击的回调（比如提示“别急”）
+  cooldownMs: number; // Cooldown duration in ms, e.g. 5000 = 5 seconds — 冷却时间，单位 ms，比如 5000 = 5 秒
+  onCooldownClick?: () => void; // Optional: callback fired when clicked during cooldown (e.g. a "hold on" hint) — 可选：在冷却时点击的回调（比如提示“别急”）
 }
 
 export const CooldownButton: React.FC<CooldownButtonProps> = ({

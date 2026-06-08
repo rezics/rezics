@@ -129,6 +129,7 @@ describe("PollService.castVote — single-choice (5.1)", () => {
     await service.castVote("user-1", "poll-1", "B");
 
     // Old vote row removed, new one created — exactly one remains.
+    // 旧投票行被删除，新行被创建——恰好保留一行。
     expect(tx.deleteVote).toHaveBeenCalledWith({
       pollUnitId: "poll-1",
       userId: "user-1",
@@ -143,6 +144,7 @@ describe("PollService.castVote — single-choice (5.1)", () => {
     });
 
     // A decremented, B incremented.
+    // A 递减，B 递增。
     expect((tx.incrementOptionVoteCount as any).mock.calls).toEqual([
       ["poll-1", "A", -1],
       ["poll-1", "B", 1],
@@ -373,6 +375,7 @@ describe("poll.mapper — anonymity (5.5)", () => {
     expect(dto.myVote).toEqual(["B"]);
 
     // No voter->option mapping is serialized anywhere in the DTO.
+    // DTO 中任何地方都不会序列化 voter->option 的映射。
     expect(JSON.stringify(dto)).not.toContain("userId");
   });
 
@@ -385,6 +388,7 @@ describe("poll.mapper — anonymity (5.5)", () => {
     expect(dto.totalVotes).toBeUndefined();
     expect(dto.options.every((o) => o.voteCount === undefined)).toBe(true);
     // Caller's own vote is still returned even when tallies are withheld.
+    // 即使隐去票数统计，调用者自己的投票仍会返回。
     expect(dto.myVote).toEqual(["B"]);
   });
 });

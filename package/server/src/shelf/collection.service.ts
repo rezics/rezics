@@ -37,11 +37,20 @@ type UnitTargetRow = {
 };
 
 interface ResolvedTarget {
-  /** Unit id of the parent shelf item (the target work, or the target itself). */
+  /**
+   * Unit id of the parent shelf item (the target work, or the target itself).
+   * 父级 shelf item 的 unit id（目标作品，或目标本身）。
+   */
   parentUnitId: string;
-  /** Kind discriminator for the parent shelf item. */
+  /**
+   * Kind discriminator for the parent shelf item.
+   * 父级 shelf item 的 kind 判别符。
+   */
   parentKind: ShelfItemKind;
-  /** If the original targetId is a review post, its unit id and kind; else undefined. */
+  /**
+   * If the original targetId is a review post, its unit id and kind; else undefined.
+   * 若原始 targetId 是 review 帖子，则为其 unit id 与 kind；否则为 undefined。
+   */
   reviewUnitId?: string;
   reviewKind?: ShelfItemKind;
 }
@@ -584,6 +593,11 @@ export class CollectionService {
    * - If `targetId` is a REVIEW post whose Unit has a canonical target, the
    *   target work is the parent and the review itself is threaded back as a child.
    * - Otherwise the target is the parent.
+   * 将收藏目标解析为一个父级 shelf item + 可选的 review 子项。
+   *
+   * - 若 `targetId` 是其 Unit 拥有规范目标的 REVIEW 帖子，则目标作品为父级，
+   *   而 review 本身作为子项串接回来。
+   * - 否则该目标即为父级。
    */
   private async resolveTarget(
     targetId: string,
@@ -614,6 +628,7 @@ export class CollectionService {
 
   /**
    * Collect a unit to multiple shelves.
+   * 将一个 unit 收藏到多个 shelf。
    */
   async collect(userId: string, input: CollectInput): Promise<CollectResponse> {
     const {

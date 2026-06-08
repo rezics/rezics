@@ -215,6 +215,7 @@ export async function seedChaptersForBook(
   const tree: FactoryBookContentStructureItem[] = [];
 
   // Distribute children as evenly as possible across top-level parents
+  // 在顶层父节点之间尽量均匀地分配子节点
   const childCounts: number[] = Array.from(
     { length: topLevelCount },
     (_, i) =>
@@ -262,6 +263,9 @@ export async function seedChaptersForBook(
   // subset. The rest live as ContentStructureNode rows with
   // contentUnitId = NULL and can be lazily promoted to a Unit at runtime
   // when something needs to attach to them (review target, comment, etc.).
+  // 树始终完整构建；但只为随机子集物化 Unit。其余的以 contentUnitId = NULL 的
+  // ContentStructureNode 行存在，当需要附加到它们的内容（评价目标、评论等）时，
+  // 可在运行时惰性提升为 Unit。
   const allRows = [...parentRows, ...childRows];
   const materializedRows = allRows.filter(
     () => Math.random() < chapterPlan.unitProbability,
@@ -413,6 +417,7 @@ export async function seedChaptersForBook(
   }
 
   // Chapter Units now exist; insert ContentStructureNode rows referencing them.
+  // 章节 Unit 现已存在；插入引用它们的 ContentStructureNode 行。
   chapterCount = await insertNodeRows(
     ctx.db,
     bookUnitId,
@@ -444,6 +449,8 @@ export async function seedChaptersForBook(
 // Base36 fractional-index position generation for sibling ordering.
 // Mirrors the runtime utility but kept inline to avoid factory importing from
 // server/src.
+// 用于同级排序的 Base36 分数索引位置生成。
+// 与运行时工具保持一致，但保留为内联实现，以避免 factory 从 server/src 导入。
 const LEXO_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 const LEXO_FIRST = "0";
 const LEXO_LAST = "z";
@@ -506,6 +513,8 @@ interface TreeNode {
  * Flatten the in-memory tree into ContentStructureNode row inputs and
  * batch-insert via createMany. Each sibling gets a position via lexoBetween
  * keyed off its left neighbour.
+ * 将内存中的树展平为 ContentStructureNode 行输入，并通过 createMany 批量插入。
+ * 每个同级节点都以其左邻居为基准，通过 lexoBetween 获得一个 position。
  */
 async function insertNodeRows(
   db: Pick<ServerDb, "delete" | "insert" | "select">,
@@ -555,6 +564,9 @@ async function insertNodeRows(
  * chapters. Each picked chapter gets one extra ContentStructureNode row with
  * the same `contentUnitId` but a fresh `id` / `parentId` / `position`,
  * exercising the multi-link contract end-to-end.
+ * 为部分已物化的章节插入额外的多链接节点行。每个被选中的章节获得一个额外的
+ * ContentStructureNode 行，其 `contentUnitId` 相同，但 `id` / `parentId` /
+ * `position` 全新，从而端到端地演练多链接契约。
  */
 export async function insertMultiLinkNodes(
   db: Pick<ServerDb, "delete" | "insert" | "select">,
@@ -565,6 +577,7 @@ export async function insertMultiLinkNodes(
   if (multiLinkProbability <= 0 || materializedRows.length === 0) return 0;
 
   // Fetch root positions for this book so we can append after the last root.
+  // 获取该书的根节点 position，以便可以追加到最后一个根节点之后。
   const roots = await db
     .select({ position: ContentStructureNode.position })
     .from(ContentStructureNode)

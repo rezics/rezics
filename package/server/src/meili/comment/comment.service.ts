@@ -8,6 +8,8 @@ import { searchClient } from "../search-client";
 export function commentSliceSort(sort: CommentSortMode = "best"): string {
   // Future CommentRankServing table swaps in here if Meili consistency or
   // cursor stability stops being sufficient for ranked comment slices.
+  // 如果 Meili 的一致性或游标稳定性不再满足排序评论切片的需求，未来的
+  // CommentRankServing 表将在此处替换接入。
   switch (sort) {
     case "best":
       return "bestScore:desc";

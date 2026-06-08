@@ -73,6 +73,8 @@ function groupTags(entries: TagEntry[]) {
   // Grouped layout is a lossy display projection only. It shows depth 0/1
   // entries and deliberately ignores deeper descendants without mutating or
   // rejecting the stored forest.
+  // 分组布局只是一个有损的展示投影：它仅显示深度 0/1 的条目，并刻意忽略更深层的
+  // 后代，同时不会修改或拒绝已存储的森林结构。
   for (const entry of entries.filter((item) => item.depth <= 1)) {
     const key = entry.groupLabel ?? "Ungrouped";
     grouped.set(key, [...(grouped.get(key) ?? []), entry]);

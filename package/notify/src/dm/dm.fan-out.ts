@@ -32,6 +32,7 @@ export function publish(userId: string, message: unknown) {
       conn.send(data);
     } catch {
       // Dead connection — cleaned up on close
+      // 失效的连接——在关闭时清理
     }
   }
 }

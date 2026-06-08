@@ -4,6 +4,7 @@ import { languageSchema } from "../language";
 import { readLanguageBodyBase } from "../list-query-base";
 
 // ANCHOR: Realm Search Document
+// ANCHOR: Realm 搜索文档
 
 export const RealmSearchDocumentSchema = t.Object({
   id: t.String(),
@@ -24,11 +25,13 @@ export const RealmSearchDocumentSchema = t.Object({
   ),
 
   // Searchable arrays (denormalized from UnitTranslation)
+  // 可搜索数组（从 UnitTranslation 反规范化而来）
   titles: t.Array(t.String()),
   descriptions: t.Array(t.String()),
   aliasValues: t.Array(t.String()),
 
   // Structured translations for display rendering
+  // 用于展示渲染的结构化译文
   translations: t.Array(
     t.Object({
       language: languageSchema,
@@ -38,6 +41,7 @@ export const RealmSearchDocumentSchema = t.Object({
   ),
 
   // Extra
+  // 额外字段
   extra: t.Optional(t.Any()),
   resolvedLanguage: t.Optional(t.Union([languageSchema, t.Null()])),
   title: t.Optional(t.Union([t.String(), t.Null()])),
@@ -47,6 +51,7 @@ export const RealmSearchDocumentSchema = t.Object({
 export type RealmSearchDocument = Static<typeof RealmSearchDocumentSchema>;
 
 // ANCHOR: Realm Search Options
+// ANCHOR: Realm 搜索选项
 
 export const RealmSearchOptionsSchema = t.Object({
   ...readLanguageBodyBase.properties,
@@ -71,6 +76,7 @@ export const RealmSearchOptionsSchema = t.Object({
 export type RealmSearchOptions = Static<typeof RealmSearchOptionsSchema>;
 
 // ANCHOR: Realm Search Result
+// ANCHOR: Realm 搜索结果
 
 export const RealmSearchResultSchema = t.Object({
   items: t.Array(RealmSearchDocumentSchema),

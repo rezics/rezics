@@ -64,6 +64,7 @@ function updateContentStructureNodeTitle(
 }
 
 /**
+ * TODO After switching the Chapter List to Tree mode, editing still lacks validation.
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
  */
 export const BookEditChapterPage: React.FC = () => {
@@ -72,8 +73,9 @@ export const BookEditChapterPage: React.FC = () => {
   const { chapterId } = bookEditChapterRoute.useParams();
   // `$chapterId` is the existing route param name; current logic treats it as
   // the materialized content Unit id for this content-structure node.
+  // `$chapterId` 是现有的路由参数名；当前逻辑将其视为该内容结构节点
+  // 物化后的 content Unit id。
   const contentUnitId = chapterId;
-  // Load chapter detail
   const {
     data,
     isPending: isLoading,
@@ -86,6 +88,7 @@ export const BookEditChapterPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("write");
 
   // Load chapter tree for the move dialog
+  // 为移动对话框加载章节树
   const { data: contentStructureData } = useQuery(
     bookQueries.contentStructure(bookId),
   );
@@ -98,10 +101,12 @@ export const BookEditChapterPage: React.FC = () => {
   );
 
   // ---- Chapter actions menu ----
+  // ---- 章节操作菜单 ----
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
 
   // Initialize form state from fetched data
+  // 从获取的数据初始化表单状态
   useEffect(() => {
     if (data) {
       setTitle((data as any).title || "");
@@ -159,6 +164,7 @@ export const BookEditChapterPage: React.FC = () => {
   ]);
 
   // Ctrl/Cmd+S to save
+  // Ctrl/Cmd+S 保存
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const isSaveHotkey =
@@ -253,6 +259,7 @@ export const BookEditChapterPage: React.FC = () => {
         onSave={({ title: newTitle, status }) => {
           setTitle(newTitle);
           // TODO: persist status change via API
+          // TODO: 通过 API 持久化状态变更
           console.log("Chapter status update:", status);
         }}
       />
@@ -274,6 +281,7 @@ export const BookEditChapterPage: React.FC = () => {
         }
         onConfirm={(targetParentId) => {
           // TODO: move chapter to new parent via API
+          // TODO: 通过 API 将章节移动到新的父节点
           console.log("Move chapter to:", targetParentId);
         }}
       />

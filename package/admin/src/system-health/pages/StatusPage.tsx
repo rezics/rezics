@@ -30,6 +30,9 @@ import {
 // service links, and summary cards that *link down* to the focused sub-pages —
 // the Meili card links to `/meili/observability` rather than rebuilding the
 // Meili panel, which already lives there.
+// 概览页刻意不渲染重型面板（服务表、任务队列表、完整 Meili 摘要）。它只展示
+// 整体状态横幅、服务链接，以及向下链接到聚焦子页面的摘要卡片——
+// Meili 卡片链接到 `/meili/observability`，而非重建已存在于那里的 Meili 面板。
 function SummaryCard({
   title,
   status,

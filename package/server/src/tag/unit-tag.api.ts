@@ -35,6 +35,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tag" })
   .use(authMacro)
 
   // POST /unit-tag — creation-as-vote (login)
+  // POST /unit-tag — 创建即投票（需登录）。
   .post(
     "/",
     async ({ body, identity }) => {
@@ -65,6 +66,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tag" })
   )
 
   // PATCH /unit-tag/:unitId/:tagUnitId — pin / position (admin or unit owner)
+  // PATCH /unit-tag/:unitId/:tagUnitId — 置顶/排序（管理员或 unit 所有者）。
   .patch(
     "/:unitId/:tagUnitId",
     async ({ params, body, identity }): Promise<UnitTagDTO> => {
@@ -88,6 +90,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tag" })
   )
 
   // DELETE /unit-tag/:unitId/:tagUnitId — delete (admin or unit owner)
+  // DELETE /unit-tag/:unitId/:tagUnitId — 删除（管理员或 unit 所有者）。
   .delete(
     "/:unitId/:tagUnitId",
     async ({ params, identity }): Promise<{ message: string }> => {
@@ -109,6 +112,7 @@ export const tagVoteApi = new Elysia({ prefix: "/tag-vote" })
   .use(authMacro)
 
   // POST /tag-vote — explicit vote action (login)
+  // POST /tag-vote — 显式投票操作（需登录）。
   .post(
     "/",
     async ({ body, identity }) => {
@@ -144,6 +148,7 @@ export const lowScoreTagsAdminApi = new Elysia({
   .use(authMacro)
 
   // GET /admin/low-score-tag — admin discovery
+  // GET /admin/low-score-tag — 管理员查找。
   .get(
     "/",
     async ({ headers, query, set }) => {
@@ -176,6 +181,8 @@ export const lowScoreTagsAdminApi = new Elysia({
 
       // Realm scope is delegated to realmService via dynamic import to avoid
       // circular static imports between tag and realm modules.
+      // realm 作用域通过动态导入委托给 realmService，以避免 tag 与 realm
+      // 模块之间的静态循环导入。
       const { realmService } = await import("@/realm/realm.service");
       const { mapRealmTagApplicationToDTO } = await import(
         "@/realm/realm.mapper"

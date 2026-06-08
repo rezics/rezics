@@ -7,6 +7,13 @@ import type { SeedPreset } from "@rezics/server/db/seed-factory";
 // run while still exercising real-world relationships: 50 each of books /
 // games / media, 40 tags, ~10 shelf placements per work (30 shelves × 50
 // items / 150 works ≈ 10), 20 reviews per work, 100 tree posts per work.
+// 中等规模的固定内容预设。
+//
+// 确定性的中等体量数据集。模式为 `fixed`，因此每个 CountSpec 都解析为其
+// `target`（钳制到 [min, max]）。设计目标是运行快速，同时仍能演练真实世界的
+// 关系：books / games / media 各 50 个，40 个 tags，每个作品约 10 个书架放置
+// （30 个 shelves × 50 items / 150 works ≈ 10），每个作品 20 条评论，每个作品
+// 100 条 tree 帖子。
 export const medium: SeedPreset = {
   mode: "fixed",
   plan: {

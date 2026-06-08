@@ -29,7 +29,10 @@ import { serverJobProducer } from "@/job/job-boundary";
 import { TagVote, Unit, UnitTag, UnitTranslation } from "../db/schema";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
 
-/** Score at or below this threshold hides a UnitTag from regular users. */
+/**
+ * Score at or below this threshold hides a UnitTag from regular users.
+ * 分数等于或低于此阈值时，对普通用户隐藏该 UnitTag。
+ */
 export const VISIBILITY_THRESHOLD = -100;
 
 type UnitTagRow = typeof UnitTag.$inferSelect;
@@ -482,6 +485,7 @@ export class TagService {
 
   /**
    * List tag Units, optionally filtered by name search and language.
+   * 列出标签 Unit，可按名称搜索和语言进行过滤。
    */
   async list(query: TagListQuery = {}): Promise<{
     tags: TagWithTranslations[];
@@ -492,6 +496,7 @@ export class TagService {
 
   /**
    * Get a single tag Unit by its id, including translations.
+   * 根据 id 获取单个标签 Unit，包含其翻译。
    */
   async getByUnitId(unitId: string): Promise<TagWithTranslations> {
     return this.repository.getTag(unitId);
@@ -500,6 +505,8 @@ export class TagService {
   /**
    * Create a new tag Unit with translations.
    * Tags are always isLanguageNeutral=true and type=TAG.
+   * 创建一个带翻译的新标签 Unit。
+   * 标签始终为 isLanguageNeutral=true 且 type=TAG。
    */
   async create(
     userId: string,
@@ -523,6 +530,7 @@ export class TagService {
 
   /**
    * Update a tag's translations (upsert each provided translation).
+   * 更新标签的翻译（对每条提供的翻译执行 upsert）。
    */
   async update(
     unitId: string,
@@ -534,6 +542,7 @@ export class TagService {
 
   /**
    * Delete a tag Unit (cascades to UnitTag, TagVote via DB).
+   * 删除一个标签 Unit（通过数据库级联删除 UnitTag、TagVote）。
    */
   async delete(unitId: string): Promise<void> {
     await this.repository.deleteTag(unitId);
@@ -541,10 +550,14 @@ export class TagService {
 
   /**
    * Create a UnitTag with creation-as-vote semantics.
+   * 以“创建即投票”语义创建一个 UnitTag。
    *
    * - First call: writes the UnitTag (score=1, voteCount=1) and a +1 TagVote.
    * - Subsequent distinct-user calls: insert a TagVote and recompute score/voteCount.
    * - Idempotent for the same user: existing TagVote is left untouched.
+   * - 首次调用：写入 UnitTag（score=1, voteCount=1）以及一条 +1 的 TagVote。
+   * - 不同用户的后续调用：插入一条 TagVote 并重新计算 score/voteCount。
+   * - 对同一用户幂等：已存在的 TagVote 保持不变。
    */
   async createUnitTag(
     userId: string,
@@ -564,6 +577,8 @@ export class TagService {
   /**
    * Set pin/position on a UnitTag. Authorization is enforced by the route.
    * `position` may be null to clear it; `pinned=false` clears `position` too.
+   * 设置 UnitTag 的 pin/position。授权由路由层强制执行。
+   * `position` 可为 null 以清除它；`pinned=false` 同样会清除 `position`。
    */
   async setUnitTagPin(
     unitId: string,
@@ -582,6 +597,7 @@ export class TagService {
 
   /**
    * Delete a UnitTag and the underlying TagVote rows for that pair.
+   * 删除一个 UnitTag 以及该配对对应的底层 TagVote 行。
    */
   async deleteUnitTag(
     unitId: string,
@@ -595,6 +611,8 @@ export class TagService {
   /**
    * Cast a vote on a tag-unit association.
    * Upserts the TagVote and recalculates the UnitTag score and voteCount.
+   * 对一个标签-unit 关联投票。
+   * 对 TagVote 执行 upsert，并重新计算 UnitTag 的 score 和 voteCount。
    */
   async castVote(
     userId: string,
@@ -606,7 +624,10 @@ export class TagService {
     await enqueueContentTagsSync(unitId);
   }
 
-  /** Compatibility wrapper for older attach-tag call sites. */
+  /**
+   * Compatibility wrapper for older attach-tag call sites.
+   * 为旧的 attach-tag 调用点提供的兼容性包装。
+   */
   async attach(
     userId: string,
     input: AttachTagInput,
@@ -615,17 +636,24 @@ export class TagService {
     return this.createUnitTag(userId, input.unitId, input.tagUnitId, actor);
   }
 
-  /** Compatibility wrapper for vote input objects. */
+  /**
+   * Compatibility wrapper for vote input objects.
+   * 为投票输入对象提供的兼容性包装。
+   */
   async vote(userId: string, input: CastTagVoteInput): Promise<void> {
     await this.castVote(userId, input.unitId, input.tagUnitId, input.value);
   }
 
   /**
    * Get UnitTag rows for a given unit, ordered pin-first then score-desc.
+   * 获取指定 unit 的 UnitTag 行，按置顶优先、然后按分数降序排列。
    *
    * Regular callers do not see rows with `score <= VISIBILITY_THRESHOLD`.
    * Privileged callers (platform admin / unit owner) see them so the route
    * can flag them with `belowVisibilityThreshold`.
+   * 普通调用方看不到 `score <= VISIBILITY_THRESHOLD` 的行。
+   * 特权调用方（平台管理员 / unit 所有者）可以看到它们，以便路由层
+   * 用 `belowVisibilityThreshold` 对其进行标记。
    */
   async getTagsForUnit(
     unitId: string,
@@ -637,6 +665,8 @@ export class TagService {
   /**
    * Admin-only discovery: list UnitTag rows at or below the given score
    * threshold, ordered ascending so the worst offenders surface first.
+   * 仅管理员可用的发现接口：列出分数等于或低于给定阈值的 UnitTag 行，
+   * 按升序排列，使问题最严重的项最先出现。
    */
   async listLowScoreUnitTags(
     threshold: number,
@@ -648,6 +678,8 @@ export class TagService {
   /**
    * Resolve display translations for a batch of tag unit IDs in the requested language.
    * Uses the standard translation resolution chain (requested -> unit default -> platform fallback -> first).
+   * 为一批标签 unit ID 解析所请求语言下的展示翻译。
+   * 使用标准翻译解析链（请求语言 -> unit 默认语言 -> 平台回退语言 -> 第一条）。
    */
   async batchTranslations(
     tagUnitIds: string[],

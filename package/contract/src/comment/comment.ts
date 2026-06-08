@@ -10,6 +10,7 @@ import {
 import { publicUserSchema } from "../unit/unit";
 
 // ANCHOR: Comment DTO
+// ANCHOR: 评论 DTO
 
 export const commentDTOSchema = t.Object({
   id: t.String(),
@@ -45,6 +46,7 @@ export const commentDTOSchema = t.Object({
 export type CommentDTO = Static<typeof commentDTOSchema>;
 
 // ANCHOR: Comment List
+// ANCHOR: 评论列表
 
 export const commentSliceModeSchema = t.Union([
   t.Literal("discovery"),
@@ -113,11 +115,15 @@ export const commentListResponseSchema = t.Object({
   /**
    * Thread read only: whether the current caller may pin/accept within this
    * root comment partition. Mirrors the post promotion write guard.
+   * 仅用于线程读取：当前调用者是否可以在该根评论分区内置顶/采纳。与帖子提升的
+   * 写入守卫保持一致。
    */
   viewerCanPromote: t.Optional(t.Boolean()),
   /**
    * Thread read only: whether the root bears the reserved Q&A tag, which gates
    * accepted-answer affordances for direct comments.
+   * 仅用于线程读取：根是否带有保留的问答标签，该标签决定了直接评论的“采纳答案”
+   * 功能是否可用。
    */
   isQuestionThread: t.Optional(t.Boolean()),
 });
@@ -125,6 +131,7 @@ export const commentListResponseSchema = t.Object({
 export type CommentListResponse = Static<typeof commentListResponseSchema>;
 
 // ANCHOR: Comment Write
+// ANCHOR: 评论写入
 
 export const createCommentSchema = t.Object({
   rootUnitId: t.String(),

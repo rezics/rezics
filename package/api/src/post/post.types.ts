@@ -1,8 +1,10 @@
 /**
  * Post-related TypeScript types and interfaces for the frontend
+ * 前端的 post 相关 TypeScript 类型与接口。
  *
  * Posts are top-level discussion entities. Reply-tree reads and writes belong
  * to the comment domain.
+ * Post 是顶层讨论实体。回复树的读写归属于 comment 域。
  */
 
 import type {
@@ -14,7 +16,6 @@ import type {
   UpdatePostInput,
 } from "@rezics/contract";
 
-// Re-export contract types
 export type {
   CreatePostInput,
   PostDTO,
@@ -28,6 +29,7 @@ export type CreateRootPostInput = CreatePostInput;
 
 /**
  * Extended frontend types
+ * 前端扩展类型。
  */
 export type PostFormData = CreateRootPostInput;
 

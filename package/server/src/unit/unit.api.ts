@@ -244,12 +244,14 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     },
   )
   // ─── Slug ────────────────────────────────────────────────────
+  // ─── Slug（短链标识）─────────────────────────────────────────
   .put(
     "/:unitId/slug",
     async ({ params, body, identity, set }) => {
       const target = await unitService.getByUnitId(params.unitId);
 
       // Type-gate: only TAG, REALM, and ZONE
+      // 类型限制：仅 TAG、REALM 和 ZONE。
       if (
         target.type !== "TAG" &&
         target.type !== "REALM" &&
@@ -265,6 +267,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       }
 
       // Write-once: reject if slug already set and caller is not admin
+      // 一次写入：若 slug 已设置且调用者非管理员则拒绝。
       if (target.slug !== null) {
         const isAdmin = await verifyAdminFromDb(identity.userId);
         if (!isAdmin) {
@@ -279,6 +282,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       }
 
       // Permission: must own the unit or be admin
+      // 权限：必须拥有该 unit 或为管理员。
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
@@ -295,7 +299,6 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         };
       }
 
-      // Validate
       const validation = validateSlug(body.slug);
       if (!validation.ok) {
         set.status = 400;
@@ -326,6 +329,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     },
   )
   // ─── Translation CRUD ────────────────────────────────────────
+  // ─── 翻译增删改查（Translation CRUD）─────────────────────────
   .get(
     "/:unitId/translations/:language",
     async ({ params }) => {

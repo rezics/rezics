@@ -58,6 +58,7 @@ function shouldDefaultToMainCatalogEntry(opts: ContentSearchOptions): boolean {
 
 /**
  * Search the unified content index with typed options.
+ * 使用类型化选项检索统一内容索引。
  */
 export async function searchContent(
   opts: ContentSearchOptions,
@@ -66,6 +67,7 @@ export async function searchContent(
   const filter: string[] = [];
 
   // Type filter
+  // 类型过滤
   if (opts.type) {
     const types = Array.isArray(opts.type) ? opts.type : [opts.type];
     if (types.length === 1) {
@@ -80,6 +82,7 @@ export async function searchContent(
   }
 
   // Post kind filter (only meaningful when type includes POST)
+  // 帖子种类过滤（仅当 type 包含 POST 时有意义）
   if (opts.postKind?.length) {
     if (opts.postKind.length === 1) {
       filter.push(`postKind = "${opts.postKind[0]}"`);
@@ -91,6 +94,7 @@ export async function searchContent(
   }
 
   // Text length range (books with textLength field on the content index)
+  // 文本长度区间（内容索引上带 textLength 字段的书籍）
   if (opts.textLength) {
     if (typeof opts.textLength.min === "number") {
       filter.push(`textLength >= ${opts.textLength.min}`);
@@ -102,6 +106,8 @@ export async function searchContent(
 
   // Global tag filter — tags (SlugRef[]) takes precedence over tagIds.
   // Work-inherited tag projection is intentionally not part of content search.
+  // 全局标签过滤——tags (SlugRef[]) 优先于 tagIds。
+  // 作品继承的标签投影有意不纳入内容检索。
   if (opts.tags?.length) {
     const resolvedTagIds = await resolveSlugRefs(opts.tags);
     for (const tagId of resolvedTagIds) {
@@ -138,11 +144,13 @@ export async function searchContent(
   }
 
   // Realm filter
+  // realm 过滤
   if (opts.realmId) {
     filter.push(`realmIds = "${opts.realmId}"`);
   }
 
   // Realm-scoped tag filter (build compound keys)
+  // realm 范围内的标签过滤（构造复合键）
   if (opts.realmId && opts.realmTagIds?.length) {
     const realmTagFilters = opts.realmTagIds.map(
       (tagId) => `realmTagKeys = "${opts.realmId}:${tagId}"`,
@@ -163,6 +171,9 @@ export async function searchContent(
   // passes an empty array or omits the field, no rating constraint is applied
   // here; upstream callers are expected to have already intersected the
   // request with the session's allowed rating set.
+  // 分级过滤——基于集合（ratings: ContentRating[]）。当调用方传入空数组或省略
+  // 该字段时，此处不施加分级约束；上游调用方应已将请求与会话允许的分级集合
+  // 取交集。
   if (opts.ratings?.length) {
     const ratingList = opts.ratings.map((r) => `"${r}"`).join(", ");
     filter.push(`rating IN [${ratingList}]`);
@@ -176,6 +187,7 @@ export async function searchContent(
   }
 
   // Licensed filter
+  // 授权状态过滤
   if (opts.isLicensed === true) {
     filter.push("isLicensed = true");
   } else if (opts.isLicensed === false) {
@@ -183,9 +195,11 @@ export async function searchContent(
   }
 
   // Visibility: always public for content search
+  // 可见性：内容检索始终限定为公开
   filter.push('visibility = "PUBLIC"');
 
   // Sort
+  // 排序
   const sort: string[] = [];
   if (opts.sort?.field && opts.sort.field !== "relevance") {
     const order = opts.sort.order ?? "desc";

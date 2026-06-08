@@ -1,8 +1,8 @@
 /**
- * Post API client functions
- * Direct API communication layer
- *
  * Post API client functions for top-level discussion entities.
+ * Direct API communication layer.
+ * 顶层讨论实体的 Post API 客户端函数。
+ * 直接的 API 通信层。
  */
 
 import type {
@@ -52,12 +52,10 @@ function normalizeCreatePostInput(
   return normalized;
 }
 
-/**
- * Post API methods
- */
 export const postApi = {
   /**
    * List top-level posts with optional filters.
+   * 列出顶层帖子，可选筛选条件。
    */
   list: async (filters?: PostFilters): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(`/post/list${buildQueryString(filters)}`);
@@ -65,6 +63,7 @@ export const postApi = {
 
   /**
    * Get single post by unitId
+   * 通过 unitId 获取单个帖子。
    */
   get: async (unitId: string, query?: PostReadQuery): Promise<PostResponse> => {
     return apiFetch<PostResponse>(`/post/${unitId}${buildQueryString(query)}`);
@@ -72,6 +71,7 @@ export const postApi = {
 
   /**
    * Get posts for a specific target unit (e.g. book)
+   * 获取特定目标单元（如 book）下的帖子。
    */
   getByTarget: async (
     targetUnitId: string,
@@ -84,6 +84,7 @@ export const postApi = {
 
   /**
    * Get posts that mention an exact selected VARIANT context.
+   * 获取提及某个明确选定的 VARIANT 上下文的帖子。
    */
   getByVariant: async (
     variantUnitId: string,
@@ -96,6 +97,7 @@ export const postApi = {
 
   /**
    * Get posts by author
+   * 按作者获取帖子。
    */
   getByAuthor: async (
     authorUserId: string,
@@ -108,6 +110,7 @@ export const postApi = {
 
   /**
    * Get posts within a realm
+   * 获取某个 realm 内的帖子。
    */
   getByRealm: async (
     realmUnitId: string,
@@ -150,6 +153,7 @@ export const postApi = {
 
   /**
    * Create new post
+   * 创建新帖子。
    */
   create: async (input: CreateRootPostInput): Promise<PostResponse> => {
     return apiFetch<PostResponse>("/post", {
@@ -158,7 +162,10 @@ export const postApi = {
     });
   },
 
-  /** Publish a draft post or revert a published post to draft (owner-only). */
+  /**
+   * Publish a draft post or revert a published post to draft (owner-only).
+   * 发布草稿帖子，或将已发布帖子退回草稿（仅限所有者）。
+   */
   setPublication: async (
     unitId: string,
     input: SetPostPublicationInput,
@@ -191,6 +198,7 @@ export const postApi = {
 
   /**
    * Update existing post
+   * 更新已有帖子。
    */
   update: async (
     unitId: string,
@@ -219,6 +227,7 @@ export const postApi = {
 
   /**
    * Delete post
+   * 删除帖子。
    */
   remove: async (unitId: string): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(`/post/${unitId}`, {
@@ -229,6 +238,7 @@ export const postApi = {
   /**
    * Transition a post's lifecycle state (write-strict; gated by the post's
    * schema transitions server-side).
+   * 转换帖子的生命周期状态（写入严格；由服务端的帖子 schema 转换约束）。
    */
   setState: async (
     unitId: string,
@@ -240,7 +250,10 @@ export const postApi = {
     });
   },
 
-  /** Pin a reply within its thread (kind = PINNED). */
+  /**
+   * Pin a reply within its thread (kind = PINNED).
+   * 在所属主题内置顶一条回复（kind = PINNED）。
+   */
   pin: async (input: PinCommentInput): Promise<CommentPromotionDTO> => {
     return apiFetch<CommentPromotionDTO>("/post/pins", {
       method: "POST",
@@ -248,7 +261,10 @@ export const postApi = {
     });
   },
 
-  /** Remove a PINNED promotion. */
+  /**
+   * Remove a PINNED promotion.
+   * 移除一条 PINNED 提升记录。
+   */
   unpin: async (
     scopeUnitId: string,
     commentId: string,
@@ -259,7 +275,10 @@ export const postApi = {
     );
   },
 
-  /** Accept a direct reply as an answer (kind = ACCEPTED_ANSWER) in a Q&A thread. */
+  /**
+   * Accept a direct reply as an answer (kind = ACCEPTED_ANSWER) in a Q&A thread.
+   * 在问答主题中将一条直接回复采纳为答案（kind = ACCEPTED_ANSWER）。
+   */
   acceptAnswer: async (
     input: AcceptAnswerInput,
   ): Promise<CommentPromotionDTO> => {
@@ -269,7 +288,10 @@ export const postApi = {
     });
   },
 
-  /** Remove an ACCEPTED_ANSWER promotion. */
+  /**
+   * Remove an ACCEPTED_ANSWER promotion.
+   * 移除一条 ACCEPTED_ANSWER 提升记录。
+   */
   unacceptAnswer: async (
     scopeUnitId: string,
     commentId: string,

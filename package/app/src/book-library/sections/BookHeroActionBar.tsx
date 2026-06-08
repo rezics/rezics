@@ -56,6 +56,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
 
   const handleAddToShelf = () => {
     // MOCK: route to the shelves-by-book page until a shelf-picker dialog exists.
+    // MOCK：在书架选择器对话框出现之前，先跳转到按书查看书架的页面。
     navigate({ to: "/shelf/book/$bookId", params: { bookId } });
   };
 

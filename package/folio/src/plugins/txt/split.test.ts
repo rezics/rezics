@@ -110,6 +110,7 @@ Second chapter`;
 
   it("tries rules in order, uses first that matches >= 2", () => {
     // Text has both CJK and English markers — CJK should win (comes first in default rules)
+    // 文本同时含有 CJK 和英文标记 —— CJK 应当胜出（在默认规则中排在前面）
     const raw = `第一章 开头
 内容A
 

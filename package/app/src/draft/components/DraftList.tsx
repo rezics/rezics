@@ -12,6 +12,8 @@ export interface DraftListProps {
  * Presentational list of cross-type drafts. Each row links to the draft's
  * server-resolved `resumeRoute` so the matching editor reopens with the
  * draft loaded. Empty/loading/error states are owned by the caller.
+ * 跨类型草稿的展示型列表。每一行链接到草稿由服务端解析的 `resumeRoute`，
+ * 以便对应的编辑器在加载该草稿后重新打开。空/加载/错误状态由调用方负责。
  */
 export const DraftList: React.FC<DraftListProps> = ({ drafts }) => {
   const { t } = useTranslation(["page"]);
@@ -49,7 +51,10 @@ export const DraftList: React.FC<DraftListProps> = ({ drafts }) => {
   );
 };
 
-/** Localized per-kind label. Literal `t` calls keep the R12 token check happy. */
+/**
+ * Localized per-kind label. Literal `t` calls keep the R12 token check happy.
+ * 按 kind 本地化的标签。字面量 `t` 调用让 R12 token 检查通过。
+ */
 function draftKindLabel(t: (key: string) => string, kind: DraftKind): string {
   switch (kind) {
     case "review":

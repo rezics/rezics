@@ -116,7 +116,7 @@ export class SearchClient {
     await this.waitForTasks([settingsTask, primaryKeyTask]);
   }
 
-  // ANCHOR: Index initialization
+  // ANCHOR: Index initialization — 索引初始化
 
   async initContentIndex(): Promise<void> {
     await this.initIndexFromSchema(getExpectedMeiliIndexSchema("content"));
@@ -162,7 +162,7 @@ export class SearchClient {
     );
   }
 
-  // ANCHOR: Content document operations
+  // ANCHOR: Content document operations — 内容文档操作
 
   addOrUpdateContent(docs: any[]) {
     return this.contentIndex.addDocuments(docs);
@@ -177,7 +177,7 @@ export class SearchClient {
     return this.contentIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Feedback document operations
+  // ANCHOR: Feedback document operations — 反馈文档操作
 
   addOrUpdateFeedbacks(feedbacks: any[]) {
     return this.feedbackIndex.addDocuments(feedbacks);
@@ -192,7 +192,7 @@ export class SearchClient {
     return this.feedbackIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: User document operations
+  // ANCHOR: User document operations — 用户文档操作
 
   addOrUpdateUsers(users: any[]) {
     return this.userIndex.addDocuments(users);
@@ -207,7 +207,7 @@ export class SearchClient {
     return this.userIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Post document operations
+  // ANCHOR: Post document operations — 帖子文档操作
 
   addOrUpdatePosts(docs: any[]) {
     return this.postIndex.addDocuments(docs);
@@ -222,7 +222,7 @@ export class SearchClient {
     return this.postIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Comment document operations
+  // ANCHOR: Comment document operations — 评论文档操作
 
   addOrUpdateComments(docs: any[]) {
     return this.commentIndex.addDocuments(docs);
@@ -237,7 +237,7 @@ export class SearchClient {
     return this.commentIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Poll document operations
+  // ANCHOR: Poll document operations — 投票文档操作
 
   addOrUpdatePolls(docs: any[]) {
     return this.pollIndex.addDocuments(docs);
@@ -252,7 +252,7 @@ export class SearchClient {
     return this.pollIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Shelf item document operations
+  // ANCHOR: Shelf item document operations — 书架条目文档操作
 
   addOrUpdateShelfItems(docs: any[]) {
     return this.shelfItemIndex.addDocuments(docs);
@@ -267,7 +267,7 @@ export class SearchClient {
     return this.shelfItemIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Realm document operations
+  // ANCHOR: Realm document operations — realm 文档操作
 
   addOrUpdateRealms(docs: any[]) {
     return this.realmIndex.addDocuments(docs);
@@ -282,7 +282,7 @@ export class SearchClient {
     return this.realmIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Entity document operations
+  // ANCHOR: Entity document operations — 实体文档操作
 
   addOrUpdateEntities(docs: any[]) {
     return this.entityIndex.addDocuments(docs);
@@ -297,7 +297,7 @@ export class SearchClient {
     return this.entityIndex.deleteAllDocuments();
   }
 
-  // ANCHOR: Progress document operations
+  // ANCHOR: Progress document operations — 进度文档操作
 
   addOrUpdateProgress(docs: any[]) {
     return this.progressIndex.addDocuments(docs);
@@ -323,7 +323,7 @@ export class SearchClient {
     await this.waitForTasks(tasks);
   }
 
-  // ANCHOR: Index deletion
+  // ANCHOR: Index deletion — 索引删除
 
   async deleteAllIndexes() {
     const { results } = await this.meili.getIndexes();
@@ -332,7 +332,7 @@ export class SearchClient {
     );
   }
 
-  // ANCHOR: Key management
+  // ANCHOR: Key management — 密钥管理
 
   async getAdminKey() {
     return this.meili.createKey({

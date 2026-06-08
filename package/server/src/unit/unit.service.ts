@@ -79,6 +79,11 @@ function catalogEntryKindValue(
  *
  * The runtime query path below is Drizzle-native; this helper remains exported
  * for tests and callers that inspect filter intent without importing Drizzle.
+ *
+ * 构造旧版可序列化的 Unit 列表过滤结构。
+ *
+ * 下方的运行时查询路径是 Drizzle 原生实现；此 helper 仍被导出，供测试以及那些
+ * 不导入 Drizzle 却需检视过滤意图的调用方使用。
  */
 export function buildUnitWhereClause(options: UnitListQuery): UnitFilterShape {
   const andWhere: UnitFilterShape[] = [];
@@ -210,6 +215,7 @@ export function buildUnitWhereClause(options: UnitListQuery): UnitFilterShape {
 
 /**
  * Merge multiple serializable where inputs with AND semantics.
+ * 以 AND 语义合并多个可序列化的 where 输入。
  */
 export function mergeUnitWhereInputs(
   ...clauses: (UnitFilterShape | undefined)[]
@@ -593,6 +599,7 @@ function createDrizzleUnitRepository(): UnitRepository {
 
 /**
  * Unit Service - Business logic for generic Unit entities
+ * Unit Service —— 通用 Unit 实体的业务逻辑
  */
 export class UnitService {
   constructor(
@@ -601,6 +608,7 @@ export class UnitService {
 
   /**
    * List Units with pagination and rich filters.
+   * 以分页和丰富的过滤条件列出 Unit。
    */
   async list(
     options: UnitListQuery = {},
@@ -608,12 +616,12 @@ export class UnitService {
     return this.repository.list(options);
   }
 
-  /** Get a unit by id with relations */
+  /** Get a unit by id with relations. 按 id 获取 unit 及其关联数据。 */
   async getByUnitId(unitId: string): Promise<UnitWithRelations> {
     return this.repository.getByUnitId(unitId);
   }
 
-  /** Create a Unit with optional translations */
+  /** Create a Unit with optional translations. 创建 Unit，可选附带译文。 */
   async create(input: CreateUnitInput): Promise<UnitWithRelations> {
     const unit = await this.repository.create(input);
     await enqueueContentCommand(SEARCH_COMMAND_KINDS.contentSync, unit.id);
@@ -626,6 +634,11 @@ export class UnitService {
    * Unit rating is independent per unit -- a chapter may rate higher than its
    * book; no parent/child rating constraint is enforced, by design
    * (chapter-level moderation).
+   *
+   * 更新 Unit（不涉及译文 —— 请使用 TranslationService）。
+   *
+   * Unit 的评级按 unit 独立计算 —— 某一章节的评级可能高于其所属书籍；按设计不
+   * 强制任何父子评级约束（章节级审核）。
    */
   async update(
     unitId: string,
@@ -658,6 +671,8 @@ export class UnitService {
   /**
    * Get a unit by `(scope, slug)`. `scope` is either a named scope key
    * (`user|realm|tag|zone|entity`) or an owner unit id.
+   * 按 `(scope, slug)` 获取 unit。`scope` 可以是具名作用域键
+   * (`user|realm|tag|zone|entity`)，也可以是归属者的 unit id。
    */
   async getBySlug(
     scope: string,
@@ -669,12 +684,12 @@ export class UnitService {
     return this.repository.getBySlug({ slugScope, slug });
   }
 
-  /** Set or update a unit's slug */
+  /** Set or update a unit's slug. 设置或更新 unit 的 slug。 */
   async setSlug(unitId: string, slug: string): Promise<UnitWithRelations> {
     return this.repository.setSlug(unitId, slug);
   }
 
-  /** Delete a Unit by id (cascades) */
+  /** Delete a Unit by id (cascades). 按 id 删除 Unit（级联删除）。 */
   async delete(unitId: string): Promise<void> {
     await this.repository.delete(unitId);
     await enqueueContentCommand(SEARCH_COMMAND_KINDS.contentDelete, unitId);

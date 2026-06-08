@@ -15,26 +15,34 @@ knowledge. Runtime and package manager: Bun. Workspaces live under `package/*`.
 
 ## Commands
 
+The command surface is [go-task](https://taskfile.dev). Every workspace under
+`package/*` owns a `Taskfile.yml`; the root `Taskfile.yml` aggregates them via
+`includes`, so package tasks are namespaced (`task server:dev`, `task
+app:build`). `bun` stays under the hood only — runtime (it executes the `tool/`
+CLI), package manager (`bun install`), and bundler (`bun build`). Run `task` to
+list everything.
+
 ```bash
-bun run dev                         # start the local dev orchestration
-bun --filter=@rezics/app run dev    # frontend app, Vite
-bun --filter=@rezics/server run dev # main Elysia API
-bun --filter=@rezics/auth run dev   # auth service
+task                     # list every task (task --list)
+task dev                 # start all dev processes (devenv up; process-compose)
+task app:dev             # frontend app, Vite
+task server:dev          # main Elysia API
+task auth:dev            # auth service
 
-bun test                            # tests in the current package
-bun run format                      # Biome format
-bun run format:check                # Biome format check
-bun run check:convention            # repo conventions
-bun run check:tokens                # token checks
-bun run knip                        # unused exports/deps
+task test                # all tests (bun test)
+task format              # Biome format
+task format:check        # Biome format check
+task check:convention    # repo conventions
+task check:tokens        # token checks
+task knip                # unused exports/deps
 
-bun --filter=@rezics/server run db:generate
-bun --filter=@rezics/server run db:migrate
-bun --filter=@rezics/server run seed:factory
-bun --filter=@rezics/server run seed:factory:fast
+task db:generate         # generate migrations (all schema units)
+task db:migrate          # apply migrations (all schema units)
+task seed:factory        # synthetic data — realistic preset
+task seed:factory:fast   # synthetic data — fast preset
 
-bun run storybook                   # all Storybooks
-bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
+task storybook           # all Storybooks
+task ui:storybook        # UI Storybook, port 6007
 ```
 
 ## Architecture Rules
@@ -80,7 +88,7 @@ flag them.
   the `check:convention` / `check:tokens` rules; do not duplicate those details
   here.
 - For browser verification, prefer giving the user the exact URLs to verify
-  after they run `bun run dev` from the repo root. Do not download browsers or
+  after they run `task dev` from the repo root. Do not download browsers or
   run heavyweight browser automation unless the user explicitly asks.
 
 ## References

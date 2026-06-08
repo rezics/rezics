@@ -1,4 +1,5 @@
 // MOCK: static excerpts for landing/preview layouts until backend support lands
+// MOCK：在后端支持落地之前，用于落地页/预览布局的静态摘录数据。
 export const mockExcerpts = [
   {
     id: "1",

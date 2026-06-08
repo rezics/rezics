@@ -23,6 +23,7 @@ import {
 } from "./realm-extra.service";
 
 // Param names match `realmApi`'s `:unitId` — memoirist rejects mismatched names at the same trie position.
+// 参数名与 `realmApi` 的 `:unitId` 一致 —— memoirist 会拒绝同一 trie 位置上不匹配的参数名。
 const listParamsSchema = t.Object({
   unitId: t.String(),
   key: t.String(),

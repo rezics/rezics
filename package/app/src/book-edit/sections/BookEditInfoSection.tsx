@@ -213,11 +213,15 @@ export interface BookEditMainPageProps {
 
 /**
  * BookEditMainPage — multi-language book editor.
+ * BookEditMainPage — 多语言图书编辑器。
  *
  * Layout: book-level metadata (isbn/cover/etc.) is edited once and saved via
  * `updateBook`. Per-language fields (title/subtitle/summary/description) live
  * in `translations[]` and are saved via `upsertTranslation` keyed by the
  * language picked in the language bar.
+ * 布局：图书级元数据（isbn/cover 等）只编辑一次，通过 `updateBook` 保存。
+ * 每种语言的字段（title/subtitle/summary/description）存放于 `translations[]`，
+ * 通过 `upsertTranslation` 以语言栏中选中的语言为键保存。
  */
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
@@ -764,6 +768,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         )}
 
         {/* Translation: language bar + per-language fields + sync actions */}
+        {/* 翻译：语言栏 + 每种语言的字段 + 同步操作 */}
         {!newBook && data && (
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
@@ -865,6 +870,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         )}
 
         {/* For newBook flow: just show one language's fields, no language bar yet */}
+        {/* newBook 流程：仅显示单一语言的字段，暂不显示语言栏 */}
         {newBook && (
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">

@@ -323,6 +323,7 @@ export function useCleanupOrphansMutation(
 }
 
 // Collection mutations
+// 收藏（collection）相关的 mutations
 
 export function useCollectMutation(
   options?: Omit<

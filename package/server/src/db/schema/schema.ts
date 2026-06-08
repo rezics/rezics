@@ -1,5 +1,7 @@
 // Drizzle Kit reads this thin server-only schema entry; public consumers use
 // index.ts, which also exposes relations, aliases, and row helper types.
+// Drizzle Kit 读取这个精简的、仅服务端使用的 schema 入口；公共消费方使用
+// index.ts，它还额外暴露关系、别名以及行的辅助类型。
 
 export * from "./alias";
 export * from "./attribution";

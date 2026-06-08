@@ -3,6 +3,8 @@ import { XMLParser } from "fast-xml-parser";
 
 // Test the XML parsing logic used by container/opf/toc modules
 // Since these modules depend on FileMap from zip.ts, we test the parsing logic directly
+// 测试 container/opf/toc 模块使用的 XML 解析逻辑。
+// 由于这些模块依赖 zip.ts 中的 FileMap，这里直接测试解析逻辑。
 
 describe("epub container.xml parsing", () => {
   it("extracts rootfile full-path", () => {
@@ -46,6 +48,7 @@ describe("epub OPF parsing", () => {
     const pkg = doc.package;
 
     // Manifest
+    // 清单。
     const items = Array.isArray(pkg.manifest.item)
       ? pkg.manifest.item
       : [pkg.manifest.item];
@@ -54,6 +57,7 @@ describe("epub OPF parsing", () => {
     expect(items[0]["@_href"]).toBe("chapter1.xhtml");
 
     // Spine
+    // 书脊（阅读顺序）。
     const spineItems = Array.isArray(pkg.spine.itemref)
       ? pkg.spine.itemref
       : [pkg.spine.itemref];
@@ -62,9 +66,11 @@ describe("epub OPF parsing", () => {
     expect(spineItems[1]["@_idref"]).toBe("ch2");
 
     // Toc reference
+    // 目录引用。
     expect(pkg.spine["@_toc"]).toBe("ncx");
 
     // Metadata
+    // 元数据。
     expect(pkg.metadata["dc:title"]).toBe("Test Book");
     expect(pkg.metadata["dc:creator"]).toBe("Test Author");
   });
@@ -100,6 +106,7 @@ describe("epub NCX TOC parsing", () => {
     expect(navPoints).toHaveLength(2);
 
     // First has nested navPoint
+    // 第一个含有嵌套的 navPoint。
     const part1 = navPoints[0];
     expect(part1.navLabel.text).toBe("Part 1");
     expect(part1.content["@_src"]).toBe("part1.xhtml");
@@ -109,6 +116,7 @@ describe("epub NCX TOC parsing", () => {
     expect(nested.content["@_src"]).toBe("ch1.xhtml");
 
     // Second is flat
+    // 第二个是扁平的（无嵌套）。
     const ch2 = navPoints[1];
     expect(ch2.navLabel.text).toBe("Chapter 2");
   });
@@ -118,6 +126,7 @@ describe("asset URL rewriting", () => {
   it("rewrites relative src attributes", () => {
     const html = '<img src="../images/cover.jpg" />';
     // The regex from assets.ts
+    // 来自 assets.ts 的正则。
     const ASSET_ATTR_REGEX = /(?:src|href)\s*=\s*["']([^"']+)["']/gi;
 
     const matches = [...html.matchAll(ASSET_ATTR_REGEX)];

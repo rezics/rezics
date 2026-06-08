@@ -12,10 +12,16 @@ import type { NodeRendererProps, TreeApi } from "react-arborist";
 import { useLongPress } from "../hooks/useLongPress";
 import type { Chapter, ChapterContextMenuState } from "./BookTocEditor";
 
-/** Uniform row height — react-arborist (react-window) requires a single number. */
+/**
+ * Uniform row height — react-arborist (react-window) requires a single number.
+ * 统一行高 — react-arborist（react-window）要求单一数值。
+ */
 export const LEAF_ROW_HEIGHT = 100;
 
-/** Stable hash for seeded random mock values. */
+/**
+ * Stable hash for seeded random mock values.
+ * 用于生成可复现随机 mock 值的稳定哈希。
+ */
 function hashCode(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -26,6 +32,7 @@ function hashCode(str: string): number {
 }
 
 // MOCK: word count derived from node id hash — replace with real data when backend is ready
+// MOCK：字数由节点 id 哈希派生 — 待后端就绪后替换为真实数据
 export function mockWordCount(node: Chapter): number {
   if (node.children?.length) {
     return node.children.reduce((sum, c) => sum + mockWordCount(c), 0);
@@ -33,7 +40,10 @@ export function mockWordCount(node: Chapter): number {
   return (hashCode(String(node.id)) % 8000) + 500;
 }
 
-/** Format number for display. */
+/**
+ * Format number for display.
+ * 格式化数字以供显示。
+ */
 function formatCount(n: number): string {
   if (n >= 10000) {
     return `${(n / 10000).toFixed(1)}w`;
@@ -45,6 +55,7 @@ function formatCount(n: number): string {
 }
 
 // MOCK: date from node id hash — replace with real createdAt/updatedAt
+// MOCK：日期由节点 id 哈希派生 — 待替换为真实的 createdAt/updatedAt
 function mockDate(id: string | number): string {
   const h = hashCode(String(id));
   const year = 2026;
@@ -56,16 +67,21 @@ function mockDate(id: string | number): string {
 }
 
 // MOCK: publish status derived from node id hash
+// MOCK：发布状态由节点 id 哈希派生
 function mockPublishStatus(id: string | number): "DRAFT" | "PUBLISHED" {
   return hashCode(String(id)) % 3 === 0 ? "DRAFT" : "PUBLISHED";
 }
 
 // MOCK: view count derived from node id hash
+// MOCK：浏览量由节点 id 哈希派生
 function mockViewCount(id: string | number): number {
   return (hashCode(String(id)) % 5000) + 10;
 }
 
-/** Options for the node renderer factory. */
+/**
+ * Options for the node renderer factory.
+ * 节点渲染器工厂的选项。
+ */
 export interface BookTocEditorNodeOptions {
   setContextMenu: React.Dispatch<React.SetStateAction<ChapterContextMenuState>>;
   treeRef: React.RefObject<TreeApi<Chapter> | null>;
@@ -80,6 +96,7 @@ export interface BookTocEditorNodeOptions {
 
 /**
  * Factory that returns a Node renderer bound to editor state setters.
+ * 返回一个绑定到编辑器状态 setter 的节点渲染器的工厂。
  */
 export const createBookTocEditorNode = ({
   setContextMenu,
@@ -123,6 +140,7 @@ export const createBookTocEditorNode = ({
     const longPress = useLongPress(openContextMenuFromTouch);
 
     // ─── Parent / section node ───
+    // ─── 父级 / 章节分组节点 ───
     if (hasChildren) {
       return (
         <div
@@ -184,7 +202,9 @@ export const createBookTocEditorNode = ({
     }
 
     // ─── Leaf / chapter node ───
+    // ─── 叶子 / 章节节点 ───
     // MOCK: publish status and view count
+    // MOCK：发布状态与浏览量
     const status = mockPublishStatus(node.id);
     const views = mockViewCount(node.id);
     const effectiveRating = node.data.rating ?? bookRating;
@@ -238,7 +258,7 @@ export const createBookTocEditorNode = ({
                 />
               )}
               <div className="min-w-0 flex-1">
-                {/* Title row */}
+                {/* Title row 标题行 */}
                 <div className="flex items-center gap-1.5">
                   {isSortingMode && (
                     <span className="flex-shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
@@ -257,11 +277,11 @@ export const createBookTocEditorNode = ({
                   )}
                 </div>
 
-                {/* Status & date line */}
+                {/* Status & date line 状态与日期行 */}
                 <div
                   className={`flex items-center gap-3 mt-2 ${isSortingMode ? "pl-6" : "pl-0"}`}
                 >
-                  {/* MOCK: publish status chip */}
+                  {/* MOCK: publish status chip 模拟：发布状态标签 */}
                   <Badge
                     variant="outline"
                     className={`h-5 text-[0.675rem] ${
@@ -277,14 +297,14 @@ export const createBookTocEditorNode = ({
                   </span>
                 </div>
 
-                {/* Stats line */}
+                {/* Stats line 统计数据行 */}
                 <div
                   className={`flex items-center gap-3 mt-1 ${isSortingMode ? "pl-6" : "pl-0"}`}
                 >
                   <span className="text-xs text-muted-foreground tabular-nums">
                     {formatCount(wordCount)} words
                   </span>
-                  {/* MOCK: view count */}
+                  {/* MOCK: view count 模拟：浏览量 */}
                   <span className="text-xs text-muted-foreground tabular-nums flex items-center gap-0.5">
                     <Visibility size={12} />
                     {formatCount(views)}
@@ -292,7 +312,7 @@ export const createBookTocEditorNode = ({
                 </div>
               </div>
 
-              {/* Kebab menu — always visible */}
+              {/* Kebab menu — always visible 三点菜单 — 始终可见 */}
               <Button
                 size="icon"
                 variant="ghost"

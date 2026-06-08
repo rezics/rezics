@@ -17,6 +17,7 @@ export function parseContainer(fileMap: FileMap): string {
   }
 
   // Handle single or array of rootfiles
+  // 处理单个或数组形式的 rootfiles
   const rootfile = Array.isArray(rootfiles) ? rootfiles[0] : rootfiles;
   const fullPath = rootfile?.["@_full-path"];
 

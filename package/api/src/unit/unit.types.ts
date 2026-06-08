@@ -1,5 +1,6 @@
 /**
  * Unit-related TypeScript types and interfaces for the frontend
+ * 面向前端的 Unit 相关 TypeScript 类型与接口
  */
 
 import type {
@@ -12,7 +13,6 @@ import type {
   UpdateUnitInput,
 } from "@rezics/contract";
 
-// Re-export contract types
 export type {
   CreateUnitInput,
   UnitDTO,
@@ -25,6 +25,7 @@ export type {
 
 /**
  * Extended frontend types
+ * 扩展的前端类型
  */
 export type UnitFormData = Omit<CreateUnitInput, "userId">;
 

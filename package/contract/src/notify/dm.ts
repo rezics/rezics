@@ -17,22 +17,22 @@ export const dmConversationSchema = t.Object({
   participantB: t.String(),
   createdAt: t.String(),
   updatedAt: t.String(),
-  /** Unread messages for the requesting viewer, when resolved. */
+  /** Unread messages for the requesting viewer, when resolved. 已解析时，请求查看者的未读消息数。 */
   unreadCount: t.Optional(t.Integer({ minimum: 0 })),
-  /** The viewer has blocked the peer (no new messages may be sent). */
+  /** The viewer has blocked the peer (no new messages may be sent). 查看者已屏蔽对方（无法发送新消息）。 */
   peerBlocked: t.Optional(t.Boolean()),
-  /** The peer has blocked the viewer (sending is disabled). */
+  /** The peer has blocked the viewer (sending is disabled). 对方已屏蔽查看者（禁止发送）。 */
   blockedByPeer: t.Optional(t.Boolean()),
 });
 export type DmConversation = (typeof dmConversationSchema)["static"];
 
-// ---- read receipts ----
+// ---- read receipts 已读回执 ----
 
 export const dmReadReceiptSchema = t.Object({
   conversationId: t.String(),
-  /** The participant the receipt belongs to. */
+  /** The participant the receipt belongs to. 该回执所属的参与者。 */
   userId: t.String(),
-  /** The latest message id the participant has read. */
+  /** The latest message id the participant has read. 参与者已读的最新消息 id。 */
   lastReadMessageId: t.Nullable(t.String()),
   readAt: t.String(),
 });
@@ -40,12 +40,12 @@ export type DmReadReceipt = (typeof dmReadReceiptSchema)["static"];
 
 export const dmMarkReadBodySchema = t.Object({
   conversationId: t.String(),
-  /** Mark every message up to and including this id as read. */
+  /** Mark every message up to and including this id as read. 将截至并包含此 id 的所有消息标记为已读。 */
   upToMessageId: t.String(),
 });
 export type DmMarkReadBody = (typeof dmMarkReadBodySchema)["static"];
 
-// ---- typing indicator ----
+// ---- typing indicator 正在输入指示 ----
 
 export const dmTypingIndicatorSchema = t.Object({
   conversationId: t.String(),
@@ -61,11 +61,11 @@ export const dmTypingBodySchema = t.Object({
 });
 export type DmTypingBody = (typeof dmTypingBodySchema)["static"];
 
-// ---- block / unblock peer ----
+// ---- block / unblock peer 屏蔽 / 取消屏蔽对方 ----
 
 export const dmBlockPeerBodySchema = t.Object({
   peerId: t.String(),
-  /** `true` to block, `false` to unblock. */
+  /** `true` to block, `false` to unblock. `true` 为屏蔽，`false` 为取消屏蔽。 */
   blocked: t.Boolean(),
 });
 export type DmBlockPeerBody = (typeof dmBlockPeerBodySchema)["static"];

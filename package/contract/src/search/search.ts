@@ -7,6 +7,7 @@ import { SlugRefSchema } from "../slug/slug-ref";
 import { aiDisclosureModeSchema, contentRatingSchema } from "../unit/unit";
 
 // ANCHOR: Search Query
+// ANCHOR: 搜索查询
 
 export const TextLengthRangeSchema = t.Object({
   min: t.Optional(t.Number()),

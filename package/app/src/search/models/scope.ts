@@ -1,6 +1,7 @@
 import type { SearchScope } from "@rezics/contract";
 
 // ANCHOR: resolveScope
+// ANCHOR: resolveScope（路由解析为作用域）
 //
 // Pure route-to-scope resolver. Single source of truth used by HeaderSearch,
 // scoped page mounts, and any link composer that builds a search URL.
@@ -9,6 +10,13 @@ import type { SearchScope } from "@rezics/contract";
 // `SearchScope` directly (that requires resolving slug → userId at the
 // caller site). Instead it returns an intermediate `userSlug` shape that
 // callers turn into `{ kind: "user", userId }`.
+//
+// 纯粹的路由到 scope 的解析器。作为单一可信源，供 HeaderSearch、
+// scoped 页面挂载点，以及任何构建搜索 URL 的链接组装器使用。
+//
+// 基于 slug 的 `/u/:userSlug/...` 形式不会直接产出契约中的
+// `SearchScope`（那需要在调用方处解析 slug → userId）。相反，它返回
+// 一个中间的 `userSlug` 结构，由调用方转换为 `{ kind: "user", userId }`。
 
 export type ResolvedScope =
   | SearchScope
@@ -46,9 +54,12 @@ export function resolveScope(pathname: string): ResolvedScope {
 }
 
 // ANCHOR: isContractScope
+// ANCHOR: isContractScope（判断是否为契约作用域）
 // Type guard that narrows out the slug intermediate. Useful when callers
 // have already resolved the slug to an id and want to treat both forms
 // uniformly.
+// 类型守卫，用于排除 slug 中间形态。当调用方已将 slug 解析为 id 并希望
+// 统一处理两种形态时很有用。
 
 export function isContractScope(scope: ResolvedScope): scope is SearchScope {
   return scope.kind !== "userSlug";

@@ -1,0 +1,195 @@
+version: "3"
+
+includes:
+  app: { taskfile: ./package/app/Taskfile.yml, dir: ./package/app }
+  admin: { taskfile: ./package/admin/Taskfile.yml, dir: ./package/admin }
+  about: { taskfile: ./package/about/Taskfile.yml, dir: ./package/about }
+  api: { taskfile: ./package/api/Taskfile.yml, dir: ./package/api }
+  auth: { taskfile: ./package/auth/Taskfile.yml, dir: ./package/auth }
+  contract:
+    { taskfile: ./package/contract/Taskfile.yml, dir: ./package/contract }
+  edge: { taskfile: ./package/edge/Taskfile.yml, dir: ./package/edge }
+  editor: { taskfile: ./package/editor/Taskfile.yml, dir: ./package/editor }
+  folio: { taskfile: ./package/folio/Taskfile.yml, dir: ./package/folio }
+  history:
+    { taskfile: ./package/history/Taskfile.yml, dir: ./package/history }
+  job: { taskfile: ./package/job/Taskfile.yml, dir: ./package/job }
+  job-runner:
+    { taskfile: ./package/job-runner/Taskfile.yml, dir: ./package/job-runner }
+  notify: { taskfile: ./package/notify/Taskfile.yml, dir: ./package/notify }
+  preview:
+    { taskfile: ./package/preview/Taskfile.yml, dir: ./package/preview }
+  ranking:
+    { taskfile: ./package/ranking/Taskfile.yml, dir: ./package/ranking }
+  reaction:
+    { taskfile: ./package/reaction/Taskfile.yml, dir: ./package/reaction }
+  search: { taskfile: ./package/search/Taskfile.yml, dir: ./package/search }
+  server: { taskfile: ./package/server/Taskfile.yml, dir: ./package/server }
+  ui: { taskfile: ./package/ui/Taskfile.yml, dir: ./package/ui }
+  utils: { taskfile: ./package/utils/Taskfile.yml, dir: ./package/utils }
+
+tasks:
+  default:
+    desc: List all available tasks
+    cmd: task --list
+
+  # ── Dev orchestration ──────────────────────────────────────────────────
+  dev:
+    desc: Full local dev session (devenv process-compose; backend + frontend)
+    cmd: devenv up
+
+  # ── Format / lint / static checks ──────────────────────────────────────
+  format:
+    desc: Format the repo (write) with Biome
+    cmd: bun biome format --write .
+  format:check:
+    desc: Check formatting with Biome
+    cmd: bun biome format .
+  lint:
+    desc: Lint with Biome
+    cmd: bun biome lint .
+  lint:fix:
+    desc: Lint and apply safe fixes with Biome
+    cmd: bun biome check --write .
+  check:
+    desc: Biome check (lint + format, write)
+    cmd: bun biome check --write .
+  knip:
+    desc: Report unused exports & dependencies
+    cmd: bun knip
+  check:convention:
+    desc: Repo route & folder conventions (pass --staged after --)
+    cmd: bun run tool/src/commands/convention/check.ts {{.CLI_ARGS}}
+  check:tokens:
+    desc: Design token checks
+    cmd: bun run tool/src/commands/tokens/check.ts
+  check:i18n:
+    desc: i18n keys & namespaces
+    cmd: bun run tool/bin/tool.ts i18n check
+  check:runtime-env:
+    desc: Runtime env isolation
+    cmd: node tool/src/commands/check-no-runtime-env.mjs
+  ci:
+    desc: Run the CI gate locally (convention, i18n, knip, runtime-env)
+    cmds:
+      - task: check:convention
+      - task: check:i18n
+      - task: knip
+      - task: check:runtime-env
+
+  # ── Tests ──────────────────────────────────────────────────────────────
+  test:
+    desc: Run all tests (bun test, whole repo)
+    cmd: bun test
+
+  # ── Database: repo orchestrator (tool/ CLI) ────────────────────────────
+  # Per-service Drizzle tasks live in each package, e.g. `task server:db:migrate`.
+  db:generate:
+    desc: Generate migrations across schema units (pass --package=<owner> after --)
+    cmd: bun run tool/bin/tool.ts db generate {{.CLI_ARGS}}
+  db:migrate:
+    desc: Apply migrations across schema units (pass --package=<owner> after --)
+    cmd: bun run tool/bin/tool.ts db migrate {{.CLI_ARGS}}
+  db:deploy:
+    desc: Deploy migrations (production shape)
+    cmd: bun run tool/bin/tool.ts db deploy {{.CLI_ARGS}}
+  db:reset:
+    desc: Reset local databases (pass --yes after --)
+    cmd: bun run tool/bin/tool.ts db reset {{.CLI_ARGS}}
+  db:ensure:
+    desc: Ensure local databases exist
+    cmd: bun run tool/bin/tool.ts db ensure {{.CLI_ARGS}}
+  db:smoke:
+    desc: Database smoke test
+    cmd: bun run tool/bin/tool.ts db smoke {{.CLI_ARGS}}
+
+  # ── Seed / factory (tool/ CLI) ─────────────────────────────────────────
+  seed:
+    desc: Interactive seeder (pass args after --)
+    cmd: bun run tool/bin/tool.ts seed {{.CLI_ARGS}}
+  seed:all:
+    desc: Seed non-interactively
+    cmd: bun run tool/bin/tool.ts seed --no-interactive
+  factory:
+    desc: Synthetic data factory (pass args after --)
+    cmd: bun run tool/bin/tool.ts factory {{.CLI_ARGS}}
+  seed:factory:
+    desc: Factory — realistic preset
+    cmd: bun run tool/bin/tool.ts factory --preset=realistic --no-interactive
+  seed:factory:fast:
+    desc: Factory — fast preset
+    cmd: bun run tool/bin/tool.ts factory --preset=fast --no-interactive
+  seed:factory:medium:
+    desc: Factory — medium preset
+    cmd: bun run tool/bin/tool.ts factory --preset=medium --no-interactive
+  seed:factory:echokv:
+    desc: Factory — echokv subset only
+    cmd: bun run tool/bin/tool.ts factory --only=echokv --no-interactive
+  seed:reset-root:
+    desc: Reset the root user/account
+    cmd: bun run tool/bin/tool.ts seed reset-root
+  seed:database-reset:
+    desc: Seed-driven database reset (pass args after --)
+    cmd: bun run tool/bin/tool.ts seed database-reset {{.CLI_ARGS}}
+  seed:init-meili-search:
+    desc: Initialize Meilisearch indexes
+    cmd: bun run tool/bin/tool.ts seed init-meili-search
+
+  # ── Local service stack (Docker Compose via tool/ CLI) ─────────────────
+  service:
+    desc: "Service stack passthrough: task service -- up|down|health|ps|logs|..."
+    cmd: bun run tool/bin/service.ts {{.CLI_ARGS}}
+  service:up:
+    desc: Start the local service stack
+    cmd: bun run tool/bin/service.ts up
+  service:down:
+    desc: Stop the local service stack
+    cmd: bun run tool/bin/service.ts down
+  service:health:
+    desc: Local service stack health
+    cmd: bun run tool/bin/service.ts health
+  service:ps:
+    desc: Local service stack status
+    cmd: bun run tool/bin/service.ts ps
+  service:logs:
+    desc: Local service stack logs
+    cmd: bun run tool/bin/service.ts logs
+
+  # ── Storybook ──────────────────────────────────────────────────────────
+  storybook:
+    desc: All Storybooks (host + every package) with color-prefixed output
+    cmd: >-
+      bun concurrently -k -n host,ui,editor,folio,admin,app,info
+      -c blue,cyan,magenta,green,yellow,red,greenBright
+      "task storybook:host -- --quiet --loglevel error"
+      "task ui:storybook -- --quiet --loglevel error"
+      "task editor:storybook -- --quiet --loglevel error"
+      "task folio:storybook -- --quiet --loglevel error"
+      "task admin:storybook -- --quiet --loglevel error"
+      "task app:storybook -- --quiet --loglevel error"
+      "task storybook:banner"
+  storybook:host:
+    desc: Host Storybook (port 6006)
+    cmd: bun storybook dev -p 6006 --no-open {{.CLI_ARGS}}
+  storybook:banner:
+    internal: true
+    cmd: bun run tool/src/commands/storybook/banner.ts
+  build:storybook:
+    desc: Build every static Storybook
+    cmd: >-
+      bun concurrently -n host,ui,editor,folio,admin,app
+      -c blue,cyan,magenta,green,yellow,red
+      "task storybook:build-host"
+      "task ui:build-storybook"
+      "task editor:build-storybook"
+      "task folio:build-storybook"
+      "task admin:build-storybook"
+      "task app:build-storybook"
+  storybook:build-host:
+    internal: true
+    cmd: bun storybook build -o storybook-static
+
+  # ── Raw tool/ CLI passthrough ──────────────────────────────────────────
+  tool:
+    desc: "Raw repo maintenance CLI: task tool -- <subcommand> <args>"
+    cmd: bun run tool/bin/tool.ts {{.CLI_ARGS}}

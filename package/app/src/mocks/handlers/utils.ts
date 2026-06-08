@@ -8,7 +8,7 @@ export function pickRandom<T>(arr: T[], count: number): T[] {
   for (let i = 0; i < n; i++) {
     const idx = Math.floor(Math.random() * copy.length);
     result.push(copy[idx]);
-    copy.splice(idx, 1); // 移除已选
+    copy.splice(idx, 1); // Remove the picked item — 移除已选项
   }
   return result;
 }
@@ -21,7 +21,7 @@ export function pickRandomAllowRepeat<T>(arr: T[], count: number): T[] {
     const idx = Math.floor(Math.random() * arr.length);
     let item = arr[idx];
     item = { ...item, id: uuidv4() } as T;
-    result.push(item); // 不删除，允许重复
+    result.push(item); // Don't remove, allow repeats — 不删除，允许重复
   }
   return result;
 }

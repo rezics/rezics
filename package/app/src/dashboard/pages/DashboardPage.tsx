@@ -12,9 +12,9 @@ import { SafetySection } from "../sections/SafetySection";
 import { ShelvesSection } from "../sections/ShelvesSection";
 
 export interface DashboardPageProps {
-  /** Bookshelf layout from the route URL query (highest precedence). */
+  /** Bookshelf layout from the route URL query (highest precedence). 来自路由 URL 查询的书架布局（优先级最高）。 */
   libraryUrlConfig?: BookshelfViewConfig | null;
-  /** Clear the URL override so the viewer's stored settings take effect. */
+  /** Clear the URL override so the viewer's stored settings take effect. 清除 URL 覆盖，使查看者存储的设置生效。 */
   onResetLibraryUrlConfig?: () => void;
 }
 

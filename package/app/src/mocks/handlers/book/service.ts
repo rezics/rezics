@@ -51,4 +51,5 @@ export function updateBook(id: Id, patch: Record<string, unknown>) {
 
 export function removeBook(_id: Id) {
   // no-op in pure mock service
+  // 纯 mock service 中为空操作
 }

@@ -25,7 +25,10 @@ import { useRequireAuth } from "@/user/pages/useAuth";
 
 const COLUMN_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
-/** Human label for a breakpoint, derived from its `minWidthPx`. */
+/**
+ * Human label for a breakpoint, derived from its `minWidthPx`.
+ * 断点的可读标签，根据其 `minWidthPx` 推导得出。
+ */
 function breakpointLabelKey(minWidthPx: number): string {
   if (minWidthPx >= 1280) return "settings:library_bp_wide";
   if (minWidthPx >= 1024) return "settings:library_bp_large";
@@ -47,6 +50,7 @@ export const SettingsLibrarySection: FC = () => {
   const [saved, setSaved] = useState(false);
 
   // Hydrate local edit state once settings load (or fall back to default).
+  // settings 加载后填充本地编辑状态（否则回退到默认值）。
   useEffect(() => {
     if (settings) {
       setConfig(settings.library?.bookshelf ?? DEFAULT_BOOKSHELF_CONFIG);

@@ -9,11 +9,20 @@ import { progressLibraryRowToBookshelfItem } from "@/progress";
 import { DashboardLibraryShelfBlock } from "./DashboardLibraryShelfBlock";
 
 export interface DashboardLibrarySectionProps {
-  /** Progress-owned library rows; shelf membership is not required. */
+  /**
+   * Progress-owned library rows; shelf membership is not required.
+   * 由 progress 拥有的库行；不要求 shelf 成员关系。
+   */
   progressRows: readonly ProgressLibraryRow[];
-  /** Bookshelf layout from the URL query, if any (highest precedence). */
+  /**
+   * Bookshelf layout from the URL query, if any (highest precedence).
+   * 来自 URL 查询的书架布局（如有，优先级最高）。
+   */
   urlConfig?: BookshelfViewConfig | null;
-  /** Clear the URL override so the viewer's stored settings take effect. */
+  /**
+   * Clear the URL override so the viewer's stored settings take effect.
+   * 清除 URL 覆盖项，使浏览者存储的设置生效。
+   */
   onResetUrlConfig?: () => void;
 }
 
@@ -22,6 +31,9 @@ export interface DashboardLibrarySectionProps {
  * shared `bookshelf` view. Layout follows the `shelf-collection` resolution
  * order — URL override → viewer's `userSettings.library.bookshelf` → default —
  * and exposes the same "use my settings" reset.
+ * 仪表盘库分区：由 progress 拥有的行通过共享的 `bookshelf` 视图渲染。
+ * 布局遵循 `shelf-collection` 的解析顺序——URL 覆盖项 → 浏览者的
+ * `userSettings.library.bookshelf` → 默认值——并提供相同的“使用我的设置”重置。
  */
 export function DashboardLibrarySection({
   progressRows,

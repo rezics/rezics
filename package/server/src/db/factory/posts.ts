@@ -49,6 +49,9 @@ const BATCH_SIZE = 500;
  * Per-work counts are drawn from the active CountProvider, so under realistic
  * mode they follow a power-law distribution and under fixed mode they hit the
  * configured target verbatim.
+ * 为所有作品单元（书籍、游戏、媒体）填充种子帖子。
+ * 每个作品的数量由当前激活的 CountProvider 抽取，因此在 realistic 模式下
+ * 遵循幂律分布，在 fixed 模式下则精确命中配置的目标值。
  */
 export async function seedPostsForWorks(
   ctx: SeedCtx,
@@ -447,6 +450,7 @@ async function seedTreePostsForTarget(
 }
 
 // Deterministic uuidv7-shaped ids (version nibble 7) so reseeds are stable.
+// 确定性的 uuidv7 形态 id（版本位为 7），以保证重新填充时保持稳定。
 const WIKI_POST_ZH_ID = "01910000-0000-7000-8000-000000001001";
 const WIKI_POST_EN_ID = "01910000-0000-7000-8000-000000001002";
 const WIKI_POST_JA_ID = "01910000-0000-7000-8000-000000001003";
@@ -462,6 +466,7 @@ const WIKI_POSTS: {
     language: "zh-hant",
     title: "Rezics 是甚麼",
     // MOCK: seeded wiki content for the Traditional Chinese variant.
+    // MOCK：繁体中文版本的种子维基内容。
     contentSource: "Rezics 是一個讓不同語言版本的維基條目並列共存的平台。",
   },
   {
@@ -469,6 +474,7 @@ const WIKI_POSTS: {
     language: "en",
     title: "What is Rezics",
     // MOCK: seeded wiki content for the English variant.
+    // MOCK：英文版本的种子维基内容。
     contentSource:
       "Rezics keeps language-specific wiki bodies as ContentTranslation rows on one shared wiki post.",
   },
@@ -477,6 +483,7 @@ const WIKI_POSTS: {
     language: "ja",
     title: "Rezics とは",
     // MOCK: seeded wiki content for the Japanese variant.
+    // MOCK：日文版本的种子维基内容。
     contentSource:
       "Rezics は、各言語のウィキ記事を独立した投稿として扱い、並列翻訳としてつなげるプラットフォームです。",
   },

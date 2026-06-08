@@ -104,7 +104,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Signed-out: opening the dialog offers a sign-in prompt, not the report form. */
+/**
+ * Signed-out: opening the dialog offers a sign-in prompt, not the report form.
+ * 未登录：打开对话框会提供登录提示，而非举报表单。
+ */
 export const SignedOut: Story = {
   render: () => (
     <StoryHost isAuthenticated={false}>
@@ -115,12 +118,16 @@ export const SignedOut: Story = {
     await userEvent.click(within(canvasElement).getByRole("button"));
     await waitFor(() => expect(screen.getByRole("dialog")).toBeInTheDocument());
     // No reason field for signed-out users; a sign-in link is offered instead.
+    // 未登录用户没有理由输入框；改为提供登录链接。
     expect(screen.queryByRole("textbox")).toBeNull();
     expect(screen.getByRole("link")).toBeInTheDocument();
   },
 };
 
-/** Allowed: signed-in members see the reason form. */
+/**
+ * Allowed: signed-in members see the reason form.
+ * 允许：已登录成员可看到理由表单。
+ */
 export const Allowed: Story = {
   render: () => (
     <StoryHost isAuthenticated>
@@ -135,7 +142,10 @@ export const Allowed: Story = {
   },
 };
 
-/** Rate-limited: submission surfaces an inline policy denial, not a toast. */
+/**
+ * Rate-limited: submission surfaces an inline policy denial, not a toast.
+ * 限流：提交时以内联策略拒绝形式展示，而非 toast。
+ */
 export const RateLimited: Story = {
   render: () => (
     <StoryHost isAuthenticated outcome="rate-limited">
@@ -153,7 +163,10 @@ export const RateLimited: Story = {
   },
 };
 
-/** Submitted: a successful report swaps the form for a confirmation. */
+/**
+ * Submitted: a successful report swaps the form for a confirmation.
+ * 已提交：举报成功后表单被替换为确认状态。
+ */
 export const Submitted: Story = {
   render: () => (
     <StoryHost isAuthenticated outcome="success">
@@ -167,6 +180,7 @@ export const Submitted: Story = {
     const submit = dialog.getAllByRole("button").at(-1);
     if (submit) await userEvent.click(submit);
     // The reason form is replaced by the confirmation state.
+    // 理由表单被确认状态替换。
     await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull());
   },
 };

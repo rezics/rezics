@@ -76,7 +76,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
 
   return (
     <div className="w-11/12 max-w-4xl mx-auto mt-16 mb-16">
-      {/* ANCHOR Header */}
+      {/* ANCHOR Header — 头部 */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold">
@@ -98,7 +98,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
         </div>
       </div>
 
-      {/* ANCHOR User & basic meta */}
+      {/* ANCHOR User & basic meta — 用户与基本元数据 */}
       {(author || unit.createdAt || unit.updatedAt) && (
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {author && (
@@ -154,7 +154,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
         </div>
       )}
 
-      {/* ANCHOR Content */}
+      {/* ANCHOR Content — 内容 */}
       <div className="mt-12">
         <div className="bg-surface-elevated p-6 rounded-md">
           {content ? (
@@ -167,7 +167,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
         </div>
       </div>
 
-      {/* ANCHOR Metadata */}
+      {/* ANCHOR Metadata — 元数据 */}
       <div className="mt-16">
         <div className="flex items-center gap-2 mb-4">
           <AccentBar />

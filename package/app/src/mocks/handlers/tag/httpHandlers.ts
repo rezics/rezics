@@ -5,6 +5,7 @@ const tagStore = new Map<string, any>();
 
 export const tagHttpHandlers = [
   // GET /api/tag/list?offset=&limit=
+  // GET /api/tag/list?offset=&limit=（分页查询标签列表）
   http.get("/api/tag/list", ({ request }) => {
     const url = new URL(request.url);
     const offset = toNonNegativeInt(url.searchParams.get("offset"), 0);
@@ -16,6 +17,7 @@ export const tagHttpHandlers = [
   }),
 
   // GET /api/tag/:id
+  // GET /api/tag/:id（按 id 获取单个标签）
   http.get("/api/tag/:id", ({ params }) => {
     const id = String((params as any).id);
     const found = tagStore.get(id);
@@ -25,6 +27,7 @@ export const tagHttpHandlers = [
   }),
 
   // POST /api/tag
+  // POST /api/tag（创建标签）
   http.post("/api/tag", async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as any;
     const id = genId();
@@ -41,6 +44,7 @@ export const tagHttpHandlers = [
   }),
 
   // PATCH /api/tag/:id
+  // PATCH /api/tag/:id（更新标签）
   http.patch("/api/tag/:id", async ({ params, request }) => {
     const id = String((params as any).id);
     const prev = tagStore.get(id) ?? { id };
@@ -55,6 +59,7 @@ export const tagHttpHandlers = [
   }),
 
   // DELETE /api/tag/:id
+  // DELETE /api/tag/:id（删除标签）
   http.delete("/api/tag/:id", ({ params }) => {
     const id = String((params as any).id);
     tagStore.delete(id);

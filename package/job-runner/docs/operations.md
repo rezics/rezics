@@ -6,10 +6,10 @@ Sequin CDC is started outside `@rezics/job-runner`:
 
 ```bash
 cp tool/.env.example tool/.env
-bun run service up
-bun run service health
-bun run service logs
-bun run service down
+task service:up
+task service:health
+task service:logs
+task service:down
 ```
 
 The wrapper loads `tool/.env`, requires Docker Compose v2, and manages source
@@ -194,7 +194,7 @@ Queue database expectations:
 
 - `JOB_DATABASE_URL` points at a dedicated pg-boss database.
 - The database itself must exist before startup. For local development, run
-  `bun --filter=@rezics/job-runner run db:ensure` to create it from
+  `task job-runner:db:ensure` to create it from
   `JOB_DATABASE_URL` when missing.
 - pg-boss owns its internal schema, tables, functions, and version migrations
   inside that database. Do not add Rezics schema-owner migrations for the job
@@ -215,7 +215,7 @@ repair unrelated services.
 Before enabling Sequin in a non-production environment:
 
 1. Confirm `wal_level=logical` and the replication role permissions.
-2. Start managed services and confirm `bun run service health` succeeds.
+2. Start managed services and confirm `task service:health` succeeds.
 3. Confirm `JOB_RUNNER_BASE_URL` reaches `@rezics/job-runner`.
 4. Confirm unauthorized `/webhooks/sequin` requests return 401.
 5. Change one search-affecting table and verify a search lane receives work.

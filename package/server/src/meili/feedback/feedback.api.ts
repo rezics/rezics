@@ -11,6 +11,11 @@ import { defaultSort } from "../util";
  *
  * Prefer using {@link searchFeedbacks} in new code, which accepts a typed
  * {@link FeedbackListQuery} object and builds the query for you.
+ *
+ * 底层搜索 API，接受一个已完整构造好的 Meilisearch 查询字符串。
+ *
+ * 新代码请优先使用 {@link searchFeedbacks}，它接受类型化的
+ * {@link FeedbackListQuery} 对象并为你构造查询。
  */
 export async function searchFeedbacksRaw(
   q: string,
@@ -47,11 +52,19 @@ function escapeValue(value: string): string {
  *   into Meilisearch filter expressions.
  *
  * This is the main function you should consume from other packages.
+ *
+ * 面向 feedback 的高层搜索 API。
+ *
+ * - 输入为来自 `@rezics/contract` 的 {@link FeedbackListQuery}。
+ * - 它将 `userId`、`targetKind`、`targetId`、`addressedUnitId`、`type`、
+ *   `resolved`、`createdAtFrom`、`createdAtTo` 等契约字段映射为 Meilisearch
+ *   过滤表达式。
+ *
+ * 这是其他包应当使用的主函数。
  */
 export async function searchFeedbacks(
   opts: FeedbackListQuery,
 ): Promise<FeedbackSearchResult> {
-  // Use the provided query string or default to empty
   const q = opts.q || "";
 
   const filter: string[] = [];
@@ -88,7 +101,8 @@ export async function searchFeedbacks(
     filter.push(`createdAt <= "${opts.createdAtTo}"`);
   }
 
-  // Feedback 默认按创建时间倒序
+  // Feedback defaults to descending order by creation time.
+  // Feedback 默认按创建时间倒序。
   const sort: string[] = ["createdAt:desc"];
 
   const limit = opts.limit ?? 20;

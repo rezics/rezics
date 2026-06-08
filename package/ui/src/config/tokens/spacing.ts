@@ -3,6 +3,12 @@
 //
 // This object is a docs-only reference (used by the Storybook gallery). It
 // does NOT drive UnoCSS — preset-wind4 derives every step from `--spacing`.
+//
+// Foundation v1 间距参考。与 Tailwind v4 / preset-wind4 对齐：
+// 每个 UnoCSS 步进 = N × 4px（单一的 `--spacing` 基准为 0.25rem）。
+//
+// 该对象仅供文档参考（供 Storybook gallery 使用），不会驱动 UnoCSS——
+// preset-wind4 会从 `--spacing` 推导出每个步进。
 
 export const spacing = {
   0: "0",

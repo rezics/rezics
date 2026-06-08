@@ -72,6 +72,8 @@ export type ReplyComposerProps =
  * Blur-retain rule: if the body is empty, the composer should collapse on
  * blur; otherwise it retains the draft and stays expanded. Returning a
  * boolean here keeps the caller in charge of the actual open/closed state.
+ * 失焦保留规则：若正文为空，编辑器应在失焦时折叠；否则保留草稿并保持展开。
+ * 这里返回一个布尔值，让调用方掌控实际的展开/折叠状态。
  */
 export function useBlurRetain(body: string) {
   return useCallback(() => body.trim().length > 0, [body]);
@@ -81,6 +83,8 @@ export function useBlurRetain(body: string) {
  * Lightweight inline composer for replies and simple contextual posts. Realm
  * page-level authoring owns wiki creation, draft publishing, and existing
  * content submission outside this component.
+ * 用于回复和简单上下文帖子的轻量内联编辑器。realm 页面级别的创作在本组件之外
+ * 负责 wiki 创建、草稿发布以及已有内容的提交。
  */
 export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
@@ -246,6 +250,10 @@ export const ReplyComposer = forwardRef<
    * deliberately non-atomic — an orphan poll on post failure is acceptable: the
    * failure surfaces (the poll error inside `PollComposer`, the post error
    * below) and the minted poll stays reusable as a standalone unit.
+   * 附加投票流程：`PollComposer` 已经创建好投票（`useCreatePoll`）；现在创建带
+   * 投票内容块的帖子。这里刻意不做原子操作——帖子失败时留下孤立投票是可接受的：
+   * 失败会显现出来（`PollComposer` 内的投票错误、下方的帖子错误），且已创建的
+   * 投票仍可作为独立单元复用。
    */
   const handlePollCreated = (poll: PollDTO) => {
     if (!authGuard.requireAuth()) return;

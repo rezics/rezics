@@ -31,6 +31,10 @@ import { useCallback, useMemo, useState } from "react";
 // modal would let users mis-route a unit through the wrong write path, so
 // the modal filters them out entirely. Favorites and Saved stay as
 // system-shelf collectable targets.
+// Backlog/Active/Completed 只能通过进度状态的副作用到达
+// （`user-unit-progress` 规范）。若在弹窗中将它们暴露为可收藏目标，
+// 会让用户经由错误的写入路径误导一个 unit，因此弹窗将其完全过滤掉。
+// Favorites 和 Saved 仍作为系统书架的可收藏目标保留。
 const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
   "backlog",
   "active",
@@ -71,6 +75,7 @@ export function CollectionModal({
   const [searchText, setSearchText] = useState("");
 
   // Initialize selected shelves from status
+  // 根据 status 初始化已选中的书架
   useMemo(() => {
     if (status?.shelves) {
       setSelectedShelves(new Set(status.shelves.map((s) => s.id)));
@@ -134,7 +139,7 @@ export function CollectionModal({
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {/* Content-type filter chips */}
+            {/* Content-type filter chips 内容类型筛选标签 */}
             <div className="flex flex-wrap gap-1">
               <Badge
                 variant={filterTag === null ? "default" : "outline"}
@@ -155,7 +160,7 @@ export function CollectionModal({
               ))}
             </div>
 
-            {/* Shelf list with checkboxes */}
+            {/* Shelf list with checkboxes 带复选框的书架列表 */}
             <ul className="flex flex-col">
               {filteredShelves.length === 0 ? (
                 <p className="text-sm text-text-secondary px-2">
@@ -210,7 +215,7 @@ export function CollectionModal({
               </p>
             </div>
 
-            {/* Dual collection mode for reviews */}
+            {/* Dual collection mode for reviews 评论的双重收藏模式 */}
             {isReview && (
               <div className="flex items-center gap-2">
                 <Checkbox

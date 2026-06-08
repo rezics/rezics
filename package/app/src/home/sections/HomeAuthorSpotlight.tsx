@@ -12,13 +12,14 @@ type Book = BookDTO;
 
 export type HomeAuthorSpotlightProps = {
   title?: string;
-  limit?: number; // number of books to sample authors from
+  limit?: number; // number of books to sample authors from — 从中采样作者的书籍数量
   maxAuthors?: number;
 };
 
 /**
  * HomeAuthorSpotlight
  * Collect unique authors from recent books and display them.
+ * 从近期书籍中收集去重后的作者并展示。
  */
 export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   title,

@@ -11,6 +11,8 @@ import { withUpdatedAtRows } from "./utils.js";
 /**
  * Seed tags as Unit(type=TAG) + UnitTranslation + UnitSupportLanguage.
  * Uses three-phase bulk inserts for maximum throughput.
+ * 以 Unit(type=TAG) + UnitTranslation + UnitSupportLanguage 的形式播种标签。
+ * 使用三阶段批量插入以获得最大吞吐量。
  */
 export async function seedTags(
   ctx: SeedCtx,
@@ -30,6 +32,7 @@ export async function seedTags(
   if (tags.length === 0) return [];
 
   // Phase 1: Create Unit rows
+  // 阶段 1：创建 Unit 行
   await ctx.db.insert(Unit).values(
     withUpdatedAtRows(
       tags.map((t) => ({
@@ -46,6 +49,7 @@ export async function seedTags(
   );
 
   // Phase 2: Create UnitTranslation rows (all languages)
+  // 阶段 2：创建 UnitTranslation 行（所有语言）
   await ctx.db.insert(UnitTranslation).values(
     withUpdatedAtRows(
       tags.flatMap((t) =>
@@ -60,6 +64,7 @@ export async function seedTags(
   );
 
   // Phase 3: Create UnitSupportLanguage rows
+  // 阶段 3：创建 UnitSupportLanguage 行
   await ctx.db.insert(UnitSupportLanguage).values(
     withUpdatedAtRows(
       tags.flatMap((t) =>

@@ -18,19 +18,26 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
-/** Extract the best title from the translations array. */
+/**
+ * Extract the best title from the translations array.
+ * 从 translations 数组中提取最合适的标题。
+ */
 function extractTitle(book: BookDTO): string {
   const translations = book.translations;
   if (!translations?.length)
     return getI18nRuntime().i18n.t("admin:unit_no_title");
   // Prefer default language match, fall back to first translation
+  // 优先匹配默认语言，否则回退到第一条 translation。
   const primary =
     translations.find((t) => t.language === (book as any).defaultLanguage) ??
     translations[0];
   return primary?.title || getI18nRuntime().i18n.t("admin:unit_no_title");
 }
 
-/** Format credit attribution into a readable string. */
+/**
+ * Format credit attribution into a readable string.
+ * 将贡献署名格式化为可读字符串。
+ */
 function formatCredits(book: BookDTO): string {
   const credits = book.creditAttributions ?? [];
   if (!credits.length) return "-";

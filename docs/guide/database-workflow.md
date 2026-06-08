@@ -30,21 +30,21 @@ The tool preflight requires PostgreSQL 18+ with built-in `uuidv7()`.
 For ordinary schema changes:
 
 1. Edit the owning package's Drizzle schema under `package/<owner>/src/db/schema`.
-2. Run `bun run db:generate -- --package=<owner>` from the repo root.
+2. Run `task db:generate -- --package=<owner>` from the repo root.
 3. Review the generated SQL and metadata.
-4. Run `bun run db:migrate -- --package=<owner>` for narrow validation.
-5. Before handing off broad database work, run `bun run db:reset -- --yes` and
-   then `bun run db:migrate` from the repo root.
+4. Run `task db:migrate -- --package=<owner>` for narrow validation.
+5. Before handing off broad database work, run `task db:reset -- --yes` and
+   then `task db:migrate` from the repo root.
 
 Use the root commands for multi-owner changes:
 
 ```bash
-bun run db:generate
-bun run db:migrate
-bun run db:deploy
-bun run db:reset -- --yes
-bun run db:ensure
-bun run db:smoke
+task db:generate
+task db:migrate
+task db:deploy
+task db:reset -- --yes
+task db:ensure
+task db:smoke
 ```
 
 Do not use `drizzle push` as the durable repository migration path. It is not a

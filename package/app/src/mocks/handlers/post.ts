@@ -32,7 +32,6 @@ const posts = [
 ];
 
 export const postHandlers = [
-  // List posts
   http.get(Post.list.path, ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get("page") ?? 1);
@@ -47,7 +46,6 @@ export const postHandlers = [
     });
   }),
 
-  // Get post
   http.get(Post.get.path, ({ params }) => {
     const post = posts.find((p) => p.id === (params as any).id);
     if (!post) {
@@ -56,7 +54,6 @@ export const postHandlers = [
     return HttpResponse.json(post);
   }),
 
-  // Create post
   http.post(Post.create.path, async ({ request }) => {
     const body = await request.json();
     const newPost = {
@@ -69,7 +66,6 @@ export const postHandlers = [
     return HttpResponse.json(newPost, { status: 201 });
   }),
 
-  // Update post
   http.put(Post.update.path, async ({ params, request }) => {
     const index = posts.findIndex((p) => p.id === (params as any).id);
     if (index === -1) {
@@ -83,6 +79,5 @@ export const postHandlers = [
     };
     return HttpResponse.json(posts[index]);
   }),
-  // Categories
   // http.get(Post.categories.path, () => HttpResponse.json(categories)),
 ];

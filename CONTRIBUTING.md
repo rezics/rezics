@@ -14,22 +14,23 @@ workspaces; packages live under `package/`.
 **Prerequisites:** Bun, Docker Compose v2 for repo-managed local services
 
 ```bash
-bun install
-bun run dev              # Start all dev services
-bun run app:dev          # Frontend only (Vite, port 35001)
-bun run server:dev       # Backend only (Elysia with --watch)
-bun --filter=@rezics/history run dev # History service only (Elysia, port 3004)
+bun install              # install workspace deps (Bun is the package manager)
+task                     # list every task (task --list)
+task dev                 # Start all dev processes (devenv up; process-compose)
+task app:dev             # Frontend only (Vite, port 35001)
+task server:dev          # Backend only (Elysia with --watch)
+task history:dev         # History service only (Elysia, port 3004)
 ```
 
-`bun run dev` starts application processes only. It does not provision external
+`task dev` starts application processes only. It does not provision external
 dependencies such as PostgreSQL, Meilisearch, Redis, object storage, or Sequin.
 For the repo-managed local path, start Docker Compose v2 services first:
 
 ```bash
-bun run service up
-bun run service health
-bun run service logs
-bun run service down
+task service:up
+task service:health
+task service:logs
+task service:down
 ```
 
 This starts the managed source PostgreSQL, Meilisearch, Sequin state
@@ -40,8 +41,8 @@ editing package env files manually, but `service` commands do not discover,
 start, stop, or repair unrelated services.
 
 If the managed source database comes from an old or manually modified volume,
-use `bun run service source verify` first. Reserve
-`bun run service source repair` for existing, external, or broken local source
+use `task service -- source verify` first. Reserve
+`task service -- source repair` for existing, external, or broken local source
 databases; it is not required for a fresh managed Docker volume.
 
 Start any other required external services first, then start the dependent
@@ -93,7 +94,7 @@ Every `*ListQuerySchema` spreads `listGetQueryBase.properties` from `@rezics/con
 ### Enforcement
 
 ```bash
-bun run check:convention   # Scans routes and folders; exits non-zero on violations
+task check:convention   # Scans routes and folders; exits non-zero on violations
 ```
 
 - Pre-commit hook runs it in `--staged` mode
@@ -110,11 +111,11 @@ Every public Unit-resolving URL falls into one of two families, and the prefix t
 
 Mixing the two is forbidden: a slug under a long prefix or a UUID under a short prefix MUST be rejected at the route layer (typed by-slug endpoints like `/user/by-slug/:slug` are the only exception and exist precisely so this rule stays clean).
 
-`R10` in `bun run check:convention` flags route definitions whose param names violate this convention (a `:userSlug` under `/user`, or a `:unitId` under `/u`).
+`R10` in `task check:convention` flags route definitions whose param names violate this convention (a `:userSlug` under `/user`, or a `:unitId` under `/u`).
 
 ### Enforcement
 
-These conventions are enforced by `bun run check:convention`; each rule
+These conventions are enforced by `task check:convention`; each rule
 (`tool/src/commands/convention/rules/`) states its own normative rule and is
 the authoritative source.
 
@@ -134,12 +135,12 @@ cannot express, or for correcting a documented Drizzle-generated SQL defect
 while keeping the schema source in sync.
 
 ```bash
-bun run db:generate
-bun run db:migrate
-bun run db:deploy
-bun run db:reset -- --yes
-bun run db:ensure
-bun run db:smoke
+task db:generate
+task db:migrate
+task db:deploy
+task db:reset -- --yes
+task db:ensure
+task db:smoke
 ```
 
 `db:migrate`, `db:deploy`, and `db:reset` run schema owners in package order:
@@ -157,7 +158,7 @@ rules, and Drizzle rc caveats.
 
 ## Seeding
 
-The unified CLI is `bun run seed` (entry: `package/utils/bin/cli.ts`). It covers users, infrastructure, and factory (synthetic dev) data.
+The unified CLI is `task seed` (entry: `package/utils/bin/cli.ts`). It covers users, infrastructure, and factory (synthetic dev) data.
 
 **Two seed concepts**, kept separate for safety:
 - **`package/server/src/db/seed/`** — production-required infra: default realm, content type tags, root user, meilisearch init. Idempotent.
@@ -170,18 +171,18 @@ setup-time seed/factory flows must not require `JOB_RUNNER_BASE_URL`,
 
 ```bash
 # Interactive baseline seed; does not reset databases
-bun run seed
+task seed
 
 # Factory data only, named preset, no prompts
-bun run seed:factory              # shortcut for --preset=realistic --no-interactive
-bun run seed:factory:fast         # shortcut for --preset=fast --no-interactive
-bun run seed:factory:medium       # shortcut for --preset=medium --no-interactive
-bun run ../../tool/bin/tool.ts factory --preset=minimal --no-interactive
+task seed:factory              # shortcut for --preset=realistic --no-interactive
+task seed:factory:fast         # shortcut for --preset=fast --no-interactive
+task seed:factory:medium       # shortcut for --preset=medium --no-interactive
+task factory -- --preset=minimal --no-interactive
 
 # Explicit destructive reset
-bun run seed:database-reset
+task seed:database-reset
 # CI/headless reset requires explicit confirmation
-bun run ../../tool/bin/tool.ts seed database-reset --yes
+task seed:database-reset -- --yes
 ```
 
 **Presets** (`package/utils/src/factory/presets/`):
@@ -201,7 +202,7 @@ bun run ../../tool/bin/tool.ts seed database-reset --yes
 - `fixed` → clamp(`target ?? floor((min+max)/2)`, min, max)
 - `uniform` → `randInt(min ?? 0, max)`
 
-Seeders never read counts directly — all count decisions go through `ctx.draw(...)`. R7 (`bun run check:convention`) blocks new `powerLaw` imports outside `strategy.ts`/`utils.ts`.
+Seeders never read counts directly — all count decisions go through `ctx.draw(...)`. R7 (`task check:convention`) blocks new `powerLaw` imports outside `strategy.ts`/`utils.ts`.
 
 ## UI Component Policy
 
@@ -240,9 +241,9 @@ The design system is documented across **five package-owned Storybooks** plus an
 
 ### Running
 
-- `bun run storybook` — boots all six instances concurrently (color-prefixed output via `concurrently`).
-- `bun run build-storybook` — builds all six static dists concurrently.
-- `bun run storybook:host` / `bun --cwd package/<name> run storybook` — boot one at a time.
+- `task storybook` — boots all six instances concurrently (color-prefixed output via `concurrently`).
+- `task build:storybook` — builds all six static dists concurrently.
+- `task storybook:host` / `task <name>:storybook` (e.g. `task ui:storybook`) — boot one at a time.
 
 The host on `:6006` aggregates the others via `refs`, so visiting a single URL is enough once the per-package instances are up.
 

@@ -51,11 +51,11 @@ export function parseNavDoc(fileMap: FileMap, navPath: string): TocNavPoint[] {
   const doc = parser.parse(xml);
 
   // EPUB 3 nav doc — look for <nav epub:type="toc">
+  // EPUB 3 导航文档 — 查找 <nav epub:type="toc">
   const html = doc?.html ?? doc;
   const body = html?.body;
   if (!body) return [];
 
-  // Find the nav element with toc
   const navs = ensureArray(body.nav);
   const tocNav =
     navs.find((n: Record<string, unknown>) =>
@@ -94,14 +94,17 @@ export function tocToFolioNodes(
 ): FolioNode[] {
   function convert(np: TocNavPoint): FolioNode {
     // Strip fragment from src for matching
+    // 从 src 中去除片段标识符以便匹配
     const baseSrc = np.src.split("#")[0];
 
     if (np.children.length > 0) {
       // Has children — may itself be a leaf too if src points to content
+      // 有子节点 — 如果 src 指向内容，它本身也可能是叶子节点
       const children = np.children.map(convert);
 
       if (baseSrc && spineHrefs.includes(baseSrc)) {
         // Branch that also has content — make it a leaf with children
+        // 同时带有内容的分支 — 将其设为带子节点的叶子节点
         return {
           id: `epub-${baseSrc}`,
           title: np.label || baseSrc,
@@ -118,6 +121,7 @@ export function tocToFolioNodes(
     }
 
     // Leaf node
+    // 叶子节点
     return {
       id: `epub-${baseSrc || np.id}`,
       title: np.label || baseSrc || "Untitled",

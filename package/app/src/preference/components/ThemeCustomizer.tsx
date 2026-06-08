@@ -25,6 +25,8 @@ const BRAND_DEFAULT_COLOR = "#DB515C";
 
 // MOCK: local preset palette until token-driven theme picker arrives.
 // First entry is the rezics brand red.
+// MOCK：在基于 token 的主题选择器到来之前的本地预设调色板。
+// 第一项是 rezics 品牌红。
 const PRESET_COLORS: string[] = [
   "#DB515C",
   "#3b82f6",
@@ -71,7 +73,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
     const value = event.target.value;
     setCustomHex(value);
 
-    // 验证十六进制颜色格式
+    // Validate the hex color format.
+    // 验证十六进制颜色格式。
     if (/^#[0-9A-F]{6}$/i.test(value)) {
       setSelectedColor(value);
       setCustomColor(value);
@@ -111,7 +114,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
         </DialogHeader>
 
         <div className="flex flex-col gap-6">
-          {/* 当前颜色预览 */}
+          {/* Current color preview. 当前颜色预览。 */}
           <div>
             <p className="text-sm font-medium mb-2">
               {t("shell:theme_customizer_current_accent")}
@@ -132,7 +135,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             </div>
           </div>
 
-          {/* 预设颜色 */}
+          {/* Preset colors. 预设颜色。 */}
           <div>
             <p className="text-sm font-medium mb-2">
               {t("shell:theme_customizer_preset_colors")}
@@ -164,7 +167,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             </div>
           </div>
 
-          {/* 自定义十六进制颜色 */}
+          {/* Custom hex color. 自定义十六进制颜色。 */}
           <div>
             <p className="text-sm font-medium mb-2">
               {t("shell:theme_customizer_custom_color")}
@@ -204,7 +207,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   );
 };
 
-// 快速主题切换按钮组件
+// Quick theme toggle button component.
+// 快速主题切换按钮组件。
 export const ThemeQuickToggle: React.FC = () => {
   const { t } = useTranslation(["common", "shell"]);
   const [open, setOpen] = useState(false);

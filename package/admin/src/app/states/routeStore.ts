@@ -1,21 +1,20 @@
-// src/store/scrollTabStore.ts
 import { create } from "zustand";
 
-/** 每个路由要保存的数据结构 */
+/** Data structure persisted per route. 每个路由要保存的数据结构 */
 interface RouteData {
   scrollY?: number;
   tab?: string;
 }
 
-/** 整个 store 的状态和操作 */
+/** State and actions for the whole store. 整个 store 的状态和操作 */
 interface RouteStore {
-  /** 路由 key -> RouteData */
+  /** Route key -> RouteData. 路由 key -> RouteData */
   routeMap: Record<string, RouteData>;
-  /** 设置或合并某个路由的数据 */
+  /** Set or merge data for a given route. 设置或合并某个路由的数据 */
   setRouteData: (routeKey: string, data: Partial<RouteData>) => void;
-  /** 清空某个路由的数据（可选） */
+  /** Clear data for a given route (optional). 清空某个路由的数据（可选） */
   clearRouteData: (routeKey: string) => void;
-  /** 获取某个路由的数据 */
+  /** Get data for a given route. 获取某个路由的数据 */
   getRouteData: (routeKey: string) => RouteData | undefined;
 }
 

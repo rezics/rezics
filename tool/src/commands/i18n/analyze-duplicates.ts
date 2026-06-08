@@ -6,6 +6,13 @@
  *
  * Classification defaults to `accidental` when call sites span ≥3 distinct
  * underscore prefixes; reviewers can override by editing the report.
+ *
+ * 读取 `package/i18n/messages/en.json`，并按相同值将键分组。
+ * 生成 `tool/src/commands/i18n/dedup-report.json`，列出每个重复组及其英文值、
+ * 成员键，以及按包统计的调用点计数。
+ *
+ * 当调用点跨越 ≥3 个不同的下划线前缀时，分类默认为 `accidental`；
+ * 审阅者可通过编辑该报告进行覆盖。
  */
 
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
@@ -74,6 +81,7 @@ async function main(): Promise<void> {
   }
 
   // Build a per-key call-site count by package.
+  // 按包构建每个键的调用点计数。
   const filesByPackage = new Map<string, string[]>();
   for (const rel of SCAN_ROOTS) {
     const pkg = rel.split("/")[1] ?? "(root)";

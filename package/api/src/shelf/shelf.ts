@@ -1,10 +1,13 @@
 // API Clients
+// API 客户端。
 export { collectionApi, shelfApi } from "./shelf.api";
 
 // Query Keys
+// 查询键。
 export { collectionKeys, shelfKeys } from "./shelf.keys";
 
 // Mutation Hooks
+// 变更 Hooks。
 export {
   collectionMutations,
   shelfMutations,
@@ -24,6 +27,7 @@ export {
 } from "./shelf.mutations";
 
 // Query Configurations
+// 查询配置。
 export {
   collectionQueries,
   collectionStatusBatchQuery,
@@ -40,6 +44,7 @@ export {
   userShelvesQuery,
 } from "./shelf.queries";
 // Types
+// 类型。
 export type {
   AddShelfItemInput,
   CleanupShelfOrphansInput,
@@ -80,6 +85,7 @@ export type {
   TagListEntryDTO,
 } from "./useShelfHydration";
 // Hydration hook
+// 水合 Hook。
 export {
   useHydratedShelfItems,
   useShelfHydration,

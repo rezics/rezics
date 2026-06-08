@@ -376,6 +376,7 @@ async function runProgressSyncWithRetry(
 
 /**
  * Build a ContentSearchDocument from a Unit row with all search relations attached.
+ * 从已附加全部搜索关联的 Unit 行构建 ContentSearchDocument。
  */
 export function buildContentDocument(unit: any): ContentSearchDocument {
   const translations: any[] = unit.translations ?? [];
@@ -389,6 +390,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const subjectAttributions: any[] = unit.subjectAttributions ?? [];
 
   // Flatten translations
+  // 展平 translations
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const subtitles = translations.map((t: any) => t.subtitle).filter(Boolean);
   const summaries = translations.map((t: any) => t.summary).filter(Boolean);
@@ -405,6 +407,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 
   // Tags
+  // 标签
   const tagIds = unitTags.map((ut: any) => ut.tagUnitId);
   const tagScores: Record<string, number> = {};
   const tagLabels: string[] = [];
@@ -437,14 +440,17 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   ];
 
   // Realms
+  // 领域
   const realmIds = realmIdsForSearch(unit);
 
   // Realm-tag compound keys
+  // 领域-标签复合键
   const realmTagKeys = realmTagApplicationsAsTargetUnit.map(
     (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
   );
 
   // Credit attribution
+  // 署名归属
   const creditNames = creditAttributions
     .map((a: any) => {
       const translations = a.entity?.translations ?? [];
@@ -490,6 +496,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
       : undefined;
 
   // Type extension fields
+  // 类型扩展字段
   const ext = unit.book ?? unit.game ?? unit.media ?? null;
   const isLicensed = ext?.isLicensed ?? false;
   const coverUrl = pickCoverUrlFromTranslations(
@@ -498,10 +505,12 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   );
 
   // Link-specific fields
+  // Link 专属字段
   const linkUrl = unit.link?.url ?? null;
   const linkSiteName = unit.link?.siteName ?? null;
 
   // Post kind + book textLength for search filters
+  // 用于搜索筛选的 Post kind 与 book textLength
   const postKind = unit.post?.kind ?? null;
   const textLength = unit.book?.textLength ?? null;
   const gameReleaseDate =
@@ -522,6 +531,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     unit.type === "MEDIA" ? Boolean(unit.ownedContentStructure) : undefined;
 
   // Shelf membership: list of unit ids contained in this shelf (SHELF type only)
+  // 书架成员关系：该书架包含的 unit id 列表（仅 SHELF 类型）
   const containedUnitIds: string[] | undefined =
     unit.type === "SHELF"
       ? ((unit.shelf?.units ?? []) as { unitId: string }[]).map((i) => i.unitId)
@@ -985,6 +995,7 @@ async function listContentSyncRows(input: {
 }
 
 // ANCHOR: Full content reindex
+// ANCHOR: 全量内容重建索引
 
 export async function syncAllContent(client: SearchClient) {
   const deleteResult = await client.deleteAllContent();
@@ -1067,6 +1078,7 @@ export async function syncGameMediaContentSegment(
 }
 
 // ANCHOR: Progress sync functions
+// ANCHOR: 进度同步函数
 
 export async function syncProgress(
   client: SearchClient,
@@ -1196,6 +1208,7 @@ export async function syncAllProgress(client: SearchClient) {
 }
 
 // ANCHOR: Shelf item sync functions
+// ANCHOR: 书架条目同步函数
 
 type ShelfItemSyncRow = typeof ShelfItem.$inferSelect & {
   shelfOwnerUserId: string | null;
@@ -1499,11 +1512,13 @@ export async function syncAllShelfItems(client: SearchClient) {
 }
 
 // ANCHOR: Incremental single-unit sync
+// ANCHOR: 单个 unit 的增量同步
 
 export async function syncSingleContent(client: SearchClient, unitId: string) {
   const unitBase = await findContentBaseRow(unitId);
 
   // If unit doesn't exist or doesn't qualify, remove from index
+  // 若 unit 不存在或不符合条件，则从索引中移除
   if (
     !unitBase ||
     !INDEXABLE_TYPES.includes(unitBase.type as any) ||
@@ -1526,6 +1541,7 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
 }
 
 // ANCHOR: Content partial sync functions
+// ANCHOR: 内容部分同步函数
 
 export async function patchContentTags(client: SearchClient, unitId: string) {
   if (!(await isContentPatchEligible(unitId))) {
@@ -1794,6 +1810,8 @@ export async function patchContentMetadata(
  * Recompute the post-state `containedUnitIds` for a SHELF unit and push a
  * partial update to Meilisearch. The caller is responsible for invoking this
  * after every ShelfItem insert/delete on the shelf.
+ * 为 SHELF unit 重新计算变更后的 `containedUnitIds`，并向 Meilisearch 推送一次
+ * 部分更新。调用方负责在该书架上每次 ShelfItem 插入/删除后调用此函数。
  */
 export async function patchContentContainedUnitIds(
   client: SearchClient,
@@ -1852,6 +1870,7 @@ export async function patchCommentRankingFields(
 }
 
 // ANCHOR: Post partial sync functions
+// ANCHOR: Post 部分同步函数
 
 function publicPostUnitConditions() {
   return and(
@@ -2076,6 +2095,7 @@ export async function patchPostFields(
 }
 
 // ANCHOR: Realm partial sync functions
+// ANCHOR: Realm 部分同步函数
 
 export async function patchRealmMemberCount(
   client: SearchClient,
@@ -2175,6 +2195,7 @@ export async function patchRealmAliases(client: SearchClient, unitId: string) {
 }
 
 // ANCHOR: User and feedback partial sync functions
+// ANCHOR: 用户与反馈部分同步函数
 
 type UserSyncRow = {
   unitId: string;
@@ -2302,6 +2323,7 @@ export async function patchFeedbackResolutionFromDb(
 }
 
 // ANCHOR: Feedbacks sync
+// ANCHOR: 反馈同步
 
 export function buildFeedbackSearchDocument(
   feedback: any,
@@ -2413,6 +2435,7 @@ export async function syncFeedbackSegment(
 }
 
 // ANCHOR: Post document builder
+// ANCHOR: Post 文档构建器
 
 function languageOrder(unit: any, rows: any[]): string[] {
   const supportLanguages = unit?.supportLanguages ?? [];
@@ -2514,6 +2537,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
   const contentTranslations: any[] = post.unit?.contentTranslations ?? [];
 
   // Denormalized target unit info
+  // 反规范化的目标 unit 信息
   let targetTitles: string[] | null = null;
   let targetType: string | null = null;
   let targetCoverUrl: string | null = null;
@@ -2804,6 +2828,7 @@ async function listPostSyncRows(input: {
 }
 
 // ANCHOR: Post sync functions
+// ANCHOR: Post 同步函数
 
 export async function syncSinglePost(client: SearchClient, unitId: string) {
   const postBase = await findPostBaseRow(unitId);
@@ -2870,6 +2895,7 @@ export async function syncPostSegment(
 }
 
 // ANCHOR: Comment sync functions
+// ANCHOR: 评论同步函数
 
 const commentSyncSelect = {
   id: Comment.id,
@@ -3203,6 +3229,7 @@ export async function syncPostsByTarget(
 }
 
 // ANCHOR: Realm document builder
+// ANCHOR: Realm 文档构建器
 
 export function buildRealmDocument(realm: any): RealmSearchDocument {
   const unit = realm.unit;
@@ -3246,6 +3273,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
 }
 
 // ANCHOR: Poll document builder
+// ANCHOR: Poll 文档构建器
 
 export function buildPollDocument(poll: any): PollSearchDocument {
   const unit = poll.unit;
@@ -3291,6 +3319,7 @@ export function buildPollDocument(poll: any): PollSearchDocument {
 }
 
 // ANCHOR: Poll sync functions
+// ANCHOR: Poll 同步函数
 
 type PollBaseRow = {
   unitId: string;
@@ -3455,6 +3484,7 @@ export async function syncAllPolls(client: SearchClient) {
 }
 
 // ANCHOR: Realm sync functions
+// ANCHOR: Realm 同步函数
 
 type RealmBaseRow = {
   unitId: string;
@@ -3634,6 +3664,7 @@ export async function syncRealmSegment(
 }
 
 // ANCHOR: Entity document builder + sync
+// ANCHOR: Entity 文档构建器 + 同步
 
 type EntityBaseRow = {
   unitId: string;
@@ -3880,6 +3911,7 @@ export async function syncEntitySegment(
 }
 
 // ANCHOR: Users sync
+// ANCHOR: 用户同步
 
 export async function syncAllUsers(client: SearchClient) {
   const deleteResult = await client.deleteAllUsers();

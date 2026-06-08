@@ -50,15 +50,24 @@ export const Realm = pgTable("Realm", {
   extra: jsonData(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
-  /** Versioned rule policy for the POST Unit referenced by Realm.extra.rule. */
+  /**
+   * Versioned rule policy for the POST Unit referenced by Realm.extra.rule.
+   * 由 Realm.extra.rule 引用的 POST Unit 的带版本号规则策略。
+   */
   ruleVersion: integer().default(1).notNull(),
   ruleRequireOnJoin: boolean().default(false).notNull(),
   ruleRequireOnPost: boolean().default(false).notNull(),
   ruleRequireOnUpdate: boolean().default(true).notNull(),
   rulePolicyUpdatedAt: nullableTimestamp(),
-  /** New joins are stored as pending until a realm moderator approves them. */
+  /**
+   * New joins are stored as pending until a realm moderator approves them.
+   * 新加入的成员以待处理状态存储，直到 realm 版主批准。
+   */
   joinRequiresApproval: boolean().default(false).notNull(),
-  /** Author submissions enter the realm feed as pending review until approved. */
+  /**
+   * Author submissions enter the realm feed as pending review until approved.
+   * 作者提交的内容以待审核状态进入 realm 信息流，直到获批。
+   */
   contentRequiresApproval: boolean().default(false).notNull(),
 });
 
@@ -220,6 +229,7 @@ export const RealmTagContext = pgTable(
      * Pair-level explanatory surface for (realmUnitId, tagUnitId). The pair is
      * the identity; contextUnitId is only a materialized content carrier for
      * explanation, examples, discussion, and history.
+     * (realmUnitId, tagUnitId) 配对级别的解释性载体。配对本身即身份标识；contextUnitId 仅是用于承载解释、示例、讨论和历史的物化内容载体。
      */
     realmUnitId: uuid()
       .notNull()
@@ -257,6 +267,7 @@ export const RealmTagContext = pgTable(
  * Community/feed membership for a target Unit in a realm. This junction is not
  * semantic tagging and is not a prerequisite or owner relation for
  * RealmTagApplication.
+ * realm 中目标 Unit 的社区/信息流成员关系。此连接表不是语义化标签，也不是 RealmTagApplication 的前置条件或所有者关系。
  */
 export const UnitRealm = pgTable(
   "UnitRealm",
@@ -272,6 +283,7 @@ export const UnitRealm = pgTable(
     /**
      * Realm-local moderation snapshot. REMOVED is soft deletion of this
      * Unit-realm relation; hard deletion removes the row.
+     * realm 本地的审核状态快照。REMOVED 表示对此 Unit-realm 关系的软删除；硬删除则移除该行。
      */
     moderationStatus: ModerationStatus().default("APPROVED").notNull(),
   },

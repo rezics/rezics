@@ -59,6 +59,7 @@ export type AuthSessionDerivedState = {
   registration: AuthRegistrationState;
   authAccountState: GetSessionStateResponse["authAccountState"] | null;
   // TODO(openspec-retired): capabilityLevel was slated for removal in favor of role/unitId; it remains in use. Revisit.
+  // TODO(openspec-retired): capabilityLevel 原计划被移除以改用 role/unitId；但仍在使用。需重新审视。
   capabilityLevel: AuthCapabilityLevel;
   error: string | null;
 };
@@ -158,6 +159,7 @@ export function deriveAuthSessionState(
       userId: hasMemberSession ? (snapshot?.rezicsUserId ?? null) : null,
       permission,
       // UI visibility hints only. Server policy remains the source of truth.
+      // 仅作为 UI 可见性提示。服务端策略始终是事实来源。
       governanceCapabilities: hasMemberSession
         ? (snapshot?.governanceCapabilities ?? [])
         : [],

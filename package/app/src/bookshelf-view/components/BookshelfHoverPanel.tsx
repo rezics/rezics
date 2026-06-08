@@ -12,6 +12,8 @@ export interface BookshelfHoverPanelProps {
  * Desktop-only hover preview shown when a viewer hovers a bookshelf cover.
  * Renders richer metadata, the viewer's reading progress when known, and a
  * direct link to the item's detail page.
+ * 仅桌面端、当浏览者悬停书架封面时显示的悬停预览。
+ * 渲染更丰富的元数据、已知时的浏览者阅读进度，以及指向条目详情页的直接链接。
  */
 export const BookshelfHoverPanel: React.FC<BookshelfHoverPanelProps> = ({
   item,
@@ -19,6 +21,7 @@ export const BookshelfHoverPanel: React.FC<BookshelfHoverPanelProps> = ({
   const { t } = useTranslation(["page"]);
   // Show the progress line only when the book has countable chapters; never a
   // "0/0" placeholder.
+  // 仅当书籍有可计数的章节时才显示进度行；绝不显示 "0/0" 占位符。
   const hasProgress = item.chaptersTotal != null && item.chaptersTotal > 0;
   const hasCover = item.coverUrl.trim().length > 0;
 

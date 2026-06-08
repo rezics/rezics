@@ -109,6 +109,8 @@ export function countStatusStates(
 
 // STATUS_ORDER is worst-first, so the lowest index wins when rolling several
 // checks up into one badge for a status sub-section.
+// STATUS_ORDER 以最差优先排列，因此在将多个检查汇总为某个状态子区块的单个徽章时，
+// 索引最小者胜出。
 export function worstStatusState(states: StatusState[]): StatusState {
   if (states.length === 0) return "unknown";
   return states.reduce((worst, state) =>

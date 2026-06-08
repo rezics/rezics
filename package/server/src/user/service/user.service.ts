@@ -1,5 +1,6 @@
 /**
  * Never send unHashed passwords to server
+ * 切勿将未哈希的密码发送到服务器
  */
 
 import { randomUUID } from "node:crypto";
@@ -52,6 +53,11 @@ export type CompleteProfileSetupInput = {
  *
  * Called whenever User.unitId becomes known. Idempotent: a re-call with the
  * same `(unitId, slug)` is a no-op.
+ *
+ * upsert 承载用户规范 slug 的 USER Unit。
+ *
+ * 在 User.unitId 变为已知时调用。幂等：以相同的 `(unitId, slug)` 再次调用为
+ * 空操作。
  */
 type UserRow = typeof User.$inferSelect;
 
@@ -534,6 +540,7 @@ function createDrizzleUserRepository(): UserRepository {
 
 /**
  * User Service - Business logic layer
+ * 用户服务——业务逻辑层
  */
 export class UserService {
   constructor(
@@ -542,6 +549,7 @@ export class UserService {
 
   /**
    * List users with filters and pagination
+   * 按过滤条件并分页列出用户
    */
   async list(options: UserFilterOptions = {}): Promise<{
     users: UserWithRelations[];
@@ -561,6 +569,7 @@ export class UserService {
 
   /**
    * Get user by unitId (formerly userId)
+   * 按 unitId（旧称 userId）获取用户
    */
   async getByUserId(userId: string): Promise<UserWithRelations> {
     return this.repository.getByUserId(userId);
@@ -568,14 +577,12 @@ export class UserService {
 
   /**
    * Get user by slug (USER scope on Unit)
+   * 按 slug 获取用户（Unit 上的 USER scope）
    */
   async getBySlug(slug: string): Promise<UserWithRelations | null> {
     return this.repository.getBySlug(slug);
   }
 
-  /**
-   * Create new user
-   */
   async create(req: CreateUserProfileInput): Promise<UserWithRelations> {
     const user = await this.repository.create(req);
 
@@ -603,6 +610,8 @@ export class UserService {
   /**
    * Update user. User slugs are immutable — any caller that smuggles a
    * `slug` field is rejected with `USER_SLUG_IMMUTABLE`.
+   * 更新用户。用户 slug 不可变——任何夹带 `slug` 字段的调用方都会被以
+   * `USER_SLUG_IMMUTABLE` 拒绝。
    */
   async update(userId: string, req: UpdateUser): Promise<UserWithRelations> {
     if ((req as Record<string, unknown>).slug !== undefined) {
@@ -639,17 +648,11 @@ export class UserService {
     return user as UserWithRelations;
   }
 
-  /**
-   * Delete user by unitId
-   */
   async delete(userId: string): Promise<void> {
     await this.repository.delete(userId);
     await enqueueUserSearch(SEARCH_COMMAND_KINDS.userDelete, userId);
   }
 
-  /**
-   * Check if user exists by unitId
-   */
   async exists(userId: string): Promise<boolean> {
     return this.repository.exists(userId);
   }
@@ -660,6 +663,10 @@ export class UserService {
    * Two-query pattern (subscription ids, then user rows) — `User` is
    * keyed by `unitId`, not by `Unit.userId`, so we cannot rely on
    * relation hydration to walk Unit→User for USER-type units.
+   * 列出关注者——对 `userId` 持有有效 USER→USER `Subscription` 的用户。
+   * 采用两次查询模式（先取订阅 id，再取用户行）——`User` 以 `unitId` 为键，
+   * 而非 `Unit.userId`，因此无法依赖关系 hydration 对 USER 类型的 unit
+   * 遍历 Unit→User。
    */
   async getFollowers(
     userId: string,
@@ -675,6 +682,7 @@ export class UserService {
   /**
    * List followings — users that `userId` has an active USER→USER
    * `Subscription` to.
+   * 列出关注对象——`userId` 持有有效 USER→USER `Subscription` 所指向的用户。
    */
   async getFollowings(
     userId: string,
@@ -690,11 +698,12 @@ export class UserService {
   /**
    * Look up a user's canonical slug from the matching USER Unit. Returns
    * `null` when no Unit row exists for the user.
+   * 从匹配的 USER Unit 查找用户的规范 slug。当该用户没有对应的 Unit 行时
+   * 返回 `null`。
    */
   async getCanonicalSlug(userId: string): Promise<string | null> {
     return this.repository.getCanonicalSlug(userId);
   }
 }
 
-// Export singleton instance
 export const userService = new UserService();

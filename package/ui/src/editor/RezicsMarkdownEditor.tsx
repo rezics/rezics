@@ -37,7 +37,10 @@ export interface RezicsMarkdownEditorProps
   imageProviders?: ImageProvider[];
   userSearch?: UserSearchAdapter;
   disableResize?: boolean;
-  /** Fill the parent container height via CSS flex instead of resize drag. */
+  /**
+   * Fill the parent container height via CSS flex instead of resize drag.
+   * 通过 CSS flex 填满父容器高度，而非使用拖拽调整尺寸。
+   */
   fillHeight?: boolean;
   onViewModeChange?: (mode: ViewMode) => void;
 }
@@ -56,6 +59,7 @@ export function RezicsMarkdownEditor({
   onChange,
   toolbar: callerToolbar,
   // Handled by this wrapper — don't forward to MarkdownEditor
+  // 由本包装组件处理——不向下转发给 MarkdownEditor
   emoji: _emoji,
   mention: _mention,
   ...editorProps
@@ -72,6 +76,7 @@ export function RezicsMarkdownEditor({
   }, []);
 
   // ---- Image ----
+  // ---- 图片 ----
 
   const handleInsertImage = useCallback((url: string, alt?: string) => {
     if (viewRef.current) {
@@ -80,6 +85,7 @@ export function RezicsMarkdownEditor({
   }, []);
 
   // ---- Emoji ----
+  // ---- 表情 ----
 
   const handleEmojiPick = useCallback((emoji: string) => {
     const view = viewRef.current;
@@ -100,6 +106,7 @@ export function RezicsMarkdownEditor({
     : null;
 
   // ---- Mention ----
+  // ---- 提及 ----
 
   const mention = useMentionPanel(editorView, userSearch);
 
@@ -112,6 +119,7 @@ export function RezicsMarkdownEditor({
   );
 
   // ---- Toolbar (add emoji button, merge caller overrides) ----
+  // ---- 工具栏（添加表情按钮，合并调用方覆盖项） ----
 
   const toolbar = useMemo((): ToolbarOverride | false | undefined => {
     if (callerToolbar === false) return false;
@@ -136,6 +144,7 @@ export function RezicsMarkdownEditor({
   }, [callerToolbar]);
 
   // ---- Layout ----
+  // ---- 布局 ----
 
   const resolvedResize =
     fillHeight || disableResize
@@ -151,6 +160,8 @@ export function RezicsMarkdownEditor({
         // Prevent Enter from propagating to parent forms or dialogs.
         // Modifier+Enter is allowed through so consumers can bind
         // Ctrl+Enter for submit.
+        // 阻止 Enter 向上冒泡到父级表单或对话框。
+        // 放行 Modifier+Enter，以便使用方可绑定 Ctrl+Enter 用于提交。
         if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
           e.stopPropagation();
         }

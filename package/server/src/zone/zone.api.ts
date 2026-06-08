@@ -101,6 +101,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
   )
 
   // Admin: Create zone
+  // 管理员：创建 zone
   .post(
     "/",
     async ({ body, identity, set }) => {
@@ -150,6 +151,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
   )
 
   // Admin: Update zone
+  // 管理员：更新 zone
   .patch(
     "/:unitId",
     async ({ params, body, identity, set }) => {
@@ -199,6 +201,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
   )
 
   // Admin: Delete zone
+  // 管理员：删除 zone
   .delete(
     "/:unitId",
     async ({ params, identity, set }) => {

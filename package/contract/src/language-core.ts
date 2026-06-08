@@ -1,5 +1,6 @@
 // ============================================================
 // CANONICAL LANGUAGE CODES
+// 规范化语言代码
 // ============================================================
 
 export const LANGUAGES = {
@@ -15,6 +16,7 @@ export type Language = (typeof LANGUAGES)[keyof typeof LANGUAGES];
 
 // ============================================================
 // DISPLAY METADATA
+// 显示元数据
 // ============================================================
 
 export const LANGUAGE_META: Record<
@@ -31,6 +33,7 @@ export const LANGUAGE_META: Record<
 
 // ============================================================
 // DEFAULTS
+// 默认值
 // ============================================================
 
 export const DEFAULT_LANGUAGE: Language = "zh-hant";
@@ -42,6 +45,9 @@ const ALL_CANONICAL = new Set<string>(Object.values(LANGUAGES));
  * Normalize a language code to its canonical form.
  * Handles case-insensitive matching against canonical codes.
  * Returns null for unknown codes.
+ * 将语言代码规范化为其规范形式。
+ * 对规范代码进行大小写不敏感的匹配。
+ * 对未知代码返回 null。
  */
 export function normalizeLanguage(code: string): Language | null {
   const lower = code.toLowerCase();

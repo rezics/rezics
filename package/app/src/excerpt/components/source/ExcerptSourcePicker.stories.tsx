@@ -14,6 +14,8 @@ import { ExcerptSourcePicker } from "./ExcerptSourcePicker";
 
 // MOCK: fixtures used to hydrate the React Query cache so the stories render
 // resolved unit titles instead of identifiers.
+// MOCK：用于填充 React Query 缓存的 fixtures，使 stories 渲染
+// 已解析的 unit 标题而非标识符。
 const fixtureBook: UnitDTO = {
   id: "book-abc",
   type: "book",

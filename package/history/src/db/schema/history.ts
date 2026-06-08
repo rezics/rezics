@@ -9,6 +9,8 @@ const updatedAt = () => timestamp().notNull().defaultNow();
  * Content-addressed payload for canonical editorial revisions. It stores final
  * revision content for history compare/restore and must not be used for draft
  * snapshots or autosave recovery data.
+ * 规范编辑修订版本的内容寻址负载。存储用于历史比对/恢复的最终修订内容，
+ * 不得用于草稿快照或自动保存的恢复数据。
  */
 export const revisionContents = p.pgTable("RevisionContent", {
   hash: p.varchar("hash", { length: 64 }).primaryKey(),
@@ -20,6 +22,8 @@ export const revisionContents = p.pgTable("RevisionContent", {
  * Canonical editorial commit ingested from main HistoryOutbox. A revision is a
  * user-visible save of applied canonical state, not editor autosave, draft
  * storage, or an uncommitted frontend operation log.
+ * 从主 HistoryOutbox 摄取的规范编辑提交。一次修订是已应用规范状态的用户可见保存，
+ * 而非编辑器自动保存、草稿存储或未提交的前端操作日志。
  */
 export const unitRevisions = p.pgTable(
   "UnitRevision",
@@ -38,6 +42,7 @@ export const unitRevisions = p.pgTable(
     message: p.text("message"),
     restoreSource: p.jsonb("restoreSource"),
     // Event time is supplied by the producer; ingestion time records arrival.
+    // 事件时间由生产者提供；摄取时间记录到达时刻。
     createdAt: timestamp().notNull(),
     ingestedAt: p
       .timestamp("ingestedAt", { precision: 3 })
@@ -61,6 +66,8 @@ export const unitRevisions = p.pgTable(
 /**
  * Derived per-path snapshot index for editorial revision compare. Rows are
  * rebuilt from UnitRevision content and are not authoritative history state.
+ * 用于编辑修订比对的派生式按路径快照索引。各行由 UnitRevision 内容重建，
+ * 并非权威的历史状态。
  */
 export const unitRevisionPaths = p.pgTable(
   "UnitRevisionPath",
@@ -93,6 +100,8 @@ export const unitRevisionPaths = p.pgTable(
  * Canonical high-change structure batch event ingested from main HistoryOutbox.
  * It represents semantic structure saves such as table-of-contents batches,
  * not every drag, click, or local editor operation.
+ * 从主 HistoryOutbox 摄取的规范高变更结构批量事件。它代表语义化的结构保存，
+ * 例如目录批量变更，而非每一次拖拽、点击或本地编辑器操作。
  */
 export const structureEvents = p.pgTable(
   "StructureEvent",
@@ -106,6 +115,7 @@ export const structureEvents = p.pgTable(
     payload: p.jsonb("payload").notNull(),
     message: p.text("message"),
     // Event time is supplied by the producer; ingestion time records arrival.
+    // 事件时间由生产者提供；摄取时间记录到达时刻。
     createdAt: timestamp().notNull(),
     ingestedAt: p
       .timestamp("ingestedAt", { precision: 3 })

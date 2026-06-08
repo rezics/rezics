@@ -22,6 +22,7 @@ export function chapterReadHandler(_body: any) {
 
 // =========================
 // Chapter REST (MSW http handlers)
+// Chapter REST（MSW http 处理器）
 // =========================
 export const chapterHttpHandlers = [
   http.get("/api/book/:bookId/chapters", ({ params }) => {

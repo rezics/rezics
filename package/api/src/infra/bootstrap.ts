@@ -41,6 +41,7 @@ function writeToStorage(value: InfraCacheShape): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
   } catch {
     // localStorage unavailable
+    // localStorage 不可用
   }
 }
 
@@ -62,13 +63,15 @@ export function infraBootstrapQuery() {
   return queryOptions({
     queryKey: infraBootstrapKey,
     queryFn: infraApi.bootstrap,
-    staleTime: 1000 * 60 * 60 * 24, // 24h
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours — 24 小时
   });
 }
 
 /**
  * Synchronous accessor for the default realm ID.
+ * 默认 realm ID 的同步访问器。
  * Reads memory mirror first (populated from localStorage on first call).
+ * 优先读取内存镜像（首次调用时从 localStorage 填充）。
  */
 export function getDefaultRealmId(): string | null {
   return loadMemoryMirror()?.defaultRealmId ?? null;
@@ -76,6 +79,7 @@ export function getDefaultRealmId(): string | null {
 
 /**
  * Synchronous accessor for a seed tag ID by semantic name.
+ * 按语义名同步访问 seed tag ID。
  */
 export function getSeedTagId(name: SeedTagName): string | null {
   return loadMemoryMirror()?.seedTags[name] ?? null;
@@ -83,8 +87,10 @@ export function getSeedTagId(name: SeedTagName): string | null {
 
 /**
  * Synchronous accessor for a named-scope unitId.
+ * 按命名作用域同步访问 unitId。
  *
  * Returns `null` until `useInfraBootstrap` has hydrated the cache.
+ * 在 `useInfraBootstrap` 完成缓存水合之前返回 `null`。
  */
 export function getSlugScopeId(name: SlugScopeName): string | null {
   return loadMemoryMirror()?.slugScopes?.[name] ?? null;
@@ -93,6 +99,8 @@ export function getSlugScopeId(name: SlugScopeName): string | null {
 /**
  * Hook that fetches `/infra/bootstrap` and persists the result to
  * localStorage. Call once near the root of the app.
+ * 获取 `/infra/bootstrap` 并将结果持久化到 localStorage 的 hook。
+ * 在应用根部附近调用一次。
  */
 export function useInfraBootstrap(): void {
   const { data } = useQuery(infraBootstrapQuery());
@@ -113,6 +121,7 @@ export function useInfraBootstrap(): void {
 
 /**
  * Clears the infra bootstrap cache (localStorage + in-memory + query cache).
+ * 清空 infra bootstrap 缓存（localStorage + 内存 + query 缓存）。
  */
 export function useInvalidateInfraCache(): () => void {
   const queryClient = useQueryClient();
@@ -121,6 +130,7 @@ export function useInvalidateInfraCache(): () => void {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
+      // 忽略
     }
     memoryMirror = null;
     queryClient.removeQueries({ queryKey: infraBootstrapKey });
@@ -132,6 +142,7 @@ export function invalidateInfraCache(): void {
     localStorage.removeItem(STORAGE_KEY);
   } catch {
     // ignore
+    // 忽略
   }
   memoryMirror = null;
 }

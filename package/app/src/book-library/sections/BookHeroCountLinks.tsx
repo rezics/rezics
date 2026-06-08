@@ -11,7 +11,10 @@ import type { BookHeroStatKey } from "./BookHeroStatCards";
 
 interface BookHeroCountLinksProps {
   bookId: string;
-  /** Stat keys already shown as big-icon cards above; suppressed from the link row. */
+  /**
+   * Stat keys already shown as big-icon cards above; suppressed from the link row.
+   * 已在上方大图标卡片中展示的统计项；会从链接行中隐藏。
+   */
   excludeKeys?: BookHeroStatKey[];
 }
 

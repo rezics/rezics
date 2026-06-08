@@ -72,6 +72,7 @@ describe("position index", () => {
       expect(mid < b).toBe(true);
       // Each iteration the right bound shrinks toward `a`, so the key must
       // grow to stay strictly between.
+      // 每次迭代右边界都向 `a` 收缩，因此键必须增长才能保持严格居中。
       expect(mid.length).toBeGreaterThanOrEqual(prevLen);
       prevLen = mid.length;
       lastMid = mid;
@@ -85,6 +86,7 @@ describe("position index", () => {
     keys.push(keyAfter(keys.at(-1)!));
     keys.push(keyAfter(keys.at(-1)!));
     // Insert in the middle a few times.
+    // 在中间插入若干次。
     keys.splice(1, 0, between(keys[0]!, keys[1]!));
     keys.splice(3, 0, between(keys[2]!, keys[3]!));
 

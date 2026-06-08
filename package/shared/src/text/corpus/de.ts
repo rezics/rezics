@@ -1,4 +1,5 @@
 // Curated German text corpus for seed and story data
+// 为种子数据和示例数据精选的德文文本语料库
 
 export const BOOK_TITLES = [
   "Hundert Jahre Einsamkeit",

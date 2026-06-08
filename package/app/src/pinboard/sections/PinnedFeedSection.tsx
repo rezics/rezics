@@ -18,7 +18,10 @@ const PINNED_ITEM_CLASS =
 
 export interface PinnedFeedSectionProps {
   realmUnitId: string;
-  /** When provided, used as the link target for each card (e.g. "/post/{unitId}"). */
+  /**
+   * When provided, used as the link target for each card (e.g. "/post/{unitId}").
+   * 提供时，用作每张卡片的链接目标（例如 "/post/{unitId}"）。
+   */
   linkFor?: (unitId: string) => string;
 }
 
@@ -26,6 +29,8 @@ export interface PinnedFeedSectionProps {
  * Renders the pinned region above a realm feed. No-ops when the list is
  * empty, silent on errors in the feed-adjacent position to avoid crowding
  * the viewport — errors still surface via the skeleton fallback state.
+ * 在 realm feed 上方渲染置顶区域。列表为空时不渲染任何内容；在紧邻 feed 的位置
+ * 对错误保持静默，以免拥挤视口——错误仍会通过骨架屏回退状态显现。
  */
 export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   realmUnitId,

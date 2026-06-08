@@ -17,6 +17,7 @@ function createMentionSource(config: MentionConfig) {
     context: CompletionContext,
   ): Promise<CompletionResult | null> => {
     // Find @ trigger — must be at start of line or after whitespace/punctuation
+    // 查找 @ 触发符——必须位于行首或空白/标点之后
     const line = context.state.doc.lineAt(context.pos);
     const lineText = line.text.slice(0, context.pos - line.from);
 
@@ -24,7 +25,7 @@ function createMentionSource(config: MentionConfig) {
     if (!match) return null;
 
     const query = match[2];
-    const atPos = context.pos - query.length - 1; // position of @
+    const atPos = context.pos - query.length - 1; // position of @ — @ 的位置
 
     let items: MentionItem[];
     try {

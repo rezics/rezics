@@ -44,6 +44,7 @@ export const localeParityRule: RuleScanner = {
     const baseLocale = "en";
 
     // 1. The shared product/admin tree lives at `package/i18n/locales/<lng>/<ns>.json`.
+    // 1. 共享的 product/admin 文案树位于 `package/i18n/locales/<lng>/<ns>.json`。
     const sharedRoot = I18N_LOCALES_ROOT;
     if (!existsSync(sharedRoot) || !statSync(sharedRoot).isDirectory()) {
       violations.push({
@@ -99,6 +100,8 @@ export const localeParityRule: RuleScanner = {
 
     // 2. UI per-locale ES modules at `package/ui/locales/<lng>.ts` must mirror
     //    the English UI bundle's key set.
+    // 2. 位于 `package/ui/locales/<lng>.ts` 的各语言 UI ES 模块必须与英文 UI
+    //    bundle 的键集合保持一致。
     const uiRoot = UI_LOCALES_ROOT;
     if (!existsSync(uiRoot)) {
       violations.push({

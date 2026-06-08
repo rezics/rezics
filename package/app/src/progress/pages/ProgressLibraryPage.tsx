@@ -13,9 +13,9 @@ import {
 import { progressLibraryRowToBookshelfItem } from "../models/progressBookshelf";
 
 export interface ProgressLibraryPageProps {
-  /** Bookshelf layout from the route URL query (highest precedence). */
+  /** Bookshelf layout from the route URL query (highest precedence). 来自路由 URL query 的书架布局（优先级最高）。 */
   libraryUrlConfig?: BookshelfViewConfig | null;
-  /** Clear the URL override so the viewer's stored settings take effect. */
+  /** Clear the URL override so the viewer's stored settings take effect. 清除 URL 覆盖，使浏览者已保存的设置生效。 */
   onResetLibraryUrlConfig?: () => void;
 }
 

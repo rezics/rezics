@@ -62,6 +62,7 @@ describe("update listener guard logic", () => {
     let active = true;
 
     // Simulate the guard pattern used in useEditorUpdate
+    // 模拟 useEditorUpdate 中使用的守卫模式
     const guard = () => {
       if (active) count++;
     };
@@ -74,6 +75,6 @@ describe("update listener guard logic", () => {
 
     active = false;
     guard();
-    expect(count).toBe(2); // No increment after deactivation
+    expect(count).toBe(2); // No increment after deactivation — 停用后不再自增
   });
 });

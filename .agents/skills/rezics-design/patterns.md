@@ -205,7 +205,7 @@ import { SafeLink } from '@rezics/ui';
 <SafeLink href={url}>Read on Goodreads</SafeLink>
 ```
 
-`<SafeLink>` classifies external URLs and routes them through a confirmation modal. Enforced by R5 in `bun run check:convention`.
+`<SafeLink>` classifies external URLs and routes them through a confirmation modal. Enforced by R5 in `task check:convention`.
 
 ### ❌ DON'T — raw `<a href>`
 

@@ -14,6 +14,11 @@ import {
 // Body content lives in ContentTranslation. Title lives in UnitTranslation.title.
 // Cover (optional) lives in UnitTranslation.extra.coverUrl
 // (see unitTranslationExtraSchema). BookContentStructure JSON stores chapter order.
+// 章节契约
+// Chapter = Unit(type=POST, targetUnitId=<book>) + Post(kind=CHAPTER)。
+// 正文内容存于 ContentTranslation。标题存于 UnitTranslation.title。
+// 封面（可选）存于 UnitTranslation.extra.coverUrl
+//（见 unitTranslationExtraSchema）。BookContentStructure JSON 存储章节顺序。
 // ============================================================
 
 export const chapterListItemSchema = t.Object({
@@ -133,6 +138,8 @@ export type ChapterResponse = (typeof chapterResponseSchema)["static"];
 export const chapterMaterializationRequestSchema = t.Object({
   // The target ContentStructureNode.id. Node ids are stable uuidv7 values, so
   // they cannot drift under a TOC reorder — no stale-path guards are needed.
+  // 目标 ContentStructureNode.id。节点 id 是稳定的 uuidv7 值，因此
+  // 在目录重排序时不会漂移 — 无需防过期路径的保护。
   nodeId: t.String(),
 });
 
@@ -156,6 +163,8 @@ export const createChapterSchema = t.Object({
   content: t.Optional(contentDocWriteSchema),
   // The parent book unit id (Unit.targetUnitId after persistence).
   // MUST resolve to a Unit(type=BOOK) — server rejects otherwise.
+  // 父书籍的 unit id（持久化后即 Unit.targetUnitId）。
+  // 必须解析为 Unit(type=BOOK) — 否则服务端拒绝。
   targetUnitId: t.String(),
   coverUrl: t.Optional(t.String()),
   status: t.Optional(t.String()),

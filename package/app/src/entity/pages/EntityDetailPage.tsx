@@ -17,6 +17,9 @@ import { WorksTab } from "../sections/WorksTab";
  * AWARDS_TAB: uncomment when an awards data source lands.
  *   Tab registration in `tabs[]` below AND the JSX block must both be
  *   uncommented. See entity detail page spec.
+ * AWARDS_TAB：当奖项数据源接入后取消注释。
+ *   下方 `tabs[]` 中的标签页注册以及 JSX 区块都必须一并取消注释。
+ *   参见 entity 详情页规范。
  *
  * import { AwardsTab, hasAwardsData } from "../sections/AwardsTab";
  */
@@ -25,6 +28,9 @@ import { WorksTab } from "../sections/WorksTab";
  * NEWS_TAB: uncomment when a news/press data source lands.
  *   Tab registration in `tabs[]` below AND the JSX block must both be
  *   uncommented. See entity detail page spec.
+ * NEWS_TAB：当新闻/媒体数据源接入后取消注释。
+ *   下方 `tabs[]` 中的标签页注册以及 JSX 区块都必须一并取消注释。
+ *   参见 entity 详情页规范。
  *
  * import { NewsTab, hasNewsData } from "../sections/NewsTab";
  */
@@ -40,6 +46,7 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
 
   // Hooks must run unconditionally — call works hook with current id regardless
   // of whether the entity is loaded yet.
+  // Hooks 必须无条件执行——无论 entity 是否已加载完成，都要用当前 id 调用 works hook。
   const { works } = useEntityWorks(unitId);
 
   const languages = entity ? getEntityLanguages(entity) : [];

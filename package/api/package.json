@@ -74,11 +74,6 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {
-    "test": "bun test",
-    "dev": "bun run --watch src/index.ts",
-    "spike:book-db": "bun run src/book/book.collection.spike.ts"
-  },
   "dependencies": {
     "@rezics/app": "workspace:*",
     "@rezics/contract": "workspace:*",

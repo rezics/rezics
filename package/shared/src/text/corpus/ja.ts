@@ -1,4 +1,5 @@
 // Curated Japanese text corpus for seed and story data
+// 用于 seed 与 story 数据的精选日文文本语料库
 
 export const BOOK_TITLES = [
   "百年の孤独",

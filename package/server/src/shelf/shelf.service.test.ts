@@ -1514,7 +1514,7 @@ describe("ShelfService", () => {
           unitTag: {
             findMany: async ({ select }: any) => {
               if (select?.tagUnitId && !select.score) {
-                return []; // initial existing
+                return []; // initial existing — 初始已存在集合
               }
               return [
                 {

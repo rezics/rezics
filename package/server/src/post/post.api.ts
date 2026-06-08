@@ -256,6 +256,8 @@ export const postApi = new Elysia({ prefix: "/post" })
     async ({ params, body, identity, status }) => {
       // Publishing makes the draft public, so it runs the create policy
       // (blocked/silenced authors are denied); reverting to draft does not.
+      // 发布会让草稿公开，因此会执行创建策略
+      //（被屏蔽/被禁言的作者会被拒绝）；而退回草稿不会。
       if (body.publish) {
         if (isBlocked(identity.permission)) {
           return status(403, "Forbidden: blocked users cannot publish posts");
@@ -345,6 +347,8 @@ export const postApi = new Elysia({ prefix: "/post" })
       // `state` gates no behavior, but a transition is still an edit — reuse the
       // post-update permission (author / admin). The schema enforces which
       // values and transitions are legal (write-strict).
+      // `state` 不控制任何行为，但状态切换仍是一次编辑——复用帖子更新权限
+      //（作者 / 管理员）。schema 强制约束哪些取值和切换是合法的（写入严格）。
       const target = await postService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdatePost(

@@ -38,7 +38,7 @@ async function confirmDatabaseReset(options: { yes?: boolean } = {}) {
 
   if (!process.stdin.isTTY) {
     throw new Error(
-      "Database reset requires interactive confirmation. Run `bun run seed:database-reset` in a terminal, or pass `--yes` to confirm the destructive reset.",
+      "Database reset requires interactive confirmation. Run `task seed:database-reset` in a terminal, or pass `--yes` to confirm the destructive reset.",
     );
   }
 
@@ -168,7 +168,7 @@ export const seedCommand = define({
 
     if (!ctx.values.noInteractive) {
       throw new Error(
-        "Interactive seed workflow requires a TTY. Run `bun run seed` in a terminal, or pass `--no-interactive` to run the baseline seed directly.",
+        "Interactive seed workflow requires a TTY. Run `task seed` in a terminal, or pass `--no-interactive` to run the baseline seed directly.",
       );
     }
 

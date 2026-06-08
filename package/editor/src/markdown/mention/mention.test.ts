@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 // Test trigger detection logic in isolation
+// 单独测试触发检测逻辑。
 function matchMentionTrigger(
   lineText: string,
 ): { query: string; atPos: number } | null {

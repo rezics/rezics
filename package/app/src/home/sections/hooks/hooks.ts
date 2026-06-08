@@ -38,6 +38,7 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
 }
 
 // Shelves from content search - returns shelf-type content docs
+// 来自内容搜索的书架 —— 返回 shelf 类型的内容文档
 export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
   const { data, isLoading, error } = useLocalizedContentSearch({
     type: "SHELF",
@@ -73,7 +74,9 @@ export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
 }
 
 // Excerpts are not in the content index (type QUOTE not indexed)
+// 摘录不在内容索引中（QUOTE 类型未被索引）
 // MOCK: returns empty results until an excerpt search mechanism is implemented
+// MOCK：在实现摘录搜索机制之前返回空结果
 export function useHomeExcerpts(
   _limit = 6,
 ): SimpleQueryState<import("@rezics/contract").UnitDTO> {

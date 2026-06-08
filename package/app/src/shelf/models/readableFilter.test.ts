@@ -60,6 +60,7 @@ describe("filterReadableEntries", () => {
     const result = filterReadableEntries(mixed, true);
     // The unlicensed book is dropped; games, media, reviews, and the
     // licensed book all remain.
+    // 未授权的 book 被丢弃；games、media、reviews 以及已授权的 book 全部保留。
     expect(result).toHaveLength(4);
     expect(
       result.some(

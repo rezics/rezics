@@ -7,11 +7,20 @@
 // short stable brand chrome. Ordinary textual navigation uses the link group.
 // Contrast numbers are diagnostics, not a blanket veto; long-form and frequently
 // changing content must stay on neutral text roles.
+//
+// 基础颜色 token —— rezics 设计系统的单一事实来源。UnoCSS preset-wind4 会读取此
+// 文件（通过 uno-config.ts）并按需生成扁平的 `--colors-*` CSS 自定义属性。深色模式
+// 覆盖由 uno-config 的 preflight 从 `darkColors` 以编程方式生成。
+//
+// 品牌红承载身份识别、主要填充控件、选中指示器以及短期稳定的品牌装饰。普通文本导航
+// 使用 link 分组。对比度数值仅作诊断用途，并非一刀切的否决依据；长文本与频繁变化的
+// 内容必须保持中性文本角色。
 
 export type ColorScheme = "light" | "dark";
 
 export interface ColorTokens {
   // ──── shadcn slots ────────────────────────────────────────────────────────
+  // ──── shadcn 槽位 ────
   background: string;
   foreground: string;
   card: { DEFAULT: string; foreground: string };
@@ -25,6 +34,7 @@ export interface ColorTokens {
   ring: string;
 
   // ──── rezics extensions ───────────────────────────────────────────────────
+  // ──── rezics 扩展 ────
   surface: {
     canvas: string;
     base: string;

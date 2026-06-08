@@ -1,5 +1,6 @@
 /**
  * TODO The current strategy has an issue. In list mode, a review actually does not need to be tied to the prime ordering. It should be able to be sorted into any position independently, while the bound prime information should be shown in the review card.
+ * TODO 当前策略存在问题。在 list 模式下，review 其实不需要绑定到 prime 排序。它应当能够独立排序到任意位置，同时绑定的 prime 信息应展示在 review card 中。
  */
 import type { ShelfView } from "@rezics/api/shelf";
 import { shelfDetailQuery } from "@rezics/api/shelf";
@@ -71,12 +72,17 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
 
-  /** Persisted default shelf view — edited via metadata form. */
+  /**
+   * Persisted default shelf view — edited via metadata form.
+   * 持久化的默认 shelf 视图 —— 通过元数据表单编辑。
+   */
   const [defaultViewMode, setDefaultViewMode] = useState<ShelfView>("nested");
 
   // Editor preview view is local state and must not dirty metadata or trigger
   // Save; the persisted default view lives in shelf.extra.viewMode, edited via
   // the metadata form.
+  // 编辑器预览视图是本地 state，不应弄脏元数据或触发 Save；持久化的默认视图存放在
+  // shelf.extra.viewMode 中，通过元数据表单编辑。
   const [editorPreviewView, setEditorPreviewView] =
     useState<ShelfView>("nested");
 

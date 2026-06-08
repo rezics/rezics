@@ -21,7 +21,7 @@ A lightweight Elysia-based service that handles non-human user requests routed b
 ## Scripts
 
 ```bash
-bun run dev    # Start with --watch (development)
+task preview:dev    # Start with --watch (development)
 ```
 
 ## Tech Stack

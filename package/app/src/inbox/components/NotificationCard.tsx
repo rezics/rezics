@@ -7,13 +7,19 @@ import { resolveNotificationHref } from "../models/notificationTarget";
 
 export interface NotificationCardProps {
   item: NotificationItem;
-  /** Invoked on activation (e.g. mark-as-read); navigation happens via target. */
+  /**
+   * Invoked on activation (e.g. mark-as-read); navigation happens via target.
+   * 在激活时调用（例如标记为已读）；导航通过目标进行。
+   */
   onClick?: () => void;
 }
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 
-/** Map a notification kind to its (literal) community message, i18n-resolved. */
+/**
+ * Map a notification kind to its (literal) community message, i18n-resolved.
+ * 将通知类型映射到其（字面的）社区消息，经 i18n 解析。
+ */
 function kindLabel(t: Translate, kind: string): string {
   switch (kind) {
     case "reaction.upvote":
@@ -95,7 +101,8 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
       {!item.read && (
         <>
           {/* Unread state is also exposed as text so it is not conveyed by
-              color/position alone. */}
+              color/position alone.
+              未读状态也以文本形式暴露，因此不会仅靠颜色/位置传达。 */}
           <span className="sr-only">{t("community:notification_unread")}</span>
           <span
             aria-hidden="true"
@@ -109,6 +116,8 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
   // When the server resolved a deep-link target, the card navigates there and
   // still marks itself read on activation; otherwise it is a plain mark-read
   // button.
+  // 当服务端解析出深链接目标时，卡片会导航到该目标，并仍在激活时将自身标记为已读；
+  // 否则它只是一个普通的标记已读按钮。
   if (href) {
     return (
       <Link to={href} onClick={onClick} className={className}>

@@ -7,22 +7,26 @@ export interface BaseNode {
 }
 
 interface TreeNode extends BaseNode {
-  title: string; // Required title to match Chapter type
+  title: string; // Required title to match Chapter type — 必填 title，与 Chapter 类型匹配
   children?: TreeNode[];
 }
 
 /**
- * 树操作工具
+ * Tree manipulation utilities.
+ * 树操作工具。
  */
 
-// 辅助函数：安全地将 id 转换为字符串进行比较
+// Helper: safely convert id to string for comparison.
+// 辅助函数：安全地将 id 转换为字符串进行比较。
 const normalizeId = (id: string | number): string => String(id);
 
-// 辅助函数：检查两个 id 是否相等
+// Helper: check whether two ids are equal.
+// 辅助函数：检查两个 id 是否相等。
 const idsEqual = (id1: string | number, id2: string | number): boolean =>
   normalizeId(id1) === normalizeId(id2);
 
-// 辅助函数：在数组中查找节点索引
+// Helper: find a node's index within an array.
+// 辅助函数：在数组中查找节点索引。
 const findNodeIndex = (
   nodes: TreeNode[],
   targetId: string | number,
@@ -31,7 +35,8 @@ const findNodeIndex = (
     idsEqual(node.id, targetId),
   );
 
-// 辅助函数：安全地在指定位置插入元素
+// Helper: safely insert elements at a given position.
+// 辅助函数：安全地在指定位置插入元素。
 const insertAt =
   <T>(index: number, items: T[]) =>
   (array: T[]): T[] => {
@@ -39,7 +44,8 @@ const insertAt =
     return [...before, ...items, ...after];
   };
 
-// 辅助函数：深拷贝节点（避免引用共享）
+// Helper: deep-clone a node (avoid shared references).
+// 辅助函数：深拷贝节点（避免引用共享）。
 const _cloneNode = (node: TreeNode): TreeNode => {
   const { children, ...rest } = node;
   if (children) {
@@ -49,14 +55,16 @@ const _cloneNode = (node: TreeNode): TreeNode => {
 };
 
 /**
- * 查找并移除指定 ID 的节点
+ * Find and remove nodes with the given IDs.
+ * 查找并移除指定 ID 的节点。
  */
 /**
- * 在一棵 id/children 结构的树中，移除 ids 里的节点
- * @param tree    原始树
- * @param ids     要移除的节点 id 列表
- * @param removed 传入一个空数组，函数会把所有被删的节点 push 到这里
- * @returns       新树 (不含被移除节点)
+ * Within an id/children-structured tree, remove the nodes listed in `ids`.
+ * 在一棵 id/children 结构的树中，移除 ids 里的节点。
+ * @param tree    Original tree。原始树。
+ * @param ids     List of node ids to remove。要移除的节点 id 列表。
+ * @param removed Pass an empty array; the function pushes every removed node into it。传入一个空数组，函数会把所有被删的节点 push 到这里。
+ * @returns       New tree (without the removed nodes)。新树（不含被移除节点）。
  */
 export function findAndRemove(
   tree: TreeNode[],
@@ -79,12 +87,13 @@ export function findAndRemove(
 /**
  * Recursively finds the target parent node and inserts given nodes
  * into its children array at the specified index.
+ * 递归查找目标父节点，并在指定索引处把给定节点插入其 children 数组。
  *
- * @param tree - Current subtree
- * @param parentId - Target parent id (null means root)
- * @param index - Insert position within the parent's children
- * @param nodes - Nodes to insert
- * @returns Updated subtree
+ * @param tree - Current subtree。当前子树。
+ * @param parentId - Target parent id (null means root)。目标父节点 id（null 表示根）。
+ * @param index - Insert position within the parent's children。在父节点 children 中的插入位置。
+ * @param nodes - Nodes to insert。要插入的节点。
+ * @returns Updated subtree。更新后的子树。
  */
 export function findAndInsert(
   tree: TreeNode[],
@@ -92,7 +101,8 @@ export function findAndInsert(
   index: number,
   nodes: TreeNode[],
 ): TreeNode[] {
-  // Insert at root level
+  // Insert at root level.
+  // 在根层级插入。
   if (parentId === null) {
     const next = [...tree];
     next.splice(index, 0, ...nodes);
@@ -122,7 +132,8 @@ export function findAndInsert(
 }
 
 /**
- * 查找并编辑节点标题
+ * Find a node and edit its title.
+ * 查找并编辑节点标题。
  */
 export const findAndEdit = (
   tree: ReadonlyArray<TreeNode>,
@@ -145,7 +156,8 @@ export const findAndEdit = (
 };
 
 /**
- * 查找并删除指定 ID 的节点
+ * Find and delete nodes with the given IDs.
+ * 查找并删除指定 ID 的节点。
  */
 export const findAndDelete = (
   tree: ReadonlyArray<TreeNode>,
@@ -176,7 +188,8 @@ export const findAndDelete = (
 };
 
 /**
- * 查找并添加子节点
+ * Find a node and append a child to it.
+ * 查找并添加子节点。
  */
 export const findAndAddChild = (
   tree: ReadonlyArray<TreeNode>,
@@ -200,7 +213,8 @@ export const findAndAddChild = (
 };
 
 /**
- * 在目标节点之后插入同级节点
+ * Insert a sibling node after the target node.
+ * 在目标节点之后插入同级节点。
  */
 export const insertSiblingAfter = (
   tree: ReadonlyArray<TreeNode>,
@@ -233,7 +247,8 @@ export const insertSiblingAfter = (
 };
 
 export function attachFirstOrphanToParent(treeData: any[], parentId: string) {
-  // Deep clone
+  // Deep clone.
+  // 深拷贝。
   const data = treeData.map((n) => ({ ...n }));
 
   const orphanIndex = data.findIndex(
@@ -261,7 +276,8 @@ export function attachFirstOrphanToParent(treeData: any[], parentId: string) {
 }
 
 /**
- * 将节点移动到同级最前
+ * Move a node to the first position among its siblings.
+ * 将节点移动到同级最前。
  */
 export const moveSiblingFirst = (
   tree: ReadonlyArray<TreeNode>,
@@ -298,7 +314,8 @@ export const moveSiblingFirst = (
 };
 
 /**
- * 将节点移动到同级最后
+ * Move a node to the last position among its siblings.
+ * 将节点移动到同级最后。
  */
 export const moveSiblingLast = (
   tree: ReadonlyArray<TreeNode>,

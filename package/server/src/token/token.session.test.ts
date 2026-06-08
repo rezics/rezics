@@ -5,15 +5,22 @@ import { tokenService } from "./token.service";
 
 /**
  * Unit tests for POST /token/session
+ * POST /token/session 的单元测试。
  *
  * These test the route handler logic by mocking the token service and database.
  * Integration tests with a real database are out of scope here.
+ * 这些测试通过 mock token service 和数据库来测试路由处理逻辑。
+ * 使用真实数据库的集成测试不在此范围内。
  */
 
 // We test the core logic extracted from the route handler:
 // 1. authenticateFromHeader → returns userId + scopes
 // 2. hasScope check for dispatch:rezics-server-session
 // 3. User lookup + session token signing
+// 我们测试从路由处理器中提取出的核心逻辑：
+// 1. authenticateFromHeader → 返回 userId + scopes
+// 2. 针对 dispatch:rezics-server-session 的 hasScope 检查
+// 3. 用户查找 + 会话 token 签名
 
 describe("token session - scope check", () => {
   it("grants access when token has dispatch:rezics-server-session scope", () => {

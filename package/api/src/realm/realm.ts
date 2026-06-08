@@ -1,6 +1,8 @@
 /**
  * Realm API - Main entry point
  * Realms are community spaces with membership, content, and tag classification.
+ * Realm API —— 主入口
+ * Realm 是带有成员、内容和标签分类的社区空间。
  *
  * File organization:
  * - realm.types.ts: TypeScript types and interfaces
@@ -9,9 +11,17 @@
  * - realm.queries.ts: Query configurations
  * - realm.mutations.ts: Mutation hooks
  * - realm.ts: Main entry (this file) - unified exports
+ * 文件组织：
+ * - realm.types.ts：TypeScript 类型和接口
+ * - realm.keys.ts：React Query 键工厂
+ * - realm.api.ts：API 客户端函数
+ * - realm.queries.ts：查询配置
+ * - realm.mutations.ts：变更 hooks
+ * - realm.ts：主入口（本文件）—— 统一导出
  */
 
 // Re-export contract types used by new realm-tag mutations
+// 重新导出新的 realm-tag 变更所用到的 contract 类型
 export type {
   CastRealmTagApplicationVoteInput,
   CreateRealmTagApplicationInput,
@@ -23,10 +33,13 @@ export type {
   UpdateRealmTagContextInput,
 } from "@rezics/contract";
 // API Client
+// API 客户端
 export { realmApi } from "./realm.api";
 // Query Keys
+// 查询键
 export { realmKeys } from "./realm.keys";
 // Mutation Hooks
+// 变更 hooks
 export {
   realmMutations,
   useAddRealmTagApplicationMutation,
@@ -52,6 +65,7 @@ export {
   useUpdateRealmTagContextMutation,
 } from "./realm.mutations";
 // Query Configurations
+// 查询配置
 export {
   myRealmMembershipQuery,
   myRealmsQuery,
@@ -66,6 +80,7 @@ export {
   realmTagContextQuery,
 } from "./realm.queries";
 // Types
+// 类型
 export type {
   AcknowledgeRealmRuleInput,
   AddRealmTagApplicationInput,

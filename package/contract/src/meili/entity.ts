@@ -6,9 +6,13 @@ import { subjectAttributionRoleKeySchema } from "../entity/subject-attribution";
 import { languageSchema } from "../language";
 
 // ANCHOR: Entity Search Document
+// ANCHOR: 实体搜索文档
 
 export const EntitySearchDocumentSchema = t.Object({
-  /** Primary key for the Meili `entities` index — equals `Unit.id`. */
+  /**
+   * Primary key for the Meili `entities` index — equals `Unit.id`.
+   * Meili `entities` 索引的主键——等于 `Unit.id`。
+   */
   id: t.String(),
   unitId: t.String(),
   kind: t.Union([t.String(), t.Null()]),
@@ -18,15 +22,18 @@ export const EntitySearchDocumentSchema = t.Object({
   avatar: t.Union([t.String(), t.Null()]),
 
   // Searchable arrays (denormalized from UnitTranslation)
+  // 可搜索数组（从 UnitTranslation 反规范化而来）
   titles: t.Array(t.String()),
   summaries: t.Array(t.String()),
   aliasValues: t.Array(t.String()),
 
   // Entity-owned eligibility facets
+  // Entity 自有的资格分面
   eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),
   eligibleSubjectRoles: t.Array(subjectAttributionRoleKeySchema),
 
   // Structured translations for display rendering
+  // 用于展示渲染的结构化翻译
   translations: t.Array(
     t.Object({
       language: languageSchema,

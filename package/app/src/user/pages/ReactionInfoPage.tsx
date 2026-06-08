@@ -6,6 +6,7 @@ import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 
 // MOCK: Reaction history page — waiting on reaction service /reactions/history endpoint
+// MOCK：互动历史页面 — 等待 reaction 服务的 /reactions/history 端点。
 export const ReactionInfoPage: React.FC = () => {
   const { t } = useTranslation(["settings"]);
   const navigate = useNavigate();

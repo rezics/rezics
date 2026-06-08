@@ -38,11 +38,11 @@ export type FeedbackResolvedFilter = boolean | undefined;
 export type FeedbackListProps = {
   queryType: "mine" | "all" | "user";
   userId?: string;
-  /** Full-text search keyword. */
+  /** Full-text search keyword. 全文搜索关键词。 */
   search?: string;
-  /** Filter by feedback type. */
+  /** Filter by feedback type. 按反馈类型过滤。 */
   typeFilter?: FeedbackType;
-  /** Filter by resolved status; `undefined` means all. */
+  /** Filter by resolved status; `undefined` means all. 按解决状态过滤；`undefined` 表示全部。 */
   resolved?: FeedbackResolvedFilter;
 };
 

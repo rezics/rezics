@@ -361,6 +361,7 @@ export default function UnitEditPage() {
               </div>
 
               {/* Translations (read-only display) */}
+              {/* 翻译（只读展示） */}
               {detailQuery.data?.translations?.length ? (
                 <div className="flex flex-col gap-2 mb-6">
                   <p className="text-xs font-semibold text-text-secondary">

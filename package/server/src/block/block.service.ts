@@ -134,11 +134,14 @@ function createDrizzleBlockRepository(): BlockRepository {
  * `blockedId`); enforcement that should apply both ways (DM) uses
  * `isBlockedEitherWay`. Content hiding uses `blockedUserIds` (the ids the
  * viewer has blocked).
+ * 用户对用户的拉黑。拉黑是有方向的（`blockerId` 拉黑了 `blockedId`）；需要双向
+ * 生效的约束（如私信 DM）使用 `isBlockedEitherWay`。内容隐藏使用
+ * `blockedUserIds`（观看者已拉黑的 id 集合）。
  */
 export class BlockService {
   constructor(private readonly repository = createDrizzleBlockRepository()) {}
 
-  /** The blocker's blocked users, enriched with public brief + block time. */
+  /** The blocker's blocked users, enriched with public brief + block time. 拉黑者所拉黑的用户，附带公开简介与拉黑时间。 */
   async listBlocked(blockerId: string): Promise<BlockedUser[]> {
     const blocks = await this.repository.listBlocks(blockerId);
     if (blocks.length === 0) return [];
@@ -162,27 +165,27 @@ export class BlockService {
     );
   }
 
-  /** Idempotently record that `blockerId` blocks `blockedId`. */
+  /** Idempotently record that `blockerId` blocks `blockedId`. 幂等地记录 `blockerId` 拉黑 `blockedId`。 */
   async add(blockerId: string, blockedId: string): Promise<void> {
     await this.repository.add(blockerId, blockedId);
   }
 
-  /** Remove the block from `blockerId` to `blockedId` (no-op if absent). */
+  /** Remove the block from `blockerId` to `blockedId` (no-op if absent). 移除 `blockerId` 到 `blockedId` 的拉黑（不存在时为无操作）。 */
   async remove(blockerId: string, blockedId: string): Promise<void> {
     await this.repository.remove(blockerId, blockedId);
   }
 
-  /** unitIds the blocker has blocked — used to hide content in feeds. */
+  /** unitIds the blocker has blocked — used to hide content in feeds. 拉黑者已拉黑的 unitId — 用于在信息流中隐藏内容。 */
   async blockedUserIds(blockerId: string): Promise<string[]> {
     return this.repository.blockedUserIds(blockerId);
   }
 
-  /** True if either user has blocked the other — used to gate DM. */
+  /** True if either user has blocked the other — used to gate DM. 任一方拉黑对方则为 true — 用于限制私信 DM。 */
   async isBlockedEitherWay(a: string, b: string): Promise<boolean> {
     return this.repository.isBlockedEitherWay(a, b);
   }
 
-  /** Remove every block row referencing the user (either side). */
+  /** Remove every block row referencing the user (either side). 移除引用该用户（任一侧）的所有拉黑记录。 */
   async removeAllForUser(userId: string): Promise<void> {
     await this.repository.removeAllForUser(userId);
   }

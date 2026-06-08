@@ -14,6 +14,9 @@ export const notificationExtraSchema = t.Optional(
  * re-deriving the route client-side. The server picks `route` per the
  * link-selection policy in `app-product-navigation` (e.g.
  * `/book/:bookId/node/:nodeId` when the event carries a `nodeId`).
+ * 由服务端解析的深链目标，使通知卡片无需在客户端重新派生路由即可导航。服务端按
+ * `app-product-navigation` 中的链接选择策略选定 `route`（例如当事件携带 `nodeId`
+ * 时选用 `/book/:bookId/node/:nodeId`）。
  */
 export const notificationTargetSchema = t.Object({
   route: t.String(),
@@ -31,7 +34,10 @@ export const notificationItemSchema = t.Object({
   extra: t.Optional(t.Any()),
   read: t.Boolean(),
   latestAt: t.String(),
-  /** Deep-link target resolved by the server emitter. */
+  /**
+   * Deep-link target resolved by the server emitter.
+   * 由服务端发射方解析的深链目标。
+   */
   target: t.Optional(notificationTargetSchema),
 });
 export type NotificationItem = (typeof notificationItemSchema)["static"];

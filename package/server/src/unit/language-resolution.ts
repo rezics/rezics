@@ -98,6 +98,8 @@ export function preferredLanguageVisibilityWhere(input: {
 
   // Visibility filtering decides whether the Unit appears; display language
   // resolution remains a separate support-language read on the returned row.
+  // 可见性过滤决定 Unit 是否出现；显示语言的解析仍是对返回行的一次独立
+  // support-language 读取。
   return {
     OR: [
       { isLanguageNeutral: true },
@@ -343,6 +345,8 @@ export class UnitLanguageService {
       // ContentTranslation stores body/content; UnitTranslation stores display
       // metadata such as title and description, so post language reads may
       // intentionally bundle both rows.
+      // ContentTranslation 存储正文/内容；UnitTranslation 存储 title、description
+      // 等显示元数据，因此帖子的语言读取可能有意将两行数据合并返回。
       content: (contentTranslation?.content as any) ?? null,
     };
   }

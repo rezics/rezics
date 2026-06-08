@@ -1,4 +1,5 @@
 // MOCK: Storybook realm fixtures, hand-authored against `RealmDTO`.
+// MOCK：Storybook realm 夹具，手工依据 `RealmDTO` 编写。
 import type { RealmDTO } from "@rezics/contract";
 import { LANGUAGES } from "@rezics/contract";
 import { userAlice } from "./user.ts";

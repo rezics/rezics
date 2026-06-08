@@ -742,10 +742,14 @@ export class ShelfService {
    * Resolve `{ ownerUserId, slug }` under the owner scope. Only system shelf
    * slugs ('favorites' | 'saved' | 'backlog' | 'active' | 'completed') are accepted in
    * v1 — every other slug returns null per `SHELF_CUSTOM_SLUG_DISABLED`.
+   * 在所有者作用域下解析 `{ ownerUserId, slug }`。v1 仅接受系统书架的
+   * slug（'favorites' | 'saved' | 'backlog' | 'active' | 'completed'）—
+   * 其他 slug 一律按 `SHELF_CUSTOM_SLUG_DISABLED` 返回 null。
    *
    * Lookup goes through the Unit slug index `(slugScope = ownerUserId,
    * slug)` so the resolver shares the path used by every other slug-bearing
    * Unit.
+   * 查找走 Unit 的 slug 索引 `(slugScope = ownerUserId, slug)`，使该解析器与所有其他带 slug 的 Unit 共用同一路径。
    */
   async getByOwnerAndSlug(
     ownerUserId: string,
@@ -794,6 +798,9 @@ export class ShelfService {
     // (schema-enforced) — system shelves only. Custom slugs are a deliberate
     // future toggle, not an oversight. Guard against any payload that smuggles
     // a `slug` field (SHELF_CUSTOM_SLUG_DISABLED).
+    // v1 拒绝用户创建书架时客户端提供的任何 slug（由 schema 强制）— 仅限系统书架。
+    // 自定义 slug 是有意保留的未来开关，并非疏漏。防范任何夹带 `slug` 字段的载荷
+    // （SHELF_CUSTOM_SLUG_DISABLED）。
     if ((req as Record<string, unknown>).slug != null) {
       throw new AppError(
         400,
@@ -1053,9 +1060,11 @@ export class ShelfService {
   }
 
   // --- Shelf item operations ---
+  // --- 书架条目操作 ---
 
   /**
    * Derive the ShelfItem kind for a unit at write time.
+   * 在写入时为某个 unit 推导其 ShelfItem kind。
    */
   async deriveKind(unitId: string): Promise<ShelfItemKind> {
     const db = await getServerDb();
@@ -1331,6 +1340,7 @@ export class ShelfService {
   }
 
   // --- ShelfItemChild operations ---
+  // --- ShelfItemChild 操作 ---
 
   async attachReview(
     shelfId: string,
@@ -1397,6 +1407,7 @@ export class ShelfService {
   /**
    * Reconcile the children of a parent for a single role to exactly the supplied list.
    * Auto-creates child ShelfItem rows if needed; end-of-shelf position rule.
+   * 将某父项在单一 role 下的子项精确对齐到所提供的列表。必要时自动创建子 ShelfItem 行；采用书架末尾的 position 规则。
    */
   async setChildren(
     shelfId: string,

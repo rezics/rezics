@@ -41,6 +41,8 @@ function TooltipIconTrigger(props: Record<string, unknown>) {
  * BookMetadataValue — flat overlay of book unit-level fields (i.e. fields
  * that are NOT per-language). Per-language title/subtitle/summary/description
  * are edited via the translation editor instead.
+ * BookMetadataValue —— 书籍 unit 级字段的扁平覆盖层（即非按语言区分的字段）。
+ * 按语言区分的 title/subtitle/summary/description 改由翻译编辑器编辑。
  */
 export type BookMetadataValue = Partial<BookDTO>;
 
@@ -105,7 +107,6 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* ISBN-13 + Cover URL */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-isbn">
@@ -134,7 +135,6 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
       </div>
 
-      {/* Page Count + Text Length */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-pagecount">
@@ -179,7 +179,6 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         />
       ) : null}
 
-      {/* Rating + Flags */}
       <div className="flex flex-col gap-4">
         <div className="max-w-xs">
           <RatingSelector

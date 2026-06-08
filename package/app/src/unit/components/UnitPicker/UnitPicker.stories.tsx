@@ -15,6 +15,7 @@ import type { Candidate } from "../../models/types";
 import { UnitPicker } from "./UnitPicker";
 
 // MOCK: fixture units for storybook cache hydration.
+// MOCK：用于 storybook 缓存预填充的夹具单元。
 const fixtureBook: UnitDTO = {
   id: "book-abc",
   type: "book",
@@ -114,6 +115,8 @@ function StoryShell({ initialInput, mode }: StoryShellProps) {
 // MOCK: storybook router stub. Declares route templates with unit-bearing
 // params so router.getMatchedRoutes() returns realistic results for the
 // stories' initialInput values.
+// MOCK：storybook 路由桩。声明带有 unit 参数的路由模板，使
+// router.getMatchedRoutes() 针对各 story 的 initialInput 值返回真实结果。
 function StoryRouterHost({ children }: { children: React.ReactNode }) {
   const router = useMemo(() => {
     const rootRoute = createRootRoute({

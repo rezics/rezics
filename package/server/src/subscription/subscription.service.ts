@@ -258,6 +258,9 @@ function createDrizzleSubscriptionRepository(): SubscriptionRepository {
  * subscriber Unit (USER in v1) to any subscribed Unit. All write paths
  * maintain the denormalized counters on `Unit.subscriberCount` and on
  * `User.followersCount` / `followingsCount` (USER->USER edges) atomically.
+ * `Subscription` 行的服务——从订阅者 Unit（v1 中为 USER）到任意被订阅
+ * Unit 的通用关注边。所有写入路径都原子地维护 `Unit.subscriberCount` 以及
+ * `User.followersCount` / `followingsCount`（USER->USER 边）上的反范式计数器。
  */
 export class SubscriptionService {
   constructor(
@@ -267,17 +270,25 @@ export class SubscriptionService {
 
   /**
    * Insert a subscription row plus counter updates in one transaction.
+   * 在单个事务中插入订阅行并更新计数器。
    *
    * - `subscriberUnitId === subscribedUnitId` is rejected (400).
+   *   `subscriberUnitId === subscribedUnitId` 会被拒绝（400）。
    * - Target's `Unit.type` must be in `CHANNEL_REGISTRY` (400 otherwise).
+   *   目标的 `Unit.type` 必须存在于 `CHANNEL_REGISTRY` 中（否则 400）。
    * - Private REALM targets require the subscriber to already be a
    *   `RealmMember`; non-members can only subscribe to public realms
    *   (403 otherwise).
+   *   私有 REALM 目标要求订阅者已是 `RealmMember`；非成员只能订阅公开
+   *   realm（否则 403）。
    * - Channels are validated against the per-type registry. Default is
    *   `['*']` when omitted; an empty array is rejected (would be a
    *   silent no-op subscription).
+   *   channels 会针对按类型的注册表进行校验。省略时默认为 `['*']`；空数组
+   *   会被拒绝（否则会成为静默无效的订阅）。
    * - Database uniqueness on `(subscriberUnitId, subscribedUnitId)` rejects
    *   duplicates.
+   *   `(subscriberUnitId, subscribedUnitId)` 上的数据库唯一性约束会拒绝重复项。
    */
   async subscribe(
     subscriberUnitId: string,
@@ -342,6 +353,7 @@ export class SubscriptionService {
     });
 
     // A failed notification must not roll back the subscription write.
+    // 通知失败不得回滚订阅写入。
     if (isUserToUser) {
       this.broadcastFollow({
         kind: "follow.new",
@@ -358,6 +370,8 @@ export class SubscriptionService {
    * Delete the subscription row and reverse the counter updates in one
    * transaction. Missing rows are idempotent — returns `false` rather
    * than throwing so the UI can be a single-button toggle.
+   * 在单个事务中删除订阅行并反向更新计数器。缺失的行是幂等的——返回
+   * `false` 而非抛出异常，以便 UI 可以是单按钮切换。
    */
   async unsubscribe(
     subscriberUnitId: string,
@@ -385,6 +399,8 @@ export class SubscriptionService {
    * Replace `channels` on an existing subscription row. Channels are
    * validated against the subscribed unit's UnitType registry. Counter values
    * are not touched (channel scope changes do not affect the count).
+   * 替换现有订阅行上的 `channels`。channels 会针对被订阅 unit 的 UnitType
+   * 注册表进行校验。计数器值不会被改动（channel 范围变更不影响计数）。
    */
   async updateChannels(
     subscriberUnitId: string,
@@ -427,6 +443,8 @@ export class SubscriptionService {
    * List the caller's subscriptions, optionally filtered by the
    * subscribed unit's UnitType (e.g., `subscribedType=USER` powers the
    * "followings" view on the profile-followers-tab).
+   * 列出调用方的订阅，可选按被订阅 unit 的 UnitType 过滤（例如
+   * `subscribedType=USER` 支撑 profile-followers-tab 上的“关注中”视图）。
    */
   async listMine(
     userId: string,
@@ -440,6 +458,8 @@ export class SubscriptionService {
    * Probe whether the caller is subscribed to `subscribedUnitId`. Returns
    * `{ subscribed: false }` rather than 404 so the UI can render a
    * toggle without two requests.
+   * 探测调用方是否已订阅 `subscribedUnitId`。返回 `{ subscribed: false }`
+   * 而非 404，以便 UI 无需两次请求即可渲染切换。
    */
   async checkSubscription(
     userId: string,
@@ -458,6 +478,9 @@ export class SubscriptionService {
    * counter is maintained transactionally by this service alongside
    * every Subscription insert/delete; the migration seeded the initial
    * value from a COUNT(*) over the backfilled rows.
+   * 从 `Unit.subscriberCount` 读取缓存的订阅者计数。该计数器由本服务在每次
+   * Subscription 插入/删除时事务性地维护；迁移通过对回填行执行 COUNT(*)
+   * 来初始化其初始值。
    */
   async getSubscriberCount(subscribedUnitId: string): Promise<number> {
     const subscriberCount =

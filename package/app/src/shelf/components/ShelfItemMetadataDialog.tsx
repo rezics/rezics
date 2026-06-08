@@ -99,6 +99,7 @@ function ShelfItemMetadataDialogContent({
       onClose();
     } catch {
       // Mutation hooks expose the error in the dialog.
+      // mutation hooks 会在对话框中暴露该错误。
     }
   }
 

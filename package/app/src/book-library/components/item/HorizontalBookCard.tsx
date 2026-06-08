@@ -43,6 +43,7 @@ export function HorizontalBookCard({
     >
       <div className="flex gap-4 items-start">
         {/* Cover */}
+        {/* 封面 */}
         <div
           className="
             w-15
@@ -69,6 +70,7 @@ export function HorizontalBookCard({
         </div>
 
         {/* Text */}
+        {/* 文本 */}
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold line-clamp-1 mb-1">{title}</div>
 

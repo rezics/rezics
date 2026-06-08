@@ -19,6 +19,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   .use(authMacro)
 
   // POST /score — upsert score (auth required)
+  // POST /score —— 写入或更新评分（需要登录鉴权）
   .post(
     "/",
     async ({ body, identity }) => {
@@ -39,6 +40,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // DELETE /score/:id — delete score (auth required)
+  // DELETE /score/:id —— 删除评分（需要登录鉴权）
   .delete(
     "/:id",
     async ({ params, identity, set }) => {
@@ -65,6 +67,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // GET /score/unit/:unitId — all realm aggregates for a unit
+  // GET /score/unit/:unitId —— 某个 unit 的所有 realm 聚合数据
   .get(
     "/unit/:unitId",
     async ({ params }) => {
@@ -81,6 +84,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // GET /score/unit/:unitId/:realm — single realm aggregate
+  // GET /score/unit/:unitId/:realm —— 单个 realm 的聚合数据
   .get(
     "/unit/:unitId/:realm",
     async ({ params }) => {
@@ -97,6 +101,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // GET /score/user/:userId/:unitId — user's score entries for a unit
+  // GET /score/user/:userId/:unitId —— 用户针对某个 unit 的评分条目
   .get(
     "/user/:userId/:unitId",
     async ({ params }) => {
@@ -113,6 +118,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // POST /score/recalculate — admin recalculation endpoint
+  // POST /score/recalculate —— 管理员触发的重新计算端点
   .post(
     "/recalculate",
     async ({ body, identity }) => {
@@ -141,6 +147,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // GET /score/realm/:realmId — list realm fields
+  // GET /score/realm/:realmId —— 列出 realm 的字段
   .get(
     "/realm/:realmId",
     async ({ params }) => {
@@ -154,6 +161,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // POST /score/realm/:realmId — add field (admin)
+  // POST /score/realm/:realmId —— 新增字段（管理员）
   .post(
     "/realm/:realmId",
     async ({ params, body, identity }) => {
@@ -183,6 +191,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
   )
 
   // DELETE /score/realm/:realmId/:key — remove field (admin)
+  // DELETE /score/realm/:realmId/:key —— 移除字段（管理员）
   .delete(
     "/realm/:realmId/:key",
     async ({ params, identity, set }) => {

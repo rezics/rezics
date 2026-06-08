@@ -36,7 +36,6 @@ export default function AdminLayout({
         </div>
       </header>
 
-      {/* Mobile drawer */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
@@ -47,7 +46,7 @@ export default function AdminLayout({
         </SheetContent>
       </Sheet>
 
-      {/* Desktop permanent sidebar — reserves space via flex shrink-0 */}
+      {/* Desktop permanent sidebar — reserves space via flex shrink-0 — 桌面端常驻侧栏：通过 flex shrink-0 预留空间 */}
       <div
         className="hidden md:block shrink-0"
         style={{ width: drawerWidth }}

@@ -6,7 +6,10 @@ const DmInboxPage = lazyRouteComponent(
 );
 
 type DmInboxSearch = {
-  /** Optional peer to open a conversation with (set by the DM action). */
+  /**
+   * Optional peer to open a conversation with (set by the DM action).
+   * 可选的会话对端，用于打开与其的对话（由 DM 操作设置）。
+   */
   peerId?: string;
 };
 

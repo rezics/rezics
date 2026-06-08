@@ -29,7 +29,7 @@ Reset local managed service volumes with:
 
 ```bash
 docker compose -p rezics-dev-external-services -f tool/service/compose.yml down -v
-bun run service up
+task service:up
 ```
 
 If you have containers from the old `rezics-external-services` project name,
@@ -40,14 +40,14 @@ docker compose -p rezics-external-services -f tool/service/compose.yml down
 ```
 
 The source PostgreSQL init scripts recreate local development databases on
-first boot. Run schema-owner migrations through `bun run db:migrate`; run
-`bun run db:ensure` for `job-runner` because pg-boss owns its internal schema.
+first boot. Run schema-owner migrations through `task db:migrate`; run
+`task job-runner:db:ensure` for `job-runner` because pg-boss owns its internal schema.
 
 Run health checks after startup:
 
 ```bash
-bun run service health
-bun run service source verify
+task service:health
+task service -- source verify
 ```
 
 For the optional observability smoke stack:

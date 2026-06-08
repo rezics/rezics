@@ -5,6 +5,9 @@ import type { ContentStructureNodeRow } from "./types";
 // buildContentStructureTree or resolveContentStructurePath. The mapper does not
 // re-check that invariant; passing in tombstoned rows will silently include
 // them in the resulting tree.
+// 软删除：调用方在调用 buildContentStructureTree 或
+// resolveContentStructurePath 之前必须过滤 isDeleted = false。mapper 不会重新
+// 校验该不变量；传入墓碑行会静默地将它们包含进结果树中。
 
 export function buildContentStructureTree(
   rows: readonly ContentStructureNodeRow[],

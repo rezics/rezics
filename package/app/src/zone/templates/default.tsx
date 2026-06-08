@@ -6,6 +6,8 @@ import type { ZoneTemplateProps } from "./types";
 /**
  * Default zone homepage template.
  * Generic layout: banner + search + content area.
+ * 默认的 zone 主页模板。
+ * 通用布局：横幅 + 搜索 + 内容区域。
  */
 export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
   zone,
@@ -22,7 +24,7 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
 
   return (
     <div>
-      {/* Banner */}
+      {/* Banner 横幅 */}
       <div
         className="relative py-24 px-8 mb-8 rounded-lg"
         style={{
@@ -40,7 +42,7 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search 搜索 */}
       <div className="mb-12">
         <KeywordInput
           value={keywordBind.value ?? ""}
@@ -50,12 +52,12 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
         />
       </div>
 
-      {/* Content area — populated by child routes or sections */}
+      {/* Content area — populated by child routes or sections 内容区域 —— 由子路由或区块填充 */}
       <div>
         <h2 className="text-lg font-semibold mb-4">
           {t("search:zone_latest_content")}
         </h2>
-        {/* MOCK: content sections will be wired when zone-specific content queries exist */}
+        {/* MOCK: content sections will be wired when zone-specific content queries exist 内容区块将在存在 zone 特定的内容查询时接入 */}
         <p className="text-text-secondary">
           {t("search:zone_content_placeholder")}
         </p>

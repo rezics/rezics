@@ -17,6 +17,7 @@ import { tokenService } from "./token.service";
 import { userRoute } from "./token.user.api";
 
 // Token-auth book & user routes (independent auth via API token header)
+// 令牌鉴权的 book 与 user 路由（通过 API 令牌请求头独立鉴权）
 const tokenExternalRoutes = new Elysia({ prefix: "/token" })
   .use(bookRoute)
   .use(userRoute);
@@ -32,6 +33,7 @@ async function findTokenSessionUser(userId: string) {
 }
 
 // Token-auth session exchange route
+// 令牌鉴权的会话交换路由
 const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
   "/session",
   async ({ headers, set }) => {
@@ -88,6 +90,7 @@ const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
 );
 
 // Owner-authenticated token management routes
+// 所有者鉴权的令牌管理路由
 const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   .use(authMacro)
   .get(

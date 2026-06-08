@@ -297,6 +297,7 @@ export function RealmManagePage({
           </div>
           <div className="flex justify-end">
             {/* Identity save only upserts the selected translation; realm extra controls auto-save independently. */}
+            {/* 身份保存仅 upsert 选中的翻译；realm 的额外控件各自独立自动保存。 */}
             <Button onClick={handleSave} disabled={saving}>
               {t("common:save")}
             </Button>

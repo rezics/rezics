@@ -36,12 +36,15 @@ describe("MarkdownEditor composition", () => {
 
     expect(overridden.find((t) => t.name === "bold")?.icon).toBe(customIcon);
     // Other items keep their default icons
+    // 其他项保留其默认图标
     expect(overridden.find((t) => t.name === "italic")?.icon).toBeDefined();
   });
 
   it("toolbar={false} results in empty items", () => {
     // When toolbar is false, the component skips resolution
     // This is a no-op test to document the behavior
+    // 当 toolbar 为 false 时，组件跳过解析
+    // 这是一个用于记录该行为的空操作测试
     const items: any[] = [];
     expect(items).toHaveLength(0);
   });

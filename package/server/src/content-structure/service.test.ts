@@ -438,6 +438,7 @@ describe("ContentStructureService.update — soft-delete-aware", () => {
     await contentStructureService.update("book-1", [{ id: "a", title: "A" }]);
 
     // No soft delete should have fired because "buried" was not in baseline diff
+    // 不应触发软删除，因为 "buried" 不在基线 diff 中
     const updateManyCalls = updateManyContentStructureNode.mock.calls;
     expect(updateManyCalls.length).toBe(0);
   });

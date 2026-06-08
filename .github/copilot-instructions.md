@@ -29,7 +29,7 @@ tests, comments), not in a parallel spec corpus.
 ## Validation expectations
 
 - Prefer targeted checks first (affected package build/lint/tests), then broader
-  checks (`bun run check:convention`, `bun run check:tokens`, `bun run knip`).
+  checks (`task check:convention`, `task check:tokens`, `task knip`).
 - Do not fix unrelated failures as part of a focused change.
 
 ## Documentation expectations

@@ -305,7 +305,7 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
 
 const defaultRepository = createDrizzleAccountDataRepository();
 
-/** The caller's `@`-handle (USER unit slug), or null if none is set. */
+/** The caller's `@`-handle (USER unit slug), or null if none is set. 调用者的 `@` 句柄（USER unit slug），若未设置则为 null。 */
 async function getHandle(
   userId: string,
   repository: AccountDataRepository = defaultRepository,
@@ -317,6 +317,8 @@ async function getHandle(
  * Assemble the caller's personal data as a single JSON payload. Scope is
  * documented on `userDataExportSchema`: profile, settings, authored content,
  * and social graph. Returned inline — no job/file storage.
+ * 将调用者的个人数据汇集为单个 JSON 负载。范围记录在 `userDataExportSchema` 上：
+ * 个人资料、设置、所撰写内容以及社交关系图。内联返回 — 不经过任务/文件存储。
  */
 export async function exportUserData(
   userId: string,
@@ -390,7 +392,7 @@ export async function exportUserData(
   };
 }
 
-/** Thrown when the deletion confirmation does not match the account handle. */
+/** Thrown when the deletion confirmation does not match the account handle. 当删除确认与账号句柄不匹配时抛出。 */
 export class DeletionNotConfirmedError extends Error {}
 
 /**
@@ -406,6 +408,17 @@ export class DeletionNotConfirmedError extends Error {}
  *
  * Requires `confirmation` to equal the account handle; otherwise throws
  * `DeletionNotConfirmedError` and makes no changes.
+ *
+ * 匿名化并保留式的账号删除（已记录的策略）：
+ *
+ * - 移除/清除：User 行上的 PII（email、name、avatar、bio、description、
+ *   settings）、auth 关联、公开个人资料（USER unit 置为 DELETED + PRIVATE）、
+ *   私有收藏元数据、用户的拉黑记录，以及用户的关注边（同步调整对端计数器）。
+ * - 保留：所撰写的内容（posts/reviews/books/shelves）— 保留并显示为由已删除
+ *   用户撰写 — 以及审核案件、处置与审计记录，出于安全/审计完整性，这里不予改动。
+ *
+ * 要求 `confirmation` 等于账号句柄；否则抛出 `DeletionNotConfirmedError`
+ * 且不做任何更改。
  */
 export async function deleteAccount(
   userId: string,
@@ -421,6 +434,7 @@ export async function deleteAccount(
   }
 
   // Remove follow edges in both directions, keeping peer counters consistent.
+  // 移除双向的关注边，并保持对端计数器一致。
   const [followings, followers] = await Promise.all([
     repository.listFollows(userId),
     repository.listFollowers(userId),
@@ -433,9 +447,12 @@ export async function deleteAccount(
   }
 
   // Clear safety state that references the user on either side.
+  // 清除任一侧引用该用户的安全状态。
   await blockService.removeAllForUser(userId);
 
   // Scrub PII and hide the public profile. Authored content (separate Unit
   // rows) and moderation/audit records are intentionally left in place.
+  // 清除 PII 并隐藏公开个人资料。所撰写内容（独立的 Unit 行）以及审核/审计
+  // 记录有意保留原处。
   await repository.scrubDeletedAccount(userId, new Date());
 }

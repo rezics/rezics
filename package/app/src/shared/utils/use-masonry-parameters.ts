@@ -31,7 +31,8 @@ function calcMasonryParams(width: number): MasonryParams {
 
 export function useMasonryParameters(): MasonryParams {
   const [params, setParams] = useState<MasonryParams>(() => {
-    // SSR / 初始渲染兜底
+    // SSR / initial-render fallback.
+    // SSR / 初始渲染兜底。
     if (typeof window === "undefined") {
       return { columns: 4, spacing: 2 };
     }
@@ -45,7 +46,8 @@ export function useMasonryParameters(): MasonryParams {
       setParams(calcMasonryParams(window.innerWidth));
     };
 
-    // 初始化再算一次，防止初始宽度变化
+    // Recompute once on init to guard against an initial width change.
+    // 初始化再算一次，防止初始宽度变化。
     handleResize();
 
     window.addEventListener("resize", handleResize);
@@ -55,7 +57,8 @@ export function useMasonryParameters(): MasonryParams {
   return params;
 }
 
-// 轻量 throttle
+// Lightweight throttle.
+// 轻量 throttle。
 function throttle<T extends (...args: any[]) => void>(fn: T, wait: number) {
   let last = 0;
   let timer: any = null;
@@ -82,7 +85,7 @@ function throttle<T extends (...args: any[]) => void>(fn: T, wait: number) {
 export function useThrottleMasonryParameters(throttleMs = 1000): MasonryParams {
   const [params, setParams] = useState<MasonryParams>(() => {
     if (typeof window === "undefined") {
-      return { columns: 4, spacing: 2 }; // SSR 兜底
+      return { columns: 4, spacing: 2 }; // SSR fallback — SSR 兜底
     }
     return calcMasonryParams(window.innerWidth);
   });
@@ -90,12 +93,14 @@ export function useThrottleMasonryParameters(throttleMs = 1000): MasonryParams {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // 包一层节流
+    // Wrap with throttling.
+    // 包一层节流。
     const throttledResize = throttle(() => {
       setParams(calcMasonryParams(window.innerWidth));
     }, throttleMs);
 
-    // 立刻执行一次
+    // Run once immediately.
+    // 立刻执行一次。
     throttledResize();
 
     window.addEventListener("resize", throttledResize);

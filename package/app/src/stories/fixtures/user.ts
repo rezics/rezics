@@ -1,4 +1,5 @@
 // MOCK: Storybook user fixtures, hand-authored against `PublicUser`.
+// MOCK：Storybook 用户夹具，依据 `PublicUser` 手工编写。
 import type { PublicUser } from "@rezics/contract";
 
 export const userAlice: PublicUser = {

@@ -12,8 +12,10 @@
 FROM rezics-base:dev AS build
 WORKDIR /repo/package/reaction
 
-# Compile the standalone Linux amd64 binary.
-RUN bun run build:linux
+# Compile the standalone Linux amd64 binary inline (mirrors
+# `task reaction:build:linux`).
+RUN bun build src/cluster.ts --compile --minify-whitespace --minify-syntax \
+  --target bun-linux-x64 --outfile reaction
 
 # --- runtime stage ---------------------------------------------------------
 # Slim glibc runtime (the bun-linux-x64 binary links glibc, not musl).

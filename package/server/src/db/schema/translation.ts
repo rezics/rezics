@@ -31,10 +31,13 @@ export const UnitTranslation = pgTable(
     /**
      * Rich ContentDoc JSON. Search projections such as descriptionText are
      * Meilisearch-only and must not be added as PostgreSQL columns.
+     * 富文本 ContentDoc JSON。诸如 descriptionText 的搜索投影仅存在于
+     * Meilisearch，不得作为 PostgreSQL 列加入。
      */
     description: jsonData(),
     extra: jsonData(),
-    /** Optional provenance Unit for the translation's display/content source. */
+    /** Optional provenance Unit for the translation's display/content source.
+     * 可选的来源 Unit，用于标记该翻译的展示/内容出处。 */
     sourceUnitId: uuid(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -87,6 +90,7 @@ export const ContentTranslation = pgTable(
     /**
      * Optional hooks for source/provenance migration. These scalar ids do not
      * imply ownership or source validation rules.
+     * 用于来源/出处迁移的可选挂钩。这些标量 id 不蕴含所有权或来源校验规则。
      */
     sourceUnitId: uuid(),
     authorUserId: uuid(),

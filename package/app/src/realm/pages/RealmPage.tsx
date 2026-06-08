@@ -157,6 +157,7 @@ export function RealmPage({
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
   // Public realm tabs are consumption-only; configuration and queues live in /manage.
+  // 公开 realm 标签页仅供浏览；配置与队列位于 /manage。
   const activeTab = localTab === "wiki" && !showWikiTab ? "feed" : localTab;
   const handleTabChange = (value: string) => {
     const next = value as RealmPageTab;

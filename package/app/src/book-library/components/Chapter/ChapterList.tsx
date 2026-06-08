@@ -114,6 +114,9 @@ const CHAPTER_GRID_CLASS =
  * Render chapter tree items WITHOUT a wrapping layout container.
  * This is important so recursion can keep rendering at the same "root grid level"
  * (no nested grid/indent), while group headers can span full width.
+ * 渲染章节树项时不包裹布局容器。
+ * 这一点很重要：使递归能持续在同一“根网格层级”渲染（无嵌套网格/缩进），
+ * 同时让分组标题可以横跨整行宽度。
  */
 const BookTocTreeItems = React.memo(function BookTocTreeItems({
   bookId,
@@ -206,6 +209,8 @@ type BookTocTreeViewProps = {
    * Optional: persist expanded ids externally (e.g. Zustand store).
    * If provided, component will read initial expanded ids from it once on mount,
    * and call it on every change.
+   * 可选：将展开的 id 持久化到外部（例如 Zustand store）。
+   * 若提供，组件会在挂载时从中读取一次初始展开的 id，并在每次变化时回调写入。
    */
   storageKey?: string;
   defaultExpandAll?: boolean;
@@ -224,15 +229,18 @@ export const BookTocTreeView = forwardRef<
 
   const initialExpanded = useMemo(() => {
     // from store if exists
+    // 若存在则取自 store
     if (persisted) {
       try {
         const arr = JSON.parse(persisted) as string[];
         return new Set(arr.map(String));
       } catch {
         // ignore malformed storage
+        // 忽略格式错误的存储数据
       }
     }
     // otherwise default
+    // 否则使用默认值
     return defaultExpandAll ? getAllExpandableIds(nodes) : new Set<string>();
   }, [persisted, defaultExpandAll, nodes]);
 
@@ -240,6 +248,8 @@ export const BookTocTreeView = forwardRef<
 
   // If nodes change drastically (e.g. fetch reload), keep current expanded when possible,
   // but ensure ids still valid; optionally expand all if empty & defaultExpandAll.
+  // 当 nodes 发生大幅变化时（例如重新拉取），尽量保留当前展开状态，
+  // 但需确保 id 仍然有效；若结果为空且 defaultExpandAll 为真，则可选地展开全部。
   useEffect(() => {
     const expandable = getAllExpandableIds(nodes);
     setExpanded((prev) => {
@@ -333,9 +343,9 @@ export const BookTocTreeView = forwardRef<
   );
 });
 
-/** Props for ChapterList component. */
+/** Props for ChapterList component. ChapterList 组件的属性。 */
 export interface ChapterListProps {
-  /** Book unit ID. */
+  /** Book unit ID. 书籍 Unit ID。 */
   id: string;
 }
 
@@ -343,6 +353,9 @@ export interface ChapterListProps {
  * Chapter List - Displays a lightweight virtualized chapter tree.
  *
  * Fetches chapter data and renders using BookTocTreeView.
+ * 章节列表 — 展示一个轻量级的虚拟化章节树。
+ *
+ * 拉取章节数据并通过 BookTocTreeView 渲染。
  */
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
   const { t } = useTranslation(["book", "common"]);

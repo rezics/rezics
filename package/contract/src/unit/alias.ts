@@ -35,9 +35,9 @@ export type UnitAliasStatus = (typeof unitAliasStatusLiterals)["static"];
 export const unitAliasDTOSchema = t.Object({
   id: t.String(),
   unitId: t.String(),
-  /** User-facing display/audit text, stored with only accepted trimming. */
+  /** User-facing display/audit text, stored with only accepted trimming. 面向用户的展示/审计文本，仅做被接受的修剪后存储。 */
   value: t.String(),
-  /** Machine matching and per-Unit de-duplication key derived from value. */
+  /** Machine matching and per-Unit de-duplication key derived from value. 由 value 派生的机器匹配与每个 Unit 的去重键。 */
   normalizedValue: t.String(),
   language: t.Optional(t.Nullable(t.String())),
   kind: unitAliasKindLiterals,
@@ -67,7 +67,7 @@ export type UnitAliasVoteDTO = (typeof unitAliasVoteDTOSchema)["static"];
 
 export const createUnitAliasSchema = t.Object({
   unitId: t.String(),
-  /** Display/audit text. The server derives normalizedValue. */
+  /** Display/audit text. The server derives normalizedValue. 展示/审计文本。服务端据此派生 normalizedValue。 */
   value: t.String(),
   language: t.Optional(t.Nullable(t.String())),
   kind: t.Optional(unitAliasKindLiterals),
@@ -76,7 +76,7 @@ export const createUnitAliasSchema = t.Object({
 export type CreateUnitAliasInput = (typeof createUnitAliasSchema)["static"];
 
 export const updateUnitAliasSchema = t.Object({
-  /** Display/audit text. Updating it also recomputes normalizedValue. */
+  /** Display/audit text. Updating it also recomputes normalizedValue. 展示/审计文本。更新它也会重新计算 normalizedValue。 */
   value: t.Optional(t.String()),
   language: t.Optional(t.Nullable(t.String())),
   kind: t.Optional(unitAliasKindLiterals),

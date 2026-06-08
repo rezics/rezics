@@ -40,8 +40,10 @@ type UserEditFormData = Omit<UpdateUser, "description"> & {
 };
 
 /**
- * UserEditPage - 用户资料编辑页面
- * 允许用户编辑自己的个人信息
+ * UserEditPage - user profile edit page.
+ * UserEditPage - 用户资料编辑页面。
+ * Lets users edit their own personal information.
+ * 允许用户编辑自己的个人信息。
  */
 export const UserEditPage: FC<UserEditPageProps> = ({
   onCancel,
@@ -96,7 +98,8 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         description: markdownContentDoc(formData.description),
       };
 
-      // Only include password if it's not empty
+      // Only include password if it's not empty.
+      // 仅在密码非空时才包含它。
       if (formData.password && formData.password.trim() !== "") {
         updateData.password = formData.password;
       }
@@ -112,7 +115,8 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         onSuccess(updatedUser);
       }
 
-      // Clear password field after successful update
+      // Clear password field after successful update.
+      // 更新成功后清空密码字段。
       setFormData((prev) => ({ ...prev, password: "" }));
     } catch (err) {
       setError(err);

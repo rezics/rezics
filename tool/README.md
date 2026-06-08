@@ -19,11 +19,11 @@ Set real local values for `SECRET_KEY_BASE` and `VAULT_KEY` before starting
 Sequin. `SEQUIN_WEBHOOK_SECRET` must match `package/job-runner/.env`.
 
 ```sh
-bun run service up
-bun run service health
-bun run service ps
-bun run service logs
-bun run service down
+task service:up
+task service:health
+task service:ps
+task service:logs
+task service:down
 ```
 
 The managed source Postgres container starts with logical replication enabled:
@@ -37,20 +37,20 @@ migrations run through the repo `db:*` tooling; `job-runner` only runs
 Validate the compose plan without starting services:
 
 ```sh
-bun run service config plan
+task service -- config plan
 ```
 
 Verify the managed source database after startup:
 
 ```sh
-bun run service source verify
+task service -- source verify
 ```
 
 Use repair only for existing, external, or broken local source databases:
 
 ```sh
-bun run service source repair
-bun run service source repair --force-active-slot
+task service -- source repair
+task service -- source repair --force-active-slot
 ```
 
 Repair can recreate the local Sequin publication and replication slot. If it
@@ -65,7 +65,7 @@ repairs the repo Docker Compose project; it will not stop host services or
 unrelated containers. If a default port is already in use, stop the conflicting
 service manually or override the published port in `tool/.env`.
 
-Use `bun run service ...` for the repo-managed local Docker workflow.
+Use `task service -- ...` for the repo-managed local Docker workflow.
 
 ## Deploy
 

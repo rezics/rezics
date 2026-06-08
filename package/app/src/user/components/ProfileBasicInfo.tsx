@@ -44,6 +44,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   return (
     <>
       {/* Mobile: compact horizontal layout */}
+      {/* 移动端：紧凑的横向布局 */}
       <div className="relative flex items-start gap-4 py-4 px-4 md:hidden">
         {isCurrentUser && (
           <Link to="/user/me/setting" className="absolute top-3 right-3">
@@ -113,6 +114,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
       </div>
 
       {/* Desktop: generous vertical layout */}
+      {/* 桌面端：宽松的纵向布局 */}
       <div className="hidden md:flex flex-col items-start gap-4 py-12 px-4">
         <Avatar className="w-full h-auto aspect-square rounded-lg text-5xl">
           <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
@@ -177,6 +179,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         </div>
 
         {/* Stats — desktop only, shown in sidebar */}
+        {/* 统计数据 — 仅桌面端，显示在侧边栏中 */}
         <div className="w-full mt-4 flex flex-col gap-2">
           <span className="text-sm font-semibold mb-1">
             {t("settings:profile_stats")}

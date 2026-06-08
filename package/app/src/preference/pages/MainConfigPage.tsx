@@ -1,3 +1,4 @@
+// Not sure what this is for yet.
 // 暂时不知道干嘛的
 
 export function MainConfigPage() {

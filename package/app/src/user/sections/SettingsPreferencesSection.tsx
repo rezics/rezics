@@ -112,6 +112,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
 
 export const SettingsPreferencesSection: FC = () => {
   // TODO(openspec-retired): a keyword-vocabulary preference (PATCH /users/me/keywords) was specified but never built.
+  // TODO(openspec-retired)：曾规划过关键词词表偏好（PATCH /users/me/keywords），但从未实现。
   const { t } = useTranslation(["common", "settings"]);
   useRequireAuth();
 

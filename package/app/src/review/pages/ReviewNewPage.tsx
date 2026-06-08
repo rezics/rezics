@@ -59,6 +59,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     },
     onError: (error) => {
       // A recognized policy denial renders inline below; other errors toast.
+      // 已识别的策略拒绝会在下方内联渲染；其他错误则以 toast 提示。
       if (!policyDenialFromError(error)) {
         show(`Create review failed: ${error}`);
       }
@@ -76,6 +77,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     }
 
     // Drafts may be incomplete; only enforce the length floor on publish.
+    // 草稿可能不完整；仅在发布时强制执行长度下限。
     if (
       status === "PUBLISHED" &&
       kind === PostKind.REVIEW &&

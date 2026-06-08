@@ -4,6 +4,7 @@ import { tags } from "@lezer/highlight";
 
 const markdownHighlightStyle = HighlightStyle.define([
   // Headings
+  // 标题
   {
     tag: tags.heading1,
     fontSize: "1.6em",
@@ -27,11 +28,13 @@ const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.heading6, fontSize: "1em", fontWeight: "bold" },
 
   // Inline formatting
+  // 行内格式
   { tag: tags.strong, fontWeight: "bold" },
   { tag: tags.emphasis, fontStyle: "italic" },
   { tag: tags.strikethrough, textDecoration: "line-through" },
 
   // Code
+  // 代码
   {
     tag: tags.monospace,
     fontFamily: "ui-monospace, monospace",
@@ -39,20 +42,25 @@ const markdownHighlightStyle = HighlightStyle.define([
   },
 
   // Links & URLs
+  // 链接与 URL
   { tag: tags.link, color: "#0969da", textDecoration: "underline" },
   { tag: tags.url, color: "#0969da" },
 
   // Markdown meta characters (# * ``` etc.)
+  // Markdown 元字符（# * ``` 等）
   { tag: tags.processingInstruction, color: "#6e7781" },
   { tag: tags.meta, color: "#6e7781" },
 
   // Quotes
+  // 引用
   { tag: tags.quote, color: "#656d76", fontStyle: "italic" },
 
   // Lists
+  // 列表
   { tag: tags.list, color: "#953800" },
 
   // Programming language tokens (for fenced code blocks)
+  // 编程语言词法单元（用于围栏代码块）
   { tag: tags.keyword, color: "#cf222e" },
   { tag: tags.string, color: "#0a3069" },
   { tag: tags.comment, color: "#6e7781", fontStyle: "italic" },

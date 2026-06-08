@@ -7,6 +7,8 @@ import type { ZoneTemplateProps } from "./types";
  * Book-oriented zone homepage template.
  * Will reuse sections from book-library feature when
  * zone-scoped content queries are available.
+ * 面向图书的 zone 主页模板。
+ * 当 zone 范围的内容查询可用时，将复用 book-library 功能中的区块。
  */
 export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
   zone,
@@ -23,7 +25,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
 
   return (
     <div>
-      {/* Banner */}
+      {/* Banner 横幅 */}
       <div
         className="relative py-24 px-8 mb-8 rounded-lg"
         style={{
@@ -41,7 +43,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search 搜索 */}
       <div className="mb-12">
         <KeywordInput
           value={keywordBind.value ?? ""}
@@ -53,12 +55,12 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
         />
       </div>
 
-      {/* Book sections */}
+      {/* Book sections 图书区块 */}
       <div>
         <h2 className="text-lg font-semibold mb-4">
           {t("search:zone_books_title")}
         </h2>
-        {/* MOCK: book listing sections with zone.filters pre-applied will be wired here */}
+        {/* MOCK: book listing sections with zone.filters pre-applied will be wired here 预先应用 zone.filters 的图书列表区块将在此处接入 */}
         <p className="text-text-secondary">
           {t("search:zone_book_content_placeholder")}
         </p>

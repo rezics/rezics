@@ -25,6 +25,8 @@ export const bookRoute = new Elysia()
   /**
    * Token-authenticated: Get book by unitId
    * GET /token/books/:unitId
+   * 令牌认证：按 unitId 获取 book。
+   * GET /token/books/:unitId
    */
   .get(
     "/books/:unitId",
@@ -49,6 +51,7 @@ export const bookRoute = new Elysia()
       const book = await bookService.getByUnitId(params.unitId);
 
       // Reuse existing DTO mapper through the book service index
+      // 通过 book 服务索引复用现有的 DTO 映射器。
       const { mapBookToDTO } = await import("../book/mapper");
       return mapBookToDTO(book as any);
     },
@@ -66,6 +69,8 @@ export const bookRoute = new Elysia()
 
   /**
    * Token-authenticated: Create a book
+   * POST /token/books
+   * 令牌认证：创建 book。
    * POST /token/books
    */
   .post(
@@ -89,6 +94,7 @@ export const bookRoute = new Elysia()
       }
 
       // Force owner to be the token's user
+      // 强制将所有者设为该令牌的用户。
       const created = await bookService.create({
         ...body,
         userId,
@@ -111,6 +117,8 @@ export const bookRoute = new Elysia()
 
   /**
    * Token-authenticated: Update a book
+   * PUT /token/books/:unitId
+   * 令牌认证：更新 book。
    * PUT /token/books/:unitId
    */
   .put(
@@ -152,6 +160,8 @@ export const bookRoute = new Elysia()
 
   /**
    * Token-authenticated: Delete a book
+   * DELETE /token/books/:unitId
+   * 令牌认证：删除 book。
    * DELETE /token/books/:unitId
    */
   .delete(

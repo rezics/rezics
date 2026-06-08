@@ -65,6 +65,7 @@ const MANY_POSTS: PostDTO[] = Array.from({ length: 12 }).map((_, i) =>
 );
 
 // MOCK: story-only auth state override so Storybook can demo signed-out path.
+// MOCK：仅用于 story 的认证状态覆盖，使 Storybook 能演示已登出路径。
 function useMockAuthed(authed: boolean) {
   useEffect(() => {
     useAuthSessionStore.setState({

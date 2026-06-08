@@ -1,12 +1,16 @@
 /**
  * Reaction API - Main entry point
+ * Reaction API —— 主入口。
  */
 
 // API Client
+// API 客户端。
 export { reactionApi } from "./reaction.api";
 // Query Keys
+// 查询键。
 export { reactionKeys } from "./reaction.keys";
 // Mutation Hooks
+// 变更 Hooks。
 export {
   reactionMutations,
   syncShareMutationCache,
@@ -15,6 +19,7 @@ export {
   useRecordShareMutation,
 } from "./reaction.mutations";
 // Query Configurations
+// 查询配置。
 export {
   batchReactionSummaryQuery,
   batchShareSummaryQuery,
@@ -29,6 +34,7 @@ export {
   useReceivedReactionsInfinite,
 } from "./reaction.queries";
 // Types
+// 类型。
 export type {
   ReactionCreateInput,
   ReactionDeleteQuery,

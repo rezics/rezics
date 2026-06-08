@@ -92,6 +92,8 @@ export function AdminNav({
 
     // Avoid the "List" item being selected when a more specific sibling route is active.
     // Example: `/user` matches `/user/create` by prefix, but only `Create` should be selected.
+    // 当更具体的同级路由处于激活状态时，避免选中 "List" 项。
+    // 例如：`/user` 会以前缀方式匹配 `/user/create`，但只应选中 `Create`。
     if (selected && siblings?.length) {
       const hasMoreSpecificActiveSibling = siblings.some(
         (s) =>

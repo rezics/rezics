@@ -11,7 +11,9 @@ FROM rezics-base:dev AS build
 
 WORKDIR /repo/package/history
 ENV HISTORY_DATABASE_URL="postgresql://build:build@localhost:5432/build"
-RUN bun run build:linux
+# Compile the linux-x64 binary inline (mirrors `task history:build:linux`).
+RUN bun build src/cluster.ts --compile --minify-whitespace --minify-syntax \
+  --target bun-linux-x64 --outfile history
 
 # --- runtime stage ---------------------------------------------------------
 FROM debian:bookworm-slim AS runtime

@@ -19,11 +19,11 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
 
 export interface TranslationSyncActionsProps {
-  /** Source unit id this language is wired to. Falsy disables actions. */
+  /** Source unit id this language is wired to. Falsy disables actions. 此语言关联的源 unit id。为假值时禁用操作。 */
   sourceUnitId: string | null | undefined;
-  /** Currently selected language. */
+  /** Currently selected language. 当前选中的语言。 */
   language: string;
-  /** Called with a fresh draft to overwrite the local form. */
+  /** Called with a fresh draft to overwrite the local form. 以新的草稿调用，覆盖本地表单。 */
   onSync: (draft: EditorDraft) => void;
 }
 
@@ -32,6 +32,9 @@ export interface TranslationSyncActionsProps {
  * Offers two actions: pull the source entry's fields into the form (purely
  * client-side prefill — caller saves explicitly), and navigate to the source
  * entry's edit page.
+ * 当前语言的翻译带有 `sourceUnitId` 时显示。
+ * 提供两个操作：将源条目的字段拉入表单（纯客户端预填——由调用方显式保存），
+ * 以及导航到源条目的编辑页。
  */
 export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   sourceUnitId,

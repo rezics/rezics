@@ -6,21 +6,30 @@ export interface RunClusterOptions {
   /**
    * Number of worker processes. Falls back to the `WORKERS` env var, then to
    * `os.availableParallelism()`. Values < 1 are treated as 1.
+   * worker 进程数量。回退到 `WORKERS` 环境变量，再回退到
+   * `os.availableParallelism()`。小于 1 的值按 1 处理。
    */
   workers?: number;
-  /** Service label for primary-process log lines. */
+  /** Service label for primary-process log lines.
+   *  用于主进程日志行的服务标签。 */
   serviceName?: string;
 }
 
 /**
  * Production cluster entrypoint for an Elysia HTTP service.
+ * Elysia HTTP 服务的生产环境集群入口。
  *
  * The primary process forks `workers` children (each runs `start`), respawns a
  * worker that exits unexpectedly, and on SIGTERM/SIGINT stops respawning and
  * forwards the signal so each worker drains its own connections before the
  * primary exits. A worker process simply runs `start` (which binds the port).
+ * 主进程 fork 出 `workers` 个子进程（每个运行 `start`），对意外退出的 worker
+ * 重新 fork，并在 SIGTERM/SIGINT 时停止重新 fork 并转发信号，使每个 worker 在
+ * 主进程退出前各自排空连接。worker 进程只是运行 `start`（绑定端口）。
  *
  * Usage in a service's `cluster.ts`:
+ *   runCluster(() => import("./index"), { serviceName: "server" });
+ * 在服务的 `cluster.ts` 中的用法：
  *   runCluster(() => import("./index"), { serviceName: "server" });
  */
 export async function runCluster(

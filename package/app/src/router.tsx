@@ -14,6 +14,8 @@ export const router = createRouter({
   defaultPreload: "intent",
   // Since we're using React Query, we don't want loader calls to ever be stale
   // This will ensure that the loader is always called when the route is preloaded or visited
+  // 由于我们使用 React Query，不希望 loader 调用出现过期数据
+  // 这样可以确保路由被预加载或访问时总是调用 loader
   defaultPreloadStaleTime: 0,
   scrollRestoration: true,
   getScrollRestorationKey: (location: ParsedLocation<AnySchema>) => {

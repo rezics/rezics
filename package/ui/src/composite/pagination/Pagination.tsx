@@ -22,6 +22,7 @@ import { ToggleGroup, ToggleGroupItem } from "#/shadcn/toggle-group";
 
 /**
  * example:
+ * 示例：
  * ```ts
  *   const [sortConfig, setSortConfig] = useState<{
  *       type: "time" | "name" | "popular" | "agree";
@@ -130,6 +131,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   }, [page, dataLength, totalPages]);
   if (totalPages <= 1) return null;
   // dataLength is the number of page buttons to render.
+  // dataLength 是要渲染的页码按钮数量。
   const visibleTotal = dataLength;
   const pages = getPageRange(page, visibleTotal, 1);
 
@@ -216,7 +218,7 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
   externalItemsPerPage?: number;
   /**
    *
-   * @param externalPage - the page number need to query
+   * @param externalPage - the page number need to query。需要查询的页码。
    * @returns
    */
   requestData: (externalPage: number) => void;
@@ -238,7 +240,7 @@ export type UniversalPaginatorHandle = {
  * UniversalPaginator
  * @param {UniversalPaginatorProps<T>} props
  * @returns {React.ReactNode}
- * @todo Add an option to keep the page scrolled to the bottom to prevent it from jumping to the top when new data loads.
+ * @todo Add an option to keep the page scrolled to the bottom to prevent it from jumping to the top when new data loads。新增一个选项，使页面保持滚动到底部，避免新数据加载时跳回顶部。
  */
 export const UniversalPaginator = <T,>({
   ref,
@@ -343,7 +345,7 @@ export const UniversalPaginator = <T,>({
       "endIndex",
       startIndex + itemsPerPage - 1,
     );
-    return data.slice(startIndex, startIndex + itemsPerPage); // no minus 1, because slice is not inclusive
+    return data.slice(startIndex, startIndex + itemsPerPage); // no minus 1, because slice is not inclusive — 不减 1，因为 slice 不包含结束索引
   }, [
     data,
     currentPage,

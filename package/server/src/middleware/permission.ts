@@ -101,6 +101,9 @@ export async function tryResolveIdentity(
 // The token `role` is a rejection-only hint: it may deny a request but never
 // grant elevated access. Only `unitId` is trusted as identity; any
 // admin/elevated check must verify against the database, never the token claim.
+// 令牌中的 `role` 仅作拒绝提示：它可以拒绝请求，但绝不会授予提升的权限。
+// 只有 `unitId` 被视为可信身份；任何管理员/提权检查都必须以数据库为准，
+// 绝不能依赖令牌声明。
 function isAdminRole(identity: RezicsSessionClaims | null): boolean {
   if (!identity) return false;
   return (

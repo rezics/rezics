@@ -9,7 +9,9 @@ type ApproxCountRow = { int8: bigint };
 
 /**
  * Get approximate count of Book
+ * 获取 Book 的近似计数
  * TODO ANALYZE "Book"; once per hour
+ * TODO 每小时执行一次 ANALYZE "Book";
  * @returns
  */
 export async function getBookApproxCount() {

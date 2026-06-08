@@ -18,6 +18,9 @@ export interface RezicsRendererOptions {
  * Reads `token.map` gaps between block elements and injects `empty_line` tokens.
  * A single empty line (standard paragraph break) is ignored; gaps of 2+ empty lines
  * emit the full count as tokens so the visual spacing is faithfully preserved.
+ * 读取块级元素之间的 `token.map` 间隔并注入 `empty_line` token。
+ * 单个空行（标准段落分隔）会被忽略；2 行及以上的空行间隔将完整数量作为 token 发出，
+ * 从而忠实保留视觉间距。
  */
 function emptyLinesCore(state: {
   tokens: Array<{
@@ -59,6 +62,8 @@ function emptyLinesCore(state: {
 /**
  * Walks inline tokens and replaces runs of 2+ spaces with `&nbsp;` entities
  * so they render visibly instead of collapsing.
+ * 遍历内联 token，将 2 个及以上连续空格替换为 `&nbsp;` 实体，
+ * 使其可见渲染而非被折叠。
  */
 function preserveSpacesCore(state: {
   tokens: Array<{
@@ -105,7 +110,7 @@ function preserveSpacesCore(state: {
   }
 }
 
-/** markdown-it plugin: preserves extra blank lines as a height-compensated spacer. */
+/** markdown-it plugin: preserves extra blank lines as a height-compensated spacer. markdown-it 插件：将额外空行保留为高度补偿的间隔元素。 */
 export function emptyLinesPlugin(md: MarkdownIt): void {
   md.core.ruler.push(
     "empty_lines",
@@ -121,7 +126,7 @@ export function emptyLinesPlugin(md: MarkdownIt): void {
   };
 }
 
-/** markdown-it plugin: preserves runs of 2+ inline spaces as `&nbsp;` entities. */
+/** markdown-it plugin: preserves runs of 2+ inline spaces as `&nbsp;` entities. markdown-it 插件：将 2 个及以上连续内联空格保留为 `&nbsp;` 实体。 */
 export function preserveSpacesPlugin(md: MarkdownIt): void {
   md.core.ruler.push(
     "preserve_spaces",
@@ -129,13 +134,13 @@ export function preserveSpacesPlugin(md: MarkdownIt): void {
   );
 }
 
-/** markdown-it plugin: enables `breaks`, blank-line preservation, and space preservation. */
+/** markdown-it plugin: enables `breaks`, blank-line preservation, and space preservation. markdown-it 插件：启用 `breaks`、空行保留与空格保留。 */
 export function novelModePlugin(md: MarkdownIt): void {
   md.options.breaks = true;
   md.use(emptyLinesPlugin).use(preserveSpacesPlugin);
 }
 
-/** markdown-it plugin: selectively applies blank-line and space preservation. */
+/** markdown-it plugin: selectively applies blank-line and space preservation. markdown-it 插件：按需选择性应用空行与空格保留。 */
 export function preserveFormattingPlugin(
   md: MarkdownIt,
   options?: PreserveFormatOptions,
@@ -145,7 +150,7 @@ export function preserveFormattingPlugin(
   if (preserveSpaces) md.use(preserveSpacesPlugin);
 }
 
-/** Returns a fully configured `MarkdownIt` instance for novel/prose content. */
+/** Returns a fully configured `MarkdownIt` instance for novel/prose content. 返回为小说/散文内容完整配置的 `MarkdownIt` 实例。 */
 export function createRezicsRenderer(
   options?: RezicsRendererOptions,
 ): MarkdownIt {

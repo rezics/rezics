@@ -57,6 +57,7 @@ export async function turnPage(
   const rect = container.getBoundingClientRect();
 
   // ① Clone current viewport as ghost
+  // ① 将当前视口克隆为幽灵层
   const ghost = container.cloneNode(true) as HTMLDivElement;
   Object.assign(ghost.style, {
     position: "fixed",
@@ -72,11 +73,13 @@ export async function turnPage(
   document.body.appendChild(ghost);
 
   // ② Real content jumps instantly
+  // ② 真实内容瞬间切换到位
   inner.style.transition = "none";
   onTurn();
-  void inner.offsetWidth; // force reflow
+  void inner.offsetWidth; // force reflow — 强制重排
 
   // ③ Ghost animates out via WAAPI
+  // ③ 幽灵层通过 WAAPI 动画退场
   const animation = ghost.animate(getKeyframes(style, direction), {
     duration: 320,
     easing: "ease-in",

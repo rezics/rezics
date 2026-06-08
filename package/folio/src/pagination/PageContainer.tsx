@@ -23,6 +23,7 @@ export function PageContainer({ children }: PageContainerProps) {
   }, [dispatch]);
 
   // Recalculate on mount and resize
+  // 在挂载和尺寸变化时重新计算
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -34,16 +35,19 @@ export function PageContainer({ children }: PageContainerProps) {
   }, [recalculate]);
 
   // Recalculate on font load
+  // 在字体加载完成时重新计算
   useEffect(() => {
     document.fonts.ready.then(recalculate);
   }, [recalculate]);
 
   // Recalculate when content changes
+  // 在内容变化时重新计算
   useEffect(() => {
     recalculate();
   }, [recalculate]);
 
   // Observe image loads within content
+  // 监听内容中的图片加载
   useEffect(() => {
     const inner = innerRef.current;
     if (!inner) return;

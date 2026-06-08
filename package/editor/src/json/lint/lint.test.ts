@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 // Test the JSON parse error extraction logic in isolation
+// 单独测试 JSON 解析错误提取逻辑。
 function getJsonDiagnostic(
   text: string,
 ): { from: number; message: string } | null {

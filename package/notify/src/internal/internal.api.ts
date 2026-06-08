@@ -41,6 +41,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
           publishSse(event.recipientId, event.raw);
         } catch (err) {
           // SSE failures are logged but do not fail persistence
+          // SSE 失败会被记录，但不会导致持久化失败
           console.error(
             `[notify/internal/event] SSE push failed for ${event.recipientId}:`,
             err,

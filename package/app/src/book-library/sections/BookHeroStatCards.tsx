@@ -15,14 +15,16 @@ import { Link } from "@/shared/ui/link";
 
 interface BookHeroStatCardsProps {
   bookId: string;
-  /** Subset of stat keys to render as cards. Defaults to all available stats. */
+  /** Subset of stat keys to render as cards. Defaults to all available stats. 要渲染为卡片的统计键子集。默认为所有可用统计项。 */
   cardKeys?: BookHeroStatKey[];
 }
 
 export type BookHeroStatKey = "reviews" | "shelves" | "tags";
 
 /** Default set promoted to big-icon cards. Stats outside this list fall through
- *  to the inline-link list rendered below the metadata block. */
+ *  to the inline-link list rendered below the metadata block.
+ *  提升为大图标卡片的默认集合。不在此列表中的统计项会下沉到元数据块
+ *  下方渲染的内联链接列表中。 */
 export const DEFAULT_STAT_CARD_KEYS: BookHeroStatKey[] = [
   "reviews",
   "shelves",

@@ -1,0 +1,12 @@
+# @rezics/search — local Meilisearch runner. Aggregated as `search:*`.
+version: '3'
+
+tasks:
+  meilisearch:
+    desc: Run local Meilisearch from the bundled binary
+    dir: bin
+    cmd: ./meilisearch --config-file-path='./config.toml'
+  meilisearch:wsl:
+    desc: Run local Meilisearch bound to 0.0.0.0 (WSL)
+    dir: bin
+    cmd: ./meilisearch --http-addr 0.0.0.0:7700 --config-file-path='./config.toml'

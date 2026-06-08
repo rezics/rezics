@@ -83,6 +83,7 @@ export function WikiPostEditor({
   const activeMutation = post ? updateMutation : createMutation;
 
   // Create surfaces policy denials inline; edit keeps the locked-field alert.
+  // 创建时内联展示策略拒绝；编辑时保留锁定字段提示。
   const createDenial = policyDenialFromError(createMutation.error);
   const isPublished = post?.status === "PUBLISHED";
 

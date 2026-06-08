@@ -12,7 +12,10 @@ export type VoteGroupProps = {
   targetUnitId: string;
   summaryScopeKey?: string | null;
   userScopeKey?: string | null;
-  /** Override the size from context. Rarely needed; prefer setting on the bar. */
+  /**
+   * Override the size from context. Rarely needed; prefer setting on the bar.
+   * 覆盖来自 context 的 size。很少需要；优先在 bar 上设置。
+   */
   size?: EngagementSize;
 };
 

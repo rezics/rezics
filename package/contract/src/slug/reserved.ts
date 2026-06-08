@@ -9,10 +9,18 @@ import { SYSTEM_SHELF_SLUGS } from "./system-slugs";
  *
  * When adding new platform routes, owner sub-resource types, or
  * contract-defined system slug values, add them here.
+ *
+ * 平台级保留 slug。
+ *
+ * 在每个 slug 作用域（`user`、`realm`、`tag`、`zone`、`entity` 以及
+ * owner 作用域）中统一应用。在任一作用域中保留的词，在每个作用域中均被保留。
+ *
+ * 新增平台路由、owner 子资源类型或 contract 定义的系统 slug 值时，
+ * 请在此处添加。
  */
 
 const RESERVED: readonly string[] = [
-  // ── Platform routes ──────────────────────────────────────────
+  // ── Platform routes 平台路由 ──────────────────────────────────
   "tag",
   "tags",
   "realm",
@@ -93,7 +101,7 @@ const RESERVED: readonly string[] = [
   "share",
   "report",
 
-  // ── Auth / account ───────────────────────────────────────────
+  // ── Auth / account 认证 / 账户 ────────────────────────────────
   "login",
   "logout",
   "signin",
@@ -126,7 +134,7 @@ const RESERVED: readonly string[] = [
   "mfa",
   "sso",
 
-  // ── Roles / identities ──────────────────────────────────────
+  // ── Roles / identities 角色 / 身份 ────────────────────────────
   "admin",
   "admins",
   "administrator",
@@ -160,7 +168,7 @@ const RESERVED: readonly string[] = [
   "bot",
   "bots",
 
-  // ── Technical ────────────────────────────────────────────────
+  // ── Technical 技术 ────────────────────────────────────────────
   "api",
   "graphql",
   "rest",
@@ -236,7 +244,7 @@ const RESERVED: readonly string[] = [
   "client",
   "redirect",
 
-  // ── Navigation ───────────────────────────────────────────────
+  // ── Navigation 导航 ───────────────────────────────────────────
   "help",
   "docs",
   "documentation",
@@ -298,7 +306,7 @@ const RESERVED: readonly string[] = [
   "wiki",
   "handbook",
 
-  // ── Common confusable ────────────────────────────────────────
+  // ── Common confusable 常见易混词 ──────────────────────────────
   "me",
   "myself",
   "you",
@@ -330,7 +338,7 @@ const RESERVED: readonly string[] = [
   "temporary",
   "unused",
 
-  // ── Brand ────────────────────────────────────────────────────
+  // ── Brand 品牌 ────────────────────────────────────────────────
   "rezics",
   "rezics-team",
   "rezics-official",
@@ -341,6 +349,8 @@ const RESERVED: readonly string[] = [
   // ── Owner-path segments (under /u/:slug, /r/:slug, …) ────────
   // Type-prefix segments that appear after an owner slug. Reserved
   // globally to keep owner-scope URL parsing unambiguous.
+  // 出现在 owner slug 之后的类型前缀段。全局保留，以保持
+  // owner 作用域 URL 解析无歧义。
   "list",
 ];
 

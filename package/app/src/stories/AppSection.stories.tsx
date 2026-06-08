@@ -17,6 +17,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // MOCK: placeholder book grid until /api/books is wired
+// MOCK：占位的书籍网格，直到 /api/books 接入
 const books = [
   { id: 1, title: "The Sense of Style", author: "Steven Pinker" },
   { id: 2, title: "Sapiens", author: "Yuval Noah Harari" },

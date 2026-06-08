@@ -17,7 +17,7 @@ export const feedbackTypeValues = [
   "OTHER",
 ] as const;
 
-/** Feedback type vocabulary shared by client contracts and storage. */
+/** Feedback type vocabulary shared by client contracts and storage. 客户端契约与存储共享的反馈类型词汇表。 */
 export const feedbackTypeSchema = t.Union([
   t.Literal("REPORT"),
   t.Literal("BUG"),
@@ -29,6 +29,7 @@ export type FeedbackType = (typeof feedbackTypeSchema)["static"];
 
 /**
  * Feedback DTO exposed to clients
+ * 暴露给客户端的反馈 DTO
  */
 export type FeedbackDTO = {
   id: string;
@@ -62,8 +63,10 @@ export const feedbackDTOSchema = t.Object({
 
 /**
  * Create feedback
+ * 创建反馈
  *
  * - userId is taken from JWT on server side
+ * - userId 由服务端从 JWT 中获取
  */
 export type CreateFeedbackInput = {
   url?: string | null;
@@ -85,6 +88,7 @@ export const createFeedbackSchema = t.Object({
 
 /**
  * List / filter feedbacks (admin or per-user)
+ * 列出/筛选反馈（管理员或按用户）
  */
 export type FeedbackListQuery = OffsetPaginationParams & {
   ids?: string;

@@ -9,6 +9,7 @@ import { notFoundHtml } from "../templates/not-found";
 import { BOOK_DETAIL_CACHE_CONTROL } from "../utils/cache";
 import { getRequestOrigin, toAbsoluteUrl } from "../utils/url";
 
+// Route everything through the MeiliSearch API later; do not query the primary DB directly, it is too slow.
 // 之后全部走 MeiliSearch API，不要直接查主库，太慢了
 
 async function renderBookSharePage(opts: {
@@ -34,10 +35,12 @@ async function renderBookSharePage(opts: {
 
 /**
  * Shareable HTML page (bots can parse OG/Twitter meta).
+ * 可分享的 HTML 页面（爬虫可解析 OG/Twitter meta）。
  */
 export const bookApi = coreInstance("/book")
   /**
    * GET /book/:unitId
+   * 获取 /book/:unitId
    */
   .get(
     "/:unitId",

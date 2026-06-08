@@ -4,15 +4,17 @@ import { Star } from "lucide-react";
 import type React from "react";
 
 interface BookHeroScoreBlockProps {
-  /** Average score, 0–10 scale, 0 means no ratings yet. */
+  /** Average score, 0–10 scale, 0 means no ratings yet. 平均分，0–10 分制，0 表示尚无评分。 */
   rating: number;
-  /** Number of ratings contributing to the average. */
+  /** Number of ratings contributing to the average. 计入平均分的评分数量。 */
   count?: number;
-  /** Optional onRate handler; when provided + rating==0, shows interactive rater. */
+  /** Optional onRate handler; when provided + rating==0, shows interactive rater. 可选的 onRate 处理器；提供且 rating==0 时显示可交互的评分器。 */
   onRate?: (next: number) => void;
   /**
    * `inline` renders a compact one-line variant for use beside the title.
    * `block` (default) renders the original right-rail block.
+   * `inline` 渲染用于标题旁的紧凑单行变体。
+   * `block`（默认）渲染原始的右侧栏区块。
    */
   variant?: "block" | "inline";
 }

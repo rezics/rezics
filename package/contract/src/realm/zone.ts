@@ -6,6 +6,7 @@ import { SlugRefSchema } from "../slug/slug-ref";
 import { contentRatingSchema } from "../unit/unit";
 
 // ANCHOR: Zone Filters
+// ANCHOR: 专区筛选器
 
 export const wikiZoneSubjectFilterSchema = t.Object(
   {
@@ -391,6 +392,7 @@ export const wikiZoneHomepageDataSchema = t.Object({
 export type WikiZoneHomepageData = Static<typeof wikiZoneHomepageDataSchema>;
 
 // ANCHOR: Zone DTO
+// ANCHOR: 专区 DTO
 
 export const ZoneDTOSchema = t.Object({
   unitId: t.String(),

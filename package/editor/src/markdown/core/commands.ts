@@ -11,6 +11,7 @@ function wrapToggle(view: EditorView, marker: string): boolean {
     selected.length >= marker.length * 2
   ) {
     // Unwrap
+    // 去除包裹
     view.dispatch({
       changes: {
         from,
@@ -26,11 +27,13 @@ function wrapToggle(view: EditorView, marker: string): boolean {
   }
 
   // Check if surrounding text has the markers
+  // 检查周围文本是否带有标记符
   const before = state.sliceDoc(Math.max(0, from - marker.length), from);
   const after = state.sliceDoc(to, to + marker.length);
 
   if (before === marker && after === marker) {
     // Unwrap surrounding markers
+    // 去除周围的标记符
     view.dispatch({
       changes: [
         { from: from - marker.length, to: from, insert: "" },
@@ -46,12 +49,14 @@ function wrapToggle(view: EditorView, marker: string): boolean {
 
   if (from === to) {
     // No selection — insert markers and place cursor between
+    // 没有选区——插入标记符并将光标置于其间
     view.dispatch({
       changes: { from, to, insert: marker + marker },
       selection: { anchor: from + marker.length },
     });
   } else {
     // Wrap selection
+    // 包裹选区
     view.dispatch({
       changes: { from, to, insert: marker + selected + marker },
       selection: {
@@ -87,6 +92,7 @@ function lineToggle(
 
   if (allHavePrefix) {
     // Remove prefix
+    // 移除前缀
     for (let i = lineFrom.number; i <= lineTo.number; i++) {
       const line = state.doc.line(i);
       const expectedPrefix = ordered ? `${i - lineFrom.number + 1}. ` : prefix;
@@ -98,6 +104,7 @@ function lineToggle(
     }
   } else {
     // Add prefix
+    // 添加前缀
     for (let i = lineFrom.number; i <= lineTo.number; i++) {
       const line = state.doc.line(i);
       const newPrefix = ordered ? `${i - lineFrom.number + 1}. ` : prefix;
@@ -138,17 +145,20 @@ export function toggleHeading(view: EditorView): boolean {
     const level = match[1].length;
     if (level >= 6) {
       // Remove heading
+      // 移除标题
       view.dispatch({
         changes: { from: line.from, to: line.from + level + 1, insert: "" },
       });
     } else {
       // Increase level
+      // 提升标题级别
       view.dispatch({
         changes: { from: line.from, to: line.from, insert: "#" },
       });
     }
   } else {
     // Add h1
+    // 添加一级标题
     view.dispatch({
       changes: { from: line.from, to: line.from, insert: "# " },
     });
@@ -177,6 +187,7 @@ export function toggleCodeBlock(view: EditorView): boolean {
   const lineTo = state.doc.lineAt(to);
 
   // Check if already in a code block
+  // 检查是否已经位于代码块中
   const prevLine =
     lineFrom.number > 1 ? state.doc.line(lineFrom.number - 1).text : "";
   const nextLine =
@@ -186,6 +197,7 @@ export function toggleCodeBlock(view: EditorView): boolean {
 
   if (prevLine.startsWith("```") && nextLine.startsWith("```")) {
     // Unwrap code block
+    // 去除代码块包裹
     const prevLineObj = state.doc.line(lineFrom.number - 1);
     const nextLineObj = state.doc.line(lineTo.number + 1);
     view.dispatch({
@@ -196,6 +208,7 @@ export function toggleCodeBlock(view: EditorView): boolean {
     });
   } else {
     // Wrap in code block
+    // 用代码块包裹
     view.dispatch({
       changes: {
         from,

@@ -35,9 +35,14 @@ export interface PinboardEntryCardProps {
   /**
    * Rendered at the leading edge of the adminRow variant; intended for
    * dnd-kit drag handle wiring (listeners/attributes).
+   * 渲染在 adminRow 变体的前端边缘；用于 dnd-kit 拖拽手柄的接线
+   * （listeners/attributes）。
    */
   dragHandle?: React.ReactNode;
-  /** Warning ribbon to mark this entry as stale (underlying unit gone). */
+  /**
+   * Warning ribbon to mark this entry as stale (underlying unit gone).
+   * 警告标带，用于标记此条目已过期（底层 unit 已消失）。
+   */
   stale?: boolean;
 }
 

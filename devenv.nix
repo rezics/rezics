@@ -1,23 +1,37 @@
 { pkgs, ... }:
 
-# Dev shell for the Rezics monorepo.
-#
-# Scope: devenv provides the *host toolchain* only. The external services
-# (PostgreSQL 18, Meilisearch, Sequin) are managed via Docker Compose v2 —
-# the repo's only supported runtime for them — through `bun run service up`.
-# Provisioning them here would duplicate that path and collide on ports
-# 5432/7700, so they are intentionally left out.
 {
   languages.javascript = {
-    enable = true; # Node.js 24 — used by `bun run check:runtime-env`.
-    bun.enable = true; # Runtime + package manager. Repo targets bun 1.3.x.
+    enable = true;
+    nodejs.enable = true;
+    bun.enable = true;
+    bun.install.enable = true;
   };
 
   packages = [
+    pkgs.go-task
+    pkgs.fish
     pkgs.git
-    pkgs.zellij # Required by `bun run dev`; it exits if zellij is missing.
-    pkgs.postgresql_18 # psql 18 client — db tooling shells out to `psql`.
-    pkgs.openssl # Generate local secrets (SECRET_KEY_BASE, VAULT_KEY).
+    pkgs.postgresql_18
+    pkgs.openssl
     pkgs.jq
   ];
+
+  # Local dev processes, started together via `devenv up` (process-compose).
+  # Each delegates to the package's authoritative go-task `dev` task, which runs
+  # in the package dir (root Taskfile `includes` `dir:`) and loads its own
+  # `.env`. Do NOT set infra secrets in `env` here: Postgres/Meilisearch/Sequin
+  # stay on Docker Compose (`task service:up`), and keeping their secrets out of
+  # the process env preserves the isolation the old zellij orchestrator enforced.
+  processes = {
+    auth.exec = "task auth:dev";
+    server.exec = "task server:dev";
+    history.exec = "task history:dev";
+    "job-runner".exec = "task job-runner:dev";
+    reaction.exec = "task reaction:dev";
+    ranking.exec = "task ranking:dev";
+    notify.exec = "task notify:dev";
+    app.exec = "task app:dev";
+    admin.exec = "task admin:dev";
+  };
 }

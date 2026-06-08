@@ -10,16 +10,21 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 
-/** Props for BookListViewItem component. */
+/**
+ * Props for BookListViewItem component.
+ * BookListViewItem 组件的 props。
+ */
 export type BookListViewItemProps = {
-  /** Book data to display. */
+  /** Book data to display. 要展示的书籍数据。 */
   book: BookDTO;
 };
 
 /**
  * Book List View Item - Single book card in the list.
+ * Book List View Item - 列表中的单个书籍卡片。
  *
  * Displays book cover, title, author, and description preview.
+ * 展示书籍封面、标题、作者和描述预览。
  */
 export const BookListViewItem: React.FC<BookListViewItemProps> = ({ book }) => {
   const title = getBookTitle(book);
@@ -56,16 +61,21 @@ export const BookListViewItem: React.FC<BookListViewItemProps> = ({ book }) => {
   );
 };
 
-/** Props for BookListView component. */
+/**
+ * Props for BookListView component.
+ * BookListView 组件的 props。
+ */
 export type BookListViewProps = {
-  /** List of books to display. */
+  /** List of books to display. 要展示的书籍列表。 */
   books: BookDTO[];
 };
 
 /**
  * Book List View - Grid of book cards.
+ * Book List View - 书籍卡片网格。
  *
  * Renders a list of BookListViewItem components.
+ * 渲染一组 BookListViewItem 组件。
  */
 export const BookListView: React.FC<BookListViewProps> = ({ books }) => {
   return (

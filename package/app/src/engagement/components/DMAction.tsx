@@ -15,15 +15,24 @@ import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
 export interface DMActionProps {
-  /** The peer's canonical user id (`USER` Unit id). */
+  /**
+   * The peer's canonical user id (`USER` Unit id).
+   * 对方的规范用户 id（`USER` Unit id）。
+   */
   peerUserId: string;
-  /** Shown only as the accessible/tooltip label; the button text is fixed. */
+  /**
+   * Shown only as the accessible/tooltip label; the button text is fixed.
+   * 仅作为无障碍/tooltip 标签显示；按钮文本是固定的。
+   */
   peerName?: string;
   showLabel?: boolean;
   className?: string;
 }
 
-/** Direct messaging requires an active subscription to the peer with the DM channel enabled. */
+/**
+ * Direct messaging requires an active subscription to the peer with the DM channel enabled.
+ * 私信要求对该对方持有已启用 DM 频道的有效订阅。
+ */
 function hasDmChannel(channels: readonly string[] | undefined): boolean {
   if (!channels) return false;
   return channels.some(
@@ -39,6 +48,10 @@ function hasDmChannel(channels: readonly string[] | undefined): boolean {
  * the action is hidden; when signed in but not DM-eligible it renders a disabled
  * button explaining why; when eligible it links to the DM inbox addressed to the
  * peer, opening an existing thread if one exists.
+ * 私信入口。DM 受权限管控：访问者必须已登录并对该对方持有启用了 DM 频道的订阅
+ * （服务端在发送时强制执行 `dm_must_subscribe_to_dm` 规则）。未登录时隐藏该操作；
+ * 已登录但不符合 DM 资格时渲染一个禁用按钮并说明原因；符合资格时链接到指向该对方的
+ * DM 收件箱，若已存在会话则打开现有会话。
  */
 export const DMAction: React.FC<DMActionProps> = ({
   peerUserId,
@@ -54,8 +67,10 @@ export const DMAction: React.FC<DMActionProps> = ({
   );
 
   // Signed out: do not offer the action.
+  // 未登录：不提供该操作。
   if (!isAuthenticated) return null;
   // While the eligibility check is in flight, render nothing to avoid flicker.
+  // 资格检查进行中时不渲染任何内容，以避免闪烁。
   if (isPending) return null;
 
   const canDm =

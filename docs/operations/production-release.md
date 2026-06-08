@@ -107,7 +107,7 @@ routing points at it. Use read-only `DATABASE_URL`, Meilisearch access, and
 After `@rezics/app` is built and deployed, deploy `@rezics/edge` with Wrangler:
 
 ```bash
-bun --filter=@rezics/edge run deploy
+task edge:deploy
 ```
 
 The Worker needs `PREVIEW_BASE_URL` and `PREVIEW_INTERNAL_SECRET`. Route changes

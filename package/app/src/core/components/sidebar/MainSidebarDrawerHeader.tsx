@@ -9,6 +9,7 @@ export function MainSidebarDrawerHeader({
 }) {
   const { t } = useTranslation(["shell"]);
   // Direction is fixed to LTR by default; document.dir handled at <html>.
+  // 方向默认固定为 LTR；document.dir 在 <html> 处理。
   const isLtr = typeof document !== "undefined" ? document.dir !== "rtl" : true;
 
   return (

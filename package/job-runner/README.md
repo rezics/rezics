@@ -46,7 +46,7 @@ Required environment for this service:
 Create the dedicated queue database before starting the service:
 
 ```bash
-bun --filter=@rezics/job-runner run db:ensure
+task job-runner:db:ensure
 ```
 
 The script reads `JOB_DATABASE_URL`, connects through the `postgres` or
@@ -64,8 +64,8 @@ cp tool/.env.example tool/.env
 openssl rand -base64 48 # SECRET_KEY_BASE
 openssl rand -base64 32 # VAULT_KEY
 
-bun run service up
-bun run service health
+task service:up
+task service:health
 ```
 
 The managed runtime uses Docker Compose v2 through `tool/service`.
@@ -82,12 +82,12 @@ Tool-owned Sequin runtime settings live in `tool/.env`. The
 Run locally with:
 
 ```bash
-bun --filter=@rezics/job-runner run dev
+task job-runner:dev
 ```
 
 Use `JOB_RUNNER_ROLE=all` for local development when Sequin is running. The root
-`bun run dev` zellij layout starts the `job-runner` tab automatically because
-runtime server mutations enqueue queue-backed search and history
+`task dev` (devenv `devenv up`) starts the `job-runner` process automatically
+because runtime server mutations enqueue queue-backed search and history
 synchronization work. If this service is not running, those runtime writes
 either fail while enqueueing or leave derived state stale.
 
@@ -102,7 +102,7 @@ same package.
 
 `all` and `http` require `SEQUIN_HEALTH_URL` to return 2xx during startup. This
 fails before webhook ingress is exposed and points operators at
-`bun run service up`. `worker` skips the Sequin health check so it can
+`task service:up`. `worker` skips the Sequin health check so it can
 drain already-enqueued pg-boss jobs while Sequin is stopped or restarting.
 
 ## Producer Configuration

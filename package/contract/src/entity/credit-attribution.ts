@@ -18,6 +18,7 @@ export {
 
 // ============================================================
 // ROLE REGISTRY
+// 角色注册表
 // ============================================================
 
 export const creditAttributionRoleRegistry = {
@@ -141,6 +142,7 @@ export const creditAttributionRoleRegistry = {
 
 // ============================================================
 // CREDIT ATTRIBUTION DTO
+// 署名归属 DTO
 // ============================================================
 
 export const creditAttributionEvidenceSourceSiteSummarySchema = t.Object({
@@ -215,6 +217,7 @@ export type CreditAttributionDTO =
 
 // ============================================================
 // CREDIT ATTRIBUTION LINK/UNLINK
+// 署名归属 关联/解除关联
 // ============================================================
 
 export const linkCreditAttributionSchema = t.Object({
@@ -246,6 +249,7 @@ export type EntityAttributionBatchSetCreditsOp =
 
 // ============================================================
 // CREDIT ATTRIBUTION BRIEF (inline for BookDTO etc.)
+// 署名归属简要信息（内联于 BookDTO 等）
 // ============================================================
 
 export const creditAttributionBriefEntitySchema = t.Object({

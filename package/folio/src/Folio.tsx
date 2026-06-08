@@ -40,6 +40,7 @@ function FolioInner({
   const themeVars = getThemeVars(state.theme);
 
   // Loading state
+  // 加载状态
   if (state.status.state === "loading") {
     return (
       <div className="folio-loading" style={{ ...themeVars, height: "100%" }}>
@@ -49,6 +50,7 @@ function FolioInner({
   }
 
   // Error state
+  // 错误状态
   if (state.status.state === "error") {
     const { error, retry } = state.status;
     return (
@@ -77,7 +79,8 @@ function FolioInner({
           "env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)",
       }}
     >
-      {/* TOC Sidebar */}
+      {/* TOC Sidebar
+          目录侧边栏 */}
       {showToc && (
         <div
           className="folio-toc-sidebar"
@@ -92,7 +95,8 @@ function FolioInner({
         </div>
       )}
 
-      {/* Main Content Area */}
+      {/* Main Content Area
+          主内容区域 */}
       <div
         style={{
           flex: 1,
@@ -101,7 +105,8 @@ function FolioInner({
           minWidth: 0,
         }}
       >
-        {/* Toolbar */}
+        {/* Toolbar
+            工具栏 */}
         {showUI && (
           <div
             className="folio-toolbar"
@@ -138,7 +143,8 @@ function FolioInner({
           </div>
         )}
 
-        {/* Content */}
+        {/* Content
+            内容 */}
         <div
           {...(state.readMode === "page" ? bind() : {})}
           ref={containerRef}
@@ -155,7 +161,8 @@ function FolioInner({
           </Container>
         </div>
 
-        {/* Controls */}
+        {/* Controls
+            控制栏 */}
         {showUI && (
           <div
             className="folio-controls"
@@ -179,7 +186,8 @@ function FolioInner({
         )}
       </div>
 
-      {/* Settings Drawer — could be a modal/drawer, for now a side panel */}
+      {/* Settings Drawer — could be a modal/drawer, for now a side panel
+          设置抽屉 —— 可做成模态框/抽屉，目前先作为侧边面板 */}
       <PanelSlot slot="Settings" onTreeChange={onTreeChange} />
     </div>
   );

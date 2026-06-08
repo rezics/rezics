@@ -50,7 +50,10 @@ import { CreateChapterDialog } from "./CreateChapterDialog";
 import { EditChapterDialog } from "./EditChapterDialog";
 import { MoveToParentDialog } from "./MoveToParentDialog";
 
-/** Chapter tree node structure. */
+/**
+ * Chapter tree node structure.
+ * 章节树节点结构。
+ */
 export type Chapter = {
   id: string | number;
   title: string;
@@ -67,14 +70,20 @@ export type Chapter = {
   >
 >;
 
-/** Context menu state. */
+/**
+ * Context menu state.
+ * 右键菜单状态。
+ */
 export type ChapterContextMenuState = {
   x: number;
   y: number;
   node: NodeApi<Chapter>;
 } | null;
 
-/** Imperative handle for parent components. */
+/**
+ * Imperative handle for parent components.
+ * 供父组件使用的命令式句柄。
+ */
 export interface BookTocEditorHandle {
   expandAll: () => void;
   collapseAll: () => void;
@@ -87,7 +96,10 @@ interface BookTocEditorProps {
   onDownloadJSON?: () => void;
 }
 
-/** Find the last non-leaf node (last volume/section with children). */
+/**
+ * Find the last non-leaf node (last volume/section with children).
+ * 查找最后一个非叶子节点（最后一个带子节点的卷/分卷）。
+ */
 function findLastNonLeafId(tree: Chapter[]): string | number | null {
   let lastId: string | number | null = null;
   for (const node of tree) {
@@ -106,7 +118,10 @@ function findLastNonLeafId(tree: Chapter[]): string | number | null {
   return lastId;
 }
 
-/** Count all leaf nodes in tree. */
+/**
+ * Count all leaf nodes in tree.
+ * 统计树中所有叶子节点。
+ */
 function countChapters(tree: Chapter[]): number {
   let count = 0;
   for (const node of tree) {
@@ -119,12 +134,18 @@ function countChapters(tree: Chapter[]): number {
   return count;
 }
 
-/** Sum word count across all nodes. */
+/**
+ * Sum word count across all nodes.
+ * 累加所有节点的字数。
+ */
 function totalWordCount(tree: Chapter[]): number {
   return tree.reduce((sum, node) => sum + mockWordCount(node), 0);
 }
 
-/** Format word count for display. */
+/**
+ * Format word count for display.
+ * 格式化字数用于展示。
+ */
 function formatTotal(n: number): string {
   if (n >= 10000) {
     return `${(n / 10000).toFixed(1)}w`;
@@ -189,11 +210,13 @@ export const BookTocEditor = forwardRef<
   const [bulkRating, setBulkRating] = useState<ContentRating>("GENERAL");
 
   // Edit chapter dialog state
+  // 编辑章节对话框状态
   const [editDialogChapter, setEditDialogChapter] = useState<Chapter | null>(
     null,
   );
 
   // Move-to-parent dialog state
+  // 移动到父节点对话框状态
   const [moveDialogChapter, setMoveDialogChapter] = useState<Chapter | null>(
     null,
   );
@@ -278,7 +301,10 @@ export const BookTocEditor = forwardRef<
     setCurrentEditParentId(parentId);
   }
 
-  /** One-click new chapter: insert at last non-leaf, enter rename mode. */
+  /**
+   * One-click new chapter: insert at last non-leaf, enter rename mode.
+   * 一键新建章节：插入到最后一个非叶子节点下，并进入重命名模式。
+   */
   function handleQuickCreate() {
     const parentId = findLastNonLeafId(treeData);
     if (parentId !== null) {
@@ -288,12 +314,18 @@ export const BookTocEditor = forwardRef<
     }
   }
 
-  /** Open the edit dialog for a chapter. */
+  /**
+   * Open the edit dialog for a chapter.
+   * 打开某章节的编辑对话框。
+   */
   const handleEditChapter = useCallback((chapter: Chapter) => {
     setEditDialogChapter(chapter);
   }, []);
 
-  /** Navigate to the chapter content editor page. */
+  /**
+   * Navigate to the chapter content editor page.
+   * 跳转到章节内容编辑页面。
+   */
   const handleNavigateToChapter = useCallback(
     async (chapter: Chapter) => {
       const contentUnitId = contentUnitIdForNode(chapter);
@@ -316,7 +348,10 @@ export const BookTocEditor = forwardRef<
     [ensureChapterUnit, navigate, bookUnitId, showAlert],
   );
 
-  /** Save edits from the edit dialog (title rename + mock status). */
+  /**
+   * Save edits from the edit dialog (title rename + mock status).
+   * 保存编辑对话框的改动（标题重命名 + 模拟状态）。
+   */
   const handleEditSave = useCallback(
     (update: { title: string; status: string; rating: ContentRating }) => {
       setTreeData(
@@ -328,17 +363,24 @@ export const BookTocEditor = forwardRef<
           ) as Chapter[],
       );
       // MOCK: rating update persists via chapter update API here (handled by caller in production)
+      // MOCK：此处通过章节更新 API 持久化分级改动（生产环境由调用方处理）
       void update.rating;
     },
     [editDialogChapter],
   );
 
-  /** Open the move-to-parent dialog. */
+  /**
+   * Open the move-to-parent dialog.
+   * 打开移动到父节点对话框。
+   */
   const handleMoveToParent = useCallback((chapter: Chapter) => {
     setMoveDialogChapter(chapter);
   }, []);
 
-  /** Confirm moving a node to a new parent. */
+  /**
+   * Confirm moving a node to a new parent.
+   * 确认将节点移动到新的父节点。
+   */
   const handleMoveConfirm = useCallback(
     (targetParentId: string | number | null) => {
       if (!moveDialogChapter || targetParentId === null) return;
@@ -393,7 +435,10 @@ export const BookTocEditor = forwardRef<
     ],
   );
 
-  /** Bulk-edit: set rating for only the selected leaf chapters, then save. */
+  /**
+   * Bulk-edit: set rating for only the selected leaf chapters, then save.
+   * 批量编辑：仅为选中的叶子章节设置分级，然后保存。
+   */
   async function applyBulkRating(rating: ContentRating) {
     const ids = selectedIds;
     const materializedChapterIds: string[] = [];
@@ -430,7 +475,10 @@ export const BookTocEditor = forwardRef<
     setIsSelectionMode(false);
   }
 
-  /** Resync: recompute index overrides from current materialized chapter ratings. */
+  /**
+   * Resync: recompute index overrides from current materialized chapter ratings.
+   * 重新同步：根据当前已落地章节的分级重新计算索引覆盖项。
+   */
   async function handleResyncOverrides() {
     const ratingByChapterId = new Map<string, ContentRating | undefined>();
 
@@ -503,6 +551,7 @@ export const BookTocEditor = forwardRef<
       />
 
       {/* Tree area — flex-1 fills remaining space; min-h provides scroll fallback */}
+      {/* 树区域 — flex-1 占满剩余空间；min-h 提供滚动兜底 */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: tree container */}
       <div
         ref={treeAreaCallbackRef}
@@ -563,7 +612,6 @@ export const BookTocEditor = forwardRef<
         )}
       </div>
 
-      {/* Footer */}
       <div className="flex items-center justify-between py-3 pb-8 text-sm text-muted-foreground">
         <span>
           {t("book:edit_toc_footer_summary", {

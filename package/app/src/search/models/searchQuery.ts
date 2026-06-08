@@ -56,20 +56,22 @@ const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
 
 /**
  * Parse a StackOverflow-style search string into a structured SearchQuery.
+ * 将 StackOverflow 风格的搜索字符串解析为结构化的 SearchQuery。
  *
  * Supported tokens:
- *   [slug]          → tag filter
- *   type:value      → content type
- *   lang:value      → language
- *   rating:tier     → rating tier (GENERAL, R_15, R_18, R_18G; repeatable)
- *   platform:id     → game platform Entity id (repeatable)
- *   ageRating:id    → external rating tag Unit id (repeatable)
- *   ai:value        → AI disclosure mode (UNKNOWN, NONE, AI_ASSISTED, AI_ORIGINATED, MACHINE_GENERATED; repeatable)
- *   licensed:yes|no → licensed toggle
- *   in:slug         → realm scope
- *   sort:value      → sort order
- *   kind:value      → post kind (review/excerpt/remark/post/chapter/wiki; last-wins)
- *   everything else → keyword
+ * 支持的 token：
+ *   [slug]          → tag filter。标签过滤
+ *   type:value      → content type。内容类型
+ *   lang:value      → language。语言
+ *   rating:tier     → rating tier (GENERAL, R_15, R_18, R_18G; repeatable)。分级（可重复）
+ *   platform:id     → game platform Entity id (repeatable)。游戏平台 Entity id（可重复）
+ *   ageRating:id    → external rating tag Unit id (repeatable)。外部分级标签 Unit id（可重复）
+ *   ai:value        → AI disclosure mode (UNKNOWN, NONE, AI_ASSISTED, AI_ORIGINATED, MACHINE_GENERATED; repeatable)。AI 披露模式（可重复）
+ *   licensed:yes|no → licensed toggle。授权开关
+ *   in:slug         → realm scope。realm 范围
+ *   sort:value      → sort order。排序方式
+ *   kind:value      → post kind (review/excerpt/remark/post/chapter/wiki; last-wins)。帖子类型（后者覆盖前者）
+ *   everything else → keyword。其余皆为关键词
  */
 export function parseSearchString(input: string): SearchQuery {
   if (!input.trim()) return {};
@@ -78,6 +80,7 @@ export function parseSearchString(input: string): SearchQuery {
   let remaining = input;
 
   // Extract [tag] tokens
+  // 提取 [tag] token
   const tagMatches = [...input.matchAll(TAG_REGEX)];
   if (tagMatches.length > 0) {
     result.tags = tagMatches
@@ -90,6 +93,7 @@ export function parseSearchString(input: string): SearchQuery {
   }
 
   // Extract key:value tokens
+  // 提取 key:value token
   const filterMatches = [...remaining.matchAll(FILTER_REGEX)];
   for (const m of filterMatches) {
     const key = m[1]!.toLowerCase();
@@ -154,6 +158,7 @@ export function parseSearchString(input: string): SearchQuery {
         const kind = KIND_TOKENS[rawValue.toLowerCase()];
         if (kind) {
           // Single-valued, last-wins. Unknown values are silently dropped.
+          // 单值，后者覆盖前者。未知值会被静默丢弃。
           result.kind = kind;
         }
         break;
@@ -164,6 +169,7 @@ export function parseSearchString(input: string): SearchQuery {
   }
 
   // Remaining text is the keyword
+  // 剩余文本即为关键词
   const keyword = remaining.trim();
   if (keyword) {
     result.keyword = keyword;
@@ -174,6 +180,7 @@ export function parseSearchString(input: string): SearchQuery {
 
 /**
  * Serialize a structured SearchQuery back into the SO-style syntax string.
+ * 将结构化的 SearchQuery 序列化回 SO 风格的语法字符串。
  */
 export function serializeSearchString(query: SearchQuery): string {
   const parts: string[] = [];

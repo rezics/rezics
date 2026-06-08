@@ -120,6 +120,7 @@ if (isDev) {
 }
 
 // Bootstrap server-local JWT service for signing rezics-session-tokens
+// 引导用于签发 rezics-session-tokens 的服务器本地 JWT 服务
 const serverJwksUrl = `http://localhost:${port}/.well-known/jwks.json`;
 
 await bootstrapJwtServiceRecord("server-local", {
@@ -145,6 +146,7 @@ const configuredApp = app
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       // x-auth-session-token is intentionally absent: session credentials travel only via the httpOnly cookie, never a request header.
+      // x-auth-session-token 有意缺席：会话凭证仅通过 httpOnly cookie 传递，绝不经由请求头。
       allowedHeaders: ["content-type", "authorization", "accept"],
       maxAge: 600,
     }),
@@ -280,6 +282,8 @@ routeApp
 
 // Slug-scopes must hydrate first: default-realm and seed-tags lookups go
 // through `(slugScope, slug)` and depend on the scope cache being populated.
+// slug-scopes 必须先完成填充：default-realm 和 seed-tags 查询都经由
+// `(slugScope, slug)`，依赖 scope 缓存已被填充。
 await initSlugScopesCache();
 await Promise.all([initDefaultRealmCache(), initSeedTagsCache()]);
 

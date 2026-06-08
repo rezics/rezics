@@ -11,13 +11,6 @@
     "./json": "./src/json/index.ts",
     "./editor": "./src/editor/index.ts"
   },
-  "scripts": {
-    "build": "vite build",
-    "test": "bun test",
-    "dev": "vite build --watch",
-    "storybook": "storybook dev -p 6008 --no-open",
-    "build-storybook": "storybook build -o storybook-static"
-  },
   "dependencies": {
     "@rezics/contract": "workspace:*",
     "@rezics/storybook-config": "workspace:*",

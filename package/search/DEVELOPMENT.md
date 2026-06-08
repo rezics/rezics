@@ -5,16 +5,16 @@
 ```bash
 # Linux / macOS
 cd package/search
-bun run meilisearch
+task meilisearch
 
 # WSL
-bun run meilisearch:wsl
+task meilisearch:wsl
 ```
 
 ## Windows (PowerShell) Multi-Service Startup
 
 ```powershell
 tabby --new-tab "cd D:\path\to\project; pg_ctl start" `
-      --new-tab "cd D:\path\to\project\package\search; bun run meilisearch:wsl" `
-      --new-tab "cd D:\path\to\project\package\app; bun dev"
+      --new-tab "cd D:\path\to\project\package\search; task meilisearch:wsl" `
+      --new-tab "cd D:\path\to\project\package\app; task dev"
 ```

@@ -55,6 +55,7 @@ describe("search history model", () => {
     for (let i = 0; i < 12; i++) pushSearchHistory(`term-${i}`);
     expect(readSearchHistory()).toHaveLength(8);
     // newest retained, oldest dropped
+    // 保留最新的，丢弃最旧的
     expect(readSearchHistory()[0]).toBe("term-11");
     expect(readSearchHistory()).not.toContain("term-0");
   });

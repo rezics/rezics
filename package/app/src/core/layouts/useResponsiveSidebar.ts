@@ -6,6 +6,7 @@ import { useUserProfileStore } from "@/user/states";
 import { useLayoutStore } from "../states/layoutStore.ts";
 
 // TODO Introduce Layout Store instead of useState for drawer width and sidebar open state
+// TODO 用 Layout Store 替代 useState 来管理抽屉宽度和侧边栏展开状态
 
 export interface ResponsiveSidebarState {
   isMobile: boolean;

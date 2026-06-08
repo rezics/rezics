@@ -12,6 +12,7 @@ import type {
 
 // Relation payload shape for shelf metadata. Shelf items are paged separately through
 // `GET /shelf/:unitId/items`.
+// 书架元数据的关联负载结构。书架条目通过 `GET /shelf/:unitId/items` 单独分页。
 export const shelfInclude = {
   unit: {
     include: {
@@ -31,6 +32,7 @@ export type ShelfWithMetadata = typeof Shelf.$inferSelect & {
 };
 
 // Lighter select for list queries (no units/relations)
+// 用于列表查询的轻量 select（不含 units/relations）
 export const shelfListSelect = {
   unitId: true,
   kindKey: true,

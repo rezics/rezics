@@ -50,6 +50,8 @@ export function orderRealmFeedTagChips(
   const selectedChips = chips.filter((chip) => selected.has(chip.tagId));
   // The cap keeps this row a feed shortcut surface; complete browsing stays in
   // the realm Tags tab, so selected chips are preserved outside the shortcut cap.
+  // 该上限使此行保持为信息流快捷入口；完整浏览仍在 realm 的 Tags 标签页中进行，
+  // 因此已选中的 chip 不受快捷入口上限的约束而被保留。
   const shortcutChips = chips
     .filter((chip) => !selected.has(chip.tagId))
     .slice(0, shortcutLimit);

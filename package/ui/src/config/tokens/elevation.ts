@@ -2,6 +2,9 @@
 // Default policy is flat with tonal separation. shadow-1/shadow-2 are allowed
 // for shadcn Card surface="elevated" and its interactive hover state; heavier
 // shadows are for floating/modal tiers.
+// Foundation v1 高度（elevation）令牌。来源：brief §7。
+// 默认策略为扁平化加色调分离。shadow-1/shadow-2 仅用于 shadcn Card
+// surface="elevated" 及其交互悬停状态；更重的阴影用于浮层/模态层级。
 
 export const lightShadows = {
   none: "none",

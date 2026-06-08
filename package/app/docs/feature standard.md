@@ -19,7 +19,7 @@ feature/                  # 模块根目录（singular domain）
 Folder naming follows the repo-wide β dual-track convention: domain / feature
 folders are singular; container folders are plural drawn from a fixed allowlist
 (`hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, …).
-The allowlist and its exceptions live in `bun run check:convention`, which is
+The allowlist and its exceptions live in `task check:convention`, which is
 the authoritative enforcer; extend the allowlist there rather than redefining
 the rule here.
 

@@ -10,9 +10,12 @@ function escapeValue(value: string): string {
 
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
+ * 接受完整构造好的 Meilisearch 查询字符串的底层搜索 API。
  *
  * Prefer using {@link searchUsers} in new code, which accepts a typed
  * {@link UserListQuery} object and builds the query for you.
+ * 新代码中优先使用 {@link searchUsers}，它接受一个带类型的
+ * {@link UserListQuery} 对象并为你构建查询。
  */
 export async function searchUsersRaw(
   q: string,
@@ -39,10 +42,14 @@ export async function searchUsersRaw(
 
 /**
  * Higher-level search API for users.
+ * 面向用户的更高层搜索 API。
  *
  * - Input is {@link UserListQuery} from `@rezics/contract`.
+ *   输入是来自 `@rezics/contract` 的 {@link UserListQuery}。
  * - It maps contract fields like `q`, `slug`, `type`, `page`, `limit`
  *   into Meilisearch filter expressions and pagination options.
+ *   它将 `q`、`slug`、`type`、`page`、`limit` 等契约字段映射为
+ *   Meilisearch 的 filter 表达式和分页选项。
  */
 export async function searchUsers(
   opts: UserListQuery,

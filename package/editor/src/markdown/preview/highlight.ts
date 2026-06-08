@@ -34,6 +34,7 @@ export function highlightCode(code: string, lang: string): string {
       return hljs.highlight(code, { language: lang }).value;
     } catch {
       // fall through to default escaping
+      // 失败时落到默认转义逻辑
     }
   }
   return "";

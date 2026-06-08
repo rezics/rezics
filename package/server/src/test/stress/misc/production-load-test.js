@@ -6,18 +6,19 @@ export const loginDuration = new Trend("login_duration");
 export const apiErrors = new Counter("api_errors");
 export const successRate = new Rate("success_rate");
 
-// 测试阈值 —— 若不满足则视为失败 (CI/CD Gate)
+// Test thresholds — failing any of them marks the run as failed (CI/CD gate).
+// 测试阈值 —— 若不满足则视为失败 (CI/CD Gate)。
 export const options = {
   stages: [
-    { duration: "1m", target: 50 }, // ramp up to 50 users
-    { duration: "3m", target: 200 }, // keep 200 VUs to load test
-    { duration: "1m", target: 0 }, // ramp down
+    { duration: "1m", target: 50 }, // ramp up to 50 users — 爬升至 50 用户
+    { duration: "3m", target: 200 }, // keep 200 VUs to load test — 保持 200 VU 进行压测
+    { duration: "1m", target: 0 }, // ramp down — 逐步退场
   ],
   thresholds: {
-    http_req_duration: ["p(95)<500"], // 95% 响应时间 < 500ms
-    "checks{type:login}": ["rate>0.98"], // 登录成功率 > 98%
-    success_rate: ["rate>0.97"], // API 成功率 > 97%
-    api_errors: ["count<50"], // 错误数量少于 50
+    http_req_duration: ["p(95)<500"], // 95% response time < 500ms — 95% 响应时间 < 500ms
+    "checks{type:login}": ["rate>0.98"], // login success rate > 98% — 登录成功率 > 98%
+    success_rate: ["rate>0.97"], // API success rate > 97% — API 成功率 > 97%
+    api_errors: ["count<50"], // fewer than 50 errors — 错误数量少于 50
   },
 };
 
@@ -33,7 +34,8 @@ function login() {
     headers: { "Content-Type": "application/json" },
   });
 
-  // 检查登录请求
+  // Check the login request.
+  // 检查登录请求。
   const ok = check(
     res,
     {
@@ -94,7 +96,8 @@ export default function () {
     getUserInfo(token);
     postAction(token);
 
-    // 模拟真实思考时间
+    // Simulate realistic think time.
+    // 模拟真实思考时间。
     sleep(Math.random() * 3 + 1);
   });
 }

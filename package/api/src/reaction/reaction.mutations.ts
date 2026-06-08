@@ -1,10 +1,14 @@
 /**
  * React Query mutations for Reaction operations.
+ * 用于 Reaction 操作的 React Query mutation。
  *
  * Cache-update strategy: per-target optimistic update against every cached
  * `summaryBatch` and `myBatch` containing the affected `targetId`. Snapshot
  * is restored on error. `onSuccess` reconciles only the affected slice when
  * the server-reported value differs — never a page-wide invalidate.
+ * 缓存更新策略：对每个包含受影响 `targetId` 的缓存 `summaryBatch` 和
+ * `myBatch` 执行按目标的乐观更新。出错时恢复快照。当服务端报告的值不同时，
+ * `onSuccess` 仅协调受影响的切片——从不执行整页失效。
  */
 
 import {
@@ -295,6 +299,9 @@ export function useCreateReactionMutation(
       // cache, so reaction summaries are not invalidated here. Cross-cutting
       // surfaces (detail/dashboard/profile/realm-feed/search) still refresh
       // through the coherence map so activity and counts stay consistent.
+      // 乐观增量已写入每个受影响的 reaction batch 缓存，因此这里不会使
+      // reaction summaries 失效。横切面（detail/dashboard/profile/realm-feed/search）
+      // 仍通过一致性映射刷新，以保持活动和计数一致。
       void invalidateForCacheDomain(queryClient, "reaction");
       options?.onSuccess?.(data, variables, context, mutationCtx);
     },

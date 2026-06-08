@@ -19,13 +19,16 @@ export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
   const warnings: string[] = [];
 
   // Parse structure
+  // 解析结构
   const opfPath = parseContainer(fileMap);
   const opf = parseOpf(fileMap, opfPath);
 
   // Build asset tracker for blob URL cleanup
+  // 构建资产追踪器以便清理 blob URL
   const tracker = createAssetTracker();
 
   // Resolve spine items to full paths
+  // 将 spine 条目解析为完整路径
   const spineEntries: { href: string; fullPath: string }[] = [];
   for (const spineItem of opf.spine) {
     const manifestItem = opf.manifest.get(spineItem.idref);
@@ -36,6 +39,7 @@ export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
   }
 
   // Pre-extract chapter HTML with asset resolution
+  // 预先提取章节 HTML 并解析其中的资产引用
   const chapterCache = new Map<string, string>();
   for (const entry of spineEntries) {
     const raw = readText(fileMap, entry.fullPath);
@@ -48,10 +52,12 @@ export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
   }
 
   // Parse TOC
+  // 解析目录（TOC）
   const spineHrefs = spineEntries.map((e) => e.href);
   let tocNodes: FolioNode[];
 
   // Try EPUB 3 nav doc first, then NCX
+  // 优先尝试 EPUB 3 的 nav 文档，再回退到 NCX
   const navItem = Array.from(opf.manifest.values()).find((item) =>
     item.properties?.includes("nav"),
   );
@@ -84,6 +90,7 @@ export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
   }
 
   // If TOC parsing didn't produce a good tree, fall back to spine order
+  // 若目录解析未能生成有效的树，则回退到 spine 顺序
   const flatFromToc = flattenTree(tocNodes);
   if (flatFromToc.length === 0) {
     tocNodes = spineEntries
@@ -96,6 +103,7 @@ export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
   }
 
   // Build TOC items for the Controls panel
+  // 为 Controls 面板构建目录项
   const flat = flattenTree(tocNodes);
   const tocItems = flat.map((f) => ({
     label: f.node.title,
@@ -105,6 +113,7 @@ export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
   const Controls = createEpubControls(tocItems);
 
   // Simple HTML renderer — renders sanitized HTML
+  // 简单的 HTML 渲染器 —— 渲染已净化的 HTML
   function EpubRenderer({ raw }: { raw: string }) {
     return (
       <div

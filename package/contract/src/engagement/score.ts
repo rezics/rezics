@@ -2,6 +2,7 @@ import { t } from "elysia";
 
 // ============================================================
 // SCORE CONSTANTS
+// 评分常量
 // ============================================================
 
 export const SCORE_MIN = 1;
@@ -14,6 +15,7 @@ export const scoreValueSchema = t.Integer({
 
 // ============================================================
 // SCORE ENTRY DTO
+// 评分记录 DTO
 // ============================================================
 
 export const scoreEntryDTOSchema = t.Object({
@@ -31,6 +33,7 @@ export type ScoreEntryDTO = (typeof scoreEntryDTOSchema)["static"];
 
 // ============================================================
 // SCORE AGGREGATE DTO
+// 评分聚合 DTO
 // ============================================================
 
 export const scoreDistributionSchema = t.Record(t.String(), t.Integer());
@@ -57,6 +60,7 @@ export type ScoreAggregateDTO = (typeof scoreAggregateDTOSchema)["static"];
 
 // ============================================================
 // UPSERT SCORE INPUT
+// upsert 评分输入
 // ============================================================
 
 export const upsertScoreInputSchema = t.Object({
@@ -70,6 +74,7 @@ export type UpsertScoreInput = (typeof upsertScoreInputSchema)["static"];
 
 // ============================================================
 // SCORE REALM FIELD DTO
+// 评分 realm 字段 DTO
 // ============================================================
 
 export const scoreRealmFieldDTOSchema = t.Object({
@@ -85,6 +90,7 @@ export type ScoreRealmFieldDTO = (typeof scoreRealmFieldDTOSchema)["static"];
 
 // ============================================================
 // ADD REALM FIELD INPUT
+// 添加 realm 字段输入
 // ============================================================
 
 export const addRealmFieldInputSchema = t.Object({

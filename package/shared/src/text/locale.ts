@@ -10,12 +10,12 @@ const fakerInstances: Record<Language, Faker> = {
   [LANGUAGES.KO]: new Faker({ locale: [ko, en, base] }),
 };
 
-/** Locale-appropriate Faker instance for a given language. */
+/** Locale-appropriate Faker instance for a given language. 为指定语言返回相应区域设置的 Faker 实例。 */
 export function getFaker(lang: Language): Faker {
   return fakerInstances[lang];
 }
 
-/** Languages beyond zh-hant and their inclusion probability for multilingual generation. */
+/** Languages beyond zh-hant and their inclusion probability for multilingual generation. zh-hant 以外的语言及其在多语言生成中的纳入概率。 */
 export const LANG_DISTRIBUTION: readonly [Language, number][] = [
   [LANGUAGES.EN, 0.7],
   [LANGUAGES.ZH_HANS, 0.4],

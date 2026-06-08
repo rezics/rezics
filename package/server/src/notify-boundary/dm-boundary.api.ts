@@ -24,6 +24,9 @@ async function getServerDb() {
  * Whether a user-to-user block exists between the two users in either
  * direction. Mirrors `blockService.isBlockedEitherWay` while keeping the DM
  * route independent from the block domain module.
+ *
+ * 两个用户之间是否在任一方向上存在用户对用户的拉黑。镜像
+ * `blockService.isBlockedEitherWay`，同时让 DM 路由独立于 block 域模块。
  */
 async function defaultIsBlockedEitherWay(
   a: string,
@@ -81,6 +84,8 @@ export function createDmBoundaryApi(deps: DmBoundaryDeps = {}) {
       // User-to-user block gate: neither party may DM the other if either has
       // blocked the other. Checked before the subscription/policy gates so a
       // block always wins.
+      // 用户对用户的拉黑闸门：若任一方拉黑了对方，则双方都不能给对方发 DM。在
+      // subscription/policy 闸门之前检查，使拉黑始终优先生效。
       if (await isBlockedEitherWay(senderId, recipientId)) {
         set.status = 403;
         return { error: "You cannot message this user" };
@@ -101,6 +106,9 @@ export function createDmBoundaryApi(deps: DmBoundaryDeps = {}) {
       // Permission gate: sender must have a Subscription(sender -> recipient)
       // whose `channels` permits DM. Existing follow-based DM relationships
       // were materialized as Subscription rows with channels=['*'].
+      // 权限闸门：发送方必须拥有一条 `channels` 允许 DM 的
+      // Subscription（sender -> recipient）。既有基于 follow 的 DM 关系已物化为
+      // channels=['*'] 的 Subscription 行。
       const channels = await getSubscriptionChannels(senderId, recipientId);
 
       if (!channels || !subscriptionPermitsDm(channels)) {

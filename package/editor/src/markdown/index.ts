@@ -28,6 +28,7 @@ export function markdownFull(config?: MarkdownFullConfig): EditorPlugin[] {
 
 export { insertImageUrl } from "./core/commands";
 // Re-export granular factories
+// 重新导出细粒度工厂函数
 export { markdown } from "./core/index";
 export type { EmojiConfig } from "./emoji/index";
 export { emoji } from "./emoji/index";

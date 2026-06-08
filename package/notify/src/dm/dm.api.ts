@@ -63,6 +63,7 @@ export const dmApi = new Elysia({ prefix: "/dm" })
       }
 
       // Mark messages as read when fetching
+      // 拉取时将消息标记为已读
       await dmService.markMessagesAsRead(params.id, userId);
 
       return {
@@ -104,6 +105,7 @@ export const dmApi = new Elysia({ prefix: "/dm" })
       const peerId = await dmService.getPeerId(params.id, userId);
       if (peerId) {
         // Tell the peer their messages were read (their sent-message receipts).
+        // 告知对端其消息已被阅读（对端已发送消息的回执）。
         dmFanOut.publish(peerId, {
           kind: "dm.read",
           conversationId: params.id,
@@ -223,6 +225,7 @@ export const dmApi = new Elysia({ prefix: "/dm" })
     },
     message() {
       // Receive-only — ignore client messages
+      // 仅接收 — 忽略客户端消息
     },
     close(ws) {
       const userId = (ws.data as any).userId;

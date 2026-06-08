@@ -14,10 +14,6 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {
-    "test": "bun test",
-    "typecheck": "bunx tsc --noEmit"
-  },
   "peerDependencies": {
     "typescript": "^6"
   },

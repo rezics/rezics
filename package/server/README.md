@@ -42,22 +42,22 @@ Environment variables (`AUTH_JWKS_URL`, `AUTH_JWT_ISSUER`, `MAIN_SESSION_JWT_*`)
 ## Scripts
 
 ```bash
-bun run dev              # Start with --watch (development)
-bun run build            # Compile to standalone binary
-bun run db:generate      # Generate Drizzle migrations
-bun run db:migrate       # Run local Drizzle migrations
-bun run db:deploy        # Deploy Drizzle migrations (production)
-bun run db:studio        # Open Drizzle Studio
-bun run seed:factory     # Seed factory data
+task server:dev              # Start with --watch (development)
+task server:build            # Compile to standalone binary
+task server:db:generate      # Generate Drizzle migrations
+task server:db:migrate       # Run local Drizzle migrations
+task server:db:deploy        # Deploy Drizzle migrations (production)
+task server:db:studio        # Open Drizzle Studio
+task seed:factory            # Seed factory data
 ```
 
 ## Factory Seed
 
-Factory seed commands seed baseline rows without resetting databases, run a base preset, optionally run special scenarios, and print special scenario fixture Unit IDs. Run `bun run seed:database-reset` explicitly when a clean database is needed; headless reset requires `seed database-reset --yes`.
+Factory seed commands seed baseline rows without resetting databases, run a base preset, optionally run special scenarios, and print special scenario fixture Unit IDs. Run `task seed:database-reset` explicitly when a clean database is needed; headless reset requires `task seed:database-reset -- --yes`.
 
 ```bash
-bun run seed:factory:fast
-bun run ../../package/utils/bin/cli.ts factory --preset=fast --no-interactive --scenario=complex-shelf --manifest=both
+task seed:factory:fast
+task factory -- --preset=fast --no-interactive --scenario=complex-shelf --manifest=both
 bun run ../../package/utils/bin/cli.ts factory --preset=fast --no-interactive --all-scenarios --meili=skip
 ```
 

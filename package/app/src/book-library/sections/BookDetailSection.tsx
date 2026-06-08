@@ -33,7 +33,7 @@ function useActiveTabRoute(): TabRoute {
 export type BookDetailShellProps = {
   bookInfo: BookDTO;
   children: React.ReactNode;
-  /** Sidebar content rendered in the right column on lg+. */
+  /** Sidebar content rendered in the right column on lg+. 在 lg+ 时渲染在右侧栏的边栏内容。 */
   sidebar?: React.ReactNode;
 };
 
@@ -41,6 +41,8 @@ export type BookDetailShellProps = {
  * Shell layout for book detail sub-pages.
  * Renders the tab navigation (as route links) + an optional sidebar,
  * with the routed page content as children.
+ * 书籍详情子页面的外壳布局。
+ * 渲染标签导航（作为路由链接）+ 可选的边栏，路由页面内容作为子节点。
  */
 export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   bookInfo,

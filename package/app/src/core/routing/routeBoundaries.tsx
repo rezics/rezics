@@ -5,6 +5,13 @@
 // `pendingComponent` / `errorComponent` / `notFoundComponent` into a route, and
 // render `RouteDenied` / `RouteUnauthenticated` from a route component when a
 // policy or session check fails.
+//
+// 共享的路由级边界状态。
+//
+// 功能路由不应重新定义 loading / error / not-found / denied / unauthenticated
+// 这些框架性界面。使用 `routeBoundaries()` 将通用的 `pendingComponent` /
+// `errorComponent` / `notFoundComponent` 展开到路由中，并在策略或会话检查失败时，
+// 从路由组件中渲染 `RouteDenied` / `RouteUnauthenticated`。
 
 import { useTranslation } from "@rezics/i18n/react";
 import {
@@ -70,7 +77,7 @@ function BoundaryShell({
   );
 }
 
-/** Pending state for a route whose loader/component is in flight. */
+/** Pending state for a route whose loader/component is in flight. 路由的 loader/组件加载中时的等待状态。 */
 export const RouteLoading: React.FC = () => {
   const { t } = useTranslation(["common"]);
   return (
@@ -88,7 +95,7 @@ export const RouteLoading: React.FC = () => {
   );
 };
 
-/** Error boundary state. Receives router error props when used as a route `errorComponent`. */
+/** Error boundary state. Receives router error props when used as a route `errorComponent`. 错误边界状态。作为路由 `errorComponent` 使用时会接收路由错误 props。 */
 export const RouteError: React.FC<Partial<ErrorComponentProps>> = ({
   reset,
 }) => {
@@ -122,7 +129,7 @@ export const RouteError: React.FC<Partial<ErrorComponentProps>> = ({
   );
 };
 
-/** Denied state for a route the signed-in user lacks permission to view. */
+/** Denied state for a route the signed-in user lacks permission to view. 已登录用户无权查看某路由时的拒绝访问状态。 */
 export const RouteDenied: React.FC<{
   title?: string;
   description?: string;
@@ -137,7 +144,7 @@ export const RouteDenied: React.FC<{
   );
 };
 
-/** Unauthenticated state prompting the visitor to sign in. */
+/** Unauthenticated state prompting the visitor to sign in. 提示访客登录的未认证状态。 */
 export const RouteUnauthenticated: React.FC<{
   title?: string;
   description?: string;
@@ -160,12 +167,14 @@ export const RouteUnauthenticated: React.FC<{
   );
 };
 
-/** Not-found state. Re-exported so routes share a single source. */
+/** Not-found state. Re-exported so routes share a single source. 未找到状态。重新导出以便各路由共用同一来源。 */
 export const RouteNotFound = NotFoundContainer;
 
 /**
  * Common route boundary components to spread into a `createFileRoute(...)`
  * definition so feature routes don't redefine them:
+ *
+ * 可展开到 `createFileRoute(...)` 定义中的通用路由边界组件，使功能路由无需重复定义：
  *
  * ```ts
  * createFileRoute("/_mainLayout/x")({ component: X, ...routeBoundaries() });

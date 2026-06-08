@@ -14,7 +14,10 @@ export const activityListQuery = (userId: string, query?: ActivityListQuery) =>
     staleTime: 1000 * 30,
   });
 
-/** Cursor-paginated timeline; `before` watermark threads through pages. */
+/**
+ * Cursor-paginated timeline; `before` watermark threads through pages.
+ * 游标分页的时间线；`before` 水位线贯穿各页传递。
+ */
 export const activityInfiniteQuery = (userId: string, limit?: number) =>
   infiniteQueryOptions({
     queryKey: activityKeys.list(userId, { limit }),

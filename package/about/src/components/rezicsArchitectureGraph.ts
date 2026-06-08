@@ -61,6 +61,9 @@ digraph RezicsArchitecture {
   // RealmTagApplication is a realm-scoped use of an existing global Tag. Keep
   // these separate so the diagram does not imply that realms own tags or that
   // realm-tag classification requires a work to be posted into the realm feed.
+  // Realm 是社区界面，UnitRealm 是 feed 成员关系，而 RealmTagApplication 是对
+  // 现有全局 Tag 的 realm 范围内的使用。保持三者分离，以免图示暗示 realm 拥有
+  // tag，或暗示 realm-tag 分类需要先把作品发布到 realm feed 中。
   Realm -> RealmTag [label="interprets"];
   RealmTag -> Tag [label="uses"];
   RealmTag -> WorkUnit [label="classifies in context"];

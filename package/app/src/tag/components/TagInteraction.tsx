@@ -51,26 +51,39 @@ export type TagInteractionProps = {
   tags: UnitTagDTO[];
   translations: BatchTagTranslationResult;
   bookUnitId: string;
-  /** The parent book; drives the edit-permission check. */
+  /**
+   * The parent book; drives the edit-permission check.
+   * 父书；驱动编辑权限检查。
+   */
   bookUnit?: BookDTO;
-  /** Override the search navigation target. Defaults to global `/search`. */
+  /**
+   * Override the search navigation target. Defaults to global `/search`.
+   * 覆盖搜索导航目标。默认为全局 `/search`。
+   */
   onSearchTags?: (tags: InjectedTag[]) => void;
   className?: string;
 };
 
 /**
  * TagInteraction — interactive tag chip group with preview and selection states.
+ * TagInteraction — 带预览与选择状态的交互式标签 chip 组。
  *
  *   preview: clicked chip opens an anchored Popover with detail/vote/search
  *   selection: clicked chips are selected; an action bar offers "Search selected tags"
+ *   preview：点击 chip 打开锚定的 Popover，含详情/投票/搜索
+ *   selection：被点击的 chip 进入选中态；操作栏提供 "Search selected tags"
  *
  * Chips render translated labels from the batch translation map. Navigation
  * to search uses the shared `useNavigateToTagSearch` helper so the target
  * page receives pre-resolved tag data via router state.
+ * chip 从批量翻译映射渲染翻译后的标签。搜索导航使用共享的
+ * `useNavigateToTagSearch` 辅助函数，使目标页通过路由 state 收到预解析的标签数据。
  *
  * The popover is rendered with `modal={false}` so the backdrop is absent,
  * scroll lock is disabled, and other chips remain clickable while the
  * preview is open.
+ * popover 以 `modal={false}` 渲染，因此没有背景遮罩、滚动锁定被禁用，
+ * 且预览打开时其他 chip 仍可点击。
  */
 export const TagInteraction: React.FC<TagInteractionProps> = ({
   tags,
@@ -179,6 +192,8 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
           // Preserve click ordering when moving from preview into selection.
           // Otherwise Base UI may close the preview before the chip click can
           // fold the previewed tag into the selected array.
+          // 从预览进入选择时保留点击顺序。否则 Base UI 可能在 chip 点击
+          // 把预览标签折叠进选中数组之前就关闭了预览。
           if (
             details?.reason === "outside-press" &&
             isTagChipEventTarget(details.event)

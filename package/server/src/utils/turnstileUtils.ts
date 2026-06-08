@@ -28,7 +28,8 @@ export async function verifyTurnstileToken(
     },
   );
 
-  // 官方返回类型
+  // Official response type.
+  // 官方返回类型。
   const data: TurnstileResponse = await resp.json();
 
   return data;

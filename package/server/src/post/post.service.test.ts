@@ -2232,6 +2232,7 @@ describe("PostService.create targetUnitId derivation", () => {
     expect(unitCreateDataArg().targetUnitId).toBeNull();
     expect(createDataArg().targetUnitId).toBeUndefined();
     // No Unit lookup needed when there is no target.
+    // 没有 target 时无需查询 Unit。
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
@@ -2499,6 +2500,7 @@ describe("PostService.update immutability", () => {
     ]);
 
     // Restore the shared mock so subsequent tests see the standard behavior.
+    // 恢复共享的 mock，使后续测试看到标准行为。
     Object.assign(legacyDbMock.post, { update: postUpdateMock });
   });
 
@@ -3102,7 +3104,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     resetMocks();
     seedLegacyPostRow(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
-    unitFindFirstMock.mockResolvedValueOnce(null); // no official question tag
+    unitFindFirstMock.mockResolvedValueOnce(null); // no official question tag — 没有官方 question 标签
 
     await expect(
       service.acceptAnswer({ scopeUnitId: "root-1", commentId: "reply-1" }, op),
@@ -3253,6 +3255,8 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
     );
     // First unit.findFirst is the question-tag lookup (none); second is the
     // owned-realm lookup (hit).
+    // 第一次 unit.findFirst 是 question 标签查询（无结果）；第二次是所属 realm
+    // 查询（命中）。
     unitFindFirstMock
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({ id: "realm-1" });
@@ -3274,12 +3278,14 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
 
   test("viewerCanPromote=false agrees with the write guard for the same caller", async () => {
     // Read path: stranger gets no capability.
+    // 读取路径：陌生人不获得任何权限。
     resetMocks();
     seedLegacyPostRow(readScope());
     const read = await service.getThreadPromotionSignals("root-1", stranger);
     expect(read.viewerCanPromote).toBe(false);
 
     // Write guard: the same stranger is rejected when they attempt to pin.
+    // 写入守卫：同一个陌生人尝试 pin 时会被拒绝。
     resetMocks();
     seedLegacyPostRow(readScope({ unit: { type: "POST", inRealms: [] } }));
     await expect(
@@ -3378,6 +3384,7 @@ describe("PostService lifecycle state", () => {
   });
 
   // 5.2 — the snapshot is written only at creation; setState never rewrites it.
+  // 5.2 — 快照仅在创建时写入；setState 永不重写它。
   test("setState changes only `state`, never the stateSchemaTag snapshot", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
@@ -3414,6 +3421,7 @@ describe("PostService lifecycle state", () => {
     });
 
     // solved → duplicate is a closed→closed jump the schema does not declare.
+    // solved → duplicate 是 schema 未声明的 closed→closed 跳转。
     await expect(service.setState("post-1", "duplicate")).rejects.toThrow(
       /Disallowed state transition/,
     );

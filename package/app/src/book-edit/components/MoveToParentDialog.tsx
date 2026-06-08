@@ -21,12 +21,12 @@ interface MoveToParentDialogProps {
   open: boolean;
   onClose: () => void;
   treeData: Chapter[];
-  /** The node being moved — excluded from the selectable tree along with its descendants. */
+  /** The node being moved — excluded from the selectable tree along with its descendants. 正在移动的节点——连同其后代一起从可选树中排除。 */
   movingNode: Chapter | null;
   onConfirm: (targetParentId: string | number | null) => void;
 }
 
-/** Collect all descendant IDs of a node (including itself). */
+/** Collect all descendant IDs of a node (including itself). 收集节点的所有后代 ID（包括其自身）。 */
 function collectIds(node: Chapter): Set<string> {
   const ids = new Set<string>([String(node.id)]);
   if (node.children) {
@@ -37,7 +37,7 @@ function collectIds(node: Chapter): Set<string> {
   return ids;
 }
 
-/** Filter tree: remove excluded nodes and optionally filter by search query. */
+/** Filter tree: remove excluded nodes and optionally filter by search query. 过滤树：移除被排除的节点，并可选地按搜索查询过滤。 */
 function filterTree(
   nodes: Chapter[],
   excludeIds: Set<string>,
@@ -163,6 +163,7 @@ export function MoveToParentDialog({
   }, [selectedId, onConfirm, onClose]);
 
   // Reset state when dialog opens
+  // 对话框打开时重置状态
   useEffect(() => {
     if (open) {
       setSearch("");

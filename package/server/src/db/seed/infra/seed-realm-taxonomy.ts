@@ -157,6 +157,9 @@ async function ensureGlobalTag(
  * substrate (POST is not slug-bearing); existence is determined by an
  * idempotency tuple of (owner, kind, content translation main source) seeded
  * only at infra time.
+ * 确保存在一个由 `userId` 拥有的 POST unit。在新底座中 POST unit 没有 slug
+ * （POST 不携带 slug）；其存在性由（owner、kind、内容翻译主源）幂等元组判定，
+ * 该元组仅在 infra 阶段进行 seed。
  */
 async function ensurePostUnit(
   db: RealmTaxonomySeedDb,
@@ -190,6 +193,8 @@ async function ensurePostUnit(
         userId,
         // POSTs do not carry slugs; pin slugScope to the owner so the row is
         // owner-scoped if a slug is ever assigned in the future.
+        // POST 不携带 slug；将 slugScope 固定为 owner，这样即使将来分配 slug，
+        // 该行也是 owner 范围内的。
         slugScope: userId,
         status: "PUBLISHED",
         visibility: "PUBLIC",
@@ -400,6 +405,9 @@ async function ensureRealmTagApplication(
  * Seed realm taxonomy examples that protect the product model:
  * realms are community spaces, global TAG Units are shared vocabulary, and
  * RealmTagApplication remains independent from UnitRealm feed membership.
+ * Seed 一批维护产品模型的 realm 分类示例：
+ * realm 是社区空间，全局 TAG Unit 是共享词汇，
+ * 且 RealmTagApplication 与 UnitRealm 的 feed 成员关系保持独立。
  */
 export async function seedRealmTaxonomy(
   db: RealmTaxonomySeedDb,

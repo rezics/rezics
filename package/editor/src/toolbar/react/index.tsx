@@ -13,6 +13,8 @@ export interface ReactToolbarProps {
 /**
  * Hook that subscribes to CodeMirror state changes via an updateListener
  * extension, re-rendering only when the document or selection changes.
+ * 通过 updateListener 扩展订阅 CodeMirror 状态变化的 Hook，仅在文档或选区
+ * 变化时重新渲染。
  */
 function useEditorUpdate(view: EditorView | null) {
   const [, setTick] = useState(0);

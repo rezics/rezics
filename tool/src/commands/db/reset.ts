@@ -97,7 +97,9 @@ function runPostgresReset(databaseNames: readonly string[]): void {
 }
 
 async function runRootWorkflow(args: readonly string[]): Promise<void> {
-  const proc = Bun.spawn(["bun", "run", ...args], {
+  // seed/factory are tool/ CLI subcommands, not package.json scripts; invoke the
+  // CLI entry by path so `bun run` resolves a file rather than a missing script.
+  const proc = Bun.spawn(["bun", "run", "tool/bin/tool.ts", ...args], {
     cwd: path.resolve(TOOL_DIR, ".."),
     stdout: "inherit",
     stderr: "inherit",
@@ -106,7 +108,7 @@ async function runRootWorkflow(args: readonly string[]): Promise<void> {
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
     throw new Error(
-      `Command failed with exit code ${exitCode}: bun run ${args.join(" ")}`,
+      `Command failed with exit code ${exitCode}: bun run tool/bin/tool.ts ${args.join(" ")}`,
     );
   }
 }

@@ -1,10 +1,7 @@
-// API client
 export { entityApi } from "./entity.api";
 
-// Query keys
 export { entityKeys } from "./entity.keys";
 
-// Mutation hooks
 export {
   entityMutations,
   useCreateEntity,
@@ -12,7 +9,6 @@ export {
   useUpdateEntity,
 } from "./entity.mutations";
 
-// Query configurations and hooks
 export {
   entityBySlugQueryOptions,
   entityDetailQueryOptions,
@@ -25,7 +21,6 @@ export {
   useEntitySearch,
 } from "./entity.queries";
 
-// Types
 export type {
   CreateEntityInput,
   EntityDTO,

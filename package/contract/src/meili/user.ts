@@ -3,11 +3,16 @@ import { t } from "elysia";
 import { contentDocSchema } from "../content/doc-v1";
 
 // ANCHOR: User Search Document
+// ANCHOR: 用户搜索文档
 // UserType removed — no more AUTHOR/PRESS/PRODUCER distinction.
+// UserType 已移除——不再区分 AUTHOR/PRESS/PRODUCER。
 
 export const UserSearchDocumentSchema = t.Object({
   id: t.String(),
-  /** Canonical user identifier — the USER `Unit.id`. Equals `id` post-`user-namespace-slug`. */
+  /**
+   * Canonical user identifier — the USER `Unit.id`. Equals `id` post-`user-namespace-slug`.
+   * 规范的用户标识符——即 USER 的 `Unit.id`。在 `user-namespace-slug` 之后等于 `id`。
+   */
   unitId: t.String(),
   name: t.String(),
   email: t.Optional(t.String()),

@@ -327,6 +327,7 @@ function createDrizzleChapterRepository(): ChapterRepository {
         }
 
         // Node id is a stable uuidv7, so it cannot drift under reorder.
+        // node id 是稳定的 uuidv7，因此不会在重排序时漂移。
         const [node] = await tx
           .select()
           .from(ContentStructureNode)
@@ -593,13 +594,20 @@ function createDrizzleChapterRepository(): ChapterRepository {
 
 /**
  * Thin wrapper over Post(kind=CHAPTER) — see chapter-as-post-and-cover-relocation.
+ * 对 Post(kind=CHAPTER) 的薄封装 —— 参见 chapter-as-post-and-cover-relocation。
  *
  * Storage:
+ * 存储：
  *   - Chapter title       -> UnitTranslation.title
  *   - Chapter cover URL   -> UnitTranslation.extra.coverUrl (typed)
  *   - Chapter content     -> ContentTranslation.content
  *   - Chapter parent book -> Unit.targetUnitId (must reference Unit(type=BOOK))
  *   - Chapter ordering    -> ContentStructureNode rows (out of scope of this service)
+ *   - 章节标题   -> UnitTranslation.title
+ *   - 章节封面 URL -> UnitTranslation.extra.coverUrl（带类型）
+ *   - 章节内容   -> ContentTranslation.content
+ *   - 章节所属书 -> Unit.targetUnitId（必须引用 Unit(type=BOOK)）
+ *   - 章节排序   -> ContentStructureNode 行（不在本 service 范围内）
  */
 export class ChapterService {
   constructor(

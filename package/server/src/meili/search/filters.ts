@@ -10,28 +10,42 @@ import type {
 import { normalizeLanguage } from "@rezics/contract";
 
 // ANCHOR: shared filter builders for federated search
+// ANCHOR: 联合搜索的共享过滤器构造器
 //
 // These builders are pure functions that accept a `SearchQuery` plus the
 // route-derived `SearchScope` (and pre-resolved tag/realm ids when relevant)
 // and return a Meilisearch filter expression as a string array.
+// 这些构造器是纯函数，接受一个 `SearchQuery` 以及从路由派生的
+// `SearchScope`（在相关时还包括预先解析的 tag/realm id），并返回作为
+// 字符串数组的 Meilisearch 过滤表达式。
 //
 // The federated endpoint (`POST /meili/search/federated`) is the single
 // caller; each sub-query for a permitted index is built via one of these.
 // They are pure so they can be unit-tested without a database client or live
 // Meilisearch instance.
+// 联合端点（`POST /meili/search/federated`）是唯一的调用方；每个被允许
+// 索引的子查询都通过其中之一构建。它们是纯函数，因此无需数据库客户端
+// 或运行中的 Meilisearch 实例即可进行单元测试。
 
 export interface FilterContext {
   // Tag ids resolved upstream from `query.tags` (SlugRef[]).
+  // 从上游 `query.tags`（SlugRef[]）解析出的 tag id。
   resolvedTagIds?: string[];
   // Realm unitId resolved upstream from `query.realm` (SlugRef).
+  // 从上游 `query.realm`（SlugRef）解析出的 realm unitId。
   resolvedRealmId?: string | null;
   // Allowed ratings derived from the caller session (already intersected
   // with `query.ratings` if provided). Pass null/undefined for "no rating
   // restriction" (e.g., admin contexts); pass an empty array for "no
   // ratings allowed" — the builder will reject all content.
+  // 从调用方会话派生的允许评级（若提供了 `query.ratings` 则已与之取交集）。
+  // 传入 null/undefined 表示“无评级限制”（例如管理员上下文）；传入空数组
+  // 表示“不允许任何评级”——构造器将拒绝所有内容。
   allowedRatings?: ContentRating[] | null;
   // Authenticated viewer. Used only for viewer-private search affordances
   // such as owner-only shelf item notes.
+  // 已认证的查看者。仅用于查看者私有的搜索能力，例如仅所有者可见的书架
+  // 条目备注。
   viewerUserId?: string | null;
 }
 
@@ -39,13 +53,17 @@ export interface ContentBuildOpts {
   // Hint that scopes the content sub-query to either the BOOK-side
   // surfaces or the SHELF subset. Drives `type =` filters and the book
   // scope's `containedUnitIds` join.
+  // 将内容子查询限定到 BOOK 侧界面或 SHELF 子集的提示。驱动 `type =`
+  // 过滤以及 book 作用域的 `containedUnitIds` 关联。
   contentSubtype?: "books" | "shelves";
   // Top-level category hint passed by the federated orchestrator.
+  // 由联合编排器传入的顶层 category 提示。
   categoryHint?: SearchCategory;
 }
 
 export interface PostBuildOpts {
   // Maps category to a `kind =` literal; supersedes `query.kind`/`postKind`.
+  // 将 category 映射为 `kind =` 字面量；优先于 `query.kind`/`postKind`。
   postCategory?: "reviews" | "excerpts" | "remarks" | "posts";
   categoryHint?: SearchCategory;
 }
@@ -120,6 +138,7 @@ function resolveBookScope(scope: SearchScope): {
 }
 
 // ANCHOR: buildContentFilter
+// ANCHOR: buildContentFilter（构建内容筛选器）
 // Maps SearchScope onto the content index per the strict-membership table:
 //   global → no scope filter
 //   book   → contentSubtype must be "shelves" (BOOK/GAME/MEDIA/LINK excluded)
@@ -127,6 +146,13 @@ function resolveBookScope(scope: SearchScope): {
 //   realm  → realmIds = realmId
 //   user   → userId = userId
 //   saved  → handled by the shelf-item grouped path, not direct content search
+// 按严格成员关系表将 SearchScope 映射到内容索引：
+//   global → 无作用域过滤
+//   book   → contentSubtype 必须为 "shelves"（排除 BOOK/GAME/MEDIA/LINK）
+//          → containedUnitIds = unitId AND type = "SHELF"
+//   realm  → realmIds = realmId
+//   user   → userId = userId
+//   saved  → 由书架条目分组路径处理，而非直接的内容搜索
 
 export function buildContentFilter(
   query: SearchQuery,
@@ -137,10 +163,12 @@ export function buildContentFilter(
   const filter: string[] = [];
 
   // 1. Type filter
+  // 1. 类型过滤
   if (opts.contentSubtype === "shelves") {
     filter.push(`type = "SHELF"`);
   } else if (opts.contentSubtype === "books") {
     // BOOK-side content surfaces (BOOK | GAME | MEDIA | LINK)
+    // BOOK 侧内容界面（BOOK | GAME | MEDIA | LINK）
     filter.push(`type IN [${quoteList(BOOK_CONTENT_TYPES)}]`);
     filter.push(`(${BOOK_CONTENT_CATALOG_FILTER})`);
   } else if (query.type?.length) {
@@ -152,6 +180,7 @@ export function buildContentFilter(
   }
 
   // 2. Scope filter
+  // 2. 作用域过滤
   if (scope.kind === "book") {
     const bookScope = resolveBookScope(scope);
     filter.push(`containedUnitIds = "${bookScope.unitId}"`);
@@ -164,23 +193,28 @@ export function buildContentFilter(
   }
 
   // 3. Resolved realm tag (from query.realm SlugRef)
+  // 3. 已解析的 realm 标签（来自 query.realm SlugRef）
   if (ctx.resolvedRealmId && scope.kind !== "realm") {
     filter.push(`realmIds = "${ctx.resolvedRealmId}"`);
   }
 
   // 4. Tag IDs (already resolved from SlugRefs)
+  // 4. Tag ID（已从 SlugRef 解析）
   for (const tagId of ctx.resolvedTagIds ?? []) {
     filter.push(`tagIds = "${tagId}"`);
   }
 
   // 5. Preferred read languages. Visibility filtering is separate from
   // resolved-display selection, which happens after each hit is returned.
+  // 5. 偏好的阅读语言。可见性过滤独立于已解析的显示选择，后者在每条命中
+  // 返回后才进行。
   const languageFilter = buildPreferredLanguageFilter(query);
   if (languageFilter) {
     filter.push(languageFilter);
   }
 
   // 6. Ratings — intersect query.ratings with allowedRatings if both provided
+  // 6. 评级——若同时提供了 query.ratings 与 allowedRatings 则取交集
   const requested = query.ratings ?? null;
   const allowed = ctx.allowedRatings ?? null;
   let effectiveRatings: ContentRating[] | null = null;
@@ -197,15 +231,18 @@ export function buildContentFilter(
   }
 
   // 7. AI disclosure
+  // 7. AI 披露
   if (query.aiDisclosureModes?.length) {
     filter.push(`aiDisclosureMode IN [${quoteList(query.aiDisclosureModes)}]`);
   }
 
   // 8. License
+  // 8. 许可
   if (query.isLicensed === true) filter.push("isLicensed = true");
   else if (query.isLicensed === false) filter.push("isLicensed = false");
 
   // 9. Text length
+  // 9. 文本长度
   if (query.textLength) {
     if (typeof query.textLength.min === "number") {
       filter.push(`textLength >= ${query.textLength.min}`);
@@ -216,14 +253,21 @@ export function buildContentFilter(
   }
 
   // 10. Visibility — content search is always public-only.
+  // 10. 可见性——内容搜索始终仅限公开。
   filter.push('visibility = "PUBLIC"');
 
   return filter;
 }
 
 // ANCHOR: buildPostFilter
+// ANCHOR: buildPostFilter（构建帖子筛选器）
 // Scope mapping for posts:
 //   global → no scope filter
+//   book   → targetUnitId = unitId
+//   realm  → realmIds = realmId
+//   user   → authorUserId = userId
+// 帖子的作用域映射：
+//   global → 无作用域过滤
 //   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
 //   user   → authorUserId = userId
@@ -237,6 +281,7 @@ export function buildPostFilter(
   const filter: string[] = [];
 
   // 1. Kind filter — category-implied wins; otherwise honor query.kind / query.postKind
+  // 1. Kind 过滤——category 隐含的优先；否则采用 query.kind / query.postKind
   if (opts.postCategory) {
     filter.push(`kind = "${POST_CATEGORY_TO_KIND[opts.postCategory]}"`);
   } else if (query.kind) {
@@ -250,6 +295,7 @@ export function buildPostFilter(
   }
 
   // 2. Scope filter
+  // 2. 作用域过滤
   if (scope.kind === "book") {
     filter.push(`targetUnitId = "${scope.unitId}"`);
   } else if (scope.kind === "realm") {
@@ -261,6 +307,7 @@ export function buildPostFilter(
   }
 
   // 3. Locked posts excluded by default (per content-search-api default filters).
+  // 3. 默认排除已锁定的帖子（依据 content-search-api 的默认过滤）。
   filter.push("isLocked = false");
 
   const languageFilter = buildPreferredLanguageFilter(query);
@@ -272,8 +319,14 @@ export function buildPostFilter(
 }
 
 // ANCHOR: buildCommentFilter
+// ANCHOR: buildCommentFilter（构建评论筛选器）
 // Scope mapping for comments:
 //   global → no scope filter
+//   book   → rootUnitId = unitId
+//   realm  → realmUnitId = realmId
+//   user   → authorUserId = userId
+// 评论的作用域映射：
+//   global → 无作用域过滤
 //   book   → rootUnitId = unitId
 //   realm  → realmUnitId = realmId
 //   user   → authorUserId = userId
@@ -302,14 +355,18 @@ export function buildCommentFilter(
 }
 
 // ANCHOR: buildRealmFilter
+// ANCHOR: buildRealmFilter（构建 realm 筛选器）
 // Realm scope is meaningless on the realms index (you don't search for realms
 // inside a single realm). Only `global` permits this index per strict membership.
+// 在 realms 索引上 realm 作用域没有意义（你不会在单个 realm 内部搜索 realm）。
+// 依据严格成员关系，只有 `global` 允许使用该索引。
 
 export function buildRealmFilter(
   query: SearchQuery,
   _scope: SearchScope,
 ): string[] {
   // Default visibility filter for realms: public only.
+  // realm 的默认可见性过滤：仅公开。
   const filter = ["isPublic = true"];
   const languageFilter = buildPreferredLanguageFilter(query);
   if (languageFilter) {
@@ -319,8 +376,11 @@ export function buildRealmFilter(
 }
 
 // ANCHOR: buildUserFilter
+// ANCHOR: buildUserFilter（构建用户筛选器）
 // User scope is meaningless on the users index. Only `global` permits this
 // index per strict membership. User search currently applies no filters.
+// 在 users 索引上 user 作用域没有意义。依据严格成员关系，只有 `global`
+// 允许使用该索引。用户搜索目前不应用任何过滤。
 
 export function buildUserFilter(
   _query: SearchQuery,
@@ -330,9 +390,13 @@ export function buildUserFilter(
 }
 
 // ANCHOR: buildShelfItemFilter
+// ANCHOR: buildShelfItemFilter（构建书架条目筛选器）
 // Shelf-item search is the grouped shelf-match path. Public viewers search only
 // public shelf/item text; owners may also search their occurrence-level
 // `ShelfItem.searchText` through attributesToSearchOn in the service.
+// 书架条目搜索是分组的书架匹配路径。公开查看者只搜索公开的书架/条目
+// 文本；所有者还可通过 service 中的 attributesToSearchOn 搜索其出现级别
+// 的 `ShelfItem.searchText`。
 
 export function buildShelfItemFilter(
   _query: SearchQuery,

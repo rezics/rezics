@@ -13,6 +13,8 @@ async function getServerDb() {
 /**
  * Look up the default realm by `(realmScope, slug)` and cache its ID in
  * memory. Called once at server startup, after `initSlugScopesCache`.
+ * 通过 `(realmScope, slug)` 查找默认 realm 并将其 ID 缓存在内存中。
+ * 在服务器启动时、`initSlugScopesCache` 之后调用一次。
  */
 export async function initDefaultRealmCache(): Promise<void> {
   const realmScope = getSlugScopeId("realm");
@@ -50,7 +52,7 @@ export async function initDefaultRealmCache(): Promise<void> {
   console.log(`[infra] default realm ID cached: ${cachedDefaultRealmId}`);
 }
 
-/** Return the cached default realm ID, or `null` if not available. */
+/** Return the cached default realm ID, or `null` if not available. 返回缓存的默认 realm ID，若不可用则返回 `null`。 */
 export function getDefaultRealmId(): string | null {
   return cachedDefaultRealmId;
 }

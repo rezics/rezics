@@ -35,6 +35,7 @@ function getDefaultHelpActions(t: (key: string) => string): HelpFabAction[] {
 
 /**
  * Floating Action Button (FAB) for help
+ * 用于帮助的浮动操作按钮（FAB）
  */
 export const HelpFab: React.FC<HelpFabProps> = ({
   actions,
@@ -71,6 +72,7 @@ export const HelpFab: React.FC<HelpFabProps> = ({
       style={{ transitionDelay: `${enterDelayMs}ms` }}
     >
       {/* Action FAB list */}
+      {/* 操作 FAB 列表 */}
       <div className="flex flex-col-reverse items-end mb-3 pointer-events-none">
         {list.map((item, index) => {
           const reversedIndex = list.length - 1 - index;
@@ -104,6 +106,7 @@ export const HelpFab: React.FC<HelpFabProps> = ({
       </div>
 
       {/* Main FAB */}
+      {/* 主 FAB */}
       <div className="float-end">
         <Button
           variant="default"

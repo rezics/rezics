@@ -12,6 +12,8 @@ export function OverviewTab({ entity, language }: OverviewTabProps) {
   const tr = getEntityTranslation(entity, language);
   // Per entity detail page spec: do NOT silently fall back to another language;
   // explicit empty-state for the current language.
+  // 依据实体详情页规范：不要静默回退到其他语言；
+  // 对当前语言显式呈现空状态。
   const matched = tr?.language === language ? tr : undefined;
   const summary = matched?.summary?.trim() ?? "";
   const description = contentDocMarkdownFallback(matched?.description).trim();

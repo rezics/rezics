@@ -6,8 +6,8 @@ export function generateRandomItemsFrom<T>(source: T[], count: number): T[] {
     const randomIndex = Math.floor(Math.random() * source.length);
     const original = source[randomIndex];
     const item = {
-      ...original, // 浅拷贝原始对象
-      id: uuidv4(), // 覆盖 id
+      ...original, // Shallow-copy the original object — 浅拷贝原始对象
+      id: uuidv4(), // Override the id — 覆盖 id
     } as T;
     result.push(item);
   }

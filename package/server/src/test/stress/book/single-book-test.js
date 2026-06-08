@@ -2,13 +2,14 @@ import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporte
 import { check, sleep } from "k6";
 import http from "k6/http";
 
-// 压力策略 — 单节点配合 CPU/内存监控使用
+// Load strategy — use on a single node alongside CPU/memory monitoring.
+// 压力策略 — 单节点配合 CPU/内存监控使用。
 export const options = {
-  vus: 300, // 初始虚拟用户数量
-  duration: "30s", // 压测 1 分钟
+  vus: 300, // Initial virtual user count — 初始虚拟用户数量
+  duration: "30s", // Load test duration — 压测时长
   thresholds: {
-    http_req_duration: ["p(95)<300"], // 95% 请求 < 300ms
-    http_req_failed: ["rate<0.02"], // 失败率 < 2%
+    http_req_duration: ["p(95)<300"], // 95% of requests < 300ms — 95% 请求 < 300ms
+    http_req_failed: ["rate<0.02"], // Failure rate < 2% — 失败率 < 2%
   },
 };
 
@@ -31,10 +32,11 @@ export default function () {
   sleep(0.1);
 }
 
-// 测试结束后自动生成 HTML 报告
+// Automatically generate an HTML report after the test finishes.
+// 测试结束后自动生成 HTML 报告。
 export function handleSummary(data) {
   return {
     "load-test-report.html": htmlReport(data),
-    stdout: JSON.stringify(data), // 可选：保留 JSON 输出
+    stdout: JSON.stringify(data), // Optional: keep JSON output — 可选：保留 JSON 输出
   };
 }

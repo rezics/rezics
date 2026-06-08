@@ -16,6 +16,7 @@ import { DashboardPage } from "./DashboardPage";
 
 // ------------------------------------------------------------
 // Fixtures
+// 测试固件
 // ------------------------------------------------------------
 
 function ok<T>(value: T): DashboardSectionResult<T> {
@@ -56,7 +57,10 @@ const REALM: DashboardRealmSummary = {
   slug: "russian-lit",
 };
 
-/** Build a full summary; every section defaults to an empty `ok` value. */
+/**
+ * Build a full summary; every section defaults to an empty `ok` value.
+ * 构建完整摘要；每个 section 默认为空的 `ok` 值。
+ */
 function makeSummary(
   overrides: Partial<DashboardSummary> = {},
 ): DashboardSummary {
@@ -77,6 +81,8 @@ function makeSummary(
 // ------------------------------------------------------------
 // Host: seed the dashboard summary into the query cache, then render the
 // real page so its loading/error/partial-success branches all exercise.
+// Host：将 dashboard 摘要注入 query 缓存，然后渲染真实页面，
+// 以便其 loading/error/partial-success 分支都得到演练。
 // ------------------------------------------------------------
 
 function StoryHost({
@@ -113,6 +119,8 @@ type Story = StoryObj<typeof meta>;
  * Partial success: continue-reading loaded, shelves failed retryably (retry
  * affordance shown), realms failed non-retryably (section hidden, owned by a
  * dedicated hook elsewhere).
+ * 部分成功：continue-reading 已加载，shelves 失败但可重试（显示重试控件），
+ * realms 失败且不可重试（section 隐藏，由别处的专用 hook 负责）。
  */
 export const PartialSuccess: Story = {
   render: () => (
@@ -129,15 +137,20 @@ export const PartialSuccess: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     // Loaded section renders its content.
+    // 已加载的 section 渲染其内容。
     await waitFor(() =>
       expect(canvas.getByText("War and Peace")).toBeInTheDocument(),
     );
     // Retryable failure offers exactly one retry control.
+    // 可重试的失败恰好提供一个重试控件。
     expect(canvas.getAllByRole("button")).toHaveLength(1);
   },
 };
 
-/** Empty new user: every section loaded but empty; no items, no safety notice. */
+/**
+ * Empty new user: every section loaded but empty; no items, no safety notice.
+ * 空白新用户：每个 section 都已加载但为空；无条目，无安全提示。
+ */
 export const EmptyNewUser: Story = {
   render: () => (
     <StoryHost summary={makeSummary()}>
@@ -150,12 +163,16 @@ export const EmptyNewUser: Story = {
       expect(canvas.getByRole("heading", { level: 1 })).toBeInTheDocument(),
     );
     // No content links and no retry buttons when sections are simply empty.
+    // 当 section 仅仅为空时，不出现内容链接，也不出现重试按钮。
     expect(canvas.queryAllByRole("link")).toHaveLength(0);
     expect(canvas.queryAllByRole("button")).toHaveLength(0);
   },
 };
 
-/** Active reader: continue-reading and shelves populated. */
+/**
+ * Active reader: continue-reading and shelves populated.
+ * 活跃读者：continue-reading 与 shelves 均有数据。
+ */
 export const ActiveReader: Story = {
   render: () => (
     <StoryHost
@@ -174,12 +191,16 @@ export const ActiveReader: Story = {
     );
     expect(canvas.getByText("To Read")).toBeInTheDocument();
     // Continue-reading links to the server-chosen node resume route.
+    // Continue-reading 链接到服务端选定的节点续读路由。
     const link = canvas.getByRole("link", { name: /War and Peace/ });
     expect(link).toHaveAttribute("href", "/book/book-1/node/node-3");
   },
 };
 
-/** Active community member: realms populated. */
+/**
+ * Active community member: realms populated.
+ * 活跃社区成员：realms 有数据。
+ */
 export const ActiveCommunityMember: Story = {
   render: () => (
     <StoryHost
@@ -201,7 +222,10 @@ export const ActiveCommunityMember: Story = {
   },
 };
 
-/** Active enforcement: safety section surfaces its notices. */
+/**
+ * Active enforcement: safety section surfaces its notices.
+ * 处于执法状态：safety section 显示其提示信息。
+ */
 export const SafetyEnforcement: Story = {
   render: () => (
     <StoryHost

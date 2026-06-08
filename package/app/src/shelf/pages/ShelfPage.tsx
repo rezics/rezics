@@ -88,6 +88,8 @@ interface ShelfPageProps {
  * Legacy view-mode values map forward (review to nested, list to flat, grid to
  * masonry); unknown to nested. No data migration — the legacy value is
  * overwritten on next write.
+ * 旧的 view-mode 值向前映射（review 映射为 nested、list 映射为 flat、grid 映射为
+ * masonry）；未知值映射为 nested。不做数据迁移 —— 旧值会在下次写入时被覆盖。
  */
 function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
   if (typeof raw !== "string") return undefined;
@@ -98,6 +100,8 @@ function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
 // masonry primitive lands. The column breaks are browser-driven and not
 // height-balanced; the emitted stream and the enum value are real.
+// MOCK：masonry 布局使用 CSS column-count 作为占位，直到真正的 masonry 基础组件落地。
+// 列断点由浏览器驱动且不做高度平衡；但发出的 stream 和枚举值是真实的。
 const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
@@ -189,6 +193,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const [itemSearchText, setItemSearchText] = useState("");
   // Standalone shelf pages expose the readable filter as opt-in (default off);
   // the dashboard library composition applies it by default instead.
+  // 独立 shelf 页面将 readable 过滤器作为可选项暴露（默认关闭）；
+  // 而 dashboard library 组合则默认应用该过滤器。
   const [readableOnly, setReadableOnly] = useState<boolean>(false);
   const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
