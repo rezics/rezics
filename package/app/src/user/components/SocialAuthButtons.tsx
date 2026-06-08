@@ -15,26 +15,6 @@ import { providerIcons } from "./providerIcons";
 
 // TODO 横条文字应该居中一点，更美观
 
-function formatProviderLabel(
-  providerId: string,
-  t: (key: string) => string,
-): string {
-  switch (providerId) {
-    case "github":
-      return t("auth:flow_providers_github");
-    case "google":
-      return t("auth:flow_providers_google");
-    case "microsoft":
-      return t("auth:flow_providers_microsoft");
-    case "telegram":
-      return t("auth:flow_providers_telegram");
-    case "twitter":
-      return t("auth:flow_providers_twitter");
-    default:
-      return providerId;
-  }
-}
-
 const FEATURED_COUNT = 2;
 
 const OPTIMISTIC_PROVIDER: AuthProvider = {
@@ -147,3 +127,23 @@ export const SocialAuthButtons: FC<{
     </div>
   );
 };
+
+function formatProviderLabel(
+  providerId: string,
+  t: (key: string) => string,
+): string {
+  switch (providerId) {
+    case "github":
+      return t("auth:flow_providers_github");
+    case "google":
+      return t("auth:flow_providers_google");
+    case "microsoft":
+      return t("auth:flow_providers_microsoft");
+    case "telegram":
+      return t("auth:flow_providers_telegram");
+    case "twitter":
+      return t("auth:flow_providers_twitter");
+    default:
+      return providerId;
+  }
+}

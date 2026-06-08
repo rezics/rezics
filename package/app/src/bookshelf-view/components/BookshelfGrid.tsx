@@ -1,7 +1,7 @@
 import type { BookshelfViewConfig } from "@rezics/contract";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { BookCard } from "@/book-library/components/item/VerticalBookCard";
+import { BookCard } from "@/book-library";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import {
   aspectRatioForKind,

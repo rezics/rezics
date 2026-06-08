@@ -20,10 +20,6 @@ interface FavoriteButtonProps {
   color?: string;
 }
 
-function iconSize(size: "small" | "medium" | "large"): number {
-  return size === "small" ? 18 : size === "large" ? 28 : 22;
-}
-
 export function FavoriteButton({
   unitId,
   size = "small",
@@ -81,4 +77,8 @@ export function FavoriteButton({
       </Tooltip>
     </TooltipProvider>
   );
+}
+
+function iconSize(size: "small" | "medium" | "large"): number {
+  return size === "small" ? 18 : size === "large" ? 28 : 22;
 }

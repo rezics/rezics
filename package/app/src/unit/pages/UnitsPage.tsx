@@ -19,8 +19,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { KeywordInput, useSearchQuery } from "@/search";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
@@ -29,48 +28,6 @@ import { buildUnitUrl } from "@/shared/utils/build-url";
 type Unit = UnitDTO;
 
 type UnitsPageMode = "tab" | "single";
-
-function defaultChildren(units: Unit[], t: (key: string) => string) {
-  return (
-    <div className="space-y-3">
-      {units.map((item) => (
-        <div
-          key={item.id}
-          className="flex items-start justify-between rounded-md bg-surface-elevated px-3 py-2 shadow-sm"
-        >
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={(props) => (
-                      <Link to={buildUnitUrl(item)} {...props}>
-                        <Badge variant="outline" className="text-[11px]">
-                          {item.type || "UNKNOWN"}
-                        </Badge>
-                      </Link>
-                    )}
-                  />
-                  <TooltipContent>
-                    {t("book:unit_open_content_page")}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <p className="text-base font-semibold truncate mb-1">
-                {item.title || t("book:unit_untitled_content")}
-              </p>
-            </div>
-            {item.description && (
-              <p className="text-sm text-text-secondary line-clamp-4">
-                {contentDocMarkdownFallback(item.description)}
-              </p>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export interface UnitsPageProps {
   /**
@@ -277,4 +234,44 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   );
 };
 
-export default UnitsPage;
+function defaultChildren(units: Unit[], t: (key: string) => string) {
+  return (
+    <div className="space-y-3">
+      {units.map((item) => (
+        <div
+          key={item.id}
+          className="flex items-start justify-between rounded-md bg-surface-elevated px-3 py-2 shadow-sm"
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <Link to={buildUnitUrl(item)} {...props}>
+                        <Badge variant="outline" className="text-[11px]">
+                          {item.type || "UNKNOWN"}
+                        </Badge>
+                      </Link>
+                    )}
+                  />
+                  <TooltipContent>
+                    {t("book:unit_open_content_page")}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <p className="text-base font-semibold truncate mb-1">
+                {item.title || t("book:unit_untitled_content")}
+              </p>
+            </div>
+            {item.description && (
+              <p className="text-sm text-text-secondary line-clamp-4">
+                {contentDocMarkdownFallback(item.description)}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

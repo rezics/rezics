@@ -84,5 +84,3 @@ export const TagDetailCard: React.FC<{
     </Card>
   );
 };
-
-export default TagCard;

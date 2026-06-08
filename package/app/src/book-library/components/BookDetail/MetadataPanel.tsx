@@ -4,7 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { AiDisclosureBadge } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
-import { aiDisclosureLabel } from "@/unit/models/aiDisclosureLabels";
+import { aiDisclosureLabel } from "@/unit";
 
 export type MetadataPanelProps = {
   bookInfo: BookDTO;

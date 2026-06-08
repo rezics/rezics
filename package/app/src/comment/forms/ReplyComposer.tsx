@@ -28,10 +28,10 @@ import {
   useState,
 } from "react";
 import { PollComposer, PollLibrarySurface } from "@/poll";
-import { RealmPostTagPicker } from "@/realm/components/RealmPostTagPicker";
+import { RealmPostTagPicker } from "@/realm";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import { useAuthGuard } from "@/user/hooks/useAuthGuard";
+import { useAuthGuard } from "@/user";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -67,17 +67,6 @@ export type ReplyComposerRealmPostModeProps = ReplyComposerBaseProps & {
 export type ReplyComposerProps =
   | ReplyComposerReplyModeProps
   | ReplyComposerRealmPostModeProps;
-
-/**
- * Blur-retain rule: if the body is empty, the composer should collapse on
- * blur; otherwise it retains the draft and stays expanded. Returning a
- * boolean here keeps the caller in charge of the actual open/closed state.
- * 失焦保留规则：若正文为空，编辑器应在失焦时折叠；否则保留草稿并保持展开。
- * 这里返回一个布尔值，让调用方掌控实际的展开/折叠状态。
- */
-export function useBlurRetain(body: string) {
-  return useCallback(() => body.trim().length > 0, [body]);
-}
 
 /**
  * Lightweight inline composer for replies and simple contextual posts. Realm
@@ -488,3 +477,14 @@ export const ReplyComposer = forwardRef<
     </div>
   );
 });
+
+/**
+ * Blur-retain rule: if the body is empty, the composer should collapse on
+ * blur; otherwise it retains the draft and stays expanded. Returning a
+ * boolean here keeps the caller in charge of the actual open/closed state.
+ * 失焦保留规则：若正文为空，编辑器应在失焦时折叠；否则保留草稿并保持展开。
+ * 这里返回一个布尔值，让调用方掌控实际的展开/折叠状态。
+ */
+export function useBlurRetain(body: string) {
+  return useCallback(() => body.trim().length > 0, [body]);
+}

@@ -21,12 +21,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import {
   BOOK_LOCK_FIELD_GROUPS,
   editorialPathLabel,
   lockMatchesPath,
-} from "@/unit/models/lockFieldLabels";
+} from "@/unit";
 
 const CUSTOM_LOCK_PATH = "__custom__";
 

@@ -38,26 +38,6 @@ const AVAILABLE_SCOPES = [
   },
 ] as const;
 
-function scopesToSet(scopes?: Record<string, string[]>): Set<string> {
-  if (!scopes) return new Set();
-  const set = new Set<string>();
-  for (const [domain, perms] of Object.entries(scopes)) {
-    for (const p of perms) set.add(`${domain}:${p}`);
-  }
-  return set;
-}
-
-function setToScopes(set: Set<string>): ApiTokenScopes {
-  const scopes: ApiTokenScopes = {};
-  for (const label of set) {
-    const [domain, ...rest] = label.split(":");
-    const perm = rest.join(":");
-    if (!scopes[domain]) scopes[domain] = [];
-    scopes[domain].push(perm);
-  }
-  return scopes;
-}
-
 export const SettingsTokensSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
   useRequireAuth();
@@ -250,3 +230,23 @@ export const SettingsTokensSection: FC = () => {
     </div>
   );
 };
+
+function scopesToSet(scopes?: Record<string, string[]>): Set<string> {
+  if (!scopes) return new Set();
+  const set = new Set<string>();
+  for (const [domain, perms] of Object.entries(scopes)) {
+    for (const p of perms) set.add(`${domain}:${p}`);
+  }
+  return set;
+}
+
+function setToScopes(set: Set<string>): ApiTokenScopes {
+  const scopes: ApiTokenScopes = {};
+  for (const label of set) {
+    const [domain, ...rest] = label.split(":");
+    const perm = rest.join(":");
+    if (!scopes[domain]) scopes[domain] = [];
+    scopes[domain].push(perm);
+  }
+  return scopes;
+}

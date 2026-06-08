@@ -18,11 +18,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link, unitHref } from "@/shared/ui/link";
-import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 import {
   mapJoinedRealmToListItem,
   type RealmListItemModel,
-} from "@/user/models/realmListItem";
+  selectHasMemberSession,
+  useAuthSessionStore,
+} from "@/user";
 import {
   selectedRealmItems,
   toggleRealmSelection,
@@ -267,5 +268,3 @@ function RealmManagementListItem({
     </Link>
   );
 }
-
-export default RealmListPage;

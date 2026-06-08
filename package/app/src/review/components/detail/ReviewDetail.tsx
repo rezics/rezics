@@ -3,10 +3,9 @@ import type { BookDTO, PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useMemo } from "react";
-import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
+import { BookListViewItem } from "@/book-library";
 import { ReactionBar, ReportAction } from "@/engagement";
-import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
-import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
+import { PostAuthorHeader, PostBodyMarkdown } from "@/post";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
 
 interface ReviewDetailProps {

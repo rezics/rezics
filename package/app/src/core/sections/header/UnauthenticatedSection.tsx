@@ -3,8 +3,7 @@ import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useIsMobile } from "@/shared/utils/use-media-query";
-import { LoginModal } from "@/user/pages/LoginPage";
-import { RegisterModal } from "@/user/pages/RegisterPage";
+import { LoginModal, RegisterModal } from "@/user";
 import { MoreHorizMenu } from "../../components/header/MoreHorizMenu";
 
 const LoginPrompt = () => {

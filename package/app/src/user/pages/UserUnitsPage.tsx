@@ -27,22 +27,22 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
-import { BookListView } from "@/book-library/components/BookList/BookListView";
+import { BookListView } from "@/book-library";
 import { ExcerptList } from "@/excerpt";
-import { ReviewList } from "@/review/components/list/ReviewList";
-import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { mapPostSearchDocToPostDTO, ReviewList } from "@/review";
+import { KeywordInput, useSearchQuery } from "@/search";
 import {
   useLocalizedContentSearch,
   useLocalizedPostSearch,
 } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { ShelfCard } from "@/shelf/components/ShelfCard";
+import { ShelfCard } from "@/shelf";
 
 export interface UserUnitsPageProps {
   userId: string;
 }
+
+type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 
 const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
   return (
@@ -53,8 +53,6 @@ const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
     </div>
   );
 };
-
-type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 
 const EXTERNAL_PAGE_SIZE = 50;
 

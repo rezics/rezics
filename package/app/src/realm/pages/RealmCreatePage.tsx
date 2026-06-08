@@ -172,5 +172,3 @@ export function RealmCreatePage({
     </div>
   );
 }
-
-export default RealmCreatePage;

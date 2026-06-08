@@ -26,6 +26,98 @@ interface MoveToParentDialogProps {
   onConfirm: (targetParentId: string | number | null) => void;
 }
 
+export function MoveToParentDialog({
+  open,
+  onClose,
+  treeData,
+  movingNode,
+  onConfirm,
+}: MoveToParentDialogProps) {
+  const { t } = useTranslation(["book", "common"]);
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<string | number | null>(null);
+
+  const excludeIds = useMemo(
+    () => (movingNode ? collectIds(movingNode) : new Set<string>()),
+    [movingNode],
+  );
+
+  const filteredTree = useMemo(
+    () => filterTree(treeData, excludeIds, search.trim()),
+    [treeData, excludeIds, search],
+  );
+
+  const handleConfirm = useCallback(() => {
+    onConfirm(selectedId);
+    onClose();
+  }, [selectedId, onConfirm, onClose]);
+
+  // Reset state when dialog opens
+  // 对话框打开时重置状态
+  useEffect(() => {
+    if (open) {
+      setSearch("");
+      setSelectedId(null);
+    }
+  }, [open]);
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-xs">
+        <DialogHeader>
+          <DialogTitle>{t("book:chapter_move_dialog_title")}</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3 min-h-[320px]">
+          {movingNode && (
+            <p className="text-sm text-text-secondary mb-1">
+              {t("book:chapter_move_dialog_moving")}{" "}
+              <strong>{movingNode.title}</strong>
+            </p>
+          )}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-text-tertiary" />
+            <Input
+              placeholder={t("book:chapter_move_dialog_search_placeholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+              className="pl-8"
+            />
+          </div>
+          <div
+            className="flex-1 overflow-y-auto -mx-1"
+            style={{ maxHeight: 320 }}
+          >
+            {filteredTree.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-12">
+                {t("book:chapter_move_dialog_no_results")}
+              </div>
+            ) : (
+              filteredTree.map((node) => (
+                <TreeNode
+                  key={node.id}
+                  node={node}
+                  depth={0}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                />
+              ))
+            )}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {t("common:cancel")}
+          </Button>
+          <Button onClick={handleConfirm} disabled={selectedId === null}>
+            {t("common:ok")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /** Collect all descendant IDs of a node (including itself). 收集节点的所有后代 ID（包括其自身）。 */
 function collectIds(node: Chapter): Set<string> {
   const ids = new Set<string>([String(node.id)]);
@@ -133,97 +225,5 @@ function TreeNode({
         </div>
       )}
     </div>
-  );
-}
-
-export function MoveToParentDialog({
-  open,
-  onClose,
-  treeData,
-  movingNode,
-  onConfirm,
-}: MoveToParentDialogProps) {
-  const { t } = useTranslation(["book", "common"]);
-  const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<string | number | null>(null);
-
-  const excludeIds = useMemo(
-    () => (movingNode ? collectIds(movingNode) : new Set<string>()),
-    [movingNode],
-  );
-
-  const filteredTree = useMemo(
-    () => filterTree(treeData, excludeIds, search.trim()),
-    [treeData, excludeIds, search],
-  );
-
-  const handleConfirm = useCallback(() => {
-    onConfirm(selectedId);
-    onClose();
-  }, [selectedId, onConfirm, onClose]);
-
-  // Reset state when dialog opens
-  // 对话框打开时重置状态
-  useEffect(() => {
-    if (open) {
-      setSearch("");
-      setSelectedId(null);
-    }
-  }, [open]);
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-xs">
-        <DialogHeader>
-          <DialogTitle>{t("book:chapter_move_dialog_title")}</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-3 min-h-[320px]">
-          {movingNode && (
-            <p className="text-sm text-text-secondary mb-1">
-              {t("book:chapter_move_dialog_moving")}{" "}
-              <strong>{movingNode.title}</strong>
-            </p>
-          )}
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-text-tertiary" />
-            <Input
-              placeholder={t("book:chapter_move_dialog_search_placeholder")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-              className="pl-8"
-            />
-          </div>
-          <div
-            className="flex-1 overflow-y-auto -mx-1"
-            style={{ maxHeight: 320 }}
-          >
-            {filteredTree.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-12">
-                {t("book:chapter_move_dialog_no_results")}
-              </div>
-            ) : (
-              filteredTree.map((node) => (
-                <TreeNode
-                  key={node.id}
-                  node={node}
-                  depth={0}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                />
-              ))
-            )}
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
-            {t("common:cancel")}
-          </Button>
-          <Button onClick={handleConfirm} disabled={selectedId === null}>
-            {t("common:ok")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }

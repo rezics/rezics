@@ -37,5 +37,3 @@ export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
     </div>
   );
 };
-
-export default HomePromotionStrip;

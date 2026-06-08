@@ -8,8 +8,7 @@ import {
 import type React from "react";
 import { useMemo } from "react";
 import { ReactionBar, ReportAction } from "@/engagement";
-import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
-import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
+import { PostAuthorHeader, PostBodyMarkdown } from "@/post";
 import { TextLink } from "@/shared/ui/link";
 import { remarkDetailActions, remarkPolicy } from "../../models/remarkPolicy";
 

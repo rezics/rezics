@@ -25,18 +25,6 @@ import { useRequireAuth } from "@/user/pages/useAuth";
 
 const COLUMN_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
-/**
- * Human label for a breakpoint, derived from its `minWidthPx`.
- * 断点的可读标签，根据其 `minWidthPx` 推导得出。
- */
-function breakpointLabelKey(minWidthPx: number): string {
-  if (minWidthPx >= 1280) return "settings:library_bp_wide";
-  if (minWidthPx >= 1024) return "settings:library_bp_large";
-  if (minWidthPx >= 768) return "settings:library_bp_medium";
-  if (minWidthPx >= 640) return "settings:library_bp_small";
-  return "settings:library_bp_mobile";
-}
-
 export const SettingsLibrarySection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
   useRequireAuth();
@@ -155,3 +143,15 @@ export const SettingsLibrarySection: FC = () => {
     </div>
   );
 };
+
+/**
+ * Human label for a breakpoint, derived from its `minWidthPx`.
+ * 断点的可读标签，根据其 `minWidthPx` 推导得出。
+ */
+function breakpointLabelKey(minWidthPx: number): string {
+  if (minWidthPx >= 1280) return "settings:library_bp_wide";
+  if (minWidthPx >= 1024) return "settings:library_bp_large";
+  if (minWidthPx >= 768) return "settings:library_bp_medium";
+  if (minWidthPx >= 640) return "settings:library_bp_small";
+  return "settings:library_bp_mobile";
+}

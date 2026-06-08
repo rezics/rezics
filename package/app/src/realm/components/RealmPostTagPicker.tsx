@@ -43,85 +43,6 @@ export interface RealmPostTagPickerProps {
   onSelectedTagIdsChange: (tagIds: string[]) => void;
 }
 
-function getTagLabel(tagId: string, label?: string) {
-  return label?.trim() || tagId.slice(0, 8);
-}
-
-function toggleTagId(tagIds: string[], tagId: string) {
-  return tagIds.includes(tagId)
-    ? tagIds.filter((id) => id !== tagId)
-    : [...tagIds, tagId];
-}
-
-function buildParentLookup(rows: RealmTagTreePickerRow[]) {
-  const parents = new Map<string, string | null>();
-  const visit = (items: RealmTagTreePickerRow[], parentId: string | null) => {
-    for (const item of items) {
-      parents.set(item.id, parentId);
-      visit(item.children, item.id);
-    }
-  };
-  visit(rows, null);
-  return parents;
-}
-
-function TagTreeRow({
-  row,
-  selected,
-  onToggle,
-  onEnter,
-}: {
-  row: RealmTagTreePickerRow;
-  selected: boolean;
-  onToggle: (tagId: string) => void;
-  onEnter: (row: RealmTagTreePickerRow) => void;
-}) {
-  const hasChildren = row.children.length > 0;
-  const handleRowClick = () => {
-    if (row.selectable && row.tagId) {
-      onToggle(row.tagId);
-      return;
-    }
-    if (hasChildren) onEnter(row);
-  };
-
-  return (
-    <div className="flex min-w-0 items-stretch border-b border-border-whisper last:border-b-0">
-      <button
-        type="button"
-        className="flex min-w-0 flex-1 items-center gap-3 py-3 pr-3 text-left outline-none transition-colors hover:bg-surface-subtle focus-visible:bg-surface-subtle"
-        onClick={handleRowClick}
-      >
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center text-text-brand">
-          {selected ? <Check className="h-4 w-4" aria-hidden /> : null}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium leading-ui text-text-primary">
-            {row.label}
-          </span>
-          {row.description || row.pathLabel ? (
-            <span className="block truncate text-xs leading-dense text-text-secondary">
-              {row.description ?? row.pathLabel}
-            </span>
-          ) : null}
-        </span>
-      </button>
-      {hasChildren ? (
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          className="my-auto shrink-0"
-          aria-label={`Open ${row.label}`}
-          onClick={() => onEnter(row)}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      ) : null}
-    </div>
-  );
-}
-
 export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
   realmUnitIds,
   tagIds,
@@ -417,3 +338,82 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
     </div>
   );
 };
+
+function getTagLabel(tagId: string, label?: string) {
+  return label?.trim() || tagId.slice(0, 8);
+}
+
+function toggleTagId(tagIds: string[], tagId: string) {
+  return tagIds.includes(tagId)
+    ? tagIds.filter((id) => id !== tagId)
+    : [...tagIds, tagId];
+}
+
+function buildParentLookup(rows: RealmTagTreePickerRow[]) {
+  const parents = new Map<string, string | null>();
+  const visit = (items: RealmTagTreePickerRow[], parentId: string | null) => {
+    for (const item of items) {
+      parents.set(item.id, parentId);
+      visit(item.children, item.id);
+    }
+  };
+  visit(rows, null);
+  return parents;
+}
+
+function TagTreeRow({
+  row,
+  selected,
+  onToggle,
+  onEnter,
+}: {
+  row: RealmTagTreePickerRow;
+  selected: boolean;
+  onToggle: (tagId: string) => void;
+  onEnter: (row: RealmTagTreePickerRow) => void;
+}) {
+  const hasChildren = row.children.length > 0;
+  const handleRowClick = () => {
+    if (row.selectable && row.tagId) {
+      onToggle(row.tagId);
+      return;
+    }
+    if (hasChildren) onEnter(row);
+  };
+
+  return (
+    <div className="flex min-w-0 items-stretch border-b border-border-whisper last:border-b-0">
+      <button
+        type="button"
+        className="flex min-w-0 flex-1 items-center gap-3 py-3 pr-3 text-left outline-none transition-colors hover:bg-surface-subtle focus-visible:bg-surface-subtle"
+        onClick={handleRowClick}
+      >
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center text-text-brand">
+          {selected ? <Check className="h-4 w-4" aria-hidden /> : null}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium leading-ui text-text-primary">
+            {row.label}
+          </span>
+          {row.description || row.pathLabel ? (
+            <span className="block truncate text-xs leading-dense text-text-secondary">
+              {row.description ?? row.pathLabel}
+            </span>
+          ) : null}
+        </span>
+      </button>
+      {hasChildren ? (
+        <Button
+          type="button"
+          size="icon-sm"
+          variant="ghost"
+          className="my-auto shrink-0"
+          aria-label={`Open ${row.label}`}
+          onClick={() => onEnter(row)}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      ) : null}
+    </div>
+  );
+}

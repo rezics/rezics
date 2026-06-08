@@ -3,8 +3,7 @@ import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { ReplyComposer } from "@/comment";
 import { PostListSection } from "@/post";
-import { useAuthModal } from "@/user/components/useAuthModal";
-import { useAuth } from "@/user/pages/useAuth";
+import { useAuth, useAuthModal } from "@/user";
 
 interface ShelfDiscussionSectionProps {
   shelfItemId: string;

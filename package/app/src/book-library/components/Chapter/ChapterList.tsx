@@ -19,7 +19,7 @@ import React, {
   useState,
 } from "react";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { Link } from "@/shared/ui/link";
 import {
   type BookContentStructureOccurrence,

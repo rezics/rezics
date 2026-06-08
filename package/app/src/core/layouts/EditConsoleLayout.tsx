@@ -27,17 +27,6 @@ export interface EditConsoleLayoutProps {
   mainClassName?: string;
 }
 
-function toNavigationItem(item: EditConsoleNavigationItem): NavigationItem {
-  return {
-    kind: "item",
-    title: item.label,
-    segment: item.href,
-    icon: item.icon,
-    activeMatch: item.activeMatch,
-    isActive: item.isActive,
-  };
-}
-
 export const EditConsoleLayout: React.FC<EditConsoleLayoutProps> = ({
   returnItem,
   primaryItems,
@@ -81,3 +70,14 @@ export const EditConsoleLayout: React.FC<EditConsoleLayoutProps> = ({
     </div>
   );
 };
+
+function toNavigationItem(item: EditConsoleNavigationItem): NavigationItem {
+  return {
+    kind: "item",
+    title: item.label,
+    segment: item.href,
+    icon: item.icon,
+    activeMatch: item.activeMatch,
+    isActive: item.isActive,
+  };
+}

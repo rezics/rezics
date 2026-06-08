@@ -1,9 +1,9 @@
-export const REALM_FEED_TAG_DRAG_THRESHOLD_PX = 2;
-
 export type HorizontalWheelScroll = {
   nextScrollLeft: number;
   preventPageScroll: boolean;
 };
+
+export const REALM_FEED_TAG_DRAG_THRESHOLD_PX = 2;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);

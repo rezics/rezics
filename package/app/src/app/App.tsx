@@ -23,6 +23,19 @@ import { useAppStore } from "./states/appStore";
 
 import "virtual:uno.css";
 import "@rezics/ui/config/base.css";
+
+export function App() {
+  return (
+    <RezicsI18nProvider>
+      <Suspense fallback={null}>
+        <AppProviders>
+          <LocalizedRouterProvider />
+        </AppProviders>
+      </Suspense>
+    </RezicsI18nProvider>
+  );
+}
+
 function AppInit({ children }: { children: ReactNode }) {
   useAppInit();
   return children;
@@ -73,16 +86,4 @@ function LocalizedRouterProvider() {
   }, [locale]);
 
   return <RouterProvider router={router} />;
-}
-
-export default function App() {
-  return (
-    <RezicsI18nProvider>
-      <Suspense fallback={null}>
-        <AppProviders>
-          <LocalizedRouterProvider />
-        </AppProviders>
-      </Suspense>
-    </RezicsI18nProvider>
-  );
 }

@@ -24,7 +24,7 @@ import {
   Send,
 } from "lucide-react";
 import type React from "react";
-import { useShareMenu } from "@/engagement/hooks/useShareMenu";
+import { useShareMenu } from "@/engagement";
 import { BookProgressStatusSection } from "@/progress-status";
 
 interface BookHeroActionBarProps {

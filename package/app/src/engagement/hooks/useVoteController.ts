@@ -4,8 +4,7 @@ import {
 } from "@rezics/api/reaction/reaction.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { useRetryToast } from "@/shared/hooks/useRetryToast";
-import { useAuthModal } from "@/user/components/useAuthModal";
-import { useAuth } from "@/user/pages/useAuth";
+import { useAuth, useAuthModal } from "@/user";
 import { decideVoteAction, type VoteValue } from "./voteAction";
 
 export type { VoteAction, VoteValue } from "./voteAction";

@@ -11,7 +11,7 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useId, useState } from "react";
-import { FollowButton } from "@/engagement/components/FollowButton";
+import { FollowButton } from "@/engagement";
 import { Link, unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 export type UserHoverPreviewSize = "compact" | "default";

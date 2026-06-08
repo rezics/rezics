@@ -45,12 +45,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronDown as ExpandMore, LockKeyhole, Plus } from "lucide-react";
 import React from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { EntityPicker } from "@/entity-picker";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { TextLink } from "@/shared/ui/link";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
-import { editorialPathLabel } from "@/unit/models/lockFieldLabels";
+import { editorialPathLabel } from "@/unit";
 import { AddTranslationDialog } from "../components/AddTranslationDialog";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
 import {

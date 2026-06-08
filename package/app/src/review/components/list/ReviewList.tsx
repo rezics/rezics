@@ -4,6 +4,12 @@ import type React from "react";
 import { useMemo } from "react";
 import { ReviewCard } from "../item/ReviewCard";
 
+export interface ReviewListProps {
+  reviews: PostDTO[];
+  spacing?: number | string;
+  showTargetUnit?: boolean;
+}
+
 const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
   0: "gap-0",
   1: "gap-2",
@@ -11,12 +17,6 @@ const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
   3: "gap-6",
   4: "gap-8",
 };
-
-export interface ReviewListProps {
-  reviews: PostDTO[];
-  spacing?: number | string;
-  showTargetUnit?: boolean;
-}
 
 export const ReviewList: React.FC<ReviewListProps> = ({
   reviews,

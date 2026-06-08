@@ -22,16 +22,6 @@ export type SourceEvidencePreviewProps = {
   className?: string;
 };
 
-function sourceTitle(evidence: CreditAttributionEvidenceSummary) {
-  const source = evidence.sourceSite;
-  return (
-    source?.entity?.translations?.[0]?.title ??
-    source?.entity?.slug ??
-    source?.key ??
-    evidence.sourceSiteEntityUnitId
-  );
-}
-
 export function SourceEvidencePreview({
   entityUnitId,
   entitySlug,
@@ -138,5 +128,15 @@ export function SourceEvidencePreview({
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function sourceTitle(evidence: CreditAttributionEvidenceSummary) {
+  const source = evidence.sourceSite;
+  return (
+    source?.entity?.translations?.[0]?.title ??
+    source?.entity?.slug ??
+    source?.key ??
+    evidence.sourceSiteEntityUnitId
   );
 }

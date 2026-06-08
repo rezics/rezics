@@ -31,6 +31,15 @@ interface EntityInlineCreateFormProps {
   onCancel?: () => void;
 }
 
+interface EligibilityRoleEditorProps<Role extends string> {
+  label: string;
+  roles: readonly Role[];
+  availableRoles: readonly Role[];
+  getLabel: (role: Role) => string;
+  onAdd: (role: Role) => void;
+  onRemove: (role: Role) => void;
+}
+
 export function EntityInlineCreateForm({
   initialTitle = "",
   initialLanguage = "en",
@@ -202,15 +211,6 @@ export function EntityInlineCreateForm({
       </div>
     </form>
   );
-}
-
-interface EligibilityRoleEditorProps<Role extends string> {
-  label: string;
-  roles: readonly Role[];
-  availableRoles: readonly Role[];
-  getLabel: (role: Role) => string;
-  onAdd: (role: Role) => void;
-  onRemove: (role: Role) => void;
 }
 
 function EligibilityRoleEditor<Role extends string>({

@@ -10,8 +10,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Star as StarIcon } from "lucide-react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
-import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
-import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
+import { PostAuthorHeader, PostBodyMarkdown } from "@/post";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { VariantContextLink } from "@/unit";
@@ -169,5 +168,3 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     </div>
   );
 };
-
-export default ReviewCard;

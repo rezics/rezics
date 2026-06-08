@@ -6,15 +6,15 @@ import type React from "react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useSyncUserProfile } from "@/user/hooks/useSyncUserProfile";
-import { shouldRenderNormalAppChrome } from "@/user/models/authRedirect";
 import {
   selectHasAuthIdentity,
   selectHasMemberSession,
   selectShouldRedirectToCompleteRegistration,
+  shouldRenderNormalAppChrome,
   useAuthSessionStore,
+  useSyncUserProfile,
   useUserProfileStore,
-} from "@/user/states";
+} from "@/user";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { unitHref } from "@/shared/ui/link";
 import { MainLayoutFooter } from "../components/footer/MainLayoutFooter";

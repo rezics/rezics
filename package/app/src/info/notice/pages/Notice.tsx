@@ -1,4 +1,4 @@
-import { NoticeBoard } from "@/home/sections/NoticeBoard.tsx";
+import { NoticeBoard } from "@/home";
 
 export function NoticePage() {
   return (

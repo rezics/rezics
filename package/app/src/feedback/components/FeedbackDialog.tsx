@@ -8,7 +8,7 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import type React from "react";
-import FeedbackForm from "./FeedbackForm";
+import { FeedbackForm } from "./FeedbackForm";
 
 type FeedbackDialogProps = {
   open: boolean;
@@ -20,7 +20,7 @@ type FeedbackDialogProps = {
   };
 };
 
-const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
+export const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
   open,
   onClose,
   defaultValues,
@@ -45,5 +45,3 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
     </Dialog>
   );
 };
-
-export default FeedbackDialog;

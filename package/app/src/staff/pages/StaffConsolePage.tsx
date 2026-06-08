@@ -34,107 +34,6 @@ import {
   useStaffConsoleAccess,
 } from "./shared";
 
-function statusBadge(state: string) {
-  if (state === "new" || state === "triaged") return "secondary";
-  if (state === "resolved" || state === "actioned") return "default";
-  return "outline";
-}
-
-function CaseTable({ cases }: { cases: ModerationCaseDTO[] }) {
-  if (cases.length === 0) {
-    return (
-      <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
-        No moderation cases match the current view.
-      </div>
-    );
-  }
-
-  return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Case</TableHead>
-            <TableHead>Target</TableHead>
-            <TableHead>State</TableHead>
-            <TableHead>Severity</TableHead>
-            <TableHead>Assigned</TableHead>
-            <TableHead>Updated</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {cases.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <Link
-                  to="/staff/case/$caseId"
-                  params={{ caseId: item.id }}
-                  className="font-medium text-text-primary underline-offset-2 hover:underline"
-                >
-                  {item.id}
-                </Link>
-              </TableCell>
-              <TableCell>
-                <span className="text-text-secondary">
-                  {item.target.kind}:{item.target.id}
-                </span>
-              </TableCell>
-              <TableCell>
-                <Badge variant={statusBadge(item.state)}>{item.state}</Badge>
-              </TableCell>
-              <TableCell>{item.severity ?? "—"}</TableCell>
-              <TableCell>{item.assignedToUserId ?? "Unassigned"}</TableCell>
-              <TableCell>{formatStaffDate(item.updatedAt)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-}
-
-function RealmCaseList({ items }: { items: ModerationCaseDTO[] }) {
-  if (items.length === 0) {
-    return (
-      <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
-        No realm cases are available for this realm.
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-3">
-      {items.map((item) => (
-        <Card key={item.id} surface="plain">
-          <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={statusBadge(item.state)}>{item.state}</Badge>
-                <span className="text-sm font-medium leading-ui text-text-primary">
-                  {item.target.kind}:{item.target.id}
-                </span>
-              </div>
-              <p className="mt-2 text-sm leading-body text-text-secondary">
-                {item.reason ?? item.safeSummary ?? "No summary recorded."}
-              </p>
-            </div>
-            {item.parentCaseId ? (
-              <Link
-                to="/staff/case/$caseId"
-                params={{ caseId: item.parentCaseId }}
-              >
-                <Button variant="outline" size="sm">
-                  Open case
-                </Button>
-              </Link>
-            ) : null}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
 export function StaffConsolePage({
   initialRealmUnitId = "",
   initialAccountUserId = "",
@@ -298,5 +197,106 @@ export function StaffConsolePage({
         ) : null}
       </section>
     </StaffPageShell>
+  );
+}
+
+function statusBadge(state: string) {
+  if (state === "new" || state === "triaged") return "secondary";
+  if (state === "resolved" || state === "actioned") return "default";
+  return "outline";
+}
+
+function CaseTable({ cases }: { cases: ModerationCaseDTO[] }) {
+  if (cases.length === 0) {
+    return (
+      <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
+        No moderation cases match the current view.
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Case</TableHead>
+            <TableHead>Target</TableHead>
+            <TableHead>State</TableHead>
+            <TableHead>Severity</TableHead>
+            <TableHead>Assigned</TableHead>
+            <TableHead>Updated</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {cases.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell>
+                <Link
+                  to="/staff/case/$caseId"
+                  params={{ caseId: item.id }}
+                  className="font-medium text-text-primary underline-offset-2 hover:underline"
+                >
+                  {item.id}
+                </Link>
+              </TableCell>
+              <TableCell>
+                <span className="text-text-secondary">
+                  {item.target.kind}:{item.target.id}
+                </span>
+              </TableCell>
+              <TableCell>
+                <Badge variant={statusBadge(item.state)}>{item.state}</Badge>
+              </TableCell>
+              <TableCell>{item.severity ?? "—"}</TableCell>
+              <TableCell>{item.assignedToUserId ?? "Unassigned"}</TableCell>
+              <TableCell>{formatStaffDate(item.updatedAt)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function RealmCaseList({ items }: { items: ModerationCaseDTO[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
+        No realm cases are available for this realm.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-3">
+      {items.map((item) => (
+        <Card key={item.id} surface="plain">
+          <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={statusBadge(item.state)}>{item.state}</Badge>
+                <span className="text-sm font-medium leading-ui text-text-primary">
+                  {item.target.kind}:{item.target.id}
+                </span>
+              </div>
+              <p className="mt-2 text-sm leading-body text-text-secondary">
+                {item.reason ?? item.safeSummary ?? "No summary recorded."}
+              </p>
+            </div>
+            {item.parentCaseId ? (
+              <Link
+                to="/staff/case/$caseId"
+                params={{ caseId: item.parentCaseId }}
+              >
+                <Button variant="outline" size="sm">
+                  Open case
+                </Button>
+              </Link>
+            ) : null}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 }

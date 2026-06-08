@@ -6,7 +6,7 @@ import { Link2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DraftPublishActions } from "@/draft";
-import { buildInternalSharePostCreateInput } from "@/engagement/models/sharePost";
+import { buildInternalSharePostCreateInput } from "@/engagement";
 import { policyDenialFromError } from "@/policy";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";

@@ -17,35 +17,10 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useMemo, useRef } from "react";
-import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
-import type { InjectedTag } from "@/search/models/injectedTags";
+import type { InjectedTag } from "@/search";
+import { useNavigateToTagSearch } from "@/search";
 import { cn } from "@/shared/utils/css-util";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
-
-const TAG_CHIP_SELECTOR = '[data-tag-chip="true"]';
-
-function isTagChipEventTarget(event: Event | undefined): boolean {
-  const target = event?.target;
-
-  if (target instanceof Element && target.closest(TAG_CHIP_SELECTOR)) {
-    return true;
-  }
-
-  if (
-    target instanceof Node &&
-    target.parentElement?.closest(TAG_CHIP_SELECTOR)
-  ) {
-    return true;
-  }
-
-  return (
-    event
-      ?.composedPath()
-      .some(
-        (node) => node instanceof Element && node.matches(TAG_CHIP_SELECTOR),
-      ) ?? false
-  );
-}
 
 export type TagInteractionProps = {
   tags: UnitTagDTO[];
@@ -63,6 +38,8 @@ export type TagInteractionProps = {
   onSearchTags?: (tags: InjectedTag[]) => void;
   className?: string;
 };
+
+const TAG_CHIP_SELECTOR = '[data-tag-chip="true"]';
 
 /**
  * TagInteraction — interactive tag chip group with preview and selection states.
@@ -358,4 +335,25 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   );
 };
 
-export default TagInteraction;
+function isTagChipEventTarget(event: Event | undefined): boolean {
+  const target = event?.target;
+
+  if (target instanceof Element && target.closest(TAG_CHIP_SELECTOR)) {
+    return true;
+  }
+
+  if (
+    target instanceof Node &&
+    target.parentElement?.closest(TAG_CHIP_SELECTOR)
+  ) {
+    return true;
+  }
+
+  return (
+    event
+      ?.composedPath()
+      .some(
+        (node) => node instanceof Element && node.matches(TAG_CHIP_SELECTOR),
+      ) ?? false
+  );
+}

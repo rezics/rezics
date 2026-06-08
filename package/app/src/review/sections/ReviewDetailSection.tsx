@@ -14,7 +14,7 @@ import {
   type ReplyComposerHandle,
   useFocusReplyFromQuery,
 } from "@/comment";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { ReviewDetail } from "../components/detail/ReviewDetail";

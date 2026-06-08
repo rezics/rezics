@@ -9,7 +9,7 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 
-const BookCard = ({
+export const BookCard = ({
   book,
   className = "",
 }: {
@@ -61,5 +61,3 @@ const BookCard = ({
     </Card>
   );
 };
-
-export default BookCard;

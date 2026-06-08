@@ -6,7 +6,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { expect, screen, userEvent, waitFor, within } from "storybook/test";
 
 import { withRouter } from "@/stories/decorators/withRouter";
-import { useAuthSessionStore } from "@/user/states";
+import { useAuthSessionStore } from "@/user";
 import { ReportAction } from "./ReportAction";
 
 const REALM_UNIT_ID = "realm-fixture";

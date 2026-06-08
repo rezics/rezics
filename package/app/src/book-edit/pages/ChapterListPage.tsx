@@ -6,9 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
-import { BookTocJsonEditor } from "@/book-library/components/Chapter/BookTocJsonEditor";
-import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import {
+  BookTocJsonEditor,
+  withBookContentStructureOccurrences,
+} from "@/book-library";
+import { QueryErrorDisplay } from "@/core";
 import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
 import {
   BookTocEditor,

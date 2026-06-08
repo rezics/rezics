@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { NavigationList } from "@/core/components/navigation/NavigationList";
+import { NavigationList } from "@/core";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { historyBookId } from "@/stories/fixtures/history";
 import { createBookEditConsoleConfig } from "./bookEditConsoleConfig";

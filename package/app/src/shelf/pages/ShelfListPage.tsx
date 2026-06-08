@@ -71,5 +71,3 @@ export function ShelfListPage() {
     </div>
   );
 }
-
-export default ShelfListPage;

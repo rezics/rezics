@@ -3,7 +3,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { RemarkEditDialog } from "../forms/RemarkEditDialog";
 
 interface RemarkEditPageProps {
@@ -25,5 +25,3 @@ export const RemarkEditPage: React.FC<RemarkEditPageProps> = ({ reviewId }) => {
 
   return <RemarkEditDialog remark={data} open onClose={handleClose} />;
 };
-
-export default RemarkEditPage;

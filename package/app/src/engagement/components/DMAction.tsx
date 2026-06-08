@@ -12,7 +12,7 @@ import { MessageCircle } from "lucide-react";
 import type React from "react";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
+import { selectHasMemberSession, useAuthSessionStore } from "@/user";
 
 export interface DMActionProps {
   /**
@@ -27,18 +27,6 @@ export interface DMActionProps {
   peerName?: string;
   showLabel?: boolean;
   className?: string;
-}
-
-/**
- * Direct messaging requires an active subscription to the peer with the DM channel enabled.
- * 私信要求对该对方持有已启用 DM 频道的有效订阅。
- */
-function hasDmChannel(channels: readonly string[] | undefined): boolean {
-  if (!channels) return false;
-  return channels.some(
-    (channel) =>
-      channel === "*" || channel === "dm" || channel.startsWith("dm."),
-  );
 }
 
 /**
@@ -121,3 +109,15 @@ export const DMAction: React.FC<DMActionProps> = ({
     </TextLink>
   );
 };
+
+/**
+ * Direct messaging requires an active subscription to the peer with the DM channel enabled.
+ * 私信要求对该对方持有已启用 DM 频道的有效订阅。
+ */
+function hasDmChannel(channels: readonly string[] | undefined): boolean {
+  if (!channels) return false;
+  return channels.some(
+    (channel) =>
+      channel === "*" || channel === "dm" || channel.startsWith("dm."),
+  );
+}

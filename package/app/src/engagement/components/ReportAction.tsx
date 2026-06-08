@@ -16,11 +16,10 @@ import {
 import { CheckCircle2, Flag } from "lucide-react";
 import type React from "react";
 import { useId, useState } from "react";
-import { PolicyDenialNotice } from "@/policy";
-import { policyDenialFromError } from "@/policy/models/policyDenial";
+import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
+import { selectHasMemberSession, useAuthSessionStore } from "@/user";
 
 export interface ReportTarget {
   /**

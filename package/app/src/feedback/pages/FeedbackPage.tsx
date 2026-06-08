@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import React from "react";
-import FeedbackDrawer from "../components/FeedbackDrawer";
-import FeedbackList from "../components/FeedbackList";
+import { FeedbackDrawer } from "../components/FeedbackDrawer";
+import { FeedbackList } from "../components/FeedbackList";
 
 export const FeedbackPage: React.FC = () => {
   const { t } = useTranslation(["common", "community", "search"]);

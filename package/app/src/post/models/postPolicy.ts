@@ -10,12 +10,12 @@ export const postCardOverflow: Action[] = ["shelf"];
 export const postDetailActions: Action[] = ["vote", "reply", "share"];
 export const postDetailOverflow: Action[] = ["shelf"];
 
+export const postPolicy: ReactionBarPolicy = {
+  getShareHref: getPostShareHref,
+};
+
 export function getPostShareHref(
   post: Pick<ReactionBarPost, "unitId">,
 ): string {
   return `/post/${post.unitId}`;
 }
-
-export const postPolicy: ReactionBarPolicy = {
-  getShareHref: getPostShareHref,
-};

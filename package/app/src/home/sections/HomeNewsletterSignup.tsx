@@ -43,5 +43,3 @@ export const HomeNewsletterSignup: React.FC = () => {
     </div>
   );
 };
-
-export default HomeNewsletterSignup;

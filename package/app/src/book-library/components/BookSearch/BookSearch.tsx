@@ -3,6 +3,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { SlidersHorizontal as TuneIcon } from "lucide-react";
 import type React from "react";
+import type { UseSearchQueryReturn } from "@/search";
 import {
   AppliedFilterChips,
   KeywordInput,
@@ -11,9 +12,8 @@ import {
   TagGroupSuggestions,
   TagPicker,
   WordCountRangeInput,
-} from "@/search/components/primitive";
-import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
-import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
+} from "@/search";
+import { useAllowedRatings } from "@/user";
 
 export type BookSearchProps = {
   query: UseSearchQueryReturn["query"];

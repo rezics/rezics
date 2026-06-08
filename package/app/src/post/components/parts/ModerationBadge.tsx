@@ -24,6 +24,68 @@ type StatusTone = "success" | "warning" | "error";
 export const moderationControlStateClass =
   "bg-transparent transition-colors hover:!bg-surface-sunken focus-visible:!bg-surface-sunken data-open:!bg-surface-sunken data-popup-open:!bg-surface-sunken aria-expanded:!bg-surface-sunken";
 
+export function ModerationBadge({
+  at,
+  latestAction,
+  post,
+  status,
+}: {
+  at?: string | Date | null;
+  latestAction?: ModerationActionDTO | null;
+  post: PostDTO;
+  status?: ModerationStatus;
+}) {
+  const { t } = useTranslation(["community"]);
+  if (!status) return null;
+
+  const label = badgeLabel(t, status, latestAction);
+  const relativeTime = latestAction
+    ? formatRelativeTime(latestAction.createdAt)
+    : formatRelativeTime(at);
+  const showActorAvatar = Boolean(latestAction);
+
+  return (
+    <Popover>
+      <PopoverTrigger
+        nativeButton
+        className={cn(
+          "flex min-w-0 shrink-0 items-center gap-2 rounded-md px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus",
+          moderationControlStateClass,
+        )}
+        title={label}
+      >
+        {showActorAvatar ? (
+          <div className="relative shrink-0">
+            <ModerationActorAvatar action={latestAction} post={post} />
+            <span
+              className={cn(
+                "absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-surface-canvas",
+                statusDotClass(statusTone(status)),
+              )}
+            />
+          </div>
+        ) : null}
+        <span className="truncate text-xs leading-ui text-text-secondary">
+          {label}
+          {relativeTime ? ` ${relativeTime}` : ""}
+        </span>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="w-80 gap-3 rounded-md p-3"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <PopoverHeader>
+          <PopoverTitle className="text-sm leading-ui">
+            {t("community:moderation_previous_actions_title")}
+          </PopoverTitle>
+        </PopoverHeader>
+        <ModerationActionListItem action={latestAction} post={post} />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function statusDotClass(tone: StatusTone) {
   switch (tone) {
     case "success":
@@ -207,67 +269,5 @@ function ModerationActionListItem({
         ) : null}
       </div>
     </div>
-  );
-}
-
-export function ModerationBadge({
-  at,
-  latestAction,
-  post,
-  status,
-}: {
-  at?: string | Date | null;
-  latestAction?: ModerationActionDTO | null;
-  post: PostDTO;
-  status?: ModerationStatus;
-}) {
-  const { t } = useTranslation(["community"]);
-  if (!status) return null;
-
-  const label = badgeLabel(t, status, latestAction);
-  const relativeTime = latestAction
-    ? formatRelativeTime(latestAction.createdAt)
-    : formatRelativeTime(at);
-  const showActorAvatar = Boolean(latestAction);
-
-  return (
-    <Popover>
-      <PopoverTrigger
-        nativeButton
-        className={cn(
-          "flex min-w-0 shrink-0 items-center gap-2 rounded-md px-2 py-1.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus",
-          moderationControlStateClass,
-        )}
-        title={label}
-      >
-        {showActorAvatar ? (
-          <div className="relative shrink-0">
-            <ModerationActorAvatar action={latestAction} post={post} />
-            <span
-              className={cn(
-                "absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-surface-canvas",
-                statusDotClass(statusTone(status)),
-              )}
-            />
-          </div>
-        ) : null}
-        <span className="truncate text-xs leading-ui text-text-secondary">
-          {label}
-          {relativeTime ? ` ${relativeTime}` : ""}
-        </span>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        className="w-80 gap-3 rounded-md p-3"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <PopoverHeader>
-          <PopoverTitle className="text-sm leading-ui">
-            {t("community:moderation_previous_actions_title")}
-          </PopoverTitle>
-        </PopoverHeader>
-        <ModerationActionListItem action={latestAction} post={post} />
-      </PopoverContent>
-    </Popover>
   );
 }

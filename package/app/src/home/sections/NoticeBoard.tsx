@@ -8,27 +8,45 @@ import {
 } from "@/pinboard";
 import { TextLink } from "@/shared/ui/link";
 
-function formatRelative(dateIso: string): string {
-  const ms = Date.now() - new Date(dateIso).getTime();
-  const h = Math.floor(ms / 36e5);
-  if (h < 1)
-    return getI18nRuntime().i18n.t("page:home_noticeboard_time_just_now");
-  if (h < 24)
-    return getI18nRuntime().i18n.t(
-      "page:home_noticeboard_time_hours_ago_other",
-      { count: h },
-    );
-  const d = Math.floor(h / 24);
-  if (d < 7)
-    return getI18nRuntime().i18n.t(
-      "page:home_noticeboard_time_days_ago_other",
-      { count: d },
-    );
-  const w = Math.floor(d / 7);
-  return getI18nRuntime().i18n.t("page:home_noticeboard_time_weeks_ago_other", {
-    count: w,
-  });
-}
+export const NoticeBoard: React.FC = () => {
+  return (
+    <div className="w-full h-full flex flex-col">
+      <NoticeBoardHeader className="sticky top-0 z-10 rounded-lg" />
+
+      <div className="flex-1 overflow-y-auto space-y-3 mt-3 p-2">
+        <AnnouncementFeedSection
+          loadingFallback={
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 rounded" />
+              <Skeleton className="h-4 rounded" />
+              <Skeleton className="h-4 rounded" />
+              <Skeleton className="h-4 rounded" />
+            </div>
+          }
+        >
+          {(items) => {
+            if (items.length === 0) {
+              return (
+                <p className="text-sm text-text-secondary">
+                  {getI18nRuntime().i18n.t("page:home_noticeboard_empty")}
+                </p>
+              );
+            }
+            return (
+              <ul className="max-h-full overflow-auto pr-1 list-none m-0 p-0">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <NoticeBoardItem item={item} />
+                  </li>
+                ))}
+              </ul>
+            );
+          }}
+        </AnnouncementFeedSection>
+      </div>
+    </div>
+  );
+};
 
 function NoticeBoardHeader({ className }: { className?: string }) {
   return (
@@ -106,42 +124,24 @@ function NoticeBoardItem({ item }: { item: PinboardAnnouncementItem }) {
   );
 }
 
-export const NoticeBoard: React.FC = () => {
-  return (
-    <div className="w-full h-full flex flex-col">
-      <NoticeBoardHeader className="sticky top-0 z-10 rounded-lg" />
-
-      <div className="flex-1 overflow-y-auto space-y-3 mt-3 p-2">
-        <AnnouncementFeedSection
-          loadingFallback={
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-4 rounded" />
-              <Skeleton className="h-4 rounded" />
-              <Skeleton className="h-4 rounded" />
-              <Skeleton className="h-4 rounded" />
-            </div>
-          }
-        >
-          {(items) => {
-            if (items.length === 0) {
-              return (
-                <p className="text-sm text-text-secondary">
-                  {getI18nRuntime().i18n.t("page:home_noticeboard_empty")}
-                </p>
-              );
-            }
-            return (
-              <ul className="max-h-full overflow-auto pr-1 list-none m-0 p-0">
-                {items.map((item) => (
-                  <li key={item.id}>
-                    <NoticeBoardItem item={item} />
-                  </li>
-                ))}
-              </ul>
-            );
-          }}
-        </AnnouncementFeedSection>
-      </div>
-    </div>
-  );
-};
+function formatRelative(dateIso: string): string {
+  const ms = Date.now() - new Date(dateIso).getTime();
+  const h = Math.floor(ms / 36e5);
+  if (h < 1)
+    return getI18nRuntime().i18n.t("page:home_noticeboard_time_just_now");
+  if (h < 24)
+    return getI18nRuntime().i18n.t(
+      "page:home_noticeboard_time_hours_ago_other",
+      { count: h },
+    );
+  const d = Math.floor(h / 24);
+  if (d < 7)
+    return getI18nRuntime().i18n.t(
+      "page:home_noticeboard_time_days_ago_other",
+      { count: d },
+    );
+  const w = Math.floor(d / 7);
+  return getI18nRuntime().i18n.t("page:home_noticeboard_time_weeks_ago_other", {
+    count: w,
+  });
+}

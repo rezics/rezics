@@ -4,7 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import FollowButton from "@/engagement/components/FollowButton";
+import { FollowButton } from "@/engagement";
 import { Link, unitHref } from "@/shared/ui/link";
 import {
   type ChipDefinition,

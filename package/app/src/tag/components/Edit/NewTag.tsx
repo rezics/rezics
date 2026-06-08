@@ -1,7 +1,7 @@
 import { useAttachTagMutation } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
 import type React from "react";
-import TagEdit from "./TagEdit";
+import { TagEdit } from "./TagEdit";
 
 export type NewTagProps = {
   objectUnitId?: string;
@@ -32,5 +32,3 @@ export const NewTag: React.FC<NewTagProps> = ({
 
   return <TagEdit onSaved={handleSaved} className={className} />;
 };
-
-export default NewTag;

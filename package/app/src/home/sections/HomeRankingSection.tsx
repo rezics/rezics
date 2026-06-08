@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import {
   getBookAuthorName,
   getBookCoverUrl,
@@ -90,5 +90,3 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
     </div>
   );
 };
-
-export default HomeRankingSection;

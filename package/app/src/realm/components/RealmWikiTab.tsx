@@ -6,7 +6,7 @@ import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ExternalLink, Settings } from "lucide-react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { PostCard } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 

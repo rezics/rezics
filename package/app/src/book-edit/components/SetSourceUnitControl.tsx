@@ -11,13 +11,13 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 
-const NO_SOURCE = "__none__";
-
 export interface SetSourceUnitControlProps {
   book: BookDTO;
   language: string;
   currentSourceUnitId: string | null | undefined;
 }
+
+const NO_SOURCE = "__none__";
 
 /**
  * Inline control that lets the user wire (or unwire) the current language's

@@ -120,5 +120,3 @@ export const TagList: React.FC<{
     </div>
   );
 };
-
-export default TagList;

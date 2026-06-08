@@ -5,7 +5,7 @@ import {
   FileText as DescriptionIcon,
   History as HistoryIcon,
 } from "lucide-react";
-import type { EditConsoleLayoutProps } from "@/core/layouts/EditConsoleLayout";
+import type { EditConsoleLayoutProps } from "@/core";
 
 const BOOK_EDIT_RESERVED_SEGMENTS = new Set([
   "authority",

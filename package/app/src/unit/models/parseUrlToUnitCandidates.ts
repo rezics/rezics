@@ -16,6 +16,8 @@ export interface MatchedRoutesResult {
 
 export type GetMatchedRoutes = (pathname: string) => MatchedRoutesResult;
 
+const ID_PARAM_RE = /\$([A-Za-z][A-Za-z0-9]*)/g;
+
 /**
  * Normalise a free-form URL input into a pathname.
  * Returns null if the input cannot be reduced to a path starting with `/`.
@@ -43,8 +45,6 @@ function normalisePathname(input: string): string | null {
   if (!pathname.startsWith("/")) return null;
   return pathname;
 }
-
-const ID_PARAM_RE = /\$([A-Za-z][A-Za-z0-9]*)/g;
 
 /**
  * Extract unit-bearing param names from a matched route's path template.

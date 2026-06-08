@@ -1,7 +1,7 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
-import { logout } from "@/user/models/handler";
+import { logout } from "@/user";
 
 export function PendingVerificationSection() {
   const { t } = useTranslation(["auth"]);

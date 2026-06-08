@@ -35,11 +35,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Pencil, RotateCcw, ShieldX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { PostEditDialog } from "@/post/forms/PostEditDialog";
-import {
-  hasGovernanceCapabilityHint,
-  useAuthSessionStore,
-} from "@/user/states";
+import { PostEditDialog } from "@/post";
+import { hasGovernanceCapabilityHint, useAuthSessionStore } from "@/user";
 import { CommentPromotionControls } from "../components/parts/CommentPromotionControls";
 import { decidePromotionControls } from "../models/commentPromotionGate";
 import { mergeCommentDiscoveryRows } from "../models/commentTreeRails";
@@ -48,24 +45,6 @@ import {
   DEFAULT_MAX_DEPTH,
   DEFAULT_VISUAL_MAX_DEPTH,
 } from "./commentTreeLayout";
-
-const COMMENT_SORT_OPTIONS: CommentSortMode[] = [
-  "best",
-  "top",
-  "rising",
-  "controversial",
-  "new",
-  "old",
-];
-
-const COMMENT_SORT_LABEL_KEYS: Record<CommentSortMode, string> = {
-  best: "community:comment_sort_best",
-  top: "community:comment_sort_top",
-  rising: "community:comment_sort_rising",
-  controversial: "community:comment_sort_controversial",
-  new: "community:comment_sort_new",
-  old: "community:comment_sort_old",
-};
 
 interface CommentThreadSectionProps {
   rootUnitId: string;
@@ -85,6 +64,24 @@ interface CommentThreadSectionProps {
    */
   onReply?: (postUnitId: string) => void;
 }
+
+const COMMENT_SORT_OPTIONS: CommentSortMode[] = [
+  "best",
+  "top",
+  "rising",
+  "controversial",
+  "new",
+  "old",
+];
+
+const COMMENT_SORT_LABEL_KEYS: Record<CommentSortMode, string> = {
+  best: "community:comment_sort_best",
+  top: "community:comment_sort_top",
+  rising: "community:comment_sort_rising",
+  controversial: "community:comment_sort_controversial",
+  new: "community:comment_sort_new",
+  old: "community:comment_sort_old",
+};
 
 export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
   rootUnitId,

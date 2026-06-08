@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { withRouter } from "@/stories/decorators/withRouter";
-import { useAuthSessionStore } from "@/user/states";
+import { useAuthSessionStore } from "@/user";
 import { StaffConsolePage } from "./StaffConsolePage";
 
 const REALM_UNIT_ID = "realm-library-east";

@@ -25,56 +25,6 @@ import { toast } from "sonner";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";
 
-interface SortableRowProps {
-  entry: PinboardEntryView;
-  stale?: boolean;
-  onDelete?: (entry: PinboardEntryView) => void;
-}
-
-function SortableRow({ entry, stale, onDelete }: SortableRowProps) {
-  const { t } = useTranslation(["entity"]);
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: entry.unitId });
-
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      <PinboardEntryCard
-        entry={entry}
-        variant="adminRow"
-        stale={stale}
-        openHref={`/unit/${entry.unitId}`}
-        onDelete={onDelete}
-        dragHandle={
-          <Button
-            size="icon"
-            variant="ghost"
-            className="cursor-grab touch-none"
-            {...attributes}
-            {...listeners}
-            aria-label={t("entity:pinboard_reorder_drag_handle", {
-              title: entry.title ?? entry.unitId,
-            })}
-          >
-            <DragIndicatorRoundedIcon className="h-4 w-4" />
-          </Button>
-        }
-      />
-    </div>
-  );
-}
-
 interface PinboardReorderListProps {
   realmUnitId: string;
   pinboardKey: PinboardListKey;
@@ -176,3 +126,53 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
     </DndContext>
   );
 };
+
+interface SortableRowProps {
+  entry: PinboardEntryView;
+  stale?: boolean;
+  onDelete?: (entry: PinboardEntryView) => void;
+}
+
+function SortableRow({ entry, stale, onDelete }: SortableRowProps) {
+  const { t } = useTranslation(["entity"]);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: entry.unitId });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <PinboardEntryCard
+        entry={entry}
+        variant="adminRow"
+        stale={stale}
+        openHref={`/unit/${entry.unitId}`}
+        onDelete={onDelete}
+        dragHandle={
+          <Button
+            size="icon"
+            variant="ghost"
+            className="cursor-grab touch-none"
+            {...attributes}
+            {...listeners}
+            aria-label={t("entity:pinboard_reorder_drag_handle", {
+              title: entry.title ?? entry.unitId,
+            })}
+          >
+            <DragIndicatorRoundedIcon className="h-4 w-4" />
+          </Button>
+        }
+      />
+    </div>
+  );
+}

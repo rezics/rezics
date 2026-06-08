@@ -1,34 +1,20 @@
-export {
-  PostDetail,
-  type PostDetailProps,
-} from "./components/detail/PostDetail";
+export { PostThreadPage } from "./pages/PostThreadPage";
+export { PostListSection } from "./sections/PostListSection";
+export { PostEditDialog } from "./forms/PostEditDialog";
+export { PostEditorSurface } from "./forms/PostEditorSurface";
+export { RootPostTranslationEditor } from "./forms/RootPostTranslationEditor";
+export { WikiPostEditor } from "./forms/WikiPostEditor";
 export { PostCard } from "./components/item/PostCard";
+export {
+  ModerationBadge,
+  moderationControlStateClass,
+} from "./components/parts/ModerationBadge";
 export { PostAuthorHeader } from "./components/parts/PostAuthorHeader";
 export { PostBodyMarkdown } from "./components/parts/PostBodyMarkdown";
-export { PostEditDialog } from "./forms/PostEditDialog";
-export {
-  PostEditorSurface,
-  type PostEditorSurfaceProps,
-} from "./forms/PostEditorSurface";
-export {
-  type RootPostTranslationDraft,
-  RootPostTranslationEditor,
-  type RootPostTranslationEditorProps,
-} from "./forms/RootPostTranslationEditor";
-export {
-  WikiPostEditor,
-  type WikiPostEditorProps,
-} from "./forms/WikiPostEditor";
-export {
-  isPostEditorSurfaceSubmittable,
-  type PostEditorSurfaceDraft,
-} from "./models/postEditorSurface";
+export { isPostEditorSurfaceSubmittable } from "./models/postEditorSurface";
 export {
   getPostShareHref,
   postCardActions,
   postCardOverflow,
-  postDetailActions,
-  postDetailOverflow,
   postPolicy,
 } from "./models/postPolicy";
-export { PostListSection } from "./sections/PostListSection";

@@ -8,7 +8,7 @@ import { type FormEvent, useState } from "react";
 import {
   suggestCreditEligibility,
   suggestSubjectEligibility,
-} from "@/entity-picker/models/eligibilitySuggestions";
+} from "@/entity-picker";
 import { unitHref } from "@/shared/ui/link";
 
 export function NewEntityPage() {

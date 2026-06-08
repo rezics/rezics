@@ -12,7 +12,7 @@ import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { PostBodyMarkdown } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { RealmRuleDialog } from "./RealmRuleDialog";
@@ -21,35 +21,6 @@ interface RealmRuleSummaryCardProps {
   realmUnitId: string;
   fallbackPostUnitId?: string | null;
   empty?: "hidden" | "state";
-}
-
-function ruleContent(
-  rule?: RealmRuleResolvedDTO | null,
-  post?: PostDTO | null,
-) {
-  return (
-    rule?.sourceRulePost?.content ??
-    post?.content ??
-    rule?.translation?.description ??
-    null
-  );
-}
-
-function rulePreview(
-  rule?: RealmRuleResolvedDTO | null,
-  post?: PostDTO | null,
-) {
-  const content = ruleContent(rule, post);
-  return (
-    mainMarkdownSource(content)?.trim().split("\n").find(Boolean) ??
-    rule?.translation?.summary ??
-    rule?.translation?.title ??
-    contentDocMarkdownFallback(rule?.translation?.description)
-      .trim()
-      .split("\n")
-      .find(Boolean) ??
-    ""
-  );
 }
 
 export function RealmRuleSummaryCard({
@@ -145,5 +116,34 @@ export function RealmRuleSummaryCard({
         <RealmRuleDialog open={open} content={content} onOpenChange={setOpen} />
       </CardContent>
     </Card>
+  );
+}
+
+function ruleContent(
+  rule?: RealmRuleResolvedDTO | null,
+  post?: PostDTO | null,
+) {
+  return (
+    rule?.sourceRulePost?.content ??
+    post?.content ??
+    rule?.translation?.description ??
+    null
+  );
+}
+
+function rulePreview(
+  rule?: RealmRuleResolvedDTO | null,
+  post?: PostDTO | null,
+) {
+  const content = ruleContent(rule, post);
+  return (
+    mainMarkdownSource(content)?.trim().split("\n").find(Boolean) ??
+    rule?.translation?.summary ??
+    rule?.translation?.title ??
+    contentDocMarkdownFallback(rule?.translation?.description)
+      .trim()
+      .split("\n")
+      .find(Boolean) ??
+    ""
   );
 }

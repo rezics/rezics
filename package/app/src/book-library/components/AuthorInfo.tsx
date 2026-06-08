@@ -6,7 +6,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { FollowButton } from "@/engagement/components/FollowButton.tsx";
+import { FollowButton } from "@/engagement";
 import { unitHref } from "@/shared/ui/link";
 import { useIsMobile } from "@/shared/utils/use-media-query.ts";
 

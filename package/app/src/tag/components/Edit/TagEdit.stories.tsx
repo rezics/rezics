@@ -3,7 +3,7 @@ import { unitApi } from "@rezics/api/unit/unit";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useEffect, useState } from "react";
 
-import TagEdit from "./TagEdit";
+import { TagEdit } from "./TagEdit";
 
 type TagDetailDTO = {
   id: string;

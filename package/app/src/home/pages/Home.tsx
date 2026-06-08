@@ -1,6 +1,6 @@
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
-import { MainContentContainer } from "@/core/components/container/MainContentContainer";
+import { MainContentContainer } from "@/core";
 import { FeedLayout, FeedSection } from "@/feed";
 import { HomeSearch } from "@/search";
 import { useIsMobile } from "@/shared/utils/use-media-query";

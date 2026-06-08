@@ -26,21 +26,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useCallback, useMemo, useState } from "react";
 
-// Backlog/Active/Completed are reached only via progress-status side-effects
-// (`user-unit-progress` spec). Surfacing them as collectable targets in the
-// modal would let users mis-route a unit through the wrong write path, so
-// the modal filters them out entirely. Favorites and Saved stay as
-// system-shelf collectable targets.
-// Backlog/Active/Completed 只能通过进度状态的副作用到达
-// （`user-unit-progress` 规范）。若在弹窗中将它们暴露为可收藏目标，
-// 会让用户经由错误的写入路径误导一个 unit，因此弹窗将其完全过滤掉。
-// Favorites 和 Saved 仍作为系统书架的可收藏目标保留。
-const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
-  "backlog",
-  "active",
-  "completed",
-]);
-
 interface CollectionModalProps {
   open: boolean;
   onClose: () => void;
@@ -55,6 +40,21 @@ interface CollectionModalProps {
   isLoading: boolean;
   isReview?: boolean;
 }
+
+// Backlog/Active/Completed are reached only via progress-status side-effects
+// (`user-unit-progress` spec). Surfacing them as collectable targets in the
+// modal would let users mis-route a unit through the wrong write path, so
+// the modal filters them out entirely. Favorites and Saved stay as
+// system-shelf collectable targets.
+// Backlog/Active/Completed 只能通过进度状态的副作用到达
+// （`user-unit-progress` 规范）。若在弹窗中将它们暴露为可收藏目标，
+// 会让用户经由错误的写入路径误导一个 unit，因此弹窗将其完全过滤掉。
+// Favorites 和 Saved 仍作为系统书架的可收藏目标保留。
+const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
+  "backlog",
+  "active",
+  "completed",
+]);
 
 export function CollectionModal({
   open,

@@ -24,6 +24,11 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
 import { unitHref } from "@/shared/ui/link";
 
+interface ProfileTabBarProps {
+  userId: string;
+  userSlug?: string;
+}
+
 const PROFILE_TABS = [
   { label: i18nMessages.profile_tab_overview, path: "" },
   { label: i18nMessages.profile_tab_content, path: "/content" },
@@ -34,11 +39,6 @@ const PROFILE_TABS = [
   { label: i18nMessages.profile_tab_reactions, path: "/reactions" },
   { label: i18nMessages.profile_tab_activity, path: "/activity" },
 ] as const;
-
-interface ProfileTabBarProps {
-  userId: string;
-  userSlug?: string;
-}
 
 export const ProfileTabBar: FC<ProfileTabBarProps> = ({ userId, userSlug }) => {
   const navigate = useNavigate();

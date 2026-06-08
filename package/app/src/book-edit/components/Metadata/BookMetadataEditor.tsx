@@ -25,7 +25,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
-import { aiDisclosureLabelMap } from "@/unit/models/aiDisclosureLabels";
+import { aiDisclosureLabelMap } from "@/unit";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
 
 function TooltipIconTrigger(props: Record<string, unknown>) {
@@ -255,5 +255,3 @@ export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
     </div>
   );
 }
-
-export default BookMetadataEditor;

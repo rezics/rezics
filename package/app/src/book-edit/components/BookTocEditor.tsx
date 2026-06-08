@@ -25,11 +25,11 @@ import type {
   RenameHandler,
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
-import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
 import {
   type BookContentStructureOccurrence,
   contentUnitIdForNode,
-} from "@/book-library/models/bookContentStructurePath";
+  useEnsureChapterUnit,
+} from "@/book-library";
 import {
   findAndAddChild,
   findAndDelete,
@@ -94,63 +94,6 @@ interface BookTocEditorProps {
   bookUnitId: string;
   bookRating?: ContentRating;
   onDownloadJSON?: () => void;
-}
-
-/**
- * Find the last non-leaf node (last volume/section with children).
- * 查找最后一个非叶子节点（最后一个带子节点的卷/分卷）。
- */
-function findLastNonLeafId(tree: Chapter[]): string | number | null {
-  let lastId: string | number | null = null;
-  for (const node of tree) {
-    if (node.children !== undefined) {
-      lastId = node.id;
-    }
-  }
-  if (lastId === null) {
-    for (const node of tree) {
-      if (node.children) {
-        const deepId = findLastNonLeafId(node.children);
-        if (deepId !== null) lastId = deepId;
-      }
-    }
-  }
-  return lastId;
-}
-
-/**
- * Count all leaf nodes in tree.
- * 统计树中所有叶子节点。
- */
-function countChapters(tree: Chapter[]): number {
-  let count = 0;
-  for (const node of tree) {
-    if (node.children?.length) {
-      count += countChapters(node.children);
-    } else {
-      count++;
-    }
-  }
-  return count;
-}
-
-/**
- * Sum word count across all nodes.
- * 累加所有节点的字数。
- */
-function totalWordCount(tree: Chapter[]): number {
-  return tree.reduce((sum, node) => sum + mockWordCount(node), 0);
-}
-
-/**
- * Format word count for display.
- * 格式化字数用于展示。
- */
-function formatTotal(n: number): string {
-  if (n >= 10000) {
-    return `${(n / 10000).toFixed(1)}w`;
-  }
-  return n.toLocaleString();
 }
 
 const MIN_TREE_HEIGHT = 300;
@@ -678,3 +621,60 @@ export const BookTocEditor = forwardRef<
 });
 
 BookTocEditor.displayName = "BookTocEditor";
+
+/**
+ * Find the last non-leaf node (last volume/section with children).
+ * 查找最后一个非叶子节点（最后一个带子节点的卷/分卷）。
+ */
+function findLastNonLeafId(tree: Chapter[]): string | number | null {
+  let lastId: string | number | null = null;
+  for (const node of tree) {
+    if (node.children !== undefined) {
+      lastId = node.id;
+    }
+  }
+  if (lastId === null) {
+    for (const node of tree) {
+      if (node.children) {
+        const deepId = findLastNonLeafId(node.children);
+        if (deepId !== null) lastId = deepId;
+      }
+    }
+  }
+  return lastId;
+}
+
+/**
+ * Count all leaf nodes in tree.
+ * 统计树中所有叶子节点。
+ */
+function countChapters(tree: Chapter[]): number {
+  let count = 0;
+  for (const node of tree) {
+    if (node.children?.length) {
+      count += countChapters(node.children);
+    } else {
+      count++;
+    }
+  }
+  return count;
+}
+
+/**
+ * Sum word count across all nodes.
+ * 累加所有节点的字数。
+ */
+function totalWordCount(tree: Chapter[]): number {
+  return tree.reduce((sum, node) => sum + mockWordCount(node), 0);
+}
+
+/**
+ * Format word count for display.
+ * 格式化字数用于展示。
+ */
+function formatTotal(n: number): string {
+  if (n >= 10000) {
+    return `${(n / 10000).toFixed(1)}w`;
+  }
+  return n.toLocaleString();
+}

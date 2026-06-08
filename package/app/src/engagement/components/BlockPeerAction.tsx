@@ -4,7 +4,7 @@ import { Button } from "@rezics/ui/shadcn";
 import { Ban } from "lucide-react";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
-import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
+import { selectHasMemberSession, useAuthSessionStore } from "@/user";
 
 export interface BlockPeerActionProps {
   /** The peer's canonical user id (`USER` Unit id). 对方的规范用户 id（`USER` Unit id）。 */

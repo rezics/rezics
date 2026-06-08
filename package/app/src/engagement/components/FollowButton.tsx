@@ -16,7 +16,7 @@ import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import { cn } from "@/shared/utils/css-util";
-import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
+import { selectHasMemberSession, useAuthSessionStore } from "@/user";
 
 type ButtonVariant =
   | "default"
@@ -206,5 +206,3 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     </div>
   );
 };
-
-export default FollowButton;

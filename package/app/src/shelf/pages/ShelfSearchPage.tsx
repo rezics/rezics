@@ -3,8 +3,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { KeywordInput, useSearchQuery } from "@/search";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { ShelfCard } from "../components/ShelfCard";
 
@@ -92,5 +91,3 @@ export function ShelfSearchPage() {
     </div>
   );
 }
-
-export default ShelfSearchPage;

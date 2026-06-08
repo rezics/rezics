@@ -1,7 +1,7 @@
 import { slugApi } from "@rezics/api/slug";
 import { isPublicUserShelfSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { ShelfPage } from "@/shelf/pages/ShelfPage";
+import { ShelfPage } from "@/shelf";
 
 /**
  * `/u/:userSlug/shelf/:slug` resolves to a SHELF Unit under the user's

@@ -34,23 +34,6 @@ interface MenuItemProps {
   destructive?: boolean;
 }
 
-function MenuItem({ onClick, icon, children, destructive }: MenuItemProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-sm hover:bg-accent transition-colors ${
-        destructive ? "text-error-text" : ""
-      }`}
-    >
-      <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
-        {icon}
-      </span>
-      <span className="flex-1">{children}</span>
-    </button>
-  );
-}
-
 export const BookTocContextMenu = ({
   contextMenu,
   setContextMenu,
@@ -196,3 +179,20 @@ export const BookTocContextMenu = ({
     </div>
   );
 };
+
+function MenuItem({ onClick, icon, children, destructive }: MenuItemProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-sm hover:bg-accent transition-colors ${
+        destructive ? "text-error-text" : ""
+      }`}
+    >
+      <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+        {icon}
+      </span>
+      <span className="flex-1">{children}</span>
+    </button>
+  );
+}

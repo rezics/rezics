@@ -4,7 +4,7 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import type { qc } from "@/app/providers/reactQueryUtil";
+import type { qc } from "@/app";
 
 export const Route = createRootRouteWithContext<{ qc: typeof qc }>()({
   component: () => (

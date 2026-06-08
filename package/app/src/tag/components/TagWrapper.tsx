@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { RealmTagHighlights } from "./RealmTagHighlights";
-import TagList from "./TagList";
+import { TagList } from "./TagList";
 
 type Mode = "flat" | "grouped";
 
@@ -76,5 +76,3 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     </div>
   );
 };
-
-export default TagWrapper;

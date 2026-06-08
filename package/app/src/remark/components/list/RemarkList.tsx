@@ -6,6 +6,11 @@ import type React from "react";
 import { useMemo } from "react";
 import { RemarkCard } from "../item/RemarkCard";
 
+interface RemarkListProps {
+  posts: PostDTO[];
+  spacing?: number | string;
+}
+
 const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
   0: "gap-0",
   1: "gap-2",
@@ -13,11 +18,6 @@ const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
   3: "gap-6",
   4: "gap-8",
 };
-
-interface RemarkListProps {
-  posts: PostDTO[];
-  spacing?: number | string;
-}
 
 export const RemarkList: React.FC<RemarkListProps> = ({
   posts,

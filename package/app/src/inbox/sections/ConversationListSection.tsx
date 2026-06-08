@@ -12,15 +12,6 @@ interface ConversationListSectionProps {
   openPeerId?: string;
 }
 
-function compareUpdatedDesc(a: DmConversation, b: DmConversation): number {
-  return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
-}
-
-function formatPeerInitial(c: DmConversation): string {
-  if (c.peerName) return c.peerName.slice(0, 1).toUpperCase();
-  return c.peerId.slice(0, 2).toUpperCase();
-}
-
 /**
  * Conversation list section — newest activity first, click routes to
  * the thread view. Loading / error / empty states follow the same copy
@@ -98,4 +89,11 @@ export const ConversationListSection: FC<ConversationListSectionProps> = ({
   );
 };
 
-export default ConversationListSection;
+function compareUpdatedDesc(a: DmConversation, b: DmConversation): number {
+  return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
+}
+
+function formatPeerInitial(c: DmConversation): string {
+  if (c.peerName) return c.peerName.slice(0, 1).toUpperCase();
+  return c.peerId.slice(0, 2).toUpperCase();
+}

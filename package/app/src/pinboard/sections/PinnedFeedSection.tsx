@@ -13,9 +13,6 @@ import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { usePinboardList } from "../hooks/usePinboard";
 
-const PINNED_ITEM_CLASS =
-  "pl-4 basis-[82%] @sm:basis-[58%] @md:basis-[42%] @lg:basis-[34%] @xl:basis-[30%]";
-
 export interface PinnedFeedSectionProps {
   realmUnitId: string;
   /**
@@ -24,6 +21,9 @@ export interface PinnedFeedSectionProps {
    */
   linkFor?: (unitId: string) => string;
 }
+
+const PINNED_ITEM_CLASS =
+  "pl-4 basis-[82%] @sm:basis-[58%] @md:basis-[42%] @lg:basis-[34%] @xl:basis-[30%]";
 
 /**
  * Renders the pinned region above a realm feed. No-ops when the list is

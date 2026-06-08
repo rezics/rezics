@@ -5,7 +5,7 @@ import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { Link } from "@/shared/ui/link";
 
 export type HomeTagExploreProps = {
@@ -63,5 +63,3 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
     </div>
   );
 };
-
-export default HomeTagExplore;

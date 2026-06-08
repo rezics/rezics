@@ -5,7 +5,7 @@ import {
 import { useIsSubscribed } from "@rezics/api/subscription/subscription";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
-import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
+import { selectHasMemberSession, useAuthSessionStore } from "@/user";
 
 interface RealmMuteButtonProps {
   realmUnitId: string;
@@ -61,5 +61,3 @@ export const RealmMuteButton: React.FC<RealmMuteButtonProps> = ({
     </Button>
   );
 };
-
-export default RealmMuteButton;

@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { PostEditorSurface } from "../forms/PostEditorSurface";
 import { isPostEditorSurfaceSubmittable } from "../models/postEditorSurface";
 
@@ -169,5 +169,3 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     </section>
   );
 }
-
-export default PostEditPage;

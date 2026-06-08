@@ -6,10 +6,6 @@ import {
   type ToggleGroupStatus,
 } from "../models/status";
 
-function cx(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export const STATUS_ICONS: Record<
   ToggleGroupStatus,
   React.ComponentType<{ className?: string }>
@@ -111,4 +107,8 @@ export function StatusPrimaryActionButton({
       <span className="min-w-0 truncate">{label}</span>
     </Button>
   );
+}
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
 }

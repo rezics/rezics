@@ -31,50 +31,6 @@ export type BookProgressStatusSectionProps = {
   bookUnitId: string;
 };
 
-function isReasonStatus(
-  status: UserUnitProgressStatus,
-): status is ReasonStatus {
-  return status === "PAUSED" || status === "DROPPED";
-}
-
-function usesChineseProgressLayout(language: string | undefined) {
-  return language?.toLowerCase().startsWith("zh") ?? false;
-}
-
-function getDefaultPrimaryAction(
-  status: UserUnitProgressStatus | null,
-  t: (key: string) => string,
-): {
-  status: ToggleGroupStatus;
-  label: string;
-} {
-  if (!status) {
-    return {
-      status: "BACKLOG",
-      label: t("book:hero_actions_want_to_read"),
-    };
-  }
-
-  if (status === "ACTIVE") {
-    return {
-      status: "COMPLETED",
-      label: t("book:hero_actions_mark_as_read"),
-    };
-  }
-
-  if (status === "COMPLETED") {
-    return {
-      status: "COMPLETED",
-      label: t("book:hero_actions_read_again"),
-    };
-  }
-
-  return {
-    status: "ACTIVE",
-    label: t("book:hero_actions_start_reading"),
-  };
-}
-
 export function BookProgressStatusSection({
   bookUnitId,
 }: BookProgressStatusSectionProps) {
@@ -350,4 +306,48 @@ export function BookProgressStatusSection({
       />
     </div>
   );
+}
+
+function isReasonStatus(
+  status: UserUnitProgressStatus,
+): status is ReasonStatus {
+  return status === "PAUSED" || status === "DROPPED";
+}
+
+function usesChineseProgressLayout(language: string | undefined) {
+  return language?.toLowerCase().startsWith("zh") ?? false;
+}
+
+function getDefaultPrimaryAction(
+  status: UserUnitProgressStatus | null,
+  t: (key: string) => string,
+): {
+  status: ToggleGroupStatus;
+  label: string;
+} {
+  if (!status) {
+    return {
+      status: "BACKLOG",
+      label: t("book:hero_actions_want_to_read"),
+    };
+  }
+
+  if (status === "ACTIVE") {
+    return {
+      status: "COMPLETED",
+      label: t("book:hero_actions_mark_as_read"),
+    };
+  }
+
+  if (status === "COMPLETED") {
+    return {
+      status: "COMPLETED",
+      label: t("book:hero_actions_read_again"),
+    };
+  }
+
+  return {
+    status: "ACTIVE",
+    label: t("book:hero_actions_start_reading"),
+  };
 }

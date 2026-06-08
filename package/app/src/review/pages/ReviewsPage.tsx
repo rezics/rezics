@@ -7,8 +7,7 @@ import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { KeywordInput, useSearchQuery } from "@/search";
 import { useLocalizedPostSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 type Review = PostDTO;
@@ -121,5 +120,3 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
     </div>
   );
 };
-
-export default ReviewsPage;

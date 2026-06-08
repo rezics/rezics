@@ -2,7 +2,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
-import { ResponsiveBookGridLimited } from "@/book-library/components/list/ResponsiveBookGridLimited";
+import { ResponsiveBookGridLimited } from "@/book-library";
 import {
   getBookAuthorName,
   getBookCoverUrl,

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
 
 type Book = BookDTO;
@@ -58,5 +58,3 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
     </div>
   );
 };
-
-export default HomeTrendingWiki;

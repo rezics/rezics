@@ -16,28 +16,6 @@ import {
 import type { FC } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
-const REACTION_ICONS: Record<string, LucideIcon> = {
-  upvote: ThumbsUp,
-  downvote: ThumbsDown,
-  heart: Heart,
-  funny: Laugh,
-  award: Award,
-};
-
-function reactionIconFor(reaction: string): LucideIcon {
-  return REACTION_ICONS[reaction] ?? Sparkles;
-}
-
-function formatTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
 type GivenProps = {
   mode: "given";
   item: ReactionHistoryGivenItem;
@@ -49,6 +27,14 @@ type ReceivedProps = {
 };
 
 export type ReactionHistoryItemProps = GivenProps | ReceivedProps;
+
+const REACTION_ICONS: Record<string, LucideIcon> = {
+  upvote: ThumbsUp,
+  downvote: ThumbsDown,
+  heart: Heart,
+  funny: Laugh,
+  award: Award,
+};
 
 export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
   const { t } = useTranslation(["community"]);
@@ -100,6 +86,20 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
     </article>
   );
 };
+
+function reactionIconFor(reaction: string): LucideIcon {
+  return REACTION_ICONS[reaction] ?? Sparkles;
+}
+
+function formatTimestamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
 const ReceivedActor: FC<{
   actor: ReactionHistoryReceivedItem["actor"];

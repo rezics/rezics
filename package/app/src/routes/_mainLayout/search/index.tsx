@@ -1,12 +1,13 @@
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { routeBoundaries } from "@/core/routing/routeBoundaries";
-import { FederatedSearchPage, isSearchCategory } from "@/search";
+import { routeBoundaries } from "@/core";
 import {
+  FederatedSearchPage,
+  isSearchCategory,
   parseSearchString,
   serializeSearchString,
-} from "@/search/models/searchQuery";
+} from "@/search";
 
 type SearchRouteParams = {
   q?: string;

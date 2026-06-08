@@ -5,9 +5,9 @@ import { setupWorker } from "msw/browser";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 
-import TagCard, { TagDetailCard } from "./TagCards";
-import TagList from "./TagList";
-import TagWrapper from "./TagWrapper";
+import { TagCard, TagDetailCard } from "./TagCards";
+import { TagList } from "./TagList";
+import { TagWrapper } from "./TagWrapper";
 
 type TagDetailDTO = {
   id: string;

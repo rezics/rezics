@@ -18,7 +18,7 @@ import {
   TriangleAlert as Warning,
 } from "lucide-react";
 import type React from "react";
-import { useAppStore } from "@/app/states/appStore";
+import { useAppStore } from "@/app";
 
 // MOCK: local preview palette for demo cards (used to be PRESET_COLORS from ui).
 // MOCK：演示卡片的本地预览调色板（曾经是 ui 中的 PRESET_COLORS）。

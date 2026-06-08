@@ -3,7 +3,7 @@ import type { UnitDTO } from "@rezics/contract";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import type * as React from "react";
 import { useMemo } from "react";
-import ExcerptCard from "../item/ExcerptCard";
+import { ExcerptCard } from "../item/ExcerptCard";
 
 export interface HorizontalExcerptCarouselProps {
   excerptList: UnitDTO[];
@@ -34,5 +34,3 @@ export const HorizontalExcerptCarousel: React.FC<
     />
   );
 };
-
-export default HorizontalExcerptCarousel;

@@ -11,8 +11,6 @@ import {
 import { Plus as AddIcon } from "lucide-react";
 import type React from "react";
 
-const ALL_LANGUAGES = Object.values(LANGUAGES);
-
 export interface UnitTranslationLanguageBarProps {
   existingLanguages: string[];
   selectedLanguage: string;
@@ -27,10 +25,7 @@ export interface UnitTranslationLanguageBarProps {
   selectClassName?: string;
 }
 
-function languageLabel(lang: string): string {
-  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[lang];
-  return meta?.nativeName ? `${meta.nativeName} (${lang})` : lang;
-}
+const ALL_LANGUAGES = Object.values(LANGUAGES);
 
 export const UnitTranslationLanguageBar: React.FC<
   UnitTranslationLanguageBarProps
@@ -88,3 +83,8 @@ export const UnitTranslationLanguageBar: React.FC<
     </div>
   );
 };
+
+function languageLabel(lang: string): string {
+  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[lang];
+  return meta?.nativeName ? `${meta.nativeName} (${lang})` : lang;
+}

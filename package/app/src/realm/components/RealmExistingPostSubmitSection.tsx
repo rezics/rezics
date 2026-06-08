@@ -35,41 +35,9 @@ type ExistingSubmitCandidate = {
   source: "draft" | "published";
 };
 
-function isExistingSubmitCandidate(
-  candidate: ExistingSubmitCandidate | null,
-): candidate is ExistingSubmitCandidate {
-  return candidate !== null;
-}
-
 export interface RealmExistingPostSubmitSectionProps {
   realmId: string;
   contentRequiresApproval?: boolean;
-}
-
-function draftCandidate(draft: DraftMetadata): ExistingSubmitCandidate | null {
-  if (draft.kind !== "post" && draft.kind !== "wiki") return null;
-  return {
-    unitId: draft.id,
-    title: draft.title,
-    excerpt: draft.excerpt,
-    source: "draft",
-  };
-}
-
-function postCandidate(post: PostDTO): ExistingSubmitCandidate {
-  return {
-    unitId: post.unitId,
-    title: post.title?.trim() || post.unitId,
-    excerpt: contentDocMarkdownFallback(post.content).slice(0, 200),
-    source: "published",
-  };
-}
-
-function canSubmitPublishedPost(post: PostDTO, realmId: string) {
-  return (
-    post.realmUnitId !== realmId &&
-    (post.kind === PostKind.POST || post.kind === PostKind.WIKI)
-  );
 }
 
 export function RealmExistingPostSubmitSection({
@@ -232,5 +200,37 @@ export function RealmExistingPostSubmitSection({
         </>
       ) : null}
     </div>
+  );
+}
+
+function isExistingSubmitCandidate(
+  candidate: ExistingSubmitCandidate | null,
+): candidate is ExistingSubmitCandidate {
+  return candidate !== null;
+}
+
+function draftCandidate(draft: DraftMetadata): ExistingSubmitCandidate | null {
+  if (draft.kind !== "post" && draft.kind !== "wiki") return null;
+  return {
+    unitId: draft.id,
+    title: draft.title,
+    excerpt: draft.excerpt,
+    source: "draft",
+  };
+}
+
+function postCandidate(post: PostDTO): ExistingSubmitCandidate {
+  return {
+    unitId: post.unitId,
+    title: post.title?.trim() || post.unitId,
+    excerpt: contentDocMarkdownFallback(post.content).slice(0, 200),
+    source: "published",
+  };
+}
+
+function canSubmitPublishedPost(post: PostDTO, realmId: string) {
+  return (
+    post.realmUnitId !== realmId &&
+    (post.kind === PostKind.POST || post.kind === PostKind.WIKI)
   );
 }

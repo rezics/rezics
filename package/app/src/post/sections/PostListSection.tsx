@@ -6,7 +6,7 @@ import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { resolvePostTargetVariantLabel } from "@/book-library/models/communityFeed";
+import { resolvePostTargetVariantLabel } from "@/book-library";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { PostCard } from "../components/item/PostCard";
 

@@ -2,7 +2,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import { Moon as Brightness4Icon, Sun as Brightness7Icon } from "lucide-react";
 import { useMemo } from "react";
-import { useAppStore } from "@/app/states/appStore";
+import { useAppStore } from "@/app";
 
 export function ThemeToggler() {
   const { t } = useTranslation(["shell"]);

@@ -31,43 +31,6 @@ type ItemRowCategory =
   | UserRowCategory
   | EntityRowCategory;
 
-function originBadge(hit: FederatedRankedHit): string {
-  const origin = hit._origin;
-  if (origin.indexUid === "content") {
-    const doc = hit as ContentSearchDocument & { _origin: typeof origin };
-    return doc.type === "SHELF"
-      ? getI18nRuntime().i18n.t("search:category_shelves")
-      : getI18nRuntime().i18n.t("search:origin_book");
-  }
-  if (origin.indexUid === "post") {
-    const doc = hit as PostSearchDocument & { _origin: typeof origin };
-    return doc.kind ?? getI18nRuntime().i18n.t("search:origin_post");
-  }
-  if (origin.indexUid === "comments") {
-    return getI18nRuntime().i18n.t("search:origin_comment");
-  }
-  if (origin.indexUid === "realm")
-    return getI18nRuntime().i18n.t("search:origin_realm");
-  if (origin.indexUid === "user")
-    return getI18nRuntime().i18n.t("search:origin_user");
-  if (origin.indexUid === "entities")
-    return getI18nRuntime().i18n.t("search:origin_entity");
-  return origin.indexUid;
-}
-
-function RankedHitCard({ hit }: { hit: FederatedRankedHit }) {
-  const badge = originBadge(hit);
-  return renderFederatedSearchCard(
-    hit._origin.category,
-    hit,
-    renderOriginBadge(badge),
-  );
-}
-
-function renderSingleItem(category: SearchCategory, item: FederatedSingleItem) {
-  return renderFederatedSearchCard(category, item);
-}
-
 export type FederatedResultListProps = {
   result?: FederatedSearchResult;
   isLoading: boolean;
@@ -194,3 +157,40 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
     </div>
   );
 };
+
+function originBadge(hit: FederatedRankedHit): string {
+  const origin = hit._origin;
+  if (origin.indexUid === "content") {
+    const doc = hit as ContentSearchDocument & { _origin: typeof origin };
+    return doc.type === "SHELF"
+      ? getI18nRuntime().i18n.t("search:category_shelves")
+      : getI18nRuntime().i18n.t("search:origin_book");
+  }
+  if (origin.indexUid === "post") {
+    const doc = hit as PostSearchDocument & { _origin: typeof origin };
+    return doc.kind ?? getI18nRuntime().i18n.t("search:origin_post");
+  }
+  if (origin.indexUid === "comments") {
+    return getI18nRuntime().i18n.t("search:origin_comment");
+  }
+  if (origin.indexUid === "realm")
+    return getI18nRuntime().i18n.t("search:origin_realm");
+  if (origin.indexUid === "user")
+    return getI18nRuntime().i18n.t("search:origin_user");
+  if (origin.indexUid === "entities")
+    return getI18nRuntime().i18n.t("search:origin_entity");
+  return origin.indexUid;
+}
+
+function RankedHitCard({ hit }: { hit: FederatedRankedHit }) {
+  const badge = originBadge(hit);
+  return renderFederatedSearchCard(
+    hit._origin.category,
+    hit,
+    renderOriginBadge(badge),
+  );
+}
+
+function renderSingleItem(category: SearchCategory, item: FederatedSingleItem) {
+  return renderFederatedSearchCard(category, item);
+}

@@ -1,11 +1,7 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
-import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
-import {
-  realmContextPostEditHref,
-  realmContextPostHref,
-} from "@/realm/models/realmPostContext";
+import { createMinimalEditConsoleConfig, EditConsoleLayout } from "@/core";
+import { realmContextPostEditHref, realmContextPostHref } from "@/realm";
 
 const PostEditPage = lazyRouteComponent(
   () => import("@/post/pages/PostEditPage"),

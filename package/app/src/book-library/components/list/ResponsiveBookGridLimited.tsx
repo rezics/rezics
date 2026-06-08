@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useCurrentBreakpoint } from "@/core/hooks/useCurrentBreakpoint";
+import { useCurrentBreakpoint } from "@/core";
 import { cn } from "@/shared/utils/css-util";
 import {
   HorizontalBookCard,

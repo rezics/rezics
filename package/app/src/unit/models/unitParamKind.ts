@@ -1,5 +1,10 @@
 import type { CandidateKind, IdentifierType } from "./types";
 
+export interface ParamKind {
+  kind: CandidateKind;
+  identifierType: IdentifierType;
+}
+
 const PARAM_KIND_BY_NAME: Record<string, CandidateKind> = {
   rootPostUnitId: "post",
   reviewId: "review",
@@ -15,11 +20,6 @@ const PARAM_KIND_BY_NAME: Record<string, CandidateKind> = {
 
 const ID_SUFFIX = "Id";
 const SLUG_SUFFIX = "Slug";
-
-export interface ParamKind {
-  kind: CandidateKind;
-  identifierType: IdentifierType;
-}
 
 /**
  * Derive the candidate kind and identifier type for a route param name.

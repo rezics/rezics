@@ -68,7 +68,7 @@ const getFeedbackTypeLabel = (type: FeedbackDTO["type"]) => {
   }
 };
 
-const FeedbackList: React.FC<FeedbackListProps> = ({
+export const FeedbackList: React.FC<FeedbackListProps> = ({
   queryType,
   userId,
   search,
@@ -362,5 +362,3 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     </div>
   );
 };
-
-export default FeedbackList;

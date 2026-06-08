@@ -1,6 +1,6 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { routeBoundaries } from "@/core/routing/routeBoundaries";
-import { normalizeCreatePageSearch } from "@/create/models/shareCreateSearch";
+import { routeBoundaries } from "@/core";
+import { normalizeCreatePageSearch } from "@/create";
 
 const CreatePage = lazyRouteComponent(() => import("@/create"), "CreatePage");
 

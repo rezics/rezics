@@ -34,11 +34,6 @@ interface ShelfEditPageProps {
   shelfId: string;
 }
 
-function normalizeViewMode(raw: unknown): ShelfView {
-  if (raw === "flat" || raw === "nested" || raw === "masonry") return raw;
-  return "nested";
-}
-
 const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
   {
     value: "nested",
@@ -277,4 +272,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   );
 }
 
-export default ShelfEditPage;
+function normalizeViewMode(raw: unknown): ShelfView {
+  if (raw === "flat" || raw === "nested" || raw === "masonry") return raw;
+  return "nested";
+}

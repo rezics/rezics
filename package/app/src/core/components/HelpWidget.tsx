@@ -6,7 +6,7 @@ import {
   TriangleAlert as ReportProblemIcon,
 } from "lucide-react";
 import * as React from "react";
-import FeedbackDialog from "@/feedback/components/FeedbackDialog";
+import { FeedbackDialog } from "@/feedback";
 import { cn } from "@/shared/utils/css-util";
 export interface HelpFabAction {
   id: string;
@@ -21,16 +21,6 @@ export interface HelpFabProps {
   ariaLabel?: string;
   visible?: boolean;
   enterDelayMs?: number;
-}
-
-function getDefaultHelpActions(t: (key: string) => string): HelpFabAction[] {
-  return [
-    {
-      id: "feedback",
-      label: t("shell:app_help_feedback"),
-      icon: <ReportProblemIcon className="w-4 h-4" />,
-    },
-  ];
 }
 
 /**
@@ -126,3 +116,13 @@ export const HelpFab: React.FC<HelpFabProps> = ({
     </div>
   );
 };
+
+function getDefaultHelpActions(t: (key: string) => string): HelpFabAction[] {
+  return [
+    {
+      id: "feedback",
+      label: t("shell:app_help_feedback"),
+      icon: <ReportProblemIcon className="w-4 h-4" />,
+    },
+  ];
+}

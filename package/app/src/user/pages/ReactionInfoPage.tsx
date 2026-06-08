@@ -48,5 +48,3 @@ export const ReactionInfoPage: React.FC = () => {
     </div>
   );
 };
-
-export default ReactionInfoPage;

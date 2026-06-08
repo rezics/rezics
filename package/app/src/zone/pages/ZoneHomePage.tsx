@@ -13,6 +13,10 @@ import {
   WikiMinimalZoneTemplate,
 } from "../templates/wiki";
 
+export type ZoneHomePageProps = {
+  slug: string;
+};
+
 const templates: Record<string, React.FC<any>> = {
   default: DefaultZoneTemplate,
   book: BookZoneTemplate,
@@ -20,10 +24,6 @@ const templates: Record<string, React.FC<any>> = {
   "wiki-media": WikiMediaZoneTemplate,
   "wiki-database": WikiDatabaseZoneTemplate,
   "wiki-minimal": WikiMinimalZoneTemplate,
-};
-
-export type ZoneHomePageProps = {
-  slug: string;
 };
 
 export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {

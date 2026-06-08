@@ -4,8 +4,7 @@ import { EmptyState, Spinner } from "@rezics/ui";
 import { useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { KeywordInput, useSearchQuery } from "@/search";
 import { useLocalizedPostSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export function ReviewSearchPage() {
@@ -52,5 +51,3 @@ export function ReviewSearchPage() {
     </div>
   );
 }
-
-export default ReviewSearchPage;

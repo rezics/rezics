@@ -5,9 +5,8 @@ import {
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import type React from "react";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import type { BookLibSortKey } from "@/search/components/SearchFilter";
-import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
+import { QueryErrorDisplay } from "@/core";
+import type { BookLibSortKey, UseSearchQueryReturn } from "@/search";
 import { BookListView } from "../components/BookList/BookListView";
 import { BookSearch } from "../components/BookSearch/BookSearch";
 

@@ -2,7 +2,7 @@ import { contentStructureQueries } from "@rezics/api/content-structure";
 import type { ContentStructureItem } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { contentUnitIdForNode } from "@/book-library/models/bookContentStructurePath";
+import { contentUnitIdForNode } from "@/book-library";
 
 export type ChapterPickerOption = {
   nodeId: string;

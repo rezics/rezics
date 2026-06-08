@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-import { useAuthSessionStore } from "@/user/states";
+import { useAuthSessionStore } from "@/user";
 
 import { ShelfDiscussionSection } from "./ShelfDiscussionSection";
 
