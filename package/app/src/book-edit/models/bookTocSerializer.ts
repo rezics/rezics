@@ -33,7 +33,7 @@ export function serializeBookToc(
     if (rating !== undefined && rating !== bookRating) {
       serialized.rating = rating;
     }
-    if (children) {
+    if (children?.length) {
       serialized.children = serializeBookToc(children, bookRating);
     }
     return serialized;
