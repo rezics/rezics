@@ -1,9 +1,13 @@
+import { useServerPermission } from "@rezics/api/hooks";
+import { myRealmMembershipQuery } from "@rezics/api/realm/realm";
 import { zoneHomepageByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { useZone } from "../hooks/useZone";
+import { canManageZone } from "../models/canManageZone";
 import { BookZoneTemplate } from "../templates/book";
 import { DefaultZoneTemplate } from "../templates/default";
 import {
@@ -31,9 +35,18 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   const locale = useLocale();
   const { zone, isLoading, error } = useZone(slug);
   const navigate = useNavigate();
+  const permission = useServerPermission();
+  const membershipQuery = useQuery({
+    ...myRealmMembershipQuery(zone?.ownerRealmUnitId ?? ""),
+    enabled: Boolean(zone?.ownerRealmUnitId),
+  });
   const homepageQuery = useQuery(
     zoneHomepageByUnitIdQueryOptions(zone?.unitId ?? "", [locale]),
   );
+  const showManage = canManageZone({
+    permission,
+    ownerRealmMemberRoleKey: membershipQuery.data?.roleKey,
+  });
 
   if (isLoading) {
     return (
@@ -63,12 +76,22 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
     navigate({
       to: "/z/$slug/search",
       params: { slug },
-      search: { keyword },
+      search: { q: keyword },
     });
   };
 
   return (
     <div className="max-w-8xl mx-auto px-4 py-8">
+      {showManage ? (
+        <div className="mb-4 flex justify-end">
+          <SafeLink
+            href={`/z/${slug}/manage`}
+            className="rounded-md bg-surface-subtle px-3 py-2 text-sm font-medium leading-ui text-text-primary transition-colors hover:bg-surface-sunken"
+          >
+            Manage
+          </SafeLink>
+        </div>
+      ) : null}
       <Template
         zone={zone}
         homepageData={homepageQuery.data}

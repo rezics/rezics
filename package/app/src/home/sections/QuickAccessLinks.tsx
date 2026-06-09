@@ -9,7 +9,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { Link } from "@/shared/ui/link";
+import { AppSafeLink } from "@/shared/ui/link";
+import { officialZoneSearchHref } from "@/zone";
 
 import { DynamicIcon, type IconKey } from "./DynamicIcon";
 
@@ -46,7 +47,9 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
       <CarouselContent className="-ml-2">
         {items.map(({ name, icon }) => (
           <CarouselItem key={name} className="pl-2 basis-auto">
-            <Link to="/book/search" search={{ tags: name }}>
+            <AppSafeLink
+              href={officialZoneSearchHref("book", { q: `[${name}]` })}
+            >
               <Badge
                 variant="secondary"
                 className="cursor-pointer flex items-center gap-1"
@@ -54,7 +57,7 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
                 <DynamicIcon name={icon as IconKey} className="ml-1" />
                 {name}
               </Badge>
-            </Link>
+            </AppSafeLink>
           </CarouselItem>
         ))}
       </CarouselContent>

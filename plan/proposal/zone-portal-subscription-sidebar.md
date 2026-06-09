@@ -1,8 +1,8 @@
 ---
 title: Zone Portal, Subscription List, and Sidebar Cutover
-status: active
+status: done
 created: 2026-06-09
-completed:
+completed: 2026-06-09
 supersededBy:
 tags: [zone, realm, subscription, sidebar, search, feed, onboarding]
 ---
@@ -243,29 +243,29 @@ zone ownership/permissions inherit from realms.
 
 ## 8. Zone management and theme boundaries
 
-- [ ] 8.1 Add or extend zone management pages under `package/app/src/zone/` and
+- [x] 8.1 Add or extend zone management pages under `package/app/src/zone/` and
   routes so realm-authorized managers can edit zone sections, navigation,
   theme tokens/images/layout, and lifecycle.
-- [ ] 8.2 Wire zone management permission hints through owner-realm capabilities,
+- [x] 8.2 Wire zone management permission hints through owner-realm capabilities,
   matching existing `RealmManagePage` and governance patterns.
 - [x] 8.3 Define public theme config as typed tokens and media references only;
   leave arbitrary CSS/JS for a later reviewed `ThemePackage` plan.
-- [ ] 8.4 Add UI and server tests proving users without owner-realm capability
+- [x] 8.4 Add UI and server tests proving users without owner-realm capability
   cannot mutate zone config, while allowed realm managers can.
 
 ## 9. Cleanup and cutover
 
-- [ ] 9.1 Move book library, realm discovery, and popular sidebar destinations
+- [x] 9.1 Move book library, realm discovery, and popular sidebar destinations
   to official zone routes where the app links need to expose zone behavior.
-- [ ] 9.2 Keep Home as the app route and allow it to reuse zone section
+- [x] 9.2 Keep Home as the app route and allow it to reuse zone section
   components without becoming a zone.
-- [ ] 9.3 Remove or redirect obsolete sidebar-only assumptions in
+- [x] 9.3 Remove or redirect obsolete sidebar-only assumptions in
   `MainNavigation`, route tests, and i18n strings once zone/realm subscription
   sections are live.
-- [ ] 9.4 Run focused contract, server, API, app model, and navigation tests
+- [x] 9.4 Run focused contract, server, API, app model, and navigation tests
   covering the new subscription list, zone config, registration defaults,
   sidebar rendering, zone search, and zone feed.
-- [ ] 9.5 Run `task check:convention` and `task format:check` after the code
+- [x] 9.5 Run `task check:convention` and `task format:check` after the code
   change lands.
 
 ## Out of scope

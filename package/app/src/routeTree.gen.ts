@@ -64,7 +64,9 @@ import { Route as MainLayoutExcerptUnitIdIndexRouteImport } from './routes/_main
 import { Route as MainLayoutEntityUnitIdIndexRouteImport } from './routes/_mainLayout/entity/$unitId/index'
 import { Route as MainLayoutBookBookIdIndexRouteImport } from './routes/_mainLayout/book/$bookId/index'
 import { Route as MainLayoutZoneUnitIdSearchRouteImport } from './routes/_mainLayout/zone/$unitId/search'
+import { Route as MainLayoutZoneUnitIdManageRouteImport } from './routes/_mainLayout/zone/$unitId/manage'
 import { Route as MainLayoutZSlugSearchRouteImport } from './routes/_mainLayout/z/$slug/search'
+import { Route as MainLayoutZSlugManageRouteImport } from './routes/_mainLayout/z/$slug/manage'
 import { Route as MainLayoutUserMeRecoveryRouteImport } from './routes/_mainLayout/user/me/recovery'
 import { Route as MainLayoutUserMeReactionRouteImport } from './routes/_mainLayout/user/me/reaction'
 import { Route as MainLayoutUserMeFollowRouteImport } from './routes/_mainLayout/user/me/follow'
@@ -451,9 +453,20 @@ const MainLayoutZoneUnitIdSearchRoute =
     path: '/zone/$unitId/search',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutZoneUnitIdManageRoute =
+  MainLayoutZoneUnitIdManageRouteImport.update({
+    id: '/zone/$unitId/manage',
+    path: '/zone/$unitId/manage',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutZSlugSearchRoute = MainLayoutZSlugSearchRouteImport.update({
   id: '/z/$slug/search',
   path: '/z/$slug/search',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
+const MainLayoutZSlugManageRoute = MainLayoutZSlugManageRouteImport.update({
+  id: '/z/$slug/manage',
+  path: '/z/$slug/manage',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutUserMeRecoveryRoute =
@@ -1130,7 +1143,9 @@ export interface FileRoutesByFullPath {
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
+  '/z/$slug/manage': typeof MainLayoutZSlugManageRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
+  '/zone/$unitId/manage': typeof MainLayoutZoneUnitIdManageRoute
   '/zone/$unitId/search': typeof MainLayoutZoneUnitIdSearchRoute
   '/book/$bookId/': typeof MainLayoutBookBookIdIndexRoute
   '/entity/$unitId/': typeof MainLayoutEntityUnitIdIndexRoute
@@ -1275,7 +1290,9 @@ export interface FileRoutesByTo {
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
+  '/z/$slug/manage': typeof MainLayoutZSlugManageRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
+  '/zone/$unitId/manage': typeof MainLayoutZoneUnitIdManageRoute
   '/zone/$unitId/search': typeof MainLayoutZoneUnitIdSearchRoute
   '/book/$bookId': typeof MainLayoutBookBookIdIndexRoute
   '/entity/$unitId': typeof MainLayoutEntityUnitIdIndexRoute
@@ -1430,7 +1447,9 @@ export interface FileRoutesById {
   '/_mainLayout/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/_mainLayout/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/_mainLayout/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
+  '/_mainLayout/z/$slug/manage': typeof MainLayoutZSlugManageRoute
   '/_mainLayout/z/$slug/search': typeof MainLayoutZSlugSearchRoute
+  '/_mainLayout/zone/$unitId/manage': typeof MainLayoutZoneUnitIdManageRoute
   '/_mainLayout/zone/$unitId/search': typeof MainLayoutZoneUnitIdSearchRoute
   '/_mainLayout/book/$bookId/': typeof MainLayoutBookBookIdIndexRoute
   '/_mainLayout/entity/$unitId/': typeof MainLayoutEntityUnitIdIndexRoute
@@ -1586,7 +1605,9 @@ export interface FileRouteTypes {
     | '/user/me/follow'
     | '/user/me/reaction'
     | '/user/me/recovery'
+    | '/z/$slug/manage'
     | '/z/$slug/search'
+    | '/zone/$unitId/manage'
     | '/zone/$unitId/search'
     | '/book/$bookId/'
     | '/entity/$unitId/'
@@ -1731,7 +1752,9 @@ export interface FileRouteTypes {
     | '/user/me/follow'
     | '/user/me/reaction'
     | '/user/me/recovery'
+    | '/z/$slug/manage'
     | '/z/$slug/search'
+    | '/zone/$unitId/manage'
     | '/zone/$unitId/search'
     | '/book/$bookId'
     | '/entity/$unitId'
@@ -1885,7 +1908,9 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/me/follow'
     | '/_mainLayout/user/me/reaction'
     | '/_mainLayout/user/me/recovery'
+    | '/_mainLayout/z/$slug/manage'
     | '/_mainLayout/z/$slug/search'
+    | '/_mainLayout/zone/$unitId/manage'
     | '/_mainLayout/zone/$unitId/search'
     | '/_mainLayout/book/$bookId/'
     | '/_mainLayout/entity/$unitId/'
@@ -2339,11 +2364,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutZoneUnitIdSearchRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/zone/$unitId/manage': {
+      id: '/_mainLayout/zone/$unitId/manage'
+      path: '/zone/$unitId/manage'
+      fullPath: '/zone/$unitId/manage'
+      preLoaderRoute: typeof MainLayoutZoneUnitIdManageRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
     '/_mainLayout/z/$slug/search': {
       id: '/_mainLayout/z/$slug/search'
       path: '/z/$slug/search'
       fullPath: '/z/$slug/search'
       preLoaderRoute: typeof MainLayoutZSlugSearchRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/z/$slug/manage': {
+      id: '/_mainLayout/z/$slug/manage'
+      path: '/z/$slug/manage'
+      fullPath: '/z/$slug/manage'
+      preLoaderRoute: typeof MainLayoutZSlugManageRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/user/me/recovery': {
@@ -3412,7 +3451,9 @@ interface MainLayoutRouteChildren {
   MainLayoutUMeDashboardRoute: typeof MainLayoutUMeDashboardRoute
   MainLayoutUMeDraftsRoute: typeof MainLayoutUMeDraftsRoute
   MainLayoutUMeProgressRoute: typeof MainLayoutUMeProgressRoute
+  MainLayoutZSlugManageRoute: typeof MainLayoutZSlugManageRoute
   MainLayoutZSlugSearchRoute: typeof MainLayoutZSlugSearchRoute
+  MainLayoutZoneUnitIdManageRoute: typeof MainLayoutZoneUnitIdManageRoute
   MainLayoutZoneUnitIdSearchRoute: typeof MainLayoutZoneUnitIdSearchRoute
   MainLayoutEntityUnitIdIndexRoute: typeof MainLayoutEntityUnitIdIndexRoute
   MainLayoutExcerptUnitIdIndexRoute: typeof MainLayoutExcerptUnitIdIndexRoute
@@ -3491,7 +3532,9 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutUMeDashboardRoute: MainLayoutUMeDashboardRoute,
   MainLayoutUMeDraftsRoute: MainLayoutUMeDraftsRoute,
   MainLayoutUMeProgressRoute: MainLayoutUMeProgressRoute,
+  MainLayoutZSlugManageRoute: MainLayoutZSlugManageRoute,
   MainLayoutZSlugSearchRoute: MainLayoutZSlugSearchRoute,
+  MainLayoutZoneUnitIdManageRoute: MainLayoutZoneUnitIdManageRoute,
   MainLayoutZoneUnitIdSearchRoute: MainLayoutZoneUnitIdSearchRoute,
   MainLayoutEntityUnitIdIndexRoute: MainLayoutEntityUnitIdIndexRoute,
   MainLayoutExcerptUnitIdIndexRoute: MainLayoutExcerptUnitIdIndexRoute,
