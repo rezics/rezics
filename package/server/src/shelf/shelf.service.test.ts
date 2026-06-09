@@ -809,6 +809,47 @@ describe("ShelfService", () => {
     });
   });
 
+  test("list hydrates the matched variant child when filtering by variantUnitId", async () => {
+    Object.assign(legacyDbMock, {
+      shelf: {
+        findMany: async () => [makeShelfListRow()],
+        count: async () => 1,
+      },
+      shelfItem: {
+        findMany: async () => [
+          makeShelfItemRow({
+            itemId: "variant-1",
+            parentItemId: "main-1",
+            parentRole: "variant",
+          }),
+        ],
+      },
+      unit: {
+        findMany: async () => [
+          {
+            id: "variant-1",
+            defaultLanguage: "en",
+            translations: [{ language: "en", title: "Variant Child Edition" }],
+          },
+        ],
+      },
+    });
+
+    const { shelfService } = await import(
+      "./shelf.service.ts?shelf-service-test-actual" as string
+    );
+    const result = await shelfService.list({
+      variantUnitId: "variant-1",
+      limit: 10,
+    });
+
+    expect(result.shelves[0]?.matchedUnit).toEqual({
+      unitId: "variant-1",
+      kind: "book",
+      title: "Variant Child Edition",
+    });
+  });
+
   test("rejects reserved system shelf kind keys on create", async () => {
     const { shelfService } = await import(
       "./shelf.service.ts?shelf-service-test-actual" as string

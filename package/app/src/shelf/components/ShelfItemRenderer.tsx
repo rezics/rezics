@@ -214,15 +214,19 @@ function NestedRootCard({
 }) {
   const [tab, setTab] = useState("0");
   const primary = renderUnit(root, "nested");
-  const reviewChildren = attachedChildren.filter(
-    (c) => c.unit.kind === "review",
+  const tabChildren = attachedChildren.filter(
+    (c) =>
+      c.unit.parentRole === "review" ||
+      c.unit.parentRole === "variant" ||
+      c.unit.kind === "review",
   );
 
-  if (reviewChildren.length === 0) {
+  if (tabChildren.length === 0) {
     return <>{primary}</>;
   }
 
   const activeIdx = Number(tab);
+  const activeChild = tabChildren[activeIdx];
 
   return (
     <div className="flex flex-col gap-2">
@@ -230,26 +234,29 @@ function NestedRootCard({
       <div>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="overflow-x-auto">
-            {reviewChildren.map((c, idx) => {
-              const post = c.data as PostDTO | undefined;
+            {tabChildren.map((c, idx) => {
+              const labelPrefix =
+                c.unit.parentRole === "variant" ? "Variant" : "Review";
               return (
                 <TabsTrigger
                   key={shelfItemIdentity(c.unit)}
                   value={String(idx)}
                 >
-                  {post?.title ?? `Review ${idx + 1}`}
+                  {labelPrefix} {idx + 1}
                 </TabsTrigger>
               );
             })}
           </TabsList>
         </Tabs>
-        {reviewChildren[activeIdx]?.data && (
+        {activeChild?.unit.kind === "review" && activeChild.data ? (
           <ReviewCard
-            review={reviewChildren[activeIdx]!.data as PostDTO}
+            review={activeChild.data as PostDTO}
             showTargetUnit={false}
-            variantContext={reviewChildren[activeIdx]!.unit.variantContext}
+            variantContext={activeChild.unit.variantContext}
           />
-        )}
+        ) : activeChild ? (
+          renderUnit(activeChild, "nested")
+        ) : null}
       </div>
     </div>
   );

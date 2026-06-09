@@ -32,6 +32,10 @@ function createDb(rowSets: unknown[][]) {
 }
 
 function shelfItemRow(overrides: Record<string, unknown> = {}) {
+  const itemId = (overrides.itemId ?? overrides.unitId ?? "unit-1") as string;
+  const parentItemId = (overrides.parentItemId ??
+    overrides.parentUnitId ??
+    null) as string | null;
   return {
     shelfId: "shelf-1",
     shelfOwnerUserId: "user-1",
@@ -39,10 +43,12 @@ function shelfItemRow(overrides: Record<string, unknown> = {}) {
     shelfStatus: "PUBLISHED",
     shelfTitle: "Reading list",
     itemType: "unit",
-    unitId: "unit-1",
+    itemId,
+    unitId: itemId,
     kind: "root",
     parentItemType: null,
-    parentUnitId: null,
+    parentItemId,
+    parentUnitId: parentItemId,
     parentRole: null,
     position: "a0",
     searchText: "private alias",
@@ -100,6 +106,43 @@ describe("shelf item search sync", () => {
     );
 
     expect(deleteShelfItems).toHaveBeenCalledWith(["shelf-1:unit:missing"]);
+  });
+
+  test("syncs variant child shelf items with main root context", async () => {
+    const addOrUpdateShelfItems = mock(async () => ({}));
+    const deleteShelfItems = mock(async () => ({}));
+    setSearchDb(
+      createDb([
+        [
+          shelfItemRow({
+            unitId: "variant-1",
+            parentItemType: "unit",
+            parentUnitId: "main-1",
+            parentRole: "variant",
+            itemTitle: "Variant edition",
+            rootUnitId: "variant-1",
+          }),
+        ],
+      ]) as never,
+    );
+
+    await syncSingleShelfItem(
+      { addOrUpdateShelfItems, deleteShelfItems } as any,
+      "shelf-1",
+      "unit",
+      "variant-1",
+    );
+
+    expect(addOrUpdateShelfItems).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: "shelf-1:unit:variant-1",
+        itemId: "variant-1",
+        parentItemId: "main-1",
+        parentRole: "variant",
+        rootItemId: "main-1",
+        rootUnitId: "main-1",
+      }),
+    ]);
   });
 
   test("syncs full and source-filtered segments with composite cursors", async () => {

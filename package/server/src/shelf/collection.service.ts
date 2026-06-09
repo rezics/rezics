@@ -4,10 +4,11 @@ import type {
   CollectionStatusResponse,
   CollectResponse,
   ShelfItemKind,
+  ShelfItemParentRole,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import {
@@ -30,8 +31,10 @@ const COLLECTION_STATUS_BATCH_CAP = 100;
 
 type UnitKind = typeof Unit.$inferSelect.type;
 type PostKind = NonNullable<typeof Post.$inferSelect.kind>;
+type CatalogEntryKind = typeof Unit.$inferSelect.catalogEntryKind;
 type UnitTargetRow = {
   type: UnitKind;
+  catalogEntryKind: CatalogEntryKind;
   targetUnitId: string | null;
   postKind: PostKind | null;
 };
@@ -53,12 +56,22 @@ interface ResolvedTarget {
    */
   reviewUnitId?: string;
   reviewKind?: ShelfItemKind;
+  /**
+   * Collected VARIANT identity. `ShelfItem.variantUnitId` remains a weak
+   * context field; real variant collection is represented by this child item.
+   * 被收藏的 VARIANT 标识。`ShelfItem.variantUnitId` 仍是弱上下文字段；
+   * 真正的变体收藏由此子级条目表示。
+   */
+  variantUnitId?: string;
+  variantKind?: ShelfItemKind;
+  legacyVariantUnitId?: string | null;
 }
 
 interface BatchResolvedTarget {
   targetId: string;
   parentUnitId: string;
   reviewUnitId?: string;
+  variantUnitId?: string;
 }
 
 export type CollectionRepository = {
@@ -81,6 +94,7 @@ export type CollectionRepository = {
     shelfIds: string[];
   }): Promise<CollectResponse>;
   hasShelfItem(shelfId: string, unitId: string): Promise<boolean>;
+  hasVariantShelfItem(shelfId: string, variantUnitId: string): Promise<boolean>;
   removeFavorite(input: {
     shelfId: string;
     resolved: ResolvedTarget;
@@ -96,6 +110,10 @@ export type CollectionRepository = {
   listReviewShelfIds(input: {
     userId: string;
     reviewUnitIds: string[];
+  }): Promise<Array<{ childUnitId: string; shelfId: string }>>;
+  listVariantShelfIds(input: {
+    userId: string;
+    variantUnitIds: string[];
   }): Promise<Array<{ childUnitId: string; shelfId: string }>>;
   listShelfTitles(
     shelfIds: string[],
@@ -217,12 +235,13 @@ async function insertShelfItem(
   return false;
 }
 
-async function upsertReviewRelation(
+async function upsertChildRelation(
   tx: any,
   input: {
     shelfId: string;
     parentUnitId: string;
     childUnitId: string;
+    role: ShelfItemParentRole;
   },
 ): Promise<void> {
   const [before] = await tx
@@ -240,7 +259,7 @@ async function upsertReviewRelation(
     .set({
       parentItemType: "unit",
       parentItemId: input.parentUnitId,
-      parentRole: "review",
+      parentRole: input.role,
       updatedAt: new Date(),
     })
     .where(
@@ -279,6 +298,7 @@ function createDrizzleCollectionRepository(): CollectionRepository {
       const [unit] = await db
         .select({
           type: Unit.type,
+          catalogEntryKind: Unit.catalogEntryKind,
           targetUnitId: Unit.targetUnitId,
           postKind: Post.kind,
         })
@@ -296,6 +316,7 @@ function createDrizzleCollectionRepository(): CollectionRepository {
         .select({
           id: Unit.id,
           type: Unit.type,
+          catalogEntryKind: Unit.catalogEntryKind,
           targetUnitId: Unit.targetUnitId,
           postKind: Post.kind,
         })
@@ -360,20 +381,20 @@ function createDrizzleCollectionRepository(): CollectionRepository {
             const created = await insertShelfItem(tx, {
               shelfId,
               unitId: input.resolved.parentUnitId,
-              variantUnitId: input.variantUnitId,
+              variantUnitId: input.resolved.legacyVariantUnitId,
               kind: input.resolved.parentKind,
               searchText: input.searchText,
             });
             if (created) isNew = true;
           } else if (
-            input.variantUnitId !== undefined ||
+            input.resolved.legacyVariantUnitId !== undefined ||
             input.searchText !== undefined
           ) {
             await tx
               .update(ShelfItem)
               .set({
-                ...(input.variantUnitId !== undefined
-                  ? { variantUnitId: input.variantUnitId }
+                ...(input.resolved.legacyVariantUnitId !== undefined
+                  ? { variantUnitId: input.resolved.legacyVariantUnitId }
                   : {}),
                 ...(input.searchText !== undefined
                   ? { searchText: input.searchText }
@@ -408,10 +429,40 @@ function createDrizzleCollectionRepository(): CollectionRepository {
                 parentRole: "review",
               });
             }
-            await upsertReviewRelation(tx, {
+            await upsertChildRelation(tx, {
               shelfId,
               parentUnitId: input.resolved.parentUnitId,
               childUnitId: input.resolved.reviewUnitId,
+              role: "review",
+            });
+          }
+
+          if (input.resolved.variantUnitId && input.resolved.variantKind) {
+            const [existingVariant] = await tx
+              .select({ unitId: ShelfItem.itemId })
+              .from(ShelfItem)
+              .where(
+                and(
+                  eq(ShelfItem.shelfId, shelfId),
+                  eq(ShelfItem.itemId, input.resolved.variantUnitId),
+                ),
+              )
+              .limit(1);
+            if (!existingVariant) {
+              const created = await insertShelfItem(tx, {
+                shelfId,
+                unitId: input.resolved.variantUnitId,
+                kind: input.resolved.variantKind,
+                parentUnitId: input.resolved.parentUnitId,
+                parentRole: "variant",
+              });
+              if (created) isNew = true;
+            }
+            await upsertChildRelation(tx, {
+              shelfId,
+              parentUnitId: input.resolved.parentUnitId,
+              childUnitId: input.resolved.variantUnitId,
+              role: "variant",
             });
           }
 
@@ -431,9 +482,47 @@ function createDrizzleCollectionRepository(): CollectionRepository {
         .limit(1);
       return Boolean(row);
     },
+    async hasVariantShelfItem(shelfId, variantUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ unitId: ShelfItem.itemId })
+        .from(ShelfItem)
+        .where(
+          and(
+            eq(ShelfItem.shelfId, shelfId),
+            eq(ShelfItem.itemId, variantUnitId),
+            eq(ShelfItem.parentRole, "variant"),
+          ),
+        )
+        .limit(1);
+      return Boolean(row);
+    },
     async removeFavorite(input) {
       const db = await getServerDb();
       await db.transaction(async (tx) => {
+        if (input.resolved.variantUnitId) {
+          const variantDeleted = await tx
+            .delete(ShelfItem)
+            .where(
+              and(
+                eq(ShelfItem.shelfId, input.shelfId),
+                eq(ShelfItem.itemId, input.resolved.variantUnitId),
+                eq(ShelfItem.parentRole, "variant"),
+              ),
+            )
+            .returning({ unitId: ShelfItem.itemId });
+          if (variantDeleted.length > 0) {
+            await tx
+              .update(Shelf)
+              .set({
+                itemCount: sql`${Shelf.itemCount} - ${variantDeleted.length}`,
+                updatedAt: new Date(),
+              })
+              .where(eq(Shelf.unitId, input.shelfId));
+          }
+          return;
+        }
+
         const deleted = await tx
           .delete(ShelfItem)
           .where(
@@ -500,6 +589,21 @@ function createDrizzleCollectionRepository(): CollectionRepository {
           unitId: input.resolved.parentUnitId,
           kind: input.resolved.parentKind,
         });
+        if (input.resolved.variantUnitId && input.resolved.variantKind) {
+          await insertShelfItem(tx, {
+            shelfId: input.shelfId,
+            unitId: input.resolved.variantUnitId,
+            kind: input.resolved.variantKind,
+            parentUnitId: input.resolved.parentUnitId,
+            parentRole: "variant",
+          });
+          await upsertChildRelation(tx, {
+            shelfId: input.shelfId,
+            parentUnitId: input.resolved.parentUnitId,
+            childUnitId: input.resolved.variantUnitId,
+            role: "variant",
+          });
+        }
         if (input.resolved.reviewUnitId && input.resolved.reviewKind) {
           await insertShelfItem(tx, {
             shelfId: input.shelfId,
@@ -508,10 +612,11 @@ function createDrizzleCollectionRepository(): CollectionRepository {
             parentUnitId: input.resolved.parentUnitId,
             parentRole: "review",
           });
-          await upsertReviewRelation(tx, {
+          await upsertChildRelation(tx, {
             shelfId: input.shelfId,
             parentUnitId: input.resolved.parentUnitId,
             childUnitId: input.resolved.reviewUnitId,
+            role: "review",
           });
         }
       });
@@ -527,6 +632,7 @@ function createDrizzleCollectionRepository(): CollectionRepository {
         .where(
           and(
             inArray(ShelfItem.itemId, input.unitIds),
+            isNull(ShelfItem.parentItemId),
             eq(Unit.userId, input.userId),
           ),
         );
@@ -546,6 +652,25 @@ function createDrizzleCollectionRepository(): CollectionRepository {
           and(
             inArray(ShelfItem.itemId, input.reviewUnitIds),
             eq(ShelfItem.parentRole, "review"),
+            eq(Unit.userId, input.userId),
+          ),
+        );
+    },
+    async listVariantShelfIds(input) {
+      if (input.variantUnitIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          childUnitId: ShelfItem.itemId,
+          shelfId: ShelfItem.shelfId,
+        })
+        .from(ShelfItem)
+        .innerJoin(Shelf, eq(ShelfItem.shelfId, Shelf.unitId))
+        .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
+        .where(
+          and(
+            inArray(ShelfItem.itemId, input.variantUnitIds),
+            eq(ShelfItem.parentRole, "variant"),
             eq(Unit.userId, input.userId),
           ),
         );
@@ -588,22 +713,42 @@ export class CollectionService {
   }
 
   /**
-   * Resolve the collect target to a parent shelf item + optional review child.
+   * Resolve the collect target to a parent shelf item + optional child.
    *
    * - If `targetId` is a REVIEW post whose Unit has a canonical target, the
    *   target work is the parent and the review itself is threaded back as a child.
+   * - If `targetId` is a catalog VARIANT, or a valid selected `variantUnitId`
+   *   points back to the target work, the main catalog Unit is the parent and
+   *   the variant itself is threaded back as a child.
    * - Otherwise the target is the parent.
-   * 将收藏目标解析为一个父级 shelf item + 可选的 review 子项。
+   * 将收藏目标解析为一个父级 shelf item + 可选子项。
    *
    * - 若 `targetId` 是其 Unit 拥有规范目标的 REVIEW 帖子，则目标作品为父级，
    *   而 review 本身作为子项串接回来。
+   * - 若 `targetId` 是目录 VARIANT，或有效的 `variantUnitId` 指回目标作品，
+   *   则主目录 Unit 为父级，而变体本身作为子项串接回来。
    * - 否则该目标即为父级。
    */
   private async resolveTarget(
     targetId: string,
     independent: boolean,
+    selectedVariantUnitId?: string,
   ): Promise<ResolvedTarget> {
     const unit = await this.repository.getUnitTarget(targetId);
+
+    if (
+      !independent &&
+      unit.catalogEntryKind === "VARIANT" &&
+      unit.targetUnitId
+    ) {
+      const target = await this.repository.getUnitTarget(unit.targetUnitId);
+      return {
+        parentUnitId: unit.targetUnitId,
+        parentKind: mapUnitToKind(target.type, target.postKind),
+        variantUnitId: targetId,
+        variantKind: mapUnitToKind(unit.type, unit.postKind),
+      };
+    }
 
     if (
       !independent &&
@@ -617,6 +762,32 @@ export class CollectionService {
         parentKind: mapUnitToKind(target.type, target.postKind),
         reviewUnitId: targetId,
         reviewKind: "review",
+      };
+    }
+
+    if (selectedVariantUnitId?.trim()) {
+      const variantUnitId = selectedVariantUnitId.trim();
+      try {
+        const variant = await this.repository.getUnitTarget(variantUnitId);
+        if (
+          variant.catalogEntryKind === "VARIANT" &&
+          variant.targetUnitId === targetId
+        ) {
+          return {
+            parentUnitId: targetId,
+            parentKind: mapUnitToKind(unit.type, unit.postKind),
+            variantUnitId,
+            variantKind: mapUnitToKind(variant.type, variant.postKind),
+          };
+        }
+      } catch {
+        // Keep historical weak-context writes for arbitrary variant hints.
+        // 对任意变体提示保留历史弱上下文写入。
+      }
+      return {
+        parentUnitId: targetId,
+        parentKind: mapUnitToKind(unit.type, unit.postKind),
+        legacyVariantUnitId: variantUnitId,
       };
     }
 
@@ -639,7 +810,11 @@ export class CollectionService {
       tagUnitIds,
       searchText,
     } = input;
-    const resolved = await this.resolveTarget(targetId, independent);
+    const resolved = await this.resolveTarget(
+      targetId,
+      independent,
+      variantUnitId,
+    );
 
     await this.repository.applyCollectionMetadata({
       userId,
@@ -650,7 +825,7 @@ export class CollectionService {
     const result = await this.repository.collectToShelves({
       userId,
       resolved,
-      variantUnitId,
+      variantUnitId: resolved.legacyVariantUnitId,
       searchText,
       shelfIds,
     });
@@ -677,10 +852,12 @@ export class CollectionService {
       throw new AppError(400, "A shelf cannot contain itself");
     }
 
-    const existing = await this.repository.hasShelfItem(
-      favShelfId,
-      resolved.parentUnitId,
-    );
+    const existing = resolved.variantUnitId
+      ? await this.repository.hasVariantShelfItem(
+          favShelfId,
+          resolved.variantUnitId,
+        )
+      : await this.repository.hasShelfItem(favShelfId, resolved.parentUnitId);
 
     if (existing) {
       await this.repository.removeFavorite({ shelfId: favShelfId, resolved });
@@ -701,15 +878,20 @@ export class CollectionService {
     const resolved = await this.resolveTarget(targetId, false);
     const favShelfId = await this.getFavoritesShelfId(userId);
 
-    const shelfRows = resolved.reviewUnitId
-      ? await this.repository.listReviewShelfIds({
+    const shelfRows = resolved.variantUnitId
+      ? await this.repository.listVariantShelfIds({
           userId,
-          reviewUnitIds: [resolved.reviewUnitId],
+          variantUnitIds: [resolved.variantUnitId],
         })
-      : await this.repository.listDirectShelfIds({
-          userId,
-          unitIds: [resolved.parentUnitId],
-        });
+      : resolved.reviewUnitId
+        ? await this.repository.listReviewShelfIds({
+            userId,
+            reviewUnitIds: [resolved.reviewUnitId],
+          })
+        : await this.repository.listDirectShelfIds({
+            userId,
+            unitIds: [resolved.parentUnitId],
+          });
     const shelfIds = shelfRows.map((row) => row.shelfId);
 
     if (shelfIds.length === 0) {
@@ -761,6 +943,7 @@ export class CollectionService {
 
     const units = await this.repository.listUnitTargets(normalizedTargetIds);
     const reviewTargetIds = new Set<string>();
+    const variantTargetIds = new Set<string>();
     for (const unit of units) {
       if (
         unit.type === "POST" &&
@@ -769,17 +952,34 @@ export class CollectionService {
       ) {
         reviewTargetIds.add(unit.targetUnitId);
       }
+      if (unit.catalogEntryKind === "VARIANT" && unit.targetUnitId) {
+        variantTargetIds.add(unit.targetUnitId);
+      }
     }
 
-    const reviewTargets =
-      reviewTargetIds.size > 0
-        ? await this.repository.listUnitTargets([...reviewTargetIds])
+    const parentTargetIds = [
+      ...new Set([...reviewTargetIds, ...variantTargetIds]),
+    ];
+    const parentTargets =
+      parentTargetIds.length > 0
+        ? await this.repository.listUnitTargets(parentTargetIds)
         : [];
     const reviewTargetById = new Map(
-      reviewTargets.map((unit) => [unit.id, unit]),
+      parentTargets.map((unit) => [unit.id, unit]),
     );
 
     const resolvedTargets: BatchResolvedTarget[] = units.map((unit) => {
+      if (unit.catalogEntryKind === "VARIANT" && unit.targetUnitId) {
+        const target = reviewTargetById.get(unit.targetUnitId);
+        if (target) {
+          return {
+            targetId: unit.id,
+            parentUnitId: target.id,
+            variantUnitId: unit.id,
+          };
+        }
+      }
+
       if (
         unit.type === "POST" &&
         unit.postKind === "REVIEW" &&
@@ -805,7 +1005,7 @@ export class CollectionService {
     const parentUnitIds = [
       ...new Set(
         resolvedTargets
-          .filter((target) => !target.reviewUnitId)
+          .filter((target) => !target.reviewUnitId && !target.variantUnitId)
           .map((target) => target.parentUnitId),
       ),
     ];
@@ -816,10 +1016,18 @@ export class CollectionService {
           .filter((id): id is string => Boolean(id)),
       ),
     ];
+    const variantUnitIds = [
+      ...new Set(
+        resolvedTargets
+          .map((target) => target.variantUnitId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
 
-    const [directRows, reviewRows] = await Promise.all([
+    const [directRows, reviewRows, variantRows] = await Promise.all([
       this.repository.listDirectShelfIds({ userId, unitIds: parentUnitIds }),
       this.repository.listReviewShelfIds({ userId, reviewUnitIds }),
+      this.repository.listVariantShelfIds({ userId, variantUnitIds }),
     ]);
 
     const directShelfIdsByUnitId = new Map<string, string[]>();
@@ -835,12 +1043,20 @@ export class CollectionService {
       ids.push(row.shelfId);
       reviewShelfIdsByUnitId.set(row.childUnitId, ids);
     }
+    const variantShelfIdsByUnitId = new Map<string, string[]>();
+    for (const row of variantRows) {
+      const ids = variantShelfIdsByUnitId.get(row.childUnitId) ?? [];
+      ids.push(row.shelfId);
+      variantShelfIdsByUnitId.set(row.childUnitId, ids);
+    }
 
     const allShelfIds = new Set<string>();
     for (const target of resolvedTargets) {
-      const shelfIds = target.reviewUnitId
-        ? (reviewShelfIdsByUnitId.get(target.reviewUnitId) ?? [])
-        : (directShelfIdsByUnitId.get(target.parentUnitId) ?? []);
+      const shelfIds = target.variantUnitId
+        ? (variantShelfIdsByUnitId.get(target.variantUnitId) ?? [])
+        : target.reviewUnitId
+          ? (reviewShelfIdsByUnitId.get(target.reviewUnitId) ?? [])
+          : (directShelfIdsByUnitId.get(target.parentUnitId) ?? []);
       for (const shelfId of shelfIds) allShelfIds.add(shelfId);
     }
 
@@ -852,9 +1068,11 @@ export class CollectionService {
     );
 
     for (const target of resolvedTargets) {
-      const shelfIds = target.reviewUnitId
-        ? (reviewShelfIdsByUnitId.get(target.reviewUnitId) ?? [])
-        : (directShelfIdsByUnitId.get(target.parentUnitId) ?? []);
+      const shelfIds = target.variantUnitId
+        ? (variantShelfIdsByUnitId.get(target.variantUnitId) ?? [])
+        : target.reviewUnitId
+          ? (reviewShelfIdsByUnitId.get(target.reviewUnitId) ?? [])
+          : (directShelfIdsByUnitId.get(target.parentUnitId) ?? []);
       statusesByTarget[target.targetId] = {
         isFavorited: shelfIds.includes(favShelfId),
         shelves: shelfIds.map((shelfId) => ({

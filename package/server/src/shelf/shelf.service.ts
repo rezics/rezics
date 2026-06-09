@@ -558,7 +558,10 @@ export class ShelfService {
       conditions.push(sql`exists (
         select 1 from "ShelfItem" su
         where su."shelfId" = ${Shelf.unitId}
-          and su."variantUnitId" = ${variantUnitId}
+          and (
+            (su."itemId" = ${variantUnitId} and su."parentRole" = 'variant')
+            or su."variantUnitId" = ${variantUnitId}
+          )
       )`);
     }
 
@@ -652,7 +655,13 @@ export class ShelfService {
           inArray(ShelfItem.shelfId, shelfIds),
           containsUnitId ? eq(ShelfItem.itemId, containsUnitId) : undefined,
           variantUnitId
-            ? eq(ShelfItem.variantUnitId, variantUnitId)
+            ? or(
+                and(
+                  eq(ShelfItem.itemId, variantUnitId),
+                  eq(ShelfItem.parentRole, "variant"),
+                ),
+                eq(ShelfItem.variantUnitId, variantUnitId),
+              )
             : undefined,
         ),
       )
@@ -1275,7 +1284,17 @@ export class ShelfService {
           sql`${ShelfItem.parentItemId} is null`,
           query.itemType ? eq(ShelfItem.itemType, query.itemType) : undefined,
           query.variantUnitId?.trim()
-            ? eq(ShelfItem.variantUnitId, query.variantUnitId.trim())
+            ? or(
+                eq(ShelfItem.variantUnitId, query.variantUnitId.trim()),
+                sql`exists (
+                  select 1 from "ShelfItem" child
+                  where child."shelfId" = ${ShelfItem.shelfId}
+                    and child."parentItemType" = ${ShelfItem.itemType}
+                    and child."parentItemId" = ${ShelfItem.itemId}
+                    and child."itemId" = ${query.variantUnitId.trim()}
+                    and child."parentRole" = 'variant'
+                )`,
+              )
             : undefined,
           searchIds ? inArray(ShelfItem.itemId, [...searchIds]) : undefined,
           query.cursor

@@ -65,6 +65,7 @@ export type ShelfItemKind = (typeof shelfItemKindSchema)["static"];
 
 export const shelfItemParentRoleSchema = t.Union([
   t.Literal("review"),
+  t.Literal("variant"),
   t.Literal("comment"),
   t.Literal("tag"),
   t.Literal("annotation"),
@@ -353,9 +354,11 @@ export const addShelfItemSchema = t.Object({
   /**
    * Weak selected VARIANT context. The ShelfItem row remains keyed by
    * `(shelfId, itemType, itemId)` and this value is not validated as existing
-   * or VARIANT.
+   * or VARIANT. Collected VARIANT units are represented by their own child
+   * ShelfItem identity instead of this weak context field.
    * 弱关联的所选 VARIANT 上下文。ShelfItem 行的主键仍为
    * `(shelfId, itemType, itemId)`，此值不会校验其是否存在或为 VARIANT。
+   * 被收藏的 VARIANT unit 使用自己的子级 ShelfItem 标识，而不是此弱上下文字段。
    */
   variantUnitId: t.Optional(t.String()),
   kind: shelfItemKindSchema,

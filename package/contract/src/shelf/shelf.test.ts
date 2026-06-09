@@ -139,6 +139,18 @@ describe("shelf containment contract fields", () => {
       }),
     ).toBe(true);
     expect(
+      Value.Check(shelfItemDTOSchema, {
+        shelfId: "shelf-1",
+        itemType: "unit",
+        itemId: "variant-1",
+        kind: "book",
+        parentItemType: "unit",
+        parentItemId: "book-1",
+        parentRole: "variant",
+        position: "c1",
+      }),
+    ).toBe(true);
+    expect(
       Value.Check(shelfItemChildDTOSchema, {
         shelfId: "shelf-1",
         parentItemType: "unit",
@@ -146,6 +158,16 @@ describe("shelf containment contract fields", () => {
         childItemType: "comment",
         childItemId: "comment-1",
         role: "comment",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shelfItemChildDTOSchema, {
+        shelfId: "shelf-1",
+        parentItemType: "unit",
+        parentItemId: "book-1",
+        childItemType: "unit",
+        childItemId: "variant-1",
+        role: "variant",
       }),
     ).toBe(true);
     expect(

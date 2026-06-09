@@ -21,6 +21,7 @@ export function useCollectionModal(
   const [open, setOpen] = useState(false);
   const targetItemType = options?.targetItemType ?? "unit";
   const isUnitTarget = targetItemType === "unit";
+  const statusTargetUnitId = options?.variantUnitId ?? unitId;
 
   const shelvesQuery = useQuery({
     ...userShelvesQuery(),
@@ -28,8 +29,8 @@ export function useCollectionModal(
   });
 
   const statusQuery = useQuery({
-    ...collectionStatusQuery(unitId),
-    enabled: isUnitTarget && open && !!unitId,
+    ...collectionStatusQuery(statusTargetUnitId),
+    enabled: isUnitTarget && open && !!statusTargetUnitId,
   });
 
   const recovery = useSystemShelfRecoveryToast();

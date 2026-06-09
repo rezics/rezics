@@ -193,6 +193,54 @@ describe("deriveShelfStream — nested mode", () => {
     }
   });
 
+  test("variant children group under the main catalog root", () => {
+    const units: EnrichedShelfItem[] = [
+      {
+        unit: makeUnit({
+          itemId: "main-1",
+          kind: "book",
+          position: "a",
+        }),
+        data: makeBook("main-1", "Main Work"),
+      },
+      {
+        unit: makeUnit({
+          itemId: "variant-1",
+          kind: "book",
+          parentItemType: "unit",
+          parentItemId: "main-1",
+          parentRole: "variant",
+          position: "a~00",
+        }),
+        data: makeBook("variant-1", "Variant Edition"),
+      },
+    ];
+    const relations: ShelfItemChildDTO[] = [
+      {
+        shelfId: "s1",
+        parentItemType: "unit",
+        parentItemId: "main-1",
+        childItemType: "unit",
+        childItemId: "variant-1",
+        role: "variant",
+      },
+    ];
+
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "nested",
+      manualAsc,
+      true,
+    );
+
+    expect(idsOf(stream)).toEqual(["main-1"]);
+    const [root] = stream;
+    if (root?.kind === "root") {
+      expect(root.children.map((c) => c.unit.itemId)).toEqual(["variant-1"]);
+    }
+  });
+
   test("two-step cycle (A ↔ B as each other's children) renders no roots", () => {
     const units: EnrichedShelfItem[] = [
       {
