@@ -12,6 +12,7 @@ export const SearchScopeSchema = t.Union([
     unitId: t.String(),
   }),
   t.Object({ kind: t.Literal("realm"), realmId: t.String() }),
+  t.Object({ kind: t.Literal("zone"), zoneUnitId: t.String() }),
   t.Object({ kind: t.Literal("user"), userId: t.String() }),
   t.Object({
     kind: t.Literal("saved"),

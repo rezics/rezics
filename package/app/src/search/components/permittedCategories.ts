@@ -37,6 +37,7 @@ export function permittedCategoriesForScope(
     case "global":
       return ALL_CATEGORIES;
     case "realm":
+    case "zone":
       return ALL_CATEGORIES.filter(
         (c) => c !== "realms" && c !== "users" && c !== "entities",
       );

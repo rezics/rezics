@@ -8,8 +8,10 @@ import type {
 import { useLocale } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
+import { FeedSection } from "@/feed";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
-import { zoneHomeSections } from "../models/zoneSections";
+import { zoneDetailRoute } from "../models/zoneDetailRoutes";
+import { zoneHomeSections, zoneSectionPrimitive } from "../models/zoneSections";
 
 type ConfigLink = {
   key: string;
@@ -69,7 +71,7 @@ function manualLinks(section: ZoneSection, locale: Language): ConfigLink[] {
   });
 }
 
-function configuredLinks(section: ZoneSection): ConfigLink[] {
+function configuredLinks(section: ZoneSection, zone: ZoneDTO): ConfigLink[] {
   if (section.kind === "realmList") {
     return (section.realmUnitIds ?? []).map((unitId) => ({
       key: `${section.id}:realm:${unitId}`,
@@ -94,7 +96,11 @@ function configuredLinks(section: ZoneSection): ConfigLink[] {
   if (section.kind === "wikiCollection") {
     return (section.wikiUnitIds ?? []).map((unitId) => ({
       key: `${section.id}:wiki:${unitId}`,
-      href: `/unit/id/${unitId}`,
+      href: zoneDetailRoute({
+        zoneSlug: zone.slug,
+        kind: "wiki",
+        unitId,
+      }).href,
       label: unitId,
     }));
   }
@@ -126,27 +132,51 @@ function LinkList({ links }: { links: ConfigLink[] }) {
 }
 
 function DeferredSection({ section }: { section: ZoneSection }) {
+  const locale = useLocale();
   if (section.emptyState === "hide") return null;
   return (
-    <p className="text-sm leading-body text-text-secondary">
-      This zone section is configured and will render when its scoped data query
-      is connected.
-    </p>
+    <EmptyState
+      title="No items yet"
+      description={`${sectionTitle(section, locale)} has no visible items.`}
+    />
   );
 }
 
-export function ZoneSectionRenderer({ section }: { section: ZoneSection }) {
+export function ZoneSectionRenderer({
+  section,
+  zone,
+}: {
+  section: ZoneSection;
+  zone: ZoneDTO;
+}) {
   const locale = useLocale();
-  if (section.kind === "manualContent") {
+  const primitive = zoneSectionPrimitive(section);
+  if (primitive === "manualContent" && section.kind === "manualContent") {
     return <MarkdownContent content={section.body.markdown} />;
+  }
+
+  if (section.kind === "feed") {
+    return (
+      <FeedSection
+        query={{
+          scope: "zone",
+          zoneUnitId: zone.unitId,
+          ...(section.limit ? { limit: section.limit } : {}),
+          ...(section.feedKind === "updates" ? { sort: "new" } : {}),
+        }}
+        emptyTitle="No feed items yet"
+      />
+    );
   }
 
   const links =
     section.kind === "manualLinks"
       ? manualLinks(section, locale)
-      : configuredLinks(section);
+      : configuredLinks(section, zone);
 
-  if (links.length > 0) return <LinkList links={links} />;
+  if (primitive === "configuredLinkList" && links.length > 0) {
+    return <LinkList links={links} />;
+  }
   return <DeferredSection section={section} />;
 }
 
@@ -172,7 +202,7 @@ export function ZoneSectionList({ zone }: { zone: ZoneDTO }) {
               {sectionTitle(section, locale)}
             </h2>
           </div>
-          <ZoneSectionRenderer section={section} />
+          <ZoneSectionRenderer section={section} zone={zone} />
         </section>
       ))}
     </div>

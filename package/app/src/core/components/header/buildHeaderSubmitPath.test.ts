@@ -32,6 +32,18 @@ describe("buildHeaderSubmitPath", () => {
     );
   });
 
+  test("zone pathname submits to /z/:slug/search", () => {
+    expect(buildHeaderSubmitPath("/z/book/wiki", "deep")).toBe(
+      "/z/book/search?q=deep",
+    );
+  });
+
+  test("zone direct id pathname submits to /zone/:unitId/search", () => {
+    expect(buildHeaderSubmitPath("/zone/zone-1/search", "deep")).toBe(
+      "/zone/zone-1/search?q=deep",
+    );
+  });
+
   test("empty value omits q from URL", () => {
     expect(buildHeaderSubmitPath("/realm/r-1/forum", "")).toBe(
       "/realm/r-1/search",

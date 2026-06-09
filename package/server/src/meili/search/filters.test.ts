@@ -37,6 +37,15 @@ describe("buildContentFilter", () => {
     expect(filter).toContain('realmIds = "r-7"');
   });
 
+  test("zone scope relies on query filters instead of index membership", () => {
+    const scope: SearchScope = { kind: "zone", zoneUnitId: "zone-1" };
+    const filter = buildContentFilter({ type: ["BOOK"] }, scope);
+    expect(filter).toContain('type = "BOOK"');
+    expect(filter).toContain('visibility = "PUBLIC"');
+    expect(filter).not.toContain('realmIds = "zone-1"');
+    expect(filter).not.toContain('zoneUnitId = "zone-1"');
+  });
+
   test("user scope emits userId filter", () => {
     const scope: SearchScope = { kind: "user", userId: "u-3" };
     const filter = buildContentFilter(emptyQuery, scope);
@@ -149,6 +158,15 @@ describe("buildPostFilter", () => {
     expect(filter).toContain('realmIds = "r-9"');
   });
 
+  test("zone scope does not map posts to realm membership", () => {
+    const filter = buildPostFilter(emptyQuery, {
+      kind: "zone",
+      zoneUnitId: "zone-1",
+    });
+    expect(filter).toContain("isLocked = false");
+    expect(filter).not.toContain('realmIds = "zone-1"');
+  });
+
   test("user scope emits authorUserId", () => {
     const filter = buildPostFilter(emptyQuery, { kind: "user", userId: "u-5" });
     expect(filter).toContain('authorUserId = "u-5"');
@@ -165,7 +183,7 @@ describe("buildPostFilter", () => {
       { kind: "global" },
     );
     expect(filter).toContain(
-      '(isLanguageNeutral = true OR languages IN ["ja", "en"])',
+      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
     );
   });
 
@@ -195,6 +213,14 @@ describe("buildCommentFilter", () => {
     expect(
       buildCommentFilter(emptyQuery, { kind: "user", userId: "user-1" }),
     ).toContain('authorUserId = "user-1"');
+  });
+
+  test("zone scope does not map comments to realm partition", () => {
+    const filter = buildCommentFilter(emptyQuery, {
+      kind: "zone",
+      zoneUnitId: "zone-1",
+    });
+    expect(filter).toEqual(["isLocked = false"]);
   });
 });
 
@@ -243,6 +269,17 @@ describe("buildShelfItemFilter", () => {
 
     expect(filter).toContain('itemType = "unit"');
     expect(filter).toContain('itemId = "book-1"');
+  });
+
+  test("zone scope keeps public shelf visibility without realm membership", () => {
+    const filter = buildShelfItemFilter(emptyQuery, {
+      kind: "zone",
+      zoneUnitId: "zone-1",
+    });
+
+    expect(filter).toEqual([
+      '(shelfVisibility = "PUBLIC" AND shelfStatus = "PUBLISHED")',
+    ]);
   });
 
   test("saved scope constrains to the user's saved shelf items", () => {

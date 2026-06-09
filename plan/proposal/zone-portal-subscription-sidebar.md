@@ -200,44 +200,44 @@ zone ownership/permissions inherit from realms.
 - [x] 6.1 Replace placeholder `DefaultZoneTemplate` and `BookZoneTemplate` paths
   in `package/app/src/zone/templates/` with a typed zone page renderer that
   consumes `zone.pages.home.sections`.
-- [ ] 6.2 Add section renderer primitives in `package/app/src/zone/` for latest
+- [x] 6.2 Add section renderer primitives in `package/app/src/zone/` for latest
   content, popular/ranked content, feed, review stream, shelf carousel, realm
   list, tag/navigation groups, wiki collections, and manual content blocks.
-- [ ] 6.3 Reuse existing book/search/feed/list components where practical, but
+- [x] 6.3 Reuse existing book/search/feed/list components where practical, but
   host zone-specific query and implicit-filter state in zone models/hooks
   rather than duplicating DTOs in app code.
-- [ ] 6.4 Add route files for zone-framed details where needed:
+- [x] 6.4 Add route files for zone-framed details where needed:
   `/z/$slug/post/$postUnitId`, `/z/$slug/wiki/$wikiUnitId`, and
   `/z/$slug/unit/$unitId`.
-- [ ] 6.5 Ensure zone-framed detail routes pass presentation context only. They
+- [x] 6.5 Ensure zone-framed detail routes pass presentation context only. They
   must not pass `realmUnitId` into `PostThreadPage`, comment components,
   reaction scope helpers, or moderation actions.
-- [ ] 6.6 Keep explicit realm routes as the only route family that creates realm
+- [x] 6.6 Keep explicit realm routes as the only route family that creates realm
   interaction context; realm routes may use a primary zone theme for
   presentation if configured.
-- [ ] 6.7 Add app tests/models proving zone-framed links, direct links, and
+- [x] 6.7 Add app tests/models proving zone-framed links, direct links, and
   realm-context links resolve to different `PageContext`/href shapes.
 
 ## 7. Zone search and feed scope
 
-- [ ] 7.1 Extend `package/contract/src/search/scope.ts` with
+- [x] 7.1 Extend `package/contract/src/search/scope.ts` with
   `{ kind: "zone"; zoneUnitId: string }`.
-- [ ] 7.2 Update `package/app/src/search/models/scope.ts` and header/search
+- [x] 7.2 Update `package/app/src/search/models/scope.ts` and header/search
   route resolution so `/z/:slug/search` resolves to zone search scope after
   slug lookup.
-- [ ] 7.3 Replace `package/app/src/zone/pages/ZoneSearchPage.tsx` content-only
+- [x] 7.3 Replace `package/app/src/zone/pages/ZoneSearchPage.tsx` content-only
   search with `FederatedSearchPage` using zone scope and zone implicit filters.
-- [ ] 7.4 Update `package/server/src/meili/search/filters.ts` and
+- [x] 7.4 Update `package/server/src/meili/search/filters.ts` and
   `federated.service.ts` so zone scope applies zone filters across permitted
   content, post, shelf, comment search where appropriate. Comments should only
   be scoped by zone when the zone config explicitly defines direct-content
   search boundaries; zone scope must not map to realm comment partition.
-- [ ] 7.5 Extend `package/contract/src/feed/feed.ts` with zone feed scope and
+- [x] 7.5 Extend `package/contract/src/feed/feed.ts` with zone feed scope and
   update `package/server/src/feed/feed.service.ts` to resolve zone source
   config into feed queries/rows.
-- [ ] 7.6 Update `package/api/src/feed/` and `package/app/src/feed/` consumers so
+- [x] 7.6 Update `package/api/src/feed/` and `package/app/src/feed/` consumers so
   zone feed sections can query `scope: "zone"` with zone implicit filters.
-- [ ] 7.7 Add tests for zone search/filter inheritance, unremovable implicit
+- [x] 7.7 Add tests for zone search/filter inheritance, unremovable implicit
   filters, zone feed queries, and separation from realm comment/moderation
   context.
 

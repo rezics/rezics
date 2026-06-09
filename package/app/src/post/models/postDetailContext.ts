@@ -7,6 +7,7 @@ export type PostDetailContext =
 export type PostDetailRouteParams = {
   rootPostUnitId?: string;
   postUnitId?: string;
+  wikiUnitId?: string;
   realmId?: string;
 };
 
@@ -22,7 +23,10 @@ export function resolvePostDetailContext(input: {
   realmUnitId?: string | null;
 }): ResolvedPostDetailContext {
   const rootPostUnitId =
-    input.params.rootPostUnitId ?? input.params.postUnitId ?? "";
+    input.params.rootPostUnitId ??
+    input.params.postUnitId ??
+    input.params.wikiUnitId ??
+    "";
   const realmUnitId = input.realmUnitId ?? input.params.realmId ?? null;
   const context: PostDetailContext = realmUnitId
     ? { kind: "realm", realmUnitId }

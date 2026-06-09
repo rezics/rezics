@@ -40,6 +40,16 @@ describe("buildSearchPath", () => {
     ).toBe("/book/b-7/search?q=deep&category=reviews");
   });
 
+  test("zone scope nests the zone Unit id in the direct zone path", () => {
+    expect(
+      buildSearchPath({
+        scope: { kind: "zone", zoneUnitId: "zone-1" },
+        category: "posts",
+        keyword: "deep",
+      }),
+    ).toBe("/zone/zone-1/search?q=deep&category=posts");
+  });
+
   test("saved scope uses the shelf search route", () => {
     expect(
       buildSearchPath({

@@ -1,53 +1,26 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
-import { feedResponseSchema } from "./feed";
+import { feedQuerySchema, feedResponseSchema } from "./feed";
 
-describe("feed row contract", () => {
-  test("accepts content rows with sort-aware cursor", () => {
+describe("feedQuerySchema", () => {
+  test("accepts zone feed scope with a concrete zone Unit id", () => {
     expect(
-      Value.Check(feedResponseSchema, {
-        scope: "home",
-        sort: "best",
-        rows: [
-          {
-            type: "content",
-            rowId: "post:post-1",
-            href: "/post/post-1",
-            post: {
-              unitId: "post-1",
-              authorUserId: "user-1",
-              kind: "REVIEW",
-            },
-            targetUnit: {
-              unitId: "book-1",
-              kind: "book",
-              title: "Target Work",
-            },
-          },
-        ],
-        nextCursor: {
-          rowId: "post:post-1",
-          sortValue: 42,
-          createdAt: "2026-06-05T00:00:00.000Z",
-        },
+      Value.Check(feedQuerySchema, {
+        scope: "zone",
+        zoneUnitId: "zone-1",
+        limit: 20,
       }),
     ).toBe(true);
   });
+});
 
-  test("accepts carousel rows", () => {
+describe("feedResponseSchema", () => {
+  test("accepts zone feed responses", () => {
     expect(
       Value.Check(feedResponseSchema, {
-        scope: "library",
+        scope: "zone",
         sort: "new",
-        rows: [
-          {
-            type: "carousel",
-            rowId: "carousel:works:book",
-            carouselKind: "works",
-            title: { key: "feed.carousel.newBooks" },
-            works: [{ unitId: "book-1", kind: "book", title: "Book" }],
-          },
-        ],
+        rows: [],
         nextCursor: null,
       }),
     ).toBe(true);

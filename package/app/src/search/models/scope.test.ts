@@ -67,6 +67,24 @@ describe("resolveScope", () => {
     expect(resolveScope("/book/new")).toEqual({ kind: "global" });
   });
 
+  test("resolves /z/:slug/search to zoneSlug intermediate", () => {
+    expect(resolveScope("/z/book/search")).toEqual({
+      kind: "zoneSlug",
+      zoneSlug: "book",
+    });
+  });
+
+  test("resolves /zone/:unitId/search to zone scope", () => {
+    expect(resolveScope("/zone/zone-1/search")).toEqual({
+      kind: "zone",
+      zoneUnitId: "zone-1",
+    });
+  });
+
+  test("/z/search directory falls back to global", () => {
+    expect(resolveScope("/z/search")).toEqual({ kind: "global" });
+  });
+
   test("unknown path falls back to global", () => {
     expect(resolveScope("/feedback/admin")).toEqual({ kind: "global" });
   });
@@ -87,12 +105,20 @@ describe("isContractScope", () => {
     );
   });
 
+  test("narrows out zoneSlug", () => {
+    expect(isContractScope({ kind: "zoneSlug", zoneSlug: "book" })).toBe(false);
+  });
+
   test("accepts global", () => {
     expect(isContractScope({ kind: "global" })).toBe(true);
   });
 
   test("accepts realm", () => {
     expect(isContractScope({ kind: "realm", realmId: "r1" })).toBe(true);
+  });
+
+  test("accepts zone", () => {
+    expect(isContractScope({ kind: "zone", zoneUnitId: "zone-1" })).toBe(true);
   });
 
   test("accepts user", () => {

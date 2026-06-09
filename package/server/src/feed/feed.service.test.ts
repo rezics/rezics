@@ -43,10 +43,21 @@ let shelfListResult = {
   total: 2,
 };
 
+let zoneResult: any = {
+  unitId: "zone-1",
+  filters: {
+    realmUnitId: "realm-1",
+    tags: [{ unitId: "tag-1" }],
+    postKind: "REVIEW",
+    languages: ["en"],
+  },
+};
+
 const listMock = mock(async () => listResult);
 const byRealmMock = mock(async () => byRealmResult);
 const bookListMock = mock(async () => bookListResult);
 const shelfListMock = mock(async () => shelfListResult);
+const zoneGetByUnitIdMock = mock(async () => zoneResult);
 const mapPostToDTOMock = mock((post) => post);
 const hydrateVariantContextSummariesMock = mock(async () => new Map());
 const resolveEffectiveReadLanguageCandidatesMock = mock(
@@ -101,6 +112,12 @@ mock.module("@/shelf", () => ({
   },
 }));
 
+mock.module("@/zone", () => ({
+  zoneService: {
+    getByUnitId: zoneGetByUnitIdMock,
+  },
+}));
+
 mock.module("@/utils/errors", () => ({
   AppError: class AppError extends Error {
     statusCode: number;
@@ -152,10 +169,20 @@ beforeEach(() => {
     ],
     total: 2,
   };
+  zoneResult = {
+    unitId: "zone-1",
+    filters: {
+      realmUnitId: "realm-1",
+      tags: [{ unitId: "tag-1" }],
+      postKind: "REVIEW",
+      languages: ["en"],
+    },
+  };
   listMock.mockClear();
   byRealmMock.mockClear();
   bookListMock.mockClear();
   shelfListMock.mockClear();
+  zoneGetByUnitIdMock.mockClear();
   mapPostToDTOMock.mockClear();
   hydrateVariantContextSummariesMock.mockClear();
   resolveEffectiveReadLanguageCandidatesMock.mockClear();
@@ -319,6 +346,63 @@ describe("FeedService", () => {
       href: "/realm/realm-1/post/review-1",
       realm: { unitId: "realm-1", title: "Realm One" },
       targetUnit: { unitId: "book-1", title: "Book One" },
+    });
+  });
+
+  test("builds zone rows from zone filter-backed post list", async () => {
+    const { FeedService } = await import("./feed.service");
+    const service = new FeedService();
+
+    const result = await service.list({
+      scope: "zone",
+      zoneUnitId: "zone-1",
+      tagIds: ["tag-2"],
+      sort: "new",
+      limit: 10,
+    });
+
+    expect(zoneGetByUnitIdMock).toHaveBeenCalledWith("zone-1");
+    expect(listMock).toHaveBeenCalledWith(
+      {
+        sort: "new",
+        cursor: undefined,
+        limit: 10,
+        realmUnitId: "realm-1",
+        kind: "REVIEW",
+        languages: ["en"],
+        tagIds: ["tag-2", "tag-1"],
+      },
+      undefined,
+    );
+    expect(result.scope).toBe("zone");
+    expect(result.rows[0]).toMatchObject({
+      type: "content",
+      rowId: "post:post-1",
+      recommendationReason: "zone-feed-activity",
+    });
+    expect(byRealmMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects zone feed without a zone Unit id", async () => {
+    const { FeedService } = await import("./feed.service");
+    const service = new FeedService();
+
+    await expect(service.list({ scope: "zone" })).rejects.toMatchObject({
+      statusCode: 400,
+      message: "zoneUnitId is required for zone feed",
+    });
+  });
+
+  test("rejects missing zone feed targets", async () => {
+    zoneResult = null;
+    const { FeedService } = await import("./feed.service");
+    const service = new FeedService();
+
+    await expect(
+      service.list({ scope: "zone", zoneUnitId: "missing-zone" }),
+    ).rejects.toMatchObject({
+      statusCode: 404,
+      message: "Zone not found",
     });
   });
 

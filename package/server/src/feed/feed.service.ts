@@ -9,6 +9,7 @@ import type {
   PostDTO,
   PostListQuery,
   ShelfSummaryDTO,
+  ZoneFilters,
 } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
 import { bookService } from "@/book";
@@ -19,6 +20,7 @@ import { shelfService } from "@/shelf";
 import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
 import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { AppError } from "@/utils/errors";
+import { zoneService } from "@/zone";
 import { feedResponse, mapPostToFeedRow } from "./feed.mapper";
 
 const FEED_LIMIT_CAP = 50;
@@ -68,6 +70,38 @@ function postQueryForFeed(query: FeedQuery, limit: number): PostListQuery {
     ...(query.tagIds?.length ? { tagIds: query.tagIds } : {}),
     ...(query.realmModerationStatus
       ? { realmModerationStatus: query.realmModerationStatus }
+      : {}),
+  };
+}
+
+function uniqueStrings(values: readonly (string | null | undefined)[]) {
+  return [
+    ...new Set(values.filter((value): value is string => Boolean(value))),
+  ];
+}
+
+function tagIdsFromZoneFilters(filters: ZoneFilters | null | undefined) {
+  return uniqueStrings((filters?.tags ?? []).map((tag) => tag.unitId));
+}
+
+function withZoneFeedFilters(
+  base: PostListQuery,
+  filters: ZoneFilters | null | undefined,
+): PostListQuery {
+  if (!filters) return base;
+  const zoneTagIds = tagIdsFromZoneFilters(filters);
+  // Zone feed is post-backed in this service; only PostListQuery-native filters
+  // are applied here. Content-only filters such as type/rating/license belong
+  // to a future mixed content feed source.
+  return {
+    ...base,
+    ...(filters.realmUnitId || filters.realmId
+      ? { realmUnitId: filters.realmUnitId ?? filters.realmId }
+      : {}),
+    ...(filters.postKind ? { kind: filters.postKind } : {}),
+    ...(filters.languages?.length ? { languages: filters.languages } : {}),
+    ...(zoneTagIds.length
+      ? { tagIds: uniqueStrings([...(base.tagIds ?? []), ...zoneTagIds]) }
       : {}),
   };
 }
@@ -282,6 +316,30 @@ export class FeedService {
           rows: await mapPostsToFeedRows(posts.posts, query, {
             realmUnitId: query.realmUnitId,
             reason: "realm-feed-activity",
+          }),
+        }),
+        limit,
+      );
+    }
+
+    if (scope === "zone") {
+      if (!query.zoneUnitId) {
+        throw new AppError(400, "zoneUnitId is required for zone feed");
+      }
+      const zone = await zoneService.getByUnitId(query.zoneUnitId);
+      if (!zone) {
+        throw new AppError(404, "Zone not found");
+      }
+      const posts = await postService.list(
+        withZoneFeedFilters(postQuery, zone.filters as ZoneFilters),
+        options,
+      );
+      return withSliceCursor(
+        feedResponse({
+          scope,
+          sort,
+          rows: await mapPostsToFeedRows(posts.posts, query, {
+            reason: "zone-feed-activity",
           }),
         }),
         limit,

@@ -9,8 +9,8 @@ type SearchRouteParams = {
   category?: SearchCategory;
 };
 
-function ZoneSearchRoute() {
-  const { slug } = Route.useParams();
+function ZoneUnitSearchRoute() {
+  const { unitId } = Route.useParams();
   const { q, category } = Route.useSearch();
   const navigate = useNavigate();
   const initialQuery = useMemo<SearchQuery>(
@@ -20,13 +20,13 @@ function ZoneSearchRoute() {
 
   return (
     <ZoneSearchPage
-      slug={slug}
+      unitId={unitId}
       initialQuery={initialQuery}
       initialCategory={category ?? "all"}
       onCategoryChange={(next) => {
         navigate({
-          to: "/z/$slug/search",
-          params: { slug },
+          to: "/zone/$unitId/search",
+          params: { unitId },
           search: (prev: SearchRouteParams) => ({
             ...prev,
             category: next === "all" ? undefined : next,
@@ -37,8 +37,7 @@ function ZoneSearchRoute() {
   );
 }
 
-export const Route = createFileRoute("/_mainLayout/z/$slug/search")({
-  component: ZoneSearchRoute,
+export const Route = createFileRoute("/_mainLayout/zone/$unitId/search")({
   validateSearch: (search: Record<string, unknown>): SearchRouteParams => ({
     q: typeof search.q === "string" ? search.q : undefined,
     category:
@@ -46,4 +45,5 @@ export const Route = createFileRoute("/_mainLayout/z/$slug/search")({
         ? search.category
         : undefined,
   }),
+  component: ZoneUnitSearchRoute,
 });
