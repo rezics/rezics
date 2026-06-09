@@ -7,7 +7,7 @@ import {
   userShelvesQuery,
 } from "@rezics/api/shelf";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useSystemShelfRecoveryToast } from "./useSystemShelfRecoveryToast";
 
 export function useCollectionModal(
@@ -45,59 +45,47 @@ export function useCollectionModal(
     },
   });
 
-  const handleOpen = useCallback(() => setOpen(true), []);
-  const handleClose = useCallback(() => setOpen(false), []);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleCollect = useCallback(
-    async (
-      shelfIds: string[],
-      independent?: boolean,
-      searchText?: string | null,
-    ) => {
-      try {
-        if (isUnitTarget) {
-          await collectMutation.mutateAsync({
-            targetId: unitId,
-            variantUnitId: options?.variantUnitId,
-            shelfIds,
-            independent,
-            searchText,
-          });
-        } else {
-          const kind = options?.targetKind ?? targetItemType;
-          await Promise.all(
-            shelfIds.map((shelfId) =>
-              addShelfItemMutation.mutateAsync({
-                shelfId,
-                input: {
-                  itemType: targetItemType,
-                  itemId: unitId,
-                  kind,
-                  searchText,
-                },
-              }),
-            ),
-          );
-        }
-        handleClose();
-      } catch {
-        // onError surfaces the recovery toast; the user re-opens the modal
-        // and re-clicks Save themselves after retry succeeds.
-        // onError 弹出恢复提示；用户在重试成功后自行重新打开弹窗
-        // 并再次点击保存。
+  const handleCollect = async (
+    shelfIds: string[],
+    independent?: boolean,
+    searchText?: string | null,
+  ) => {
+    try {
+      if (isUnitTarget) {
+        await collectMutation.mutateAsync({
+          targetId: unitId,
+          variantUnitId: options?.variantUnitId,
+          shelfIds,
+          independent,
+          searchText,
+        });
+      } else {
+        const kind = options?.targetKind ?? targetItemType;
+        await Promise.all(
+          shelfIds.map((shelfId) =>
+            addShelfItemMutation.mutateAsync({
+              shelfId,
+              input: {
+                itemType: targetItemType,
+                itemId: unitId,
+                kind,
+                searchText,
+              },
+            }),
+          ),
+        );
       }
-    },
-    [
-      unitId,
-      options?.variantUnitId,
-      options?.targetKind,
-      targetItemType,
-      isUnitTarget,
-      collectMutation,
-      addShelfItemMutation,
-      handleClose,
-    ],
-  );
+      handleClose();
+    } catch {
+      // onError surfaces the recovery toast; the user re-opens the modal
+      // and re-clicks Save themselves after retry succeeds.
+      // onError 弹出恢复提示；用户在重试成功后自行重新打开弹窗
+      // 并再次点击保存。
+    }
+  };
 
   return {
     open,

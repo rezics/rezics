@@ -300,44 +300,35 @@ export const BookTocEditor = forwardRef<
     [],
   );
 
-  const onMove: MoveHandler<Chapter> = useCallback(
-    ({ dragIds, parentId, index }) => {
-      setTreeData((current) => {
-        const removed: Chapter[] = [];
-        const withoutDragged = findAndRemove(
-          current,
-          dragIds,
-          removed,
-        ) as Chapter[];
-        return findAndInsert(
-          withoutDragged,
-          parentId,
-          index,
-          removed,
-        ) as Chapter[];
-      });
-      enqueueOp("move", dragIds[0], { parentId, index, count: dragIds.length });
-    },
-    [enqueueOp],
-  );
+  const onMove: MoveHandler<Chapter> = ({ dragIds, parentId, index }) => {
+    setTreeData((current) => {
+      const removed: Chapter[] = [];
+      const withoutDragged = findAndRemove(
+        current,
+        dragIds,
+        removed,
+      ) as Chapter[];
+      return findAndInsert(
+        withoutDragged,
+        parentId,
+        index,
+        removed,
+      ) as Chapter[];
+    });
+    enqueueOp("move", dragIds[0], { parentId, index, count: dragIds.length });
+  };
 
-  const onRename: RenameHandler<Chapter> = useCallback(
-    ({ id, name }) => {
-      setTreeData(
-        (current) => findAndEdit(current, String(id), name) as Chapter[],
-      );
-      enqueueOp("rename", String(id));
-    },
-    [enqueueOp],
-  );
+  const onRename: RenameHandler<Chapter> = ({ id, name }) => {
+    setTreeData(
+      (current) => findAndEdit(current, String(id), name) as Chapter[],
+    );
+    enqueueOp("rename", String(id));
+  };
 
-  const onDelete: DeleteHandler<Chapter> = useCallback(
-    ({ ids }) => {
-      setTreeData((current) => findAndDelete(current, ids) as Chapter[]);
-      enqueueOp("delete", ids[0], { count: ids.length });
-    },
-    [enqueueOp],
-  );
+  const onDelete: DeleteHandler<Chapter> = ({ ids }) => {
+    setTreeData((current) => findAndDelete(current, ids) as Chapter[]);
+    enqueueOp("delete", ids[0], { count: ids.length });
+  };
 
   async function saveTree(data: Chapter[]) {
     try {
@@ -425,23 +416,24 @@ export const BookTocEditor = forwardRef<
    * Save edits from the edit dialog (title rename + mock status).
    * 保存编辑对话框的改动（标题重命名 + 模拟状态）。
    */
-  const handleEditSave = useCallback(
-    (update: { title: string; status: string; rating: ContentRating }) => {
-      setTreeData(
-        (current) =>
-          findAndEdit(
-            current,
-            String(editDialogChapter!.id),
-            update.title,
-          ) as Chapter[],
-      );
-      // MOCK: rating update persists via chapter update API here (handled by caller in production)
-      // MOCK：此处通过章节更新 API 持久化分级改动（生产环境由调用方处理）
-      void update.rating;
-      enqueueOp("edit", String(editDialogChapter!.id));
-    },
-    [editDialogChapter, enqueueOp],
-  );
+  const handleEditSave = (update: {
+    title: string;
+    status: string;
+    rating: ContentRating;
+  }) => {
+    setTreeData(
+      (current) =>
+        findAndEdit(
+          current,
+          String(editDialogChapter!.id),
+          update.title,
+        ) as Chapter[],
+    );
+    // MOCK: rating update persists via chapter update API here (handled by caller in production)
+    // MOCK：此处通过章节更新 API 持久化分级改动（生产环境由调用方处理）
+    void update.rating;
+    enqueueOp("edit", String(editDialogChapter!.id));
+  };
 
   /**
    * Open the move-to-parent dialog.
@@ -455,32 +447,29 @@ export const BookTocEditor = forwardRef<
    * Confirm moving a node to a new parent.
    * 确认将节点移动到新的父节点。
    */
-  const handleMoveConfirm = useCallback(
-    (targetParentId: string | number | null) => {
-      if (!moveDialogChapter) return;
-      setTreeData((current) => {
-        const removed: Chapter[] = [];
-        const withoutNode = findAndRemove(
-          current,
-          [String(moveDialogChapter.id)],
-          removed,
-        ) as Chapter[];
-        if (removed.length === 0) return current;
-        if (targetParentId === null) {
-          return [...withoutNode, removed[0]];
-        }
-        return findAndAddChild(
-          withoutNode,
-          targetParentId,
-          removed[0],
-        ) as Chapter[];
-      });
-      enqueueOp("moveTo", String(moveDialogChapter.id), {
-        parentId: targetParentId,
-      });
-    },
-    [moveDialogChapter, enqueueOp],
-  );
+  const handleMoveConfirm = (targetParentId: string | number | null) => {
+    if (!moveDialogChapter) return;
+    setTreeData((current) => {
+      const removed: Chapter[] = [];
+      const withoutNode = findAndRemove(
+        current,
+        [String(moveDialogChapter.id)],
+        removed,
+      ) as Chapter[];
+      if (removed.length === 0) return current;
+      if (targetParentId === null) {
+        return [...withoutNode, removed[0]];
+      }
+      return findAndAddChild(
+        withoutNode,
+        targetParentId,
+        removed[0],
+      ) as Chapter[];
+    });
+    enqueueOp("moveTo", String(moveDialogChapter.id), {
+      parentId: targetParentId,
+    });
+  };
 
   const handleCreateChild = useCallback((chapter: Chapter) => {
     handlePreCreate(chapter.id);
@@ -531,13 +520,13 @@ export const BookTocEditor = forwardRef<
     [enqueueOp],
   );
 
-  const cancelPendingOps = useCallback(() => {
+  const cancelPendingOps = () => {
     setTreeData(savedTreeData);
     setOpLog((current) => clearTreeEditOpLog(current));
     setSelectedIds(new Set());
     setLastSelectionAnchorId(null);
     setBulkMoveDialogOpen(false);
-  }, [savedTreeData]);
+  };
 
   const onToggleSelect = useCallback(
     (id: string, event?: React.MouseEvent | React.KeyboardEvent) => {
@@ -630,62 +619,54 @@ export const BookTocEditor = forwardRef<
     return result;
   }, [selectedIds, treeData]);
 
-  const handleBulkMoveConfirm = useCallback(
-    (targetParentId: string | number | null) => {
-      const ids = [...selectedIds];
-      if (ids.length === 0) return;
-      setTreeData(
-        (current) =>
-          moveTreeNodes(
-            current,
-            ids,
-            targetParentId,
-            Number.MAX_SAFE_INTEGER,
-          ) as Chapter[],
-      );
-      enqueueOp("bulkMoveTo", undefined, {
-        count: ids.length,
-        parentId: targetParentId,
-      });
-      setBulkMoveDialogOpen(false);
-    },
-    [enqueueOp, selectedIds],
-  );
+  const handleBulkMoveConfirm = (targetParentId: string | number | null) => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    setTreeData(
+      (current) =>
+        moveTreeNodes(
+          current,
+          ids,
+          targetParentId,
+          Number.MAX_SAFE_INTEGER,
+        ) as Chapter[],
+    );
+    enqueueOp("bulkMoveTo", undefined, {
+      count: ids.length,
+      parentId: targetParentId,
+    });
+    setBulkMoveDialogOpen(false);
+  };
 
-  const handleBulkMoveToEdge = useCallback(
-    (edge: "first" | "last") => {
-      const ids = new Set(selectedIds);
-      if (ids.size === 0) return;
+  const handleBulkMoveToEdge = (edge: "first" | "last") => {
+    const ids = new Set(selectedIds);
+    if (ids.size === 0) return;
 
-      const visit = (nodes: Chapter[]): Chapter[] => {
-        const selected: Chapter[] = [];
-        const rest: Chapter[] = [];
-        for (const node of nodes) {
-          const next = node.children?.length
-            ? { ...node, children: visit(node.children) }
-            : node;
-          if (ids.has(String(node.id))) {
-            selected.push(next);
-          } else {
-            rest.push(next);
-          }
+    const visit = (nodes: Chapter[]): Chapter[] => {
+      const selected: Chapter[] = [];
+      const rest: Chapter[] = [];
+      for (const node of nodes) {
+        const next = node.children?.length
+          ? { ...node, children: visit(node.children) }
+          : node;
+        if (ids.has(String(node.id))) {
+          selected.push(next);
+        } else {
+          rest.push(next);
         }
-        return edge === "first"
-          ? [...selected, ...rest]
-          : [...rest, ...selected];
-      };
+      }
+      return edge === "first" ? [...selected, ...rest] : [...rest, ...selected];
+    };
 
-      setTreeData((current) => visit(current));
-      enqueueOp(
-        edge === "first" ? "bulkMoveToFirst" : "bulkMoveToLast",
-        undefined,
-        {
-          count: ids.size,
-        },
-      );
-    },
-    [enqueueOp, selectedIds],
-  );
+    setTreeData((current) => visit(current));
+    enqueueOp(
+      edge === "first" ? "bulkMoveToFirst" : "bulkMoveToLast",
+      undefined,
+      {
+        count: ids.size,
+      },
+    );
+  };
 
   /**
    * Bulk-edit: set rating for selected chapter nodes, including chapters that

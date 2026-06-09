@@ -11,7 +11,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
-import { useCallback } from "react";
 import { useSystemShelfRecoveryToast } from "@/collection/hooks/useSystemShelfRecoveryToast";
 import { useAuth, useAuthModal } from "@/user";
 
@@ -42,7 +41,7 @@ export function FavoriteButton({
 
   const isFavorited = statusQuery.data?.isFavorited ?? false;
 
-  const handleToggle = useCallback(() => {
+  const handleToggle = () => {
     // Prompt sign-in before favoriting; the toggle needs a member session, so
     // an anonymous click would otherwise hit a server auth error.
     // 收藏前先引导登录；切换收藏需要成员会话，否则匿名点击会在服务端因鉴权失败而报错。
@@ -51,7 +50,7 @@ export function FavoriteButton({
       return;
     }
     toggleMutation.mutate(unitId);
-  }, [unitId, toggleMutation, isAuthenticated, auth.openLogin]);
+  };
 
   return (
     <>

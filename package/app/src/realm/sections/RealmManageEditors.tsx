@@ -935,14 +935,15 @@ export function TagTreeEditor({
     setOpLog(emptyTreeEditOpLog);
   }, [initialValue, toEditorNodes]);
 
-  const enqueueOp = useCallback(
-    (type: string, targetId?: string, options?: Record<string, unknown>) => {
-      setOpLog((current) =>
-        enqueueTreeEditOp(current, { type, targetId, options }),
-      );
-    },
-    [],
-  );
+  const enqueueOp = (
+    type: string,
+    targetId?: string,
+    options?: Record<string, unknown>,
+  ) => {
+    setOpLog((current) =>
+      enqueueTreeEditOp(current, { type, targetId, options }),
+    );
+  };
 
   const treeAreaCallbackRef = useCallback((el: HTMLDivElement | null) => {
     if (resizeObserverRef.current) {
@@ -1128,43 +1129,40 @@ export function TagTreeEditor({
     insertAndClose(createLocalHeadingNode(title, labelLanguage));
   };
 
-  const onMove: MoveHandler<EditorNode> = useCallback(
-    ({ dragIds, parentId, index }) => {
-      const removed: EditorNode[] = [];
-      const remove = (items: EditorNode[]): EditorNode[] =>
-        items.flatMap((item) => {
-          if (dragIds.includes(item.id)) {
-            removed.push(item);
-            return [];
-          }
-          return [
-            item.children?.length
-              ? { ...item, children: remove(item.children) }
-              : item,
-          ];
-        });
-      const insert = (items: EditorNode[]): EditorNode[] => {
-        if (parentId === null) {
-          const next = [...items];
-          next.splice(index, 0, ...removed);
-          return next;
+  const onMove: MoveHandler<EditorNode> = ({ dragIds, parentId, index }) => {
+    const removed: EditorNode[] = [];
+    const remove = (items: EditorNode[]): EditorNode[] =>
+      items.flatMap((item) => {
+        if (dragIds.includes(item.id)) {
+          removed.push(item);
+          return [];
         }
-        return items.map((item) => {
-          if (item.id === parentId) {
-            const children = [...(item.children ?? [])];
-            children.splice(index, 0, ...removed);
-            return { ...item, children };
-          }
-          return item.children?.length
-            ? { ...item, children: insert(item.children) }
-            : item;
-        });
-      };
-      setNodes((current) => insert(remove(current)));
-      enqueueOp("move", dragIds[0], { parentId, index, count: dragIds.length });
-    },
-    [enqueueOp],
-  );
+        return [
+          item.children?.length
+            ? { ...item, children: remove(item.children) }
+            : item,
+        ];
+      });
+    const insert = (items: EditorNode[]): EditorNode[] => {
+      if (parentId === null) {
+        const next = [...items];
+        next.splice(index, 0, ...removed);
+        return next;
+      }
+      return items.map((item) => {
+        if (item.id === parentId) {
+          const children = [...(item.children ?? [])];
+          children.splice(index, 0, ...removed);
+          return { ...item, children };
+        }
+        return item.children?.length
+          ? { ...item, children: insert(item.children) }
+          : item;
+      });
+    };
+    setNodes((current) => insert(remove(current)));
+    enqueueOp("move", dragIds[0], { parentId, index, count: dragIds.length });
+  };
 
   const moveDepth = (nodeId: string, direction: "indent" | "outdent") => {
     setNodes((current) => {

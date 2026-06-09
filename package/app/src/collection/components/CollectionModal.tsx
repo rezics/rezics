@@ -24,7 +24,7 @@ import {
   Separator,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface CollectionModalProps {
   open: boolean;
@@ -98,33 +98,30 @@ export function CollectionModal({
     );
   }, [visibleShelves, filterTag]);
 
-  const shelfDisplayTitle = useCallback(
-    (shelf: ShelfSummaryDTO): string => {
-      if (shelf.kindKey === "favorites") {
-        return t("entity:shelf_system_favorites");
-      }
-      return shelf.title ?? t("common:untitled");
-    },
-    [t],
-  );
+  const shelfDisplayTitle = (shelf: ShelfSummaryDTO): string => {
+    if (shelf.kindKey === "favorites") {
+      return t("entity:shelf_system_favorites");
+    }
+    return shelf.title ?? t("common:untitled");
+  };
 
-  const toggleShelf = useCallback((shelfId: string) => {
+  const toggleShelf = (shelfId: string) => {
     setSelectedShelves((prev) => {
       const next = new Set(prev);
       if (next.has(shelfId)) next.delete(shelfId);
       else next.add(shelfId);
       return next;
     });
-  }, []);
+  };
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     const normalizedSearchText = searchText.trim();
     onCollect(
       [...selectedShelves],
       independent,
       normalizedSearchText.length > 0 ? normalizedSearchText : undefined,
     );
-  }, [selectedShelves, independent, searchText, onCollect]);
+  };
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>

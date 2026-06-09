@@ -1,6 +1,6 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { CommentDTO } from "@rezics/contract";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCommentTreeCollapse } from "../hooks/useCommentTreeCollapse";
 import { buildCommentTreeNodes } from "../models/commentTreeRails";
 import { CommentTreeNode } from "./CommentTreeNode";
@@ -85,48 +85,42 @@ export function CommentTreeList({
     [revealPostUnitId, visiblePosts],
   );
 
-  const handleReplyClick = useCallback(
-    (postUnitId: string) => {
-      if (onReply) {
-        onReply(postUnitId);
-        return;
-      }
-      setOpenComposers((prev) => {
-        if (prev.has(postUnitId)) return prev;
-        const next = new Set(prev);
-        next.add(postUnitId);
-        return next;
-      });
-    },
-    [onReply],
-  );
+  const handleReplyClick = (postUnitId: string) => {
+    if (onReply) {
+      onReply(postUnitId);
+      return;
+    }
+    setOpenComposers((prev) => {
+      if (prev.has(postUnitId)) return prev;
+      const next = new Set(prev);
+      next.add(postUnitId);
+      return next;
+    });
+  };
 
-  const handleComposerDone = useCallback((postUnitId: string) => {
+  const handleComposerDone = (postUnitId: string) => {
     setOpenComposers((prev) => {
       if (!prev.has(postUnitId)) return prev;
       const next = new Set(prev);
       next.delete(postUnitId);
       return next;
     });
-  }, []);
+  };
 
-  const handleComposerSubmitted = useCallback(
-    (parentCommentId: string, post: CommentDTO) => {
-      setSubmittedPostUnitId(post.unitId);
-      handleComposerDone(parentCommentId);
-    },
-    [handleComposerDone],
-  );
+  const handleComposerSubmitted = (
+    parentCommentId: string,
+    post: CommentDTO,
+  ) => {
+    setSubmittedPostUnitId(post.unitId);
+    handleComposerDone(parentCommentId);
+  };
 
-  const handleThreadHoverChange = useCallback(
-    (postUnitId: string, hovered: boolean) => {
-      setHighlightedThreadUnitId((current) => {
-        if (hovered) return postUnitId;
-        return current === postUnitId ? undefined : current;
-      });
-    },
-    [],
-  );
+  const handleThreadHoverChange = (postUnitId: string, hovered: boolean) => {
+    setHighlightedThreadUnitId((current) => {
+      if (hovered) return postUnitId;
+      return current === postUnitId ? undefined : current;
+    });
+  };
 
   useEffect(() => {
     if (!revealPostUnitId || !revealPostIsVisible) return;

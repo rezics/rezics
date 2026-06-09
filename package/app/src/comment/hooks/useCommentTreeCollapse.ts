@@ -1,5 +1,5 @@
 import type { CommentDTO } from "@rezics/contract";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   filterByCollapsedParents,
   getRevealExpandedIds,
@@ -118,19 +118,16 @@ export function useCommentTreeCollapse(
     seededUnitIds,
   ]);
 
-  const isCollapsed = useCallback(
-    (unitId: string) => collapsedIds.has(unitId),
-    [collapsedIds],
-  );
+  const isCollapsed = (unitId: string) => collapsedIds.has(unitId);
 
-  const toggleCollapse = useCallback((unitId: string) => {
+  const toggleCollapse = (unitId: string) => {
     setCollapsedIds((prev) => {
       const next = new Set(prev);
       if (next.has(unitId)) next.delete(unitId);
       else next.add(unitId);
       return next;
     });
-  }, []);
+  };
 
   const visiblePosts = useMemo(
     () => filterByCollapsedParents(posts, collapsedIds),

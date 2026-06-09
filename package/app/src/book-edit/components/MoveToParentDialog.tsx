@@ -14,7 +14,7 @@ import {
   ChevronDown as ExpandMore,
   Search,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
 
 interface MoveToParentDialogProps {
@@ -47,10 +47,10 @@ export function MoveToParentDialog({
     [treeData, excludeIds, search],
   );
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = () => {
     onConfirm(selectedId);
     onClose();
-  }, [selectedId, onConfirm, onClose]);
+  };
 
   // Reset state when dialog opens
   // 对话框打开时重置状态

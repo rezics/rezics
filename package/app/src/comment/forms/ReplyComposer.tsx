@@ -127,69 +127,52 @@ export const ReplyComposer = forwardRef<
   const submitting = postMutation.isPending || commentMutation.isPending;
   const derivedTitle =
     body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Post";
-  const reset = useCallback(() => {
+  const reset = () => {
     setBody("");
     setAttachingPoll(false);
     if (mode === "progressive") setExpanded(false);
-  }, [mode]);
+  };
 
-  const submitReply = useCallback(
-    (content: ReturnType<typeof markdownContentDoc>) => {
-      if (parentCommentId) {
-        if (!rootUnitId || !realmUnitId) return;
-        commentMutation.mutate(
-          {
-            rootUnitId,
-            realmUnitId,
-            parentCommentId:
-              parentCommentId === rootUnitId ? undefined : parentCommentId,
-            content,
-          },
-          {
-            onSuccess: (comment) => {
-              reset();
-              onSubmitted?.(comment);
-            },
-          },
-        );
-        return;
-      }
-
-      postMutation.mutate(
+  const submitReply = (content: ReturnType<typeof markdownContentDoc>) => {
+    if (parentCommentId) {
+      if (!rootUnitId || !realmUnitId) return;
+      commentMutation.mutate(
         {
-          targetUnitId,
-          variantUnitId,
-          realmUnitIds,
-          tagIds: selectedTagIds,
-          kind: PostKind.POST,
-          language: authoringLanguage,
-          title: derivedTitle,
+          rootUnitId,
+          realmUnitId,
+          parentCommentId:
+            parentCommentId === rootUnitId ? undefined : parentCommentId,
           content,
         },
         {
-          onSuccess: (post) => {
+          onSuccess: (comment) => {
             reset();
-            onSubmitted?.(post);
+            onSubmitted?.(comment);
           },
         },
       );
-    },
-    [
-      commentMutation.mutate,
-      onSubmitted,
-      derivedTitle,
-      authoringLanguage,
-      parentCommentId,
-      postMutation.mutate,
-      realmUnitId,
-      realmUnitIds,
-      reset,
-      rootUnitId,
-      selectedTagIds,
-      targetUnitId,
-      variantUnitId,
-    ],
-  );
+      return;
+    }
+
+    postMutation.mutate(
+      {
+        targetUnitId,
+        variantUnitId,
+        realmUnitIds,
+        tagIds: selectedTagIds,
+        kind: PostKind.POST,
+        language: authoringLanguage,
+        title: derivedTitle,
+        content,
+      },
+      {
+        onSuccess: (post) => {
+          reset();
+          onSubmitted?.(post);
+        },
+      },
+    );
+  };
 
   const resize = useMemo(
     () => ({ height: 150, minHeight: 100, maxHeight: 400 }),
@@ -486,5 +469,5 @@ export const ReplyComposer = forwardRef<
  * 这里返回一个布尔值，让调用方掌控实际的展开/折叠状态。
  */
 export function useBlurRetain(body: string) {
-  return useCallback(() => body.trim().length > 0, [body]);
+  return () => body.trim().length > 0;
 }

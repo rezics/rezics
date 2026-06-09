@@ -1,6 +1,5 @@
 import type { SearchQuery } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback } from "react";
 import type { InjectedTag } from "../models/injectedTags";
 import { serializeSearchString } from "../models/searchQuery";
 
@@ -17,21 +16,18 @@ import { serializeSearchString } from "../models/searchQuery";
  */
 export function useNavigateToTagSearch() {
   const navigate = useNavigate();
-  return useCallback(
-    (tags: InjectedTag[]) => {
-      const sluggableTags = tags.filter(
-        (t): t is InjectedTag & { slug: string } => Boolean(t.slug),
-      );
-      const urlQuery: SearchQuery = {
-        tags: sluggableTags.map((t) => ({ slug: t.slug })),
-      };
-      const q = serializeSearchString(urlQuery);
-      navigate({
-        to: "/search",
-        search: q ? { q } : {},
-        state: { injectedTags: tags } as never,
-      });
-    },
-    [navigate],
-  );
+  return (tags: InjectedTag[]) => {
+    const sluggableTags = tags.filter(
+      (t): t is InjectedTag & { slug: string } => Boolean(t.slug),
+    );
+    const urlQuery: SearchQuery = {
+      tags: sluggableTags.map((t) => ({ slug: t.slug })),
+    };
+    const q = serializeSearchString(urlQuery);
+    navigate({
+      to: "/search",
+      search: q ? { q } : {},
+      state: { injectedTags: tags } as never,
+    });
+  };
 }

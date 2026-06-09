@@ -27,7 +27,6 @@ import {
 import {
   type FC,
   type ReactNode,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -177,7 +176,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
     }
   }, [languageTouched, localeLanguage]);
 
-  const togglePreferredLanguage = useCallback((language: Language) => {
+  const togglePreferredLanguage = (language: Language) => {
     setLanguageTouched(true);
     setPreferredLanguages((current) => {
       const next = current.includes(language)
@@ -185,7 +184,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
         : [...current, language];
       return uniqueLanguages(next);
     });
-  }, []);
+  };
 
   // Slug availability check
   // slug 可用性检查
@@ -559,12 +558,12 @@ export const CompleteRegistrationPage: FC = () => {
         ? 2
         : 1;
 
-  const handleAccountSetupComplete = useCallback(async () => {
+  const handleAccountSetupComplete = async () => {
     await hydrateAuthSessionState({ requirePresence: false });
     navigate({ to: "/" });
-  }, [navigate]);
+  };
 
-  const handleEmailComplete = useCallback(async () => {
+  const handleEmailComplete = async () => {
     setJustCompletedEmail(true);
     setMaterializing(true);
     setMaterializeError(undefined);
@@ -582,7 +581,7 @@ export const CompleteRegistrationPage: FC = () => {
       setMaterializing(false);
     }
     await hydrateAuthSessionState({ requirePresence: false });
-  }, []);
+  };
 
   useEffect(() => {
     if (

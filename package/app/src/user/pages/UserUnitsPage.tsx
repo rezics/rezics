@@ -26,7 +26,7 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
+import React, { type FC, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library";
 import { ExcerptList } from "@/excerpt";
 import { mapPostSearchDocToPostDTO, ReviewList } from "@/review";
@@ -194,74 +194,28 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   // ======= Pagination control =======
   // ======= 分页控制 =======
 
-  const handleNeedMoreData = useCallback(
-    (page: number) => {
-      const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-      if (tab === "shelf") {
-        setStartShelf(start);
-      } else if (tab === "review") {
-        setStartReview(start);
-      } else if (tab === "remark") {
-        setStartRemark(start);
-      } else if (tab === "book") {
-        setStartBook(start);
-      } else if (tab === "excerpt") {
-        setStartExcerpt(start);
-      }
-    },
-    [tab],
-  );
+  const handleNeedMoreData = (page: number) => {
+    const start = (page - 1) * EXTERNAL_PAGE_SIZE;
+    if (tab === "shelf") {
+      setStartShelf(start);
+    } else if (tab === "review") {
+      setStartReview(start);
+    } else if (tab === "remark") {
+      setStartRemark(start);
+    } else if (tab === "book") {
+      setStartBook(start);
+    } else if (tab === "excerpt") {
+      setStartExcerpt(start);
+    }
+  };
 
-  const handlePreRequestData = useCallback(
-    async (page: number) => {
-      const start = (page - 1) * EXTERNAL_PAGE_SIZE;
+  const handlePreRequestData = async (page: number) => {
+    const start = (page - 1) * EXTERNAL_PAGE_SIZE;
 
-      if (tab === "shelf") {
-        const result = await queryClient.fetchQuery(
-          contentSearchQueryOptions({
-            type: "SHELF",
-            keyword: keyword || undefined,
-            offset: start,
-            limit: EXTERNAL_PAGE_SIZE,
-            languages: readContext.languages,
-            appLocale: readContext.appLocale,
-            languageMode: readContext.languageMode,
-          }),
-        );
-        return result?.items?.length ?? 0;
-      }
-
-      if (tab === "review" || tab === "remark") {
-        const result = await queryClient.fetchQuery(
-          postSearchQueryOptions({
-            kind: tab === "review" ? PostKind.REVIEW : PostKind.REMARK,
-            authorUserId: userId,
-            keyword: keyword || undefined,
-            offset: start,
-            limit: EXTERNAL_PAGE_SIZE,
-            languages: readContext.languages,
-            appLocale: readContext.appLocale,
-            languageMode: readContext.languageMode,
-          }),
-        );
-        return result?.items?.length ?? 0;
-      }
-
-      if (tab === "book") {
-        const result = await queryClient.fetchQuery(
-          bookQueries.byUser(userId, {
-            start,
-            limit: EXTERNAL_PAGE_SIZE,
-            languages: readContext.languages,
-            appLocale: readContext.appLocale,
-          }),
-        );
-        return result?.books?.length ?? 0;
-      }
-
+    if (tab === "shelf") {
       const result = await queryClient.fetchQuery(
         contentSearchQueryOptions({
-          type: UnitType.QUOTE,
+          type: "SHELF",
           keyword: keyword || undefined,
           offset: start,
           limit: EXTERNAL_PAGE_SIZE,
@@ -271,17 +225,49 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         }),
       );
       return result?.items?.length ?? 0;
-    },
-    [
-      tab,
-      keyword,
-      userId,
-      queryClient,
-      readContext.languages,
-      readContext.appLocale,
-      readContext.languageMode,
-    ],
-  );
+    }
+
+    if (tab === "review" || tab === "remark") {
+      const result = await queryClient.fetchQuery(
+        postSearchQueryOptions({
+          kind: tab === "review" ? PostKind.REVIEW : PostKind.REMARK,
+          authorUserId: userId,
+          keyword: keyword || undefined,
+          offset: start,
+          limit: EXTERNAL_PAGE_SIZE,
+          languages: readContext.languages,
+          appLocale: readContext.appLocale,
+          languageMode: readContext.languageMode,
+        }),
+      );
+      return result?.items?.length ?? 0;
+    }
+
+    if (tab === "book") {
+      const result = await queryClient.fetchQuery(
+        bookQueries.byUser(userId, {
+          start,
+          limit: EXTERNAL_PAGE_SIZE,
+          languages: readContext.languages,
+          appLocale: readContext.appLocale,
+        }),
+      );
+      return result?.books?.length ?? 0;
+    }
+
+    const result = await queryClient.fetchQuery(
+      contentSearchQueryOptions({
+        type: UnitType.QUOTE,
+        keyword: keyword || undefined,
+        offset: start,
+        limit: EXTERNAL_PAGE_SIZE,
+        languages: readContext.languages,
+        appLocale: readContext.appLocale,
+        languageMode: readContext.languageMode,
+      }),
+    );
+    return result?.items?.length ?? 0;
+  };
 
   // Select data source by current tab
   // 根据当前标签页选择数据源。

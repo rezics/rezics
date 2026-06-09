@@ -12,14 +12,12 @@ export function useAuthGuard() {
     return false;
   }, [auth.openLogin, isAuthenticated]);
 
-  const guard = useCallback(
+  const guard =
     <Args extends unknown[]>(action: (...args: Args) => void) =>
-      (...args: Args) => {
-        if (!requireAuth()) return;
-        action(...args);
-      },
-    [requireAuth],
-  );
+    (...args: Args) => {
+      if (!requireAuth()) return;
+      action(...args);
+    };
 
   return {
     isAuthenticated,

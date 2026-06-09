@@ -16,7 +16,7 @@ import {
   ThumbsUp as ThumbUpOutlinedIcon,
 } from "lucide-react";
 import type React from "react";
-import { useCallback, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import type { InjectedTag } from "@/search";
 import { useNavigateToTagSearch } from "@/search";
 import { cn } from "@/shared/utils/css-util";
@@ -79,15 +79,10 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   const canEditTags = useCanEdit({ resource: "tag", ownerUnit: bookUnit });
   const suppressNextClickRef = useRef<string | null>(null);
 
-  const labelOf = useCallback(
-    (tagUnitId: string) => translations[tagUnitId]?.name || tagUnitId,
-    [translations],
-  );
-  const slugOf = useCallback(
-    (tagUnitId: string): string | undefined =>
-      translations[tagUnitId]?.slug || undefined,
-    [translations],
-  );
+  const labelOf = (tagUnitId: string) =>
+    translations[tagUnitId]?.name || tagUnitId;
+  const slugOf = (tagUnitId: string): string | undefined =>
+    translations[tagUnitId]?.slug || undefined;
 
   const previewTag = useMemo(() => {
     if (!state.preview) return null;
