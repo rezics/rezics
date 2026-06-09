@@ -7,6 +7,8 @@ import type React from "react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { unitHref } from "@/shared/ui/link";
 import {
   selectHasAuthIdentity,
   selectHasMemberSession,
@@ -16,8 +18,6 @@ import {
   useSyncUserProfile,
   useUserProfileStore,
 } from "@/user";
-import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { unitHref } from "@/shared/ui/link";
 import { MainLayoutFooter } from "../components/footer/MainLayoutFooter";
 import { HelpFab } from "../components/HelpWidget";
 import { Header } from "../components/header/MainLayoutHeader";
@@ -66,6 +66,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     entries?.map((entry) => ({
       unitId: entry.subscribedUnitId,
       title: entry.subscribedTitle ?? entry.subscribedUnitId,
+      subscribedType:
+        entry.subscribedType === "ZONE" || entry.subscribedType === "REALM"
+          ? entry.subscribedType
+          : undefined,
+      pinned: entry.pinned,
+      position: entry.position,
+      state: entry.state,
+      createdAt:
+        entry.createdAt instanceof Date
+          ? entry.createdAt.toISOString()
+          : entry.createdAt,
       href: unitHref({
         type: entry.subscribedType as any,
         unitId: entry.subscribedUnitId,

@@ -64,6 +64,7 @@ import { Route as MainLayoutExcerptUnitIdIndexRouteImport } from './routes/_main
 import { Route as MainLayoutEntityUnitIdIndexRouteImport } from './routes/_mainLayout/entity/$unitId/index'
 import { Route as MainLayoutBookBookIdIndexRouteImport } from './routes/_mainLayout/book/$bookId/index'
 import { Route as MainLayoutZSlugSearchRouteImport } from './routes/_mainLayout/z/$slug/search'
+import { Route as MainLayoutUserMeRecoveryRouteImport } from './routes/_mainLayout/user/me/recovery'
 import { Route as MainLayoutUserMeReactionRouteImport } from './routes/_mainLayout/user/me/reaction'
 import { Route as MainLayoutUserMeFollowRouteImport } from './routes/_mainLayout/user/me/follow'
 import { Route as MainLayoutUserMeEditRouteImport } from './routes/_mainLayout/user/me/edit'
@@ -445,6 +446,12 @@ const MainLayoutZSlugSearchRoute = MainLayoutZSlugSearchRouteImport.update({
   path: '/z/$slug/search',
   getParentRoute: () => MainLayoutRoute,
 } as any)
+const MainLayoutUserMeRecoveryRoute =
+  MainLayoutUserMeRecoveryRouteImport.update({
+    id: '/recovery',
+    path: '/recovery',
+    getParentRoute: () => MainLayoutUserMeRouteRoute,
+  } as any)
 const MainLayoutUserMeReactionRoute =
   MainLayoutUserMeReactionRouteImport.update({
     id: '/reaction',
@@ -1094,6 +1101,7 @@ export interface FileRoutesByFullPath {
   '/user/me/edit': typeof MainLayoutUserMeEditRoute
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
+  '/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
   '/book/$bookId/': typeof MainLayoutBookBookIdIndexRoute
   '/entity/$unitId/': typeof MainLayoutEntityUnitIdIndexRoute
@@ -1234,6 +1242,7 @@ export interface FileRoutesByTo {
   '/user/me/edit': typeof MainLayoutUserMeEditRoute
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
+  '/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
   '/book/$bookId': typeof MainLayoutBookBookIdIndexRoute
   '/entity/$unitId': typeof MainLayoutEntityUnitIdIndexRoute
@@ -1384,6 +1393,7 @@ export interface FileRoutesById {
   '/_mainLayout/user/me/edit': typeof MainLayoutUserMeEditRoute
   '/_mainLayout/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/_mainLayout/user/me/reaction': typeof MainLayoutUserMeReactionRoute
+  '/_mainLayout/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
   '/_mainLayout/z/$slug/search': typeof MainLayoutZSlugSearchRoute
   '/_mainLayout/book/$bookId/': typeof MainLayoutBookBookIdIndexRoute
   '/_mainLayout/entity/$unitId/': typeof MainLayoutEntityUnitIdIndexRoute
@@ -1535,6 +1545,7 @@ export interface FileRouteTypes {
     | '/user/me/edit'
     | '/user/me/follow'
     | '/user/me/reaction'
+    | '/user/me/recovery'
     | '/z/$slug/search'
     | '/book/$bookId/'
     | '/entity/$unitId/'
@@ -1675,6 +1686,7 @@ export interface FileRouteTypes {
     | '/user/me/edit'
     | '/user/me/follow'
     | '/user/me/reaction'
+    | '/user/me/recovery'
     | '/z/$slug/search'
     | '/book/$bookId'
     | '/entity/$unitId'
@@ -1824,6 +1836,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/me/edit'
     | '/_mainLayout/user/me/follow'
     | '/_mainLayout/user/me/reaction'
+    | '/_mainLayout/user/me/recovery'
     | '/_mainLayout/z/$slug/search'
     | '/_mainLayout/book/$bookId/'
     | '/_mainLayout/entity/$unitId/'
@@ -2273,6 +2286,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/z/$slug/search'
       preLoaderRoute: typeof MainLayoutZSlugSearchRouteImport
       parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/user/me/recovery': {
+      id: '/_mainLayout/user/me/recovery'
+      path: '/recovery'
+      fullPath: '/user/me/recovery'
+      preLoaderRoute: typeof MainLayoutUserMeRecoveryRouteImport
+      parentRoute: typeof MainLayoutUserMeRouteRoute
     }
     '/_mainLayout/user/me/reaction': {
       id: '/_mainLayout/user/me/reaction'
@@ -3079,6 +3099,7 @@ interface MainLayoutUserMeRouteRouteChildren {
   MainLayoutUserMeEditRoute: typeof MainLayoutUserMeEditRoute
   MainLayoutUserMeFollowRoute: typeof MainLayoutUserMeFollowRoute
   MainLayoutUserMeReactionRoute: typeof MainLayoutUserMeReactionRoute
+  MainLayoutUserMeRecoveryRoute: typeof MainLayoutUserMeRecoveryRoute
   MainLayoutUserMeIndexRoute: typeof MainLayoutUserMeIndexRoute
   MainLayoutUserMeEntityNewRoute: typeof MainLayoutUserMeEntityNewRoute
   MainLayoutUserMeEntityIndexRoute: typeof MainLayoutUserMeEntityIndexRoute
@@ -3091,6 +3112,7 @@ const MainLayoutUserMeRouteRouteChildren: MainLayoutUserMeRouteRouteChildren = {
   MainLayoutUserMeEditRoute: MainLayoutUserMeEditRoute,
   MainLayoutUserMeFollowRoute: MainLayoutUserMeFollowRoute,
   MainLayoutUserMeReactionRoute: MainLayoutUserMeReactionRoute,
+  MainLayoutUserMeRecoveryRoute: MainLayoutUserMeRecoveryRoute,
   MainLayoutUserMeIndexRoute: MainLayoutUserMeIndexRoute,
   MainLayoutUserMeEntityNewRoute: MainLayoutUserMeEntityNewRoute,
   MainLayoutUserMeEntityIndexRoute: MainLayoutUserMeEntityIndexRoute,

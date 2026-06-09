@@ -167,9 +167,9 @@ zone ownership/permissions inherit from realms.
 - [x] 4.4 Add server tests in `package/server/src/user/service/` covering
   complete-registration default subscriptions, default entry order, and
   idempotency.
-- [ ] 4.5 Add a user recovery page route under `package/app/src/routes/_mainLayout/user/me/`
+- [x] 4.5 Add a user recovery page route under `package/app/src/routes/_mainLayout/user/me/`
   and corresponding user feature page/components for removed subscriptions.
-- [ ] 4.6 Recovery UI must list official removed entries separately from other
+- [x] 4.6 Recovery UI must list official removed entries separately from other
   removed entries and provide clear restore failures when the target cannot be
   recovered.
 
@@ -186,18 +186,18 @@ zone ownership/permissions inherit from realms.
   active `ZONE` list entries ordered by pinned/position/createdAt.
 - [x] 5.5 Build the Realms section so its first entry is `All Realms`, followed
   by active `REALM` list entries ordered by pinned/position/createdAt.
-- [ ] 5.6 Extend navigation item types/rendering in
+- [x] 5.6 Extend navigation item types/rendering in
   `package/app/src/core/components/navigation/navigation.ts` and
   `NavigationList.tsx` only as needed for future pin/reorder affordances; keep
   current simple links if drag/drop is deferred.
-- [ ] 5.7 Add focused navigation/sidebar tests in
+- [x] 5.7 Add focused navigation/sidebar tests in
   `package/app/src/core/components/navigation/MainNavigation.test.ts` for Home
   label behavior, All entries, pinned ordering, removed-entry exclusion, and
   authenticated/unauthenticated states.
 
 ## 6. Zone pages, sections, and presentation context
 
-- [ ] 6.1 Replace placeholder `DefaultZoneTemplate` and `BookZoneTemplate` paths
+- [x] 6.1 Replace placeholder `DefaultZoneTemplate` and `BookZoneTemplate` paths
   in `package/app/src/zone/templates/` with a typed zone page renderer that
   consumes `zone.pages.home.sections`.
 - [ ] 6.2 Add section renderer primitives in `package/app/src/zone/` for latest

@@ -35,6 +35,11 @@ export interface MainSidebarSubscriptionItem {
   unitId: string;
   title: string;
   href: string;
+  subscribedType?: "ZONE" | "REALM";
+  pinned?: boolean;
+  position?: string;
+  state?: "ACTIVE" | "REMOVED";
+  createdAt?: string | Date;
 }
 
 export interface NavigationBuildOptions {
@@ -143,7 +148,7 @@ function buildSubscriptionSection(input: {
       tone: "danger",
     });
   } else {
-    const items = input.entries?.items ?? [];
+    const items = sortSidebarSubscriptionItems(input.entries?.items ?? []);
     if (items.length === 0) {
       children.push({
         kind: "status",
@@ -158,6 +163,14 @@ function buildSubscriptionSection(input: {
             segment: item.href,
             title: item.title,
             activeMatch: "prefix",
+            subscriptionListEntry: item.subscribedType
+              ? {
+                  subscribedUnitId: item.unitId,
+                  subscribedType: item.subscribedType,
+                  pinned: item.pinned ?? false,
+                  position: item.position ?? "",
+                }
+              : undefined,
           }),
         ),
       );
@@ -173,6 +186,22 @@ function buildSubscriptionSection(input: {
     visibility: "authenticated",
     children,
   };
+}
+
+function sortSidebarSubscriptionItems(items: MainSidebarSubscriptionItem[]) {
+  return items
+    .filter((item) => item.state !== "REMOVED")
+    .slice()
+    .sort((a, b) => {
+      const pinnedA = a.pinned ?? false;
+      const pinnedB = b.pinned ?? false;
+      if (pinnedA !== pinnedB) return pinnedA ? -1 : 1;
+      const position = (a.position ?? "").localeCompare(b.position ?? "");
+      if (position !== 0) return position;
+      const createdAtA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const createdAtB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return createdAtA - createdAtB;
+    });
 }
 
 function buildRealmSection(

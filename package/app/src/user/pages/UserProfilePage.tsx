@@ -11,7 +11,7 @@ import {
   CardContent,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil as EditIcon } from "lucide-react";
+import { Pencil as EditIcon, RotateCcw as RecoveryIcon } from "lucide-react";
 import type { FC } from "react";
 import { FollowButton } from "@/engagement";
 import { Link } from "@/shared/ui/link";
@@ -168,6 +168,12 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             <Link to={`/user/me/reaction`}>
               <Button variant="ghost" className="text-text-brand">
                 {t("settings:profile_tab_reactions")}
+              </Button>
+            </Link>
+            <Link to={`/user/me/recovery`}>
+              <Button variant="ghost" className="gap-2 text-text-brand">
+                <RecoveryIcon className="h-4 w-4" aria-hidden="true" />
+                {t("settings:profile_subscription_recovery")}
               </Button>
             </Link>
           </CardContent>
