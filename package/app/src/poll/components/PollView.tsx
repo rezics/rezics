@@ -2,6 +2,7 @@ import type { PollResultsDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Lock } from "lucide-react";
 import type React from "react";
+import { useAuth, useAuthModal } from "@/user";
 import { usePollVote } from "../hooks/usePollVote";
 import { selectPollView } from "../models/pollView";
 import { PollOption } from "./PollOption";
@@ -20,6 +21,8 @@ interface PollViewProps {
  */
 export const PollView: React.FC<PollViewProps> = ({ results, realmUnitId }) => {
   const { t } = useTranslation(["common", "community"]);
+  const { isAuthenticated } = useAuth();
+  const auth = useAuthModal("login");
   const view = selectPollView(results, { currentRealmUnitId: realmUnitId });
   const vote = usePollVote({
     pollUnitId: view.pollUnitId,
@@ -28,6 +31,17 @@ export const PollView: React.FC<PollViewProps> = ({ results, realmUnitId }) => {
     realmUnitId,
     canVote: view.votingEnabled,
   });
+
+  // Prompt sign-in before voting; voting requires a member session, so an
+  // anonymous click would otherwise fail server-side with an auth error.
+  // 投票前先引导登录；投票需要成员会话，否则匿名点击会在服务端因鉴权失败而报错。
+  const handleSelect = (optionId: string) => {
+    if (!isAuthenticated) {
+      auth.openLogin();
+      return;
+    }
+    vote.select(optionId);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -54,7 +68,7 @@ export const PollView: React.FC<PollViewProps> = ({ results, realmUnitId }) => {
             votingEnabled={view.votingEnabled}
             countsVisible={view.countsVisible}
             pending={vote.isPending}
-            onSelect={vote.select}
+            onSelect={handleSelect}
           />
         ))}
       </div>
@@ -76,6 +90,8 @@ export const PollView: React.FC<PollViewProps> = ({ results, realmUnitId }) => {
           <p className="text-error-text">{t("community:poll_vote_error")}</p>
         )}
       </div>
+
+      {!isAuthenticated && auth.AuthModal({})}
     </div>
   );
 };

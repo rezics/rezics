@@ -11,12 +11,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import { cn } from "@/shared/utils/css-util";
-import { selectHasMemberSession, useAuthSessionStore } from "@/user";
+import {
+  selectHasMemberSession,
+  useAuthModal,
+  useAuthSessionStore,
+} from "@/user";
 
 type ButtonVariant =
   | "default"
@@ -79,7 +82,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["settings", "community"]);
-  const navigate = useNavigate();
+  const auth = useAuthModal("login");
   const showRetryToast = useRetryToast();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const authSessionLoading = useAuthSessionStore(
@@ -157,8 +160,12 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   const handleClick = async () => {
     if (!userId || loading) return;
 
+    // Prompt sign-in in place rather than navigating away, so the user keeps
+    // their context (list/profile) and can follow right after authenticating.
+    // 就地引导登录而非跳转离开，让用户保留所处上下文（列表/主页），
+    // 登录后即可继续关注。
     if (!hasMemberSession) {
-      navigate({ to: "/login" });
+      auth.openLogin();
       return;
     }
 
@@ -190,11 +197,9 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
       ? t("settings:profile_followers_count", { count: localFollowers })
       : null;
 
-  if (!followersText) {
-    return button;
-  }
-
-  return (
+  const content = !followersText ? (
+    button
+  ) : (
     <div className="flex items-center gap-2">
       <TooltipProvider>
         <Tooltip>
@@ -204,5 +209,12 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
       </TooltipProvider>
       <span className="text-xs text-text-secondary">{followersText}</span>
     </div>
+  );
+
+  return (
+    <>
+      {content}
+      {!hasMemberSession && auth.AuthModal({})}
+    </>
   );
 };
