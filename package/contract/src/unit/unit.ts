@@ -28,7 +28,12 @@ export const UnitType = {
   VIDEO: "VIDEO",
   QUOTE: "QUOTE",
   LINK: "LINK",
+  ENTITY: "ENTITY",
+  ZONE: "ZONE",
+  USER: "USER",
+  SCOPE: "SCOPE",
   LABEL: "LABEL",
+  POLL: "POLL",
 } as const;
 
 export type UnitType = (typeof UnitType)[keyof typeof UnitType];
@@ -69,7 +74,12 @@ export const unitTypeSchema = t.Union([
   t.Literal("VIDEO"),
   t.Literal("QUOTE"),
   t.Literal("LINK"),
+  t.Literal("ENTITY"),
+  t.Literal("ZONE"),
+  t.Literal("USER"),
+  t.Literal("SCOPE"),
   t.Literal("LABEL"),
+  t.Literal("POLL"),
 ]);
 
 /**
