@@ -97,7 +97,6 @@ type ProgressUpdateData = {
 
 type ProgressShelfLinkRow = {
   unitId: string;
-  variantUnitId: string | null;
   shelfId: string;
   shelf: { unit: TitleDisplay };
 };
@@ -464,7 +463,6 @@ function createDrizzleProgressRepository(): ProgressRepository {
       const rows = await db
         .select({
           unitId: ShelfItem.itemId,
-          variantUnitId: ShelfItem.variantUnitId,
           shelfId: ShelfItem.shelfId,
           shelfDefaultLanguage: Unit.defaultLanguage,
           translationLanguage: UnitTranslation.language,
@@ -478,10 +476,7 @@ function createDrizzleProgressRepository(): ProgressRepository {
         )
         .where(
           and(
-            or(
-              inArray(ShelfItem.itemId, unitIds),
-              inArray(ShelfItem.variantUnitId, unitIds),
-            ),
+            inArray(ShelfItem.itemId, unitIds),
             eq(ShelfItem.itemType, "unit"),
             eq(Unit.userId, userId),
           ),
@@ -490,12 +485,11 @@ function createDrizzleProgressRepository(): ProgressRepository {
 
       const byShelfLink = new Map<string, ProgressShelfLinkRow>();
       for (const row of rows) {
-        const key = `${row.shelfId}:${row.unitId}:${row.variantUnitId ?? ""}`;
+        const key = `${row.shelfId}:${row.unitId}`;
         const link =
           byShelfLink.get(key) ??
           ({
             unitId: row.unitId,
-            variantUnitId: row.variantUnitId,
             shelfId: row.shelfId,
             shelf: {
               unit: {
@@ -716,21 +710,14 @@ export class ProgressService {
     const shelfRows = await this.repository.findShelfLinks(userId, unitIds);
     const shelvesByUnit = new Map<string, ProgressLibraryRow["shelves"]>();
     for (const shelfRow of shelfRows) {
-      const linkedUnitIds = [
-        unitIdSet.has(shelfRow.unitId) ? shelfRow.unitId : null,
-        shelfRow.variantUnitId && unitIdSet.has(shelfRow.variantUnitId)
-          ? shelfRow.variantUnitId
-          : null,
-      ].filter((unitId): unitId is string => Boolean(unitId));
+      if (!unitIdSet.has(shelfRow.unitId)) continue;
       const link = {
         shelfId: shelfRow.shelfId,
         title: pickTitle(shelfRow.shelf.unit, query) || shelfRow.shelfId,
       };
-      for (const progressUnitId of new Set(linkedUnitIds)) {
-        const shelves = shelvesByUnit.get(progressUnitId) ?? [];
-        shelves.push(link);
-        shelvesByUnit.set(progressUnitId, shelves);
-      }
+      const shelves = shelvesByUnit.get(shelfRow.unitId) ?? [];
+      shelves.push(link);
+      shelvesByUnit.set(shelfRow.unitId, shelves);
     }
 
     return {

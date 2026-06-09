@@ -57,14 +57,13 @@ interface ResolvedTarget {
   reviewUnitId?: string;
   reviewKind?: ShelfItemKind;
   /**
-   * Collected VARIANT identity. `ShelfItem.variantUnitId` remains a weak
-   * context field; real variant collection is represented by this child item.
-   * 被收藏的 VARIANT 标识。`ShelfItem.variantUnitId` 仍是弱上下文字段；
-   * 真正的变体收藏由此子级条目表示。
+   * API-level VARIANT target. Collection resolves this to a child ShelfItem;
+   * it is never stored as weak context on the parent row.
+   * API 层的 VARIANT 目标。收藏会将其解析为子级 ShelfItem；
+   * 不再作为弱上下文存到父级行。
    */
   variantUnitId?: string;
   variantKind?: ShelfItemKind;
-  legacyVariantUnitId?: string | null;
 }
 
 interface BatchResolvedTarget {
@@ -89,7 +88,6 @@ export type CollectionRepository = {
   collectToShelves(input: {
     userId: string;
     resolved: ResolvedTarget;
-    variantUnitId?: string | null;
     searchText?: string | null;
     shelfIds: string[];
   }): Promise<CollectResponse>;
@@ -195,7 +193,6 @@ async function insertShelfItem(
     shelfId: string;
     unitId: string;
     kind: ShelfItemKind;
-    variantUnitId?: string | null;
     parentUnitId?: string | null;
     parentRole?: string | null;
     searchText?: string | null;
@@ -208,7 +205,6 @@ async function insertShelfItem(
       shelfId: input.shelfId,
       itemType: "unit",
       itemId: input.unitId,
-      variantUnitId: input.variantUnitId ?? null,
       kind: input.kind,
       parentItemType: input.parentUnitId ? "unit" : null,
       parentItemId: input.parentUnitId ?? null,
@@ -381,24 +377,15 @@ function createDrizzleCollectionRepository(): CollectionRepository {
             const created = await insertShelfItem(tx, {
               shelfId,
               unitId: input.resolved.parentUnitId,
-              variantUnitId: input.resolved.legacyVariantUnitId,
               kind: input.resolved.parentKind,
               searchText: input.searchText,
             });
             if (created) isNew = true;
-          } else if (
-            input.resolved.legacyVariantUnitId !== undefined ||
-            input.searchText !== undefined
-          ) {
+          } else if (input.searchText !== undefined) {
             await tx
               .update(ShelfItem)
               .set({
-                ...(input.resolved.legacyVariantUnitId !== undefined
-                  ? { variantUnitId: input.resolved.legacyVariantUnitId }
-                  : {}),
-                ...(input.searchText !== undefined
-                  ? { searchText: input.searchText }
-                  : {}),
+                searchText: input.searchText,
                 updatedAt: new Date(),
               })
               .where(
@@ -717,7 +704,7 @@ export class CollectionService {
    *
    * - If `targetId` is a REVIEW post whose Unit has a canonical target, the
    *   target work is the parent and the review itself is threaded back as a child.
-   * - If `targetId` is a catalog VARIANT, or a valid selected `variantUnitId`
+   * - If `targetId` is a catalog VARIANT, or a selected `variantUnitId`
    *   points back to the target work, the main catalog Unit is the parent and
    *   the variant itself is threaded back as a child.
    * - Otherwise the target is the parent.
@@ -725,7 +712,7 @@ export class CollectionService {
    *
    * - 若 `targetId` 是其 Unit 拥有规范目标的 REVIEW 帖子，则目标作品为父级，
    *   而 review 本身作为子项串接回来。
-   * - 若 `targetId` 是目录 VARIANT，或有效的 `variantUnitId` 指回目标作品，
+   * - 若 `targetId` 是目录 VARIANT，或 `variantUnitId` 指回目标作品，
    *   则主目录 Unit 为父级，而变体本身作为子项串接回来。
    * - 否则该目标即为父级。
    */
@@ -781,14 +768,9 @@ export class CollectionService {
           };
         }
       } catch {
-        // Keep historical weak-context writes for arbitrary variant hints.
-        // 对任意变体提示保留历史弱上下文写入。
+        throw new AppError(400, "invalid_variant_unit");
       }
-      return {
-        parentUnitId: targetId,
-        parentKind: mapUnitToKind(unit.type, unit.postKind),
-        legacyVariantUnitId: variantUnitId,
-      };
+      throw new AppError(400, "variant_target_mismatch");
     }
 
     return {
@@ -825,7 +807,6 @@ export class CollectionService {
     const result = await this.repository.collectToShelves({
       userId,
       resolved,
-      variantUnitId: resolved.legacyVariantUnitId,
       searchText,
       shelfIds,
     });

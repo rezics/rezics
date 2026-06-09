@@ -131,7 +131,6 @@ describe("CollectionService — user collection metadata", () => {
         parentUnitId: "book-1",
         parentKind: "book",
       },
-      variantUnitId: undefined,
       searchText: "private alias",
       shelfIds: [],
     });
@@ -177,13 +176,12 @@ describe("CollectionService — user collection metadata", () => {
         variantUnitId: "variant-1",
         variantKind: "book",
       },
-      variantUnitId: undefined,
       shelfIds: ["shelf-1"],
     });
     expect(enqueueMock).toHaveBeenCalledTimes(1);
   });
 
-  test("collect keeps arbitrary variant hints as weak context", async () => {
+  test("collect rejects arbitrary variant hints instead of storing weak context", async () => {
     const repository = createRepositoryStub({
       getUnitTarget: mock(async (targetId: string) => {
         if (targetId === "missing-variant") {
@@ -199,23 +197,51 @@ describe("CollectionService — user collection metadata", () => {
     });
     const service = await createService(repository);
 
-    await service.collect("user-1", {
-      targetId: "main-1",
-      variantUnitId: "missing-variant",
-      shelfIds: ["shelf-1"],
+    await expect(
+      service.collect("user-1", {
+        targetId: "main-1",
+        variantUnitId: "missing-variant",
+        shelfIds: ["shelf-1"],
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "invalid_variant_unit",
     });
+    expect(repository.collectToShelves).not.toHaveBeenCalled();
+  });
 
-    expect(repository.collectToShelves).toHaveBeenCalledWith({
-      userId: "user-1",
-      resolved: {
-        parentUnitId: "main-1",
-        parentKind: "book",
-        legacyVariantUnitId: "missing-variant",
-      },
-      variantUnitId: "missing-variant",
-      searchText: undefined,
-      shelfIds: ["shelf-1"],
+  test("collect rejects selected variants that do not point to the main target", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "variant-1") {
+          return {
+            type: "BOOK" as const,
+            catalogEntryKind: "VARIANT" as const,
+            targetUnitId: "other-main",
+            postKind: null,
+          };
+        }
+        return {
+          type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
     });
+    const service = await createService(repository);
+
+    await expect(
+      service.collect("user-1", {
+        targetId: "main-1",
+        variantUnitId: "variant-1",
+        shelfIds: ["shelf-1"],
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "variant_target_mismatch",
+    });
+    expect(repository.collectToShelves).not.toHaveBeenCalled();
   });
 
   test("collect attaches review posts under their target work by default", async () => {
@@ -252,7 +278,6 @@ describe("CollectionService — user collection metadata", () => {
         reviewUnitId: "review-1",
         reviewKind: "review",
       },
-      variantUnitId: undefined,
       searchText: undefined,
       shelfIds: ["shelf-1"],
     });
@@ -281,7 +306,6 @@ describe("CollectionService — user collection metadata", () => {
         parentUnitId: "shelf-target",
         parentKind: "shelf",
       },
-      variantUnitId: undefined,
       searchText: "reference shelf",
       shelfIds: ["saved-shelf"],
     });
@@ -323,7 +347,6 @@ describe("CollectionService — variant collection", () => {
         variantUnitId: "variant-1",
         variantKind: "book",
       },
-      variantUnitId: undefined,
       searchText: undefined,
       shelfIds: ["shelf-1"],
     });

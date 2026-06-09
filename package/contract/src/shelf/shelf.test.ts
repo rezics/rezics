@@ -44,7 +44,7 @@ describe("shelf containment contract fields", () => {
     ).toBe(true);
   });
 
-  test("accepts weak variant context separately from containment", () => {
+  test("keeps variant request targets separate from shelf item row shape", () => {
     expect(
       Value.Check(addShelfItemSchema, {
         itemType: "unit",
@@ -52,7 +52,7 @@ describe("shelf containment contract fields", () => {
         variantUnitId: "variant-1",
         kind: "book",
       }),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       Value.Check(shelfItemDTOSchema, {
         shelfId: "shelf-1",
@@ -66,7 +66,17 @@ describe("shelf containment contract fields", () => {
         kind: "book",
         position: "a0",
       }),
-    ).toBe(true);
+    ).toBe(false);
+    expect(
+      Value.Check(shelfItemBatchAddOpSchema, {
+        op: "add",
+        itemType: "unit",
+        itemId: "main-1",
+        variantUnitId: "variant-1",
+        kind: "book",
+        position: "a0",
+      }),
+    ).toBe(false);
     expect(
       Value.Check(shelfListQuerySchema, {
         containsUnitId: "main-1",

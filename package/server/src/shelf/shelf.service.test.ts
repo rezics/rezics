@@ -767,48 +767,6 @@ describe("ShelfService", () => {
     });
   });
 
-  test("list hydrates the matched variant context when filtering by variantUnitId", async () => {
-    Object.assign(legacyDbMock, {
-      shelf: {
-        findMany: async () => [makeShelfListRow()],
-        count: async () => 1,
-      },
-      shelfItem: {
-        findMany: async () => [
-          {
-            shelfId: "shelf-1",
-            unitId: "main-1",
-            variantUnitId: "variant-1",
-            kind: "book",
-          },
-        ],
-      },
-      unit: {
-        findMany: async () => [
-          {
-            id: "variant-1",
-            defaultLanguage: "en",
-            translations: [{ language: "en", title: "Exact Edition" }],
-          },
-        ],
-      },
-    });
-
-    const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual" as string
-    );
-    const result = await shelfService.list({
-      variantUnitId: "variant-1",
-      limit: 10,
-    });
-
-    expect(result.shelves[0]?.matchedUnit).toEqual({
-      unitId: "variant-1",
-      kind: "book",
-      title: "Exact Edition",
-    });
-  });
-
   test("list hydrates the matched variant child when filtering by variantUnitId", async () => {
     Object.assign(legacyDbMock, {
       shelf: {
@@ -898,50 +856,6 @@ describe("ShelfService", () => {
       payload: { unitId: "shelf-1" },
       source: { type: "server", service: "shelf" },
     });
-  });
-
-  test("addItem persists variantUnitId as weak context without validating it", async () => {
-    enqueueMock.mockClear();
-    let createManyArgs: any;
-
-    Object.assign(legacyDbMock, {
-      unit: {
-        findUnique: async () => ({ type: "BOOK", post: null }),
-      },
-      shelfItem: {
-        findMany: async () => [],
-      },
-      $transaction: async (fn: any) =>
-        fn({
-          shelfItem: {
-            findFirst: async () => null,
-            createMany: async (args: any) => {
-              createManyArgs = args;
-              return { count: 1 };
-            },
-            findUniqueOrThrow: async () =>
-              makeShelfItemRow({ variantUnitId: "missing-or-not-variant" }),
-          },
-          shelf: { update: async () => ({}) },
-        }),
-    });
-
-    const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual" as string
-    );
-    const dto = await shelfService.addItem("shelf-1", {
-      itemType: "unit",
-      itemId: "book-1",
-      variantUnitId: "missing-or-not-variant",
-      kind: "book",
-    });
-
-    expect(createManyArgs.data[0]).toMatchObject({
-      shelfId: "shelf-1",
-      itemId: "book-1",
-      variantUnitId: "missing-or-not-variant",
-    });
-    expect(dto.variantUnitId).toBe("missing-or-not-variant");
   });
 
   test("addItem writes optional shelf item search text and user tags", async () => {
@@ -1344,7 +1258,6 @@ describe("ShelfService", () => {
       {
         op: "add",
         unitId: "b-1",
-        variantUnitId: "variant-b-1",
         kind: "book",
         position: "a0",
       },
@@ -1359,7 +1272,7 @@ describe("ShelfService", () => {
     expect(results[2]!.status).toBe("ok");
     expect(results[2]!.op.op).toBe("reorder");
     expect(applied[0]).toBe("deleteMany");
-    expect(createManyArgs.data[0].variantUnitId).toBe("variant-b-1");
+    expect(createManyArgs.data[0]).not.toHaveProperty("variantUnitId");
     expect(enqueueMock).toHaveBeenCalledTimes(1);
   });
 

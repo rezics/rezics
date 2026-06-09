@@ -125,7 +125,7 @@ function renderUnit(
           review={post}
           targetUnit={options?.targetUnit}
           showTargetUnit={options?.showTargetUnit}
-          variantContext={post.variantContext ?? unit.variantContext}
+          variantContext={post.variantContext}
         />
       );
     }
@@ -135,14 +135,14 @@ function renderUnit(
       return (
         <ExcerptCard
           excerpt={post as unknown as UnitDTO}
-          variantContext={post.variantContext ?? unit.variantContext}
+          variantContext={post.variantContext}
         />
       );
     }
     case "post": {
       const post = data as PostDTO | undefined;
       if (!post) return <ShelfItemCard unit={unit} />;
-      return <PostCard post={post} variantContext={unit.variantContext} />;
+      return <PostCard post={post} />;
     }
     case "shelf": {
       const shelf = data as ShelfDTO | undefined;
@@ -252,7 +252,6 @@ function NestedRootCard({
           <ReviewCard
             review={activeChild.data as PostDTO}
             showTargetUnit={false}
-            variantContext={activeChild.unit.variantContext}
           />
         ) : activeChild ? (
           renderUnit(activeChild, "nested")

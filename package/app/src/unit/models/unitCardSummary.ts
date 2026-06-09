@@ -234,11 +234,7 @@ export function shelfItemToUnitCardSummary(
     };
   }
 
-  return attachSummaryMetadata(
-    summary,
-    shelfItem.variantContext,
-    attachmentCounts,
-  );
+  return attachSummaryMetadata(summary, undefined, attachmentCounts);
 }
 
 function defaultUnitLanguage(unit: UnitDtoLike): string | undefined {
