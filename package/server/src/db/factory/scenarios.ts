@@ -1255,8 +1255,11 @@ async function createWikiScenarioZone(
   await ctx.db.insert(Zone).values(
     withUpdatedAt({
       unitId: zoneUnitId,
+      ownerRealmUnitId: input.realmUnitId,
       template: input.template,
       filters: wikiFilters,
+      configVersion: 1,
+      primaryRealmUnitId: input.realmUnitId,
       wiki: {
         filters: wikiFilters,
         navigation: {

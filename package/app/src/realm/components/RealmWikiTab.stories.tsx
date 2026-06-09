@@ -17,10 +17,16 @@ const WIKI_FILTERS = {
 
 const wikiZone: ZoneDTO = {
   unitId: WIKI_ZONE_ID,
+  ownerRealmUnitId: REALM_ID,
   slug: "fixture-wiki-zone",
   name: "Fixture Wiki Zone",
   template: "wiki-classic",
   filters: {},
+  configVersion: 1,
+  pages: null,
+  sections: null,
+  theme: null,
+  primaryRealmUnitId: REALM_ID,
 } as ZoneDTO;
 
 const wikiPosts = postFlat.map(

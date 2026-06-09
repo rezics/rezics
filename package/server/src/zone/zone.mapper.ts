@@ -3,6 +3,9 @@ import {
   type WikiZoneConfig,
   type ZoneDTO,
   type ZoneFilters,
+  type ZonePages,
+  type ZoneSection,
+  type ZoneTheme,
 } from "@rezics/contract";
 import type { ZoneWithRelations } from "./zone.service";
 
@@ -23,10 +26,16 @@ export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {
 
   return {
     unitId: zone.unitId,
+    ownerRealmUnitId: zone.ownerRealmUnitId,
     slug: zone.unit?.slug ?? "",
     name: translation?.title ?? "",
     description: mainMarkdownSource(translation?.description) ?? null,
     filters: zone.filters as ZoneFilters,
+    configVersion: zone.configVersion as 1,
+    pages: (zone.pages as ZonePages | null) ?? null,
+    sections: (zone.sections as ZoneSection[] | null) ?? null,
+    theme: (zone.theme as ZoneTheme | null) ?? null,
+    primaryRealmUnitId: zone.primaryRealmUnitId ?? null,
     template: zone.template,
     styling: (zone.styling as Record<string, unknown>) ?? null,
     wiki: (zone.wiki as WikiZoneConfig | null) ?? null,

@@ -107,9 +107,15 @@ export async function seedZones(
   spec: CountSpec,
   workIds: string[],
   tagIds: string[],
+  realms: CreatedUnit[],
 ): Promise<CreatedUnit[]> {
   const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} zones...`);
+  const ownerRealm = realms[0];
+  if (!ownerRealm) {
+    console.log("[Seed]   No realms available, skipping zones.");
+    return [];
+  }
 
   const results: CreatedUnit[] = [];
 
@@ -147,8 +153,10 @@ export async function seedZones(
     await ctx.db.insert(Zone).values(
       withUpdatedAt({
         unitId: id,
+        ownerRealmUnitId: ownerRealm.id,
         template,
         filters,
+        configVersion: 1,
         styling,
         startsAt,
         endsAt,

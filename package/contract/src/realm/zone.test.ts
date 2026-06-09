@@ -7,6 +7,8 @@ import {
   wikiZoneNavigationSchema,
   wikiZoneThemeSchema,
   ZoneDTOSchema,
+  zonePagesSchema,
+  zoneThemeSchema,
 } from "./zone";
 
 describe("wiki Zone contract schemas", () => {
@@ -172,11 +174,56 @@ describe("wiki Zone contract schemas", () => {
     expect(
       Value.Check(ZoneDTOSchema, {
         unitId: "zone-1",
+        ownerRealmUnitId: "realm-1",
         slug: "wiki",
         name: "Wiki",
         filters: {},
+        configVersion: 1,
         template: "wiki-classic",
       }),
     ).toBe(true);
+  });
+
+  test("validates versioned zone pages and typed public theme config", () => {
+    expect(
+      Value.Check(zonePagesSchema, {
+        home: {
+          title: { translations: { en: "Library" } },
+          sections: [
+            {
+              id: "latest",
+              kind: "latestContent",
+              filters: { type: "BOOK" },
+              limit: 12,
+            },
+            {
+              id: "wiki",
+              kind: "wikiCollection",
+              wikiFilters: { realmUnitId: "realm-1" },
+            },
+            {
+              id: "manual",
+              kind: "manualContent",
+              body: { kind: "markdown", markdown: "Welcome" },
+            },
+          ],
+        },
+        search: { sections: [{ id: "feed", kind: "feed" }] },
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(zoneThemeSchema, {
+        tokens: { background: "#ffffff", accent: "#2f6fef" },
+        images: { bannerUnitId: "image-1" },
+        layout: { contentWidth: "wide", navPosition: "side" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(zoneThemeSchema, {
+        tokens: { accent: "#2f6fef" },
+        css: ".zone { display: none; }",
+      }),
+    ).toBe(false);
   });
 });

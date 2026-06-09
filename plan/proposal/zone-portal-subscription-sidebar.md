@@ -97,26 +97,26 @@ zone ownership/permissions inherit from realms.
 - [x] 1.5 Update schema export tests in
   `package/server/src/db/schema/schema-exports.test.ts` for the new table and
   enum.
-- [ ] 1.6 Extend `package/contract/src/realm/zone.ts` or move zone contracts to
+- [x] 1.6 Extend `package/contract/src/realm/zone.ts` or move zone contracts to
   a first-class `package/contract/src/zone/` module so zone DTO/config includes
   `ownerRealmUnitId`, `configVersion`, typed `pages`, typed `sections`, theme
   token/image/layout config, and optional realm-primary presentation linkage.
-- [ ] 1.7 Update `package/server/src/db/schema/zone.ts` with
+- [x] 1.7 Update `package/server/src/db/schema/zone.ts` with
   `ownerRealmUnitId`, `configVersion`, and the new config fields while keeping
   existing wiki config mappable during development cutover.
 
 ## 2. Zone ownership, config, and seeds
 
-- [ ] 2.1 Update `package/server/src/zone/zone.service.ts` create/update
+- [x] 2.1 Update `package/server/src/zone/zone.service.ts` create/update
   inputs, validation, repository writes, and DTO hydration for
   `ownerRealmUnitId`, `configVersion`, section config, and theme config.
-- [ ] 2.2 Update `package/server/src/zone/zone.api.ts`,
+- [x] 2.2 Update `package/server/src/zone/zone.api.ts`,
   `package/api/src/zone/zone.api.ts`, and `package/api/src/zone/zone.*.ts`
   types/queries/mutations for owner realm and versioned config.
 - [ ] 2.3 Replace admin-only zone create/update checks with owner-realm
   capability checks, using existing governance/realm capability patterns rather
   than creating zone-specific role tables.
-- [ ] 2.4 Fix zone slug hydration so `ZoneDTO.slug` is preserved instead of
+- [x] 2.4 Fix zone slug hydration so `ZoneDTO.slug` is preserved instead of
   mapped to an empty string when reading by slug.
 - [ ] 2.5 Add or update seed infrastructure so the Rezics official realm owns
   official zones for Book, Realms, and Popular, with deterministic slugs and
@@ -124,7 +124,7 @@ zone ownership/permissions inherit from realms.
 - [ ] 2.6 Update `package/server/src/db/factory/zones.ts` away from mock
   template names such as `featured-carousel` toward versioned zone config
   fixtures that exercise content sections, feed sections, and wiki sections.
-- [ ] 2.7 Add zone service tests for owner realm validation, lifecycle behavior,
+- [x] 2.7 Add zone service tests for owner realm validation, lifecycle behavior,
   slug lookup, config version mapping, and invalid section/unit references.
 
 ## 3. Subscription list service
@@ -248,7 +248,7 @@ zone ownership/permissions inherit from realms.
   theme tokens/images/layout, and lifecycle.
 - [ ] 8.2 Wire zone management permission hints through owner-realm capabilities,
   matching existing `RealmManagePage` and governance patterns.
-- [ ] 8.3 Define public theme config as typed tokens and media references only;
+- [x] 8.3 Define public theme config as typed tokens and media references only;
   leave arbitrary CSS/JS for a later reviewed `ThemePackage` plan.
 - [ ] 8.4 Add UI and server tests proving users without owner-realm capability
   cannot mutate zone config, while allowed realm managers can.
