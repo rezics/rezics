@@ -88,6 +88,7 @@ mock.module("@/post/post.mapper", () => ({
   mapPostToDTO: (row: unknown) => row,
 }));
 mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageInput: () => ({ language: "ja" }),
   resolveEffectiveReadLanguageCandidates: () => ["ja", "en"],
 }));
 mock.module("@/unit/mapper", () => ({

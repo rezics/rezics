@@ -32,6 +32,15 @@ export const CHANNEL_REGISTRY = {
     categories: ["post", "announcement", "member"] as const,
     events: ["post.new", "announcement.new", "member.joined"] as const,
   },
+  ZONE: {
+    categories: ["feed", "section", "announcement", "theme"] as const,
+    events: [
+      "feed.new",
+      "section.updated",
+      "announcement.new",
+      "theme.updated",
+    ] as const,
+  },
   TAG: {
     categories: ["unit"] as const,
     events: ["unit.tagged"] as const,

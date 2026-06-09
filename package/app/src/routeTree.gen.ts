@@ -18,6 +18,7 @@ import { Route as MainLayoutRegisterRouteImport } from './routes/_mainLayout/reg
 import { Route as MainLayoutNoticeRouteImport } from './routes/_mainLayout/notice'
 import { Route as MainLayoutLoginRouteImport } from './routes/_mainLayout/login'
 import { Route as MainLayoutCompleteRegistrationRouteImport } from './routes/_mainLayout/complete-registration'
+import { Route as MainLayoutZIndexRouteImport } from './routes/_mainLayout/z/index'
 import { Route as MainLayoutUnitIndexRouteImport } from './routes/_mainLayout/unit/index'
 import { Route as MainLayoutStaffIndexRouteImport } from './routes/_mainLayout/staff/index'
 import { Route as MainLayoutShelfIndexRouteImport } from './routes/_mainLayout/shelf/index'
@@ -202,6 +203,11 @@ const MainLayoutCompleteRegistrationRoute =
     path: '/complete-registration',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutZIndexRoute = MainLayoutZIndexRouteImport.update({
+  id: '/z/',
+  path: '/z/',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
 const MainLayoutUnitIndexRoute = MainLayoutUnitIndexRouteImport.update({
   id: '/unit/',
   path: '/unit/',
@@ -1034,6 +1040,7 @@ export interface FileRoutesByFullPath {
   '/shelf/': typeof MainLayoutShelfIndexRoute
   '/staff/': typeof MainLayoutStaffIndexRoute
   '/unit/': typeof MainLayoutUnitIndexRoute
+  '/z/': typeof MainLayoutZIndexRoute
   '/book/$bookId/edit': typeof EditorBookBookIdEditRouteRouteWithChildren
   '/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
@@ -1178,6 +1185,7 @@ export interface FileRoutesByTo {
   '/shelf': typeof MainLayoutShelfIndexRoute
   '/staff': typeof MainLayoutStaffIndexRoute
   '/unit': typeof MainLayoutUnitIndexRoute
+  '/z': typeof MainLayoutZIndexRoute
   '/entity/$unitId/edit': typeof EditorEntityUnitIdEditRoute
   '/excerpt/$unitId/edit': typeof EditorExcerptUnitIdEditRoute
   '/post/$rootPostUnitId/edit': typeof EditorPostRootPostUnitIdEditRoute
@@ -1322,6 +1330,7 @@ export interface FileRoutesById {
   '/_mainLayout/shelf/': typeof MainLayoutShelfIndexRoute
   '/_mainLayout/staff/': typeof MainLayoutStaffIndexRoute
   '/_mainLayout/unit/': typeof MainLayoutUnitIndexRoute
+  '/_mainLayout/z/': typeof MainLayoutZIndexRoute
   '/_editor/book/$bookId/edit': typeof EditorBookBookIdEditRouteRouteWithChildren
   '/_mainLayout/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/_mainLayout/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
@@ -1472,6 +1481,7 @@ export interface FileRouteTypes {
     | '/shelf/'
     | '/staff/'
     | '/unit/'
+    | '/z/'
     | '/book/$bookId/edit'
     | '/tag/book/$bookId'
     | '/tag/domain/$unitId'
@@ -1616,6 +1626,7 @@ export interface FileRouteTypes {
     | '/shelf'
     | '/staff'
     | '/unit'
+    | '/z'
     | '/entity/$unitId/edit'
     | '/excerpt/$unitId/edit'
     | '/post/$rootPostUnitId/edit'
@@ -1759,6 +1770,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/shelf/'
     | '/_mainLayout/staff/'
     | '/_mainLayout/unit/'
+    | '/_mainLayout/z/'
     | '/_editor/book/$bookId/edit'
     | '/_mainLayout/tag/book/$bookId'
     | '/_mainLayout/tag/domain/$unitId'
@@ -1938,6 +1950,13 @@ declare module '@tanstack/react-router' {
       path: '/complete-registration'
       fullPath: '/complete-registration'
       preLoaderRoute: typeof MainLayoutCompleteRegistrationRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/z/': {
+      id: '/_mainLayout/z/'
+      path: '/z'
+      fullPath: '/z/'
+      preLoaderRoute: typeof MainLayoutZIndexRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/unit/': {
@@ -3273,6 +3292,7 @@ interface MainLayoutRouteChildren {
   MainLayoutShelfIndexRoute: typeof MainLayoutShelfIndexRoute
   MainLayoutStaffIndexRoute: typeof MainLayoutStaffIndexRoute
   MainLayoutUnitIndexRoute: typeof MainLayoutUnitIndexRoute
+  MainLayoutZIndexRoute: typeof MainLayoutZIndexRoute
   MainLayoutTagBookBookIdRouteRoute: typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   MainLayoutTagDomainUnitIdRouteRoute: typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
   MainLayoutExcerptBookBookIdRoute: typeof MainLayoutExcerptBookBookIdRoute
@@ -3343,6 +3363,7 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutShelfIndexRoute: MainLayoutShelfIndexRoute,
   MainLayoutStaffIndexRoute: MainLayoutStaffIndexRoute,
   MainLayoutUnitIndexRoute: MainLayoutUnitIndexRoute,
+  MainLayoutZIndexRoute: MainLayoutZIndexRoute,
   MainLayoutTagBookBookIdRouteRoute:
     MainLayoutTagBookBookIdRouteRouteWithChildren,
   MainLayoutTagDomainUnitIdRouteRoute:

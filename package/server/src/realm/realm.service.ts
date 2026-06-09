@@ -79,6 +79,10 @@ import {
   User,
 } from "../db/schema";
 import {
+  activateSubscriptionListEntryInTx,
+  markSubscriptionListEntryRemovedInTx,
+} from "../subscription/subscription-list-entry.service";
+import {
   mapRealmMemberToDTO,
   mapRealmToDTO,
   mapUnitRealmToDTO,
@@ -666,6 +670,11 @@ export class RealmService {
           })
           .where(eq(Unit.id, realmUnitId));
       }
+      await activateSubscriptionListEntryInTx(tx, {
+        userUnitId: userId,
+        subscribedUnitId: realmUnitId,
+        subscribedType: "REALM",
+      });
 
       return { member, memberCount: updatedRealm.memberCount };
     });
@@ -851,6 +860,10 @@ export class RealmService {
           })
           .where(eq(Unit.id, realmUnitId));
       }
+      await markSubscriptionListEntryRemovedInTx(tx, {
+        userUnitId: userId,
+        subscribedUnitId: realmUnitId,
+      });
 
       if (!existingMember) {
         const [realm] = await tx
@@ -898,15 +911,22 @@ export class RealmService {
           ),
         )
         .limit(1);
-      if (!existingSub) return;
-      await tx.delete(Subscription).where(eq(Subscription.id, existingSub.id));
-      await tx
-        .update(Unit)
-        .set({
-          subscriberCount: sql`${Unit.subscriberCount} - 1`,
-          updatedAt: new Date(),
-        })
-        .where(eq(Unit.id, realmUnitId));
+      if (existingSub) {
+        await tx
+          .delete(Subscription)
+          .where(eq(Subscription.id, existingSub.id));
+        await tx
+          .update(Unit)
+          .set({
+            subscriberCount: sql`${Unit.subscriberCount} - 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(Unit.id, realmUnitId));
+      }
+      await markSubscriptionListEntryRemovedInTx(tx, {
+        userUnitId: userId,
+        subscribedUnitId: realmUnitId,
+      });
     });
   }
 
@@ -933,20 +953,26 @@ export class RealmService {
           ),
         )
         .limit(1);
-      if (existingSub) return;
-      await tx.insert(Subscription).values({
-        subscriberUnitId: userId,
-        subscribedUnitId: realmUnitId,
-        channels: ["*"],
-        updatedAt: new Date(),
-      });
-      await tx
-        .update(Unit)
-        .set({
-          subscriberCount: sql`${Unit.subscriberCount} + 1`,
+      if (!existingSub) {
+        await tx.insert(Subscription).values({
+          subscriberUnitId: userId,
+          subscribedUnitId: realmUnitId,
+          channels: ["*"],
           updatedAt: new Date(),
-        })
-        .where(eq(Unit.id, realmUnitId));
+        });
+        await tx
+          .update(Unit)
+          .set({
+            subscriberCount: sql`${Unit.subscriberCount} + 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(Unit.id, realmUnitId));
+      }
+      await activateSubscriptionListEntryInTx(tx, {
+        userUnitId: userId,
+        subscribedUnitId: realmUnitId,
+        subscribedType: "REALM",
+      });
     });
   }
 

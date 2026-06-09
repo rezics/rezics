@@ -9,10 +9,13 @@ function flattenItems(items: readonly NavigationItem[]): NavigationItem[] {
 }
 
 describe("NAVIGATION", () => {
-  test("builds the authenticated main sidebar as primary plus Realms sections", () => {
+  test("builds the authenticated main sidebar as Home plus Zones and Realms sections", () => {
     const navigation = NAVIGATION(
       { isAuthenticated: true, isAdmin: false },
       {
+        zones: {
+          items: [{ unitId: "zone-1", title: "Books", href: "/z/books" }],
+        },
         realms: {
           items: [{ unitId: "realm-1", title: "Fiction", href: "/r/fiction" }],
         },
@@ -20,8 +23,8 @@ describe("NAVIGATION", () => {
     );
 
     const sections = navigation.filter((item) => item.kind === "section");
-    expect(sections).toHaveLength(2);
-    expect(navigation[0]).toMatchObject({ kind: "section", id: "primary" });
+    expect(sections).toHaveLength(3);
+    expect(navigation[0]).toMatchObject({ kind: "section", id: "home" });
     expect(navigation[1]).toMatchObject({ kind: "divider" });
     expect(
       navigation[0].kind === "section" ? navigation[0].title : "unexpected",
@@ -32,12 +35,12 @@ describe("NAVIGATION", () => {
             item.kind === "item" ? item.title : item.kind,
           )
         : [],
-    ).toEqual(["Home", "Books", "Games", "Media"]);
+    ).toEqual(["Home"]);
 
     expect(navigation[2]).toMatchObject({
       kind: "section",
-      id: "realms",
-      title: "Realms",
+      id: "zones",
+      title: "Zones",
       collapsible: true,
       defaultOpen: true,
     });
@@ -47,13 +50,28 @@ describe("NAVIGATION", () => {
             item.kind === "item" ? item.title : item.kind,
           )
         : [],
+    ).toEqual(["All Zones", "Books"]);
+
+    expect(navigation[3]).toMatchObject({
+      kind: "section",
+      id: "realms",
+      title: "Realms",
+      collapsible: true,
+      defaultOpen: true,
+    });
+    expect(
+      navigation[3].kind === "section"
+        ? navigation[3].children.map((item) =>
+            item.kind === "item" ? item.title : item.kind,
+          )
+        : [],
     ).toEqual(["All Realms", "Fiction"]);
   });
 
   test("removes sidebar-only entry points without encoding route removal", () => {
     const navigation = NAVIGATION(
       { isAuthenticated: true, isAdmin: false },
-      { realms: { items: [] } },
+      { zones: { items: [] }, realms: { items: [] } },
     );
     const segments = flattenItems(navigation)
       .filter(
@@ -67,15 +85,30 @@ describe("NAVIGATION", () => {
     }
   });
 
-  test("shows the Realms status row after All Realms", () => {
+  test("shows subscription status rows after each All entry", () => {
     const navigation = NAVIGATION(
       { isAuthenticated: true, isAdmin: false },
-      { realms: { items: [], isLoading: true } },
+      {
+        zones: { items: [], isLoading: true },
+        realms: { items: [], isLoading: true },
+      },
+    );
+    const zones = navigation.find(
+      (item) => item.kind === "section" && item.id === "zones",
     );
     const realms = navigation.find(
       (item) => item.kind === "section" && item.id === "realms",
     );
 
+    expect(
+      zones?.kind === "section"
+        ? zones.children.map((item) =>
+            item.kind === "item" || item.kind === "status"
+              ? item.title
+              : item.kind,
+          )
+        : [],
+    ).toEqual(["All Zones", "Loading zones..."]);
     expect(
       realms?.kind === "section"
         ? realms.children.map((item) =>

@@ -3,6 +3,8 @@ import type {
   SubscriptionCheckResponse,
   SubscriptionDTO,
   SubscriptionListResponse,
+  UserSubscriptionListEntryDTO,
+  UserSubscriptionListEntryListResponse,
 } from "@rezics/contract";
 import {
   subscriberCountResponseSchema,
@@ -13,9 +15,15 @@ import {
   subscriptionListResponseSchema,
   subscriptionParamsSchema,
   subscriptionPatchBodySchema,
+  userSubscriptionListEntryDTOSchema,
+  userSubscriptionListEntryListQuerySchema,
+  userSubscriptionListEntryListResponseSchema,
+  userSubscriptionListEntryPinBodySchema,
+  userSubscriptionListEntryReorderBodySchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro } from "@/middleware";
+import { subscriptionListEntryService } from "./subscription-list-entry.service";
 import { subscriptionService } from "./subscription.service";
 
 export const subscriptionApi = new Elysia({ prefix: "/subscription" })
@@ -37,6 +45,123 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
         summary: "Create subscription",
         description:
           "Subscribe the authenticated user to a subscribed Unit. Defaults channels to ['*'].",
+        tags: ["Subscription"],
+      },
+    },
+  )
+  .get(
+    "/entries",
+    async ({
+      query,
+      identity,
+    }): Promise<UserSubscriptionListEntryListResponse> => {
+      const entries = await subscriptionListEntryService.list({
+        userUnitId: identity.userId,
+        subscribedType: query.subscribedType,
+        state: query.state,
+      });
+      return { entries };
+    },
+    {
+      requireLogin: true,
+      query: userSubscriptionListEntryListQuerySchema,
+      response: userSubscriptionListEntryListResponseSchema,
+      detail: {
+        summary: "List my subscription list entries",
+        description:
+          "List subscription-list metadata for the caller, ordered by pinned state and position. Defaults to ACTIVE entries.",
+        tags: ["Subscription"],
+      },
+    },
+  )
+  .patch(
+    "/entries/:subscribedUnitId/pin",
+    async ({
+      params,
+      body,
+      identity,
+    }): Promise<UserSubscriptionListEntryDTO> => {
+      return subscriptionListEntryService.pin({
+        userUnitId: identity.userId,
+        subscribedUnitId: params.subscribedUnitId,
+        pinned: body.pinned,
+      });
+    },
+    {
+      requireLogin: true,
+      params: subscriptionParamsSchema,
+      body: userSubscriptionListEntryPinBodySchema,
+      response: userSubscriptionListEntryDTOSchema,
+      detail: {
+        summary: "Pin or unpin a subscription list entry",
+        description:
+          "Pinning affects list/sidebar ordering only; it does not create or remove a Subscription row.",
+        tags: ["Subscription"],
+      },
+    },
+  )
+  .patch(
+    "/entries/:subscribedUnitId/reorder",
+    async ({
+      params,
+      body,
+      identity,
+    }): Promise<UserSubscriptionListEntryDTO> => {
+      return subscriptionListEntryService.reorder({
+        userUnitId: identity.userId,
+        subscribedUnitId: params.subscribedUnitId,
+        position: body.position,
+      });
+    },
+    {
+      requireLogin: true,
+      params: subscriptionParamsSchema,
+      body: userSubscriptionListEntryReorderBodySchema,
+      response: userSubscriptionListEntryDTOSchema,
+      detail: {
+        summary: "Reorder a subscription list entry",
+        description:
+          "Updates the fractional position for list/sidebar ordering without changing subscription channels.",
+        tags: ["Subscription"],
+      },
+    },
+  )
+  .delete(
+    "/entries/:subscribedUnitId",
+    async ({ params, identity }): Promise<{ removed: boolean }> => {
+      await subscriptionListEntryService.markRemoved({
+        userUnitId: identity.userId,
+        subscribedUnitId: params.subscribedUnitId,
+      });
+      return { removed: true };
+    },
+    {
+      requireLogin: true,
+      params: subscriptionParamsSchema,
+      detail: {
+        summary: "Remove a subscription from my list",
+        description:
+          "Marks the list entry REMOVED while leaving the Subscription row intact.",
+        tags: ["Subscription"],
+      },
+    },
+  )
+  .post(
+    "/entries/:subscribedUnitId/recover",
+    async ({ params, identity }): Promise<UserSubscriptionListEntryDTO> => {
+      return subscriptionListEntryService.recover({
+        userUnitId: identity.userId,
+        subscribedUnitId: params.subscribedUnitId,
+      });
+    },
+    {
+      requireLogin: true,
+      params: subscriptionParamsSchema,
+      response: userSubscriptionListEntryDTOSchema,
+      detail: {
+        summary: "Recover a removed subscription list entry",
+        description:
+          "Best-effort recovery: recreates the Subscription when permitted and marks the list entry ACTIVE.",
         tags: ["Subscription"],
       },
     },

@@ -18,7 +18,7 @@ import {
   uuidv7PrimaryKey,
 } from "./columns";
 import { ModerationTargetKind } from "./moderation";
-import { Unit } from "./unit";
+import { Unit, UnitType } from "./unit";
 
 export const FeedbackType = pgEnum("FeedbackType", feedbackTypeValues);
 
@@ -96,6 +96,63 @@ export const Subscription = pgTable(
     uniqueIndex("Subscription_subscriberUnitId_subscribedUnitId_key").using(
       "btree",
       table.subscriberUnitId.asc().nullsLast(),
+      table.subscribedUnitId.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const userSubscriptionListEntryStateStorageValues = [
+  "ACTIVE",
+  "REMOVED",
+] as const;
+
+export type UserSubscriptionListEntryStateStorage =
+  (typeof userSubscriptionListEntryStateStorageValues)[number];
+
+export const UserSubscriptionListEntryState = pgEnum(
+  "UserSubscriptionListEntryState",
+  userSubscriptionListEntryStateStorageValues,
+);
+
+/**
+ * User-owned ordering metadata for subscription lists. Subscription remains the
+ * attention/notification edge; this row controls list/sidebar presence,
+ * pinning, and recovery state for any subscribable target Unit.
+ */
+export const UserSubscriptionListEntry = pgTable(
+  "UserSubscriptionListEntry",
+  {
+    id: uuidv7PrimaryKey(),
+    userUnitId: uuid()
+      .notNull()
+      .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    subscribedUnitId: uuid()
+      .notNull()
+      .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    subscribedType: UnitType().notNull(),
+    position: varchar({ length: 64 }).notNull(),
+    pinned: boolean().default(false).notNull(),
+    state: UserSubscriptionListEntryState().default("ACTIVE").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("UserSubscriptionListEntry_user_state_type_order_idx").using(
+      "btree",
+      table.userUnitId.asc().nullsLast(),
+      table.state.asc().nullsLast(),
+      table.subscribedType.asc().nullsLast(),
+      table.pinned.desc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.createdAt.asc().nullsLast(),
+    ),
+    index("UserSubscriptionListEntry_subscribedUnitId_idx").using(
+      "btree",
+      table.subscribedUnitId.asc().nullsLast(),
+    ),
+    uniqueIndex("UserSubscriptionListEntry_user_subscribed_key").using(
+      "btree",
+      table.userUnitId.asc().nullsLast(),
       table.subscribedUnitId.asc().nullsLast(),
     ),
   ],

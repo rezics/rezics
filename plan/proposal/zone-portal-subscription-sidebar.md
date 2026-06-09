@@ -80,21 +80,21 @@ zone ownership/permissions inherit from realms.
 
 ## 1. Contracts and storage shape
 
-- [ ] 1.1 Extend `package/contract/src/subscription/channel-registry.ts` with
+- [x] 1.1 Extend `package/contract/src/subscription/channel-registry.ts` with
   `ZONE` channels and matching notification kind registry entries in
   `package/contract/src/notification/kind-registry.ts` as needed for zone
   feed/section/announcement/theme events.
-- [ ] 1.2 Add `UserSubscriptionListEntry` contract schemas and DTOs under
+- [x] 1.2 Add `UserSubscriptionListEntry` contract schemas and DTOs under
   `package/contract/src/subscription/` with `ACTIVE | REMOVED` state,
   `subscribedType`, `position`, `pinned`, list/reorder/pin/recover inputs, and
   type-filtered list query shapes.
-- [ ] 1.3 Extend `package/server/src/db/schema/engagement.ts` with
+- [x] 1.3 Extend `package/server/src/db/schema/engagement.ts` with
   `UserSubscriptionListEntry`, its state enum, uniqueness on
   `(userUnitId, subscribedUnitId)`, and indexes for
   `(userUnitId, state, subscribedType, pinned, position)` and recovery reads.
-- [ ] 1.4 Generate Drizzle migrations with `task db:generate` after schema
+- [x] 1.4 Generate Drizzle migrations with `task db:generate` after schema
   source changes; do not hand-author ordinary migration SQL.
-- [ ] 1.5 Update schema export tests in
+- [x] 1.5 Update schema export tests in
   `package/server/src/db/schema/schema-exports.test.ts` for the new table and
   enum.
 - [ ] 1.6 Extend `package/contract/src/realm/zone.ts` or move zone contracts to
@@ -129,21 +129,21 @@ zone ownership/permissions inherit from realms.
 
 ## 3. Subscription list service
 
-- [ ] 3.1 Add a server service module for `UserSubscriptionListEntry` under
+- [x] 3.1 Add a server service module for `UserSubscriptionListEntry` under
   `package/server/src/subscription/` that can activate, mark removed, pin,
   reorder, list active entries, list removed entries, and recover entries.
-- [ ] 3.2 Make `package/server/src/subscription/subscription.service.ts`
+- [x] 3.2 Make `package/server/src/subscription/subscription.service.ts`
   coordinate `Subscription` writes with list entry activation/removal for all
   subscribable targets, while preserving existing subscriber counters.
-- [ ] 3.3 Update direct realm subscription writes in
+- [x] 3.3 Update direct realm subscription writes in
   `package/server/src/realm/realm.service.ts` (`joinRealm`, `removeMember`,
   `muteRealm`, `unmuteRealm`) so they use the shared subscription/list-entry
   helper or perform equivalent list-entry writes in the same local transaction.
-- [ ] 3.4 Add list-entry endpoints to
+- [x] 3.4 Add list-entry endpoints to
   `package/server/src/subscription/subscription.api.ts`: active list by type,
   removed/recovery list by type, pin/unpin, reorder, remove from list, and
   recover.
-- [ ] 3.5 Add frontend API modules in `package/api/src/subscription/` for active
+- [x] 3.5 Add frontend API modules in `package/api/src/subscription/` for active
   list entries, removed list entries, pin/reorder/remove/recover mutations, and
   cache invalidation keyed by subscribed type.
 - [ ] 3.6 Add tests proving subscribe/unsubscribe, realm join/leave, realm
@@ -175,16 +175,16 @@ zone ownership/permissions inherit from realms.
 
 ## 5. Sidebar cutover
 
-- [ ] 5.1 Update `package/app/src/core/components/navigation/MainNavigation.tsx`
+- [x] 5.1 Update `package/app/src/core/components/navigation/MainNavigation.tsx`
   so the primary hard-coded Book/Game/Media/Realms entries are replaced by the
   target shape: fixed Home, labeled Zones, and labeled Realms.
-- [ ] 5.2 Update `package/app/src/core/layouts/MainLayout.tsx` to query
+- [x] 5.2 Update `package/app/src/core/layouts/MainLayout.tsx` to query
   `UserSubscriptionListEntry` for `ZONE` and `REALM` entries instead of
   `myRealmsQuery` for sidebar population.
-- [ ] 5.3 Keep Home as an unlabeled fixed entry outside subscription data.
-- [ ] 5.4 Build the Zones section so its first entry is `All Zones`, followed by
+- [x] 5.3 Keep Home as an unlabeled fixed entry outside subscription data.
+- [x] 5.4 Build the Zones section so its first entry is `All Zones`, followed by
   active `ZONE` list entries ordered by pinned/position/createdAt.
-- [ ] 5.5 Build the Realms section so its first entry is `All Realms`, followed
+- [x] 5.5 Build the Realms section so its first entry is `All Realms`, followed
   by active `REALM` list entries ordered by pinned/position/createdAt.
 - [ ] 5.6 Extend navigation item types/rendering in
   `package/app/src/core/components/navigation/navigation.ts` and

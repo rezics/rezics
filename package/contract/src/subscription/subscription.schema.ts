@@ -65,3 +65,57 @@ export const subscriptionListResponseSchema = t.Object({
 
 export type SubscriptionListResponse =
   (typeof subscriptionListResponseSchema)["static"];
+
+export const userSubscriptionListEntryStateSchema = t.Union([
+  t.Literal("ACTIVE"),
+  t.Literal("REMOVED"),
+]);
+
+export type UserSubscriptionListEntryState =
+  (typeof userSubscriptionListEntryStateSchema)["static"];
+
+export const userSubscriptionListEntryDTOSchema = t.Object({
+  id: t.String(),
+  userUnitId: t.String(),
+  subscribedUnitId: t.String(),
+  subscribedType: unitTypeSchema,
+  subscribedSlug: t.Optional(t.Union([t.String(), t.Null()])),
+  subscribedTitle: t.Optional(t.Union([t.String(), t.Null()])),
+  position: t.String(),
+  pinned: t.Boolean(),
+  state: userSubscriptionListEntryStateSchema,
+  createdAt: t.Union([t.String(), t.Date()]),
+  updatedAt: t.Union([t.String(), t.Date()]),
+});
+
+export type UserSubscriptionListEntryDTO =
+  (typeof userSubscriptionListEntryDTOSchema)["static"];
+
+export const userSubscriptionListEntryListQuerySchema = t.Object({
+  subscribedType: t.Optional(unitTypeSchema),
+  state: t.Optional(userSubscriptionListEntryStateSchema),
+});
+
+export type UserSubscriptionListEntryListQuery =
+  (typeof userSubscriptionListEntryListQuerySchema)["static"];
+
+export const userSubscriptionListEntryListResponseSchema = t.Object({
+  entries: t.Array(userSubscriptionListEntryDTOSchema),
+});
+
+export type UserSubscriptionListEntryListResponse =
+  (typeof userSubscriptionListEntryListResponseSchema)["static"];
+
+export const userSubscriptionListEntryReorderBodySchema = t.Object({
+  position: t.String({ minLength: 1 }),
+});
+
+export type UserSubscriptionListEntryReorderBody =
+  (typeof userSubscriptionListEntryReorderBodySchema)["static"];
+
+export const userSubscriptionListEntryPinBodySchema = t.Object({
+  pinned: t.Boolean(),
+});
+
+export type UserSubscriptionListEntryPinBody =
+  (typeof userSubscriptionListEntryPinBodySchema)["static"];

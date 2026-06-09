@@ -113,6 +113,8 @@ const expectedSchemaExports = [
   "User",
   "UserBlock",
   "UserContentNodeProgress",
+  "UserSubscriptionListEntry",
+  "UserSubscriptionListEntryState",
   "UserTagApplication",
   "UserUnitProgress",
   "UserUnitProgressStatus",
@@ -139,6 +141,7 @@ const expectedSchemaExports = [
   "timestamps",
   "unitTypeStorageValues",
   "updatedAt",
+  "userSubscriptionListEntryStateStorageValues",
   "uuidv7",
   "uuidv7PrimaryKey",
 ] as const;

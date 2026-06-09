@@ -137,6 +137,10 @@ export type NewSubjectAttributionRow =
   typeof schema.SubjectAttribution.$inferInsert;
 export type SubscriptionRow = typeof schema.Subscription.$inferSelect;
 export type NewSubscriptionRow = typeof schema.Subscription.$inferInsert;
+export type UserSubscriptionListEntryRow =
+  typeof schema.UserSubscriptionListEntry.$inferSelect;
+export type NewUserSubscriptionListEntryRow =
+  typeof schema.UserSubscriptionListEntry.$inferInsert;
 export type TagVoteRow = typeof schema.TagVote.$inferSelect;
 export type NewTagVoteRow = typeof schema.TagVote.$inferInsert;
 export type UnitRow = typeof schema.Unit.$inferSelect;

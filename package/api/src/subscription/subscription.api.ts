@@ -5,6 +5,11 @@ import type {
   SubscriptionDTO,
   SubscriptionListResponse,
   SubscriptionPatchBody,
+  UserSubscriptionListEntryDTO,
+  UserSubscriptionListEntryListQuery,
+  UserSubscriptionListEntryListResponse,
+  UserSubscriptionListEntryPinBody,
+  UserSubscriptionListEntryReorderBody,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
@@ -63,6 +68,58 @@ export const subscriptionApi = {
   count: async (subscribedUnitId: string): Promise<SubscriberCountResponse> => {
     return apiFetch<SubscriberCountResponse>(
       `/subscription/count/${subscribedUnitId}`,
+    );
+  },
+
+  listEntries: async (
+    query?: UserSubscriptionListEntryListQuery,
+  ): Promise<UserSubscriptionListEntryListResponse> => {
+    return apiFetch<UserSubscriptionListEntryListResponse>(
+      `/subscription/entries${buildQueryString(query)}`,
+    );
+  },
+
+  pinEntry: async (
+    subscribedUnitId: string,
+    input: UserSubscriptionListEntryPinBody,
+  ): Promise<UserSubscriptionListEntryDTO> => {
+    return apiFetch<UserSubscriptionListEntryDTO>(
+      `/subscription/entries/${subscribedUnitId}/pin`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  reorderEntry: async (
+    subscribedUnitId: string,
+    input: UserSubscriptionListEntryReorderBody,
+  ): Promise<UserSubscriptionListEntryDTO> => {
+    return apiFetch<UserSubscriptionListEntryDTO>(
+      `/subscription/entries/${subscribedUnitId}/reorder`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  removeEntry: async (
+    subscribedUnitId: string,
+  ): Promise<{ removed: boolean }> => {
+    return apiFetch<{ removed: boolean }>(
+      `/subscription/entries/${subscribedUnitId}`,
+      { method: "DELETE" },
+    );
+  },
+
+  recoverEntry: async (
+    subscribedUnitId: string,
+  ): Promise<UserSubscriptionListEntryDTO> => {
+    return apiFetch<UserSubscriptionListEntryDTO>(
+      `/subscription/entries/${subscribedUnitId}/recover`,
+      { method: "POST" },
     );
   },
 };
