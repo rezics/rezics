@@ -206,11 +206,42 @@ describe("wiki Zone contract schemas", () => {
               kind: "manualContent",
               body: { kind: "markdown", markdown: "Welcome" },
             },
+            {
+              id: "links",
+              kind: "manualLinks",
+              links: [
+                {
+                  kind: "manualLink",
+                  href: "/wiki",
+                  label: { translations: { en: "Wiki" } },
+                },
+              ],
+            },
           ],
         },
         search: { sections: [{ id: "feed", kind: "feed" }] },
       }),
     ).toBe(true);
+
+    expect(
+      Value.Check(zonePagesSchema, {
+        home: {
+          sections: [
+            {
+              id: "bad-links",
+              kind: "manualLinks",
+              links: [
+                {
+                  kind: "manualLink",
+                  href: "/wiki",
+                  label: "Wiki",
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    ).toBe(false);
 
     expect(
       Value.Check(zoneThemeSchema, {

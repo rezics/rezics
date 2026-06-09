@@ -12,6 +12,7 @@ export const ZONE_SECTION_KINDS = [
   "tagNavigation",
   "wikiCollection",
   "manualContent",
+  "manualLinks",
 ] as const satisfies readonly ZoneSection["kind"][];
 
 export type ZoneSectionPrimitive =

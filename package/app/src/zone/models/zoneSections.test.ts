@@ -65,6 +65,7 @@ describe("zone section resolution", () => {
       "tagNavigation",
       "wikiCollection",
       "manualContent",
+      "manualLinks",
     ]);
     expect(zoneSectionPrimitive({ kind: "manualContent" })).toBe(
       "manualContent",

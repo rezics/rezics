@@ -445,6 +445,14 @@ export const zoneSectionSchema = t.Union([
     },
     { additionalProperties: false },
   ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("manualLinks"),
+      links: t.Array(wikiZoneNavigationItemSchema),
+    },
+    { additionalProperties: false },
+  ),
 ]);
 
 export type ZoneSection = Static<typeof zoneSectionSchema>;
