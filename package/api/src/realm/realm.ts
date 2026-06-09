@@ -79,6 +79,7 @@ export {
   realmSearchQuery,
   realmTagContextQuery,
 } from "./realm.queries";
+export { realmBySlugQuery, useRealmBySlug } from "./useRealmBySlug";
 // Types
 // 类型
 export type {

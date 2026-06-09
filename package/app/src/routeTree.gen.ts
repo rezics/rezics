@@ -58,6 +58,7 @@ import { Route as MainLayoutUUserSlugIndexRouteImport } from './routes/_mainLayo
 import { Route as MainLayoutShelfShelfIdIndexRouteImport } from './routes/_mainLayout/shelf/$shelfId/index'
 import { Route as MainLayoutReviewReviewIdIndexRouteImport } from './routes/_mainLayout/review/$reviewId/index'
 import { Route as MainLayoutRemarkReviewIdIndexRouteImport } from './routes/_mainLayout/remark/$reviewId/index'
+import { Route as MainLayoutRRealmSlugIndexRouteImport } from './routes/_mainLayout/r/$realmSlug/index'
 import { Route as MainLayoutPostRootPostUnitIdIndexRouteImport } from './routes/_mainLayout/post/$rootPostUnitId/index'
 import { Route as MainLayoutInboxDmIndexRouteImport } from './routes/_mainLayout/inbox/dm/index'
 import { Route as MainLayoutExcerptUnitIdIndexRouteImport } from './routes/_mainLayout/excerpt/$unitId/index'
@@ -102,7 +103,13 @@ import { Route as MainLayoutRealmRealmIdSearchRouteImport } from './routes/_main
 import { Route as MainLayoutRealmRealmIdManageRouteImport } from './routes/_mainLayout/realm/$realmId/manage'
 import { Route as MainLayoutRealmRealmIdCreateRouteImport } from './routes/_mainLayout/realm/$realmId/create'
 import { Route as MainLayoutRealmRealmIdDetailRouteImport } from './routes/_mainLayout/realm/$realmId/_detail'
+import { Route as MainLayoutRRealmSlugWikiRouteImport } from './routes/_mainLayout/r/$realmSlug/wiki'
+import { Route as MainLayoutRRealmSlugTagsRouteImport } from './routes/_mainLayout/r/$realmSlug/tags'
+import { Route as MainLayoutRRealmSlugSearchRouteImport } from './routes/_mainLayout/r/$realmSlug/search'
+import { Route as MainLayoutRRealmSlugMembersRouteImport } from './routes/_mainLayout/r/$realmSlug/members'
 import { Route as MainLayoutRRealmSlugManageRouteImport } from './routes/_mainLayout/r/$realmSlug/manage'
+import { Route as MainLayoutRRealmSlugCreateRouteImport } from './routes/_mainLayout/r/$realmSlug/create'
+import { Route as MainLayoutRRealmSlugAboutRouteImport } from './routes/_mainLayout/r/$realmSlug/about'
 import { Route as MainLayoutInboxDmConversationIdRouteImport } from './routes/_mainLayout/inbox/dm/$conversationId'
 import { Route as MainLayoutExcerptBookBookIdRouteImport } from './routes/_mainLayout/excerpt/book/$bookId'
 import { Route as MainLayoutBookBookIdVariantsRouteImport } from './routes/_mainLayout/book/$bookId/variants'
@@ -418,6 +425,12 @@ const MainLayoutRemarkReviewIdIndexRoute =
     path: '/remark/$reviewId/',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutRRealmSlugIndexRoute =
+  MainLayoutRRealmSlugIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
 const MainLayoutPostRootPostUnitIdIndexRoute =
   MainLayoutPostRootPostUnitIdIndexRouteImport.update({
     id: '/post/$rootPostUnitId/',
@@ -674,10 +687,46 @@ const MainLayoutRealmRealmIdDetailRoute =
     path: '/realm/$realmId',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutRRealmSlugWikiRoute =
+  MainLayoutRRealmSlugWikiRouteImport.update({
+    id: '/wiki',
+    path: '/wiki',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
+const MainLayoutRRealmSlugTagsRoute =
+  MainLayoutRRealmSlugTagsRouteImport.update({
+    id: '/tags',
+    path: '/tags',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
+const MainLayoutRRealmSlugSearchRoute =
+  MainLayoutRRealmSlugSearchRouteImport.update({
+    id: '/search',
+    path: '/search',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
+const MainLayoutRRealmSlugMembersRoute =
+  MainLayoutRRealmSlugMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
 const MainLayoutRRealmSlugManageRoute =
   MainLayoutRRealmSlugManageRouteImport.update({
     id: '/manage',
     path: '/manage',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
+const MainLayoutRRealmSlugCreateRoute =
+  MainLayoutRRealmSlugCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
+const MainLayoutRRealmSlugAboutRoute =
+  MainLayoutRRealmSlugAboutRouteImport.update({
+    id: '/about',
+    path: '/about',
     getParentRoute: () => MainLayoutRRealmSlugRoute,
   } as any)
 const MainLayoutInboxDmConversationIdRoute =
@@ -1107,7 +1156,13 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/variants': typeof MainLayoutBookBookIdVariantsRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
+  '/r/$realmSlug/about': typeof MainLayoutRRealmSlugAboutRoute
+  '/r/$realmSlug/create': typeof MainLayoutRRealmSlugCreateRoute
   '/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
+  '/r/$realmSlug/members': typeof MainLayoutRRealmSlugMembersRoute
+  '/r/$realmSlug/search': typeof MainLayoutRRealmSlugSearchRoute
+  '/r/$realmSlug/tags': typeof MainLayoutRRealmSlugTagsRoute
+  '/r/$realmSlug/wiki': typeof MainLayoutRRealmSlugWikiRoute
   '/realm/$realmId': typeof MainLayoutRealmRealmIdDetailRouteWithChildren
   '/realm/$realmId/create': typeof MainLayoutRealmRealmIdCreateRoute
   '/realm/$realmId/manage': typeof MainLayoutRealmRealmIdManageRoute
@@ -1152,6 +1207,7 @@ export interface FileRoutesByFullPath {
   '/excerpt/$unitId/': typeof MainLayoutExcerptUnitIdIndexRoute
   '/inbox/dm/': typeof MainLayoutInboxDmIndexRoute
   '/post/$rootPostUnitId/': typeof MainLayoutPostRootPostUnitIdIndexRoute
+  '/r/$realmSlug/': typeof MainLayoutRRealmSlugIndexRoute
   '/remark/$reviewId/': typeof MainLayoutRemarkReviewIdIndexRoute
   '/review/$reviewId/': typeof MainLayoutReviewReviewIdIndexRoute
   '/shelf/$shelfId/': typeof MainLayoutShelfShelfIdIndexRoute
@@ -1220,7 +1276,6 @@ export interface FileRoutesByTo {
   '/inbox/notification': typeof MainLayoutInboxNotificationRoute
   '/poll/$unitId': typeof MainLayoutPollUnitIdRoute
   '/poll/new': typeof MainLayoutPollNewRoute
-  '/r/$realmSlug': typeof MainLayoutRRealmSlugRouteWithChildren
   '/realm/new': typeof MainLayoutRealmNewRoute
   '/realm/search': typeof MainLayoutRealmSearchRoute
   '/review/search': typeof MainLayoutReviewSearchRoute
@@ -1255,7 +1310,13 @@ export interface FileRoutesByTo {
   '/book/$bookId/variants': typeof MainLayoutBookBookIdVariantsRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
+  '/r/$realmSlug/about': typeof MainLayoutRRealmSlugAboutRoute
+  '/r/$realmSlug/create': typeof MainLayoutRRealmSlugCreateRoute
   '/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
+  '/r/$realmSlug/members': typeof MainLayoutRRealmSlugMembersRoute
+  '/r/$realmSlug/search': typeof MainLayoutRRealmSlugSearchRoute
+  '/r/$realmSlug/tags': typeof MainLayoutRRealmSlugTagsRoute
+  '/r/$realmSlug/wiki': typeof MainLayoutRRealmSlugWikiRoute
   '/realm/$realmId/create': typeof MainLayoutRealmRealmIdCreateRoute
   '/realm/$realmId/manage': typeof MainLayoutRealmRealmIdManageRoute
   '/realm/$realmId/search': typeof MainLayoutRealmRealmIdSearchRoute
@@ -1299,6 +1360,7 @@ export interface FileRoutesByTo {
   '/excerpt/$unitId': typeof MainLayoutExcerptUnitIdIndexRoute
   '/inbox/dm': typeof MainLayoutInboxDmIndexRoute
   '/post/$rootPostUnitId': typeof MainLayoutPostRootPostUnitIdIndexRoute
+  '/r/$realmSlug': typeof MainLayoutRRealmSlugIndexRoute
   '/remark/$reviewId': typeof MainLayoutRemarkReviewIdIndexRoute
   '/review/$reviewId': typeof MainLayoutReviewReviewIdIndexRoute
   '/shelf/$shelfId': typeof MainLayoutShelfShelfIdIndexRoute
@@ -1411,7 +1473,13 @@ export interface FileRoutesById {
   '/_mainLayout/book/$bookId/variants': typeof MainLayoutBookBookIdVariantsRoute
   '/_mainLayout/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/_mainLayout/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
+  '/_mainLayout/r/$realmSlug/about': typeof MainLayoutRRealmSlugAboutRoute
+  '/_mainLayout/r/$realmSlug/create': typeof MainLayoutRRealmSlugCreateRoute
   '/_mainLayout/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
+  '/_mainLayout/r/$realmSlug/members': typeof MainLayoutRRealmSlugMembersRoute
+  '/_mainLayout/r/$realmSlug/search': typeof MainLayoutRRealmSlugSearchRoute
+  '/_mainLayout/r/$realmSlug/tags': typeof MainLayoutRRealmSlugTagsRoute
+  '/_mainLayout/r/$realmSlug/wiki': typeof MainLayoutRRealmSlugWikiRoute
   '/_mainLayout/realm/$realmId/_detail': typeof MainLayoutRealmRealmIdDetailRouteWithChildren
   '/_mainLayout/realm/$realmId/create': typeof MainLayoutRealmRealmIdCreateRoute
   '/_mainLayout/realm/$realmId/manage': typeof MainLayoutRealmRealmIdManageRoute
@@ -1456,6 +1524,7 @@ export interface FileRoutesById {
   '/_mainLayout/excerpt/$unitId/': typeof MainLayoutExcerptUnitIdIndexRoute
   '/_mainLayout/inbox/dm/': typeof MainLayoutInboxDmIndexRoute
   '/_mainLayout/post/$rootPostUnitId/': typeof MainLayoutPostRootPostUnitIdIndexRoute
+  '/_mainLayout/r/$realmSlug/': typeof MainLayoutRRealmSlugIndexRoute
   '/_mainLayout/remark/$reviewId/': typeof MainLayoutRemarkReviewIdIndexRoute
   '/_mainLayout/review/$reviewId/': typeof MainLayoutReviewReviewIdIndexRoute
   '/_mainLayout/shelf/$shelfId/': typeof MainLayoutShelfShelfIdIndexRoute
@@ -1569,7 +1638,13 @@ export interface FileRouteTypes {
     | '/book/$bookId/variants'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
+    | '/r/$realmSlug/about'
+    | '/r/$realmSlug/create'
     | '/r/$realmSlug/manage'
+    | '/r/$realmSlug/members'
+    | '/r/$realmSlug/search'
+    | '/r/$realmSlug/tags'
+    | '/r/$realmSlug/wiki'
     | '/realm/$realmId'
     | '/realm/$realmId/create'
     | '/realm/$realmId/manage'
@@ -1614,6 +1689,7 @@ export interface FileRouteTypes {
     | '/excerpt/$unitId/'
     | '/inbox/dm/'
     | '/post/$rootPostUnitId/'
+    | '/r/$realmSlug/'
     | '/remark/$reviewId/'
     | '/review/$reviewId/'
     | '/shelf/$shelfId/'
@@ -1682,7 +1758,6 @@ export interface FileRouteTypes {
     | '/inbox/notification'
     | '/poll/$unitId'
     | '/poll/new'
-    | '/r/$realmSlug'
     | '/realm/new'
     | '/realm/search'
     | '/review/search'
@@ -1717,7 +1792,13 @@ export interface FileRouteTypes {
     | '/book/$bookId/variants'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
+    | '/r/$realmSlug/about'
+    | '/r/$realmSlug/create'
     | '/r/$realmSlug/manage'
+    | '/r/$realmSlug/members'
+    | '/r/$realmSlug/search'
+    | '/r/$realmSlug/tags'
+    | '/r/$realmSlug/wiki'
     | '/realm/$realmId/create'
     | '/realm/$realmId/manage'
     | '/realm/$realmId/search'
@@ -1761,6 +1842,7 @@ export interface FileRouteTypes {
     | '/excerpt/$unitId'
     | '/inbox/dm'
     | '/post/$rootPostUnitId'
+    | '/r/$realmSlug'
     | '/remark/$reviewId'
     | '/review/$reviewId'
     | '/shelf/$shelfId'
@@ -1872,7 +1954,13 @@ export interface FileRouteTypes {
     | '/_mainLayout/book/$bookId/variants'
     | '/_mainLayout/excerpt/book/$bookId'
     | '/_mainLayout/inbox/dm/$conversationId'
+    | '/_mainLayout/r/$realmSlug/about'
+    | '/_mainLayout/r/$realmSlug/create'
     | '/_mainLayout/r/$realmSlug/manage'
+    | '/_mainLayout/r/$realmSlug/members'
+    | '/_mainLayout/r/$realmSlug/search'
+    | '/_mainLayout/r/$realmSlug/tags'
+    | '/_mainLayout/r/$realmSlug/wiki'
     | '/_mainLayout/realm/$realmId/_detail'
     | '/_mainLayout/realm/$realmId/create'
     | '/_mainLayout/realm/$realmId/manage'
@@ -1917,6 +2005,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/excerpt/$unitId/'
     | '/_mainLayout/inbox/dm/'
     | '/_mainLayout/post/$rootPostUnitId/'
+    | '/_mainLayout/r/$realmSlug/'
     | '/_mainLayout/remark/$reviewId/'
     | '/_mainLayout/review/$reviewId/'
     | '/_mainLayout/shelf/$shelfId/'
@@ -2322,6 +2411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutRemarkReviewIdIndexRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/r/$realmSlug/': {
+      id: '/_mainLayout/r/$realmSlug/'
+      path: '/'
+      fullPath: '/r/$realmSlug/'
+      preLoaderRoute: typeof MainLayoutRRealmSlugIndexRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
     '/_mainLayout/post/$rootPostUnitId/': {
       id: '/_mainLayout/post/$rootPostUnitId/'
       path: '/post/$rootPostUnitId'
@@ -2630,11 +2726,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutRealmRealmIdDetailRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/r/$realmSlug/wiki': {
+      id: '/_mainLayout/r/$realmSlug/wiki'
+      path: '/wiki'
+      fullPath: '/r/$realmSlug/wiki'
+      preLoaderRoute: typeof MainLayoutRRealmSlugWikiRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
+    '/_mainLayout/r/$realmSlug/tags': {
+      id: '/_mainLayout/r/$realmSlug/tags'
+      path: '/tags'
+      fullPath: '/r/$realmSlug/tags'
+      preLoaderRoute: typeof MainLayoutRRealmSlugTagsRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
+    '/_mainLayout/r/$realmSlug/search': {
+      id: '/_mainLayout/r/$realmSlug/search'
+      path: '/search'
+      fullPath: '/r/$realmSlug/search'
+      preLoaderRoute: typeof MainLayoutRRealmSlugSearchRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
+    '/_mainLayout/r/$realmSlug/members': {
+      id: '/_mainLayout/r/$realmSlug/members'
+      path: '/members'
+      fullPath: '/r/$realmSlug/members'
+      preLoaderRoute: typeof MainLayoutRRealmSlugMembersRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
     '/_mainLayout/r/$realmSlug/manage': {
       id: '/_mainLayout/r/$realmSlug/manage'
       path: '/manage'
       fullPath: '/r/$realmSlug/manage'
       preLoaderRoute: typeof MainLayoutRRealmSlugManageRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
+    '/_mainLayout/r/$realmSlug/create': {
+      id: '/_mainLayout/r/$realmSlug/create'
+      path: '/create'
+      fullPath: '/r/$realmSlug/create'
+      preLoaderRoute: typeof MainLayoutRRealmSlugCreateRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
+    '/_mainLayout/r/$realmSlug/about': {
+      id: '/_mainLayout/r/$realmSlug/about'
+      path: '/about'
+      fullPath: '/r/$realmSlug/about'
+      preLoaderRoute: typeof MainLayoutRRealmSlugAboutRouteImport
       parentRoute: typeof MainLayoutRRealmSlugRoute
     }
     '/_mainLayout/inbox/dm/$conversationId': {
@@ -3243,13 +3381,27 @@ const MainLayoutUserMeRouteRouteWithChildren =
   )
 
 interface MainLayoutRRealmSlugRouteChildren {
+  MainLayoutRRealmSlugAboutRoute: typeof MainLayoutRRealmSlugAboutRoute
+  MainLayoutRRealmSlugCreateRoute: typeof MainLayoutRRealmSlugCreateRoute
   MainLayoutRRealmSlugManageRoute: typeof MainLayoutRRealmSlugManageRoute
+  MainLayoutRRealmSlugMembersRoute: typeof MainLayoutRRealmSlugMembersRoute
+  MainLayoutRRealmSlugSearchRoute: typeof MainLayoutRRealmSlugSearchRoute
+  MainLayoutRRealmSlugTagsRoute: typeof MainLayoutRRealmSlugTagsRoute
+  MainLayoutRRealmSlugWikiRoute: typeof MainLayoutRRealmSlugWikiRoute
+  MainLayoutRRealmSlugIndexRoute: typeof MainLayoutRRealmSlugIndexRoute
   MainLayoutRRealmSlugPostPostUnitIdRoute: typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   MainLayoutRRealmSlugShelfSlugRoute: typeof MainLayoutRRealmSlugShelfSlugRoute
 }
 
 const MainLayoutRRealmSlugRouteChildren: MainLayoutRRealmSlugRouteChildren = {
+  MainLayoutRRealmSlugAboutRoute: MainLayoutRRealmSlugAboutRoute,
+  MainLayoutRRealmSlugCreateRoute: MainLayoutRRealmSlugCreateRoute,
   MainLayoutRRealmSlugManageRoute: MainLayoutRRealmSlugManageRoute,
+  MainLayoutRRealmSlugMembersRoute: MainLayoutRRealmSlugMembersRoute,
+  MainLayoutRRealmSlugSearchRoute: MainLayoutRRealmSlugSearchRoute,
+  MainLayoutRRealmSlugTagsRoute: MainLayoutRRealmSlugTagsRoute,
+  MainLayoutRRealmSlugWikiRoute: MainLayoutRRealmSlugWikiRoute,
+  MainLayoutRRealmSlugIndexRoute: MainLayoutRRealmSlugIndexRoute,
   MainLayoutRRealmSlugPostPostUnitIdRoute:
     MainLayoutRRealmSlugPostPostUnitIdRoute,
   MainLayoutRRealmSlugShelfSlugRoute: MainLayoutRRealmSlugShelfSlugRoute,

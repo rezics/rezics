@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
-import { publicUnitResolverSearchSchema } from "./public-route";
+import {
+  isPublicRealmIdRouteParams,
+  publicUnitResolverSearchSchema,
+} from "./public-route";
 
 describe("public Unit resolver search schema", () => {
   test("accepts omitted view", () => {
@@ -23,5 +26,19 @@ describe("public Unit resolver search schema", () => {
     expect(Value.Check(publicUnitResolverSearchSchema, { view: "raw" })).toBe(
       false,
     );
+  });
+});
+
+describe("public realm id route params", () => {
+  test("accepts UUID-shaped unit ids", () => {
+    expect(
+      isPublicRealmIdRouteParams({
+        unitId: "018f9326-8d80-7b86-bc9f-ccceec9a43f5",
+      }),
+    ).toBe(true);
+  });
+
+  test("rejects slug-shaped values", () => {
+    expect(isPublicRealmIdRouteParams({ unitId: "rezics" })).toBe(false);
   });
 });

@@ -1,17 +1,22 @@
-import type { SearchCategory, SearchQuery } from "@rezics/contract";
+import {
+  isPublicRealmSlugRouteParams,
+  type SearchCategory,
+  type SearchQuery,
+} from "@rezics/contract";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { FederatedSearchPage, isSearchCategory } from "@/search";
-import { parseSearchString } from "@/search";
-import { isRealmUnitIdParam } from "@/realm/models/realmDetailRoutes";
+import { isSearchCategory, parseSearchString } from "@/search";
+import { FederatedSearchPage } from "@/search";
+import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
 
 type SearchRouteParams = {
   q?: string;
   category?: SearchCategory;
 };
 
-function RealmScopedSearchPage() {
-  const { realmId } = Route.useParams();
+function RealmSlugScopedSearchPage() {
+  const params = Route.useParams();
+  const { realm } = Route.useLoaderData();
   const { q, category } = Route.useSearch();
   const navigate = useNavigate();
 
@@ -22,13 +27,13 @@ function RealmScopedSearchPage() {
 
   return (
     <FederatedSearchPage
-      scope={{ kind: "realm", realmId }}
+      scope={{ kind: "realm", realmId: realm.unitId }}
       initialQuery={initialQuery}
       initialCategory={category ?? "all"}
       onCategoryChange={(next) => {
         navigate({
-          to: "/realm/$realmId/search",
-          params: { realmId },
+          to: "/r/$realmSlug/search",
+          params,
           search: (prev: SearchRouteParams) => ({
             ...prev,
             category: next === "all" ? undefined : next,
@@ -39,9 +44,13 @@ function RealmScopedSearchPage() {
   );
 }
 
-export const Route = createFileRoute("/_mainLayout/realm/$realmId/search")({
-  loader: ({ params }) => {
-    if (!isRealmUnitIdParam(params.realmId)) throw notFound();
+export const Route = createFileRoute("/_mainLayout/r/$realmSlug/search")({
+  loader: async ({ params, context }) => {
+    if (!isPublicRealmSlugRouteParams(params)) throw notFound();
+    return loadRealmSlugRoute({
+      params,
+      queryClient: context.qc,
+    });
   },
   validateSearch: (search: Record<string, unknown>): SearchRouteParams => ({
     q: typeof search.q === "string" ? search.q : undefined,
@@ -50,5 +59,5 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/search")({
         ? search.category
         : undefined,
   }),
-  component: RealmScopedSearchPage,
+  component: RealmSlugScopedSearchPage,
 });

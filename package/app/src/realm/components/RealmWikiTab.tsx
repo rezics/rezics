@@ -14,12 +14,14 @@ interface RealmWikiTabProps {
   realmId: string;
   wikiZoneUnitId?: string | null;
   canManage: boolean;
+  manageHref?: string;
 }
 
 export function RealmWikiTab({
   realmId,
   wikiZoneUnitId,
   canManage,
+  manageHref = `/realm/${realmId}/manage`,
 }: RealmWikiTabProps) {
   const { t } = useTranslation(["common", "entity"]);
   const readContext = useReadLanguageContext();
@@ -97,7 +99,7 @@ export function RealmWikiTab({
                   homepage entry point.
                 </p>
               </div>
-              <Link to="/realm/$realmId/manage" params={{ realmId }}>
+              <Link to={manageHref}>
                 <Button size="sm" variant="outline" className="w-full gap-2">
                   <Settings className="h-4 w-4" />
                   {t("entity:realm_manage")}

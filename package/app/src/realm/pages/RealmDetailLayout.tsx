@@ -11,6 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 import type { ReactNode } from "react";
+import {
+  realmCreateHref,
+  type RealmDetailRouteLocation,
+  realmManageHref,
+} from "../models/realmDetailRoutes";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
 import { RealmMuteButton } from "../components/RealmMuteButton";
@@ -21,6 +26,7 @@ import { RealmDetailProvider } from "./realmDetailContext";
 
 interface RealmDetailLayoutProps {
   realmId: string;
+  routeLocation?: RealmDetailRouteLocation;
   children: ReactNode;
 }
 
@@ -35,6 +41,9 @@ interface RealmDetailLayoutProps {
  */
 export function RealmDetailLayout({
   realmId,
+  // Public realm routes may be slug-based while API calls still use the
+  // resolved realm unit id.
+  routeLocation = { kind: "unitId", realmId },
   children,
 }: RealmDetailLayoutProps) {
   const { t } = useTranslation(["common", "entity"]);
@@ -82,6 +91,7 @@ export function RealmDetailLayout({
     <RealmDetailProvider
       value={{
         realmId,
+        routeLocation,
         realm,
         membership,
         isMember,
@@ -106,7 +116,7 @@ export function RealmDetailLayout({
               <div className="flex min-w-0 flex-row items-center gap-2">
                 <h1 className="truncate text-2xl font-semibold">{title}</h1>
                 {showManage && (
-                  <Link to="/realm/$realmId/manage" params={{ realmId }}>
+                  <Link to={realmManageHref(routeLocation)}>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -120,7 +130,7 @@ export function RealmDetailLayout({
             </div>
             <div className="flex items-center gap-2">
               {isMember ? (
-                <Link to="/realm/$realmId/create" params={{ realmId }}>
+                <Link to={realmCreateHref(routeLocation)}>
                   <Button size="sm" className="gap-1 rounded-full px-2 md:px-4">
                     <Plus className="h-4 w-4" />
                     {t("common:create")}

@@ -2,20 +2,18 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import {
+  realmDetailHref,
+  type RealmDetailRouteLocation,
+  type RealmDetailTab,
+} from "../models/realmDetailRoutes";
 import { useRealmDetail } from "../pages/realmDetailContext";
 
 // Realm detail tab routes. "feed" is the index route (empty path suffix); the
 // others are sibling sub-routes under the realm detail layout.
 // realm 详情标签路由。"feed" 为索引路由（路径后缀为空）；其余为详情布局下的
 // 同级子路由。
-const TAB_PATHS = {
-  feed: "",
-  wiki: "/wiki",
-  tags: "/tags",
-  about: "/about",
-  members: "/members",
-} as const;
-type RealmTabKey = keyof typeof TAB_PATHS;
+const REALM_TABS = ["feed", "wiki", "tags", "about", "members"] as const;
 
 /**
  * Tab navigation shell for realm detail. Renders the tab bar as route links and
@@ -26,14 +24,13 @@ type RealmTabKey = keyof typeof TAB_PATHS;
  */
 export function RealmDetailShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation(["common", "entity"]);
-  const { realmId, showWikiTab } = useRealmDetail();
+  const { routeLocation, showWikiTab } = useRealmDetail();
   const navigate = useNavigate();
-  const activeTab = useActiveTab(realmId);
+  const activeTab = useActiveTab(routeLocation);
 
   const handleTabChange = (value: string) => {
     navigate({
-      to: `/realm/$realmId${TAB_PATHS[value as RealmTabKey]}`,
-      params: { realmId },
+      to: realmDetailHref(routeLocation, value as RealmDetailTab),
     });
   };
 
@@ -55,11 +52,12 @@ export function RealmDetailShell({ children }: { children: ReactNode }) {
   );
 }
 
-function useActiveTab(realmId: string): RealmTabKey {
+function useActiveTab(routeLocation: RealmDetailRouteLocation): RealmDetailTab {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const base = `/realm/${realmId}`;
-  const match = (Object.keys(TAB_PATHS) as RealmTabKey[]).find(
-    (key) => key !== "feed" && pathname.startsWith(`${base}${TAB_PATHS[key]}`),
+  const match = REALM_TABS.find(
+    (key) =>
+      key !== "feed" &&
+      pathname.startsWith(realmDetailHref(routeLocation, key)),
   );
   return match ?? "feed";
 }

@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { RealmManagePage } from "@/realm";
+import { isRealmUnitIdParam } from "@/realm/models/realmDetailRoutes";
 
 const manageTabs = [
   "profile",
@@ -17,6 +18,9 @@ function isRealmManageTab(value: unknown): value is RealmManageTab {
 }
 
 export const Route = createFileRoute("/_mainLayout/realm/$realmId/manage")({
+  loader: ({ params }) => {
+    if (!isRealmUnitIdParam(params.realmId)) throw notFound();
+  },
   validateSearch: (
     search: Record<string, unknown>,
   ): { tab?: RealmManageTab } => ({

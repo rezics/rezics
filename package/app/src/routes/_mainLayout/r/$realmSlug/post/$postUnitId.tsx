@@ -1,21 +1,20 @@
-import { slugApi } from "@rezics/api/slug";
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { PostThreadPage } from "@/post";
+import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
 
 export const Route = createFileRoute(
   "/_mainLayout/r/$realmSlug/post/$postUnitId",
 )({
-  loader: async ({ params }) => {
+  loader: async ({ params, context }) => {
     if (!isPublicRealmSlugRouteParams(params)) throw notFound();
-    const resolved = await slugApi
-      .resolve({ scope: "realm", slug: params.realmSlug })
-      .catch(() => null);
-    if (!resolved) throw notFound();
-    return { realmUnitId: resolved.unitId };
+    return loadRealmSlugRoute({
+      params,
+      queryClient: context.qc,
+    });
   },
   component: () => {
-    const { realmUnitId } = Route.useLoaderData();
-    return <PostThreadPage realmUnitId={realmUnitId} />;
+    const { realm } = Route.useLoaderData();
+    return <PostThreadPage realmUnitId={realm.unitId} />;
   },
 });

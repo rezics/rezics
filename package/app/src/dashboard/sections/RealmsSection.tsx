@@ -4,6 +4,7 @@ import type {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
+import { realmSummaryHref } from "@/realm/models/realmDetailRoutes";
 import { Link } from "@/shared/ui/link";
 import { DashboardSection } from "../components/DashboardSection";
 
@@ -28,7 +29,7 @@ export const RealmsSection: React.FC<RealmsSectionProps> = ({
       {(realms) => (
         <div className="flex flex-wrap gap-2">
           {realms.map((realm) => {
-            const href: string = `/realm/${realm.slug ?? realm.realmId}`;
+            const href = realmSummaryHref(realm);
             return (
               <Link
                 key={realm.realmId}

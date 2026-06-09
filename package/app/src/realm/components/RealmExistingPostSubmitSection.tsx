@@ -38,11 +38,15 @@ type ExistingSubmitCandidate = {
 export interface RealmExistingPostSubmitSectionProps {
   realmId: string;
   contentRequiresApproval?: boolean;
+  detailHref?: string;
+  postHref?: (postUnitId: string) => string;
 }
 
 export function RealmExistingPostSubmitSection({
   realmId,
   contentRequiresApproval = false,
+  detailHref = `/realm/${realmId}`,
+  postHref = (postUnitId) => `/realm/${realmId}/post/${postUnitId}`,
 }: RealmExistingPostSubmitSectionProps) {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
@@ -65,17 +69,11 @@ export function RealmExistingPostSubmitSection({
     onSuccess: (post) => {
       if (contentRequiresApproval) {
         toast.success("Submitted for review.");
-        navigate({
-          to: "/realm/$realmId",
-          params: { realmId },
-        });
+        navigate({ to: detailHref });
         return;
       }
       toast.success("Post published to realm.");
-      navigate({
-        to: "/realm/$realmId/post/$postUnitId",
-        params: { realmId, postUnitId: post.unitId },
-      });
+      navigate({ to: postHref(post.unitId) });
     },
   });
   const denial = policyDenialFromError(submitMutation.error);
