@@ -2,16 +2,19 @@ import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import { realmDetailQuery } from "@rezics/api/realm/realm";
-import { PostKind } from "@rezics/contract";
+import { type CommentListContext, PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Pencil } from "lucide-react";
 import type React from "react";
+import { useState } from "react";
 import {
   CommentThreadSection,
   ReplyComposer,
+  resolveDefaultCommentContext,
+  toCommentWriteRealmUnitId,
   useFocusReplyFromQuery,
 } from "@/comment";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
@@ -21,10 +24,19 @@ import { resolvePostDetailContext } from "../models/postDetailContext";
 
 export type PostThreadPageProps = {
   realmUnitId?: string | null;
+  /**
+   * Comment-context default for zone-framed routes (the zone's
+   * `config.context`). Realm/direct routes derive their default from the
+   * resolved post-detail context instead.
+   * 专区路由的评论语境默认值（专区的 `config.context`）。realm/直接路由
+   * 则从解析出的帖子详情语境推导默认值。
+   */
+  defaultCommentContext?: CommentListContext;
 };
 
 export const PostThreadPage: React.FC<PostThreadPageProps> = ({
   realmUnitId,
+  defaultCommentContext,
 }) => {
   const { t } = useTranslation(["common"]);
   const navigate = useNavigate();
@@ -39,6 +51,14 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     realmUnitId: contextRealmUnitId,
     reactionScopeKey,
   } = resolvePostDetailContext({ params, realmUnitId });
+  const defaultContext =
+    defaultCommentContext ?? resolveDefaultCommentContext(context);
+  // Mirrors the thread section's uncontrolled selector so the root composer
+  // writes into the partition the user is currently viewing.
+  // 镜像线程区块的非受控选择器，使根级编辑器写入用户当前查看的分区。
+  const [pickedCommentContext, setPickedCommentContext] =
+    useState<CommentListContext | null>(null);
+  const commentContext = pickedCommentContext ?? defaultContext;
   const search = useSearch({ strict: false }) as
     | { focusPostUnitId?: string | null }
     | undefined;
@@ -140,19 +160,21 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
           />
         </div>
       )}
-      {root && contextRealmUnitId && (
+      {root && (
         <ReplyComposer
           ref={composerRef}
           mode="progressive"
           targetUnitId={root.targetUnitId ?? root.unitId}
           rootUnitId={root.unitId}
-          realmUnitId={contextRealmUnitId}
+          realmUnitId={toCommentWriteRealmUnitId(commentContext)}
           parentCommentId={root.unitId}
         />
       )}
       <CommentThreadSection
         rootUnitId={rootPostUnitId}
-        realmUnitId={contextRealmUnitId}
+        defaultContext={defaultContext}
+        availableRealmUnitIds={[contextRealmUnitId, root?.realmUnitId]}
+        onContextChange={setPickedCommentContext}
         rootAuthorUserId={root?.author?.unitId ?? root?.authorUserId}
         summaryScopeKey={reactionScopeKey}
         reactionScopeKey={reactionScopeKey}

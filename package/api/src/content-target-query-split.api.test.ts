@@ -53,15 +53,18 @@ describe("target query split", () => {
 
   test("chapter pages query Unit.targetUnitId while comments query topology", async () => {
     await chapterApi.getByTargetUnitId("book-1", { limit: 20 });
+    const realmContext = encodeURIComponent(
+      JSON.stringify({ kind: "realm", realmUnitId: "realm-1" }),
+    );
     await commentApi.list({
       rootUnitId: "post-root-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       mode: "discovery",
       limit: 50,
     });
     await commentApi.list({
       rootUnitId: "chapter-discussion-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       mode: "root",
       rootCommentId: "comment-1",
       limit: 50,
@@ -69,8 +72,8 @@ describe("target query split", () => {
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
       "http://api.example/chapter/list?targetUnitId=book-1&limit=20",
-      "http://api.example/comment/list?rootUnitId=post-root-1&realmUnitId=realm-1&mode=discovery&limit=50",
-      "http://api.example/comment/list?rootUnitId=chapter-discussion-1&realmUnitId=realm-1&mode=root&rootCommentId=comment-1&limit=50",
+      `http://api.example/comment/list?rootUnitId=post-root-1&context=${realmContext}&mode=discovery&limit=50`,
+      `http://api.example/comment/list?rootUnitId=chapter-discussion-1&context=${realmContext}&mode=root&rootCommentId=comment-1&limit=50`,
     ]);
   });
 });

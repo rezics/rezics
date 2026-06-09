@@ -246,64 +246,64 @@ compatibility.
 
 ## 6. Frontend API (`package/api/src/`)
 
-- [ ] 6.1 Rewrite `package/api/src/zone/`: portal query, per-section data
+- [x] 6.1 Rewrite `package/api/src/zone/`: portal query, per-section data
   query with cursor (infinite), create/update mutations with translations,
   keys per section id; drop dead query shapes.
-- [ ] 6.2 Update `package/api/src/comment/` queries/mutations for the new
+- [x] 6.2 Update `package/api/src/comment/` queries/mutations for the new
   `realmUnitId` semantics (absent vs string; create with null).
-- [ ] 6.3 Add `package/api/src/label/` for LABEL search/create.
+- [x] 6.3 Add `package/api/src/label/` for LABEL search/create.
 
 ## 7. App portal rendering (`package/app/src/zone/`)
 
-- [ ] 7.1 Delete `templates/` (`default.tsx`, `book.tsx`, `wiki.tsx`,
+- [x] 7.1 Delete `templates/` (`default.tsx`, `book.tsx`, `wiki.tsx`,
   `types.ts`, stories) and legacy models (`zoneSections.ts`,
   `zoneManageDraft.ts` in its JSON-draft form); replace `ZoneHomePage.tsx`
   with a single `ZonePortalPage` that renders `config.pages.home.sections`.
-- [ ] 7.2 New section renderers under `components/sections/` for all 8 kinds:
+- [x] 7.2 New section renderers under `components/sections/` for all 8 kinds:
   `hero` (zone unit translations + theme/hero images + CTAs), `richText`
   (ContentDoc render of the fragment unit), `collection` (display variants),
   `query` (per-section data query + loadMore), `feed` (existing feed
   components, zone scope), `stats`, `tabs` (lazy pane fetch), `columns`
   (side/main layout). Empty states and default titles from i18n keys.
-- [ ] 7.3 `ZoneHeader`: layer-2 zone header (zone logo, menu dropdowns from
+- [x] 7.3 `ZoneHeader`: layer-2 zone header (zone logo, menu dropdowns from
   the menu registry, zone search); on scroll, sticky merged state absorbing
   the sidebar toggle + rezics mark on the left and the user area on the
   right; mobile drawer renders the same menu tree. Load the `rezics-design`
   skill when implementing; reuse theme tokens.
-- [ ] 7.4 `models/zoneMenu.ts`: menu tree model — label resolution chain
+- [x] 7.4 `models/zoneMenu.ts`: menu tree model — label resolution chain
   (labelUnitId → target unit title → external text), projections (header
   bar/dropdowns, drawer, in-page `menu`-style rendering via a
   `collection`/menu section), href resolution for `ZoneLinkTarget` (unit
   detail routes, zone pages, external).
-- [ ] 7.5 Routes: keep `routes/_mainLayout/z/$slug/{index,search,manage}` and
+- [x] 7.5 Routes: keep `routes/_mainLayout/z/$slug/{index,search,manage}` and
   zone-framed detail routes; when `config.context` is a realm, "create
   wiki/post" CTAs link to `/r/$realmSlug/create?mode=wiki` (explicit realm
   route — interaction stays realm-routed); hero join-CTA links to realm join.
-- [ ] 7.6 Model tests: label/title resolution, menu projection + depth
+- [x] 7.6 Model tests: label/title resolution, menu projection + depth
   rendering, ZoneLinkTarget href shapes, query-section param building,
   context-CTA routing.
 
 ## 8. Comment context selector (`package/app/src/comment/`)
 
-- [ ] 8.1 Context Select component (shadcn-style Select, label "context"):
+- [x] 8.1 Context Select component (shadcn-style Select, label "context"):
   options = All + the root unit's realms (from its `UnitRealm`-derived data);
   searchable when long; zone-context realm pinned first after All. Do not show
   direct-only in the normal selector; it exists as an API/test context, not a
   default user-facing mode. Default per surface: zone-framed routes →
   `config.context` realm, realm routes → that realm, direct unit routes → All.
-- [ ] 8.2 Thread view wires the Select to `CommentListQuery.context`
+- [x] 8.2 Thread view wires the Select to `CommentListQuery.context`
   (All → `{kind:"all"}`, realm option → `{kind:"realm", realmUnitId}`); All
   view renders a realm badge on realm-context comments.
-- [ ] 8.3 Composer: root comments take the Select's context (All → null);
+- [x] 8.3 Composer: root comments take the Select's context (All → null);
   reply composers show the inherited context read-only.
-- [ ] 8.4 Component/model tests for defaults per surface, badge rendering,
+- [x] 8.4 Component/model tests for defaults per surface, badge rendering,
   and write-context mapping.
 
 ## 9. i18n
 
-- [ ] 9.1 Add `"zone"` to `LAZY_NAMESPACES` in
+- [x] 9.1 Add `"zone"` to `LAZY_NAMESPACES` in
   `package/i18n/src/namespaces.ts`.
-- [ ] 9.2 Add `zone.json` for all six locales under
+- [x] 9.2 Add `zone.json` for all six locales under
   `package/i18n/locales/*/`: per-kind default section titles, load-more with
   `{label}` interpolation, tab "All", empty states, subscribe wording, stats
   labels. Comment-context strings (All / direct comment / context label) go

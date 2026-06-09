@@ -1,17 +1,19 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
+import type { CommentListContext } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import type React from "react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
+  COMMENT_CONTEXT_ALL,
   CommentThreadSection,
   ReplyComposer,
-  type ReplyComposerHandle,
+  toCommentWriteRealmUnitId,
   useFocusReplyFromQuery,
 } from "@/comment";
 import { QueryErrorDisplay } from "@/core";
@@ -55,6 +57,13 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
     surface: "review",
     ownerUnit: { user: review?.author },
   });
+  // Direct unit surface: the selector defaults to All; the root composer
+  // mirrors the user's pick so new comments target the selected partition.
+  // 直接 Unit 界面：选择器默认为“全部”；根级编辑器镜像用户的选择，使新
+  // 评论写入所选分区。
+  const [pickedCommentContext, setPickedCommentContext] =
+    useState<CommentListContext | null>(null);
+  const commentContext = pickedCommentContext ?? COMMENT_CONTEXT_ALL;
 
   if (isLoading) return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
@@ -100,13 +109,15 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
           mode="progressive"
           targetUnitId={review.targetUnitId ?? review.unitId}
           rootUnitId={review.unitId}
-          realmUnitId={review.realmUnitId}
+          realmUnitId={toCommentWriteRealmUnitId(commentContext)}
           parentCommentId={review.unitId}
         />
 
         <CommentThreadSection
           rootUnitId={review.unitId}
-          realmUnitId={review.realmUnitId}
+          defaultContext={COMMENT_CONTEXT_ALL}
+          availableRealmUnitIds={[review.realmUnitId]}
+          onContextChange={setPickedCommentContext}
           rootAuthorUserId={review.author?.unitId ?? review.authorUserId}
         />
       </div>

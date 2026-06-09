@@ -1,16 +1,17 @@
+import {
+  useUpdateZone,
+  zonePortalQueryOptions,
+  zoneQueryOptions,
+} from "@rezics/api";
 import { useServerPermission } from "@rezics/api/hooks";
 import { myRealmMembershipQuery } from "@rezics/api/realm/realm";
 import {
-  useUpdateZone,
-  zoneByUnitIdQueryOptions,
-  zoneQueryOptions,
-} from "@rezics/api/zone/zone";
-import type {
-  ZoneFilters,
-  ZonePages,
-  ZoneSection,
-  ZoneTheme,
+  ZONE_CONFIG_SCHEMA,
+  ZONE_CONFIG_V1_VERSION,
+  type ZoneConfig,
+  type ZoneTranslation,
 } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -26,18 +27,12 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 import { canManageZone } from "../models/canManageZone";
-import {
-  formatJsonDraft,
-  nullableText,
-  optionalText,
-  parseJsonDraft,
-} from "../models/zoneManageDraft";
 
-type ZoneManageTab = "profile" | "sections" | "theme" | "lifecycle";
+export type ZoneManageTab = "profile" | "config" | "lifecycle";
 
 type ZoneManagePageProps = {
   activeTab?: ZoneManageTab;
@@ -53,18 +48,48 @@ type ZoneManagePageProps = {
     }
 );
 
+type TranslationRow = {
+  /** Stable editor row identity (not the language). 稳定的编辑器行标识（非语言）。 */
+  rowId: string;
+  language: string;
+  title: string;
+  description: string;
+};
+
+let nextRowId = 0;
+function makeRowId(): string {
+  nextRowId += 1;
+  return `zone-translation-row-${nextRowId}`;
+}
+
+/**
+ * Interim manage surface for the versioned config era: structured editors
+ * (sections, menus, theme) land in a later batch; until then the whole
+ * `config` envelope is edited as one JSON document. The client only checks
+ * the envelope literals — the server validates strictly.
+ * 版本化配置时代的过渡管理界面：结构化编辑器（分区、菜单、主题）在后续
+ * 批次落地；在那之前整个 `config` 信封作为单个 JSON 文档编辑。客户端
+ * 只检查信封字面量——服务端进行严格校验。
+ */
 export function ZoneManagePage({
   unitId,
   slug,
   activeTab = "profile",
   onTabChange,
 }: ZoneManagePageProps) {
-  const byUnitIdQuery = useQuery(zoneByUnitIdQueryOptions(unitId ?? ""));
-  const bySlugQuery = useQuery(zoneQueryOptions(slug ?? ""));
-  const zone = unitId ? byUnitIdQuery.data : bySlugQuery.data;
-  const isLoading = unitId ? byUnitIdQuery.isLoading : bySlugQuery.isLoading;
-  const isError = unitId ? byUnitIdQuery.isError : bySlugQuery.isError;
-  const error = unitId ? byUnitIdQuery.error : bySlugQuery.error;
+  const { t } = useTranslation(["zone", "common"]);
+  const bySlugQuery = useQuery({
+    ...zoneQueryOptions(slug ?? ""),
+    enabled: !unitId && !!slug,
+  });
+  const byUnitQuery = useQuery({
+    ...zonePortalQueryOptions(unitId ?? ""),
+    enabled: !!unitId,
+  });
+  const zone = unitId ? byUnitQuery.data?.zone : bySlugQuery.data;
+  const isLoading = unitId ? byUnitQuery.isLoading : bySlugQuery.isLoading;
+  const isError = unitId ? byUnitQuery.isError : bySlugQuery.isError;
+  const error = unitId ? byUnitQuery.error : bySlugQuery.error;
 
   const membershipQuery = useQuery({
     ...myRealmMembershipQuery(zone?.ownerRealmUnitId ?? ""),
@@ -76,29 +101,26 @@ export function ZoneManagePage({
     ownerRealmMemberRoleKey: membershipQuery.data?.roleKey,
   });
   const updateZone = useUpdateZone({
-    onSuccess: () => toast.success("Zone settings saved."),
-    onError: (error) => toast.error(error.message),
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
   });
 
-  const [template, setTemplate] = useState("");
-  const [ownerRealmUnitId, setOwnerRealmUnitId] = useState("");
-  const [primaryRealmUnitId, setPrimaryRealmUnitId] = useState("");
-  const [filtersDraft, setFiltersDraft] = useState("{}");
-  const [pagesDraft, setPagesDraft] = useState("null");
-  const [sectionsDraft, setSectionsDraft] = useState("null");
-  const [themeDraft, setThemeDraft] = useState("null");
+  const [rows, setRows] = useState<TranslationRow[]>([]);
+  const [configDraft, setConfigDraft] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
 
   useEffect(() => {
     if (!zone) return;
-    setTemplate(zone.template);
-    setOwnerRealmUnitId(zone.ownerRealmUnitId);
-    setPrimaryRealmUnitId(zone.primaryRealmUnitId ?? "");
-    setFiltersDraft(formatJsonDraft(zone.filters ?? {}));
-    setPagesDraft(formatJsonDraft(zone.pages));
-    setSectionsDraft(formatJsonDraft(zone.sections));
-    setThemeDraft(formatJsonDraft(zone.theme));
+    setRows(
+      zone.translations.map((translation) => ({
+        rowId: makeRowId(),
+        language: translation.language,
+        title: translation.title ?? "",
+        description: translation.description ?? "",
+      })),
+    );
+    setConfigDraft(JSON.stringify(zone.config, null, 2));
     setStartsAt(zone.startsAt ?? "");
     setEndsAt(zone.endsAt ?? "");
   }, [zone]);
@@ -106,37 +128,47 @@ export function ZoneManagePage({
   const saving = updateZone.isPending;
   const unitIdForSave = zone?.unitId ?? "";
 
+  const updateRow = (rowId: string, patch: Partial<TranslationRow>) => {
+    setRows((current) =>
+      current.map((row) => (row.rowId === rowId ? { ...row, ...patch } : row)),
+    );
+  };
+
   const saveProfile = () => {
+    const translations = rows
+      .filter((row) => row.language.trim())
+      .map((row) => ({
+        language: row.language.trim(),
+        ...(row.title.trim() ? { title: row.title.trim() } : {}),
+        ...(row.description.trim()
+          ? { description: row.description.trim() }
+          : {}),
+      })) as ZoneTranslation[];
     updateZone.mutate({
       unitId: unitIdForSave,
-      input: {
-        ownerRealmUnitId: ownerRealmUnitId.trim(),
-        primaryRealmUnitId: nullableText(primaryRealmUnitId),
-        template: template.trim(),
-        filters: parseJsonDraft<ZoneFilters>("Filters", filtersDraft),
-      },
+      input: { translations },
     });
   };
 
-  const saveSections = () => {
+  const saveConfig = () => {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(configDraft);
+    } catch {
+      toast.error(t("zone:manage_config_invalid"));
+      return;
+    }
+    const envelope = parsed as { schema?: unknown; version?: unknown };
+    if (
+      envelope?.schema !== ZONE_CONFIG_SCHEMA ||
+      envelope?.version !== ZONE_CONFIG_V1_VERSION
+    ) {
+      toast.error(t("zone:manage_config_invalid"));
+      return;
+    }
     updateZone.mutate({
       unitId: unitIdForSave,
-      input: {
-        pages: parseJsonDraft<ZonePages | null>("Pages", pagesDraft),
-        sections: parseJsonDraft<ZoneSection[] | null>(
-          "Sections",
-          sectionsDraft,
-        ),
-      },
-    });
-  };
-
-  const saveTheme = () => {
-    updateZone.mutate({
-      unitId: unitIdForSave,
-      input: {
-        theme: parseJsonDraft<ZoneTheme | null>("Theme", themeDraft),
-      },
+      input: { config: parsed as ZoneConfig },
     });
   };
 
@@ -144,13 +176,11 @@ export function ZoneManagePage({
     updateZone.mutate({
       unitId: unitIdForSave,
       input: {
-        startsAt: optionalText(startsAt) ?? null,
-        endsAt: optionalText(endsAt) ?? null,
+        startsAt: startsAt.trim() ? startsAt.trim() : null,
+        endsAt: endsAt.trim() ? endsAt.trim() : null,
       },
     });
   };
-
-  const title = useMemo(() => zone?.name ?? zone?.slug ?? "Zone", [zone]);
 
   if (isLoading || membershipQuery.isLoading) {
     return (
@@ -172,7 +202,7 @@ export function ZoneManagePage({
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
-          Zone settings are unavailable for this zone.
+          {t("zone:not_found_description")}
         </div>
       </div>
     );
@@ -183,11 +213,10 @@ export function ZoneManagePage({
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <div className="rounded-md bg-surface-subtle p-6">
           <h1 className="text-lg font-semibold leading-ui text-text-primary">
-            Zone management unavailable
+            {t("zone:manage")}
           </h1>
           <p className="mt-2 text-sm leading-body text-text-secondary">
-            You need owner-realm manager or staff permissions to manage this
-            zone.
+            {t("zone:manage_denied")}
           </p>
         </div>
       </div>
@@ -198,11 +227,8 @@ export function ZoneManagePage({
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold leading-ui text-text-primary">
-          Manage {title}
+          {t("zone:manage")} · {zone.name || zone.slug}
         </h1>
-        <p className="mt-2 text-sm leading-body text-text-secondary">
-          Owner realm: {zone.ownerRealmUnitId}
-        </p>
       </div>
 
       <Tabs
@@ -210,112 +236,120 @@ export function ZoneManagePage({
         onValueChange={(value) => onTabChange?.(value as ZoneManageTab)}
       >
         <TabsList className="mb-6 flex flex-wrap">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="sections">Sections</TabsTrigger>
-          <TabsTrigger value="theme">Theme</TabsTrigger>
-          <TabsTrigger value="lifecycle">Lifecycle</TabsTrigger>
+          <TabsTrigger value="profile">{t("zone:manage_profile")}</TabsTrigger>
+          <TabsTrigger value="config">{t("zone:manage_config")}</TabsTrigger>
+          <TabsTrigger value="lifecycle">
+            {t("zone:manage_lifecycle")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
           <Card surface="contained">
             <CardContent className="flex flex-col gap-5 p-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Template" htmlFor="zone-template">
-                  <Input
-                    id="zone-template"
-                    value={template}
-                    onChange={(event) => setTemplate(event.target.value)}
-                  />
-                </Field>
-                <Field label="Owner realm Unit id" htmlFor="zone-owner-realm">
-                  <Input
-                    id="zone-owner-realm"
-                    value={ownerRealmUnitId}
-                    onChange={(event) =>
-                      setOwnerRealmUnitId(event.target.value)
-                    }
-                  />
-                </Field>
-                <Field
-                  label="Primary realm Unit id"
-                  htmlFor="zone-primary-realm"
+              <div className="flex flex-col gap-4">
+                {rows.map((row) => (
+                  <div
+                    key={row.rowId}
+                    className="grid gap-3 md:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)_auto]"
+                  >
+                    <Field
+                      label={t("common:language")}
+                      htmlFor={`${row.rowId}-language`}
+                    >
+                      <Input
+                        id={`${row.rowId}-language`}
+                        value={row.language}
+                        onChange={(event) =>
+                          updateRow(row.rowId, { language: event.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field
+                      label={t("common:title")}
+                      htmlFor={`${row.rowId}-title`}
+                    >
+                      <Input
+                        id={`${row.rowId}-title`}
+                        value={row.title}
+                        onChange={(event) =>
+                          updateRow(row.rowId, { title: event.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field
+                      label={t("common:description")}
+                      htmlFor={`${row.rowId}-description`}
+                    >
+                      <Input
+                        id={`${row.rowId}-description`}
+                        value={row.description}
+                        onChange={(event) =>
+                          updateRow(row.rowId, {
+                            description: event.target.value,
+                          })
+                        }
+                      />
+                    </Field>
+                    <div className="flex items-end">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() =>
+                          setRows((current) =>
+                            current.filter(
+                              (candidate) => candidate.rowId !== row.rowId,
+                            ),
+                          )
+                        }
+                      >
+                        {t("common:remove")}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    setRows((current) => [
+                      ...current,
+                      {
+                        rowId: makeRowId(),
+                        language: "",
+                        title: "",
+                        description: "",
+                      },
+                    ])
+                  }
                 >
-                  <Input
-                    id="zone-primary-realm"
-                    value={primaryRealmUnitId}
-                    onChange={(event) =>
-                      setPrimaryRealmUnitId(event.target.value)
-                    }
-                  />
-                </Field>
-              </div>
-              <Field label="Filters JSON" htmlFor="zone-filters">
-                <Textarea
-                  id="zone-filters"
-                  value={filtersDraft}
-                  onChange={(event) => setFiltersDraft(event.target.value)}
-                  rows={12}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <div className="flex justify-end">
+                  {t("common:add")}
+                </Button>
                 <Button onClick={saveProfile} disabled={saving}>
-                  Save profile
+                  {t("common:save")}
                 </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="sections">
+        <TabsContent value="config">
           <Card surface="contained">
             <CardContent className="flex flex-col gap-5 p-4">
-              <Field label="Pages JSON" htmlFor="zone-pages">
+              <Field label={t("zone:manage_config")} htmlFor="zone-config">
                 <Textarea
-                  id="zone-pages"
-                  value={pagesDraft}
-                  onChange={(event) => setPagesDraft(event.target.value)}
-                  rows={16}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <Field label="Legacy sections JSON" htmlFor="zone-sections">
-                <Textarea
-                  id="zone-sections"
-                  value={sectionsDraft}
-                  onChange={(event) => setSectionsDraft(event.target.value)}
-                  rows={10}
+                  id="zone-config"
+                  value={configDraft}
+                  onChange={(event) => setConfigDraft(event.target.value)}
+                  rows={24}
                   spellCheck={false}
                   className="font-mono text-sm leading-body"
                 />
               </Field>
               <div className="flex justify-end">
-                <Button onClick={saveSections} disabled={saving}>
-                  Save sections
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="theme">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <Field label="Theme JSON" htmlFor="zone-theme">
-                <Textarea
-                  id="zone-theme"
-                  value={themeDraft}
-                  onChange={(event) => setThemeDraft(event.target.value)}
-                  rows={16}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <div className="flex justify-end">
-                <Button onClick={saveTheme} disabled={saving}>
-                  Save theme
+                <Button onClick={saveConfig} disabled={saving}>
+                  {t("common:save")}
                 </Button>
               </div>
             </CardContent>
@@ -326,7 +360,10 @@ export function ZoneManagePage({
           <Card surface="contained">
             <CardContent className="flex flex-col gap-5 p-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Starts at" htmlFor="zone-starts-at">
+                <Field
+                  label={t("zone:manage_starts_at")}
+                  htmlFor="zone-starts-at"
+                >
                   <Input
                     id="zone-starts-at"
                     value={startsAt}
@@ -334,7 +371,7 @@ export function ZoneManagePage({
                     placeholder="2026-06-09T00:00:00.000Z"
                   />
                 </Field>
-                <Field label="Ends at" htmlFor="zone-ends-at">
+                <Field label={t("zone:manage_ends_at")} htmlFor="zone-ends-at">
                   <Input
                     id="zone-ends-at"
                     value={endsAt}
@@ -345,7 +382,7 @@ export function ZoneManagePage({
               </div>
               <div className="flex justify-end">
                 <Button onClick={saveLifecycle} disabled={saving}>
-                  Save lifecycle
+                  {t("common:save")}
                 </Button>
               </div>
             </CardContent>

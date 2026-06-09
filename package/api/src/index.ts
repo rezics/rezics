@@ -18,6 +18,7 @@ export * from "./feed/feed";
 export * from "./game-system-requirement/game-system-requirement";
 export * from "./governance/governance";
 export * from "./history/history";
+export * from "./label/label";
 export * from "./meili/meili";
 export * from "./progress";
 export {

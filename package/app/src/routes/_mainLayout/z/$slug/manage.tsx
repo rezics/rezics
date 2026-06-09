@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ZoneManagePage } from "@/zone";
+import { ZoneManagePage, type ZoneManageTab } from "@/zone";
 
-const manageTabs = ["profile", "sections", "theme", "lifecycle"] as const;
-
-type ZoneManageTab = (typeof manageTabs)[number];
+const manageTabs = ["profile", "config", "lifecycle"] as const;
 
 function isZoneManageTab(value: unknown): value is ZoneManageTab {
   return typeof value === "string" && manageTabs.includes(value as never);

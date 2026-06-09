@@ -1,69 +1,47 @@
 import type {
-  WikiZoneConfig,
-  WikiZoneHomepageData,
-  ZoneConfigVersion,
+  CreateZoneInput,
+  UpdateZoneInput,
   ZoneDTO,
-  ZoneFilters,
-  ZonePages,
-  ZoneSection,
-  ZoneTheme,
+  ZonePortalResponse,
+  ZoneSectionData,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
-
-export type CreateZoneInput = {
-  slug: string;
-  translations: Array<{
-    language: string;
-    title?: string;
-    description?: string;
-  }>;
-  ownerRealmUnitId: string;
-  filters: ZoneFilters;
-  configVersion?: ZoneConfigVersion;
-  pages?: ZonePages | null;
-  sections?: ZoneSection[] | null;
-  theme?: ZoneTheme | null;
-  primaryRealmUnitId?: string | null;
-  template: string;
-  styling?: Record<string, unknown>;
-  wiki?: WikiZoneConfig | null;
-  startsAt?: string;
-  endsAt?: string;
-};
-
-export type UpdateZoneInput = {
-  ownerRealmUnitId?: string;
-  filters?: ZoneFilters;
-  configVersion?: ZoneConfigVersion;
-  pages?: ZonePages | null;
-  sections?: ZoneSection[] | null;
-  theme?: ZoneTheme | null;
-  primaryRealmUnitId?: string | null;
-  template?: string;
-  styling?: Record<string, unknown> | null;
-  wiki?: WikiZoneConfig | null;
-  startsAt?: string | null;
-  endsAt?: string | null;
-};
+import { buildQueryString } from "../utils/buildQuery";
 
 export const zoneApi = {
-  getBySlug: async (slug: string): Promise<ZoneDTO> => {
-    return apiFetch<ZoneDTO>(`/zone/by-slug/${encodeURIComponent(slug)}`);
+  getBySlug: async (
+    slug: string,
+    languages: readonly string[] = [],
+  ): Promise<ZoneDTO> => {
+    const qs = buildQueryString({
+      languages: languages.length ? [...languages] : undefined,
+    });
+    return apiFetch<ZoneDTO>(`/zone/by-slug/${encodeURIComponent(slug)}${qs}`);
   },
 
-  get: async (unitId: string): Promise<ZoneDTO> => {
-    return apiFetch<ZoneDTO>(`/zone/${encodeURIComponent(unitId)}`);
-  },
-
-  getHomepage: async (
+  getPortal: async (
     unitId: string,
-    languages?: string[],
-  ): Promise<WikiZoneHomepageData> => {
-    const query = languages?.length
-      ? `?languages=${encodeURIComponent(languages.join(","))}`
-      : "";
-    return apiFetch<WikiZoneHomepageData>(
-      `/zone/${encodeURIComponent(unitId)}/homepage${query}`,
+    languages: readonly string[] = [],
+  ): Promise<ZonePortalResponse> => {
+    const qs = buildQueryString({
+      languages: languages.length ? [...languages] : undefined,
+    });
+    return apiFetch<ZonePortalResponse>(
+      `/zone/${encodeURIComponent(unitId)}/portal${qs}`,
+    );
+  },
+
+  getSection: async (
+    unitId: string,
+    sectionId: string,
+    options: { cursor?: string; languages?: readonly string[] } = {},
+  ): Promise<ZoneSectionData> => {
+    const qs = buildQueryString({
+      cursor: options.cursor,
+      languages: options.languages?.length ? [...options.languages] : undefined,
+    });
+    return apiFetch<ZoneSectionData>(
+      `/zone/${encodeURIComponent(unitId)}/section/${encodeURIComponent(sectionId)}${qs}`,
     );
   },
 

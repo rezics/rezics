@@ -1,12 +1,33 @@
-import { zoneQueryOptions } from "@rezics/api";
+import { zonePortalQueryOptions, zoneQueryOptions } from "@rezics/api";
 import { useQuery } from "@tanstack/react-query";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
-export function useZone(slug: string) {
-  const { data, isLoading, error } = useQuery(zoneQueryOptions(slug));
+/**
+ * Portal data is keyed by unitId while routes are slug-canonical, so the
+ * portal read chains slug → zone → portal (zone + ref-unit summaries).
+ * 门户数据以 unitId 为键，而路由以 slug 为正则入口，因此门户读取按
+ * slug → zone → 门户（zone + 引用 Unit 摘要）链式获取。
+ */
+export function useZonePortal(slug: string) {
+  const readContext = useReadLanguageContext();
+  const zoneQuery = useQuery({
+    ...zoneQueryOptions(slug, readContext.languages),
+    enabled: readContext.ready && !!slug,
+  });
+  const unitId = zoneQuery.data?.unitId ?? "";
+  const portalQuery = useQuery({
+    ...zonePortalQueryOptions(unitId, readContext.languages),
+    enabled: readContext.ready && !!unitId,
+  });
 
   return {
-    zone: data,
-    isLoading,
-    error,
+    zone: portalQuery.data?.zone,
+    refUnits: portalQuery.data?.refUnits,
+    languages: readContext.languages,
+    isLoading:
+      !readContext.ready ||
+      zoneQuery.isLoading ||
+      (!!unitId && portalQuery.isLoading),
+    error: zoneQuery.error ?? portalQuery.error,
   };
 }

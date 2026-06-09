@@ -30,6 +30,7 @@ export interface CommentTreeNodeProps {
   summaryScopeKey?: string | null;
   reactionScopeKey?: string | null;
   renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
+  renderContextBadge?: (post: CommentDTO) => React.ReactNode;
   onComposerSubmitted: (parentCommentId: string, post: CommentDTO) => void;
   onComposerDone: (postUnitId: string) => void;
   onThreadHoverChange: (postUnitId: string, hovered: boolean) => void;
@@ -49,6 +50,7 @@ export function CommentTreeNode({
   summaryScopeKey,
   reactionScopeKey,
   renderOverflowContent,
+  renderContextBadge,
   onComposerSubmitted,
   onComposerDone,
   onThreadHoverChange,
@@ -136,6 +138,7 @@ export function CommentTreeNode({
             summaryScopeKey={summaryScopeKey}
             reactionScopeKey={reactionScopeKey}
             overflowContent={renderOverflowContent?.(post)}
+            contextBadge={renderContextBadge?.(post)}
             replyComposerSlot={
               composerOpen ? (
                 <ReplyComposer
@@ -143,7 +146,7 @@ export function CommentTreeNode({
                   autoFocus
                   targetUnitId={rootUnitId}
                   rootUnitId={rootUnitId}
-                  realmUnitId={post.realmUnitId}
+                  realmUnitId={post.realmUnitId ?? null}
                   parentCommentId={post.unitId}
                   onSubmitted={(createdPost) => {
                     if (!("rootUnitId" in createdPost)) return;
@@ -195,6 +198,7 @@ export function CommentTreeNode({
                 summaryScopeKey={summaryScopeKey}
                 reactionScopeKey={reactionScopeKey}
                 renderOverflowContent={renderOverflowContent}
+                renderContextBadge={renderContextBadge}
                 onComposerSubmitted={onComposerSubmitted}
                 onComposerDone={onComposerDone}
                 onThreadHoverChange={onThreadHoverChange}

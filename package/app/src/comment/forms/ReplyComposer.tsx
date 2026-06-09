@@ -1,5 +1,6 @@
 import { useCreateCommentMutation } from "@rezics/api/comment/comment";
 import { useCreatePostMutation } from "@rezics/api/post/post";
+import { realmDetailQuery } from "@rezics/api/realm/realm";
 import {
   type CommentDTO,
   markdownContentDoc,
@@ -17,6 +18,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Link2 } from "lucide-react";
 import {
   forwardRef,
@@ -51,6 +53,15 @@ export type ReplyComposerReplyModeProps = ReplyComposerBaseProps & {
   targetUnitId: string;
   variantUnitId?: string;
   rootUnitId?: string;
+  /**
+   * Comment write context, mirroring `CreateCommentInput.realmUnitId`:
+   * `null` is a direct comment, a string is a realm-context comment. When
+   * `parentCommentId` is set it must be provided explicitly (replies pass
+   * the parent's context; the server rejects a mismatch).
+   * 评论写入语境，对应 `CreateCommentInput.realmUnitId`：`null` 为直接
+   * 评论，字符串为 realm 语境评论。设置了 `parentCommentId` 时必须显式
+   * 提供（回复传入父评论的语境；不一致会被服务端拒绝）。
+   */
   realmUnitId?: string | null;
   parentCommentId?: string;
   realmUnitIds?: never;
@@ -111,8 +122,27 @@ export const ReplyComposer = forwardRef<
       (props as Partial<ReplyComposerReplyModeProps>).targetUnitId ||
         (props as Partial<ReplyComposerReplyModeProps>).parentCommentId,
     );
+  // `null` is a valid write target (direct comment); only an absent value
+  // is a wiring error now that `CreateCommentInput.realmUnitId` is
+  // required-nullable.
+  // `null` 是合法的写入目标（直接评论）；既然 `CreateCommentInput.realmUnitId`
+  // 已是必填可空字段，只有缺失值才算接线错误。
   const invalidCommentReplyMode =
-    isCommentReplyMode && (!rootUnitId || !realmUnitId);
+    isCommentReplyMode && (!rootUnitId || realmUnitId === undefined);
+  // True replies (not the root-level composer, whose parent is the root
+  // itself) inherit the parent comment's context server-side; surface it
+  // read-only above the editor.
+  // 真正的回复（而非父级即根的根级编辑器）在服务端继承父评论的语境；
+  // 在编辑器上方以只读方式展示。
+  const isInheritedContextReply =
+    isCommentReplyMode && parentCommentId !== rootUnitId;
+  const inheritedRealmUnitId = isInheritedContextReply
+    ? (realmUnitId ?? null)
+    : null;
+  const inheritedRealmQuery = useQuery({
+    ...realmDetailQuery(inheritedRealmUnitId ?? ""),
+    enabled: Boolean(inheritedRealmUnitId),
+  });
   const startsExpanded = mode === "expanded" || autoFocus;
   const [expanded, setExpanded] = useState<boolean>(startsExpanded);
   const [body, setBody] = useState("");
@@ -135,7 +165,7 @@ export const ReplyComposer = forwardRef<
 
   const submitReply = (content: ReturnType<typeof markdownContentDoc>) => {
     if (parentCommentId) {
-      if (!rootUnitId || !realmUnitId) return;
+      if (!rootUnitId || realmUnitId === undefined) return;
       commentMutation.mutate(
         {
           rootUnitId,
@@ -369,6 +399,15 @@ export const ReplyComposer = forwardRef<
       onClick={(e) => e.stopPropagation()}
       className="flex flex-col gap-2"
     >
+      {isInheritedContextReply ? (
+        <p className="text-xs leading-ui text-text-tertiary">
+          {t("community:comment_context_reply_in", {
+            context: inheritedRealmUnitId
+              ? (inheritedRealmQuery.data?.title ?? inheritedRealmUnitId)
+              : t("community:comment_context_direct"),
+          })}
+        </p>
+      ) : null}
       <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
       {isRealmPostMode && (realmUnitIds?.length ?? 0) > 0 && (
         <RealmPostTagPicker

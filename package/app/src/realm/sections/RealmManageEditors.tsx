@@ -5,7 +5,7 @@ import {
 import { tagApi } from "@rezics/api/tag/tag";
 import { unitApi, unitQueries } from "@rezics/api/unit/unit";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
-import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
+import { zonePortalQueryOptions } from "@rezics/api/zone/zone";
 import type {
   RealmAvatarExtra,
   RealmBannerExtra,
@@ -13,10 +13,6 @@ import type {
   RealmTagViewStyle,
   TagTreeNode,
   UnitDTO,
-  WikiZoneConfig,
-  WikiZoneHomepageSection,
-  WikiZoneNavigation,
-  WikiZoneTheme,
 } from "@rezics/contract";
 import {
   contentDocMarkdownFallback,
@@ -25,10 +21,12 @@ import {
   markdownContentDoc,
   normalizeLanguage,
 } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import {
   Button,
+  buttonVariants,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -42,7 +40,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -51,7 +48,6 @@ import {
   Download,
   ListTree,
   Plus,
-  Save,
   Tag,
   Trash2,
   Type,
@@ -63,17 +59,18 @@ import { Tree } from "react-arborist";
 import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import {
   clearTreeEditOpLog,
-  ensureTreeChildren,
   emptyTreeEditOpLog,
   enqueueTreeEditOp,
+  ensureTreeChildren,
+  type TreeActionItem,
+  type TreeEditOpLog,
   TreeEditorFooter,
   TreeEditorRow,
   TreeMoveToDialog,
-  type TreeActionItem,
-  type TreeEditOpLog,
 } from "@/tree-edit";
 
 function nodeLabel(node: TagTreeNode) {
@@ -103,73 +100,10 @@ function unitLabel(unit: UnitDTO) {
   return unit.title ?? tr?.title ?? unit.slug ?? unit.id;
 }
 
-const wikiTemplateOptions = [
-  "wiki-classic",
-  "wiki-media",
-  "wiki-database",
-  "wiki-minimal",
-] as const;
-type WikiTemplateOption = (typeof wikiTemplateOptions)[number];
-
-const wikiHomepageTemplateOptions = [
-  "wiki-classic-home",
-  "wiki-media-home",
-  "wiki-database-home",
-  "wiki-minimal-home",
-] as const;
-type WikiHomepageTemplateOption = (typeof wikiHomepageTemplateOptions)[number];
-
-const densityOptions = ["comfortable", "compact"] as const;
-const navPositionOptions = ["side", "top"] as const;
-const contentWidthOptions = ["normal", "wide"] as const;
-const infoboxPositionOptions = ["right", "inline"] as const;
-const labelInsertTargets = ["navigation", "homepage"] as const;
 const TREE_DROP_INDENT = 32;
-type DensityOption = (typeof densityOptions)[number];
-type NavPositionOption = (typeof navPositionOptions)[number];
-type ContentWidthOption = (typeof contentWidthOptions)[number];
-type InfoboxPositionOption = (typeof infoboxPositionOptions)[number];
-type LabelInsertTarget = (typeof labelInsertTargets)[number];
 
 function prettyJson(value: unknown) {
   return JSON.stringify(value, null, 2);
-}
-
-function parseJsonField<T>(value: string, fallback: T): T {
-  const trimmed = value.trim();
-  if (!trimmed) return fallback;
-  return JSON.parse(trimmed) as T;
-}
-
-function hexToRgb(value: string): [number, number, number] | null {
-  const hex = value.trim().replace(/^#/, "");
-  if (!/^[0-9a-f]{6}$/i.test(hex)) return null;
-  return [
-    Number.parseInt(hex.slice(0, 2), 16),
-    Number.parseInt(hex.slice(2, 4), 16),
-    Number.parseInt(hex.slice(4, 6), 16),
-  ];
-}
-
-function relativeLuminance([r, g, b]: [number, number, number]) {
-  const channel = (value: number) => {
-    const normalized = value / 255;
-    return normalized <= 0.03928
-      ? normalized / 12.92
-      : ((normalized + 0.055) / 1.055) ** 2.4;
-  };
-  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-}
-
-function hasLowContrast(foreground: string, background: string) {
-  const fg = hexToRgb(foreground);
-  const bg = hexToRgb(background);
-  if (!fg || !bg) return false;
-  const fgLum = relativeLuminance(fg);
-  const bgLum = relativeLuminance(bg);
-  const lighter = Math.max(fgLum, bgLum);
-  const darker = Math.min(fgLum, bgLum);
-  return (lighter + 0.05) / (darker + 0.05) < 4.5;
 }
 
 export function TagViewPreferenceEditor({
@@ -260,12 +194,14 @@ export function WikiZonePicker({
   realmId: string;
   value?: string | null;
 }) {
+  const { t } = useTranslation(["zone"]);
   const [zoneId, setZoneId] = useState(value ?? "");
   const [error, setError] = useState<string | null>(null);
   const trimmedZoneId = zoneId.trim();
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
-  const zoneQuery = useQuery(zoneByUnitIdQueryOptions(trimmedZoneId));
+  const zoneQuery = useQuery(zonePortalQueryOptions(trimmedZoneId));
+  const zone = zoneQuery.data?.zone;
 
   useEffect(() => {
     setZoneId(value ?? "");
@@ -308,10 +244,10 @@ export function WikiZonePicker({
       />
       {trimmedZoneId && (
         <div className="rounded-md border border-border-default bg-surface-base px-3 py-2 text-sm leading-ui">
-          {zoneQuery.data ? (
+          {zone ? (
             <div className="flex flex-col gap-1">
               <span className="font-medium text-text-primary">
-                {zoneQuery.data.name || zoneQuery.data.slug}
+                {zone.name || zone.slug}
               </span>
               <span className="text-text-secondary">
                 {getI18nRuntime().i18n.t("common:selected_id", {
@@ -343,472 +279,24 @@ export function WikiZonePicker({
           {getI18nRuntime().i18n.t("common:save")}
         </Button>
       </div>
-      {zoneQuery.data && (
-        <WikiZoneConfigEditor realmId={realmId} zone={zoneQuery.data} />
+      {zone && (
+        // Zone layout/menus/theme are edited on the zone's own manage page
+        // (versioned config envelope); the legacy inline wiki-zone editor
+        // is gone.
+        // 专区的布局/菜单/主题在专区自己的管理页编辑（版本化配置信封）；
+        // 旧的内联 wiki 专区编辑器已移除。
+        <div className="flex justify-end border-t border-border-default pt-3">
+          <SafeLink
+            href={`/z/${zone.slug}/manage`}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+          >
+            {t("zone:manage")}
+          </SafeLink>
+        </div>
       )}
     </div>
   );
 }
-
-export function WikiZoneConfigEditor({
-  realmId,
-  zone,
-}: {
-  realmId: string;
-  zone: {
-    unitId: string;
-    template: string;
-    wiki?: WikiZoneConfig | null;
-  };
-}) {
-  const updateZone = useUpdateZone();
-  const wiki = zone.wiki;
-  const theme = wiki?.theme;
-  const homepage = wiki?.homepage;
-  const [template, setTemplate] = useState<WikiTemplateOption>(
-    theme?.template ?? "wiki-classic",
-  );
-  const [homepageTemplate, setHomepageTemplate] =
-    useState<WikiHomepageTemplateOption>(
-      theme?.homepageTemplate ?? homepage?.template ?? "wiki-classic-home",
-    );
-  const [background, setBackground] = useState(
-    theme?.palette?.background ?? "",
-  );
-  const [surface, setSurface] = useState(theme?.palette?.surface ?? "");
-  const [text, setText] = useState(theme?.palette?.text ?? "");
-  const [accent, setAccent] = useState(theme?.palette?.accent ?? "");
-  const [density, setDensity] = useState<DensityOption>(
-    theme?.chrome?.density ?? "comfortable",
-  );
-  const [navPosition, setNavPosition] = useState<NavPositionOption>(
-    theme?.chrome?.navPosition ?? "side",
-  );
-  const [contentWidth, setContentWidth] = useState<ContentWidthOption>(
-    theme?.layout?.contentWidth ?? "normal",
-  );
-  const [infoboxPosition, setInfoboxPosition] = useState<InfoboxPositionOption>(
-    theme?.layout?.infoboxPosition ?? "right",
-  );
-  const [navigationJson, setNavigationJson] = useState(
-    prettyJson(wiki?.navigation ?? { sections: [] }),
-  );
-  const [sectionsJson, setSectionsJson] = useState(
-    prettyJson(homepage?.sections ?? []),
-  );
-  const [labelSearch, setLabelSearch] = useState("");
-  const [labelTitle, setLabelTitle] = useState("");
-  const [labelTarget, setLabelTarget] =
-    useState<LabelInsertTarget>("navigation");
-  const [error, setError] = useState<string | null>(null);
-  const authoringLanguage = useAuthoringLanguageDefault();
-  const readContext = useReadLanguageContext();
-  const labelSearchTerm = labelSearch.trim();
-  const { data: labelSearchData } = useQuery({
-    ...unitQueries.search(labelSearchTerm, {
-      type: "LABEL",
-      languages: readContext.languages,
-      appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
-      limit: 8,
-    }),
-    enabled: readContext.ready && Boolean(labelSearchTerm),
-  });
-
-  useEffect(() => {
-    setTemplate(theme?.template ?? "wiki-classic");
-    setHomepageTemplate(
-      theme?.homepageTemplate ?? homepage?.template ?? "wiki-classic-home",
-    );
-    setBackground(theme?.palette?.background ?? "");
-    setSurface(theme?.palette?.surface ?? "");
-    setText(theme?.palette?.text ?? "");
-    setAccent(theme?.palette?.accent ?? "");
-    setDensity(theme?.chrome?.density ?? "comfortable");
-    setNavPosition(theme?.chrome?.navPosition ?? "side");
-    setContentWidth(theme?.layout?.contentWidth ?? "normal");
-    setInfoboxPosition(theme?.layout?.infoboxPosition ?? "right");
-    setNavigationJson(prettyJson(wiki?.navigation ?? { sections: [] }));
-    setSectionsJson(prettyJson(homepage?.sections ?? []));
-  }, [homepage, theme, wiki]);
-
-  const insertLabel = (labelUnitId: string, target: LabelInsertTarget) => {
-    try {
-      if (target === "navigation") {
-        const navigation = parseJsonField<WikiZoneNavigation>(navigationJson, {
-          sections: [],
-        });
-        const [firstSection, ...restSections] = navigation.sections;
-        const nextFirstSection = firstSection ?? { id: "main", items: [] };
-        setNavigationJson(
-          prettyJson({
-            sections: [
-              {
-                ...nextFirstSection,
-                items: [
-                  { kind: "labelHeading", labelUnitId },
-                  ...nextFirstSection.items,
-                ],
-              },
-              ...restSections,
-            ],
-          }),
-        );
-      } else {
-        const sections = parseJsonField<WikiZoneHomepageSection[]>(
-          sectionsJson,
-          [],
-        );
-        setSectionsJson(
-          prettyJson([
-            {
-              id: `label-${labelUnitId.slice(0, 8)}`,
-              kind: "manualLinks",
-              titleLabelUnitId: labelUnitId,
-              links: [],
-            },
-            ...sections,
-          ]),
-        );
-      }
-      setError(null);
-    } catch {
-      const message = getI18nRuntime().i18n.t(
-        "entity:realm_wiki_zone_invalid_json",
-      );
-      setError(message);
-      toast.error(message);
-    }
-  };
-
-  const createLabel = async () => {
-    const title = labelTitle.trim();
-    if (!title) return;
-    setError(null);
-    try {
-      const created = await unitApi.create({
-        type: "LABEL",
-        isLanguageNeutral: true,
-        translations: [{ language: authoringLanguage, title }],
-      });
-      insertLabel(created.id, labelTarget);
-      setLabelTitle("");
-      toast.success(
-        getI18nRuntime().i18n.t("entity:realm_wiki_zone_label_created"),
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setError(message);
-      toast.error(message);
-    }
-  };
-
-  const save = async () => {
-    setError(null);
-    try {
-      const navigation = parseJsonField<WikiZoneNavigation>(navigationJson, {
-        sections: [],
-      });
-      const sections = parseJsonField<WikiZoneHomepageSection[]>(
-        sectionsJson,
-        [],
-      );
-      const palette: NonNullable<WikiZoneTheme["palette"]> = {};
-      if (background.trim()) palette.background = background.trim();
-      if (surface.trim()) palette.surface = surface.trim();
-      if (text.trim()) palette.text = text.trim();
-      if (accent.trim()) palette.accent = accent.trim();
-      if (
-        palette.text &&
-        ((palette.background &&
-          hasLowContrast(palette.text, palette.background)) ||
-          (palette.surface && hasLowContrast(palette.text, palette.surface)))
-      ) {
-        throw new Error(
-          getI18nRuntime().i18n.t("entity:realm_wiki_zone_low_contrast"),
-        );
-      }
-
-      const nextTheme: WikiZoneTheme = {
-        template,
-        homepageTemplate,
-        ...(Object.keys(palette).length ? { palette } : {}),
-        chrome: { density, navPosition },
-        layout: { contentWidth, infoboxPosition },
-      };
-      const nextWiki: WikiZoneConfig = {
-        filters: {
-          ...wiki?.filters,
-          realmUnitId: wiki?.filters.realmUnitId ?? realmId,
-          type: "POST",
-          postKind: wiki?.filters.postKind ?? "WIKI",
-        },
-        navigation,
-        homepage: { template: homepageTemplate, sections },
-        theme: nextTheme,
-      };
-
-      await updateZone.mutateAsync({
-        unitId: zone.unitId,
-        input: { template, wiki: nextWiki },
-      });
-      toast.success(
-        getI18nRuntime().i18n.t("entity:realm_wiki_zone_config_saved"),
-      );
-    } catch (error) {
-      const message =
-        error instanceof SyntaxError
-          ? getI18nRuntime().i18n.t("entity:realm_wiki_zone_invalid_json")
-          : error instanceof Error
-            ? error.message
-            : String(error);
-      setError(message);
-      toast.error(message);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-4 border-t border-border-default pt-4">
-      <div>
-        <h4 className="text-sm font-medium leading-ui text-text-primary">
-          {getI18nRuntime().i18n.t("entity:realm_wiki_zone_editor")}
-        </h4>
-        <p className="mt-1 text-sm leading-body text-text-secondary">
-          {getI18nRuntime().i18n.t("entity:realm_wiki_zone_editor_description")}
-        </p>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2">
-        <LabeledSelect
-          label={getI18nRuntime().i18n.t("entity:realm_wiki_zone_template")}
-          value={template}
-          options={wikiTemplateOptions}
-          onChange={setTemplate}
-        />
-        <LabeledSelect
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_wiki_zone_homepage_template",
-          )}
-          value={homepageTemplate}
-          options={wikiHomepageTemplateOptions}
-          onChange={setHomepageTemplate}
-        />
-        <LabeledSelect
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_wiki_zone_theme_density",
-          )}
-          value={density}
-          options={densityOptions}
-          onChange={setDensity}
-        />
-        <LabeledSelect
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_wiki_zone_theme_nav_position",
-          )}
-          value={navPosition}
-          options={navPositionOptions}
-          onChange={setNavPosition}
-        />
-        <LabeledSelect
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_wiki_zone_theme_content_width",
-          )}
-          value={contentWidth}
-          options={contentWidthOptions}
-          onChange={setContentWidth}
-        />
-        <LabeledSelect
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_wiki_zone_theme_infobox_position",
-          )}
-          value={infoboxPosition}
-          options={infoboxPositionOptions}
-          onChange={setInfoboxPosition}
-        />
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2">
-        <LabeledInput
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_wiki_zone_theme_background",
-          )}
-          value={background}
-          onChange={setBackground}
-        />
-        <LabeledInput
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_wiki_zone_theme_surface",
-          )}
-          value={surface}
-          onChange={setSurface}
-        />
-        <LabeledInput
-          label={getI18nRuntime().i18n.t("entity:realm_wiki_zone_theme_text")}
-          value={text}
-          onChange={setText}
-        />
-        <LabeledInput
-          label={getI18nRuntime().i18n.t("entity:realm_wiki_zone_theme_accent")}
-          value={accent}
-          onChange={setAccent}
-        />
-      </div>
-
-      <div className="flex flex-col gap-3 rounded-md border border-border-default bg-surface-base p-3">
-        <div>
-          <h5 className="text-sm font-medium leading-ui text-text-primary">
-            {getI18nRuntime().i18n.t("entity:realm_wiki_zone_label_picker")}
-          </h5>
-          <p className="mt-1 text-sm leading-body text-text-secondary">
-            {getI18nRuntime().i18n.t(
-              "entity:realm_wiki_zone_label_picker_description",
-            )}
-          </p>
-        </div>
-        <div className="grid gap-3 md:grid-cols-[1fr_11rem]">
-          <Input
-            value={labelSearch}
-            onChange={(event) => setLabelSearch(event.target.value)}
-            placeholder={getI18nRuntime().i18n.t(
-              "entity:realm_wiki_zone_label_search_placeholder",
-            )}
-          />
-          <LabeledSelect
-            label=""
-            value={labelTarget}
-            options={labelInsertTargets}
-            onChange={setLabelTarget}
-            getLabel={(option) =>
-              option === "navigation"
-                ? getI18nRuntime().i18n.t(
-                    "entity:realm_wiki_zone_label_navigation",
-                  )
-                : getI18nRuntime().i18n.t(
-                    "entity:realm_wiki_zone_label_homepage",
-                  )
-            }
-          />
-        </div>
-        {labelSearchTerm && labelSearchData?.units?.length ? (
-          <div className="flex flex-wrap gap-2">
-            {labelSearchData.units.map((unit) => (
-              <Button
-                key={unit.id}
-                type="button"
-                size="sm"
-                variant="secondary"
-                onClick={() => insertLabel(unit.id, labelTarget)}
-              >
-                {unitLabel(unit)}
-              </Button>
-            ))}
-          </div>
-        ) : null}
-        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-          <Input
-            value={labelTitle}
-            onChange={(event) => setLabelTitle(event.target.value)}
-            placeholder={getI18nRuntime().i18n.t(
-              "entity:realm_wiki_zone_label_title_placeholder",
-            )}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={createLabel}
-            disabled={!labelTitle.trim()}
-          >
-            {getI18nRuntime().i18n.t("entity:realm_wiki_zone_label_create")}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <Label>
-            {getI18nRuntime().i18n.t("entity:realm_wiki_zone_navigation_json")}
-          </Label>
-          <Textarea
-            value={navigationJson}
-            onChange={(event) => setNavigationJson(event.target.value)}
-            className="min-h-48 font-mono text-xs"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label>
-            {getI18nRuntime().i18n.t(
-              "entity:realm_wiki_zone_homepage_sections_json",
-            )}
-          </Label>
-          <Textarea
-            value={sectionsJson}
-            onChange={(event) => setSectionsJson(event.target.value)}
-            className="min-h-48 font-mono text-xs"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        {error && (
-          <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
-        )}
-        <Button type="button" onClick={save} disabled={updateZone.isPending}>
-          {getI18nRuntime().i18n.t("common:save")}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function LabeledInput({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label>{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} />
-    </div>
-  );
-}
-
-function LabeledSelect<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-  getLabel,
-}: {
-  label: string;
-  value: T;
-  options: readonly T[];
-  onChange: (value: T) => void;
-  getLabel?: (value: T) => string;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      {label ? <Label>{label}</Label> : null}
-      <Select value={value} onValueChange={(next) => onChange(next as T)}>
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {getLabel ? getLabel(option) : option}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
 export function TagTreeEditor({
   realmId,
   initialValue,

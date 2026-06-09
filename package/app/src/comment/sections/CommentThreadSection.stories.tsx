@@ -1,6 +1,7 @@
 import { commentKeys } from "@rezics/api/comment/comment.keys";
 import {
   type CommentDTO,
+  type CommentListContext,
   type CommentSortMode,
   markdownContentDoc,
 } from "@rezics/contract";
@@ -8,11 +9,16 @@ import { Button } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { CommentReply } from "../components/item/CommentReply";
 import { CommentThreadSection } from "./CommentThreadSection";
 import { CommentTreeList } from "./CommentTreeList";
 
 const ROOT_ID = "fixture-root-1";
 const REALM_ID = "fixture-realm-1";
+const REALM_CONTEXT: CommentListContext = {
+  kind: "realm",
+  realmUnitId: REALM_ID,
+};
 const COMMENT_SORTS: CommentSortMode[] = [
   "best",
   "top",
@@ -202,7 +208,7 @@ function Seeded({
     for (const sort of COMMENT_SORTS) {
       const query = {
         rootUnitId: ROOT_ID,
-        realmUnitId: REALM_ID,
+        context: REALM_CONTEXT,
         mode: "discovery" as const,
         sort,
         limit: 50,
@@ -216,25 +222,28 @@ function Seeded({
 
   return (
     <div className="p-4">
-      <CommentThreadSection rootUnitId={ROOT_ID} realmUnitId={REALM_ID} />
+      <CommentThreadSection
+        rootUnitId={ROOT_ID}
+        defaultContext={REALM_CONTEXT}
+      />
     </div>
   );
 }
 
 function RootEntryPreview({
   rootComment,
-  children,
+  childComments,
   hasMore = false,
 }: {
   rootComment: CommentDTO;
-  children: CommentDTO[];
+  childComments: CommentDTO[];
   hasMore?: boolean;
 }) {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
       <CommentReply post={rootComment} />
       <CommentTreeList
-        posts={children}
+        posts={childComments}
         rootUnitId={ROOT_ID}
         baseDepth={rootComment.depth ?? 0}
       />
@@ -254,7 +263,7 @@ const meta = {
   component: CommentThreadSection,
   args: {
     rootUnitId: ROOT_ID,
-    realmUnitId: REALM_ID,
+    defaultContext: REALM_CONTEXT,
   },
 } satisfies Meta<typeof CommentThreadSection>;
 
@@ -298,7 +307,7 @@ export const RootCommentEntry: Story = {
   render: () => (
     <RootEntryPreview
       rootComment={THREADED_3DEEP_POSTS[0]!}
-      children={THREADED_3DEEP_POSTS.slice(1)}
+      childComments={THREADED_3DEEP_POSTS.slice(1)}
       hasMore
     />
   ),
@@ -308,7 +317,7 @@ export const DirectChildExpansion: Story = {
   render: () => (
     <RootEntryPreview
       rootComment={CONTINUOUS_RAIL_POSTS[0]!}
-      children={CONTINUOUS_RAIL_POSTS.slice(1)}
+      childComments={CONTINUOUS_RAIL_POSTS.slice(1)}
     />
   ),
 };

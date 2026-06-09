@@ -28,6 +28,12 @@ interface CommentReplyProps {
   onReply?: () => void;
   overflowContent?: React.ReactNode;
   replyComposerSlot?: React.ReactNode;
+  /**
+   * Context (realm/direct) badge supplied by mixed "All" thread views;
+   * single-context views leave it unset.
+   * 混合“全部”线程视图传入的语境（realm/直接）徽章；单一语境视图不设置。
+   */
+  contextBadge?: React.ReactNode;
   showAvatar?: boolean;
   summaryScopeKey?: string | null;
   reactionScopeKey?: string | null;
@@ -38,6 +44,7 @@ export const CommentReply: React.FC<CommentReplyProps> = ({
   onReply,
   overflowContent,
   replyComposerSlot,
+  contextBadge,
   showAvatar = true,
   summaryScopeKey,
   reactionScopeKey,
@@ -89,7 +96,14 @@ export const CommentReply: React.FC<CommentReplyProps> = ({
     <div className="flex min-w-0 flex-col gap-1 py-1">
       <PostAuthorHeader post={post} size="compact" showAvatar={showAvatar} />
       <div className={`flex min-w-0 flex-col gap-1 ${contentIndentClass}`}>
-        {post.pinKind ? <CommentPromotionBadge pinKind={post.pinKind} /> : null}
+        {post.pinKind || contextBadge ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {post.pinKind ? (
+              <CommentPromotionBadge pinKind={post.pinKind} />
+            ) : null}
+            {contextBadge}
+          </div>
+        ) : null}
         <PostBodyMarkdown
           content={post.content}
           clamp={{ maxLines: 4 }}
