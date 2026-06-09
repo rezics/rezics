@@ -86,12 +86,13 @@ compatibility.
   editor its interaction machinery (recursive tree, `number[]` path ops), not
   its schema (`title: string` would violate zero-inline-text;
   `contentUnitId`-only targets are too narrow).
-- `(type)` **Comment context contract**: `CommentListQuery.realmUnitId?:
-  string` — absent means All (unconstrained read across direct and all realm
-  contexts; no merging logic, just no filter); present filters to that realm's
-  thread. There is no "direct-only" read filter — it has no user.
-  `CreateCommentInput.realmUnitId: string | null` — null is a *direct
-  comment*.
+- `(type)` **Comment context contract**: `CommentListQuery.context` is a
+  three-state read selector:
+  `{kind:"all"}` = unconstrained read across direct and all realm contexts;
+  `{kind:"direct"}` = direct comments only; `{kind:"realm", realmUnitId}` =
+  that realm's thread. `CreateCommentInput.realmUnitId: string | null` keeps
+  write targeting simple: null is a *direct comment*, string is a
+  realm-context comment.
 - `(test)` **Comment context rules**: root comment context comes from the
   thread view's context Select (All → null); replies always inherit the parent
   comment's context regardless of the view. Create with a realm context
@@ -169,8 +170,10 @@ compatibility.
 ## 2. Comment context contract
 
 - [ ] 2.1 Update `package/contract/src/comment/comment.ts`:
-  `commentListQuerySchema.realmUnitId?: string` (absent = All/unconstrained;
-  drop the nullable form and any null-filter semantics),
+  `commentListQuerySchema.context:
+  {kind:"all"} | {kind:"direct"} | {kind:"realm", realmUnitId: string}`
+  (All = unconstrained; direct = `Comment.realmUnitId IS NULL`; realm =
+  equality filter),
   `CreateCommentInput.realmUnitId: string | null` (null = direct comment);
   document both semantics at the schema site.
 
@@ -229,9 +232,10 @@ compatibility.
 ## 5. Comment server behavior
 
 - [ ] 5.1 `package/server/src/comment/comment.service.ts` +
-  `comment.api.ts`: list with absent `realmUnitId` = no realm constraint
-  (plain `rootUnitId` query; no partition merging logic); present = filter.
-  Remove null-filter handling.
+  `comment.api.ts`: list with `context.kind = "all"` = no realm constraint
+  (plain `rootUnitId` query; no partition merging logic);
+  `context.kind = "direct"` = `Comment.realmUnitId IS NULL`;
+  `context.kind = "realm"` = equality filter.
 - [ ] 5.2 Create path: `realmUnitId: null` = direct comment; non-null
   validated against the root unit's `UnitRealm` set and the realm's
   moderation policy; replies force-inherit the parent's `realmUnitId`
@@ -283,11 +287,13 @@ compatibility.
 
 - [ ] 8.1 Context Select component (shadcn-style Select, label "context"):
   options = All + the root unit's realms (from its `UnitRealm`-derived data);
-  searchable when long; zone-context realm pinned first after All. Default
-  per surface: zone-framed routes → `config.context` realm, realm routes →
-  that realm, direct unit routes → All.
-- [ ] 8.2 Thread view wires the Select to `CommentListQuery.realmUnitId`
-  (All → omit); All view renders a realm badge on realm-context comments.
+  searchable when long; zone-context realm pinned first after All. Do not show
+  direct-only in the normal selector; it exists as an API/test context, not a
+  default user-facing mode. Default per surface: zone-framed routes →
+  `config.context` realm, realm routes → that realm, direct unit routes → All.
+- [ ] 8.2 Thread view wires the Select to `CommentListQuery.context`
+  (All → `{kind:"all"}`, realm option → `{kind:"realm", realmUnitId}`); All
+  view renders a realm badge on realm-context comments.
 - [ ] 8.3 Composer: root comments take the Select's context (All → null);
   reply composers show the inherited context read-only.
 - [ ] 8.4 Component/model tests for defaults per surface, badge rendering,
