@@ -9,7 +9,7 @@ import type {
   PostDTO,
   PostListQuery,
   ShelfSummaryDTO,
-  ZoneFilters,
+  ZoneConfig,
 } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
 import { bookService } from "@/book";
@@ -80,26 +80,45 @@ function uniqueStrings(values: readonly (string | null | undefined)[]) {
   ];
 }
 
-function tagIdsFromZoneFilters(filters: ZoneFilters | null | undefined) {
-  return uniqueStrings((filters?.tags ?? []).map((tag) => tag.unitId));
+function zoneBoundaryRealmUnitId(config: ZoneConfig): string | undefined {
+  const realm = config.filters.realm;
+  if (realm && realm !== "context") {
+    // PostListQuery is single-realm; a multi-realm boundary is enforced fully
+    // on the meili query-section path, not here.
+    // PostListQuery 是单 realm 的；多 realm 边界完全在 meili 查询分区路径
+    // 上强制执行，而不是这里。
+    return realm.unitIds.length === 1 ? realm.unitIds[0] : undefined;
+  }
+  return config.context.kind === "realm"
+    ? config.context.realmUnitId
+    : undefined;
 }
 
 function withZoneFeedFilters(
   base: PostListQuery,
-  filters: ZoneFilters | null | undefined,
+  config: ZoneConfig,
 ): PostListQuery {
-  if (!filters) return base;
-  const zoneTagIds = tagIdsFromZoneFilters(filters);
-  // Zone feed is post-backed in this service; only PostListQuery-native filters
-  // are applied here. Content-only filters such as type/rating/license belong
-  // to a future mixed content feed source.
+  // Zone feed is post-backed in this service; only PostListQuery-native
+  // filters from the zone boundary are applied here. Content-only filters
+  // such as type/rating belong to the meili query-section path.
+  // 专区 feed 在本服务中基于帖子；这里只应用专区边界中 PostListQuery
+  // 原生支持的过滤。type/rating 等仅内容侧的过滤属于 meili 查询分区路径。
+  const boundary = config.filters;
+  const realmUnitId = zoneBoundaryRealmUnitId(config);
+  const kind =
+    boundary.postKinds?.length === 1 ? boundary.postKinds[0] : undefined;
+  const languages = Array.isArray(boundary.languages)
+    ? boundary.languages
+    : undefined;
+  const zoneTagIds = uniqueStrings([
+    ...(boundary.tagUnitIds ?? []),
+    ...(boundary.realmTagUnitIds ?? []),
+  ]);
   return {
     ...base,
-    ...(filters.realmUnitId || filters.realmId
-      ? { realmUnitId: filters.realmUnitId ?? filters.realmId }
-      : {}),
-    ...(filters.postKind ? { kind: filters.postKind } : {}),
-    ...(filters.languages?.length ? { languages: filters.languages } : {}),
+    ...(realmUnitId ? { realmUnitId } : {}),
+    ...(kind ? { kind } : {}),
+    ...(languages?.length ? { languages: languages.join(",") } : {}),
     ...(zoneTagIds.length
       ? { tagIds: uniqueStrings([...(base.tagIds ?? []), ...zoneTagIds]) }
       : {}),
@@ -331,7 +350,7 @@ export class FeedService {
         throw new AppError(404, "Zone not found");
       }
       const posts = await postService.list(
-        withZoneFeedFilters(postQuery, zone.filters as ZoneFilters),
+        withZoneFeedFilters(postQuery, zone.config),
         options,
       );
       return withSliceCursor(

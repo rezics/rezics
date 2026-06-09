@@ -1,28 +1,34 @@
 import {
+  type ContentDoc,
   type Language,
   mainMarkdownSource,
   markdownContentDoc,
+  parseZoneConfig,
   resolveReadLanguage,
-  type WikiZoneConfig,
-  type WikiZoneHomepageData,
-  type WikiZoneHomepageItem,
-  type WikiZoneHomepageSection,
-  type WikiZoneNavigationItem,
-  type WikiZoneTranslatedLabel,
-  type ZoneConfigVersion,
-  type ZoneFilters,
-  type ZonePages,
-  type ZoneSection,
-  type ZoneTheme,
+  type UnitType,
+  ZONE_MENU_MAX_DEPTH,
+  type ZoneCollectionItem,
+  type ZoneConfig,
+  type ZoneContentSection,
+  type ZoneMenuNode,
+  type ZonePageSection,
+  type ZoneSectionData,
+  type ZoneSectionItem,
+  type ZoneSectionQuery,
+  type ZoneTranslation,
 } from "@rezics/contract";
-import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, count, eq, inArray, ne, notInArray } from "drizzle-orm";
+import {
+  compileZoneSectionQuery,
+  zoneSectionQueryUnsupportedFields,
+} from "@/meili/search/filters";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
 import {
   ContentTranslation,
   Entity,
   Post,
-  SubjectAttribution,
+  Realm,
   Unit,
   UnitRealm,
   UnitSupportLanguage,
@@ -30,7 +36,10 @@ import {
   Zone,
 } from "../db/schema";
 
-export type ZoneWithRelations = typeof Zone.$inferSelect & {
+const SECTION_DEFAULT_LIMIT = 12;
+
+export type ZoneWithRelations = Omit<typeof Zone.$inferSelect, "config"> & {
+  config: ZoneConfig;
   unit?:
     | (typeof Unit.$inferSelect & {
         translations: (typeof UnitTranslation.$inferSelect)[];
@@ -41,13 +50,10 @@ export type ZoneWithRelations = typeof Zone.$inferSelect & {
 
 type UnitRef = { id: string; type: string };
 
-const WIKI_HOMEPAGE_DEFAULT_TEMPLATE = "wiki-classic-home";
-const WIKI_SECTION_DEFAULT_LIMIT = 12;
 type TranslatedUnitRow = {
   id: string;
   type?: string;
   slug?: string | null;
-  defaultLanguage?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   translations?: Array<{
@@ -55,13 +61,13 @@ type TranslatedUnitRow = {
     title?: string | null;
     summary?: string | null;
     description?: unknown;
+    extra?: unknown;
   }>;
   supportLanguages?: Array<{
     language: string;
     isPrimary?: boolean;
     sortOrder?: number;
   }>;
-  contentTranslations?: Array<{ content?: unknown }>;
   post?: { kind?: string | null } | null;
   entity?: { kind?: string | null } | null;
 };
@@ -69,36 +75,25 @@ type TranslatedUnitRow = {
 type ZoneCreateData = {
   unitId: string;
   ownerRealmUnitId: string;
-  filters: ZoneFilters;
-  configVersion: ZoneConfigVersion;
-  pages: ZonePages | null;
-  sections: ZoneSection[] | null;
-  theme: ZoneTheme | null;
-  primaryRealmUnitId: string | null;
-  template: string;
-  styling: Record<string, unknown> | null;
-  wiki: WikiZoneConfig | null;
+  config: ZoneConfig;
   startsAt: Date | null;
   endsAt: Date | null;
 };
 
 type ZoneUpdateData = Partial<{
   ownerRealmUnitId: string;
-  filters: ZoneFilters;
-  configVersion: ZoneConfigVersion;
-  pages: ZonePages | null;
-  sections: ZoneSection[] | null;
-  theme: ZoneTheme | null;
-  primaryRealmUnitId: string | null;
-  template: string;
-  styling: Record<string, unknown> | null;
-  wiki: WikiZoneConfig | null;
+  config: ZoneConfig;
   startsAt: Date | null;
   endsAt: Date | null;
 }>;
 
 export type ZoneRepository = {
   findUnitRefs(ids: string[]): Promise<UnitRef[]>;
+  // Post kinds for richText fragment refs (POST units only).
+  // richText 片段引用的 Post kind（仅 POST Unit）。
+  findPostKinds(
+    unitIds: string[],
+  ): Promise<Array<{ unitId: string; kind: string }>>;
   getByUnitId(unitId: string): Promise<ZoneWithRelations | null>;
   findUnitBySlug(
     slugScope: string,
@@ -106,20 +101,30 @@ export type ZoneRepository = {
   ): Promise<{ id: string; type: string; visibility: string } | null>;
   createZone(data: ZoneCreateData): Promise<ZoneWithRelations>;
   updateZone(unitId: string, data: ZoneUpdateData): Promise<ZoneWithRelations>;
-  findWikiPosts(input: {
-    realmUnitId: string;
-    unitIds?: string[];
-    order: "created" | "updated";
-    take: number;
-    includeContent?: boolean;
-  }): Promise<TranslatedUnitRow[]>;
-  findTags(tagUnitIds: string[]): Promise<TranslatedUnitRow[]>;
-  findEntitySection(input: {
-    realmUnitId: string;
-    subjectRoles?: string[];
-    entityKinds?: string[];
-    take: number;
-  }): Promise<Array<{ entityId: string; entity: TranslatedUnitRow }>>;
+  // Full-replace semantics: the array is the authoritative language set, so
+  // the manage editor can both add and remove languages in one write.
+  // 全量替换语义：数组即权威语言集合，使管理编辑器能在一次写入中同时
+  // 增删语言。
+  replaceTranslations(
+    unitId: string,
+    translations: ZoneTranslation[],
+  ): Promise<void>;
+  hydrateUnits(
+    unitIds: string[],
+    options?: { includeEntity?: boolean },
+  ): Promise<Map<string, TranslatedUnitRow>>;
+  findFragmentTranslations(
+    unitId: string,
+  ): Promise<Array<{ language: string; content: unknown }>>;
+  searchSection(input: {
+    index: "content" | "posts";
+    filter: string[];
+    sort: string[];
+    offset: number;
+    limit: number;
+  }): Promise<{ ids: string[]; total: number }>;
+  countWikiArticles(realmUnitId: string): Promise<number>;
+  getRealmMemberCount(realmUnitId: string): Promise<number | null>;
   deleteUnit(unitId: string): Promise<void>;
 };
 
@@ -133,10 +138,7 @@ function pushIfPresent(target: Set<string>, value: string | null | undefined) {
 }
 
 function sectionLimit(section: { limit?: number }): number {
-  return Math.min(
-    Math.max(section.limit ?? WIKI_SECTION_DEFAULT_LIMIT, 1),
-    100,
-  );
+  return Math.min(Math.max(section.limit ?? SECTION_DEFAULT_LIMIT, 1), 100);
 }
 
 function preferredTranslation(
@@ -150,7 +152,7 @@ function preferredTranslation(
   });
   return resolvedLanguage
     ? (translations.find((tr) => tr.language === resolvedLanguage) ?? null)
-    : null;
+    : (translations[0] ?? null);
 }
 
 function toIsoString(value: Date | string | undefined): string {
@@ -158,124 +160,256 @@ function toIsoString(value: Date | string | undefined): string {
   return value instanceof Date ? value.toISOString() : value;
 }
 
-function mapUnitToWikiPostItem(
+function translationImageUrl(translation: { extra?: unknown }): string | null {
+  const extra = translation?.extra;
+  if (extra && typeof extra === "object" && !Array.isArray(extra)) {
+    const coverUrl = (extra as Record<string, unknown>).coverUrl;
+    if (typeof coverUrl === "string" && coverUrl.length > 0) return coverUrl;
+  }
+  return null;
+}
+
+function mapUnitToSectionItem(
   row: TranslatedUnitRow,
   preferredLanguages: readonly string[] = [],
-): WikiZoneHomepageItem {
+): ZoneSectionItem {
   const translation = preferredTranslation(row, preferredLanguages);
   return {
-    kind: "wikiPost",
     unitId: row.id,
-    language: (translation?.language ?? null) as Language | null,
+    type: (row.type ?? "POST") as UnitType,
+    slug: row.slug ?? null,
     title: translation?.title ?? null,
     summary: translation?.summary ?? null,
+    language: (translation?.language ?? null) as Language | null,
+    imageUrl: translation ? translationImageUrl(translation) : null,
+    postKind: row.post?.kind ?? null,
+    entityKind: row.entity?.kind ?? null,
     createdAt: toIsoString(row.createdAt),
     updatedAt: toIsoString(row.updatedAt),
   };
 }
 
-function mapUnitToTagItem(
-  row: TranslatedUnitRow,
-  preferredLanguages: readonly string[] = [],
-): WikiZoneHomepageItem {
-  const translation = preferredTranslation(row, preferredLanguages);
-  return {
-    kind: "tag",
-    tagUnitId: row.id,
-    title: translation?.title ?? null,
-    summary: translation?.summary ?? null,
-  };
-}
+// ANCHOR: config reference collection
+// ANCHOR: 配置引用收集
 
-function mapUnitToEntityItem(
-  row: TranslatedUnitRow,
-  preferredLanguages: readonly string[] = [],
-): WikiZoneHomepageItem {
-  const translation = preferredTranslation(row, preferredLanguages);
-  return {
-    kind: "entity",
-    entityUnitId: row.id,
-    entityKind: row.entity?.kind ?? null,
-    title: translation?.title ?? null,
-    summary: translation?.summary ?? null,
-  };
-}
-
-function assertTranslatedLabel(label: WikiZoneTranslatedLabel | undefined) {
-  if (!label) return;
-  if (Object.keys(label.translations).length === 0) {
-    throw new AppError(400, "Wiki Zone manual labels require translations", {
-      code: "WIKI_ZONE_MANUAL_LABEL_INVALID",
-    });
-  }
-}
-
-function collectNavigationRefs(input: {
-  item: WikiZoneNavigationItem;
-  entityIds: Set<string>;
-  tagUnitIds: Set<string>;
-  unitIds: Set<string>;
+export type ZoneConfigRefs = {
   labelUnitIds: Set<string>;
-}) {
-  switch (input.item.kind) {
-    case "entity":
-      input.entityIds.add(input.item.entityId);
-      pushIfPresent(input.labelUnitIds, input.item.labelUnitId);
+  imageUnitIds: Set<string>;
+  realmUnitIds: Set<string>;
+  fragmentUnitIds: Set<string>;
+  targetUnitIds: Set<string>;
+};
+
+function collectMenuNodeRefs(node: ZoneMenuNode, refs: ZoneConfigRefs) {
+  pushIfPresent(refs.labelUnitIds, node.labelUnitId);
+  if (node.target?.kind === "unit") refs.targetUnitIds.add(node.target.unitId);
+  for (const child of node.children ?? []) collectMenuNodeRefs(child, refs);
+}
+
+function collectCollectionItemRefs(
+  items: readonly ZoneCollectionItem[] | undefined,
+  refs: ZoneConfigRefs,
+) {
+  for (const item of items ?? []) {
+    pushIfPresent(refs.labelUnitIds, item.labelUnitId);
+    if (item.target.kind === "unit") refs.targetUnitIds.add(item.target.unitId);
+  }
+}
+
+function collectQueryRefs(query: ZoneSectionQuery, refs: ZoneConfigRefs) {
+  if (query.realm && query.realm !== "context") {
+    for (const id of query.realm.unitIds) refs.realmUnitIds.add(id);
+  }
+}
+
+function collectContentSectionRefs(
+  section: ZoneContentSection,
+  refs: ZoneConfigRefs,
+) {
+  pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+  switch (section.kind) {
+    case "hero":
+      pushIfPresent(refs.imageUnitIds, section.bannerImageUnitId);
+      pushIfPresent(refs.imageUnitIds, section.logoImageUnitId);
+      collectCollectionItemRefs(section.ctas, refs);
       break;
-    case "tag":
-      input.tagUnitIds.add(input.item.tagUnitId);
-      pushIfPresent(input.labelUnitIds, input.item.labelUnitId);
+    case "richText":
+      refs.fragmentUnitIds.add(section.contentUnitId);
       break;
-    case "wikiUnit":
-    case "unit":
-      input.unitIds.add(input.item.unitId);
-      pushIfPresent(input.labelUnitIds, input.item.labelUnitId);
+    case "collection":
+      collectCollectionItemRefs(section.items, refs);
       break;
-    case "labelHeading":
-      input.labelUnitIds.add(input.item.labelUnitId);
+    case "query":
+      collectQueryRefs(section.query, refs);
       break;
-    case "external":
-    case "manualLink":
-      assertTranslatedLabel(input.item.label);
+    case "feed":
+    case "stats":
       break;
   }
 }
+
+function collectPageSectionRefs(
+  section: ZonePageSection,
+  refs: ZoneConfigRefs,
+) {
+  if (section.kind === "tabs") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const tab of section.tabs) {
+      pushIfPresent(refs.labelUnitIds, tab.titleLabelUnitId);
+      for (const inner of tab.sections) collectContentSectionRefs(inner, refs);
+    }
+    return;
+  }
+  if (section.kind === "columns") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const inner of [...section.side, ...section.main]) {
+      if (inner.kind === "tabs") {
+        collectPageSectionRefs(inner, refs);
+      } else {
+        collectContentSectionRefs(inner, refs);
+      }
+    }
+    return;
+  }
+  collectContentSectionRefs(section, refs);
+}
+
+export function collectZoneConfigRefs(config: ZoneConfig): ZoneConfigRefs {
+  const refs: ZoneConfigRefs = {
+    labelUnitIds: new Set(),
+    imageUnitIds: new Set(),
+    realmUnitIds: new Set(),
+    fragmentUnitIds: new Set(),
+    targetUnitIds: new Set(),
+  };
+
+  if (config.context.kind === "realm") {
+    refs.realmUnitIds.add(config.context.realmUnitId);
+  }
+  if (config.filters.realm && config.filters.realm !== "context") {
+    for (const id of config.filters.realm.unitIds) refs.realmUnitIds.add(id);
+  }
+  pushIfPresent(refs.targetUnitIds, config.filters.targetUnitId);
+  for (const menu of config.menus) {
+    for (const node of menu.nodes) collectMenuNodeRefs(node, refs);
+  }
+  pushIfPresent(refs.imageUnitIds, config.header.logoImageUnitId);
+  for (const page of [
+    config.pages.home,
+    config.pages.search,
+    config.pages.feed,
+  ]) {
+    for (const section of page?.sections ?? []) {
+      collectPageSectionRefs(section, refs);
+    }
+  }
+  pushIfPresent(refs.imageUnitIds, config.theme.images?.logoUnitId);
+  pushIfPresent(refs.imageUnitIds, config.theme.images?.bannerUnitId);
+  pushIfPresent(refs.imageUnitIds, config.theme.images?.backgroundUnitId);
+
+  return refs;
+}
+
+// ANCHOR: section traversal
+// ANCHOR: 分区遍历
+
+type LocatedSection =
+  | { kind: "content"; section: ZoneContentSection }
+  | { kind: "container"; section: ZonePageSection };
+
+function* iterateConfigSections(config: ZoneConfig): Generator<{
+  section: ZonePageSection | ZoneContentSection;
+  container: boolean;
+}> {
+  for (const page of [
+    config.pages.home,
+    config.pages.search,
+    config.pages.feed,
+  ]) {
+    for (const section of page?.sections ?? []) {
+      yield {
+        section,
+        container: section.kind === "tabs" || section.kind === "columns",
+      };
+      if (section.kind === "tabs") {
+        for (const tab of section.tabs) {
+          for (const inner of tab.sections) {
+            yield { section: inner, container: false };
+          }
+        }
+      }
+      if (section.kind === "columns") {
+        for (const inner of [...section.side, ...section.main]) {
+          yield { section: inner, container: inner.kind === "tabs" };
+          if (inner.kind === "tabs") {
+            for (const tab of inner.tabs) {
+              for (const paneSection of tab.sections) {
+                yield { section: paneSection, container: false };
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function findSectionById(
+  config: ZoneConfig,
+  sectionId: string,
+): LocatedSection | null {
+  for (const { section, container } of iterateConfigSections(config)) {
+    if (section.id !== sectionId) continue;
+    return container
+      ? { kind: "container", section: section as ZonePageSection }
+      : { kind: "content", section: section as ZoneContentSection };
+  }
+  return null;
+}
+
+function menuDepth(nodes: readonly ZoneMenuNode[]): number {
+  let depth = 0;
+  for (const node of nodes) {
+    depth = Math.max(depth, 1 + (node.children ? menuDepth(node.children) : 0));
+  }
+  return depth;
+}
+
+function* iterateMenuNodes(
+  nodes: readonly ZoneMenuNode[],
+): Generator<ZoneMenuNode> {
+  for (const node of nodes) {
+    yield node;
+    if (node.children) yield* iterateMenuNodes(node.children);
+  }
+}
+
+// ANCHOR: drizzle repository
+// ANCHOR: drizzle 仓储
 
 async function hydrateTranslatedUnits(
   unitIds: string[],
-  options: { includeContent?: boolean; includeEntity?: boolean } = {},
+  options: { includeEntity?: boolean } = {},
 ): Promise<Map<string, TranslatedUnitRow>> {
   const uniqueIds = [...new Set(unitIds)];
   if (uniqueIds.length === 0) return new Map();
   const db = await getServerDb();
-  const [
-    units,
-    translations,
-    supportLanguages,
-    contentTranslations,
-    posts,
-    entities,
-  ] = await Promise.all([
-    db.select().from(Unit).where(inArray(Unit.id, uniqueIds)),
-    db
-      .select()
-      .from(UnitTranslation)
-      .where(inArray(UnitTranslation.unitId, uniqueIds)),
-    db
-      .select()
-      .from(UnitSupportLanguage)
-      .where(inArray(UnitSupportLanguage.unitId, uniqueIds)),
-    options.includeContent
-      ? db
-          .select()
-          .from(ContentTranslation)
-          .where(inArray(ContentTranslation.unitId, uniqueIds))
-      : Promise.resolve([]),
-    db.select().from(Post).where(inArray(Post.unitId, uniqueIds)),
-    options.includeEntity
-      ? db.select().from(Entity).where(inArray(Entity.unitId, uniqueIds))
-      : Promise.resolve([]),
-  ]);
+  const [units, translations, supportLanguages, posts, entities] =
+    await Promise.all([
+      db.select().from(Unit).where(inArray(Unit.id, uniqueIds)),
+      db
+        .select()
+        .from(UnitTranslation)
+        .where(inArray(UnitTranslation.unitId, uniqueIds)),
+      db
+        .select()
+        .from(UnitSupportLanguage)
+        .where(inArray(UnitSupportLanguage.unitId, uniqueIds)),
+      db.select().from(Post).where(inArray(Post.unitId, uniqueIds)),
+      options.includeEntity
+        ? db.select().from(Entity).where(inArray(Entity.unitId, uniqueIds))
+        : Promise.resolve([]),
+    ]);
 
   const translationsByUnit = new Map<string, typeof translations>();
   for (const translation of translations) {
@@ -291,13 +425,6 @@ async function hydrateTranslatedUnits(
     supportByUnit.set(language.unitId, list);
   }
 
-  const contentByUnit = new Map<string, Array<{ content?: unknown }>>();
-  for (const translation of contentTranslations) {
-    const list = contentByUnit.get(translation.unitId) ?? [];
-    list.push({ content: translation.content });
-    contentByUnit.set(translation.unitId, list);
-  }
-
   const postByUnit = new Map(posts.map((post) => [post.unitId, post]));
   const entityByUnit = new Map(
     entities.map((entity) => [entity.unitId, entity]),
@@ -310,17 +437,32 @@ async function hydrateTranslatedUnits(
         id: unit.id,
         type: unit.type,
         slug: unit.slug,
-        defaultLanguage: unit.defaultLanguage,
         createdAt: unit.createdAt,
         updatedAt: unit.updatedAt,
         translations: translationsByUnit.get(unit.id) ?? [],
         supportLanguages: supportByUnit.get(unit.id) ?? [],
-        contentTranslations: contentByUnit.get(unit.id) ?? [],
         post: postByUnit.get(unit.id) ?? null,
         entity: entityByUnit.get(unit.id) ?? null,
       } as TranslatedUnitRow,
     ]),
   );
+}
+
+export function parseZoneRowConfig(
+  zone: Pick<typeof Zone.$inferSelect, "unitId" | "config">,
+): ZoneConfig {
+  const config = parseZoneConfig(zone.config);
+  if (!config) {
+    // No old-shape compatibility (development-stage cutover); a row that
+    // fails the envelope union needs a factory reseed, not a silent skip.
+    // 不兼容旧形态（开发阶段切换）；未通过信封联合校验的行需要工厂重播种，
+    // 而不是静默跳过。
+    throw new AppError(500, "Zone config failed envelope validation", {
+      code: "ZONE_CONFIG_INVALID",
+      details: { unitId: zone.unitId },
+    });
+  }
+  return config;
 }
 
 async function hydrateZone(
@@ -330,47 +472,12 @@ async function hydrateZone(
   const unit = map.get(zone.unitId);
   return {
     ...zone,
-    unit: unit
-      ? ({
-          ...unit,
-        } as unknown as ZoneWithRelations["unit"])
-      : null,
+    config: parseZoneRowConfig(zone),
+    unit: unit ? ({ ...unit } as unknown as ZoneWithRelations["unit"]) : null,
   };
 }
 
 function createDrizzleZoneRepository(): ZoneRepository {
-  async function findWikiUnitIds(input: {
-    realmUnitId: string;
-    unitIds?: string[];
-    order: "created" | "updated";
-    take: number;
-  }): Promise<string[]> {
-    const db = await getServerDb();
-    const conditions = [
-      eq(Unit.type, "POST"),
-      eq(Unit.status, "PUBLISHED"),
-      eq(Unit.visibility, "PUBLIC"),
-      eq(Unit.moderationStatus, "APPROVED"),
-      eq(Post.kind, "WIKI"),
-      eq(UnitRealm.realmUnitId, input.realmUnitId),
-      eq(UnitRealm.moderationStatus, "APPROVED"),
-    ];
-    if (input.unitIds) conditions.push(inArray(Unit.id, input.unitIds));
-
-    const rows = await db
-      .select({ id: Unit.id })
-      .from(Unit)
-      .innerJoin(Post, eq(Post.unitId, Unit.id))
-      .innerJoin(UnitRealm, eq(UnitRealm.unitId, Unit.id))
-      .where(and(...conditions))
-      .orderBy(
-        input.order === "created" ? desc(Unit.createdAt) : desc(Unit.updatedAt),
-        asc(Unit.id),
-      )
-      .limit(input.take);
-    return rows.map((row) => row.id);
-  }
-
   return {
     async findUnitRefs(ids) {
       if (ids.length === 0) return [];
@@ -379,6 +486,15 @@ function createDrizzleZoneRepository(): ZoneRepository {
         .select({ id: Unit.id, type: Unit.type })
         .from(Unit)
         .where(and(inArray(Unit.id, ids), ne(Unit.status, "DELETED")));
+    },
+    async findPostKinds(unitIds) {
+      if (unitIds.length === 0) return [];
+      const db = await getServerDb();
+      const rows = await db
+        .select({ unitId: Post.unitId, kind: Post.kind })
+        .from(Post)
+        .where(inArray(Post.unitId, unitIds));
+      return rows.map((row) => ({ unitId: row.unitId, kind: row.kind ?? "" }));
     },
     async getByUnitId(unitId) {
       const db = await getServerDb();
@@ -418,78 +534,132 @@ function createDrizzleZoneRepository(): ZoneRepository {
       if (!zone) throw new AppError(404, "Zone not found");
       return hydrateZone(zone);
     },
-    async findWikiPosts(input) {
-      const ids = await findWikiUnitIds(input);
-      const map = await hydrateTranslatedUnits(ids, {
-        includeContent: input.includeContent,
-      });
-      return ids.flatMap((id) => {
-        const row = map.get(id);
-        return row ? [row] : [];
+    async replaceTranslations(unitId, translations) {
+      const db = await getServerDb();
+      const languages = translations.map((tr) => tr.language);
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(UnitTranslation)
+          .where(
+            and(
+              eq(UnitTranslation.unitId, unitId),
+              notInArray(UnitTranslation.language, languages),
+            ),
+          );
+        await tx
+          .delete(UnitSupportLanguage)
+          .where(
+            and(
+              eq(UnitSupportLanguage.unitId, unitId),
+              notInArray(UnitSupportLanguage.language, languages),
+            ),
+          );
+        for (const [index, tr] of translations.entries()) {
+          const description = tr.description
+            ? markdownContentDoc(tr.description)
+            : null;
+          await tx
+            .insert(UnitTranslation)
+            .values({
+              unitId,
+              language: tr.language,
+              title: tr.title ?? null,
+              description,
+              updatedAt: new Date(),
+            })
+            .onConflictDoUpdate({
+              target: [UnitTranslation.unitId, UnitTranslation.language],
+              set: {
+                title: tr.title ?? null,
+                description,
+                updatedAt: new Date(),
+              },
+            });
+          await tx
+            .insert(UnitSupportLanguage)
+            .values({
+              unitId,
+              language: tr.language,
+              isPrimary: index === 0,
+              sortOrder: index,
+            })
+            .onConflictDoUpdate({
+              target: [
+                UnitSupportLanguage.unitId,
+                UnitSupportLanguage.language,
+              ],
+              set: { isPrimary: index === 0, sortOrder: index },
+            });
+        }
       });
     },
-    async findTags(tagUnitIds) {
-      if (tagUnitIds.length === 0) return [];
-      const db = await getServerDb();
-      const rows = await db
-        .select({ id: Unit.id })
-        .from(Unit)
-        .where(
-          and(
-            inArray(Unit.id, tagUnitIds),
-            eq(Unit.type, "TAG"),
-            ne(Unit.status, "DELETED"),
-          ),
-        );
-      const validIds = rows.map((row) => row.id);
-      const map = await hydrateTranslatedUnits(validIds);
-      return tagUnitIds.flatMap((id) => {
-        const row = map.get(id);
-        return row ? [row] : [];
-      });
+    async hydrateUnits(unitIds, options) {
+      return hydrateTranslatedUnits(unitIds, options);
     },
-    async findEntitySection(input) {
-      const wikiUnitIds = await findWikiUnitIds({
-        realmUnitId: input.realmUnitId,
-        order: "updated",
-        take: 1000,
-      });
-      if (wikiUnitIds.length === 0) return [];
+    async findFragmentTranslations(unitId) {
       const db = await getServerDb();
-      const conditions = [inArray(SubjectAttribution.unitId, wikiUnitIds)];
-      if (input.subjectRoles?.length) {
-        conditions.push(inArray(SubjectAttribution.role, input.subjectRoles));
-      }
       const rows = await db
         .select({
-          entityId: SubjectAttribution.entityId,
-          sortOrder: SubjectAttribution.sortOrder,
+          language: ContentTranslation.language,
+          content: ContentTranslation.content,
         })
-        .from(SubjectAttribution)
-        .where(and(...conditions))
-        .orderBy(
-          asc(SubjectAttribution.sortOrder),
-          asc(SubjectAttribution.entityId),
-        )
-        .limit(input.take * 3);
-      const entityIds = [...new Set(rows.map((row) => row.entityId))];
-      const entities = await hydrateTranslatedUnits(entityIds, {
-        includeEntity: true,
+        .from(ContentTranslation)
+        .where(
+          and(
+            eq(ContentTranslation.unitId, unitId),
+            eq(ContentTranslation.status, "PUBLISHED"),
+          ),
+        );
+      return rows;
+    },
+    async searchSection(input) {
+      const { searchClient } = await import("@/meili/search-client");
+      const index =
+        input.index === "content"
+          ? searchClient.contentIndex
+          : searchClient.postIndex;
+      const resp = await index.search<{ id: string }>("", {
+        filter:
+          input.filter.length > 0 ? input.filter.join(" AND ") : undefined,
+        sort: input.sort,
+        offset: input.offset,
+        limit: input.limit,
       });
-      const out: Array<{ entityId: string; entity: TranslatedUnitRow }> = [];
-      for (const row of rows) {
-        const entity = entities.get(row.entityId);
-        if (!entity || entity.type !== "ENTITY") continue;
-        if (
-          input.entityKinds?.length &&
-          !input.entityKinds.includes(entity.entity?.kind ?? "")
-        ) {
-          continue;
-        }
-        out.push({ entityId: row.entityId, entity });
-        if (out.length >= input.take) break;
-      }
-      return out;
+      return {
+        ids: resp.hits.map((hit) => hit.id),
+        total: resp.estimatedTotalHits ?? resp.hits.length,
+      };
+    },
+    async countWikiArticles(realmUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ value: count() })
+        .from(Unit)
+        .innerJoin(Post, eq(Post.unitId, Unit.id))
+        .innerJoin(UnitRealm, eq(UnitRealm.unitId, Unit.id))
+        .where(
+          and(
+            eq(Unit.type, "POST"),
+            eq(Unit.status, "PUBLISHED"),
+            // PUBLIC only: UNLISTED zone fragments are not articles.
+            // 仅 PUBLIC：UNLISTED 专区片段不算条目。
+            eq(Unit.visibility, "PUBLIC"),
+            eq(Unit.moderationStatus, "APPROVED"),
+            eq(Post.kind, "WIKI"),
+            eq(UnitRealm.realmUnitId, realmUnitId),
+            eq(UnitRealm.moderationStatus, "APPROVED"),
+          ),
+        );
+      return row?.value ?? 0;
+    },
+    async getRealmMemberCount(realmUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ memberCount: Realm.memberCount })
+        .from(Realm)
+        .where(eq(Realm.unitId, realmUnitId))
+        .limit(1);
+      return row?.memberCount ?? null;
     },
     async deleteUnit(unitId) {
       const db = await getServerDb();
@@ -497,6 +667,9 @@ function createDrizzleZoneRepository(): ZoneRepository {
     },
   };
 }
+
+// ANCHOR: zone service
+// ANCHOR: 专区服务
 
 export class ZoneService {
   constructor(
@@ -507,12 +680,12 @@ export class ZoneService {
     refs: Set<string>,
     expectedType: string,
     code: string,
-    message = "Wiki Zone config references invalid Units",
+    message: string,
   ): Promise<void> {
     if (refs.size === 0) return;
     const ids = [...refs];
     const rows = await this.repository.findUnitRefs(ids);
-    const byId = new Map(rows.map((row: UnitRef) => [row.id, row]));
+    const byId = new Map(rows.map((row) => [row.id, row]));
     const invalid = ids.filter((id) => byId.get(id)?.type !== expectedType);
     if (invalid.length > 0) {
       throw new AppError(400, message, {
@@ -522,272 +695,151 @@ export class ZoneService {
     }
   }
 
-  private async assertAnyUnitRefs(
-    refs: Set<string>,
-    message = "Wiki Zone config references missing Units",
-    code = "WIKI_ZONE_UNIT_REF_INVALID",
-  ): Promise<void> {
+  private async assertAnyUnitRefs(refs: Set<string>): Promise<void> {
     if (refs.size === 0) return;
     const ids = [...refs];
     const rows = await this.repository.findUnitRefs(ids);
-    const found = new Set(rows.map((row: { id: string }) => row.id));
+    const found = new Set(rows.map((row) => row.id));
     const invalid = ids.filter((id) => !found.has(id));
     if (invalid.length > 0) {
-      throw new AppError(400, message, {
-        code,
+      throw new AppError(400, "Zone config references missing Units", {
+        code: "ZONE_UNIT_REF_INVALID",
         details: { ids: invalid },
       });
     }
   }
 
-  private collectHomepageSectionRefs(
-    section: WikiZoneHomepageSection,
-    refs: {
-      entityIds: Set<string>;
-      tagUnitIds: Set<string>;
-      unitIds: Set<string>;
-      labelUnitIds: Set<string>;
-    },
-  ) {
-    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
-    assertTranslatedLabel(section.title);
-
-    if (section.kind === "tagCollection") {
-      for (const id of section.tagUnitIds ?? []) refs.tagUnitIds.add(id);
-      for (const id of section.realmTagUnitIds ?? []) refs.tagUnitIds.add(id);
-      return;
-    }
-
-    if (section.kind === "wikiUnitCollection") {
-      for (const id of section.unitIds) refs.unitIds.add(id);
-      return;
-    }
-
-    if (section.kind === "manualLinks") {
-      for (const item of section.links) {
-        collectNavigationRefs({ item, ...refs });
-      }
+  private async assertWikiFragments(refs: Set<string>): Promise<void> {
+    if (refs.size === 0) return;
+    const ids = [...refs];
+    const [unitRows, postRows] = await Promise.all([
+      this.repository.findUnitRefs(ids),
+      this.repository.findPostKinds(ids),
+    ]);
+    const typeById = new Map(unitRows.map((row) => [row.id, row.type]));
+    const kindById = new Map(postRows.map((row) => [row.unitId, row.kind]));
+    const invalid = ids.filter(
+      (id) => typeById.get(id) !== "POST" || kindById.get(id) !== "WIKI",
+    );
+    if (invalid.length > 0) {
+      throw new AppError(400, "richText sections require WIKI post fragments", {
+        code: "ZONE_FRAGMENT_REF_INVALID",
+        details: { ids: invalid },
+      });
     }
   }
 
-  private async validateWikiConfig(wiki: WikiZoneConfig | null | undefined) {
-    if (!wiki) return;
+  private assertConfigStructure(config: ZoneConfig) {
+    const fail = (
+      code: string,
+      message: string,
+      details?: Record<string, unknown>,
+    ) => {
+      throw new AppError(400, message, { code, details });
+    };
 
-    const entityIds = new Set<string>();
-    const tagUnitIds = new Set<string>();
-    const unitIds = new Set<string>();
-    const labelUnitIds = new Set<string>();
-
-    unitIds.add(wiki.filters.realmUnitId);
-    for (const id of wiki.filters.tagUnitIds ?? []) tagUnitIds.add(id);
-    for (const id of wiki.filters.realmTagUnitIds ?? []) tagUnitIds.add(id);
-    for (const filter of wiki.filters.subjectFilters ?? []) {
-      for (const id of filter.entityIds ?? []) entityIds.add(id);
-    }
-    for (const id of wiki.filters.wikiUnitIds ?? []) unitIds.add(id);
-
-    for (const section of wiki.navigation?.sections ?? []) {
-      pushIfPresent(labelUnitIds, section.labelUnitId);
-      assertTranslatedLabel(section.label);
-      for (const item of section.items) {
-        collectNavigationRefs({
-          item,
-          entityIds,
-          tagUnitIds,
-          unitIds,
-          labelUnitIds,
+    // Section ids unique across the whole config (containers included).
+    // 分区 id 在整个配置内唯一（包含容器）。
+    const sectionIds = new Set<string>();
+    for (const { section } of iterateConfigSections(config)) {
+      if (sectionIds.has(section.id)) {
+        fail("ZONE_SECTION_ID_DUPLICATE", "Zone section ids must be unique", {
+          id: section.id,
         });
       }
+      sectionIds.add(section.id);
+      if (section.kind === "tabs") {
+        const tabIds = new Set(section.tabs.map((tab) => tab.id));
+        if (tabIds.size !== section.tabs.length) {
+          fail("ZONE_TAB_ID_DUPLICATE", "Zone tab ids must be unique", {
+            sectionId: section.id,
+          });
+        }
+        if (section.defaultTabId && !tabIds.has(section.defaultTabId)) {
+          fail(
+            "ZONE_TAB_DEFAULT_INVALID",
+            "defaultTabId must reference one of the tabs",
+            { sectionId: section.id, defaultTabId: section.defaultTabId },
+          );
+        }
+      }
+      if (section.kind === "query") {
+        const unsupported = zoneSectionQueryUnsupportedFields(section.query);
+        if (unsupported.length > 0) {
+          fail(
+            "ZONE_QUERY_FIELD_UNSUPPORTED",
+            "Zone section query uses fields the target index cannot filter or sort",
+            { sectionId: section.id, fields: unsupported },
+          );
+        }
+      }
     }
 
-    for (const section of wiki.homepage?.sections ?? []) {
-      this.collectHomepageSectionRefs(section, {
-        entityIds,
-        tagUnitIds,
-        unitIds,
-        labelUnitIds,
+    const menuIds = new Set<string>();
+    for (const menu of config.menus) {
+      if (menuIds.has(menu.id)) {
+        fail("ZONE_MENU_ID_DUPLICATE", "Zone menu ids must be unique", {
+          id: menu.id,
+        });
+      }
+      menuIds.add(menu.id);
+      if (menuDepth(menu.nodes) > ZONE_MENU_MAX_DEPTH) {
+        fail("ZONE_MENU_TOO_DEEP", "Zone menu trees are capped at depth 3", {
+          menuId: menu.id,
+        });
+      }
+      for (const node of iterateMenuNodes(menu.nodes)) {
+        const isGroup = (node.children?.length ?? 0) > 0;
+        // Leaves need a target; groups need something to resolve a label
+        // from (labelUnitId or a unit target).
+        // 叶子需要 target；分组需要可解析标签的来源（labelUnitId 或
+        // unit target）。
+        if (!isGroup && !node.target) {
+          fail("ZONE_MENU_NODE_INVALID", "Leaf menu nodes require a target", {
+            menuId: menu.id,
+            nodeId: node.id,
+          });
+        }
+        if (isGroup && !node.labelUnitId && !node.target) {
+          fail(
+            "ZONE_MENU_NODE_INVALID",
+            "Group menu nodes require a labelUnitId or target to resolve a label",
+            { menuId: menu.id, nodeId: node.id },
+          );
+        }
+      }
+    }
+    if (!menuIds.has(config.header.menuId)) {
+      fail("ZONE_HEADER_MENU_INVALID", "header.menuId must reference a menu", {
+        menuId: config.header.menuId,
       });
     }
+  }
 
-    pushIfPresent(unitIds, wiki.theme?.media?.logoUnitId);
-    pushIfPresent(unitIds, wiki.theme?.media?.bannerUnitId);
-    pushIfPresent(unitIds, wiki.theme?.media?.backgroundUnitId);
-
+  async validateZoneConfig(config: ZoneConfig): Promise<void> {
+    this.assertConfigStructure(config);
+    const refs = collectZoneConfigRefs(config);
     await Promise.all([
       this.assertUnitRefs(
-        new Set([wiki.filters.realmUnitId]),
-        "REALM",
-        "WIKI_ZONE_REALM_REF_INVALID",
-      ),
-      this.assertUnitRefs(entityIds, "ENTITY", "WIKI_ZONE_ENTITY_REF_INVALID"),
-      this.assertUnitRefs(tagUnitIds, "TAG", "WIKI_ZONE_TAG_REF_INVALID"),
-      this.assertUnitRefs(labelUnitIds, "LABEL", "WIKI_ZONE_LABEL_REF_INVALID"),
-      this.assertAnyUnitRefs(unitIds),
-    ]);
-  }
-
-  private collectZoneFilterRefs(
-    filters: ZoneFilters | undefined,
-    refs: {
-      entityIds: Set<string>;
-      unitIds: Set<string>;
-      realmUnitIds: Set<string>;
-    },
-  ) {
-    pushIfPresent(refs.realmUnitIds, filters?.realmUnitId);
-    for (const filter of filters?.subjectFilters ?? []) {
-      for (const id of filter.entityIds ?? []) refs.entityIds.add(id);
-    }
-    for (const id of filters?.wikiUnitIds ?? []) refs.unitIds.add(id);
-  }
-
-  private collectWikiFilterRefs(
-    filters: WikiZoneConfig["filters"] | undefined,
-    refs: {
-      entityIds: Set<string>;
-      tagUnitIds: Set<string>;
-      unitIds: Set<string>;
-      realmUnitIds: Set<string>;
-    },
-  ) {
-    pushIfPresent(refs.realmUnitIds, filters?.realmUnitId);
-    for (const id of filters?.tagUnitIds ?? []) refs.tagUnitIds.add(id);
-    for (const id of filters?.realmTagUnitIds ?? []) refs.tagUnitIds.add(id);
-    for (const filter of filters?.subjectFilters ?? []) {
-      for (const id of filter.entityIds ?? []) refs.entityIds.add(id);
-    }
-    for (const id of filters?.wikiUnitIds ?? []) refs.unitIds.add(id);
-  }
-
-  private collectZoneSectionRefs(
-    section: ZoneSection,
-    refs: {
-      entityIds: Set<string>;
-      tagUnitIds: Set<string>;
-      unitIds: Set<string>;
-      labelUnitIds: Set<string>;
-      realmUnitIds: Set<string>;
-    },
-  ) {
-    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
-    assertTranslatedLabel(section.title);
-    this.collectZoneFilterRefs(section.filters, refs);
-
-    if (section.kind === "shelfCarousel") {
-      for (const id of section.shelfUnitIds ?? []) refs.unitIds.add(id);
-      return;
-    }
-
-    if (section.kind === "realmList") {
-      for (const id of section.realmUnitIds ?? []) refs.realmUnitIds.add(id);
-      return;
-    }
-
-    if (section.kind === "tagNavigation") {
-      for (const id of section.tagUnitIds ?? []) refs.tagUnitIds.add(id);
-      for (const id of section.realmTagUnitIds ?? []) refs.tagUnitIds.add(id);
-      return;
-    }
-
-    if (section.kind === "wikiCollection") {
-      for (const id of section.wikiUnitIds ?? []) refs.unitIds.add(id);
-      this.collectWikiFilterRefs(section.wikiFilters, refs);
-    }
-  }
-
-  private collectZonePageRefs(
-    page: ZonePages[keyof ZonePages] | undefined,
-    refs: Parameters<ZoneService["collectZoneSectionRefs"]>[1],
-  ) {
-    if (!page) return;
-    pushIfPresent(refs.labelUnitIds, page.titleLabelUnitId);
-    assertTranslatedLabel(page.title);
-    for (const section of page.sections) {
-      this.collectZoneSectionRefs(section, refs);
-    }
-  }
-
-  private async validateZoneConfig(input: {
-    ownerRealmUnitId?: string;
-    primaryRealmUnitId?: string | null;
-    pages?: ZonePages | null;
-    sections?: ZoneSection[] | null;
-    theme?: ZoneTheme | null;
-  }) {
-    const entityIds = new Set<string>();
-    const tagUnitIds = new Set<string>();
-    const unitIds = new Set<string>();
-    const labelUnitIds = new Set<string>();
-    const realmUnitIds = new Set<string>();
-
-    // Ownership controls management authority only. Realm interaction context
-    // must come from explicit realm routes, not from visiting a zone.
-    pushIfPresent(realmUnitIds, input.ownerRealmUnitId);
-    pushIfPresent(realmUnitIds, input.primaryRealmUnitId);
-    this.collectZonePageRefs(input.pages?.home, {
-      entityIds,
-      tagUnitIds,
-      unitIds,
-      labelUnitIds,
-      realmUnitIds,
-    });
-    this.collectZonePageRefs(input.pages?.search, {
-      entityIds,
-      tagUnitIds,
-      unitIds,
-      labelUnitIds,
-      realmUnitIds,
-    });
-    this.collectZonePageRefs(input.pages?.feed, {
-      entityIds,
-      tagUnitIds,
-      unitIds,
-      labelUnitIds,
-      realmUnitIds,
-    });
-    for (const section of input.sections ?? []) {
-      this.collectZoneSectionRefs(section, {
-        entityIds,
-        tagUnitIds,
-        unitIds,
-        labelUnitIds,
-        realmUnitIds,
-      });
-    }
-    pushIfPresent(unitIds, input.theme?.images?.logoUnitId);
-    pushIfPresent(unitIds, input.theme?.images?.bannerUnitId);
-    pushIfPresent(unitIds, input.theme?.images?.backgroundUnitId);
-
-    await Promise.all([
-      this.assertUnitRefs(
-        realmUnitIds,
-        "REALM",
-        "ZONE_REALM_REF_INVALID",
-        "Zone config references invalid Realms",
-      ),
-      this.assertUnitRefs(
-        entityIds,
-        "ENTITY",
-        "ZONE_ENTITY_REF_INVALID",
-        "Zone config references invalid Entities",
-      ),
-      this.assertUnitRefs(
-        tagUnitIds,
-        "TAG",
-        "ZONE_TAG_REF_INVALID",
-        "Zone config references invalid Tags",
-      ),
-      this.assertUnitRefs(
-        labelUnitIds,
+        refs.labelUnitIds,
         "LABEL",
         "ZONE_LABEL_REF_INVALID",
-        "Zone config references invalid Labels",
+        "Zone config references invalid LABEL units",
       ),
-      this.assertAnyUnitRefs(
-        unitIds,
-        "Zone config references missing Units",
-        "ZONE_UNIT_REF_INVALID",
+      this.assertUnitRefs(
+        refs.imageUnitIds,
+        "IMAGE",
+        "ZONE_IMAGE_REF_INVALID",
+        "Zone config references invalid IMAGE units",
       ),
+      this.assertUnitRefs(
+        refs.realmUnitIds,
+        "REALM",
+        "ZONE_REALM_REF_INVALID",
+        "Zone config references invalid REALM units",
+      ),
+      this.assertWikiFragments(refs.fragmentUnitIds),
+      this.assertAnyUnitRefs(refs.targetUnitIds),
     ]);
   }
 
@@ -800,9 +852,7 @@ export class ZoneService {
     const zoneScope = getSlugScopeId("zone");
     if (!zoneScope) return null;
     const unit = await this.repository.findUnitBySlug(zoneScope, slug);
-
     if (!unit || unit.type !== "ZONE") return null;
-
     return this.repository.getByUnitId(unit.id);
   }
 
@@ -812,47 +862,27 @@ export class ZoneService {
    */
   checkLifecycle(zone: ZoneWithRelations): string | null {
     const now = new Date();
-
-    if (zone.startsAt && now < zone.startsAt) {
-      return "not_started";
-    }
-
-    if (zone.endsAt && now > zone.endsAt) {
-      return "ended";
-    }
-
+    if (zone.startsAt && now < zone.startsAt) return "not_started";
+    if (zone.endsAt && now > zone.endsAt) return "ended";
     return null;
   }
 
   async create(input: {
     userId: string;
     slug: string;
-    translations: Array<{
-      language: string;
-      title?: string;
-      description?: string;
-    }>;
+    translations: ZoneTranslation[];
     ownerRealmUnitId: string;
-    filters: ZoneFilters;
-    configVersion?: ZoneConfigVersion;
-    pages?: ZonePages | null;
-    sections?: ZoneSection[] | null;
-    theme?: ZoneTheme | null;
-    primaryRealmUnitId?: string | null;
-    template: string;
-    styling?: Record<string, unknown> | null;
-    wiki?: WikiZoneConfig | null;
+    config: ZoneConfig;
     startsAt?: Date | null;
     endsAt?: Date | null;
   }): Promise<ZoneWithRelations> {
-    await this.validateZoneConfig({
-      ownerRealmUnitId: input.ownerRealmUnitId,
-      primaryRealmUnitId: input.primaryRealmUnitId,
-      pages: input.pages,
-      sections: input.sections,
-      theme: input.theme,
-    });
-    await this.validateWikiConfig(input.wiki);
+    await this.assertUnitRefs(
+      new Set([input.ownerRealmUnitId]),
+      "REALM",
+      "ZONE_REALM_REF_INVALID",
+      "Zone owner must be a REALM unit",
+    );
+    await this.validateZoneConfig(input.config);
 
     const unit = await unitService.create({
       userId: input.userId,
@@ -869,215 +899,256 @@ export class ZoneService {
 
     await unitService.setSlug(unit.id, input.slug);
 
-    const zone = await this.repository.createZone({
+    return this.repository.createZone({
       unitId: unit.id,
       ownerRealmUnitId: input.ownerRealmUnitId,
-      filters: input.filters,
-      configVersion: input.configVersion ?? 1,
-      pages: input.pages ?? null,
-      sections: input.sections ?? null,
-      theme: input.theme ?? null,
-      primaryRealmUnitId: input.primaryRealmUnitId ?? null,
-      template: input.template,
-      styling: input.styling ?? null,
-      wiki: input.wiki ?? null,
+      config: input.config,
       startsAt: input.startsAt ?? null,
       endsAt: input.endsAt ?? null,
     });
-
-    return zone;
   }
 
   async update(
     unitId: string,
     input: {
       ownerRealmUnitId?: string;
-      filters?: ZoneFilters;
-      configVersion?: ZoneConfigVersion;
-      pages?: ZonePages | null;
-      sections?: ZoneSection[] | null;
-      theme?: ZoneTheme | null;
-      primaryRealmUnitId?: string | null;
-      template?: string;
-      styling?: Record<string, unknown> | null;
-      wiki?: WikiZoneConfig | null;
+      translations?: ZoneTranslation[];
+      config?: ZoneConfig;
       startsAt?: Date | null;
       endsAt?: Date | null;
     },
   ): Promise<ZoneWithRelations> {
-    await this.validateZoneConfig(input);
-    await this.validateWikiConfig(input.wiki);
-
-    const zone = await this.repository.updateZone(unitId, input);
-
-    return zone;
-  }
-
-  private async hydrateWikiPostSection(input: {
-    realmUnitId: string;
-    section: WikiZoneHomepageSection;
-    preferredLanguages?: string[];
-    mode: "recent" | "updated" | "stub";
-  }): Promise<WikiZoneHomepageItem[]> {
-    const limit = sectionLimit(input.section);
-    const rows = await this.repository.findWikiPosts({
-      realmUnitId: input.realmUnitId,
-      order: input.mode === "recent" ? "created" : "updated",
-      take: input.mode === "stub" ? limit * 3 : limit,
-      includeContent: input.mode === "stub",
-    });
-
-    const filtered =
-      input.mode !== "stub"
-        ? rows
-        : rows.filter((row) => {
-            const source = (row.contentTranslations ?? [])
-              .map((translation) => mainMarkdownSource(translation.content))
-              .find((value) => value !== null);
-            if (input.section.kind !== "stubWiki") return false;
-            if (input.section.predicate === "missing-body") return !source;
-            return !source || source.length < 500;
-          });
-
-    return filtered
-      .slice(0, limit)
-      .map((row) => mapUnitToWikiPostItem(row, input.preferredLanguages));
-  }
-
-  private async hydrateWikiUnitSection(input: {
-    realmUnitId: string;
-    section: Extract<WikiZoneHomepageSection, { kind: "wikiUnitCollection" }>;
-    preferredLanguages?: string[];
-  }): Promise<WikiZoneHomepageItem[]> {
-    const unitIds = input.section.unitIds;
-    if (unitIds.length === 0) return [];
-
-    const rows = await this.repository.findWikiPosts({
-      realmUnitId: input.realmUnitId,
-      unitIds,
-      order: "created",
-      take: unitIds.length,
-    });
-    const byId = new Map(rows.map((row) => [row.id, row]));
-    return unitIds.flatMap((unitId) => {
-      const row = byId.get(unitId);
-      return row ? [mapUnitToWikiPostItem(row, input.preferredLanguages)] : [];
+    if (input.ownerRealmUnitId) {
+      await this.assertUnitRefs(
+        new Set([input.ownerRealmUnitId]),
+        "REALM",
+        "ZONE_REALM_REF_INVALID",
+        "Zone owner must be a REALM unit",
+      );
+    }
+    if (input.config) {
+      await this.validateZoneConfig(input.config);
+    }
+    if (input.translations) {
+      if (input.translations.length === 0) {
+        throw new AppError(400, "Zones require at least one translation", {
+          code: "ZONE_TRANSLATIONS_EMPTY",
+        });
+      }
+      await this.repository.replaceTranslations(unitId, input.translations);
+    }
+    return this.repository.updateZone(unitId, {
+      ownerRealmUnitId: input.ownerRealmUnitId,
+      config: input.config,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
     });
   }
 
-  private async hydrateTagSection(input: {
-    section: Extract<WikiZoneHomepageSection, { kind: "tagCollection" }>;
-    preferredLanguages?: string[];
-  }): Promise<WikiZoneHomepageItem[]> {
-    const tagUnitIds = [
-      ...new Set([
-        ...(input.section.tagUnitIds ?? []),
-        ...(input.section.realmTagUnitIds ?? []),
-      ]),
+  /**
+   * Portal read: zone + batch summaries for every unit the config
+   * references. List data is intentionally absent — it hydrates lazily per
+   * section id via `getSectionData` (only the active tab pane fetches
+   * initially).
+   * 门户读取：专区 + 配置引用的每个 Unit 的批量摘要。列表数据有意缺席——
+   * 它通过 `getSectionData` 按分区 id 惰性水合（初始只有活动标签页面板
+   * 拉取）。
+   */
+  async getPortalRefUnits(
+    zone: ZoneWithRelations,
+    options: { preferredLanguages?: string[] } = {},
+  ): Promise<Record<string, ZoneSectionItem>> {
+    const refs = collectZoneConfigRefs(zone.config);
+    const ids = [
+      ...refs.labelUnitIds,
+      ...refs.imageUnitIds,
+      ...refs.realmUnitIds,
+      ...refs.fragmentUnitIds,
+      ...refs.targetUnitIds,
     ];
-    if (tagUnitIds.length === 0) return [];
-
-    const rows = await this.repository.findTags(tagUnitIds);
-    const byId = new Map(rows.map((row) => [row.id, row]));
-    return tagUnitIds.flatMap((tagUnitId) => {
-      const row = byId.get(tagUnitId);
-      return row ? [mapUnitToTagItem(row, input.preferredLanguages)] : [];
+    const rows = await this.repository.hydrateUnits(ids, {
+      includeEntity: true,
     });
+    const out: Record<string, ZoneSectionItem> = {};
+    for (const [id, row] of rows) {
+      out[id] = mapUnitToSectionItem(row, options.preferredLanguages);
+    }
+    return out;
   }
 
-  private async hydrateEntitySection(input: {
-    realmUnitId: string;
-    section: Extract<WikiZoneHomepageSection, { kind: "entityCollection" }>;
+  private feedSectionQuery(
+    feedKind: "all" | "updates" | "reviews" | undefined,
+  ): ZoneSectionQuery {
+    // Feed sections are query presets over the posts index: the standalone
+    // feed service keeps serving the zone /feed page, while sections share
+    // the single compiled-query execution path (one renderer, one boundary
+    // intersection).
+    // feed 分区是 posts 索引上的查询预设：独立的 feed service 继续服务
+    // 专区 /feed 页面，而分区共享单一的编译查询执行路径（单一渲染器、
+    // 单一边界交集）。
+    switch (feedKind) {
+      case "reviews":
+        return {
+          target: "post",
+          postKinds: ["REVIEW"],
+          realm: "context",
+          sort: { field: "createdAt", direction: "desc" },
+        };
+      case "updates":
+        return {
+          target: "post",
+          realm: "context",
+          sort: { field: "updatedAt", direction: "desc" },
+        };
+      default:
+        return {
+          target: "post",
+          realm: "context",
+          sort: { field: "hotScore", direction: "desc" },
+        };
+    }
+  }
+
+  private async executeQuerySection(input: {
+    zone: ZoneWithRelations;
+    sectionId: string;
+    query: ZoneSectionQuery;
+    limit: number;
+    cursor?: string | null;
     preferredLanguages?: string[];
-  }): Promise<WikiZoneHomepageItem[]> {
-    const realmUnitId = input.section.realmUnitId ?? input.realmUnitId;
-    const rows = await this.repository.findEntitySection({
-      realmUnitId,
-      subjectRoles: input.section.subjectRoles,
-      entityKinds: input.section.entityKinds,
-      take: sectionLimit(input.section) * 3,
+  }): Promise<ZoneSectionData> {
+    const offset = input.cursor ? Number.parseInt(input.cursor, 10) || 0 : 0;
+    const config = input.zone.config;
+    const compiled = compileZoneSectionQuery(input.query, config.filters, {
+      contextRealmUnitId:
+        config.context.kind === "realm" ? config.context.realmUnitId : null,
+      viewerLanguageCandidates: input.preferredLanguages ?? [],
     });
-
-    const items: WikiZoneHomepageItem[] = [];
-    const seen = new Set<string>();
-    for (const row of rows) {
-      if (seen.has(row.entityId)) continue;
-      seen.add(row.entityId);
-      items.push(mapUnitToEntityItem(row.entity, input.preferredLanguages));
-      if (items.length >= sectionLimit(input.section)) break;
-    }
-    return items;
-  }
-
-  private async hydrateHomepageSection(input: {
-    realmUnitId: string;
-    section: WikiZoneHomepageSection;
-    preferredLanguages?: string[];
-  }): Promise<WikiZoneHomepageItem[]> {
-    switch (input.section.kind) {
-      case "wikiUnitCollection":
-        return this.hydrateWikiUnitSection({
-          realmUnitId: input.realmUnitId,
-          section: input.section,
-          preferredLanguages: input.preferredLanguages,
-        });
-      case "tagCollection":
-        return this.hydrateTagSection({
-          section: input.section,
-          preferredLanguages: input.preferredLanguages,
-        });
-      case "entityCollection":
-        return this.hydrateEntitySection({
-          realmUnitId: input.realmUnitId,
-          section: input.section,
-          preferredLanguages: input.preferredLanguages,
-        });
-      case "recentWiki":
-        return this.hydrateWikiPostSection({ ...input, mode: "recent" });
-      case "updatedWiki":
-        return this.hydrateWikiPostSection({ ...input, mode: "updated" });
-      case "stubWiki":
-        return this.hydrateWikiPostSection({ ...input, mode: "stub" });
-      case "manualLinks":
-        return input.section.links.map((item) => ({
-          kind: "navigationItem",
-          item,
-        }));
-    }
-  }
-
-  async getWikiHomepageData(
-    unitId: string,
-    input: { preferredLanguages?: string[] } = {},
-  ): Promise<WikiZoneHomepageData | null> {
-    const zone = await this.getByUnitId(unitId);
-    const wiki = zone?.wiki as WikiZoneConfig | null;
-    if (!zone || !wiki) return null;
-
-    const homepage = wiki.homepage;
-    if (!homepage) {
-      return {
-        template:
-          wiki.theme?.homepageTemplate ?? WIKI_HOMEPAGE_DEFAULT_TEMPLATE,
-        sections: [],
-      };
-    }
-
-    const sections = await Promise.all(
-      homepage.sections.map(async (section) => ({
-        section,
-        items: await this.hydrateHomepageSection({
-          realmUnitId: wiki.filters.realmUnitId,
-          section,
-          preferredLanguages: input.preferredLanguages,
-        }),
-      })),
-    );
-
+    const result = await this.repository.searchSection({
+      index: compiled.index,
+      filter: compiled.filter,
+      sort: compiled.sort,
+      offset,
+      limit: input.limit,
+    });
+    const rows = await this.repository.hydrateUnits(result.ids, {
+      includeEntity: true,
+    });
+    const items = result.ids.flatMap((id) => {
+      const row = rows.get(id);
+      return row ? [mapUnitToSectionItem(row, input.preferredLanguages)] : [];
+    });
+    const nextOffset = offset + input.limit;
     return {
-      template: homepage.template,
-      sections,
+      sectionId: input.sectionId,
+      items,
+      nextCursor: nextOffset < result.total ? String(nextOffset) : null,
     };
+  }
+
+  async getSectionData(
+    unitId: string,
+    sectionId: string,
+    options: { cursor?: string | null; preferredLanguages?: string[] } = {},
+  ): Promise<ZoneSectionData | null> {
+    const zone = await this.getByUnitId(unitId);
+    if (!zone) return null;
+    const located = findSectionById(zone.config, sectionId);
+    if (!located) return null;
+    if (located.kind === "container") {
+      // Tabs/columns have no data of their own; panes resolve through the
+      // section ids they contain.
+      // tabs/columns 自身没有数据；面板通过其包含的分区 id 解析。
+      throw new AppError(400, "Container sections have no section data", {
+        code: "ZONE_SECTION_NO_DATA",
+        details: { sectionId },
+      });
+    }
+    const section = located.section;
+
+    switch (section.kind) {
+      case "query":
+        return this.executeQuerySection({
+          zone,
+          sectionId,
+          query: section.query,
+          limit: sectionLimit(section),
+          cursor: options.cursor,
+          preferredLanguages: options.preferredLanguages,
+        });
+      case "feed":
+        return this.executeQuerySection({
+          zone,
+          sectionId,
+          query: this.feedSectionQuery(section.feedKind),
+          limit: sectionLimit(section),
+          cursor: options.cursor,
+          preferredLanguages: options.preferredLanguages,
+        });
+      case "collection": {
+        const unitIds = section.items.flatMap((item) =>
+          item.target.kind === "unit" ? [item.target.unitId] : [],
+        );
+        const rows = await this.repository.hydrateUnits(unitIds, {
+          includeEntity: true,
+        });
+        const items = unitIds.flatMap((id) => {
+          const row = rows.get(id);
+          return row
+            ? [mapUnitToSectionItem(row, options.preferredLanguages)]
+            : [];
+        });
+        return { sectionId, items, nextCursor: null };
+      }
+      case "richText": {
+        const translations = await this.repository.findFragmentTranslations(
+          section.contentUnitId,
+        );
+        const resolvedLanguage = resolveReadLanguage({
+          languages: options.preferredLanguages ?? [],
+          supportLanguages: translations.map((row, sortOrder) => ({
+            language: row.language,
+            isPrimary: sortOrder === 0,
+            sortOrder,
+          })),
+        });
+        const translation =
+          translations.find((row) => row.language === resolvedLanguage) ??
+          translations[0] ??
+          null;
+        return {
+          sectionId,
+          items: [],
+          doc: (translation?.content as ContentDoc | null) ?? null,
+          docLanguage: (translation?.language ?? null) as Language | null,
+          nextCursor: null,
+        };
+      }
+      case "stats": {
+        const contextRealmUnitId =
+          zone.config.context.kind === "realm"
+            ? zone.config.context.realmUnitId
+            : null;
+        const stats: { articles?: number; members?: number } = {};
+        if (contextRealmUnitId) {
+          if (section.metrics.includes("articles")) {
+            stats.articles =
+              await this.repository.countWikiArticles(contextRealmUnitId);
+          }
+          if (section.metrics.includes("members")) {
+            stats.members =
+              (await this.repository.getRealmMemberCount(contextRealmUnitId)) ??
+              undefined;
+          }
+        }
+        return { sectionId, items: [], stats, nextCursor: null };
+      }
+      case "hero":
+        throw new AppError(400, "Hero sections have no section data", {
+          code: "ZONE_SECTION_NO_DATA",
+          details: { sectionId },
+        });
+    }
   }
 
   async delete(unitId: string): Promise<void> {

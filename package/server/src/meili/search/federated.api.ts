@@ -9,6 +9,7 @@ import { resolveSlugRef, resolveSlugRefs } from "../../shared/slug-ref";
 import { searchClient } from "../search-client";
 import { federatedSearch } from "./federated.service";
 import type { FilterContext } from "./filters";
+import { compileZoneSectionQuery } from "./filters";
 
 // ANCHOR: POST /meili/search/federated
 // ANCHOR: POST /meili/search/federated（联邦搜索接口）
@@ -35,6 +36,34 @@ export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
     const allowed = await deriveAllowedRatings(identity?.userId ?? null);
     ctx.allowedRatings = intersectRatings(allowed, body.query.ratings);
     ctx.viewerUserId = identity?.userId ?? null;
+    if (body.scope.kind === "zone") {
+      // Zone search runs inside the zone's unremovable `config.filters`
+      // boundary; the request's own query can only narrow within it.
+      // 专区搜索在专区不可移除的 `config.filters` 边界内运行；请求自身的
+      // 查询只能在其内部收窄。
+      const { zoneService } = await import("@/zone/zone.service");
+      const zone = await zoneService.getByUnitId(body.scope.zoneUnitId);
+      if (zone) {
+        const zoneCtx = {
+          contextRealmUnitId:
+            zone.config.context.kind === "realm"
+              ? zone.config.context.realmUnitId
+              : null,
+          viewerLanguageCandidates: body.query.languages ?? [],
+        };
+        const sort = { field: "createdAt" } as const;
+        ctx.zoneBoundaryContentFilter = compileZoneSectionQuery(
+          { target: "unit", sort },
+          zone.config.filters,
+          zoneCtx,
+        ).filter;
+        ctx.zoneBoundaryPostFilter = compileZoneSectionQuery(
+          { target: "post", sort },
+          zone.config.filters,
+          zoneCtx,
+        ).filter;
+      }
+    }
     return federatedSearch(searchClient, body, ctx);
   },
   {

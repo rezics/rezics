@@ -1,27 +1,31 @@
 import {
+  type Language,
   mainMarkdownSource,
-  type WikiZoneConfig,
+  resolveReadLanguage,
   type ZoneDTO,
-  type ZoneFilters,
-  type ZonePages,
-  type ZoneSection,
-  type ZoneTheme,
+  type ZoneTranslation,
 } from "@rezics/contract";
 import type { ZoneWithRelations } from "./zone.service";
 
 /**
- * Map Zone + Unit storage rows to ZoneDTO.
- * Resolves translations using the first available translation.
- * 将 Zone + Unit 存储行映射为 ZoneDTO。
- * 使用第一个可用的翻译来解析翻译内容。
+ * Map Zone + Unit storage rows to ZoneDTO. `name`/`description` resolve via
+ * the reader's language candidate chain; the full `translations` array rides
+ * along for the manage profile editor.
+ * 将 Zone + Unit 存储行映射为 ZoneDTO。`name`/`description` 通过读者的
+ * 语言候选链解析；完整的 `translations` 数组随行返回，供管理页资料编辑器
+ * 使用。
  */
-export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {
+export function mapZoneToDTO(
+  zone: ZoneWithRelations,
+  preferredLanguages: readonly string[] = [],
+): ZoneDTO {
   const translations = zone.unit?.translations ?? [];
-
-  // Pick best translation: requested lang > first available
-  // 选择最佳翻译：优先请求的 lang，其次第一个可用项。
+  const resolvedLanguage = resolveReadLanguage({
+    languages: preferredLanguages,
+    supportLanguages: zone.unit?.supportLanguages,
+  });
   const translation =
-    (lang ? translations.find((t) => t.language === lang) : undefined) ??
+    translations.find((tr) => tr.language === resolvedLanguage) ??
     translations[0];
 
   return {
@@ -30,15 +34,14 @@ export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {
     slug: zone.unit?.slug ?? "",
     name: translation?.title ?? "",
     description: mainMarkdownSource(translation?.description) ?? null,
-    filters: zone.filters as ZoneFilters,
-    configVersion: zone.configVersion as 1,
-    pages: (zone.pages as ZonePages | null) ?? null,
-    sections: (zone.sections as ZoneSection[] | null) ?? null,
-    theme: (zone.theme as ZoneTheme | null) ?? null,
-    primaryRealmUnitId: zone.primaryRealmUnitId ?? null,
-    template: zone.template,
-    styling: (zone.styling as Record<string, unknown>) ?? null,
-    wiki: (zone.wiki as WikiZoneConfig | null) ?? null,
+    translations: translations.map(
+      (tr): ZoneTranslation => ({
+        language: tr.language as Language,
+        title: tr.title ?? undefined,
+        description: mainMarkdownSource(tr.description) ?? undefined,
+      }),
+    ),
+    config: zone.config,
     startsAt: zone.startsAt?.toISOString() ?? null,
     endsAt: zone.endsAt?.toISOString() ?? null,
   };

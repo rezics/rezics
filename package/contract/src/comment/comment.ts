@@ -75,9 +75,34 @@ export const commentSliceCursorSchema = t.Object({
 
 export type CommentSliceCursor = Static<typeof commentSliceCursorSchema>;
 
+/**
+ * Three-state read selector over the root unit's comment partitions:
+ * - `all`: unconstrained read across the direct partition and every realm
+ *   context, interleaved by sort (no partition merging or dedup logic);
+ * - `direct`: direct comments only (`Comment.realmUnitId IS NULL`);
+ * - `realm`: that realm's thread (equality filter).
+ * Omitted context defaults to `all`.
+ * 对根 Unit 评论分区的三态读取选择器：
+ * - `all`：跨直接分区与所有 realm 语境的无约束读取，按排序交错（没有
+ *   分区合并或去重逻辑）；
+ * - `direct`：仅直接评论（`Comment.realmUnitId IS NULL`）；
+ * - `realm`：该 realm 的线程（相等过滤）。
+ * 省略 context 时默认为 `all`。
+ */
+export const commentListContextSchema = t.Union([
+  t.Object({ kind: t.Literal("all") }, { additionalProperties: false }),
+  t.Object({ kind: t.Literal("direct") }, { additionalProperties: false }),
+  t.Object(
+    { kind: t.Literal("realm"), realmUnitId: t.String() },
+    { additionalProperties: false },
+  ),
+]);
+
+export type CommentListContext = Static<typeof commentListContextSchema>;
+
 export const commentListQuerySchema = t.Object({
   rootUnitId: t.String(),
-  realmUnitId: t.Optional(t.Nullable(t.String())),
+  context: t.Optional(commentListContextSchema),
   mode: commentSliceModeSchema,
   rootCommentId: t.Optional(t.String()),
   parentCommentId: t.Optional(t.Nullable(t.String())),
@@ -92,7 +117,7 @@ export type CommentListQuery = Static<typeof commentListQuerySchema>;
 
 export const commentListBodySchema = t.Object({
   rootUnitId: t.String(),
-  realmUnitId: t.Optional(t.Nullable(t.String())),
+  context: t.Optional(commentListContextSchema),
   mode: commentSliceModeSchema,
   rootCommentId: t.Optional(t.String()),
   parentCommentId: t.Optional(t.Nullable(t.String())),
@@ -133,9 +158,19 @@ export type CommentListResponse = Static<typeof commentListResponseSchema>;
 // ANCHOR: Comment Write
 // ANCHOR: 评论写入
 
+/**
+ * Write targeting stays a plain nullable id: `null` is a *direct comment*,
+ * a string is a realm-context comment (validated against the root unit's
+ * `UnitRealm` set and that realm's moderation policy). Replies always
+ * inherit the parent comment's context; a mismatched explicit value is
+ * rejected.
+ * 写入目标保持为普通的可空 id：`null` 表示*直接评论*，字符串表示 realm
+ * 语境评论（会校验根 Unit 的 `UnitRealm` 集合及该 realm 的审核策略）。
+ * 回复始终继承父评论的语境；显式传入不一致的值会被拒绝。
+ */
 export const createCommentSchema = t.Object({
   rootUnitId: t.String(),
-  realmUnitId: t.Optional(t.Nullable(t.String())),
+  realmUnitId: t.Nullable(t.String()),
   parentCommentId: t.Optional(t.String()),
   content: contentDocWriteSchema,
 });

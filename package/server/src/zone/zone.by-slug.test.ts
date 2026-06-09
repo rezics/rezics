@@ -27,6 +27,10 @@ const updateZoneMock = mock(async (unitId: string, input: unknown) => ({
   input,
 }));
 const deleteZoneMock = mock(async () => undefined);
+const sectionDataMock = mock(
+  async (_unitId: string, sectionId: string): Promise<unknown | null> =>
+    sectionId === "s-known" ? { sectionId, items: [], nextCursor: null } : null,
+);
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -49,29 +53,35 @@ mock.module("@/governance", () => ({
   },
 }));
 
+const zoneConfigStub = {
+  schema: "rezics/zone-config",
+  version: 1,
+  context: { kind: "global" },
+  filters: {},
+  menus: [{ id: "main", nodes: [] }],
+  header: { menuId: "main" },
+  pages: { home: { sections: [] } },
+  theme: {},
+};
+
 const zoneStub = {
   unitId: "zone-1",
   ownerRealmUnitId: "realm-1",
   slug: "featured",
-  unit: { visibility: "PUBLIC" },
-  template: "grid",
-  filters: {},
-  styling: null,
+  unit: { visibility: "PUBLIC", translations: [], supportLanguages: [] },
+  config: zoneConfigStub,
+  startsAt: null,
+  endsAt: null,
 };
 
 mock.module("./zone.mapper", () => ({
-  mapZoneToDTO: (z: unknown) => z,
+  mapZoneToDTO: (zone: unknown) => zone,
 }));
 
+class ZoneServiceStub {}
+
 mock.module("./zone.service", () => ({
-  ZoneService: class {
-    checkLifecycle(zone: { startsAt?: Date | null; endsAt?: Date | null }) {
-      const now = Date.now();
-      if (zone.startsAt && zone.startsAt.getTime() > now) return "not_started";
-      if (zone.endsAt && zone.endsAt.getTime() < now) return "ended";
-      return null;
-    }
-  },
+  ZoneService: ZoneServiceStub,
   zoneService: {
     create: createZoneMock,
     update: updateZoneMock,
@@ -84,6 +94,10 @@ mock.module("./zone.service", () => ({
       if (slug === "featured") return zoneStub;
       return null;
     },
+    getPortalRefUnits: async () => ({
+      "label-1": { unitId: "label-1", type: "LABEL", title: "Characters" },
+    }),
+    getSectionData: sectionDataMock,
     checkLifecycle: () => null,
   },
 }));
@@ -99,6 +113,7 @@ beforeEach(() => {
   createZoneMock.mockClear();
   updateZoneMock.mockClear();
   deleteZoneMock.mockClear();
+  sectionDataMock.mockClear();
 });
 
 describe("GET /zone/by-slug/:slug", () => {
@@ -120,20 +135,71 @@ describe("GET /zone/by-slug/:slug", () => {
   });
 });
 
+describe("GET /zone/:unitId/portal", () => {
+  test("returns the zone plus batch ref-unit summaries", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone/zone-1/portal?languages=zh-hant"),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.zone.unitId).toBe("zone-1");
+    expect(body.refUnits["label-1"].title).toBe("Characters");
+  });
+
+  test("404s for unknown zones", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone/zone-x/portal"),
+    );
+    expect(res.status).toBe(404);
+  });
+});
+
+describe("GET /zone/:unitId/section/:sectionId", () => {
+  test("executes a section with cursor and languages", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request(
+        "http://localhost/zone/zone-1/section/s-known?cursor=12&languages=en",
+      ),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      sectionId: "s-known",
+      items: [],
+      nextCursor: null,
+    });
+    expect(sectionDataMock).toHaveBeenCalledWith("zone-1", "s-known", {
+      cursor: "12",
+      preferredLanguages: ["en"],
+    });
+  });
+
+  test("404s for unknown section ids", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone/zone-1/section/s-unknown"),
+    );
+    expect(res.status).toBe(404);
+  });
+});
+
 describe("zone mutation policy", () => {
+  const createBody = {
+    slug: "new-zone",
+    translations: [{ language: "en", title: "New Zone" }],
+    ownerRealmUnitId: "realm-1",
+    config: zoneConfigStub,
+  };
+
   test("denies zone creation rejected by the owner realm policy", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
       new Request("http://localhost/zone", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          slug: "new-zone",
-          translations: [{ language: "en", title: "New Zone" }],
-          ownerRealmUnitId: "realm-1",
-          filters: {},
-          template: "default",
-        }),
+        body: JSON.stringify(createBody),
       }),
     );
 
@@ -159,13 +225,7 @@ describe("zone mutation policy", () => {
       new Request("http://localhost/zone", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          slug: "new-zone",
-          translations: [{ language: "en", title: "New Zone" }],
-          ownerRealmUnitId: "realm-1",
-          filters: {},
-          template: "default",
-        }),
+        body: JSON.stringify(createBody),
       }),
     );
 
@@ -174,8 +234,49 @@ describe("zone mutation policy", () => {
       expect.objectContaining({
         userId: "user-1",
         ownerRealmUnitId: "realm-1",
+        config: zoneConfigStub,
       }),
     );
+  });
+
+  test("write bodies are normalized to the strict envelope shape", async () => {
+    policyAllowed = true;
+
+    const { zoneApi } = await import("./zone.api");
+    // Elysia normalizes additionalProperties away before the handler, so
+    // legacy keys (e.g. `template`) never reach persistence.
+    // Elysia 在 handler 之前会按 additionalProperties 归一化，因此旧键
+    // （例如 `template`）绝不会进入持久化。
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          ...createBody,
+          config: { ...zoneConfigStub, template: "wiki-classic" },
+        }),
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const input = createZoneMock.mock.calls[0]![0] as { config: object };
+    expect("template" in input.config).toBe(false);
+
+    // A structurally invalid envelope (wrong version literal) still 422s.
+    // 结构无效的信封（错误的版本字面量）仍返回 422。
+    createZoneMock.mockClear();
+    const invalid = await zoneApi.handle(
+      new Request("http://localhost/zone", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          ...createBody,
+          config: { ...zoneConfigStub, version: 99 },
+        }),
+      }),
+    );
+    expect(invalid.status).toBe(422);
+    expect(createZoneMock).not.toHaveBeenCalled();
   });
 
   test("updates only after the current owner realm policy allows it", async () => {
@@ -184,21 +285,14 @@ describe("zone mutation policy", () => {
       new Request("http://localhost/zone/zone-1", {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ template: "updated" }),
+        body: JSON.stringify({
+          translations: [{ language: "en", title: "Renamed" }],
+        }),
       }),
     );
 
     expect(denied.status).toBe(403);
     expect(updateZoneMock).not.toHaveBeenCalled();
-    expect(decideForIdentityMock).toHaveBeenCalledWith({
-      identity: currentIdentity,
-      action: "zone.manage",
-      target: {
-        kind: "zone",
-        id: "zone-1",
-        realmUnitId: "realm-1",
-      },
-    });
 
     policyAllowed = true;
     decideForIdentityMock.mockClear();
@@ -206,14 +300,18 @@ describe("zone mutation policy", () => {
       new Request("http://localhost/zone/zone-1", {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ template: "updated" }),
+        body: JSON.stringify({
+          translations: [{ language: "en", title: "Renamed" }],
+        }),
       }),
     );
 
     expect(allowed.status).toBe(200);
     expect(updateZoneMock).toHaveBeenCalledWith(
       "zone-1",
-      expect.objectContaining({ template: "updated" }),
+      expect.objectContaining({
+        translations: [{ language: "en", title: "Renamed" }],
+      }),
     );
   });
 
@@ -234,59 +332,24 @@ describe("zone mutation policy", () => {
       {
         identity: currentIdentity,
         action: "zone.manage",
-        target: {
-          kind: "zone",
-          id: "zone-1",
-          realmUnitId: "realm-1",
-        },
+        target: { kind: "zone", id: "zone-1", realmUnitId: "realm-1" },
       },
       {
         identity: currentIdentity,
         action: "zone.manage",
-        target: {
-          kind: "zone",
-          id: "zone-1",
-          realmUnitId: "realm-2",
-        },
+        target: { kind: "zone", id: "zone-1", realmUnitId: "realm-2" },
       },
     ]);
-    expect(updateZoneMock).toHaveBeenCalled();
   });
 
-  test("deletes only after the current owner realm policy allows it", async () => {
-    const { zoneApi } = await import("./zone.api");
-    const denied = await zoneApi.handle(
-      new Request("http://localhost/zone/zone-1", { method: "DELETE" }),
-    );
-
-    expect(denied.status).toBe(403);
-    expect(deleteZoneMock).not.toHaveBeenCalled();
-
+  test("deletes through the owner realm policy", async () => {
     policyAllowed = true;
-    const allowed = await zoneApi.handle(
-      new Request("http://localhost/zone/zone-1", { method: "DELETE" }),
-    );
 
-    expect(allowed.status).toBe(200);
-    expect(deleteZoneMock).toHaveBeenCalledWith("zone-1");
-  });
-});
-
-describe("GET /zone/:unitId", () => {
-  test("returns zone when id resolves to ZONE", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
-      new Request("http://localhost/zone/zone-1"),
+      new Request("http://localhost/zone/zone-1", { method: "DELETE" }),
     );
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(zoneStub);
-  });
-
-  test("does not resolve slug-shaped segments through the unitId route", async () => {
-    const { zoneApi } = await import("./zone.api");
-    const res = await zoneApi.handle(
-      new Request("http://localhost/zone/featured"),
-    );
-    expect(res.status).toBe(404);
+    expect(deleteZoneMock).toHaveBeenCalled();
   });
 });

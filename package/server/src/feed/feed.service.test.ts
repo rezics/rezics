@@ -171,11 +171,19 @@ beforeEach(() => {
   };
   zoneResult = {
     unitId: "zone-1",
-    filters: {
-      realmUnitId: "realm-1",
-      tags: [{ unitId: "tag-1" }],
-      postKind: "REVIEW",
-      languages: ["en"],
+    config: {
+      schema: "rezics/zone-config",
+      version: 1,
+      context: { kind: "realm", realmUnitId: "realm-1" },
+      filters: {
+        postKinds: ["REVIEW"],
+        languages: ["en"],
+        tagUnitIds: ["tag-1"],
+      },
+      menus: [{ id: "main", nodes: [] }],
+      header: { menuId: "main" },
+      pages: { home: { sections: [] } },
+      theme: {},
     },
   };
   listMock.mockClear();
@@ -369,7 +377,7 @@ describe("FeedService", () => {
         limit: 10,
         realmUnitId: "realm-1",
         kind: "REVIEW",
-        languages: ["en"],
+        languages: "en",
         tagIds: ["tag-2", "tag-1"],
       },
       undefined,

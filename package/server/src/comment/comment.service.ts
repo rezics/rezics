@@ -1,5 +1,6 @@
 import type {
   CommentListBody,
+  CommentListContext,
   CommentListQuery,
   CommentSearchOptions,
   CreateCommentInput,
@@ -22,7 +23,7 @@ import { blockService } from "@/block/block.service";
 import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import type { PublicUserSelected } from "@/utils/sanitizeUser";
-import { Comment, CommentPromotion, Post, User } from "../db/schema";
+import { Comment, CommentPromotion, Post, UnitRealm, User } from "../db/schema";
 import type { CommentWithRelations } from "./comment.types";
 
 const DEFAULT_LIMIT = 50;
@@ -32,7 +33,7 @@ type CommentListInput = CommentListQuery | CommentListBody;
 type CommentRow = typeof Comment.$inferSelect;
 type CommentListRepositoryInput = {
   rootUnitId: string;
-  realmUnitId: string | null;
+  context: CommentListContext;
   authorUserId?: string;
   state?: string;
   parentCommentId?: string | null;
@@ -44,6 +45,10 @@ type CommentListRepositoryInput = {
 type CommentParentRow = Pick<
   CommentRow,
   "id" | "rootUnitId" | "realmUnitId" | "depth" | "isLocked"
+>;
+type UnitRealmContextRow = Pick<
+  typeof UnitRealm.$inferSelect,
+  "moderationStatus" | "isLocked"
 >;
 
 export type CommentRepository = {
@@ -61,6 +66,10 @@ export type CommentRepository = {
     },
   >(comments: T[]): Promise<T[]>;
   getParentForCreate(id: string): Promise<CommentParentRow>;
+  getRealmContextForCreate(input: {
+    realmUnitId: string;
+    rootUnitId: string;
+  }): Promise<UnitRealmContextRow | null>;
   create(input: {
     rootUnitId: string;
     realmUnitId: string | null;
@@ -103,10 +112,29 @@ function mapCommentRow(row: {
   };
 }
 
-function realmPartitionCondition(realmUnitId: string | null) {
-  return realmUnitId
-    ? eq(Comment.realmUnitId, realmUnitId)
-    : isNull(Comment.realmUnitId);
+/**
+ * Context selector → SQL constraints. `all` adds no realm constraint, so
+ * direct and realm-context comments interleave by the requested sort.
+ * 语境选择器 → SQL 约束。`all` 不加 realm 约束，直接评论与 realm 语境评论
+ * 按请求的排序交错。
+ */
+function contextConditions(context: CommentListContext) {
+  if (context.kind === "direct") return [isNull(Comment.realmUnitId)];
+  if (context.kind === "realm") {
+    return [eq(Comment.realmUnitId, context.realmUnitId)];
+  }
+  return [];
+}
+
+function isInContext(
+  comment: Pick<CommentRow, "realmUnitId">,
+  context: CommentListContext,
+) {
+  if (context.kind === "direct") return comment.realmUnitId === null;
+  if (context.kind === "realm") {
+    return comment.realmUnitId === context.realmUnitId;
+  }
+  return true;
 }
 
 function cursorDate(value?: string) {
@@ -150,7 +178,7 @@ function createDrizzleCommentRepository(): CommentRepository {
       const db = await getServerDb();
       const conditions = [
         eq(Comment.rootUnitId, input.rootUnitId),
-        realmPartitionCondition(input.realmUnitId),
+        ...contextConditions(input.context),
         eq(Comment.moderationStatus, "APPROVED"),
         isNull(Comment.deletedAt),
       ];
@@ -279,6 +307,23 @@ function createDrizzleCommentRepository(): CommentRepository {
         .limit(1);
       if (!parent) throw new AppError(404, `Comment not found: ${id}`);
       return parent;
+    },
+    async getRealmContextForCreate({ realmUnitId, rootUnitId }) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({
+          moderationStatus: UnitRealm.moderationStatus,
+          isLocked: UnitRealm.isLocked,
+        })
+        .from(UnitRealm)
+        .where(
+          and(
+            eq(UnitRealm.realmUnitId, realmUnitId),
+            eq(UnitRealm.unitId, rootUnitId),
+          ),
+        )
+        .limit(1);
+      return row ?? null;
     },
     async create(input) {
       const db = await getServerDb();
@@ -420,9 +465,16 @@ export function createSearchBackedCommentRepository(
         const { searchComments } = await import(
           "../meili/comment/comment.service"
         );
+        // Search documents store null realmUnitId verbatim, so `direct` maps
+        // to the Meili `realmUnitId IS NULL` filter and `all` omits the filter.
+        // 搜索文档原样存储 null 的 realmUnitId，因此 `direct` 映射为 Meili 的
+        // `realmUnitId IS NULL` 过滤器，`all` 则省略该过滤器。
         const result = await searchComments({
           rootUnitId: input.rootUnitId,
-          realmUnitId: input.realmUnitId,
+          ...(input.context.kind === "direct" ? { realmUnitId: null } : {}),
+          ...(input.context.kind === "realm"
+            ? { realmUnitId: input.context.realmUnitId }
+            : {}),
           ...(input.parentCommentId !== undefined
             ? { parentCommentId: input.parentCommentId }
             : {}),
@@ -550,7 +602,7 @@ export class CommentService {
       1,
       Math.min(Number(query.limit ?? DEFAULT_LIMIT), MAX_LIMIT),
     );
-    const realmUnitId = query.realmUnitId ?? null;
+    const context = query.context ?? { kind: "all" as const };
     let parentCommentId: string | null | undefined =
       query.mode === "discovery" ? undefined : (query.parentCommentId ?? null);
     let rootComment: CommentWithRelations | null | undefined;
@@ -562,11 +614,11 @@ export class CommentService {
       rootComment = await this.repository.getById(query.rootCommentId);
       if (
         rootComment.rootUnitId !== query.rootUnitId ||
-        rootComment.realmUnitId !== realmUnitId
+        !isInContext(rootComment, context)
       ) {
         throw new AppError(
           400,
-          "Root comment is outside the requested root/realm partition",
+          "Root comment is outside the requested root/context partition",
         );
       }
       parentCommentId = rootComment.id;
@@ -582,11 +634,11 @@ export class CommentService {
       const parent = await this.repository.getById(query.parentCommentId);
       if (
         parent.rootUnitId !== query.rootUnitId ||
-        parent.realmUnitId !== realmUnitId
+        !isInContext(parent, context)
       ) {
         throw new AppError(
           400,
-          "Parent comment is outside the requested root/realm partition",
+          "Parent comment is outside the requested root/context partition",
         );
       }
       parentCommentId = parent.id;
@@ -596,7 +648,7 @@ export class CommentService {
     const blockedIds = await blockedAuthorIds(options);
     const listed = await this.repository.list({
       rootUnitId: query.rootUnitId,
-      realmUnitId,
+      context,
       authorUserId: query.authorUserId,
       state: query.state,
       ...(parentCommentId !== undefined ? { parentCommentId } : {}),
@@ -646,25 +698,29 @@ export class CommentService {
     if (parent) {
       if (parent.isLocked)
         throw new AppError(409, "Cannot reply to a locked comment");
-      const requestedRealm = input.realmUnitId ?? null;
-      const hasExplicitRealm = input.realmUnitId !== undefined;
       if (parent.rootUnitId !== input.rootUnitId) {
         throw new AppError(
           400,
           "Parent comment is outside the requested root/realm partition",
         );
       }
-      if (hasExplicitRealm && parent.realmUnitId !== requestedRealm) {
+      // Replies always inherit the parent's context; a mismatched explicit
+      // value is rejected instead of silently overwritten.
+      // 回复始终继承父评论的语境；显式传入不一致的值会被拒绝而非静默覆盖。
+      if (input.realmUnitId !== parent.realmUnitId) {
         throw new AppError(
           400,
           "Parent comment is outside the requested root/realm partition",
         );
       }
       depth = parent.depth + 1;
+    } else if (input.realmUnitId !== null) {
+      await this.assertRealmContextWritable(
+        input.realmUnitId,
+        input.rootUnitId,
+      );
     }
-    const realmUnitId = parent
-      ? parent.realmUnitId
-      : (input.realmUnitId ?? null);
+    const realmUnitId = parent ? parent.realmUnitId : input.realmUnitId;
 
     const comment = await this.repository.create({
       rootUnitId: input.rootUnitId,
@@ -678,6 +734,33 @@ export class CommentService {
 
     await enqueueCommentSync(comment.id);
     return comment;
+  }
+
+  /**
+   * Realm write policy for root comments: the root unit must be an APPROVED
+   * member of the realm (`UnitRealm`), and the membership must not be locked
+   * (`UnitRealm.isLocked` is the realm-moderation lock on this unit's thread,
+   * set via governance lock actions). `Realm.contentRequiresApproval` only
+   * gates adding units to a realm, so membership + APPROVED is the policy here.
+   * 根评论的 realm 写入策略：根 Unit 必须是该 realm 的 APPROVED 成员
+   * （`UnitRealm`），且成员关系未被锁定（`UnitRealm.isLocked` 是 realm 审核
+   * 对该 Unit 线程的锁，由治理锁定操作设置）。`Realm.contentRequiresApproval`
+   * 只约束将 Unit 加入 realm，因此这里的策略就是成员关系 + APPROVED。
+   */
+  private async assertRealmContextWritable(
+    realmUnitId: string,
+    rootUnitId: string,
+  ): Promise<void> {
+    const membership = await this.repository.getRealmContextForCreate({
+      realmUnitId,
+      rootUnitId,
+    });
+    if (!membership || membership.moderationStatus !== "APPROVED") {
+      throw new AppError(400, "Realm is not an approved context for this unit");
+    }
+    if (membership.isLocked) {
+      throw new AppError(409, "Comments are locked in this realm context");
+    }
   }
 
   async update(

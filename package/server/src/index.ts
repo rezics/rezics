@@ -37,6 +37,7 @@ import { infraApi } from "./infra/infra.api";
 import { initSeedTagsCache } from "./infra/seed-tags";
 import { initSlugScopesCache } from "./infra/slug-scopes";
 import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
+import { labelApi } from "./label";
 import { linkApi } from "./link";
 import { federatedSearchApi, meiliApi } from "./meili";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
@@ -226,6 +227,7 @@ routeApp
   .use(collectionApi)
   .use(linkApi)
   .use(zoneApi)
+  .use(labelApi)
   .use(realmApi)
   .use(realmExtraApi)
   .use(realmTagContextApi)

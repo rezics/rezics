@@ -119,15 +119,15 @@ compatibility.
 
 ## 1. Zone contract module (`package/contract/src/zone/`)
 
-- [ ] 1.1 Create `package/contract/src/zone/link-target.ts`: `ZoneLinkTarget`
+- [x] 1.1 Create `package/contract/src/zone/link-target.ts`: `ZoneLinkTarget`
   union — `{kind:"unit", unitId}` | `{kind:"zonePage", pageId}` |
   `{kind:"external", url, text}`.
-- [ ] 1.2 Create `package/contract/src/zone/menu.ts`: recursive
+- [x] 1.2 Create `package/contract/src/zone/menu.ts`: recursive
   `menuNodeSchema` (`id`, optional `labelUnitId`, optional `target`, optional
   `children`; `t.Recursive` like `contract/src/content/structure.ts`), menu
   registry shape `Array<{id, nodes}>`, depth-3 cap and leaf/group rules
   documented for the validator.
-- [ ] 1.3 Create `package/contract/src/zone/section.ts`: shared base (`id`,
+- [x] 1.3 Create `package/contract/src/zone/section.ts`: shared base (`id`,
   `titleLabelUnitId?`, `limit?`, `emptyState?`), `ZoneSectionQuery`
   (`target: "unit"|"post"`, `types?`, `postKinds?`,
   `realm?: "context" | {unitIds}`, `tagUnitIds?`, `realmTagUnitIds?`,
@@ -141,27 +141,27 @@ compatibility.
   (metrics: subset of `articles|members`), `tabs` (defaultTabId?, tabs:
   `{id, titleLabelUnitId?, sections}`[]), `columns` (sidePosition?, side,
   main).
-- [ ] 1.4 Create `package/contract/src/zone/config-v1.ts`: envelope
+- [x] 1.4 Create `package/contract/src/zone/config-v1.ts`: envelope
   `{schema: t.Literal("rezics/zone-config"), version: t.Literal(1), context,
   filters, menus, header: {menuId, logoImageUnitId?, searchPlaceholderKey?},
   pages: {home, search?, feed?}, theme}` with
   `additionalProperties: false` throughout; `ZoneBoundaryFilter` = query
   vocabulary minus sort. Carry over theme tokens/images/layout from the old
   `zoneThemeSchema`, dropping `navPosition`.
-- [ ] 1.5 Create `package/contract/src/zone/upgrade.ts`:
+- [x] 1.5 Create `package/contract/src/zone/upgrade.ts`:
   `zoneConfigEnvelopeSchema` (union of versions), `parseZoneConfig()` +
   `upgradeZoneConfig()` chain (v1 = identity today, harness ready for v2),
   mirroring the doc-v1/doc-v2 file layout.
-- [ ] 1.6 Rewrite `ZoneDTO` in the new module: `unitId`, `ownerRealmUnitId`,
+- [x] 1.6 Rewrite `ZoneDTO` in the new module: `unitId`, `ownerRealmUnitId`,
   `slug`, `name`, `description`, `translations` (full array for manage),
   `config` (latest type), `startsAt`, `endsAt`. Add create/update input
   schemas (update includes `translations`). Export portal/section-data
   response shapes (`refUnits` summary map; section items + cursor).
-- [ ] 1.7 Delete `package/contract/src/realm/zone.ts` (including
+- [x] 1.7 Delete `package/contract/src/realm/zone.ts` (including
   `wikiZoneTranslatedLabelSchema`, both legacy section unions,
   `ZoneFiltersSchema`, `zoneConfigVersionSchema`); update
   `package/contract/src/index.ts` exports and all contract-internal imports.
-- [ ] 1.8 Contract tests (`config-v1.test.ts`, `menu.test.ts`,
+- [x] 1.8 Contract tests (`config-v1.test.ts`, `menu.test.ts`,
   `section.test.ts`, `upgrade.test.ts`): nesting rules, menu depth, section-id
   uniqueness expectations, strict `additionalProperties`, upgrade
   normalization, zero-inline-text (no string-map fields anywhere in the
@@ -169,7 +169,7 @@ compatibility.
 
 ## 2. Comment context contract
 
-- [ ] 2.1 Update `package/contract/src/comment/comment.ts`:
+- [x] 2.1 Update `package/contract/src/comment/comment.ts`:
   `commentListQuerySchema.context:
   {kind:"all"} | {kind:"direct"} | {kind:"realm", realmUnitId: string}`
   (All = unconstrained; direct = `Comment.realmUnitId IS NULL`; realm =
@@ -179,68 +179,68 @@ compatibility.
 
 ## 3. Database schema
 
-- [ ] 3.1 Rewrite `package/server/src/db/schema/zone.ts`: keep `unitId`,
+- [x] 3.1 Rewrite `package/server/src/db/schema/zone.ts`: keep `unitId`,
   `ownerRealmUnitId`, `startsAt`, `endsAt`, timestamps; add
   `config: jsonData().notNull()`; drop `filters`, `configVersion`, `pages`,
   `sections`, `theme`, `primaryRealmUnitId`, `template`, `styling`, `wiki`.
-- [ ] 3.2 `task db:generate` for the migration (no hand-authored SQL); update
+- [x] 3.2 `task db:generate` for the migration (no hand-authored SQL); update
   `package/server/src/db/schema/schema-exports.test.ts`.
 
 ## 4. Server zone domain (`package/server/src/zone/`)
 
-- [ ] 4.1 Rewrite `zone.service.ts` create/update: update accepts
+- [x] 4.1 Rewrite `zone.service.ts` create/update: update accepts
   `translations` and upserts `UnitTranslation` + `UnitSupportLanguage`;
   reads run `parseZoneConfig()`/`upgradeZoneConfig()` before returning;
   writes validate the latest-version envelope strictly.
-- [ ] 4.2 Rewrite `validateZoneConfig()` over the envelope: typed ref
+- [x] 4.2 Rewrite `validateZoneConfig()` over the envelope: typed ref
   assertions (LABEL for every `labelUnitId`/`titleLabelUnitId`, IMAGE for
   theme/hero images, POST kind=WIKI for `richText.contentUnitId`, REALM for
   `context.realmUnitId` and query realm ids, existence for menu/collection
   unit targets), container nesting + menu depth + section-id uniqueness,
   `header.menuId` resolves, query fields within the supported set.
-- [ ] 4.3 Replace `getWikiHomepageData()` and the wiki hydrators with generic
+- [x] 4.3 Replace `getWikiHomepageData()` and the wiki hydrators with generic
   hydration: `getPortal(unitId, lang)` → zone + batch ref-unit summaries
   (one query over all unitIds referenced by the config, with translations),
   and `getSectionData(unitId, sectionId, {cursor, lang})` → executes the
   section by kind (query → search, feed → feed service, collection → ref
   resolution, stats → aggregates). Tabs panes resolve through their contained
   section ids.
-- [ ] 4.4 Query compilation: extend `package/server/src/meili/search/filters.ts`
+- [x] 4.4 Query compilation: extend `package/server/src/meili/search/filters.ts`
   (and reuse the zone-scope path in `federated.service.ts`) to compile
   `ZoneSectionQuery` → content/posts index filters + sort, intersected with
   `config.filters` as the unremovable boundary; resolve `realm: "context"`
   and `languages: "viewer"` (via existing language-resolution helpers).
   Exclude UNLISTED units from all query-section results.
-- [ ] 4.5 `stats` metrics: `articles` (count of WIKI posts in the context
+- [x] 4.5 `stats` metrics: `articles` (count of WIKI posts in the context
   realm via `UnitRealm`, excluding UNLISTED fragments), `members` (context
   realm `memberCount`). No edits/images metrics in this plan.
-- [ ] 4.6 Rewrite `zone.api.ts`: `GET /zone/by-slug/:slug`,
+- [x] 4.6 Rewrite `zone.api.ts`: `GET /zone/by-slug/:slug`,
   `GET /zone/:unitId/portal`, `GET /zone/:unitId/section/:sectionId`
   (cursor/lang query), `POST /zone/`, `PATCH /zone/:unitId` (with
   translations), `DELETE /zone/:unitId`; permission checks unchanged
   (owner-realm capability). Update `zone.mapper.ts` for the new DTO.
-- [ ] 4.7 Add a LABEL unit API for manage pickers, following domain
+- [x] 4.7 Add a LABEL unit API for manage pickers, following domain
   conventions (`package/server/src/label/label.api.ts` + `.service.ts` +
   `.mapper.ts` or the existing unit domain if a list/create surface already
   fits): search LABEL units by name, create LABEL with multilingual
   translations. Mount from `package/server/src/index.ts`.
-- [ ] 4.8 Update/extend `zone.service.test.ts`: translations upsert on update,
+- [x] 4.8 Update/extend `zone.service.test.ts`: translations upsert on update,
   envelope validation cases (each nesting/ref violation), upgrade-on-read,
   section data execution per kind, boundary-filter intersection, UNLISTED
   exclusion.
 
 ## 5. Comment server behavior
 
-- [ ] 5.1 `package/server/src/comment/comment.service.ts` +
+- [x] 5.1 `package/server/src/comment/comment.service.ts` +
   `comment.api.ts`: list with `context.kind = "all"` = no realm constraint
   (plain `rootUnitId` query; no partition merging logic);
   `context.kind = "direct"` = `Comment.realmUnitId IS NULL`;
   `context.kind = "realm"` = equality filter.
-- [ ] 5.2 Create path: `realmUnitId: null` = direct comment; non-null
+- [x] 5.2 Create path: `realmUnitId: null` = direct comment; non-null
   validated against the root unit's `UnitRealm` set and the realm's
   moderation policy; replies force-inherit the parent's `realmUnitId`
   (reject or overwrite mismatched input — pick one and test it).
-- [ ] 5.3 `comment.service.test.ts`: All-mode unconstrained read returns
+- [x] 5.3 `comment.service.test.ts`: All-mode unconstrained read returns
   direct + realm-context comments interleaved by sort; reply inheritance;
   UnitRealm membership validation; direct-comment creation.
 

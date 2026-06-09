@@ -7,6 +7,8 @@ import {
   buildRealmFilter,
   buildShelfItemFilter,
   buildUserFilter,
+  compileZoneSectionQuery,
+  zoneSectionQueryUnsupportedFields,
 } from "./filters";
 
 const emptyQuery: SearchQuery = {};
@@ -307,5 +309,158 @@ describe("buildShelfItemFilter", () => {
     expect(filter).toContain(
       '(shelfVisibility = "PUBLIC" AND shelfStatus = "PUBLISHED")',
     );
+  });
+});
+
+describe("compileZoneSectionQuery", () => {
+  test("compiles a unit query with context realm and viewer languages", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "unit",
+        types: ["BOOK"],
+        realm: "context",
+        languages: "viewer",
+        sort: { field: "publishedAt", direction: "desc" },
+      },
+      undefined,
+      {
+        contextRealmUnitId: "realm-1",
+        viewerLanguageCandidates: ["zh-hant", "en"],
+      },
+    );
+    expect(compiled.index).toBe("content");
+    expect(compiled.filter).toContain('type = "BOOK"');
+    expect(compiled.filter).toContain('realmIds = "realm-1"');
+    expect(compiled.filter).toContain(
+      '(isLanguageNeutral = true OR languages IN ["zh-hant", "en"])',
+    );
+    // UNLISTED units never reach the index; PUBLIC documents the boundary
+    expect(compiled.filter).toContain('visibility = "PUBLIC"');
+    expect(compiled.sort).toEqual(["publishedAt:desc"]);
+  });
+
+  test("compiles a post query with kind and lock defaults", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "post",
+        postKinds: ["WIKI"],
+        realm: "context",
+        sort: { field: "updatedAt" },
+      },
+      undefined,
+      { contextRealmUnitId: "realm-1" },
+    );
+    expect(compiled.index).toBe("posts");
+    expect(compiled.filter).toContain('kind = "WIKI"');
+    expect(compiled.filter).toContain("isLocked = false");
+    expect(compiled.sort).toEqual(["updatedAt:desc"]);
+  });
+
+  test("context realm resolves to unscoped for global-context zones", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "unit",
+        realm: "context",
+        sort: { field: "createdAt" },
+      },
+      undefined,
+      { contextRealmUnitId: null },
+    );
+    expect(
+      compiled.filter.some((clause) => clause.startsWith("realmIds")),
+    ).toBe(false);
+  });
+
+  test("the boundary narrows the query and never widens it", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "unit",
+        types: ["BOOK", "SERIES"],
+        ratings: ["GENERAL", "R_15"],
+        tagUnitIds: ["tag-a"],
+        sort: { field: "createdAt" },
+      },
+      {
+        types: ["BOOK"],
+        ratings: ["GENERAL"],
+        tagUnitIds: ["tag-b"],
+        realm: { unitIds: ["realm-9"] },
+      },
+      {},
+    );
+    expect(compiled.filter).toContain('type = "BOOK"');
+    expect(compiled.filter).toContain('rating = "GENERAL"');
+    // boundary tags compose by union (each tag is AND-ed)
+    expect(compiled.filter).toContain('tagIds = "tag-a"');
+    expect(compiled.filter).toContain('tagIds = "tag-b"');
+    expect(compiled.filter).toContain('realmIds = "realm-9"');
+  });
+
+  test("an empty boundary intersection matches nothing", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "unit",
+        types: ["BOOK"],
+        sort: { field: "createdAt" },
+      },
+      { types: ["SERIES"] },
+      {},
+    );
+    expect(
+      compiled.filter.some((clause) =>
+        clause.includes("__zone_boundary_empty_intersection__"),
+      ),
+    ).toBe(true);
+  });
+
+  test("rejects fields the target index cannot filter or sort", () => {
+    expect(
+      zoneSectionQueryUnsupportedFields({
+        target: "post",
+        tagUnitIds: ["tag-1"],
+        subjects: { roles: ["character"] },
+        ratings: ["GENERAL"],
+        sort: { field: "publishedAt" },
+      }),
+    ).toEqual(["tagUnitIds", "subjects", "ratings", "sort.publishedAt"]);
+
+    expect(
+      zoneSectionQueryUnsupportedFields({
+        target: "unit",
+        subjects: { entityUnitIds: ["entity-1"], roles: ["character"] },
+        sort: { field: "replyCount" },
+      }),
+    ).toEqual(["sort.replyCount"]);
+
+    expect(() =>
+      compileZoneSectionQuery(
+        {
+          target: "post",
+          tagUnitIds: ["tag-1"],
+          sort: { field: "createdAt" },
+        },
+        undefined,
+        {},
+      ),
+    ).toThrow("unsupported on the post index");
+  });
+});
+
+describe("zone scope boundary in federated builders", () => {
+  const zoneScope: SearchScope = { kind: "zone", zoneUnitId: "zone-1" };
+
+  test("content sub-queries embed the pre-compiled zone boundary", () => {
+    const filter = buildContentFilter(emptyQuery, zoneScope, {
+      zoneBoundaryContentFilter: ['type = "BOOK"', 'realmIds = "realm-1"'],
+    });
+    expect(filter).toContain('type = "BOOK"');
+    expect(filter).toContain('realmIds = "realm-1"');
+  });
+
+  test("post sub-queries embed the pre-compiled zone boundary", () => {
+    const filter = buildPostFilter(emptyQuery, zoneScope, {
+      zoneBoundaryPostFilter: ['kind = "WIKI"'],
+    });
+    expect(filter).toContain('kind = "WIKI"');
   });
 });
