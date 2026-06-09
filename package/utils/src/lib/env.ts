@@ -54,7 +54,7 @@ function loadFromWorkspacePackages(): string[] {
       sources.set(targetKey, { kind: "process" });
       continue;
     }
-    const file = join(root, "packages", pkg, ".env");
+    const file = join(root, "package", pkg, ".env");
     if (!existsSync(file)) {
       attempts.push(`package/${pkg}/.env (file missing)`);
       continue;
@@ -73,7 +73,7 @@ function loadFromWorkspacePackages(): string[] {
 }
 
 function readExampleTemplate(): { path: string; contents: string } | null {
-  const path = join(getRepoRoot(), "packages", "utils", ".env.example");
+  const path = join(getRepoRoot(), "package", "utils", ".env.example");
   if (!existsSync(path)) return null;
   return { path, contents: readFileSync(path, "utf8") };
 }
