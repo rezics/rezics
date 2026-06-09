@@ -7,7 +7,6 @@ import { randomUUID } from "node:crypto";
 import type { Language, UpdateUser, UserSettings } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
-import { getDefaultRealmId } from "@/infra/default-realm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
 import {
@@ -16,12 +15,12 @@ import {
 } from "@/shelf/system-shelves";
 import {
   EmailVerificationContract,
-  RealmMember,
   Subscription,
   Unit,
   User,
 } from "../../db/schema";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
+import { ensureRegistrationDefaultSubscriptions } from "./registration-defaults";
 
 export type CreateUserProfileInput = {
   userId: string;
@@ -386,18 +385,7 @@ function createDrizzleUserRepository(): UserRepository {
           input.slug,
           createDrizzleSystemShelfClient(tx),
         );
-        const defaultRealmId = getDefaultRealmId();
-        if (defaultRealmId) {
-          await tx
-            .insert(RealmMember)
-            .values({
-              realmUnitId: defaultRealmId,
-              userId: updated.unitId,
-              roleKey: "member",
-              updatedAt: now,
-            })
-            .onConflictDoNothing();
-        }
+        await ensureRegistrationDefaultSubscriptions(tx, updated.unitId);
         return updated;
       });
       return (await hydrateUsers([row]))[0]!;

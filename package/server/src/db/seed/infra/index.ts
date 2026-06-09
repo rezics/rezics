@@ -6,6 +6,10 @@ import {
   seedGameMediaTaxonomy,
 } from "./seed-game-media-taxonomy";
 import {
+  type OfficialZoneDefinition,
+  seedOfficialZones,
+} from "./seed-official-zones";
+import {
   type RealmTaxonomySeedResult,
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
@@ -18,6 +22,11 @@ export {
   seedGameMediaTaxonomy,
 } from "./seed-game-media-taxonomy";
 export {
+  OFFICIAL_ZONE_DEFINITIONS,
+  type OfficialZoneDefinition,
+  seedOfficialZones,
+} from "./seed-official-zones";
+export {
   type RealmTaxonomySeedResult,
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
@@ -28,6 +37,7 @@ export interface SeedInfraResult {
   slugScopes: SlugScopesMap;
   tagMap: Record<SeedTagName, string>;
   defaultRealmId: string;
+  officialZoneIds: Record<OfficialZoneDefinition["key"], string>;
   realmTaxonomy: RealmTaxonomySeedResult;
   searchTagIds: TagGroupIds;
   gameMediaTaxonomy: GameMediaTaxonomySeedResult;
@@ -57,6 +67,11 @@ export async function seedInfra(
   const { db, slugScopes } = opts;
   const tagMap = await seedContentTypeTags(db, slugScopes);
   const defaultRealmId = await seedDefaultRealm(db, rootUserId, slugScopes);
+  const officialZoneIds = await seedOfficialZones(
+    db,
+    defaultRealmId,
+    slugScopes,
+  );
   const realmTaxonomy = await seedRealmTaxonomy(
     db,
     rootUserId,
@@ -69,6 +84,7 @@ export async function seedInfra(
     slugScopes,
     tagMap,
     defaultRealmId,
+    officialZoneIds,
     realmTaxonomy,
     searchTagIds,
     gameMediaTaxonomy,

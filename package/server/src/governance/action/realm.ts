@@ -9,6 +9,7 @@ export const realmPolicyActions = {
   memberCapabilityChange: "realm.member.capability.change",
   memberModerate: "realm.member.moderate",
   reportEscalate: "realm.report.escalate",
+  zoneManage: "zone.manage",
   dmSend: "dm.send",
   contentPin: "content.pin",
   tagVote: "tag.vote",
@@ -53,6 +54,12 @@ export const realmActionDefinitions = [
   {
     action: realmPolicyActions.reportEscalate,
     requiredCapability: "moderation.case.escalate",
+    family: "realm",
+    realmScoped: true,
+  },
+  {
+    action: realmPolicyActions.zoneManage,
+    requiredCapability: "queue.realm.decide",
     family: "realm",
     realmScoped: true,
   },

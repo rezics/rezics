@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { mapZoneToDTO } from "./zone.mapper";
+
+const { mapZoneToDTO } = await import(
+  "./zone.mapper.ts?zone-mapper-test-actual" as string
+);
 
 describe("mapZoneToDTO", () => {
   test("preserves the hydrated Unit slug", () => {

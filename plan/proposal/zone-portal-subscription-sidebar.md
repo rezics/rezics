@@ -113,15 +113,15 @@ zone ownership/permissions inherit from realms.
 - [x] 2.2 Update `package/server/src/zone/zone.api.ts`,
   `package/api/src/zone/zone.api.ts`, and `package/api/src/zone/zone.*.ts`
   types/queries/mutations for owner realm and versioned config.
-- [ ] 2.3 Replace admin-only zone create/update checks with owner-realm
+- [x] 2.3 Replace admin-only zone create/update checks with owner-realm
   capability checks, using existing governance/realm capability patterns rather
   than creating zone-specific role tables.
 - [x] 2.4 Fix zone slug hydration so `ZoneDTO.slug` is preserved instead of
   mapped to an empty string when reading by slug.
-- [ ] 2.5 Add or update seed infrastructure so the Rezics official realm owns
+- [x] 2.5 Add or update seed infrastructure so the Rezics official realm owns
   official zones for Book, Realms, and Popular, with deterministic slugs and
   typed section presets.
-- [ ] 2.6 Update `package/server/src/db/factory/zones.ts` away from mock
+- [x] 2.6 Update `package/server/src/db/factory/zones.ts` away from mock
   template names such as `featured-carousel` toward versioned zone config
   fixtures that exercise content sections, feed sections, and wiki sections.
 - [x] 2.7 Add zone service tests for owner realm validation, lifecycle behavior,
@@ -146,25 +146,25 @@ zone ownership/permissions inherit from realms.
 - [x] 3.5 Add frontend API modules in `package/api/src/subscription/` for active
   list entries, removed list entries, pin/reorder/remove/recover mutations, and
   cache invalidation keyed by subscribed type.
-- [ ] 3.6 Add tests proving subscribe/unsubscribe, realm join/leave, realm
+- [x] 3.6 Add tests proving subscribe/unsubscribe, realm join/leave, realm
   mute/unmute, pin/unpin, reorder, and recovery keep `Subscription`,
   subscriber counts, and `UserSubscriptionListEntry` consistent.
-- [ ] 3.7 Keep recovery best-effort: tests should cover missing target,
+- [x] 3.7 Keep recovery best-effort: tests should cover missing target,
   unsubscribable target, and private realm permission failures without requiring
   cross-table rollback of unrelated user state.
 
 ## 4. Registration defaults and recovery
 
-- [ ] 4.1 Add a contract or server-owned registry for default registration
+- [x] 4.1 Add a contract or server-owned registry for default registration
   subscriptions and sidebar order, covering official zones and the Rezics
   official realm.
-- [ ] 4.2 Extend `package/server/src/user/service/user.service.ts`
+- [x] 4.2 Extend `package/server/src/user/service/user.service.ts`
   `completeProfileSetup` so after system shelf bootstrap and default realm join
   it also subscribes the user to official zones and creates default
   `UserSubscriptionListEntry` rows in deterministic fractional order.
-- [ ] 4.3 Ensure default registration seeding is idempotent for users who repeat
+- [x] 4.3 Ensure default registration seeding is idempotent for users who repeat
   completion or already have some default subscriptions/list entries.
-- [ ] 4.4 Add server tests in `package/server/src/user/service/` covering
+- [x] 4.4 Add server tests in `package/server/src/user/service/` covering
   complete-registration default subscriptions, default entry order, and
   idempotency.
 - [ ] 4.5 Add a user recovery page route under `package/app/src/routes/_mainLayout/user/me/`

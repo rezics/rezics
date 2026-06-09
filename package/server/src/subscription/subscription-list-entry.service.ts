@@ -139,13 +139,17 @@ export async function markSubscriptionListEntryRemovedInTx(
     );
 }
 
+type DbProvider = () => Promise<any>;
+
 export class SubscriptionListEntryService {
+  constructor(private readonly dbProvider: DbProvider = getServerDb) {}
+
   async activate(input: {
     userUnitId: string;
     subscribedUnitId: string;
     position?: string;
   }): Promise<UserSubscriptionListEntryDTO> {
-    const db = await getServerDb();
+    const db = await this.dbProvider();
     const row = await activateSubscriptionListEntryInTx(db, input);
     return mapUserSubscriptionListEntryToDTO(row);
   }
@@ -154,7 +158,7 @@ export class SubscriptionListEntryService {
     userUnitId: string;
     subscribedUnitId: string;
   }): Promise<void> {
-    const db = await getServerDb();
+    const db = await this.dbProvider();
     await markSubscriptionListEntryRemovedInTx(db, input);
   }
 
@@ -163,7 +167,7 @@ export class SubscriptionListEntryService {
     subscribedType?: UnitType;
     state?: UserSubscriptionListEntryState;
   }): Promise<UserSubscriptionListEntryDTO[]> {
-    const db = await getServerDb();
+    const db = await this.dbProvider();
     const conditions = [
       eq(UserSubscriptionListEntry.userUnitId, input.userUnitId),
       eq(UserSubscriptionListEntry.state, input.state ?? "ACTIVE"),
@@ -210,7 +214,7 @@ export class SubscriptionListEntryService {
     subscribedUnitId: string;
     pinned: boolean;
   }): Promise<UserSubscriptionListEntryDTO> {
-    const db = await getServerDb();
+    const db = await this.dbProvider();
     const [entry] = await db
       .update(UserSubscriptionListEntry)
       .set({ pinned: input.pinned, updatedAt: new Date() })
@@ -238,7 +242,7 @@ export class SubscriptionListEntryService {
     subscribedUnitId: string;
     position: string;
   }): Promise<UserSubscriptionListEntryDTO> {
-    const db = await getServerDb();
+    const db = await this.dbProvider();
     const [entry] = await db
       .update(UserSubscriptionListEntry)
       .set({ position: input.position, updatedAt: new Date() })
@@ -265,7 +269,7 @@ export class SubscriptionListEntryService {
     userUnitId: string;
     subscribedUnitId: string;
   }): Promise<UserSubscriptionListEntryDTO> {
-    const db = await getServerDb();
+    const db = await this.dbProvider();
     const subscribedType = await getSubscribedType(db, input.subscribedUnitId);
     if (!isSubscribableUnitType(subscribedType)) {
       throw new AppError(
