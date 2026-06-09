@@ -3,6 +3,7 @@ import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 const calls = {
   resetDatabase: 0,
   resetAuthDatabase: 0,
+  seedInfra: [] as Array<{ rootUserId: string; db: unknown }>,
 };
 
 const seedUsers = [
@@ -46,7 +47,9 @@ mock.module("@rezics/auth/seed", () => ({
 
 mock.module("./infra", () => ({
   seedSlugScopes: mock(async () => ({ user: "scope-user" })),
-  seedInfra: mock(async () => {}),
+  seedInfra: mock(async (rootUserId: string, opts: { db: unknown }) => {
+    calls.seedInfra.push({ rootUserId, db: opts.db });
+  }),
 }));
 
 mock.module("./users", () => ({
@@ -114,6 +117,30 @@ mock.module("./users", () => ({
   }),
 }));
 
+mock.module("../lib/env", () => ({
+  getEnv: () => ({
+    AUTH_DATABASE_URL: "postgres://auth.test",
+    SERVER_DATABASE_URL: "postgres://server.test",
+  }),
+}));
+
+const serverDb = {
+  db: { kind: "server-db" },
+  disconnect: mock(async () => {}),
+};
+const authDb = {
+  db: { kind: "auth-db" },
+  disconnect: mock(async () => {}),
+};
+
+mock.module("../lib/db-factory", () => ({
+  createAuthDbClient: mock(() => authDb),
+}));
+
+mock.module("@rezics/server/db/factory", () => ({
+  createServerDb: mock(() => serverDb),
+}));
+
 afterAll(() => {
   mock.restore();
 });
@@ -122,6 +149,9 @@ describe("seedBaseline", () => {
   beforeEach(() => {
     calls.resetDatabase = 0;
     calls.resetAuthDatabase = 0;
+    calls.seedInfra = [];
+    serverDb.disconnect.mockClear();
+    authDb.disconnect.mockClear();
   });
 
   test("does not reset databases by default", async () => {
@@ -152,5 +182,20 @@ describe("seedBaseline", () => {
     await expect(seedBaseline({} as never)).rejects.toThrow(
       /Drizzle server database client/,
     );
+  });
+
+  test("reset-root reseeds infra so root default subscriptions are repaired", async () => {
+    const { runResetRoot } = await import("./index");
+
+    await runResetRoot();
+
+    expect(calls.seedInfra).toEqual([
+      {
+        rootUserId: "root-user",
+        db: serverDb.db,
+      },
+    ]);
+    expect(serverDb.disconnect).toHaveBeenCalledTimes(1);
+    expect(authDb.disconnect).toHaveBeenCalledTimes(1);
   });
 });

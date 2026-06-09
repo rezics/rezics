@@ -11,10 +11,12 @@ import {
 } from "@rezics/auth/db/schema";
 import { seedAuthUser } from "@rezics/auth/seed/seed-auth-user";
 import {
+  DEFAULT_REALM,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   markdownContentDoc,
 } from "@rezics/contract";
-import { inArray, like } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
+import { ensureRegistrationDefaultSubscriptions } from "../../user/service/registration-defaults";
 import { Unit, User } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import {
@@ -186,9 +188,43 @@ export async function seedUsers(
     },
   );
 
+  await ensureFactoryDefaultSubscriptions(ctx, created);
+
   for (const user of created) {
     await ctx.sync.user(user.userId);
   }
 
   return created.slice(1);
+}
+
+async function ensureFactoryDefaultSubscriptions(
+  ctx: SeedCtx,
+  users: CreatedUser[],
+): Promise<void> {
+  const [defaultRealm] = await ctx.db
+    .select({ id: Unit.id, type: Unit.type })
+    .from(Unit)
+    .where(
+      and(
+        eq(Unit.slugScope, ctx.slugScopes.realm),
+        eq(Unit.slug, DEFAULT_REALM.slug),
+      ),
+    )
+    .limit(1);
+
+  if (!defaultRealm) return;
+  if (defaultRealm.type !== "REALM") {
+    throw new Error(
+      `[Seed] Default realm slug "${DEFAULT_REALM.slug}" resolved to non-REALM unit (type=${defaultRealm.type}).`,
+    );
+  }
+
+  // Factory users are created after baseline infra in normal local seeds. When
+  // that infra is unavailable, skip defaults rather than fabricating targets.
+  for (const user of users) {
+    await ensureRegistrationDefaultSubscriptions(ctx.db, user.userId, {
+      defaultRealmUnitId: defaultRealm.id,
+      zoneSlugScopeId: ctx.slugScopes.zone,
+    });
+  }
 }

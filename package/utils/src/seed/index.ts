@@ -141,6 +141,10 @@ export async function runResetRoot(): Promise<void> {
       serverDb.db,
       slugScopes,
     );
+    await seedInfra(result.userId, {
+      db: serverDb.db,
+      slugScopes,
+    });
     rootSpinner.stop("Root user reset.");
 
     printSeedCredentials([{ result, serverRole }], { singular: true });
