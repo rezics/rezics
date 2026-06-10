@@ -32,9 +32,17 @@ import {
 // 图书扩展 SCHEMA
 // ============================================================
 
-export const bookExtraSchema = t.Object({
-  publishURL: t.Optional(t.Array(t.String())),
-});
+/**
+ * @compat additive-only
+ * Book.extra read shape. Missing `publishURL` means no known publication URLs;
+ * unknown keys are tolerated for additive evolution.
+ */
+export const bookExtraSchema = t.Object(
+  {
+    publishURL: t.Optional(t.Array(t.String())),
+  },
+  { additionalProperties: true },
+);
 
 export type BookExtra = (typeof bookExtraSchema)["static"];
 

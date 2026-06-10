@@ -37,6 +37,12 @@ function readRepoFile(relPath: string): string | null {
   return readFileSync(absPath, "utf8");
 }
 
+function stripComments(source: string): string {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+}
+
 function collectJsonColumns(schemaFiles: string[]): JsonColumn[] {
   const columns: JsonColumn[] = [];
 
@@ -117,18 +123,19 @@ function checkCompatSchema(entry: (typeof jsonColumnRegistry)[number]) {
   if (!source) {
     return [`missing schema file ${entry.contractSchema.path}`];
   }
+  const code = stripComments(source);
   if (!source.includes("@compat additive-only")) {
     failures.push("compat schema JSDoc must include @compat additive-only");
   }
-  if (/additionalProperties\s*:\s*false/.test(source)) {
+  if (/additionalProperties\s*:\s*false/.test(code)) {
     failures.push(
       "additive-compatible schemas must not use additionalProperties: false",
     );
   }
-  if (/t\.Union\([\s\S]*type\s*:\s*t\.Literal\(/.test(source)) {
+  if (/t\.Union\([\s\S]*(?:kind|type)\s*:\s*t\.Literal\(/.test(code)) {
     const hasUnknownFallback =
-      /type\s*:\s*t\.String\(\)/.test(source) ||
-      /unknown\w*Schema/i.test(source);
+      /(?:kind|type)\s*:\s*t\.String\(\)/.test(code) ||
+      /unknown\w*Schema/i.test(code);
     if (!hasUnknownFallback) {
       failures.push(
         "closed discriminated unions need an unknown-kind fallback branch",
@@ -157,17 +164,6 @@ export const jsonPolicyRule: RuleScanner = {
     }
 
     for (const entry of jsonColumnRegistry) {
-      if (
-        entry.category === "todo" &&
-        entry.auditPlan !== "plan/proposal/compat-schema-audit.md"
-      ) {
-        violations.push({
-          rule: "R15",
-          path: "tool/src/commands/convention/rules/json-policy-registry.ts",
-          message: `${registryKey(entry)} is in the temporary TODO bucket but does not point to compat-schema-audit.md.`,
-          spec: SPEC,
-        });
-      }
       if (entry.category === "exempt" && entry.reason.trim().length === 0) {
         violations.push({
           rule: "R15",
@@ -185,7 +181,7 @@ export const jsonPolicyRule: RuleScanner = {
         violations.push({
           rule: "R15",
           path:
-            entry.category === "exempt" || entry.category === "todo"
+            entry.category === "exempt"
               ? "tool/src/commands/convention/rules/json-policy-registry.ts"
               : entry.contractSchema.path,
           message: `${registryKey(entry)}: ${failure}.`,

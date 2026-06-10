@@ -5,7 +5,6 @@ import {
   integer,
   pgEnum,
   pgTable,
-  primaryKey,
   text,
   uniqueIndex,
   uuid,
@@ -15,7 +14,6 @@ import {
   createdAt,
   jsonData,
   nullableTimestamp,
-  timestampMs,
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
@@ -29,6 +27,7 @@ export const EmailVerificationContractStatus = pgEnum(
 
 export const EchoKV = pgTable("EchoKV", {
   key: text().primaryKey(),
+  // Exempt JSON: EchoKV is an intentionally generic development KV store.
   value: jsonData().notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -95,6 +94,7 @@ export const HistoryOutbox = pgTable(
         onUpdate: "cascade",
       }),
     category: varchar({ length: 64 }).notNull(),
+    // Not exempt: short-lived rows still carry an internal protocol payload.
     payload: jsonData().notNull(),
     payloadHash: varchar({ length: 64 }),
     status: varchar({ length: 32 }).default("pending").notNull(),

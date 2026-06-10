@@ -1,4 +1,4 @@
-export type JsonColumnCategory = "enveloped" | "compat" | "exempt" | "todo";
+export type JsonColumnCategory = "enveloped" | "compat" | "exempt";
 
 export type ContractSchemaReference = {
   symbol: string;
@@ -23,13 +23,7 @@ export type JsonColumnRegistryEntry = {
       category: "exempt";
       reason: string;
     }
-  | {
-      category: "todo";
-      auditPlan: "plan/proposal/compat-schema-audit.md";
-    }
 );
-
-const auditPlan = "plan/proposal/compat-schema-audit.md" as const;
 
 export const jsonColumnRegistry = [
   {
@@ -51,6 +45,17 @@ export const jsonColumnRegistry = [
     contractSchema: {
       symbol: "contentDocEnvelopeSchema",
       path: "package/contract/src/content/doc-v1.ts",
+    },
+  },
+  {
+    database: "server",
+    table: "User",
+    column: "description",
+    category: "enveloped",
+    contractSchema: {
+      symbol: "persistedContentDocSchema",
+      path: "package/contract/src/json-column.ts",
+      supportingPaths: ["package/contract/src/content/doc-v1.ts"],
     },
   },
   {
@@ -115,49 +120,117 @@ export const jsonColumnRegistry = [
     category: "exempt",
     reason: "Intentionally generic development KV store.",
   },
-  ...todoColumns([
-    ["server", "Unit", "extra"],
-    ["server", "Unit", "aiDisclosureDetails"],
-    ["server", "UnitTranslation", "extra"],
-    ["server", "ContentTranslation", "provenance"],
-    ["server", "Shelf", "extra"],
-    ["server", "Series", "extra"],
-    ["server", "Realm", "extra"],
-    ["server", "UserUnitProgress", "extra"],
-    ["server", "UserUnitProgress", "lastReadAnchor"],
-    ["server", "User", "description"],
-    ["server", "User", "permission"],
-    ["server", "User", "settings"],
-    ["server", "User", "extra"],
-    ["server", "ApiToken", "scopes"],
-    ["server", "ContentStructureAnchor", "ancestorNodeIds"],
-    ["server", "ContentStructureAnchor", "path"],
-    ["server", "ContentStructureAnchor", "titlePath"],
-    ["server", "SourceSite", "refRules"],
-    ["server", "ScoreAggregate", "distribution"],
-    ["server", "ScoreAggregate", "fields"],
-    ["server", "ScoreEntry", "fields"],
-    ["server", "Post", "extra"],
-    ["server", "HistoryOutbox", "payload"],
-    ["server", "Game", "extra"],
-    ["server", "GameSystemRequirement", "hardware"],
-    ["server", "Media", "extra"],
-    ["server", "AccountEnforcement", "metadata"],
-    ["server", "ModerationCase", "metadata"],
-    ["server", "StaffAuditLog", "metadata"],
-    ["server", "Link", "extra"],
-    ["server", "Book", "extra"],
-  ]),
+  compat("server", "Unit", "extra", "unitExtraJsonSchema"),
+  compat(
+    "server",
+    "Unit",
+    "aiDisclosureDetails",
+    "unitAiDisclosureDetailsJsonSchema",
+  ),
+  compat(
+    "server",
+    "UnitTranslation",
+    "extra",
+    "unitTranslationExtraJsonSchema",
+  ),
+  compat(
+    "server",
+    "ContentTranslation",
+    "provenance",
+    "contentTranslationProvenanceJsonSchema",
+  ),
+  compat("server", "Shelf", "extra", "genericMetadataJsonSchema"),
+  compat("server", "Series", "extra", "genericMetadataJsonSchema"),
+  compat("server", "Realm", "extra", "genericMetadataJsonSchema"),
+  compat(
+    "server",
+    "UserUnitProgress",
+    "extra",
+    "userUnitProgressExtraJsonSchema",
+  ),
+  compat(
+    "server",
+    "UserUnitProgress",
+    "lastReadAnchor",
+    "lastReadAnchorJsonSchema",
+  ),
+  compat("server", "User", "permission", "userPermissionJsonSchema"),
+  compat("server", "User", "settings", "userSettingsJsonSchema"),
+  compat("server", "User", "extra", "genericMetadataJsonSchema"),
+  compat("server", "ApiToken", "scopes", "apiTokenScopesJsonSchema"),
+  compat(
+    "server",
+    "ContentStructureAnchor",
+    "ancestorNodeIds",
+    "contentStructurePathJsonSchema",
+  ),
+  compat(
+    "server",
+    "ContentStructureAnchor",
+    "path",
+    "contentStructurePathJsonSchema",
+  ),
+  compat(
+    "server",
+    "ContentStructureAnchor",
+    "titlePath",
+    "contentStructureTitlePathJsonSchema",
+  ),
+  compat("server", "SourceSite", "refRules", "sourceSiteRefRulesJsonSchema"),
+  compat(
+    "server",
+    "ScoreAggregate",
+    "distribution",
+    "scoreDistributionJsonSchema",
+  ),
+  compat(
+    "server",
+    "ScoreAggregate",
+    "fields",
+    "scoreAggregateFieldsJsonSchema",
+  ),
+  compat("server", "ScoreEntry", "fields", "scoreEntryFieldsJsonSchema"),
+  compat("server", "Post", "extra", "genericMetadataJsonSchema"),
+  compat(
+    "server",
+    "HistoryOutbox",
+    "payload",
+    "historyOutboxPayloadJsonSchema",
+  ),
+  compat("server", "Game", "extra", "genericMetadataJsonSchema"),
+  compat(
+    "server",
+    "GameSystemRequirement",
+    "hardware",
+    "gameSystemRequirementHardwareJsonSchema",
+  ),
+  compat("server", "Media", "extra", "genericMetadataJsonSchema"),
+  compat(
+    "server",
+    "AccountEnforcement",
+    "metadata",
+    "genericMetadataJsonSchema",
+  ),
+  compat("server", "ModerationCase", "metadata", "genericMetadataJsonSchema"),
+  compat("server", "StaffAuditLog", "metadata", "genericMetadataJsonSchema"),
+  compat("server", "Link", "extra", "genericMetadataJsonSchema"),
+  compat("server", "Book", "extra", "bookExtraJsonSchema"),
 ] satisfies JsonColumnRegistryEntry[];
 
-function todoColumns(
-  columns: Array<[JsonColumnRegistryEntry["database"], string, string]>,
-): JsonColumnRegistryEntry[] {
-  return columns.map(([database, table, column]) => ({
+function compat(
+  database: JsonColumnRegistryEntry["database"],
+  table: string,
+  column: string,
+  symbol: string,
+): JsonColumnRegistryEntry {
+  return {
     database,
     table,
     column,
-    category: "todo",
-    auditPlan,
-  }));
+    category: "compat",
+    contractSchema: {
+      symbol,
+      path: "package/contract/src/json-column.ts",
+    },
+  };
 }

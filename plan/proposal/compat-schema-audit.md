@@ -1,8 +1,8 @@
 ---
 title: Compatibility Schema Audit — Filling JSON Shape Gaps and Enforcing Additive Discipline
-status: active
+status: done
 created: 2026-06-10
-completed:
+completed: 2026-06-10
 supersededBy:
 tags: [contract, schema, compat, convention, audit]
 ---
@@ -59,10 +59,10 @@ JSON.
 
 ## 1. Finalize Discipline and Checks
 
-- [ ] 1.1 Put the six rules in
+- [x] 1.1 Put the six rules in
       `package/contract/src/envelope/envelope.ts` module JSDoc in bilingual
       form, and define the exact `@compat additive-only` marker format.
-- [ ] 1.2 Add convention checks under
+- [x] 1.2 Add convention checks under
       `tool/src/commands/convention/rules/`: schemas marked
       `@compat additive-only` must not use strict read-side
       `additionalProperties: false`, and discriminated unions need an
@@ -74,47 +74,47 @@ For each column: inspect real reads and writes -> classify in the JSON column
 registry -> define the contract schema or exemption -> add `@compat
 additive-only` where applicable -> remove the temporary TODO entry.
 
-- [ ] 2.1 Identity and user profile:
+- [x] 2.1 Identity and user profile:
       `User.description` (ContentDoc envelope), `User.permission`,
       `User.settings`, `User.extra`, and `ApiToken.scopes`
       (`db/schema/identity.ts`) -> contract user/auth modules.
-- [ ] 2.2 Shared unit state:
+- [x] 2.2 Shared unit state:
       `Unit.extra` and `Unit.aiDisclosureDetails`
       (`db/schema/unit.ts`) -> contract unit module.
-- [ ] 2.3 Catalog domains:
+- [x] 2.3 Catalog domains:
       `Book.extra` (expand existing `bookExtraSchema` and add `@compat`),
       `Game.extra`, `GameSystemRequirement.hardware`, `Media.extra`,
       `Series.extra`, `Shelf.extra`, `Link.extra`, and `SourceSite.refRules`.
-- [ ] 2.4 Social and discussion:
+- [x] 2.4 Social and discussion:
       `Post.extra`, `Realm.extra`, `UserUnitProgress.extra`,
       `UserUnitProgress.lastReadAnchor`, and `Comment.content`
       (ContentDoc envelope).
-- [ ] 2.5 Translation and content:
+- [x] 2.5 Translation and content:
       `UnitTranslation.description` (ContentDoc envelope),
       `UnitTranslation.extra`, `ContentTranslation.content`
       (ContentDoc envelope), and `ContentTranslation.provenance`.
-- [ ] 2.6 Scoring:
+- [x] 2.6 Scoring:
       `ScoreAggregate.distribution`, `ScoreAggregate.fields`, and
       `ScoreEntry.fields`.
-- [ ] 2.7 Content structure:
+- [x] 2.7 Content structure:
       `ContentStructureAnchor.ancestorNodeIds/path/titlePath`. These are array
       columns stored as JSON and should be typed array schemas, not exemptions.
-- [ ] 2.8 Governance:
+- [x] 2.8 Governance:
       `AccountEnforcement.metadata`, `ModerationCase.metadata`, and
       `StaffAuditLog.metadata`.
-- [ ] 2.9 Infrastructure:
+- [x] 2.9 Infrastructure:
       `HistoryOutbox.payload` as a kind-discriminated union with fallback;
       `EchoKV.value` as an explicit exemption with a reason comment.
-- [ ] 2.10 Exemptions:
+- [x] 2.10 Exemptions:
       server and auth `Jwks.publicJwk/privateJwk`, auth
       `OAuthClient.metadata`, and `EchoKV.value` must be present in the JSON
       column registry with reasons and local comments.
 
 ## 3. Closeout
 
-- [ ] 3.1 Empty the temporary TODO bucket introduced by
+- [x] 3.1 Empty the temporary TODO bucket introduced by
       `json-evolution-policy.md` task 2.5; `task check:convention` passes.
-- [ ] 3.2 If schema filling finds fields that are written but never read, or
+- [x] 3.2 If schema filling finds fields that are written but never read, or
       read but never written, record that fact in the owning schema JSDoc or
       hand it to `task knip` / a later cleanup. Do not expand this proposal into
       deletion or behavior changes.

@@ -9,6 +9,33 @@ import { t } from "elysia";
  * self-describing `{ schema, version, ...body }` documents and owns a
  * permanent upgrade chain. Additive-compatible JSON is settings/metadata-style
  * payload with no envelope and an `@compat additive-only` schema discipline.
+ * The exact marker is a JSDoc tag on the exported read schema:
+ * `@compat additive-only`.
+ *
+ * Additive-only rules:
+ * 1. Tolerant readers: read/parse schemas must not use
+ *    `additionalProperties: false`; strictness is reserved for write DTOs.
+ * 2. New fields are optional and have documented defaults. Optional fields
+ *    never become required.
+ * 3. Closed discriminated unions include an unknown-kind fallback so old
+ *    readers degrade instead of crashing.
+ * 4. Defaults are part of the contract and are immutable.
+ * 5. Field types and semantics do not change, and removed field names are not
+ *    reused. Add a new field instead.
+ * 6. Start with string enums instead of booleans when a third state may appear.
+ *
+ * 追加兼容 JSON 使用无信封 payload，并通过导出读取 schema 上的
+ * `@compat additive-only` JSDoc 标签约束演进。
+ *
+ * 追加规则：
+ * 1. 读取/解析 schema 必须宽容，不能使用 `additionalProperties: false`；
+ *    严格校验保留给写入 DTO。
+ * 2. 新字段必须可选并记录默认语义；可选字段不能变为必填。
+ * 3. 封闭的判别 union 必须包含未知 kind fallback，让旧读取方降级而非崩溃。
+ * 4. 默认值是契约的一部分，不能改变。
+ * 5. 字段类型和语义不能改变，已移除字段名不能复用；应添加新字段。
+ * 6. 可能出现第三种状态时，优先使用字符串枚举而非布尔值。
+ *
  * Exempt JSON is owned by an external format or is intentionally generic KV.
  * The class depends on backend consumption and expected evolution, not table
  * size.

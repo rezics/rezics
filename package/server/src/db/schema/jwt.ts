@@ -2,7 +2,6 @@ import {
   boolean,
   index,
   pgTable,
-  primaryKey,
   text,
   uniqueIndex,
   uuid,
@@ -11,7 +10,6 @@ import {
   createdAt,
   jsonData,
   nullableTimestamp,
-  timestampMs,
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
@@ -25,7 +23,9 @@ export const Jwks = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    // Exempt JSON: JOSE/JWK owns the key object shape.
     publicJwk: jsonData().notNull(),
+    // Exempt JSON: JOSE/JWK owns the key object shape.
     privateJwk: jsonData().notNull(),
     alg: text(),
     createdAt: createdAt(),
