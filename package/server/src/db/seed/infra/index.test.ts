@@ -5,6 +5,18 @@ import {
   Unit,
   UserSubscriptionListEntry,
 } from "../../schema";
+// Static imports run before the `mock.module` calls below, so these bind
+// the real module namespaces for the afterAll restore: `mock.restore()`
+// does not undo `mock.module`, and the stubs would otherwise leak into
+// every later test file in the same process.
+// 静态导入先于下方的 `mock.module` 执行，因此这里绑定的是真实模块命名
+// 空间，供 afterAll 还原使用：`mock.restore()` 不会撤销 `mock.module`，
+// 否则桩会泄漏到同一进程中之后的所有测试文件。
+import * as realSeedDefaultRealm from "./seed-default-realm";
+import * as realSeedGameMediaTaxonomy from "./seed-game-media-taxonomy";
+import * as realSeedOfficialZones from "./seed-official-zones";
+import * as realSeedRealmTaxonomy from "./seed-realm-taxonomy";
+import * as realSeedTags from "./seed-tags";
 
 const calls = {
   order: [] as string[],
@@ -121,6 +133,11 @@ describe("seedInfra", () => {
 
 afterAll(() => {
   mock.restore();
+  mock.module("./seed-tags", () => realSeedTags);
+  mock.module("./seed-default-realm", () => realSeedDefaultRealm);
+  mock.module("./seed-official-zones", () => realSeedOfficialZones);
+  mock.module("./seed-realm-taxonomy", () => realSeedRealmTaxonomy);
+  mock.module("./seed-game-media-taxonomy", () => realSeedGameMediaTaxonomy);
 });
 
 function createDefaultSubscriptionMemoryDb() {
@@ -230,6 +247,7 @@ function createDefaultSubscriptionMemoryDb() {
       return Promise.resolve(this.execute().slice(0, count));
     }
 
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle select doubles are awaitable.
     then(resolve: (value: unknown[]) => unknown) {
       return Promise.resolve(this.execute()).then(resolve);
     }
@@ -321,6 +339,7 @@ function createDefaultSubscriptionMemoryDb() {
       );
     }
 
+    // biome-ignore lint/suspicious/noThenProperty: Drizzle insert doubles are awaitable.
     then(resolve: (value: unknown[]) => unknown) {
       this.execute();
       return Promise.resolve([]).then(resolve);
@@ -366,7 +385,7 @@ function createDefaultSubscriptionMemoryDb() {
     insert(table: unknown) {
       return new InsertBuilder(table);
     },
-    update(table: unknown) {
+    update(_table: unknown) {
       return {
         set() {
           return { where: () => undefined };

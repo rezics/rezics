@@ -1,8 +1,8 @@
 ---
 title: Zone Portal Redesign — Versioned Config, Section Primitives, Realm Context
-status: active
+status: done
 created: 2026-06-10
-completed:
+completed: 2026-06-10
 supersededBy:
 tags: [zone, contract, comment, search, i18n, manage, factory]
 ---
@@ -311,37 +311,37 @@ compatibility.
 
 ## 10. Manage UI rebuild (`package/app/src/zone/pages/ZoneManagePage.tsx`)
 
-- [ ] 10.1 Replace the four JSON textareas with structured tabs: Profile,
+- [x] 10.1 Replace the four JSON textareas with structured tabs: Profile,
   Pages & Sections, Menus, Theme, Lifecycle. Permission via existing
   `canManageZone`.
-- [ ] 10.2 Profile tab: multilingual title/description editor (per-language
+- [x] 10.2 Profile tab: multilingual title/description editor (per-language
   rows over `translations`, add/remove language), context picker (global |
   realm with realm search), read-only owner realm + slug.
-- [ ] 10.3 Sections editor: per-page section list with add/remove/reorder;
+- [x] 10.3 Sections editor: per-page section list with add/remove/reorder;
   per-kind config forms; query builder generated from the `ZoneSectionQuery`
   schema fields; container editing for tabs (panes) and columns (side/main)
   enforcing nesting rules client-side; LABEL unit picker with inline
   quick-create (multilingual names, via the label API); content-unit picker
   for `richText` (context/owner realm WIKI posts incl. UNLISTED fragments)
   plus a "create fragment" shortcut into the wiki editor preset to UNLISTED.
-- [ ] 10.4 Menu tree editor: adapt the book TOC structure editor's tree
+- [x] 10.4 Menu tree editor: adapt the book TOC structure editor's tree
   interaction (path-based add/remove/move) to `MenuNode`; target picker
   (unit search / zone page / external URL+text); depth-3 guard.
-- [ ] 10.5 Theme tab: token inputs and IMAGE unit pickers. Lifecycle tab:
+- [x] 10.5 Theme tab: token inputs and IMAGE unit pickers. Lifecycle tab:
   startsAt/endsAt (unchanged semantics).
-- [ ] 10.6 Manage model tests replacing `zoneManageDraft.test.ts`: draft ↔
+- [x] 10.6 Manage model tests replacing `zoneManageDraft.test.ts`: draft ↔
   envelope round-trip, client-side nesting guards, translation row editing.
 
 ## 11. Factory and seeds
 
-- [ ] 11.1 Update `package/server/src/db/seed/infra/seed-official-zones.ts`:
+- [x] 11.1 Update `package/server/src/db/seed/infra/seed-official-zones.ts`:
   Book / Realms / Popular zones as v1 envelopes (hero + query sections with
   real sorts; global context), keeping the existing en/zh-hant/ja
   translations and deterministic slugs.
-- [ ] 11.2 Rewrite `package/server/src/db/factory/zones.ts` fixtures to
+- [x] 11.2 Rewrite `package/server/src/db/factory/zones.ts` fixtures to
   envelope-based generation exercising every section kind (including one
   tabs and one columns fixture).
-- [ ] 11.3 Add a `toaru-wiki` scenario to
+- [x] 11.3 Add a `toaru-wiki` scenario to
   `package/server/src/db/factory/scenarios.ts` (pattern:
   `wiki-zone-experience`): realm `r/toaru`; LABEL units（人物角色／名詞術語／
   機構組織／地點場所／事件記錄／時間線／魔法側／科學側）; ~10 ENTITY units
@@ -355,19 +355,19 @@ compatibility.
   collection, tabs(最新編輯 feed / 熱門討論 query / 新作 query), stats;
   side: menu, covers collection, did-you-know richText), header menus, theme
   tokens, `context: realm`.
-- [ ] 11.4 Register the scenario, update `scenarios.test.ts`, and verify
+- [x] 11.4 Register the scenario, update `scenarios.test.ts`, and verify
   `task seed:factory:fast` + scenario runs end-to-end.
 
 ## 12. Cleanup and verification
 
-- [ ] 12.1 Repo-wide sweep: no remaining references to
+- [x] 12.1 Repo-wide sweep: no remaining references to
   `wikiZoneTranslatedLabel`, `ZoneFiltersSchema`, `template`, `styling`,
   `primaryRealmUnitId`, `getWikiHomepageData`, or the deleted template files;
   `task knip` clean.
-- [ ] 12.2 Run focused tests (contract, server zone/comment, api, app
+- [x] 12.2 Run focused tests (contract, server zone/comment, api, app
   models), then `task test`, `task check:convention`, `task check:tokens`,
   `task format:check`.
-- [ ] 12.3 Hand the user verification URLs after `task dev`: `/z/toaru`
+- [x] 12.3 Hand the user verification URLs after `task dev`: `/z/toaru`
   (portal incl. header scroll behavior, tabs, comment selector on
   `/z/toaru/wiki/:id`), `/z/book`, `/z/realms`, `/z/toaru/manage`, with
   locale switching across zh-hant/en/ja.

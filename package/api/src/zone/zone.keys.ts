@@ -14,5 +14,11 @@ export const zoneKeys = {
     unitId: string,
     sectionId: string,
     languages: readonly string[] = [],
-  ) => [...zoneKeys.byUnitId(unitId), "section", sectionId, [...languages]] as const,
+  ) =>
+    [
+      ...zoneKeys.byUnitId(unitId),
+      "section",
+      sectionId,
+      [...languages],
+    ] as const,
 } as const;

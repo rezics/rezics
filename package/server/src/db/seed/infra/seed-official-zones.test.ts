@@ -112,9 +112,9 @@ describe("seedOfficialZones", () => {
       zoneInserts.every(
         (call: InsertCall) =>
           call.value.ownerRealmUnitId === "realm-rezics" &&
-          call.value.configVersion === 1 &&
-          call.value.pages?.home?.sections?.length > 0 &&
-          call.value.sections?.length > 0,
+          call.value.config?.schema === "rezics/zone-config" &&
+          call.value.config?.version === 1 &&
+          call.value.config?.pages?.home?.sections?.length > 0,
       ),
     ).toBe(true);
   });
@@ -146,7 +146,8 @@ describe("seedOfficialZones", () => {
         (call: InsertCall) =>
           call.conflict &&
           call.conflict.set.ownerRealmUnitId === "realm-rezics" &&
-          call.conflict.set.configVersion === 1,
+          (call.conflict.set.config as { version?: number } | undefined)
+            ?.version === 1,
       ),
     ).toBe(true);
   });

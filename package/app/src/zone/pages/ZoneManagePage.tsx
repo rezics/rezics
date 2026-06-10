@@ -5,34 +5,46 @@ import {
 } from "@rezics/api";
 import { useServerPermission } from "@rezics/api/hooks";
 import { myRealmMembershipQuery } from "@rezics/api/realm/realm";
-import {
-  ZONE_CONFIG_SCHEMA,
-  ZONE_CONFIG_V1_VERSION,
-  type ZoneConfig,
-  type ZoneTranslation,
-} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-  Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import type React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
+import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
+import { ZoneManageMenusTab } from "../components/manage/ZoneManageMenusTab";
+import { ZoneManageProfileTab } from "../components/manage/ZoneManageProfileTab";
+import { ZoneManageSectionsTab } from "../components/manage/ZoneManageSectionsTab";
+import { ZoneManageThemeTab } from "../components/manage/ZoneManageThemeTab";
 import { canManageZone } from "../models/canManageZone";
+import {
+  collectZoneSectionIds,
+  validateZoneManageDraft,
+  type ZoneManageDraft,
+  type ZoneManageIssue,
+  type ZoneTranslationRow,
+  zoneConfigToDraft,
+  zoneManageDraftToConfig,
+  zoneRowsToTranslations,
+  zoneTranslationsToRows,
+} from "../models/zoneManageDraft";
 
-export type ZoneManageTab = "profile" | "config" | "lifecycle";
+export type ZoneManageTab =
+  | "profile"
+  | "sections"
+  | "menus"
+  | "theme"
+  | "lifecycle";
 
 type ZoneManagePageProps = {
   activeTab?: ZoneManageTab;
@@ -48,28 +60,38 @@ type ZoneManagePageProps = {
     }
 );
 
-type TranslationRow = {
-  /** Stable editor row identity (not the language). 稳定的编辑器行标识（非语言）。 */
-  rowId: string;
-  language: string;
-  title: string;
-  description: string;
-};
+const ISSUE_KEYS = {
+  section_id_duplicate: "zone:manage_issue_section_id_duplicate",
+  tab_id_duplicate: "zone:manage_issue_tab_id_duplicate",
+  tab_default_invalid: "zone:manage_issue_tab_default_invalid",
+  query_field_unsupported: "zone:manage_issue_query_field_unsupported",
+  menu_id_duplicate: "zone:manage_issue_menu_id_duplicate",
+  menu_too_deep: "zone:manage_issue_menu_too_deep",
+  menu_leaf_missing_target: "zone:manage_issue_menu_leaf_missing_target",
+  menu_group_missing_label: "zone:manage_issue_menu_group_missing_label",
+  header_menu_invalid: "zone:manage_issue_header_menu_invalid",
+} as const satisfies Record<ZoneManageIssue["code"], `zone:${string}`>;
 
-let nextRowId = 0;
-function makeRowId(): string {
-  nextRowId += 1;
-  return `zone-translation-row-${nextRowId}`;
+function issueParams(issue: ZoneManageIssue): Record<string, string> {
+  const { code: _code, ...rest } = issue;
+  return Object.fromEntries(
+    Object.entries(rest).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? value.join(", ") : String(value),
+    ]),
+  );
 }
 
 /**
- * Interim manage surface for the versioned config era: structured editors
- * (sections, menus, theme) land in a later batch; until then the whole
- * `config` envelope is edited as one JSON document. The client only checks
- * the envelope literals — the server validates strictly.
- * 版本化配置时代的过渡管理界面：结构化编辑器（分区、菜单、主题）在后续
- * 批次落地；在那之前整个 `config` 信封作为单个 JSON 文档编辑。客户端
- * 只检查信封字面量——服务端进行严格校验。
+ * Structured zone manage surface over the v1 config envelope: Profile
+ * (translations + context), Pages & Sections, Menus, Theme, Lifecycle. All
+ * config tabs edit one shared draft (`models/zoneManageDraft.ts`); each
+ * save validates the draft client-side first — the server's
+ * `validateZoneConfig` stays the enforcement point.
+ * 基于 v1 配置信封的结构化专区管理界面：资料（译文 + 语境）、页面与
+ * 分区、菜单、主题、生命週期。所有配置标签页编辑同一份共享草稿
+ * （`models/zoneManageDraft.ts`）；每次保存先在客户端校验草稿——服务端
+ * 的 `validateZoneConfig` 仍是强制执行点。
  */
 export function ZoneManagePage({
   unitId,
@@ -82,14 +104,22 @@ export function ZoneManagePage({
     ...zoneQueryOptions(slug ?? ""),
     enabled: !unitId && !!slug,
   });
-  const byUnitQuery = useQuery({
-    ...zonePortalQueryOptions(unitId ?? ""),
-    enabled: !!unitId,
+  const resolvedUnitId = unitId ?? bySlugQuery.data?.unitId ?? "";
+  // The portal read also returns `refUnits` summaries used for label/image
+  // previews throughout the editors.
+  // 门户读取同时返回 `refUnits` 摘要，供编辑器各处的标签/图片预览使用。
+  const portalQuery = useQuery({
+    ...zonePortalQueryOptions(resolvedUnitId),
+    enabled: !!resolvedUnitId,
   });
-  const zone = unitId ? byUnitQuery.data?.zone : bySlugQuery.data;
-  const isLoading = unitId ? byUnitQuery.isLoading : bySlugQuery.isLoading;
-  const isError = unitId ? byUnitQuery.isError : bySlugQuery.isError;
-  const error = unitId ? byUnitQuery.error : bySlugQuery.error;
+  const zone =
+    portalQuery.data?.zone ?? (unitId ? undefined : bySlugQuery.data);
+  const refUnits = portalQuery.data?.refUnits ?? {};
+  const isLoading = unitId
+    ? portalQuery.isLoading
+    : bySlugQuery.isLoading || portalQuery.isLoading;
+  const isError = unitId ? portalQuery.isError : bySlugQuery.isError;
+  const error = unitId ? portalQuery.error : bySlugQuery.error;
 
   const membershipQuery = useQuery({
     ...myRealmMembershipQuery(zone?.ownerRealmUnitId ?? ""),
@@ -105,70 +135,37 @@ export function ZoneManagePage({
     onError: (mutationError) => toast.error(mutationError.message),
   });
 
-  const [rows, setRows] = useState<TranslationRow[]>([]);
-  const [configDraft, setConfigDraft] = useState("");
+  const [draft, setDraft] = useState<ZoneManageDraft | null>(null);
+  const [rows, setRows] = useState<ZoneTranslationRow[]>([]);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
 
   useEffect(() => {
     if (!zone) return;
-    setRows(
-      zone.translations.map((translation) => ({
-        rowId: makeRowId(),
-        language: translation.language,
-        title: translation.title ?? "",
-        description: translation.description ?? "",
-      })),
-    );
-    setConfigDraft(JSON.stringify(zone.config, null, 2));
+    setDraft(zoneConfigToDraft(zone.config));
+    setRows(zoneTranslationsToRows(zone.translations));
     setStartsAt(zone.startsAt ?? "");
     setEndsAt(zone.endsAt ?? "");
   }, [zone]);
 
   const saving = updateZone.isPending;
   const unitIdForSave = zone?.unitId ?? "";
+  const issues = draft ? validateZoneManageDraft(draft) : [];
 
-  const updateRow = (rowId: string, patch: Partial<TranslationRow>) => {
-    setRows((current) =>
-      current.map((row) => (row.rowId === rowId ? { ...row, ...patch } : row)),
-    );
-  };
-
-  const saveProfile = () => {
-    const translations = rows
-      .filter((row) => row.language.trim())
-      .map((row) => ({
-        language: row.language.trim(),
-        ...(row.title.trim() ? { title: row.title.trim() } : {}),
-        ...(row.description.trim()
-          ? { description: row.description.trim() }
+  const saveDraftConfig = (withTranslations: boolean) => {
+    if (!draft) return;
+    if (issues.length > 0) {
+      toast.error(t("zone:manage_config_invalid"));
+      return;
+    }
+    updateZone.mutate({
+      unitId: unitIdForSave,
+      input: {
+        config: zoneManageDraftToConfig(draft),
+        ...(withTranslations
+          ? { translations: zoneRowsToTranslations(rows) }
           : {}),
-      })) as ZoneTranslation[];
-    updateZone.mutate({
-      unitId: unitIdForSave,
-      input: { translations },
-    });
-  };
-
-  const saveConfig = () => {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(configDraft);
-    } catch {
-      toast.error(t("zone:manage_config_invalid"));
-      return;
-    }
-    const envelope = parsed as { schema?: unknown; version?: unknown };
-    if (
-      envelope?.schema !== ZONE_CONFIG_SCHEMA ||
-      envelope?.version !== ZONE_CONFIG_V1_VERSION
-    ) {
-      toast.error(t("zone:manage_config_invalid"));
-      return;
-    }
-    updateZone.mutate({
-      unitId: unitIdForSave,
-      input: { config: parsed as ZoneConfig },
+      },
     });
   };
 
@@ -223,6 +220,36 @@ export function ZoneManagePage({
     );
   }
 
+  if (!draft) {
+    return (
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
+    );
+  }
+
+  const contextRealmUnitId =
+    draft.context.kind === "realm" ? draft.context.realmUnitId : null;
+  const editorCtx = {
+    refUnits,
+    allSectionIds: collectZoneSectionIds(draft.pages),
+    contextRealmUnitId,
+    contextRealmSlug: contextRealmUnitId
+      ? (refUnits[contextRealmUnitId]?.slug ?? null)
+      : null,
+  };
+
+  const configSaveRow = (
+    <div className="mt-4 flex justify-end">
+      <Button
+        onClick={() => saveDraftConfig(false)}
+        disabled={saving || issues.length > 0}
+      >
+        {t("common:save")}
+      </Button>
+    </div>
+  );
+
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="mb-6">
@@ -231,181 +258,91 @@ export function ZoneManagePage({
         </h1>
       </div>
 
+      {issues.length > 0 ? (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>{t("zone:manage_issues")}</AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc pl-4">
+              {issues.map((issue, index) => (
+                <li
+                  // biome-ignore lint/suspicious/noArrayIndexKey: display list
+                  key={index}
+                >
+                  {t(ISSUE_KEYS[issue.code], issueParams(issue))}
+                </li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <Tabs
         value={activeTab}
         onValueChange={(value) => onTabChange?.(value as ZoneManageTab)}
       >
         <TabsList className="mb-6 flex flex-wrap">
           <TabsTrigger value="profile">{t("zone:manage_profile")}</TabsTrigger>
-          <TabsTrigger value="config">{t("zone:manage_config")}</TabsTrigger>
+          <TabsTrigger value="sections">
+            {t("zone:manage_sections")}
+          </TabsTrigger>
+          <TabsTrigger value="menus">{t("zone:manage_menus")}</TabsTrigger>
+          <TabsTrigger value="theme">{t("zone:manage_theme")}</TabsTrigger>
           <TabsTrigger value="lifecycle">
             {t("zone:manage_lifecycle")}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <div className="flex flex-col gap-4">
-                {rows.map((row) => (
-                  <div
-                    key={row.rowId}
-                    className="grid gap-3 md:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)_auto]"
-                  >
-                    <Field
-                      label={t("common:language")}
-                      htmlFor={`${row.rowId}-language`}
-                    >
-                      <Input
-                        id={`${row.rowId}-language`}
-                        value={row.language}
-                        onChange={(event) =>
-                          updateRow(row.rowId, { language: event.target.value })
-                        }
-                      />
-                    </Field>
-                    <Field
-                      label={t("common:title")}
-                      htmlFor={`${row.rowId}-title`}
-                    >
-                      <Input
-                        id={`${row.rowId}-title`}
-                        value={row.title}
-                        onChange={(event) =>
-                          updateRow(row.rowId, { title: event.target.value })
-                        }
-                      />
-                    </Field>
-                    <Field
-                      label={t("common:description")}
-                      htmlFor={`${row.rowId}-description`}
-                    >
-                      <Input
-                        id={`${row.rowId}-description`}
-                        value={row.description}
-                        onChange={(event) =>
-                          updateRow(row.rowId, {
-                            description: event.target.value,
-                          })
-                        }
-                      />
-                    </Field>
-                    <div className="flex items-end">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() =>
-                          setRows((current) =>
-                            current.filter(
-                              (candidate) => candidate.rowId !== row.rowId,
-                            ),
-                          )
-                        }
-                      >
-                        {t("common:remove")}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    setRows((current) => [
-                      ...current,
-                      {
-                        rowId: makeRowId(),
-                        language: "",
-                        title: "",
-                        description: "",
-                      },
-                    ])
-                  }
-                >
-                  {t("common:add")}
-                </Button>
-                <Button onClick={saveProfile} disabled={saving}>
-                  {t("common:save")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ZoneManageProfileTab
+            zone={zone}
+            rows={rows}
+            onRowsChange={setRows}
+            draft={draft}
+            onDraftChange={setDraft}
+            refUnits={refUnits}
+            onSave={() => saveDraftConfig(true)}
+            saving={saving}
+          />
         </TabsContent>
 
-        <TabsContent value="config">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <Field label={t("zone:manage_config")} htmlFor="zone-config">
-                <Textarea
-                  id="zone-config"
-                  value={configDraft}
-                  onChange={(event) => setConfigDraft(event.target.value)}
-                  rows={24}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <div className="flex justify-end">
-                <Button onClick={saveConfig} disabled={saving}>
-                  {t("common:save")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="sections">
+          <ZoneManageSectionsTab
+            draft={draft}
+            onDraftChange={setDraft}
+            ctx={editorCtx}
+          />
+          {configSaveRow}
+        </TabsContent>
+
+        <TabsContent value="menus">
+          <ZoneManageMenusTab
+            draft={draft}
+            onDraftChange={setDraft}
+            refUnits={refUnits}
+          />
+          {configSaveRow}
+        </TabsContent>
+
+        <TabsContent value="theme">
+          <ZoneManageThemeTab
+            draft={draft}
+            onDraftChange={setDraft}
+            refUnits={refUnits}
+          />
+          {configSaveRow}
         </TabsContent>
 
         <TabsContent value="lifecycle">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field
-                  label={t("zone:manage_starts_at")}
-                  htmlFor="zone-starts-at"
-                >
-                  <Input
-                    id="zone-starts-at"
-                    value={startsAt}
-                    onChange={(event) => setStartsAt(event.target.value)}
-                    placeholder="2026-06-09T00:00:00.000Z"
-                  />
-                </Field>
-                <Field label={t("zone:manage_ends_at")} htmlFor="zone-ends-at">
-                  <Input
-                    id="zone-ends-at"
-                    value={endsAt}
-                    onChange={(event) => setEndsAt(event.target.value)}
-                    placeholder="2026-06-30T00:00:00.000Z"
-                  />
-                </Field>
-              </div>
-              <div className="flex justify-end">
-                <Button onClick={saveLifecycle} disabled={saving}>
-                  {t("common:save")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ZoneManageLifecycleTab
+            startsAt={startsAt}
+            endsAt={endsAt}
+            onStartsAtChange={setStartsAt}
+            onEndsAtChange={setEndsAt}
+            onSave={saveLifecycle}
+            saving={saving}
+          />
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
-      {children}
     </div>
   );
 }

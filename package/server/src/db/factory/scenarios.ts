@@ -4,6 +4,9 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LANGUAGES,
   markdownContentDoc,
+  ZONE_CONFIG_SCHEMA,
+  ZONE_CONFIG_V1_VERSION,
+  type ZoneConfigV1,
 } from "@rezics/contract";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { generateBetween } from "../../shelf/fractional-index";
@@ -46,7 +49,7 @@ export const FACTORY_SCENARIO_NAMES = [
   "large-content-tree",
   "large-history",
   "complex-shelf",
-  "wiki-zone-experience",
+  "toaru-wiki",
   "showcase-feed",
 ] as const;
 
@@ -139,9 +142,46 @@ async function createScenarioTag(ctx: SeedCtx, title: string): Promise<string> {
   return id;
 }
 
+interface ScenarioTranslation {
+  language: string;
+  title: string;
+  summary?: string;
+  description?: string;
+}
+
+async function insertScenarioTranslations(
+  ctx: SeedCtx,
+  unitId: string,
+  translations: ScenarioTranslation[],
+) {
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAtRows(
+      translations.map((item) => ({
+        unitId,
+        language: item.language,
+        title: item.title,
+        summary: item.summary,
+        description: item.description
+          ? (markdownContentDoc(item.description) as never)
+          : undefined,
+      })),
+    ),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAtRows(
+      translations.map((item, index) => ({
+        unitId,
+        language: item.language,
+        isPrimary: index === 0,
+        sortOrder: index,
+      })),
+    ),
+  );
+}
+
 async function createScenarioLabel(
   ctx: SeedCtx,
-  title: string,
+  translations: ScenarioTranslation[],
 ): Promise<string> {
   const id = randomUUID();
   await ctx.db.insert(Unit).values(
@@ -151,33 +191,20 @@ async function createScenarioLabel(
       slugScope: ctx.slugScopes.zone,
       status: UnitStatus.PUBLISHED,
       visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
+      defaultLanguage: translations[0]?.language ?? DEFAULT_LANGUAGE,
       isLanguageNeutral: true,
     }),
   );
-  await ctx.db.insert(UnitTranslation).values(
-    withUpdatedAt({
-      unitId: id,
-      language: DEFAULT_LANGUAGE,
-      title,
-    }),
-  );
-  await ctx.db.insert(UnitSupportLanguage).values(
-    withUpdatedAt({
-      unitId: id,
-      language: DEFAULT_LANGUAGE,
-      isPrimary: true,
-    }),
-  );
+  await insertScenarioTranslations(ctx, id, translations);
   return id;
 }
 
 async function createScenarioEntity(
   ctx: SeedCtx,
   input: {
-    title: string;
     kind: string;
     subjectRoles: string[];
+    translations: ScenarioTranslation[];
   },
 ): Promise<string> {
   const id = randomUUID();
@@ -188,24 +215,10 @@ async function createScenarioEntity(
       slugScope: ctx.slugScopes.entity,
       status: UnitStatus.PUBLISHED,
       visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
+      defaultLanguage: input.translations[0]?.language ?? DEFAULT_LANGUAGE,
     }),
   );
-  await ctx.db.insert(UnitTranslation).values(
-    withUpdatedAt({
-      unitId: id,
-      language: DEFAULT_LANGUAGE,
-      title: input.title,
-      summary: `${input.title} fixture entity for wiki Zone sections.`,
-    }),
-  );
-  await ctx.db.insert(UnitSupportLanguage).values(
-    withUpdatedAt({
-      unitId: id,
-      language: DEFAULT_LANGUAGE,
-      isPrimary: true,
-    }),
-  );
+  await insertScenarioTranslations(ctx, id, input.translations);
   await ctx.db.insert(Entity).values(
     withUpdatedAt({
       unitId: id,
@@ -222,9 +235,8 @@ async function createScenarioBookUnit(
   ctx: SeedCtx,
   input: {
     userId: string;
-    title: string;
-    language: string;
-    visibility?: UnitVisibility;
+    publishedAt: Date;
+    translations: ScenarioTranslation[];
     pageCount?: number;
     textLength?: number;
   },
@@ -237,28 +249,13 @@ async function createScenarioBookUnit(
       userId: input.userId,
       slugScope: input.userId,
       status: UnitStatus.PUBLISHED,
-      visibility: input.visibility ?? UnitVisibility.PUBLIC,
+      visibility: UnitVisibility.PUBLIC,
       licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      defaultLanguage: input.language,
-      publishedAt: new Date(),
+      defaultLanguage: input.translations[0]?.language ?? DEFAULT_LANGUAGE,
+      publishedAt: input.publishedAt,
     }),
   );
-  await ctx.db.insert(UnitTranslation).values(
-    withUpdatedAt({
-      unitId,
-      language: input.language,
-      title: input.title,
-      summary: `${input.title} factory fixture.`,
-    }),
-  );
-  await ctx.db.insert(UnitSupportLanguage).values(
-    withUpdatedAt({
-      unitId,
-      language: input.language,
-      isPrimary: true,
-      sortOrder: 0,
-    }),
-  );
+  await insertScenarioTranslations(ctx, unitId, input.translations);
   await ctx.db.insert(Book).values(
     withUpdatedAt({
       unitId,
@@ -840,6 +837,12 @@ async function createWikiScenarioPost(
     targetUnitId: string;
     realmUnitId: string;
     defaultLanguage: string;
+    // UNLISTED makes a "zone fragment": the post renders in richText
+    // sections but stays out of wiki listings, query sections, and search
+    // (the sync layer indexes PUBLIC units only).
+    // UNLISTED 形成“专区片段”：该帖子在 richText 分区中渲染，但不出现在
+    // wiki 列表、查询分区与搜索中（同步层只索引 PUBLIC Unit）。
+    visibility?: UnitVisibility;
     translations: Array<{ language: string; title: string; body: string }>;
     publishedAt: Date;
   },
@@ -851,7 +854,7 @@ async function createWikiScenarioPost(
     userId: input.userId,
     slugScope: input.userId,
     status: UnitStatus.PUBLISHED,
-    visibility: UnitVisibility.PUBLIC,
+    visibility: input.visibility ?? UnitVisibility.PUBLIC,
     licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
     defaultLanguage: input.defaultLanguage,
     targetUnitId: input.targetUnitId,
@@ -878,6 +881,12 @@ async function createWikiScenarioPost(
       })),
     ),
   );
+  // richText sections read fragment bodies from PUBLISHED
+  // `ContentTranslation` rows (see `findFragmentTranslations`), so every
+  // language ships as a published content translation, not unit summary text.
+  // richText 分区从 PUBLISHED 的 `ContentTranslation` 行读取片段正文
+  // （见 `findFragmentTranslations`），因此每种语言都以已发布的内容翻译
+  // 落库，而不是 Unit 摘要文本。
   await ctx.db.insert(ContentTranslation).values(
     withUpdatedAtRows(
       input.translations.map((item) => ({
@@ -886,7 +895,7 @@ async function createWikiScenarioPost(
         content: markdownContentDoc(item.body) as never,
         status: "PUBLISHED" as const,
         authorUserId: input.userId,
-        provenance: { importedFrom: "factory-wiki-zone-scenario" },
+        provenance: { importedFrom: "factory-toaru-wiki-scenario" },
       })),
     ),
   );
@@ -1195,193 +1204,585 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
   return result;
 }
 
-async function createWikiScenarioZone(
-  ctx: SeedCtx,
-  input: {
-    realmUnitId: string;
-    slug: string;
-    title: string;
-    template: "wiki-classic" | "wiki-media" | "wiki-database" | "wiki-minimal";
-    homepageTemplate:
-      | "wiki-classic-home"
-      | "wiki-media-home"
-      | "wiki-database-home"
-      | "wiki-minimal-home";
-    labelUnitIds: {
-      overview: string;
-      characters: string;
-      places: string;
-    };
-    entityIds: string[];
-    tagUnitIds: string[];
-    wikiUnitIds: string[];
-  },
-): Promise<string> {
-  const zoneUnitId = randomUUID();
-  const wikiFilters = {
-    realmUnitId: input.realmUnitId,
-    type: "POST",
-    postKind: "WIKI",
-  };
-  await ctx.db.insert(Unit).values(
-    withUpdatedAt({
-      id: zoneUnitId,
-      type: UnitType.ZONE,
-      slug: input.slug,
-      slugScope: ctx.slugScopes.zone,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-    }),
-  );
-  await ctx.db.insert(UnitTranslation).values(
-    withUpdatedAt({
-      unitId: zoneUnitId,
-      language: DEFAULT_LANGUAGE,
-      title: input.title,
-      description: markdownContentDoc(
-        `${input.title} fixture portal for wiki Zone verification.`,
-      ) as never,
-    }),
-  );
-  await ctx.db.insert(UnitSupportLanguage).values(
-    withUpdatedAt({
-      unitId: zoneUnitId,
-      language: DEFAULT_LANGUAGE,
-      isPrimary: true,
-    }),
-  );
-  await ctx.db.insert(Zone).values(
-    withUpdatedAt({
-      unitId: zoneUnitId,
-      ownerRealmUnitId: input.realmUnitId,
-      template: input.template,
-      filters: wikiFilters,
-      configVersion: 1,
-      primaryRealmUnitId: input.realmUnitId,
-      wiki: {
-        filters: wikiFilters,
-        navigation: {
-          sections: [
-            {
-              id: "main",
-              labelUnitId: input.labelUnitIds.overview,
-              items: [
-                {
-                  kind: "labelHeading",
-                  labelUnitId: input.labelUnitIds.overview,
-                },
-                { kind: "entity", entityId: input.entityIds[0] },
-                { kind: "tag", tagUnitId: input.tagUnitIds[0] },
-                {
-                  kind: "wikiUnit",
-                  unitId: input.wikiUnitIds[0],
-                },
-                {
-                  kind: "manualLink",
-                  href: "/realm",
-                  label: {
-                    translations: { en: "Realm index" },
-                    fallbackLanguage: DEFAULT_LANGUAGE,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        homepage: {
-          template: input.homepageTemplate,
-          sections: [
-            {
-              id: "characters",
-              kind: "entityCollection",
-              titleLabelUnitId: input.labelUnitIds.characters,
-              entityKinds: ["character", "location", "faction"],
-              subjectRoles: ["primary_character", "setting", "about"],
-              realmUnitId: input.realmUnitId,
-              limit: 6,
-              sort: "title",
-              emptyState: "show-empty",
-            },
-            {
-              id: "tags",
-              kind: "tagCollection",
-              title: {
-                translations: { en: "Wiki tags" },
-                fallbackLanguage: DEFAULT_LANGUAGE,
-              },
-              tagUnitIds: input.tagUnitIds,
-              limit: 6,
-              sort: "title",
-            },
-            {
-              id: "wiki-units",
-              kind: "wikiUnitCollection",
-              title: {
-                translations: { en: "Translated entries" },
-                fallbackLanguage: DEFAULT_LANGUAGE,
-              },
-              unitIds: input.wikiUnitIds,
-              limit: 6,
-            },
-            { id: "recent", kind: "recentWiki", limit: 4 },
-            { id: "updated", kind: "updatedWiki", limit: 4 },
-            {
-              id: "stub",
-              kind: "stubWiki",
-              predicate: "short",
-              limit: 4,
-              emptyState: "show-empty",
-            },
-            {
-              id: "manual",
-              kind: "manualLinks",
-              titleLabelUnitId: input.labelUnitIds.places,
-              links: [
-                {
-                  kind: "manualLink",
-                  href: "/realm/search",
-                  label: {
-                    translations: { en: "Search wiki posts" },
-                    fallbackLanguage: DEFAULT_LANGUAGE,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        theme: {
-          template: input.template,
-          homepageTemplate: input.homepageTemplate,
-          palette: {
-            background: "#f8fafc",
-            surface: "#ffffff",
-            text: "#1f2937",
-            accent: "#2563eb",
-          },
-          chrome: { density: "comfortable", navPosition: "side" },
-          layout: { contentWidth: "wide", infoboxPosition: "right" },
-        },
-      },
-    }),
-  );
-  return zoneUnitId;
+// ANCHOR: toaru-wiki scenario
+// ANCHOR: toaru-wiki 情境
+
+interface ToaruTrilingual {
+  zhHant: string;
+  en: string;
+  ja: string;
 }
 
-async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
+function toaruTranslations(
+  titles: ToaruTrilingual,
+  extras?: { summaries?: ToaruTrilingual; descriptions?: ToaruTrilingual },
+): ScenarioTranslation[] {
+  return [
+    {
+      language: LANGUAGES.ZH_HANT,
+      title: titles.zhHant,
+      summary: extras?.summaries?.zhHant,
+      description: extras?.descriptions?.zhHant,
+    },
+    {
+      language: LANGUAGES.EN,
+      title: titles.en,
+      summary: extras?.summaries?.en,
+      description: extras?.descriptions?.en,
+    },
+    {
+      language: LANGUAGES.JA,
+      title: titles.ja,
+      summary: extras?.summaries?.ja,
+      description: extras?.descriptions?.ja,
+    },
+  ];
+}
+
+export const TOARU_LABELS = {
+  characters: { zhHant: "人物角色", en: "Characters", ja: "キャラクター" },
+  terms: { zhHant: "名詞術語", en: "Terminology", ja: "用語" },
+  factions: { zhHant: "機構組織", en: "Factions", ja: "組織" },
+  locations: { zhHant: "地點場所", en: "Locations", ja: "場所" },
+  events: { zhHant: "事件記錄", en: "Events", ja: "事件" },
+  timeline: { zhHant: "時間線", en: "Timeline", ja: "タイムライン" },
+  magicSide: { zhHant: "魔法側", en: "Magic Side", ja: "魔術サイド" },
+  scienceSide: { zhHant: "科學側", en: "Science Side", ja: "科学サイド" },
+  // Tab titles for the activity tabs section; LABEL units like the 8
+  // category labels above so `titleLabelUnitId` resolution is exercised.
+  // 活动标签页分区的标签标题；与上方 8 个分类标签一样是 LABEL Unit，
+  // 以演练 `titleLabelUnitId` 解析。
+  latestEdits: { zhHant: "最新編輯", en: "Recent Edits", ja: "最近の編集" },
+  hotDiscussions: {
+    zhHant: "熱門討論",
+    en: "Hot Discussions",
+    ja: "人気の議論",
+  },
+  newReleases: { zhHant: "新作", en: "New Releases", ja: "新刊" },
+} satisfies Record<string, ToaruTrilingual>;
+
+export type ToaruLabelKey = keyof typeof TOARU_LABELS;
+
+export const TOARU_ENTITIES = {
+  kamijou: {
+    kind: "character",
+    subjectRoles: ["primary_character"],
+    titles: { zhHant: "上條當麻", en: "Kamijou Touma", ja: "上条当麻" },
+  },
+  misaka: {
+    kind: "character",
+    subjectRoles: ["primary_character"],
+    titles: { zhHant: "御坂美琴", en: "Misaka Mikoto", ja: "御坂美琴" },
+  },
+  accelerator: {
+    kind: "character",
+    subjectRoles: ["primary_character"],
+    titles: { zhHant: "一方通行", en: "Accelerator", ja: "一方通行" },
+  },
+  index: {
+    kind: "character",
+    subjectRoles: ["primary_character"],
+    titles: { zhHant: "茵蒂克絲", en: "Index", ja: "インデックス" },
+  },
+  aleister: {
+    kind: "character",
+    subjectRoles: ["primary_character"],
+    titles: {
+      zhHant: "亞雷斯塔",
+      en: "Aleister Crowley",
+      ja: "アレイスター＝クロウリー",
+    },
+  },
+  academyCity: {
+    kind: "location",
+    subjectRoles: ["setting"],
+    titles: { zhHant: "學園都市", en: "Academy City", ja: "学園都市" },
+  },
+  tokiwadai: {
+    kind: "location",
+    subjectRoles: ["setting"],
+    titles: {
+      zhHant: "常盤台中學",
+      en: "Tokiwadai Middle School",
+      ja: "常盤台中学",
+    },
+  },
+  anglicanChurch: {
+    kind: "faction",
+    subjectRoles: ["about"],
+    titles: {
+      zhHant: "英國清教",
+      en: "Anglican Church",
+      ja: "イギリス清教",
+    },
+  },
+  darkSide: {
+    kind: "faction",
+    subjectRoles: ["about"],
+    titles: {
+      zhHant: "學園都市暗部",
+      en: "Academy City Dark Side",
+      ja: "学園都市暗部",
+    },
+  },
+  daihasei: {
+    kind: "event",
+    subjectRoles: ["about"],
+    titles: {
+      zhHant: "大霸星祭",
+      en: "Daihasei Festival",
+      ja: "大覇星祭",
+    },
+  },
+} satisfies Record<
+  string,
+  { kind: string; subjectRoles: string[]; titles: ToaruTrilingual }
+>;
+
+export type ToaruEntityKey = keyof typeof TOARU_ENTITIES;
+
+// Ordered newest → oldest so the covers rail and the publishedAt-desc query
+// both surface the latest release first.
+// 按从新到旧排序，使封面栏与 publishedAt 降序查询都先呈现最新刊。
+const TOARU_BOOKS: Array<{
+  publishedAt: string;
+  titles: ToaruTrilingual;
+  subjects: Array<{ entity: ToaruEntityKey; role: string }>;
+}> = [
+  {
+    publishedAt: "2026-05-08T00:00:00.000Z",
+    titles: {
+      zhHant: "創約 魔法禁書目錄 (15)",
+      en: "Souyaku: A Certain Magical Index Vol. 15",
+      ja: "創約 とある魔術の禁書目録 (15)",
+    },
+    subjects: [
+      { entity: "kamijou", role: "primary_character" },
+      { entity: "academyCity", role: "setting" },
+    ],
+  },
+  {
+    publishedAt: "2023-01-10T00:00:00.000Z",
+    titles: {
+      zhHant: "暗部少女共棲",
+      en: "A Certain Dark Side Girls' Cohabitation",
+      ja: "とある暗部の少女共棲",
+    },
+    subjects: [
+      { entity: "darkSide", role: "about" },
+      { entity: "academyCity", role: "setting" },
+    ],
+  },
+  {
+    publishedAt: "2020-09-25T00:00:00.000Z",
+    titles: {
+      zhHant: "科學心理掌握",
+      en: "A Certain Scientific Mental Out",
+      ja: "とある科学の心理掌握",
+    },
+    subjects: [{ entity: "tokiwadai", role: "setting" }],
+  },
+  {
+    publishedAt: "2007-02-08T00:00:00.000Z",
+    titles: {
+      zhHant: "科學超電磁砲",
+      en: "A Certain Scientific Railgun",
+      ja: "とある科学の超電磁砲",
+    },
+    subjects: [
+      { entity: "misaka", role: "primary_character" },
+      { entity: "tokiwadai", role: "setting" },
+    ],
+  },
+  {
+    publishedAt: "2004-04-10T00:00:00.000Z",
+    titles: {
+      zhHant: "魔法禁書目錄",
+      en: "A Certain Magical Index",
+      ja: "とある魔術の禁書目録",
+    },
+    subjects: [
+      { entity: "kamijou", role: "primary_character" },
+      { entity: "index", role: "primary_character" },
+      { entity: "academyCity", role: "setting" },
+    ],
+  },
+];
+
+const TOARU_FRAGMENTS = {
+  welcome: {
+    titles: {
+      zhHant: "歡迎",
+      en: "Welcome",
+      ja: "ようこそ",
+    },
+    bodies: {
+      zhHant:
+        "歡迎來到魔法禁書目錄 Wiki！這裡由 r/toaru 社群共同整理角色、用語、組織與事件。",
+      en: "Welcome to the Toaru wiki! The r/toaru community collects characters, terminology, factions, and events here.",
+      ja: "とある魔術の禁書目録 Wiki へようこそ！r/toaru コミュニティがキャラクター・用語・組織・出来事をまとめています。",
+    },
+  },
+  spoilerNotice: {
+    titles: {
+      zhHant: "劇透注意",
+      en: "Spoiler Notice",
+      ja: "ネタバレ注意",
+    },
+    bodies: {
+      zhHant: "注意：本 Wiki 含有最新刊（含創約）劇透，請斟酌閱讀。",
+      en: "Heads up: this wiki contains spoilers up to the latest volumes, including Souyaku.",
+      ja: "注意：本 Wiki には最新刊（創約を含む）のネタバレが含まれます。",
+    },
+  },
+  news: {
+    titles: {
+      zhHant: "最新消息",
+      en: "News",
+      ja: "ニュース",
+    },
+    bodies: {
+      zhHant: "最新消息：創約 第 15 卷已發售；大霸星祭相關條目整理中。",
+      en: "News: Souyaku Vol. 15 is out; Daihasei Festival articles are being reorganized.",
+      ja: "ニュース：創約 15 巻発売中。大覇星祭関連の項目を整理中。",
+    },
+  },
+  didYouKnow: {
+    titles: {
+      zhHant: "你知道嗎",
+      en: "Did You Know",
+      ja: "豆知識",
+    },
+    bodies: {
+      zhHant: "你知道嗎：學園都市的人口約有八成是學生。",
+      en: "Did you know: about eighty percent of Academy City's population are students.",
+      ja: "豆知識:学園都市の人口の約 8 割は学生。",
+    },
+  },
+} satisfies Record<
+  string,
+  { titles: ToaruTrilingual; bodies: ToaruTrilingual }
+>;
+
+type ToaruFragmentKey = keyof typeof TOARU_FRAGMENTS;
+
+export interface ToaruZoneConfigIds {
+  realmUnitId: string;
+  labels: Record<ToaruLabelKey, string>;
+  entities: Record<ToaruEntityKey, string>;
+  bookUnitIds: string[];
+  fragments: Record<ToaruFragmentKey, string>;
+}
+
+/**
+ * Pure builder for the /z/toaru zone config, exercising every config
+ * primitive: hero with CTAs, columns, richText fragments, collections,
+ * tabs with per-target queries, feed, stats, label-driven menus, header,
+ * boundary filters, and theme tokens. The factory writes this straight to
+ * the `Zone.config` column (bypassing service validation) while the read
+ * path throws on invalid envelopes, so the output must always satisfy
+ * `zoneConfigV1Schema` and the structural invariants (unique section ids,
+ * menu depth ≤ 3, header menu reference); tests assert both.
+ * /z/toaru 专区配置的纯构造器，演练所有配置原语：带 CTA 的 hero、
+ * columns、richText 片段、collection、按目标查询的 tabs、feed、stats、
+ * 标签驱动的菜单、header、边界过滤与主题 token。工厂将其直接写入
+ * `Zone.config` 列（绕过 service 校验），而读取路径会对非法信封抛错，
+ * 因此输出必须始终满足 `zoneConfigV1Schema` 与结构不变量（分区 id 唯一、
+ * 菜单深度 ≤ 3、header 菜单引用）；测试对两者均有断言。
+ */
+export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ZoneConfigV1 {
+  const { labels, entities, fragments } = ids;
+  const unitTarget = (unitId: string) => ({ kind: "unit", unitId }) as const;
+  return {
+    schema: ZONE_CONFIG_SCHEMA,
+    version: ZONE_CONFIG_V1_VERSION,
+    context: { kind: "realm", realmUnitId: ids.realmUnitId },
+    // The boundary pins every query, search, and feed to the wiki realm.
+    // 边界将所有查询、搜索与 feed 固定在 wiki realm 内。
+    filters: { realm: "context" },
+    menus: [
+      {
+        id: "main",
+        nodes: [
+          {
+            id: "nav-characters",
+            labelUnitId: labels.characters,
+            children: [
+              { id: "nav-kamijou", target: unitTarget(entities.kamijou) },
+              { id: "nav-misaka", target: unitTarget(entities.misaka) },
+              {
+                id: "nav-accelerator",
+                target: unitTarget(entities.accelerator),
+              },
+              { id: "nav-index", target: unitTarget(entities.index) },
+              { id: "nav-aleister", target: unitTarget(entities.aleister) },
+            ],
+          },
+          {
+            id: "nav-terms",
+            labelUnitId: labels.terms,
+            target: { kind: "zonePage", pageId: "search" },
+          },
+          {
+            id: "nav-factions",
+            labelUnitId: labels.factions,
+            children: [
+              {
+                id: "nav-anglican",
+                target: unitTarget(entities.anglicanChurch),
+              },
+              { id: "nav-dark-side", target: unitTarget(entities.darkSide) },
+            ],
+          },
+          {
+            id: "nav-locations",
+            labelUnitId: labels.locations,
+            children: [
+              {
+                id: "nav-academy-city",
+                target: unitTarget(entities.academyCity),
+              },
+              { id: "nav-tokiwadai", target: unitTarget(entities.tokiwadai) },
+            ],
+          },
+          {
+            id: "nav-events",
+            labelUnitId: labels.events,
+            children: [
+              { id: "nav-daihasei", target: unitTarget(entities.daihasei) },
+            ],
+          },
+          {
+            id: "nav-timeline",
+            labelUnitId: labels.timeline,
+            target: { kind: "zonePage", pageId: "feed" },
+          },
+          {
+            id: "nav-magic",
+            labelUnitId: labels.magicSide,
+            children: [
+              { id: "nav-magic-index", target: unitTarget(entities.index) },
+              {
+                id: "nav-magic-anglican",
+                target: unitTarget(entities.anglicanChurch),
+              },
+            ],
+          },
+          {
+            id: "nav-science",
+            labelUnitId: labels.scienceSide,
+            children: [
+              { id: "nav-science-misaka", target: unitTarget(entities.misaka) },
+              {
+                id: "nav-science-accelerator",
+                target: unitTarget(entities.accelerator),
+              },
+              {
+                id: "nav-science-academy-city",
+                target: unitTarget(entities.academyCity),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    header: { menuId: "main" },
+    pages: {
+      home: {
+        sections: [
+          {
+            id: "hero",
+            kind: "hero",
+            showDescription: true,
+            ctas: [
+              // `external.text` is the single sanctioned inline-text
+              // exception in zone configs.
+              // `external.text` 是专区配置中唯一被允许的内联文本例外。
+              {
+                target: {
+                  kind: "external",
+                  url: "/r/toaru/create?mode=wiki",
+                  text: "建立條目",
+                },
+              },
+              {
+                target: { kind: "external", url: "/r/toaru", text: "r/toaru" },
+              },
+            ],
+          },
+          {
+            id: "layout",
+            kind: "columns",
+            sidePosition: "right",
+            main: [
+              {
+                id: "welcome",
+                kind: "richText",
+                contentUnitId: fragments.welcome,
+              },
+              {
+                id: "spoiler-notice",
+                kind: "richText",
+                contentUnitId: fragments.spoilerNotice,
+              },
+              {
+                id: "featured-characters",
+                kind: "collection",
+                display: "tiles",
+                titleLabelUnitId: labels.characters,
+                items: [
+                  entities.kamijou,
+                  entities.misaka,
+                  entities.accelerator,
+                  entities.index,
+                  entities.aleister,
+                ].map((unitId) => ({ target: unitTarget(unitId) })),
+              },
+              {
+                id: "activity",
+                kind: "tabs",
+                defaultTabId: "latest-edits",
+                tabs: [
+                  {
+                    id: "latest-edits",
+                    titleLabelUnitId: labels.latestEdits,
+                    sections: [
+                      {
+                        id: "latest-edits-feed",
+                        kind: "feed",
+                        feedKind: "updates",
+                        limit: 12,
+                      },
+                    ],
+                  },
+                  {
+                    id: "hot-discussions",
+                    titleLabelUnitId: labels.hotDiscussions,
+                    sections: [
+                      {
+                        id: "hot-discussions-query",
+                        kind: "query",
+                        display: "list",
+                        limit: 12,
+                        loadMore: true,
+                        query: {
+                          target: "post",
+                          realm: "context",
+                          sort: { field: "hotScore", direction: "desc" },
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    id: "new-releases",
+                    titleLabelUnitId: labels.newReleases,
+                    sections: [
+                      {
+                        id: "new-releases-query",
+                        kind: "query",
+                        display: "covers",
+                        limit: 8,
+                        query: {
+                          target: "unit",
+                          types: ["BOOK"],
+                          realm: "context",
+                          sort: { field: "publishedAt", direction: "desc" },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                id: "wiki-stats",
+                kind: "stats",
+                metrics: ["articles", "members"],
+              },
+            ],
+            side: [
+              {
+                id: "quick-links",
+                kind: "collection",
+                display: "list",
+                items: [
+                  {
+                    target: unitTarget(entities.daihasei),
+                    labelUnitId: labels.events,
+                  },
+                  {
+                    target: unitTarget(entities.academyCity),
+                    labelUnitId: labels.locations,
+                  },
+                  {
+                    target: { kind: "zonePage", pageId: "search" },
+                    labelUnitId: labels.terms,
+                  },
+                  {
+                    target: {
+                      kind: "external",
+                      url: "https://toaru.fandom.com/",
+                      text: "Toaru Wiki (Fandom)",
+                    },
+                  },
+                ],
+              },
+              {
+                id: "book-covers",
+                kind: "collection",
+                display: "covers",
+                titleLabelUnitId: labels.newReleases,
+                items: ids.bookUnitIds.map((unitId) => ({
+                  target: unitTarget(unitId),
+                })),
+              },
+              { id: "news", kind: "richText", contentUnitId: fragments.news },
+              {
+                id: "did-you-know",
+                kind: "richText",
+                contentUnitId: fragments.didYouKnow,
+              },
+            ],
+          },
+        ],
+      },
+      search: { sections: [] },
+      feed: {
+        sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
+      },
+    },
+    theme: {
+      tokens: { accent: "#155e75", accentText: "#ffffff" },
+      layout: { contentWidth: "wide", density: "comfortable" },
+    },
+  };
+}
+
+function toaruWikiTranslations(
+  titles: ToaruTrilingual,
+): Array<{ language: string; title: string; body: string }> {
+  return [
+    {
+      language: LANGUAGES.ZH_HANT,
+      title: titles.zhHant,
+      body: `${titles.zhHant}是《魔法禁書目錄》世界觀中的重要條目。本條目整理其登場、設定與相關事件。`,
+    },
+    {
+      language: LANGUAGES.EN,
+      title: titles.en,
+      body: `${titles.en} is a key article in the A Certain Magical Index setting, collecting appearances, lore, and related events.`,
+    },
+    {
+      language: LANGUAGES.JA,
+      title: titles.ja,
+      body: `${titles.ja}は『とある魔術の禁書目録』世界の主要項目。登場・設定・関連する出来事をまとめる。`,
+    },
+  ];
+}
+
+async function runToaruWiki(ctx: SeedCtx): Promise<SeedResult> {
   const result = createSeedResult();
   const user = await getScenarioUser(ctx);
-  const wikiEntryUnitId = await createScenarioBookUnit(ctx, {
-    userId: user.userId,
-    title: "Factory Scenario: Wiki Zone Entry",
-    language: DEFAULT_LANGUAGE,
-  });
-  const releaseUnitId = await createScenarioBookUnit(ctx, {
-    userId: user.userId,
-    title: "Factory Scenario: Wiki Zone Release",
-    language: DEFAULT_LANGUAGE,
-  });
+  const now = new Date();
 
   const realmUnitId = randomUUID();
   await ctx.db.insert(Unit).values(
@@ -1389,33 +1790,39 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
       id: realmUnitId,
       type: UnitType.REALM,
       userId: user.userId,
+      slug: "toaru",
       slugScope: ctx.slugScopes.realm,
       status: UnitStatus.PUBLISHED,
       visibility: UnitVisibility.PUBLIC,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
+      defaultLanguage: LANGUAGES.ZH_HANT,
+      publishedAt: now,
     }),
   );
-  await ctx.db.insert(UnitTranslation).values(
-    withUpdatedAt({
-      unitId: realmUnitId,
-      language: DEFAULT_LANGUAGE,
-      title: "Factory Scenario: Wiki Realm",
-    }),
-  );
-  await ctx.db.insert(UnitSupportLanguage).values(
-    withUpdatedAt({
-      unitId: realmUnitId,
-      language: DEFAULT_LANGUAGE,
-      isPrimary: true,
-    }),
+  await insertScenarioTranslations(
+    ctx,
+    realmUnitId,
+    toaruTranslations(
+      {
+        zhHant: "魔法禁書目錄",
+        en: "A Certain Magical Index",
+        ja: "とある魔術の禁書目録",
+      },
+      {
+        descriptions: {
+          zhHant: "魔法禁書目錄系列的索引、討論與協作知識社群。",
+          en: "The community indexing, discussing, and documenting the A Certain Magical Index series.",
+          ja: "とある魔術の禁書目録シリーズの索引・議論・共同知識コミュニティ。",
+        },
+      },
+    ),
   );
   await ctx.db.insert(Realm).values(
     withUpdatedAt({
       unitId: realmUnitId,
       isPublic: true,
       isOfficial: true,
-      extra: { scenario: "wiki-zone-experience" },
+      memberCount: 1,
+      extra: { scenario: "toaru-wiki" },
     }),
   );
   await ctx.db.insert(RealmMember).values(
@@ -1425,79 +1832,37 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
       roleKey: "owner",
     }),
   );
-  const [characterId, locationId, factionId] = await Promise.all([
-    createScenarioEntity(ctx, {
-      title: "Factory Wiki Character",
-      kind: "character",
-      subjectRoles: ["primary_character"],
-    }),
-    createScenarioEntity(ctx, {
-      title: "Factory Wiki Location",
-      kind: "location",
-      subjectRoles: ["setting"],
-    }),
-    createScenarioEntity(ctx, {
-      title: "Factory Wiki Faction",
-      kind: "faction",
-      subjectRoles: ["about"],
-    }),
-  ]);
-  await ctx.db
-    .insert(SubjectAttribution)
-    .values([
-      {
-        unitId: wikiEntryUnitId,
-        entityId: characterId,
-        role: "primary_character",
-      },
-      { unitId: wikiEntryUnitId, entityId: locationId, role: "setting" },
-      { unitId: releaseUnitId, entityId: factionId, role: "about" },
-    ])
-    .onConflictDoNothing();
 
-  const [overviewLabelId, charactersLabelId, placesLabelId] = await Promise.all(
-    [
-      createScenarioLabel(ctx, "Overview"),
-      createScenarioLabel(ctx, "Characters"),
-      createScenarioLabel(ctx, "Places"),
-    ],
-  );
-  const [loreTagId, stubTagId] = await Promise.all([
-    createScenarioTag(ctx, "Factory Wiki Lore"),
-    createScenarioTag(ctx, "Factory Wiki Stub"),
-  ]);
+  const labelEntries = Object.entries(TOARU_LABELS) as Array<
+    [ToaruLabelKey, ToaruTrilingual]
+  >;
+  const labelIds = {} as Record<ToaruLabelKey, string>;
+  for (const [key, titles] of labelEntries) {
+    labelIds[key] = await createScenarioLabel(ctx, toaruTranslations(titles));
+  }
 
-  const wikiEntries = [
-    { id: randomUUID(), en: "Overview", zh: "概覽" },
-    { id: randomUUID(), en: "Characters", zh: "角色" },
-    { id: randomUUID(), en: "Stub Notes", zh: "短條目" },
-  ];
+  const entityEntries = Object.entries(TOARU_ENTITIES) as Array<
+    [ToaruEntityKey, (typeof TOARU_ENTITIES)[ToaruEntityKey]]
+  >;
+  const entityIds = {} as Record<ToaruEntityKey, string>;
+  for (const [key, definition] of entityEntries) {
+    entityIds[key] = await createScenarioEntity(ctx, {
+      kind: definition.kind,
+      subjectRoles: definition.subjectRoles,
+      translations: toaruTranslations(definition.titles),
+    });
+  }
 
-  const now = new Date();
-  const postIds: string[] = [];
-  for (const [index, entry] of wikiEntries.entries()) {
-    postIds.push(
+  const seriesTagId = await createScenarioTag(ctx, "魔法禁書目錄");
+  const entityWikiPostIds: string[] = [];
+  for (const [index, [key, definition]] of entityEntries.entries()) {
+    entityWikiPostIds.push(
       await createWikiScenarioPost(ctx, {
         userId: user.userId,
-        targetUnitId: wikiEntryUnitId,
+        targetUnitId: entityIds[key],
         realmUnitId,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        translations: [
-          {
-            language: LANGUAGES.EN,
-            title: `Factory Wiki: ${entry.en}`,
-            body:
-              index === 2
-                ? "Stub."
-                : `Long-form wiki entry for ${entry.en} in the wiki Zone scenario.`,
-          },
-          {
-            language: LANGUAGES.ZH_HANT,
-            title: `Factory Wiki：${entry.zh}`,
-            body:
-              index === 2 ? "短。" : `Wiki Zone 情境的${entry.zh}繁中條目。`,
-          },
-        ],
+        defaultLanguage: LANGUAGES.ZH_HANT,
+        translations: toaruWikiTranslations(definition.titles),
         publishedAt: new Date(now.getTime() - index * 86400000),
       }),
     );
@@ -1505,82 +1870,164 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   await ctx.db
     .insert(UnitTag)
     .values(
-      withUpdatedAtRows([
-        ...postIds.map((unitId) => ({ unitId, tagUnitId: loreTagId })),
-        { unitId: postIds.at(-1)!, tagUnitId: stubTagId },
-      ]),
+      withUpdatedAtRows(
+        entityWikiPostIds.map((unitId) => ({ unitId, tagUnitId: seriesTagId })),
+      ),
+    )
+    .onConflictDoNothing();
+  await ctx.db
+    .insert(UnitRealm)
+    .values(
+      withUpdatedAtRows(
+        Object.values(entityIds).map((unitId) => ({ realmUnitId, unitId })),
+      ),
     )
     .onConflictDoNothing();
 
-  const zoneInputs = [
-    ["wiki-classic", "wiki-classic-home"],
-    ["wiki-media", "wiki-media-home"],
-    ["wiki-database", "wiki-database-home"],
-    ["wiki-minimal", "wiki-minimal-home"],
-  ] as const;
-  const zoneIds: string[] = [];
-  for (const [template, homepageTemplate] of zoneInputs) {
-    zoneIds.push(
-      await createWikiScenarioZone(ctx, {
-        realmUnitId,
-        slug: `factory-${template}`,
-        title: `Factory Scenario: ${template}`,
-        template,
-        homepageTemplate,
-        labelUnitIds: {
-          overview: overviewLabelId,
-          characters: charactersLabelId,
-          places: placesLabelId,
-        },
-        entityIds: [characterId, locationId, factionId],
-        tagUnitIds: [loreTagId, stubTagId],
-        wikiUnitIds: postIds,
-      }),
-    );
+  const bookUnitIds: string[] = [];
+  for (const book of TOARU_BOOKS) {
+    const bookUnitId = await createScenarioBookUnit(ctx, {
+      userId: user.userId,
+      publishedAt: new Date(book.publishedAt),
+      translations: toaruTranslations(book.titles),
+    });
+    bookUnitIds.push(bookUnitId);
+    await ctx.db
+      .insert(SubjectAttribution)
+      .values(
+        book.subjects.map((subject) => ({
+          unitId: bookUnitId,
+          entityId: entityIds[subject.entity],
+          role: subject.role,
+        })),
+      )
+      .onConflictDoNothing();
   }
+  // Realm association makes the books reachable from the zone's
+  // realm-context query sections (e.g. the publishedAt-desc release rail).
+  // realm 关联使这些书可被专区的 realm 语境查询分区命中（如 publishedAt
+  // 降序的新刊栏）。
   await ctx.db
-    .update(Realm)
-    .set({
-      extra: {
-        scenario: "wiki-zone-experience",
-        wikiZoneUnitId: zoneIds[0],
+    .insert(UnitRealm)
+    .values(
+      withUpdatedAtRows(bookUnitIds.map((unitId) => ({ realmUnitId, unitId }))),
+    )
+    .onConflictDoNothing();
+
+  const fragmentEntries = Object.entries(TOARU_FRAGMENTS) as Array<
+    [ToaruFragmentKey, (typeof TOARU_FRAGMENTS)[ToaruFragmentKey]]
+  >;
+  const fragmentIds = {} as Record<ToaruFragmentKey, string>;
+  for (const [key, fragment] of fragmentEntries) {
+    // UNLISTED keeps the fragments out of wiki listings, query sections,
+    // and search while richText sections still render them.
+    // UNLISTED 使片段不出现在 wiki 列表、查询分区与搜索中，但 richText
+    // 分区仍会渲染它们。
+    fragmentIds[key] = await createWikiScenarioPost(ctx, {
+      userId: user.userId,
+      targetUnitId: realmUnitId,
+      realmUnitId,
+      defaultLanguage: LANGUAGES.ZH_HANT,
+      visibility: UnitVisibility.UNLISTED,
+      translations: [
+        {
+          language: LANGUAGES.ZH_HANT,
+          title: fragment.titles.zhHant,
+          body: fragment.bodies.zhHant,
+        },
+        {
+          language: LANGUAGES.EN,
+          title: fragment.titles.en,
+          body: fragment.bodies.en,
+        },
+        {
+          language: LANGUAGES.JA,
+          title: fragment.titles.ja,
+          body: fragment.bodies.ja,
+        },
+      ],
+      publishedAt: now,
+    });
+  }
+
+  const zoneUnitId = randomUUID();
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: zoneUnitId,
+      type: UnitType.ZONE,
+      userId: user.userId,
+      slug: "toaru",
+      slugScope: ctx.slugScopes.zone,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      defaultLanguage: LANGUAGES.ZH_HANT,
+      publishedAt: now,
+    }),
+  );
+  await insertScenarioTranslations(
+    ctx,
+    zoneUnitId,
+    toaruTranslations(
+      {
+        zhHant: "魔法禁書目錄 Wiki",
+        en: "Toaru Wiki",
+        ja: "とある魔術の禁書目録 Wiki",
       },
-    })
-    .where(eq(Realm.unitId, realmUnitId));
+      {
+        descriptions: {
+          zhHant: "由 r/toaru 社群維護的魔法禁書目錄百科與導航門戶。",
+          en: "The community-run encyclopedia and portal for A Certain Magical Index, maintained by r/toaru.",
+          ja: "r/toaru コミュニティが運営する、とある魔術の禁書目録の百科とポータル。",
+        },
+      },
+    ),
+  );
+  await ctx.db.insert(Zone).values(
+    withUpdatedAt({
+      unitId: zoneUnitId,
+      ownerRealmUnitId: realmUnitId,
+      config: buildToaruZoneConfig({
+        realmUnitId,
+        labels: labelIds,
+        entities: entityIds,
+        bookUnitIds,
+        fragments: fragmentIds,
+      }),
+    }),
+  );
 
   await Promise.all([
-    ctx.sync.content(wikiEntryUnitId),
-    ctx.sync.content(releaseUnitId),
     ctx.sync.realm(realmUnitId),
-    ...zoneIds.map((zoneId) => ctx.sync.content(zoneId)),
+    ctx.sync.content(zoneUnitId),
+    ...bookUnitIds.map((unitId) => ctx.sync.content(unitId)),
   ]);
 
   addSpecialSeedTarget(result, {
-    label: "Wiki Zone entry",
-    scenario: "wiki-zone-experience",
-    unitType: UnitType.BOOK,
-    unitId: wikiEntryUnitId,
-  });
-  addSpecialSeedTarget(result, {
-    label: "Wiki Zone release",
-    scenario: "wiki-zone-experience",
-    unitType: UnitType.BOOK,
-    unitId: releaseUnitId,
-  });
-  addSpecialSeedTarget(result, {
-    label: "Wiki Zone official realm",
-    scenario: "wiki-zone-experience",
+    label: "Toaru wiki realm",
+    scenario: "toaru-wiki",
     unitType: UnitType.REALM,
     unitId: realmUnitId,
+    notes: "r/toaru — the wiki realm backing the /z/toaru portal.",
   });
-  for (const [index, zoneId] of zoneIds.entries()) {
-    addSpecialSeedTarget(result, {
-      label: `Wiki Zone template ${zoneInputs[index]![0]}`,
-      scenario: "wiki-zone-experience",
-      unitType: UnitType.ZONE,
-      unitId: zoneId,
-    });
-  }
+  addSpecialSeedTarget(result, {
+    label: "Toaru zone portal",
+    scenario: "toaru-wiki",
+    unitType: UnitType.ZONE,
+    unitId: zoneUnitId,
+    notes: "Open /z/toaru to verify every zone config primitive.",
+  });
+  addSpecialSeedTarget(result, {
+    label: "Toaru entity (上條當麻)",
+    scenario: "toaru-wiki",
+    unitType: UnitType.ENTITY,
+    unitId: entityIds.kamijou,
+  });
+  addSpecialSeedTarget(result, {
+    label: "Toaru latest release",
+    scenario: "toaru-wiki",
+    unitType: UnitType.BOOK,
+    unitId: bookUnitIds[0]!,
+  });
 
   return result;
 }
@@ -1610,12 +2057,12 @@ export const FACTORY_SCENARIOS: Record<FactoryScenarioName, FactoryScenario> = {
     defaultSelected: true,
     run: runComplexShelf,
   },
-  "wiki-zone-experience": {
-    name: "wiki-zone-experience",
+  "toaru-wiki": {
+    name: "toaru-wiki",
     description:
-      "Official wiki realm with translated WIKI posts, labels, entities, and all wiki Zone templates.",
+      "r/toaru wiki realm and /z/toaru zone exercising every zone config primitive with trilingual labels, entities, books, and fragments.",
     defaultSelected: true,
-    run: runWikiZoneExperience,
+    run: runToaruWiki,
   },
   "showcase-feed": {
     name: "showcase-feed",
