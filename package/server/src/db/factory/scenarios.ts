@@ -1242,14 +1242,29 @@ function toaruTranslations(
 }
 
 export const TOARU_LABELS = {
+  classification: { zhHant: "分類", en: "Categories", ja: "分類" },
   characters: { zhHant: "人物角色", en: "Characters", ja: "キャラクター" },
   terms: { zhHant: "名詞術語", en: "Terminology", ja: "用語" },
   factions: { zhHant: "機構組織", en: "Factions", ja: "組織" },
   locations: { zhHant: "地點場所", en: "Locations", ja: "場所" },
   events: { zhHant: "事件記錄", en: "Events", ja: "事件" },
   timeline: { zhHant: "時間線", en: "Timeline", ja: "タイムライン" },
+  world: { zhHant: "世界", en: "World", ja: "世界" },
   magicSide: { zhHant: "魔法側", en: "Magic Side", ja: "魔術サイド" },
   scienceSide: { zhHant: "科學側", en: "Science Side", ja: "科学サイド" },
+  series: { zhHant: "系列", en: "Series", ja: "シリーズ" },
+  carrier: { zhHant: "載體", en: "Media", ja: "媒体" },
+  editGuide: { zhHant: "編輯規範", en: "Editing Guide", ja: "編集ガイド" },
+  pageStyle: { zhHant: "頁面樣式", en: "Page Style", ja: "ページ様式" },
+  citationGuide: { zhHant: "引用來源", en: "Citations", ja: "出典" },
+  wikiBuild: { zhHant: "維基建設", en: "Wiki Building", ja: "Wiki構築" },
+  recentChanges: { zhHant: "最近更改", en: "Recent Changes", ja: "最近の更新" },
+  wantedPages: { zhHant: "待建頁面", en: "Wanted Pages", ja: "作成待ちページ" },
+  watchOrder: {
+    zhHant: "作品觀看順序參考",
+    en: "Viewing Order Reference",
+    ja: "視聴順参考",
+  },
   // Tab titles for the activity tabs section; LABEL units like the 8
   // category labels above so `titleLabelUnitId` resolution is exercised.
   // 活动标签页分区的标签标题；与上方 8 个分类标签一样是 LABEL Unit，
@@ -1508,6 +1523,11 @@ export type ToaruZoneConfig = {
 export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
   const { labels, entities, fragments } = ids;
   const unitTarget = (unitId: string) => ({ kind: "unit", unitId }) as const;
+  const bookTarget = (index: number) =>
+    ({
+      kind: "unit",
+      unitId: ids.bookUnitIds[index] ?? ids.bookUnitIds[0]!,
+    }) as const;
   const pageIds = {
     home: "00000000-0000-7000-8000-000000001001",
     search: "00000000-0000-7000-8000-000000001002",
@@ -1530,91 +1550,136 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
           id: "main",
           nodes: [
             {
-              id: "nav-home",
-              target: { kind: "zonePage", pageId: pageIds.home },
-            },
-            {
-              id: "nav-characters",
-              labelUnitId: labels.characters,
-              target: { kind: "zonePage", pageId: pageIds.characters },
+              id: "nav-classification",
+              labelUnitId: labels.classification,
               children: [
-                { id: "nav-kamijou", target: unitTarget(entities.kamijou) },
-                { id: "nav-misaka", target: unitTarget(entities.misaka) },
                 {
-                  id: "nav-accelerator",
-                  target: unitTarget(entities.accelerator),
+                  id: "nav-characters",
+                  labelUnitId: labels.characters,
+                  target: { kind: "zonePage", pageId: pageIds.characters },
                 },
-                { id: "nav-index", target: unitTarget(entities.index) },
-                { id: "nav-aleister", target: unitTarget(entities.aleister) },
-              ],
-            },
-            {
-              id: "nav-terms",
-              labelUnitId: labels.terms,
-              target: { kind: "zonePage", pageId: pageIds.search },
-            },
-            {
-              id: "nav-factions",
-              labelUnitId: labels.factions,
-              children: [
                 {
-                  id: "nav-anglican",
+                  id: "nav-terms",
+                  labelUnitId: labels.terms,
+                  target: { kind: "zonePage", pageId: pageIds.search },
+                },
+                {
+                  id: "nav-factions",
+                  labelUnitId: labels.factions,
                   target: unitTarget(entities.anglicanChurch),
                 },
-                { id: "nav-dark-side", target: unitTarget(entities.darkSide) },
-              ],
-            },
-            {
-              id: "nav-locations",
-              labelUnitId: labels.locations,
-              children: [
                 {
-                  id: "nav-academy-city",
+                  id: "nav-locations",
+                  labelUnitId: labels.locations,
                   target: unitTarget(entities.academyCity),
                 },
-                { id: "nav-tokiwadai", target: unitTarget(entities.tokiwadai) },
+                {
+                  id: "nav-events",
+                  labelUnitId: labels.events,
+                  target: unitTarget(entities.daihasei),
+                },
+                {
+                  id: "nav-timeline",
+                  labelUnitId: labels.timeline,
+                  target: { kind: "zonePage", pageId: pageIds.feed },
+                },
               ],
             },
             {
-              id: "nav-events",
-              labelUnitId: labels.events,
+              id: "nav-world",
+              labelUnitId: labels.world,
               children: [
-                { id: "nav-daihasei", target: unitTarget(entities.daihasei) },
+                {
+                  id: "nav-magic",
+                  labelUnitId: labels.magicSide,
+                  target: unitTarget(entities.index),
+                  children: [
+                    {
+                      id: "nav-magic-index",
+                      target: unitTarget(entities.index),
+                    },
+                    {
+                      id: "nav-magic-anglican",
+                      target: unitTarget(entities.anglicanChurch),
+                    },
+                  ],
+                },
+                {
+                  id: "nav-science",
+                  labelUnitId: labels.scienceSide,
+                  target: unitTarget(entities.academyCity),
+                  children: [
+                    {
+                      id: "nav-science-misaka",
+                      target: unitTarget(entities.misaka),
+                    },
+                    {
+                      id: "nav-science-accelerator",
+                      target: unitTarget(entities.accelerator),
+                    },
+                    {
+                      id: "nav-science-academy-city",
+                      target: unitTarget(entities.academyCity),
+                    },
+                  ],
+                },
               ],
             },
             {
-              id: "nav-timeline",
-              labelUnitId: labels.timeline,
+              id: "nav-series",
+              labelUnitId: labels.series,
+              children: [
+                { id: "nav-index-series", target: bookTarget(4) },
+                { id: "nav-railgun-series", target: bookTarget(3) },
+                { id: "nav-mental-out-series", target: bookTarget(2) },
+                { id: "nav-dark-side-series", target: bookTarget(1) },
+              ],
+            },
+            {
+              id: "nav-carrier",
+              labelUnitId: labels.carrier,
+              children: [
+                { id: "nav-light-novel", target: bookTarget(0) },
+                { id: "nav-comic", target: bookTarget(3) },
+                { id: "nav-spinoff", target: bookTarget(1) },
+              ],
+            },
+            {
+              id: "nav-edit-guide",
+              labelUnitId: labels.editGuide,
+              children: [
+                {
+                  id: "nav-page-style",
+                  labelUnitId: labels.pageStyle,
+                  target: { kind: "zonePage", pageId: pageIds.characters },
+                },
+                {
+                  id: "nav-citation-guide",
+                  labelUnitId: labels.citationGuide,
+                  target: { kind: "zonePage", pageId: pageIds.search },
+                },
+              ],
+            },
+            {
+              id: "nav-wiki-build",
+              labelUnitId: labels.wikiBuild,
+              children: [
+                {
+                  id: "nav-recent-changes",
+                  labelUnitId: labels.recentChanges,
+                  target: { kind: "zonePage", pageId: pageIds.feed },
+                },
+                {
+                  id: "nav-wanted-pages",
+                  labelUnitId: labels.wantedPages,
+                  target: { kind: "zonePage", pageId: pageIds.search },
+                },
+              ],
+            },
+            {
+              id: "nav-watch-order",
+              labelUnitId: labels.watchOrder,
               target: { kind: "zonePage", pageId: pageIds.feed },
-            },
-            {
-              id: "nav-magic",
-              labelUnitId: labels.magicSide,
-              children: [
-                { id: "nav-magic-index", target: unitTarget(entities.index) },
-                {
-                  id: "nav-magic-anglican",
-                  target: unitTarget(entities.anglicanChurch),
-                },
-              ],
-            },
-            {
-              id: "nav-science",
-              labelUnitId: labels.scienceSide,
-              children: [
-                {
-                  id: "nav-science-misaka",
-                  target: unitTarget(entities.misaka),
-                },
-                {
-                  id: "nav-science-accelerator",
-                  target: unitTarget(entities.accelerator),
-                },
-                {
-                  id: "nav-science-academy-city",
-                  target: unitTarget(entities.academyCity),
-                },
-              ],
             },
           ],
         },
