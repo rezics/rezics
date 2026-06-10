@@ -46,6 +46,7 @@ export function ZoneManageProfileTab({
   refUnits,
   onSave,
   saving,
+  saveDisabled,
 }: {
   zone: ZoneDTO;
   rows: ZoneTranslationRow[];
@@ -55,6 +56,7 @@ export function ZoneManageProfileTab({
   refUnits: ZoneRefUnitMap;
   onSave: () => void;
   saving: boolean;
+  saveDisabled?: boolean;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const ownerRealmQuery = useQuery(realmDetailQuery(zone.ownerRealmUnitId));
@@ -218,7 +220,7 @@ export function ZoneManageProfileTab({
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={onSave} disabled={saving}>
+          <Button onClick={onSave} disabled={saving || saveDisabled}>
             {t("common:save")}
           </Button>
         </div>

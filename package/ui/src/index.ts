@@ -1,4 +1,5 @@
 export * from "./brand";
+export * from "./color";
 export * from "./composite";
 export * from "./link";
 export { RatingInput, type RatingInputProps } from "./primitive/control";

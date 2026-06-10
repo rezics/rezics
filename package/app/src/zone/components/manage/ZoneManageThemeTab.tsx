@@ -1,15 +1,25 @@
 import type { ZoneTheme } from "@rezics/contract";
+import { uploadApi } from "@rezics/api/upload/upload.api";
 import { useTranslation } from "@rezics/i18n/react";
+import { ColorField, type ColorThemeSet } from "@rezics/ui";
+import { createRezicsUploadProvider } from "@rezics/ui/editor";
 import {
+  Button,
   Card,
   CardContent,
   Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
+import { ImagePlus } from "lucide-react";
+import type React from "react";
+import { useMemo } from "react";
 import type { ZoneManageDraft } from "../../models/zoneManageDraft";
 import { ManageField, ManageGroupHeading } from "./ZoneManageFields";
 
@@ -49,6 +59,42 @@ const IMAGE_LABEL_KEYS = {
 
 const NONE = "__none__";
 
+const COLOR_SWATCHES = [
+  { label: "Brand", value: "#db515c" },
+  { label: "Ink", value: "#1f2937" },
+  { label: "Muted", value: "#64748b" },
+  { label: "Canvas", value: "#ffffff" },
+  { label: "Night", value: "#111827" },
+  { label: "Ocean", value: "#2563eb" },
+  { label: "Forest", value: "#16a34a" },
+  { label: "Amber", value: "#d97706" },
+];
+
+const THEME_SETS = [
+  {
+    label: "Archive",
+    values: {
+      background: "#ffffff",
+      surface: "#f8fafc",
+      text: "#1f2937",
+      mutedText: "#64748b",
+      accent: "#db515c",
+      accentText: "#ffffff",
+    },
+  },
+  {
+    label: "Night",
+    values: {
+      background: "#111827",
+      surface: "#1f2937",
+      text: "#f9fafb",
+      mutedText: "#cbd5e1",
+      accent: "#60a5fa",
+      accentText: "#0f172a",
+    },
+  },
+] as const satisfies readonly ColorThemeSet<keyof ThemeTokens>[];
+
 function prune<T extends Record<string, unknown>>(value: T): T | undefined {
   const entries = Object.entries(value).filter(
     ([, entry]) => entry !== undefined && entry !== "",
@@ -58,14 +104,17 @@ function prune<T extends Record<string, unknown>>(value: T): T | undefined {
 
 /**
  * Theme tab. Token values are raw CSS color strings authored by the zone
- * manager (rendered via the zone-scoped `--zone-color-*` variables, never
- * app design tokens), so plain text inputs with a live swatch are the
- * honest editor. Image fields are HTTPS URLs; CSP and media-library product
- * decisions stay outside zone schema validation.
+ * manager (rendered via the zone-scoped `--zone-color-*` variables, never app
+ * design tokens), so the picker is only an affordance layered over a raw CSS
+ * text input. Non-hex values such as `rgb()` and `oklch()` remain first-class.
+ * Image upload reuses the markdown editor upload provider and writes the
+ * returned URL back into the same manual URL fields; zone does not create IMAGE
+ * units here.
  * 主题标签页。token 值是专区管理者撰写的原始 CSS 颜色字符串（经专区
- * 作用域的 `--zone-color-*` 变量渲染，绝非应用设计 token），因此带实时
- * 色样的纯文本输入是最诚实的编辑器。图片字段是 HTTPS URL；CSP 与媒体
- * 库产品决策不属于 zone schema 校验。
+ * 作用域的 `--zone-color-*` 变量渲染，绝非应用设计 token），因此拾色器
+ * 只是原始 CSS 文本输入之上的辅助能力。`rgb()` 与 `oklch()` 等非 hex 值
+ * 仍是一等输入。图片上传复用 markdown 编辑器的上传 provider，并把返回的
+ * URL 写回同一手动 URL 字段；zone 这里不创建 IMAGE 单元。
  */
 export function ZoneManageThemeTab({
   draft,
@@ -78,6 +127,10 @@ export function ZoneManageThemeTab({
   const tokens = draft.theme.tokens ?? {};
   const images = draft.theme.images ?? {};
   const layout = draft.theme.layout ?? {};
+  const imageProvider = useMemo(
+    () => createRezicsUploadProvider(uploadApi.uploadImage),
+    [],
+  );
 
   const setTokens = (patch: Partial<ThemeTokens>) => {
     onDraftChange({
@@ -109,26 +162,16 @@ export function ZoneManageThemeTab({
           </ManageGroupHeading>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {TOKEN_FIELDS.map((field) => (
-              <ManageField key={field} label={t(TOKEN_LABEL_KEYS[field])}>
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={tokens[field] ?? ""}
-                    className="font-mono text-sm"
-                    onChange={(event) =>
-                      setTokens({
-                        [field]: event.target.value || undefined,
-                      })
-                    }
-                  />
-                  {/* Live swatch of the authored CSS color value. */}
-                  {/* 所填 CSS 颜色值的实时色样。 */}
-                  <span
-                    aria-hidden
-                    className="size-6 shrink-0 rounded-sm border border-border-defined"
-                    style={{ backgroundColor: tokens[field] ?? "transparent" }}
-                  />
-                </div>
-              </ManageField>
+              <ColorField<keyof ThemeTokens>
+                key={field}
+                label={t(TOKEN_LABEL_KEYS[field])}
+                value={tokens[field] ?? ""}
+                placeholder="oklch(...)"
+                swatches={COLOR_SWATCHES}
+                themeSets={THEME_SETS}
+                onApplyThemeSet={setTokens}
+                onChange={(value) => setTokens({ [field]: value || undefined })}
+              />
             ))}
           </div>
         </CardContent>
@@ -142,30 +185,32 @@ export function ZoneManageThemeTab({
           <div className="grid gap-4 md:grid-cols-2">
             {IMAGE_FIELDS.map((field) => (
               <ManageField key={field} label={t(IMAGE_LABEL_KEYS[field])}>
-                <Input
+                <ImageUrlInput
                   value={images[field] ?? ""}
-                  placeholder="https://"
-                  className="font-mono text-sm"
-                  onChange={(event) =>
-                    setImages({ [field]: event.target.value || undefined })
+                  onChange={(value) =>
+                    setImages({ [field]: value || undefined })
                   }
+                  onUpload={(url) => setImages({ [field]: url })}
+                  uploadPanel={imageProvider.render}
                 />
               </ManageField>
             ))}
             <ManageField label={t("zone:manage_image_header_logo")}>
-              <Input
+              <ImageUrlInput
                 value={draft.header.logoImageUrl ?? ""}
-                placeholder="https://"
-                className="font-mono text-sm"
-                onChange={(event) => {
+                onChange={(value) => {
                   const header = { ...draft.header };
-                  if (event.target.value) {
-                    header.logoImageUrl = event.target.value;
-                  } else {
-                    delete header.logoImageUrl;
-                  }
+                  if (value) header.logoImageUrl = value;
+                  else delete header.logoImageUrl;
                   onDraftChange({ ...draft, header });
                 }}
+                onUpload={(url) => {
+                  onDraftChange({
+                    ...draft,
+                    header: { ...draft.header, logoImageUrl: url },
+                  });
+                }}
+                uploadPanel={imageProvider.render}
               />
             </ManageField>
           </div>
@@ -233,6 +278,46 @@ export function ZoneManageThemeTab({
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function ImageUrlInput({
+  value,
+  onChange,
+  onUpload,
+  uploadPanel,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onUpload: (url: string) => void;
+  uploadPanel: (props: { onInsert: (url: string) => void }) => React.ReactNode;
+}) {
+  return (
+    <div className="flex min-w-0 gap-2">
+      <Input
+        value={value}
+        placeholder="https://"
+        className="font-mono text-sm"
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <Popover>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              aria-label="Upload image"
+            />
+          }
+        >
+          <ImagePlus className="size-4" aria-hidden />
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-96 rounded-md">
+          {uploadPanel({ onInsert: onUpload })}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

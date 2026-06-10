@@ -28,10 +28,11 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
+import { ZoneManageJsonFrame } from "../components/manage/ZoneManageJsonFrame";
 import { ZoneManageMenusTab } from "../components/manage/ZoneManageMenusTab";
 import { ZoneManageProfileTab } from "../components/manage/ZoneManageProfileTab";
 import { ZoneManageSectionsTab } from "../components/manage/ZoneManageSectionsTab";
@@ -198,6 +199,9 @@ export function ZoneManagePage({
   const [rows, setRows] = useState<ZoneTranslationRow[]>([]);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  const [jsonProblemsByKey, setJsonProblemsByKey] = useState<
+    Record<string, string[]>
+  >({});
 
   useEffect(() => {
     if (!zone || !portalQuery.data?.page) return;
@@ -231,10 +235,23 @@ export function ZoneManagePage({
     deletePage.isPending;
   const unitIdForSave = zone?.unitId ?? "";
   const issues = draft ? validateZoneManageDraft(draft) : [];
+  const hasJsonProblems = Object.values(jsonProblemsByKey).some(
+    (problems) => problems.length > 0,
+  );
+  const saveBlocked = issues.length > 0 || hasJsonProblems;
+  const setJsonProblems = useCallback((key: string, problems: string[]) => {
+    setJsonProblemsByKey((current) => {
+      if (problems.length === 0) {
+        const { [key]: _removed, ...rest } = current;
+        return rest;
+      }
+      return { ...current, [key]: problems };
+    });
+  }, []);
 
   const saveProfile = () => {
     if (!draft) return;
-    if (issues.length > 0) {
+    if (saveBlocked) {
       toast.error(t("zone:manage_config_invalid"));
       return;
     }
@@ -250,7 +267,7 @@ export function ZoneManagePage({
 
   const saveMenus = () => {
     if (!draft) return;
-    if (issues.length > 0) {
+    if (saveBlocked) {
       toast.error(t("zone:manage_config_invalid"));
       return;
     }
@@ -262,10 +279,14 @@ export function ZoneManagePage({
 
   const saveTheme = () => {
     if (!draft) return;
-    if (issues.length > 0) {
+    if (saveBlocked) {
       toast.error(t("zone:manage_config_invalid"));
       return;
     }
+    updateNav.mutate({
+      unitId: unitIdForSave,
+      input: { nav: zoneManageDraftToNav(draft) },
+    });
     updateTheme.mutate({
       unitId: unitIdForSave,
       input: { theme: zoneManageDraftToTheme(draft) },
@@ -274,7 +295,7 @@ export function ZoneManagePage({
 
   const saveSelectedPage = () => {
     if (!draft) return;
-    if (issues.length > 0) {
+    if (saveBlocked) {
       toast.error(t("zone:manage_config_invalid"));
       return;
     }
@@ -407,7 +428,7 @@ export function ZoneManagePage({
 
   const saveRow = (onSave: () => void) => (
     <div className="mt-4 flex justify-end">
-      <Button onClick={onSave} disabled={saving || issues.length > 0}>
+      <Button onClick={onSave} disabled={saving || saveBlocked}>
         {t("common:save")}
       </Button>
     </div>
@@ -439,6 +460,21 @@ export function ZoneManagePage({
         </Alert>
       ) : null}
 
+      {hasJsonProblems ? (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>{t("zone:manage_json_invalid")}</AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc pl-4">
+              {Object.entries(jsonProblemsByKey).flatMap(([key, problems]) =>
+                problems.map((problem) => (
+                  <li key={`${key}:${problem}`}>{problem}</li>
+                )),
+              )}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <Tabs
         value={activeTab}
         onValueChange={(value) => onTabChange?.(value as ZoneManageTab)}
@@ -456,16 +492,24 @@ export function ZoneManagePage({
         </TabsList>
 
         <TabsContent value="profile">
-          <ZoneManageProfileTab
-            zone={zone}
-            rows={rows}
-            onRowsChange={setRows}
+          <ZoneManageJsonFrame
             draft={draft}
             onDraftChange={setDraft}
-            refUnits={refUnits}
-            onSave={saveProfile}
-            saving={saving}
-          />
+            target={{ kind: "boundary" }}
+            onProblemsChange={setJsonProblems}
+          >
+            <ZoneManageProfileTab
+              zone={zone}
+              rows={rows}
+              onRowsChange={setRows}
+              draft={draft}
+              onDraftChange={setDraft}
+              refUnits={refUnits}
+              onSave={saveProfile}
+              saving={saving}
+              saveDisabled={saveBlocked}
+            />
+          </ZoneManageJsonFrame>
         </TabsContent>
 
         <TabsContent value="sections">
@@ -482,22 +526,37 @@ export function ZoneManagePage({
             onDeletePage={deleteSelectedPage}
             onSaveSelectedPage={saveSelectedPage}
             saving={saving}
-            saveDisabled={issues.length > 0 || !portalQuery.data?.page.id}
+            saveDisabled={saveBlocked || !portalQuery.data?.page.id}
+            onJsonProblemsChange={setJsonProblems}
           />
         </TabsContent>
 
         <TabsContent value="menus">
-          <ZoneManageMenusTab
+          <ZoneManageJsonFrame
             draft={draft}
             onDraftChange={setDraft}
-            refUnits={refUnits}
-          />
-          {saveRow(saveMenus)}
+            target={{ kind: "nav" }}
+            onProblemsChange={setJsonProblems}
+          >
+            <ZoneManageMenusTab
+              draft={draft}
+              onDraftChange={setDraft}
+              refUnits={refUnits}
+            />
+            {saveRow(saveMenus)}
+          </ZoneManageJsonFrame>
         </TabsContent>
 
         <TabsContent value="theme">
-          <ZoneManageThemeTab draft={draft} onDraftChange={setDraft} />
-          {saveRow(saveTheme)}
+          <ZoneManageJsonFrame
+            draft={draft}
+            onDraftChange={setDraft}
+            target={{ kind: "theme" }}
+            onProblemsChange={setJsonProblems}
+          >
+            <ZoneManageThemeTab draft={draft} onDraftChange={setDraft} />
+            {saveRow(saveTheme)}
+          </ZoneManageJsonFrame>
         </TabsContent>
 
         <TabsContent value="lifecycle">

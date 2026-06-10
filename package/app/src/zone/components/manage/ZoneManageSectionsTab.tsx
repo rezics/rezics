@@ -13,6 +13,7 @@ import {
   type ZoneManageEditorContext,
   ZoneSectionListEditor,
 } from "./ZoneSectionListEditor";
+import { ZoneManageJsonFrame } from "./ZoneManageJsonFrame";
 
 type ZonePageSummary = ZoneDTO["pages"][number];
 
@@ -51,6 +52,7 @@ export function ZoneManageSectionsTab({
   onSaveSelectedPage,
   saving,
   saveDisabled,
+  onJsonProblemsChange,
 }: {
   draft: ZoneManageDraft;
   onDraftChange: (draft: ZoneManageDraft) => void;
@@ -65,6 +67,7 @@ export function ZoneManageSectionsTab({
   onSaveSelectedPage: () => void;
   saving: boolean;
   saveDisabled: boolean;
+  onJsonProblemsChange: (key: string, problems: string[]) => void;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const sortedPages = useMemo(() => [...pages].sort(pageSort), [pages]);
@@ -270,30 +273,37 @@ export function ZoneManageSectionsTab({
               </CardContent>
             </Card>
 
-            <ZoneSectionListEditor
-              sections={selectedSections}
-              onChange={(sections) =>
-                onDraftChange({
-                  ...draft,
-                  pages: updateZonePageSections(
-                    draft.pages,
-                    selectedPage.id,
-                    () => sections,
-                  ),
-                })
-              }
-              slot="page"
-              ctx={ctx}
-            />
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                onClick={onSaveSelectedPage}
-                disabled={saving || saveDisabled}
-              >
-                {t("zone:manage_save_page")}
-              </Button>
-            </div>
+            <ZoneManageJsonFrame
+              draft={draft}
+              onDraftChange={onDraftChange}
+              target={{ kind: "page", pageId: selectedPage.id }}
+              onProblemsChange={onJsonProblemsChange}
+            >
+              <ZoneSectionListEditor
+                sections={selectedSections}
+                onChange={(sections) =>
+                  onDraftChange({
+                    ...draft,
+                    pages: updateZonePageSections(
+                      draft.pages,
+                      selectedPage.id,
+                      () => sections,
+                    ),
+                  })
+                }
+                slot="page"
+                ctx={ctx}
+              />
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={onSaveSelectedPage}
+                  disabled={saving || saveDisabled}
+                >
+                  {t("zone:manage_save_page")}
+                </Button>
+              </div>
+            </ZoneManageJsonFrame>
           </div>
         ) : null}
       </div>

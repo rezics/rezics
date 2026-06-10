@@ -20,6 +20,8 @@ import {
   moveZoneMenuNodeAtPath,
   nextZoneId,
   outdentZoneMenuNodeAtPath,
+  applyZoneManageJsonBody,
+  parseZoneManageJsonText,
   removeZoneMenuNodeAtPath,
   removeZonePage,
   removeZoneTranslationRow,
@@ -30,6 +32,8 @@ import {
   zoneManageDraftToNav,
   zoneManageDraftToPage,
   zoneManageDraftToTheme,
+  zoneManageJsonBody,
+  zoneManageJsonText,
   zoneMenuNodeAtPath,
   zoneQueryUnsupportedFields,
   zoneRowsToTranslations,
@@ -149,6 +153,91 @@ describe("zoneManageDraft split round-trip", () => {
     });
     draft.menus[0]!.id = "changed";
     expect(nav.menus[0]!.id).toBe("main");
+  });
+});
+
+describe("zone manage JSON body editor", () => {
+  it("edits envelope bodies without dropping page fields", () => {
+    const draft = sampleDraft();
+    const body = zoneManageJsonBody(draft, { kind: "page", pageId: "home" });
+    expect(body).toEqual({ sections: samplePage().sections });
+
+    const nextText = zoneManageJsonText(draft, {
+      kind: "page",
+      pageId: "home",
+    });
+    const parsed = parseZoneManageJsonText(
+      { kind: "page", pageId: "home" },
+      nextText,
+    );
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      const applied = applyZoneManageJsonBody(
+        draft,
+        {
+          kind: "page",
+          pageId: "home",
+        },
+        parsed.body,
+      );
+      expect(zoneManageDraftToPage(applied, "home")).toEqual(samplePage());
+    }
+  });
+
+  it("signals invalid JSON instead of mutating the draft", () => {
+    const parsed = parseZoneManageJsonText(
+      { kind: "theme" },
+      '{"tokens": {"accent":',
+    );
+    expect(parsed.ok).toBe(false);
+  });
+
+  it("validates JSON bodies with the contract schema before save", () => {
+    const parsed = parseZoneManageJsonText(
+      { kind: "theme" },
+      JSON.stringify({ images: { logoUrl: "http://example.com/logo.png" } }),
+    );
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) {
+      expect(
+        parsed.problems.some((problem) => problem.path.includes("logoUrl")),
+      ).toBe(true);
+    }
+  });
+
+  it("strips system-owned envelope metadata injected through JSON", () => {
+    const draft = sampleDraft();
+    const parsed = parseZoneManageJsonText(
+      { kind: "theme" },
+      JSON.stringify({
+        schema: "rezics/zone-config",
+        version: 99,
+        tokens: { accent: "rgb(219 81 92)" },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      const applied = applyZoneManageJsonBody(
+        draft,
+        { kind: "theme" },
+        parsed.body,
+      );
+      expect(zoneManageDraftToTheme(applied)).toEqual({
+        schema: "rezics/zone-theme",
+        version: 1,
+        tokens: { accent: "rgb(219 81 92)" },
+        images: undefined,
+        layout: undefined,
+      });
+    }
+  });
+
+  it("preserves non-hex CSS color strings in theme saves", () => {
+    const draft = sampleDraft();
+    draft.theme.tokens = { accent: "oklch(0.7 0.1 20)" };
+    expect(zoneManageDraftToTheme(draft).tokens?.accent).toBe(
+      "oklch(0.7 0.1 20)",
+    );
   });
 });
 

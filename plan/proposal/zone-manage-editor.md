@@ -1,8 +1,8 @@
 ---
 title: Zone Manage Editor — JSON View, ColorField Palette, and Image URL Flow
-status: active
+status: done
 created: 2026-06-10
-completed:
+completed: 2026-06-10
 supersededBy:
 tags: [zone, app, ui, editor, theme, design]
 ---
@@ -56,34 +56,34 @@ UI, and an upload-to-URL flow for theme images. UI implementation must load the
 
 ## 1. ColorField (`@rezics/ui`)
 
-- [ ] 1.1 Add `react-colorful` to `package/ui`; create
+- [x] 1.1 Add `react-colorful` to `package/ui`; create
       `src/color/ColorField.tsx` with `HexColorPicker` in a popover,
       `HexColorInput`, raw text input, and live swatch. Style
       `.react-colorful__*` classes through UnoCSS so the picker matches design
       tokens.
-- [ ] 1.2 Create `src/color/ColorPalette.tsx` for preset swatch grids and
+- [x] 1.2 Create `src/color/ColorPalette.tsx` for preset swatch grids and
       theme-set application. Export it alongside `ColorField`.
-- [ ] 1.3 Add Storybook stories and verify with `task ui:storybook`: single
+- [x] 1.3 Add Storybook stories and verify with `task ui:storybook`: single
       color selection, theme-set application, and non-hex value input.
 
 ## 2. Theme Tab Integration (`package/app`)
 
-- [ ] 2.1 Replace `ZoneManageThemeTab` color fields with `ColorField` plus
+- [x] 2.1 Replace `ZoneManageThemeTab` color fields with `ColorField` plus
       palette support. Update the local "honest editor" comment to describe the
       new picker + raw CSS value shape.
-- [ ] 2.2 Add upload buttons to theme image URL fields. Use
+- [x] 2.2 Add upload buttons to theme image URL fields. Use
       `createRezicsUploadProvider` / `uploadApi.uploadImage` to obtain a URL and
       write it back to the field. Keep manual URL paste.
 
 ## 3. JSON View (`package/app`)
 
-- [ ] 3.1 Add a JSON view toggle to zone manage. Current editing surfaces
+- [x] 3.1 Add a JSON view toggle to zone manage. Current editing surfaces
       (page sections draft and `boundary`/`nav`/`theme` shell body drafts) use
       `RezicsJsonEditor`; both views share one draft, and invalid JSON locks the
       structured view.
-- [ ] 3.2 Before save, run `Value.Check` against the corresponding envelope body
+- [x] 3.2 Before save, run `Value.Check` against the corresponding envelope body
       schema and map TypeBox errors to CodeMirror lint diagnostics.
-- [ ] 3.3 Add draft-layer tests: JSON view round-trips without dropping fields,
+- [x] 3.3 Add draft-layer tests: JSON view round-trips without dropping fields,
       invalid JSON locks structured editing, and envelope metadata cannot be
       injected through JSON (`schema`/`version` keys are stripped or rejected).
 
