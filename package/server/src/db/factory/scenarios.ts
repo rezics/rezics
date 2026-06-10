@@ -1904,7 +1904,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       schema: "rezics/zone-theme",
       version: 1,
       tokens: { accent: "#155e75", accentText: "#ffffff" },
-      layout: { contentWidth: "wide", density: "comfortable" },
+      layout: { contentMaxWidth: 1440, density: "comfortable" },
     },
   };
 }

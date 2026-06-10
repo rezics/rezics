@@ -57,7 +57,7 @@ const theme: ZoneTheme = {
     backgroundUrl: "https://cdn.example.test/background.png",
   },
   layout: {
-    contentWidth: "wide",
+    contentMaxWidth: 1440,
     density: "comfortable",
   },
 };

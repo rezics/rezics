@@ -16,7 +16,14 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronDown, Menu as MenuIcon, Search } from "lucide-react";
-import { type FormEvent, Fragment, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type FormEvent,
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Link, AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import {
@@ -25,6 +32,7 @@ import {
   resolveZoneMenuNodes,
   type ZoneRefUnitMap,
 } from "../models/zoneMenu";
+import { ZONE_CONTENT_MAX_WIDTH_DEFAULT } from "../models/zoneTheme";
 import { useZoneLabelResolver } from "./sections/shared";
 
 type ZoneHeaderProps = {
@@ -83,6 +91,9 @@ export function ZoneHeader({ zone, refUnits }: ZoneHeaderProps) {
         defaultValue: t("zone:search_placeholder"),
       })
     : t("zone:search_placeholder");
+  const contentStyle = {
+    maxWidth: `var(--zone-content-max-width, ${ZONE_CONTENT_MAX_WIDTH_DEFAULT}px)`,
+  } satisfies CSSProperties;
 
   const nodeLabel = (node: ResolvedZoneMenuNode) =>
     resolveLabel(node.label, node.labelKey);
@@ -109,7 +120,10 @@ export function ZoneHeader({ zone, refUnits }: ZoneHeaderProps) {
             : "bg-transparent",
         )}
       >
-        <div className="flex h-12 items-center gap-2 px-4 md:gap-3 md:px-6">
+        <div
+          className="mx-auto flex h-12 items-center gap-2 px-4 md:gap-3 md:px-6"
+          style={contentStyle}
+        >
           <SafeLink
             href={`/z/${zone.slug}`}
             className="flex min-w-0 shrink-0 items-center gap-2"

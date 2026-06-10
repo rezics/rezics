@@ -154,8 +154,6 @@
   "manage_image_header_logo": "헤더 로고 이미지 URL",
   "manage_theme_layout": "레이아웃",
   "manage_content_width": "콘텐츠 너비",
-  "manage_width_normal": "보통",
-  "manage_width_wide": "넓게",
   "manage_density": "밀도",
   "manage_density_compact": "컴팩트",
   "manage_density_comfortable": "여유 있게",

@@ -224,30 +224,18 @@ export function ZoneManageThemeTab({
           </ManageGroupHeading>
           <div className="grid gap-4 md:grid-cols-2">
             <ManageField label={t("zone:manage_content_width")}>
-              <Select
-                value={layout.contentWidth ?? NONE}
-                onValueChange={(value) =>
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder="1440"
+                value={layout.contentMaxWidth ?? ""}
+                onChange={(event) => {
+                  const value = event.target.value;
                   setLayout({
-                    contentWidth:
-                      value === NONE
-                        ? undefined
-                        : (value as ThemeLayout["contentWidth"]),
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NONE}>{t("common:none")}</SelectItem>
-                  <SelectItem value="normal">
-                    {t("zone:manage_width_normal")}
-                  </SelectItem>
-                  <SelectItem value="wide">
-                    {t("zone:manage_width_wide")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                    contentMaxWidth: value === "" ? undefined : Number(value),
+                  });
+                }}
+              />
             </ManageField>
             <ManageField label={t("zone:manage_density")}>
               <Select

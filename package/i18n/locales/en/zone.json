@@ -154,8 +154,6 @@
   "manage_image_header_logo": "Header logo image URL",
   "manage_theme_layout": "Layout",
   "manage_content_width": "Content width",
-  "manage_width_normal": "Normal",
-  "manage_width_wide": "Wide",
   "manage_density": "Density",
   "manage_density_compact": "Compact",
   "manage_density_comfortable": "Comfortable",

@@ -168,7 +168,7 @@ function fixtureTheme(): ZoneTheme {
       accentText: "#ffffff",
     },
     layout: {
-      contentWidth: faker.helpers.arrayElement(["normal", "wide"]),
+      contentMaxWidth: faker.helpers.arrayElement([1152, 1280, 1440]),
       density: faker.helpers.arrayElement(["compact", "comfortable"]),
     },
   };

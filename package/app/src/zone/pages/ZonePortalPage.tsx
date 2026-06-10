@@ -9,7 +9,10 @@ import { ZoneSectionList } from "../components/sections/ZoneSectionList";
 import { ZoneHeader } from "../components/ZoneHeader";
 import { useZonePortal } from "../hooks/useZone";
 import { canManageZone } from "../models/canManageZone";
-import { zoneContentWidthClass, zoneThemeCssVars } from "../models/zoneTheme";
+import {
+  ZONE_CONTENT_MAX_WIDTH_DEFAULT,
+  zoneThemeCssVars,
+} from "../models/zoneTheme";
 
 type ZonePortalPageProps = {
   slug: string;
@@ -61,7 +64,9 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
   }
 
   const themeVars = zoneThemeCssVars(zone.theme) as CSSProperties;
-  const widthClass = zoneContentWidthClass(zone.theme);
+  const contentStyle = {
+    maxWidth: `var(--zone-content-max-width, ${ZONE_CONTENT_MAX_WIDTH_DEFAULT}px)`,
+  } satisfies CSSProperties;
 
   return (
     <div
@@ -75,7 +80,7 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
       className="min-h-full"
     >
       <ZoneHeader zone={zone} refUnits={refUnits} />
-      <div className={`mx-auto w-full ${widthClass} px-4 py-8`}>
+      <div className="mx-auto w-full px-4 py-8" style={contentStyle}>
         {showManage ? (
           <div className="mb-6 flex justify-end">
             <SafeLink

@@ -143,7 +143,7 @@ function officialConfig(input: {
       schema: "rezics/zone-theme",
       version: 1,
       tokens: { accent: input.accent, accentText: "#ffffff" },
-      layout: { contentWidth: "wide", density: input.density },
+      layout: { contentMaxWidth: 1440, density: input.density },
     },
   };
 }

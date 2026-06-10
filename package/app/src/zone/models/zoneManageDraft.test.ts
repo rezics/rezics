@@ -82,7 +82,7 @@ function sampleTheme(): ZoneTheme {
     schema: "rezics/zone-theme",
     version: 1,
     tokens: { accent: "oklch(0.7 0.1 20)" },
-    layout: { contentWidth: "wide" },
+    layout: { contentMaxWidth: 1440 },
   };
 }
 

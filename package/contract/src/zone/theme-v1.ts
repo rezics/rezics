@@ -37,9 +37,9 @@ export const zoneThemeV1Schema = t.Object(
     layout: t.Optional(
       t.Object(
         {
-          contentWidth: t.Optional(
-            t.Union([t.Literal("normal"), t.Literal("wide")]),
-          ),
+          // Deliberately unclamped: bad values only affect that zone's
+          // presentation, while author-controlled widths remain unrestricted.
+          contentMaxWidth: t.Optional(t.Number()),
           density: t.Optional(
             t.Union([t.Literal("compact"), t.Literal("comfortable")]),
           ),
