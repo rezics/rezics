@@ -27,8 +27,8 @@ import {
   updateZoneTranslationRow,
   validateZoneManageDraft,
   zoneManageDraftToBoundary,
-  zoneManageDraftToHomePage,
   zoneManageDraftToNav,
+  zoneManageDraftToPage,
   zoneManageDraftToTheme,
   zoneMenuNodeAtPath,
   zoneQueryUnsupportedFields,
@@ -136,7 +136,7 @@ describe("zoneManageDraft split round-trip", () => {
     expect(zoneManageDraftToBoundary(draft)).toEqual(sampleBoundary());
     expect(zoneManageDraftToNav(draft)).toEqual(sampleNav());
     expect(zoneManageDraftToTheme(draft)).toEqual(sampleTheme());
-    expect(zoneManageDraftToHomePage(draft)).toEqual(samplePage());
+    expect(zoneManageDraftToPage(draft, "home")).toEqual(samplePage());
   });
 
   it("draft edits do not leak into the source envelopes", () => {
@@ -425,12 +425,14 @@ describe("translation rows", () => {
 });
 
 describe("page helpers", () => {
-  it("adds optional pages, never removes home", () => {
+  it("adds and removes open page draft entries", () => {
     const draft = sampleDraft();
-    const withFeed = addZonePage(draft.pages, "feed");
-    expect(withFeed.feed).toEqual({ sections: [] });
-    expect(removeZonePage(withFeed, "home").home).toBeDefined();
-    expect(removeZonePage(withFeed, "feed").feed).toBeUndefined();
+    const withCharacters = addZonePage(draft.pages, "page-characters");
+    expect(withCharacters["page-characters"]).toEqual({ sections: [] });
+    expect(removeZonePage(withCharacters, "home").home).toBeUndefined();
+    expect(
+      removeZonePage(withCharacters, "page-characters")["page-characters"],
+    ).toBeUndefined();
   });
 
   it("moveListItem reorders within bounds", () => {

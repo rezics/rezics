@@ -1,8 +1,8 @@
 ---
 title: Zone Shell/Page Split — Shell Columns, ZonePage Rows, and Open Slug Pages
-status: active
+status: done
 created: 2026-06-10
-completed:
+completed: 2026-06-10
 supersededBy:
 tags: [zone, contract, server, db, api, app, factory, meili]
 ---
@@ -132,11 +132,11 @@ depends on the shared envelope module from `json-evolution-policy.md`.
 
 ## 4. App (`package/app/src/zone`)
 
-- [ ] 4.1 Split `models/zoneManageDraft.ts` into three shell drafts
+- [x] 4.1 Split `models/zoneManageDraft.ts` into three shell drafts
       (`boundary`, `nav`, `theme`) plus a page draft containing one page's
       sections. Move menu and section tree operations to their new homes. Add a
       `pageSlug` segment to `zoneDetailRoutes` and `officialZoneRoutes`.
-- [ ] 4.2 Recompose `ZoneManagePage`: boundary tab (including old filters),
+- [x] 4.2 Recompose `ZoneManagePage`: boundary tab (including old filters),
       menus tab, and theme tab save by column; sections tab becomes page
       management with page list CRUD, slug editing, ordering, selected-page
       section editing.
@@ -152,7 +152,7 @@ depends on the shared envelope module from `json-evolution-policy.md`.
       scenario to emit three shell envelopes plus multiple page rows
       (`home` and custom pages such as `characters`), covering
       `displayUnitId`, avatar-wall display, and URL images.
-- [ ] 5.2 Verify `task seed:factory:fast`, `task test`, and
+- [x] 5.2 Verify `task seed:factory:fast`, `task test`, and
       `task check:convention`; run `task knip` to remove exports left behind by
       the split.
 
@@ -165,3 +165,17 @@ depends on the shared envelope module from `json-evolution-policy.md`.
 - Zone discovery/listing and permission model changes.
 - Compatibility with old `rezics/zone-config` data; development-stage reseed is
   required.
+
+## Closeout notes
+
+- `task check:convention` passes after the shell/page split and migration patch.
+- `task format:check` passes.
+- `task db:reset -- --yes` passes locally and reapplies all schema-owner
+  migrations.
+- `task seed:factory:fast` passes after the clean reset.
+- Focused zone contract, API, app model, server mapper/service, factory scenario,
+  and seed-infra tests pass.
+- `task app:build` passes; Vite still reports the existing treeshake,
+  `node:fs/promises`, and chunk-size warnings.
+- Broad `task test`, `task knip`, and app `tsc --noEmit` still report repo-wide
+  issues outside this split.

@@ -25,12 +25,7 @@ import { LANGUAGES, ZONE_MENU_MAX_DEPTH } from "@rezics/contract";
  * 校验过的内容。
  */
 export type ZonePageId = string;
-export type ZonePages = Record<
-  string,
-  { sections: ZonePageSection[] } | undefined
-> & {
-  home: { sections: ZonePageSection[] };
-};
+export type ZonePages = Record<string, { sections: ZonePageSection[] }>;
 
 export type ZoneManageDraft = Omit<ZoneBoundary, "schema" | "version"> &
   Omit<ZoneNav, "schema" | "version"> & {
@@ -48,6 +43,7 @@ export function zoneShellToDraft(input: {
   nav: ZoneNav;
   theme: ZoneTheme;
   page?: ZonePage;
+  pageId?: ZonePageId;
 }): ZoneManageDraft {
   const {
     schema: _boundarySchema,
@@ -64,9 +60,9 @@ export function zoneShellToDraft(input: {
     ...boundary,
     ...nav,
     theme,
-    pages: {
-      home: { sections: input.page?.sections ?? [] },
-    },
+    pages: input.page
+      ? { [input.pageId ?? "home"]: { sections: input.page.sections } }
+      : {},
   });
 }
 
@@ -100,11 +96,14 @@ export function zoneManageDraftToTheme(draft: ZoneManageDraft): ZoneTheme {
   };
 }
 
-export function zoneManageDraftToHomePage(draft: ZoneManageDraft): ZonePage {
+export function zoneManageDraftToPage(
+  draft: ZoneManageDraft,
+  pageId: ZonePageId,
+): ZonePage {
   return {
     schema: "rezics/zone-page",
     version: 1,
-    sections: deepClone(draft.pages.home.sections),
+    sections: deepClone(draft.pages[pageId]?.sections ?? []),
   };
 }
 
@@ -213,8 +212,6 @@ function* iterateSections(
   }
 }
 
-export const ZONE_PAGE_IDS = ["home"] as const;
-
 function pageSections(
   pages: ZonePages,
   pageId: ZonePageId,
@@ -223,14 +220,14 @@ function pageSections(
 }
 
 /**
- * Every section id across every page, containers and nested sections
- * included — the uniqueness scope the server validator enforces.
- * 跨所有页面的每个分区 id，包含容器与嵌套分区——即服务端校验器强制的
- * 唯一性范围。
+ * Every section id across the loaded page draft, containers and nested
+ * sections included. Section ids are page-local in the split ZonePage model.
+ * 已加载页面草稿中的每个分区 id，包含容器与嵌套分区。拆分后的
+ * ZonePage 模型中，分区 id 的唯一性是页面局部的。
  */
 export function collectZoneSectionIds(pages: ZonePages): string[] {
   const ids: string[] = [];
-  for (const pageId of ZONE_PAGE_IDS) {
+  for (const pageId of Object.keys(pages)) {
     for (const section of iterateSections(pageSections(pages, pageId))) {
       ids.push(section.id);
     }
@@ -587,7 +584,7 @@ export function validateZoneManageDraft(
   const issues: ZoneManageIssue[] = [];
 
   const sectionIds = new Set<string>();
-  for (const pageId of ZONE_PAGE_IDS) {
+  for (const pageId of Object.keys(draft.pages)) {
     for (const section of iterateSections(pageSections(draft.pages, pageId))) {
       if (sectionIds.has(section.id)) {
         issues.push({ code: "section_id_duplicate", id: section.id });
@@ -745,16 +742,15 @@ export function addZonePage(pages: ZonePages, pageId: ZonePageId): ZonePages {
   return { ...pages, [pageId]: { sections: [] } };
 }
 
-/**
- * `home` is required by the contract and cannot be removed.
- * 契约要求 `home` 必填，不可移除。
- */
 export function removeZonePage(
   pages: ZonePages,
   pageId: ZonePageId,
 ): ZonePages {
-  if (pageId === "home") return pages;
   const next = { ...pages };
   delete next[pageId];
   return next;
+}
+
+export function zonePageToDraftPage(page: ZonePage): ZonePages[string] {
+  return deepClone({ sections: page.sections });
 }
