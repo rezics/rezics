@@ -135,6 +135,11 @@ tasks:
     desc: Initialize Meilisearch indexes
     cmd: bun run tool/bin/tool.ts seed init-meili-search
 
+  # ── Browser inspection workbench ───────────────────────────────────────
+  browser:inspect:
+    desc: "Run a headed browser inspect scratch script from tool/browser-inspect/work"
+    cmd: bun run tool/browser-inspect/run-work.ts {{.CLI_ARGS}}
+
   # ── Local service stack (Docker Compose via tool/ CLI) ─────────────────
   service:
     desc: "Service stack passthrough: task service -- up|down|health|ps|logs|..."
