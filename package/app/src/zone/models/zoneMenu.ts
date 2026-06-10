@@ -59,7 +59,7 @@ export function zonePageHref(
   if (!page) return null;
   return page.slug === "home"
     ? `/z/${zoneSlug}`
-    : `/z/${zoneSlug}/pages/${page.slug}`;
+    : `/z/${zoneSlug}/page/${page.slug}`;
 }
 
 export function zoneLinkHref(

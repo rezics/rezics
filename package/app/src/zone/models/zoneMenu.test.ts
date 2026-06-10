@@ -70,14 +70,14 @@ describe("zoneLinkHref", () => {
   it("builds zone page hrefs from page summaries", () => {
     expect(zonePageHref("home", "toaru-wiki", pages)).toBe("/z/toaru-wiki");
     expect(zonePageHref("search", "toaru-wiki", pages)).toBe(
-      "/z/toaru-wiki/pages/search",
+      "/z/toaru-wiki/page/search",
     );
     expect(zonePageHref("feed", "toaru-wiki", pages)).toBe(
-      "/z/toaru-wiki/pages/feed",
+      "/z/toaru-wiki/page/feed",
     );
     expect(zonePageHref("missing", "toaru-wiki", pages)).toBeNull();
     expect(zoneLinkHref({ kind: "zonePage", pageId: "search" }, ctx)).toBe(
-      "/z/toaru-wiki/pages/search",
+      "/z/toaru-wiki/page/search",
     );
   });
 
@@ -173,7 +173,7 @@ describe("resolveZoneMenuNodes", () => {
             id: "page",
             label: null,
             labelKey: "zone:page_search",
-            href: "/z/toaru-wiki/pages/search",
+            href: "/z/toaru-wiki/page/search",
             isExternal: false,
             children: [],
           },

@@ -6,6 +6,6 @@ function ZoneCustomPageRoute() {
   return <ZonePortalPage slug={slug} pageSlug={pageSlug} />;
 }
 
-export const Route = createFileRoute("/_mainLayout/z/$slug/pages/$pageSlug")({
+export const Route = createFileRoute("/_mainLayout/z/$slug/page/$pageSlug")({
   component: ZoneCustomPageRoute,
 });
