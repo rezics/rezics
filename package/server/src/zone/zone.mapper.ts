@@ -41,7 +41,15 @@ export function mapZoneToDTO(
         description: mainMarkdownSource(tr.description) ?? undefined,
       }),
     ),
-    config: zone.config,
+    boundary: zone.boundary,
+    nav: zone.nav,
+    theme: zone.theme,
+    homePageId: zone.homePageId ?? "",
+    pages: (zone.pages ?? []).map((page) => ({
+      id: page.id,
+      slug: page.slug,
+      position: page.position,
+    })),
     startsAt: zone.startsAt?.toISOString() ?? null,
     endsAt: zone.endsAt?.toISOString() ?? null,
   };

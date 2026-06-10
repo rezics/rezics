@@ -1,5 +1,18 @@
-import { index, pgTable, uuid } from "drizzle-orm/pg-core";
-import { createdAt, jsonData, nullableTimestamp, updatedAt } from "./columns";
+import {
+  index,
+  integer,
+  pgTable,
+  text,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
+import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 import { Unit } from "./unit";
 
 export const Zone = pgTable(
@@ -18,11 +31,23 @@ export const Zone = pgTable(
         onDelete: "restrict",
         onUpdate: "cascade",
       }),
-    // The whole zone configuration as one self-describing versioned
-    // envelope (`rezics/zone-config`); see `@rezics/contract` zone module.
-    // 整个专区配置作为单一自描述版本化信封（`rezics/zone-config`）；
-    // 见 `@rezics/contract` 的 zone 模块。
-    config: jsonData().notNull(),
+    // Split shell columns match manage tabs and enable column-level updates, so
+    // a nav save cannot overwrite concurrent theme/boundary edits. Each column
+    // owns an independent versioned envelope and upgrade chain.
+    boundary: jsonData().notNull(),
+    // Menus stay JSON: recursive trees are loaded whole, capped at three
+    // levels, and never queried by node. `header.menuId` remains validated in
+    // the same nav envelope as the menu tree.
+    nav: jsonData().notNull(),
+    // Decorative theme images are external HTTPS URLs, not IMAGE units. IMAGE
+    // units remain catalog works, not a zone asset library.
+    theme: jsonData().notNull(),
+    // Home is explicit page identity for rename safety and semantics; it is
+    // not a reserved slug. Service code creates it with the zone and blocks
+    // deletion. This intentionally avoids a Drizzle-level mutual FK because
+    // `ZonePage.zoneUnitId` already owns the cascade edge and immediate
+    // circular inserts are not deferrable through ordinary Drizzle generation.
+    homePageId: uuid(),
     startsAt: nullableTimestamp(),
     endsAt: nullableTimestamp(),
     createdAt: createdAt(),
@@ -32,6 +57,35 @@ export const Zone = pgTable(
     index("Zone_ownerRealmUnitId_idx").using(
       "btree",
       table.ownerRealmUnitId.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const ZonePage = pgTable(
+  "ZonePage",
+  {
+    id: uuidv7PrimaryKey(),
+    zoneUnitId: uuid()
+      .notNull()
+      .references(() => Zone.unitId, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    slug: text().notNull(),
+    // Pages own their section tree. Section ids are unique within one page, not
+    // across the whole zone, because data execution addresses
+    // `(zoneId, pageId, sectionId)`.
+    config: jsonData().notNull(),
+    position: integer().notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    unique("ZonePage_zoneUnitId_slug_unique").on(table.zoneUnitId, table.slug),
+    index("ZonePage_zoneUnitId_position_idx").using(
+      "btree",
+      table.zoneUnitId.asc().nullsLast(),
+      table.position.asc().nullsLast(),
     ),
   ],
 );

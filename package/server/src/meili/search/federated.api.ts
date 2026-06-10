@@ -37,29 +37,29 @@ export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
     ctx.allowedRatings = intersectRatings(allowed, body.query.ratings);
     ctx.viewerUserId = identity?.userId ?? null;
     if (body.scope.kind === "zone") {
-      // Zone search runs inside the zone's unremovable `config.filters`
+      // Zone search runs inside the zone's unremovable `boundary.filters`
       // boundary; the request's own query can only narrow within it.
-      // 专区搜索在专区不可移除的 `config.filters` 边界内运行；请求自身的
+      // 专区搜索在专区不可移除的 `boundary.filters` 边界内运行；请求自身的
       // 查询只能在其内部收窄。
       const { zoneService } = await import("@/zone/zone.service");
       const zone = await zoneService.getByUnitId(body.scope.zoneUnitId);
       if (zone) {
         const zoneCtx = {
           contextRealmUnitId:
-            zone.config.context.kind === "realm"
-              ? zone.config.context.realmUnitId
+            zone.boundary.context.kind === "realm"
+              ? zone.boundary.context.realmUnitId
               : null,
           viewerLanguageCandidates: body.query.languages ?? [],
         };
         const sort = { field: "createdAt" } as const;
         ctx.zoneBoundaryContentFilter = compileZoneSectionQuery(
           { target: "unit", sort },
-          zone.config.filters,
+          zone.boundary.filters,
           zoneCtx,
         ).filter;
         ctx.zoneBoundaryPostFilter = compileZoneSectionQuery(
           { target: "post", sort },
-          zone.config.filters,
+          zone.boundary.filters,
           zoneCtx,
         ).filter;
       }

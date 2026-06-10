@@ -99,7 +99,7 @@ describe("zone section nesting rules", () => {
         id: "s-hero",
         kind: "hero",
         showDescription: true,
-        bannerImageUnitId: "image-1",
+        bannerImageUrl: "https://cdn.example/banner.png",
         ctas: [
           { target: { kind: "zonePage", pageId: "feed" } },
           {

@@ -4,9 +4,10 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LANGUAGES,
   markdownContentDoc,
-  ZONE_CONFIG_SCHEMA,
-  ZONE_CONFIG_V1_VERSION,
-  type ZoneConfigV1,
+  type ZoneBoundary,
+  type ZoneNav,
+  type ZonePage as ZonePageConfig,
+  type ZoneTheme,
 } from "@rezics/contract";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { generateBetween } from "../../shelf/fractional-index";
@@ -31,6 +32,7 @@ import {
   UnitTranslation,
   User,
   Zone,
+  ZonePage,
 } from "../schema";
 import { seedChaptersForBook } from "./books.js";
 import { addSpecialSeedTarget, createSeedResult } from "./result.js";
@@ -1474,283 +1476,368 @@ export interface ToaruZoneConfigIds {
   fragments: Record<ToaruFragmentKey, string>;
 }
 
+export type ToaruZoneConfig = {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  pages: Array<{
+    id: string;
+    slug: string;
+    position: number;
+    config: ZonePageConfig;
+  }>;
+  homePageId: string;
+};
+
 /**
- * Pure builder for the /z/toaru zone config, exercising every config
- * primitive: hero with CTAs, columns, richText fragments, collections,
- * tabs with per-target queries, feed, stats, label-driven menus, header,
- * boundary filters, and theme tokens. The factory writes this straight to
- * the `Zone.config` column (bypassing service validation) while the read
- * path throws on invalid envelopes, so the output must always satisfy
- * `zoneConfigV1Schema` and the structural invariants (unique section ids,
- * menu depth ≤ 3, header menu reference); tests assert both.
- * /z/toaru 专区配置的纯构造器，演练所有配置原语：带 CTA 的 hero、
+ * Pure builder for the /z/toaru zone split envelopes, exercising every zone
+ * primitive: hero with CTAs, columns, richText fragments, collections, tabs
+ * with per-target queries, feed, stats, label-driven menus, header, boundary
+ * filters, and theme tokens. The factory writes this straight to Zone and
+ * ZonePage rows (bypassing service validation) while the read path throws on
+ * invalid envelopes, so the output must always satisfy the contract schemas
+ * and structural invariants (page-local section ids, menu depth ≤ 3, header
+ * menu reference); tests assert both.
+ * /z/toaru 专区拆分信封的纯构造器，演练所有专区原语：带 CTA 的 hero、
  * columns、richText 片段、collection、按目标查询的 tabs、feed、stats、
- * 标签驱动的菜单、header、边界过滤与主题 token。工厂将其直接写入
- * `Zone.config` 列（绕过 service 校验），而读取路径会对非法信封抛错，
- * 因此输出必须始终满足 `zoneConfigV1Schema` 与结构不变量（分区 id 唯一、
- * 菜单深度 ≤ 3、header 菜单引用）；测试对两者均有断言。
+ * 标签驱动的菜单、header、边界过滤与主题 token。工厂将其直接写入 Zone 与
+ * ZonePage 行（绕过 service 校验），而读取路径会对非法信封抛错，因此输出
+ * 必须始终满足契约 schema 与结构不变量（页面内分区 id 唯一、菜单深度 ≤ 3、
+ * header 菜单引用）；测试对两者均有断言。
  */
-export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ZoneConfigV1 {
+export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
   const { labels, entities, fragments } = ids;
   const unitTarget = (unitId: string) => ({ kind: "unit", unitId }) as const;
+  const pageIds = {
+    home: "00000000-0000-7000-8000-000000001001",
+    search: "00000000-0000-7000-8000-000000001002",
+    feed: "00000000-0000-7000-8000-000000001003",
+    characters: "00000000-0000-7000-8000-000000001004",
+  };
   return {
-    schema: ZONE_CONFIG_SCHEMA,
-    version: ZONE_CONFIG_V1_VERSION,
-    context: { kind: "realm", realmUnitId: ids.realmUnitId },
-    // The boundary pins every query, search, and feed to the wiki realm.
-    // 边界将所有查询、搜索与 feed 固定在 wiki realm 内。
-    filters: { realm: "context" },
-    menus: [
+    boundary: {
+      schema: "rezics/zone-boundary",
+      version: 1,
+      context: { kind: "realm", realmUnitId: ids.realmUnitId },
+      // The boundary pins every query, search, and feed to the wiki realm.
+      filters: { realm: "context" },
+    },
+    nav: {
+      schema: "rezics/zone-nav",
+      version: 1,
+      menus: [
+        {
+          id: "main",
+          nodes: [
+            {
+              id: "nav-home",
+              target: { kind: "zonePage", pageId: pageIds.home },
+            },
+            {
+              id: "nav-characters",
+              labelUnitId: labels.characters,
+              target: { kind: "zonePage", pageId: pageIds.characters },
+              children: [
+                { id: "nav-kamijou", target: unitTarget(entities.kamijou) },
+                { id: "nav-misaka", target: unitTarget(entities.misaka) },
+                {
+                  id: "nav-accelerator",
+                  target: unitTarget(entities.accelerator),
+                },
+                { id: "nav-index", target: unitTarget(entities.index) },
+                { id: "nav-aleister", target: unitTarget(entities.aleister) },
+              ],
+            },
+            {
+              id: "nav-terms",
+              labelUnitId: labels.terms,
+              target: { kind: "zonePage", pageId: pageIds.search },
+            },
+            {
+              id: "nav-factions",
+              labelUnitId: labels.factions,
+              children: [
+                {
+                  id: "nav-anglican",
+                  target: unitTarget(entities.anglicanChurch),
+                },
+                { id: "nav-dark-side", target: unitTarget(entities.darkSide) },
+              ],
+            },
+            {
+              id: "nav-locations",
+              labelUnitId: labels.locations,
+              children: [
+                {
+                  id: "nav-academy-city",
+                  target: unitTarget(entities.academyCity),
+                },
+                { id: "nav-tokiwadai", target: unitTarget(entities.tokiwadai) },
+              ],
+            },
+            {
+              id: "nav-events",
+              labelUnitId: labels.events,
+              children: [
+                { id: "nav-daihasei", target: unitTarget(entities.daihasei) },
+              ],
+            },
+            {
+              id: "nav-timeline",
+              labelUnitId: labels.timeline,
+              target: { kind: "zonePage", pageId: pageIds.feed },
+            },
+            {
+              id: "nav-magic",
+              labelUnitId: labels.magicSide,
+              children: [
+                { id: "nav-magic-index", target: unitTarget(entities.index) },
+                {
+                  id: "nav-magic-anglican",
+                  target: unitTarget(entities.anglicanChurch),
+                },
+              ],
+            },
+            {
+              id: "nav-science",
+              labelUnitId: labels.scienceSide,
+              children: [
+                {
+                  id: "nav-science-misaka",
+                  target: unitTarget(entities.misaka),
+                },
+                {
+                  id: "nav-science-accelerator",
+                  target: unitTarget(entities.accelerator),
+                },
+                {
+                  id: "nav-science-academy-city",
+                  target: unitTarget(entities.academyCity),
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      header: { menuId: "main" },
+    },
+    pages: [
       {
-        id: "main",
-        nodes: [
-          {
-            id: "nav-characters",
-            labelUnitId: labels.characters,
-            children: [
-              { id: "nav-kamijou", target: unitTarget(entities.kamijou) },
-              { id: "nav-misaka", target: unitTarget(entities.misaka) },
-              {
-                id: "nav-accelerator",
-                target: unitTarget(entities.accelerator),
-              },
-              { id: "nav-index", target: unitTarget(entities.index) },
-              { id: "nav-aleister", target: unitTarget(entities.aleister) },
-            ],
-          },
-          {
-            id: "nav-terms",
-            labelUnitId: labels.terms,
-            target: { kind: "zonePage", pageId: "search" },
-          },
-          {
-            id: "nav-factions",
-            labelUnitId: labels.factions,
-            children: [
-              {
-                id: "nav-anglican",
-                target: unitTarget(entities.anglicanChurch),
-              },
-              { id: "nav-dark-side", target: unitTarget(entities.darkSide) },
-            ],
-          },
-          {
-            id: "nav-locations",
-            labelUnitId: labels.locations,
-            children: [
-              {
-                id: "nav-academy-city",
-                target: unitTarget(entities.academyCity),
-              },
-              { id: "nav-tokiwadai", target: unitTarget(entities.tokiwadai) },
-            ],
-          },
-          {
-            id: "nav-events",
-            labelUnitId: labels.events,
-            children: [
-              { id: "nav-daihasei", target: unitTarget(entities.daihasei) },
-            ],
-          },
-          {
-            id: "nav-timeline",
-            labelUnitId: labels.timeline,
-            target: { kind: "zonePage", pageId: "feed" },
-          },
-          {
-            id: "nav-magic",
-            labelUnitId: labels.magicSide,
-            children: [
-              { id: "nav-magic-index", target: unitTarget(entities.index) },
-              {
-                id: "nav-magic-anglican",
-                target: unitTarget(entities.anglicanChurch),
-              },
-            ],
-          },
-          {
-            id: "nav-science",
-            labelUnitId: labels.scienceSide,
-            children: [
-              { id: "nav-science-misaka", target: unitTarget(entities.misaka) },
-              {
-                id: "nav-science-accelerator",
-                target: unitTarget(entities.accelerator),
-              },
-              {
-                id: "nav-science-academy-city",
-                target: unitTarget(entities.academyCity),
-              },
-            ],
-          },
-        ],
+        id: pageIds.home,
+        slug: "home",
+        position: 0,
+        config: {
+          schema: "rezics/zone-page",
+          version: 1,
+          sections: [
+            {
+              id: "hero",
+              kind: "hero",
+              showDescription: true,
+              ctas: [
+                // `external.text` is the single sanctioned inline-text
+                // exception in zone configs.
+                // `external.text` 是专区配置中唯一被允许的内联文本例外。
+                {
+                  target: {
+                    kind: "external",
+                    url: "/r/toaru/create?mode=wiki",
+                    text: "建立條目",
+                  },
+                },
+                {
+                  target: {
+                    kind: "external",
+                    url: "/r/toaru",
+                    text: "r/toaru",
+                  },
+                },
+              ],
+            },
+            {
+              id: "layout",
+              kind: "columns",
+              sidePosition: "right",
+              main: [
+                {
+                  id: "welcome",
+                  kind: "richText",
+                  contentUnitId: fragments.welcome,
+                },
+                {
+                  id: "spoiler-notice",
+                  kind: "richText",
+                  contentUnitId: fragments.spoilerNotice,
+                },
+                {
+                  id: "featured-characters",
+                  kind: "collection",
+                  display: "tiles",
+                  titleLabelUnitId: labels.characters,
+                  items: [
+                    entities.kamijou,
+                    entities.misaka,
+                    entities.accelerator,
+                    entities.index,
+                    entities.aleister,
+                  ].map((unitId) => ({ target: unitTarget(unitId) })),
+                },
+                {
+                  id: "activity",
+                  kind: "tabs",
+                  defaultTabId: "latest-edits",
+                  tabs: [
+                    {
+                      id: "latest-edits",
+                      titleLabelUnitId: labels.latestEdits,
+                      sections: [
+                        {
+                          id: "latest-edits-feed",
+                          kind: "feed",
+                          feedKind: "updates",
+                          limit: 12,
+                        },
+                      ],
+                    },
+                    {
+                      id: "hot-discussions",
+                      titleLabelUnitId: labels.hotDiscussions,
+                      sections: [
+                        {
+                          id: "hot-discussions-query",
+                          kind: "query",
+                          display: "list",
+                          limit: 12,
+                          loadMore: true,
+                          query: {
+                            target: "post",
+                            realm: "context",
+                            sort: { field: "hotScore", direction: "desc" },
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      id: "new-releases",
+                      titleLabelUnitId: labels.newReleases,
+                      sections: [
+                        {
+                          id: "new-releases-query",
+                          kind: "query",
+                          display: "covers",
+                          limit: 8,
+                          query: {
+                            target: "unit",
+                            types: ["BOOK"],
+                            realm: "context",
+                            sort: { field: "publishedAt", direction: "desc" },
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  id: "wiki-stats",
+                  kind: "stats",
+                  metrics: ["articles", "members"],
+                },
+              ],
+              side: [
+                {
+                  id: "quick-links",
+                  kind: "collection",
+                  display: "list",
+                  items: [
+                    {
+                      target: unitTarget(entities.daihasei),
+                      labelUnitId: labels.events,
+                    },
+                    {
+                      target: unitTarget(entities.academyCity),
+                      labelUnitId: labels.locations,
+                    },
+                    {
+                      target: { kind: "zonePage", pageId: pageIds.search },
+                      labelUnitId: labels.terms,
+                    },
+                    {
+                      target: {
+                        kind: "external",
+                        url: "https://toaru.fandom.com/",
+                        text: "Toaru Wiki (Fandom)",
+                      },
+                    },
+                  ],
+                },
+                {
+                  id: "book-covers",
+                  kind: "collection",
+                  display: "covers",
+                  titleLabelUnitId: labels.newReleases,
+                  items: ids.bookUnitIds.map((unitId) => ({
+                    target: unitTarget(unitId),
+                  })),
+                },
+                { id: "news", kind: "richText", contentUnitId: fragments.news },
+                {
+                  id: "did-you-know",
+                  kind: "richText",
+                  contentUnitId: fragments.didYouKnow,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: pageIds.characters,
+        slug: "characters",
+        position: 1,
+        config: {
+          schema: "rezics/zone-page",
+          version: 1,
+          sections: [
+            {
+              id: "characters",
+              kind: "collection",
+              display: "avatar-wall",
+              titleLabelUnitId: labels.characters,
+              items: [
+                entities.kamijou,
+                entities.misaka,
+                entities.accelerator,
+                entities.index,
+                entities.aleister,
+              ].map((unitId) => ({
+                target: unitTarget(unitId),
+                displayUnitId: unitId,
+              })),
+            },
+          ],
+        },
+      },
+      {
+        id: pageIds.search,
+        slug: "search",
+        position: 2,
+        config: { schema: "rezics/zone-page", version: 1, sections: [] },
+      },
+      {
+        id: pageIds.feed,
+        slug: "feed",
+        position: 3,
+        config: {
+          schema: "rezics/zone-page",
+          version: 1,
+          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
+        },
       },
     ],
-    header: { menuId: "main" },
-    pages: {
-      home: {
-        sections: [
-          {
-            id: "hero",
-            kind: "hero",
-            showDescription: true,
-            ctas: [
-              // `external.text` is the single sanctioned inline-text
-              // exception in zone configs.
-              // `external.text` 是专区配置中唯一被允许的内联文本例外。
-              {
-                target: {
-                  kind: "external",
-                  url: "/r/toaru/create?mode=wiki",
-                  text: "建立條目",
-                },
-              },
-              {
-                target: { kind: "external", url: "/r/toaru", text: "r/toaru" },
-              },
-            ],
-          },
-          {
-            id: "layout",
-            kind: "columns",
-            sidePosition: "right",
-            main: [
-              {
-                id: "welcome",
-                kind: "richText",
-                contentUnitId: fragments.welcome,
-              },
-              {
-                id: "spoiler-notice",
-                kind: "richText",
-                contentUnitId: fragments.spoilerNotice,
-              },
-              {
-                id: "featured-characters",
-                kind: "collection",
-                display: "tiles",
-                titleLabelUnitId: labels.characters,
-                items: [
-                  entities.kamijou,
-                  entities.misaka,
-                  entities.accelerator,
-                  entities.index,
-                  entities.aleister,
-                ].map((unitId) => ({ target: unitTarget(unitId) })),
-              },
-              {
-                id: "activity",
-                kind: "tabs",
-                defaultTabId: "latest-edits",
-                tabs: [
-                  {
-                    id: "latest-edits",
-                    titleLabelUnitId: labels.latestEdits,
-                    sections: [
-                      {
-                        id: "latest-edits-feed",
-                        kind: "feed",
-                        feedKind: "updates",
-                        limit: 12,
-                      },
-                    ],
-                  },
-                  {
-                    id: "hot-discussions",
-                    titleLabelUnitId: labels.hotDiscussions,
-                    sections: [
-                      {
-                        id: "hot-discussions-query",
-                        kind: "query",
-                        display: "list",
-                        limit: 12,
-                        loadMore: true,
-                        query: {
-                          target: "post",
-                          realm: "context",
-                          sort: { field: "hotScore", direction: "desc" },
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    id: "new-releases",
-                    titleLabelUnitId: labels.newReleases,
-                    sections: [
-                      {
-                        id: "new-releases-query",
-                        kind: "query",
-                        display: "covers",
-                        limit: 8,
-                        query: {
-                          target: "unit",
-                          types: ["BOOK"],
-                          realm: "context",
-                          sort: { field: "publishedAt", direction: "desc" },
-                        },
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                id: "wiki-stats",
-                kind: "stats",
-                metrics: ["articles", "members"],
-              },
-            ],
-            side: [
-              {
-                id: "quick-links",
-                kind: "collection",
-                display: "list",
-                items: [
-                  {
-                    target: unitTarget(entities.daihasei),
-                    labelUnitId: labels.events,
-                  },
-                  {
-                    target: unitTarget(entities.academyCity),
-                    labelUnitId: labels.locations,
-                  },
-                  {
-                    target: { kind: "zonePage", pageId: "search" },
-                    labelUnitId: labels.terms,
-                  },
-                  {
-                    target: {
-                      kind: "external",
-                      url: "https://toaru.fandom.com/",
-                      text: "Toaru Wiki (Fandom)",
-                    },
-                  },
-                ],
-              },
-              {
-                id: "book-covers",
-                kind: "collection",
-                display: "covers",
-                titleLabelUnitId: labels.newReleases,
-                items: ids.bookUnitIds.map((unitId) => ({
-                  target: unitTarget(unitId),
-                })),
-              },
-              { id: "news", kind: "richText", contentUnitId: fragments.news },
-              {
-                id: "did-you-know",
-                kind: "richText",
-                contentUnitId: fragments.didYouKnow,
-              },
-            ],
-          },
-        ],
-      },
-      search: { sections: [] },
-      feed: {
-        sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
-      },
-    },
+    homePageId: pageIds.home,
     theme: {
+      schema: "rezics/zone-theme",
+      version: 1,
       tokens: { accent: "#155e75", accentText: "#ffffff" },
       layout: { contentWidth: "wide", density: "comfortable" },
     },
@@ -1982,18 +2069,33 @@ async function runToaruWiki(ctx: SeedCtx): Promise<SeedResult> {
       },
     ),
   );
+  const toaruZoneConfig = buildToaruZoneConfig({
+    realmUnitId,
+    labels: labelIds,
+    entities: entityIds,
+    bookUnitIds,
+    fragments: fragmentIds,
+  });
   await ctx.db.insert(Zone).values(
     withUpdatedAt({
       unitId: zoneUnitId,
       ownerRealmUnitId: realmUnitId,
-      config: buildToaruZoneConfig({
-        realmUnitId,
-        labels: labelIds,
-        entities: entityIds,
-        bookUnitIds,
-        fragments: fragmentIds,
-      }),
+      boundary: toaruZoneConfig.boundary,
+      nav: toaruZoneConfig.nav,
+      theme: toaruZoneConfig.theme,
+      homePageId: toaruZoneConfig.homePageId,
     }),
+  );
+  await ctx.db.insert(ZonePage).values(
+    withUpdatedAtRows(
+      toaruZoneConfig.pages.map((page) => ({
+        id: page.id,
+        zoneUnitId: zoneUnitId,
+        slug: page.slug,
+        position: page.position,
+        config: page.config,
+      })),
+    ),
   );
 
   await Promise.all([

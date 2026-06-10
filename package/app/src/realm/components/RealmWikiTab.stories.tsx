@@ -22,15 +22,30 @@ const wikiZonePortal: ZonePortalResponse = {
     slug: "fixture-wiki-zone",
     name: "Fixture Wiki Zone",
     translations: [{ language: "en", title: "Fixture Wiki Zone" }],
-    config: {
-      schema: "rezics/zone-config",
+    boundary: {
+      schema: "rezics/zone-boundary",
       version: 1,
       context: { kind: "realm", realmUnitId: REALM_ID },
       filters: { realm: "context" },
+    },
+    nav: {
+      schema: "rezics/zone-nav",
+      version: 1,
       menus: [{ id: "main", nodes: [] }],
       header: { menuId: "main" },
-      pages: { home: { sections: [] } },
-      theme: {},
+    },
+    theme: { schema: "rezics/zone-theme", version: 1 },
+    homePageId: "wiki-home-page",
+    pages: [{ id: "wiki-home-page", slug: "home", position: 0 }],
+  },
+  page: {
+    id: "wiki-home-page",
+    slug: "home",
+    position: 0,
+    config: {
+      schema: "rezics/zone-page",
+      version: 1,
+      sections: [],
     },
   },
   refUnits: {},
@@ -64,7 +79,10 @@ function Seeded({
       total: posts.length,
     });
     if (portal) {
-      qc.setQueryData(zoneKeys.portal(portal.zone.unitId), portal);
+      qc.setQueryData(
+        zoneKeys.portal(portal.zone.unitId, portal.page.slug),
+        portal,
+      );
     }
   }, [posts, qc, portal]);
 

@@ -14,8 +14,8 @@ import { useZoneLabelResolver, type ZonePortalContext } from "./shared";
 
 /**
  * Hero owns no text: it renders the zone unit's own translations
- * (`zone.name`/`zone.description`). Image units may carry no resolved URL
- * yet; missing banner/logo render nothing rather than placeholders.
+ * (`zone.name`/`zone.description`). Decorative images are HTTPS URLs; missing
+ * banner/logo render nothing rather than placeholders.
  * hero 不拥有文本：它渲染专区 Unit 自身的译文（`zone.name`/
  * `zone.description`）。图片 Unit 可能尚无已解析的 URL；缺失的横幅/
  * 标识直接不渲染而非占位。
@@ -29,20 +29,12 @@ export function HeroSection({
 }) {
   const { t } = useTranslation(["zone"]);
   const { zone, refUnits } = ctx;
-  const images = zone.config.theme.images;
-  const bannerUrl =
-    (section.bannerImageUnitId
-      ? refUnits[section.bannerImageUnitId]?.imageUrl
-      : null) ??
-    (images?.bannerUnitId ? refUnits[images.bannerUnitId]?.imageUrl : null);
-  const logoUrl =
-    (section.logoImageUnitId
-      ? refUnits[section.logoImageUnitId]?.imageUrl
-      : null) ??
-    (images?.logoUnitId ? refUnits[images.logoUnitId]?.imageUrl : null);
+  const images = zone.theme.images;
+  const bannerUrl = section.bannerImageUrl ?? images?.bannerUrl ?? null;
+  const logoUrl = section.logoImageUrl ?? images?.logoUrl ?? null;
 
   const resolveLabel = useZoneLabelResolver();
-  const linkCtx = { zoneSlug: zone.slug, refUnits };
+  const linkCtx = { zoneSlug: zone.slug, pages: zone.pages, refUnits };
   const ctas = (section.ctas ?? []).flatMap((item, index) => {
     const href = zoneLinkHref(item.target, linkCtx);
     const label = resolveLabel(
@@ -52,9 +44,9 @@ export function HeroSection({
     if (!href || !label) return [];
     return [{ key: `${section.id}:cta:${index}`, href, label }];
   });
-  const joinHref = zoneJoinHref(zone.config, refUnits);
-  const createWikiHref = zoneCreateHref(zone.config, refUnits, "wiki");
-  const createPostHref = zoneCreateHref(zone.config, refUnits, "post");
+  const joinHref = zoneJoinHref(zone.boundary, refUnits);
+  const createWikiHref = zoneCreateHref(zone.boundary, refUnits, "wiki");
+  const createPostHref = zoneCreateHref(zone.boundary, refUnits, "post");
 
   return (
     <section

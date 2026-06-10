@@ -1,6 +1,11 @@
 import type {
   CreateZoneInput,
+  CreateZonePageInput,
   UpdateZoneInput,
+  UpdateZoneBoundaryInput,
+  UpdateZoneNavInput,
+  UpdateZonePageInput,
+  UpdateZoneThemeInput,
   ZoneDTO,
 } from "@rezics/contract";
 import {
@@ -59,6 +64,113 @@ export function useUpdateZone(
   });
 }
 
+function useZoneInvalidatingMutation<TInput>(
+  mutationFn: (input: TInput) => Promise<ZoneDTO>,
+  options?: Omit<UseMutationOptions<ZoneDTO, Error, TInput>, "mutationFn">,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateZoneQueries(queryClient);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useUpdateZoneBoundary(
+  options?: Omit<
+    UseMutationOptions<
+      ZoneDTO,
+      Error,
+      { unitId: string; input: UpdateZoneBoundaryInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  return useZoneInvalidatingMutation(
+    ({ unitId, input }) => zoneApi.updateBoundary(unitId, input),
+    options,
+  );
+}
+
+export function useUpdateZoneNav(
+  options?: Omit<
+    UseMutationOptions<
+      ZoneDTO,
+      Error,
+      { unitId: string; input: UpdateZoneNavInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  return useZoneInvalidatingMutation(
+    ({ unitId, input }) => zoneApi.updateNav(unitId, input),
+    options,
+  );
+}
+
+export function useUpdateZoneTheme(
+  options?: Omit<
+    UseMutationOptions<
+      ZoneDTO,
+      Error,
+      { unitId: string; input: UpdateZoneThemeInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  return useZoneInvalidatingMutation(
+    ({ unitId, input }) => zoneApi.updateTheme(unitId, input),
+    options,
+  );
+}
+
+export function useCreateZonePage(
+  options?: Omit<
+    UseMutationOptions<
+      ZoneDTO,
+      Error,
+      { unitId: string; input: CreateZonePageInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  return useZoneInvalidatingMutation(
+    ({ unitId, input }) => zoneApi.createPage(unitId, input),
+    options,
+  );
+}
+
+export function useUpdateZonePage(
+  options?: Omit<
+    UseMutationOptions<
+      ZoneDTO,
+      Error,
+      { unitId: string; pageId: string; input: UpdateZonePageInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  return useZoneInvalidatingMutation(
+    ({ unitId, pageId, input }) => zoneApi.updatePage(unitId, pageId, input),
+    options,
+  );
+}
+
+export function useDeleteZonePage(
+  options?: Omit<
+    UseMutationOptions<ZoneDTO, Error, { unitId: string; pageId: string }>,
+    "mutationFn"
+  >,
+) {
+  return useZoneInvalidatingMutation(
+    ({ unitId, pageId }) => zoneApi.deletePage(unitId, pageId),
+    options,
+  );
+}
+
 export function useDeleteZone(
   options?: Omit<
     UseMutationOptions<{ message: string }, Error, string>,
@@ -80,5 +192,11 @@ export function useDeleteZone(
 export const zoneMutations = {
   useCreate: useCreateZone,
   useUpdate: useUpdateZone,
+  useUpdateBoundary: useUpdateZoneBoundary,
+  useUpdateNav: useUpdateZoneNav,
+  useUpdateTheme: useUpdateZoneTheme,
+  useCreatePage: useCreateZonePage,
+  useUpdatePage: useUpdateZonePage,
+  useDeletePage: useDeleteZonePage,
   useDelete: useDeleteZone,
 };

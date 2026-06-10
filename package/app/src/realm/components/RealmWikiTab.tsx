@@ -39,7 +39,9 @@ export function RealmWikiTab({
   // only the slug is needed to deep-link into the zone frame.
   // 通过门户读取（以 unitId 为键）解析配置的专区；深链进专区框架只需要
   // slug。
-  const zoneQuery = useQuery(zonePortalQueryOptions(wikiZoneUnitId ?? ""));
+  const zoneQuery = useQuery(
+    zonePortalQueryOptions(wikiZoneUnitId ?? "", "home", readContext.languages),
+  );
   const posts = wikiPostsQuery.data?.posts ?? [];
   const zoneSlug = zoneQuery.data?.zone.slug ?? null;
 

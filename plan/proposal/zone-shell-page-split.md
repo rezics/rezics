@@ -88,45 +88,45 @@ depends on the shared envelope module from `json-evolution-policy.md`.
 
 ## 1. Contract (`@rezics/contract` Zone Module)
 
-- [ ] 1.1 Split `config-v1.ts` into `boundary-v1.ts`, `nav-v1.ts`,
+- [x] 1.1 Split `config-v1.ts` into `boundary-v1.ts`, `nav-v1.ts`,
       `theme-v1.ts`, and `page-v1.ts`, each as an envelope built through the
       shared envelope module and each with its own upgrade chain. Delete the
       monolithic `rezics/zone-config` envelope and fixed-key `zonePagesSchema`.
-- [ ] 1.2 Convert theme/hero/header image fields from unit ids to HTTPS URLs;
+- [x] 1.2 Convert theme/hero/header image fields from unit ids to HTTPS URLs;
       add optional `ZoneCollectionItem.displayUnitId`; add an avatar-wall
       collection display variant; change `ZoneLinkTarget.zonePage` to reference
       `pageId`.
-- [ ] 1.3 Reshape DTOs: `zoneDTOSchema` returns the shell
+- [x] 1.3 Reshape DTOs: `zoneDTOSchema` returns the shell
       (`boundary`, `nav`, `theme`, translations, lifecycle, `homePageId`) plus
       a page list (`id`, `slug`, `position`, no `config`); portal response
       returns shell + requested page config + `refUnits`; add page CRUD input
       schemas; add `pageId` to section-data requests.
-- [ ] 1.4 Synchronize zone i18n keys if manage-page copy changes.
+- [x] 1.4 Synchronize zone i18n keys if manage-page copy changes.
 
 ## 2. Server (DB + Domain)
 
-- [ ] 2.1 Update `db/schema/zone.ts`: add the three shell columns and
+- [x] 2.1 Update `db/schema/zone.ts`: add the three shell columns and
       `homePageId`, add the new `ZonePage` table, and generate a Drizzle
       migration with `task db:generate`. Because this is development-stage,
       delete the old `config` column without data migration.
-- [ ] 2.2 Implement `zone.service.ts` changes: hydrate shell from three parsed
+- [x] 2.2 Implement `zone.service.ts` changes: hydrate shell from three parsed
       envelope columns; add page CRUD with unique slug, position ordering,
       home-page deletion guard, and nav-reference deletion guard with reported
       locations; move validation for page-local section ids, menu depth, refs,
       and boundary vocabulary to the new shape; address section execution by
       `(zoneId, pageId, sectionId)`.
-- [ ] 2.3 Update `zone.api.ts` and mapper: shell PATCH endpoints by column
+- [x] 2.3 Update `zone.api.ts` and mapper: shell PATCH endpoints by column
       (`boundary`, `nav`, `theme`), page CRUD routes, portal route with
       `pageSlug`, and shell-level built-in search route.
-- [ ] 2.4 Update Meili `filters.ts`: read boundary filters from `Zone.boundary`
+- [x] 2.4 Update Meili `filters.ts`: read boundary filters from `Zone.boundary`
       instead of `config.filters`; keep compile behavior unchanged.
-- [ ] 2.5 Update server tests: `zone.service.test`, `zone.mapper.test`, and
+- [x] 2.5 Update server tests: `zone.service.test`, `zone.mapper.test`, and
       `zone.by-slug.test`; add tests for the home invariant and page deletion
       nav-reference guard.
 
 ## 3. `@rezics/api`
 
-- [ ] 3.1 Update `zone/zone.api.ts`, `zone.queries.ts`, `zone.mutations.ts`,
+- [x] 3.1 Update `zone/zone.api.ts`, `zone.queries.ts`, `zone.mutations.ts`,
       and `zone.keys.ts` for shell column endpoints, page CRUD, portal
       `(slug, pageSlug)`, section-data `pageId`, and `useZoneBySlug`.
 
@@ -140,15 +140,15 @@ depends on the shared envelope module from `json-evolution-policy.md`.
       menus tab, and theme tab save by column; sections tab becomes page
       management with page list CRUD, slug editing, ordering, selected-page
       section editing.
-- [ ] 4.3 Update portal rendering: `ZonePortalPage` fetches shell + one page by
+- [x] 4.3 Update portal rendering: `ZonePortalPage` fetches shell + one page by
       `(slug, pageSlug)`; dangling pageId menu targets degrade to hidden;
       collection renders `displayUnitId` avatar/title and avatar-wall display;
       theme/hero/header images render URLs.
-- [ ] 4.4 Update app-side tests such as `zoneManageDraft.test`.
+- [x] 4.4 Update app-side tests such as `zoneManageDraft.test`.
 
 ## 5. Factory and Closeout
 
-- [ ] 5.1 Update `package/server/src/db/factory/zones.ts` and the toaru-wiki
+- [x] 5.1 Update `package/server/src/db/factory/zones.ts` and the toaru-wiki
       scenario to emit three shell envelopes plus multiple page rows
       (`home` and custom pages such as `characters`), covering
       `displayUnitId`, avatar-wall display, and URL images.

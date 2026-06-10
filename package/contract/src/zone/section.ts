@@ -20,8 +20,8 @@ import { zoneLinkTargetSchema } from "./link-target";
  * 是查询预设加默认标题 i18n key，绝不是新的分区 kind。
  */
 export const zoneSectionQueryRealmSchema = t.Union([
-  // "context" resolves to `config.context` at execution time.
-  // "context" 在执行时解析为 `config.context`。
+  // "context" resolves to `boundary.context` at execution time.
+  // "context" 在执行时解析为 `boundary.context`。
   t.Literal("context"),
   t.Object(
     {
@@ -123,6 +123,7 @@ export const zoneSectionDisplaySchema = t.Union([
   t.Literal("carousel"),
   t.Literal("covers"),
   t.Literal("featured"),
+  t.Literal("avatar-wall"),
 ]);
 
 export type ZoneSectionDisplay = Static<typeof zoneSectionDisplaySchema>;
@@ -147,6 +148,10 @@ export const zoneCollectionItemSchema = t.Object(
   {
     target: zoneLinkTargetSchema,
     labelUnitId: t.Optional(t.String()),
+    // Optional display unit only affects rendered avatar/title; click behavior
+    // still follows `target`, so an item can show an entity while linking to a
+    // wiki page or external resource.
+    displayUnitId: t.Optional(t.String()),
   },
   { additionalProperties: false },
 );
@@ -164,8 +169,8 @@ export const zoneHeroSectionSchema = t.Object(
     ...zoneSectionBaseSchema.properties,
     kind: t.Literal("hero"),
     showDescription: t.Optional(t.Boolean()),
-    bannerImageUnitId: t.Optional(t.String()),
-    logoImageUnitId: t.Optional(t.String()),
+    bannerImageUrl: t.Optional(t.String({ pattern: "^https://" })),
+    logoImageUrl: t.Optional(t.String({ pattern: "^https://" })),
     ctas: t.Optional(t.Array(zoneCollectionItemSchema)),
   },
   { additionalProperties: false },

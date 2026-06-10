@@ -1,0 +1,685 @@
+import { beforeAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import type {
+  ZoneBoundary,
+  ZoneNav,
+  ZonePage as ZonePageConfig,
+  ZoneTheme,
+} from "@rezics/contract";
+import type {
+  ZonePageWithConfig,
+  ZoneRepository,
+  ZoneWithRelations,
+} from "./zone.service";
+
+const unitRows = new Map<string, { id: string; type: string }>([
+  ["realm-1", { id: "realm-1", type: "REALM" }],
+  ["label-1", { id: "label-1", type: "LABEL" }],
+  ["entity-1", { id: "entity-1", type: "ENTITY" }],
+  ["book-1", { id: "book-1", type: "BOOK" }],
+  ["fragment-1", { id: "fragment-1", type: "POST" }],
+  ["post-1", { id: "post-1", type: "POST" }],
+]);
+
+const postKinds = new Map<string, string>([
+  ["fragment-1", "WIKI"],
+  ["post-1", "REMARK"],
+]);
+
+const hydratedUnits = new Map<string, any>([
+  [
+    "book-1",
+    {
+      id: "book-1",
+      type: "BOOK",
+      slug: "index-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+      translations: [
+        { language: "en", title: "A Certain Index", summary: null },
+        { language: "zh-hant", title: "魔法禁書目錄", summary: null },
+      ],
+      supportLanguages: [
+        { language: "en", isPrimary: true, sortOrder: 0 },
+        { language: "zh-hant", isPrimary: false, sortOrder: 1 },
+      ],
+    },
+  ],
+  [
+    "post-1",
+    {
+      id: "post-1",
+      type: "POST",
+      slug: null,
+      createdAt: new Date("2026-02-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-02-02T00:00:00.000Z"),
+      translations: [{ language: "en", title: "Hot thread", summary: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      post: { kind: "REMARK" },
+    },
+  ],
+  [
+    "label-1",
+    {
+      id: "label-1",
+      type: "LABEL",
+      translations: [
+        { language: "en", title: "Characters" },
+        { language: "zh-hant", title: "人物角色" },
+      ],
+      supportLanguages: [
+        { language: "en", isPrimary: true, sortOrder: 0 },
+        { language: "zh-hant", isPrimary: false, sortOrder: 1 },
+      ],
+    },
+  ],
+]);
+
+const fragmentTranslations = new Map<
+  string,
+  Array<{ language: string; content: unknown }>
+>([
+  [
+    "fragment-1",
+    [
+      {
+        language: "en",
+        content: {
+          schema: "rezics.content",
+          version: 1,
+          main: { type: "markdown", source: "Welcome" },
+        },
+      },
+      {
+        language: "zh-hant",
+        content: {
+          schema: "rezics.content",
+          version: 1,
+          main: { type: "markdown", source: "歡迎" },
+        },
+      },
+    ],
+  ],
+]);
+
+const searchSectionMock = mock(
+  async (_input: {
+    index: "content" | "posts";
+    filter: string[];
+    sort: string[];
+    offset: number;
+    limit: number;
+  }): Promise<{ ids: string[]; total: number }> => ({
+    ids: ["book-1"],
+    total: 1,
+  }),
+);
+const replaceTranslationsMock = mock(async (..._args: unknown[]) => undefined);
+const updateZoneDataMock = mock(async (): Promise<void> => undefined);
+
+function baseBoundary(): ZoneBoundary {
+  return {
+    schema: "rezics/zone-boundary",
+    version: 1,
+    context: { kind: "realm", realmUnitId: "realm-1" },
+    filters: {},
+  };
+}
+
+function baseNav(): ZoneNav {
+  return {
+    schema: "rezics/zone-nav",
+    version: 1,
+    menus: [
+      {
+        id: "main",
+        nodes: [
+          {
+            id: "group-characters",
+            labelUnitId: "label-1",
+            children: [
+              { id: "entity", target: { kind: "unit", unitId: "entity-1" } },
+            ],
+          },
+        ],
+      },
+    ],
+    header: { menuId: "main" },
+  };
+}
+
+function baseTheme(): ZoneTheme {
+  return {
+    schema: "rezics/zone-theme",
+    version: 1,
+  };
+}
+
+function basePage(): ZonePageConfig {
+  return {
+    schema: "rezics/zone-page",
+    version: 1,
+    sections: [
+      {
+        id: "s-hero",
+        kind: "hero",
+        bannerImageUrl: "https://example.com/a.jpg",
+      },
+      {
+        id: "s-columns",
+        kind: "columns",
+        main: [
+          { id: "s-notice", kind: "richText", contentUnitId: "fragment-1" },
+          {
+            id: "s-tabs",
+            kind: "tabs",
+            tabs: [
+              {
+                id: "tab-new",
+                sections: [
+                  {
+                    id: "s-new",
+                    kind: "query",
+                    display: "covers",
+                    limit: 2,
+                    query: {
+                      target: "unit",
+                      types: ["BOOK"],
+                      realm: "context",
+                      languages: "viewer",
+                      sort: { field: "publishedAt", direction: "desc" },
+                    },
+                  },
+                ],
+              },
+              {
+                id: "tab-hot",
+                sections: [{ id: "s-feed", kind: "feed", feedKind: "all" }],
+              },
+            ],
+          },
+        ],
+        side: [
+          {
+            id: "s-stats",
+            kind: "stats",
+            metrics: ["articles", "members"],
+          },
+          {
+            id: "s-collection",
+            kind: "collection",
+            display: "list",
+            items: [
+              { target: { kind: "unit", unitId: "book-1" } },
+              {
+                target: {
+                  kind: "external",
+                  url: "https://example.com",
+                  text: "QQ 12345",
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function pageRow(config: ZonePageConfig = basePage()): ZonePageWithConfig {
+  return {
+    id: "page-home",
+    zoneUnitId: "zone-1",
+    slug: "home",
+    position: 0,
+    config,
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+  };
+}
+
+function zoneRow(
+  input: {
+    boundary?: ZoneBoundary;
+    nav?: ZoneNav;
+    theme?: ZoneTheme;
+    page?: ZonePageConfig;
+  } = {},
+): ZoneWithRelations {
+  return {
+    unitId: "zone-1",
+    ownerRealmUnitId: "realm-1",
+    boundary: input.boundary ?? baseBoundary(),
+    nav: input.nav ?? baseNav(),
+    theme: input.theme ?? baseTheme(),
+    homePageId: "page-home",
+    pages: [pageRow(input.page)],
+    startsAt: null,
+    endsAt: null,
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    unit: {
+      translations: [],
+      supportLanguages: [],
+    } as unknown as ZoneWithRelations["unit"],
+  } as ZoneWithRelations;
+}
+
+let currentZone: ZoneWithRelations | null = null;
+let currentPage: ZonePageWithConfig = pageRow();
+
+function createMockRepository(): ZoneRepository {
+  return {
+    async findUnitRefs(ids) {
+      return ids.flatMap((id) => {
+        const row = unitRows.get(id);
+        return row ? [row] : [];
+      });
+    },
+    async findPostKinds(ids) {
+      return ids.flatMap((id) => {
+        const kind = postKinds.get(id);
+        return kind ? [{ unitId: id, kind }] : [];
+      });
+    },
+    async getByUnitId(unitId) {
+      return currentZone && currentZone.unitId === unitId ? currentZone : null;
+    },
+    async findPageBySlug(_zoneUnitId, slug) {
+      return currentPage.slug === slug ? currentPage : null;
+    },
+    async getPage(_zoneUnitId, pageId) {
+      return currentPage.id === pageId ? currentPage : null;
+    },
+    async findUnitBySlug() {
+      return null;
+    },
+    async createZone(data) {
+      currentPage = pageRow(data.homePage);
+      currentZone = zoneRow({
+        boundary: data.boundary,
+        nav: data.nav,
+        theme: data.theme,
+        page: data.homePage,
+      });
+      return currentZone;
+    },
+    async updateZone(unitId, data) {
+      await updateZoneDataMock();
+      currentZone = { ...(currentZone ?? zoneRow()), ...data, unitId };
+      return currentZone;
+    },
+    async updateZoneBoundary(unitId, boundary) {
+      await updateZoneDataMock();
+      currentZone = { ...(currentZone ?? zoneRow()), boundary, unitId };
+      return currentZone;
+    },
+    async updateZoneNav(unitId, nav) {
+      await updateZoneDataMock();
+      currentZone = { ...(currentZone ?? zoneRow()), nav, unitId };
+      return currentZone;
+    },
+    async updateZoneTheme(unitId, theme) {
+      await updateZoneDataMock();
+      currentZone = { ...(currentZone ?? zoneRow()), theme, unitId };
+      return currentZone;
+    },
+    async createPage() {
+      return currentZone ?? zoneRow();
+    },
+    async updatePage() {
+      return currentZone ?? zoneRow();
+    },
+    async deletePage() {
+      return currentZone ?? zoneRow();
+    },
+    async replaceTranslations(unitId, translations) {
+      await replaceTranslationsMock(unitId, translations);
+    },
+    async hydrateUnits(unitIds) {
+      const map = new Map<string, any>();
+      for (const id of unitIds) {
+        const row = hydratedUnits.get(id);
+        if (row) map.set(id, row);
+      }
+      return map;
+    },
+    async findFragmentTranslations(unitId) {
+      return fragmentTranslations.get(unitId) ?? [];
+    },
+    searchSection: searchSectionMock,
+    async countWikiArticles() {
+      return 42;
+    },
+    async getRealmMemberCount() {
+      return 7;
+    },
+    async deleteUnit() {},
+  };
+}
+
+let ZoneServiceCtor: typeof import("./zone.service").ZoneService;
+let service: import("./zone.service").ZoneService;
+
+beforeAll(async () => {
+  mock.restore();
+  const filters = await import("../meili/search/filters");
+  mock.module("@/meili/search/filters", () => filters);
+  mock.module("@/unit", () => ({ unitService: {} }));
+  mock.module("@/utils/errors", () => ({
+    AppError: class AppError extends Error {
+      public readonly code?: string;
+      public readonly details?: Record<string, unknown>;
+
+      constructor(
+        public readonly statusCode: number,
+        message: string,
+        options?: { code?: string; details?: Record<string, unknown> },
+      ) {
+        super(message);
+        this.name = "AppError";
+        this.code = options?.code;
+        this.details = options?.details;
+      }
+    },
+  }));
+  const serviceModule = await import(
+    new URL("./zone.service.ts", import.meta.url).href
+  );
+  ZoneServiceCtor = serviceModule.ZoneService;
+});
+
+beforeEach(() => {
+  searchSectionMock.mockClear();
+  replaceTranslationsMock.mockClear();
+  updateZoneDataMock.mockClear();
+  currentPage = pageRow(basePage());
+  currentZone = zoneRow({ page: currentPage.config });
+  service = new ZoneServiceCtor(createMockRepository());
+});
+
+async function expectValidationCode(promise: Promise<unknown>, code: string) {
+  let actualCode: unknown;
+  try {
+    await promise;
+  } catch (error: any) {
+    actualCode = error.options?.code ?? error.code;
+  }
+  expect(actualCode).toBe(code);
+}
+
+describe("zone split validation", () => {
+  test("accepts the base shell and page", async () => {
+    await service.validateZoneShell({
+      boundary: baseBoundary(),
+      nav: baseNav(),
+      theme: baseTheme(),
+    });
+    await service.validateZonePage({
+      boundary: baseBoundary(),
+      nav: baseNav(),
+      theme: baseTheme(),
+      page: basePage(),
+    });
+  });
+
+  test("rejects menus deeper than three levels", async () => {
+    const nav = baseNav();
+    nav.menus[0]!.nodes = [
+      {
+        id: "l1",
+        labelUnitId: "label-1",
+        children: [
+          {
+            id: "l2",
+            labelUnitId: "label-1",
+            children: [
+              {
+                id: "l3",
+                labelUnitId: "label-1",
+                children: [
+                  { id: "l4", target: { kind: "unit", unitId: "entity-1" } },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    await expectValidationCode(
+      service.validateZoneShell({
+        boundary: baseBoundary(),
+        nav,
+        theme: baseTheme(),
+      }),
+      "ZONE_MENU_TOO_DEEP",
+    );
+  });
+
+  test("rejects missing menu labels, missing header refs, and bad realm refs", async () => {
+    const nav = baseNav();
+    nav.menus[0]!.nodes.push({ id: "dangling" });
+    await expectValidationCode(
+      service.validateZoneShell({
+        boundary: baseBoundary(),
+        nav,
+        theme: baseTheme(),
+      }),
+      "ZONE_MENU_NODE_INVALID",
+    );
+
+    const missingHeaderNav = baseNav();
+    missingHeaderNav.header.menuId = "missing";
+    await expectValidationCode(
+      service.validateZoneShell({
+        boundary: baseBoundary(),
+        nav: missingHeaderNav,
+        theme: baseTheme(),
+      }),
+      "ZONE_HEADER_MENU_INVALID",
+    );
+
+    const boundary = baseBoundary();
+    boundary.context = { kind: "realm", realmUnitId: "book-1" };
+    await expectValidationCode(
+      service.validateZoneShell({
+        boundary,
+        nav: baseNav(),
+        theme: baseTheme(),
+      }),
+      "ZONE_REALM_REF_INVALID",
+    );
+  });
+
+  test("validates page-local section ids and nested tab defaults", async () => {
+    const duplicate = basePage();
+    duplicate.sections.push({ id: "s-new", kind: "feed" });
+    await expectValidationCode(
+      service.validateZonePage({
+        boundary: baseBoundary(),
+        nav: baseNav(),
+        theme: baseTheme(),
+        page: duplicate,
+      }),
+      "ZONE_SECTION_ID_DUPLICATE",
+    );
+
+    const badTab = basePage();
+    const columns = badTab.sections[1] as Extract<
+      ZonePageConfig["sections"][number],
+      { kind: "columns" }
+    >;
+    const tabs = columns.main[1] as Extract<
+      (typeof columns.main)[number],
+      { kind: "tabs" }
+    >;
+    tabs.defaultTabId = "missing-tab";
+    await expectValidationCode(
+      service.validateZonePage({
+        boundary: baseBoundary(),
+        nav: baseNav(),
+        theme: baseTheme(),
+        page: badTab,
+      }),
+      "ZONE_TAB_DEFAULT_INVALID",
+    );
+  });
+
+  test("rejects bad fragment refs and unsupported query fields", async () => {
+    const badFragment = basePage();
+    const columns = badFragment.sections[1] as Extract<
+      ZonePageConfig["sections"][number],
+      { kind: "columns" }
+    >;
+    (columns.main[0] as { contentUnitId: string }).contentUnitId = "post-1";
+    await expectValidationCode(
+      service.validateZonePage({
+        boundary: baseBoundary(),
+        nav: baseNav(),
+        theme: baseTheme(),
+        page: badFragment,
+      }),
+      "ZONE_FRAGMENT_REF_INVALID",
+    );
+
+    const badQuery = basePage();
+    badQuery.sections.push({
+      id: "s-bad-query",
+      kind: "query",
+      display: "list",
+      query: {
+        target: "post",
+        tagUnitIds: ["tag-1"],
+        sort: { field: "createdAt" },
+      },
+    });
+    await expectValidationCode(
+      service.validateZonePage({
+        boundary: baseBoundary(),
+        nav: baseNav(),
+        theme: baseTheme(),
+        page: badQuery,
+      }),
+      "ZONE_QUERY_FIELD_UNSUPPORTED",
+    );
+  });
+});
+
+describe("zone update", () => {
+  test("replaces translations through the repository on update", async () => {
+    await service.update("zone-1", {
+      translations: [
+        { language: "en", title: "Toaru Wiki" },
+        { language: "zh-hant", title: "魔禁百科" },
+      ],
+    });
+    expect(replaceTranslationsMock).toHaveBeenCalledWith("zone-1", [
+      { language: "en", title: "Toaru Wiki" },
+      { language: "zh-hant", title: "魔禁百科" },
+    ]);
+  });
+
+  test("validates nav before persisting shell updates", async () => {
+    const nav = baseNav();
+    nav.header.menuId = "missing";
+    expect(service.updateNav("zone-1", nav)).rejects.toThrow(
+      "header.menuId must reference a menu",
+    );
+    expect(updateZoneDataMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("section data execution", () => {
+  test("query sections compile through the boundary and hydrate items", async () => {
+    const data = await service.getSectionData("zone-1", "page-home", "s-new", {
+      preferredLanguages: ["zh-hant"],
+    });
+    expect(searchSectionMock).toHaveBeenCalledTimes(1);
+    const input = searchSectionMock.mock.calls[0]![0];
+    expect(input.index).toBe("content");
+    expect(input.filter).toContain('type = "BOOK"');
+    expect(input.filter).toContain('realmIds = "realm-1"');
+    expect(input.filter).toContain('visibility = "PUBLIC"');
+    expect(input.sort).toEqual(["publishedAt:desc"]);
+    expect(input.limit).toBe(2);
+    expect(data?.items).toEqual([
+      expect.objectContaining({
+        unitId: "book-1",
+        title: "魔法禁書目錄",
+        language: "zh-hant",
+      }),
+    ]);
+    expect(data?.nextCursor).toBeNull();
+  });
+
+  test("query sections intersect with the zone boundary filter", async () => {
+    const boundary = baseBoundary();
+    boundary.filters = { types: ["SERIES"], ratings: ["GENERAL"] };
+    currentZone = zoneRow({ boundary, page: currentPage.config });
+
+    await service.getSectionData("zone-1", "page-home", "s-new");
+    const input = searchSectionMock.mock.calls[0]![0];
+    expect(
+      input.filter.some((clause: string) =>
+        clause.includes("__zone_boundary_empty_intersection__"),
+      ),
+    ).toBe(true);
+    expect(input.filter).toContain('rating = "GENERAL"');
+  });
+
+  test("feed, collection, stats, and richText sections execute by page id", async () => {
+    searchSectionMock.mockResolvedValueOnce({ ids: ["post-1"], total: 1 });
+    const feed = await service.getSectionData("zone-1", "page-home", "s-feed");
+    expect(searchSectionMock.mock.calls[0]![0].index).toBe("posts");
+    expect(feed?.items[0]?.postKind).toBe("REMARK");
+
+    const collection = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      "s-collection",
+    );
+    expect(collection?.items.map((item) => item.unitId)).toEqual(["book-1"]);
+
+    const stats = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      "s-stats",
+    );
+    expect(stats?.stats).toEqual({ articles: 42, members: 7 });
+
+    const richText = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      "s-notice",
+      { preferredLanguages: ["zh-hant"] },
+    );
+    expect(richText?.docLanguage).toBe("zh-hant");
+    expect((richText?.doc as any)?.main?.source).toBe("歡迎");
+  });
+
+  test("container and hero sections expose no data endpoint", async () => {
+    expect(
+      service.getSectionData("zone-1", "page-home", "s-tabs"),
+    ).rejects.toThrow("Container sections have no section data");
+    expect(
+      service.getSectionData("zone-1", "page-home", "s-hero"),
+    ).rejects.toThrow("Hero sections have no section data");
+  });
+});
+
+describe("portal ref units", () => {
+  test("batches summaries for shell and page-referenced units", async () => {
+    const refUnits = await service.getPortalRefUnits(
+      currentZone!,
+      currentPage,
+      {
+        preferredLanguages: ["en"],
+      },
+    );
+    expect(refUnits["label-1"]).toEqual(
+      expect.objectContaining({ unitId: "label-1", title: "Characters" }),
+    );
+    expect(refUnits["book-1"]).toEqual(
+      expect.objectContaining({ unitId: "book-1", title: "A Certain Index" }),
+    );
+  });
+});

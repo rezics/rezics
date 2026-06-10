@@ -138,6 +138,7 @@ import { Route as EditorBookBookIdEditIndexRouteImport } from './routes/_editor/
 import { Route as MainLayoutZSlugWikiWikiUnitIdRouteImport } from './routes/_mainLayout/z/$slug/wiki/$wikiUnitId'
 import { Route as MainLayoutZSlugUnitUnitIdRouteImport } from './routes/_mainLayout/z/$slug/unit/$unitId'
 import { Route as MainLayoutZSlugPostPostUnitIdRouteImport } from './routes/_mainLayout/z/$slug/post/$postUnitId'
+import { Route as MainLayoutZSlugPagesPageSlugRouteImport } from './routes/_mainLayout/z/$slug/pages/$pageSlug'
 import { Route as MainLayoutUserMeSettingTokensRouteImport } from './routes/_mainLayout/user/me/setting/tokens'
 import { Route as MainLayoutUserMeSettingSecurityRouteImport } from './routes/_mainLayout/user/me/setting/security'
 import { Route as MainLayoutUserMeSettingProfileRouteImport } from './routes/_mainLayout/user/me/setting/profile'
@@ -894,6 +895,12 @@ const MainLayoutZSlugPostPostUnitIdRoute =
     path: '/z/$slug/post/$postUnitId',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutZSlugPagesPageSlugRoute =
+  MainLayoutZSlugPagesPageSlugRouteImport.update({
+    id: '/z/$slug/pages/$pageSlug',
+    path: '/z/$slug/pages/$pageSlug',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutUserMeSettingTokensRoute =
   MainLayoutUserMeSettingTokensRouteImport.update({
     id: '/tokens',
@@ -1242,6 +1249,7 @@ export interface FileRoutesByFullPath {
   '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
   '/user/me/setting/tokens': typeof MainLayoutUserMeSettingTokensRoute
+  '/z/$slug/pages/$pageSlug': typeof MainLayoutZSlugPagesPageSlugRoute
   '/z/$slug/post/$postUnitId': typeof MainLayoutZSlugPostPostUnitIdRoute
   '/z/$slug/unit/$unitId': typeof MainLayoutZSlugUnitUnitIdRoute
   '/z/$slug/wiki/$wikiUnitId': typeof MainLayoutZSlugWikiWikiUnitIdRoute
@@ -1393,6 +1401,7 @@ export interface FileRoutesByTo {
   '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
   '/user/me/setting/tokens': typeof MainLayoutUserMeSettingTokensRoute
+  '/z/$slug/pages/$pageSlug': typeof MainLayoutZSlugPagesPageSlugRoute
   '/z/$slug/post/$postUnitId': typeof MainLayoutZSlugPostPostUnitIdRoute
   '/z/$slug/unit/$unitId': typeof MainLayoutZSlugUnitUnitIdRoute
   '/z/$slug/wiki/$wikiUnitId': typeof MainLayoutZSlugWikiWikiUnitIdRoute
@@ -1559,6 +1568,7 @@ export interface FileRoutesById {
   '/_mainLayout/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/_mainLayout/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
   '/_mainLayout/user/me/setting/tokens': typeof MainLayoutUserMeSettingTokensRoute
+  '/_mainLayout/z/$slug/pages/$pageSlug': typeof MainLayoutZSlugPagesPageSlugRoute
   '/_mainLayout/z/$slug/post/$postUnitId': typeof MainLayoutZSlugPostPostUnitIdRoute
   '/_mainLayout/z/$slug/unit/$unitId': typeof MainLayoutZSlugUnitUnitIdRoute
   '/_mainLayout/z/$slug/wiki/$wikiUnitId': typeof MainLayoutZSlugWikiWikiUnitIdRoute
@@ -1724,6 +1734,7 @@ export interface FileRouteTypes {
     | '/user/me/setting/profile'
     | '/user/me/setting/security'
     | '/user/me/setting/tokens'
+    | '/z/$slug/pages/$pageSlug'
     | '/z/$slug/post/$postUnitId'
     | '/z/$slug/unit/$unitId'
     | '/z/$slug/wiki/$wikiUnitId'
@@ -1875,6 +1886,7 @@ export interface FileRouteTypes {
     | '/user/me/setting/profile'
     | '/user/me/setting/security'
     | '/user/me/setting/tokens'
+    | '/z/$slug/pages/$pageSlug'
     | '/z/$slug/post/$postUnitId'
     | '/z/$slug/unit/$unitId'
     | '/z/$slug/wiki/$wikiUnitId'
@@ -2040,6 +2052,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/me/setting/profile'
     | '/_mainLayout/user/me/setting/security'
     | '/_mainLayout/user/me/setting/tokens'
+    | '/_mainLayout/z/$slug/pages/$pageSlug'
     | '/_mainLayout/z/$slug/post/$postUnitId'
     | '/_mainLayout/z/$slug/unit/$unitId'
     | '/_mainLayout/z/$slug/wiki/$wikiUnitId'
@@ -2971,6 +2984,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutZSlugPostPostUnitIdRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/z/$slug/pages/$pageSlug': {
+      id: '/_mainLayout/z/$slug/pages/$pageSlug'
+      path: '/z/$slug/pages/$pageSlug'
+      fullPath: '/z/$slug/pages/$pageSlug'
+      preLoaderRoute: typeof MainLayoutZSlugPagesPageSlugRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
     '/_mainLayout/user/me/setting/tokens': {
       id: '/_mainLayout/user/me/setting/tokens'
       path: '/tokens'
@@ -3618,6 +3638,7 @@ interface MainLayoutRouteChildren {
   MainLayoutZSlugIndexRoute: typeof MainLayoutZSlugIndexRoute
   MainLayoutPostRootPostUnitIdContinueUnitIdRoute: typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
   MainLayoutRealmRealmIdPostPostUnitIdRoute: typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
+  MainLayoutZSlugPagesPageSlugRoute: typeof MainLayoutZSlugPagesPageSlugRoute
   MainLayoutZSlugPostPostUnitIdRoute: typeof MainLayoutZSlugPostPostUnitIdRoute
   MainLayoutZSlugUnitUnitIdRoute: typeof MainLayoutZSlugUnitUnitIdRoute
   MainLayoutZSlugWikiWikiUnitIdRoute: typeof MainLayoutZSlugWikiWikiUnitIdRoute
@@ -3702,6 +3723,7 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
     MainLayoutPostRootPostUnitIdContinueUnitIdRoute,
   MainLayoutRealmRealmIdPostPostUnitIdRoute:
     MainLayoutRealmRealmIdPostPostUnitIdRoute,
+  MainLayoutZSlugPagesPageSlugRoute: MainLayoutZSlugPagesPageSlugRoute,
   MainLayoutZSlugPostPostUnitIdRoute: MainLayoutZSlugPostPostUnitIdRoute,
   MainLayoutZSlugUnitUnitIdRoute: MainLayoutZSlugUnitUnitIdRoute,
   MainLayoutZSlugWikiWikiUnitIdRoute: MainLayoutZSlugWikiWikiUnitIdRoute,

@@ -68,18 +68,16 @@ export function ZoneHeader({ zone, refUnits }: ZoneHeaderProps) {
     return () => observer.disconnect();
   }, []);
 
-  const { header, menus, theme } = zone.config;
+  const { header, menus } = zone.nav;
   const menu = findZoneMenu(menus, header.menuId);
   const nodes = menu
-    ? resolveZoneMenuNodes(menu.nodes, { zoneSlug: zone.slug, refUnits })
+    ? resolveZoneMenuNodes(menu.nodes, {
+        zoneSlug: zone.slug,
+        pages: zone.pages,
+        refUnits,
+      })
     : [];
-  const logoUrl =
-    (header.logoImageUnitId
-      ? refUnits[header.logoImageUnitId]?.imageUrl
-      : null) ??
-    (theme.images?.logoUnitId
-      ? refUnits[theme.images.logoUnitId]?.imageUrl
-      : null);
+  const logoUrl = header.logoImageUrl ?? zone.theme.images?.logoUrl ?? null;
   const searchPlaceholder = header.searchPlaceholderKey
     ? t(header.searchPlaceholderKey, {
         defaultValue: t("zone:search_placeholder"),

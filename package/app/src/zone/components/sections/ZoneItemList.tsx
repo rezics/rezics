@@ -11,7 +11,7 @@ export type ZoneListEntry = {
 };
 
 /**
- * Shared layout for collection/query entries. The six display variants map
+ * Shared layout for collection/query entries. The display variants map
  * onto three restrained layouts: rows (`list`), card grids
  * (`tiles`/`grid`/`featured` — featured uses wider cells), and horizontal
  * cover rails (`carousel`/`covers`). Image units may carry no resolved URL;
@@ -82,6 +82,39 @@ export function ZoneItemList({
                 )}
               </span>
               <span className="line-clamp-2 text-xs leading-dense text-text-primary">
+                {entry.label}
+              </span>
+            </SafeLink>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (display === "avatar-wall") {
+    return (
+      <ul className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
+        {entries.map((entry) => (
+          <li key={entry.key}>
+            <SafeLink
+              href={entry.href}
+              className="flex min-w-0 flex-col items-center gap-2 rounded-md px-2 py-3 text-center transition-colors hover:bg-surface-subtle"
+            >
+              <span className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-surface-subtle">
+                {entry.imageUrl ? (
+                  <img
+                    src={entry.imageUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <ImageIcon
+                    className="size-5 text-text-tertiary"
+                    aria-hidden
+                  />
+                )}
+              </span>
+              <span className="line-clamp-2 text-xs font-medium leading-dense text-text-primary">
                 {entry.label}
               </span>
             </SafeLink>

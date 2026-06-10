@@ -1,5 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import type { ZoneConfig, ZoneMenuNode } from "@rezics/contract";
+import type {
+  ZoneBoundary,
+  ZoneMenuNode,
+  ZoneNav,
+  ZonePage,
+  ZoneTheme,
+} from "@rezics/contract";
 import {
   addZonePage,
   addZoneTranslationRow,
@@ -17,31 +23,39 @@ import {
   removeZoneMenuNodeAtPath,
   removeZonePage,
   removeZoneTranslationRow,
+  updateZonePageSections,
   updateZoneTranslationRow,
   validateZoneManageDraft,
-  zoneConfigToDraft,
-  zoneManageDraftToConfig,
+  zoneManageDraftToBoundary,
+  zoneManageDraftToHomePage,
+  zoneManageDraftToNav,
+  zoneManageDraftToTheme,
   zoneMenuNodeAtPath,
   zoneQueryUnsupportedFields,
   zoneRowsToTranslations,
+  zoneShellToDraft,
   zoneTranslationLanguageOptions,
   zoneTranslationsToRows,
 } from "./zoneManageDraft";
 
-function sampleConfig(): ZoneConfig {
+function sampleBoundary(): ZoneBoundary {
   return {
-    schema: "rezics/zone-config",
+    schema: "rezics/zone-boundary",
     version: 1,
     context: { kind: "realm", realmUnitId: "realm-1" },
     filters: { types: ["BOOK"] },
+  };
+}
+
+function sampleNav(): ZoneNav {
+  return {
+    schema: "rezics/zone-nav",
+    version: 1,
     menus: [
       {
         id: "main",
         nodes: [
-          {
-            id: "n-1",
-            target: { kind: "zonePage", pageId: "home" },
-          },
+          { id: "n-1", target: { kind: "zonePage", pageId: "page-home" } },
           {
             id: "n-2",
             labelUnitId: "label-1",
@@ -56,34 +70,46 @@ function sampleConfig(): ZoneConfig {
       },
     ],
     header: { menuId: "main" },
-    pages: {
-      home: {
-        sections: [
-          { id: "hero", kind: "hero" },
+  };
+}
+
+function sampleTheme(): ZoneTheme {
+  return {
+    schema: "rezics/zone-theme",
+    version: 1,
+    tokens: { accent: "oklch(0.7 0.1 20)" },
+    layout: { contentWidth: "wide" },
+  };
+}
+
+function samplePage(): ZonePage {
+  return {
+    schema: "rezics/zone-page",
+    version: 1,
+    sections: [
+      { id: "hero", kind: "hero" },
+      {
+        id: "cols",
+        kind: "columns",
+        side: [{ id: "stats", kind: "stats", metrics: ["members"] }],
+        main: [
           {
-            id: "cols",
-            kind: "columns",
-            side: [{ id: "stats", kind: "stats", metrics: ["members"] }],
-            main: [
+            id: "tabs",
+            kind: "tabs",
+            defaultTabId: "t-1",
+            tabs: [
               {
-                id: "tabs",
-                kind: "tabs",
-                defaultTabId: "t-1",
-                tabs: [
+                id: "t-1",
+                sections: [
                   {
-                    id: "t-1",
-                    sections: [
-                      {
-                        id: "q-1",
-                        kind: "query",
-                        query: {
-                          target: "unit",
-                          types: ["BOOK"],
-                          sort: { field: "publishedAt", direction: "desc" },
-                        },
-                        display: "grid",
-                      },
-                    ],
+                    id: "q-1",
+                    kind: "query",
+                    query: {
+                      target: "unit",
+                      types: ["BOOK"],
+                      sort: { field: "publishedAt", direction: "desc" },
+                    },
+                    display: "grid",
                   },
                 ],
               },
@@ -91,27 +117,38 @@ function sampleConfig(): ZoneConfig {
           },
         ],
       },
-      search: { sections: [] },
-    },
-    theme: {
-      tokens: { accent: "oklch(0.7 0.1 20)" },
-      layout: { contentWidth: "wide" },
-    },
+    ],
   };
 }
 
-describe("zoneManageDraft round-trip", () => {
-  it("envelope → draft → envelope is identity", () => {
-    const config = sampleConfig();
-    const draft = zoneConfigToDraft(config);
-    expect(zoneManageDraftToConfig(draft)).toEqual(config);
+function sampleDraft() {
+  return zoneShellToDraft({
+    boundary: sampleBoundary(),
+    nav: sampleNav(),
+    theme: sampleTheme(),
+    page: samplePage(),
+  });
+}
+
+describe("zoneManageDraft split round-trip", () => {
+  it("shell/page envelopes round-trip through the draft adapter", () => {
+    const draft = sampleDraft();
+    expect(zoneManageDraftToBoundary(draft)).toEqual(sampleBoundary());
+    expect(zoneManageDraftToNav(draft)).toEqual(sampleNav());
+    expect(zoneManageDraftToTheme(draft)).toEqual(sampleTheme());
+    expect(zoneManageDraftToHomePage(draft)).toEqual(samplePage());
   });
 
-  it("draft edits do not leak into the source config", () => {
-    const config = sampleConfig();
-    const draft = zoneConfigToDraft(config);
+  it("draft edits do not leak into the source envelopes", () => {
+    const nav = sampleNav();
+    const draft = zoneShellToDraft({
+      boundary: sampleBoundary(),
+      nav,
+      theme: sampleTheme(),
+      page: samplePage(),
+    });
     draft.menus[0]!.id = "changed";
-    expect(config.menus[0]!.id).toBe("main");
+    expect(nav.menus[0]!.id).toBe("main");
   });
 });
 
@@ -135,9 +172,8 @@ describe("section nesting guards", () => {
 });
 
 describe("section ids", () => {
-  it("collects nested ids across pages and containers", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
-    expect(collectZoneSectionIds(draft.pages)).toEqual([
+  it("collects nested ids across the managed page and containers", () => {
+    expect(collectZoneSectionIds(sampleDraft().pages)).toEqual([
       "hero",
       "cols",
       "stats",
@@ -147,8 +183,8 @@ describe("section ids", () => {
   });
 
   it("flags duplicate section ids including nested ones", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
-    draft.pages = updatePages(draft.pages, [
+    const draft = sampleDraft();
+    draft.pages = updateZonePageSections(draft.pages, "home", () => [
       ...draft.pages.home.sections,
       createZoneSection("feed", "stats"),
     ]);
@@ -163,17 +199,10 @@ describe("section ids", () => {
   });
 });
 
-function updatePages(
-  pages: ReturnType<typeof zoneConfigToDraft>["pages"],
-  sections: ReturnType<typeof zoneConfigToDraft>["pages"]["home"]["sections"],
-) {
-  return { ...pages, home: { sections } };
-}
-
 describe("tabs invariants", () => {
   it("flags duplicate tab ids and missing default tab", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
-    draft.pages = updatePages(draft.pages, [
+    const draft = sampleDraft();
+    draft.pages = updateZonePageSections(draft.pages, "home", () => [
       {
         id: "t",
         kind: "tabs",
@@ -236,13 +265,13 @@ describe("query vocabulary", () => {
 
 describe("menu tree path operations", () => {
   const nodes = (): ZoneMenuNode[] => [
-    { id: "a", target: { kind: "zonePage", pageId: "home" } },
+    { id: "a", target: { kind: "zonePage", pageId: "page-home" } },
     {
       id: "b",
       labelUnitId: "label-1",
       children: [
-        { id: "b-1", target: { kind: "zonePage", pageId: "search" } },
-        { id: "b-2", target: { kind: "zonePage", pageId: "feed" } },
+        { id: "b-1", target: { kind: "zonePage", pageId: "page-search" } },
+        { id: "b-2", target: { kind: "zonePage", pageId: "page-feed" } },
       ],
     },
   ];
@@ -282,7 +311,6 @@ describe("menu tree path operations", () => {
     expect(zoneMenuNodeAtPath(removed, [1, 0])?.id).toBe("b-2");
     const moved = moveZoneMenuNodeAtPath(nodes(), [1, 1], "up");
     expect(zoneMenuNodeAtPath(moved, [1, 0])?.id).toBe("b-2");
-    // Edge moves are no-ops. 边界移动为空操作。
     const unmoved = moveZoneMenuNodeAtPath(nodes(), [0], "up");
     expect(zoneMenuNodeAtPath(unmoved, [0])?.id).toBe("a");
   });
@@ -291,8 +319,6 @@ describe("menu tree path operations", () => {
     const indented = indentZoneMenuNodeAtPath(nodes(), [1, 1]);
     expect(indented).not.toBeNull();
     expect(zoneMenuNodeAtPath(indented!, [1, 0, 0])?.id).toBe("b-2");
-    // Indenting a tall subtree past depth 3 is rejected.
-    // 将过高的子树缩进超过深度 3 会被拒绝。
     const tall: ZoneMenuNode[] = [
       { id: "x" },
       { id: "y", children: [{ id: "y-1", children: [{ id: "y-1-1" }] }] },
@@ -310,7 +336,7 @@ describe("menu tree path operations", () => {
 
 describe("menu validation", () => {
   it("flags depth, leaf, group, and header issues", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
+    const draft = sampleDraft();
     draft.menus = [
       {
         id: "main",
@@ -354,10 +380,8 @@ describe("menu validation", () => {
     });
   });
 
-  it("returns no issues for the sample config", () => {
-    expect(validateZoneManageDraft(zoneConfigToDraft(sampleConfig()))).toEqual(
-      [],
-    );
+  it("returns no issues for the sample draft", () => {
+    expect(validateZoneManageDraft(sampleDraft())).toEqual([]);
   });
 });
 
@@ -402,7 +426,7 @@ describe("translation rows", () => {
 
 describe("page helpers", () => {
   it("adds optional pages, never removes home", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
+    const draft = sampleDraft();
     const withFeed = addZonePage(draft.pages, "feed");
     expect(withFeed.feed).toEqual({ sections: [] });
     expect(removeZonePage(withFeed, "home").home).toBeDefined();

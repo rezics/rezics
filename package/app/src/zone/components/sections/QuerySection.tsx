@@ -35,7 +35,12 @@ export function QuerySection({
   const { zone, refUnits } = ctx;
   const title = useZoneSectionTitle(section, refUnits);
   const query = useInfiniteQuery(
-    zoneSectionInfiniteQuery(zone.unitId, section.id, ctx.languages),
+    zoneSectionInfiniteQuery(
+      zone.unitId,
+      ctx.pageId,
+      section.id,
+      ctx.languages,
+    ),
   );
 
   if (query.isLoading) {

@@ -2,19 +2,25 @@ import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
   DEFAULT_LANGUAGE,
-  ZONE_CONFIG_SCHEMA,
-  ZONE_CONFIG_V1_VERSION,
+  type ZoneBoundary,
   type ZoneBoundaryFilter,
   type ZoneCollectionItem,
-  type ZoneConfigV1,
   type ZoneContentSection,
   type ZoneMenu,
+  type ZoneNav,
+  type ZonePage as ZonePageConfig,
   type ZonePageSection,
   type ZoneSectionQuery,
   type ZoneSectionQuerySortField,
   type ZoneTheme,
 } from "@rezics/contract";
-import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../schema";
+import {
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+  Zone,
+  ZonePage,
+} from "../schema";
 import { generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
@@ -47,6 +53,25 @@ export interface ZoneFixtureRefs {
   tagUnitIds: string[];
   realmUnitIds: string[];
 }
+
+export type ZoneFixtureConfig = {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  pages: Array<{
+    id: string;
+    slug: string;
+    position: number;
+    config: ZonePageConfig;
+  }>;
+  homePageId: string;
+};
+
+type ZoneFixturePageIds = {
+  home: string;
+  search: string;
+  feed: string;
+};
 
 const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 
@@ -102,11 +127,14 @@ function unitItems(unitIds: string[], max: number): ZoneCollectionItem[] {
   return picked.map((unitId) => ({ target: { kind: "unit", unitId } }));
 }
 
-function fixtureMenus(refs: ZoneFixtureRefs): ZoneMenu[] {
+function fixtureMenus(
+  refs: ZoneFixtureRefs,
+  pageIds: ZoneFixturePageIds,
+): ZoneMenu[] {
   const nodes: ZoneMenu["nodes"] = [
-    { id: "home", target: { kind: "zonePage", pageId: "home" } },
-    { id: "search", target: { kind: "zonePage", pageId: "search" } },
-    { id: "feed", target: { kind: "zonePage", pageId: "feed" } },
+    { id: "home", target: { kind: "zonePage", pageId: pageIds.home } },
+    { id: "search", target: { kind: "zonePage", pageId: pageIds.search } },
+    { id: "feed", target: { kind: "zonePage", pageId: pageIds.feed } },
   ];
   // A unit-target group node resolves its label from the target unit, so it
   // is valid without a labelUnitId.
@@ -128,6 +156,8 @@ function fixtureMenus(refs: ZoneFixtureRefs): ZoneMenu[] {
 
 function fixtureTheme(): ZoneTheme {
   return {
+    schema: "rezics/zone-theme",
+    version: 1,
     tokens: {
       accent: faker.helpers.arrayElement([
         "#2563eb",
@@ -328,34 +358,67 @@ function fixtureHomeSections(
 }
 
 /**
- * Pure config builder for one fixture shape. The factory writes Zone rows
- * directly (bypassing the service write validation), while the read path
- * throws on invalid envelopes — so every generated config must pass
- * `zoneConfigV1Schema`; tests assert this for each fixture kind.
- * 单个 fixture 形态的纯配置构造器。工厂直接写入 Zone 行（绕过 service
- * 写入校验），而读取路径会对非法信封抛错——因此生成的每个配置都必须
- * 通过 `zoneConfigV1Schema`；测试对每种 fixture 形态断言这一点。
+ * Pure split-envelope builder for one fixture shape. The factory writes Zone
+ * and ZonePage rows directly (bypassing service write validation), while the
+ * read path throws on invalid envelopes — so every generated shell/page
+ * envelope must satisfy its contract schema.
+ * 单个 fixture 形态的拆分信封构造器。工厂直接写入 Zone 与 ZonePage 行
+ * （绕过 service 写入校验），而读取路径会对非法信封抛错——因此生成的
+ * 每个 shell/page 信封都必须满足对应契约 schema。
  */
 export function buildZoneFixtureConfig(
   kind: ZoneFixtureKind,
   refs: ZoneFixtureRefs,
-): ZoneConfigV1 {
+): ZoneFixtureConfig {
+  const pageIds = {
+    home: randomUUID(),
+    search: randomUUID(),
+    feed: randomUUID(),
+  };
   return {
-    schema: ZONE_CONFIG_SCHEMA,
-    version: ZONE_CONFIG_V1_VERSION,
-    context: refs.contextRealmUnitId
-      ? { kind: "realm", realmUnitId: refs.contextRealmUnitId }
-      : { kind: "global" },
-    filters: fixtureBoundary(kind, refs),
-    menus: fixtureMenus(refs),
-    header: { menuId: "main" },
-    pages: {
-      home: { sections: fixtureHomeSections(kind, refs) },
-      search: { sections: [] },
-      feed: {
-        sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 30 }],
-      },
+    boundary: {
+      schema: "rezics/zone-boundary",
+      version: 1,
+      context: refs.contextRealmUnitId
+        ? { kind: "realm", realmUnitId: refs.contextRealmUnitId }
+        : { kind: "global" },
+      filters: fixtureBoundary(kind, refs),
     },
+    nav: {
+      schema: "rezics/zone-nav",
+      version: 1,
+      menus: fixtureMenus(refs, pageIds),
+      header: { menuId: "main" },
+    },
+    pages: [
+      {
+        id: pageIds.home,
+        slug: "home",
+        position: 0,
+        config: {
+          schema: "rezics/zone-page",
+          version: 1,
+          sections: fixtureHomeSections(kind, refs),
+        },
+      },
+      {
+        id: pageIds.search,
+        slug: "search",
+        position: 1,
+        config: { schema: "rezics/zone-page", version: 1, sections: [] },
+      },
+      {
+        id: pageIds.feed,
+        slug: "feed",
+        position: 2,
+        config: {
+          schema: "rezics/zone-page",
+          version: 1,
+          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 30 }],
+        },
+      },
+    ],
+    homePageId: pageIds.home,
     theme: fixtureTheme(),
   };
 }
@@ -418,10 +481,24 @@ export async function seedZones(
       withUpdatedAt({
         unitId: id,
         ownerRealmUnitId: ownerRealm.id,
-        config,
+        boundary: config.boundary,
+        nav: config.nav,
+        theme: config.theme,
+        homePageId: config.homePageId,
         startsAt,
         endsAt,
       }),
+    );
+    await ctx.db.insert(ZonePage).values(
+      withUpdatedAtRows(
+        config.pages.map((page) => ({
+          id: page.id,
+          zoneUnitId: id,
+          slug: page.slug,
+          position: page.position,
+          config: page.config,
+        })),
+      ),
     );
     await ctx.db.insert(UnitTranslation).values(
       withUpdatedAtRows(

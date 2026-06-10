@@ -200,7 +200,7 @@ export function WikiZonePicker({
   const trimmedZoneId = zoneId.trim();
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
-  const zoneQuery = useQuery(zonePortalQueryOptions(trimmedZoneId));
+  const zoneQuery = useQuery(zonePortalQueryOptions(trimmedZoneId, "home"));
   const zone = zoneQuery.data?.zone;
 
   useEffect(() => {

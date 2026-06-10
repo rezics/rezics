@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "08643221-7b06-49dc-a79b-5cf0998a71e5",
-  "prevIds": ["7c802c41-f80b-4bc9-a2d2-1444d6113c1c"],
+  "id": "03706baa-936b-4f73-aae4-fa87a053031d",
+  "prevIds": ["78890875-9fa8-47fc-a599-9b2890715ad1"],
   "ddl": [
     {
       "values": [
@@ -664,6 +664,12 @@
     {
       "isRlsEnabled": false,
       "name": "Zone",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "ZonePage",
       "entityType": "tables",
       "schema": "public"
     },
@@ -8462,33 +8468,20 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "filters",
+      "name": "boundary",
       "entityType": "columns",
       "schema": "public",
       "table": "Zone"
     },
     {
-      "type": "integer",
+      "type": "jsonb",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "1",
-      "generated": null,
-      "identity": null,
-      "name": "configVersion",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "Zone"
-    },
-    {
-      "type": "jsonb",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "pages",
+      "name": "nav",
       "entityType": "columns",
       "schema": "public",
       "table": "Zone"
@@ -8496,20 +8489,7 @@
     {
       "type": "jsonb",
       "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "sections",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "Zone"
-    },
-    {
-      "type": "jsonb",
-      "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
@@ -8527,33 +8507,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "primaryRealmUnitId",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "Zone"
-    },
-    {
-      "type": "varchar(64)",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "template",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "Zone"
-    },
-    {
-      "type": "jsonb",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "styling",
+      "name": "homePageId",
       "entityType": "columns",
       "schema": "public",
       "table": "Zone"
@@ -8611,17 +8565,95 @@
       "table": "Zone"
     },
     {
-      "type": "jsonb",
+      "type": "uuid",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ZonePage"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "wiki",
+      "name": "zoneUnitId",
       "entityType": "columns",
       "schema": "public",
-      "table": "Zone"
+      "table": "ZonePage"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "slug",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ZonePage"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "config",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ZonePage"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "position",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ZonePage"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ZonePage"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ZonePage"
     },
     {
       "nameExplicit": true,
@@ -14003,7 +14035,14 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "primaryRealmUnitId",
+          "value": "zoneUnitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "position",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -14015,10 +14054,10 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "Zone_primaryRealmUnitId_idx",
+      "name": "ZonePage_zoneUnitId_position_idx",
       "entityType": "indexes",
       "schema": "public",
-      "table": "Zone"
+      "table": "ZonePage"
     },
     {
       "nameExplicit": false,
@@ -15634,16 +15673,16 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["primaryRealmUnitId"],
+      "columns": ["zoneUnitId"],
       "schemaTo": "public",
-      "tableTo": "Unit",
-      "columnsTo": ["id"],
+      "tableTo": "Zone",
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
-      "onDelete": "SET NULL",
-      "name": "Zone_primaryRealmUnitId_Unit_id_fkey",
+      "onDelete": "CASCADE",
+      "name": "ZonePage_zoneUnitId_Zone_unitId_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "Zone"
+      "table": "ZonePage"
     },
     {
       "columns": ["aliasId", "userId"],
@@ -16196,6 +16235,23 @@
       "schema": "public",
       "table": "Zone",
       "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "ZonePage_pkey",
+      "schema": "public",
+      "table": "ZonePage",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": ["zoneUnitId", "slug"],
+      "nullsNotDistinct": false,
+      "name": "ZonePage_zoneUnitId_slug_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "ZonePage"
     },
     {
       "value": "\"parentItemId\" is null or \"parentItemId\" <> \"itemId\" or \"parentItemType\" <> \"itemType\"",

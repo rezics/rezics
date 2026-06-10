@@ -1,6 +1,11 @@
 import type {
   CreateZoneInput,
+  CreateZonePageInput,
   UpdateZoneInput,
+  UpdateZoneBoundaryInput,
+  UpdateZoneNavInput,
+  UpdateZonePageInput,
+  UpdateZoneThemeInput,
   ZoneDTO,
   ZonePortalResponse,
   ZoneSectionData,
@@ -21,18 +26,20 @@ export const zoneApi = {
 
   getPortal: async (
     unitId: string,
+    pageSlug: string,
     languages: readonly string[] = [],
   ): Promise<ZonePortalResponse> => {
     const qs = buildQueryString({
       languages: languages.length ? [...languages] : undefined,
     });
     return apiFetch<ZonePortalResponse>(
-      `/zone/${encodeURIComponent(unitId)}/portal${qs}`,
+      `/zone/${encodeURIComponent(unitId)}/portal/${encodeURIComponent(pageSlug)}${qs}`,
     );
   },
 
   getSection: async (
     unitId: string,
+    pageId: string,
     sectionId: string,
     options: { cursor?: string; languages?: readonly string[] } = {},
   ): Promise<ZoneSectionData> => {
@@ -41,7 +48,7 @@ export const zoneApi = {
       languages: options.languages?.length ? [...options.languages] : undefined,
     });
     return apiFetch<ZoneSectionData>(
-      `/zone/${encodeURIComponent(unitId)}/section/${encodeURIComponent(sectionId)}${qs}`,
+      `/zone/${encodeURIComponent(unitId)}/page/${encodeURIComponent(pageId)}/section/${encodeURIComponent(sectionId)}${qs}`,
     );
   },
 
@@ -57,6 +64,67 @@ export const zoneApi = {
       method: "PATCH",
       body: JSON.stringify(input),
     });
+  },
+
+  updateBoundary: async (
+    unitId: string,
+    input: UpdateZoneBoundaryInput,
+  ): Promise<ZoneDTO> => {
+    return apiFetch<ZoneDTO>(`/zone/${encodeURIComponent(unitId)}/boundary`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  updateNav: async (
+    unitId: string,
+    input: UpdateZoneNavInput,
+  ): Promise<ZoneDTO> => {
+    return apiFetch<ZoneDTO>(`/zone/${encodeURIComponent(unitId)}/nav`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  updateTheme: async (
+    unitId: string,
+    input: UpdateZoneThemeInput,
+  ): Promise<ZoneDTO> => {
+    return apiFetch<ZoneDTO>(`/zone/${encodeURIComponent(unitId)}/theme`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  createPage: async (
+    unitId: string,
+    input: CreateZonePageInput,
+  ): Promise<ZoneDTO> => {
+    return apiFetch<ZoneDTO>(`/zone/${encodeURIComponent(unitId)}/pages`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  updatePage: async (
+    unitId: string,
+    pageId: string,
+    input: UpdateZonePageInput,
+  ): Promise<ZoneDTO> => {
+    return apiFetch<ZoneDTO>(
+      `/zone/${encodeURIComponent(unitId)}/pages/${encodeURIComponent(pageId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  deletePage: async (unitId: string, pageId: string): Promise<ZoneDTO> => {
+    return apiFetch<ZoneDTO>(
+      `/zone/${encodeURIComponent(unitId)}/pages/${encodeURIComponent(pageId)}`,
+      { method: "DELETE" },
+    );
   },
 
   remove: async (unitId: string): Promise<{ message: string }> => {

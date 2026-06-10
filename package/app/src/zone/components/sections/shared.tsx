@@ -22,6 +22,7 @@ import {
  */
 export type ZonePortalContext = {
   zone: ZoneDTO;
+  pageId: string;
   refUnits: ZoneRefUnitMap;
   languages: Language[];
 };

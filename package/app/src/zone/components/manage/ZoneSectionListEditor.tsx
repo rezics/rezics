@@ -60,6 +60,7 @@ const DISPLAY_KEYS = {
   carousel: "zone:manage_display_carousel",
   covers: "zone:manage_display_covers",
   featured: "zone:manage_display_featured",
+  "avatar-wall": "zone:manage_display_avatar_wall",
 } as const satisfies Record<ZoneSectionDisplay, `zone:${string}`>;
 
 const DISPLAY_OPTIONS = Object.keys(DISPLAY_KEYS) as ZoneSectionDisplay[];
@@ -345,23 +346,18 @@ function ZoneSectionKindFields({
           <div className="grid gap-4 md:grid-cols-2">
             <ManageField
               label={t("zone:manage_hero_banner")}
-              hint={
-                section.bannerImageUnitId
-                  ? (ctx.refUnits[section.bannerImageUnitId]?.title ??
-                    undefined)
-                  : undefined
-              }
+              hint={section.bannerImageUrl}
             >
               <Input
-                value={section.bannerImageUnitId ?? ""}
-                placeholder={t("common:unit_id")}
+                value={section.bannerImageUrl ?? ""}
+                placeholder="https://"
                 className="font-mono text-sm"
                 onChange={(event) => {
                   const next = { ...section };
                   if (event.target.value) {
-                    next.bannerImageUnitId = event.target.value;
+                    next.bannerImageUrl = event.target.value;
                   } else {
-                    delete next.bannerImageUnitId;
+                    delete next.bannerImageUrl;
                   }
                   onChange(next);
                 }}
@@ -369,22 +365,18 @@ function ZoneSectionKindFields({
             </ManageField>
             <ManageField
               label={t("zone:manage_hero_logo")}
-              hint={
-                section.logoImageUnitId
-                  ? (ctx.refUnits[section.logoImageUnitId]?.title ?? undefined)
-                  : undefined
-              }
+              hint={section.logoImageUrl}
             >
               <Input
-                value={section.logoImageUnitId ?? ""}
-                placeholder={t("common:unit_id")}
+                value={section.logoImageUrl ?? ""}
+                placeholder="https://"
                 className="font-mono text-sm"
                 onChange={(event) => {
                   const next = { ...section };
                   if (event.target.value) {
-                    next.logoImageUnitId = event.target.value;
+                    next.logoImageUrl = event.target.value;
                   } else {
-                    delete next.logoImageUnitId;
+                    delete next.logoImageUrl;
                   }
                   onChange(next);
                 }}

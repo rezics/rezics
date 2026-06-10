@@ -30,7 +30,7 @@ export function CollectionSection({
   const { zone, refUnits } = ctx;
   const title = useZoneSectionTitle(section, refUnits);
   const resolveLabel = useZoneLabelResolver();
-  const linkCtx = { zoneSlug: zone.slug, refUnits };
+  const linkCtx = { zoneSlug: zone.slug, pages: zone.pages, refUnits };
 
   const entries: ZoneListEntry[] = section.items.flatMap((item, index) => {
     const href = zoneLinkHref(item.target, linkCtx);
@@ -39,8 +39,11 @@ export function CollectionSection({
       zoneLinkFallbackKey(item.target),
     );
     if (!href || !label) return [];
-    const ref =
-      item.target.kind === "unit" ? refUnits[item.target.unitId] : undefined;
+    const ref = item.displayUnitId
+      ? refUnits[item.displayUnitId]
+      : item.target.kind === "unit"
+        ? refUnits[item.target.unitId]
+        : undefined;
     return [
       {
         key: `${section.id}:${index}`,

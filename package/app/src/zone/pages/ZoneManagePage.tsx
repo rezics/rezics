@@ -1,4 +1,8 @@
 import {
+  useUpdateZoneBoundary,
+  useUpdateZoneNav,
+  useUpdateZonePage,
+  useUpdateZoneTheme,
   useUpdateZone,
   zonePortalQueryOptions,
   zoneQueryOptions,
@@ -33,8 +37,11 @@ import {
   type ZoneManageDraft,
   type ZoneManageIssue,
   type ZoneTranslationRow,
-  zoneConfigToDraft,
-  zoneManageDraftToConfig,
+  zoneManageDraftToBoundary,
+  zoneManageDraftToHomePage,
+  zoneManageDraftToNav,
+  zoneManageDraftToTheme,
+  zoneShellToDraft,
   zoneRowsToTranslations,
   zoneTranslationsToRows,
 } from "../models/zoneManageDraft";
@@ -83,15 +90,14 @@ function issueParams(issue: ZoneManageIssue): Record<string, string> {
 }
 
 /**
- * Structured zone manage surface over the v1 config envelope: Profile
- * (translations + context), Pages & Sections, Menus, Theme, Lifecycle. All
- * config tabs edit one shared draft (`models/zoneManageDraft.ts`); each
- * save validates the draft client-side first — the server's
- * `validateZoneConfig` stays the enforcement point.
- * 基于 v1 配置信封的结构化专区管理界面：资料（译文 + 语境）、页面与
- * 分区、菜单、主题、生命週期。所有配置标签页编辑同一份共享草稿
- * （`models/zoneManageDraft.ts`）；每次保存先在客户端校验草稿——服务端
- * 的 `validateZoneConfig` 仍是强制执行点。
+ * Structured zone manage surface over the split shell/page envelopes:
+ * Profile (translations + context), Pages & Sections, Menus, Theme,
+ * Lifecycle. Shell tabs save their own columns; section edits save the
+ * selected page envelope. The server remains the enforcement point for
+ * cross-envelope invariants.
+ * 基于拆分后的 shell/page 信封的结构化专区管理界面：资料（译文 + 语境）、
+ * 页面与分区、菜单、主题、生命週期。Shell 标签页分别保存自己的列；
+ * 分区编辑保存选中的页面信封。跨信封不变量仍由服务端强制执行。
  */
 export function ZoneManagePage({
   unitId,
@@ -109,7 +115,7 @@ export function ZoneManagePage({
   // previews throughout the editors.
   // 门户读取同时返回 `refUnits` 摘要，供编辑器各处的标签/图片预览使用。
   const portalQuery = useQuery({
-    ...zonePortalQueryOptions(resolvedUnitId),
+    ...zonePortalQueryOptions(resolvedUnitId, "home"),
     enabled: !!resolvedUnitId,
   });
   const zone =
@@ -134,6 +140,22 @@ export function ZoneManagePage({
     onSuccess: () => toast.success(t("zone:manage_saved")),
     onError: (mutationError) => toast.error(mutationError.message),
   });
+  const updateBoundary = useUpdateZoneBoundary({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const updateNav = useUpdateZoneNav({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const updateTheme = useUpdateZoneTheme({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const updatePage = useUpdateZonePage({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
 
   const [draft, setDraft] = useState<ZoneManageDraft | null>(null);
   const [rows, setRows] = useState<ZoneTranslationRow[]>([]);
@@ -141,14 +163,26 @@ export function ZoneManagePage({
   const [endsAt, setEndsAt] = useState("");
 
   useEffect(() => {
-    if (!zone) return;
-    setDraft(zoneConfigToDraft(zone.config));
+    if (!zone || !portalQuery.data?.page) return;
+    setDraft(
+      zoneShellToDraft({
+        boundary: zone.boundary,
+        nav: zone.nav,
+        theme: zone.theme,
+        page: portalQuery.data.page.config,
+      }),
+    );
     setRows(zoneTranslationsToRows(zone.translations));
     setStartsAt(zone.startsAt ?? "");
     setEndsAt(zone.endsAt ?? "");
-  }, [zone]);
+  }, [zone, portalQuery.data?.page]);
 
-  const saving = updateZone.isPending;
+  const saving =
+    updateZone.isPending ||
+    updateBoundary.isPending ||
+    updateNav.isPending ||
+    updateTheme.isPending ||
+    updatePage.isPending;
   const unitIdForSave = zone?.unitId ?? "";
   const issues = draft ? validateZoneManageDraft(draft) : [];
 
@@ -158,15 +192,32 @@ export function ZoneManagePage({
       toast.error(t("zone:manage_config_invalid"));
       return;
     }
-    updateZone.mutate({
+    if (withTranslations) {
+      updateZone.mutate({
+        unitId: unitIdForSave,
+        input: { translations: zoneRowsToTranslations(rows) },
+      });
+    }
+    updateBoundary.mutate({
       unitId: unitIdForSave,
-      input: {
-        config: zoneManageDraftToConfig(draft),
-        ...(withTranslations
-          ? { translations: zoneRowsToTranslations(rows) }
-          : {}),
-      },
+      input: { boundary: zoneManageDraftToBoundary(draft) },
     });
+    updateNav.mutate({
+      unitId: unitIdForSave,
+      input: { nav: zoneManageDraftToNav(draft) },
+    });
+    updateTheme.mutate({
+      unitId: unitIdForSave,
+      input: { theme: zoneManageDraftToTheme(draft) },
+    });
+    const pageId = portalQuery.data?.page.id;
+    if (pageId) {
+      updatePage.mutate({
+        unitId: unitIdForSave,
+        pageId,
+        input: { config: zoneManageDraftToHomePage(draft) },
+      });
+    }
   };
 
   const saveLifecycle = () => {
@@ -324,11 +375,7 @@ export function ZoneManagePage({
         </TabsContent>
 
         <TabsContent value="theme">
-          <ZoneManageThemeTab
-            draft={draft}
-            onDraftChange={setDraft}
-            refUnits={refUnits}
-          />
+          <ZoneManageThemeTab draft={draft} onDraftChange={setDraft} />
           {configSaveRow}
         </TabsContent>
 

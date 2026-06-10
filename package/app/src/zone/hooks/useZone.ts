@@ -8,7 +8,7 @@ import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates
  * 门户数据以 unitId 为键，而路由以 slug 为正则入口，因此门户读取按
  * slug → zone → 门户（zone + 引用 Unit 摘要）链式获取。
  */
-export function useZonePortal(slug: string) {
+export function useZonePortal(slug: string, pageSlug = "home") {
   const readContext = useReadLanguageContext();
   const zoneQuery = useQuery({
     ...zoneQueryOptions(slug, readContext.languages),
@@ -16,12 +16,13 @@ export function useZonePortal(slug: string) {
   });
   const unitId = zoneQuery.data?.unitId ?? "";
   const portalQuery = useQuery({
-    ...zonePortalQueryOptions(unitId, readContext.languages),
-    enabled: readContext.ready && !!unitId,
+    ...zonePortalQueryOptions(unitId, pageSlug, readContext.languages),
+    enabled: readContext.ready && !!unitId && !!pageSlug,
   });
 
   return {
     zone: portalQuery.data?.zone,
+    page: portalQuery.data?.page,
     refUnits: portalQuery.data?.refUnits,
     languages: readContext.languages,
     isLoading:

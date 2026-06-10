@@ -26,7 +26,12 @@ export function RichTextSection({
 }) {
   const title = useZoneSectionTitle(section, ctx.refUnits);
   const query = useInfiniteQuery(
-    zoneSectionInfiniteQuery(ctx.zone.unitId, section.id, ctx.languages),
+    zoneSectionInfiniteQuery(
+      ctx.zone.unitId,
+      ctx.pageId,
+      section.id,
+      ctx.languages,
+    ),
   );
 
   if (query.isLoading) {

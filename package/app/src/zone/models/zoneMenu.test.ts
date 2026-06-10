@@ -37,7 +37,13 @@ const refUnits: Record<string, ZoneRefUnitSummary> = {
   "untitled-label": { unitId: "untitled-label", type: "LABEL", title: null },
 };
 
-const ctx = { zoneSlug: "toaru-wiki", refUnits };
+const pages = [
+  { id: "home", slug: "home", position: 0 },
+  { id: "search", slug: "search", position: 1 },
+  { id: "feed", slug: "feed", position: 2 },
+];
+
+const ctx = { zoneSlug: "toaru-wiki", pages, refUnits };
 
 describe("zoneDetailKindForRef", () => {
   it("routes WIKI posts to wiki, other posts to post, the rest to unit", () => {
@@ -61,12 +67,17 @@ describe("zoneLinkHref", () => {
     );
   });
 
-  it("builds zone page hrefs (feed falls back to home until the route exists)", () => {
-    expect(zonePageHref("home", "toaru-wiki")).toBe("/z/toaru-wiki");
-    expect(zonePageHref("search", "toaru-wiki")).toBe("/z/toaru-wiki/search");
-    expect(zonePageHref("feed", "toaru-wiki")).toBe("/z/toaru-wiki");
+  it("builds zone page hrefs from page summaries", () => {
+    expect(zonePageHref("home", "toaru-wiki", pages)).toBe("/z/toaru-wiki");
+    expect(zonePageHref("search", "toaru-wiki", pages)).toBe(
+      "/z/toaru-wiki/pages/search",
+    );
+    expect(zonePageHref("feed", "toaru-wiki", pages)).toBe(
+      "/z/toaru-wiki/pages/feed",
+    );
+    expect(zonePageHref("missing", "toaru-wiki", pages)).toBeNull();
     expect(zoneLinkHref({ kind: "zonePage", pageId: "search" }, ctx)).toBe(
-      "/z/toaru-wiki/search",
+      "/z/toaru-wiki/pages/search",
     );
   });
 
@@ -162,7 +173,7 @@ describe("resolveZoneMenuNodes", () => {
             id: "page",
             label: null,
             labelKey: "zone:page_search",
-            href: "/z/toaru-wiki/search",
+            href: "/z/toaru-wiki/pages/search",
             isExternal: false,
             children: [],
           },

@@ -29,12 +29,43 @@ export const jsonColumnRegistry = [
   {
     database: "server",
     table: "Zone",
+    column: "boundary",
+    category: "enveloped",
+    contractSchema: {
+      symbol: "zoneBoundaryEnvelopeSchema",
+      path: "package/contract/src/zone/boundary-v1.ts",
+    },
+  },
+  {
+    database: "server",
+    table: "Zone",
+    column: "nav",
+    category: "enveloped",
+    contractSchema: {
+      symbol: "zoneNavEnvelopeSchema",
+      path: "package/contract/src/zone/nav-v1.ts",
+      supportingPaths: ["package/contract/src/zone/menu.ts"],
+    },
+  },
+  {
+    database: "server",
+    table: "Zone",
+    column: "theme",
+    category: "enveloped",
+    contractSchema: {
+      symbol: "zoneThemeEnvelopeSchema",
+      path: "package/contract/src/zone/theme-v1.ts",
+    },
+  },
+  {
+    database: "server",
+    table: "ZonePage",
     column: "config",
     category: "enveloped",
     contractSchema: {
-      symbol: "zoneConfigEnvelopeSchema",
-      path: "package/contract/src/zone/upgrade.ts",
-      supportingPaths: ["package/contract/src/zone/config-v1.ts"],
+      symbol: "zonePageEnvelopeSchema",
+      path: "package/contract/src/zone/page-v1.ts",
+      supportingPaths: ["package/contract/src/zone/section.ts"],
     },
   },
   {

@@ -5,11 +5,11 @@ import { type ZoneLinkTarget, zoneLinkTargetSchema } from "./link-target";
 // ANCHOR: 专区菜单树
 
 /**
- * Menus live inside the zone config envelope (not separately persisted like
- * `ContentStructure`): menus and the header/sections referencing them must
- * change in one atomic versioned write.
- * 菜单存放在专区配置信封内部（不像 `ContentStructure` 单独持久化）：
- * 菜单与引用它们的 header/sections 必须在一次原子化的版本写入中变更。
+ * Menus live inside the zone nav envelope (not separately persisted like
+ * `ContentStructure`): menus and the header referencing them must change in
+ * one atomic versioned write.
+ * 菜单存放在专区导航信封内部（不像 `ContentStructure` 单独持久化）：
+ * 菜单与引用它们的 header 必须在一次原子化的版本写入中变更。
  *
  * Node label resolution chain: `labelUnitId` (LABEL unit) → target unit's
  * translated title → `external.text`. A node pointing at a unit therefore

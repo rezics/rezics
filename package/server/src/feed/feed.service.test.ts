@@ -171,8 +171,8 @@ beforeEach(() => {
   };
   zoneResult = {
     unitId: "zone-1",
-    config: {
-      schema: "rezics/zone-config",
+    boundary: {
+      schema: "rezics/zone-boundary",
       version: 1,
       context: { kind: "realm", realmUnitId: "realm-1" },
       filters: {
@@ -180,10 +180,6 @@ beforeEach(() => {
         languages: ["en"],
         tagUnitIds: ["tag-1"],
       },
-      menus: [{ id: "main", nodes: [] }],
-      header: { menuId: "main" },
-      pages: { home: { sections: [] } },
-      theme: {},
     },
   };
   listMock.mockClear();

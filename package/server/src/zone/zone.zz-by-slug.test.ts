@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
 
 process.env.NODE_ENV = "test";
@@ -26,9 +26,46 @@ const updateZoneMock = mock(async (unitId: string, input: unknown) => ({
   unitId,
   input,
 }));
+const updateBoundaryMock = mock(async (unitId: string, boundary: unknown) => ({
+  ...zoneStub,
+  unitId,
+  boundary,
+}));
+const updateNavMock = mock(async (unitId: string, nav: unknown) => ({
+  ...zoneStub,
+  unitId,
+  nav,
+}));
+const updateThemeMock = mock(async (unitId: string, theme: unknown) => ({
+  ...zoneStub,
+  unitId,
+  theme,
+}));
+const createPageMock = mock(async (unitId: string, page: unknown) => ({
+  ...zoneStub,
+  unitId,
+  page,
+}));
+const updatePageMock = mock(
+  async (unitId: string, pageId: string, page: unknown) => ({
+    ...zoneStub,
+    unitId,
+    pageId,
+    page,
+  }),
+);
+const deletePageMock = mock(async (unitId: string, pageId: string) => ({
+  ...zoneStub,
+  unitId,
+  pageId,
+}));
 const deleteZoneMock = mock(async () => undefined);
 const sectionDataMock = mock(
-  async (_unitId: string, sectionId: string): Promise<unknown | null> =>
+  async (
+    _unitId: string,
+    _pageId: string,
+    sectionId: string,
+  ): Promise<unknown | null> =>
     sectionId === "s-known" ? { sectionId, items: [], nextCursor: null } : null,
 );
 
@@ -53,15 +90,39 @@ mock.module("@/governance", () => ({
   },
 }));
 
-const zoneConfigStub = {
-  schema: "rezics/zone-config",
+const zoneBoundaryStub = {
+  schema: "rezics/zone-boundary",
   version: 1,
   context: { kind: "global" },
   filters: {},
+};
+
+const zoneNavStub = {
+  schema: "rezics/zone-nav",
+  version: 1,
   menus: [{ id: "main", nodes: [] }],
   header: { menuId: "main" },
-  pages: { home: { sections: [] } },
-  theme: {},
+};
+
+const zoneThemeStub = {
+  schema: "rezics/zone-theme",
+  version: 1,
+};
+
+const zonePageStub = {
+  schema: "rezics/zone-page",
+  version: 1,
+  sections: [],
+};
+
+const homePageStub = {
+  id: "page-home",
+  zoneUnitId: "zone-1",
+  slug: "home",
+  position: 0,
+  config: zonePageStub,
+  createdAt: new Date("2026-01-01T00:00:00.000Z"),
+  updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 };
 
 const zoneStub = {
@@ -69,7 +130,11 @@ const zoneStub = {
   ownerRealmUnitId: "realm-1",
   slug: "featured",
   unit: { visibility: "PUBLIC", translations: [], supportLanguages: [] },
-  config: zoneConfigStub,
+  boundary: zoneBoundaryStub,
+  nav: zoneNavStub,
+  theme: zoneThemeStub,
+  homePageId: "page-home",
+  pages: [homePageStub],
   startsAt: null,
   endsAt: null,
 };
@@ -94,10 +159,20 @@ mock.module("./zone.service", () => ({
       if (slug === "featured") return zoneStub;
       return null;
     },
+    getPageBySlug: async (_unitId: string, pageSlug: string) => {
+      if (pageSlug === "home") return homePageStub;
+      return null;
+    },
     getPortalRefUnits: async () => ({
       "label-1": { unitId: "label-1", type: "LABEL", title: "Characters" },
     }),
     getSectionData: sectionDataMock,
+    updateBoundary: updateBoundaryMock,
+    updateNav: updateNavMock,
+    updateTheme: updateThemeMock,
+    createPage: createPageMock,
+    updatePage: updatePageMock,
+    deletePage: deletePageMock,
     checkLifecycle: () => null,
   },
 }));
@@ -112,8 +187,18 @@ beforeEach(() => {
   decideForIdentityMock.mockClear();
   createZoneMock.mockClear();
   updateZoneMock.mockClear();
+  updateBoundaryMock.mockClear();
+  updateNavMock.mockClear();
+  updateThemeMock.mockClear();
+  createPageMock.mockClear();
+  updatePageMock.mockClear();
+  deletePageMock.mockClear();
   deleteZoneMock.mockClear();
   sectionDataMock.mockClear();
+});
+
+afterAll(() => {
+  mock.restore();
 });
 
 describe("GET /zone/by-slug/:slug", () => {
@@ -123,7 +208,17 @@ describe("GET /zone/by-slug/:slug", () => {
       new Request("http://localhost/zone/by-slug/featured"),
     );
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(zoneStub);
+    const body = await res.json();
+    expect(body).toEqual({
+      ...zoneStub,
+      pages: [
+        {
+          ...homePageStub,
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+      ],
+    });
   });
 
   test("returns 404 when slug does not exist or resolves to non-zone", async () => {
@@ -135,33 +230,34 @@ describe("GET /zone/by-slug/:slug", () => {
   });
 });
 
-describe("GET /zone/:unitId/portal", () => {
+describe("GET /zone/:unitId/portal/:pageSlug", () => {
   test("returns the zone plus batch ref-unit summaries", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
-      new Request("http://localhost/zone/zone-1/portal?languages=zh-hant"),
+      new Request("http://localhost/zone/zone-1/portal/home?languages=zh-hant"),
     );
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.zone.unitId).toBe("zone-1");
+    expect(body.page.id).toBe("page-home");
     expect(body.refUnits["label-1"].title).toBe("Characters");
   });
 
   test("404s for unknown zones", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
-      new Request("http://localhost/zone/zone-x/portal"),
+      new Request("http://localhost/zone/zone-x/portal/home"),
     );
     expect(res.status).toBe(404);
   });
 });
 
-describe("GET /zone/:unitId/section/:sectionId", () => {
+describe("GET /zone/:unitId/page/:pageId/section/:sectionId", () => {
   test("executes a section with cursor and languages", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
       new Request(
-        "http://localhost/zone/zone-1/section/s-known?cursor=12&languages=en",
+        "http://localhost/zone/zone-1/page/page-home/section/s-known?cursor=12&languages=en",
       ),
     );
     expect(res.status).toBe(200);
@@ -170,16 +266,23 @@ describe("GET /zone/:unitId/section/:sectionId", () => {
       items: [],
       nextCursor: null,
     });
-    expect(sectionDataMock).toHaveBeenCalledWith("zone-1", "s-known", {
-      cursor: "12",
-      preferredLanguages: ["en"],
-    });
+    expect(sectionDataMock).toHaveBeenCalledWith(
+      "zone-1",
+      "page-home",
+      "s-known",
+      {
+        cursor: "12",
+        preferredLanguages: ["en"],
+      },
+    );
   });
 
   test("404s for unknown section ids", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
-      new Request("http://localhost/zone/zone-1/section/s-unknown"),
+      new Request(
+        "http://localhost/zone/zone-1/page/page-home/section/s-unknown",
+      ),
     );
     expect(res.status).toBe(404);
   });
@@ -190,7 +293,10 @@ describe("zone mutation policy", () => {
     slug: "new-zone",
     translations: [{ language: "en", title: "New Zone" }],
     ownerRealmUnitId: "realm-1",
-    config: zoneConfigStub,
+    boundary: zoneBoundaryStub,
+    nav: zoneNavStub,
+    theme: zoneThemeStub,
+    homePage: zonePageStub,
   };
 
   test("denies zone creation rejected by the owner realm policy", async () => {
@@ -234,7 +340,10 @@ describe("zone mutation policy", () => {
       expect.objectContaining({
         userId: "user-1",
         ownerRealmUnitId: "realm-1",
-        config: zoneConfigStub,
+        boundary: zoneBoundaryStub,
+        nav: zoneNavStub,
+        theme: zoneThemeStub,
+        homePage: zonePageStub,
       }),
     );
   });
@@ -244,23 +353,23 @@ describe("zone mutation policy", () => {
 
     const { zoneApi } = await import("./zone.api");
     // Elysia normalizes additionalProperties away before the handler, so
-    // legacy keys (e.g. `template`) never reach persistence.
+    // legacy keys never reach persistence.
     // Elysia 在 handler 之前会按 additionalProperties 归一化，因此旧键
-    // （例如 `template`）绝不会进入持久化。
+    // 绝不会进入持久化。
     const res = await zoneApi.handle(
       new Request("http://localhost/zone", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           ...createBody,
-          config: { ...zoneConfigStub, template: "wiki-classic" },
+          boundary: { ...zoneBoundaryStub, template: "wiki-classic" },
         }),
       }),
     );
 
     expect(res.status).toBe(200);
-    const input = createZoneMock.mock.calls[0]![0] as { config: object };
-    expect("template" in input.config).toBe(false);
+    const input = createZoneMock.mock.calls[0]![0] as { boundary: object };
+    expect("template" in input.boundary).toBe(false);
 
     // A structurally invalid envelope (wrong version literal) still 422s.
     // 结构无效的信封（错误的版本字面量）仍返回 422。
@@ -271,7 +380,7 @@ describe("zone mutation policy", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           ...createBody,
-          config: { ...zoneConfigStub, version: 99 },
+          boundary: { ...zoneBoundaryStub, version: 99 },
         }),
       }),
     );
@@ -328,7 +437,9 @@ describe("zone mutation policy", () => {
     );
 
     expect(res.status).toBe(200);
-    expect(decideForIdentityMock.mock.calls.map((call) => call[0])).toEqual([
+    expect(
+      (decideForIdentityMock.mock.calls as unknown[][]).map((call) => call[0]),
+    ).toEqual([
       {
         identity: currentIdentity,
         action: "zone.manage",

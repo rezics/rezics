@@ -4,11 +4,7 @@ import { t } from "elysia";
 // ANCHOR: Zone link target
 // ANCHOR: 专区链接目标
 
-export const zonePageIdSchema = t.Union([
-  t.Literal("home"),
-  t.Literal("search"),
-  t.Literal("feed"),
-]);
+export const zonePageIdSchema = t.String();
 
 export type ZonePageId = Static<typeof zonePageIdSchema>;
 

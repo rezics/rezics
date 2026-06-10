@@ -1,21 +1,16 @@
 import type {
   Language,
-  ZoneConfig,
-  ZoneConfigV1,
+  ZoneBoundary,
   ZoneMenuNode,
-  ZonePageId,
+  ZoneNav,
+  ZonePage,
   ZonePageSection,
-  ZonePages,
   ZoneSectionQuery,
   ZoneSectionQuerySortField,
+  ZoneTheme,
   ZoneTranslation,
 } from "@rezics/contract";
-import {
-  LANGUAGES,
-  ZONE_CONFIG_SCHEMA,
-  ZONE_CONFIG_V1_VERSION,
-  ZONE_MENU_MAX_DEPTH,
-} from "@rezics/contract";
+import { LANGUAGES, ZONE_MENU_MAX_DEPTH } from "@rezics/contract";
 
 // ANCHOR: Zone manage draft
 // ANCHOR: 专区管理草稿
@@ -29,22 +24,87 @@ import {
  * 内容）。草稿 → 信封必须是恒等往返：编辑器绝不归一化或改写服务端已
  * 校验过的内容。
  */
-export type ZoneManageDraft = Omit<ZoneConfigV1, "schema" | "version">;
+export type ZonePageId = string;
+export type ZonePages = Record<
+  string,
+  { sections: ZonePageSection[] } | undefined
+> & {
+  home: { sections: ZonePageSection[] };
+};
+
+export type ZoneManageDraft = Omit<ZoneBoundary, "schema" | "version"> &
+  Omit<ZoneNav, "schema" | "version"> & {
+    theme: Omit<ZoneTheme, "schema" | "version">;
+    pages: ZonePages;
+  };
 
 function deepClone<T>(value: T): T {
+  if (value === undefined) return value;
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-export function zoneConfigToDraft(config: ZoneConfig): ZoneManageDraft {
-  const { schema: _schema, version: _version, ...body } = config;
-  return deepClone(body);
+export function zoneShellToDraft(input: {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  page?: ZonePage;
+}): ZoneManageDraft {
+  const {
+    schema: _boundarySchema,
+    version: _boundaryVersion,
+    ...boundary
+  } = input.boundary;
+  const { schema: _navSchema, version: _navVersion, ...nav } = input.nav;
+  const {
+    schema: _themeSchema,
+    version: _themeVersion,
+    ...theme
+  } = input.theme;
+  return deepClone({
+    ...boundary,
+    ...nav,
+    theme,
+    pages: {
+      home: { sections: input.page?.sections ?? [] },
+    },
+  });
 }
 
-export function zoneManageDraftToConfig(draft: ZoneManageDraft): ZoneConfigV1 {
+export function zoneManageDraftToBoundary(
+  draft: ZoneManageDraft,
+): ZoneBoundary {
   return {
-    schema: ZONE_CONFIG_SCHEMA,
-    version: ZONE_CONFIG_V1_VERSION,
-    ...deepClone(draft),
+    schema: "rezics/zone-boundary",
+    version: 1,
+    context: deepClone(draft.context),
+    filters: deepClone(draft.filters),
+  };
+}
+
+export function zoneManageDraftToNav(draft: ZoneManageDraft): ZoneNav {
+  return {
+    schema: "rezics/zone-nav",
+    version: 1,
+    menus: deepClone(draft.menus),
+    header: deepClone(draft.header),
+  };
+}
+
+export function zoneManageDraftToTheme(draft: ZoneManageDraft): ZoneTheme {
+  return {
+    schema: "rezics/zone-theme",
+    version: 1,
+    tokens: deepClone(draft.theme.tokens),
+    images: deepClone(draft.theme.images),
+    layout: deepClone(draft.theme.layout),
+  };
+}
+
+export function zoneManageDraftToHomePage(draft: ZoneManageDraft): ZonePage {
+  return {
+    schema: "rezics/zone-page",
+    version: 1,
+    sections: deepClone(draft.pages.home.sections),
   };
 }
 
@@ -153,7 +213,7 @@ function* iterateSections(
   }
 }
 
-export const ZONE_PAGE_IDS = ["home", "search", "feed"] as const;
+export const ZONE_PAGE_IDS = ["home"] as const;
 
 function pageSections(
   pages: ZonePages,

@@ -3,18 +3,24 @@ import {
   type Language,
   mainMarkdownSource,
   markdownContentDoc,
-  parseZoneConfig,
+  parseZoneBoundary,
+  parseZoneNav,
+  parseZonePage,
+  parseZoneTheme,
   resolveReadLanguage,
   type UnitType,
   ZONE_MENU_MAX_DEPTH,
+  type ZoneBoundary,
   type ZoneCollectionItem,
-  type ZoneConfig,
   type ZoneContentSection,
   type ZoneMenuNode,
+  type ZoneNav,
+  type ZonePage as ZonePageConfig,
   type ZonePageSection,
   type ZoneSectionData,
   type ZoneSectionItem,
   type ZoneSectionQuery,
+  type ZoneTheme,
   type ZoneTranslation,
 } from "@rezics/contract";
 import { and, count, eq, inArray, ne, notInArray } from "drizzle-orm";
@@ -34,12 +40,26 @@ import {
   UnitSupportLanguage,
   UnitTranslation,
   Zone,
+  ZonePage,
 } from "../db/schema";
 
 const SECTION_DEFAULT_LIMIT = 12;
 
-export type ZoneWithRelations = Omit<typeof Zone.$inferSelect, "config"> & {
-  config: ZoneConfig;
+export type ZonePageWithConfig = Omit<
+  typeof ZonePage.$inferSelect,
+  "config"
+> & {
+  config: ZonePageConfig;
+};
+
+export type ZoneWithRelations = Omit<
+  typeof Zone.$inferSelect,
+  "boundary" | "nav" | "theme"
+> & {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  pages: ZonePageWithConfig[];
   unit?:
     | (typeof Unit.$inferSelect & {
         translations: (typeof UnitTranslation.$inferSelect)[];
@@ -75,16 +95,31 @@ type TranslatedUnitRow = {
 type ZoneCreateData = {
   unitId: string;
   ownerRealmUnitId: string;
-  config: ZoneConfig;
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  homePage: ZonePageConfig;
+  homePageSlug: string;
   startsAt: Date | null;
   endsAt: Date | null;
 };
 
 type ZoneUpdateData = Partial<{
   ownerRealmUnitId: string;
-  config: ZoneConfig;
   startsAt: Date | null;
   endsAt: Date | null;
+}>;
+
+type ZonePageCreateData = {
+  slug: string;
+  position: number;
+  config: ZonePageConfig;
+};
+
+type ZonePageUpdateData = Partial<{
+  slug: string;
+  position: number;
+  config: ZonePageConfig;
 }>;
 
 export type ZoneRepository = {
@@ -95,12 +130,36 @@ export type ZoneRepository = {
     unitIds: string[],
   ): Promise<Array<{ unitId: string; kind: string }>>;
   getByUnitId(unitId: string): Promise<ZoneWithRelations | null>;
+  findPageBySlug(
+    zoneUnitId: string,
+    slug: string,
+  ): Promise<ZonePageWithConfig | null>;
+  getPage(
+    zoneUnitId: string,
+    pageId: string,
+  ): Promise<ZonePageWithConfig | null>;
   findUnitBySlug(
     slugScope: string,
     slug: string,
   ): Promise<{ id: string; type: string; visibility: string } | null>;
   createZone(data: ZoneCreateData): Promise<ZoneWithRelations>;
   updateZone(unitId: string, data: ZoneUpdateData): Promise<ZoneWithRelations>;
+  updateZoneBoundary(
+    unitId: string,
+    boundary: ZoneBoundary,
+  ): Promise<ZoneWithRelations>;
+  updateZoneNav(unitId: string, nav: ZoneNav): Promise<ZoneWithRelations>;
+  updateZoneTheme(unitId: string, theme: ZoneTheme): Promise<ZoneWithRelations>;
+  createPage(
+    zoneUnitId: string,
+    data: ZonePageCreateData,
+  ): Promise<ZoneWithRelations>;
+  updatePage(
+    zoneUnitId: string,
+    pageId: string,
+    data: ZonePageUpdateData,
+  ): Promise<ZoneWithRelations>;
+  deletePage(zoneUnitId: string, pageId: string): Promise<ZoneWithRelations>;
   // Full-replace semantics: the array is the authoritative language set, so
   // the manage editor can both add and remove languages in one write.
   // 全量替换语义：数组即权威语言集合，使管理编辑器能在一次写入中同时
@@ -189,18 +248,17 @@ function mapUnitToSectionItem(
   };
 }
 
-// ANCHOR: config reference collection
-// ANCHOR: 配置引用收集
+// ANCHOR: zone reference collection
+// ANCHOR: 专区引用收集
 
-export type ZoneConfigRefs = {
+export type ZoneRefAccumulator = {
   labelUnitIds: Set<string>;
-  imageUnitIds: Set<string>;
   realmUnitIds: Set<string>;
   fragmentUnitIds: Set<string>;
   targetUnitIds: Set<string>;
 };
 
-function collectMenuNodeRefs(node: ZoneMenuNode, refs: ZoneConfigRefs) {
+function collectMenuNodeRefs(node: ZoneMenuNode, refs: ZoneRefAccumulator) {
   pushIfPresent(refs.labelUnitIds, node.labelUnitId);
   if (node.target?.kind === "unit") refs.targetUnitIds.add(node.target.unitId);
   for (const child of node.children ?? []) collectMenuNodeRefs(child, refs);
@@ -208,15 +266,16 @@ function collectMenuNodeRefs(node: ZoneMenuNode, refs: ZoneConfigRefs) {
 
 function collectCollectionItemRefs(
   items: readonly ZoneCollectionItem[] | undefined,
-  refs: ZoneConfigRefs,
+  refs: ZoneRefAccumulator,
 ) {
   for (const item of items ?? []) {
     pushIfPresent(refs.labelUnitIds, item.labelUnitId);
+    pushIfPresent(refs.targetUnitIds, item.displayUnitId);
     if (item.target.kind === "unit") refs.targetUnitIds.add(item.target.unitId);
   }
 }
 
-function collectQueryRefs(query: ZoneSectionQuery, refs: ZoneConfigRefs) {
+function collectQueryRefs(query: ZoneSectionQuery, refs: ZoneRefAccumulator) {
   if (query.realm && query.realm !== "context") {
     for (const id of query.realm.unitIds) refs.realmUnitIds.add(id);
   }
@@ -224,13 +283,11 @@ function collectQueryRefs(query: ZoneSectionQuery, refs: ZoneConfigRefs) {
 
 function collectContentSectionRefs(
   section: ZoneContentSection,
-  refs: ZoneConfigRefs,
+  refs: ZoneRefAccumulator,
 ) {
   pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
   switch (section.kind) {
     case "hero":
-      pushIfPresent(refs.imageUnitIds, section.bannerImageUnitId);
-      pushIfPresent(refs.imageUnitIds, section.logoImageUnitId);
       collectCollectionItemRefs(section.ctas, refs);
       break;
     case "richText":
@@ -250,7 +307,7 @@ function collectContentSectionRefs(
 
 function collectPageSectionRefs(
   section: ZonePageSection,
-  refs: ZoneConfigRefs,
+  refs: ZoneRefAccumulator,
 ) {
   if (section.kind === "tabs") {
     pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
@@ -274,38 +331,39 @@ function collectPageSectionRefs(
   collectContentSectionRefs(section, refs);
 }
 
-export function collectZoneConfigRefs(config: ZoneConfig): ZoneConfigRefs {
-  const refs: ZoneConfigRefs = {
+export function collectZoneRefs(input: {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  pages?: readonly ZonePageWithConfig[] | readonly { config: ZonePageConfig }[];
+}): ZoneRefAccumulator {
+  const refs: ZoneRefAccumulator = {
     labelUnitIds: new Set(),
-    imageUnitIds: new Set(),
     realmUnitIds: new Set(),
     fragmentUnitIds: new Set(),
     targetUnitIds: new Set(),
   };
 
-  if (config.context.kind === "realm") {
-    refs.realmUnitIds.add(config.context.realmUnitId);
+  if (input.boundary.context.kind === "realm") {
+    refs.realmUnitIds.add(input.boundary.context.realmUnitId);
   }
-  if (config.filters.realm && config.filters.realm !== "context") {
-    for (const id of config.filters.realm.unitIds) refs.realmUnitIds.add(id);
+  if (
+    input.boundary.filters.realm &&
+    input.boundary.filters.realm !== "context"
+  ) {
+    for (const id of input.boundary.filters.realm.unitIds) {
+      refs.realmUnitIds.add(id);
+    }
   }
-  pushIfPresent(refs.targetUnitIds, config.filters.targetUnitId);
-  for (const menu of config.menus) {
+  pushIfPresent(refs.targetUnitIds, input.boundary.filters.targetUnitId);
+  for (const menu of input.nav.menus) {
     for (const node of menu.nodes) collectMenuNodeRefs(node, refs);
   }
-  pushIfPresent(refs.imageUnitIds, config.header.logoImageUnitId);
-  for (const page of [
-    config.pages.home,
-    config.pages.search,
-    config.pages.feed,
-  ]) {
-    for (const section of page?.sections ?? []) {
+  for (const page of input.pages ?? []) {
+    for (const section of page.config.sections) {
       collectPageSectionRefs(section, refs);
     }
   }
-  pushIfPresent(refs.imageUnitIds, config.theme.images?.logoUnitId);
-  pushIfPresent(refs.imageUnitIds, config.theme.images?.bannerUnitId);
-  pushIfPresent(refs.imageUnitIds, config.theme.images?.backgroundUnitId);
 
   return refs;
 }
@@ -317,35 +375,29 @@ type LocatedSection =
   | { kind: "content"; section: ZoneContentSection }
   | { kind: "container"; section: ZonePageSection };
 
-function* iterateConfigSections(config: ZoneConfig): Generator<{
+function* iteratePageSections(page: ZonePageConfig): Generator<{
   section: ZonePageSection | ZoneContentSection;
   container: boolean;
 }> {
-  for (const page of [
-    config.pages.home,
-    config.pages.search,
-    config.pages.feed,
-  ]) {
-    for (const section of page?.sections ?? []) {
-      yield {
-        section,
-        container: section.kind === "tabs" || section.kind === "columns",
-      };
-      if (section.kind === "tabs") {
-        for (const tab of section.tabs) {
-          for (const inner of tab.sections) {
-            yield { section: inner, container: false };
-          }
+  for (const section of page.sections) {
+    yield {
+      section,
+      container: section.kind === "tabs" || section.kind === "columns",
+    };
+    if (section.kind === "tabs") {
+      for (const tab of section.tabs) {
+        for (const inner of tab.sections) {
+          yield { section: inner, container: false };
         }
       }
-      if (section.kind === "columns") {
-        for (const inner of [...section.side, ...section.main]) {
-          yield { section: inner, container: inner.kind === "tabs" };
-          if (inner.kind === "tabs") {
-            for (const tab of inner.tabs) {
-              for (const paneSection of tab.sections) {
-                yield { section: paneSection, container: false };
-              }
+    }
+    if (section.kind === "columns") {
+      for (const inner of [...section.side, ...section.main]) {
+        yield { section: inner, container: inner.kind === "tabs" };
+        if (inner.kind === "tabs") {
+          for (const tab of inner.tabs) {
+            for (const paneSection of tab.sections) {
+              yield { section: paneSection, container: false };
             }
           }
         }
@@ -355,10 +407,10 @@ function* iterateConfigSections(config: ZoneConfig): Generator<{
 }
 
 function findSectionById(
-  config: ZoneConfig,
+  page: ZonePageConfig,
   sectionId: string,
 ): LocatedSection | null {
-  for (const { section, container } of iterateConfigSections(config)) {
+  for (const { section, container } of iteratePageSections(page)) {
     if (section.id !== sectionId) continue;
     return container
       ? { kind: "container", section: section as ZonePageSection }
@@ -382,6 +434,26 @@ function* iterateMenuNodes(
     yield node;
     if (node.children) yield* iterateMenuNodes(node.children);
   }
+}
+
+function findNavPageReferences(nav: ZoneNav, pageId: string) {
+  const references: Array<{ menuId: string; nodeId: string; path: string[] }> =
+    [];
+  const visit = (
+    menuId: string,
+    nodes: readonly ZoneMenuNode[],
+    path: string[],
+  ) => {
+    for (const node of nodes) {
+      const nextPath = [...path, node.id];
+      if (node.target?.kind === "zonePage" && node.target.pageId === pageId) {
+        references.push({ menuId, nodeId: node.id, path: nextPath });
+      }
+      if (node.children) visit(menuId, node.children, nextPath);
+    }
+  };
+  for (const menu of nav.menus) visit(menu.id, menu.nodes, []);
+  return references;
 }
 
 // ANCHOR: drizzle repository
@@ -448,18 +520,31 @@ async function hydrateTranslatedUnits(
   );
 }
 
-export function parseZoneRowConfig(
-  zone: Pick<typeof Zone.$inferSelect, "unitId" | "config">,
-): ZoneConfig {
-  const config = parseZoneConfig(zone.config);
-  if (!config) {
-    // No old-shape compatibility (development-stage cutover); a row that
-    // fails the envelope union needs a factory reseed, not a silent skip.
-    // 不兼容旧形态（开发阶段切换）；未通过信封联合校验的行需要工厂重播种，
-    // 而不是静默跳过。
-    throw new AppError(500, "Zone config failed envelope validation", {
-      code: "ZONE_CONFIG_INVALID",
+export function parseZoneRowShell(
+  zone: Pick<typeof Zone.$inferSelect, "unitId" | "boundary" | "nav" | "theme">,
+): { boundary: ZoneBoundary; nav: ZoneNav; theme: ZoneTheme } {
+  const boundary = parseZoneBoundary(zone.boundary);
+  const nav = parseZoneNav(zone.nav);
+  const theme = parseZoneTheme(zone.theme);
+  if (!boundary || !nav || !theme) {
+    // No old-shape compatibility (development-stage cutover); a row that fails
+    // a split envelope needs a factory reseed, not a silent skip.
+    throw new AppError(500, "Zone shell failed envelope validation", {
+      code: "ZONE_SHELL_INVALID",
       details: { unitId: zone.unitId },
+    });
+  }
+  return { boundary, nav, theme };
+}
+
+export function parseZonePageRowConfig(
+  page: Pick<typeof ZonePage.$inferSelect, "id" | "config">,
+): ZonePageConfig {
+  const config = parseZonePage(page.config);
+  if (!config) {
+    throw new AppError(500, "Zone page failed envelope validation", {
+      code: "ZONE_PAGE_INVALID",
+      details: { pageId: page.id },
     });
   }
   return config;
@@ -468,11 +553,28 @@ export function parseZoneRowConfig(
 async function hydrateZone(
   zone: typeof Zone.$inferSelect,
 ): Promise<ZoneWithRelations> {
+  if (!zone.homePageId) {
+    throw new AppError(500, "Zone is missing a home page", {
+      code: "ZONE_HOME_PAGE_MISSING",
+      details: { unitId: zone.unitId },
+    });
+  }
   const map = await hydrateTranslatedUnits([zone.unitId]);
   const unit = map.get(zone.unitId);
+  const db = await getServerDb();
+  const pages = await db
+    .select()
+    .from(ZonePage)
+    .where(eq(ZonePage.zoneUnitId, zone.unitId))
+    .orderBy(ZonePage.position);
+  const shell = parseZoneRowShell(zone);
   return {
     ...zone,
-    config: parseZoneRowConfig(zone),
+    ...shell,
+    pages: pages.map((page) => ({
+      ...page,
+      config: parseZonePageRowConfig(page),
+    })),
     unit: unit ? ({ ...unit } as unknown as ZoneWithRelations["unit"]) : null,
   };
 }
@@ -505,6 +607,28 @@ function createDrizzleZoneRepository(): ZoneRepository {
         .limit(1);
       return zone ? hydrateZone(zone) : null;
     },
+    async findPageBySlug(zoneUnitId, slug) {
+      const db = await getServerDb();
+      const [page] = await db
+        .select()
+        .from(ZonePage)
+        .where(
+          and(eq(ZonePage.zoneUnitId, zoneUnitId), eq(ZonePage.slug, slug)),
+        )
+        .limit(1);
+      return page ? { ...page, config: parseZonePageRowConfig(page) } : null;
+    },
+    async getPage(zoneUnitId, pageId) {
+      const db = await getServerDb();
+      const [page] = await db
+        .select()
+        .from(ZonePage)
+        .where(
+          and(eq(ZonePage.zoneUnitId, zoneUnitId), eq(ZonePage.id, pageId)),
+        )
+        .limit(1);
+      return page ? { ...page, config: parseZonePageRowConfig(page) } : null;
+    },
     async findUnitBySlug(slugScope, slug) {
       const db = await getServerDb();
       const [unit] = await db
@@ -517,12 +641,41 @@ function createDrizzleZoneRepository(): ZoneRepository {
     async createZone(data) {
       const db = await getServerDb();
       const now = new Date();
-      const [zone] = await db
-        .insert(Zone)
-        .values({ ...data, updatedAt: now })
-        .returning();
-      if (!zone) throw new AppError(500, "Failed to create zone");
-      return hydrateZone(zone);
+      const created = await db.transaction(async (tx) => {
+        const [zone] = await tx
+          .insert(Zone)
+          .values({
+            unitId: data.unitId,
+            ownerRealmUnitId: data.ownerRealmUnitId,
+            boundary: data.boundary,
+            nav: data.nav,
+            theme: data.theme,
+            startsAt: data.startsAt,
+            endsAt: data.endsAt,
+            updatedAt: now,
+          })
+          .returning();
+        if (!zone) throw new AppError(500, "Failed to create zone");
+        const [homePage] = await tx
+          .insert(ZonePage)
+          .values({
+            zoneUnitId: data.unitId,
+            slug: data.homePageSlug,
+            position: 0,
+            config: data.homePage,
+            updatedAt: now,
+          })
+          .returning();
+        if (!homePage) throw new AppError(500, "Failed to create home page");
+        const [updated] = await tx
+          .update(Zone)
+          .set({ homePageId: homePage.id, updatedAt: now })
+          .where(eq(Zone.unitId, data.unitId))
+          .returning();
+        if (!updated) throw new AppError(500, "Failed to link home page");
+        return updated;
+      });
+      return hydrateZone(created);
     },
     async updateZone(unitId, data) {
       const db = await getServerDb();
@@ -530,6 +683,90 @@ function createDrizzleZoneRepository(): ZoneRepository {
         .update(Zone)
         .set({ ...data, updatedAt: new Date() })
         .where(eq(Zone.unitId, unitId))
+        .returning();
+      if (!zone) throw new AppError(404, "Zone not found");
+      return hydrateZone(zone);
+    },
+    async updateZoneBoundary(unitId, boundary) {
+      const db = await getServerDb();
+      const [zone] = await db
+        .update(Zone)
+        .set({ boundary, updatedAt: new Date() })
+        .where(eq(Zone.unitId, unitId))
+        .returning();
+      if (!zone) throw new AppError(404, "Zone not found");
+      return hydrateZone(zone);
+    },
+    async updateZoneNav(unitId, nav) {
+      const db = await getServerDb();
+      const [zone] = await db
+        .update(Zone)
+        .set({ nav, updatedAt: new Date() })
+        .where(eq(Zone.unitId, unitId))
+        .returning();
+      if (!zone) throw new AppError(404, "Zone not found");
+      return hydrateZone(zone);
+    },
+    async updateZoneTheme(unitId, theme) {
+      const db = await getServerDb();
+      const [zone] = await db
+        .update(Zone)
+        .set({ theme, updatedAt: new Date() })
+        .where(eq(Zone.unitId, unitId))
+        .returning();
+      if (!zone) throw new AppError(404, "Zone not found");
+      return hydrateZone(zone);
+    },
+    async createPage(zoneUnitId, data) {
+      const db = await getServerDb();
+      const [page] = await db
+        .insert(ZonePage)
+        .values({
+          zoneUnitId,
+          slug: data.slug,
+          position: data.position,
+          config: data.config,
+          updatedAt: new Date(),
+        })
+        .returning();
+      if (!page) throw new AppError(500, "Failed to create zone page");
+      const [zone] = await db
+        .update(Zone)
+        .set({ updatedAt: new Date() })
+        .where(eq(Zone.unitId, zoneUnitId))
+        .returning();
+      if (!zone) throw new AppError(404, "Zone not found");
+      return hydrateZone(zone);
+    },
+    async updatePage(zoneUnitId, pageId, data) {
+      const db = await getServerDb();
+      const [page] = await db
+        .update(ZonePage)
+        .set({ ...data, updatedAt: new Date() })
+        .where(
+          and(eq(ZonePage.zoneUnitId, zoneUnitId), eq(ZonePage.id, pageId)),
+        )
+        .returning();
+      if (!page) throw new AppError(404, "Zone page not found");
+      const [zone] = await db
+        .update(Zone)
+        .set({ updatedAt: new Date() })
+        .where(eq(Zone.unitId, zoneUnitId))
+        .returning();
+      if (!zone) throw new AppError(404, "Zone not found");
+      return hydrateZone(zone);
+    },
+    async deletePage(zoneUnitId, pageId) {
+      const db = await getServerDb();
+      await db
+        .delete(ZonePage)
+        .where(
+          and(eq(ZonePage.zoneUnitId, zoneUnitId), eq(ZonePage.id, pageId)),
+        );
+      const [zone] = await db
+        .update(Zone)
+        .set({ updatedAt: new Date() })
+        .where(eq(Zone.unitId, zoneUnitId))
         .returning();
       if (!zone) throw new AppError(404, "Zone not found");
       return hydrateZone(zone);
@@ -729,7 +966,7 @@ export class ZoneService {
     }
   }
 
-  private assertConfigStructure(config: ZoneConfig) {
+  private assertPageStructure(page: ZonePageConfig) {
     const fail = (
       code: string,
       message: string,
@@ -738,14 +975,17 @@ export class ZoneService {
       throw new AppError(400, message, { code, details });
     };
 
-    // Section ids unique across the whole config (containers included).
-    // 分区 id 在整个配置内唯一（包含容器）。
+    // Section ids are page-local because section data routes include pageId.
     const sectionIds = new Set<string>();
-    for (const { section } of iterateConfigSections(config)) {
+    for (const { section } of iteratePageSections(page)) {
       if (sectionIds.has(section.id)) {
-        fail("ZONE_SECTION_ID_DUPLICATE", "Zone section ids must be unique", {
-          id: section.id,
-        });
+        fail(
+          "ZONE_SECTION_ID_DUPLICATE",
+          "Zone page section ids must be unique",
+          {
+            id: section.id,
+          },
+        );
       }
       sectionIds.add(section.id);
       if (section.kind === "tabs") {
@@ -774,9 +1014,19 @@ export class ZoneService {
         }
       }
     }
+  }
+
+  private assertNavStructure(nav: ZoneNav) {
+    const fail = (
+      code: string,
+      message: string,
+      details?: Record<string, unknown>,
+    ) => {
+      throw new AppError(400, message, { code, details });
+    };
 
     const menuIds = new Set<string>();
-    for (const menu of config.menus) {
+    for (const menu of nav.menus) {
       if (menuIds.has(menu.id)) {
         fail("ZONE_MENU_ID_DUPLICATE", "Zone menu ids must be unique", {
           id: menu.id,
@@ -809,16 +1059,20 @@ export class ZoneService {
         }
       }
     }
-    if (!menuIds.has(config.header.menuId)) {
+    if (!menuIds.has(nav.header.menuId)) {
       fail("ZONE_HEADER_MENU_INVALID", "header.menuId must reference a menu", {
-        menuId: config.header.menuId,
+        menuId: nav.header.menuId,
       });
     }
   }
 
-  async validateZoneConfig(config: ZoneConfig): Promise<void> {
-    this.assertConfigStructure(config);
-    const refs = collectZoneConfigRefs(config);
+  async validateZoneShell(input: {
+    boundary: ZoneBoundary;
+    nav: ZoneNav;
+    theme: ZoneTheme;
+  }): Promise<void> {
+    this.assertNavStructure(input.nav);
+    const refs = collectZoneRefs(input);
     await Promise.all([
       this.assertUnitRefs(
         refs.labelUnitIds,
@@ -827,16 +1081,41 @@ export class ZoneService {
         "Zone config references invalid LABEL units",
       ),
       this.assertUnitRefs(
-        refs.imageUnitIds,
-        "IMAGE",
-        "ZONE_IMAGE_REF_INVALID",
-        "Zone config references invalid IMAGE units",
+        refs.realmUnitIds,
+        "REALM",
+        "ZONE_REALM_REF_INVALID",
+        "Zone config references invalid REALM units",
+      ),
+      this.assertWikiFragments(refs.fragmentUnitIds),
+      this.assertAnyUnitRefs(refs.targetUnitIds),
+    ]);
+  }
+
+  async validateZonePage(input: {
+    boundary: ZoneBoundary;
+    nav: ZoneNav;
+    theme: ZoneTheme;
+    page: ZonePageConfig;
+  }): Promise<void> {
+    this.assertPageStructure(input.page);
+    const refs = collectZoneRefs({
+      boundary: input.boundary,
+      nav: input.nav,
+      theme: input.theme,
+      pages: [{ config: input.page }],
+    });
+    await Promise.all([
+      this.assertUnitRefs(
+        refs.labelUnitIds,
+        "LABEL",
+        "ZONE_LABEL_REF_INVALID",
+        "Zone page references invalid LABEL units",
       ),
       this.assertUnitRefs(
         refs.realmUnitIds,
         "REALM",
         "ZONE_REALM_REF_INVALID",
-        "Zone config references invalid REALM units",
+        "Zone page references invalid REALM units",
       ),
       this.assertWikiFragments(refs.fragmentUnitIds),
       this.assertAnyUnitRefs(refs.targetUnitIds),
@@ -856,6 +1135,13 @@ export class ZoneService {
     return this.repository.getByUnitId(unit.id);
   }
 
+  async getPageBySlug(
+    zoneUnitId: string,
+    pageSlug: string,
+  ): Promise<ZonePageWithConfig | null> {
+    return this.repository.findPageBySlug(zoneUnitId, pageSlug);
+  }
+
   /**
    * Check lifecycle constraints.
    * Returns null if accessible, or a reason string if not.
@@ -872,7 +1158,11 @@ export class ZoneService {
     slug: string;
     translations: ZoneTranslation[];
     ownerRealmUnitId: string;
-    config: ZoneConfig;
+    boundary: ZoneBoundary;
+    nav: ZoneNav;
+    theme: ZoneTheme;
+    homePage: ZonePageConfig;
+    homePageSlug?: string;
     startsAt?: Date | null;
     endsAt?: Date | null;
   }): Promise<ZoneWithRelations> {
@@ -882,7 +1172,17 @@ export class ZoneService {
       "ZONE_REALM_REF_INVALID",
       "Zone owner must be a REALM unit",
     );
-    await this.validateZoneConfig(input.config);
+    await this.validateZoneShell({
+      boundary: input.boundary,
+      nav: input.nav,
+      theme: input.theme,
+    });
+    await this.validateZonePage({
+      boundary: input.boundary,
+      nav: input.nav,
+      theme: input.theme,
+      page: input.homePage,
+    });
 
     const unit = await unitService.create({
       userId: input.userId,
@@ -902,7 +1202,11 @@ export class ZoneService {
     return this.repository.createZone({
       unitId: unit.id,
       ownerRealmUnitId: input.ownerRealmUnitId,
-      config: input.config,
+      boundary: input.boundary,
+      nav: input.nav,
+      theme: input.theme,
+      homePage: input.homePage,
+      homePageSlug: input.homePageSlug ?? "home",
       startsAt: input.startsAt ?? null,
       endsAt: input.endsAt ?? null,
     });
@@ -913,7 +1217,6 @@ export class ZoneService {
     input: {
       ownerRealmUnitId?: string;
       translations?: ZoneTranslation[];
-      config?: ZoneConfig;
       startsAt?: Date | null;
       endsAt?: Date | null;
     },
@@ -926,9 +1229,6 @@ export class ZoneService {
         "Zone owner must be a REALM unit",
       );
     }
-    if (input.config) {
-      await this.validateZoneConfig(input.config);
-    }
     if (input.translations) {
       if (input.translations.length === 0) {
         throw new AppError(400, "Zones require at least one translation", {
@@ -939,10 +1239,113 @@ export class ZoneService {
     }
     return this.repository.updateZone(unitId, {
       ownerRealmUnitId: input.ownerRealmUnitId,
-      config: input.config,
       startsAt: input.startsAt,
       endsAt: input.endsAt,
     });
+  }
+
+  async updateBoundary(
+    unitId: string,
+    boundary: ZoneBoundary,
+  ): Promise<ZoneWithRelations> {
+    const current = await this.getByUnitId(unitId);
+    if (!current) throw new AppError(404, "Zone not found");
+    await this.validateZoneShell({
+      boundary,
+      nav: current.nav,
+      theme: current.theme,
+    });
+    for (const page of current.pages) {
+      await this.validateZonePage({
+        boundary,
+        nav: current.nav,
+        theme: current.theme,
+        page: page.config,
+      });
+    }
+    return this.repository.updateZoneBoundary(unitId, boundary);
+  }
+
+  async updateNav(unitId: string, nav: ZoneNav): Promise<ZoneWithRelations> {
+    const current = await this.getByUnitId(unitId);
+    if (!current) throw new AppError(404, "Zone not found");
+    await this.validateZoneShell({
+      boundary: current.boundary,
+      nav,
+      theme: current.theme,
+    });
+    return this.repository.updateZoneNav(unitId, nav);
+  }
+
+  async updateTheme(
+    unitId: string,
+    theme: ZoneTheme,
+  ): Promise<ZoneWithRelations> {
+    const current = await this.getByUnitId(unitId);
+    if (!current) throw new AppError(404, "Zone not found");
+    await this.validateZoneShell({
+      boundary: current.boundary,
+      nav: current.nav,
+      theme,
+    });
+    return this.repository.updateZoneTheme(unitId, theme);
+  }
+
+  async createPage(
+    zoneUnitId: string,
+    input: ZonePageCreateData,
+  ): Promise<ZoneWithRelations> {
+    const current = await this.getByUnitId(zoneUnitId);
+    if (!current) throw new AppError(404, "Zone not found");
+    await this.validateZonePage({
+      boundary: current.boundary,
+      nav: current.nav,
+      theme: current.theme,
+      page: input.config,
+    });
+    return this.repository.createPage(zoneUnitId, input);
+  }
+
+  async updatePage(
+    zoneUnitId: string,
+    pageId: string,
+    input: ZonePageUpdateData,
+  ): Promise<ZoneWithRelations> {
+    const current = await this.getByUnitId(zoneUnitId);
+    if (!current) throw new AppError(404, "Zone not found");
+    const page = current.pages.find((candidate) => candidate.id === pageId);
+    if (!page) throw new AppError(404, "Zone page not found");
+    if (input.config) {
+      await this.validateZonePage({
+        boundary: current.boundary,
+        nav: current.nav,
+        theme: current.theme,
+        page: input.config,
+      });
+    }
+    return this.repository.updatePage(zoneUnitId, pageId, input);
+  }
+
+  async deletePage(
+    zoneUnitId: string,
+    pageId: string,
+  ): Promise<ZoneWithRelations> {
+    const current = await this.getByUnitId(zoneUnitId);
+    if (!current) throw new AppError(404, "Zone not found");
+    if (current.homePageId === pageId) {
+      throw new AppError(400, "Zone home page cannot be deleted", {
+        code: "ZONE_HOME_PAGE_DELETE",
+        details: { pageId },
+      });
+    }
+    const references = findNavPageReferences(current.nav, pageId);
+    if (references.length > 0) {
+      throw new AppError(400, "Zone page is still referenced by navigation", {
+        code: "ZONE_PAGE_NAV_REFERENCED",
+        details: { pageId, references },
+      });
+    }
+    return this.repository.deletePage(zoneUnitId, pageId);
   }
 
   /**
@@ -956,12 +1359,17 @@ export class ZoneService {
    */
   async getPortalRefUnits(
     zone: ZoneWithRelations,
+    page: ZonePageWithConfig,
     options: { preferredLanguages?: string[] } = {},
   ): Promise<Record<string, ZoneSectionItem>> {
-    const refs = collectZoneConfigRefs(zone.config);
+    const refs = collectZoneRefs({
+      boundary: zone.boundary,
+      nav: zone.nav,
+      theme: zone.theme,
+      pages: [page],
+    });
     const ids = [
       ...refs.labelUnitIds,
-      ...refs.imageUnitIds,
       ...refs.realmUnitIds,
       ...refs.fragmentUnitIds,
       ...refs.targetUnitIds,
@@ -1011,6 +1419,7 @@ export class ZoneService {
 
   private async executeQuerySection(input: {
     zone: ZoneWithRelations;
+    pageId: string;
     sectionId: string;
     query: ZoneSectionQuery;
     limit: number;
@@ -1018,10 +1427,10 @@ export class ZoneService {
     preferredLanguages?: string[];
   }): Promise<ZoneSectionData> {
     const offset = input.cursor ? Number.parseInt(input.cursor, 10) || 0 : 0;
-    const config = input.zone.config;
-    const compiled = compileZoneSectionQuery(input.query, config.filters, {
+    const boundary = input.zone.boundary;
+    const compiled = compileZoneSectionQuery(input.query, boundary.filters, {
       contextRealmUnitId:
-        config.context.kind === "realm" ? config.context.realmUnitId : null,
+        boundary.context.kind === "realm" ? boundary.context.realmUnitId : null,
       viewerLanguageCandidates: input.preferredLanguages ?? [],
     });
     const result = await this.repository.searchSection({
@@ -1040,6 +1449,7 @@ export class ZoneService {
     });
     const nextOffset = offset + input.limit;
     return {
+      pageId: input.pageId,
       sectionId: input.sectionId,
       items,
       nextCursor: nextOffset < result.total ? String(nextOffset) : null,
@@ -1048,12 +1458,15 @@ export class ZoneService {
 
   async getSectionData(
     unitId: string,
+    pageId: string,
     sectionId: string,
     options: { cursor?: string | null; preferredLanguages?: string[] } = {},
   ): Promise<ZoneSectionData | null> {
     const zone = await this.getByUnitId(unitId);
     if (!zone) return null;
-    const located = findSectionById(zone.config, sectionId);
+    const page = await this.repository.getPage(unitId, pageId);
+    if (!page) return null;
+    const located = findSectionById(page.config, sectionId);
     if (!located) return null;
     if (located.kind === "container") {
       // Tabs/columns have no data of their own; panes resolve through the
@@ -1070,6 +1483,7 @@ export class ZoneService {
       case "query":
         return this.executeQuerySection({
           zone,
+          pageId,
           sectionId,
           query: section.query,
           limit: sectionLimit(section),
@@ -1079,6 +1493,7 @@ export class ZoneService {
       case "feed":
         return this.executeQuerySection({
           zone,
+          pageId,
           sectionId,
           query: this.feedSectionQuery(section.feedKind),
           limit: sectionLimit(section),
@@ -1087,7 +1502,11 @@ export class ZoneService {
         });
       case "collection": {
         const unitIds = section.items.flatMap((item) =>
-          item.target.kind === "unit" ? [item.target.unitId] : [],
+          item.displayUnitId
+            ? [item.displayUnitId]
+            : item.target.kind === "unit"
+              ? [item.target.unitId]
+              : [],
         );
         const rows = await this.repository.hydrateUnits(unitIds, {
           includeEntity: true,
@@ -1098,7 +1517,7 @@ export class ZoneService {
             ? [mapUnitToSectionItem(row, options.preferredLanguages)]
             : [];
         });
-        return { sectionId, items, nextCursor: null };
+        return { pageId, sectionId, items, nextCursor: null };
       }
       case "richText": {
         const translations = await this.repository.findFragmentTranslations(
@@ -1117,6 +1536,7 @@ export class ZoneService {
           translations[0] ??
           null;
         return {
+          pageId,
           sectionId,
           items: [],
           doc: (translation?.content as ContentDoc | null) ?? null,
@@ -1126,8 +1546,8 @@ export class ZoneService {
       }
       case "stats": {
         const contextRealmUnitId =
-          zone.config.context.kind === "realm"
-            ? zone.config.context.realmUnitId
+          zone.boundary.context.kind === "realm"
+            ? zone.boundary.context.realmUnitId
             : null;
         const stats: { articles?: number; members?: number } = {};
         if (contextRealmUnitId) {
@@ -1141,7 +1561,7 @@ export class ZoneService {
               undefined;
           }
         }
-        return { sectionId, items: [], stats, nextCursor: null };
+        return { pageId, sectionId, items: [], stats, nextCursor: null };
       }
       case "hero":
         throw new AppError(400, "Hero sections have no section data", {

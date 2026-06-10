@@ -1,5 +1,11 @@
 import { describe, expect, mock, test } from "bun:test";
-import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../../schema";
+import {
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+  Zone,
+  ZonePage,
+} from "../../schema";
 import {
   OFFICIAL_ZONE_DEFINITIONS,
   seedOfficialZones,
@@ -112,9 +118,22 @@ describe("seedOfficialZones", () => {
       zoneInserts.every(
         (call: InsertCall) =>
           call.value.ownerRealmUnitId === "realm-rezics" &&
-          call.value.config?.schema === "rezics/zone-config" &&
-          call.value.config?.version === 1 &&
-          call.value.config?.pages?.home?.sections?.length > 0,
+          call.value.boundary?.schema === "rezics/zone-boundary" &&
+          call.value.nav?.schema === "rezics/zone-nav" &&
+          call.value.theme?.schema === "rezics/zone-theme" &&
+          typeof call.value.homePageId === "string",
+      ),
+    ).toBe(true);
+
+    const pageInserts = db.calls.inserts.filter(
+      (call: InsertCall) => call.table === ZonePage,
+    );
+    expect(pageInserts).toHaveLength(OFFICIAL_ZONE_DEFINITIONS.length * 3);
+    expect(
+      pageInserts.every(
+        (call: InsertCall) =>
+          call.value.config?.schema === "rezics/zone-page" &&
+          call.value.config?.version === 1,
       ),
     ).toBe(true);
   });
@@ -146,7 +165,11 @@ describe("seedOfficialZones", () => {
         (call: InsertCall) =>
           call.conflict &&
           call.conflict.set.ownerRealmUnitId === "realm-rezics" &&
-          (call.conflict.set.config as { version?: number } | undefined)
+          (call.conflict.set.boundary as { version?: number } | undefined)
+            ?.version === 1 &&
+          (call.conflict.set.nav as { version?: number } | undefined)
+            ?.version === 1 &&
+          (call.conflict.set.theme as { version?: number } | undefined)
             ?.version === 1,
       ),
     ).toBe(true);

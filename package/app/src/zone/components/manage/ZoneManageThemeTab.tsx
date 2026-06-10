@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type { ZoneManageDraft } from "../../models/zoneManageDraft";
-import type { ZoneRefUnitMap } from "../../models/zoneMenu";
 import { ManageField, ManageGroupHeading } from "./ZoneManageFields";
 
 type ThemeTokens = NonNullable<ZoneTheme["tokens"]>;
@@ -37,15 +36,15 @@ const TOKEN_LABEL_KEYS = {
 } as const satisfies Record<keyof ThemeTokens, `zone:${string}`>;
 
 const IMAGE_FIELDS = [
-  "logoUnitId",
-  "bannerUnitId",
-  "backgroundUnitId",
+  "logoUrl",
+  "bannerUrl",
+  "backgroundUrl",
 ] as const satisfies readonly (keyof ThemeImages)[];
 
 const IMAGE_LABEL_KEYS = {
-  logoUnitId: "zone:manage_image_logo",
-  bannerUnitId: "zone:manage_image_banner",
-  backgroundUnitId: "zone:manage_image_background",
+  logoUrl: "zone:manage_image_logo",
+  bannerUrl: "zone:manage_image_banner",
+  backgroundUrl: "zone:manage_image_background",
 } as const satisfies Record<keyof ThemeImages, `zone:${string}`>;
 
 const NONE = "__none__";
@@ -61,23 +60,19 @@ function prune<T extends Record<string, unknown>>(value: T): T | undefined {
  * Theme tab. Token values are raw CSS color strings authored by the zone
  * manager (rendered via the zone-scoped `--zone-color-*` variables, never
  * app design tokens), so plain text inputs with a live swatch are the
- * honest editor. Image fields are raw IMAGE unit ids with refUnit title
- * previews — boundary: no IMAGE-unit search/picker API exists in
- * `@rezics/api` yet, so ids are pasted.
+ * honest editor. Image fields are HTTPS URLs; CSP and media-library product
+ * decisions stay outside zone schema validation.
  * 主题标签页。token 值是专区管理者撰写的原始 CSS 颜色字符串（经专区
  * 作用域的 `--zone-color-*` 变量渲染，绝非应用设计 token），因此带实时
- * 色样的纯文本输入是最诚实的编辑器。图片字段是原始 IMAGE unit id 加
- * refUnit 标题预览——边界：`@rezics/api` 尚无 IMAGE Unit 搜索/选择 API，
- * 故 id 需粘贴。
+ * 色样的纯文本输入是最诚实的编辑器。图片字段是 HTTPS URL；CSP 与媒体
+ * 库产品决策不属于 zone schema 校验。
  */
 export function ZoneManageThemeTab({
   draft,
   onDraftChange,
-  refUnits,
 }: {
   draft: ZoneManageDraft;
   onDraftChange: (draft: ZoneManageDraft) => void;
-  refUnits: ZoneRefUnitMap;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const tokens = draft.theme.tokens ?? {};
@@ -146,18 +141,10 @@ export function ZoneManageThemeTab({
           </ManageGroupHeading>
           <div className="grid gap-4 md:grid-cols-2">
             {IMAGE_FIELDS.map((field) => (
-              <ManageField
-                key={field}
-                label={t(IMAGE_LABEL_KEYS[field])}
-                hint={
-                  images[field]
-                    ? (refUnits[images[field] as string]?.title ?? undefined)
-                    : undefined
-                }
-              >
+              <ManageField key={field} label={t(IMAGE_LABEL_KEYS[field])}>
                 <Input
                   value={images[field] ?? ""}
-                  placeholder={t("common:unit_id")}
+                  placeholder="https://"
                   className="font-mono text-sm"
                   onChange={(event) =>
                     setImages({ [field]: event.target.value || undefined })
@@ -165,24 +152,17 @@ export function ZoneManageThemeTab({
                 />
               </ManageField>
             ))}
-            <ManageField
-              label={t("zone:manage_image_header_logo")}
-              hint={
-                draft.header.logoImageUnitId
-                  ? (refUnits[draft.header.logoImageUnitId]?.title ?? undefined)
-                  : undefined
-              }
-            >
+            <ManageField label={t("zone:manage_image_header_logo")}>
               <Input
-                value={draft.header.logoImageUnitId ?? ""}
-                placeholder={t("common:unit_id")}
+                value={draft.header.logoImageUrl ?? ""}
+                placeholder="https://"
                 className="font-mono text-sm"
                 onChange={(event) => {
                   const header = { ...draft.header };
                   if (event.target.value) {
-                    header.logoImageUnitId = event.target.value;
+                    header.logoImageUrl = event.target.value;
                   } else {
-                    delete header.logoImageUnitId;
+                    delete header.logoImageUrl;
                   }
                   onDraftChange({ ...draft, header });
                 }}
