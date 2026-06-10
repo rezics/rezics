@@ -11,6 +11,7 @@ export * from "./content/index";
 export * from "./dashboard/index";
 export * from "./dispatch";
 export * from "./editorial-path-scope";
+export * from "./envelope";
 export * from "./engagement/index";
 export * from "./entity/index";
 export * from "./feed/index";

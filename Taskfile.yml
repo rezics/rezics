@@ -103,6 +103,10 @@ tasks:
     desc: Database smoke test
     cmd: bun run tool/bin/tool.ts db smoke {{.CLI_ARGS}}
 
+  backfill:
+    desc: Resumable persisted JSON envelope backfills
+    cmd: bun run tool/bin/tool.ts backfill {{.CLI_ARGS}}
+
   # ── Seed / factory (tool/ CLI) ─────────────────────────────────────────
   seed:
     desc: Interactive seeder (pass args after --)

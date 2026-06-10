@@ -20,6 +20,12 @@ export const timestamps = () => ({
   updatedAt: updatedAt(),
 });
 
+/**
+ * Persisted JSON columns must be classified by the convention registry. Use
+ * `@rezics/contract` envelope helpers for self-describing versioned documents;
+ * `task check:convention` rejects unregistered JSON columns and in-database
+ * JSON mutation helpers.
+ */
 export const jsonData = () => jsonb();
 
 export const textArray = () => text().array();

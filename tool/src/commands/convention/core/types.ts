@@ -9,7 +9,8 @@ export type Rule =
   | "R11"
   | "R12"
   | "R13"
-  | "R14";
+  | "R14"
+  | "R15";
 
 export interface Violation {
   rule: Rule;
@@ -22,6 +23,7 @@ export interface ScanContext {
   apiFiles: string[];
   tsxFiles: string[];
   tsAndTsxFiles: string[];
+  schemaFiles: string[];
   r9CandidateFiles: string[];
   folderPaths: string[];
 }

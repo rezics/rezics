@@ -1,6 +1,7 @@
 import type { RuleScanner } from "../core/types";
 import { folderNamingRule } from "./folder-naming";
 import { i18nInvariantsRule } from "./i18n-invariants";
+import { jsonPolicyRule } from "./json-policy";
 import { localeParityRule } from "./locale-parity";
 import { queryKeysRule } from "./query-keys";
 import { routePrefixRule } from "./route-prefix";
@@ -17,6 +18,8 @@ export const ALL_RULES: RuleScanner[] = [
   uiAutonomyRule,
   i18nInvariantsRule,
   localeParityRule,
+  jsonPolicyRule,
 ];
 
 export { scanI18nSourceForTest } from "./i18n-invariants";
+export { scanJsonPolicyForTest } from "./json-policy";
