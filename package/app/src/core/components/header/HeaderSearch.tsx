@@ -143,6 +143,7 @@ function resolveScope(pathname: string): HeaderSearchScope {
 }
 
 function useHeaderSearchPresentation(pathname: string) {
+  const { t } = useTranslation();
   const scope = useMemo(() => resolveScope(pathname), [pathname]);
   const currentUser = useUserProfileStore((state) => state.user);
   const readContext = useReadLanguageContext();
@@ -179,7 +180,7 @@ function useHeaderSearchPresentation(pathname: string) {
       avatar: null,
       fallback: null,
       showAvatar: false,
-      placeholder: "搜尋此 realm",
+      placeholder: t("search:header_placeholder_realm"),
     };
   }
 
@@ -191,7 +192,7 @@ function useHeaderSearchPresentation(pathname: string) {
       avatar: null,
       fallback: null,
       showAvatar: false,
-      placeholder: "搜尋此 zone",
+      placeholder: t("search:header_placeholder_zone"),
     };
   }
 
@@ -213,7 +214,7 @@ function useHeaderSearchPresentation(pathname: string) {
       avatar: user?.avatar ?? null,
       fallback: handle.charAt(0).toUpperCase(),
       showAvatar: true,
-      placeholder: "搜尋此使用者",
+      placeholder: t("search:header_placeholder_user"),
     };
   }
 
@@ -224,7 +225,7 @@ function useHeaderSearchPresentation(pathname: string) {
     fallback: null,
     showAvatar: false,
     placeholder: pathname.startsWith("/book")
-      ? "搜尋書籍、書評、書單..."
-      : "Find anything",
+      ? t("search:header_placeholder_book")
+      : t("search:header_placeholder_general"),
   };
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useId, useState } from "react";
@@ -20,12 +21,14 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
   onValueChange,
   onSubmit,
   label,
-  placeholder,
+  placeholder: placeholderProp,
   className,
   startAdornmentIcon,
 }) => {
+  const { t } = useTranslation();
   const [focused, setFocused] = useState(false);
   const inputId = useId();
+  const placeholder = placeholderProp ?? t("search:header_placeholder_general");
   return (
     <div className={className}>
       {label && (
@@ -48,7 +51,7 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
         <Input
           id={inputId}
           autoComplete="off"
-          placeholder={placeholder ?? "Find anything"}
+          placeholder={placeholder}
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
           onFocus={() => setFocused(true)}
