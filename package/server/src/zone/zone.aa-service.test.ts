@@ -167,55 +167,65 @@ function basePage(): ZonePageConfig {
       {
         id: "s-columns",
         kind: "columns",
-        main: [
-          { id: "s-notice", kind: "richText", contentUnitId: "fragment-1" },
+        columns: [
           {
-            id: "s-tabs",
-            kind: "tabs",
-            tabs: [
+            id: "main",
+            ratio: 3,
+            sections: [
+              { id: "s-notice", kind: "richText", contentUnitId: "fragment-1" },
               {
-                id: "tab-new",
-                sections: [
+                id: "s-tabs",
+                kind: "tabs",
+                tabs: [
                   {
-                    id: "s-new",
-                    kind: "query",
-                    display: "covers",
-                    limit: 2,
-                    query: {
-                      target: "unit",
-                      types: ["BOOK"],
-                      realm: "context",
-                      languages: "viewer",
-                      sort: { field: "publishedAt", direction: "desc" },
-                    },
+                    id: "tab-new",
+                    sections: [
+                      {
+                        id: "s-new",
+                        kind: "query",
+                        display: "covers",
+                        limit: 2,
+                        query: {
+                          target: "unit",
+                          types: ["BOOK"],
+                          realm: "context",
+                          languages: "viewer",
+                          sort: { field: "publishedAt", direction: "desc" },
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    id: "tab-hot",
+                    sections: [{ id: "s-feed", kind: "feed", feedKind: "all" }],
                   },
                 ],
               },
-              {
-                id: "tab-hot",
-                sections: [{ id: "s-feed", kind: "feed", feedKind: "all" }],
-              },
             ],
           },
-        ],
-        side: [
           {
-            id: "s-stats",
-            kind: "stats",
-            metrics: ["articles", "members"],
-          },
-          {
-            id: "s-collection",
-            kind: "collection",
-            display: "list",
-            items: [
-              { target: { kind: "unit", unitId: "book-1" } },
+            id: "side",
+            ratio: 1,
+            sections: [
               {
-                target: {
-                  kind: "external",
-                  url: "https://example.com",
-                  text: "QQ 12345",
-                },
+                id: "s-stats",
+                kind: "stats",
+                metrics: ["articles", "members"],
+              },
+              {
+                id: "s-collection",
+                kind: "collection",
+                display: "list",
+                items: [
+                  { target: { kind: "unit", unitId: "book-1" } },
+                  {
+                    target: {
+                      kind: "external",
+                      url: "https://example.com",
+                      text: "QQ 12345",
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -508,8 +518,8 @@ describe("zone split validation", () => {
       ZonePageConfig["sections"][number],
       { kind: "columns" }
     >;
-    const tabs = columns.main[1] as Extract<
-      (typeof columns.main)[number],
+    const tabs = columns.columns[0]!.sections[1] as Extract<
+      (typeof columns.columns)[number]["sections"][number],
       { kind: "tabs" }
     >;
     tabs.defaultTabId = "missing-tab";
@@ -530,7 +540,9 @@ describe("zone split validation", () => {
       ZonePageConfig["sections"][number],
       { kind: "columns" }
     >;
-    (columns.main[0] as { contentUnitId: string }).contentUnitId = "post-1";
+    (
+      columns.columns[0]!.sections[0] as { contentUnitId: string }
+    ).contentUnitId = "post-1";
     await expectValidationCode(
       service.validateZonePage({
         boundary: baseBoundary(),

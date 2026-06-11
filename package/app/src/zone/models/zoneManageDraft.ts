@@ -385,7 +385,14 @@ export function createZoneSection(
     case "tabs":
       return { id, kind: "tabs", tabs: [] };
     case "columns":
-      return { id, kind: "columns", side: [], main: [] };
+      return {
+        id,
+        kind: "columns",
+        columns: [
+          { id: "main", ratio: 3, sections: [] },
+          { id: "side", ratio: 1, sections: [] },
+        ],
+      };
   }
 }
 
@@ -398,8 +405,9 @@ function* iterateSections(
       for (const tab of section.tabs) yield* iterateSections(tab.sections);
     }
     if (section.kind === "columns") {
-      yield* iterateSections(section.side);
-      yield* iterateSections(section.main);
+      for (const column of section.columns) {
+        yield* iterateSections(column.sections);
+      }
     }
   }
 }

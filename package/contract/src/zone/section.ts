@@ -259,10 +259,13 @@ export type ZoneStatsSection = Static<typeof zoneStatsSectionSchema>;
  * The 6 content primitives. Container nesting rules are encoded in the
  * union layering below: `tabs` panes hold content sections only; `columns`
  * panes hold content sections or `tabs`; `columns` itself appears only at
- * page top level. No tabs-in-tabs, no columns-in-anything.
+ * page top level. No tabs-in-tabs, no columns-in-anything. This keeps
+ * `columns` as an ordered page layout primitive instead of an arbitrary grid
+ * builder.
  * 6 个内容原语。容器嵌套规则编码在下方的联合分层中：`tabs` 面板只容纳
  * 内容分区；`columns` 面板容纳内容分区或 `tabs`；`columns` 自身只出现
- * 在页面顶层。不允许 tabs 套 tabs，不允许任何东西套 columns。
+ * 在页面顶层。不允许 tabs 套 tabs，不允许任何东西套 columns。这使
+ * `columns` 保持为有序页面布局原语，而不是任意网格构建器。
  */
 export const zoneContentSectionSchema = t.Union([
   zoneHeroSectionSchema,
@@ -296,13 +299,24 @@ export const zoneTabsSectionSchema = t.Object(
 
 export type ZoneTabsSection = Static<typeof zoneTabsSectionSchema>;
 
+export const zoneColumnSchema = t.Object(
+  {
+    id: t.String(),
+    ratio: t.Integer({ minimum: 1, maximum: 12 }),
+    sections: t.Array(
+      t.Union([zoneContentSectionSchema, zoneTabsSectionSchema]),
+    ),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneColumn = Static<typeof zoneColumnSchema>;
+
 export const zoneColumnsSectionSchema = t.Object(
   {
     ...zoneSectionBaseSchema.properties,
     kind: t.Literal("columns"),
-    sidePosition: t.Optional(t.Union([t.Literal("left"), t.Literal("right")])),
-    side: t.Array(t.Union([zoneContentSectionSchema, zoneTabsSectionSchema])),
-    main: t.Array(t.Union([zoneContentSectionSchema, zoneTabsSectionSchema])),
+    columns: t.Array(zoneColumnSchema, { minItems: 2, maxItems: 4 }),
   },
   { additionalProperties: false },
 );

@@ -14,10 +14,10 @@
 
 
 ## Zone
-- [ ] Toaru Wiki 這個名字是錯誤的， wiki zone 也是錯誤的，應該是 realm's zone，因爲 wiki zone 不止 wiki
-- [ ] 橫向滾動的 section 比如 /z/toaru 的 New Releases 應當改用 carousel 重寫
+- [ ] 
+- [ ] 
 - [ ] realms 有問題
-- [ ] zones zone 缺失
+- [ ] 
 
 
 ## 搜索

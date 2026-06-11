@@ -1722,133 +1722,149 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
             {
               id: "layout",
               kind: "columns",
-              sidePosition: "right",
-              main: [
+              columns: [
                 {
-                  id: "welcome",
-                  kind: "richText",
-                  contentUnitId: fragments.welcome,
-                },
-                {
-                  id: "spoiler-notice",
-                  kind: "richText",
-                  contentUnitId: fragments.spoilerNotice,
-                },
-                {
-                  id: "featured-characters",
-                  kind: "collection",
-                  display: "tiles",
-                  titleLabelUnitId: labels.characters,
-                  items: [
-                    entities.kamijou,
-                    entities.misaka,
-                    entities.accelerator,
-                    entities.index,
-                    entities.aleister,
-                  ].map((unitId) => ({ target: unitTarget(unitId) })),
-                },
-                {
-                  id: "activity",
-                  kind: "tabs",
-                  defaultTabId: "latest-edits",
-                  tabs: [
+                  id: "main",
+                  ratio: 3,
+                  sections: [
                     {
-                      id: "latest-edits",
-                      titleLabelUnitId: labels.latestEdits,
-                      sections: [
+                      id: "welcome",
+                      kind: "richText",
+                      contentUnitId: fragments.welcome,
+                    },
+                    {
+                      id: "spoiler-notice",
+                      kind: "richText",
+                      contentUnitId: fragments.spoilerNotice,
+                    },
+                    {
+                      id: "featured-characters",
+                      kind: "collection",
+                      display: "tiles",
+                      titleLabelUnitId: labels.characters,
+                      items: [
+                        entities.kamijou,
+                        entities.misaka,
+                        entities.accelerator,
+                        entities.index,
+                        entities.aleister,
+                      ].map((unitId) => ({ target: unitTarget(unitId) })),
+                    },
+                    {
+                      id: "activity",
+                      kind: "tabs",
+                      defaultTabId: "latest-edits",
+                      tabs: [
                         {
-                          id: "latest-edits-feed",
-                          kind: "feed",
-                          feedKind: "updates",
-                          limit: 12,
+                          id: "latest-edits",
+                          titleLabelUnitId: labels.latestEdits,
+                          sections: [
+                            {
+                              id: "latest-edits-feed",
+                              kind: "feed",
+                              feedKind: "updates",
+                              limit: 12,
+                            },
+                          ],
+                        },
+                        {
+                          id: "hot-discussions",
+                          titleLabelUnitId: labels.hotDiscussions,
+                          sections: [
+                            {
+                              id: "hot-discussions-query",
+                              kind: "query",
+                              display: "list",
+                              limit: 12,
+                              loadMore: true,
+                              query: {
+                                target: "post",
+                                realm: "context",
+                                sort: { field: "hotScore", direction: "desc" },
+                              },
+                            },
+                          ],
+                        },
+                        {
+                          id: "new-releases",
+                          titleLabelUnitId: labels.newReleases,
+                          sections: [
+                            {
+                              id: "new-releases-query",
+                              kind: "query",
+                              display: "covers",
+                              limit: 8,
+                              query: {
+                                target: "unit",
+                                types: ["BOOK"],
+                                realm: "context",
+                                sort: {
+                                  field: "publishedAt",
+                                  direction: "desc",
+                                },
+                              },
+                            },
+                          ],
                         },
                       ],
                     },
                     {
-                      id: "hot-discussions",
-                      titleLabelUnitId: labels.hotDiscussions,
-                      sections: [
+                      id: "wiki-stats",
+                      kind: "stats",
+                      metrics: ["articles", "members"],
+                    },
+                  ],
+                },
+                {
+                  id: "side",
+                  ratio: 1,
+                  sections: [
+                    {
+                      id: "quick-links",
+                      kind: "collection",
+                      display: "list",
+                      items: [
                         {
-                          id: "hot-discussions-query",
-                          kind: "query",
-                          display: "list",
-                          limit: 12,
-                          loadMore: true,
-                          query: {
-                            target: "post",
-                            realm: "context",
-                            sort: { field: "hotScore", direction: "desc" },
+                          target: unitTarget(entities.daihasei),
+                          labelUnitId: labels.events,
+                        },
+                        {
+                          target: unitTarget(entities.academyCity),
+                          labelUnitId: labels.locations,
+                        },
+                        {
+                          target: { kind: "zonePage", pageId: pageIds.search },
+                          labelUnitId: labels.terms,
+                        },
+                        {
+                          target: {
+                            kind: "external",
+                            url: "https://toaru.fandom.com/",
+                            text: "Toaru Wiki (Fandom)",
                           },
                         },
                       ],
                     },
                     {
-                      id: "new-releases",
+                      id: "book-covers",
+                      kind: "collection",
+                      display: "covers",
                       titleLabelUnitId: labels.newReleases,
-                      sections: [
-                        {
-                          id: "new-releases-query",
-                          kind: "query",
-                          display: "covers",
-                          limit: 8,
-                          query: {
-                            target: "unit",
-                            types: ["BOOK"],
-                            realm: "context",
-                            sort: { field: "publishedAt", direction: "desc" },
-                          },
-                        },
-                      ],
+                      items: ids.bookUnitIds.map((unitId) => ({
+                        target: unitTarget(unitId),
+                      })),
+                    },
+                    {
+                      id: "news",
+                      kind: "richText",
+                      contentUnitId: fragments.news,
+                    },
+                    {
+                      id: "did-you-know",
+                      kind: "richText",
+                      contentUnitId: fragments.didYouKnow,
                     },
                   ],
-                },
-                {
-                  id: "wiki-stats",
-                  kind: "stats",
-                  metrics: ["articles", "members"],
-                },
-              ],
-              side: [
-                {
-                  id: "quick-links",
-                  kind: "collection",
-                  display: "list",
-                  items: [
-                    {
-                      target: unitTarget(entities.daihasei),
-                      labelUnitId: labels.events,
-                    },
-                    {
-                      target: unitTarget(entities.academyCity),
-                      labelUnitId: labels.locations,
-                    },
-                    {
-                      target: { kind: "zonePage", pageId: pageIds.search },
-                      labelUnitId: labels.terms,
-                    },
-                    {
-                      target: {
-                        kind: "external",
-                        url: "https://toaru.fandom.com/",
-                        text: "Toaru Wiki (Fandom)",
-                      },
-                    },
-                  ],
-                },
-                {
-                  id: "book-covers",
-                  kind: "collection",
-                  display: "covers",
-                  titleLabelUnitId: labels.newReleases,
-                  items: ids.bookUnitIds.map((unitId) => ({
-                    target: unitTarget(unitId),
-                  })),
-                },
-                { id: "news", kind: "richText", contentUnitId: fragments.news },
-                {
-                  id: "did-you-know",
-                  kind: "richText",
-                  contentUnitId: fragments.didYouKnow,
                 },
               ],
             },

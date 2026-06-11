@@ -95,29 +95,39 @@ function samplePage(): ZonePage {
       {
         id: "cols",
         kind: "columns",
-        side: [{ id: "stats", kind: "stats", metrics: ["members"] }],
-        main: [
+        columns: [
           {
-            id: "tabs",
-            kind: "tabs",
-            defaultTabId: "t-1",
-            tabs: [
+            id: "main",
+            ratio: 3,
+            sections: [
               {
-                id: "t-1",
-                sections: [
+                id: "tabs",
+                kind: "tabs",
+                defaultTabId: "t-1",
+                tabs: [
                   {
-                    id: "q-1",
-                    kind: "query",
-                    query: {
-                      target: "unit",
-                      types: ["BOOK"],
-                      sort: { field: "publishedAt", direction: "desc" },
-                    },
-                    display: "grid",
+                    id: "t-1",
+                    sections: [
+                      {
+                        id: "q-1",
+                        kind: "query",
+                        query: {
+                          target: "unit",
+                          types: ["BOOK"],
+                          sort: { field: "publishedAt", direction: "desc" },
+                        },
+                        display: "grid",
+                      },
+                    ],
                   },
                 ],
               },
             ],
+          },
+          {
+            id: "side",
+            ratio: 1,
+            sections: [{ id: "stats", kind: "stats", metrics: ["members"] }],
           },
         ],
       },
@@ -265,10 +275,21 @@ describe("section ids", () => {
     expect(collectZoneSectionIds(sampleDraft().pages)).toEqual([
       "hero",
       "cols",
-      "stats",
       "tabs",
       "q-1",
+      "stats",
     ]);
+  });
+
+  it("creates a valid two-column section by default", () => {
+    expect(createZoneSection("columns", "cols")).toEqual({
+      id: "cols",
+      kind: "columns",
+      columns: [
+        { id: "main", ratio: 3, sections: [] },
+        { id: "side", ratio: 1, sections: [] },
+      ],
+    });
   });
 
   it("flags duplicate section ids including nested ones", () => {

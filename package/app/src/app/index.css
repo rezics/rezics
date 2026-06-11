@@ -6,3 +6,13 @@ input.MuiInputBase-input.MuiOutlinedInput-input:-webkit-autofill:active {
   -webkit-text-fill-color: inherit;
   caret-color: inherit;
 }
+
+.zone-columns-section {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 64rem) {
+  .zone-columns-section {
+    grid-template-columns: var(--zone-columns-template);
+  }
+}

@@ -319,11 +319,13 @@ function collectPageSectionRefs(
   }
   if (section.kind === "columns") {
     pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
-    for (const inner of [...section.side, ...section.main]) {
-      if (inner.kind === "tabs") {
-        collectPageSectionRefs(inner, refs);
-      } else {
-        collectContentSectionRefs(inner, refs);
+    for (const column of section.columns) {
+      for (const inner of column.sections) {
+        if (inner.kind === "tabs") {
+          collectPageSectionRefs(inner, refs);
+        } else {
+          collectContentSectionRefs(inner, refs);
+        }
       }
     }
     return;
@@ -392,12 +394,14 @@ function* iteratePageSections(page: ZonePageConfig): Generator<{
       }
     }
     if (section.kind === "columns") {
-      for (const inner of [...section.side, ...section.main]) {
-        yield { section: inner, container: inner.kind === "tabs" };
-        if (inner.kind === "tabs") {
-          for (const tab of inner.tabs) {
-            for (const paneSection of tab.sections) {
-              yield { section: paneSection, container: false };
+      for (const column of section.columns) {
+        for (const inner of column.sections) {
+          yield { section: inner, container: inner.kind === "tabs" };
+          if (inner.kind === "tabs") {
+            for (const tab of inner.tabs) {
+              for (const paneSection of tab.sections) {
+                yield { section: paneSection, container: false };
+              }
             }
           }
         }

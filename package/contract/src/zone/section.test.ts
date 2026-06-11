@@ -77,20 +77,83 @@ describe("zone section nesting rules", () => {
     const columnsSection = {
       id: "s-columns",
       kind: "columns",
-      sidePosition: "right",
-      side: [querySection],
-      main: [tabsSection],
+      columns: [
+        { id: "main", ratio: 3, sections: [tabsSection] },
+        { id: "side", ratio: 1, sections: [querySection] },
+      ],
     };
     expect(Value.Check(zoneColumnsSectionSchema, columnsSection)).toBe(true);
     expect(Value.Check(zonePageSectionSchema, columnsSection)).toBe(true);
     expect(
       Value.Check(zoneColumnsSectionSchema, {
         ...columnsSection,
-        main: [columnsSection],
+        columns: [
+          { id: "nested", ratio: 1, sections: [columnsSection] },
+          { id: "ok", ratio: 1, sections: [] },
+        ],
       }),
     ).toBe(false);
     // columns is not a content section, so it can never nest below page level
     expect(Value.Check(zoneContentSectionSchema, columnsSection)).toBe(false);
+  });
+
+  test("columns validate count, ratio bounds, and reject legacy fields", () => {
+    const column = { id: "a", ratio: 1, sections: [querySection] };
+    expect(
+      Value.Check(zoneColumnsSectionSchema, {
+        id: "s-columns",
+        kind: "columns",
+        columns: [
+          { id: "a", ratio: 7, sections: [querySection] },
+          { id: "b", ratio: 3, sections: [tabsSection] },
+          { id: "c", ratio: 2, sections: [] },
+          { id: "d", ratio: 1, sections: [] },
+        ],
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(zoneColumnsSectionSchema, {
+        id: "s-columns",
+        kind: "columns",
+        columns: [column],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneColumnsSectionSchema, {
+        id: "s-columns",
+        kind: "columns",
+        columns: [column, column, column, column, column],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneColumnsSectionSchema, {
+        id: "s-columns",
+        kind: "columns",
+        columns: [
+          { id: "a", ratio: 0, sections: [] },
+          { id: "b", ratio: 1, sections: [] },
+        ],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneColumnsSectionSchema, {
+        id: "s-columns",
+        kind: "columns",
+        columns: [
+          { id: "a", ratio: 13, sections: [] },
+          { id: "b", ratio: 1, sections: [] },
+        ],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneColumnsSectionSchema, {
+        id: "s-columns",
+        kind: "columns",
+        sidePosition: "right",
+        side: [querySection],
+        main: [tabsSection],
+      }),
+    ).toBe(false);
   });
 
   test("hero owns no text fields", () => {

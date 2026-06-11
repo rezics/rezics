@@ -303,42 +303,53 @@ function fixtureHomeSections(
         {
           id: "layout",
           kind: "columns",
-          sidePosition: faker.helpers.arrayElement(["left", "right"]),
-          main: [
-            unitQuerySection({ id: "main-works", limit: 18 }),
+          columns: [
             {
-              id: "main-tabs",
-              kind: "tabs",
-              tabs: [
+              id: "main",
+              ratio: 3,
+              sections: [
+                unitQuerySection({ id: "main-works", limit: 18 }),
                 {
-                  id: "hot",
-                  sections: [postQuerySection({ id: "main-hot", limit: 10 })],
-                },
-                {
-                  id: "recent",
-                  sections: [
+                  id: "main-tabs",
+                  kind: "tabs",
+                  tabs: [
                     {
-                      id: "main-feed",
-                      kind: "feed",
-                      feedKind: "all",
-                      limit: 10,
+                      id: "hot",
+                      sections: [
+                        postQuerySection({ id: "main-hot", limit: 10 }),
+                      ],
+                    },
+                    {
+                      id: "recent",
+                      sections: [
+                        {
+                          id: "main-feed",
+                          kind: "feed",
+                          feedKind: "all",
+                          limit: 10,
+                        },
+                      ],
                     },
                   ],
                 },
               ],
             },
-          ],
-          side: [
             {
-              id: "side-picks",
-              kind: "collection",
-              display: "list",
-              items: unitItems(refs.workUnitIds, 6),
-            },
-            {
-              id: "side-stats",
-              kind: "stats",
-              metrics: ["articles", "members"],
+              id: "side",
+              ratio: 1,
+              sections: [
+                {
+                  id: "side-picks",
+                  kind: "collection",
+                  display: "list",
+                  items: unitItems(refs.workUnitIds, 6),
+                },
+                {
+                  id: "side-stats",
+                  kind: "stats",
+                  metrics: ["articles", "members"],
+                },
+              ],
             },
           ],
         },

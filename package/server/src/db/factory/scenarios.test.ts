@@ -50,12 +50,14 @@ function collectSectionEntries(
       }
     }
     if (section.kind === "columns") {
-      for (const inner of [...section.side, ...section.main]) {
-        entries.push({ id: inner.id, kind: inner.kind });
-        if (inner.kind === "tabs") {
-          for (const tab of inner.tabs) {
-            for (const pane of tab.sections) {
-              entries.push({ id: pane.id, kind: pane.kind });
+      for (const column of section.columns) {
+        for (const inner of column.sections) {
+          entries.push({ id: inner.id, kind: inner.kind });
+          if (inner.kind === "tabs") {
+            for (const tab of inner.tabs) {
+              for (const pane of tab.sections) {
+                entries.push({ id: pane.id, kind: pane.kind });
+              }
             }
           }
         }
