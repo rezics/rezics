@@ -165,6 +165,8 @@
   "profile_about_help": "あなた自身について教えてください",
   "profile_avatar_help": "プロフィール写真の URL を入力してください",
   "profile_edit_title": "プロフィールの編集",
+  "profile_password_label": "新しいパスワード（任意）",
+  "profile_password_helper": "現在のパスワードを維持するには空欄のままにしてください",
   "security_unknown_device": "不明なデバイス",
   "user_cannot_resolve": "ユーザー情報を解決できません",
   "user_cannot_resolve_description": "最初にサインインするか、ユーザー詳細ページからこのページを開きます。",

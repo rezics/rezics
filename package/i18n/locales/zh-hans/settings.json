@@ -165,6 +165,8 @@
   "profile_about_help": "告诉我们你自己",
   "profile_avatar_help": "输入您的个人资料图片的 URL",
   "profile_edit_title": "编辑个人资料",
+  "profile_password_label": "新密码（可选）",
+  "profile_password_helper": "留空以保持当前密码",
   "security_unknown_device": "未知设备",
   "user_cannot_resolve": "无法解析用户信息",
   "user_cannot_resolve_description": "首先登录，或从用户详细信息页面打开此页面。",

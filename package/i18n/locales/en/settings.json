@@ -165,6 +165,8 @@
   "profile_about_help": "Tell us about yourself",
   "profile_avatar_help": "Enter a URL for your profile picture",
   "profile_edit_title": "Edit profile",
+  "profile_password_label": "New Password (optional)",
+  "profile_password_helper": "Leave empty to keep current password",
   "security_unknown_device": "Unknown device",
   "user_cannot_resolve": "Unable to resolve user information",
   "user_cannot_resolve_description": "Sign in first, or open this page from a user detail page.",

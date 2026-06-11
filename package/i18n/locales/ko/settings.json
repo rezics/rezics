@@ -165,6 +165,8 @@
   "profile_about_help": "자신에 대해 알려주세요",
   "profile_avatar_help": "프로필 사진의 URL을 입력하세요.",
   "profile_edit_title": "프로필 수정",
+  "profile_password_label": "새 비밀번호 (선택 사항)",
+  "profile_password_helper": "현재 비밀번호를 유지하려면 비워 두세요",
   "security_unknown_device": "알 수 없는 장치",
   "user_cannot_resolve": "사용자 정보를 확인할 수 없습니다.",
   "user_cannot_resolve_description": "먼저 로그인하거나 사용자 세부정보 페이지에서 이 페이지를 엽니다.",
