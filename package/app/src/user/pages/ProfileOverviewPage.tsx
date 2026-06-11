@@ -9,21 +9,12 @@ import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 import {
   ProfileActivityCard,
-  ProfilePinnedItemCard,
   ProfileStatLink,
 } from "@/user/components/ProfileOverviewCards";
 
 export const ProfileOverviewPage: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
   const { user, userId } = useProfileContext();
-
-  // MOCK: pinned items — first 6 published units by this user
-  // MOCK：置顶项 —— 该用户发布的前 6 个单元
-  const pinnedQuery = useLocalizedContentSearch({
-    userId,
-    sort: { field: "publishedAt", order: "desc" },
-    limit: 6,
-  });
 
   // MOCK: recent activity — latest published units
   // MOCK：最近动态 —— 最新发布的单元
@@ -47,7 +38,6 @@ export const ProfileOverviewPage: FC = () => {
     limit: 0,
   });
 
-  const pinned = pinnedQuery.data?.items ?? [];
   const recent = recentQuery.data?.items ?? [];
   const description = contentDocMarkdownFallback(user.description);
 
@@ -85,25 +75,6 @@ export const ProfileOverviewPage: FC = () => {
       {/* DESCRIPTION.md */}
       {/* DESCRIPTION.md —— 个人简介 */}
       {description.trim() !== "" && <DescriptionBox content={description} />}
-
-      <div>
-        <h6 className="text-sm font-semibold mb-3">{t("common:pinned")}</h6>
-        {pinned.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {pinned.map((item: ContentSearchDocument) => (
-              <ProfilePinnedItemCard
-                key={item.id}
-                item={item}
-                untitledLabel={t("common:untitled")}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-text-secondary">
-            {t("settings:profile_no_pinned_items")}
-          </p>
-        )}
-      </div>
 
       <div>
         <h6 className="text-sm font-semibold mb-3">

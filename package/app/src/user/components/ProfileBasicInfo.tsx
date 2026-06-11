@@ -38,6 +38,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
     sort: { field: "createdAt", order: "desc" },
     limit: 0,
   });
+  const canEditOwnProfile = isCurrentUser && canEdit;
 
   return (
     <>
@@ -63,8 +64,8 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
             <h6 className="text-base font-semibold">{user.name}</h6>
-            {canEdit && (
-              <Link to="/user/$userId/edit" params={{ userId }}>
+            {canEditOwnProfile && (
+              <Link to="/user/me/setting/profile">
                 <Button
                   size="icon"
                   variant="ghost"
@@ -149,8 +150,8 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         </div>
 
         <div className="w-full">
-          {canEdit ? (
-            <Link to="/user/$userId/edit" params={{ userId }} className="block">
+          {canEditOwnProfile ? (
+            <Link to="/user/me/setting/profile" className="block">
               <Button variant="outline" size="sm" className="w-full">
                 {t("settings:profile_edit_title")}
               </Button>
