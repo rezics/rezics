@@ -262,6 +262,7 @@ export const UniversalPaginator = <T,>({
   setCurrentPage,
   paginationTipsLabel,
 }: UniversalPaginatorProps<T>) => {
+  const { t } = useTranslation(["common"]);
   const [paginationPageNumber, setPaginationPageNumber] = useState<number>(
     externalItemsPerPage / itemsPerPage,
   );
