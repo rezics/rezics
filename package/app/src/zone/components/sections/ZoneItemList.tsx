@@ -1,4 +1,5 @@
 import type { ZoneSectionDisplay } from "@rezics/contract";
+import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { Image as ImageIcon } from "lucide-react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
@@ -13,13 +14,15 @@ export type ZoneListEntry = {
 /**
  * Shared layout for collection/query entries. The display variants map
  * onto three restrained layouts: rows (`list`), card grids
- * (`tiles`/`grid`/`featured` — featured uses wider cells), and horizontal
- * cover rails (`carousel`/`covers`). Image units may carry no resolved URL;
- * covers fall back to an icon placeholder and inline thumbnails are skipped.
+ * (`tiles`/`grid`/`featured` — featured uses wider cells), and DomainCarousel
+ * cover rails (`carousel` shows arrows and snapped cells; `covers` is a
+ * lightweight drag-free rail). Image units may carry no resolved URL; covers
+ * fall back to an icon placeholder and inline thumbnails are skipped.
  * collection/query 条目的共享布局。六种 display 变体映射到三种克制的
  * 布局：行（`list`）、卡片网格（`tiles`/`grid`/`featured`——featured 使用
- * 更宽的单元格）与横向封面栏（`carousel`/`covers`）。图片 Unit 可能没有
- * 已解析的 URL；封面回退到图标占位，行内缩略图直接跳过。
+ * 更宽的单元格）与 DomainCarousel 封面栏（`carousel` 显示箭头并按单元格
+ * 吸附，`covers` 是轻量的自由拖拽栏）。图片 Unit 可能没有已解析的 URL；
+ * 封面回退到图标占位，行内缩略图直接跳过。
  */
 export function ZoneItemList({
   entries,
@@ -62,10 +65,18 @@ export function ZoneItemList({
   }
 
   if (display === "carousel" || display === "covers") {
+    const isCarousel = display === "carousel";
+
     return (
-      <ul className="flex gap-4 overflow-x-auto pb-2">
-        {entries.map((entry) => (
-          <li key={entry.key} className="w-28 shrink-0 sm:w-32">
+      <DomainCarousel
+        items={entries}
+        itemKey={(entry) => entry.key}
+        itemClassName="!basis-auto pl-4"
+        showArrows={isCarousel}
+        dragFree={!isCarousel}
+        scrollSnap="start"
+        renderItem={(entry) => (
+          <div className="w-28 sm:w-32">
             <SafeLink href={entry.href} className="flex flex-col gap-2">
               <span className="flex aspect-[2/3] items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
                 {entry.imageUrl ? (
@@ -85,9 +96,9 @@ export function ZoneItemList({
                 {entry.label}
               </span>
             </SafeLink>
-          </li>
-        ))}
-      </ul>
+          </div>
+        )}
+      />
     );
   }
 
