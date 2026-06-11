@@ -14,7 +14,7 @@ import {
 
 export const ProfileOverviewPage: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-  const { user, userId } = useProfileContext();
+  const { user, userId, profileBasePath } = useProfileContext();
 
   // MOCK: recent activity — latest published units
   // MOCK：最近动态 —— 最新发布的单元
@@ -49,25 +49,25 @@ export const ProfileOverviewPage: FC = () => {
         <ProfileStatLink
           label={t("settings:profile_tab_shelves")}
           count={shelvesCountQuery.data?.total}
-          to={`/user/${userId}/shelves`}
+          to={`${profileBasePath}/shelves`}
           variant="compact"
         />
         <ProfileStatLink
           label={t("settings:profile_tab_content")}
           count={reviewsCountQuery.data?.total}
-          to={`/user/${userId}/content`}
+          to={`${profileBasePath}/content`}
           variant="compact"
         />
         <ProfileStatLink
           label={t("settings:profile_tab_followers")}
           count={user.followersCount ?? 0}
-          to={`/user/${userId}/followers`}
+          to={`${profileBasePath}/followers`}
           variant="compact"
         />
         <ProfileStatLink
           label={t("settings:profile_following")}
           count={user.followingsCount ?? 0}
-          to={`/user/${userId}/followers?filter=following`}
+          to={`${profileBasePath}/followers?filter=following`}
           variant="compact"
         />
       </div>

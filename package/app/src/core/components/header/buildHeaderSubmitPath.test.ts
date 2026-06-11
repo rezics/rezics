@@ -15,7 +15,7 @@ describe("buildHeaderSubmitPath", () => {
   });
 
   test("user-by-id pathname submits to /user/:id/search", () => {
-    expect(buildHeaderSubmitPath("/user/u-3/content", "epic")).toBe(
+    expect(buildHeaderSubmitPath("/user/u-3/profile/content", "epic")).toBe(
       "/user/u-3/search?q=epic",
     );
   });

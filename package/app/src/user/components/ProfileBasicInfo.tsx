@@ -13,12 +13,14 @@ interface ProfileBasicInfoProps {
   user: UserDTO;
   isCurrentUser: boolean;
   userId: string;
+  profileBasePath?: string;
 }
 
 export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   user,
   isCurrentUser,
   userId,
+  profileBasePath = `/user/${userId}/profile`,
 }) => {
   const { t } = useTranslation(["settings"]);
   const canEdit = useCanEdit({
@@ -186,22 +188,22 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           <ProfileStatLink
             label={t("settings:profile_tab_shelves")}
             count={shelvesCountQuery.data?.total}
-            to={`/user/${userId}/shelves`}
+            to={`${profileBasePath}/shelves`}
           />
           <ProfileStatLink
             label={t("settings:profile_tab_content")}
             count={reviewsCountQuery.data?.total}
-            to={`/user/${userId}/content`}
+            to={`${profileBasePath}/content`}
           />
           <ProfileStatLink
             label={t("settings:profile_tab_followers")}
             count={user.followersCount ?? 0}
-            to={`/user/${userId}/followers`}
+            to={`${profileBasePath}/followers`}
           />
           <ProfileStatLink
             label={t("settings:profile_following")}
             count={user.followingsCount ?? 0}
-            to={`/user/${userId}/followers?filter=following`}
+            to={`${profileBasePath}/followers?filter=following`}
           />
         </div>
       </div>

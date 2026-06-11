@@ -17,8 +17,9 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import type React from "react";
-import { Link, unitHref } from "@/shared/ui/link";
+import { Link } from "@/shared/ui/link";
 import { logout, useUserProfileStore } from "@/user";
+import { userProfileHref } from "@/user/models/profileRoutes";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
 
 export type AccountMenuProps = {
@@ -67,8 +68,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
             <Link
               to={
                 user?.unitId
-                  ? unitHref({
-                      type: "USER",
+                  ? userProfileHref({
                       unitId: user.unitId,
                       slug: user.slug ?? null,
                     })

@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_mainLayout/user/me/reaction")({
     const userId = useUserProfileStore.getState().user?.unitId;
     if (userId) {
       throw redirect({
-        to: "/user/$userId/reactions",
+        to: "/user/$userId/profile/reactions",
         params: { userId },
       });
     }

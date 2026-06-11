@@ -32,7 +32,7 @@ const SORT_OPTION_LABEL = {
 
 export const ShelvesTabSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "search"]);
-  const { user, userId, isCurrentUser } = useProfileContext();
+  const { user, userId, isCurrentUser, profileBasePath } = useProfileContext();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -99,7 +99,7 @@ export const ShelvesTabSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
-      <ShelfContentsSearchEntry userId={userId} userSlug={user.slug} />
+      <ShelfContentsSearchEntry profileBasePath={profileBasePath} />
 
       <InnerFilterPanel
         chips={kindChips}
@@ -142,9 +142,8 @@ export const ShelvesTabSection: FC = () => {
 };
 
 const ShelfContentsSearchEntry: FC<{
-  userId: string;
-  userSlug?: string;
-}> = ({ userId, userSlug }) => {
+  profileBasePath: string;
+}> = ({ profileBasePath }) => {
   const { t } = useTranslation(["entity"]);
   const card = (
     <Card
@@ -162,24 +161,8 @@ const ShelfContentsSearchEntry: FC<{
     </Card>
   );
 
-  if (userSlug) {
-    return (
-      <Link
-        to="/u/$userSlug/shelves/search"
-        params={{ userSlug }}
-        className="no-underline"
-      >
-        {card}
-      </Link>
-    );
-  }
-
   return (
-    <Link
-      to="/user/$userId/shelves/search"
-      params={{ userId }}
-      className="no-underline"
-    >
+    <Link to={`${profileBasePath}/shelves/search`} className="no-underline">
       {card}
     </Link>
   );

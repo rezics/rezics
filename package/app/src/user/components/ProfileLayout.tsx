@@ -13,6 +13,7 @@ interface ProfileContextValue {
   user: UserDTO;
   isCurrentUser: boolean;
   userId: string;
+  profileBasePath: string;
 }
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -30,6 +31,12 @@ export const ProfileLayout: FC = () => {
     userId?: string;
     userSlug?: string;
   };
+  const userSpaceBasePath = routeUserId
+    ? `/user/${routeUserId}`
+    : userSlug
+      ? `/u/${userSlug}`
+      : "";
+  const profileBasePath = `${userSpaceBasePath}/profile`;
   const currentUser = useUserProfileStore((s) => s.user);
   const isCurrentUser = routeUserId
     ? currentUser?.unitId === routeUserId
@@ -81,7 +88,7 @@ export const ProfileLayout: FC = () => {
 
   return (
     <ProfileContext.Provider
-      value={{ user, isCurrentUser, userId: user.unitId }}
+      value={{ user, isCurrentUser, userId: user.unitId, profileBasePath }}
     >
       <div className="w-full max-w-12/16 mx-auto">
         <div className="flex flex-col md:flex-row md:gap-12 px-4 pb-12">
@@ -90,12 +97,12 @@ export const ProfileLayout: FC = () => {
               user={user}
               isCurrentUser={isCurrentUser}
               userId={user.unitId}
+              profileBasePath={profileBasePath}
             />
           </aside>
           <ProfileShell
-            userId={user.unitId}
-            userSlug={user.slug ?? userSlug}
             isCurrentUser={isCurrentUser}
+            profileBasePath={profileBasePath}
           />
         </div>
       </div>

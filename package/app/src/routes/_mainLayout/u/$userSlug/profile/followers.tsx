@@ -6,7 +6,7 @@ const FollowersTabSection = lazyRouteComponent(
   "FollowersTabSection",
 );
 
-export const Route = createFileRoute("/_mainLayout/u/$userSlug/followers")({
+export const Route = createFileRoute("/_mainLayout/u/$userSlug/profile/followers")({
   component: FollowersTabSection,
   ...routeBoundaries(),
 });

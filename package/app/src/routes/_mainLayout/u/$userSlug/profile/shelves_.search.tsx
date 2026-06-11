@@ -6,7 +6,7 @@ const ShelfContentsSearchSection = lazyRouteComponent(
 );
 
 export const Route = createFileRoute(
-  "/_mainLayout/u/$userSlug/shelves_/search",
+  "/_mainLayout/u/$userSlug/profile/shelves_/search",
 )({
   component: ShelfContentsSearchSection,
 });

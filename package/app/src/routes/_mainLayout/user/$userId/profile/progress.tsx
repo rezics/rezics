@@ -39,7 +39,7 @@ function ProgressRoute() {
       libraryUrlConfig={urlConfigFromSearch(search)}
       onResetLibraryUrlConfig={() =>
         navigate({
-          to: "/u/$userSlug/progress",
+          to: "/user/$userId/profile/progress",
           search: (prev: ProgressSearch) => ({ ...prev, cols: undefined }),
         })
       }
@@ -47,7 +47,9 @@ function ProgressRoute() {
   );
 }
 
-export const Route = createFileRoute("/_mainLayout/u/$userSlug/progress")({
+export const Route = createFileRoute(
+  "/_mainLayout/user/$userId/profile/progress",
+)({
   validateSearch: (search: Record<string, unknown>): ProgressSearch => ({
     cols: typeof search.cols === "string" ? search.cols : undefined,
   }),
