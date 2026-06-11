@@ -4,6 +4,7 @@ import {
   useDecideRealmCaseMutation,
 } from "@rezics/api/governance/governance";
 import type { ModerationCaseDTO } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -33,6 +34,7 @@ interface RealmModerationQueueSectionProps {
 export function RealmModerationQueueSection({
   realmUnitId,
 }: RealmModerationQueueSectionProps) {
+  const { t } = useTranslation(["community", "common"]);
   const casesQuery = useQuery(
     governanceRealmCaseListQuery(realmUnitId, { limit: 25 }),
   );
@@ -63,43 +65,43 @@ export function RealmModerationQueueSection({
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-text-tertiary" aria-hidden />
         <h2 className="text-base font-semibold leading-ui text-text-primary">
-          Moderation
+          {t("community:moderation_title")}
         </h2>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={ClipboardList}
-          title="Reports"
+          title={t("community:moderation_reports")}
           value={String(openCases.length)}
-          detail="Realm-scoped cases for reports, owner delegation, and moderation decisions."
+          detail={t("community:moderation_reports_detail")}
         >
           <Link to="/staff" search={{ realmUnitId, accountUserId: undefined }}>
             <Button variant="outline" size="sm">
-              Staff cases
+              {t("community:moderation_staff_cases")}
             </Button>
           </Link>
         </MetricCard>
         <MetricCard
           icon={Scale}
-          title="Cases"
+          title={t("community:moderation_cases")}
           value={String(linkedCases.size)}
-          detail="Realm cases escalated to a linked platform moderation case."
+          detail={t("community:moderation_cases_detail")}
         >
           {Array.from(linkedCases)
             .slice(0, 1)
             .map((caseId) => (
               <Link key={caseId} to="/staff/case/$caseId" params={{ caseId }}>
                 <Button variant="outline" size="sm">
-                  Open case
+                  {t("community:moderation_open_case")}
                 </Button>
               </Link>
             ))}
         </MetricCard>
         <MetricCard
           icon={UserRoundCheck}
-          title="Sanctions"
+          title={t("community:moderation_sanctions")}
           value={String(new Set(subjectUserIds).size)}
-          detail="Subject accounts connected to this realm's cases and enforcement history."
+          detail={t("community:moderation_sanctions_detail")}
         >
           {firstSubjectUserId ? (
             <Link
@@ -107,32 +109,32 @@ export function RealmModerationQueueSection({
               params={{ targetUserId: firstSubjectUserId }}
             >
               <Button variant="outline" size="sm">
-                Account safety
+                {t("community:moderation_account_safety")}
               </Button>
             </Link>
           ) : null}
         </MetricCard>
         <MetricCard
           icon={FileClock}
-          title="Audit"
+          title={t("community:moderation_audit")}
           value={
             auditQuery.isLoading ? "..." : String(auditQuery.data?.length ?? 0)
           }
-          detail="Recent privileged actions scoped to this realm when audit access is available."
+          detail={t("community:moderation_audit_detail")}
         >
           <Link
             to="/staff/audit"
             search={{ targetKind: "realm", targetId: realmUnitId }}
           >
             <Button variant="outline" size="sm">
-              Audit view
+              {t("community:moderation_audit_view")}
             </Button>
           </Link>
         </MetricCard>
       </div>
       <Card surface="contained">
         <CardHeader>
-          <CardTitle>Realm cases</CardTitle>
+          <CardTitle>{t("community:moderation_realm_cases")}</CardTitle>
         </CardHeader>
         <CardContent>
           {casesQuery.isLoading ? (
@@ -152,20 +154,20 @@ export function RealmModerationQueueSection({
               ))}
             </div>
           ) : (
-            <EmptyState title="No realm cases" />
+            <EmptyState title={t("community:moderation_no_realm_cases")} />
           )}
         </CardContent>
       </Card>
       {auditQuery.isError ? (
         <div className="rounded-md bg-error-fill/10 p-4 text-sm leading-body text-error-text">
-          Unable to load realm audit records.
+          {t("community:moderation_audit_error")}
         </div>
       ) : auditQuery.data?.length ? (
         <section className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <FileClock className="h-4 w-4 text-text-tertiary" aria-hidden />
             <h3 className="text-base font-semibold leading-ui text-text-primary">
-              Recent audit
+              {t("community:moderation_recent_audit")}
             </h3>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
@@ -211,10 +213,11 @@ function RealmCaseCard({
   item: ModerationCaseDTO;
   realmUnitId: string;
 }) {
-  const summary = item.reason ?? item.safeSummary ?? "No summary recorded.";
+  const { t } = useTranslation(["community", "common"]);
+  const summary = item.reason ?? item.safeSummary ?? t("community:moderation_no_summary");
   const updatedAt = formatDate(item.updatedAt);
   const decideCase = useDecideRealmCaseMutation({
-    onSuccess: () => toast.success("Case updated."),
+    onSuccess: () => toast.success(t("community:moderation_case_updated")),
     onError: (error) => toast.error(error.message),
   });
   const isPendingReview = item.target.kind === "unit" && item.state === "new";
@@ -234,7 +237,7 @@ function RealmCaseCard({
             {item.target.kind}:{item.target.id}
           </span>
           {item.parentCaseId ? (
-            <Badge variant="outline">case linked</Badge>
+            <Badge variant="outline">{t("community:moderation_case_linked")}</Badge>
           ) : null}
         </div>
         <p className="m-0 text-sm leading-body text-text-secondary">
@@ -247,13 +250,13 @@ function RealmCaseCard({
               params={{ targetUserId: item.subjectUserId }}
               className="underline-offset-2 hover:text-text-primary hover:underline"
             >
-              Subject {item.subjectUserId}
+              {t("community:moderation_subject", { id: item.subjectUserId })}
             </Link>
           ) : null}
           {item.assignedToUserId ? (
-            <span>Assigned {item.assignedToUserId}</span>
+            <span>{t("community:moderation_assigned", { id: item.assignedToUserId })}</span>
           ) : null}
-          {updatedAt ? <span>Updated {updatedAt}</span> : null}
+          {updatedAt ? <span>{t("community:moderation_updated", { date: updatedAt })}</span> : null}
         </div>
         {isPendingReview || item.parentCaseId ? (
           <div className="flex flex-wrap gap-2">
@@ -265,7 +268,7 @@ function RealmCaseCard({
                   disabled={decideCase.isPending}
                   onClick={() => decide("approve", "approved_for_realm")}
                 >
-                  Approve
+                  {t("common:approve")}
                 </Button>
                 <Button
                   variant="outline"
@@ -273,7 +276,7 @@ function RealmCaseCard({
                   disabled={decideCase.isPending}
                   onClick={() => decide("remove", "removed_from_realm")}
                 >
-                  Remove
+                  {t("common:remove")}
                 </Button>
               </>
             ) : null}
@@ -283,7 +286,7 @@ function RealmCaseCard({
                 params={{ caseId: item.parentCaseId }}
               >
                 <Button variant="outline" size="sm">
-                  Open case
+                  {t("community:moderation_open_case")}
                 </Button>
               </Link>
             ) : null}
