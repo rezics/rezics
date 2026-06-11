@@ -304,7 +304,7 @@
   "shelf_move_to_page_title": "移至頁面",
   "shelf_new_title": "新增書架",
   "shelf_no_description": "沒有描述",
-  "shelf_no_search_matches": "沒有符合您搜尋條件的貨架",
+  "shelf_no_search_matches": "沒有符合您搜尋條件的書架",
   "shelf_none_for_this_book": "找不到包含這本書的書架",
   "shelf_none_found": "找不到書架",
   "shelf_ops_failed": "{count} 個操作失敗。",
