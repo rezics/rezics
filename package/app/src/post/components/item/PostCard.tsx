@@ -71,7 +71,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   overflowContent,
   moderationMenuContent,
 }) => {
-  const { t } = useTranslation("common");
+  const { t } = useTranslation(["common", "community"]);
   const navigate = useNavigate();
   const rootPostUnitId = post.unitId;
   const resolvedVariantContext = variantContext ?? post.variantContext;
@@ -228,7 +228,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                         type="button"
                         size="sm"
                         variant="ghost"
-                        aria-label="Realm moderation actions"
+                        aria-label={t("community:realm_moderation_actions")}
                         className={cn(
                           "h-8 w-8 p-0 text-text-secondary",
                           moderationControlStateClass,
