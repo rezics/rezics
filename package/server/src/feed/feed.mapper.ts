@@ -22,8 +22,12 @@ export function postHrefForFeed(post: PostDTO, realmUnitId?: string | null) {
   return `/post/${post.unitId}`;
 }
 
-function targetUnitForPost(post: PostDTO): FeedWorkSummary | null {
+function targetUnitForPost(
+  post: PostDTO,
+  resolved?: FeedWorkSummary | null,
+): FeedWorkSummary | null {
   if (!post.targetUnitId) return null;
+  if (resolved) return resolved;
   return {
     unitId: post.targetUnitId,
     title: post.extra?.book?.title ?? null,
@@ -36,6 +40,7 @@ export function mapPostToFeedRow(
     realm?: FeedContentRow["realm"];
     realmUnitId?: string | null;
     reason?: string | null;
+    resolvedTargetUnit?: FeedWorkSummary | null;
   } = {},
 ): FeedContentRow {
   return {
@@ -44,7 +49,7 @@ export function mapPostToFeedRow(
     post,
     href: postHrefForFeed(post, input.realmUnitId),
     realm: input.realm ?? null,
-    targetUnit: targetUnitForPost(post),
+    targetUnit: targetUnitForPost(post, input.resolvedTargetUnit),
     variantContext: post.variantContext ?? null,
     recommendationReason: input.reason ?? null,
   };
