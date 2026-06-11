@@ -57,7 +57,7 @@ export function RealmPollPostCreateForm({
         onSuccess: (post) => {
           onCreated?.(post);
           if (status === "PUBLISHED") {
-            toast.success("Post published.");
+            toast.success(t("community:post_published"));
             navigate({ to: postHref(post.unitId) });
           } else {
             toast.success(t("common:save_draft"));

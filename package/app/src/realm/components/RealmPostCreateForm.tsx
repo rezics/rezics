@@ -104,10 +104,10 @@ export function RealmPostCreateForm({
             return;
           }
           if (contentRequiresApproval) {
-            toast.success("Submitted for review.");
+            toast.success(tc("community:post_submitted_for_review"));
             navigate({ to: detailHref });
           } else {
-            toast.success("Post published.");
+            toast.success(tc("community:post_published"));
             navigate({ to: postHref(post.unitId) });
           }
         },
