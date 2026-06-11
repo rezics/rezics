@@ -143,7 +143,7 @@ function resolveScope(pathname: string): HeaderSearchScope {
 }
 
 function useHeaderSearchPresentation(pathname: string) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(["search"]);
   const scope = useMemo(() => resolveScope(pathname), [pathname]);
   const currentUser = useUserProfileStore((state) => state.user);
   const readContext = useReadLanguageContext();
