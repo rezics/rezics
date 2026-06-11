@@ -192,6 +192,8 @@
   "realm_list_selected_count": "{count} selected",
   "realm_list_sign_in_prompt": "Sign in to see and manage the realms you have joined.",
   "realm_list_subtitle": "Realms you have joined.",
+  "realm_list_tab_administered": "Administered",
+  "realm_list_tab_joined": "Joined",
   "realm_list_title": "Realms",
   "realm_manage": "Manage Realm",
   "realm_member_count": "{count} members",

@@ -1,4 +1,4 @@
-import type { ZoneSectionData } from "@rezics/contract";
+import type { ZoneListQuery, ZoneSectionData } from "@rezics/contract";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { zoneApi } from "./zone.api";
 import { zoneKeys } from "./zone.keys";
@@ -12,6 +12,21 @@ export const zoneQueryOptions = (
     queryFn: () => zoneApi.getBySlug(slug, languages),
     enabled: !!slug,
     staleTime: 1000 * 60 * 10,
+  });
+
+export const myZonesQuery = (query?: ZoneListQuery) =>
+  queryOptions({
+    queryKey: zoneKeys.mine(query),
+    queryFn: () => zoneApi.mine(query),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export const zonesByUserQuery = (userId: string, query?: ZoneListQuery) =>
+  queryOptions({
+    queryKey: zoneKeys.byUser(userId, query),
+    queryFn: () => zoneApi.byUser(userId, query),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
   });
 
 export const zonePortalQueryOptions = (
@@ -47,6 +62,8 @@ export const zoneSectionInfiniteQuery = (
   });
 
 export const zoneQueries = {
+  mine: myZonesQuery,
+  byUser: zonesByUserQuery,
   detail: zoneQueryOptions,
   portal: zonePortalQueryOptions,
   sectionInfinite: zoneSectionInfiniteQuery,

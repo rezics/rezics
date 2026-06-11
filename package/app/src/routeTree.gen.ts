@@ -68,6 +68,8 @@ import { Route as MainLayoutZoneUnitIdSearchRouteImport } from './routes/_mainLa
 import { Route as MainLayoutZoneUnitIdManageRouteImport } from './routes/_mainLayout/zone/$unitId/manage'
 import { Route as MainLayoutZSlugSearchRouteImport } from './routes/_mainLayout/z/$slug/search'
 import { Route as MainLayoutZSlugManageRouteImport } from './routes/_mainLayout/z/$slug/manage'
+import { Route as MainLayoutUserUserIdZonesRouteImport } from './routes/_mainLayout/user_/$userId/zones'
+import { Route as MainLayoutUserUserIdRealmsRouteImport } from './routes/_mainLayout/user_/$userId/realms'
 import { Route as MainLayoutUserMeRecoveryRouteImport } from './routes/_mainLayout/user/me/recovery'
 import { Route as MainLayoutUserMeReactionRouteImport } from './routes/_mainLayout/user/me/reaction'
 import { Route as MainLayoutUserMeFollowRouteImport } from './routes/_mainLayout/user/me/follow'
@@ -75,18 +77,18 @@ import { Route as MainLayoutUserMeEditRouteImport } from './routes/_mainLayout/u
 import { Route as MainLayoutUserMeBookmarkRouteImport } from './routes/_mainLayout/user/me/bookmark'
 import { Route as MainLayoutUserUserIdShelvesRouteImport } from './routes/_mainLayout/user/$userId/shelves'
 import { Route as MainLayoutUserUserIdSearchRouteImport } from './routes/_mainLayout/user/$userId/search'
-import { Route as MainLayoutUserUserIdRealmsRouteImport } from './routes/_mainLayout/user/$userId/realms'
 import { Route as MainLayoutUserUserIdReactionsRouteImport } from './routes/_mainLayout/user/$userId/reactions'
 import { Route as MainLayoutUserUserIdFollowersRouteImport } from './routes/_mainLayout/user/$userId/followers'
 import { Route as MainLayoutUserUserIdEditRouteImport } from './routes/_mainLayout/user/$userId/edit'
 import { Route as MainLayoutUserUserIdContentRouteImport } from './routes/_mainLayout/user/$userId/content'
 import { Route as MainLayoutUserUserIdCollectionRouteImport } from './routes/_mainLayout/user/$userId/collection'
 import { Route as MainLayoutUserUserIdActivityRouteImport } from './routes/_mainLayout/user/$userId/activity'
+import { Route as MainLayoutUUserSlugZonesRouteImport } from './routes/_mainLayout/u_/$userSlug/zones'
+import { Route as MainLayoutUUserSlugRealmsRouteImport } from './routes/_mainLayout/u_/$userSlug/realms'
 import { Route as MainLayoutUMeProgressRouteImport } from './routes/_mainLayout/u/me/progress'
 import { Route as MainLayoutUMeDraftsRouteImport } from './routes/_mainLayout/u/me/drafts'
 import { Route as MainLayoutUUserSlugShelvesRouteImport } from './routes/_mainLayout/u/$userSlug/shelves'
 import { Route as MainLayoutUUserSlugSearchRouteImport } from './routes/_mainLayout/u/$userSlug/search'
-import { Route as MainLayoutUUserSlugRealmsRouteImport } from './routes/_mainLayout/u/$userSlug/realms'
 import { Route as MainLayoutUUserSlugReactionsRouteImport } from './routes/_mainLayout/u/$userSlug/reactions'
 import { Route as MainLayoutUUserSlugProgressRouteImport } from './routes/_mainLayout/u/$userSlug/progress'
 import { Route as MainLayoutUUserSlugFollowersRouteImport } from './routes/_mainLayout/u/$userSlug/followers'
@@ -485,6 +487,18 @@ const MainLayoutZSlugManageRoute = MainLayoutZSlugManageRouteImport.update({
   path: '/z/$slug/manage',
   getParentRoute: () => MainLayoutRoute,
 } as any)
+const MainLayoutUserUserIdZonesRoute =
+  MainLayoutUserUserIdZonesRouteImport.update({
+    id: '/user_/$userId/zones',
+    path: '/user/$userId/zones',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
+const MainLayoutUserUserIdRealmsRoute =
+  MainLayoutUserUserIdRealmsRouteImport.update({
+    id: '/user_/$userId/realms',
+    path: '/user/$userId/realms',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutUserMeRecoveryRoute =
   MainLayoutUserMeRecoveryRouteImport.update({
     id: '/recovery',
@@ -525,12 +539,6 @@ const MainLayoutUserUserIdSearchRoute =
     path: '/search',
     getParentRoute: () => MainLayoutUserUserIdRoute,
   } as any)
-const MainLayoutUserUserIdRealmsRoute =
-  MainLayoutUserUserIdRealmsRouteImport.update({
-    id: '/realms',
-    path: '/realms',
-    getParentRoute: () => MainLayoutUserUserIdRoute,
-  } as any)
 const MainLayoutUserUserIdReactionsRoute =
   MainLayoutUserUserIdReactionsRouteImport.update({
     id: '/reactions',
@@ -567,6 +575,18 @@ const MainLayoutUserUserIdActivityRoute =
     path: '/activity',
     getParentRoute: () => MainLayoutUserUserIdRoute,
   } as any)
+const MainLayoutUUserSlugZonesRoute =
+  MainLayoutUUserSlugZonesRouteImport.update({
+    id: '/u_/$userSlug/zones',
+    path: '/u/$userSlug/zones',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
+const MainLayoutUUserSlugRealmsRoute =
+  MainLayoutUUserSlugRealmsRouteImport.update({
+    id: '/u_/$userSlug/realms',
+    path: '/u/$userSlug/realms',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutUMeProgressRoute = MainLayoutUMeProgressRouteImport.update({
   id: '/u/me/progress',
   path: '/u/me/progress',
@@ -587,12 +607,6 @@ const MainLayoutUUserSlugSearchRoute =
   MainLayoutUUserSlugSearchRouteImport.update({
     id: '/search',
     path: '/search',
-    getParentRoute: () => MainLayoutUUserSlugRoute,
-  } as any)
-const MainLayoutUUserSlugRealmsRoute =
-  MainLayoutUUserSlugRealmsRouteImport.update({
-    id: '/realms',
-    path: '/realms',
     getParentRoute: () => MainLayoutUUserSlugRoute,
   } as any)
 const MainLayoutUUserSlugReactionsRoute =
@@ -1201,18 +1215,18 @@ export interface FileRoutesByFullPath {
   '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
   '/u/$userSlug/progress': typeof MainLayoutUUserSlugProgressRoute
   '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
-  '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
   '/u/me/progress': typeof MainLayoutUMeProgressRoute
+  '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
+  '/u/$userSlug/zones': typeof MainLayoutUUserSlugZonesRoute
   '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/user/$userId/collection': typeof MainLayoutUserUserIdCollectionRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
   '/user/$userId/reactions': typeof MainLayoutUserUserIdReactionsRoute
-  '/user/$userId/realms': typeof MainLayoutUserUserIdRealmsRoute
   '/user/$userId/search': typeof MainLayoutUserUserIdSearchRoute
   '/user/$userId/shelves': typeof MainLayoutUserUserIdShelvesRoute
   '/user/me/bookmark': typeof MainLayoutUserMeBookmarkRoute
@@ -1220,6 +1234,8 @@ export interface FileRoutesByFullPath {
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
+  '/user/$userId/realms': typeof MainLayoutUserUserIdRealmsRoute
+  '/user/$userId/zones': typeof MainLayoutUserUserIdZonesRoute
   '/z/$slug/manage': typeof MainLayoutZSlugManageRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
   '/zone/$unitId/manage': typeof MainLayoutZoneUnitIdManageRoute
@@ -1357,18 +1373,18 @@ export interface FileRoutesByTo {
   '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
   '/u/$userSlug/progress': typeof MainLayoutUUserSlugProgressRoute
   '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
-  '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
   '/u/me/progress': typeof MainLayoutUMeProgressRoute
+  '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
+  '/u/$userSlug/zones': typeof MainLayoutUUserSlugZonesRoute
   '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/user/$userId/collection': typeof MainLayoutUserUserIdCollectionRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
   '/user/$userId/reactions': typeof MainLayoutUserUserIdReactionsRoute
-  '/user/$userId/realms': typeof MainLayoutUserUserIdRealmsRoute
   '/user/$userId/search': typeof MainLayoutUserUserIdSearchRoute
   '/user/$userId/shelves': typeof MainLayoutUserUserIdShelvesRoute
   '/user/me/bookmark': typeof MainLayoutUserMeBookmarkRoute
@@ -1376,6 +1392,8 @@ export interface FileRoutesByTo {
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
+  '/user/$userId/realms': typeof MainLayoutUserUserIdRealmsRoute
+  '/user/$userId/zones': typeof MainLayoutUserUserIdZonesRoute
   '/z/$slug/manage': typeof MainLayoutZSlugManageRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
   '/zone/$unitId/manage': typeof MainLayoutZoneUnitIdManageRoute
@@ -1524,18 +1542,18 @@ export interface FileRoutesById {
   '/_mainLayout/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
   '/_mainLayout/u/$userSlug/progress': typeof MainLayoutUUserSlugProgressRoute
   '/_mainLayout/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
-  '/_mainLayout/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/_mainLayout/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
   '/_mainLayout/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/_mainLayout/u/me/drafts': typeof MainLayoutUMeDraftsRoute
   '/_mainLayout/u/me/progress': typeof MainLayoutUMeProgressRoute
+  '/_mainLayout/u_/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
+  '/_mainLayout/u_/$userSlug/zones': typeof MainLayoutUUserSlugZonesRoute
   '/_mainLayout/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/_mainLayout/user/$userId/collection': typeof MainLayoutUserUserIdCollectionRoute
   '/_mainLayout/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/_mainLayout/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/_mainLayout/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
   '/_mainLayout/user/$userId/reactions': typeof MainLayoutUserUserIdReactionsRoute
-  '/_mainLayout/user/$userId/realms': typeof MainLayoutUserUserIdRealmsRoute
   '/_mainLayout/user/$userId/search': typeof MainLayoutUserUserIdSearchRoute
   '/_mainLayout/user/$userId/shelves': typeof MainLayoutUserUserIdShelvesRoute
   '/_mainLayout/user/me/bookmark': typeof MainLayoutUserMeBookmarkRoute
@@ -1543,6 +1561,8 @@ export interface FileRoutesById {
   '/_mainLayout/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/_mainLayout/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/_mainLayout/user/me/recovery': typeof MainLayoutUserMeRecoveryRoute
+  '/_mainLayout/user_/$userId/realms': typeof MainLayoutUserUserIdRealmsRoute
+  '/_mainLayout/user_/$userId/zones': typeof MainLayoutUserUserIdZonesRoute
   '/_mainLayout/z/$slug/manage': typeof MainLayoutZSlugManageRoute
   '/_mainLayout/z/$slug/search': typeof MainLayoutZSlugSearchRoute
   '/_mainLayout/zone/$unitId/manage': typeof MainLayoutZoneUnitIdManageRoute
@@ -1692,18 +1712,18 @@ export interface FileRouteTypes {
     | '/u/$userSlug/followers'
     | '/u/$userSlug/progress'
     | '/u/$userSlug/reactions'
-    | '/u/$userSlug/realms'
     | '/u/$userSlug/search'
     | '/u/$userSlug/shelves'
     | '/u/me/drafts'
     | '/u/me/progress'
+    | '/u/$userSlug/realms'
+    | '/u/$userSlug/zones'
     | '/user/$userId/activity'
     | '/user/$userId/collection'
     | '/user/$userId/content'
     | '/user/$userId/edit'
     | '/user/$userId/followers'
     | '/user/$userId/reactions'
-    | '/user/$userId/realms'
     | '/user/$userId/search'
     | '/user/$userId/shelves'
     | '/user/me/bookmark'
@@ -1711,6 +1731,8 @@ export interface FileRouteTypes {
     | '/user/me/follow'
     | '/user/me/reaction'
     | '/user/me/recovery'
+    | '/user/$userId/realms'
+    | '/user/$userId/zones'
     | '/z/$slug/manage'
     | '/z/$slug/search'
     | '/zone/$unitId/manage'
@@ -1848,18 +1870,18 @@ export interface FileRouteTypes {
     | '/u/$userSlug/followers'
     | '/u/$userSlug/progress'
     | '/u/$userSlug/reactions'
-    | '/u/$userSlug/realms'
     | '/u/$userSlug/search'
     | '/u/$userSlug/shelves'
     | '/u/me/drafts'
     | '/u/me/progress'
+    | '/u/$userSlug/realms'
+    | '/u/$userSlug/zones'
     | '/user/$userId/activity'
     | '/user/$userId/collection'
     | '/user/$userId/content'
     | '/user/$userId/edit'
     | '/user/$userId/followers'
     | '/user/$userId/reactions'
-    | '/user/$userId/realms'
     | '/user/$userId/search'
     | '/user/$userId/shelves'
     | '/user/me/bookmark'
@@ -1867,6 +1889,8 @@ export interface FileRouteTypes {
     | '/user/me/follow'
     | '/user/me/reaction'
     | '/user/me/recovery'
+    | '/user/$userId/realms'
+    | '/user/$userId/zones'
     | '/z/$slug/manage'
     | '/z/$slug/search'
     | '/zone/$unitId/manage'
@@ -2014,18 +2038,18 @@ export interface FileRouteTypes {
     | '/_mainLayout/u/$userSlug/followers'
     | '/_mainLayout/u/$userSlug/progress'
     | '/_mainLayout/u/$userSlug/reactions'
-    | '/_mainLayout/u/$userSlug/realms'
     | '/_mainLayout/u/$userSlug/search'
     | '/_mainLayout/u/$userSlug/shelves'
     | '/_mainLayout/u/me/drafts'
     | '/_mainLayout/u/me/progress'
+    | '/_mainLayout/u_/$userSlug/realms'
+    | '/_mainLayout/u_/$userSlug/zones'
     | '/_mainLayout/user/$userId/activity'
     | '/_mainLayout/user/$userId/collection'
     | '/_mainLayout/user/$userId/content'
     | '/_mainLayout/user/$userId/edit'
     | '/_mainLayout/user/$userId/followers'
     | '/_mainLayout/user/$userId/reactions'
-    | '/_mainLayout/user/$userId/realms'
     | '/_mainLayout/user/$userId/search'
     | '/_mainLayout/user/$userId/shelves'
     | '/_mainLayout/user/me/bookmark'
@@ -2033,6 +2057,8 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/me/follow'
     | '/_mainLayout/user/me/reaction'
     | '/_mainLayout/user/me/recovery'
+    | '/_mainLayout/user_/$userId/realms'
+    | '/_mainLayout/user_/$userId/zones'
     | '/_mainLayout/z/$slug/manage'
     | '/_mainLayout/z/$slug/search'
     | '/_mainLayout/zone/$unitId/manage'
@@ -2521,6 +2547,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutZSlugManageRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/user_/$userId/zones': {
+      id: '/_mainLayout/user_/$userId/zones'
+      path: '/user/$userId/zones'
+      fullPath: '/user/$userId/zones'
+      preLoaderRoute: typeof MainLayoutUserUserIdZonesRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/user_/$userId/realms': {
+      id: '/_mainLayout/user_/$userId/realms'
+      path: '/user/$userId/realms'
+      fullPath: '/user/$userId/realms'
+      preLoaderRoute: typeof MainLayoutUserUserIdRealmsRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
     '/_mainLayout/user/me/recovery': {
       id: '/_mainLayout/user/me/recovery'
       path: '/recovery'
@@ -2570,13 +2610,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserUserIdSearchRouteImport
       parentRoute: typeof MainLayoutUserUserIdRoute
     }
-    '/_mainLayout/user/$userId/realms': {
-      id: '/_mainLayout/user/$userId/realms'
-      path: '/realms'
-      fullPath: '/user/$userId/realms'
-      preLoaderRoute: typeof MainLayoutUserUserIdRealmsRouteImport
-      parentRoute: typeof MainLayoutUserUserIdRoute
-    }
     '/_mainLayout/user/$userId/reactions': {
       id: '/_mainLayout/user/$userId/reactions'
       path: '/reactions'
@@ -2619,6 +2652,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserUserIdActivityRouteImport
       parentRoute: typeof MainLayoutUserUserIdRoute
     }
+    '/_mainLayout/u_/$userSlug/zones': {
+      id: '/_mainLayout/u_/$userSlug/zones'
+      path: '/u/$userSlug/zones'
+      fullPath: '/u/$userSlug/zones'
+      preLoaderRoute: typeof MainLayoutUUserSlugZonesRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/u_/$userSlug/realms': {
+      id: '/_mainLayout/u_/$userSlug/realms'
+      path: '/u/$userSlug/realms'
+      fullPath: '/u/$userSlug/realms'
+      preLoaderRoute: typeof MainLayoutUUserSlugRealmsRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
     '/_mainLayout/u/me/progress': {
       id: '/_mainLayout/u/me/progress'
       path: '/u/me/progress'
@@ -2645,13 +2692,6 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/u/$userSlug/search'
       preLoaderRoute: typeof MainLayoutUUserSlugSearchRouteImport
-      parentRoute: typeof MainLayoutUUserSlugRoute
-    }
-    '/_mainLayout/u/$userSlug/realms': {
-      id: '/_mainLayout/u/$userSlug/realms'
-      path: '/realms'
-      fullPath: '/u/$userSlug/realms'
-      preLoaderRoute: typeof MainLayoutUUserSlugRealmsRouteImport
       parentRoute: typeof MainLayoutUUserSlugRoute
     }
     '/_mainLayout/u/$userSlug/reactions': {
@@ -3478,7 +3518,6 @@ interface MainLayoutUUserSlugRouteChildren {
   MainLayoutUUserSlugFollowersRoute: typeof MainLayoutUUserSlugFollowersRoute
   MainLayoutUUserSlugProgressRoute: typeof MainLayoutUUserSlugProgressRoute
   MainLayoutUUserSlugReactionsRoute: typeof MainLayoutUUserSlugReactionsRoute
-  MainLayoutUUserSlugRealmsRoute: typeof MainLayoutUUserSlugRealmsRoute
   MainLayoutUUserSlugSearchRoute: typeof MainLayoutUUserSlugSearchRoute
   MainLayoutUUserSlugShelvesRoute: typeof MainLayoutUUserSlugShelvesRoute
   MainLayoutUUserSlugIndexRoute: typeof MainLayoutUUserSlugIndexRoute
@@ -3493,7 +3532,6 @@ const MainLayoutUUserSlugRouteChildren: MainLayoutUUserSlugRouteChildren = {
   MainLayoutUUserSlugFollowersRoute: MainLayoutUUserSlugFollowersRoute,
   MainLayoutUUserSlugProgressRoute: MainLayoutUUserSlugProgressRoute,
   MainLayoutUUserSlugReactionsRoute: MainLayoutUUserSlugReactionsRoute,
-  MainLayoutUUserSlugRealmsRoute: MainLayoutUUserSlugRealmsRoute,
   MainLayoutUUserSlugSearchRoute: MainLayoutUUserSlugSearchRoute,
   MainLayoutUUserSlugShelvesRoute: MainLayoutUUserSlugShelvesRoute,
   MainLayoutUUserSlugIndexRoute: MainLayoutUUserSlugIndexRoute,
@@ -3511,7 +3549,6 @@ interface MainLayoutUserUserIdRouteChildren {
   MainLayoutUserUserIdEditRoute: typeof MainLayoutUserUserIdEditRoute
   MainLayoutUserUserIdFollowersRoute: typeof MainLayoutUserUserIdFollowersRoute
   MainLayoutUserUserIdReactionsRoute: typeof MainLayoutUserUserIdReactionsRoute
-  MainLayoutUserUserIdRealmsRoute: typeof MainLayoutUserUserIdRealmsRoute
   MainLayoutUserUserIdSearchRoute: typeof MainLayoutUserUserIdSearchRoute
   MainLayoutUserUserIdShelvesRoute: typeof MainLayoutUserUserIdShelvesRoute
   MainLayoutUserUserIdIndexRoute: typeof MainLayoutUserUserIdIndexRoute
@@ -3525,7 +3562,6 @@ const MainLayoutUserUserIdRouteChildren: MainLayoutUserUserIdRouteChildren = {
   MainLayoutUserUserIdEditRoute: MainLayoutUserUserIdEditRoute,
   MainLayoutUserUserIdFollowersRoute: MainLayoutUserUserIdFollowersRoute,
   MainLayoutUserUserIdReactionsRoute: MainLayoutUserUserIdReactionsRoute,
-  MainLayoutUserUserIdRealmsRoute: MainLayoutUserUserIdRealmsRoute,
   MainLayoutUserUserIdSearchRoute: MainLayoutUserUserIdSearchRoute,
   MainLayoutUserUserIdShelvesRoute: MainLayoutUserUserIdShelvesRoute,
   MainLayoutUserUserIdIndexRoute: MainLayoutUserUserIdIndexRoute,
@@ -3670,6 +3706,10 @@ interface MainLayoutRouteChildren {
   MainLayoutStaffCaseCaseIdRoute: typeof MainLayoutStaffCaseCaseIdRoute
   MainLayoutUMeDraftsRoute: typeof MainLayoutUMeDraftsRoute
   MainLayoutUMeProgressRoute: typeof MainLayoutUMeProgressRoute
+  MainLayoutUUserSlugRealmsRoute: typeof MainLayoutUUserSlugRealmsRoute
+  MainLayoutUUserSlugZonesRoute: typeof MainLayoutUUserSlugZonesRoute
+  MainLayoutUserUserIdRealmsRoute: typeof MainLayoutUserUserIdRealmsRoute
+  MainLayoutUserUserIdZonesRoute: typeof MainLayoutUserUserIdZonesRoute
   MainLayoutZSlugManageRoute: typeof MainLayoutZSlugManageRoute
   MainLayoutZSlugSearchRoute: typeof MainLayoutZSlugSearchRoute
   MainLayoutZoneUnitIdManageRoute: typeof MainLayoutZoneUnitIdManageRoute
@@ -3751,6 +3791,10 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutStaffCaseCaseIdRoute: MainLayoutStaffCaseCaseIdRoute,
   MainLayoutUMeDraftsRoute: MainLayoutUMeDraftsRoute,
   MainLayoutUMeProgressRoute: MainLayoutUMeProgressRoute,
+  MainLayoutUUserSlugRealmsRoute: MainLayoutUUserSlugRealmsRoute,
+  MainLayoutUUserSlugZonesRoute: MainLayoutUUserSlugZonesRoute,
+  MainLayoutUserUserIdRealmsRoute: MainLayoutUserUserIdRealmsRoute,
+  MainLayoutUserUserIdZonesRoute: MainLayoutUserUserIdZonesRoute,
   MainLayoutZSlugManageRoute: MainLayoutZSlugManageRoute,
   MainLayoutZSlugSearchRoute: MainLayoutZSlugSearchRoute,
   MainLayoutZoneUnitIdManageRoute: MainLayoutZoneUnitIdManageRoute,

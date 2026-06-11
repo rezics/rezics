@@ -218,7 +218,10 @@ export const realmApi = new Elysia({ prefix: "/realm" })
             languages: query.languages,
             appLocale: query.appLocale,
           }),
+          view: query.view,
           languageMode: query.languageMode,
+          start: query.start,
+          limit: query.limit,
         },
       );
       return { realms, total };
@@ -248,7 +251,10 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           languages: query.languages,
           appLocale: query.appLocale,
         }),
+        view: query.view,
         languageMode: query.languageMode,
+        start: query.start,
+        limit: query.limit,
       });
       return { realms, total };
     },

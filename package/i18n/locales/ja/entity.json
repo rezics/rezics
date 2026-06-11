@@ -192,6 +192,8 @@
   "realm_list_selected_count": "{count} 件選択中",
   "realm_list_sign_in_prompt": "ログインすると、参加中のレルムを確認・管理できます。",
   "realm_list_subtitle": "参加中のレルム。",
+  "realm_list_tab_administered": "管理権限あり",
+  "realm_list_tab_joined": "参加中",
   "realm_list_title": "レルム",
   "realm_manage": "レルムの管理",
   "realm_member_count": "{count}メンバー",

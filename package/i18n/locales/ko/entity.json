@@ -192,6 +192,8 @@
   "realm_list_selected_count": "{count}개 선택됨",
   "realm_list_sign_in_prompt": "로그인하면 가입한 렐름을 확인하고 관리할 수 있습니다.",
   "realm_list_subtitle": "가입한 렐름 목록입니다.",
+  "realm_list_tab_administered": "관리 가능",
+  "realm_list_tab_joined": "가입됨",
   "realm_list_title": "렐름",
   "realm_manage": "영역 관리",
   "realm_member_count": "{count}명 회원",

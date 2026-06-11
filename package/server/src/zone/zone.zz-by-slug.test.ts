@@ -60,6 +60,7 @@ const deletePageMock = mock(async (unitId: string, pageId: string) => ({
   pageId,
 }));
 const deleteZoneMock = mock(async () => undefined);
+const listByUserMock = mock(async () => ({ zones: [zoneStub], total: 1 }));
 const sectionDataMock = mock(
   async (
     _unitId: string,
@@ -159,6 +160,7 @@ mock.module("./zone.service", () => ({
       if (slug === "featured") return zoneStub;
       return null;
     },
+    listByUser: listByUserMock,
     getPageBySlug: async (_unitId: string, pageSlug: string) => {
       if (pageSlug === "home") return homePageStub;
       return null;
@@ -194,6 +196,7 @@ beforeEach(() => {
   updatePageMock.mockClear();
   deletePageMock.mockClear();
   deleteZoneMock.mockClear();
+  listByUserMock.mockClear();
   sectionDataMock.mockClear();
 });
 
@@ -202,6 +205,39 @@ afterAll(() => {
 });
 
 describe("GET /zone/by-slug/:slug", () => {
+  test("lists my zones with the requested view", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone/me?view=managing&languages=en"),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.total).toBe(1);
+    expect(listByUserMock).toHaveBeenCalledWith({
+      userUnitId: "user-1",
+      view: "managing",
+      start: undefined,
+      limit: 20,
+    });
+  });
+
+  test("lists public user zones with public-only filtering", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone/user/user-2?view=subscribed"),
+    );
+
+    expect(res.status).toBe(200);
+    expect(listByUserMock).toHaveBeenCalledWith({
+      userUnitId: "user-2",
+      view: "subscribed",
+      publicOnly: true,
+      start: undefined,
+      limit: 20,
+    });
+  });
+
   test("returns zone when slug resolves to ZONE", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(

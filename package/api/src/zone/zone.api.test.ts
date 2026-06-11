@@ -61,6 +61,24 @@ describe("zoneApi", () => {
     );
   });
 
+  test("fetches user zone lists with view and language context", async () => {
+    await zoneApi.mine({
+      view: "managing",
+      languages: "en,ja",
+      appLocale: "zh-hant",
+      languageMode: "preferred",
+    });
+    await zoneApi.byUser("user-1", {
+      view: "subscribed",
+      languages: "en",
+    });
+
+    expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
+      "http://api.example/zone/me?view=managing&languages=en%2Cja&appLocale=zh-hant&languageMode=preferred",
+      "http://api.example/zone/user/user-1?view=subscribed&languages=en",
+    ]);
+  });
+
   test("fetches the portal bundle and per-section data with cursor", async () => {
     await zoneApi.getPortal("zone-1", "home", ["en"]);
     await zoneApi.getSection("zone-1", "page-home", "s-latest", {
@@ -135,6 +153,19 @@ describe("zoneApi", () => {
   });
 
   test("builds per-section keys scoped under the zone unit", () => {
+    expect(zoneKeys.mine({ view: "managing" })).toEqual([
+      "zones",
+      "list",
+      "mine",
+      { view: "managing" },
+    ]);
+    expect(zoneKeys.byUser("user-1", { view: "subscribed" })).toEqual([
+      "zones",
+      "list",
+      "user",
+      "user-1",
+      { view: "subscribed" },
+    ]);
     expect(zoneKeys.detail("toaru", ["en"])).toEqual([
       "zones",
       "detail",

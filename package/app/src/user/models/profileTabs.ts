@@ -2,7 +2,6 @@ export const BASE_PROFILE_TAB_PATHS = [
   "",
   "/content",
   "/shelves",
-  "/realms",
   "/followers",
   "/reactions",
   "/activity",

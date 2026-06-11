@@ -24,13 +24,14 @@ describe("realmApi read language queries", () => {
 
   test("serializes member realms read language context", async () => {
     await realmApi.byMember("user-1", {
+      view: "managing",
       appLocale: "zh-hant",
       languages: ["en", "ja"],
       languageMode: "preferred",
     });
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/realm/member/user-1?appLocale=zh-hant&languages=en%2Cja&languageMode=preferred",
+      "http://api.example/realm/member/user-1?view=managing&appLocale=zh-hant&languages=en%2Cja&languageMode=preferred",
     );
   });
 

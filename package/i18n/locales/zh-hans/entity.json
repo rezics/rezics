@@ -192,6 +192,8 @@
   "realm_list_selected_count": "已选中 {count} 个",
   "realm_list_sign_in_prompt": "登录后即可查看及管理你已加入的领域。",
   "realm_list_subtitle": "你已加入的领域。",
+  "realm_list_tab_administered": "可管理",
+  "realm_list_tab_joined": "已加入",
   "realm_list_title": "领域",
   "realm_manage": "管理领域",
   "realm_member_count": "{count} 位成员",

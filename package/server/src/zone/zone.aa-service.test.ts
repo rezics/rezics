@@ -115,6 +115,14 @@ const searchSectionMock = mock(
 );
 const replaceTranslationsMock = mock(async (..._args: unknown[]) => undefined);
 const updateZoneDataMock = mock(async (): Promise<void> => undefined);
+const listSubscribedZoneIdsMock = mock(async () => ({
+  unitIds: ["zone-1"],
+  total: 1,
+}));
+const listManageableZoneIdsMock = mock(async () => ({
+  unitIds: ["zone-1"],
+  total: 1,
+}));
 
 function baseBoundary(): ZoneBoundary {
   return {
@@ -294,6 +302,8 @@ function createMockRepository(): ZoneRepository {
     async getByUnitId(unitId) {
       return currentZone && currentZone.unitId === unitId ? currentZone : null;
     },
+    listSubscribedZoneIds: listSubscribedZoneIdsMock,
+    listManageableZoneIds: listManageableZoneIdsMock,
     async findPageBySlug(_zoneUnitId, slug) {
       return currentPage.slug === slug ? currentPage : null;
     },
@@ -402,6 +412,8 @@ beforeEach(() => {
   searchSectionMock.mockClear();
   replaceTranslationsMock.mockClear();
   updateZoneDataMock.mockClear();
+  listSubscribedZoneIdsMock.mockClear();
+  listManageableZoneIdsMock.mockClear();
   currentPage = pageRow(basePage());
   currentZone = zoneRow({ page: currentPage.config });
   service = new ZoneServiceCtor(createMockRepository());
@@ -597,6 +609,44 @@ describe("zone update", () => {
       "header.menuId must reference a menu",
     );
     expect(updateZoneDataMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("zone user lists", () => {
+  test("lists subscribed zones through subscription list entries", async () => {
+    const result = await service.listByUser({
+      userUnitId: "user-1",
+      view: "subscribed",
+      publicOnly: true,
+      start: 5,
+      limit: 25,
+    });
+
+    expect(listSubscribedZoneIdsMock).toHaveBeenCalledWith({
+      userUnitId: "user-1",
+      publicOnly: true,
+      offset: 5,
+      limit: 25,
+    });
+    expect(listManageableZoneIdsMock).not.toHaveBeenCalled();
+    expect(result.zones.map((zone) => zone.unitId)).toEqual(["zone-1"]);
+    expect(result.total).toBe(1);
+  });
+
+  test("lists manageable zones through owner realm authority", async () => {
+    await service.listByUser({
+      userUnitId: "user-1",
+      view: "managing",
+      publicOnly: false,
+    });
+
+    expect(listManageableZoneIdsMock).toHaveBeenCalledWith({
+      userUnitId: "user-1",
+      publicOnly: false,
+      offset: 0,
+      limit: 50,
+    });
+    expect(listSubscribedZoneIdsMock).not.toHaveBeenCalled();
   });
 });
 

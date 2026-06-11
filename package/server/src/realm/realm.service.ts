@@ -7,6 +7,7 @@ import type {
   RealmExtraOkResponse,
   RealmExtraReadResponse,
   RealmListQuery,
+  RealmListView,
   ListLanguageMode,
   RealmMemberDTO,
   RealmMemberListQuery,
@@ -229,6 +230,7 @@ function communityListTargetKind(key: RealmCommunityListKey) {
 }
 
 const REALM_JOIN_APPROVAL_ROLES = ["owner", "admin", "moderator"] as const;
+const REALM_MANAGE_ROLES = REALM_JOIN_APPROVAL_ROLES;
 
 function notifyRealmRuleUpdated(input: {
   actorUserId: string;
@@ -1826,36 +1828,63 @@ export class RealmService {
     userId: string,
     options: {
       publicOnly?: boolean;
+      view?: RealmListView | null;
       languageMode?: ListLanguageMode | null;
+      start?: number | null;
+      limit?: number | null;
     } & EffectiveReadLanguageInput = {},
   ): Promise<{ realms: RealmDTO[]; total: number }> {
     const db = await getServerDb();
-    const members = await db
-      .select({ realmUnitId: RealmMember.realmUnitId })
-      .from(RealmMember)
-      .where(eq(RealmMember.userId, userId));
+    const view = options.view ?? "joined";
+    const offset = Math.max(0, Number(options.start ?? 0) || 0);
+    const limit = Math.min(Math.max(Number(options.limit ?? 50) || 50, 1), 100);
+    const filters: SQL[] = [
+      eq(RealmMember.userId, userId),
+      eq(RealmMember.state, "ACTIVE"),
+    ];
+    if (view === "managing") {
+      filters.push(inArray(RealmMember.roleKey, [...REALM_MANAGE_ROLES]));
+    }
+    if (options.publicOnly) {
+      filters.push(eq(Realm.isPublic, true));
+    }
+    const where = and(...filters);
 
-    const realmIds = members.map((m) => m.realmUnitId);
-    if (realmIds.length === 0) return { realms: [], total: 0 };
-
-    const where = and(
-      inArray(Realm.unitId, realmIds),
-      options.publicOnly ? eq(Realm.isPublic, true) : undefined,
-    );
     const [realms, totalRows] = await Promise.all([
       db
         .select({ unitId: Realm.unitId })
-        .from(Realm)
+        .from(RealmMember)
+        .innerJoin(Realm, eq(RealmMember.realmUnitId, Realm.unitId))
         .innerJoin(Unit, eq(Realm.unitId, Unit.id))
         .where(where)
-        .orderBy(desc(Unit.createdAt)),
-      db.select({ total: count() }).from(Realm).where(where),
+        .orderBy(desc(Unit.createdAt))
+        .offset(offset)
+        .limit(limit),
+      db
+        .select({ total: count() })
+        .from(RealmMember)
+        .innerJoin(Realm, eq(RealmMember.realmUnitId, Realm.unitId))
+        .where(where),
     ]);
 
-    const hydratedRealms = await hydrateUnitOwnerUserSlugs(
-      await Promise.all(
-        realms.map((realm) => hydrateRealmWithRelations(realm.unitId)),
-      ),
+    if (realms.length === 0) {
+      return { realms: [], total: totalRows[0]?.total ?? 0 };
+    }
+
+    const realmIds = realms.map((realm) => realm.unitId);
+    const orderedRealmIds = new Map(
+      realmIds.map((realmUnitId, index) => [realmUnitId, index]),
+    );
+    const hydratedRealms = (
+      await hydrateUnitOwnerUserSlugs(
+        await Promise.all(
+          realmIds.map((realmUnitId) => hydrateRealmWithRelations(realmUnitId)),
+        ),
+      )
+    ).sort(
+      (left, right) =>
+        (orderedRealmIds.get(left.unitId) ?? 0) -
+        (orderedRealmIds.get(right.unitId) ?? 0),
     );
     return {
       realms: await Promise.all(

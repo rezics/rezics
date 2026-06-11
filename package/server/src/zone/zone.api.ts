@@ -7,6 +7,8 @@ import {
   updateZoneNavInputSchema,
   updateZonePageInputSchema,
   updateZoneThemeInputSchema,
+  zoneListQuerySchema,
+  type ZoneListResponse,
   type ZoneBoundary,
   type ZoneNav,
   type ZonePage,
@@ -14,7 +16,7 @@ import {
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
-import { authMacro } from "@/middleware";
+import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapZoneToDTO } from "./zone.mapper";
 import type { ZoneWithRelations } from "./zone.service";
 import { zoneService } from "./zone.service";
@@ -88,6 +90,67 @@ function parseLifecycleDate(
 
 export const zoneApi = new Elysia({ prefix: "/zone" })
   .use(authMacro)
+
+  .get(
+    "/me",
+    async ({ identity, query }): Promise<ZoneListResponse> => {
+      const { zones, total } = await zoneService.listByUser({
+        userUnitId: identity.userId,
+        view: query.view,
+        start: query.start,
+        limit: query.limit,
+      });
+      const languages = preferredLanguages(query);
+      return {
+        zones: zones.map((zone) => mapZoneToDTO(zone, languages)),
+        total,
+      };
+    },
+    {
+      requireLogin: true,
+      query: zoneListQuerySchema,
+      detail: {
+        summary: "My zones",
+        description:
+          "Get zones the current user has subscribed to or can manage.",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .get(
+    "/user/:userId",
+    async ({ params, headers, query }): Promise<ZoneListResponse> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      const canSeePrivate =
+        identity?.userId === params.userId || isAdminRole(identity);
+      const { zones, total } = await zoneService.listByUser({
+        userUnitId: params.userId,
+        view: query.view,
+        publicOnly: !canSeePrivate,
+        start: query.start,
+        limit: query.limit,
+      });
+      const languages = preferredLanguages(query);
+      return {
+        zones: zones.map((zone) => mapZoneToDTO(zone, languages)),
+        total,
+      };
+    },
+    {
+      params: t.Object({ userId: t.String() }),
+      query: zoneListQuerySchema,
+      detail: {
+        summary: "Zones for user",
+        description:
+          "Get zones a user has subscribed to or can manage. Public callers see only public zones.",
+        tags: ["Zones"],
+      },
+    },
+  )
 
   .get(
     "/by-slug/:slug",

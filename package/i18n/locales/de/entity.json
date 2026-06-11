@@ -192,6 +192,8 @@
   "realm_list_selected_count": "{count} ausgewählt",
   "realm_list_sign_in_prompt": "Melde dich an, um deine beigetretenen Realms zu sehen und zu verwalten.",
   "realm_list_subtitle": "Realms, denen du beigetreten bist.",
+  "realm_list_tab_administered": "Administriert",
+  "realm_list_tab_joined": "Beigetreten",
   "realm_list_title": "Realms",
   "realm_manage": "Realm verwalten",
   "realm_member_count": "{count} Mitglieder",
