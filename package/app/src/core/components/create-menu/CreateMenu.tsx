@@ -19,7 +19,7 @@ export const CreateMenu: React.FC = () => {
       <DropdownMenuTrigger
         nativeButton
         render={(props) => (
-          <HeaderTooltip label="Create new">
+          <HeaderTooltip label={t("shell:app_create_menu_tooltip")}>
             <Button
               variant="ghost"
               size="icon"
