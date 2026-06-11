@@ -1,29 +1,35 @@
 import { postQueries } from "@rezics/api/post/post";
 import { zonePortalQueryOptions } from "@rezics/api/zone/zone";
+import {
+  mainMarkdownSource,
+  type RealmWikiSidebar as RealmWikiSidebarConfig,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
-import { Button, Card, CardContent } from "@rezics/ui/shadcn";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import { ExternalLink, Settings } from "lucide-react";
 import { QueryErrorDisplay } from "@/core";
-import { PostCard } from "@/post";
+import { PostBodyMarkdown, PostCard } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
+import { pickZoneMenu, ZoneNavTree } from "@/zone";
+import {
+  realmDetailBaseHref,
+  type RealmDetailRouteLocation,
+} from "../models/realmDetailRoutes";
 
 interface RealmWikiTabProps {
   realmId: string;
-  wikiZoneUnitId?: string | null;
-  canManage: boolean;
-  manageHref?: string;
+  routeLocation: RealmDetailRouteLocation;
+  wikiSidebar?: RealmWikiSidebarConfig | null;
 }
 
 export function RealmWikiTab({
   realmId,
-  wikiZoneUnitId,
-  canManage,
-  manageHref = `/realm/${realmId}/manage`,
+  routeLocation,
+  wikiSidebar,
 }: RealmWikiTabProps) {
-  const { t } = useTranslation(["common", "entity"]);
+  const { t } = useTranslation(["common", "entity", "zone"]);
   const readContext = useReadLanguageContext();
   const wikiPostsQuery = useQuery({
     ...postQueries.wikiByRealm(realmId, {
@@ -35,15 +41,7 @@ export function RealmWikiTab({
     }),
     enabled: readContext.ready && Boolean(realmId),
   });
-  // Resolve the configured zone through the portal read (unitId-keyed);
-  // only the slug is needed to deep-link into the zone frame.
-  // 通过门户读取（以 unitId 为键）解析配置的专区；深链进专区框架只需要
-  // slug。
-  const zoneQuery = useQuery(
-    zonePortalQueryOptions(wikiZoneUnitId ?? "", "home", readContext.languages),
-  );
   const posts = wikiPostsQuery.data?.posts ?? [];
-  const zoneSlug = zoneQuery.data?.zone.slug ?? null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
@@ -67,54 +65,135 @@ export function RealmWikiTab({
       </div>
 
       <aside className="min-w-0">
-        {wikiZoneUnitId ? (
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-3">
-              <div>
-                <h2 className="text-base font-medium leading-ui text-text-primary">
-                  Wiki
-                </h2>
-                <p className="mt-1 text-sm leading-body text-text-secondary">
-                  Realm Wiki entries can also be browsed through the configured
-                  Zone.
-                </p>
-              </div>
-              {zoneSlug ? (
-                <Link to="/z/$slug" params={{ slug: zoneSlug }}>
-                  <Button size="sm" className="w-full gap-2">
-                    <ExternalLink className="h-4 w-4" />
-                    {t("common:open")}
-                  </Button>
-                </Link>
-              ) : (
-                <Button size="sm" className="w-full" disabled>
-                  {zoneQuery.isLoading ? t("common:loading") : t("common:open")}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : canManage ? (
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-3">
-              <div>
-                <h2 className="text-base font-medium leading-ui text-text-primary">
-                  Wiki setup
-                </h2>
-                <p className="mt-1 text-sm leading-body text-text-secondary">
-                  Assign a Wiki Zone to turn this tab into a curated realm
-                  homepage entry point.
-                </p>
-              </div>
-              <Link to={manageHref}>
-                <Button size="sm" variant="outline" className="w-full gap-2">
-                  <Settings className="h-4 w-4" />
-                  {t("entity:realm_manage")}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ) : null}
+        <RealmWikiSidebar
+          routeLocation={routeLocation}
+          sidebar={wikiSidebar}
+          posts={posts}
+          postsLoading={wikiPostsQuery.isLoading}
+        />
       </aside>
     </div>
+  );
+}
+
+function RealmWikiSidebar({
+  routeLocation,
+  sidebar,
+  posts,
+  postsLoading,
+}: {
+  routeLocation: RealmDetailRouteLocation;
+  sidebar?: RealmWikiSidebarConfig | null;
+  posts: Array<{ unitId: string; title?: string | null }>;
+  postsLoading: boolean;
+}) {
+  if (sidebar?.kind === "post") {
+    return <WikiPostSidebar postUnitId={sidebar.postUnitId} />;
+  }
+  if (sidebar?.kind === "zoneNav") {
+    return (
+      <WikiZoneNavSidebar
+        zoneUnitId={sidebar.zoneUnitId}
+        menuId={sidebar.menuId}
+      />
+    );
+  }
+  return (
+    <WikiAutoListSidebar
+      routeLocation={routeLocation}
+      posts={posts}
+      loading={postsLoading}
+    />
+  );
+}
+
+function WikiAutoListSidebar({
+  routeLocation,
+  posts,
+  loading,
+}: {
+  routeLocation: RealmDetailRouteLocation;
+  posts: Array<{ unitId: string; title?: string | null }>;
+  loading: boolean;
+}) {
+  const { t } = useTranslation(["common"]);
+  if (loading || posts.length === 0) return null;
+  const baseHref = realmDetailBaseHref(routeLocation);
+  return (
+    <Card surface="contained">
+      <CardContent className="flex flex-col gap-3 p-4">
+        <h2 className="text-sm font-medium leading-ui text-text-primary">
+          Wiki
+        </h2>
+        <ul className="flex flex-col gap-1">
+          {posts.map((post) => (
+            <li key={post.unitId}>
+              <SafeLink
+                href={`${baseHref}/post/${post.unitId}`}
+                className="block rounded-md px-2 py-1.5 text-sm leading-ui text-text-secondary transition-colors hover:bg-surface-sunken hover:text-text-primary"
+              >
+                {post.title || t("common:untitled")}
+              </SafeLink>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function WikiPostSidebar({ postUnitId }: { postUnitId: string }) {
+  const readContext = useReadLanguageContext();
+  const { data: post, isError } = useQuery({
+    ...postQueries.detail(postUnitId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && Boolean(postUnitId),
+  });
+  const markdown = mainMarkdownSource(post?.content);
+  if (isError || !post || !markdown) return null;
+  return (
+    <Card surface="contained">
+      <CardContent className="p-4">
+        <PostBodyMarkdown
+          content={post.content}
+          className="text-sm leading-body text-text-secondary"
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function WikiZoneNavSidebar({
+  zoneUnitId,
+  menuId,
+}: {
+  zoneUnitId: string;
+  menuId?: string;
+}) {
+  const readContext = useReadLanguageContext();
+  const zoneQuery = useQuery({
+    ...zonePortalQueryOptions(zoneUnitId, "home", readContext.languages),
+    enabled: readContext.ready && Boolean(zoneUnitId),
+  });
+  const data = zoneQuery.data;
+  if (zoneQuery.isError || !data) return null;
+  const menu = pickZoneMenu(data.zone.nav, menuId);
+  if (!menu) return null;
+  return (
+    <Card surface="contained">
+      <CardContent className="flex flex-col gap-3 p-4">
+        <h2 className="text-sm font-medium leading-ui text-text-primary">
+          {data.zone.name}
+        </h2>
+        <ZoneNavTree
+          menu={menu}
+          zoneSlug={data.zone.slug}
+          pages={data.zone.pages}
+          refUnits={data.refUnits}
+        />
+      </CardContent>
+    </Card>
   );
 }

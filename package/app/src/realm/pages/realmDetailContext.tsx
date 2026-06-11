@@ -20,8 +20,6 @@ export interface RealmDetailContextValue {
   membership: RealmMembershipMeDTO | null | undefined;
   isMember: boolean;
   showManage: boolean;
-  showWikiTab: boolean;
-  wikiZoneUnitId: string | null;
   tagTree: TagTreeNode[] | undefined;
   description: string;
 }

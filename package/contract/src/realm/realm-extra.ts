@@ -12,6 +12,10 @@ export const realmAvatarExtraNote =
   "Direct image URL used as the realm's avatar.";
 export const realmTagTreeExtraNote =
   "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.";
+export const realmFeaturedZoneExtraNote =
+  "Optional weak link to a Zone Unit featured in the realm sidebar; unresolved links render nothing.";
+export const realmWikiSidebarExtraNote =
+  "Optional single source for the realm Wiki sidebar; absent uses the automatic wiki page list.";
 
 export const realmTagViewStyleValues = ["flat", "grouped", "tree"] as const;
 
@@ -32,6 +36,26 @@ export const realmTagViewSchema = t.Object(
 );
 
 export type RealmTagView = (typeof realmTagViewSchema)["static"];
+
+export const realmWikiSidebarSchema = t.Union([
+  t.Object(
+    {
+      kind: t.Literal("post"),
+      postUnitId: t.String(),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      kind: t.Literal("zoneNav"),
+      zoneUnitId: t.String(),
+      menuId: t.Optional(t.String()),
+    },
+    { additionalProperties: false },
+  ),
+]);
+
+export type RealmWikiSidebar = (typeof realmWikiSidebarSchema)["static"];
 
 export const realmTagTreeLabelSchema = t.Object(
   {
@@ -180,12 +204,24 @@ export const realmExtraSchema = t.Object(
     defaultLicenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
 
     /**
-     * Optional Zone Unit id for the realm's themed wiki portal. The realm Wiki
-     * tab remains app-themed and links into this Zone when configured.
-     * 用于 realm 主题化 wiki 门户的可选 Zone Unit id。realm Wiki 标签页保持应用
-     * 主题，配置后会链接进入该 Zone。
+     * Optional weak link to a Zone Unit surfaced as a featured card in the
+     * realm sidebar. This is intentionally not a structural ownership edge:
+     * the server only stores the id, the frontend resolves it and renders
+     * nothing when the target is missing.
+     * 在 realm 侧栏展示的可选 Zone Unit 弱链接。它刻意不是结构性归属边：
+     * 服务端只保存 id，前端解析失败时不渲染。
      */
-    wikiZoneUnitId: t.Optional(t.Nullable(t.String())),
+    featuredZoneUnitId: t.Optional(t.Nullable(t.String())),
+
+    /**
+     * Optional single source for the realm Wiki sidebar. Absent means the
+     * automatic realm wiki page list; `post` embeds one sidebar post; `zoneNav`
+     * renders an app-themed Zone navigation tree. All references are weak links.
+     * realm Wiki 侧栏的可选单一来源。缺失时使用自动 realm wiki 页面列表；
+     * `post` 嵌入一个侧栏帖子；`zoneNav` 渲染应用主题的 Zone 导览树。
+     * 所有引用都是弱链接。
+     */
+    wikiSidebar: t.Optional(realmWikiSidebarSchema),
   },
   { additionalProperties: true },
 );

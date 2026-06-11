@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import type { ZoneMenuNode, ZoneRefUnitSummary } from "@rezics/contract";
 import {
+  pickZoneMenu,
   resolveZoneMenuNodes,
   zoneCreateHref,
   zoneDetailKindForRef,
@@ -206,6 +207,36 @@ describe("resolveZoneMenuNodes", () => {
     const d3 = resolved[0]?.children[0]?.children[0];
     expect(d3?.id).toBe("d3");
     expect(d3?.children).toEqual([]);
+  });
+});
+
+describe("pickZoneMenu", () => {
+  const nav = {
+    schema: "rezics/zone-nav" as const,
+    version: 1 as const,
+    header: { menuId: "main" },
+    menus: [
+      { id: "main", nodes: [] },
+      { id: "sidebar", nodes: [] },
+    ],
+  };
+
+  it("uses an explicit menu id when present", () => {
+    expect(pickZoneMenu(nav, "sidebar")?.id).toBe("sidebar");
+  });
+
+  it("falls back to the header menu when no explicit menu is selected", () => {
+    expect(pickZoneMenu(nav)?.id).toBe("main");
+  });
+
+  it("falls back to the header menu when the explicit id is unknown", () => {
+    expect(pickZoneMenu(nav, "missing")?.id).toBe("main");
+  });
+
+  it("returns null when neither explicit nor header menu resolves", () => {
+    expect(
+      pickZoneMenu({ ...nav, header: { menuId: "missing" } }, "unknown"),
+    ).toBeNull();
   });
 });
 

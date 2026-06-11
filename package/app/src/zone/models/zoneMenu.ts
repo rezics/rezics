@@ -155,6 +155,15 @@ export function findZoneMenu(
   return menus.find((menu) => menu.id === menuId) ?? null;
 }
 
+export function pickZoneMenu(
+  nav: { menus: ZoneMenu[]; header: { menuId: string } },
+  menuId?: string | null,
+): ZoneMenu | null {
+  const explicit = menuId ? findZoneMenu(nav.menus, menuId) : null;
+  if (explicit) return explicit;
+  return findZoneMenu(nav.menus, nav.header.menuId);
+}
+
 // ANCHOR: Section titles
 // ANCHOR: 分区标题
 

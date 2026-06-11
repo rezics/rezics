@@ -3,10 +3,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { RealmDetailLayout, useRealmDetail } from "@/realm";
 import { RealmWikiTab } from "@/realm/components/RealmWikiTab";
 import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
-import {
-  realmDetailLocationFromSlugParams,
-  realmManageHref,
-} from "@/realm/models/realmDetailRoutes";
+import { realmDetailLocationFromSlugParams } from "@/realm/models/realmDetailRoutes";
 
 function RealmSlugWikiRoute() {
   const params = Route.useParams();
@@ -22,14 +19,12 @@ function RealmSlugWikiRoute() {
 }
 
 function RealmSlugWikiTab() {
-  const { routeLocation, realmId, wikiZoneUnitId, showManage } =
-    useRealmDetail();
+  const { routeLocation, realmId, realm } = useRealmDetail();
   return (
     <RealmWikiTab
       realmId={realmId}
-      wikiZoneUnitId={wikiZoneUnitId}
-      canManage={showManage}
-      manageHref={realmManageHref(routeLocation)}
+      routeLocation={routeLocation}
+      wikiSidebar={realm.extra?.wikiSidebar ?? null}
     />
   );
 }

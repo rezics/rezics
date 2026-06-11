@@ -55,7 +55,6 @@ const repository = {
   findValidTagUnitIds: mock(async (ids: string[]) => {
     return new Set(ids.filter((id) => id.startsWith("tag-")));
   }),
-  zoneExists: mock(async (unitId: string) => unitId.startsWith("zone-")),
   updateExtraWithLock: updateExtraWithLockMock,
   findVisibleUnitIds: mock(async (ids: string[]) => {
     return new Set(ids.filter((id) => id.startsWith("post-")));
@@ -86,7 +85,7 @@ describe("realm extra single-key service", () => {
     }
   });
 
-  test("sets and replaces rule/about/banner/avatar/tag view/wiki Zone keys", async () => {
+  test("sets and replaces rule/about/banner/avatar/tag view/featured zone/wiki sidebar keys", async () => {
     await setSingleExtraKey(caller, "realm-1", "rule", "post-rule");
     expect(storedExtra.rule).toBe("post-rule");
 
@@ -120,8 +119,33 @@ describe("realm extra single-key service", () => {
       allowViewerSwitch: false,
     });
 
-    await setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "zone-wiki");
-    expect(storedExtra.wikiZoneUnitId).toBe("zone-wiki");
+    await setSingleExtraKey(
+      caller,
+      "realm-1",
+      "featuredZoneUnitId",
+      "missing-zone",
+    );
+    expect(storedExtra.featuredZoneUnitId).toBe("missing-zone");
+
+    await setSingleExtraKey(caller, "realm-1", "wikiSidebar", {
+      kind: "post",
+      postUnitId: "missing-post",
+    });
+    expect(storedExtra.wikiSidebar).toEqual({
+      kind: "post",
+      postUnitId: "missing-post",
+    });
+
+    await setSingleExtraKey(caller, "realm-1", "wikiSidebar", {
+      kind: "zoneNav",
+      zoneUnitId: "missing-zone",
+      menuId: "main",
+    });
+    expect(storedExtra.wikiSidebar).toEqual({
+      kind: "zoneNav",
+      zoneUnitId: "missing-zone",
+      menuId: "main",
+    });
   });
 
   test("clears each supported key", async () => {
@@ -132,7 +156,8 @@ describe("realm extra single-key service", () => {
       banner: { kind: "url", url: "https://example.com/banner.png" },
       tagView: { defaultStyle: "tree", allowViewerSwitch: true },
       tagTree: [{ tagId: "tag-action" }],
-      wikiZoneUnitId: "zone-wiki",
+      featuredZoneUnitId: "zone-wiki",
+      wikiSidebar: { kind: "zoneNav", zoneUnitId: "zone-wiki" },
     };
 
     await clearSingleExtraKey(caller, "realm-1", "rule");
@@ -141,7 +166,8 @@ describe("realm extra single-key service", () => {
     await clearSingleExtraKey(caller, "realm-1", "banner");
     await clearSingleExtraKey(caller, "realm-1", "tagView");
     await clearSingleExtraKey(caller, "realm-1", "tagTree");
-    await clearSingleExtraKey(caller, "realm-1", "wikiZoneUnitId");
+    await clearSingleExtraKey(caller, "realm-1", "featuredZoneUnitId");
+    await clearSingleExtraKey(caller, "realm-1", "wikiSidebar");
 
     expect(storedExtra).toEqual({});
   });
@@ -163,7 +189,20 @@ describe("realm extra single-key service", () => {
       }),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
-      setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "missing-zone"),
+      setSingleExtraKey(caller, "realm-1", "featuredZoneUnitId", ""),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "wikiSidebar", {
+        kind: "post",
+        zoneUnitId: "zone-wiki",
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "wikiSidebar", {
+        kind: "zoneNav",
+        zoneUnitId: "zone-wiki",
+        extra: true,
+      }),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
       setSingleExtraKey(caller, "realm-1", "tagView", {

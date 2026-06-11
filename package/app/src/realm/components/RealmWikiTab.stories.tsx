@@ -31,7 +31,17 @@ const wikiZonePortal: ZonePortalResponse = {
     nav: {
       schema: "rezics/zone-nav",
       version: 1,
-      menus: [{ id: "main", nodes: [] }],
+      menus: [
+        {
+          id: "main",
+          nodes: [
+            {
+              id: "home",
+              target: { kind: "zonePage", pageId: "home" },
+            },
+          ],
+        },
+      ],
       header: { menuId: "main" },
     },
     theme: { schema: "rezics/zone-theme", version: 1 },
@@ -78,6 +88,9 @@ function Seeded({
       posts,
       total: posts.length,
     });
+    for (const post of posts) {
+      qc.setQueryData(postQueries.detail(post.unitId).queryKey, post);
+    }
     if (portal) {
       qc.setQueryData(
         zoneKeys.portal(portal.zone.unitId, portal.page.slug),
@@ -95,15 +108,15 @@ const meta = {
   decorators: [withRouter],
   args: {
     realmId: REALM_ID,
-    wikiZoneUnitId: WIKI_ZONE_ID,
-    canManage: true,
+    routeLocation: { kind: "unitId", realmId: REALM_ID },
+    wikiSidebar: null,
   },
 } satisfies Meta<typeof RealmWikiTab>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const WithConfiguredZone: Story = {
+export const AutoPageList: Story = {
   render: (args) => (
     <Seeded posts={wikiPosts}>
       <RealmWikiTab {...args} />
@@ -111,8 +124,29 @@ export const WithConfiguredZone: Story = {
   ),
 };
 
-export const EmptyWithSetup: Story = {
-  args: { wikiZoneUnitId: null },
+export const SidebarPost: Story = {
+  args: {
+    wikiSidebar: { kind: "post", postUnitId: "wiki-post-1" },
+  },
+  render: (args) => (
+    <Seeded posts={wikiPosts}>
+      <RealmWikiTab {...args} />
+    </Seeded>
+  ),
+};
+
+export const ZoneNavigation: Story = {
+  args: {
+    wikiSidebar: { kind: "zoneNav", zoneUnitId: WIKI_ZONE_ID },
+  },
+  render: (args) => (
+    <Seeded posts={wikiPosts}>
+      <RealmWikiTab {...args} />
+    </Seeded>
+  ),
+};
+
+export const EmptyAutoList: Story = {
   render: (args) => (
     <Seeded posts={[]} portal={null}>
       <RealmWikiTab {...args} />

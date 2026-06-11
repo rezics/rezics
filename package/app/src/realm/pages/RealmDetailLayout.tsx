@@ -77,15 +77,11 @@ export function RealmDetailLayout({
   const avatarUrl =
     realm.extra?.avatar?.kind === "url" ? realm.extra.avatar.url : undefined;
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
-  const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showManage = canManageRealm({
     permission,
     memberRoleKey: membership?.roleKey,
   });
   const isMember = Boolean(membership);
-  // Wiki tab shows when a wiki zone exists or a manager can configure one.
-  // 当存在 wiki zone 或管理者可配置时，显示 Wiki 标签。
-  const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
 
   return (
     <RealmDetailProvider
@@ -96,8 +92,6 @@ export function RealmDetailLayout({
         membership,
         isMember,
         showManage,
-        showWikiTab,
-        wikiZoneUnitId,
         tagTree,
         description,
       }}
