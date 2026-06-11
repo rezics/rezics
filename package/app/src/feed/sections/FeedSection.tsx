@@ -1,6 +1,6 @@
 import {
-  type FeedQuery,
   type FeedPostRow,
+  type FeedQuery,
   feedRowsInfiniteQuery,
 } from "@rezics/api/feed/feed";
 import { useTranslation } from "@rezics/i18n/react";

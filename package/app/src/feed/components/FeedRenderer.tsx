@@ -6,6 +6,7 @@ import type React from "react";
 import { FeedBookCard } from "./FeedBookCard";
 import { FeedPostRowCard } from "./FeedPostRowCard";
 import { FeedShelfCard } from "./FeedShelfCard";
+import { FeedUnitCard } from "./FeedUnitCard";
 
 interface FeedRendererProps {
   rows: FeedRow[];
@@ -61,6 +62,10 @@ export const FeedRenderer: React.FC<FeedRendererProps> = ({
             return <FeedBookCard key={row.rowId} row={row} />;
           case "shelf":
             return <FeedShelfCard key={row.rowId} row={row} />;
+          case "unit":
+            return <FeedUnitCard key={row.rowId} row={row} />;
+          default:
+            return null;
         }
       })}
     </div>

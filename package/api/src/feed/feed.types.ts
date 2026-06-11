@@ -5,6 +5,7 @@ import type {
   FeedResponse,
   FeedRow,
   FeedShelfRow,
+  FeedUnitRow,
 } from "@rezics/contract";
 
 export type {
@@ -14,4 +15,5 @@ export type {
   FeedResponse,
   FeedRow,
   FeedShelfRow,
+  FeedUnitRow,
 };

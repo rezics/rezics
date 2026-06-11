@@ -1,19 +1,22 @@
 import type {
   FeedBookRow,
-  FeedQuery,
+  FeedFilterType,
   FeedPostRow,
+  FeedQuery,
   FeedResponse,
   FeedRow,
   FeedShelfRow,
   FeedSort,
+  FeedUnitRow,
   FeedWorkSummary,
   PostDTO,
+  PostKind as PostKindValue,
   PostListQuery,
   ShelfSummaryDTO,
   ZoneBoundary,
 } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
-import { eq, inArray } from "drizzle-orm";
+import { mainMarkdownSource, PostKind } from "@rezics/contract";
+import { and, desc, eq, inArray, lt } from "drizzle-orm";
 import { bookService } from "@/book";
 import { db } from "@/db";
 import { UnitTranslation } from "@/db/schema/translation";
@@ -26,7 +29,11 @@ import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resoluti
 import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { AppError } from "@/utils/errors";
 import { zoneService } from "@/zone";
-import { feedResponse, mapPostToFeedRow } from "./feed.mapper";
+import {
+  feedResponse,
+  mapPostToFeedRow,
+  mapUnitToFeedRow,
+} from "./feed.mapper";
 
 const FEED_LIMIT_CAP = 50;
 const RECOMMENDATION_ITEM_LIMIT = 8;
@@ -141,6 +148,40 @@ function withSliceCursor(response: FeedResponse, limit: number): FeedResponse {
   return response;
 }
 
+const UNIT_FILTER_TYPES = {
+  book: "BOOK",
+  game: "GAME",
+  media: "MEDIA",
+  realm: "REALM",
+  zone: "ZONE",
+} as const satisfies Partial<
+  Record<FeedFilterType, FeedUnitRow["unit"]["type"]>
+>;
+
+function unitTypeForFeedFilter(
+  filterType: FeedFilterType,
+): FeedUnitRow["unit"]["type"] | null {
+  return (
+    UNIT_FILTER_TYPES[filterType as keyof typeof UNIT_FILTER_TYPES] ?? null
+  );
+}
+
+function postKindForFeedFilter(
+  filterType: FeedFilterType,
+): PostKindValue | null {
+  if (filterType === "post") return PostKind.POST;
+  if (filterType === "review") return PostKind.REVIEW;
+  return null;
+}
+
+function unitCursorForFeed(cursor: FeedQuery["cursor"]): Date | null {
+  if (!cursor?.rowId || !cursor.createdAt) return null;
+  const [type] = cursor.rowId.split(":");
+  if (type !== "unit") return null;
+  const createdAt = new Date(cursor.createdAt);
+  return Number.isNaN(createdAt.getTime()) ? null : createdAt;
+}
+
 function titleFromTranslations(
   source:
     | {
@@ -155,6 +196,20 @@ function titleFromTranslations(
     source?.unit?.translations?.find((translation) => translation.title)
       ?.title ??
     null
+  );
+}
+
+function preferredTranslation<T extends { language: string }>(
+  translations: T[],
+  languages: string[],
+): T | undefined {
+  if (languages.length === 0) return translations[0];
+  return (
+    languages
+      .map((language) =>
+        translations.find((translation) => translation.language === language),
+      )
+      .find(Boolean) ?? translations[0]
   );
 }
 
@@ -492,6 +547,42 @@ export class FeedService {
       );
     }
 
+    const filterType = query.filterType ?? "all";
+    const postKind = postKindForFeedFilter(filterType);
+    if (postKind) {
+      const posts = await postService.list(
+        {
+          ...postQuery,
+          kind: postKind,
+        },
+        options,
+      );
+      return withSliceCursor(
+        feedResponse({
+          scope,
+          sort,
+          rows: await mapPostsToFeedRows(posts.posts, query, {
+            reason:
+              postKind === PostKind.REVIEW
+                ? "global-review-rank"
+                : "global-post-rank",
+          }),
+        }),
+        limit,
+      );
+    }
+
+    const unitType = unitTypeForFeedFilter(filterType);
+    if (unitType) {
+      const unitRows = await this.homeUnitRows(query, unitType, limit);
+      const response = feedResponse({
+        scope,
+        sort,
+        rows: unitRows.rows,
+      });
+      return unitRows.hasMore ? response : { ...response, nextCursor: null };
+    }
+
     const [posts, recommendations] = await Promise.all([
       postService.list(postQuery, options),
       query.cursor ? Promise.resolve([]) : this.homeRecommendationRows(),
@@ -507,6 +598,84 @@ export class FeedService {
       }),
       limit,
     );
+  }
+
+  private async homeUnitRows(
+    query: FeedQuery,
+    unitType: FeedUnitRow["unit"]["type"],
+    limit: number,
+  ): Promise<{ rows: FeedUnitRow[]; hasMore: boolean }> {
+    const cursorCreatedAt = unitCursorForFeed(query.cursor);
+    const conditions = [
+      eq(Unit.type, unitType),
+      eq(Unit.status, "PUBLISHED"),
+      eq(Unit.visibility, "PUBLIC"),
+      ...(cursorCreatedAt ? [lt(Unit.createdAt, cursorCreatedAt)] : []),
+    ];
+    const rows = await db
+      .select({
+        unitId: Unit.id,
+        type: Unit.type,
+        slug: Unit.slug,
+        extra: Unit.extra,
+        createdAt: Unit.createdAt,
+      })
+      .from(Unit)
+      .where(and(...conditions))
+      .orderBy(desc(Unit.createdAt))
+      .limit(limit + 1);
+    const visibleRows = rows.slice(0, limit);
+    if (visibleRows.length === 0) {
+      return { rows: [], hasMore: false };
+    }
+    const translations = await db
+      .select({
+        unitId: UnitTranslation.unitId,
+        language: UnitTranslation.language,
+        title: UnitTranslation.title,
+        summary: UnitTranslation.summary,
+        description: UnitTranslation.description,
+      })
+      .from(UnitTranslation)
+      .where(
+        inArray(
+          UnitTranslation.unitId,
+          visibleRows.map((row) => row.unitId),
+        ),
+      );
+    const languages = resolveEffectiveReadLanguageCandidates({
+      languages: query.languages,
+      appLocale: query.appLocale,
+    });
+    const translationsByUnit = new Map<string, typeof translations>();
+    for (const translation of translations) {
+      const current = translationsByUnit.get(translation.unitId) ?? [];
+      current.push(translation);
+      translationsByUnit.set(translation.unitId, current);
+    }
+
+    return {
+      hasMore: rows.length > limit,
+      rows: visibleRows.map((row) => {
+        const translation = preferredTranslation(
+          translationsByUnit.get(row.unitId) ?? [],
+          languages,
+        );
+        const extra = row.extra as { coverUrl?: string | null } | null;
+        return mapUnitToFeedRow({
+          unitId: row.unitId,
+          type: row.type as FeedUnitRow["unit"]["type"],
+          slug: row.slug ?? null,
+          title: translation?.title ?? null,
+          coverUrl: extra?.coverUrl ?? null,
+          description:
+            translation?.summary ??
+            mainMarkdownSource(translation?.description) ??
+            null,
+          createdAt: row.createdAt.toISOString(),
+        });
+      }),
+    };
   }
 
   private async homeRecommendationRows(): Promise<FeedRow[]> {

@@ -7,9 +7,10 @@ export {
 } from "./feed.queries";
 export type {
   FeedBookRow,
-  FeedQuery,
   FeedPostRow,
+  FeedQuery,
   FeedResponse,
   FeedRow,
   FeedShelfRow,
+  FeedUnitRow,
 } from "./feed.types";
