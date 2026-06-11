@@ -125,6 +125,7 @@ const BookTocTreeItems = React.memo(function BookTocTreeItems({
   onToggle,
   renderGroupActions = true,
 }: BookTocTreeProps) {
+  const { t } = useTranslation("common");
   if (!nodes || nodes.length === 0) return null;
 
   return (
@@ -159,7 +160,7 @@ const BookTocTreeItems = React.memo(function BookTocTreeItems({
                   size="sm"
                   onClick={() => onToggle(nodeKey)}
                 >
-                  {isOpen ? "Collapse" : "Expand"}
+                  {isOpen ? t("collapse") : t("expand")}
                 </Button>
               )}
             </div>

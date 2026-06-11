@@ -7,6 +7,7 @@ import {
   PostKind,
   type VariantContextSummary,
 } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -70,6 +71,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   overflowContent,
   moderationMenuContent,
 }) => {
+  const { t } = useTranslation("common");
   const navigate = useNavigate();
   const rootPostUnitId = post.unitId;
   const resolvedVariantContext = variantContext ?? post.variantContext;
@@ -118,7 +120,7 @@ export const PostCard: React.FC<PostCardProps> = ({
     <>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuLabel>Unit</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("unit")}</DropdownMenuLabel>
         <DropdownMenuItem
           onSelect={(event) => {
             event.stopPropagation();
@@ -129,7 +131,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           }}
         >
           <Pencil className="h-4 w-4" aria-hidden />
-          Edit
+          {t("edit")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
     </>
