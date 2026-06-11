@@ -214,6 +214,23 @@ Pick UI primitives in this order:
 
 There is no third option. Icons: `lucide-react` by default, `@tabler/icons-react` as the named fallback when lucide lacks the glyph. Load the `rezics-design` skill and see the `@rezics/ui` Storybook for the authoritative rules.
 
+### Frontend Copy and i18n
+
+All user-facing frontend product copy must go through `@rezics/i18n`, not
+hard-coded strings in JSX or component state. Add keys to
+`package/i18n/locales/{locale}/{ns}.json`, choose the namespace closest to the
+feature domain, and use `common` only for genuinely shared words or actions.
+
+Use `useTranslation` / `Trans` from `@rezics/i18n/react` in React components.
+For dynamic enum or slug labels, use typed key maps in `@rezics/i18n` helpers
+instead of branching to raw strings in app code. Reusable `@rezics/ui`
+components that own default copy must also resolve it through i18n; host string
+override props remain host-owned and are rendered as supplied.
+
+User-generated content, imported catalog metadata, API identifiers, test fixture
+data, route paths, aria IDs, and non-display constants are not product copy and
+do not need i18n keys.
+
 The retired `SEED_*` env vars (e.g. `SEED_PROFILE=fast`) no longer have any effect — replace with `--preset=<name>`.
 
 ## Change Management
