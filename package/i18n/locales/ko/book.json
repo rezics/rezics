@@ -198,7 +198,7 @@
   "chapter_label": "장",
   "release_scope_all_releases": "모든 판본",
   "release_scope_this_release": "이 판본",
-  "source_evidence_observed": "{{date}}에 관측됨",
+  "source_evidence_observed": "{date}에 관측됨",
   "source_evidence_view_entity": "엔티티 보기",
   "source_evidence_open_source": "소스 열기"
 }

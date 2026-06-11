@@ -173,7 +173,7 @@
   "profile_password_label": "新しいパスワード（任意）",
   "profile_password_helper": "現在のパスワードを維持するには空欄のままにしてください",
   "profile_default_name": "読者",
-  "profile_open_aria": "{{name}} のプロフィールを開く",
+  "profile_open_aria": "{name} のプロフィールを開く",
   "security_unknown_device": "不明なデバイス",
   "user_cannot_resolve": "ユーザー情報を解決できません",
   "user_cannot_resolve_description": "最初にサインインするか、ユーザー詳細ページからこのページを開きます。",

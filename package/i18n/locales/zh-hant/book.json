@@ -198,7 +198,7 @@
   "chapter_label": "章節",
   "release_scope_all_releases": "所有版本",
   "release_scope_this_release": "此版本",
-  "source_evidence_observed": "觀測於 {{date}}",
+  "source_evidence_observed": "觀測於 {date}",
   "source_evidence_view_entity": "檢視實體",
   "source_evidence_open_source": "檢視來源"
 }

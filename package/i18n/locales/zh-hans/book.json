@@ -198,7 +198,7 @@
   "chapter_label": "章节",
   "release_scope_all_releases": "所有版本",
   "release_scope_this_release": "此版本",
-  "source_evidence_observed": "观测于 {{date}}",
+  "source_evidence_observed": "观测于 {date}",
   "source_evidence_view_entity": "查看实体",
   "source_evidence_open_source": "查看来源"
 }

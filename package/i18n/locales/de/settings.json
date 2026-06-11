@@ -173,7 +173,7 @@
   "profile_password_label": "Neues Passwort (optional)",
   "profile_password_helper": "Leer lassen, um das aktuelle Passwort beizubehalten",
   "profile_default_name": "Leser",
-  "profile_open_aria": "Profil von {{name}} öffnen",
+  "profile_open_aria": "Profil von {name} öffnen",
   "security_unknown_device": "Unbekanntes Gerät",
   "user_cannot_resolve": "Benutzerinformationen können nicht aufgelöst werden",
   "user_cannot_resolve_description": "Melden Sie sich zuerst an oder öffnen Sie diese Seite über eine Benutzerdetailseite.",
