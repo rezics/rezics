@@ -1,82 +1,97 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "../env";
 
-const ALLOWED_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-] as const;
-
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
-
-const MIME_TO_EXT: Record<string, string> = {
+const ALLOWED_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
   "image/gif": "gif",
+  "image/avif": "avif",
+  "image/svg+xml": "svg",
 };
 
-function getR2Client(): S3Client | null {
-  const { R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = env;
-  if (!R2_ENDPOINT || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+const DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+const DEFAULT_PRESIGN_EXPIRY = 600; // 10 minutes
+const DEFAULT_CACHE_MAX_AGE = 31_536_000; // 1 year
+
+function getS3Client(): S3Client | null {
+  const { S3_ENDPOINT, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY } = env;
+  if (!S3_ENDPOINT || !S3_ACCESS_KEY_ID || !S3_SECRET_ACCESS_KEY) {
     return null;
   }
   return new S3Client({
-    region: "auto",
-    endpoint: R2_ENDPOINT,
+    region: env.S3_REGION ?? "auto",
+    endpoint: S3_ENDPOINT,
     credentials: {
-      accessKeyId: R2_ACCESS_KEY_ID,
-      secretAccessKey: R2_SECRET_ACCESS_KEY,
+      accessKeyId: S3_ACCESS_KEY_ID,
+      secretAccessKey: S3_SECRET_ACCESS_KEY,
     },
+    forcePathStyle: true,
   });
 }
 
-export function isR2Configured(): boolean {
+export function isStorageConfigured(): boolean {
   return !!(
-    env.R2_ENDPOINT &&
-    env.R2_ACCESS_KEY_ID &&
-    env.R2_SECRET_ACCESS_KEY &&
-    env.R2_BUCKET &&
-    env.R2_PUBLIC_URL
+    env.S3_ENDPOINT &&
+    env.S3_ACCESS_KEY_ID &&
+    env.S3_SECRET_ACCESS_KEY &&
+    env.S3_BUCKET &&
+    env.MEDIA_PUBLIC_BASE_URL
   );
 }
 
-export async function uploadImage(file: File): Promise<{ url: string }> {
-  if (!isR2Configured()) {
+export async function createPresignedUpload(
+  contentType: string,
+  size: number,
+  userId: string,
+): Promise<{
+  uploadUrl: string;
+  fileUrl: string;
+  headers: Record<string, string>;
+}> {
+  if (!isStorageConfigured()) {
     throw new Error("Storage not configured");
   }
 
-  const mimeType = file.type;
-  if (!ALLOWED_MIME_TYPES.includes(mimeType as any)) {
+  const ext = ALLOWED_TYPES[contentType];
+  if (!ext) {
     throw new Error(
-      `Unsupported file type: ${mimeType}. Accepted: ${ALLOWED_MIME_TYPES.join(", ")}`,
+      `Unsupported file type: ${contentType}. Accepted: ${Object.keys(ALLOWED_TYPES).join(", ")}`,
     );
   }
 
-  if (file.size > MAX_SIZE_BYTES) {
-    throw new Error(`File too large. Maximum size is 5MB.`);
+  const maxSize = env.MEDIA_MAX_UPLOAD_SIZE ?? DEFAULT_MAX_SIZE;
+  if (size > maxSize) {
+    throw new Error(
+      `File too large. Maximum size is ${Math.round(maxSize / 1024 / 1024)}MB.`,
+    );
   }
 
-  const client = getR2Client()!;
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const client = getS3Client()!;
   const id = crypto.randomUUID();
-  const ext = MIME_TO_EXT[mimeType] ?? "bin";
-  const key = `images/${year}/${month}/${id}.${ext}`;
+  const key = `${userId}/${id}.${ext}`;
+  const cacheControl = `public, max-age=${DEFAULT_CACHE_MAX_AGE}, immutable`;
 
-  const buffer = await file.arrayBuffer();
-
-  await client.send(
+  const uploadUrl = await getSignedUrl(
+    client,
     new PutObjectCommand({
-      Bucket: env.R2_BUCKET!,
+      Bucket: env.S3_BUCKET!,
       Key: key,
-      Body: new Uint8Array(buffer),
-      ContentType: mimeType,
+      ContentType: contentType,
+      ContentLength: size,
+      CacheControl: cacheControl,
     }),
+    { expiresIn: env.MEDIA_PRESIGN_EXPIRY ?? DEFAULT_PRESIGN_EXPIRY },
   );
 
-  const publicUrl = `${env.R2_PUBLIC_URL!.replace(/\/$/, "")}/${key}`;
-  return { url: publicUrl };
+  const publicBaseUrl = env.MEDIA_PUBLIC_BASE_URL!.replace(/\/$/, "");
+  return {
+    uploadUrl,
+    fileUrl: `${publicBaseUrl}/${key}`,
+    headers: {
+      "content-type": contentType,
+      "cache-control": cacheControl,
+    },
+  };
 }

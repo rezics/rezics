@@ -1,28 +1,26 @@
-import type { ImageUploadResponse } from "@rezics/contract";
-import { getApiConfig } from "../config";
+import type { PresignUploadResponse } from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
 
 export const uploadApi = {
-  uploadImage: async (file: File): Promise<ImageUploadResponse> => {
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const url = `${getApiConfig().apiBaseUrl}/upload/image`;
-    const response = await fetch(url, {
+  uploadImage: async (file: File): Promise<{ url: string }> => {
+    const grant = await apiFetch<PresignUploadResponse>("/upload/presign", {
       method: "POST",
-      body: formData,
-      credentials: "include",
+      body: JSON.stringify({
+        contentType: file.type,
+        size: file.size,
+      }),
     });
 
-    if (!response.ok) {
-      const json = await response.json().catch(() => null);
-      throw new Error(
-        JSON.stringify({
-          status: response.status,
-          message: json?.message ?? response.statusText,
-        }),
-      );
+    const putResponse = await fetch(grant.uploadUrl, {
+      method: "PUT",
+      headers: grant.headers,
+      body: file,
+    });
+
+    if (!putResponse.ok) {
+      throw new Error(`Direct upload failed: ${putResponse.status}`);
     }
 
-    return response.json();
+    return { url: grant.fileUrl };
   },
 };
