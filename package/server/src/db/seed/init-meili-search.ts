@@ -27,6 +27,9 @@ export async function initMeiliSearch(
     searchClient.initRealmIndex(),
     searchClient.initEntityIndex(),
     searchClient.initProgressIndex(),
+    searchClient.initCommentIndex(),
+    searchClient.initPollIndex(),
+    searchClient.initShelfItemIndex(),
   ]);
 
   console.log("MeiliSearch indexes initialized.");
