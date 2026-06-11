@@ -3,7 +3,7 @@ import type {
   RealmTagViewStyle,
   TagTreeNode,
 } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -23,19 +23,19 @@ type TagEntry = {
   groupLabel?: string;
 };
 
-const viewLabels: Record<RealmTagViewStyle, string> = {
-  flat: "Flat",
-  grouped: "Grouped",
-  tree: "Tree",
-};
-
 export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
   realmId: _realmId,
   tagTree,
   tagView,
   onTagSelect,
 }) => {
+  const { t } = useTranslation("community");
   const locale = useLocale();
+  const viewLabels: Record<RealmTagViewStyle, string> = {
+    flat: t("tag_view_flat"),
+    grouped: t("tag_view_grouped"),
+    tree: t("tag_view_tree"),
+  };
   const entries = useMemo(
     () => collectTags(tagTree, locale),
     [locale, tagTree],
@@ -52,7 +52,7 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
     : (tagView?.defaultStyle ?? "flat");
 
   if (entries.length === 0) {
-    return <EmptyState title="No realm tags" />;
+    return <EmptyState title={t("tag_empty")} />;
   }
 
   const grouped = groupTags(entries);

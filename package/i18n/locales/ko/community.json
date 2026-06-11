@@ -368,5 +368,9 @@
   "post_published_to_realm": "게시물이 렐름에 게시되었습니다.",
   "realm_settings_saved": "렐름 설정이 저장되었습니다.",
   "realm_profile_saved": "렐름 프로필이 저장되었습니다.",
-  "realm_deleted": "렐름이 삭제되었습니다."
+  "realm_deleted": "렐름이 삭제되었습니다.",
+  "tag_view_flat": "평면",
+  "tag_view_grouped": "그룹",
+  "tag_view_tree": "트리",
+  "tag_empty": "렐름 태그 없음"
 }

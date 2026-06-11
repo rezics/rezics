@@ -368,5 +368,9 @@
   "post_published_to_realm": "Beitrag im Realm veröffentlicht.",
   "realm_settings_saved": "Realm-Einstellungen gespeichert.",
   "realm_profile_saved": "Realm-Profil gespeichert.",
-  "realm_deleted": "Realm gelöscht."
+  "realm_deleted": "Realm gelöscht.",
+  "tag_view_flat": "Flach",
+  "tag_view_grouped": "Gruppiert",
+  "tag_view_tree": "Baum",
+  "tag_empty": "Keine Realm-Tags"
 }

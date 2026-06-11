@@ -368,5 +368,9 @@
   "post_published_to_realm": "投稿をレルムに公開しました。",
   "realm_settings_saved": "レルム設定を保存しました。",
   "realm_profile_saved": "レルムプロフィールを保存しました。",
-  "realm_deleted": "レルムを削除しました。"
+  "realm_deleted": "レルムを削除しました。",
+  "tag_view_flat": "フラット",
+  "tag_view_grouped": "グループ",
+  "tag_view_tree": "ツリー",
+  "tag_empty": "レルムタグはありません"
 }

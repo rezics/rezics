@@ -368,5 +368,9 @@
   "post_published_to_realm": "Post published to realm.",
   "realm_settings_saved": "Realm settings saved.",
   "realm_profile_saved": "Realm profile saved.",
-  "realm_deleted": "Realm deleted."
+  "realm_deleted": "Realm deleted.",
+  "tag_view_flat": "Flat",
+  "tag_view_grouped": "Grouped",
+  "tag_view_tree": "Tree",
+  "tag_empty": "No realm tags"
 }

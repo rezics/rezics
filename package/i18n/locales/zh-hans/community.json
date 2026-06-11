@@ -368,5 +368,9 @@
   "post_published_to_realm": "帖子已发布到领域。",
   "realm_settings_saved": "领域设置已保存。",
   "realm_profile_saved": "领域资料已保存。",
-  "realm_deleted": "领域已删除。"
+  "realm_deleted": "领域已删除。",
+  "tag_view_flat": "平铺",
+  "tag_view_grouped": "分组",
+  "tag_view_tree": "树形",
+  "tag_empty": "暂无领域标签"
 }

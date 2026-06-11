@@ -368,5 +368,9 @@
   "post_published_to_realm": "貼文已發布到領域。",
   "realm_settings_saved": "領域設定已儲存。",
   "realm_profile_saved": "領域資料已儲存。",
-  "realm_deleted": "領域已刪除。"
+  "realm_deleted": "領域已刪除。",
+  "tag_view_flat": "平鋪",
+  "tag_view_grouped": "分組",
+  "tag_view_tree": "樹狀",
+  "tag_empty": "暫無領域標籤"
 }
