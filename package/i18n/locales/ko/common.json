@@ -72,6 +72,7 @@
   "open": "열기",
   "pagination_range": "{count} 중 {from}-{to}",
   "password": "비밀번호",
+  "pending_ops": "보류 중인 작업 {count}건",
   "pinned": "고정됨",
   "prev": "이전",
   "previous_page": "이전 페이지",

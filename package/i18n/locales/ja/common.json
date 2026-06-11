@@ -72,6 +72,7 @@
   "open": "開く",
   "pagination_range": "{from}～{to}/{count}",
   "password": "パスワード",
+  "pending_ops": "{count} 件の保留中の操作",
   "pinned": "固定された",
   "prev": "前へ",
   "previous_page": "前のページへ",

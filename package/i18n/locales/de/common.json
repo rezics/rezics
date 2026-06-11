@@ -72,6 +72,7 @@
   "open": "Öffnen",
   "pagination_range": "{from}-{to}von{count}",
   "password": "Passwort",
+  "pending_ops": "{count} ausstehende Vorgänge",
   "pinned": "Angepinnt",
   "prev": "Vorher",
   "previous_page": "Vorherige Seite",

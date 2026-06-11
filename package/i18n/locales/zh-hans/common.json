@@ -72,6 +72,7 @@
   "open": "打开",
   "pagination_range": "{from}-{to}或{count}",
   "password": "密码",
+  "pending_ops": "{count} 个待处理操作",
   "pinned": "已固定",
   "prev": "上一个",
   "previous_page": "上一页",
