@@ -15,6 +15,9 @@
   "chapter_bulk_rating_description": "这将覆盖{count}所选章节的评级。",
   "chapter_bulk_rating_title": "为选定的设置评分",
   "chapter_chapter_label": "章节",
+  "chapter_items": "项目",
+  "chapter_words": "字数",
+  "chapter_updated": "更新于",
   "chapter_content_required": "内容为必填",
   "chapter_create_failed": "创建章节失败：{error}",
   "chapter_double_click_rename": "双击重命名",
@@ -215,5 +218,10 @@
   "source_evidence_open_source": "查看来源",
   "tag_domain_alert": "目前暂未开放 domain 注册，请搜索并添加 main 域的标签。",
   "tag_edit_description": "为当前书籍管理标签：可新建标签，并按列表/域分组方式查看与解绑。",
-  "tag_edit_title": "标签编辑"
+  "tag_edit_title": "标签编辑",
+  "creation_path_title": "创建路径",
+  "creation_path_catalog_entry": "目录条目",
+  "creation_path_catalog_entry_description": "由社群目录拥有，开放给协作编辑。",
+  "creation_path_personal_work": "个人作品",
+  "creation_path_personal_work_description": "由你的账户拥有，默认不开放给社群编辑。"
 }

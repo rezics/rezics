@@ -84,5 +84,7 @@
   "theme_customizer_static_theme": "Statisches Thema",
   "theme_customizer_preset_colors": "Voreingestellte Farben",
   "theme_customizer_custom_color": "Benutzerdefinierte Farbe",
-  "theme_customizer_hex_format": "Format: #RRGGBB"
+  "theme_customizer_hex_format": "Format: #RRGGBB",
+  "create_menu_new_book": "Neues Buch",
+  "create_menu_new_shelf": "Neues Regal"
 }

@@ -15,6 +15,9 @@
   "chapter_bulk_rating_description": "此操作將覆寫 {count} 個所選章節的分級。",
   "chapter_bulk_rating_title": "設定所選章節分級",
   "chapter_chapter_label": "章節",
+  "chapter_items": "項目",
+  "chapter_words": "字數",
+  "chapter_updated": "更新於",
   "chapter_content_required": "內容為必填",
   "chapter_create_failed": "建立章節失敗：{error}",
   "chapter_double_click_rename": "雙擊重新命名",
@@ -215,5 +218,10 @@
   "source_evidence_open_source": "檢視來源",
   "tag_domain_alert": "目前尚未開放 domain 註冊，請搜尋並新增 main 域的標籤。",
   "tag_edit_description": "為目前書籍管理標籤：可新建標籤，並按列表/域分組方式檢視與解除綁定。",
-  "tag_edit_title": "標籤編輯"
+  "tag_edit_title": "標籤編輯",
+  "creation_path_title": "建立路徑",
+  "creation_path_catalog_entry": "目錄項目",
+  "creation_path_catalog_entry_description": "由社群目錄擁有，開放給協作編輯。",
+  "creation_path_personal_work": "個人作品",
+  "creation_path_personal_work_description": "由你的帳戶擁有，預設不開放給社群編輯。"
 }

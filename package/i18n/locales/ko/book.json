@@ -15,6 +15,9 @@
   "chapter_bulk_rating_description": "이렇게 하면 선택한 {count}개 챕터의 등급이 재정의됩니다.",
   "chapter_bulk_rating_title": "선택한 항목에 대한 등급 설정",
   "chapter_chapter_label": "챕터",
+  "chapter_items": "항목",
+  "chapter_words": "단어",
+  "chapter_updated": "업데이트됨",
   "chapter_content_required": "내용은 필수입니다",
   "chapter_create_failed": "챕터를 만들지 못했습니다: {error}",
   "chapter_double_click_rename": "이름 바꾸기를 두 번 클릭합니다.",
@@ -215,5 +218,10 @@
   "source_evidence_open_source": "소스 열기",
   "tag_domain_alert": "현재 도메인 등록은 개방되지 않았습니다. main 도메인의 태그를 검색하여 추가해 주세요.",
   "tag_edit_description": "이 도서의 태그를 관리합니다. 새 태그를 만들고, 목록/도메인 그룹별로 조회하거나 해제할 수 있습니다.",
-  "tag_edit_title": "태그 편집"
+  "tag_edit_title": "태그 편집",
+  "creation_path_title": "생성 경로",
+  "creation_path_catalog_entry": "카탈로그 항목",
+  "creation_path_catalog_entry_description": "커뮤니티 카탈로그가 소유하며 협업 편집에 개방되어 있습니다.",
+  "creation_path_personal_work": "개인 작품",
+  "creation_path_personal_work_description": "귀하의 계정이 소유하며 기본적으로 커뮤니티 편집에 닫혀 있습니다."
 }

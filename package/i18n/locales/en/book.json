@@ -15,6 +15,9 @@
   "chapter_bulk_rating_description": "This will override the rating on {count} selected chapters.",
   "chapter_bulk_rating_title": "Set rating for selected",
   "chapter_chapter_label": "Chapter",
+  "chapter_items": "items",
+  "chapter_words": "words",
+  "chapter_updated": "Updated",
   "chapter_content_required": "Content is required",
   "chapter_create_failed": "Failed to create chapter: {error}",
   "chapter_double_click_rename": "Double-click rename",
@@ -215,5 +218,10 @@
   "source_evidence_open_source": "Open Source",
   "tag_domain_alert": "Domain registration is not open yet. Please search and add tags from the main domain.",
   "tag_edit_description": "Manage tags for this book: create new tags, and view or unbind them by list or domain grouping.",
-  "tag_edit_title": "Tag Editor"
+  "tag_edit_title": "Tag Editor",
+  "creation_path_title": "Creation path",
+  "creation_path_catalog_entry": "Catalog entry",
+  "creation_path_catalog_entry_description": "Owned by the community catalog and open to collaborative edits.",
+  "creation_path_personal_work": "Personal work",
+  "creation_path_personal_work_description": "Owned by your account and closed to community edits by default."
 }

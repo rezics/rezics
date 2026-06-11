@@ -15,6 +15,9 @@
   "chapter_bulk_rating_description": "これにより、選択した{count}章の評価が上書きされます。",
   "chapter_bulk_rating_title": "選択したものの評価を設定する",
   "chapter_chapter_label": "章",
+  "chapter_items": "項目",
+  "chapter_words": "単語",
+  "chapter_updated": "更新",
   "chapter_content_required": "本文は必須です",
   "chapter_create_failed": "章の作成に失敗しました: {error}",
   "chapter_double_click_rename": "ダブルクリックして名前を変更",
@@ -215,5 +218,10 @@
   "source_evidence_open_source": "ソースを開く",
   "tag_domain_alert": "現在 domain 登録は開放されていません。main ドメインのタグを検索して追加してください。",
   "tag_edit_description": "この書籍のタグを管理します。タグの新規作成や、リスト/ドメインごとのグループ表示・解除が可能です。",
-  "tag_edit_title": "タグ編集"
+  "tag_edit_title": "タグ編集",
+  "creation_path_title": "作成経路",
+  "creation_path_catalog_entry": "カタログエントリ",
+  "creation_path_catalog_entry_description": "コミュニティカタログが所有し、協調編集に対応しています。",
+  "creation_path_personal_work": "個人作品",
+  "creation_path_personal_work_description": "あなたのアカウントが所有しており、デフォルトではコミュニティ編集に対応していません。"
 }

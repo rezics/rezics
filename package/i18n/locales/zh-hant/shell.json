@@ -84,5 +84,7 @@
   "theme_customizer_static_theme": "靜態主題",
   "theme_customizer_preset_colors": "預設顏色",
   "theme_customizer_custom_color": "自訂顏色",
-  "theme_customizer_hex_format": "輸入格式：#RRGGBB"
+  "theme_customizer_hex_format": "輸入格式：#RRGGBB",
+  "create_menu_new_book": "新建書籍",
+  "create_menu_new_shelf": "新建書架"
 }
