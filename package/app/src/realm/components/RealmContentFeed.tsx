@@ -1,7 +1,4 @@
-import {
-  type FeedContentRow,
-  feedRowsInfiniteQuery,
-} from "@rezics/api/feed/feed";
+import { type FeedPostRow, feedRowsInfiniteQuery } from "@rezics/api/feed/feed";
 import { postQueries } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import {
@@ -17,7 +14,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core";
-import { FeedContentCard, FeedRenderer } from "@/feed";
+import { FeedPostRowCard, FeedRenderer } from "@/feed";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { realmContextReactionScopeKey } from "../models/realmPostContext";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
@@ -63,17 +60,17 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     enabled: readContext.ready && Boolean(realmId),
   });
   const rows = data?.pages.flatMap((page) => page.rows) ?? [];
-  const contentRows = useMemo(
-    () => rows.filter((row): row is FeedContentRow => row.type === "content"),
+  const postRows = useMemo(
+    () => rows.filter((row): row is FeedPostRow => row.type === "post"),
     [rows],
   );
   const reactionScopeKey = realmContextReactionScopeKey(realmId);
   const postReactionTargetIds = useMemo(
     () =>
-      contentRows
+      postRows
         .filter((row) => row.post.kind !== PostKind.REVIEW)
         .map((row) => row.post.unitId),
-    [contentRows],
+    [postRows],
   );
   const moderationOverlayQuery = useQuery({
     ...postQueries.moderationOverlays(postReactionTargetIds, realmId),
@@ -112,7 +109,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
       ? realmModerationStatus
       : "approved";
 
-  const renderContentRow = (row: FeedContentRow) => {
+  const renderPostRow = (row: FeedPostRow) => {
     const unitRealm =
       unitRealmByUnitId.get(row.post.unitId) ??
       ({
@@ -123,7 +120,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
       } satisfies UnitRealmDTO);
 
     return (
-      <FeedContentCard
+      <FeedPostRowCard
         row={row}
         summaryScopeKey={reactionScopeKey}
         reactionScopeKey={reactionScopeKey}
@@ -152,7 +149,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
         rows={rows}
         loading={isLoading}
         emptyTitle={t("entity:realm_content_empty_title")}
-        renderContentRow={renderContentRow}
+        renderPostRow={renderPostRow}
       />
       {isError && rows.length > 0 ? (
         <div className="flex justify-center">

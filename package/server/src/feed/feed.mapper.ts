@@ -1,6 +1,6 @@
 import type {
-  FeedContentRow,
   FeedCursor,
+  FeedPostRow,
   FeedResponse,
   FeedRow,
   FeedScope,
@@ -37,14 +37,14 @@ function targetUnitForPost(
 export function mapPostToFeedRow(
   post: PostDTO,
   input: {
-    realm?: FeedContentRow["realm"];
+    realm?: FeedPostRow["realm"];
     realmUnitId?: string | null;
     reason?: string | null;
     resolvedTargetUnit?: FeedWorkSummary | null;
   } = {},
-): FeedContentRow {
+): FeedPostRow {
   return {
-    type: "content",
+    type: "post",
     rowId: `post:${post.unitId}`,
     post,
     href: postHrefForFeed(post, input.realmUnitId),
@@ -57,8 +57,8 @@ export function mapPostToFeedRow(
 
 export function cursorForFeedRows(rows: FeedRow[]): FeedCursor | null {
   const last = rows
-    .filter((row): row is FeedContentRow => row.type === "content")
-    .at(-1) as (FeedContentRow & { post: FeedPost }) | undefined;
+    .filter((row): row is FeedPostRow => row.type === "post")
+    .at(-1) as (FeedPostRow & { post: FeedPost }) | undefined;
   if (!last) return null;
   return {
     rowId: last.rowId,

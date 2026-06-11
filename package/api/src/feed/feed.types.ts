@@ -1,8 +1,17 @@
 import type {
-  FeedContentRow,
+  FeedBookRow,
+  FeedPostRow,
   FeedQuery,
   FeedResponse,
   FeedRow,
+  FeedShelfRow,
 } from "@rezics/contract";
 
-export type { FeedContentRow, FeedQuery, FeedResponse, FeedRow };
+export type {
+  FeedBookRow,
+  FeedPostRow,
+  FeedQuery,
+  FeedResponse,
+  FeedRow,
+  FeedShelfRow,
+};

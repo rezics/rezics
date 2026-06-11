@@ -1,9 +1,10 @@
 import type {
-  FeedCarouselRow,
-  FeedContentRow,
+  FeedBookRow,
   FeedQuery,
+  FeedPostRow,
   FeedResponse,
   FeedRow,
+  FeedShelfRow,
   FeedSort,
   FeedWorkSummary,
   PostDTO,
@@ -28,9 +29,9 @@ import { zoneService } from "@/zone";
 import { feedResponse, mapPostToFeedRow } from "./feed.mapper";
 
 const FEED_LIMIT_CAP = 50;
-const CAROUSEL_ITEM_LIMIT = 8;
-const FIRST_CAROUSEL_AFTER = 4;
-const CAROUSEL_SPACING = 6;
+const RECOMMENDATION_ITEM_LIMIT = 8;
+const FIRST_RECOMMENDATION_AFTER = 4;
+const RECOMMENDATION_SPACING = 6;
 
 function normalizeSort(sort: FeedQuery["sort"]): FeedSort {
   return sort ?? "best";
@@ -129,12 +130,12 @@ function withZoneFeedFilters(
   };
 }
 
-function countContentRows(rows: FeedRow[]): number {
-  return rows.filter((row) => row.type === "content").length;
+function countPostRows(rows: FeedRow[]): number {
+  return rows.filter((row) => row.type === "post").length;
 }
 
 function withSliceCursor(response: FeedResponse, limit: number): FeedResponse {
-  if (countContentRows(response.rows) < limit) {
+  if (countPostRows(response.rows) < limit) {
     return { ...response, nextCursor: null };
   }
   return response;
@@ -163,6 +164,8 @@ function mapBookToWorkSummary(book: unknown): FeedWorkSummary {
     kind?: string | null;
     title?: string | null;
     coverUrl?: string | null;
+    summary?: string | null;
+    description?: string | null;
     unit?: { translations?: Array<{ title?: string | null }> };
   };
   return {
@@ -170,6 +173,7 @@ function mapBookToWorkSummary(book: unknown): FeedWorkSummary {
     kind: source.kind ?? "book",
     title: titleFromTranslations(source),
     coverUrl: source.coverUrl ?? null,
+    description: source.summary ?? source.description ?? null,
   };
 }
 
@@ -187,30 +191,59 @@ function mapShelfToSummary(shelf: unknown): ShelfSummaryDTO {
   };
 }
 
+function mapBookToFeedRow(book: unknown): FeedBookRow {
+  const summary = mapBookToWorkSummary(book);
+  return {
+    type: "book",
+    rowId: `book:${summary.unitId}`,
+    book: summary,
+    href: `/book/${summary.unitId}`,
+    recommendationReason: "home-book-recommendation",
+  };
+}
+
+function mapShelfToFeedRow(shelf: unknown): FeedShelfRow {
+  const summary = mapShelfToSummary(shelf);
+  return {
+    type: "shelf",
+    rowId: `shelf:${summary.unitId}`,
+    shelf: summary,
+    href: `/shelf/${summary.unitId}`,
+    recommendationReason: "home-shelf-recommendation",
+  };
+}
+
 function scheduleFeedRows(
-  contentRows: FeedRow[],
-  carouselRows: FeedCarouselRow[],
+  postRows: FeedRow[],
+  recommendationRows: FeedRow[],
 ): FeedRow[] {
-  if (contentRows.length === 0 || carouselRows.length === 0) {
-    return contentRows;
+  if (postRows.length === 0) {
+    return recommendationRows;
+  }
+  if (recommendationRows.length === 0) {
+    return postRows;
   }
 
   const out: FeedRow[] = [];
-  let nextCarouselAt = FIRST_CAROUSEL_AFTER;
-  let carouselIndex = 0;
+  let nextRecommendationAt = FIRST_RECOMMENDATION_AFTER;
+  let recommendationIndex = 0;
 
-  for (let index = 0; index < contentRows.length; index += 1) {
-    out.push(contentRows[index]!);
+  for (let index = 0; index < postRows.length; index += 1) {
+    out.push(postRows[index]!);
     const contentPosition = index + 1;
     if (
-      carouselIndex < carouselRows.length &&
-      contentPosition >= nextCarouselAt &&
-      out.at(-1)?.type !== "carousel"
+      recommendationIndex < recommendationRows.length &&
+      contentPosition >= nextRecommendationAt
     ) {
-      out.push(carouselRows[carouselIndex]!);
-      carouselIndex += 1;
-      nextCarouselAt = contentPosition + CAROUSEL_SPACING;
+      out.push(recommendationRows[recommendationIndex]!);
+      recommendationIndex += 1;
+      nextRecommendationAt = contentPosition + RECOMMENDATION_SPACING;
     }
+  }
+
+  while (recommendationIndex < recommendationRows.length) {
+    out.push(recommendationRows[recommendationIndex]!);
+    recommendationIndex += 1;
   }
 
   return out;
@@ -224,7 +257,11 @@ type FeedPostDTO = PostDTO & {
   feedSortValue?: number | string | null;
 };
 
-type FeedRealmSummary = NonNullable<FeedContentRow["realm"]>;
+type FeedRealmSummary = NonNullable<FeedPostRow["realm"]>;
+
+function hasEmbeddedTargetSummary(post: FeedPostDTO): boolean {
+  return Boolean(post.extra?.book?.title);
+}
 
 function realmIdForFeedPost(
   post: PostDTO,
@@ -337,12 +374,13 @@ async function mapPostsToFeedRows(
   posts: FeedPostSource[],
   query: FeedQuery,
   input: { realmUnitId?: string | null; reason?: string | null } = {},
-): Promise<FeedContentRow[]> {
+): Promise<FeedPostRow[]> {
   const dtos = await mapPostsToDTOs(posts, query);
   const realmIds = dtos
     .map((post) => realmIdForFeedPost(post, input.realmUnitId))
     .filter((unitId): unitId is string => Boolean(unitId));
   const targetUnitIds = dtos
+    .filter((post) => !hasEmbeddedTargetSummary(post))
     .map((post) => post.targetUnitId)
     .filter((unitId): unitId is string => Boolean(unitId));
   const [realms, targetUnits] = await Promise.all([
@@ -454,52 +492,44 @@ export class FeedService {
       );
     }
 
-    const [posts, carousels] = await Promise.all([
+    const [posts, recommendations] = await Promise.all([
       postService.list(postQuery, options),
-      query.cursor ? Promise.resolve([]) : this.homeCarouselRows(),
+      query.cursor ? Promise.resolve([]) : this.homeRecommendationRows(),
     ]);
-    const contentRows = await mapPostsToFeedRows(posts.posts, query, {
+    const postRows = await mapPostsToFeedRows(posts.posts, query, {
       reason: "global-post-rank",
     });
     return withSliceCursor(
       feedResponse({
         scope,
         sort,
-        rows: scheduleFeedRows(contentRows, carousels),
+        rows: scheduleFeedRows(postRows, recommendations),
       }),
       limit,
     );
   }
 
-  private async homeCarouselRows(): Promise<FeedCarouselRow[]> {
+  private async homeRecommendationRows(): Promise<FeedRow[]> {
     const [books, shelves] = await Promise.all([
-      bookService.list({ limit: CAROUSEL_ITEM_LIMIT }),
-      shelfService.list({ limit: CAROUSEL_ITEM_LIMIT }),
+      bookService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
+      shelfService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
     ]);
 
-    const workItems = books.books.map(mapBookToWorkSummary);
-    const shelfItems = shelves.shelves.map(mapShelfToSummary);
-    const rows: FeedCarouselRow[] = [];
-    if (workItems.length >= 2) {
-      rows.push({
-        type: "carousel",
-        rowId: "carousel:home:works",
-        carouselKind: "works",
-        title: { key: "feed.carousel.works" },
-        works: workItems,
-      });
-    }
-    if (shelfItems.length >= 2) {
-      rows.push({
-        type: "carousel",
-        rowId: "carousel:home:shelves",
-        carouselKind: "shelves",
-        title: { key: "feed.carousel.shelves" },
-        shelves: shelfItems,
-      });
-    }
-    return rows;
+    return interleaveRows(
+      books.books.map(mapBookToFeedRow),
+      shelves.shelves.map(mapShelfToFeedRow),
+    );
   }
 }
 
 export const feedService = new FeedService();
+
+function interleaveRows(left: FeedRow[], right: FeedRow[]): FeedRow[] {
+  const rows: FeedRow[] = [];
+  const max = Math.max(left.length, right.length);
+  for (let index = 0; index < max; index += 1) {
+    if (left[index]) rows.push(left[index]);
+    if (right[index]) rows.push(right[index]);
+  }
+  return rows;
+}

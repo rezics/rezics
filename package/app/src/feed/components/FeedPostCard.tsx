@@ -17,6 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
+import { useNavigate } from "@tanstack/react-router";
 import { Shield, Star } from "lucide-react";
 import type React from "react";
 import {
@@ -47,27 +48,28 @@ type ClampStyle = React.CSSProperties & {
   WebkitLineClamp?: number;
 };
 
-export interface FeedCardTargetUnit {
+export interface FeedPostCardTargetUnit {
   unitId: string;
   title: string;
 }
 
-export interface FeedCardMedia {
+export interface FeedPostCardMedia {
   alt?: string;
   src?: string | null;
 }
 
-export interface FeedCardProps {
+export interface FeedPostCardProps {
   post: PostDTO;
   className?: string;
   title?: React.ReactNode;
-  targetUnit?: FeedCardTargetUnit | null;
+  targetUnit?: FeedPostCardTargetUnit | null;
   variantContext?: VariantContextSummary | null;
-  media?: FeedCardMedia;
+  media?: FeedPostCardMedia;
   mediaSlot?: React.ReactNode;
   mediaMode?: "inline" | "forward";
   bodyLines?: number;
   titleLines?: number;
+  href?: string;
   onOpen?: () => void;
   onReplyInvoke?: () => void;
   summaryScopeKey?: string | null;
@@ -90,12 +92,13 @@ export interface FeedCardProps {
  * 信息流预览自行负责卡片导航与截断；完整的帖子/评论页面
  * 在信息流之外保留其更丰富的详情行为。
  */
-export function FeedCard({
+export function FeedPostCard({
   bodyLines = 4,
   className,
   media,
   mediaMode = "inline",
   mediaSlot,
+  href,
   moderationLatestAction,
   moderationMenuContent,
   onOpen,
@@ -117,13 +120,28 @@ export function FeedCard({
   titleLines = 2,
   variantContext,
   manageMode = false,
-}: FeedCardProps) {
+}: FeedPostCardProps) {
   const { t } = useTranslation(["community"]);
+  const navigate = useNavigate();
   const markdown = mainMarkdownSource(post.content) ?? "";
   const hasMedia = Boolean(mediaSlot || media?.src);
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
   const resolvedVariantContext = variantContext ?? post.variantContext;
   const resolvedTitle = title ?? post.title;
+  const replyToPost = () => {
+    if (href) {
+      navigate({
+        to: href,
+        search: { focus: "reply" },
+      });
+      return;
+    }
+    navigate({
+      to: "/post/$rootPostUnitId",
+      params: { rootPostUnitId: post.unitId },
+      search: { focus: "reply" },
+    });
+  };
 
   const reactionModel = useReactionBarModel({
     size: reactionSize,
@@ -135,7 +153,7 @@ export function FeedCard({
     actions: reactionActions,
     overflow: reactionOverflow,
     actionPolicy: reactionActionPolicy,
-    onReplyInvoke,
+    onReplyInvoke: onReplyInvoke ?? replyToPost,
   });
 
   const mediaNode =
@@ -149,16 +167,46 @@ export function FeedCard({
       />
     ) : null);
 
+  const openPost = () => {
+    if (onOpen) {
+      onOpen();
+      return;
+    }
+    if (href) {
+      navigate({ to: href });
+      return;
+    }
+    switch (post.kind) {
+      case PostKind.REVIEW:
+        navigate({
+          to: "/review/$reviewId",
+          params: { reviewId: post.unitId },
+        });
+        return;
+      case PostKind.REMARK:
+        navigate({
+          to: "/remark/$reviewId",
+          params: { reviewId: post.unitId },
+        });
+        return;
+      default:
+        navigate({
+          to: "/post/$rootPostUnitId",
+          params: { rootPostUnitId: post.unitId },
+        });
+    }
+  };
+
   return (
     <Card
       surface="plain"
-      interactive={Boolean(onOpen)}
+      interactive
       className={cn(
         "relative w-full gap-0 py-0 transition-[background-color,box-shadow,transform]",
-        onOpen && "hover:-translate-y-0.5",
+        "hover:-translate-y-0.5",
         className,
       )}
-      onClick={onOpen}
+      onClick={openPost}
     >
       <article
         className={cn(

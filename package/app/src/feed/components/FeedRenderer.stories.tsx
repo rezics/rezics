@@ -10,8 +10,8 @@ import { shelfList } from "@/stories/fixtures/shelf";
 import { FeedLayout } from "../layouts/FeedLayout";
 import { FeedRenderer } from "./FeedRenderer";
 
-const contentRow = {
-  type: "content",
+const postRow = {
+  type: "post",
   rowId: "post:feed-post-1",
   post: postFlat[0],
   href: "/post/feed-post-1",
@@ -19,7 +19,7 @@ const contentRow = {
 } satisfies FeedRow;
 
 const reviewRow = {
-  type: "content",
+  type: "post",
   rowId: "post:feed-review-1",
   post: {
     ...reviewShort,
@@ -35,25 +35,25 @@ const reviewRow = {
   recommendationReason: "book-library-review",
 } satisfies FeedRow;
 
-const workCarouselRow = {
-  type: "carousel",
-  rowId: "carousel:home:works",
-  carouselKind: "works",
-  title: { key: "feed.carousel.works" },
-  works: bookMany.slice(0, 6).map((book) => ({
+const bookRows = bookMany.slice(0, 2).map((book) => ({
+  type: "book",
+  rowId: `book:${book.unitId}`,
+  href: `/book/${book.unitId}`,
+  book: {
     unitId: book.unitId,
     kind: "book",
     title: book.title,
     coverUrl: book.coverUrl,
-  })),
-} satisfies FeedRow;
+    description: book.summary,
+  },
+  recommendationReason: "home-book-recommendation",
+})) satisfies FeedRow[];
 
-const shelfCarouselRow = {
-  type: "carousel",
-  rowId: "carousel:home:shelves",
-  carouselKind: "shelves",
-  title: { key: "feed.carousel.shelves" },
-  shelves: shelfList.map((shelf) => ({
+const shelfRows = shelfList.slice(0, 2).map((shelf) => ({
+  type: "shelf",
+  rowId: `shelf:${shelf.unitId}`,
+  href: `/shelf/${shelf.unitId}`,
+  shelf: {
     unitId: shelf.unitId,
     slug: shelf.slug,
     userId: shelf.userId,
@@ -61,8 +61,9 @@ const shelfCarouselRow = {
     coverUrl: shelf.coverUrl,
     title: shelf.translations?.[0]?.title ?? null,
     itemCount: shelf.itemCount ?? shelf.items?.length ?? 0,
-  })),
-} satisfies FeedRow;
+  },
+  recommendationReason: "home-shelf-recommendation",
+})) satisfies FeedRow[];
 
 function Frame({ children }: { children: React.ReactNode }) {
   return <FeedLayout className="px-4 py-6">{children}</FeedLayout>;
@@ -80,7 +81,7 @@ type Story = StoryObj<typeof meta>;
 export const ContentRows: Story = {
   render: () => (
     <Frame>
-      <FeedRenderer rows={[contentRow, reviewRow]} />
+      <FeedRenderer rows={[postRow, reviewRow]} />
     </Frame>
   ),
 };
@@ -93,18 +94,18 @@ export const ReviewTargetRow: Story = {
   ),
 };
 
-export const WorkCarousel: Story = {
+export const BookRows: Story = {
   render: () => (
     <Frame>
-      <FeedRenderer rows={[workCarouselRow]} />
+      <FeedRenderer rows={bookRows} />
     </Frame>
   ),
 };
 
-export const ShelfCarousel: Story = {
+export const ShelfRows: Story = {
   render: () => (
     <Frame>
-      <FeedRenderer rows={[shelfCarouselRow]} />
+      <FeedRenderer rows={shelfRows} />
     </Frame>
   ),
 };
@@ -112,9 +113,7 @@ export const ShelfCarousel: Story = {
 export const MixedRows: Story = {
   render: () => (
     <Frame>
-      <FeedRenderer
-        rows={[contentRow, reviewRow, workCarouselRow, contentRow]}
-      />
+      <FeedRenderer rows={[postRow, reviewRow, ...bookRows, ...shelfRows]} />
     </Frame>
   ),
 };
@@ -138,7 +137,7 @@ export const Empty: Story = {
 export const RetryState: Story = {
   render: () => (
     <Frame>
-      <FeedRenderer rows={[contentRow, reviewRow]} />
+      <FeedRenderer rows={[postRow, reviewRow]} />
       <div className="mt-4 flex justify-center">
         <Button type="button" variant="outline">
           Retry

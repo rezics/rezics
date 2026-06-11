@@ -7,8 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { resolvePostTargetVariantLabel } from "@/book-library";
+import { FeedPostCard } from "@/feed";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { PostCard } from "../components/item/PostCard";
 
 interface PostListSectionProps {
   targetUnitId?: string;
@@ -79,7 +79,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
                 <Badge variant="outline">Variant: {targetVariantLabel}</Badge>
               </div>
             )}
-            <PostCard
+            <FeedPostCard
               post={post}
               onOpen={() =>
                 navigate({

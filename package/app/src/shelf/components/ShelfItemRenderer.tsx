@@ -24,7 +24,7 @@ import { BookCard, HorizontalBookCard } from "@/book-library";
 import { aspectRatioForKind } from "@/bookshelf-view";
 import { CommentReply } from "@/comment";
 import { ExcerptCard } from "@/excerpt";
-import { PostCard } from "@/post";
+import { FeedPostCard } from "@/feed";
 import { ReviewCard } from "@/review";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
 import { SingleTagChip } from "@/tag";
@@ -142,7 +142,7 @@ function renderUnit(
     case "post": {
       const post = data as PostDTO | undefined;
       if (!post) return <ShelfItemCard unit={unit} />;
-      return <PostCard post={post} />;
+      return <FeedPostCard post={post} />;
     }
     case "shelf": {
       const shelf = data as ShelfDTO | undefined;

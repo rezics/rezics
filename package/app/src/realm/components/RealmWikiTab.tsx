@@ -9,7 +9,8 @@ import { EmptyState, Spinner } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core";
-import { PostBodyMarkdown, PostCard } from "@/post";
+import { FeedPostCard } from "@/feed";
+import { PostBodyMarkdown } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { pickZoneMenu, ZoneNavTree } from "@/zone";
@@ -58,7 +59,7 @@ export function RealmWikiTab({
         ) : (
           <div>
             {posts.map((post) => (
-              <PostCard key={post.unitId} post={post} />
+              <FeedPostCard key={post.unitId} post={post} />
             ))}
           </div>
         )}

@@ -21,7 +21,7 @@ export const feedApi = new Elysia({ prefix: "/feed" }).use(authMacro).get(
     detail: {
       summary: "List feed rows",
       description:
-        "Return ordered feed rows for home, realm, or library scopes. V1 emits content rows from the existing post list service and reserves carousel rows for scheduled recommendation data.",
+        "Return ordered feed rows for home, realm, or library scopes. V1 emits post rows from the existing post list service plus scheduled single-row book and shelf recommendations.",
       tags: ["Feed"],
     },
   },

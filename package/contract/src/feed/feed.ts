@@ -63,12 +63,13 @@ export const feedWorkSummarySchema = t.Object({
   kind: t.Optional(t.String()),
   title: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
 });
 
 export type FeedWorkSummary = (typeof feedWorkSummarySchema)["static"];
 
-export const feedContentRowSchema = t.Object({
-  type: t.Literal("content"),
+export const feedPostRowSchema = t.Object({
+  type: t.Literal("post"),
   rowId: t.String(),
   post: postDTOSchema,
   href: t.String(),
@@ -86,22 +87,32 @@ export const feedContentRowSchema = t.Object({
   recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
-export type FeedContentRow = (typeof feedContentRowSchema)["static"];
+export type FeedPostRow = (typeof feedPostRowSchema)["static"];
 
-export const feedCarouselRowSchema = t.Object({
-  type: t.Literal("carousel"),
+export const feedBookRowSchema = t.Object({
+  type: t.Literal("book"),
   rowId: t.String(),
-  carouselKind: t.Union([t.Literal("works"), t.Literal("shelves")]),
-  title: feedTitleSchema,
-  works: t.Optional(t.Array(feedWorkSummarySchema)),
-  shelves: t.Optional(t.Array(shelfSummaryDTOSchema)),
+  book: feedWorkSummarySchema,
+  href: t.String(),
+  recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
-export type FeedCarouselRow = (typeof feedCarouselRowSchema)["static"];
+export type FeedBookRow = (typeof feedBookRowSchema)["static"];
+
+export const feedShelfRowSchema = t.Object({
+  type: t.Literal("shelf"),
+  rowId: t.String(),
+  shelf: shelfSummaryDTOSchema,
+  href: t.String(),
+  recommendationReason: t.Optional(t.Nullable(t.String())),
+});
+
+export type FeedShelfRow = (typeof feedShelfRowSchema)["static"];
 
 export const feedRowSchema = t.Union([
-  feedContentRowSchema,
-  feedCarouselRowSchema,
+  feedPostRowSchema,
+  feedBookRowSchema,
+  feedShelfRowSchema,
 ]);
 
 export type FeedRow = (typeof feedRowSchema)["static"];

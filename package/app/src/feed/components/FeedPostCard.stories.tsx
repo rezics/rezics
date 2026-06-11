@@ -4,7 +4,7 @@ import { expect, within } from "storybook/test";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { postLongBody } from "@/stories/fixtures/post";
 import { reviewShort } from "@/stories/fixtures/review";
-import { FeedCard } from "./FeedCard";
+import { FeedPostCard } from "./FeedPostCard";
 
 const withCardFrame: Decorator = (Story) => (
   <div className="max-w-[45.75rem] bg-surface-canvas p-4 text-text-primary">
@@ -13,15 +13,15 @@ const withCardFrame: Decorator = (Story) => (
 );
 
 const meta = {
-  title: "App/Feed/FeedCard",
-  component: FeedCard,
+  title: "App/Feed/FeedPostCard",
+  component: FeedPostCard,
   decorators: [withRouter, withCardFrame],
   args: {
     post: postLongBody,
     title: "A feed card title can clamp independently from the body",
     onOpen: () => undefined,
   },
-} satisfies Meta<typeof FeedCard>;
+} satisfies Meta<typeof FeedPostCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

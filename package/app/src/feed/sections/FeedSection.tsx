@@ -1,6 +1,6 @@
 import {
-  type FeedContentRow,
   type FeedQuery,
+  type FeedPostRow,
   feedRowsInfiniteQuery,
 } from "@rezics/api/feed/feed";
 import { useTranslation } from "@rezics/i18n/react";
@@ -14,13 +14,13 @@ import { FeedRenderer } from "../components/FeedRenderer";
 interface FeedSectionProps {
   query?: FeedQuery;
   emptyTitle?: string;
-  renderContentRow?: (row: FeedContentRow) => React.ReactNode;
+  renderPostRow?: (row: FeedPostRow) => React.ReactNode;
 }
 
 export const FeedSection: React.FC<FeedSectionProps> = ({
   query,
   emptyTitle,
-  renderContentRow,
+  renderPostRow,
 }) => {
   const { t } = useTranslation(["common"]);
   const {
@@ -43,7 +43,7 @@ export const FeedSection: React.FC<FeedSectionProps> = ({
         rows={rows}
         loading={isLoading}
         emptyTitle={emptyTitle}
-        renderContentRow={renderContentRow}
+        renderPostRow={renderPostRow}
       />
       {isError && rows.length > 0 ? (
         <div className="flex justify-center">
