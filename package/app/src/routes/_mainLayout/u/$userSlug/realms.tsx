@@ -5,6 +5,6 @@ const RealmListPage = lazyRouteComponent(
   "RealmListPage",
 );
 
-export const Route = createFileRoute("/_mainLayout/user_/$userId/realms")({
+export const Route = createFileRoute("/_mainLayout/u/$userSlug/realms")({
   component: RealmListPage,
 });

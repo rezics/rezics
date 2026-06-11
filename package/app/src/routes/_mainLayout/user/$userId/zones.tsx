@@ -5,6 +5,6 @@ const ZoneListPage = lazyRouteComponent(
   "ZoneListPage",
 );
 
-export const Route = createFileRoute("/_mainLayout/u_/$userSlug/zones")({
+export const Route = createFileRoute("/_mainLayout/user/$userId/zones")({
   component: ZoneListPage,
 });
