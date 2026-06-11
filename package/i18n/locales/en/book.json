@@ -197,5 +197,8 @@
   "unit_type_tabs_label": "Unit type tabs",
   "chapter_label": "Chapter",
   "release_scope_all_releases": "All releases",
-  "release_scope_this_release": "This release"
+  "release_scope_this_release": "This release",
+  "source_evidence_observed": "Observed {{date}}",
+  "source_evidence_view_entity": "View Entity",
+  "source_evidence_open_source": "Open Source"
 }

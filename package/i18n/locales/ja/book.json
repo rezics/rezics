@@ -197,5 +197,8 @@
   "unit_type_tabs_label": "ユニットタイプのタブ",
   "chapter_label": "章",
   "release_scope_all_releases": "すべての版",
-  "release_scope_this_release": "この版"
+  "release_scope_this_release": "この版",
+  "source_evidence_observed": "{{date}} に観測",
+  "source_evidence_view_entity": "エンティティを表示",
+  "source_evidence_open_source": "ソースを開く"
 }
