@@ -168,6 +168,8 @@
   "profile_password_label": "New Password (optional)",
   "profile_password_helper": "Leave empty to keep current password",
   "security_unknown_device": "Unknown device",
+  "profile_default_name": "Reader",
+  "profile_open_aria": "Open {{name}}'s profile",
   "user_cannot_resolve": "Unable to resolve user information",
   "user_cannot_resolve_description": "Sign in first, or open this page from a user detail page.",
   "user_empty": "No users.",

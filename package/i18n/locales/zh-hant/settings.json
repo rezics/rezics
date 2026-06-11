@@ -167,6 +167,8 @@
   "profile_edit_title": "編輯個人資料",
   "profile_password_label": "新密碼（可選）",
   "profile_password_helper": "留空以保持目前的密碼",
+  "profile_default_name": "讀者",
+  "profile_open_aria": "開啟 {{name}} 的個人資料",
   "security_unknown_device": "未知設備",
   "user_cannot_resolve": "無法解析使用者資訊",
   "user_cannot_resolve_description": "首先登錄，或從使用者詳細資料頁面開啟此頁面。",
