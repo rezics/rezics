@@ -27,13 +27,13 @@ export interface ReadingProgressBarProps {
 
 /**
  * Shared reading-progress display. Every surface that reflects the same
- * `UserUnitProgress` / `UserContentNodeProgress` fact-source — the dashboard
- * continue-reading cards and the book detail progress hint — renders through
+ * `UserUnitProgress` / `UserContentNodeProgress` fact-source — continue-reading
+ * cards and the book detail progress hint — renders through
  * this one component so the bar stays visually consistent. Progress is never
  * communicated by color alone: the numeric caption carries the same fact.
  * 共享的阅读进度展示。每个反映同一
- * `UserUnitProgress` / `UserContentNodeProgress` 事实来源的面 —— dashboard
- * 的继续阅读卡片与书籍详情的进度提示 —— 都通过这一个组件渲染，使进度条
+ * `UserUnitProgress` / `UserContentNodeProgress` 事实来源的面 —— 继续阅读
+ * 卡片与书籍详情的进度提示 —— 都通过这一个组件渲染，使进度条
  * 在视觉上保持一致。进度从不仅靠颜色传达：数字标题承载着相同的事实。
  */
 export const ReadingProgressBar: React.FC<ReadingProgressBarProps> = ({

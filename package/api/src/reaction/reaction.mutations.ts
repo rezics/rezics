@@ -297,10 +297,10 @@ export function useCreateReactionMutation(
     onSuccess: (data, variables, context, mutationCtx) => {
       // The optimistic delta already landed in every affected reaction batch
       // cache, so reaction summaries are not invalidated here. Cross-cutting
-      // surfaces (detail/dashboard/profile/realm-feed/search) still refresh
+      // surfaces (detail/profile/realm-feed/search) still refresh
       // through the coherence map so activity and counts stay consistent.
       // 乐观增量已写入每个受影响的 reaction batch 缓存，因此这里不会使
-      // reaction summaries 失效。横切面（detail/dashboard/profile/realm-feed/search）
+      // reaction summaries 失效。横切面（detail/profile/realm-feed/search）
       // 仍通过一致性映射刷新，以保持活动和计数一致。
       void invalidateForCacheDomain(queryClient, "reaction");
       options?.onSuccess?.(data, variables, context, mutationCtx);

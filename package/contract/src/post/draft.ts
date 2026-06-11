@@ -7,11 +7,11 @@ import { t } from "elysia";
 //
 // Each content type (review, post, remark, wiki, shelf description)
 // already persists its own draft. `DraftMetadata` is the unified,
-// read-only projection the dashboard and the `u/me/drafts` page consume
+// read-only projection the `u/me/drafts` page consumes
 // to list and recover drafts across all types without duplicating each
 // type's storage model.
 // 每种内容类型（review、post、remark、wiki、shelf description）都已各自持久化
-// 其草稿。`DraftMetadata` 是仪表盘和 `u/me/drafts` 页面所消费的统一只读投影，
+// 其草稿。`DraftMetadata` 是 `u/me/drafts` 页面所消费的统一只读投影，
 // 用于跨所有类型列出并恢复草稿，而无需重复每种类型的存储模型。
 
 export const draftKindSchema = t.Union([

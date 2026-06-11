@@ -138,9 +138,9 @@ export function useCreatePostMutation(
         realmUnitIds: variables.realmUnitIds,
       });
 
-      // A draft create adds to the drafts list / dashboard; route through the
-      // draft cache domain so both refresh.
-      // 创建草稿会将其加入草稿列表 / 仪表盘；通过 draft 缓存域路由，使两者都刷新。
+      // A draft create adds to the drafts list; route through the draft cache
+      // domain so draft readers refresh.
+      // 创建草稿会将其加入草稿列表；通过 draft 缓存域路由，使草稿读取方刷新。
       if (variables.status === "DRAFT") {
         await invalidateForCacheDomain(queryClient, "draft");
       }
@@ -174,8 +174,8 @@ export function useCreateWikiPostMutation(
         variantUnitIds: [variables.variantUnitId],
         realmUnitIds: variables.realmUnitIds,
       });
-      // A draft wiki create surfaces in the drafts list / dashboard.
-      // 创建 wiki 草稿会出现在草稿列表 / 仪表盘中。
+      // A draft wiki create surfaces in the drafts list.
+      // 创建 wiki 草稿会出现在草稿列表中。
       if (variables.status === "DRAFT") {
         await invalidateForCacheDomain(queryClient, "draft");
       }
@@ -266,10 +266,10 @@ export function useDeletePostMutation(
 
 /**
  * Publish a draft post or revert a published post to draft. Routes
- * invalidation through the `draft` cache domain (dashboard + drafts list) and
+ * invalidation through the `draft` cache domain (drafts list) and
  * refreshes post lists/detail so the post appears/disappears consistently.
  * 发布草稿 post，或将已发布的 post 还原为草稿。通过 `draft` 缓存域
- *（仪表盘 + 草稿列表）路由失效，并刷新 post 列表/详情，使 post 一致地出现/消失。
+ *（草稿列表）路由失效，并刷新 post 列表/详情，使 post 一致地出现/消失。
  */
 export function useSetPostPublicationMutation(
   options?: Omit<

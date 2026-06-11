@@ -92,7 +92,11 @@ export const ProfileLayout: FC = () => {
               userId={user.unitId}
             />
           </aside>
-          <ProfileShell userId={user.unitId} userSlug={user.slug ?? userSlug} />
+          <ProfileShell
+            userId={user.unitId}
+            userSlug={user.slug ?? userSlug}
+            isCurrentUser={isCurrentUser}
+          />
         </div>
       </div>
     </ProfileContext.Provider>

@@ -5,6 +5,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { routeBoundaries } from "@/core";
+import { useProfileContext } from "@/user/components/ProfileLayout";
 
 const ProgressLibraryPage = lazyRouteComponent(
   () => import("@/progress"),
@@ -12,10 +13,6 @@ const ProgressLibraryPage = lazyRouteComponent(
 );
 
 type ProgressSearch = {
-  /**
-   * Bookshelf column override for the progress library. Kept string-valued for
-   * URLSearchParams-compatible search shape.
-   */
   cols?: string;
 };
 
@@ -31,14 +28,18 @@ function urlConfigFromSearch(
 }
 
 function ProgressRoute() {
+  const { isCurrentUser } = useProfileContext();
   const search = Route.useSearch();
   const navigate = useNavigate();
+
+  if (!isCurrentUser) return null;
+
   return (
     <ProgressLibraryPage
       libraryUrlConfig={urlConfigFromSearch(search)}
       onResetLibraryUrlConfig={() =>
         navigate({
-          to: "/u/me/progress",
+          to: "/u/$userSlug/progress",
           search: (prev: ProgressSearch) => ({ ...prev, cols: undefined }),
         })
       }
@@ -46,7 +47,7 @@ function ProgressRoute() {
   );
 }
 
-export const Route = createFileRoute("/_mainLayout/u/me/progress")({
+export const Route = createFileRoute("/_mainLayout/u/$userSlug/progress")({
   validateSearch: (search: Record<string, unknown>): ProgressSearch => ({
     cols: typeof search.cols === "string" ? search.cols : undefined,
   }),

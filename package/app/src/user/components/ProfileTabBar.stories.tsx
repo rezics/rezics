@@ -7,7 +7,7 @@ const meta = {
   title: "Domain/User/ProfileTabBar",
   component: ProfileTabBar,
   decorators: [withRouter],
-  args: { userId: "user-alice" },
+  args: { userId: "user-alice", isCurrentUser: true },
 } satisfies Meta<typeof ProfileTabBar>;
 
 export default meta;

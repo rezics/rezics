@@ -84,11 +84,11 @@ import { Route as MainLayoutUserUserIdCollectionRouteImport } from './routes/_ma
 import { Route as MainLayoutUserUserIdActivityRouteImport } from './routes/_mainLayout/user/$userId/activity'
 import { Route as MainLayoutUMeProgressRouteImport } from './routes/_mainLayout/u/me/progress'
 import { Route as MainLayoutUMeDraftsRouteImport } from './routes/_mainLayout/u/me/drafts'
-import { Route as MainLayoutUMeDashboardRouteImport } from './routes/_mainLayout/u/me/dashboard'
 import { Route as MainLayoutUUserSlugShelvesRouteImport } from './routes/_mainLayout/u/$userSlug/shelves'
 import { Route as MainLayoutUUserSlugSearchRouteImport } from './routes/_mainLayout/u/$userSlug/search'
 import { Route as MainLayoutUUserSlugRealmsRouteImport } from './routes/_mainLayout/u/$userSlug/realms'
 import { Route as MainLayoutUUserSlugReactionsRouteImport } from './routes/_mainLayout/u/$userSlug/reactions'
+import { Route as MainLayoutUUserSlugProgressRouteImport } from './routes/_mainLayout/u/$userSlug/progress'
 import { Route as MainLayoutUUserSlugFollowersRouteImport } from './routes/_mainLayout/u/$userSlug/followers'
 import { Route as MainLayoutUUserSlugContentRouteImport } from './routes/_mainLayout/u/$userSlug/content'
 import { Route as MainLayoutUUserSlugCollectionRouteImport } from './routes/_mainLayout/u/$userSlug/collection'
@@ -577,11 +577,6 @@ const MainLayoutUMeDraftsRoute = MainLayoutUMeDraftsRouteImport.update({
   path: '/u/me/drafts',
   getParentRoute: () => MainLayoutRoute,
 } as any)
-const MainLayoutUMeDashboardRoute = MainLayoutUMeDashboardRouteImport.update({
-  id: '/u/me/dashboard',
-  path: '/u/me/dashboard',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
 const MainLayoutUUserSlugShelvesRoute =
   MainLayoutUUserSlugShelvesRouteImport.update({
     id: '/shelves',
@@ -604,6 +599,12 @@ const MainLayoutUUserSlugReactionsRoute =
   MainLayoutUUserSlugReactionsRouteImport.update({
     id: '/reactions',
     path: '/reactions',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
+const MainLayoutUUserSlugProgressRoute =
+  MainLayoutUUserSlugProgressRouteImport.update({
+    id: '/progress',
+    path: '/progress',
     getParentRoute: () => MainLayoutUUserSlugRoute,
   } as any)
 const MainLayoutUUserSlugFollowersRoute =
@@ -1198,11 +1199,11 @@ export interface FileRoutesByFullPath {
   '/u/$userSlug/collection': typeof MainLayoutUUserSlugCollectionRoute
   '/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
   '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
+  '/u/$userSlug/progress': typeof MainLayoutUUserSlugProgressRoute
   '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
   '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
-  '/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
   '/u/me/progress': typeof MainLayoutUMeProgressRoute
   '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
@@ -1354,11 +1355,11 @@ export interface FileRoutesByTo {
   '/u/$userSlug/collection': typeof MainLayoutUUserSlugCollectionRoute
   '/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
   '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
+  '/u/$userSlug/progress': typeof MainLayoutUUserSlugProgressRoute
   '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
   '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
-  '/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
   '/u/me/progress': typeof MainLayoutUMeProgressRoute
   '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
@@ -1521,11 +1522,11 @@ export interface FileRoutesById {
   '/_mainLayout/u/$userSlug/collection': typeof MainLayoutUUserSlugCollectionRoute
   '/_mainLayout/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
   '/_mainLayout/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
+  '/_mainLayout/u/$userSlug/progress': typeof MainLayoutUUserSlugProgressRoute
   '/_mainLayout/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
   '/_mainLayout/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/_mainLayout/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
   '/_mainLayout/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
-  '/_mainLayout/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/_mainLayout/u/me/drafts': typeof MainLayoutUMeDraftsRoute
   '/_mainLayout/u/me/progress': typeof MainLayoutUMeProgressRoute
   '/_mainLayout/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
@@ -1689,11 +1690,11 @@ export interface FileRouteTypes {
     | '/u/$userSlug/collection'
     | '/u/$userSlug/content'
     | '/u/$userSlug/followers'
+    | '/u/$userSlug/progress'
     | '/u/$userSlug/reactions'
     | '/u/$userSlug/realms'
     | '/u/$userSlug/search'
     | '/u/$userSlug/shelves'
-    | '/u/me/dashboard'
     | '/u/me/drafts'
     | '/u/me/progress'
     | '/user/$userId/activity'
@@ -1845,11 +1846,11 @@ export interface FileRouteTypes {
     | '/u/$userSlug/collection'
     | '/u/$userSlug/content'
     | '/u/$userSlug/followers'
+    | '/u/$userSlug/progress'
     | '/u/$userSlug/reactions'
     | '/u/$userSlug/realms'
     | '/u/$userSlug/search'
     | '/u/$userSlug/shelves'
-    | '/u/me/dashboard'
     | '/u/me/drafts'
     | '/u/me/progress'
     | '/user/$userId/activity'
@@ -2011,11 +2012,11 @@ export interface FileRouteTypes {
     | '/_mainLayout/u/$userSlug/collection'
     | '/_mainLayout/u/$userSlug/content'
     | '/_mainLayout/u/$userSlug/followers'
+    | '/_mainLayout/u/$userSlug/progress'
     | '/_mainLayout/u/$userSlug/reactions'
     | '/_mainLayout/u/$userSlug/realms'
     | '/_mainLayout/u/$userSlug/search'
     | '/_mainLayout/u/$userSlug/shelves'
-    | '/_mainLayout/u/me/dashboard'
     | '/_mainLayout/u/me/drafts'
     | '/_mainLayout/u/me/progress'
     | '/_mainLayout/user/$userId/activity'
@@ -2632,13 +2633,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUMeDraftsRouteImport
       parentRoute: typeof MainLayoutRoute
     }
-    '/_mainLayout/u/me/dashboard': {
-      id: '/_mainLayout/u/me/dashboard'
-      path: '/u/me/dashboard'
-      fullPath: '/u/me/dashboard'
-      preLoaderRoute: typeof MainLayoutUMeDashboardRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
     '/_mainLayout/u/$userSlug/shelves': {
       id: '/_mainLayout/u/$userSlug/shelves'
       path: '/shelves'
@@ -2665,6 +2659,13 @@ declare module '@tanstack/react-router' {
       path: '/reactions'
       fullPath: '/u/$userSlug/reactions'
       preLoaderRoute: typeof MainLayoutUUserSlugReactionsRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
+    '/_mainLayout/u/$userSlug/progress': {
+      id: '/_mainLayout/u/$userSlug/progress'
+      path: '/progress'
+      fullPath: '/u/$userSlug/progress'
+      preLoaderRoute: typeof MainLayoutUUserSlugProgressRouteImport
       parentRoute: typeof MainLayoutUUserSlugRoute
     }
     '/_mainLayout/u/$userSlug/followers': {
@@ -3475,6 +3476,7 @@ interface MainLayoutUUserSlugRouteChildren {
   MainLayoutUUserSlugCollectionRoute: typeof MainLayoutUUserSlugCollectionRoute
   MainLayoutUUserSlugContentRoute: typeof MainLayoutUUserSlugContentRoute
   MainLayoutUUserSlugFollowersRoute: typeof MainLayoutUUserSlugFollowersRoute
+  MainLayoutUUserSlugProgressRoute: typeof MainLayoutUUserSlugProgressRoute
   MainLayoutUUserSlugReactionsRoute: typeof MainLayoutUUserSlugReactionsRoute
   MainLayoutUUserSlugRealmsRoute: typeof MainLayoutUUserSlugRealmsRoute
   MainLayoutUUserSlugSearchRoute: typeof MainLayoutUUserSlugSearchRoute
@@ -3489,6 +3491,7 @@ const MainLayoutUUserSlugRouteChildren: MainLayoutUUserSlugRouteChildren = {
   MainLayoutUUserSlugCollectionRoute: MainLayoutUUserSlugCollectionRoute,
   MainLayoutUUserSlugContentRoute: MainLayoutUUserSlugContentRoute,
   MainLayoutUUserSlugFollowersRoute: MainLayoutUUserSlugFollowersRoute,
+  MainLayoutUUserSlugProgressRoute: MainLayoutUUserSlugProgressRoute,
   MainLayoutUUserSlugReactionsRoute: MainLayoutUUserSlugReactionsRoute,
   MainLayoutUUserSlugRealmsRoute: MainLayoutUUserSlugRealmsRoute,
   MainLayoutUUserSlugSearchRoute: MainLayoutUUserSlugSearchRoute,
@@ -3665,7 +3668,6 @@ interface MainLayoutRouteChildren {
   MainLayoutShelfBookBookIdRoute: typeof MainLayoutShelfBookBookIdRoute
   MainLayoutStaffAccountTargetUserIdRoute: typeof MainLayoutStaffAccountTargetUserIdRoute
   MainLayoutStaffCaseCaseIdRoute: typeof MainLayoutStaffCaseCaseIdRoute
-  MainLayoutUMeDashboardRoute: typeof MainLayoutUMeDashboardRoute
   MainLayoutUMeDraftsRoute: typeof MainLayoutUMeDraftsRoute
   MainLayoutUMeProgressRoute: typeof MainLayoutUMeProgressRoute
   MainLayoutZSlugManageRoute: typeof MainLayoutZSlugManageRoute
@@ -3747,7 +3749,6 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutStaffAccountTargetUserIdRoute:
     MainLayoutStaffAccountTargetUserIdRoute,
   MainLayoutStaffCaseCaseIdRoute: MainLayoutStaffCaseCaseIdRoute,
-  MainLayoutUMeDashboardRoute: MainLayoutUMeDashboardRoute,
   MainLayoutUMeDraftsRoute: MainLayoutUMeDraftsRoute,
   MainLayoutUMeProgressRoute: MainLayoutUMeProgressRoute,
   MainLayoutZSlugManageRoute: MainLayoutZSlugManageRoute,

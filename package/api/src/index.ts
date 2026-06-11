@@ -11,7 +11,6 @@ export * from "./comment/comment";
 export * from "./content-structure/content-structure";
 export * from "./content-translation/content-translation";
 export * from "./credit-attribution/credit-attribution";
-export * from "./dashboard";
 export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";
 export * from "./feed/feed";

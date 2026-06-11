@@ -162,15 +162,15 @@ describe("mutation → query namespace coherence map", () => {
     }
   });
 
-  test("node-completion invalidates dashboard and per-book node-completion list", () => {
+  test("node-completion invalidates progress and per-book node-completion list", () => {
     const namespaces = CACHE_COHERENCE_MAP["node-completion"];
-    expect(namespaces).toContain("dashboard");
+    expect(namespaces).toContain("progress");
     expect(namespaces).toContain("bookNodeCompletionList");
   });
 
-  test("progress invalidates dashboard but NOT the per-book node-completion list", () => {
+  test("progress invalidates progress but NOT the per-book node-completion list", () => {
     const namespaces = CACHE_COHERENCE_MAP.progress;
-    expect(namespaces).toContain("dashboard");
+    expect(namespaces).toContain("progress");
     expect(namespaces).not.toContain("bookNodeCompletionList");
   });
 

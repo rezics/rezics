@@ -192,9 +192,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
   const [itemSearchText, setItemSearchText] = useState("");
   // Standalone shelf pages expose the readable filter as opt-in (default off);
-  // the dashboard library composition applies it by default instead.
+  // progress/profile library compositions can apply their own defaults.
   // 独立 shelf 页面将 readable 过滤器作为可选项暴露（默认关闭）；
-  // 而 dashboard library 组合则默认应用该过滤器。
+  // 进度/profile 书库组合可应用自己的默认值。
   const [readableOnly, setReadableOnly] = useState<boolean>(false);
   const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");

@@ -19,7 +19,6 @@ import { commentApi } from "./comment";
 import { contentStructureApi } from "./content-structure";
 import { contentTranslationApi } from "./content-translation";
 import { creditAttributionApi } from "./credit-attribution";
-import { dashboardApi } from "./dashboard";
 import { statusApi } from "./diagnostic";
 import { dispatchApi } from "./dispatch";
 import { draftApi } from "./draft";
@@ -220,7 +219,6 @@ routeApp
   .use(postApi)
   .use(feedApi)
   .use(progressApi)
-  .use(dashboardApi)
   .use(draftApi)
   .use(activityApi)
   .use(shelfApi)

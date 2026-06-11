@@ -21,7 +21,7 @@ export const draftApi = new Elysia().use(authMacro).get(
     detail: {
       summary: "List the current user's drafts",
       description:
-        "Cross-type listing of the user's draft-status content (review/post/remark/wiki), newest first, for the dashboard and the drafts page.",
+        "Cross-type listing of the user's draft-status content (review/post/remark/wiki), newest first, for the drafts page.",
       tags: ["Drafts"],
     },
   },
