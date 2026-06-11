@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { UnitDTO } from "@rezics/contract";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
@@ -13,6 +14,7 @@ export interface HorizontalExcerptCarouselProps {
 export const HorizontalExcerptCarousel: React.FC<
   HorizontalExcerptCarouselProps
 > = ({ excerptList, className }) => {
+  const { t } = useTranslation("book");
   const targetIds = useMemo(
     () => excerptList.map((u) => u.id).filter(Boolean) as string[],
     [excerptList],
@@ -29,7 +31,7 @@ export const HorizontalExcerptCarousel: React.FC<
       itemKey={(item) => item.id}
       itemClassName="pl-4 basis-[100%] lg:basis-[50%] xl:basis-[40%]"
       className={className}
-      ariaLabel="Excerpts"
+      ariaLabel={t("excerpts")}
       renderItem={(item) => <ExcerptCard excerpt={item} />}
     />
   );

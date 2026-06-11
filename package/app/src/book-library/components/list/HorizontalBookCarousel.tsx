@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import type * as React from "react";
 import { BookCard, type BookProps } from "../item/VerticalBookCard";
@@ -11,6 +12,7 @@ export const HorizontalBookCarousel: React.FC<HorizontalBookCarouselProps> = ({
   bookList,
   className,
 }) => {
+  const { t } = useTranslation("common");
   if (!bookList || bookList.length === 0) {
     return null;
   }
@@ -21,7 +23,7 @@ export const HorizontalBookCarousel: React.FC<HorizontalBookCarouselProps> = ({
       itemKey={(book) => book.id}
       itemClassName="pl-4 !basis-1/3 xsm:!basis-1/4 sm:!basis-1/5 md:!basis-1/6 lg:!basis-1/7 xl:!basis-1/8"
       className={className}
-      ariaLabel="Books"
+      ariaLabel={t("books")}
       renderItem={(book) => (
         <BookCard
           title={book.title}
