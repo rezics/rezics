@@ -442,7 +442,7 @@
   "user_roles": "角色",
   "user_search_action": "搜索用户",
   "user_search_placeholder": "q/rezics-电子邮件/slug...",
-  "user_slug": "蛞蝓",
+  "user_slug": "Slug",
   "user_slug_help": "5 个以上字符，可使用字母、数字、- 与 _",
   "user_slug_label": "Slug（用户名）",
   "user_update_failed": "更新失败",
