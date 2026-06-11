@@ -20,6 +20,7 @@
   "chapter_move_dialog_no_results": "No matching nodes",
   "chapter_move_dialog_search_placeholder": "Search nodes...",
   "chapter_move_dialog_title": "Move to...",
+  "move_selected_to": "Move selected to...",
   "chapter_rename_help": "Renaming chapters here only affects the table-of-contents display and will not update the actual chapter title. To rename the chapter title, go to the chapter editor page; after changing the title there, the table of contents will update automatically.",
   "chapter_resync_overrides": "Resync index overrides",
   "chapter_search_term_placeholder": "Enter search term",

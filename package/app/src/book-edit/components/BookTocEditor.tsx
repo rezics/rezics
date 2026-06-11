@@ -905,7 +905,7 @@ export const BookTocEditor = forwardRef<
 
       <TreeMoveToDialog
         open={bulkMoveDialogOpen}
-        title="Move selected to..."
+        title={t("book:move_selected_to")}
         onClose={() => setBulkMoveDialogOpen(false)}
         nodes={treeData}
         movingNode={null}

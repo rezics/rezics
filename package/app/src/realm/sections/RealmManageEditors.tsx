@@ -409,7 +409,7 @@ export function WikiSidebarPicker({
             id="realm-wiki-sidebar-post"
             value={postUnitId}
             onChange={(event) => setPostUnitId(event.target.value)}
-            placeholder="Post Unit ID"
+            placeholder={getI18nRuntime().i18n.t("common:unit_id")}
           />
           <ResolutionPreview
             id={trimmedPostUnitId}

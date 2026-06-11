@@ -20,6 +20,7 @@
   "chapter_move_dialog_no_results": "一致するノードがありません",
   "chapter_move_dialog_search_placeholder": "ノードを検索...",
   "chapter_move_dialog_title": "に移動します...",
+  "move_selected_to": "選択した項目を移動...",
   "chapter_rename_help": "ここで章の名前を変更すると、目次の表示にのみ影響し、実際の章のタイトルは更新されません。章タイトルの名前を変更するには、章エディター ページに移動します。そこでタイトルを変更すると、目次が自動的に更新されます。",
   "chapter_resync_overrides": "再同期インデックスのオーバーライド",
   "chapter_search_term_placeholder": "検索語を入力",

@@ -20,6 +20,7 @@
   "chapter_move_dialog_no_results": "沒有符合的節點",
   "chapter_move_dialog_search_placeholder": "搜尋節點...",
   "chapter_move_dialog_title": "移動至...",
+  "move_selected_to": "移動選取項目至...",
   "chapter_rename_help": "修改此處的章節名稱僅影響目錄結構顯示，不會更新實際章節標題。若需修改章節標題，請前往章節編輯頁面，在那裡修改標題後會自動更新目錄結構。",
   "chapter_resync_overrides": "重新同步索引覆寫",
   "chapter_search_term_placeholder": "輸入搜尋字詞",

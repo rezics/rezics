@@ -20,6 +20,7 @@
   "chapter_move_dialog_no_results": "Keine passenden Knoten",
   "chapter_move_dialog_search_placeholder": "Knoten durchsuchen...",
   "chapter_move_dialog_title": "Umzug nach...",
+  "move_selected_to": "Auswahl verschieben nach...",
   "chapter_rename_help": "Das Umbenennen von Kapiteln hier wirkt sich nur auf die Anzeige des Inhaltsverzeichnisses aus und aktualisiert nicht den eigentlichen Kapiteltitel. Um den Kapiteltitel umzubenennen, gehen Sie zur Seite des Kapiteleditors. Nachdem Sie dort den Titel geändert haben, wird das Inhaltsverzeichnis automatisch aktualisiert.",
   "chapter_resync_overrides": "Indexüberschreibungen für die erneute Synchronisierung",
   "chapter_search_term_placeholder": "Suchbegriff eingeben",
