@@ -47,7 +47,7 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
         <Link to="/shelf" className={buttonVariants({ variant: "ghost" })}>
-          More
+          {t("common:more")}
         </Link>
       </div>
 
