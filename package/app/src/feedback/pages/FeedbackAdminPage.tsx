@@ -28,6 +28,18 @@ export const FeedbackAdminPage: React.FC = () => {
   const resolvedValue =
     resolvedFilter === "all" ? undefined : resolvedFilter === "resolved";
 
+  const resolvedFilterLabel = {
+    all: t("search:category_all"),
+    unresolved: t("community:feedback_status_unresolved"),
+    resolved: t("community:feedback_status_resolved"),
+  }[resolvedFilter];
+
+  const typeLabel = {
+    all: t("search:category_all"),
+    mine: t("community:feedback_view_mine"),
+    user: t("community:feedback_view_user"),
+  }[type];
+
   // Prefetch general list for smoother UX
   // 预取通用列表以获得更流畅的 UX
   useQuery(feedbackListQuery());
@@ -68,7 +80,7 @@ export const FeedbackAdminPage: React.FC = () => {
               }
             >
               <SelectTrigger id="admin-feedback-resolved">
-                <SelectValue />
+                <SelectValue>{resolvedFilterLabel}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("search:category_all")}</SelectItem>
@@ -90,7 +102,7 @@ export const FeedbackAdminPage: React.FC = () => {
                 onValueChange={(v) => setType(v as "all" | "mine" | "user")}
               >
                 <SelectTrigger id="admin-feedback-view">
-                  <SelectValue />
+                  <SelectValue>{typeLabel}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">

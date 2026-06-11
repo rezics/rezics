@@ -45,12 +45,16 @@ export const SortSelect: React.FC<SortSelectProps> = ({
   const handleChange = (next: string) => {
     onChange(next === "relevance" ? undefined : next);
   };
+  const selectedValue = value ?? "relevance";
+  const selectedLabel =
+    options.find((opt) => opt.value === selectedValue)?.label() ??
+    selectedValue;
   return (
     <div className="flex flex-col gap-1 min-w-[160px]">
       {label && <Label>{label}</Label>}
-      <Select value={value ?? "relevance"} onValueChange={handleChange}>
+      <Select value={selectedValue} onValueChange={handleChange}>
         <SelectTrigger className="min-w-[160px]">
-          <SelectValue />
+          <SelectValue>{selectedLabel}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {options.map((opt) => (
