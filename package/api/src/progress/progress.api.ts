@@ -1,4 +1,6 @@
 import type {
+  ContinueReadingListQuery,
+  ContinueReadingListResponse,
   NodeCompletionToggleBody,
   ProgressLibraryListResponse,
   UnitProgressListQuery,
@@ -32,6 +34,15 @@ export const progressApi = {
   ): Promise<UnitProgressListResponse> => {
     const qs = buildQueryString(query ?? {});
     return apiFetch<UnitProgressListResponse>(`/me/progress${qs}`);
+  },
+
+  listMyContinueReading: async (
+    query?: ContinueReadingListQuery,
+  ): Promise<ContinueReadingListResponse> => {
+    const qs = buildQueryString(query ?? {});
+    return apiFetch<ContinueReadingListResponse>(
+      `/me/progress/continue-reading${qs}`,
+    );
   },
 
   listMyProgressLibrary: async (

@@ -1,4 +1,7 @@
-import type { UnitProgressListQuery } from "@rezics/contract";
+import type {
+  ContinueReadingListQuery,
+  UnitProgressListQuery,
+} from "@rezics/contract";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { progressApi } from "./progress.api";
 import { progressKeys } from "./progress.keys";
@@ -15,6 +18,13 @@ export const myProgressListQuery = (query?: UnitProgressListQuery) =>
   queryOptions({
     queryKey: progressKeys.list(query),
     queryFn: () => progressApi.listMyProgress(query),
+    staleTime: 1000 * 30,
+  });
+
+export const myContinueReadingQuery = (query?: ContinueReadingListQuery) =>
+  queryOptions({
+    queryKey: progressKeys.continueReadingList(query),
+    queryFn: () => progressApi.listMyContinueReading(query),
     staleTime: 1000 * 30,
   });
 
@@ -52,6 +62,10 @@ export function useMyProgressList(query?: UnitProgressListQuery) {
   return useQuery(myProgressListQuery(query));
 }
 
+export function useMyContinueReading(query?: ContinueReadingListQuery) {
+  return useQuery(myContinueReadingQuery(query));
+}
+
 export function useMyProgressLibrary(query?: UnitProgressListQuery) {
   return useQuery(myProgressLibraryQuery(query));
 }
@@ -64,6 +78,7 @@ export const progressQueries = {
   unit: unitProgressQuery,
   stats: unitProgressStatsQuery,
   list: myProgressListQuery,
+  continueReading: myContinueReadingQuery,
   library: myProgressLibraryQuery,
   page: myProgressPageQuery,
 };

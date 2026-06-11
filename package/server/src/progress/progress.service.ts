@@ -1,4 +1,7 @@
 import {
+  type ContinueReadingItem,
+  type ContinueReadingListQuery,
+  type ContinueReadingListResponse,
   PROGRESS_EXTRA_KNOWN_KEYS,
   type ProgressLibraryListResponse,
   type ProgressLibraryRow,
@@ -12,7 +15,18 @@ import {
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { PROGRESS_BUCKET_COUNT } from "@rezics/search";
-import { and, asc, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  lt,
+  or,
+  sql,
+} from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { searchClient } from "@/meili/search-client";
 import { AppError } from "@/utils/errors";
@@ -34,6 +48,8 @@ import { progressStatusMap } from "./progress.types";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
+const CONTINUE_READING_LIMIT = 12;
+const ANCHOR_PREVIEW_MAX = 200;
 
 type UserUnitProgressRow = typeof UserUnitProgress.$inferSelect;
 type ProgressStatus = UserUnitProgressRow["status"];
@@ -101,6 +117,18 @@ type ProgressShelfLinkRow = {
   shelf: { unit: TitleDisplay };
 };
 
+type ContinueReadingRow = {
+  unitId: string;
+  lastReadNodeId: string | null;
+  lastReadAnchor: unknown;
+  unit: TitleDisplay;
+  lastReadNode: {
+    id: string;
+    title: string;
+    isDeleted: boolean;
+  } | null;
+};
+
 export type ProgressRepository = {
   findProgressState(
     userId: string,
@@ -127,6 +155,15 @@ export type ProgressRepository = {
     userId: string,
     unitIds: string[],
   ): Promise<ProgressShelfLinkRow[]>;
+  listContinueReading(input: {
+    userId: string;
+    take: number;
+  }): Promise<ContinueReadingRow[]>;
+  countChaptersTotal(bookIds: string[]): Promise<Map<string, number>>;
+  listCompletedChapterOwnerUnitIds(
+    userId: string,
+    bookIds: string[],
+  ): Promise<string[]>;
   softDeleteProgress(userId: string, unitId: string, now: Date): Promise<void>;
   upsertNodeCompletion(userId: string, nodeId: string): Promise<void>;
   deleteNodeCompletion(userId: string, nodeId: string): Promise<void>;
@@ -242,6 +279,18 @@ function pickCover(
   for (const tr of orderedTranslations(unit, readLanguage)) {
     const url = readCoverUrlFromExtra(tr?.extra);
     if (url) return url;
+  }
+  return undefined;
+}
+
+function pickAnchorText(anchor: unknown): string | undefined {
+  if (anchor && typeof anchor === "object" && "text" in anchor) {
+    const text = (anchor as { text?: unknown }).text;
+    if (typeof text === "string" && text.length > 0) {
+      return text.length <= ANCHOR_PREVIEW_MAX
+        ? text
+        : text.slice(0, ANCHOR_PREVIEW_MAX);
+    }
   }
   return undefined;
 }
@@ -508,6 +557,108 @@ function createDrizzleProgressRepository(): ProgressRepository {
       }
       return [...byShelfLink.values()];
     },
+    async listContinueReading({ userId, take }) {
+      const db = await getServerDb();
+      const rows = await db
+        .select({
+          unitId: UserUnitProgress.unitId,
+          lastReadNodeId: UserUnitProgress.lastReadNodeId,
+          lastReadAnchor: UserUnitProgress.lastReadAnchor,
+          defaultLanguage: Unit.defaultLanguage,
+          lastReadNode: {
+            id: ContentStructureNode.id,
+            title: ContentStructureNode.title,
+            isDeleted: ContentStructureNode.isDeleted,
+          },
+        })
+        .from(UserUnitProgress)
+        .innerJoin(Unit, eq(Unit.id, UserUnitProgress.unitId))
+        .leftJoin(
+          ContentStructureNode,
+          eq(ContentStructureNode.id, UserUnitProgress.lastReadNodeId),
+        )
+        .where(
+          and(
+            eq(UserUnitProgress.userId, userId),
+            eq(UserUnitProgress.isDeleted, false),
+            inArray(UserUnitProgress.status, ["ACTIVE", "PAUSED"]),
+          ),
+        )
+        .orderBy(desc(UserUnitProgress.lastSeenAt))
+        .limit(take);
+
+      const unitIds = rows.map((row) => row.unitId);
+      const translations = unitIds.length
+        ? await db
+            .select({
+              unitId: UnitTranslation.unitId,
+              language: UnitTranslation.language,
+              title: UnitTranslation.title,
+              extra: UnitTranslation.extra,
+            })
+            .from(UnitTranslation)
+            .where(inArray(UnitTranslation.unitId, unitIds))
+        : [];
+      const translationsByUnit = new Map<string, TranslationRow[]>();
+      for (const translation of translations) {
+        const list = translationsByUnit.get(translation.unitId) ?? [];
+        list.push({
+          language: translation.language,
+          title: translation.title,
+          extra: translation.extra,
+        });
+        translationsByUnit.set(translation.unitId, list);
+      }
+
+      return rows.map((row) => ({
+        unitId: row.unitId,
+        lastReadNodeId: row.lastReadNodeId,
+        lastReadAnchor: row.lastReadAnchor,
+        unit: {
+          defaultLanguage: row.defaultLanguage,
+          translations: translationsByUnit.get(row.unitId) ?? [],
+        },
+        lastReadNode: row.lastReadNode?.id ? row.lastReadNode : null,
+      }));
+    },
+    async countChaptersTotal(bookIds) {
+      if (bookIds.length === 0) return new Map();
+      const db = await getServerDb();
+      const rows = await db
+        .select({
+          ownerUnitId: ContentStructureNode.ownerUnitId,
+          total: count(),
+        })
+        .from(ContentStructureNode)
+        .where(
+          and(
+            inArray(ContentStructureNode.ownerUnitId, bookIds),
+            eq(ContentStructureNode.isDeleted, false),
+            isNotNull(ContentStructureNode.contentUnitId),
+          ),
+        )
+        .groupBy(ContentStructureNode.ownerUnitId);
+      return new Map(rows.map((row) => [row.ownerUnitId, row.total]));
+    },
+    async listCompletedChapterOwnerUnitIds(userId, bookIds) {
+      if (bookIds.length === 0) return [];
+      const db = await getServerDb();
+      const rows = await db
+        .select({ ownerUnitId: ContentStructureNode.ownerUnitId })
+        .from(UserContentNodeProgress)
+        .innerJoin(
+          ContentStructureNode,
+          eq(ContentStructureNode.id, UserContentNodeProgress.nodeId),
+        )
+        .where(
+          and(
+            eq(UserContentNodeProgress.userId, userId),
+            inArray(ContentStructureNode.ownerUnitId, bookIds),
+            eq(ContentStructureNode.isDeleted, false),
+          ),
+        );
+      return rows.map((row) => row.ownerUnitId);
+    },
     async softDeleteProgress(userId, unitId, now) {
       const db = await getServerDb();
       await db
@@ -755,6 +906,57 @@ export class ProgressService {
         };
       }),
       nextCursor: page.nextCursor,
+    };
+  }
+
+  async continueReading(
+    userId: string,
+    query: ContinueReadingListQuery = {},
+  ): Promise<ContinueReadingListResponse> {
+    const limit = Math.max(
+      1,
+      Math.min(Number(query.limit ?? CONTINUE_READING_LIMIT), MAX_LIMIT),
+    );
+    const rows = await this.repository.listContinueReading({
+      userId,
+      take: limit,
+    });
+
+    if (rows.length === 0) return { items: [] };
+
+    const bookIds = rows.map((row) => row.unitId);
+    const [totalByBook, completedRows] = await Promise.all([
+      this.repository.countChaptersTotal(bookIds),
+      this.repository.listCompletedChapterOwnerUnitIds(userId, bookIds),
+    ]);
+    const completedByBook = new Map<string, number>();
+    for (const ownerUnitId of completedRows) {
+      completedByBook.set(
+        ownerUnitId,
+        (completedByBook.get(ownerUnitId) ?? 0) + 1,
+      );
+    }
+
+    return {
+      items: rows.map((row): ContinueReadingItem => {
+        const nodeAlive = row.lastReadNode && !row.lastReadNode.isDeleted;
+        return {
+          bookUnitId: row.unitId,
+          bookTitle: pickTitle(row.unit, query),
+          bookCoverUrl: pickCover(row.unit, query),
+          lastReadNodeId: row.lastReadNodeId,
+          lastReadNodeTitle: nodeAlive
+            ? (row.lastReadNode?.title ?? null)
+            : null,
+          lastReadAnchorText: pickAnchorText(row.lastReadAnchor),
+          chaptersCompleted: completedByBook.get(row.unitId) ?? 0,
+          chaptersTotal: totalByBook.get(row.unitId) ?? 0,
+          resumeRoute:
+            nodeAlive && row.lastReadNodeId
+              ? { kind: "node", bookId: row.unitId, nodeId: row.lastReadNodeId }
+              : { kind: "book", bookId: row.unitId },
+        };
+      }),
     };
   }
 

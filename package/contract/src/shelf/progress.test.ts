@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  continueReadingListResponseSchema,
   lastReadAnchorSchema,
   nodeCompletionToggleBodySchema,
   progressExtraSchema,
@@ -271,5 +272,29 @@ describe("progress contract schemas", () => {
         extra: { device: "web" },
       }),
     ).toBe(false);
+  });
+
+  test("validates continue-reading response shape", () => {
+    expect(
+      Value.Check(continueReadingListResponseSchema, {
+        items: [
+          {
+            bookUnitId: "book-1",
+            bookTitle: "Dune",
+            bookCoverUrl: "https://cdn.example/dune.jpg",
+            lastReadNodeId: "node-1",
+            lastReadNodeTitle: "Chapter One",
+            lastReadAnchorText: "Resume here",
+            chaptersCompleted: 2,
+            chaptersTotal: 8,
+            resumeRoute: {
+              kind: "node",
+              bookId: "book-1",
+              nodeId: "node-1",
+            },
+          },
+        ],
+      }),
+    ).toBe(true);
   });
 });

@@ -131,6 +131,72 @@ export const unitProgressListResponseSchema = t.Object({
 export type UnitProgressListResponse =
   (typeof unitProgressListResponseSchema)["static"];
 
+/**
+ * Discriminated resume route so progress surfaces can navigate without
+ * re-deriving the URL. `node` preserves multi-link TOC disambiguation.
+ * 判别式的续读路由，使进度界面无需重新推导 URL 即可导航。`node` 保留
+ * 多链接目录的消歧信息。
+ */
+export const resumeRouteSchema = t.Union([
+  t.Object({
+    kind: t.Literal("node"),
+    bookId: t.String(),
+    nodeId: t.String(),
+  }),
+  t.Object({
+    kind: t.Literal("chapter"),
+    bookId: t.String(),
+    chapterId: t.String(),
+  }),
+  t.Object({
+    kind: t.Literal("book"),
+    bookId: t.String(),
+  }),
+]);
+
+export type ResumeRoute = (typeof resumeRouteSchema)["static"];
+
+export const continueReadingItemSchema = t.Object({
+  bookUnitId: t.String(),
+  bookTitle: t.String(),
+  bookCoverUrl: t.Optional(t.String()),
+  /**
+   * Null for legacy/first-time progress without a node anchor.
+   * 对于没有节点锚点的旧数据或首次进度为 null。
+   */
+  lastReadNodeId: t.Nullable(t.String()),
+  /**
+   * Server-resolved from the TOC; null when no node or node hard-deleted.
+   * 从目录在服务端解析得出；当没有节点或节点被硬删除时为 null。
+   */
+  lastReadNodeTitle: t.Nullable(t.String()),
+  /**
+   * `lastReadAnchor.text` truncated to <= 200 chars, when present.
+   * 存在时，将 `lastReadAnchor.text` 截断到 <= 200 个字符。
+   */
+  lastReadAnchorText: t.Optional(t.String()),
+  chaptersCompleted: t.Integer({ minimum: 0 }),
+  chaptersTotal: t.Integer({ minimum: 0 }),
+  resumeRoute: resumeRouteSchema,
+});
+
+export type ContinueReadingItem = (typeof continueReadingItemSchema)["static"];
+
+export const continueReadingListQuerySchema = t.Object({
+  limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+  ...readLanguageGetQueryBase.properties,
+});
+
+export type ContinueReadingListQuery =
+  (typeof continueReadingListQuerySchema)["static"];
+
+export const continueReadingListResponseSchema = t.Object({
+  items: t.Array(continueReadingItemSchema),
+});
+
+export type ContinueReadingListResponse =
+  (typeof continueReadingListResponseSchema)["static"];
+
 export const progressLibraryShelfLinkSchema = t.Object({
   shelfId: t.String(),
   title: t.String(),
