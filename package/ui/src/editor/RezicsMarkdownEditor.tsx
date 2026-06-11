@@ -49,7 +49,7 @@ export interface RezicsMarkdownEditorProps
 export function RezicsMarkdownEditor({
   onSubmit,
   onCancel,
-  submitLabel = "Submit",
+  submitLabel,
   submitDisabled,
   extraRight,
   imageProviders,
@@ -103,7 +103,7 @@ export function RezicsMarkdownEditor({
 
   const emojiAnchorEl = emojiOpen
     ? (wrapperRef.current?.querySelector(
-        '[aria-label="Emoji"]',
+        `[aria-label="${t("common:emoji")}"]`,
       ) as HTMLElement | null)
     : null;
 
@@ -132,7 +132,7 @@ export function RezicsMarkdownEditor({
           ...items,
           {
             name: "emoji",
-            label: "Emoji",
+            label: t("common:emoji"),
             icon: <Smile size={16} />,
             action: () => setEmojiOpen((prev) => !prev),
           },
@@ -217,7 +217,7 @@ export function RezicsMarkdownEditor({
                 onClick={onSubmit}
                 disabled={submitDisabled}
               >
-                {submitLabel}
+                {submitLabel ?? t("common:submit")}
               </Button>
             )}
           </>
