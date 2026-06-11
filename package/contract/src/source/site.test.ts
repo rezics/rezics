@@ -117,5 +117,9 @@ describe("source site contract schemas", () => {
       "book",
       "publisher",
     ]);
+    expect(suggestExternalKinds("ZONE", ["book", "wiki"])).toEqual([
+      "wiki",
+      "book",
+    ]);
   });
 });

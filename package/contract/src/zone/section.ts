@@ -256,13 +256,32 @@ export const zoneStatsSectionSchema = t.Object(
 export type ZoneStatsSection = Static<typeof zoneStatsSectionSchema>;
 
 /**
- * The 6 content primitives. Container nesting rules are encoded in the
+ * `sources` renders external presences attached to the zone Unit itself:
+ * a ZONE is a Unit, so its `UnitExternalRef`s mean "this portal's
+ * counterparts elsewhere". There is intentionally no section `unitId`;
+ * readers always query the owning zone unit.
+ * `sources` 渲染挂在专区 Unit 自身上的外部存在：ZONE 本身就是 Unit，
+ * 其 `UnitExternalRef` 表示“这个门户在其他地方的对应站点”。这里刻意
+ * 没有分区级 `unitId`；读取方始终查询所属专区 Unit。
+ */
+export const zoneSourcesSectionSchema = t.Object(
+  {
+    ...zoneSectionBaseSchema.properties,
+    kind: t.Literal("sources"),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneSourcesSection = Static<typeof zoneSourcesSectionSchema>;
+
+/**
+ * The 7 content primitives. Container nesting rules are encoded in the
  * union layering below: `tabs` panes hold content sections only; `columns`
  * panes hold content sections or `tabs`; `columns` itself appears only at
  * page top level. No tabs-in-tabs, no columns-in-anything. This keeps
  * `columns` as an ordered page layout primitive instead of an arbitrary grid
  * builder.
- * 6 个内容原语。容器嵌套规则编码在下方的联合分层中：`tabs` 面板只容纳
+ * 7 个内容原语。容器嵌套规则编码在下方的联合分层中：`tabs` 面板只容纳
  * 内容分区；`columns` 面板容纳内容分区或 `tabs`；`columns` 自身只出现
  * 在页面顶层。不允许 tabs 套 tabs，不允许任何东西套 columns。这使
  * `columns` 保持为有序页面布局原语，而不是任意网格构建器。
@@ -274,6 +293,7 @@ export const zoneContentSectionSchema = t.Union([
   zoneQuerySectionSchema,
   zoneFeedSectionSchema,
   zoneStatsSectionSchema,
+  zoneSourcesSectionSchema,
 ]);
 
 export type ZoneContentSection = Static<typeof zoneContentSectionSchema>;

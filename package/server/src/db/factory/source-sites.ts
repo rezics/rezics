@@ -35,6 +35,16 @@ const QIDIAN_REF_RULES = [
   },
 ] as const;
 
+const FANDOM_REF_RULES = [
+  {
+    externalKind: "wiki",
+    externalIdName: "subdomain",
+    urlTemplate: "https://{externalId}.fandom.com/",
+    urlMatchPattern: "^https://(?<externalId>[^./?#]+)\\.fandom\\.com/?",
+    crawlSupported: false,
+  },
+] as const;
+
 async function ensureQidianSourceSite(ctx: SeedCtx) {
   const [existing] = await ctx.db
     .select({ entityUnitId: SourceSite.entityUnitId })
@@ -85,6 +95,62 @@ async function ensureQidianSourceSite(ctx: SeedCtx) {
       crawlEnabled: false,
       crawlerAdapterKey: "qidian",
       refRules: QIDIAN_REF_RULES as any,
+    }),
+  );
+
+  await ctx.sync.entity(sourceUnit.id);
+  return sourceUnit.id;
+}
+
+export async function ensureFandomSourceSite(ctx: SeedCtx) {
+  const [existing] = await ctx.db
+    .select({ entityUnitId: SourceSite.entityUnitId })
+    .from(SourceSite)
+    .where(eq(SourceSite.key, "fandom"))
+    .limit(1);
+  if (existing) return existing.entityUnitId;
+
+  const sourceUnit = { id: randomUUID() };
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: sourceUnit.id,
+      type: UnitType.ENTITY,
+      slug: "fandom",
+      slugScope: ctx.slugScopes.entity,
+      status: UnitStatus.PUBLISHED,
+      defaultLanguage: DEFAULT_LANGUAGE,
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values([
+    withUpdatedAt({
+      unitId: sourceUnit.id,
+      language: LANGUAGES.ZH_HANT,
+      title: "Fandom",
+      summary: "來源站點實體，用於示範 wiki 外部來源規則。",
+    }),
+    withUpdatedAt({
+      unitId: sourceUnit.id,
+      language: LANGUAGES.EN,
+      title: "Fandom",
+      summary: "Source site Entity for wiki external reference fixtures.",
+    }),
+  ]);
+  await ctx.db.insert(Entity).values(
+    withUpdatedAt({
+      unitId: sourceUnit.id,
+      kind: "organization",
+      verified: true,
+      eligibleCreditRoles: [],
+      eligibleSubjectRoles: [],
+    }),
+  );
+  await ctx.db.insert(SourceSite).values(
+    withUpdatedAt({
+      entityUnitId: sourceUnit.id,
+      key: "fandom",
+      crawlSupport: "none",
+      crawlEnabled: false,
+      refRules: FANDOM_REF_RULES as any,
     }),
   );
 

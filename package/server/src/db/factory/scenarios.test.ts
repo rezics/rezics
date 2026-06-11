@@ -166,6 +166,7 @@ describe("buildToaruZoneConfig", () => {
       "hero",
       "query",
       "richText",
+      "sources",
       "stats",
       "tabs",
     ]);
@@ -174,6 +175,8 @@ describe("buildToaruZoneConfig", () => {
     for (const fragmentId of Object.values(ids.fragments)) {
       expect(richTextRefs).toContain(fragmentId);
     }
+    expect(richTextRefs).toContain('"kind":"sources"');
+    expect(richTextRefs).not.toContain("toaru.fandom.com");
   });
 
   test("scopes context and boundary to the Toaru realm", () => {

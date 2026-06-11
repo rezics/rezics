@@ -5,6 +5,7 @@ import {
   zoneContentSectionSchema,
   zonePageSectionSchema,
   zoneSectionQuerySchema,
+  zoneSourcesSectionSchema,
   zoneTabsSectionSchema,
 } from "./section";
 
@@ -202,6 +203,30 @@ describe("zone section nesting rules", () => {
         id: "s-stats",
         kind: "stats",
         metrics: ["edits"],
+      }),
+    ).toBe(false);
+  });
+
+  test("sources section owns no target unit field", () => {
+    expect(
+      Value.Check(zoneSourcesSectionSchema, {
+        id: "s-sources",
+        kind: "sources",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(zonePageSectionSchema, {
+        id: "s-sources",
+        kind: "sources",
+        titleLabelUnitId: "label-1",
+        emptyState: "show-empty",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(zoneSourcesSectionSchema, {
+        id: "s-sources",
+        kind: "sources",
+        unitId: "other-unit",
       }),
     ).toBe(false);
   });

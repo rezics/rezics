@@ -9,8 +9,14 @@ import {
   parseSourceUrl,
   type SourceSiteRefRule,
 } from "@rezics/contract";
-import { and, count, desc, eq, type SQL } from "drizzle-orm";
-import { SourceSite, Unit, UnitExternalRef } from "../db/schema";
+import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import {
+  Entity,
+  SourceSite,
+  Unit,
+  UnitExternalRef,
+  UnitTranslation,
+} from "../db/schema";
 import { AppError } from "../utils/errors";
 import type { UnitExternalRefWithRelations } from "./unit-external-ref.types";
 
@@ -171,6 +177,62 @@ function withSourceSite(row: {
 }
 
 function createDrizzleUnitExternalRefRepository(): UnitExternalRefRepository {
+  async function hydrateSourceSites(
+    rows: UnitExternalRefWithRelations[],
+  ): Promise<UnitExternalRefWithRelations[]> {
+    const sourceSiteIds = [
+      ...new Set(
+        rows
+          .map((row) => row.sourceSite?.entityUnitId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    if (sourceSiteIds.length === 0) {
+      return rows;
+    }
+
+    const db = await getServerDb();
+    const [entityRows, translationRows] = await Promise.all([
+      db
+        .select({ entity: Entity, unit: Unit })
+        .from(Entity)
+        .innerJoin(Unit, eq(Entity.unitId, Unit.id))
+        .where(inArray(Entity.unitId, sourceSiteIds)),
+      db
+        .select()
+        .from(UnitTranslation)
+        .where(inArray(UnitTranslation.unitId, sourceSiteIds)),
+    ]);
+
+    const translationsByUnit = new Map<string, typeof translationRows>();
+    for (const translation of translationRows) {
+      const list = translationsByUnit.get(translation.unitId) ?? [];
+      list.push(translation);
+      translationsByUnit.set(translation.unitId, list);
+    }
+
+    const entitiesByUnit = new Map<string, unknown>();
+    for (const row of entityRows) {
+      entitiesByUnit.set(row.entity.unitId, {
+        ...row.entity,
+        unit: {
+          ...row.unit,
+          translations: translationsByUnit.get(row.entity.unitId) ?? [],
+        },
+      });
+    }
+
+    return rows.map((row) => ({
+      ...row,
+      sourceSite: row.sourceSite
+        ? {
+            ...row.sourceSite,
+            entity: entitiesByUnit.get(row.sourceSite.entityUnitId) ?? null,
+          }
+        : row.sourceSite,
+    }));
+  }
+
   async function getById(
     id: string,
   ): Promise<UnitExternalRefWithRelations | undefined> {
@@ -185,7 +247,9 @@ function createDrizzleUnitExternalRefRepository(): UnitExternalRefRepository {
       .where(eq(UnitExternalRef.id, id))
       .limit(1);
 
-    return row ? withSourceSite(row) : undefined;
+    return row
+      ? (await hydrateSourceSites([withSourceSite(row)]))[0]
+      : undefined;
   }
 
   return {
@@ -209,7 +273,7 @@ function createDrizzleUnitExternalRefRepository(): UnitExternalRefRepository {
       ]);
 
       return {
-        rows: rows.map(withSourceSite),
+        rows: await hydrateSourceSites(rows.map(withSourceSite)),
         total: totalRows[0]?.total ?? 0,
       };
     },

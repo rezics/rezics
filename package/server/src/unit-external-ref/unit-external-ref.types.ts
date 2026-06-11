@@ -1,4 +1,5 @@
 import type { UnitExternalRef } from "../db/schema";
+import type { SourceSiteWithRelations } from "../source-site/source-site.types";
 
 export const unitExternalRefInclude = {
   sourceSite: {
@@ -18,5 +19,5 @@ export const unitExternalRefInclude = {
 
 export type UnitExternalRefWithRelations =
   typeof UnitExternalRef.$inferSelect & {
-    sourceSite?: unknown | null;
+    sourceSite?: SourceSiteWithRelations | null;
   };

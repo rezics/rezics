@@ -173,6 +173,7 @@ const SECTION_TITLE_KEYS: Partial<Record<ZoneSectionKind, string>> = {
   feed: "zone:section_title_feed",
   richText: "zone:section_title_richText",
   stats: "zone:section_title_stats",
+  sources: "zone:section_title_sources",
 };
 
 /**

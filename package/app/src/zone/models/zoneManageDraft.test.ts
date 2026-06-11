@@ -256,6 +256,7 @@ describe("section nesting guards", () => {
     expect(canInsertZoneSectionKind("tabs", "tabs")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "columns")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "query")).toBe(true);
+    expect(canInsertZoneSectionKind("tabs", "sources")).toBe(true);
   });
 
   it("rejects columns inside columns but allows tabs", () => {
@@ -289,6 +290,13 @@ describe("section ids", () => {
         { id: "main", ratio: 3, sections: [] },
         { id: "side", ratio: 1, sections: [] },
       ],
+    });
+  });
+
+  it("creates a minimal sources section by default", () => {
+    expect(createZoneSection("sources", "sources-1")).toEqual({
+      id: "sources-1",
+      kind: "sources",
     });
   });
 

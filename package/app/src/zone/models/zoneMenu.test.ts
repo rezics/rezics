@@ -255,6 +255,7 @@ describe("section titles", () => {
     expect(zoneSectionTitleKey("feed")).toBe("zone:section_title_feed");
     expect(zoneSectionTitleKey("richText")).toBe("zone:section_title_richText");
     expect(zoneSectionTitleKey("stats")).toBe("zone:section_title_stats");
+    expect(zoneSectionTitleKey("sources")).toBe("zone:section_title_sources");
     expect(zoneSectionTitleKey("hero")).toBeNull();
     expect(zoneSectionTitleKey("tabs")).toBeNull();
     expect(zoneSectionTitleKey("columns")).toBeNull();

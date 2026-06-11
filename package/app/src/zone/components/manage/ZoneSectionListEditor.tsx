@@ -50,6 +50,7 @@ const KIND_KEYS = {
   query: "zone:manage_kind_query",
   feed: "zone:manage_kind_feed",
   stats: "zone:manage_kind_stats",
+  sources: "zone:manage_kind_sources",
   tabs: "zone:manage_kind_tabs",
   columns: "zone:manage_kind_columns",
 } as const satisfies Record<ZonePageSection["kind"], `zone:${string}`>;
@@ -503,6 +504,9 @@ function ZoneSectionKindFields({
           renderOption={(metric) => t(STATS_METRIC_KEYS[metric])}
         />
       );
+
+    case "sources":
+      return null;
 
     case "tabs":
       return (

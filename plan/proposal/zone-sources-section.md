@@ -51,38 +51,38 @@ manage entry, and factory demo data.
 
 ## 1. Contract
 
-- [ ] 1.1 `package/contract/src/zone/section.ts`: add
+- [x] 1.1 `package/contract/src/zone/section.ts`: add
   `zoneSourcesSectionSchema` (`kind: "sources"`, shared title props,
   `additionalProperties: false`) to the section union, with the anchor
   comment; cover in `section.test.ts` (valid shape, extra-prop rejection).
-- [ ] 1.2 `package/contract/src/source/external-kind.ts`: add `"wiki"` to
+- [x] 1.2 `package/contract/src/source/external-kind.ts`: add `"wiki"` to
   `externalKinds` + `externalKindRegistry` (`suggestedUnitTypes: ["ZONE"]`).
-- [ ] 1.3 `package/contract/src/zone/link-target.ts`: extend the
+- [x] 1.3 `package/contract/src/zone/link-target.ts`: extend the
   `external.text` exception comment with the sources/custom boundary.
 
 ## 2. App
 
-- [ ] 2.1 New
+- [x] 2.1 New
   `package/app/src/zone/components/sections/SourcesSection.tsx`: list query
   from `@rezics/api/unit-external-ref` filtered to `ctx.zone.unitId`; render
   each ref as a link — label from `sourceSite.entity` translations (fallback
   `sourceSite.key`), href `canonicalUrl`; empty → section's none state.
   Register the kind in `ZoneContentSections.tsx`. Load `rezics-design` before
   the JSX work.
-- [ ] 2.2 `package/app/src/zone/components/manage/ZoneSectionListEditor.tsx`
+- [x] 2.2 `package/app/src/zone/components/manage/ZoneSectionListEditor.tsx`
   (+ `zoneManageDraft.ts` if kinds are enumerated there): add the `sources`
   kind — no fields beyond the shared title.
-- [ ] 2.3 Verify the list endpoint embeds `sourceSite` (and its `entity`
+- [x] 2.3 Verify the list endpoint embeds `sourceSite` (and its `entity`
   labels) in `unit-external-ref.mapper.ts`/`.service.ts`; if entity
   translations are not hydrated, extend the mapper (server-side, small).
 
 ## 3. Factory demo
 
-- [ ] 3.1 `package/server/src/db/factory/source-sites.ts`: add
+- [x] 3.1 `package/server/src/db/factory/source-sites.ts`: add
   `ensureFandomSourceSite` following the qidian pattern — refRule
   `externalKind: "wiki"`, `urlTemplate: "https://{externalId}.fandom.com/"`,
   matching `urlMatchPattern`, no crawl support.
-- [ ] 3.2 `package/server/src/db/factory/scenarios.ts`: give the toaru zone
+- [x] 3.2 `package/server/src/db/factory/scenarios.ts`: give the toaru zone
   unit a `UnitExternalRef` (`externalId: "toaru"`); replace the quick-links
   Fandom `external` item with a `sources` section in the side column; keep
   one genuine one-off `external` item so that arm stays exercised in the

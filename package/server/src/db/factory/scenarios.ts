@@ -25,6 +25,7 @@ import {
   ShelfItem,
   SubjectAttribution,
   Unit,
+  UnitExternalRef,
   UnitHistoryClock,
   UnitRealm,
   UnitSupportLanguage,
@@ -36,6 +37,7 @@ import {
 } from "../schema";
 import { seedChaptersForBook } from "./books.js";
 import { addSpecialSeedTarget, createSeedResult } from "./result.js";
+import { ensureFandomSourceSite } from "./source-sites.js";
 import {
   PostKind,
   UnitStatus,
@@ -1820,6 +1822,11 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                   ratio: 1,
                   sections: [
                     {
+                      id: "external-sources",
+                      kind: "sources",
+                      limit: 6,
+                    },
+                    {
                       id: "quick-links",
                       kind: "collection",
                       display: "list",
@@ -1839,8 +1846,8 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                         {
                           target: {
                             kind: "external",
-                            url: "https://toaru.fandom.com/",
-                            text: "Toaru Wiki (Fandom)",
+                            url: "https://discord.gg/toaru",
+                            text: "Discord",
                           },
                         },
                       ],
@@ -2153,6 +2160,31 @@ async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
       },
     ),
   );
+  const fandomSourceSiteEntityUnitId = await ensureFandomSourceSite(ctx);
+  await ctx.db
+    .insert(UnitExternalRef)
+    .values(
+      withUpdatedAt({
+        unitId: zoneUnitId,
+        sourceSiteEntityUnitId: fandomSourceSiteEntityUnitId,
+        externalKind: "wiki",
+        externalId: "toaru",
+        canonicalUrl: "https://toaru.fandom.com/",
+        originalUrl: "https://toaru.fandom.com/",
+      }),
+    )
+    .onConflictDoUpdate({
+      target: [
+        UnitExternalRef.sourceSiteEntityUnitId,
+        UnitExternalRef.externalKind,
+        UnitExternalRef.externalId,
+      ],
+      set: {
+        unitId: zoneUnitId,
+        canonicalUrl: "https://toaru.fandom.com/",
+        originalUrl: "https://toaru.fandom.com/",
+      },
+    });
   const toaruZoneConfig = buildToaruZoneConfig({
     realmUnitId,
     labels: labelIds,

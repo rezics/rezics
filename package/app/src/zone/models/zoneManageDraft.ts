@@ -309,6 +309,7 @@ export const ZONE_CONTENT_SECTION_KINDS = [
   "query",
   "feed",
   "stats",
+  "sources",
 ] as const;
 
 export const ZONE_PAGE_SECTION_KINDS = [
@@ -382,6 +383,8 @@ export function createZoneSection(
       return { id, kind: "feed" };
     case "stats":
       return { id, kind: "stats", metrics: ["articles", "members"] };
+    case "sources":
+      return { id, kind: "sources" };
     case "tabs":
       return { id, kind: "tabs", tabs: [] };
     case "columns":
