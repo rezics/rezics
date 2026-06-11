@@ -133,6 +133,7 @@
   "profile_realms_none_joined": "아직 어떤 영역에도 속해 있지 않습니다.",
   "profile_search_content_placeholder": "콘텐츠 검색...",
   "profile_sort_most_replies": "답글 많은순",
+  "danger_zone": "위험 구역",
   "account_delete_confirm_prefix": "이 작업은 영구적이며 취소할 수 없습니다. 확인하려면 사용자 이름을 입력하세요.",
   "account_delete_confirm_suffix": "아래에.",
   "account_delete_my_account": "내 계정 삭제",

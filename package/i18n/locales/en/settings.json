@@ -133,6 +133,7 @@
   "profile_realms_none_joined": "Not a member of any realms yet",
   "profile_search_content_placeholder": "Search content...",
   "profile_sort_most_replies": "Most replies",
+  "danger_zone": "Danger Zone",
   "account_delete_confirm_prefix": "This action is permanent and cannot be undone. To confirm, type your username",
   "account_delete_confirm_suffix": "below.",
   "account_delete_my_account": "Delete My Account",
