@@ -191,7 +191,7 @@ describe("buildToaruZoneConfig", () => {
 
 describe("official zone definitions", () => {
   test("every official zone config is schema-valid with a global context", () => {
-    expect(OFFICIAL_ZONE_DEFINITIONS).toHaveLength(3);
+    expect(OFFICIAL_ZONE_DEFINITIONS).toHaveLength(4);
     for (const definition of OFFICIAL_ZONE_DEFINITIONS) {
       expectValidZoneConfig(definition.config);
       expect(definition.config.boundary.context).toEqual({ kind: "global" });

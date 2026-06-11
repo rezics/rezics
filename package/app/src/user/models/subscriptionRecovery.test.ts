@@ -45,6 +45,11 @@ describe("subscription recovery grouping", () => {
     ).toBe(true);
     expect(
       isOfficialRecoveryEntry(
+        entry({ subscribedType: "ZONE", subscribedSlug: "zones" }),
+      ),
+    ).toBe(true);
+    expect(
+      isOfficialRecoveryEntry(
         entry({ subscribedType: "REALM", subscribedSlug: "fiction" }),
       ),
     ).toBe(false);

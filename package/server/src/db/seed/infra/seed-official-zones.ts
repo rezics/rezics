@@ -27,7 +27,7 @@ interface OfficialZoneTranslation {
 }
 
 export interface OfficialZoneDefinition {
-  key: "book" | "realms" | "popular";
+  key: "book" | "realms" | "zones" | "popular";
   slug: string;
   config: OfficialZoneConfig;
   translations: Record<string, OfficialZoneTranslation>;
@@ -63,6 +63,11 @@ const OFFICIAL_PAGE_IDS = {
     home: "00000000-0000-7000-8000-000000000301",
     search: "00000000-0000-7000-8000-000000000302",
     feed: "00000000-0000-7000-8000-000000000303",
+  },
+  zones: {
+    home: "00000000-0000-7000-8000-000000000401",
+    search: "00000000-0000-7000-8000-000000000402",
+    feed: "00000000-0000-7000-8000-000000000403",
   },
 } as const;
 
@@ -200,7 +205,19 @@ const realmsConfig = officialConfig({
   homeSections: [
     { id: "hero", kind: "hero", showDescription: true },
     {
-      id: "featured-realms",
+      id: "latest-realms",
+      kind: "query",
+      display: "carousel",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["REALM"],
+        sort: { field: "createdAt", direction: "desc" },
+      },
+    },
+    {
+      id: "browse-realms",
       kind: "query",
       display: "tiles",
       limit: 24,
@@ -211,22 +228,44 @@ const realmsConfig = officialConfig({
         sort: { field: "qualityScore", direction: "desc" },
       },
     },
-    {
-      id: "active-realms",
-      kind: "query",
-      display: "list",
-      limit: 24,
-      loadMore: true,
-      query: {
-        target: "unit",
-        types: ["REALM"],
-        sort: { field: "trendingScore", direction: "desc" },
-      },
-    },
     { id: "realm-updates", kind: "feed", feedKind: "updates", limit: 20 },
   ],
   accent: "#0f766e",
   density: "compact",
+});
+
+const zonesConfig = officialConfig({
+  pageIds: OFFICIAL_PAGE_IDS.zones,
+  filters: { types: ["ZONE"] },
+  homeSections: [
+    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "latest-zones",
+      kind: "query",
+      display: "carousel",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["ZONE"],
+        sort: { field: "createdAt", direction: "desc" },
+      },
+    },
+    {
+      id: "all-zones",
+      kind: "query",
+      display: "grid",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["ZONE"],
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+    },
+  ],
+  accent: "#7c3aed",
+  density: "comfortable",
 });
 
 const popularConfig = officialConfig({
@@ -262,6 +301,13 @@ const popularConfig = officialConfig({
   density: "comfortable",
 });
 
+/**
+ * Official zones are either type libraries, one per major UnitType, or
+ * cross-cutting views. Libraries lead with browsable catalog sections and
+ * activity; trending-led discovery belongs to `popular`. ZONE units usually
+ * have sparse score signals early, so the zones library leads with recency
+ * and update sorts rather than qualityScore.
+ */
 export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
   {
     key: "book",
@@ -289,15 +335,37 @@ export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
     translations: {
       en: {
         title: "Realms",
-        description: "Discover communities that classify and discuss works.",
+        description:
+          "The Rezics realms library: communities that classify and discuss works.",
       },
       "zh-hant": {
         title: "Realms",
-        description: "探索共同分類與討論作品的社群。",
+        description: "Rezics 的 Realms 社群資料庫：共同分類與討論作品的地方。",
       },
       ja: {
         title: "Realms",
-        description: "作品を分類し語り合うコミュニティを見つける。",
+        description:
+          "Rezics の Realms ライブラリ。作品を分類し語り合うコミュニティ。",
+      },
+    },
+  },
+  {
+    key: "zones",
+    slug: "zones",
+    config: zonesConfig,
+    translations: {
+      en: {
+        title: "Zones",
+        description: "The Rezics zones library: curated portals across units.",
+      },
+      "zh-hant": {
+        title: "專區",
+        description: "Rezics 的專區資料庫：跨 Unit 的整理入口。",
+      },
+      ja: {
+        title: "ゾーン",
+        description:
+          "Rezics のゾーンライブラリ。ユニットを横断する整理ポータル。",
       },
     },
   },

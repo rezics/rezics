@@ -110,7 +110,16 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               </SectionTitle>
               <div className="flex flex-col gap-1">
                 <FooterLink href={officialZoneHref("book")}>
-                  {t("shell:layout_footer_product_discover")}
+                  {t("shell:layout_footer_product_books")}
+                </FooterLink>
+                <FooterLink href={officialZoneHref("realms")}>
+                  {t("shell:layout_footer_product_realms")}
+                </FooterLink>
+                <FooterLink href={officialZoneHref("zones")}>
+                  {t("shell:layout_footer_product_zones")}
+                </FooterLink>
+                <FooterLink href={officialZoneHref("popular")}>
+                  {t("shell:layout_footer_product_popular")}
                 </FooterLink>
                 <FooterLink href="/shelf">
                   {t("shell:layout_footer_product_shelves")}

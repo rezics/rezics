@@ -4,6 +4,7 @@ const OFFICIAL_RECOVERY_TARGETS = new Set([
   "REALM:rezics",
   "ZONE:book",
   "ZONE:realms",
+  "ZONE:zones",
   "ZONE:popular",
 ]);
 

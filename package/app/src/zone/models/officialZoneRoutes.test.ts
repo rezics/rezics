@@ -5,6 +5,7 @@ describe("officialZoneRoutes", () => {
   test("keeps official portal routes on ordinary zone URLs", () => {
     expect(officialZoneHref("book")).toBe("/z/book");
     expect(officialZoneHref("realms")).toBe("/z/realms");
+    expect(officialZoneHref("zones")).toBe("/z/zones");
     expect(officialZoneHref("popular")).toBe("/z/popular");
   });
 
