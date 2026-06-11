@@ -28,6 +28,7 @@
   "comment_context_reply_in": "Antwort in {context}",
   "feed_carousel_works": "Werke zum Entdecken",
   "feed_carousel_shelves": "Regale aus der Community",
+  "feed_empty": "Noch keine Feed-Einträge",
   "discussion_empty": "Noch keine Diskussionen.",
   "dm_back_to_list": "Alle Gespräche",
   "dm_composer_placeholder": "Nachricht schreiben",

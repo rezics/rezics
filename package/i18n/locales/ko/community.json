@@ -28,6 +28,7 @@
   "comment_context_reply_in": "{context}에 답글 작성",
   "feed_carousel_works": "살펴볼 작품",
   "feed_carousel_shelves": "커뮤니티 책장",
+  "feed_empty": "아직 피드가 없습니다",
   "discussion_empty": "아직 토론이 없습니다.",
   "dm_back_to_list": "모든 대화",
   "dm_composer_placeholder": "메시지 쓰기",

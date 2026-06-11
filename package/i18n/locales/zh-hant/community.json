@@ -28,6 +28,7 @@
   "comment_context_reply_in": "將在 {context} 中回覆",
   "feed_carousel_works": "值得探索的作品",
   "feed_carousel_shelves": "社群書架",
+  "feed_empty": "還沒有動態",
   "discussion_empty": "目前還沒有討論。",
   "dm_back_to_list": "所有對話",
   "dm_composer_placeholder": "輸入訊息",

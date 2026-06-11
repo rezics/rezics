@@ -28,6 +28,7 @@
   "comment_context_reply_in": "Replying in {context}",
   "feed_carousel_works": "Works to explore",
   "feed_carousel_shelves": "Shelves from the community",
+  "feed_empty": "No feed items yet",
   "discussion_empty": "No discussions yet.",
   "dm_back_to_list": "All conversations",
   "dm_composer_placeholder": "Write a message",

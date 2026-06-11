@@ -147,11 +147,14 @@ function FeedCarousel({ row }: { row: FeedCarouselRow }) {
 export const FeedRenderer: React.FC<FeedRendererProps> = ({
   rows,
   loading = false,
-  emptyTitle = "No feed items yet",
+  emptyTitle,
   renderContentRow,
 }) => {
+  const { t } = useTranslation("community");
+  const effectiveEmptyTitle = emptyTitle ?? t("feed_empty");
+
   if (loading) return <FeedLoadingRows />;
-  if (rows.length === 0) return <EmptyState title={emptyTitle} />;
+  if (rows.length === 0) return <EmptyState title={effectiveEmptyTitle} />;
 
   return (
     <div className="space-y-4">
