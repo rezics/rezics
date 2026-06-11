@@ -1,6 +1,30 @@
 import { describe, expect, test } from "bun:test";
-import { NAVIGATION, REMOVED_MAIN_SIDEBAR_SEGMENTS } from "./MainNavigation";
+import {
+  NAVIGATION,
+  type NavigationTranslateFn,
+  REMOVED_MAIN_SIDEBAR_SEGMENTS,
+} from "./MainNavigation";
 import type { NavigationItem } from "./navigation";
+
+const EN: Record<string, string> = {
+  "shell:navigation_home": "Home",
+  "shell:navigation_login": "Sign in",
+  "shell:navigation_create_account": "Create account",
+  "shell:navigation_zones": "Zones",
+  "shell:navigation_all_zones": "All Zones",
+  "shell:navigation_no_subscribed_zones": "No subscribed zones",
+  "shell:navigation_realms": "Realms",
+  "shell:navigation_all_realms": "All Realms",
+  "shell:navigation_no_subscribed_realms": "No subscribed realms",
+  "shell:navigation_loading": "Loading {section}...",
+};
+const t: NavigationTranslateFn = (key, params) => {
+  let value = EN[key] ?? key;
+  if (params)
+    for (const [k, v] of Object.entries(params))
+      value = value.replace(`{${k}}`, v);
+  return value;
+};
 
 function flattenItems(items: readonly NavigationItem[]): NavigationItem[] {
   return items.flatMap((item) =>
@@ -20,6 +44,7 @@ describe("NAVIGATION", () => {
           items: [{ unitId: "realm-1", title: "Fiction", href: "/r/fiction" }],
         },
       },
+      t,
     );
 
     const sections = navigation.filter((item) => item.kind === "section");
@@ -72,6 +97,7 @@ describe("NAVIGATION", () => {
     const navigation = NAVIGATION(
       { isAuthenticated: true, isAdmin: false },
       { zones: { items: [] }, realms: { items: [] } },
+      t,
     );
     const segments = flattenItems(navigation)
       .filter(
@@ -92,6 +118,7 @@ describe("NAVIGATION", () => {
         zones: { items: [], isLoading: true },
         realms: { items: [], isLoading: true },
       },
+      t,
     );
     const zones = navigation.find(
       (item) => item.kind === "section" && item.id === "zones",
@@ -157,6 +184,7 @@ describe("NAVIGATION", () => {
         },
         realms: { items: [] },
       },
+      t,
     );
     const zones = navigation.find(
       (item) => item.kind === "section" && item.id === "zones",
@@ -197,6 +225,7 @@ describe("NAVIGATION", () => {
           items: [{ unitId: "realm-1", title: "Fiction", href: "/r/fiction" }],
         },
       },
+      t,
     );
 
     expect(

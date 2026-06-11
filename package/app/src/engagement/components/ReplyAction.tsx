@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { MessageSquare } from "lucide-react";
 import type React from "react";
@@ -22,6 +23,7 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
   mode = "count",
   onInvoke,
 }) => {
+  const { t } = useTranslation();
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const isPill = ctx.variant === "pill";
@@ -32,7 +34,7 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
   };
 
   const showCount = mode === "count" && replyCount > 0;
-  const label = showCount ? String(replyCount) : "Reply";
+  const label = showCount ? String(replyCount) : t("common:reply");
 
   return (
     <Button
