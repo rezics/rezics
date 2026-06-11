@@ -118,7 +118,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   onPageChange,
   tipsLabel,
 }) => {
-  const { t } = useTranslation(["ui"]);
+  const { t } = useTranslation(["common"]);
   useEffect(() => {
     console.log(
       "PaginationBar",
@@ -203,9 +203,9 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
           <ChevronsRight className="size-4" />
         </Button>
       </div>
-      <div className="text-sm text-gray-500 text-center">
-        {tipsLabel ?? t("ui:pagination_tips")}
-      </div>
+      {tipsLabel ? (
+        <div className="text-sm text-gray-500 text-center">{tipsLabel}</div>
+      ) : null}
     </div>
   );
 };
@@ -408,7 +408,7 @@ export const UniversalPaginator = <T,>({
         )}
         {children(currentPageItems)}
         {!isLoading && currentPageItems.length === 0 && (
-          <p className="text-center p-5">没有内容。</p>
+          <p className="text-center p-5">{t("common:no_data")}</p>
         )}
       </div>
       <PaginationBar
