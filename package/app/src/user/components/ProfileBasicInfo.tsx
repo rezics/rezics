@@ -152,7 +152,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           {canEdit ? (
             <Link to="/user/$userId/edit" params={{ userId }} className="block">
               <Button variant="outline" size="sm" className="w-full">
-                Edit profile
+                {t("settings:profile_edit_title")}
               </Button>
             </Link>
           ) : (
