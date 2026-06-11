@@ -36,6 +36,7 @@
   "content_pages": "페이지: {count}",
   "content_reading": "읽기",
   "content_text_length": "글자 수: {count}",
+  "create_book": "도서 만들기",
   "copyright_notice_body": "표지 삽화 및 서지 메타데이터는 해당 출판사, 저자 및 저작권 소유자의 자산입니다.",
   "copyright_notice_fair_use": "이 플랫폼은 목록 작성 및 독자 토론을 위해 공정 사용 하에 해당 내용을 표시합니다. 귀하가 권리 보유자이고 우려 사항이 있는 경우 당사에 문의하시기 바랍니다.",
   "description": "설명",
@@ -206,5 +207,8 @@
   "release_scope_this_release": "이 판본",
   "source_evidence_observed": "{date}에 관측됨",
   "source_evidence_view_entity": "엔티티 보기",
-  "source_evidence_open_source": "소스 열기"
+  "source_evidence_open_source": "소스 열기",
+  "tag_domain_alert": "현재 도메인 등록은 개방되지 않았습니다. main 도메인의 태그를 검색하여 추가해 주세요.",
+  "tag_edit_description": "이 도서의 태그를 관리합니다. 새 태그를 만들고, 목록/도메인 그룹별로 조회하거나 해제할 수 있습니다.",
+  "tag_edit_title": "태그 편집"
 }

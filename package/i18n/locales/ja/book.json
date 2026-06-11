@@ -36,6 +36,7 @@
   "content_pages": "ページ数: {count}",
   "content_reading": "読書",
   "content_text_length": "文字数: {count}",
+  "create_book": "書籍を作成",
   "copyright_notice_body": "カバーアートワークと書誌メタデータは、それぞれの出版社、著者、著作権所有者の財産です。",
   "copyright_notice_fair_use": "このプラットフォームでは、カタログ作成や読者のディスカッションのためにフェアユースの下でそれらを表示します。権利所有者の方でご不明な点がございましたら、弊社までご連絡ください。",
   "description": "説明",
@@ -206,5 +207,8 @@
   "release_scope_this_release": "この版",
   "source_evidence_observed": "{date} に観測",
   "source_evidence_view_entity": "エンティティを表示",
-  "source_evidence_open_source": "ソースを開く"
+  "source_evidence_open_source": "ソースを開く",
+  "tag_domain_alert": "現在 domain 登録は開放されていません。main ドメインのタグを検索して追加してください。",
+  "tag_edit_description": "この書籍のタグを管理します。タグの新規作成や、リスト/ドメインごとのグループ表示・解除が可能です。",
+  "tag_edit_title": "タグ編集"
 }

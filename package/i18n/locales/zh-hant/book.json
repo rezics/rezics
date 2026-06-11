@@ -36,6 +36,7 @@
   "content_pages": "頁數：{count}",
   "content_reading": "閱讀",
   "content_text_length": "文字長度：{count}",
+  "create_book": "建立書籍",
   "copyright_notice_body": "封面圖像與書目元資料之版權，歸屬於原出版商、作者及版權所有者。",
   "copyright_notice_fair_use": "本平台基於合理使用原則展示，僅作書目參考與讀者交流之用。若您為版權所有者並有任何疑慮，歡迎與我們聯繫。",
   "description": "簡介",
@@ -206,5 +207,8 @@
   "release_scope_this_release": "此版本",
   "source_evidence_observed": "觀測於 {date}",
   "source_evidence_view_entity": "檢視實體",
-  "source_evidence_open_source": "檢視來源"
+  "source_evidence_open_source": "檢視來源",
+  "tag_domain_alert": "目前尚未開放 domain 註冊，請搜尋並新增 main 域的標籤。",
+  "tag_edit_description": "為目前書籍管理標籤：可新建標籤，並按列表/域分組方式檢視與解除綁定。",
+  "tag_edit_title": "標籤編輯"
 }

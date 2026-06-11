@@ -36,6 +36,7 @@
   "content_pages": "页数：{count}",
   "content_reading": "阅读",
   "content_text_length": "文字长度：{count}",
+  "create_book": "创建书籍",
   "copyright_notice_body": "封面艺术作品和书目元数据是其各自出版商、作者和版权所有者的财产。",
   "copyright_notice_fair_use": "该平台在合理使用的情况下显示它们，以供编目和读者讨论。如果您是权利持有人并有任何疑问，请联系我们。",
   "description": "描述",
@@ -206,5 +207,8 @@
   "release_scope_this_release": "此版本",
   "source_evidence_observed": "观测于 {date}",
   "source_evidence_view_entity": "查看实体",
-  "source_evidence_open_source": "查看来源"
+  "source_evidence_open_source": "查看来源",
+  "tag_domain_alert": "目前暂未开放 domain 注册，请搜索并添加 main 域的标签。",
+  "tag_edit_description": "为当前书籍管理标签：可新建标签，并按列表/域分组方式查看与解绑。",
+  "tag_edit_title": "标签编辑"
 }

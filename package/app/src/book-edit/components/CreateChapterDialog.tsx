@@ -58,9 +58,9 @@ export function CreateChapterDialog({
   const createMutation = useCreateChapterMutation({
     onError: (error) => {
       show(
-        `创建章节失败: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        t("book:chapter_create_failed", {
+          error: error instanceof Error ? error.message : String(error),
+        }),
       );
     },
   });
@@ -73,12 +73,12 @@ export function CreateChapterDialog({
   async function handleSubmit() {
     if (!open) return;
     if (isInvalid) {
-      show("标题和内容不能为空");
+      show(t("book:chapter_title_content_required"));
       return;
     }
 
     if (!userId) {
-      show("请先登录");
+      show(t("common:route_unauthenticated_title"));
       return;
     }
 
