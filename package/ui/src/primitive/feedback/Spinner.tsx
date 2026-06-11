@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { Loader2 } from "lucide-react";
 
 import { cn } from "../../shared/lib/utils";
@@ -10,20 +11,18 @@ const SIZE_CLASS = {
 
 export interface SpinnerProps {
   size?: "sm" | "md" | "lg";
-  /** Accessible name. Rendered as `aria-label`; defaults to `"Loading"`. */
+  /** Accessible name. Rendered as `aria-label`; defaults to translated "Loading". */
   label?: string;
   className?: string;
 }
 
-export function Spinner({
-  size = "md",
-  label = "Loading",
-  className,
-}: SpinnerProps) {
+export function Spinner({ size = "md", label, className }: SpinnerProps) {
+  const { t } = useTranslation("common");
+  const effectiveLabel = label ?? t("loading");
   return (
     <span
       role="status"
-      aria-label={label}
+      aria-label={effectiveLabel}
       aria-live="polite"
       className={cn("inline-flex items-center justify-center", className)}
     >
@@ -31,7 +30,7 @@ export function Spinner({
         aria-hidden="true"
         className={cn(SIZE_CLASS[size], "animate-spin text-text-secondary")}
       />
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{effectiveLabel}</span>
     </span>
   );
 }

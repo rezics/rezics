@@ -1,6 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { useCanEdit } from "@rezics/api/hooks";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -19,6 +20,7 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
   bookId,
   nodeId,
 }) => {
+  const { t } = useTranslation("common");
   const navigate = useNavigate();
   const readContext = useReadLanguageContext();
   const { data: bookInfo } = useQuery({
@@ -51,9 +53,9 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
   const chapterDeleted =
     chapterData && (chapterData as { status?: string }).status === "DELETED";
 
-  if (state.kind === "loading") return <div className="p-4">Loading…</div>;
+  if (state.kind === "loading") return <div className="p-4">{t("loading")}</div>;
   if (state.kind === "not-found")
-    return <div className="p-4">Node not found</div>;
+    return <div className="p-4">{t("not_found")}</div>;
 
   if (state.kind === "deleted" || chapterDeleted) {
     const node = state.kind === "deleted" ? state.node : null;

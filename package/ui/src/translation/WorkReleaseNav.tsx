@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { Badge } from "#/shadcn/badge";
 
@@ -43,16 +44,19 @@ interface WorkReleaseNavProps {
 export const WorkReleaseNav: React.FC<WorkReleaseNavProps> = ({
   releases,
   currentUnitId,
-  heading = "Other Editions",
-  emptyLabel = "Edition",
+  heading,
+  emptyLabel,
   renderLink,
 }) => {
+  const { t } = useTranslation("book");
+  const effectiveHeading = heading ?? t("otherEditions");
+  const effectiveEmptyLabel = emptyLabel ?? t("editionFallback");
   const others = releases.filter((r) => r.unitId !== currentUnitId);
   if (others.length === 0) return null;
 
   return (
     <div>
-      <p className="text-sm font-semibold mb-1">{heading}</p>
+      <p className="text-sm font-semibold mb-1">{effectiveHeading}</p>
       <div className="flex flex-row flex-wrap gap-2">
         {others.map((release) =>
           renderLink(
@@ -62,7 +66,7 @@ export const WorkReleaseNav: React.FC<WorkReleaseNavProps> = ({
               variant="outline"
               className="cursor-pointer"
             >
-              {release.title ?? emptyLabel}
+              {release.title ?? effectiveEmptyLabel}
             </Badge>,
           ),
         )}
