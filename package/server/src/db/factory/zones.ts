@@ -30,9 +30,9 @@ import { pickN, withUpdatedAt, withUpdatedAtRows } from "./utils.js";
 /**
  * Fixture shapes covering every zone section kind except `richText`: the
  * synthetic seeder has no WIKI fragment posts to reference, so `richText`
- * coverage lives in the deterministic `toaru-wiki` factory scenario.
+ * coverage lives in the deterministic `toaru` factory scenario.
  * 覆盖除 `richText` 外所有专区分区 kind 的 fixture 形态：合成播种器没有
- * 可引用的 WIKI 片段帖子，因此 `richText` 的覆盖由确定性的 `toaru-wiki`
+ * 可引用的 WIKI 片段帖子，因此 `richText` 的覆盖由确定性的 `toaru`
  * 工厂情境承担。
  */
 export const ZONE_FIXTURE_KINDS = [

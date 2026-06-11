@@ -51,7 +51,7 @@ export const FACTORY_SCENARIO_NAMES = [
   "large-content-tree",
   "large-history",
   "complex-shelf",
-  "toaru-wiki",
+  "toaru",
   "showcase-feed",
 ] as const;
 
@@ -897,7 +897,7 @@ async function createWikiScenarioPost(
         content: markdownContentDoc(item.body) as never,
         status: "PUBLISHED" as const,
         authorUserId: input.userId,
-        provenance: { importedFrom: "factory-toaru-wiki-scenario" },
+        provenance: { importedFrom: "factory-toaru-scenario" },
       })),
     ),
   );
@@ -1206,8 +1206,8 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
   return result;
 }
 
-// ANCHOR: toaru-wiki scenario
-// ANCHOR: toaru-wiki 情境
+// ANCHOR: toaru scenario
+// ANCHOR: toaru 情境
 
 interface ToaruTrilingual {
   zhHant: string;
@@ -1539,7 +1539,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       schema: "rezics/zone-boundary",
       version: 1,
       context: { kind: "realm", realmUnitId: ids.realmUnitId },
-      // The boundary pins every query, search, and feed to the wiki realm.
+      // The boundary pins every query, search, and feed to the Toaru realm.
       filters: { realm: "context" },
     },
     nav: {
@@ -1947,7 +1947,7 @@ function toaruWikiTranslations(
   ];
 }
 
-async function runToaruWiki(ctx: SeedCtx): Promise<SeedResult> {
+async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
   const result = createSeedResult();
   const user = await getScenarioUser(ctx);
   const now = new Date();
@@ -1990,7 +1990,7 @@ async function runToaruWiki(ctx: SeedCtx): Promise<SeedResult> {
       isPublic: true,
       isOfficial: true,
       memberCount: 1,
-      extra: { scenario: "toaru-wiki" },
+      extra: { scenario: "toaru" },
     }),
   );
   await ctx.db.insert(RealmMember).values(
@@ -2137,15 +2137,18 @@ async function runToaruWiki(ctx: SeedCtx): Promise<SeedResult> {
     zoneUnitId,
     toaruTranslations(
       {
-        zhHant: "魔法禁書目錄 Wiki",
-        en: "Toaru Wiki",
-        ja: "とある魔術の禁書目録 Wiki",
+        // Zones are the realm's portal, named after the community/work. Wiki
+        // remains a section inside the portal, not the portal's name.
+        zhHant: "魔法禁書目錄",
+        en: "Toaru",
+        ja: "とある魔術の禁書目録",
       },
       {
         descriptions: {
-          zhHant: "由 r/toaru 社群維護的魔法禁書目錄百科與導航門戶。",
-          en: "The community-run encyclopedia and portal for A Certain Magical Index, maintained by r/toaru.",
-          ja: "r/toaru コミュニティが運営する、とある魔術の禁書目録の百科とポータル。",
+          zhHant:
+            "由 r/toaru 社群維護的魔法禁書目錄社群門戶，含百科、討論與新作索引。",
+          en: "The r/toaru community portal for A Certain Magical Index, with encyclopedia pages, discussion, and release indexes.",
+          ja: "r/toaru コミュニティによる、とある魔術の禁書目録のポータル。百科ページ、議論、新刊索引を含みます。",
         },
       },
     ),
@@ -2186,28 +2189,28 @@ async function runToaruWiki(ctx: SeedCtx): Promise<SeedResult> {
   ]);
 
   addSpecialSeedTarget(result, {
-    label: "Toaru wiki realm",
-    scenario: "toaru-wiki",
+    label: "Toaru realm",
+    scenario: "toaru",
     unitType: UnitType.REALM,
     unitId: realmUnitId,
-    notes: "r/toaru — the wiki realm backing the /z/toaru portal.",
+    notes: "r/toaru — the realm behind the /z/toaru portal.",
   });
   addSpecialSeedTarget(result, {
     label: "Toaru zone portal",
-    scenario: "toaru-wiki",
+    scenario: "toaru",
     unitType: UnitType.ZONE,
     unitId: zoneUnitId,
     notes: "Open /z/toaru to verify every zone config primitive.",
   });
   addSpecialSeedTarget(result, {
     label: "Toaru entity (上條當麻)",
-    scenario: "toaru-wiki",
+    scenario: "toaru",
     unitType: UnitType.ENTITY,
     unitId: entityIds.kamijou,
   });
   addSpecialSeedTarget(result, {
     label: "Toaru latest release",
-    scenario: "toaru-wiki",
+    scenario: "toaru",
     unitType: UnitType.BOOK,
     unitId: bookUnitIds[0]!,
   });
@@ -2240,12 +2243,12 @@ export const FACTORY_SCENARIOS: Record<FactoryScenarioName, FactoryScenario> = {
     defaultSelected: true,
     run: runComplexShelf,
   },
-  "toaru-wiki": {
-    name: "toaru-wiki",
+  toaru: {
+    name: "toaru",
     description:
-      "r/toaru wiki realm and /z/toaru zone exercising every zone config primitive with trilingual labels, entities, books, and fragments.",
+      "r/toaru realm and /z/toaru portal exercising every zone config primitive with trilingual labels, entities, books, and fragments.",
     defaultSelected: true,
-    run: runToaruWiki,
+    run: runToaru,
   },
   "showcase-feed": {
     name: "showcase-feed",

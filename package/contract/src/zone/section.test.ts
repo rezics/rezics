@@ -176,7 +176,7 @@ describe("zone section nesting rules", () => {
       Value.Check(zonePageSectionSchema, {
         id: "s-hero",
         kind: "hero",
-        title: "Toaru Wiki",
+        title: "Toaru",
       }),
     ).toBe(false);
   });

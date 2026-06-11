@@ -61,7 +61,7 @@ function zoneFixture(): ZoneWithRelations {
       translations: [
         {
           language: "en",
-          title: "Toaru Wiki",
+          title: "Toaru",
           description: {
             schema: "rezics.content",
             version: 1,
@@ -99,12 +99,12 @@ describe("mapZoneToDTO", () => {
 
   test("returns the full translations array for the manage editor", () => {
     const dto = mapZoneToDTO(zoneFixture(), ["en"]);
-    expect(dto.name).toBe("Toaru Wiki");
+    expect(dto.name).toBe("Toaru");
     expect(dto.description).toBe("English description");
     expect(dto.translations).toEqual([
       {
         language: "en",
-        title: "Toaru Wiki",
+        title: "Toaru",
         description: "English description",
       },
       { language: "zh-hant", title: "魔禁百科", description: undefined },
@@ -113,6 +113,6 @@ describe("mapZoneToDTO", () => {
 
   test("falls back to the first translation when no language matches", () => {
     const dto = mapZoneToDTO(zoneFixture(), ["ko"]);
-    expect(dto.name).toBe("Toaru Wiki");
+    expect(dto.name).toBe("Toaru");
   });
 });

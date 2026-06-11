@@ -44,7 +44,7 @@ const pages = [
   { id: "feed", slug: "feed", position: 2 },
 ];
 
-const ctx = { zoneSlug: "toaru-wiki", pages, refUnits };
+const ctx = { zoneSlug: "toaru", pages, refUnits };
 
 describe("zoneDetailKindForRef", () => {
   it("routes WIKI posts to wiki, other posts to post, the rest to unit", () => {
@@ -58,27 +58,23 @@ describe("zoneDetailKindForRef", () => {
 describe("zoneLinkHref", () => {
   it("builds zone-framed unit detail hrefs", () => {
     expect(zoneLinkHref({ kind: "unit", unitId: "wiki-1" }, ctx)).toBe(
-      "/z/toaru-wiki/wiki/wiki-1",
+      "/z/toaru/wiki/wiki-1",
     );
     expect(zoneLinkHref({ kind: "unit", unitId: "post-1" }, ctx)).toBe(
-      "/z/toaru-wiki/post/post-1",
+      "/z/toaru/post/post-1",
     );
     expect(zoneLinkHref({ kind: "unit", unitId: "book-1" }, ctx)).toBe(
-      "/z/toaru-wiki/unit/book-1",
+      "/z/toaru/unit/book-1",
     );
   });
 
   it("builds zone page hrefs from page summaries", () => {
-    expect(zonePageHref("home", "toaru-wiki", pages)).toBe("/z/toaru-wiki");
-    expect(zonePageHref("search", "toaru-wiki", pages)).toBe(
-      "/z/toaru-wiki/page/search",
-    );
-    expect(zonePageHref("feed", "toaru-wiki", pages)).toBe(
-      "/z/toaru-wiki/page/feed",
-    );
-    expect(zonePageHref("missing", "toaru-wiki", pages)).toBeNull();
+    expect(zonePageHref("home", "toaru", pages)).toBe("/z/toaru");
+    expect(zonePageHref("search", "toaru", pages)).toBe("/z/toaru/page/search");
+    expect(zonePageHref("feed", "toaru", pages)).toBe("/z/toaru/page/feed");
+    expect(zonePageHref("missing", "toaru", pages)).toBeNull();
     expect(zoneLinkHref({ kind: "zonePage", pageId: "search" }, ctx)).toBe(
-      "/z/toaru-wiki/page/search",
+      "/z/toaru/page/search",
     );
   });
 
@@ -166,7 +162,7 @@ describe("resolveZoneMenuNodes", () => {
             id: "leaf",
             label: "上條當麻",
             labelKey: null,
-            href: "/z/toaru-wiki/wiki/wiki-1",
+            href: "/z/toaru/wiki/wiki-1",
             isExternal: false,
             children: [],
           },
@@ -174,7 +170,7 @@ describe("resolveZoneMenuNodes", () => {
             id: "page",
             label: null,
             labelKey: "zone:page_search",
-            href: "/z/toaru-wiki/page/search",
+            href: "/z/toaru/page/search",
             isExternal: false,
             children: [],
           },

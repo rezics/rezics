@@ -115,7 +115,7 @@ describe("factory scenarios", () => {
       "large-content-tree",
       "large-history",
       "complex-shelf",
-      "toaru-wiki",
+      "toaru",
       "showcase-feed",
     ]);
 
@@ -176,7 +176,7 @@ describe("buildToaruZoneConfig", () => {
     }
   });
 
-  test("scopes context and boundary to the wiki realm", () => {
+  test("scopes context and boundary to the Toaru realm", () => {
     const config = buildToaruZoneConfig(buildIds());
     expect(config.boundary.context).toEqual({
       kind: "realm",
@@ -228,8 +228,8 @@ describe("zone fixture configs", () => {
         }
       }
     }
-    // richText needs WIKI fragment posts; the toaru-wiki scenario covers it.
-    // richText 需要 WIKI 片段帖子；由 toaru-wiki 情境覆盖。
+    // richText needs WIKI fragment posts; the toaru scenario covers it.
+    // richText 需要 WIKI 片段帖子；由 toaru 情境覆盖。
     expect([...kinds].toSorted()).toEqual([
       "collection",
       "columns",

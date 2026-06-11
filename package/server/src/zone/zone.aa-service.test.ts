@@ -580,12 +580,12 @@ describe("zone update", () => {
   test("replaces translations through the repository on update", async () => {
     await service.update("zone-1", {
       translations: [
-        { language: "en", title: "Toaru Wiki" },
+        { language: "en", title: "Toaru" },
         { language: "zh-hant", title: "魔禁百科" },
       ],
     });
     expect(replaceTranslationsMock).toHaveBeenCalledWith("zone-1", [
-      { language: "en", title: "Toaru Wiki" },
+      { language: "en", title: "Toaru" },
       { language: "zh-hant", title: "魔禁百科" },
     ]);
   });

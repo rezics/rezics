@@ -78,7 +78,7 @@ describe("zoneApi", () => {
     await zoneApi.create({
       slug: "toaru",
       ownerRealmUnitId: "realm-1",
-      translations: [{ language: "en", title: "Toaru Wiki" }],
+      translations: [{ language: "en", title: "Toaru" }],
       boundary,
       nav,
       theme,
