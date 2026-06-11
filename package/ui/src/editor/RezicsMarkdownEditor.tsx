@@ -6,6 +6,7 @@ import type {
 } from "@rezics/editor/editor";
 import { MarkdownEditor } from "@rezics/editor/editor";
 import { insertImageUrl } from "@rezics/editor/markdown";
+import { useTranslation } from "@rezics/i18n/react";
 import { Paperclip, Smile } from "lucide-react";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -64,6 +65,7 @@ export function RezicsMarkdownEditor({
   mention: _mention,
   ...editorProps
 }: RezicsMarkdownEditorProps) {
+  const { t } = useTranslation(["editor", "common"]);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [editorView, setEditorView] = useState<any>(null);
@@ -174,6 +176,10 @@ export function RezicsMarkdownEditor({
         viewRef={handleViewRef}
         onChange={handleEditorChange}
         toolbar={toolbar}
+        labels={{
+          write: t("editor:write"),
+          preview: t("editor:preview"),
+        }}
         onViewModeChange={onViewModeChange}
       />
       <EditorPanel
@@ -183,11 +189,11 @@ export function RezicsMarkdownEditor({
             variant="ghost"
             size="sm"
             onClick={() => setImageModalOpen(true)}
-            title="Insert image"
+            title={t("editor:upload_image")}
             className="px-2 text-[0.9rem] leading-tight font-normal normal-case"
           >
             <Paperclip className="size-[0.9em]" />
-            <span>upload image</span>
+            <span>{t("editor:upload_image")}</span>
           </Button>
         }
         right={
@@ -200,7 +206,7 @@ export function RezicsMarkdownEditor({
                 variant="ghost"
                 onClick={onCancel}
               >
-                Cancel
+                {t("common:cancel")}
               </Button>
             )}
             {onSubmit && (
