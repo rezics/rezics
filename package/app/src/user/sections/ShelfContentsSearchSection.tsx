@@ -9,7 +9,7 @@ import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Plus, Search, X } from "lucide-react";
+import { ArrowLeft, Plus, Search, X } from "lucide-react";
 import { type FC, useMemo, useState } from "react";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
@@ -19,10 +19,10 @@ type SearchTagOption = {
   slug?: string | null;
 };
 
-export const CollectionTabSection: FC = () => {
+export const ShelfContentsSearchSection: FC = () => {
   const locale = useLocale();
   const { t } = useTranslation(["common", "community", "entity"]);
-  const { userId, isCurrentUser } = useProfileContext();
+  const { user, userId, isCurrentUser } = useProfileContext();
   const [queryText, setQueryText] = useState("");
   const [tagSearchText, setTagSearchText] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -66,29 +66,53 @@ export const CollectionTabSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
+      {user.slug ? (
+        <Link
+          to="/u/$userSlug/shelves"
+          params={{ userSlug: user.slug }}
+          className="w-fit no-underline"
+        >
+          <Button type="button" variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            {t("common:back")}
+          </Button>
+        </Link>
+      ) : (
+        <Link
+          to="/user/$userId/shelves"
+          params={{ userId }}
+          className="w-fit no-underline"
+        >
+          <Button type="button" variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            {t("common:back")}
+          </Button>
+        </Link>
+      )}
+
       <div className="flex flex-col gap-3">
-        <Label htmlFor="collection-search-input">
+        <Label htmlFor="shelf-contents-search-input">
           {isCurrentUser
-            ? t("entity:collection_search_private_title")
-            : t("entity:collection_search_public_title")}
+            ? t("entity:shelf_contents_search_private_title")
+            : t("entity:shelf_contents_search_public_title")}
         </Label>
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 shrink-0 text-text-secondary" />
           <Input
-            id="collection-search-input"
+            id="shelf-contents-search-input"
             value={queryText}
             onChange={(event) => setQueryText(event.target.value)}
-            placeholder={t("entity:collection_search_input_placeholder")}
+            placeholder={t("entity:shelf_contents_search_input_placeholder")}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="collection-tag-filter">
+        <Label htmlFor="shelf-contents-tag-filter">
           {t("entity:collection_tag_filter_label")}
         </Label>
         <Input
-          id="collection-tag-filter"
+          id="shelf-contents-tag-filter"
           value={tagSearchText}
           onChange={(event) => setTagSearchText(event.target.value)}
           placeholder={t("community:tag_search_placeholder")}
@@ -150,12 +174,12 @@ export const CollectionTabSection: FC = () => {
         </p>
       ) : units.length === 0 ? (
         <p className="py-12 text-center text-sm text-text-secondary">
-          {t("entity:collection_search_empty")}
+          {t("entity:shelf_contents_search_empty")}
         </p>
       ) : (
         <div className="flex flex-col gap-2">
           {units.map((unit) => (
-            <CollectionUnitRow
+            <ShelfContentsUnitRow
               key={unit.unitId}
               unit={unit}
               showPrivateText={isCurrentUser}
@@ -163,7 +187,7 @@ export const CollectionTabSection: FC = () => {
           ))}
           {collection.data?.hasMore && (
             <p className="py-2 text-center text-sm text-text-secondary">
-              {t("entity:collection_search_has_more")}
+              {t("entity:shelf_contents_search_has_more")}
             </p>
           )}
         </div>
@@ -176,7 +200,7 @@ function tagOptionLabel(option: SearchTagOption): string {
   return option.label ?? option.slug ?? option.unitId;
 }
 
-function CollectionUnitRow({
+function ShelfContentsUnitRow({
   unit,
   showPrivateText,
 }: {

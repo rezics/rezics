@@ -150,6 +150,8 @@ import { Route as MainLayoutUserMeSettingConnectionsRouteImport } from './routes
 import { Route as MainLayoutUserMeSettingBlockedRouteImport } from './routes/_mainLayout/user/me/setting/blocked'
 import { Route as MainLayoutUserMeSettingAccountRouteImport } from './routes/_mainLayout/user/me/setting/account'
 import { Route as MainLayoutUserMeEntityNewRouteImport } from './routes/_mainLayout/user/me/entity/new'
+import { Route as MainLayoutUserUserIdShelvesSearchRouteImport } from './routes/_mainLayout/user/$userId/shelves_.search'
+import { Route as MainLayoutUUserSlugShelvesSearchRouteImport } from './routes/_mainLayout/u/$userSlug/shelves_.search'
 import { Route as MainLayoutUUserSlugShelfSlugRouteImport } from './routes/_mainLayout/u/$userSlug/shelf/$slug'
 import { Route as MainLayoutRealmRealmIdPostPostUnitIdRouteImport } from './routes/_mainLayout/realm/$realmId/post/$postUnitId'
 import { Route as MainLayoutRealmRealmIdDetailWikiRouteImport } from './routes/_mainLayout/realm/$realmId/_detail/wiki'
@@ -967,6 +969,18 @@ const MainLayoutUserMeEntityNewRoute =
     path: '/entity/new',
     getParentRoute: () => MainLayoutUserMeRouteRoute,
   } as any)
+const MainLayoutUserUserIdShelvesSearchRoute =
+  MainLayoutUserUserIdShelvesSearchRouteImport.update({
+    id: '/shelves_/search',
+    path: '/shelves/search',
+    getParentRoute: () => MainLayoutUserUserIdRoute,
+  } as any)
+const MainLayoutUUserSlugShelvesSearchRoute =
+  MainLayoutUUserSlugShelvesSearchRouteImport.update({
+    id: '/shelves_/search',
+    path: '/shelves/search',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
 const MainLayoutUUserSlugShelfSlugRoute =
   MainLayoutUUserSlugShelfSlugRouteImport.update({
     id: '/shelf/$slug',
@@ -1238,6 +1252,8 @@ export interface FileRoutesByFullPath {
   '/realm/$realmId/wiki': typeof MainLayoutRealmRealmIdDetailWikiRoute
   '/realm/$realmId/post/$postUnitId': typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
   '/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
+  '/u/$userSlug/shelves/search': typeof MainLayoutUUserSlugShelvesSearchRoute
+  '/user/$userId/shelves/search': typeof MainLayoutUserUserIdShelvesSearchRoute
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
   '/user/me/setting/blocked': typeof MainLayoutUserMeSettingBlockedRoute
@@ -1390,6 +1406,8 @@ export interface FileRoutesByTo {
   '/realm/$realmId/wiki': typeof MainLayoutRealmRealmIdDetailWikiRoute
   '/realm/$realmId/post/$postUnitId': typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
   '/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
+  '/u/$userSlug/shelves/search': typeof MainLayoutUUserSlugShelvesSearchRoute
+  '/user/$userId/shelves/search': typeof MainLayoutUserUserIdShelvesSearchRoute
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
   '/user/me/setting/blocked': typeof MainLayoutUserMeSettingBlockedRoute
@@ -1557,6 +1575,8 @@ export interface FileRoutesById {
   '/_mainLayout/realm/$realmId/_detail/wiki': typeof MainLayoutRealmRealmIdDetailWikiRoute
   '/_mainLayout/realm/$realmId/post/$postUnitId': typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
   '/_mainLayout/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
+  '/_mainLayout/u/$userSlug/shelves_/search': typeof MainLayoutUUserSlugShelvesSearchRoute
+  '/_mainLayout/user/$userId/shelves_/search': typeof MainLayoutUserUserIdShelvesSearchRoute
   '/_mainLayout/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/_mainLayout/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
   '/_mainLayout/user/me/setting/blocked': typeof MainLayoutUserMeSettingBlockedRoute
@@ -1723,6 +1743,8 @@ export interface FileRouteTypes {
     | '/realm/$realmId/wiki'
     | '/realm/$realmId/post/$postUnitId'
     | '/u/$userSlug/shelf/$slug'
+    | '/u/$userSlug/shelves/search'
+    | '/user/$userId/shelves/search'
     | '/user/me/entity/new'
     | '/user/me/setting/account'
     | '/user/me/setting/blocked'
@@ -1875,6 +1897,8 @@ export interface FileRouteTypes {
     | '/realm/$realmId/wiki'
     | '/realm/$realmId/post/$postUnitId'
     | '/u/$userSlug/shelf/$slug'
+    | '/u/$userSlug/shelves/search'
+    | '/user/$userId/shelves/search'
     | '/user/me/entity/new'
     | '/user/me/setting/account'
     | '/user/me/setting/blocked'
@@ -2041,6 +2065,8 @@ export interface FileRouteTypes {
     | '/_mainLayout/realm/$realmId/_detail/wiki'
     | '/_mainLayout/realm/$realmId/post/$postUnitId'
     | '/_mainLayout/u/$userSlug/shelf/$slug'
+    | '/_mainLayout/u/$userSlug/shelves_/search'
+    | '/_mainLayout/user/$userId/shelves_/search'
     | '/_mainLayout/user/me/entity/new'
     | '/_mainLayout/user/me/setting/account'
     | '/_mainLayout/user/me/setting/blocked'
@@ -3068,6 +3094,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserMeEntityNewRouteImport
       parentRoute: typeof MainLayoutUserMeRouteRoute
     }
+    '/_mainLayout/user/$userId/shelves_/search': {
+      id: '/_mainLayout/user/$userId/shelves_/search'
+      path: '/shelves/search'
+      fullPath: '/user/$userId/shelves/search'
+      preLoaderRoute: typeof MainLayoutUserUserIdShelvesSearchRouteImport
+      parentRoute: typeof MainLayoutUserUserIdRoute
+    }
+    '/_mainLayout/u/$userSlug/shelves_/search': {
+      id: '/_mainLayout/u/$userSlug/shelves_/search'
+      path: '/shelves/search'
+      fullPath: '/u/$userSlug/shelves/search'
+      preLoaderRoute: typeof MainLayoutUUserSlugShelvesSearchRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
     '/_mainLayout/u/$userSlug/shelf/$slug': {
       id: '/_mainLayout/u/$userSlug/shelf/$slug'
       path: '/shelf/$slug'
@@ -3441,6 +3481,7 @@ interface MainLayoutUUserSlugRouteChildren {
   MainLayoutUUserSlugShelvesRoute: typeof MainLayoutUUserSlugShelvesRoute
   MainLayoutUUserSlugIndexRoute: typeof MainLayoutUUserSlugIndexRoute
   MainLayoutUUserSlugShelfSlugRoute: typeof MainLayoutUUserSlugShelfSlugRoute
+  MainLayoutUUserSlugShelvesSearchRoute: typeof MainLayoutUUserSlugShelvesSearchRoute
 }
 
 const MainLayoutUUserSlugRouteChildren: MainLayoutUUserSlugRouteChildren = {
@@ -3454,6 +3495,7 @@ const MainLayoutUUserSlugRouteChildren: MainLayoutUUserSlugRouteChildren = {
   MainLayoutUUserSlugShelvesRoute: MainLayoutUUserSlugShelvesRoute,
   MainLayoutUUserSlugIndexRoute: MainLayoutUUserSlugIndexRoute,
   MainLayoutUUserSlugShelfSlugRoute: MainLayoutUUserSlugShelfSlugRoute,
+  MainLayoutUUserSlugShelvesSearchRoute: MainLayoutUUserSlugShelvesSearchRoute,
 }
 
 const MainLayoutUUserSlugRouteWithChildren =
@@ -3470,6 +3512,7 @@ interface MainLayoutUserUserIdRouteChildren {
   MainLayoutUserUserIdSearchRoute: typeof MainLayoutUserUserIdSearchRoute
   MainLayoutUserUserIdShelvesRoute: typeof MainLayoutUserUserIdShelvesRoute
   MainLayoutUserUserIdIndexRoute: typeof MainLayoutUserUserIdIndexRoute
+  MainLayoutUserUserIdShelvesSearchRoute: typeof MainLayoutUserUserIdShelvesSearchRoute
 }
 
 const MainLayoutUserUserIdRouteChildren: MainLayoutUserUserIdRouteChildren = {
@@ -3483,6 +3526,8 @@ const MainLayoutUserUserIdRouteChildren: MainLayoutUserUserIdRouteChildren = {
   MainLayoutUserUserIdSearchRoute: MainLayoutUserUserIdSearchRoute,
   MainLayoutUserUserIdShelvesRoute: MainLayoutUserUserIdShelvesRoute,
   MainLayoutUserUserIdIndexRoute: MainLayoutUserUserIdIndexRoute,
+  MainLayoutUserUserIdShelvesSearchRoute:
+    MainLayoutUserUserIdShelvesSearchRoute,
 }
 
 const MainLayoutUserUserIdRouteWithChildren =
