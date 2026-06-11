@@ -355,5 +355,18 @@
   "moderation_unlock_confirm": "Unlock this content in this realm?",
   "moderation_unlock_success": "Unlocked in this realm.",
   "content_removed_by_moderator": "This content was removed by a moderator.",
-  "content_deleted_by_author": "This content was deleted by its author."
+  "content_deleted_by_author": "This content was deleted by its author.",
+  "member_role_updated": "Mitgliedsrolle aktualisiert.",
+  "member_removed": "Mitglied entfernt.",
+  "member_loading": "Mitglieder werden geladen…",
+  "member_empty": "Keine Mitglieder gefunden.",
+  "member_role_aria": "Mitgliedsrolle",
+  "member_remove_title": "Mitglied entfernen?",
+  "member_remove_description": "Das Mitglied wird aus der Realm-Liste entfernt.",
+  "post_submitted_for_review": "Zur Überprüfung eingereicht.",
+  "post_published": "Beitrag veröffentlicht.",
+  "post_published_to_realm": "Beitrag im Realm veröffentlicht.",
+  "realm_settings_saved": "Realm-Einstellungen gespeichert.",
+  "realm_profile_saved": "Realm-Profil gespeichert.",
+  "realm_deleted": "Realm gelöscht."
 }

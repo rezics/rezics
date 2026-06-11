@@ -355,5 +355,18 @@
   "poll_workspace_open_new": "Open standalone",
   "poll_workspace_create_title": "Create reusable poll",
   "poll_workspace_create_description": "Create a poll now, then attach it from a post when you are ready to publish it to the realm feed.",
-  "poll_workspace_create": "Create reusable poll"
+  "poll_workspace_create": "Create reusable poll",
+  "member_role_updated": "Member role updated.",
+  "member_removed": "Member removed.",
+  "member_loading": "Loading members...",
+  "member_empty": "No members found.",
+  "member_role_aria": "Member role",
+  "member_remove_title": "Remove member?",
+  "member_remove_description": "This removes the member from the realm roster.",
+  "post_submitted_for_review": "Submitted for review.",
+  "post_published": "Post published.",
+  "post_published_to_realm": "Post published to realm.",
+  "realm_settings_saved": "Realm settings saved.",
+  "realm_profile_saved": "Realm profile saved.",
+  "realm_deleted": "Realm deleted."
 }

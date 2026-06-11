@@ -355,5 +355,18 @@
   "moderation_unlock_confirm": "Unlock this content in this realm?",
   "moderation_unlock_success": "Unlocked in this realm.",
   "content_removed_by_moderator": "This content was removed by a moderator.",
-  "content_deleted_by_author": "This content was deleted by its author."
+  "content_deleted_by_author": "This content was deleted by its author.",
+  "member_role_updated": "成员角色已更新。",
+  "member_removed": "成员已移除。",
+  "member_loading": "正在加载成员…",
+  "member_empty": "未找到成员。",
+  "member_role_aria": "成员角色",
+  "member_remove_title": "移除成员？",
+  "member_remove_description": "这将从领域名册中移除该成员。",
+  "post_submitted_for_review": "已提交审核。",
+  "post_published": "帖子已发布。",
+  "post_published_to_realm": "帖子已发布到领域。",
+  "realm_settings_saved": "领域设置已保存。",
+  "realm_profile_saved": "领域资料已保存。",
+  "realm_deleted": "领域已删除。"
 }

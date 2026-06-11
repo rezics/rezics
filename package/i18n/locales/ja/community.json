@@ -355,5 +355,18 @@
   "moderation_unlock_confirm": "Unlock this content in this realm?",
   "moderation_unlock_success": "Unlocked in this realm.",
   "content_removed_by_moderator": "This content was removed by a moderator.",
-  "content_deleted_by_author": "This content was deleted by its author."
+  "content_deleted_by_author": "This content was deleted by its author.",
+  "member_role_updated": "メンバーの役割を更新しました。",
+  "member_removed": "メンバーを削除しました。",
+  "member_loading": "メンバーを読み込み中…",
+  "member_empty": "メンバーが見つかりません。",
+  "member_role_aria": "メンバーの役割",
+  "member_remove_title": "メンバーを削除しますか？",
+  "member_remove_description": "このメンバーをレルムの名簿から削除します。",
+  "post_submitted_for_review": "審査に提出しました。",
+  "post_published": "投稿を公開しました。",
+  "post_published_to_realm": "投稿をレルムに公開しました。",
+  "realm_settings_saved": "レルム設定を保存しました。",
+  "realm_profile_saved": "レルムプロフィールを保存しました。",
+  "realm_deleted": "レルムを削除しました。"
 }
