@@ -381,5 +381,10 @@
   "work_link_claim_modal_reject_title": "拒絕申請",
   "work_link_claim_modal_withdraw_description": "此操作將撤回你目前的申請，之後仍可重新提交。",
   "work_link_claim_modal_withdraw_done": "申請已撤回。",
-  "work_link_claim_modal_withdraw_title": "撤回申請"
+  "work_link_claim_modal_withdraw_title": "撤回申請",
+  "seed_tag_book": "書籍",
+  "seed_tag_game": "遊戲",
+  "seed_tag_media": "媒體",
+  "seed_tag_post": "貼文",
+  "seed_tag_link": "連結"
 }

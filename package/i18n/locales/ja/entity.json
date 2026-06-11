@@ -381,5 +381,10 @@
   "work_link_claim_modal_reject_title": "申請を却下",
   "work_link_claim_modal_withdraw_description": "現在の申請を取り下げます。後で再送信することもできます。",
   "work_link_claim_modal_withdraw_done": "申請を取り下げました。",
-  "work_link_claim_modal_withdraw_title": "申請を取り下げる"
+  "work_link_claim_modal_withdraw_title": "申請を取り下げる",
+  "seed_tag_book": "書籍",
+  "seed_tag_game": "ゲーム",
+  "seed_tag_media": "メディア",
+  "seed_tag_post": "投稿",
+  "seed_tag_link": "リンク"
 }

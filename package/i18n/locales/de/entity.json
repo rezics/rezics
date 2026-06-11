@@ -381,5 +381,10 @@
   "work_link_claim_modal_reject_title": "Anfrage ablehnen",
   "work_link_claim_modal_withdraw_description": "Damit wird deine ausstehende Anfrage entfernt. Du kannst sie später erneut einreichen.",
   "work_link_claim_modal_withdraw_done": "Anfrage zurückgezogen.",
-  "work_link_claim_modal_withdraw_title": "Anfrage zurückziehen"
+  "work_link_claim_modal_withdraw_title": "Anfrage zurückziehen",
+  "seed_tag_book": "Buch",
+  "seed_tag_game": "Spiel",
+  "seed_tag_media": "Medien",
+  "seed_tag_post": "Beitrag",
+  "seed_tag_link": "Link"
 }

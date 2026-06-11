@@ -20,16 +20,29 @@ export function SeedTagChipGroup({
   disabled = false,
 }: SeedTagChipGroupProps) {
   const { t } = useTranslation(["entity"]);
+  // Map seed tag names to i18n keys for content type labels.
+  // 将 seed tag 名称映射到 i18n 键用于内容类型标签。
+  const seedTagI18nKeys: Record<SeedTagName, string> = {
+    book: "entity:seed_tag_book",
+    game: "entity:seed_tag_game",
+    media: "entity:seed_tag_media",
+    post: "entity:seed_tag_post",
+    link: "entity:seed_tag_link",
+  };
+
   const chips = useMemo(
     () =>
       SEED_TAG_NAMES.map((name) => {
         const tagId = getSeedTagId(name);
-        return tagId ? { name, tagId, label: SEED_TAG_TITLES[name] } : null;
+        // Use i18n key if available, fallback to SEED_TAG_TITLES.
+        // 如果可用，使用 i18n 键，否则使用 SEED_TAG_TITLES 作为后备。
+        const label = t(seedTagI18nKeys[name]) || SEED_TAG_TITLES[name];
+        return tagId ? { name, tagId, label } : null;
       }).filter(
         (c): c is { name: SeedTagName; tagId: string; label: string } =>
           c !== null,
       ),
-    [],
+    [t],
   );
 
   const selected = useMemo(() => new Set(value), [value]);

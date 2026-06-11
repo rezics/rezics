@@ -381,5 +381,10 @@
   "work_link_claim_modal_reject_title": "청구 거부",
   "work_link_claim_modal_withdraw_description": "대기 중인 소유권 주장이 삭제됩니다. 나중에 다시 제출할 수 있습니다.",
   "work_link_claim_modal_withdraw_done": "청구가 철회되었습니다.",
-  "work_link_claim_modal_withdraw_title": "청구 철회"
+  "work_link_claim_modal_withdraw_title": "청구 철회",
+  "seed_tag_book": "도서",
+  "seed_tag_game": "게임",
+  "seed_tag_media": "미디어",
+  "seed_tag_post": "게시물",
+  "seed_tag_link": "링크"
 }
