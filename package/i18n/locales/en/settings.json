@@ -233,5 +233,18 @@
   "data_delete_confirm_prefix": "To confirm, type your handle",
   "data_delete_confirm_suffix": "below.",
   "data_delete_button": "Delete my account",
-  "data_deleting": "Deleting..."
+  "data_deleting": "Deleting...",
+  "subscription_recovery_title": "Subscription recovery",
+  "subscription_recovery_description": "Restore removed zones, realms, and other subscriptions when the target still exists and is available to your account.",
+  "subscription_recovery_loading": "Loading removed subscriptions",
+  "subscription_recovery_empty_title": "No removed subscriptions",
+  "subscription_recovery_empty_description": "Subscriptions removed from your sidebar will appear here.",
+  "subscription_recovery_official_title": "Official defaults",
+  "subscription_recovery_official_description": "These are the Rezics default realm and platform zones created for new accounts.",
+  "subscription_recovery_official_empty": "No official defaults are removed.",
+  "subscription_recovery_other_title": "Other subscriptions",
+  "subscription_recovery_other_description": "User-added subscriptions can be restored when the target is still visible and subscribable.",
+  "subscription_recovery_other_empty": "No other removed subscriptions.",
+  "subscription_recovery_restore_error": "This subscription cannot be restored right now.",
+  "subscription_recovery_restore": "Restore"
 }

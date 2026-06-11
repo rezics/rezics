@@ -233,5 +233,18 @@
   "data_delete_confirm_prefix": "如需确认，请输入你的用户名",
   "data_delete_confirm_suffix": "于下方。",
   "data_delete_button": "删除我的账户",
-  "data_deleting": "正在删除..."
+  "data_deleting": "正在删除...",
+  "subscription_recovery_title": "订阅恢复",
+  "subscription_recovery_description": "恢复已移除的区域、领域及其他订阅，前提是目标仍然存在且你的账户可以访问。",
+  "subscription_recovery_loading": "正在加载已移除的订阅",
+  "subscription_recovery_empty_title": "没有已移除的订阅",
+  "subscription_recovery_empty_description": "从侧栏移除的订阅会显示在这里。",
+  "subscription_recovery_official_title": "官方默认",
+  "subscription_recovery_official_description": "这些是 Rezics 为新账户创建的默认领域和平台区域。",
+  "subscription_recovery_official_empty": "没有已移除的官方默认项。",
+  "subscription_recovery_other_title": "其他订阅",
+  "subscription_recovery_other_description": "用户添加的订阅在目标仍然可见且可订阅时可以恢复。",
+  "subscription_recovery_other_empty": "没有其他已移除的订阅。",
+  "subscription_recovery_restore_error": "此订阅目前无法恢复。",
+  "subscription_recovery_restore": "恢复"
 }

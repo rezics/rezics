@@ -233,5 +233,18 @@
   "data_delete_confirm_prefix": "Geben Sie zur Bestätigung Ihr Handle",
   "data_delete_confirm_suffix": "unten ein.",
   "data_delete_button": "Mein Konto löschen",
-  "data_deleting": "Wird gelöscht..."
+  "data_deleting": "Wird gelöscht...",
+  "subscription_recovery_title": "Abonnement-Wiederherstellung",
+  "subscription_recovery_description": "Stellen Sie entfernte Zonen, Realms und andere Abonnements wieder her, wenn das Ziel noch existiert und für Ihr Konto zugänglich ist.",
+  "subscription_recovery_loading": "Entfernte Abonnements werden geladen",
+  "subscription_recovery_empty_title": "Keine entfernten Abonnements",
+  "subscription_recovery_empty_description": "Aus der Seitenleiste entfernte Abonnements werden hier angezeigt.",
+  "subscription_recovery_official_title": "Offizielle Standardeinträge",
+  "subscription_recovery_official_description": "Dies sind die Rezics-Standard-Realms und Plattform-Zonen, die für neue Konten erstellt werden.",
+  "subscription_recovery_official_empty": "Keine offiziellen Standardeinträge entfernt.",
+  "subscription_recovery_other_title": "Andere Abonnements",
+  "subscription_recovery_other_description": "Vom Nutzer hinzugefügte Abonnements können wiederhergestellt werden, wenn das Ziel noch sichtbar und abonnierbar ist.",
+  "subscription_recovery_other_empty": "Keine anderen entfernten Abonnements.",
+  "subscription_recovery_restore_error": "Dieses Abonnement kann derzeit nicht wiederhergestellt werden.",
+  "subscription_recovery_restore": "Wiederherstellen"
 }

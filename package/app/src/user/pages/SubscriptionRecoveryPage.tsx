@@ -3,6 +3,7 @@ import {
   useRecoverSubscriptionListEntryMutation,
 } from "@rezics/api/subscription/subscription";
 import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +20,7 @@ import { useRequireAuth } from "./useAuth";
 
 export const SubscriptionRecoveryPage: React.FC = () => {
   useRequireAuth();
+  const { t } = useTranslation("settings");
   const query = useQuery(mySubscriptionListEntriesQuery({ state: "REMOVED" }));
   const recover = useRecoverSubscriptionListEntryMutation();
   const [recoveringId, setRecoveringId] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export const SubscriptionRecoveryPage: React.FC = () => {
       const message =
         error instanceof Error
           ? error.message
-          : "This subscription cannot be restored right now.";
+          : t("subscription_recovery_restore_error");
       setErrors((current) => ({
         ...current,
         [entry.subscribedUnitId]: message,
@@ -63,40 +65,39 @@ export const SubscriptionRecoveryPage: React.FC = () => {
     <div className="w-full max-w-5xl mx-auto px-4 py-12">
       <header className="mb-8">
         <h1 className="text-2xl font-semibold leading-ui text-text-primary">
-          Subscription recovery
+          {t("subscription_recovery_title")}
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-secondary">
-          Restore removed zones, realms, and other subscriptions when the target
-          still exists and is available to your account.
+          {t("subscription_recovery_description")}
         </p>
       </header>
 
       {query.isLoading ? (
         <div className="flex items-center gap-2 py-12 text-sm text-text-secondary">
           <Spinner size="sm" />
-          Loading removed subscriptions
+          {t("subscription_recovery_loading")}
         </div>
       ) : grouped.official.length === 0 && grouped.other.length === 0 ? (
         <EmptyState
-          title="No removed subscriptions"
-          description="Subscriptions removed from your sidebar will appear here."
+          title={t("subscription_recovery_empty_title")}
+          description={t("subscription_recovery_empty_description")}
         />
       ) : (
         <div className="flex flex-col gap-10">
           <RecoveryGroup
-            title="Official defaults"
-            description="These are the Rezics default realm and platform zones created for new accounts."
+            title={t("subscription_recovery_official_title")}
+            description={t("subscription_recovery_official_description")}
             entries={grouped.official}
-            empty="No official defaults are removed."
+            empty={t("subscription_recovery_official_empty")}
             recoveringId={recoveringId}
             errors={errors}
             onRecover={handleRecover}
           />
           <RecoveryGroup
-            title="Other subscriptions"
-            description="User-added subscriptions can be restored when the target is still visible and subscribable."
+            title={t("subscription_recovery_other_title")}
+            description={t("subscription_recovery_other_description")}
             entries={grouped.other}
-            empty="No other removed subscriptions."
+            empty={t("subscription_recovery_other_empty")}
             recoveringId={recoveringId}
             errors={errors}
             onRecover={handleRecover}
@@ -151,6 +152,7 @@ function RecoveryRow(props: {
   error?: string;
   onRecover: () => void;
 }) {
+  const { t } = useTranslation("settings");
   const href = subscriptionRecoveryTargetHref(props.entry);
   const title =
     props.entry.subscribedTitle ??
@@ -184,7 +186,7 @@ function RecoveryRow(props: {
           ) : (
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
           )}
-          Restore
+          {t("subscription_recovery_restore")}
         </Button>
       </div>
       {props.error ? (

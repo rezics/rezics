@@ -233,5 +233,18 @@
   "data_delete_confirm_prefix": "若要確認，請於下方輸入你的帳號代稱",
   "data_delete_confirm_suffix": "。",
   "data_delete_button": "刪除我的帳號",
-  "data_deleting": "正在刪除..."
+  "data_deleting": "正在刪除...",
+  "subscription_recovery_title": "訂閱恢復",
+  "subscription_recovery_description": "恢復已移除的區域、領域及其他訂閱，前提是目標仍然存在且你的帳號可以存取。",
+  "subscription_recovery_loading": "正在載入已移除的訂閱",
+  "subscription_recovery_empty_title": "沒有已移除的訂閱",
+  "subscription_recovery_empty_description": "從側欄移除的訂閱會顯示在這裡。",
+  "subscription_recovery_official_title": "官方預設",
+  "subscription_recovery_official_description": "這些是 Rezics 為新帳號建立的預設領域和平台區域。",
+  "subscription_recovery_official_empty": "沒有已移除的官方預設項。",
+  "subscription_recovery_other_title": "其他訂閱",
+  "subscription_recovery_other_description": "使用者新增的訂閱在目標仍然可見且可訂閱時可以恢復。",
+  "subscription_recovery_other_empty": "沒有其他已移除的訂閱。",
+  "subscription_recovery_restore_error": "此訂閱目前無法恢復。",
+  "subscription_recovery_restore": "恢復"
 }
