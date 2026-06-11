@@ -34,9 +34,7 @@ export function ProgressLibraryPage({
 }: ProgressLibraryPageProps) {
   const { t } = useTranslation(["common", "page", "book"]);
   const continueReadingQuery = useQuery(myContinueReadingQuery({ limit: 12 }));
-  const libraryQuery = useQuery(
-    myProgressPageQuery({ limit: 50 }),
-  );
+  const libraryQuery = useQuery(myProgressPageQuery({ limit: 50 }));
   const { data: settings } = useQuery(userQueries.settings());
   const rows = libraryQuery.data?.rows ?? [];
   const continueReadingItems = continueReadingQuery.data?.items ?? [];

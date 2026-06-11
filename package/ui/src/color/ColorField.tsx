@@ -67,7 +67,9 @@ export function ColorField<TToken extends string = string>({
                 size="icon"
                 variant="outline"
                 disabled={disabled}
-                aria-label={label ? `${label} ${t("color_picker")}` : t("color_picker")}
+                aria-label={
+                  label ? `${label} ${t("color_picker")}` : t("color_picker")
+                }
               />
             }
           >

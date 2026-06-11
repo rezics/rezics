@@ -119,8 +119,6 @@ function isFileRouterSegmentPath(relPath: string): boolean {
   return /^package\/(app|admin)\/src\/routes(?:\/|$)/.test(relPath);
 }
 
-export function scanFolderNamingForTest(
-  folderPaths: string[],
-): Violation[] {
+export function scanFolderNamingForTest(folderPaths: string[]): Violation[] {
   return folderNamingRule.scan({ folderPaths });
 }

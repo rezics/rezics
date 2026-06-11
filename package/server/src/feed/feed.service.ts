@@ -296,8 +296,16 @@ async function hydrateTargetUnitSummaries(
     appLocale: query.appLocale,
   });
   const [units, translations] = await Promise.all([
-    db.select({ id: Unit.id, type: Unit.type }).from(Unit).where(inArray(Unit.id, uniqueIds)),
-    db.select({ unitId: UnitTranslation.unitId, language: UnitTranslation.language, title: UnitTranslation.title })
+    db
+      .select({ id: Unit.id, type: Unit.type })
+      .from(Unit)
+      .where(inArray(Unit.id, uniqueIds)),
+    db
+      .select({
+        unitId: UnitTranslation.unitId,
+        language: UnitTranslation.language,
+        title: UnitTranslation.title,
+      })
       .from(UnitTranslation)
       .where(inArray(UnitTranslation.unitId, uniqueIds)),
   ]);
@@ -305,10 +313,14 @@ async function hydrateTargetUnitSummaries(
   const titlesByUnit = new Map<string, string | null>();
   for (const unitId of uniqueIds) {
     const unitTranslations = translations.filter((t) => t.unitId === unitId);
-    const preferred = languages.length > 0
-      ? unitTranslations.find((t) => languages.includes(t.language))
-      : undefined;
-    titlesByUnit.set(unitId, preferred?.title ?? unitTranslations[0]?.title ?? null);
+    const preferred =
+      languages.length > 0
+        ? unitTranslations.find((t) => languages.includes(t.language))
+        : undefined;
+    titlesByUnit.set(
+      unitId,
+      preferred?.title ?? unitTranslations[0]?.title ?? null,
+    );
   }
   const result = new Map<string, FeedWorkSummary>();
   for (const unitId of uniqueIds) {
@@ -343,7 +355,9 @@ async function mapPostsToFeedRows(
       realmUnitId,
       realm: realmUnitId ? (realms.get(realmUnitId) ?? null) : null,
       reason: input.reason,
-      resolvedTargetUnit: post.targetUnitId ? (targetUnits.get(post.targetUnitId) ?? null) : null,
+      resolvedTargetUnit: post.targetUnitId
+        ? (targetUnits.get(post.targetUnitId) ?? null)
+        : null,
     });
   });
 }

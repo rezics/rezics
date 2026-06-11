@@ -67,10 +67,7 @@ export function RealmAboutTab({
         <InfoCard label={t("realm_about_your_role")} value={role} />
         <InfoCard label={t("realm_about_membership")} value={state} />
         {realm.isOfficial ? (
-          <InfoCard
-            label={t("realm_title")}
-            value={t("realm_official")}
-          />
+          <InfoCard label={t("realm_title")} value={t("realm_official")} />
         ) : null}
         <Card surface="contained">
           <CardContent className="p-4">

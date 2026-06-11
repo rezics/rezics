@@ -214,7 +214,8 @@ function RealmCaseCard({
   realmUnitId: string;
 }) {
   const { t } = useTranslation(["community", "common"]);
-  const summary = item.reason ?? item.safeSummary ?? t("community:moderation_no_summary");
+  const summary =
+    item.reason ?? item.safeSummary ?? t("community:moderation_no_summary");
   const updatedAt = formatDate(item.updatedAt);
   const decideCase = useDecideRealmCaseMutation({
     onSuccess: () => toast.success(t("community:moderation_case_updated")),
@@ -237,7 +238,9 @@ function RealmCaseCard({
             {item.target.kind}:{item.target.id}
           </span>
           {item.parentCaseId ? (
-            <Badge variant="outline">{t("community:moderation_case_linked")}</Badge>
+            <Badge variant="outline">
+              {t("community:moderation_case_linked")}
+            </Badge>
           ) : null}
         </div>
         <p className="m-0 text-sm leading-body text-text-secondary">
@@ -254,9 +257,17 @@ function RealmCaseCard({
             </Link>
           ) : null}
           {item.assignedToUserId ? (
-            <span>{t("community:moderation_assigned", { id: item.assignedToUserId })}</span>
+            <span>
+              {t("community:moderation_assigned", {
+                id: item.assignedToUserId,
+              })}
+            </span>
           ) : null}
-          {updatedAt ? <span>{t("community:moderation_updated", { date: updatedAt })}</span> : null}
+          {updatedAt ? (
+            <span>
+              {t("community:moderation_updated", { date: updatedAt })}
+            </span>
+          ) : null}
         </div>
         {isPendingReview || item.parentCaseId ? (
           <div className="flex flex-wrap gap-2">

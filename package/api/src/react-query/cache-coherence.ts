@@ -66,13 +66,7 @@ export type CacheMutationDomain =
  *（`UserUnitProgress` 写入不会改变按节点的行）。
  */
 export const CACHE_COHERENCE_MAP = {
-  collect: [
-    "detail",
-    "profile",
-    "search",
-    "shelves",
-    "collection",
-  ],
+  collect: ["detail", "profile", "search", "shelves", "collection"],
   follow: ["detail", "profile", "subscription"],
   reaction: ["detail", "profile", "realmFeed", "search"],
   progress: ["detail", "profile", "progress"],

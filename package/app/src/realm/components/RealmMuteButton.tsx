@@ -53,11 +53,7 @@ export const RealmMuteButton: React.FC<RealmMuteButtonProps> = ({
       size="sm"
       onClick={handleClick}
       disabled={pending}
-      title={
-        isSubscribed
-          ? t("realm_mute_tooltip")
-          : t("realm_unmute_tooltip")
-      }
+      title={isSubscribed ? t("realm_mute_tooltip") : t("realm_unmute_tooltip")}
     >
       {isSubscribed ? t("realm_mute") : t("realm_unmute")}
     </Button>

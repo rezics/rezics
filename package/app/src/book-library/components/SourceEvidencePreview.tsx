@@ -95,7 +95,9 @@ export function SourceEvidencePreview({
             <div className="mt-1 font-mono">{firstEvidence.claimPath}</div>
           ) : null}
           <div className="mt-1">
-            {t("source_evidence_observed", { date: new Date(firstEvidence.observedAt).toLocaleString() })}
+            {t("source_evidence_observed", {
+              date: new Date(firstEvidence.observedAt).toLocaleString(),
+            })}
           </div>
         </div>
 

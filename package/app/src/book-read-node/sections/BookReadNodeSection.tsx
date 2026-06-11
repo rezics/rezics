@@ -53,7 +53,8 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
   const chapterDeleted =
     chapterData && (chapterData as { status?: string }).status === "DELETED";
 
-  if (state.kind === "loading") return <div className="p-4">{t("loading")}</div>;
+  if (state.kind === "loading")
+    return <div className="p-4">{t("loading")}</div>;
   if (state.kind === "not-found")
     return <div className="p-4">{t("not_found")}</div>;
 
