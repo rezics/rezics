@@ -39,9 +39,9 @@ export function RealmDetailShell({ children }: { children: ReactNode }) {
       <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-4">
         <TabsList>
           <TabsTrigger value="feed">{t("entity:realm_tab_feed")}</TabsTrigger>
-          <TabsTrigger value="wiki">Wiki</TabsTrigger>
+          <TabsTrigger value="wiki">{t("entity:realm_tab_wiki")}</TabsTrigger>
           <TabsTrigger value="tags">{t("entity:realm_tab_tags")}</TabsTrigger>
-          <TabsTrigger value="about">About</TabsTrigger>
+          <TabsTrigger value="about">{t("entity:realm_tab_about")}</TabsTrigger>
           <TabsTrigger value="members">
             {t("entity:realm_tab_members")}
           </TabsTrigger>

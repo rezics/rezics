@@ -3,6 +3,7 @@ import {
   useUnmuteRealmMutation,
 } from "@rezics/api/realm/realm";
 import { useIsSubscribed } from "@rezics/api/subscription/subscription";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user";
@@ -23,6 +24,7 @@ interface RealmMuteButtonProps {
 export const RealmMuteButton: React.FC<RealmMuteButtonProps> = ({
   realmUnitId,
 }) => {
+  const { t } = useTranslation("entity");
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const { data: subscription, isLoading } = useIsSubscribed(
     hasMemberSession ? realmUnitId : "",
@@ -53,11 +55,11 @@ export const RealmMuteButton: React.FC<RealmMuteButtonProps> = ({
       disabled={pending}
       title={
         isSubscribed
-          ? "Stop receiving notifications from this realm"
-          : "Receive activity notifications from this realm again"
+          ? t("realm_mute_tooltip")
+          : t("realm_unmute_tooltip")
       }
     >
-      {isSubscribed ? "Mute" : "Unmute"}
+      {isSubscribed ? t("realm_mute") : t("realm_unmute")}
     </Button>
   );
 };

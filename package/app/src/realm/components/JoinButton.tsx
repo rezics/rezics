@@ -6,6 +6,7 @@ import {
   useLeaveRealmMutation,
 } from "@rezics/api/realm/realm";
 import { mainMarkdownSource } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -18,6 +19,7 @@ interface JoinButtonProps {
 }
 
 export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
+  const { t } = useTranslation("entity");
   const [ruleOpen, setRuleOpen] = useState(false);
   const readContext = useReadLanguageContext();
   const readQuery = {
@@ -85,7 +87,7 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
         onClick={handleToggle}
         disabled={isPending}
       >
-        {isMember ? "Leave" : "Join"}
+        {isMember ? t("realm_leave") : t("realm_join")}
       </Button>
       <RealmRuleDialog
         open={ruleOpen}
