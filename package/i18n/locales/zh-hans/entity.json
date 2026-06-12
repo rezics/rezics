@@ -45,6 +45,7 @@
   "collection_title": "收藏",
   "collection_unit_shelf_count": "{count} 个书架",
   "collection_unit_tag_count": "{count} 个标签",
+  "community_catalog": "社区目录",
   "shelf_contents_search_empty": "未找到书架条目",
   "shelf_contents_search_entry_title": "搜索所有书架内容",
   "shelf_contents_search_has_more": "还有更多符合此搜索的书架条目。",
@@ -188,6 +189,7 @@
   "realm_leave": "离开",
   "realm_list_leave_confirm_description": "你将退出 {count} 个已选中的领域。这不会删除该领域。",
   "realm_list_leave_confirm_title": "退出已选中的领域？",
+  "realm_list_leave_failed": "退出部分领域失败，请重试。",
   "realm_list_manage": "管理",
   "realm_list_selected_count": "已选中 {count} 个",
   "realm_list_sign_in_prompt": "登录后即可查看及管理你已加入的领域。",
@@ -386,5 +388,7 @@
   "seed_tag_game": "游戏",
   "seed_tag_media": "媒体",
   "seed_tag_post": "帖子",
-  "seed_tag_link": "链接"
+  "seed_tag_link": "链接",
+  "variant": "变体",
+  "review": "书评"
 }

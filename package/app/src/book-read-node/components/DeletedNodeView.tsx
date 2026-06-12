@@ -1,4 +1,5 @@
 import { useRestoreContentStructureNodes } from "@rezics/api/content-structure";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 
@@ -13,14 +14,16 @@ export const DeletedNodeView: React.FC<DeletedNodeViewProps> = ({
   nodeId,
   canEdit,
 }) => {
+  const { t } = useTranslation(["book"]);
   const restore = useRestoreContentStructureNodes(bookUnitId);
 
   return (
-    <div className="w-11/12 mx-auto p-4 max-w-prose">
-      <h1 className="text-2xl font-bold mb-2">This entry was deleted</h1>
+    <div className="w-full mx-auto p-4 max-w-prose">
+      <h1 className="text-2xl font-bold mb-2">
+        {t("book:read_deleted_title")}
+      </h1>
       <p className="text-text-secondary leading-relaxed">
-        The TOC entry you opened has been removed. Its original placement is
-        preserved and can be restored.
+        {t("book:read_deleted_description")}
       </p>
       {canEdit && (
         <Button
@@ -30,7 +33,9 @@ export const DeletedNodeView: React.FC<DeletedNodeViewProps> = ({
           disabled={restore.isPending}
           onClick={() => restore.mutate([nodeId])}
         >
-          {restore.isPending ? "Restoring…" : "Restore this entry"}
+          {restore.isPending
+            ? t("book:read_deleted_restoring")
+            : t("book:read_deleted_restore")}
         </Button>
       )}
     </div>

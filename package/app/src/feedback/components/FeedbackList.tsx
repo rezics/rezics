@@ -295,7 +295,10 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
                               )}
                             </div>
 
-                            <Button onClick={() => handleResolve(item.id)}>
+                            <Button
+                              onClick={() => handleResolve(item.id)}
+                              disabled={resolveMutation.isPending}
+                            >
                               {getI18nRuntime().i18n.t("common:confirm")}
                             </Button>
                           </div>

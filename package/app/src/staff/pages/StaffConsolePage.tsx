@@ -26,6 +26,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ListFilter, Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { RealmSearchField } from "@/shared/ui/RealmSearchField";
+import { UserSearchField } from "@/shared/ui/UserSearchField";
 import {
   formatStaffDate,
   StaffForbiddenState,
@@ -34,6 +36,32 @@ import {
   useStaffConsoleAccess,
 } from "./shared";
 
+/**
+ * 审查控制台主页面。查看全站审查案件、领域案件流入、并跳转至账户安全记录。
+ *
+ * 布局结构：
+ *
+ * Filter Row (md+):
+ * ┌────────────────┬─────────────┬─────────────┬──────────┐
+ * │ State Select   │ Assignment  │ Target Text │ Account  │
+ * │ [Dropdown]     │ [Dropdown]  │ [Input]     │ [Input]  │
+ * └────────────────┴─────────────┴─────────────┴──────────┘
+ *
+ * Site Cases Section:
+ * ┌──────────────────────────────────────────────────┐
+ * │ Case          │ Target      │ State │ Severity   │
+ * │ ─────────────────────────────────────────────── │
+ * │ case-123      │ unit:unit-1 │ new   │ high       │
+ * │ case-456      │ unit:unit-2 │ open  │ medium     │
+ * └──────────────────────────────────────────────────┘
+ *
+ * Realm Cases Section (when realm ID entered):
+ * ┌──────────────────────────────────────────────────┐
+ * │ [Card] Realm Case 1                              │
+ * │ [Card] Realm Case 2                              │
+ * │ [Card] Realm Case 3                              │
+ * └──────────────────────────────────────────────────┘
+ */
 export function StaffConsolePage({
   initialRealmUnitId = "",
   initialAccountUserId = "",
@@ -146,12 +174,12 @@ export function StaffConsolePage({
           </div>
         </div>
         <div className="flex flex-col gap-1">
-          <Label htmlFor="staff-account-id">Account</Label>
-          <Input
+          <UserSearchField
             id="staff-account-id"
             value={accountUserId}
-            onChange={(event) => setAccountUserId(event.target.value)}
-            placeholder="user id"
+            onChange={setAccountUserId}
+            label="Account"
+            placeholder="search by name or slug"
           />
         </div>
       </section>
@@ -175,13 +203,13 @@ export function StaffConsolePage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <div className="flex max-w-xl flex-col gap-1">
-          <Label htmlFor="staff-realm-id">Realm cases</Label>
-          <Input
+        <div className="max-w-xl">
+          <RealmSearchField
             id="staff-realm-id"
             value={realmUnitId}
-            onChange={(event) => setRealmUnitId(event.target.value)}
-            placeholder="realm unit id"
+            onChange={setRealmUnitId}
+            label="Realm cases"
+            placeholder="search realms by name"
           />
         </div>
         {realmUnitId.trim() ? (

@@ -260,5 +260,11 @@
   "subscription_recovery_other_description": "使用者新增的訂閱在目標仍然可見且可訂閱時可以恢復。",
   "subscription_recovery_other_empty": "沒有其他已移除的訂閱。",
   "subscription_recovery_restore_error": "此訂閱目前無法恢復。",
-  "subscription_recovery_restore": "恢復"
+  "subscription_recovery_restore": "恢復",
+  "tokens_created_date": "建立於 {date}",
+  "tokens_expires_date": "到期於 {date}",
+  "tokens_last_used_date": "最後使用 {date}",
+  "tokens_last_used_from_ip": "來自 {ip}",
+  "tokens_never_used": "從未使用",
+  "security_current_session": "目前工作階段"
 }

@@ -9,6 +9,14 @@ export const dmConversationsQuery = () =>
     staleTime: 1000 * 30,
   });
 
+export const dmConversationQuery = (id: string) =>
+  queryOptions({
+    queryKey: dmKeys.conversation(id),
+    queryFn: () => dmApi.getConversation(id),
+    enabled: !!id,
+    staleTime: 1000 * 30,
+  });
+
 export const dmMessagesQuery = (
   conversationId: string,
   opts?: { cursor?: string; limit?: number },
@@ -22,6 +30,10 @@ export const dmMessagesQuery = (
 
 export function useConversations() {
   return useQuery(dmConversationsQuery());
+}
+
+export function useConversation(id: string) {
+  return useQuery(dmConversationQuery(id));
 }
 
 export function useMessages(
@@ -45,6 +57,7 @@ export function useDmBlockState(peerId: string) {
 
 export const dmQueries = {
   conversations: dmConversationsQuery,
+  conversation: dmConversationQuery,
   messages: dmMessagesQuery,
   blockState: dmBlockStateQuery,
 };

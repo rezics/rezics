@@ -28,7 +28,7 @@ export const ReadingNodeView: React.FC<ReadingNodeViewProps> = ({
   canEdit = false,
   initialIsCompleted = false,
 }) => {
-  const { t } = useTranslation(["common"]);
+  const { t } = useTranslation(["book", "common"]);
   const navigate = useNavigate();
   const { data, isPending, error, isError } = useQuery(
     chapterDetailQuery(contentUnitId),
@@ -51,14 +51,19 @@ export const ReadingNodeView: React.FC<ReadingNodeViewProps> = ({
     );
   };
 
-  if (isPending) return <div>Loading…</div>;
-  if (isError) return <div>Error loading chapter: {String(error)}</div>;
+  if (isPending) return <div>{t("common:loading")}</div>;
+  if (isError)
+    return (
+      <div>
+        {t("book:reading_error_loading_chapter", { error: String(error) })}
+      </div>
+    );
 
   const md = createRezicsRenderer();
   const html = md.render(contentDocMarkdownFallback(data?.content));
 
   return (
-    <div className="w-11/12 mx-auto p-4">
+    <div className="w-full mx-auto px-4 pt-4 pb-4">
       <div className="flex items-center justify-between gap-4 mb-2">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold">{data?.title ?? title}</h1>
@@ -85,7 +90,9 @@ export const ReadingNodeView: React.FC<ReadingNodeViewProps> = ({
           onClick={handleToggle}
           disabled={toggleCompletion.isPending}
         >
-          {isCompleted ? "Marked as read" : "Mark as read"}
+          {isCompleted
+            ? t("book:hero_actions_marked_as_read")
+            : t("book:hero_actions_mark_as_read")}
         </Button>
       </div>
       <div id="markdown-chapter-content" className="markdown-body">

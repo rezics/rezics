@@ -30,6 +30,68 @@ import {
 
 const CUSTOM_LOCK_PATH = "__custom__";
 
+/**
+ * BookAuthorityPage — field lock management interface for books.
+ * BookAuthorityPage — 图书字段锁定管理界面。
+ *
+ * Displays sections for locking/unlocking fields in a book unit. Responsive
+ * layout: single column on mobile, grouped sections with flex layout on sm+.
+ * 显示用于在图书单元中锁定/解锁字段的部分。响应式布局：移动设备上单列，
+ * sm+ 上带有 flex 布局的分组部分。
+ *
+ * Mobile <640px:
+ * +------------------------+
+ * | Header (flex col)      |
+ * | - Icon + Title         |
+ * | - Description          |
+ * +------------------------+
+ * | All Fields Section     |
+ * | - Text (col)           |
+ * | - Button               |
+ * +------------------------+
+ * | Field Groups           |
+ * | - Sections (rows)      |
+ * | - Each row stacked     |
+ * +------------------------+
+ * | Custom Path Section    |
+ * | - Fields (full width)  |
+ * +------------------------+
+ *
+ * Tablet 640-1023px:
+ * +---------------------+
+ * | Header              |
+ * +---------------------+
+ * | All Fields (flex)   |
+ * | - Text | Button (sm)|
+ * +---------------------+
+ * | Field Groups        |
+ * | - Rows with toggle  |
+ * +---------------------+
+ * | Custom Path (grid)  |
+ * | - select | input | + |
+ * +---------------------+
+ *
+ * Desktop 1024-1535px:
+ * +----------------------------+
+ * | Header (full width)        |
+ * +----------------------------+
+ * | All Fields (flex row)      |
+ * | - Content | Button (right) |
+ * +----------------------------+
+ * | Field Groups (grid gap-6)  |
+ * | - Sections with rows       |
+ * +----------------------------+
+ * | Custom Path (grid cols-3)  |
+ * | - select | input | button  |
+ * +----------------------------+
+ *
+ * Ultra-wide >=1536px:
+ * +-------------------------------+
+ * | max-w-5xl container centered  |
+ * | Header + sections            |
+ * | Same grid structure as 1024px |
+ * +-------------------------------+
+ */
 export function BookAuthorityPage() {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const bookQuery = useQuery({
@@ -42,7 +104,7 @@ export function BookAuthorityPage() {
   });
 
   return (
-    <main className="mx-auto mt-16 max-w-5xl px-4 pb-16">
+    <main className="w-full mx-auto mt-16 max-w-5xl px-4 pb-16">
       <BookAuthorityPanel
         unitId={bookId}
         canManageLocks={bookQuery.isSuccess ? canEditBook : undefined}

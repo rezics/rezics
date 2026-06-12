@@ -64,7 +64,11 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
 function PublishURL({ value, onChange }: BookExtraEditorProps) {
   const { t } = useTranslation(["book", "common", "editor"]);
   const [newUrl, setNewUrl] = useState("");
-  const urls: string[] = Array.isArray(value) ? value : [];
+  // Read publishURL from the extra data object, not the object itself.
+  // 从附加数据对象中读取 publishURL，而非对象本身。
+  const urls: string[] = Array.isArray(value?.publishURL)
+    ? value.publishURL
+    : [];
 
   const handleAdd = () => {
     if (newUrl.trim() && onChange) {

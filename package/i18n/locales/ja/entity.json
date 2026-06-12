@@ -45,6 +45,7 @@
   "collection_title": "集める",
   "collection_unit_shelf_count": "{count} 件の棚",
   "collection_unit_tag_count": "{count} 件のタグ",
+  "community_catalog": "コミュニティカタログ",
   "shelf_contents_search_empty": "棚の項目が見つかりません",
   "shelf_contents_search_entry_title": "すべての棚の内容を検索",
   "shelf_contents_search_has_more": "この検索に一致する棚の項目がさらにあります。",
@@ -188,6 +189,7 @@
   "realm_leave": "離れる",
   "realm_list_leave_confirm_description": "選択した {count} 件のレルムから脱退します。レルムは削除されません。",
   "realm_list_leave_confirm_title": "選択したレルムから脱退しますか？",
+  "realm_list_leave_failed": "一部のレルムからの脱退に失敗しました。もう一度お試しください。",
   "realm_list_manage": "管理",
   "realm_list_selected_count": "{count} 件選択中",
   "realm_list_sign_in_prompt": "ログインすると、参加中のレルムを確認・管理できます。",
@@ -386,5 +388,7 @@
   "seed_tag_game": "ゲーム",
   "seed_tag_media": "メディア",
   "seed_tag_post": "投稿",
-  "seed_tag_link": "リンク"
+  "seed_tag_link": "リンク",
+  "variant": "バリアント",
+  "review": "レビュー"
 }

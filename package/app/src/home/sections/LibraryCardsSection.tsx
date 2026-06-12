@@ -48,6 +48,57 @@ const LIBRARY_CARD_TITLE = {
   media_library: i18nMessages.page_home_sections_library_cards_media_library,
 } as const satisfies Record<LibraryKey, () => string>;
 
+/**
+ * Home section with three library entry cards: Books, Games, and Media.
+ * 主页部分有三个库入口卡：书籍、游戏和媒体。
+ *
+ * Each card is a clickable link to its respective library page.
+ * Inactive libraries show a "Coming Soon" badge.
+ * 每张卡都是到其相应库页面的可点击链接。
+ * 不活跃的库显示"即将推出"徽章。
+ *
+ * Desktop (md+):
+ * ┌──────────────────────────────────────────┐
+ * │ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
+ * │ │ 📖 Books │ │ 🎮 Games │ │ 🎬 Media │  │
+ * │ │ Library  │ │ Library  │ │ Library  │  │
+ * │ └──────────┘ └──────────┘ └──────────┘  │
+ * └──────────────────────────────────────────┘
+ *
+ * Tablet (sm-md):
+ * ┌──────────────────────────────┐
+ * │ ┌──────────┐ ┌──────────┐   │
+ * │ │ 📖 Books │ │ 🎮 Games │   │
+ * │ ├──────────┤ ├──────────┤   │
+ * │ │ Library  │ │ Library  │   │
+ * │ ├──────────┤ ┌──────────┐   │
+ * │ │ 🎬 Media │ │ Library  │   │
+ * │ └──────────┘ └──────────┘   │
+ * └──────────────────────────────┘
+ *
+ * Mobile (xs-sm):
+ * ┌────────────────────┐
+ * │ ┌────────────────┐ │
+ * │ │ 📖 Books       │ │
+ * │ │ Library        │ │
+ * │ └────────────────┘ │
+ * │ ┌────────────────┐ │
+ * │ │ 🎮 Games       │ │
+ * │ │ Library        │ │
+ * │ └────────────────┘ │
+ * │ ┌────────────────┐ │
+ * │ │ 🎬 Media       │ │
+ * │ │ Library        │ │
+ * │ └────────────────┘ │
+ * └────────────────────┘
+ *
+ * Inactive card (with badge):
+ * ┌──────────────────┐
+ * │ 🎮 Games         │
+ * │ Library          │
+ * │ [Coming Soon]    │
+ * └──────────────────┘
+ */
 export const LibraryCardsSection: React.FC = () => {
   const { t } = useTranslation(["page"]);
   const renderLibraryCard = (lib: (typeof libraries)[number]) => (

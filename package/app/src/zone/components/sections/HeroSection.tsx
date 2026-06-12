@@ -19,6 +19,92 @@ import { useZoneLabelResolver, type ZonePortalContext } from "./shared";
  * hero 不拥有文本：它渲染专区 Unit 自身的译文（`zone.name`/
  * `zone.description`）。图片 Unit 可能尚无已解析的 URL；缺失的横幅/
  * 标识直接不渲染而非占位。
+ *
+ * Layout responsive design with layered background images and button wrapping:
+ * - Mobile (<640px): Single column layout, px-6 py-12, buttons wrap vertically
+ * - Tablet (640-1023px): Same padding, buttons flow inline with wrapping
+ * - Desktop (1024-1535px): px-12 py-16 padding, buttons inline with gap-3
+ * - Ultra-wide (≥1536px): Same as desktop with rounded-lg container
+ *
+ * Mobile (<640px):
+ * ┌─────────────────────────────────┐
+ * │ [rounded-lg container]          │
+ * │ ┌───────────────────────────┐   │
+ * │ │ [Banner image (opacity)]  │   │
+ * │ └───────────────────────────┘   │
+ * │ [Logo 16x16]                    │
+ * │                                 │
+ * │ Zone Name (text-3xl bold)       │
+ * │                                 │
+ * │ Description text that wraps     │
+ * │ across multiple lines on        │
+ * │ mobile screens and displays     │
+ * │ the zone's purpose...           │
+ * │                                 │
+ * │ [Join Realm Button (sm)]        │ (primary)
+ * │ [Custom CTA 1 (sm, outline)]    │
+ * │ [Custom CTA 2 (sm, outline)]    │
+ * │ [Create Wiki Button (sm, ghost)]│
+ * │ [Create Post Button (sm, ghost)]│
+ * │                                 │
+ * └─────────────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌──────────────────────────────────┐
+ * │ [rounded-lg container]           │
+ * │ [Banner bg image]                │
+ * │ ┌────────────────────────────┐   │
+ * │ │ [Logo 16x16]               │   │
+ * │ │                            │   │
+ * │ │ Zone Name (text-3xl bold)  │   │
+ * │ │                            │   │
+ * │ │ Description that spans up  │   │
+ * │ │ to max-w-2xl, readable...  │   │
+ * │ │                            │   │
+ * │ │ [Join] [CTA1] [CTA2]       │   │
+ * │ │ [Wiki] [Post]              │   │ (flex wrap gap-3)
+ * │ └────────────────────────────┘   │
+ * └──────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌──────────────────────────────────────────────┐
+ * │ [rounded-lg bg-surface-subtle]               │
+ * │ [Banner image overlay (opacity-30)]          │
+ * │ ┌──────────────────────────────────────────┐ │
+ * │ │ [Logo 16x16 rounded-md]                  │ │
+ * │ │                                          │ │
+ * │ │ Zone Name (text-3xl font-semibold)       │ │
+ * │ │                                          │ │
+ * │ │ Description (max-w-2xl, text-base)       │ │
+ * │ │ Fully rendered with wrapping support     │ │
+ * │ │ for longer zone descriptions...          │ │
+ * │ │                                          │ │
+ * │ │ [Join Realm] [CTA1] [CTA2]               │ │
+ * │ │ [Create Wiki] [Create Post]              │ │ (flex gap-3)
+ * │ └──────────────────────────────────────────┘ │
+ * └──────────────────────────────────────────────┘
+ *
+ * Ultra-wide (≥1536px):
+ * ┌────────────────────────────────────────────────────────┐
+ * │ [Extra padding]                                        │
+ * │ ┌──────────────────────────────────────────────────┐   │
+ * │ │ [rounded-lg with theme surface background]       │   │
+ * │ │                                                  │   │
+ * │ │ [Banner image with opacity overlay]              │   │
+ * │ │ ┌────────────────────────────────────────────┐   │   │
+ * │ │ │ [Logo 16x16]                              │   │   │
+ * │ │ │                                            │   │   │
+ * │ │ │ Zone Name (large responsive heading)       │   │   │
+ * │ │ │                                            │   │   │
+ * │ │ │ Description (max-w-2xl for readability)   │   │   │
+ * │ │ │ Full text with proper line-height...      │   │   │
+ * │ │ │                                            │   │   │
+ * │ │ │ [Join Realm] [CTA1] [CTA2]                │   │   │
+ * │ │ │ [Create Wiki] [Create Post]               │   │   │
+ * │ │ └────────────────────────────────────────────┘   │   │
+ * │ └──────────────────────────────────────────────────┘   │
+ * │ [Extra padding]                                        │
+ * └────────────────────────────────────────────────────────┘
  */
 export function HeroSection({
   section,

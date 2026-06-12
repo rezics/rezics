@@ -6,6 +6,15 @@ import { useIsMobile } from "@/shared/utils/use-media-query";
 import { LoginModal, RegisterModal } from "@/user";
 import { MoreHorizMenu } from "../../components/header/MoreHorizMenu";
 
+/**
+ * 未认证用户的头部部分。在手机上显示登录链接，在桌面上显示登录/注册模态框和菜单。
+ * Unauthenticated user header section. Shows login link on mobile, login/register modals and menu on desktop.
+ *
+ * Mobile:            Tablet:             Desktop:            Ultra-wide:
+ * ┌────────────────────┐ ┌──────────────────────────┐ ┌──────────────────────────┐ ┌────────────────────────┐
+ * │ [Login] [⋮]        │ │ [Login] [Register] [⋮]   │ │ [Login] [Register] [⋮]   │ │ [Login] [Register] [⋮] │
+ * └────────────────────┘ └──────────────────────────┘ └──────────────────────────┘ └────────────────────────┘
+ */
 const LoginPrompt = () => {
   const { t } = useTranslation(["auth"]);
   const [loginModalOpen, setLoginModalOpen] = useState(false);

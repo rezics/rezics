@@ -163,7 +163,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
                 >
                   <MoreHorizontal className="w-4 h-4 mr-2" aria-hidden />
                   <span className="hidden sm:inline">
-                    Options
+                    {t("book:edit_selection_options")}
                     {selectedCount > 0 ? ` (${selectedCount})` : ""}
                   </span>
                   <ChevronDown className="w-4 h-4 ml-1" aria-hidden />
@@ -179,13 +179,13 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onBulkMoveTo}>
                 <ListTree className="size-4" aria-hidden />
-                Move to...
+                {t("book:chapter_move_dialog_title")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onBulkMoveToFirst}>
-                Move to first
+                {t("book:chapter_move_to_first")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onBulkMoveToLast}>
-                Move to last
+                {t("book:chapter_move_to_last")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

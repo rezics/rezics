@@ -63,6 +63,7 @@
   "edit_expand_all": "모두 확장",
   "edit_no_chapters_yet": "아직 챕터가 없습니다.",
   "edit_rate_selected": "평가 {count}개",
+  "edit_selection_options": "옵션",
   "edit_resync_index_overrides": "인덱스 재정의 재동기화",
   "edit_search_chapters_placeholder": "챕터 검색...",
   "edit_sections_extra": "추가의",
@@ -97,6 +98,7 @@
   "hero_actions_dropped": "중단",
   "hero_actions_edit_details": "도서 세부정보 수정",
   "hero_actions_mark_as_read": "읽음으로 표시",
+  "hero_actions_marked_as_read": "읽음으로 표시됨",
   "hero_actions_paused": "일시중지됨",
   "hero_actions_read": "읽기",
   "hero_actions_read_again": "다시 읽기",
@@ -223,5 +225,11 @@
   "creation_path_catalog_entry": "카탈로그 항목",
   "creation_path_catalog_entry_description": "커뮤니티 카탈로그가 소유하며 협업 편집에 개방되어 있습니다.",
   "creation_path_personal_work": "개인 작품",
-  "creation_path_personal_work_description": "귀하의 계정이 소유하며 기본적으로 커뮤니티 편집에 닫혀 있습니다."
+  "creation_path_personal_work_description": "귀하의 계정이 소유하며 기본적으로 커뮤니티 편집에 닫혀 있습니다.",
+  "write_a_review": "리뷰 작성",
+  "reading_error_loading_chapter": "챕터 로드 오류: {{error}}",
+  "read_deleted_title": "이 항목이 삭제되었습니다",
+  "read_deleted_description": "열었던 목차 항목이 삭제되었습니다. 원래 위치는 보존되어 복원할 수 있습니다.",
+  "read_deleted_restoring": "복원 중…",
+  "read_deleted_restore": "이 항목 복원"
 }

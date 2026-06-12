@@ -13,6 +13,56 @@ interface ReviewListSectionProps {
   limit?: number;
 }
 
+/**
+ * Review list section.
+ *
+ * Queries and displays all reviews targeting a specific unit (e.g., a book).
+ * Respects user's language preferences. Shows empty state if no reviews exist.
+ *
+ * 评论列表区域，查询并显示针对特定 Unit（如书籍）的所有评论。
+ * 尊重用户的语言偏好设置。如无评论，显示空状态。
+ *
+ * Desktop (1200px):
+ * +---------------------------------------------+
+ * | Reviews of This Book (24)                   |
+ * +---------------------------------------------+
+ * | [Review 1] - Author 1 | Rating ★★★★★      |
+ * | 3 weeks ago | 5 helpful votes               |
+ * | Review preview text here...                 |
+ * |                                             |
+ * | [Review 2] - Author 2 | Rating ★★★★       |
+ * | 1 month ago | 3 helpful votes               |
+ * +---------------------------------------------+
+ *
+ * Tablet (768px):
+ * +----------------------------------+
+ * | Reviews (24)                     |
+ * +----------------------------------+
+ * | [Review 1]                       |
+ * | Author 1 | ★★★★★ | 3 weeks ago  |
+ * | Preview...                       |
+ * |                                  |
+ * | [Review 2]                       |
+ * | Author 2 | ★★★★                 |
+ * +----------------------------------+
+ *
+ * Mobile (360px):
+ * +----------+
+ * | Reviews  |
+ * +----------+
+ * | Title 1  |
+ * | Author 1 |
+ * | ★★★★★   |
+ * |          |
+ * | Title 2  |
+ * | Author 2 |
+ * +----------+
+ *
+ * Empty State:
+ * +-----------+
+ * | No reviews|
+ * +-----------+
+ */
 export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
   targetUnitId,
   limit = 20,

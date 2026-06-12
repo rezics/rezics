@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 function BookEditHistoryOutlet() {
   return (
-    <main className="mx-auto mt-16 max-w-5xl px-4 pb-16">
+    <main className="w-full mx-auto mt-16 max-w-5xl px-4 pb-16">
       <Outlet />
     </main>
   );

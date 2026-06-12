@@ -39,6 +39,16 @@ export const scoreApi = {
     return apiFetch<ScoreEntryDTO[]>(`/score/user/${userId}/${unitId}`);
   },
 
+  getUserScoreForRealm: async (
+    userId: string,
+    unitId: string,
+    realm: string,
+  ): Promise<ScoreEntryDTO | null> => {
+    return apiFetch<ScoreEntryDTO | null>(
+      `/score/user/${userId}/${unitId}/${realm}`,
+    );
+  },
+
   getRealmFields: async (realmId: string): Promise<ScoreRealmFieldDTO[]> => {
     return apiFetch<ScoreRealmFieldDTO[]>(`/score/realm/${realmId}`);
   },

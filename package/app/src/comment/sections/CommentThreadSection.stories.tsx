@@ -240,7 +240,7 @@ function RootEntryPreview({
   hasMore?: boolean;
 }) {
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
+    <div className="w-full mx-auto flex max-w-3xl flex-col gap-4 p-4">
       <CommentReply post={rootComment} />
       <CommentTreeList
         posts={childComments}

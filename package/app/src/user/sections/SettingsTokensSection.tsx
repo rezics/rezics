@@ -38,6 +38,93 @@ const AVAILABLE_SCOPES = [
   },
 ] as const;
 
+/**
+ * API 令牌部分：管理个人 API 令牌用于程序化访问。
+ * 用户可以生成新令牌、编辑令牌名称和作用域、设置过期日期，以及撤销不再需要的令牌。
+ *
+ * Desktop (≥1024px):
+ * ┌─────────────────────────────────────┐
+ * │ API Tokens                          │
+ * │ [+ Generate Token]                  │
+ * │                                     │
+ * │ Token Name • Created Last Used      │
+ * │ user:read user:write          Edit  │
+ * │ [Revoke]                           │
+ * │ ────────────────────────────────    │
+ * │ Server Token • Created 2 days ago   │
+ * │ user:read       Expires 2026-12-31 │
+ * │ [Revoke]                           │
+ * │                                     │
+ * │ Create Token Dialog                 │
+ * │ [Token Name] [Scope Checkboxes]     │
+ * │ [Expiration Date] [Create]          │
+ * │                                     │
+ * │ Edit Token Dialog                   │
+ * │ [Token Name] [Scope Checkboxes]     │
+ * │ [Expiration Date] [Save]            │
+ * │                                     │
+ * │ Revoke Confirmation Dialog          │
+ * │ Are you sure? [Cancel] [Revoke]     │
+ * └─────────────────────────────────────┘
+ *
+ * Tablet (768px-1023px):
+ * ┌──────────────────────────────┐
+ * │ API Tokens                   │
+ * │ [+ Generate Token]           │
+ * │                              │
+ * │ Token Name                   │
+ * │ Scopes: user:read, user:write
+ * │ [Edit] [Revoke]              │
+ * │ ──────────────────────────── │
+ * │ Server Token                 │
+ * │ Expires: 2026-12-31          │
+ * │ [Edit] [Revoke]              │
+ * │                              │
+ * │ Create Token Dialog          │
+ * │ [Token Name]                 │
+ * │ [Scopes]                     │
+ * │ [Expiration] [Create]        │
+ * └──────────────────────────────┘
+ *
+ * Mobile (480px-767px):
+ * ┌──────────────────┐
+ * │API Tokens        │
+ * │[+ Generate]      │
+ * │                  │
+ * │Token Name        │
+ * │Scopes: user:read │
+ * │user:write        │
+ * │[Edit] [Revoke]   │
+ * │─────────────────│
+ * │Server Token      │
+ * │Expires 2026-12-31
+ * │[Edit] [Revoke]   │
+ * │                  │
+ * │Create Dialog     │
+ * │[Token Name]      │
+ * │[Scopes]          │
+ * │[Date] [Create]   │
+ * └──────────────────┘
+ *
+ * Small Mobile (<480px):
+ * ┌──────────┐
+ * │API Toks  │
+ * │[+Gen]    │
+ * │          │
+ * │Token1    │
+ * │user:read │
+ * │[E][Rev]  │
+ * │────────  │
+ * │Token2    │
+ * │user:rw   │
+ * │[E][Rev]  │
+ * │          │
+ * │[Create]  │
+ * │[Name]    │
+ * │[Scopes]  │
+ * │[Create]  │
+ * └──────────┘
+ */
 export const SettingsTokensSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
   useRequireAuth();

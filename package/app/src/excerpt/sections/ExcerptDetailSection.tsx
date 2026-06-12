@@ -15,6 +15,22 @@ interface ExcerptDetailSectionProps {
   unitId: string;
 }
 
+/**
+ * 摘录详情部分。显示摘录内容、编辑按钮和评论列表，支持添加新回复。
+ * Excerpt detail section. Displays excerpt content, edit button, and comment list, supports adding new replies.
+ *
+ * Mobile:            Tablet:             Desktop:            Ultra-wide:
+ * ┌──────────────────┐ ┌────────────────────────┐ ┌────────────────────────┐ ┌──────────────────────────┐
+ * │ Title [✏]        │ │ Title              [✏] │ │ Title              [✏] │ │ Title              [✏]   │
+ * │                  │ │                        │ │                        │ │                          │
+ * │ Content Content  │ │ Full Excerpt Content   │ │ Full Excerpt Content   │ │ Full Excerpt Content     │
+ * │ ...              │ │ ...                    │ │ ...                    │ │ ...                      │
+ * │                  │ │                        │ │                        │ │                          │
+ * │ ▬ Comments       │ │ ▬ Comments             │ │ ▬ Comments             │ │ ▬ Comments               │
+ * │ Composer         │ │ Composer input         │ │ Composer input         │ │ Composer input           │
+ * │ Comment 1        │ │ Comment 1              │ │ Comment 1              │ │ Comment 1                │
+ * └──────────────────┘ └────────────────────────┘ └────────────────────────┘ └──────────────────────────┘
+ */
 export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   unitId,
 }) => {

@@ -27,7 +27,9 @@ function lock(path: string, reason: string | null = null): UnitFieldLockDTO {
 }
 
 function StoryShell({ children }: { children: React.ReactNode }) {
-  return <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>;
+  return (
+    <main className="w-full mx-auto max-w-5xl px-6 py-10">{children}</main>
+  );
 }
 
 export const NoLocks: Story = {

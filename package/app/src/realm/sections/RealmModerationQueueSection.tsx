@@ -27,6 +27,76 @@ import type { ComponentType, ReactNode } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 
+/**
+ * Moderation dashboard showing realm-specific cases, metrics, and audit trail.
+ * Displays 4 metric cards (Reports, Cases, Sanctions, Audit), case list with actions,
+ * and recent audit entries. Managers can approve/remove reported content.
+ *
+ * 显示社区特定案件、指标和审计日志的审核仪表板。
+ * 显示4个指标卡(报告、案件、制裁、审计)、带操作的案件列表和最近的审计条目。
+ * 管理员可以批准/删除报告的内容。
+ *
+ * Layout:
+ * Mobile (<640px):
+ * ┌──────────────────────────┐
+ * │ [Shield] Moderation      │
+ * ├──────────────────────────┤
+ * │ [Metric 1]               │
+ * │ [Metric 2]               │
+ * │ [Metric 3]               │
+ * │ [Metric 4]               │
+ * ├──────────────────────────┤
+ * │ Realm Cases              │
+ * │ [Case 1 - with action]   │
+ * │ [Case 2 - with action]   │
+ * ├──────────────────────────┤
+ * │ Recent Audit             │
+ * │ [Audit 1] [Audit 2]      │
+ * └──────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ [Shield] Moderation                │
+ * ├────────────────────────────────────┤
+ * │ [Metric 1] [Metric 2]              │
+ * │ [Metric 3] [Metric 4]              │
+ * ├────────────────────────────────────┤
+ * │ Realm Cases                        │
+ * │ [Case 1 - with action]             │
+ * │ [Case 2 - with action]             │
+ * ├────────────────────────────────────┤
+ * │ Recent Audit                       │
+ * │ [Audit 1] [Audit 2]                │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌──────────────────────────────────────┐
+ * │ [Shield] Moderation                  │
+ * ├──────────────────────────────────────┤
+ * │ [M1] [M2] [M3] [M4]                 │
+ * ├──────────────────────────────────────┤
+ * │ Realm Cases                          │
+ * │ [Case 1]          [Case 2]           │
+ * │ [Case 3]          [Case 4]           │
+ * ├──────────────────────────────────────┤
+ * │ Recent Audit                         │
+ * │ [Audit 1]         [Audit 2]          │
+ * │ [Audit 3]         [Audit 4]          │
+ * └──────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌────────────────────────────────────────┐
+ * │ [Shield] Moderation                    │
+ * ├────────────────────────────────────────┤
+ * │ [M1] [M2] [M3] [M4]                   │
+ * ├────────────────────────────────────────┤
+ * │ Realm Cases                            │
+ * │ [Case 1] [Case 2] [Case 3] [Case 4]    │
+ * ├────────────────────────────────────────┤
+ * │ Recent Audit                           │
+ * │ [Audit 1]   [Audit 2]   [Audit 3]      │
+ * └────────────────────────────────────────┘
+ */
 interface RealmModerationQueueSectionProps {
   realmUnitId: string;
 }

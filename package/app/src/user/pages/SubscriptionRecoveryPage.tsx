@@ -18,6 +18,93 @@ import {
 } from "../models/subscriptionRecovery";
 import { useRequireAuth } from "./useAuth";
 
+/**
+ * Page for recovering subscription list entries that have been removed. Organizes
+ * subscriptions into official and other categories with individual recovery controls
+ * for each entry. Displays loading, empty, and error states gracefully.
+ * 用于恢复已删除订阅列表条目的页面。将订阅组织为官方和其他类别，每个条目均具有单独的恢复控制。优雅地显示加载、空白和错误状态。
+ *
+ * Layout:
+ *
+ * Mobile (<640px):
+ * ┌──────────────────────────────┐
+ * │ Subscription Recovery         │
+ * │ [Description text]            │
+ * ├──────────────────────────────┤
+ * │ Official Subscriptions        │
+ * │ [Description]                 │
+ * │ ┌────────────────────────────┐│
+ * │ │ Title [Restore] ⟳         ││
+ * │ │ TYPE                       ││
+ * │ └────────────────────────────┘│
+ * │                              │
+ * │ Other Subscriptions           │
+ * │ [Description]                 │
+ * │ ┌────────────────────────────┐│
+ * │ │ Title [Restore] ⟳         ││
+ * │ │ TYPE                       ││
+ * │ └────────────────────────────┘│
+ * └──────────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌──────────────────────────────────────┐
+ * │ Subscription Recovery                │
+ * │ [Longer description text]             │
+ * ├──────────────────────────────────────┤
+ * │ Official Subscriptions                │
+ * │ [Description]                         │
+ * │ ┌────────────────────────────────────┐│
+ * │ │ Title        [Restore Button] ⟳   ││
+ * │ │ TYPE                               ││
+ * │ └────────────────────────────────────┘│
+ * │                                       │
+ * │ Other Subscriptions                   │
+ * │ [Description]                         │
+ * │ ┌────────────────────────────────────┐│
+ * │ │ Title        [Restore Button] ⟳   ││
+ * │ │ TYPE                               ││
+ * │ └────────────────────────────────────┘│
+ * └──────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌───────────────────────────────────────────┐
+ * │ Subscription Recovery                     │
+ * │ [Detailed description text spanning page] │
+ * │ [explaining recovery process]             │
+ * ├───────────────────────────────────────────┤
+ * │ Official Subscriptions                    │
+ * │ [Description]                             │
+ * │ ┌─────────────────────────────────────────┐│
+ * │ │ Title         TYPE   [Restore] ⟳       ││
+ * │ └─────────────────────────────────────────┘│
+ * │                                           │
+ * │ Other Subscriptions                       │
+ * │ [Description]                             │
+ * │ ┌─────────────────────────────────────────┐│
+ * │ │ Title         TYPE   [Restore] ⟳       ││
+ * │ └─────────────────────────────────────────┘│
+ * └───────────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌────────────────────────────────────────────────┐
+ * │ Subscription Recovery                          │
+ * │ [Full width detailed description text]         │
+ * │ [explaining the recovery process and timing]   │
+ * ├────────────────────────────────────────────────┤
+ * │ Official Subscriptions                         │
+ * │ [Description]                                  │
+ * │ ┌──────────────────────────────────────────────┐│
+ * │ │ Title              TYPE  [Restore] ⟳        ││
+ * │ │ Title              TYPE  [Restore] ⟳        ││
+ * │ └──────────────────────────────────────────────┘│
+ * │                                                │
+ * │ Other Subscriptions                            │
+ * │ [Description]                                  │
+ * │ ┌──────────────────────────────────────────────┐│
+ * │ │ Title              TYPE  [Restore] ⟳        ││
+ * │ └──────────────────────────────────────────────┘│
+ * └────────────────────────────────────────────────┘
+ */
 export const SubscriptionRecoveryPage: React.FC = () => {
   useRequireAuth();
   const { t } = useTranslation("settings");

@@ -37,6 +37,58 @@ export type FederatedSearchPageProps = {
   onQueryChange?: (query: SearchQuery) => void;
 };
 
+/**
+ * Federated search interface with category navigation, advanced filters, and
+ * result deduplication across multiple content types. Supports URL-backed
+ * filter persistence and search history tracking.
+ *
+ * 联邦搜索界面，具有类别导航、高级筛选器和跨多个内容类型的结果去重。
+ * 支持 URL 保存的筛选持久化和搜索历史跟踪。
+ *
+ * @layout
+ *
+ * Mobile <640px (px-4, py-8, max-w-4xl):
+ * +-------+
+ * |Title  |
+ * +-------+
+ * |Category|
+ * |Nav    |
+ * +-------+
+ * |Search |
+ * |Input  |
+ * +-------+
+ * |Filters|
+ * +-------+
+ * |History|
+ * |or     |
+ * |Results|
+ * +-------+
+ *
+ * Tablet 640–1023px (px-4, py-8, max-w-4xl, centered):
+ * +-----------+
+ * |Title      |
+ * +-----------+
+ * |Category   |
+ * |Nav        |
+ * +-----------+
+ * |Search     |
+ * |Input      |
+ * +-----------+
+ * |Applied    |
+ * |Filters    |
+ * +-----------+
+ * |History    |
+ * |or         |
+ * |Results    |
+ * |(multi col)|
+ * +-----------+
+ *
+ * Desktop 1024–1535px (px-4, py-8, max-w-4xl):
+ * Centered at max-w-4xl, category nav in tabs/pills, results in 2-col grid
+ *
+ * Ultra-wide ≥1536px (px-4, py-8, max-w-4xl):
+ * Centered at max-w-4xl, results in 2-col or 3-col grid per content type
+ */
 export function FederatedSearchPage({
   scope,
   initialQuery,
@@ -101,7 +153,7 @@ export function FederatedSearchPage({
   const showHistory = !search.query.keyword?.trim();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold">{t("common:accessibility_search")}</h1>
       <SearchCategoryNav
         scope={scope}

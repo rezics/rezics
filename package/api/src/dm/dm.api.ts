@@ -2,6 +2,7 @@ import type { DmBlockState, DmReadReceipt, DmSendBody } from "@rezics/contract";
 import { notifyFetch } from "../notification/notify-fetch";
 import { apiFetch } from "../react-query/http";
 import type {
+  DmConversation,
   DmConversationListResponse,
   DmMessageListResponse,
 } from "./dm.types";
@@ -26,6 +27,10 @@ export const dmApi = {
 
   listConversations: async (): Promise<DmConversationListResponse> => {
     return notifyFetch<DmConversationListResponse>("/dm/conversations");
+  },
+
+  getConversation: async (conversationId: string): Promise<DmConversation> => {
+    return notifyFetch<DmConversation>(`/dm/conversations/${conversationId}`);
   },
 
   listMessages: async (

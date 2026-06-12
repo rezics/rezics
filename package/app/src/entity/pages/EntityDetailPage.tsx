@@ -1,3 +1,35 @@
+/**
+ * Entity detail page displaying entity information across multiple tabs.
+ * 展示实体详情的页面，包含多个标签页。
+ *
+ * Layout structure with hero section and tabbed content areas.
+ * 包含 hero 区块和选项卡式内容的布局结构。
+ *
+ * Mobile (<640px):
+ * +--40px--+
+ * |  Hero  |  px-4 vertical spacing
+ * |  Tabs  |
+ * +--------+
+ *
+ * Tablet (640-1023px):
+ * +-------60px-------+
+ * |      Hero        |  px-4 wider padding
+ * |      Tabs        |
+ * +------------------+
+ *
+ * Desktop (1024-1535px):
+ * +--------80px--------+
+ * |       Hero         |  max-w-5xl centered
+ * |       Tabs         |  mt-8 spacing
+ * +--------------------+
+ *
+ * Ultra-wide (>=1536px):
+ * +----------100px---------+
+ * |         Hero           |  max-w-5xl constraint
+ * |         Tabs           |  py-8 vertical padding
+ * +------------------------+
+ */
+
 import { entityDetailQueryOptions, useEntity } from "@rezics/api/entity";
 import { useServerPermission } from "@rezics/api/hooks";
 import { BasicAdminPermission } from "@rezics/contract";
@@ -66,7 +98,7 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
 
   if (error || !entity) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="w-full mx-auto max-w-3xl px-4 py-12">
         <h1 className="text-lg font-semibold text-text-primary">
           {t("entity:not_found")}
         </h1>

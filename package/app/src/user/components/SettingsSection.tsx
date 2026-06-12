@@ -8,6 +8,53 @@ interface SettingsSectionProps {
   divider?: boolean;
 }
 
+/**
+ * A reusable settings section container for organizing related settings groups.
+ * 设置分组容器，用于组织相关的设置项。
+ *
+ * Layout:
+ *
+ * Mobile (<640px):
+ * ┌─────────────────────┐
+ * │ Title               │
+ * │ Description         │
+ * │                     │
+ * │ [Content]           │
+ * │ [Content]           │
+ * ├─────────────────────┤
+ * │ ─────────────────── │ (divider)
+ * └─────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────┐
+ * │ Title                      │
+ * │ Description text           │
+ * │                            │
+ * │ [Content]   [Content]      │
+ * ├────────────────────────────┤
+ * │ ─────────────────────────── │ (divider)
+ * └────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌────────────────────────────────────┐
+ * │ Title                              │
+ * │ Descriptive text explaining intent │
+ * │                                    │
+ * │ [Content] [Content] [Content]      │
+ * ├────────────────────────────────────┤
+ * │ ────────────────────────────────── │ (divider)
+ * └────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌──────────────────────────────────────────┐
+ * │ Title                                    │
+ * │ Descriptive text explaining section use  │
+ * │                                          │
+ * │ [Content] [Content] [Content] [Content]  │
+ * ├──────────────────────────────────────────┤
+ * │ ─────────────────────────────────────── │ (divider)
+ * └──────────────────────────────────────────┘
+ */
 export const SettingsSection: FC<SettingsSectionProps> = ({
   title,
   description,

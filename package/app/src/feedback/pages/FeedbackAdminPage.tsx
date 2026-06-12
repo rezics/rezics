@@ -1,3 +1,56 @@
+/**
+ * Admin feedback page for managing all feedback with advanced filtering.
+ * 管理员反馈页面，用于管理所有反馈并进行高级过滤。
+ *
+ * Header with title and create button, followed by filter controls (search, status, type, user ID) and list.
+ * 包含标题和创建按钮的头部，后面是过滤控制（搜索、状态、类型、用户 ID）和列表。
+ *
+ * Mobile (<640px):
+ * +------40px-----+
+ * | Title         |  flex-col sm:flex-row
+ * | [New]         |  mb-8 gap-4 responsive
+ * |               |
+ * | Search        |  flex-col md:flex-row
+ * |               |  pb-4 spacing
+ * | Status        |  gap-4 controls
+ * |               |
+ * | View Selector |  min-w-[300px] flex-row
+ * | User ID Input |  (conditional)
+ * |               |
+ * | Feedback List |  flex-col gap-1
+ * +---------------+
+ *
+ * Tablet (640-1023px):
+ * +-------60px-------+
+ * | Title   [New]    |  flex-col md:flex-row
+ * |                  |  max-w-8xl mx-auto
+ * | Search | Status  |  items-center justify
+ * | View | User ID   |
+ * |                  |
+ * | Feedback List    |  p-4 padding
+ * +------------------+
+ *
+ * Desktop (1024-1535px):
+ * +-------80px-------+
+ * |  Title    [New]  |  max-w-8xl centered
+ * |                  |  flex-col md:flex-row
+ * | Search   Status  |  gap-4 compact layout
+ * | View      User   |
+ * |                  |
+ * | Feedback List    |
+ * +------------------+
+ *
+ * Ultra-wide (>=1536px):
+ * +----------100px-----------+
+ * |    Title           [New] |  max-w-8xl constraint
+ * |                          |  mb-8 py-4 padding
+ * | Search  Status  View User |
+ * |      (all in row)        |
+ * |                          |
+ * |   Complete Feedback List |
+ * +------------------------+
+ */
+
 import { feedbackListQuery } from "@rezics/api/feedback/feedback.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import {
@@ -12,6 +65,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
+import { UserSearchField } from "@/shared/ui/UserSearchField";
 import { FeedbackDrawer } from "../components/FeedbackDrawer";
 import { FeedbackList } from "../components/FeedbackList";
 
@@ -45,7 +99,7 @@ export const FeedbackAdminPage: React.FC = () => {
   useQuery(feedbackListQuery());
 
   return (
-    <div className="max-w-8xl mx-auto p-4">
+    <div className="w-full max-w-8xl mx-auto p-4">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
         <h1 className="text-xl font-bold">
           {t("community:feedback_admin_title")}
@@ -119,14 +173,12 @@ export const FeedbackAdminPage: React.FC = () => {
             </div>
 
             {type === "user" && (
-              <div className="flex flex-col gap-1 flex-1">
-                <Label htmlFor="admin-feedback-user-id">
-                  {t("settings:user_id_label")}
-                </Label>
-                <Input
+              <div className="flex flex-1 flex-col gap-1">
+                <UserSearchField
                   id="admin-feedback-user-id"
                   value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
+                  onChange={setUserId}
+                  label={t("settings:user_id_label")}
                   placeholder={t("community:feedback_user_id_placeholder")}
                 />
               </div>

@@ -27,6 +27,74 @@ import { DangerZone } from "@/user/components/DangerZone";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
+/**
+ * 账户设置部分：管理当前用户的电子邮件地址、验证状态和账户删除。
+ * 允许用户查看和更改其关联的电子邮件，请求验证码，验证新电子邮件地址，以及永久删除账户。
+ *
+ * Desktop (≥1024px):
+ * ┌─────────────────────────────────────┐
+ * │ Email Verification                  │
+ * │ user@example.com [VERIFIED]         │
+ * │ [Resend Verification Code]          │
+ * │                                     │
+ * │ Change Email                        │
+ * │ [new-email@...]      [Send Code]    │
+ * │ [verification-code]  [Verify]       │
+ * │                                     │
+ * │ DANGER ZONE                         │
+ * │ Delete Account Risk Warning         │
+ * │ [Delete My Account]                 │
+ * └─────────────────────────────────────┘
+ *
+ * Tablet (768px-1023px):
+ * ┌──────────────────────────────┐
+ * │ Email Verification           │
+ * │ user@example.com [VERIFIED]  │
+ * │ [Resend Verification Code]   │
+ * │                              │
+ * │ Change Email                 │
+ * │ [new-email@...]              │
+ * │ [Send Code]                  │
+ * │ [verification-code]          │
+ * │ [Verify]                     │
+ * │                              │
+ * │ DANGER ZONE                  │
+ * │ [Delete My Account]          │
+ * └──────────────────────────────┘
+ *
+ * Mobile (480px-767px):
+ * ┌──────────────────┐
+ * │Email Verification│
+ * │user@example.com  │
+ * │[VERIFIED]        │
+ * │[Resend Code]     │
+ * │                  │
+ * │Change Email      │
+ * │[new-email@...]   │
+ * │[Send Code]       │
+ * │[verify-code]     │
+ * │[Verify]          │
+ * │                  │
+ * │DANGER ZONE       │
+ * │[Delete Account]  │
+ * └──────────────────┘
+ *
+ * Small Mobile (<480px):
+ * ┌──────────┐
+ * │Email     │
+ * │verify    │
+ * │[Resend]  │
+ * │          │
+ * │Change    │
+ * │[input]   │
+ * │[Send]    │
+ * │[code]    │
+ * │[Verify]  │
+ * │          │
+ * │DANGER    │
+ * │[Delete]  │
+ * └──────────┘
+ */
 export const SettingsAccountSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
   useRequireAuth();

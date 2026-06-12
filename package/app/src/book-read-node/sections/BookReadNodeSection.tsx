@@ -16,6 +16,21 @@ type BookReadNodeSectionProps = {
   nodeId: string;
 };
 
+/**
+ * 书籍节点内容查看部分。管理节点状态（加载、删除、空、阅读），
+ * 处理章节数据获取和权限检查。
+ * Book node content viewing section. Manages node states (loading, deleted, empty, reading),
+ * handles chapter data fetching and permission checks.
+ *
+ * Mobile:            Tablet:             Desktop:            Ultra-wide:
+ * ┌─────────────┐   ┌──────────────────┐ ┌──────────────────┐ ┌────────────────────┐
+ * │ [Loading]   │   │ [Loading...]      │ │ [Loading...]     │ │ [Loading...]       │
+ * │             │   │                   │ │                  │ │                    │
+ * │ or          │   │ or                │ │ or               │ │ or                 │
+ * │             │   │                   │ │                  │ │                    │
+ * │ [Content]   │   │ [Full Content]    │ │ [Full Content]   │ │ [Full Content]     │
+ * └─────────────┘   └──────────────────┘ └──────────────────┘ └────────────────────┘
+ */
 export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
   bookId,
   nodeId,

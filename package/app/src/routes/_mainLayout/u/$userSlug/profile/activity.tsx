@@ -6,7 +6,9 @@ const ActivityTabSection = lazyRouteComponent(
   "ActivityTabSection",
 );
 
-export const Route = createFileRoute("/_mainLayout/u/$userSlug/profile/activity")({
+export const Route = createFileRoute(
+  "/_mainLayout/u/$userSlug/profile/activity",
+)({
   component: ActivityTabSection,
   ...routeBoundaries(),
 });

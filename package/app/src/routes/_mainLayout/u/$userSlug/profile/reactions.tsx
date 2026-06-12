@@ -5,6 +5,8 @@ const ReactionsTabSection = lazyRouteComponent(
   "ReactionsTabSection",
 );
 
-export const Route = createFileRoute("/_mainLayout/u/$userSlug/profile/reactions")({
+export const Route = createFileRoute(
+  "/_mainLayout/u/$userSlug/profile/reactions",
+)({
   component: ReactionsTabSection,
 });

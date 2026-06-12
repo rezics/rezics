@@ -19,6 +19,53 @@ export interface NewBookSectionProps {
   className?: string;
 }
 
+/**
+ * Home section showcasing newly added or updated books with tab filtering.
+ * 主页部分展示新增或更新的书籍，带有标签页过滤。
+ *
+ * Three tabs: Latest Updates, New on Shelf, Recently Completed.
+ * Displays books in a horizontal carousel with covers and metadata.
+ * 三个标签页：最新更新、架上新书、最近完成。
+ * 在水平轮播中显示带有封面和元数据的书籍。
+ *
+ * Desktop (md+):
+ * ┌──────────────────────────────────────────┐
+ * │ New Books                      [Browse]   │
+ * │ [Latest▼] [New on Shelf] [Completed]     │
+ * │ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ │
+ * │ │Cover│ │Cover│ │Cover│ │Cover│ │Cover│ │
+ * │ │Book 1 │ │Book 2 │ │Book 3 │ │Book 4 │ │
+ * │ │Author │ │Author │ │Author │ │Author │ │
+ * │ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ │
+ * └──────────────────────────────────────────┘
+ *
+ * Tablet (sm-md):
+ * ┌──────────────────────────┐
+ * │ New Books     [Browse]   │
+ * │ [Latest▼][New][Done]     │
+ * │ ┌───┐ ┌───┐ ┌───┐       │
+ * │ │ 1 │ │ 2 │ │ 3 │ ...   │
+ * │ │   │ │   │ │   │       │
+ * │ └───┘ └───┘ └───┘       │
+ * └──────────────────────────┘
+ *
+ * Mobile (xs-sm):
+ * ┌────────────────────┐
+ * │ New Books[Browse]  │
+ * │ [L] [N] [C] »      │
+ * │ ┌──────┐           │
+ * │ │ Book │ >         │
+ * │ │ 1    │           │
+ * │ └──────┘           │
+ * └────────────────────┘
+ *
+ * Loading state:
+ * ┌──────────────────────────────────────────┐
+ * │ New Books                                │
+ * │ [Latest▼] [New] [Completed]              │
+ * │ Loading...                               │
+ * └──────────────────────────────────────────┘
+ */
 export const NewBookSection: React.FC<NewBookSectionProps> = ({
   limit = 12,
   className,

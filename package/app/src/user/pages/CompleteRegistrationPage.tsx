@@ -517,6 +517,71 @@ function EmailVerificationStep({
 // --- Main Page ---
 // --- 主页面 ---
 
+/**
+ * Multi-step registration flow page guiding users through email verification
+ * and account identity setup. Displays a vertical stepper with conditional forms.
+ * 指导用户完成邮箱验证和账户身份设置的多步注册流程页面。显示包含条件表单的垂直步进器。
+ *
+ * Layout:
+ *
+ * Mobile (<640px):
+ * ┌──────────────────────┐
+ * │ Complete Registration│
+ * ├──────────────────────┤
+ * │ [Intro Text]         │
+ * │                      │
+ * │ Step 1: Verify Email │
+ * │ ⊙ 1    Verify Email  │
+ * │ │      [OTP Form]    │
+ * │ ⊙ 2    Setup Account │
+ * │        (locked)      │
+ * │                      │
+ * │ [Pause] Button       │
+ * └──────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────┐
+ * │ Complete Your Registration │
+ * ├────────────────────────────┤
+ * │ [Intro Text]               │
+ * │                            │
+ * │ ⊙ 1  Verify Email          │
+ * │ │    [OTP Form spanning]    │
+ * │ ⊙ 2  Setup Account         │
+ * │      [Identity Form]       │
+ * │                            │
+ * │ [Pause Registration]       │
+ * └────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌─────────────────────────────────────┐
+ * │ Complete Your Registration          │
+ * ├─────────────────────────────────────┤
+ * │ [Intro Text - wider column]         │
+ * │                                     │
+ * │ ⊙ 1  Verify Email                  │
+ * │ │    [OTP Form - full width]        │
+ * │ ⊙ 2  Setup Account                 │
+ * │      [Name] [Slug] [Languages]     │
+ * │                                     │
+ * │                 [Pause Registration]│
+ * └─────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌──────────────────────────────────────────────┐
+ * │ Complete Your Registration                   │
+ * ├──────────────────────────────────────────────┤
+ * │ [Intro Text - wider column]                  │
+ * │                                              │
+ * │ ⊙ 1  Verify Email                           │
+ * │ │    [OTP Form - full width]                 │
+ * │ ⊙ 2  Setup Account                          │
+ * │      [Name] [Slug]                           │
+ * │      [Languages - wide grid]                 │
+ * │                                              │
+ * │                    [Pause] [Logout]          │
+ * └──────────────────────────────────────────────┘
+ */
 export const CompleteRegistrationPage: FC = () => {
   const { t } = useTranslation(["auth", "common"]);
   const navigate = useNavigate();

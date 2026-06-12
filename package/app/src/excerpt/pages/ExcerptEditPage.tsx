@@ -22,6 +22,30 @@ interface ExcerptEditPageProps {
   setData: (data: UnitFormData) => void;
 }
 
+/**
+ * 摘录编辑表单组件 - 编辑摘录的标题、来源和内容
+ *
+ * 布局结构：
+ * - 移动端 (<640px)：垂直堆叠，间距 gap-4
+ * - 平板 (640-1023px)：垂直堆叠，间距 gap-4
+ * - 桌面 (1024-1535px)：垂直堆叠，min-h-[300px] markdown 编辑器
+ * - 超宽 (>=1536px)：垂直堆叠，min-h-[300px] markdown 编辑器
+ *
+ * ASCII 布局示意:
+ *
+ * All Viewports
+ * +----------+
+ * |TITLE FLD |
+ * +----------+
+ * +----------+
+ * |SOURCE    |
+ * +----------+
+ * +----------+
+ * |MARKDOWN  |
+ * |EDITOR    |
+ * |...[300+] |
+ * +----------+
+ */
 export function ExcerptEditPage({
   unitId,
   data,
@@ -34,15 +58,13 @@ export function ExcerptEditPage({
   const source = extra.source as ExcerptSource | undefined;
 
   const { mutate } = useUpdateUnitMutation({
-    onSuccess: (result) => {
+    onSuccess: () => {
       show(t("community:excerpt_updated_success"));
-      console.log("update excerpt success", result);
     },
     onError: (error) => {
       show(
         t("community:excerpt_messages_update_failed", { error: String(error) }),
       );
-      console.error("update excerpt failed", error);
     },
   });
 
@@ -115,6 +137,24 @@ export function ExcerptEditPage({
   );
 }
 
+/**
+ * 摘录编辑页面容器 - 从路由参数加载摘录数据并显示编辑表单
+ *
+ * 布局结构：
+ * - 移动端 (<640px)：w-11/12 边距，顶部 mt-4
+ * - 平板 (640-1023px)：max-w-4xl 中心，mx-auto
+ * - 桌面 (1024-1535px)：max-w-4xl 中心，mx-auto
+ * - 超宽 (>=1536px)：max-w-4xl 中心，mx-auto
+ *
+ * ASCII 布局示意:
+ *
+ * Mobile (<640px)          Tablet (640-1023px)      Desktop (1024-1535px)    Ultra-wide (>=1536px)
+ * +--+                     +------+                  +----------+              +----------+
+ * |  | margin              | FORM |                  | FORM     |              | FORM     |
+ * |FM|                     +------+                  +----------+              +----------+
+ * |  | margin
+ * +--+
+ */
 export function ExcerptEditPageContainer() {
   const { t } = useTranslation(["common", "community"]);
   const { unitId } = excerptEditRoute.useParams();
@@ -152,7 +192,7 @@ export function ExcerptEditPageContainer() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-4">
+    <div className="w-full max-w-4xl mx-auto mt-4">
       <ExcerptEditPage
         unitId={unitId}
         data={excerptData}

@@ -107,11 +107,7 @@ export function ZoneManageMenusTab({
       </Card>
 
       {draft.menus.map((menu, index) => (
-        <Card
-          surface="contained"
-          // biome-ignore lint/suspicious/noArrayIndexKey: positional rows
-          key={index}
-        >
+        <Card surface="contained" key={menu.id}>
           <CardContent className="flex flex-col gap-4 p-4">
             <div className="flex items-end justify-between gap-3">
               <ManageField label={t("zone:manage_menu_id")}>
@@ -213,8 +209,7 @@ function ZoneMenuNodeList({
     >
       {nodes.map((node, index) => (
         <ZoneMenuNodeEditor
-          // biome-ignore lint/suspicious/noArrayIndexKey: positional rows
-          key={index}
+          key={node.id}
           node={node}
           path={[...parentPath, index]}
           siblingCount={nodes.length}

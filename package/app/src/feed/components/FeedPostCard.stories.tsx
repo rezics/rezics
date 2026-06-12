@@ -19,7 +19,6 @@ const meta = {
   args: {
     post: postLongBody,
     title: "A feed card title can clamp independently from the body",
-    onOpen: () => undefined,
   },
 } satisfies Meta<typeof FeedPostCard>;
 

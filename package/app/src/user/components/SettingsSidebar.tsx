@@ -1,3 +1,28 @@
+/**
+ * 设置侧边栏导航，包含主设置路由和额外实体导航。
+ * Settings sidebar navigation with main settings routes and additional entity navigation.
+ *
+ * All breakpoints:
+ * +-----------------+
+ * | ⚙  Profile      |
+ * | ✉  Account      |
+ * | 🔒 Security     |
+ * | 🔗 Connections  |
+ * | 🔑 Tokens       |
+ * | 🎚  Preferences |
+ * | 🔔 Notif.      |
+ * | 📚 Library      |
+ * | 🚫 Blocked      |
+ * | 💾 Data         |
+ * | --- 分隔线      |
+ * | 🪪 Entities     |
+ * +-----------------+
+ *
+ * 全宽，每行 px-3 py-2，活跃项背景 surface-elevated，非活跃项悬停背景。
+ * Full width list, each item has px-3 py-2 padding, active items show surface-elevated background.
+ * 图标 24px，最小宽度 24px，标签跟随。分隔线 my-1，border-top border-border-whisper。
+ * Icons 24px with min-w-[24px], divider separates main nav from extra nav.
+ */
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 
 const i18nMessages = {

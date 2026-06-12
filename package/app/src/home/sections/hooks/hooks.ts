@@ -1,14 +1,10 @@
 import { bookQueries } from "@rezics/api/book/book";
-import {
-  type BookDTO,
-  type ContentSearchDocument,
-  DEFAULT_LANGUAGE,
-  type ShelfDTO,
-} from "@rezics/contract";
+import type { BookDTO, ShelfDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
+import { mapContentSearchDocToShelfDTO } from "@/shelf";
 
 export type SimpleQueryState<T> = {
   items: T[];
@@ -46,27 +42,10 @@ export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
     sort: { field: "createdAt", order: "desc" },
   });
 
-  const items = useMemo<ShelfDTO[]>(() => {
-    return ((data?.items ?? []) as ContentSearchDocument[]).map((doc) => ({
-      id: doc.id,
-      title: doc.titles[0] ?? "",
-      content: doc.descriptions[0] ?? "",
-      translations:
-        doc.translations ??
-        (doc.titles[0]
-          ? [
-              {
-                unitId: doc.id,
-                language: doc.defaultLanguage ?? DEFAULT_LANGUAGE,
-                title: doc.titles[0],
-                subtitle: null,
-                summary: doc.summaries[0] ?? null,
-                description: doc.descriptions[0] ?? null,
-              },
-            ]
-          : []),
-    })) as unknown as ShelfDTO[];
-  }, [data]);
+  const items = useMemo<ShelfDTO[]>(
+    () => (data?.items ?? []).map(mapContentSearchDocToShelfDTO),
+    [data],
+  );
 
   const total: number | undefined = data?.total;
 

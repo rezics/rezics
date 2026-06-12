@@ -10,6 +10,55 @@ interface RemarkEditPageProps {
   reviewId: string;
 }
 
+/**
+ * Remark (post) editing page.
+ *
+ * Fetches a remark by ID and displays the edit dialog in a full-page route.
+ * Closes and navigates back on save or dismiss.
+ *
+ * 编辑页面用于修改一条备注（post）。通过 ID 获取备注内容，
+ * 在全屏对话框中编辑。保存或关闭时返回到详情页面。
+ *
+ * Desktop:
+ * +-------------------------------------+
+ * |  < Remark Edit                      |
+ * +-------------------------------------+
+ * | Title  [__________________]         |
+ * | Content                             |
+ * | [_________________________]          |
+ * | [_________________________]          |
+ * | [Cancel]              [Save]        |
+ * +-------------------------------------+
+ *
+ * Tablet (600px):
+ * +---------------------------+
+ * | < Remark Edit             |
+ * +---------------------------+
+ * | Title  [___________]      |
+ * | Content                   |
+ * | [___________________]     |
+ * | [Cancel]    [Save]        |
+ * +---------------------------+
+ *
+ * Mobile (360px):
+ * +--------------+
+ * | < Edit       |
+ * +--------------+
+ * | Title        |
+ * | [________]   |
+ * | Content      |
+ * | [______]     |
+ * | [Dismiss]    |
+ * | [Save]       |
+ * +--------------+
+ *
+ * Loading State (360px):
+ * +--------------+
+ * | < Edit       |
+ * +--------------+
+ * | Loading...   |
+ * +--------------+
+ */
 export const RemarkEditPage: React.FC<RemarkEditPageProps> = ({ reviewId }) => {
   const { t } = useTranslation(["common"]);
   const navigate = useNavigate();

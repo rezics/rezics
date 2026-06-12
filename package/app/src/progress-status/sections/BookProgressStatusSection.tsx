@@ -26,6 +26,45 @@ import {
   openStatusModalAtom,
   statusModalAtom,
 } from "../states/statusModalAtom";
+
+/**
+ * Interactive hero section for managing a book's reading progress status.
+ * Displays reading progress bar, status toggles (Backlog/Active/Completed),
+ * and overflow menu for additional actions. Supports language-specific layouts
+ * and modals for detailed status transitions (Active progress, Paused/Dropped reasons, etc).
+ *
+ * 管理书籍阅读进度状态的交互式主视觉部分。
+ * 显示阅读进度条、状态切换(待读/阅读中/已完成)和溢出菜单。
+ * 支持语言特定布局和详细状态转换的模态框。
+ *
+ * Layout:
+ * Mobile (<640px):
+ * ┌─────────────────────────┐
+ * │ [Progress 45%      ]    │
+ * ├─────────────────────────┤
+ * │ [Backlog][Active][≡]    │
+ * │ [Menu overlay when ≡]   │
+ * └─────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ [Progress 45%            ]         │
+ * ├────────────────────────────────────┤
+ * │ [Backlog][Active][Completed][≡]    │
+ * │ [Modal overlay for detailed entry] │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌──────────────────────────────────────┐
+ * │ [Progress 45%              ]        │
+ * ├──────────────────────────────────────┤
+ * │ [Backlog][Active][Completed][≡]     │
+ * │ [Modal or inline form for actions]  │
+ * └──────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * Same as Desktop - responsive container max-width
+ */
 export type BookProgressStatusSectionProps = {
   bookUnitId: string;
 };

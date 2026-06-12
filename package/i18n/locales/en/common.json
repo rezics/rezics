@@ -5,7 +5,11 @@
   "accessibility_favorite": "Favorite",
   "accessibility_hot": "Hot",
   "accessibility_open_drawer": "Open drawer",
+  "accessibility_add_to_favorites": "Add to favorites",
+  "accessibility_clear_selection": "Clear selection",
+  "accessibility_remove_from_favorites": "Remove from favorites",
   "accessibility_search": "Search",
+  "accessibility_search_results": "Search results",
   "action": "Action",
   "actions": "Actions",
   "active": "Active",
@@ -186,5 +190,12 @@
   "route_denied_title": "Access restricted",
   "route_denied_description": "You don't have permission to view this page.",
   "route_unauthenticated_title": "Sign in to continue",
-  "route_unauthenticated_description": "You need to be signed in to view this page."
+  "route_unauthenticated_description": "You need to be signed in to view this page.",
+  "please_login_first": "Please login first",
+  "relative_time_just_now": "just now",
+  "relative_time_minutes_ago": "{value} minutes ago",
+  "relative_time_hours_ago": "{value} hours ago",
+  "relative_time_days_ago": "{value} days ago",
+  "relative_time_weeks_ago": "{value} weeks ago",
+  "mutation_error_generic": "Something went wrong. Please try again."
 }

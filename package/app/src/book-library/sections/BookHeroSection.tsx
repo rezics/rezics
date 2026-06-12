@@ -74,6 +74,63 @@ const CREDIT_ROLES = [
   { role: "producer", label: i18nMessages.book_hero_meta_producer },
 ] as const;
 
+/**
+ * Book Hero Section - Full-width header with cover, title, rating, and metadata.
+ * 图书英雄部分——包含封面、标题、评分和元数据的全宽标题。
+ *
+ * Renders a dramatic dark background hero with book cover, dynamic stat cards,
+ * featured review (if available), and metadata rows.
+ *
+ * Mobile <640px:
+ * +-----------------+
+ * | Title           |
+ * | Score (inline)  |
+ * | Brief info      |
+ * +-----------------+
+ * | Cover centered  |
+ * +-----------------+
+ * | Review (opt)    |
+ * | Stat cards      |
+ * +-----------------+
+ * | Metadata        |
+ * | Tags            |
+ * | Actions         |
+ * +-----------------+
+ *
+ * Tablet 640-1023px:
+ * +-----------------+
+ * | Title + Score   |
+ * | Brief info      |
+ * +-----------------+
+ * | Cover | Stacked |
+ * |       | cards   |
+ * +-----------------+
+ * | Metadata + Tags |
+ * | Actions (right) |
+ * +-----------------+
+ *
+ * Desktop 1024-1535px:
+ * +-----+---+-----+
+ * | Title (full) + Score + Your Score |
+ * | Brief info                        |
+ * +-----+---+-----+
+ * | Cov | Rev | Stat |
+ * | er  | iew | Cards|
+ * +-----+---+-----+
+ * | Metadata (left) | Actions (right) |
+ * +-----------------+-----------------+
+ *
+ * Ultra-wide >=1536px:
+ * +-----+----+------+
+ * | Title (full) + Score + Your Score |
+ * | Brief info                        |
+ * +-----+----+------+
+ * | Cov | Review   | Stat Cards |
+ * | er  |          | (promoted) |
+ * +-----+----------+------------+
+ * | Metadata (left) | Actions (right) |
+ * +-----------------+-----------------+
+ */
 export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   bookInfo,
   rating,

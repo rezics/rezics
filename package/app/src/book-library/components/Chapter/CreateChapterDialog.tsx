@@ -69,6 +69,7 @@ export function CreateChapterDialog({
 
   async function handleSubmit() {
     if (!open) return;
+    if (createMutation.isPending) return;
     if (isInvalid) {
       show(t("book:chapter_title_content_required"));
       return;
@@ -101,10 +102,9 @@ export function CreateChapterDialog({
       });
 
       onClose();
-    } catch (e) {
-      // Error already surfaced via onError
-      // 错误已通过 onError 呈现
-      console.error("Create chapter failed", e);
+    } catch {
+      // Error already surfaced via the mutation's onError callback.
+      // 错误已通过 mutation 的 onError 回调呈现。
     }
   }
 
@@ -141,6 +141,7 @@ export function CreateChapterDialog({
               onChange={setContent}
               onSubmit={handleSubmit}
               onCancel={onClose}
+              submitDisabled={createMutation.isPending}
               submitLabel={
                 createMutation.isPending
                   ? t("common:submitting")

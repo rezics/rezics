@@ -38,11 +38,10 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   const userId = useCurrentUserId();
   const isAuthed = Boolean(userId);
 
-  const { data: userScores } = useQuery({
-    ...scoreQueries.userScores(userId ?? "", bookUnitId),
-    enabled: isAuthed && Boolean(bookUnitId),
+  const { data: existing } = useQuery({
+    ...scoreQueries.userScoreForRealm(userId ?? "", bookUnitId, realmId),
+    enabled: isAuthed && Boolean(bookUnitId) && Boolean(realmId),
   });
-  const existing = userScores?.find((s) => s.realm === realmId);
   const currentValue = existing?.value ?? null;
 
   const [open, setOpen] = useState(false);

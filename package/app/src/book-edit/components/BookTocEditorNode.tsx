@@ -221,7 +221,8 @@ export const createBookTocEditorNode = ({
 
     const sectionMeta = (
       <span>
-        {node.children?.length ?? 0} {t("book:chapter_items")} · {formatCount(wordCount)} {t("book:chapter_words")}
+        {node.children?.length ?? 0} {t("book:chapter_items")} ·{" "}
+        {formatCount(wordCount)} {t("book:chapter_words")}
       </span>
     );
 
@@ -245,9 +246,17 @@ export const createBookTocEditorNode = ({
         >
           {statusLabel}
         </Badge>
-        <span>{t("book:chapter_updated")} {mockDate(node.id)}</span>
-        <span>{formatCount(wordCount)} {t("book:chapter_words")}</span>
-        {hasChildren ? <span>{node.children?.length ?? 0} {t("book:chapter_items")}</span> : null}
+        <span>
+          {t("book:chapter_updated")} {mockDate(node.id)}
+        </span>
+        <span>
+          {formatCount(wordCount)} {t("book:chapter_words")}
+        </span>
+        {hasChildren ? (
+          <span>
+            {node.children?.length ?? 0} {t("book:chapter_items")}
+          </span>
+        ) : null}
         <span className="inline-flex items-center gap-0.5">
           <Visibility size={12} />
           {formatCount(views)}

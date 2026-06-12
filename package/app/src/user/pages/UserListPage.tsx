@@ -12,6 +12,7 @@ import {
   Input,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -29,9 +30,8 @@ export interface UserListPageProps {
  */
 export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   const { t } = useTranslation(["settings"]);
-  const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -58,13 +58,8 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   }, [page, debouncedQuery]);
 
   const { data, isLoading, error } = useQuery(userQueries.list(queryParams));
-
-  useEffect(() => {
-    if (data) {
-      setUsers(data.users);
-      setTotal(data.total);
-    }
-  }, [data]);
+  const users = data?.users ?? [];
+  const total = data?.total ?? 0;
 
   const handlePageChange = (value: number) => {
     setPage(value);
@@ -75,14 +70,14 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
     if (onUserClick) {
       onUserClick(unitId);
     } else {
-      window.location.href = `/users/${unitId}`;
+      navigate({ to: "/user/$userId", params: { userId: unitId } });
     }
   };
 
   const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
-    <div className="w-11/12 mx-auto mt-16">
+    <div className="w-full px-4 mt-16">
       <h3 className="text-3xl font-bold mb-8">
         {t("settings:user_list_title")}
       </h3>

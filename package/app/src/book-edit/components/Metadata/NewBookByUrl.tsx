@@ -16,7 +16,6 @@ export function NewBookByUrl() {
   const [url, setUrl] = useState("");
   function handleCreateBook() {
     // TODO 对接爬虫
-    console.log("create book", url);
   }
   const supportedSitesQuery = useQuery(
     echoKvGetQuery("crawler.supportedSites"),
@@ -33,7 +32,7 @@ export function NewBookByUrl() {
     }
   }, [supportedSitesQuery]);
   return (
-    <div className="mt-16 mx-auto w-11/12">
+    <div className="mt-16 w-full px-4">
       <div className="text-2xl font-bold mb-4">
         {t("book:edit_create_book_by_url_title")}
       </div>

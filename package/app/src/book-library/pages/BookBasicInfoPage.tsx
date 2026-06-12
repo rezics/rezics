@@ -25,6 +25,94 @@ import { useBookLanguage } from "../hooks/useBookLanguage";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
+/**
+ * 书籍基本信息页面。展示书籍的描述、标签、摘录和评论等基本信息。
+ * Book Basic Info Page: displays description, tags, excerpts, and remarks for a book.
+ *
+ * Layout breakpoints:
+ *
+ * Mobile (<640px):
+ * ┌──────────────────────┐
+ * │ Book Description     │
+ * │ [Full width content] │
+ * ├──────────────────────┤
+ * │ Metadata Panel       │
+ * │ (inline variant)     │
+ * ├──────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━  │ (Separator)
+ * ├──────────────────────┤
+ * │ Tags Section         │
+ * │ [Tag list display]   │
+ * ├──────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━  │
+ * ├──────────────────────┤
+ * │ Excerpts → More      │
+ * │ [Excerpt preview]    │
+ * ├──────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━  │
+ * ├──────────────────────┤
+ * │ Remarks             │
+ * │ [Form + Preview]    │
+ * ├──────────────────────┤
+ * │ Copyright Notice    │
+ * └──────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ Book Description (wider)           │
+ * │ [Content spans full width]         │
+ * ├────────────────────────────────────┤
+ * │ Metadata Panel (inline)            │
+ * ├────────────────────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+ * ├────────────────────────────────────┤
+ * │ Tags Section [with navigation]     │
+ * │ [Tag list display (more visible)]  │
+ * ├────────────────────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+ * ├────────────────────────────────────┤
+ * │ Excerpts → More                    │
+ * │ [Excerpt preview (larger)]         │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌─────────────────────────────────────────────┐
+ * │ Book Description                            │
+ * │ [Content constrained width]                 │
+ * ├─────────────────────────────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+ * ├─────────────────────────────────────────────┤
+ * │ Tags Section [with search navigation]       │
+ * │ [Complete tag list with interactions]       │
+ * ├─────────────────────────────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+ * ├─────────────────────────────────────────────┤
+ * │ Excerpts → More                             │
+ * │ [Full excerpt preview with details]         │
+ * ├─────────────────────────────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+ * ├─────────────────────────────────────────────┤
+ * │ Remarks [with full interaction form]        │
+ * │ [Full preview]                              │
+ * └─────────────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌─────────────────────────────────────────────────────┐
+ * │ [Sidebar (hidden)]  │ Main Content (optimal width)  │
+ * │ Metadata Panel (lg) │ Book Description              │
+ * │ [sticky/fixed]      │ [Comfortable reading width]   │
+ * │                     ├───────────────────────────────┤
+ * │                     │ ━━━━━━━━━━━━━━━━━━━━━━━━  │
+ * │                     ├───────────────────────────────┤
+ * │                     │ Tags [full interaction]       │
+ * │                     │ [Complete tag cloud]          │
+ * │                     ├───────────────────────────────┤
+ * │                     │ Excerpts [full preview]       │
+ * │                     ├───────────────────────────────┤
+ * │                     │ Remarks [full form + preview] │
+ * │                     │ [Complete discussion]         │
+ * │                     └───────────────────────────────┘
+ */
 export const BookBasicInfoPage: React.FC = () => {
   const { t } = useTranslation(["book"]);
   const { bookId } = useParams({ strict: false }) as { bookId: string };

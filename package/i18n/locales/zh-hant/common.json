@@ -5,7 +5,11 @@
   "accessibility_favorite": "收藏",
   "accessibility_hot": "熱門",
   "accessibility_open_drawer": "開啟側邊欄",
+  "accessibility_add_to_favorites": "加入收藏",
+  "accessibility_clear_selection": "清除選擇",
+  "accessibility_remove_from_favorites": "從收藏中移除",
   "accessibility_search": "搜尋",
+  "accessibility_search_results": "搜尋結果",
   "action": "行動",
   "actions": "行動",
   "active": "啟用",
@@ -186,5 +190,12 @@
   "route_denied_title": "存取受限",
   "route_denied_description": "你沒有檢視此頁面的權限。",
   "route_unauthenticated_title": "請先登入",
-  "route_unauthenticated_description": "你需要登入才能檢視此頁面。"
+  "route_unauthenticated_description": "你需要登入才能檢視此頁面。",
+  "please_login_first": "請先登入",
+  "relative_time_just_now": "剛剛",
+  "relative_time_minutes_ago": "{value} 分鐘前",
+  "relative_time_hours_ago": "{value} 小時前",
+  "relative_time_days_ago": "{value} 天前",
+  "relative_time_weeks_ago": "{value} 週前",
+  "mutation_error_generic": "發生錯誤，請重試。"
 }

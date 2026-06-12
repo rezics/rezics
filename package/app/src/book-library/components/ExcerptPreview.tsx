@@ -1,10 +1,10 @@
 import { postQueries } from "@rezics/api/post/post";
-import { type PostDTO, PostKind, type UnitDTO } from "@rezics/contract";
+import { PostKind, type UnitDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core";
-import { ExcerptList } from "@/excerpt";
+import { ExcerptList, mapPostToExcerptUnit } from "@/excerpt";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export type ExcerptPreviewProps = {
@@ -33,30 +33,8 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   if (error) return <QueryErrorDisplay error={error} />;
 
   const units: UnitDTO[] =
-    data?.posts?.slice(0, excerptNumber).map(mapExcerptPostToUnit) ?? [];
+    data?.posts?.slice(0, excerptNumber).map(mapPostToExcerptUnit) ?? [];
   return <ExcerptList units={units} />;
 };
 
 export { ExcerptPreview as ExcerptPreviewContainer };
-
-function mapExcerptPostToUnit(post: PostDTO): UnitDTO {
-  return {
-    id: post.unitId,
-    unitId: post.unitId,
-    type: "QUOTE",
-    user: post.author,
-    translations: [
-      {
-        unitId: post.unitId,
-        language: post.resolvedLanguage ?? "en",
-        title: null,
-        subtitle: null,
-        summary: null,
-        description: post.content ?? null,
-      },
-    ],
-    extra: post.extra,
-    createdAt: post.createdAt,
-    updatedAt: post.updatedAt,
-  } as unknown as UnitDTO;
-}

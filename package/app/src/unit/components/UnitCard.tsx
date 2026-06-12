@@ -22,11 +22,12 @@ export function UnitCard({
   authorSlot,
   className,
 }: UnitCardProps) {
-  const { t } = useTranslation(["book"]);
+  const { t } = useTranslation(["book", "entity"]);
   const titleId = useId();
   const isCompact = variant === "compact";
   const addedAt = formatAddedAt(summary.addedAt);
-  const author = authorSlot ?? renderAuthor(summary);
+  const communityCatalogLabel = t("entity:community_catalog");
+  const author = authorSlot ?? renderAuthor(summary, communityCatalogLabel);
   const translationMeta = renderTranslationMeta(summary);
   const attachments = renderAttachmentCounts(summary);
 
@@ -129,11 +130,11 @@ export function UnitCard({
   );
 }
 
-function renderAuthor(summary: UnitCardSummary) {
+function renderAuthor(summary: UnitCardSummary, communityCatalogLabel: string) {
   if (summary.isCommunityCatalog) {
     return (
       <span className="min-w-0 truncate text-text-secondary">
-        Community catalog
+        {communityCatalogLabel}
       </span>
     );
   }

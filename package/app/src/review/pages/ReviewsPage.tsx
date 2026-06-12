@@ -5,6 +5,7 @@ import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
+import { QueryErrorDisplay } from "@/core";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput, useSearchQuery } from "@/search";
@@ -17,6 +18,31 @@ export interface ReviewsPageProps {
   variantUnitId?: string;
 }
 
+/**
+ * 评论列表页面 - 使用分页、搜索、标签标签过滤显示评论和备注
+ *
+ * 布局结构：
+ * - 移动端 (<640px)：全宽 max-w-7xl，p-4 边距，mt-4（顶部间距）
+ * - 平板 (640-1023px)：mx-auto 中心，max-w-7xl，p-4，mt-4
+ * - 桌面 (1024-1535px)：mx-auto 中心，max-w-7xl，p-4，mt-4
+ * - 超宽 (>=1536px)：mx-auto 中心，max-w-7xl，p-4，mt-4
+ *
+ * ASCII 布局示意:
+ *
+ * All Viewports (max-w-7xl, centered, p-4, mt-4)
+ * +----------+
+ * |SEARCH    |
+ * +----------+
+ * +----------+
+ * |TAB|REMARK|
+ * +----------+
+ * +----------+
+ * |REVIEW    |
+ * |LIST      |
+ * |[10 items]|
+ * +----------+
+ * +__PAGIN___+
+ */
 export const ReviewsPage: React.FC<ReviewsPageProps> = ({
   bookUnitId,
   variantUnitId,
@@ -34,7 +60,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
 
   const kind = tab === "review" ? "REVIEW" : "REMARK";
 
-  const { data, isLoading } = useLocalizedPostSearch({
+  const { data, isLoading, isError, error } = useLocalizedPostSearch({
     kind,
     targetUnitId: targetUnitId || undefined,
     variantUnitId,
@@ -66,8 +92,16 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
     setCurrentPage(1);
   }
 
+  if (isError) {
+    return (
+      <div className="w-full mx-auto max-w-7xl p-4 mt-4">
+        <QueryErrorDisplay error={error} />
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-7xl p-4 mt-4">
+    <div className="w-full mx-auto max-w-7xl p-4 mt-4">
       <UniversalPaginator<Review>
         ref={ref}
         data={baseReviews}

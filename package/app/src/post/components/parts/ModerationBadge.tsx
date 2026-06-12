@@ -17,7 +17,7 @@ import {
 import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 
-type CommunityT = ReturnType<typeof useTranslation>["t"];
+type TranslationT = ReturnType<typeof useTranslation>["t"];
 
 type StatusTone = "success" | "warning" | "error";
 
@@ -35,13 +35,13 @@ export function ModerationBadge({
   post: PostDTO;
   status?: ModerationStatus;
 }) {
-  const { t } = useTranslation(["community"]);
+  const { t } = useTranslation(["common", "community"]);
   if (!status) return null;
 
   const label = badgeLabel(t, status, latestAction);
   const relativeTime = latestAction
-    ? formatRelativeTime(latestAction.createdAt)
-    : formatRelativeTime(at);
+    ? formatRelativeTime(t, latestAction.createdAt)
+    : formatRelativeTime(t, at);
   const showActorAvatar = Boolean(latestAction);
 
   return (
@@ -97,24 +97,29 @@ function statusDotClass(tone: StatusTone) {
   }
 }
 
-function formatRelativeTime(value?: string | Date | null) {
+/**
+ * Format a date as a human-readable relative time string.
+ * 将日期格式化为可读的相对时间字符串。
+ */
+function formatRelativeTime(t: TranslationT, value?: string | Date | null) {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return t("common:relative_time_just_now");
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  if (minutes < 60)
+    return t("common:relative_time_minutes_ago", { value: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (hours < 24) return t("common:relative_time_hours_ago", { value: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+  if (days < 7) return t("common:relative_time_days_ago", { value: days });
   const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+  if (weeks < 5) return t("common:relative_time_weeks_ago", { value: weeks });
   return date.toLocaleDateString();
 }
 
-function moderationActionLabel(t: CommunityT, action: ModerationActionDTO) {
+function moderationActionLabel(t: TranslationT, action: ModerationActionDTO) {
   switch (action.actionKind) {
     case "approve":
       return t("community:moderation_latest_action_approve");
@@ -131,7 +136,7 @@ function moderationActionLabel(t: CommunityT, action: ModerationActionDTO) {
   }
 }
 
-function statusLabel(t: CommunityT, status: ModerationStatus) {
+function statusLabel(t: TranslationT, status: ModerationStatus) {
   switch (status) {
     case "pending":
       return t("community:moderation_status_pending");
@@ -153,7 +158,7 @@ function statusTone(status: ModerationStatus): StatusTone {
   }
 }
 
-function moderationActorLabel(t: CommunityT, action: ModerationActionDTO) {
+function moderationActorLabel(t: TranslationT, action: ModerationActionDTO) {
   if (action.actorUserId) return `@${action.actorUserId}`;
   switch (action.actorKind) {
     case "system":
@@ -168,7 +173,7 @@ function moderationActorLabel(t: CommunityT, action: ModerationActionDTO) {
 }
 
 function badgeLabel(
-  t: CommunityT,
+  t: TranslationT,
   status: ModerationStatus,
   latestAction?: ModerationActionDTO | null,
 ) {
@@ -209,12 +214,12 @@ function ModerationActionListItem({
   action?: ModerationActionDTO | null;
   post: PostDTO;
 }) {
-  const { t } = useTranslation(["community"]);
+  const { t } = useTranslation(["common", "community"]);
   const label = action
     ? moderationActionLabel(t, action)
     : t("community:moderation_auto_approved");
   const actor = action ? moderationActorLabel(t, action) : null;
-  const time = formatRelativeTime(action?.createdAt);
+  const time = formatRelativeTime(t, action?.createdAt);
   const reason = action?.reasonText ?? action?.publicMessage ?? null;
 
   return (

@@ -45,6 +45,7 @@
   "collection_title": "Sammeln",
   "collection_unit_shelf_count": "{count} Regale",
   "collection_unit_tag_count": "{count} Tags",
+  "community_catalog": "Gemeinschaftskatalog",
   "shelf_contents_search_empty": "Keine Regalobjekte gefunden",
   "shelf_contents_search_entry_title": "Alle Regalinhalte durchsuchen",
   "shelf_contents_search_has_more": "Weitere Regalobjekte passen zu dieser Suche.",
@@ -188,6 +189,7 @@
   "realm_leave": "Verlassen",
   "realm_list_leave_confirm_description": "Du verlässt {count} ausgewählte Realm(s). Die Realms werden nicht gelöscht.",
   "realm_list_leave_confirm_title": "Ausgewählte Realms verlassen?",
+  "realm_list_leave_failed": "Einige Realms konnten nicht verlassen werden. Bitte versuche es erneut.",
   "realm_list_manage": "Verwalten",
   "realm_list_selected_count": "{count} ausgewählt",
   "realm_list_sign_in_prompt": "Melde dich an, um deine beigetretenen Realms zu sehen und zu verwalten.",
@@ -386,5 +388,7 @@
   "seed_tag_game": "Spiel",
   "seed_tag_media": "Medien",
   "seed_tag_post": "Beitrag",
-  "seed_tag_link": "Link"
+  "seed_tag_link": "Link",
+  "variant": "Variante",
+  "review": "Rezension"
 }

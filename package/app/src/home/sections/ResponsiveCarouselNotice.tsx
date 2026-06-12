@@ -21,7 +21,9 @@ export function ResponsiveCarouselNotice() {
       // 同步高度
       if (carouselRef.current && noticeRef.current) {
         const h = carouselRef.current.getBoundingClientRect().height;
-        noticeRef.current.style.height = isWide ? `${h}px` : "auto";
+        // Derive layout mode from current width to avoid stale closure over isWide.
+        // 从当前宽度推导布局模式，避免闭包捕获到过期的 isWide。
+        noticeRef.current.style.height = w >= 1200 ? `${h}px` : "auto";
       }
     };
 
@@ -34,7 +36,7 @@ export function ResponsiveCarouselNotice() {
       window.removeEventListener("resize", updateLayout);
       ro.disconnect();
     };
-  }, [isWide]);
+  }, []);
 
   return (
     <div

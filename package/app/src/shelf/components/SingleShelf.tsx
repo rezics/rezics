@@ -31,7 +31,9 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
             variant="ghost"
             size="icon"
             aria-label={t("common:edit")}
-            onClick={() => navigate({ to: `/shelf/${shelfId}/edit` })}
+            onClick={() =>
+              navigate({ to: "/shelf/$shelfId/edit", params: { shelfId } })
+            }
             className="h-7 w-7"
           >
             <EditOutlined className="h-4 w-4" />

@@ -1,3 +1,52 @@
+/**
+ * FollowersTabSection — 用户资料页内的关注者与正在关注标签页，
+ * 支持切换视图，分页展示用户列表，支持关注/取消关注操作。
+ *
+ * ┌───────────────────────────────────────────┐
+ * │ Followers Tab (desktop 1024px+)           │
+ * │ ┌─────────────────────────────────────────┐
+ * │ │ [Followers: 234] [Following: 89]        │
+ * │ ├─────────────────────────────────────────┤
+ * │ │ [Avatar] Jane Doe @jane               │
+ * │ │          Bio: Love reading...          │
+ * │ │ [Avatar] John Smith @john  [Follow]   │
+ * │ │          Bio: Tech enthusiast          │
+ * │ │ [Avatar] Alice Chen @alice  [Follow]  │
+ * │ │ [Prev] Page 1 of 12 [Next]             │
+ * │ └─────────────────────────────────────────┘
+ * └───────────────────────────────────────────┘
+ *
+ * ┌───────────────────────┐
+ * │ Followers (tablet)    │
+ * │ ┌─────────────────────┐
+ * │ │ [Followers] [Fol..]  │
+ * │ ├─────────────────────┤
+ * │ │ [A] Jane Doe @jane  │
+ * │ │     Love reading    │
+ * │ │ [J] John Smith @j   │
+ * │ │ [Prev] 1 of 6[Next] │
+ * │ └─────────────────────┘
+ * └───────────────────────┘
+ *
+ * ┌──────────────────────┐
+ * │ Mobile (375px)       │
+ * │ ┌────────────────────┐
+ * │ │ Followers Foll..   │
+ * │ ├────────────────────┤
+ * │ │ [J] Jane           │
+ * │ │ [A] Alice          │
+ * │ │ [Prev] 1/6[Next]   │
+ * │ └────────────────────┘
+ * └──────────────────────┘
+ *
+ * ┌──────────────────────┐
+ * │ Empty State (no us)  │
+ * │ ┌────────────────────┐
+ * │ │ No followers yet   │
+ * │ └────────────────────┘
+ * └──────────────────────┘
+ */
+
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

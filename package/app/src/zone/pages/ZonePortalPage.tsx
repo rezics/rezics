@@ -24,6 +24,115 @@ type ZonePortalPageProps = {
  * through the section primitives — template dispatch is dead.
  * 单一的配置驱动门户：通过分区原语渲染 `config.pages.home.sections`
  * ——模板分发已废弃。
+ *
+ * Layout responsive design with custom zone theming (CSS var injection):
+ * - Mobile (<640px): Full-width single column, theme background with px-4 padding
+ * - Tablet (640-1023px): Same as mobile with max-width constraint
+ * - Desktop (1024-1535px): Max-width 4xl centered content, zone header full-width
+ * - Ultra-wide (≥1536px): Same as desktop with wider viewport
+ *
+ * Mobile (<640px):
+ * ┌───────────────────────────┐
+ * │ [Zone Background]         │
+ * │ ┌─────────────────────┐   │
+ * │ │ Zone Header         │   │
+ * │ │ [Logo] Zone Name    │   │
+ * │ │ Description...      │   │
+ * │ └─────────────────────┘   │
+ * │ ┌─────────────────────┐   │
+ * │ │ [Manage] (if auth)  │   │ (right-aligned)
+ * │ └─────────────────────┘   │
+ * │ ┌─────────────────────┐   │
+ * │ │ Hero Section        │   │ (config-driven sections)
+ * │ │ [Banner image]      │   │
+ * │ │ [CTA buttons]       │   │
+ * │ └─────────────────────┘   │
+ * │ ┌─────────────────────┐   │
+ * │ │ Collection Section  │   │
+ * │ │ [Item grid]         │   │
+ * │ └─────────────────────┘   │
+ * │ ┌─────────────────────┐   │
+ * │ │ Feed Section        │   │
+ * │ │ [Posts list]        │   │
+ * │ └─────────────────────┘   │
+ * └───────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌───────────────────────────────┐
+ * │      [Zone Background]        │
+ * │      ┌───────────────────┐    │
+ * │      │ Zone Header       │    │
+ * │      │ [Logo] Zone Name  │    │
+ * │      │ Description...    │    │
+ * │      └───────────────────┘    │
+ * │      [Manage] (right-aligned) │
+ * │      ┌───────────────────┐    │
+ * │      │ Hero Section      │    │
+ * │      │ [Banner]          │    │
+ * │      │ [CTAs]            │    │
+ * │      └───────────────────┘    │
+ * │      ┌───────────────────┐    │
+ * │      │ Collections       │    │
+ * │      │ [Grid items]      │    │
+ * │      └───────────────────┘    │
+ * │      ┌───────────────────┐    │
+ * │      │ Feed              │    │
+ * │      │ [Posts]           │    │
+ * │      └───────────────────┘    │
+ * └───────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌────────────────────────────────────────────┐
+ * │ [Zone Background (theme colors)]           │
+ * │ ┌──────────────────────────────────────┐   │
+ * │ │ Zone Header (full width)             │   │
+ * │ │ [Logo] Zone Name                     │   │
+ * │ │ Description text...                  │   │
+ * │ └──────────────────────────────────────┘   │
+ * │                                            │
+ * │ ┌──────────────────────────────────────┐   │
+ * │ │ [Manage Link] (right-aligned)        │   │
+ * │ └──────────────────────────────────────┘   │
+ * │                                            │
+ * │ ┌──────────────────────────────────────┐   │
+ * │ │ Hero Section                         │   │
+ * │ │ [Banner with image] [CTA buttons]    │   │
+ * │ └──────────────────────────────────────┘   │
+ * │                                            │
+ * │ ┌──────────────────────────────────────┐   │
+ * │ │ Collection Section                   │   │
+ * │ │ [Item grid layout]                   │   │
+ * │ └──────────────────────────────────────┘   │
+ * │                                            │
+ * │ ┌──────────────────────────────────────┐   │
+ * │ │ Feed Section                         │   │
+ * │ │ [Posts timeline]                     │   │
+ * │ └──────────────────────────────────────┘   │
+ * └────────────────────────────────────────────┘
+ *
+ * Ultra-wide (≥1536px):
+ * ┌──────────────────────────────────────────────────────────┐
+ * │ [Padding] [Zone Background (theme colors)]  [Padding]   │
+ * │           ┌────────────────────────────┐                │
+ * │           │ Zone Header                │                │
+ * │           │ [Logo] Zone Name           │                │
+ * │           │ Description...             │                │
+ * │           └────────────────────────────┘                │
+ * │                                                          │
+ * │           ┌────────────────────────────┐                │
+ * │           │ [Manage] (right-aligned)   │                │
+ * │           └────────────────────────────┘                │
+ * │                                                          │
+ * │           ┌────────────────────────────┐                │
+ * │           │ Hero Section               │                │
+ * │           │ [Wide content area]        │                │
+ * │           └────────────────────────────┘                │
+ * │                                                          │
+ * │           ┌────────────────────────────┐                │
+ * │           │ Collections/Feed/etc       │                │
+ * │           │ [Config-driven sections]   │                │
+ * │           └────────────────────────────┘                │
+ * └──────────────────────────────────────────────────────────┘
  */
 export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
   slug,
@@ -46,7 +155,7 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+      <div className="w-full mx-auto max-w-4xl px-4 py-24 text-center">
         <p className="text-text-secondary">{t("zone:loading")}</p>
       </div>
     );
@@ -54,7 +163,7 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
 
   if (error || !zone || !page || !refUnits) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+      <div className="w-full mx-auto max-w-4xl px-4 py-24 text-center">
         <h2 className="mb-2 text-2xl font-semibold leading-ui text-text-primary">
           {t("zone:not_found")}
         </h2>

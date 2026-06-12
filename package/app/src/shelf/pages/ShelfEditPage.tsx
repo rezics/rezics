@@ -3,14 +3,65 @@
  * TODO 当前策略存在问题。在 list 模式下，review 其实不需要绑定到 prime 排序。它应当能够独立排序到任意位置，同时绑定的 prime 信息应展示在 review card 中。
  */
 import type { ShelfView } from "@rezics/api/shelf";
+
+/**
+ * Shelf edit page with metadata form and item editor. Supports editing title,
+ * description, cover URL, pinned tags, and default view mode (nested/flat).
+ * 书架编辑页面，包含元数据表单和条目编辑器。支持编辑标题、描述、封面 URL、固定标签和默认视图模式。
+ *
+ * Mobile <640px:
+ * +--[Back][Title]--+
+ * |  Input         |
+ * |  Label         |
+ * |  Textarea      |
+ * |  TagChips      |
+ * |  Select        |
+ * |  [Cancel][Save]|
+ * |  ItemsSection  |
+ * +----------------+
+ *
+ * Tablet 640-1023px:
+ * +--------[Back][Title]--------+
+ * |  Input      Input          |
+ * |  Label      Label          |
+ * |  Textarea   TagChips       |
+ * |  Select         Select     |
+ * |  [Cancel]     [Save]       |
+ * |  ItemsSection              |
+ * +----------------------------+
+ *
+ * Desktop 1024-1535px:
+ * +----------[Back][Title]----------+
+ * |  Input         Input           |
+ * |  Label         Label           |
+ * |  Textarea      TagChips        |
+ * |  Select            Select      |
+ * |                [Cancel][Save]  |
+ * |  ItemsSection (full width)     |
+ * +--------------------------------+
+ *
+ * Ultra-wide >=1536px:
+ * +-------[Back][Title (max-w-3xl)]-------+
+ * |  Input              Input            |
+ * |  Label              Label            |
+ * |  Textarea           TagChips         |
+ * |  Select                 Select       |
+ * |                   [Cancel][Save]     |
+ * |  ItemsSection (centered max-w-3xl)   |
+ * +--------------------------------------+
+ */
 import { shelfDetailQuery } from "@rezics/api/shelf";
 import {
   useSetShelfPinnedTagsMutation,
   useUpdateShelfMutation,
 } from "@rezics/api/shelf/shelf.mutations";
-import { contentDocMarkdownFallback } from "@rezics/contract";
+import { useUpsertTranslationMutation } from "@rezics/api/unit/unit.mutations";
+import {
+  contentDocMarkdownFallback,
+  markdownContentDoc,
+} from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
-import { Spinner } from "@rezics/ui";
+import { ConfirmDialog, Spinner } from "@rezics/ui";
 import {
   Button,
   Input,
@@ -24,7 +75,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { QueryErrorDisplay } from "@/core";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
@@ -45,9 +97,15 @@ const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
 
 export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const navigate = useNavigate();
-  const { data: shelf, isLoading } = useQuery(shelfDetailQuery(shelfId));
+  const {
+    data: shelf,
+    isLoading,
+    isError,
+    error,
+  } = useQuery(shelfDetailQuery(shelfId));
   const updateMutation = useUpdateShelfMutation();
   const setPinnedTagsMutation = useSetShelfPinnedTagsMutation();
+  const upsertTranslationMutation = useUpsertTranslationMutation();
   const editor = useShelfItemsEditor(shelfId);
 
   const pinnedTagIds = useMemo(
@@ -81,8 +139,15 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [editorPreviewView, setEditorPreviewView] =
     useState<ShelfView>("nested");
 
+  // Only initialize form state on first data load; skip subsequent refetches
+  // so that mutation-triggered query invalidations don't wipe in-progress edits.
+  // 仅在首次数据加载时初始化表单状态；跳过后续 refetch，
+  // 避免 mutation 触发的查询失效覆盖正在编辑的内容。
+  const initializedRef = useRef(false);
   useEffect(() => {
+    if (initializedRef.current) return;
     if (translation) {
+      initializedRef.current = true;
       setTitle(translation.title ?? "");
       setDescription(contentDocMarkdownFallback(translation.description));
       setCoverUrl(shelf?.coverUrl ?? "");
@@ -112,13 +177,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
 
   const isDirty = metadataDirty || editor.dirty;
 
-  useBlocker({
-    shouldBlockFn: () => {
-      if (!isDirty) return false;
-      return !window.confirm(
-        getI18nRuntime().i18n.t("entity:shelf_unsaved_changes_confirm"),
-      );
-    },
+  const blocker = useBlocker({
+    shouldBlockFn: () => isDirty,
+    withResolver: true,
     enableBeforeUnload: () => isDirty,
   });
 
@@ -135,7 +196,32 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
         },
       },
     });
+
+    // Persist description via upsertTranslation — the shelf update endpoint
+    // does not carry a description field.
+    // 通过 upsertTranslation 持久化描述 —— shelf 更新端点不包含 description 字段。
+    const lang = translation?.language;
+    if (lang) {
+      upsertTranslationMutation.mutate({
+        unitId: shelfId,
+        language: lang,
+        input: {
+          title,
+          description: markdownContentDoc(description),
+        },
+      });
+    }
   };
+
+  // Shelf detail query failed — show error before content
+  // 书架详情查询失败 —— 在内容之前显示错误
+  if (isError) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-6">
+        <QueryErrorDisplay error={error} />
+      </div>
+    );
+  }
 
   if (isLoading || !shelf) {
     return (
@@ -255,7 +341,11 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           </Button>
           <Button
             onClick={handleSave}
-            disabled={updateMutation.isPending || !metadataDirty}
+            disabled={
+              updateMutation.isPending ||
+              upsertTranslationMutation.isPending ||
+              !metadataDirty
+            }
           >
             {getI18nRuntime().i18n.t("common:save")}
           </Button>
@@ -268,6 +358,16 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           editor={editor}
         />
       </div>
+
+      <ConfirmDialog
+        open={blocker.status === "blocked"}
+        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => blocker.reset?.()}
+        title={getI18nRuntime().i18n.t("entity:shelf_unsaved_changes_confirm")}
+        confirmLabel={getI18nRuntime().i18n.t("common:confirm")}
+        cancelLabel={getI18nRuntime().i18n.t("common:cancel")}
+        variant="destructive"
+      />
     </div>
   );
 }

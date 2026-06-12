@@ -19,6 +19,97 @@ import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink, unitHref } from "@/shared/ui/link";
 
+/**
+ * Unit detail page displaying unit metadata, markdown content, and associated
+ * metadata fields. Header includes title, ID, badges, author info, and timestamps.
+ * Unit 详情页面，显示 unit 元数据、Markdown 内容和关联的元数据字段。
+ * 页头包括标题、ID、徽章、作者信息和时间戳。
+ *
+ * Mobile <640px:
+ * +--[max-w-4xl]--+
+ * | [Title]       |
+ * | ID: xxx...    |
+ * | [Badge][Badge]|
+ * | +--+          |
+ * | |Av| Author   |
+ * | |tr| @slug    |
+ * | +--+          |
+ * | Created: ..   |
+ * | Updated: ...  |
+ * | +-Content---+ |
+ * | | Markdown  | |
+ * | +-----------+ |
+ * | Metadata      |
+ * | +-+--------+  |
+ * | |k|  v     |  |
+ * | +-+--------+  |
+ * +---------------+
+ *
+ * Tablet 640-1023px:
+ * +----[max-w-4xl]----+
+ * | [Title] [Badges]  |
+ * | ID: xxx...        |
+ * | +--+ Author Info  |
+ * | |Av| @slug        |
+ * | |tr|              |
+ * | +--+ Created: ... |
+ * |     Updated: ...  |
+ * | +-Content-------+ |
+ * | | Markdown      | |
+ * | | Content Text  | |
+ * | +---------------+ |
+ * | Metadata          |
+ * | +-Key-+ +-Value+ |
+ * | | k1  | | v1  | |
+ * | +-Key-+ +-Value+ |
+ * | | k2  | | v2  | |
+ * | +-----+ +-----+ |
+ * +------------------+
+ *
+ * Desktop 1024-1535px:
+ * +-------[max-w-4xl]-------+
+ * | [Title]    [Badges]    |
+ * | ID: xxx... [Status]    |
+ * | +--+ Author [Created]  |
+ * | |Av| @slug  [Updated]  |
+ * | |tr|                    |
+ * | +--+                    |
+ * | +-Content-----------+ |
+ * | | Markdown Content  | |
+ * | | Full Paragraph... | |
+ * | +-------------------+ |
+ * | Metadata              |
+ * | +-Key-----+ +-Value+ |
+ * | | Field 1 | |Value1| |
+ * | +---------+ +-----+ |
+ * | +-Key-----+ +-Value+ |
+ * | | Field 2 | |Value2| |
+ * | +---------+ +-----+ |
+ * +------------------------+
+ *
+ * Ultra-wide >=1536px:
+ * +-------[max-w-4xl]-------+
+ * | [Title]    [Badges]    |
+ * | ID: xxx... [Status]    |
+ * | +--+ Author [Created]  |
+ * | |Av| @slug  [Updated]  |
+ * | |tr|                    |
+ * | +--+                    |
+ * | +-Content-----------+ |
+ * | | Markdown Content  | |
+ * | | Full Paragraph... | |
+ * | +-------------------+ |
+ * | Metadata              |
+ * | +-Key-----+ +-Key--+  |
+ * | | Field 1 | |Field3|  |
+ * | | Value 1 | |Val 3 |  |
+ * | +---------+ +------+  |
+ * | +-Key-----+ +-Key--+  |
+ * | | Field 2 | |Field4|  |
+ * | | Value 2 | |Val 4 |  |
+ * | +---------+ +------+  |
+ * +------------------------+
+ */
 export function UnitPageById({ unitId }: { unitId: string }) {
   const { t } = useTranslation(["book", "common", "settings"]);
   const readContext = useReadLanguageContext();
@@ -60,7 +151,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   const author = unit.user;
 
   return (
-    <div className="w-11/12 max-w-4xl mx-auto mt-16 mb-16">
+    <div className="w-full px-4 max-w-4xl mx-auto mt-16 mb-16">
       {/* ANCHOR Header — 头部 */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">

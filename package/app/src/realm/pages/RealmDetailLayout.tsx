@@ -48,7 +48,11 @@ export function RealmDetailLayout({
 }: RealmDetailLayoutProps) {
   const { t } = useTranslation(["common", "entity"]);
   const readContext = useReadLanguageContext();
-  const { data: realm, isLoading } = useQuery({
+  const {
+    data: realm,
+    isLoading,
+    error,
+  } = useQuery({
     ...realmDetailQuery(realmId, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
@@ -63,6 +67,14 @@ export function RealmDetailLayout({
       <div className="flex justify-center py-12">
         <Spinner />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className="py-8 text-center text-destructive">
+        {t("common:error_generic")}
+      </p>
     );
   }
 

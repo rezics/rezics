@@ -17,6 +17,7 @@ import {
   toCommentWriteRealmUnitId,
   useFocusReplyFromQuery,
 } from "@/comment";
+import { QueryErrorDisplay } from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink } from "@/shared/ui/link";
 import { PostDetail } from "../components/detail/PostDetail";
@@ -34,6 +35,62 @@ export type PostThreadPageProps = {
   defaultCommentContext?: CommentListContext;
 };
 
+/**
+ * 帖子线程页面：单个帖子的详情视图，包含帖子详情、回复编辑器和评论线程
+ * Post thread page — displays a single post with its detail, reply composer,
+ * and nested comment thread. Max-width container with centered column layout.
+ *
+ * Layout Structure:
+ *
+ * Mobile (<640px):
+ *  +-----------------+
+ *  | Realm breadcrumb| (conditional)
+ *  +-----------------+
+ *  |  Post Detail    |
+ *  +-----------------+
+ *  |  Edit button    | (if owner)
+ *  +-----------------+
+ *  | Reply Composer  |
+ *  +-----------------+
+ *  | Comments Thread | (scrollable, infinite load)
+ *  +-----------------+
+ *
+ * Tablet (640-1023px):
+ *  +--------------------+
+ *  | Realm breadcrumb   | (conditional)
+ *  +--------------------+
+ *  | Edit button (right)|
+ *  | Post Detail        |
+ *  +--------------------+
+ *  | Reply Composer     |
+ *  +--------------------+
+ *  | Comments Thread    |
+ *  +--------------------+
+ *
+ * Desktop (1024-1535px):
+ *  +------------------------+
+ *  | Realm breadcrumb       | (conditional)
+ *  | Edit button (right)    |
+ *  +------------------------+
+ *  | Post Detail            | (max-w-3xl centered)
+ *  +------------------------+
+ *  | Reply Composer         |
+ *  +------------------------+
+ *  | Comments Thread        | (nested, threaded)
+ *  +------------------------+
+ *
+ * Ultra-wide (>=1536px):
+ *  +----------------------------------+
+ *  | Realm breadcrumb               |
+ *  | Edit button (right)            |
+ *  +----------------------------------+
+ *  | Post Detail (max-w-3xl)        |
+ *  +----------------------------------+
+ *  | Reply Composer                 |
+ *  +----------------------------------+
+ *  | Comments Thread (threaded tree)|
+ *  +----------------------------------+
+ */
 export const PostThreadPage: React.FC<PostThreadPageProps> = ({
   realmUnitId,
   defaultCommentContext,
@@ -64,7 +121,11 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     | undefined;
   const composerRef = useFocusReplyFromQuery();
   const readContext = useReadLanguageContext();
-  const { data: root } = useQuery({
+  const {
+    data: root,
+    isError: isRootError,
+    error: rootError,
+  } = useQuery({
     ...postQueries.detail(rootPostUnitId, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
@@ -91,6 +152,16 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     ownerUnit: { user: root?.author },
     capabilities: root?.kind === PostKind.WIKI ? ["content", "tag"] : undefined,
   });
+
+  // Post detail query failed — show error before any content
+  // 帖子详情查询失败 —— 在任何内容之前显示错误
+  if (isRootError) {
+    return (
+      <div className="w-full max-w-3xl mx-auto mt-8 px-4">
+        <QueryErrorDisplay error={rootError} />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-8 px-4 flex flex-col gap-4">

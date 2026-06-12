@@ -111,7 +111,7 @@ function SharedLayoutShellPreview() {
   const { t } = useTranslation(["book", "common", "settings"]);
   return (
     <EditConsoleLayout {...createBookEditConsoleConfig(historyBookId)}>
-      <section className="mx-auto max-w-3xl px-6 py-10">
+      <section className="w-full mx-auto max-w-3xl px-6 py-10">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
           {t("book:edit_sidebar_history")}
         </h2>
@@ -131,7 +131,7 @@ function MinimalLayoutShellPreview() {
         editorHref: "/review/review-1/edit",
       })}
     >
-      <section className="mx-auto max-w-3xl px-6 py-10">
+      <section className="w-full mx-auto max-w-3xl px-6 py-10">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
           {t("common:edit")}
         </h2>

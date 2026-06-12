@@ -18,7 +18,7 @@ export function TagDomainPage() {
   const { data, isLoading, error } = useQuery(tagQueries.list({ unitId }));
   if (isLoading) {
     return (
-      <div className="w-11/12 mx-auto mt-16">
+      <div className="w-full px-4 mt-16">
         <div className="text-sm text-gray-500">
           {t("community:tag_loading")}
         </div>
@@ -28,7 +28,7 @@ export function TagDomainPage() {
 
   if (error) {
     return (
-      <div className="w-11/12 mx-auto mt-16">
+      <div className="w-full px-4 mt-16">
         <div className="text-sm text-red-600">
           {t("common:load_failed")}: {String((error as any)?.message ?? error)}
         </div>
@@ -37,7 +37,7 @@ export function TagDomainPage() {
   }
 
   return (
-    <div className="w-11/12 mx-auto mt-16">
+    <div className="w-full px-4 mt-16">
       <AccentBarWithText
         text={title ?? t("community:tag_domain_title", { id: unitId })}
       />

@@ -7,6 +7,77 @@ import { useState } from "react";
 import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
+/**
+ * New shelf creation page.
+ *
+ * Form to create a new shelf with title, description, cover URL, and
+ * optional seed tags for categorizing shelf content type. Navigates
+ * to the new shelf on success.
+ *
+ * 新建书架页面。创建书架的表单，包括标题、描述、封面 URL 和
+ * 可选的分类标签。成功后导航到新创建的书架。
+ *
+ * Desktop (1200px):
+ * +----------------------------------------------+
+ * | Create New Shelf                             |
+ * +----------------------------------------------+
+ * | Title *                                      |
+ * | [_________________________________]          |
+ * |                                              |
+ * | Description                                  |
+ * | [_________________________________]          |
+ * | [_________________________________]          |
+ * | [_________________________________]          |
+ * |                                              |
+ * | Cover Image URL                              |
+ * | [_________________________________]          |
+ * |                                              |
+ * | Content Type                                 |
+ * | [Fiction] [Non-fiction] [Other]              |
+ * |                                              |
+ * | [Create Shelf]                               |
+ * +----------------------------------------------+
+ *
+ * Tablet (768px):
+ * +--------------------------+
+ * | Create New Shelf         |
+ * +--------------------------+
+ * | Title *                  |
+ * | [___________________]    |
+ * |                          |
+ * | Description              |
+ * | [___________________]    |
+ * | [___________________]    |
+ * |                          |
+ * | Cover Image URL          |
+ * | [___________________]    |
+ * |                          |
+ * | Content Type             |
+ * | [Fiction] [Non-fiction]  |
+ * |                          |
+ * | [Create Shelf]           |
+ * +--------------------------+
+ *
+ * Mobile (360px):
+ * +----------+
+ * | New      |
+ * | Shelf    |
+ * +----------+
+ * | Title *  |
+ * | [___]    |
+ * |          |
+ * | Desc     |
+ * | [___]    |
+ * |          |
+ * | Cover    |
+ * | [___]    |
+ * |          |
+ * | Type     |
+ * | [Fiction]|
+ * |          |
+ * | [Create] |
+ * +----------+
+ */
 export function NewShelfPage() {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();

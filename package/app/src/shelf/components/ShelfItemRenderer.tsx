@@ -3,14 +3,7 @@ import type {
   ShelfView,
   TagListEntryDTO,
 } from "@rezics/api/shelf";
-import type {
-  BookDTO,
-  CommentDTO,
-  PostDTO,
-  ShelfDTO,
-  UnitDTO,
-  UnitTagDTO,
-} from "@rezics/contract";
+import type { BookDTO, CommentDTO, PostDTO, ShelfDTO } from "@rezics/contract";
 import {
   contentDocMarkdownFallback,
   isLibraryKind,
@@ -18,16 +11,17 @@ import {
   shelfItemReference,
   shelfItemUnitId,
 } from "@rezics/contract";
-import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
+import { useTranslation } from "@rezics/i18n/react";
+import { Badge, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { BookCard, HorizontalBookCard } from "@/book-library";
 import { aspectRatioForKind } from "@/bookshelf-view";
 import { CommentReply } from "@/comment";
-import { ExcerptCard } from "@/excerpt";
+import { ExcerptCard, mapPostToExcerptUnit } from "@/excerpt";
 import { FeedPostCard } from "@/feed";
 import { ReviewCard } from "@/review";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
-import { SingleTagChip } from "@/tag";
+import { Link, unitHref } from "@/shared/ui/link";
 import { shelfItemToUnitCardSummary, UnitCard } from "@/unit";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
@@ -134,7 +128,7 @@ function renderUnit(
       if (!post) return <ShelfItemCard unit={unit} />;
       return (
         <ExcerptCard
-          excerpt={post as unknown as UnitDTO}
+          excerpt={mapPostToExcerptUnit(post)}
           variantContext={post.variantContext}
         />
       );
@@ -152,7 +146,16 @@ function renderUnit(
     case "tag": {
       const tag = data as TagListEntryDTO | undefined;
       if (!tag) return <ShelfItemCard unit={unit} />;
-      return <SingleTagChip tag={tag as unknown as UnitTagDTO} />;
+      const tagLabel =
+        tag.translations?.[0]?.title ?? tag.label ?? tag.slug ?? tag.unitId;
+      const href = unitHref({ type: "TAG", unitId: tag.unitId, slug: null });
+      return (
+        <Link to={href}>
+          <Badge variant="secondary" className="cursor-pointer">
+            {tagLabel}
+          </Badge>
+        </Link>
+      );
     }
     case "comment": {
       const comment = data as CommentDTO | undefined;
@@ -212,6 +215,7 @@ function NestedRootCard({
   root: EnrichedShelfItem;
   attachedChildren: EnrichedShelfItem[];
 }) {
+  const { t } = useTranslation("entity");
   const [tab, setTab] = useState("0");
   const primary = renderUnit(root, "nested");
   const tabChildren = attachedChildren.filter(
@@ -235,8 +239,10 @@ function NestedRootCard({
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="overflow-x-auto">
             {tabChildren.map((c, idx) => {
+              // Resolve tab label from the child's role.
+              // 根据子项的角色解析标签页名称。
               const labelPrefix =
-                c.unit.parentRole === "variant" ? "Variant" : "Review";
+                c.unit.parentRole === "variant" ? t("variant") : t("review");
               return (
                 <TabsTrigger
                   key={shelfItemIdentity(c.unit)}

@@ -45,6 +45,7 @@
   "collection_title": "Collect",
   "collection_unit_shelf_count": "{count} shelves",
   "collection_unit_tag_count": "{count} tags",
+  "community_catalog": "Community catalog",
   "shelf_contents_search_empty": "No shelf items found",
   "shelf_contents_search_entry_title": "Search all shelf contents",
   "shelf_contents_search_has_more": "More shelf items match this search.",
@@ -188,6 +189,7 @@
   "realm_leave": "Leave",
   "realm_list_leave_confirm_description": "You will leave {count} selected realm(s). This does not delete the realms.",
   "realm_list_leave_confirm_title": "Leave selected realms?",
+  "realm_list_leave_failed": "Failed to leave some realms. Please try again.",
   "realm_list_manage": "Manage",
   "realm_list_selected_count": "{count} selected",
   "realm_list_sign_in_prompt": "Sign in to see and manage the realms you have joined.",
@@ -386,5 +388,7 @@
   "seed_tag_game": "Game",
   "seed_tag_media": "Media",
   "seed_tag_post": "Post",
-  "seed_tag_link": "Link"
+  "seed_tag_link": "Link",
+  "variant": "Variant",
+  "review": "Review"
 }

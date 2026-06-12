@@ -52,7 +52,8 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   });
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     let hasError = false;
     setLoading(true);
     setError(undefined);
@@ -148,7 +149,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
 
   const actions = (
     <>
-      <Button type="button" disabled={loading} onClick={handleSubmit}>
+      <Button type="submit" disabled={loading}>
         {loading ? t("common:loading") : t("auth:register")}
       </Button>
     </>
@@ -159,6 +160,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       title={t("auth:register")}
       content={content}
       actions={actions}
+      onSubmit={handleSubmit}
     />
   );
 };

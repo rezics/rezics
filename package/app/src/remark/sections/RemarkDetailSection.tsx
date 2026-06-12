@@ -22,6 +22,72 @@ interface RemarkDetailSectionProps {
   remarkId: string;
 }
 
+/**
+ * Remark (post) detail section.
+ *
+ * Displays a remark with edit button (if authorized), a reply composer,
+ * and a threaded comment section. Comment context selector defaults to All.
+ *
+ * 备注详情区域，显示备注内容、编辑按钮（如有权限）、回复框和评论线程。
+ * 评论分区选择器默认为"全部"。
+ *
+ * Desktop (1200px):
+ * +-----------------------------------------------+
+ * | [Edit icon]                                  |
+ * +-----------------------------------------------+
+ * | Remark Title                                 |
+ * | Author | Date                                |
+ * | Remark content text here...                  |
+ * +-----------------------------------------------+
+ * | + Reply Composer                             |
+ * | [____________________________]                |
+ * | [Cancel]              [Post]                 |
+ * +-----------------------------------------------+
+ * | Comments                                     |
+ * | [All] [Realm A] [Realm B]                    |
+ * | - Comment 1                                  |
+ * |   - Reply 1                                  |
+ * +-----------------------------------------------+
+ *
+ * Tablet (768px):
+ * +---------------------------------+
+ * | [Edit]                          |
+ * +---------------------------------+
+ * | Remark Title                    |
+ * | Author | Date                   |
+ * | Remark content...               |
+ * +---------------------------------+
+ * | Reply Composer                  |
+ * | [_____________________]          |
+ * | [Cancel]     [Post]             |
+ * +---------------------------------+
+ * | Comments                        |
+ * | [All] [Realm A]                 |
+ * | - Comment 1                     |
+ * +---------------------------------+
+ *
+ * Mobile (360px):
+ * +----------+
+ * | [Edit]   |
+ * +----------+
+ * | Title    |
+ * | Author   |
+ * | Content  |
+ * +----------+
+ * | Reply    |
+ * | [_____]  |
+ * | [Post]   |
+ * +----------+
+ * | Comments |
+ * | [All]    |
+ * | Cmts...  |
+ * +----------+
+ *
+ * Loading State:
+ * +----------+
+ * | Loading...|
+ * +----------+
+ */
 export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   remarkId,
 }) => {

@@ -16,6 +16,23 @@ interface InnerFilterPanelProps {
   className?: string;
 }
 
+/**
+ * 内部过滤面板，显示可选择的徽章芯片和子内容。
+ * Inner filter panel with selectable badge chips and optional children content.
+ *
+ * All breakpoints:
+ * +----------------------------------+
+ * | [Chip1] [Chip2] [Chip3]         |
+ * | [Chip4] ...                     |
+ * +----------------------------------+
+ * | 子内容 (可选)                    |
+ * +----------------------------------+
+ *
+ * 芯片采用 flex-wrap 自动换行，gap-2 控制间距。
+ * Chips wrap horizontally with gap-2; children render below if provided.
+ * 禁用芯片显示 50% 不透明度和禁用光标。
+ * Disabled chips show 50% opacity and disabled cursor.
+ */
 export const InnerFilterPanel: FC<InnerFilterPanelProps> = ({
   chips,
   activeValue,

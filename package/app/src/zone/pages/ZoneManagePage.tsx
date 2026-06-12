@@ -277,20 +277,27 @@ export function ZoneManagePage({
     });
   };
 
-  const saveTheme = () => {
+  const saveTheme = async () => {
     if (!draft) return;
     if (saveBlocked) {
       toast.error(t("zone:manage_config_invalid"));
       return;
     }
-    updateNav.mutate({
-      unitId: unitIdForSave,
-      input: { nav: zoneManageDraftToNav(draft) },
-    });
-    updateTheme.mutate({
-      unitId: unitIdForSave,
-      input: { theme: zoneManageDraftToTheme(draft) },
-    });
+    try {
+      await Promise.all([
+        updateNav.mutateAsync({
+          unitId: unitIdForSave,
+          input: { nav: zoneManageDraftToNav(draft) },
+        }),
+        updateTheme.mutateAsync({
+          unitId: unitIdForSave,
+          input: { theme: zoneManageDraftToTheme(draft) },
+        }),
+      ]);
+    } catch {
+      // Global MutationCache.onError handles the toast.
+      // 全局 MutationCache.onError 处理 toast 通知。
+    }
   };
 
   const saveSelectedPage = () => {

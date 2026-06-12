@@ -24,7 +24,7 @@ export const SessionListItem: FC<SessionListItemProps> = ({
   onRevoke,
   revoking,
 }) => {
-  const { t } = useTranslation(["settings"]);
+  const { t } = useTranslation(["common", "settings"]);
   const userAgent = parseUserAgent(
     session.userAgent,
     t("settings:security_unknown_device"),
@@ -45,7 +45,7 @@ export const SessionListItem: FC<SessionListItemProps> = ({
           <span className="text-sm font-medium truncate">{userAgent}</span>
           {isCurrent && (
             <Badge variant="outline" className="text-text-brand">
-              Current session
+              {t("settings:security_current_session")}
             </Badge>
           )}
         </div>
@@ -61,7 +61,7 @@ export const SessionListItem: FC<SessionListItemProps> = ({
           disabled={revoking}
           className="text-error-text"
         >
-          Revoke
+          {t("common:revoke")}
         </Button>
       )}
     </div>

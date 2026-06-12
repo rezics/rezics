@@ -10,5 +10,6 @@ export {
   scoreAggregateQuery,
   scoreAggregatesQuery,
   scoreQueries,
+  userScoreForRealmQuery,
   userScoresQuery,
 } from "./score.queries";

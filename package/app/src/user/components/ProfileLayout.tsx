@@ -25,6 +25,38 @@ export function useProfileContext(): ProfileContextValue {
   return ctx;
 }
 
+/**
+ * 用户资料主布局，包含侧边栏和内容区的响应式容器。
+ * User profile main layout with responsive sidebar and content area.
+ *
+ * Mobile (<640px):
+ * +------------------+
+ * | 用户基本信息      |
+ * +------------------+
+ * | 资料内容         |
+ * +------------------+
+ *
+ * Tablet (640-1023px):
+ * +------------------+
+ * | 基本信息 | 资料  |
+ * |         | 内容  |
+ * +------------------+
+ *
+ * Desktop (1024-1535px):
+ * +----------+------------------+
+ * | 基本信息 |   资料内容       |
+ * | (280px)  |   (flex)         |
+ * +----------+------------------+
+ *
+ * Ultra-wide (>=1536px):
+ * +----------+------------------+
+ * | 基本信息 |   资料内容       |
+ * | (280px)  |   (max-width)    |
+ * +----------+------------------+
+ *
+ * 全宽约束 max-w-12/16 保留两侧内边距，水平响应从堆叠到 md 及以上并排。
+ * Keeps max-width constraint with horizontal padding; stacks on mobile, side-by-side on md+.
+ */
 export const ProfileLayout: FC = () => {
   const { t } = useTranslation(["settings"]);
   const { userId: routeUserId, userSlug } = useParams({ strict: false }) as {

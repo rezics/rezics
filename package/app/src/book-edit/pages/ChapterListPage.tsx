@@ -18,6 +18,58 @@ import {
   type Chapter,
 } from "../components/BookTocEditor";
 
+/**
+ * BookEditChapterListPage — table-of-contents editor for book structure.
+ * BookEditChapterListPage — 图书结构的目录编辑器。
+ *
+ * Displays tabbed interface for editing book chapter/content hierarchy.
+ * Responsive fixed-height layout with tabs and nested editor. Uses
+ * h-[calc(100dvh-8rem)] for content area below header.
+ * 显示用于编辑图书章节/内容层级的选项卡界面。响应式固定高度布局，
+ * 带有选项卡和嵌套编辑器。在标题下方使用 h-[calc(100dvh-8rem)]。
+ *
+ * Mobile <640px:
+ * +------------------+
+ * | Title (text-lg)  |
+ * | mb-2             |
+ * +------------------+
+ * | Tabs (flex col)  |
+ * | - TabsList       |
+ * | - TabsContent    |
+ * | - Full width     |
+ * +------------------+
+ * (px-4, overflow)
+ *
+ * Tablet 640-1023px:
+ * +------------------+
+ * | Title            |
+ * +------------------+
+ * | Tabs flex-col    |
+ * | - TabsList       |
+ * | - TabsContent    |
+ * | - Width: max-2xl |
+ * +------------------+
+ * (px-4, min-h-0)
+ *
+ * Desktop 1024-1535px:
+ * +---------------------+
+ * | mx-auto max-w-2xl   |
+ * | Title (text-lg)     |
+ * +---------------------+
+ * | Tabs flex-col       |
+ * | - TabsList flex     |
+ * | - TabsContent H:0   |
+ * | - flex-1 min-h-0    |
+ * +---------------------+
+ * (px-4, pb-4)
+ *
+ * Ultra-wide >=1536px:
+ * +---------------------+
+ * | Same as desktop     |
+ * | max-w-2xl centered  |
+ * | Full viewport calc  |
+ * +---------------------+
+ */
 export const BookEditChapterListPage: React.FC = () => {
   const { t } = useTranslation(["book", "common"]);
   const { bookId } = bookEditLayoutRoute.useParams();
@@ -53,7 +105,7 @@ export const BookEditChapterListPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="mt-4 mx-auto max-w-2xl px-4">
+      <div className="w-full mt-4 mx-auto max-w-2xl px-4">
         <div className="text-muted-foreground">{t("common:loading")}</div>
       </div>
     );
@@ -61,14 +113,14 @@ export const BookEditChapterListPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="mt-4 mx-auto max-w-2xl px-4">
+      <div className="w-full mt-4 mx-auto max-w-2xl px-4">
         <QueryErrorDisplay error={error} />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-8rem)] max-w-2xl flex-col px-4 pb-4">
+    <div className="w-full mx-auto flex h-[calc(100dvh-8rem)] max-w-2xl flex-col px-4 pb-4">
       <h2 className="text-lg font-semibold mb-2">
         {t("book:edit_toc_management_title")}
       </h2>

@@ -55,6 +55,7 @@
   "authority_edit_form_all_locked_notice": "Alle bearbeitbaren Felder sind für normale Community-Mitwirkende gesperrt.",
   "authority_edit_form_privileged_notice": "Wenn Sie über Eigentümer-, Betreuer- oder Administratorberechtigungen verfügen, akzeptiert der Server Ihre Änderungen möglicherweise trotzdem.",
   "authority_edit_form_locked_error": "Speichern durch Feldsperren blockiert:{paths}. Ihre nicht gespeicherte Eingabe befindet sich noch auf dieser Seite.",
+  "chapter_unsaved_changes_confirm": "Du hast ungespeicherte Änderungen. Trotzdem verlassen?",
   "placeholders_chapter_title": "Kapiteltitel eingeben",
   "placeholders_enter_search_term": "Suchbegriff eingeben",
   "placeholders_enter_url": "Geben Sie die URL ein",

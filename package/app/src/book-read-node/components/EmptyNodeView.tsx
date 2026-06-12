@@ -75,7 +75,7 @@ export const EmptyNodeView: React.FC<EmptyNodeViewProps> = ({
   };
 
   return (
-    <div className="w-11/12 mx-auto p-4 max-w-prose">
+    <div className="w-full mx-auto p-4 max-w-prose">
       <h1 className="text-2xl font-bold mb-2">{title}</h1>
       <div className="text-text-secondary leading-relaxed">
         <p>{t("book:read_empty_chapter_description")}</p>

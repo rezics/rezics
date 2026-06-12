@@ -1,3 +1,55 @@
+/**
+ * FollowInfoPage — 用户关注信息展示页面，包含关注者和正在关注的用户列表，支持分页展示和切换标签页。
+ *
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │  Follow Info Page (desktop 1024px+)                         │
+ * │  ┌─────────────────────────────────────────────────────────┐│
+ * │  │ Title: "Follow Info" | [Back Button]                   ││
+ * │  ├─────────────────────────────────────────────────────────┤│
+ * │  │ [Following Tab] [Followers Tab]                        ││
+ * │  ├─────────────────────────────────────────────────────────┤│
+ * │  │ [Avatar] User Name @slug                               ││
+ * │  │ [Avatar] User Name @slug                               ││
+ * │  │ [Avatar] User Name @slug                               ││
+ * │  │ [Prev] Page 1 of 5 [Next]                              ││
+ * │  └─────────────────────────────────────────────────────────┘│
+ * └─────────────────────────────────────────────────────────────┘
+ *
+ * ┌─────────────────────────────────┐
+ * │ Follow Info (tablet 768px)      │
+ * │ ┌─────────────────────────────┐│
+ * │ │ Title [Back Button]        ││
+ * │ ├─────────────────────────────┤│
+ * │ │ [Following] [Followers]    ││
+ * │ ├─────────────────────────────┤│
+ * │ │ [Avatar] User Name         ││
+ * │ │ [Avatar] User Name         ││
+ * │ │ [Prev] 1 of 3 [Next]       ││
+ * │ └─────────────────────────────┘│
+ * └─────────────────────────────────┘
+ *
+ * ┌────────────────────────┐
+ * │ Follow (mobile 375px)  │
+ * │ ┌────────────────────┐ │
+ * │ │ Title         [Back]│ │
+ * │ ├────────────────────┤ │
+ * │ │ Follow Followers   │ │
+ * │ ├────────────────────┤ │
+ * │ │ [Avatar] User Name │ │
+ * │ │ [Avatar] User Name │ │
+ * │ │ [Prev] 1/2 [Next]  │ │
+ * │ └────────────────────┘ │
+ * └────────────────────────┘
+ *
+ * ┌─────────────────────────────────────┐
+ * │ Empty State (no users)              │
+ * │ ┌─────────────────────────────────┐ │
+ * │ │  Cannot resolve user            │ │
+ * │ │  User info not available        │ │
+ * │ └─────────────────────────────────┘ │
+ * └─────────────────────────────────────┘
+ */
+
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -128,7 +180,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   }
 
   return (
-    <div className="w-11/12 mx-auto mt-16 px-4">
+    <div className="w-full px-4 mt-16">
       <div className="flex items-center justify-between">
         <div className="mb-4">
           <h5 className="text-xl font-bold mb-2">

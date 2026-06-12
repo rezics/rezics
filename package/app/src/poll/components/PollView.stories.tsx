@@ -65,7 +65,7 @@ function SeededPollView({
   }, [qc, units]);
   if (!ready) return null;
   return (
-    <div className="mx-auto max-w-md p-6">
+    <div className="w-full mx-auto max-w-md p-6">
       <PollView results={data} />
     </div>
   );

@@ -14,6 +14,29 @@ import { useEffect, useRef, useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_editor/review/$reviewId/edit";
 
+/**
+ * 评论编辑页面容器 - 从路由参数加载评论数据并显示编辑表单
+ *
+ * 布局结构：
+ * - 移动端 (<640px)：全宽 max-w-4xl，垂直堆叠，mt-4（顶部间距）
+ * - 平板 (640-1023px)：mx-auto 中心，max-w-4xl，mt-4
+ * - 桌面 (1024-1535px)：mx-auto 中心，max-w-4xl，mt-4
+ * - 超宽 (>=1536px)：mx-auto 中心，max-w-4xl，mt-4
+ *
+ * ASCII 布局示意:
+ *
+ * All Viewports (centered with max-w-4xl, mt-4)
+ * +----------+
+ * |TITLE     |
+ * +----------+
+ * +----------+
+ * |FORM      |
+ * |...[form] |
+ * +----------+
+ * +----------+
+ * |DELETE    |
+ * +----------+
+ */
 export function ReviewEditPageContainer() {
   const { t } = useTranslation(["common", "community"]);
   const locale = useLocale();
@@ -52,6 +75,12 @@ export function ReviewEditPageContainer() {
   const { mutate, isPending } = useUpdatePostMutation({
     onSuccess: () => {
       show(t("community:review_messages_update_success"));
+      // Navigate back to the review detail page after successful update.
+      // 更新成功后导航回评论详情页。
+      navigate({
+        to: "/review/book/$bookId",
+        params: { bookId: reviewData.targetUnitId ?? "" },
+      });
     },
     onError: (error) => {
       show(String(error));
@@ -101,7 +130,10 @@ export function ReviewEditPageContainer() {
     deletePostMutation(reviewId, {
       onSuccess: () => {
         show(t("community:review_messages_delete_success"));
-        navigate({ to: `/review/book/${reviewData.targetUnitId ?? ""}` });
+        navigate({
+          to: "/review/book/$bookId",
+          params: { bookId: reviewData.targetUnitId ?? "" },
+        });
       },
       onError: (error) => {
         show(`Review delete failed: ${error}`);
@@ -119,7 +151,7 @@ export function ReviewEditPageContainer() {
 
   return (
     <div>
-      <div className="max-w-4xl mx-auto mt-4">
+      <div className="w-full max-w-4xl mx-auto mt-4">
         <h1 className="text-xl font-semibold">
           {t("community:review_edit_title")}
         </h1>

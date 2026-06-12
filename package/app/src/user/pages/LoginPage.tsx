@@ -51,13 +51,13 @@ export const LoginPage: FC<LoginPageProps> = ({
   });
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     let hasError = false;
     setLoading(true);
     setError(undefined);
 
     try {
-      console.log("try to login");
       let validateData: { valid: boolean; error: string | null } = {
         valid: false,
         error: null,
@@ -89,7 +89,6 @@ export const LoginPage: FC<LoginPageProps> = ({
       onRegisterClick();
     } else {
       navigate({ to: "/register" });
-      console.log("handleRegisterClick");
       onClose?.();
     }
   };
@@ -138,12 +137,7 @@ export const LoginPage: FC<LoginPageProps> = ({
 
   const actions = (
     <>
-      <Button
-        className="justify-end"
-        type="button"
-        disabled={loading}
-        onClick={handleSubmit}
-      >
+      <Button className="justify-end" type="submit" disabled={loading}>
         {loading ? t("common:loading") : t("auth:login")}
       </Button>
     </>
@@ -154,6 +148,7 @@ export const LoginPage: FC<LoginPageProps> = ({
       title={t("auth:login")}
       content={content}
       actions={actions}
+      onSubmit={handleSubmit}
     />
   );
 };

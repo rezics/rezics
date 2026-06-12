@@ -55,6 +55,7 @@
   "authority_edit_form_all_locked_notice": "일반 커뮤니티 기여자의 경우 편집 가능한 모든 필드가 잠겨 있습니다.",
   "authority_edit_form_privileged_notice": "소유자, 관리자 또는 관리자 권한이 있는 경우 서버는 여전히 변경 사항을 수락할 수 있습니다.",
   "authority_edit_form_locked_error": "필드 잠금으로 인해 저장이 차단되었습니다: {paths}. 저장되지 않은 입력 내용이 아직 이 페이지에 있습니다.",
+  "chapter_unsaved_changes_confirm": "저장하지 않은 변경 사항이 있습니다. 그래도 나가시겠습니까?",
   "placeholders_chapter_title": "장 제목을 입력하세요",
   "placeholders_enter_search_term": "검색어를 입력하세요",
   "placeholders_enter_url": "URL을 입력하세요",

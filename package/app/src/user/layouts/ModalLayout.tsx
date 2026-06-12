@@ -1,13 +1,14 @@
 import { Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import type React from "react";
-import type { FC } from "react";
+import type { FC, FormEvent } from "react";
 
 export const ModalLayout: FC<{
   title: string;
   content: React.ReactNode;
   actions: React.ReactNode;
-}> = ({ title, content, actions }) => (
-  <form>
+  onSubmit?: (e: FormEvent<HTMLFormElement>) => void;
+}> = ({ title, content, actions, onSubmit }) => (
+  <form className="flex min-h-0 flex-col" onSubmit={onSubmit}>
     <Card
       surface="contained"
       className="min-w-full sm:min-w-[384px] lg:min-w-[480px]"

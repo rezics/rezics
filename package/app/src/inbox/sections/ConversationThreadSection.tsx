@@ -91,6 +91,12 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
     void dmApi.setTyping(conversationId, isTyping).catch(() => {});
   };
 
+  useEffect(() => {
+    return () => {
+      if (typingResetRef.current) clearTimeout(typingResetRef.current);
+    };
+  }, []);
+
   const handleDraftChange = (value: string) => {
     setDraft(value);
     emitTyping(true);

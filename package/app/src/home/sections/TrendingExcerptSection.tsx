@@ -12,6 +12,62 @@ export type TrendingExcerptSectionProps = {
   limit?: number;
 };
 
+/**
+ * Home section displaying trending book excerpts in a horizontal carousel.
+ * 主页部分在水平轮播中显示热门书籍摘录。
+ *
+ * Loads excerpts and displays them in a scrollable carousel.
+ * "More" button navigates to the first excerpt's book or excerpt listing.
+ * 加载摘录并在可滚动轮播中显示它们。
+ * "更多"按钮导航到第一个摘录的书籍或摘录列表。
+ *
+ * Desktop (md+):
+ * ┌──────────────────────────────────────────┐
+ * │ Trending Excerpts              [More →]  │
+ * │ ┌──────────────────────────┬──────┐     │
+ * │ │ Excerpt text preview...  │ Book │     │
+ * │ │ Author: John Doe         │ 1    │     │
+ * │ │ Rating: ★★★★☆           │      │     │
+ * │ └──────────────────────────┴──────┘     │
+ * │ ┌──────────────────────────┬──────┐     │
+ * │ │ Another excerpt...       │ Book │ ... │
+ * │ └──────────────────────────┴──────┘     │
+ * └──────────────────────────────────────────┘
+ *
+ * Tablet (sm-md):
+ * ┌──────────────────────────┐
+ * │ Excerpts       [More →]  │
+ * │ ┌────────────────────┐   │
+ * │ │ Excerpt text...    │ > │
+ * │ │ Author: Name       │   │
+ * │ │ Rating: ★★★★☆     │   │
+ * │ └────────────────────┘   │
+ * └──────────────────────────┘
+ *
+ * Mobile (xs-sm):
+ * ┌────────────────────┐
+ * │ Excerpts [More]    │
+ * │ ┌────────────────┐ │
+ * │ │ Text...        │ │
+ * │ │ Author: Name   │ │
+ * │ │ ★★★★☆         │ │
+ * │ │ (swipeable) >  │ │
+ * │ └────────────────┘ │
+ * └────────────────────┘
+ *
+ * Empty state:
+ * ┌──────────────────────────────────────────┐
+ * │ Trending Excerpts              [More →]  │
+ * │                                          │
+ * │ No excerpts available yet.               │
+ * └──────────────────────────────────────────┘
+ *
+ * Error state:
+ * ┌──────────────────────────────────────────┐
+ * │ Trending Excerpts                        │
+ * │ [Error loading excerpts] [Retry]         │
+ * └──────────────────────────────────────────┘
+ */
 export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
   title,
   limit = 8,

@@ -14,6 +14,43 @@ export interface BookshelfHoverPanelProps {
  * direct link to the item's detail page.
  * 仅桌面端、当浏览者悬停书架封面时显示的悬停预览。
  * 渲染更丰富的元数据、已知时的浏览者阅读进度，以及指向条目详情页的直接链接。
+ *
+ * Desktop 1024-1535px (w-64, 256px):
+ * +----------Panel----------+
+ * | +---+ Title        [▲]  |
+ * | |Cov| Author       |    |
+ * | |er | Progress: 5/10    |
+ * | |   | [Link]  ------->  |
+ * | +---+                   |
+ * +------------------------+
+ *
+ * Ultra-wide >=1536px (w-64, 256px):
+ * +----------Panel----------+
+ * | +---+ Title        [▲]  |
+ * | |Cov| Author       |    |
+ * | |er | Progress: 5/10    |
+ * | |   | LastChapter  ---  |
+ * | |   | [Link] ---------> |
+ * | +---+                   |
+ * +------------------------+
+ *
+ * No Cover Variant:
+ * +----------Panel----------+
+ * | +---+ Title        [▲]  |
+ * | |   | Author       |    |
+ * | |✒ | Progress: 5/10    |
+ * | |   | [Link] ---------> |
+ * | +---+                   |
+ * +------------------------+
+ *
+ * No Progress Variant:
+ * +----------Panel----------+
+ * | +---+ Title        [▲]  |
+ * | |Cov| Author       |    |
+ * | |er | (No Progress)    |
+ * | |   | [Link] ---------> |
+ * | +---+                   |
+ * +------------------------+
  */
 export const BookshelfHoverPanel: React.FC<BookshelfHoverPanelProps> = ({
   item,

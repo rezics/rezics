@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { Plus } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import {
   canInsertZoneSectionKind,
   createZoneSection,
@@ -133,10 +133,7 @@ export function ZoneSectionListEditor({
     <div className="flex flex-col gap-3">
       {sections.map((section, index) => (
         <ZoneSectionEditor
-          // Ids are editable, so positional keys keep input focus stable.
-          // id 可编辑，因此位置键保持输入焦点稳定。
-          // biome-ignore lint/suspicious/noArrayIndexKey: positional rows
-          key={index}
+          key={section.id}
           section={section}
           slot={slot}
           ctx={ctx}
@@ -559,9 +556,11 @@ function ZoneDisplaySelect({
 
 /**
  * Shared editor for `ZoneCollectionItem[]` (collection items and hero
- * CTAs): link target plus optional LABEL override.
+ * CTAs): link target plus optional LABEL override. Uses a stable counter
+ * to key items since `ZoneCollectionItem` has no id field.
  * `ZoneCollectionItem[]` 的共享编辑器（集合条目与 hero CTA）：链接目标
- * 加可选的 LABEL 覆盖。
+ * 加可选的 LABEL 覆盖。由于 `ZoneCollectionItem` 没有 id 字段，使用
+ * 稳定计数器为条目分配 key。
  */
 function ZoneCollectionItemsEditor({
   items,
@@ -573,31 +572,66 @@ function ZoneCollectionItemsEditor({
   ctx: ZoneManageEditorContext;
 }) {
   const { t } = useTranslation(["zone", "common"]);
+
+  // Stable keys for items that lack an id field. The counter ref persists
+  // across renders; the key map is rebuilt when the list length changes
+  // (add/remove) to stay in sync.
+  // 为缺少 id 字段的条目提供稳定 key。计数器 ref 跨渲染保持；key 映射
+  // 在列表长度变化（增删）时重建以保持同步。
+  const counterRef = useRef(0);
+  const keysRef = useRef<number[]>([]);
+  if (keysRef.current.length !== items.length) {
+    // Preserve existing keys for items that remain; assign new keys for
+    // additions at the end.
+    // 为仍然存在的条目保留现有 key；为末尾新增的条目分配新 key。
+    const next: number[] = [];
+    for (let i = 0; i < items.length; i++) {
+      next.push(keysRef.current[i] ?? ++counterRef.current);
+    }
+    keysRef.current = next;
+  }
+
+  const handleRemove = (removeIndex: number) => {
+    keysRef.current = keysRef.current.filter((_, i) => i !== removeIndex);
+    onChange(items.filter((_, i) => i !== removeIndex));
+  };
+
+  const handleMoveUp = (moveIndex: number) => {
+    const nextKeys = [...keysRef.current];
+    [nextKeys[moveIndex - 1], nextKeys[moveIndex]] = [
+      nextKeys[moveIndex],
+      nextKeys[moveIndex - 1],
+    ];
+    keysRef.current = nextKeys;
+    onChange(moveListItem(items, moveIndex, "up"));
+  };
+
+  const handleMoveDown = (moveIndex: number) => {
+    const nextKeys = [...keysRef.current];
+    [nextKeys[moveIndex], nextKeys[moveIndex + 1]] = [
+      nextKeys[moveIndex + 1],
+      nextKeys[moveIndex],
+    ];
+    keysRef.current = nextKeys;
+    onChange(moveListItem(items, moveIndex, "down"));
+  };
+
   return (
     <div className="flex flex-col gap-3">
       {items.map((item, index) => (
         <div
-          // biome-ignore lint/suspicious/noArrayIndexKey: positional rows
-          key={index}
+          key={keysRef.current[index]}
           className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3"
         >
           <div className="flex justify-end">
             <RowActions
-              onMoveUp={
-                index > 0
-                  ? () => onChange(moveListItem(items, index, "up"))
-                  : undefined
-              }
+              onMoveUp={index > 0 ? () => handleMoveUp(index) : undefined}
               onMoveDown={
                 index < items.length - 1
-                  ? () => onChange(moveListItem(items, index, "down"))
+                  ? () => handleMoveDown(index)
                   : undefined
               }
-              onRemove={() =>
-                onChange(
-                  items.filter((_, currentIndex) => currentIndex !== index),
-                )
-              }
+              onRemove={() => handleRemove(index)}
             />
           </div>
           <ZoneLinkTargetField
@@ -701,8 +735,7 @@ function ZoneTabsSectionFields({
 
       {section.tabs.map((tab, index) => (
         <div
-          // biome-ignore lint/suspicious/noArrayIndexKey: positional rows
-          key={index}
+          key={tab.id}
           className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3"
         >
           <div className="flex items-end justify-between gap-3">
@@ -814,10 +847,7 @@ function ZoneColumnsSectionFields({
     <div className="flex flex-col gap-4">
       {section.columns.map((column, index) => (
         <div
-          // Column ids are editable, so positional keys keep input focus stable.
-          // column id 可编辑，因此位置键保持输入焦点稳定。
-          // biome-ignore lint/suspicious/noArrayIndexKey: positional rows
-          key={index}
+          key={column.id}
           className="flex flex-col gap-4 rounded-md bg-surface-subtle p-4"
         >
           <div className="flex items-center justify-between gap-3">

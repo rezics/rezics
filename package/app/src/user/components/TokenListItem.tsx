@@ -1,4 +1,5 @@
 import type { ApiTokenDTO } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Key as KeyIcon } from "lucide-react";
 import type { FC } from "react";
@@ -14,6 +15,7 @@ export const TokenListItem: FC<TokenListItemProps> = ({
   onEdit,
   onRevoke,
 }) => {
+  const { t } = useTranslation(["common", "settings"]);
   const scopeLabels = formatScopes(token.scopes);
 
   return (
@@ -31,30 +33,40 @@ export const TokenListItem: FC<TokenListItemProps> = ({
           </div>
         )}
         <p className="mt-1 block text-xs text-text-secondary">
-          Created {formatDate(token.createdAt)}
-          {token.expiresAt && ` · Expires ${formatDate(token.expiresAt)}`}
-          {token.lastUsedAt && ` · Last used ${formatDate(token.lastUsedAt)}`}
-          {token.lastIP && ` from ${token.lastIP}`}
+          {t("settings:tokens_created_date", {
+            date: formatDate(t, token.createdAt),
+          })}
+          {token.expiresAt &&
+            ` · ${t("settings:tokens_expires_date", { date: formatDate(t, token.expiresAt) })}`}
+          {token.lastUsedAt &&
+            ` · ${t("settings:tokens_last_used_date", { date: formatDate(t, token.lastUsedAt) })}`}
+          {token.lastIP &&
+            ` ${t("settings:tokens_last_used_from_ip", { ip: token.lastIP })}`}
         </p>
       </div>
       <div className="flex gap-1 shrink-0">
         <Button size="sm" variant="ghost" onClick={() => onEdit(token)}>
-          Edit
+          {t("common:edit")}
         </Button>
         <Button
           size="sm"
           variant="destructive"
           onClick={() => onRevoke(token.id)}
         >
-          Revoke
+          {t("common:revoke")}
         </Button>
       </div>
     </div>
   );
 };
 
-function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return "Never";
+type TranslationT = ReturnType<typeof useTranslation>["t"];
+
+function formatDate(
+  t: TranslationT,
+  date: string | Date | null | undefined,
+): string {
+  if (!date) return t("settings:tokens_never_used");
   return new Date(date).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",

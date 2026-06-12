@@ -15,7 +15,7 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
-import { type FC, useState } from "react";
+import { type FC, useRef, useState } from "react";
 
 interface TokenCreateDialogProps {
   open: boolean;
@@ -77,11 +77,19 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
     );
   };
 
+  // Track the "copied" feedback timer so it can be cancelled on unmount.
+  // 追踪"已复制"反馈定时器，以便卸载时取消。
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleCopy = async () => {
     if (!rawToken) return;
     await navigator.clipboard.writeText(rawToken);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    copiedTimerRef.current = setTimeout(() => {
+      setCopied(false);
+      copiedTimerRef.current = null;
+    }, 2000);
   };
 
   const handleClose = () => {
@@ -90,6 +98,10 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
     setExpiresAt("");
     setRawToken(null);
     setCopied(false);
+    if (copiedTimerRef.current) {
+      clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = null;
+    }
     createToken.reset();
     onClose();
   };
@@ -179,6 +191,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
               id="token-expiry"
               type="date"
               value={expiresAt}
+              min={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setExpiresAt(e.target.value)}
             />
           </div>

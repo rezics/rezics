@@ -1,6 +1,5 @@
 import type { FeedPostRow } from "@rezics/api/feed/feed";
 import type { ModerationActionDTO, ModerationStatus } from "@rezics/contract";
-import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { FeedPostCard } from "./FeedPostCard";
 
@@ -18,6 +17,8 @@ export interface FeedPostRowCardProps {
 /**
  * Generic feed row presentation. Realm-specific moderation stays injected
  * through props so the feed feature does not own realm behavior.
+ * 通用信息流行展示。Realm 相关的审核功能通过 props 注入，
+ * 使信息流 feature 不持有 realm 行为。
  */
 export function FeedPostRowCard({
   row,
@@ -29,19 +30,10 @@ export function FeedPostRowCard({
   moderationLatestAction,
   moderationMenuContent,
 }: FeedPostRowCardProps) {
-  const navigate = useNavigate();
-  const openRow = () => navigate({ to: row.href });
-
   return (
     <FeedPostCard
       post={row.post}
-      onOpen={openRow}
-      onReplyInvoke={() =>
-        navigate({
-          to: row.href,
-          search: { focus: "reply" },
-        })
-      }
+      href={row.href}
       summaryScopeKey={summaryScopeKey}
       reactionScopeKey={reactionScopeKey}
       variantContext={row.variantContext}

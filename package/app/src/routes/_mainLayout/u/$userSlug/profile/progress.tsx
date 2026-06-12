@@ -47,7 +47,9 @@ function ProgressRoute() {
   );
 }
 
-export const Route = createFileRoute("/_mainLayout/u/$userSlug/profile/progress")({
+export const Route = createFileRoute(
+  "/_mainLayout/u/$userSlug/profile/progress",
+)({
   validateSearch: (search: Record<string, unknown>): ProgressSearch => ({
     cols: typeof search.cols === "string" ? search.cols : undefined,
   }),

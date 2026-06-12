@@ -5,6 +5,8 @@ const ShelvesTabSection = lazyRouteComponent(
   "ShelvesTabSection",
 );
 
-export const Route = createFileRoute("/_mainLayout/user/$userId/profile/shelves")({
+export const Route = createFileRoute(
+  "/_mainLayout/user/$userId/profile/shelves",
+)({
   component: ShelvesTabSection,
 });

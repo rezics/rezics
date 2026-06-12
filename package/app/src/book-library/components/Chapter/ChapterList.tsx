@@ -150,6 +150,7 @@ const BookTocTreeItems = React.memo(function BookTocTreeItems({
                 type="button"
                 className="text-xl font-semibold mb-2 cursor-pointer text-left"
                 onClick={() => onToggle(nodeKey)}
+                aria-expanded={isOpen}
               >
                 {node.title}
               </button>
@@ -159,6 +160,7 @@ const BookTocTreeItems = React.memo(function BookTocTreeItems({
                   variant="ghost"
                   size="sm"
                   onClick={() => onToggle(nodeKey)}
+                  aria-expanded={isOpen}
                 >
                   {isOpen ? t("collapse") : t("expand")}
                 </Button>

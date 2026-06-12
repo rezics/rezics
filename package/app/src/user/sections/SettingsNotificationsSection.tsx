@@ -12,6 +12,75 @@ import { type FC, useState } from "react";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
+/**
+ * 通知部分：允许用户管理各种通知偏好（回复、关注、直消、审核、领域、系统）。
+ * 用户可以独立切换每种通知类型，即时反馈保存确认消息，以及错误提示。
+ *
+ * Desktop (≥1024px):
+ * ┌─────────────────────────────────────┐
+ * │ Notification Preferences            │
+ * │ Saved: Settings updated!            │
+ * │                                     │
+ * │ [X] Replies                         │
+ * │     Notify when someone replies     │
+ * │ [X] Follows                         │
+ * │     Notify when someone follows     │
+ * │ [ ] Direct Messages                 │
+ * │     Notify on new direct messages   │
+ * │ [X] Moderation                      │
+ * │     Notify on moderation actions    │
+ * │ [X] Realm Notifications             │
+ * │     Notify on realm activity        │
+ * │ [X] System Notifications            │
+ * │     Notify on system updates        │
+ * └─────────────────────────────────────┘
+ *
+ * Tablet (768px-1023px):
+ * ┌──────────────────────────────┐
+ * │ Notification Preferences     │
+ * │ [Saved]                      │
+ * │                              │
+ * │ [X] Replies                  │
+ * │     Notify when someone      │
+ * │     replies to you           │
+ * │ [X] Follows                  │
+ * │     Notify when someone      │
+ * │     follows you              │
+ * │ [ ] Direct Messages          │
+ * │     Notify on new DM         │
+ * │ [X] Moderation               │
+ * │     Notify on moderation     │
+ * └──────────────────────────────┘
+ *
+ * Mobile (480px-767px):
+ * ┌──────────────────┐
+ * │Notification      │
+ * │Preferences       │
+ * │[Saved]           │
+ * │                  │
+ * │[X] Replies       │
+ * │    Reply notify  │
+ * │[X] Follows       │
+ * │    Follow notify │
+ * │[ ] Direct Msg    │
+ * │    DM notify     │
+ * │[X] Moderation    │
+ * │    Mod notify    │
+ * └──────────────────┘
+ *
+ * Small Mobile (<480px):
+ * ┌──────────┐
+ * │Notif     │
+ * │[Saved]   │
+ * │          │
+ * │[X]Reply  │
+ * │[X]Follow │
+ * │[ ]DM     │
+ * │[X]Mod    │
+ * │[X]Realm  │
+ * │[X]System │
+ * └──────────┘
+ */
 export const SettingsNotificationsSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
   useRequireAuth();

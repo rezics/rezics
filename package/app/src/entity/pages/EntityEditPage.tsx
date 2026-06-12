@@ -1,3 +1,66 @@
+/**
+ * Entity edit page for updating entity metadata and translations.
+ * 编辑实体元数据和翻译内容的页面。
+ *
+ * Two-section form: entity metadata and translation controls.
+ * 两个部分的表单：实体元数据和翻译控制。
+ *
+ * Mobile (<640px):
+ * +-----40px-----+
+ * |  Title       |  flex-row gap-4 responsive
+ * |  [Cancel]    |
+ * |  [Save]      |
+ * |              |
+ * |  SECTION 1   |
+ * |  ----        |  gap-6 form fields
+ * |  Kind, Slug  |
+ * |  Avatar...   |
+ * |              |
+ * |  SECTION 2   |  gap-12 between sections
+ * |  Language    |
+ * |  Title...    |
+ * +-------------+
+ *
+ * Tablet (640-1023px):
+ * +-------60px-------+
+ * |  Title  [Cancel] |  flex-row justify-between
+ * |          [Save]  |
+ * |  SECTION 1       |
+ * |  Kind, Slug...   |  flex-col gap-6
+ * |                  |
+ * |  SECTION 2       |
+ * |  Language Bar    |
+ * |  Title, Subtitle |
+ * +------------------+
+ *
+ * Desktop (1024-1535px):
+ * +-------80px-------+
+ * | Title   [Cancel] |  max-w-3xl centered
+ * |          [Save]  |  mb-10 spacing
+ * |                  |
+ * | ENTITY SECTION   |  gap-6 inputs
+ * | Kind             |
+ * | Slug             |
+ * | Avatar           |
+ * | Verified         |
+ * |                  |
+ * | TRANSLATION SEC  |
+ * | Language Bar     |
+ * | Title, Subtitle  |
+ * | Summary          |
+ * | Description      |
+ * +------------------+
+ *
+ * Ultra-wide (>=1536px):
+ * +----------100px-----------+
+ * |  Title          [Cancel] |  max-w-3xl constraint
+ * |                  [Save]  |  flex-col gap-12
+ * |                          |
+ * |  ENTITY / TRANSLATION    |
+ * |  SECTIONS WITH FULL WID  |
+ * +-------------------------+
+ */
+
 import { entityKeys, useEntity, useUpdateEntity } from "@rezics/api/entity";
 import { useServerPermission } from "@rezics/api/hooks";
 import type { EntityDTO, EntityKind } from "@rezics/contract";
@@ -122,35 +185,40 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
 
   const handleSave = async () => {
     if (!title.trim()) return;
-    const updated = await updateEntity.mutateAsync({
-      unitId,
-      input: {
-        patch: {
-          entity: {
-            kind: kind === NO_KIND ? null : (kind as EntityKind),
-            avatar: avatar.trim() || null,
-            verified,
-            slug: slug.trim() ? slug.trim() : null,
-          },
-          translations: {
-            [selectedLanguage]: {
-              title: title.trim(),
-              subtitle: subtitle.trim() || null,
-              summary: summary.trim() || null,
-              description: description.trim()
-                ? markdownContentDoc(description)
-                : null,
+    try {
+      const updated = await updateEntity.mutateAsync({
+        unitId,
+        input: {
+          patch: {
+            entity: {
+              kind: kind === NO_KIND ? null : (kind as EntityKind),
+              avatar: avatar.trim() || null,
+              verified,
+              slug: slug.trim() ? slug.trim() : null,
+            },
+            translations: {
+              [selectedLanguage]: {
+                title: title.trim(),
+                subtitle: subtitle.trim() || null,
+                summary: summary.trim() || null,
+                description: description.trim()
+                  ? markdownContentDoc(description)
+                  : null,
+              },
             },
           },
         },
-      },
-    });
+      });
 
-    if (updated.slug) {
-      queryClient.setQueryData(entityKeys.bySlug(updated.slug), updated);
+      if (updated.slug) {
+        queryClient.setQueryData(entityKeys.bySlug(updated.slug), updated);
+      }
+
+      navigate({ to: "/entity/$unitId", params: { unitId } });
+    } catch {
+      // Global MutationCache.onError already shows a toast; catch only prevents unhandled rejection.
+      // 全局 MutationCache.onError 已显示 toast；此处仅捕获以防止未处理的 rejection。
     }
-
-    navigate({ to: "/entity/$unitId", params: { unitId } });
   };
 
   if (isLoading) {
@@ -163,7 +231,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
 
   if (error || !entity) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="w-full mx-auto max-w-3xl px-4 py-12">
         <h1 className="text-lg font-semibold text-text-primary">
           Entity not found
         </h1>

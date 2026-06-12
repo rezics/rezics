@@ -157,14 +157,19 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
               disabled={removeMember.isPending}
               onClick={async () => {
                 if (!pendingRemove) return;
-                await removeMember.mutateAsync({
-                  realmUnitId: realmId,
-                  userId: pendingRemove.userId,
-                });
-                setPendingRemove(null);
-                await queryClient.invalidateQueries({
-                  queryKey: realmMembersQuery(realmId).queryKey,
-                });
+                try {
+                  await removeMember.mutateAsync({
+                    realmUnitId: realmId,
+                    userId: pendingRemove.userId,
+                  });
+                  setPendingRemove(null);
+                  await queryClient.invalidateQueries({
+                    queryKey: realmMembersQuery(realmId).queryKey,
+                  });
+                } catch {
+                  // Mutation onError already shows a toast; just keep the dialog open for retry.
+                  // 变更 onError 已弹出提示；保持对话框打开以便重试。
+                }
               }}
             >
               {t("common:remove")}

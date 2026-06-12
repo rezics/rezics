@@ -7,13 +7,72 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
-import { HorizontalShelfCarousel } from "@/shelf";
+import {
+  HorizontalShelfCarousel,
+  mapContentSearchDocToShelfDTO,
+} from "@/shelf";
 
 export type TrendingShelfSectionProps = {
   title?: string;
   limit?: number;
 };
 
+/**
+ * Home section displaying trending/most popular shelves in a horizontal carousel.
+ * 主页部分在水平轮播中显示热门/最受欢迎的书架。
+ *
+ * Searches for SHELF type content sorted by trending metrics.
+ * Displays shelves in a scrollable carousel with metadata and links.
+ * 搜索 SHELF 类型内容，按趋势指标排序。
+ * 在可滚动轮播中显示书架，带有元数据和链接。
+ *
+ * Desktop (md+):
+ * ┌──────────────────────────────────────────┐
+ * │ Trending Shelves               [More]    │
+ * │ ┌────────────────────┬──────────────────┐│
+ * │ │ Cover/Icon  Shelf 1│ 234 items        ││
+ * │ │                    │ 45 followers     ││
+ * │ └────────────────────┴──────────────────┘│
+ * │ ┌────────────────────┬──────────────────┐│
+ * │ │ Shelf 2            │ 189 items        ││
+ * │ │                    │ 32 followers     ││
+ * │ └────────────────────┴──────────────────┘│
+ * └──────────────────────────────────────────┘
+ *
+ * Tablet (sm-md):
+ * ┌──────────────────────────┐
+ * │ Shelves        [More]    │
+ * │ ┌──────────────────────┐ │
+ * │ │ Shelf 1              │ │
+ * │ │ 234 items [→]        │ │
+ * │ └──────────────────────┘ │
+ * │ ┌──────────────────────┐ │
+ * │ │ Shelf 2 ...          │ │
+ * │ └──────────────────────┘ │
+ * └──────────────────────────┘
+ *
+ * Mobile (xs-sm):
+ * ┌────────────────────┐
+ * │ Shelves [More]     │
+ * │ ┌────────────────┐ │
+ * │ │ Shelf 1        │ │
+ * │ │ 234 items      │ │
+ * │ │ (swipeable) >  │ │
+ * │ └────────────────┘ │
+ * └────────────────────┘
+ *
+ * Loading state:
+ * ┌──────────────────────────────────────────┐
+ * │ Trending Shelves                         │
+ * │ ⟳ Loading...                             │
+ * └──────────────────────────────────────────┘
+ *
+ * Error state:
+ * ┌──────────────────────────────────────────┐
+ * │ Trending Shelves                         │
+ * │ [Error loading shelves] [Retry]          │
+ * └──────────────────────────────────────────┘
+ */
 export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
   title,
   limit = 8,
@@ -26,10 +85,10 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
     limit,
   });
 
-  // Content search items cast to ShelfDTO shape (Meilisearch content index)
-  // 将内容搜索结果断言为 ShelfDTO 形状（Meilisearch 内容索引）
+  // Map content search docs to ShelfDTO shape (id -> unitId, translations, etc.)
+  // 将内容搜索文档映射为 ShelfDTO 形状（id -> unitId、翻译等）
   const items = useMemo<ShelfDTO[]>(
-    () => (data?.items ?? []) as unknown as ShelfDTO[],
+    () => (data?.items ?? []).map(mapContentSearchDocToShelfDTO),
     [data],
   );
 

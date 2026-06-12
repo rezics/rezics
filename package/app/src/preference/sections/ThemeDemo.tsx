@@ -44,7 +44,7 @@ export const ThemeDemo: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 mx-auto max-w-[1200px]">
+    <div className="w-full p-6 mx-auto max-w-[1200px]">
       {/* Header area. 标题区域。 */}
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-semibold mb-2 text-brand-fill">
@@ -55,7 +55,7 @@ export const ThemeDemo: React.FC = () => {
         </h2>
 
         {customColor && (
-          <Alert className="mt-4 max-w-[600px] mx-auto">
+          <Alert className="w-full mt-4 max-w-[600px] mx-auto">
             <AlertDescription>
               当前自定义颜色: {customColor.toUpperCase()}
             </AlertDescription>

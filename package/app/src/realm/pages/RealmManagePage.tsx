@@ -39,7 +39,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 import { PinboardAdminSection } from "@/pinboard";
@@ -62,6 +62,57 @@ import {
 } from "../sections/RealmManageEditors";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 
+/**
+ * Full-page admin dashboard for managing realm settings across 6 tabs:
+ * Profile (translations, bio, media), Organization (tags, views, pinboard),
+ * Wiki (featured zone, sidebar), Moderation (approval settings, queue),
+ * Members (member list), and Danger (delete realm).
+ * Permission-gated: redirects non-managers to realm detail page.
+ *
+ * 用于管理社区设置的完整页面管理仪表板，包含6个选项卡：
+ * 资料(翻译、简介、媒体)、组织(标签、视图、内容墙)、
+ * Wiki(特色区域、侧边栏)、审核(批准设置、队列)、
+ * 成员(成员列表)和危险(删除社区)。
+ * 权限受控：将非管理员重定向到社区详情页面。
+ *
+ * Layout:
+ * Mobile (<640px):
+ * ┌──────────────────────────┐
+ * │ Realm Management         │
+ * ├──────────────────────────┤
+ * │ [Profile][Org][Wiki]     │
+ * │ [Mod][Members][Danger]   │
+ * ├──────────────────────────┤
+ * │ [Active Tab Content]     │
+ * │ [Forms, sections, cards] │
+ * │ [Scrollable vertically]  │
+ * └──────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ Realm Management                   │
+ * ├────────────────────────────────────┤
+ * │ [Profile][Org][Wiki][Mod]          │
+ * │ [Members][Danger]                  │
+ * ├────────────────────────────────────┤
+ * │ [Active Tab Content]               │
+ * │ [Multiple form sections]           │
+ * │ [Cards in responsive layout]       │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌──────────────────────────────────────┐
+ * │ Realm Management                     │
+ * ├──────────────────────────────────────┤
+ * │ [Profile][Org][Wiki][Mod][Mem][Danger]
+ * ├──────────────────────────────────────┤
+ * │ [Active Tab Content - max-width 5xl] │
+ * │ [Form sections, grids, editors]     │
+ * └──────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * Same as Desktop - max-width 5xl container centered
+ */
 type RealmManageTab =
   | "profile"
   | "organization"
@@ -120,6 +171,9 @@ export function RealmManagePage({
   const [saving, setSaving] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [draftLanguages, setDraftLanguages] = useState<string[]>([]);
+  // Track which language has been synced to form state to prevent refetch overwrites
+  // 记录已同步到表单状态的语言，防止 refetch 覆盖未保存的编辑
+  const syncedLanguageRef = useRef<string | null>(null);
   const canDeleteRealm =
     membership?.roleKey === "owner" ||
     membership?.roleKey === "admin" ||
@@ -141,12 +195,15 @@ export function RealmManagePage({
 
   useEffect(() => {
     if (!isLoading && !membershipLoading && !allowed) {
+      // Replace history entry so Back doesn't re-trigger the redirect loop.
+      // 替换历史条目，避免 Back 键重新触发重定向循环。
       navigate({
         to: unitHref({
           type: "REALM",
           unitId: realmId,
           slug: realm?.slug ?? null,
         }),
+        replace: true,
       });
     }
   }, [isLoading, membershipLoading, allowed, navigate, realmId, realm?.slug]);
@@ -165,9 +222,12 @@ export function RealmManagePage({
   }, [editableLanguages, selectedLanguage]);
 
   useEffect(() => {
-    setTitle(translation?.title ?? "");
-    setDescription(contentDocMarkdownFallback(translation?.description));
-  }, [translation]);
+    if (!translation) return;
+    if (syncedLanguageRef.current === selectedLanguage) return;
+    syncedLanguageRef.current = selectedLanguage;
+    setTitle(translation.title ?? "");
+    setDescription(contentDocMarkdownFallback(translation.description));
+  }, [translation, selectedLanguage]);
 
   const handleAddLanguage = (language: string) => {
     setAddOpen(false);
@@ -201,6 +261,12 @@ export function RealmManagePage({
       });
 
       toast.success(t("community:realm_profile_saved"));
+    } catch (error) {
+      // Raw API call — no global MutationCache.onError; show error feedback manually.
+      // 原始 API 调用——无全局 MutationCache.onError；需手动显示错误反馈。
+      toast.error(
+        error instanceof Error ? error.message : t("common:error_generic"),
+      );
     } finally {
       setSaving(false);
     }
@@ -226,7 +292,7 @@ export function RealmManagePage({
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
-          Realm settings are unavailable for this realm.
+          {t("community:realm_settings_unavailable")}
         </div>
       </div>
     );
@@ -237,11 +303,10 @@ export function RealmManagePage({
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <div className="rounded-md bg-surface-subtle p-6">
           <h1 className="text-lg font-semibold leading-ui text-text-primary">
-            Realm management unavailable
+            {t("community:realm_management_unavailable")}
           </h1>
           <p className="mt-2 text-sm leading-body text-text-secondary">
-            You need owner, moderator, or staff permissions to manage this
-            realm.
+            {t("community:realm_management_permission_required")}
           </p>
         </div>
       </div>
@@ -260,12 +325,24 @@ export function RealmManagePage({
         onValueChange={(value) => onTabChange?.(value as RealmManageTab)}
       >
         <TabsList className="mb-6 flex flex-wrap">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="organization">Organization</TabsTrigger>
-          <TabsTrigger value="wiki">Wiki</TabsTrigger>
-          <TabsTrigger value="moderation">Moderation</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
-          <TabsTrigger value="danger">Danger</TabsTrigger>
+          <TabsTrigger value="profile">
+            {t("community:realm_manage_tab_profile")}
+          </TabsTrigger>
+          <TabsTrigger value="organization">
+            {t("community:realm_manage_tab_organization")}
+          </TabsTrigger>
+          <TabsTrigger value="wiki">
+            {t("community:realm_manage_tab_wiki")}
+          </TabsTrigger>
+          <TabsTrigger value="moderation">
+            {t("community:realm_manage_tab_moderation")}
+          </TabsTrigger>
+          <TabsTrigger value="members">
+            {t("community:realm_manage_tab_members")}
+          </TabsTrigger>
+          <TabsTrigger value="danger">
+            {t("community:realm_manage_tab_danger")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="flex flex-col gap-6">
@@ -362,11 +439,10 @@ export function RealmManagePage({
                   htmlFor="realm-content-approval"
                   className="text-sm font-medium leading-ui text-text-primary"
                 >
-                  Require content approval
+                  {t("community:realm_require_content_approval")}
                 </Label>
                 <p className="m-0 text-sm leading-body text-text-secondary">
-                  New feed submissions wait for realm case review before
-                  appearing publicly.
+                  {t("community:realm_require_content_approval_description")}
                 </p>
               </div>
             </CardContent>
@@ -409,6 +485,7 @@ function RealmOwnershipSection({
   canDelete: boolean;
   onDeleted: () => void;
 }) {
+  const { t } = useTranslation(["common", "community"]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const deleteRealm = useDeleteRealmMutation({
     onSuccess: () => {
@@ -424,10 +501,13 @@ function RealmOwnershipSection({
     <section className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
       <div>
         <h2 className="text-lg font-semibold leading-ui text-text-primary">
-          Ownership
+          {t("community:realm_ownership")}
         </h2>
         <p className="mt-1 text-sm leading-body text-text-secondary">
-          Owner {realm.user?.name ?? realm.userId ?? "Unknown owner"}
+          {t("community:realm_owner")}{" "}
+          {realm.user?.name ??
+            realm.userId ??
+            t("community:realm_unknown_owner")}
         </p>
       </div>
       <div className="flex flex-wrap justify-end gap-2">
@@ -437,27 +517,29 @@ function RealmOwnershipSection({
           disabled={!canDelete}
           onClick={() => setDeleteOpen(true)}
         >
-          Delete realm
+          {t("community:realm_delete")}
         </Button>
       </div>
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete this realm?</DialogTitle>
+            <DialogTitle>
+              {t("community:realm_delete_confirm_title")}
+            </DialogTitle>
             <DialogDescription>
-              This permanently removes the realm and cannot be undone.
+              {t("community:realm_delete_confirm_description")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-              Cancel
+              {t("common:cancel")}
             </Button>
             <Button
               variant="destructive"
               disabled={deleteRealm.isPending}
               onClick={() => deleteRealm.mutate(realm.unitId)}
             >
-              Delete realm
+              {t("community:realm_delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

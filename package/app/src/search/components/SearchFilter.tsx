@@ -53,7 +53,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
 }) => {
   const { t } = useTranslation(["search"]);
   const handleSecondaryMenuSelect = (key: string) => () => {
-    console.log(key);
+    onSortChange({ type: key });
   };
 
   return (

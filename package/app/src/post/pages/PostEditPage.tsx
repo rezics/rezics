@@ -26,6 +26,75 @@ export interface PostEditPageProps {
   returnTo: string;
 }
 
+/**
+ * 帖子编辑页面：编辑帖子标题、内容和语言，支持普通帖和维基帖
+ * Post edit page — allows authors to edit post title, body content, and language.
+ * Single-column form with max-width container. Includes error display and
+ * conditional wiki post header. Horizontal action buttons with validation feedback.
+ *
+ * Layout Structure:
+ *
+ * Mobile (<640px):
+ *  +-----------+
+ *  | Error msg | (if present)
+ *  +-----------+
+ *  | Wiki Title| (if wiki post)
+ *  +-----------+
+ *  | Form      |
+ *  | - Title   |
+ *  | - Content |
+ *  | - Language|
+ *  +-----------+
+ *  |  Cancel   | (full width)
+ *  |  Save     | (full width)
+ *  | validation|
+ *  +-----------+
+ *
+ * Tablet (640-1023px):
+ *  +---------------+
+ *  | Error msg     | (if present)
+ *  +---------------+
+ *  | Wiki Title    | (if wiki post)
+ *  +---------------+
+ *  | Form          |
+ *  | - Title       |
+ *  | - Content     |
+ *  | - Language    |
+ *  +---------------+
+ *  | Cancel  Save  | (right-aligned)
+ *  | msg     valdn | (stacked)
+ *  +---------------+
+ *
+ * Desktop (1024-1535px):
+ *  +-------------------+
+ *  | Error msg         | (if present)
+ *  +-------------------+
+ *  | Wiki Title        | (if wiki post)
+ *  +-------------------+
+ *  | Form (max-w-3xl)  |
+ *  | - Title (input)   |
+ *  | - Content (editor)|
+ *  | - Language select |
+ *  +-------------------+
+ *  | Cancel  Save      | (right end)
+ *  | msg     validation| (below right)
+ *  +-------------------+
+ *
+ * Ultra-wide (>=1536px):
+ *  +---------------------------+
+ *  | Error msg                 | (if present)
+ *  +---------------------------+
+ *  | Wiki Title                | (if wiki post)
+ *  +---------------------------+
+ *  | Form (max-w-3xl centered) |
+ *  | - Title (full editor)     |
+ *  | - Content (rich editor)   |
+ *  | - Language selector       |
+ *  +---------------------------+
+ *  | Cancel  Save              | (right aligned)
+ *  | msg     validation        | (stacked right)
+ *  +---------------------------+
+ */
 export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
   const { t } = useTranslation(["common", "community"]);
   const locale = useLocale();

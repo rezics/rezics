@@ -46,7 +46,9 @@ export const TagEdit: React.FC<TagEditProps> = ({
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const translations = [{ language: DEFAULT_LANGUAGE, title: name.trim() }];
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const translations = [{ language: DEFAULT_LANGUAGE, title: trimmed }];
     if (isUpdate && tag) {
       const payload: UpdateTagInput = { translations };
       await updateMutation.mutateAsync({

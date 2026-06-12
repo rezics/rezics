@@ -55,6 +55,7 @@
   "authority_edit_form_all_locked_notice": "すべての編集可能なフィールドは、一般のコミュニティ投稿者に対してロックされています。",
   "authority_edit_form_privileged_notice": "あなたが所有者、メンテナ、または管理者権限を持っている場合、サーバーは変更を受け入れることができます。",
   "authority_edit_form_locked_error": "フィールド ロックにより保存がブロックされました:{paths}。保存されていない入力内容はまだこのページにあります。",
+  "chapter_unsaved_changes_confirm": "未保存の変更があります。移動しますか？",
   "placeholders_chapter_title": "チャプタータイトルを入力",
   "placeholders_enter_search_term": "検索語を入力してください",
   "placeholders_enter_url": "URLを入力してください",

@@ -1,10 +1,6 @@
 import { userBySlugQuery } from "@rezics/api/user/user.queries";
 import { isPublicUserSlugRouteParams } from "@rezics/contract";
-import {
-  createFileRoute,
-  notFound,
-  Outlet,
-} from "@tanstack/react-router";
+import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 /**
  * Slug-based user-space root, not the profile surface.
