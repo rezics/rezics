@@ -65,8 +65,10 @@ export const ReadingNodeView: React.FC<ReadingNodeViewProps> = ({
   return (
     <div className="w-full mx-auto px-4 pt-4 pb-4">
       <div className="flex items-center justify-between gap-4 mb-2">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">{data?.title ?? title}</h1>
+        <div className="flex min-w-0 items-center gap-2">
+          <h1 className="text-2xl font-bold truncate">
+            {data?.title ?? title}
+          </h1>
           {canEdit && (
             <Button
               type="button"

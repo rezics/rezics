@@ -714,7 +714,7 @@ export const CompleteRegistrationPage: FC = () => {
   // 两个步骤都完成后重定向
   useEffect(() => {
     if (auth.registrationComplete && !auth.loading) {
-      navigate({ to: "/" });
+      navigate({ to: "/", replace: true });
     }
   }, [auth.registrationComplete, auth.loading, navigate]);
 
@@ -806,7 +806,7 @@ export const CompleteRegistrationPage: FC = () => {
       id: "email",
       label: t("auth:flow_verify_title"),
       optional: emailVerified
-        ? `${email}${trustedProvider ? ` (verified by ${trustedProvider})` : ""}`
+        ? `${email}${trustedProvider ? ` ${t("auth:flow_verify_trusted_provider", { provider: trustedProvider })}` : ""}`
         : undefined,
       completed: !!emailVerified,
       active: activeStep === 0,

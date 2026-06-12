@@ -121,6 +121,8 @@
   "review_search_empty_title": "리뷰가 없습니다",
   "review_short_review": "단평",
   "review_top_rated_short_reviews": "최고 평점의 짧은 리뷰",
+  "review_char_count": "{{current}} / {{min}} 최소 글자",
+  "review_chars_remaining": "{{count}}자 남음",
   "review_validation_min_chars": "리뷰는 200자 이상이어야 합니다.",
   "tag_clear": "지우기",
   "tag_downvote": "반대표",

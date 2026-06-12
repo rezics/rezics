@@ -85,11 +85,13 @@ export const UserEditPage: FC<UserEditPageProps> = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const trimmedName = (formData.name ?? "").trim();
+    if (!trimmedName) return;
     setSaving(true);
 
     try {
       const updateData: UpdateUser = {
-        name: formData.name,
+        name: trimmedName,
         avatar: formData.avatar || undefined,
         bio: formData.bio || undefined,
         description: markdownContentDoc(formData.description),

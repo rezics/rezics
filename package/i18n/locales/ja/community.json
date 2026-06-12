@@ -121,6 +121,8 @@
   "review_search_empty_title": "レビューが見つかりませんでした",
   "review_short_review": "レビュー",
   "review_top_rated_short_reviews": "高評価の短いレビュー",
+  "review_char_count": "{{current}} / {{min}} 文字以上",
+  "review_chars_remaining": "残り {{count}} 文字",
   "review_validation_min_chars": "レビューは 200 文字以上にする必要があります",
   "tag_clear": "クリア",
   "tag_downvote": "反対票を投じる",

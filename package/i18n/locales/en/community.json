@@ -121,6 +121,8 @@
   "review_search_empty_title": "No reviews found",
   "review_short_review": "Review",
   "review_top_rated_short_reviews": "Top-rated short reviews",
+  "review_char_count": "{{current}} / {{min}} min characters",
+  "review_chars_remaining": "{{count}} characters remaining",
   "review_validation_min_chars": "Reviews must be at least 200 characters",
   "tag_clear": "Clear",
   "tag_downvote": "Downvote",

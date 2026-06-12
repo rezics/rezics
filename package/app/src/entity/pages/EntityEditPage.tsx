@@ -143,7 +143,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
 
   useEffect(() => {
     if (!isLoading && !canEdit) {
-      navigate({ to: "/entity/$unitId", params: { unitId } });
+      navigate({ to: "/entity/$unitId", params: { unitId }, replace: true });
     }
   }, [canEdit, isLoading, navigate, unitId]);
 
@@ -233,7 +233,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
     return (
       <div className="w-full mx-auto max-w-3xl px-4 py-12">
         <h1 className="text-lg font-semibold text-text-primary">
-          Entity not found
+          {t("entity:not_found")}
         </h1>
       </div>
     );

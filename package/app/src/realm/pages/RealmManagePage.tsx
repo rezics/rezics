@@ -240,13 +240,15 @@ export function RealmManagePage({
   };
 
   const handleSave = async () => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
     setSaving(true);
     try {
       const translation = await unitApi.upsertTranslation(
         realmId,
         selectedLanguage,
         {
-          title,
+          title: trimmedTitle,
           description: markdownContentDoc(description),
         },
       );
@@ -376,7 +378,7 @@ export function RealmManagePage({
           <div className="flex justify-end">
             {/* Identity save only upserts the selected translation; realm extra controls auto-save independently. */}
             {/* 身份保存仅 upsert 选中的翻译；realm 的额外控件各自独立自动保存。 */}
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={handleSave} disabled={saving || !title.trim()}>
               {t("common:save")}
             </Button>
           </div>

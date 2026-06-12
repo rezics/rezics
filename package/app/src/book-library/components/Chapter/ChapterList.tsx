@@ -148,7 +148,7 @@ const BookTocTreeItems = React.memo(function BookTocTreeItems({
             <div className="col-span-full flex items-center justify-between">
               <button
                 type="button"
-                className="text-xl font-semibold mb-2 cursor-pointer text-left"
+                className="text-xl font-semibold mb-2 cursor-pointer text-left min-w-0 truncate"
                 onClick={() => onToggle(nodeKey)}
                 aria-expanded={isOpen}
               >

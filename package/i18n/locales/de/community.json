@@ -121,6 +121,8 @@
   "review_search_empty_title": "Keine Bewertungen gefunden",
   "review_short_review": "Rezension",
   "review_top_rated_short_reviews": "Bestbewertete Kurzrezensionen",
+  "review_char_count": "{{current}} / {{min}} Mindestzeichen",
+  "review_chars_remaining": "{{count}} Zeichen übrig",
   "review_validation_min_chars": "Bewertungen müssen mindestens 200 Zeichen lang sein",
   "tag_clear": "Klar",
   "tag_downvote": "Ablehnen",

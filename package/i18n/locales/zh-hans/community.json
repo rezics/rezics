@@ -121,6 +121,8 @@
   "review_search_empty_title": "没有找到评论",
   "review_short_review": "书评",
   "review_top_rated_short_reviews": "最受好评的短评论",
+  "review_char_count": "{{current}} / {{min}} 最少字符",
+  "review_chars_remaining": "还差 {{count}} 个字符",
   "review_validation_min_chars": "评论必须至少 200 个字符",
   "tag_clear": "清除",
   "tag_downvote": "投反对票",

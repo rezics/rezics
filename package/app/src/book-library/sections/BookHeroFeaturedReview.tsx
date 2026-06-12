@@ -106,18 +106,18 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
         {QUOTE_CLOSE}
       </p>
 
-      <div className="flex items-center gap-2 text-white/85">
+      <div className="flex min-w-0 items-center gap-2 text-white/85">
         {author?.avatar && (
           <Avatar className="w-6 h-6">
             <AvatarImage src={author.avatar} alt={author.name ?? ""} />
             <AvatarFallback>{(author.name ?? "?").slice(0, 1)}</AvatarFallback>
           </Avatar>
         )}
-        <span className="text-sm font-medium">
+        <span className="text-sm font-medium min-w-0 truncate">
           {author?.name ?? t("book:hero_featured_review_unknown_author")}
         </span>
         {score != null && (
-          <div className="ml-1">
+          <div className="ml-1 shrink-0">
             <RatingInput
               value={Math.round(score)}
               onChange={() => {}}

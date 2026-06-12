@@ -58,11 +58,13 @@ export const DmConversationPage: React.FC = () => {
 
   return (
     <div className="mx-auto mt-16 flex h-[calc(100vh-8rem)] w-full px-4 max-w-3xl flex-col">
-      <div className="mb-4 flex items-center justify-between">
-        <AccentBarWithText text={peerLabel} />
+      <div className="mb-4 flex min-w-0 items-center justify-between">
+        <div className="min-w-0 overflow-hidden">
+          <AccentBarWithText text={peerLabel} />
+        </div>
         <Link
           to="/inbox/dm"
-          className="text-sm text-text-secondary hover:text-text-primary"
+          className="shrink-0 text-sm text-text-secondary hover:text-text-primary"
         >
           {t("community:inbox_all_conversations")}
         </Link>
