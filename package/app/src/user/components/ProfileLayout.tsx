@@ -123,8 +123,8 @@ export const ProfileLayout: FC = () => {
       value={{ user, isCurrentUser, userId: user.unitId, profileBasePath }}
     >
       <div className="w-full max-w-12/16 mx-auto">
-        <div className="flex flex-col md:flex-row md:gap-12 px-4 pb-12">
-          <aside className="w-full md:w-[280px] md:shrink-0">
+        <div className="flex flex-col lg:flex-row lg:gap-12 px-4 pb-12">
+          <aside className="w-full lg:w-[280px] lg:shrink-0">
             <ProfileBasicInfo
               user={user}
               isCurrentUser={isCurrentUser}

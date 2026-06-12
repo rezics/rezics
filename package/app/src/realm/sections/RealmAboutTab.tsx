@@ -15,14 +15,12 @@ import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates
 
 interface RealmAboutTabProps {
   realm: RealmDTO;
-  description?: string;
   membership?: RealmMembershipMeDTO | null;
   canManage: boolean;
 }
 
 export function RealmAboutTab({
   realm,
-  description,
   membership,
   canManage,
 }: RealmAboutTabProps) {
@@ -30,9 +28,6 @@ export function RealmAboutTab({
   const role = membership?.roleKey ?? "visitor";
   const state =
     membership?.state ?? (membership?.member ? "active" : "visitor");
-  const visibility = realm.isPublic
-    ? t("realm_about_visibility_public")
-    : t("realm_about_visibility_member_only");
   const moderatorContext = canManage
     ? t("realm_about_moderator_has_tools")
     : t("realm_about_moderator_description");
@@ -40,16 +35,6 @@ export function RealmAboutTab({
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="flex min-w-0 flex-col gap-6">
-        {description ? (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold leading-ui text-text-primary">
-              {t("realm_about_summary")}
-            </h2>
-            <p className="m-0 text-sm leading-body text-text-secondary">
-              {description}
-            </p>
-          </section>
-        ) : null}
         <RealmMarkdownPanel
           title={t("realm_tab_about")}
           postUnitId={realm.extra?.about ?? null}
@@ -59,11 +44,6 @@ export function RealmAboutTab({
       </div>
 
       <aside className="flex min-w-0 flex-col gap-3">
-        <InfoCard
-          label={t("realm_tab_members")}
-          value={String(realm.memberCount ?? 0)}
-        />
-        <InfoCard label={t("realm_about_visibility")} value={visibility} />
         <InfoCard label={t("realm_about_your_role")} value={role} />
         <InfoCard label={t("realm_about_membership")} value={state} />
         {realm.isOfficial ? (

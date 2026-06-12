@@ -204,7 +204,6 @@ export const ThemeDemo: React.FC = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

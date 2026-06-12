@@ -17,7 +17,9 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
   const translation = getTranslation(shelf.translations);
   const title =
     translation?.title ||
-    (shelf.kindKey ? shelfKindLabel(shelf.kindKey) : t("entity:shelf_untitled"));
+    (shelf.kindKey
+      ? shelfKindLabel(shelf.kindKey)
+      : t("entity:shelf_untitled"));
   const description = contentDocMarkdownFallback(translation?.description);
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "shelf", ownerUnit: shelf });

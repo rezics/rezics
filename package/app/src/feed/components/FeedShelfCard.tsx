@@ -5,23 +5,32 @@ import { Library } from "lucide-react";
 import { AppSafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 
-function shelfKindLabel(
-  kindKey: string,
-  t: (key: string) => string,
-): string {
+function shelfKindLabel(kindKey: string, t: (key: string) => string): string {
   switch (kindKey) {
-    case "favorites": return t("entity:shelf_system_favorites");
-    case "saved": return t("entity:shelf_system_saved");
-    case "backlog": return t("entity:shelf_system_backlog");
-    case "active": return t("entity:shelf_system_active");
-    case "completed": return t("entity:shelf_system_completed");
-    case "CUSTOM": return t("entity:shelf_kind_custom");
-    case "FAVORITES": return t("entity:shelf_kind_favorites");
-    case "PLAYLIST": return t("entity:shelf_kind_playlist");
-    case "READING_LIST": return t("entity:shelf_kind_reading_list");
-    case "WATCHLIST": return t("entity:shelf_kind_watchlist");
+    case "favorites":
+      return t("entity:shelf_system_favorites");
+    case "saved":
+      return t("entity:shelf_system_saved");
+    case "backlog":
+      return t("entity:shelf_system_backlog");
+    case "active":
+      return t("entity:shelf_system_active");
+    case "completed":
+      return t("entity:shelf_system_completed");
+    case "CUSTOM":
+      return t("entity:shelf_kind_custom");
+    case "FAVORITES":
+      return t("entity:shelf_kind_favorites");
+    case "PLAYLIST":
+      return t("entity:shelf_kind_playlist");
+    case "READING_LIST":
+      return t("entity:shelf_kind_reading_list");
+    case "WATCHLIST":
+      return t("entity:shelf_kind_watchlist");
     default:
-      return kindKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      return kindKey
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
   }
 }
 

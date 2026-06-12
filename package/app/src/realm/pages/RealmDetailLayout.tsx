@@ -111,7 +111,7 @@ export function RealmDetailLayout({
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
         <BannerSection banner={realm.extra?.banner ?? null} />
         <div className="mb-6 flex flex-col gap-4">
-          <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 flex-row items-center gap-3">
               <Avatar className="size-14 rounded-md bg-surface-subtle">
                 <AvatarImage src={avatarUrl} alt="" />
@@ -134,7 +134,7 @@ export function RealmDetailLayout({
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {isMember ? (
                 <Link to={realmCreateHref(routeLocation)}>
                   <Button size="sm" className="gap-1 rounded-full px-2 md:px-4">

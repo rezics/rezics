@@ -5,15 +5,16 @@ import { BookOpen } from "lucide-react";
 import { AppSafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 
-function bookKindLabel(
-  kind: string,
-  t: (key: string) => string,
-): string {
+function bookKindLabel(kind: string, t: (key: string) => string): string {
   switch (kind) {
-    case "book": return t("page:home_feed_type_book");
-    case "game": return t("page:home_feed_type_game");
-    case "media": return t("page:home_feed_type_media");
-    default: return kind;
+    case "book":
+      return t("page:home_feed_type_book");
+    case "game":
+      return t("page:home_feed_type_game");
+    case "media":
+      return t("page:home_feed_type_media");
+    default:
+      return kind;
   }
 }
 

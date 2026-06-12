@@ -268,7 +268,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
               <LazyLoadImage
                 src={coverUrl}
                 alt={title}
-                className="max-h-[320px] rounded-lg shadow-xl"
+                className="max-h-[320px] rounded-lg object-contain shadow-xl"
               />
             </div>
 

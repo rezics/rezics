@@ -15,7 +15,7 @@ export function MarkdownContent({
     // biome-ignore lint/a11y/noStaticElementInteractions: delegated click handler only intercepts links in rendered markdown.
     // biome-ignore lint/a11y/useKeyWithClickEvents: markdown links remain keyboard-accessible as native anchors.
     <div
-      className={className}
+      className={`break-words ${className ?? ""}`}
       onClick={handleExternalLinkClick}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering
       dangerouslySetInnerHTML={{ __html: chapterHtml }}

@@ -46,7 +46,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
     <>
       {/* Mobile: compact horizontal layout */}
       {/* 移动端：紧凑的横向布局 */}
-      <div className="relative flex items-start gap-4 py-4 px-4 md:hidden">
+      <div className="relative flex items-start gap-4 py-4 px-4 lg:hidden">
         {isCurrentUser && (
           <Link to="/user/me/setting" className="absolute top-3 right-3">
             <Button
@@ -116,7 +116,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
       {/* Desktop: generous vertical layout */}
       {/* 桌面端：宽松的纵向布局 */}
-      <div className="hidden md:flex flex-col items-start gap-4 py-12 px-4">
+      <div className="hidden lg:flex flex-col items-start gap-4 py-12 px-4">
         <Avatar className="w-full h-auto aspect-square rounded-lg text-5xl">
           <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
           <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
@@ -134,22 +134,6 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         {user.bio && (
           <p className="text-sm text-text-secondary max-w-xs">{user.bio}</p>
         )}
-
-        <div className="flex items-center gap-3 text-sm text-text-secondary">
-          <span>
-            <strong className="font-medium text-text-primary">
-              {user.followersCount ?? 0}
-            </strong>{" "}
-            {t("settings:profile_tab_followers")}
-          </span>
-          <span aria-hidden="true">&middot;</span>
-          <span>
-            <strong className="font-medium text-text-primary">
-              {user.followingsCount ?? 0}
-            </strong>{" "}
-            {t("settings:profile_following")}
-          </span>
-        </div>
 
         <div className="w-full">
           {canEditOwnProfile ? (

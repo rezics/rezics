@@ -6,11 +6,10 @@ export const Route = createFileRoute(
   "/_mainLayout/realm/$realmId/_detail/about",
 )({
   component: () => {
-    const { realm, description, membership, showManage } = useRealmDetail();
+    const { realm, membership, showManage } = useRealmDetail();
     return (
       <RealmAboutTab
         realm={realm}
-        description={description}
         membership={membership}
         canManage={showManage}
       />
