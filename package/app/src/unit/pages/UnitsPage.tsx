@@ -282,9 +282,9 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
               <div className="mt-4 mb-4 border-b border-border-whisper">
                 <Tabs value={tab} onValueChange={(v) => setTab(v)}>
                   <TabsList aria-label={t("book:unit_type_tabs_label")}>
-                    {types.map((t) => (
-                      <TabsTrigger key={t} value={t}>
-                        {t}
+                    {types.map((type) => (
+                      <TabsTrigger key={type} value={type}>
+                        {type}
                       </TabsTrigger>
                     ))}
                   </TabsList>

@@ -42,8 +42,8 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
     <>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 text-sm">
-          <span className="font-medium text-foreground">{actorSummary}</span>
-          <span className="text-muted-foreground">{kindText}</span>
+          <span className="font-medium text-text-primary">{actorSummary}</span>
+          <span className="text-text-secondary">{kindText}</span>
           {item.count > 1 && (
             <Badge variant="secondary" className="ml-1">
               ×{item.count}
@@ -51,11 +51,11 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
           )}
         </div>
         {extra?.unitTitle && (
-          <p className="mt-1 truncate text-sm text-muted-foreground">
+          <p className="mt-1 truncate text-sm text-text-secondary">
             {extra.unitTitle}
           </p>
         )}
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-xs text-text-secondary">
           {relativeTime(t, item.latestAt)}
         </p>
       </div>
@@ -115,7 +115,7 @@ function kindLabel(t: Translate, kind: string): string {
     case "system.notice":
       return t("community:notification_kind_system");
     default:
-      return kind;
+      return t("community:notification_kind_system");
   }
 }
 

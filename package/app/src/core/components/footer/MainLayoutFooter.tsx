@@ -249,24 +249,24 @@ export function MainLayoutFooter({ className }: { className?: string }) {
           </p>
 
           <div className="flex flex-row items-center gap-4 pr-20">
-            <a
-              href="/privacy"
+            <Link
+              to="/privacy"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_privacy")}
-            </a>
-            <a
-              href="/terms"
+            </Link>
+            <Link
+              to="/terms"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_terms")}
-            </a>
-            <a
-              href="/contact"
+            </Link>
+            <Link
+              to="/contact"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_contact")}
-            </a>
+            </Link>
           </div>
         </div>
       </div>

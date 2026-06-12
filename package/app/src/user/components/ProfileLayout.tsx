@@ -112,7 +112,7 @@ export const ProfileLayout: FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-error-text">
-          {error ? (error as Error).message : t("settings:user_not_found")}
+          {error ? t("common:unexpected_error") : t("settings:user_not_found")}
         </p>
       </div>
     );
