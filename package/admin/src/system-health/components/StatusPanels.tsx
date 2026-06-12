@@ -56,7 +56,6 @@ function repairSearch({
     | "queue-failed-job"
     | "history-outbox-replay"
     | "attribution"
-    | "source-site"
     | "counters";
   targetIds?: string;
   historyOutboxStatuses?: ("pending" | "failed")[];

@@ -13,7 +13,7 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
-import { UnitExternalRef } from "./source";
+import { UnitExternalLink } from "./entity";
 import { Unit } from "./unit";
 
 export const Game = pgTable("Game", {
@@ -44,7 +44,7 @@ export const GameSystemRequirement = pgTable(
     }),
     tier: varchar({ length: 32 }).notNull(),
     language: varchar({ length: 16 }),
-    sourceRefId: uuid().references(() => UnitExternalRef.id, {
+    sourceExternalLinkId: uuid().references(() => UnitExternalLink.id, {
       onDelete: "set null",
       onUpdate: "cascade",
     }),
@@ -65,15 +65,15 @@ export const GameSystemRequirement = pgTable(
       table.gameUnitId.asc().nullsLast(),
       table.platformEntityId.asc().nullsLast(),
       table.tier.asc().nullsLast(),
-      table.sourceRefId.asc().nullsLast(),
+      table.sourceExternalLinkId.asc().nullsLast(),
     ),
     index("GameSystemRequirement_platformEntityId_idx").using(
       "btree",
       table.platformEntityId.asc().nullsLast(),
     ),
-    index("GameSystemRequirement_sourceRefId_idx").using(
+    index("GameSystemRequirement_sourceExternalLinkId_idx").using(
       "btree",
-      table.sourceRefId.asc().nullsLast(),
+      table.sourceExternalLinkId.asc().nullsLast(),
     ),
     index("GameSystemRequirement_tier_idx").using(
       "btree",

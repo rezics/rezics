@@ -17,7 +17,7 @@ import { seedRealms } from "./realms.js";
 import { createSeedResult } from "./result.js";
 import { seedScores } from "./scores.js";
 import { seedShelves } from "./shelves.js";
-import { seedSourceSiteFixtures } from "./source-sites.js";
+import { seedExternalLinkFixtures } from "./external-links.js";
 import { PostKind } from "./storage-values.js";
 import type { SeedCtx } from "./strategy.js";
 import { seedTags } from "./tags.js";
@@ -87,8 +87,8 @@ export async function runFactorySeed(
   );
   done();
 
-  done = stepTimer("Step 3b: Source site fixtures");
-  await seedSourceSiteFixtures(ctx, books, organizations);
+  done = stepTimer("Step 3b: External link fixtures");
+  await seedExternalLinkFixtures(ctx, books, organizations);
   done();
 
   done = stepTimer("Step 4: Realms");

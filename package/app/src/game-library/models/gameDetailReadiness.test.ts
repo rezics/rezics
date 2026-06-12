@@ -47,7 +47,7 @@ describe("game detail readiness", () => {
   });
 
   test("keeps hero media as domain media instead of raw game columns", () => {
-    expect(gameDetailDomainMediaPolicy.sources).toContain("UnitExternalRef");
+    expect(gameDetailDomainMediaPolicy.sources).toContain("UnitExternalLink");
     expect(gameDetailDomainMediaPolicy.excludedGameColumns).toContain(
       "trailerUrl",
     );

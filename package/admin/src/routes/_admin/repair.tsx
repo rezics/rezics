@@ -14,7 +14,6 @@ const repairScopes = new Set<AdminRepairJobScope>([
   "history-outbox-replay",
   "slug",
   "attribution",
-  "source-site",
   "counters",
 ]);
 const historyOutboxStatuses = new Set<HistoryOutboxRepairStatus>([

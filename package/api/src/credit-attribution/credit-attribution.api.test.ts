@@ -26,13 +26,16 @@ describe("creditAttributionApi evidence", () => {
               unitId: "book-1",
               entityId: "publisher-1",
               role: "publisher",
-              sourceRefId: "ref-1",
-              sourceSiteEntityUnitId: "source-site-1",
-              externalKind: "book",
-              externalId: "123",
-              canonicalUrl: "https://book.qidian.com/info/123",
+              sourceExternalLinkId: "link-1",
+              url: "https://book.qidian.com/info/123",
               observedAt: "2026-05-25T00:00:00.000Z",
-              sourceSite: { entityUnitId: "source-site-1", key: "qidian" },
+              sourceExternalLink: {
+                id: "link-1",
+                unitId: "book-1",
+                sourceEntityUnitId: "qidian-entity",
+                url: "https://book.qidian.com/info/123",
+                role: "source",
+              },
             },
           ],
         }),
@@ -47,7 +50,7 @@ describe("creditAttributionApi evidence", () => {
       unitId: "book-1",
       entityId: "publisher-1",
       role: "publisher",
-      sourceRefId: "ref-1",
+      sourceExternalLinkId: "link-1",
     });
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
@@ -59,12 +62,12 @@ describe("creditAttributionApi evidence", () => {
         unitId: "book-1",
         entityId: "publisher-1",
         role: "publisher",
-        sourceRefId: "ref-1",
+        sourceExternalLinkId: "link-1",
       }),
     });
     expect(dto.evidence?.[0]).toMatchObject({
-      sourceRefId: "ref-1",
-      sourceSite: { key: "qidian" },
+      sourceExternalLinkId: "link-1",
+      sourceExternalLink: { sourceEntityUnitId: "qidian-entity" },
     });
   });
 });

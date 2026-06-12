@@ -257,11 +257,11 @@ export type ZoneStatsSection = Static<typeof zoneStatsSectionSchema>;
 
 /**
  * `sources` renders external presences attached to the zone Unit itself:
- * a ZONE is a Unit, so its `UnitExternalRef`s mean "this portal's
+ * a ZONE is a Unit, so its `UnitExternalLink`s mean "this portal's
  * counterparts elsewhere". There is intentionally no section `unitId`;
  * readers always query the owning zone unit.
  * `sources` 渲染挂在专区 Unit 自身上的外部存在：ZONE 本身就是 Unit，
- * 其 `UnitExternalRef` 表示“这个门户在其他地方的对应站点”。这里刻意
+ * 其 `UnitExternalLink` 表示“这个门户在其他地方的对应站点”。这里刻意
  * 没有分区级 `unitId`；读取方始终查询所属专区 Unit。
  */
 export const zoneSourcesSectionSchema = t.Object(

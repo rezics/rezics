@@ -10,9 +10,8 @@ import {
   CreditAttribution,
   CreditAttributionEvidence,
   Entity,
-  SourceSite,
   Unit,
-  UnitExternalRef,
+  UnitExternalLink,
   UnitTranslation,
 } from "../db/schema";
 import { serverJobProducer } from "../job/job-boundary";
@@ -98,37 +97,33 @@ async function hydrateRows(
     ],
   );
 
-  const sourceRefIds = unique(evidenceRows.map((row) => row.sourceRefId));
-  const sourceRefs =
-    sourceRefIds.length > 0
+  const sourceExternalLinkIds = unique(
+    evidenceRows.map((row) => row.sourceExternalLinkId),
+  );
+  const sourceExternalLinks =
+    sourceExternalLinkIds.length > 0
       ? await db
           .select()
-          .from(UnitExternalRef)
-          .where(sqlIn(UnitExternalRef.id, sourceRefIds))
+          .from(UnitExternalLink)
+          .where(sqlIn(UnitExternalLink.id, sourceExternalLinkIds))
       : [];
-  const sourceSiteIds = unique(
-    sourceRefs.map((row) => row.sourceSiteEntityUnitId),
+  const sourceEntityUnitIds = unique(
+    sourceExternalLinks.map((row) => row.sourceEntityUnitId),
   );
-  const [
-    sourceSites,
-    sourceSiteEntities,
-    sourceSiteUnits,
-    sourceSiteTranslations,
-  ] =
-    sourceSiteIds.length > 0
+  const [sourceEntities, sourceEntityUnits, sourceEntityTranslations] =
+    sourceEntityUnitIds.length > 0
       ? await Promise.all([
           db
             .select()
-            .from(SourceSite)
-            .where(sqlIn(SourceSite.entityUnitId, sourceSiteIds)),
-          db.select().from(Entity).where(sqlIn(Entity.unitId, sourceSiteIds)),
-          db.select().from(Unit).where(sqlIn(Unit.id, sourceSiteIds)),
+            .from(Entity)
+            .where(sqlIn(Entity.unitId, sourceEntityUnitIds)),
+          db.select().from(Unit).where(sqlIn(Unit.id, sourceEntityUnitIds)),
           db
             .select()
             .from(UnitTranslation)
-            .where(sqlIn(UnitTranslation.unitId, sourceSiteIds)),
+            .where(sqlIn(UnitTranslation.unitId, sourceEntityUnitIds)),
         ])
-      : [[], [], [], []];
+      : [[], [], []];
 
   const unitById = new Map(entityUnits.map((unit) => [unit.id, unit]));
   const entityById = new Map(entities.map((entity) => [entity.unitId, entity]));
@@ -139,24 +134,23 @@ async function hydrateRows(
     translationsByUnitId.set(translation.unitId, list);
   }
 
-  const sourceRefById = new Map(sourceRefs.map((ref) => [ref.id, ref]));
-  const sourceSiteById = new Map(
-    sourceSites.map((site) => [site.entityUnitId, site]),
+  const sourceExternalLinkById = new Map(
+    sourceExternalLinks.map((link) => [link.id, link]),
   );
-  const sourceSiteEntityById = new Map(
-    sourceSiteEntities.map((entity) => [entity.unitId, entity]),
+  const sourceEntityById = new Map(
+    sourceEntities.map((entity) => [entity.unitId, entity]),
   );
-  const sourceSiteUnitById = new Map(
-    sourceSiteUnits.map((unit) => [unit.id, unit]),
+  const sourceEntityUnitById = new Map(
+    sourceEntityUnits.map((unit) => [unit.id, unit]),
   );
-  const sourceSiteTranslationsByUnitId = new Map<
+  const sourceEntityTranslationsByUnitId = new Map<
     string,
-    typeof sourceSiteTranslations
+    typeof sourceEntityTranslations
   >();
-  for (const translation of sourceSiteTranslations) {
-    const list = sourceSiteTranslationsByUnitId.get(translation.unitId) ?? [];
+  for (const translation of sourceEntityTranslations) {
+    const list = sourceEntityTranslationsByUnitId.get(translation.unitId) ?? [];
     list.push(translation);
-    sourceSiteTranslationsByUnitId.set(translation.unitId, list);
+    sourceEntityTranslationsByUnitId.set(translation.unitId, list);
   }
 
   const evidenceByKey = new Map<string, typeof evidenceRows>();
@@ -174,38 +168,32 @@ async function hydrateRows(
     const evidence = (
       evidenceByKey.get(`${row.unitId}:${row.entityId}:${row.role}`) ?? []
     ).map((evidence) => {
-      const sourceRef = sourceRefById.get(evidence.sourceRefId);
-      const sourceSite = sourceRef
-        ? sourceSiteById.get(sourceRef.sourceSiteEntityUnitId)
+      const sourceExternalLink = sourceExternalLinkById.get(
+        evidence.sourceExternalLinkId,
+      );
+      const sourceEntity = sourceExternalLink
+        ? sourceEntityById.get(sourceExternalLink.sourceEntityUnitId)
         : undefined;
-      const sourceSiteEntity = sourceRef
-        ? sourceSiteEntityById.get(sourceRef.sourceSiteEntityUnitId)
-        : undefined;
-      const sourceSiteUnit = sourceRef
-        ? sourceSiteUnitById.get(sourceRef.sourceSiteEntityUnitId)
+      const sourceEntityUnit = sourceExternalLink
+        ? sourceEntityUnitById.get(sourceExternalLink.sourceEntityUnitId)
         : undefined;
       return {
         ...evidence,
-        sourceRef: sourceRef
+        sourceExternalLink: sourceExternalLink
           ? {
-              ...sourceRef,
-              sourceSite: sourceSite
+              ...sourceExternalLink,
+              sourceEntity: sourceEntity
                 ? {
-                    ...sourceSite,
-                    entity: sourceSiteEntity
+                    ...sourceEntity,
+                    unit: sourceEntityUnit
                       ? {
-                          ...sourceSiteEntity,
-                          unit: sourceSiteUnit
-                            ? {
-                                ...sourceSiteUnit,
-                                translations:
-                                  sourceSiteTranslationsByUnitId.get(
-                                    sourceSiteUnit.id,
-                                  ) ?? [],
-                              }
-                            : undefined,
+                          ...sourceEntityUnit,
+                          translations:
+                            sourceEntityTranslationsByUnitId.get(
+                              sourceEntityUnit.id,
+                            ) ?? [],
                         }
-                      : null,
+                      : undefined,
                   }
                 : null,
             }
@@ -370,18 +358,23 @@ function createDrizzleCreditAttributionRepository(): CreditAttributionRepository
         .limit(1);
       if (!existing) throw new Error("CreditAttribution not found");
 
-      const [sourceRef] = await db
-        .select({ id: UnitExternalRef.id })
-        .from(UnitExternalRef)
-        .where(eq(UnitExternalRef.id, input.sourceRefId))
+      const [sourceExternalLink] = await db
+        .select({ id: UnitExternalLink.id, unitId: UnitExternalLink.unitId })
+        .from(UnitExternalLink)
+        .where(eq(UnitExternalLink.id, input.sourceExternalLinkId))
         .limit(1);
-      if (!sourceRef) throw new Error("UnitExternalRef not found");
+      if (!sourceExternalLink) throw new Error("UnitExternalLink not found");
+      if (sourceExternalLink.unitId !== input.unitId) {
+        throw new Error(
+          "CreditAttributionEvidence sourceExternalLinkId must reference the same Unit",
+        );
+      }
 
       await db.insert(CreditAttributionEvidence).values({
         unitId: input.unitId,
         entityId: input.entityId,
         role: input.role,
-        sourceRefId: input.sourceRefId,
+        sourceExternalLinkId: input.sourceExternalLinkId,
         claimPath: input.claimPath ?? null,
         observedUrl: input.observedUrl ?? null,
         observedAt: input.observedAt ? new Date(input.observedAt) : new Date(),

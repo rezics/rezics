@@ -4,6 +4,7 @@ import { ZoneManagePage, type ZoneManageTab } from "@/zone";
 const manageTabs = [
   "profile",
   "sections",
+  "sources",
   "menus",
   "theme",
   "lifecycle",

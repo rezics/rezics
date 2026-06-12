@@ -42,6 +42,7 @@
   "manage_ends_at": "Ends at",
   "manage_denied": "You need owner-realm manager or staff permissions to manage this zone.",
   "manage_sections": "Pages & Sections",
+  "manage_sources": "Sources",
   "manage_pages": "Pages",
   "manage_home_page": "Home page",
   "manage_add_page": "Add page",

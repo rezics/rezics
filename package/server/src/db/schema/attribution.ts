@@ -11,7 +11,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createdAt, timestampMs, updatedAt, uuidv7PrimaryKey } from "./columns";
-import { UnitExternalRef } from "./source";
+import { UnitExternalLink } from "./entity";
 import { Unit } from "./unit";
 
 export const CreditAttribution = pgTable(
@@ -52,9 +52,9 @@ export const CreditAttributionEvidence = pgTable(
     unitId: uuid().notNull(),
     entityId: uuid().notNull(),
     role: varchar({ length: 64 }).notNull(),
-    sourceRefId: uuid()
+    sourceExternalLinkId: uuid()
       .notNull()
-      .references(() => UnitExternalRef.id, {
+      .references(() => UnitExternalLink.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
@@ -77,9 +77,9 @@ export const CreditAttributionEvidence = pgTable(
     })
       .onUpdate("cascade")
       .onDelete("cascade"),
-    index("CreditAttributionEvidence_sourceRefId_idx").using(
+    index("CreditAttributionEvidence_sourceExternalLinkId_idx").using(
       "btree",
-      table.sourceRefId.asc().nullsLast(),
+      table.sourceExternalLinkId.asc().nullsLast(),
     ),
     index("CreditAttributionEvidence_unitId_entityId_role_idx").using(
       "btree",

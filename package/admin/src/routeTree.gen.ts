@@ -20,7 +20,6 @@ import { Route as AdminAuthorityRouteImport } from './routes/_admin/authority'
 import { Route as AdminUserIndexRouteImport } from './routes/_admin/user/index'
 import { Route as AdminUnitIndexRouteImport } from './routes/_admin/unit/index'
 import { Route as AdminStatusIndexRouteImport } from './routes/_admin/status/index'
-import { Route as AdminSourceSiteIndexRouteImport } from './routes/_admin/source-site/index'
 import { Route as AdminShelfIndexRouteImport } from './routes/_admin/shelf/index'
 import { Route as AdminReviewIndexRouteImport } from './routes/_admin/review/index'
 import { Route as AdminRealmIndexRouteImport } from './routes/_admin/realm/index'
@@ -40,7 +39,6 @@ import { Route as AdminStatusServicesRouteImport } from './routes/_admin/status/
 import { Route as AdminStatusQueueRouteImport } from './routes/_admin/status/queue'
 import { Route as AdminStatusHistoryRouteImport } from './routes/_admin/status/history'
 import { Route as AdminStatusCdcRouteImport } from './routes/_admin/status/cdc'
-import { Route as AdminSourceSiteEntityUnitIdRouteImport } from './routes/_admin/source-site/$entityUnitId'
 import { Route as AdminMiscEchokvRouteImport } from './routes/_admin/misc/echokv'
 import { Route as AdminMeiliObservabilityRouteImport } from './routes/_admin/meili/observability'
 import { Route as AdminGovernanceEnforcementRouteImport } from './routes/_admin/governance/enforcement'
@@ -106,11 +104,6 @@ const AdminUnitIndexRoute = AdminUnitIndexRouteImport.update({
 const AdminStatusIndexRoute = AdminStatusIndexRouteImport.update({
   id: '/status/',
   path: '/status/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSourceSiteIndexRoute = AdminSourceSiteIndexRouteImport.update({
-  id: '/source-site/',
-  path: '/source-site/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminShelfIndexRoute = AdminShelfIndexRouteImport.update({
@@ -208,12 +201,6 @@ const AdminStatusCdcRoute = AdminStatusCdcRouteImport.update({
   path: '/status/cdc',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminSourceSiteEntityUnitIdRoute =
-  AdminSourceSiteEntityUnitIdRouteImport.update({
-    id: '/source-site/$entityUnitId',
-    path: '/source-site/$entityUnitId',
-    getParentRoute: () => AdminRoute,
-  } as any)
 const AdminMiscEchokvRoute = AdminMiscEchokvRouteImport.update({
   id: '/misc/echokv',
   path: '/misc/echokv',
@@ -296,7 +283,6 @@ export interface FileRoutesByFullPath {
   '/governance/enforcement': typeof AdminGovernanceEnforcementRoute
   '/meili/observability': typeof AdminMeiliObservabilityRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
-  '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/status/cdc': typeof AdminStatusCdcRoute
   '/status/history': typeof AdminStatusHistoryRoute
   '/status/queue': typeof AdminStatusQueueRoute
@@ -316,7 +302,6 @@ export interface FileRoutesByFullPath {
   '/realm/': typeof AdminRealmIndexRoute
   '/review/': typeof AdminReviewIndexRoute
   '/shelf/': typeof AdminShelfIndexRoute
-  '/source-site/': typeof AdminSourceSiteIndexRoute
   '/status/': typeof AdminStatusIndexRoute
   '/unit/': typeof AdminUnitIndexRoute
   '/user/': typeof AdminUserIndexRoute
@@ -341,7 +326,6 @@ export interface FileRoutesByTo {
   '/governance/enforcement': typeof AdminGovernanceEnforcementRoute
   '/meili/observability': typeof AdminMeiliObservabilityRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
-  '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/status/cdc': typeof AdminStatusCdcRoute
   '/status/history': typeof AdminStatusHistoryRoute
   '/status/queue': typeof AdminStatusQueueRoute
@@ -361,7 +345,6 @@ export interface FileRoutesByTo {
   '/realm': typeof AdminRealmIndexRoute
   '/review': typeof AdminReviewIndexRoute
   '/shelf': typeof AdminShelfIndexRoute
-  '/source-site': typeof AdminSourceSiteIndexRoute
   '/status': typeof AdminStatusIndexRoute
   '/unit': typeof AdminUnitIndexRoute
   '/user': typeof AdminUserIndexRoute
@@ -388,7 +371,6 @@ export interface FileRoutesById {
   '/_admin/governance/enforcement': typeof AdminGovernanceEnforcementRoute
   '/_admin/meili/observability': typeof AdminMeiliObservabilityRoute
   '/_admin/misc/echokv': typeof AdminMiscEchokvRoute
-  '/_admin/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/_admin/status/cdc': typeof AdminStatusCdcRoute
   '/_admin/status/history': typeof AdminStatusHistoryRoute
   '/_admin/status/queue': typeof AdminStatusQueueRoute
@@ -408,7 +390,6 @@ export interface FileRoutesById {
   '/_admin/realm/': typeof AdminRealmIndexRoute
   '/_admin/review/': typeof AdminReviewIndexRoute
   '/_admin/shelf/': typeof AdminShelfIndexRoute
-  '/_admin/source-site/': typeof AdminSourceSiteIndexRoute
   '/_admin/status/': typeof AdminStatusIndexRoute
   '/_admin/unit/': typeof AdminUnitIndexRoute
   '/_admin/user/': typeof AdminUserIndexRoute
@@ -435,7 +416,6 @@ export interface FileRouteTypes {
     | '/governance/enforcement'
     | '/meili/observability'
     | '/misc/echokv'
-    | '/source-site/$entityUnitId'
     | '/status/cdc'
     | '/status/history'
     | '/status/queue'
@@ -455,7 +435,6 @@ export interface FileRouteTypes {
     | '/realm/'
     | '/review/'
     | '/shelf/'
-    | '/source-site/'
     | '/status/'
     | '/unit/'
     | '/user/'
@@ -480,7 +459,6 @@ export interface FileRouteTypes {
     | '/governance/enforcement'
     | '/meili/observability'
     | '/misc/echokv'
-    | '/source-site/$entityUnitId'
     | '/status/cdc'
     | '/status/history'
     | '/status/queue'
@@ -500,7 +478,6 @@ export interface FileRouteTypes {
     | '/realm'
     | '/review'
     | '/shelf'
-    | '/source-site'
     | '/status'
     | '/unit'
     | '/user'
@@ -526,7 +503,6 @@ export interface FileRouteTypes {
     | '/_admin/governance/enforcement'
     | '/_admin/meili/observability'
     | '/_admin/misc/echokv'
-    | '/_admin/source-site/$entityUnitId'
     | '/_admin/status/cdc'
     | '/_admin/status/history'
     | '/_admin/status/queue'
@@ -546,7 +522,6 @@ export interface FileRouteTypes {
     | '/_admin/realm/'
     | '/_admin/review/'
     | '/_admin/shelf/'
-    | '/_admin/source-site/'
     | '/_admin/status/'
     | '/_admin/unit/'
     | '/_admin/user/'
@@ -634,13 +609,6 @@ declare module '@tanstack/react-router' {
       path: '/status'
       fullPath: '/status/'
       preLoaderRoute: typeof AdminStatusIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/source-site/': {
-      id: '/_admin/source-site/'
-      path: '/source-site'
-      fullPath: '/source-site/'
-      preLoaderRoute: typeof AdminSourceSiteIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/shelf/': {
@@ -776,13 +744,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStatusCdcRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/source-site/$entityUnitId': {
-      id: '/_admin/source-site/$entityUnitId'
-      path: '/source-site/$entityUnitId'
-      fullPath: '/source-site/$entityUnitId'
-      preLoaderRoute: typeof AdminSourceSiteEntityUnitIdRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/misc/echokv': {
       id: '/_admin/misc/echokv'
       path: '/misc/echokv'
@@ -889,7 +850,6 @@ interface AdminRouteChildren {
   AdminGovernanceEnforcementRoute: typeof AdminGovernanceEnforcementRoute
   AdminMeiliObservabilityRoute: typeof AdminMeiliObservabilityRoute
   AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute
-  AdminSourceSiteEntityUnitIdRoute: typeof AdminSourceSiteEntityUnitIdRoute
   AdminStatusCdcRoute: typeof AdminStatusCdcRoute
   AdminStatusHistoryRoute: typeof AdminStatusHistoryRoute
   AdminStatusQueueRoute: typeof AdminStatusQueueRoute
@@ -909,7 +869,6 @@ interface AdminRouteChildren {
   AdminRealmIndexRoute: typeof AdminRealmIndexRoute
   AdminReviewIndexRoute: typeof AdminReviewIndexRoute
   AdminShelfIndexRoute: typeof AdminShelfIndexRoute
-  AdminSourceSiteIndexRoute: typeof AdminSourceSiteIndexRoute
   AdminStatusIndexRoute: typeof AdminStatusIndexRoute
   AdminUnitIndexRoute: typeof AdminUnitIndexRoute
   AdminUserIndexRoute: typeof AdminUserIndexRoute
@@ -934,7 +893,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminGovernanceEnforcementRoute: AdminGovernanceEnforcementRoute,
   AdminMeiliObservabilityRoute: AdminMeiliObservabilityRoute,
   AdminMiscEchokvRoute: AdminMiscEchokvRoute,
-  AdminSourceSiteEntityUnitIdRoute: AdminSourceSiteEntityUnitIdRoute,
   AdminStatusCdcRoute: AdminStatusCdcRoute,
   AdminStatusHistoryRoute: AdminStatusHistoryRoute,
   AdminStatusQueueRoute: AdminStatusQueueRoute,
@@ -954,7 +912,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRealmIndexRoute: AdminRealmIndexRoute,
   AdminReviewIndexRoute: AdminReviewIndexRoute,
   AdminShelfIndexRoute: AdminShelfIndexRoute,
-  AdminSourceSiteIndexRoute: AdminSourceSiteIndexRoute,
   AdminStatusIndexRoute: AdminStatusIndexRoute,
   AdminUnitIndexRoute: AdminUnitIndexRoute,
   AdminUserIndexRoute: AdminUserIndexRoute,

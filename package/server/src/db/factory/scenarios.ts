@@ -25,7 +25,7 @@ import {
   ShelfItem,
   SubjectAttribution,
   Unit,
-  UnitExternalRef,
+  UnitExternalLink,
   UnitHistoryClock,
   UnitRealm,
   UnitSupportLanguage,
@@ -37,7 +37,7 @@ import {
 } from "../schema";
 import { seedChaptersForBook } from "./books.js";
 import { addSpecialSeedTarget, createSeedResult } from "./result.js";
-import { ensureFandomSourceSite } from "./source-sites.js";
+import { ensureFandomSourceEntity } from "./external-links.js";
 import {
   PostKind,
   UnitStatus,
@@ -2160,31 +2160,21 @@ async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
       },
     ),
   );
-  const fandomSourceSiteEntityUnitId = await ensureFandomSourceSite(ctx);
+  const fandomSourceEntityUnitId = await ensureFandomSourceEntity(ctx);
   await ctx.db
-    .insert(UnitExternalRef)
+    .insert(UnitExternalLink)
     .values(
       withUpdatedAt({
         unitId: zoneUnitId,
-        sourceSiteEntityUnitId: fandomSourceSiteEntityUnitId,
-        externalKind: "wiki",
-        externalId: "toaru",
-        canonicalUrl: "https://toaru.fandom.com/",
-        originalUrl: "https://toaru.fandom.com/",
+        sourceEntityUnitId: fandomSourceEntityUnitId,
+        url: "https://toaru.fandom.com/",
+        normalizedUrl: "https://toaru.fandom.com/",
+        normalizedUrlHash:
+          "815d1333159a3a5a444554d82a293593fa2fa334d15d96a41526eecff8735090",
+        role: "wiki",
       }),
     )
-    .onConflictDoUpdate({
-      target: [
-        UnitExternalRef.sourceSiteEntityUnitId,
-        UnitExternalRef.externalKind,
-        UnitExternalRef.externalId,
-      ],
-      set: {
-        unitId: zoneUnitId,
-        canonicalUrl: "https://toaru.fandom.com/",
-        originalUrl: "https://toaru.fandom.com/",
-      },
-    });
+    .onConflictDoNothing();
   const toaruZoneConfig = buildToaruZoneConfig({
     realmUnitId,
     labels: labelIds,

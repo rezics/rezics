@@ -88,8 +88,8 @@ export function SourceEvidencePreview({
         </PopoverDescription>
 
         <div className="mt-3 rounded-md bg-surface-subtle p-3 text-xs leading-normal text-text-secondary">
-          <div className="font-mono text-text-primary">
-            {firstEvidence.externalKind}:{firstEvidence.externalId}
+          <div className="truncate font-mono text-text-primary">
+            {firstEvidence.url}
           </div>
           {firstEvidence.claimPath ? (
             <div className="mt-1 font-mono">{firstEvidence.claimPath}</div>
@@ -118,11 +118,7 @@ export function SourceEvidencePreview({
             variant="outline"
             render={(props) => (
               <SafeLink
-                href={
-                  firstEvidence.observedUrl ??
-                  firstEvidence.originalUrl ??
-                  firstEvidence.canonicalUrl
-                }
+                href={firstEvidence.observedUrl ?? firstEvidence.url}
                 {...props}
               >
                 {t("source_evidence_open_source")}
@@ -136,11 +132,11 @@ export function SourceEvidencePreview({
 }
 
 function sourceTitle(evidence: CreditAttributionEvidenceSummary) {
-  const source = evidence.sourceSite;
+  const source = evidence.sourceExternalLink;
   return (
-    source?.entity?.translations?.[0]?.title ??
-    source?.entity?.slug ??
-    source?.key ??
-    evidence.sourceSiteEntityUnitId
+    source?.sourceEntity?.translations?.[0]?.title ??
+    source?.sourceEntity?.slug ??
+    source?.url ??
+    evidence.sourceExternalLinkId
   );
 }

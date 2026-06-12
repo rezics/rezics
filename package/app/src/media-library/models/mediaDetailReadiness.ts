@@ -19,7 +19,7 @@ export const mediaDetailHeroRegions = [
 
 export const mediaDetailDomainMediaPolicy = {
   heroRegion: "domain-media",
-  sources: ["UnitExternalRef", "ContentDoc", "future-typed-media-asset"],
+  sources: ["UnitExternalLink", "ContentDoc", "future-typed-media-asset"],
   excludedMediaColumns: [
     "trailerUrl",
     "clipUrls",

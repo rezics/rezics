@@ -42,6 +42,7 @@
   "manage_ends_at": "종료 시각",
   "manage_denied": "이 존을 관리하려면 소유 렐름의 관리자 또는 스태프 권한이 필요합니다.",
   "manage_sections": "페이지와 섹션",
+  "manage_sources": "소스",
   "manage_pages": "페이지",
   "manage_home_page": "홈 페이지",
   "manage_add_page": "페이지 추가",

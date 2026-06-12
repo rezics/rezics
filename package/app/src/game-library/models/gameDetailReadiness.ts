@@ -23,7 +23,7 @@ export const gameDetailHeroRegions = [
 
 export const gameDetailDomainMediaPolicy = {
   heroRegion: "domain-media",
-  sources: ["UnitExternalRef", "ContentDoc", "future-typed-media-asset"],
+  sources: ["UnitExternalLink", "ContentDoc", "future-typed-media-asset"],
   excludedGameColumns: ["trailerUrl", "screenshotUrls", "carouselUrls"],
 } as const;
 

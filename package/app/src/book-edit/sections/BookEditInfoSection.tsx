@@ -52,6 +52,7 @@ import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguage
 import { TextLink } from "@/shared/ui/link";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
 import { editorialPathLabel } from "@/unit";
+import { UnitExternalLinkEditor } from "@/unit-external-link";
 import { AddTranslationDialog } from "../components/AddTranslationDialog";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
 import {
@@ -71,10 +72,6 @@ import {
   isRestoreEditSubmitDisabled,
   withRestoreSource,
 } from "../models/restoreEdit";
-
-function validatePublishURL(publishURL: string[]) {
-  return publishURL.every((url) => url.startsWith("https://"));
-}
 
 type UpdateBookDialogState = {
   title: string;
@@ -531,24 +528,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           },
         ],
       };
-      const publishURL = metadataState?.extra?.publishURL;
-      if (
-        createBookData.isLicensed ||
-        (publishURL && validatePublishURL(publishURL))
-      ) {
-        await createBookMutation.mutateAsync(createBookData);
-      } else {
-        setDialogState({
-          title: getI18nRuntime().i18n.t(
-            "page:book_edit_info_toast_create_failed_title",
-          ),
-          message: getI18nRuntime().i18n.t(
-            "page:book_edit_info_validation_publish_url_required",
-          ),
-          error: true,
-        });
-        setUpdateBookErrorOpen(true);
-      }
+      await createBookMutation.mutateAsync(createBookData);
       return;
     }
 
@@ -975,6 +955,18 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
             <LockedFieldNotice locks={locks} paths={metadataLockPaths} />
           </div>
         </section>
+
+        {bookId ? (
+          <section>
+            <UnitExternalLinkEditor
+              unitId={bookId}
+              title={getI18nRuntime().i18n.t("common:external_links_title")}
+              description={getI18nRuntime().i18n.t(
+                "common:external_links_book_description",
+              )}
+            />
+          </section>
+        ) : null}
 
         <section>
           <button

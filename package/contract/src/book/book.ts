@@ -34,15 +34,10 @@ import {
 
 /**
  * @compat additive-only
- * Book.extra read shape. Missing `publishURL` means no known publication URLs;
- * unknown keys are tolerated for additive evolution.
+ * Book.extra has no authoritative typed fields. External references belong to
+ * UnitExternalLink; unknown keys are tolerated for additive evolution.
  */
-export const bookExtraSchema = t.Object(
-  {
-    publishURL: t.Optional(t.Array(t.String())),
-  },
-  { additionalProperties: true },
-);
+export const bookExtraSchema = t.Object({}, { additionalProperties: true });
 
 export type BookExtra = (typeof bookExtraSchema)["static"];
 

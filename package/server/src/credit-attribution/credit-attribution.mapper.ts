@@ -16,29 +16,33 @@ export function mapCreditAttributionToDTO(
   const entityExt = (entityUnit as any).entity;
 
   const evidence = (row.evidence ?? []).map((item: any) => {
-    const sourceRef = item.sourceRef;
-    const sourceSite = sourceRef?.sourceSite;
+    const sourceExternalLink = item.sourceExternalLink;
+    if (!sourceExternalLink) {
+      throw new Error(
+        "CreditAttribution evidence source link hydration failed",
+      );
+    }
     return {
       id: item.id,
       unitId: item.unitId,
       entityId: item.entityId,
       role: item.role as CreditAttributionRole,
-      sourceRefId: item.sourceRefId,
-      sourceSiteEntityUnitId: sourceRef.sourceSiteEntityUnitId,
-      externalKind: sourceRef.externalKind,
-      externalId: sourceRef.externalId,
-      canonicalUrl: sourceRef.canonicalUrl,
-      originalUrl: sourceRef.originalUrl ?? undefined,
+      sourceExternalLinkId: item.sourceExternalLinkId,
+      url: sourceExternalLink.url,
       claimPath: item.claimPath ?? undefined,
       observedUrl: item.observedUrl ?? undefined,
       observedAt: item.observedAt,
       confidence: item.confidence ?? undefined,
-      sourceSite: sourceSite
+      sourceExternalLink: sourceExternalLink
         ? {
-            entityUnitId: sourceSite.entityUnitId,
-            key: sourceSite.key,
-            entity: sourceSite.entity
-              ? mapEntityToDTO(sourceSite.entity as any)
+            id: sourceExternalLink.id,
+            unitId: sourceExternalLink.unitId,
+            sourceEntityUnitId: sourceExternalLink.sourceEntityUnitId,
+            url: sourceExternalLink.url,
+            normalizedUrl: sourceExternalLink.normalizedUrl ?? undefined,
+            role: sourceExternalLink.role,
+            sourceEntity: sourceExternalLink.sourceEntity
+              ? mapEntityToDTO(sourceExternalLink.sourceEntity as any)
               : undefined,
           }
         : undefined,

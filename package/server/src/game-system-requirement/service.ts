@@ -8,7 +8,7 @@ import {
   Entity,
   Game,
   GameSystemRequirement,
-  UnitExternalRef,
+  UnitExternalLink,
 } from "../db/schema";
 import { AppError } from "../utils/errors";
 import type { GameSystemRequirementRow } from "./types";
@@ -17,14 +17,19 @@ type PlatformEntityRow = Pick<
   typeof Entity.$inferSelect,
   "kind" | "eligibleSubjectRoles"
 >;
-type SourceRefRow = Pick<typeof UnitExternalRef.$inferSelect, "id" | "unitId">;
+type SourceExternalLinkRow = Pick<
+  typeof UnitExternalLink.$inferSelect,
+  "id" | "unitId"
+>;
 
 type GameSystemRequirementRepository = {
   findGame(gameUnitId: string): Promise<{ unitId: string } | undefined>;
   findPlatformEntity(
     platformEntityId: string,
   ): Promise<PlatformEntityRow | undefined>;
-  findSourceRef(sourceRefId: string): Promise<SourceRefRow | undefined>;
+  findSourceExternalLink(
+    sourceExternalLinkId: string,
+  ): Promise<SourceExternalLinkRow | undefined>;
   list(
     filters?: GameSystemRequirementListFilters,
   ): Promise<GameSystemRequirementRow[]>;
@@ -65,8 +70,13 @@ function buildListConditions(
   if (filters.language) {
     conditions.push(eq(GameSystemRequirement.language, filters.language));
   }
-  if (filters.sourceRefId) {
-    conditions.push(eq(GameSystemRequirement.sourceRefId, filters.sourceRefId));
+  if (filters.sourceExternalLinkId) {
+    conditions.push(
+      eq(
+        GameSystemRequirement.sourceExternalLinkId,
+        filters.sourceExternalLinkId,
+      ),
+    );
   }
   return conditions;
 }
@@ -96,12 +106,12 @@ function createDrizzleGameSystemRequirementRepository(): GameSystemRequirementRe
       return row;
     },
 
-    async findSourceRef(sourceRefId) {
+    async findSourceExternalLink(sourceExternalLinkId) {
       const db = await getServerDb();
       const [row] = await db
-        .select({ id: UnitExternalRef.id, unitId: UnitExternalRef.unitId })
-        .from(UnitExternalRef)
-        .where(eq(UnitExternalRef.id, sourceRefId))
+        .select({ id: UnitExternalLink.id, unitId: UnitExternalLink.unitId })
+        .from(UnitExternalLink)
+        .where(eq(UnitExternalLink.id, sourceExternalLinkId))
         .limit(1);
       return row;
     },
@@ -141,7 +151,7 @@ function createDrizzleGameSystemRequirementRepository(): GameSystemRequirementRe
           platformEntityId: input.platformEntityId ?? null,
           tier: input.tier,
           language: input.language ?? null,
-          sourceRefId: input.sourceRefId ?? null,
+          sourceExternalLinkId: input.sourceExternalLinkId ?? null,
           hardware: input.hardware,
           rawText: input.rawText ?? null,
           updatedAt: now,
@@ -227,29 +237,34 @@ async function assertPlatformEntity(
   }
 }
 
-async function assertSourceRef(
+async function assertSourceExternalLink(
   repository: GameSystemRequirementRepository,
   gameUnitId: string,
-  sourceRefId: string | null | undefined,
+  sourceExternalLinkId: string | null | undefined,
 ) {
-  if (!sourceRefId) {
+  if (!sourceExternalLinkId) {
     return;
   }
 
-  const sourceRef = await repository.findSourceRef(sourceRefId);
-  if (!sourceRef) {
-    throw new AppError(404, "Game system requirement source ref not found", {
-      code: "game_requirement_source_ref_not_found",
-      details: { sourceRefId },
+  const sourceExternalLink =
+    await repository.findSourceExternalLink(sourceExternalLinkId);
+  if (!sourceExternalLink) {
+    throw new AppError(404, "Game system requirement source link not found", {
+      code: "game_requirement_source_link_not_found",
+      details: { sourceExternalLinkId },
     });
   }
-  if (sourceRef.unitId !== gameUnitId) {
+  if (sourceExternalLink.unitId !== gameUnitId) {
     throw new AppError(
       400,
-      "Game system requirement sourceRefId must reference the same game Unit",
+      "Game system requirement sourceExternalLinkId must reference the same game Unit",
       {
-        code: "game_requirement_source_ref_unit_mismatch",
-        details: { gameUnitId, sourceRefId, sourceRefUnitId: sourceRef.unitId },
+        code: "game_requirement_source_link_unit_mismatch",
+        details: {
+          gameUnitId,
+          sourceExternalLinkId,
+          sourceExternalLinkUnitId: sourceExternalLink.unitId,
+        },
       },
     );
   }
@@ -271,7 +286,11 @@ export class GameSystemRequirementService {
   async create(input: CreateGameSystemRequirementInput) {
     await assertGameExists(this.repository, input.gameUnitId);
     await assertPlatformEntity(this.repository, input.platformEntityId);
-    await assertSourceRef(this.repository, input.gameUnitId, input.sourceRefId);
+    await assertSourceExternalLink(
+      this.repository,
+      input.gameUnitId,
+      input.sourceExternalLinkId,
+    );
 
     return this.repository.create(input);
   }
@@ -280,7 +299,7 @@ export class GameSystemRequirementService {
     if (input.platformEntityId !== undefined) {
       await assertPlatformEntity(this.repository, input.platformEntityId);
     }
-    if (input.sourceRefId !== undefined) {
+    if (input.sourceExternalLinkId !== undefined) {
       const gameUnitId = await this.repository.findRequirementGameUnitId(id);
       if (!gameUnitId) {
         throw new AppError(404, "Game system requirement not found", {
@@ -288,7 +307,11 @@ export class GameSystemRequirementService {
           details: { id },
         });
       }
-      await assertSourceRef(this.repository, gameUnitId, input.sourceRefId);
+      await assertSourceExternalLink(
+        this.repository,
+        gameUnitId,
+        input.sourceExternalLinkId,
+      );
     }
 
     return this.repository.update(id, input);

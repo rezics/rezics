@@ -56,7 +56,6 @@ import { scoreApi } from "./score/score.api";
 import { seriesApi } from "./series-unit";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
-import { sourceSiteApi } from "./source-site";
 import { statsAdminApi } from "./stat";
 import { subjectAttributionApi } from "./subject-attribution";
 import { subscriptionApi } from "./subscription";
@@ -69,7 +68,7 @@ import {
   unitAuthorityApi,
 } from "./unit";
 import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
-import { unitExternalRefApi } from "./unit-external-ref";
+import { unitExternalLinkApi } from "./unit-external-link";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { userTagApplicationApi } from "./user-tag-application";
@@ -234,8 +233,7 @@ routeApp
   .use(creditAttributionApi)
   .use(subjectAttributionApi)
   .use(entityAttributionApi)
-  .use(sourceSiteApi)
-  .use(unitExternalRefApi)
+  .use(unitExternalLinkApi)
   .use(gameSystemRequirementApi)
   .use(entityApi)
   .use(slugApi)

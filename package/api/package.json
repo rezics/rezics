@@ -33,13 +33,9 @@
       "types": "./src/entity/index.ts",
       "default": "./src/entity/index.ts"
     },
-    "./source-site": {
-      "types": "./src/source-site/index.ts",
-      "default": "./src/source-site/index.ts"
-    },
-    "./unit-external-ref": {
-      "types": "./src/unit-external-ref/index.ts",
-      "default": "./src/unit-external-ref/index.ts"
+    "./unit-external-link": {
+      "types": "./src/unit-external-link/index.ts",
+      "default": "./src/unit-external-link/index.ts"
     },
     "./echokv": {
       "types": "./src/echokv/echokv.ts",

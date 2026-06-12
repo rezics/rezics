@@ -1,11 +1,10 @@
-import { unitExternalRefListQueryOptions } from "@rezics/api/unit-external-ref";
+import { unitExternalLinksQueryOptions } from "@rezics/api/unit-external-link";
 import type { ZoneSourcesSection } from "@rezics/contract";
 import { Skeleton } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { QueryErrorDisplay } from "@/core";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
-import { sourceSiteLabel } from "../../models/sourceSiteLabel";
 import {
   useZoneSectionTitle,
   type ZonePortalContext,
@@ -14,9 +13,9 @@ import {
 } from "./shared";
 
 /**
- * Sources is a thin reader over UnitExternalRef. It does not hydrate through
- * the zone section-data endpoint because SourceSite/UnitExternalRef own this
- * data and canonical URL derivation.
+ * Sources reads the display-ready Unit external-links model. The server stores
+ * complete URLs and source Entity display data; crawler-specific URL parsing is
+ * deliberately outside this UI path.
  */
 export function SourcesSection({
   section,
@@ -26,12 +25,7 @@ export function SourcesSection({
   ctx: ZonePortalContext;
 }) {
   const title = useZoneSectionTitle(section, ctx.refUnits);
-  const query = useQuery(
-    unitExternalRefListQueryOptions({
-      unitId: ctx.zone.unitId,
-      limit: section.limit,
-    }),
-  );
+  const query = useQuery(unitExternalLinksQueryOptions(ctx.zone.unitId));
 
   if (query.isLoading) {
     return (
@@ -52,22 +46,22 @@ export function SourcesSection({
     );
   }
 
-  const refs = query.data?.refs ?? [];
-  if (refs.length === 0) {
+  const links = (query.data?.links ?? []).slice(0, section.limit);
+  if (links.length === 0) {
     return <ZoneSectionEmpty title={title} emptyState={section.emptyState} />;
   }
 
   return (
     <ZoneSectionShell title={title}>
       <ul className="flex flex-col gap-2">
-        {refs.map((ref) => (
-          <li key={ref.id}>
+        {links.map((link) => (
+          <li key={link.id}>
             <SafeLink
-              href={ref.canonicalUrl}
+              href={link.url}
               className="flex items-center justify-between gap-3 rounded-md bg-surface-subtle px-4 py-3 text-sm leading-ui transition-colors hover:bg-surface-sunken"
             >
               <span className="min-w-0 truncate font-medium text-text-primary">
-                {sourceSiteLabel(ref, ctx.languages)}
+                {link.label}
               </span>
               <ExternalLink
                 className="size-4 shrink-0 text-text-tertiary"

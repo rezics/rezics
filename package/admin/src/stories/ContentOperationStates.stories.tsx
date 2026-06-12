@@ -64,7 +64,7 @@ function DemoTable({
   return (
     <SearchablePaginatedTableCard<DemoRow>
       title="Content operation table"
-      description="Compact admin table state used by Unit, entity, realm, shelf, and source-site operations."
+      description="Compact admin table state used by Unit, entity, realm, shelf, and external-link operations."
       searchInputId="content-operation-story-search"
       searchPlaceholder="search units"
       q={q}

@@ -22,7 +22,7 @@ import {
   Series,
   SeriesContentIndex,
   Unit,
-  UnitExternalRef,
+  UnitExternalLink,
   UnitSupportLanguage,
   UnitTranslation,
   User,
@@ -393,9 +393,9 @@ function createDrizzleSeriesRepository(): SeriesRepository {
                 .from(UnitTranslation)
                 .where(inArray(UnitTranslation.unitId, releaseUnitIds)),
               db
-                .select({ unitId: UnitExternalRef.unitId })
-                .from(UnitExternalRef)
-                .where(inArray(UnitExternalRef.unitId, releaseUnitIds)),
+                .select({ unitId: UnitExternalLink.unitId })
+                .from(UnitExternalLink)
+                .where(inArray(UnitExternalLink.unitId, releaseUnitIds)),
             ]);
       const translationsByUnitId = new Map<string, typeof translations>();
       for (const tr of translations) {
