@@ -109,7 +109,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
       page: externalPage,
       limit: EXTERNAL_ITEMS_PER_PAGE,
     }),
-    enabled: !!resolvedUnitId,
+    enabled: !!resolvedUnitId && tab === "followers",
   });
 
   const followingsQuery = useQuery({
@@ -117,7 +117,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
       page: externalPage,
       limit: EXTERNAL_ITEMS_PER_PAGE,
     }),
-    enabled: !!resolvedUnitId,
+    enabled: !!resolvedUnitId && tab === "following",
   });
 
   const isLoading = followersQuery.isLoading || followingsQuery.isLoading;

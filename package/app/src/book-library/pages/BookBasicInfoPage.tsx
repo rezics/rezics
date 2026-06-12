@@ -13,7 +13,6 @@ import { useMemo } from "react";
 import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { Link } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag";
 import { BookCopyrightNotice } from "../components/BookCopyrightNotice";

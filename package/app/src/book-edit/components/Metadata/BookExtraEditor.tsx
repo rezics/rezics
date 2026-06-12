@@ -115,6 +115,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
                 size="icon"
                 variant="ghost"
                 onClick={() => handleRemove(index)}
+                aria-label={t("common:delete")}
                 className="w-7 h-7 text-error-text hover:text-error-text"
               >
                 <Delete size={14} />
@@ -127,6 +128,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
       <div className="flex gap-2">
         <input
           type="url"
+          aria-label={t("editor:placeholders_enter_url")}
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
           onKeyDown={(e) => {

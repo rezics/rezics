@@ -1,6 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -66,7 +65,6 @@ export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
   targetUnitId,
   limit = 20,
 }) => {
-  const { t } = useTranslation(["common"]);
   const readContext = useReadLanguageContext();
   const { data, isLoading, error } = useQuery({
     ...postQueries.list({

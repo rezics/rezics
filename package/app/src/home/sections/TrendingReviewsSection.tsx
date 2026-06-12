@@ -93,7 +93,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
+        <h2 className="text-base font-semibold mb-3">{resolvedTitle}</h2>
         <QueryErrorDisplay error={error} />
       </div>
     );

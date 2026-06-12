@@ -92,6 +92,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
 
   const myResult = useQuery(
     buildMeiliFeedbackQuery(startMine, EXTERNAL_PAGE_SIZE, search ?? "", {
+      userId: userId ?? undefined,
       type: typeFilter,
       resolved,
     }),
@@ -164,6 +165,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
         limit,
         search ?? "",
         {
+          userId: userId ?? undefined,
           type: typeFilter,
           resolved,
         },

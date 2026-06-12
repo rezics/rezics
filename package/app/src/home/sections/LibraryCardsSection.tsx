@@ -113,9 +113,9 @@ export const LibraryCardsSection: React.FC = () => {
               }
             />
             <div className="min-w-0">
-              <h6 className="m-0 truncate text-xs font-semibold leading-tight sm:text-base">
+              <h2 className="m-0 truncate text-xs font-semibold leading-tight sm:text-base">
                 {LIBRARY_CARD_TITLE[lib.key]()}
-              </h6>
+              </h2>
               {!lib.active && (
                 <Badge variant="outline" className="text-xs">
                   {t("page:home_sections_library_cards_coming_soon")}

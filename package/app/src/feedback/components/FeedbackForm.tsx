@@ -16,7 +16,6 @@ import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
-  Input,
   Label,
   Select,
   SelectContent,

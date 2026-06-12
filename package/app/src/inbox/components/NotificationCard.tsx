@@ -121,6 +121,8 @@ function kindLabel(t: Translate, kind: string): string {
 
 function relativeTime(t: Translate, iso: string): string {
   const date = new Date(iso);
+  // Bail out on unparseable timestamps. 无法解析的时间戳直接返回空字符串。
+  if (Number.isNaN(date.getTime())) return "";
   const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
   if (minutes < 1) return t("community:notification_time_now");
   if (minutes < 60)

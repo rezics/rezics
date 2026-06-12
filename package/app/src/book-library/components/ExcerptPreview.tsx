@@ -1,6 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind, type UnitDTO } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -17,7 +16,6 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   id,
   excerptNumber = 3,
 }) => {
-  const { t } = useTranslation(["common"]);
   const readContext = useReadLanguageContext();
   const { data, isLoading, error } = useQuery({
     ...postQueries.byTarget(id, {

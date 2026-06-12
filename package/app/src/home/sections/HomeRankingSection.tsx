@@ -77,7 +77,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
+        <h2 className="text-base font-semibold mb-3">{resolvedTitle}</h2>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -86,7 +86,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        <h2 className="text-base font-semibold m-0">{resolvedTitle}</h2>
         {isLoading && <Spinner size="sm" />}
       </div>
       <ul className="list-none m-0 p-0">

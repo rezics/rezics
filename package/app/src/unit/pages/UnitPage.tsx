@@ -182,7 +182,10 @@ export function UnitPageById({ unitId }: { unitId: string }) {
           {author && (
             <div className="flex items-center gap-3">
               <Avatar className="w-10 h-10 rounded-md">
-                <AvatarImage src={author.avatar ?? ""} />
+                <AvatarImage
+                  src={author.avatar ?? ""}
+                  alt={author.name ?? ""}
+                />
                 <AvatarFallback>
                   {author.name?.charAt(0).toUpperCase() ?? "?"}
                 </AvatarFallback>

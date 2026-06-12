@@ -93,6 +93,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
             className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
+            aria-label={t("book:edit_search_chapters_placeholder")}
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onSearchChange(e.target.value)
