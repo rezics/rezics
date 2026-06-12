@@ -79,6 +79,44 @@ async function getConversation(
   return conversation ?? null;
 }
 
+/**
+ * Fetch a single conversation enriched with viewer state (unread count, block
+ * flags). Returns `null` when the conversation does not exist or `userId` is
+ * not a participant.
+ * 获取单个会话并附加查看者状态（未读数、屏蔽标志）。当会话不存在或 `userId`
+ * 不是参与者时返回 `null`。
+ */
+export async function getEnrichedConversation(
+  conversationId: string,
+  userId: string,
+) {
+  const conversation = await getConversation(conversationId);
+  if (!conversation) return null;
+  if (
+    conversation.participantA !== userId &&
+    conversation.participantB !== userId
+  ) {
+    return null;
+  }
+  const peerId =
+    conversation.participantA === userId
+      ? conversation.participantB
+      : conversation.participantA;
+  const viewer = await getConversationViewerState(
+    conversation.id,
+    userId,
+    peerId,
+  );
+  return {
+    ...conversation,
+    createdAt: conversation.createdAt.toISOString(),
+    updatedAt: conversation.updatedAt.toISOString(),
+    unreadCount: viewer.unreadCount,
+    peerBlocked: viewer.peerBlocked,
+    blockedByPeer: viewer.blockedByPeer,
+  };
+}
+
 export async function getMessages(
   conversationId: string,
   userId: string,

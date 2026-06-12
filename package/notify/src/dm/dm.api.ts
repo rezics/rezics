@@ -47,6 +47,31 @@ export const dmApi = new Elysia({ prefix: "/dm" })
     },
   )
   .get(
+    "/conversations/:id",
+    async ({ userId, params, set }) => {
+      const conversation = await dmService.getEnrichedConversation(
+        params.id,
+        userId,
+      );
+      if (!conversation) {
+        set.status = 404;
+        return { error: "Conversation not found" };
+      }
+      return conversation;
+    },
+    {
+      requireUser: true,
+      params: t.Object({ id: t.String() }),
+      detail: {
+        summary: "Get a single conversation",
+        description:
+          "Returns a single DM conversation enriched with viewer state (unread count, block flags). Returns 404 if not found or the caller is not a participant.",
+        tags: ["Direct Messages"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
     "/conversations/:id/messages",
     async ({ userId, params, query, set }) => {
       const page = Number(query.page ?? 1);
