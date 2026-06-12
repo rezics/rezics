@@ -449,5 +449,6 @@
   "realm_management_unavailable": "Realm management unavailable",
   "realm_management_permission_required": "You need owner, moderator, or staff permissions to manage this realm.",
   "post_edit_locked_path_detail": "Locked path: {lockPath}; patch path: {patchPath}",
-  "post_edit_locked_paths": "Locked paths: {paths}"
+  "post_edit_locked_paths": "Locked paths: {paths}",
+  "reply_count": "{count} replies"
 }

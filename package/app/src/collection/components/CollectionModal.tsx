@@ -24,7 +24,7 @@ import {
   Separator,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface CollectionModalProps {
   open: boolean;
@@ -76,11 +76,21 @@ export function CollectionModal({
 
   // Initialize selected shelves from status
   // 根据 status 初始化已选中的书架
-  useMemo(() => {
+  useEffect(() => {
     if (status?.shelves) {
       setSelectedShelves(new Set(status.shelves.map((s) => s.id)));
     }
   }, [status]);
+
+  // Reset transient filter state when modal opens
+  // 弹窗打开时重置临时筛选状态
+  useEffect(() => {
+    if (open) {
+      setFilterTag(null);
+      setSearchText("");
+      setIndependent(false);
+    }
+  }, [open]);
 
   const visibleShelves = useMemo(() => {
     return shelves.filter((s) => {

@@ -29,6 +29,7 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   SortableContext,
+  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
@@ -260,7 +261,9 @@ export function ShelfEditorItemsSection({
     useSensor(TouchSensor, {
       activationConstraint: { delay: 150, tolerance: 5 },
     }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const canReorder = canUseShelfReorder(mode === "edit", sortState);

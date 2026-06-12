@@ -98,7 +98,13 @@ const SORT_OPTION_LABEL = {
 } as const satisfies Record<string, () => string>;
 
 export const ContentTabSection: FC = () => {
-  const { t } = useTranslation(["common", "entity", "search", "settings"]);
+  const { t } = useTranslation([
+    "common",
+    "community",
+    "entity",
+    "search",
+    "settings",
+  ]);
   const { userId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({
@@ -224,6 +230,7 @@ export const ContentTabSection: FC = () => {
 };
 
 const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
+  const { t } = useTranslation(["community", "settings"]);
   const targetTitle = post.targetTitles?.[0];
   const date = new Date(post.createdAt).toLocaleDateString();
   const scoreDisplay =
@@ -258,11 +265,15 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
                   search={{ view: "auto" }}
                   className="text-sm text-text-secondary no-underline hover:text-text-primary"
                 >
-                  on {targetTitle}
+                  {t("settings:profile_content_on_target", {
+                    title: targetTitle,
+                  })}
                 </Link>
               ) : (
                 <span className="text-sm text-text-secondary">
-                  on {targetTitle}
+                  {t("settings:profile_content_on_target", {
+                    title: targetTitle,
+                  })}
                 </span>
               ))}
             <span className="text-xs text-text-secondary">{date}</span>
@@ -271,7 +282,11 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
             <p className="text-sm mt-1 line-clamp-3">{post.contentText}</p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs text-text-secondary">
-            {post.replyCount > 0 && <span>{post.replyCount} replies</span>}
+            {post.replyCount > 0 && (
+              <span>
+                {t("community:reply_count", { count: post.replyCount })}
+              </span>
+            )}
           </div>
         </div>
       </div>

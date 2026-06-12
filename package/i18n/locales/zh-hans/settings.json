@@ -266,5 +266,6 @@
   "tokens_last_used_date": "最后使用 {date}",
   "tokens_last_used_from_ip": "来自 {ip}",
   "tokens_never_used": "从未使用",
-  "security_current_session": "当前会话"
+  "security_current_session": "当前会话",
+  "profile_content_on_target": "关于{title}"
 }

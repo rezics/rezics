@@ -134,7 +134,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
     }
 
     paginatorRef.current?.resetPaginationPageNumber?.();
-  }, [queryType]);
+  }, [queryType, search, typeFilter, resolved]);
 
   const handleNeedMoreData = (externalPage: number) => {
     const offset = (externalPage - 1) * EXTERNAL_PAGE_SIZE;

@@ -361,7 +361,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         <div className="border-b border-border-whisper mt-4 mb-4">
           <Tabs
             value={tab}
-            onValueChange={(v) => setTab(v as TabKey)}
+            onValueChange={(v) => {
+              setTab(v as TabKey);
+              setCurrentPage(1);
+              ref.current?.resetPaginationPageNumber?.();
+            }}
             aria-label={t("settings:profile_unit_tabs_label")}
           >
             <TabsList>

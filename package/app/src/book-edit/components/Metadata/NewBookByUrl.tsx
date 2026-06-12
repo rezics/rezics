@@ -30,7 +30,7 @@ export function NewBookByUrl() {
     ) {
       setSupportedSitesList(supportedSitesQuery.data.value);
     }
-  }, [supportedSitesQuery]);
+  }, [supportedSitesQuery.data]);
   return (
     <div className="mt-16 w-full px-4">
       <div className="text-2xl font-bold mb-4">

@@ -197,5 +197,6 @@
   "relative_time_hours_ago": "{value} hours ago",
   "relative_time_days_ago": "{value} days ago",
   "relative_time_weeks_ago": "{value} weeks ago",
-  "mutation_error_generic": "Something went wrong. Please try again."
+  "mutation_error_generic": "Something went wrong. Please try again.",
+  "showing_range": "Showing {start}–{end} of {total}"
 }

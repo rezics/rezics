@@ -25,7 +25,7 @@ import { UserError, UserLoading } from "./UserState";
  * 显示所有用户，支持搜索和分页。
  */
 export const UserListPage: FC = () => {
-  const { t } = useTranslation(["settings"]);
+  const { t } = useTranslation(["common", "settings"]);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -150,10 +150,10 @@ export const UserListPage: FC = () => {
                 disabled={page === 1}
                 onClick={() => handlePageChange(Math.max(1, page - 1))}
               >
-                Previous
+                {t("common:previous_page")}
               </Button>
               <span className="text-sm text-text-secondary px-2">
-                Page {page} of {totalPages}
+                {t("common:page_of", { page, total: totalPages })}
               </span>
               <Button
                 variant="outline"
@@ -161,15 +161,18 @@ export const UserListPage: FC = () => {
                 disabled={page >= totalPages}
                 onClick={() => handlePageChange(page + 1)}
               >
-                Next
+                {t("common:next_page")}
               </Button>
             </div>
           )}
 
           <div className="mt-4 text-center">
             <p className="text-sm text-text-secondary">
-              Showing {(page - 1) * itemsPerPage + 1} -{" "}
-              {Math.min(page * itemsPerPage, total)} of {total} users
+              {t("common:showing_range", {
+                start: (page - 1) * itemsPerPage + 1,
+                end: Math.min(page * itemsPerPage, total),
+                total,
+              })}
             </p>
           </div>
         </>

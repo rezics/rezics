@@ -81,7 +81,7 @@ export function ShelfEditorItemRow({
           <button
             type="button"
             aria-label={t("entity:shelf_drag_to_reorder")}
-            className="p-1 rounded text-text-secondary hover:text-text-primary cursor-grab active:cursor-grabbing"
+            className="p-1 rounded text-text-secondary hover:text-text-primary cursor-grab active:cursor-grabbing touch-none"
             {...attributes}
             {...listeners}
           >

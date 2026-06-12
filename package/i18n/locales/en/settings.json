@@ -266,5 +266,6 @@
   "tokens_last_used_date": "Last used {date}",
   "tokens_last_used_from_ip": "from {ip}",
   "tokens_never_used": "Never",
-  "security_current_session": "Current session"
+  "security_current_session": "Current session",
+  "profile_content_on_target": "on {title}"
 }

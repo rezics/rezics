@@ -94,8 +94,11 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   useEffect(() => {
     return () => {
       if (typingResetRef.current) clearTimeout(typingResetRef.current);
+      // Notify peer that typing stopped on unmount
+      // 卸载时通知对方用户已停止输入
+      void dmApi.setTyping(conversationId, false).catch(() => {});
     };
-  }, []);
+  }, [conversationId]);
 
   const handleDraftChange = (value: string) => {
     setDraft(value);

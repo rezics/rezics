@@ -1010,6 +1010,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         existingLanguages={editor.existingLanguages}
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddTranslation}
+        isPending={upsertTranslationMutation.isPending}
       />
 
       {bookId ? (

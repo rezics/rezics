@@ -449,5 +449,6 @@
   "realm_management_unavailable": "レルム管理を利用できません",
   "realm_management_permission_required": "このレルムを管理するには、オーナー、モデレーター、またはスタッフの権限が必要です。",
   "post_edit_locked_path_detail": "ロック中のパス: {lockPath}; パッチパス: {patchPath}",
-  "post_edit_locked_paths": "ロック中のパス: {paths}"
+  "post_edit_locked_paths": "ロック中のパス: {paths}",
+  "reply_count": "{count}件の返信"
 }

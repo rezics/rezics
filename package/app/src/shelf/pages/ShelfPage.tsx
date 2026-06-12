@@ -315,6 +315,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     setPageState({ unitId, page: 1 });
   }, [unitId]);
 
+  // Reset to first page when item search text changes.
+  // 当搜索文本变化时重置到第一页。
+  useEffect(() => {
+    setPageState({ unitId, page: 1 });
+  }, [normalizedItemSearchText, unitId]);
+
   useEffect(() => {
     if (waitingForPageData && !isFetchingNextPage) {
       void fetchNextPage();

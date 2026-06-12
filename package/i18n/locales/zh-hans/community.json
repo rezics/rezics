@@ -449,5 +449,6 @@
   "realm_management_unavailable": "领域管理不可用",
   "realm_management_permission_required": "你需要所有者、版主或工作人员权限才能管理此领域。",
   "post_edit_locked_path_detail": "锁定路径：{lockPath}；补丁路径：{patchPath}",
-  "post_edit_locked_paths": "锁定路径：{paths}"
+  "post_edit_locked_paths": "锁定路径：{paths}",
+  "reply_count": "{count} 条回复"
 }

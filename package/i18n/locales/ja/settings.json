@@ -266,5 +266,6 @@
   "tokens_last_used_date": "最終使用 {date}",
   "tokens_last_used_from_ip": "{ip} から",
   "tokens_never_used": "未使用",
-  "security_current_session": "現在のセッション"
+  "security_current_session": "現在のセッション",
+  "profile_content_on_target": "{title}について"
 }

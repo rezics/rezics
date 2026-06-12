@@ -256,6 +256,7 @@ export const BookTocEditor = forwardRef<
   >(null);
   const [bulkRatingOpen, setBulkRatingOpen] = useState(false);
   const [bulkRating, setBulkRating] = useState<ContentRating>("GENERAL");
+  const [bulkRatingPending, setBulkRatingPending] = useState(false);
   const [bulkMoveDialogOpen, setBulkMoveDialogOpen] = useState(false);
 
   // Edit chapter dialog state
@@ -674,39 +675,44 @@ export const BookTocEditor = forwardRef<
    * chapter content.
    */
   async function applyBulkRating(rating: ContentRating) {
-    const ids = selectedIds;
-    const materializedChapterIds: string[] = [];
-    function walk(nodes: Chapter[]): Chapter[] {
-      return nodes.map((node) => {
-        const next: Chapter = { ...node };
-        if (ids.has(String(node.id)) && node.noContent !== true) {
-          const contentUnitId = contentUnitIdForNode(node);
-          if (contentUnitId) {
-            materializedChapterIds.push(contentUnitId);
+    setBulkRatingPending(true);
+    try {
+      const ids = selectedIds;
+      const materializedChapterIds: string[] = [];
+      function walk(nodes: Chapter[]): Chapter[] {
+        return nodes.map((node) => {
+          const next: Chapter = { ...node };
+          if (ids.has(String(node.id)) && node.noContent !== true) {
+            const contentUnitId = contentUnitIdForNode(node);
+            if (contentUnitId) {
+              materializedChapterIds.push(contentUnitId);
+            }
+            next.rating = rating;
           }
-          next.rating = rating;
-        }
-        if (node.children) {
-          next.children = walk(node.children);
-        }
-        return next;
-      });
+          if (node.children) {
+            next.children = walk(node.children);
+          }
+          return next;
+        });
+      }
+      const updated = walk(treeData);
+      await Promise.all(
+        [...new Set(materializedChapterIds)].map((unitId) =>
+          updateChapterMutation.mutateAsync({
+            unitId,
+            input: { rating },
+          }),
+        ),
+      );
+      setTreeData(updated);
+      enqueueOp("bulkRating", undefined, { count: selectedIds.size });
+      await saveTree(updated);
+      setBulkRatingOpen(false);
+      setSelectedIds(new Set());
+      setIsSelectionMode(false);
+    } finally {
+      setBulkRatingPending(false);
     }
-    const updated = walk(treeData);
-    await Promise.all(
-      [...new Set(materializedChapterIds)].map((unitId) =>
-        updateChapterMutation.mutateAsync({
-          unitId,
-          input: { rating },
-        }),
-      ),
-    );
-    setTreeData(updated);
-    enqueueOp("bulkRating", undefined, { count: selectedIds.size });
-    await saveTree(updated);
-    setBulkRatingOpen(false);
-    setSelectedIds(new Set());
-    setIsSelectionMode(false);
   }
 
   /**
@@ -921,6 +927,7 @@ export const BookTocEditor = forwardRef<
         value={bulkRating}
         onChange={setBulkRating}
         onConfirm={() => void applyBulkRating(bulkRating)}
+        isPending={bulkRatingPending}
       />
     </div>
   );

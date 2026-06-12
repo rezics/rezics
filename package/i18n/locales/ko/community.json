@@ -449,5 +449,6 @@
   "realm_management_unavailable": "렐름 관리를 사용할 수 없습니다",
   "realm_management_permission_required": "이 렐름을 관리하려면 소유자, 관리자 또는 스태프 권한이 필요합니다.",
   "post_edit_locked_path_detail": "잠긴 경로: {lockPath}; 패치 경로: {patchPath}",
-  "post_edit_locked_paths": "잠긴 경로: {paths}"
+  "post_edit_locked_paths": "잠긴 경로: {paths}",
+  "reply_count": "답글 {count}개"
 }

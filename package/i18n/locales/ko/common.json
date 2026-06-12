@@ -197,5 +197,6 @@
   "relative_time_hours_ago": "{value}시간 전",
   "relative_time_days_ago": "{value}일 전",
   "relative_time_weeks_ago": "{value}주 전",
-  "mutation_error_generic": "문제가 발생했습니다. 다시 시도해 주세요."
+  "mutation_error_generic": "문제가 발생했습니다. 다시 시도해 주세요.",
+  "showing_range": "{total}개 중 {start}–{end}개 표시"
 }

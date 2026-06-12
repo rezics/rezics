@@ -266,5 +266,6 @@
   "tokens_last_used_date": "마지막 사용 {date}",
   "tokens_last_used_from_ip": "{ip}에서",
   "tokens_never_used": "사용 안 함",
-  "security_current_session": "현재 세션"
+  "security_current_session": "현재 세션",
+  "profile_content_on_target": "{title}에 대해"
 }

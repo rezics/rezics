@@ -197,5 +197,6 @@
   "relative_time_hours_ago": "{value}時間前",
   "relative_time_days_ago": "{value}日前",
   "relative_time_weeks_ago": "{value}週間前",
-  "mutation_error_generic": "問題が発生しました。もう一度お試しください。"
+  "mutation_error_generic": "問題が発生しました。もう一度お試しください。",
+  "showing_range": "{total}件中 {start}–{end}件を表示"
 }
