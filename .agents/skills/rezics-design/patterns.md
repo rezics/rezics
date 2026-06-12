@@ -475,3 +475,191 @@ Look at the story names you'd write. If the list is `Default / Compact / Large` 
 | `DomainCarousel` — generic | Four domain wrappers (`HorizontalBookCarousel`, etc.) shim through this. Naming test: each wrapper has its own name; the generic stays headless. | `Composite/Carousel/DomainCarousel--default` |
 
 The full prose version of this section lives in [`Foundation/Patterns#13`](./../../package/ui/src/docs/patterns.mdx) with side-by-side `<Compare>` blocks.
+
+---
+
+## 14. Centering container trinity
+
+### ✅ DO — `w-full max-w-* mx-auto`
+
+```tsx
+<main className="w-full max-w-6xl mx-auto px-4">
+  {children}
+</main>
+```
+
+All three classes are mandatory. `w-full` prevents collapse in flex parents;
+`max-w-*` caps the width; `mx-auto` centers.
+
+### ❌ DON'T — missing `w-full`
+
+```tsx
+{/* WRONG — collapses to fit-content in flex parent */}
+<main className="max-w-6xl mx-auto px-4">
+  {children}
+</main>
+```
+
+### ✅ DO — shrink-center (exception)
+
+```tsx
+{/* Badges and small elements: w-fit mx-auto, NO max-w-* */}
+<span className="w-fit mx-auto">Badge</span>
+```
+
+---
+
+## 15. Flex constraint chain
+
+### ✅ DO — wrapper continues the chain
+
+```tsx
+<DialogContent>
+  <DialogHeader>...</DialogHeader>
+  <form className="flex min-h-0 flex-col">
+    <DialogBody>{/* scrolls */}</DialogBody>
+    <DialogFooter>{/* pinned */}</DialogFooter>
+  </form>
+</DialogContent>
+```
+
+A `<form>` (or any DOM wrapper) between DialogContent and DialogBody/Footer
+breaks the flex height chain. The wrapper must explicitly continue it with
+`flex min-h-0 flex-col`.
+
+### ❌ DON'T — bare wrapper breaks chain
+
+```tsx
+{/* WRONG — <form> is display:block, breaks flex-1/h-full in children */}
+<DialogContent>
+  <DialogHeader>...</DialogHeader>
+  <form>
+    <DialogBody>{/* can't scroll, overflows */}</DialogBody>
+    <DialogFooter>{/* pushed outside card radius */}</DialogFooter>
+  </form>
+</DialogContent>
+```
+
+---
+
+## 16. Same-row parallel elements
+
+### ✅ DO — handle both narrow and wide
+
+```tsx
+<div className="flex items-center gap-2">
+  <Avatar className="shrink-0" />
+  <span className="min-w-0 truncate">{longUserName}</span>
+  <Button className="shrink-0 ml-auto">Follow</Button>
+</div>
+```
+
+- Fixed items (`Avatar`, `Button`): `shrink-0`
+- Truncatable content: `min-w-0 truncate`
+- Wide viewport: `ml-auto` pushes action to the right
+
+### ❌ DON'T — no narrow/wide handling
+
+```tsx
+{/* WRONG — name overflows on narrow, no truncation; no stretch on wide */}
+<div className="flex items-center gap-2">
+  <Avatar />
+  <span>{longUserName}</span>
+  <Button>Follow</Button>
+</div>
+```
+
+---
+
+## 17. Same-row control height equality
+
+### ✅ DO — same size tier
+
+```tsx
+<div className="flex items-center gap-2">
+  <Input size="sm" className="flex-1" />
+  <Button size="sm">Search</Button>
+</div>
+```
+
+Both controls at `sm` tier = same height. Statically deducible.
+
+### ❌ DON'T — mixed sizes
+
+```tsx
+{/* WRONG — sm button (h-7) next to default input (h-8) */}
+<div className="flex items-center gap-2">
+  <Input className="flex-1" />
+  <Button size="sm">Search</Button>
+</div>
+```
+
+---
+
+## 18. TSDoc ASCII design documentation
+
+Every page or component with visual design must have a TSDoc comment before
+export. ASCII art uses pure English (monospace alignment); explanatory text in
+Chinese. Include four breakpoint sketches.
+
+### ✅ DO — four-breakpoint TSDoc
+
+```tsx
+/**
+ * 用户资料页头部 — 头像、用户名、统计信息、操作按钮。
+ *
+ * Mobile (<640px):
+ * +----------------------------------+
+ * |  [Avatar 64px]                   |
+ * |  Username          ^truncate     |
+ * |  @handle                         |
+ * |  [Follow]  [Message]  [...]      |
+ * |  12 posts · 34 followers         |
+ * +----------------------------------+
+ *
+ * Tablet (640px–1023px):
+ * +----------------------------------------------+
+ * |  [Avatar 80px]  Username · @handle            |
+ * |                 12 posts · 34 followers        |
+ * |                 [Follow] [Message] [...]       |
+ * +----------------------------------------------+
+ *
+ * Desktop (1024px–1535px):
+ * +-----------------------------------------------------------+
+ * |  [Avatar 96px]  Username · @handle   [Follow] [Msg] [...] |
+ * |                 12 posts · 34 followers                    |
+ * +-----------------------------------------------------------+
+ *
+ * Ultra-wide (>=1536px):
+ * +------ max-w-4xl mx-auto, w-full -------------------------+
+ * |  (same as Desktop, centered with capped width)            |
+ * +-----------------------------------------------------------+
+ *
+ * 窄端处置：用户名 min-w-0 truncate；按钮 shrink-0。
+ * 宽端处置：内容区 flex-1 max-w-4xl；多余留白落在两侧。
+ */
+export function UserProfileHeader({ user }: UserProfileHeaderProps) {
+  // ...
+}
+```
+
+### ❌ DON'T — no breakpoint sketches
+
+```tsx
+{/* WRONG — no design documentation */}
+export function UserProfileHeader({ user }: UserProfileHeaderProps) {
+  // ...
+}
+```
+
+### ❌ DON'T — comment on pure logic wrappers
+
+```tsx
+{/* WRONG — Providers is a pure logic wrapper, no visual design */}
+/**
+ * Wraps the app with all providers.
+ */
+export function Providers({ children }: { children: React.ReactNode }) {
+  // ...
+}
+```
