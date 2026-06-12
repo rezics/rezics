@@ -236,7 +236,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
       />
       <div aria-hidden="true" className="absolute inset-0 bg-black/65" />
       <div className="relative w-full">
-        <div className="container mx-auto max-w-[1280px] px-4 py-8 lg:py-10">
+        <div className="w-full mx-auto max-w-[1280px] px-4 py-8 lg:py-10">
           {/* Title row + inline score (count stacks below the score). 标题行 + 内联分数（计数堆叠在分数下方）。 */}
           <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
             <h1 className="text-white font-serif text-3xl lg:text-5xl font-semibold leading-tight tracking-tight break-words flex-1 min-w-[12rem]">

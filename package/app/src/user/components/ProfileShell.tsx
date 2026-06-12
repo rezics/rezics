@@ -11,7 +11,7 @@ export const ProfileShell: FC<ProfileShellProps> = ({
   isCurrentUser = false,
   profileBasePath,
 }) => (
-  <div className="min-w-0 flex-1">
+  <div className="min-w-0 flex-1 max-w-4xl">
     <ProfileTabBar
       isCurrentUser={isCurrentUser}
       profileBasePath={profileBasePath}
