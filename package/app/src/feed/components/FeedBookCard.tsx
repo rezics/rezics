@@ -5,13 +5,25 @@ import { BookOpen } from "lucide-react";
 import { AppSafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 
+function bookKindLabel(
+  kind: string,
+  t: (key: string) => string,
+): string {
+  switch (kind) {
+    case "book": return t("page:home_feed_type_book");
+    case "game": return t("page:home_feed_type_game");
+    case "media": return t("page:home_feed_type_media");
+    default: return kind;
+  }
+}
+
 interface FeedBookCardProps {
   row: FeedBookRow;
   className?: string;
 }
 
 export function FeedBookCard({ row, className }: FeedBookCardProps) {
-  const { t } = useTranslation(["common"]);
+  const { t } = useTranslation(["common", "page"]);
   const title = row.book.title ?? t("common:untitled");
   const description = row.book.description;
 
@@ -52,7 +64,7 @@ export function FeedBookCard({ row, className }: FeedBookCardProps) {
               </h3>
               {row.book.kind ? (
                 <p className="mt-1 truncate text-xs leading-dense text-text-tertiary">
-                  {row.book.kind}
+                  {bookKindLabel(row.book.kind, t)}
                 </p>
               ) : null}
             </div>
