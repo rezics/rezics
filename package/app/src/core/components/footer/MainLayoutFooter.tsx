@@ -248,7 +248,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
             {t("shell:layout_footer_copyright", { year })}
           </p>
 
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-4 pr-20">
             <a
               href="/privacy"
               className="text-xs text-text-secondary hover:underline"

@@ -9,7 +9,6 @@ import {
   CardContent,
 } from "@rezics/ui/shadcn";
 import {
-  Plus as Add,
   CircleCheck as CheckCircle,
   CircleAlert as ErrorIcon,
   Heart as Favorite,
@@ -206,14 +205,6 @@ export const ThemeDemo: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating action button. 浮动操作按钮。 */}
-      <Button
-        size="icon"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
-        aria-label="add"
-      >
-        <Add className="h-6 w-6" />
-      </Button>
     </div>
   );
 };
