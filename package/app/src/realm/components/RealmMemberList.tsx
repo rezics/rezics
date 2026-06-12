@@ -1,4 +1,5 @@
 import {
+  realmKeys,
   realmMembersQuery,
   useRemoveMemberMutation,
   useUpdateMemberRoleMutation,
@@ -163,8 +164,10 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
                     userId: pendingRemove.userId,
                   });
                   setPendingRemove(null);
+                  // Use broad prefix to invalidate all paginated member queries
+                  // 使用更宽泛的前缀以失效所有分页成员查询
                   await queryClient.invalidateQueries({
-                    queryKey: realmMembersQuery(realmId).queryKey,
+                    queryKey: realmKeys.members(realmId),
                   });
                 } catch {
                   // Mutation onError already shows a toast; just keep the dialog open for retry.

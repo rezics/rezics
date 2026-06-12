@@ -74,6 +74,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QueryErrorDisplay } from "@/core";
@@ -103,7 +104,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     isError,
     error,
   } = useQuery(shelfDetailQuery(shelfId));
-  const updateMutation = useUpdateShelfMutation();
+  const updateMutation = useUpdateShelfMutation({
+    onSuccess: () => toast.success(getI18nRuntime().i18n.t("common:saved")),
+  });
   const setPinnedTagsMutation = useSetShelfPinnedTagsMutation();
   const upsertTranslationMutation = useUpsertTranslationMutation();
   const editor = useShelfItemsEditor(shelfId);

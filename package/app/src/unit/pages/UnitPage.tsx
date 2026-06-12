@@ -125,7 +125,9 @@ export function UnitPageById({ unitId }: { unitId: string }) {
     enabled: readContext.ready && Boolean(unitId),
   });
 
-  if (isLoading) {
+  // Show loading while fetching or before query is enabled
+  // 加载中或查询尚未启用时显示加载状态
+  if (isLoading || !readContext.ready) {
     return (
       <div className="mt-8 text-center text-sm text-gray-500">
         {t("common:loading")}

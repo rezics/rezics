@@ -111,7 +111,9 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
   });
   const posts = data?.posts ?? [];
 
-  if (isLoading) {
+  // Show spinner while loading or before query is enabled
+  // 加载中或查询尚未启用时显示加载指示器
+  if (isLoading || !readContext.ready) {
     return (
       <div className="flex justify-center py-6">
         <Spinner size="sm" />

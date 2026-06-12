@@ -216,6 +216,9 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
             onValueChange={(value) => {
               setTab(value as "following" | "followers");
               setCurrentPage(1);
+              // Reset external page so the new tab fetches from page 1
+              // 重置外部页码，使新标签页从第 1 页开始获取
+              setExternalPage(1);
               paginatorRef.current?.resetPaginationPageNumber();
             }}
           >

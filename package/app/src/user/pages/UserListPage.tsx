@@ -12,15 +12,11 @@ import {
   Input,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { Link, unitHref } from "@/shared/ui/link";
 import { UserError, UserLoading } from "./UserState";
-
-export interface UserListPageProps {
-  onUserClick?: (unitId: string) => void;
-}
 
 /**
  * UserListPage - user list page.
@@ -28,9 +24,8 @@ export interface UserListPageProps {
  * Shows all users with search and pagination support.
  * 显示所有用户，支持搜索和分页。
  */
-export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
+export const UserListPage: FC = () => {
   const { t } = useTranslation(["settings"]);
-  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -64,14 +59,6 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   const handlePageChange = (value: number) => {
     setPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleUserClick = (unitId: string) => {
-    if (onUserClick) {
-      onUserClick(unitId);
-    } else {
-      navigate({ to: "/user/$userId", params: { userId: unitId } });
-    }
   };
 
   const totalPages = Math.ceil(total / itemsPerPage);
@@ -108,40 +95,50 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {users.map((user) => (
-              <Card
+              <Link
                 key={user.unitId}
-                surface="contained"
-                className="cursor-pointer transition-colors hover:bg-surface-subtle"
-                onClick={() => handleUserClick(user.unitId)}
+                to={unitHref({
+                  type: "USER",
+                  unitId: user.unitId,
+                  slug: user.slug ?? null,
+                })}
+                className="no-underline"
               >
-                <CardContent className="text-center pt-6">
-                  <Avatar className="w-16 h-16 mx-auto mb-3">
-                    <AvatarImage
-                      src={user.avatar ?? undefined}
-                      alt={user.name ?? ""}
-                    />
-                    <AvatarFallback>
-                      {user.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h6 className="text-base font-semibold mb-2">{user.name}</h6>
-                  {user.slug && (
-                    <Badge variant="outline" className="mb-2">
-                      @{user.slug}
-                    </Badge>
-                  )}
-                  {user.bio && (
-                    <p className="text-sm text-text-secondary line-clamp-2">
-                      {user.bio}
-                    </p>
-                  )}
-                  {!user.bio && (
-                    <p className="text-sm text-text-secondary italic">
-                      {t("settings:user_no_bio")}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+                <Card
+                  surface="contained"
+                  className="h-full cursor-pointer transition-colors hover:bg-surface-subtle"
+                >
+                  <CardContent className="text-center pt-6">
+                    <Avatar className="w-16 h-16 mx-auto mb-3">
+                      <AvatarImage
+                        src={user.avatar ?? undefined}
+                        alt={user.name ?? ""}
+                      />
+                      <AvatarFallback>
+                        {user.name?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h6 className="text-base font-semibold mb-2">
+                      {user.name}
+                    </h6>
+                    {user.slug && (
+                      <Badge variant="outline" className="mb-2">
+                        @{user.slug}
+                      </Badge>
+                    )}
+                    {user.bio && (
+                      <p className="text-sm text-text-secondary line-clamp-2">
+                        {user.bio}
+                      </p>
+                    )}
+                    {!user.bio && (
+                      <p className="text-sm text-text-secondary italic">
+                        {t("settings:user_no_bio")}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 

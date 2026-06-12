@@ -43,7 +43,9 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
 
   const review = data?.posts?.[0];
 
-  if (isLoading) {
+  // Show skeleton while loading or before query is enabled
+  // 加载中或查询尚未启用时显示骨架屏
+  if (isLoading || !readContext.ready) {
     return (
       <div className="flex flex-col gap-3">
         <Skeleton

@@ -139,18 +139,34 @@ export function CollectionModal({
             {/* Content-type filter chips 内容类型筛选标签 */}
             <div className="flex flex-wrap gap-1">
               <Badge
+                role="button"
+                tabIndex={0}
                 variant={filterTag === null ? "default" : "outline"}
                 className="cursor-pointer"
                 onClick={() => setFilterTag(null)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setFilterTag(null);
+                  }
+                }}
               >
                 {t("common:all")}
               </Badge>
               {SEED_TAG_NAMES.map((name) => (
                 <Badge
                   key={name}
+                  role="button"
+                  tabIndex={0}
                   variant={filterTag === name ? "default" : "outline"}
                   className="cursor-pointer"
                   onClick={() => setFilterTag(filterTag === name ? null : name)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setFilterTag(filterTag === name ? null : name);
+                    }
+                  }}
                 >
                   {SEED_TAG_TITLES[name]}
                 </Badge>

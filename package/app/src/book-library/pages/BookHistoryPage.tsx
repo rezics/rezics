@@ -221,8 +221,8 @@ function HistoryTabButton({
       aria-selected={active}
       className={
         active
-          ? "rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand"
-          : "rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle"
+          ? "rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          : "rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       }
       onClick={onClick}
     >

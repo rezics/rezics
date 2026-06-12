@@ -61,6 +61,8 @@ task ui:storybook        # UI Storybook, port 6007
 
 ## Workflows
 
+- For multi-file, architectural, or ambiguous work, explore first and present a
+  plan before editing.
 - Planning is code-first: capture context, durable constraints, and a task
   checklist in `plan/proposal/<change>.md` via `/rezics-propose`, then implement
   with `/rezics-apply`, routing each durable item into code (types/tests/comments)

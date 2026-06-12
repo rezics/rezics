@@ -1,6 +1,7 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind, type UnitDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core";
@@ -29,7 +30,15 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
     enabled: readContext.ready && Boolean(id),
   });
 
-  if (isLoading) return <div>{t("common:loading")}</div>;
+  // Show spinner while loading or before query is enabled
+  // 加载中或查询尚未启用时显示加载指示器
+  if (isLoading || !readContext.ready) {
+    return (
+      <div className="flex justify-center py-6">
+        <Spinner size="sm" />
+      </div>
+    );
+  }
   if (error) return <QueryErrorDisplay error={error} />;
 
   const units: UnitDTO[] =

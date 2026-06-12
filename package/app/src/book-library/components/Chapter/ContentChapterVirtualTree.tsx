@@ -153,7 +153,7 @@ function createContentChapterNode(bookId: string) {
           height: CONTENT_ROW_HEIGHT,
           boxSizing: "border-box",
         }}
-        className="outline-none"
+        className="outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onKeyDown={(event: React.KeyboardEvent) => {
           if (event.key === "Enter" && hasChildren) node.toggle();
         }}

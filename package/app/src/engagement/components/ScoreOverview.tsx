@@ -1,6 +1,7 @@
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { scoreQueries } from "@rezics/api/score/score";
 import { useTranslation } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 
@@ -14,7 +15,19 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   realm = getDefaultRealmId() ?? "default",
 }) => {
   const { t } = useTranslation(["community"]);
-  const { data: aggregate } = useQuery(scoreQueries.aggregate(unitId, realm));
+  const { data: aggregate, isLoading } = useQuery(
+    scoreQueries.aggregate(unitId, realm),
+  );
+
+  // Show spinner while loading; only show "no ratings" after query settles
+  // 加载中显示加载指示器；仅在查询完成后才显示"无评分"
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-6">
+        <Spinner size="sm" />
+      </div>
+    );
+  }
 
   if (!aggregate) {
     return (
