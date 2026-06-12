@@ -20,6 +20,7 @@
   "chapter_updated": "업데이트됨",
   "chapter_content_required": "내용은 필수입니다",
   "chapter_create_failed": "챕터를 만들지 못했습니다: {error}",
+  "chapter_save_failed": "챕터를 저장하지 못했습니다: {error}",
   "chapter_double_click_rename": "이름 바꾸기를 두 번 클릭합니다.",
   "chapter_edit_dialog_status": "게시 상태",
   "chapter_edit_dialog_title": "장 편집",
@@ -233,6 +234,7 @@
   "read_deleted_restoring": "복원 중…",
   "read_deleted_restore": "이 항목 복원",
   "toc_new_chapter_title": "새 챕터",
+  "toc_resync_failed": "인덱스 오버라이드 재동기화 실패: {error}",
   "toc_save_failed": "저장 실패: {error}",
   "toc_chapter_unsaved_warning": "목차가 저장되기 전에는 챕터를 열 수 없습니다.",
   "chapter_load_failed": "챕터를 불러오지 못했습니다"

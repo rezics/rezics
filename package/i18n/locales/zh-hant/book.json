@@ -20,6 +20,7 @@
   "chapter_updated": "更新於",
   "chapter_content_required": "內容為必填",
   "chapter_create_failed": "建立章節失敗：{error}",
+  "chapter_save_failed": "儲存章節失敗：{error}",
   "chapter_double_click_rename": "雙擊重新命名",
   "chapter_edit_dialog_status": "發布狀態",
   "chapter_edit_dialog_title": "編輯章節",
@@ -233,6 +234,7 @@
   "read_deleted_restoring": "正在恢復…",
   "read_deleted_restore": "恢復此條目",
   "toc_new_chapter_title": "新章節",
+  "toc_resync_failed": "重新同步覆蓋項失敗：{error}",
   "toc_save_failed": "儲存失敗：{error}",
   "toc_chapter_unsaved_warning": "目錄儲存前無法開啟章節。",
   "chapter_load_failed": "載入章節失敗"

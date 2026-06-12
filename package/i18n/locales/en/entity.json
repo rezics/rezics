@@ -99,6 +99,7 @@
   "picker_search_placeholder": "Search entities...",
   "picker_title": "Find or create entity",
   "pinboard_admin_create": "New entry",
+  "pinboard_admin_create_failed": "Failed to create entry: {error}",
   "pinboard_admin_delete_description": "This will remove \"{title}\" from the pinboard. This action cannot be undone.",
   "pinboard_admin_delete_done": "Entry deleted.",
   "pinboard_admin_delete_failed": "Delete failed: {error}",

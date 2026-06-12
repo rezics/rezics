@@ -20,6 +20,7 @@
   "chapter_updated": "更新",
   "chapter_content_required": "本文は必須です",
   "chapter_create_failed": "章の作成に失敗しました: {error}",
+  "chapter_save_failed": "章の保存に失敗しました: {error}",
   "chapter_double_click_rename": "ダブルクリックして名前を変更",
   "chapter_edit_dialog_status": "公開ステータス",
   "chapter_edit_dialog_title": "章の編集",
@@ -233,6 +234,7 @@
   "read_deleted_restoring": "復元中…",
   "read_deleted_restore": "このエントリを復元",
   "toc_new_chapter_title": "新しい章",
+  "toc_resync_failed": "インデックスオーバーライドの再同期に失敗しました: {error}",
   "toc_save_failed": "保存に失敗しました: {error}",
   "toc_chapter_unsaved_warning": "目次が保存されるまで章を開くことはできません。",
   "chapter_load_failed": "章の読み込みに失敗しました"

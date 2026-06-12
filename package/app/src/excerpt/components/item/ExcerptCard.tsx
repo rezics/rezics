@@ -66,6 +66,18 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
         className,
       )}
       onClick={handleOpenExcerpt}
+      tabIndex={excerptId ? 0 : undefined}
+      role={excerptId ? "link" : undefined}
+      onKeyDown={
+        excerptId
+          ? (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleOpenExcerpt();
+              }
+            }
+          : undefined
+      }
     >
       <CardContent>
         <div className="flex items-start gap-2">

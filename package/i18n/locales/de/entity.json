@@ -99,6 +99,7 @@
   "picker_search_placeholder": "Entitäten suchen...",
   "picker_title": "Entität suchen oder erstellen",
   "pinboard_admin_create": "Neuer Eintrag",
+  "pinboard_admin_create_failed": "Eintrag konnte nicht erstellt werden: {error}",
   "pinboard_admin_delete_description": "Dadurch wird „{title}“ aus der Pinnwand entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
   "pinboard_admin_delete_done": "Eintrag gelöscht.",
   "pinboard_admin_delete_failed": "Löschen fehlgeschlagen:{error}",

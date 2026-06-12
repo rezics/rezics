@@ -99,6 +99,7 @@
   "picker_search_placeholder": "エンティティを検索...",
   "picker_title": "エンティティの検索または作成",
   "pinboard_admin_create": "新規エントリー",
+  "pinboard_admin_create_failed": "エントリの作成に失敗しました: {error}",
   "pinboard_admin_delete_description": "これにより、ピンボードから「{title}」が削除されます。この操作は元に戻すことができません。",
   "pinboard_admin_delete_done": "エントリが削除されました。",
   "pinboard_admin_delete_failed": "削除に失敗しました:{error}",

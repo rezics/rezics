@@ -20,6 +20,7 @@
   "chapter_updated": "Aktualisiert",
   "chapter_content_required": "Inhalt ist erforderlich",
   "chapter_create_failed": "Kapitel konnte nicht erstellt werden: {error}",
+  "chapter_save_failed": "Kapitel konnte nicht gespeichert werden: {error}",
   "chapter_double_click_rename": "Doppelklicken Sie auf „Umbenennen“.",
   "chapter_edit_dialog_status": "Veröffentlichungsstatus",
   "chapter_edit_dialog_title": "Kapitel bearbeiten",
@@ -233,6 +234,7 @@
   "read_deleted_restoring": "Wird wiederhergestellt …",
   "read_deleted_restore": "Eintrag wiederherstellen",
   "toc_new_chapter_title": "Neues Kapitel",
+  "toc_resync_failed": "Neusynchronisierung der Überschreibungen fehlgeschlagen: {error}",
   "toc_save_failed": "Speichern fehlgeschlagen: {error}",
   "toc_chapter_unsaved_warning": "Ein Kapitel kann erst geöffnet werden, wenn das Inhaltsverzeichnis gespeichert wurde.",
   "chapter_load_failed": "Kapitel konnte nicht geladen werden"

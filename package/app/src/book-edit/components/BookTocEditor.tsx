@@ -25,6 +25,7 @@ import type {
   RenameHandler,
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
+import { toast } from "sonner";
 import {
   type BookContentStructureOccurrence,
   contentUnitIdForNode,
@@ -718,49 +719,57 @@ export const BookTocEditor = forwardRef<
    * 重新同步：根据当前已落地章节的分级重新计算索引覆盖项。
    */
   async function handleResyncOverrides() {
-    const ratingByChapterId = new Map<string, ContentRating | undefined>();
+    try {
+      const ratingByChapterId = new Map<string, ContentRating | undefined>();
 
-    async function collect(nodes: Chapter[]) {
-      for (const node of nodes) {
-        const contentUnitId = contentUnitIdForNode(node);
-        if (contentUnitId && !ratingByChapterId.has(contentUnitId)) {
-          const chapter = await queryClient.ensureQueryData(
-            chapterDetailQuery(contentUnitId),
-          );
-          ratingByChapterId.set(
-            contentUnitId,
-            chapter.rating as ContentRating | undefined,
-          );
-        }
-        if (node.children) await collect(node.children);
-      }
-    }
-
-    function rewrite(nodes: Chapter[]): Chapter[] {
-      return nodes.map((node) => {
-        const next: Chapter = { ...node };
-        if (node.children) {
-          next.children = rewrite(node.children);
-        }
-        const contentUnitId = contentUnitIdForNode(node);
-        if (contentUnitId) {
-          const chapterRating = ratingByChapterId.get(contentUnitId);
-          if (chapterRating === undefined || chapterRating === bookRating) {
-            delete next.rating;
-          } else {
-            next.rating = chapterRating;
+      async function collect(nodes: Chapter[]) {
+        for (const node of nodes) {
+          const contentUnitId = contentUnitIdForNode(node);
+          if (contentUnitId && !ratingByChapterId.has(contentUnitId)) {
+            const chapter = await queryClient.ensureQueryData(
+              chapterDetailQuery(contentUnitId),
+            );
+            ratingByChapterId.set(
+              contentUnitId,
+              chapter.rating as ContentRating | undefined,
+            );
           }
-        } else if (next.rating === bookRating) {
-          delete next.rating;
+          if (node.children) await collect(node.children);
         }
-        return next;
-      });
-    }
+      }
 
-    await collect(treeData);
-    const updated = rewrite(treeData);
-    setTreeData(updated);
-    await saveTree(updated);
+      function rewrite(nodes: Chapter[]): Chapter[] {
+        return nodes.map((node) => {
+          const next: Chapter = { ...node };
+          if (node.children) {
+            next.children = rewrite(node.children);
+          }
+          const contentUnitId = contentUnitIdForNode(node);
+          if (contentUnitId) {
+            const chapterRating = ratingByChapterId.get(contentUnitId);
+            if (chapterRating === undefined || chapterRating === bookRating) {
+              delete next.rating;
+            } else {
+              next.rating = chapterRating;
+            }
+          } else if (next.rating === bookRating) {
+            delete next.rating;
+          }
+          return next;
+        });
+      }
+
+      await collect(treeData);
+      const updated = rewrite(treeData);
+      setTreeData(updated);
+      await saveTree(updated);
+    } catch (err) {
+      toast.error(
+        t("book:toc_resync_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+    }
   }
 
   const chapterCount = useMemo(() => countChapters(treeData), [treeData]);

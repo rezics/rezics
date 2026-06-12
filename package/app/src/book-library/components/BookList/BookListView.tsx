@@ -50,7 +50,7 @@ export const BookListViewItem: React.FC<BookListViewItemProps> = ({ book }) => {
           )}
           <CardContent className="flex-1 flex flex-col justify-between min-w-0 p-4">
             <div>
-              <h6 className="mb-1 text-lg font-medium">{title}</h6>
+              <h3 className="mb-1 text-lg font-medium">{title}</h3>
               <p className="mb-2 text-sm text-text-secondary">{authorName}</p>
               <p className="line-clamp-3 text-sm">{description}</p>
             </div>

@@ -14,6 +14,7 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { resolveCatalogEntryInteractionContext } from "@/book-library";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
@@ -117,12 +118,21 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     let scoreEntryId: string | undefined;
 
     if (reviewData._editRating > 0) {
-      const scoreEntry = await scoreMutation.mutateAsync({
-        unitId: bookUnitId,
-        realm: getDefaultRealmId() ?? "default",
-        value: reviewData._editRating,
-      });
-      scoreEntryId = scoreEntry.id;
+      try {
+        const scoreEntry = await scoreMutation.mutateAsync({
+          unitId: bookUnitId,
+          realm: getDefaultRealmId() ?? "default",
+          value: reviewData._editRating,
+        });
+        scoreEntryId = scoreEntry.id;
+      } catch (err) {
+        toast.error(
+          t("community:review_messages_score_failed", {
+            error: err instanceof Error ? err.message : String(err),
+          }),
+        );
+        return;
+      }
     }
 
     postMutation.mutate({

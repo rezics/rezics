@@ -145,6 +145,7 @@ export function BookAuthorityPanel({
     onError: (err) => setError(err.message),
   });
   const removeLock = useRemoveUnitFieldLockMutation({
+    onSuccess: () => setError(null),
     onError: (err) => setError(err.message),
   });
   const locks = demoMode ? localLocks : (locksQuery.data?.locks ?? []);

@@ -97,11 +97,8 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
           return (
             <li key={book.unitId} className="py-2 flex items-center gap-3">
               <Avatar className="rounded-md">
-                {coverUrl ? (
-                  <AvatarImage src={coverUrl} alt={title} />
-                ) : (
-                  <AvatarFallback>{idx + 1}</AvatarFallback>
-                )}
+                {coverUrl && <AvatarImage src={coverUrl} alt={title} />}
+                <AvatarFallback>{idx + 1}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">

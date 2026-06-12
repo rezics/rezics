@@ -99,6 +99,7 @@
   "picker_search_placeholder": "搜索实体...",
   "picker_title": "查找或创建实体",
   "pinboard_admin_create": "新条目",
+  "pinboard_admin_create_failed": "创建条目失败：{error}",
   "pinboard_admin_delete_description": "这将从看板中删除“{title}”。此操作无法撤消。",
   "pinboard_admin_delete_done": "条目已删除。",
   "pinboard_admin_delete_failed": "删除失败：{error}",

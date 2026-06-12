@@ -54,6 +54,17 @@ export const HelpFab: React.FC<HelpFabProps> = ({
     setOpen(false);
   };
 
+  // Close panel on Escape key
+  // 按 Escape 键关闭面板
+  React.useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
   if (!visible) return null;
 
   return (
@@ -102,6 +113,7 @@ export const HelpFab: React.FC<HelpFabProps> = ({
           variant="default"
           size="icon"
           aria-label={resolvedAriaLabel}
+          aria-expanded={open}
           onClick={handleToggle}
           className="rounded-full shadow-lg w-14 h-14"
         >

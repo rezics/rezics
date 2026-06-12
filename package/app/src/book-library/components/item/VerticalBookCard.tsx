@@ -43,24 +43,18 @@ export function BookCard({
     >
       <div
         className="relative w-full overflow-hidden"
-        style={aspectRatio ? { aspectRatio } : undefined}
+        style={{ aspectRatio: aspectRatio ?? 2 / 3 }}
       >
         {hasCover ? (
           <img
             src={coverUrl}
             alt={title}
-            className={cn(
-              "w-full object-cover rounded",
-              aspectRatio ? "h-full" : "",
-            )}
+            className="w-full h-full object-cover rounded"
             loading="lazy"
           />
         ) : (
           <div
-            className={cn(
-              "flex w-full items-center justify-center rounded bg-surface-subtle text-text-tertiary",
-              aspectRatio ? "h-full" : "aspect-[2/3]",
-            )}
+            className="flex w-full h-full items-center justify-center rounded bg-surface-subtle text-text-tertiary"
             aria-hidden="true"
           >
             <BookOpen className="h-8 w-8" />

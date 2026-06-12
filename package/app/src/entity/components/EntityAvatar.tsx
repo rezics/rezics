@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "@/shared/utils/css-util";
 
 interface EntityAvatarProps {
@@ -19,6 +20,7 @@ export function EntityAvatar({
   size = "md",
   className,
 }: EntityAvatarProps) {
+  const [imgError, setImgError] = useState(false);
   const fallback = title?.trim().slice(0, 1).toUpperCase() || "?";
 
   return (
@@ -29,12 +31,13 @@ export function EntityAvatar({
         className,
       )}
     >
-      {avatar ? (
+      {avatar && !imgError ? (
         <img
           src={avatar}
           alt=""
           className="size-full object-cover"
           loading="lazy"
+          onError={() => setImgError(true)}
         />
       ) : (
         fallback

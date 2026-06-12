@@ -20,6 +20,7 @@
   "chapter_updated": "Updated",
   "chapter_content_required": "Content is required",
   "chapter_create_failed": "Failed to create chapter: {error}",
+  "chapter_save_failed": "Failed to save chapter: {error}",
   "chapter_double_click_rename": "Double-click rename",
   "chapter_edit_dialog_status": "Publish Status",
   "chapter_edit_dialog_title": "Edit Chapter",
@@ -233,6 +234,7 @@
   "read_deleted_restoring": "Restoring…",
   "read_deleted_restore": "Restore this entry",
   "toc_new_chapter_title": "New Chapter",
+  "toc_resync_failed": "Failed to resync overrides: {error}",
   "toc_save_failed": "Failed to save: {error}",
   "toc_chapter_unsaved_warning": "Cannot open a chapter before the table of contents is saved.",
   "chapter_load_failed": "Failed to load chapter"

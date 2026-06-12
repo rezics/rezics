@@ -202,7 +202,6 @@ export function CollectionModal({
                       >
                         <Checkbox
                           checked={selectedShelves.has(shelf.unitId)}
-                          tabIndex={-1}
                           aria-label={t("entity:collection_select_shelf", {
                             title: displayTitle,
                           })}

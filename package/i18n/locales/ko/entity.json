@@ -99,6 +99,7 @@
   "picker_search_placeholder": "항목 검색...",
   "picker_title": "엔터티 찾기 또는 만들기",
   "pinboard_admin_create": "신규 항목",
+  "pinboard_admin_create_failed": "항목 생성에 실패했습니다: {error}",
   "pinboard_admin_delete_description": "이렇게 하면 핀보드에서 \"{title}\"이 제거됩니다. 이 작업은 취소할 수 없습니다.",
   "pinboard_admin_delete_done": "항목이 삭제되었습니다.",
   "pinboard_admin_delete_failed": "삭제 실패: {error}",

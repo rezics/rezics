@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import {
@@ -177,25 +178,33 @@ export const BookEditChapterPage: React.FC = () => {
     // 防止从编辑器按钮路径重复提交
     if (updateMutation.isPending || updateContentStructureMutation.isPending)
       return;
-    await updateMutation.mutateAsync({
-      unitId: contentUnitId,
-      input: {
-        title,
-        content: markdownContentDoc(content),
-      } as any,
-    });
-    const contentStructure = await queryClient.fetchQuery(
-      bookContentStructureQuery(bookId),
-    );
-    if (contentStructure) {
-      await updateContentStructureMutation.mutateAsync({
-        bookUnitId: bookId,
-        nodes: updateContentStructureNodeTitle(
-          contentStructure.nodes,
-          contentUnitId,
+    try {
+      await updateMutation.mutateAsync({
+        unitId: contentUnitId,
+        input: {
           title,
-        ),
+          content: markdownContentDoc(content),
+        } as any,
       });
+      const contentStructure = await queryClient.fetchQuery(
+        bookContentStructureQuery(bookId),
+      );
+      if (contentStructure) {
+        await updateContentStructureMutation.mutateAsync({
+          bookUnitId: bookId,
+          nodes: updateContentStructureNodeTitle(
+            contentStructure.nodes,
+            contentUnitId,
+            title,
+          ),
+        });
+      }
+    } catch (err) {
+      toast.error(
+        t("book:chapter_save_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
     }
   }, [
     isInvalid,
@@ -206,6 +215,7 @@ export const BookEditChapterPage: React.FC = () => {
     queryClient,
     updateContentStructureMutation,
     bookId,
+    t,
   ]);
 
   // Ctrl/Cmd+S to save
