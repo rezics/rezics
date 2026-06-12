@@ -231,5 +231,9 @@
   "read_deleted_title": "Dieser Eintrag wurde gelöscht",
   "read_deleted_description": "Der geöffnete Inhaltsverzeichnis-Eintrag wurde entfernt. Seine ursprüngliche Position bleibt erhalten und kann wiederhergestellt werden.",
   "read_deleted_restoring": "Wird wiederhergestellt …",
-  "read_deleted_restore": "Eintrag wiederherstellen"
+  "read_deleted_restore": "Eintrag wiederherstellen",
+  "toc_new_chapter_title": "Neues Kapitel",
+  "toc_save_failed": "Speichern fehlgeschlagen: {error}",
+  "toc_chapter_unsaved_warning": "Ein Kapitel kann erst geöffnet werden, wenn das Inhaltsverzeichnis gespeichert wurde.",
+  "chapter_load_failed": "Kapitel konnte nicht geladen werden"
 }

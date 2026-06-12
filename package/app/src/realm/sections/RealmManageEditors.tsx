@@ -145,7 +145,7 @@ export function TagViewPreferenceEditor({
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
       <div>
         <h3 className="text-sm font-medium leading-ui text-text-primary">
-          Tags tab view
+          {getI18nRuntime().i18n.t("community:tag_view_heading")}
         </h3>
       </div>
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">

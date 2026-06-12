@@ -231,5 +231,9 @@
   "read_deleted_title": "此條目已被刪除",
   "read_deleted_description": "你打開的目錄條目已被移除。其原始位置已保留，可以恢復。",
   "read_deleted_restoring": "正在恢復…",
-  "read_deleted_restore": "恢復此條目"
+  "read_deleted_restore": "恢復此條目",
+  "toc_new_chapter_title": "新章節",
+  "toc_save_failed": "儲存失敗：{error}",
+  "toc_chapter_unsaved_warning": "目錄儲存前無法開啟章節。",
+  "chapter_load_failed": "載入章節失敗"
 }

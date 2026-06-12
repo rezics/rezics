@@ -135,8 +135,8 @@ export function ReviewEditPageContainer() {
           params: { bookId: reviewData.targetUnitId ?? "" },
         });
       },
-      onError: (error) => {
-        show(`Review delete failed: ${error}`);
+      onError: () => {
+        show(t("community:review_messages_delete_failed"));
       },
     });
   }

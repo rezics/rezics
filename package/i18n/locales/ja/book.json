@@ -231,5 +231,9 @@
   "read_deleted_title": "このエントリは削除されました",
   "read_deleted_description": "開いた目次エントリは削除されました。元の配置は保持されており、復元できます。",
   "read_deleted_restoring": "復元中…",
-  "read_deleted_restore": "このエントリを復元"
+  "read_deleted_restore": "このエントリを復元",
+  "toc_new_chapter_title": "新しい章",
+  "toc_save_failed": "保存に失敗しました: {error}",
+  "toc_chapter_unsaved_warning": "目次が保存されるまで章を開くことはできません。",
+  "chapter_load_failed": "章の読み込みに失敗しました"
 }

@@ -86,5 +86,7 @@
   "theme_customizer_custom_color": "カスタムカラー",
   "theme_customizer_hex_format": "形式: #RRGGBB",
   "create_menu_new_book": "新しい本",
-  "create_menu_new_shelf": "新しい棚"
+  "create_menu_new_shelf": "新しい棚",
+  "navigation_zones_error": "ゾーンの読み込みに失敗しました",
+  "navigation_realms_error": "レルムの読み込みに失敗しました"
 }

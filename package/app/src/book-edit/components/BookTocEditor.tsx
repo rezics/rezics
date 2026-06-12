@@ -340,7 +340,7 @@ export const BookTocEditor = forwardRef<
       setSavedTreeData(data);
       setOpLog((current) => clearTreeEditOpLog(current));
     } catch (error) {
-      showAlert(`Failed to save: ${error}`);
+      showAlert(t("book:toc_save_failed", { error: String(error) }));
     }
   }
 
@@ -395,9 +395,7 @@ export const BookTocEditor = forwardRef<
     async (chapter: Chapter) => {
       const contentUnitId = contentUnitIdForNode(chapter);
       if (!contentUnitId && !chapter.nodeId) {
-        showAlert(
-          "Cannot open a chapter before the table of contents is saved.",
-        );
+        showAlert(t("book:toc_chapter_unsaved_warning"));
         return;
       }
       const targetContentUnitId = await ensureChapterUnit({
@@ -480,7 +478,7 @@ export const BookTocEditor = forwardRef<
     (chapter: Chapter) => {
       const newNode: Chapter = {
         id: `draft-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`,
-        title: "New Chapter",
+        title: t("book:toc_new_chapter_title"),
       };
       setTreeData(
         (current) =>

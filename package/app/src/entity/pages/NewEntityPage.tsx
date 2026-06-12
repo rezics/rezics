@@ -10,6 +10,7 @@ import {
   suggestSubjectEligibility,
 } from "@/entity-picker";
 import { unitHref } from "@/shared/ui/link";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 /**
  * 新建实体页面。提供表单用于创建新的目录实体（书籍、游戏、媒体等），
@@ -33,6 +34,7 @@ import { unitHref } from "@/shared/ui/link";
  * └──────────────────┘ └────────────────────────┘ └────────────────────────┘ └──────────────────────────┘
  */
 export function NewEntityPage() {
+  useRequireAuth();
   const { t } = useTranslation(["common", "entity", "shell"]);
   const navigate = useNavigate();
   const [title, setTitle] = useState("");

@@ -168,8 +168,13 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   const [tab, setTab] = useState<string>(types[0] ?? "");
   const [startMap, setStartMap] = useState<Record<string, number>>({});
 
-  // initialize tab from URL (only in tab mode)
-  // 从 URL 初始化标签页（仅在 tab 模式下）
+  // Stable serialization of `types` for use as a dependency.
+  // 将 `types` 稳定序列化，用作依赖项。
+  const typesKey = JSON.stringify(types);
+
+  // Initialize tab from URL (only in tab mode).
+  // 从 URL 初始化标签页（仅在 tab 模式下）。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: typesKey is a stable serialization of types — listing types directly would cause infinite re-renders.
   useEffect(() => {
     if (isSingle) {
       if (type && types.includes(type)) {
@@ -185,28 +190,20 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     } else if (types.length > 0) {
       setTab(types[0]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isSingle,
-    types.includes,
-    types.length,
-    type,
-    types[0],
-    searchParams.get,
-  ]);
+  }, [isSingle, typesKey, type, searchParams]);
 
-  // ensure startMap has keys for current tabTypes
-  // 确保 startMap 为当前的 tabTypes 都有对应的键
+  // Ensure startMap has keys for current tabTypes.
+  // 确保 startMap 为当前的 tabTypes 都有对应的键。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: typesKey is a stable serialization of types — listing types directly would cause infinite re-renders.
   useEffect(() => {
     setStartMap((prev) => {
       const next = { ...prev };
-      types.forEach((t) => {
+      for (const t of types) {
         if (next[t] == null) next[t] = 0;
-      });
+      }
       return next;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [types.forEach]);
+  }, [typesKey]);
 
   const searchOptions = {
     type: tab === "UNIT" ? undefined : tab,

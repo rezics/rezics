@@ -86,5 +86,7 @@
   "theme_customizer_custom_color": "Benutzerdefinierte Farbe",
   "theme_customizer_hex_format": "Format: #RRGGBB",
   "create_menu_new_book": "Neues Buch",
-  "create_menu_new_shelf": "Neues Regal"
+  "create_menu_new_shelf": "Neues Regal",
+  "navigation_zones_error": "Zonen konnten nicht geladen werden",
+  "navigation_realms_error": "Realms konnten nicht geladen werden"
 }

@@ -89,7 +89,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AddUnitTranslationLanguageDialog,
   UnitTranslationLanguageBar,
@@ -137,6 +137,13 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
   const [summary, setSummary] = useState("");
   const [description, setDescription] = useState("");
 
+  // Guard: only seed entity metadata into form state once, not on every background refetch.
+  // 守卫：仅在首次加载时将实体元数据填入表单状态，不在后台重新获取时覆盖。
+  const entityInitializedRef = useRef(false);
+  // Guard: re-seed translation fields when the user switches language, but not on same-language refetch.
+  // 守卫：当用户切换语言时重新填充翻译字段，但同一语言的后台刷新不覆盖。
+  const translationInitLangRef = useRef<string | null>(null);
+
   const translation = entity?.translations?.find(
     (item) => item.language === selectedLanguage,
   );
@@ -148,7 +155,8 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
   }, [canEdit, isLoading, navigate, unitId]);
 
   useEffect(() => {
-    if (!entity) return;
+    if (entityInitializedRef.current || !entity) return;
+    entityInitializedRef.current = true;
     setKind(entity.kind ?? NO_KIND);
     setAvatar(entity.avatar ?? "");
     setVerified(entity.verified);
@@ -165,11 +173,13 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
   }, [editableLanguages, selectedLanguage]);
 
   useEffect(() => {
+    if (translationInitLangRef.current === selectedLanguage) return;
+    translationInitLangRef.current = selectedLanguage;
     setTitle(translation?.title ?? "");
     setSubtitle(translation?.subtitle ?? "");
     setSummary(translation?.summary ?? "");
     setDescription(contentDocMarkdownFallback(translation?.description));
-  }, [translation]);
+  }, [translation, selectedLanguage]);
 
   const handleAddLanguage = (language: string) => {
     setAddOpen(false);

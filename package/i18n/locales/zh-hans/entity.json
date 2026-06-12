@@ -395,5 +395,9 @@
   "seed_tag_post": "帖子",
   "seed_tag_link": "链接",
   "variant": "变体",
-  "review": "书评"
+  "review": "书评",
+  "unit_review_count": "{count} 条书评",
+  "unit_tag_count": "{count} 个标签",
+  "unit_override_label": "覆盖：{title}",
+  "unit_source_label": "来源：{title}"
 }

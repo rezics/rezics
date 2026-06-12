@@ -5,6 +5,7 @@ import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
+import { useRequireAuth } from "@/user/pages/useAuth";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
 /**
@@ -79,6 +80,7 @@ import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
  * +----------+
  */
 export function NewShelfPage() {
+  useRequireAuth();
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
   const createMutation = useCreateShelfMutation();

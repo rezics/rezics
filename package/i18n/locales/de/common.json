@@ -198,5 +198,7 @@
   "relative_time_days_ago": "vor {value} Tagen",
   "relative_time_weeks_ago": "vor {value} Wochen",
   "mutation_error_generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
-  "showing_range": "Zeige {start}–{end} von {total}"
+  "showing_range": "Zeige {start}–{end} von {total}",
+  "link_copied": "Link kopiert",
+  "clipboard_failed": "Kopieren fehlgeschlagen. Bitte manuell auswählen und kopieren."
 }

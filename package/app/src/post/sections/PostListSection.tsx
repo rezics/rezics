@@ -151,7 +151,11 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
           <div key={post.unitId}>
             {targetVariantLabel && (
               <div className="pt-3">
-                <Badge variant="outline">Variant: {targetVariantLabel}</Badge>
+                <Badge variant="outline">
+                  {t("community:post_variant_badge", {
+                    label: targetVariantLabel,
+                  })}
+                </Badge>
               </div>
             )}
             <FeedPostCard post={post} />

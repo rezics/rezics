@@ -395,5 +395,9 @@
   "seed_tag_post": "Beitrag",
   "seed_tag_link": "Link",
   "variant": "Variante",
-  "review": "Rezension"
+  "review": "Rezension",
+  "unit_review_count": "{count} Rezensionen",
+  "unit_tag_count": "{count} Tags",
+  "unit_override_label": "Überschreibung: {title}",
+  "unit_source_label": "Quelle: {title}"
 }

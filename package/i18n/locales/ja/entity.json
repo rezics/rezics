@@ -395,5 +395,9 @@
   "seed_tag_post": "投稿",
   "seed_tag_link": "リンク",
   "variant": "バリアント",
-  "review": "レビュー"
+  "review": "レビュー",
+  "unit_review_count": "{count}件のレビュー",
+  "unit_tag_count": "{count}件のタグ",
+  "unit_override_label": "オーバーライド: {title}",
+  "unit_source_label": "ソース: {title}"
 }

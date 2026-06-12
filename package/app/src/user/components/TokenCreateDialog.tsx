@@ -16,6 +16,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 import { type FC, useRef, useState } from "react";
+import { toast } from "sonner";
 
 interface TokenCreateDialogProps {
   open: boolean;
@@ -83,13 +84,19 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
 
   const handleCopy = async () => {
     if (!rawToken) return;
-    await navigator.clipboard.writeText(rawToken);
-    setCopied(true);
-    if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
-    copiedTimerRef.current = setTimeout(() => {
-      setCopied(false);
-      copiedTimerRef.current = null;
-    }, 2000);
+    try {
+      await navigator.clipboard.writeText(rawToken);
+      setCopied(true);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => {
+        setCopied(false);
+        copiedTimerRef.current = null;
+      }, 2000);
+    } catch {
+      // Clipboard write can fail in insecure contexts; show manual-copy hint.
+      // 剪贴板写入在不安全上下文中可能失败；提示用户手动复制。
+      toast.error(t("common:clipboard_failed"));
+    }
   };
 
   const handleClose = () => {

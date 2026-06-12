@@ -69,9 +69,14 @@ export function WikiPostEditor({
       }
       setLockedError(
         locked.offendingLockPath && locked.offendingPatchPath
-          ? `Locked path: ${locked.offendingLockPath}; patch path: ${locked.offendingPatchPath}`
+          ? tc("community:post_edit_locked_path_detail", {
+              lockPath: locked.offendingLockPath,
+              patchPath: locked.offendingPatchPath,
+            })
           : locked.blockedPaths.length
-            ? `Locked paths: ${locked.blockedPaths.join(", ")}`
+            ? tc("community:post_edit_locked_paths", {
+                paths: locked.blockedPaths.join(", "),
+              })
             : locked.message,
       );
     },

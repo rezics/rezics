@@ -18,6 +18,7 @@ import {
   UseMySettingsButton,
 } from "@/bookshelf-view";
 import { readStatusLabel } from "@/progress-status/models/status";
+import { useRequireAuth } from "@/user/pages/useAuth";
 import { progressLibraryRowToBookshelfItem } from "../models/progressBookshelf";
 import { ContinueReadingSection } from "../sections/ContinueReadingSection";
 
@@ -93,6 +94,7 @@ export function ProgressLibraryPage({
   libraryUrlConfig,
   onResetLibraryUrlConfig,
 }: ProgressLibraryPageProps) {
+  useRequireAuth();
   const { t } = useTranslation(["common", "page", "book"]);
   const continueReadingQuery = useQuery(myContinueReadingQuery({ limit: 12 }));
   const libraryQuery = useQuery(myProgressPageQuery({ limit: 50 }));

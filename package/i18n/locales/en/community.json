@@ -450,5 +450,9 @@
   "realm_management_permission_required": "You need owner, moderator, or staff permissions to manage this realm.",
   "post_edit_locked_path_detail": "Locked path: {lockPath}; patch path: {patchPath}",
   "post_edit_locked_paths": "Locked paths: {paths}",
-  "reply_count": "{count} replies"
+  "reply_count": "{count} replies",
+  "post_variant_badge": "Variant: {label}",
+  "review_messages_delete_failed": "Failed to delete review",
+  "wiki_locked_path": "Locked path: {path}",
+  "wiki_locked_paths": "Locked paths: {paths}"
 }

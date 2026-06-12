@@ -86,5 +86,7 @@
   "theme_customizer_custom_color": "맞춤 색상",
   "theme_customizer_hex_format": "형식: #RRGGBB",
   "create_menu_new_book": "새 도서",
-  "create_menu_new_shelf": "새 선반"
+  "create_menu_new_shelf": "새 선반",
+  "navigation_zones_error": "존을 불러오지 못했습니다",
+  "navigation_realms_error": "렐름을 불러오지 못했습니다"
 }

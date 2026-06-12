@@ -28,8 +28,8 @@ export function UnitCard({
   const addedAt = formatAddedAt(summary.addedAt);
   const communityCatalogLabel = t("entity:community_catalog");
   const author = authorSlot ?? renderAuthor(summary, communityCatalogLabel);
-  const translationMeta = renderTranslationMeta(summary);
-  const attachments = renderAttachmentCounts(summary);
+  const translationMeta = renderTranslationMeta(summary, t);
+  const attachments = renderAttachmentCounts(summary, t);
 
   return (
     <article
@@ -158,28 +158,36 @@ function renderAuthor(summary: UnitCardSummary, communityCatalogLabel: string) {
   return <span className="min-w-0 truncate text-text-secondary">{name}</span>;
 }
 
-function renderAttachmentCounts(summary: UnitCardSummary): string | null {
+function renderAttachmentCounts(
+  summary: UnitCardSummary,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string | null {
   const counts = summary.attachmentCounts;
   if (!counts) return null;
   const parts: string[] = [];
   if (counts.reviews > 0) {
-    parts.push(
-      `${counts.reviews} ${counts.reviews === 1 ? "review" : "reviews"}`,
-    );
+    parts.push(t("entity:unit_review_count", { count: counts.reviews }));
   }
   if (counts.tags > 0) {
-    parts.push(`${counts.tags} ${counts.tags === 1 ? "tag" : "tags"}`);
+    parts.push(t("entity:unit_tag_count", { count: counts.tags }));
   }
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
-function renderTranslationMeta(summary: UnitCardSummary): string | null {
+function renderTranslationMeta(
+  summary: UnitCardSummary,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string | null {
   const meta = summary.translationMeta;
   if (!meta) return null;
   const parts = [
     meta.language,
-    meta.overrideTitle ? `Override: ${meta.overrideTitle}` : undefined,
-    meta.sourceTitle ? `Source: ${meta.sourceTitle}` : undefined,
+    meta.overrideTitle
+      ? t("entity:unit_override_label", { title: meta.overrideTitle })
+      : undefined,
+    meta.sourceTitle
+      ? t("entity:unit_source_label", { title: meta.sourceTitle })
+      : undefined,
   ].filter((part): part is string => Boolean(part));
   return parts.length > 0 ? parts.join(" · ") : null;
 }

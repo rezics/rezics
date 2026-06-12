@@ -1,4 +1,5 @@
 import { useToggleNodeCompletion, useUpdateUnitProgress } from "@rezics/api";
+import { useCurrentUserId } from "@rezics/api/hooks";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
@@ -30,6 +31,7 @@ export const ReadingNodeView: React.FC<ReadingNodeViewProps> = ({
 }) => {
   const { t } = useTranslation(["book", "common"]);
   const navigate = useNavigate();
+  const userId = useCurrentUserId();
   const { data, isPending, error, isError } = useQuery(
     chapterDetailQuery(contentUnitId),
   );
@@ -39,10 +41,16 @@ export const ReadingNodeView: React.FC<ReadingNodeViewProps> = ({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: deliberate — record the resume position only when the node changes
   useEffect(() => {
+    // Skip progress update for unauthenticated visitors.
+    // 未认证的访客跳过进度更新。
+    if (!userId) return;
     updateProgress.mutate({ status: "ACTIVE", lastReadNodeId: nodeId });
-  }, [nodeId]);
+  }, [nodeId, userId]);
 
   const handleToggle = () => {
+    // Require auth before toggling completion.
+    // 切换完成状态前需要认证。
+    if (!userId) return;
     const next = !isCompleted;
     setIsCompleted(next);
     toggleCompletion.mutate(

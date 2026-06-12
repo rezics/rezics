@@ -81,6 +81,7 @@ export function useShareMenu({
     event.stopPropagation();
     try {
       await navigator.clipboard.writeText(absolute(href));
+      toast.success(t("common:link_copied"));
     } catch {
       // swallow — clipboard write can fail in insecure contexts
       // 吞掉错误 —— 在不安全上下文中剪贴板写入可能失败

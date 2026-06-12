@@ -59,8 +59,10 @@ import {
 import React from "react";
 import { FeedbackDrawer } from "../components/FeedbackDrawer";
 import { FeedbackList } from "../components/FeedbackList";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 export const FeedbackPage: React.FC = () => {
+  useRequireAuth();
   const { t } = useTranslation(["common", "community", "search"]);
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");

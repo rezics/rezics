@@ -450,5 +450,9 @@
   "realm_management_permission_required": "Sie benötigen Eigentümer-, Moderator- oder Mitarbeiterberechtigungen, um dieses Realm zu verwalten.",
   "post_edit_locked_path_detail": "Gesperrter Pfad: {lockPath}; Patch-Pfad: {patchPath}",
   "post_edit_locked_paths": "Gesperrte Pfade: {paths}",
-  "reply_count": "{count} Antworten"
+  "reply_count": "{count} Antworten",
+  "post_variant_badge": "Variante: {label}",
+  "review_messages_delete_failed": "Löschen der Rezension fehlgeschlagen",
+  "wiki_locked_path": "Gesperrter Pfad: {path}",
+  "wiki_locked_paths": "Gesperrte Pfade: {paths}"
 }

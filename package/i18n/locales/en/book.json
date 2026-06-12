@@ -231,5 +231,9 @@
   "read_deleted_title": "This entry was deleted",
   "read_deleted_description": "The TOC entry you opened has been removed. Its original placement is preserved and can be restored.",
   "read_deleted_restoring": "Restoring…",
-  "read_deleted_restore": "Restore this entry"
+  "read_deleted_restore": "Restore this entry",
+  "toc_new_chapter_title": "New Chapter",
+  "toc_save_failed": "Failed to save: {error}",
+  "toc_chapter_unsaved_warning": "Cannot open a chapter before the table of contents is saved.",
+  "chapter_load_failed": "Failed to load chapter"
 }

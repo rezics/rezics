@@ -247,7 +247,7 @@ export const BookEditChapterPage: React.FC = () => {
   if (isError) {
     return (
       <div className="w-full max-w-xl mx-auto p-8 text-destructive">
-        {(error as Error)?.message || "Failed to load chapter"}
+        {(error as Error)?.message || t("book:chapter_load_failed")}
       </div>
     );
   }

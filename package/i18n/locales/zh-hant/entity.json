@@ -395,5 +395,9 @@
   "seed_tag_post": "貼文",
   "seed_tag_link": "連結",
   "variant": "變體",
-  "review": "書評"
+  "review": "書評",
+  "unit_review_count": "{count} 則書評",
+  "unit_tag_count": "{count} 個標籤",
+  "unit_override_label": "覆寫：{title}",
+  "unit_source_label": "來源：{title}"
 }

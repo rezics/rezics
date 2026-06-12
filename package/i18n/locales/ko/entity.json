@@ -395,5 +395,9 @@
   "seed_tag_post": "게시물",
   "seed_tag_link": "링크",
   "variant": "변형",
-  "review": "리뷰"
+  "review": "리뷰",
+  "unit_review_count": "리뷰 {count}개",
+  "unit_tag_count": "태그 {count}개",
+  "unit_override_label": "오버라이드: {title}",
+  "unit_source_label": "출처: {title}"
 }

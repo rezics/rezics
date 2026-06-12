@@ -395,5 +395,9 @@
   "seed_tag_post": "Post",
   "seed_tag_link": "Link",
   "variant": "Variant",
-  "review": "Review"
+  "review": "Review",
+  "unit_review_count": "{count} reviews",
+  "unit_tag_count": "{count} tags",
+  "unit_override_label": "Override: {title}",
+  "unit_source_label": "Source: {title}"
 }

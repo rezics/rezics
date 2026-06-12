@@ -108,8 +108,15 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
   const resolveMutation = useSetFeedbackResolvedMutation();
 
   const handleResolve = (id: string) => {
-    resolveMutation.mutate({ id, resolved: true });
-    showAlert(getI18nRuntime().i18n.t("community:feedback_resolve_success"));
+    resolveMutation.mutate(
+      { id, resolved: true },
+      {
+        onSuccess: () =>
+          showAlert(
+            getI18nRuntime().i18n.t("community:feedback_resolve_success"),
+          ),
+      },
+    );
   };
 
   const activeResult =

@@ -198,5 +198,7 @@
   "relative_time_days_ago": "{value} 天前",
   "relative_time_weeks_ago": "{value} 週前",
   "mutation_error_generic": "發生錯誤，請重試。",
-  "showing_range": "顯示第 {start}–{end} 項，共 {total} 項"
+  "showing_range": "顯示第 {start}–{end} 項，共 {total} 項",
+  "link_copied": "連結已複製",
+  "clipboard_failed": "複製失敗，請手動選取並複製。"
 }

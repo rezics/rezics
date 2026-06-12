@@ -3,6 +3,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import type React from "react";
 import { DraftList } from "../components/DraftList";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 /**
  * `u/me/drafts` — the unified cross-type draft inbox. Drafts are not part of
@@ -41,6 +42,7 @@ import { DraftList } from "../components/DraftList";
  * Centered single column, constrained to max-w-3xl
  */
 export const DraftsPage: React.FC = () => {
+  useRequireAuth();
   const { t } = useTranslation(["page", "common"]);
   const { data, isLoading, isError } = useDrafts();
   const drafts = data?.drafts ?? [];

@@ -450,5 +450,9 @@
   "realm_management_permission_required": "이 렐름을 관리하려면 소유자, 관리자 또는 스태프 권한이 필요합니다.",
   "post_edit_locked_path_detail": "잠긴 경로: {lockPath}; 패치 경로: {patchPath}",
   "post_edit_locked_paths": "잠긴 경로: {paths}",
-  "reply_count": "답글 {count}개"
+  "reply_count": "답글 {count}개",
+  "post_variant_badge": "변형: {label}",
+  "review_messages_delete_failed": "리뷰 삭제에 실패했습니다",
+  "wiki_locked_path": "잠긴 경로: {path}",
+  "wiki_locked_paths": "잠긴 경로: {paths}"
 }

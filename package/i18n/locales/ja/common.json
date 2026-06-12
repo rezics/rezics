@@ -198,5 +198,7 @@
   "relative_time_days_ago": "{value}日前",
   "relative_time_weeks_ago": "{value}週間前",
   "mutation_error_generic": "問題が発生しました。もう一度お試しください。",
-  "showing_range": "{total}件中 {start}–{end}件を表示"
+  "showing_range": "{total}件中 {start}–{end}件を表示",
+  "link_copied": "リンクをコピーしました",
+  "clipboard_failed": "コピーに失敗しました。手動で選択してコピーしてください。"
 }

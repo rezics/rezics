@@ -8,7 +8,7 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 export function NewBookByUrl() {
@@ -20,17 +20,14 @@ export function NewBookByUrl() {
   const supportedSitesQuery = useQuery(
     echoKvGetQuery("crawler.supportedSites"),
   );
-  const [supportedSitesList, setSupportedSitesList] = useState<
-    { name: string; url: string }[]
-  >([]);
-  useEffect(() => {
-    if (
+  const supportedSitesList = useMemo<{ name: string; url: string }[]>(
+    () =>
       supportedSitesQuery.data?.value &&
       Array.isArray(supportedSitesQuery.data.value)
-    ) {
-      setSupportedSitesList(supportedSitesQuery.data.value);
-    }
-  }, [supportedSitesQuery.data]);
+        ? supportedSitesQuery.data.value
+        : [],
+    [supportedSitesQuery.data],
+  );
   return (
     <div className="mt-16 w-full px-4">
       <div className="text-2xl font-bold mb-4">

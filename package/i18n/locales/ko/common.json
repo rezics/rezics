@@ -198,5 +198,7 @@
   "relative_time_days_ago": "{value}일 전",
   "relative_time_weeks_ago": "{value}주 전",
   "mutation_error_generic": "문제가 발생했습니다. 다시 시도해 주세요.",
-  "showing_range": "{total}개 중 {start}–{end}개 표시"
+  "showing_range": "{total}개 중 {start}–{end}개 표시",
+  "link_copied": "링크 복사됨",
+  "clipboard_failed": "복사에 실패했습니다. 직접 선택하여 복사해 주세요."
 }
