@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Tag, X } from "lucide-react";
+import { ChevronDown, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedValue } from "@/entity-picker";
@@ -75,38 +75,33 @@ export function ZoneLabelField({
 
   return (
     <ManageField label={label}>
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setOpen(true)}
-          className="max-w-64 justify-start"
-        >
-          <Tag
-            className="mr-1 size-4 shrink-0 text-text-tertiary"
-            aria-hidden
-          />
-          <span className="truncate">
-            {display ?? t("zone:manage_label_pick")}
-          </span>
-        </Button>
-        {value ? (
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-label={t("common:clear")}
-            onClick={() => onChange(undefined)}
-          >
-            <X className="size-4" aria-hidden />
-          </Button>
-        ) : null}
-      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setOpen(true)}
+        className="max-w-64 justify-start"
+      >
+        <span className="min-w-0 flex-1 truncate text-left">
+          {display ?? t("zone:manage_label_pick")}
+        </span>
+        <ChevronDown
+          className="ml-2 size-4 shrink-0 text-text-tertiary"
+          aria-hidden
+        />
+      </Button>
       <ZoneLabelPickerDialog
         open={open}
         onOpenChange={setOpen}
         onPick={pick}
+        onClear={
+          value
+            ? () => {
+                onChange(undefined);
+                setOpen(false);
+              }
+            : undefined
+        }
         language={i18n.language}
       />
     </ManageField>
@@ -117,11 +112,13 @@ function ZoneLabelPickerDialog({
   open,
   onOpenChange,
   onPick,
+  onClear,
   language,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPick: (unitId: string, title: string) => void;
+  onClear?: () => void;
   language: string;
 }) {
   const { t } = useTranslation(["zone", "common"]);
@@ -146,13 +143,23 @@ function ZoneLabelPickerDialog({
         <DialogHeader className="border-b border-border-whisper p-4">
           <DialogTitle>{t("zone:manage_label_pick")}</DialogTitle>
         </DialogHeader>
-        <div className="p-3">
+        <div className="flex flex-col gap-2 p-3">
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("zone:manage_label_search")}
             autoFocus
           />
+          {onClear ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={onClear}
+            >
+              {t("zone:manage_label_use_default")}
+            </Button>
+          ) : null}
         </div>
         <div className="max-h-56 overflow-y-auto px-3 pb-2">
           {searchQuery.isFetching && debouncedQuery ? (
