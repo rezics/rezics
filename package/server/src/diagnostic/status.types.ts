@@ -113,8 +113,28 @@ export interface QueueStatus {
   failedJobs: FailedJobSummary[];
 }
 
-export interface CdcStatus {
+export type CdcIssueCode =
+  | "source_unconfigured"
+  | "wal_level_not_logical"
+  | "publication_missing"
+  | "publication_missing_tables"
+  | "publication_extra_tables"
+  | "slot_missing"
+  | "slot_inactive"
+  | "slot_lag_high"
+  | "wal_senders_exhausted";
+
+export interface CdcDetectedIssue {
+  sourceId: string;
+  code: CdcIssueCode;
+  message: string;
+  remediation?: string;
+}
+
+export interface CdcSourceStatus {
   item: StatusItem;
+  id: string;
+  label: string;
   walLevel?: string | null;
   publicationName?: string | null;
   publicationExists?: boolean;
@@ -135,6 +155,11 @@ export interface CdcStatus {
   availableWalSenders?: number | null;
   confirmedFlushLsn?: string | null;
   lagBytes?: number | null;
+  detectedIssues: CdcDetectedIssue[];
+}
+
+export interface CdcStatus extends CdcSourceStatus {
+  sources: CdcSourceStatus[];
 }
 
 export interface HistoryOutboxFailedSummary {

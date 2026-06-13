@@ -12,6 +12,7 @@ const repairScopes = new Set<AdminRepairJobScope>([
   "search",
   "queue-failed-job",
   "history-outbox-replay",
+  "cdc",
   "slug",
   "attribution",
   "counters",

@@ -54,6 +54,75 @@ export const serviceSubCommands = {
       }),
     },
   }),
+  cdc: define({
+    name: "cdc",
+    description: "Verify or repair every Sequin CDC source.",
+    subCommands: {
+      verify: define({
+        name: "verify",
+        description: "Verify every Sequin CDC source.",
+        args: {
+          source: {
+            type: "string",
+            description: "Limit verification to source or reaction.",
+          },
+          sourceUrl: {
+            type: "string",
+            toKebab: true,
+            description: "Override server source Postgres connection URL.",
+          },
+          reactionUrl: {
+            type: "string",
+            toKebab: true,
+            description: "Override reaction Postgres connection URL.",
+          },
+        },
+        toKebab: true,
+        run: (ctx) =>
+          runServiceCommand({
+            kind: "cdc-verify",
+            source: ctx.values.source as "source" | "reaction" | undefined,
+            sourceUrl: ctx.values.sourceUrl as string | undefined,
+            reactionUrl: ctx.values.reactionUrl as string | undefined,
+          }),
+      }),
+      repair: define({
+        name: "repair",
+        description:
+          "Repair local Sequin CDC sources with apply/dev-reset semantics.",
+        args: {
+          source: {
+            type: "string",
+            description: "Limit repair to source or reaction.",
+          },
+          sourceUrl: {
+            type: "string",
+            toKebab: true,
+            description: "Override server source Postgres connection URL.",
+          },
+          reactionUrl: {
+            type: "string",
+            toKebab: true,
+            description: "Override reaction Postgres connection URL.",
+          },
+          forceActiveSlot: {
+            type: "boolean",
+            toKebab: true,
+            description: "Drop an active local replication slot.",
+          },
+        },
+        toKebab: true,
+        run: (ctx) =>
+          runServiceCommand({
+            kind: "cdc-repair",
+            source: ctx.values.source as "source" | "reaction" | undefined,
+            sourceUrl: ctx.values.sourceUrl as string | undefined,
+            reactionUrl: ctx.values.reactionUrl as string | undefined,
+            forceActiveSlot: Boolean(ctx.values.forceActiveSlot),
+          }),
+      }),
+    },
+  }),
   source: define({
     name: "source",
     description: "Verify or repair the source Postgres CDC setup.",

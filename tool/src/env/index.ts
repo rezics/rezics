@@ -228,6 +228,20 @@ export function createToolConfig(input: ToolEnv = env) {
       SOURCE_DB_NAME: sourceDbName,
       SOURCE_DB_USER: input.SOURCE_DB_USER ?? DEFAULT_TOOL_ENV.SOURCE_DB_USER,
       SOURCE_DB_PASSWORD: sourceDbPassword,
+      REACTION_DB_HOST: "127.0.0.1",
+      REACTION_DB_PORT:
+        input.SOURCE_DB_PORT_PUBLISHED ??
+        input.SOURCE_DB_PORT ??
+        DEFAULT_TOOL_ENV.SOURCE_DB_PORT,
+      REACTION_DB_NAME: reactionDbName,
+      REACTION_DB_USER:
+        input.REACTION_DB_USER ??
+        input.SOURCE_DB_USER ??
+        DEFAULT_TOOL_ENV.REACTION_DB_USER,
+      REACTION_DB_PASSWORD:
+        input.REACTION_DB_PASSWORD ??
+        input.SOURCE_DB_PASSWORD ??
+        DEFAULT_TOOL_ENV.REACTION_DB_PASSWORD,
     },
   } as const;
 }

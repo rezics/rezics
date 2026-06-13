@@ -41,6 +41,8 @@ describe("tool env config boundary", () => {
       "rezics_ranking",
     ]);
     expect(config.sourceVerifyEnv.SOURCE_DB_NAME).toBe("rezics_server");
+    expect(config.sourceVerifyEnv.REACTION_DB_NAME).toBe("rezics_reaction");
+    expect(config.sourceVerifyEnv.REACTION_DB_PASSWORD).toBe("source");
   });
 
   test("reports missing required Sequin env before runtime work starts", () => {

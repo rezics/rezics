@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, inArray, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { db } from "./client";
 import {
   outboxProcessingFailures,
@@ -23,6 +23,10 @@ type UnitRevisionWithIncludes = UnitRevisionRow & {
 
 function conditionsOf<T>(conditions: Array<T | undefined>): T[] {
   return conditions.filter((condition) => condition !== undefined);
+}
+
+export function revisionPathJsonbValue(value: unknown): unknown {
+  return value === null ? sql`'null'::jsonb` : value;
 }
 
 async function attachRevisionIncludes(
@@ -172,7 +176,7 @@ export class DrizzleHistoryRepository {
           unitId: create.unitId,
           sequence: BigInt(create.sequence),
           path: create.path,
-          value: create.value,
+          value: revisionPathJsonbValue(create.value),
           revisionId: create.revisionId,
         })
         .onConflictDoUpdate({
@@ -182,7 +186,7 @@ export class DrizzleHistoryRepository {
             unitRevisionPaths.path,
           ],
           set: {
-            value: update.value,
+            value: revisionPathJsonbValue(update.value),
             revisionId: update.revisionId,
           },
         })

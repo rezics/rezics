@@ -5,6 +5,7 @@ import {
   useAdminRepairJobDryRunMutation,
   useAdminRepairJobStartMutation,
 } from "@rezics/api";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
@@ -40,50 +41,52 @@ const HISTORY_OUTBOX_REPAIR_STATUSES: HistoryOutboxRepairStatus[] = [
   "failed",
 ];
 
-const repairScopes: RepairScopeConfig[] = [
-  {
-    scope: "search",
-    title: "Search projections",
-    description:
-      "Detects Meili indexes with missing indexes or schema/settings drift.",
-    link: { to: "/meili/observability", label: "Open Meili status" },
-  },
-  {
-    scope: "queue-failed-job",
-    title: "Failed queue jobs",
-    description:
-      "Detects failed pg-boss jobs that can be retried through job-runner admin endpoints.",
-    link: { to: "/status", label: "Open queue status" },
-  },
-  {
-    scope: "history-outbox-replay",
-    title: "History outbox replay",
-    description:
-      "Finds pending or failed HistoryOutbox rows and queues idempotent history ingest jobs.",
-    link: { to: "/status", label: "Open system status" },
-  },
-  {
-    scope: "slug",
-    title: "Slugs and aliases",
-    description:
-      "Dry-run contract for slug and alias drift repair. Detector wiring is pending.",
-    link: { to: "/unit", label: "Open Units" },
-  },
-  {
-    scope: "attribution",
-    title: "Attribution",
-    description:
-      "Dry-run contract for credit and subject attribution repair. Detector wiring is pending.",
-    link: { to: "/entity", label: "Open Entities" },
-  },
-  {
-    scope: "counters",
-    title: "Denormalized counters",
-    description:
-      "Dry-run contract for denormalized count repair. Detector wiring is pending.",
-    link: { to: "/status", label: "Open system status" },
-  },
-];
+function buildRepairScopes(t: (key: string) => string): RepairScopeConfig[] {
+  return [
+    {
+      scope: "search",
+      title: t("admin:repair_scope_search_title"),
+      description: t("admin:repair_scope_search_description"),
+      link: { to: "/meili/observability", label: t("admin:repair_link_meili") },
+    },
+    {
+      scope: "queue-failed-job",
+      title: t("admin:repair_scope_queue_title"),
+      description: t("admin:repair_scope_queue_description"),
+      link: { to: "/status", label: t("admin:repair_link_queue") },
+    },
+    {
+      scope: "history-outbox-replay",
+      title: t("admin:repair_scope_history_title"),
+      description: t("admin:repair_scope_history_description"),
+      link: { to: "/status", label: t("admin:repair_link_system") },
+    },
+    {
+      scope: "cdc",
+      title: t("admin:repair_scope_cdc_title"),
+      description: t("admin:repair_scope_cdc_description"),
+      link: { to: "/status/cdc", label: t("admin:repair_link_cdc") },
+    },
+    {
+      scope: "slug",
+      title: t("admin:repair_scope_slug_title"),
+      description: t("admin:repair_scope_slug_description"),
+      link: { to: "/unit", label: t("admin:repair_link_units") },
+    },
+    {
+      scope: "attribution",
+      title: t("admin:repair_scope_attribution_title"),
+      description: t("admin:repair_scope_attribution_description"),
+      link: { to: "/entity", label: t("admin:repair_link_entities") },
+    },
+    {
+      scope: "counters",
+      title: t("admin:repair_scope_counters_title"),
+      description: t("admin:repair_scope_counters_description"),
+      link: { to: "/status", label: t("admin:repair_link_system") },
+    },
+  ];
+}
 
 function parseTargetIds(value: string) {
   const ids = value
@@ -97,16 +100,17 @@ function DryRunResult({
   dryRun,
   onStart,
   isStarting,
+  t,
 }: {
   dryRun: AdminRepairJobDryRun | null;
   onStart: () => void;
   isStarting: boolean;
+  t: (key: string, values?: Record<string, unknown>) => string;
 }) {
   if (!dryRun) {
     return (
       <p className="text-sm leading-[1.4] text-text-secondary">
-        Run a dry-run first to see affected counts and sample targets without
-        mutating data.
+        {t("admin:repair_dry_run_empty")}
       </p>
     );
   }
@@ -115,22 +119,30 @@ function DryRunResult({
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-sm bg-surface-subtle p-3">
-          <p className="text-xs text-text-secondary">Scope</p>
+          <p className="text-xs text-text-secondary">
+            {t("admin:repair_result_scope")}
+          </p>
           <p className="mt-1 text-sm font-medium">{dryRun.scope}</p>
         </div>
         <div className="rounded-sm bg-surface-subtle p-3">
-          <p className="text-xs text-text-secondary">Affected</p>
+          <p className="text-xs text-text-secondary">
+            {t("admin:repair_result_affected")}
+          </p>
           <p className="mt-1 text-sm font-medium">{dryRun.affectedCount}</p>
         </div>
         <div className="rounded-sm bg-surface-subtle p-3">
-          <p className="text-xs text-text-secondary">Dry-run id</p>
+          <p className="text-xs text-text-secondary">
+            {t("admin:repair_result_dry_run_id")}
+          </p>
           <p className="mt-1 break-all text-xs font-mono">{dryRun.id}</p>
         </div>
       </div>
 
       {dryRun.warnings.length ? (
         <div className="rounded-sm border border-warning-border bg-warning-surface p-3">
-          <p className="text-sm font-medium text-warning-text">Warnings</p>
+          <p className="text-sm font-medium text-warning-text">
+            {t("admin:repair_result_warnings")}
+          </p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-warning-text">
             {dryRun.warnings.map((warning) => (
               <li key={warning}>{warning}</li>
@@ -141,7 +153,9 @@ function DryRunResult({
 
       {dryRun.sampleTargets.length ? (
         <div>
-          <p className="mb-2 text-sm font-medium">Sample targets</p>
+          <p className="mb-2 text-sm font-medium">
+            {t("admin:repair_result_sample_targets")}
+          </p>
           <div className="flex flex-wrap gap-1">
             {dryRun.sampleTargets.map((target) => (
               <Badge key={target} variant="outline">
@@ -152,14 +166,16 @@ function DryRunResult({
         </div>
       ) : (
         <p className="text-sm text-text-secondary">
-          No affected targets were reported for this dry-run.
+          {t("admin:repair_result_no_targets")}
         </p>
       )}
 
       {dryRun.sampleLimited ? (
         <p className="text-xs leading-[1.4] text-text-secondary">
-          Showing the first {dryRun.sampleTargets.length} targets. Queueing uses
-          all {dryRun.targetIds.length} dry-run targets.
+          {t("admin:repair_result_sample_limited", {
+            shown: dryRun.sampleTargets.length,
+            total: dryRun.targetIds.length,
+          })}
         </p>
       ) : null}
 
@@ -173,7 +189,7 @@ function DryRunResult({
         ) : (
           <Play className="size-4" />
         )}
-        Queue repair
+        {t("admin:repair_queue")}
       </Button>
     </div>
   );
@@ -182,9 +198,11 @@ function DryRunResult({
 function RepairScopePicker({
   scope,
   onChange,
+  repairScopes,
 }: {
   scope: AdminRepairJobScope;
   onChange: (scope: AdminRepairJobScope) => void;
+  repairScopes: RepairScopeConfig[];
 }) {
   return (
     <div className="grid gap-2">
@@ -218,8 +236,48 @@ function RepairScopePicker({
   );
 }
 
+/**
+ * RepairJobsPage
+ *
+ * 管理後台的資料修復操作台。此頁保持高密度、可掃描的雙欄工作面：
+ *
+ * Mobile:
+ * +--------------------------+
+ * | Page title               |
+ * | Scope picker             |
+ * | Filters / reason         |
+ * | Dry-run result           |
+ * | Coverage list            |
+ * +--------------------------+
+ *
+ * Tablet:
+ * +--------------------------+
+ * | Page title               |
+ * | Scope picker             |
+ * | Filters / reason         |
+ * | Dry-run result           |
+ * | Coverage grid            |
+ * +--------------------------+
+ *
+ * Desktop:
+ * +-------------+------------+
+ * | Scope +     | Dry-run    |
+ * | filters     | result     |
+ * +-------------+------------+
+ * | Coverage grid            |
+ * +--------------------------+
+ *
+ * Ultra-wide:
+ * +---------------+----------------------+
+ * | 360px controls| Fluid result panel   |
+ * +---------------+----------------------+
+ * | Centered coverage grid               |
+ * +--------------------------------------+
+ */
 export default function RepairJobsPage() {
+  const { t } = useTranslation(["admin"]);
   const search = Route.useSearch();
+  const repairScopes = React.useMemo(() => buildRepairScopes(t), [t]);
   const [scope, setScope] = React.useState<AdminRepairJobScope>(
     search.scope ?? "search",
   );
@@ -248,7 +306,13 @@ export default function RepairJobsPage() {
   });
   const startMutation = useAdminRepairJobStartMutation({
     onSuccess: (job) => {
-      setMessage(`${job.id} ${job.status}. ${job.safeSummary}`);
+      setMessage(
+        t("admin:repair_started_message", {
+          id: job.id,
+          status: job.status,
+          summary: job.safeSummary,
+        }),
+      );
     },
   });
 
@@ -291,28 +355,29 @@ export default function RepairJobsPage() {
       scope: dryRun.scope,
       targetIds: dryRun.targetIds,
       dryRunId: dryRun.id,
-      reason: reason.trim() || "Repair drift from admin dry-run",
+      reason: reason.trim() || t("admin:repair_default_reason"),
     });
   }
 
   return (
     <Page
-      title="Repair jobs"
-      description="Dry-run and queue data integrity repairs through typed admin APIs."
+      title={t("admin:repair_title")}
+      description={t("admin:repair_description")}
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
         <Card surface="contained">
           <CardHeader>
-            <CardTitle>Repair scope</CardTitle>
+            <CardTitle>{t("admin:repair_scope_card_title")}</CardTitle>
             <CardDescription>
-              Choose a repair detector and optionally narrow the target ids.
+              {t("admin:repair_scope_card_description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Scope</Label>
+              <Label>{t("admin:repair_scope_label")}</Label>
               <RepairScopePicker
                 scope={scope}
+                repairScopes={repairScopes}
                 onChange={(value) => {
                   setScope(value);
                   setDryRun(null);
@@ -343,12 +408,14 @@ export default function RepairJobsPage() {
             ) : null}
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="repair-targets">Target ids</Label>
+              <Label htmlFor="repair-targets">
+                {t("admin:repair_target_ids")}
+              </Label>
               <Textarea
                 id="repair-targets"
                 value={targetIds}
                 onChange={(event) => setTargetIds(event.target.value)}
-                placeholder="optional ids, comma or newline separated"
+                placeholder={t("admin:repair_target_ids_placeholder")}
                 rows={4}
               />
             </div>
@@ -357,42 +424,52 @@ export default function RepairJobsPage() {
               <div className="space-y-3 rounded-sm bg-surface-subtle p-3">
                 <div>
                   <p className="text-sm font-medium leading-[1.4]">
-                    HistoryOutbox filters
+                    {t("admin:repair_history_filters_title")}
                   </p>
                   <p className="mt-1 text-xs leading-[1.4] text-text-secondary">
-                    Explicit target ids are treated as HistoryOutbox row ids.
+                    {t("admin:repair_history_filters_description")}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {HISTORY_OUTBOX_REPAIR_STATUSES.map((status) => (
-                    <label
-                      key={status}
-                      className="flex items-center gap-2 text-sm leading-[1.4]"
-                    >
-                      <Checkbox
-                        checked={historyOutboxStatuses.includes(status)}
-                        onCheckedChange={() =>
-                          toggleHistoryOutboxStatus(status)
-                        }
-                      />
-                      {status}
-                    </label>
-                  ))}
+                  {HISTORY_OUTBOX_REPAIR_STATUSES.map((status) => {
+                    const statusId = `history-outbox-status-${status}`;
+                    return (
+                      <div
+                        key={status}
+                        className="flex items-center gap-2 text-sm leading-[1.4]"
+                      >
+                        <Checkbox
+                          id={statusId}
+                          checked={historyOutboxStatuses.includes(status)}
+                          onCheckedChange={() =>
+                            toggleHistoryOutboxStatus(status)
+                          }
+                        />
+                        <Label htmlFor={statusId}>{status}</Label>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="history-outbox-unit-id">Unit id</Label>
+                    <Label htmlFor="history-outbox-unit-id">
+                      {t("admin:repair_history_unit_id")}
+                    </Label>
                     <Input
                       id="history-outbox-unit-id"
                       value={historyOutboxUnitId}
                       onChange={(event) =>
                         setHistoryOutboxUnitId(event.target.value)
                       }
-                      placeholder="optional unit id"
+                      placeholder={t(
+                        "admin:repair_history_unit_id_placeholder",
+                      )}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="history-outbox-age">Older than min</Label>
+                    <Label htmlFor="history-outbox-age">
+                      {t("admin:repair_history_older_than")}
+                    </Label>
                     <Input
                       id="history-outbox-age"
                       type="number"
@@ -404,7 +481,9 @@ export default function RepairJobsPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="history-outbox-limit">Max enqueue</Label>
+                    <Label htmlFor="history-outbox-limit">
+                      {t("admin:repair_history_limit")}
+                    </Label>
                     <Input
                       id="history-outbox-limit"
                       type="number"
@@ -421,12 +500,12 @@ export default function RepairJobsPage() {
             ) : null}
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="repair-reason">Reason</Label>
+              <Label htmlFor="repair-reason">{t("admin:repair_reason")}</Label>
               <Input
                 id="repair-reason"
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
-                placeholder="operator reason"
+                placeholder={t("admin:repair_reason_placeholder")}
               />
             </div>
 
@@ -440,7 +519,7 @@ export default function RepairJobsPage() {
               ) : (
                 <Search className="size-4" />
               )}
-              Run dry-run
+              {t("admin:repair_run_dry_run")}
             </Button>
 
             {dryRunMutation.isError || startMutation.isError ? (
@@ -449,7 +528,7 @@ export default function RepairJobsPage() {
                   (
                     dryRunMutation.error ??
                     startMutation.error ??
-                    new Error("Repair request failed")
+                    new Error(t("admin:repair_request_failed"))
                   ).message
                 }
               </p>
@@ -464,10 +543,9 @@ export default function RepairJobsPage() {
 
         <Card surface="contained">
           <CardHeader>
-            <CardTitle>Dry-run result</CardTitle>
+            <CardTitle>{t("admin:repair_result_title")}</CardTitle>
             <CardDescription>
-              Results show affected counts and samples only. Queueing repair is
-              separate.
+              {t("admin:repair_result_description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -475,6 +553,7 @@ export default function RepairJobsPage() {
               dryRun={dryRun}
               onStart={startRepair}
               isStarting={startMutation.isPending}
+              t={t}
             />
           </CardContent>
         </Card>
@@ -484,10 +563,9 @@ export default function RepairJobsPage() {
 
       <Card surface="contained">
         <CardHeader>
-          <CardTitle>Repair coverage</CardTitle>
+          <CardTitle>{t("admin:repair_coverage_title")}</CardTitle>
           <CardDescription>
-            The surface covers every data-integrity scope from the OpenSpec
-            task. Some scopes have contracts before detector implementation.
+            {t("admin:repair_coverage_description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
