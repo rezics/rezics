@@ -52,7 +52,7 @@ export function mapUnitExternalLinkToDTO(
     labelUnitId: row.labelUnitId ?? undefined,
     fallbackText: row.fallbackText ?? undefined,
     sourceEntity,
-    sortOrder: row.sortOrder,
+    position: row.position,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

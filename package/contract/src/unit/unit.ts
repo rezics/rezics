@@ -290,7 +290,7 @@ export const unitSupportLanguageDTOSchema = t.Object({
   unitId: t.String(),
   language: languageSchema,
   isPrimary: t.Boolean(),
-  sortOrder: t.Number(),
+  position: t.String(), // Fractional Indexing
 });
 
 export type UnitSupportLanguageDTO =

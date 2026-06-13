@@ -47,7 +47,7 @@ function zoneFixture(): ZoneWithRelations {
         zoneUnitId: "zone-1",
         slug: "home",
         config: homePageConfig,
-        position: 0,
+        position: "a",
         createdAt: new Date("2026-01-01T00:00:00.000Z"),
         updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       },
@@ -75,8 +75,8 @@ function zoneFixture(): ZoneWithRelations {
         },
       ],
       supportLanguages: [
-        { language: "en", isPrimary: true, sortOrder: 0 },
-        { language: "zh-hant", isPrimary: false, sortOrder: 1 },
+        { language: "en", isPrimary: true, position: "a" },
+        { language: "zh-hant", isPrimary: false, position: "b" },
       ],
     } as unknown as ZoneWithRelations["unit"],
   } as ZoneWithRelations;
@@ -92,7 +92,9 @@ describe("mapZoneToDTO", () => {
     expect(dto.nav).toEqual(nav);
     expect(dto.theme).toEqual(theme);
     expect(dto.homePageId).toBe("page-home");
-    expect(dto.pages).toEqual([{ id: "page-home", slug: "home", position: 0 }]);
+    expect(dto.pages).toEqual([
+      { id: "page-home", slug: "home", position: "a" },
+    ]);
     expect(dto.startsAt).toBe("2026-01-01T00:00:00.000Z");
     expect(dto.endsAt).toBeNull();
   });

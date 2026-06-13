@@ -24,8 +24,8 @@ function realmRow(overrides: Record<string, unknown> = {}) {
       userId: null,
       user: null,
       supportLanguages: [
-        { unitId: "realm-1", language: "ja", isPrimary: true, sortOrder: 0 },
-        { unitId: "realm-1", language: "en", isPrimary: false, sortOrder: 1 },
+        { unitId: "realm-1", language: "ja", isPrimary: true, position: "a" },
+        { unitId: "realm-1", language: "en", isPrimary: false, position: "b" },
       ],
       translations: [
         {
@@ -83,13 +83,13 @@ describe("realm mappers", () => {
               unitId: "realm-1",
               language: "en",
               isPrimary: true,
-              sortOrder: 0,
+              position: "a",
             },
             {
               unitId: "realm-1",
               language: "zh-hant",
               isPrimary: false,
-              sortOrder: 1,
+              position: "b",
             },
           ],
           translations: [

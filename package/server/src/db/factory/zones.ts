@@ -14,6 +14,7 @@ import {
   type ZoneSectionQuerySortField,
   type ZoneTheme,
 } from "@rezics/contract";
+import { rebalance } from "../../shelf/fractional-index.js";
 import {
   Unit,
   UnitSupportLanguage,
@@ -62,7 +63,7 @@ export type ZoneFixtureConfig = {
   pages: Array<{
     id: string;
     slug: string;
-    position: number;
+    position: string;
     config: ZonePageConfig;
   }>;
   homePageId: string;
@@ -453,6 +454,7 @@ export function buildZoneFixtureConfig(
     search: randomUUID(),
     feed: randomUUID(),
   };
+  const pagePositions = rebalance(3);
   return {
     boundary: {
       schema: "rezics/zone-boundary",
@@ -472,7 +474,7 @@ export function buildZoneFixtureConfig(
       {
         id: pageIds.home,
         slug: "home",
-        position: 0,
+        position: pagePositions[0]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -482,13 +484,13 @@ export function buildZoneFixtureConfig(
       {
         id: pageIds.search,
         slug: "search",
-        position: 1,
+        position: pagePositions[1]!,
         config: { schema: "rezics/zone-page", version: 1, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
-        position: 2,
+        position: pagePositions[2]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -594,7 +596,7 @@ export async function seedZones(
           unitId: id,
           language: t.language,
           isPrimary: idx === 0,
-          sortOrder: idx,
+          position: rebalance(translations.length)[idx]!,
         })),
       ),
     );

@@ -4,6 +4,7 @@ import {
   useUnitExternalLinks,
 } from "@rezics/api/unit-external-link";
 import { useEntity } from "@rezics/api/entity";
+import { positionForNewBottomPin } from "@rezics/api/tag/fractional-index";
 import type { UnitExternalLinkDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -112,7 +113,9 @@ export function UnitExternalLinkEditor({
   const sortedLinks = useMemo(
     () =>
       [...(linksQuery.data?.links ?? [])].sort(
-        (left, right) => left.sortOrder - right.sortOrder,
+        (left, right) =>
+          left.position.localeCompare(right.position) ||
+          left.id.localeCompare(right.id),
       ),
     [linksQuery.data?.links],
   );
@@ -131,7 +134,7 @@ export function UnitExternalLinkEditor({
       sourceEntityUnitId,
       url: trimmedUrl,
       role: "source",
-      sortOrder: sortedLinks.length,
+      position: positionForNewBottomPin(sortedLinks.at(-1)?.position),
     });
   };
 

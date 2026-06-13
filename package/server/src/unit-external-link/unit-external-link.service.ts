@@ -4,8 +4,9 @@ import type {
   UnitExternalLinkListQuery,
   UpdateUnitExternalLinkInput,
 } from "@rezics/contract";
-import { and, asc, count, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 import { Entity, Unit, UnitExternalLink, UnitTranslation } from "../db/schema";
+import { generateBetween } from "../shelf/fractional-index";
 import { AppError } from "../utils/errors";
 import type {
   HydratedExternalLinkEntity,
@@ -28,7 +29,7 @@ type UnitExternalLinkUpdateData = Partial<
     | "role"
     | "labelUnitId"
     | "fallbackText"
-    | "sortOrder"
+    | "position"
   >
 >;
 
@@ -40,6 +41,7 @@ export type UnitExternalLinkRepository = {
   }): Promise<{ rows: UnitExternalLinkWithRelations[]; total: number }>;
   unitExists(unitId: string): Promise<boolean>;
   entityExists(unitId: string): Promise<boolean>;
+  nextPosition(unitId: string): Promise<string>;
   create(
     data: UnitExternalLinkCreateData,
   ): Promise<UnitExternalLinkWithRelations>;
@@ -184,7 +186,7 @@ function createDrizzleUnitExternalLinkRepository(): UnitExternalLinkRepository {
           .select()
           .from(UnitExternalLink)
           .where(where)
-          .orderBy(asc(UnitExternalLink.sortOrder), asc(UnitExternalLink.id))
+          .orderBy(asc(UnitExternalLink.position), asc(UnitExternalLink.id))
           .offset(offset)
           .limit(limit),
         db.select({ total: count() }).from(UnitExternalLink).where(where),
@@ -203,6 +205,17 @@ function createDrizzleUnitExternalLinkRepository(): UnitExternalLinkRepository {
         .where(eq(Unit.id, unitId))
         .limit(1);
       return Boolean(row);
+    },
+
+    async nextPosition(unitId) {
+      const db = await getServerDb();
+      const [last] = await db
+        .select({ position: UnitExternalLink.position })
+        .from(UnitExternalLink)
+        .where(eq(UnitExternalLink.unitId, unitId))
+        .orderBy(desc(UnitExternalLink.position), desc(UnitExternalLink.id))
+        .limit(1);
+      return generateBetween(last?.position, undefined);
     },
 
     async entityExists(unitId) {
@@ -284,7 +297,7 @@ function createDrizzleUnitExternalLinkRepository(): UnitExternalLinkRepository {
         .select()
         .from(UnitExternalLink)
         .where(inArray(UnitExternalLink.unitId, [...unitIds]))
-        .orderBy(asc(UnitExternalLink.sortOrder), asc(UnitExternalLink.id));
+        .orderBy(asc(UnitExternalLink.position), asc(UnitExternalLink.id));
       return hydrate(rows);
     },
   };
@@ -317,7 +330,8 @@ export class UnitExternalLinkService {
       role: input.role ?? "related",
       labelUnitId: input.labelUnitId ?? null,
       fallbackText: input.fallbackText ?? null,
-      sortOrder: input.sortOrder ?? 0,
+      position:
+        input.position ?? (await this.repository.nextPosition(input.unitId)),
     });
   }
 
@@ -349,7 +363,7 @@ export class UnitExternalLinkService {
         input.labelUnitId !== undefined ? input.labelUnitId : undefined,
       fallbackText:
         input.fallbackText !== undefined ? input.fallbackText : undefined,
-      sortOrder: input.sortOrder,
+      position: input.position,
     });
   }
 

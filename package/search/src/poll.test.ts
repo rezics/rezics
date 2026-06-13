@@ -66,7 +66,7 @@ const pollTranslations = [
 ];
 
 const pollSupportLanguages = [
-  { unitId: "poll-1", language: "en", isPrimary: true, sortOrder: 0 },
+  { unitId: "poll-1", language: "en", isPrimary: true, position: "a" },
 ];
 
 describe("buildPollDocument", () => {
@@ -82,7 +82,7 @@ describe("buildPollDocument", () => {
       updatedAt: new Date("2026-06-01T00:00:00.000Z"),
       unit: {
         userId: "user-1",
-        supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+        supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
         translations: [
           {
             language: "en",
@@ -123,7 +123,7 @@ describe("buildPollDocument", () => {
       updatedAt: new Date("2026-06-01T00:00:00.000Z"),
       unit: {
         userId: "user-2",
-        supportLanguages: [{ language: "ja", isPrimary: true, sortOrder: 0 }],
+        supportLanguages: [{ language: "ja", isPrimary: true, position: "a" }],
         translations: [
           {
             language: "ja",

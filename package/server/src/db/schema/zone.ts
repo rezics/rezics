@@ -1,10 +1,10 @@
 import {
   index,
-  integer,
   pgTable,
   text,
   unique,
   uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 import {
   createdAt,
@@ -76,16 +76,17 @@ export const ZonePage = pgTable(
     // across the whole zone, because data execution addresses
     // `(zoneId, pageId, sectionId)`.
     config: jsonData().notNull(),
-    position: integer().notNull().default(0),
+    position: varchar({ length: 64 }).notNull().default("V"), // Fractional Indexing
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (table) => [
     unique("ZonePage_zoneUnitId_slug_unique").on(table.zoneUnitId, table.slug),
-    index("ZonePage_zoneUnitId_position_idx").using(
+    index("ZonePage_zoneUnitId_position_id_idx").using(
       "btree",
       table.zoneUnitId.asc().nullsLast(),
       table.position.asc().nullsLast(),
+      table.id.asc().nullsLast(),
     ),
   ],
 );

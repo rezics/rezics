@@ -81,7 +81,7 @@ export const userSubscriptionListEntryDTOSchema = t.Object({
   subscribedType: unitTypeSchema,
   subscribedSlug: t.Optional(t.Union([t.String(), t.Null()])),
   subscribedTitle: t.Optional(t.Union([t.String(), t.Null()])),
-  position: t.String(),
+  position: t.String(), // Fractional Indexing
   pinned: t.Boolean(),
   state: userSubscriptionListEntryStateSchema,
   createdAt: t.Union([t.String(), t.Date()]),
@@ -107,7 +107,7 @@ export type UserSubscriptionListEntryListResponse =
   (typeof userSubscriptionListEntryListResponseSchema)["static"];
 
 export const userSubscriptionListEntryReorderBodySchema = t.Object({
-  position: t.String({ minLength: 1 }),
+  position: t.String({ minLength: 1 }), // Fractional Indexing
 });
 
 export type UserSubscriptionListEntryReorderBody =

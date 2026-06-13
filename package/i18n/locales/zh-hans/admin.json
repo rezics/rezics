@@ -392,7 +392,6 @@
   "unit_primary_user_help": "后端当前使用登录用户覆盖此设置；如果需要，可以稍后启用管理员选择的所有权。",
   "unit_search_label": "搜索",
   "unit_search_placeholder": "q/用户 ID/类型...",
-  "unit_sort_order_invalid": "排序顺序必须是数字。",
   "unit_status_placeholder": "草稿/已发布/已存档/...",
   "unit_subject_attribution_empty": "尚无主题属性。",
   "unit_subject_attribution_failed_load": "无法加载主题属性。",

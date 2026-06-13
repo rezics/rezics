@@ -63,7 +63,7 @@ function contentHydrationRows() {
       },
     ],
     [],
-    [{ unitId: "book-1", language: "en", isPrimary: true, sortOrder: 0 }],
+    [{ unitId: "book-1", language: "en", isPrimary: true, position: "a" }],
     [
       {
         unitId: "book-1",
@@ -98,7 +98,7 @@ function contentHydrationRows() {
         unitId: "book-1",
         entityId: "person-1",
         role: "author",
-        sortOrder: 0,
+        position: "a",
         kind: "person",
         title: "Alice",
       },
@@ -108,7 +108,7 @@ function contentHydrationRows() {
         unitId: "book-1",
         entityId: "subject-1",
         role: "topic",
-        sortOrder: 0,
+        position: "a",
         kind: "concept",
         title: "Topic",
       },
@@ -158,7 +158,7 @@ function postHydrationRows() {
         content: markdownContentDoc("Post body"),
       },
     ],
-    [{ unitId: "post-1", language: "en", isPrimary: true, sortOrder: 0 }],
+    [{ unitId: "post-1", language: "en", isPrimary: true, position: "a" }],
     [
       {
         unitId: "post-1",
@@ -322,8 +322,8 @@ describe("buildPostDocument", () => {
         inRealms: [],
         isLanguageNeutral: false,
         supportLanguages: [
-          { language: "ja", isPrimary: true, sortOrder: 0 },
-          { language: "en", isPrimary: false, sortOrder: 1 },
+          { language: "ja", isPrimary: true, position: "a" },
+          { language: "en", isPrimary: false, position: "b" },
         ],
         translations: [
           { language: "en", title: "English title", extra: null },
@@ -336,8 +336,8 @@ describe("buildPostDocument", () => {
 
     expect(doc.languages).toEqual(["ja", "en"]);
     expect(doc.supportLanguages).toEqual([
-      { language: "ja", isPrimary: true, sortOrder: 0 },
-      { language: "en", isPrimary: false, sortOrder: 1 },
+      { language: "ja", isPrimary: true, position: "a" },
+      { language: "en", isPrimary: false, position: "b" },
     ]);
   });
 
@@ -468,8 +468,8 @@ describe("buildPostDocument", () => {
         inRealms: [],
         defaultLanguage: "ja",
         supportLanguages: [
-          { language: "en", isPrimary: true, sortOrder: 1 },
-          { language: "ja", isPrimary: false, sortOrder: 2 },
+          { language: "en", isPrimary: true, position: "b" },
+          { language: "ja", isPrimary: false, position: "c" },
         ],
         translations: [
           { language: "en", title: "English title" },
@@ -539,7 +539,7 @@ describe("buildContentDocument realm tag keys", () => {
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       publishedAt: null,
       translations: [{ language: "en", title: "Book", extra: null }],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
       unitTags: [],
       inRealms: [],
       realmTagApplicationsAsTargetUnit: [
@@ -568,7 +568,7 @@ describe("buildContentDocument realm tag keys", () => {
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       publishedAt: null,
       translations: [{ language: "en", title: "Release", extra: null }],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
       unitTags: [],
       seriesContentIndexesAsRelease: [
         {
@@ -671,7 +671,7 @@ describe("buildContentDocument realm tag keys", () => {
           },
         },
       ],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
     });
 
     expect(doc.contentText).toBe("content main");
@@ -697,7 +697,7 @@ describe("buildContentDocument subject attributions", () => {
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       publishedAt: null,
       translations: [{ language: "en", title: "Fanfic", extra: null }],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
       unitTags: [],
       inRealms: [],
       realmTagApplicationsAsTargetUnit: [],
@@ -750,7 +750,7 @@ describe("buildContentDocument containedUnitIds", () => {
       id: "shelf-1",
       type: "SHELF",
       translations: [{ language: "en", title: "My Shelf", extra: null }],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
       shelf: {
         units: [{ unitId: "u-a" }, { unitId: "u-b" }, { unitId: "u-c" }],
       },
@@ -772,7 +772,7 @@ describe("buildContentDocument containedUnitIds", () => {
       id: "book-1",
       type: "BOOK",
       translations: [{ language: "en", title: "Book", extra: null }],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
       book: { textLength: 100, isLicensed: false },
     });
 
@@ -802,9 +802,9 @@ describe("buildContentDocument language availability", () => {
         { language: "ja", title: "Japanese title", extra: null },
       ],
       supportLanguages: [
-        { language: "ja", isPrimary: true, sortOrder: 0 },
-        { language: "en", isPrimary: false, sortOrder: 1 },
-        { language: "ja", isPrimary: false, sortOrder: 2 },
+        { language: "ja", isPrimary: true, position: "a" },
+        { language: "en", isPrimary: false, position: "b" },
+        { language: "ja", isPrimary: false, position: "c" },
       ],
       unitTags: [],
       inRealms: [],
@@ -816,9 +816,9 @@ describe("buildContentDocument language availability", () => {
 
     expect(doc.languages).toEqual(["ja", "en"]);
     expect(doc.supportLanguages).toEqual([
-      { language: "ja", isPrimary: true, sortOrder: 0 },
-      { language: "en", isPrimary: false, sortOrder: 1 },
-      { language: "ja", isPrimary: false, sortOrder: 2 },
+      { language: "ja", isPrimary: true, position: "a" },
+      { language: "en", isPrimary: false, position: "b" },
+      { language: "ja", isPrimary: false, position: "c" },
     ]);
   });
 
@@ -1436,7 +1436,7 @@ describe("search sync global moderation projection", () => {
             description: markdownContentDoc("Long description"),
           },
         ],
-        [{ language: "en", isPrimary: true, sortOrder: 0 }],
+        [{ language: "en", isPrimary: true, position: "a" }],
         [eligibleUnit],
       ]) as never,
     );

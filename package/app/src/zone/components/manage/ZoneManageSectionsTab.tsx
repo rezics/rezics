@@ -3,6 +3,7 @@ import type {
   UpdateZonePageInput,
   ZoneDTO,
 } from "@rezics/contract";
+import { positionForNewBottomPin } from "@rezics/api/shared/fractional-index";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Card, CardContent, Input, Label } from "@rezics/ui/shadcn";
 import { ArrowDown, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
@@ -22,7 +23,7 @@ function emptyPageConfig(): CreateZonePageInput["config"] {
 }
 
 function pageSort(a: ZonePageSummary, b: ZonePageSummary) {
-  return a.position - b.position || a.slug.localeCompare(b.slug);
+  return a.position.localeCompare(b.position) || a.slug.localeCompare(b.slug);
 }
 
 function nextPageSlug(pages: readonly ZonePageSummary[]): string {
@@ -81,13 +82,9 @@ export function ZoneManageSectionsTab({
     : -1;
   const [newSlug, setNewSlug] = useState(() => nextPageSlug(sortedPages));
   const [slugDraft, setSlugDraft] = useState(selectedPage?.slug ?? "");
-  const [positionDraft, setPositionDraft] = useState(
-    selectedPage ? String(selectedPage.position) : "0",
-  );
 
   useEffect(() => {
     setSlugDraft(selectedPage?.slug ?? "");
-    setPositionDraft(selectedPage ? String(selectedPage.position) : "0");
   }, [selectedPage]);
 
   useEffect(() => {
@@ -105,13 +102,9 @@ export function ZoneManageSectionsTab({
   const createPage = () => {
     const slug = newSlug.trim();
     if (!slug) return;
-    const maxPosition = sortedPages.reduce(
-      (max, page) => Math.max(max, page.position),
-      -1,
-    );
     onCreatePage({
       slug,
-      position: maxPosition + 1,
+      position: positionForNewBottomPin(sortedPages.at(-1)?.position),
       config: emptyPageConfig(),
     });
   };
@@ -119,9 +112,8 @@ export function ZoneManageSectionsTab({
   const saveMetadata = () => {
     if (!selectedPage) return;
     const slug = slugDraft.trim();
-    const position = Number(positionDraft);
-    if (!slug || !Number.isInteger(position)) return;
-    onUpdatePage(selectedPage.id, { slug, position });
+    if (!slug) return;
+    onUpdatePage(selectedPage.id, { slug });
   };
 
   const moveSelected = (direction: "up" | "down") => {
@@ -146,7 +138,7 @@ export function ZoneManageSectionsTab({
               </h3>
             </div>
             <div className="flex flex-col gap-1">
-              {sortedPages.map((page) => {
+              {sortedPages.map((page, index) => {
                 const isSelected = page.id === selectedPage?.id;
                 return (
                   <button
@@ -166,7 +158,7 @@ export function ZoneManageSectionsTab({
                     <span className="block text-xs leading-dense text-text-tertiary">
                       {page.id === homePageId
                         ? t("zone:manage_home_page")
-                        : `#${page.position}`}
+                        : `#${index + 1}`}
                     </span>
                   </button>
                 );
@@ -202,7 +194,7 @@ export function ZoneManageSectionsTab({
         {selectedPage ? (
           <div className="flex flex-col gap-4">
             <Card surface="contained">
-              <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8rem_auto]">
+              <CardContent className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="zone-page-slug">
                     {t("zone:manage_page_slug")}
@@ -211,17 +203,6 @@ export function ZoneManageSectionsTab({
                     id="zone-page-slug"
                     value={slugDraft}
                     onChange={(event) => setSlugDraft(event.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="zone-page-position">
-                    {t("zone:manage_page_position")}
-                  </Label>
-                  <Input
-                    id="zone-page-position"
-                    inputMode="numeric"
-                    value={positionDraft}
-                    onChange={(event) => setPositionDraft(event.target.value)}
                   />
                 </div>
                 <div className="flex items-end gap-2">

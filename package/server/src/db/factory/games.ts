@@ -4,6 +4,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
+import { rebalance } from "../../shelf/fractional-index.js";
 import { Game, Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
 import {
   type FactoryCreditAttributionInsert,
@@ -93,25 +94,29 @@ export async function seedGames(
             unitId: unit.id,
             language: t.language,
             isPrimary: i === 0,
-            sortOrder: i,
+            position: rebalance(translations.length)[i]!,
           })),
         ),
       );
 
-      for (const [i, p] of pickN(people, randomInt(1, 3)).entries()) {
+      const pickedPeople = pickN(people, randomInt(1, 3));
+      const peoplePositions = rebalance(pickedPeople.length);
+      for (const [i, p] of pickedPeople.entries()) {
         allCreditAttributions.push({
           unitId: unit.id,
           entityId: p.unitId,
           role: faker.helpers.arrayElement(GAME_PERSON_ROLES),
-          sortOrder: i,
+          position: peoplePositions[i]!,
         });
       }
-      for (const [i, o] of pickN(organizations, randomInt(1, 2)).entries()) {
+      const pickedOrganizations = pickN(organizations, randomInt(1, 2));
+      const organizationPositions = rebalance(pickedOrganizations.length);
+      for (const [i, o] of pickedOrganizations.entries()) {
         allCreditAttributions.push({
           unitId: unit.id,
           entityId: o.unitId,
           role: faker.helpers.arrayElement(GAME_ORG_ROLES),
-          sortOrder: i,
+          position: organizationPositions[i]!,
         });
       }
       for (const t of pickN(tags, randomInt(1, 5))) {

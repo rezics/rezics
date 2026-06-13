@@ -10,6 +10,7 @@ import {
   subjectAttributionRoleRegistry,
   subjectAttributionRoles,
 } from "@rezics/contract";
+import { rebalance } from "../../shelf/fractional-index.js";
 import type { ServerDb } from "../client.js";
 import {
   Entity,
@@ -183,14 +184,15 @@ async function batchInsertEntities(
     await db.insert(UnitTranslation).values(withUpdatedAtRows(chunk));
   }
 
-  const allSupport = rows.flatMap((r) =>
-    r.translations.map((tr, i) => ({
+  const allSupport = rows.flatMap((r) => {
+    const positions = rebalance(r.translations.length);
+    return r.translations.map((tr, i) => ({
       unitId: r.id,
       language: tr.language,
       isPrimary: i === 0,
-      sortOrder: i,
-    })),
-  );
+      position: positions[i]!,
+    }));
+  });
   for (let i = 0; i < allSupport.length; i += BATCH_SIZE) {
     const chunk = allSupport.slice(i, i + BATCH_SIZE);
     if (chunk.length === 0) continue;
@@ -301,7 +303,7 @@ export async function seedSubjectAttributions(
                 "appears",
               ])
             : faker.helpers.arrayElement(eligibleSubjectRoles),
-        sortOrder: index,
+        position: rebalance(subjects.length)[index]!,
         weight: Number(faker.number.float({ min: 0.1, max: 1 }).toFixed(2)),
       });
     }

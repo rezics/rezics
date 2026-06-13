@@ -20,7 +20,7 @@ export const ShelfItemSearchDocumentSchema = t.Object({
   parentItemType: t.Union([t.String(), t.Null()]),
   parentItemId: t.Union([t.String(), t.Null()]),
   parentRole: t.Union([t.String(), t.Null()]),
-  position: t.String(),
+  position: t.String(), // Fractional Indexing
 
   itemTitle: t.Union([t.String(), t.Null()]),
   itemSummary: t.Union([t.String(), t.Null()]),

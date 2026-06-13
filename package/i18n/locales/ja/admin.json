@@ -392,7 +392,6 @@
   "unit_primary_user_help": "現在、バックエンドはサインインしているユーザーでこれをオーバーライドします。管理者が選択した所有権は、必要に応じて後で有効にすることができます。",
   "unit_search_label": "検索",
   "unit_search_placeholder": "q/ユーザーID/タイプ...",
-  "unit_sort_order_invalid": "並べ替え順序は数値である必要があります。",
   "unit_status_placeholder": "ドラフト / 公開 / アーカイブ /...",
   "unit_subject_attribution_empty": "主題の帰属はまだありません。",
   "unit_subject_attribution_failed_load": "件名の属性をロードできませんでした。",

@@ -160,7 +160,6 @@ export default function UnitEditPage() {
   const [subjectRole, setSubjectRole] = React.useState<
     (typeof subjectAttributionRoles)[number]
   >(subjectAttributionRoles[0]);
-  const [subjectSortOrder, setSubjectSortOrder] = React.useState("0");
   const [subjectWeight, setSubjectWeight] = React.useState("");
   const [lockPath, setLockPath] = React.useState<string>(UNIT_FIELD_LOCK_ALL);
   const [lockReason, setLockReason] = React.useState("");
@@ -206,17 +205,12 @@ export default function UnitEditPage() {
   async function onLinkSubject(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const parsedSortOrder = Number.parseInt(subjectSortOrder, 10);
     const parsedWeight = subjectWeight.trim()
       ? Number.parseFloat(subjectWeight)
       : undefined;
 
     if (!subjectEntityId.trim()) {
       setError(t("admin:unit_subject_required"));
-      return;
-    }
-    if (Number.isNaN(parsedSortOrder)) {
-      setError(t("admin:unit_sort_order_invalid"));
       return;
     }
     if (parsedWeight !== undefined && Number.isNaN(parsedWeight)) {
@@ -228,11 +222,9 @@ export default function UnitEditPage() {
       unitId,
       entityId: subjectEntityId.trim(),
       role: subjectRole,
-      sortOrder: parsedSortOrder,
       weight: parsedWeight,
     });
     setSubjectEntityId("");
-    setSubjectSortOrder("0");
     setSubjectWeight("");
     await subjectQuery.refetch();
   }
@@ -454,7 +446,6 @@ export default function UnitEditPage() {
                               {subject.entity?.kind
                                 ? entityKindLabel(subject.entity.kind)
                                 : t("admin:unit_entity_fallback")}{" "}
-                              · order {subject.sortOrder}
                               {subject.weight != null
                                 ? ` · weight ${subject.weight}`
                                 : ""}
@@ -525,16 +516,6 @@ export default function UnitEditPage() {
                         </option>
                       ))}
                     </select>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Label htmlFor="subject-sort-order">
-                      {t("admin:unit_order")}
-                    </Label>
-                    <Input
-                      id="subject-sort-order"
-                      value={subjectSortOrder}
-                      onChange={(e) => setSubjectSortOrder(e.target.value)}
-                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="subject-weight">

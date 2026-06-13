@@ -12,7 +12,7 @@ type VariantTitleRow = {
   supportLanguages: {
     language: string;
     isPrimary: boolean;
-    sortOrder: number;
+    position: string;
   }[];
   translations: { language: string; title: string | null }[];
 };
@@ -44,13 +44,14 @@ export async function hydrateVariantContextSummaries<
         unitId: UnitSupportLanguage.unitId,
         language: UnitSupportLanguage.language,
         isPrimary: UnitSupportLanguage.isPrimary,
-        sortOrder: UnitSupportLanguage.sortOrder,
+        position: UnitSupportLanguage.position,
       })
       .from(UnitSupportLanguage)
       .where(inArray(UnitSupportLanguage.unitId, ids))
       .orderBy(
         asc(UnitSupportLanguage.unitId),
-        asc(UnitSupportLanguage.sortOrder),
+        asc(UnitSupportLanguage.position),
+        asc(UnitSupportLanguage.language),
       ),
     db
       .select({
@@ -71,7 +72,7 @@ export async function hydrateVariantContextSummaries<
     items.push({
       language: row.language,
       isPrimary: row.isPrimary,
-      sortOrder: row.sortOrder,
+      position: row.position,
     });
     supportLanguagesByUnitId.set(row.unitId, items);
   }

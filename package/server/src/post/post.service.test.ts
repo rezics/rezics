@@ -89,7 +89,7 @@ mock.module("@/unit/language-resolution", () => ({
   primarySupportLanguageCreate: (language: string) => ({
     language,
     isPrimary: true,
-    sortOrder: 0,
+    position: "a",
   }),
   resolveEffectiveReadLanguageCandidates: (input: {
     explicitLanguage?: string | null;
@@ -2290,7 +2290,7 @@ describe("PostService.create targetUnitId derivation", () => {
           unitId: "post-1",
           language: "en",
           isPrimary: true,
-          sortOrder: 0,
+          position: "a",
         }),
       }),
     );
@@ -2771,7 +2771,7 @@ describe("PostService wiki posts", () => {
         create: expect.objectContaining({
           language: "zh-hant",
           isPrimary: true,
-          sortOrder: 0,
+          position: "a",
         }),
       }),
     );

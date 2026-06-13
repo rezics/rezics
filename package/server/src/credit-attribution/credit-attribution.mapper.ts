@@ -53,7 +53,7 @@ export function mapCreditAttributionToDTO(
     unitId: row.unitId,
     entityId: row.entityId,
     role: row.role as CreditAttributionRole,
-    sortOrder: row.sortOrder,
+    position: row.position,
     entity: entityUnit
       ? {
           unitId: entityUnit.id,

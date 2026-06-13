@@ -39,8 +39,8 @@ const hydratedUnits = new Map<string, any>([
         { language: "zh-hant", title: "魔法禁書目錄", summary: null },
       ],
       supportLanguages: [
-        { language: "en", isPrimary: true, sortOrder: 0 },
-        { language: "zh-hant", isPrimary: false, sortOrder: 1 },
+        { language: "en", isPrimary: true, position: "a" },
+        { language: "zh-hant", isPrimary: false, position: "b" },
       ],
     },
   ],
@@ -53,7 +53,7 @@ const hydratedUnits = new Map<string, any>([
       createdAt: new Date("2026-03-01T00:00:00.000Z"),
       updatedAt: new Date("2026-03-02T00:00:00.000Z"),
       translations: [{ language: "en", title: "Academy City", summary: null }],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
     },
   ],
   [
@@ -65,7 +65,7 @@ const hydratedUnits = new Map<string, any>([
       createdAt: new Date("2026-02-01T00:00:00.000Z"),
       updatedAt: new Date("2026-02-02T00:00:00.000Z"),
       translations: [{ language: "en", title: "Hot thread", summary: null }],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
       post: { kind: "REMARK" },
     },
   ],
@@ -80,7 +80,7 @@ const hydratedUnits = new Map<string, any>([
       translations: [
         { language: "en", title: "Featured Zone", summary: "A portal" },
       ],
-      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+      supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
     },
   ],
   [
@@ -93,8 +93,8 @@ const hydratedUnits = new Map<string, any>([
         { language: "zh-hant", title: "人物角色" },
       ],
       supportLanguages: [
-        { language: "en", isPrimary: true, sortOrder: 0 },
-        { language: "zh-hant", isPrimary: false, sortOrder: 1 },
+        { language: "en", isPrimary: true, position: "a" },
+        { language: "zh-hant", isPrimary: false, position: "b" },
       ],
     },
   ],
@@ -274,7 +274,7 @@ function pageRow(config: ZonePageConfig = basePage()): ZonePageWithConfig {
     id: "page-home",
     zoneUnitId: "zone-1",
     slug: "home",
-    position: 0,
+    position: "a",
     config,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
     updatedAt: new Date("2026-01-01T00:00:00.000Z"),

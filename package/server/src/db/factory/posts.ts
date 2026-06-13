@@ -6,6 +6,7 @@ import {
   markdownContentDoc,
 } from "@rezics/contract";
 import { eq } from "drizzle-orm";
+import { rebalance } from "../../shelf/fractional-index.js";
 import {
   ContentTranslation,
   Post,
@@ -214,7 +215,7 @@ async function seedPostKindForTarget(
               unitId: unit.id,
               language: t.language,
               isPrimary: i === 0,
-              sortOrder: i,
+              position: rebalance(translations.length)[i]!,
             })),
           )
         : [
@@ -356,14 +357,14 @@ async function seedPostKindBatch(
           unitId: r.id,
           language: t.language,
           isPrimary: i === 0,
-          sortOrder: i,
+          position: rebalance(r.translations.length)[i]!,
         }))
       : [
           {
             unitId: r.id,
             language: DEFAULT_LANGUAGE,
             isPrimary: true,
-            sortOrder: 0,
+            position: rebalance(1)[0]!,
           },
         ],
   );
@@ -542,7 +543,7 @@ export async function seedWikiContentTranslations(
           unitId: primary.id,
           language: p.language,
           isPrimary: p.language === primary.language,
-          sortOrder: index,
+          position: rebalance(WIKI_POSTS.length)[index]!,
         })),
       ),
     );

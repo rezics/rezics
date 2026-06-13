@@ -35,7 +35,7 @@ export function resolvePostActivityTitle(input: {
   supportLanguages?: Array<{
     language: string;
     isPrimary: boolean;
-    sortOrder: number;
+    position: string;
   }>;
   extra?: unknown;
 }): string | undefined {
@@ -43,7 +43,7 @@ export function resolvePostActivityTitle(input: {
     input.defaultLanguage,
     input.supportLanguages?.find((language) => language.isPrimary)?.language,
     ...(input.supportLanguages ?? [])
-      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .sort((a, b) => a.position.localeCompare(b.position))
       .map((language) => language.language),
     ...input.translations.map((translation) => translation.language),
   ];

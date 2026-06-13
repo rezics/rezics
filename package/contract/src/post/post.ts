@@ -222,7 +222,7 @@ export const commentPromotionDTOSchema = t.Object({
   scopeUnitId: t.String(),
   commentId: t.String(),
   kind: pinKindLiterals,
-  position: t.String(),
+  position: t.String(), // Fractional Indexing
   byUserId: t.String(),
   createdAt: t.Union([t.String(), t.Date()]),
 });

@@ -85,7 +85,7 @@ describe("credit attribution role registry schemas", () => {
         unitId: "book-1",
         entityId: "publisher-1",
         role: "publisher",
-        sortOrder: 0,
+        position: "a",
       }),
     ).toBe(true);
   });
@@ -96,7 +96,7 @@ describe("credit attribution role registry schemas", () => {
         unitId: "book-1",
         entityId: "publisher-1",
         role: "publisher",
-        sortOrder: 0,
+        position: "a",
         evidence: [
           {
             id: "evidence-1",

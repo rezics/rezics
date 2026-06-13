@@ -45,7 +45,7 @@ type SupportLanguageRow = {
   unitId: string;
   language: string;
   isPrimary: boolean;
-  sortOrder: number;
+  position: string;
 };
 
 function publicUnitPredicate() {
@@ -124,7 +124,7 @@ async function loadPostActivityRows(options: {
         unitId: UnitSupportLanguage.unitId,
         language: UnitSupportLanguage.language,
         isPrimary: UnitSupportLanguage.isPrimary,
-        sortOrder: UnitSupportLanguage.sortOrder,
+        position: UnitSupportLanguage.position,
       })
       .from(UnitSupportLanguage)
       .where(inArray(UnitSupportLanguage.unitId, unitIds)),

@@ -126,7 +126,7 @@ export const CommentPromotion = pgTable(
         onUpdate: "cascade",
       }),
     kind: PinKind().notNull(),
-    position: varchar({ length: 64 }).notNull(),
+    position: varchar({ length: 64 }).notNull(), // Fractional Indexing
     byUserId: uuid().notNull(),
     createdAt: createdAt(),
   },

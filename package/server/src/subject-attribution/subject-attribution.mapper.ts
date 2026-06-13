@@ -33,7 +33,7 @@ export function mapSubjectAttributionToDTO(
     unitId: row.unitId,
     entityId: row.entityId,
     role: row.role as SubjectAttributionRole,
-    sortOrder: row.sortOrder,
+    position: row.position,
     weight: row.weight ?? undefined,
     entity: entityUnit
       ? {
@@ -75,7 +75,7 @@ export function mapSubjectAttributionToDTO(
             unitId: language.unitId,
             language: language.language as Language,
             isPrimary: language.isPrimary,
-            sortOrder: language.sortOrder,
+            position: language.position,
           })),
         }
       : undefined,

@@ -67,7 +67,7 @@ export function mapUnitToDTO(
         unitId: sl.unitId,
         language: sl.language,
         isPrimary: sl.isPrimary,
-        sortOrder: sl.sortOrder,
+        position: sl.position,
       })) ?? [],
   } as UnitDTO;
 }

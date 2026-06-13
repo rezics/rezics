@@ -30,7 +30,7 @@ function bookRow(overrides: Record<string, unknown> = {}) {
       referenceCount: 0,
       shareCount: 0,
       supportLanguages: [
-        { unitId: "release-1", language: "en", isPrimary: true, sortOrder: 0 },
+        { unitId: "release-1", language: "en", isPrimary: true, position: "a" },
       ],
       translations: [],
       creditAttributions: [],
@@ -123,13 +123,13 @@ describe("mapBaseBookToDTO", () => {
               unitId: "release-1",
               language: "ja",
               isPrimary: true,
-              sortOrder: 0,
+              position: "a",
             },
             {
               unitId: "release-1",
               language: "en",
               isPrimary: false,
-              sortOrder: 1,
+              position: "b",
             },
           ],
           translations: [
@@ -162,13 +162,13 @@ describe("mapBaseBookToDTO", () => {
               unitId: "release-1",
               language: "ja",
               isPrimary: true,
-              sortOrder: 0,
+              position: "a",
             },
             {
               unitId: "release-1",
               language: "en",
               isPrimary: false,
-              sortOrder: 1,
+              position: "b",
             },
           ],
           translations: [
@@ -205,13 +205,13 @@ describe("mapBaseBookToDTO", () => {
               unitId: "release-1",
               language: "en",
               isPrimary: true,
-              sortOrder: 0,
+              position: "a",
             },
             {
               unitId: "release-1",
               language: "zh-hant",
               isPrimary: false,
-              sortOrder: 1,
+              position: "b",
             },
           ],
           translations: [

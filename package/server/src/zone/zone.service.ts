@@ -42,6 +42,7 @@ import {
 import { serverJobProducer } from "@/job/job-boundary";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
+import { generateBetween, rebalance } from "../shelf/fractional-index";
 import {
   ContentTranslation,
   Entity,
@@ -100,7 +101,7 @@ type TranslatedUnitRow = {
   supportLanguages?: Array<{
     language: string;
     isPrimary?: boolean;
-    sortOrder?: number;
+    position?: string;
   }>;
   post?: { kind?: string | null } | null;
   entity?: { kind?: string | null } | null;
@@ -126,13 +127,13 @@ type ZoneUpdateData = Partial<{
 
 type ZonePageCreateData = {
   slug: string;
-  position: number;
+  position?: string;
   config: ZonePageConfig;
 };
 
 type ZonePageUpdateData = Partial<{
   slug: string;
-  position: number;
+  position: string;
   config: ZonePageConfig;
 }>;
 
@@ -607,7 +608,7 @@ async function hydrateZone(
     .select()
     .from(ZonePage)
     .where(eq(ZonePage.zoneUnitId, zone.unitId))
-    .orderBy(ZonePage.position);
+    .orderBy(asc(ZonePage.position), asc(ZonePage.id));
   const shell = parseZoneRowShell(zone);
   return {
     ...zone,
@@ -618,6 +619,19 @@ async function hydrateZone(
     })),
     unit: unit ? ({ ...unit } as unknown as ZoneWithRelations["unit"]) : null,
   };
+}
+
+async function nextZonePagePosition(
+  db: Pick<Awaited<ReturnType<typeof getServerDb>>, "select">,
+  zoneUnitId: string,
+): Promise<string> {
+  const [last] = await db
+    .select({ position: ZonePage.position })
+    .from(ZonePage)
+    .where(eq(ZonePage.zoneUnitId, zoneUnitId))
+    .orderBy(desc(ZonePage.position), desc(ZonePage.id))
+    .limit(1);
+  return generateBetween(last?.position, undefined);
 }
 
 function createDrizzleZoneRepository(): ZoneRepository {
@@ -777,7 +791,7 @@ function createDrizzleZoneRepository(): ZoneRepository {
           .values({
             zoneUnitId: data.unitId,
             slug: data.homePageSlug,
-            position: 0,
+            position: generateBetween(undefined, undefined),
             config: data.homePage,
             updatedAt: now,
           })
@@ -840,7 +854,8 @@ function createDrizzleZoneRepository(): ZoneRepository {
         .values({
           zoneUnitId,
           slug: data.slug,
-          position: data.position,
+          position:
+            data.position ?? (await nextZonePagePosition(db, zoneUnitId)),
           config: data.config,
           updatedAt: new Date(),
         })
@@ -907,6 +922,7 @@ function createDrizzleZoneRepository(): ZoneRepository {
               notInArray(UnitSupportLanguage.language, languages),
             ),
           );
+        const positions = rebalance(translations.length);
         for (const [index, tr] of translations.entries()) {
           const description = tr.description
             ? markdownContentDoc(tr.description)
@@ -934,14 +950,14 @@ function createDrizzleZoneRepository(): ZoneRepository {
               unitId,
               language: tr.language,
               isPrimary: index === 0,
-              sortOrder: index,
+              position: positions[index]!,
             })
             .onConflictDoUpdate({
               target: [
                 UnitSupportLanguage.unitId,
                 UnitSupportLanguage.language,
               ],
-              set: { isPrimary: index === 0, sortOrder: index },
+              set: { isPrimary: index === 0, position: positions[index]! },
             });
         }
       });
@@ -1690,12 +1706,13 @@ export class ZoneService {
         const translations = await this.repository.findFragmentTranslations(
           section.contentUnitId,
         );
+        const positions = rebalance(translations.length);
         const resolvedLanguage = resolveReadLanguage({
           languages: options.preferredLanguages ?? [],
-          supportLanguages: translations.map((row, sortOrder) => ({
+          supportLanguages: translations.map((row, index) => ({
             language: row.language,
-            isPrimary: sortOrder === 0,
-            sortOrder,
+            isPrimary: index === 0,
+            position: positions[index]!,
           })),
         });
         const translation =

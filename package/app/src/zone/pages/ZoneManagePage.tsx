@@ -126,7 +126,8 @@ export function ZoneManagePage({
     () =>
       [...(summaryZone?.pages ?? [])].sort(
         (left, right) =>
-          left.position - right.position || left.slug.localeCompare(right.slug),
+          left.position.localeCompare(right.position) ||
+          left.slug.localeCompare(right.slug),
       ),
     [summaryZone?.pages],
   );
@@ -384,7 +385,7 @@ export function ZoneManagePage({
       ? sortedPages
       : [...zone.pages].sort(
           (left, right) =>
-            left.position - right.position ||
+            left.position.localeCompare(right.position) ||
             left.slug.localeCompare(right.slug),
         );
   const editorCtx = {

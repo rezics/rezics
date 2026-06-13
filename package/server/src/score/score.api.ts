@@ -203,7 +203,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
         params.realmId,
         body.key,
         body.label,
-        body.sortOrder,
+        body.position,
       );
       return mapScoreRealmFieldToDTO(field);
     },

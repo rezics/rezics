@@ -28,7 +28,7 @@ export const zonePageSummarySchema = t.Object(
   {
     id: t.String(),
     slug: t.String(),
-    position: t.Number(),
+    position: t.String(), // Fractional Indexing
   },
   { additionalProperties: false },
 );
@@ -173,7 +173,7 @@ export type UpdateZoneThemeInput = Omit<
 export const createZonePageInputSchema = t.Object(
   {
     slug: t.String({ minLength: 1 }),
-    position: t.Number(),
+    position: t.Optional(t.String()), // Fractional Indexing
     config: zonePageV1Schema,
   },
   { additionalProperties: false },
@@ -187,7 +187,7 @@ export type CreateZonePageInput = Omit<
 export const updateZonePageInputSchema = t.Object(
   {
     slug: t.Optional(t.String({ minLength: 1 })),
-    position: t.Optional(t.Number()),
+    position: t.Optional(t.String()), // Fractional Indexing
     config: t.Optional(zonePageV1Schema),
   },
   { additionalProperties: false },
@@ -228,7 +228,7 @@ export const zonePortalResponseSchema = t.Object({
     {
       id: t.String(),
       slug: t.String(),
-      position: t.Number(),
+      position: t.String(), // Fractional Indexing
       config: zonePageV1Schema,
     },
     { additionalProperties: false },

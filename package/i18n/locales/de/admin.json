@@ -392,7 +392,6 @@
   "unit_primary_user_help": "Das Backend überschreibt dies derzeit mit dem angemeldeten Benutzer; Der vom Administrator ausgewählte Besitz kann später bei Bedarf aktiviert werden.",
   "unit_search_label": "Suchen",
   "unit_search_placeholder": "q/Benutzer-ID/Typ...",
-  "unit_sort_order_invalid": "Die Sortierreihenfolge muss eine Zahl sein.",
   "unit_status_placeholder": "ENTWURF / VERÖFFENTLICHT / ARCHIVIERT /...",
   "unit_subject_attribution_empty": "Noch keine Themenzuordnungen.",
   "unit_subject_attribution_failed_load": "Die Betreffangaben konnten nicht geladen werden.",

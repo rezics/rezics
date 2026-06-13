@@ -13,6 +13,7 @@ import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { creditAttributionService } from "../credit-attribution/credit-attribution.service";
 import { CreditAttribution, Entity, SubjectAttribution } from "../db/schema";
 import { serverJobProducer } from "../job/job-boundary";
+import { rebalance } from "../shelf/fractional-index";
 import { subjectAttributionService } from "../subject-attribution/subject-attribution.service";
 import {
   assertCanEditCollaborativeMetadata,
@@ -24,7 +25,7 @@ import { AppError } from "../utils/errors";
 
 type CreditEntry = {
   entityId: string;
-  sortOrder: number;
+  position: string;
 };
 
 type SubjectEntry = CreditEntry & {
@@ -93,9 +94,10 @@ function normalizeCreditEntries(
   op: EntityAttributionBatchSetCreditsOp,
 ): CreditEntry[] {
   assertNoDuplicateEntities(op, op.entries);
+  const positions = rebalance(op.entries.length);
   return op.entries.map((entry, index) => ({
     entityId: entry.entityId,
-    sortOrder: entry.sortOrder ?? index,
+    position: entry.position ?? positions[index]!,
   }));
 }
 
@@ -103,22 +105,23 @@ function normalizeSubjectEntries(
   op: EntityAttributionBatchSetSubjectsOp,
 ): SubjectEntry[] {
   assertNoDuplicateEntities(op, op.entries);
+  const positions = rebalance(op.entries.length);
   return op.entries.map((entry, index) => ({
     entityId: entry.entityId,
-    sortOrder: entry.sortOrder ?? index,
+    position: entry.position ?? positions[index]!,
     weight: entry.weight ?? null,
   }));
 }
 
 function sameCreditSet(
-  rows: readonly { entityId: string; sortOrder: number }[],
+  rows: readonly { entityId: string; position: string }[],
   entries: readonly CreditEntry[],
 ): boolean {
   if (rows.length !== entries.length) return false;
   return entries.every((entry) =>
     rows.some(
       (row) =>
-        row.entityId === entry.entityId && row.sortOrder === entry.sortOrder,
+        row.entityId === entry.entityId && row.position === entry.position,
     ),
   );
 }
@@ -126,7 +129,7 @@ function sameCreditSet(
 function sameSubjectSet(
   rows: readonly {
     entityId: string;
-    sortOrder: number;
+    position: string;
     weight: number | null;
   }[],
   entries: readonly SubjectEntry[],
@@ -136,7 +139,7 @@ function sameSubjectSet(
     rows.some(
       (row) =>
         row.entityId === entry.entityId &&
-        row.sortOrder === entry.sortOrder &&
+        row.position === entry.position &&
         (row.weight ?? null) === entry.weight,
     ),
   );
@@ -277,12 +280,12 @@ export interface EntityAttributionBatchRepository {
   listCreditRows(
     unitId: string,
     role: string,
-  ): Promise<Array<{ entityId: string; sortOrder: number }>>;
+  ): Promise<Array<{ entityId: string; position: string }>>;
   listSubjectRows(
     unitId: string,
     role: string,
   ): Promise<
-    Array<{ entityId: string; sortOrder: number; weight: number | null }>
+    Array<{ entityId: string; position: string; weight: number | null }>
   >;
   replaceCredits(
     unitId: string,
@@ -356,7 +359,7 @@ function createDrizzleEntityAttributionBatchRepository(
       return db
         .select({
           entityId: CreditAttribution.entityId,
-          sortOrder: CreditAttribution.sortOrder,
+          position: CreditAttribution.position,
         })
         .from(CreditAttribution)
         .where(
@@ -372,7 +375,7 @@ function createDrizzleEntityAttributionBatchRepository(
       return db
         .select({
           entityId: SubjectAttribution.entityId,
-          sortOrder: SubjectAttribution.sortOrder,
+          position: SubjectAttribution.position,
           weight: SubjectAttribution.weight,
         })
         .from(SubjectAttribution)
@@ -405,7 +408,7 @@ function createDrizzleEntityAttributionBatchRepository(
             unitId,
             entityId: entry.entityId,
             role,
-            sortOrder: entry.sortOrder,
+            position: entry.position,
           })
           .onConflictDoUpdate({
             target: [
@@ -413,7 +416,7 @@ function createDrizzleEntityAttributionBatchRepository(
               CreditAttribution.entityId,
               CreditAttribution.role,
             ],
-            set: { sortOrder: entry.sortOrder },
+            set: { position: entry.position },
           });
       }
     },
@@ -439,7 +442,7 @@ function createDrizzleEntityAttributionBatchRepository(
             unitId,
             entityId: entry.entityId,
             role,
-            sortOrder: entry.sortOrder,
+            position: entry.position,
             weight: entry.weight,
           })
           .onConflictDoUpdate({
@@ -448,7 +451,7 @@ function createDrizzleEntityAttributionBatchRepository(
               SubjectAttribution.entityId,
               SubjectAttribution.role,
             ],
-            set: { sortOrder: entry.sortOrder, weight: entry.weight },
+            set: { position: entry.position, weight: entry.weight },
           });
       }
     },

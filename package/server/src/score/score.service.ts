@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import {
   Post,
   ScoreAggregate,
@@ -6,6 +6,7 @@ import {
   ScoreRealmField,
   Unit,
 } from "../db/schema";
+import { generateBetween } from "../shelf/fractional-index";
 import {
   applyDistributionDelta,
   applyFieldsDelta,
@@ -274,14 +275,14 @@ export class ScoreService {
       .select()
       .from(ScoreRealmField)
       .where(eq(ScoreRealmField.realm, realmId))
-      .orderBy(asc(ScoreRealmField.sortOrder));
+      .orderBy(asc(ScoreRealmField.position), asc(ScoreRealmField.key));
   }
 
   async addRealmField(
     realmId: string,
     key: string,
     label?: string,
-    sortOrder?: number,
+    position?: string,
   ) {
     if (!FIELD_KEY_PATTERN.test(key)) {
       throw new Error(
@@ -290,13 +291,19 @@ export class ScoreService {
     }
 
     const db = await getServerDb();
+    const [last] = await db
+      .select({ position: ScoreRealmField.position })
+      .from(ScoreRealmField)
+      .where(eq(ScoreRealmField.realm, realmId))
+      .orderBy(desc(ScoreRealmField.position), desc(ScoreRealmField.key))
+      .limit(1);
     const [row] = await db
       .insert(ScoreRealmField)
       .values({
         realm: realmId,
         key,
         label: label ?? null,
-        sortOrder: sortOrder ?? 0,
+        position: position ?? generateBetween(last?.position, undefined),
         updatedAt: new Date(),
       })
       .returning();

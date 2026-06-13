@@ -392,7 +392,6 @@
   "unit_primary_user_help": "The backend currently overrides this with the signed-in user; admin-selected ownership can be enabled later if needed.",
   "unit_search_label": "Search",
   "unit_search_placeholder": "q/userId/type...",
-  "unit_sort_order_invalid": "Sort order must be a number.",
   "unit_status_placeholder": "DRAFT / PUBLISHED / ARCHIVED / ...",
   "unit_subject_attribution_empty": "No subject attributions yet.",
   "unit_subject_attribution_failed_load": "Failed to load subject attributions.",

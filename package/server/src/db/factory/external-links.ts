@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "@rezics/contract";
 import { eq } from "drizzle-orm";
+import { generateBetween } from "../../shelf/fractional-index.js";
 import {
   CreditAttribution,
   CreditAttributionEvidence,
@@ -100,7 +101,7 @@ async function findOrCreatePublisherCredit(
       unitId: book.id,
       entityId: publisher.unitId,
       role: "publisher",
-      sortOrder: 0,
+      position: generateBetween(undefined, undefined),
     })
     .onConflictDoNothing();
 }

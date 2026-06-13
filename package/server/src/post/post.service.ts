@@ -324,7 +324,10 @@ async function hydratePostsByUnitIds(
         .select()
         .from(UnitSupportLanguage)
         .where(inArray(UnitSupportLanguage.unitId, ids))
-        .orderBy(asc(UnitSupportLanguage.sortOrder)),
+        .orderBy(
+          asc(UnitSupportLanguage.position),
+          asc(UnitSupportLanguage.language),
+        ),
     ])) as [any[], any[], any[], any[], any[]];
   const userIds = uniqueValues(
     units

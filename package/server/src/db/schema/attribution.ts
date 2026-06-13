@@ -3,7 +3,6 @@ import {
   doublePrecision,
   foreignKey,
   index,
-  integer,
   pgTable,
   primaryKey,
   text,
@@ -24,7 +23,7 @@ export const CreditAttribution = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     role: varchar({ length: 64 }).notNull(),
-    sortOrder: integer().default(0).notNull(),
+    position: varchar({ length: 64 }).default("V").notNull(), // Fractional Indexing
   },
   (table) => [
     primaryKey({
@@ -36,11 +35,12 @@ export const CreditAttribution = pgTable(
       table.entityId.asc().nullsLast(),
       table.role.asc().nullsLast(),
     ),
-    index("CreditAttribution_unitId_role_sortOrder_idx").using(
+    index("CreditAttribution_unitId_role_position_entityId_idx").using(
       "btree",
       table.unitId.asc().nullsLast(),
       table.role.asc().nullsLast(),
-      table.sortOrder.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.entityId.asc().nullsLast(),
     ),
   ],
 );
@@ -100,7 +100,7 @@ export const SubjectAttribution = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     role: varchar({ length: 64 }).notNull(),
-    sortOrder: integer().default(0).notNull(),
+    position: varchar({ length: 64 }).default("V").notNull(), // Fractional Indexing
     weight: doublePrecision(),
   },
   (table) => [
@@ -108,22 +108,25 @@ export const SubjectAttribution = pgTable(
       columns: [table.unitId, table.entityId, table.role],
       name: "SubjectAttribution_pkey",
     }),
-    index("SubjectAttribution_entityId_role_sortOrder_idx").using(
+    index("SubjectAttribution_entityId_role_position_unitId_idx").using(
       "btree",
       table.entityId.asc().nullsLast(),
       table.role.asc().nullsLast(),
-      table.sortOrder.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.unitId.asc().nullsLast(),
     ),
-    index("SubjectAttribution_entityId_sortOrder_idx").using(
+    index("SubjectAttribution_entityId_position_unitId_idx").using(
       "btree",
       table.entityId.asc().nullsLast(),
-      table.sortOrder.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.unitId.asc().nullsLast(),
     ),
-    index("SubjectAttribution_unitId_role_sortOrder_idx").using(
+    index("SubjectAttribution_unitId_role_position_entityId_idx").using(
       "btree",
       table.unitId.asc().nullsLast(),
       table.role.asc().nullsLast(),
-      table.sortOrder.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.entityId.asc().nullsLast(),
     ),
   ],
 );

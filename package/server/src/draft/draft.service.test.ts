@@ -19,8 +19,8 @@ describe("draftService.listMine", () => {
           targetUnitId: null,
           defaultLanguage: "ja",
           supportLanguages: [
-            { language: "en", isPrimary: true, sortOrder: 1 },
-            { language: "ja", isPrimary: false, sortOrder: 2 },
+            { language: "en", isPrimary: true, position: "b" },
+            { language: "ja", isPrimary: false, position: "c" },
           ],
           translations: [
             { language: "en", title: "English draft" },
@@ -57,8 +57,8 @@ describe("draftService.listMine", () => {
           targetUnitId: "book-1",
           defaultLanguage: "ja",
           supportLanguages: [
-            { language: "en", isPrimary: true, sortOrder: 1 },
-            { language: "ja", isPrimary: false, sortOrder: 2 },
+            { language: "en", isPrimary: true, position: "b" },
+            { language: "ja", isPrimary: false, position: "c" },
           ],
           translations: [
             { language: "ja", title: " " },

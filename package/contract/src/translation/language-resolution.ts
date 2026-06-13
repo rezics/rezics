@@ -30,8 +30,15 @@ export type LanguageResolutionInput =
 export type SupportLanguageLike = {
   language: string | Language;
   isPrimary?: boolean | null;
-  sortOrder?: number | null;
+  position?: string | null; // Fractional Indexing
 };
+
+function compareSupportLanguagePosition(
+  a: SupportLanguageLike,
+  b: SupportLanguageLike,
+) {
+  return (a.position ?? "").localeCompare(b.position ?? "");
+}
 
 export const readLanguageQuerySchema = t.Object({
   languages: t.Optional(t.String()),
@@ -51,7 +58,7 @@ export function primaryLanguages(
   return uniqueLanguages(
     supportLanguages
       .filter((item) => item.isPrimary)
-      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .sort(compareSupportLanguagePosition)
       .map((item) => item.language),
   );
 }
@@ -64,7 +71,7 @@ export function defaultSupportLanguage(
   supportLanguages: readonly SupportLanguageLike[] | null | undefined = [],
 ): Language | null {
   const ordered = [...(supportLanguages ?? [])].sort(
-    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
+    compareSupportLanguagePosition,
   );
   return (
     primaryLanguages(ordered)[0] ??
@@ -94,10 +101,10 @@ export function readLanguageCandidates(input: {
   const supportLanguages = input.supportLanguages ?? [];
   const primary = supportLanguages
     .filter((item) => item.isPrimary)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    .sort(compareSupportLanguagePosition);
   const remaining = supportLanguages
     .filter((item) => !item.isPrimary)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    .sort(compareSupportLanguagePosition);
 
   return uniqueLanguages([
     input.explicitLanguage,

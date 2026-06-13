@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
+import { rebalance } from "../../shelf/fractional-index.js";
 import { ScoreAggregate, ScoreEntry, ScoreRealmField } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
@@ -13,11 +14,11 @@ import {
 const CHUNK_SIZE = 10;
 
 const STORY_REALM_FIELDS = [
-  { key: "pacing", label: "Pacing", sortOrder: 1 },
-  { key: "plot", label: "Plot", sortOrder: 2 },
-  { key: "characters", label: "Characters", sortOrder: 3 },
-  { key: "world-building", label: "World Building", sortOrder: 4 },
-  { key: "writing-style", label: "Writing Style", sortOrder: 5 },
+  { key: "pacing", label: "Pacing" },
+  { key: "plot", label: "Plot" },
+  { key: "characters", label: "Characters" },
+  { key: "world-building", label: "World Building" },
+  { key: "writing-style", label: "Writing Style" },
 ];
 
 interface ScoreResult {
@@ -46,9 +47,10 @@ export async function seedScores(
   if (storyRealm) {
     await ctx.db.insert(ScoreRealmField).values(
       withUpdatedAtRows(
-        STORY_REALM_FIELDS.map((f) => ({
+        STORY_REALM_FIELDS.map((f, index) => ({
           realm: storyRealm.id,
           ...f,
+          position: rebalance(STORY_REALM_FIELDS.length)[index]!,
         })),
       ),
     );

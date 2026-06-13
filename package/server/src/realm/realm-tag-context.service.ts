@@ -90,7 +90,7 @@ async function loadUnitBundles(
       .from(UnitSupportLanguage)
       .where(inArray(UnitSupportLanguage.unitId, ids))
       .orderBy(
-        asc(UnitSupportLanguage.sortOrder),
+        asc(UnitSupportLanguage.position),
         asc(UnitSupportLanguage.language),
       ),
   ]);

@@ -42,7 +42,7 @@ export const unitExternalLinkDTOSchema = t.Object({
   labelUnitId: t.Optional(t.Nullable(t.String())),
   fallbackText: t.Optional(t.Nullable(t.String())),
   sourceEntity: externalLinkDisplayEntitySummarySchema,
-  sortOrder: t.Number(),
+  position: t.String(), // Fractional Indexing
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -57,7 +57,7 @@ export const createUnitExternalLinkSchema = t.Object(
     role: t.Optional(unitExternalLinkRoleSchema),
     labelUnitId: t.Optional(t.Nullable(t.String())),
     fallbackText: t.Optional(t.Nullable(t.String())),
-    sortOrder: t.Optional(t.Number()),
+    position: t.Optional(t.String()), // Fractional Indexing
   },
   { additionalProperties: false },
 );
@@ -72,7 +72,7 @@ export const updateUnitExternalLinkSchema = t.Object(
     role: t.Optional(unitExternalLinkRoleSchema),
     labelUnitId: t.Optional(t.Nullable(t.String())),
     fallbackText: t.Optional(t.Nullable(t.String())),
-    sortOrder: t.Optional(t.Number()),
+    position: t.Optional(t.String()), // Fractional Indexing
   },
   { additionalProperties: false },
 );

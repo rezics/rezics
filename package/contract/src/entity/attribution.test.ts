@@ -14,8 +14,8 @@ describe("entity attribution batch schemas", () => {
             op: "setCredits",
             role: "author",
             entries: [
-              { entityId: "entity-1", sortOrder: 0 },
-              { entityId: "entity-2", sortOrder: 1 },
+              { entityId: "entity-1", position: "a" },
+              { entityId: "entity-2", position: "b" },
             ],
           },
         ],
@@ -47,7 +47,7 @@ describe("entity attribution batch schemas", () => {
           {
             op: "setSubjects",
             role: "featured_character",
-            entries: [{ entityId: "entity-1", sortOrder: 2, weight: null }],
+            entries: [{ entityId: "entity-1", position: "c", weight: null }],
           },
         ],
       }),

@@ -8,6 +8,7 @@ import {
 import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
 import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
 import { getLockedFieldError } from "@rezics/api/react-query/errors";
+import { positionForNewBottomPin } from "@rezics/api/tag/fractional-index";
 import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,
@@ -1012,11 +1013,16 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           creationContext="catalog"
           lockedCreditRole="author"
           onSelect={(entityId) => {
-            const existingAuthors =
+            const existingAuthors = (
               authorCreditsQuery.data?.filter(
                 (credit) =>
                   credit.role === "author" && credit.entityId !== entityId,
-              ) ?? [];
+              ) ?? []
+            ).sort(
+              (left, right) =>
+                left.position.localeCompare(right.position) ||
+                left.entityId.localeCompare(right.entityId),
+            );
             batchAuthorMutation.mutate({
               unitId: bookId,
               request: {
@@ -1025,13 +1031,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                     op: "setCredits",
                     role: "author",
                     entries: [
-                      ...existingAuthors.map((credit, index) => ({
+                      ...existingAuthors.map((credit) => ({
                         entityId: credit.entityId,
-                        sortOrder: index,
+                        position: credit.position,
                       })),
                       {
                         entityId,
-                        sortOrder: existingAuthors.length,
+                        position: positionForNewBottomPin(
+                          existingAuthors.at(-1)?.position,
+                        ),
                       },
                     ],
                   },

@@ -20,7 +20,7 @@ function makeCreditRow(overrides: Record<string, any> = {}) {
     unitId: overrides.unitId ?? "book-1",
     entityId: overrides.entityId ?? "entity-1",
     role: overrides.role ?? "author",
-    sortOrder: overrides.sortOrder ?? 0,
+    position: overrides.position ?? "a",
     entity: {
       id: overrides.entityId ?? "entity-1",
       type: "ENTITY",
@@ -71,7 +71,7 @@ function createRepository() {
         unitId: input.unitId,
         entityId: input.entityId,
         role: input.role,
-        sortOrder: input.sortOrder,
+        position: input.position,
       }),
     ),
     delete: mock(async () => {}),
@@ -107,7 +107,7 @@ describe("CreditAttributionService.link", () => {
       unitId: "book-1",
       entityId: "entity-1",
       role: "author",
-      sortOrder: 2,
+      position: "c",
     });
 
     expect(row.entityId).toBe("entity-1");
@@ -192,7 +192,7 @@ describe("CreditAttributionService.createEvidence", () => {
           role: "source",
           labelUnitId: null,
           fallbackText: null,
-          sortOrder: 0,
+          position: "a",
           createdAt: now,
           updatedAt: now,
           sourceEntity: {

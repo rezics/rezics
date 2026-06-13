@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
-  integer,
   pgTable,
   text,
   uniqueIndex,
@@ -45,22 +44,22 @@ export const UnitExternalLink = pgTable(
       onUpdate: "cascade",
     }),
     fallbackText: text(),
-    sortOrder: integer().default(0).notNull(),
+    position: varchar({ length: 64 }).default("V").notNull(), // Fractional Indexing
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (table) => [
-    index("UnitExternalLink_unitId_sortOrder_id_idx").using(
+    index("UnitExternalLink_unitId_position_id_idx").using(
       "btree",
       table.unitId.asc().nullsLast(),
-      table.sortOrder.asc().nullsLast(),
+      table.position.asc().nullsLast(),
       table.id.asc().nullsLast(),
     ),
-    index("UnitExternalLink_unitId_sourceEntityUnitId_sortOrder_idx").using(
+    index("UnitExternalLink_unitId_sourceEntityUnitId_position_idx").using(
       "btree",
       table.unitId.asc().nullsLast(),
       table.sourceEntityUnitId.asc().nullsLast(),
-      table.sortOrder.asc().nullsLast(),
+      table.position.asc().nullsLast(),
       table.id.asc().nullsLast(),
     ),
     index("UnitExternalLink_sourceEntityUnitId_unitId_idx").using(

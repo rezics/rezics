@@ -11,7 +11,7 @@ import {
   type ZoneTheme,
 } from "@rezics/contract";
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { generateBetween } from "../../shelf/fractional-index";
+import { generateBetween, rebalance } from "../../shelf/fractional-index";
 import {
   Book,
   Comment,
@@ -179,7 +179,7 @@ async function insertScenarioTranslations(
         unitId,
         language: item.language,
         isPrimary: index === 0,
-        sortOrder: index,
+        position: rebalance(translations.length)[index]!,
       })),
     ),
   );
@@ -915,7 +915,7 @@ async function createWikiScenarioPost(
         unitId: postUnitId,
         language: item.language,
         isPrimary: item.language === input.defaultLanguage,
-        sortOrder: index,
+        position: rebalance(input.translations.length)[index]!,
       })),
     ),
   );
@@ -1099,7 +1099,7 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
       unitId: work.unitId,
       entityId: work.authorEntityUnitId,
       role: "author",
-      sortOrder: 0,
+      position: generateBetween(undefined, undefined),
     });
     await ctx.db.insert(UnitTag).values(
       withUpdatedAtRows(
@@ -1599,7 +1599,7 @@ export type ToaruZoneConfig = {
   pages: Array<{
     id: string;
     slug: string;
-    position: number;
+    position: string;
     config: ZonePageConfig;
   }>;
   homePageId: string;
@@ -1635,6 +1635,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
     feed: "00000000-0000-7000-8000-000000001003",
     characters: "00000000-0000-7000-8000-000000001004",
   };
+  const pagePositions = rebalance(4);
   return {
     boundary: {
       schema: "rezics/zone-boundary",
@@ -1791,7 +1792,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       {
         id: pageIds.home,
         slug: "home",
-        position: 0,
+        position: pagePositions[0]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -1980,7 +1981,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       {
         id: pageIds.characters,
         slug: "characters",
-        position: 1,
+        position: pagePositions[1]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -2007,13 +2008,13 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       {
         id: pageIds.search,
         slug: "search",
-        position: 2,
+        position: pagePositions[2]!,
         config: { schema: "rezics/zone-page", version: 1, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
-        position: 3,
+        position: pagePositions[3]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,

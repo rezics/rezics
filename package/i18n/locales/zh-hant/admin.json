@@ -392,7 +392,6 @@
   "unit_primary_user_help": "後端目前使用登入使用者覆蓋此設定；如果需要，可以稍後啟用管理員選擇的所有權。",
   "unit_search_label": "搜尋",
   "unit_search_placeholder": "q/使用者 ID/類型...",
-  "unit_sort_order_invalid": "排序順序必須是數字。",
   "unit_status_placeholder": "草稿/已發佈/已存檔/...",
   "unit_subject_attribution_empty": "尚無主題屬性。",
   "unit_subject_attribution_failed_load": "無法載入主題屬性。",

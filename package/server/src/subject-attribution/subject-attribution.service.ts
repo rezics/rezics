@@ -6,7 +6,7 @@ import type {
   SubjectAttributionDTO,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
 import {
   Entity,
   SubjectAttribution,
@@ -15,6 +15,7 @@ import {
   UnitTranslation,
 } from "../db/schema";
 import { serverJobProducer } from "../job/job-boundary";
+import { generateBetween } from "../shelf/fractional-index";
 import {
   assertCanEditCollaborativeMetadata,
   createDrizzleCollaborativeMetadataTx,
@@ -38,6 +39,27 @@ type EntityUnitProbe = { id: string; type: string };
 type SubjectEntityProbe = { eligibleSubjectRoles: string[] };
 type SubjectAttributionRow = typeof SubjectAttribution.$inferSelect;
 type SubjectAttributionTx = Awaited<ReturnType<typeof getServerDb>>;
+
+async function nextSubjectAttributionPosition(
+  db: Pick<SubjectAttributionTx, "select">,
+  input: Pick<LinkSubjectAttributionInput, "unitId" | "role">,
+): Promise<string> {
+  const [last] = await db
+    .select({ position: SubjectAttribution.position })
+    .from(SubjectAttribution)
+    .where(
+      and(
+        eq(SubjectAttribution.unitId, input.unitId),
+        eq(SubjectAttribution.role, input.role),
+      ),
+    )
+    .orderBy(
+      desc(SubjectAttribution.position),
+      desc(SubjectAttribution.entityId),
+    )
+    .limit(1);
+  return generateBetween(last?.position, undefined);
+}
 
 export interface SubjectAttributionRepository {
   getEntityUnit(entityId: string): Promise<EntityUnitProbe | null>;
@@ -168,13 +190,15 @@ function createDrizzleSubjectAttributionRepository(): SubjectAttributionReposito
     async create(input, actor) {
       const db = await getServerDb();
       if (!actor) {
+        const position =
+          input.position ?? (await nextSubjectAttributionPosition(db, input));
         const [row] = await db
           .insert(SubjectAttribution)
           .values({
             unitId: input.unitId,
             entityId: input.entityId,
             role: input.role,
-            sortOrder: input.sortOrder ?? 0,
+            position,
             weight: input.weight ?? null,
           })
           .returning();
@@ -196,7 +220,9 @@ function createDrizzleSubjectAttributionRepository(): SubjectAttributionReposito
             unitId: input.unitId,
             entityId: input.entityId,
             role: input.role,
-            sortOrder: input.sortOrder ?? 0,
+            position:
+              input.position ??
+              (await nextSubjectAttributionPosition(tx, input)),
             weight: input.weight ?? null,
           })
           .returning();
@@ -209,7 +235,7 @@ function createDrizzleSubjectAttributionRepository(): SubjectAttributionReposito
               [input.role]: [
                 {
                   entityId: input.entityId,
-                  sortOrder: input.sortOrder ?? 0,
+                  position: row.position,
                   weight: input.weight ?? null,
                 },
               ],
@@ -274,7 +300,8 @@ function createDrizzleSubjectAttributionRepository(): SubjectAttributionReposito
         .where(and(...filters))
         .orderBy(
           asc(SubjectAttribution.role),
-          asc(SubjectAttribution.sortOrder),
+          asc(SubjectAttribution.position),
+          asc(SubjectAttribution.entityId),
         );
       return hydrateRows(db, rows);
     },
@@ -295,7 +322,7 @@ function createDrizzleSubjectAttributionRepository(): SubjectAttributionReposito
           unitId: SubjectAttribution.unitId,
           entityId: SubjectAttribution.entityId,
           role: SubjectAttribution.role,
-          sortOrder: SubjectAttribution.sortOrder,
+          position: SubjectAttribution.position,
           weight: SubjectAttribution.weight,
         })
         .from(SubjectAttribution)
@@ -303,7 +330,8 @@ function createDrizzleSubjectAttributionRepository(): SubjectAttributionReposito
         .where(and(...filters))
         .orderBy(
           asc(SubjectAttribution.role),
-          asc(SubjectAttribution.sortOrder),
+          asc(SubjectAttribution.position),
+          asc(SubjectAttribution.unitId),
         );
       return hydrateRows(db, rows);
     },

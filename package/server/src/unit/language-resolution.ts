@@ -17,6 +17,7 @@ import {
   UnitSupportLanguage,
   UnitTranslation,
 } from "../db/schema";
+import { generateBetween } from "../shelf/fractional-index";
 import { notFound } from "../utils/errors";
 import { mapTranslationToDTO } from "./mapper";
 
@@ -46,9 +47,13 @@ export function resolveUnitAuthoringLanguage(input: {
 export function primarySupportLanguageCreate(language: string): {
   language: string;
   isPrimary: true;
-  sortOrder: 0;
+  position: string;
 } {
-  return { language, isPrimary: true, sortOrder: 0 };
+  return {
+    language,
+    isPrimary: true,
+    position: generateBetween(undefined, undefined),
+  };
 }
 
 export function resolveEffectiveReadLanguageCandidates(input: {
@@ -119,9 +124,9 @@ export async function ensurePrimarySupportLanguage(
           unitId: string;
           language: string;
           isPrimary: true;
-          sortOrder: 0;
+          position: string;
         };
-        update: { isPrimary: true; sortOrder: 0 };
+        update: { isPrimary: true; position: string };
       }): Promise<unknown>;
     };
   },
@@ -131,7 +136,10 @@ export async function ensurePrimarySupportLanguage(
   await tx.unitSupportLanguage.upsert({
     where: { unitId_language: { unitId, language } },
     create: { unitId, ...primarySupportLanguageCreate(language) },
-    update: { isPrimary: true, sortOrder: 0 },
+    update: {
+      isPrimary: true,
+      position: generateBetween(undefined, undefined),
+    },
   });
 }
 
@@ -220,7 +228,10 @@ function createDrizzleUnitLanguageRepository(): UnitLanguageRepository {
             .select()
             .from(UnitSupportLanguage)
             .where(eq(UnitSupportLanguage.unitId, unitId))
-            .orderBy(asc(UnitSupportLanguage.sortOrder)),
+            .orderBy(
+              asc(UnitSupportLanguage.position),
+              asc(UnitSupportLanguage.language),
+            ),
           db
             .select({ language: UnitTranslation.language })
             .from(UnitTranslation)
@@ -247,7 +258,10 @@ function createDrizzleUnitLanguageRepository(): UnitLanguageRepository {
             .select()
             .from(UnitSupportLanguage)
             .where(eq(UnitSupportLanguage.unitId, unitId))
-            .orderBy(asc(UnitSupportLanguage.sortOrder)),
+            .orderBy(
+              asc(UnitSupportLanguage.position),
+              asc(UnitSupportLanguage.language),
+            ),
           db
             .select()
             .from(UnitTranslation)
@@ -291,7 +305,7 @@ export class UnitLanguageService {
         unitId: item.unitId,
         language: item.language as any,
         isPrimary: item.isPrimary,
-        sortOrder: item.sortOrder,
+        position: item.position,
       })),
       unitTranslationLanguages: unit.translations.map(
         (item) => item.language as any,
@@ -332,7 +346,7 @@ export class UnitLanguageService {
         unitId: item.unitId,
         language: item.language as any,
         isPrimary: item.isPrimary,
-        sortOrder: item.sortOrder,
+        position: item.position,
       })),
       unitTranslation: unitTranslation
         ? mapTranslationToDTO(unitTranslation as any)

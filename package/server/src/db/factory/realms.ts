@@ -4,6 +4,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
+import { rebalance } from "../../shelf/fractional-index.js";
 import {
   Realm,
   RealmMember,
@@ -106,7 +107,7 @@ export async function seedRealms(
             unitId: unit.id,
             language: t.language,
             isPrimary: i === 0,
-            sortOrder: i,
+            position: rebalance(translations.length)[i]!,
           })),
         ),
       );

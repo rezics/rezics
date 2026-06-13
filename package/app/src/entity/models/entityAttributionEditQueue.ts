@@ -5,6 +5,7 @@ import type {
   SubjectAttributionDTO,
   SubjectAttributionRole,
 } from "@rezics/contract";
+import { generateKeyBetween } from "@rezics/api/shared/fractional-index";
 
 export type EntityAttributionQueueSaveStatus =
   | "idle"
@@ -15,14 +16,14 @@ export type EntityAttributionQueueSaveStatus =
 export type CreditAttributionQueueEntry = {
   entityId: string;
   role: CreditAttributionRole;
-  sortOrder: number;
+  position: string;
   entity?: CreditAttributionDTO["entity"];
 };
 
 export type SubjectAttributionQueueEntry = {
   entityId: string;
   role: SubjectAttributionRole;
-  sortOrder: number;
+  position: string;
   weight: number | null;
   entity?: SubjectAttributionDTO["entity"];
 };
@@ -44,16 +45,32 @@ type QueueInput = {
   subjects?: readonly SubjectAttributionDTO[];
 };
 
-function sortByOrder<T extends { sortOrder: number; entityId: string }>(
+function positionsForOrder(count: number): string[] {
+  const positions: string[] = [];
+  let previous: string | undefined;
+  for (let index = 0; index < count; index += 1) {
+    previous = generateKeyBetween(previous, undefined);
+    positions.push(previous);
+  }
+  return positions;
+}
+
+function sortByPosition<T extends { position: string; entityId: string }>(
   entries: readonly T[],
 ): T[] {
   return [...entries].sort(
-    (a, b) => a.sortOrder - b.sortOrder || a.entityId.localeCompare(b.entityId),
+    (a, b) =>
+      a.position.localeCompare(b.position) ||
+      a.entityId.localeCompare(b.entityId),
   );
 }
 
-function normalizeOrder<T extends { sortOrder: number }>(entries: T[]): T[] {
-  return entries.map((entry, index) => ({ ...entry, sortOrder: index }));
+function normalizePositions<T extends { position: string }>(entries: T[]): T[] {
+  const positions = positionsForOrder(entries.length);
+  return entries.map((entry, index) => ({
+    ...entry,
+    position: positions[index]!,
+  }));
 }
 
 function groupCredits(
@@ -65,12 +82,12 @@ function groupCredits(
     grouped[credit.role]?.push({
       entityId: credit.entityId,
       role: credit.role,
-      sortOrder: credit.sortOrder,
+      position: credit.position,
       entity: credit.entity,
     });
   }
   for (const [role, entries] of Object.entries(grouped)) {
-    grouped[role] = normalizeOrder(sortByOrder(entries));
+    grouped[role] = normalizePositions(sortByPosition(entries));
   }
   return grouped;
 }
@@ -84,13 +101,13 @@ function groupSubjects(
     grouped[subject.role]?.push({
       entityId: subject.entityId,
       role: subject.role,
-      sortOrder: subject.sortOrder,
+      position: subject.position,
       weight: subject.weight ?? null,
       entity: subject.entity,
     });
   }
   for (const [role, entries] of Object.entries(grouped)) {
-    grouped[role] = normalizeOrder(sortByOrder(entries));
+    grouped[role] = normalizePositions(sortByPosition(entries));
   }
   return grouped;
 }
@@ -145,13 +162,14 @@ function updateQueue(
 export function replaceCreditAttributions(
   queue: EntityAttributionEditQueue,
   role: CreditAttributionRole,
-  entries: readonly Omit<CreditAttributionQueueEntry, "role" | "sortOrder">[],
+  entries: readonly Omit<CreditAttributionQueueEntry, "role" | "position">[],
 ): EntityAttributionEditQueue {
   return updateQueue(queue, (current) => {
+    const positions = positionsForOrder(entries.length);
     current.credits[role] = entries.map((entry, index) => ({
       ...entry,
       role,
-      sortOrder: index,
+      position: positions[index]!,
     }));
   });
 }
@@ -159,16 +177,16 @@ export function replaceCreditAttributions(
 export function addCreditAttribution(
   queue: EntityAttributionEditQueue,
   role: CreditAttributionRole,
-  entry: Omit<CreditAttributionQueueEntry, "role" | "sortOrder">,
+  entry: Omit<CreditAttributionQueueEntry, "role" | "position">,
 ): EntityAttributionEditQueue {
   return updateQueue(queue, (current) => {
     const existing = current.credits[role] ?? [];
     const withoutDuplicate = existing.filter(
       (item) => item.entityId !== entry.entityId,
     );
-    current.credits[role] = normalizeOrder([
+    current.credits[role] = normalizePositions([
       ...withoutDuplicate,
-      { ...entry, role, sortOrder: withoutDuplicate.length },
+      { ...entry, role, position: generateKeyBetween(undefined, undefined) },
     ]);
   });
 }
@@ -179,7 +197,7 @@ export function removeCreditAttribution(
   entityId: string,
 ): EntityAttributionEditQueue {
   return updateQueue(queue, (current) => {
-    current.credits[role] = normalizeOrder(
+    current.credits[role] = normalizePositions(
       (current.credits[role] ?? []).filter(
         (entry) => entry.entityId !== entityId,
       ),
@@ -199,20 +217,22 @@ export function reorderCreditAttributions(
     current.credits[role] = entityIds
       .map((entityId) => byId.get(entityId))
       .filter((entry): entry is CreditAttributionQueueEntry => !!entry)
-      .map((entry, index) => ({ ...entry, sortOrder: index }));
+      .map((entry) => ({ ...entry }));
+    current.credits[role] = normalizePositions(current.credits[role] ?? []);
   });
 }
 
 export function replaceSubjectAttributions(
   queue: EntityAttributionEditQueue,
   role: SubjectAttributionRole,
-  entries: readonly Omit<SubjectAttributionQueueEntry, "role" | "sortOrder">[],
+  entries: readonly Omit<SubjectAttributionQueueEntry, "role" | "position">[],
 ): EntityAttributionEditQueue {
   return updateQueue(queue, (current) => {
+    const positions = positionsForOrder(entries.length);
     current.subjects[role] = entries.map((entry, index) => ({
       ...entry,
       role,
-      sortOrder: index,
+      position: positions[index]!,
       weight: entry.weight ?? null,
     }));
   });
@@ -221,19 +241,19 @@ export function replaceSubjectAttributions(
 export function addSubjectAttribution(
   queue: EntityAttributionEditQueue,
   role: SubjectAttributionRole,
-  entry: Omit<SubjectAttributionQueueEntry, "role" | "sortOrder">,
+  entry: Omit<SubjectAttributionQueueEntry, "role" | "position">,
 ): EntityAttributionEditQueue {
   return updateQueue(queue, (current) => {
     const existing = current.subjects[role] ?? [];
     const withoutDuplicate = existing.filter(
       (item) => item.entityId !== entry.entityId,
     );
-    current.subjects[role] = normalizeOrder([
+    current.subjects[role] = normalizePositions([
       ...withoutDuplicate,
       {
         ...entry,
         role,
-        sortOrder: withoutDuplicate.length,
+        position: generateKeyBetween(undefined, undefined),
         weight: entry.weight ?? null,
       },
     ]);
@@ -246,7 +266,7 @@ export function removeSubjectAttribution(
   entityId: string,
 ): EntityAttributionEditQueue {
   return updateQueue(queue, (current) => {
-    current.subjects[role] = normalizeOrder(
+    current.subjects[role] = normalizePositions(
       (current.subjects[role] ?? []).filter(
         (entry) => entry.entityId !== entityId,
       ),
@@ -266,7 +286,8 @@ export function reorderSubjectAttributions(
     current.subjects[role] = entityIds
       .map((entityId) => byId.get(entityId))
       .filter((entry): entry is SubjectAttributionQueueEntry => !!entry)
-      .map((entry, index) => ({ ...entry, sortOrder: index }));
+      .map((entry) => ({ ...entry }));
+    current.subjects[role] = normalizePositions(current.subjects[role] ?? []);
   });
 }
 
@@ -280,7 +301,7 @@ function creditEntriesEqual(
       (entry, index) =>
         entry.entityId === b[index]?.entityId &&
         entry.role === b[index]?.role &&
-        entry.sortOrder === b[index]?.sortOrder,
+        entry.position === b[index]?.position,
     )
   );
 }
@@ -295,7 +316,7 @@ function subjectEntriesEqual(
       (entry, index) =>
         entry.entityId === b[index]?.entityId &&
         entry.role === b[index]?.role &&
-        entry.sortOrder === b[index]?.sortOrder &&
+        entry.position === b[index]?.position &&
         entry.weight === b[index]?.weight,
     )
   );
@@ -328,7 +349,7 @@ export function buildEntityAttributionBatchOps(
     role: role as CreditAttributionRole,
     entries: (queue.current.credits[role] ?? []).map((entry) => ({
       entityId: entry.entityId,
-      sortOrder: entry.sortOrder,
+      position: entry.position,
     })),
   }));
 
@@ -341,7 +362,7 @@ export function buildEntityAttributionBatchOps(
     role: role as SubjectAttributionRole,
     entries: (queue.current.subjects[role] ?? []).map((entry) => ({
       entityId: entry.entityId,
-      sortOrder: entry.sortOrder,
+      position: entry.position,
       weight: entry.weight,
     })),
   }));

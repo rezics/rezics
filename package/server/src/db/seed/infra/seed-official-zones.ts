@@ -9,6 +9,7 @@ import {
   type ZoneTheme,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
+import { rebalance } from "../../../shelf/fractional-index";
 import type { ServerDb } from "../../client";
 import {
   Unit,
@@ -44,7 +45,7 @@ export type OfficialZoneConfig = {
   pages: Array<{
     id: string;
     slug: string;
-    position: number;
+    position: string;
     config: ZonePageConfig;
   }>;
   homePageId: string;
@@ -187,6 +188,7 @@ function officialConfig(input: {
   pageIds: { home: string; search: string; feed: string };
 }): OfficialZoneConfig {
   const pageIds = input.pageIds;
+  const pagePositions = rebalance(3);
   return {
     boundary: {
       schema: "rezics/zone-boundary",
@@ -220,7 +222,7 @@ function officialConfig(input: {
       {
         id: pageIds.home,
         slug: "home",
-        position: 0,
+        position: pagePositions[0]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -230,13 +232,13 @@ function officialConfig(input: {
       {
         id: pageIds.search,
         slug: "search",
-        position: 1,
+        position: pagePositions[1]!,
         config: { schema: "rezics/zone-page", version: 1, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
-        position: 2,
+        position: pagePositions[2]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -603,13 +605,13 @@ async function upsertTranslations(
         unitId,
         language,
         isPrimary: language === DEFAULT_LANGUAGE,
-        sortOrder: index,
+        position: rebalance(translations.length)[index]!,
       })
       .onConflictDoUpdate({
         target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
         set: {
           isPrimary: language === DEFAULT_LANGUAGE,
-          sortOrder: index,
+          position: rebalance(translations.length)[index]!,
         },
       });
   }
@@ -670,13 +672,13 @@ async function upsertOfficialSectionLabels(
           unitId: label.id,
           language,
           isPrimary: language === DEFAULT_LANGUAGE,
-          sortOrder: index,
+          position: rebalance(translations.length)[index]!,
         })
         .onConflictDoUpdate({
           target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
           set: {
             isPrimary: language === DEFAULT_LANGUAGE,
-            sortOrder: index,
+            position: rebalance(translations.length)[index]!,
           },
         });
     }

@@ -5,6 +5,7 @@ import {
   type RatingTagSlug,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
+import { rebalance } from "../../../shelf/fractional-index";
 import type { ServerDb } from "../../client";
 import {
   Entity,
@@ -86,10 +87,9 @@ async function syncUnitTranslations(
   unitId: string,
   title: string,
 ): Promise<void> {
-  for (const [sortOrder, language] of [
-    DEFAULT_LANGUAGE,
-    FALLBACK_LANGUAGE,
-  ].entries()) {
+  const languages = [DEFAULT_LANGUAGE, FALLBACK_LANGUAGE];
+  const positions = rebalance(languages.length);
+  for (const [index, language] of languages.entries()) {
     await db
       .insert(UnitTranslation)
       .values({
@@ -108,13 +108,13 @@ async function syncUnitTranslations(
         unitId,
         language,
         isPrimary: language === DEFAULT_LANGUAGE,
-        sortOrder,
+        position: positions[index]!,
       })
       .onConflictDoUpdate({
         target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
         set: {
           isPrimary: language === DEFAULT_LANGUAGE,
-          sortOrder,
+          position: positions[index]!,
         },
       });
   }

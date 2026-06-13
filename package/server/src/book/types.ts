@@ -30,7 +30,7 @@ export const bookInclude = {
             include: { entity: true, translations: true },
           },
         },
-        orderBy: { sortOrder: "asc" as const },
+        orderBy: { position: "asc" as const },
       },
     },
   },

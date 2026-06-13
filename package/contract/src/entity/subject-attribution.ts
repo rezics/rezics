@@ -95,7 +95,7 @@ export const subjectAttributionDTOSchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: subjectAttributionRoleKeySchema,
-  sortOrder: t.Number(),
+  position: t.String(), // Fractional Indexing
   weight: t.Optional(t.Nullable(t.Number())),
   entity: t.Optional(entityDTOSchema),
   unit: t.Optional(unitDTOSchema),
@@ -113,7 +113,7 @@ export const linkSubjectAttributionSchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: subjectAttributionRoleKeySchema,
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
   weight: t.Optional(t.Nullable(t.Number())),
 });
 
@@ -131,7 +131,7 @@ export type UnlinkSubjectAttributionInput =
 
 export const entityAttributionBatchSetSubjectsEntrySchema = t.Object({
   entityId: t.String(),
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
   weight: t.Optional(t.Nullable(t.Number())),
 });
 

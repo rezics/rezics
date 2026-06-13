@@ -19,6 +19,7 @@ import {
   mapGameLibraryContentToDTO,
   mapMediaLibraryContentToDTO,
 } from "./mapper";
+import { rebalance } from "../shelf/fractional-index";
 import type { GameLibraryRow, MediaLibraryRow } from "./types";
 
 export interface GameMetadataRelationInput {
@@ -129,7 +130,10 @@ function createDrizzleGameMediaLibraryRepository(): GameMediaLibraryRepository {
               eq(SubjectAttribution.role, "available_on"),
             ),
           )
-          .orderBy(asc(SubjectAttribution.sortOrder)),
+          .orderBy(
+            asc(SubjectAttribution.position),
+            asc(SubjectAttribution.entityId),
+          ),
         loadUnitTagsWithSlug(unitId),
         loadOwnedContentStructure(unitId),
         db
@@ -209,14 +213,15 @@ function createDrizzleGameMediaLibraryRepository(): GameMediaLibraryRepository {
     async appendAvailableOnRelations(gameUnitId, platformEntityIds) {
       if (platformEntityIds.length === 0) return;
       const db = await getServerDb();
+      const positions = rebalance(platformEntityIds.length);
       await db
         .insert(SubjectAttribution)
         .values(
-          platformEntityIds.map((entityId, sortOrder) => ({
+          platformEntityIds.map((entityId, index) => ({
             unitId: gameUnitId,
             entityId,
             role: "available_on",
-            sortOrder,
+            position: positions[index]!,
           })),
         )
         .onConflictDoNothing();

@@ -17,16 +17,16 @@ type ReadOptions = {
 
 function availableSupportLanguages(hit: {
   supportLanguages?:
-    | readonly { language: string; isPrimary?: boolean; sortOrder?: number }[]
+    | readonly { language: string; isPrimary?: boolean; position?: string }[]
     | null;
   languages?: readonly string[] | null;
 }) {
   return hit.supportLanguages?.length
     ? hit.supportLanguages
-    : (hit.languages ?? []).map((language, sortOrder) => ({
+    : (hit.languages ?? []).map((language, index) => ({
         language,
-        isPrimary: sortOrder === 0,
-        sortOrder,
+        isPrimary: index === 0,
+        position: String(index).padStart(8, "0"),
       }));
 }
 

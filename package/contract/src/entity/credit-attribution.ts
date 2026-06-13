@@ -208,7 +208,7 @@ export const creditAttributionDTOSchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: creditAttributionRoleKeySchema,
-  sortOrder: t.Number(),
+  position: t.String(), // Fractional Indexing
   entity: t.Optional(entityDTOSchema),
   evidence: t.Optional(t.Array(creditAttributionEvidenceSummarySchema)),
 });
@@ -225,7 +225,7 @@ export const linkCreditAttributionSchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: creditAttributionRoleKeySchema,
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
 });
 
 export type LinkCreditAttributionInput =
@@ -233,7 +233,7 @@ export type LinkCreditAttributionInput =
 
 export const entityAttributionBatchSetCreditsEntrySchema = t.Object({
   entityId: t.String(),
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
 });
 
 export type EntityAttributionBatchSetCreditsEntry =
@@ -265,7 +265,7 @@ export const creditAttributionBriefSchema = t.Object({
   entityId: t.String(),
   name: t.String(),
   role: creditAttributionRoleKeySchema,
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
   entity: t.Optional(creditAttributionBriefEntitySchema),
   evidence: t.Optional(t.Array(creditAttributionEvidenceSummarySchema)),
 });

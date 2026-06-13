@@ -15,7 +15,7 @@ function makeHydratedLink(overrides: Record<string, unknown> = {}) {
     role: "source",
     labelUnitId: null,
     fallbackText: null,
-    sortOrder: 0,
+    position: "a",
     createdAt: now,
     updatedAt: now,
     sourceEntity: {
@@ -71,6 +71,9 @@ function makeRepository(
     },
     async entityExists(unitId: string) {
       return unitId === "source-entity-1" || unitId === "source-entity-2";
+    },
+    async nextPosition() {
+      return "V";
     },
     async create(data) {
       created.push(data);

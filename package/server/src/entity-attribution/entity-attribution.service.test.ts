@@ -24,10 +24,10 @@ const actor = (role: "ADMIN" | "USER" = "ADMIN"): RezicsSessionClaims => ({
 
 function createRepository(
   options: {
-    existingCredits?: Array<{ entityId: string; sortOrder: number }>;
+    existingCredits?: Array<{ entityId: string; position: string }>;
     existingSubjects?: Array<{
       entityId: string;
-      sortOrder: number;
+      position: string;
       weight: number | null;
     }>;
     eligibleCreditRoles?: string[];
@@ -64,7 +64,7 @@ function createRepository(
           unitId: "book-1",
           entityId: "entity-b",
           role: "author",
-          sortOrder: 0,
+          position: "a",
         } as any,
       ],
       subjects: [
@@ -72,7 +72,7 @@ function createRepository(
           unitId: "book-1",
           entityId: "character-1",
           role: "primary_character",
-          sortOrder: 0,
+          position: "a",
           weight: 0.8,
         } as any,
       ],
@@ -106,8 +106,8 @@ describe("EntityAttributionBatchService.batchUpdate", () => {
   test("commits mixed credit and subject changes with one history row", async () => {
     const { repository, txRepository } = createRepository({
       existingCredits: [
-        { entityId: "entity-a", sortOrder: 0 },
-        { entityId: "entity-b", sortOrder: 1 },
+        { entityId: "entity-a", position: "a" },
+        { entityId: "entity-b", position: "b" },
       ],
       existingSubjects: [],
     });
@@ -121,8 +121,8 @@ describe("EntityAttributionBatchService.batchUpdate", () => {
             op: "setCredits",
             role: "author",
             entries: [
-              { entityId: "entity-b", sortOrder: 0 },
-              { entityId: "entity-c", sortOrder: 1 },
+              { entityId: "entity-b", position: "a" },
+              { entityId: "entity-c", position: "b" },
             ],
           },
           {
@@ -181,7 +181,7 @@ describe("EntityAttributionBatchService.batchUpdate", () => {
 
   test("returns success for no-op batches without history or search writes", async () => {
     const { repository, txRepository } = createRepository({
-      existingCredits: [{ entityId: "entity-a", sortOrder: 0 }],
+      existingCredits: [{ entityId: "entity-a", position: "a" }],
     });
     const service = await createService(repository);
 
@@ -192,7 +192,7 @@ describe("EntityAttributionBatchService.batchUpdate", () => {
           {
             op: "setCredits",
             role: "author",
-            entries: [{ entityId: "entity-a", sortOrder: 0 }],
+            entries: [{ entityId: "entity-a", position: "a" }],
           },
         ],
       },

@@ -34,7 +34,7 @@ describe("searchRealms", () => {
     await searchRealms({ languages: ["ja"], appLocale: "en" });
 
     expect(realmSearchMock.mock.calls[0]?.[1].filter).toEqual([
-      '(isLanguageNeutral = true OR languages IN ["ja", "en"])',
+      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
     ]);
   });
 
@@ -46,8 +46,8 @@ describe("searchRealms", () => {
           languages: ["ja", "en"],
           isLanguageNeutral: false,
           supportLanguages: [
-            { language: "ja", isPrimary: true, sortOrder: 0 },
-            { language: "en", isPrimary: false, sortOrder: 1 },
+            { language: "ja", isPrimary: true, position: "a" },
+            { language: "en", isPrimary: false, position: "b" },
           ],
           translations: [
             { language: "ja", title: null, description: null },

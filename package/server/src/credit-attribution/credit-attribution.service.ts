@@ -15,6 +15,7 @@ import {
   UnitTranslation,
 } from "../db/schema";
 import { serverJobProducer } from "../job/job-boundary";
+import { generateBetween } from "../shelf/fractional-index";
 import {
   assertCanEditCollaborativeMetadata,
   createDrizzleCollaborativeMetadataTx,
@@ -37,6 +38,24 @@ function enqueueContentCreditsSync(unitId: string) {
 
 type CreditAttributionRow = typeof CreditAttribution.$inferSelect;
 type CreditAttributionTx = Awaited<ReturnType<typeof getServerDb>>;
+
+async function nextCreditAttributionPosition(
+  db: Pick<CreditAttributionTx, "select">,
+  input: Pick<LinkCreditAttributionInput, "unitId" | "role">,
+): Promise<string> {
+  const [last] = await db
+    .select({ position: CreditAttribution.position })
+    .from(CreditAttribution)
+    .where(
+      and(
+        eq(CreditAttribution.unitId, input.unitId),
+        eq(CreditAttribution.role, input.role),
+      ),
+    )
+    .orderBy(desc(CreditAttribution.position), desc(CreditAttribution.entityId))
+    .limit(1);
+  return generateBetween(last?.position, undefined);
+}
 
 export interface CreditAttributionRepository {
   getCreditEntity(
@@ -234,13 +253,15 @@ function createDrizzleCreditAttributionRepository(): CreditAttributionRepository
     async create(input, actor) {
       const db = await getServerDb();
       if (!actor) {
+        const position =
+          input.position ?? (await nextCreditAttributionPosition(db, input));
         const [row] = await db
           .insert(CreditAttribution)
           .values({
             unitId: input.unitId,
             entityId: input.entityId,
             role: input.role,
-            sortOrder: input.sortOrder ?? 0,
+            position,
           })
           .returning();
         if (!row) throw new Error("Failed to create CreditAttribution");
@@ -262,7 +283,9 @@ function createDrizzleCreditAttributionRepository(): CreditAttributionRepository
             unitId: input.unitId,
             entityId: input.entityId,
             role: input.role,
-            sortOrder: input.sortOrder ?? 0,
+            position:
+              input.position ??
+              (await nextCreditAttributionPosition(tx, input)),
           })
           .returning();
         if (!row) throw new Error("Failed to create CreditAttribution");
@@ -275,7 +298,7 @@ function createDrizzleCreditAttributionRepository(): CreditAttributionRepository
                 {
                   entityId: input.entityId,
                   role: input.role,
-                  sortOrder: input.sortOrder ?? 0,
+                  position: row.position,
                 },
               ],
             },
@@ -334,7 +357,11 @@ function createDrizzleCreditAttributionRepository(): CreditAttributionRepository
         .select()
         .from(CreditAttribution)
         .where(eq(CreditAttribution.unitId, unitId))
-        .orderBy(asc(CreditAttribution.role), asc(CreditAttribution.sortOrder));
+        .orderBy(
+          asc(CreditAttribution.role),
+          asc(CreditAttribution.position),
+          asc(CreditAttribution.entityId),
+        );
       return hydrateRows(db, rows);
     },
 
@@ -345,7 +372,7 @@ function createDrizzleCreditAttributionRepository(): CreditAttributionRepository
           unitId: CreditAttribution.unitId,
           entityId: CreditAttribution.entityId,
           role: CreditAttribution.role,
-          sortOrder: CreditAttribution.sortOrder,
+          position: CreditAttribution.position,
         })
         .from(CreditAttribution)
         .where(

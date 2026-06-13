@@ -324,10 +324,10 @@ function indexedSupportLanguages(unit: {
     | readonly {
         language?: string | null;
         isPrimary?: boolean | null;
-        sortOrder?: number | null;
+        position?: string | null;
       }[]
     | null;
-}): { language: Language; isPrimary: boolean; sortOrder: number }[] {
+}): { language: Language; isPrimary: boolean; position: string }[] {
   return (unit.supportLanguages ?? [])
     .map((item) => ({
       item,
@@ -340,7 +340,7 @@ function indexedSupportLanguages(unit: {
         item: {
           language?: string | null;
           isPrimary?: boolean | null;
-          sortOrder?: number | null;
+          position?: string | null;
         };
         language: Language;
       } => Boolean(entry.language),
@@ -348,9 +348,9 @@ function indexedSupportLanguages(unit: {
     .map(({ item, language }) => ({
       language,
       isPrimary: Boolean(item.isPrimary),
-      sortOrder: item.sortOrder ?? 0,
+      position: item.position ?? "",
     }))
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+    .sort((a, b) => a.position.localeCompare(b.position));
 }
 
 async function runProgressSyncWithRetry(
@@ -709,7 +709,7 @@ function attributionRowsFromJoinRows(rows: any[]) {
       unitId: row.unitId,
       entityId: row.entityId,
       role: row.role,
-      sortOrder: row.sortOrder,
+      position: row.position,
       entity: {
         entity: row.kind ? { kind: row.kind } : null,
         translations: [],
@@ -832,7 +832,7 @@ async function hydrateContentRows(rows: any[]) {
         unitId: CreditAttribution.unitId,
         entityId: CreditAttribution.entityId,
         role: CreditAttribution.role,
-        sortOrder: CreditAttribution.sortOrder,
+        position: CreditAttribution.position,
         kind: Entity.kind,
         title: UnitTranslation.title,
       })
@@ -843,13 +843,16 @@ async function hydrateContentRows(rows: any[]) {
         eq(UnitTranslation.unitId, CreditAttribution.entityId),
       )
       .where(inArray(CreditAttribution.unitId, unitIds))
-      .orderBy(asc(CreditAttribution.sortOrder)),
+      .orderBy(
+        asc(CreditAttribution.position),
+        asc(CreditAttribution.entityId),
+      ),
     getSearchDb()
       .select({
         unitId: SubjectAttribution.unitId,
         entityId: SubjectAttribution.entityId,
         role: SubjectAttribution.role,
-        sortOrder: SubjectAttribution.sortOrder,
+        position: SubjectAttribution.position,
         kind: Entity.kind,
         title: UnitTranslation.title,
       })
@@ -860,7 +863,10 @@ async function hydrateContentRows(rows: any[]) {
         eq(UnitTranslation.unitId, SubjectAttribution.entityId),
       )
       .where(inArray(SubjectAttribution.unitId, unitIds))
-      .orderBy(asc(SubjectAttribution.sortOrder)),
+      .orderBy(
+        asc(SubjectAttribution.position),
+        asc(SubjectAttribution.entityId),
+      ),
     getSearchDb().select().from(Book).where(inArray(Book.unitId, unitIds)),
     getSearchDb().select().from(Game).where(inArray(Game.unitId, unitIds)),
     getSearchDb().select().from(Media).where(inArray(Media.unitId, unitIds)),
@@ -1632,7 +1638,7 @@ export async function patchContentCredits(
       eq(UnitTranslation.unitId, CreditAttribution.entityId),
     )
     .where(eq(CreditAttribution.unitId, unitId))
-    .orderBy(asc(CreditAttribution.sortOrder));
+    .orderBy(asc(CreditAttribution.position), asc(CreditAttribution.entityId));
 
   const seenCredits = new Set<string>();
   const creditNames: string[] = [];
@@ -1670,7 +1676,10 @@ export async function patchContentSubjects(
       eq(UnitTranslation.unitId, SubjectAttribution.entityId),
     )
     .where(eq(SubjectAttribution.unitId, unitId))
-    .orderBy(asc(SubjectAttribution.sortOrder));
+    .orderBy(
+      asc(SubjectAttribution.position),
+      asc(SubjectAttribution.entityId),
+    );
 
   const subjectEntityIds: string[] = [];
   const seenSubjects = new Set<string>();
@@ -2448,7 +2457,9 @@ function languageOrder(unit: any, rows: any[]): string[] {
     unit?.defaultLanguage,
     supportLanguages.find((language: any) => language.isPrimary)?.language,
     ...[...supportLanguages]
-      .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .sort((a: any, b: any) =>
+        String(a.position ?? "").localeCompare(String(b.position ?? "")),
+      )
       .map((language: any) => language.language),
     ...rows.map((row: any) => row.language),
   ].filter(

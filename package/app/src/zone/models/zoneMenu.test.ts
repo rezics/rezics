@@ -46,9 +46,9 @@ const refUnits: Record<string, ZoneRefUnitSummary> = {
 };
 
 const pages = [
-  { id: "home", slug: "home", position: 0 },
-  { id: "search", slug: "search", position: 1 },
-  { id: "feed", slug: "feed", position: 2 },
+  { id: "home", slug: "home", position: "a" },
+  { id: "search", slug: "search", position: "b" },
+  { id: "feed", slug: "feed", position: "c" },
 ];
 
 const ctx = { zoneSlug: "toaru", pages, refUnits };

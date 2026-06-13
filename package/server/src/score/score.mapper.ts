@@ -52,7 +52,7 @@ export function mapScoreRealmFieldToDTO(
     realm: field.realm,
     key: field.key,
     label: field.label,
-    sortOrder: field.sortOrder,
+    position: field.position,
     createdAt: field.createdAt.toISOString(),
     updatedAt: field.updatedAt.toISOString(),
   };
