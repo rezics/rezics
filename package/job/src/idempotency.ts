@@ -39,6 +39,8 @@ export const searchIdempotency = {
 export const historyIdempotency = {
   outboxIngest: (outboxId: string) =>
     createIdempotencyKey("history.outbox.ingest", outboxId),
+  outboxIngestBatch: (batchSize?: number | null) =>
+    createIdempotencyKey("history.outbox.ingestBatch", batchSize),
 };
 
 export type RankingIdempotencyScope = {

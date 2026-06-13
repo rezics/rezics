@@ -21,6 +21,13 @@ function targetId(message: SequinMessage, keys: string[] = ["id"]) {
   return undefined;
 }
 
+function normalizeTableName(table: string) {
+  return table
+    .split(".")
+    .at(-1)
+    ?.replace(/^"+|"+$/g, "");
+}
+
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value)
     ? value
@@ -58,7 +65,7 @@ function sequinSource(message: SequinMessage): CommandSource {
 
 export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
   const source = sequinSource(message);
-  const table = message.table;
+  const table = normalizeTableName(message.table);
   const action = message.action.toLowerCase();
   const isDelete = action === "delete";
 

@@ -26,6 +26,7 @@ import {
   compareRevisionPathSnapshots,
   type DiffPart,
   type HistoryFieldChange,
+  resolveRevisionComparePair,
 } from "../models/historyCompare";
 
 type HistoryTab = "editorial" | "structure";
@@ -155,7 +156,17 @@ export function BookHistoryPage() {
           onRestore={setRestoreSequence}
         />
       ) : null}
-      {tab === "structure" ? (
+      {tab === "structure" && structureQuery.isLoading ? (
+        <p className="text-sm leading-ui text-text-secondary">
+          {getI18nRuntime().i18n.t("common:loading")}
+        </p>
+      ) : null}
+      {tab === "structure" && structureQuery.error ? (
+        <QueryErrorDisplay error={structureQuery.error} />
+      ) : null}
+      {tab === "structure" &&
+      !structureQuery.isLoading &&
+      !structureQuery.error ? (
         <StructureTimeline events={structureEvents} actors={actors} />
       ) : null}
 
@@ -250,13 +261,14 @@ export function RevisionTimeline({
   ]
     .filter(Number.isFinite)
     .sort((a, b) => b - a);
-  const latestSequence = revisionSequences[0];
 
   return (
     <ol className="flex flex-col divide-y divide-border-whisper">
       {revisions.map((revision) => {
-        const compareTarget = latestSequence ?? revision.sequence;
-        const compareBase = revision.sequence;
+        const comparePair = resolveRevisionComparePair(
+          revisionSequences,
+          revision.sequence,
+        );
         return (
           <li key={revision.id} className="grid gap-3 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -278,24 +290,24 @@ export function RevisionTimeline({
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {latestSequence ? (
+                {comparePair ? (
                   <Link
                     to="/book/$bookId/edit/history/compare/$targetSequence"
                     params={{
                       bookId,
-                      targetSequence: String(compareTarget),
+                      targetSequence: String(comparePair.targetSequence),
                     }}
                     search={
                       {
-                        base: String(compareBase),
+                        base: String(comparePair.baseSequence),
                         mode: "unified",
                       } as never
                     }
                     aria-label={getI18nRuntime().i18n.t(
                       "search:history_revision_compare_label",
                       {
-                        base: compareBase,
-                        target: compareTarget,
+                        base: comparePair.baseSequence,
+                        target: comparePair.targetSequence,
                       },
                     )}
                     className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"

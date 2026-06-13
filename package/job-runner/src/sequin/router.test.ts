@@ -26,6 +26,44 @@ describe("Sequin payload routing", () => {
     ]);
   });
 
+  test("routes schema-qualified HistoryOutbox inserts to history ingest", () => {
+    const messages = parseSequinPayload({
+      table: "public.HistoryOutbox",
+      action: "insert",
+      record: { id: "outbox-1" },
+      idempotency_key: "seq-1",
+    });
+
+    expect(routeSequinMessages(messages)).toMatchObject([
+      {
+        kind: "history.outbox.ingest",
+        payload: { outboxId: "outbox-1" },
+        source: {
+          table: "public.HistoryOutbox",
+        },
+      },
+    ]);
+  });
+
+  test("routes quoted schema-qualified table names without losing diagnostics", () => {
+    const messages = parseSequinPayload({
+      table: '"public"."UnitTranslation"',
+      action: "update",
+      record: { unitId: "work-1" },
+    });
+
+    expect(routeSequinMessages(messages)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "search.content.patchTranslations",
+          source: expect.objectContaining({
+            table: '"public"."UnitTranslation"',
+          }),
+        }),
+      ]),
+    );
+  });
+
   test("routes UnitTag without using CDC changes as a Meili patch", () => {
     const messages = parseSequinPayload({
       table: "UnitTag",

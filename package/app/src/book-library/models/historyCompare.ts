@@ -41,6 +41,11 @@ export type HistoryCompareResult = {
   changes: HistoryFieldChange[];
 };
 
+export type RevisionComparePair = {
+  baseSequence: number;
+  targetSequence: number;
+};
+
 const TEXT_SOURCE_FIELD_NAMES = new Set([
   "summary",
   "description",
@@ -319,4 +324,29 @@ export function compareRevisionPathSnapshots(
   });
 
   return { changes };
+}
+
+export function resolveRevisionComparePair(
+  sequences: readonly number[],
+  selectedSequence: number,
+): RevisionComparePair | null {
+  const ordered = [...new Set(sequences)]
+    .filter(Number.isFinite)
+    .sort((a, b) => b - a);
+  const selectedIndex = ordered.indexOf(selectedSequence);
+  if (selectedIndex < 0 || ordered.length < 2) return null;
+
+  const targetSequence =
+    selectedIndex === 0 ? ordered[0] : ordered[selectedIndex - 1];
+  const baseSequence = selectedIndex === 0 ? ordered[1] : selectedSequence;
+
+  if (
+    baseSequence === undefined ||
+    targetSequence === undefined ||
+    baseSequence === targetSequence
+  ) {
+    return null;
+  }
+
+  return { baseSequence, targetSequence };
 }

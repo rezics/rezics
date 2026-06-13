@@ -4,6 +4,7 @@ import {
   compareRevisionSlots,
   createInlineTokenDiff,
   createMarkdownLineDiff,
+  resolveRevisionComparePair,
 } from "./historyCompare";
 
 describe("history compare utilities", () => {
@@ -318,6 +319,18 @@ describe("history compare utilities", () => {
     });
 
     expect(result.changes).toEqual([]);
+  });
+
+  test("resolves revision compare pairs without comparing a revision to itself", () => {
+    expect(resolveRevisionComparePair([5, 4, 3], 5)).toEqual({
+      baseSequence: 4,
+      targetSequence: 5,
+    });
+    expect(resolveRevisionComparePair([5, 4, 3], 4)).toEqual({
+      baseSequence: 4,
+      targetSequence: 5,
+    });
+    expect(resolveRevisionComparePair([5], 5)).toBeNull();
   });
 
   test("creates CJK-aware inline token diff with safe output", () => {
