@@ -36,6 +36,7 @@ export const HorizontalReviewCarousel: React.FC<
       itemClassName="pl-4 basis-[100%] lg:basis-[50%] xl:basis-[40%]"
       className={className}
       ariaLabel="Review pairs"
+      wheelScroll
       renderItem={(pair) => (
         <ReviewCardPair review1={pair.review1} review2={pair.review2} />
       )}

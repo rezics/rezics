@@ -101,6 +101,7 @@ export const ActiveRealmsSection: React.FC = () => {
               itemKey={(realm) => realm.unitId}
               itemClassName="pl-4 basis-[86%] xsm:basis-[62%]"
               showArrows={false}
+              wheelScroll
               ariaLabel={t("page:home_sections_active_realms_title")}
               renderItem={(realm) => <RealmCard realm={realm} />}
             />

@@ -78,6 +78,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
             itemKey={(entry) => entry.unitId}
             itemClassName={PINNED_ITEM_CLASS}
             ariaLabel={t("entity:pinboard_pinned_region")}
+            wheelScroll
             renderItem={(entry) => (
               <PinboardEntryCard
                 entry={entry}
