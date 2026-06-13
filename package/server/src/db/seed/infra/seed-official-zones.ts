@@ -605,13 +605,13 @@ async function upsertTranslations(
         unitId,
         language,
         isPrimary: language === DEFAULT_LANGUAGE,
-        position: rebalance(translations.length)[index]!,
+        position: rebalance(languages.length)[index]!,
       })
       .onConflictDoUpdate({
         target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
         set: {
           isPrimary: language === DEFAULT_LANGUAGE,
-          position: rebalance(translations.length)[index]!,
+          position: rebalance(languages.length)[index]!,
         },
       });
   }
@@ -672,13 +672,13 @@ async function upsertOfficialSectionLabels(
           unitId: label.id,
           language,
           isPrimary: language === DEFAULT_LANGUAGE,
-          position: rebalance(translations.length)[index]!,
+          position: rebalance(languages.length)[index]!,
         })
         .onConflictDoUpdate({
           target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
           set: {
             isPrimary: language === DEFAULT_LANGUAGE,
-            position: rebalance(translations.length)[index]!,
+            position: rebalance(languages.length)[index]!,
           },
         });
     }
