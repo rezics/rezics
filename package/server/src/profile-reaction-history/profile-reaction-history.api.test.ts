@@ -29,7 +29,7 @@ interface FakeReactionRow {
   userId: string;
   targetId: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
   createdAt: string;
 }
 
@@ -135,6 +135,16 @@ mock.module("../utils/errors", () => ({
 }));
 
 mock.module("../reaction-boundary/reaction-boundary.client", () => ({
+  cleanupReactions: async () => ({ ok: true }),
+  createReaction: async () => ({
+    id: "reaction-1",
+    userId: "user-1",
+    targetId: "target-1",
+    reaction: "upvote",
+    contextUnitId: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    created: true,
+  }),
   listGivenReactions: async (q: {
     userId: string;
     cursor?: string;
@@ -172,6 +182,12 @@ mock.module("../reaction-boundary/reaction-boundary.client", () => ({
     const limit = body.limit ?? 20;
     return { items: rows.slice(0, limit), nextCursor: null };
   },
+  recordShare: async () => ({
+    targetId: "target-1",
+    shareCount: 1,
+    created: true,
+  }),
+  removeReaction: async () => ({ success: true }),
 }));
 
 let api: any;
@@ -196,7 +212,7 @@ function row(
     userId: "u-actor",
     targetId: "t-1",
     reaction: "upvote",
-    scopeKey: "direct",
+    contextUnitId: null,
     createdAt: `2026-01-01T00:00:${String(i).padStart(2, "0")}.000Z`,
     ...partial,
   };
@@ -277,7 +293,7 @@ describe("GET /profile/:userId/reaction/given", () => {
     expect(body.items[0].target).toBeNull();
   });
 
-  test("links realm-scoped post reactions to the realm-context route", async () => {
+  test("links realm-context post reactions to the realm-context route", async () => {
     users.set("u1", { userId: "u1" });
     units.set("realm-1", {
       id: "realm-1",
@@ -290,14 +306,14 @@ describe("GET /profile/:userId/reaction/given", () => {
       id: "post-1",
       type: "POST",
       userId: "someone-else",
-      translations: [{ title: "Scoped", description: null }],
+      translations: [{ title: "Contextual", description: null }],
     });
     givenByUser.set("u1", [
       row(1, {
         id: "r1",
         userId: "u1",
         targetId: "post-1",
-        scopeKey: "realm:realm-1",
+        contextUnitId: "realm-1",
       }),
     ]);
 

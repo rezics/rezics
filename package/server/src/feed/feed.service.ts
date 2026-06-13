@@ -552,7 +552,7 @@ async function hydrateTargetUnitSummaries(
   for (const unitId of uniqueIds) {
     result.set(unitId, {
       unitId,
-      kind: unitTypeMap.get(unitId)?.toLowerCase() ?? null,
+      kind: unitTypeMap.get(unitId)?.toLowerCase(),
       title: titlesByUnit.get(unitId) ?? null,
     });
   }
@@ -840,8 +840,10 @@ function interleaveRows(left: FeedRow[], right: FeedRow[]): FeedRow[] {
   const rows: FeedRow[] = [];
   const max = Math.max(left.length, right.length);
   for (let index = 0; index < max; index += 1) {
-    if (left[index]) rows.push(left[index]);
-    if (right[index]) rows.push(right[index]);
+    const leftRow = left[index];
+    if (leftRow) rows.push(leftRow);
+    const rightRow = right[index];
+    if (rightRow) rows.push(rightRow);
   }
   return rows;
 }

@@ -17,6 +17,7 @@ const createReactionMock = mock(async () => ({
   userId: "user-1",
   targetId: "post-1",
   reaction: "upvote",
+  contextUnitId: null,
   createdAt: "2026-05-28T00:00:00.000Z",
   created: true,
 }));
@@ -71,6 +72,11 @@ mock.module("./reaction-boundary.client", () => ({
   createReaction: createReactionMock,
   listByUser: mock(async () => ({ items: [], nextCursor: null })),
   listGivenReactions: mock(async () => ({ items: [], nextCursor: null })),
+  recordShare: mock(async () => ({
+    targetId: "post-1",
+    shareCount: 1,
+    created: true,
+  })),
   removeReaction: mock(async () => ({ success: true })),
 }));
 
@@ -84,6 +90,7 @@ describe("reactionBoundaryApi", () => {
       userId: "user-1",
       targetId: "post-1",
       reaction: "upvote",
+      contextUnitId: null,
       createdAt: "2026-05-28T00:00:00.000Z",
       created: true,
     }));
@@ -144,7 +151,7 @@ describe("reactionBoundaryApi", () => {
       currentIdentity.userId,
       "post-1",
       "upvote",
-      "direct",
+      null,
     );
     expect(findTargetOwner).toHaveBeenCalledWith("post-1");
   });
@@ -157,6 +164,7 @@ describe("reactionBoundaryApi", () => {
       userId: "user-1",
       targetId: "post-1",
       reaction: "downvote",
+      contextUnitId: null,
       createdAt: "2026-05-28T00:00:00.000Z",
       created: true,
     }));
@@ -182,13 +190,13 @@ describe("reactionBoundaryApi", () => {
       currentIdentity.userId,
       "post-1",
       "downvote",
-      "direct",
+      null,
     );
     expect(findTargetOwner).not.toHaveBeenCalled();
     expect(broadcastMock).not.toHaveBeenCalled();
   });
 
-  test("rejects private realm-scoped reactions without membership", async () => {
+  test("rejects private realm-context reactions without membership", async () => {
     policyAllowed = true;
     findPolicyRealm.mockResolvedValue({
       id: "realm-1",
@@ -210,7 +218,7 @@ describe("reactionBoundaryApi", () => {
         body: JSON.stringify({
           targetId: "post-1",
           reaction: "upvote",
-          scopeKey: "realm:realm-1",
+          contextUnitId: "realm-1",
         }),
       }),
     );

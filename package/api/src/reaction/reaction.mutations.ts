@@ -56,27 +56,27 @@ function isBatchKey(key: QueryKey, prefix: readonly unknown[]): boolean {
 
 function batchKeyTail(
   key: QueryKey,
-): { targetIds: readonly string[]; scopeKey: string | null } | undefined {
+): { targetIds: readonly string[]; contextUnitId: string | null } | undefined {
   const tail = (key as unknown[])[key.length - 1];
-  if (Array.isArray(tail)) return { targetIds: tail, scopeKey: null };
+  if (Array.isArray(tail)) return { targetIds: tail, contextUnitId: null };
   if (!tail || typeof tail !== "object") return undefined;
   const objectTail = tail as {
     targetIds?: unknown;
-    scopeKey?: string | null;
+    contextUnitId?: string | null;
   };
   if (!Array.isArray(objectTail.targetIds)) return undefined;
   return {
     targetIds: objectTail.targetIds.filter(
       (id): id is string => typeof id === "string",
     ),
-    scopeKey: objectTail.scopeKey ?? null,
+    contextUnitId: objectTail.contextUnitId ?? null,
   };
 }
 
 function snapshotAffectedBatches(
   queryClient: ReturnType<typeof useQueryClient>,
   targetId: string,
-  userScopeKey?: string | null,
+  userContextUnitId?: string | null,
 ): MutationContext {
   const summaryPrefix = [...reactionKeys.summaries(), "batch"] as const;
   const myPrefix = [...reactionKeys.mine(), "batch"] as const;
@@ -88,7 +88,10 @@ function snapshotAffectedBatches(
     if (!isBatchKey(key, summaryPrefix)) continue;
     const tail = batchKeyTail(key);
     if (!tail?.targetIds.includes(targetId)) continue;
-    if (tail.scopeKey !== null && tail.scopeKey !== (userScopeKey ?? null)) {
+    if (
+      tail.contextUnitId !== null &&
+      tail.contextUnitId !== (userContextUnitId ?? null)
+    ) {
       continue;
     }
     if (data === undefined) continue;
@@ -102,7 +105,7 @@ function snapshotAffectedBatches(
     if (!isBatchKey(key, myPrefix)) continue;
     const tail = batchKeyTail(key);
     if (!tail?.targetIds.includes(targetId)) continue;
-    if (tail.scopeKey !== (userScopeKey ?? null)) continue;
+    if (tail.contextUnitId !== (userContextUnitId ?? null)) continue;
     if (data === undefined) continue;
     mySnapshots.push({ key, data });
   }
@@ -263,7 +266,7 @@ export function useCreateReactionMutation(
       const context = snapshotAffectedBatches(
         queryClient,
         variables.targetId,
-        variables.scopeKey,
+        variables.contextUnitId,
       );
 
       for (const snap of context.summarySnapshots) {
@@ -334,7 +337,7 @@ export function useDeleteReactionMutation(
       const context = snapshotAffectedBatches(
         queryClient,
         variables.targetId,
-        variables.scopeKey,
+        variables.contextUnitId,
       );
 
       for (const snap of context.summarySnapshots) {

@@ -31,6 +31,7 @@ describe("reaction contract", () => {
       Value.Check(createSchema, {
         targetId: "unit-1",
         reaction: "upvote",
+        contextUnitId: null,
       }),
     ).toBe(true);
 
@@ -40,6 +41,17 @@ describe("reaction contract", () => {
         reaction: "heart",
       }),
     ).toBe(false);
+  });
+
+  test("uses nullable contextUnitId instead of scopeKey", () => {
+    expect(
+      Value.Check(createSchema, {
+        targetId: "comment-1",
+        reaction: "upvote",
+        contextUnitId: "realm-1",
+      }),
+    ).toBe(true);
+    expect("scopeKey" in createSchema.properties).toBe(false);
   });
 
   test("share schemas use singular shareCount fields", () => {

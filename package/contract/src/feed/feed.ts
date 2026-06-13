@@ -118,6 +118,7 @@ export const feedPostRowSchema = t.Object({
   rowId: t.String(),
   post: postDTOSchema,
   href: t.String(),
+  contextUnitId: t.Nullable(t.String()),
   realm: t.Optional(
     t.Nullable(
       t.Object({

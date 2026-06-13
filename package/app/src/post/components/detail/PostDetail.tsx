@@ -22,8 +22,8 @@ import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
 export interface PostDetailProps {
   post: PostDTO;
   variantContext?: VariantContextSummary | null;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   onReplyInvoke?: () => void;
   overflowContent?: React.ReactNode;
 }
@@ -35,8 +35,8 @@ export interface PostDetailProps {
 export function PostDetail({
   post,
   variantContext,
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
   onReplyInvoke,
   overflowContent,
 }: PostDetailProps) {
@@ -47,8 +47,8 @@ export function PostDetail({
     variant: "pill",
     post,
     policy: postPolicy,
-    summaryScopeKey,
-    reactionScopeKey,
+    summaryContextUnitId,
+    reactionContextUnitId,
     actions: postDetailActions,
     overflow: postDetailOverflow,
     onReplyInvoke,

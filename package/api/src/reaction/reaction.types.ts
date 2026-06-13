@@ -10,20 +10,20 @@ export type ReactionDTO = {
   userId: string;
   targetId: string;
   reaction: AllowedReactionKind;
-  scopeKey: string;
+  contextUnitId: string | null;
   createdAt: string;
 };
 
 export type ReactionCreateInput = {
   targetId: string;
   reaction: AllowedReactionKind;
-  scopeKey?: string;
+  contextUnitId?: string | null;
 };
 
 export type ReactionDeleteQuery = {
   targetId: string;
   reaction: AllowedReactionKind;
-  scopeKey?: string;
+  contextUnitId?: string | null;
 };
 
 /**
@@ -83,7 +83,7 @@ export type ReactionHistoryActor = {
 export type ReactionHistoryGivenItem = {
   id: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
   createdAt: string;
   target: ReactionHistoryTarget | null;
 };
@@ -99,7 +99,7 @@ export type ReactionHistoryPage<TItem> = {
 
 export type ReactionHistoryQuery = {
   reactions?: string;
-  scopeKey?: string;
+  contextUnitId?: string | null;
   cursor?: string;
   limit?: number;
 };

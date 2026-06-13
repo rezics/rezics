@@ -18,7 +18,7 @@ interface FakeReactionRow {
   userId: string;
   targetId: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
   createdAt: Date;
 }
 
@@ -26,7 +26,12 @@ let allRows: FakeReactionRow[] = [];
 const shareRows = new Set<string>();
 const summaries = new Map<
   string,
-  { targetId: string; reaction: string; scopeKey: string; count: number }
+  {
+    targetId: string;
+    reaction: string;
+    contextUnitId: string | null;
+    count: number;
+  }
 >();
 const shareSummaries = new Map<
   string,
@@ -41,17 +46,17 @@ function reactionKey(input: {
   userId: string;
   targetId: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
 }) {
-  return `${input.userId}|${input.targetId}|${input.reaction}|${input.scopeKey}`;
+  return `${input.userId}|${input.targetId}|${input.reaction}|${input.contextUnitId}`;
 }
 
 function summaryKey(input: {
   targetId: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
 }) {
-  return `${input.targetId}|${input.reaction}|${input.scopeKey}`;
+  return `${input.targetId}|${input.reaction}|${input.contextUnitId}`;
 }
 
 function usageKey(input: { userId: string; targetId: string }) {
@@ -63,9 +68,12 @@ function shareKey(input: { userId: string; targetId: string }) {
 }
 
 class InMemoryReactionRepository implements ReactionRepository {
-  async getSummaryRows(targetIds: string[], scopeKey: string | undefined) {
+  async getSummaryRows(
+    targetIds: string[],
+    contextUnitId: string | null | undefined,
+  ) {
     const ids = new Set(targetIds);
-    if (scopeKey === undefined) {
+    if (contextUnitId === undefined) {
       const grouped = new Map<
         string,
         { targetId: string; reaction: string; count: number }
@@ -85,14 +93,14 @@ class InMemoryReactionRepository implements ReactionRepository {
     }
 
     return Array.from(summaries.values()).filter(
-      (row) => ids.has(row.targetId) && row.scopeKey === scopeKey,
+      (row) => ids.has(row.targetId) && row.contextUnitId === contextUnitId,
     );
   }
 
   async getUserReactionRows(
     userId: string,
     targetIds: string[],
-    scopeKey: string,
+    contextUnitId: string | null,
   ) {
     const ids = new Set(targetIds);
     return allRows
@@ -100,7 +108,7 @@ class InMemoryReactionRepository implements ReactionRepository {
         (row) =>
           row.userId === userId &&
           ids.has(row.targetId) &&
-          row.scopeKey === scopeKey,
+          row.contextUnitId === contextUnitId,
       )
       .map((row) => ({ targetId: row.targetId, reaction: row.reaction }));
   }
@@ -122,8 +130,8 @@ class InMemoryReactionRepository implements ReactionRepository {
       const reactions = new Set(input.reactions);
       rows = rows.filter((row) => reactions.has(row.reaction));
     }
-    if (input.scopeKey) {
-      rows = rows.filter((row) => row.scopeKey === input.scopeKey);
+    if (input.contextUnitId !== undefined) {
+      rows = rows.filter((row) => row.contextUnitId === input.contextUnitId);
     }
     if (input.cursor) {
       rows = rows.filter(
@@ -179,7 +187,7 @@ class InMemoryReactionRepository implements ReactionRepository {
       userId: input.userId,
       targetId: input.targetId,
       reaction: input.reaction,
-      scopeKey: input.scopeKey,
+      contextUnitId: input.contextUnitId,
     });
     allRows.push(created);
 
@@ -189,12 +197,12 @@ class InMemoryReactionRepository implements ReactionRepository {
       ({
         targetId: input.targetId,
         reaction: input.reaction,
-        scopeKey: input.scopeKey,
+        contextUnitId: input.contextUnitId,
         count: 0,
       } satisfies {
         targetId: string;
         reaction: string;
-        scopeKey: string;
+        contextUnitId: string | null;
         count: number;
       });
     summary.count += 1;
@@ -279,7 +287,7 @@ function seed(rows: FakeReactionRow[]) {
     const current = summaries.get(sk) ?? {
       targetId: r.targetId,
       reaction: r.reaction,
-      scopeKey: r.scopeKey,
+      contextUnitId: r.contextUnitId,
       count: 0,
     };
     current.count += 1;
@@ -305,7 +313,7 @@ function row(
     userId: "u-actor",
     targetId: "t-1",
     reaction: "upvote",
-    scopeKey: "direct",
+    contextUnitId: null,
     createdAt: new Date(2026, 0, 1, 0, 0, i),
     ...partial,
   };
@@ -460,56 +468,54 @@ describe("reactionService.listByUser", () => {
   });
 });
 
-describe("reactionService scoped reactions", () => {
-  test("allows the same reaction in direct and realm scopes and aggregates globally", async () => {
+describe("reactionService contextual reactions", () => {
+  test("allows the same reaction in direct and realm contexts and aggregates globally", async () => {
     seed([]);
 
     await service.create("u", "t-1", "upvote");
-    await service.create("u", "t-1", "upvote", "realm:realm-1");
-    await service.create("u", "t-1", "upvote", "realm:realm-2");
+    await service.create("u", "t-1", "upvote", "realm-1");
+    await service.create("u", "t-1", "upvote", "realm-2");
 
     await expect(service.getUserReactions("u", ["t-1"])).resolves.toEqual({
       "t-1": ["upvote"],
     });
     await expect(
-      service.getUserReactions("u", ["t-1"], "realm:realm-1"),
+      service.getUserReactions("u", ["t-1"], "realm-1"),
     ).resolves.toEqual({ "t-1": ["upvote"] });
     await expect(service.getSummary(["t-1"])).resolves.toEqual({
       "t-1": { upvote: 3 },
     });
-    await expect(service.getSummary(["t-1"], "realm:realm-2")).resolves.toEqual(
-      {
-        "t-1": { upvote: 1 },
-      },
-    );
+    await expect(service.getSummary(["t-1"], "realm-2")).resolves.toEqual({
+      "t-1": { upvote: 1 },
+    });
   });
 
-  test("rejects active quota overflow across scopes and releases quota on delete", async () => {
+  test("rejects active quota overflow across contexts and releases quota on delete", async () => {
     seed([]);
 
     await service.create("u", "t-1", "upvote");
-    await service.create("u", "t-1", "downvote", "realm:realm-1");
-    await service.create("u", "t-1", "upvote", "realm:realm-2");
+    await service.create("u", "t-1", "downvote", "realm-1");
+    await service.create("u", "t-1", "upvote", "realm-2");
 
     await expect(
-      service.create("u", "t-1", "downvote", "realm:realm-3"),
+      service.create("u", "t-1", "downvote", "realm-3"),
     ).rejects.toBeInstanceOf(ReactionQuotaExceededError);
 
-    await service.remove("u", "t-1", "upvote", "realm:realm-2");
+    await service.remove("u", "t-1", "upvote", "realm-2");
     await expect(
-      service.create("u", "t-1", "downvote", "realm:realm-3"),
+      service.create("u", "t-1", "downvote", "realm-3"),
     ).resolves.toMatchObject({ created: true });
   });
 
-  test("list filters can select a reaction scope", async () => {
+  test("list filters can select a reaction context", async () => {
     seed([
-      row(1, { id: "direct", userId: "u", scopeKey: "direct" }),
-      row(2, { id: "realm", userId: "u", scopeKey: "realm:realm-1" }),
+      row(1, { id: "direct", userId: "u", contextUnitId: null }),
+      row(2, { id: "realm", userId: "u", contextUnitId: "realm-1" }),
     ]);
 
     const result = await service.listGiven({
       userId: "u",
-      scopeKey: "realm:realm-1",
+      contextUnitId: "realm-1",
     });
 
     expect(result.items.map((item: any) => item.id)).toEqual(["realm"]);
@@ -558,9 +564,9 @@ describe("reactionService share intent", () => {
     await service.recordShare("u", "t-1");
     await service.recordShare("u", "t-1");
     await service.create("u", "t-1", "upvote");
-    await service.create("u", "t-1", "downvote", "realm:realm-1");
+    await service.create("u", "t-1", "downvote", "realm-1");
     await expect(
-      service.create("u", "t-1", "upvote", "realm:realm-2"),
+      service.create("u", "t-1", "upvote", "realm-2"),
     ).resolves.toMatchObject({ created: true });
   });
 

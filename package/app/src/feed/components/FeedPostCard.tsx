@@ -72,8 +72,8 @@ export interface FeedPostCardProps {
   /** Override the default post detail route. 覆盖默认的帖子详情路由。 */
   href?: string;
   onReplyInvoke?: () => void;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   reactionSize?: EngagementSize;
   reactionActions?: Action[];
   reactionOverflow?: Action[];
@@ -136,11 +136,11 @@ export function FeedPostCard({
     : postCardActions,
   reactionOverflow = post.kind === PostKind.REVIEW ? [] : postCardOverflow,
   reactionPolicy = post.kind === PostKind.REVIEW ? reviewPolicy : postPolicy,
-  reactionScopeKey,
+  reactionContextUnitId,
   reactionSize = "md",
   realmModerationAt,
   realmModerationStatus,
-  summaryScopeKey,
+  summaryContextUnitId,
   targetUnit,
   title,
   titleLines = 2,
@@ -173,12 +173,12 @@ export function FeedPostCard({
     variant: "pill",
     post,
     policy: reactionPolicy,
-    summaryScopeKey,
-    reactionScopeKey,
+    summaryContextUnitId,
+    reactionContextUnitId,
     actions: reactionActions,
     overflow: reactionOverflow,
     actionPolicy: reactionActionPolicy,
-    onReplyInvoke: onReplyInvoke ?? (() => undefined),
+    onReplyInvoke: onReplyInvoke ?? openPost,
   });
 
   const mediaNode =

@@ -70,14 +70,14 @@ export const rankingIdempotency = {
     createIdempotencyKey("ranking.viewBucketFlush", cursor),
   reactionBucket: (
     targetId: string,
-    scopeKey: string,
+    contextUnitId: string | null | undefined,
     reaction: string,
     at?: string | null,
   ) =>
     createIdempotencyKey(
       "ranking.reactionBucket",
       targetId,
-      scopeKey,
+      contextUnitId ?? "direct",
       reaction,
       at,
     ),

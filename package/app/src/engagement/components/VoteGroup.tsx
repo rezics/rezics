@@ -9,9 +9,9 @@ import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type VoteGroupProps = {
-  targetUnitId: string;
-  summaryScopeKey?: string | null;
-  userScopeKey?: string | null;
+  targetId: string;
+  summaryContextUnitId?: string | null;
+  userContextUnitId?: string | null;
   /**
    * Override the size from context. Rarely needed; prefer setting on the bar.
    * 覆盖来自 context 的 size。很少需要；优先在 bar 上设置。
@@ -20,18 +20,18 @@ export type VoteGroupProps = {
 };
 
 export const VoteGroup: React.FC<VoteGroupProps> = ({
-  targetUnitId,
-  summaryScopeKey,
-  userScopeKey,
+  targetId,
+  summaryContextUnitId,
+  userContextUnitId,
   size: sizeProp,
 }) => {
   const { t } = useTranslation(["community"]);
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const variant = ctx.variant;
-  const { summary, userReactions, isHydrated } = useReactionData(targetUnitId, {
-    summaryScopeKey,
-    userScopeKey,
+  const { summary, userReactions, isHydrated } = useReactionData(targetId, {
+    summaryContextUnitId,
+    userContextUnitId,
   });
   const score = (summary.upvote ?? 0) - (summary.downvote ?? 0);
   const userVote: "upvote" | "downvote" | null = userReactions.includes(
@@ -42,8 +42,8 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
       ? "downvote"
       : null;
   const { toggleUp, toggleDown, auth } = useVoteController({
-    targetUnitId,
-    scopeKey: userScopeKey ?? undefined,
+    targetId,
+    contextUnitId: userContextUnitId ?? null,
     userVote,
   });
 

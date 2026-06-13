@@ -31,6 +31,15 @@ function toNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+function reactionContextForRankingScope(
+  scope: RankingScope,
+): string | null | undefined {
+  // Ranking scopes are not interaction contexts. Only a realm ranking scope maps
+  // to reaction.contextUnitId; global/work/tag/parent rankings read all-context
+  // reaction aggregates.
+  return scope.kind === "realm" ? (scope.id ?? null) : undefined;
+}
+
 function rankKindsForState(
   state: Awaited<ReturnType<MainStateReader["readUnitState"]>>,
 ): RankKind[] {
@@ -210,7 +219,7 @@ export class RankingService {
           reactionCounts: reactionSummaries[unitId] ?? {},
           recentVoteCounts: await this.repository.readRecentVoteWindows(
             unitId,
-            scopeKeyValue,
+            reactionContextForRankingScope(scope),
             computedAt,
           ),
           bucketSignals,
@@ -265,7 +274,7 @@ export class RankingService {
   async ingestReactionBucket(
     input: {
       targetId: string;
-      scopeKey: string;
+      contextUnitId?: string | null;
       reaction: "upvote" | "downvote";
       count: number;
       at?: string;
@@ -280,7 +289,7 @@ export class RankingService {
 
     const bucket = await this.repository.upsertReactionBucket({
       targetId: input.targetId,
-      scopeKey: input.scopeKey,
+      contextUnitId: input.contextUnitId ?? null,
       reaction: input.reaction,
       bucketStart,
       bucketEnd,

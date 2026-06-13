@@ -23,11 +23,11 @@ import type {
  */
 export const reactionSummaryQuery = (
   targetId: string,
-  scopeKey?: string | null,
+  contextUnitId: string | null = null,
 ) =>
   queryOptions({
-    queryKey: reactionKeys.summary(targetId, scopeKey),
-    queryFn: () => reactionApi.summary([targetId], { scopeKey }),
+    queryKey: reactionKeys.summary(targetId, contextUnitId),
+    queryFn: () => reactionApi.summary([targetId], { contextUnitId }),
     enabled: !!targetId,
     staleTime: 1000 * 60 * 2,
   });
@@ -35,10 +35,13 @@ export const reactionSummaryQuery = (
 /**
  * Query options for getting current user's reactions for a target
  */
-export const reactionMyQuery = (targetId: string, scopeKey?: string | null) =>
+export const reactionMyQuery = (
+  targetId: string,
+  contextUnitId: string | null = null,
+) =>
   queryOptions({
-    queryKey: reactionKeys.my(targetId, scopeKey),
-    queryFn: () => reactionApi.my([targetId], { scopeKey }),
+    queryKey: reactionKeys.my(targetId, contextUnitId),
+    queryFn: () => reactionApi.my([targetId], { contextUnitId }),
     enabled: !!targetId,
     staleTime: 1000 * 60 * 1,
   });
@@ -49,12 +52,12 @@ export const reactionMyQuery = (targetId: string, scopeKey?: string | null) =>
  */
 export const batchReactionSummaryQuery = (
   targetIds: readonly string[],
-  scopeKey?: string | null,
+  contextUnitId: string | null = null,
 ) => {
   const normalized = normalizeIds(targetIds);
   return queryOptions({
-    queryKey: reactionKeys.summaryBatch(normalized, scopeKey),
-    queryFn: () => reactionApi.summary(normalized, { scopeKey }),
+    queryKey: reactionKeys.summaryBatch(normalized, contextUnitId),
+    queryFn: () => reactionApi.summary(normalized, { contextUnitId }),
     enabled: normalized.length > 0,
     staleTime: 1000 * 60 * 2,
   });
@@ -65,14 +68,19 @@ export const batchReactionSummaryQuery = (
  */
 export const useBatchReactionSummary = (
   targetIds: readonly string[],
-  options?: { enabled?: boolean; scopeKey?: string | null },
+  options?: { enabled?: boolean; contextUnitId?: string | null },
 ) => {
   const normalized = normalizeIds(targetIds);
   const enabled = (options?.enabled ?? true) && normalized.length > 0;
   return useQuery<ReactionSummaryResponse>({
-    queryKey: reactionKeys.summaryBatch(normalized, options?.scopeKey),
+    queryKey: reactionKeys.summaryBatch(
+      normalized,
+      options?.contextUnitId ?? null,
+    ),
     queryFn: () =>
-      reactionApi.summary(normalized, { scopeKey: options?.scopeKey }),
+      reactionApi.summary(normalized, {
+        contextUnitId: options?.contextUnitId ?? null,
+      }),
     enabled,
     staleTime: 1000 * 60 * 2,
   });
@@ -108,12 +116,12 @@ export const useBatchShareSummary = (
  */
 export const batchUserReactionsQuery = (
   targetIds: readonly string[],
-  scopeKey?: string | null,
+  contextUnitId: string | null = null,
 ) => {
   const normalized = normalizeIds(targetIds);
   return queryOptions({
-    queryKey: reactionKeys.myBatch(normalized, scopeKey),
-    queryFn: () => reactionApi.my(normalized, { scopeKey }),
+    queryKey: reactionKeys.myBatch(normalized, contextUnitId),
+    queryFn: () => reactionApi.my(normalized, { contextUnitId }),
     enabled: normalized.length > 0,
     staleTime: 1000 * 60 * 1,
   });
@@ -128,13 +136,16 @@ export const batchUserReactionsQuery = (
  */
 export const useBatchUserReactions = (
   targetIds: readonly string[],
-  options?: { enabled?: boolean; scopeKey?: string | null },
+  options?: { enabled?: boolean; contextUnitId?: string | null },
 ) => {
   const normalized = normalizeIds(targetIds);
   const enabled = (options?.enabled ?? true) && normalized.length > 0;
   return useQuery<ReactionMyResponse>({
-    queryKey: reactionKeys.myBatch(normalized, options?.scopeKey),
-    queryFn: () => reactionApi.my(normalized, { scopeKey: options?.scopeKey }),
+    queryKey: reactionKeys.myBatch(normalized, options?.contextUnitId ?? null),
+    queryFn: () =>
+      reactionApi.my(normalized, {
+        contextUnitId: options?.contextUnitId ?? null,
+      }),
     enabled,
     staleTime: 1000 * 60 * 1,
   });
@@ -150,7 +161,7 @@ export const useGivenReactionsInfinite = (
   userId: string | undefined,
   options?: {
     reactions?: string;
-    scopeKey?: string | null;
+    contextUnitId?: string | null;
     enabled?: boolean;
     limit?: number;
   },
@@ -166,12 +177,12 @@ export const useGivenReactionsInfinite = (
     queryKey: reactionKeys.given(
       userId ?? "",
       options?.reactions,
-      options?.scopeKey,
+      options?.contextUnitId,
     ),
     queryFn: ({ pageParam }) =>
       reactionApi.given(userId!, {
         reactions: options?.reactions,
-        scopeKey: options?.scopeKey ?? undefined,
+        contextUnitId: options?.contextUnitId,
         cursor: pageParam,
         limit: options?.limit,
       }),

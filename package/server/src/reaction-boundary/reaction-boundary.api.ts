@@ -3,8 +3,7 @@ import {
   createShareResponseSchema,
   createShareSchema,
   deleteQuerySchema,
-  normalizeReactionScopeKey,
-  parseReactionScopeKey,
+  normalizeReactionContextUnitId,
 } from "@rezics/contract/reaction";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -59,29 +58,24 @@ async function findReactionTargetOwner(targetId: string) {
   return unit?.userId ?? null;
 }
 
-async function resolveScopedReactionPolicy(input: {
-  scopeKey: string;
+async function resolveContextReactionPolicy(input: {
+  contextUnitId: string | null;
   identity: { userId: string };
   findPolicyRealm: NonNullable<ReactionBoundaryDeps["findPolicyRealm"]>;
 }) {
-  const scope = parseReactionScopeKey(input.scopeKey);
-  if (!scope) {
-    return {
-      allowed: false as const,
-      status: 400,
-      message: "Invalid reaction scope",
-    };
-  }
-  if (scope.kind === "direct") return { allowed: true as const };
+  if (!input.contextUnitId) return { allowed: true as const };
 
-  const realm = await input.findPolicyRealm(scope.realmUnitId);
+  // Reaction context is Unit-backed. The only supported context Unit today is
+  // realm; future context types extend this policy branch without changing
+  // reaction storage.
+  const realm = await input.findPolicyRealm(input.contextUnitId);
   if (!realm || realm.type !== "REALM") {
     return { allowed: false as const, status: 404, message: "Realm not found" };
   }
   if (realm.visibility !== "PUBLIC") {
     const membership =
       await governanceCapabilityService.realmMembershipForPolicy(
-        scope.realmUnitId,
+        input.contextUnitId,
         input.identity.userId,
       );
     if (!membership) {
@@ -92,7 +86,7 @@ async function resolveScopedReactionPolicy(input: {
       };
     }
   }
-  return { allowed: true as const, realmUnitId: scope.realmUnitId };
+  return { allowed: true as const, realmUnitId: input.contextUnitId };
 }
 
 export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
@@ -105,14 +99,16 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
       "/",
       async ({ body, identity, set, status }) => {
         const userId = identity.userId;
-        const scopeKey = normalizeReactionScopeKey(body.scopeKey);
-        const scopePolicy = await resolveScopedReactionPolicy({
-          scopeKey,
+        const contextUnitId = normalizeReactionContextUnitId(
+          body.contextUnitId,
+        );
+        const contextPolicy = await resolveContextReactionPolicy({
+          contextUnitId,
           identity,
           findPolicyRealm,
         });
-        if (!scopePolicy.allowed) {
-          return status(scopePolicy.status, scopePolicy.message);
+        if (!contextPolicy.allowed) {
+          return status(contextPolicy.status, contextPolicy.message);
         }
         const decision = await governanceRoutePolicyService.decideForIdentity({
           identity,
@@ -120,8 +116,8 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
           target: {
             kind: "reaction",
             id: body.targetId,
-            ...(scopePolicy.realmUnitId
-              ? { realmUnitId: scopePolicy.realmUnitId }
+            ...(contextPolicy.realmUnitId
+              ? { realmUnitId: contextPolicy.realmUnitId }
               : {}),
           },
         });
@@ -134,7 +130,7 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
           userId,
           body.targetId,
           body.reaction,
-          scopeKey,
+          contextUnitId,
         );
 
         set.status = result.created ? 201 : 200;
@@ -162,7 +158,7 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
           userId: result.userId,
           targetId: result.targetId,
           reaction: result.reaction,
-          scopeKey: result.scopeKey,
+          contextUnitId: result.contextUnitId,
           createdAt: result.createdAt,
         };
       },
@@ -218,20 +214,22 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
     .delete(
       "/",
       async ({ query, identity, status }) => {
-        const scopeKey = normalizeReactionScopeKey(query.scopeKey);
-        const scopePolicy = await resolveScopedReactionPolicy({
-          scopeKey,
+        const contextUnitId = normalizeReactionContextUnitId(
+          query.contextUnitId,
+        );
+        const contextPolicy = await resolveContextReactionPolicy({
+          contextUnitId,
           identity,
           findPolicyRealm,
         });
-        if (!scopePolicy.allowed) {
-          return status(scopePolicy.status, scopePolicy.message);
+        if (!contextPolicy.allowed) {
+          return status(contextPolicy.status, contextPolicy.message);
         }
         return removeReaction(
           identity.userId,
           query.targetId,
           query.reaction,
-          scopeKey,
+          contextUnitId,
         );
       },
       {

@@ -61,7 +61,7 @@ const RankingViewBucketFlushPayloadSchema = v.strictObject({
 
 const RankingReactionBucketPayloadSchema = v.strictObject({
   targetId: v.string(),
-  scopeKey: v.string(),
+  contextUnitId: v.optional(v.string()),
   reaction: v.union([v.literal("upvote"), v.literal("downvote")]),
   count: v.number(),
   at: v.optional(v.string()),
@@ -144,7 +144,7 @@ export function createRankingCommand(
         : kind === RANKING_COMMAND_KINDS.reactionBucket
           ? rankingIdempotency.reactionBucket(
               payloadRecord.targetId,
-              payloadRecord.scopeKey,
+              payloadRecord.contextUnitId,
               payloadRecord.reaction,
               payloadRecord.at,
             )

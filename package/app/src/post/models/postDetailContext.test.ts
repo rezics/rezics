@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { resolvePostDetailContext } from "./postDetailContext";
 
 describe("resolvePostDetailContext", () => {
-  test("resolves direct post routes without a scoped reaction key", () => {
+  test("resolves direct post routes with null reaction context", () => {
     expect(
       resolvePostDetailContext({
         params: { rootPostUnitId: "post-1" },
@@ -11,7 +11,7 @@ describe("resolvePostDetailContext", () => {
       rootPostUnitId: "post-1",
       context: { kind: "direct" },
       realmUnitId: null,
-      reactionScopeKey: undefined,
+      reactionContextUnitId: null,
     });
   });
 
@@ -24,7 +24,7 @@ describe("resolvePostDetailContext", () => {
       rootPostUnitId: "post-1",
       context: { kind: "direct" },
       realmUnitId: null,
-      reactionScopeKey: undefined,
+      reactionContextUnitId: null,
     });
     expect(
       resolvePostDetailContext({
@@ -34,7 +34,7 @@ describe("resolvePostDetailContext", () => {
       rootPostUnitId: "wiki-1",
       context: { kind: "direct" },
       realmUnitId: null,
-      reactionScopeKey: undefined,
+      reactionContextUnitId: null,
     });
   });
 
@@ -48,7 +48,7 @@ describe("resolvePostDetailContext", () => {
       rootPostUnitId: "post-1",
       context: { kind: "realm", realmUnitId: "realm-1" },
       realmUnitId: "realm-1",
-      reactionScopeKey: "realm:realm-1",
+      reactionContextUnitId: "realm-1",
     });
   });
 
@@ -56,7 +56,7 @@ describe("resolvePostDetailContext", () => {
     expect(
       resolvePostDetailContext({
         params: { postUnitId: "post-1", realmId: "realm-2" },
-      }).reactionScopeKey,
-    ).toBe("realm:realm-2");
+      }).reactionContextUnitId,
+    ).toBe("realm-2");
   });
 });

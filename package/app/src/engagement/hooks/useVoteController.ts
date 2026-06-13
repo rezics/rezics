@@ -11,8 +11,8 @@ export type { VoteAction, VoteValue } from "./voteAction";
 export { decideVoteAction };
 
 export type UseVoteControllerArgs = {
-  targetUnitId: string;
-  scopeKey?: string;
+  targetId: string;
+  contextUnitId?: string | null;
   /** Current user vote derived from the React Query cache by the caller. 由调用方从 React Query 缓存派生的当前用户投票。 */
   userVote: VoteValue;
 };
@@ -25,8 +25,8 @@ export type UseVoteControllerReturn = {
 };
 
 export function useVoteController({
-  targetUnitId,
-  scopeKey,
+  targetId,
+  contextUnitId,
   userVote,
 }: UseVoteControllerArgs): UseVoteControllerReturn {
   const { isAuthenticated } = useAuth();
@@ -40,11 +40,11 @@ export function useVoteController({
 
   const runDelete = (reaction: NonNullable<VoteValue>) => {
     deleteReaction.mutate(
-      { targetId: targetUnitId, reaction, scopeKey },
+      { targetId, reaction, contextUnitId },
       {
         onError: () =>
           showRetryToast(
-            `reaction:${targetUnitId}:delete:${reaction}`,
+            `reaction:${targetId}:delete:${reaction}`,
             retryMessage(),
             async () => runDelete(reaction),
           ),
@@ -54,11 +54,11 @@ export function useVoteController({
 
   const runCreate = (reaction: NonNullable<VoteValue>) => {
     createReaction.mutate(
-      { targetId: targetUnitId, reaction, scopeKey },
+      { targetId, reaction, contextUnitId },
       {
         onError: () =>
           showRetryToast(
-            `reaction:${targetUnitId}:create:${reaction}`,
+            `reaction:${targetId}:create:${reaction}`,
             retryMessage(),
             async () => runCreate(reaction),
           ),

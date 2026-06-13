@@ -58,8 +58,8 @@ export type ReactionBarPolicy = {
 export type ReactionBarProps = {
   post: ReactionBarPost;
   policy: ReactionBarPolicy;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   /**
    * Explicit action list — overrides `actionPolicy.actions` when provided.
    * 显式动作列表 — 提供时会覆盖 `actionPolicy.actions`。
@@ -116,8 +116,8 @@ export type ReactionBarModel = {
   hasOverflow: boolean;
   size: EngagementSize;
   variant: ReactionBarVariant;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   onReplyInvoke?: () => void;
   replyLabel?: string;
   replyMode: "count" | "label";
@@ -176,8 +176,8 @@ export function useReactionBarModel({
   actionPolicy,
   size = "md",
   variant = "plain",
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
   onReplyInvoke,
   replyLabel,
   replyMode = "count",
@@ -218,8 +218,8 @@ export function useReactionBarModel({
     hasOverflow,
     size,
     variant,
-    summaryScopeKey,
-    reactionScopeKey,
+    summaryContextUnitId,
+    reactionContextUnitId,
     onReplyInvoke,
     replyLabel,
     replyMode,
@@ -243,8 +243,8 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
     hidden,
     size,
     variant,
-    summaryScopeKey,
-    reactionScopeKey,
+    summaryContextUnitId,
+    reactionContextUnitId,
     replyLabel,
     replyMode,
     shareHref,
@@ -290,9 +290,9 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
               return (
                 <VoteGroup
                   key="vote"
-                  targetUnitId={post.unitId}
-                  summaryScopeKey={summaryScopeKey}
-                  userScopeKey={reactionScopeKey}
+                  targetId={post.unitId}
+                  summaryContextUnitId={summaryContextUnitId}
+                  userContextUnitId={reactionContextUnitId}
                 />
               );
             case "reply":

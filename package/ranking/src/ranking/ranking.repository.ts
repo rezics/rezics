@@ -73,7 +73,7 @@ export interface RankingRepository {
   }): Promise<RankingSignalBucketRow>;
   upsertReactionBucket(input: {
     targetId: string;
-    scopeKey: string;
+    contextUnitId: string | null;
     reaction: RankingReactionKind;
     bucketStart: Date;
     bucketEnd: Date;
@@ -82,7 +82,7 @@ export interface RankingRepository {
   readBucketSignals(unitId: string): Promise<{ views: number; reads: number }>;
   readRecentVoteWindows(
     targetId: string,
-    scopeKey: string,
+    contextUnitId: string | null | undefined,
     now: Date,
   ): Promise<{
     upvote1h: number;
@@ -214,36 +214,52 @@ export class DrizzleRankingRepository implements RankingRepository {
 
   async upsertReactionBucket(input: {
     targetId: string;
-    scopeKey: string;
+    contextUnitId: string | null;
     reaction: RankingReactionKind;
     bucketStart: Date;
     bucketEnd: Date;
     count: number;
   }): Promise<RankingReactionBucketRow> {
     const now = new Date();
+    const bucketWhere = and(
+      eq(rankingReactionBuckets.targetId, input.targetId),
+      input.contextUnitId === null
+        ? isNull(rankingReactionBuckets.contextUnitId)
+        : eq(rankingReactionBuckets.contextUnitId, input.contextUnitId),
+      eq(rankingReactionBuckets.reaction, input.reaction),
+      eq(rankingReactionBuckets.bucketStart, input.bucketStart),
+    );
+    const [existing] = await db
+      .select({ id: rankingReactionBuckets.id })
+      .from(rankingReactionBuckets)
+      .where(bucketWhere)
+      .limit(1);
+    if (existing) {
+      const [bucket] = await db
+        .update(rankingReactionBuckets)
+        .set({
+          count: sql`${rankingReactionBuckets.count} + ${input.count}`,
+          bucketEnd: input.bucketEnd,
+          updatedAt: now,
+        })
+        .where(bucketWhere)
+        .returning();
+      if (!bucket) {
+        throw new Error("Failed to upsert ranking reaction bucket");
+      }
+      return bucket;
+    }
+
     const [bucket] = await db
       .insert(rankingReactionBuckets)
       .values({
         targetId: input.targetId,
-        scopeKey: input.scopeKey,
+        contextUnitId: input.contextUnitId,
         reaction: input.reaction,
         bucketStart: input.bucketStart,
         bucketEnd: input.bucketEnd,
         count: input.count,
         updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: [
-          rankingReactionBuckets.targetId,
-          rankingReactionBuckets.scopeKey,
-          rankingReactionBuckets.reaction,
-          rankingReactionBuckets.bucketStart,
-        ],
-        set: {
-          count: sql`${rankingReactionBuckets.count} + ${input.count}`,
-          bucketEnd: input.bucketEnd,
-          updatedAt: now,
-        },
       })
       .returning();
 
@@ -273,7 +289,7 @@ export class DrizzleRankingRepository implements RankingRepository {
 
   async readRecentVoteWindows(
     targetId: string,
-    scopeKey: string,
+    contextUnitId: string | null | undefined,
     now: Date,
   ): Promise<{
     upvote1h: number;
@@ -294,7 +310,11 @@ export class DrizzleRankingRepository implements RankingRepository {
       .where(
         and(
           eq(rankingReactionBuckets.targetId, targetId),
-          eq(rankingReactionBuckets.scopeKey, scopeKey),
+          contextUnitId === undefined
+            ? undefined
+            : contextUnitId === null
+              ? isNull(rankingReactionBuckets.contextUnitId)
+              : eq(rankingReactionBuckets.contextUnitId, contextUnitId),
           gte(rankingReactionBuckets.bucketStart, dayStart),
         ),
       )

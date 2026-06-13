@@ -35,8 +35,8 @@ interface CommentReplyProps {
    */
   contextBadge?: React.ReactNode;
   showAvatar?: boolean;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
 }
 
 export const CommentReply: React.FC<CommentReplyProps> = ({
@@ -46,8 +46,8 @@ export const CommentReply: React.FC<CommentReplyProps> = ({
   replyComposerSlot,
   contextBadge,
   showAvatar = true,
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
 }) => {
   const { t } = useTranslation(["community"]);
   const contentIndentClass = showAvatar ? "pl-10" : "";
@@ -120,8 +120,8 @@ export const CommentReply: React.FC<CommentReplyProps> = ({
           size="sm"
           post={post}
           policy={commentPolicy}
-          summaryScopeKey={summaryScopeKey}
-          reactionScopeKey={reactionScopeKey}
+          summaryContextUnitId={summaryContextUnitId}
+          reactionContextUnitId={reactionContextUnitId}
           actions={commentRowActions}
           overflow={commentRowOverflow}
           onReplyInvoke={onReply}

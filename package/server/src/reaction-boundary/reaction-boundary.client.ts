@@ -7,7 +7,7 @@ import type {
   InternalCreateShareResponse,
   InternalRemoveResponse,
 } from "@rezics/contract/reaction";
-import { normalizeReactionScopeKey } from "@rezics/contract/reaction";
+import { normalizeReactionContextUnitId } from "@rezics/contract/reaction";
 import { env } from "../env";
 
 const baseUrl = env.REACTION_BASE_URL;
@@ -41,12 +41,12 @@ async function postInternal<T>(path: string, body: unknown): Promise<T> {
 
 async function getPublic<T>(
   path: string,
-  query: Record<string, string | number | undefined>,
+  query: Record<string, string | number | null | undefined>,
 ): Promise<T> {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (value === undefined) continue;
-    params.append(key, String(value));
+    params.append(key, value === null ? "" : String(value));
   }
   const qs = params.toString();
   const url = `${baseUrl}${path}${qs ? `?${qs}` : ""}`;
@@ -68,13 +68,13 @@ export async function createReaction(
   userId: string,
   targetId: string,
   reaction: AllowedReactionKind,
-  scopeKey?: string,
+  contextUnitId?: string | null,
 ): Promise<InternalCreateResponse> {
   return postInternal<InternalCreateResponse>("/internal/create", {
     userId,
     targetId,
     reaction,
-    scopeKey: normalizeReactionScopeKey(scopeKey),
+    contextUnitId: normalizeReactionContextUnitId(contextUnitId),
   });
 }
 
@@ -85,13 +85,13 @@ export async function removeReaction(
   userId: string,
   targetId: string,
   reaction: AllowedReactionKind,
-  scopeKey?: string,
+  contextUnitId?: string | null,
 ): Promise<InternalRemoveResponse> {
   return postInternal<InternalRemoveResponse>("/internal/remove", {
     userId,
     targetId,
     reaction,
-    scopeKey: normalizeReactionScopeKey(scopeKey),
+    contextUnitId: normalizeReactionContextUnitId(contextUnitId),
   });
 }
 
@@ -113,7 +113,7 @@ export async function recordShare(
 export async function listGivenReactions(query: {
   userId: string;
   reactions?: string;
-  scopeKey?: string;
+  contextUnitId?: string | null;
   cursor?: string;
   limit?: number;
 }): Promise<GivenResponse> {

@@ -386,12 +386,11 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
 
   if (table === "ReactionSummary") {
     const unitId = targetId(message, ["targetId", "target_id"]);
-    const scopeKey = targetId(message, ["scopeKey", "scope_key"]);
+    const contextUnitId =
+      targetId(message, ["contextUnitId", "context_unit_id"]) ?? null;
     const reaction = targetId(message, ["reaction"]);
     const voteDelta = reactionSummaryDelta(message);
-    const realmUnitId = scopeKey?.startsWith("realm:")
-      ? scopeKey.slice("realm:".length)
-      : undefined;
+    const realmUnitId = contextUnitId ?? undefined;
     const voteBucketCommands =
       unitId !== undefined &&
       (reaction === "upvote" || reaction === "downvote") &&
@@ -402,7 +401,7 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
               RANKING_COMMAND_KINDS.reactionBucket,
               {
                 targetId: unitId,
-                scopeKey: scopeKey ?? "global",
+                ...(contextUnitId ? { contextUnitId } : {}),
                 reaction,
                 count: voteDelta,
                 at: message.commitTimestamp,

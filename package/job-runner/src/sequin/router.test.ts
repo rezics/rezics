@@ -117,7 +117,6 @@ describe("Sequin payload routing", () => {
         lane: "ranking",
         payload: {
           targetId: "unit-1",
-          scopeKey: "global",
           reaction: "upvote",
           count: -1,
         },
@@ -136,7 +135,7 @@ describe("Sequin payload routing", () => {
       action: "update",
       record: {
         targetId: "unit-1",
-        scopeKey: "realm:realm-1",
+        contextUnitId: "realm-1",
         reaction: "downvote",
         count: 3,
       },
@@ -150,7 +149,7 @@ describe("Sequin payload routing", () => {
           kind: "ranking.reactionBucket",
           payload: {
             targetId: "unit-1",
-            scopeKey: "realm:realm-1",
+            contextUnitId: "realm-1",
             reaction: "downvote",
             count: 2,
             at: "2026-02-01T10:25:00.000Z",

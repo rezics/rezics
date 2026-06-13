@@ -106,7 +106,7 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     rootPostUnitId,
     context,
     realmUnitId: contextRealmUnitId,
-    reactionScopeKey,
+    reactionContextUnitId,
   } = resolvePostDetailContext({ params, realmUnitId });
   const defaultContext =
     defaultCommentContext ?? resolveDefaultCommentContext(context);
@@ -143,8 +143,8 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
       Boolean(contextRealmUnitId),
   });
   useReactionHydration(rootPostUnitId ? [rootPostUnitId] : [], {
-    summaryScopeKey: reactionScopeKey,
-    userScopeKey: reactionScopeKey,
+    summaryContextUnitId: reactionContextUnitId,
+    userContextUnitId: reactionContextUnitId,
   });
   const focusPostUnitId = search?.focusPostUnitId ?? undefined;
   const editorEntry = useEditorEntry({
@@ -210,8 +210,8 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
           ) : null}
           <PostDetail
             post={root}
-            summaryScopeKey={reactionScopeKey}
-            reactionScopeKey={reactionScopeKey}
+            summaryContextUnitId={reactionContextUnitId}
+            reactionContextUnitId={reactionContextUnitId}
             onReplyInvoke={() =>
               navigate({
                 to:
@@ -247,8 +247,8 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
         availableRealmUnitIds={[contextRealmUnitId, root?.realmUnitId]}
         onContextChange={setPickedCommentContext}
         rootAuthorUserId={root?.author?.unitId ?? root?.authorUserId}
-        summaryScopeKey={reactionScopeKey}
-        reactionScopeKey={reactionScopeKey}
+        summaryContextUnitId={reactionContextUnitId}
+        reactionContextUnitId={reactionContextUnitId}
         focusPostUnitId={focusPostUnitId}
         highlightFocusedPost={Boolean(focusPostUnitId)}
       />

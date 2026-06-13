@@ -1,5 +1,3 @@
-import { realmReactionScopeKey } from "@rezics/contract";
-
 export type PostDetailContext =
   | { kind: "direct" }
   | { kind: "realm"; realmUnitId: string };
@@ -15,7 +13,7 @@ export type ResolvedPostDetailContext = {
   rootPostUnitId: string;
   context: PostDetailContext;
   realmUnitId: string | null;
-  reactionScopeKey: string | undefined;
+  reactionContextUnitId: string | null;
 };
 
 export function resolvePostDetailContext(input: {
@@ -36,9 +34,7 @@ export function resolvePostDetailContext(input: {
     rootPostUnitId,
     context,
     realmUnitId,
-    reactionScopeKey:
-      context.kind === "realm"
-        ? realmReactionScopeKey(context.realmUnitId)
-        : undefined,
+    reactionContextUnitId:
+      context.kind === "realm" ? context.realmUnitId : null,
   };
 }

@@ -5,8 +5,8 @@ import { FeedPostCard } from "./FeedPostCard";
 
 export interface FeedPostRowCardProps {
   row: FeedPostRow;
-  summaryScopeKey?: string;
-  reactionScopeKey?: string;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   manageMode?: boolean;
   realmModerationStatus?: ModerationStatus;
   realmModerationAt?: string | Date | null;
@@ -22,20 +22,29 @@ export interface FeedPostRowCardProps {
  */
 export function FeedPostRowCard({
   row,
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
   manageMode,
   realmModerationStatus,
   realmModerationAt,
   moderationLatestAction,
   moderationMenuContent,
 }: FeedPostRowCardProps) {
+  const resolvedSummaryContextUnitId =
+    summaryContextUnitId !== undefined
+      ? summaryContextUnitId
+      : (row.contextUnitId ?? null);
+  const resolvedReactionContextUnitId =
+    reactionContextUnitId !== undefined
+      ? reactionContextUnitId
+      : (row.contextUnitId ?? null);
+
   return (
     <FeedPostCard
       post={row.post}
       href={row.href}
-      summaryScopeKey={summaryScopeKey}
-      reactionScopeKey={reactionScopeKey}
+      summaryContextUnitId={resolvedSummaryContextUnitId}
+      reactionContextUnitId={resolvedReactionContextUnitId}
       variantContext={row.variantContext}
       targetUnit={
         row.targetUnit?.unitId

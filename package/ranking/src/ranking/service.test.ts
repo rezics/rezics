@@ -174,7 +174,7 @@ class FakeRankingRepository implements RankingRepository {
     return {
       id: "reaction-bucket-1",
       targetId: input.targetId,
-      scopeKey: input.scopeKey,
+      contextUnitId: input.contextUnitId,
       reaction: input.reaction,
       bucketStart: input.bucketStart,
       bucketEnd: input.bucketEnd,
@@ -188,9 +188,14 @@ class FakeRankingRepository implements RankingRepository {
     return { views: 0, reads: 0 };
   }
 
-  async readRecentVoteWindows(targetId: string, scopeKey: string) {
+  async readRecentVoteWindows(
+    targetId: string,
+    contextUnitId: string | null | undefined,
+  ) {
+    const contextKey =
+      contextUnitId === undefined ? "*" : (contextUnitId ?? "");
     return (
-      recentVoteWindows.get(`${targetId}:${scopeKey}`) ?? {
+      recentVoteWindows.get(`${targetId}:${contextKey}`) ?? {
         upvote1h: 0,
         downvote1h: 0,
         upvote6h: 0,
@@ -361,7 +366,7 @@ describe("RankingService", () => {
   });
 
   test("uses recent vote buckets for rising and best while totals drive quality", async () => {
-    recentVoteWindows.set("comment-1:parent-comment-1", {
+    recentVoteWindows.set("comment-1:*", {
       upvote1h: 5,
       downvote1h: 0,
       upvote6h: 7,
@@ -392,7 +397,7 @@ describe("RankingService", () => {
     await service.recomputeUnit("comment-1");
 
     expect(projectionUpserts[0].signalSnapshot.recentVoteCounts).toEqual(
-      recentVoteWindows.get("comment-1:parent-comment-1"),
+      recentVoteWindows.get("comment-1:*"),
     );
     expect(projectionUpserts[0].qualityScore).toBe(0);
     expect(projectionUpserts[0].risingScore).toBeGreaterThan(0);
@@ -409,7 +414,7 @@ describe("RankingService", () => {
 
     await service.ingestReactionBucket({
       targetId: "unit-1",
-      scopeKey: "global",
+      contextUnitId: null,
       reaction: "upvote",
       count: 1,
       at: "2026-02-01T10:25:00.000Z",
@@ -418,7 +423,7 @@ describe("RankingService", () => {
     expect(reactionBucketUpserts).toMatchObject([
       {
         targetId: "unit-1",
-        scopeKey: "global",
+        contextUnitId: null,
         reaction: "upvote",
         count: 1,
         bucketStart: new Date("2026-02-01T10:00:00.000Z"),

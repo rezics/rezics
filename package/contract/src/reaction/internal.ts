@@ -9,7 +9,7 @@ export const internalCreateBodySchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
   reaction: allowedReactionKindSchema,
-  scopeKey: t.String(),
+  contextUnitId: t.Nullable(t.String()),
 });
 
 export const internalCreateResponseSchema = t.Object({
@@ -17,7 +17,7 @@ export const internalCreateResponseSchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
   reaction: allowedReactionKindSchema,
-  scopeKey: t.String(),
+  contextUnitId: t.Nullable(t.String()),
   createdAt: t.String(),
   created: t.Boolean(),
 });
@@ -28,7 +28,7 @@ export const internalRemoveBodySchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
   reaction: allowedReactionKindSchema,
-  scopeKey: t.String(),
+  contextUnitId: t.Nullable(t.String()),
 });
 
 export const internalRemoveResponseSchema = t.Object({
@@ -57,7 +57,7 @@ export type InternalCreateShareResponse =
 export const internalByUserBodySchema = t.Object({
   targetIds: t.Array(t.String()),
   reactions: t.Optional(t.Array(t.String())),
-  scopeKey: t.Optional(t.String()),
+  contextUnitId: t.Optional(t.Nullable(t.String())),
   excludeUserId: t.Optional(t.String()),
   cursor: t.Optional(t.String()),
   limit: t.Optional(t.Number()),
@@ -69,7 +69,7 @@ const internalReactionRowSchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
   reaction: t.String(),
-  scopeKey: t.String(),
+  contextUnitId: t.Nullable(t.String()),
   createdAt: t.String(),
 });
 
