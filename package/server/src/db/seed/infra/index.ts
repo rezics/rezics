@@ -53,8 +53,9 @@ export interface SeedInfraOptions {
  * Shared infrastructure seeder.
  *
  * Order is significant: slug scopes are seeded first so every subsequent
- * slug-bearing seed (tags, default realm, taxonomy) can stamp `slugScope`
- * on inserted Units. Each step is idempotent.
+ * slug-bearing seed can stamp `slugScope` on inserted Units, and the shared
+ * search tag registry is seeded before official zones so zone configs can
+ * persist canonical tag Unit ids. Each step is idempotent.
  */
 export async function seedInfra(
   rootUserId: string,
@@ -67,11 +68,13 @@ export async function seedInfra(
   }
   const { db, slugScopes } = opts;
   const tagMap = await seedContentTypeTags(db, slugScopes);
+  const searchTagIds = await seedSearchTagIds(db, slugScopes);
   const defaultRealmId = await seedDefaultRealm(db, rootUserId, slugScopes);
   const officialZoneIds = await seedOfficialZones(
     db,
     defaultRealmId,
     slugScopes,
+    { searchTagIds },
   );
   // Default sidebar entries are subscription-list rows. Seed them only after
   // the default realm and official zone Units exist.
@@ -86,7 +89,6 @@ export async function seedInfra(
     slugScopes,
   );
   const gameMediaTaxonomy = await seedGameMediaTaxonomy(db, slugScopes);
-  const searchTagIds = await seedSearchTagIds(db, slugScopes);
   return {
     slugScopes,
     tagMap,

@@ -46,13 +46,21 @@ export const zoneSectionInfiniteQuery = (
   pageId: string,
   sectionId: string,
   languages: readonly string[] = [],
+  options: { dynamicTagUnitIds?: readonly string[] } = {},
 ) =>
   infiniteQueryOptions({
-    queryKey: zoneKeys.section(unitId, pageId, sectionId, languages),
+    queryKey: zoneKeys.section(
+      unitId,
+      pageId,
+      sectionId,
+      languages,
+      options.dynamicTagUnitIds ?? [],
+    ),
     queryFn: ({ pageParam }) =>
       zoneApi.getSection(unitId, pageId, sectionId, {
         cursor: pageParam ?? undefined,
         languages,
+        dynamicTagUnitIds: options.dynamicTagUnitIds,
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: ZoneSectionData) =>

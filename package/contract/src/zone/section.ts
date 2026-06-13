@@ -115,6 +115,34 @@ export type ZoneSectionQuery = Static<typeof zoneSectionQuerySchema>;
 // ANCHOR: Zone section primitives
 // ANCHOR: 专区分区原语
 
+export const zoneDynamicTagOptionSchema = t.Object(
+  {
+    tagUnitIds: t.Array(t.String(), { minItems: 1 }),
+    probability: t.Number({ minimum: 0, maximum: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneDynamicTagOption = Static<typeof zoneDynamicTagOptionSchema>;
+
+/**
+ * Dynamic tags are a query-section modifier, not a section kind. Random
+ * selection is frontend-owned; saved config only stores canonical tag unit ids
+ * and probabilities.
+ * 动态标签是 query 分区的修饰项，而不是新的分区类型。随机选择由前端负责；
+ * 持久化配置只保存规范化后的 tag unit id 与概率。
+ */
+export const zoneDynamicTagsSchema = t.Object(
+  {
+    groupId: t.Optional(t.String()),
+    fallback: t.Optional(t.Boolean()),
+    options: t.Array(zoneDynamicTagOptionSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneDynamicTags = Static<typeof zoneDynamicTagsSchema>;
+
 export const zoneSectionEmptyStateSchema = t.Union([
   t.Literal("hide"),
   t.Literal("show-empty"),
@@ -224,6 +252,7 @@ export const zoneQuerySectionSchema = t.Object(
     query: zoneSectionQuerySchema,
     display: zoneSectionDisplaySchema,
     loadMore: t.Optional(t.Boolean()),
+    dynamicTags: t.Optional(zoneDynamicTagsSchema),
   },
   { additionalProperties: false },
 );

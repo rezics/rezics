@@ -9,6 +9,7 @@ import type {
 import {
   addZonePage,
   addZoneTranslationRow,
+  applyZoneManageJsonBody,
   canAddZoneMenuChild,
   canInsertZoneSectionKind,
   coerceZoneQueryTarget,
@@ -20,7 +21,6 @@ import {
   moveZoneMenuNodeAtPath,
   nextZoneId,
   outdentZoneMenuNodeAtPath,
-  applyZoneManageJsonBody,
   parseZoneManageJsonText,
   removeZoneMenuNodeAtPath,
   removeZonePage,
@@ -28,6 +28,7 @@ import {
   updateZonePageSections,
   updateZoneTranslationRow,
   validateZoneManageDraft,
+  zoneDynamicTagsFallbackProbability,
   zoneManageDraftToBoundary,
   zoneManageDraftToNav,
   zoneManageDraftToPage,
@@ -396,6 +397,84 @@ describe("query vocabulary", () => {
       sort: { field: "createdAt", direction: "asc" },
     });
     expect(zoneQueryUnsupportedFields(coerced)).toEqual([]);
+  });
+
+  it("validates dynamic tag probability totals with and without fallback", () => {
+    const draft = sampleDraft();
+    draft.pages = updateZonePageSections(draft.pages, "home", () => [
+      {
+        id: "dynamic",
+        kind: "query",
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "hotScore", direction: "desc" },
+        },
+        display: "carousel",
+        dynamicTags: {
+          options: [
+            { tagUnitIds: ["tag-a"], probability: 0.4 },
+            { tagUnitIds: ["tag-b"], probability: 0.6 },
+          ],
+        },
+      },
+    ]);
+    expect(validateZoneManageDraft(draft)).toEqual([]);
+
+    const section = draft.pages.home.sections[0];
+    if (section?.kind === "query") {
+      section.dynamicTags = {
+        fallback: true,
+        options: [{ tagUnitIds: ["tag-a"], probability: 0.4 }],
+      };
+      expect(zoneDynamicTagsFallbackProbability(section.dynamicTags)).toBe(0.6);
+    }
+    expect(validateZoneManageDraft(draft)).toEqual([]);
+  });
+
+  it("rejects overfull dynamic tags and dynamic tags on non-unit query targets", () => {
+    const draft = sampleDraft();
+    draft.pages = updateZonePageSections(draft.pages, "home", () => [
+      {
+        id: "dynamic-overfull",
+        kind: "query",
+        query: {
+          target: "unit",
+          sort: { field: "hotScore", direction: "desc" },
+        },
+        display: "carousel",
+        dynamicTags: {
+          fallback: true,
+          options: [
+            { tagUnitIds: ["tag-a"], probability: 0.8 },
+            { tagUnitIds: ["tag-b"], probability: 0.3 },
+          ],
+        },
+      },
+      {
+        id: "dynamic-post",
+        kind: "query",
+        query: {
+          target: "post",
+          sort: { field: "hotScore", direction: "desc" },
+        },
+        display: "list",
+        dynamicTags: {
+          options: [{ tagUnitIds: ["tag-a"], probability: 1 }],
+        },
+      },
+    ]);
+
+    const issues = validateZoneManageDraft(draft);
+    expect(issues).toContainEqual({
+      code: "dynamic_tags_probability_invalid",
+      sectionId: "dynamic-overfull",
+      total: 1.1,
+    });
+    expect(issues).toContainEqual({
+      code: "dynamic_tags_target_unsupported",
+      sectionId: "dynamic-post",
+    });
   });
 });
 

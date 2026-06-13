@@ -6,6 +6,7 @@ import {
   type ZoneBoundaryFilter,
   type ZoneCollectionItem,
   type ZoneContentSection,
+  type ZoneDynamicTags,
   type ZoneMenu,
   type ZoneNav,
   type ZonePage as ZonePageConfig,
@@ -194,6 +195,7 @@ function fixtureBoundary(
   const contentType = faker.helpers.arrayElement(WORK_TYPE_FILTERS);
   switch (kind) {
     case "book-portal":
+      return { types: [UnitType.BOOK] };
     case "tabbed-portal":
       return { types: [contentType] };
     case "pulse-board":
@@ -205,6 +207,23 @@ function fixtureBoundary(
     case "zone-directory":
       return { types: [UnitType.ZONE] };
   }
+}
+
+function fixtureBookDynamicTags(
+  tagUnitIds: readonly string[],
+): ZoneDynamicTags {
+  const options = pickN(tagUnitIds, Math.min(8, tagUnitIds.length)).map(
+    (tagUnitId) => ({
+      tagUnitIds: [tagUnitId],
+      probability:
+        tagUnitIds.length > 0 ? 0.8 / Math.min(8, tagUnitIds.length) : 0,
+    }),
+  );
+  return {
+    groupId: "book-portal-topics",
+    fallback: true,
+    options,
+  };
 }
 
 function unitQuerySection(input: {
@@ -301,19 +320,74 @@ function fixtureHomeSections(
   refs: ZoneFixtureRefs,
 ): ZonePageSection[] {
   switch (kind) {
-    case "book-portal":
+    case "book-portal": {
       return [
         { id: "hero", kind: "hero", showDescription: true },
-        unitQuerySection({
+        {
           id: "latest",
-          tagUnitIds:
-            refs.tagUnitIds.length > 0
-              ? pickN(refs.tagUnitIds, Math.min(2, refs.tagUnitIds.length))
-              : undefined,
+          kind: "query",
+          display: "carousel",
           limit: 24,
-        }),
-        postQuerySection({ id: "discussions", limit: 12 }),
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "publishedAt", direction: "desc" },
+          },
+        },
+        {
+          id: "topic-a",
+          kind: "query",
+          display: "carousel",
+          limit: 18,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "qualityScore", direction: "desc" },
+          },
+          dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
+        },
+        {
+          id: "topic-b",
+          kind: "query",
+          display: "carousel",
+          limit: 18,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "risingScore", direction: "desc" },
+          },
+          dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
+        },
+        {
+          id: "topic-c",
+          kind: "query",
+          display: "carousel",
+          limit: 18,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "trendingScore", direction: "desc" },
+          },
+          dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
+        },
+        {
+          id: "hot-feed",
+          kind: "query",
+          display: "list",
+          limit: 24,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "hotScore", direction: "desc" },
+          },
+        },
       ];
+    }
     case "pulse-board":
       return [
         postQuerySection({ id: "pulse", limit: 30 }),

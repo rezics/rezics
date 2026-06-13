@@ -3,6 +3,7 @@ import type {
   Language,
   PostKind,
   UnitType,
+  ZoneDynamicTags,
   ZoneSectionQuery,
   ZoneSectionQuerySortField,
 } from "@rezics/contract";
@@ -28,6 +29,7 @@ import {
   type ZoneQueryFilterField,
 } from "../../models/zoneManageDraft";
 import type { ZoneRefUnitMap } from "../../models/zoneMenu";
+import { ZoneDynamicTagEditor } from "./ZoneDynamicTagEditor";
 import { CheckGroup, ManageField, StringListEditor } from "./ZoneManageFields";
 import { ZoneRealmSearchField } from "./ZoneRealmSearchField";
 import { ZoneUnitSearchField } from "./ZoneUnitSearchField";
@@ -57,11 +59,15 @@ const LANG_LIST = "__list__";
  */
 export function ZoneQueryEditor({
   query,
+  dynamicTags,
   onChange,
+  onDynamicTagsChange,
   refUnits,
 }: {
   query: ZoneSectionQuery;
+  dynamicTags?: ZoneDynamicTags;
   onChange: (query: ZoneSectionQuery) => void;
+  onDynamicTagsChange?: (dynamicTags: ZoneDynamicTags | undefined) => void;
   refUnits: ZoneRefUnitMap;
 }) {
   const { t } = useTranslation(["zone", "common"]);
@@ -264,11 +270,20 @@ export function ZoneQueryEditor({
       ) : null}
 
       {has("tagUnitIds") ? (
-        <StringListEditor
-          label={t("zone:manage_query_tags")}
-          values={query.tagUnitIds ?? []}
-          onChange={(values) => setList("tagUnitIds", values)}
-        />
+        <div className="flex flex-col gap-3">
+          <StringListEditor
+            label={t("zone:manage_query_tags")}
+            values={query.tagUnitIds ?? []}
+            onChange={(values) => setList("tagUnitIds", values)}
+          />
+          {onDynamicTagsChange ? (
+            <ZoneDynamicTagEditor
+              value={dynamicTags}
+              onChange={onDynamicTagsChange}
+              refUnits={refUnits}
+            />
+          ) : null}
+        </div>
       ) : null}
 
       {has("realmTagUnitIds") ? (

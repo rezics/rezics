@@ -1,20 +1,20 @@
-import type {
-  CreateZonePageInput,
-  UpdateZonePageInput,
-} from "@rezics/contract";
 import {
   useCreateZonePage,
   useDeleteZonePage,
+  useUpdateZone,
   useUpdateZoneBoundary,
   useUpdateZoneNav,
   useUpdateZonePage,
   useUpdateZoneTheme,
-  useUpdateZone,
   zonePortalQueryOptions,
   zoneQueryOptions,
 } from "@rezics/api";
 import { useServerPermission } from "@rezics/api/hooks";
 import { myRealmMembershipQuery } from "@rezics/api/realm/realm";
+import type {
+  CreateZonePageInput,
+  UpdateZonePageInput,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
@@ -32,8 +32,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 import { UnitExternalLinkEditor } from "@/unit-external-link";
-import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
 import { ZoneManageJsonFrame } from "../components/manage/ZoneManageJsonFrame";
+import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
 import { ZoneManageMenusTab } from "../components/manage/ZoneManageMenusTab";
 import { ZoneManageProfileTab } from "../components/manage/ZoneManageProfileTab";
 import { ZoneManageSectionsTab } from "../components/manage/ZoneManageSectionsTab";
@@ -46,12 +46,12 @@ import {
   type ZoneManageIssue,
   type ZoneTranslationRow,
   zoneManageDraftToBoundary,
-  zoneManageDraftToPage,
   zoneManageDraftToNav,
+  zoneManageDraftToPage,
   zoneManageDraftToTheme,
   zonePageToDraftPage,
-  zoneShellToDraft,
   zoneRowsToTranslations,
+  zoneShellToDraft,
   zoneTranslationsToRows,
 } from "../models/zoneManageDraft";
 
@@ -82,6 +82,10 @@ const ISSUE_KEYS = {
   tab_id_duplicate: "zone:manage_issue_tab_id_duplicate",
   tab_default_invalid: "zone:manage_issue_tab_default_invalid",
   query_field_unsupported: "zone:manage_issue_query_field_unsupported",
+  dynamic_tags_target_unsupported:
+    "zone:manage_issue_dynamic_tags_target_unsupported",
+  dynamic_tags_probability_invalid:
+    "zone:manage_issue_dynamic_tags_probability_invalid",
   menu_id_duplicate: "zone:manage_issue_menu_id_duplicate",
   menu_too_deep: "zone:manage_issue_menu_too_deep",
   menu_leaf_missing_target: "zone:manage_issue_menu_leaf_missing_target",

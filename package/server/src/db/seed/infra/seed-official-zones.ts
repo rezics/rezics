@@ -1,6 +1,7 @@
 import {
   DEFAULT_LANGUAGE,
   markdownContentDoc,
+  type TagGroupIds,
   type ZoneBoundary,
   type ZoneBoundaryFilter,
   type ZoneNav,
@@ -52,6 +53,17 @@ export type OfficialZoneConfig = {
 };
 
 const MAIN_MENU_ID = "main";
+const BOOK_DYNAMIC_TAG_GROUP_ID = "official-book-topics";
+const DEFAULT_BOOK_DYNAMIC_TAG_UNIT_IDS = [
+  "official-book-topic-science-fiction",
+  "official-book-topic-fantasy",
+  "official-book-topic-mystery",
+  "official-book-topic-romance",
+  "official-book-topic-history",
+  "official-book-topic-adventure",
+  "official-book-topic-slice-of-life",
+  "official-book-topic-drama",
+];
 
 const OFFICIAL_PAGE_IDS = {
   book: {
@@ -99,6 +111,30 @@ export const OFFICIAL_SECTION_LABELS = {
       en: { title: "Recent Reviews" },
       "zh-hant": { title: "最新書評" },
       ja: { title: "最新レビュー" },
+    },
+  },
+  bookTopicOne: {
+    id: "00000000-0000-7000-8000-000000000512",
+    translations: {
+      en: { title: "Book Topics" },
+      "zh-hant": { title: "主題書籍" },
+      ja: { title: "テーマ別の本" },
+    },
+  },
+  bookTopicTwo: {
+    id: "00000000-0000-7000-8000-000000000513",
+    translations: {
+      en: { title: "Explore Books" },
+      "zh-hant": { title: "探索書籍" },
+      ja: { title: "本を探す" },
+    },
+  },
+  bookTopicThree: {
+    id: "00000000-0000-7000-8000-000000000514",
+    translations: {
+      en: { title: "Reader Picks" },
+      "zh-hant": { title: "讀者選書" },
+      ja: { title: "読者のおすすめ" },
     },
   },
   realmsLatest: {
@@ -256,54 +292,101 @@ function officialConfig(input: {
   };
 }
 
-const bookConfig = officialConfig({
-  pageIds: OFFICIAL_PAGE_IDS.book,
-  filters: { types: ["BOOK"] },
-  homeSections: [
-    { id: "hero", kind: "hero", showDescription: true },
-    {
-      id: "latest-books",
-      kind: "query",
-      titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookLatest.id,
-      display: "covers",
-      limit: 24,
-      loadMore: true,
-      query: {
-        target: "unit",
-        types: ["BOOK"],
-        sort: { field: "publishedAt", direction: "desc" },
+function bookDynamicTags(tagUnitIds: readonly string[]) {
+  const options = tagUnitIds.slice(0, 8).map((tagUnitId) => ({
+    tagUnitIds: [tagUnitId],
+    probability: 0.1,
+  }));
+  return {
+    groupId: BOOK_DYNAMIC_TAG_GROUP_ID,
+    fallback: true,
+    options,
+  };
+}
+
+function buildBookConfig(
+  bookDynamicTagUnitIds: readonly string[] = DEFAULT_BOOK_DYNAMIC_TAG_UNIT_IDS,
+): OfficialZoneConfig {
+  return officialConfig({
+    pageIds: OFFICIAL_PAGE_IDS.book,
+    filters: { types: ["BOOK"] },
+    homeSections: [
+      { id: "hero", kind: "hero", showDescription: true },
+      {
+        id: "latest-books",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookLatest.id,
+        display: "carousel",
+        limit: 24,
+        loadMore: true,
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "publishedAt", direction: "desc" },
+        },
       },
-    },
-    {
-      id: "popular-books",
-      kind: "query",
-      titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
-      display: "grid",
-      limit: 24,
-      loadMore: true,
-      query: {
-        target: "unit",
-        types: ["BOOK"],
-        sort: { field: "qualityScore", direction: "desc" },
+      {
+        id: "topic-books-a",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicOne.id,
+        display: "carousel",
+        limit: 18,
+        loadMore: true,
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "qualityScore", direction: "desc" },
+        },
+        dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
       },
-    },
-    {
-      id: "book-reviews",
-      kind: "query",
-      titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookReviews.id,
-      display: "list",
-      limit: 20,
-      loadMore: true,
-      query: {
-        target: "post",
-        postKinds: ["REVIEW"],
-        sort: { field: "createdAt", direction: "desc" },
+      {
+        id: "topic-books-b",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicTwo.id,
+        display: "carousel",
+        limit: 18,
+        loadMore: true,
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "risingScore", direction: "desc" },
+        },
+        dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
       },
-    },
-  ],
-  accent: "#2563eb",
-  density: "comfortable",
-});
+      {
+        id: "topic-books-c",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicThree.id,
+        display: "carousel",
+        limit: 18,
+        loadMore: true,
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "trendingScore", direction: "desc" },
+        },
+        dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
+      },
+      {
+        id: "hot-books",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
+        display: "list",
+        limit: 24,
+        loadMore: true,
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "hotScore", direction: "desc" },
+        },
+      },
+    ],
+    accent: "#2563eb",
+    density: "comfortable",
+  });
+}
+
+const bookConfig = buildBookConfig();
 
 const realmsConfig = officialConfig({
   pageIds: OFFICIAL_PAGE_IDS.realms,
@@ -519,6 +602,19 @@ export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
     },
   },
 ];
+
+export function buildOfficialZoneDefinitions(
+  input: { bookDynamicTagUnitIds?: readonly string[] } = {},
+): OfficialZoneDefinition[] {
+  return OFFICIAL_ZONE_DEFINITIONS.map((definition) =>
+    definition.key === "book"
+      ? {
+          ...definition,
+          config: buildBookConfig(input.bookDynamicTagUnitIds),
+        }
+      : definition,
+  );
+}
 
 async function upsertZoneRow(
   db: OfficialZoneSeedDb,
@@ -737,12 +833,16 @@ export async function seedOfficialZones(
   db: OfficialZoneSeedDb,
   ownerRealmUnitId: string,
   slugScopes: SlugScopesMap,
+  options: { searchTagIds?: TagGroupIds } = {},
 ): Promise<Record<OfficialZoneDefinition["key"], string>> {
   console.log("[Seed] Seeding official zones...");
   await upsertOfficialSectionLabels(db, slugScopes);
   const result = {} as Record<OfficialZoneDefinition["key"], string>;
+  const definitions = buildOfficialZoneDefinitions({
+    bookDynamicTagUnitIds: options.searchTagIds?.book,
+  });
 
-  for (const definition of OFFICIAL_ZONE_DEFINITIONS) {
+  for (const definition of definitions) {
     const [existing] = await db
       .select({ id: Unit.id, type: Unit.type })
       .from(Unit)

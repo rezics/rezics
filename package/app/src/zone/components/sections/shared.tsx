@@ -7,6 +7,7 @@ import type {
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import type { ReactNode } from "react";
+import type { ZoneDynamicTagSelectionMap } from "../../models/zoneDynamicTags";
 import {
   type ZoneRefUnitMap,
   zoneSectionTitleKey,
@@ -25,6 +26,7 @@ export type ZonePortalContext = {
   pageId: string;
   refUnits: ZoneRefUnitMap;
   languages: Language[];
+  dynamicTagSelections?: ZoneDynamicTagSelectionMap;
 };
 
 /**

@@ -293,7 +293,7 @@ describe("GET /zone/:unitId/page/:pageId/section/:sectionId", () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
       new Request(
-        "http://localhost/zone/zone-1/page/page-home/section/s-known?cursor=12&languages=en",
+        "http://localhost/zone/zone-1/page/page-home/section/s-known?cursor=12&languages=en&dynamicTagUnitIds=tag-a,tag-b",
       ),
     );
     expect(res.status).toBe(200);
@@ -309,6 +309,7 @@ describe("GET /zone/:unitId/page/:pageId/section/:sectionId", () => {
       {
         cursor: "12",
         preferredLanguages: ["en"],
+        dynamicTagUnitIds: ["tag-a", "tag-b"],
       },
     );
   });

@@ -28,6 +28,14 @@ export const tagDetailQuery = (unitId: string) =>
     staleTime: 1000 * 60 * 10,
   });
 
+export const tagBySlugQuery = (slug: string) =>
+  queryOptions({
+    queryKey: tagKeys.bySlug(slug),
+    queryFn: () => tagApi.getBySlug(slug),
+    enabled: slug.length > 0,
+    staleTime: 1000 * 60 * 10,
+  });
+
 /**
  * Query options for searching tags by a keyword (default limit 20).
  */
@@ -111,6 +119,7 @@ export const lowScoreTagsQuery = (query?: LowScoreTagsQuery) =>
 export const tagQueries = {
   list: tagListQuery,
   detail: tagDetailQuery,
+  bySlug: tagBySlugQuery,
   search: tagSearchQuery,
   forUnit: tagsForUnitQuery,
   context: tagContextQuery,

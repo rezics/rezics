@@ -43,6 +43,7 @@ export {
 export {
   lowScoreTagsQuery,
   tagBatchTranslationsQuery,
+  tagBySlugQuery,
   tagContextQuery,
   tagDetailQuery,
   tagInfiniteListQuery,

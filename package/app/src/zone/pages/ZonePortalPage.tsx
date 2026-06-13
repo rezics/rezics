@@ -4,11 +4,13 @@ import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import type { CSSProperties } from "react";
+import { useMemo, useState } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { ZoneSectionList } from "../components/sections/ZoneSectionList";
 import { ZoneHeader } from "../components/ZoneHeader";
 import { useZonePortal } from "../hooks/useZone";
 import { canManageZone } from "../models/canManageZone";
+import { selectZoneDynamicTags } from "../models/zoneDynamicTags";
 import {
   ZONE_CONTENT_MAX_WIDTH_DEFAULT,
   zoneThemeCssVars,
@@ -143,6 +145,12 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
     slug,
     pageSlug,
   );
+  const [dynamicTagSeed] = useState(() => `${Date.now()}:${Math.random()}`);
+  const dynamicTagSelections = useMemo(
+    () =>
+      page ? selectZoneDynamicTags(page.config.sections, dynamicTagSeed) : {},
+    [dynamicTagSeed, page],
+  );
   const permission = useServerPermission();
   const membershipQuery = useQuery({
     ...myRealmMembershipQuery(zone?.ownerRealmUnitId ?? ""),
@@ -202,7 +210,13 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
         ) : null}
         <ZoneSectionList
           sections={page.config.sections}
-          ctx={{ zone, pageId: page.id, refUnits, languages }}
+          ctx={{
+            zone,
+            pageId: page.id,
+            refUnits,
+            languages,
+            dynamicTagSelections,
+          }}
         />
       </div>
     </div>

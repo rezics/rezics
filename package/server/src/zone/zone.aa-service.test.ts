@@ -704,6 +704,28 @@ describe("section data execution", () => {
     expect(data?.nextCursor).toBeNull();
   });
 
+  test("query sections apply dynamic tag overrides without mutating config", async () => {
+    await service.getSectionData("zone-1", "page-home", "s-new", {
+      dynamicTagUnitIds: ["tag-dynamic"],
+    });
+
+    const input = searchSectionMock.mock.calls[0]![0];
+    expect(input.filter).toContain('tagIds = "tag-dynamic"');
+    const columns = currentPage.config.sections[1] as Extract<
+      ZonePageConfig["sections"][number],
+      { kind: "columns" }
+    >;
+    const tabs = columns.columns[0]!.sections[1] as Extract<
+      ZonePageConfig["sections"][number],
+      { kind: "tabs" }
+    >;
+    const section = tabs.tabs[0]!.sections[0] as Extract<
+      ZonePageConfig["sections"][number],
+      { kind: "query" }
+    >;
+    expect(section.query.tagUnitIds).toBeUndefined();
+  });
+
   test("query sections intersect with the zone boundary filter", async () => {
     const boundary = baseBoundary();
     boundary.filters = { types: ["SERIES"], ratings: ["GENERAL"] };

@@ -1,8 +1,8 @@
 import type {
   CreateZoneInput,
   CreateZonePageInput,
-  UpdateZoneInput,
   UpdateZoneBoundaryInput,
+  UpdateZoneInput,
   UpdateZoneNavInput,
   UpdateZonePageInput,
   UpdateZoneThemeInput,
@@ -56,11 +56,18 @@ export const zoneApi = {
     unitId: string,
     pageId: string,
     sectionId: string,
-    options: { cursor?: string; languages?: readonly string[] } = {},
+    options: {
+      cursor?: string;
+      languages?: readonly string[];
+      dynamicTagUnitIds?: readonly string[];
+    } = {},
   ): Promise<ZoneSectionData> => {
     const qs = buildQueryString({
       cursor: options.cursor,
       languages: options.languages?.length ? [...options.languages] : undefined,
+      dynamicTagUnitIds: options.dynamicTagUnitIds?.length
+        ? options.dynamicTagUnitIds.join(",")
+        : undefined,
     });
     return apiFetch<ZoneSectionData>(
       `/zone/${encodeURIComponent(unitId)}/page/${encodeURIComponent(pageId)}/section/${encodeURIComponent(sectionId)}${qs}`,

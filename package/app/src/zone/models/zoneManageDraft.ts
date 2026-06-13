@@ -1,6 +1,7 @@
 import type {
   Language,
   ZoneBoundary,
+  ZoneDynamicTags,
   ZoneMenuNode,
   ZoneNav,
   ZonePage,
@@ -549,6 +550,33 @@ export function zoneQueryUnsupportedFields(query: ZoneSectionQuery): string[] {
   return unsupported;
 }
 
+const ZONE_DYNAMIC_TAG_PROBABILITY_EPSILON = 0.000001;
+
+export function zoneDynamicTagsProbabilityTotal(
+  dynamicTags: ZoneDynamicTags,
+): number {
+  return dynamicTags.options.reduce(
+    (sum, option) => sum + option.probability,
+    0,
+  );
+}
+
+export function zoneDynamicTagsFallbackProbability(
+  dynamicTags: ZoneDynamicTags,
+): number {
+  return Math.max(0, 1 - zoneDynamicTagsProbabilityTotal(dynamicTags));
+}
+
+export function zoneDynamicTagsProbabilityValid(
+  dynamicTags: ZoneDynamicTags,
+): boolean {
+  const total = zoneDynamicTagsProbabilityTotal(dynamicTags);
+  if (dynamicTags.fallback) {
+    return total <= 1 + ZONE_DYNAMIC_TAG_PROBABILITY_EPSILON;
+  }
+  return Math.abs(total - 1) <= ZONE_DYNAMIC_TAG_PROBABILITY_EPSILON;
+}
+
 /**
  * Switching the query target drops filters and sort fields the new target
  * cannot serve, instead of letting the save fail server-side.
@@ -768,6 +796,12 @@ export type ZoneManageIssue =
   | { code: "tab_id_duplicate"; sectionId: string }
   | { code: "tab_default_invalid"; sectionId: string }
   | { code: "query_field_unsupported"; sectionId: string; fields: string[] }
+  | { code: "dynamic_tags_target_unsupported"; sectionId: string }
+  | {
+      code: "dynamic_tags_probability_invalid";
+      sectionId: string;
+      total: number;
+    }
   | { code: "menu_id_duplicate"; id: string }
   | { code: "menu_too_deep"; menuId: string }
   | { code: "menu_leaf_missing_target"; menuId: string; nodeId: string }
@@ -812,6 +846,21 @@ export function validateZoneManageDraft(
             sectionId: section.id,
             fields,
           });
+        }
+        if (section.dynamicTags) {
+          if (section.query.target !== "unit") {
+            issues.push({
+              code: "dynamic_tags_target_unsupported",
+              sectionId: section.id,
+            });
+          }
+          if (!zoneDynamicTagsProbabilityValid(section.dynamicTags)) {
+            issues.push({
+              code: "dynamic_tags_probability_invalid",
+              sectionId: section.id,
+              total: zoneDynamicTagsProbabilityTotal(section.dynamicTags),
+            });
+          }
         }
       }
     }

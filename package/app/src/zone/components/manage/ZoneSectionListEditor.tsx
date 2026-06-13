@@ -460,6 +460,13 @@ function ZoneSectionKindFields({
           <ZoneQueryEditor
             query={section.query}
             onChange={(query) => onChange({ ...section, query })}
+            dynamicTags={section.dynamicTags}
+            onDynamicTagsChange={(dynamicTags) => {
+              const next = { ...section };
+              if (dynamicTags) next.dynamicTags = dynamicTags;
+              else delete next.dynamicTags;
+              onChange(next);
+            }}
             refUnits={ctx.refUnits}
           />
         </div>

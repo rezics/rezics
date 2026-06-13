@@ -1,7 +1,6 @@
 import {
   type ContentDoc,
   type Language,
-  mainMarkdownSource,
   markdownContentDoc,
   parseZoneBoundary,
   parseZoneNav,
@@ -13,6 +12,8 @@ import {
   type ZoneBoundary,
   type ZoneCollectionItem,
   type ZoneContentSection,
+  type ZoneDynamicTags,
+  type ZoneListView,
   type ZoneMenuNode,
   type ZoneNav,
   type ZonePage as ZonePageConfig,
@@ -21,7 +22,6 @@ import {
   type ZoneSectionItem,
   type ZoneSectionQuery,
   type ZoneTheme,
-  type ZoneListView,
   type ZoneTranslation,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
@@ -35,14 +35,13 @@ import {
   ne,
   notInArray,
 } from "drizzle-orm";
+import { serverJobProducer } from "@/job/job-boundary";
 import {
   compileZoneSectionQuery,
   zoneSectionQueryUnsupportedFields,
 } from "@/meili/search/filters";
-import { serverJobProducer } from "@/job/job-boundary";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
-import { generateBetween, rebalance } from "../shelf/fractional-index";
 import {
   ContentTranslation,
   Entity,
@@ -57,6 +56,7 @@ import {
   Zone,
   ZonePage,
 } from "../db/schema";
+import { generateBetween, rebalance } from "../shelf/fractional-index";
 
 const SECTION_DEFAULT_LIMIT = 12;
 
@@ -238,6 +238,23 @@ function sectionLimit(section: { limit?: number }): number {
   return Math.min(Math.max(section.limit ?? SECTION_DEFAULT_LIMIT, 1), 100);
 }
 
+const ZONE_DYNAMIC_TAG_PROBABILITY_EPSILON = 0.000001;
+
+function dynamicTagsProbabilityTotal(dynamicTags: ZoneDynamicTags): number {
+  return dynamicTags.options.reduce(
+    (sum, option) => sum + option.probability,
+    0,
+  );
+}
+
+function dynamicTagsProbabilityValid(dynamicTags: ZoneDynamicTags): boolean {
+  const total = dynamicTagsProbabilityTotal(dynamicTags);
+  if (dynamicTags.fallback) {
+    return total <= 1 + ZONE_DYNAMIC_TAG_PROBABILITY_EPSILON;
+  }
+  return Math.abs(total - 1) <= ZONE_DYNAMIC_TAG_PROBABILITY_EPSILON;
+}
+
 function preferredTranslation(
   row: TranslatedUnitRow,
   preferredLanguages: readonly string[] = [],
@@ -336,6 +353,11 @@ function collectContentSectionRefs(
       break;
     case "query":
       collectQueryRefs(section.query, refs);
+      for (const option of section.dynamicTags?.options ?? []) {
+        for (const tagUnitId of option.tagUnitIds) {
+          refs.targetUnitIds.add(tagUnitId);
+        }
+      }
       break;
     case "feed":
     case "stats":
@@ -1148,6 +1170,25 @@ export class ZoneService {
             { sectionId: section.id, fields: unsupported },
           );
         }
+        if (section.dynamicTags) {
+          if (section.query.target !== "unit") {
+            fail(
+              "ZONE_DYNAMIC_TAG_TARGET_UNSUPPORTED",
+              "Dynamic tag filters require a unit query",
+              { sectionId: section.id },
+            );
+          }
+          if (!dynamicTagsProbabilityValid(section.dynamicTags)) {
+            fail(
+              "ZONE_DYNAMIC_TAG_PROBABILITY_INVALID",
+              "Dynamic tag probabilities must resolve to 1",
+              {
+                sectionId: section.id,
+                total: dynamicTagsProbabilityTotal(section.dynamicTags),
+              },
+            );
+          }
+        }
       }
     }
   }
@@ -1608,10 +1649,28 @@ export class ZoneService {
     limit: number;
     cursor?: string | null;
     preferredLanguages?: string[];
+    dynamicTagUnitIds?: string[];
   }): Promise<ZoneSectionData> {
     const offset = input.cursor ? Number.parseInt(input.cursor, 10) || 0 : 0;
     const boundary = input.zone.boundary;
-    const compiled = compileZoneSectionQuery(input.query, boundary.filters, {
+    let query = input.query;
+    if (input.dynamicTagUnitIds && input.dynamicTagUnitIds.length > 0) {
+      if (query.target !== "unit") {
+        throw new AppError(400, "Dynamic tag filters require a unit query", {
+          code: "ZONE_DYNAMIC_TAG_TARGET_UNSUPPORTED",
+          details: { sectionId: input.sectionId },
+        });
+      }
+      // Dynamic tags are a transient execution-time filter chosen by the
+      // frontend. They compose with saved tags as additional AND constraints.
+      query = {
+        ...query,
+        tagUnitIds: [
+          ...new Set([...(query.tagUnitIds ?? []), ...input.dynamicTagUnitIds]),
+        ],
+      };
+    }
+    const compiled = compileZoneSectionQuery(query, boundary.filters, {
       contextRealmUnitId:
         boundary.context.kind === "realm" ? boundary.context.realmUnitId : null,
       viewerLanguageCandidates: input.preferredLanguages ?? [],
@@ -1643,7 +1702,11 @@ export class ZoneService {
     unitId: string,
     pageId: string,
     sectionId: string,
-    options: { cursor?: string | null; preferredLanguages?: string[] } = {},
+    options: {
+      cursor?: string | null;
+      preferredLanguages?: string[];
+      dynamicTagUnitIds?: string[];
+    } = {},
   ): Promise<ZoneSectionData | null> {
     const zone = await this.getByUnitId(unitId);
     if (!zone) return null;
@@ -1672,6 +1735,7 @@ export class ZoneService {
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
+          dynamicTagUnitIds: options.dynamicTagUnitIds,
         });
       case "feed":
         return this.executeQuerySection({
