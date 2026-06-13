@@ -51,10 +51,13 @@ describe("server Drizzle migration artifacts", () => {
     ]);
   });
 
-  test("server custom SQL preserves extension and comment path helpers", () => {
+  test("server custom SQL preserves extension helpers and drops stale comment path helpers", () => {
     const extensionSql = readMigration("20260604061700_server_ltree_extension");
     const helperSql = readMigration(
       "20260604061730_server_comment_path_helpers",
+    );
+    const cleanupSql = readMigration(
+      "20260613213000_server_drop_comment_path_helpers",
     );
 
     expect(extensionSql).toContain("CREATE EXTENSION IF NOT EXISTS ltree");
@@ -62,6 +65,12 @@ describe("server Drizzle migration artifacts", () => {
       "CREATE OR REPLACE FUNCTION rezics_to_base36(n bigint)",
     );
     expect(helperSql).toContain("IMMUTABLE");
+    expect(cleanupSql).toContain(
+      "DROP FUNCTION IF EXISTS rezics_to_base36(bigint)",
+    );
+    expect(cleanupSql).toContain(
+      'DROP SEQUENCE IF EXISTS "public"."post_path_label_seq"',
+    );
   });
 
   test("server baseline keeps generated tables plus raw-owned SQL constructs", () => {

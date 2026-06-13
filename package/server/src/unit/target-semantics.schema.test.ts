@@ -96,7 +96,6 @@ describe("Unit target semantics in Drizzle schema", () => {
     expectColumn(Comment, "realmUnitId");
     expectColumn(Comment, "parentCommentId");
     expectColumn(Comment, "depth");
-    expectColumn(Comment, "path");
     expectColumn(Comment, "moderationStatus");
     expectColumn(Comment, "deletedAt");
     expectNoColumn(Comment, "targetUnitId");

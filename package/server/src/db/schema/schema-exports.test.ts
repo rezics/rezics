@@ -133,7 +133,6 @@ const expectedSchemaExports = [
   "moderationTargetKindStorageValues",
   "nullableTimestamp",
   "pgEnumName",
-  "post_path_label_seq",
   "realmMemberStateStorageValues",
   "textArray",
   "timestampMs",
