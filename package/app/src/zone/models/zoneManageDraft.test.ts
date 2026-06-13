@@ -362,6 +362,24 @@ describe("query vocabulary", () => {
     ).toEqual(["tagUnitIds", "subjects", "sort.publishedAt"]);
   });
 
+  it("allows only realm index filters and sorts on realm target", () => {
+    expect(
+      zoneQueryUnsupportedFields({
+        target: "realm",
+        types: ["REALM"],
+        languages: ["en"],
+        sort: { field: "memberCount" },
+      }),
+    ).toEqual([]);
+    expect(
+      zoneQueryUnsupportedFields({
+        target: "realm",
+        realm: "context",
+        sort: { field: "qualityScore" },
+      }),
+    ).toEqual(["realm", "sort.qualityScore"]);
+  });
+
   it("coerces target switches by dropping unsupported fields", () => {
     const coerced = coerceZoneQueryTarget(
       {

@@ -45,6 +45,18 @@ const hydratedUnits = new Map<string, any>([
     },
   ],
   [
+    "realm-2",
+    {
+      id: "realm-2",
+      type: "REALM",
+      slug: "academy-city",
+      createdAt: new Date("2026-03-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-03-02T00:00:00.000Z"),
+      translations: [{ language: "en", title: "Academy City", summary: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+    },
+  ],
+  [
     "post-1",
     {
       id: "post-1",
@@ -103,7 +115,7 @@ const fragmentTranslations = new Map<
 
 const searchSectionMock = mock(
   async (_input: {
-    index: "content" | "posts";
+    index: "content" | "posts" | "realms";
     filter: string[];
     sort: string[];
     offset: number;
@@ -686,6 +698,40 @@ describe("section data execution", () => {
       ),
     ).toBe(true);
     expect(input.filter).toContain('rating = "GENERAL"');
+  });
+
+  test("realm query sections use the realms index and hydrate realm units", async () => {
+    searchSectionMock.mockResolvedValueOnce({ ids: ["realm-2"], total: 1 });
+    const page = basePage();
+    page.sections.push({
+      id: "s-realms",
+      kind: "query",
+      display: "tiles",
+      limit: 12,
+      query: {
+        target: "realm",
+        types: ["REALM"],
+        sort: { field: "memberCount", direction: "desc" },
+      },
+    });
+    currentPage = pageRow(page);
+    currentZone = zoneRow({ page });
+
+    const data = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      "s-realms",
+    );
+    const input = searchSectionMock.mock.calls[0]![0];
+    expect(input.index).toBe("realms");
+    expect(input.filter).toContain("isPublic = true");
+    expect(input.sort).toEqual(["memberCount:desc"]);
+    expect(data?.items).toEqual([
+      expect.objectContaining({
+        unitId: "realm-2",
+        title: "Academy City",
+      }),
+    ]);
   });
 
   test("feed, collection, stats, and richText sections execute by page id", async () => {

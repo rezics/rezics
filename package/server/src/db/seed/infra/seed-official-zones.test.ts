@@ -14,6 +14,7 @@ import {
 } from "../../schema";
 import {
   OFFICIAL_ZONE_DEFINITIONS,
+  OFFICIAL_SECTION_LABELS,
   seedOfficialZones,
 } from "./seed-official-zones";
 
@@ -97,17 +98,37 @@ describe("seedOfficialZones", () => {
       {
         id: "latest-realms",
         kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsLatest.id,
         display: "carousel",
-        query: { types: ["REALM"], sort: { field: "createdAt" } },
+        query: {
+          target: "realm",
+          types: ["REALM"],
+          sort: { field: "createdAt" },
+        },
       },
       {
         id: "browse-realms",
         kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsBrowse.id,
         display: "tiles",
         loadMore: true,
-        query: { types: ["REALM"], sort: { field: "qualityScore" } },
+        query: {
+          target: "realm",
+          types: ["REALM"],
+          sort: { field: "memberCount" },
+        },
       },
-      { id: "realm-updates", kind: "feed", feedKind: "updates" },
+      {
+        id: "realm-updates",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsUpdates.id,
+        display: "list",
+        query: {
+          target: "realm",
+          types: ["REALM"],
+          sort: { field: "updatedAt" },
+        },
+      },
     ]);
   });
 
@@ -122,12 +143,14 @@ describe("seedOfficialZones", () => {
       {
         id: "latest-zones",
         kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesLatest.id,
         display: "carousel",
         query: { types: ["ZONE"], sort: { field: "createdAt" } },
       },
       {
         id: "all-zones",
         kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
         display: "grid",
         loadMore: true,
         query: { types: ["ZONE"], sort: { field: "updatedAt" } },
@@ -151,7 +174,7 @@ describe("seedOfficialZones", () => {
     expect(db.calls.transactions).toBe(OFFICIAL_ZONE_DEFINITIONS.length);
 
     const unitInserts = db.calls.inserts.filter(
-      (call: InsertCall) => call.table === Unit,
+      (call: InsertCall) => call.table === Unit && call.value.type === "ZONE",
     );
     expect(unitInserts.map((call: InsertCall) => call.value.slug)).toEqual([
       "book",
@@ -165,6 +188,16 @@ describe("seedOfficialZones", () => {
           call.value.type === "ZONE" && call.value.slugScope === "zone-scope",
       ),
     ).toBe(true);
+
+    const labelInserts = db.calls.inserts.filter(
+      (call: InsertCall) => call.table === Unit && call.value.type === "LABEL",
+    );
+    expect(labelInserts).toHaveLength(
+      Object.keys(OFFICIAL_SECTION_LABELS).length,
+    );
+    expect(labelInserts.map((call: InsertCall) => call.value.id)).toEqual(
+      Object.values(OFFICIAL_SECTION_LABELS).map((label) => label.id),
+    );
 
     const zoneInserts = db.calls.inserts.filter(
       (call: InsertCall) => call.table === Zone,
@@ -207,6 +240,33 @@ describe("seedOfficialZones", () => {
       );
       for (const page of definition.config.pages) {
         expect(parseZonePage(page.config)).toEqual(page.config);
+      }
+    }
+  });
+
+  test("labels every official home section that would otherwise use a generic fallback title", () => {
+    const labelIds = new Set(
+      Object.values(OFFICIAL_SECTION_LABELS).map((label) => label.id),
+    );
+
+    for (const definition of OFFICIAL_ZONE_DEFINITIONS) {
+      const home = definition.config.pages.find(
+        (page) => page.id === definition.config.homePageId,
+      );
+      const unlabeledDataSections = home?.config.sections.filter(
+        (section) =>
+          (section.kind === "query" || section.kind === "feed") &&
+          !section.titleLabelUnitId,
+      );
+
+      expect(unlabeledDataSections).toEqual([]);
+      for (const section of home?.config.sections ?? []) {
+        if (
+          (section.kind === "query" || section.kind === "feed") &&
+          section.titleLabelUnitId
+        ) {
+          expect(labelIds.has(section.titleLabelUnitId)).toBe(true);
+        }
       }
     }
   });
@@ -275,10 +335,15 @@ describe("seedOfficialZones", () => {
     const supportLanguageInserts = db.calls.inserts.filter(
       (call: InsertCall) => call.table === UnitSupportLanguage,
     );
-    const expectedLanguageRows = OFFICIAL_ZONE_DEFINITIONS.reduce(
+    const expectedZoneLanguageRows = OFFICIAL_ZONE_DEFINITIONS.reduce(
       (sum, definition) => sum + Object.keys(definition.translations).length,
       0,
     );
+    const expectedLabelLanguageRows = Object.values(
+      OFFICIAL_SECTION_LABELS,
+    ).reduce((sum, label) => sum + Object.keys(label.translations).length, 0);
+    const expectedLanguageRows =
+      expectedZoneLanguageRows + expectedLabelLanguageRows;
 
     expect(translationInserts).toHaveLength(expectedLanguageRows);
     expect(supportLanguageInserts).toHaveLength(expectedLanguageRows);

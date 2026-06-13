@@ -356,6 +356,49 @@ describe("compileZoneSectionQuery", () => {
     expect(compiled.sort).toEqual(["updatedAt:desc"]);
   });
 
+  test("compiles a realm query against the realms index", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "realm",
+        types: ["REALM"],
+        languages: "viewer",
+        sort: { field: "memberCount", direction: "desc" },
+      },
+      { types: ["REALM"] },
+      { viewerLanguageCandidates: ["en", "ja"] },
+    );
+
+    expect(compiled.index).toBe("realms");
+    expect(compiled.filter).toContain("isPublic = true");
+    expect(compiled.filter).toContain(
+      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
+    );
+    expect(compiled.filter.some((clause) => clause.startsWith("type"))).toBe(
+      false,
+    );
+    expect(compiled.filter).not.toContain('visibility = "PUBLIC"');
+    expect(compiled.sort).toEqual(["memberCount:desc"]);
+  });
+
+  test("realm queries cannot widen an incompatible zone boundary", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "realm",
+        types: ["REALM"],
+        sort: { field: "updatedAt" },
+      },
+      { types: ["BOOK"] },
+      {},
+    );
+
+    expect(compiled.index).toBe("realms");
+    expect(
+      compiled.filter.some((clause) =>
+        clause.includes("__zone_boundary_empty_intersection__"),
+      ),
+    ).toBe(true);
+  });
+
   test("context realm resolves to unscoped for global-context zones", () => {
     const compiled = compileZoneSectionQuery(
       {
@@ -431,6 +474,14 @@ describe("compileZoneSectionQuery", () => {
         sort: { field: "replyCount" },
       }),
     ).toEqual(["sort.replyCount"]);
+
+    expect(
+      zoneSectionQueryUnsupportedFields({
+        target: "realm",
+        realm: "context",
+        sort: { field: "qualityScore" },
+      }),
+    ).toEqual(["realm", "sort.qualityScore"]);
 
     expect(() =>
       compileZoneSectionQuery(

@@ -60,19 +60,22 @@ const IMAGE_LABEL_KEYS = {
 const NONE = "__none__";
 
 const COLOR_SWATCHES = [
-  { label: "Brand", value: "#db515c" },
-  { label: "Ink", value: "#1f2937" },
-  { label: "Muted", value: "#64748b" },
-  { label: "Canvas", value: "#ffffff" },
-  { label: "Night", value: "#111827" },
-  { label: "Ocean", value: "#2563eb" },
-  { label: "Forest", value: "#16a34a" },
-  { label: "Amber", value: "#d97706" },
-];
+  { labelKey: "zone:manage_color_brand", value: "#db515c" },
+  { labelKey: "zone:manage_color_ink", value: "#1f2937" },
+  { labelKey: "zone:manage_color_muted", value: "#64748b" },
+  { labelKey: "zone:manage_color_canvas", value: "#ffffff" },
+  { labelKey: "zone:manage_color_night", value: "#111827" },
+  { labelKey: "zone:manage_color_ocean", value: "#2563eb" },
+  { labelKey: "zone:manage_color_forest", value: "#16a34a" },
+  { labelKey: "zone:manage_color_amber", value: "#d97706" },
+] as const satisfies readonly {
+  labelKey: `zone:${string}`;
+  value: string;
+}[];
 
 const THEME_SETS = [
   {
-    label: "Archive",
+    labelKey: "zone:manage_theme_set_archive",
     values: {
       background: "#ffffff",
       surface: "#f8fafc",
@@ -83,7 +86,7 @@ const THEME_SETS = [
     },
   },
   {
-    label: "Night",
+    labelKey: "zone:manage_theme_set_night",
     values: {
       background: "#111827",
       surface: "#1f2937",
@@ -93,7 +96,12 @@ const THEME_SETS = [
       accentText: "#0f172a",
     },
   },
-] as const satisfies readonly ColorThemeSet<keyof ThemeTokens>[];
+] as const satisfies readonly (Omit<
+  ColorThemeSet<keyof ThemeTokens>,
+  "label"
+> & {
+  labelKey: `zone:${string}`;
+})[];
 
 function prune<T extends Record<string, unknown>>(value: T): T | undefined {
   const entries = Object.entries(value).filter(
@@ -152,6 +160,22 @@ export function ZoneManageThemeTab({
       theme: { ...draft.theme, layout: prune({ ...layout, ...patch }) },
     });
   };
+  const colorSwatches = useMemo(
+    () =>
+      COLOR_SWATCHES.map((swatch) => ({
+        label: t(swatch.labelKey),
+        value: swatch.value,
+      })),
+    [t],
+  );
+  const themeSets = useMemo(
+    () =>
+      THEME_SETS.map((set) => ({
+        label: t(set.labelKey),
+        values: set.values,
+      })),
+    [t],
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -167,8 +191,8 @@ export function ZoneManageThemeTab({
                 label={t(TOKEN_LABEL_KEYS[field])}
                 value={tokens[field] ?? ""}
                 placeholder="oklch(...)"
-                swatches={COLOR_SWATCHES}
-                themeSets={THEME_SETS}
+                swatches={colorSwatches}
+                themeSets={themeSets}
                 onApplyThemeSet={setTokens}
                 onChange={(value) => setTokens({ [field]: value || undefined })}
               />

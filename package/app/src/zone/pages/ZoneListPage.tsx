@@ -255,6 +255,8 @@ const ZoneManagementListItem: FC<{
   selected: boolean;
   onToggle: () => void;
 }> = ({ zone, manageMode, selected, onToggle }) => {
+  const { t } = useTranslation(["zone"]);
+  const zoneName = zone.name || zone.slug;
   const content = (
     <div className="rounded-md border border-border-whisper p-4 transition-colors hover:border-border-defined">
       <div className="flex items-start gap-3">
@@ -263,14 +265,14 @@ const ZoneManagementListItem: FC<{
             checked={selected}
             onCheckedChange={onToggle}
             onClick={(event) => event.stopPropagation()}
-            aria-label={`Select ${zone.name || zone.slug}`}
+            aria-label={t("zone:list_select_zone", { name: zoneName })}
             className="mt-1"
           />
         )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-base font-medium leading-ui text-text-primary">
-              {zone.name || zone.slug}
+              {zoneName}
             </span>
           </div>
           {zone.description && (

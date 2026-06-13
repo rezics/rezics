@@ -77,9 +77,10 @@ const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 
 // Per-target sort vocabularies mirror `ZONE_QUERY_SORTABLE` in
 // `meili/search/filters.ts`: unit queries may not sort by replyCount, post
-// queries may not sort by publishedAt.
+// queries may not sort by publishedAt, and realm queries use the realm index.
 // 按目标的排序词汇表与 `meili/search/filters.ts` 的 `ZONE_QUERY_SORTABLE`
-// 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序。
+// 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序，
+// realm 查询使用 realm 索引。
 const UNIT_SORT_FIELDS: ZoneSectionQuerySortField[] = [
   "createdAt",
   "updatedAt",
@@ -95,6 +96,11 @@ const POST_SORT_FIELDS: ZoneSectionQuerySortField[] = [
   "hotScore",
   "bestScore",
   "topScore",
+];
+const REALM_SORT_FIELDS: ZoneSectionQuerySortField[] = [
+  "createdAt",
+  "updatedAt",
+  "memberCount",
 ];
 
 interface ZoneTemporalState {
@@ -239,6 +245,27 @@ function postQuerySection(input: {
   };
 }
 
+function realmQuerySection(input: {
+  id: string;
+  limit: number;
+}): ZoneContentSection {
+  return {
+    id: input.id,
+    kind: "query",
+    display: faker.helpers.arrayElement(["tiles", "list", "avatar-wall"]),
+    limit: input.limit,
+    loadMore: true,
+    query: {
+      target: "realm",
+      types: ["REALM"],
+      sort: {
+        field: faker.helpers.arrayElement(REALM_SORT_FIELDS),
+        direction: "desc",
+      },
+    },
+  };
+}
+
 function fixtureHomeSections(
   kind: ZoneFixtureKind,
   refs: ZoneFixtureRefs,
@@ -363,7 +390,7 @@ function fixtureHomeSections(
           display: "tiles",
           items: unitItems(refs.realmUnitIds, 12),
         },
-        unitQuerySection({ id: "all-realms", types: ["REALM"], limit: 24 }),
+        realmQuerySection({ id: "all-realms", limit: 24 }),
       ];
   }
 }

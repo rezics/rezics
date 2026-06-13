@@ -9,6 +9,7 @@ import type {
   ZoneSectionKind,
 } from "@rezics/contract";
 import { ZONE_MENU_MAX_DEPTH } from "@rezics/contract";
+import { unitHref } from "@rezics/ui/primitive/link";
 import { type ZoneDetailKind, zoneDetailRoute } from "./zoneDetailRoutes";
 
 export type ZoneRefUnitMap = Record<string, ZoneRefUnitSummary>;
@@ -34,20 +35,63 @@ export function zoneDetailKindForRef(
 }
 
 /**
- * Zone-framed href for a hydrated section item (same routing rule as menu
- * unit targets, but the item carries its own type/postKind).
- * 已水合分区条目的专区框架 href（与菜单 Unit 目标相同的路由规则，但条目
- * 自带 type/postKind）。
+ * Canonical href for a unit surfaced inside a zone. Posts keep the zone
+ * presentation frame because their discussion context matters; catalog units
+ * leave the zone and open their product route directly.
+ * 专区内浮现的 Unit 的规范 href。帖子保留专区展示框架，因为其讨论语境
+ * 重要；目录 Unit 离开专区并直接打开自身产品路由。
  */
-export function zoneSectionItemHref(
-  item: { unitId: string; type?: string | null; postKind?: string | null },
+export function zoneUnitHref(
+  item: {
+    unitId: string;
+    type?: string | null;
+    slug?: string | null;
+    postKind?: string | null;
+  },
   zoneSlug: string,
 ): string {
-  return zoneDetailRoute({
-    zoneSlug,
-    kind: zoneDetailKindForRef(item),
-    unitId: item.unitId,
-  }).href;
+  if (item.type === "POST") {
+    return zoneDetailRoute({
+      zoneSlug,
+      kind: zoneDetailKindForRef(item),
+      unitId: item.unitId,
+    }).href;
+  }
+
+  switch (item.type) {
+    case "BOOK":
+      return `/book/${item.unitId}`;
+    case "QUOTE":
+      return `/excerpt/${item.unitId}`;
+    case "POLL":
+      return `/poll/${item.unitId}`;
+    case "SHELF":
+      return `/shelf/${item.unitId}`;
+    case "USER":
+    case "REALM":
+    case "TAG":
+    case "ZONE":
+    case "ENTITY":
+      return unitHref({
+        type: item.type,
+        unitId: item.unitId,
+        slug: item.slug ?? null,
+      });
+    default:
+      return `/unit/${item.unitId}`;
+  }
+}
+
+export function zoneSectionItemHref(
+  item: {
+    unitId: string;
+    type?: string | null;
+    slug?: string | null;
+    postKind?: string | null;
+  },
+  zoneSlug: string,
+): string {
+  return zoneUnitHref(item, zoneSlug);
 }
 
 export function zonePageHref(
@@ -68,11 +112,10 @@ export function zoneLinkHref(
 ): string | null {
   switch (target.kind) {
     case "unit":
-      return zoneDetailRoute({
-        zoneSlug: ctx.zoneSlug,
-        kind: zoneDetailKindForRef(ctx.refUnits[target.unitId]),
-        unitId: target.unitId,
-      }).href;
+      return zoneUnitHref(
+        ctx.refUnits[target.unitId] ?? { unitId: target.unitId },
+        ctx.zoneSlug,
+      );
     case "zonePage":
       return zonePageHref(target.pageId, ctx.zoneSlug, ctx.pages);
     case "external":

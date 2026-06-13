@@ -200,7 +200,7 @@ export type ZoneRepository = {
     unitId: string,
   ): Promise<Array<{ language: string; content: unknown }>>;
   searchSection(input: {
-    index: "content" | "posts";
+    index: "content" | "posts" | "realms";
     filter: string[];
     sort: string[];
     offset: number;
@@ -957,7 +957,9 @@ function createDrizzleZoneRepository(): ZoneRepository {
       const index =
         input.index === "content"
           ? searchClient.contentIndex
-          : searchClient.postIndex;
+          : input.index === "realms"
+            ? searchClient.realmIndex
+            : searchClient.postIndex;
       const resp = await index.search<{ id: string }>("", {
         filter:
           input.filter.length > 0 ? input.filter.join(" AND ") : undefined,
