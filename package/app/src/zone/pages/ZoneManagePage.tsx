@@ -119,7 +119,7 @@ export function ZoneManagePage({
   activeTab = "profile",
   onTabChange,
 }: ZoneManagePageProps) {
-  const { t } = useTranslation(["zone", "common"]);
+  const { t, i18n } = useTranslation(["zone", "common"]);
   const bySlugQuery = useQuery({
     ...zoneQueryOptions(slug ?? ""),
     enabled: !unitId && !!slug,
@@ -384,6 +384,17 @@ export function ZoneManagePage({
 
   const contextRealmUnitId =
     draft.context.kind === "realm" ? draft.context.realmUnitId : null;
+  const localizedHeroRow =
+    rows.find(
+      (row) =>
+        row.language === i18n.language &&
+        (row.title.trim() || row.description.trim()),
+    ) ?? rows.find((row) => row.title.trim() || row.description.trim());
+  const heroTitle =
+    localizedHeroRow?.title.trim() || zone.name || zone.slug || null;
+  const heroDescription =
+    localizedHeroRow?.description.trim() || zone.description || null;
+  const themeImages = draft.theme.images ?? zone.theme.images ?? {};
   const managePages =
     sortedPages.length > 0
       ? sortedPages
@@ -399,6 +410,10 @@ export function ZoneManagePage({
     contextRealmSlug: contextRealmUnitId
       ? (refUnits[contextRealmUnitId]?.slug ?? null)
       : null,
+    heroTitle,
+    heroDescription,
+    themeBannerUrl: themeImages.bannerUrl ?? null,
+    themeLogoUrl: themeImages.logoUrl ?? null,
   };
 
   const selectPage = (page: (typeof managePages)[number]) => {
