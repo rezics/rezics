@@ -10,6 +10,7 @@ import {
   RealmSearchOptionsSchema,
   type UserListQuery,
   userListQuerySchema,
+  ZoneSearchOptionsSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import {
@@ -187,6 +188,21 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       },
     },
   )
+  .post(
+    "/zones/search",
+    async ({ body }) => {
+      return meiliService.searchZones(body);
+    },
+    {
+      body: ZoneSearchOptionsSchema,
+      detail: {
+        summary: "Search zones (Meilisearch)",
+        description:
+          "Full-text search over zones with owner realm, language, and lifecycle metadata.",
+        tags: ["Meili", "Zones", "Search"],
+      },
+    },
+  )
   // ANCHOR: Admin — index init
   // ANCHOR: 管理员 — 索引初始化
   .post(
@@ -323,6 +339,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Init realms index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/zones/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init zones index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init zones index");
+      }
+      await meiliService.initZonesIndex();
+      return { message: "zones index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init zones index",
         tags: ["Meili", "Admin"],
       },
     },
@@ -514,6 +553,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   .post(
+    "/zones/sync",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync zones");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync zones");
+      }
+      const task = await meiliService.syncAllZones();
+      return { task };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Sync all zones to Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
     "/entities/sync",
     async ({ identity, set }) => {
       if (!isRoot(identity.permission)) {
@@ -672,6 +734,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Delete all realms from Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .delete(
+    "/zones/deleteAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all zones");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all zones");
+      }
+      await meiliService.deleteAllZones();
+      return { message: "all zones deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all zones from Meilisearch",
         tags: ["Meili", "Admin"],
       },
     },

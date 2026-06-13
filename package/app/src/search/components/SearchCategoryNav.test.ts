@@ -14,14 +14,16 @@ describe("permittedCategoriesForScope", () => {
       "comments",
       "shelves",
       "realms",
+      "zones",
       "users",
       "entities",
     ]);
   });
 
-  test("realm scope omits realms, users, and entities", () => {
+  test("realm scope omits realms, zones, users, and entities", () => {
     const out = permittedCategoriesForScope({ kind: "realm", realmId: "r" });
     expect(out).not.toContain("realms");
+    expect(out).not.toContain("zones");
     expect(out).not.toContain("users");
     expect(out).not.toContain("entities");
     expect(out).toContain("books");
@@ -29,12 +31,13 @@ describe("permittedCategoriesForScope", () => {
     expect(out).toContain("shelves");
   });
 
-  test("zone scope omits realms, users, and entities", () => {
+  test("zone scope omits realms, zones, users, and entities", () => {
     const out = permittedCategoriesForScope({
       kind: "zone",
       zoneUnitId: "zone-1",
     });
     expect(out).not.toContain("realms");
+    expect(out).not.toContain("zones");
     expect(out).not.toContain("users");
     expect(out).not.toContain("entities");
     expect(out).toContain("books");
@@ -47,13 +50,15 @@ describe("permittedCategoriesForScope", () => {
     expect(out).not.toContain("users");
     expect(out).toContain("entities");
     expect(out).toContain("realms");
+    expect(out).toContain("zones");
     expect(out).toContain("comments");
   });
 
-  test("book scope omits books, realms, users, and entities", () => {
+  test("book scope omits books, realms, zones, users, and entities", () => {
     const out = permittedCategoriesForScope({ kind: "book", unitId: "b" });
     expect(out).not.toContain("books");
     expect(out).not.toContain("realms");
+    expect(out).not.toContain("zones");
     expect(out).not.toContain("users");
     expect(out).not.toContain("entities");
     expect(out).toContain("reviews");

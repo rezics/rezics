@@ -29,6 +29,7 @@ export class SearchClient {
   readonly pollIndex: Index;
   readonly shelfItemIndex: Index;
   readonly realmIndex: Index;
+  readonly zoneIndex: Index;
   readonly entityIndex: Index;
   readonly progressIndex: Index;
 
@@ -42,6 +43,7 @@ export class SearchClient {
     this.pollIndex = this.meili.index("polls");
     this.shelfItemIndex = this.meili.index(SHELF_ITEM_INDEX_NAME);
     this.realmIndex = this.meili.index("realms");
+    this.zoneIndex = this.meili.index("zones");
     this.entityIndex = this.meili.index("entities");
     this.progressIndex = this.meili.index(PROGRESS_INDEX_NAME);
   }
@@ -96,6 +98,8 @@ export class SearchClient {
         return this.shelfItemIndex;
       case "realms":
         return this.realmIndex;
+      case "zones":
+        return this.zoneIndex;
       case "entities":
         return this.entityIndex;
       case PROGRESS_INDEX_NAME:
@@ -150,6 +154,10 @@ export class SearchClient {
 
   async initRealmIndex(): Promise<void> {
     await this.initIndexFromSchema(getExpectedMeiliIndexSchema("realms"));
+  }
+
+  async initZoneIndex(): Promise<void> {
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("zones"));
   }
 
   async initEntityIndex(): Promise<void> {
@@ -280,6 +288,21 @@ export class SearchClient {
   }
   deleteAllRealms() {
     return this.realmIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Zone document operations — zone 文档操作
+
+  addOrUpdateZones(docs: any[]) {
+    return this.zoneIndex.addDocuments(docs);
+  }
+  patchZones(docs: any[]) {
+    return this.zoneIndex.updateDocuments(docs);
+  }
+  deleteZones(ids: string[]) {
+    return this.zoneIndex.deleteDocuments(ids);
+  }
+  deleteAllZones() {
+    return this.zoneIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Entity document operations — 实体文档操作

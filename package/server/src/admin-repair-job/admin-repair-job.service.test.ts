@@ -114,6 +114,7 @@ describe("adminRepairJobService", () => {
       "poll",
       "shelf-item",
       "realm",
+      "zone",
       "entity",
       "progress",
     ]);
@@ -128,6 +129,7 @@ describe("adminRepairJobService", () => {
       "job-8",
       "job-9",
       "job-10",
+      "job-11",
     ]);
   });
 

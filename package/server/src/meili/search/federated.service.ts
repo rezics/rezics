@@ -11,6 +11,7 @@ import type {
   ShelfItemSearchDocument,
   ShelfItemShelfGroup,
   UserSearchDocument,
+  ZoneSearchDocument,
 } from "@rezics/contract";
 import type { SearchClient } from "@rezics/search";
 import {
@@ -26,11 +27,13 @@ import {
   buildRealmFilter,
   buildShelfItemFilter,
   buildUserFilter,
+  buildZoneFilter,
 } from "./filters";
 import {
   resolveContentHitDisplay,
   resolvePostHitDisplay,
   resolveRealmHitDisplay,
+  resolveZoneHitDisplay,
 } from "./read-language";
 
 // ANCHOR: federatedSearch
@@ -50,6 +53,7 @@ interface PermittedIndexes {
   posts: boolean;
   comments: boolean;
   realms: boolean;
+  zones: boolean;
   users: boolean;
   entities: boolean;
 }
@@ -63,6 +67,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         comments: true,
         realms: true,
+        zones: true,
         users: true,
         entities: true,
       };
@@ -77,6 +82,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         comments: true,
         realms: false,
+        zones: false,
         users: false,
         entities: false,
       };
@@ -88,6 +94,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         comments: true,
         realms: false,
+        zones: false,
         users: false,
         entities: false,
       };
@@ -98,6 +105,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         comments: true,
         realms: false,
+        zones: false,
         users: false,
         entities: true,
       };
@@ -108,6 +116,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: false,
         comments: false,
         realms: false,
+        zones: false,
         users: false,
         entities: false,
       };
@@ -127,6 +136,9 @@ function resolveFederatedHitDisplay(
   }
   if (indexUid === "realms") {
     return resolveRealmHitDisplay(hit as RealmSearchDocument, query as any);
+  }
+  if (indexUid === "zones") {
+    return resolveZoneHitDisplay(hit as ZoneSearchDocument, query as any);
   }
   return hit;
 }
@@ -282,6 +294,19 @@ async function federatedSingle(
         limit: hitsPerPage,
       });
       items = resp.hits;
+      totalHits = resp.estimatedTotalHits ?? resp.hits.length;
+      processingTimeMs = resp.processingTimeMs;
+      break;
+    }
+    case "zones": {
+      if (!permitted.zones) break;
+      const filter = buildZoneFilter(query, scope, ctx);
+      const resp = await client.zoneIndex.search<ZoneSearchDocument>(q, {
+        filter: joinFilter(filter),
+        offset,
+        limit: hitsPerPage,
+      });
+      items = resp.hits.map((hit) => resolveZoneHitDisplay(hit, query as any));
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;
@@ -619,6 +644,7 @@ interface BuiltSubQuery extends BuiltQuery {
     | "comments"
     | "shelves"
     | "realms"
+    | "zones"
     | "users"
     | "entities";
 }
@@ -714,6 +740,17 @@ function buildAllSubQueries(
     });
   }
 
+  if (permitted.zones) {
+    const filter = buildZoneFilter(query, scope, ctx);
+    out.push({
+      indexUid: "zones",
+      q: query.keyword ?? "",
+      filter,
+      weightKey: "zones",
+      sectionKey: "zones",
+    });
+  }
+
   if (permitted.users) {
     const filter = buildUserFilter(query, scope);
     out.push({
@@ -764,6 +801,7 @@ function mapIndexToCategory(indexUid: string, hit: any): SearchCategory {
     return "books";
   }
   if (indexUid === "realms") return "realms";
+  if (indexUid === "zones") return "zones";
   if (indexUid === "users") return "users";
   if (indexUid === "entities") return "entities";
   // Fallback for unmapped index uids — treat as posts so the union resolves.

@@ -11,6 +11,7 @@ export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "comments",
   "shelves",
   "realms",
+  "zones",
   "users",
   "entities",
 ];
@@ -26,6 +27,7 @@ export const CATEGORY_LABELS = {
   comments: () => getI18nRuntime().i18n.t("search:category_comments"),
   shelves: () => getI18nRuntime().i18n.t("search:category_shelves"),
   realms: () => getI18nRuntime().i18n.t("search:category_realms"),
+  zones: () => getI18nRuntime().i18n.t("search:category_zones"),
   users: () => getI18nRuntime().i18n.t("search:category_users"),
   entities: () => getI18nRuntime().i18n.t("search:category_entities"),
 } as const satisfies Record<SearchCategory, () => string>;
@@ -39,14 +41,19 @@ export function permittedCategoriesForScope(
     case "realm":
     case "zone":
       return ALL_CATEGORIES.filter(
-        (c) => c !== "realms" && c !== "users" && c !== "entities",
+        (c) =>
+          c !== "realms" && c !== "zones" && c !== "users" && c !== "entities",
       );
     case "user":
       return ALL_CATEGORIES.filter((c) => c !== "users");
     case "book":
       return ALL_CATEGORIES.filter(
         (c) =>
-          c !== "books" && c !== "realms" && c !== "users" && c !== "entities",
+          c !== "books" &&
+          c !== "realms" &&
+          c !== "zones" &&
+          c !== "users" &&
+          c !== "entities",
       );
     case "saved":
       return ["all", "shelves"];

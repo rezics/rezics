@@ -211,6 +211,7 @@ export function ZoneManageThemeTab({
               <ManageField key={field} label={t(IMAGE_LABEL_KEYS[field])}>
                 <ImageUrlInput
                   value={images[field] ?? ""}
+                  uploadLabel={t("common:upload_image")}
                   onChange={(value) =>
                     setImages({ [field]: value || undefined })
                   }
@@ -222,6 +223,7 @@ export function ZoneManageThemeTab({
             <ManageField label={t("zone:manage_image_header_logo")}>
               <ImageUrlInput
                 value={draft.header.logoImageUrl ?? ""}
+                uploadLabel={t("common:upload_image")}
                 onChange={(value) => {
                   const header = { ...draft.header };
                   if (value) header.logoImageUrl = value;
@@ -296,11 +298,13 @@ export function ZoneManageThemeTab({
 
 function ImageUrlInput({
   value,
+  uploadLabel,
   onChange,
   onUpload,
   uploadPanel,
 }: {
   value: string;
+  uploadLabel: string;
   onChange: (value: string) => void;
   onUpload: (url: string) => void;
   uploadPanel: (props: { onInsert: (url: string) => void }) => React.ReactNode;
@@ -320,7 +324,7 @@ function ImageUrlInput({
               type="button"
               size="icon"
               variant="outline"
-              aria-label={t("common:upload_image")}
+              aria-label={uploadLabel}
             />
           }
         >

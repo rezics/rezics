@@ -16,6 +16,7 @@ interface CapturedSearch {
     | "posts"
     | "comments"
     | "realms"
+    | "zones"
     | "users"
     | "entities"
     | "shelfItems";
@@ -105,6 +106,7 @@ function makeFakeClient(opts?: {
     postIndex: captureIndex("posts"),
     commentIndex: captureIndex("comments"),
     realmIndex: captureIndex("realms"),
+    zoneIndex: captureIndex("zones"),
     userIndex: captureIndex("users"),
     entityIndex: captureIndex("entities"),
     shelfItemIndex: captureIndex("shelfItems"),
@@ -130,14 +132,15 @@ describe("federatedSearch", () => {
     // 编排器只发起一次 multiSearch，包含所有允许的子查询。
     expect(multi.length).toBe(1);
     const indexUids = multi[0]!.queries.map((q) => q.indexUid).sort();
-    // Books + 4 post sections + comments + shelves + realms + users + entities = 10 sub-queries.
+    // Books + 4 post sections + comments + shelves + realms + zones + users + entities = 11 sub-queries.
     // Books and shelves both target the "content" index.
-    // Books + 4 个 post 分区 + comments + shelves + realms + users + entities = 10 个子查询。
+    // Books + 4 个 post 分区 + comments + shelves + realms + zones + users + entities = 11 个子查询。
     // Books 和 shelves 都指向 "content" 索引。
     expect(indexUids.filter((u) => u === "content")).toHaveLength(2);
     expect(indexUids.filter((u) => u === "posts")).toHaveLength(4);
     expect(indexUids.filter((u) => u === "comments")).toHaveLength(1);
     expect(indexUids).toContain("realms");
+    expect(indexUids).toContain("zones");
     expect(indexUids).toContain("users");
     expect(indexUids).toContain("entities");
   });
@@ -156,9 +159,10 @@ describe("federatedSearch", () => {
     expect(multi.length).toBe(1);
     const queries = multi[0]!.queries;
     const indexUids = queries.map((q) => q.indexUid);
-    // No realms, no users, no entities.
-    // 不含 realms、users、entities。
+    // No realms, zones, users, or entities.
+    // 不含 realms、zones、users、entities。
     expect(indexUids).not.toContain("realms");
+    expect(indexUids).not.toContain("zones");
     expect(indexUids).not.toContain("users");
     expect(indexUids).not.toContain("entities");
     // The shelves sub-query (one of the two `content` targets) must include
@@ -194,6 +198,7 @@ describe("federatedSearch", () => {
     const queries = multi[0]!.queries;
     const indexUids = queries.map((q) => q.indexUid);
     expect(indexUids).not.toContain("realms");
+    expect(indexUids).not.toContain("zones");
     expect(indexUids).not.toContain("users");
     for (const q of queries.filter(
       (qq) => qq.indexUid === "content" || qq.indexUid === "posts",
@@ -220,6 +225,7 @@ describe("federatedSearch", () => {
     expect(indexUids).toContain("posts");
     expect(indexUids).toContain("comments");
     expect(indexUids).not.toContain("realms");
+    expect(indexUids).not.toContain("zones");
     expect(indexUids).not.toContain("users");
     expect(indexUids).not.toContain("entities");
     for (const q of queries.filter(
@@ -275,6 +281,24 @@ describe("federatedSearch", () => {
     expect(bookResult.kind).toBe("single");
     if (bookResult.kind !== "single") throw new Error("expected single");
     expect(bookResult.totalHits).toBe(0);
+  });
+
+  test("single zones category drills down on the zones index", async () => {
+    const { client, calls } = makeFakeClient();
+
+    await federatedSearch(client, {
+      scope: { kind: "global" },
+      category: "zones",
+      query: { keyword: "portal" },
+      page: 2,
+      hitsPerPage: 20,
+    });
+
+    expect(calls.length).toBe(1);
+    expect(calls[0]?.index).toBe("zones");
+    expect(calls[0]?.offset).toBe(20);
+    expect(calls[0]?.limit).toBe(20);
+    expect(calls[0]?.filter).toContain('visibility = "PUBLIC"');
   });
 
   test("mixed category uses federated multiSearch with weights", async () => {

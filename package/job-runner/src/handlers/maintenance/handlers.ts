@@ -20,6 +20,8 @@ function searchSyncKindForTarget(targetType: string) {
       return SEARCH_COMMAND_KINDS.pollSync;
     case "realm":
       return SEARCH_COMMAND_KINDS.realmSync;
+    case "zone":
+      return SEARCH_COMMAND_KINDS.zoneSync;
     case "entity":
       return SEARCH_COMMAND_KINDS.entitySync;
     case "user":
@@ -43,6 +45,8 @@ function fullSyncKindForIndex(index: string) {
       return SEARCH_COMMAND_KINDS.pollFullSync;
     case "realm":
       return SEARCH_COMMAND_KINDS.realmFullSync;
+    case "zone":
+      return SEARCH_COMMAND_KINDS.zoneFullSync;
     case "entity":
       return SEARCH_COMMAND_KINDS.entityFullSync;
     case "user":
@@ -162,15 +166,15 @@ export function createMaintenanceHandlers(
       if (!("index" in maintenance.payload)) return;
       const kind = fullSyncKindForIndex(maintenance.payload.index);
       if (!kind) return { enqueued: 0 };
+      const payload: { cursor?: string; limit?: number } = {};
+      if (maintenance.payload.cursor !== undefined) {
+        payload.cursor = maintenance.payload.cursor;
+      }
+      if (maintenance.payload.limit !== undefined) {
+        payload.limit = maintenance.payload.limit;
+      }
       await context.enqueue(
-        createSearchCommand(
-          kind,
-          {
-            cursor: maintenance.payload.cursor,
-            limit: maintenance.payload.limit,
-          },
-          maintenance.source,
-        ),
+        createSearchCommand(kind, payload, maintenance.source),
       );
       return { enqueued: 1 };
     },

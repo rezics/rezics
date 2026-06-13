@@ -7,6 +7,7 @@ import type {
   PostSearchDocument,
   RealmSearchDocument,
   UserSearchDocument,
+  ZoneSearchDocument,
 } from "@rezics/contract";
 import {
   type Language,
@@ -46,6 +47,7 @@ import {
   UnitTranslation,
   User,
   UserUnitProgress,
+  Zone,
 } from "@rezics/server/db/schema";
 import { and, asc, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import type { SearchClient } from "./client";
@@ -3275,6 +3277,50 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
   };
 }
 
+// ANCHOR: Zone document builder
+// ANCHOR: Zone 文档构建器
+
+export function buildZoneDocument(zone: any): ZoneSearchDocument {
+  const unit = zone.unit;
+  const translations: any[] = unit?.translations ?? [];
+  const aliases: any[] = (unit?.aliases ?? []).filter(isSearchVisibleScoredRow);
+  const ownerRealmTranslations: any[] = zone.ownerRealmTranslations ?? [];
+
+  const titles = translations.map((t: any) => t.title).filter(Boolean);
+  const descriptions = translations
+    .map((t: any) => searchDescriptionText(t.description))
+    .filter(isNonEmptyString);
+  const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
+  const ownerRealmTitles = ownerRealmTranslations
+    .map((translation: any) => translation.title)
+    .filter(isNonEmptyString);
+  const languages = indexedLanguages(unit ?? {});
+
+  return {
+    id: zone.unitId,
+    slug: unit?.slug ?? null,
+    ownerRealmUnitId: zone.ownerRealmUnitId,
+    createdAt: toIsoString(zone.createdAt) ?? "",
+    updatedAt: toIsoString(zone.updatedAt) ?? "",
+    startsAt: toIsoString(zone.startsAt),
+    endsAt: toIsoString(zone.endsAt),
+    userId: unit?.userId ?? null,
+    visibility: unit?.visibility ?? "PRIVATE",
+    languages,
+    isLanguageNeutral: Boolean(unit?.isLanguageNeutral),
+    supportLanguages: indexedSupportLanguages(unit ?? {}),
+    titles,
+    descriptions,
+    aliasValues,
+    ownerRealmTitles,
+    translations: translations.map((tr: any) => ({
+      language: tr.language,
+      title: tr.title ?? null,
+      description: searchDescriptionText(tr.description),
+    })),
+  };
+}
+
 // ANCHOR: Poll document builder
 // ANCHOR: Poll 文档构建器
 
@@ -3662,6 +3708,206 @@ export async function syncRealmSegment(
   const { current, nextCursor } = segmentRows(realms, limit, "unitId");
   if (current.length > 0) {
     await client.addOrUpdateRealms(current.map(buildRealmDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
+// ANCHOR: Zone sync functions
+// ANCHOR: Zone 同步函数
+
+type ZoneBaseRow = {
+  unitId: string;
+  ownerRealmUnitId: string;
+  startsAt: Date | string | null;
+  endsAt: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  unitStatus: string | null;
+  unitVisibility: string | null;
+  unitModerationStatus: string | null;
+  userId: string | null;
+  slug: string | null;
+  isLanguageNeutral: boolean | null;
+};
+
+const zoneBaseSelect = {
+  unitId: Zone.unitId,
+  ownerRealmUnitId: Zone.ownerRealmUnitId,
+  startsAt: Zone.startsAt,
+  endsAt: Zone.endsAt,
+  createdAt: Zone.createdAt,
+  updatedAt: Zone.updatedAt,
+  unitStatus: Unit.status,
+  unitVisibility: Unit.visibility,
+  unitModerationStatus: Unit.moderationStatus,
+  userId: Unit.userId,
+  slug: Unit.slug,
+  isLanguageNeutral: Unit.isLanguageNeutral,
+} as const;
+
+function zoneFromRows(
+  row: ZoneBaseRow,
+  translationsByUnitId: Map<string, any[]>,
+  supportLanguagesByUnitId: Map<string, any[]>,
+  aliasesByUnitId: Map<string, any[]>,
+  ownerRealmTranslationsByUnitId: Map<string, any[]>,
+) {
+  return {
+    unitId: row.unitId,
+    ownerRealmUnitId: row.ownerRealmUnitId,
+    startsAt: row.startsAt,
+    endsAt: row.endsAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    ownerRealmTranslations:
+      ownerRealmTranslationsByUnitId.get(row.ownerRealmUnitId) ?? [],
+    unit: {
+      status: row.unitStatus,
+      visibility: row.unitVisibility,
+      moderationStatus: row.unitModerationStatus,
+      userId: row.userId,
+      slug: row.slug,
+      isLanguageNeutral: row.isLanguageNeutral,
+      translations: translationsByUnitId.get(row.unitId) ?? [],
+      supportLanguages: supportLanguagesByUnitId.get(row.unitId) ?? [],
+      aliases: aliasesByUnitId.get(row.unitId) ?? [],
+    },
+  };
+}
+
+async function hydrateZoneRows(rows: ZoneBaseRow[]) {
+  if (rows.length === 0) return [];
+  const unitIds = rows.map((row) => row.unitId);
+  const ownerRealmUnitIds = [
+    ...new Set(rows.map((row) => row.ownerRealmUnitId)),
+  ];
+  const [translations, supportLanguages, aliases, ownerRealmTranslations] =
+    await Promise.all([
+      getSearchDb()
+        .select()
+        .from(UnitTranslation)
+        .where(inArray(UnitTranslation.unitId, unitIds)),
+      getSearchDb()
+        .select()
+        .from(UnitSupportLanguage)
+        .where(inArray(UnitSupportLanguage.unitId, unitIds)),
+      getSearchDb()
+        .select()
+        .from(UnitAlias)
+        .where(
+          and(
+            inArray(UnitAlias.unitId, unitIds),
+            eq(UnitAlias.status, "ACTIVE"),
+            or(
+              gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+              eq(UnitAlias.pinned, true),
+            ),
+          ),
+        )
+        .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score)),
+      getSearchDb()
+        .select()
+        .from(UnitTranslation)
+        .where(inArray(UnitTranslation.unitId, ownerRealmUnitIds)),
+    ]);
+  return rows.map((row) =>
+    zoneFromRows(
+      row,
+      groupRowsByKey(translations as any[], "unitId"),
+      groupRowsByKey(supportLanguages as any[], "unitId"),
+      groupRowsByKey(aliases as any[], "unitId"),
+      groupRowsByKey(ownerRealmTranslations as any[], "unitId"),
+    ),
+  );
+}
+
+async function findZoneSyncRow(unitId: string) {
+  const [row] = await getSearchDb()
+    .select(zoneBaseSelect)
+    .from(Zone)
+    .leftJoin(Unit, eq(Unit.id, Zone.unitId))
+    .where(eq(Zone.unitId, unitId))
+    .limit(1);
+  const [zone] = await hydrateZoneRows(row ? ([row] as ZoneBaseRow[]) : []);
+  return zone ?? null;
+}
+
+async function listZoneSyncRows(input: { limit: number; cursor?: string }) {
+  const query = getSearchDb()
+    .select(zoneBaseSelect)
+    .from(Zone)
+    .leftJoin(Unit, eq(Unit.id, Zone.unitId));
+  const rows = input.cursor
+    ? await query
+        .where(and(eq(Unit.status, "PUBLISHED"), gt(Zone.unitId, input.cursor)))
+        .orderBy(asc(Zone.unitId))
+        .limit(input.limit)
+    : await query
+        .where(eq(Unit.status, "PUBLISHED"))
+        .orderBy(asc(Zone.unitId))
+        .limit(input.limit);
+  return hydrateZoneRows(rows as ZoneBaseRow[]);
+}
+
+function isPublicIndexableZoneUnit(zone: any): boolean {
+  return (
+    zone?.unit?.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
+    zone.unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
+    zone.unit.moderationStatus === PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus
+  );
+}
+
+export async function syncSingleZone(client: SearchClient, unitId: string) {
+  const zone = await findZoneSyncRow(unitId);
+
+  if (!zone || !isPublicIndexableZoneUnit(zone)) {
+    await client.deleteZones([unitId]);
+    return;
+  }
+
+  await client.addOrUpdateZones([buildZoneDocument(zone)]);
+}
+
+export async function syncAllZones(client: SearchClient) {
+  const deleteResult = await client.deleteAllZones();
+  console.log("syncAllZones: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    console.log("syncAllZones: cursor", cursor, "total", total);
+
+    const zones = await listZoneSyncRows({ limit: BATCH_SIZE, cursor });
+
+    if (zones.length === 0) break;
+
+    const docs = zones.filter(isPublicIndexableZoneUnit).map(buildZoneDocument);
+    const addResult = docs.length
+      ? await client.addOrUpdateZones(docs)
+      : undefined;
+    console.log("syncAllZones: added batch", addResult);
+
+    total += docs.length;
+    cursor = zones[zones.length - 1]!.unitId;
+  }
+
+  return { message: "syncAllZones success", totalSynced: total };
+}
+
+export async function syncZoneSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const zones = await listZoneSyncRows({
+    limit: limit + 1,
+    cursor: options.cursor,
+  });
+  const { current, nextCursor } = segmentRows(zones, limit, "unitId");
+  const docs = current.filter(isPublicIndexableZoneUnit).map(buildZoneDocument);
+  if (docs.length > 0) {
+    await client.addOrUpdateZones(docs);
   }
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }

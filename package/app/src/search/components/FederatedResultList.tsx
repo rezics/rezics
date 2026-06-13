@@ -21,6 +21,7 @@ type ContentRowCategory = "books" | "shelves";
 type PostRowCategory = "reviews" | "excerpts" | "remarks" | "posts";
 type CommentRowCategory = "comments";
 type RealmRowCategory = "realms";
+type ZoneRowCategory = "zones";
 type UserRowCategory = "users";
 type EntityRowCategory = "entities";
 type ItemRowCategory =
@@ -28,6 +29,7 @@ type ItemRowCategory =
   | PostRowCategory
   | CommentRowCategory
   | RealmRowCategory
+  | ZoneRowCategory
   | UserRowCategory
   | EntityRowCategory;
 
@@ -69,6 +71,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
     if (s.posts) sectionEntries.push(["posts", s.posts]);
     if (s.shelves) sectionEntries.push(["shelves", s.shelves]);
     if (s.realms) sectionEntries.push(["realms", s.realms]);
+    if (s.zones) sectionEntries.push(["zones", s.zones]);
     if (s.users) sectionEntries.push(["users", s.users]);
     if (s.entities) sectionEntries.push(["entities", s.entities]);
 
@@ -166,16 +169,18 @@ function originBadge(hit: FederatedRankedHit): string {
       ? getI18nRuntime().i18n.t("search:category_shelves")
       : getI18nRuntime().i18n.t("search:origin_book");
   }
-  if (origin.indexUid === "post") {
+  if (origin.indexUid === "posts") {
     const doc = hit as PostSearchDocument & { _origin: typeof origin };
     return doc.kind ?? getI18nRuntime().i18n.t("search:origin_post");
   }
   if (origin.indexUid === "comments") {
     return getI18nRuntime().i18n.t("search:origin_comment");
   }
-  if (origin.indexUid === "realm")
+  if (origin.indexUid === "realms")
     return getI18nRuntime().i18n.t("search:origin_realm");
-  if (origin.indexUid === "user")
+  if (origin.indexUid === "zones")
+    return getI18nRuntime().i18n.t("search:origin_zone");
+  if (origin.indexUid === "users")
     return getI18nRuntime().i18n.t("search:origin_user");
   if (origin.indexUid === "entities")
     return getI18nRuntime().i18n.t("search:origin_entity");

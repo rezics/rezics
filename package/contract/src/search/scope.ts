@@ -38,6 +38,7 @@ export const SearchCategorySchema = t.Union([
   t.Literal("comments"),
   t.Literal("shelves"),
   t.Literal("realms"),
+  t.Literal("zones"),
   t.Literal("users"),
   t.Literal("entities"),
 ]);

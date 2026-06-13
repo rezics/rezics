@@ -70,6 +70,20 @@ const hydratedUnits = new Map<string, any>([
     },
   ],
   [
+    "zone-2",
+    {
+      id: "zone-2",
+      type: "ZONE",
+      slug: "featured-zone",
+      createdAt: new Date("2026-04-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-04-02T00:00:00.000Z"),
+      translations: [
+        { language: "en", title: "Featured Zone", summary: "A portal" },
+      ],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+    },
+  ],
+  [
     "label-1",
     {
       id: "label-1",
@@ -115,7 +129,7 @@ const fragmentTranslations = new Map<
 
 const searchSectionMock = mock(
   async (_input: {
-    index: "content" | "posts" | "realms";
+    index: "content" | "posts" | "realms" | "zones";
     filter: string[];
     sort: string[];
     offset: number;
@@ -396,6 +410,11 @@ beforeAll(async () => {
   mock.restore();
   const filters = await import("../meili/search/filters");
   mock.module("@/meili/search/filters", () => filters);
+  mock.module("@/job/job-boundary", () => ({
+    serverJobProducer: {
+      enqueue: mock(async () => ({ status: "created" })),
+    },
+  }));
   mock.module("@/unit", () => ({ unitService: {} }));
   mock.module("@/utils/errors", () => ({
     AppError: class AppError extends Error {
@@ -730,6 +749,37 @@ describe("section data execution", () => {
       expect.objectContaining({
         unitId: "realm-2",
         title: "Academy City",
+      }),
+    ]);
+  });
+
+  test("zone query sections use the zones index and hydrate zone units", async () => {
+    searchSectionMock.mockResolvedValueOnce({ ids: ["zone-2"], total: 1 });
+    const page = basePage();
+    page.sections.push({
+      id: "s-zones",
+      kind: "query",
+      display: "grid",
+      limit: 12,
+      query: {
+        target: "zone",
+        types: ["ZONE"],
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+    });
+    currentPage = pageRow(page);
+    currentZone = zoneRow({ page });
+
+    const data = await service.getSectionData("zone-1", "page-home", "s-zones");
+    const input = searchSectionMock.mock.calls[0]![0];
+    expect(input.index).toBe("zones");
+    expect(input.filter).toContain('visibility = "PUBLIC"');
+    expect(input.sort).toEqual(["updatedAt:desc"]);
+    expect(data?.items).toEqual([
+      expect.objectContaining({
+        unitId: "zone-2",
+        type: "ZONE",
+        title: "Featured Zone",
       }),
     ]);
   });

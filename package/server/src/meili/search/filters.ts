@@ -56,6 +56,7 @@ export interface FilterContext {
   // 预编译（见 `compileZoneSectionQuery`）。用户过滤只能在其内部收窄。
   zoneBoundaryContentFilter?: string[];
   zoneBoundaryPostFilter?: string[];
+  zoneBoundaryZoneFilter?: string[];
 }
 
 export interface ContentBuildOpts {
@@ -400,6 +401,28 @@ export function buildRealmFilter(
   return filter;
 }
 
+// ANCHOR: buildZoneFilter
+// ANCHOR: buildZoneFilter（构建专区筛选器）
+// Zone search mirrors realm discovery: only global search exposes the directory
+// index, while zone-section queries use their own compiled boundary filters.
+// 专区搜索与 realm 发现保持一致：只有全局搜索暴露目录索引；专区分区查询
+// 使用自身编译后的边界过滤器。
+
+export function buildZoneFilter(
+  query: SearchQuery,
+  scope: SearchScope,
+  ctx: FilterContext = {},
+): string[] {
+  const filter =
+    scope.kind === "zone" ? [...(ctx.zoneBoundaryZoneFilter ?? [])] : [];
+  filter.push('visibility = "PUBLIC"');
+  const languageFilter = buildPreferredLanguageFilter(query);
+  if (languageFilter) {
+    filter.push(languageFilter);
+  }
+  return filter;
+}
+
 // ANCHOR: buildUserFilter
 // ANCHOR: buildUserFilter（构建用户筛选器）
 // User scope is meaningless on the users index. Only `global` permits this
@@ -466,14 +489,14 @@ export function buildShelfItemFilter(
 // ANCHOR: compileZoneSectionQuery
 // ANCHOR: compileZoneSectionQuery（编译专区分区查询）
 // Compiles a typed `ZoneSectionQuery` (intersected with the zone-level
-// `ZoneBoundaryFilter`) into content/posts/realms index filter + sort expressions.
+// `ZoneBoundaryFilter`) into content/posts/realms/zones index filter + sort expressions.
 // Only fields the target index can actually filter/sort are accepted —
 // `zoneSectionQueryUnsupportedFields` is the shared validation surface used
 // both here and by zone config validation. The sync layer indexes PUBLIC
 // units only, so UNLISTED zone fragments never appear in query results; the
 // explicit content visibility filter below documents that boundary.
 // 将类型化的 `ZoneSectionQuery`（与专区级 `ZoneBoundaryFilter` 取交集）
-// 编译为 content/posts/realms 索引的过滤 + 排序表达式。只接受目标索引实际可
+// 编译为 content/posts/realms/zones 索引的过滤 + 排序表达式。只接受目标索引实际可
 // 过滤/排序的字段——`zoneSectionQueryUnsupportedFields` 是这里与专区配置
 // 校验共用的校验面。同步层只索引 PUBLIC Unit，因此 UNLISTED 专区片段
 // 绝不会出现在查询结果中；下方显式的 content 可见性过滤记录了该边界。
@@ -488,7 +511,7 @@ export interface ZoneQueryCompileContext {
 }
 
 export interface CompiledZoneSectionQuery {
-  index: "content" | "posts" | "realms";
+  index: "content" | "posts" | "realms" | "zones";
   filter: string[];
   sort: string[];
 }
@@ -510,6 +533,7 @@ const ZONE_QUERY_FILTERABLE: Record<
   ]),
   post: new Set(["postKinds", "realm", "targetUnitId", "languages"]),
   realm: new Set(["types", "languages"]),
+  zone: new Set(["types", "realm", "languages"]),
 };
 
 const ZONE_QUERY_SORTABLE: Record<ZoneSectionQuery["target"], Set<string>> = {
@@ -538,6 +562,7 @@ const ZONE_QUERY_SORTABLE: Record<ZoneSectionQuery["target"], Set<string>> = {
     "qualityScore",
   ]),
   realm: new Set(["createdAt", "updatedAt", "memberCount"]),
+  zone: new Set(["createdAt", "updatedAt"]),
 };
 
 export function zoneSectionQueryUnsupportedFields(
@@ -710,7 +735,7 @@ export function compileZoneSectionQuery(
       query.realm !== undefined && boundary?.realm !== undefined,
     );
     filter.push("isLocked = false");
-  } else {
+  } else if (query.target === "realm") {
     if (types !== undefined && !types.includes("REALM")) {
       empty = true;
     }
@@ -727,10 +752,32 @@ export function compileZoneSectionQuery(
       empty = true;
     }
     filter.push("isPublic = true");
+  } else {
+    if (types !== undefined && !types.includes("ZONE")) {
+      empty = true;
+    }
+    if (
+      postKinds !== undefined ||
+      tagUnitIds !== undefined ||
+      subjectEntityIds !== undefined ||
+      subjectRoles !== undefined ||
+      ratings !== undefined ||
+      query.targetUnitId !== undefined ||
+      boundary?.targetUnitId !== undefined
+    ) {
+      empty = true;
+    }
+    pushIntersected(
+      "ownerRealmUnitId",
+      realmIds,
+      query.realm !== undefined && boundary?.realm !== undefined,
+    );
+    filter.push('visibility = "PUBLIC"');
   }
 
   if (
     query.target !== "realm" &&
+    query.target !== "zone" &&
     (query.targetUnitId !== undefined || boundary?.targetUnitId !== undefined)
   ) {
     if (
@@ -764,7 +811,9 @@ export function compileZoneSectionQuery(
         ? "content"
         : query.target === "post"
           ? "posts"
-          : "realms",
+          : query.target === "realm"
+            ? "realms"
+            : "zones",
     filter,
     sort: [`${query.sort.field}:${query.sort.direction ?? "desc"}`],
   };

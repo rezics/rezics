@@ -365,7 +365,7 @@ const zonesConfig = officialConfig({
       limit: 24,
       loadMore: true,
       query: {
-        target: "unit",
+        target: "zone",
         types: ["ZONE"],
         sort: { field: "createdAt", direction: "desc" },
       },
@@ -378,7 +378,7 @@ const zonesConfig = officialConfig({
       limit: 24,
       loadMore: true,
       query: {
-        target: "unit",
+        target: "zone",
         types: ["ZONE"],
         sort: { field: "updatedAt", direction: "desc" },
       },

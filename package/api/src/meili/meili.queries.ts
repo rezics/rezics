@@ -13,6 +13,7 @@ import type {
   PostSearchOptions,
   RealmSearchOptions,
   UserListQuery,
+  ZoneSearchOptions,
 } from "@rezics/contract";
 import {
   queryOptions,
@@ -27,6 +28,7 @@ import {
   meiliPostApi,
   meiliRealmApi,
   meiliUserApi,
+  meiliZoneApi,
 } from "./meili.api";
 
 // ANCHOR: Content search 内容搜索
@@ -196,6 +198,36 @@ export function useRealmSearchInfiniteQuery(
     queryKey: ["meili", "realms", "infinite", opts],
     queryFn: ({ pageParam = 0 }) =>
       meiliRealmApi.realmSearch({ ...opts, offset: pageParam, limit }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.items.length < limit) return undefined;
+      return lastPageParam + limit;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+}
+
+// ANCHOR: Zone search 专区搜索
+
+export const zoneSearchQueryOptions = (opts: ZoneSearchOptions) =>
+  queryOptions({
+    queryKey: ["meili", "zones", opts],
+    queryFn: () => meiliZoneApi.zoneSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function useZoneSearchQuery(opts: ZoneSearchOptions) {
+  return useQuery(zoneSearchQueryOptions(opts));
+}
+
+export function useZoneSearchInfiniteQuery(
+  opts: Omit<ZoneSearchOptions, "offset">,
+) {
+  const limit = opts.limit ?? 20;
+  return useInfiniteQuery({
+    queryKey: ["meili", "zones", "infinite", opts],
+    queryFn: ({ pageParam = 0 }) =>
+      meiliZoneApi.zoneSearch({ ...opts, offset: pageParam, limit }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       if (lastPage.items.length < limit) return undefined;

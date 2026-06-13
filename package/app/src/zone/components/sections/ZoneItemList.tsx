@@ -1,28 +1,189 @@
-import type { ZoneSectionDisplay } from "@rezics/contract";
+import {
+  useIsSubscribed,
+  useSubscribeMutation,
+  useUnsubscribeMutation,
+} from "@rezics/api/subscription/subscription";
+import type { UnitType, ZoneSectionDisplay } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Card,
+  CardContent,
+} from "@rezics/ui/shadcn";
 import { Image as ImageIcon } from "lucide-react";
+import { JoinButton } from "@/realm";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
+import {
+  selectHasMemberSession,
+  useAuthModal,
+  useAuthSessionStore,
+} from "@/user";
 
 export type ZoneListEntry = {
   key: string;
+  unitId?: string | null;
   href: string;
   label: string;
   summary?: string | null;
   imageUrl?: string | null;
+  type?: UnitType | string | null;
 };
 
+function isCommunityEntry(entry: ZoneListEntry): boolean {
+  return entry.type === "REALM" || entry.type === "ZONE";
+}
+
+function communityInitial(label: string): string {
+  return label.trim().slice(0, 1).toUpperCase() || "R";
+}
+
+function ZoneSubscriptionButton({ zoneUnitId }: { zoneUnitId: string }) {
+  const { t } = useTranslation(["entity"]);
+  const auth = useAuthModal("login");
+  const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
+  const authSessionLoading = useAuthSessionStore(
+    (state) => state.status === "loading",
+  );
+  const { data: subscription, isLoading } = useIsSubscribed(
+    hasMemberSession ? zoneUnitId : "",
+  );
+  const subscribe = useSubscribeMutation();
+  const unsubscribe = useUnsubscribeMutation();
+  const isJoined = subscription?.subscribed === true;
+  const isPending =
+    authSessionLoading ||
+    isLoading ||
+    subscribe.isPending ||
+    unsubscribe.isPending;
+
+  const handleClick = () => {
+    if (isPending) return;
+    if (!hasMemberSession) {
+      auth.openLogin();
+      return;
+    }
+    if (isJoined) {
+      unsubscribe.mutate(zoneUnitId);
+    } else {
+      subscribe.mutate({ subscribedUnitId: zoneUnitId });
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant={isJoined ? "outline" : "default"}
+        size="sm"
+        disabled={isPending}
+        onClick={handleClick}
+        className="h-8 shrink-0 px-3"
+      >
+        {isJoined ? t("entity:realm_leave") : t("entity:realm_join")}
+      </Button>
+      {!hasMemberSession && auth.AuthModal({})}
+    </>
+  );
+}
+
+function CommunityEntryAction({ entry }: { entry: ZoneListEntry }) {
+  if (!entry.unitId) return null;
+  if (entry.type === "REALM") {
+    return <JoinButton realmId={entry.unitId} />;
+  }
+  if (entry.type === "ZONE") {
+    return <ZoneSubscriptionButton zoneUnitId={entry.unitId} />;
+  }
+  return null;
+}
+
+function CommunityEntryCard({
+  entry,
+  className = "",
+}: {
+  entry: ZoneListEntry;
+  className?: string;
+}) {
+  const { t } = useTranslation(["common"]);
+  const kindLabel =
+    entry.type === "ZONE" ? t("common:zone") : t("common:realm");
+  const summary = entry.summary?.trim() || t("common:no_description");
+  const action = <CommunityEntryAction entry={entry} />;
+
+  return (
+    <Card
+      interactive
+      surface="plain"
+      className={`relative h-full min-h-30 cursor-pointer ${className}`}
+    >
+      <SafeLink
+        href={entry.href}
+        aria-label={entry.label}
+        className="absolute inset-0 z-10 rounded-md"
+      />
+      <CardContent className="pointer-events-none flex h-full min-w-0 flex-col gap-3 p-4">
+        <div className="flex min-w-0 items-start gap-3">
+          <Avatar className="size-11 shrink-0 rounded-md bg-surface-subtle">
+            {entry.imageUrl ? (
+              <AvatarImage src={entry.imageUrl} alt="" />
+            ) : null}
+            <AvatarFallback className="rounded-md leading-ui">
+              {communityInitial(entry.label)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold leading-ui text-text-primary">
+              {entry.label}
+            </span>
+            <span className="mt-0.5 block text-xs leading-dense text-text-tertiary">
+              {kindLabel}
+            </span>
+          </div>
+          <div className="pointer-events-auto relative z-20 shrink-0">
+            {action}
+          </div>
+        </div>
+        <span className="line-clamp-2 min-h-8 text-xs leading-dense text-text-secondary">
+          {summary}
+        </span>
+      </CardContent>
+    </Card>
+  );
+}
+
 /**
- * Shared layout for collection/query entries. The display variants map
- * onto three restrained layouts: rows (`list`), card grids
- * (`tiles`/`grid`/`featured` — featured uses wider cells), and DomainCarousel
- * cover rails (`carousel` shows arrows and snapped cells; `covers` is a
- * lightweight drag-free rail). Image units may carry no resolved URL; covers
- * fall back to an icon placeholder and inline thumbnails are skipped.
- * collection/query 条目的共享布局。六种 display 变体映射到三种克制的
- * 布局：行（`list`）、卡片网格（`tiles`/`grid`/`featured`——featured 使用
- * 更宽的单元格）与 DomainCarousel 封面栏（`carousel` 显示箭头并按单元格
- * 吸附，`covers` 是轻量的自由拖拽栏）。图片 Unit 可能没有已解析的 URL；
- * 封面回退到图标占位，行内缩略图直接跳过。
+ * collection/query 条目的共享布局。Mobile 为单列列表或横向 rail；Tablet
+ * 起 grid 变两列；Desktop 为三列；Ultra-wide 仍由父级 max width 控制。
+ * REALM/ZONE 使用等高 community card：左侧 avatar/monogram，中间标题与
+ * 摘要，右侧单一 join/leave 动作；整卡仍通过 overlay link 进入详情。
+ * 非 community 内容保留封面/列表形态。
+ *
+ * Mobile
+ * +--------------------------------+
+ * | [avatar] title            View |
+ * |          description           |
+ * | [cover/text item]              |
+ * +--------------------------------+
+ *
+ * Tablet
+ * +----------------+  +----------------+
+ * | avatar title   |  | avatar title   |
+ * | summary        |  | summary        |
+ * +----------------+  +----------------+
+ *
+ * Desktop
+ * +-------------+ +-------------+ +-------------+
+ * | community   | | community   | | community   |
+ * +-------------+ +-------------+ +-------------+
+ *
+ * Ultra-wide
+ * +-------------+ +-------------+ +-------------+
+ * | parent max-width keeps centered rhythm       |
+ * +----------------------------------------------+
  */
 export function ZoneItemList({
   entries,
@@ -36,28 +197,32 @@ export function ZoneItemList({
       <ul className="flex flex-col gap-2">
         {entries.map((entry) => (
           <li key={entry.key}>
-            <SafeLink
-              href={entry.href}
-              className="flex items-center gap-3 rounded-md bg-surface-subtle px-4 py-3 transition-colors hover:bg-surface-sunken"
-            >
-              {entry.imageUrl ? (
-                <img
-                  src={entry.imageUrl}
-                  alt=""
-                  className="h-10 w-10 shrink-0 rounded-sm object-cover"
-                />
-              ) : null}
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium leading-ui text-text-primary">
-                  {entry.label}
-                </span>
-                {entry.summary ? (
-                  <span className="block truncate text-xs leading-dense text-text-secondary">
-                    {entry.summary}
-                  </span>
+            {isCommunityEntry(entry) ? (
+              <CommunityEntryCard entry={entry} />
+            ) : (
+              <SafeLink
+                href={entry.href}
+                className="flex items-center gap-3 rounded-md bg-surface-subtle px-4 py-3 transition-colors hover:bg-surface-sunken"
+              >
+                {entry.imageUrl ? (
+                  <img
+                    src={entry.imageUrl}
+                    alt=""
+                    className="h-10 w-10 shrink-0 rounded-sm object-cover"
+                  />
                 ) : null}
-              </span>
-            </SafeLink>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium leading-ui text-text-primary">
+                    {entry.label}
+                  </span>
+                  {entry.summary ? (
+                    <span className="block truncate text-xs leading-dense text-text-secondary">
+                      {entry.summary}
+                    </span>
+                  ) : null}
+                </span>
+              </SafeLink>
+            )}
           </li>
         ))}
       </ul>
@@ -75,29 +240,35 @@ export function ZoneItemList({
         showArrows={isCarousel}
         dragFree={!isCarousel}
         scrollSnap="start"
-        renderItem={(entry) => (
-          <div className="w-28 sm:w-32">
-            <SafeLink href={entry.href} className="flex flex-col gap-2">
-              <span className="flex aspect-[2/3] items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
-                {entry.imageUrl ? (
-                  <img
-                    src={entry.imageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <ImageIcon
-                    className="size-6 text-text-tertiary"
-                    aria-hidden
-                  />
-                )}
-              </span>
-              <span className="line-clamp-2 text-xs leading-dense text-text-primary">
-                {entry.label}
-              </span>
-            </SafeLink>
-          </div>
-        )}
+        renderItem={(entry) =>
+          isCommunityEntry(entry) ? (
+            <div className="w-72 sm:w-80">
+              <CommunityEntryCard entry={entry} />
+            </div>
+          ) : (
+            <div className="w-28 sm:w-32">
+              <SafeLink href={entry.href} className="flex flex-col gap-2">
+                <span className="flex aspect-[2/3] items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                  {entry.imageUrl ? (
+                    <img
+                      src={entry.imageUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon
+                      className="size-6 text-text-tertiary"
+                      aria-hidden
+                    />
+                  )}
+                </span>
+                <span className="line-clamp-2 text-xs leading-dense text-text-primary">
+                  {entry.label}
+                </span>
+              </SafeLink>
+            </div>
+          )
+        }
       />
     );
   }
@@ -137,25 +308,29 @@ export function ZoneItemList({
 
   const gridClass =
     display === "featured"
-      ? "grid gap-3 sm:grid-cols-2"
-      : "grid gap-3 sm:grid-cols-2 lg:grid-cols-3";
+      ? "grid auto-rows-fr gap-3 sm:grid-cols-2"
+      : "grid auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3";
   return (
     <ul className={gridClass}>
       {entries.map((entry) => (
         <li key={entry.key}>
-          <SafeLink
-            href={entry.href}
-            className="flex h-full flex-col gap-1 rounded-md bg-surface-subtle px-4 py-3 transition-colors hover:bg-surface-sunken"
-          >
-            <span className="text-sm font-medium leading-ui text-text-primary">
-              {entry.label}
-            </span>
-            {entry.summary ? (
-              <span className="line-clamp-2 text-xs leading-dense text-text-secondary">
-                {entry.summary}
+          {isCommunityEntry(entry) ? (
+            <CommunityEntryCard entry={entry} />
+          ) : (
+            <SafeLink
+              href={entry.href}
+              className="flex h-full flex-col gap-1 rounded-md bg-surface-subtle px-4 py-3 transition-colors hover:bg-surface-sunken"
+            >
+              <span className="text-sm font-medium leading-ui text-text-primary">
+                {entry.label}
               </span>
-            ) : null}
-          </SafeLink>
+              {entry.summary ? (
+                <span className="line-clamp-2 text-xs leading-dense text-text-secondary">
+                  {entry.summary}
+                </span>
+              ) : null}
+            </SafeLink>
+          )}
         </li>
       ))}
     </ul>

@@ -44,6 +44,10 @@ export const SEARCH_COMMAND_KINDS = {
   realmPatchMemberCount: "search.realm.patchMemberCount",
   realmFullSync: "search.realm.fullSync",
 
+  zoneSync: "search.zone.sync",
+  zoneDelete: "search.zone.delete",
+  zoneFullSync: "search.zone.fullSync",
+
   entitySync: "search.entity.sync",
   entityDelete: "search.entity.delete",
   entityPatchAliases: "search.entity.patchAliases",
@@ -79,6 +83,7 @@ const PostTargetPayloadSchema = v.strictObject({ postId: v.string() });
 const CommentTargetPayloadSchema = v.strictObject({ commentId: v.string() });
 const PollTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const RealmTargetPayloadSchema = v.strictObject({ unitId: v.string() });
+const ZoneTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const EntityTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const UserTargetPayloadSchema = v.strictObject({ userId: v.string() });
 const FeedbackTargetPayloadSchema = v.strictObject({ feedbackId: v.string() });
@@ -289,6 +294,22 @@ export const RealmFullSyncCommandSchema = commandSchema(
   FullSyncPayloadSchema,
 );
 
+export const ZoneSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.zoneSync,
+  JOB_LANES.searchSyncFast,
+  ZoneTargetPayloadSchema,
+);
+export const ZoneDeleteCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.zoneDelete,
+  JOB_LANES.searchSyncFast,
+  ZoneTargetPayloadSchema,
+);
+export const ZoneFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.zoneFullSync,
+  JOB_LANES.maintenance,
+  FullSyncPayloadSchema,
+);
+
 export const EntitySyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.entitySync,
   JOB_LANES.searchSyncFast,
@@ -433,6 +454,9 @@ export const SearchCommandSchema = v.union([
   RealmPatchAliasesCommandSchema,
   RealmPatchMemberCountCommandSchema,
   RealmFullSyncCommandSchema,
+  ZoneSyncCommandSchema,
+  ZoneDeleteCommandSchema,
+  ZoneFullSyncCommandSchema,
   EntitySyncCommandSchema,
   EntityDeleteCommandSchema,
   EntityPatchAliasesCommandSchema,

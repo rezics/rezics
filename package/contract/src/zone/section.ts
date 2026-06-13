@@ -10,11 +10,11 @@ import { zoneLinkTargetSchema } from "./link-target";
 
 /**
  * `ZoneSectionQuery` compiles only to fields the Meilisearch `content`,
- * `posts`, or `realms` indexes can filter or sort; the server-side compiler rejects
+ * `posts`, `realms`, or `zones` indexes can filter or sort; the server-side compiler rejects
  * combinations outside that vocabulary (e.g. `tagUnitIds` on the posts
  * index). Semantic section variants ("latest", "popular", "recent wiki")
  * are query presets plus default-title i18n keys, never new section kinds.
- * `ZoneSectionQuery` 只编译为 Meilisearch `content`、`posts` 或 `realms` 索引可
+ * `ZoneSectionQuery` 只编译为 Meilisearch `content`、`posts`、`realms` 或 `zones` 索引可
  * 过滤或排序的字段；服务端编译器会拒绝词汇表之外的组合（例如 posts
  * 索引上的 `tagUnitIds`）。语义化的分区变体（“最新”“热门”“最近 wiki”）
  * 是查询预设加默认标题 i18n key，绝不是新的分区 kind。
@@ -90,7 +90,12 @@ export type ZoneSectionQuerySubjects = Static<
 
 export const zoneSectionQuerySchema = t.Object(
   {
-    target: t.Union([t.Literal("unit"), t.Literal("post"), t.Literal("realm")]),
+    target: t.Union([
+      t.Literal("unit"),
+      t.Literal("post"),
+      t.Literal("realm"),
+      t.Literal("zone"),
+    ]),
     types: t.Optional(t.Array(unitTypeSchema)),
     postKinds: t.Optional(t.Array(postKindLiterals)),
     realm: t.Optional(zoneSectionQueryRealmSchema),

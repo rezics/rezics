@@ -41,6 +41,7 @@ export const ZONE_FIXTURE_KINDS = [
   "tabbed-portal",
   "columns-portal",
   "realm-directory",
+  "zone-directory",
 ] as const;
 
 export type ZoneFixtureKind = (typeof ZONE_FIXTURE_KINDS)[number];
@@ -77,10 +78,11 @@ const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 
 // Per-target sort vocabularies mirror `ZONE_QUERY_SORTABLE` in
 // `meili/search/filters.ts`: unit queries may not sort by replyCount, post
-// queries may not sort by publishedAt, and realm queries use the realm index.
+// queries may not sort by publishedAt, and realm/zone queries use their
+// dedicated indexes.
 // 按目标的排序词汇表与 `meili/search/filters.ts` 的 `ZONE_QUERY_SORTABLE`
 // 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序，
-// realm 查询使用 realm 索引。
+// realm/zone 查询使用各自的专用索引。
 const UNIT_SORT_FIELDS: ZoneSectionQuerySortField[] = [
   "createdAt",
   "updatedAt",
@@ -101,6 +103,10 @@ const REALM_SORT_FIELDS: ZoneSectionQuerySortField[] = [
   "createdAt",
   "updatedAt",
   "memberCount",
+];
+const ZONE_SORT_FIELDS: ZoneSectionQuerySortField[] = [
+  "createdAt",
+  "updatedAt",
 ];
 
 interface ZoneTemporalState {
@@ -195,6 +201,8 @@ function fixtureBoundary(
       return refs.contextRealmUnitId ? { realm: "context" } : {};
     case "realm-directory":
       return { types: [UnitType.REALM] };
+    case "zone-directory":
+      return { types: [UnitType.ZONE] };
   }
 }
 
@@ -260,6 +268,27 @@ function realmQuerySection(input: {
       types: ["REALM"],
       sort: {
         field: faker.helpers.arrayElement(REALM_SORT_FIELDS),
+        direction: "desc",
+      },
+    },
+  };
+}
+
+function zoneQuerySection(input: {
+  id: string;
+  limit: number;
+}): ZoneContentSection {
+  return {
+    id: input.id,
+    kind: "query",
+    display: faker.helpers.arrayElement(["tiles", "list"]),
+    limit: input.limit,
+    loadMore: true,
+    query: {
+      target: "zone",
+      types: ["ZONE"],
+      sort: {
+        field: faker.helpers.arrayElement(ZONE_SORT_FIELDS),
         direction: "desc",
       },
     },
@@ -391,6 +420,17 @@ function fixtureHomeSections(
           items: unitItems(refs.realmUnitIds, 12),
         },
         realmQuerySection({ id: "all-realms", limit: 24 }),
+      ];
+    case "zone-directory":
+      return [
+        { id: "hero", kind: "hero", showDescription: true },
+        zoneQuerySection({ id: "latest-zones", limit: 24 }),
+        {
+          id: "featured-realms",
+          kind: "collection",
+          display: "tiles",
+          items: unitItems(refs.realmUnitIds, 12),
+        },
       ];
   }
 }

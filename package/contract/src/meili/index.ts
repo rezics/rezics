@@ -7,3 +7,4 @@ export * from "./post";
 export * from "./realm";
 export * from "./shelf-item";
 export * from "./user";
+export * from "./zone";

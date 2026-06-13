@@ -145,7 +145,11 @@ describe("seedOfficialZones", () => {
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesLatest.id,
         display: "carousel",
-        query: { types: ["ZONE"], sort: { field: "createdAt" } },
+        query: {
+          target: "zone",
+          types: ["ZONE"],
+          sort: { field: "createdAt" },
+        },
       },
       {
         id: "all-zones",
@@ -153,7 +157,11 @@ describe("seedOfficialZones", () => {
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
         display: "grid",
         loadMore: true,
-        query: { types: ["ZONE"], sort: { field: "updatedAt" } },
+        query: {
+          target: "zone",
+          types: ["ZONE"],
+          sort: { field: "updatedAt" },
+        },
       },
     ]);
   });

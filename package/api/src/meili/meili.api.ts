@@ -21,6 +21,8 @@ import type {
   RealmSearchResult,
   UserDTO,
   UserListQuery,
+  ZoneSearchOptions,
+  ZoneSearchResult,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
@@ -91,6 +93,17 @@ export const meiliCommentApi = {
 export const meiliRealmApi = {
   realmSearch: async (opts: RealmSearchOptions): Promise<RealmSearchResult> => {
     return apiFetch<RealmSearchResult>(`/meili/realms/search`, {
+      method: "POST",
+      body: JSON.stringify(opts),
+    });
+  },
+};
+
+// ANCHOR: Zone search 专区搜索
+
+export const meiliZoneApi = {
+  zoneSearch: async (opts: ZoneSearchOptions): Promise<ZoneSearchResult> => {
+    return apiFetch<ZoneSearchResult>(`/meili/zones/search`, {
       method: "POST",
       body: JSON.stringify(opts),
     });

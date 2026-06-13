@@ -399,6 +399,50 @@ describe("compileZoneSectionQuery", () => {
     ).toBe(true);
   });
 
+  test("compiles a zone query against the zones index", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "zone",
+        types: ["ZONE"],
+        realm: "context",
+        languages: "viewer",
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+      { types: ["ZONE"] },
+      {
+        contextRealmUnitId: "realm-1",
+        viewerLanguageCandidates: ["zh-hant"],
+      },
+    );
+
+    expect(compiled.index).toBe("zones");
+    expect(compiled.filter).toContain('ownerRealmUnitId = "realm-1"');
+    expect(compiled.filter).toContain('visibility = "PUBLIC"');
+    expect(compiled.filter).toContain(
+      '(isLanguageNeutral = true OR languages IN ["zh-hant"])',
+    );
+    expect(compiled.sort).toEqual(["updatedAt:desc"]);
+  });
+
+  test("zone queries cannot widen an incompatible zone boundary", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "zone",
+        types: ["ZONE"],
+        sort: { field: "updatedAt" },
+      },
+      { types: ["REALM"] },
+      {},
+    );
+
+    expect(compiled.index).toBe("zones");
+    expect(
+      compiled.filter.some((clause) =>
+        clause.includes("__zone_boundary_empty_intersection__"),
+      ),
+    ).toBe(true);
+  });
+
   test("context realm resolves to unscoped for global-context zones", () => {
     const compiled = compileZoneSectionQuery(
       {
@@ -482,6 +526,14 @@ describe("compileZoneSectionQuery", () => {
         sort: { field: "qualityScore" },
       }),
     ).toEqual(["realm", "sort.qualityScore"]);
+
+    expect(
+      zoneSectionQueryUnsupportedFields({
+        target: "zone",
+        tagUnitIds: ["tag-1"],
+        sort: { field: "memberCount" },
+      }),
+    ).toEqual(["tagUnitIds", "sort.memberCount"]);
 
     expect(() =>
       compileZoneSectionQuery(

@@ -24,6 +24,7 @@ import {
   type ZoneListView,
   type ZoneTranslation,
 } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import {
   and,
   asc,
@@ -38,6 +39,7 @@ import {
   compileZoneSectionQuery,
   zoneSectionQueryUnsupportedFields,
 } from "@/meili/search/filters";
+import { serverJobProducer } from "@/job/job-boundary";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
 import {
@@ -200,7 +202,7 @@ export type ZoneRepository = {
     unitId: string,
   ): Promise<Array<{ language: string; content: unknown }>>;
   searchSection(input: {
-    index: "content" | "posts" | "realms";
+    index: "content" | "posts" | "realms" | "zones";
     filter: string[];
     sort: string[];
     offset: number;
@@ -218,6 +220,17 @@ async function getServerDb() {
 
 function pushIfPresent(target: Set<string>, value: string | null | undefined) {
   if (value) target.add(value);
+}
+
+function enqueueZoneSearch(
+  kind:
+    | typeof SEARCH_COMMAND_KINDS.zoneSync
+    | typeof SEARCH_COMMAND_KINDS.zoneDelete,
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(kind, { unitId }, { type: "server", service: "zone" }),
+  );
 }
 
 function sectionLimit(section: { limit?: number }): number {
@@ -957,9 +970,11 @@ function createDrizzleZoneRepository(): ZoneRepository {
       const index =
         input.index === "content"
           ? searchClient.contentIndex
-          : input.index === "realms"
-            ? searchClient.realmIndex
-            : searchClient.postIndex;
+          : input.index === "zones"
+            ? searchClient.zoneIndex
+            : input.index === "realms"
+              ? searchClient.realmIndex
+              : searchClient.postIndex;
       const resp = await index.search<{ id: string }>("", {
         filter:
           input.filter.length > 0 ? input.filter.join(" AND ") : undefined,
@@ -1335,7 +1350,7 @@ export class ZoneService {
 
     await unitService.setSlug(unit.id, input.slug);
 
-    return this.repository.createZone({
+    const zone = await this.repository.createZone({
       unitId: unit.id,
       ownerRealmUnitId: input.ownerRealmUnitId,
       boundary: input.boundary,
@@ -1346,6 +1361,8 @@ export class ZoneService {
       startsAt: input.startsAt ?? null,
       endsAt: input.endsAt ?? null,
     });
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, zone.unitId);
+    return zone;
   }
 
   async update(
@@ -1373,11 +1390,13 @@ export class ZoneService {
       }
       await this.repository.replaceTranslations(unitId, input.translations);
     }
-    return this.repository.updateZone(unitId, {
+    const zone = await this.repository.updateZone(unitId, {
       ownerRealmUnitId: input.ownerRealmUnitId,
       startsAt: input.startsAt,
       endsAt: input.endsAt,
     });
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, unitId);
+    return zone;
   }
 
   async updateBoundary(
@@ -1399,7 +1418,9 @@ export class ZoneService {
         page: page.config,
       });
     }
-    return this.repository.updateZoneBoundary(unitId, boundary);
+    const zone = await this.repository.updateZoneBoundary(unitId, boundary);
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, unitId);
+    return zone;
   }
 
   async updateNav(unitId: string, nav: ZoneNav): Promise<ZoneWithRelations> {
@@ -1410,7 +1431,9 @@ export class ZoneService {
       nav,
       theme: current.theme,
     });
-    return this.repository.updateZoneNav(unitId, nav);
+    const zone = await this.repository.updateZoneNav(unitId, nav);
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, unitId);
+    return zone;
   }
 
   async updateTheme(
@@ -1424,7 +1447,9 @@ export class ZoneService {
       nav: current.nav,
       theme,
     });
-    return this.repository.updateZoneTheme(unitId, theme);
+    const zone = await this.repository.updateZoneTheme(unitId, theme);
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, unitId);
+    return zone;
   }
 
   async createPage(
@@ -1439,7 +1464,9 @@ export class ZoneService {
       theme: current.theme,
       page: input.config,
     });
-    return this.repository.createPage(zoneUnitId, input);
+    const zone = await this.repository.createPage(zoneUnitId, input);
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, zoneUnitId);
+    return zone;
   }
 
   async updatePage(
@@ -1459,7 +1486,9 @@ export class ZoneService {
         page: input.config,
       });
     }
-    return this.repository.updatePage(zoneUnitId, pageId, input);
+    const zone = await this.repository.updatePage(zoneUnitId, pageId, input);
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, zoneUnitId);
+    return zone;
   }
 
   async deletePage(
@@ -1481,7 +1510,9 @@ export class ZoneService {
         details: { pageId, references },
       });
     }
-    return this.repository.deletePage(zoneUnitId, pageId);
+    const zone = await this.repository.deletePage(zoneUnitId, pageId);
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneSync, zoneUnitId);
+    return zone;
   }
 
   /**
@@ -1709,6 +1740,7 @@ export class ZoneService {
 
   async delete(unitId: string): Promise<void> {
     await this.repository.deleteUnit(unitId);
+    await enqueueZoneSearch(SEARCH_COMMAND_KINDS.zoneDelete, unitId);
   }
 }
 

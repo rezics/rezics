@@ -138,6 +138,18 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
+  const initZonesMutation = meiliAdminMutations.useInitZonesIndex({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_zones_index_initialized"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
   const initEntitiesMutation = meiliAdminMutations.useInitEntitiesIndex({
     onSuccess: (res) => {
       setMessage({
@@ -205,6 +217,16 @@ export function MeiliPage() {
       setMessage({
         type: "success",
         text: getI18nRuntime().i18n.t("admin:meili_realms_sync_started"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const syncZonesMutation = meiliAdminMutations.useSyncZones({
+    onSuccess: () => {
+      setMessage({
+        type: "success",
+        text: getI18nRuntime().i18n.t("admin:meili_zones_sync_started"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -287,6 +309,18 @@ export function MeiliPage() {
         text:
           res.message ||
           getI18nRuntime().i18n.t("admin:meili_all_realms_deleted"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const deleteAllZonesMutation = meiliAdminMutations.useDeleteAllZones({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_zones_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -394,6 +428,13 @@ export function MeiliPage() {
       onClick: () => initRealmsMutation.mutate(),
     },
     {
+      id: "zones",
+      label: getI18nRuntime().i18n.t("admin:meili_init_zones_index"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_initializing"),
+      isPending: initZonesMutation.isPending,
+      onClick: () => initZonesMutation.mutate(),
+    },
+    {
       id: "entities",
       label: getI18nRuntime().i18n.t("admin:meili_init_entities_index"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_initializing"),
@@ -449,6 +490,14 @@ export function MeiliPage() {
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_syncing"),
       isPending: syncRealmsMutation.isPending,
       onClick: () => syncRealmsMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "zones",
+      label: getI18nRuntime().i18n.t("admin:meili_sync_all_zones"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_syncing"),
+      isPending: syncZonesMutation.isPending,
+      onClick: () => syncZonesMutation.mutate(),
       variant: "outline",
     },
     {
@@ -521,6 +570,16 @@ export function MeiliPage() {
       ),
       isPending: deleteAllRealmsMutation.isPending,
       onConfirm: () => deleteAllRealmsMutation.mutate(),
+    },
+    {
+      id: "zones",
+      label: getI18nRuntime().i18n.t("admin:meili_delete_all_zones"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_zones_confirm",
+      ),
+      isPending: deleteAllZonesMutation.isPending,
+      onConfirm: () => deleteAllZonesMutation.mutate(),
     },
     {
       id: "entities",

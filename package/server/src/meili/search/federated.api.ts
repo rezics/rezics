@@ -69,9 +69,9 @@ export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
   {
     body: FederatedSearchOptionsSchema,
     detail: {
-      summary: "Federated search across content, posts, realms, users",
+      summary: "Federated search across content, posts, realms, zones, users",
       description:
-        "Single endpoint replacing /content/search, /posts/search, /realms/search, /users/search. Accepts SearchScope (route-derived) × SearchCategory × SearchQuery.",
+        "Single endpoint replacing /content/search, /posts/search, /realms/search, /zones/search, /users/search. Accepts SearchScope (route-derived) × SearchCategory × SearchQuery.",
       tags: ["Meili", "Search"],
     },
   },

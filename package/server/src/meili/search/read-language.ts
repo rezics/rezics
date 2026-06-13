@@ -5,6 +5,8 @@ import type {
   PostSearchOptions,
   RealmSearchDocument,
   RealmSearchOptions,
+  ZoneSearchDocument,
+  ZoneSearchOptions,
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
 
@@ -76,6 +78,27 @@ export function resolveRealmHitDisplay(
   hit: RealmSearchDocument,
   opts: RealmSearchOptions,
 ): RealmSearchDocument {
+  const resolvedLanguage = resolveReadLanguage({
+    languages: opts.languages,
+    appLocale: opts.appLocale,
+    supportLanguages: availableSupportLanguages(hit),
+  });
+  const translation = resolvedLanguage
+    ? hit.translations?.find((item) => item.language === resolvedLanguage)
+    : undefined;
+
+  return {
+    ...hit,
+    resolvedLanguage,
+    title: translation?.title ?? null,
+    description: translation?.description ?? null,
+  };
+}
+
+export function resolveZoneHitDisplay(
+  hit: ZoneSearchDocument,
+  opts: ZoneSearchOptions,
+): ZoneSearchDocument {
   const resolvedLanguage = resolveReadLanguage({
     languages: opts.languages,
     appLocale: opts.appLocale,
