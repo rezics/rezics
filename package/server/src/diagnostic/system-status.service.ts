@@ -282,6 +282,7 @@ type CdcSourceOptions = {
   slotName: string;
   lagWarningBytes: number;
   unconfiguredReason?: string;
+  unconfiguredRemediation?: string;
 };
 
 function cdcIssue(
@@ -311,7 +312,8 @@ async function getCdcSourceStatus(
       options,
       "source_unconfigured",
       options.unconfiguredReason ?? "CDC diagnostic database is not configured",
-      "Set the source diagnostic database URL or verify it with task service -- cdc verify.",
+      options.unconfiguredRemediation ??
+        "Set the source diagnostic database URL or verify it with task service -- cdc verify.",
     );
     return {
       item: {
@@ -618,6 +620,8 @@ async function getCdcStatus(options: {
       slotName: options.reactionSlotName ?? defaultReactionSlotName(),
       lagWarningBytes,
       unconfiguredReason: "STATUS_REACTION_DATABASE_URL is not configured",
+      unconfiguredRemediation:
+        "Set STATUS_REACTION_DATABASE_URL on @rezics/server to the reaction Postgres URL, then verify reaction CDC with task service -- cdc verify --source=reaction.",
     }),
   ]);
 

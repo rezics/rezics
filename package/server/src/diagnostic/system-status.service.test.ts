@@ -288,6 +288,33 @@ describe("getSystemStatusSummary", () => {
     expect(summary.cdc.restartLsn).toBe("0/16B6C40");
   });
 
+  test("reports reaction CDC setup remediation when the status database is not configured", async () => {
+    const { getSystemStatusSummary } = await import("./system-status.service");
+    const summary = await getSystemStatusSummary({
+      fetchImpl: (async () =>
+        jsonResponse({ status: "ok" })) as unknown as typeof fetch,
+      queryClient: queryClient({
+        publicationTables: [...SOURCE_SEQUIN_TABLES],
+      }),
+      reactionQueryClient: null,
+      meiliSummary,
+    });
+
+    const reactionSource = summary.cdc.sources.find(
+      (source) => source.id === "reaction",
+    );
+    expect(reactionSource?.item.status).toBe("unknown");
+    expect(reactionSource?.item.reason).toBe(
+      "STATUS_REACTION_DATABASE_URL is not configured",
+    );
+    expect(reactionSource?.item.remediation).toContain(
+      "Set STATUS_REACTION_DATABASE_URL on @rezics/server",
+    );
+    expect(reactionSource?.item.remediation).toContain(
+      "task service -- cdc verify --source=reaction",
+    );
+  });
+
   test("reports CDC degradation for extra publication tables and walsender pressure", async () => {
     const { getSystemStatusSummary } = await import("./system-status.service");
     const summary = await getSystemStatusSummary({
