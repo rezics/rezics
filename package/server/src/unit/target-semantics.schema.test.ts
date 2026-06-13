@@ -15,9 +15,10 @@ import {
 } from "../db/schema";
 
 const schemaSource = [
-  "catalog",
+  "unit",
+  "post",
+  "comment",
   "content-structure",
-  "discussion",
   "engagement",
   "governance",
   "realm",
