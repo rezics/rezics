@@ -4,6 +4,7 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LANGUAGES,
   markdownContentDoc,
+  withCoverUrl,
   type ZoneBoundary,
   type ZoneNav,
   type ZonePage as ZonePageConfig,
@@ -16,6 +17,7 @@ import {
   Comment,
   ContentStructure,
   ContentTranslation,
+  CreditAttribution,
   Entity,
   HistoryOutbox,
   Post,
@@ -36,8 +38,8 @@ import {
   ZonePage,
 } from "../schema";
 import { seedChaptersForBook } from "./books.js";
-import { addSpecialSeedTarget, createSeedResult } from "./result.js";
 import { ensureFandomSourceEntity } from "./external-links.js";
+import { addSpecialSeedTarget, createSeedResult } from "./result.js";
 import {
   PostKind,
   UnitStatus,
@@ -292,6 +294,11 @@ async function getWorkIds(ctx: SeedCtx): Promise<string[]> {
 interface ShowcaseFeedWorkPlan {
   unitId: string;
   title: string;
+  subtitle: string;
+  coverUrl: string;
+  authorEntityUnitId: string;
+  authorName: string;
+  tags: Array<{ unitId: string; title: string }>;
   textLength: number;
 }
 
@@ -347,16 +354,43 @@ export function buildShowcaseFeedPlan(input: {
     {
       unitId: id(),
       title: "Showcase Feed: The Long Harbor",
+      subtitle: "A cartographic fantasy of tides, gates, and borrowed names",
+      coverUrl: "https://picsum.photos/seed/rezics-long-harbor/360/540",
+      authorEntityUnitId: id(),
+      authorName: "Mira Hoshino",
+      tags: [
+        { unitId: id(), title: "Urban Fantasy" },
+        { unitId: id(), title: "Archive Mystery" },
+        { unitId: id(), title: "Sea Cities" },
+      ],
       textLength: 132000,
     },
     {
       unitId: id(),
       title: "Showcase Feed: Signal Garden",
+      subtitle: "Letters, antennas, and a city that answers in flowers",
+      coverUrl: "https://picsum.photos/seed/rezics-signal-garden/360/540",
+      authorEntityUnitId: id(),
+      authorName: "Ren Calder",
+      tags: [
+        { unitId: id(), title: "Speculative" },
+        { unitId: id(), title: "Epistolary" },
+        { unitId: id(), title: "Botanical Tech" },
+      ],
       textLength: 88000,
     },
     {
       unitId: id(),
       title: "Showcase Feed: Index of Blue Cities",
+      subtitle: "A catalog of impossible places and the readers who map them",
+      coverUrl: "https://picsum.photos/seed/rezics-blue-cities/360/540",
+      authorEntityUnitId: id(),
+      authorName: "Chen Yue",
+      tags: [
+        { unitId: id(), title: "Catalog Fiction" },
+        { unitId: id(), title: "Metafiction" },
+        { unitId: id(), title: "Blue Cities" },
+      ],
       textLength: 104000,
     },
   ];
@@ -974,6 +1008,53 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
   for (const work of plan.works) {
     await ctx.db.insert(Unit).values(
       withUpdatedAt({
+        id: work.authorEntityUnitId,
+        type: UnitType.ENTITY,
+        slugScope: ctx.slugScopes.entity,
+        status: UnitStatus.PUBLISHED,
+        visibility: UnitVisibility.PUBLIC,
+        defaultLanguage: DEFAULT_LANGUAGE,
+      }),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAt({
+        unitId: work.authorEntityUnitId,
+        language: DEFAULT_LANGUAGE,
+        title: work.authorName,
+      }),
+    );
+    await ctx.db.insert(Entity).values(
+      withUpdatedAt({
+        unitId: work.authorEntityUnitId,
+        kind: "person",
+        verified: true,
+        eligibleCreditRoles: ["author"],
+      }),
+    );
+    await ctx.db.insert(Unit).values(
+      withUpdatedAtRows(
+        work.tags.map((tag) => ({
+          id: tag.unitId,
+          type: UnitType.TAG,
+          slugScope: ctx.slugScopes.tag,
+          status: UnitStatus.PUBLISHED,
+          visibility: UnitVisibility.PUBLIC,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          isLanguageNeutral: true,
+        })),
+      ),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAtRows(
+        work.tags.map((tag) => ({
+          unitId: tag.unitId,
+          language: DEFAULT_LANGUAGE,
+          title: tag.title,
+        })),
+      ),
+    );
+    await ctx.db.insert(Unit).values(
+      withUpdatedAt({
         id: work.unitId,
         type: UnitType.BOOK,
         userId: user.userId,
@@ -999,7 +1080,9 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
         unitId: work.unitId,
         language: DEFAULT_LANGUAGE,
         title: work.title,
+        subtitle: work.subtitle,
         summary: `${work.title} deterministic showcase work.`,
+        extra: withCoverUrl(undefined, work.coverUrl) as never,
       }),
     );
     await ctx.db.insert(UnitSupportLanguage).values(
@@ -1012,6 +1095,22 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
     await ctx.db
       .insert(ContentStructure)
       .values(withUpdatedAt({ ownerUnitId: work.unitId }));
+    await ctx.db.insert(CreditAttribution).values({
+      unitId: work.unitId,
+      entityId: work.authorEntityUnitId,
+      role: "author",
+      sortOrder: 0,
+    });
+    await ctx.db.insert(UnitTag).values(
+      withUpdatedAtRows(
+        work.tags.map((tag, index) => ({
+          unitId: work.unitId,
+          tagUnitId: tag.unitId,
+          score: 10 - index,
+          voteCount: 10 - index,
+        })),
+      ),
+    );
   }
 
   await ctx.db.insert(Unit).values(

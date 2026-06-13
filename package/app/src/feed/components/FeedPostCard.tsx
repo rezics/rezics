@@ -17,6 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
+import { useNavigate } from "@tanstack/react-router";
 import { Shield, Star } from "lucide-react";
 import type React from "react";
 import {
@@ -38,7 +39,7 @@ import {
   postPolicy,
 } from "@/post";
 import { reviewCardActions, reviewPolicy } from "@/review";
-import { AppSafeLink, TextLink } from "@/shared/ui/link";
+import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { VariantContextLink } from "@/unit";
 
@@ -86,10 +87,37 @@ export interface FeedPostCardProps {
 }
 
 /**
- * Feed previews own card navigation and truncation; full post/review surfaces
- * keep their richer detail behavior outside the feed stream.
- * 信息流预览自行负责卡片导航与截断；完整的帖子/评论页面
- * 在信息流之外保留其更丰富的详情行为。
+ * Feed post card：信息流预览自行负责卡片导航与截断；完整的帖子/评论
+ * 页面在信息流之外保留更丰富的详情行为。窄屏时正文列 `min-w-0` 截断，
+ * 媒体前置模式改为纵向；宽屏时媒体固定宽度，正文伸展。Reaction row
+ * 是独立交互区，点击或键盘触发都不打开卡片。
+ *
+ * Mobile (<640px)
+ * +------------------------------+
+ * | Author / rating              |
+ * | Title two lines              |
+ * | Body preview                 |
+ * | (optional media)             |
+ * | [vote][reply][share][more]   |
+ * +------------------------------+
+ *
+ * Tablet (640px-1023px)
+ * +--------------------------------------+
+ * | Author                         Media |
+ * | Title / target / body preview        |
+ * | Reaction row anchored to bottom      |
+ * +--------------------------------------+
+ *
+ * Desktop (1024px-1535px)
+ * +------------------------------------------------+
+ * | Content column stretches, media fixed if shown |
+ * | Footer stays at card bottom below short content |
+ * +------------------------------------------------+
+ *
+ * Ultra-wide (>=1536px)
+ * +----------------------------------------------------------+
+ * | Card width is inherited from feed container constraints   |
+ * +----------------------------------------------------------+
  */
 export function FeedPostCard({
   bodyLines = 4,
@@ -120,6 +148,7 @@ export function FeedPostCard({
   manageMode = false,
 }: FeedPostCardProps) {
   const { t } = useTranslation(["community"]);
+  const navigate = useNavigate();
   const markdown = mainMarkdownSource(post.content) ?? "";
   const hasMedia = Boolean(mediaSlot || media?.src);
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
@@ -129,6 +158,15 @@ export function FeedPostCard({
   // Compute the canonical detail href from post kind.
   // 根据帖子类型计算规范的详情页链接。
   const resolvedHref = href ?? postDetailHref(post);
+  const openPost = () => {
+    navigate({ to: resolvedHref });
+  };
+
+  const handleCardKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    openPost();
+  };
 
   const reactionModel = useReactionBarModel({
     size: reactionSize,
@@ -154,161 +192,169 @@ export function FeedPostCard({
       />
     ) : null);
 
-  return (
-    <AppSafeLink
-      href={resolvedHref}
-      className="block no-underline"
-      aria-label={typeof resolvedTitle === "string" ? resolvedTitle : undefined}
+  const renderReactionFooter = (footerClassName?: string) => (
+    <div
+      className={cn("flex items-center justify-between gap-2", footerClassName)}
     >
-      <Card
-        surface="plain"
-        interactive
+      <div className="flex min-w-0 items-center gap-1.5">
+        <ReactionActionRow model={reactionModel} />
+        <ReactionOverflowMenu
+          model={reactionModel}
+          className="hidden sm:block"
+        />
+      </div>
+      {manageMode && (realmModerationStatus || moderationMenuContent) ? (
+        // biome-ignore lint/a11y/noStaticElementInteractions: this wrapper prevents nested moderation controls from triggering the parent card link.
+        <div
+          className="flex shrink-0 items-center gap-2"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={() => undefined}
+        >
+          <ModerationBadge
+            at={realmModerationAt}
+            latestAction={moderationLatestAction}
+            post={post}
+            status={realmModerationStatus}
+          />
+          {moderationMenuContent ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                nativeButton
+                render={(props) => (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    aria-label={t("community:realm_moderation_actions")}
+                    className={cn(
+                      "h-8 w-8 p-0 text-text-secondary",
+                      moderationControlStateClass,
+                    )}
+                    {...props}
+                  >
+                    <Shield className="h-4 w-4" aria-hidden />
+                  </Button>
+                )}
+              />
+              <DropdownMenuContent
+                align="end"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {moderationMenuContent}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+
+  return (
+    <Card
+      surface="plain"
+      interactive
+      role="link"
+      tabIndex={0}
+      aria-label={typeof resolvedTitle === "string" ? resolvedTitle : undefined}
+      onClick={openPost}
+      onKeyDown={handleCardKeyDown}
+      className={cn(
+        "relative w-full gap-0 py-0 transition-[background-color,box-shadow,transform]",
+        "hover:-translate-y-0.5",
+        className,
+      )}
+    >
+      <article
         className={cn(
-          "relative w-full gap-0 py-0 transition-[background-color,box-shadow,transform]",
-          "hover:-translate-y-0.5",
-          className,
+          "flex min-w-0 items-stretch gap-4 p-3",
+          mediaMode === "forward" && "flex-col gap-3",
         )}
       >
-        <article
-          className={cn(
-            "flex min-w-0 gap-4 p-3",
-            mediaMode === "forward" && "flex-col gap-3",
-          )}
-        >
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <div className="flex min-w-0 items-center justify-between gap-3">
-              <div className="min-w-0">
-                <PostAuthorHeader post={post} />
-              </div>
-              <FeedReviewRating post={post} />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <div className="min-w-0">
+              <PostAuthorHeader post={post} />
             </div>
-
-            {resolvedTitle ? (
-              <h3
-                className="m-0 text-base font-medium leading-ui text-text-primary"
-                style={clampStyle(titleLines)}
-              >
-                {resolvedTitle}
-              </h3>
-            ) : null}
-
-            {targetUnit ? (
-              <div className="flex min-w-0 items-center gap-1 text-xs leading-dense text-text-secondary">
-                <span className="shrink-0">
-                  {t("community:review_target_label")}
-                </span>
-                <TextLink
-                  to="/book/$bookId"
-                  params={{ bookId: targetUnit.unitId }}
-                  underline="none"
-                  className="min-w-0 truncate text-text-secondary hover:text-text-primary"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  {targetUnit.title}
-                </TextLink>
-              </div>
-            ) : null}
-
-            <div
-              className="text-sm leading-ui text-text-secondary"
-              style={clampStyle(bodyLines)}
-            >
-              <MarkdownContent content={markdown} />
-            </div>
-
-            {resolvedVariantContext ? (
-              // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents parent feed card navigation when the nested route link is used.
-              <div
-                className="w-fit max-w-full"
-                onClick={(event) => event.stopPropagation()}
-                onKeyDown={() => undefined}
-              >
-                <VariantContextLink context={resolvedVariantContext} />
-              </div>
-            ) : null}
-
-            {pollUnitIds.map((pollUnitId) => (
-              <PollEmbed
-                key={pollUnitId}
-                pollUnitId={pollUnitId}
-                realmUnitId={post.realmUnitId}
-              />
-            ))}
-
-            <div className="flex items-center justify-between gap-2 pt-1">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <ReactionActionRow model={reactionModel} />
-                <ReactionOverflowMenu
-                  model={reactionModel}
-                  className="hidden sm:block"
-                />
-              </div>
-              {manageMode &&
-              (realmModerationStatus || moderationMenuContent) ? (
-                // biome-ignore lint/a11y/noStaticElementInteractions: this wrapper prevents nested moderation controls from triggering the parent card link.
-                <div
-                  className="flex shrink-0 items-center gap-2"
-                  onClick={(event) => event.stopPropagation()}
-                  onKeyDown={() => undefined}
-                >
-                  <ModerationBadge
-                    at={realmModerationAt}
-                    latestAction={moderationLatestAction}
-                    post={post}
-                    status={realmModerationStatus}
-                  />
-                  {moderationMenuContent ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        nativeButton
-                        render={(props) => (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            aria-label={t("community:realm_moderation_actions")}
-                            className={cn(
-                              "h-8 w-8 p-0 text-text-secondary",
-                              moderationControlStateClass,
-                            )}
-                            {...props}
-                          >
-                            <Shield className="h-4 w-4" aria-hidden />
-                          </Button>
-                        )}
-                      />
-                      <DropdownMenuContent
-                        align="end"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        {moderationMenuContent}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-            <ReactionOverflowMenu
-              model={reactionModel}
-              className="absolute right-2 top-2 z-10 sm:hidden"
-            />
+            <FeedReviewRating post={post} />
           </div>
 
-          {hasMedia ? (
-            <CardMedia
-              className={cn(
-                "rounded-sm bg-surface-subtle",
-                mediaMode === "forward"
-                  ? "aspect-[16/9]"
-                  : "hidden h-24 w-32 shrink-0 sm:block",
-              )}
+          {resolvedTitle ? (
+            <h3
+              className="m-0 text-base font-medium leading-ui text-text-primary"
+              style={clampStyle(titleLines)}
             >
-              {mediaNode}
-            </CardMedia>
+              {resolvedTitle}
+            </h3>
           ) : null}
-        </article>
-      </Card>
-    </AppSafeLink>
+
+          {targetUnit ? (
+            <div className="flex min-w-0 items-center gap-1 text-xs leading-dense text-text-secondary">
+              <span className="shrink-0">
+                {t("community:review_target_label")}
+              </span>
+              <TextLink
+                to="/book/$bookId"
+                params={{ bookId: targetUnit.unitId }}
+                underline="none"
+                className="min-w-0 truncate text-text-secondary hover:text-text-primary"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {targetUnit.title}
+              </TextLink>
+            </div>
+          ) : null}
+
+          <div
+            className="text-sm leading-ui text-text-secondary"
+            style={clampStyle(bodyLines)}
+          >
+            <MarkdownContent content={markdown} />
+          </div>
+
+          {resolvedVariantContext ? (
+            // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents parent feed card navigation when the nested route link is used.
+            <div
+              className="w-fit max-w-full"
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={() => undefined}
+            >
+              <VariantContextLink context={resolvedVariantContext} />
+            </div>
+          ) : null}
+
+          {pollUnitIds.map((pollUnitId) => (
+            <PollEmbed
+              key={pollUnitId}
+              pollUnitId={pollUnitId}
+              realmUnitId={post.realmUnitId}
+            />
+          ))}
+
+          {mediaMode !== "forward"
+            ? renderReactionFooter("mt-auto pt-1")
+            : null}
+          <ReactionOverflowMenu
+            model={reactionModel}
+            className="absolute right-2 top-2 z-10 sm:hidden"
+          />
+        </div>
+
+        {hasMedia ? (
+          <CardMedia
+            className={cn(
+              "rounded-sm bg-surface-subtle",
+              mediaMode === "forward"
+                ? "aspect-[16/9]"
+                : "hidden h-24 w-32 shrink-0 sm:block",
+            )}
+          >
+            {mediaNode}
+          </CardMedia>
+        ) : null}
+
+        {mediaMode === "forward" ? renderReactionFooter("pt-1") : null}
+      </article>
+    </Card>
   );
 }
 

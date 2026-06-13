@@ -1,4 +1,5 @@
 import type {
+  BookDTO,
   FeedBookRow,
   FeedFilterType,
   FeedPostRow,
@@ -16,11 +17,9 @@ import type {
   ZoneBoundary,
 } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
-import { and, desc, eq, inArray, lt } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
 import { bookService } from "@/book";
 import { db } from "@/db";
-import { UnitTranslation } from "@/db/schema/translation";
-import { Unit } from "@/db/schema/unit";
 import { postService } from "@/post";
 import { mapPostToDTO } from "@/post/post.mapper";
 import { realmService } from "@/realm";
@@ -29,6 +28,9 @@ import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resoluti
 import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { AppError } from "@/utils/errors";
 import { zoneService } from "@/zone";
+import { UnitTag } from "../db/schema/tagging";
+import { UnitTranslation } from "../db/schema/translation";
+import { Unit } from "../db/schema/unit";
 import {
   feedResponse,
   mapPostToFeedRow,
@@ -39,6 +41,8 @@ const FEED_LIMIT_CAP = 50;
 const RECOMMENDATION_ITEM_LIMIT = 8;
 const FIRST_RECOMMENDATION_AFTER = 4;
 const RECOMMENDATION_SPACING = 6;
+const FEED_WORK_TAG_LIMIT = 5;
+const FEED_TAG_VISIBILITY_THRESHOLD = -100;
 
 function normalizeSort(sort: FeedQuery["sort"]): FeedSort {
   return sort ?? "best";
@@ -213,23 +217,153 @@ function preferredTranslation<T extends { language: string }>(
   );
 }
 
+function firstCreditName(
+  credits: BookDTO["creditAttributions"],
+): FeedWorkSummary["primaryAuthor"] {
+  const credit = credits?.find(
+    (item) => item.role === "author" || item.role === "co-author",
+  );
+  if (!credit?.name) return null;
+  return {
+    unitId: credit.entityId,
+    name: credit.name,
+    role: credit.role,
+  };
+}
+
 function mapBookToWorkSummary(book: unknown): FeedWorkSummary {
   const source = book as {
     unitId?: string;
     kind?: string | null;
     title?: string | null;
+    subtitle?: string | null;
     coverUrl?: string | null;
     summary?: string | null;
     description?: string | null;
-    unit?: { translations?: Array<{ title?: string | null }> };
+    creditAttributions?: BookDTO["creditAttributions"];
+    tags?: FeedWorkSummary["tags"];
+    unit?: {
+      translations?: Array<{
+        title?: string | null;
+        subtitle?: string | null;
+      }>;
+    };
   };
+  const translation = source.unit?.translations?.find(
+    (item) => item.title || item.subtitle,
+  );
   return {
     unitId: source.unitId ?? "",
     kind: source.kind ?? "book",
     title: titleFromTranslations(source),
+    subtitle: source.subtitle ?? translation?.subtitle ?? null,
     coverUrl: source.coverUrl ?? null,
     description: source.summary ?? source.description ?? null,
+    primaryAuthor: firstCreditName(source.creditAttributions),
+    tags: source.tags ?? [],
   };
+}
+
+function pickTagLabel(
+  translations: Array<{
+    language: string;
+    title: string | null;
+  }>,
+  languages: string[],
+  defaultLanguage?: string | null,
+): string | null {
+  const ordered = [
+    ...languages.map((language) =>
+      translations.find((item) => item.language === language && item.title),
+    ),
+    defaultLanguage
+      ? translations.find(
+          (item) => item.language === defaultLanguage && item.title,
+        )
+      : undefined,
+    translations.find((item) => item.language === "en" && item.title),
+    translations.find((item) => item.title),
+  ];
+  return ordered.find(Boolean)?.title ?? null;
+}
+
+async function loadFeedTagsForUnits(
+  unitIds: string[],
+  query: FeedQuery,
+): Promise<Map<string, NonNullable<FeedWorkSummary["tags"]>>> {
+  if (unitIds.length === 0) return new Map();
+  const rows = await db
+    .select({
+      unitId: UnitTag.unitId,
+      tagUnitId: UnitTag.tagUnitId,
+    })
+    .from(UnitTag)
+    .where(
+      and(
+        inArray(UnitTag.unitId, unitIds),
+        gt(UnitTag.score, FEED_TAG_VISIBILITY_THRESHOLD),
+      ),
+    )
+    .orderBy(
+      asc(UnitTag.unitId),
+      desc(UnitTag.pinned),
+      asc(UnitTag.position),
+      desc(UnitTag.score),
+      asc(UnitTag.tagUnitId),
+    );
+  if (rows.length === 0) return new Map();
+
+  const tagUnitIds = uniqueStrings(rows.map((row) => row.tagUnitId));
+  const [tagUnits, translations] = await Promise.all([
+    db
+      .select({
+        id: Unit.id,
+        slug: Unit.slug,
+        defaultLanguage: Unit.defaultLanguage,
+      })
+      .from(Unit)
+      .where(and(inArray(Unit.id, tagUnitIds), eq(Unit.type, "TAG"))),
+    db
+      .select({
+        unitId: UnitTranslation.unitId,
+        language: UnitTranslation.language,
+        title: UnitTranslation.title,
+      })
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, tagUnitIds)),
+  ]);
+  const tagUnitById = new Map(tagUnits.map((unit) => [unit.id, unit]));
+  const translationsByTag = new Map<string, typeof translations>();
+  for (const translation of translations) {
+    const current = translationsByTag.get(translation.unitId) ?? [];
+    current.push(translation);
+    translationsByTag.set(translation.unitId, current);
+  }
+  const languages = resolveEffectiveReadLanguageCandidates({
+    languages: query.languages,
+    appLocale: query.appLocale,
+  });
+
+  const out = new Map<string, NonNullable<FeedWorkSummary["tags"]>>();
+  for (const row of rows) {
+    const current = out.get(row.unitId) ?? [];
+    if (current.length >= FEED_WORK_TAG_LIMIT) continue;
+    const tagUnit = tagUnitById.get(row.tagUnitId);
+    if (!tagUnit) continue;
+    const label = pickTagLabel(
+      translationsByTag.get(row.tagUnitId) ?? [],
+      languages,
+      tagUnit.defaultLanguage,
+    );
+    if (!label) continue;
+    current.push({
+      unitId: row.tagUnitId,
+      label,
+      slug: tagUnit.slug ?? null,
+    });
+    out.set(row.unitId, current);
+  }
+  return out;
 }
 
 function mapShelfToSummary(shelf: unknown): ShelfSummaryDTO {
@@ -585,7 +719,7 @@ export class FeedService {
 
     const [posts, recommendations] = await Promise.all([
       postService.list(postQuery, options),
-      query.cursor ? Promise.resolve([]) : this.homeRecommendationRows(),
+      query.cursor ? Promise.resolve([]) : this.homeRecommendationRows(query),
     ]);
     const postRows = await mapPostsToFeedRows(posts.posts, query, {
       reason: "global-post-rank",
@@ -678,14 +812,23 @@ export class FeedService {
     };
   }
 
-  private async homeRecommendationRows(): Promise<FeedRow[]> {
+  private async homeRecommendationRows(query: FeedQuery): Promise<FeedRow[]> {
     const [books, shelves] = await Promise.all([
       bookService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
       shelfService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
     ]);
+    const tagsByUnit = await loadFeedTagsForUnits(
+      books.books.map((book) => book.unitId).filter(Boolean),
+      query,
+    );
 
     return interleaveRows(
-      books.books.map(mapBookToFeedRow),
+      books.books.map((book) =>
+        mapBookToFeedRow({
+          ...book,
+          tags: tagsByUnit.get(book.unitId) ?? [],
+        }),
+      ),
       shelves.shelves.map(mapShelfToFeedRow),
     );
   }
