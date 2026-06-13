@@ -12,7 +12,7 @@ ALTER TABLE "RankingReactionBucket" ALTER COLUMN "contextUnitId" SET DATA TYPE u
 );--> statement-breakpoint
 WITH merged AS (
 	SELECT
-		min("id") AS keep_id,
+		(array_agg("id" ORDER BY "createdAt", "id"))[1] AS keep_id,
 		"targetId",
 		"contextUnitId",
 		"reaction",
