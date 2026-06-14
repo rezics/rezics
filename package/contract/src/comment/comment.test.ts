@@ -97,7 +97,7 @@ describe("comment contract", () => {
     expect(
       Value.Check(commentListQuerySchema, {
         rootUnitId: "post-1",
-        language: "spa",
+        language: "es",
         mode: "discovery",
       }),
     ).toBe(true);

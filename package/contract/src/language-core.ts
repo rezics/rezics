@@ -22,15 +22,46 @@ export type AppLanguage = (typeof APP_LANGUAGES)[keyof typeof APP_LANGUAGES];
 export type Language = AppLanguage;
 
 export type RezicsLanguageRegistryEntry = {
+  /**
+   * Canonical Rezics content-language slug.
+   *
+   * This is a product-facing authored-content language identifier, not a
+   * detector code and not a locale. Use the shortest canonical BCP-47 form that
+   * identifies the language for readers:
+   *
+   * - Prefer a primary language subtag (`en`, `fr`, `sco`, `ckb`).
+   * - Add script only when script changes practical readability (`zh-hant`,
+   *   `zh-hans`).
+   * - Do not split by country, region, accent, or national standard
+   *   (`en-US`, `en-GB`, `pt-BR`, `es-419`).
+   * - Do not encode macrolanguage hierarchy in the slug (`yue`, not `zh-yue`).
+   *
+   * Slugs are flat in the product sense: one selectable language has one
+   * canonical slug. Macrolanguage grouping is metadata, not an alias.
+   */
   slug: string;
   englishName: string;
   nativeName: string;
-  francMin: string;
+  /**
+   * ISO 639-1 metadata when the language has a two-letter code. This is not a
+   * public alias; public content-language input accepts canonical slugs only.
+   */
   iso6391?: string;
   script?: "Hans" | "Hant";
+  macrolanguage?: string;
   direction?: "ltr" | "rtl";
   appLocale?: boolean;
   contentLanguage: true;
+  /**
+   * Optional automatic-detection metadata.
+   *
+   * `francMin` is the code emitted by franc-min for this language. It is
+   * accepted only on the detector path and must not be treated as a public slug
+   * alias.
+   */
+  detection?: {
+    francMin: string;
+  };
 };
 
 // ============================================================
@@ -43,7 +74,7 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "zh-hant",
     englishName: "Traditional Chinese",
     nativeName: "繁體中文",
-    francMin: "cmn",
+    detection: { francMin: "cmn" },
     iso6391: "zh",
     script: "Hant",
     appLocale: true,
@@ -53,7 +84,7 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "zh-hans",
     englishName: "Simplified Chinese",
     nativeName: "简体中文",
-    francMin: "cmn",
+    detection: { francMin: "cmn" },
     iso6391: "zh",
     script: "Hans",
     appLocale: true,
@@ -63,7 +94,7 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "en",
     englishName: "English",
     nativeName: "English",
-    francMin: "eng",
+    detection: { francMin: "eng" },
     iso6391: "en",
     appLocale: true,
     contentLanguage: true,
@@ -72,7 +103,7 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "ja",
     englishName: "Japanese",
     nativeName: "日本語",
-    francMin: "jpn",
+    detection: { francMin: "jpn" },
     iso6391: "ja",
     appLocale: true,
     contentLanguage: true,
@@ -81,7 +112,7 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "de",
     englishName: "German",
     nativeName: "Deutsch",
-    francMin: "deu",
+    detection: { francMin: "deu" },
     iso6391: "de",
     appLocale: true,
     contentLanguage: true,
@@ -90,45 +121,49 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "ko",
     englishName: "Korean",
     nativeName: "한국어",
-    francMin: "kor",
+    detection: { francMin: "kor" },
     iso6391: "ko",
     appLocale: true,
     contentLanguage: true,
   },
   {
-    slug: "amh",
+    slug: "am",
     englishName: "Amharic",
     nativeName: "Amharic",
-    francMin: "amh",
+    detection: { francMin: "amh" },
+    iso6391: "am",
     contentLanguage: true,
   },
   {
-    slug: "arb",
+    slug: "ar",
     englishName: "Standard Arabic",
     nativeName: "Standard Arabic",
-    francMin: "arb",
+    detection: { francMin: "arb" },
+    iso6391: "ar",
     direction: "rtl",
     contentLanguage: true,
   },
   {
-    slug: "azj",
+    slug: "az",
     englishName: "North Azerbaijani",
     nativeName: "North Azerbaijani",
-    francMin: "azj",
+    detection: { francMin: "azj" },
+    iso6391: "az",
     contentLanguage: true,
   },
   {
-    slug: "bel",
+    slug: "be",
     englishName: "Belarusian",
     nativeName: "Belarusian",
-    francMin: "bel",
+    detection: { francMin: "bel" },
+    iso6391: "be",
     contentLanguage: true,
   },
   {
-    slug: "ben",
+    slug: "bn",
     englishName: "Bengali",
     nativeName: "Bengali",
-    francMin: "ben",
+    detection: { francMin: "ben" },
     iso6391: "bn",
     contentLanguage: true,
   },
@@ -136,22 +171,22 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "bho",
     englishName: "Bhojpuri",
     nativeName: "Bhojpuri",
-    francMin: "bho",
+    detection: { francMin: "bho" },
     contentLanguage: true,
   },
   {
-    slug: "bos",
+    slug: "bs",
     englishName: "Bosnian",
     nativeName: "Bosnian",
-    francMin: "bos",
+    detection: { francMin: "bos" },
     iso6391: "bs",
     contentLanguage: true,
   },
   {
-    slug: "bul",
+    slug: "bg",
     englishName: "Bulgarian",
     nativeName: "Bulgarian",
-    francMin: "bul",
+    detection: { francMin: "bul" },
     iso6391: "bg",
     contentLanguage: true,
   },
@@ -159,14 +194,14 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "ceb",
     englishName: "Cebuano",
     nativeName: "Cebuano",
-    francMin: "ceb",
+    detection: { francMin: "ceb" },
     contentLanguage: true,
   },
   {
-    slug: "ces",
+    slug: "cs",
     englishName: "Czech",
     nativeName: "Czech",
-    francMin: "ces",
+    detection: { francMin: "ces" },
     iso6391: "cs",
     contentLanguage: true,
   },
@@ -174,54 +209,55 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "ckb",
     englishName: "Central Kurdish",
     nativeName: "Central Kurdish",
-    francMin: "ckb",
+    detection: { francMin: "ckb" },
     direction: "rtl",
     contentLanguage: true,
   },
   {
-    slug: "ell",
+    slug: "el",
     englishName: "Modern Greek",
     nativeName: "Modern Greek",
-    francMin: "ell",
+    detection: { francMin: "ell" },
     iso6391: "el",
     contentLanguage: true,
   },
   {
-    slug: "fra",
+    slug: "fr",
     englishName: "French",
     nativeName: "French",
-    francMin: "fra",
+    detection: { francMin: "fra" },
     iso6391: "fr",
     contentLanguage: true,
   },
   {
-    slug: "fuv",
+    slug: "ff",
     englishName: "Nigerian Fulfulde",
     nativeName: "Nigerian Fulfulde",
-    francMin: "fuv",
+    detection: { francMin: "fuv" },
+    iso6391: "ff",
     contentLanguage: true,
   },
   {
-    slug: "guj",
+    slug: "gu",
     englishName: "Gujarati",
     nativeName: "Gujarati",
-    francMin: "guj",
+    detection: { francMin: "guj" },
     iso6391: "gu",
     contentLanguage: true,
   },
   {
-    slug: "hau",
+    slug: "ha",
     englishName: "Hausa",
     nativeName: "Hausa",
-    francMin: "hau",
+    detection: { francMin: "hau" },
     iso6391: "ha",
     contentLanguage: true,
   },
   {
-    slug: "hin",
+    slug: "hi",
     englishName: "Hindi",
     nativeName: "Hindi",
-    francMin: "hin",
+    detection: { francMin: "hin" },
     iso6391: "hi",
     contentLanguage: true,
   },
@@ -229,37 +265,37 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "hms",
     englishName: "Southern Qiandong Miao",
     nativeName: "Southern Qiandong Miao",
-    francMin: "hms",
+    detection: { francMin: "hms" },
     contentLanguage: true,
   },
   {
     slug: "hnj",
     englishName: "Hmong Njua",
     nativeName: "Hmong Njua",
-    francMin: "hnj",
+    detection: { francMin: "hnj" },
     contentLanguage: true,
   },
   {
-    slug: "hrv",
+    slug: "hr",
     englishName: "Croatian",
     nativeName: "Croatian",
-    francMin: "hrv",
+    detection: { francMin: "hrv" },
     iso6391: "hr",
     contentLanguage: true,
   },
   {
-    slug: "hun",
+    slug: "hu",
     englishName: "Hungarian",
     nativeName: "Hungarian",
-    francMin: "hun",
+    detection: { francMin: "hun" },
     iso6391: "hu",
     contentLanguage: true,
   },
   {
-    slug: "ibo",
+    slug: "ig",
     englishName: "Igbo",
     nativeName: "Igbo",
-    francMin: "ibo",
+    detection: { francMin: "ibo" },
     iso6391: "ig",
     contentLanguage: true,
   },
@@ -267,54 +303,54 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "ilo",
     englishName: "Iloko",
     nativeName: "Iloko",
-    francMin: "ilo",
+    detection: { francMin: "ilo" },
     contentLanguage: true,
   },
   {
-    slug: "ind",
+    slug: "id",
     englishName: "Indonesian",
     nativeName: "Indonesian",
-    francMin: "ind",
+    detection: { francMin: "ind" },
     iso6391: "id",
     contentLanguage: true,
   },
   {
-    slug: "ita",
+    slug: "it",
     englishName: "Italian",
     nativeName: "Italian",
-    francMin: "ita",
+    detection: { francMin: "ita" },
     iso6391: "it",
     contentLanguage: true,
   },
   {
-    slug: "jav",
+    slug: "jv",
     englishName: "Javanese",
     nativeName: "Javanese",
-    francMin: "jav",
+    detection: { francMin: "jav" },
     iso6391: "jv",
     contentLanguage: true,
   },
   {
-    slug: "kan",
+    slug: "kn",
     englishName: "Kannada",
     nativeName: "Kannada",
-    francMin: "kan",
+    detection: { francMin: "kan" },
     iso6391: "kn",
     contentLanguage: true,
   },
   {
-    slug: "kaz",
+    slug: "kk",
     englishName: "Kazakh",
     nativeName: "Kazakh",
-    francMin: "kaz",
+    detection: { francMin: "kaz" },
     iso6391: "kk",
     contentLanguage: true,
   },
   {
-    slug: "kin",
+    slug: "rw",
     englishName: "Kinyarwanda",
     nativeName: "Kinyarwanda",
-    francMin: "kin",
+    detection: { francMin: "kin" },
     iso6391: "rw",
     contentLanguage: true,
   },
@@ -322,14 +358,14 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "koi",
     englishName: "Komi-Permyak",
     nativeName: "Komi-Permyak",
-    francMin: "koi",
+    detection: { francMin: "koi" },
     contentLanguage: true,
   },
   {
-    slug: "lin",
+    slug: "ln",
     englishName: "Lingala",
     nativeName: "Lingala",
-    francMin: "lin",
+    detection: { francMin: "lin" },
     iso6391: "ln",
     contentLanguage: true,
   },
@@ -337,115 +373,117 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "mad",
     englishName: "Madurese",
     nativeName: "Madurese",
-    francMin: "mad",
+    detection: { francMin: "mad" },
     contentLanguage: true,
   },
   {
     slug: "mag",
     englishName: "Magahi",
     nativeName: "Magahi",
-    francMin: "mag",
+    detection: { francMin: "mag" },
     contentLanguage: true,
   },
   {
     slug: "mai",
     englishName: "Maithili",
     nativeName: "Maithili",
-    francMin: "mai",
+    detection: { francMin: "mai" },
     contentLanguage: true,
   },
   {
-    slug: "mal",
+    slug: "ml",
     englishName: "Malayalam",
     nativeName: "Malayalam",
-    francMin: "mal",
+    detection: { francMin: "mal" },
     iso6391: "ml",
     contentLanguage: true,
   },
   {
-    slug: "mar",
+    slug: "mr",
     englishName: "Marathi",
     nativeName: "Marathi",
-    francMin: "mar",
+    detection: { francMin: "mar" },
     iso6391: "mr",
     contentLanguage: true,
   },
   {
-    slug: "mya",
+    slug: "my",
     englishName: "Burmese",
     nativeName: "Burmese",
-    francMin: "mya",
+    detection: { francMin: "mya" },
     iso6391: "my",
     contentLanguage: true,
   },
   {
-    slug: "nld",
+    slug: "nl",
     englishName: "Dutch",
     nativeName: "Dutch",
-    francMin: "nld",
+    detection: { francMin: "nld" },
     iso6391: "nl",
     contentLanguage: true,
   },
   {
-    slug: "npi",
+    slug: "ne",
     englishName: "Nepali",
     nativeName: "Nepali",
-    francMin: "npi",
+    detection: { francMin: "npi" },
     iso6391: "ne",
     contentLanguage: true,
   },
   {
-    slug: "nya",
+    slug: "ny",
     englishName: "Nyanja",
     nativeName: "Nyanja",
-    francMin: "nya",
+    detection: { francMin: "nya" },
     iso6391: "ny",
     contentLanguage: true,
   },
   {
-    slug: "pan",
+    slug: "pa",
     englishName: "Panjabi",
     nativeName: "Panjabi",
-    francMin: "pan",
+    detection: { francMin: "pan" },
     iso6391: "pa",
     contentLanguage: true,
   },
   {
-    slug: "pbu",
+    slug: "ps",
     englishName: "Northern Pashto",
     nativeName: "Northern Pashto",
-    francMin: "pbu",
+    detection: { francMin: "pbu" },
+    iso6391: "ps",
     contentLanguage: true,
   },
   {
-    slug: "pes",
+    slug: "fa",
     englishName: "Iranian Persian",
     nativeName: "Iranian Persian",
-    francMin: "pes",
+    detection: { francMin: "pes" },
     iso6391: "fa",
     direction: "rtl",
     contentLanguage: true,
   },
   {
-    slug: "plt",
+    slug: "mg",
     englishName: "Plateau Malagasy",
     nativeName: "Plateau Malagasy",
-    francMin: "plt",
+    detection: { francMin: "plt" },
+    iso6391: "mg",
     contentLanguage: true,
   },
   {
-    slug: "pol",
+    slug: "pl",
     englishName: "Polish",
     nativeName: "Polish",
-    francMin: "pol",
+    detection: { francMin: "pol" },
     iso6391: "pl",
     contentLanguage: true,
   },
   {
-    slug: "por",
+    slug: "pt",
     englishName: "Portuguese",
     nativeName: "Portuguese",
-    francMin: "por",
+    detection: { francMin: "por" },
     iso6391: "pt",
     contentLanguage: true,
   },
@@ -453,38 +491,38 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "qug",
     englishName: "Chimborazo Highland Quichua",
     nativeName: "Chimborazo Highland Quichua",
-    francMin: "qug",
+    detection: { francMin: "qug" },
     contentLanguage: true,
   },
   {
-    slug: "ron",
+    slug: "ro",
     englishName: "Romanian",
     nativeName: "Romanian",
-    francMin: "ron",
+    detection: { francMin: "ron" },
     iso6391: "ro",
     contentLanguage: true,
   },
   {
-    slug: "run",
+    slug: "rn",
     englishName: "Rundi",
     nativeName: "Rundi",
-    francMin: "run",
+    detection: { francMin: "run" },
     iso6391: "rn",
     contentLanguage: true,
   },
   {
-    slug: "rus",
+    slug: "ru",
     englishName: "Russian",
     nativeName: "Russian",
-    francMin: "rus",
+    detection: { francMin: "rus" },
     iso6391: "ru",
     contentLanguage: true,
   },
   {
-    slug: "sin",
+    slug: "si",
     englishName: "Sinhala",
     nativeName: "Sinhala",
-    francMin: "sin",
+    detection: { francMin: "sin" },
     iso6391: "si",
     contentLanguage: true,
   },
@@ -492,159 +530,167 @@ export const REZICS_LANGUAGE_REGISTRY = [
     slug: "skr",
     englishName: "Saraiki",
     nativeName: "Saraiki",
-    francMin: "skr",
+    detection: { francMin: "skr" },
     direction: "rtl",
     contentLanguage: true,
   },
   {
-    slug: "som",
+    slug: "so",
     englishName: "Somali",
     nativeName: "Somali",
-    francMin: "som",
+    detection: { francMin: "som" },
     iso6391: "so",
     contentLanguage: true,
   },
   {
-    slug: "spa",
+    slug: "sco",
+    englishName: "Scots",
+    nativeName: "Scots",
+    contentLanguage: true,
+  },
+  {
+    slug: "es",
     englishName: "Spanish",
     nativeName: "Spanish",
-    francMin: "spa",
+    detection: { francMin: "spa" },
     iso6391: "es",
     contentLanguage: true,
   },
   {
-    slug: "srp",
+    slug: "sr",
     englishName: "Serbian",
     nativeName: "Serbian",
-    francMin: "srp",
+    detection: { francMin: "srp" },
     iso6391: "sr",
     contentLanguage: true,
   },
   {
-    slug: "sun",
+    slug: "su",
     englishName: "Sundanese",
     nativeName: "Sundanese",
-    francMin: "sun",
+    detection: { francMin: "sun" },
     iso6391: "su",
     contentLanguage: true,
   },
   {
-    slug: "swe",
+    slug: "sv",
     englishName: "Swedish",
     nativeName: "Swedish",
-    francMin: "swe",
+    detection: { francMin: "swe" },
     iso6391: "sv",
     contentLanguage: true,
   },
   {
-    slug: "swh",
+    slug: "sw",
     englishName: "Swahili",
     nativeName: "Swahili",
-    francMin: "swh",
+    detection: { francMin: "swh" },
     iso6391: "sw",
     contentLanguage: true,
   },
   {
-    slug: "tam",
+    slug: "ta",
     englishName: "Tamil",
     nativeName: "Tamil",
-    francMin: "tam",
+    detection: { francMin: "tam" },
     iso6391: "ta",
     contentLanguage: true,
   },
   {
-    slug: "tel",
+    slug: "te",
     englishName: "Telugu",
     nativeName: "Telugu",
-    francMin: "tel",
+    detection: { francMin: "tel" },
     iso6391: "te",
     contentLanguage: true,
   },
   {
-    slug: "tgl",
+    slug: "tl",
     englishName: "Tagalog",
     nativeName: "Tagalog",
-    francMin: "tgl",
+    detection: { francMin: "tgl" },
     iso6391: "tl",
     contentLanguage: true,
   },
   {
-    slug: "tha",
+    slug: "th",
     englishName: "Thai",
     nativeName: "Thai",
-    francMin: "tha",
+    detection: { francMin: "tha" },
     iso6391: "th",
     contentLanguage: true,
   },
   {
-    slug: "tur",
+    slug: "tr",
     englishName: "Turkish",
     nativeName: "Turkish",
-    francMin: "tur",
+    detection: { francMin: "tur" },
     iso6391: "tr",
     contentLanguage: true,
   },
   {
-    slug: "ukr",
+    slug: "uk",
     englishName: "Ukrainian",
     nativeName: "Ukrainian",
-    francMin: "ukr",
+    detection: { francMin: "ukr" },
     iso6391: "uk",
     contentLanguage: true,
   },
   {
-    slug: "urd",
+    slug: "ur",
     englishName: "Urdu",
     nativeName: "Urdu",
-    francMin: "urd",
+    detection: { francMin: "urd" },
     iso6391: "ur",
     direction: "rtl",
     contentLanguage: true,
   },
   {
-    slug: "uzn",
+    slug: "uz",
     englishName: "Northern Uzbek",
     nativeName: "Northern Uzbek",
-    francMin: "uzn",
+    detection: { francMin: "uzn" },
+    iso6391: "uz",
     contentLanguage: true,
   },
   {
-    slug: "vie",
+    slug: "vi",
     englishName: "Vietnamese",
     nativeName: "Vietnamese",
-    francMin: "vie",
+    detection: { francMin: "vie" },
     iso6391: "vi",
     contentLanguage: true,
   },
   {
-    slug: "yor",
+    slug: "yo",
     englishName: "Yoruba",
     nativeName: "Yoruba",
-    francMin: "yor",
+    detection: { francMin: "yor" },
     iso6391: "yo",
     contentLanguage: true,
   },
   {
-    slug: "zlm",
+    slug: "ms",
     englishName: "Malay",
     nativeName: "Malay",
-    francMin: "zlm",
+    detection: { francMin: "zlm" },
     iso6391: "ms",
     contentLanguage: true,
   },
   {
-    slug: "zul",
+    slug: "zu",
     englishName: "Zulu",
     nativeName: "Zulu",
-    francMin: "zul",
+    detection: { francMin: "zul" },
     iso6391: "zu",
     contentLanguage: true,
   },
   {
-    slug: "zyb",
+    slug: "za",
     englishName: "Yongbei Zhuang",
     nativeName: "Yongbei Zhuang",
-    francMin: "zyb",
+    detection: { francMin: "zyb" },
+    iso6391: "za",
     contentLanguage: true,
   },
 ] as const satisfies readonly RezicsLanguageRegistryEntry[];
@@ -667,17 +713,17 @@ const CONTENT_BY_SLUG = new Map(
   REZICS_LANGUAGE_REGISTRY.map((entry) => [entry.slug, entry]),
 );
 
-const CONTENT_ALIAS_TO_SLUG = new Map<string, ContentLanguage>();
+const CONTENT_SLUG_TO_CANONICAL = new Map<string, ContentLanguage>();
+const FRANC_MIN_TO_CONTENT_SLUG = new Map<string, ContentLanguage>();
 for (const entry of REZICS_LANGUAGE_REGISTRY) {
-  CONTENT_ALIAS_TO_SLUG.set(entry.slug.toLowerCase(), entry.slug);
-  CONTENT_ALIAS_TO_SLUG.set(entry.francMin.toLowerCase(), entry.slug);
-  if (entry.iso6391) {
-    CONTENT_ALIAS_TO_SLUG.set(entry.iso6391.toLowerCase(), entry.slug);
+  CONTENT_SLUG_TO_CANONICAL.set(entry.slug.toLowerCase(), entry.slug);
+  if ("detection" in entry) {
+    FRANC_MIN_TO_CONTENT_SLUG.set(
+      entry.detection.francMin.toLowerCase(),
+      entry.slug,
+    );
   }
 }
-
-// ISO-639-3 `cmn` cannot distinguish Traditional/Simplified Chinese by itself.
-CONTENT_ALIAS_TO_SLUG.set("cmn", "zh-hans");
 
 // ============================================================
 // DISPLAY METADATA
@@ -720,11 +766,11 @@ export function normalizeLanguage(code: string): Language | null {
 }
 
 /**
- * Normalize authored content language identifiers to Rezics slugs. Accepts
- * Rezics slugs, known ISO-639-1 aliases, and franc-min ISO-639-3 codes.
+ * Normalize public authored-content language input to a canonical Rezics slug.
+ * Detector codes and historical aliases are intentionally rejected here.
  */
 export function normalizeContentLanguage(code: string): ContentLanguage | null {
-  return CONTENT_ALIAS_TO_SLUG.get(code.toLowerCase()) ?? null;
+  return CONTENT_SLUG_TO_CANONICAL.get(code.toLowerCase()) ?? null;
 }
 
 export function contentLanguageMeta(
@@ -742,7 +788,7 @@ export function francMinLanguageToContentLanguage(
   } = {},
 ): ContentLanguage | null {
   const code = francMinCode.toLowerCase();
-  if (code !== "cmn") return normalizeContentLanguage(code);
+  if (code !== "cmn") return FRANC_MIN_TO_CONTENT_SLUG.get(code) ?? null;
 
   const script = detectChineseScript(options.text ?? "");
   if (script) return script;

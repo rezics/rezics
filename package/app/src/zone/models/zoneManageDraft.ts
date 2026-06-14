@@ -1,4 +1,5 @@
 import type {
+  ContentLanguage,
   Language,
   ZoneBoundary,
   ZoneDynamicTags,
@@ -12,7 +13,7 @@ import type {
   ZoneTranslation,
 } from "@rezics/contract";
 import {
-  LANGUAGES,
+  CONTENT_LANGUAGE_SLUGS,
   ZONE_BOUNDARY_SCHEMA,
   ZONE_BOUNDARY_V1_VERSION,
   ZONE_MENU_MAX_DEPTH,
@@ -852,14 +853,13 @@ export function validateZoneManageDraft(
 // ANCHOR: 译文行
 
 export type ZoneTranslationRow = {
-  language: Language;
+  language: ContentLanguage;
   title: string;
   description: string;
 };
 
-export const ZONE_TRANSLATION_LANGUAGES = Object.values(
-  LANGUAGES,
-) as Language[];
+export const ZONE_TRANSLATION_LANGUAGES: ContentLanguage[] =
+  CONTENT_LANGUAGE_SLUGS;
 
 export function zoneTranslationsToRows(
   translations: readonly ZoneTranslation[],
@@ -888,8 +888,8 @@ export function zoneRowsToTranslations(
 
 export function zoneTranslationLanguageOptions(
   rows: readonly ZoneTranslationRow[],
-  current?: Language,
-): Language[] {
+  current?: ContentLanguage,
+): ContentLanguage[] {
   const used = new Set(rows.map((row) => row.language));
   return ZONE_TRANSLATION_LANGUAGES.filter(
     (language) => language === current || !used.has(language),

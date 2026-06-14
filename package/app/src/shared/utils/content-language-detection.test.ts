@@ -16,7 +16,7 @@ describe("detectContentLanguage", () => {
       detectContentLanguage(
         "Esta es una frase clara en español sobre libros, juegos, idiomas, búsqueda de catálogo y conversaciones de comunidad.",
       )?.language,
-    ).toBe("spa");
+    ).toBe("es");
   });
 
   test("uses Chinese script hints for franc-min Mandarin", () => {

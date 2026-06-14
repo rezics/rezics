@@ -27,7 +27,7 @@ import {
   lockPathIntersectsPatchPath,
   mainMarkdownSource,
   markdownContentDoc,
-  normalizeLanguage,
+  normalizeContentLanguage,
   UNIT_FIELD_LOCK_ALL,
 } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
@@ -500,7 +500,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
     if (newBook || !bookId) {
       const createLanguage =
-        normalizeLanguage(editor.selectedLanguage) ?? authoringLanguage;
+        normalizeContentLanguage(editor.selectedLanguage) ?? authoringLanguage;
       const createBookData: CreateBookInput = {
         isbn13: metadataState?.isbn13 ?? undefined,
         coverUrl: metadataState?.coverUrl ?? undefined,

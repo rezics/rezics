@@ -4,7 +4,11 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type { Language, UpdateUser, UserSettings } from "@rezics/contract";
+import type {
+  ContentLanguage,
+  UpdateUser,
+  UserSettings,
+} from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
@@ -44,7 +48,7 @@ export type CompleteProfileSetupInput = {
   slug: string;
   displayName?: string;
   avatar?: string | null;
-  preferredLanguages: Language[];
+  preferredLanguages: ContentLanguage[];
 };
 
 /**

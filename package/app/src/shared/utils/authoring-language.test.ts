@@ -18,7 +18,7 @@ describe("resolveAuthoringLanguageDefault", () => {
         appLocale: "en-US",
         fallbackLanguage: "en",
       }),
-    ).toBe("fra");
+    ).toBe("fr");
   });
 
   test("falls back when no user or app language is usable", () => {

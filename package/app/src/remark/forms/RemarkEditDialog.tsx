@@ -1,5 +1,6 @@
 import { useUpdatePostMutation } from "@rezics/api/post/post";
 import {
+  type ContentLanguage,
   mainMarkdownSource,
   markdownContentDoc,
   normalizeContentLanguage,
@@ -40,7 +41,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
   );
-  const [language, setLanguage] = useState(locale);
+  const [language, setLanguage] = useState<ContentLanguage>(locale);
   const [title, setTitle] = useState(remark.title ?? "");
   const [text, setText] = useState(mainMarkdownSource(remark.content) ?? "");
   const [saveError, setSaveError] = useState<string | null>(null);

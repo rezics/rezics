@@ -6,6 +6,7 @@ import {
 } from "@rezics/api/post/post";
 import { unitQueries } from "@rezics/api/unit/unit";
 import {
+  type ContentLanguage,
   mainMarkdownSource,
   markdownContentDoc,
   normalizeContentLanguage,
@@ -108,7 +109,7 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     useQuery(unitQueries.languageContent(postUnitId, { appLocale: locale }));
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
-  const [language, setLanguage] = useState(locale);
+  const [language, setLanguage] = useState<ContentLanguage>(locale);
   const [lockedError, setLockedError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const isWikiPost = post?.kind === PostKind.WIKI;

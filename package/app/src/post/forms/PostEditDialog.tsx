@@ -6,6 +6,7 @@ import {
 } from "@rezics/api/post/post";
 import type { CommentDTO, PostDTO } from "@rezics/contract";
 import {
+  type ContentLanguage,
   CONTENT_LANGUAGE_SLUGS,
   LANGUAGE_META,
   mainMarkdownSource,
@@ -52,7 +53,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const isComment = "rootUnitId" in post;
   const [title, setTitle] = useState(!isComment ? (post.title ?? "") : "");
   const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
-  const [language, setLanguage] = useState(
+  const [language, setLanguage] = useState<ContentLanguage>(
     normalizeContentLanguage(
       isComment ? (post.language ?? locale) : (post.resolvedLanguage ?? locale),
     ) ?? locale,
@@ -175,7 +176,12 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
                 rows={6}
                 className="min-h-[120px] max-h-[400px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
-              <Select value={language} onValueChange={setLanguage}>
+              <Select
+                value={language}
+                onValueChange={(nextLanguage) =>
+                  setLanguage(normalizeContentLanguage(nextLanguage) ?? locale)
+                }
+              >
                 <SelectTrigger
                   aria-label={t("common:language")}
                   className="h-9 w-[9.5rem] max-w-full"

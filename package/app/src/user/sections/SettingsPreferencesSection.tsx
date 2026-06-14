@@ -19,10 +19,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import {
+  CONTENT_LANGUAGE_SLUGS,
   LANGUAGE_META,
-  LANGUAGES,
-  type Language,
-  normalizeLanguage,
+  type ContentLanguage,
+  normalizeContentLanguage,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -45,14 +45,14 @@ import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
 type SortableLangItemProps = {
-  code: Language;
-  onRemove: (code: Language) => void;
+  code: ContentLanguage;
+  onRemove: (code: ContentLanguage) => void;
   disabled?: boolean;
 };
 
-const SUPPORTED_LANGUAGES: Language[] = Object.values(LANGUAGES);
+const SUPPORTED_LANGUAGES: ContentLanguage[] = CONTENT_LANGUAGE_SLUGS;
 
-function getLanguageLabel(code: Language): string {
+function getLanguageLabel(code: ContentLanguage): string {
   return LANGUAGE_META[code].nativeName;
 }
 
@@ -203,11 +203,11 @@ export const SettingsPreferencesSection: FC = () => {
   const [langSuccess, setLangSuccess] = useState(false);
   const [moderationSuccess, setModerationSuccess] = useState(false);
 
-  const preferredLangs: Language[] = settings?.preferredLanguages ?? [];
+  const preferredLangs: ContentLanguage[] = settings?.preferredLanguages ?? [];
   const availableToAdd = SUPPORTED_LANGUAGES.filter(
     (language) => !preferredLangs.includes(language),
   );
-  const [addPick, setAddPick] = useState<Language | "">("");
+  const [addPick, setAddPick] = useState<ContentLanguage | "">("");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -216,7 +216,7 @@ export const SettingsPreferencesSection: FC = () => {
     }),
   );
 
-  const persistOrder = (next: Language[]) => {
+  const persistOrder = (next: ContentLanguage[]) => {
     updateSettings.mutate(
       { preferredLanguages: next },
       {
@@ -228,21 +228,21 @@ export const SettingsPreferencesSection: FC = () => {
     );
   };
 
-  const handleAddLang = (code: Language | "") => {
+  const handleAddLang = (code: ContentLanguage | "") => {
     if (!code || preferredLangs.includes(code)) return;
     persistOrder([...preferredLangs, code]);
     setAddPick("");
   };
 
-  const handleRemoveLang = (code: Language) => {
+  const handleRemoveLang = (code: ContentLanguage) => {
     persistOrder(preferredLangs.filter((c) => c !== code));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const activeLanguage = normalizeLanguage(String(active.id));
-    const overLanguage = normalizeLanguage(String(over.id));
+    const activeLanguage = normalizeContentLanguage(String(active.id));
+    const overLanguage = normalizeContentLanguage(String(over.id));
     if (!activeLanguage || !overLanguage) return;
     const oldIndex = preferredLangs.indexOf(activeLanguage);
     const newIndex = preferredLangs.indexOf(overLanguage);
@@ -318,7 +318,7 @@ export const SettingsPreferencesSection: FC = () => {
             <Select
               value={addPick}
               onValueChange={(value) =>
-                setAddPick(normalizeLanguage(value) ?? "")
+                setAddPick(normalizeContentLanguage(value) ?? "")
               }
             >
               <SelectTrigger className="min-w-0 flex-1 h-9">

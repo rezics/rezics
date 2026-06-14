@@ -1,6 +1,6 @@
 import type {
+  ContentLanguage,
   CreatePostInput,
-  Language,
   SubmitPostToRealmInput,
 } from "@rezics/contract";
 import {
@@ -41,7 +41,7 @@ export function buildRealmPostCreateInput(input: {
   realmId: string;
   title: string;
   content: string;
-  language: Language;
+  language: ContentLanguage;
   tagIds: string[];
   status: "DRAFT" | "PUBLISHED";
 }): CreatePostInput {
@@ -60,7 +60,7 @@ export function buildRealmWikiCreateInput(input: {
   realmId: string;
   title: string;
   content: string;
-  language: Language;
+  language: ContentLanguage;
   status: "DRAFT" | "PUBLISHED";
 }): Omit<CreatePostInput, "kind" | "creationMode"> {
   return {
@@ -76,7 +76,7 @@ export function buildRealmPollPostCreateInput(input: {
   realmId: string;
   title: string;
   content: string;
-  language: Language;
+  language: ContentLanguage;
   tagIds: string[];
   pollUnitId: string;
   status: "DRAFT" | "PUBLISHED";

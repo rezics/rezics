@@ -8,7 +8,11 @@ import { francAll } from "franc-min";
 
 const MIN_DETECTABLE_TEXT_LENGTH = 20;
 const FRANC_MIN_CODES = [
-  ...new Set(REZICS_LANGUAGE_REGISTRY.map((entry) => entry.francMin)),
+  ...new Set(
+    REZICS_LANGUAGE_REGISTRY.flatMap((entry) =>
+      "detection" in entry ? [entry.detection.francMin] : [],
+    ),
+  ),
 ];
 
 export type ContentLanguageDetection = {

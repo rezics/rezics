@@ -1,8 +1,13 @@
-import type { BookDTO, Language, UnitTranslationDTO } from "@rezics/contract";
+import type {
+  BookDTO,
+  ContentLanguage,
+  UnitTranslationDTO,
+} from "@rezics/contract";
 import {
+  CONTENT_LANGUAGE_SLUGS,
   DEFAULT_LANGUAGE,
-  LANGUAGES,
   mainMarkdownSource,
+  normalizeContentLanguage,
 } from "@rezics/contract";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
@@ -16,7 +21,7 @@ export type TranslationDraft = {
 
 export type DraftMap = Record<string, TranslationDraft>;
 
-export const ALL_LANGUAGES: Language[] = Object.values(LANGUAGES);
+export const ALL_LANGUAGES: ContentLanguage[] = CONTENT_LANGUAGE_SLUGS;
 
 export function emptyDraft(): TranslationDraft {
   return { title: "", subtitle: "", summary: "", description: "" };
@@ -35,7 +40,7 @@ export function translationToDraft(
 
 function pickInitialLanguage(
   book: BookDTO | null | undefined,
-  fallbackLanguage = DEFAULT_LANGUAGE,
+  fallbackLanguage: ContentLanguage = DEFAULT_LANGUAGE,
 ): string {
   if (!book) return fallbackLanguage;
   const existing = book.translations?.[0]?.language;
@@ -55,13 +60,15 @@ function pickInitialLanguage(
  */
 export function useBookTranslationEditor(
   book: BookDTO | null | undefined,
-  fallbackLanguage = DEFAULT_LANGUAGE,
+  fallbackLanguage: ContentLanguage = DEFAULT_LANGUAGE,
 ) {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { lang?: string };
 
   const initialLang = pickInitialLanguage(book, fallbackLanguage);
-  const selectedLanguage = (search.lang as string | undefined) ?? initialLang;
+  const selectedLanguage = search.lang
+    ? (normalizeContentLanguage(search.lang) ?? initialLang)
+    : initialLang;
 
   const [drafts, setDrafts] = useState<DraftMap>({});
 
