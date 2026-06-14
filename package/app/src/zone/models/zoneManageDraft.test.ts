@@ -381,6 +381,25 @@ describe("query vocabulary", () => {
     ).toEqual(["realm", "sort.qualityScore"]);
   });
 
+  it("allows zone index filters and sorts on zone target", () => {
+    expect(
+      zoneQueryUnsupportedFields({
+        target: "zone",
+        types: ["ZONE"],
+        realm: "context",
+        languages: "viewer",
+        sort: { field: "updatedAt", direction: "desc" },
+      }),
+    ).toEqual([]);
+    expect(
+      zoneQueryUnsupportedFields({
+        target: "zone",
+        tagUnitIds: ["tag-1"],
+        sort: { field: "memberCount" },
+      }),
+    ).toEqual(["tagUnitIds", "sort.memberCount"]);
+  });
+
   it("coerces target switches by dropping unsupported fields", () => {
     const coerced = coerceZoneQueryTarget(
       {
@@ -395,6 +414,28 @@ describe("query vocabulary", () => {
       target: "post",
       postKinds: ["WIKI"],
       sort: { field: "createdAt", direction: "asc" },
+    });
+    expect(zoneQueryUnsupportedFields(coerced)).toEqual([]);
+  });
+
+  it("coerces zone target switches by dropping unsupported fields", () => {
+    const coerced = coerceZoneQueryTarget(
+      {
+        target: "unit",
+        types: ["ZONE"],
+        tagUnitIds: ["tag-1"],
+        realm: "context",
+        languages: "viewer",
+        sort: { field: "qualityScore", direction: "desc" },
+      },
+      "zone",
+    );
+    expect(coerced).toEqual({
+      target: "zone",
+      types: ["ZONE"],
+      realm: "context",
+      languages: "viewer",
+      sort: { field: "createdAt", direction: "desc" },
     });
     expect(zoneQueryUnsupportedFields(coerced)).toEqual([]);
   });

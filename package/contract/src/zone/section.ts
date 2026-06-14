@@ -111,6 +111,70 @@ export const zoneSectionQuerySchema = t.Object(
 );
 
 export type ZoneSectionQuery = Static<typeof zoneSectionQuerySchema>;
+export type ZoneSectionQueryTarget = ZoneSectionQuery["target"];
+export type ZoneSectionQueryFilterField = keyof Omit<
+  ZoneSectionQuery,
+  "target" | "sort"
+>;
+
+/**
+ * Per-target Meilisearch field vocabulary for zone query sections. The
+ * contract owns this table because server compilation and app-side management
+ * editors must stay in lockstep when a query target is added.
+ * 专区查询分区按目标划分的 Meilisearch 字段词汇表。契约拥有此表，因为
+ * 服务端编译与应用端管理编辑器在新增查询目标时必须保持同步。
+ */
+export const ZONE_SECTION_QUERY_FILTERABLE_FIELDS = {
+  unit: [
+    "types",
+    "postKinds",
+    "realm",
+    "tagUnitIds",
+    "realmTagUnitIds",
+    "subjects",
+    "targetUnitId",
+    "languages",
+    "ratings",
+  ],
+  post: ["postKinds", "realm", "targetUnitId", "languages"],
+  realm: ["types", "languages"],
+  zone: ["types", "realm", "languages"],
+} as const satisfies Record<
+  ZoneSectionQueryTarget,
+  readonly ZoneSectionQueryFilterField[]
+>;
+
+export const ZONE_SECTION_QUERY_SORT_FIELDS = {
+  unit: [
+    "createdAt",
+    "updatedAt",
+    "publishedAt",
+    "bestScore",
+    "hotScore",
+    "topScore",
+    "risingScore",
+    "controversyScore",
+    "trendingScore",
+    "qualityScore",
+  ],
+  post: [
+    "createdAt",
+    "updatedAt",
+    "replyCount",
+    "bestScore",
+    "hotScore",
+    "topScore",
+    "risingScore",
+    "controversyScore",
+    "trendingScore",
+    "qualityScore",
+  ],
+  realm: ["createdAt", "updatedAt", "memberCount"],
+  zone: ["createdAt", "updatedAt"],
+} as const satisfies Record<
+  ZoneSectionQueryTarget,
+  readonly ZoneSectionQuerySortField[]
+>;
 
 // ANCHOR: Zone section primitives
 // ANCHOR: 专区分区原语

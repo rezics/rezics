@@ -12,8 +12,8 @@ import {
   type ZonePage as ZonePageConfig,
   type ZonePageSection,
   type ZoneSectionQuery,
-  type ZoneSectionQuerySortField,
   type ZoneTheme,
+  ZONE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
 import { rebalance } from "../../shelf/fractional-index.js";
 import {
@@ -78,38 +78,10 @@ type ZoneFixturePageIds = {
 
 const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 
-// Per-target sort vocabularies mirror `ZONE_QUERY_SORTABLE` in
-// `meili/search/filters.ts`: unit queries may not sort by replyCount, post
-// queries may not sort by publishedAt, and realm/zone queries use their
-// dedicated indexes.
-// 按目标的排序词汇表与 `meili/search/filters.ts` 的 `ZONE_QUERY_SORTABLE`
-// 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序，
-// realm/zone 查询使用各自的专用索引。
-const UNIT_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-  "publishedAt",
-  "trendingScore",
-  "qualityScore",
-  "topScore",
-];
-const POST_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-  "replyCount",
-  "hotScore",
-  "bestScore",
-  "topScore",
-];
-const REALM_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-  "memberCount",
-];
-const ZONE_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-];
+const UNIT_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.unit;
+const POST_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.post;
+const REALM_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.realm;
+const ZONE_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.zone;
 
 interface ZoneTemporalState {
   startsAt: Date | null;

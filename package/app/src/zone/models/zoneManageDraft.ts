@@ -7,7 +7,7 @@ import type {
   ZonePage,
   ZonePageSection,
   ZoneSectionQuery,
-  ZoneSectionQuerySortField,
+  ZoneSectionQueryFilterField,
   ZoneTheme,
   ZoneTranslation,
 } from "@rezics/contract";
@@ -20,6 +20,8 @@ import {
   ZONE_NAV_V1_VERSION,
   ZONE_PAGE_SCHEMA,
   ZONE_PAGE_V1_VERSION,
+  ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
+  ZONE_SECTION_QUERY_SORT_FIELDS,
   ZONE_THEME_SCHEMA,
   ZONE_THEME_V1_VERSION,
   zoneBoundaryV1Schema,
@@ -470,69 +472,15 @@ export function moveListItem<T>(
 // ANCHOR: 查询词汇表
 
 /**
- * Client-side mirror of the server's `ZONE_QUERY_FILTERABLE` /
- * `ZONE_QUERY_SORTABLE` (`package/server/src/meili/search/filters.ts`).
- * The server stays authoritative; this only powers the query builder UI and
- * pre-save guard. Keep both in sync when the index vocabulary changes.
- * 服务端 `ZONE_QUERY_FILTERABLE` / `ZONE_QUERY_SORTABLE`
- * （`package/server/src/meili/search/filters.ts`）的客户端镜像。服务端
- * 仍是权威；这里只驱动查询构建器 UI 与保存前守卫。索引词汇表变更时需
- * 同步两处。
+ * Query builder vocabulary is contract-owned so the app editor and server
+ * compiler cannot drift when a target such as `zone` is added.
+ * 查询构建器词汇表由契约拥有，避免应用端编辑器与服务端编译器在新增
+ * `zone` 等目标时漂移。
  */
-export type ZoneQueryFilterField = keyof Omit<
-  ZoneSectionQuery,
-  "target" | "sort"
->;
-
-export const ZONE_QUERY_FILTERABLE_FIELDS: Record<
-  ZoneSectionQuery["target"],
-  readonly ZoneQueryFilterField[]
-> = {
-  unit: [
-    "types",
-    "postKinds",
-    "realm",
-    "tagUnitIds",
-    "realmTagUnitIds",
-    "subjects",
-    "targetUnitId",
-    "languages",
-    "ratings",
-  ],
-  post: ["postKinds", "realm", "targetUnitId", "languages"],
-  realm: ["types", "languages"],
-};
-
-export const ZONE_QUERY_SORT_FIELDS: Record<
-  ZoneSectionQuery["target"],
-  readonly ZoneSectionQuerySortField[]
-> = {
-  unit: [
-    "createdAt",
-    "updatedAt",
-    "publishedAt",
-    "bestScore",
-    "hotScore",
-    "topScore",
-    "risingScore",
-    "controversyScore",
-    "trendingScore",
-    "qualityScore",
-  ],
-  post: [
-    "createdAt",
-    "updatedAt",
-    "replyCount",
-    "bestScore",
-    "hotScore",
-    "topScore",
-    "risingScore",
-    "controversyScore",
-    "trendingScore",
-    "qualityScore",
-  ],
-  realm: ["createdAt", "updatedAt", "memberCount"],
-};
+export type ZoneQueryFilterField = ZoneSectionQueryFilterField;
+export const ZONE_QUERY_FILTERABLE_FIELDS =
+  ZONE_SECTION_QUERY_FILTERABLE_FIELDS;
+export const ZONE_QUERY_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS;
 
 export function zoneQueryUnsupportedFields(query: ZoneSectionQuery): string[] {
   const filterable = ZONE_QUERY_FILTERABLE_FIELDS[query.target];

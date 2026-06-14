@@ -226,8 +226,19 @@ describe("seedOfficialZones", () => {
         id: "all-zones",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
-        display: "grid",
+        display: "tiles",
         loadMore: true,
+        query: {
+          target: "zone",
+          types: ["ZONE"],
+          sort: { field: "updatedAt" },
+        },
+      },
+      {
+        id: "zone-updates",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesUpdates.id,
+        display: "list",
         query: {
           target: "zone",
           types: ["ZONE"],

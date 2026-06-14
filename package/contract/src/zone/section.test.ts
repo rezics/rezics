@@ -5,6 +5,8 @@ import {
   zoneContentSectionSchema,
   zoneDynamicTagsSchema,
   zonePageSectionSchema,
+  ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
+  ZONE_SECTION_QUERY_SORT_FIELDS,
   zoneSectionQuerySchema,
   zoneSourcesSectionSchema,
   zoneTabsSectionSchema,
@@ -40,6 +42,27 @@ describe("zone section query", () => {
         sort: { field: "memberCount", direction: "desc" },
       }),
     ).toBe(true);
+    expect(
+      Value.Check(zoneSectionQuerySchema, {
+        target: "zone",
+        types: ["ZONE"],
+        realm: "context",
+        languages: "viewer",
+        sort: { field: "updatedAt", direction: "desc" },
+      }),
+    ).toBe(true);
+  });
+
+  test("publishes per-target filter and sort vocabularies", () => {
+    expect(ZONE_SECTION_QUERY_FILTERABLE_FIELDS.zone).toEqual([
+      "types",
+      "realm",
+      "languages",
+    ]);
+    expect(ZONE_SECTION_QUERY_SORT_FIELDS.zone).toEqual([
+      "createdAt",
+      "updatedAt",
+    ]);
   });
 
   test("requires a sort and rejects unknown fields", () => {

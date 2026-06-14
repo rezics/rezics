@@ -177,6 +177,14 @@ export const OFFICIAL_SECTION_LABELS = {
       ja: { title: "すべてのゾーン" },
     },
   },
+  zonesUpdates: {
+    id: "00000000-0000-7000-8000-000000000515",
+    translations: {
+      en: { title: "Zone Updates" },
+      "zh-hant": { title: "專區動態" },
+      ja: { title: "ゾーン更新" },
+    },
+  },
   popularNow: {
     id: "00000000-0000-7000-8000-000000000509",
     translations: {
@@ -459,8 +467,21 @@ const zonesConfig = officialConfig({
       id: "all-zones",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
-      display: "grid",
+      display: "tiles",
       limit: 24,
+      loadMore: true,
+      query: {
+        target: "zone",
+        types: ["ZONE"],
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+    },
+    {
+      id: "zone-updates",
+      kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesUpdates.id,
+      display: "list",
+      limit: 20,
       loadMore: true,
       query: {
         target: "zone",
