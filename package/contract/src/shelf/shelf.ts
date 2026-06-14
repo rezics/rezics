@@ -136,7 +136,6 @@ export const shelfDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(shelfExtraSchema)),
   rootItemCount: t.Optional(t.Number()),
@@ -159,7 +158,6 @@ export const shelfSummaryDTOSchema = t.Object({
   unitId: t.String(),
   slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
-  kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   title: t.Optional(t.Nullable(t.String())),
   itemCount: t.Number(),
@@ -203,7 +201,6 @@ export type ShelfDetailDTO = (typeof shelfDetailDTOSchema)["static"];
 const shelfListCommonProperties = {
   ...listGetQueryBase.properties,
   userId: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
   q: t.Optional(t.String()),
   tagIds: t.Optional(t.Array(t.String())),
   containsUnitId: t.Optional(t.String()),
@@ -228,7 +225,6 @@ const shelfListCommonProperties = {
 const shelfListBodyCommonProperties = {
   ...listPostBodyBase.properties,
   userId: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
   q: t.Optional(t.String()),
   tagIds: t.Optional(t.Array(t.String())),
   containsUnitId: t.Optional(t.String()),
@@ -286,7 +282,6 @@ export type ShelfResponse = (typeof shelfResponseSchema)["static"];
 
 export const createShelfSchema = t.Object({
   title: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   tagIds: t.Optional(t.Array(t.String())),
@@ -309,7 +304,6 @@ export type CreateShelfInput = (typeof createShelfSchema)["static"];
 
 export const updateShelfSchema = t.Object({
   title: t.Optional(t.String()),
-  kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),

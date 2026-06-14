@@ -1,41 +1,38 @@
 import type {
   EnsureSystemShelfResponse,
-  SystemShelfKindKey,
+  ReservedShelfSlug,
 } from "@rezics/contract";
-import { SYSTEM_SHELF_KIND_KEYS } from "@rezics/contract";
+import { RESERVED_SHELF_SLUGS } from "@rezics/contract";
 import { useCallback, useRef } from "react";
 import { ApiError } from "../react-query/errors";
 import { useEnsureSystemShelf } from "./useEnsureSystemShelf";
 
-const SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set(
-  SYSTEM_SHELF_KIND_KEYS,
+const RESERVED_SLUGS: ReadonlySet<ReservedShelfSlug> = new Set(
+  RESERVED_SHELF_SLUGS,
 );
 
-export function isSystemShelfKindKey(
+export function isReservedShelfSlug(
   value: unknown,
-): value is SystemShelfKindKey {
+): value is ReservedShelfSlug {
   return (
-    typeof value === "string" &&
-    SYSTEM_KIND_KEYS.has(value as SystemShelfKindKey)
+    typeof value === "string" && RESERVED_SLUGS.has(value as ReservedShelfSlug)
   );
 }
 
 /**
- * Parse a thrown error and return its `kindKey` if the server reported a
+ * Parse a thrown error and return its reserved `slug` if the server reported a
  * recoverable missing system shelf.
  */
-export function getSystemShelfMissingKindKey(
+export function getSystemShelfMissingSlug(
   error: unknown,
-): SystemShelfKindKey | null {
+): ReservedShelfSlug | null {
   if (!(error instanceof ApiError)) return null;
   if (error.code !== "system_shelf_missing") return null;
-  return isSystemShelfKindKey(error.detail?.kindKey)
-    ? error.detail.kindKey
-    : null;
+  return isReservedShelfSlug(error.detail?.slug) ? error.detail.slug : null;
 }
 
 export type UseSystemShelfRecoveryResult = {
-  ensure: (kindKey: SystemShelfKindKey) => Promise<EnsureSystemShelfResponse>;
+  ensure: (slug: ReservedShelfSlug) => Promise<EnsureSystemShelfResponse>;
   ensureFromError: (
     error: unknown,
   ) => Promise<EnsureSystemShelfResponse | null>;
@@ -46,24 +43,24 @@ export type UseSystemShelfRecoveryResult = {
  * Shared recovery primitive for the rare orphan state where one of the
  * viewer's system shelves is missing.
  *
- * Requests are single-flight per `kindKey`: concurrent callers share the same
+ * Requests are single-flight per reserved slug: concurrent callers share the same
  * ensure promise, so one user action cannot fan out duplicate recovery calls.
  */
 export function useSystemShelfRecovery(): UseSystemShelfRecoveryResult {
   const { mutateAsync: ensureSystemShelf, isPending } = useEnsureSystemShelf();
   const inFlight = useRef(
-    new Map<SystemShelfKindKey, Promise<EnsureSystemShelfResponse>>(),
+    new Map<ReservedShelfSlug, Promise<EnsureSystemShelfResponse>>(),
   );
 
   const ensure = useCallback(
-    (kindKey: SystemShelfKindKey): Promise<EnsureSystemShelfResponse> => {
-      const pending = inFlight.current.get(kindKey);
+    (slug: ReservedShelfSlug): Promise<EnsureSystemShelfResponse> => {
+      const pending = inFlight.current.get(slug);
       if (pending) return pending;
 
-      const promise = ensureSystemShelf(kindKey).finally(() =>
-        inFlight.current.delete(kindKey),
+      const promise = ensureSystemShelf(slug).finally(() =>
+        inFlight.current.delete(slug),
       );
-      inFlight.current.set(kindKey, promise);
+      inFlight.current.set(slug, promise);
       return promise;
     },
     [ensureSystemShelf],
@@ -71,8 +68,8 @@ export function useSystemShelfRecovery(): UseSystemShelfRecoveryResult {
 
   const ensureFromError = useCallback(
     async (error: unknown): Promise<EnsureSystemShelfResponse | null> => {
-      const kindKey = getSystemShelfMissingKindKey(error);
-      return kindKey ? ensure(kindKey) : null;
+      const slug = getSystemShelfMissingSlug(error);
+      return slug ? ensure(slug) : null;
     },
     [ensure],
   );

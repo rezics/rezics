@@ -1,43 +1,26 @@
-import type { ProgressExtra, UserUnitProgressStatus } from "@rezics/contract";
-
-export type { ProgressExtra };
+import type {
+  ProgressPostLinkDTO,
+  UserUnitProgressStatus,
+} from "@rezics/contract";
 
 export type ReasonStatus = Extract<
   UserUnitProgressStatus,
   "PAUSED" | "DROPPED"
 >;
 
-const STATUS_TO_EXTRA_KEY = {
-  PAUSED: "paused",
-  DROPPED: "dropped",
-} as const satisfies Record<ReasonStatus, "paused" | "dropped">;
-
-export function getReasonPostIds(
-  extra: ProgressExtra | null | undefined,
+export function getReasonPostLinks(
+  links: readonly ProgressPostLinkDTO[] | null | undefined,
   status: ReasonStatus,
-): string[] {
-  const key = STATUS_TO_EXTRA_KEY[status];
-  const bucket = extra?.[key];
-  return bucket?.reasonPostUnitIds ?? [];
+): ProgressPostLinkDTO[] {
+  return (links ?? []).filter((link) => link.status === status);
 }
 
 export function getLatestReasonPostId(
-  extra: ProgressExtra | null | undefined,
+  links: readonly ProgressPostLinkDTO[] | null | undefined,
   status: ReasonStatus,
 ): string | null {
-  const ids = getReasonPostIds(extra, status);
-  return ids.length > 0 ? ids[ids.length - 1] : null;
-}
-
-export function appendReasonPostId(
-  extra: ProgressExtra | null | undefined,
-  status: ReasonStatus,
-  postUnitId: string,
-): ProgressExtra {
-  const key = STATUS_TO_EXTRA_KEY[status];
-  const existing = getReasonPostIds(extra, status);
-  return {
-    ...(extra ?? {}),
-    [key]: { reasonPostUnitIds: [...existing, postUnitId] },
-  };
+  const linksForStatus = getReasonPostLinks(links, status);
+  return linksForStatus.length > 0
+    ? linksForStatus[linksForStatus.length - 1].postUnitId
+    : null;
 }

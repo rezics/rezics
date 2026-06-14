@@ -47,7 +47,7 @@ import type { ReasonStatus } from "../models/extra";
 type ReasonModalProps = {
   open: boolean;
   status: ReasonStatus;
-  reasonPostUnitIds: string[];
+  postUnitIds: string[];
   onCancel: () => void;
   onSkip: () => void;
   onSave: (payload: {
@@ -75,7 +75,7 @@ const DESC_MESSAGE = {
 export function ReasonModal({
   open,
   status,
-  reasonPostUnitIds,
+  postUnitIds,
   onCancel,
   onSkip,
   onSave,
@@ -83,8 +83,7 @@ export function ReasonModal({
   isPending,
 }: ReasonModalProps) {
   const { t } = useTranslation(["common", "community"]);
-  const { posts, isLoading: postsLoading } =
-    useReasonPostHistory(reasonPostUnitIds);
+  const { posts, isLoading: postsLoading } = useReasonPostHistory(postUnitIds);
 
   const latestPost: ReasonPost | undefined = posts[posts.length - 1];
   const olderPosts = posts.slice(0, -1).reverse();

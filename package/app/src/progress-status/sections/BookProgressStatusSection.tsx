@@ -1,4 +1,11 @@
-import { useUnitProgress } from "@rezics/api/progress/progress.queries";
+import {
+  useLinkProgressPost,
+  useUpdateProgressPostLink,
+} from "@rezics/api/progress/progress.mutations";
+import {
+  useUnitProgress,
+  useUnitProgressPosts,
+} from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";
@@ -16,8 +23,8 @@ import {
 import { useReasonPostMutations } from "../hooks/useReasonPostMutations";
 import { useStatusTransition } from "../hooks/useStatusTransition";
 import {
-  appendReasonPostId,
-  getReasonPostIds,
+  getLatestReasonPostId,
+  getReasonPostLinks,
   type ReasonStatus,
 } from "../models/extra";
 import { isToggleGroupStatus, type ToggleGroupStatus } from "../models/status";
@@ -75,6 +82,7 @@ export function BookProgressStatusSection({
   const language = useLocale();
   const { t } = useTranslation(["book"]);
   const progress = useUnitProgress(bookUnitId);
+  const progressPosts = useUnitProgressPosts(bookUnitId);
   const currentStatus: UserUnitProgressStatus | null =
     progress.data?.status ?? null;
 
@@ -84,6 +92,8 @@ export function BookProgressStatusSection({
   );
 
   const { createReasonPost, updateReasonPost } = useReasonPostMutations();
+  const linkProgressPost = useLinkProgressPost(bookUnitId);
+  const updateProgressPostLink = useUpdateProgressPostLink(bookUnitId);
 
   const [modal] = useAtom(statusModalAtom);
   const openModal = useSetAtom(openStatusModalAtom);
@@ -158,8 +168,10 @@ export function BookProgressStatusSection({
   }) => {
     if (!modal.status || !isReasonStatus(modal.status)) return;
     const reasonStatus = modal.status;
-    const ids = getReasonPostIds(progress.data?.extra ?? null, reasonStatus);
-    const latestId = ids[ids.length - 1];
+    const latestId = getLatestReasonPostId(
+      progressPosts.data?.links ?? [],
+      reasonStatus,
+    );
 
     if (latestId) {
       await updateReasonPost({
@@ -167,9 +179,10 @@ export function BookProgressStatusSection({
         body,
         visibility,
       });
-      await transition({
-        to: reasonStatus,
-        extra: progress.data?.extra ?? null,
+      await transition({ to: reasonStatus });
+      await updateProgressPostLink.mutateAsync({
+        postUnitId: latestId,
+        input: { status: reasonStatus },
       });
     } else {
       const created = await createReasonPost({
@@ -177,12 +190,11 @@ export function BookProgressStatusSection({
         body,
         visibility,
       });
-      const nextExtra = appendReasonPostId(
-        progress.data?.extra ?? null,
-        reasonStatus,
-        created.unitId,
-      );
-      await transition({ to: reasonStatus, extra: nextExtra });
+      await transition({ to: reasonStatus });
+      await linkProgressPost.mutateAsync({
+        postUnitId: created.unitId,
+        status: reasonStatus,
+      });
     }
 
     closeModal();
@@ -202,12 +214,11 @@ export function BookProgressStatusSection({
       body,
       visibility,
     });
-    const nextExtra = appendReasonPostId(
-      progress.data?.extra ?? null,
-      reasonStatus,
-      created.unitId,
-    );
-    await transition({ to: reasonStatus, extra: nextExtra });
+    await transition({ to: reasonStatus });
+    await linkProgressPost.mutateAsync({
+      postUnitId: created.unitId,
+      status: reasonStatus,
+    });
     closeModal();
   };
 
@@ -292,15 +303,19 @@ export function BookProgressStatusSection({
         <ReasonModal
           open={modal.kind === "reason"}
           status={reasonStatusForModal}
-          reasonPostUnitIds={getReasonPostIds(
-            progress.data?.extra ?? null,
+          postUnitIds={getReasonPostLinks(
+            progressPosts.data?.links ?? [],
             reasonStatusForModal,
-          )}
+          ).map((link) => link.postUnitId)}
           onCancel={closeModal}
           onSkip={handleReasonSkip}
           onSave={handleReasonSave}
           onAppend={handleReasonAppend}
-          isPending={isPending}
+          isPending={
+            isPending ||
+            linkProgressPost.isPending ||
+            updateProgressPostLink.isPending
+          }
         />
       )}
 

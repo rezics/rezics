@@ -13,7 +13,7 @@ import {
   UnitSupportLanguage,
   UnitTranslation,
 } from "../schema";
-import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
+import { getRandomShelfCover } from "./data.js";
 import { generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
@@ -70,7 +70,6 @@ export async function seedShelves(
     async () => {
       const author = faker.helpers.arrayElement(users);
       const translations = generateTranslations(UnitType.SHELF);
-      const kindKey = faker.helpers.arrayElement([...SHELF_KIND_KEYS]);
       const coverUrl = randomBoolean(0.7) ? getRandomShelfCover() : null;
 
       const extra = randomBoolean(0.3)
@@ -150,7 +149,6 @@ export async function seedShelves(
       await ctx.db.insert(Shelf).values(
         withUpdatedAt({
           unitId: unit.id,
-          kindKey,
           extra,
           rootItemCount: selectedWorks.length,
           itemCount: shelfItemRows.length,

@@ -7,8 +7,4 @@ export { ShelfItemAnnotationPanel } from "./components/ShelfItemAnnotationPanel"
 export { ShelfPickerToolbar } from "./components/ShelfPickerToolbar";
 export { ShelfPickerVirtualList } from "./components/ShelfPickerVirtualList";
 export { useAddToShelfDialog } from "./hooks/useAddToShelfDialog";
-export {
-  shelfKindLabel,
-  systemShelfKindLabel,
-} from "./models/systemShelfLabel";
 export { mapContentSearchDocToShelfDTO } from "./models/contentSearchDocToShelfDTO";

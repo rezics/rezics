@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { ProgressRepository } from "./progress.service";
 
 const baseRow: any = {
+  id: "progress-1",
   userId: "user-1",
   unitId: "unit-1",
   progress: 0,
@@ -13,7 +14,6 @@ const baseRow: any = {
   lastReadAnchor: null,
   firstSeenAt: new Date("2026-01-01T00:00:00.000Z"),
   lastSeenAt: new Date("2026-01-01T00:00:00.000Z"),
-  extra: null,
 };
 
 const enqueueMock = mock(async (_command: any) => ({
@@ -78,11 +78,39 @@ function createHarness(
     chapterTotals?: Map<string, number>;
     completedOwnerUnitIds?: string[];
     contentNode?: any;
+    postOwner?: any;
+    progressPostLinks?: any[];
+    progressPostLinkRow?: any;
   } = {},
 ) {
   const repository: ProgressRepository = {
     findProgressState: mock(async () => input.progressState ?? null),
     findProgress: mock(async () => input.upsertRow ?? baseRow),
+    findPostOwner: mock(
+      async () => input.postOwner ?? { authorUserId: "user-1" },
+    ),
+    listProgressPostLinks: mock(async () => input.progressPostLinks ?? []),
+    upsertProgressPostLink: mock(
+      async ({ progressId, postUnitId, status }) =>
+        input.progressPostLinkRow ?? {
+          progressId,
+          postUnitId,
+          status,
+          createdAt: new Date("2026-01-02T00:00:00.000Z"),
+          updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+        },
+    ),
+    updateProgressPostLinkStatus: mock(
+      async ({ progressId, postUnitId, status }) =>
+        input.progressPostLinkRow ?? {
+          progressId,
+          postUnitId,
+          status,
+          createdAt: new Date("2026-01-02T00:00:00.000Z"),
+          updatedAt: new Date("2026-01-03T00:00:00.000Z"),
+        },
+    ),
+    deleteProgressPostLink: mock(async () => {}),
     findContentNode: mock(async () => input.contentNode ?? null),
     upsertProgress: mock(async () => input.upsertRow ?? baseRow),
     listProgressRows: mock(async () => input.progressRows ?? []),
@@ -158,7 +186,6 @@ describe("ProgressService", () => {
     expect(update.completedCount).toBeUndefined();
     expect(update.lastReadNodeId).toBeUndefined();
     expect(update.lastReadAnchor).toBeUndefined();
-    expect(update.extra).toBeUndefined();
   });
 
   test("persists lastReadNodeId via direct node id", async () => {
@@ -209,34 +236,44 @@ describe("ProgressService", () => {
     expect(repository.upsertProgress).not.toHaveBeenCalled();
   });
 
-  test("accepts narrow paused extra", async () => {
-    const { repository } = createHarness();
+  test("links a progress-owned post with status snapshot", async () => {
+    const { repository } = createHarness({
+      upsertRow: { ...baseRow, id: "progress-1", status: "PAUSED" },
+    });
     const service = await createService(repository);
 
-    await service.upsert("user-1", "unit-1", {
+    const result = await service.linkPost("user-1", "unit-1", {
+      postUnitId: "post-1",
       status: "PAUSED",
-      extra: { paused: { reasonPostUnitIds: ["post-1"] } },
     });
 
-    const args = firstArg(repository.upsertProgress as any);
-    expect(args.create.extra).toEqual({
-      paused: { reasonPostUnitIds: ["post-1"] },
+    expect(repository.findPostOwner).toHaveBeenCalledWith("post-1");
+    expect(repository.upsertProgressPostLink).toHaveBeenCalledWith({
+      progressId: "progress-1",
+      postUnitId: "post-1",
+      status: "PAUSED",
+      now: expect.any(Date),
     });
-    expect(args.update.extra).toEqual({
-      paused: { reasonPostUnitIds: ["post-1"] },
+    expect(result).toEqual({
+      progressId: "progress-1",
+      postUnitId: "post-1",
+      status: "PAUSED",
+      createdAt: "2026-01-02T00:00:00.000Z",
     });
   });
 
-  test("rejects extra with unknown top-level key", async () => {
-    const { repository } = createHarness();
+  test("rejects linking another user's post", async () => {
+    const { repository } = createHarness({
+      postOwner: { authorUserId: "other-user" },
+    });
     const service = await createService(repository);
 
     await expect(
-      service.upsert("user-1", "unit-1", {
-        extra: { foo: { bar: 1 } } as never,
+      service.linkPost("user-1", "unit-1", {
+        postUnitId: "post-1",
       }),
-    ).rejects.toThrow(/extra/);
-    expect(repository.upsertProgress).not.toHaveBeenCalled();
+    ).rejects.toThrow(/another user's post/);
+    expect(repository.upsertProgressPostLink).not.toHaveBeenCalled();
   });
 
   test("coerces completed status when progress reaches 1 without explicit status", async () => {

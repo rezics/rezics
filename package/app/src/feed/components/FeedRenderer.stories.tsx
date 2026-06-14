@@ -70,7 +70,6 @@ const shelfRows = shelfList.slice(0, 2).map((shelf) => ({
     unitId: shelf.unitId,
     slug: shelf.slug,
     userId: shelf.userId,
-    kindKey: shelf.kindKey,
     coverUrl: shelf.coverUrl,
     title: shelf.translations?.[0]?.title ?? null,
     itemCount: shelf.itemCount ?? shelf.items?.length ?? 0,

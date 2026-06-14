@@ -27,6 +27,7 @@ function createDb(rowSets: unknown[][]) {
 }
 
 const progressRow = {
+  id: "progress-1",
   userId: "user-1",
   unitId: "unit-1",
   progress: 0.34,
@@ -73,6 +74,7 @@ describe("user unit progress search sync", () => {
     expect(documents).toEqual([
       {
         id: "user-1:unit-1",
+        progressId: "progress-1",
         userId: "user-1",
         unitId: "unit-1",
         status: "ACTIVE",

@@ -70,7 +70,7 @@ import {
   mapShelfSummaryToDTO,
   mapShelfToDTO,
 } from "./shelf.mapper";
-import { isSystemKindKey } from "./system-shelves";
+import { isReservedShelfSlug } from "./system-shelves";
 
 const REBALANCE_WINDOW = 50;
 const SHELF_SEARCH_HIT_LIMIT = 1000;
@@ -544,10 +544,6 @@ export class ShelfService {
       conditions.push(eq(Unit.userId, options.userId));
     }
 
-    if (options.kindKey?.trim()) {
-      conditions.push(eq(Shelf.kindKey, options.kindKey));
-    }
-
     const q = options.q?.trim();
     if (q) {
       conditions.push(sql`exists (
@@ -806,12 +802,11 @@ export class ShelfService {
   }
 
   /**
-   * Resolve `{ ownerUserId, slug }` under the owner scope. Only system shelf
-   * slugs ('favorites' | 'saved' | 'backlog' | 'active' | 'completed') are accepted in
-   * v1 — every other slug returns null per `SHELF_CUSTOM_SLUG_DISABLED`.
-   * 在所有者作用域下解析 `{ ownerUserId, slug }`。v1 仅接受系统书架的
-   * slug（'favorites' | 'saved' | 'backlog' | 'active' | 'completed'）—
-   * 其他 slug 一律按 `SHELF_CUSTOM_SLUG_DISABLED` 返回 null。
+   * Resolve `{ ownerUserId, slug }` under the owner scope. Only reserved shelf
+   * slugs are accepted in v1 — every other slug returns null per
+   * `SHELF_CUSTOM_SLUG_DISABLED`.
+   * 在所有者作用域下解析 `{ ownerUserId, slug }`。v1 仅接受保留书架
+   * slug；其他 slug 一律按 `SHELF_CUSTOM_SLUG_DISABLED` 返回 null。
    *
    * Lookup goes through the Unit slug index `(slugScope = ownerUserId,
    * slug)` so the resolver shares the path used by every other slug-bearing
@@ -822,7 +817,7 @@ export class ShelfService {
     ownerUserId: string,
     slug: string,
   ): Promise<ShelfDetailDTO | null> {
-    if (!isSystemKindKey(slug)) return null;
+    if (!isReservedShelfSlug(slug)) return null;
     const db = await getServerDb();
     const [unit] = await db
       .select({ id: Unit.id })
@@ -844,22 +839,7 @@ export class ShelfService {
   }
 
   async create(req: CreateShelfInput, userId: string): Promise<ShelfDTO> {
-    const {
-      title,
-      kindKey,
-      coverUrl,
-      visibility,
-      tagIds,
-      extra,
-      translations,
-    } = req;
-
-    if (isSystemKindKey(kindKey)) {
-      throw new AppError(
-        400,
-        `kindKey '${kindKey}' is reserved for system shelves`,
-      );
-    }
+    const { title, coverUrl, visibility, tagIds, extra, translations } = req;
 
     // v1 rejects any client-supplied slug for user-created shelves
     // (schema-enforced) — system shelves only. Custom slugs are a deliberate
@@ -955,7 +935,6 @@ export class ShelfService {
 
     await db.insert(Shelf).values({
       unitId: unit.id,
-      ...(kindKey !== undefined ? { kindKey } : {}),
       ...(extra !== undefined ? { extra: extra ?? null } : {}),
       updatedAt: new Date(),
     });
@@ -971,7 +950,7 @@ export class ShelfService {
         "Custom shelf slugs are disabled (SHELF_CUSTOM_SLUG_DISABLED).",
       );
     }
-    const { kindKey, coverUrl, visibility, extra, title } = req;
+    const { coverUrl, visibility, extra, title } = req;
     const db = await getServerDb();
 
     if (visibility !== undefined || req.licenseSlug !== undefined) {
@@ -1035,7 +1014,6 @@ export class ShelfService {
     const [updated] = await db
       .update(Shelf)
       .set({
-        ...(kindKey !== undefined ? { kindKey } : {}),
         ...(extra !== undefined ? { extra: extra ?? null } : {}),
         updatedAt: new Date(),
       })

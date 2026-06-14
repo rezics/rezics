@@ -20,7 +20,7 @@ import type {
   ShelfItemType,
   ShelfListResponse,
   ShelfResponse,
-  SystemShelfKindKey,
+  ReservedShelfSlug,
   ToggleFavoriteResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
@@ -197,11 +197,11 @@ export const shelfApi = {
   },
 
   ensureSystem: async (
-    kindKey: SystemShelfKindKey,
+    slug: ReservedShelfSlug,
   ): Promise<EnsureSystemShelfResponse> => {
     return apiFetch<EnsureSystemShelfResponse>("/shelf/system/ensure", {
       method: "POST",
-      body: JSON.stringify({ kindKey }),
+      body: JSON.stringify({ slug }),
     });
   },
 };

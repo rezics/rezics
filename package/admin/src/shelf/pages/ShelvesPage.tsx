@@ -28,7 +28,6 @@ export default function ShelvesPage() {
   const [q, setQ] = React.useState("");
   const [queryIds, setQueryIds] = React.useState("");
   const [userId, setUserId] = React.useState("");
-  const [kindKey, setKindKey] = React.useState("");
   const [containsUnitId, setContainsUnitId] = React.useState("");
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
@@ -40,7 +39,6 @@ export default function ShelvesPage() {
       limit,
       ids: optionalFilter(queryIds),
       userId: optionalFilter(userId),
-      kindKey: optionalFilter(kindKey),
       containsUnitId: optionalFilter(containsUnitId),
     }),
   );
@@ -77,12 +75,6 @@ export default function ShelvesPage() {
         cell: (shelf) => (
           <span className="text-sm font-mono">{shelf.slug ?? "-"}</span>
         ),
-      },
-      {
-        id: "kind",
-        header: "Kind",
-        minWidth: 140,
-        cell: (shelf) => shelf.kindKey ?? "-",
       },
       {
         id: "user",
@@ -170,7 +162,7 @@ export default function ShelvesPage() {
           setQueryIds(q.trim());
         }}
         filters={
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col gap-1">
               <Label htmlFor="shelf-filter-user" className="text-xs">
                 {getI18nRuntime().i18n.t("common:user")}
@@ -183,20 +175,6 @@ export default function ShelvesPage() {
                   setPage(0);
                 }}
                 placeholder="user id"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="shelf-filter-kind" className="text-xs">
-                Kind
-              </Label>
-              <Input
-                id="shelf-filter-kind"
-                value={kindKey}
-                onChange={(event) => {
-                  setKindKey(event.target.value);
-                  setPage(0);
-                }}
-                placeholder="kind key"
               />
             </div>
             <div className="flex flex-col gap-1">

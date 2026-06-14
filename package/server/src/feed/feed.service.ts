@@ -372,7 +372,6 @@ function mapShelfToSummary(shelf: unknown): ShelfSummaryDTO {
     unitId: source.unitId ?? "",
     slug: source.slug ?? null,
     userId: source.userId ?? null,
-    kindKey: source.kindKey ?? null,
     coverUrl: source.coverUrl ?? null,
     title: source.title ?? null,
     itemCount: source.itemCount ?? 0,

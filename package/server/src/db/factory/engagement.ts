@@ -77,7 +77,6 @@ async function seedFavorites(
     await ctx.db.insert(Shelf).values(
       withUpdatedAt({
         unitId: shelfId,
-        kindKey: "favorites",
       }),
     );
     await ctx.db.insert(UnitTranslation).values(

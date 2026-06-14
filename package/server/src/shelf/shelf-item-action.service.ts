@@ -7,6 +7,7 @@ import type {
   ShelfItemParentRole,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
+import { FAVORITES_SHELF_SLUG } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
@@ -22,11 +23,10 @@ import {
 import { generateBetween } from "./fractional-index";
 import {
   createDrizzleSystemShelfClient,
-  findSystemShelf,
+  findReservedShelfBySlug,
 } from "./system-shelves";
 import { enqueueShelfItemSourceSearchSync } from "./user-shelf-item.service";
 
-const FAVORITES_KIND_KEY = "favorites" as const;
 const SHELF_ITEM_STATUS_BATCH_CAP = 100;
 
 type UnitKind = typeof Unit.$inferSelect.type;
@@ -283,9 +283,9 @@ function createDrizzleShelfItemActionRepository(): ShelfItemActionRepository {
   return {
     async findFavoritesShelfId(userId) {
       const db = await getServerDb();
-      return findSystemShelf(
+      return findReservedShelfBySlug(
         userId,
-        FAVORITES_KIND_KEY,
+        FAVORITES_SHELF_SLUG,
         createDrizzleSystemShelfClient(db),
       );
     },
@@ -693,7 +693,7 @@ export class ShelfItemActionService {
     if (!shelfId) {
       throw new AppError(404, "Favorites shelf not found", {
         code: "system_shelf_missing",
-        details: { kindKey: FAVORITES_KIND_KEY },
+        details: { slug: FAVORITES_SHELF_SLUG },
       });
     }
     return shelfId;

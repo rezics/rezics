@@ -1,7 +1,10 @@
 import type {
+  LinkProgressPostBody,
   NodeCompletionToggleBody,
+  ProgressPostLinkDTO,
   UnitProgressRowDTO,
   UnitProgressUpsertBody,
+  UpdateProgressPostLinkBody,
 } from "@rezics/contract";
 import {
   type UseMutationOptions,
@@ -53,6 +56,78 @@ export function useDeleteUnitProgress(
   });
 }
 
+function invalidateProgressPosts(
+  queryClient: ReturnType<typeof useQueryClient>,
+  unitId: string,
+) {
+  queryClient.invalidateQueries({ queryKey: progressKeys.unitPosts(unitId) });
+  void invalidateForCacheDomain(queryClient, "progress");
+}
+
+export function useLinkProgressPost(
+  unitId: string,
+  options?: Omit<
+    UseMutationOptions<ProgressPostLinkDTO, Error, LinkProgressPostBody>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: LinkProgressPostBody) =>
+      progressApi.linkProgressPost(unitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateProgressPosts(queryClient, unitId);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useUpdateProgressPostLink(
+  unitId: string,
+  options?: Omit<
+    UseMutationOptions<
+      ProgressPostLinkDTO,
+      Error,
+      { postUnitId: string; input: UpdateProgressPostLinkBody }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ postUnitId, input }) =>
+      progressApi.updateProgressPostLink(unitId, postUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateProgressPosts(queryClient, unitId);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useUnlinkProgressPost(
+  unitId: string,
+  options?: Omit<
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (postUnitId: string) =>
+      progressApi.unlinkProgressPost(unitId, postUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateProgressPosts(queryClient, unitId);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export function useToggleNodeCompletion(
   unitId: string,
   options?: Omit<
@@ -76,5 +151,8 @@ export function useToggleNodeCompletion(
 export const progressMutations = {
   useUpdateUnitProgress,
   useDeleteUnitProgress,
+  useLinkProgressPost,
+  useUpdateProgressPostLink,
+  useUnlinkProgressPost,
   useToggleNodeCompletion,
 };

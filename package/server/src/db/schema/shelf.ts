@@ -22,7 +22,6 @@ export const Shelf = pgTable("Shelf", {
   unitId: uuid()
     .primaryKey()
     .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  kindKey: varchar({ length: 64 }),
   extra: jsonData(),
   rootItemCount: integer().default(0).notNull(),
   itemCount: integer().default(0).notNull(),

@@ -1,27 +1,27 @@
 import { describe, expect, test } from "bun:test";
 import { ApiError } from "../react-query/errors";
-import { getSystemShelfMissingKindKey } from "./useSystemShelfRecovery";
+import { getSystemShelfMissingSlug } from "./useSystemShelfRecovery";
 
-describe("getSystemShelfMissingKindKey", () => {
-  test("extracts system shelf kind from recoverable API error", () => {
+describe("getSystemShelfMissingSlug", () => {
+  test("extracts reserved shelf slug from recoverable API error", () => {
     const error = new ApiError(404, "system_shelf_missing", "missing", {
-      kindKey: "active",
+      slug: "favorites",
     });
 
-    expect(getSystemShelfMissingKindKey(error)).toBe("active");
+    expect(getSystemShelfMissingSlug(error)).toBe("favorites");
   });
 
-  test("ignores non-system shelf errors", () => {
+  test("ignores non-reserved shelf errors", () => {
     expect(
-      getSystemShelfMissingKindKey(
+      getSystemShelfMissingSlug(
         new ApiError(404, "system_shelf_missing", "missing", {
-          kindKey: "custom",
+          slug: "custom",
         }),
       ),
     ).toBeNull();
     expect(
-      getSystemShelfMissingKindKey(new ApiError(404, "NOT_FOUND", "missing")),
+      getSystemShelfMissingSlug(new ApiError(404, "NOT_FOUND", "missing")),
     ).toBeNull();
-    expect(getSystemShelfMissingKindKey(new Error("nope"))).toBeNull();
+    expect(getSystemShelfMissingSlug(new Error("nope"))).toBeNull();
   });
 });

@@ -9,11 +9,19 @@ import {
   pgEnum,
   pgTable,
   primaryKey,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { createdAt, jsonData, timestampMs, updatedAt } from "./columns";
+import {
+  createdAt,
+  jsonData,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
 import { ContentStructureNode } from "./content-structure";
 import { User } from "./identity";
+import { Post } from "./post";
 import { Unit } from "./unit";
 
 export const UserUnitProgressStatus = pgEnum(
@@ -24,6 +32,7 @@ export const UserUnitProgressStatus = pgEnum(
 export const UserUnitProgress = pgTable(
   "UserUnitProgress",
   {
+    id: uuidv7PrimaryKey(),
     userId: uuid()
       .notNull()
       .references(() => User.unitId, {
@@ -38,7 +47,6 @@ export const UserUnitProgress = pgTable(
     isDeleted: boolean().default(false).notNull(),
     completedCount: integer().default(0).notNull(),
     totalTimeMs: bigint({ mode: "number" }).default(0).notNull(),
-    extra: jsonData(),
     firstSeenAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
     lastSeenAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
     lastReadNodeId: uuid().references(() => ContentStructureNode.id, {
@@ -48,10 +56,11 @@ export const UserUnitProgress = pgTable(
     lastReadAnchor: jsonData(),
   },
   (table) => [
-    primaryKey({
-      columns: [table.userId, table.unitId],
-      name: "UserUnitProgress_pkey",
-    }),
+    uniqueIndex("UserUnitProgress_userId_unitId_key").using(
+      "btree",
+      table.userId.asc().nullsLast(),
+      table.unitId.asc().nullsLast(),
+    ),
     index("UserUnitProgress_lastReadNodeId_idx").using(
       "btree",
       table.lastReadNodeId.asc().nullsLast(),
@@ -71,6 +80,46 @@ export const UserUnitProgress = pgTable(
       "btree",
       table.userId.asc().nullsLast(),
       table.lastSeenAt.desc().nullsFirst(),
+    ),
+  ],
+);
+
+export const UserUnitProgressPost = pgTable(
+  "UserUnitProgressPost",
+  {
+    progressId: uuid()
+      .notNull()
+      .references(() => UserUnitProgress.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    postUnitId: uuid()
+      .notNull()
+      .references(() => Post.unitId, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    /**
+     * Snapshot of UserUnitProgress.status when the post was linked. This is
+     * the progress context role; do not create a separate role taxonomy.
+     */
+    status: UserUnitProgressStatus().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.progressId, table.postUnitId],
+      name: "UserUnitProgressPost_pkey",
+    }),
+    index("UserUnitProgressPost_postUnitId_idx").using(
+      "btree",
+      table.postUnitId.asc().nullsLast(),
+    ),
+    index("UserUnitProgressPost_progressId_status_idx").using(
+      "btree",
+      table.progressId.asc().nullsLast(),
+      table.status.asc().nullsLast(),
     ),
   ],
 );

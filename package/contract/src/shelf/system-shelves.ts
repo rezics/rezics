@@ -1,25 +1,21 @@
 import { t } from "elysia";
-import { type SystemShelfKindKey, systemShelfKindKeySchema } from "./progress";
+import { FAVORITES_SHELF_SLUG } from "../slug/system-slugs";
 
-export const SYSTEM_SHELF_LABELS: Record<SystemShelfKindKey, string> = {
+export const RESERVED_SHELF_LABELS = {
   favorites: "Favorites",
-  saved: "Saved",
-  backlog: "Backlog",
-  active: "Active",
-  completed: "Completed",
-};
+} as const;
 
-export function formatSystemShelfTitle(
+export function formatReservedShelfTitle(
   slug: string,
-  kindKey: SystemShelfKindKey,
+  shelfSlug: typeof FAVORITES_SHELF_SLUG,
   label?: string,
 ): string {
-  return `${slug}'s ${label ?? SYSTEM_SHELF_LABELS[kindKey]}`;
+  return `${slug}'s ${label ?? RESERVED_SHELF_LABELS[shelfSlug]}`;
 }
 
 export const ensureSystemShelfBodySchema = t.Object(
   {
-    kindKey: systemShelfKindKeySchema,
+    slug: t.Literal(FAVORITES_SHELF_SLUG),
   },
   { additionalProperties: false },
 );

@@ -92,7 +92,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       const { unitId, created } = await ensureSystemShelf(
         identity.userId,
         user.slug,
-        body.kindKey,
+        body.slug,
       );
       return { unitId, created };
     },
@@ -118,9 +118,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
             code: "invalid_body",
           });
         }
-        const extraneousKeys = Object.keys(parsed).filter(
-          (k) => k !== "kindKey",
-        );
+        const extraneousKeys = Object.keys(parsed).filter((k) => k !== "slug");
         if (extraneousKeys.length > 0) {
           throw new AppError(
             400,

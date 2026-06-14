@@ -3,6 +3,7 @@ export const PROGRESS_BUCKET_COUNT = 10;
 export const PROGRESS_INDEX_NAME = "user_unit_progress";
 
 export interface UserUnitProgressRow {
+  id: string;
   userId: string;
   unitId: string;
   progress: number;
@@ -12,6 +13,7 @@ export interface UserUnitProgressRow {
 
 export interface UserUnitProgressDocument {
   id: string;
+  progressId: string;
   userId: string;
   unitId: string;
   status: string;
@@ -49,6 +51,7 @@ export function buildProgressDocument(
 ): UserUnitProgressDocument {
   return {
     id: progressDocumentId(row.userId, row.unitId),
+    progressId: row.id,
     userId: row.userId,
     unitId: row.unitId,
     status: row.status,

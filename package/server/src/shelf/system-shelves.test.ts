@@ -31,96 +31,62 @@ async function loadSystemShelves() {
   return import("./system-shelves.ts?system-shelves-test-actual" as string);
 }
 
-describe("system shelves", () => {
-  test("recognizes reserved system kind keys", async () => {
-    const { isSystemKindKey, SYSTEM_KIND_KEYS } = await loadSystemShelves();
+describe("reserved shelves", () => {
+  test("recognizes reserved shelf slugs", async () => {
+    const { isReservedShelfSlug, RESERVED_SHELF_SLUG_SET } =
+      await loadSystemShelves();
 
-    expect(SYSTEM_KIND_KEYS).toEqual([
-      "favorites",
-      "saved",
-      "backlog",
-      "active",
-      "completed",
-    ]);
-    expect(isSystemKindKey("favorites")).toBe(true);
-    expect(isSystemKindKey("custom")).toBe(false);
+    expect([...RESERVED_SHELF_SLUG_SET]).toEqual(["favorites"]);
+    expect(isReservedShelfSlug("favorites")).toBe(true);
+    expect(isReservedShelfSlug("custom")).toBe(false);
   });
 
-  test("bootstrap creates slug-bearing system shelves with formatted titles", async () => {
+  test("bootstrap creates the slug-bearing favorites shelf with formatted title", async () => {
     const { bootstrapSystemShelves } = await loadSystemShelves();
     const mocks = makeClient();
 
     await bootstrapSystemShelves("user-1", "alice", mocks.client as any);
 
-    expect(mocks.unitFindFirst).toHaveBeenCalledTimes(5);
-    expect(mocks.unitCreate).toHaveBeenCalledTimes(5);
-    expect(mocks.shelfCreate).toHaveBeenCalledTimes(5);
+    expect(mocks.unitFindFirst).toHaveBeenCalledTimes(1);
+    expect(mocks.unitCreate).toHaveBeenCalledTimes(1);
+    expect(mocks.shelfCreate).toHaveBeenCalledTimes(1);
 
-    const unitCreateCalls = mocks.unitCreate.mock.calls as any[];
-    const created = unitCreateCalls.map((call) => ({
-      slug: call[0].data.slug,
-      slugScope: call[0].data.slugScope,
-      userId: call[0].data.userId,
-      title: call[0].data.translations.create.title,
-    }));
-    expect(created).toEqual([
-      {
-        slug: "favorites",
-        slugScope: "user-1",
-        userId: "user-1",
-        title: "alice's Favorites",
-      },
-      {
-        slug: "saved",
-        slugScope: "user-1",
-        userId: "user-1",
-        title: "alice's Saved",
-      },
-      {
-        slug: "backlog",
-        slugScope: "user-1",
-        userId: "user-1",
-        title: "alice's Backlog",
-      },
-      {
-        slug: "active",
-        slugScope: "user-1",
-        userId: "user-1",
-        title: "alice's Active",
-      },
-      {
-        slug: "completed",
-        slugScope: "user-1",
-        userId: "user-1",
-        title: "alice's Completed",
-      },
-    ]);
+    const created = firstArg(mocks.unitCreate);
+    expect({
+      slug: created.data.slug,
+      slugScope: created.data.slugScope,
+      userId: created.data.userId,
+      title: created.data.translations.create.title,
+    }).toEqual({
+      slug: "favorites",
+      slugScope: "user-1",
+      userId: "user-1",
+      title: "alice's Favorites",
+    });
 
-    expect(
-      (mocks.shelfCreate.mock.calls as any[]).map(
-        (call) => call[0].data.kindKey,
-      ),
-    ).toEqual(["favorites", "saved", "backlog", "active", "completed"]);
+    expect(firstArg(mocks.shelfCreate).data).toEqual({
+      unitId: "favorites-shelf",
+    });
   });
 
   test("ensure lookup resolves existing shelf via unit slug index without creating", async () => {
     const { ensureSystemShelf } = await loadSystemShelves();
     const mocks = makeClient();
-    mocks.unitFindFirst.mockResolvedValueOnce({ id: "existing-active" });
+    mocks.unitFindFirst.mockResolvedValueOnce({ id: "existing-favorites" });
 
     const result = await ensureSystemShelf(
       "user-1",
       "alice",
-      "active",
+      "favorites",
       mocks.client as any,
     );
 
-    expect(result).toEqual({ unitId: "existing-active", created: false });
+    expect(result).toEqual({ unitId: "existing-favorites", created: false });
     expect(mocks.unitCreate).not.toHaveBeenCalled();
     expect(mocks.shelfCreate).not.toHaveBeenCalled();
     expect(firstArg(mocks.unitFindFirst).where).toEqual({
       type: "SHELF",
-      slug: "active",
+      slug: "favorites",
       slugScope: "user-1",
     });
   });
@@ -152,26 +118,26 @@ describe("system shelves", () => {
     mocks.unitCreate.mockImplementationOnce(async () => {
       throw Object.assign(new Error("unique violation"), { code: "23505" });
     });
-    mocks.unitFindFirst.mockResolvedValueOnce({ id: "raced-completed" });
+    mocks.unitFindFirst.mockResolvedValueOnce({ id: "raced-favorites" });
 
     const result = await ensureSystemShelf(
       "user-3",
       "carol",
-      "completed",
+      "favorites",
       mocks.client as any,
     );
 
-    expect(result).toEqual({ unitId: "raced-completed", created: false });
+    expect(result).toEqual({ unitId: "raced-favorites", created: false });
     expect(mocks.unitFindFirst).toHaveBeenCalledTimes(2);
     expect(mocks.unitCreate).toHaveBeenCalledTimes(1);
     expect(mocks.shelfCreate).not.toHaveBeenCalled();
   });
 
-  test("findSystemShelf returns null when nothing exists", async () => {
-    const { findSystemShelf } = await loadSystemShelves();
+  test("findReservedShelfBySlug returns null when nothing exists", async () => {
+    const { findReservedShelfBySlug } = await loadSystemShelves();
     const mocks = makeClient();
 
-    const result = await findSystemShelf(
+    const result = await findReservedShelfBySlug(
       "user-4",
       "favorites",
       mocks.client as any,
@@ -181,12 +147,12 @@ describe("system shelves", () => {
     expect(mocks.unitFindFirst).toHaveBeenCalledTimes(1);
   });
 
-  test("findSystemShelf returns the unitId when shelf exists", async () => {
-    const { findSystemShelf } = await loadSystemShelves();
+  test("findReservedShelfBySlug returns the unitId when shelf exists", async () => {
+    const { findReservedShelfBySlug } = await loadSystemShelves();
     const mocks = makeClient();
     mocks.unitFindFirst.mockResolvedValueOnce({ id: "fav-shelf-id" });
 
-    const result = await findSystemShelf(
+    const result = await findReservedShelfBySlug(
       "user-4",
       "favorites",
       mocks.client as any,

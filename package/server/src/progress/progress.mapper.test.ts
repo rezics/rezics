@@ -1,7 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { mapProgressToDTO, type ProgressStorageRow } from "./progress.mapper";
+import {
+  mapProgressPostLinkToDTO,
+  mapProgressToDTO,
+  type ProgressStorageRow,
+} from "./progress.mapper";
 
 const baseRow = {
+  id: "progress-1",
   userId: "user-1",
   unitId: "unit-1",
   progress: 0,
@@ -13,52 +18,22 @@ const baseRow = {
   lastReadAnchor: null,
   firstSeenAt: new Date("2026-01-01T00:00:00.000Z"),
   lastSeenAt: new Date("2026-01-01T00:00:00.000Z"),
-  extra: null,
 } satisfies ProgressStorageRow;
 
 describe("mapProgressToDTO", () => {
-  test("returns null extra when stored extra is null", () => {
-    expect(mapProgressToDTO({ ...baseRow }).extra).toBeNull();
-  });
-
-  test("strips unknown top-level keys from stored extra", () => {
-    const row: ProgressStorageRow = {
-      ...baseRow,
-      extra: {
-        unknownBucket: 1,
-        device: "web",
-        paused: { reasonPostUnitIds: ["post-1", "post-2"] },
-      },
-    };
-
-    const dto = mapProgressToDTO(row);
-
-    expect(dto.extra).toEqual({
-      paused: { reasonPostUnitIds: ["post-1", "post-2"] },
-    });
-  });
-
-  test("returns empty object when stored extra is unrecognized", () => {
-    const row: ProgressStorageRow = {
-      ...baseRow,
-      extra: {
-        totallyUnknown: { foo: 1 },
-      },
-    };
-
-    expect(mapProgressToDTO(row).extra).toEqual({});
-  });
-
-  test("preserves dropped reason posts", () => {
-    const row: ProgressStorageRow = {
-      ...baseRow,
-      extra: {
-        dropped: { reasonPostUnitIds: ["post-x"] },
-      },
-    };
-
-    expect(mapProgressToDTO(row).extra).toEqual({
-      dropped: { reasonPostUnitIds: ["post-x"] },
+  test("maps core progress fields without extra payload", () => {
+    expect(mapProgressToDTO({ ...baseRow })).toEqual({
+      userId: "user-1",
+      unitId: "unit-1",
+      progress: 0,
+      status: "BACKLOG",
+      isDeleted: false,
+      completedCount: 0,
+      totalTimeMs: 0,
+      lastReadNodeId: null,
+      lastReadAnchor: null,
+      firstSeenAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-01T00:00:00.000Z",
     });
   });
 
@@ -96,5 +71,24 @@ describe("mapProgressToDTO", () => {
       },
     });
     expect(wrongShape.lastReadAnchor).toBeNull();
+  });
+});
+
+describe("mapProgressPostLinkToDTO", () => {
+  test("maps link rows with the progress status snapshot", () => {
+    expect(
+      mapProgressPostLinkToDTO({
+        progressId: "progress-1",
+        postUnitId: "post-1",
+        status: "PAUSED",
+        createdAt: new Date("2026-01-02T00:00:00.000Z"),
+        updatedAt: new Date("2026-01-03T00:00:00.000Z"),
+      }),
+    ).toEqual({
+      progressId: "progress-1",
+      postUnitId: "post-1",
+      status: "PAUSED",
+      createdAt: "2026-01-02T00:00:00.000Z",
+    });
   });
 });

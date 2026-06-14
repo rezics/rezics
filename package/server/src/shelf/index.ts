@@ -12,11 +12,13 @@ export {
 } from "./shelf.mapper";
 export { ShelfService, shelfService } from "./shelf.service";
 export {
+  bootstrapReservedShelves,
   bootstrapSystemShelves,
+  ensureReservedShelf,
   ensureSystemShelf,
-  findSystemShelf,
-  isSystemKindKey,
-  SYSTEM_KIND_KEYS,
+  findReservedShelfBySlug,
+  isReservedShelfSlug,
+  RESERVED_SHELF_SLUG_SET,
 } from "./system-shelves";
 export * from "./types";
 export { applyUserShelfItemMetadata } from "./user-shelf-item.service";

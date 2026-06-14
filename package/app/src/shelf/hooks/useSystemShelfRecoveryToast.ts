@@ -1,11 +1,14 @@
 import {
-  getSystemShelfMissingKindKey,
+  getSystemShelfMissingSlug,
   useSystemShelfRecovery,
 } from "@rezics/api/shelf";
-import type { SystemShelfKindKey } from "@rezics/contract";
+import { FAVORITES_SHELF_SLUG, type ReservedShelfSlug } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { toast } from "sonner";
-import { systemShelfKindLabel } from "@/shelf";
+
+const SYSTEM_SHELF_RECOVERY_LABEL_KEY = {
+  [FAVORITES_SHELF_SLUG]: "entity:shelf_system_favorites",
+} as const satisfies Record<ReservedShelfSlug, `entity:${string}`>;
 
 export type SystemShelfRecoveryToast = {
   /**
@@ -14,7 +17,7 @@ export type SystemShelfRecoveryToast = {
    * The original mutation is NOT auto-retried; the user re-clicks the
    * source action themselves.
    */
-  showRecoveryToast: (kindKey: SystemShelfKindKey) => void;
+  showRecoveryToast: (slug: ReservedShelfSlug) => void;
   /**
    * Convenience wrapper for mutation `onError`: if the error is a
    * `system_shelf_missing` AppError, surface the recovery toast and return
@@ -27,19 +30,18 @@ export type SystemShelfRecoveryToast = {
 export function useSystemShelfRecoveryToast(): SystemShelfRecoveryToast {
   const recovery = useSystemShelfRecovery();
 
-  const showRecoveryToast = (kindKey: SystemShelfKindKey): void => {
-    const kindLabel = systemShelfKindLabel(kindKey);
+  const showRecoveryToast = (slug: ReservedShelfSlug): void => {
     const toastId = toast.error(
       getI18nRuntime().i18n.t("entity:shelf_system_recoveryToast", {
-        kind: kindLabel,
+        kind: getI18nRuntime().i18n.t(SYSTEM_SHELF_RECOVERY_LABEL_KEY[slug]),
       }),
       {
         action: {
           label: getI18nRuntime().i18n.t("entity:shelf_system_recoveryRetry"),
           onClick: () => {
-            recovery.ensure(kindKey).then(
+            recovery.ensure(slug).then(
               () => toast.dismiss(toastId),
-              () => showRecoveryToast(kindKey),
+              () => showRecoveryToast(slug),
             );
           },
         },
@@ -48,9 +50,9 @@ export function useSystemShelfRecoveryToast(): SystemShelfRecoveryToast {
   };
 
   const handleError = (error: unknown): boolean => {
-    const kindKey = getSystemShelfMissingKindKey(error);
-    if (!kindKey) return false;
-    showRecoveryToast(kindKey);
+    const slug = getSystemShelfMissingSlug(error);
+    if (!slug) return false;
+    showRecoveryToast(slug);
     return true;
   };
 

@@ -6,6 +6,8 @@ import type {
 export const progressKeys = {
   all: () => ["progress"] as const,
   unit: (unitId: string) => [...progressKeys.all(), "unit", unitId] as const,
+  unitPosts: (unitId: string) =>
+    [...progressKeys.unit(unitId), "posts"] as const,
   stats: (unitId: string) => [...progressKeys.all(), "stats", unitId] as const,
   lists: () => [...progressKeys.all(), "list"] as const,
   list: (query?: UnitProgressListQuery) =>

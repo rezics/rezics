@@ -1,6 +1,6 @@
 import type {
   EnsureSystemShelfResponse,
-  SystemShelfKindKey,
+  ReservedShelfSlug,
 } from "@rezics/contract";
 import {
   type UseMutationOptions,
@@ -15,32 +15,31 @@ import { shelfApi } from "./shelf.api";
  * Low-level ensure mutation for the rare orphan-state case where a system
  * shelf is missing for the authenticated viewer.
  *
- * On success this invalidates the `slugResolveQuery({ scope: viewer, slug:
- * kindKey })` cache entry so the next read picks up the freshly-minted
- * unitId.
+ * On success this invalidates the `slugResolveQuery({ scope: viewer, slug })`
+ * cache entry so the next read picks up the freshly-minted unitId.
  *
  * The mutation deliberately disables retry-on-error; callers decide whether
  * and how to surface or retry recovery.
  */
 export function useEnsureSystemShelf(
   options?: Omit<
-    UseMutationOptions<EnsureSystemShelfResponse, Error, SystemShelfKindKey>,
+    UseMutationOptions<EnsureSystemShelfResponse, Error, ReservedShelfSlug>,
     "mutationFn" | "retry"
   >,
 ) {
   const queryClient = useQueryClient();
   const viewerUnitId = useCurrentUserId();
   return useMutation({
-    mutationFn: (kindKey: SystemShelfKindKey) => shelfApi.ensureSystem(kindKey),
+    mutationFn: (slug: ReservedShelfSlug) => shelfApi.ensureSystem(slug),
     retry: false,
     ...options,
-    onSuccess: (data, kindKey, onMutateResult, context) => {
+    onSuccess: (data, slug, onMutateResult, context) => {
       if (viewerUnitId) {
         queryClient.invalidateQueries({
-          queryKey: slugKeys.resolve({ scope: viewerUnitId, slug: kindKey }),
+          queryKey: slugKeys.resolve({ scope: viewerUnitId, slug }),
         });
       }
-      options?.onSuccess?.(data, kindKey, onMutateResult, context);
+      options?.onSuccess?.(data, slug, onMutateResult, context);
     },
   });
 }

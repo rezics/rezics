@@ -90,7 +90,7 @@ describe("ShelfItemActionService — missing favorites shelf", () => {
     expect(captured).toBeInstanceOf(TestAppError);
     expect(captured?.statusCode).toBe(404);
     expect(captured?.code).toBe("system_shelf_missing");
-    expect(captured?.details).toEqual({ kindKey: "favorites" });
+    expect(captured?.details).toEqual({ slug: "favorites" });
   });
 
   test("getShelfItemStatus throws 404 when favorites shelf absent", async () => {

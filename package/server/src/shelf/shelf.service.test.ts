@@ -9,7 +9,6 @@ import {
   User,
   UserTagApplication,
 } from "../db/schema";
-import { SYSTEM_KIND_KEYS } from "./system-shelves";
 
 const legacyDbMock: Record<string, any> = {};
 
@@ -638,7 +637,6 @@ function makeShelfItemRow(overrides: Record<string, unknown> = {}) {
 function makeShelfListRow(overrides: Record<string, unknown> = {}) {
   return {
     unitId: "shelf-1",
-    kindKey: "custom",
     extra: null,
     itemCount: 1,
     createdAt: new Date("2026-05-27T00:00:00.000Z"),
@@ -806,18 +804,6 @@ describe("ShelfService", () => {
       kind: "book",
       title: "Variant Child Edition",
     });
-  });
-
-  test("rejects reserved system shelf kind keys on create", async () => {
-    const { shelfService } = await import(
-      "./shelf.service.ts?shelf-service-test-actual" as string
-    );
-
-    for (const kindKey of SYSTEM_KIND_KEYS) {
-      await expect(
-        shelfService.create({ title: kindKey, kindKey }, "u1"),
-      ).rejects.toThrow(/reserved/);
-    }
   });
 
   test("addItem enqueues containedUnitIds sync after the canonical write", async () => {
@@ -1699,7 +1685,6 @@ describe("ShelfService", () => {
           if (where.unitId !== "favorites-unit") return null;
           return {
             unitId: "favorites-unit",
-            kindKey: "favorites",
             extra: null,
             itemCount: 0,
             pinnedTagOrder: [],

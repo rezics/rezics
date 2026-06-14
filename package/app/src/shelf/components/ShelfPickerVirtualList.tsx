@@ -4,7 +4,6 @@ import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { ListChecks } from "lucide-react";
 import type { ListChildComponentProps } from "react-window";
 import { FixedSizeList } from "react-window";
-import { systemShelfKindLabel } from "../models/systemShelfLabel";
 
 const ROW_HEIGHT = 72;
 const LIST_HEIGHT = 288;
@@ -31,9 +30,7 @@ type RowData = Pick<
 };
 
 function shelfTitle(shelf: ShelfDTO, untitled: string): string {
-  const systemKind = shelf.kindKey ? systemShelfKindLabel(shelf.kindKey) : null;
   return (
-    systemKind ??
     shelf.translations?.find((translation) => translation.title)?.title ??
     untitled
   );
@@ -64,9 +61,6 @@ function ShelfRow({ index, style, data }: ListChildComponentProps<RowData>) {
             <span className="shrink-0">
               {data.labels.itemCount(shelf.itemCount ?? 0)}
             </span>
-            {shelf.kindKey ? (
-              <span className="min-w-0 truncate">{shelf.kindKey}</span>
-            ) : null}
           </div>
         </div>
       </button>

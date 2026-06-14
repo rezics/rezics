@@ -1,14 +1,13 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 
 /**
- * ShelvesTabSection — 用户资料页内的书架标签页，支持按种类过滤和按名称搜索，
- * 展示用户的所有书架（系统书架和自定义书架），支持排序和搜索功能。
+ * ShelvesTabSection — 用户资料页内的书架标签页，支持按名称搜索，
+ * 展示用户的所有书架，favorites 保持首位，其余书架支持排序和搜索功能。
  *
  * ┌────────────────────────────────────────────┐
  * │ Shelves Tab (desktop 1024px+)              │
  * │ ┌──────────────────────────────────────────┐
  * │ │ [Search Contents...]                     │
- * │ │ [All] [Reading] [Read] [ToRead] [DNF]    │
  * │ │ [Search shelf..]  [Sort: Newest ▼]       │
  * │ ├──────────────────────────────────────────┤
  * │ │ ┌──────────┐ ┌──────────┐ ┌──────────┐   │
@@ -23,7 +22,6 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
  * │ Shelves (tablet 768px)   │
  * │ ┌────────────────────────┐
  * │ │ [Search Content]       │
- * │ │ [All] [Reading] [Read] │
  * │ │ [Search..] [Newest ▼]  │
  * │ ├────────────────────────┤
  * │ │ ┌──────────┐ ┌──────────┐
@@ -63,23 +61,14 @@ const i18nMessages = {
 } as const;
 
 import { shelfQueries } from "@rezics/api/shelf/shelf.queries";
-import {
-  type ShelfDTO,
-  SYSTEM_SHELF_KIND_KEYS,
-  type SystemShelfKindKey,
-} from "@rezics/contract";
+import { FAVORITES_SHELF_SLUG, type ShelfDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Card } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Search } from "lucide-react";
 import { type FC, useMemo, useState } from "react";
 import { Link } from "@/shared/ui/link";
-import { systemShelfKindLabel } from "@/shelf";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
-import {
-  type ChipDefinition,
-  InnerFilterPanel,
-} from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
 const SORT_OPTION_LABEL = {
@@ -88,9 +77,8 @@ const SORT_OPTION_LABEL = {
 } as const satisfies Record<string, () => string>;
 
 export const ShelvesTabSection: FC = () => {
-  const { t } = useTranslation(["common", "entity", "search"]);
-  const { user, userId, isCurrentUser, profileBasePath } = useProfileContext();
-  const [kindKey, setKindKey] = useState("all");
+  const { t } = useTranslation(["common", "entity"]);
+  const { user, userId, profileBasePath } = useProfileContext();
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
   });
@@ -106,29 +94,8 @@ export const ShelvesTabSection: FC = () => {
 
   const shelves: ShelfDTO[] = (data as any)?.shelves ?? data ?? [];
 
-  // Build dynamic kind chips from data
-  // 从数据动态构建 kind chips
-  const kindChips = useMemo<ChipDefinition[]>(() => {
-    const kindSet = new Set<string>();
-    for (const s of shelves) {
-      if (s.kindKey) kindSet.add(s.kindKey);
-    }
-    const chips: ChipDefinition[] = [
-      { value: "all", label: t("search:category_all") },
-    ];
-    for (const k of kindSet) {
-      const label =
-        isCurrentUser && isSystemKindKey(k) ? systemShelfKindLabel(k) : k;
-      chips.push({ value: k, label });
-    }
-    return chips;
-  }, [shelves, isCurrentUser, t]);
-
   const filtered = useMemo(() => {
     let result = shelves;
-    if (kindKey !== "all") {
-      result = result.filter((s) => s.kindKey === kindKey);
-    }
     if (filters.q) {
       const q = filters.q.toLowerCase();
       result = result.filter((s) => {
@@ -136,8 +103,8 @@ export const ShelvesTabSection: FC = () => {
         return title.toLowerCase().includes(q);
       });
     }
-    return result;
-  }, [shelves, kindKey, filters.q]);
+    return orderFavoritesFirst(result);
+  }, [shelves, filters.q]);
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,
@@ -158,19 +125,13 @@ export const ShelvesTabSection: FC = () => {
     <div className="flex flex-col gap-4 py-4">
       <ShelfContentsSearchEntry profileBasePath={profileBasePath} />
 
-      <InnerFilterPanel
-        chips={kindChips}
-        activeValue={kindKey}
-        onChipChange={setKindKey}
-      >
-        <FilterBar
-          config={filterConfig}
-          values={filters}
-          onChange={(key, value) =>
-            setFilters((prev) => ({ ...prev, [key]: value }))
-          }
-        />
-      </InnerFilterPanel>
+      <FilterBar
+        config={filterConfig}
+        values={filters}
+        onChange={(key, value) =>
+          setFilters((prev) => ({ ...prev, [key]: value }))
+        }
+      />
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
@@ -185,12 +146,7 @@ export const ShelvesTabSection: FC = () => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {filtered.map((shelf) => (
-            <ShelfCard
-              key={shelf.unitId}
-              shelf={shelf}
-              isOwnerView={isCurrentUser}
-              userSlug={user.slug}
-            />
+            <ShelfCard key={shelf.unitId} shelf={shelf} userSlug={user.slug} />
           ))}
         </div>
       )}
@@ -225,28 +181,25 @@ const ShelfContentsSearchEntry: FC<{
   );
 };
 
-function isSystemKindKey(
-  kindKey: string | null | undefined,
-): kindKey is SystemShelfKindKey {
-  return (
-    !!kindKey && (SYSTEM_SHELF_KIND_KEYS as readonly string[]).includes(kindKey)
+function orderFavoritesFirst(shelves: ShelfDTO[]): ShelfDTO[] {
+  const favorites = shelves.filter(
+    (shelf) => shelf.slug === FAVORITES_SHELF_SLUG,
   );
+  const ordinary = shelves.filter(
+    (shelf) => shelf.slug !== FAVORITES_SHELF_SLUG,
+  );
+  return [...favorites, ...ordinary];
 }
 
 const ShelfCard: FC<{
   shelf: ShelfDTO;
-  isOwnerView: boolean;
   userSlug?: string;
-}> = ({ shelf, isOwnerView, userSlug }) => {
-  const { t } = useTranslation(["common", "entity", "search"]);
+}> = ({ shelf, userSlug }) => {
+  const { t } = useTranslation(["entity"]);
   const dbTitle = shelf.translations?.[0]?.title ?? t("entity:shelf_untitled");
-  const systemKindKey = isSystemKindKey(shelf.kindKey) ? shelf.kindKey : null;
-  const isSystemShelf = systemKindKey !== null;
-  const title =
-    isOwnerView && isSystemShelf
-      ? systemShelfKindLabel(systemKindKey)
-      : dbTitle;
-  const itemCount = (shelf as { items?: unknown[] }).items?.length ?? 0;
+  const title = dbTitle;
+  const itemCount =
+    shelf.itemCount ?? (shelf as { items?: unknown[] }).items?.length ?? 0;
   const card = (
     <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors h-full flex flex-col">
       {shelf.coverUrl && (
@@ -263,18 +216,15 @@ const ShelfCard: FC<{
         <span className="text-xs text-text-secondary">
           {t("entity:shelf_items_count", { count: itemCount })}
         </span>
-        {shelf.kindKey && (
-          <span className="text-xs text-text-secondary">{shelf.kindKey}</span>
-        )}
       </div>
     </div>
   );
 
-  if (isSystemShelf && userSlug) {
+  if (shelf.slug === FAVORITES_SHELF_SLUG && userSlug) {
     return (
       <Link
         to="/u/$userSlug/shelf/$slug"
-        params={{ userSlug, slug: systemKindKey }}
+        params={{ userSlug, slug: FAVORITES_SHELF_SLUG }}
         className="no-underline"
       >
         {card}

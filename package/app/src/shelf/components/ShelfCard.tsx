@@ -9,7 +9,6 @@ import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-import { shelfKindLabel } from "../models/systemShelfLabel";
 
 interface ShelfCardProps {
   shelf: ShelfDTO;
@@ -24,8 +23,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
   const { t } = useTranslation(["common", "entity"]);
   const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
   const translation = getTranslation(shelf.translations);
-  const title =
-    translation?.title || (shelf.kindKey ? shelfKindLabel(shelf.kindKey) : "");
+  const title = translation?.title || "";
   const description = contentDocMarkdownFallback(translation?.description);
   const itemsCount =
     shelf.itemCount ?? (shelf as { items?: unknown[] }).items?.length ?? 0;

@@ -14,6 +14,14 @@ export const unitProgressQuery = (unitId: string) =>
     staleTime: 1000 * 60,
   });
 
+export const unitProgressPostsQuery = (unitId: string) =>
+  queryOptions({
+    queryKey: progressKeys.unitPosts(unitId),
+    queryFn: () => progressApi.listProgressPosts(unitId),
+    enabled: !!unitId,
+    staleTime: 1000 * 30,
+  });
+
 export const myProgressListQuery = (query?: UnitProgressListQuery) =>
   queryOptions({
     queryKey: progressKeys.list(query),
@@ -58,6 +66,10 @@ export function useUnitProgressStats(unitId: string) {
   return useQuery(unitProgressStatsQuery(unitId));
 }
 
+export function useUnitProgressPosts(unitId: string) {
+  return useQuery(unitProgressPostsQuery(unitId));
+}
+
 export function useMyProgressList(query?: UnitProgressListQuery) {
   return useQuery(myProgressListQuery(query));
 }
@@ -76,6 +88,7 @@ export function useMyProgressPage(query?: UnitProgressListQuery) {
 
 export const progressQueries = {
   unit: unitProgressQuery,
+  unitPosts: unitProgressPostsQuery,
   stats: unitProgressStatsQuery,
   list: myProgressListQuery,
   continueReading: myContinueReadingQuery,
