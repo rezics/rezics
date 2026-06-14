@@ -3,7 +3,12 @@ import {
   useSubscribeMutation,
   useUnsubscribeMutation,
 } from "@rezics/api/subscription/subscription";
-import type { UnitType, ZoneSectionDisplay } from "@rezics/contract";
+import {
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
+  isCatalogUnitType,
+  type UnitType,
+  type ZoneSectionDisplay,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import {
@@ -35,6 +40,16 @@ export type ZoneListEntry = {
 
 function isCommunityEntry(entry: ZoneListEntry): boolean {
   return entry.type === "REALM" || entry.type === "ZONE";
+}
+
+function catalogCoverAspectRatioForEntry(entry: ZoneListEntry): number {
+  return entry.type && isCatalogUnitType(entry.type)
+    ? CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[entry.type]
+    : CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE.BOOK;
+}
+
+function hasCatalogCoverFrame(entry: ZoneListEntry): boolean {
+  return Boolean(entry.type && isCatalogUnitType(entry.type));
 }
 
 function communityInitial(label: string): string {
@@ -160,7 +175,8 @@ function CommunityEntryCard({
  * 起 grid 变两列；Desktop 为三列；Ultra-wide 仍由父级 max width 控制。
  * REALM/ZONE 使用等高 community card：左侧 avatar/monogram，中间标题与
  * 摘要，右侧单一 join/leave 动作；整卡仍通过 overlay link 进入详情。
- * 非 community 内容保留封面/列表形态。
+ * 非 community 内容保留封面/列表形态，BOOK/GAME/MEDIA 的封面比例来自
+ * catalog Unit contract。
  *
  * Mobile
  * +--------------------------------+
@@ -204,12 +220,36 @@ export function ZoneItemList({
                 href={entry.href}
                 className="flex items-center gap-3 rounded-md bg-surface-subtle px-4 py-3 transition-colors hover:bg-surface-sunken"
               >
-                {entry.imageUrl ? (
-                  <img
-                    src={entry.imageUrl}
-                    alt=""
-                    className="h-10 w-10 shrink-0 rounded-sm object-cover"
-                  />
+                {entry.imageUrl || hasCatalogCoverFrame(entry) ? (
+                  <span
+                    className={`flex shrink-0 items-center justify-center overflow-hidden rounded-sm bg-surface-sunken ${
+                      hasCatalogCoverFrame(entry) ? "w-10" : "h-10 w-10"
+                    }`}
+                    style={
+                      hasCatalogCoverFrame(entry)
+                        ? {
+                            aspectRatio: catalogCoverAspectRatioForEntry(entry),
+                          }
+                        : undefined
+                    }
+                  >
+                    {entry.imageUrl ? (
+                      <img
+                        src={entry.imageUrl}
+                        alt=""
+                        className={`h-full w-full ${
+                          hasCatalogCoverFrame(entry)
+                            ? "object-fill"
+                            : "object-cover"
+                        }`}
+                      />
+                    ) : (
+                      <ImageIcon
+                        className="size-5 text-text-tertiary"
+                        aria-hidden
+                      />
+                    )}
+                  </span>
                 ) : null}
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium leading-ui text-text-primary">
@@ -249,12 +289,21 @@ export function ZoneItemList({
           ) : (
             <div className="w-28 sm:w-32">
               <SafeLink href={entry.href} className="flex flex-col gap-2">
-                <span className="flex aspect-[2/3] items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                <span
+                  className="flex w-full items-center justify-center overflow-hidden rounded-md bg-surface-subtle"
+                  style={{
+                    aspectRatio: catalogCoverAspectRatioForEntry(entry),
+                  }}
+                >
                   {entry.imageUrl ? (
                     <img
                       src={entry.imageUrl}
                       alt=""
-                      className="h-full w-full object-cover"
+                      className={`h-full w-full ${
+                        hasCatalogCoverFrame(entry)
+                          ? "object-fill"
+                          : "object-cover"
+                      }`}
                     />
                   ) : (
                     <ImageIcon

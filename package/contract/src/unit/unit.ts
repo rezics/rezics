@@ -90,18 +90,51 @@ export const unitTypeSchema = t.Union([
 ]);
 
 /**
+ * Unit types that represent cataloged works. These are the Unit-level source
+ * of truth for work cover presentation and collaborative catalog/wiki editing.
+ * 表示可编目作品的 Unit 类型。这是作品封面展示与协作式目录/wiki 编辑的
+ * Unit 级事实来源。
+ */
+export const CATALOG_UNIT_TYPES = [
+  UnitType.BOOK,
+  UnitType.GAME,
+  UnitType.MEDIA,
+] as const;
+
+export type CatalogUnitType = (typeof CATALOG_UNIT_TYPES)[number];
+
+export const catalogUnitTypeSchema = t.Union([
+  t.Literal(UnitType.BOOK),
+  t.Literal(UnitType.GAME),
+  t.Literal(UnitType.MEDIA),
+]);
+
+export function isCatalogUnitType(type: string): type is CatalogUnitType {
+  return (CATALOG_UNIT_TYPES as readonly string[]).includes(type);
+}
+
+/**
+ * Catalog work cover aspect ratio (width / height) by Unit type. Keep values
+ * independent even where they match so a single catalog type can change without
+ * affecting the others.
+ * 按 Unit 类型定义的目录作品封面宽高比（宽 / 高）。即使数值相同也保持
+ * 独立，以便单一目录类型可以更改而不影响其他类型。
+ */
+export const CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE = {
+  [UnitType.BOOK]: 2 / 3,
+  [UnitType.GAME]: 2 / 3,
+  [UnitType.MEDIA]: 2 / 3,
+} as const satisfies Record<CatalogUnitType, number>;
+
+/**
  * Unit types that participate in collaborative catalog/wiki editing.
  * 参与协作式目录/wiki 编辑的 Unit 类型。
  */
-export const WIKI_TYPES = ["BOOK", "GAME", "MEDIA"] as const;
+export const WIKI_TYPES = CATALOG_UNIT_TYPES;
 
-export type WikiType = (typeof WIKI_TYPES)[number];
+export type WikiType = CatalogUnitType;
 
-export const wikiTypeSchema = t.Union([
-  t.Literal("BOOK"),
-  t.Literal("GAME"),
-  t.Literal("MEDIA"),
-]);
+export const wikiTypeSchema = catalogUnitTypeSchema;
 
 export const unitStatusSchema = t.Union([
   t.Literal("DRAFT"),

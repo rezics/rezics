@@ -6,8 +6,8 @@ export type { UseMySettingsButtonProps } from "./components/UseMySettingsButton"
 export { UseMySettingsButton } from "./components/UseMySettingsButton";
 export {
   applyReadableFilter,
-  aspectRatioForKind,
   type BookshelfItem,
   columnsForWidth,
+  coverAspectRatioForLibraryKind,
   resolveBookshelfConfig,
 } from "./models";

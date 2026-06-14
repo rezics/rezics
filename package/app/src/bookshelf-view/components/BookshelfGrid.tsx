@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { BookCard } from "@/book-library";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import {
-  aspectRatioForKind,
   columnsForWidth,
+  coverAspectRatioForLibraryKind,
 } from "../models/resolveBookshelfConfig";
 import type { BookshelfItem } from "../models/types";
 import { BookshelfHoverPanel } from "./BookshelfHoverPanel";
@@ -77,7 +77,7 @@ export const BookshelfGrid: React.FC<BookshelfGridProps> = ({
             coverUrl={item.coverUrl}
             href={item.href}
             showTitle={config.showTitle}
-            aspectRatio={aspectRatioForKind(item.kind)}
+            aspectRatio={coverAspectRatioForLibraryKind(item.kind)}
           />
           {item.chaptersTotal != null && item.chaptersTotal > 0 ? (
             <div className="mt-1 text-xs tabular-nums text-text-secondary">

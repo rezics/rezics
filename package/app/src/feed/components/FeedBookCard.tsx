@@ -1,4 +1,8 @@
 import type { FeedBookRow } from "@rezics/api/feed/feed";
+import {
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
+  UnitType,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Card, CardMedia } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -34,8 +38,9 @@ interface FeedBookCardProps {
 
 /**
  * Feed book card：列表中的作品推荐项，封面负责第一识别，右上角 badge 只
- * 标注 kind。窄屏时封面固定宽度、正文 `min-w-0` 截断；宽屏时正文伸展、
- * card 保持 `w-full`，右上角 badge 固定不挤压标题。
+ * 标注 kind。封面比例来自 catalog Unit contract，图片填满该比例；窄屏时
+ * 封面固定宽度、正文 `min-w-0` 截断；宽屏时正文伸展、card 保持
+ * `w-full`，右上角 badge 固定不挤压标题。
  *
  * Mobile (<640px)
  * +--------------------------------+
@@ -126,13 +131,18 @@ export function FeedBookCard({ row, className }: FeedBookCardProps) {
       ) : null}
 
       <article className="flex min-w-0 items-stretch gap-4 p-4 pr-16">
-        <CardMedia className="h-28 w-18 shrink-0 rounded-sm bg-surface-subtle text-text-tertiary sm:h-32 sm:w-22">
+        <CardMedia
+          className="w-18 shrink-0 rounded-sm bg-surface-subtle text-text-tertiary sm:w-22"
+          style={{
+            aspectRatio: CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[UnitType.BOOK],
+          }}
+        >
           {row.book.coverUrl ? (
             <img
               src={row.book.coverUrl}
               alt=""
               loading="lazy"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-fill"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">

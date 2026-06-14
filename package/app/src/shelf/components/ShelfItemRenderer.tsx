@@ -15,7 +15,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { BookCard, HorizontalBookCard } from "@/book-library";
-import { aspectRatioForKind } from "@/bookshelf-view";
+import { coverAspectRatioForLibraryKind } from "@/bookshelf-view";
 import { CommentReply } from "@/comment";
 import { ExcerptCard, mapPostToExcerptUnit } from "@/excerpt";
 import { FeedPostCard } from "@/feed";
@@ -75,7 +75,7 @@ function renderUnit(
         coverUrl={book?.coverUrl ?? ""}
         href={`/book/${unitId}`}
         showTitle
-        aspectRatio={aspectRatioForKind(unit.kind)}
+        aspectRatio={coverAspectRatioForLibraryKind(unit.kind)}
       />
     );
   }

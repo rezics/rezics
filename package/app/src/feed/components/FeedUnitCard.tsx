@@ -1,4 +1,8 @@
 import type { FeedUnitRow } from "@rezics/api/feed/feed";
+import {
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
+  isCatalogUnitType,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Card, CardMedia } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -63,12 +67,14 @@ function shelfKindForUnit(
 }
 
 /**
- * Feed unit card：统一 Unit 推荐项。封面固定，正文列 `min-w-0 flex-1`
- * 吸收宽度变化；窄屏截断标题，宽屏由 feed 容器决定最终宽度。
+ * Feed unit card：统一 Unit 推荐项。BOOK/GAME/MEDIA 使用 catalog cover
+ * contract 固定封面比例，其他 Unit 使用图标/图片框；正文列
+ * `min-w-0 flex-1` 吸收宽度变化；窄屏截断标题，宽屏由 feed 容器决定
+ * 最终宽度。
  *
  * Mobile (<640px)
  * +------------------------------+
- * | [icon] Unit title       Type |
+ * | [cover/icon] Title      Type |
  * |        Summary lines         |
  * |        (flex spacer)         |
  * |        [vote][shelf][share]  |
@@ -98,6 +104,9 @@ export function FeedUnitCard({ row, className }: FeedUnitCardProps) {
   const typeLabel = unitTypeLabel(row.unit.type, t);
   const Icon = UNIT_TYPE_ICONS[row.unit.type] ?? Boxes;
   const isBook = row.unit.type === "BOOK";
+  const catalogCoverAspectRatio = isCatalogUnitType(row.unit.type)
+    ? CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[row.unit.type]
+    : null;
   const actions: Action[] = isBook
     ? ["vote", "reply", "shelf", "share"]
     : ["vote", "shelf", "share"];
@@ -140,13 +149,26 @@ export function FeedUnitCard({ row, className }: FeedUnitCardProps) {
       )}
     >
       <article className="flex min-w-0 items-stretch gap-4 p-4">
-        <CardMedia className="h-24 w-24 shrink-0 rounded-sm bg-surface-subtle text-text-tertiary">
+        <CardMedia
+          className={cn(
+            "shrink-0 rounded-sm bg-surface-subtle text-text-tertiary",
+            catalogCoverAspectRatio ? "w-18 sm:w-22" : "h-24 w-24",
+          )}
+          style={
+            catalogCoverAspectRatio
+              ? { aspectRatio: catalogCoverAspectRatio }
+              : undefined
+          }
+        >
           {row.unit.coverUrl ? (
             <img
               src={row.unit.coverUrl}
               alt=""
               loading="lazy"
-              className="h-full w-full object-cover"
+              className={cn(
+                "h-full w-full",
+                catalogCoverAspectRatio ? "object-fill" : "object-cover",
+              )}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">

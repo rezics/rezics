@@ -1,4 +1,8 @@
 import { t } from "elysia";
+import {
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
+  UnitType,
+} from "../unit/unit";
 
 // ============================================================
 // BOOKSHELF VIEW CONFIG
@@ -77,15 +81,19 @@ export function isLibraryKind(kind: string): kind is LibraryKind {
 }
 
 /**
- * Cover aspect ratio (width / height) per library kind. Kept independent
- * even where values coincide so a single kind can change without
- * affecting the others.
- * 每种库类型的封面宽高比（宽 / 高）。即使数值相同也保持各自独立，以便单一
- * 类型可以更改而不影响其他类型。
+ * Cover aspect ratio (width / height) per shelf library kind. The Unit-level
+ * source of truth is `CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE`; these lowercase
+ * aliases keep shelf/bookshelf payloads aligned with that contract.
+ * 每种 shelf library 类型的封面宽高比（宽 / 高）。Unit 级事实来源是
+ * `CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE`；这些小写别名让
+ * shelf/bookshelf payload 与该 contract 保持一致。
  */
-export const BOOK_ASPECT_RATIO = 2 / 3;
-export const GAME_ASPECT_RATIO = 3 / 4;
-export const MEDIA_ASPECT_RATIO = 2 / 3;
+export const BOOK_ASPECT_RATIO =
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[UnitType.BOOK];
+export const GAME_ASPECT_RATIO =
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[UnitType.GAME];
+export const MEDIA_ASPECT_RATIO =
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[UnitType.MEDIA];
 
 export const LIBRARY_KIND_ASPECT_RATIO: Record<LibraryKind, number> = {
   book: BOOK_ASPECT_RATIO,

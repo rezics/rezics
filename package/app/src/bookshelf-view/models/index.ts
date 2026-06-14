@@ -1,6 +1,6 @@
 export {
-  aspectRatioForKind,
   columnsForWidth,
+  coverAspectRatioForLibraryKind,
   resolveBookshelfConfig,
 } from "./resolveBookshelfConfig";
 export type { BookshelfItem } from "./types";
