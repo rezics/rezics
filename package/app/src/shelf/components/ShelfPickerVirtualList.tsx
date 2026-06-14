@@ -2,16 +2,19 @@ import type { ShelfDTO } from "@rezics/api/shelf";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { ListChecks } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ListChildComponentProps } from "react-window";
 import { FixedSizeList } from "react-window";
+import { cn } from "@/shared/utils/css-util";
 
 const ROW_HEIGHT = 72;
-const LIST_HEIGHT = 288;
+const DEFAULT_LIST_HEIGHT = 288;
 
 interface ShelfPickerVirtualListProps {
   shelves: ShelfDTO[];
   selectedShelfIds: Set<string>;
   onToggleShelf: (shelfId: string) => void;
+  fillHeight?: boolean;
   isLoading?: boolean;
   hasMore?: boolean;
   isFetchingMore?: boolean;
@@ -69,10 +72,11 @@ function ShelfRow({ index, style, data }: ListChildComponentProps<RowData>) {
 }
 
 /**
- * Fixed-height virtual shelf list.
+ * Virtual shelf list.
  *
- * 列表高度固定，row 高度固定，避免 shelf 數量增長造成 dialog 撐高。窄屏時
- * row 內標題截斷，checkbox 與數字不收縮；寬屏時留白落在標題區。
+ * 預設高度固定；桌面 dialog 可切換為填滿父層剩餘高度，由 shelf 列表自己滾動，
+ * 避免外層 dialog body 出現第二條滾動條。row 高度固定，窄屏時 row 內標題截斷，
+ * checkbox 與數字不收縮；寬屏時留白落在標題區。
  *
  * Mobile:
  * +----------------------+
@@ -89,8 +93,8 @@ function ShelfRow({ index, style, data }: ListChildComponentProps<RowData>) {
  *
  * Desktop:
  * +------------------------------------------------+
+ * | list fills remaining dialog height             |
  * | [x] Long shelf title                 12 custom |
- * | [ ] Another shelf                     4        |
  * +------------------------------------------------+
  *
  * Ultra-wide:
@@ -102,41 +106,97 @@ export function ShelfPickerVirtualList({
   shelves,
   selectedShelfIds,
   onToggleShelf,
+  fillHeight = false,
   isLoading = false,
   hasMore = false,
   isFetchingMore = false,
   onLoadMore,
 }: ShelfPickerVirtualListProps) {
   const { t } = useTranslation(["common", "entity"]);
+  const observerRef = useRef<ResizeObserver | null>(null);
+  const [measuredHeight, setMeasuredHeight] = useState(DEFAULT_LIST_HEIGHT);
   const labels = {
     untitled: t("common:untitled"),
     itemCount: (count: number) => t("entity:shelf_items_count", { count }),
     selectShelf: (title: string) =>
       t("entity:shelf_picker_select_shelf", { title }),
   };
+  const viewportClassName = cn(
+    "w-full overflow-hidden rounded-md bg-surface-subtle",
+    fillHeight ? "min-h-[12rem] flex-1" : "h-[18rem]",
+  );
+  const measureViewport = useCallback((viewport: HTMLDivElement | null) => {
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (!viewport || typeof ResizeObserver === "undefined") return;
+
+    const updateHeight = () => {
+      setMeasuredHeight(
+        Math.max(ROW_HEIGHT, Math.floor(viewport.clientHeight)),
+      );
+    };
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(viewport);
+    observerRef.current = observer;
+  }, []);
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
 
   if (isLoading) {
     return (
-      <div className="flex h-[18rem] w-full items-center justify-center rounded-md bg-surface-subtle text-sm text-text-secondary">
-        {t("common:loading")}
+      <div
+        className={cn(
+          "flex w-full flex-col",
+          fillHeight ? "min-h-0 flex-1" : null,
+        )}
+      >
+        <div
+          ref={measureViewport}
+          className={cn(
+            "flex items-center justify-center text-sm text-text-secondary",
+            viewportClassName,
+          )}
+        >
+          {t("common:loading")}
+        </div>
       </div>
     );
   }
 
   if (shelves.length === 0) {
     return (
-      <div className="flex h-[18rem] w-full flex-col items-center justify-center gap-2 rounded-md bg-surface-subtle text-center text-sm text-text-secondary">
-        <ListChecks className="h-5 w-5" />
-        <span>{t("entity:shelf_picker_empty")}</span>
+      <div
+        className={cn(
+          "flex w-full flex-col",
+          fillHeight ? "min-h-0 flex-1" : null,
+        )}
+      >
+        <div
+          ref={measureViewport}
+          className={cn(
+            "flex flex-col items-center justify-center gap-2 text-center text-sm text-text-secondary",
+            viewportClassName,
+          )}
+        >
+          <ListChecks className="h-5 w-5" />
+          <span>{t("entity:shelf_picker_empty")}</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      <div className="h-[18rem] w-full overflow-hidden rounded-md bg-surface-subtle">
+    <div
+      className={cn(
+        "flex w-full flex-col gap-2",
+        fillHeight ? "min-h-0 flex-1" : null,
+      )}
+    >
+      <div ref={measureViewport} className={viewportClassName}>
         <FixedSizeList
-          height={LIST_HEIGHT}
+          height={measuredHeight}
           itemCount={shelves.length}
           itemSize={ROW_HEIGHT}
           width="100%"
