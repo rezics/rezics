@@ -16,20 +16,20 @@ const NONE = "__none__";
 
 type TargetKind = ZoneLinkTarget["kind"] | typeof NONE;
 
-const ZONE_PAGE_OPTIONS = ["home", "search", "feed"] as const;
+export type ZoneLinkTargetPageOption = {
+  id: ZonePageId;
+  slug: string;
+};
 
-const PAGE_LABEL_KEYS = {
-  home: "zone:page_home",
-  search: "zone:page_search",
-  feed: "zone:page_feed",
-} as const satisfies Record<ZonePageId, `zone:${string}`>;
-
-function defaultTarget(kind: ZoneLinkTarget["kind"]): ZoneLinkTarget {
+function defaultTarget(
+  kind: ZoneLinkTarget["kind"],
+  defaultZonePageId: ZonePageId,
+): ZoneLinkTarget {
   switch (kind) {
     case "unit":
       return { kind: "unit", unitId: "" };
     case "zonePage":
-      return { kind: "zonePage", pageId: "home" };
+      return { kind: "zonePage", pageId: defaultZonePageId };
     case "external":
       // `external.text` is the single documented inline-text exception in
       // the zone config (`package/contract/src/zone/link-target.ts`).
@@ -49,15 +49,25 @@ export function ZoneLinkTargetField({
   value,
   onChange,
   refUnits,
+  zonePages = [],
+  defaultPageId,
   allowNone = false,
 }: {
   value: ZoneLinkTarget | undefined;
   onChange: (value: ZoneLinkTarget | undefined) => void;
   refUnits: ZoneRefUnitMap;
+  zonePages?: readonly ZoneLinkTargetPageOption[];
+  defaultPageId?: ZonePageId | null;
   allowNone?: boolean;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const kind: TargetKind = value?.kind ?? NONE;
+  const defaultZonePageId = defaultPageId ?? zonePages[0]?.id ?? "home";
+  const zonePageOptions =
+    value?.kind === "zonePage" &&
+    !zonePages.some((page) => page.id === value.pageId)
+      ? [{ id: value.pageId, slug: value.pageId }, ...zonePages]
+      : zonePages;
 
   return (
     <div className="flex flex-col gap-3">
@@ -66,7 +76,14 @@ export function ZoneLinkTargetField({
           value={kind}
           onValueChange={(next) => {
             if (next === NONE) onChange(undefined);
-            else onChange(defaultTarget(next as ZoneLinkTarget["kind"]));
+            else {
+              onChange(
+                defaultTarget(
+                  next as ZoneLinkTarget["kind"],
+                  defaultZonePageId,
+                ),
+              );
+            }
           }}
         >
           <SelectTrigger className="w-48">
@@ -110,9 +127,11 @@ export function ZoneLinkTargetField({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {ZONE_PAGE_OPTIONS.map((pageId) => (
-                <SelectItem key={pageId} value={pageId}>
-                  {t(PAGE_LABEL_KEYS[pageId])}
+              {zonePageOptions.map((page) => (
+                <SelectItem key={page.id} value={page.id}>
+                  {page.slug === "home"
+                    ? t("zone:manage_home_page")
+                    : page.slug}
                 </SelectItem>
               ))}
             </SelectContent>

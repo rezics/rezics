@@ -8,6 +8,7 @@ import type {
 } from "@rezics/contract";
 import {
   addZonePage,
+  addZonePageDraftIfMissing,
   addZoneTranslationRow,
   applyZoneManageJsonBody,
   canAddZoneMenuChild,
@@ -22,12 +23,16 @@ import {
   nextZoneId,
   outdentZoneMenuNodeAtPath,
   parseZoneManageJsonText,
+  removeZoneMenuAtIndex,
   removeZoneMenuNodeAtPath,
   removeZonePage,
   removeZoneTranslationRow,
+  updateZoneManageJsonProblems,
+  updateZoneMenuAtIndex,
   updateZonePageSections,
   updateZoneTranslationRow,
   validateZoneManageDraft,
+  ZONE_TRANSLATION_LANGUAGES,
   zoneDynamicTagsFallbackProbability,
   zoneManageDraftToBoundary,
   zoneManageDraftToNav,
@@ -168,6 +173,18 @@ describe("zoneManageDraft split round-trip", () => {
 });
 
 describe("zone manage JSON body editor", () => {
+  it("keeps repeated empty diagnostics as a state no-op", () => {
+    const empty = {};
+    expect(updateZoneManageJsonProblems(empty, "nav", [])).toBe(empty);
+
+    const withProblem = updateZoneManageJsonProblems(empty, "nav", ["bad"]);
+    expect(withProblem).toEqual({ nav: ["bad"] });
+    expect(updateZoneManageJsonProblems(withProblem, "nav", ["bad"])).toBe(
+      withProblem,
+    );
+    expect(updateZoneManageJsonProblems(withProblem, "nav", [])).toEqual({});
+  });
+
   it("edits envelope bodies without dropping page fields", () => {
     const draft = sampleDraft();
     const body = zoneManageJsonBody(draft, { kind: "page", pageId: "home" });
@@ -591,6 +608,28 @@ describe("menu tree path operations", () => {
 });
 
 describe("menu validation", () => {
+  it("keeps header.menuId aligned when the referenced menu id changes", () => {
+    const draft = sampleDraft();
+    const renamed = updateZoneMenuAtIndex(draft, 0, {
+      ...draft.menus[0]!,
+      id: "renamed",
+    });
+    expect(renamed.header.menuId).toBe("renamed");
+    expect(renamed.menus[0]?.id).toBe("renamed");
+  });
+
+  it("falls header.menuId back when the referenced menu is removed", () => {
+    const draft = sampleDraft();
+    draft.menus = [
+      { id: "main", nodes: [] },
+      { id: "secondary", nodes: [] },
+    ];
+    draft.header = { menuId: "main" };
+    const removed = removeZoneMenuAtIndex(draft, 0);
+    expect(removed.header.menuId).toBe("secondary");
+    expect(removed.menus).toEqual([{ id: "secondary", nodes: [] }]);
+  });
+
   it("flags depth, leaf, group, and header issues", () => {
     const draft = sampleDraft();
     draft.menus = [
@@ -665,11 +704,11 @@ describe("translation rows", () => {
     expect(options).toContain("zh-hant");
     expect(options).not.toContain("zh-hans");
     const full = zoneTranslationsToRows(
-      ["zh-hant", "zh-hans", "en", "ja", "de", "ko"].map((language) => ({
+      ZONE_TRANSLATION_LANGUAGES.map((language) => ({
         language: language as never,
       })),
     );
-    expect(addZoneTranslationRow(full)).toHaveLength(6);
+    expect(addZoneTranslationRow(full)).toHaveLength(full.length);
   });
 
   it("edits and removes rows by index", () => {
@@ -681,6 +720,25 @@ describe("translation rows", () => {
 });
 
 describe("page helpers", () => {
+  it("adds fetched page drafts without overwriting local page edits", () => {
+    const draft = sampleDraft();
+    draft.pages.home = { sections: [{ id: "local", kind: "hero" }] };
+    const samePage = addZonePageDraftIfMissing(draft, "home", samplePage());
+    expect(samePage).toBe(draft);
+    expect(samePage.pages.home.sections).toEqual([
+      { id: "local", kind: "hero" },
+    ]);
+
+    const nextPage = addZonePageDraftIfMissing(
+      draft,
+      "page-extra",
+      samplePage(),
+    );
+    expect(nextPage.pages["page-extra"]).toEqual({
+      sections: samplePage().sections,
+    });
+  });
+
   it("adds and removes open page draft entries", () => {
     const draft = sampleDraft();
     const withCharacters = addZonePage(draft.pages, "page-characters");

@@ -1,8 +1,8 @@
 import type {
   ContentLanguage,
-  Language,
   ZoneBoundary,
   ZoneDynamicTags,
+  ZoneMenu,
   ZoneMenuNode,
   ZoneNav,
   ZonePage,
@@ -65,9 +65,40 @@ export type ZoneManageJsonProblem = {
   message: string;
 };
 
+export type ZoneManageJsonProblemsByKey = Record<string, string[]>;
+
 function deepClone<T>(value: T): T {
   if (value === undefined) return value;
   return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function stringArraysEqual(
+  left: readonly string[] | undefined,
+  right: readonly string[],
+): boolean {
+  if (!left || left.length !== right.length) return false;
+  return left.every((value, index) => value === right[index]);
+}
+
+/**
+ * Parent-level JSON diagnostics are keyed by envelope. Returning the previous
+ * object for semantic no-ops is important because every JSON frame reports
+ * during effects; empty/unchanged reports must not drive a parent render loop.
+ * 父级 JSON 诊断按信封分组。语义为空操作时返回旧对象很重要，因为每个
+ * JSON frame 都会在 effect 中报告；空/未变化报告不得驱动父级渲染循环。
+ */
+export function updateZoneManageJsonProblems(
+  current: ZoneManageJsonProblemsByKey,
+  key: string,
+  problems: readonly string[],
+): ZoneManageJsonProblemsByKey {
+  if (problems.length === 0) {
+    if (!(key in current)) return current;
+    const { [key]: _removed, ...rest } = current;
+    return rest;
+  }
+  if (stringArraysEqual(current[key], problems)) return current;
+  return { ...current, [key]: [...problems] };
 }
 
 export function zoneShellToDraft(input: {
@@ -470,6 +501,21 @@ export function moveListItem<T>(
   return next;
 }
 
+export function addZonePageDraftIfMissing(
+  draft: ZoneManageDraft,
+  pageId: ZonePageId,
+  page: ZonePage,
+): ZoneManageDraft {
+  if (draft.pages[pageId]) return draft;
+  return {
+    ...draft,
+    pages: {
+      ...draft.pages,
+      [pageId]: zonePageToDraftPage(page),
+    },
+  };
+}
+
 // ANCHOR: Query vocabulary
 // ANCHOR: 查询词汇表
 
@@ -618,6 +664,42 @@ function zoneMenuSubtreeHeight(node: ZoneMenuNode): number {
 
 export function canAddZoneMenuChild(parentPath: ZoneMenuNodePath): boolean {
   return parentPath.length + 1 <= ZONE_MENU_MAX_DEPTH;
+}
+
+export function updateZoneMenuAtIndex(
+  draft: ZoneManageDraft,
+  index: number,
+  menu: ZoneMenu,
+): ZoneManageDraft {
+  const previousMenu = draft.menus[index];
+  if (!previousMenu) return draft;
+  return {
+    ...draft,
+    header:
+      draft.header.menuId === previousMenu.id
+        ? { ...draft.header, menuId: menu.id }
+        : draft.header,
+    menus: draft.menus.map((current, currentIndex) =>
+      currentIndex === index ? menu : current,
+    ),
+  };
+}
+
+export function removeZoneMenuAtIndex(
+  draft: ZoneManageDraft,
+  index: number,
+): ZoneManageDraft {
+  const removed = draft.menus[index];
+  if (!removed) return draft;
+  const menus = draft.menus.filter((_, currentIndex) => currentIndex !== index);
+  return {
+    ...draft,
+    header:
+      draft.header.menuId === removed.id
+        ? { ...draft.header, menuId: menus[0]?.id ?? "" }
+        : draft.header,
+    menus,
+  };
 }
 
 /**

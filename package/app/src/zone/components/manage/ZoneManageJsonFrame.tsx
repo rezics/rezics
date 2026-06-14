@@ -56,12 +56,15 @@ export function ZoneManageJsonFrame({
   const [mode, setMode] = useState<ViewMode>("form");
   const [text, setText] = useState(() => zoneManageJsonText(draft, target));
   const [problems, setProblems] = useState<string[]>([]);
+  const clearProblems = useCallback(() => {
+    setProblems((current) => (current.length === 0 ? current : []));
+  }, []);
 
   useEffect(() => {
     setMode("form");
     setText(zoneManageJsonText(draft, target));
-    setProblems([]);
-  }, [draft, target]);
+    clearProblems();
+  }, [clearProblems, draft, target]);
 
   useEffect(() => {
     onProblemsChange(targetKey, problems);
@@ -84,7 +87,7 @@ export function ZoneManageJsonFrame({
 
   const openJson = () => {
     setText(zoneManageJsonText(draft, target));
-    setProblems([]);
+    clearProblems();
     setMode("json");
   };
 
@@ -95,7 +98,7 @@ export function ZoneManageJsonFrame({
 
   const revertJson = () => {
     setText(zoneManageJsonText(draft, target));
-    setProblems([]);
+    clearProblems();
   };
 
   const updateJson = (next: string) => {
@@ -105,7 +108,7 @@ export function ZoneManageJsonFrame({
       setProblems(formatProblems(parsed.problems));
       return;
     }
-    setProblems([]);
+    clearProblems();
     onDraftChange(applyZoneManageJsonBody(draft, target, parsed.body));
   };
 

@@ -34,7 +34,10 @@ import {
 import type { ZoneRefUnitMap } from "../../models/zoneMenu";
 import { ZoneFragmentField } from "./ZoneFragmentField";
 import { ZoneLabelField } from "./ZoneLabelField";
-import { ZoneLinkTargetField } from "./ZoneLinkTargetField";
+import {
+  ZoneLinkTargetField,
+  type ZoneLinkTargetPageOption,
+} from "./ZoneLinkTargetField";
 import {
   CheckGroup,
   ManageField,
@@ -85,6 +88,8 @@ const ZONE_COLUMNS_MAX = 4;
 
 export type ZoneManageEditorContext = {
   refUnits: ZoneRefUnitMap;
+  pages: readonly ZoneLinkTargetPageOption[];
+  defaultPageId: string | null;
   /**
    * Every section id in the whole draft (all pages, nested included) so
    * added sections get globally unique ids.
@@ -595,6 +600,8 @@ function ZoneSectionKindFields({
               onChange(next);
             }}
             refUnits={ctx.refUnits}
+            zonePages={ctx.pages}
+            defaultPageId={ctx.defaultPageId}
           />
         </div>
       );
@@ -779,6 +786,8 @@ function ZoneCollectionItemsEditor({
               );
             }}
             refUnits={ctx.refUnits}
+            zonePages={ctx.pages}
+            defaultPageId={ctx.defaultPageId}
           />
           <ZoneLabelField
             label={t("zone:manage_node_label")}
@@ -806,7 +815,12 @@ function ZoneCollectionItemsEditor({
           onClick={() =>
             onChange([
               ...items,
-              { target: { kind: "zonePage", pageId: "home" } },
+              {
+                target: {
+                  kind: "zonePage",
+                  pageId: ctx.defaultPageId ?? "home",
+                },
+              },
             ])
           }
         >
