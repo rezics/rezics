@@ -2306,7 +2306,7 @@ async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
 
   await Promise.all([
     ctx.sync.realm(realmUnitId),
-    ctx.sync.content(zoneUnitId),
+    ctx.sync.zone(zoneUnitId),
     ...bookUnitIds.map((unitId) => ctx.sync.content(unitId)),
   ]);
 

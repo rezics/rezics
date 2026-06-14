@@ -30,6 +30,56 @@ function createUserSyncDb() {
   };
 }
 
+function createQueuedSelectDb(rowSets: unknown[][]) {
+  const queue = [...rowSets];
+  const nextRows = () => queue.shift() ?? [];
+  const chain = () => {
+    const api = {
+      from: () => api,
+      leftJoin: () => api,
+      where: () => api,
+      orderBy: async () => nextRows(),
+      limit: async () => nextRows(),
+      then: (resolve: (value: unknown[]) => unknown) =>
+        Promise.resolve(nextRows()).then(resolve),
+    };
+    return api;
+  };
+  return { select: () => chain() };
+}
+
+function createZoneSyncDb() {
+  return createQueuedSelectDb([
+    [
+      {
+        unitId: "zone-1",
+        ownerRealmUnitId: "realm-1",
+        startsAt: null,
+        endsAt: null,
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-02T00:00:00.000Z",
+        unitStatus: "PUBLISHED",
+        unitVisibility: "PUBLIC",
+        unitModerationStatus: "APPROVED",
+        userId: null,
+        slug: "zone-one",
+        isLanguageNeutral: false,
+      },
+    ],
+    [
+      {
+        unitId: "zone-1",
+        language: "en",
+        title: "Zone One",
+        description: null,
+      },
+    ],
+    [{ unitId: "zone-1", language: "en", isPrimary: true, position: "a0" }],
+    [],
+    [{ unitId: "realm-1", language: "en", title: "Realm One" }],
+  ]);
+}
+
 describe("createSeedRuntime", () => {
   test("stores special targets separately from sync state", async () => {
     const runtime = createSeedRuntime({
@@ -152,5 +202,39 @@ describe("createSeedRuntime", () => {
         Bun.env.SEQUIN_WEBHOOK_SECRET = previousSequinWebhookSecret;
       }
     }
+  });
+
+  test("runs targeted zone sync for factory-created zones", async () => {
+    const syncedZones: unknown[] = [];
+    const runtime = createSeedRuntime({
+      config: {
+        meiliMode: "init-and-sync",
+        manifestFormat: "human",
+        scenarioNames: [],
+      },
+      authDb: { disconnect: async () => {} } as never,
+      serverDb: createZoneSyncDb() as never,
+      searchClient: {
+        addOrUpdateZones: async (documents: unknown[]) => {
+          syncedZones.push(...documents);
+        },
+        deleteZones: async () => {},
+      } as never,
+    });
+
+    await runtime.sync.zone("zone-1");
+
+    expect(runtime.state.syncSummary).toMatchObject({
+      targets: { zone: 1 },
+      total: 1,
+    });
+    expect(syncedZones).toMatchObject([
+      {
+        id: "zone-1",
+        slug: "zone-one",
+        ownerRealmUnitId: "realm-1",
+        visibility: "PUBLIC",
+      },
+    ]);
   });
 });
