@@ -3,8 +3,9 @@ import type {
   ZoneColumn,
   ZoneColumnsSection,
   ZoneContentSection,
-  ZonePageSection,
   ZoneSectionDisplay,
+  ZoneStageChildSection,
+  ZoneStageSection,
   ZoneStatsMetric,
   ZoneTabsSection,
 } from "@rezics/contract";
@@ -28,6 +29,7 @@ import {
   createZoneSection,
   moveListItem,
   nextZoneId,
+  type ZoneEditableSection,
   type ZoneSectionSlot,
   zoneSectionSlotAllowedKinds,
 } from "../../models/zoneManageDraft";
@@ -47,7 +49,10 @@ import {
 import { ZoneQueryEditor } from "./ZoneQueryEditor";
 
 const KIND_KEYS = {
-  hero: "zone:manage_kind_hero",
+  stage: "zone:manage_kind_stage",
+  zoneInfo: "zone:manage_kind_zoneInfo",
+  image: "zone:manage_kind_image",
+  actions: "zone:manage_kind_actions",
   richText: "zone:manage_kind_richText",
   collection: "zone:manage_kind_collection",
   query: "zone:manage_kind_query",
@@ -56,7 +61,7 @@ const KIND_KEYS = {
   sources: "zone:manage_kind_sources",
   tabs: "zone:manage_kind_tabs",
   columns: "zone:manage_kind_columns",
-} as const satisfies Record<ZonePageSection["kind"], `zone:${string}`>;
+} as const satisfies Record<ZoneEditableSection["kind"], `zone:${string}`>;
 
 const DISPLAY_KEYS = {
   tiles: "zone:manage_display_tiles",
@@ -85,6 +90,22 @@ const STATS_METRIC_KEYS = {
 const NONE = "__none__";
 const ZONE_COLUMNS_MIN = 2;
 const ZONE_COLUMNS_MAX = 4;
+const ACTION_BUILT_IN_KEYS = {
+  joinRealm: "zone:manage_action_builtin_join_realm",
+  createWiki: "zone:manage_action_builtin_create_wiki",
+  createPost: "zone:manage_action_builtin_create_post",
+} as const;
+const ACTION_BUILT_INS = Object.keys(ACTION_BUILT_IN_KEYS) as Array<
+  keyof typeof ACTION_BUILT_IN_KEYS
+>;
+const IMAGE_VARIANT_KEYS = {
+  inline: "zone:manage_image_variant_inline",
+  banner: "zone:manage_image_variant_banner",
+  logo: "zone:manage_image_variant_logo",
+} as const;
+const IMAGE_VARIANTS = Object.keys(IMAGE_VARIANT_KEYS) as Array<
+  keyof typeof IMAGE_VARIANT_KEYS
+>;
 
 export type ZoneManageEditorContext = {
   refUnits: ZoneRefUnitMap;
@@ -99,11 +120,19 @@ export type ZoneManageEditorContext = {
   allSectionIds: string[];
   contextRealmUnitId: string | null;
   contextRealmSlug: string | null;
-  heroTitle: string | null;
-  heroDescription: string | null;
+  zoneTitle: string | null;
+  zoneDescription: string | null;
   themeBannerUrl: string | null;
   themeLogoUrl: string | null;
 };
+
+type SectionWithChrome = Exclude<ZoneEditableSection, { kind: "zoneInfo" }>;
+
+function hasSectionChrome(
+  section: ZoneEditableSection,
+): section is SectionWithChrome {
+  return section.kind !== "zoneInfo";
+}
 
 /**
  * Section list editor for one slot (page top level, a tabs pane, or a
@@ -145,15 +174,15 @@ export function ZoneSectionListEditor({
   slot,
   ctx,
 }: {
-  sections: readonly ZonePageSection[];
-  onChange: (sections: ZonePageSection[]) => void;
+  sections: readonly ZoneEditableSection[];
+  onChange: (sections: ZoneEditableSection[]) => void;
   slot: ZoneSectionSlot;
   ctx: ZoneManageEditorContext;
 }) {
   const { t } = useTranslation(["zone"]);
   const allowedKinds = zoneSectionSlotAllowedKinds(slot);
-  const [addKind, setAddKind] = useState<ZonePageSection["kind"]>(
-    allowedKinds[0] as ZonePageSection["kind"],
+  const [addKind, setAddKind] = useState<ZoneEditableSection["kind"]>(
+    allowedKinds[0] as ZoneEditableSection["kind"],
   );
   const keyCounterRef = useRef(0);
   const sectionKeysRef = useRef<number[]>([]);
@@ -179,7 +208,7 @@ export function ZoneSectionListEditor({
       ...sectionKeysRef.current,
       ++keyCounterRef.current,
     ];
-    onChange([...sections, createZoneSection(addKind, id)]);
+    onChange([...sections, createZoneSection(addKind, id, ctx.allSectionIds)]);
   };
 
   const removeAt = (index: number) => {
@@ -224,7 +253,9 @@ export function ZoneSectionListEditor({
       <div className="flex items-center gap-2">
         <Select
           value={addKind}
-          onValueChange={(kind) => setAddKind(kind as ZonePageSection["kind"])}
+          onValueChange={(kind) =>
+            setAddKind(kind as ZoneEditableSection["kind"])
+          }
         >
           <SelectTrigger className="w-44">
             <SelectValue />
@@ -255,20 +286,21 @@ function ZoneSectionEditor({
   onMoveUp,
   onMoveDown,
 }: {
-  section: ZonePageSection;
+  section: ZoneEditableSection;
   slot: ZoneSectionSlot;
   ctx: ZoneManageEditorContext;
-  onChange: (section: ZonePageSection) => void;
+  onChange: (section: ZoneEditableSection) => void;
   onRemove: () => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const [expanded, setExpanded] = useState(false);
-  const titleText = section.titleLabelUnitId
-    ? (ctx.refUnits[section.titleLabelUnitId]?.title ??
-      section.titleLabelUnitId)
-    : null;
+  const titleText =
+    hasSectionChrome(section) && section.titleLabelUnitId
+      ? (ctx.refUnits[section.titleLabelUnitId]?.title ??
+        section.titleLabelUnitId)
+      : null;
 
   return (
     <Card surface="contained">
@@ -314,69 +346,10 @@ function ZoneSectionEditor({
 
         {expanded ? (
           <div className="flex flex-col gap-4 border-t border-border-whisper p-4">
-            <div className="grid gap-4 md:grid-cols-3">
-              <ManageField label={t("zone:manage_section_id")}>
-                <Input
-                  value={section.id}
-                  onChange={(event) =>
-                    onChange({ ...section, id: event.target.value })
-                  }
-                  className="font-mono text-sm"
-                />
-              </ManageField>
-              <ManageField label={t("zone:manage_limit")}>
-                <Input
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={section.limit ?? ""}
-                  onChange={(event) => {
-                    const parsed = Number(event.target.value);
-                    const next = { ...section };
-                    if (event.target.value && Number.isFinite(parsed)) {
-                      next.limit = parsed;
-                    } else {
-                      delete next.limit;
-                    }
-                    onChange(next);
-                  }}
-                />
-              </ManageField>
-              <ManageField label={t("zone:manage_empty_state")}>
-                <Select
-                  value={section.emptyState ?? "show-empty"}
-                  onValueChange={(value) =>
-                    onChange({
-                      ...section,
-                      emptyState: value as "hide" | "show-empty",
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="show-empty">
-                      {t("zone:manage_empty_state_show")}
-                    </SelectItem>
-                    <SelectItem value="hide">
-                      {t("zone:manage_empty_state_hide")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </ManageField>
-            </div>
-
-            <ZoneLabelField
-              label={t("zone:manage_title_label")}
-              value={section.titleLabelUnitId}
-              onChange={(titleLabelUnitId) => {
-                const next = { ...section };
-                if (titleLabelUnitId) next.titleLabelUnitId = titleLabelUnitId;
-                else delete next.titleLabelUnitId;
-                onChange(next);
-              }}
-              refUnits={ctx.refUnits}
+            <SectionBaseFields
+              section={section}
+              ctx={ctx}
+              onChange={onChange}
             />
 
             <ZoneSectionKindFields
@@ -392,146 +365,148 @@ function ZoneSectionEditor({
   );
 }
 
+function SectionBaseFields({
+  section,
+  ctx,
+  onChange,
+}: {
+  section: ZoneEditableSection;
+  ctx: ZoneManageEditorContext;
+  onChange: (section: ZoneEditableSection) => void;
+}) {
+  const { t } = useTranslation(["zone"]);
+
+  if (!hasSectionChrome(section)) {
+    return (
+      <ManageField label={t("zone:manage_section_id")}>
+        <Input
+          value={section.id}
+          onChange={(event) => onChange({ ...section, id: event.target.value })}
+          className="font-mono text-sm"
+        />
+      </ManageField>
+    );
+  }
+
+  return (
+    <>
+      <div className="grid gap-4 md:grid-cols-3">
+        <ManageField label={t("zone:manage_section_id")}>
+          <Input
+            value={section.id}
+            onChange={(event) =>
+              onChange({ ...section, id: event.target.value })
+            }
+            className="font-mono text-sm"
+          />
+        </ManageField>
+        <ManageField label={t("zone:manage_limit")}>
+          <Input
+            type="number"
+            min={1}
+            max={100}
+            value={section.limit ?? ""}
+            onChange={(event) => {
+              const parsed = Number(event.target.value);
+              const next = { ...section };
+              if (event.target.value && Number.isFinite(parsed)) {
+                next.limit = parsed;
+              } else {
+                delete next.limit;
+              }
+              onChange(next);
+            }}
+          />
+        </ManageField>
+        <ManageField label={t("zone:manage_empty_state")}>
+          <Select
+            value={section.emptyState ?? "show-empty"}
+            onValueChange={(value) =>
+              onChange({
+                ...section,
+                emptyState: value as "hide" | "show-empty",
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="show-empty">
+                {t("zone:manage_empty_state_show")}
+              </SelectItem>
+              <SelectItem value="hide">
+                {t("zone:manage_empty_state_hide")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </ManageField>
+      </div>
+
+      <ZoneLabelField
+        label={t("zone:manage_title_label")}
+        value={section.titleLabelUnitId}
+        onChange={(titleLabelUnitId) => {
+          const next = { ...section };
+          if (titleLabelUnitId) next.titleLabelUnitId = titleLabelUnitId;
+          else delete next.titleLabelUnitId;
+          onChange(next);
+        }}
+        refUnits={ctx.refUnits}
+      />
+    </>
+  );
+}
+
 function ZoneSectionKindFields({
   section,
   slot: _slot,
   ctx,
   onChange,
 }: {
-  section: ZonePageSection;
+  section: ZoneEditableSection;
   slot: ZoneSectionSlot;
   ctx: ZoneManageEditorContext;
-  onChange: (section: ZonePageSection) => void;
+  onChange: (section: ZoneEditableSection) => void;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const baseId = useId();
 
   switch (section.kind) {
-    case "hero":
+    case "stage":
       return (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3">
-            <ManageGroupHeading>
-              {t("zone:manage_hero_text")}
-            </ManageGroupHeading>
-            <dl className="grid gap-3 md:grid-cols-2">
-              <div className="min-w-0">
-                <dt className="flex items-center gap-2 text-xs font-medium leading-dense text-text-tertiary">
-                  <span>{t("common:title")}</span>
-                  <span className="rounded-sm bg-surface-base px-1.5 py-0.5 leading-dense">
-                    {t("zone:manage_profile")}
-                  </span>
-                </dt>
-                <dd className="mt-1 truncate text-sm leading-ui text-text-primary">
-                  {ctx.heroTitle ?? t("common:none")}
-                </dd>
-              </div>
-              <div className="min-w-0">
-                <dt className="flex items-center gap-2 text-xs font-medium leading-dense text-text-tertiary">
-                  <span>{t("common:description")}</span>
-                  <span className="rounded-sm bg-surface-base px-1.5 py-0.5 leading-dense">
-                    {t("zone:manage_profile")}
-                  </span>
-                </dt>
-                <dd className="mt-1 line-clamp-2 text-sm leading-ui text-text-primary">
-                  {ctx.heroDescription ?? t("common:none")}
-                </dd>
-              </div>
-            </dl>
-            <label
-              htmlFor={`${baseId}-show-description`}
-              className="flex items-center gap-2 text-sm leading-ui text-text-primary"
-            >
-              <Checkbox
-                id={`${baseId}-show-description`}
-                checked={section.showDescription !== false}
-                onCheckedChange={(checked) => {
-                  const next = { ...section };
-                  if (checked) delete next.showDescription;
-                  else next.showDescription = false;
-                  onChange(next);
-                }}
-              />
-              {t("zone:manage_hero_show_description")}
-            </label>
-          </div>
-          <div className="flex flex-col gap-3">
-            <ManageGroupHeading>
-              {t("zone:manage_hero_images")}
-            </ManageGroupHeading>
-            <div className="grid gap-4 md:grid-cols-2">
-              <ManageField
-                label={t("zone:manage_hero_banner")}
-                hint={
-                  section.bannerImageUrl
-                    ? section.bannerImageUrl
-                    : ctx.themeBannerUrl
-                      ? t("zone:manage_hero_theme_fallback", {
-                          value: ctx.themeBannerUrl,
-                        })
-                      : undefined
-                }
-              >
-                <Input
-                  value={section.bannerImageUrl ?? ""}
-                  placeholder="https://"
-                  className="font-mono text-sm"
-                  onChange={(event) => {
-                    const next = { ...section };
-                    if (event.target.value) {
-                      next.bannerImageUrl = event.target.value;
-                    } else {
-                      delete next.bannerImageUrl;
-                    }
-                    onChange(next);
-                  }}
-                />
-              </ManageField>
-              <ManageField
-                label={t("zone:manage_hero_logo")}
-                hint={
-                  section.logoImageUrl
-                    ? section.logoImageUrl
-                    : ctx.themeLogoUrl
-                      ? t("zone:manage_hero_theme_fallback", {
-                          value: ctx.themeLogoUrl,
-                        })
-                      : undefined
-                }
-              >
-                <Input
-                  value={section.logoImageUrl ?? ""}
-                  placeholder="https://"
-                  className="font-mono text-sm"
-                  onChange={(event) => {
-                    const next = { ...section };
-                    if (event.target.value) {
-                      next.logoImageUrl = event.target.value;
-                    } else {
-                      delete next.logoImageUrl;
-                    }
-                    onChange(next);
-                  }}
-                />
-              </ManageField>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <ManageGroupHeading>
-              {t("zone:manage_hero_ctas")}
-            </ManageGroupHeading>
-            <ZoneCollectionItemsEditor
-              items={section.ctas ?? []}
-              onChange={(ctas) => {
-                const next = { ...section };
-                if (ctas.length > 0) next.ctas = ctas;
-                else delete next.ctas;
-                onChange(next);
-              }}
-              ctx={ctx}
-            />
-          </div>
-        </div>
+        <ZoneStageSectionFields
+          section={section}
+          ctx={ctx}
+          onChange={onChange}
+        />
+      );
+
+    case "zoneInfo":
+      return (
+        <ZoneInfoSectionFields
+          section={section}
+          ctx={ctx}
+          onChange={onChange}
+        />
+      );
+
+    case "image":
+      return (
+        <ZoneImageSectionFields
+          section={section}
+          ctx={ctx}
+          onChange={onChange}
+        />
+      );
+
+    case "actions":
+      return (
+        <ZoneActionsSectionFields
+          section={section}
+          ctx={ctx}
+          onChange={onChange}
+        />
       );
 
     case "richText":
@@ -666,6 +641,337 @@ function ZoneSectionKindFields({
   }
 }
 
+function ZoneStageSectionFields({
+  section,
+  ctx,
+  onChange,
+}: {
+  section: ZoneStageSection;
+  ctx: ZoneManageEditorContext;
+  onChange: (section: ZoneEditableSection) => void;
+}) {
+  const { t } = useTranslation(["zone"]);
+  const background = section.background ?? {};
+  const mask = section.mask ?? {};
+
+  const updateBackground = (
+    patch: Partial<NonNullable<typeof section.background>>,
+  ) => {
+    const nextBackground = { ...background, ...patch };
+    for (const key of Object.keys(nextBackground) as Array<
+      keyof typeof nextBackground
+    >) {
+      if (!nextBackground[key]) delete nextBackground[key];
+    }
+    onChange({
+      ...section,
+      background:
+        Object.keys(nextBackground).length > 0 ? nextBackground : undefined,
+    });
+  };
+  const updateMask = (patch: Partial<NonNullable<typeof section.mask>>) => {
+    const nextMask = { ...mask, ...patch };
+    for (const key of Object.keys(nextMask) as Array<keyof typeof nextMask>) {
+      if (nextMask[key] == null || nextMask[key] === "") delete nextMask[key];
+    }
+    onChange({
+      ...section,
+      mask: Object.keys(nextMask).length > 0 ? nextMask : undefined,
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <ManageField label={t("zone:manage_stage_bg_color")}>
+          <Input
+            value={background.color ?? ""}
+            placeholder="var(--colors-surface-subtle)"
+            onChange={(event) =>
+              updateBackground({ color: event.target.value || undefined })
+            }
+          />
+        </ManageField>
+        <ManageField
+          label={t("zone:manage_stage_bg_image")}
+          hint={ctx.themeBannerUrl ?? undefined}
+        >
+          <Input
+            value={background.imageUrl ?? ""}
+            placeholder="https://"
+            className="font-mono text-sm"
+            onChange={(event) =>
+              updateBackground({ imageUrl: event.target.value || undefined })
+            }
+          />
+        </ManageField>
+        <ManageField label={t("zone:manage_stage_bg_fit")}>
+          <Select
+            value={background.fit ?? "cover"}
+            onValueChange={(fit) =>
+              updateBackground({ fit: fit as "cover" | "contain" })
+            }
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cover">
+                {t("zone:manage_stage_fit_cover")}
+              </SelectItem>
+              <SelectItem value="contain">
+                {t("zone:manage_stage_fit_contain")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </ManageField>
+        <ManageField label={t("zone:manage_stage_bg_position")}>
+          <Input
+            value={background.position ?? ""}
+            placeholder="center"
+            onChange={(event) =>
+              updateBackground({ position: event.target.value || undefined })
+            }
+          />
+        </ManageField>
+        <ManageField label={t("zone:manage_stage_mask_color")}>
+          <Input
+            value={mask.color ?? ""}
+            placeholder="rgba(0, 0, 0, 0.35)"
+            onChange={(event) =>
+              updateMask({ color: event.target.value || undefined })
+            }
+          />
+        </ManageField>
+        <ManageField label={t("zone:manage_stage_mask_opacity")}>
+          <Input
+            type="number"
+            min={0}
+            max={1}
+            step={0.05}
+            value={mask.opacity ?? ""}
+            onChange={(event) => {
+              if (event.target.value === "") {
+                updateMask({ opacity: undefined });
+                return;
+              }
+              const opacity = Number(event.target.value);
+              if (Number.isFinite(opacity) && opacity >= 0 && opacity <= 1) {
+                updateMask({ opacity });
+              }
+            }}
+          />
+        </ManageField>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <ManageGroupHeading>
+          {t("zone:manage_stage_sections")}
+        </ManageGroupHeading>
+        <ZoneSectionListEditor
+          sections={section.sections}
+          onChange={(sections) =>
+            onChange({
+              ...section,
+              sections: sections as ZoneStageChildSection[],
+            })
+          }
+          slot="stage"
+          ctx={ctx}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ZoneInfoSectionFields({
+  section,
+  ctx,
+  onChange,
+}: {
+  section: Extract<ZoneStageChildSection, { kind: "zoneInfo" }>;
+  ctx: ZoneManageEditorContext;
+  onChange: (section: ZoneEditableSection) => void;
+}) {
+  const { t } = useTranslation(["zone", "common"]);
+  const titleId = useId();
+  const descriptionId = useId();
+  return (
+    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3">
+      <dl className="grid gap-3 md:grid-cols-2">
+        <div className="min-w-0">
+          <dt className="text-xs font-medium leading-dense text-text-tertiary">
+            {t("common:title")}
+          </dt>
+          <dd className="mt-1 truncate text-sm leading-ui text-text-primary">
+            {ctx.zoneTitle ?? t("common:none")}
+          </dd>
+        </div>
+        <div className="min-w-0">
+          <dt className="text-xs font-medium leading-dense text-text-tertiary">
+            {t("common:description")}
+          </dt>
+          <dd className="mt-1 line-clamp-2 text-sm leading-ui text-text-primary">
+            {ctx.zoneDescription ?? t("common:none")}
+          </dd>
+        </div>
+      </dl>
+      <div className="flex flex-wrap gap-4">
+        <label
+          htmlFor={titleId}
+          className="flex items-center gap-2 text-sm leading-ui text-text-primary"
+        >
+          <Checkbox
+            id={titleId}
+            checked={section.showTitle !== false}
+            onCheckedChange={(checked) => {
+              const next = { ...section };
+              if (checked) delete next.showTitle;
+              else next.showTitle = false;
+              onChange(next);
+            }}
+          />
+          {t("zone:manage_zone_info_show_title")}
+        </label>
+        <label
+          htmlFor={descriptionId}
+          className="flex items-center gap-2 text-sm leading-ui text-text-primary"
+        >
+          <Checkbox
+            id={descriptionId}
+            checked={section.showDescription !== false}
+            onCheckedChange={(checked) => {
+              const next = { ...section };
+              if (checked) delete next.showDescription;
+              else next.showDescription = false;
+              onChange(next);
+            }}
+          />
+          {t("zone:manage_zone_info_show_description")}
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function ZoneImageSectionFields({
+  section,
+  ctx,
+  onChange,
+}: {
+  section: Extract<ZoneContentSection, { kind: "image" }>;
+  ctx: ZoneManageEditorContext;
+  onChange: (section: ZoneEditableSection) => void;
+}) {
+  const { t } = useTranslation(["zone"]);
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <ManageField
+          label={t("zone:manage_image_url")}
+          hint={ctx.themeLogoUrl ?? undefined}
+        >
+          <Input
+            value={section.url}
+            placeholder="https://"
+            className="font-mono text-sm"
+            onChange={(event) =>
+              onChange({ ...section, url: event.target.value })
+            }
+          />
+        </ManageField>
+        <ManageField label={t("zone:manage_image_variant")}>
+          <Select
+            value={section.variant ?? "inline"}
+            onValueChange={(variant) =>
+              onChange({
+                ...section,
+                variant: variant as NonNullable<typeof section.variant>,
+              })
+            }
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {IMAGE_VARIANTS.map((variant) => (
+                <SelectItem key={variant} value={variant}>
+                  {t(IMAGE_VARIANT_KEYS[variant])}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </ManageField>
+      </div>
+      <ZoneLabelField
+        label={t("zone:manage_image_alt_label")}
+        value={section.altLabelUnitId}
+        onChange={(altLabelUnitId) => {
+          const next = { ...section };
+          if (altLabelUnitId) next.altLabelUnitId = altLabelUnitId;
+          else delete next.altLabelUnitId;
+          onChange(next);
+        }}
+        refUnits={ctx.refUnits}
+      />
+      <ZoneLinkTargetField
+        value={section.target}
+        onChange={(target) => {
+          const next = { ...section };
+          if (target) next.target = target;
+          else delete next.target;
+          onChange(next);
+        }}
+        refUnits={ctx.refUnits}
+        zonePages={ctx.pages}
+        defaultPageId={ctx.defaultPageId}
+        allowNone
+      />
+    </div>
+  );
+}
+
+function ZoneActionsSectionFields({
+  section,
+  ctx,
+  onChange,
+}: {
+  section: Extract<ZoneContentSection, { kind: "actions" }>;
+  ctx: ZoneManageEditorContext;
+  onChange: (section: ZoneEditableSection) => void;
+}) {
+  const { t } = useTranslation(["zone"]);
+  return (
+    <div className="flex flex-col gap-4">
+      <CheckGroup
+        label={t("zone:manage_action_builtins")}
+        options={ACTION_BUILT_INS}
+        values={section.builtIns ?? []}
+        onChange={(builtIns) => {
+          const next = { ...section };
+          if (builtIns.length > 0) next.builtIns = builtIns;
+          else delete next.builtIns;
+          onChange(next);
+        }}
+        renderOption={(builtIn) => t(ACTION_BUILT_IN_KEYS[builtIn])}
+      />
+      <div className="flex flex-col gap-2">
+        <ManageGroupHeading>{t("zone:manage_items")}</ManageGroupHeading>
+        <ZoneCollectionItemsEditor
+          items={section.items ?? []}
+          onChange={(items) => {
+            const next = { ...section };
+            if (items.length > 0) next.items = items;
+            else delete next.items;
+            onChange(next);
+          }}
+          ctx={ctx}
+        />
+      </div>
+    </div>
+  );
+}
+
 function ZoneDisplaySelect({
   value,
   onChange,
@@ -696,10 +1002,10 @@ function ZoneDisplaySelect({
 }
 
 /**
- * Shared editor for `ZoneCollectionItem[]` (collection items and hero
- * CTAs): link target plus optional LABEL override. Uses a stable counter
+ * Shared editor for `ZoneCollectionItem[]` (collection and action items):
+ * link target plus optional LABEL override. Uses a stable counter
  * to key items since `ZoneCollectionItem` has no id field.
- * `ZoneCollectionItem[]` 的共享编辑器（集合条目与 hero CTA）：链接目标
+ * `ZoneCollectionItem[]` 的共享编辑器（集合与行动条目）：链接目标
  * 加可选的 LABEL 覆盖。由于 `ZoneCollectionItem` 没有 id 字段，使用
  * 稳定计数器为条目分配 key。
  */
@@ -839,7 +1145,7 @@ function ZoneTabsSectionFields({
 }: {
   section: ZoneTabsSection;
   ctx: ZoneManageEditorContext;
-  onChange: (section: ZonePageSection) => void;
+  onChange: (section: ZoneEditableSection) => void;
 }) {
   const { t } = useTranslation(["zone", "common"]);
 
@@ -985,7 +1291,7 @@ function ZoneColumnsSectionFields({
 }: {
   section: ZoneColumnsSection;
   ctx: ZoneManageEditorContext;
-  onChange: (section: ZonePageSection) => void;
+  onChange: (section: ZoneEditableSection) => void;
 }) {
   const { t } = useTranslation(["zone"]);
   const updateColumns = (columns: ZoneColumn[]) =>

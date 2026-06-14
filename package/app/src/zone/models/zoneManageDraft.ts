@@ -10,6 +10,7 @@ import type {
   ZoneSectionQuery,
   ZoneSectionQueryFilterField,
   ZoneSectionQuerySortField,
+  ZoneStageChildSection,
   ZoneTheme,
   ZoneTranslation,
 } from "@rezics/contract";
@@ -339,7 +340,8 @@ export function applyZoneManageJsonBody(
 // ANCHOR: 分区插槽与嵌套守卫
 
 export const ZONE_CONTENT_SECTION_KINDS = [
-  "hero",
+  "image",
+  "actions",
   "richText",
   "collection",
   "query",
@@ -348,13 +350,23 @@ export const ZONE_CONTENT_SECTION_KINDS = [
   "sources",
 ] as const;
 
-export const ZONE_PAGE_SECTION_KINDS = [
+export const ZONE_STAGE_CHILD_SECTION_KINDS = [
+  "zoneInfo",
   ...ZONE_CONTENT_SECTION_KINDS,
   "tabs",
   "columns",
 ] as const;
 
-export type ZoneSectionSlot = "page" | "tabs" | "columns";
+export const ZONE_PAGE_SECTION_KINDS = [
+  "stage",
+  ...ZONE_CONTENT_SECTION_KINDS,
+  "tabs",
+  "columns",
+] as const;
+
+export type ZoneEditableSection = ZonePageSection | ZoneStageChildSection;
+
+export type ZoneSectionSlot = "page" | "stage" | "tabs" | "columns";
 
 /**
  * Client-side mirror of the contract's container nesting rules (see
@@ -367,10 +379,12 @@ export type ZoneSectionSlot = "page" | "tabs" | "columns";
  */
 export function zoneSectionSlotAllowedKinds(
   slot: ZoneSectionSlot,
-): readonly ZonePageSection["kind"][] {
+): readonly ZoneEditableSection["kind"][] {
   switch (slot) {
     case "page":
       return ZONE_PAGE_SECTION_KINDS;
+    case "stage":
+      return ZONE_STAGE_CHILD_SECTION_KINDS;
     case "tabs":
       return ZONE_CONTENT_SECTION_KINDS;
     case "columns":
@@ -380,7 +394,7 @@ export function zoneSectionSlotAllowedKinds(
 
 export function canInsertZoneSectionKind(
   slot: ZoneSectionSlot,
-  kind: ZonePageSection["kind"],
+  kind: ZoneEditableSection["kind"],
 ): boolean {
   return (zoneSectionSlotAllowedKinds(slot) as readonly string[]).includes(
     kind,
@@ -395,12 +409,35 @@ export function canInsertZoneSectionKind(
  * 排序的字段填充必填的 `sort`。
  */
 export function createZoneSection(
-  kind: ZonePageSection["kind"],
+  kind: ZoneEditableSection["kind"],
   id: string,
-): ZonePageSection {
+  existingIds: readonly string[] = [],
+): ZoneEditableSection {
   switch (kind) {
-    case "hero":
-      return { id, kind: "hero" };
+    case "stage":
+      return {
+        id,
+        kind: "stage",
+        sections: [
+          {
+            id: nextZoneId(`${id}-info`, existingIds),
+            kind: "zoneInfo",
+            showTitle: true,
+            showDescription: true,
+          },
+        ],
+      };
+    case "zoneInfo":
+      return {
+        id,
+        kind: "zoneInfo",
+        showTitle: true,
+        showDescription: true,
+      };
+    case "image":
+      return { id, kind: "image", url: "https://", variant: "inline" };
+    case "actions":
+      return { id, kind: "actions", items: [] };
     case "richText":
       return { id, kind: "richText", contentUnitId: "" };
     case "collection":
@@ -436,10 +473,13 @@ export function createZoneSection(
 }
 
 function* iterateSections(
-  sections: readonly ZonePageSection[],
-): Generator<ZonePageSection> {
+  sections: readonly ZoneEditableSection[],
+): Generator<ZoneEditableSection> {
   for (const section of sections) {
     yield section;
+    if (section.kind === "stage") {
+      yield* iterateSections(section.sections);
+    }
     if (section.kind === "tabs") {
       for (const tab of section.tabs) yield* iterateSections(tab.sections);
     }

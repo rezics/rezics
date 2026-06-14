@@ -1,6 +1,7 @@
 import type { ZonePageSection } from "@rezics/contract";
 import { ColumnsSection } from "./ColumnsSection";
 import type { ZonePortalContext } from "./shared";
+import { StageSection } from "./StageSection";
 import { TabsSection } from "./TabsSection";
 import { ZoneContentSectionView } from "./ZoneContentSections";
 
@@ -11,6 +12,9 @@ function ZoneSectionView({
   section: ZonePageSection;
   ctx: ZonePortalContext;
 }) {
+  if (section.kind === "stage") {
+    return <StageSection section={section} ctx={ctx} />;
+  }
   if (section.kind === "columns") {
     return <ColumnsSection section={section} ctx={ctx} />;
   }

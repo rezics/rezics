@@ -22,6 +22,7 @@ import {
   type ZoneSectionData,
   type ZoneSectionItem,
   type ZoneSectionQuery,
+  type ZoneStageChildSection,
   type ZoneTheme,
   type ZoneTranslation,
 } from "@rezics/contract";
@@ -348,6 +349,13 @@ function collectCollectionItemRefs(
   }
 }
 
+function collectLinkTargetRefs(
+  target: ZoneCollectionItem["target"] | undefined,
+  refs: ZoneRefAccumulator,
+) {
+  if (target?.kind === "unit") refs.targetUnitIds.add(target.unitId);
+}
+
 function collectQueryRefs(query: ZoneSectionQuery, refs: ZoneRefAccumulator) {
   if (query.realm && query.realm !== "context") {
     for (const id of query.realm.unitIds) refs.realmUnitIds.add(id);
@@ -360,8 +368,12 @@ function collectContentSectionRefs(
 ) {
   pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
   switch (section.kind) {
-    case "hero":
-      collectCollectionItemRefs(section.ctas, refs);
+    case "image":
+      pushIfPresent(refs.labelUnitIds, section.altLabelUnitId);
+      collectLinkTargetRefs(section.target, refs);
+      break;
+    case "actions":
+      collectCollectionItemRefs(section.items, refs);
       break;
     case "richText":
       refs.fragmentUnitIds.add(section.contentUnitId);
@@ -379,14 +391,51 @@ function collectContentSectionRefs(
       break;
     case "feed":
     case "stats":
+    case "sources":
       break;
   }
+}
+
+function collectStageChildSectionRefs(
+  section: ZoneStageChildSection,
+  refs: ZoneRefAccumulator,
+) {
+  if (section.kind === "zoneInfo") return;
+  if (section.kind === "tabs") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const tab of section.tabs) {
+      pushIfPresent(refs.labelUnitIds, tab.titleLabelUnitId);
+      for (const inner of tab.sections) collectContentSectionRefs(inner, refs);
+    }
+    return;
+  }
+  if (section.kind === "columns") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const column of section.columns) {
+      for (const inner of column.sections) {
+        if (inner.kind === "tabs") {
+          collectStageChildSectionRefs(inner, refs);
+        } else {
+          collectContentSectionRefs(inner, refs);
+        }
+      }
+    }
+    return;
+  }
+  collectContentSectionRefs(section, refs);
 }
 
 function collectPageSectionRefs(
   section: ZonePageSection,
   refs: ZoneRefAccumulator,
 ) {
+  if (section.kind === "stage") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const child of section.sections) {
+      collectStageChildSectionRefs(child, refs);
+    }
+    return;
+  }
   if (section.kind === "tabs") {
     pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
     for (const tab of section.tabs) {
@@ -453,17 +502,76 @@ export function collectZoneRefs(input: {
 
 type LocatedSection =
   | { kind: "content"; section: ZoneContentSection }
-  | { kind: "container"; section: ZonePageSection };
+  | { kind: "container"; section: ZonePageSection | ZoneStageChildSection };
+
+function isZoneContentSection(
+  section: ZonePageSection | ZoneStageChildSection,
+): section is ZoneContentSection {
+  switch (section.kind) {
+    case "image":
+    case "actions":
+    case "richText":
+    case "collection":
+    case "query":
+    case "feed":
+    case "stats":
+    case "sources":
+      return true;
+    case "stage":
+    case "zoneInfo":
+    case "tabs":
+    case "columns":
+      return false;
+  }
+}
+
+function* iterateColumnSections(
+  sections: readonly (
+    | ZoneContentSection
+    | Extract<ZonePageSection, { kind: "tabs" }>
+  )[],
+): Generator<{
+  section: ZoneContentSection | Extract<ZonePageSection, { kind: "tabs" }>;
+  container: boolean;
+}> {
+  for (const inner of sections) {
+    yield { section: inner, container: inner.kind === "tabs" };
+    if (inner.kind === "tabs") {
+      for (const tab of inner.tabs) {
+        for (const paneSection of tab.sections) {
+          yield { section: paneSection, container: false };
+        }
+      }
+    }
+  }
+}
 
 function* iteratePageSections(page: ZonePageConfig): Generator<{
-  section: ZonePageSection | ZoneContentSection;
+  section: ZonePageSection | ZoneStageChildSection;
   container: boolean;
 }> {
   for (const section of page.sections) {
     yield {
       section,
-      container: section.kind === "tabs" || section.kind === "columns",
+      container: !isZoneContentSection(section),
     };
+    if (section.kind === "stage") {
+      for (const child of section.sections) {
+        yield { section: child, container: !isZoneContentSection(child) };
+        if (child.kind === "tabs") {
+          for (const tab of child.tabs) {
+            for (const inner of tab.sections) {
+              yield { section: inner, container: false };
+            }
+          }
+        }
+        if (child.kind === "columns") {
+          yield* iterateColumnSections(
+            child.columns.flatMap((c) => c.sections),
+          );
+        }
+      }
+    }
     if (section.kind === "tabs") {
       for (const tab of section.tabs) {
         for (const inner of tab.sections) {
@@ -473,16 +581,7 @@ function* iteratePageSections(page: ZonePageConfig): Generator<{
     }
     if (section.kind === "columns") {
       for (const column of section.columns) {
-        for (const inner of column.sections) {
-          yield { section: inner, container: inner.kind === "tabs" };
-          if (inner.kind === "tabs") {
-            for (const tab of inner.tabs) {
-              for (const paneSection of tab.sections) {
-                yield { section: paneSection, container: false };
-              }
-            }
-          }
-        }
+        yield* iterateColumnSections(column.sections);
       }
     }
   }
@@ -1915,10 +2014,12 @@ export class ZoneService {
         }
         return { pageId, sectionId, items: [], stats, nextCursor: null };
       }
-      case "hero":
-        throw new AppError(400, "Hero sections have no section data", {
+      case "image":
+      case "actions":
+      case "sources":
+        throw new AppError(400, "Display sections have no section data", {
           code: "ZONE_SECTION_NO_DATA",
-          details: { sectionId },
+          details: { sectionId, kind: section.kind },
         });
       default:
         throw new AppError(400, "Unsupported section data kind", {

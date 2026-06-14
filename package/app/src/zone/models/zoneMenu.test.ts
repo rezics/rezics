@@ -275,7 +275,7 @@ describe("section titles", () => {
     ).toBeNull();
   });
 
-  it("maps content kinds to default i18n keys; hero and containers have none", () => {
+  it("maps content kinds to default i18n keys; stage chrome has none", () => {
     expect(zoneSectionTitleKey("query")).toBe("zone:section_title_query");
     expect(zoneSectionTitleKey("collection")).toBe(
       "zone:section_title_collection",
@@ -284,7 +284,10 @@ describe("section titles", () => {
     expect(zoneSectionTitleKey("richText")).toBe("zone:section_title_richText");
     expect(zoneSectionTitleKey("stats")).toBe("zone:section_title_stats");
     expect(zoneSectionTitleKey("sources")).toBe("zone:section_title_sources");
-    expect(zoneSectionTitleKey("hero")).toBeNull();
+    expect(zoneSectionTitleKey("stage")).toBeNull();
+    expect(zoneSectionTitleKey("zoneInfo")).toBeNull();
+    expect(zoneSectionTitleKey("image")).toBeNull();
+    expect(zoneSectionTitleKey("actions")).toBeNull();
     expect(zoneSectionTitleKey("tabs")).toBeNull();
     expect(zoneSectionTitleKey("columns")).toBeNull();
   });

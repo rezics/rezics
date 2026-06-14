@@ -97,7 +97,11 @@ function samplePage(): ZonePage {
     schema: "rezics/zone-page",
     version: 1,
     sections: [
-      { id: "hero", kind: "hero" },
+      {
+        id: "stage",
+        kind: "stage",
+        sections: [{ id: "zone-info", kind: "zoneInfo" }],
+      },
       {
         id: "cols",
         kind: "columns",
@@ -273,17 +277,20 @@ describe("section nesting guards", () => {
   it("rejects containers inside tabs panes", () => {
     expect(canInsertZoneSectionKind("tabs", "tabs")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "columns")).toBe(false);
+    expect(canInsertZoneSectionKind("tabs", "stage")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "query")).toBe(true);
     expect(canInsertZoneSectionKind("tabs", "sources")).toBe(true);
   });
 
-  it("rejects columns inside columns but allows tabs", () => {
+  it("rejects stage and columns inside columns but allows tabs", () => {
     expect(canInsertZoneSectionKind("columns", "columns")).toBe(false);
+    expect(canInsertZoneSectionKind("columns", "stage")).toBe(false);
     expect(canInsertZoneSectionKind("columns", "tabs")).toBe(true);
-    expect(canInsertZoneSectionKind("columns", "hero")).toBe(true);
+    expect(canInsertZoneSectionKind("columns", "image")).toBe(true);
   });
 
-  it("allows every kind at page level", () => {
+  it("allows stage and containers at page level", () => {
+    expect(canInsertZoneSectionKind("page", "stage")).toBe(true);
     expect(canInsertZoneSectionKind("page", "columns")).toBe(true);
     expect(canInsertZoneSectionKind("page", "tabs")).toBe(true);
   });
@@ -292,12 +299,28 @@ describe("section nesting guards", () => {
 describe("section ids", () => {
   it("collects nested ids across the managed page and containers", () => {
     expect(collectZoneSectionIds(sampleDraft().pages)).toEqual([
-      "hero",
+      "stage",
+      "zone-info",
       "cols",
       "tabs",
       "q-1",
       "stats",
     ]);
+  });
+
+  it("creates a stage with zoneInfo by default", () => {
+    expect(createZoneSection("stage", "stage", ["stage"])).toEqual({
+      id: "stage",
+      kind: "stage",
+      sections: [
+        {
+          id: "stage-info-1",
+          kind: "zoneInfo",
+          showTitle: true,
+          showDescription: true,
+        },
+      ],
+    });
   });
 
   it("creates a valid two-column section by default", () => {
@@ -722,11 +745,13 @@ describe("translation rows", () => {
 describe("page helpers", () => {
   it("adds fetched page drafts without overwriting local page edits", () => {
     const draft = sampleDraft();
-    draft.pages.home = { sections: [{ id: "local", kind: "hero" }] };
+    draft.pages.home = {
+      sections: [{ id: "local", kind: "stage", sections: [] }],
+    };
     const samePage = addZonePageDraftIfMissing(draft, "home", samplePage());
     expect(samePage).toBe(draft);
     expect(samePage.pages.home.sections).toEqual([
-      { id: "local", kind: "hero" },
+      { id: "local", kind: "stage", sections: [] },
     ]);
 
     const nextPage = addZonePageDraftIfMissing(

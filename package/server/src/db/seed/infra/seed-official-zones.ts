@@ -319,7 +319,11 @@ function buildBookConfig(
     pageIds: OFFICIAL_PAGE_IDS.book,
     filters: { types: ["BOOK"] },
     homeSections: [
-      { id: "hero", kind: "hero", showDescription: true },
+      {
+        id: "stage",
+        kind: "stage",
+        sections: [{ id: "zone-info", kind: "zoneInfo" }],
+      },
       {
         id: "latest-books",
         kind: "query",
@@ -400,7 +404,11 @@ const realmsConfig = officialConfig({
   pageIds: OFFICIAL_PAGE_IDS.realms,
   filters: { types: ["REALM"] },
   homeSections: [
-    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "stage",
+      kind: "stage",
+      sections: [{ id: "zone-info", kind: "zoneInfo" }],
+    },
     {
       id: "latest-realms",
       kind: "query",
@@ -449,7 +457,11 @@ const zonesConfig = officialConfig({
   pageIds: OFFICIAL_PAGE_IDS.zones,
   filters: { types: ["ZONE"] },
   homeSections: [
-    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "stage",
+      kind: "stage",
+      sections: [{ id: "zone-info", kind: "zoneInfo" }],
+    },
     {
       id: "latest-zones",
       kind: "query",
@@ -498,7 +510,11 @@ const popularConfig = officialConfig({
   pageIds: OFFICIAL_PAGE_IDS.popular,
   filters: {},
   homeSections: [
-    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "stage",
+      kind: "stage",
+      sections: [{ id: "zone-info", kind: "zoneInfo" }],
+    },
     {
       id: "popular-now",
       kind: "query",

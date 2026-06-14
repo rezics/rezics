@@ -1605,14 +1605,14 @@ export type ToaruZoneConfig = {
 
 /**
  * Pure builder for the /z/toaru zone split envelopes, exercising every zone
- * primitive: hero with CTAs, columns, richText fragments, collections, tabs
+ * primitive: stage with actions, columns, richText fragments, collections, tabs
  * with per-target queries, feed, stats, label-driven menus, header, boundary
  * filters, and theme tokens. The factory writes this straight to Zone and
  * ZonePage rows (bypassing service validation) while the read path throws on
  * invalid envelopes, so the output must always satisfy the contract schemas
  * and structural invariants (page-local section ids, menu depth ≤ 3, header
  * menu reference); tests assert both.
- * /z/toaru 专区拆分信封的纯构造器，演练所有专区原语：带 CTA 的 hero、
+ * /z/toaru 专区拆分信封的纯构造器，演练所有专区原语：带行动的 stage、
  * columns、richText 片段、collection、按目标查询的 tabs、feed、stats、
  * 标签驱动的菜单、header、边界过滤与主题 token。工厂将其直接写入 Zone 与
  * ZonePage 行（绕过 service 校验），而读取路径会对非法信封抛错，因此输出
@@ -1796,26 +1796,32 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
           version: 1,
           sections: [
             {
-              id: "hero",
-              kind: "hero",
-              showDescription: true,
-              ctas: [
-                // `external.text` is the single sanctioned inline-text
-                // exception in zone configs.
-                // `external.text` 是专区配置中唯一被允许的内联文本例外。
+              id: "stage",
+              kind: "stage",
+              sections: [
+                { id: "zone-info", kind: "zoneInfo" },
                 {
-                  target: {
-                    kind: "external",
-                    url: "/r/toaru/create?mode=wiki",
-                    text: "建立條目",
-                  },
-                },
-                {
-                  target: {
-                    kind: "external",
-                    url: "/r/toaru",
-                    text: "r/toaru",
-                  },
+                  id: "stage-actions",
+                  kind: "actions",
+                  items: [
+                    // `external.text` is the single sanctioned inline-text
+                    // exception in zone configs.
+                    // `external.text` 是专区配置中唯一被允许的内联文本例外。
+                    {
+                      target: {
+                        kind: "external",
+                        url: "/r/toaru/create?mode=wiki",
+                        text: "建立條目",
+                      },
+                    },
+                    {
+                      target: {
+                        kind: "external",
+                        url: "/r/toaru",
+                        text: "r/toaru",
+                      },
+                    },
+                  ],
                 },
               ],
             },

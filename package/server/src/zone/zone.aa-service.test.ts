@@ -235,9 +235,13 @@ function basePage(): ZonePageConfig {
     version: 1,
     sections: [
       {
-        id: "s-hero",
-        kind: "hero",
-        bannerImageUrl: "https://example.com/a.jpg",
+        id: "s-stage",
+        kind: "stage",
+        background: { imageUrl: "https://example.com/a.jpg" },
+        sections: [
+          { id: "s-zone-info", kind: "zoneInfo" },
+          { id: "s-image", kind: "image", url: "https://example.com/logo.jpg" },
+        ],
       },
       {
         id: "s-columns",
@@ -947,13 +951,16 @@ describe("section data execution", () => {
     expect((richText?.doc as any)?.main?.source).toBe("歡迎");
   });
 
-  test("container and hero sections expose no data endpoint", async () => {
+  test("container and display sections expose no data endpoint", async () => {
     expect(
       service.getSectionData("zone-1", "page-home", "s-tabs"),
     ).rejects.toThrow("Container sections have no section data");
     expect(
-      service.getSectionData("zone-1", "page-home", "s-hero"),
-    ).rejects.toThrow("Hero sections have no section data");
+      service.getSectionData("zone-1", "page-home", "s-stage"),
+    ).rejects.toThrow("Container sections have no section data");
+    expect(
+      service.getSectionData("zone-1", "page-home", "s-image"),
+    ).rejects.toThrow("Display sections have no section data");
   });
 });
 

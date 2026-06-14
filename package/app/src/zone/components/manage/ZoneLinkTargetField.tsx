@@ -40,9 +40,10 @@ function defaultTarget(
 }
 
 /**
- * Shared `ZoneLinkTarget` editor for menu nodes, collection items, and hero
- * CTAs: none (menu groups only) | unit by id/search | zone page | external.
- * 菜单节点、集合条目与 hero CTA 共享的 `ZoneLinkTarget` 编辑器：
+ * Shared `ZoneLinkTarget` editor for menu nodes, collection items, images, and
+ * action items: none (menu groups only) | unit by id/search | zone page |
+ * external.
+ * 菜单节点、集合条目、图片与行动条目共享的 `ZoneLinkTarget` 编辑器：
  * 无（仅菜单分组）| 按 id/搜索的 Unit | 专区页面 | 外部链接。
  */
 export function ZoneLinkTargetField({

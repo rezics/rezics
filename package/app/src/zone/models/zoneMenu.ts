@@ -222,9 +222,9 @@ const SECTION_TITLE_KEYS: Partial<Record<ZoneSectionKind, string>> = {
 /**
  * Section title resolution chain: `titleLabelUnitId` (LABEL unit) →
  * kind-default frontend i18n key (`zoneSectionTitleKey`). Containers and
- * hero have no default title.
+ * display-only stage chrome have no default title.
  * 分区标题解析链：`titleLabelUnitId`（LABEL Unit）→ 按 kind 的默认前端
- * i18n key（`zoneSectionTitleKey`）。容器与 hero 没有默认标题。
+ * i18n key（`zoneSectionTitleKey`）。容器与展示型 stage chrome 没有默认标题。
  */
 export function zoneSectionTitleText(
   section: { titleLabelUnitId?: string },

@@ -383,16 +383,16 @@ export function ZoneManagePage({
 
   const contextRealmUnitId =
     draft.context.kind === "realm" ? draft.context.realmUnitId : null;
-  const localizedHeroRow =
+  const localizedZoneInfoRow =
     rows.find(
       (row) =>
         row.language === i18n.language &&
         (row.title.trim() || row.description.trim()),
     ) ?? rows.find((row) => row.title.trim() || row.description.trim());
-  const heroTitle =
-    localizedHeroRow?.title.trim() || zone.name || zone.slug || null;
-  const heroDescription =
-    localizedHeroRow?.description.trim() || zone.description || null;
+  const zoneTitle =
+    localizedZoneInfoRow?.title.trim() || zone.name || zone.slug || null;
+  const zoneDescription =
+    localizedZoneInfoRow?.description.trim() || zone.description || null;
   const themeImages = draft.theme.images ?? zone.theme.images ?? {};
   const managePages =
     sortedPages.length > 0
@@ -414,8 +414,8 @@ export function ZoneManagePage({
     contextRealmSlug: contextRealmUnitId
       ? (refUnits[contextRealmUnitId]?.slug ?? null)
       : null,
-    heroTitle,
-    heroDescription,
+    zoneTitle,
+    zoneDescription,
     themeBannerUrl: themeImages.bannerUrl ?? null,
     themeLogoUrl: themeImages.logoUrl ?? null,
   };

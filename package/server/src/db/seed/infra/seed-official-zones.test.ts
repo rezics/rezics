@@ -96,7 +96,7 @@ describe("seedOfficialZones", () => {
 
     expect(book?.config.boundary.filters).toEqual({ types: ["BOOK"] });
     expect(book?.config.pages[0]?.config.sections).toMatchObject([
-      { id: "hero", kind: "hero" },
+      { id: "stage", kind: "stage" },
       {
         id: "latest-books",
         kind: "query",
@@ -156,7 +156,7 @@ describe("seedOfficialZones", () => {
     ]);
     expect(
       book?.config.pages[0]?.config.sections.map((section) => section.kind),
-    ).toEqual(["hero", "query", "query", "query", "query", "query"]);
+    ).toEqual(["stage", "query", "query", "query", "query", "query"]);
   });
 
   test("frames Realms as a catalog library instead of trending discovery", () => {
@@ -165,7 +165,7 @@ describe("seedOfficialZones", () => {
     );
     expect(realms?.config.boundary.filters).toEqual({ types: ["REALM"] });
     expect(realms?.config.pages[0]?.config.sections).toMatchObject([
-      { id: "hero", kind: "hero" },
+      { id: "stage", kind: "stage" },
       {
         id: "latest-realms",
         kind: "query",
@@ -210,7 +210,7 @@ describe("seedOfficialZones", () => {
     expect(zones?.slug).toBe("zones");
     expect(zones?.config.boundary.filters).toEqual({ types: ["ZONE"] });
     expect(zones?.config.pages[0]?.config.sections).toMatchObject([
-      { id: "hero", kind: "hero" },
+      { id: "stage", kind: "stage" },
       {
         id: "latest-zones",
         kind: "query",
