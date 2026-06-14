@@ -158,7 +158,8 @@ export function ZoneManageJsonFrame({
                 value={text}
                 onChange={updateJson}
                 diagnostics={diagnostics}
-                className="h-96 overflow-hidden rounded-md"
+                resize={{ height: 512, minHeight: 320, maxHeight: 960 }}
+                className="overflow-hidden rounded-md"
               />
             </CardContent>
           </Card>
