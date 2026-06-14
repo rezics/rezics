@@ -90,6 +90,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import {
   AddUnitTranslationLanguageDialog,
   UnitTranslationLanguageBar,
@@ -308,14 +309,11 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
                 onChange={(event) => setSlug(event.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-avatar">{t("entity:avatar_url")}</Label>
-              <Input
-                id="entity-avatar"
-                value={avatar}
-                onChange={(event) => setAvatar(event.target.value)}
-              />
-            </div>
+            <ImageUploadField
+              value={avatar || null}
+              onChange={(url) => setAvatar(url ?? "")}
+              label={t("entity:avatar_url")}
+            />
             <Label
               htmlFor="entity-verified"
               className="flex flex-row items-center gap-2 text-sm"

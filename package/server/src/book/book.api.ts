@@ -29,6 +29,7 @@ import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { resolveEffectiveReadLanguageInput } from "@/unit/language-resolution";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import { unitService } from "@/unit/unit.service";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import { bookService } from "./book.service";
 import { mapBookToDTO } from "./mapper";
 
@@ -87,6 +88,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
   .post(
     "/",
     async ({ body, identity }): Promise<BookResponse> => {
+      assertMediaUrl(body.coverUrl);
       const bookReq: CreateBookInput = {
         ...body,
         userId: identity.userId,
@@ -195,6 +197,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
         !Array.isArray(body.patch.extension)
           ? (body.patch.extension as Record<string, unknown>)
           : {};
+      if (extension.coverUrl !== undefined) assertMediaUrl(extension.coverUrl as string | null);
       const unit =
         body.patch.unit &&
         typeof body.patch.unit === "object" &&

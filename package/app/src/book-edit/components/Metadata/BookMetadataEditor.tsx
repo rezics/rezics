@@ -25,6 +25,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import { aiDisclosureLabelMap } from "@/unit";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
 
@@ -120,19 +121,11 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
-        <div className="space-y-1">
-          <label className="text-sm" htmlFor="book-cover">
-            {t("book:fields_cover_url")}
-          </label>
-          <input
-            id="book-cover"
-            value={currentCoverUrl}
-            onChange={(e) => onChange?.({ coverUrl: e.target.value })}
-            disabled={disabled}
-            placeholder={t("common:url_placeholder")}
-            className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
-          />
-        </div>
+        <ImageUploadField
+          value={currentCoverUrl || null}
+          onChange={(url) => onChange?.({ coverUrl: url ?? "" })}
+          label={t("book:fields_cover_url")}
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

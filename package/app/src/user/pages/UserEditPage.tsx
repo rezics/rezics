@@ -25,6 +25,7 @@ import type React from "react";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import { UserLoading } from "./UserState";
 
 export interface UserEditPageProps {
@@ -177,19 +178,11 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   required
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user-edit-avatar">
-                  {t("entity:avatar_url")}
-                </Label>
-                <Input
-                  id="user-edit-avatar"
-                  value={formData.avatar ?? ""}
-                  onChange={(e) => handleChange("avatar", e.target.value)}
-                />
-                <p className="text-xs text-text-secondary">
-                  {t("settings:profile_avatar_help")}
-                </p>
-              </div>
+              <ImageUploadField
+                value={formData.avatar || null}
+                onChange={(url) => handleChange("avatar", url ?? "")}
+                label={t("entity:avatar_url")}
+              />
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="user-edit-summary">
                   {t("settings:profile_summary")}

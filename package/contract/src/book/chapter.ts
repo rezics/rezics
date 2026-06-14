@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import { mediaUrlSchema } from "../media-url";
 import { paginationLimitSchema } from "../pagination";
 import {
   aiDisclosureDetailsSchema,
@@ -166,7 +167,7 @@ export const createChapterSchema = t.Object({
   // 父书籍的 unit id（持久化后即 Unit.targetUnitId）。
   // 必须解析为 Unit(type=BOOK) — 否则服务端拒绝。
   targetUnitId: t.String(),
-  coverUrl: t.Optional(t.String()),
+  coverUrl: t.Optional(mediaUrlSchema),
   status: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
@@ -179,7 +180,7 @@ export const updateChapterSchema = t.Object({
   title: t.Optional(t.String()),
   content: t.Optional(contentDocWriteSchema),
   targetUnitId: t.Optional(t.Nullable(t.String())),
-  coverUrl: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(mediaUrlSchema)),
   status: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),

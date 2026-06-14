@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
+import { mediaUrlSchema } from "../media-url";
 
 export const realmRuleExtraNote =
   "Single Post Unit ID that holds the realm's rule content shown before joining.";
@@ -75,7 +76,7 @@ export type RealmTagTreeLabel = (typeof realmTagTreeLabelSchema)["static"];
 export const realmImageExtraSchema = t.Object(
   {
     kind: t.Literal("url"),
-    url: t.String(),
+    url: mediaUrlSchema,
   },
   { additionalProperties: false },
 );

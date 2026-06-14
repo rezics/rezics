@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { contentLanguageSchema } from "../language";
+import { mediaUrlSchema } from "../media-url";
 import { userDTOSchema } from "../user/user";
 
 export const accountStageSchema = t.Union([
@@ -70,7 +71,7 @@ export type ProfileSetupError = (typeof profileSetupErrorSchema)["static"];
 export const accountSetupBodySchema = t.Object({
   displayName: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
   slug: t.String({ minLength: 1 }),
-  avatar: t.Optional(t.String()),
+  avatar: t.Optional(mediaUrlSchema),
   preferredLanguages: t.Optional(t.Array(contentLanguageSchema)),
 });
 export type AccountSetupBody = (typeof accountSetupBodySchema)["static"];

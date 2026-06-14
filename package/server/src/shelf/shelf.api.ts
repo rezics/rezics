@@ -34,6 +34,7 @@ import { authMacro, tryResolveIdentity } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { userService } from "@/user/service/user.service";
 import { AppError } from "@/utils/errors";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import { shelfService } from "./shelf.service";
 import { ensureSystemShelf } from "./system-shelves";
 
@@ -215,6 +216,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .post(
     "/",
     async ({ body, identity }): Promise<ShelfDTO> => {
+      assertMediaUrl(body.coverUrl);
       return shelfService.create(body, identity.userId);
     },
     {
@@ -247,6 +249,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to update this shelf",
         );
       }
+      assertMediaUrl(body.coverUrl);
       return shelfService.update(params.unitId, body);
     },
     {

@@ -15,6 +15,7 @@ import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { type FormEvent, useMemo, useState } from "react";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import {
   suggestCreditEligibility,
   suggestSubjectEligibility,
@@ -161,15 +162,11 @@ export function EntityInlineCreateForm({
           </select>
         </div>
       </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="entity-inline-avatar">{t("entity:avatar_url")}</Label>
-        <Input
-          id="entity-inline-avatar"
-          value={avatar}
-          onChange={(e) => setAvatar(e.target.value)}
-          placeholder={t("entity:avatar_placeholder")}
-        />
-      </div>
+      <ImageUploadField
+        value={avatar || null}
+        onChange={(url) => setAvatar(url ?? "")}
+        label={t("entity:avatar_url")}
+      />
       <EligibilityRoleEditor
         label={t("entity:credit_eligibility")}
         roles={eligibleCreditRoles}

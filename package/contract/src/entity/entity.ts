@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { creationModeSchema } from "../content/authority";
 import { contentDocWriteSchema } from "../content/doc-v1";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import { mediaUrlSchema } from "../media-url";
 import { unitTranslationDTOSchema } from "../unit/unit";
 import { creditAttributionRoleKeySchema } from "./credit-attribution.roles";
 import { subjectAttributionRoleKeySchema } from "./subject-attribution.roles";
@@ -135,7 +136,7 @@ export const createEntityTranslationSchema = t.Object({
 export const createEntitySchema = t.Object({
   creationMode: t.Optional(creationModeSchema),
   kind: t.Optional(t.Nullable(entityKindKeySchema)),
-  avatar: t.Optional(t.Nullable(t.String())),
+  avatar: t.Optional(t.Nullable(mediaUrlSchema)),
   eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),
   eligibleSubjectRoles: t.Array(subjectAttributionRoleKeySchema),
   /**
@@ -155,7 +156,7 @@ export type CreateEntityInput = (typeof createEntitySchema)["static"];
 
 export const updateEntitySchema = t.Object({
   kind: t.Optional(t.Nullable(entityKindKeySchema)),
-  avatar: t.Optional(t.Nullable(t.String())),
+  avatar: t.Optional(t.Nullable(mediaUrlSchema)),
   eligibleCreditRoles: t.Optional(t.Array(creditAttributionRoleKeySchema)),
   eligibleSubjectRoles: t.Optional(t.Array(subjectAttributionRoleKeySchema)),
   /**

@@ -11,6 +11,7 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole, verifyAdminFromDb } from "@/middleware";
 import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import { mapEntityToDTO } from "./entity.mapper";
 import { entityService } from "./entity.service";
 
@@ -91,6 +92,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
   .post(
     "/",
     async ({ body, identity }): Promise<EntityDTO> => {
+      assertMediaUrl(body.avatar);
       const isAdmin =
         isAdminRole(identity) || (await verifyAdminFromDb(identity.userId));
       const row = await entityService.create(body, {
@@ -124,6 +126,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
         !Array.isArray(body.patch.entity)
           ? (body.patch.entity as Record<string, unknown>)
           : {};
+      if (entity.avatar !== undefined) assertMediaUrl(entity.avatar as string | null);
       const translations =
         body.patch.translations &&
         typeof body.patch.translations === "object" &&

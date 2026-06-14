@@ -10,6 +10,7 @@ import {
 } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
 import { authMacro, tryResolveIdentity } from "@/middleware";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import {
   appendToList,
   clearSingleExtraKey,
@@ -154,6 +155,14 @@ export const realmExtraApi = new Elysia()
   .put(
     "/realm/:unitId/extra/:key",
     async ({ params, body, identity }): Promise<RealmExtraOkResponse> => {
+      if (
+        (params.key === "avatar" || params.key === "banner") &&
+        body.value &&
+        typeof body.value === "object" &&
+        body.value.kind === "url"
+      ) {
+        assertMediaUrl(body.value.url);
+      }
       try {
         if (params.key === "tagTree") {
           await setTagTreeExtra(identity, params.unitId, body.value);

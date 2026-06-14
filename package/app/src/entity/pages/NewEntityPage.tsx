@@ -9,6 +9,7 @@ import {
   suggestCreditEligibility,
   suggestSubjectEligibility,
 } from "@/entity-picker";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import { unitHref } from "@/shared/ui/link";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
@@ -123,15 +124,11 @@ export function NewEntityPage() {
             </select>
           </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-avatar">{t("entity:avatar_url")}</Label>
-          <Input
-            id="entity-avatar"
-            value={avatar}
-            onChange={(e) => setAvatar(e.target.value)}
-            placeholder={t("entity:avatar_person_placeholder")}
-          />
-        </div>
+        <ImageUploadField
+          value={avatar || null}
+          onChange={(url) => setAvatar(url ?? "")}
+          label={t("entity:avatar_url")}
+        />
 
         {error ? <p className="text-sm text-text-error">{error}</p> : null}
 

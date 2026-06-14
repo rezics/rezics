@@ -3,6 +3,7 @@ import {
   slugAvailabilityQuerySchema,
 } from "@rezics/contract";
 import { Elysia, status } from "elysia";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import {
   checkAccountSlugAvailability,
   completeProfileSetupFromMain,
@@ -42,7 +43,10 @@ export const authPublicApi = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/account/profile-setup",
-    ({ request, body }) => completeProfileSetupFromMain(request, body),
+    ({ request, body }) => {
+      assertMediaUrl(body.avatar);
+      return completeProfileSetupFromMain(request, body);
+    },
     {
       body: accountSetupBodySchema,
       detail: {

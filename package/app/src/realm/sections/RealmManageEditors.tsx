@@ -56,6 +56,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MoveHandler, NodeRendererProps, TreeApi } from "react-arborist";
 import { Tree } from "react-arborist";
 import { toast } from "sonner";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -1662,60 +1663,36 @@ function RealmImagePicker({
   savedMessage: string;
   value?: RealmBannerExtra | RealmAvatarExtra | null;
 }) {
-  const [url, setUrl] = useState(value?.kind === "url" ? value.url : "");
-  const setValue = useSetRealmExtraValueMutation();
+  const setExtraValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setUrl(value?.kind === "url" ? value.url : "");
-  }, [value]);
+  const currentUrl = value?.kind === "url" ? value.url : null;
 
-  const save = async () => {
-    setError(null);
+  const handleChange = async (url: string | null) => {
     try {
-      if (url.trim()) {
-        await setValue.mutateAsync({
+      if (url) {
+        await setExtraValue.mutateAsync({
           realmId,
           key: extraKey,
-          value: { kind: "url", url: url.trim() },
+          value: { kind: "url", url },
         });
       } else {
         await clearValue.mutateAsync({ realmId, key: extraKey });
       }
       toast.success(savedMessage);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setError(message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       toast.error(message);
     }
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
-      <Label>{label}</Label>
-      <Input
-        value={url}
-        onChange={(event) => setUrl(event.target.value)}
-        placeholder={getI18nRuntime().i18n.t(
-          "entity:realm_direct_image_url_placeholder",
-        )}
+    <div className="rounded-md bg-surface-subtle p-4">
+      <ImageUploadField
+        value={currentUrl}
+        onChange={(url) => void handleChange(url)}
+        label={label}
       />
-      <div className="flex justify-end gap-2">
-        {error && (
-          <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
-        )}
-        <Button type="button" variant="ghost" onClick={() => setUrl("")}>
-          {getI18nRuntime().i18n.t("common:clear")}
-        </Button>
-        <Button
-          type="button"
-          onClick={save}
-          disabled={setValue.isPending || clearValue.isPending}
-        >
-          {getI18nRuntime().i18n.t("common:save")}
-        </Button>
-      </div>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 import { Elysia, t } from "elysia";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import { mapZoneToDTO } from "./zone.mapper";
 import type { ZoneWithRelations } from "./zone.service";
 import { zoneService } from "./zone.service";
@@ -280,6 +281,13 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
       });
       if (denied) return denied;
 
+      const themeImages = (body.theme as ZoneTheme)?.images;
+      if (themeImages) {
+        assertMediaUrl(themeImages.logoUrl);
+        assertMediaUrl(themeImages.bannerUrl);
+        assertMediaUrl(themeImages.backgroundUrl);
+      }
+
       const zone = await zoneService.create({
         userId: identity.userId,
         slug: body.slug,
@@ -440,6 +448,12 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         zoneUnitId: params.unitId,
       });
       if (denied) return denied;
+      const themeImages = (body.theme as ZoneTheme)?.images;
+      if (themeImages) {
+        assertMediaUrl(themeImages.logoUrl);
+        assertMediaUrl(themeImages.bannerUrl);
+        assertMediaUrl(themeImages.backgroundUrl);
+      }
       return mapZoneToDTO(
         await zoneService.updateTheme(params.unitId, body.theme as ZoneTheme),
       );

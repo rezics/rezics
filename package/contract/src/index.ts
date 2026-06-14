@@ -22,6 +22,7 @@ export * from "./license";
 export * from "./link";
 export * from "./list-query-base";
 export * from "./media/index";
+export * from "./media-url";
 export * from "./meili";
 export * from "./notification";
 export * from "./notify";
