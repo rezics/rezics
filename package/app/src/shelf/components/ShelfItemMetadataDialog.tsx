@@ -1,9 +1,9 @@
 import {
   tagBatchTranslationsQuery,
   tagSearchQuery,
-  usePatchUserUnitCollectionMutation,
+  usePatchUserShelfItemMutation,
   userTagApplicationsForUnitQuery,
-  userUnitCollectionForUnitQuery,
+  userShelfItemForUnitQuery,
   useSetUserTagApplicationsMutation,
 } from "@rezics/api";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
@@ -48,13 +48,13 @@ function ShelfItemMetadataDialogContent({
   const [searchText, setSearchText] = useState("");
 
   const applicationsQuery = useQuery(userTagApplicationsForUnitQuery(unitId));
-  const collectionQuery = useQuery(userUnitCollectionForUnitQuery(unitId));
+  const shelfItemQuery = useQuery(userShelfItemForUnitQuery(unitId));
   const tagSearchQueryResult = useQuery(tagSearchQuery(tagSearchText.trim()));
   const tagTranslationsQuery = useQuery(
     tagBatchTranslationsQuery(selectedTagIds, locale),
   );
   const setTagsMutation = useSetUserTagApplicationsMutation();
-  const patchCollectionMutation = usePatchUserUnitCollectionMutation();
+  const patchShelfItemMutation = usePatchUserShelfItemMutation();
 
   useEffect(() => {
     if (!applicationsQuery.data) return;
@@ -62,8 +62,8 @@ function ShelfItemMetadataDialogContent({
   }, [applicationsQuery.data]);
 
   useEffect(() => {
-    setSearchText(collectionQuery.data?.searchText ?? "");
-  }, [collectionQuery.data]);
+    setSearchText(shelfItemQuery.data?.searchText ?? "");
+  }, [shelfItemQuery.data]);
 
   const selectedTags = useMemo(() => new Set(selectedTagIds), [selectedTagIds]);
   const tagLabels = tagTranslationsQuery.data ?? {};
@@ -71,9 +71,9 @@ function ShelfItemMetadataDialogContent({
     (tagSearchQueryResult.data?.tags ?? []) as SearchTagOption[]
   ).filter((tag) => !selectedTags.has(tag.unitId));
   const isSaving =
-    setTagsMutation.isPending || patchCollectionMutation.isPending;
-  const loadError = applicationsQuery.error ?? collectionQuery.error;
-  const saveError = setTagsMutation.error ?? patchCollectionMutation.error;
+    setTagsMutation.isPending || patchShelfItemMutation.isPending;
+  const loadError = applicationsQuery.error ?? shelfItemQuery.error;
+  const saveError = setTagsMutation.error ?? patchShelfItemMutation.error;
 
   function addTag(tagUnitId: string) {
     setSelectedTagIds((current) =>
@@ -91,7 +91,7 @@ function ShelfItemMetadataDialogContent({
     try {
       await Promise.all([
         setTagsMutation.mutateAsync({ unitId, tagUnitIds: selectedTagIds }),
-        patchCollectionMutation.mutateAsync({
+        patchShelfItemMutation.mutateAsync({
           unitId,
           searchText: normalizedSearchText || null,
         }),
@@ -179,17 +179,17 @@ function ShelfItemMetadataDialogContent({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor={`shelf-item-search-text-${unitId}`}>
-            {t("entity:collection_search_text_label")}
+            {t("entity:shelf_item_private_text_label")}
           </Label>
           <Textarea
             id={`shelf-item-search-text-${unitId}`}
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
-            placeholder={t("entity:collection_search_text_placeholder")}
+            placeholder={t("entity:shelf_item_private_text_placeholder")}
             rows={3}
           />
           <p className="text-sm text-text-secondary">
-            {t("entity:collection_search_text_hint")}
+            {t("entity:shelf_item_private_text_hint")}
           </p>
         </div>
 

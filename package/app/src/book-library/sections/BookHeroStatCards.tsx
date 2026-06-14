@@ -5,7 +5,7 @@ import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BookMarked as CollectionsBookmarkOutlined,
+  BookMarked as ShelvesBookmarkOutlined,
   Tag as LocalOfferOutlined,
   MessageSquareText as RateReviewOutlined,
 } from "lucide-react";
@@ -87,7 +87,7 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
     },
     {
       key: "shelves",
-      icon: <CollectionsBookmarkOutlined size={36} />,
+      icon: <ShelvesBookmarkOutlined size={36} />,
       count: shelfCount,
       label: t("book:hero_stat_shelves"),
       to: "/shelf/book/$bookId",

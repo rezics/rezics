@@ -98,7 +98,7 @@ export const ProfileOverviewPage: FC = () => {
         <ProfileStatLink
           label={t("settings:profile_tab_shelves")}
           count={shelvesCountQuery.data?.total}
-          to={`${profileBasePath}/shelves`}
+          to={`${profileBasePath}/shelf`}
           variant="compact"
         />
         <ProfileStatLink

@@ -43,8 +43,6 @@ const RESERVED: readonly string[] = [
   "library",
   "catalog",
   "catalogue",
-  "collection",
-  "collections",
   "reading",
   "readlist",
   "readlists",

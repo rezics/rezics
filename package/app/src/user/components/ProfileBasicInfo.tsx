@@ -172,7 +172,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           <ProfileStatLink
             label={t("settings:profile_tab_shelves")}
             count={shelvesCountQuery.data?.total}
-            to={`${profileBasePath}/shelves`}
+            to={`${profileBasePath}/shelf`}
           />
           <ProfileStatLink
             label={t("settings:profile_tab_content")}

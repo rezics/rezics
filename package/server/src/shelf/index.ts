@@ -1,5 +1,8 @@
-export { collectionApi } from "./collection.api";
-export { CollectionService, collectionService } from "./collection.service";
+export { shelfItemActionApi } from "./shelf-item-action.api";
+export {
+  ShelfItemActionService,
+  shelfItemActionService,
+} from "./shelf-item-action.service";
 export { shelfApi } from "./shelf.api";
 export {
   mapShelfItemToDTO,
@@ -16,4 +19,4 @@ export {
   SYSTEM_KIND_KEYS,
 } from "./system-shelves";
 export * from "./types";
-export { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";
+export { applyUserShelfItemMetadata } from "./user-shelf-item.service";

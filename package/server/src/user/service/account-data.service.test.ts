@@ -44,7 +44,7 @@ function repository(): AccountDataRepository {
         updatedAt: new Date("2026-03-01T00:00:00.000Z"),
       },
     ]),
-    listUserUnitCollections: mock(async () => [
+    listUserShelfItems: mock(async () => [
       {
         unitId: "book-1",
         searchText: "private alias",
@@ -105,7 +105,7 @@ describe("exportUserData", () => {
       },
     ]);
     expect(data.shelves[0]?.title).toBe("Favourites");
-    expect(data.userUnitCollections).toEqual([
+    expect(data.userShelfItems).toEqual([
       {
         unitId: "book-1",
         searchText: "private alias",

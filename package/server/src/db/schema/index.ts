@@ -189,7 +189,7 @@ export * from "../relations";
 export * from "./alias";
 export * from "./attribution";
 export * from "./book";
-export * from "./collection";
+export * from "./progress";
 export * from "./columns";
 export * from "./comment";
 export * from "./content-structure";

@@ -15,8 +15,8 @@ import { User } from "./identity";
 import { Unit } from "./unit";
 
 /**
- * General user-curated collections. Series is a separate first-class model.
- * 通用的用户自建收藏夹。Series 是独立的一等模型。
+ * General user-curated shelves. Series is a separate first-class model.
+ * 通用的用户自建书架。Series 是独立的一等模型。
  */
 export const Shelf = pgTable("Shelf", {
   unitId: uuid()
@@ -47,9 +47,9 @@ export const ShelfItem = pgTable(
     parentRole: varchar({ length: 32 }),
     position: varchar({ length: 64 }).notNull(), // Fractional Indexing
     /**
-     * User-authored indexing help only. Do not copy collected Unit content,
+     * User-authored indexing help only. Do not copy added Unit content,
      * metadata, tags, or shelf metadata into this field or its search index.
-     * 仅供用户自填的索引辅助信息。不要将被收藏的 Unit 内容、元数据、标签或书架
+     * 仅供用户自填的索引辅助信息。不要将加入书架的 Unit 内容、元数据、标签或书架
      * 元数据复制到此字段或其搜索索引中。
      */
     searchText: text(),

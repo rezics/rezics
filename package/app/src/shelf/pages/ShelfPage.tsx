@@ -25,8 +25,8 @@ import {
   shelfDetailQuery,
   shelfItemsInfiniteQuery,
   useCleanupOrphansMutation,
-  useCollectionStatusHydration,
   useHydratedShelfItems,
+  useShelfItemStatusHydration,
 } from "@rezics/api/shelf";
 import { userQueries } from "@rezics/api/user/user.queries";
 import {
@@ -341,7 +341,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     return [...ids];
   }, [shelf?.unitId, visibleStream]);
   useReactionHydration(reactionTargetIds);
-  useCollectionStatusHydration(reactionTargetIds, {
+  useShelfItemStatusHydration(reactionTargetIds, {
     enabled: !!currentUser,
   });
 

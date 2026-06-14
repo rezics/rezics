@@ -1,21 +1,21 @@
 // API Clients
 // API 客户端。
-export { collectionApi, shelfApi } from "./shelf.api";
+export { shelfItemActionApi, shelfApi } from "./shelf.api";
 
 // Query Keys
 // 查询键。
-export { collectionKeys, shelfKeys } from "./shelf.keys";
+export { shelfItemStatusKeys, shelfKeys } from "./shelf.keys";
 
 // Mutation Hooks
 // 变更 Hooks。
 export {
-  collectionMutations,
+  shelfItemActionMutations,
   shelfMutations,
+  useAddToShelvesMutation,
   useAddShelfItemMutation,
   useAttachReviewMutation,
   useBatchUpdateShelfItemsMutation,
   useCleanupOrphansMutation,
-  useCollectMutation,
   useCreateShelfMutation,
   useDeleteShelfMutation,
   useDetachReviewMutation,
@@ -29,10 +29,10 @@ export {
 // Query Configurations
 // 查询配置。
 export {
-  collectionQueries,
-  collectionStatusBatchQuery,
-  collectionStatusQuery,
   shelfDetailQuery,
+  shelfItemStatusBatchQuery,
+  shelfItemStatusQueries,
+  shelfItemStatusQuery,
   shelfInfiniteListQuery,
   shelfItemsInfiniteQuery,
   shelfItemsQuery,
@@ -40,7 +40,8 @@ export {
   shelfQueries,
   shelvesByUserQuery,
   shelvesByVariantContextQuery,
-  useCollectionStatusHydration,
+  useShelfItemStatusHydration,
+  userShelvesInfiniteQuery,
   userShelvesQuery,
 } from "./shelf.queries";
 // Types
@@ -48,10 +49,10 @@ export {
 export type {
   AddShelfItemInput,
   CleanupShelfOrphansInput,
-  CollectInput,
-  CollectionStatusBatchResponse,
-  CollectionStatusResponse,
-  CollectResponse,
+  AddToShelvesInput,
+  ShelfItemStatusBatchResponse,
+  ShelfItemStatusResponse,
+  AddToShelvesResponse,
   CreateShelfInput,
   ReorderShelfItemInput,
   SetShelfItemChildrenInput,

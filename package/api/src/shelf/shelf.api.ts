@@ -1,10 +1,10 @@
 import type {
   AddShelfItemInput,
   CleanupShelfOrphansInput,
-  CollectInput,
-  CollectionStatusBatchResponse,
-  CollectionStatusResponse,
-  CollectResponse,
+  AddToShelvesInput,
+  ShelfItemStatusBatchResponse,
+  ShelfItemStatusResponse,
+  AddToShelvesResponse,
   CreateShelfInput,
   EnsureSystemShelfResponse,
   ReorderShelfItemInput,
@@ -20,7 +20,6 @@ import type {
   ShelfItemType,
   ShelfListResponse,
   ShelfResponse,
-  ShelfSummaryDTO,
   SystemShelfKindKey,
   ToggleFavoriteResponse,
   UpdateShelfInput,
@@ -51,8 +50,8 @@ export const shelfApi = {
     );
   },
 
-  mine: async (): Promise<ShelfSummaryDTO[]> => {
-    return apiFetch<ShelfSummaryDTO[]>("/shelf/me");
+  mine: async (filters?: ShelfFilters): Promise<ShelfListResponse> => {
+    return apiFetch<ShelfListResponse>(`/shelf/me${buildQueryString(filters)}`);
   },
 
   create: async (input: CreateShelfInput): Promise<ShelfResponse> => {
@@ -207,29 +206,33 @@ export const shelfApi = {
   },
 };
 
-export const collectionApi = {
-  collect: async (input: CollectInput): Promise<CollectResponse> => {
-    return apiFetch<CollectResponse>("/collect", {
+export const shelfItemActionApi = {
+  addToShelves: async (
+    input: AddToShelvesInput,
+  ): Promise<AddToShelvesResponse> => {
+    return apiFetch<AddToShelvesResponse>("/shelf/items/add", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   toggleFavorite: async (targetId: string): Promise<ToggleFavoriteResponse> => {
-    return apiFetch<ToggleFavoriteResponse>("/collect/toggle-favorite", {
+    return apiFetch<ToggleFavoriteResponse>("/shelf/system/favorites/toggle", {
       method: "POST",
       body: JSON.stringify({ targetId }),
     });
   },
 
-  status: async (targetId: string): Promise<CollectionStatusResponse> => {
-    return apiFetch<CollectionStatusResponse>(`/collect/status/${targetId}`);
+  status: async (targetId: string): Promise<ShelfItemStatusResponse> => {
+    return apiFetch<ShelfItemStatusResponse>(
+      `/shelf/items/status/${encodePathPart(targetId)}`,
+    );
   },
 
   statusBatch: async (
     targetIds: string[],
-  ): Promise<CollectionStatusBatchResponse> => {
-    return apiFetch<CollectionStatusBatchResponse>("/collect/status/batch", {
+  ): Promise<ShelfItemStatusBatchResponse> => {
+    return apiFetch<ShelfItemStatusBatchResponse>("/shelf/items/status/batch", {
       method: "POST",
       body: JSON.stringify({ targetIds }),
     });

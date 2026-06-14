@@ -41,7 +41,7 @@ export const userDataExportSchema = t.Object({
       updatedAt: t.String(),
     }),
   ),
-  userUnitCollections: t.Array(
+  userShelfItems: t.Array(
     t.Object({
       unitId: t.String(),
       searchText: t.Optional(t.Nullable(t.String())),

@@ -53,10 +53,10 @@
 import {
   tagBatchTranslationsQuery,
   tagSearchQuery,
-  userUnitCollectionSearchMineQuery,
-  userUnitCollectionSearchUserQuery,
+  userShelfItemSearchMineQuery,
+  userShelfItemSearchUserQuery,
 } from "@rezics/api";
-import type { CollectionUnitDTO } from "@rezics/contract";
+import type { UserShelfItemDTO } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -79,20 +79,20 @@ export const ShelfContentsSearchSection: FC = () => {
   const [tagSearchText, setTagSearchText] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
-  const collectionQuery = {
+  const shelfItemQuery = {
     q: queryText.trim() || undefined,
     tagUnitIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
     limit: 100,
   };
-  const ownCollection = useQuery({
-    ...userUnitCollectionSearchMineQuery(collectionQuery),
+  const ownShelfItems = useQuery({
+    ...userShelfItemSearchMineQuery(shelfItemQuery),
     enabled: isCurrentUser,
   });
-  const publicCollection = useQuery({
-    ...userUnitCollectionSearchUserQuery(userId, collectionQuery),
+  const publicShelfItems = useQuery({
+    ...userShelfItemSearchUserQuery(userId, shelfItemQuery),
     enabled: !isCurrentUser && Boolean(userId),
   });
-  const collection = isCurrentUser ? ownCollection : publicCollection;
+  const shelfItems = isCurrentUser ? ownShelfItems : publicShelfItems;
   const tagSearch = useQuery(tagSearchQuery(tagSearchText.trim()));
   const tagTranslations = useQuery(
     tagBatchTranslationsQuery(selectedTagIds, locale),
@@ -103,7 +103,7 @@ export const ShelfContentsSearchSection: FC = () => {
     .filter((tag) => !selectedTags.has(tag.unitId))
     .slice(0, 8);
   const tagLabels = tagTranslations.data ?? {};
-  const units = collection.data?.units ?? [];
+  const units = shelfItems.data?.units ?? [];
 
   function addTag(tagUnitId: string) {
     setSelectedTagIds((current) =>
@@ -118,7 +118,7 @@ export const ShelfContentsSearchSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
-      <Link to={`${profileBasePath}/shelves`} className="w-fit no-underline">
+      <Link to={`${profileBasePath}/shelf`} className="w-fit no-underline">
         <Button type="button" variant="ghost" size="sm" className="gap-2">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           {t("common:back")}
@@ -144,7 +144,7 @@ export const ShelfContentsSearchSection: FC = () => {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="shelf-contents-tag-filter">
-          {t("entity:collection_tag_filter_label")}
+          {t("entity:shelf_item_tag_filter_label")}
         </Label>
         <Input
           id="shelf-contents-tag-filter"
@@ -199,13 +199,13 @@ export const ShelfContentsSearchSection: FC = () => {
         )}
       </div>
 
-      {collection.isLoading ? (
+      {shelfItems.isLoading ? (
         <p className="py-12 text-center text-sm text-text-secondary">
           {t("common:loading")}
         </p>
-      ) : collection.error ? (
+      ) : shelfItems.error ? (
         <p className="py-12 text-center text-sm text-text-error">
-          {collection.error.message}
+          {shelfItems.error.message}
         </p>
       ) : units.length === 0 ? (
         <p className="py-12 text-center text-sm text-text-secondary">
@@ -220,7 +220,7 @@ export const ShelfContentsSearchSection: FC = () => {
               showPrivateText={isCurrentUser}
             />
           ))}
-          {collection.data?.hasMore && (
+          {shelfItems.data?.hasMore && (
             <p className="py-2 text-center text-sm text-text-secondary">
               {t("entity:shelf_contents_search_has_more")}
             </p>
@@ -239,7 +239,7 @@ function ShelfContentsUnitRow({
   unit,
   showPrivateText,
 }: {
-  unit: CollectionUnitDTO;
+  unit: UserShelfItemDTO;
   showPrivateText: boolean;
 }) {
   const { t } = useTranslation(["entity"]);
@@ -255,20 +255,20 @@ function ShelfContentsUnitRow({
           {unit.unitId}
         </span>
         <span className="shrink-0 text-xs text-text-secondary">
-          {t("entity:collection_unit_shelf_count", {
+          {t("entity:shelf_item_shelf_count", {
             count: unit.shelfIds.length,
           })}
         </span>
       </div>
       <div className="flex flex-wrap gap-2 text-xs text-text-secondary">
         <span>
-          {t("entity:collection_unit_tag_count", {
+          {t("entity:shelf_item_tag_count", {
             count: unit.tagUnitIds.length,
           })}
         </span>
         {showPrivateText && unit.searchText ? (
           <span className="min-w-0 truncate">
-            {t("entity:collection_search_text_label")}: {unit.searchText}
+            {t("entity:shelf_item_private_text_label")}: {unit.searchText}
           </span>
         ) : null}
       </div>

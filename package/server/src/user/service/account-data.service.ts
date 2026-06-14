@@ -38,7 +38,7 @@ type ExportShelfRow = {
   updatedAt: Date;
 };
 
-type ExportCollectionRow = {
+type ExportUserShelfItemRow = {
   unitId: string;
   searchText: string | null;
   createdAt: Date;
@@ -69,7 +69,7 @@ export interface AccountDataRepository {
   getExportUser(userId: string): Promise<ExportUserRow>;
   listExportPosts(userId: string): Promise<ExportPostRow[]>;
   listExportShelves(userId: string): Promise<ExportShelfRow[]>;
-  listUserUnitCollections(userId: string): Promise<ExportCollectionRow[]>;
+  listUserShelfItems(userId: string): Promise<ExportUserShelfItemRow[]>;
   listUserTagApplications(
     userId: string,
   ): Promise<ExportUserTagApplicationRow[]>;
@@ -178,7 +178,7 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
       }));
     },
 
-    async listUserUnitCollections(userId) {
+    async listUserShelfItems(userId) {
       const db = await getServerDb();
       const rows = await db
         .select({
@@ -193,7 +193,7 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
         .where(and(eq(Unit.userId, userId), eq(ShelfItem.itemType, "unit")))
         .orderBy(desc(ShelfItem.updatedAt), asc(ShelfItem.itemId));
 
-      const byUnitId = new Map<string, ExportCollectionRow>();
+      const byUnitId = new Map<string, ExportUserShelfItemRow>();
       for (const row of rows) {
         if (!byUnitId.has(row.unitId)) {
           byUnitId.set(row.unitId, row);
@@ -329,7 +329,7 @@ export async function exportUserData(
     handle,
     posts,
     shelves,
-    userUnitCollections,
+    userShelfItems,
     userTagApplications,
     follows,
     blocks,
@@ -338,7 +338,7 @@ export async function exportUserData(
     getHandle(userId, repository),
     repository.listExportPosts(userId),
     repository.listExportShelves(userId),
-    repository.listUserUnitCollections(userId),
+    repository.listUserShelfItems(userId),
     repository.listUserTagApplications(userId),
     repository.listFollows(userId),
     repository.listBlocks(userId),
@@ -367,7 +367,7 @@ export async function exportUserData(
       title: s.title ?? "",
       updatedAt: s.updatedAt.toISOString(),
     })),
-    userUnitCollections: userUnitCollections.map((row) => ({
+    userShelfItems: userShelfItems.map((row) => ({
       unitId: row.unitId,
       searchText: row.searchText,
       createdAt: row.createdAt.toISOString(),
@@ -400,7 +400,7 @@ export class DeletionNotConfirmedError extends Error {}
  *
  * - Removed/scrubbed: PII on the User row (email, name, avatar, bio,
  *   description, settings), the auth link, the public profile (USER unit set
- *   to DELETED + PRIVATE), private collection metadata, the user's blocks, and
+ *   to DELETED + PRIVATE), private shelf item metadata, the user's blocks, and
  *   the user's follow edges (counters adjusted on peers).
  * - Retained: authored content (posts/reviews/books/shelves) — kept and shown
  *   as authored by a deleted user — plus moderation cases, enforcement, and
@@ -413,7 +413,7 @@ export class DeletionNotConfirmedError extends Error {}
  *
  * - 移除/清除：User 行上的 PII（email、name、avatar、bio、description、
  *   settings）、auth 关联、公开个人资料（USER unit 置为 DELETED + PRIVATE）、
- *   私有收藏元数据、用户的拉黑记录，以及用户的关注边（同步调整对端计数器）。
+ *   私有书架项目元数据、用户的拉黑记录，以及用户的关注边（同步调整对端计数器）。
  * - 保留：所撰写的内容（posts/reviews/books/shelves）— 保留并显示为由已删除
  *   用户撰写 — 以及审核案件、处置与审计记录，出于安全/审计完整性，这里不予改动。
  *

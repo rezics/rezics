@@ -219,7 +219,7 @@ const ShelfContentsSearchEntry: FC<{
   );
 
   return (
-    <Link to={`${profileBasePath}/shelves/search`} className="no-underline">
+    <Link to={`${profileBasePath}/shelf/items`} className="no-underline">
       {card}
     </Link>
   );

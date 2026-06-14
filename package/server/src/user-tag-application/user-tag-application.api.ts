@@ -48,8 +48,8 @@ export const userTagApplicationApi = new Elysia({
       detail: {
         summary: "List visible direct user tags for a Unit",
         description:
-          "Applies the profile user tag privacy setting. Shelf and collection APIs make separate exposure decisions from shelf visibility.",
-        tags: ["Collection", "Tags"],
+          "Applies the profile user tag privacy setting. Shelf APIs make separate exposure decisions from shelf visibility.",
+        tags: ["Shelves", "Tags"],
       },
     },
   )
@@ -69,7 +69,7 @@ export const userTagApplicationApi = new Elysia({
         summary: "List my user tags for a Unit",
         description:
           "Returns direct user-to-unit tag applications. These rows do not prove shelf containment.",
-        tags: ["Collection", "Tags"],
+        tags: ["Shelves", "Tags"],
       },
     },
   )
@@ -88,7 +88,7 @@ export const userTagApplicationApi = new Elysia({
       body: setUserTagApplicationsSchema,
       detail: {
         summary: "Replace my user tags for a Unit",
-        tags: ["Collection", "Tags"],
+        tags: ["Shelves", "Tags"],
       },
     },
   )
@@ -112,7 +112,7 @@ export const userTagApplicationApi = new Elysia({
       body: reorderUserTagApplicationSchema,
       detail: {
         summary: "Reorder one user tag application",
-        tags: ["Collection", "Tags"],
+        tags: ["Shelves", "Tags"],
       },
     },
   )
@@ -131,7 +131,7 @@ export const userTagApplicationApi = new Elysia({
       params: tagParamsSchema,
       detail: {
         summary: "Delete one user tag application",
-        tags: ["Collection", "Tags"],
+        tags: ["Shelves", "Tags"],
       },
     },
   );

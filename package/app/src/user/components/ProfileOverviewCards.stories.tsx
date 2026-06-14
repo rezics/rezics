@@ -68,7 +68,7 @@ export const StatCards: Story = {
       <ProfileStatLink
         label="Shelves"
         count={18}
-        to="/user/user-alice/profile/shelves"
+        to="/user/user-alice/profile/shelf"
       />
       <ProfileStatLink
         label="Content"
