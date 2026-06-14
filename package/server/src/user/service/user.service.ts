@@ -26,7 +26,7 @@ export type CreateUserProfileInput = {
   userId: string;
   slug: string;
   avatar?: string;
-  bio?: string;
+  summary?: string;
 };
 
 export type CreateVerifiedAuthAccountInput = {
@@ -294,7 +294,7 @@ function createDrizzleUserRepository(): UserRepository {
             unitId: input.userId,
             name: input.slug,
             avatar: input.avatar ?? null,
-            bio: input.bio ?? null,
+            summary: input.summary ?? null,
             joinDate: now,
             updatedAt: now,
           })
@@ -610,12 +610,12 @@ export class UserService {
       throw err;
     }
 
-    const { name, avatar, bio, description } = req;
+    const { name, avatar, summary, description } = req;
 
     const updateData: Partial<UserRow> = {
       name: name ?? undefined,
       avatar: avatar !== undefined ? avatar : undefined,
-      bio: bio !== undefined ? bio : undefined,
+      summary: summary !== undefined ? summary : undefined,
       description: description !== undefined ? description : undefined,
     };
 
@@ -624,7 +624,7 @@ export class UserService {
     const userPatchFields: Record<string, any> = {};
     if (name !== undefined) userPatchFields.name = user.name;
     if (avatar !== undefined) userPatchFields.avatar = user.avatar;
-    if (bio !== undefined) userPatchFields.bio = user.bio;
+    if (summary !== undefined) userPatchFields.summary = user.summary;
     if (description !== undefined)
       userPatchFields.description = user.description;
     const jobs = [enqueueUserPatchFields(userId, userPatchFields)];

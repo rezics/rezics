@@ -47,7 +47,7 @@ interface FactoryUserPlan {
   name: string;
   slug: string;
   email: string;
-  bio: string;
+  summary: string;
   description: string;
   joinDate: Date;
   avatar: string;
@@ -100,7 +100,7 @@ export async function seedUsers(
     name: "Factory Admin",
     slug: "factory-admin",
     email: `factory-admin${randomUUID().slice(0, 8)}@mock.rezics.local`,
-    bio: generateParagraph(1, 2),
+    summary: generateParagraph(1, 2),
     description: generateParagraph(5, 10),
     joinDate: faker.date.past({ years: 4 }),
     avatar: faker.image.avatar(),
@@ -116,7 +116,7 @@ export async function seedUsers(
       name,
       slug: generateSlug(name),
       email: generateEmail(name),
-      bio: generateParagraph(1, 2),
+      summary: generateParagraph(1, 2),
       description: generateParagraph(5, 10),
       joinDate: faker.date.past({ years: 4 }),
       avatar: faker.image.avatar(),
@@ -166,7 +166,7 @@ export async function seedUsers(
           email: plan.email,
           name: plan.name,
           avatar: plan.avatar,
-          bio: plan.bio,
+          summary: plan.summary,
           description: markdownContentDoc(plan.description),
           joinDate: plan.joinDate,
           settings: plan.settings,

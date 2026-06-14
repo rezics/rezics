@@ -133,17 +133,17 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                 <p className="text-sm text-text-secondary">{user.email}</p>
               </div>
             )}
-            {user.bio && (
+            {user.summary && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">
-                  {t("settings:profile_bio")}
+                  {t("settings:profile_summary")}
                 </h6>
-                <p className="text-base">{user.bio}</p>
+                <p className="text-base">{user.summary}</p>
               </div>
             )}
-            {!user.bio && (
+            {!user.summary && (
               <p className="text-sm text-text-secondary italic">
-                {t("settings:user_no_bio_available")}
+                {t("settings:user_no_summary_available")}
               </p>
             )}
           </div>

@@ -31,7 +31,7 @@ type ProfileReactionActorRow = {
   slug: string | null;
   name: string | null;
   avatar: string | null;
-  bio: string | null;
+  summary: string | null;
   description: unknown;
   followersCount: number;
   followingsCount: number;
@@ -105,7 +105,7 @@ function createDrizzleProfileReactionHistoryRepository(): ProfileReactionHistory
           slug: Unit.slug,
           name: User.name,
           avatar: User.avatar,
-          bio: User.bio,
+          summary: User.summary,
           description: User.description,
           followersCount: User.followersCount,
           followingsCount: User.followingsCount,

@@ -419,7 +419,7 @@
   "user_admin_login_description": "Melde dich an, um die Admin-Konsole zu öffnen.",
   "user_admin_login_title": "Admin-Anmeldung",
   "user_avatar_url_label": "Avatar-URL",
-  "user_bio_label": "Bio",
+  "user_summary_label": "Zusammenfassung",
   "user_create_description": "Erstelle einen neuen Benutzer über die Admin-Konsole.",
   "user_create_failed": "Erstellen fehlgeschlagen",
   "user_create_note": "Von Admins erstellte Benutzer benötigen keinen Verifizierungscode. Das Backend validiert Slug, Rezics Email und Slug-Eindeutigkeit und hasht anschließend das Passwort.",

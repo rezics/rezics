@@ -26,7 +26,7 @@ const baseComment = {
     unitId: "user-1",
     name: "Author",
     avatar: null,
-    bio: null,
+    summary: null,
     description: null,
     followersCount: 0,
     followingsCount: 0,

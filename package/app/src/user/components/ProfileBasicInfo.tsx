@@ -99,9 +99,9 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
               {t("settings:profile_following")}
             </span>
           </div>
-          {user.bio && (
+          {user.summary && (
             <p className="text-sm text-text-secondary mt-2 line-clamp-2">
-              {user.bio}
+              {user.summary}
             </p>
           )}
           {!isCurrentUser && (
@@ -131,8 +131,8 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           )}
         </div>
 
-        {user.bio && (
-          <p className="text-sm text-text-secondary max-w-xs">{user.bio}</p>
+        {user.summary && (
+          <p className="text-sm text-text-secondary max-w-xs">{user.summary}</p>
         )}
 
         <div className="w-full">

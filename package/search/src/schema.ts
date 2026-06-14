@@ -120,7 +120,13 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
   {
     uid: "users",
     primaryKey: "id",
-    searchableAttributes: ["name", "slug", "email", "bio", "descriptionText"],
+    searchableAttributes: [
+      "name",
+      "slug",
+      "email",
+      "summary",
+      "descriptionText",
+    ],
     filterableAttributes: ["slug", "email", "joinDate"],
     sortableAttributes: ["joinDate", "followersCount", "followingsCount"],
     supportsFullSync: true,

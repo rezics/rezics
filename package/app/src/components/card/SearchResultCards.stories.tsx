@@ -115,7 +115,8 @@ export const UserResult: Story = {
         user={{
           ...userAlice,
           slug: "alice-mei",
-          bio: "Reads translation notes, public library histories, and anything with careful marginalia.",
+          summary:
+            "Reads translation notes, public library histories, and anything with careful marginalia.",
           followersCount: 428,
           followingsCount: 90,
         }}

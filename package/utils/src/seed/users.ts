@@ -25,7 +25,7 @@ export interface CrossSeedUserInput {
   role?: string;
   slug?: string;
   password?: string;
-  bio?: string;
+  summary?: string;
   permission?: unknown;
   settings?: unknown;
 }
@@ -64,19 +64,19 @@ export const SEED_USERS: CrossSeedUserInput[] = [
 export interface InfraUserSeedInput {
   slug: string;
   name: string;
-  bio: string;
+  summary: string;
 }
 
 export const INFRA_USERS: InfraUserSeedInput[] = [
   {
     slug: REZICS_INFRA_SLUG,
     name: "Rezics",
-    bio: "Official platform account for Rezics-owned content.",
+    summary: "Official platform account for Rezics-owned content.",
   },
   {
     slug: REZICS_WIKI_INFRA_SLUG,
     name: "Rezics Wiki",
-    bio: "Community catalog custodian account for wiki-owned content.",
+    summary: "Community catalog custodian account for wiki-owned content.",
   },
 ];
 
@@ -90,7 +90,7 @@ interface SeedServerUserInput {
   email: string;
   name: string;
   avatar?: string;
-  bio?: string;
+  summary?: string;
   permission?: unknown;
   settings?: unknown;
 }
@@ -133,7 +133,7 @@ async function seedServerUser(
       email: input.email,
       name: input.name,
       avatar: input.avatar ?? null,
-      bio: input.bio ?? null,
+      summary: input.summary ?? null,
       permission: input.permission,
       settings: input.settings,
       updatedAt: now,
@@ -233,7 +233,7 @@ export async function seedInfraUsers(
       authUserId: null,
       email: null,
       name: input.name,
-      bio: input.bio,
+      summary: input.summary,
       permission: null,
       settings: null,
       updatedAt: now,
@@ -276,7 +276,7 @@ export async function seedAllMainUsers(
       slug,
       email: authResult.email,
       name: authResult.name,
-      bio: input.bio,
+      summary: input.summary,
       permission: input.permission,
       settings: input.settings,
     });
@@ -448,7 +448,7 @@ export async function resetRootUser(
     authUserId: authResult.userId,
     email: authResult.email,
     name: authResult.name,
-    bio: rootInput.bio ?? null,
+    summary: rootInput.summary ?? null,
     permission: rootInput.permission,
     settings: rootInput.settings,
     updatedAt: now,

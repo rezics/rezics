@@ -86,7 +86,7 @@ export function editorialPathLabel(path: string) {
     ),
     "unit.slug": getI18nRuntime().i18n.t("editor:authority_path_slug"),
     "user.avatar": getI18nRuntime().i18n.t("editor:authority_path_avatar"),
-    "user.bio": getI18nRuntime().i18n.t("book:author_info_bio_label"),
+    "user.summary": getI18nRuntime().i18n.t("common:summary"),
     "user.description": getI18nRuntime().i18n.t("common:description"),
     "user.name": getI18nRuntime().i18n.t("common:name"),
   };

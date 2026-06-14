@@ -18,7 +18,7 @@ async function getServerDb() {
 type BriefRow = {
   unitId: string;
   name: string | null;
-  bio: string | null;
+  summary: string | null;
   avatar: string | null;
 };
 
@@ -27,7 +27,7 @@ function toBrief(user: BriefRow, slug: string | null) {
     unitId: user.unitId,
     name: user.name ?? undefined,
     slug: slug ?? undefined,
-    bio: user.bio ?? undefined,
+    summary: user.summary ?? undefined,
     avatar: user.avatar ?? undefined,
   };
 }
@@ -60,7 +60,7 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
         .select({
           unitId: User.unitId,
           name: User.name,
-          bio: User.bio,
+          summary: User.summary,
           avatar: User.avatar,
         })
         .from(User)
@@ -76,7 +76,7 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
       detail: {
         summary: "Get user brief by unitId",
         description:
-          "Returns a lightweight user object (unitId, name, slug, bio, avatar) for card/mention contexts.",
+          "Returns a lightweight user object (unitId, name, slug, summary, avatar) for card/mention contexts.",
         tags: ["Users"],
       },
     },
@@ -90,7 +90,7 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
         .select({
           unitId: User.unitId,
           name: User.name,
-          bio: User.bio,
+          summary: User.summary,
           avatar: User.avatar,
         })
         .from(User)

@@ -12,7 +12,7 @@ interface FakeUser {
   slug?: string;
   name?: string;
   avatar?: string | null;
-  bio?: string | null;
+  summary?: string | null;
   description?: string | null;
 }
 
@@ -83,7 +83,7 @@ function fakeRepository(): ProfileReactionHistoryRepository {
           slug: units.get(u.userId)?.slug ?? null,
           name: u.name ?? null,
           avatar: u.avatar ?? null,
-          bio: u.bio ?? null,
+          summary: u.summary ?? null,
           description: u.description ?? null,
           followersCount: 0,
           followingsCount: 0,

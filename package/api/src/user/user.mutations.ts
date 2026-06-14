@@ -46,7 +46,7 @@ type AdminCreateUserInput = {
   password: string;
   slug: string;
   avatar?: string;
-  bio?: string;
+  summary?: string;
 };
 
 // MOCK: pairs with userApi.adminCreate; remove the MOCK marker once backend endpoint exists

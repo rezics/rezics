@@ -125,14 +125,14 @@ export const UserListPage: FC = () => {
                         @{user.slug}
                       </Badge>
                     )}
-                    {user.bio && (
+                    {user.summary && (
                       <p className="text-sm text-text-secondary line-clamp-2">
-                        {user.bio}
+                        {user.summary}
                       </p>
                     )}
-                    {!user.bio && (
+                    {!user.summary && (
                       <p className="text-sm text-text-secondary italic">
-                        {t("settings:user_no_bio")}
+                        {t("settings:user_no_summary")}
                       </p>
                     )}
                   </CardContent>

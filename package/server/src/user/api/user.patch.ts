@@ -13,8 +13,10 @@ export function userPatchToUpdateUser(
       user.avatar === null || typeof user.avatar === "string"
         ? user.avatar
         : undefined,
-    bio:
-      user.bio === null || typeof user.bio === "string" ? user.bio : undefined,
+    summary:
+      user.summary === null || typeof user.summary === "string"
+        ? user.summary
+        : undefined,
     description:
       user.description === null ||
       (typeof user.description === "object" && !Array.isArray(user.description))

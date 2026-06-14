@@ -6,7 +6,7 @@ import { mapBlockedUser } from "./mapper";
 type BlockRow = typeof UserBlock.$inferSelect;
 type UserBriefRow = Pick<
   typeof User.$inferSelect,
-  "unitId" | "name" | "bio" | "avatar"
+  "unitId" | "name" | "summary" | "avatar"
 >;
 type UnitSlugRow = Pick<typeof Unit.$inferSelect, "id" | "slug">;
 
@@ -47,7 +47,7 @@ function createDrizzleBlockRepository(): BlockRepository {
         .select({
           unitId: User.unitId,
           name: User.name,
-          bio: User.bio,
+          summary: User.summary,
           avatar: User.avatar,
         })
         .from(User)

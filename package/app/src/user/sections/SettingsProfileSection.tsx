@@ -26,10 +26,10 @@ import { useRequireAuth } from "@/user/pages/useAuth";
 
 type SettingsProfileFormData = Omit<
   UpdateUser,
-  "avatar" | "bio" | "description" | "name"
+  "avatar" | "summary" | "description" | "name"
 > & {
   avatar: string;
-  bio: string;
+  summary: string;
   description: string;
   name: string;
 };
@@ -51,8 +51,8 @@ type SettingsProfileFormData = Omit<
  * │ Username (read-only)                │
  * │ @johndoe                            │
  * │                                     │
- * │ Bio                                 │
- * │ [Short bio text..................    │
+ * │ Summary                                 │
+ * │ [Short summary text..................    │
  * │                                     │
  * │ Description (Markdown)              │
  * │ [Markdown Editor..................   │
@@ -73,8 +73,8 @@ type SettingsProfileFormData = Omit<
  * │ Username (read-only)         │
  * │ @johndoe                     │
  * │                              │
- * │ Bio                          │
- * │ [Short bio text............]  │
+ * │ Summary                          │
+ * │ [Short summary text............]  │
  * │                              │
  * │ Description (Markdown)       │
  * │ [Markdown Editor...]         │
@@ -96,8 +96,8 @@ type SettingsProfileFormData = Omit<
  * │Username          │
  * │@johndoe          │
  * │                  │
- * │Bio               │
- * │[bio text...]     │
+ * │Summary               │
+ * │[summary text...]     │
  * │                  │
  * │Description       │
  * │[Markdown Edit]   │
@@ -118,8 +118,8 @@ type SettingsProfileFormData = Omit<
  * │          │
  * │@johndoe  │
  * │          │
- * │Bio       │
- * │[bio]     │
+ * │Summary       │
+ * │[summary]     │
  * │          │
  * │Desc      │
  * │[Markdown]│
@@ -134,7 +134,7 @@ export const SettingsProfileSection: FC = () => {
   const [formData, setFormData] = useState<SettingsProfileFormData>({
     name: "",
     avatar: "",
-    bio: "",
+    summary: "",
     description: "",
   });
   const [success, setSuccess] = useState(false);
@@ -151,7 +151,7 @@ export const SettingsProfileSection: FC = () => {
       setFormData({
         name: user.name ?? "",
         avatar: user.avatar ?? "",
-        bio: user.bio ?? "",
+        summary: user.summary ?? "",
         description: contentDocMarkdownFallback(user.description),
       });
     }
@@ -175,14 +175,14 @@ export const SettingsProfileSection: FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedName = formData.name.trim();
-    const trimmedBio = formData.bio.trim();
+    const trimmedSummary = formData.summary.trim();
     // Reject whitespace-only display names
     // 拒绝纯空白的显示名称
     if (!trimmedName) return;
     updateMe.mutate({
       name: trimmedName || undefined,
       avatar: formData.avatar || undefined,
-      bio: trimmedBio || undefined,
+      summary: trimmedSummary || undefined,
       description: markdownContentDoc(formData.description),
     });
   };
@@ -248,13 +248,13 @@ export const SettingsProfileSection: FC = () => {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="bio">{t("settings:profile_bio")}</Label>
+            <Label htmlFor="summary">{t("settings:profile_summary")}</Label>
             <textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) => handleChange("bio", e.target.value)}
+              id="summary"
+              value={formData.summary}
+              onChange={(e) => handleChange("summary", e.target.value)}
               rows={2}
-              placeholder={t("settings:profile_bio_placeholder")}
+              placeholder={t("settings:profile_summary_placeholder")}
               className="w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
             />
           </div>

@@ -17,7 +17,7 @@ const baseSummary: UnitCardSummary = {
     slug: "mina",
     name: "Mina Park",
     avatar: null,
-    bio: "Curates library shelves and translation notes.",
+    summary: "Curates library shelves and translation notes.",
   },
   addedAt: "2026-04-21T10:30:00.000Z",
 };

@@ -24,12 +24,12 @@ const infraUsers = [
   {
     slug: "rezics",
     name: "Rezics",
-    bio: "Official platform account for Rezics-owned content.",
+    summary: "Official platform account for Rezics-owned content.",
   },
   {
     slug: "rezics-wiki",
     name: "Rezics Wiki",
-    bio: "Community catalog custodian account for wiki-owned content.",
+    summary: "Community catalog custodian account for wiki-owned content.",
   },
 ];
 

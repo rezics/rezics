@@ -6,7 +6,8 @@ const userInfo = {
   name: "John Doe",
   avatar:
     "https://styles.redditmedia.com/t5_2hyqpk/styles/communityIcon_x6pum2tm8hbd1.png?width=128&frame=1&auto=webp&s=e5904cf74875c0df8fcd42c8bc95fe06304e052c",
-  bio: "This is a short bio describing the user. It can include interests, background, or any other relevant information.",
+  summary:
+    "This is a short summary describing the user. It can include interests, background, or any other relevant information.",
   joinDate: "2022-01-15",
 };
 
@@ -35,7 +36,7 @@ export const userHttpHandlers = [
       id: genId(),
       name: payload?.name ?? "Anonymous",
       avatar: payload?.avatar,
-      bio: payload?.bio,
+      summary: payload?.summary,
     };
     userStore.set(created.id, created);
     return HttpResponse.json(created, { status: 201 });

@@ -419,7 +419,7 @@
   "user_admin_login_description": "관리 콘솔에 접근하려면 로그인하세요.",
   "user_admin_login_title": "관리자 로그인",
   "user_avatar_url_label": "아바타 URL",
-  "user_bio_label": "소개",
+  "user_summary_label": "소개",
   "user_create_description": "관리 콘솔에서 새 사용자를 생성합니다.",
   "user_create_failed": "생성 실패",
   "user_create_note": "관리자가 생성한 사용자는 인증 코드가 필요하지 않습니다. 백엔드는 slug, Rezics Email, slug 고유성을 검증하고 비밀번호를 해시합니다.",

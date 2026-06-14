@@ -49,7 +49,7 @@ export async function syncUserToMeili(userId: string): Promise<void> {
     name: user.name,
     slug,
     avatar: user.avatar,
-    bio: user.bio,
+    summary: user.summary,
     description: user.description as UserSearchDocument["description"],
     descriptionText: mainMarkdownSource(user.description),
     followersCount: user.followersCount,

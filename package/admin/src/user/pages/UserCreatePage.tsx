@@ -24,7 +24,7 @@ export default function UserCreatePage() {
   const [password, setPassword] = React.useState("");
   const [slug, setSlug] = React.useState("");
   const [avatar, setAvatar] = React.useState("");
-  const [bio, setBio] = React.useState("");
+  const [summary, setSummary] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
   const createMutation = userMutations.useAdminCreate({
@@ -42,7 +42,7 @@ export default function UserCreatePage() {
       password,
       slug: slug.trim(),
       avatar: avatar.trim() || undefined,
-      bio: bio.trim() || undefined,
+      summary: summary.trim() || undefined,
     });
     await navigate({ to: `/user/${user.unitId}`, replace: true });
   }
@@ -128,11 +128,13 @@ export default function UserCreatePage() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-bio">{t("admin:user_bio_label")}</Label>
+                <Label htmlFor="ucp-summary">
+                  {t("admin:user_summary_label")}
+                </Label>
                 <textarea
-                  id="ucp-bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
+                  id="ucp-summary"
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
                   rows={3}
                   className="rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
                 />

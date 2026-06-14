@@ -40,7 +40,7 @@ export default function UserEditPage() {
 
   const [name, setName] = React.useState("");
   const [avatar, setAvatar] = React.useState("");
-  const [bio, setBio] = React.useState("");
+  const [summary, setSummary] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -49,7 +49,7 @@ export default function UserEditPage() {
     if (!u) return;
     setName(u.name ?? "");
     setAvatar(u.avatar ?? "");
-    setBio(u.bio ?? "");
+    setSummary(u.summary ?? "");
     setDescription(contentDocMarkdownFallback(u.description));
     setPassword("");
   }, [detailQuery.data]);
@@ -62,7 +62,7 @@ export default function UserEditPage() {
       input: {
         name: name.trim() || undefined,
         avatar: avatar.trim() || undefined,
-        bio: bio.trim() || undefined,
+        summary: summary.trim() || undefined,
         description: description.trim()
           ? markdownContentDoc(description.trim())
           : undefined,
@@ -144,11 +144,13 @@ export default function UserEditPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-bio">{t("admin:user_bio_label")}</Label>
+                    <Label htmlFor="uep-summary">
+                      {t("admin:user_summary_label")}
+                    </Label>
                     <textarea
-                      id="uep-bio"
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
+                      id="uep-summary"
+                      value={summary}
+                      onChange={(e) => setSummary(e.target.value)}
                       rows={2}
                       className="rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
                     />

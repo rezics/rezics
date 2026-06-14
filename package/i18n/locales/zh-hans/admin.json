@@ -419,7 +419,7 @@
   "user_admin_login_description": "登录以访问管理后台。",
   "user_admin_login_title": "管理员登录",
   "user_avatar_url_label": "头像 URL",
-  "user_bio_label": "简介",
+  "user_summary_label": "简介",
   "user_create_description": "从管理后台创建新用户。",
   "user_create_failed": "创建失败",
   "user_create_note": "管理员创建的用户不需要验证码。后端会验证 slug、Rezics Email 与 slug 唯一性，并哈希密码。",

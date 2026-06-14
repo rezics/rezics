@@ -4,7 +4,7 @@
  * ┌───────────────────────────────────────┐
  * │ Overview (desktop 1024px+)            │
  * │ ┌─────────────────────────────────────┐
- * │ │ User bio / description section      │
+ * │ │ User summary / description section      │
  * │ ├─────────────────────────────────────┤
  * │ │ Recent Activity                     │
  * │ │ • Unit 1 — May 15, 2024            │
@@ -16,7 +16,7 @@
  * ┌─────────────────────────┐
  * │ Overview (tablet 768px) │
  * │ ┌─────────────────────┐ │
- * │ │ Bio box             │ │
+ * │ │ Summary box             │ │
  * │ ├─────────────────────┤ │
  * │ │ Recent Activity     │ │
  * │ │ • Unit 1 — May 15   │ │
@@ -32,7 +32,7 @@
  * │ │ [Followers:2]│ │
  * │ │ [Following:1]│ │
  * │ ├──────────────┤ │
- * │ │ Bio box      │ │
+ * │ │ Summary box      │ │
  * │ ├──────────────┤ │
  * │ │ Recent Items │ │
  * │ │ • Unit 1     │ │

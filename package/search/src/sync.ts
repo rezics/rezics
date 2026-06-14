@@ -2216,7 +2216,7 @@ type UserSyncRow = {
   email: string | null;
   name: string | null;
   avatar: string | null;
-  bio: string | null;
+  summary: string | null;
   description: unknown;
   followersCount: number;
   followingsCount: number;
@@ -2230,7 +2230,7 @@ const userSyncSelect = {
   email: User.email,
   name: User.name,
   avatar: User.avatar,
-  bio: User.bio,
+  summary: User.summary,
   description: User.description,
   followersCount: User.followersCount,
   followingsCount: User.followingsCount,
@@ -2247,7 +2247,7 @@ function buildUserSearchDocument(row: UserSyncRow): UserSearchDocument {
     email: row.email ?? undefined,
     slug: row.slug ?? null,
     avatar: row.avatar,
-    bio: row.bio,
+    summary: row.summary,
     description: row.description as UserSearchDocument["description"],
     descriptionText: mainMarkdownSource(row.description),
     followersCount: row.followersCount,

@@ -19,7 +19,7 @@ type ExportUserRow = {
   unitId: string;
   name: string | null;
   email: string | null;
-  bio: string | null;
+  summary: string | null;
   avatar: string | null;
   joinDate: Date | null;
   settings: unknown;
@@ -128,7 +128,7 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
           unitId: User.unitId,
           name: User.name,
           email: User.email,
-          bio: User.bio,
+          summary: User.summary,
           avatar: User.avatar,
           joinDate: User.joinDate,
           settings: User.settings,
@@ -261,7 +261,7 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
             email: null,
             name: null,
             avatar: null,
-            bio: null,
+            summary: null,
             description: null,
             settings: null,
             authUserId: null,
@@ -351,7 +351,7 @@ export async function exportUserData(
       handle,
       name: user.name,
       email: user.email,
-      bio: user.bio,
+      summary: user.summary,
       avatar: user.avatar,
       joinDate: user.joinDate ? user.joinDate.toISOString() : null,
     },
@@ -398,7 +398,7 @@ export class DeletionNotConfirmedError extends Error {}
 /**
  * Anonymize-and-retain account deletion (the documented policy):
  *
- * - Removed/scrubbed: PII on the User row (email, name, avatar, bio,
+ * - Removed/scrubbed: PII on the User row (email, name, avatar, summary,
  *   description, settings), the auth link, the public profile (USER unit set
  *   to DELETED + PRIVATE), private shelf item metadata, the user's blocks, and
  *   the user's follow edges (counters adjusted on peers).
@@ -411,7 +411,7 @@ export class DeletionNotConfirmedError extends Error {}
  *
  * 匿名化并保留式的账号删除（已记录的策略）：
  *
- * - 移除/清除：User 行上的 PII（email、name、avatar、bio、description、
+ * - 移除/清除：User 行上的 PII（email、name、avatar、summary、description、
  *   settings）、auth 关联、公开个人资料（USER unit 置为 DELETED + PRIVATE）、
  *   私有书架项目元数据、用户的拉黑记录，以及用户的关注边（同步调整对端计数器）。
  * - 保留：所撰写的内容（posts/reviews/books/shelves）— 保留并显示为由已删除

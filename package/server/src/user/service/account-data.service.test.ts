@@ -24,7 +24,7 @@ function repository(): AccountDataRepository {
       unitId: "me",
       name: "Alice",
       email: "alice@example.com",
-      bio: "hi",
+      summary: "hi",
       avatar: null,
       joinDate: new Date("2026-01-01T00:00:00.000Z"),
       settings: { notifications: { follow: false } },
