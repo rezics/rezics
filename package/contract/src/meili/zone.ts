@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { readLanguageBodyBase } from "../list-query-base";
 
 // ANCHOR: Zone Search Document
@@ -16,11 +16,11 @@ export const ZoneSearchDocumentSchema = t.Object({
   endsAt: t.Union([t.String(), t.Null()]),
   userId: t.Union([t.String(), t.Null()]),
   visibility: t.String(),
-  languages: t.Array(languageSchema),
+  languages: t.Array(contentLanguageSchema),
   isLanguageNeutral: t.Boolean(),
   supportLanguages: t.Array(
     t.Object({
-      language: languageSchema,
+      language: contentLanguageSchema,
       isPrimary: t.Optional(t.Boolean()),
       position: t.Optional(t.String()), // Fractional Indexing
     }),
@@ -37,13 +37,13 @@ export const ZoneSearchDocumentSchema = t.Object({
   // 用于展示渲染的结构化译文
   translations: t.Array(
     t.Object({
-      language: languageSchema,
+      language: contentLanguageSchema,
       title: t.Union([t.String(), t.Null()]),
       description: t.Union([t.String(), t.Null()]),
     }),
   ),
 
-  resolvedLanguage: t.Optional(t.Union([languageSchema, t.Null()])),
+  resolvedLanguage: t.Optional(t.Union([contentLanguageSchema, t.Null()])),
   title: t.Optional(t.Union([t.String(), t.Null()])),
   description: t.Optional(t.Union([t.String(), t.Null()])),
 });

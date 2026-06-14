@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { contentDocSchema, contentDocWriteSchema } from "./doc-v1";
 
 export const contentTranslationStatusValues = [
@@ -21,7 +21,7 @@ export type ContentTranslationStatus = Static<
 
 export const contentTranslationDTOSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
   content: contentDocSchema,
   status: contentTranslationStatusSchema,
   sourceUnitId: t.Union([t.String(), t.Null()]),
@@ -35,7 +35,7 @@ export type ContentTranslationDTO = Static<typeof contentTranslationDTOSchema>;
 
 export const contentTranslationParamsSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
 });
 
 export type ContentTranslationParams = Static<
@@ -60,7 +60,7 @@ export type ContentTranslationListResponse = Static<
 
 export const upsertContentTranslationSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
   content: contentDocWriteSchema,
   status: t.Optional(contentTranslationStatusSchema),
   sourceUnitId: t.Optional(t.Union([t.String(), t.Null()])),

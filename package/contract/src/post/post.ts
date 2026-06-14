@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { creationModeSchema } from "../content/authority";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import {
   listGetQueryBase,
@@ -155,7 +155,7 @@ export const postDTOSchema = t.Object({
   realmUnitId: t.Optional(t.Nullable(t.String())),
   referenceCount: t.Optional(t.Number()),
   shareCount: t.Optional(t.Number()),
-  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   /**
    * Resolved root-post display title for the selected/default language.
    * 针对选定/默认语言解析后的根帖子展示标题。
@@ -437,7 +437,7 @@ export type PostParams = (typeof postParamsSchema)["static"];
 
 export const postReadQuerySchema = t.Object({
   ...readLanguageGetQueryBase.properties,
-  explicitLanguage: t.Optional(languageSchema),
+  explicitLanguage: t.Optional(contentLanguageSchema),
 });
 
 export type PostReadQuery = (typeof postReadQuerySchema)["static"];
@@ -471,7 +471,7 @@ export const createPostSchema = t.Object({
    */
   tagIds: t.Optional(t.Array(t.String())),
   kind: t.Optional(postKindLiterals),
-  language: languageSchema,
+  language: contentLanguageSchema,
   creationMode: t.Optional(creationModeSchema),
   title: t.String({ minLength: 1, maxLength: 300 }),
   content: contentDocWriteSchema,
@@ -511,7 +511,7 @@ export type SubmitPostToRealmInput = (typeof submitPostToRealmSchema)["static"];
 export const updatePostSchema = t.Object({
   title: t.Optional(t.String({ minLength: 1, maxLength: 300 })),
   content: t.Optional(contentDocWriteSchema),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   isLocked: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });

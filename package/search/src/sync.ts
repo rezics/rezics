@@ -10,9 +10,9 @@ import type {
   ZoneSearchDocument,
 } from "@rezics/contract";
 import {
-  type Language,
+  type ContentLanguage,
   mainMarkdownSource,
-  normalizeLanguage,
+  normalizeContentLanguage,
   RATING_TAGS,
   readCoverUrlFromExtra,
 } from "@rezics/contract";
@@ -308,13 +308,15 @@ function delay(ms: number): Promise<void> {
 
 function indexedLanguages(unit: {
   supportLanguages?: readonly { language?: string | null }[] | null;
-}): Language[] {
+}): ContentLanguage[] {
   return [
     ...new Set(
       (unit.supportLanguages ?? [])
         .map((item) => item.language)
-        .map((language) => (language ? normalizeLanguage(language) : null))
-        .filter((language): language is Language => !!language),
+        .map((language) =>
+          language ? normalizeContentLanguage(language) : null,
+        )
+        .filter((language): language is ContentLanguage => !!language),
     ),
   ];
 }
@@ -327,11 +329,11 @@ function indexedSupportLanguages(unit: {
         position?: string | null;
       }[]
     | null;
-}): { language: Language; isPrimary: boolean; position: string }[] {
+}): { language: ContentLanguage; isPrimary: boolean; position: string }[] {
   return (unit.supportLanguages ?? [])
     .map((item) => ({
       item,
-      language: item.language ? normalizeLanguage(item.language) : null,
+      language: item.language ? normalizeContentLanguage(item.language) : null,
     }))
     .filter(
       (
@@ -342,7 +344,7 @@ function indexedSupportLanguages(unit: {
           isPrimary?: boolean | null;
           position?: string | null;
         };
-        language: Language;
+        language: ContentLanguage;
       } => Boolean(entry.language),
     )
     .map(({ item, language }) => ({
@@ -2509,6 +2511,7 @@ export function buildCommentDocument(comment: any): CommentSearchDocument {
   return {
     id: comment.id,
     contentText: mainMarkdownSource(comment.content),
+    language: comment.language ?? null,
     rootUnitId: comment.rootUnitId,
     realmUnitId: comment.realmUnitId ?? null,
     parentCommentId: comment.parentCommentId ?? null,
@@ -2916,6 +2919,7 @@ export async function syncPostSegment(
 const commentSyncSelect = {
   id: Comment.id,
   content: Comment.content,
+  language: Comment.language,
   rootUnitId: Comment.rootUnitId,
   realmUnitId: Comment.realmUnitId,
   parentCommentId: Comment.parentCommentId,
@@ -2939,6 +2943,7 @@ function commentFromRow(row: any) {
   return {
     id: row.id,
     content: row.content,
+    language: row.language,
     rootUnitId: row.rootUnitId,
     realmUnitId: row.realmUnitId,
     parentCommentId: row.parentCommentId,

@@ -2,7 +2,7 @@ import { useUpdatePostMutation } from "@rezics/api/post/post";
 import {
   mainMarkdownSource,
   markdownContentDoc,
-  normalizeLanguage,
+  normalizeContentLanguage,
   type PostDTO,
   SCORE_MAX,
 } from "@rezics/contract";
@@ -112,7 +112,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
               title={title}
               body={text}
               onLanguageChange={(nextLanguage) =>
-                setLanguage(normalizeLanguage(nextLanguage) ?? locale)
+                setLanguage(normalizeContentLanguage(nextLanguage) ?? locale)
               }
               onTitleChange={setTitle}
               onBodyChange={setText}

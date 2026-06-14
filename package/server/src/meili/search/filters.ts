@@ -1,6 +1,6 @@
 import type {
+  ContentLanguage,
   ContentRating,
-  Language,
   ListLanguageMode,
   PostKind,
   SearchCategory,
@@ -11,7 +11,7 @@ import type {
   ZoneSectionQueryFilterField,
 } from "@rezics/contract";
 import {
-  normalizeLanguage,
+  normalizeContentLanguage,
   ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
   ZONE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
@@ -118,9 +118,11 @@ export function readLanguageFilterCandidates(
     ...new Set(
       [input.appLocale, ...(input.languages ?? [])]
         .map((language) =>
-          typeof language === "string" ? normalizeLanguage(language) : null,
+          typeof language === "string"
+            ? normalizeContentLanguage(language)
+            : null,
         )
-        .filter((language): language is Language => !!language),
+        .filter((language): language is ContentLanguage => !!language),
     ),
   ];
 }

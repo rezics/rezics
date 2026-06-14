@@ -6,9 +6,11 @@ import {
 } from "@rezics/api/post/post";
 import type { CommentDTO, PostDTO } from "@rezics/contract";
 import {
+  CONTENT_LANGUAGE_SLUGS,
+  LANGUAGE_META,
   mainMarkdownSource,
   markdownContentDoc,
-  normalizeLanguage,
+  normalizeContentLanguage,
   PostKind,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
@@ -21,6 +23,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
@@ -44,7 +52,11 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const isComment = "rootUnitId" in post;
   const [title, setTitle] = useState(!isComment ? (post.title ?? "") : "");
   const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
-  const [language, setLanguage] = useState(locale);
+  const [language, setLanguage] = useState(
+    normalizeContentLanguage(
+      isComment ? (post.language ?? locale) : (post.resolvedLanguage ?? locale),
+    ) ?? locale,
+  );
   const [lockedError, setLockedError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const originalTitle = isComment ? "" : (post.title ?? "");
@@ -116,7 +128,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
     if (isComment) {
       updateCommentMutation.mutate({
         id: post.unitId,
-        input: { content },
+        input: { content, language },
       });
       return;
     }
@@ -156,12 +168,31 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
             </Alert>
           ) : null}
           {isComment ? (
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={6}
-              className="w-full min-h-[120px] max-h-[400px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            />
+            <div className="flex flex-col gap-2">
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={6}
+                className="min-h-[120px] max-h-[400px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger
+                  aria-label={t("common:language")}
+                  className="h-9 w-[9.5rem] max-w-full"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {CONTENT_LANGUAGE_SLUGS.map((lang) => (
+                      <SelectItem key={lang} value={lang}>
+                        {languageLabel(lang)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
           ) : (
             <PostEditorSurface
               post={post}
@@ -170,7 +201,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
               title={title}
               body={text}
               onLanguageChange={(nextLanguage) =>
-                setLanguage(normalizeLanguage(nextLanguage) ?? locale)
+                setLanguage(normalizeContentLanguage(nextLanguage) ?? locale)
               }
               onTitleChange={setTitle}
               onBodyChange={setText}
@@ -201,3 +232,10 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
     </Dialog>
   );
 };
+
+function languageLabel(language: string): string {
+  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[
+    language
+  ];
+  return meta?.nativeName ? `${meta.nativeName} (${language})` : language;
+}

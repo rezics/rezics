@@ -8,7 +8,7 @@ import { unitQueries } from "@rezics/api/unit/unit";
 import {
   mainMarkdownSource,
   markdownContentDoc,
-  normalizeLanguage,
+  normalizeContentLanguage,
   PostKind,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
@@ -117,7 +117,10 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     if (!post || !languageContent) return;
     setTitle(languageContent.title ?? "");
     setText(mainMarkdownSource(languageContent.content) ?? "");
-    setLanguage(normalizeLanguage(languageContent.resolvedLanguage) ?? locale);
+    setLanguage(
+      normalizeContentLanguage(languageContent.resolvedLanguage ?? "") ??
+        locale,
+    );
   }, [languageContent, locale, post]);
 
   const handleSaved = () => {
@@ -210,7 +213,7 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
         title={title}
         body={text}
         onLanguageChange={(nextLanguage) =>
-          setLanguage(normalizeLanguage(nextLanguage) ?? locale)
+          setLanguage(normalizeContentLanguage(nextLanguage) ?? locale)
         }
         onTitleChange={setTitle}
         onBodyChange={setText}

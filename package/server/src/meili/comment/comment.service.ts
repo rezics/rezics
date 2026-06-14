@@ -49,6 +49,9 @@ export function buildCommentSearchFilter(opts: CommentSearchOptions): string[] {
   if (opts.authorUserId) {
     filter.push(`authorUserId = "${opts.authorUserId}"`);
   }
+  if (opts.language) {
+    filter.push(`language = "${opts.language}"`);
+  }
   if (typeof opts.depth === "number") {
     filter.push(`depth = ${opts.depth}`);
   }

@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentDocWriteSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
@@ -205,7 +205,7 @@ const shelfListCommonProperties = {
   tagIds: t.Optional(t.Array(t.String())),
   containsUnitId: t.Optional(t.String()),
   variantUnitId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -229,7 +229,7 @@ const shelfListBodyCommonProperties = {
   tagIds: t.Optional(t.Array(t.String())),
   containsUnitId: t.Optional(t.String()),
   variantUnitId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -290,7 +290,7 @@ export const createShelfSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),

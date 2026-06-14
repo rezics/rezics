@@ -5,7 +5,7 @@ import {
   editorialPatchSubmissionSchema,
   hasPermissionToUpdatePost,
   isBlocked,
-  normalizeLanguage,
+  normalizeContentLanguage,
   PostKind,
   type PostListQuery,
   type PostListResponse,
@@ -470,7 +470,7 @@ export const postApi = new Elysia({ prefix: "/post" })
           : {};
       const patchLanguage =
         typeof postPatch.language === "string"
-          ? (normalizeLanguage(postPatch.language) ?? undefined)
+          ? (normalizeContentLanguage(postPatch.language) ?? undefined)
           : undefined;
       const currentContent =
         target.unit.contentTranslations.find(

@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import {
   listGetQueryBase,
@@ -246,7 +246,7 @@ export type PublicUser = (typeof publicUserSchema)["static"];
 
 export const unitTranslationDTOSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
@@ -288,7 +288,7 @@ export type PublishableUnitInput =
 
 export const unitSupportLanguageDTOSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
   isPrimary: t.Boolean(),
   position: t.String(), // Fractional Indexing
 });
@@ -333,7 +333,7 @@ export type BaseUnit = (typeof baseUnitSchema)["static"];
 
 export const unitDTOSchema = t.Object({
   ...baseUnitSchema.properties,
-  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
@@ -364,7 +364,7 @@ export const unitListQuerySchema = t.Object({
   visibility: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
@@ -405,7 +405,7 @@ export const unitListBodySchema = t.Object({
   visibility: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
@@ -472,7 +472,7 @@ export const createUnitSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),
@@ -508,7 +508,7 @@ export type UpdateUnitInput = (typeof updateUnitSchema)["static"];
 // ============================================================
 
 export const createTranslationSchema = t.Object({
-  language: languageSchema,
+  language: contentLanguageSchema,
   title: t.Optional(t.String()),
   subtitle: t.Optional(t.String()),
   summary: t.Optional(t.String()),
@@ -532,7 +532,7 @@ export type UpdateTranslationInput = (typeof updateTranslationSchema)["static"];
 
 export const translationParamsSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
 });
 
 export type TranslationParams = (typeof translationParamsSchema)["static"];

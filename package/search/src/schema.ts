@@ -178,6 +178,7 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "realmUnitId",
       "parentCommentId",
       "authorUserId",
+      "language",
       "depth",
       "isLocked",
       "state",

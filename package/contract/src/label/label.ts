@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 
 // ANCHOR: Label DTO
 // ANCHOR: 标签 DTO
@@ -14,7 +14,7 @@ import { languageSchema } from "../language";
  */
 export const labelTranslationSchema = t.Object(
   {
-    language: languageSchema,
+    language: contentLanguageSchema,
     title: t.Nullable(t.String()),
   },
   { additionalProperties: false },
@@ -34,7 +34,7 @@ export const createLabelInputSchema = t.Object(
     translations: t.Array(
       t.Object(
         {
-          language: languageSchema,
+          language: contentLanguageSchema,
           title: t.String({ minLength: 1 }),
         },
         { additionalProperties: false },

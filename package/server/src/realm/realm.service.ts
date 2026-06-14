@@ -2,13 +2,13 @@ import type {
   AcknowledgeRealmRuleInput,
   AddUnitRealmInput,
   CreateRealmInput,
+  ListLanguageMode,
   RealmDTO,
   RealmExtraAdminReadResponse,
   RealmExtraOkResponse,
   RealmExtraReadResponse,
   RealmListQuery,
   RealmListView,
-  ListLanguageMode,
   RealmMemberDTO,
   RealmMemberListQuery,
   RealmMemberListResponse,
@@ -22,7 +22,7 @@ import type {
   UpdateRealmRulePolicyInput,
 } from "@rezics/contract";
 import {
-  normalizeLanguage,
+  normalizeContentLanguage,
   parseIdsCsv,
   resolveReadLanguage,
   validateSlug,
@@ -107,7 +107,7 @@ import type { RealmWithRelations } from "./types";
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 
 function normalizedLanguage(language: string | null | undefined) {
-  return language ? normalizeLanguage(language) : null;
+  return language ? normalizeContentLanguage(language) : null;
 }
 
 async function getServerDb() {

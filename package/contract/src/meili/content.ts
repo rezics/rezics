@@ -2,7 +2,7 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
 import { contentDocSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { readLanguageBodyBase } from "../list-query-base";
 import { gameSystemRequirementSummarySchema } from "../media/game-media";
 import { postKindLiterals } from "../post";
@@ -104,7 +104,7 @@ export const ContentSearchDocumentSchema = t.Object({
   supportLanguages: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         isPrimary: t.Optional(t.Boolean()),
         position: t.Optional(t.String()), // Fractional Indexing
       }),
@@ -141,12 +141,12 @@ export const ContentSearchDocumentSchema = t.Object({
 
   // Result display fields
   // 结果展示字段。
-  resolvedLanguage: t.Optional(t.Union([languageSchema, t.Null()])),
+  resolvedLanguage: t.Optional(t.Union([contentLanguageSchema, t.Null()])),
   title: t.Optional(t.Union([t.String(), t.Null()])),
   subtitle: t.Optional(t.Union([t.String(), t.Null()])),
   summary: t.Optional(t.Union([t.String(), t.Null()])),
   description: t.Optional(t.Union([contentDocSchema, t.Null()])),
-  defaultLanguage: t.Union([languageSchema, t.Null()]),
+  defaultLanguage: t.Union([contentLanguageSchema, t.Null()]),
   coverUrl: t.Union([t.String(), t.Null()]),
   userId: t.Union([t.String(), t.Null()]),
 
@@ -165,7 +165,7 @@ export const ContentSearchDocumentSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Union([t.String(), t.Null()]),
         subtitle: t.Union([t.String(), t.Null()]),
         summary: t.Union([t.String(), t.Null()]),

@@ -1,6 +1,7 @@
 import { unitQueries } from "@rezics/api/unit/unit";
 import {
   mainMarkdownSource,
+  normalizeContentLanguage,
   normalizeLanguage,
   type PostDTO,
 } from "@rezics/contract";
@@ -75,7 +76,7 @@ export function RootPostTranslationEditor({
   }));
   const contentQuery = useMemo(
     () => ({
-      explicitLanguage: normalizeLanguage(language) ?? undefined,
+      explicitLanguage: normalizeContentLanguage(language) ?? undefined,
       appLocale: defaultLanguage
         ? (normalizeLanguage(defaultLanguage) ?? undefined)
         : undefined,

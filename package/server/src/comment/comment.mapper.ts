@@ -24,6 +24,7 @@ export function mapCommentToDTO(comment: CommentWithRelations): CommentDTO {
       : isDeleted
         ? "author_deleted"
         : null) as CommentDTO["redactionKind"],
+    language: comment.language as CommentDTO["language"],
     depth: comment.depth,
     createdAt: comment.createdAt.toISOString(),
     updatedAt: comment.updatedAt.toISOString(),

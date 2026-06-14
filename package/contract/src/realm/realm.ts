@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { appLanguageSchema, contentLanguageSchema } from "../language";
 import {
   listGetQueryBase,
   listPostBodyBase,
@@ -112,7 +112,7 @@ export const realmDTOSchema = t.Object({
   memberCount: t.Number(),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
   viewerCapabilities: t.Optional(t.Array(capabilityHintSchema)),
-  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   title: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(contentDocSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
@@ -201,8 +201,8 @@ export const realmRuleResolvedDTOSchema = t.Object({
   requireOnPost: t.Optional(t.Boolean()),
   requireOnUpdate: t.Optional(t.Boolean()),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
-  requestedLanguage: t.Optional(t.Nullable(languageSchema)),
-  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  requestedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   translation: t.Optional(t.Nullable(unitTranslationDTOSchema)),
   sourceRulePostUnitId: t.Optional(t.Nullable(t.String())),
   sourceRulePost: t.Optional(t.Nullable(postDTOSchema)),
@@ -212,9 +212,9 @@ export type RealmRuleResolvedDTO =
   (typeof realmRuleResolvedDTOSchema)["static"];
 
 export const resolveRealmRuleQuerySchema = t.Object({
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   languages: t.Optional(t.String()),
-  appLocale: t.Optional(languageSchema),
+  appLocale: t.Optional(appLanguageSchema),
 });
 
 export const realmRuleAcknowledgementDTOSchema = t.Object({
@@ -223,14 +223,14 @@ export const realmRuleAcknowledgementDTOSchema = t.Object({
   version: t.Number(),
   userId: t.String(),
   acceptedAt: t.Union([t.String(), t.Date()]),
-  acceptedLanguage: t.Optional(t.Nullable(languageSchema)),
+  acceptedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
 });
 
 export type RealmRuleAcknowledgementDTO =
   (typeof realmRuleAcknowledgementDTOSchema)["static"];
 
 export const acknowledgeRealmRuleSchema = t.Object({
-  acceptedLanguage: t.Optional(t.Nullable(languageSchema)),
+  acceptedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
 });
 
 export type AcknowledgeRealmRuleInput =
@@ -253,7 +253,7 @@ export const realmRuleAcknowledgementStatusSchema = t.Object({
   acceptedRuleUnitId: t.Optional(t.Nullable(t.String())),
   acceptedVersion: t.Optional(t.Nullable(t.Number())),
   acceptedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
-  acceptedLanguage: t.Optional(t.Nullable(languageSchema)),
+  acceptedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   acknowledgementRequired: t.Boolean(),
 });
 
@@ -530,7 +530,7 @@ export const realmListQuerySchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -550,7 +550,7 @@ export const realmListBodySchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -583,7 +583,7 @@ export type RealmParams = (typeof realmParamsSchema)["static"];
 
 export const realmReadQuerySchema = t.Object({
   ...readLanguageGetQueryBase.properties,
-  explicitLanguage: t.Optional(languageSchema),
+  explicitLanguage: t.Optional(contentLanguageSchema),
 });
 
 export type RealmReadQuery = (typeof realmReadQuerySchema)["static"];
@@ -603,7 +603,7 @@ export const createRealmSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),

@@ -1,8 +1,22 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
-import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
+import {
+  CONTENT_LANGUAGE_SLUGS,
+  LANGUAGE_META,
+  markdownContentDoc,
+  PostKind,
+  SCORE_MAX,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
-import { Input } from "@rezics/ui/shadcn";
+import {
+  Input,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import {
   forwardRef,
   useImperativeHandle,
@@ -11,7 +25,7 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
-import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
+import { useAutoDetectedAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
 interface RemarkInlineFormProps {
@@ -56,10 +70,12 @@ export const RemarkInlineForm = forwardRef<
   RemarkInlineFormProps
 >(({ bookUnitId, onSuccess }, ref) => {
   const { t } = useTranslation(["common", "community", "page"]);
-  const authoringLanguage = useAuthoringLanguageDefault();
   const [expanded, setExpanded] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const { language, setLanguage } = useAutoDetectedAuthoringLanguageState({
+    text: `${title}\n${body}`,
+  });
   const [score, setScore] = useState<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -86,7 +102,7 @@ export const RemarkInlineForm = forwardRef<
       {
         targetUnitId: bookUnitId,
         kind: PostKind.REMARK,
-        language: authoringLanguage,
+        language,
         title: trimmedTitle,
         content: markdownContentDoc(trimmed),
         ...(extra ? { extra } : {}),
@@ -137,13 +153,30 @@ export const RemarkInlineForm = forwardRef<
 
   return (
     <div ref={wrapperRef} className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-row flex-wrap items-center gap-2">
         <RatingInput
           value={score}
           onChange={setScore}
           max={SCORE_MAX}
           aria-label={t("page:remark_form_rating")}
         />
+        <Select value={language} onValueChange={setLanguage}>
+          <SelectTrigger
+            aria-label={t("common:language")}
+            className="h-9 w-[9.5rem] max-w-full"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {CONTENT_LANGUAGE_SLUGS.map((lang) => (
+                <SelectItem key={lang} value={lang}>
+                  {languageLabel(lang)}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
       <Input
         value={title}
@@ -169,3 +202,10 @@ export const RemarkInlineForm = forwardRef<
 });
 
 RemarkInlineForm.displayName = "RemarkInlineForm";
+
+function languageLabel(language: string): string {
+  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[
+    language
+  ];
+  return meta?.nativeName ? `${meta.nativeName} (${language})` : language;
+}

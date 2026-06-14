@@ -11,14 +11,14 @@ describe("resolveAuthoringLanguageDefault", () => {
     ).toBe("ja");
   });
 
-  test("normalizes and ignores unsupported language codes", () => {
+  test("normalizes broad content language codes", () => {
     expect(
       resolveAuthoringLanguageDefault({
         preferredLanguages: ["fr", "zh-Hant"],
         appLocale: "en-US",
         fallbackLanguage: "en",
       }),
-    ).toBe("zh-hant");
+    ).toBe("fra");
   });
 
   test("falls back when no user or app language is usable", () => {

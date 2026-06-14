@@ -21,6 +21,7 @@ describe("comment contract", () => {
         parentCommentId: null,
         authorUserId: "user-1",
         content: null,
+        language: "en",
         moderationStatus: "approved",
         depth: 1,
         pinKind: "ACCEPTED_ANSWER",
@@ -34,6 +35,7 @@ describe("comment contract", () => {
       Value.Check(createCommentSchema, {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
+        language: "en",
         content: { type: "doc", content: [] },
       }),
     ).toBe(true);
@@ -43,12 +45,14 @@ describe("comment contract", () => {
       Value.Check(createCommentSchema, {
         rootUnitId: "post-1",
         realmUnitId: null,
+        language: "en",
         content: { type: "doc", content: [] },
       }),
     ).toBe(true);
     expect(
       Value.Check(createCommentSchema, {
         rootUnitId: "post-1",
+        language: "en",
         content: { type: "doc", content: [] },
       }),
     ).toBe(false);
@@ -56,6 +60,7 @@ describe("comment contract", () => {
     expect(
       Value.Check(createCommentSchema, {
         rootPostUnitId: "post-1",
+        language: "en",
         content: { type: "doc", content: [] },
       }),
     ).toBe(false);
@@ -92,6 +97,7 @@ describe("comment contract", () => {
     expect(
       Value.Check(commentListQuerySchema, {
         rootUnitId: "post-1",
+        language: "spa",
         mode: "discovery",
       }),
     ).toBe(true);

@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 
 export const realmRuleExtraNote =
@@ -60,7 +60,7 @@ export type RealmWikiSidebar = (typeof realmWikiSidebarSchema)["static"];
 export const realmTagTreeLabelSchema = t.Object(
   {
     translations: t.Record(t.String(), t.String()),
-    fallbackLanguage: t.Optional(languageSchema),
+    fallbackLanguage: t.Optional(contentLanguageSchema),
   },
   { additionalProperties: false },
 );

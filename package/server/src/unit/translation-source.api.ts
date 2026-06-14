@@ -1,5 +1,5 @@
 import {
-  languageSchema,
+  contentLanguageSchema,
   type TranslationSourceResponse,
   translationSourceBodySchema,
   translationSourceResponseSchema,
@@ -15,7 +15,7 @@ import {
 // 参数名 `unitId` 与 `unitApi` 的一致 —— memoirist 要求同一 trie 位置上的参数名必须保持一致。
 const workTranslationPathParamsSchema = t.Object({
   unitId: t.String(),
-  lang: languageSchema,
+  lang: contentLanguageSchema,
 });
 
 export const translationSourceApi = new Elysia({ prefix: "/unit" })

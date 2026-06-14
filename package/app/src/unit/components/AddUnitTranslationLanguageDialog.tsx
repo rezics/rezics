@@ -1,4 +1,4 @@
-import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
+import { CONTENT_LANGUAGE_SLUGS, LANGUAGE_META } from "@rezics/contract";
 import {
   Button,
   Dialog,
@@ -28,7 +28,7 @@ export interface AddUnitTranslationLanguageDialogProps {
   submitLabel: React.ReactNode;
 }
 
-const ALL_LANGUAGES = Object.values(LANGUAGES);
+const ALL_LANGUAGES = CONTENT_LANGUAGE_SLUGS;
 
 export const AddUnitTranslationLanguageDialog: React.FC<
   AddUnitTranslationLanguageDialogProps

@@ -9,7 +9,7 @@ import {
   contentStructureNodeSchema,
 } from "../content/structure";
 import { creditAttributionBriefSchema } from "../entity/credit-attribution";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import {
   listGetQueryBase,
@@ -56,8 +56,8 @@ export const bookDTOSchema = t.Object({
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  defaultLanguage: t.Optional(t.Nullable(languageSchema)),
-  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  defaultLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
@@ -104,7 +104,7 @@ export const bookListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   ...readLanguageGetQueryBase.properties,
   rating: t.Optional(contentRatingSchema),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
@@ -134,7 +134,7 @@ export const bookListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   ...readLanguageBodyBase.properties,
   rating: t.Optional(contentRatingSchema),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
@@ -180,7 +180,7 @@ export type BookParams = (typeof bookParamsSchema)["static"];
 
 export const bookReadQuerySchema = t.Object({
   ...readLanguageGetQueryBase.properties,
-  explicitLanguage: t.Optional(languageSchema),
+  explicitLanguage: t.Optional(contentLanguageSchema),
 });
 
 export type BookReadQuery = (typeof bookReadQuerySchema)["static"];
@@ -196,7 +196,7 @@ export type BookResponse = (typeof bookResponseSchema)["static"];
 export const createBookSchema = t.Object({
   userId: t.Optional(t.String()),
   creationMode: t.Optional(creationModeSchema),
-  defaultLanguage: t.Optional(languageSchema),
+  defaultLanguage: t.Optional(contentLanguageSchema),
   isbn13: t.Optional(t.String()),
   publicationDate: t.Optional(t.Union([t.String(), t.Date()])),
   pageCount: t.Optional(t.Number()),
@@ -213,7 +213,7 @@ export const createBookSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),

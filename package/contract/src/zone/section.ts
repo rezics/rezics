@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { postKindLiterals } from "../post/post";
 import { contentRatingSchema, unitTypeSchema } from "../unit/unit";
 import { zoneLinkTargetSchema } from "./link-target";
@@ -40,7 +40,7 @@ export type ZoneSectionQueryRealm = Static<typeof zoneSectionQueryRealmSchema>;
  */
 export const zoneSectionQueryLanguagesSchema = t.Union([
   t.Literal("viewer"),
-  t.Array(languageSchema),
+  t.Array(contentLanguageSchema),
 ]);
 
 export type ZoneSectionQueryLanguages = Static<
