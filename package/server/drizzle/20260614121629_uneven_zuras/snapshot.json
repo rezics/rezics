@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "e8f6ac45-3534-4af5-9b1f-0d5a44bc3de8",
-  "prevIds": [
-    "4897977f-c145-4b81-a5e2-93c0101b7627"
-  ],
+  "prevIds": ["4897977f-c145-4b81-a5e2-93c0101b7627"],
   "ddl": [
     {
       "values": [
@@ -21,42 +19,25 @@
       "schema": "public"
     },
     {
-      "values": [
-        "ACTIVE",
-        "HIDDEN"
-      ],
+      "values": ["ACTIVE", "HIDDEN"],
       "name": "UnitAliasStatus",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "BACKLOG",
-        "ACTIVE",
-        "PAUSED",
-        "COMPLETED",
-        "DROPPED"
-      ],
+      "values": ["BACKLOG", "ACTIVE", "PAUSED", "COMPLETED", "DROPPED"],
       "name": "UserUnitProgressStatus",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "REPORT",
-        "BUG",
-        "FEATURE",
-        "OTHER"
-      ],
+      "values": ["REPORT", "BUG", "FEATURE", "OTHER"],
       "name": "FeedbackType",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "ACTIVE",
-        "REMOVED"
-      ],
+      "values": ["ACTIVE", "REMOVED"],
       "name": "UserSubscriptionListEntryState",
       "entityType": "enums",
       "schema": "public"
@@ -75,31 +56,19 @@
       "schema": "public"
     },
     {
-      "values": [
-        "ACTIVE",
-        "EXPIRED",
-        "REVOKED"
-      ],
+      "values": ["ACTIVE", "EXPIRED", "REVOKED"],
       "name": "AccountEnforcementState",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "ACTIVE",
-        "EXPIRED",
-        "REVOKED"
-      ],
+      "values": ["ACTIVE", "EXPIRED", "REVOKED"],
       "name": "GovernanceGrantState",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "PENDING",
-        "VERIFIED",
-        "EXPIRED"
-      ],
+      "values": ["PENDING", "VERIFIED", "EXPIRED"],
       "name": "EmailVerificationContractStatus",
       "entityType": "enums",
       "schema": "public"
@@ -133,22 +102,13 @@
       "schema": "public"
     },
     {
-      "values": [
-        "USER",
-        "SYSTEM",
-        "AUTOMATION",
-        "IMPORT"
-      ],
+      "values": ["USER", "SYSTEM", "AUTOMATION", "IMPORT"],
       "name": "ModerationActorKind",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "PLATFORM",
-        "REALM",
-        "OWNER"
-      ],
+      "values": ["PLATFORM", "REALM", "OWNER"],
       "name": "ModerationAuthority",
       "entityType": "enums",
       "schema": "public"
@@ -170,20 +130,13 @@
       "schema": "public"
     },
     {
-      "values": [
-        "PLATFORM",
-        "REALM"
-      ],
+      "values": ["PLATFORM", "REALM"],
       "name": "ModerationScope",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "APPROVED",
-        "PENDING",
-        "REMOVED"
-      ],
+      "values": ["APPROVED", "PENDING", "REMOVED"],
       "name": "ModerationStatus",
       "entityType": "enums",
       "schema": "public"
@@ -203,64 +156,37 @@
       "schema": "public"
     },
     {
-      "values": [
-        "LIVE",
-        "AFTER_CLOSE"
-      ],
+      "values": ["LIVE", "AFTER_CLOSE"],
       "name": "PollResultVisibility",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "SINGLE",
-        "MULTI"
-      ],
+      "values": ["SINGLE", "MULTI"],
       "name": "PollVoteMode",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "ACCEPTED_ANSWER",
-        "PINNED",
-        "HIGHLIGHT"
-      ],
+      "values": ["ACCEPTED_ANSWER", "PINNED", "HIGHLIGHT"],
       "name": "PinKind",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "REVIEW",
-        "EXCERPT",
-        "REMARK",
-        "POST",
-        "CHAPTER",
-        "WIKI"
-      ],
+      "values": ["REVIEW", "EXCERPT", "REMARK", "POST", "CHAPTER", "WIKI"],
       "name": "PostKind",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "ACTIVE",
-        "PENDING",
-        "MUTED",
-        "REMOVED",
-        "BANNED"
-      ],
+      "values": ["ACTIVE", "PENDING", "MUTED", "REMOVED", "BANNED"],
       "name": "RealmMemberState",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "DRAFT",
-        "PUBLISHED",
-        "ARCHIVED"
-      ],
+      "values": ["DRAFT", "PUBLISHED", "ARCHIVED"],
       "name": "ContentTranslationStatus",
       "entityType": "enums",
       "schema": "public"
@@ -278,33 +204,19 @@
       "schema": "public"
     },
     {
-      "values": [
-        "MAIN",
-        "VARIANT",
-        "NONE"
-      ],
+      "values": ["MAIN", "VARIANT", "NONE"],
       "name": "CatalogEntryKind",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "GENERAL",
-        "R_15",
-        "R_18",
-        "R_18G"
-      ],
+      "values": ["GENERAL", "R_15", "R_18", "R_18G"],
       "name": "ContentRating",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "DRAFT",
-        "PUBLISHED",
-        "ARCHIVED",
-        "DELETED"
-      ],
+      "values": ["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"],
       "name": "UnitStatus",
       "entityType": "enums",
       "schema": "public"
@@ -336,11 +248,7 @@
       "schema": "public"
     },
     {
-      "values": [
-        "PUBLIC",
-        "UNLISTED",
-        "PRIVATE"
-      ],
+      "values": ["PUBLIC", "UNLISTED", "PRIVATE"],
       "name": "UnitVisibility",
       "entityType": "enums",
       "schema": "public"
@@ -14316,14 +14224,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitAlias_unitId_Unit_id_fkey",
@@ -14333,14 +14237,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "createdById"
-      ],
+      "columns": ["createdById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "UnitAlias_createdById_User_unitId_fkey",
@@ -14350,14 +14250,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "updatedById"
-      ],
+      "columns": ["updatedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "UnitAlias_updatedById_User_unitId_fkey",
@@ -14367,14 +14263,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "aliasId"
-      ],
+      "columns": ["aliasId"],
       "schemaTo": "public",
       "tableTo": "UnitAlias",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitAliasVote_aliasId_UnitAlias_id_fkey",
@@ -14384,14 +14276,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitAliasVote_userId_User_unitId_fkey",
@@ -14401,14 +14289,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "CreditAttribution_unitId_Unit_id_fkey",
@@ -14418,14 +14302,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "entityId"
-      ],
+      "columns": ["entityId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "CreditAttribution_entityId_Unit_id_fkey",
@@ -14435,14 +14315,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "sourceExternalLinkId"
-      ],
+      "columns": ["sourceExternalLinkId"],
       "schemaTo": "public",
       "tableTo": "UnitExternalLink",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "CreditAttributionEvidence_JHzUoWUuNrP1_fkey",
@@ -14452,18 +14328,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "unitId",
-        "entityId",
-        "role"
-      ],
+      "columns": ["unitId", "entityId", "role"],
       "schemaTo": "public",
       "tableTo": "CreditAttribution",
-      "columnsTo": [
-        "unitId",
-        "entityId",
-        "role"
-      ],
+      "columnsTo": ["unitId", "entityId", "role"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "CreditAttributionEvidence_unitId_entityId_role_fkey",
@@ -14473,14 +14341,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "SubjectAttribution_unitId_Unit_id_fkey",
@@ -14490,14 +14354,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "entityId"
-      ],
+      "columns": ["entityId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "SubjectAttribution_entityId_Unit_id_fkey",
@@ -14507,14 +14367,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Book_unitId_Unit_id_fkey",
@@ -14524,14 +14380,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserUnitProgress_userId_User_unitId_fkey",
@@ -14541,14 +14393,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserUnitProgress_unitId_Unit_id_fkey",
@@ -14558,14 +14406,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "lastReadNodeId"
-      ],
+      "columns": ["lastReadNodeId"],
       "schemaTo": "public",
       "tableTo": "ContentStructureNode",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "UserUnitProgress_lastReadNodeId_ContentStructureNode_id_fkey",
@@ -14575,14 +14419,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "progressId"
-      ],
+      "columns": ["progressId"],
       "schemaTo": "public",
       "tableTo": "UserUnitProgress",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserUnitProgressPost_progressId_UserUnitProgress_id_fkey",
@@ -14592,14 +14432,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "postUnitId"
-      ],
+      "columns": ["postUnitId"],
       "schemaTo": "public",
       "tableTo": "Post",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserUnitProgressPost_postUnitId_Post_unitId_fkey",
@@ -14609,14 +14445,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "rootUnitId"
-      ],
+      "columns": ["rootUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Comment_rootUnitId_Unit_id_fkey",
@@ -14626,14 +14458,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "Comment_realmUnitId_Unit_id_fkey",
@@ -14643,14 +14471,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "authorUserId"
-      ],
+      "columns": ["authorUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Comment_authorUserId_User_unitId_fkey",
@@ -14660,14 +14484,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "parentCommentId"
-      ],
+      "columns": ["parentCommentId"],
       "schemaTo": "public",
       "tableTo": "Comment",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "Comment_parentCommentId_fkey",
@@ -14677,14 +14497,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "scopeUnitId"
-      ],
+      "columns": ["scopeUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "CommentPromotion_scopeUnitId_Unit_id_fkey",
@@ -14694,14 +14510,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "commentId"
-      ],
+      "columns": ["commentId"],
       "schemaTo": "public",
       "tableTo": "Comment",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "CommentPromotion_commentId_Comment_id_fkey",
@@ -14711,14 +14523,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "ownerUnitId"
-      ],
+      "columns": ["ownerUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ContentStructure_ownerUnitId_Unit_id_fkey",
@@ -14728,14 +14536,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "nodeId"
-      ],
+      "columns": ["nodeId"],
       "schemaTo": "public",
       "tableTo": "ContentStructureNode",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ContentStructureAnchor_nodeId_ContentStructureNode_id_fkey",
@@ -14745,14 +14549,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "ownerUnitId"
-      ],
+      "columns": ["ownerUnitId"],
       "schemaTo": "public",
       "tableTo": "ContentStructure",
-      "columnsTo": [
-        "ownerUnitId"
-      ],
+      "columnsTo": ["ownerUnitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ContentStructureAnchor_gELoJtlxOqDA_fkey",
@@ -14762,14 +14562,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "contentUnitId"
-      ],
+      "columns": ["contentUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ContentStructureAnchor_contentUnitId_Unit_id_fkey",
@@ -14779,14 +14575,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "ownerUnitId"
-      ],
+      "columns": ["ownerUnitId"],
       "schemaTo": "public",
       "tableTo": "ContentStructure",
-      "columnsTo": [
-        "ownerUnitId"
-      ],
+      "columnsTo": ["ownerUnitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ContentStructureNode_fs63TGvmKX6x_fkey",
@@ -14796,14 +14588,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "contentUnitId"
-      ],
+      "columns": ["contentUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ContentStructureNode_contentUnitId_Unit_id_fkey",
@@ -14813,14 +14601,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "parentId"
-      ],
+      "columns": ["parentId"],
       "schemaTo": "public",
       "tableTo": "ContentStructureNode",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ContentStructureNode_parentId_fkey",
@@ -14830,14 +14614,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserContentNodeProgress_userId_User_unitId_fkey",
@@ -14847,14 +14627,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "nodeId"
-      ],
+      "columns": ["nodeId"],
       "schemaTo": "public",
       "tableTo": "ContentStructureNode",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserContentNodeProgress_nodeId_ContentStructureNode_id_fkey",
@@ -14864,14 +14640,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "subscriberUnitId"
-      ],
+      "columns": ["subscriberUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Subscription_subscriberUnitId_Unit_id_fkey",
@@ -14881,14 +14653,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "subscribedUnitId"
-      ],
+      "columns": ["subscribedUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Subscription_subscribedUnitId_Unit_id_fkey",
@@ -14898,14 +14666,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userUnitId"
-      ],
+      "columns": ["userUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserSubscriptionListEntry_userUnitId_Unit_id_fkey",
@@ -14915,14 +14679,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "subscribedUnitId"
-      ],
+      "columns": ["subscribedUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserSubscriptionListEntry_subscribedUnitId_Unit_id_fkey",
@@ -14932,14 +14692,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Entity_unitId_Unit_id_fkey",
@@ -14949,14 +14705,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitExternalLink_unitId_Unit_id_fkey",
@@ -14966,14 +14718,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "sourceEntityUnitId"
-      ],
+      "columns": ["sourceEntityUnitId"],
       "schemaTo": "public",
       "tableTo": "Entity",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitExternalLink_sourceEntityUnitId_Entity_unitId_fkey",
@@ -14983,14 +14731,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "labelUnitId"
-      ],
+      "columns": ["labelUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "UnitExternalLink_labelUnitId_Unit_id_fkey",
@@ -15000,14 +14744,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Game_unitId_Unit_id_fkey",
@@ -15017,14 +14757,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "gameUnitId"
-      ],
+      "columns": ["gameUnitId"],
       "schemaTo": "public",
       "tableTo": "Game",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "GameSystemRequirement_gameUnitId_Game_unitId_fkey",
@@ -15034,14 +14770,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "platformEntityId"
-      ],
+      "columns": ["platformEntityId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "GameSystemRequirement_platformEntityId_Unit_id_fkey",
@@ -15051,14 +14783,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "sourceExternalLinkId"
-      ],
+      "columns": ["sourceExternalLinkId"],
       "schemaTo": "public",
       "tableTo": "UnitExternalLink",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "GameSystemRequirement_yZby2dc9mgKM_fkey",
@@ -15068,14 +14796,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "targetUserId"
-      ],
+      "columns": ["targetUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "AccountEnforcement_targetUserId_User_unitId_fkey",
@@ -15085,14 +14809,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "decidedById"
-      ],
+      "columns": ["decidedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "AccountEnforcement_decidedById_User_unitId_fkey",
@@ -15102,14 +14822,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "revokedById"
-      ],
+      "columns": ["revokedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "AccountEnforcement_revokedById_User_unitId_fkey",
@@ -15119,14 +14835,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "decisionActionId"
-      ],
+      "columns": ["decisionActionId"],
       "schemaTo": "public",
       "tableTo": "ModerationAction",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "AccountEnforcement_decisionActionId_ModerationAction_id_fkey",
@@ -15136,14 +14848,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "revocationActionId"
-      ],
+      "columns": ["revocationActionId"],
       "schemaTo": "public",
       "tableTo": "ModerationAction",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "AccountEnforcement_revocationActionId_ModerationAction_id_fkey",
@@ -15153,14 +14861,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationAction_realmUnitId_Unit_id_fkey",
@@ -15170,14 +14874,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "actorUserId"
-      ],
+      "columns": ["actorUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationAction_actorUserId_User_unitId_fkey",
@@ -15187,14 +14887,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "caseId"
-      ],
+      "columns": ["caseId"],
       "schemaTo": "public",
       "tableTo": "ModerationCase",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationAction_caseId_ModerationCase_id_fkey",
@@ -15204,14 +14900,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "reversesActionId"
-      ],
+      "columns": ["reversesActionId"],
       "schemaTo": "public",
       "tableTo": "ModerationAction",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationAction_reversesActionId_fkey",
@@ -15221,14 +14913,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "reporterUserId"
-      ],
+      "columns": ["reporterUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_reporterUserId_User_unitId_fkey",
@@ -15238,14 +14926,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "subjectUserId"
-      ],
+      "columns": ["subjectUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_subjectUserId_User_unitId_fkey",
@@ -15255,14 +14939,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "addressedUnitId"
-      ],
+      "columns": ["addressedUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_addressedUnitId_Unit_id_fkey",
@@ -15272,14 +14952,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_realmUnitId_Unit_id_fkey",
@@ -15289,14 +14965,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "sourceFeedbackId"
-      ],
+      "columns": ["sourceFeedbackId"],
       "schemaTo": "public",
       "tableTo": "Feedback",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_sourceFeedbackId_Feedback_id_fkey",
@@ -15306,14 +14978,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "assignedToUserId"
-      ],
+      "columns": ["assignedToUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_assignedToUserId_User_unitId_fkey",
@@ -15323,14 +14991,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "duplicateOfCaseId"
-      ],
+      "columns": ["duplicateOfCaseId"],
       "schemaTo": "public",
       "tableTo": "ModerationCase",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_duplicateOfCaseId_fkey",
@@ -15340,14 +15004,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "parentCaseId"
-      ],
+      "columns": ["parentCaseId"],
       "schemaTo": "public",
       "tableTo": "ModerationCase",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ModerationCase_parentCaseId_fkey",
@@ -15357,14 +15017,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "actorUserId"
-      ],
+      "columns": ["actorUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "StaffAuditLog_actorUserId_User_unitId_fkey",
@@ -15374,14 +15030,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "StaffGrant_userId_User_unitId_fkey",
@@ -15391,14 +15043,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "StaffGrant_realmUnitId_Unit_id_fkey",
@@ -15408,14 +15056,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "grantedById"
-      ],
+      "columns": ["grantedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "StaffGrant_grantedById_User_unitId_fkey",
@@ -15425,14 +15069,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "revokedById"
-      ],
+      "columns": ["revokedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "StaffGrant_revokedById_User_unitId_fkey",
@@ -15442,14 +15082,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitCollaborator_unitId_Unit_id_fkey",
@@ -15459,14 +15095,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitCollaborator_userId_User_unitId_fkey",
@@ -15476,14 +15108,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "addedById"
-      ],
+      "columns": ["addedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "UnitCollaborator_addedById_User_unitId_fkey",
@@ -15493,14 +15121,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitFieldLock_unitId_Unit_id_fkey",
@@ -15510,14 +15134,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "lockedById"
-      ],
+      "columns": ["lockedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "UnitFieldLock_lockedById_User_unitId_fkey",
@@ -15527,14 +15147,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ApiToken_userId_User_unitId_fkey",
@@ -15544,14 +15160,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "jwtServiceId"
-      ],
+      "columns": ["jwtServiceId"],
       "schemaTo": "public",
       "tableTo": "JwtService",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Jwks_jwtServiceId_JwtService_id_fkey",
@@ -15561,14 +15173,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Link_unitId_Unit_id_fkey",
@@ -15578,14 +15186,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Media_unitId_Unit_id_fkey",
@@ -15595,14 +15199,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "HistoryOutbox_unitId_Unit_id_fkey",
@@ -15612,14 +15212,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "actorUserId"
-      ],
+      "columns": ["actorUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "HistoryOutbox_actorUserId_User_unitId_fkey",
@@ -15629,14 +15225,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "processedById"
-      ],
+      "columns": ["processedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "HistoryOutbox_processedById_User_unitId_fkey",
@@ -15646,14 +15238,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitHistoryClock_unitId_Unit_id_fkey",
@@ -15663,14 +15251,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Poll_unitId_Unit_id_fkey",
@@ -15680,14 +15264,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "pollUnitId"
-      ],
+      "columns": ["pollUnitId"],
       "schemaTo": "public",
       "tableTo": "Poll",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "PollOption_pollUnitId_Poll_unitId_fkey",
@@ -15697,14 +15277,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "PollOption_unitId_Unit_id_fkey",
@@ -15714,14 +15290,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "pollUnitId"
-      ],
+      "columns": ["pollUnitId"],
       "schemaTo": "public",
       "tableTo": "Poll",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "PollVote_pollUnitId_Poll_unitId_fkey",
@@ -15731,16 +15303,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "pollUnitId",
-        "optionId"
-      ],
+      "columns": ["pollUnitId", "optionId"],
       "schemaTo": "public",
       "tableTo": "PollOption",
-      "columnsTo": [
-        "pollUnitId",
-        "optionId"
-      ],
+      "columnsTo": ["pollUnitId", "optionId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "PollVote_pollUnitId_optionId_fkey",
@@ -15750,14 +15316,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Post_unitId_Unit_id_fkey",
@@ -15767,14 +15329,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "scoreEntryId"
-      ],
+      "columns": ["scoreEntryId"],
       "schemaTo": "public",
       "tableTo": "ScoreEntry",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "Post_scoreEntryId_ScoreEntry_id_fkey",
@@ -15784,14 +15342,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Realm_unitId_Unit_id_fkey",
@@ -15801,14 +15355,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Realm",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmCapabilityGrant_realmUnitId_Realm_unitId_fkey",
@@ -15818,14 +15368,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "grantedById"
-      ],
+      "columns": ["grantedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "RealmCapabilityGrant_grantedById_User_unitId_fkey",
@@ -15835,14 +15381,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "revokedById"
-      ],
+      "columns": ["revokedById"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "RealmCapabilityGrant_revokedById_User_unitId_fkey",
@@ -15852,16 +15394,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "realmUnitId",
-        "userId"
-      ],
+      "columns": ["realmUnitId", "userId"],
       "schemaTo": "public",
       "tableTo": "RealmMember",
-      "columnsTo": [
-        "realmUnitId",
-        "userId"
-      ],
+      "columnsTo": ["realmUnitId", "userId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmCapabilityGrant_realmUnitId_userId_fkey",
@@ -15871,14 +15407,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Realm",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmMember_realmUnitId_Realm_unitId_fkey",
@@ -15888,14 +15420,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Realm",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmRuleAcknowledgement_realmUnitId_Realm_unitId_fkey",
@@ -15905,14 +15433,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "ruleUnitId"
-      ],
+      "columns": ["ruleUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmRuleAcknowledgement_ruleUnitId_Unit_id_fkey",
@@ -15922,14 +15446,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmRuleAcknowledgement_userId_User_unitId_fkey",
@@ -15939,14 +15459,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Realm",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmTagContext_realmUnitId_Realm_unitId_fkey",
@@ -15956,14 +15472,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "tagUnitId"
-      ],
+      "columns": ["tagUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmTagContext_tagUnitId_Unit_id_fkey",
@@ -15973,14 +15485,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "contextUnitId"
-      ],
+      "columns": ["contextUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "RealmTagContext_contextUnitId_Unit_id_fkey",
@@ -15990,14 +15498,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitRealm_realmUnitId_Unit_id_fkey",
@@ -16007,14 +15511,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitRealm_unitId_Unit_id_fkey",
@@ -16024,14 +15524,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Series_unitId_Unit_id_fkey",
@@ -16041,14 +15537,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "seriesUnitId"
-      ],
+      "columns": ["seriesUnitId"],
       "schemaTo": "public",
       "tableTo": "Series",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "SeriesContentIndex_seriesUnitId_Series_unitId_fkey",
@@ -16058,14 +15550,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "releaseUnitId"
-      ],
+      "columns": ["releaseUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "SeriesContentIndex_releaseUnitId_Unit_id_fkey",
@@ -16075,14 +15563,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "contentNodeId"
-      ],
+      "columns": ["contentNodeId"],
       "schemaTo": "public",
       "tableTo": "ContentStructureNode",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "SeriesContentIndex_contentNodeId_ContentStructureNode_id_fkey",
@@ -16092,14 +15576,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Shelf_unitId_Unit_id_fkey",
@@ -16109,14 +15589,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "shelfId"
-      ],
+      "columns": ["shelfId"],
       "schemaTo": "public",
       "tableTo": "Shelf",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ShelfItem_shelfId_Shelf_unitId_fkey",
@@ -16126,14 +15602,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "createdByUserId"
-      ],
+      "columns": ["createdByUserId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ShelfItem_createdByUserId_User_unitId_fkey",
@@ -16143,18 +15615,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "shelfId",
-        "parentItemType",
-        "parentItemId"
-      ],
+      "columns": ["shelfId", "parentItemType", "parentItemId"],
       "schemaTo": "public",
       "tableTo": "ShelfItem",
-      "columnsTo": [
-        "shelfId",
-        "itemType",
-        "itemId"
-      ],
+      "columnsTo": ["shelfId", "itemType", "itemId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "ShelfItem_parent_fkey",
@@ -16164,14 +15628,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "realmUnitId"
-      ],
+      "columns": ["realmUnitId"],
       "schemaTo": "public",
       "tableTo": "Realm",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmTagApplication_realmUnitId_Realm_unitId_fkey",
@@ -16181,14 +15641,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "tagUnitId"
-      ],
+      "columns": ["tagUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmTagApplication_tagUnitId_Unit_id_fkey",
@@ -16198,14 +15654,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmTagApplication_unitId_Unit_id_fkey",
@@ -16215,18 +15667,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "realmUnitId",
-        "tagUnitId",
-        "unitId"
-      ],
+      "columns": ["realmUnitId", "tagUnitId", "unitId"],
       "schemaTo": "public",
       "tableTo": "RealmTagApplication",
-      "columnsTo": [
-        "realmUnitId",
-        "tagUnitId",
-        "unitId"
-      ],
+      "columnsTo": ["realmUnitId", "tagUnitId", "unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "RealmTagApplicationVote_realmUnitId_tagUnitId_unitId_fkey",
@@ -16236,14 +15680,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "TagVote_unitId_Unit_id_fkey",
@@ -16253,14 +15693,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "tagUnitId"
-      ],
+      "columns": ["tagUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "TagVote_tagUnitId_Unit_id_fkey",
@@ -16270,14 +15706,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitTag_unitId_Unit_id_fkey",
@@ -16287,14 +15719,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "tagUnitId"
-      ],
+      "columns": ["tagUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitTag_tagUnitId_Unit_id_fkey",
@@ -16304,14 +15732,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserTagApplication_userId_User_unitId_fkey",
@@ -16321,14 +15745,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserTagApplication_unitId_Unit_id_fkey",
@@ -16338,14 +15758,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "tagUnitId"
-      ],
+      "columns": ["tagUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UserTagApplication_tagUnitId_Unit_id_fkey",
@@ -16355,14 +15771,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ContentTranslation_unitId_Unit_id_fkey",
@@ -16372,14 +15784,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitSupportLanguage_unitId_Unit_id_fkey",
@@ -16389,14 +15797,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "UnitTranslation_unitId_Unit_id_fkey",
@@ -16406,14 +15810,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "userId"
-      ],
+      "columns": ["userId"],
       "schemaTo": "public",
       "tableTo": "User",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "Unit_userId_User_unitId_fkey",
@@ -16423,14 +15823,10 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "targetUnitId"
-      ],
+      "columns": ["targetUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "SET NULL",
       "name": "Unit_targetUnitId_fkey",
@@ -16440,14 +15836,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "Zone_unitId_Unit_id_fkey",
@@ -16457,14 +15849,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "ownerRealmUnitId"
-      ],
+      "columns": ["ownerRealmUnitId"],
       "schemaTo": "public",
       "tableTo": "Unit",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "CASCADE",
       "onDelete": "RESTRICT",
       "name": "Zone_ownerRealmUnitId_Unit_id_fkey",
@@ -16474,14 +15862,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "zoneUnitId"
-      ],
+      "columns": ["zoneUnitId"],
       "schemaTo": "public",
       "tableTo": "Zone",
-      "columnsTo": [
-        "unitId"
-      ],
+      "columnsTo": ["unitId"],
       "onUpdate": "CASCADE",
       "onDelete": "CASCADE",
       "name": "ZonePage_zoneUnitId_Zone_unitId_fkey",
@@ -16490,10 +15874,7 @@
       "table": "ZonePage"
     },
     {
-      "columns": [
-        "aliasId",
-        "userId"
-      ],
+      "columns": ["aliasId", "userId"],
       "nameExplicit": true,
       "name": "UnitAliasVote_pkey",
       "entityType": "pks",
@@ -16501,11 +15882,7 @@
       "table": "UnitAliasVote"
     },
     {
-      "columns": [
-        "unitId",
-        "entityId",
-        "role"
-      ],
+      "columns": ["unitId", "entityId", "role"],
       "nameExplicit": true,
       "name": "CreditAttribution_pkey",
       "entityType": "pks",
@@ -16513,11 +15890,7 @@
       "table": "CreditAttribution"
     },
     {
-      "columns": [
-        "unitId",
-        "entityId",
-        "role"
-      ],
+      "columns": ["unitId", "entityId", "role"],
       "nameExplicit": true,
       "name": "SubjectAttribution_pkey",
       "entityType": "pks",
@@ -16525,10 +15898,7 @@
       "table": "SubjectAttribution"
     },
     {
-      "columns": [
-        "progressId",
-        "postUnitId"
-      ],
+      "columns": ["progressId", "postUnitId"],
       "nameExplicit": true,
       "name": "UserUnitProgressPost_pkey",
       "entityType": "pks",
@@ -16536,10 +15906,7 @@
       "table": "UserUnitProgressPost"
     },
     {
-      "columns": [
-        "scopeUnitId",
-        "commentId"
-      ],
+      "columns": ["scopeUnitId", "commentId"],
       "nameExplicit": true,
       "name": "CommentPromotion_pkey",
       "entityType": "pks",
@@ -16547,10 +15914,7 @@
       "table": "CommentPromotion"
     },
     {
-      "columns": [
-        "userId",
-        "nodeId"
-      ],
+      "columns": ["userId", "nodeId"],
       "nameExplicit": true,
       "name": "UserContentNodeProgress_pkey",
       "entityType": "pks",
@@ -16558,10 +15922,7 @@
       "table": "UserContentNodeProgress"
     },
     {
-      "columns": [
-        "unitId",
-        "userId"
-      ],
+      "columns": ["unitId", "userId"],
       "nameExplicit": true,
       "name": "UnitCollaborator_pkey",
       "entityType": "pks",
@@ -16569,10 +15930,7 @@
       "table": "UnitCollaborator"
     },
     {
-      "columns": [
-        "unitId",
-        "path"
-      ],
+      "columns": ["unitId", "path"],
       "nameExplicit": true,
       "name": "UnitFieldLock_pkey",
       "entityType": "pks",
@@ -16580,10 +15938,7 @@
       "table": "UnitFieldLock"
     },
     {
-      "columns": [
-        "pollUnitId",
-        "optionId"
-      ],
+      "columns": ["pollUnitId", "optionId"],
       "nameExplicit": true,
       "name": "PollOption_pkey",
       "entityType": "pks",
@@ -16591,10 +15946,7 @@
       "table": "PollOption"
     },
     {
-      "columns": [
-        "postUnitId",
-        "pollUnitId"
-      ],
+      "columns": ["postUnitId", "pollUnitId"],
       "nameExplicit": true,
       "name": "PostPollReference_pkey",
       "entityType": "pks",
@@ -16602,10 +15954,7 @@
       "table": "PostPollReference"
     },
     {
-      "columns": [
-        "sourcePostUnitId",
-        "targetUnitId"
-      ],
+      "columns": ["sourcePostUnitId", "targetUnitId"],
       "nameExplicit": true,
       "name": "PostUnitReference_pkey",
       "entityType": "pks",
@@ -16613,10 +15962,7 @@
       "table": "PostUnitReference"
     },
     {
-      "columns": [
-        "realmUnitId",
-        "userId"
-      ],
+      "columns": ["realmUnitId", "userId"],
       "nameExplicit": true,
       "name": "RealmMember_pkey",
       "entityType": "pks",
@@ -16624,12 +15970,7 @@
       "table": "RealmMember"
     },
     {
-      "columns": [
-        "realmUnitId",
-        "ruleUnitId",
-        "version",
-        "userId"
-      ],
+      "columns": ["realmUnitId", "ruleUnitId", "version", "userId"],
       "nameExplicit": true,
       "name": "RealmRuleAcknowledgement_pkey",
       "entityType": "pks",
@@ -16637,10 +15978,7 @@
       "table": "RealmRuleAcknowledgement"
     },
     {
-      "columns": [
-        "realmUnitId",
-        "tagUnitId"
-      ],
+      "columns": ["realmUnitId", "tagUnitId"],
       "nameExplicit": true,
       "name": "RealmTagContext_pkey",
       "entityType": "pks",
@@ -16648,10 +15986,7 @@
       "table": "RealmTagContext"
     },
     {
-      "columns": [
-        "realmUnitId",
-        "unitId"
-      ],
+      "columns": ["realmUnitId", "unitId"],
       "nameExplicit": true,
       "name": "UnitRealm_pkey",
       "entityType": "pks",
@@ -16659,10 +15994,7 @@
       "table": "UnitRealm"
     },
     {
-      "columns": [
-        "unitId",
-        "realm"
-      ],
+      "columns": ["unitId", "realm"],
       "nameExplicit": true,
       "name": "ScoreAggregate_pkey",
       "entityType": "pks",
@@ -16670,10 +16002,7 @@
       "table": "ScoreAggregate"
     },
     {
-      "columns": [
-        "realm",
-        "key"
-      ],
+      "columns": ["realm", "key"],
       "nameExplicit": true,
       "name": "ScoreRealmField_pkey",
       "entityType": "pks",
@@ -16681,11 +16010,7 @@
       "table": "ScoreRealmField"
     },
     {
-      "columns": [
-        "seriesUnitId",
-        "releaseUnitId",
-        "contentNodeId"
-      ],
+      "columns": ["seriesUnitId", "releaseUnitId", "contentNodeId"],
       "nameExplicit": true,
       "name": "SeriesContentIndex_pkey",
       "entityType": "pks",
@@ -16693,11 +16018,7 @@
       "table": "SeriesContentIndex"
     },
     {
-      "columns": [
-        "shelfId",
-        "itemType",
-        "itemId"
-      ],
+      "columns": ["shelfId", "itemType", "itemId"],
       "nameExplicit": true,
       "name": "ShelfItem_pkey",
       "entityType": "pks",
@@ -16705,11 +16026,7 @@
       "table": "ShelfItem"
     },
     {
-      "columns": [
-        "realmUnitId",
-        "tagUnitId",
-        "unitId"
-      ],
+      "columns": ["realmUnitId", "tagUnitId", "unitId"],
       "nameExplicit": true,
       "name": "RealmTagApplication_pkey",
       "entityType": "pks",
@@ -16717,12 +16034,7 @@
       "table": "RealmTagApplication"
     },
     {
-      "columns": [
-        "realmUnitId",
-        "tagUnitId",
-        "unitId",
-        "userId"
-      ],
+      "columns": ["realmUnitId", "tagUnitId", "unitId", "userId"],
       "nameExplicit": true,
       "name": "RealmTagApplicationVote_pkey",
       "entityType": "pks",
@@ -16730,11 +16042,7 @@
       "table": "RealmTagApplicationVote"
     },
     {
-      "columns": [
-        "userId",
-        "unitId",
-        "tagUnitId"
-      ],
+      "columns": ["userId", "unitId", "tagUnitId"],
       "nameExplicit": true,
       "name": "TagVote_pkey",
       "entityType": "pks",
@@ -16742,10 +16050,7 @@
       "table": "TagVote"
     },
     {
-      "columns": [
-        "unitId",
-        "tagUnitId"
-      ],
+      "columns": ["unitId", "tagUnitId"],
       "nameExplicit": true,
       "name": "UnitTag_pkey",
       "entityType": "pks",
@@ -16753,11 +16058,7 @@
       "table": "UnitTag"
     },
     {
-      "columns": [
-        "userId",
-        "unitId",
-        "tagUnitId"
-      ],
+      "columns": ["userId", "unitId", "tagUnitId"],
       "nameExplicit": true,
       "name": "UserTagApplication_pkey",
       "entityType": "pks",
@@ -16765,10 +16066,7 @@
       "table": "UserTagApplication"
     },
     {
-      "columns": [
-        "unitId",
-        "language"
-      ],
+      "columns": ["unitId", "language"],
       "nameExplicit": true,
       "name": "ContentTranslation_pkey",
       "entityType": "pks",
@@ -16776,10 +16074,7 @@
       "table": "ContentTranslation"
     },
     {
-      "columns": [
-        "unitId",
-        "language"
-      ],
+      "columns": ["unitId", "language"],
       "nameExplicit": true,
       "name": "UnitSupportLanguage_pkey",
       "entityType": "pks",
@@ -16787,10 +16082,7 @@
       "table": "UnitSupportLanguage"
     },
     {
-      "columns": [
-        "unitId",
-        "language"
-      ],
+      "columns": ["unitId", "language"],
       "nameExplicit": true,
       "name": "UnitTranslation_pkey",
       "entityType": "pks",
@@ -16798,9 +16090,7 @@
       "table": "UnitTranslation"
     },
     {
-      "columns": [
-        "slug"
-      ],
+      "columns": ["slug"],
       "nameExplicit": false,
       "name": "SlugScope_pkey",
       "schema": "public",
@@ -16808,9 +16098,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "UnitAlias_pkey",
       "schema": "public",
@@ -16818,9 +16106,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "CreditAttributionEvidence_pkey",
       "schema": "public",
@@ -16828,9 +16114,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Book_pkey",
       "schema": "public",
@@ -16838,9 +16122,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "UserUnitProgress_pkey",
       "schema": "public",
@@ -16848,9 +16130,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "Comment_pkey",
       "schema": "public",
@@ -16858,9 +16138,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "ownerUnitId"
-      ],
+      "columns": ["ownerUnitId"],
       "nameExplicit": false,
       "name": "ContentStructure_pkey",
       "schema": "public",
@@ -16868,9 +16146,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "nodeId"
-      ],
+      "columns": ["nodeId"],
       "nameExplicit": false,
       "name": "ContentStructureAnchor_pkey",
       "schema": "public",
@@ -16878,9 +16154,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "ContentStructureNode_pkey",
       "schema": "public",
@@ -16888,9 +16162,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "Feedback_pkey",
       "schema": "public",
@@ -16898,9 +16170,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "Subscription_pkey",
       "schema": "public",
@@ -16908,9 +16178,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "UserSubscriptionListEntry_pkey",
       "schema": "public",
@@ -16918,9 +16186,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Entity_pkey",
       "schema": "public",
@@ -16928,9 +16194,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "UnitExternalLink_pkey",
       "schema": "public",
@@ -16938,9 +16202,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Game_pkey",
       "schema": "public",
@@ -16948,9 +16210,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "GameSystemRequirement_pkey",
       "schema": "public",
@@ -16958,9 +16218,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "AccountEnforcement_pkey",
       "schema": "public",
@@ -16968,9 +16226,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "ModerationAction_pkey",
       "schema": "public",
@@ -16978,9 +16234,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "ModerationCase_pkey",
       "schema": "public",
@@ -16988,9 +16242,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "StaffAuditLog_pkey",
       "schema": "public",
@@ -16998,9 +16250,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "StaffGrant_pkey",
       "schema": "public",
@@ -17008,9 +16258,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "ApiToken_pkey",
       "schema": "public",
@@ -17018,9 +16266,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "User_pkey",
       "schema": "public",
@@ -17028,9 +16274,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "Jwks_pkey",
       "schema": "public",
@@ -17038,9 +16282,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "JwtService_pkey",
       "schema": "public",
@@ -17048,9 +16290,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Link_pkey",
       "schema": "public",
@@ -17058,9 +16298,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Media_pkey",
       "schema": "public",
@@ -17068,9 +16306,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "key"
-      ],
+      "columns": ["key"],
       "nameExplicit": false,
       "name": "EchoKV_pkey",
       "schema": "public",
@@ -17078,9 +16314,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "EmailVerificationContract_pkey",
       "schema": "public",
@@ -17088,9 +16322,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "HistoryOutbox_pkey",
       "schema": "public",
@@ -17098,9 +16330,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "UnitHistoryClock_pkey",
       "schema": "public",
@@ -17108,9 +16338,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Poll_pkey",
       "schema": "public",
@@ -17118,9 +16346,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "PollVote_pkey",
       "schema": "public",
@@ -17128,9 +16354,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Post_pkey",
       "schema": "public",
@@ -17138,9 +16362,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Realm_pkey",
       "schema": "public",
@@ -17148,9 +16370,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "RealmCapabilityGrant_pkey",
       "schema": "public",
@@ -17158,9 +16378,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "ScoreEntry_pkey",
       "schema": "public",
@@ -17168,9 +16386,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Series_pkey",
       "schema": "public",
@@ -17178,9 +16394,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Shelf_pkey",
       "schema": "public",
@@ -17188,9 +16402,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "Unit_pkey",
       "schema": "public",
@@ -17198,9 +16410,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "UserBlock_pkey",
       "schema": "public",
@@ -17208,9 +16418,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "unitId"
-      ],
+      "columns": ["unitId"],
       "nameExplicit": false,
       "name": "Zone_pkey",
       "schema": "public",
@@ -17218,9 +16426,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "ZonePage_pkey",
       "schema": "public",
@@ -17229,10 +16435,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "zoneUnitId",
-        "slug"
-      ],
+      "columns": ["zoneUnitId", "slug"],
       "nullsNotDistinct": false,
       "name": "ZonePage_zoneUnitId_slug_unique",
       "entityType": "uniques",
@@ -17261,7 +16464,5 @@
       "table": "Unit"
     }
   ],
-  "renames": [
-    "public.User.bio->public.User.summary"
-  ]
+  "renames": ["public.User.bio->public.User.summary"]
 }

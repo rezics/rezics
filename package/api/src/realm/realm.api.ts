@@ -18,11 +18,13 @@ import type {
   RealmExtraAdminReadResponse,
   RealmExtraOkResponse,
   RealmExtraReadResponse,
+  RealmListQuery,
   RealmListResponse,
   RealmMemberDTO,
   RealmMemberListQuery,
   RealmMemberListResponse,
   RealmMembershipMeDTO,
+  RealmReadQuery,
   RealmResponse,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
@@ -42,25 +44,24 @@ import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { RealmFilters } from "./realm.types";
 
-type RealmReadQuery = {
-  view?: "joined" | "managing";
-  explicitLanguage?: string;
+type RealmReadQueryInput = Omit<RealmReadQuery, "languages"> & {
   languages?: string | readonly string[];
-  appLocale?: string;
-  languageMode?: "preferred" | "all";
+};
+type RealmListQueryInput = Omit<RealmListQuery, "languages"> & {
+  languages?: string | readonly string[];
 };
 
 /**
  * Realm API methods
  */
 export const realmApi = {
-  mine: async (query?: RealmReadQuery): Promise<RealmListResponse> => {
+  mine: async (query?: RealmListQueryInput): Promise<RealmListResponse> => {
     return apiFetch<RealmListResponse>(`/realm/me${buildQueryString(query)}`);
   },
 
   byMember: async (
     userId: string,
-    query?: RealmReadQuery,
+    query?: RealmListQueryInput,
   ): Promise<RealmListResponse> => {
     return apiFetch<RealmListResponse>(
       `/realm/member/${userId}${buildQueryString(query)}`,
@@ -84,7 +85,7 @@ export const realmApi = {
    */
   get: async (
     unitId: string,
-    query?: RealmReadQuery,
+    query?: RealmReadQueryInput,
   ): Promise<RealmResponse> => {
     return apiFetch<RealmResponse>(
       `/realm/${unitId}${buildQueryString(query)}`,

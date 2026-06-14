@@ -30,6 +30,7 @@ function urlConfigFromSearch(
 function ProgressRoute() {
   const { isCurrentUser } = useProfileContext();
   const search = Route.useSearch();
+  const params = Route.useParams();
   const navigate = useNavigate();
 
   if (!isCurrentUser) return null;
@@ -40,6 +41,7 @@ function ProgressRoute() {
       onResetLibraryUrlConfig={() =>
         navigate({
           to: "/u/$userSlug/profile/progress",
+          params,
           search: (prev: ProgressSearch) => ({ ...prev, cols: undefined }),
         })
       }

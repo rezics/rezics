@@ -1,10 +1,10 @@
+import { useEntity } from "@rezics/api/entity";
+import { positionForNewBottomPin } from "@rezics/api/tag/fractional-index";
 import {
   useCreateUnitExternalLink,
   useDeleteUnitExternalLink,
   useUnitExternalLinks,
 } from "@rezics/api/unit-external-link";
-import { useEntity } from "@rezics/api/entity";
-import { positionForNewBottomPin } from "@rezics/api/tag/fractional-index";
 import type { UnitExternalLinkDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -174,11 +174,15 @@ export function UnitExternalLinkEditor({
             </Button>
           </div>
 
-          <label className="flex min-w-0 flex-[2] flex-col gap-1">
+          <label
+            htmlFor="unit-external-link-url"
+            className="flex min-w-0 flex-[2] flex-col gap-1"
+          >
             <span className="text-xs font-medium leading-dense text-text-secondary">
               {t("common:external_links_url_label")}
             </span>
             <Input
+              id="unit-external-link-url"
               type="url"
               value={url}
               onChange={(event) => setUrl(event.target.value)}

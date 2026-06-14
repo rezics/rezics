@@ -72,7 +72,8 @@ describe("versioned envelope parser", () => {
   });
 
   test("normal reads trust the envelope body after metadata dispatch", () => {
-    expect(testParser().parse({ schema: schemaName, version: 2 })).toEqual({
+    const parsed = testParser().parse({ schema: schemaName, version: 2 });
+    expect(parsed as unknown).toEqual({
       schema: schemaName,
       version: 2,
     });
@@ -97,6 +98,7 @@ describe("versioned envelope parser", () => {
           {
             version: 1,
             schema: v1Schema,
+            // @ts-expect-error This test verifies runtime rejection for invalid upgrade signatures.
             upgrade: (_value: unknown, _context: unknown) => {
               throw new Error("unreachable");
             },

@@ -253,7 +253,6 @@ function orderedTranslations(
   readLanguage: ProgressListInput = {},
 ): TranslationRow[] {
   const resolvedLanguage = resolveReadLanguage({
-    explicitLanguage: readLanguage.explicitLanguage,
     appLocale: readLanguage.appLocale,
     languages: parseReadLanguages(readLanguage.languages),
     availableLanguages: unit.translations.map((t) => t.language),

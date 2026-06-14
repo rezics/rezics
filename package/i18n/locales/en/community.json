@@ -381,7 +381,6 @@
   "tag_view_flat": "Flat",
   "tag_view_grouped": "Grouped",
   "tag_view_tree": "Tree",
-  "tag_empty": "No realm tags",
   "moderation_title": "Moderation",
   "moderation_reports": "Reports",
   "moderation_reports_detail": "Realm-scoped cases for reports, owner delegation, and moderation decisions.",

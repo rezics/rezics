@@ -27,8 +27,8 @@ import {
   type ShelfItemAnnotationValue,
 } from "./ShelfItemAnnotationPanel";
 import {
-  ShelfPickerToolbar,
   type ShelfPickerSortValue,
+  ShelfPickerToolbar,
 } from "./ShelfPickerToolbar";
 import { ShelfPickerVirtualList } from "./ShelfPickerVirtualList";
 
@@ -146,6 +146,7 @@ export function AddToShelfDialog({
     onError: (error) => recovery.handleError(error),
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: changing the target while the dialog is open must reset the draft form.
   useEffect(() => {
     if (!open) return;
     setIndependent(false);

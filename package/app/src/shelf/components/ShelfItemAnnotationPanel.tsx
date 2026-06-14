@@ -230,8 +230,12 @@ export function ShelfItemAnnotationPanel({
       </div>
 
       {showIndependent ? (
-        <label className="flex min-w-0 items-center gap-2 text-sm">
+        <label
+          htmlFor="shelf-item-independent-unit"
+          className="flex min-w-0 items-center gap-2 text-sm"
+        >
           <Checkbox
+            id="shelf-item-independent-unit"
             checked={independent}
             onCheckedChange={(checked) =>
               onIndependentChange?.(checked === true)

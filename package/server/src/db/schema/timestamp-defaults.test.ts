@@ -26,8 +26,11 @@ const tableName = Symbol.for("drizzle:Name");
 
 function updatedAtColumns(schema: Record<string, unknown>) {
   return Object.values(schema)
-    .filter((value): value is { [key: symbol]: unknown; updatedAt?: unknown } =>
-      Boolean(value && typeof value === "object" && value[isDrizzleTable]),
+    .filter(
+      (value): value is { [key: symbol]: unknown; updatedAt?: unknown } => {
+        if (!value || typeof value !== "object") return false;
+        return Boolean((value as Record<symbol, unknown>)[isDrizzleTable]);
+      },
     )
     .flatMap((table) => {
       const updatedAt = table.updatedAt as

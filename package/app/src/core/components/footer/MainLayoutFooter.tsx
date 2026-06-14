@@ -1,5 +1,6 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { GithubIcon, TelegramIcon } from "@rezics/icons";
+import { SafeLink } from "@rezics/ui";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import {
   Button,
@@ -249,24 +250,24 @@ export function MainLayoutFooter({ className }: { className?: string }) {
           </p>
 
           <div className="flex flex-row items-center gap-4 pr-20">
-            <Link
-              to="/privacy"
+            <SafeLink
+              href="/privacy"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_privacy")}
-            </Link>
-            <Link
-              to="/terms"
+            </SafeLink>
+            <SafeLink
+              href="/terms"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_terms")}
-            </Link>
-            <Link
-              to="/contact"
+            </SafeLink>
+            <SafeLink
+              href="/contact"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_contact")}
-            </Link>
+            </SafeLink>
           </div>
         </div>
       </div>

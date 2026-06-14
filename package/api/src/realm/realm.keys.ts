@@ -2,14 +2,14 @@
  * React Query keys for Realm queries
  */
 
+import type { RealmListQuery, RealmReadQuery } from "@rezics/contract";
 import type { RealmFilters } from "./realm.types";
 
-type RealmReadQuery = {
-  view?: "joined" | "managing";
-  explicitLanguage?: string;
+type RealmReadQueryInput = Omit<RealmReadQuery, "languages"> & {
   languages?: string | readonly string[];
-  appLocale?: string;
-  languageMode?: "preferred" | "all";
+};
+type RealmListQueryInput = Omit<RealmListQuery, "languages"> & {
+  languages?: string | readonly string[];
 };
 
 export const realmKeys = {
@@ -28,7 +28,7 @@ export const realmKeys = {
    * Keys for detail queries
    */
   details: () => [...realmKeys.all(), "detail"] as const,
-  detail: (unitId: string, query?: RealmReadQuery) =>
+  detail: (unitId: string, query?: RealmReadQueryInput) =>
     query === undefined
       ? ([...realmKeys.details(), unitId] as const)
       : ([...realmKeys.details(), unitId, query] as const),
@@ -81,8 +81,8 @@ export const realmKeys = {
   tagContext: (realmUnitId: string, tagUnitId: string) =>
     [...realmKeys.all(), "tagContexts", realmUnitId, tagUnitId] as const,
 
-  mine: (query?: RealmReadQuery) =>
+  mine: (query?: RealmListQueryInput) =>
     [...realmKeys.all(), "mine", query ?? null] as const,
-  byMember: (userId: string, query?: RealmReadQuery) =>
+  byMember: (userId: string, query?: RealmListQueryInput) =>
     [...realmKeys.all(), "member", userId, query ?? null] as const,
 } as const;

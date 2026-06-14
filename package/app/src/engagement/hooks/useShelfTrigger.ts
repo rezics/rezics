@@ -17,12 +17,9 @@ export type UseShelfTriggerReturn = {
   handleClick: (event: React.MouseEvent) => void;
 };
 
-export function useShelfTrigger({
-  targetUnitId,
-  variantUnitId,
-  targetItemType,
-  targetKind,
-}: UseShelfTriggerArgs): UseShelfTriggerReturn {
+export function useShelfTrigger(
+  _args: UseShelfTriggerArgs,
+): UseShelfTriggerReturn {
   const { isAuthenticated } = useAuth();
   const addToShelf = useAddToShelfDialog();
   const auth = useAuthModal("login");

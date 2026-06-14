@@ -244,15 +244,16 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     });
   }, [totalPages, unitId]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the normalized search text intentionally resets pagination when it changes.
   useEffect(() => {
     setPageState({ unitId, page: 1 });
-  }, [unitId]);
+  }, [normalizedItemSearchText, unitId]);
 
   // Reset to first page when item search text changes.
   // 当搜索文本变化时重置到第一页。
   useEffect(() => {
     setPageState({ unitId, page: 1 });
-  }, [normalizedItemSearchText, unitId]);
+  }, [unitId]);
 
   useEffect(() => {
     if (waitingForPageData && !isFetchingNextPage) {

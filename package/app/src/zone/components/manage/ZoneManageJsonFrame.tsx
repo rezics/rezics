@@ -61,7 +61,7 @@ export function ZoneManageJsonFrame({
     setMode("form");
     setText(zoneManageJsonText(draft, target));
     setProblems([]);
-  }, [targetKey]);
+  }, [draft, target]);
 
   useEffect(() => {
     onProblemsChange(targetKey, problems);

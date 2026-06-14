@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { JwtAlgorithm } from "@rezics/jwt";
 import { symmetricDecrypt, symmetricEncrypt } from "better-auth/crypto";
+import type { AuthJwtStorage } from "./storage-adapter";
 
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_auth";
@@ -34,7 +35,11 @@ const ensureLocalService = mock(async () => serviceRecord);
 const listKeys = mock(async (_serviceId: string): Promise<any[]> => []);
 const saveKey = mock(async (_serviceId: string, _key: unknown) => {});
 const markKeyRetiring = mock(async (_kid: string, _expiresAt: Date) => {});
-const getKeyByKid = mock(async (_kid: string) => null);
+const getKeyByKid = mock(
+  async (
+    _kid: string,
+  ): Promise<Awaited<ReturnType<AuthJwtStorage["getKeyByKid"]>>> => null,
+);
 
 describe("auth jwt storage adapter", () => {
   beforeEach(async () => {
@@ -327,6 +332,7 @@ describe("auth jwt storage adapter", () => {
     await authJwtPersistence.markKeyRetiring({
       issuer: getAuthJwtIssuer(),
       kid: "kid-auth",
+      retiresAt: expiresAt,
       expiresAt,
     });
 

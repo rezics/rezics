@@ -9,6 +9,7 @@ import type {
   ZonePageSection,
   ZoneSectionQuery,
   ZoneSectionQueryFilterField,
+  ZoneSectionQuerySortField,
   ZoneTheme,
   ZoneTranslation,
 } from "@rezics/contract";
@@ -479,12 +480,16 @@ export function moveListItem<T>(
  * `zone` 等目标时漂移。
  */
 export type ZoneQueryFilterField = ZoneSectionQueryFilterField;
+export type ZoneQuerySortField = ZoneSectionQuerySortField;
 export const ZONE_QUERY_FILTERABLE_FIELDS =
   ZONE_SECTION_QUERY_FILTERABLE_FIELDS;
 export const ZONE_QUERY_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS;
 
 export function zoneQueryUnsupportedFields(query: ZoneSectionQuery): string[] {
-  const filterable = ZONE_QUERY_FILTERABLE_FIELDS[query.target];
+  const filterable: readonly ZoneSectionQueryFilterField[] =
+    ZONE_QUERY_FILTERABLE_FIELDS[query.target];
+  const sortable: readonly ZoneSectionQuerySortField[] =
+    ZONE_QUERY_SORT_FIELDS[query.target];
   const unsupported: string[] = [];
   for (const key of Object.keys(query) as (keyof ZoneSectionQuery)[]) {
     if (key === "target" || key === "sort") continue;
@@ -493,7 +498,7 @@ export function zoneQueryUnsupportedFields(query: ZoneSectionQuery): string[] {
       unsupported.push(key);
     }
   }
-  if (!ZONE_QUERY_SORT_FIELDS[query.target].includes(query.sort.field)) {
+  if (!sortable.includes(query.sort.field)) {
     unsupported.push(`sort.${query.sort.field}`);
   }
   return unsupported;
@@ -537,7 +542,10 @@ export function coerceZoneQueryTarget(
   target: ZoneSectionQuery["target"],
 ): ZoneSectionQuery {
   if (query.target === target) return query;
-  const filterable = ZONE_QUERY_FILTERABLE_FIELDS[target];
+  const filterable: readonly ZoneQueryFilterField[] =
+    ZONE_QUERY_FILTERABLE_FIELDS[target];
+  const sortable: readonly ZoneQuerySortField[] =
+    ZONE_QUERY_SORT_FIELDS[target];
   const next: ZoneSectionQuery = { target, sort: { ...query.sort } };
   for (const key of filterable) {
     const value = query[key];
@@ -545,7 +553,7 @@ export function coerceZoneQueryTarget(
       (next as Record<string, unknown>)[key] = value;
     }
   }
-  if (!ZONE_QUERY_SORT_FIELDS[target].includes(next.sort.field)) {
+  if (!sortable.includes(next.sort.field)) {
     next.sort = { ...next.sort, field: "createdAt" };
   }
   return next;

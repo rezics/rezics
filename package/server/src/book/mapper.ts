@@ -15,6 +15,14 @@ function optionalCount(row: unknown, key: string): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
+function normalizeReadLanguageInput(
+  readLanguage: EffectiveReadLanguageInput | readonly string[],
+): EffectiveReadLanguageInput {
+  return Array.isArray(readLanguage)
+    ? { languages: readLanguage as readonly string[] }
+    : (readLanguage as EffectiveReadLanguageInput);
+}
+
 function pickCoverUrl(
   book: BookWithRelations,
   resolvedLanguage?: string | null,
@@ -69,9 +77,7 @@ export function mapBaseBookToDTO(
   readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): BookDTO {
   const unit = book.unit;
-  const readInput = Array.isArray(readLanguage)
-    ? { languages: readLanguage }
-    : readLanguage;
+  const readInput = normalizeReadLanguageInput(readLanguage);
   const resolvedLanguage = resolveReadLanguage({
     explicitLanguage: readInput.explicitLanguage,
     languages: readInput.languages,

@@ -47,9 +47,9 @@ import {
   enqueueTreeEditOp,
   ensureTreeChildren,
   moveTreeNodes,
+  type TreeEditOpLog,
   TreeEditorFooter,
   TreeMoveToDialog,
-  type TreeEditOpLog,
 } from "@/tree-edit";
 import { serializeBookToc } from "../models/bookTocSerializer";
 import { BookTocContextMenu } from "./BookTocContextMenu";
@@ -362,10 +362,10 @@ export const BookTocEditor = forwardRef<
     enqueueOp("addChild", String(parentId || "root"));
   }
 
-  function handlePreCreate(parentId: string | number | null) {
+  const handlePreCreate = useCallback((parentId: string | number | null) => {
     setCreateChapterDialog(true);
     setCurrentEditParentId(parentId);
-  }
+  }, []);
 
   /**
    * One-click new chapter: insert at last non-leaf, enter rename mode.
@@ -409,7 +409,7 @@ export const BookTocEditor = forwardRef<
         params: { bookId: bookUnitId, chapterId: targetContentUnitId },
       });
     },
-    [ensureChapterUnit, navigate, bookUnitId, showAlert],
+    [ensureChapterUnit, navigate, bookUnitId, showAlert, t],
   );
 
   /**
@@ -471,9 +471,12 @@ export const BookTocEditor = forwardRef<
     });
   };
 
-  const handleCreateChild = useCallback((chapter: Chapter) => {
-    handlePreCreate(chapter.id);
-  }, []);
+  const handleCreateChild = useCallback(
+    (chapter: Chapter) => {
+      handlePreCreate(chapter.id);
+    },
+    [handlePreCreate],
+  );
 
   const handleCreateSiblingAfter = useCallback(
     (chapter: Chapter) => {
@@ -487,7 +490,7 @@ export const BookTocEditor = forwardRef<
       );
       enqueueOp("addSiblingAfter", String(chapter.id));
     },
-    [enqueueOp],
+    [enqueueOp, t],
   );
 
   const handleDeleteChapter = useCallback(

@@ -15,7 +15,6 @@ function progressRow(unitId: string): ProgressLibraryRow["progress"] {
     lastReadAnchor: null,
     firstSeenAt: "2026-01-01T00:00:00.000Z",
     lastSeenAt: "2026-01-01T00:00:00.000Z",
-    extra: null,
   };
 }
 

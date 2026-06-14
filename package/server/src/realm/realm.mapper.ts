@@ -30,13 +30,19 @@ function lower<T extends string>(
   return value?.toLowerCase() as T | undefined;
 }
 
+function normalizeReadLanguageInput(
+  readLanguage: EffectiveReadLanguageInput | readonly string[],
+): EffectiveReadLanguageInput {
+  return Array.isArray(readLanguage)
+    ? { languages: readLanguage as readonly string[] }
+    : (readLanguage as EffectiveReadLanguageInput);
+}
+
 function resolvedRealmTranslation(
   row: RealmWithRelations | RealmListSelected,
   readLanguage: EffectiveReadLanguageInput | readonly string[],
 ) {
-  const readInput = Array.isArray(readLanguage)
-    ? { languages: readLanguage }
-    : readLanguage;
+  const readInput = normalizeReadLanguageInput(readLanguage);
   const resolvedLanguage = resolveReadLanguage({
     explicitLanguage: readInput.explicitLanguage,
     languages: readInput.languages,

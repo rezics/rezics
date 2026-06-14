@@ -131,6 +131,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
   const isLoading = activeResult.isLoading;
   const isError = activeResult.isError;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: filter values intentionally reset paginator state even though they are not read inside the effect body.
   useEffect(() => {
     setCurrentPage(1);
     if (queryType === "all") {

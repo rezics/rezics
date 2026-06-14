@@ -78,7 +78,7 @@ const SORT_OPTION_LABEL = {
 
 export const ShelvesTabSection: FC = () => {
   const { t } = useTranslation(["common", "entity"]);
-  const { user, userId, profileBasePath } = useProfileContext();
+  const { user, userId, profileRoute } = useProfileContext();
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
   });
@@ -123,7 +123,7 @@ export const ShelvesTabSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
-      <ShelfContentsSearchEntry profileBasePath={profileBasePath} />
+      <ShelfContentsSearchEntry profileRoute={profileRoute} />
 
       <FilterBar
         config={filterConfig}
@@ -155,8 +155,10 @@ export const ShelvesTabSection: FC = () => {
 };
 
 const ShelfContentsSearchEntry: FC<{
-  profileBasePath: string;
-}> = ({ profileBasePath }) => {
+  profileRoute:
+    | { kind: "id"; userId: string }
+    | { kind: "slug"; userSlug: string };
+}> = ({ profileRoute }) => {
   const { t } = useTranslation(["entity"]);
   const card = (
     <Card
@@ -175,7 +177,19 @@ const ShelfContentsSearchEntry: FC<{
   );
 
   return (
-    <Link to={`${profileBasePath}/shelf/items`} className="no-underline">
+    <Link
+      to={
+        profileRoute.kind === "id"
+          ? "/user/$userId/profile/shelf/items"
+          : "/u/$userSlug/profile/shelf/items"
+      }
+      params={
+        profileRoute.kind === "id"
+          ? { userId: profileRoute.userId }
+          : { userSlug: profileRoute.userSlug }
+      }
+      className="no-underline"
+    >
       {card}
     </Link>
   );

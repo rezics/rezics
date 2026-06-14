@@ -9,6 +9,7 @@ import type {
   ZoneBoundaryFilter,
   ZoneSectionQuery,
   ZoneSectionQueryFilterField,
+  ZoneSectionQuerySortField,
 } from "@rezics/contract";
 import {
   normalizeContentLanguage,
@@ -526,7 +527,10 @@ export interface CompiledZoneSectionQuery {
 export function zoneSectionQueryUnsupportedFields(
   query: ZoneSectionQuery,
 ): string[] {
-  const filterable = ZONE_SECTION_QUERY_FILTERABLE_FIELDS[query.target];
+  const filterable: readonly ZoneSectionQueryFilterField[] =
+    ZONE_SECTION_QUERY_FILTERABLE_FIELDS[query.target];
+  const sortable: readonly ZoneSectionQuerySortField[] =
+    ZONE_SECTION_QUERY_SORT_FIELDS[query.target];
   const unsupported: string[] = [];
   for (const key of Object.keys(query) as (keyof ZoneSectionQuery)[]) {
     if (key === "target" || key === "sort") continue;
@@ -535,9 +539,7 @@ export function zoneSectionQueryUnsupportedFields(
       unsupported.push(key);
     }
   }
-  if (
-    !ZONE_SECTION_QUERY_SORT_FIELDS[query.target].includes(query.sort.field)
-  ) {
+  if (!sortable.includes(query.sort.field)) {
     unsupported.push(`sort.${query.sort.field}`);
   }
   return unsupported;

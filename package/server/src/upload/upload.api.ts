@@ -1,14 +1,14 @@
 import { Elysia } from "elysia";
 import { PresignUploadBody, PresignUploadResponse } from "@rezics/contract";
 import { authMacro } from "@/middleware";
+import { AppError } from "@/utils/errors";
 import { isStorageConfigured, createPresignedUpload } from "./upload.service";
 
 export const uploadApi = new Elysia({ prefix: "/upload" }).use(authMacro).post(
   "/presign",
-  async ({ body, identity, set }) => {
+  async ({ body, identity }) => {
     if (!isStorageConfigured()) {
-      set.status = 503;
-      return { message: "Storage not configured" };
+      throw new AppError(503, "Storage not configured");
     }
 
     try {
@@ -20,13 +20,11 @@ export const uploadApi = new Elysia({ prefix: "/upload" }).use(authMacro).post(
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
       if (message.includes("too large")) {
-        set.status = 413;
+        throw new AppError(413, message);
       } else if (message.includes("Unsupported file type")) {
-        set.status = 415;
-      } else {
-        set.status = 500;
+        throw new AppError(415, message);
       }
-      return { message };
+      throw new AppError(500, message);
     }
   },
   {

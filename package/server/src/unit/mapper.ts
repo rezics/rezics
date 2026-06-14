@@ -14,6 +14,14 @@ function optionalCount(row: unknown, key: string): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
+function normalizeReadLanguageInput(
+  readLanguage: EffectiveReadLanguageInput | readonly string[],
+): EffectiveReadLanguageInput {
+  return Array.isArray(readLanguage)
+    ? { languages: readLanguage as readonly string[] }
+    : (readLanguage as EffectiveReadLanguageInput);
+}
+
 /**
  * Map internal Unit model to UnitDTO
  */
@@ -21,9 +29,7 @@ export function mapUnitToDTO(
   unit: UnitWithRelations,
   readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): UnitDTO {
-  const readInput = Array.isArray(readLanguage)
-    ? { languages: readLanguage }
-    : readLanguage;
+  const readInput = normalizeReadLanguageInput(readLanguage);
   const resolvedLanguage = resolveReadLanguage({
     explicitLanguage: readInput.explicitLanguage,
     languages: readInput.languages,
@@ -83,9 +89,7 @@ export function mapUnitListItemToDTO(
   unit: UnitWithRelations,
   readLanguage: EffectiveReadLanguageInput | readonly string[] = {},
 ): UnitDTO {
-  const readInput = Array.isArray(readLanguage)
-    ? { languages: readLanguage }
-    : readLanguage;
+  const readInput = normalizeReadLanguageInput(readLanguage);
   const resolvedLanguage = resolveReadLanguage({
     explicitLanguage: readInput.explicitLanguage,
     languages: readInput.languages,

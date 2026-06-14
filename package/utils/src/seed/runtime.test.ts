@@ -40,6 +40,7 @@ function createQueuedSelectDb(rowSets: unknown[][]) {
       where: () => api,
       orderBy: async () => nextRows(),
       limit: async () => nextRows(),
+      // biome-ignore lint/suspicious/noThenProperty: this mock intentionally implements Drizzle's thenable query builder contract.
       then: (resolve: (value: unknown[]) => unknown) =>
         Promise.resolve(nextRows()).then(resolve),
     };

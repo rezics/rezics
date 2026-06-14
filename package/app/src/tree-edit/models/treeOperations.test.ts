@@ -1,12 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { ensureTreeChildren, stripEmptyTreeChildren } from "./treeOperations";
+import {
+  ensureTreeChildren,
+  type NestedTreeNode,
+  stripEmptyTreeChildren,
+} from "./treeOperations";
 
 describe("treeOperations", () => {
   test("ensures every node has children for tree drop targets", () => {
-    const tree = ensureTreeChildren([
+    const nodes: NestedTreeNode[] = [
       { id: "root", children: [{ id: "child" }] },
       { id: "leaf" },
-    ]);
+    ];
+    const tree = ensureTreeChildren(nodes);
 
     expect(tree).toEqual([
       { id: "root", children: [{ id: "child", children: [] }] },
@@ -15,10 +20,11 @@ describe("treeOperations", () => {
   });
 
   test("strips empty UI-only children before persistence", () => {
-    const tree = stripEmptyTreeChildren([
+    const nodes: NestedTreeNode[] = [
       { id: "root", children: [{ id: "child", children: [] }] },
       { id: "leaf", children: [] },
-    ]);
+    ];
+    const tree = stripEmptyTreeChildren(nodes);
 
     expect(tree).toEqual([
       { id: "root", children: [{ id: "child" }] },

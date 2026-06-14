@@ -74,7 +74,7 @@ type SearchTagOption = {
 export const ShelfContentsSearchSection: FC = () => {
   const locale = useLocale();
   const { t } = useTranslation(["common", "community", "entity"]);
-  const { userId, isCurrentUser, profileBasePath } = useProfileContext();
+  const { userId, isCurrentUser, profileRoute } = useProfileContext();
   const [queryText, setQueryText] = useState("");
   const [tagSearchText, setTagSearchText] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -118,7 +118,19 @@ export const ShelfContentsSearchSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
-      <Link to={`${profileBasePath}/shelf`} className="w-fit no-underline">
+      <Link
+        to={
+          profileRoute.kind === "id"
+            ? "/user/$userId/profile/shelf"
+            : "/u/$userSlug/profile/shelf"
+        }
+        params={
+          profileRoute.kind === "id"
+            ? { userId: profileRoute.userId }
+            : { userSlug: profileRoute.userSlug }
+        }
+        className="w-fit no-underline"
+      >
         <Button type="button" variant="ghost" size="sm" className="gap-2">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           {t("common:back")}
