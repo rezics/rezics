@@ -24,6 +24,13 @@ The workbench lives at `tool/browser-inspect/`.
 Write task-specific Playwright code in `tool/browser-inspect/work/`. Do not put
 one-off investigation scripts elsewhere and do not commit them.
 
+`openInvestigationPage` uses the persistent `tool/browser-inspect/profile/`
+profile and prefers a system Chrome executable when available
+(`/usr/bin/google-chrome`, `/usr/bin/chromium`, then
+`/usr/bin/chromium-browser`). This avoids broken downloaded Chromium builds and
+keeps login/session state across runs. Pass `headless: true` only for read-only
+checks that do not need user interaction.
+
 ## Flow
 
 1. Create or update a scratch script under `tool/browser-inspect/work/`.
@@ -33,9 +40,12 @@ one-off investigation scripts elsewhere and do not commit them.
    - `page.locator('p:has-text("...")')`
    - `page.getByText("...")`
    - traditional CSS selectors through `page.locator(".selector")`
-5. If the page shows Cloudflare, login, captcha, consent, or other human gates,
-   keep the headed browser open and ask the user to complete the flow, then
-   press Enter in the terminal.
+5. If the page shows Cloudflare, login, captcha, consent, an authorization
+   denial, or any other human gate, keep the headed browser open through the
+   persistent profile and ask the user to complete the flow, then press Enter
+   in the terminal. If opening a headed browser requires approval, request
+   escalation for `task browser:inspect -- <script.ts>` and explain that the
+   user interaction will be stored in `tool/browser-inspect/profile/`.
 6. Highlight the selected locator and inspect it with
    `collectLocatorSummaries` and `dumpElementStyle`.
 7. Report the DOM/style findings back to the user with the exact locator used.
