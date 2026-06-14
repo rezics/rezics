@@ -14,18 +14,23 @@ export const serviceSubCommands = {
   }),
   logs: define({
     name: "logs",
-    description: "Follow managed service logs.",
+    description: "Show or follow managed service logs.",
     args: {
       service: {
         type: "positional",
         multiple: true,
         description: "Optional Compose service names.",
       },
+      tail: {
+        type: "number",
+        description: "Print this many recent log lines and exit.",
+      },
     },
     run: (ctx) =>
       runServiceCommand({
         kind: "logs",
         services: (ctx.values.service ?? []) as string[],
+        tail: ctx.values.tail as number | undefined,
       }),
   }),
   ps: define({
@@ -88,8 +93,7 @@ export const serviceSubCommands = {
       }),
       repair: define({
         name: "repair",
-        description:
-          "Repair local Sequin CDC sources with apply/dev-reset semantics.",
+        description: "Low-level local source-object repair for Sequin CDC.",
         args: {
           source: {
             type: "string",
@@ -119,6 +123,49 @@ export const serviceSubCommands = {
             sourceUrl: ctx.values.sourceUrl as string | undefined,
             reactionUrl: ctx.values.reactionUrl as string | undefined,
             forceActiveSlot: Boolean(ctx.values.forceActiveSlot),
+          }),
+      }),
+      recover: define({
+        name: "recover",
+        description:
+          "Recover local Sequin CDC end-to-end by stopping Sequin, repairing source objects, restarting, and verifying.",
+        args: {
+          source: {
+            type: "string",
+            description: "Limit recovery to source or reaction.",
+          },
+          sourceUrl: {
+            type: "string",
+            toKebab: true,
+            description: "Override server source Postgres connection URL.",
+          },
+          reactionUrl: {
+            type: "string",
+            toKebab: true,
+            description: "Override reaction Postgres connection URL.",
+          },
+          forceActiveSlot: {
+            type: "boolean",
+            toKebab: true,
+            description: "Drop an active local replication slot.",
+          },
+          logTail: {
+            type: "number",
+            toKebab: true,
+            description:
+              "Recent Sequin log lines to print when recovery fails.",
+            default: 200,
+          },
+        },
+        toKebab: true,
+        run: (ctx) =>
+          runServiceCommand({
+            kind: "cdc-recover",
+            source: ctx.values.source as "source" | "reaction" | undefined,
+            sourceUrl: ctx.values.sourceUrl as string | undefined,
+            reactionUrl: ctx.values.reactionUrl as string | undefined,
+            forceActiveSlot: Boolean(ctx.values.forceActiveSlot),
+            logTail: ctx.values.logTail as number | undefined,
           }),
       }),
     },

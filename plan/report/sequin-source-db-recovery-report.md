@@ -395,13 +395,14 @@ SELECT pg_drop_replication_slot('rezics_sequin_slot_development');
 
 ## 8. Recommendations
 
-1. Keep `bun run service source verify` as the local preflight after any source
-   DB reset, schema migration, or Sequin config change.
-2. Add a non-following `bun run service logs --tail` or equivalent wrapper so
-   agents and humans can inspect recent Sequin logs without starting a long
-   tail.
-3. Add a dedicated local command for `service restart sequin` to avoid requiring
-   raw Docker Compose usage.
+1. Keep `task service -- cdc verify` as the local preflight after any source
+   DB reset, schema migration, or Sequin config change. Use
+   `--source=source|reaction` only when intentionally scoping the check.
+2. Use `task service -- logs --tail=200 sequin` when inspecting recent Sequin
+   logs without starting a long tail.
+3. Use `task service -- cdc recover --source=source|reaction` for local CDC
+   recovery. It stops Sequin, repairs source objects, starts Sequin, then
+   verifies the selected source.
 4. Add an admin repair operation that can enqueue `history.outbox.ingest` for
    pending `HistoryOutbox` rows, so source CDC outages do not require manual
    pg-boss inserts.

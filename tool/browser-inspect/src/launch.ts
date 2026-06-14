@@ -1,4 +1,5 @@
 import path from "node:path";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { chromium, type BrowserContext, type Page } from "playwright";
 
@@ -18,20 +19,38 @@ export type OpenInvestigationPageOptions = {
   url: string;
   profileDir?: string;
   devtools?: boolean;
+  executablePath?: string;
+  headless?: boolean;
+  args?: string[];
   timeoutMs?: number;
 };
+
+function defaultChromeExecutablePath(): string | undefined {
+  for (const candidate of [
+    "/usr/bin/google-chrome",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+  ]) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return undefined;
+}
 
 export async function openInvestigationPage({
   url,
   profileDir = DEFAULT_PROFILE_DIR,
   devtools = true,
+  executablePath = defaultChromeExecutablePath(),
+  headless = false,
+  args = [],
   timeoutMs = 45_000,
 }: OpenInvestigationPageOptions): Promise<BrowserInvestigation> {
   // Persistent profile state is intentional: CF checks, login, consent, and
   // other human verification should survive repeated investigation scripts.
   const context = await chromium.launchPersistentContext(profileDir, {
-    headless: false,
-    args: devtools ? ["--auto-open-devtools-for-tabs"] : [],
+    ...(executablePath ? { executablePath } : {}),
+    headless,
+    args: [...(devtools ? ["--auto-open-devtools-for-tabs"] : []), ...args],
   });
   const page = context.pages()[0] ?? (await context.newPage());
 

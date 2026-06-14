@@ -29,6 +29,15 @@ env:
     HISTORY_BASE_URL: http://rezics-history:3004
     JOB_RUNNER_BASE_URL: http://rezics-job-runner:3005
     MEILI_HOST: http://rezics-meilisearch:7700
+    STATUS_JOB_RUNNER_URL: http://rezics-job-runner:3005
+    STATUS_SEQUIN_UI_URL: http://127.0.0.1:7376
+    STATUS_SEQUIN_HEALTH_URL: http://rezics-sequin:7376/health
+    STATUS_SEQUIN_WEBHOOK_TARGET_NAME: job-runner /webhooks/sequin
+    STATUS_CDC_PUBLICATION_NAME: rezics_sequin_pub_production
+    STATUS_CDC_REPLICATION_SLOT_NAME: rezics_sequin_slot_production
+    STATUS_REACTION_CDC_PUBLICATION_NAME: rezics_reaction_sequin_pub_production
+    STATUS_REACTION_CDC_REPLICATION_SLOT_NAME: rezics_reaction_sequin_slot_production
+    STATUS_CDC_LAG_WARNING_BYTES: "268435456"
   secret:
     - DATABASE_URL
     - AUTH_INTERNAL_TOKEN_GATEWAY_SECRET

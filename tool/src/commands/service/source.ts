@@ -50,11 +50,12 @@ function usage(): never {
       "Usage:",
       "  bun run service source verify [--url=postgresql://...]",
       "  bun run service source repair [--url=postgresql://...] [--force-active-slot]",
+      "  bun run service cdc recover [--source=source|reaction] [--force-active-slot]",
       "",
       "Legacy direct usage:",
       "  bun run tool/src/commands/service/source.ts [--url=postgresql://...] [--apply --dev-reset] [--force-active-slot]",
       "",
-      "Checks the source Postgres database used by Sequin CDC.",
+      "Legacy main/source-only CDC check. Prefer `service cdc verify` and `service cdc recover` for multi-source CDC.",
       "",
       "Verification mode is read-only.",
       "Repair mode is local-development scoped and runs with --apply --dev-reset to:",
@@ -366,6 +367,11 @@ async function main() {
   console.log(`Publication: ${publicationName()}`);
   console.log(`Replication slot: ${slotName()}`);
   console.log(args.apply ? "Mode: apply dev reset" : "Mode: check only");
+  if (args.apply) {
+    warn(
+      "legacy main/source-only repair; use `task service -- cdc recover --source=reaction` for reaction CDC",
+    );
+  }
 
   const client = new Client(sourceConnectionConfig(args));
   await client.connect();
