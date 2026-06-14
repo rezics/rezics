@@ -28,6 +28,7 @@ export const streamWorkSummarySchema = t.Object({
   description: t.Optional(t.Nullable(t.String())),
   primaryAuthor: t.Optional(t.Nullable(streamCreditSummarySchema)),
   tags: t.Optional(t.Array(streamTagSummarySchema)),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
 export type StreamWorkSummary = (typeof streamWorkSummarySchema)["static"];

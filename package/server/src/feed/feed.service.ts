@@ -14,20 +14,27 @@ import type {
 } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
 import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
-import { bookService } from "@/book";
+import { bookService, mapBookToDTO, type BookWithRelations } from "@/book";
 import { db } from "@/db";
 import { postService } from "@/post";
 import { mapPostToDTO } from "@/post/post.mapper";
 import { realmService } from "@/realm";
 import { shelfService } from "@/shelf";
-import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
+import {
+  type EffectiveReadLanguageInput,
+  resolveEffectiveReadLanguageCandidates,
+} from "@/unit/language-resolution";
 import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { AppError } from "@/utils/errors";
 import { zoneService } from "@/zone";
 import { UnitTag } from "../db/schema/tagging";
 import { UnitTranslation } from "../db/schema/translation";
 import { Unit } from "../db/schema/unit";
-import { mapBookToStreamRow, mapShelfToStreamRow } from "../stream";
+import {
+  mapBookToStreamRow,
+  mapBookToWorkSummary,
+  mapShelfToStreamRow,
+} from "../stream";
 import {
   feedResponse,
   mapPostToFeedRow,
@@ -178,9 +185,56 @@ function postKindForFeedFilter(
 function unitCursorForFeed(cursor: FeedQuery["cursor"]): Date | null {
   if (!cursor?.rowId || !cursor.createdAt) return null;
   const [type] = cursor.rowId.split(":");
-  if (type !== "unit") return null;
+  if (type !== "unit" && type !== "book") return null;
   const createdAt = new Date(cursor.createdAt);
   return Number.isNaN(createdAt.getTime()) ? null : createdAt;
+}
+
+function bookReadLanguageForFeed(query: FeedQuery): EffectiveReadLanguageInput {
+  return {
+    languages: resolveEffectiveReadLanguageCandidates({
+      languages: query.languages,
+      appLocale: query.appLocale,
+    }),
+    appLocale: query.appLocale,
+  };
+}
+
+type BookServiceListOptions = NonNullable<
+  Parameters<typeof bookService.list>[0]
+>;
+
+function bookListLanguageOptions(
+  query: FeedQuery,
+): Pick<BookServiceListOptions, "appLocale" | "languageMode" | "languages"> {
+  const readLanguage = bookReadLanguageForFeed(query);
+  return {
+    ...(readLanguage.languages?.length
+      ? { languages: readLanguage.languages.join(",") }
+      : {}),
+    ...(readLanguage.appLocale
+      ? {
+          appLocale:
+            readLanguage.appLocale as BookServiceListOptions["appLocale"],
+        }
+      : {}),
+    ...(query.languageMode ? { languageMode: query.languageMode } : {}),
+  };
+}
+
+function mapBookSourceToFeedRow(
+  book: BookWithRelations,
+  query: FeedQuery,
+  reason: string,
+  tags: NonNullable<StreamWorkSummary["tags"]> = [],
+) {
+  return mapBookToStreamRow(
+    {
+      ...mapBookToDTO(book, bookReadLanguageForFeed(query)),
+      tags,
+    },
+    reason,
+  );
 }
 
 function preferredTranslation<T extends { language: string }>(
@@ -345,10 +399,6 @@ type FeedPostDTO = PostDTO & {
 
 type FeedRealmSummary = NonNullable<FeedPostRow["realm"]>;
 
-function hasEmbeddedTargetSummary(post: FeedPostDTO): boolean {
-  return Boolean(post.extra?.book?.title);
-}
-
 function realmIdForFeedPost(
   post: PostDTO,
   fallbackRealmUnitId?: string | null,
@@ -418,11 +468,24 @@ async function hydrateTargetUnitSummaries(
     languages: query.languages,
     appLocale: query.appLocale,
   });
+  const result = new Map<string, StreamWorkSummary>();
+  const books = await bookService.list({
+    ids: uniqueIds.join(","),
+    limit: uniqueIds.length,
+    ...bookListLanguageOptions(query),
+  });
+  for (const book of books.books) {
+    const dto = mapBookToDTO(book, bookReadLanguageForFeed(query));
+    result.set(dto.unitId, mapBookToWorkSummary(dto));
+  }
+  const missingIds = uniqueIds.filter((unitId) => !result.has(unitId));
+  if (missingIds.length === 0) return result;
+
   const [units, translations] = await Promise.all([
     db
       .select({ id: Unit.id, type: Unit.type })
       .from(Unit)
-      .where(inArray(Unit.id, uniqueIds)),
+      .where(inArray(Unit.id, missingIds)),
     db
       .select({
         unitId: UnitTranslation.unitId,
@@ -430,11 +493,11 @@ async function hydrateTargetUnitSummaries(
         title: UnitTranslation.title,
       })
       .from(UnitTranslation)
-      .where(inArray(UnitTranslation.unitId, uniqueIds)),
+      .where(inArray(UnitTranslation.unitId, missingIds)),
   ]);
   const unitTypeMap = new Map(units.map((u) => [u.id, u.type]));
   const titlesByUnit = new Map<string, string | null>();
-  for (const unitId of uniqueIds) {
+  for (const unitId of missingIds) {
     const unitTranslations = translations.filter((t) => t.unitId === unitId);
     const preferred =
       languages.length > 0
@@ -445,8 +508,7 @@ async function hydrateTargetUnitSummaries(
       preferred?.title ?? unitTranslations[0]?.title ?? null,
     );
   }
-  const result = new Map<string, StreamWorkSummary>();
-  for (const unitId of uniqueIds) {
+  for (const unitId of missingIds) {
     result.set(unitId, {
       unitId,
       kind: unitTypeMap.get(unitId)?.toLowerCase(),
@@ -466,7 +528,6 @@ async function mapPostsToFeedRows(
     .map((post) => realmIdForFeedPost(post, input.realmUnitId))
     .filter((unitId): unitId is string => Boolean(unitId));
   const targetUnitIds = dtos
-    .filter((post) => !hasEmbeddedTargetSummary(post))
     .map((post) => post.targetUnitId)
     .filter((unitId): unitId is string => Boolean(unitId));
   const [realms, targetUnits] = await Promise.all([
@@ -605,6 +666,15 @@ export class FeedService {
 
     const unitType = unitTypeForFeedFilter(filterType);
     if (unitType) {
+      if (unitType === "BOOK") {
+        const bookRows = await this.homeBookRows(query, limit);
+        const response = feedResponse({
+          scope,
+          sort,
+          rows: bookRows.rows,
+        });
+        return bookRows.hasMore ? response : { ...response, nextCursor: null };
+      }
       const unitRows = await this.homeUnitRows(query, unitType, limit);
       const response = feedResponse({
         scope,
@@ -629,6 +699,49 @@ export class FeedService {
       }),
       limit,
     );
+  }
+
+  private async homeBookRows(
+    query: FeedQuery,
+    limit: number,
+  ): Promise<{ rows: FeedRow[]; hasMore: boolean }> {
+    const cursorCreatedAt = unitCursorForFeed(query.cursor);
+    const rows = await db
+      .select({
+        unitId: Unit.id,
+        createdAt: Unit.createdAt,
+      })
+      .from(Unit)
+      .where(
+        and(
+          eq(Unit.type, "BOOK"),
+          eq(Unit.status, "PUBLISHED"),
+          eq(Unit.visibility, "PUBLIC"),
+          ...(cursorCreatedAt ? [lt(Unit.createdAt, cursorCreatedAt)] : []),
+        ),
+      )
+      .orderBy(desc(Unit.createdAt))
+      .limit(limit + 1);
+    const visibleRows = rows.slice(0, limit);
+    if (visibleRows.length === 0) {
+      return { rows: [], hasMore: false };
+    }
+
+    const books = await bookService.list({
+      ids: visibleRows.map((row) => row.unitId).join(","),
+      limit: visibleRows.length,
+      ...bookListLanguageOptions(query),
+    });
+    const booksById = new Map(books.books.map((book) => [book.unitId, book]));
+    return {
+      hasMore: rows.length > limit,
+      rows: visibleRows.flatMap((row) => {
+        const book = booksById.get(row.unitId);
+        return book
+          ? [mapBookSourceToFeedRow(book, query, "home-book-feed")]
+          : [];
+      }),
+    };
   }
 
   private async homeUnitRows(
@@ -711,7 +824,10 @@ export class FeedService {
 
   private async homeRecommendationRows(query: FeedQuery): Promise<FeedRow[]> {
     const [books, shelves] = await Promise.all([
-      bookService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
+      bookService.list({
+        limit: RECOMMENDATION_ITEM_LIMIT,
+        ...bookListLanguageOptions(query),
+      }),
       shelfService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
     ]);
     const tagsByUnit = await loadFeedTagsForUnits(
@@ -721,12 +837,11 @@ export class FeedService {
 
     return interleaveRows(
       books.books.map((book) =>
-        mapBookToStreamRow(
-          {
-            ...book,
-            tags: tagsByUnit.get(book.unitId) ?? [],
-          },
+        mapBookSourceToFeedRow(
+          book,
+          query,
           "home-book-recommendation",
+          tagsByUnit.get(book.unitId) ?? [],
         ),
       ),
       shelves.shelves.map((shelf) =>

@@ -1,5 +1,6 @@
 import type {
   FeedCursor,
+  FeedBookRow,
   FeedPostRow,
   FeedResponse,
   FeedRow,
@@ -23,21 +24,38 @@ export const mapPostToFeedRow = mapPostToStreamRow;
 export const mapUnitToFeedRow = (unit: FeedUnitRow["unit"]): FeedUnitRow =>
   mapUnitToStreamRow(unit, "home-unit-feed");
 
+function dateCursorValue(value: Date | string | undefined): string | undefined {
+  return typeof value === "string" ? value : value?.toISOString();
+}
+
 export function cursorForFeedRows(rows: FeedRow[]): FeedCursor | null {
-  const last = rows
-    .filter(
-      (row): row is (FeedPostRow & { post: CursorPost }) | FeedUnitRow =>
-        row.type === "post" || row.type === "unit",
-    )
-    .at(-1) as (FeedPostRow & { post: CursorPost }) | FeedUnitRow | undefined;
+  const cursorRows = rows.filter(
+    (
+      row,
+    ): row is
+      | (FeedPostRow & { post: CursorPost })
+      | FeedUnitRow
+      | FeedBookRow =>
+      row.type === "post" || row.type === "unit" || row.type === "book",
+  ) as Array<(FeedPostRow & { post: CursorPost }) | FeedUnitRow | FeedBookRow>;
+  const last =
+    cursorRows
+      .filter(
+        (row): row is (FeedPostRow & { post: CursorPost }) | FeedUnitRow =>
+          row.type === "post" || row.type === "unit",
+      )
+      .at(-1) ?? cursorRows.at(-1);
   if (!last) return null;
   if (last.type === "unit") {
     return {
       rowId: last.rowId,
-      createdAt:
-        typeof last.unit.createdAt === "string"
-          ? last.unit.createdAt
-          : last.unit.createdAt?.toISOString(),
+      createdAt: dateCursorValue(last.unit.createdAt),
+    };
+  }
+  if (last.type === "book") {
+    return {
+      rowId: last.rowId,
+      createdAt: dateCursorValue(last.book.createdAt),
     };
   }
   return {
@@ -46,10 +64,7 @@ export function cursorForFeedRows(rows: FeedRow[]): FeedCursor | null {
     last.post.feedSortValue !== null
       ? { sortValue: last.post.feedSortValue }
       : {}),
-    createdAt:
-      typeof last.post.createdAt === "string"
-        ? last.post.createdAt
-        : last.post.createdAt?.toISOString(),
+    createdAt: dateCursorValue(last.post.createdAt),
   };
 }
 

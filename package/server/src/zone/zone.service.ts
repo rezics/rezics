@@ -7,6 +7,7 @@ import {
   parseZonePage,
   parseZoneTheme,
   resolveReadLanguage,
+  type StreamRow,
   type UnitType,
   ZONE_MENU_MAX_DEPTH,
   type ZoneBoundary,
@@ -1735,8 +1736,9 @@ export class ZoneService {
     items: ZoneSectionItem[];
     query: ZoneSectionQuery;
     preferredLanguages?: string[];
-  }) {
+  }): Promise<StreamRow[]> {
     if (input.ids.length === 0 || input.items.length === 0) return [];
+    const listLanguages = input.preferredLanguages?.join(",");
 
     if (input.query.target === "post") {
       const [{ postService }, { mapPostToDTO }] = await Promise.all([
@@ -1746,7 +1748,7 @@ export class ZoneService {
       const posts = await postService.list({
         ids: input.ids.join(","),
         limit: input.ids.length,
-        languages: input.preferredLanguages,
+        languages: listLanguages,
       });
       const postById = new Map(posts.posts.map((post) => [post.unitId, post]));
       return input.ids.flatMap((id) => {
@@ -1765,25 +1767,37 @@ export class ZoneService {
     const bookIds = input.items
       .filter((item) => item.type === "BOOK")
       .map((item) => item.unitId);
-    const { bookService } =
-      bookIds.length > 0 ? await import("../book") : { bookService: null };
+    const { bookService, mapBookToDTO } =
+      bookIds.length > 0
+        ? await import("../book")
+        : { bookService: null, mapBookToDTO: null };
     const books =
       bookIds.length > 0 && bookService
         ? await bookService.list({
             ids: bookIds.join(","),
             limit: bookIds.length,
-            languages: input.preferredLanguages,
+            languages: listLanguages,
           })
         : { books: [] };
     const bookById = new Map(books.books.map((book) => [book.unitId, book]));
 
-    return input.items.flatMap((item) => {
+    const streamRows: StreamRow[] = [];
+    for (const item of input.items) {
       const book = bookById.get(item.unitId);
-      if (book) return [mapBookToStreamRow(book, "zone-stream-book")];
-      return [
+      if (book && mapBookToDTO) {
+        streamRows.push(
+          mapBookToStreamRow(
+            mapBookToDTO(book, { languages: input.preferredLanguages ?? [] }),
+            "zone-stream-book",
+          ),
+        );
+        continue;
+      }
+      streamRows.push(
         mapUnitToStreamRow(sectionItemToStreamUnit(item), "zone-stream-unit"),
-      ];
-    });
+      );
+    }
+    return streamRows;
   }
 
   async getSectionData(

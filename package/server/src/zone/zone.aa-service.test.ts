@@ -143,10 +143,13 @@ const postListMock = mock(async () => ({
   posts: [{ unitId: "post-1", kind: "REMARK" }],
   total: 1,
 }));
-const bookListMock = mock(async () => ({
-  books: [],
-  total: 0,
-}));
+const bookListMock = mock(
+  async (): Promise<{ books: any[]; total: number }> => ({
+    books: [],
+    total: 0,
+  }),
+);
+const mapBookToDTOMock = mock((book: any) => book);
 const mapPostToDTOMock = mock((post: { unitId: string; kind?: string }) => ({
   unitId: post.unitId,
   authorUserId: "user-1",
@@ -462,6 +465,7 @@ beforeAll(async () => {
   }));
   mock.module("../book", () => ({
     bookService: { list: bookListMock },
+    mapBookToDTO: mapBookToDTOMock,
   }));
   mock.module("@/utils/errors", () => ({
     AppError: class AppError extends Error {
@@ -490,6 +494,7 @@ beforeEach(() => {
   searchSectionMock.mockClear();
   postListMock.mockClear();
   bookListMock.mockClear();
+  mapBookToDTOMock.mockClear();
   mapPostToDTOMock.mockClear();
   replaceTranslationsMock.mockClear();
   updateZoneDataMock.mockClear();

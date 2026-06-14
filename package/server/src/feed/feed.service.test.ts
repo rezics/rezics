@@ -27,7 +27,7 @@ let byRealmResult = {
   total: 1,
 };
 
-let bookListResult = {
+let bookListResult: any = {
   books: [
     {
       unitId: "book-1",
@@ -72,6 +72,26 @@ const bookListMock = mock(async () => bookListResult);
 const shelfListMock = mock(async () => shelfListResult);
 const zoneGetByUnitIdMock = mock(async () => zoneResult);
 const mapPostToDTOMock = mock((post) => post);
+const mapBookToDTOMock = mock((book: any) => {
+  if (!book.unit?.translations) return book;
+  const translation = book.unit.translations[0] ?? {};
+  return {
+    unitId: book.unitId,
+    title: translation.title ?? null,
+    subtitle: translation.subtitle ?? null,
+    summary: translation.summary ?? null,
+    description: translation.description ?? null,
+    coverUrl: translation.extra?.coverUrl ?? null,
+    creditAttributions:
+      book.unit.creditAttributions?.map((credit: any) => ({
+        entityId: credit.entityId,
+        name: credit.entity?.translations?.[0]?.title ?? "",
+        role: credit.role,
+        position: credit.position,
+      })) ?? [],
+    createdAt: book.createdAt,
+  };
+});
 const hydrateVariantContextSummariesMock = mock(async () => new Map());
 const resolveEffectiveReadLanguageCandidatesMock = mock(
   (input?: { languages?: string | readonly string[] | null }) => {
@@ -87,6 +107,35 @@ const realmGetByUnitIdMock = mock(async (unitId: string) => ({
   title: "Realm One",
 }));
 
+function internalBook(unitId = "book-1") {
+  return {
+    unitId,
+    createdAt: "2026-06-04T00:00:00.000Z",
+    unit: {
+      translations: [
+        {
+          language: "zh-hant",
+          title: "內部書名",
+          subtitle: "內部副標",
+          summary: "內部摘要",
+          description: null,
+          extra: { coverUrl: "internal-cover.jpg" },
+        },
+      ],
+      creditAttributions: [
+        {
+          entityId: "author-1",
+          role: "author",
+          position: "a",
+          entity: {
+            translations: [{ title: "內部作者" }],
+          },
+        },
+      ],
+    },
+  };
+}
+
 function emptyDbSelectChain() {
   const chain = {
     from: mock(() => chain),
@@ -95,6 +144,16 @@ function emptyDbSelectChain() {
     limit: mock(() => Promise.resolve([])),
   };
   return chain;
+}
+
+function dbSelectRowsOnce(rows: unknown[]) {
+  const chain = {
+    from: mock(() => chain),
+    where: mock(() => chain),
+    orderBy: mock(() => chain),
+    limit: mock(() => Promise.resolve(rows)),
+  };
+  dbSelectMock.mockImplementationOnce(() => chain);
 }
 
 const dbSelectMock = mock(() => emptyDbSelectChain());
@@ -135,6 +194,7 @@ mock.module("@/book", () => ({
   bookService: {
     list: bookListMock,
   },
+  mapBookToDTO: mapBookToDTOMock,
 }));
 
 mock.module("@/shelf", () => ({
@@ -232,6 +292,7 @@ beforeEach(() => {
   shelfListMock.mockClear();
   zoneGetByUnitIdMock.mockClear();
   mapPostToDTOMock.mockClear();
+  mapBookToDTOMock.mockClear();
   hydrateVariantContextSummariesMock.mockClear();
   resolveEffectiveReadLanguageCandidatesMock.mockClear();
   realmGetByUnitIdMock.mockClear();
@@ -318,6 +379,78 @@ describe("FeedService", () => {
     });
   });
 
+  test("maps home recommendation books through the book dto projection", async () => {
+    listResult = {
+      posts: Array.from({ length: 4 }, (_, index) => ({
+        unitId: `post-${index + 1}`,
+        authorUserId: "user-1",
+        kind: "POST",
+        createdAt: `2026-06-05T00:0${index}:00.000Z`,
+      })),
+      total: 4,
+    };
+    bookListResult = {
+      books: [internalBook()],
+      total: 1,
+    };
+    shelfListResult = { shelves: [], total: 0 };
+    const { FeedService } = await import("./feed.service");
+    const service = new FeedService();
+
+    const result = await service.list({
+      scope: "home",
+      sort: "best",
+      limit: 4,
+    });
+
+    expect(result.rows[4]).toMatchObject({
+      type: "book",
+      book: {
+        unitId: "book-1",
+        title: "內部書名",
+        coverUrl: "internal-cover.jpg",
+        description: "內部摘要",
+        primaryAuthor: { unitId: "author-1", name: "內部作者" },
+      },
+    });
+  });
+
+  test("builds book filter rows from hydrated books instead of unit extras", async () => {
+    dbSelectRowsOnce([
+      {
+        unitId: "book-1",
+        createdAt: new Date("2026-06-04T00:00:00.000Z"),
+      },
+    ]);
+    bookListResult = {
+      books: [internalBook()],
+      total: 1,
+    };
+    const { FeedService } = await import("./feed.service");
+    const service = new FeedService();
+
+    const result = await service.list({
+      scope: "home",
+      filterType: "book",
+      limit: 10,
+    });
+
+    expect(bookListMock).toHaveBeenCalledWith({
+      ids: "book-1",
+      limit: 1,
+    });
+    expect(result.rows[0]).toMatchObject({
+      type: "book",
+      rowId: "book:book-1",
+      book: {
+        unitId: "book-1",
+        title: "內部書名",
+        coverUrl: "internal-cover.jpg",
+      },
+    });
+    expect(result.nextCursor).toEqual(null);
+  });
+
   test("skips home recommendation rows on cursor pages", async () => {
     listResult = {
       posts: Array.from({ length: 5 }, (_, index) => ({
@@ -399,7 +532,15 @@ describe("FeedService", () => {
     expect(result.rows[0]).toMatchObject({
       href: "/realm/realm-1/post/review-1",
       realm: { unitId: "realm-1", title: "Realm One" },
-      targetUnit: { unitId: "book-1", title: "Book One" },
+      targetUnit: {
+        unitId: "book-1",
+        title: "Book One",
+        coverUrl: "book-1.jpg",
+      },
+    });
+    expect(bookListMock).toHaveBeenCalledWith({
+      ids: "book-1",
+      limit: 1,
     });
   });
 

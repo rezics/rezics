@@ -8,6 +8,7 @@ import type {
   StreamUnitRow,
   StreamWorkSummary,
 } from "@rezics/contract";
+import { mainMarkdownSource } from "@rezics/contract";
 
 export function postHrefForStream(post: PostDTO, realmUnitId?: string | null) {
   if (realmUnitId) return `/realm/${realmUnitId}/post/${post.unitId}`;
@@ -66,7 +67,7 @@ function titleFromTranslations(
 }
 
 function firstCreditName(
-  credits: BookDTO["creditAttributions"],
+  credits: BookDTO["creditAttributions"] | null | undefined,
 ): StreamWorkSummary["primaryAuthor"] {
   const credit = credits?.find(
     (item) => item.role === "author" || item.role === "co-author",
@@ -79,41 +80,27 @@ function firstCreditName(
   };
 }
 
-export function mapBookToWorkSummary(book: unknown): StreamWorkSummary {
-  const source = book as {
-    unitId?: string;
-    kind?: string | null;
-    title?: string | null;
-    subtitle?: string | null;
-    coverUrl?: string | null;
-    summary?: string | null;
-    description?: string | null;
-    creditAttributions?: BookDTO["creditAttributions"];
-    tags?: StreamWorkSummary["tags"];
-    unit?: {
-      translations?: Array<{
-        title?: string | null;
-        subtitle?: string | null;
-      }>;
-    };
-  };
-  const translation = source.unit?.translations?.find(
-    (item) => item.title || item.subtitle,
-  );
+type StreamBookDTO = BookDTO & {
+  kind?: string | null;
+  tags?: StreamWorkSummary["tags"];
+};
+
+export function mapBookToWorkSummary(book: StreamBookDTO): StreamWorkSummary {
   return {
-    unitId: source.unitId ?? "",
-    kind: source.kind ?? "book",
-    title: titleFromTranslations(source),
-    subtitle: source.subtitle ?? translation?.subtitle ?? null,
-    coverUrl: source.coverUrl ?? null,
-    description: source.summary ?? source.description ?? null,
-    primaryAuthor: firstCreditName(source.creditAttributions),
-    tags: source.tags ?? [],
+    unitId: book.unitId,
+    kind: book.kind ?? "book",
+    title: titleFromTranslations(book),
+    subtitle: book.subtitle ?? null,
+    coverUrl: book.coverUrl ?? null,
+    description: book.summary ?? mainMarkdownSource(book.description) ?? null,
+    primaryAuthor: firstCreditName(book.creditAttributions),
+    tags: book.tags ?? [],
+    createdAt: book.createdAt,
   };
 }
 
 export function mapBookToStreamRow(
-  book: unknown,
+  book: StreamBookDTO,
   reason = "stream-book",
 ): StreamBookRow {
   const summary = mapBookToWorkSummary(book);

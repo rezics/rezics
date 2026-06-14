@@ -51,6 +51,7 @@ type ClampStyle = React.CSSProperties & {
 export interface FeedPostCardTargetUnit {
   unitId: string;
   title: string;
+  coverUrl?: string | null;
 }
 
 export interface FeedPostCardMedia {
