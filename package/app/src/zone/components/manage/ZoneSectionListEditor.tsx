@@ -59,6 +59,7 @@ const DISPLAY_KEYS = {
   tiles: "zone:manage_display_tiles",
   grid: "zone:manage_display_grid",
   list: "zone:manage_display_list",
+  stream: "zone:manage_display_stream",
   carousel: "zone:manage_display_carousel",
   covers: "zone:manage_display_covers",
   featured: "zone:manage_display_featured",

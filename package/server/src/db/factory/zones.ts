@@ -349,7 +349,7 @@ function fixtureHomeSections(
         {
           id: "hot-feed",
           kind: "query",
-          display: "list",
+          display: "stream",
           limit: 24,
           loadMore: true,
           query: {

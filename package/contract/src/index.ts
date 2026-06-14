@@ -36,6 +36,7 @@ export * from "./search/index";
 export * from "./shelf/index";
 export * from "./slug";
 export * from "./source/index";
+export * from "./stream/index";
 export * from "./subscription";
 export * from "./tag/index";
 export * from "./token/index";

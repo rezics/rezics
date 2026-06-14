@@ -4,6 +4,7 @@ import { contentDocSchema } from "../content/doc-v1";
 import { contentLanguageSchema } from "../language";
 import { readLanguageGetQueryBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
+import { streamRowSchema, type StreamRow } from "../stream/stream";
 import { unitTypeSchema } from "../unit/unit";
 import { type ZoneBoundary, zoneBoundaryV1Schema } from "./boundary-v1";
 import { type ZoneNav, zoneNavV1Schema } from "./nav-v1";
@@ -274,6 +275,7 @@ export const zoneSectionDataSchema = t.Object({
   pageId: t.String(),
   sectionId: t.String(),
   items: t.Array(zoneSectionItemSchema),
+  rows: t.Optional(t.Array(streamRowSchema)),
   // richText sections only: the fragment's resolved ContentTranslation doc.
   // 仅 richText 分区：片段已解析的 ContentTranslation 文档。
   doc: t.Optional(t.Nullable(contentDocSchema)),
@@ -285,3 +287,6 @@ export const zoneSectionDataSchema = t.Object({
 });
 
 export type ZoneSectionData = Static<typeof zoneSectionDataSchema>;
+export type ZoneSectionStreamData = Omit<ZoneSectionData, "rows"> & {
+  rows?: StreamRow[];
+};

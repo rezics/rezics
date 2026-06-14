@@ -379,7 +379,7 @@ function buildBookConfig(
         id: "hot-books",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
-        display: "list",
+        display: "stream",
         limit: 24,
         loadMore: true,
         query: {

@@ -1,6 +1,11 @@
+import { zoneSectionInfiniteQuery } from "@rezics/api";
 import type { ZoneFeedSection as ZoneFeedSectionConfig } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { FeedSection } from "@/feed";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { QueryErrorDisplay } from "@/core";
+import { StreamRenderer } from "@/feed";
 import {
   useZoneSectionTitle,
   type ZonePortalContext,
@@ -8,9 +13,10 @@ import {
 } from "./shared";
 
 /**
- * Reuses the app feed surface with the zone scope; the server intersects
- * the zone boundary into the feed query.
- * 复用应用 feed 界面并使用专区 scope；服务端将专区边界并入 feed 查询。
+ * Renders zone-owned stream rows through the shared stream renderer, so feed
+ * sections and query-stream sections use the same type-dispatched card surface.
+ * 渲染专区 section 返回的 stream rows；feed section 与 query stream section
+ * 共用同一套按 type 分发的内容流卡片。
  */
 export function ZoneFeedSection({
   section,
@@ -19,24 +25,67 @@ export function ZoneFeedSection({
   section: ZoneFeedSectionConfig;
   ctx: ZonePortalContext;
 }) {
-  const { t } = useTranslation(["zone"]);
+  const { t } = useTranslation(["common", "zone"]);
   const title = useZoneSectionTitle(section, ctx.refUnits);
+  const query = useInfiniteQuery(
+    zoneSectionInfiniteQuery(
+      ctx.zone.unitId,
+      ctx.pageId,
+      section.id,
+      ctx.languages,
+    ),
+  );
+  const rows = query.data?.pages.flatMap((page) => page.rows ?? []) ?? [];
 
   return (
     <ZoneSectionShell title={title}>
-      <FeedSection
-        query={{
-          scope: "zone",
-          zoneUnitId: ctx.zone.unitId,
-          ...(section.limit ? { limit: section.limit } : {}),
-          // "updates" is a chronological preset; other feed kinds keep the
-          // feed service's default ranking.
-          // "updates" 是按时间排序的预设；其他 feed 类型沿用 feed 服务的
-          // 默认排序。
-          ...(section.feedKind === "updates" ? { sort: "new" as const } : {}),
-        }}
-        emptyTitle={t("zone:section_empty")}
-      />
+      {query.isError && rows.length === 0 ? (
+        <QueryErrorDisplay error={query.error} />
+      ) : (
+        <StreamRenderer
+          rows={rows}
+          loading={query.isLoading}
+          emptyTitle={t("zone:section_empty")}
+        />
+      )}
+      {query.isError && rows.length > 0 ? (
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void query.refetch()}
+          >
+            {t("common:retry")}
+          </Button>
+        </div>
+      ) : null}
+      {!query.isLoading && !query.isError && query.hasNextPage ? (
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={query.isFetchingNextPage}
+            onClick={() => void query.fetchNextPage()}
+          >
+            {query.isFetchingNextPage ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner size="sm" />
+                {t("common:loading")}
+              </span>
+            ) : (
+              t("common:load_more")
+            )}
+          </Button>
+        </div>
+      ) : null}
+      {!query.isLoading &&
+      !query.isError &&
+      rows.length > 0 &&
+      !query.hasNextPage ? (
+        <p className="text-center text-xs leading-dense text-text-tertiary">
+          {t("common:end_of_list")}
+        </p>
+      ) : null}
     </ZoneSectionShell>
   );
 }

@@ -6,11 +6,11 @@ import type {
   FeedScope,
   FeedSort,
   FeedUnitRow,
-  FeedWorkSummary,
   PostDTO,
 } from "@rezics/contract";
+import { mapPostToStreamRow, mapUnitToStreamRow } from "../stream";
 
-type FeedPost = PostDTO & {
+type CursorPost = PostDTO & {
   /**
    * Internal cursor value produced by the selected feed source.
    * 由所选 feed 来源生成的内部游标值。
@@ -18,73 +18,18 @@ type FeedPost = PostDTO & {
   feedSortValue?: number | string | null;
 };
 
-export function postHrefForFeed(post: PostDTO, realmUnitId?: string | null) {
-  if (realmUnitId) return `/realm/${realmUnitId}/post/${post.unitId}`;
-  return `/post/${post.unitId}`;
-}
+export const mapPostToFeedRow = mapPostToStreamRow;
 
-function targetUnitForPost(
-  post: PostDTO,
-  resolved?: FeedWorkSummary | null,
-): FeedWorkSummary | null {
-  if (!post.targetUnitId) return null;
-  if (resolved) return resolved;
-  return {
-    unitId: post.targetUnitId,
-    title: post.extra?.book?.title ?? null,
-  };
-}
-
-export function mapPostToFeedRow(
-  post: PostDTO,
-  input: {
-    realm?: FeedPostRow["realm"];
-    realmUnitId?: string | null;
-    reason?: string | null;
-    resolvedTargetUnit?: FeedWorkSummary | null;
-  } = {},
-): FeedPostRow {
-  return {
-    type: "post",
-    rowId: `post:${post.unitId}`,
-    post,
-    href: postHrefForFeed(post, input.realmUnitId),
-    contextUnitId: input.realmUnitId ?? null,
-    realm: input.realm ?? null,
-    targetUnit: targetUnitForPost(post, input.resolvedTargetUnit),
-    variantContext: post.variantContext ?? null,
-    recommendationReason: input.reason ?? null,
-  };
-}
-
-export function mapUnitToFeedRow(unit: FeedUnitRow["unit"]): FeedUnitRow {
-  return {
-    type: "unit",
-    rowId: `unit:${unit.unitId}`,
-    unit,
-    href: hrefForFeedUnit(unit),
-    recommendationReason: "home-unit-feed",
-  };
-}
-
-function hrefForFeedUnit(unit: FeedUnitRow["unit"]): string {
-  if (unit.type === "BOOK") return `/book/${unit.unitId}`;
-  if (unit.type === "REALM") {
-    return unit.slug ? `/r/${unit.slug}` : `/realm/${unit.unitId}`;
-  }
-  if (unit.type === "ZONE") {
-    return unit.slug ? `/z/${unit.slug}` : `/zone/${unit.unitId}/search`;
-  }
-  return `/unit/${unit.unitId}`;
-}
+export const mapUnitToFeedRow = (unit: FeedUnitRow["unit"]): FeedUnitRow =>
+  mapUnitToStreamRow(unit, "home-unit-feed");
 
 export function cursorForFeedRows(rows: FeedRow[]): FeedCursor | null {
   const last = rows
     .filter(
-      (row): row is (FeedPostRow & { post: FeedPost }) | FeedUnitRow =>
+      (row): row is (FeedPostRow & { post: CursorPost }) | FeedUnitRow =>
         row.type === "post" || row.type === "unit",
     )
-    .at(-1) as (FeedPostRow & { post: FeedPost }) | FeedUnitRow | undefined;
+    .at(-1) as (FeedPostRow & { post: CursorPost }) | FeedUnitRow | undefined;
   if (!last) return null;
   if (last.type === "unit") {
     return {

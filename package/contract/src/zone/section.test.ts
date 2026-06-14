@@ -143,6 +143,15 @@ describe("zone section nesting rules", () => {
     display: "list",
   };
 
+  test("query sections can opt into stream display", () => {
+    expect(
+      Value.Check(zoneContentSectionSchema, {
+        ...querySection,
+        display: "stream",
+      }),
+    ).toBe(true);
+  });
+
   const tabsSection = {
     id: "s-tabs",
     kind: "tabs",

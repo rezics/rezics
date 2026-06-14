@@ -5,6 +5,7 @@ import { Spinner } from "@rezics/ui";
 import { Button, Skeleton } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core";
+import { StreamRenderer } from "@/feed";
 import {
   zoneSectionItemHref,
   zoneSectionTitleText,
@@ -63,8 +64,11 @@ export function QuerySection({
     );
   }
 
+  const rows = query.data?.pages.flatMap((page) => page.rows ?? []) ?? [];
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
-  if (items.length === 0) {
+  const isStream = section.display === "stream";
+  const hasContent = isStream ? rows.length > 0 : items.length > 0;
+  if (!hasContent) {
     return <ZoneSectionEmpty title={title} emptyState={section.emptyState} />;
   }
 
@@ -83,7 +87,11 @@ export function QuerySection({
 
   return (
     <ZoneSectionShell title={title}>
-      <ZoneItemList entries={entries} display={section.display} />
+      {isStream ? (
+        <StreamRenderer rows={rows} emptyTitle={t("zone:section_empty")} />
+      ) : (
+        <ZoneItemList entries={entries} display={section.display} />
+      )}
       {showLoadMore ? (
         <div className="flex justify-center">
           <Button

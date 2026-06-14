@@ -146,7 +146,7 @@ describe("seedOfficialZones", () => {
         id: "hot-books",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
-        display: "list",
+        display: "stream",
         query: {
           target: "unit",
           types: ["BOOK"],

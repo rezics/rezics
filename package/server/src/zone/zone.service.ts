@@ -57,6 +57,11 @@ import {
   ZonePage,
 } from "../db/schema";
 import { generateBetween, rebalance } from "../shelf/fractional-index";
+import {
+  mapBookToStreamRow,
+  mapPostToStreamRow,
+  mapUnitToStreamRow,
+} from "../stream";
 
 const SECTION_DEFAULT_LIMIT = 12;
 
@@ -300,6 +305,18 @@ function mapUnitToSectionItem(
     entityKind: row.entity?.kind ?? null,
     createdAt: toIsoString(row.createdAt),
     updatedAt: toIsoString(row.updatedAt),
+  };
+}
+
+function sectionItemToStreamUnit(item: ZoneSectionItem) {
+  return {
+    unitId: item.unitId,
+    type: item.type,
+    slug: item.slug ?? null,
+    title: item.title ?? null,
+    coverUrl: item.imageUrl ?? null,
+    description: item.summary ?? null,
+    createdAt: item.createdAt,
   };
 }
 
@@ -1646,6 +1663,7 @@ export class ZoneService {
     pageId: string;
     sectionId: string;
     query: ZoneSectionQuery;
+    output?: "items" | "stream";
     limit: number;
     cursor?: string | null;
     preferredLanguages?: string[];
@@ -1690,12 +1708,82 @@ export class ZoneService {
       return row ? [mapUnitToSectionItem(row, input.preferredLanguages)] : [];
     });
     const nextOffset = offset + input.limit;
+    if (input.output === "stream") {
+      return {
+        pageId: input.pageId,
+        sectionId: input.sectionId,
+        items: [],
+        rows: await this.mapSectionItemsToStreamRows({
+          ids: result.ids,
+          items,
+          query: input.query,
+          preferredLanguages: input.preferredLanguages,
+        }),
+        nextCursor: nextOffset < result.total ? String(nextOffset) : null,
+      };
+    }
     return {
       pageId: input.pageId,
       sectionId: input.sectionId,
       items,
       nextCursor: nextOffset < result.total ? String(nextOffset) : null,
     };
+  }
+
+  private async mapSectionItemsToStreamRows(input: {
+    ids: string[];
+    items: ZoneSectionItem[];
+    query: ZoneSectionQuery;
+    preferredLanguages?: string[];
+  }) {
+    if (input.ids.length === 0 || input.items.length === 0) return [];
+
+    if (input.query.target === "post") {
+      const [{ postService }, { mapPostToDTO }] = await Promise.all([
+        import("../post"),
+        import("../post/post.mapper"),
+      ]);
+      const posts = await postService.list({
+        ids: input.ids.join(","),
+        limit: input.ids.length,
+        languages: input.preferredLanguages,
+      });
+      const postById = new Map(posts.posts.map((post) => [post.unitId, post]));
+      return input.ids.flatMap((id) => {
+        const post = postById.get(id);
+        return post
+          ? [
+              mapPostToStreamRow(
+                mapPostToDTO(post, undefined, input.preferredLanguages ?? []),
+                { reason: "zone-stream-post" },
+              ),
+            ]
+          : [];
+      });
+    }
+
+    const bookIds = input.items
+      .filter((item) => item.type === "BOOK")
+      .map((item) => item.unitId);
+    const { bookService } =
+      bookIds.length > 0 ? await import("../book") : { bookService: null };
+    const books =
+      bookIds.length > 0 && bookService
+        ? await bookService.list({
+            ids: bookIds.join(","),
+            limit: bookIds.length,
+            languages: input.preferredLanguages,
+          })
+        : { books: [] };
+    const bookById = new Map(books.books.map((book) => [book.unitId, book]));
+
+    return input.items.flatMap((item) => {
+      const book = bookById.get(item.unitId);
+      if (book) return [mapBookToStreamRow(book, "zone-stream-book")];
+      return [
+        mapUnitToStreamRow(sectionItemToStreamUnit(item), "zone-stream-unit"),
+      ];
+    });
   }
 
   async getSectionData(
@@ -1732,6 +1820,7 @@ export class ZoneService {
           pageId,
           sectionId,
           query: section.query,
+          output: section.display === "stream" ? "stream" : "items",
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
@@ -1743,6 +1832,7 @@ export class ZoneService {
           pageId,
           sectionId,
           query: this.feedSectionQuery(section.feedKind),
+          output: "stream",
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,

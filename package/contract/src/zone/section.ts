@@ -218,6 +218,7 @@ export const zoneSectionDisplaySchema = t.Union([
   t.Literal("tiles"),
   t.Literal("grid"),
   t.Literal("list"),
+  t.Literal("stream"),
   t.Literal("carousel"),
   t.Literal("covers"),
   t.Literal("featured"),
