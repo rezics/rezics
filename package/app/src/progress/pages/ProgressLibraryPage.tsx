@@ -1,7 +1,4 @@
-import {
-  myContinueReadingQuery,
-  myProgressPageQuery,
-} from "@rezics/api/progress/progress.queries";
+import { myProgressPageQuery } from "@rezics/api/progress/progress.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import {
   type BookshelfViewConfig,
@@ -17,10 +14,9 @@ import {
   resolveBookshelfConfig,
   UseMySettingsButton,
 } from "@/bookshelf-view";
-import { readStatusLabel } from "@/progress-status/models/status";
+import { progressStatusLabel } from "@/progress-status/models/status";
 import { useRequireAuth } from "@/user/pages/useAuth";
 import { progressLibraryRowToBookshelfItem } from "../models/progressBookshelf";
-import { ContinueReadingSection } from "../sections/ContinueReadingSection";
 
 export interface ProgressLibraryPageProps {
   /** Bookshelf layout from the route URL query (highest precedence). 来自路由 URL query 的书架布局（优先级最高）。 */
@@ -30,64 +26,55 @@ export interface ProgressLibraryPageProps {
 }
 
 /**
- * User progress library page displaying continue reading section and
- * responsive bookshelf grid with progress status overview tabs.
- * 用户进度书库页面，展示继续阅读部分和带进度状态概览标签的响应式书架网格。
+ * User progress page displaying a status overview and a responsive work grid.
+ * Cards point to the best resume route when one exists, so "continue" remains
+ * a card behavior rather than a separate page section.
+ * 用户进度页面，展示状态概览和响应式作品网格。卡片在存在恢复路线时会指向
+ * 最合适的继续位置，因此“继续”是卡片行为，而不是独立页面区块。
  *
  * Mobile <640px:
  * +--[Title]---[⚙]--+
- * |  Subtitle      |
- * |  ContinueRead  |
- * |  +--+--+      |
- * |  |st |st|      |
- * |  |at |at|      |
- * |  |us |us|      |
- * |  +--+--+      |
- * |  Library Title |
- * |  +--+--+ Grid  |
- * |  |  |  |       |
- * +----------------+
+ * | Subtitle        |
+ * | +--+--+         |
+ * | |st|st| status  |
+ * | |at|at| cards   |
+ * | +--+--+         |
+ * | Works           |
+ * | +--+--+ Grid    |
+ * | |  |  |         |
+ * +-----------------+
  *
  * Tablet 640-1023px:
  * +------[Title] [⚙]------+
- * |  Subtitle            |
- * |  ContinueRead        |
- * |  +--+--+--+--+--+   |
- * |  |st |st |st |st|   |
- * |  |at |at |at |at|   |
- * |  |us |us |us |us|   |
- * |  +--+--+--+--+--+   |
- * |  Library Title       |
- * |  +--+--+--+ Grid     |
- * |  |  |  |  |          |
- * +------------------------+
+ * | Subtitle              |
+ * | +--+--+--+--+--+      |
+ * | |st|st|st|st|st|      |
+ * | +--+--+--+--+--+      |
+ * | Works                 |
+ * | +--+--+--+ Grid       |
+ * | |  |  |  |            |
+ * +-----------------------+
  *
  * Desktop 1024-1535px:
- * +-------[Title] [⚙]-------+
- * |  Subtitle              |
- * |  ContinueRead          |
- * |  +--+--+--+--+--+     |
- * |  |st |st |st |st|     |
- * |  |at |at |at |at|     |
- * |  |us |us |us |us|     |
- * |  +--+--+--+--+--+     |
- * |  Library Title         |
- * |  +--+--+--+--+ Grid    |
- * |  |  |  |  |  |         |
- * +------------------------+
+ * +-------[Title] [⚙]------+
+ * | Subtitle              |
+ * | +--+--+--+--+--+      |
+ * | |st|st|st|st|st|      |
+ * | +--+--+--+--+--+      |
+ * | Works                 |
+ * | +--+--+--+--+ Grid    |
+ * | |  |  |  |  |         |
+ * +-----------------------+
  *
  * Ultra-wide >=1536px:
  * +-------[Title] [⚙]-------+
- * |  Subtitle              |
- * |  ContinueRead          |
- * |  +--+--+--+--+--+     |
- * |  |st |st |st |st|     |
- * |  |at |at |at |at|     |
- * |  |us |us |us |us|     |
- * |  +--+--+--+--+--+     |
- * |  Library Title         |
- * |  +--+--+--+--+--+ Grid |
- * |  |  |  |  |  |  |     |
+ * | Subtitle               |
+ * | +--+--+--+--+--+       |
+ * | |st|st|st|st|st|       |
+ * | +--+--+--+--+--+       |
+ * | Works                  |
+ * | +--+--+--+--+--+ Grid  |
+ * | |  |  |  |  |  |       |
  * +------------------------+
  */
 export function ProgressLibraryPage({
@@ -95,12 +82,10 @@ export function ProgressLibraryPage({
   onResetLibraryUrlConfig,
 }: ProgressLibraryPageProps) {
   useRequireAuth();
-  const { t } = useTranslation(["common", "page", "book"]);
-  const continueReadingQuery = useQuery(myContinueReadingQuery({ limit: 12 }));
+  const { t } = useTranslation(["common", "page"]);
   const libraryQuery = useQuery(myProgressPageQuery({ limit: 50 }));
   const { data: settings } = useQuery(userQueries.settings());
   const rows = libraryQuery.data?.rows ?? [];
-  const continueReadingItems = continueReadingQuery.data?.items ?? [];
   const config = useMemo(
     () =>
       resolveBookshelfConfig({
@@ -127,7 +112,7 @@ export function ProgressLibraryPage({
     return counts;
   }, [rows]);
 
-  if (continueReadingQuery.isLoading || libraryQuery.isLoading) {
+  if (libraryQuery.isLoading) {
     return (
       <div className="flex items-center gap-2 p-8 text-text-secondary">
         <Spinner size="sm" /> {t("common:loading")}
@@ -135,7 +120,7 @@ export function ProgressLibraryPage({
     );
   }
 
-  if (continueReadingQuery.isError || libraryQuery.isError) {
+  if (libraryQuery.isError) {
     return (
       <div className="p-8 text-sm text-error-text">{t("common:error")}</div>
     );
@@ -157,7 +142,6 @@ export function ProgressLibraryPage({
           onReset={() => onResetLibraryUrlConfig?.()}
         />
       </div>
-      <ContinueReadingSection items={continueReadingItems} />
       <section className="space-y-3">
         <h2 className="text-lg font-semibold leading-snug text-text-primary">
           {t("page:progress_overview")}
@@ -169,7 +153,7 @@ export function ProgressLibraryPage({
               className="rounded-md bg-surface-subtle px-3 py-2"
             >
               <div className="text-xs leading-dense text-text-secondary">
-                {readStatusLabel(status)}
+                {progressStatusLabel(status)}
               </div>
               <div className="mt-1 text-lg font-semibold leading-ui text-text-primary">
                 {statusCounts[status]}

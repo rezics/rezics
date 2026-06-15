@@ -44,6 +44,26 @@ describe("progressLibraryRowToBookshelfItem", () => {
     });
   });
 
+  test("uses the resume route as the card target when present", () => {
+    const row = {
+      progress: progressRow("b1"),
+      progressUnit: {
+        unitId: "b1",
+        title: "Dune",
+        unitType: "BOOK",
+        catalogEntryKind: "MAIN",
+        targetUnitId: null,
+      },
+      mainUnitContext: null,
+      resumeRoute: { kind: "node", bookId: "b1", nodeId: "n3" },
+      shelves: [],
+    } satisfies ProgressLibraryRow;
+
+    expect(progressLibraryRowToBookshelfItem(row)).toMatchObject({
+      href: "/book/b1/node/n3",
+    });
+  });
+
   test("skips non-library unit types", () => {
     const row = {
       progress: progressRow("post-1"),

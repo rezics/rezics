@@ -18,8 +18,20 @@ const READ_STATUS_MESSAGE = {
   DROPPED: () => getI18nRuntime().i18n.t("book:hero_actions_dropped"),
 } as const satisfies Record<ReadStatus, () => string>;
 
+const PROGRESS_STATUS_MESSAGE = {
+  BACKLOG: () => getI18nRuntime().i18n.t("page:progress_status_backlog"),
+  ACTIVE: () => getI18nRuntime().i18n.t("page:progress_status_active"),
+  PAUSED: () => getI18nRuntime().i18n.t("page:progress_status_paused"),
+  COMPLETED: () => getI18nRuntime().i18n.t("page:progress_status_completed"),
+  DROPPED: () => getI18nRuntime().i18n.t("page:progress_status_dropped"),
+} as const satisfies Record<ReadStatus, () => string>;
+
 export function readStatusLabel(status: ReadStatus): string {
   return READ_STATUS_MESSAGE[status]();
+}
+
+export function progressStatusLabel(status: ReadStatus): string {
+  return PROGRESS_STATUS_MESSAGE[status]();
 }
 
 export const TOGGLE_GROUP_STATUSES = [

@@ -13,7 +13,7 @@ const ProgressLibraryPage = lazyRouteComponent(
 
 type ProgressSearch = {
   /**
-   * Bookshelf column override for the progress library. Kept string-valued for
+   * Cover-grid column override for the progress page. Kept string-valued for
    * URLSearchParams-compatible search shape.
    */
   cols?: string;
