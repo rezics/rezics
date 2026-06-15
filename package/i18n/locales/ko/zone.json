@@ -1,6 +1,9 @@
 {
   "loading": "존을 불러오는 중…",
   "list_manage": "관리",
+  "list_drag_reorder": "드래그하여 재정렬",
+  "list_pin": "존 고정",
+  "list_unpin": "존 고정 해제",
   "list_select_zone": "{name} 선택",
   "list_selected_count": "{count}개 선택됨",
   "list_sign_in_prompt": "로그인하면 구독한 존을 보고 관리할 수 있습니다.",

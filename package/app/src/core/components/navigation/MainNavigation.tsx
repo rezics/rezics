@@ -8,6 +8,7 @@
 // 驱动的 Zone 和 Realm 分组。诸如 search/reviews/shelves 等既有路由仍可通
 // 过页面内的入口和直接 URL 访问；它们只是不作为侧边栏的入口。
 
+import type { UserSubscriptionListSort } from "@rezics/contract";
 import {
   Compass as CompassOutlinedIcon,
   MessageCircleQuestion as FeedbackOutlinedIcon,
@@ -18,6 +19,7 @@ import {
   Palette as PaletteOutlinedIcon,
   Headset as SupportAgentOutlinedIcon,
 } from "lucide-react";
+import { sortSubscriptionListItems } from "@/user/models/subscriptionListOrdering";
 import type {
   NavigationEntry,
   NavigationItem,
@@ -47,11 +49,13 @@ export interface NavigationBuildOptions {
   currentUserSlug?: string | null;
   zones?: {
     items: MainSidebarSubscriptionItem[];
+    sort?: UserSubscriptionListSort;
     isLoading?: boolean;
     errorMessage?: string | null;
   };
   realms?: {
     items: MainSidebarSubscriptionItem[];
+    sort?: UserSubscriptionListSort;
     isLoading?: boolean;
     errorMessage?: string | null;
   };
@@ -144,6 +148,7 @@ function buildSubscriptionSection(input: {
   icon: NavigationEntry["icon"];
   entries?: {
     items: MainSidebarSubscriptionItem[];
+    sort?: UserSubscriptionListSort;
     isLoading?: boolean;
     errorMessage?: string | null;
   };
@@ -176,7 +181,10 @@ function buildSubscriptionSection(input: {
       tone: "danger",
     });
   } else {
-    const items = sortSidebarSubscriptionItems(input.entries?.items ?? []);
+    const items = sortSubscriptionListItems(
+      (input.entries?.items ?? []).filter((item) => item.state !== "REMOVED"),
+      input.entries?.sort,
+    );
     if (items.length === 0) {
       children.push({
         kind: "status",
@@ -214,22 +222,6 @@ function buildSubscriptionSection(input: {
     visibility: "authenticated",
     children,
   };
-}
-
-function sortSidebarSubscriptionItems(items: MainSidebarSubscriptionItem[]) {
-  return items
-    .filter((item) => item.state !== "REMOVED")
-    .slice()
-    .sort((a, b) => {
-      const pinnedA = a.pinned ?? false;
-      const pinnedB = b.pinned ?? false;
-      if (pinnedA !== pinnedB) return pinnedA ? -1 : 1;
-      const position = (a.position ?? "").localeCompare(b.position ?? "");
-      if (position !== 0) return position;
-      const createdAtA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const createdAtB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return createdAtA - createdAtB;
-    });
 }
 
 function buildRealmSection(

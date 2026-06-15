@@ -1,6 +1,9 @@
 {
   "loading": "Loading zone…",
   "list_manage": "Manage",
+  "list_drag_reorder": "Drag to reorder",
+  "list_pin": "Pin zone",
+  "list_unpin": "Unpin zone",
   "list_select_zone": "Select {name}",
   "list_selected_count": "{count} selected",
   "list_sign_in_prompt": "Sign in to see and manage the zones you have subscribed to.",

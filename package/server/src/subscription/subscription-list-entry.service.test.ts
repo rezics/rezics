@@ -77,6 +77,7 @@ function createMemoryDb(input: {
   class SelectBuilder {
     private table: unknown;
     private limitCount: number | null = null;
+    private offsetCount = 0;
 
     constructor(private readonly selection: Record<string, unknown> = {}) {}
 
@@ -98,6 +99,11 @@ function createMemoryDb(input: {
     }
 
     orderBy() {
+      return this;
+    }
+
+    offset(count: number) {
+      this.offsetCount = count;
       return this;
     }
 
@@ -135,7 +141,9 @@ function createMemoryDb(input: {
           id: subscription.id,
         }));
       } else if (this.table === UserSubscriptionListEntry) {
-        if ("entry" in this.selection) {
+        if ("total" in this.selection) {
+          rows = [{ total: state.entries.length }];
+        } else if ("entry" in this.selection) {
           rows = state.entries
             .slice()
             .sort((a, b) => {
@@ -144,46 +152,50 @@ function createMemoryDb(input: {
               if (byPosition !== 0) return byPosition;
               return a.createdAt.getTime() - b.createdAt.getTime();
             })
-            .flatMap((row) => {
-              const translations = state.translations.filter(
-                (translation) => translation.unitId === row.subscribedUnitId,
-              );
-              const supportLanguages = state.supportLanguages.filter(
-                (language) => language.unitId === row.subscribedUnitId,
-              );
-              const translationRows = translations.length
-                ? translations
-                : [
-                    {
-                      unitId: row.subscribedUnitId,
-                      language: null,
-                      title: row.subscribedTitle ?? null,
-                    },
-                  ];
-              const supportRows = supportLanguages.length
-                ? supportLanguages
-                : [
-                    {
-                      unitId: row.subscribedUnitId,
-                      language: null,
-                      isPrimary: null,
-                      position: null,
-                    },
-                  ];
-              return translationRows.flatMap((translation) =>
-                supportRows.map((supportLanguage) => ({
-                  entry: row,
-                  subscribedSlug:
-                    state.units.find((unit) => unit.id === row.subscribedUnitId)
-                      ?.slug ?? null,
-                  subscribedLanguage: translation.language,
-                  subscribedTitle: translation.title,
-                  supportLanguage: supportLanguage.language,
-                  supportLanguageIsPrimary: supportLanguage.isPrimary ?? null,
-                  supportLanguagePosition: supportLanguage.position ?? null,
-                })),
-              );
-            });
+            .map((row) => ({
+              entry: row,
+              subscribedSlug:
+                state.units.find((unit) => unit.id === row.subscribedUnitId)
+                  ?.slug ?? null,
+            }));
+        } else if ("subscribedUnitId" in this.selection) {
+          rows = state.entries.flatMap((row) => {
+            const translations = state.translations.filter(
+              (translation) => translation.unitId === row.subscribedUnitId,
+            );
+            const supportLanguages = state.supportLanguages.filter(
+              (language) => language.unitId === row.subscribedUnitId,
+            );
+            const translationRows = translations.length
+              ? translations
+              : [
+                  {
+                    unitId: row.subscribedUnitId,
+                    language: null,
+                    title: row.subscribedTitle ?? null,
+                  },
+                ];
+            const supportRows = supportLanguages.length
+              ? supportLanguages
+              : [
+                  {
+                    unitId: row.subscribedUnitId,
+                    language: null,
+                    isPrimary: null,
+                    position: null,
+                  },
+                ];
+            return translationRows.flatMap((translation) =>
+              supportRows.map((supportLanguage) => ({
+                subscribedUnitId: row.subscribedUnitId,
+                subscribedLanguage: translation.language,
+                subscribedTitle: translation.title,
+                supportLanguage: supportLanguage.language,
+                supportLanguageIsPrimary: supportLanguage.isPrimary ?? null,
+                supportLanguagePosition: supportLanguage.position ?? null,
+              })),
+            );
+          });
         } else if ("position" in this.selection && "state" in this.selection) {
           rows = state.entries.map((row) => ({
             position: row.position,
@@ -198,7 +210,10 @@ function createMemoryDb(input: {
         }
       }
 
-      return this.limitCount == null ? rows : rows.slice(0, this.limitCount);
+      const offsetRows = rows.slice(this.offsetCount);
+      return this.limitCount == null
+        ? offsetRows
+        : offsetRows.slice(0, this.limitCount);
     }
   }
 
@@ -384,7 +399,7 @@ describe("SubscriptionListEntryService", () => {
       ],
     });
 
-    const rows = await createService(db).list({
+    const { entries: rows } = await createService(db).list({
       userUnitId: USER_UNIT_ID,
       subscribedType: "ZONE",
       preferredLanguages: ["zh-hant", "en"],
@@ -425,6 +440,33 @@ describe("SubscriptionListEntryService", () => {
       state: "ACTIVE",
     });
     expect(db.state.subscriptions).toHaveLength(1);
+  });
+
+  test("activate appends a new active entry after the current manual order", async () => {
+    const db = createMemoryDb({
+      units: [
+        { id: TARGET_UNIT_ID, type: "ZONE", slug: "target" },
+        { id: "zone-2", type: "ZONE", slug: "second" },
+        { id: "zone-3", type: "ZONE", slug: "third" },
+      ],
+      entries: [
+        entry({
+          subscribedUnitId: "removed-zone",
+          position: "z",
+          state: "REMOVED",
+        }),
+        entry({ subscribedUnitId: TARGET_UNIT_ID, position: "a" }),
+        entry({ subscribedUnitId: "zone-2", position: "c" }),
+      ],
+    });
+
+    const dto = await createService(db).activate({
+      userUnitId: USER_UNIT_ID,
+      subscribedUnitId: "zone-3",
+    });
+
+    expect(dto.position > "c").toBe(true);
+    expect(dto.state).toBe("ACTIVE");
   });
 
   test("markRemoved keeps the subscription row but removes the sidebar entry", async () => {

@@ -16,13 +16,14 @@ import {
   subscriptionListResponseSchema,
   subscriptionParamsSchema,
   subscriptionPatchBodySchema,
+  userSubscriptionListEntryBatchReorderBodySchema,
   userSubscriptionListEntryDTOSchema,
   userSubscriptionListEntryListQuerySchema,
   userSubscriptionListEntryListResponseSchema,
   userSubscriptionListEntryPinBodySchema,
   userSubscriptionListEntryReorderBodySchema,
 } from "@rezics/contract";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { subscriptionService } from "./subscription.service";
 import { subscriptionListEntryService } from "./subscription-list-entry.service";
@@ -60,12 +61,15 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
         userUnitId: identity.userId,
         subscribedType: query.subscribedType,
         state: query.state,
+        sort: query.sort,
+        start: query.start,
+        limit: query.limit,
         preferredLanguages: parseReadLanguages([
           query.appLocale,
           ...parseReadLanguages(query.languages),
         ]),
       });
-      return { entries };
+      return entries;
     },
     {
       requireLogin: true,
@@ -75,6 +79,26 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
         summary: "List my subscription list entries",
         description:
           "List subscription-list metadata for the caller, ordered by pinned state and position. Defaults to ACTIVE entries.",
+        tags: ["Subscription"],
+      },
+    },
+  )
+  .patch(
+    "/entries/reorder",
+    async ({ body, identity }): Promise<UserSubscriptionListEntryDTO[]> => {
+      return subscriptionListEntryService.reorderBatch({
+        userUnitId: identity.userId,
+        entries: body.entries,
+      });
+    },
+    {
+      requireLogin: true,
+      body: userSubscriptionListEntryBatchReorderBodySchema,
+      response: t.Array(userSubscriptionListEntryDTOSchema),
+      detail: {
+        summary: "Batch reorder subscription list entries",
+        description:
+          "Updates multiple fractional positions in one transaction for drag-and-drop list/sidebar ordering.",
         tags: ["Subscription"],
       },
     },

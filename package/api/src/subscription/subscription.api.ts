@@ -5,6 +5,7 @@ import type {
   SubscriptionDTO,
   SubscriptionListResponse,
   SubscriptionPatchBody,
+  UserSubscriptionListEntryBatchReorderBody,
   UserSubscriptionListEntryDTO,
   UserSubscriptionListEntryListQuery,
   UserSubscriptionListEntryListResponse,
@@ -98,6 +99,18 @@ export const subscriptionApi = {
   ): Promise<UserSubscriptionListEntryDTO> => {
     return apiFetch<UserSubscriptionListEntryDTO>(
       `/subscription/entries/${subscribedUnitId}/reorder`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  reorderEntries: async (
+    input: UserSubscriptionListEntryBatchReorderBody,
+  ): Promise<UserSubscriptionListEntryDTO[]> => {
+    return apiFetch<UserSubscriptionListEntryDTO[]>(
+      "/subscription/entries/reorder",
       {
         method: "PATCH",
         body: JSON.stringify(input),

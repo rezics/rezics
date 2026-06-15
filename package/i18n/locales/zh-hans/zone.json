@@ -1,6 +1,9 @@
 {
   "loading": "正在加载专区…",
   "list_manage": "管理",
+  "list_drag_reorder": "拖动以重新排序",
+  "list_pin": "固定专区",
+  "list_unpin": "取消固定专区",
   "list_select_zone": "选择 {name}",
   "list_selected_count": "已选择 {count} 个",
   "list_sign_in_prompt": "登录后即可查看和管理你已订阅的专区。",

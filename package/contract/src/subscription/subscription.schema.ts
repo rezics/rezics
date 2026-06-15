@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { readLanguageGetQueryBase } from "../list-query-base";
+import { paginationLimitSchema } from "../pagination";
 import { unitTypeSchema } from "../unit/unit";
 
 /**
@@ -75,6 +76,16 @@ export const userSubscriptionListEntryStateSchema = t.Union([
 export type UserSubscriptionListEntryState =
   (typeof userSubscriptionListEntryStateSchema)["static"];
 
+export const userSubscriptionListSortSchema = t.Union([
+  t.Literal("manualAsc"),
+  t.Literal("manualDesc"),
+  t.Literal("addedDesc"),
+  t.Literal("addedAsc"),
+]);
+
+export type UserSubscriptionListSort =
+  (typeof userSubscriptionListSortSchema)["static"];
+
 export const userSubscriptionListEntryDTOSchema = t.Object({
   id: t.String(),
   userUnitId: t.String(),
@@ -96,6 +107,9 @@ export const userSubscriptionListEntryListQuerySchema = t.Object({
   ...readLanguageGetQueryBase.properties,
   subscribedType: t.Optional(unitTypeSchema),
   state: t.Optional(userSubscriptionListEntryStateSchema),
+  sort: t.Optional(userSubscriptionListSortSchema),
+  start: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
 });
 
 export type UserSubscriptionListEntryListQuery =
@@ -103,6 +117,7 @@ export type UserSubscriptionListEntryListQuery =
 
 export const userSubscriptionListEntryListResponseSchema = t.Object({
   entries: t.Array(userSubscriptionListEntryDTOSchema),
+  total: t.Optional(t.Number()),
 });
 
 export type UserSubscriptionListEntryListResponse =
@@ -114,6 +129,19 @@ export const userSubscriptionListEntryReorderBodySchema = t.Object({
 
 export type UserSubscriptionListEntryReorderBody =
   (typeof userSubscriptionListEntryReorderBodySchema)["static"];
+
+export const userSubscriptionListEntryBatchReorderBodySchema = t.Object({
+  entries: t.Array(
+    t.Object({
+      subscribedUnitId: t.String(),
+      position: t.String({ minLength: 1 }),
+    }),
+    { minItems: 1, maxItems: 100 },
+  ),
+});
+
+export type UserSubscriptionListEntryBatchReorderBody =
+  (typeof userSubscriptionListEntryBatchReorderBodySchema)["static"];
 
 export const userSubscriptionListEntryPinBodySchema = t.Object({
   pinned: t.Boolean(),

@@ -1,6 +1,9 @@
 {
   "loading": "ゾーンを読み込み中…",
   "list_manage": "管理",
+  "list_drag_reorder": "ドラッグして並べ替え",
+  "list_pin": "ゾーンをピン留め",
+  "list_unpin": "ゾーンのピン留めを解除",
   "list_select_zone": "{name}を選択",
   "list_selected_count": "{count} 件選択中",
   "list_sign_in_prompt": "ログインすると、購読しているゾーンを表示・管理できます。",

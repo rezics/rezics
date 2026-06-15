@@ -1,6 +1,9 @@
 {
   "loading": "Zone wird geladen…",
   "list_manage": "Verwalten",
+  "list_drag_reorder": "Zum Sortieren ziehen",
+  "list_pin": "Zone anheften",
+  "list_unpin": "Zone lösen",
   "list_select_zone": "{name} auswählen",
   "list_selected_count": "{count} ausgewählt",
   "list_sign_in_prompt": "Melde dich an, um deine abonnierten Zonen zu sehen und zu verwalten.",
