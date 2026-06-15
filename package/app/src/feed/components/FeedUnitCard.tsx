@@ -68,13 +68,14 @@ function shelfKindForUnit(
 
 /**
  * Feed unit card：统一 Unit 推荐项。BOOK/GAME/MEDIA 使用 catalog cover
- * contract 固定封面比例，其他 Unit 使用图标/图片框；正文列
- * `min-w-0 flex-1` 吸收宽度变化；窄屏截断标题，宽屏由 feed 容器决定
- * 最终宽度。
+ * contract 固定封面比例，封面框 `self-start` 避免被右侧内容高度拉伸，
+ * 图片 `object-fit: contain` 保持原比例；其他 Unit 使用图标/图片框。
+ * 正文列 `min-w-0 flex-1` 吸收宽度变化；窄屏截断标题，宽屏由 feed
+ * 容器决定最终宽度。
  *
  * Mobile (<640px)
  * +------------------------------+
- * | [cover/icon] Title      Type |
+ * | [cover 96px] Title     Type |
  * |        Summary lines         |
  * |        (flex spacer)         |
  * |        [vote][shelf][share]  |
@@ -82,7 +83,7 @@ function shelfKindForUnit(
  *
  * Tablet (640px-1023px)
  * +--------------------------------------+
- * | [cover] Title / type                 |
+ * | [cover 112px] Title / type           |
  * |         Summary; reaction row bottom |
  * +--------------------------------------+
  *
@@ -152,7 +153,7 @@ export function FeedUnitCard({ row, className }: FeedUnitCardProps) {
         <CardMedia
           className={cn(
             "shrink-0 rounded-sm bg-surface-subtle text-text-tertiary",
-            catalogCoverAspectRatio ? "w-18 sm:w-22" : "h-24 w-24",
+            catalogCoverAspectRatio ? "w-24 self-start sm:w-28" : "h-24 w-24",
           )}
           style={
             catalogCoverAspectRatio
@@ -167,8 +168,11 @@ export function FeedUnitCard({ row, className }: FeedUnitCardProps) {
               loading="lazy"
               className={cn(
                 "h-full w-full",
-                catalogCoverAspectRatio ? "object-fill" : "object-cover",
+                !catalogCoverAspectRatio && "object-cover",
               )}
+              style={
+                catalogCoverAspectRatio ? { objectFit: "contain" } : undefined
+              }
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
