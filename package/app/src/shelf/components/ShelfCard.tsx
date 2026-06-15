@@ -8,7 +8,6 @@ import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
-import { getTranslation } from "@/shared/utils/translation-helpers";
 
 interface ShelfCardProps {
   shelf: ShelfDTO;
@@ -22,9 +21,8 @@ type ShelfCardLinkable = ShelfDTO & {
 export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
   const { t } = useTranslation(["common", "entity"]);
   const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
-  const translation = getTranslation(shelf.translations);
-  const title = translation?.title || "";
-  const description = contentDocMarkdownFallback(translation?.description);
+  const title = shelf.title || "";
+  const description = contentDocMarkdownFallback(shelf.description);
   const itemsCount =
     shelf.itemCount ?? (shelf as { items?: unknown[] }).items?.length ?? 0;
 

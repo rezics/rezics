@@ -30,7 +30,6 @@ import {
   eq,
   inArray,
   ne,
-  or,
   type SQL,
   sql,
 } from "drizzle-orm";
@@ -38,6 +37,7 @@ import { nullableContentDocJson } from "@/content-doc/json-write";
 import { getSeedTagId } from "@/infra/seed-tags";
 import { serverJobProducer } from "@/job/job-boundary";
 import { searchClient } from "@/meili/search-client";
+import { resolveEffectiveReadLanguageInput } from "@/unit/language-resolution";
 import { assertLicenseSlug } from "@/unit/publication-policy";
 import { AppError } from "@/utils/errors";
 import {
@@ -49,6 +49,7 @@ import {
   Shelf,
   ShelfItem,
   Unit,
+  UnitSupportLanguage,
   UnitTag,
   UnitTranslation,
   User,
@@ -409,7 +410,15 @@ async function hydrateShelfWithMetadata(
     .where(eq(Unit.id, unitId))
     .limit(1);
   if (!unit) throw new Error(`Shelf Unit not found: ${unitId}`);
-  const [translations, unitTags, users] = await Promise.all([
+  const [supportLanguages, translations, unitTags, users] = await Promise.all([
+    db
+      .select()
+      .from(UnitSupportLanguage)
+      .where(eq(UnitSupportLanguage.unitId, unitId))
+      .orderBy(
+        asc(UnitSupportLanguage.position),
+        asc(UnitSupportLanguage.language),
+      ),
     db.select().from(UnitTranslation).where(eq(UnitTranslation.unitId, unitId)),
     db
       .select()
@@ -429,6 +438,7 @@ async function hydrateShelfWithMetadata(
     unit: {
       ...unit,
       user: users[0] ?? null,
+      supportLanguages,
       translations,
       unitTags,
     },
@@ -613,6 +623,11 @@ export class ShelfService {
     const where = this.buildWhere(options, { publicOnly: true });
     const orderBy = this.buildOrderBy(options);
     const db = await getServerDb();
+    const readLanguage = resolveEffectiveReadLanguageInput({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+      appLocale: options.appLocale,
+    });
 
     const [rows, totalRows] = await Promise.all([
       db
@@ -642,7 +657,11 @@ export class ShelfService {
     );
     return {
       shelves: hydratedRows.map((row) =>
-        mapShelfListRowToDTO(row, matchedByShelfId.get(row.unitId)),
+        mapShelfListRowToDTO(
+          row,
+          matchedByShelfId.get(row.unitId),
+          readLanguage,
+        ),
       ),
       total: totalRows[0]?.total ?? 0,
     };
@@ -661,6 +680,11 @@ export class ShelfService {
     });
     const orderBy = this.buildOrderBy(options);
     const db = await getServerDb();
+    const readLanguage = resolveEffectiveReadLanguageInput({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+      appLocale: options.appLocale,
+    });
 
     const [rows, totalRows] = await Promise.all([
       db
@@ -682,7 +706,9 @@ export class ShelfService {
       await hydrateShelfRows(rows.map((row) => row.unitId)),
     );
     return {
-      shelves: hydratedRows.map((row) => mapShelfListRowToDTO(row)),
+      shelves: hydratedRows.map((row) =>
+        mapShelfListRowToDTO(row, undefined, readLanguage),
+      ),
       total: totalRows[0]?.total ?? 0,
     };
   }
@@ -778,8 +804,16 @@ export class ShelfService {
     return out;
   }
 
-  async listUserShelves(userId: string): Promise<ShelfSummaryDTO[]> {
+  async listUserShelves(
+    userId: string,
+    options: Pick<ShelfListQuery, "languages" | "appLocale"> = {},
+  ): Promise<ShelfSummaryDTO[]> {
     const db = await getServerDb();
+    const readLanguage = resolveEffectiveReadLanguageInput({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+      appLocale: options.appLocale,
+    });
     const rows = await db
       .select({ unitId: Shelf.unitId })
       .from(Shelf)
@@ -790,14 +824,23 @@ export class ShelfService {
       await hydrateUnitOwnerUserSlugs(
         await hydrateShelfRows(rows.map((row) => row.unitId)),
       )
-    ).map(mapShelfSummaryToDTO);
+    ).map((row) => mapShelfSummaryToDTO(row, readLanguage));
   }
 
-  async getByUnitId(unitId: string): Promise<ShelfDetailDTO> {
+  async getByUnitId(
+    unitId: string,
+    options: Pick<ShelfListQuery, "languages" | "appLocale"> = {},
+  ): Promise<ShelfDetailDTO> {
+    const readLanguage = resolveEffectiveReadLanguageInput({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+      appLocale: options.appLocale,
+    });
     const row = await hydrateShelfWithMetadata(unitId);
     return mapShelfDetailToDTO(
       await hydrateUnitOwnerUserSlugRow(row),
       row.itemCount,
+      readLanguage,
     );
   }
 
@@ -900,12 +943,14 @@ export class ShelfService {
         visibility: (visibility ??
           "PUBLIC") as typeof Unit.$inferInsert.visibility,
         licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
+        defaultLanguage,
         updatedAt: new Date(),
       })
       .returning({ id: Unit.id });
     if (!unit) throw new Error("Failed to create shelf Unit");
 
     if (translationData.length > 0) {
+      const positions = rebalance(translationData.length);
       await db.insert(UnitTranslation).values(
         translationData.map((tr) => ({
           unitId: unit.id,
@@ -918,6 +963,15 @@ export class ShelfService {
             : {}),
           ...(tr.extra !== undefined ? { extra: tr.extra } : {}),
         })) as Array<typeof UnitTranslation.$inferInsert>,
+      );
+      await db.insert(UnitSupportLanguage).values(
+        translationData.map((tr, index) => ({
+          unitId: unit.id,
+          language: tr.language,
+          isPrimary: index === 0,
+          position: positions[index]!,
+          updatedAt: new Date(),
+        })) as Array<typeof UnitSupportLanguage.$inferInsert>,
       );
     }
     if (tagIds?.length) {
@@ -940,7 +994,9 @@ export class ShelfService {
     });
 
     const row = await hydrateShelfWithMetadata(unit.id, db);
-    return mapShelfToDTO(await hydrateUnitOwnerUserSlugRow(row));
+    return mapShelfToDTO(await hydrateUnitOwnerUserSlugRow(row), {
+      explicitLanguage: defaultLanguage,
+    });
   }
 
   async update(unitId: string, req: UpdateShelfInput): Promise<ShelfDTO> {
@@ -950,7 +1006,7 @@ export class ShelfService {
         "Custom shelf slugs are disabled (SHELF_CUSTOM_SLUG_DISABLED).",
       );
     }
-    const { coverUrl, visibility, extra, title } = req;
+    const { visibility, extra } = req;
     const db = await getServerDb();
 
     if (visibility !== undefined || req.licenseSlug !== undefined) {
@@ -967,48 +1023,6 @@ export class ShelfService {
           updatedAt: new Date(),
         })
         .where(eq(Unit.id, unitId));
-    }
-
-    if (title !== undefined || coverUrl !== undefined) {
-      const [unit] = await db
-        .select({ defaultLanguage: Unit.defaultLanguage })
-        .from(Unit)
-        .where(eq(Unit.id, unitId))
-        .limit(1);
-      if (!unit) throw new Error(`Unit not found: ${unitId}`);
-      const language = unit.defaultLanguage ?? "en";
-      const [existing] = await db
-        .select({ extra: UnitTranslation.extra })
-        .from(UnitTranslation)
-        .where(
-          and(
-            eq(UnitTranslation.unitId, unitId),
-            eq(UnitTranslation.language, language),
-          ),
-        )
-        .limit(1);
-      const nextExtra =
-        coverUrl !== undefined
-          ? (withCoverUrl(
-              existing?.extra ?? undefined,
-              coverUrl ?? undefined,
-            ) as unknown)
-          : undefined;
-      await db
-        .insert(UnitTranslation)
-        .values({
-          unitId,
-          language,
-          ...(title !== undefined ? { title } : {}),
-          ...(nextExtra !== undefined ? { extra: nextExtra } : {}),
-        } as typeof UnitTranslation.$inferInsert)
-        .onConflictDoUpdate({
-          target: [UnitTranslation.unitId, UnitTranslation.language],
-          set: {
-            ...(title !== undefined ? { title } : {}),
-            ...(nextExtra !== undefined ? { extra: nextExtra } : {}),
-          },
-        });
     }
 
     const [updated] = await db

@@ -5,60 +5,66 @@
 import type { ShelfView } from "@rezics/api/shelf";
 
 /**
- * Shelf edit page with metadata form and item editor. Supports editing title,
- * description, cover URL, pinned tags, and default view mode (nested/flat).
- * 书架编辑页面，包含元数据表单和条目编辑器。支持编辑标题、描述、封面 URL、固定标签和默认视图模式。
+ * Shelf edit page with translation-row metadata and item editor. Title,
+ * description, and cover URL belong to the selected UnitTranslation; default
+ * view mode and pinned tags are shelf-level metadata.
+ * 书架编辑页面，包含按语言行编辑的展示信息和条目编辑器。标题、描述、封面 URL
+ * 属于当前选中的 UnitTranslation；默认视图和固定标签属于书架级元数据。
  *
  * Mobile <640px:
- * +--[Back][Title]--+
- * |  Input         |
- * |  Label         |
- * |  Textarea      |
- * |  TagChips      |
- * |  Select        |
- * |  [Cancel][Save]|
- * |  ItemsSection  |
- * +----------------+
+ * +----------------------+
+ * | [Back] Edit shelf    |
+ * | Lang select + Add    |
+ * | Title input          |
+ * | Markdown editor      |
+ * | Cover URL input      |
+ * | Pinned tag chips     |
+ * | View select          |
+ * |        Cancel Save   |
+ * | Items editor         |
+ * +----------------------+
  *
  * Tablet 640-1023px:
- * +--------[Back][Title]--------+
- * |  Input      Input          |
- * |  Label      Label          |
- * |  Textarea   TagChips       |
- * |  Select         Select     |
- * |  [Cancel]     [Save]       |
- * |  ItemsSection              |
+ * +----------------------------+
+ * | [Back] Edit shelf          |
+ * | Lang row wraps if needed   |
+ * | Title / Markdown / Cover   |
+ * | Tags / View                |
+ * |              Cancel Save   |
+ * | Items editor full width    |
  * +----------------------------+
  *
  * Desktop 1024-1535px:
- * +----------[Back][Title]----------+
- * |  Input         Input           |
- * |  Label         Label           |
- * |  Textarea      TagChips        |
- * |  Select            Select      |
- * |                [Cancel][Save]  |
- * |  ItemsSection (full width)     |
- * +--------------------------------+
+ * +------------------------------+
+ * | max-w-3xl centered           |
+ * | Header row                   |
+ * | Language bar                 |
+ * | Translation fields stacked   |
+ * | Shelf metadata stacked       |
+ * |                 Cancel Save  |
+ * | Items editor                 |
+ * +------------------------------+
  *
  * Ultra-wide >=1536px:
- * +-------[Back][Title (max-w-3xl)]-------+
- * |  Input              Input            |
- * |  Label              Label            |
- * |  Textarea           TagChips         |
- * |  Select                 Select       |
- * |                   [Cancel][Save]     |
- * |  ItemsSection (centered max-w-3xl)   |
- * +--------------------------------------+
+ * +------------------------------+
+ * | max-w-3xl centered           |
+ * | Same geometry as desktop     |
+ * | Outer whitespace expands     |
+ * +------------------------------+
  */
-import { shelfDetailQuery } from "@rezics/api/shelf";
+import { shelfDetailQuery, shelfKeys } from "@rezics/api/shelf";
 import {
   useSetShelfPinnedTagsMutation,
   useUpdateShelfMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import { useUpsertTranslationMutation } from "@rezics/api/unit/unit.mutations";
 import {
+  CONTENT_LANGUAGE_SLUGS,
   contentDocMarkdownFallback,
   markdownContentDoc,
+  normalizeContentLanguage,
+  readCoverUrlFromExtra,
+  type UnitTranslationDTO,
 } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { ConfirmDialog, Spinner } from "@rezics/ui";
@@ -73,12 +79,16 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useBlocker, useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { useBlocker, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import {
+  AddUnitTranslationLanguageDialog,
+  UnitTranslationLanguageBar,
+} from "@/unit";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
@@ -96,8 +106,40 @@ const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
   // { value: "masonry", label: "Masonry" },
 ];
 
+type ShelfTranslationDraft = {
+  title: string;
+  description: string;
+  coverUrl: string;
+};
+
+function emptyTranslationDraft(): ShelfTranslationDraft {
+  return { title: "", description: "", coverUrl: "" };
+}
+
+function shelfTranslationToDraft(
+  translation: UnitTranslationDTO | undefined,
+): ShelfTranslationDraft {
+  return {
+    title: translation?.title ?? "",
+    description: contentDocMarkdownFallback(translation?.description),
+    coverUrl: readCoverUrlFromExtra(translation?.extra) ?? "",
+  };
+}
+
+function shelfTranslationDraftChanged(
+  draft: ShelfTranslationDraft,
+  base: ShelfTranslationDraft,
+): boolean {
+  return (
+    draft.title !== base.title ||
+    draft.description !== base.description ||
+    draft.coverUrl !== base.coverUrl
+  );
+}
+
 export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as { lang?: string };
   const {
     data: shelf,
     isLoading,
@@ -108,7 +150,10 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     onSuccess: () => toast.success(getI18nRuntime().i18n.t("common:saved")),
   });
   const setPinnedTagsMutation = useSetShelfPinnedTagsMutation();
-  const upsertTranslationMutation = useUpsertTranslationMutation();
+  const upsertTranslationMutation = useUpsertTranslationMutation({
+    affectedDetailKeys: () => [shelfKeys.detail(shelfId)],
+    onSuccess: () => toast.success(getI18nRuntime().i18n.t("common:saved")),
+  });
   const editor = useShelfItemsEditor(shelfId);
 
   const pinnedTagIds = useMemo(
@@ -123,10 +168,56 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     });
   };
 
-  const translation = shelf ? getTranslation(shelf.translations) : null;
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [coverUrl, setCoverUrl] = useState("");
+  const translations = shelf?.translations ?? [];
+  const translationByLang = useMemo(() => {
+    const map = new Map<string, UnitTranslationDTO>();
+    for (const item of translations) {
+      if (item.language) map.set(item.language, item);
+    }
+    return map;
+  }, [translations]);
+  const existingLanguages = useMemo(
+    () => translations.map((item) => item.language).filter(Boolean) as string[],
+    [translations],
+  );
+  const hasAvailable = CONTENT_LANGUAGE_SLUGS.length > existingLanguages.length;
+  const requestedLanguage = search.lang
+    ? normalizeContentLanguage(search.lang)
+    : null;
+  const initialLanguage =
+    requestedLanguage ??
+    shelf?.resolvedLanguage ??
+    shelf?.defaultLanguage ??
+    existingLanguages[0] ??
+    "en";
+  const selectedLanguage = initialLanguage;
+  const currentTranslation = translationByLang.get(selectedLanguage);
+  const [drafts, setDrafts] = useState<Record<string, ShelfTranslationDraft>>(
+    {},
+  );
+  const [addTranslationOpen, setAddTranslationOpen] = useState(false);
+  const currentDraft =
+    drafts[selectedLanguage] ?? shelfTranslationToDraft(currentTranslation);
+
+  const setSelectedLanguage = (lang: string) => {
+    navigate({
+      to: ".",
+      search: (prev: Record<string, unknown>) => ({ ...prev, lang }),
+      replace: true,
+    });
+  };
+
+  const updateTranslationDraft = <K extends keyof ShelfTranslationDraft>(
+    key: K,
+    value: ShelfTranslationDraft[K],
+  ) => {
+    setDrafts((prev) => {
+      const base =
+        prev[selectedLanguage] ??
+        shelfTranslationToDraft(translationByLang.get(selectedLanguage));
+      return { ...prev, [selectedLanguage]: { ...base, [key]: value } };
+    });
+  };
 
   /**
    * Persisted default shelf view — edited via metadata form.
@@ -142,21 +233,6 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [editorPreviewView, setEditorPreviewView] =
     useState<ShelfView>("nested");
 
-  // Only initialize form state on first data load; skip subsequent refetches
-  // so that mutation-triggered query invalidations don't wipe in-progress edits.
-  // 仅在首次数据加载时初始化表单状态；跳过后续 refetch，
-  // 避免 mutation 触发的查询失效覆盖正在编辑的内容。
-  const initializedRef = useRef(false);
-  useEffect(() => {
-    if (initializedRef.current) return;
-    if (translation) {
-      initializedRef.current = true;
-      setTitle(translation.title ?? "");
-      setDescription(contentDocMarkdownFallback(translation.description));
-      setCoverUrl(shelf?.coverUrl ?? "");
-    }
-  }, [translation, shelf?.coverUrl]);
-
   useEffect(() => {
     const saved = normalizeViewMode(
       (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
@@ -170,15 +246,22 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     const savedViewMode = normalizeViewMode(
       (shelf.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
     );
-    return (
-      title !== (translation?.title ?? "") ||
-      description !== contentDocMarkdownFallback(translation?.description) ||
-      coverUrl !== (shelf.coverUrl ?? "") ||
-      defaultViewMode !== savedViewMode
-    );
-  }, [shelf, translation, title, description, coverUrl, defaultViewMode]);
+    return defaultViewMode !== savedViewMode;
+  }, [shelf, defaultViewMode]);
 
-  const isDirty = metadataDirty || editor.dirty;
+  const dirtyTranslationEntries = useMemo(
+    () =>
+      Object.entries(drafts).filter(([language, draft]) =>
+        shelfTranslationDraftChanged(
+          draft,
+          shelfTranslationToDraft(translationByLang.get(language)),
+        ),
+      ),
+    [drafts, translationByLang],
+  );
+  const translationDirty = dirtyTranslationEntries.length > 0;
+
+  const isDirty = metadataDirty || translationDirty || editor.dirty;
 
   const blocker = useBlocker({
     shouldBlockFn: () => isDirty,
@@ -187,33 +270,65 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   });
 
   const handleSave = () => {
-    updateMutation.mutate({
-      unitId: shelfId,
-      input: {
-        title,
-        coverUrl: coverUrl || null,
-        extra: {
-          ...((shelf?.extra as Record<string, unknown> | null | undefined) ??
-            {}),
-          viewMode: defaultViewMode,
-        },
-      },
-    });
-
-    // Persist description via upsertTranslation — the shelf update endpoint
-    // does not carry a description field.
-    // 通过 upsertTranslation 持久化描述 —— shelf 更新端点不包含 description 字段。
-    const lang = translation?.language;
-    if (lang) {
-      upsertTranslationMutation.mutate({
+    if (metadataDirty) {
+      updateMutation.mutate({
         unitId: shelfId,
-        language: lang,
         input: {
-          title,
-          description: markdownContentDoc(description),
+          extra: {
+            ...((shelf?.extra as Record<string, unknown> | null | undefined) ??
+              {}),
+            viewMode: defaultViewMode,
+          },
         },
       });
     }
+
+    for (const [language, draft] of dirtyTranslationEntries) {
+      upsertTranslationMutation.mutate(
+        {
+          unitId: shelfId,
+          language,
+          input: {
+            title: draft.title || null,
+            description: draft.description
+              ? markdownContentDoc(draft.description)
+              : null,
+            extra: draft.coverUrl
+              ? { coverUrl: draft.coverUrl }
+              : { $unset: ["coverUrl"] },
+          },
+        },
+        {
+          onSuccess: () => {
+            setDrafts((prev) => {
+              const next = { ...prev };
+              delete next[language];
+              return next;
+            });
+          },
+        },
+      );
+    }
+  };
+
+  const handleAddTranslation = (language: string) => {
+    upsertTranslationMutation.mutate(
+      {
+        unitId: shelfId,
+        language,
+        input: {},
+      },
+      {
+        onSuccess: () => {
+          setDrafts((prev) => ({
+            ...prev,
+            [language]: emptyTranslationDraft(),
+          }));
+          setAddTranslationOpen(false);
+          setSelectedLanguage(language);
+        },
+      },
+    );
   };
 
   // Shelf detail query failed — show error before content
@@ -254,26 +369,38 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
       </div>
 
       <div className="flex flex-col gap-6">
+        <UnitTranslationLanguageBar
+          existingLanguages={existingLanguages}
+          selectedLanguage={selectedLanguage}
+          defaultLanguage={shelf.defaultLanguage}
+          onSelect={setSelectedLanguage}
+          onAddClick={() => setAddTranslationOpen(true)}
+          hasAvailable={hasAvailable}
+          label={getI18nRuntime().i18n.t("common:language")}
+          addLabel={getI18nRuntime().i18n.t("common:add_translation")}
+          defaultLabel={getI18nRuntime().i18n.t(
+            "page:book_edit_info_translation_default_badge",
+          )}
+          className="flex flex-row flex-wrap items-center gap-2"
+          selectClassName="w-full sm:w-[220px]"
+        />
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-shelf-title">
             {getI18nRuntime().i18n.t("entity:shelf_title_label")}
           </Label>
           <Input
             id="edit-shelf-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={currentDraft.title}
+            onChange={(e) => updateTranslationDraft("title", e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-description">
+          <Label>
             {getI18nRuntime().i18n.t("entity:shelf_description_label")}
           </Label>
-          <textarea
-            id="edit-shelf-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
-            className="w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          <RezicsMarkdownEditor
+            value={currentDraft.description}
+            onChange={(value) => updateTranslationDraft("description", value)}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -282,8 +409,8 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           </Label>
           <Input
             id="edit-shelf-cover"
-            value={coverUrl}
-            onChange={(e) => setCoverUrl(e.target.value)}
+            value={currentDraft.coverUrl}
+            onChange={(e) => updateTranslationDraft("coverUrl", e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -347,7 +474,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             disabled={
               updateMutation.isPending ||
               upsertTranslationMutation.isPending ||
-              !metadataDirty
+              (!metadataDirty && !translationDirty)
             }
           >
             {getI18nRuntime().i18n.t("common:save")}
@@ -361,6 +488,17 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           editor={editor}
         />
       </div>
+
+      <AddUnitTranslationLanguageDialog
+        open={addTranslationOpen}
+        existingLanguages={existingLanguages}
+        onClose={() => setAddTranslationOpen(false)}
+        onSubmit={handleAddTranslation}
+        title={getI18nRuntime().i18n.t("common:add_translation")}
+        languageLabel={getI18nRuntime().i18n.t("common:language")}
+        cancelLabel={getI18nRuntime().i18n.t("common:cancel")}
+        submitLabel={getI18nRuntime().i18n.t("common:submit")}
+      />
 
       <ConfirmDialog
         open={blocker.status === "blocked"}

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { markdownContentDoc } from "../content/doc-v1";
 import {
   addShelfItemSchema,
   addToShelvesInputSchema,
@@ -19,6 +20,11 @@ describe("shelf containment contract fields", () => {
     expect(
       Value.Check(shelfDTOSchema, {
         unitId: "shelf-1",
+        defaultLanguage: "zh-hant",
+        resolvedLanguage: "zh-hant",
+        title: "書架",
+        description: markdownContentDoc("說明"),
+        coverUrl: "https://example.com/shelf.webp",
         itemCount: 1,
         matchedUnit: {
           unitId: "release-2",
@@ -33,12 +39,18 @@ describe("shelf containment contract fields", () => {
     expect(
       Value.Check(shelfListQuerySchema, {
         containsUnitId: "release-1",
+        languages: "zh-hant,en",
+        appLocale: "zh-hant",
+        languageMode: "all",
         limit: 20,
       }),
     ).toBe(true);
     expect(
       Value.Check(shelfListBodySchema, {
         containsUnitId: "release-1",
+        languages: ["zh-hant", "en"],
+        appLocale: "zh-hant",
+        languageMode: "all",
         limit: 20,
       }),
     ).toBe(true);

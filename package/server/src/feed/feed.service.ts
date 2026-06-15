@@ -14,7 +14,7 @@ import type {
 } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
 import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
-import { bookService, mapBookToDTO, type BookWithRelations } from "@/book";
+import { type BookWithRelations, bookService, mapBookToDTO } from "@/book";
 import { db } from "@/db";
 import { postService } from "@/post";
 import { mapPostToDTO } from "@/post/post.mapper";
@@ -203,6 +203,9 @@ function bookReadLanguageForFeed(query: FeedQuery): EffectiveReadLanguageInput {
 type BookServiceListOptions = NonNullable<
   Parameters<typeof bookService.list>[0]
 >;
+type ShelfServiceListOptions = NonNullable<
+  Parameters<typeof shelfService.list>[0]
+>;
 
 function bookListLanguageOptions(
   query: FeedQuery,
@@ -216,6 +219,24 @@ function bookListLanguageOptions(
       ? {
           appLocale:
             readLanguage.appLocale as BookServiceListOptions["appLocale"],
+        }
+      : {}),
+    ...(query.languageMode ? { languageMode: query.languageMode } : {}),
+  };
+}
+
+function shelfListLanguageOptions(
+  query: FeedQuery,
+): Pick<ShelfServiceListOptions, "appLocale" | "languageMode" | "languages"> {
+  const readLanguage = bookReadLanguageForFeed(query);
+  return {
+    ...(readLanguage.languages?.length
+      ? { languages: readLanguage.languages.join(",") }
+      : {}),
+    ...(readLanguage.appLocale
+      ? {
+          appLocale:
+            readLanguage.appLocale as ShelfServiceListOptions["appLocale"],
         }
       : {}),
     ...(query.languageMode ? { languageMode: query.languageMode } : {}),
@@ -828,7 +849,10 @@ export class FeedService {
         limit: RECOMMENDATION_ITEM_LIMIT,
         ...bookListLanguageOptions(query),
       }),
-      shelfService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
+      shelfService.list({
+        limit: RECOMMENDATION_ITEM_LIMIT,
+        ...shelfListLanguageOptions(query),
+      }),
     ]);
     const tagsByUnit = await loadFeedTagsForUnits(
       books.books.map((book) => book.unitId).filter(Boolean),

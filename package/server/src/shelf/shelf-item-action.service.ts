@@ -1,15 +1,15 @@
 import type {
   AddToShelvesInput,
-  ShelfItemStatusBatchResponse,
-  ShelfItemStatusResponse,
   AddToShelvesResponse,
   ShelfItemKind,
   ShelfItemParentRole,
+  ShelfItemStatusBatchResponse,
+  ShelfItemStatusResponse,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
 import { FAVORITES_SHELF_SLUG } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import {
@@ -17,6 +17,7 @@ import {
   Shelf,
   ShelfItem,
   Unit,
+  UnitSupportLanguage,
   UnitTranslation,
   UserTagApplication,
 } from "../db/schema";
@@ -665,20 +666,53 @@ function createDrizzleShelfItemActionRepository(): ShelfItemActionRepository {
     async listShelfTitles(shelfIds) {
       if (shelfIds.length === 0) return [];
       const db = await getServerDb();
-      return db
+      const rows = await db
         .select({
           id: Shelf.unitId,
+          defaultLanguage: Unit.defaultLanguage,
+          language: UnitTranslation.language,
           title: UnitTranslation.title,
+          supportLanguage: UnitSupportLanguage.language,
+          supportIsPrimary: UnitSupportLanguage.isPrimary,
+          supportPosition: UnitSupportLanguage.position,
         })
         .from(Shelf)
+        .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
+        .leftJoin(UnitTranslation, eq(UnitTranslation.unitId, Shelf.unitId))
         .leftJoin(
-          UnitTranslation,
+          UnitSupportLanguage,
           and(
-            eq(UnitTranslation.unitId, Shelf.unitId),
-            eq(UnitTranslation.language, "en"),
+            eq(UnitSupportLanguage.unitId, Shelf.unitId),
+            eq(UnitSupportLanguage.language, UnitTranslation.language),
           ),
         )
-        .where(inArray(Shelf.unitId, shelfIds));
+        .where(inArray(Shelf.unitId, shelfIds))
+        .orderBy(
+          asc(Shelf.unitId),
+          desc(UnitSupportLanguage.isPrimary),
+          asc(UnitSupportLanguage.position),
+          asc(UnitTranslation.language),
+        );
+
+      const byShelf = new Map<string, typeof rows>();
+      for (const row of rows) {
+        const current = byShelf.get(row.id) ?? [];
+        current.push(row);
+        byShelf.set(row.id, current);
+      }
+
+      return [...byShelf.entries()].map(([id, titleRows]) => {
+        const title =
+          titleRows.find(
+            (row) =>
+              row.language === row.defaultLanguage &&
+              typeof row.title === "string",
+          )?.title ??
+          titleRows.find((row) => row.supportIsPrimary && row.title)?.title ??
+          titleRows.find((row) => row.title)?.title ??
+          null;
+        return { id, title };
+      });
     },
   };
 }

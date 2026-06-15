@@ -1,13 +1,12 @@
 import type {
   AddShelfItemInput,
-  CleanupShelfOrphansInput,
   AddToShelvesInput,
-  ShelfItemStatusBatchResponse,
-  ShelfItemStatusResponse,
   AddToShelvesResponse,
+  CleanupShelfOrphansInput,
   CreateShelfInput,
   EnsureSystemShelfResponse,
   ReorderShelfItemInput,
+  ReservedShelfSlug,
   SetPinnedTagsInput,
   SetPinnedTagsResponse,
   SetShelfItemChildrenInput,
@@ -16,11 +15,12 @@ import type {
   ShelfItemBatchResponse,
   ShelfItemChildDTO,
   ShelfItemDTO,
+  ShelfItemStatusBatchResponse,
+  ShelfItemStatusResponse,
   ShelfItemsResponse,
   ShelfItemType,
   ShelfListResponse,
   ShelfResponse,
-  ReservedShelfSlug,
   ToggleFavoriteResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
@@ -37,8 +37,13 @@ export const shelfApi = {
     );
   },
 
-  get: async (unitId: string): Promise<ShelfDetailDTO> => {
-    return apiFetch<ShelfDetailDTO>(`/shelf/${unitId}`);
+  get: async (
+    unitId: string,
+    filters?: Pick<ShelfFilters, "languages" | "appLocale" | "languageMode">,
+  ): Promise<ShelfDetailDTO> => {
+    return apiFetch<ShelfDetailDTO>(
+      `/shelf/${unitId}${buildQueryString(filters)}`,
+    );
   },
 
   getByUserId: async (

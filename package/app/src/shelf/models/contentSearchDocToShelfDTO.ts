@@ -47,6 +47,10 @@ export function mapContentSearchDocToShelfDTO(
   return {
     unitId: doc.id,
     userId: doc.userId,
+    defaultLanguage: doc.defaultLanguage,
+    resolvedLanguage: doc.resolvedLanguage,
+    title: doc.title,
+    description: doc.description,
     coverUrl: doc.coverUrl,
     visibility: doc.visibility,
     translations,
