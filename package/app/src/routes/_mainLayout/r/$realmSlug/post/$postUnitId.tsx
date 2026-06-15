@@ -2,12 +2,14 @@ import { postQueries } from "@rezics/api/post/post";
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
-  titleMeta,
+  titleContext,
   titleOfPost,
   titleOfRealm,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 import { PostThreadPage } from "@/post";
 import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
+import { realmPresentationContext } from "@/unit";
 
 export const Route = createFileRoute(
   "/_mainLayout/r/$realmSlug/post/$postUnitId",
@@ -31,14 +33,21 @@ export const Route = createFileRoute(
     return { ...realmData, post };
   },
   head: ({ loaderData }) =>
-    titleMeta(
-      loaderData ? titleOfPost(loaderData.post) : null,
-      loaderData
-        ? titleOfRealm(loaderData.realm, loaderData.readContext)
-        : null,
-    ),
+    unitTitleMeta("post", loaderData ? titleOfPost(loaderData.post) : null, [
+      titleContext(
+        "realm",
+        loaderData
+          ? titleOfRealm(loaderData.realm, loaderData.readContext)
+          : null,
+      ),
+    ]),
   component: () => {
     const { realm } = Route.useLoaderData();
-    return <PostThreadPage realmUnitId={realm.unitId} />;
+    return (
+      <PostThreadPage
+        realmUnitId={realm.unitId}
+        presentationContext={realmPresentationContext(realm.unitId)}
+      />
+    );
   },
 });

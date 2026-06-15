@@ -10,6 +10,13 @@ describe("resolvePostDetailContext", () => {
     ).toEqual({
       rootPostUnitId: "post-1",
       context: { kind: "direct" },
+      interactionContext: { kind: "direct" },
+      presentationContext: {
+        kind: "unit",
+        unitKind: "post",
+        unitId: "post-1",
+        visibility: "hidden",
+      },
       realmUnitId: null,
       reactionContextUnitId: null,
     });
@@ -23,6 +30,13 @@ describe("resolvePostDetailContext", () => {
     ).toEqual({
       rootPostUnitId: "post-1",
       context: { kind: "direct" },
+      interactionContext: { kind: "direct" },
+      presentationContext: {
+        kind: "unit",
+        unitKind: "post",
+        unitId: "post-1",
+        visibility: "hidden",
+      },
       realmUnitId: null,
       reactionContextUnitId: null,
     });
@@ -33,6 +47,13 @@ describe("resolvePostDetailContext", () => {
     ).toEqual({
       rootPostUnitId: "wiki-1",
       context: { kind: "direct" },
+      interactionContext: { kind: "direct" },
+      presentationContext: {
+        kind: "unit",
+        unitKind: "post",
+        unitId: "wiki-1",
+        visibility: "hidden",
+      },
       realmUnitId: null,
       reactionContextUnitId: null,
     });
@@ -47,8 +68,40 @@ describe("resolvePostDetailContext", () => {
     ).toEqual({
       rootPostUnitId: "post-1",
       context: { kind: "realm", realmUnitId: "realm-1" },
+      interactionContext: { kind: "realm", realmUnitId: "realm-1" },
+      presentationContext: {
+        kind: "realm",
+        realmUnitId: "realm-1",
+        visibility: "visible",
+      },
       realmUnitId: "realm-1",
       reactionContextUnitId: "realm-1",
+    });
+  });
+
+  test("keeps zone presentation separate from direct interaction context", () => {
+    expect(
+      resolvePostDetailContext({
+        params: { postUnitId: "post-1" },
+        presentationContext: {
+          kind: "zone",
+          zoneUnitId: "zone-1",
+          zoneSlug: "book",
+          visibility: "visible",
+        },
+      }),
+    ).toEqual({
+      rootPostUnitId: "post-1",
+      context: { kind: "direct" },
+      interactionContext: { kind: "direct" },
+      presentationContext: {
+        kind: "zone",
+        zoneUnitId: "zone-1",
+        zoneSlug: "book",
+        visibility: "visible",
+      },
+      realmUnitId: null,
+      reactionContextUnitId: null,
     });
   });
 

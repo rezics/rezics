@@ -17,7 +17,7 @@ describe("zone detail route models", () => {
       unitId: "post-1",
     });
     const realmRoute = realmPostRoute({
-      realmId: "realm-1",
+      realmUnitId: "realm-1",
       postUnitId: "post-1",
     });
 
@@ -27,7 +27,12 @@ describe("zone detail route models", () => {
     expect(zoneRoute.interactionContext).toEqual({ kind: "direct" });
     expect(realmRoute.interactionContext).toEqual({
       kind: "realm",
-      realmId: "realm-1",
+      realmUnitId: "realm-1",
+    });
+    expect(realmRoute.presentationContext).toEqual({
+      kind: "realm",
+      realmUnitId: "realm-1",
+      visibility: "visible",
     });
   });
 
@@ -53,7 +58,13 @@ describe("zone detail route models", () => {
       }),
     ).toEqual({
       href: "/zone/zone-1/post/post-1",
-      presentationContext: { kind: "zone", routeLocation: unitLocation },
+      routeLocation: unitLocation,
+      presentationContext: {
+        kind: "zone",
+        zoneUnitId: "zone-1",
+        zoneSlug: null,
+        visibility: "visible",
+      },
       interactionContext: { kind: "direct" },
     });
   });
@@ -63,9 +74,12 @@ describe("zone detail route models", () => {
       zoneDetailRoute({ zoneSlug: "wiki", kind: "wiki", unitId: "wiki-1" }),
     ).toEqual({
       href: "/z/wiki/wiki/wiki-1",
+      routeLocation: { kind: "slug", zoneSlug: "wiki" },
       presentationContext: {
         kind: "zone",
-        routeLocation: { kind: "slug", zoneSlug: "wiki" },
+        zoneUnitId: null,
+        zoneSlug: "wiki",
+        visibility: "visible",
       },
       interactionContext: { kind: "direct" },
     });
@@ -73,9 +87,12 @@ describe("zone detail route models", () => {
       zoneDetailRoute({ zoneSlug: "book", kind: "unit", unitId: "unit-1" }),
     ).toEqual({
       href: "/z/book/unit/unit-1",
+      routeLocation: { kind: "slug", zoneSlug: "book" },
       presentationContext: {
         kind: "zone",
-        routeLocation: { kind: "slug", zoneSlug: "book" },
+        zoneUnitId: null,
+        zoneSlug: "book",
+        visibility: "visible",
       },
       interactionContext: { kind: "direct" },
     });

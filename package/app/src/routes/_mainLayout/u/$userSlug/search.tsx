@@ -4,11 +4,7 @@ import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfUser,
-} from "@/core/routing/documentTitle";
+import { titleOfUser, unitTitleMeta } from "@/core/routing/documentTitle";
 import { userSlugChildRouteLoader } from "@/routes/_mainLayout/u/$userSlug";
 import { FederatedSearchPage, isSearchCategory } from "@/search";
 import { parseSearchString } from "@/search";
@@ -65,10 +61,6 @@ export const Route = createFileRoute("/_mainLayout/u/$userSlug/search")({
         ? search.category
         : undefined,
   }),
-  head: async ({ loaderData }) =>
-    titleMeta(
-      titleOfUser(loaderData),
-      await resolveTitleLabel("common:search"),
-    ),
+  head: ({ loaderData }) => unitTitleMeta("user", titleOfUser(loaderData)),
   component: UserSlugScopedSearchPage,
 });

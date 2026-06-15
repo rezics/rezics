@@ -1,11 +1,7 @@
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfZone,
-} from "@/core/routing/documentTitle";
+import { titleOfZone, unitTitleMeta } from "@/core/routing/documentTitle";
 import { isSearchCategory, parseSearchString } from "@/search";
 import { ZoneSearchPage } from "@/zone";
 import { zoneSlugChildRouteLoader } from "./route";
@@ -46,11 +42,7 @@ function ZoneSearchRoute() {
 export const Route = createFileRoute("/_mainLayout/z/$slug/search")({
   component: ZoneSearchRoute,
   loader: zoneSlugChildRouteLoader,
-  head: async ({ loaderData }) =>
-    titleMeta(
-      titleOfZone(loaderData.zone),
-      await resolveTitleLabel("common:search"),
-    ),
+  head: ({ loaderData }) => unitTitleMeta("zone", titleOfZone(loaderData.zone)),
   validateSearch: (search: Record<string, unknown>): SearchRouteParams => ({
     q: typeof search.q === "string" ? search.q : undefined,
     category:

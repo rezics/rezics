@@ -1,4 +1,8 @@
 import type { CommentListContext } from "@rezics/contract";
+import type {
+  UnitInteractionContext,
+  UnitPresentationContext,
+} from "../../unit/models/unitPresentationContext";
 
 /**
  * Pure comment-context rules shared by the thread selector, composers, and
@@ -29,12 +33,22 @@ export const COMMENT_CONTEXT_ALL_OPTION_VALUE = "all";
 export type CommentContextSurface =
   | {
       kind: "zone";
+      presentationContext?: Extract<UnitPresentationContext, { kind: "zone" }>;
       zoneContext?:
         | { kind: "global" }
         | { kind: "realm"; realmUnitId: string }
         | null;
     }
-  | { kind: "realm"; realmUnitId: string }
+  | {
+      kind: "realm";
+      realmUnitId: string;
+      presentationContext?: Extract<UnitPresentationContext, { kind: "realm" }>;
+    }
+  | {
+      kind: "unit";
+      presentationContext: UnitPresentationContext;
+      interactionContext?: UnitInteractionContext;
+    }
   | { kind: "direct" };
 
 /**
@@ -54,6 +68,12 @@ export function resolveDefaultCommentContext(
   }
   if (surface.kind === "zone" && surface.zoneContext?.kind === "realm") {
     return { kind: "realm", realmUnitId: surface.zoneContext.realmUnitId };
+  }
+  if (surface.kind === "unit" && surface.interactionContext?.kind === "realm") {
+    return {
+      kind: "realm",
+      realmUnitId: surface.interactionContext.realmUnitId,
+    };
   }
   return COMMENT_CONTEXT_ALL;
 }

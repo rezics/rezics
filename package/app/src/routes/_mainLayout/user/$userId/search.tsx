@@ -1,11 +1,7 @@
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfUser,
-} from "@/core/routing/documentTitle";
+import { titleOfUser, unitTitleMeta } from "@/core/routing/documentTitle";
 import { userIdChildRouteLoader } from "@/routes/_mainLayout/user/$userId";
 import { FederatedSearchPage, isSearchCategory } from "@/search";
 import { parseSearchString } from "@/search";
@@ -53,10 +49,6 @@ export const Route = createFileRoute("/_mainLayout/user/$userId/search")({
         ? search.category
         : undefined,
   }),
-  head: async ({ loaderData }) =>
-    titleMeta(
-      titleOfUser(loaderData),
-      await resolveTitleLabel("common:search"),
-    ),
+  head: ({ loaderData }) => unitTitleMeta("user", titleOfUser(loaderData)),
   component: UserScopedSearchPage,
 });

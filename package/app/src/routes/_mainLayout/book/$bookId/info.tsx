@@ -1,9 +1,5 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfBook,
-} from "@/core/routing/documentTitle";
+import { titleOfBook, unitTitleMeta } from "@/core/routing/documentTitle";
 import { bookChildRouteLoader } from "./route";
 
 type BookInfoSearch = {
@@ -20,10 +16,7 @@ export const Route = createFileRoute("/_mainLayout/book/$bookId/info")({
   validateSearch: (search: Record<string, unknown>): BookInfoSearch => ({
     focus: search.focus === "remark" ? "remark" : undefined,
   }),
-  head: async ({ loaderData }) =>
-    titleMeta(
-      titleOfBook(loaderData.book, loaderData.readContext),
-      await resolveTitleLabel("page:book_tabs_info"),
-    ),
+  head: ({ loaderData }) =>
+    unitTitleMeta("book", titleOfBook(loaderData.book, loaderData.readContext)),
   component: BookBasicInfoPage,
 });

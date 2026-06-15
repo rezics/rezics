@@ -2,9 +2,10 @@ import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { zoneQueries } from "@rezics/api/zone/zone";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
-  titleMeta,
+  titleContext,
   titleOfTranslatedUnit,
   titleOfZone,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 import { UnitPageById } from "@/unit";
@@ -25,11 +26,12 @@ export const Route = createFileRoute("/_mainLayout/z/$slug/unit/$unitId")({
     return { zone, unit, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(
+    unitTitleMeta(
+      "unit",
       loaderData
         ? titleOfTranslatedUnit(loaderData.unit, loaderData.readContext)
         : null,
-      loaderData ? titleOfZone(loaderData.zone) : null,
+      [titleContext("zone", loaderData ? titleOfZone(loaderData.zone) : null)],
     ),
   component: () => {
     const { unitId } = Route.useParams();

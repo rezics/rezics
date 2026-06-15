@@ -1,3 +1,10 @@
+import {
+  type UnitInteractionContext,
+  type UnitPresentationContext,
+  realmPresentationContext,
+  zonePresentationContext,
+} from "../../unit/models/unitPresentationContext";
+
 export type ZoneDetailKind = "post" | "wiki" | "unit";
 
 export type ZoneRouteLocation =
@@ -6,14 +13,15 @@ export type ZoneRouteLocation =
 
 export type ZoneDetailRoute = {
   href: string;
-  presentationContext: { kind: "zone"; routeLocation: ZoneRouteLocation };
-  interactionContext: { kind: "direct" };
+  routeLocation: ZoneRouteLocation;
+  presentationContext: Extract<UnitPresentationContext, { kind: "zone" }>;
+  interactionContext: Extract<UnitInteractionContext, { kind: "direct" }>;
 };
 
 export type RealmPostRoute = {
   href: string;
-  presentationContext: { kind: "realm"; realmId: string };
-  interactionContext: { kind: "realm"; realmId: string };
+  presentationContext: Extract<UnitPresentationContext, { kind: "realm" }>;
+  interactionContext: Extract<UnitInteractionContext, { kind: "realm" }>;
 };
 
 export function zoneRouteLocationFromZone(input: {
@@ -51,7 +59,12 @@ export function zoneDetailRoute(input: {
   };
   return {
     href: `${zoneRouteBaseHref(location)}/${input.kind}/${input.unitId}`,
-    presentationContext: { kind: "zone", routeLocation: location },
+    routeLocation: location,
+    presentationContext: zonePresentationContext(
+      location.kind === "slug"
+        ? { zoneSlug: location.zoneSlug }
+        : { zoneUnitId: location.zoneUnitId },
+    ),
     interactionContext: { kind: "direct" },
   };
 }
@@ -61,12 +74,12 @@ export function directPostHref(postUnitId: string) {
 }
 
 export function realmPostRoute(input: {
-  realmId: string;
+  realmUnitId: string;
   postUnitId: string;
 }): RealmPostRoute {
   return {
-    href: `/realm/${input.realmId}/post/${input.postUnitId}`,
-    presentationContext: { kind: "realm", realmId: input.realmId },
-    interactionContext: { kind: "realm", realmId: input.realmId },
+    href: `/realm/${input.realmUnitId}/post/${input.postUnitId}`,
+    presentationContext: realmPresentationContext(input.realmUnitId),
+    interactionContext: { kind: "realm", realmUnitId: input.realmUnitId },
   };
 }

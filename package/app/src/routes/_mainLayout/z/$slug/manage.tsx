@@ -1,9 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfZone,
-} from "@/core/routing/documentTitle";
+import { titleOfZone, unitTitleMeta } from "@/core/routing/documentTitle";
 import { ZoneManagePage, type ZoneManageTab } from "@/zone";
 import { zoneSlugChildRouteLoader } from "./route";
 
@@ -27,11 +23,7 @@ export const Route = createFileRoute("/_mainLayout/z/$slug/manage")({
     tab: isZoneManageTab(search.tab) ? search.tab : undefined,
   }),
   loader: zoneSlugChildRouteLoader,
-  head: async ({ loaderData }) =>
-    titleMeta(
-      titleOfZone(loaderData.zone),
-      await resolveTitleLabel("zone:manage"),
-    ),
+  head: ({ loaderData }) => unitTitleMeta("zone", titleOfZone(loaderData.zone)),
   component: ZoneSlugManageRoute,
 });
 

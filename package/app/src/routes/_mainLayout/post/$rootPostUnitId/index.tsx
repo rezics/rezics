@@ -4,7 +4,7 @@ import {
   lazyRouteComponent,
   notFound,
 } from "@tanstack/react-router";
-import { titleMeta, titleOfPost } from "@/core/routing/documentTitle";
+import { titleOfPost, unitTitleMeta } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 
 type PostThreadSearch = {
@@ -46,6 +46,6 @@ export const Route = createFileRoute("/_mainLayout/post/$rootPostUnitId/")({
     return { post, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(loaderData ? titleOfPost(loaderData.post) : null),
+    unitTitleMeta("post", loaderData ? titleOfPost(loaderData.post) : null),
   component: PostThreadPage,
 });

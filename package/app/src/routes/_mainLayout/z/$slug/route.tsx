@@ -3,8 +3,8 @@ import type { ZoneDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {
   parentRouteLoaderData,
-  titleMeta,
   titleOfZone,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 import {
   type ResolvedReadLanguageContext,
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_mainLayout/z/$slug")({
     return { zone, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(loaderData ? titleOfZone(loaderData.zone) : null),
+    unitTitleMeta("zone", loaderData ? titleOfZone(loaderData.zone) : null),
   component: Outlet,
 });
 

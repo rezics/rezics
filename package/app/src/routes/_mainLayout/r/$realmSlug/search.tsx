@@ -5,11 +5,7 @@ import {
 } from "@rezics/contract";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfRealm,
-} from "@/core/routing/documentTitle";
+import { titleOfRealm, unitTitleMeta } from "@/core/routing/documentTitle";
 import { isSearchCategory, parseSearchString } from "@/search";
 import { FederatedSearchPage } from "@/search";
 import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
@@ -64,10 +60,12 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/search")({
         ? search.category
         : undefined,
   }),
-  head: async ({ loaderData }) =>
-    titleMeta(
-      loaderData ? titleOfRealm(loaderData.realm) : null,
-      await resolveTitleLabel("common:search"),
+  head: ({ loaderData }) =>
+    unitTitleMeta(
+      "realm",
+      loaderData
+        ? titleOfRealm(loaderData.realm, loaderData.readContext)
+        : null,
     ),
   component: RealmSlugScopedSearchPage,
 });

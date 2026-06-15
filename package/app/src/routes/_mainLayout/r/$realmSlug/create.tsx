@@ -1,10 +1,6 @@
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfRealm,
-} from "@/core/routing/documentTitle";
+import { titleOfRealm, unitTitleMeta } from "@/core/routing/documentTitle";
 import {
   normalizeRealmCreateMode,
   type RealmCreateMode,
@@ -52,10 +48,12 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/create")({
       queryClient: context.qc,
     });
   },
-  head: async ({ loaderData }) =>
-    titleMeta(
-      loaderData ? titleOfRealm(loaderData.realm) : null,
-      await resolveTitleLabel("zone:create_post"),
+  head: ({ loaderData }) =>
+    unitTitleMeta(
+      "realm",
+      loaderData
+        ? titleOfRealm(loaderData.realm, loaderData.readContext)
+        : null,
     ),
   component: RealmSlugCreateRoute,
 });

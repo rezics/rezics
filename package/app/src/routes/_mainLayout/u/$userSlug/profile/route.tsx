@@ -1,9 +1,5 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import {
-  resolveTitleLabel,
-  titleMeta,
-  titleOfUser,
-} from "@/core/routing/documentTitle";
+import { titleOfUser, unitTitleMeta } from "@/core/routing/documentTitle";
 import { userSlugChildRouteLoader } from "@/routes/_mainLayout/u/$userSlug";
 
 const ProfileLayout = lazyRouteComponent(
@@ -13,10 +9,6 @@ const ProfileLayout = lazyRouteComponent(
 
 export const Route = createFileRoute("/_mainLayout/u/$userSlug/profile")({
   loader: userSlugChildRouteLoader,
-  head: async ({ loaderData }) =>
-    titleMeta(
-      titleOfUser(loaderData),
-      await resolveTitleLabel("settings:nav_profile"),
-    ),
+  head: ({ loaderData }) => unitTitleMeta("user", titleOfUser(loaderData)),
   component: ProfileLayout,
 });

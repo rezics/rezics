@@ -3,8 +3,8 @@ import { isPublicUserSlugRouteParams, type UserDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {
   parentRouteLoaderData,
-  titleMeta,
   titleOfUser,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 
 /**
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_mainLayout/u/$userSlug")({
       });
   },
   head: ({ loaderData }) =>
-    titleMeta(loaderData ? titleOfUser(loaderData) : null),
+    unitTitleMeta("user", loaderData ? titleOfUser(loaderData) : null),
   component: Outlet,
 });
 
