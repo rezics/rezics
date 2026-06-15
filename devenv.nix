@@ -29,14 +29,12 @@
     pkgs.age
   ];
 
-  # Local dev processes, started together via `devenv up` (process-compose).
-  # 本地开发进程，通过 `devenv up`（process-compose）统一启动。
-  # Each delegates to the package's authoritative go-task `dev` task, which runs
-  # in the package dir (root Taskfile `includes` `dir:`) and loads its own `.env`.
-  # Infrastructure (Postgres/Meilisearch/Sequin/RustFS) runs in Nomad containers;
-  # only app services live here as host processes.
-  # 基础设施（Postgres/Meilisearch/Sequin/RustFS）在 Nomad 容器中运行；
-  # 此处仅定义在主机上运行的应用服务。
+  # Fallback process-compose definitions, started via `devenv up`.
+  # process-compose 后备定义，通过 `devenv up` 启动。
+  # Primary dev orchestration is via Nomad: `nomad job run nomad/dev.nomad.hcl`
+  # (unified job with infra + app in one group for automatic port discovery).
+  # 主要开发编排已迁移到 Nomad: `nomad job run nomad/dev.nomad.hcl`
+  # （基础设施与应用同组部署，通过 NOMAD_PORT 自动发现端口）。
   processes = {
     auth.exec = "task auth:dev";
     server.exec = "task server:dev";
