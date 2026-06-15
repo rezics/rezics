@@ -13,7 +13,7 @@ type SchemaOwner = {
 };
 
 const owners = {
-  server: { schema: serverSchema, expectedUpdatedAtColumns: 48 },
+  server: { schema: serverSchema, expectedUpdatedAtColumns: 56 },
   auth: { schema: authSchema, expectedUpdatedAtColumns: 7 },
   notify: { schema: notifySchema, expectedUpdatedAtColumns: 1 },
   history: { schema: historySchema, expectedUpdatedAtColumns: 2 },

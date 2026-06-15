@@ -27,7 +27,9 @@ function repository(): AccountDataRepository {
       summary: "hi",
       avatar: null,
       joinDate: new Date("2026-01-01T00:00:00.000Z"),
-      settings: { notifications: { follow: false } },
+    })),
+    getExportSettings: mock(async () => ({
+      notifications: { follow: false },
     })),
     listExportPosts: mock(async () => [
       {

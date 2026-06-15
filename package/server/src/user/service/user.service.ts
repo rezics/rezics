@@ -4,11 +4,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type {
-  ContentLanguage,
-  UpdateUser,
-  UserSettings,
-} from "@rezics/contract";
+import type { ContentLanguage, UpdateUser } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
@@ -22,9 +18,11 @@ import {
   Subscription,
   Unit,
   User,
+  UserPreferredLanguage,
 } from "../../db/schema";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { ensureRegistrationDefaultSubscriptions } from "./registration-defaults";
+import { normalizePreferredLanguages } from "./settings.service";
 
 export type CreateUserProfileInput = {
   userId: string;
@@ -366,11 +364,6 @@ function createDrizzleUserRepository(): UserRepository {
       const displayName = input.displayName?.trim() || input.slug;
       const row = await db.transaction(async (tx) => {
         await ensureUserUnit(tx, input.userId, input.slug);
-        const existing = await findUserById(tx, input.userId);
-        const settings = {
-          ...((existing?.settings as UserSettings | null) ?? {}),
-          preferredLanguages: input.preferredLanguages,
-        } satisfies UserSettings;
         const now = new Date();
         const [updated] = await tx
           .update(User)
@@ -378,12 +371,24 @@ function createDrizzleUserRepository(): UserRepository {
             name: displayName,
             avatar: input.avatar ?? undefined,
             joinDate: now,
-            settings,
             updatedAt: now,
           })
           .where(eq(User.unitId, input.userId))
           .returning();
         if (!updated) throw new Error("User not found");
+        await tx
+          .delete(UserPreferredLanguage)
+          .where(eq(UserPreferredLanguage.userId, input.userId));
+        await tx.insert(UserPreferredLanguage).values(
+          normalizePreferredLanguages(input.preferredLanguages).map(
+            (language, position) => ({
+              userId: input.userId,
+              language,
+              position,
+              updatedAt: now,
+            }),
+          ),
+        );
         await bootstrapSystemShelves(
           updated.unitId,
           input.slug,

@@ -110,7 +110,13 @@ export type LoginUser = (typeof loginSchema)["static"];
 
 export const realmTagPreferenceSchema = t.Object({
   realmIds: t.Array(t.String(), { maxItems: 50 }),
-  maxDisplay: t.Number(),
+  /**
+   * Optional display cap for the filtered realm tag list. Missing/null means
+   * unlimited; callers truncate after applying any realm filter/order.
+   * 过滤后的 realm tag 列表显示上限。缺失/null 表示不限制；调用方先应用 realm
+   * 过滤/排序，再截断。
+   */
+  maxDisplay: t.Optional(t.Nullable(t.Number({ minimum: 0 }))),
 });
 
 export const contentPreferenceSchema = t.Object({
@@ -177,11 +183,18 @@ export type LibrarySettings = (typeof librarySettingsSchema)["static"];
 
 export const USER_TAG_PRIVACY_FIELD_KEY = "userTags" as const;
 
-export const profileFieldVisibilitySchema = t.Union([
-  t.Literal("private"),
-  t.Literal("followers"),
-  t.Literal("public"),
-]);
+export const PROFILE_FIELD_VISIBILITIES = [
+  "private",
+  "followers",
+  "public",
+] as const;
+
+export const profileFieldVisibilitySchema = t.Union(
+  PROFILE_FIELD_VISIBILITIES.map((visibility) => t.Literal(visibility)) as [
+    ReturnType<typeof t.Literal>,
+    ...ReturnType<typeof t.Literal>[],
+  ],
+);
 
 export type ProfileFieldVisibility =
   (typeof profileFieldVisibilitySchema)["static"];

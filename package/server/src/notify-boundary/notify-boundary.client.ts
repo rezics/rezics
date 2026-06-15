@@ -6,10 +6,10 @@ import {
   type NotificationPreference,
   notificationPreferenceKeyForKind,
   type SystemEmailBody,
-  type UserSettings,
 } from "@rezics/contract";
-import { and, eq, inArray, sql } from "drizzle-orm";
-import { Subscription, User } from "../db/schema";
+import { and, eq, sql } from "drizzle-orm";
+import { Subscription } from "../db/schema";
+import { getNotificationPreferencesForUsers } from "../user/service/settings.service";
 
 async function getServerDb() {
   const { db } = await import("../db/client");
@@ -149,19 +149,7 @@ export type LoadRecipientPreferences = (
 async function defaultLoadRecipientPreferences(
   recipientIds: string[],
 ): Promise<Map<string, NotificationPreference | undefined>> {
-  const db = await getServerDb();
-  const users =
-    recipientIds.length === 0
-      ? []
-      : await db
-          .select({ unitId: User.unitId, settings: User.settings })
-          .from(User)
-          .where(inArray(User.unitId, recipientIds));
-  const map = new Map<string, NotificationPreference | undefined>();
-  for (const user of users) {
-    map.set(user.unitId, (user.settings as UserSettings | null)?.notifications);
-  }
-  return map;
+  return getNotificationPreferencesForUsers(recipientIds);
 }
 
 /**

@@ -1,16 +1,10 @@
-import type { ContentRating, UserSettings } from "@rezics/contract";
+import type { ContentRating } from "@rezics/contract";
 import { BASELINE_RATINGS, OPT_IN_RATINGS } from "@rezics/contract";
-import { eq } from "drizzle-orm";
-import { User } from "../../db/schema";
-
-async function getServerDb() {
-  const { db } = await import("../../db/client");
-  return db;
-}
+import { getAllowedRatingsForUser } from "./settings.service";
 
 /**
  * Allowed rating set for a caller:
- *   {GENERAL, R_15} ∪ (authenticated ? user.settings.content.optedInRatings : [])
+ *   {GENERAL, R_15} ∪ authenticated user's content rating preferences
  *
  * Unauthenticated callers pass `userId = null`. Invalid / unknown users fall
  * back to the baseline as well.
@@ -21,16 +15,7 @@ export async function deriveAllowedRatings(
   const base = [...BASELINE_RATINGS] as ContentRating[];
   if (!userId) return base;
 
-  const db = await getServerDb();
-  const [user] = await db
-    .select({ settings: User.settings })
-    .from(User)
-    .where(eq(User.unitId, userId))
-    .limit(1)
-    .catch(() => []);
-
-  const settings = (user?.settings as UserSettings | null) ?? null;
-  const optedIn = settings?.content?.optedInRatings ?? [];
+  const optedIn = await getAllowedRatingsForUser(userId).catch(() => []);
   const filtered = optedIn.filter((r): r is "R_18" | "R_18G" =>
     OPT_IN_RATINGS.includes(r as ContentRating),
   );

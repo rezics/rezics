@@ -4,8 +4,9 @@ import type {
   UserSettings,
 } from "@rezics/contract";
 import { and, asc, eq } from "drizzle-orm";
-import { Subscription, User, UserTagApplication } from "../db/schema";
+import { Subscription, UserTagApplication } from "../db/schema";
 import { generateBetween } from "../shelf/fractional-index";
+import { getSettings } from "../user/service/settings.service";
 import type { UserTagApplicationRow } from "./user-tag-application.types";
 
 type DirectUserTagVisibilityInput = {
@@ -79,13 +80,7 @@ function createDrizzleUserTagApplicationRepository(): UserTagApplicationReposito
     },
 
     async getOwnerSettings(ownerUserId) {
-      const db = await getServerDb();
-      const [owner] = await db
-        .select({ settings: User.settings })
-        .from(User)
-        .where(eq(User.unitId, ownerUserId))
-        .limit(1);
-      return owner ? (owner.settings as UserSettings | null) : undefined;
+      return getSettings(ownerUserId).catch(() => undefined);
     },
 
     async isFollower(viewerUserId, ownerUserId) {

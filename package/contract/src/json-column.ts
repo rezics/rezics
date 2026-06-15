@@ -5,6 +5,7 @@ import {
   HistoryOutboxPayloadKind,
   structureEventPayloadSchema,
 } from "./content/history";
+import { bookshelfViewConfigSchema } from "./shelf/bookshelf";
 import { tokenPermissionRoleSchema } from "./token/token";
 
 const openObjectOptions = { additionalProperties: true } as const;
@@ -62,26 +63,6 @@ export const userPermissionJsonSchema = t.Object(
 
 /**
  * @compat additive-only
- * User settings are open on read so new preference groups can be added without
- * breaking old readers. Missing groups use their feature-level defaults.
- * 用户设置读取时保持开放，以便新增偏好分组不会破坏旧读取方。缺失分组使用各功能自己的默认值。
- */
-export const userSettingsJsonSchema = t.Object(
-  {
-    realmTagPreferences: t.Optional(t.Record(t.String(), t.Any())),
-    preferredLanguages: t.Optional(t.Array(t.String())),
-    content: t.Optional(t.Record(t.String(), t.Any())),
-    publishing: t.Optional(t.Record(t.String(), t.Any())),
-    moderation: t.Optional(t.Record(t.String(), t.Any())),
-    library: t.Optional(t.Record(t.String(), t.Any())),
-    notifications: t.Optional(t.Record(t.String(), t.Any())),
-    privacy: t.Optional(t.Record(t.String(), t.Any())),
-  },
-  openObjectOptions,
-);
-
-/**
- * @compat additive-only
  * API token scopes are keyed by logical domain, with string permissions in each
  * domain. Missing domains grant no permissions.
  * API token scopes 以逻辑域为键，每个域内是字符串权限。缺失的域不授予权限。
@@ -90,6 +71,15 @@ export const apiTokenScopesJsonSchema = t.Record(
   t.String(),
   t.Array(t.String()),
 );
+
+/**
+ * @compat additive-only
+ * User bookshelf display config is a bounded UI preference stored as one JSON
+ * document because callers read and replace the whole layout together.
+ * 用户书架显示配置是有界 UI 偏好，以单个 JSON 文档存储，因为调用方整体读取和
+ * 替换布局。
+ */
+export const userBookshelfConfigJsonSchema = bookshelfViewConfigSchema;
 
 /**
  * @compat additive-only

@@ -76,12 +76,19 @@ export const userSubscriptionListEntryStateSchema = t.Union([
 export type UserSubscriptionListEntryState =
   (typeof userSubscriptionListEntryStateSchema)["static"];
 
-export const userSubscriptionListSortSchema = t.Union([
-  t.Literal("manualAsc"),
-  t.Literal("manualDesc"),
-  t.Literal("addedDesc"),
-  t.Literal("addedAsc"),
-]);
+export const USER_SUBSCRIPTION_LIST_SORTS = [
+  "manualAsc",
+  "manualDesc",
+  "addedDesc",
+  "addedAsc",
+] as const;
+
+export const userSubscriptionListSortSchema = t.Union(
+  USER_SUBSCRIPTION_LIST_SORTS.map((sort) => t.Literal(sort)) as [
+    ReturnType<typeof t.Literal>,
+    ...ReturnType<typeof t.Literal>[],
+  ],
+);
 
 export type UserSubscriptionListSort =
   (typeof userSubscriptionListSortSchema)["static"];

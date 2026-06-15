@@ -186,7 +186,12 @@ export const jsonColumnRegistry = [
     "lastReadAnchorJsonSchema",
   ),
   compat("server", "User", "permission", "userPermissionJsonSchema"),
-  compat("server", "User", "settings", "userSettingsJsonSchema"),
+  compat(
+    "server",
+    "UserPreference",
+    "bookshelfConfig",
+    "userBookshelfConfigJsonSchema",
+  ),
   compat("server", "User", "extra", "genericMetadataJsonSchema"),
   compat("server", "ApiToken", "scopes", "apiTokenScopesJsonSchema"),
   compat(
