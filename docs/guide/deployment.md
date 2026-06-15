@@ -2,39 +2,37 @@
 
 Production is deployed as **independent units** — each backend service, each
 worker role, each piece of infrastructure, and the static frontends all deploy
-and scale on their own lifecycle. Backends run as Docker images on a host
-orchestrated by [Kamal](https://kamal-deploy.org) over GHCR; the frontends are
-static Vite SPAs on Cloudflare Pages. Secrets are managed with SOPS + age.
-
-> The previous systemd + Nginx single-host path is retired. The authoritative
-> deploy assets live in `config/` (Kamal) and `.github/workflows/`.
+and scale on their own lifecycle. Backends run as Docker images scheduled by
+[Nomad](https://www.nomadproject.io/) over GHCR; the frontends are static Vite
+SPAs on Cloudflare Pages. Secrets are managed with SOPS + age, synced to Nomad
+Variables at deploy time.
 
 ## Topology
 
 ```text
 GitHub Actions
   ├─ build-images.yml ──────────────────► GHCR (immutable git-SHA tags)
-  ├─ deploy-production.yml (approved) ───► kamal deploy over SSH
+  ├─ deploy-production.yml (approved) ───► bin/nomad-deploy over SSH tunnel
+  ├─ deploy-infra.yml (approved) ────────► nomad job run (infra jobs)
   └─ deploy-frontend.yml ───────────────► Cloudflare Pages (app, admin)
 
-production host (Kamal units)
-  kamal-proxy (TLS)
+production host (Nomad)
+  Caddy (TLS reverse proxy)
     → server, auth, notify, reaction        (public/proxied)
     → history                               (internal-proxied)
-  ranking, job-runner, job-runner-worker,
-  ranking-worker                            (internal; container DNS only)
-  accessories: postgres (db-per-service), meilisearch,
-               sequin + redis (2 CDC sources), otel-collector (opt-in)
+  ranking, job-runner-http, job-runner-worker,
+  ranking-worker                            (internal; Nomad service discovery)
+  infra jobs: postgres (db-per-service), meilisearch, rustfs,
+              sequin (2 CDC sources), otel-collector (opt-in)
 ```
 
 ## One command
 
 ```bash
-bin/deploy <git-sha>   # validate → infra → migrate → services → workers → backfill
+bin/nomad-deploy <git-sha>   # secrets → infra → configs → migrate → services → workers → backfill
 ```
 
-See [`config/README.md`](https://github.com/rezics/rezics/blob/dev/config/README.md)
-for the per-unit config, routing, and secrets layout.
+See `nomad/jobs/` for the per-unit job definitions.
 
 ## Reference
 

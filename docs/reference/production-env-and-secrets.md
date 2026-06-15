@@ -4,17 +4,17 @@ Per-deployment-unit environment contract: which values each unit requires,
 their default, the owning unit, and secret vs non-secret classification. The
 exhaustive per-service variable lists live in
 [Production Runtime Inventory](./production-runtime-inventory.md); this document
-adds the deployment framing SOPS + Kamal consume.
+adds the deployment framing SOPS + Nomad Variables consume.
 
 Snapshot date: 2026-05-29.
 
 ## Classification Rules
 
 - **Secret** — credentials or signing material; lives only in the SOPS-encrypted
-  per-unit env file (age-decrypted at deploy, surfaced to Kamal as secrets).
+  per-unit env file (age-decrypted at deploy, synced to Nomad Variables).
   Never baked into an image layer or a static frontend bundle.
-- **Non-secret** — endpoints, ports, mode flags, tuning. May live in plain Kamal
-  env/config.
+- **Non-secret** — endpoints, ports, mode flags, tuning. May live in plain
+  Nomad job env/config.
 - **Frontend public config** (`VITE_*`) is build-time Cloudflare variables, not a
   backend deployment unit; it must never contain secrets.
 

@@ -29,8 +29,8 @@ const config: KnipConfig = {
       entry: ["bin/*.ts", "src/commands/**/*.ts", "tests/**/*.test.ts"],
       project: ["**/*.ts"],
     },
-    // CLI entry scripts invoked by the Taskfile (and bin/deploy), not by any
-    // package.json script — declare them so knip keeps them and their imports.
+    // CLI entry scripts invoked by the Taskfile, not by any package.json
+    // script — declare them so knip keeps them and their imports.
     "package/job-runner": {
       entry: ["src/index.ts", "scripts/ensure-job-db.ts"],
     },

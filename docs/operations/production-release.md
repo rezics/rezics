@@ -10,23 +10,20 @@ already exists.
   runtime images and `…-<svc>-migrate:<sha>` build-stage images on push to
   `dev`. Releases never rebuild — they deploy an existing `<sha>`.
 
-## 2. Env validation gate
+## 2. Secret sync
 
 ```bash
-bin/deploy <sha> validate     # decrypts SOPS, asserts every required secret present
+bin/nomad-deploy <sha> secrets   # decrypts SOPS, syncs to Nomad Variables
 ```
-
-Missing/empty required secrets fail here, **before** any service is mutated.
 
 ## 3. Migration jobs
 
 ```bash
-bin/deploy <sha> migrations
+bin/nomad-deploy <sha> migrations
 ```
 
-One-shot jobs run from the `…-migrate:<sha>` image (the slim runtime images
-carry only the compiled binary). A failure aborts the release before service
-rollout.
+One-shot jobs dispatched from `migrate-<unit>` parameterized jobs. A failure
+aborts the release before service rollout.
 
 ### Migration order and forward-compatibility
 
@@ -53,16 +50,16 @@ job       → package/job-runner db:ensure     (pg-boss queue prep, no schema)
 ## 4. Service rollout
 
 ```bash
-bin/deploy <sha> services     # server, auth, notify, reaction, history, ranking
+bin/nomad-deploy <sha> services   # server, auth, notify, reaction, history, ranking, preview
 ```
 
-kamal-proxy health-gates each swap on `/health`; an unhealthy new container is
-not promoted and the previous one keeps serving.
+Nomad health-gates each deployment; an unhealthy new allocation is auto-reverted
+and the previous one keeps serving.
 
 ## 5. Worker rollout
 
 ```bash
-bin/deploy <sha> workers      # job-runner (http) + job-runner-worker + ranking-worker
+bin/nomad-deploy <sha> workers    # job-runner-http + job-runner-worker + ranking-worker
 ```
 
 Worker units scale independently of HTTP services (replica count + `WORKERS`).
@@ -95,7 +92,7 @@ and confirm the affected indexes have no settings drift or failed Meili tasks.
 After ranking-relevant schema or index-settings changes:
 
 ```bash
-bin/deploy <sha> backfill     # enqueues ranking.fullSync (idempotent)
+bin/nomad-deploy <sha> backfill   # enqueues ranking.fullSync (idempotent)
 ```
 
 ## 8. Preview and Edge
@@ -121,13 +118,13 @@ Run `deploy-frontend.yml` (or `wrangler pages deploy`) for `app` and `admin`
 
 ## Release logs
 
-`kamal deploy` output records the image tag, rollout targets, healthcheck
+Nomad deployment status records the image tag, rollout targets, health-gate
 results, and (via the migration step) migration status — capture it with the
 workflow run for audit.
 
 ## Rollback limitations
 
-- Service/worker rollback is immediate (previous image tag) — see the
+- Service/worker rollback is immediate (previous allocation) — see the
   [rollback runbook](./production-rollback.md).
 - **Database rollback is not automatic.** Forward-only migrations must be
   reverted with a documented manual down-migration if needed.

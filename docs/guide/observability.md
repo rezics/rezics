@@ -71,16 +71,12 @@ do not import ClickStack, HyperDX, SigNoz, Grafana, or other backend-specific
 SDKs. Operators can replace the analysis backend by changing collector,
 deployment, or env configuration without changing service code.
 
-The repo-managed local stack includes an opt-in Collector/ClickStack smoke
-profile:
-
-```bash
-docker compose -p rezics-dev-external-services -f tool/service/compose.yml --profile observability up -d clickstack otel-collector
-```
+The local Nomad infrastructure includes an opt-in OTel Collector job
+(`nomad/jobs/infra-otel.nomad.hcl`).
 
 The OpenTelemetry Collector receives OTLP on `4317` and `4318` and exports to
-ClickStack through `CLICKSTACK_OTLP_ENDPOINT`. ClickStack all-in-one is pinned
-for local/evaluation use and exposes the HyperDX UI on `8080`.
+ClickStack through `CLICKSTACK_OTLP_ENDPOINT`. ClickStack is pinned for
+local/evaluation use and exposes the HyperDX UI on `8080`.
 
 For persistent production operations, prefer separated ClickStack/ClickHouse
 and Collector services over the all-in-one image. Keep the application boundary

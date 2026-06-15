@@ -11,7 +11,7 @@ workspaces; packages live under `package/`.
 
 ## Development Setup
 
-**Prerequisites:** Bun, Zellij, Docker Compose v2 for repo-managed local services
+**Prerequisites:** Bun, Zellij, Nomad (local agent for dev infrastructure)
 
 ```bash
 bun install              # install workspace deps (Bun is the package manager)
@@ -25,26 +25,17 @@ task history:dev         # History service only (Elysia, port 3004)
 
 `task dev` starts application processes only. It does not provision external
 dependencies such as PostgreSQL, Meilisearch, Redis, object storage, or Sequin.
-For the repo-managed local path, start Docker Compose v2 services first:
+Infrastructure runs as Nomad jobs (`nomad/jobs/infra-*.nomad.hcl`) on a local
+Nomad agent.
+
+If the source database comes from an old or manually modified volume, verify CDC
+readiness first:
 
 ```bash
-task service:up
-task service:health
-task service:logs
-task service:down
+task cdc:verify
+task cdc:repair                        # repair publications and replication slots
+task cdc:repair -- --source=reaction   # repair reaction source only
 ```
-
-This starts the managed source PostgreSQL, Meilisearch, Sequin state
-PostgreSQL, Sequin Redis, and Sequin stack. The source PostgreSQL container is
-created with logical replication enabled and creates the local development
-databases on fresh volumes. User-managed external services remain possible by
-editing package env files manually, but `service` commands do not discover,
-start, stop, or repair unrelated services.
-
-If the managed source database comes from an old or manually modified volume,
-use `task service -- source verify` first. Reserve
-`task service -- source repair` for existing, external, or broken local source
-databases; it is not required for a fresh managed Docker volume.
 
 Start any other required external services first, then start the dependent
 application process. A service failing fast because an external dependency is

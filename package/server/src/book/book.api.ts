@@ -197,7 +197,8 @@ export const bookApi = new Elysia({ prefix: "/book" })
         !Array.isArray(body.patch.extension)
           ? (body.patch.extension as Record<string, unknown>)
           : {};
-      if (extension.coverUrl !== undefined) assertMediaUrl(extension.coverUrl as string | null);
+      if (extension.coverUrl !== undefined)
+        assertMediaUrl(extension.coverUrl as string | null);
       const unit =
         body.patch.unit &&
         typeof body.patch.unit === "object" &&

@@ -1,57 +1,65 @@
-# Infrastructure changes — a SEPARATE, manually-approved target from app
-# deploys (task 7.5). Boots/reboots the self-hosted accessories (infra-db,
-# infra-search, infra-cdc) and the opt-in infra-observability unit. Kept apart
-# from deploy-production.yml because infra changes are higher-risk and are not
-# part of a routine app rollout.
+# Infrastructure changes via Nomad — a SEPARATE, manually-approved target from
+# app deploys. Runs/restarts the self-hosted infrastructure jobs (postgres,
+# meilisearch, sequin, otel-collector). Kept apart from deploy-production.yml
+# because infra changes are higher-risk and not part of a routine app rollout.
+# 基础设施 Nomad 作业 — 独立于应用部署，手动触发，高风险变更单独审批。
 name: Deploy Infrastructure
 
 on:
   workflow_dispatch:
     inputs:
-      accessory:
-        description: Accessory to boot/reboot
+      job:
+        description: Infrastructure job to run
         required: true
         type: choice
         options:
-          - postgres
-          - meilisearch
-          - sequin-postgres
-          - sequin-redis
-          - sequin
-          - otel-collector
+          - infra-postgres
+          - infra-meilisearch
+          - infra-sequin
+          - infra-otel
       action:
         description: Action
         required: true
-        default: reboot
+        default: run
         type: choice
-        options: [boot, reboot]
+        options: [run, stop]
 
 concurrency:
   group: deploy-infra
   cancel-in-progress: false
 
 jobs:
-  accessory:
-    name: ${{ inputs.action }} ${{ inputs.accessory }}
+  infra:
+    name: ${{ inputs.action }} ${{ inputs.job }}
     runs-on: ubuntu-latest
     environment: production-infra
     steps:
       - uses: actions/checkout@v4
-      - name: Install Kamal + SOPS + age
-        run: |
-          gem install kamal -v '~> 2.0'
-          sudo apt-get update && sudo apt-get install -y age
-          curl -fsSL -o /usr/local/bin/sops \
-            https://github.com/getsops/sops/releases/latest/download/sops-linux-amd64
-          sudo chmod +x /usr/local/bin/sops
-      - name: Configure SSH
+      - uses: cachix/install-nix-action@v31
+      - uses: cachix/devenv-action@v2
+
+      - name: Configure SSH tunnel to Nomad
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ vars.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
-      - name: Run accessory action
+          ssh -fN -L 4646:127.0.0.1:4646 "${{ vars.DEPLOY_SSH_USER }}@${{ vars.DEPLOY_HOST }}"
+
+      - name: Sync infrastructure secrets
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: kamal accessory ${{ inputs.action }} ${{ inputs.accessory }}
+          NOMAD_ADDR: http://127.0.0.1:4646
+          NOMAD_TOKEN: ${{ secrets.NOMAD_TOKEN }}
+        run: bin/nomad-sync-secrets infra
+
+      - name: Run infrastructure action
+        env:
+          NOMAD_ADDR: http://127.0.0.1:4646
+          NOMAD_TOKEN: ${{ secrets.NOMAD_TOKEN }}
+        run: |
+          if [ "${{ inputs.action }}" = "stop" ]; then
+            nomad job stop "${{ inputs.job }}"
+          else
+            nomad job run "nomad/jobs/${{ inputs.job }}.nomad.hcl"
+          fi

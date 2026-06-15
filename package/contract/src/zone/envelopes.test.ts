@@ -118,13 +118,20 @@ describe("zone split envelopes", () => {
     expect(parseZonePage({ ...page, version: 99 })).toBeNull();
   });
 
-  test("image fields accept only HTTPS URLs", () => {
+  test("theme image fields use mediaUrlSchema (server-side validation)", () => {
+    // Theme images use mediaUrlSchema: schema-level accepts any string,
+    // server enforces S3 origin via assertMediaUrl().
+    // theme 图片使用 mediaUrlSchema：schema 层仅要求字符串，
+    // 服务端通过 assertMediaUrl() 强制 S3 origin。
     expect(
       Value.Check(zoneThemeEnvelopeSchema, {
         ...theme,
         images: { logoUrl: "http://cdn.example.test/logo.png" },
       }),
-    ).toBe(false);
+    ).toBe(true);
+  });
+
+  test("nav and page image fields reject non-HTTPS URLs at schema level", () => {
     expect(
       Value.Check(zoneNavEnvelopeSchema, {
         ...nav,

@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# Production deploy sequencer.
+# 生产部署编排脚本。
+#
+# Submits Nomad jobs with health-gated rolling updates; failures auto-revert
+# to the previous allocation.
+#
+#   bin/nomad-deploy <git-sha>            # full sequence
+#   bin/nomad-deploy <git-sha> services   # only (re)deploy backend HTTP services
+#   bin/nomad-deploy <git-sha> workers    # only (re)deploy worker roles
+#
+# Requires: NOMAD_ADDR, NOMAD_TOKEN (or a local agent), SOPS_AGE_KEY or SOPS_AGE_KEY_FILE
+set -euo pipefail
+
+VERSION="${1:?usage: bin/nomad-deploy <git-sha> [phase]}"
+PHASE="${2:-all}"
+
+REGISTRY="${DEPLOY_REGISTRY:-ghcr.io/rezics}"
+JOBS_DIR="$(cd "$(dirname "$0")/../nomad/jobs" && pwd)"
+
+SERVICES=(server auth notify reaction history ranking preview)
+MIGRATIONS=(auth server notify reaction history ranking)
+WORKERS=(job-runner-http job-runner-worker ranking-worker)
+
+log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
+die() { printf '\033[1;31merror: %s\033[0m\n' "$*" >&2; exit 1; }
+
+# --- helpers -----------------------------------------------------------------
+
+deploy_unit() {
+  local unit="$1"
+  local job_file="${JOBS_DIR}/${unit}.nomad.hcl"
+
+  [ -f "${job_file}" ] || die "job file not found: ${job_file}"
+
+  log "deploy ${unit} @ ${VERSION}"
+  nomad job run \
+    -var="version=${VERSION}" \
+    -var="registry=${REGISTRY}" \
+    "${job_file}"
+
+  local job_name
+  job_name=$(nomad job run -output -var="version=${VERSION}" -var="registry=${REGISTRY}" "${job_file}" \
+    | jq -r '.Job.ID')
+
+  log "  waiting for healthy deployment of ${unit}..."
+  local deploy_id
+  deploy_id=$(nomad job status -json "${job_name}" 2>/dev/null \
+    | jq -r '.LatestDeployment.ID // empty')
+
+  if [ -n "${deploy_id}" ]; then
+    nomad deployment status -monitor -verbose "${deploy_id}" || {
+      die "deployment of ${unit} failed (auto_revert should restore previous)"
+    }
+  fi
+}
+
+dispatch_migration() {
+  local job_name="$1"
+  log "dispatch migration: ${job_name} @ ${VERSION}"
+  local eval_id
+  eval_id=$(nomad job dispatch -meta "version=${VERSION}" "${job_name}" \
+    | grep -oP 'Dispatch ID:\s+\K\S+' || true)
+
+  if [ -z "${eval_id}" ]; then
+    eval_id=$(nomad job dispatch -meta "version=${VERSION}" "${job_name}" 2>&1 \
+      | tail -1 | awk '{print $NF}')
+  fi
+
+  log "  waiting for ${job_name} to complete..."
+  local timeout=120
+  local elapsed=0
+  while [ "${elapsed}" -lt "${timeout}" ]; do
+    local status
+    status=$(nomad job status -json "${job_name}" 2>/dev/null \
+      | jq -r '.LatestDeployment.Status // .Status // "unknown"')
+
+    if [ "${status}" = "dead" ] || [ "${status}" = "complete" ]; then
+      log "  ${job_name} completed"
+      return 0
+    fi
+
+    sleep 3
+    elapsed=$((elapsed + 3))
+  done
+
+  die "migration ${job_name} timed out after ${timeout}s"
+}
+
+# --- Phase: sync secrets from SOPS ------------------------------------------
+
+sync_secrets() {
+  log "sync secrets from SOPS-encrypted env files → Nomad Variables"
+  "$(dirname "$0")/nomad-sync-secrets"
+}
+
+# --- Phase: infrastructure ---------------------------------------------------
+
+boot_infra() {
+  log "ensure infrastructure jobs are running"
+  for job_file in \
+    "${JOBS_DIR}/infra-postgres.nomad.hcl" \
+    "${JOBS_DIR}/infra-meilisearch.nomad.hcl" \
+    "${JOBS_DIR}/infra-sequin.nomad.hcl" \
+    "${JOBS_DIR}/infra-rustfs.nomad.hcl"; do
+    nomad job run "${job_file}"
+  done
+}
+
+# --- Phase: sync config files to host ----------------------------------------
+
+sync_configs() {
+  local host="${DEPLOY_HOST:-159.195.83.211}"
+  local ssh_user="${DEPLOY_SSH_USER:-root}"
+
+  log "sync config files to host"
+  ssh -o StrictHostKeyChecking=no "${ssh_user}@${host}" \
+    "mkdir -p /opt/nomad/config"
+  scp -o StrictHostKeyChecking=no \
+    "package/job-runner/sequin/sequin.yml" \
+    "${ssh_user}@${host}:/opt/nomad/config/sequin.yml"
+  scp -o StrictHostKeyChecking=no \
+    "tool/infra/observability/otel-collector.yml" \
+    "${ssh_user}@${host}:/opt/nomad/config/otel-collector.yml"
+}
+
+# --- Phase: migrations -------------------------------------------------------
+
+run_migrations() {
+  for unit in "${MIGRATIONS[@]}"; do
+    dispatch_migration "migrate-${unit}"
+  done
+  dispatch_migration "migrate-job-ensure"
+}
+
+# --- Phase: services ---------------------------------------------------------
+
+deploy_services() {
+  for unit in "${SERVICES[@]}"; do
+    deploy_unit "${unit}"
+  done
+}
+
+# --- Phase: workers ----------------------------------------------------------
+
+deploy_workers() {
+  for unit in "${WORKERS[@]}"; do
+    deploy_unit "${unit}"
+  done
+}
+
+# --- Phase: ranking Meili backfill -------------------------------------------
+
+ranking_backfill() {
+  log "ranking Meili full-sync backfill (enqueue ranking.fullSync)"
+  bun run --cwd package/job-runner scripts/enqueue-ranking-fullsync.ts || \
+    log "ranking backfill skipped (run scripts/enqueue-ranking-fullsync.ts manually)"
+}
+
+# --- Dispatch ----------------------------------------------------------------
+
+case "${PHASE}" in
+  all)
+    sync_secrets
+    boot_infra
+    sync_configs
+    run_migrations
+    deploy_services
+    deploy_workers
+    ranking_backfill
+    ;;
+  secrets)    sync_secrets ;;
+  infra)      boot_infra ;;
+  configs)    sync_configs ;;
+  migrations) sync_secrets && run_migrations ;;
+  services)   deploy_services ;;
+  workers)    deploy_workers ;;
+  backfill)   ranking_backfill ;;
+  *) die "unknown phase: ${PHASE}" ;;
+esac
+
+log "deploy phase '${PHASE}' complete"
