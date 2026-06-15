@@ -1,8 +1,14 @@
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
+import {
+  titleLabel,
+  titleMeta,
+  titleOfBook,
+} from "@/core/routing/documentTitle";
 import { FederatedSearchPage, isSearchCategory } from "@/search";
 import { parseSearchString } from "@/search";
+import { bookRouteLoaderData } from "./route";
 
 type SearchRouteParams = {
   q?: string;
@@ -49,5 +55,12 @@ export const Route = createFileRoute("/_mainLayout/book/$bookId/search")({
         ? search.category
         : undefined,
   }),
+  head: ({ matches }) => {
+    const data = bookRouteLoaderData(matches);
+    return titleMeta(
+      data ? titleOfBook(data.book, data.readContext) : null,
+      titleLabel("common:search"),
+    );
+  },
   component: BookScopedSearchPage,
 });

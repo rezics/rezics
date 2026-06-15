@@ -46,6 +46,7 @@ import { Pencil as EditIcon, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
@@ -136,8 +137,15 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const [readableOnly, setReadableOnly] = useState<boolean>(false);
   const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
+  const readContext = useReadLanguageContext();
 
-  const detailQuery = useQuery(shelfDetailQuery(unitId));
+  const detailQuery = useQuery({
+    ...shelfDetailQuery(unitId, {
+      languages: readContext.languages.join(",") || undefined,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && Boolean(unitId),
+  });
   const normalizedItemSearchText = itemSearchText.trim();
   const shelfItemsQuery = useMemo(
     () => ({

@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { unitHref } from "@/shared/ui/link";
 import {
@@ -122,22 +121,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }, [location.pathname, navigate, pendingRegistration]);
 
   if (!canRenderChrome) {
-    return (
-      <div className="min-h-screen bg-surface-canvas">
-        <Helmet>
-          <title>{t("shell:app_document_title_account_settings")}</title>
-        </Helmet>
-        {children}
-      </div>
-    );
+    return <div className="min-h-screen bg-surface-canvas">{children}</div>;
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Helmet>
-        <title>{t("shell:app_document_title_library")}</title>
-      </Helmet>
-
       <Header />
 
       <div className="flex flex-1">

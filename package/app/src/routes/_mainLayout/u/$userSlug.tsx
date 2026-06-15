@@ -1,6 +1,11 @@
 import { userBySlugQuery } from "@rezics/api/user/user.queries";
-import { isPublicUserSlugRouteParams } from "@rezics/contract";
+import { isPublicUserSlugRouteParams, type UserDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
+import {
+  loaderDataByRouteId,
+  titleMeta,
+  titleOfUser,
+} from "@/core/routing/documentTitle";
 
 /**
  * Slug-based user-space root, not the profile surface.
@@ -25,5 +30,18 @@ export const Route = createFileRoute("/_mainLayout/u/$userSlug")({
         throw notFound();
       });
   },
+  head: ({ loaderData }) =>
+    titleMeta(loaderData ? titleOfUser(loaderData) : null),
   component: Outlet,
 });
+
+export type UserSlugRouteLoaderData = UserDTO;
+
+export function userSlugRouteLoaderData(
+  matches: readonly { routeId: string; loaderData?: unknown }[],
+) {
+  return loaderDataByRouteId<UserSlugRouteLoaderData>(
+    matches,
+    "/_mainLayout/u/$userSlug",
+  );
+}

@@ -12,10 +12,10 @@ const realm = {
 
 describe("loadRealmSlugRoute", () => {
   test("resolves slug route params to a realm without canonicalizing to unit-id routes", async () => {
+    const queryKeys: (readonly unknown[])[] = [];
     const queryClient = {
       ensureQueryData: async (query: { queryKey: readonly unknown[] }) => {
-        expect(query.queryKey).toContain("by-slug");
-        expect(query.queryKey).toContain("rezics");
+        queryKeys.push(query.queryKey);
         return realm;
       },
     };
@@ -25,7 +25,14 @@ describe("loadRealmSlugRoute", () => {
         params: { realmSlug: "rezics" },
         queryClient: queryClient as never,
       }),
-    ).resolves.toEqual({ realm });
+    ).resolves.toEqual({
+      realm,
+      readContext: { appLocale: "zh-hant", languages: [] },
+    });
+    expect(queryKeys[0]).toContain("by-slug");
+    expect(queryKeys[0]).toContain("rezics");
+    expect(queryKeys[1]).toContain("detail");
+    expect(queryKeys[1]).toContain("realm-unit-id");
   });
 
   test("rejects non-slug route params", async () => {
