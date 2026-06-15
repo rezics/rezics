@@ -6,7 +6,7 @@ import {
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import {
-  titleLabel,
+  resolveTitleLabel,
   titleMeta,
   titleOfRealm,
 } from "@/core/routing/documentTitle";
@@ -64,10 +64,10 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/search")({
         ? search.category
         : undefined,
   }),
-  head: ({ loaderData }) =>
+  head: async ({ loaderData }) =>
     titleMeta(
       loaderData ? titleOfRealm(loaderData.realm) : null,
-      titleLabel("common:search"),
+      await resolveTitleLabel("common:search"),
     ),
   component: RealmSlugScopedSearchPage,
 });

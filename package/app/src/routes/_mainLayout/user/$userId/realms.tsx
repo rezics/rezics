@@ -1,10 +1,10 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import {
-  titleLabel,
+  resolveTitleLabel,
   titleMeta,
   titleOfUser,
 } from "@/core/routing/documentTitle";
-import { userIdRouteLoaderData } from "@/routes/_mainLayout/user/$userId";
+import { userIdChildRouteLoader } from "@/routes/_mainLayout/user/$userId";
 
 const RealmListPage = lazyRouteComponent(
   () => import("@/realm/pages/RealmListPage"),
@@ -12,12 +12,11 @@ const RealmListPage = lazyRouteComponent(
 );
 
 export const Route = createFileRoute("/_mainLayout/user/$userId/realms")({
-  head: ({ matches }) => {
-    const userData = userIdRouteLoaderData(matches);
-    return titleMeta(
-      userData ? titleOfUser(userData) : null,
-      titleLabel("shell:navigation_realms"),
-    );
-  },
+  loader: userIdChildRouteLoader,
+  head: async ({ loaderData }) =>
+    titleMeta(
+      titleOfUser(loaderData),
+      await resolveTitleLabel("shell:navigation_realms"),
+    ),
   component: RealmListPage,
 });

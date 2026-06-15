@@ -2,7 +2,7 @@ import { userBySlugQuery } from "@rezics/api/user/user.queries";
 import { isPublicUserSlugRouteParams, type UserDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {
-  loaderDataByRouteId,
+  parentRouteLoaderData,
   titleMeta,
   titleOfUser,
 } from "@/core/routing/documentTitle";
@@ -37,11 +37,10 @@ export const Route = createFileRoute("/_mainLayout/u/$userSlug")({
 
 export type UserSlugRouteLoaderData = UserDTO;
 
-export function userSlugRouteLoaderData(
-  matches: readonly { routeId: string; loaderData?: unknown }[],
-) {
-  return loaderDataByRouteId<UserSlugRouteLoaderData>(
-    matches,
-    "/_mainLayout/u/$userSlug",
-  );
+export function userSlugChildRouteLoader({
+  parentMatchPromise,
+}: {
+  parentMatchPromise: Promise<{ loaderData?: unknown }>;
+}) {
+  return parentRouteLoaderData<UserSlugRouteLoaderData>(parentMatchPromise);
 }

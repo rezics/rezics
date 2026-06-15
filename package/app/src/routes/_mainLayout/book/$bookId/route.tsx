@@ -7,7 +7,7 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import {
-  loaderDataByRouteId,
+  parentRouteLoaderData,
   titleMeta,
   titleOfBook,
 } from "@/core/routing/documentTitle";
@@ -56,11 +56,10 @@ export type BookRouteLoaderData = {
   readContext: ResolvedReadLanguageContext;
 };
 
-export function bookRouteLoaderData(
-  matches: readonly { routeId: string; loaderData?: unknown }[],
-) {
-  return loaderDataByRouteId<BookRouteLoaderData>(
-    matches,
-    "/_mainLayout/book/$bookId",
-  );
+export function bookChildRouteLoader({
+  parentMatchPromise,
+}: {
+  parentMatchPromise: Promise<{ loaderData?: unknown }>;
+}) {
+  return parentRouteLoaderData<BookRouteLoaderData>(parentMatchPromise);
 }

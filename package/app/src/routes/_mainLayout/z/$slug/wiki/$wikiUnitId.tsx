@@ -3,7 +3,7 @@ import { zoneQueries } from "@rezics/api/zone/zone";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { resolveDefaultCommentContext } from "@/comment";
 import {
-  titleLabel,
+  resolveTitleLabel,
   titleMeta,
   titleOfPost,
   titleOfZone,
@@ -46,10 +46,10 @@ export const Route = createFileRoute("/_mainLayout/z/$slug/wiki/$wikiUnitId")({
     });
     return { zone, post, readContext };
   },
-  head: ({ loaderData }) =>
+  head: async ({ loaderData }) =>
     titleMeta(
       loaderData ? titleOfPost(loaderData.post) : null,
-      titleLabel("entity:realm_tab_wiki"),
+      await resolveTitleLabel("entity:realm_tab_wiki"),
       loaderData ? titleOfZone(loaderData.zone) : null,
     ),
   component: ZoneWikiThreadRoute,

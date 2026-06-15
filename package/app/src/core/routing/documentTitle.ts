@@ -36,11 +36,41 @@ const TITLE_LABEL_KEYS = {
 
 export type TitleLabelKey = keyof typeof TITLE_LABEL_KEYS;
 
-export function titleLabel(
+const TITLE_LABEL_NAMESPACES = {
+  "common:search": "common",
+  "entity:realm_manage": "entity",
+  "entity:realm_tab_about": "entity",
+  "entity:realm_tab_members": "entity",
+  "entity:realm_tab_tags": "entity",
+  "entity:realm_tab_wiki": "entity",
+  "page:book_tabs_community": "page",
+  "page:book_tabs_content": "page",
+  "page:book_tabs_info": "page",
+  "page:book_tabs_reviews": "page",
+  "settings:nav_profile": "settings",
+  "shell:navigation_realms": "shell",
+  "shell:navigation_zones": "shell",
+  "zone:create_post": "zone",
+  "zone:manage": "zone",
+} as const satisfies Record<TitleLabelKey, string>;
+
+export async function resolveTitleLabel(
   key: TitleLabelKey,
   options?: Record<string, unknown>,
 ) {
-  return getI18nRuntime().i18n.t(TITLE_LABEL_KEYS[key], options);
+  const runtime = getI18nRuntime();
+  const namespace = TITLE_LABEL_NAMESPACES[key];
+  if (!runtime.i18n.hasLoadedNamespace(namespace)) {
+    await runtime.i18n.loadNamespaces(namespace);
+  }
+  return runtime.i18n.t(TITLE_LABEL_KEYS[key], options);
+}
+
+export async function parentRouteLoaderData<T>(
+  parentMatchPromise: Promise<{ loaderData?: unknown }>,
+): Promise<T> {
+  const parentMatch = await parentMatchPromise;
+  return parentMatch.loaderData as T;
 }
 
 export function documentTitle(

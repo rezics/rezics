@@ -1,7 +1,7 @@
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
-  titleLabel,
+  resolveTitleLabel,
   titleMeta,
   titleOfRealm,
 } from "@/core/routing/documentTitle";
@@ -36,10 +36,10 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/members")({
       queryClient: context.qc,
     });
   },
-  head: ({ loaderData }) =>
+  head: async ({ loaderData }) =>
     titleMeta(
       loaderData ? titleOfRealm(loaderData.realm) : null,
-      titleLabel("entity:realm_tab_members"),
+      await resolveTitleLabel("entity:realm_tab_members"),
     ),
   component: RealmSlugMembersRoute,
 });

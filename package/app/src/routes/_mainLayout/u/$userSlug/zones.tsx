@@ -1,10 +1,10 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import {
-  titleLabel,
+  resolveTitleLabel,
   titleMeta,
   titleOfUser,
 } from "@/core/routing/documentTitle";
-import { userSlugRouteLoaderData } from "@/routes/_mainLayout/u/$userSlug";
+import { userSlugChildRouteLoader } from "@/routes/_mainLayout/u/$userSlug";
 
 const ZoneListPage = lazyRouteComponent(
   () => import("@/zone/pages/ZoneListPage"),
@@ -12,12 +12,11 @@ const ZoneListPage = lazyRouteComponent(
 );
 
 export const Route = createFileRoute("/_mainLayout/u/$userSlug/zones")({
-  head: ({ matches }) => {
-    const userData = userSlugRouteLoaderData(matches);
-    return titleMeta(
-      userData ? titleOfUser(userData) : null,
-      titleLabel("shell:navigation_zones"),
-    );
-  },
+  loader: userSlugChildRouteLoader,
+  head: async ({ loaderData }) =>
+    titleMeta(
+      titleOfUser(loaderData),
+      await resolveTitleLabel("shell:navigation_zones"),
+    ),
   component: ZoneListPage,
 });
