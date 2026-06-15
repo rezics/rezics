@@ -19,5 +19,5 @@ tasks:
     desc: Compile native binary
     cmd: bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile server
   build:linux:
-    desc: Compile linux-x64 binary (mirrors docker/auth.Dockerfile)
+    desc: Compile linux-x64 binary (mirrors Dockerfile.auth)
     cmd: bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile server

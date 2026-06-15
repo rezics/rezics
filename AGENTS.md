@@ -24,8 +24,10 @@ list everything.
 
 ```bash
 task                     # list every task (task --list)
-task dev                 # start all dev processes (zellij)
-task devenv:up           # start all dev processes (devenv process-compose)
+task dev                 # start full dev environment (Nomad: infra + app)
+task dev:stop            # stop all services
+task dev:status          # show service status
+task dev:logs -- server  # follow logs for a specific task
 task app:dev             # frontend app, Vite
 task server:dev          # main Elysia API
 task auth:dev            # auth service

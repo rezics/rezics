@@ -11,5 +11,5 @@ tasks:
     desc: Compile native binary
     cmd: bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile preview
   build:linux:
-    desc: Compile linux-x64 binary (mirrors docker/preview.Dockerfile)
+    desc: Compile linux-x64 binary (mirrors Dockerfile.preview)
     cmd: bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile preview

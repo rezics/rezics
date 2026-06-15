@@ -15,7 +15,7 @@ worker, and infrastructure tiers.
   health checks. For manual rollback, redeploy with the previous image tag:
 
   ```bash
-  bin/nomad-deploy <previous-sha> services
+  deploy/bin/nomad-deploy <previous-sha> services
   ```
 
 - Or fail a specific deployment to trigger auto-revert:
@@ -32,7 +32,7 @@ worker, and infrastructure tiers.
   independently from HTTP services:
 
   ```bash
-  bin/nomad-deploy <previous-sha> workers
+  deploy/bin/nomad-deploy <previous-sha> workers
   ```
 
 ## Database
@@ -42,7 +42,7 @@ worker, and infrastructure tiers.
   alone is safe without touching the schema.
 - **Ranking** is exempt: it is a rebuildable projection tier. Recover by wiping
   the ranking database/index fields and re-running `ranking.fullSync`
-  (`bin/nomad-deploy <sha> backfill`) rather than restoring from backup.
+  (`deploy/bin/nomad-deploy <sha> backfill`) rather than restoring from backup.
 
 ## Infrastructure
 
@@ -54,7 +54,7 @@ worker, and infrastructure tiers.
 ## Decision order
 
 1. Is it the frontend? Roll back Cloudflare — done.
-2. Is it a backend/worker code regression? `bin/nomad-deploy <previous-sha>`.
+2. Is it a backend/worker code regression? `deploy/bin/nomad-deploy <previous-sha>`.
 3. Did a migration cause it? Roll back code if forward-compatible; otherwise
    apply the manual down-migration. For ranking, recompute.
 4. Is it infra? Handle separately, with its own approval.

@@ -2,8 +2,8 @@
 
 One-time preparation of a fresh production host before the first deploy.
 Production runs as independent Nomad jobs (Docker images on a VPS) with secrets
-in SOPS + age synced to Nomad Variables. See `nomad/jobs/` for the job
-definitions.
+in SOPS + age synced to Nomad Variables. See `deploy/prod/` for the
+nomad-pack production templates.
 
 ## 1. Host prep
 
@@ -23,7 +23,7 @@ definitions.
 ## 3. age key + SOPS secrets
 
 Follow [age key management](./age-key-management.md) to generate the key and
-encrypt each `config/secrets/<unit>.enc.env`. The deploy runner needs
+encrypt each `deploy/secrets/<unit>.enc.env`. The deploy runner needs
 `SOPS_AGE_KEY` (or `SOPS_AGE_KEY_FILE`) to decrypt and sync to Nomad.
 
 ## 4. Infrastructure jobs
@@ -31,13 +31,13 @@ encrypt each `config/secrets/<unit>.enc.env`. The deploy runner needs
 Boot the self-hosted infra units (idempotent):
 
 ```bash
-bin/nomad-deploy <git-sha> infra
+deploy/bin/nomad-deploy <git-sha> infra
 # or individually:
-nomad job run nomad/jobs/infra-postgres.nomad.hcl
-nomad job run nomad/jobs/infra-meilisearch.nomad.hcl
-nomad job run nomad/jobs/infra-sequin.nomad.hcl
-nomad job run nomad/jobs/infra-rustfs.nomad.hcl
-nomad job run nomad/jobs/infra-otel.nomad.hcl
+nomad-pack run deploy/prod --var target=infra-postgres
+nomad-pack run deploy/prod --var target=infra-meilisearch
+nomad-pack run deploy/prod --var target=infra-sequin
+nomad-pack run deploy/prod --var target=infra-rustfs
+nomad-pack run deploy/prod --var target=infra-otel
 ```
 
 - **PostgreSQL (`infra-postgres`)** — one instance, database-per-service. On
@@ -60,7 +60,7 @@ Configure Caddy (or equivalent) to route public hosts (`api`, `auth`, `notify`,
 ## 6. First deploy
 
 ```bash
-bin/nomad-deploy <git-sha>   # secrets → infra → configs → migrate → services → workers → backfill
+deploy/bin/nomad-deploy <git-sha>   # secrets → infra → configs → migrate → services → workers → backfill
 ```
 
 Then deploy the frontends (after backends — see

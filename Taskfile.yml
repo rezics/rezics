@@ -30,13 +30,67 @@ tasks:
     desc: List all available tasks
     cmd: task --list
 
-  # ── Dev orchestration ──────────────────────────────────────────────────
+  # ── Dev orchestration (Nomad) ──────────────────────────────────────────
   dev:
-    desc: Full local dev session (zellij; backend + frontend)
-    cmd: bun run --no-env-file tool/dev-script/dev.ts
-  devenv:up:
-    desc: Full local dev session (devenv process-compose; backend + frontend)
-    cmd: devenv up
+    desc: Start development environment, Ctrl+C stops all
+    cmds:
+      - task: dev:setup
+      - nomad-pack run deploy/dev --var project_root={{.ROOT_DIR}}
+      - defer: nomad job stop rezics-dev || true
+      - cmd: |-
+          alloc=$(nomad job allocs -json rezics-dev | jq -r '.[] | select(.TaskGroup == "app") | .ID' | head -1)
+          exec nomad alloc logs -f "$alloc" server
+
+  dev:stop:
+    desc: Stop all services
+    cmd: nomad job stop rezics-dev || true
+
+  dev:status:
+    desc: Show status of all services
+    cmd: nomad job status rezics-dev
+
+  dev:logs:
+    desc: "Follow logs (usage: task dev:logs -- server)"
+    cmd: |-
+      alloc=$(nomad job allocs -json rezics-dev | jq -r --arg t "{{.CLI_ARGS}}" '.[] | select(.TaskStates[$t] != null) | .ID' | head -1)
+      exec nomad alloc logs -f "$alloc" "{{.CLI_ARGS}}"
+
+  dev:destroy:
+    desc: Destroy all services and data
+    cmds:
+      - nomad job stop -purge rezics-dev 2>/dev/null || true
+
+  dev:reset:
+    desc: Destroy all data and restart
+    cmds:
+      - task: dev:destroy
+      - task: dev
+
+  dev:setup:
+    internal: true
+    cmds:
+      - docker network create rezics 2>/dev/null || true
+      - task: dev:agent
+
+  dev:agent:
+    internal: true
+    status:
+      - nomad agent-info > /dev/null 2>&1
+    cmds:
+      - mkdir -p .dev
+      - nohup nomad agent -dev -log-level=warn -bind=127.0.0.1 -config=deploy/nomad-dev.hcl > .dev/nomad.log 2>&1 &
+      - until nomad agent-info > /dev/null 2>&1; do sleep 1; done
+
+  # ── CDC (Sequin source verification) ────────────────────────────────────
+  cdc:verify:
+    desc: Verify every Sequin CDC source database
+    cmd: bun run tool/bin/tool.ts service cdc verify {{.CLI_ARGS}}
+  cdc:repair:
+    desc: Low-level repair Sequin CDC source objects
+    cmd: bun run tool/bin/tool.ts service cdc repair {{.CLI_ARGS}}
+  cdc:recover:
+    desc: End-to-end Sequin CDC recovery (repair + restart + verify)
+    cmd: bun run tool/bin/tool.ts service cdc recover {{.CLI_ARGS}}
 
   # ── Format / lint / static checks ──────────────────────────────────────
   format:
@@ -144,25 +198,6 @@ tasks:
     desc: "Run a headed browser inspect scratch script from tool/browser-inspect/work"
     cmd: bun run tool/browser-inspect/run-work.ts {{.CLI_ARGS}}
 
-  # ── Local service stack (Docker Compose via tool/ CLI) ─────────────────
-  service:
-    desc: "Service stack passthrough: task service -- up|down|health|ps|logs|..."
-    cmd: bun run tool/bin/service.ts {{.CLI_ARGS}}
-  service:up:
-    desc: Start the local service stack
-    cmd: bun run tool/bin/service.ts up
-  service:down:
-    desc: Stop the local service stack
-    cmd: bun run tool/bin/service.ts down
-  service:health:
-    desc: Local service stack health
-    cmd: bun run tool/bin/service.ts health
-  service:ps:
-    desc: Local service stack status
-    cmd: bun run tool/bin/service.ts ps
-  service:logs:
-    desc: Local service stack logs
-    cmd: bun run tool/bin/service.ts logs
 
   # ── Storybook ──────────────────────────────────────────────────────────
   storybook:

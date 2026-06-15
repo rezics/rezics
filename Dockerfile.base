@@ -1,0 +1,17 @@
+# Shared workspace base image for the Bun backend services.
+#
+# Build context is the repo root. This stage installs the full workspace once
+# so per-service Dockerfiles can `FROM rezics-base` and only run their own
+# `build:linux` compile step. Built/published once per revision:
+#
+#   docker build -f Dockerfile.base -t rezics-base:<git-sha> .
+#
+# Pinned to the repo's Bun version (see root package.json packageManager).
+FROM oven/bun:1.3.11 AS base
+WORKDIR /repo
+
+# Copy the whole (dockerignore-trimmed) workspace and install all deps.
+# `--ignore-scripts` keeps third-party postinstall hooks from running during
+# image build. Schema-owner migrate images run Drizzle Kit from the build stage.
+COPY . .
+RUN bun install --frozen-lockfile --ignore-scripts

@@ -12,7 +12,7 @@ Variables at deploy time.
 ```text
 GitHub Actions
   ├─ build-images.yml ──────────────────► GHCR (immutable git-SHA tags)
-  ├─ deploy-production.yml (approved) ───► bin/nomad-deploy over SSH tunnel
+  ├─ deploy-production.yml (approved) ───► deploy/bin/nomad-deploy over SSH tunnel
   ├─ deploy-infra.yml (approved) ────────► nomad job run (infra jobs)
   └─ deploy-frontend.yml ───────────────► Cloudflare Pages (app, admin)
 
@@ -29,10 +29,10 @@ production host (Nomad)
 ## One command
 
 ```bash
-bin/nomad-deploy <git-sha>   # secrets → infra → configs → migrate → services → workers → backfill
+deploy/bin/nomad-deploy <git-sha>   # secrets → infra → configs → migrate → services → workers → backfill
 ```
 
-See `nomad/jobs/` for the per-unit job definitions.
+See `deploy/prod/` for the nomad-pack production templates.
 
 ## Reference
 

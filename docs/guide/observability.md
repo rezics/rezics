@@ -72,7 +72,7 @@ SDKs. Operators can replace the analysis backend by changing collector,
 deployment, or env configuration without changing service code.
 
 The local Nomad infrastructure includes an opt-in OTel Collector job
-(`nomad/jobs/infra-otel.nomad.hcl`).
+(`deploy/prod/` infra-otel target).
 
 The OpenTelemetry Collector receives OTLP on `4317` and `4318` and exports to
 ClickStack through `CLICKSTACK_OTLP_ENDPOINT`. ClickStack is pinned for

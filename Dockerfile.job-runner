@@ -1,0 +1,38 @@
+# Job-runner image. No schema of its own (pg-boss tables live in
+# JOB_DATABASE_URL). Search sync, history, and maintenance use exported
+# Drizzle db helpers. One binary, role-switched at runtime via
+# JOB_RUNNER_ROLE (all | http | worker) — Kamal runs the HTTP and worker
+# roles off this same image.
+#
+#   docker build -f Dockerfile.base -t rezics-base:dev .
+#   docker build -f Dockerfile.job-runner -t rezics-job-runner:dev .
+
+# --- build stage -----------------------------------------------------------
+ARG BASE_IMAGE=rezics-base:dev
+FROM ${BASE_IMAGE} AS build
+
+WORKDIR /repo/package/job-runner
+# Compile the linux-x64 binary inline (mirrors `task job-runner:build:linux`).
+RUN bun build src/index.ts --compile --minify-whitespace --minify-syntax \
+  --target bun-linux-x64 --outfile job-runner
+
+# --- runtime stage ---------------------------------------------------------
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd --system --uid 10001 --no-create-home rezics
+WORKDIR /app
+
+COPY --from=build /repo/package/job-runner/job-runner /app/job-runner
+
+USER rezics
+ENV PORT=3005
+# all | http | worker. The worker role does not bind PORT.
+ENV JOB_RUNNER_ROLE="all"
+EXPOSE 3005
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS "http://127.0.0.1:${PORT}/ready" || exit 1
+
+ENTRYPOINT ["/app/job-runner"]

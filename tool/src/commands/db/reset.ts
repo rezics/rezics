@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { repeatedCsv } from "../../cli/values";
 import { createToolConfig } from "../../env";
 import { renderResetDatabaseSql } from "../../env/repo-database-registry";
-import { DOCKER_COMPOSE_COMMAND } from "../service/runtime";
 import { type DbSchemaPackage, resolveDbSchemaPackages } from "./packages";
 import { runDbPreflight } from "./preflight";
 import { runDbPackageScript } from "./runner";
@@ -13,7 +12,6 @@ const TOOL_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../..",
 );
-const SERVICE_DIR = path.join(TOOL_DIR, "service");
 
 interface ResetCliFlags {
   packages: string[];
@@ -52,53 +50,29 @@ function schemaDatabaseName(
 
 function runPostgresReset(databaseNames: readonly string[]): void {
   const config = createToolConfig();
-  const args = [
-    ...DOCKER_COMPOSE_COMMAND,
-    "-p",
-    config.services.composeProjectName,
-    "-f",
-    "compose.yml",
-    "exec",
-    "-T",
-    "source-postgres",
+  const { host, port, user, password } = config.postgres;
+
+  const result = spawnSync(
     "psql",
-    "-v",
-    "ON_ERROR_STOP=1",
-    "-U",
-    config.sourceVerifyEnv.SOURCE_DB_USER,
-    "-d",
-    "postgres",
-  ];
-
-  const [command, ...commandArgs] = args;
-  if (!command) {
-    throw new Error("Docker Compose command is empty.");
-  }
-
-  const result = spawnSync(command, commandArgs, {
-    cwd: SERVICE_DIR,
-    env: {
-      ...process.env,
-      ...config.composeEnv,
-      PGPASSWORD: config.sourceVerifyEnv.SOURCE_DB_PASSWORD,
+    ["-v", "ON_ERROR_STOP=1", "-h", host, "-p", port, "-U", user, "-d", "postgres"],
+    {
+      env: { ...process.env, PGPASSWORD: password },
+      input: renderResetDatabaseSql(databaseNames),
+      stdio: ["pipe", "inherit", "inherit"],
     },
-    input: renderResetDatabaseSql(databaseNames),
-    stdio: ["pipe", "inherit", "inherit"],
-  });
+  );
 
   if (result.error) {
     throw result.error;
   }
   if (result.status !== 0) {
     throw new Error(
-      `Command failed with exit code ${result.status ?? "unknown"}: ${args.join(" ")}`,
+      `psql failed with exit code ${result.status ?? "unknown"}`,
     );
   }
 }
 
 async function runRootWorkflow(args: readonly string[]): Promise<void> {
-  // seed/factory are tool/ CLI subcommands, not package.json scripts; invoke the
-  // CLI entry by path so `bun run` resolves a file rather than a missing script.
   const proc = Bun.spawn(["bun", "run", "tool/bin/tool.ts", ...args], {
     cwd: path.resolve(TOOL_DIR, ".."),
     stdout: "inherit",
