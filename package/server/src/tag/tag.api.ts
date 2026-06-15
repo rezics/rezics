@@ -300,8 +300,8 @@ export const tagApi = new Elysia({ prefix: "/tag" })
     "/for-unit/:unitId/context",
     async ({ headers, params }) => {
       const identity = await tryResolveIdentity(
-        headers["authorization"],
-        headers["cookie"],
+        headers.authorization,
+        headers.cookie,
       );
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
@@ -328,8 +328,8 @@ export const tagApi = new Elysia({ prefix: "/tag" })
     "/for-unit/:unitId",
     async ({ headers, params }): Promise<{ tags: UnitTagDTO[] }> => {
       const identity = await tryResolveIdentity(
-        headers["authorization"],
-        headers["cookie"],
+        headers.authorization,
+        headers.cookie,
       );
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
@@ -339,11 +339,19 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       const unitTags = await tagService.getTagsForUnit(params.unitId, {
         includeBelowThreshold: isPrivileged,
       });
+      const viewerVotes = identity?.userId
+        ? await tagService.getViewerVotesForUnit(
+            identity.userId,
+            params.unitId,
+            unitTags.map((unitTag) => unitTag.tagUnitId),
+          )
+        : new Map<string, number>();
       return {
         tags: unitTags.map((ut) =>
           mapUnitTagToDTO(ut, {
             belowVisibilityThreshold:
               isPrivileged && ut.score <= VISIBILITY_THRESHOLD,
+            viewerVote: viewerVotes.get(ut.tagUnitId) ?? null,
           }),
         ),
       };

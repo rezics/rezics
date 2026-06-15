@@ -3,7 +3,6 @@ import {
   FALLBACK_LANGUAGE,
   OFFICIAL_QUESTION_TAG_SLUG,
   SEED_TAG_NAMES,
-  SEED_TAG_POSITIONS,
   SEED_TAG_SLUGS,
   SEED_TAG_TITLES,
   type SeedTagName,
@@ -21,7 +20,6 @@ import {
   EchoKV,
   Unit,
   UnitSupportLanguage,
-  UnitTag,
   UnitTranslation,
 } from "../../schema";
 import type { SlugScopesMap } from "./seed-slug-scopes";
@@ -154,24 +152,6 @@ export async function seedContentTypeTags(
         `[Seed]   Created content-type tag "${name}" (${id}, slug=${slug})`,
       );
     }
-
-    const position = SEED_TAG_POSITIONS[name];
-
-    await db
-      .insert(UnitTag)
-      .values({
-        unitId: tagMap[name],
-        tagUnitId: tagMap[name],
-        score: 0,
-        voteCount: 0,
-        pinned: true,
-        position,
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: [UnitTag.unitId, UnitTag.tagUnitId],
-        set: { pinned: true, position, updatedAt: new Date() },
-      });
   }
 
   await seedOfficialQuestionTag(db, tagScope);

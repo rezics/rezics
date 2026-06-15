@@ -50,6 +50,7 @@ import {
   realmExtraApi,
   realmTagApplicationApi,
   realmTagApplicationVoteApi,
+  realmTagApplicationVoteWithdrawApi,
   realmTagContextApi,
 } from "./realm";
 import { scoreApi } from "./score/score.api";
@@ -71,8 +72,8 @@ import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
 import { unitExternalLinkApi } from "./unit-external-link";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
-import { userTagApplicationApi } from "./user-tag-application";
 import { userShelfItemApi } from "./user-shelf-item";
+import { userTagApplicationApi } from "./user-tag-application";
 import { readDatabaseErrorDetails } from "./utils/database-error";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
@@ -230,6 +231,7 @@ routeApp
   .use(realmTagContextApi)
   .use(realmTagApplicationApi)
   .use(realmTagApplicationVoteApi)
+  .use(realmTagApplicationVoteWithdrawApi)
   .use(creditAttributionApi)
   .use(subjectAttributionApi)
   .use(entityAttributionApi)

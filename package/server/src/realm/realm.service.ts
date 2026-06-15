@@ -37,7 +37,6 @@ import {
   inArray,
   lte,
   ne,
-  or,
   type SQL,
   sql,
 } from "drizzle-orm";
@@ -67,11 +66,9 @@ import {
   RealmTagApplication as RealmTagApplicationTable,
   RealmTagApplicationVote,
   Subscription,
-  TagVote,
   Unit,
   UnitRealm,
   UnitSupportLanguage,
-  UnitTag,
   UnitTranslation,
   User,
 } from "../db/schema";
@@ -1410,12 +1407,10 @@ export class RealmService {
   // --- Realm tag applications ---
   // --- Realm 标签应用 ---
   //
-  // RealmTagApplication and UnitTag remain independent score layers. The standard
-  // RealmTagApplication write path contributes the caller's global TagVote once, but
-  // later RealmTagApplication deletion never deletes or decrements UnitTag.
-  // RealmTagApplication 与 UnitTag 仍是相互独立的分数层。标准的
-  // RealmTagApplication 写入路径只贡献调用方的全局 TagVote 一次，但后续删除
-  // RealmTagApplication 时绝不会删除或递减 UnitTag。
+  // RealmTagApplication and UnitTag are independent score layers. Realm-scoped
+  // votes never create or withdraw global TagVote rows.
+  // RealmTagApplication 与 UnitTag 是相互独立的分数层。realm 作用域投票
+  // 不会创建或撤回全局 TagVote 行。
 
   /**
    * Create a RealmTagApplication with creation-as-vote semantics.
@@ -1430,8 +1425,6 @@ export class RealmService {
    *   RealmTagApplicationVote.
    * - Subsequent distinct-member calls: insert a RealmTagApplicationVote and recompute.
    * - Idempotent for the same user: existing RealmTagApplicationVote left untouched.
-   * - The caller's global TagVote(userId, unitId, tagUnitId, +1) is created
-   *   once or preserved, then UnitTag aggregates are recomputed.
    *
    * 创建 RealmTagApplication，采用“创建即投票”的语义。
    *
@@ -1444,8 +1437,6 @@ export class RealmService {
    *   RealmTagApplicationVote。
    * - 后续来自不同成员的调用：插入一条 RealmTagApplicationVote 并重新计算。
    * - 对同一用户幂等：已有的 RealmTagApplicationVote 保持不变。
-   * - 调用方的全局 TagVote(userId, unitId, tagUnitId, +1) 会被创建一次或保留，
-   *   随后重新计算 UnitTag 聚合值。
    */
   async createRealmTagApplication(
     userId: string,
@@ -1531,66 +1522,13 @@ export class RealmService {
         throw new Error("RealmTagApplication not found");
       }
 
-      const [globalVote] = await tx
-        .select({ userId: TagVote.userId })
-        .from(TagVote)
-        .where(
-          and(
-            eq(TagVote.userId, userId),
-            eq(TagVote.unitId, unitId),
-            eq(TagVote.tagUnitId, tagUnitId),
-          ),
-        )
-        .limit(1);
-
-      if (!globalVote) {
-        await tx.insert(TagVote).values({
-          userId,
-          unitId,
-          tagUnitId,
-          value: 1,
-        });
-      }
-
-      const [globalAgg] = await tx
-        .select({
-          score: sql<number>`coalesce(sum(${TagVote.value}), 0)::int`,
-          voteCount: count(TagVote.value),
-        })
-        .from(TagVote)
-        .where(
-          and(eq(TagVote.unitId, unitId), eq(TagVote.tagUnitId, tagUnitId)),
-        );
-
-      const unitTagValues = {
-        unitId,
-        tagUnitId,
-        score: globalAgg?.score ?? 0,
-        voteCount: globalAgg?.voteCount ?? 0,
-        updatedAt: new Date(),
-      };
-      await tx
-        .insert(UnitTag)
-        .values(unitTagValues)
-        .onConflictDoUpdate({
-          target: [UnitTag.unitId, UnitTag.tagUnitId],
-          set: {
-            score: unitTagValues.score,
-            voteCount: unitTagValues.voteCount,
-            updatedAt: unitTagValues.updatedAt,
-          },
-        });
-
       return realmTagApplication;
     });
 
-    await Promise.all([
-      enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchTags, unitId),
-      enqueueContentSearch(
-        SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
-        unitId,
-      ),
-    ]);
+    await enqueueContentSearch(
+      SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
+      unitId,
+    );
     return row;
   }
 
@@ -1728,6 +1666,81 @@ export class RealmService {
   }
 
   /**
+   * Withdraw a member's own RealmTagApplicationVote. If no votes remain, remove
+   * the RealmTagApplication aggregate row because the realm no longer applies
+   * that tag to the target unit.
+   * 撤回成员自己的 RealmTagApplicationVote。若没有剩余投票，则删除
+   * RealmTagApplication 聚合行，因为该 realm 已不再将该标签应用于目标 unit。
+   */
+  async withdrawRealmTagApplicationVote(
+    userId: string,
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<void> {
+    const db = await getServerDb();
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(RealmTagApplicationVote)
+        .where(
+          and(
+            eq(RealmTagApplicationVote.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationVote.unitId, unitId),
+            eq(RealmTagApplicationVote.tagUnitId, tagUnitId),
+            eq(RealmTagApplicationVote.userId, userId),
+          ),
+        );
+
+      const [agg] = await tx
+        .select({
+          score: sql<number>`coalesce(sum(${RealmTagApplicationVote.value}), 0)::int`,
+          voteCount: count(RealmTagApplicationVote.value),
+        })
+        .from(RealmTagApplicationVote)
+        .where(
+          and(
+            eq(RealmTagApplicationVote.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationVote.unitId, unitId),
+            eq(RealmTagApplicationVote.tagUnitId, tagUnitId),
+          ),
+        );
+
+      if (Number(agg?.voteCount ?? 0) === 0) {
+        await tx
+          .delete(RealmTagApplicationTable)
+          .where(
+            and(
+              eq(RealmTagApplicationTable.realmUnitId, realmUnitId),
+              eq(RealmTagApplicationTable.unitId, unitId),
+              eq(RealmTagApplicationTable.tagUnitId, tagUnitId),
+            ),
+          );
+        return;
+      }
+
+      await tx
+        .update(RealmTagApplicationTable)
+        .set({
+          score: Number(agg?.score ?? 0),
+          voteCount: Number(agg?.voteCount ?? 0),
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(RealmTagApplicationTable.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationTable.tagUnitId, tagUnitId),
+            eq(RealmTagApplicationTable.unitId, unitId),
+          ),
+        );
+    });
+
+    await enqueueContentSearch(
+      SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
+      unitId,
+    );
+  }
+
+  /**
    * List RealmTagApplication rows for a given (realm, unit), ordered pin-first
    * then score-desc. Regular callers do not see rows below the visibility
    * threshold; privileged callers (admin / realm owner) see them so the
@@ -1763,6 +1776,31 @@ export class RealmService {
         desc(RealmTagApplicationTable.score),
         asc(RealmTagApplicationTable.tagUnitId),
       );
+  }
+
+  async getViewerRealmTagApplicationVotes(
+    userId: string,
+    realmUnitId: string,
+    unitId: string,
+    tagUnitIds: string[],
+  ): Promise<Map<string, number>> {
+    if (tagUnitIds.length === 0) return new Map();
+    const db = await getServerDb();
+    const rows = await db
+      .select({
+        tagUnitId: RealmTagApplicationVote.tagUnitId,
+        value: RealmTagApplicationVote.value,
+      })
+      .from(RealmTagApplicationVote)
+      .where(
+        and(
+          eq(RealmTagApplicationVote.userId, userId),
+          eq(RealmTagApplicationVote.realmUnitId, realmUnitId),
+          eq(RealmTagApplicationVote.unitId, unitId),
+          inArray(RealmTagApplicationVote.tagUnitId, tagUnitIds),
+        ),
+      );
+    return new Map(rows.map((row) => [row.tagUnitId, row.value]));
   }
 
   /**

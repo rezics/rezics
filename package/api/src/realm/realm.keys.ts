@@ -77,6 +77,8 @@ export const realmKeys = {
    */
   tagApplications: (realmUnitId: string) =>
     [...realmKeys.all(), "tagApplications", realmUnitId] as const,
+  tagApplicationsForUnit: (realmUnitId: string, unitId: string) =>
+    [...realmKeys.tagApplications(realmUnitId), "unit", unitId] as const,
 
   tagContext: (realmUnitId: string, tagUnitId: string) =>
     [...realmKeys.all(), "tagContexts", realmUnitId, tagUnitId] as const,

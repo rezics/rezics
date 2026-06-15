@@ -1,6 +1,5 @@
 import type { UnitTagDTO } from "@rezics/contract";
 import {
-  BasicAdminPermission,
   castTagVoteSchema,
   createUnitTagSchema,
   lowScoreTagsQuerySchema,
@@ -89,6 +88,30 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tag" })
     },
   )
 
+  // DELETE /unit-tag/:unitId/:tagUnitId/vote — withdraw caller's vote.
+  // DELETE /unit-tag/:unitId/:tagUnitId/vote — 撤回调用者自己的投票。
+  .delete(
+    "/:unitId/:tagUnitId/vote",
+    async ({ params, identity }): Promise<{ message: string }> => {
+      await tagService.withdrawVote(
+        identity.userId,
+        params.unitId,
+        params.tagUnitId,
+      );
+      return { message: "Tag vote withdrawn" };
+    },
+    {
+      requireLogin: true,
+      params: unitTagPathParamsSchema,
+      detail: {
+        summary: "Withdraw own TagVote",
+        description:
+          "Deletes the caller's TagVote and removes the UnitTag aggregate when no votes remain.",
+        tags: ["Tags"],
+      },
+    },
+  )
+
   // DELETE /unit-tag/:unitId/:tagUnitId — delete (admin or unit owner)
   // DELETE /unit-tag/:unitId/:tagUnitId — 删除（管理员或 unit 所有者）。
   .delete(
@@ -153,8 +176,8 @@ export const lowScoreTagsAdminApi = new Elysia({
     "/",
     async ({ headers, query, set }) => {
       const identity = await tryResolveIdentity(
-        headers["authorization"],
-        headers["cookie"],
+        headers.authorization,
+        headers.cookie,
       );
       if (!isAdminRole(identity)) {
         set.status = 403;

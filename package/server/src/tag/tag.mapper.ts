@@ -24,13 +24,14 @@ function resolveLabel(
  */
 export function mapUnitTagToDTO(
   unitTag: UnitTagWithRelations,
-  options?: { belowVisibilityThreshold?: boolean },
+  options?: { belowVisibilityThreshold?: boolean; viewerVote?: number | null },
 ): UnitTagDTO {
   return {
     unitId: unitTag.unitId,
     tagUnitId: unitTag.tagUnitId,
     score: unitTag.score,
     voteCount: unitTag.voteCount,
+    ...(options?.viewerVote != null ? { viewerVote: options.viewerVote } : {}),
     pinned: unitTag.pinned,
     position: unitTag.position ?? null,
     ...(options?.belowVisibilityThreshold

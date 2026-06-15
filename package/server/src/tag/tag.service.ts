@@ -67,10 +67,20 @@ type TagRepository = {
     tagUnitId: string,
     value: number,
   ): Promise<void>;
+  withdrawVote(
+    userId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<void>;
   getTagsForUnit(
     unitId: string,
     options?: { includeBelowThreshold?: boolean },
   ): Promise<UnitTagWithRelations[]>;
+  getViewerVotesForUnit(
+    userId: string,
+    unitId: string,
+    tagUnitIds: string[],
+  ): Promise<Map<string, number>>;
   listLowScoreUnitTags(threshold: number, limit: number): Promise<UnitTagRow[]>;
   batchTranslations(
     tagUnitIds: string[],
@@ -168,7 +178,7 @@ function createDrizzleTagRepository(): TagRepository {
         conditions.push(inArray(Unit.id, idList));
       }
 
-      if ((query.q && query.q.trim()) || query.language) {
+      if (query.q?.trim() || query.language) {
         const translationConditions = [];
         if (query.q?.trim()) {
           translationConditions.push(
@@ -352,6 +362,33 @@ function createDrizzleTagRepository(): TagRepository {
       });
     },
 
+    async withdrawVote(userId, unitId, tagUnitId) {
+      const db = await getServerDb();
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(TagVote)
+          .where(
+            and(
+              eq(TagVote.userId, userId),
+              eq(TagVote.unitId, unitId),
+              eq(TagVote.tagUnitId, tagUnitId),
+            ),
+          );
+
+        const agg = await aggregateTagVotes(tx, unitId, tagUnitId);
+        if (agg.voteCount === 0) {
+          await tx
+            .delete(UnitTag)
+            .where(
+              and(eq(UnitTag.unitId, unitId), eq(UnitTag.tagUnitId, tagUnitId)),
+            );
+          return;
+        }
+
+        await upsertUnitTag(tx, unitId, tagUnitId, agg);
+      });
+    },
+
     async getTagsForUnit(unitId, options) {
       const db = await getServerDb();
       const rows = await db
@@ -372,6 +409,25 @@ function createDrizzleTagRepository(): TagRepository {
           asc(UnitTag.tagUnitId),
         );
       return hydrateUnitTags(db, rows);
+    },
+
+    async getViewerVotesForUnit(userId, unitId, tagUnitIds) {
+      if (tagUnitIds.length === 0) return new Map();
+      const db = await getServerDb();
+      const rows = await db
+        .select({
+          tagUnitId: TagVote.tagUnitId,
+          value: TagVote.value,
+        })
+        .from(TagVote)
+        .where(
+          and(
+            eq(TagVote.userId, userId),
+            eq(TagVote.unitId, unitId),
+            inArray(TagVote.tagUnitId, tagUnitIds),
+          ),
+        );
+      return new Map(rows.map((row) => [row.tagUnitId, row.value]));
     },
 
     async listLowScoreUnitTags(threshold, limit) {
@@ -625,6 +681,21 @@ export class TagService {
   }
 
   /**
+   * Withdraw the caller's own tag vote. If no votes remain, remove the
+   * aggregate UnitTag row because the tag is no longer applied by anyone.
+   * 撤回调用者自己的标签投票。若没有剩余投票，则删除聚合 UnitTag 行，
+   * 因为该标签已不再被任何人应用到该 unit。
+   */
+  async withdrawVote(
+    userId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<void> {
+    await this.repository.withdrawVote(userId, unitId, tagUnitId);
+    await enqueueContentTagsSync(unitId);
+  }
+
+  /**
    * Compatibility wrapper for older attach-tag call sites.
    * 为旧的 attach-tag 调用点提供的兼容性包装。
    */
@@ -660,6 +731,14 @@ export class TagService {
     options?: { includeBelowThreshold?: boolean },
   ): Promise<UnitTagWithRelations[]> {
     return this.repository.getTagsForUnit(unitId, options);
+  }
+
+  async getViewerVotesForUnit(
+    userId: string,
+    unitId: string,
+    tagUnitIds: string[],
+  ): Promise<Map<string, number>> {
+    return this.repository.getViewerVotesForUnit(userId, unitId, tagUnitIds);
   }
 
   /**

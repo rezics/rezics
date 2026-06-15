@@ -2152,7 +2152,12 @@ async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
     .insert(UnitTag)
     .values(
       withUpdatedAtRows(
-        entityWikiPostIds.map((unitId) => ({ unitId, tagUnitId: seriesTagId })),
+        entityWikiPostIds.map((unitId) => ({
+          unitId,
+          tagUnitId: seriesTagId,
+          score: 1,
+          voteCount: 1,
+        })),
       ),
     )
     .onConflictDoNothing();

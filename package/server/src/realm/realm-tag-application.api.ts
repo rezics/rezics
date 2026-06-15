@@ -7,12 +7,12 @@ import {
   realmTagApplicationPathParamsSchema,
 } from "@rezics/contract";
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
-import { authMacro } from "@/middleware";
+import { authMacro, tryResolveIdentity } from "@/middleware";
 import { Unit } from "../db/schema";
 import { mapRealmTagApplicationToDTO } from "./realm.mapper";
-import { realmService } from "./realm.service";
+import { REALM_TAG_VISIBILITY_THRESHOLD, realmService } from "./realm.service";
 
 /**
  * Membership precondition for any realm-tag write.
@@ -122,6 +122,62 @@ export const realmTagApplicationApi = new Elysia({
         summary: "Create RealmTagApplication (creation-as-vote)",
         description:
           "Membership-checked. Writes a +1 RealmTagApplicationVote on first call and recomputes RealmTagApplication.score/voteCount.",
+        tags: ["Realms", "Tags"],
+      },
+    },
+  )
+
+  // GET /realm-tag-application/:realmUnitId/:unitId — list applications for one target unit
+  // GET /realm-tag-application/:realmUnitId/:unitId — 列出某目标 unit 在 realm 内的标签应用。
+  .get(
+    "/:realmUnitId/:unitId",
+    async ({
+      headers,
+      params,
+    }): Promise<{ tags: RealmTagApplicationDTO[] }> => {
+      const identity = await tryResolveIdentity(
+        headers.authorization,
+        headers.cookie,
+      );
+      const isPrivileged = identity
+        ? await canMutateRealmTagApplication(
+            identity.permission,
+            identity.userId,
+            params.realmUnitId,
+          )
+        : false;
+      const rows = await realmService.listRealmTagsForUnit(
+        params.realmUnitId,
+        params.unitId,
+        { includeBelowThreshold: isPrivileged },
+      );
+      const viewerVotes = identity?.userId
+        ? await realmService.getViewerRealmTagApplicationVotes(
+            identity.userId,
+            params.realmUnitId,
+            params.unitId,
+            rows.map((row) => row.tagUnitId),
+          )
+        : new Map<string, number>();
+      return {
+        tags: rows.map((row) =>
+          mapRealmTagApplicationToDTO(row, {
+            belowVisibilityThreshold:
+              isPrivileged && row.score <= REALM_TAG_VISIBILITY_THRESHOLD,
+            viewerVote: viewerVotes.get(row.tagUnitId) ?? null,
+          }),
+        ),
+      };
+    },
+    {
+      params: t.Object({
+        realmUnitId: t.String(),
+        unitId: t.String(),
+      }),
+      detail: {
+        summary: "List RealmTagApplication rows for a unit",
+        description:
+          "Returns aggregate realm tag rows for one target unit, with viewerVote when the caller has voted.",
         tags: ["Realms", "Tags"],
       },
     },
@@ -244,6 +300,41 @@ export const realmTagApplicationVoteApi = new Elysia({
         summary: "Cast a RealmTagApplicationVote",
         description:
           "Upserts the member's vote and recomputes RealmTagApplication aggregates. Vote is retained even if the member later leaves the realm.",
+        tags: ["Realms", "Tags"],
+      },
+    },
+  );
+
+export const realmTagApplicationVoteWithdrawApi = new Elysia({
+  prefix: "/realm-tag-application-vote",
+})
+  .use(authMacro)
+
+  .delete(
+    "/:realmUnitId/:unitId/:tagUnitId",
+    async ({ params, identity, set }): Promise<{ message: string }> => {
+      await assertRealmTagVotePolicy({
+        identity,
+        set,
+        realmUnitId: params.realmUnitId,
+        unitId: params.unitId,
+        tagUnitId: params.tagUnitId,
+      });
+      await realmService.withdrawRealmTagApplicationVote(
+        identity.userId,
+        params.realmUnitId,
+        params.unitId,
+        params.tagUnitId,
+      );
+      return { message: "Realm tag vote withdrawn" };
+    },
+    {
+      requireLogin: true,
+      params: realmTagApplicationPathParamsSchema,
+      detail: {
+        summary: "Withdraw own RealmTagApplicationVote",
+        description:
+          "Deletes the caller's realm tag vote and removes the RealmTagApplication aggregate when no votes remain.",
         tags: ["Realms", "Tags"],
       },
     },

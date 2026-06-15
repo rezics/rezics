@@ -144,7 +144,7 @@ export function mapUnitRealmToDTO(row: UnitRealmRow): UnitRealmDTO {
 
 export function mapRealmTagApplicationToDTO(
   row: RealmTagApplicationRow,
-  options?: { belowVisibilityThreshold?: boolean },
+  options?: { belowVisibilityThreshold?: boolean; viewerVote?: number | null },
 ): RealmTagApplicationDTO {
   return {
     realmUnitId: row.realmUnitId,
@@ -152,6 +152,7 @@ export function mapRealmTagApplicationToDTO(
     unitId: row.unitId,
     score: row.score,
     voteCount: row.voteCount,
+    ...(options?.viewerVote != null ? { viewerVote: options.viewerVote } : {}),
     pinned: row.pinned,
     position: row.position ?? null,
     ...(options?.belowVisibilityThreshold

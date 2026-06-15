@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import {
-  Realm,
   RealmTagApplication as RealmTagApplicationTable,
   RealmTagApplicationVote,
   TagVote,
@@ -191,7 +190,7 @@ function createFakeSelect(selection?: Record<string, unknown>) {
       return [];
     },
     // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
-    ["then"](
+    then(
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -241,7 +240,7 @@ function createFakeInsert(table: unknown) {
       return [];
     },
     // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
-    ["then"](
+    then(
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -293,7 +292,7 @@ function createFakeUpdate(table: unknown) {
       return [];
     },
     // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
-    ["then"](
+    then(
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -314,7 +313,7 @@ function createFakeDelete(table: unknown) {
       return [];
     },
     // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
-    ["then"](
+    then(
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
     ) {
@@ -572,7 +571,6 @@ describe("RealmService.createRealmTagApplication", () => {
     );
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
-      "search.content.patchTags",
       "search.content.patchRealmTagKeys",
     ]);
   });
@@ -618,26 +616,7 @@ describe("RealmService.createRealmTagApplication", () => {
     ).rejects.toThrow("tagUnitId");
   });
 
-  test("creates global TagVote and UnitTag aggregate once per user/unit/tag", async () => {
-    await service.createRealmTagApplication(
-      "user-1",
-      "realm-1",
-      "unit-1",
-      "tag-1",
-    );
-    tagVoteFindUniqueMock.mockResolvedValueOnce({
-      userId: "user-1",
-      unitId: "unit-1",
-      tagUnitId: "tag-1",
-      value: 1,
-    });
-    realmTagApplicationVoteFindUniqueMock.mockResolvedValueOnce({
-      realmUnitId: "realm-1",
-      tagUnitId: "tag-1",
-      unitId: "unit-1",
-      userId: "user-1",
-      value: 1,
-    });
+  test("does not create global TagVote or UnitTag aggregates", async () => {
     await service.createRealmTagApplication(
       "user-1",
       "realm-1",
@@ -645,23 +624,17 @@ describe("RealmService.createRealmTagApplication", () => {
       "tag-1",
     );
 
-    expect(tagVoteCreateMock).toHaveBeenCalledTimes(1);
-    expect(unitTagUpsertMock).toHaveBeenCalledTimes(2);
+    expect(tagVoteCreateMock).not.toHaveBeenCalled();
+    expect(unitTagUpsertMock).not.toHaveBeenCalled();
   });
 
-  test("does not amplify global TagVote across multiple realms", async () => {
+  test("keeps realm votes independent from global votes across multiple realms", async () => {
     await service.createRealmTagApplication(
       "user-1",
       "realm-1",
       "unit-1",
       "tag-1",
     );
-    tagVoteFindUniqueMock.mockResolvedValueOnce({
-      userId: "user-1",
-      unitId: "unit-1",
-      tagUnitId: "tag-1",
-      value: 1,
-    });
     await service.createRealmTagApplication(
       "user-1",
       "realm-2",
@@ -669,7 +642,8 @@ describe("RealmService.createRealmTagApplication", () => {
       "tag-1",
     );
 
-    expect(tagVoteCreateMock).toHaveBeenCalledTimes(1);
+    expect(tagVoteCreateMock).not.toHaveBeenCalled();
+    expect(unitTagUpsertMock).not.toHaveBeenCalled();
   });
 });
 

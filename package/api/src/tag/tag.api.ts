@@ -122,7 +122,13 @@ export const tagApi = {
   getTagContext: async (
     unitId: string,
   ): Promise<{
-    tags: { tagUnitId: string; score: number; label: string }[];
+    tags: {
+      tagUnitId: string;
+      score: number;
+      voteCount: number;
+      viewerVote?: number | null;
+      label: string;
+    }[];
     realmHighlights: {
       realmUnitId: string;
       realmName: string;
@@ -130,6 +136,8 @@ export const tagApi = {
         tagUnitId: string;
         label: string;
         score: number;
+        voteCount: number;
+        viewerVote?: number | null;
         contextUnitId: string | null;
       }[];
     }[];
@@ -207,6 +215,23 @@ export const tagApi = {
       `/unit-tag/${encodeURIComponent(unitId)}/${encodeURIComponent(
         tagUnitId,
       )}`,
+      { method: "DELETE" },
+    );
+  },
+
+  /**
+   * Withdraw the current user's vote from a UnitTag. If the caller was the last
+   * voter, the server removes the UnitTag aggregate row.
+   * DELETE /unit-tag/:unitId/:tagUnitId/vote
+   */
+  withdrawUnitTagVote: async (
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/unit-tag/${encodeURIComponent(unitId)}/${encodeURIComponent(
+        tagUnitId,
+      )}/vote`,
       { method: "DELETE" },
     );
   },

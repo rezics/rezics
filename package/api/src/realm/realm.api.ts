@@ -450,6 +450,21 @@ export const realmApi = {
   },
 
   /**
+   * List realm-scoped tag applications for one target unit.
+   * GET /realm-tag-application/:realmUnitId/:unitId
+   */
+  listRealmTagApplicationsForUnit: async (
+    realmUnitId: string,
+    unitId: string,
+  ): Promise<{ tags: RealmTagApplicationDTO[] }> => {
+    return apiFetch<{ tags: RealmTagApplicationDTO[] }>(
+      `/realm-tag-application/${encodeURIComponent(
+        realmUnitId,
+      )}/${encodeURIComponent(unitId)}`,
+    );
+  },
+
+  /**
    * Pin/unpin or reposition a RealmTagApplication (admin or realm owner).
    * PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId
    */
@@ -498,6 +513,24 @@ export const realmApi = {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  /**
+   * Withdraw the current member's RealmTagApplicationVote. If no votes remain,
+   * the server removes the RealmTagApplication aggregate row.
+   * DELETE /realm-tag-application-vote/:realmUnitId/:unitId/:tagUnitId
+   */
+  withdrawRealmTagApplicationVote: async (
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/realm-tag-application-vote/${encodeURIComponent(
+        realmUnitId,
+      )}/${encodeURIComponent(unitId)}/${encodeURIComponent(tagUnitId)}`,
+      { method: "DELETE" },
+    );
   },
 
   // ---- Realm-tag interpretation contexts ----

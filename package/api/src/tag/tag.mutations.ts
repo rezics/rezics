@@ -115,6 +115,9 @@ export function useAttachTagMutation(
         queryKey: tagKeys.forUnit(variables.unitId),
       });
       queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
+      });
+      queryClient.invalidateQueries({
         queryKey: tagKeys.detail(variables.tagUnitId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
@@ -141,6 +144,9 @@ export function useDetachTagMutation(
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: tagKeys.forUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
       });
       queryClient.invalidateQueries({
         queryKey: tagKeys.detail(variables.tagUnitId),
@@ -170,6 +176,9 @@ export function useCastTagVoteMutation(
       // 让该 unit 的标签计分关联失效
       queryClient.invalidateQueries({
         queryKey: tagKeys.forUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
       });
       queryClient.invalidateQueries({
         queryKey: tagKeys.detail(variables.tagUnitId),
@@ -202,6 +211,9 @@ export function useCreateUnitTagMutation(
       queryClient.invalidateQueries({
         queryKey: tagKeys.forUnit(variables.unitId),
       });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
+      });
       queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -232,6 +244,9 @@ export function usePatchUnitTagMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
         queryKey: tagKeys.forUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
       });
       queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
@@ -264,6 +279,40 @@ export function useDeleteUnitTagMutation(
       queryClient.invalidateQueries({
         queryKey: tagKeys.forUnit(variables.unitId),
       });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Withdraw the current user's own UnitTag vote. The server removes the
+ * aggregate UnitTag row when this leaves no votes.
+ * 撤回当前用户自己的 UnitTag 投票；若没有剩余投票，服务端会删除聚合行。
+ */
+export function useWithdrawUnitTagVoteMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { unitId: string; tagUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, tagUnitId }) =>
+      tagApi.withdrawUnitTagVote(unitId, tagUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.forUnit(variables.unitId),
+      });
       queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -284,4 +333,5 @@ export const tagMutations = {
   useCreateUnitTag: useCreateUnitTagMutation,
   usePatchUnitTag: usePatchUnitTagMutation,
   useDeleteUnitTag: useDeleteUnitTagMutation,
+  useWithdrawUnitTagVote: useWithdrawUnitTagVoteMutation,
 };

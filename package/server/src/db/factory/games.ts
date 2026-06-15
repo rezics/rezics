@@ -120,7 +120,14 @@ export async function seedGames(
         });
       }
       for (const t of pickN(tags, randomInt(1, 5))) {
-        allTagLinks.push(withUpdatedAt({ unitId: unit.id, tagUnitId: t.id }));
+        allTagLinks.push(
+          withUpdatedAt({
+            unitId: unit.id,
+            tagUnitId: t.id,
+            score: 1,
+            voteCount: 1,
+          }),
+        );
       }
 
       return unit;

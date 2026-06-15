@@ -16,6 +16,7 @@ export { realmExtraApi } from "./realm-extra.api";
 export {
   realmTagApplicationApi,
   realmTagApplicationVoteApi,
+  realmTagApplicationVoteWithdrawApi,
 } from "./realm-tag-application.api";
 export { mapRealmTagApplicationVoteToDTO } from "./realm-tag-application-vote.mapper";
 export { realmTagContextApi } from "./realm-tag-context.api";

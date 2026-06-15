@@ -693,6 +693,15 @@ export function useCreateRealmTagApplicationMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.tagApplications(variables.realmUnitId),
       });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagApplicationsForUnit(
+          variables.realmUnitId,
+          variables.unitId,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
+      });
       queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -728,7 +737,16 @@ export function usePatchRealmTagApplicationMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.tagApplications(variables.realmUnitId),
       });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagApplicationsForUnit(
+          variables.realmUnitId,
+          variables.unitId,
+        ),
+      });
       queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
+      });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -758,7 +776,16 @@ export function useDeleteRealmTagApplicationMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.tagApplications(variables.realmUnitId),
       });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagApplicationsForUnit(
+          variables.realmUnitId,
+          variables.unitId,
+        ),
+      });
       queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
+      });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -787,6 +814,55 @@ export function useCastRealmTagApplicationVoteMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
         queryKey: realmKeys.tagApplications(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagApplicationsForUnit(
+          variables.realmUnitId,
+          variables.unitId,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Withdraw the current member's own RealmTagApplicationVote. The server removes
+ * the RealmTagApplication aggregate row when this leaves no votes.
+ * 撤回当前成员自己的 RealmTagApplicationVote；若没有剩余投票，服务端会删除聚合行。
+ */
+export function useWithdrawRealmTagApplicationVoteMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { realmUnitId: string; unitId: string; tagUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, unitId, tagUnitId }) =>
+      realmApi.withdrawRealmTagApplicationVote(realmUnitId, unitId, tagUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagApplications(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagApplicationsForUnit(
+          variables.realmUnitId,
+          variables.unitId,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.context(variables.unitId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -880,6 +956,8 @@ export const realmMutations = {
   usePatchRealmTagApplication: usePatchRealmTagApplicationMutation,
   useDeleteRealmTagApplication: useDeleteRealmTagApplicationMutation,
   useCastRealmTagApplicationVote: useCastRealmTagApplicationVoteMutation,
+  useWithdrawRealmTagApplicationVote:
+    useWithdrawRealmTagApplicationVoteMutation,
   useUpdateRealmTagContext: useUpdateRealmTagContextMutation,
   useMaterializeRealmTagContext: useMaterializeRealmTagContextMutation,
 };

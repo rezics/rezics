@@ -2,7 +2,9 @@ import { and, asc, desc, eq, gt, inArray } from "drizzle-orm";
 import {
   RealmMember,
   RealmTagApplication,
+  RealmTagApplicationVote,
   RealmTagContext,
+  TagVote,
   UnitTag,
   UnitTranslation,
 } from "../db/schema";
@@ -62,10 +64,34 @@ export async function getTagContext(
       asc(UnitTag.tagUnitId),
     );
   const tagTitles = await loadFirstTitles(unitTags.map((ut) => ut.tagUnitId));
+  const viewerTagVotes =
+    userId && unitTags.length > 0
+      ? await db
+          .select({
+            tagUnitId: TagVote.tagUnitId,
+            value: TagVote.value,
+          })
+          .from(TagVote)
+          .where(
+            and(
+              eq(TagVote.userId, userId),
+              eq(TagVote.unitId, unitId),
+              inArray(
+                TagVote.tagUnitId,
+                unitTags.map((ut) => ut.tagUnitId),
+              ),
+            ),
+          )
+      : [];
+  const viewerTagVoteByTagUnitId = new Map(
+    viewerTagVotes.map((vote) => [vote.tagUnitId, vote.value]),
+  );
 
   const tags = unitTags.map((ut) => ({
     tagUnitId: ut.tagUnitId,
     score: ut.score,
+    voteCount: ut.voteCount,
+    viewerVote: viewerTagVoteByTagUnitId.get(ut.tagUnitId) ?? null,
     pinned: ut.pinned,
     position: ut.position,
     label: tagTitles.get(ut.tagUnitId) ?? ut.tagUnitId,
@@ -78,6 +104,8 @@ export async function getTagContext(
       tagUnitId: string;
       label: string;
       score: number;
+      voteCount: number;
+      viewerVote: number | null;
       contextUnitId: string | null;
     }[];
   }[] = [];
@@ -140,6 +168,36 @@ export async function getTagContext(
           row.contextUnitId,
         ]),
       );
+      const viewerRealmVotes =
+        realmTagApplications.length === 0
+          ? []
+          : await db
+              .select({
+                realmUnitId: RealmTagApplicationVote.realmUnitId,
+                tagUnitId: RealmTagApplicationVote.tagUnitId,
+                value: RealmTagApplicationVote.value,
+              })
+              .from(RealmTagApplicationVote)
+              .where(
+                and(
+                  eq(RealmTagApplicationVote.userId, userId),
+                  eq(RealmTagApplicationVote.unitId, unitId),
+                  inArray(
+                    RealmTagApplicationVote.realmUnitId,
+                    realmTagApplications.map((rtu) => rtu.realmUnitId),
+                  ),
+                  inArray(
+                    RealmTagApplicationVote.tagUnitId,
+                    realmTagApplications.map((rtu) => rtu.tagUnitId),
+                  ),
+                ),
+              );
+      const viewerRealmVoteByPair = new Map(
+        viewerRealmVotes.map((vote) => [
+          `${vote.realmUnitId}:${vote.tagUnitId}`,
+          vote.value,
+        ]),
+      );
       const [realmNames, appliedTagTitles] = await Promise.all([
         loadFirstTitles(realmIds),
         loadFirstTitles(realmTagApplications.map((rtu) => rtu.tagUnitId)),
@@ -153,6 +211,8 @@ export async function getTagContext(
             tagUnitId: string;
             label: string;
             score: number;
+            voteCount: number;
+            viewerVote: number | null;
             contextUnitId: string | null;
           }[];
         }
@@ -169,6 +229,10 @@ export async function getTagContext(
           tagUnitId: rtu.tagUnitId,
           label: appliedTagTitles.get(rtu.tagUnitId) ?? rtu.tagUnitId,
           score: rtu.score,
+          voteCount: rtu.voteCount,
+          viewerVote:
+            viewerRealmVoteByPair.get(`${rtu.realmUnitId}:${rtu.tagUnitId}`) ??
+            null,
           contextUnitId:
             contextByPair.get(`${rtu.realmUnitId}:${rtu.tagUnitId}`) ?? null,
         });
