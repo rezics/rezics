@@ -3,7 +3,7 @@ app {
 }
 
 pack {
-  name        = "rezics-dev"
-  description = "Rezics development environment"
+  name        = "rezics-prod"
+  description = "Rezics production environment"
   version     = "0.1.0"
 }
