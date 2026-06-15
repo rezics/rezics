@@ -13,6 +13,8 @@
   "list_unsubscribe_confirm_title": "選択したゾーンの購読を解除しますか？",
   "not_found": "ゾーンが見つかりません",
   "not_found_description": "このゾーンは存在しないか、公開されていません。",
+  "subscribe": "購読",
+  "unsubscribe": "購読解除",
   "manage": "管理",
   "menu": "メニュー",
   "open_menu": "メニューを開く",

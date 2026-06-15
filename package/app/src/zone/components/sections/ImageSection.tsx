@@ -1,7 +1,7 @@
 import type { ZoneImageSection } from "@rezics/contract";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import { zoneLinkHref } from "../../models/zoneMenu";
+import { zoneLinkHref, zoneRouteLocationFromZone } from "../../models/zoneMenu";
 import {
   useZoneSectionTitle,
   type ZonePortalContext,
@@ -53,7 +53,7 @@ export function ImageSection({
   );
   const href = section.target
     ? zoneLinkHref(section.target, {
-        zoneSlug: ctx.zone.slug,
+        routeLocation: zoneRouteLocationFromZone(ctx.zone),
         pages: ctx.zone.pages,
         refUnits: ctx.refUnits,
       })

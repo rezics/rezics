@@ -13,6 +13,8 @@
   "list_unsubscribe_confirm_title": "退订已选择的专区？",
   "not_found": "找不到专区",
   "not_found_description": "此专区不存在或未公开。",
+  "subscribe": "订阅",
+  "unsubscribe": "退订",
   "manage": "管理",
   "menu": "菜单",
   "open_menu": "打开菜单",

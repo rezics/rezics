@@ -13,6 +13,8 @@
   "list_unsubscribe_confirm_title": "Unsubscribe from selected zones?",
   "not_found": "Zone not found",
   "not_found_description": "This zone does not exist or is not public.",
+  "subscribe": "Subscribe",
+  "unsubscribe": "Unsubscribe",
   "manage": "Manage",
   "menu": "Menu",
   "open_menu": "Open menu",

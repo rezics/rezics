@@ -7,6 +7,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core";
 import { StreamRenderer } from "@/feed";
 import {
+  zoneRouteLocationFromZone,
   zoneSectionItemHref,
   zoneSectionTitleText,
 } from "../../models/zoneMenu";
@@ -34,6 +35,7 @@ export function QuerySection({
 }) {
   const { t } = useTranslation(["zone"]);
   const { zone, refUnits } = ctx;
+  const routeLocation = zoneRouteLocationFromZone(zone);
   const title = useZoneSectionTitle(section, refUnits);
   const dynamicTagUnitIds = ctx.dynamicTagSelections?.[section.id] ?? [];
   const query = useInfiniteQuery(
@@ -75,7 +77,7 @@ export function QuerySection({
   const entries: ZoneListEntry[] = items.map((item) => ({
     key: item.unitId,
     unitId: item.unitId,
-    href: zoneSectionItemHref(item, zone.slug),
+    href: zoneSectionItemHref(item, routeLocation),
     label: item.title ?? item.slug ?? item.unitId,
     summary: item.summary,
     imageUrl: item.imageUrl,

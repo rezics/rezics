@@ -10,15 +10,37 @@ import type {
 } from "@rezics/contract";
 import { ZONE_MENU_MAX_DEPTH } from "@rezics/contract";
 import { unitHref } from "@rezics/ui/primitive/link";
-import { type ZoneDetailKind, zoneDetailRoute } from "./zoneDetailRoutes";
+import {
+  type ZoneDetailKind,
+  type ZoneRouteLocation,
+  zoneDetailRoute,
+  zoneRouteBaseHref,
+  zoneRouteLocationFromZone,
+} from "./zoneDetailRoutes";
+
+export {
+  type ZoneRouteLocation,
+  zoneManageHref,
+  zoneRouteBaseHref,
+  zoneRouteLocationFromZone,
+  zoneSearchHref,
+} from "./zoneDetailRoutes";
 
 export type ZoneRefUnitMap = Record<string, ZoneRefUnitSummary>;
 
 export type ZoneLinkContext = {
-  zoneSlug: string;
+  routeLocation: ZoneRouteLocation;
   pages?: readonly ZonePageSummary[];
   refUnits: ZoneRefUnitMap;
 };
+
+function normalizeZoneRouteLocation(
+  location: ZoneRouteLocation | string,
+): ZoneRouteLocation {
+  return typeof location === "string"
+    ? { kind: "slug", zoneSlug: location }
+    : location;
+}
 
 /**
  * Zone-framed detail kind from the referenced unit's shape: POST kind WIKI
@@ -48,11 +70,12 @@ export function zoneUnitHref(
     slug?: string | null;
     postKind?: string | null;
   },
-  zoneSlug: string,
+  location: ZoneRouteLocation | string,
 ): string {
+  const routeLocation = normalizeZoneRouteLocation(location);
   if (item.type === "POST") {
     return zoneDetailRoute({
-      zoneSlug,
+      location: routeLocation,
       kind: zoneDetailKindForRef(item),
       unitId: item.unitId,
     }).href;
@@ -89,21 +112,22 @@ export function zoneSectionItemHref(
     slug?: string | null;
     postKind?: string | null;
   },
-  zoneSlug: string,
+  location: ZoneRouteLocation | string,
 ): string {
-  return zoneUnitHref(item, zoneSlug);
+  return zoneUnitHref(item, location);
 }
 
 export function zonePageHref(
   pageId: ZonePageId,
-  zoneSlug: string,
+  location: ZoneRouteLocation | string,
   pages: readonly ZonePageSummary[] = [],
 ): string | null {
+  const routeLocation = normalizeZoneRouteLocation(location);
   const page = pages.find((candidate) => candidate.id === pageId);
   if (!page) return null;
   return page.slug === "home"
-    ? `/z/${zoneSlug}`
-    : `/z/${zoneSlug}/page/${page.slug}`;
+    ? zoneRouteBaseHref(routeLocation)
+    : `${zoneRouteBaseHref(routeLocation)}/page/${page.slug}`;
 }
 
 export function zoneLinkHref(
@@ -114,10 +138,10 @@ export function zoneLinkHref(
     case "unit":
       return zoneUnitHref(
         ctx.refUnits[target.unitId] ?? { unitId: target.unitId },
-        ctx.zoneSlug,
+        ctx.routeLocation,
       );
     case "zonePage":
-      return zonePageHref(target.pageId, ctx.zoneSlug, ctx.pages);
+      return zonePageHref(target.pageId, ctx.routeLocation, ctx.pages);
     case "external":
       return target.url;
   }

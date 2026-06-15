@@ -129,6 +129,8 @@
   "profile_following": "关注中",
   "profile_no_followers": "还没有关注者",
   "profile_no_following": "尚未关注任何人",
+  "profile_summary": "个人简介",
+  "profile_summary_placeholder": "添加一段简短的个人简介",
   "profile_realms_joined": "已加入",
   "profile_realms_load_failed": "无法加载领域",
   "profile_realms_managing": "管理中",

@@ -129,6 +129,8 @@
   "profile_following": "Following",
   "profile_no_followers": "No followers yet",
   "profile_no_following": "Not following anyone yet",
+  "profile_summary": "Profile summary",
+  "profile_summary_placeholder": "Add a short profile summary",
   "profile_realms_joined": "Joined",
   "profile_realms_load_failed": "Failed to load realms",
   "profile_realms_managing": "Managing",

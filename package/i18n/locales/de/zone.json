@@ -13,6 +13,8 @@
   "list_unsubscribe_confirm_title": "Ausgewählte Zonen abbestellen?",
   "not_found": "Zone nicht gefunden",
   "not_found_description": "Diese Zone existiert nicht oder ist nicht öffentlich.",
+  "subscribe": "Abonnieren",
+  "unsubscribe": "Abbestellen",
   "manage": "Verwalten",
   "menu": "Menü",
   "open_menu": "Menü öffnen",

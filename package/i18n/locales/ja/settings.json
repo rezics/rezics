@@ -129,6 +129,8 @@
   "profile_following": "フォロー中",
   "profile_no_followers": "まだフォロワーがいません",
   "profile_no_following": "まだ誰もフォローしていません",
+  "profile_summary": "プロフィール概要",
+  "profile_summary_placeholder": "短いプロフィール概要を追加",
   "profile_realms_joined": "参加しました",
   "profile_realms_load_failed": "レルムのロードに失敗しました",
   "profile_realms_managing": "管理中",

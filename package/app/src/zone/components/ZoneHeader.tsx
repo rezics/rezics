@@ -31,6 +31,8 @@ import {
   type ResolvedZoneMenuNode,
   resolveZoneMenuNodes,
   type ZoneRefUnitMap,
+  type ZoneRouteLocation,
+  zoneRouteBaseHref,
 } from "../models/zoneMenu";
 import { ZONE_CONTENT_MAX_WIDTH_DEFAULT } from "../models/zoneTheme";
 import { useZoneLabelResolver } from "./sections/shared";
@@ -38,6 +40,7 @@ import { useZoneLabelResolver } from "./sections/shared";
 type ZoneHeaderProps = {
   zone: ZoneDTO;
   refUnits: ZoneRefUnitMap;
+  routeLocation: ZoneRouteLocation;
 };
 
 /**
@@ -56,7 +59,7 @@ type ZoneHeaderProps = {
  * 需要 fork 外壳内部实现（布局 store、认证区块），因此专区头部改为
  * 渐进合并：紧贴外壳头部下方吸附，吸附后采用相同的画布/描边处理。
  */
-export function ZoneHeader({ zone, refUnits }: ZoneHeaderProps) {
+export function ZoneHeader({ zone, refUnits, routeLocation }: ZoneHeaderProps) {
   const { t } = useTranslation(["zone"]);
   const resolveLabel = useZoneLabelResolver();
   const navigate = useNavigate();
@@ -80,7 +83,7 @@ export function ZoneHeader({ zone, refUnits }: ZoneHeaderProps) {
   const menu = findZoneMenu(menus, header.menuId);
   const nodes = menu
     ? resolveZoneMenuNodes(menu.nodes, {
-        zoneSlug: zone.slug,
+        routeLocation,
         pages: zone.pages,
         refUnits,
       })
@@ -102,11 +105,19 @@ export function ZoneHeader({ zone, refUnits }: ZoneHeaderProps) {
     event.preventDefault();
     const q = keyword.trim();
     setDrawerOpen(false);
-    navigate({
-      to: "/z/$slug/search",
-      params: { slug: zone.slug },
-      search: q ? { q } : {},
-    });
+    if (routeLocation.kind === "slug") {
+      navigate({
+        to: "/z/$slug/search",
+        params: { slug: routeLocation.zoneSlug },
+        search: q ? { q } : {},
+      });
+    } else {
+      navigate({
+        to: "/zone/$unitId/search",
+        params: { unitId: routeLocation.zoneUnitId },
+        search: q ? { q } : {},
+      });
+    }
   };
 
   return (
@@ -125,7 +136,7 @@ export function ZoneHeader({ zone, refUnits }: ZoneHeaderProps) {
           style={contentStyle}
         >
           <SafeLink
-            href={`/z/${zone.slug}`}
+            href={zoneRouteBaseHref(routeLocation)}
             className="flex min-w-0 shrink-0 items-center gap-2"
           >
             {logoUrl ? (

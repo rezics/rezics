@@ -13,6 +13,8 @@
   "list_unsubscribe_confirm_title": "退訂已選取的專區？",
   "not_found": "找不到專區",
   "not_found_description": "此專區不存在或未公開。",
+  "subscribe": "訂閱",
+  "unsubscribe": "退訂",
   "manage": "管理",
   "menu": "選單",
   "open_menu": "開啟選單",

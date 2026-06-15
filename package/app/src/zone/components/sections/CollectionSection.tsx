@@ -8,6 +8,7 @@ import {
   zoneLinkFallbackKey,
   zoneLinkHref,
   zoneLinkLabel,
+  zoneRouteLocationFromZone,
 } from "../../models/zoneMenu";
 import {
   useZoneLabelResolver,
@@ -56,7 +57,11 @@ export function CollectionSection({
   const { zone, refUnits } = ctx;
   const title = useZoneSectionTitle(section, refUnits);
   const resolveLabel = useZoneLabelResolver();
-  const linkCtx = { zoneSlug: zone.slug, pages: zone.pages, refUnits };
+  const linkCtx = {
+    routeLocation: zoneRouteLocationFromZone(zone),
+    pages: zone.pages,
+    refUnits,
+  };
 
   const entries: ZoneListEntry[] = section.items.flatMap((item, index) => {
     const href = zoneLinkHref(item.target, linkCtx);

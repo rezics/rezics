@@ -9,6 +9,7 @@ import {
   zoneLinkFallbackKey,
   zoneLinkHref,
   zoneLinkLabel,
+  zoneRouteLocationFromZone,
 } from "../../models/zoneMenu";
 import {
   useZoneLabelResolver,
@@ -46,7 +47,7 @@ export function ActionsSection({
   const title = useZoneSectionTitle(section, ctx.refUnits);
   const resolveLabel = useZoneLabelResolver();
   const linkCtx = {
-    zoneSlug: ctx.zone.slug,
+    routeLocation: zoneRouteLocationFromZone(ctx.zone),
     pages: ctx.zone.pages,
     refUnits: ctx.refUnits,
   };

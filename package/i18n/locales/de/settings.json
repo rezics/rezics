@@ -129,6 +129,8 @@
   "profile_following": "Folge ich",
   "profile_no_followers": "Noch keine Follower",
   "profile_no_following": "Ich folge noch niemandem",
+  "profile_summary": "Profilzusammenfassung",
+  "profile_summary_placeholder": "Kurze Profilzusammenfassung hinzufügen",
   "profile_realms_joined": "Beigetreten",
   "profile_realms_load_failed": "Bereiche konnten nicht geladen werden",
   "profile_realms_managing": "Verwaltung",
