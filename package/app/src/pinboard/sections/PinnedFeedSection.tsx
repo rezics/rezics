@@ -23,7 +23,7 @@ export interface PinnedFeedSectionProps {
 }
 
 const PINNED_ITEM_CLASS =
-  "pl-4 basis-[78%] @sm:basis-[52%] @md:basis-[36%] @lg:basis-[30%] @xl:basis-[24%]";
+  "pl-4 basis-[86%] @sm:basis-[56%] @md:basis-[46%] @lg:basis-[38%] @xl:basis-[32%]";
 
 /**
  * Renders the pinned region above a realm feed. No-ops when the list is
@@ -34,8 +34,8 @@ const PINNED_ITEM_CLASS =
  * +--------------------------------+
  * | Pinned                       ^ |
  * | +------------------------+     |
- * | | pinned card 78% width  | --> |
- * | | h-44, horizontal scroll|     |
+ * | | pinned card 86% width  | --> |
+ * | | h-42, horizontal scroll|     |
  * | +------------------------+     |
  * +--------------------------------+
  *
@@ -43,7 +43,7 @@ const PINNED_ITEM_CLASS =
  * +------------------------------------------+
  * | Pinned                                 ^ |
  * | +----------------+ +----------------+    |
- * | | card 52%       | | card 52%       | -->|
+ * | | card 56%       | | card 56%       | -->|
  * | +----------------+ +----------------+    |
  * +------------------------------------------+
  *
@@ -51,7 +51,7 @@ const PINNED_ITEM_CLASS =
  * +------------------------------------------------+
  * | Pinned                                      ^  |
  * | +-------------+ +-------------+ +-------------+ |
- * | | card 30%    | | card 30%    | | card 30%    | |
+ * | | card 38%    | | card 38%    | | card 38%    | |
  * | +-------------+ +-------------+ +-------------+ |
  * +------------------------------------------------+
  *
@@ -59,7 +59,7 @@ const PINNED_ITEM_CLASS =
  * +------------------------------------------------------------+
  * | Pinned                                                   ^ |
  * | +----------+ +----------+ +----------+ +----------+        |
- * | | card 24% | | card 24% | | card 24% | | card 24% |  -->   |
+ * | | card 32% | | card 32% | | card 32% | | card 32% |  -->   |
  * | +----------+ +----------+ +----------+ +----------+        |
  * +------------------------------------------------------------+
  *
@@ -82,7 +82,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   if (isLoading) {
     return (
       <div className="mb-4">
-        <PinboardSkeleton rows={2} rowHeight={176} />
+        <PinboardSkeleton rows={2} rowHeight={168} />
       </div>
     );
   }
@@ -113,6 +113,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
             items={entries}
             itemKey={(entry) => entry.unitId}
             itemClassName={PINNED_ITEM_CLASS}
+            className="@container"
             ariaLabel={t("entity:pinboard_pinned_region")}
             wheelScroll
             renderItem={(entry) => (

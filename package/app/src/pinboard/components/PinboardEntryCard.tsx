@@ -55,7 +55,7 @@ export interface PinboardEntryCardProps {
  * +----------------------+
  * | pinned card 78vw     |
  * | title title          |
- * | preview x 3          |
+ * | preview x 4          |
  * +----------------------+
  *
  * Tablet:
@@ -68,7 +68,7 @@ export interface PinboardEntryCardProps {
  * Desktop:
  * +-----------+ +-----------+ +-----------+
  * | pinned    | | pinned    | | pinned    |
- * | h-44      | | h-44      | | h-44      |
+ * | h-42      | | h-42      | | h-42      |
  * +-----------+ +-----------+ +-----------+
  *
  * Ultra-wide:
@@ -78,7 +78,7 @@ export interface PinboardEntryCardProps {
  * +---------+ +---------+ +---------+ +---------+
  *
  * 视觉规则：`pinned` 是读者态置顶预览。图片存在时图片为主体，只渲染标题；
- * 没有图片时渲染真实标题（若存在）与最多三行内容。语言码和其它元信息不在读者态 footer
+ * 没有图片时渲染真实标题（若存在）与最多四行内容。语言码和其它元信息不在读者态 footer
  * 中重复出现。同行标题与图片/正文均有固定高度和截断规则，窄屏由 carousel
  * 负责横向滚动，宽屏由 item basis 控制每张卡片宽度。
  */
@@ -221,7 +221,9 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
     const content =
       preview.mode === "image" ? (
         <>
-          <CardMedia className="h-28 bg-surface-subtle">
+          <CardMedia
+            className={cn("bg-surface-subtle", pinnedTitle ? "h-26" : "h-full")}
+          >
             <img
               src={preview.imageUrl}
               alt={pinnedTitle ?? ""}
@@ -231,7 +233,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           {pinnedTitle ? (
             <div className="min-h-0 px-4 py-3">
               <p
-                className="text-sm font-semibold leading-ui text-text-primary overflow-hidden"
+                className="text-base font-semibold leading-ui text-text-primary overflow-hidden"
                 style={{
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
@@ -247,7 +249,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
         <div className="flex min-h-0 flex-1 flex-col p-4">
           {pinnedTitle ? (
             <p
-              className="text-sm font-semibold leading-ui text-text-primary overflow-hidden"
+              className="text-base font-semibold leading-ui text-text-primary overflow-hidden"
               style={{
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
@@ -260,12 +262,12 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           {preview.text ? (
             <p
               className={cn(
-                "text-xs leading-body text-text-secondary overflow-hidden",
+                "text-sm leading-body text-text-secondary overflow-hidden",
                 pinnedTitle && "mt-2",
               )}
               style={{
                 display: "-webkit-box",
-                WebkitLineClamp: 3,
+                WebkitLineClamp: 4,
                 WebkitBoxOrient: "vertical",
               }}
             >
@@ -278,7 +280,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
       <Card
         surface="plain"
         interactive={Boolean(href)}
-        className="h-44 gap-0 p-0"
+        className="h-42 gap-0 p-0"
       >
         {content}
       </Card>
