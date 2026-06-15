@@ -26,20 +26,16 @@ describe("shelfApi shelf item routes", () => {
     await shelfApi.get("shelf-1", {
       languages: ["zh-hant", "en"],
       appLocale: "zh-hant",
-      languageMode: "preferred",
     });
     await shelfApi.list({
       languages: "en,ja",
       appLocale: "ja",
-      languageMode: "preferred",
     });
 
     expect(calls[0]?.url).toBe(
-      "/shelf/shelf-1?languages=zh-hant%2Cen&appLocale=zh-hant&languageMode=preferred",
+      "/shelf/shelf-1?languages=zh-hant%2Cen&appLocale=zh-hant",
     );
-    expect(calls[1]?.url).toBe(
-      "/shelf/list?languages=en%2Cja&appLocale=ja&languageMode=preferred",
-    );
+    expect(calls[1]?.url).toBe("/shelf/list?languages=en%2Cja&appLocale=ja");
   });
 
   test("writes shelf items with item identity in the request body", async () => {

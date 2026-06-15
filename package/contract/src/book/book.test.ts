@@ -160,12 +160,11 @@ describe("bookDTOSchema", () => {
 });
 
 describe("book list schemas", () => {
-  test("accept ordered read candidates and language visibility mode", () => {
+  test("accept ordered read candidates without a visibility mode", () => {
     expect(
       Value.Check(bookListQuerySchema, {
         languages: "ja,en",
         appLocale: "zh-hant",
-        languageMode: "preferred",
         moderationStatus: "APPROVED",
         limit: 20,
       }),
@@ -174,7 +173,6 @@ describe("book list schemas", () => {
       Value.Check(bookListBodySchema, {
         languages: ["ja", "en"],
         appLocale: "zh-hant",
-        languageMode: "all",
         moderationStatus: "APPROVED",
         limit: 20,
       }),

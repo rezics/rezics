@@ -39,7 +39,6 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
       sort,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       ...(tagIds.length > 0 ? { tagIds } : {}),
       ...(realmModerationStatus ? { realmModerationStatus } : {}),
     },

@@ -86,7 +86,6 @@ function postQueryForFeed(query: FeedQuery, limit: number): PostListQuery {
     ...(query.targetUnitId ? { targetUnitId: query.targetUnitId } : {}),
     ...(query.variantUnitId ? { variantUnitId: query.variantUnitId } : {}),
     ...(query.languages ? { languages: query.languages as string } : {}),
-    ...(query.languageMode ? { languageMode: query.languageMode } : {}),
     ...(query.tagIds?.length ? { tagIds: query.tagIds } : {}),
     ...(query.realmModerationStatus
       ? { realmModerationStatus: query.realmModerationStatus }
@@ -209,7 +208,7 @@ type ShelfServiceListOptions = NonNullable<
 
 function bookListLanguageOptions(
   query: FeedQuery,
-): Pick<BookServiceListOptions, "appLocale" | "languageMode" | "languages"> {
+): Pick<BookServiceListOptions, "appLocale" | "languages"> {
   const readLanguage = bookReadLanguageForFeed(query);
   return {
     ...(readLanguage.languages?.length
@@ -221,13 +220,12 @@ function bookListLanguageOptions(
             readLanguage.appLocale as BookServiceListOptions["appLocale"],
         }
       : {}),
-    ...(query.languageMode ? { languageMode: query.languageMode } : {}),
   };
 }
 
 function shelfListLanguageOptions(
   query: FeedQuery,
-): Pick<ShelfServiceListOptions, "appLocale" | "languageMode" | "languages"> {
+): Pick<ShelfServiceListOptions, "appLocale" | "languages"> {
   const readLanguage = bookReadLanguageForFeed(query);
   return {
     ...(readLanguage.languages?.length
@@ -239,7 +237,6 @@ function shelfListLanguageOptions(
             readLanguage.appLocale as ShelfServiceListOptions["appLocale"],
         }
       : {}),
-    ...(query.languageMode ? { languageMode: query.languageMode } : {}),
   };
 }
 

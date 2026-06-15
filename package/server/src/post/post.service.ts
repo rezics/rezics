@@ -48,10 +48,7 @@ import {
   collectPatchLeafPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import {
-  primarySupportLanguageCreate,
-  resolveEffectiveReadLanguageCandidates,
-} from "@/unit/language-resolution";
+import { primarySupportLanguageCreate } from "@/unit/language-resolution";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
@@ -281,23 +278,6 @@ function rankedCursorCondition(
         and(eq(Post.createdAt, createdAt), lt(Post.unitId, cursor.unitId)),
       ),
     ),
-  );
-}
-
-function preferredLanguageCondition(
-  languageMode: PostListQuery["languageMode"],
-  readLanguages: readonly string[],
-): SQL | undefined {
-  if (languageMode !== "preferred" || readLanguages.length === 0) {
-    return undefined;
-  }
-  return or(
-    eq(Unit.isLanguageNeutral, true),
-    sql`exists (
-      select 1 from "UnitSupportLanguage" usl
-      where usl."unitId" = ${Unit.id}
-        and usl."language" in ${sqlInList(readLanguages)}
-    )`,
   );
 }
 
@@ -776,16 +756,6 @@ export class PostService {
     if (!options?.isAdmin) conditions.push(...publicUnitConditions());
     if (query.targetUnitId)
       conditions.push(eq(Unit.targetUnitId, query.targetUnitId));
-    const readLanguages = resolveEffectiveReadLanguageCandidates({
-      languages: (query as { languages?: string | readonly string[] })
-        .languages,
-      appLocale: (query as { appLocale?: string }).appLocale,
-    });
-    const languageVisibility = preferredLanguageCondition(
-      query.languageMode,
-      readLanguages,
-    );
-    if (languageVisibility) conditions.push(languageVisibility);
     // Weak context lookup only: do not resolve through Unit.targetUnitId and do
     // not validate that the value names a VARIANT.
     // 仅作弱上下文查找：不通过 Unit.targetUnitId 解析，也不校验该值是否指向 VARIANT。
@@ -861,15 +831,6 @@ export class PostService {
     const moderationStatus = toUnitRealmModerationStatus(
       opts.realmModerationStatus,
     );
-    const readLanguages = resolveEffectiveReadLanguageCandidates({
-      languages: (opts as { languages?: string | readonly string[] }).languages,
-      appLocale: (opts as { appLocale?: string }).appLocale,
-    });
-    const languageVisibility = preferredLanguageCondition(
-      opts.languageMode,
-      readLanguages,
-    );
-
     if (!(await this.canReadRealmFeed(realmUnitId, options))) {
       return { posts: [], total: 0 };
     }
@@ -881,7 +842,6 @@ export class PostService {
     } else if (moderationStatus) {
       conditions.push(eq(UnitRealm.moderationStatus, moderationStatus));
     }
-    if (languageVisibility) conditions.push(languageVisibility);
     if (tagIds.length > 0) {
       const tagCondition = or(
         sql`exists (

@@ -26,11 +26,10 @@ describe("progressApi read language queries", () => {
     await progressApi.listMyContinueReading({
       appLocale: "en",
       languages: "zh-hant,en",
-      languageMode: "preferred",
     });
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/me/progress/continue-reading?appLocale=en&languages=zh-hant%2Cen&languageMode=preferred",
+      "http://api.example/me/progress/continue-reading?appLocale=en&languages=zh-hant%2Cen",
     );
   });
 });

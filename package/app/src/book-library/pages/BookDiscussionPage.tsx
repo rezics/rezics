@@ -77,7 +77,6 @@ export const BookCommunityPage: React.FC = () => {
             : { targetUnitId: feedQuery.targetUnitId }),
           languages: readContext.languages,
           appLocale: readContext.appLocale,
-          languageMode: readContext.languageMode,
         }}
       />
     </div>

@@ -31,7 +31,6 @@ export function ZoneFeedSection({
     zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.id, {
       languages: ctx.languages,
       appLocale: ctx.appLocale,
-      languageMode: ctx.languageMode,
     }),
   );
   const rows = query.data?.pages.flatMap((page) => page.rows ?? []) ?? [];

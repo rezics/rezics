@@ -49,7 +49,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         ? readContext.languages.join(",")
         : undefined,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: hasMemberSession && readContext.ready,
   });
@@ -60,7 +59,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         ? readContext.languages.join(",")
         : undefined,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: hasMemberSession && readContext.ready,
   });

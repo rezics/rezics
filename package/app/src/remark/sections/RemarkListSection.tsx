@@ -72,7 +72,6 @@ export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
       kind: PostKind.REMARK,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit,
     }),
     enabled: readContext.ready && !!targetUnitId,

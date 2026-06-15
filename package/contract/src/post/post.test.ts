@@ -200,12 +200,11 @@ describe("post work-domain contract fields", () => {
     expect("realmUnitIds" in submitPostToRealmSchema.properties).toBe(false);
   });
 
-  test("list schemas accept ordered read candidates and language visibility mode", () => {
+  test("list schemas accept ordered read candidates without a visibility mode", () => {
     expect(
       Value.Check(postListQuerySchema, {
         languages: "ja,en",
         appLocale: "zh-hant",
-        languageMode: "preferred",
         limit: 20,
       }),
     ).toBe(true);
@@ -213,7 +212,6 @@ describe("post work-domain contract fields", () => {
       Value.Check(postListBodySchema, {
         languages: ["ja", "en"],
         appLocale: "zh-hant",
-        languageMode: "all",
         limit: 20,
       }),
     ).toBe(true);

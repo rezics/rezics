@@ -49,7 +49,6 @@ export const unitDetailQuery = (
     explicitLanguage?: string;
     languages?: string | readonly string[];
     appLocale?: string;
-    languageMode?: "preferred" | "all";
   },
 ) =>
   queryOptions({

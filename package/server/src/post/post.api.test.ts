@@ -186,7 +186,6 @@ describe("postApi", () => {
         body: JSON.stringify({
           realmUnitId: "realm-1",
           languages: ["ja", "en"],
-          languageMode: "preferred",
           limit: 20,
         }),
       }),
@@ -197,7 +196,6 @@ describe("postApi", () => {
     expect(byRealmMock.mock.calls[0]?.[1]).toMatchObject({
       realmUnitId: "realm-1",
       languages: ["ja", "en"],
-      languageMode: "preferred",
     });
     expect(mapPostToDTOMock.mock.calls[0]?.[1]).toBeInstanceOf(Map);
     expect(mapPostToDTOMock.mock.calls[0]?.[2]).toEqual(["ja", "en"]);

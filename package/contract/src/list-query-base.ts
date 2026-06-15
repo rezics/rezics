@@ -53,17 +53,9 @@ export const listPostBodyBase = t.Object({
 export type ListGetQueryBase = (typeof listGetQueryBase)["static"];
 export type ListPostBodyBase = (typeof listPostBodyBase)["static"];
 
-export const listLanguageModeSchema = t.Union([
-  t.Literal("preferred"),
-  t.Literal("all"),
-]);
-
-export type ListLanguageMode = (typeof listLanguageModeSchema)["static"];
-
 export const readLanguageBodyBase = t.Object({
   languages: t.Optional(t.Array(contentLanguageSchema)),
   appLocale: t.Optional(appLanguageSchema),
-  languageMode: t.Optional(listLanguageModeSchema),
 });
 
 export type ReadLanguageBodyBase = (typeof readLanguageBodyBase)["static"];
@@ -75,7 +67,6 @@ export const readLanguageGetQueryBase = t.Object({
   // 以便解析优先级仍由 contract 掌控。
   languages: t.Optional(t.String()),
   appLocale: t.Optional(appLanguageSchema),
-  languageMode: t.Optional(listLanguageModeSchema),
 });
 
 export type ReadLanguageGetQueryBase =

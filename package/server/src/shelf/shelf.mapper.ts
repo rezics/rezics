@@ -13,8 +13,8 @@ import type {
 } from "@rezics/contract";
 import { readCoverUrlFromExtra, resolveReadLanguage } from "@rezics/contract";
 import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
-import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
-import { mapPublicUser } from "@/utils/sanitizeUser";
+import { resolveStoredLicenseSlug } from "../unit/publication-policy";
+import { mapPublicUser } from "../utils/sanitizeUser";
 import type {
   ShelfItemRow,
   ShelfListSelected,

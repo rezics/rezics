@@ -74,7 +74,6 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
       kind: PostKind.REVIEW,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit,
     }),
     enabled: readContext.ready && !!targetUnitId,

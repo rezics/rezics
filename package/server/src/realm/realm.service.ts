@@ -2,7 +2,6 @@ import type {
   AcknowledgeRealmRuleInput,
   AddUnitRealmInput,
   CreateRealmInput,
-  ListLanguageMode,
   RealmDTO,
   RealmExtraAdminReadResponse,
   RealmExtraOkResponse,
@@ -52,10 +51,7 @@ import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapPostToDTO } from "@/post/post.mapper";
 import { postService } from "@/post/post.service";
 import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
-import {
-  resolveEffectiveReadLanguageCandidates,
-  resolveEffectiveReadLanguageInput,
-} from "@/unit/language-resolution";
+import { resolveEffectiveReadLanguageInput } from "@/unit/language-resolution";
 import { mapTranslationToDTO } from "@/unit/mapper";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import {
@@ -351,28 +347,6 @@ export class RealmService {
     }
     if (options.isOfficial !== undefined) {
       conditions.push(eq(Realm.isOfficial, options.isOfficial));
-    }
-
-    const readLanguages = resolveEffectiveReadLanguageCandidates({
-      languages: (options as { languages?: string | readonly string[] })
-        .languages,
-      appLocale: (options as { appLocale?: string }).appLocale,
-    });
-    if (options.languageMode === "preferred" && readLanguages.length > 0) {
-      conditions.push(
-        or(
-          eq(Unit.isLanguageNeutral, true),
-          sql`exists (
-            select 1
-            from "UnitSupportLanguage" usl
-            where usl."unitId" = ${Unit.id}
-              and usl."language" in (${sql.join(
-                readLanguages.map((language) => sql`${language}`),
-                sql`, `,
-              )})
-          )`,
-        )!,
-      );
     }
 
     const idList = parseIdsCsv(options.ids);
@@ -1829,7 +1803,6 @@ export class RealmService {
     options: {
       publicOnly?: boolean;
       view?: RealmListView | null;
-      languageMode?: ListLanguageMode | null;
       start?: number | null;
       limit?: number | null;
     } & EffectiveReadLanguageInput = {},

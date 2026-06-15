@@ -67,7 +67,6 @@ export const zoneApi = {
       cursor?: string;
       languages?: readonly string[];
       appLocale?: string;
-      languageMode?: ReadLanguageGetQueryBase["languageMode"];
       dynamicTagUnitIds?: readonly string[];
     } = {},
   ): Promise<ZoneSectionData> => {
@@ -75,7 +74,6 @@ export const zoneApi = {
       cursor: options.cursor,
       languages: options.languages?.length ? [...options.languages] : undefined,
       appLocale: options.appLocale,
-      languageMode: options.languageMode,
       dynamicTagUnitIds: options.dynamicTagUnitIds?.length
         ? options.dynamicTagUnitIds.join(",")
         : undefined,

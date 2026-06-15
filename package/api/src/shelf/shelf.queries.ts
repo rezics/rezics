@@ -48,7 +48,7 @@ export const shelvesByVariantContextQuery = (
 
 export const shelfDetailQuery = (
   unitId: string,
-  filters?: Pick<ShelfFilters, "languages" | "appLocale" | "languageMode">,
+  filters?: Pick<ShelfFilters, "languages" | "appLocale">,
 ) =>
   queryOptions({
     queryKey: filters

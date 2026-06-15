@@ -636,7 +636,6 @@ describe("FeedService", () => {
       libraryKind: "book",
       targetUnitId: "book-1",
       languages: ["ja", "en"],
-      languageMode: "preferred",
       sort: "best",
     });
 
@@ -647,7 +646,6 @@ describe("FeedService", () => {
         limit: 20,
         targetUnitId: "book-1",
         languages: ["ja", "en"],
-        languageMode: "preferred",
       },
       undefined,
     );

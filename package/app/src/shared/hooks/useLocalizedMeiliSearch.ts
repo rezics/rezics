@@ -23,7 +23,6 @@ function useLocalizedOptions<T extends object>(opts: T) {
       ...opts,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     [opts, readContext],
   );

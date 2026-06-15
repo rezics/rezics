@@ -10,7 +10,6 @@ import { RealmSearchOptionsSchema } from "./realm";
 const localizedQuery = {
   languages: ["ja", "en"],
   appLocale: "en",
-  languageMode: "preferred",
 } as const;
 
 describe("Meilisearch read-language contract", () => {
@@ -22,9 +21,7 @@ describe("Meilisearch read-language contract", () => {
       PollSearchOptionsSchema,
     ]) {
       expect(Value.Check(schema, localizedQuery)).toBe(true);
-      expect(
-        Value.Check(schema, { ...localizedQuery, languageMode: "all" }),
-      ).toBe(true);
+      expect("languageMode" in schema.properties).toBe(false);
     }
   });
 
@@ -41,20 +38,14 @@ describe("Meilisearch read-language contract", () => {
     ).toBe(true);
   });
 
-  test("omitted languageMode uses the endpoint default while invalid modes fail", () => {
+  test("search queries carry language candidates without a visibility mode", () => {
     expect(
       Value.Check(SearchQuerySchema, {
         languages: ["ja", "en"],
         appLocale: "en",
       }),
     ).toBe(true);
-    expect(
-      Value.Check(SearchQuerySchema, {
-        languages: ["ja", "en"],
-        appLocale: "en",
-        languageMode: "only-mine",
-      }),
-    ).toBe(false);
+    expect("languageMode" in SearchQuerySchema.properties).toBe(false);
   });
 
   test("read-language POST bodies use arrays, not CSV query strings", () => {

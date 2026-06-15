@@ -195,33 +195,7 @@ function createFakeSelect(selection?: Record<string, unknown>) {
       const values = sqlValues(condition);
       if (table === Realm) {
         const selectionKeys = Object.keys(selection ?? {});
-        const readLanguages = values.some(
-          (value) => value === "ja" || value === "en",
-        )
-          ? values.filter(
-              (value): value is string => value === "ja" || value === "en",
-            )
-          : ["ja", "en"];
-        const where =
-          readLanguages.length > 0
-            ? {
-                AND: [
-                  { unit: { status: "PUBLISHED", type: "REALM" } },
-                  {
-                    unit: {
-                      OR: [
-                        { isLanguageNeutral: true },
-                        {
-                          supportLanguages: {
-                            some: { language: { in: readLanguages } },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              }
-            : {};
+        const where = { unit: { status: "PUBLISHED", type: "REALM" } };
         if (selection?.total) {
           return [{ total: await legacyDbMock.realm?.count?.({ where }) }];
         }
@@ -625,7 +599,7 @@ afterEach(() => {
 });
 
 describe("realmService.list", () => {
-  test("preferred filtering uses support-language availability before pagination", async () => {
+  test("read-language candidates do not filter realm list visibility before pagination", async () => {
     const findMany = mock(async (_args?: any) => []);
     const count = mock(async (_args?: any) => 0);
     legacyDbMock.realm = {
@@ -635,7 +609,6 @@ describe("realmService.list", () => {
 
     await realmService.list({
       language: "ko",
-      languageMode: "preferred",
       languages: "ja,en",
       start: 10,
       limit: 5,
@@ -643,22 +616,10 @@ describe("realmService.list", () => {
 
     const findArgs = findMany.mock.calls[0]?.[0] as any;
     expect(findArgs.where).toEqual({
-      AND: [
-        { unit: { status: "PUBLISHED", type: "REALM" } },
-        {
-          unit: {
-            OR: [
-              { isLanguageNeutral: true },
-              {
-                supportLanguages: {
-                  some: { language: { in: ["ja", "en"] } },
-                },
-              },
-            ],
-          },
-        },
-      ],
+      unit: { status: "PUBLISHED", type: "REALM" },
     });
+    expect(JSON.stringify(findArgs.where)).not.toContain("supportLanguages");
+    expect(JSON.stringify(findArgs.where)).not.toContain("isLanguageNeutral");
     expect(JSON.stringify(findArgs.where)).not.toContain("translations");
     expect(count.mock.calls[0]?.[0]).toEqual({ where: findArgs.where });
     expect(findArgs.skip).toBe(10);

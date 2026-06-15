@@ -1,7 +1,6 @@
 import {
   type ContentDoc,
   type Language,
-  type ListLanguageMode,
   markdownContentDoc,
   parseZoneBoundary,
   parseZoneNav,
@@ -1771,7 +1770,6 @@ export class ZoneService {
     limit: number;
     cursor?: string | null;
     preferredLanguages?: string[];
-    languageMode?: ListLanguageMode | null;
     dynamicTagUnitIds?: string[];
   }): Promise<ZoneSectionData> {
     const offset = input.cursor ? Number.parseInt(input.cursor, 10) || 0 : 0;
@@ -1796,8 +1794,6 @@ export class ZoneService {
     const compiled = compileZoneSectionQuery(query, boundary.filters, {
       contextRealmUnitId:
         boundary.context.kind === "realm" ? boundary.context.realmUnitId : null,
-      viewerLanguageCandidates: input.preferredLanguages ?? [],
-      viewerLanguageMode: input.languageMode,
     });
     const result = await this.repository.searchSection({
       index: compiled.index,
@@ -1912,7 +1908,6 @@ export class ZoneService {
     options: {
       cursor?: string | null;
       preferredLanguages?: string[];
-      languageMode?: ListLanguageMode | null;
       dynamicTagUnitIds?: string[];
     } = {},
   ): Promise<ZoneSectionData | null> {
@@ -1944,7 +1939,6 @@ export class ZoneService {
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
-          languageMode: options.languageMode,
           dynamicTagUnitIds: options.dynamicTagUnitIds,
         });
       case "feed":
@@ -1957,7 +1951,6 @@ export class ZoneService {
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
-          languageMode: options.languageMode,
         });
       case "collection": {
         const unitIds = section.items.flatMap((item) =>

@@ -58,10 +58,9 @@ describe("zoneApi", () => {
     await zoneApi.getBySlug("toaru", {
       languages: ["zh-hant", "en"],
       appLocale: "zh-hant",
-      languageMode: "preferred",
     });
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/zone/by-slug/toaru?languages=zh-hant%2Cen&appLocale=zh-hant&languageMode=preferred",
+      "http://api.example/zone/by-slug/toaru?languages=zh-hant%2Cen&appLocale=zh-hant",
     );
   });
 
@@ -70,7 +69,6 @@ describe("zoneApi", () => {
       view: "managing",
       languages: "en,ja",
       appLocale: "zh-hant",
-      languageMode: "preferred",
     });
     await zoneApi.byUser("user-1", {
       view: "subscribed",
@@ -78,7 +76,7 @@ describe("zoneApi", () => {
     });
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
-      "http://api.example/zone/me?view=managing&languages=en%2Cja&appLocale=zh-hant&languageMode=preferred",
+      "http://api.example/zone/me?view=managing&languages=en%2Cja&appLocale=zh-hant",
       "http://api.example/zone/user/user-1?view=subscribed&languages=en",
     ]);
   });
@@ -87,19 +85,17 @@ describe("zoneApi", () => {
     await zoneApi.getPortal("zone-1", "home", {
       languages: ["en"],
       appLocale: "zh-hant",
-      languageMode: "preferred",
     });
     await zoneApi.getSection("zone-1", "page-home", "s-latest", {
       cursor: "24",
       languages: ["en"],
       appLocale: "zh-hant",
-      languageMode: "preferred",
       dynamicTagUnitIds: ["tag-a", "tag-b"],
     });
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
-      "http://api.example/zone/zone-1/portal/home?languages=en&appLocale=zh-hant&languageMode=preferred",
-      "http://api.example/zone/zone-1/page/page-home/section/s-latest?cursor=24&languages=en&appLocale=zh-hant&languageMode=preferred&dynamicTagUnitIds=tag-a%2Ctag-b",
+      "http://api.example/zone/zone-1/portal/home?languages=en&appLocale=zh-hant",
+      "http://api.example/zone/zone-1/page/page-home/section/s-latest?cursor=24&languages=en&appLocale=zh-hant&dynamicTagUnitIds=tag-a%2Ctag-b",
     ]);
   });
 

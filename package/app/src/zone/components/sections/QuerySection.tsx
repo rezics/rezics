@@ -46,7 +46,6 @@ export function QuerySection({
       {
         languages: ctx.languages,
         appLocale: ctx.appLocale,
-        languageMode: ctx.languageMode,
       },
       { dynamicTagUnitIds },
     ),

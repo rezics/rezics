@@ -1,5 +1,4 @@
 import type { ZoneSearchOptions, ZoneSearchResult } from "@rezics/contract";
-import { buildPreferredLanguageFilter } from "../search/filters";
 import { resolveZoneHitDisplay } from "../search/read-language";
 import { searchClient } from "../search-client";
 
@@ -12,11 +11,6 @@ export async function searchZones(
   if (opts.ownerRealmUnitId) {
     filter.push(`ownerRealmUnitId = "${opts.ownerRealmUnitId}"`);
   }
-  const languageFilter = buildPreferredLanguageFilter(opts);
-  if (languageFilter) {
-    filter.push(languageFilter);
-  }
-
   const sort: string[] = [];
   if (opts.sort?.field && opts.sort.field !== "relevance") {
     const order = opts.sort.order ?? "desc";

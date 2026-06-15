@@ -5,7 +5,6 @@ mock.module("@/shared/hooks/useReadLanguageCandidates", () => ({
   useReadLanguageContext: () => ({
     appLocale: "zh-hant",
     languages: ["en"],
-    languageMode: "preferred",
     ready: true,
   }),
 }));

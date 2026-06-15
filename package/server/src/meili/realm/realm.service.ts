@@ -1,5 +1,4 @@
 import type { RealmSearchOptions, RealmSearchResult } from "@rezics/contract";
-import { buildPreferredLanguageFilter } from "../search/filters";
 import { resolveRealmHitDisplay } from "../search/read-language";
 import { searchClient } from "../search-client";
 
@@ -15,11 +14,6 @@ export async function searchRealms(
   if (typeof opts.isOfficial === "boolean") {
     filter.push(`isOfficial = ${opts.isOfficial}`);
   }
-  const languageFilter = buildPreferredLanguageFilter(opts);
-  if (languageFilter) {
-    filter.push(languageFilter);
-  }
-
   const sort: string[] = [];
   if (opts.sort?.field && opts.sort.field !== "relevance") {
     const order = opts.sort.order ?? "desc";

@@ -139,7 +139,6 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
     ...zoneQueryOptions(slug ?? "", {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: readContext.ready && !unitId && !!slug,
   });

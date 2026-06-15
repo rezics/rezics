@@ -22,7 +22,6 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
       kind: PostKind.EXCERPT,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: excerptNumber,
     }),
     enabled: readContext.ready && Boolean(id),

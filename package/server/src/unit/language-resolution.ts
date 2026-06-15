@@ -4,7 +4,6 @@ import type {
   UnitLanguageContentResponse,
 } from "@rezics/contract";
 import {
-  type ListLanguageMode,
   parseReadLanguages,
   resolveAuthoringLanguage,
   resolveReadLanguage,
@@ -84,34 +83,6 @@ export function resolveEffectiveReadLanguageInput(input: {
     appLocale: input.appLocale,
     languages: parseReadLanguages(input.languages),
     preferredLanguages: input.actorSettings?.preferredLanguages,
-  };
-}
-
-export function preferredLanguageVisibilityWhere(input: {
-  languageMode?: ListLanguageMode | null;
-  languages?: readonly string[] | null;
-}):
-  | {
-      OR: [
-        { isLanguageNeutral: true },
-        { supportLanguages: { some: { language: { in: string[] } } } },
-      ];
-    }
-  | undefined {
-  if (input.languageMode !== "preferred") return undefined;
-  if (!input.languages?.length) return undefined;
-
-  // Visibility filtering decides whether the Unit appears; display language
-  // resolution remains a separate support-language read on the returned row.
-  // 可见性过滤决定 Unit 是否出现；显示语言的解析仍是对返回行的一次独立
-  // support-language 读取。
-  return {
-    OR: [
-      { isLanguageNeutral: true },
-      {
-        supportLanguages: { some: { language: { in: [...input.languages] } } },
-      },
-    ],
   };
 }
 

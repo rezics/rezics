@@ -156,16 +156,8 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
 }) => {
   const { t } = useTranslation(["zone"]);
   const locator = slug ? { slug } : { unitId: unitId ?? "" };
-  const {
-    zone,
-    page,
-    refUnits,
-    languages,
-    appLocale,
-    languageMode,
-    isLoading,
-    error,
-  } = useZonePortal(locator, pageSlug);
+  const { zone, page, refUnits, languages, appLocale, isLoading, error } =
+    useZonePortal(locator, pageSlug);
   const [dynamicTagSeed] = useState(() => `${Date.now()}:${Math.random()}`);
   const dynamicTagSelections = useMemo(
     () =>
@@ -244,7 +236,6 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
             refUnits,
             languages,
             appLocale,
-            languageMode,
             dynamicTagSelections,
           }}
         />

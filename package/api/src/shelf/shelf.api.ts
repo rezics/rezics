@@ -39,7 +39,7 @@ export const shelfApi = {
 
   get: async (
     unitId: string,
-    filters?: Pick<ShelfFilters, "languages" | "appLocale" | "languageMode">,
+    filters?: Pick<ShelfFilters, "languages" | "appLocale">,
   ): Promise<ShelfDetailDTO> => {
     return apiFetch<ShelfDetailDTO>(
       `/shelf/${unitId}${buildQueryString(filters)}`,

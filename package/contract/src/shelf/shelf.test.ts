@@ -41,7 +41,6 @@ describe("shelf containment contract fields", () => {
         containsUnitId: "release-1",
         languages: "zh-hant,en",
         appLocale: "zh-hant",
-        languageMode: "all",
         limit: 20,
       }),
     ).toBe(true);
@@ -50,7 +49,6 @@ describe("shelf containment contract fields", () => {
         containsUnitId: "release-1",
         languages: ["zh-hant", "en"],
         appLocale: "zh-hant",
-        languageMode: "all",
         limit: 20,
       }),
     ).toBe(true);

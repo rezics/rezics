@@ -137,6 +137,28 @@ mock.module("@/unit/unit.service", () => ({
   },
 }));
 
+mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageInput: (input: {
+    languages?: string | readonly string[] | null;
+    appLocale?: string | null;
+  }) => ({
+    languages:
+      typeof input.languages === "string"
+        ? input.languages.split(",").filter(Boolean)
+        : [...(input.languages ?? [])],
+    appLocale: input.appLocale,
+  }),
+  resolveEffectiveReadLanguageCandidates: (input: {
+    explicitLanguage?: string | null;
+    languages?: string | readonly string[] | null;
+  }) =>
+    input.explicitLanguage
+      ? [input.explicitLanguage]
+      : typeof input.languages === "string"
+        ? input.languages.split(",").filter(Boolean)
+        : [...(input.languages ?? [])],
+}));
+
 mock.module("./realm.mapper", async () => {
   const actual = await import(
     "./realm.mapper.ts?realm-api-test-actual" as string
@@ -201,7 +223,6 @@ describe("realmApi", () => {
       languages: ["en"],
       appLocale: undefined,
       view: "managing",
-      languageMode: undefined,
       start: 5,
       limit: 30,
     });
@@ -219,7 +240,6 @@ describe("realmApi", () => {
       languages: [],
       appLocale: undefined,
       view: "joined",
-      languageMode: undefined,
       start: undefined,
       limit: 25,
     });

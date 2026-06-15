@@ -114,7 +114,6 @@ export function UnitSearchSelect({
     ...unitQueries.search(trimmedQuery, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(trimmedQuery),

@@ -108,7 +108,7 @@ describe("UnitLanguageService.content", () => {
   });
 });
 
-describe("read language visibility helpers", () => {
+describe("read language candidate helpers", () => {
   test("normalizes app, request, and user candidates without adding fallback", async () => {
     const { resolveEffectiveReadLanguageCandidates } = await import(
       "./language-resolution"
@@ -122,47 +122,6 @@ describe("read language visibility helpers", () => {
       }),
     ).toEqual(["ko", "ja", "en", "zh-hant"]);
     expect(resolveEffectiveReadLanguageCandidates({})).toEqual([]);
-  });
-
-  test("preferred visibility uses support languages plus language-neutral units", async () => {
-    const { preferredLanguageVisibilityWhere } = await import(
-      "./language-resolution"
-    );
-
-    expect(
-      preferredLanguageVisibilityWhere({
-        languageMode: "preferred",
-        languages: ["ja", "en"],
-      }),
-    ).toEqual({
-      OR: [
-        { isLanguageNeutral: true },
-        {
-          supportLanguages: {
-            some: { language: { in: ["ja", "en"] } },
-          },
-        },
-      ],
-    });
-  });
-
-  test("empty preferred candidate lists do not filter", async () => {
-    const { preferredLanguageVisibilityWhere } = await import(
-      "./language-resolution"
-    );
-
-    expect(
-      preferredLanguageVisibilityWhere({
-        languageMode: "preferred",
-        languages: [],
-      }),
-    ).toBeUndefined();
-    expect(
-      preferredLanguageVisibilityWhere({
-        languageMode: "all",
-        languages: ["ja"],
-      }),
-    ).toBeUndefined();
   });
 });
 

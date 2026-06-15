@@ -1,9 +1,5 @@
 import { userQueries } from "@rezics/api/user/user.queries";
-import {
-  type Language,
-  type ListLanguageMode,
-  normalizeLanguage,
-} from "@rezics/contract";
+import { type Language, normalizeLanguage } from "@rezics/contract";
 import { LOCALE_STORAGE_KEY, setLocale, useLocale } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
@@ -12,7 +8,6 @@ import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 export type ReadLanguageContext = {
   languages: Language[];
   appLocale: Language;
-  languageMode: ListLanguageMode;
   ready: boolean;
 };
 
@@ -72,7 +67,6 @@ export function useReadLanguageContext(): ReadLanguageContext {
     return {
       languages,
       appLocale: normalizedLocale,
-      languageMode: "preferred",
       ready: !hasMemberSession || preferredLanguages.length > 0,
     };
   }, [hasMemberSession, locale, preferredLanguages]);

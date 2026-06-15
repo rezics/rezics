@@ -213,7 +213,6 @@ export function FeaturedZonePicker({
     zonePortalQueryOptions(trimmedZoneId, "home", {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
   );
   const zone = zoneQuery.data?.zone;
@@ -337,7 +336,6 @@ export function WikiSidebarPicker({
     ...unitDetailQuery(trimmedPostUnitId, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: readContext.ready && kind === "post" && Boolean(trimmedPostUnitId),
   });
@@ -345,7 +343,6 @@ export function WikiSidebarPicker({
     ...zonePortalQueryOptions(trimmedZoneUnitId, "home", {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled:
       readContext.ready && kind === "zoneNav" && Boolean(trimmedZoneUnitId),
@@ -613,7 +610,6 @@ export function TagTreeEditor({
       type: "LABEL",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(searchTerm),
@@ -623,7 +619,6 @@ export function TagTreeEditor({
       type: "TAG",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(searchTerm),
@@ -1496,7 +1491,6 @@ export function SlotPicker({
       type: "POST",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(searchTerm),

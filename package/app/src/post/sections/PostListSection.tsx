@@ -102,7 +102,6 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
     kind,
     languages: readContext.languages,
     appLocale: readContext.appLocale,
-    languageMode: readContext.languageMode,
     limit,
   });
   const { data, isLoading, error } = useQuery({

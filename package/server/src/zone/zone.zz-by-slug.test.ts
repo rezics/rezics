@@ -322,18 +322,17 @@ describe("GET /zone/:unitId/page/:pageId/section/:sectionId", () => {
       {
         cursor: "12",
         preferredLanguages: ["en"],
-        languageMode: "preferred",
         dynamicTagUnitIds: ["tag-a", "tag-b"],
       },
     );
   });
 
-  test("passes all-language mode through to section execution", async () => {
+  test("passes read-language candidates through to section execution", async () => {
     sectionDataMock.mockClear();
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
       new Request(
-        "http://localhost/zone/zone-1/page/page-home/section/s-known?languageMode=all&languages=ja",
+        "http://localhost/zone/zone-1/page/page-home/section/s-known?languages=ja",
       ),
     );
     expect(res.status).toBe(200);
@@ -343,7 +342,6 @@ describe("GET /zone/:unitId/page/:pageId/section/:sectionId", () => {
       "s-known",
       {
         preferredLanguages: ["ja"],
-        languageMode: "all",
         dynamicTagUnitIds: [],
         cursor: null,
       },

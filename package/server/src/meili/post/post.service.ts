@@ -1,5 +1,4 @@
 import type { PostSearchOptions, PostSearchResult } from "@rezics/contract";
-import { buildPreferredLanguageFilter } from "../search/filters";
 import { resolvePostHitDisplay } from "../search/read-language";
 import { searchClient } from "../search-client";
 
@@ -27,11 +26,6 @@ export async function searchPosts(
   if (typeof opts.isLocked === "boolean") {
     filter.push(`isLocked = ${opts.isLocked}`);
   }
-  const languageFilter = buildPreferredLanguageFilter(opts);
-  if (languageFilter) {
-    filter.push(languageFilter);
-  }
-
   const sort: string[] = [];
   if (opts.sort?.field && opts.sort.field !== "relevance") {
     const order = opts.sort.order ?? "desc";

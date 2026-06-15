@@ -37,7 +37,6 @@ export function RealmWikiTab({
       sort: { field: "updatedAt", order: "desc" },
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 24,
     }),
     enabled: readContext.ready && Boolean(realmId),
@@ -178,7 +177,6 @@ function WikiZoneNavSidebar({
     ...zonePortalQueryOptions(zoneUnitId, "home", {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: readContext.ready && Boolean(zoneUnitId),
   });

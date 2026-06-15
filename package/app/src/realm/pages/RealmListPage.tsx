@@ -138,7 +138,6 @@ export function RealmListPage() {
       view: activeTab === "administered" ? "managing" : "joined",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 50,
     }),
     enabled:

@@ -63,7 +63,6 @@ export function FeaturedZoneSection({ zoneUnitId }: FeaturedZoneSectionProps) {
     ...zonePortalQueryOptions(zoneUnitId ?? "", "home", {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: readContext.ready && Boolean(zoneUnitId),
   });

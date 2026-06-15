@@ -25,7 +25,6 @@ export function useZonePortal(locator: ZonePortalLocator, pageSlug = "home") {
   const readQuery = {
     languages: readContext.languages,
     appLocale: readContext.appLocale,
-    languageMode: readContext.languageMode,
   };
   const slug = locator.slug ?? "";
   const zoneQuery = useQuery({
@@ -44,7 +43,6 @@ export function useZonePortal(locator: ZonePortalLocator, pageSlug = "home") {
     refUnits: portalQuery.data?.refUnits,
     languages: readContext.languages,
     appLocale: readContext.appLocale,
-    languageMode: readContext.languageMode,
     isLoading:
       !readContext.ready ||
       (locator.slug !== undefined && zoneQuery.isLoading) ||

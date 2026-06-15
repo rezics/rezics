@@ -7,16 +7,10 @@ import {
   DEFAULT_LANGUAGE,
   normalizeContentLanguage,
 } from "../language-core";
-import { listLanguageModeSchema } from "../list-query-base";
 import {
   unitSupportLanguageDTOSchema,
   unitTranslationDTOSchema,
 } from "../unit/unit";
-
-export {
-  type ListLanguageMode,
-  listLanguageModeSchema,
-} from "../list-query-base";
 
 export const languageResolutionInputSchema = t.Object({
   explicitLanguage: t.Optional(contentLanguageSchema),
@@ -43,7 +37,6 @@ function compareSupportLanguagePosition(
 export const readLanguageQuerySchema = t.Object({
   languages: t.Optional(t.String()),
   appLocale: t.Optional(appLanguageSchema),
-  languageMode: t.Optional(listLanguageModeSchema),
 });
 
 export type ReadLanguageQuery = (typeof readLanguageQuerySchema)["static"];

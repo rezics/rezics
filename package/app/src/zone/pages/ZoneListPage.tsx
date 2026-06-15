@@ -95,7 +95,6 @@ export function ZoneListPage() {
         ? readContext.languages.join(",")
         : undefined,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 50,
     }),
     enabled:

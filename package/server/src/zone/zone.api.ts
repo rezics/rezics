@@ -2,7 +2,6 @@ import {
   createZoneInputSchema,
   createZonePageInputSchema,
   parseReadLanguages,
-  type ReadLanguageGetQueryBase,
   readLanguageGetQueryBase,
   updateZoneBoundaryInputSchema,
   updateZoneInputSchema,
@@ -55,10 +54,6 @@ function preferredLanguages(query: {
     query.appLocale,
     ...parseReadLanguages(query.languages),
   ]);
-}
-
-function languageMode(query: Pick<ReadLanguageGetQueryBase, "languageMode">) {
-  return query.languageMode ?? "preferred";
 }
 
 async function assertZoneManagePolicy(input: {
@@ -246,7 +241,6 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         {
           cursor: query.cursor ?? null,
           preferredLanguages: preferredLanguages(query),
-          languageMode: languageMode(query),
           dynamicTagUnitIds: (query.dynamicTagUnitIds ?? "")
             .split(",")
             .map((id) => id.trim())

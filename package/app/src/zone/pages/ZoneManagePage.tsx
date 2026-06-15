@@ -127,7 +127,6 @@ export function ZoneManagePage({
   const readQuery = {
     languages: readContext.languages,
     appLocale: readContext.appLocale,
-    languageMode: readContext.languageMode,
   };
   const bySlugQuery = useQuery({
     ...zoneQueryOptions(slug ?? "", readQuery),

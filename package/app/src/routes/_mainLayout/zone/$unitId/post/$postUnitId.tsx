@@ -16,7 +16,6 @@ function ZoneUnitPostThreadRoute() {
     ...zonePortalQueryOptions(unitId, "home", {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: readContext.ready && Boolean(unitId),
   });

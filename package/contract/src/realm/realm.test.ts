@@ -94,12 +94,11 @@ describe("RealmExtra wiki sidebar", () => {
 });
 
 describe("Realm read language schemas", () => {
-  test("accept ordered read candidates and language visibility mode", () => {
+  test("accept ordered read candidates without a visibility mode", () => {
     expect(
       Value.Check(realmListQuerySchema, {
         languages: "ja,en",
         appLocale: "zh-hant",
-        languageMode: "preferred",
         limit: 20,
       }),
     ).toBe(true);
@@ -107,7 +106,6 @@ describe("Realm read language schemas", () => {
       Value.Check(realmListBodySchema, {
         languages: ["ja", "en"],
         appLocale: "zh-hant",
-        languageMode: "all",
         limit: 20,
       }),
     ).toBe(true);

@@ -55,7 +55,6 @@ export function StatsSection({
     zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.id, {
       languages: ctx.languages,
       appLocale: ctx.appLocale,
-      languageMode: ctx.languageMode,
     }),
   );
 

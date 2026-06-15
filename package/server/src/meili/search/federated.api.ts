@@ -49,7 +49,6 @@ export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
             zone.boundary.context.kind === "realm"
               ? zone.boundary.context.realmUnitId
               : null,
-          viewerLanguageCandidates: body.query.languages ?? [],
         };
         const sort = { field: "createdAt" } as const;
         ctx.zoneBoundaryContentFilter = compileZoneSectionQuery(

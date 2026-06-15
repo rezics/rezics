@@ -9,7 +9,6 @@ type BookReadQuery = {
   explicitLanguage?: string;
   languages?: string | readonly string[];
   appLocale?: string;
-  languageMode?: "preferred" | "all";
 };
 
 export const bookKeys = {

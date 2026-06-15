@@ -18,7 +18,6 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
       kind: PostKind.REMARK,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 4,
     }),
     enabled: readContext.ready && !!bookId,
