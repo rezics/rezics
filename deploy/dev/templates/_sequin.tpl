@@ -58,7 +58,7 @@
 
       resources {
         cpu    = 300
-        memory = 384
+        memory = 768
       }
     }
   }
