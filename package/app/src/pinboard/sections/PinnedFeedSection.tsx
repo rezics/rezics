@@ -23,14 +23,50 @@ export interface PinnedFeedSectionProps {
 }
 
 const PINNED_ITEM_CLASS =
-  "pl-4 basis-[82%] @sm:basis-[58%] @md:basis-[42%] @lg:basis-[34%] @xl:basis-[30%]";
+  "pl-4 basis-[78%] @sm:basis-[52%] @md:basis-[36%] @lg:basis-[30%] @xl:basis-[24%]";
 
 /**
  * Renders the pinned region above a realm feed. No-ops when the list is
  * empty, silent on errors in the feed-adjacent position to avoid crowding
  * the viewport — errors still surface via the skeleton fallback state.
+ *
+ * Mobile:
+ * +--------------------------------+
+ * | Pinned                       ^ |
+ * | +------------------------+     |
+ * | | pinned card 78% width  | --> |
+ * | | h-44, horizontal scroll|     |
+ * | +------------------------+     |
+ * +--------------------------------+
+ *
+ * Tablet:
+ * +------------------------------------------+
+ * | Pinned                                 ^ |
+ * | +----------------+ +----------------+    |
+ * | | card 52%       | | card 52%       | -->|
+ * | +----------------+ +----------------+    |
+ * +------------------------------------------+
+ *
+ * Desktop:
+ * +------------------------------------------------+
+ * | Pinned                                      ^  |
+ * | +-------------+ +-------------+ +-------------+ |
+ * | | card 30%    | | card 30%    | | card 30%    | |
+ * | +-------------+ +-------------+ +-------------+ |
+ * +------------------------------------------------+
+ *
+ * Ultra-wide:
+ * +------------------------------------------------------------+
+ * | Pinned                                                   ^ |
+ * | +----------+ +----------+ +----------+ +----------+        |
+ * | | card 24% | | card 24% | | card 24% | | card 24% |  -->   |
+ * | +----------+ +----------+ +----------+ +----------+        |
+ * +------------------------------------------------------------+
+ *
  * 在 realm feed 上方渲染置顶区域。列表为空时不渲染任何内容；在紧邻 feed 的位置
- * 对错误保持静默，以免拥挤视口——错误仍会通过骨架屏回退状态显现。
+ * 对错误保持静默，以免拥挤视口——错误仍会通过骨架屏回退状态显现。卡片宽度
+ * 由 carousel item basis 静态决定；窄屏以横向滚动处理不足宽度，宽屏以 30% /
+ * 24% 卡片保留内容密度。
  */
 export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   realmUnitId,
@@ -46,7 +82,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   if (isLoading) {
     return (
       <div className="mb-4">
-        <PinboardSkeleton rows={2} rowHeight={112} />
+        <PinboardSkeleton rows={2} rowHeight={176} />
       </div>
     );
   }

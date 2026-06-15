@@ -27,6 +27,7 @@ export interface PinboardEntryView {
   summary?: string;
   description?: string;
   body?: string;
+  imageUrl?: string;
   defaultLanguage?: string;
   updatedAt?: string;
   createdAt?: string;
