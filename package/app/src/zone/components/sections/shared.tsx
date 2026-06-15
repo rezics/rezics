@@ -1,5 +1,6 @@
 import type {
   Language,
+  ListLanguageMode,
   ZoneDTO,
   ZoneSectionEmptyState,
   ZoneSectionKind,
@@ -26,6 +27,8 @@ export type ZonePortalContext = {
   pageId: string;
   refUnits: ZoneRefUnitMap;
   languages: Language[];
+  appLocale: Language;
+  languageMode: ListLanguageMode;
   dynamicTagSelections?: ZoneDynamicTagSelectionMap;
 };
 

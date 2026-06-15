@@ -4,6 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { FederatedSearchPage } from "@/search";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 type ZoneSearchPageBaseProps = {
   initialQuery?: SearchQuery;
@@ -133,9 +134,14 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   onCategoryChange,
 }) => {
   const { t } = useTranslation(["zone"]);
+  const readContext = useReadLanguageContext();
   const slugQuery = useQuery({
-    ...zoneQueryOptions(slug ?? ""),
-    enabled: !unitId && !!slug,
+    ...zoneQueryOptions(slug ?? "", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    }),
+    enabled: readContext.ready && !unitId && !!slug,
   });
   const zoneUnitId = unitId ?? slugQuery.data?.unitId;
 

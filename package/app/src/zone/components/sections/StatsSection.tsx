@@ -52,12 +52,11 @@ export function StatsSection({
   const { t } = useTranslation(["zone"]);
   const title = useZoneSectionTitle(section, ctx.refUnits);
   const query = useInfiniteQuery(
-    zoneSectionInfiniteQuery(
-      ctx.zone.unitId,
-      ctx.pageId,
-      section.id,
-      ctx.languages,
-    ),
+    zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.id, {
+      languages: ctx.languages,
+      appLocale: ctx.appLocale,
+      languageMode: ctx.languageMode,
+    }),
   );
 
   if (query.isLoading) {

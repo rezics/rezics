@@ -1,6 +1,7 @@
 import type {
   CreateZoneInput,
   CreateZonePageInput,
+  ReadLanguageGetQueryBase,
   UpdateZoneBoundaryInput,
   UpdateZoneInput,
   UpdateZoneNavInput,
@@ -14,6 +15,16 @@ import type {
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
+
+type ZoneReadQueryInput = Omit<ReadLanguageGetQueryBase, "languages"> & {
+  languages?: string | readonly string[];
+};
+
+function normalizeZoneReadQuery(
+  query: ZoneReadQueryInput | readonly string[] = {},
+): ZoneReadQueryInput {
+  return Array.isArray(query) ? { languages: query } : query;
+}
 
 export const zoneApi = {
   mine: async (query?: ZoneListQuery): Promise<ZoneListResponse> => {
@@ -31,22 +42,18 @@ export const zoneApi = {
 
   getBySlug: async (
     slug: string,
-    languages: readonly string[] = [],
+    query: ZoneReadQueryInput | readonly string[] = {},
   ): Promise<ZoneDTO> => {
-    const qs = buildQueryString({
-      languages: languages.length ? [...languages] : undefined,
-    });
+    const qs = buildQueryString(normalizeZoneReadQuery(query));
     return apiFetch<ZoneDTO>(`/zone/by-slug/${encodeURIComponent(slug)}${qs}`);
   },
 
   getPortal: async (
     unitId: string,
     pageSlug: string,
-    languages: readonly string[] = [],
+    query: ZoneReadQueryInput | readonly string[] = {},
   ): Promise<ZonePortalResponse> => {
-    const qs = buildQueryString({
-      languages: languages.length ? [...languages] : undefined,
-    });
+    const qs = buildQueryString(normalizeZoneReadQuery(query));
     return apiFetch<ZonePortalResponse>(
       `/zone/${encodeURIComponent(unitId)}/portal/${encodeURIComponent(pageSlug)}${qs}`,
     );
@@ -59,12 +66,16 @@ export const zoneApi = {
     options: {
       cursor?: string;
       languages?: readonly string[];
+      appLocale?: string;
+      languageMode?: ReadLanguageGetQueryBase["languageMode"];
       dynamicTagUnitIds?: readonly string[];
     } = {},
   ): Promise<ZoneSectionData> => {
     const qs = buildQueryString({
       cursor: options.cursor,
       languages: options.languages?.length ? [...options.languages] : undefined,
+      appLocale: options.appLocale,
+      languageMode: options.languageMode,
       dynamicTagUnitIds: options.dynamicTagUnitIds?.length
         ? options.dynamicTagUnitIds.join(",")
         : undefined,

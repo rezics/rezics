@@ -334,6 +334,7 @@ function buildBookConfig(
         query: {
           target: "unit",
           types: ["BOOK"],
+          languages: "viewer",
           sort: { field: "publishedAt", direction: "desc" },
         },
       },
@@ -347,6 +348,7 @@ function buildBookConfig(
         query: {
           target: "unit",
           types: ["BOOK"],
+          languages: "viewer",
           sort: { field: "qualityScore", direction: "desc" },
         },
         dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
@@ -361,6 +363,7 @@ function buildBookConfig(
         query: {
           target: "unit",
           types: ["BOOK"],
+          languages: "viewer",
           sort: { field: "risingScore", direction: "desc" },
         },
         dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
@@ -375,6 +378,7 @@ function buildBookConfig(
         query: {
           target: "unit",
           types: ["BOOK"],
+          languages: "viewer",
           sort: { field: "trendingScore", direction: "desc" },
         },
         dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
@@ -389,6 +393,7 @@ function buildBookConfig(
         query: {
           target: "unit",
           types: ["BOOK"],
+          languages: "viewer",
           sort: { field: "hotScore", direction: "desc" },
         },
       },
@@ -419,6 +424,7 @@ const realmsConfig = officialConfig({
       query: {
         target: "realm",
         types: ["REALM"],
+        languages: "viewer",
         sort: { field: "createdAt", direction: "desc" },
       },
     },
@@ -432,6 +438,7 @@ const realmsConfig = officialConfig({
       query: {
         target: "realm",
         types: ["REALM"],
+        languages: "viewer",
         sort: { field: "memberCount", direction: "desc" },
       },
     },
@@ -445,6 +452,7 @@ const realmsConfig = officialConfig({
       query: {
         target: "realm",
         types: ["REALM"],
+        languages: "viewer",
         sort: { field: "updatedAt", direction: "desc" },
       },
     },
@@ -472,6 +480,7 @@ const zonesConfig = officialConfig({
       query: {
         target: "zone",
         types: ["ZONE"],
+        languages: "viewer",
         sort: { field: "createdAt", direction: "desc" },
       },
     },
@@ -485,6 +494,7 @@ const zonesConfig = officialConfig({
       query: {
         target: "zone",
         types: ["ZONE"],
+        languages: "viewer",
         sort: { field: "updatedAt", direction: "desc" },
       },
     },
@@ -498,6 +508,7 @@ const zonesConfig = officialConfig({
       query: {
         target: "zone",
         types: ["ZONE"],
+        languages: "viewer",
         sort: { field: "updatedAt", direction: "desc" },
       },
     },
@@ -524,6 +535,7 @@ const popularConfig = officialConfig({
       loadMore: true,
       query: {
         target: "unit",
+        languages: "viewer",
         sort: { field: "trendingScore", direction: "desc" },
       },
     },
@@ -536,6 +548,7 @@ const popularConfig = officialConfig({
       loadMore: true,
       query: {
         target: "unit",
+        languages: "viewer",
         sort: { field: "publishedAt", direction: "desc" },
       },
     },

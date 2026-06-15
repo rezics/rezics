@@ -2,6 +2,8 @@ import {
   createZoneInputSchema,
   createZonePageInputSchema,
   parseReadLanguages,
+  type ReadLanguageGetQueryBase,
+  readLanguageGetQueryBase,
   updateZoneBoundaryInputSchema,
   updateZoneInputSchema,
   updateZoneNavInputSchema,
@@ -45,8 +47,18 @@ function resolvePublicZone(
   return zone;
 }
 
-function preferredLanguages(query: { languages?: string }) {
-  return parseReadLanguages(query.languages);
+function preferredLanguages(query: {
+  languages?: string;
+  appLocale?: string;
+}): string[] {
+  return parseReadLanguages([
+    query.appLocale,
+    ...parseReadLanguages(query.languages),
+  ]);
+}
+
+function languageMode(query: Pick<ReadLanguageGetQueryBase, "languageMode">) {
+  return query.languageMode ?? "preferred";
 }
 
 async function assertZoneManagePolicy(input: {
@@ -163,7 +175,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
     },
     {
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
-      query: t.Object({ languages: t.Optional(t.String()) }),
+      query: readLanguageGetQueryBase,
       detail: {
         summary: "Get zone by slug",
         description:
@@ -210,7 +222,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         unitId: t.String({ minLength: 1 }),
         pageSlug: t.String({ minLength: 1 }),
       }),
-      query: t.Object({ languages: t.Optional(t.String()) }),
+      query: readLanguageGetQueryBase,
       detail: {
         summary: "Get zone portal data",
         description:
@@ -234,6 +246,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         {
           cursor: query.cursor ?? null,
           preferredLanguages: preferredLanguages(query),
+          languageMode: languageMode(query),
           dynamicTagUnitIds: (query.dynamicTagUnitIds ?? "")
             .split(",")
             .map((id) => id.trim())
@@ -255,7 +268,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         sectionId: t.String({ minLength: 1 }),
       }),
       query: t.Object({
-        languages: t.Optional(t.String()),
+        ...readLanguageGetQueryBase.properties,
         cursor: t.Optional(t.String()),
         dynamicTagUnitIds: t.Optional(t.String()),
       }),

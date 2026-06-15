@@ -1,15 +1,23 @@
-import type { ZoneListQuery, ZoneSectionData } from "@rezics/contract";
+import type {
+  ReadLanguageGetQueryBase,
+  ZoneListQuery,
+  ZoneSectionData,
+} from "@rezics/contract";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { zoneApi } from "./zone.api";
 import { zoneKeys } from "./zone.keys";
 
+type ZoneReadQueryInput = Omit<ReadLanguageGetQueryBase, "languages"> & {
+  languages?: string | readonly string[];
+};
+
 export const zoneQueryOptions = (
   slug: string,
-  languages: readonly string[] = [],
+  query: ZoneReadQueryInput | readonly string[] = {},
 ) =>
   queryOptions({
-    queryKey: zoneKeys.detail(slug, languages),
-    queryFn: () => zoneApi.getBySlug(slug, languages),
+    queryKey: zoneKeys.detail(slug, query),
+    queryFn: () => zoneApi.getBySlug(slug, query),
     enabled: !!slug,
     staleTime: 1000 * 60 * 10,
   });
@@ -32,11 +40,11 @@ export const zonesByUserQuery = (userId: string, query?: ZoneListQuery) =>
 export const zonePortalQueryOptions = (
   unitId: string,
   pageSlug: string,
-  languages: readonly string[] = [],
+  query: ZoneReadQueryInput | readonly string[] = {},
 ) =>
   queryOptions({
-    queryKey: zoneKeys.portal(unitId, pageSlug, languages),
-    queryFn: () => zoneApi.getPortal(unitId, pageSlug, languages),
+    queryKey: zoneKeys.portal(unitId, pageSlug, query),
+    queryFn: () => zoneApi.getPortal(unitId, pageSlug, query),
     enabled: !!unitId && !!pageSlug,
     staleTime: 1000 * 60 * 5,
   });
@@ -45,7 +53,7 @@ export const zoneSectionInfiniteQuery = (
   unitId: string,
   pageId: string,
   sectionId: string,
-  languages: readonly string[] = [],
+  query: ZoneReadQueryInput | readonly string[] = {},
   options: { dynamicTagUnitIds?: readonly string[] } = {},
 ) =>
   infiniteQueryOptions({
@@ -53,13 +61,13 @@ export const zoneSectionInfiniteQuery = (
       unitId,
       pageId,
       sectionId,
-      languages,
+      query,
       options.dynamicTagUnitIds ?? [],
     ),
     queryFn: ({ pageParam }) =>
       zoneApi.getSection(unitId, pageId, sectionId, {
         cursor: pageParam ?? undefined,
-        languages,
+        ...readQueryObject(query),
         dynamicTagUnitIds: options.dynamicTagUnitIds,
       }),
     initialPageParam: undefined as string | undefined,
@@ -68,6 +76,12 @@ export const zoneSectionInfiniteQuery = (
     enabled: !!unitId && !!pageId && !!sectionId,
     staleTime: 1000 * 60 * 5,
   });
+
+function readQueryObject(
+  query: ZoneReadQueryInput | readonly string[],
+): ZoneReadQueryInput {
+  return Array.isArray(query) ? { languages: query } : query;
+}
 
 export const zoneQueries = {
   mine: myZonesQuery,

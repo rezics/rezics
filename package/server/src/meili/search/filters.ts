@@ -516,6 +516,9 @@ export interface ZoneQueryCompileContext {
   // The reader's language candidate chain for `languages: "viewer"`.
   // 供 `languages: "viewer"` 使用的读者语言候选链。
   viewerLanguageCandidates?: readonly string[];
+  // Viewer language filtering mode for `languages: "viewer"`.
+  // `languages: "viewer"` 使用的读者语言过滤模式。
+  viewerLanguageMode?: ListLanguageMode | null;
 }
 
 export interface CompiledZoneSectionQuery {
@@ -589,6 +592,7 @@ function resolveZoneLanguages(
 ): string[] | undefined {
   if (languages === undefined) return undefined;
   if (languages === "viewer") {
+    if (ctx.viewerLanguageMode === "all") return undefined;
     const candidates = readLanguageFilterCandidates({
       languages: ctx.viewerLanguageCandidates ?? [],
     });

@@ -2,13 +2,14 @@ import type {
   UserSubscriptionListEntryDTO,
   UserSubscriptionListEntryState,
 } from "@rezics/contract";
-import { isSubscribableUnitType } from "@rezics/contract";
+import { isSubscribableUnitType, resolveReadLanguage } from "@rezics/contract";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import {
   Realm,
   RealmMember,
   Subscription,
   Unit,
+  UnitSupportLanguage,
   UnitTranslation,
   User,
   UserSubscriptionListEntry,
@@ -169,6 +170,7 @@ export class SubscriptionListEntryService {
     userUnitId: string;
     subscribedType?: UnitType;
     state?: UserSubscriptionListEntryState;
+    preferredLanguages?: readonly string[];
   }): Promise<UserSubscriptionListEntryDTO[]> {
     const db = await this.dbProvider();
     const conditions = [
@@ -184,7 +186,11 @@ export class SubscriptionListEntryService {
       .select({
         entry: UserSubscriptionListEntry,
         subscribedSlug: Unit.slug,
+        subscribedLanguage: UnitTranslation.language,
         subscribedTitle: UnitTranslation.title,
+        supportLanguage: UnitSupportLanguage.language,
+        supportLanguageIsPrimary: UnitSupportLanguage.isPrimary,
+        supportLanguagePosition: UnitSupportLanguage.position,
       })
       .from(UserSubscriptionListEntry)
       .innerJoin(Unit, eq(UserSubscriptionListEntry.subscribedUnitId, Unit.id))
@@ -192,23 +198,72 @@ export class SubscriptionListEntryService {
         UnitTranslation,
         eq(UnitTranslation.unitId, UserSubscriptionListEntry.subscribedUnitId),
       )
+      .leftJoin(
+        UnitSupportLanguage,
+        eq(
+          UnitSupportLanguage.unitId,
+          UserSubscriptionListEntry.subscribedUnitId,
+        ),
+      )
       .where(and(...conditions))
       .orderBy(
         desc(UserSubscriptionListEntry.pinned),
         asc(UserSubscriptionListEntry.position),
         asc(UserSubscriptionListEntry.createdAt),
       );
-    const seen = new Set<string>();
-    return rows.flatMap((row: (typeof rows)[number]) => {
-      if (seen.has(row.entry.id)) return [];
-      seen.add(row.entry.id);
-      return [
-        mapUserSubscriptionListEntryToDTO({
-          ...row.entry,
+    const grouped = new Map<
+      string,
+      {
+        entry: (typeof rows)[number]["entry"];
+        subscribedSlug: string | null;
+        translations: Map<string, string | null>;
+        supportLanguages: Map<
+          string,
+          {
+            language: string;
+            isPrimary?: boolean | null;
+            position?: string | null;
+          }
+        >;
+      }
+    >();
+
+    for (const row of rows) {
+      let group = grouped.get(row.entry.id);
+      if (!group) {
+        group = {
+          entry: row.entry,
           subscribedSlug: row.subscribedSlug,
-          subscribedTitle: row.subscribedTitle,
-        }),
-      ];
+          translations: new Map(),
+          supportLanguages: new Map(),
+        };
+        grouped.set(row.entry.id, group);
+      }
+      if (row.subscribedLanguage) {
+        group.translations.set(row.subscribedLanguage, row.subscribedTitle);
+      }
+      if (row.supportLanguage) {
+        group.supportLanguages.set(row.supportLanguage, {
+          language: row.supportLanguage,
+          isPrimary: row.supportLanguageIsPrimary,
+          position: row.supportLanguagePosition,
+        });
+      }
+    }
+
+    return [...grouped.values()].map((group) => {
+      const resolvedLanguage = resolveReadLanguage({
+        languages: input.preferredLanguages,
+        supportLanguages: [...group.supportLanguages.values()],
+        availableLanguages: [...group.translations.keys()],
+      });
+      return mapUserSubscriptionListEntryToDTO({
+        ...group.entry,
+        subscribedSlug: group.subscribedSlug,
+        subscribedTitle: resolvedLanguage
+          ? (group.translations.get(resolvedLanguage) ?? null)
+          : null,
+      });
     });
   }
 

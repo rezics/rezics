@@ -15,8 +15,8 @@ import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { pickZoneMenu, ZoneNavTree } from "@/zone";
 import {
-  realmDetailBaseHref,
   type RealmDetailRouteLocation,
+  realmDetailBaseHref,
 } from "../models/realmDetailRoutes";
 
 interface RealmWikiTabProps {
@@ -175,7 +175,11 @@ function WikiZoneNavSidebar({
 }) {
   const readContext = useReadLanguageContext();
   const zoneQuery = useQuery({
-    ...zonePortalQueryOptions(zoneUnitId, "home", readContext.languages),
+    ...zonePortalQueryOptions(zoneUnitId, "home", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    }),
     enabled: readContext.ready && Boolean(zoneUnitId),
   });
   const data = zoneQuery.data;

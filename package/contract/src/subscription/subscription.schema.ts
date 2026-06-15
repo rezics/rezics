@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { readLanguageGetQueryBase } from "../list-query-base";
 import { unitTypeSchema } from "../unit/unit";
 
 /**
@@ -92,6 +93,7 @@ export type UserSubscriptionListEntryDTO =
   (typeof userSubscriptionListEntryDTOSchema)["static"];
 
 export const userSubscriptionListEntryListQuerySchema = t.Object({
+  ...readLanguageGetQueryBase.properties,
   subscribedType: t.Optional(unitTypeSchema),
   state: t.Optional(userSubscriptionListEntryStateSchema),
 });

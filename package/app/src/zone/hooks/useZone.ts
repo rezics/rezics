@@ -22,14 +22,19 @@ type ZonePortalLocator =
  */
 export function useZonePortal(locator: ZonePortalLocator, pageSlug = "home") {
   const readContext = useReadLanguageContext();
+  const readQuery = {
+    languages: readContext.languages,
+    appLocale: readContext.appLocale,
+    languageMode: readContext.languageMode,
+  };
   const slug = locator.slug ?? "";
   const zoneQuery = useQuery({
-    ...zoneQueryOptions(slug, readContext.languages),
+    ...zoneQueryOptions(slug, readQuery),
     enabled: readContext.ready && locator.slug !== undefined && !!slug,
   });
   const unitId = locator.unitId ?? zoneQuery.data?.unitId ?? "";
   const portalQuery = useQuery({
-    ...zonePortalQueryOptions(unitId, pageSlug, readContext.languages),
+    ...zonePortalQueryOptions(unitId, pageSlug, readQuery),
     enabled: readContext.ready && !!unitId && !!pageSlug,
   });
 
@@ -38,6 +43,8 @@ export function useZonePortal(locator: ZonePortalLocator, pageSlug = "home") {
     page: portalQuery.data?.page,
     refUnits: portalQuery.data?.refUnits,
     languages: readContext.languages,
+    appLocale: readContext.appLocale,
+    languageMode: readContext.languageMode,
     isLoading:
       !readContext.ready ||
       (locator.slug !== undefined && zoneQuery.isLoading) ||

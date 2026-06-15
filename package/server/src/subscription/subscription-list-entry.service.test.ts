@@ -40,6 +40,17 @@ function createMemoryDb(input: {
     slug?: string | null;
     subscriberCount?: number;
   }>;
+  translations?: Array<{
+    unitId: string;
+    language: string;
+    title: string | null;
+  }>;
+  supportLanguages?: Array<{
+    unitId: string;
+    language: string;
+    isPrimary?: boolean | null;
+    position?: string | null;
+  }>;
   entries?: MemoryEntry[];
   subscriptions?: Array<{
     id: string;
@@ -54,6 +65,8 @@ function createMemoryDb(input: {
     units: input.units ?? [
       { id: TARGET_UNIT_ID, type: "ZONE", slug: "target", subscriberCount: 0 },
     ],
+    translations: input.translations ?? [],
+    supportLanguages: input.supportLanguages ?? [],
     entries: input.entries ?? [],
     subscriptions: input.subscriptions ?? [],
     realms: input.realms ?? [],
@@ -131,13 +144,46 @@ function createMemoryDb(input: {
               if (byPosition !== 0) return byPosition;
               return a.createdAt.getTime() - b.createdAt.getTime();
             })
-            .map((row) => ({
-              entry: row,
-              subscribedSlug:
-                state.units.find((unit) => unit.id === row.subscribedUnitId)
-                  ?.slug ?? null,
-              subscribedTitle: row.subscribedTitle ?? null,
-            }));
+            .flatMap((row) => {
+              const translations = state.translations.filter(
+                (translation) => translation.unitId === row.subscribedUnitId,
+              );
+              const supportLanguages = state.supportLanguages.filter(
+                (language) => language.unitId === row.subscribedUnitId,
+              );
+              const translationRows = translations.length
+                ? translations
+                : [
+                    {
+                      unitId: row.subscribedUnitId,
+                      language: null,
+                      title: row.subscribedTitle ?? null,
+                    },
+                  ];
+              const supportRows = supportLanguages.length
+                ? supportLanguages
+                : [
+                    {
+                      unitId: row.subscribedUnitId,
+                      language: null,
+                      isPrimary: null,
+                      position: null,
+                    },
+                  ];
+              return translationRows.flatMap((translation) =>
+                supportRows.map((supportLanguage) => ({
+                  entry: row,
+                  subscribedSlug:
+                    state.units.find((unit) => unit.id === row.subscribedUnitId)
+                      ?.slug ?? null,
+                  subscribedLanguage: translation.language,
+                  subscribedTitle: translation.title,
+                  supportLanguage: supportLanguage.language,
+                  supportLanguageIsPrimary: supportLanguage.isPrimary ?? null,
+                  supportLanguagePosition: supportLanguage.position ?? null,
+                })),
+              );
+            });
         } else if ("position" in this.selection && "state" in this.selection) {
           rows = state.entries.map((row) => ({
             position: row.position,
@@ -308,6 +354,46 @@ function createService(db: ReturnType<typeof createMemoryDb>) {
 }
 
 describe("SubscriptionListEntryService", () => {
+  test("resolves sidebar titles through the read-language candidate chain", async () => {
+    const db = createMemoryDb({
+      entries: [entry({ subscribedUnitId: TARGET_UNIT_ID })],
+      translations: [
+        { unitId: TARGET_UNIT_ID, language: "en", title: "English Zone" },
+        { unitId: TARGET_UNIT_ID, language: "ja", title: "日本語ゾーン" },
+        { unitId: TARGET_UNIT_ID, language: "zh-hant", title: "繁體專區" },
+      ],
+      supportLanguages: [
+        {
+          unitId: TARGET_UNIT_ID,
+          language: "en",
+          isPrimary: false,
+          position: "b",
+        },
+        {
+          unitId: TARGET_UNIT_ID,
+          language: "ja",
+          isPrimary: false,
+          position: "c",
+        },
+        {
+          unitId: TARGET_UNIT_ID,
+          language: "zh-hant",
+          isPrimary: true,
+          position: "a",
+        },
+      ],
+    });
+
+    const rows = await createService(db).list({
+      userUnitId: USER_UNIT_ID,
+      subscribedType: "ZONE",
+      preferredLanguages: ["zh-hant", "en"],
+    });
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.subscribedTitle).toBe("繁體專區");
+  });
+
   test("pin and reorder update only active list metadata", async () => {
     const db = createMemoryDb({
       entries: [entry({ subscribedUnitId: TARGET_UNIT_ID })],

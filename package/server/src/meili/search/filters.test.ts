@@ -424,6 +424,26 @@ describe("compileZoneSectionQuery", () => {
     expect(compiled.sort).toEqual(["updatedAt:desc"]);
   });
 
+  test("viewer languages respect all-language mode", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "zone",
+        types: ["ZONE"],
+        languages: "viewer",
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+      undefined,
+      {
+        viewerLanguageCandidates: ["zh-hant"],
+        viewerLanguageMode: "all",
+      },
+    );
+
+    expect(
+      compiled.filter.some((clause) => clause.includes("languages IN")),
+    ).toBe(false);
+  });
+
   test("zone queries cannot widen an incompatible zone boundary", () => {
     const compiled = compileZoneSectionQuery(
       {

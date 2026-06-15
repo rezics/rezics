@@ -1,6 +1,7 @@
 import {
   type ContentDoc,
   type Language,
+  type ListLanguageMode,
   markdownContentDoc,
   parseZoneBoundary,
   parseZoneNav,
@@ -1741,18 +1742,21 @@ export class ZoneService {
           target: "post",
           postKinds: ["REVIEW"],
           realm: "context",
+          languages: "viewer",
           sort: { field: "createdAt", direction: "desc" },
         };
       case "updates":
         return {
           target: "post",
           realm: "context",
+          languages: "viewer",
           sort: { field: "updatedAt", direction: "desc" },
         };
       default:
         return {
           target: "post",
           realm: "context",
+          languages: "viewer",
           sort: { field: "hotScore", direction: "desc" },
         };
     }
@@ -1767,6 +1771,7 @@ export class ZoneService {
     limit: number;
     cursor?: string | null;
     preferredLanguages?: string[];
+    languageMode?: ListLanguageMode | null;
     dynamicTagUnitIds?: string[];
   }): Promise<ZoneSectionData> {
     const offset = input.cursor ? Number.parseInt(input.cursor, 10) || 0 : 0;
@@ -1792,6 +1797,7 @@ export class ZoneService {
       contextRealmUnitId:
         boundary.context.kind === "realm" ? boundary.context.realmUnitId : null,
       viewerLanguageCandidates: input.preferredLanguages ?? [],
+      viewerLanguageMode: input.languageMode,
     });
     const result = await this.repository.searchSection({
       index: compiled.index,
@@ -1906,6 +1912,7 @@ export class ZoneService {
     options: {
       cursor?: string | null;
       preferredLanguages?: string[];
+      languageMode?: ListLanguageMode | null;
       dynamicTagUnitIds?: string[];
     } = {},
   ): Promise<ZoneSectionData | null> {
@@ -1937,6 +1944,7 @@ export class ZoneService {
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
+          languageMode: options.languageMode,
           dynamicTagUnitIds: options.dynamicTagUnitIds,
         });
       case "feed":
@@ -1949,6 +1957,7 @@ export class ZoneService {
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
+          languageMode: options.languageMode,
         });
       case "collection": {
         const unitIds = section.items.flatMap((item) =>

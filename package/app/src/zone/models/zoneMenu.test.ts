@@ -231,6 +231,18 @@ describe("resolveZoneMenuNodes", () => {
     ]);
   });
 
+  it("uses page slugs rather than opaque page ids for built-in page labels", () => {
+    const resolved = resolveZoneMenuNodes(
+      [{ id: "home-node", target: { kind: "zonePage", pageId: "page-home" } }],
+      {
+        ...ctx,
+        pages: [{ id: "page-home", slug: "home", position: "a" }],
+      },
+    );
+
+    expect(resolved[0]?.labelKey).toBe("zone:page_home");
+  });
+
   it("clamps the tree at depth 3", () => {
     const nodes: ZoneMenuNode[] = [
       {

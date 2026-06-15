@@ -43,7 +43,11 @@ export function QuerySection({
       zone.unitId,
       ctx.pageId,
       section.id,
-      ctx.languages,
+      {
+        languages: ctx.languages,
+        appLocale: ctx.appLocale,
+        languageMode: ctx.languageMode,
+      },
       { dynamicTagUnitIds },
     ),
   );

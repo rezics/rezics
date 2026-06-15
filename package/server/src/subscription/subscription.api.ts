@@ -7,6 +7,7 @@ import type {
   UserSubscriptionListEntryListResponse,
 } from "@rezics/contract";
 import {
+  parseReadLanguages,
   subscriberCountResponseSchema,
   subscriptionCheckResponseSchema,
   subscriptionCreateBodySchema,
@@ -23,8 +24,8 @@ import {
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro } from "@/middleware";
-import { subscriptionListEntryService } from "./subscription-list-entry.service";
 import { subscriptionService } from "./subscription.service";
+import { subscriptionListEntryService } from "./subscription-list-entry.service";
 
 export const subscriptionApi = new Elysia({ prefix: "/subscription" })
   .use(authMacro)
@@ -59,6 +60,10 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
         userUnitId: identity.userId,
         subscribedType: query.subscribedType,
         state: query.state,
+        preferredLanguages: parseReadLanguages([
+          query.appLocale,
+          ...parseReadLanguages(query.languages),
+        ]),
       });
       return { entries };
     },

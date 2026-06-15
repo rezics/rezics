@@ -55,9 +55,13 @@ describe("zoneApi", () => {
   });
 
   test("fetches the zone by slug with language preferences", async () => {
-    await zoneApi.getBySlug("toaru", ["zh-hant", "en"]);
+    await zoneApi.getBySlug("toaru", {
+      languages: ["zh-hant", "en"],
+      appLocale: "zh-hant",
+      languageMode: "preferred",
+    });
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/zone/by-slug/toaru?languages=zh-hant%2Cen",
+      "http://api.example/zone/by-slug/toaru?languages=zh-hant%2Cen&appLocale=zh-hant&languageMode=preferred",
     );
   });
 
@@ -80,16 +84,22 @@ describe("zoneApi", () => {
   });
 
   test("fetches the portal bundle and per-section data with cursor", async () => {
-    await zoneApi.getPortal("zone-1", "home", ["en"]);
+    await zoneApi.getPortal("zone-1", "home", {
+      languages: ["en"],
+      appLocale: "zh-hant",
+      languageMode: "preferred",
+    });
     await zoneApi.getSection("zone-1", "page-home", "s-latest", {
       cursor: "24",
       languages: ["en"],
+      appLocale: "zh-hant",
+      languageMode: "preferred",
       dynamicTagUnitIds: ["tag-a", "tag-b"],
     });
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
-      "http://api.example/zone/zone-1/portal/home?languages=en",
-      "http://api.example/zone/zone-1/page/page-home/section/s-latest?cursor=24&languages=en&dynamicTagUnitIds=tag-a%2Ctag-b",
+      "http://api.example/zone/zone-1/portal/home?languages=en&appLocale=zh-hant&languageMode=preferred",
+      "http://api.example/zone/zone-1/page/page-home/section/s-latest?cursor=24&languages=en&appLocale=zh-hant&languageMode=preferred&dynamicTagUnitIds=tag-a%2Ctag-b",
     ]);
   });
 

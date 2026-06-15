@@ -43,11 +43,25 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   );
   const readContext = useReadLanguageContext();
   const zonesQuery = useQuery({
-    ...mySubscriptionListEntriesQuery({ subscribedType: "ZONE" }),
+    ...mySubscriptionListEntriesQuery({
+      subscribedType: "ZONE",
+      languages: readContext.languages.length
+        ? readContext.languages.join(",")
+        : undefined,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    }),
     enabled: hasMemberSession && readContext.ready,
   });
   const realmsQuery = useQuery({
-    ...mySubscriptionListEntriesQuery({ subscribedType: "REALM" }),
+    ...mySubscriptionListEntriesQuery({
+      subscribedType: "REALM",
+      languages: readContext.languages.length
+        ? readContext.languages.join(",")
+        : undefined,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    }),
     enabled: hasMemberSession && readContext.ready,
   });
   const canRenderChrome = shouldRenderNormalAppChrome({

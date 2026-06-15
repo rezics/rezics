@@ -1886,6 +1886,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                               query: {
                                 target: "post",
                                 realm: "context",
+                                languages: "viewer",
                                 sort: { field: "hotScore", direction: "desc" },
                               },
                             },
@@ -1904,6 +1905,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                                 target: "unit",
                                 types: ["BOOK"],
                                 realm: "context",
+                                languages: "viewer",
                                 sort: {
                                   field: "publishedAt",
                                   direction: "desc",
