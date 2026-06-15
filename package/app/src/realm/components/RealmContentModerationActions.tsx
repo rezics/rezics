@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
 } from "@rezics/ui/shadcn";
 import { CheckCircle2, Lock, Pin, RotateCcw, ShieldX } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 export type RealmContentModerationActionsProps = {
@@ -68,6 +68,7 @@ export function RealmContentModerationActions({
     message: string;
     variant: "default" | "destructive";
   } | null>(null);
+  const pinRequestedRef = useRef(false);
 
   const requestConfirm = (
     event: { stopPropagation: () => void },
@@ -77,6 +78,23 @@ export function RealmContentModerationActions({
   ) => {
     event.stopPropagation();
     setPendingAction({ execute, message, variant });
+  };
+
+  const requestPin = (event: { stopPropagation: () => void }) => {
+    event.stopPropagation();
+    if (pinRequestedRef.current || pin.isPending) return;
+    pinRequestedRef.current = true;
+    pin.mutate(
+      {
+        realmUnitId,
+        unitId: targetUnitId,
+      },
+      {
+        onSettled: () => {
+          pinRequestedRef.current = false;
+        },
+      },
+    );
   };
 
   return (
@@ -179,14 +197,8 @@ export function RealmContentModerationActions({
         </DropdownMenuLabel>
         <DropdownMenuItem
           disabled={pin.isPending}
-          onSelect={(event) => {
-            requestConfirm(event, t("community:moderation_pin_confirm"), () =>
-              pin.mutate({
-                realmUnitId,
-                unitId: targetUnitId,
-              }),
-            );
-          }}
+          onClick={requestPin}
+          onSelect={requestPin}
         >
           <Pin className="h-4 w-4" aria-hidden />
           {t("community:moderation_pin_action")}
