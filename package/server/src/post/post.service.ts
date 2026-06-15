@@ -831,7 +831,7 @@ export class PostService {
     const moderationStatus = toUnitRealmModerationStatus(
       opts.realmModerationStatus,
     );
-    if (!(await this.canReadRealmFeed(realmUnitId, options))) {
+    if (!(await this.canReadRealmStream(realmUnitId, options))) {
       return { posts: [], total: 0 };
     }
 
@@ -950,7 +950,7 @@ export class PostService {
       )
     ).map((post) => ({
       ...post,
-      feedSortValue: sortValues.get(post.unitId) ?? null,
+      streamSortValue: sortValues.get(post.unitId) ?? null,
     }));
 
     return {
@@ -959,7 +959,7 @@ export class PostService {
     };
   }
 
-  private async canReadRealmFeed(
+  private async canReadRealmStream(
     realmUnitId: string,
     options?: { isAdmin?: boolean; viewerUserId?: string | null },
   ): Promise<boolean> {
@@ -1127,7 +1127,7 @@ export class PostService {
     } = input;
 
     // Chapters always publish. A draft is owner-only and stays out of
-    // feeds/search until published (see publication-policy
+    // streams/search until published (see publication-policy
     // `publicUnitEligibilityWhere`).
     // 章节始终发布。草稿仅作者可见，发布前不会进入信息流/搜索
     // （参见发布策略 `publicUnitEligibilityWhere`）。
@@ -1338,7 +1338,7 @@ export class PostService {
   /**
    * Toggle a post between published and draft. Owner-only. Publishing sets
    * `publishedAt` once (first publication is preserved) and indexes the post;
-   * reverting to draft removes it from feeds/search via the publication policy
+   * reverting to draft removes it from streams/search via the publication policy
    * and re-syncs the index to de-list it.
    * 在已发布与草稿之间切换帖子。仅作者可操作。发布时只设置一次 `publishedAt`
    * （保留首次发布时间）并为帖子建立索引；回退为草稿时，通过发布策略将其从

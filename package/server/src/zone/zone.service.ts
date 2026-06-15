@@ -59,11 +59,11 @@ import {
   ZonePage,
 } from "../db/schema";
 import { generateBetween, rebalance } from "../shelf/fractional-index";
+import { mapBookToStreamRow } from "../stream/stream.mapper";
 import {
-  mapBookToStreamRow,
   mapPostToStreamRow,
   mapUnitToStreamRow,
-} from "../stream";
+} from "../stream/stream.response";
 
 const SECTION_DEFAULT_LIMIT = 12;
 
@@ -312,12 +312,12 @@ function mapUnitToSectionItem(
 
 function sectionItemToStreamUnit(item: ZoneSectionItem) {
   return {
-    unitId: item.unitId,
+    id: item.unitId,
     type: item.type,
     slug: item.slug ?? null,
     title: item.title ?? null,
-    coverUrl: item.imageUrl ?? null,
-    description: item.summary ?? null,
+    summary: item.summary ?? null,
+    extra: item.imageUrl ? { coverUrl: item.imageUrl } : null,
     createdAt: item.createdAt,
   };
 }
@@ -389,7 +389,7 @@ function collectContentSectionRefs(
         }
       }
       break;
-    case "feed":
+    case "stream":
     case "stats":
     case "sources":
       break;
@@ -513,7 +513,7 @@ function isZoneContentSection(
     case "richText":
     case "collection":
     case "query":
-    case "feed":
+    case "stream":
     case "stats":
     case "sources":
       return true;
@@ -1725,17 +1725,15 @@ export class ZoneService {
     return out;
   }
 
-  private feedSectionQuery(
-    feedKind: "all" | "updates" | "reviews" | undefined,
+  private streamSectionQuery(
+    streamKind: "all" | "updates" | "reviews" | undefined,
   ): ZoneSectionQuery {
-    // Feed sections are query presets over the posts index: the standalone
-    // feed service keeps serving the zone /feed page, while sections share
-    // the single compiled-query execution path (one renderer, one boundary
-    // intersection).
-    // feed 分区是 posts 索引上的查询预设：独立的 feed service 继续服务
-    // 专区 /feed 页面，而分区共享单一的编译查询执行路径（单一渲染器、
-    // 单一边界交集）。
-    switch (feedKind) {
+    // Stream sections are query presets over the posts index. They share the
+    // compiled-query execution path so zone sections use one renderer and one
+    // boundary intersection model.
+    // Stream 分区是 posts 索引上的查询预设。它们共享编译查询执行路径，
+    // 让专区分区使用同一套渲染器与边界交集模型。
+    switch (streamKind) {
       case "reviews":
         return {
           target: "post",
@@ -1941,12 +1939,12 @@ export class ZoneService {
           preferredLanguages: options.preferredLanguages,
           dynamicTagUnitIds: options.dynamicTagUnitIds,
         });
-      case "feed":
+      case "stream":
         return this.executeQuerySection({
           zone,
           pageId,
           sectionId,
-          query: this.feedSectionQuery(section.feedKind),
+          query: this.streamSectionQuery(section.streamKind),
           output: "stream",
           limit: sectionLimit(section),
           cursor: options.cursor,

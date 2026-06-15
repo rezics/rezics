@@ -345,14 +345,14 @@ describe("seedOfficialZones", () => {
       );
       const unlabeledDataSections = home?.config.sections.filter(
         (section) =>
-          (section.kind === "query" || section.kind === "feed") &&
+          (section.kind === "query" || section.kind === "stream") &&
           !section.titleLabelUnitId,
       );
 
       expect(unlabeledDataSections).toEqual([]);
       for (const section of home?.config.sections ?? []) {
         if (
-          (section.kind === "query" || section.kind === "feed") &&
+          (section.kind === "query" || section.kind === "stream") &&
           section.titleLabelUnitId
         ) {
           expect(labelIds.has(section.titleLabelUnitId)).toBe(true);

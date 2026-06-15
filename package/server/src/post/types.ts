@@ -61,5 +61,5 @@ export type PostWithRelations = typeof Post.$inferSelect & {
    * Internal serving cursor value for the active list sort; not a DTO field.
    * 当前列表排序的内部服务游标值；并非 DTO 字段。
    */
-  feedSortValue?: number | string | null;
+  streamSortValue?: number | string | null;
 };

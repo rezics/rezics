@@ -3,7 +3,7 @@ import type {
   UnitType,
   ZoneCollectionSection,
 } from "@rezics/contract";
-import { StreamRenderer } from "@/feed";
+import { StreamRenderer } from "@/stream";
 import {
   zoneLinkFallbackKey,
   zoneLinkHref,
@@ -29,11 +29,11 @@ function entriesToStreamRows(entries: ZoneListEntry[]): StreamRow[] {
         href: entry.href,
         recommendationReason: "zone-collection-stream",
         unit: {
-          unitId: entry.unitId,
+          id: entry.unitId,
           type: entry.type as UnitType,
           title: entry.label,
-          coverUrl: entry.imageUrl ?? null,
-          description: entry.summary ?? null,
+          summary: entry.summary ?? null,
+          extra: entry.imageUrl ? { coverUrl: entry.imageUrl } : null,
         },
       },
     ];

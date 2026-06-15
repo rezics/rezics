@@ -26,7 +26,7 @@ import { echoKvApi } from "./echokv";
 import { entityApi } from "./entity";
 import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
-import { feedApi } from "./feed";
+import { streamApi } from "./stream";
 import { feedbackApi } from "./feedback";
 import { gameSystemRequirementApi } from "./game-system-requirement";
 import { governanceApi } from "./governance";
@@ -217,7 +217,7 @@ routeApp
   .use(chapterApi)
   .use(pollApi)
   .use(postApi)
-  .use(feedApi)
+  .use(streamApi)
   .use(progressApi)
   .use(draftApi)
   .use(activityApi)

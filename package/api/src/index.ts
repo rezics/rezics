@@ -13,7 +13,7 @@ export * from "./content-translation/content-translation";
 export * from "./credit-attribution/credit-attribution";
 export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";
-export * from "./feed/feed";
+export * from "./stream/stream";
 export * from "./game-system-requirement/game-system-requirement";
 export * from "./governance/governance";
 export * from "./history/history";

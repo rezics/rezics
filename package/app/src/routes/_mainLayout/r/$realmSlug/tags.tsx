@@ -6,7 +6,7 @@ import {
   titleOfRealm,
 } from "@/core/routing/documentTitle";
 import {
-  realmFeedSearchForSingleTag,
+  realmStreamSearchForSingleTag,
   RealmDetailLayout,
   useRealmDetail,
 } from "@/realm";
@@ -39,7 +39,7 @@ function RealmSlugTagsTab() {
       onTagSelect={(tagId) =>
         navigate({
           to: realmDetailHref(routeLocation),
-          search: realmFeedSearchForSingleTag({}, tagId),
+          search: realmStreamSearchForSingleTag({}, tagId),
         })
       }
     />

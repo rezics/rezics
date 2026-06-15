@@ -1,14 +1,14 @@
 import { Skeleton } from "@rezics/ui/shadcn";
-import { AnnouncementFeedSection } from "@/pinboard";
+import { AnnouncementStreamSection } from "@/pinboard";
 import { AnnouncementBar } from "../components/AnnouncementBar";
 
 /**
  * Announcement bar section displaying up to 4 pinned announcements.
  * 公告栏部分最多显示4条固定的公告。
  *
- * Loads announcements via AnnouncementFeedSection and renders them
+ * Loads announcements via AnnouncementStreamSection and renders them
  * in a full-width bar with optional links and rotation/scrolling.
- * 通过 AnnouncementFeedSection 加载公告，并在全宽栏中呈现，
+ * 通过 AnnouncementStreamSection 加载公告，并在全宽栏中呈现，
  * 带有可选链接和旋转/滚动。
  *
  * Desktop (md+):
@@ -39,7 +39,7 @@ import { AnnouncementBar } from "../components/AnnouncementBar";
  */
 export const AnnouncementBarSection = () => {
   return (
-    <AnnouncementFeedSection
+    <AnnouncementStreamSection
       loadingFallback={<Skeleton className="h-10 w-full rounded-none" />}
     >
       {(items) => {
@@ -58,6 +58,6 @@ export const AnnouncementBarSection = () => {
           />
         );
       }}
-    </AnnouncementFeedSection>
+    </AnnouncementStreamSection>
   );
 };

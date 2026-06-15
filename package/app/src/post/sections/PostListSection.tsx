@@ -6,7 +6,7 @@ import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { resolvePostTargetVariantLabel } from "@/book-library";
-import { FeedPostCard } from "@/feed";
+import { StreamPostCard } from "@/stream";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 interface PostListSectionProps {
@@ -157,7 +157,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
                 </Badge>
               </div>
             )}
-            <FeedPostCard post={post} />
+            <StreamPostCard post={post} />
           </div>
         );
       })}

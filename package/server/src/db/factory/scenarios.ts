@@ -1867,8 +1867,8 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                           sections: [
                             {
                               id: "latest-edits-feed",
-                              kind: "feed",
-                              feedKind: "updates",
+                              kind: "stream",
+                              streamKind: "updates",
                               limit: 12,
                             },
                           ],
@@ -2024,7 +2024,9 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
         config: {
           schema: "rezics/zone-page",
           version: 1,
-          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
+          sections: [
+            { id: "feed", kind: "stream", streamKind: "all", limit: 20 },
+          ],
         },
       },
     ],

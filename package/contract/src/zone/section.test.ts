@@ -128,7 +128,7 @@ describe("zone dynamic tags", () => {
     expect(
       Value.Check(zoneContentSectionSchema, {
         id: "s-feed",
-        kind: "feed",
+        kind: "stream",
         dynamicTags: { options: [{ tagUnitIds: ["tag-1"], probability: 1 }] },
       }),
     ).toBe(false);

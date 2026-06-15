@@ -1,67 +1,23 @@
 import { t } from "elysia";
+import { bookDTOSchema, type BookDTO } from "../book/book";
 import { postDTOSchema } from "../post/post";
-import { shelfSummaryDTOSchema } from "../shelf/shelf";
-import { unitTypeSchema, variantContextSummarySchema } from "../unit/unit";
+import { shelfDTOSchema, type ShelfDTO } from "../shelf/shelf";
+import { unitDTOSchema, type UnitDTO } from "../unit/unit";
 
-export const streamCreditSummarySchema = t.Object({
-  unitId: t.String(),
-  name: t.String(),
-  role: t.Optional(t.String()),
-});
-
-export type StreamCreditSummary = (typeof streamCreditSummarySchema)["static"];
-
-export const streamTagSummarySchema = t.Object({
-  unitId: t.String(),
-  label: t.String(),
-  slug: t.Optional(t.Nullable(t.String())),
-});
-
-export type StreamTagSummary = (typeof streamTagSummarySchema)["static"];
-
-export const streamWorkSummarySchema = t.Object({
-  unitId: t.String(),
-  kind: t.Optional(t.String()),
-  title: t.Optional(t.Nullable(t.String())),
-  subtitle: t.Optional(t.Nullable(t.String())),
-  coverUrl: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
-  primaryAuthor: t.Optional(t.Nullable(streamCreditSummarySchema)),
-  tags: t.Optional(t.Array(streamTagSummarySchema)),
-  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
-});
-
-export type StreamWorkSummary = (typeof streamWorkSummarySchema)["static"];
-
-export const streamUnitSummarySchema = t.Object({
-  unitId: t.String(),
-  type: unitTypeSchema,
-  slug: t.Optional(t.Nullable(t.String())),
-  title: t.Optional(t.Nullable(t.String())),
-  coverUrl: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
-  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
-});
-
-export type StreamUnitSummary = (typeof streamUnitSummarySchema)["static"];
-
+/**
+ * Stream rows are heterogeneous ordered-list envelopes. They own row identity,
+ * cursor/rank metadata, navigation, and dispatch; they do not redefine content
+ * payloads or aggregate optional interaction state such as reactions.
+ *
+ * Stream row 是异构有序列表的 envelope。它只拥有行身份、cursor/rank 元数据、
+ * 导航与分发；不重定义内容 payload，也不聚合 reaction 这类可批量补水状态。
+ */
 export const streamPostRowSchema = t.Object({
   type: t.Literal("post"),
   rowId: t.String(),
   post: postDTOSchema,
   href: t.String(),
   contextUnitId: t.Nullable(t.String()),
-  realm: t.Optional(
-    t.Nullable(
-      t.Object({
-        unitId: t.String(),
-        slug: t.Optional(t.Nullable(t.String())),
-        title: t.Optional(t.Nullable(t.String())),
-      }),
-    ),
-  ),
-  targetUnit: t.Optional(t.Nullable(streamWorkSummarySchema)),
-  variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
   recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
@@ -70,32 +26,47 @@ export type StreamPostRow = (typeof streamPostRowSchema)["static"];
 export const streamBookRowSchema = t.Object({
   type: t.Literal("book"),
   rowId: t.String(),
-  book: streamWorkSummarySchema,
+  book: bookDTOSchema,
   href: t.String(),
   recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
-export type StreamBookRow = (typeof streamBookRowSchema)["static"];
+export type StreamBookRow = Omit<
+  (typeof streamBookRowSchema)["static"],
+  "book"
+> & {
+  book: BookDTO;
+};
 
 export const streamShelfRowSchema = t.Object({
   type: t.Literal("shelf"),
   rowId: t.String(),
-  shelf: shelfSummaryDTOSchema,
+  shelf: shelfDTOSchema,
   href: t.String(),
   recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
-export type StreamShelfRow = (typeof streamShelfRowSchema)["static"];
+export type StreamShelfRow = Omit<
+  (typeof streamShelfRowSchema)["static"],
+  "shelf"
+> & {
+  shelf: ShelfDTO;
+};
 
 export const streamUnitRowSchema = t.Object({
   type: t.Literal("unit"),
   rowId: t.String(),
-  unit: streamUnitSummarySchema,
+  unit: unitDTOSchema,
   href: t.String(),
   recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
-export type StreamUnitRow = (typeof streamUnitRowSchema)["static"];
+export type StreamUnitRow = Omit<
+  (typeof streamUnitRowSchema)["static"],
+  "unit"
+> & {
+  unit: UnitDTO;
+};
 
 export const streamRowSchema = t.Union([
   streamPostRowSchema,

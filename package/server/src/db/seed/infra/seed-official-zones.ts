@@ -286,7 +286,9 @@ function officialConfig(input: {
         config: {
           schema: "rezics/zone-page",
           version: 1,
-          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
+          sections: [
+            { id: "feed", kind: "stream", streamKind: "all", limit: 20 },
+          ],
         },
       },
     ],
@@ -554,9 +556,9 @@ const popularConfig = officialConfig({
     },
     {
       id: "popular-feed",
-      kind: "feed",
+      kind: "stream",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.popularFeed.id,
-      feedKind: "all",
+      streamKind: "all",
       limit: 20,
     },
   ],

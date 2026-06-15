@@ -28,7 +28,7 @@
   "comment_context_reply_in": "{context} に返信します",
   "feed_carousel_works": "探索したい作品",
   "feed_carousel_shelves": "コミュニティの棚",
-  "feed_empty": "まだフィードはありません",
+  "stream_empty": "まだフィードはありません",
   "discussion_empty": "まだ議論はありません。",
   "discussion_load_failed": "議論の読み込みに失敗しました。",
   "dm_back_to_list": "すべての会話",

@@ -276,7 +276,9 @@ function basePage(): ZonePageConfig {
                   },
                   {
                     id: "tab-hot",
-                    sections: [{ id: "s-feed", kind: "feed", feedKind: "all" }],
+                    sections: [
+                      { id: "s-feed", kind: "stream", streamKind: "all" },
+                    ],
                   },
                 ],
               },
@@ -604,7 +606,7 @@ describe("zone split validation", () => {
 
   test("validates page-local section ids and nested tab defaults", async () => {
     const duplicate = basePage();
-    duplicate.sections.push({ id: "s-new", kind: "feed" });
+    duplicate.sections.push({ id: "s-new", kind: "stream" });
     await expectValidationCode(
       service.validateZonePage({
         boundary: baseBoundary(),
@@ -908,10 +910,13 @@ describe("section data execution", () => {
     expect(data?.rows?.[0]).toMatchObject({
       type: "book",
       rowId: "book:book-1",
+      href: "/book/book-1",
+      recommendationReason: "zone-stream-book",
       book: {
         unitId: "book-1",
         title: "A Certain Index",
-        description: "Magic and science.",
+        summary: "Magic and science.",
+        coverUrl: "https://example.com/cover.jpg",
       },
     });
   });

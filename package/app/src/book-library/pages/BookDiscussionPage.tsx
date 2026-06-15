@@ -7,10 +7,10 @@ import { useAtomValue } from "jotai";
 import type React from "react";
 import { useMemo } from "react";
 import { ReplyComposer } from "@/comment";
-import { FeedSection } from "@/feed";
+import { StreamSection } from "@/stream";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { resolveCatalogEntryInteractionContext } from "../models/catalogEntryContext";
-import { resolveBookCommunityFeedQuery } from "../models/communityFeed";
+import { resolveBookCommunityStreamQuery } from "../models/communityStream";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
@@ -50,7 +50,7 @@ export const BookCommunityPage: React.FC = () => {
   if (!bookInfo) return null;
 
   const context = resolveCatalogEntryInteractionContext(bookInfo);
-  const feedQuery = resolveBookCommunityFeedQuery({
+  const streamQuery = resolveBookCommunityStreamQuery({
     currentCatalogEntryUnitId: context.primaryTargetUnitId,
   });
 
@@ -68,13 +68,13 @@ export const BookCommunityPage: React.FC = () => {
 
       <Separator />
 
-      <FeedSection
+      <StreamSection
         query={{
           scope: "library",
           libraryKind: "book",
           ...(context.variantUnitId
             ? { variantUnitId: context.variantUnitId }
-            : { targetUnitId: feedQuery.targetUnitId }),
+            : { targetUnitId: streamQuery.targetUnitId }),
           languages: readContext.languages,
           appLocale: readContext.appLocale,
         }}

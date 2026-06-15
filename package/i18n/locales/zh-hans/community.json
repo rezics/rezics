@@ -28,7 +28,7 @@
   "comment_context_reply_in": "将在 {context} 中回复",
   "feed_carousel_works": "值得探索的作品",
   "feed_carousel_shelves": "社区书架",
-  "feed_empty": "还没有动态",
+  "stream_empty": "还没有动态",
   "discussion_empty": "还没有讨论。",
   "discussion_load_failed": "加载讨论失败。",
   "dm_back_to_list": "所有对话",

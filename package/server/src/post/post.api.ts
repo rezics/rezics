@@ -292,7 +292,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       detail: {
         summary: "Publish or revert a post draft",
         description:
-          "Owner-only toggle between published and draft. Publishing is policy-gated; reverting to draft removes the post from feeds and search.",
+          "Owner-only toggle between published and draft. Publishing is policy-gated; reverting to draft removes the post from streams and search.",
         tags: ["Posts"],
       },
     },

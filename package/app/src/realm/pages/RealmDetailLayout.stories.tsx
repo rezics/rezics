@@ -22,7 +22,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { useAuthSessionStore } from "@/user";
 import { RealmAboutTab } from "../sections/RealmAboutTab";
-import { RealmFeedTab } from "../sections/RealmFeedTab";
+import { RealmStreamTab } from "../sections/RealmStreamTab";
 import { RealmDetailLayout } from "./RealmDetailLayout";
 import { useRealmDetail } from "./realmDetailContext";
 
@@ -39,10 +39,10 @@ type RealmStoryState =
   | "muted"
   | "banned";
 
-// Detail tabs exercised by these fixtures: the feed (manage chrome) and about
+// Detail tabs exercised by these fixtures: the stream (manage chrome) and about
 // (role/membership readout).
 // 这些 fixture 演示的详情标签：信息流（管理外壳）与关于（角色/成员信息）。
-type RealmDetailStoryTab = "feed" | "about";
+type RealmDetailStoryTab = "stream" | "about";
 
 function makePost(unitId: string, contentSource: string): PostDTO {
   return {
@@ -284,11 +284,11 @@ function DetailTab({ tab }: { tab: RealmDetailStoryTab }) {
     );
   }
   return (
-    <RealmFeedTab
-      feedSort="best"
-      feedTagIds={[]}
-      onFeedSortChange={() => {}}
-      onFeedTagIdsChange={() => {}}
+    <RealmStreamTab
+      streamSort="best"
+      streamTagIds={[]}
+      onStreamSortChange={() => {}}
+      onStreamTagIdsChange={() => {}}
       onOpenTagsTab={() => {}}
     />
   );
@@ -323,15 +323,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Owner: Story = {
-  render: () => <RealmStateStory state="owner" tab="feed" />,
+  render: () => <RealmStateStory state="owner" tab="stream" />,
 };
 
 export const Moderator: Story = {
-  render: () => <RealmStateStory state="moderator" tab="feed" />,
+  render: () => <RealmStateStory state="moderator" tab="stream" />,
 };
 
 export const GlobalStaffOverride: Story = {
-  render: () => <RealmStateStory state="global-staff" tab="feed" />,
+  render: () => <RealmStateStory state="global-staff" tab="stream" />,
 };
 
 export const Member: Story = {

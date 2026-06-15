@@ -5,7 +5,7 @@ import {
 } from "./realmPostContext";
 
 describe("realm post context helpers", () => {
-  test("builds long realm-context post links for feed cards", () => {
+  test("builds long realm-context post links for stream cards", () => {
     expect(
       realmContextPostHref({ realmId: "realm-1", postUnitId: "post-1" }),
     ).toBe("/realm/realm-1/post/post-1");

@@ -1,0 +1,51 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks";
+import * as StreamPostCardStories from "@/stream/components/StreamPostCard.stories";
+
+<Meta title="App/Stream/Stream Cards" />
+
+# Stream Cards
+
+Stream cards are app-side preview surfaces. They are used by mixed streams where
+a row opens a full post or review target, but the in-stream surface should stay
+compact, card-shaped, and non-expanding.
+
+Stream previews live in the stream feature because they own row behavior: card
+navigation, truncation, row metadata, and engagement affordances. Full
+post/review surfaces keep their own richer detail behavior.
+
+## Default stream cards
+
+`StreamPostCard` is the default text-first card. Body content truncates in place;
+the card opens the target row rather than rendering expand/collapse controls.
+
+<div className="max-w-[45.75rem] space-y-3 bg-surface-canvas p-4 text-text-primary">
+  <Canvas of={StreamPostCardStories.Default} />
+  <Canvas of={StreamPostCardStories.LongBodyTruncation} />
+  <Canvas of={StreamPostCardStories.Review} />
+  <Canvas of={StreamPostCardStories.WithInlineMedia} />
+</div>
+
+## Media-forward stream card
+
+The same card supports a media-forward layout when the stream row is led by an
+image or embedded preview.
+
+<div className="max-w-[45.75rem] bg-surface-canvas p-4 text-text-primary">
+  <Canvas of={StreamPostCardStories.MediaForward} />
+</div>
+
+```tsx
+<StreamPostCard post={post} onOpen={openRow} />
+
+<StreamPostCard
+  post={review}
+  targetUnit={{ unitId: bookId, title }}
+  onOpen={openReview}
+/>
+
+<StreamPostCard
+  post={post}
+  mediaMode="forward"
+  media={{ src: imageUrl, alt: "" }}
+/>
+```

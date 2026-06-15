@@ -6,11 +6,11 @@ export {
   useRealmDetail,
 } from "./pages/realmDetailContext";
 export { RealmDetailShell } from "./sections/RealmDetailShell";
-export { RealmFeedTab } from "./sections/RealmFeedTab";
+export { RealmStreamTab } from "./sections/RealmStreamTab";
 export {
-  type RealmFeedSort,
-  RealmFeedSortSwitcher,
-} from "./sections/RealmFeedSortSwitcher";
+  type RealmStreamSort,
+  RealmStreamSortSwitcher,
+} from "./sections/RealmStreamSortSwitcher";
 export { RealmCard } from "./components/RealmCard";
 export { JoinButton } from "./components/JoinButton";
 export { RealmPostTagPicker } from "./components/RealmPostTagPicker";
@@ -22,4 +22,4 @@ export {
   realmContextPostEditHref,
   realmContextPostHref,
 } from "./models/realmPostContext";
-export { realmFeedSearchForSingleTag } from "./models/realmTagFeedSearch";
+export { realmStreamSearchForSingleTag } from "./models/realmTagStreamSearch";

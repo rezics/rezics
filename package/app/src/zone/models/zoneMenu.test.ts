@@ -316,7 +316,7 @@ describe("section titles", () => {
     expect(zoneSectionTitleKey("collection")).toBe(
       "zone:section_title_collection",
     );
-    expect(zoneSectionTitleKey("feed")).toBe("zone:section_title_feed");
+    expect(zoneSectionTitleKey("stream")).toBe("zone:section_title_stream");
     expect(zoneSectionTitleKey("richText")).toBe("zone:section_title_richText");
     expect(zoneSectionTitleKey("stats")).toBe("zone:section_title_stats");
     expect(zoneSectionTitleKey("sources")).toBe("zone:section_title_sources");

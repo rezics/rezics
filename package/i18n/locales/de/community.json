@@ -28,7 +28,7 @@
   "comment_context_reply_in": "Antwort in {context}",
   "feed_carousel_works": "Werke zum Entdecken",
   "feed_carousel_shelves": "Regale aus der Community",
-  "feed_empty": "Noch keine Feed-Einträge",
+  "stream_empty": "Noch keine Feed-Einträge",
   "discussion_empty": "Noch keine Diskussionen.",
   "discussion_load_failed": "Diskussionen konnten nicht geladen werden.",
   "dm_back_to_list": "Alle Gespräche",

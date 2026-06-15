@@ -378,8 +378,8 @@ function fixtureHomeSections(
         postQuerySection({ id: "pulse", limit: 30 }),
         {
           id: "home-feed",
-          kind: "feed",
-          feedKind: faker.helpers.arrayElement(["all", "updates", "reviews"]),
+          kind: "stream",
+          streamKind: faker.helpers.arrayElement(["all", "updates", "reviews"]),
           limit: 30,
         },
       ];
@@ -408,8 +408,8 @@ function fixtureHomeSections(
               sections: [
                 {
                   id: "tab-feed",
-                  kind: "feed",
-                  feedKind: "updates",
+                  kind: "stream",
+                  streamKind: "updates",
                   limit: 12,
                 },
               ],
@@ -448,8 +448,8 @@ function fixtureHomeSections(
                       sections: [
                         {
                           id: "main-feed",
-                          kind: "feed",
-                          feedKind: "all",
+                          kind: "stream",
+                          streamKind: "all",
                           limit: 10,
                         },
                       ],
@@ -569,7 +569,9 @@ export function buildZoneFixtureConfig(
         config: {
           schema: "rezics/zone-page",
           version: 1,
-          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 30 }],
+          sections: [
+            { id: "feed", kind: "stream", streamKind: "all", limit: 30 },
+          ],
         },
       },
     ],

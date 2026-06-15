@@ -3,14 +3,14 @@ import {
   type PublicRealmSlugRouteParams,
 } from "@rezics/contract";
 
-export type RealmDetailTab = "feed" | "wiki" | "tags" | "about" | "members";
+export type RealmDetailTab = "stream" | "wiki" | "tags" | "about" | "members";
 
 export type RealmDetailRouteLocation =
   | { kind: "unitId"; realmId: string }
   | { kind: "slug"; realmSlug: string };
 
 const TAB_SUFFIXES = {
-  feed: "",
+  stream: "",
   wiki: "/wiki",
   tags: "/tags",
   about: "/about",
@@ -40,7 +40,7 @@ export function isRealmUnitIdParam(realmId: string): boolean {
 
 export function realmDetailHref(
   location: RealmDetailRouteLocation,
-  tab: RealmDetailTab = "feed",
+  tab: RealmDetailTab = "stream",
 ): string {
   return `${realmDetailBaseHref(location)}${TAB_SUFFIXES[tab]}`;
 }

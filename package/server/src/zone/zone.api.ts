@@ -269,7 +269,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
       detail: {
         summary: "Get zone section data",
         description:
-          "Execute one section by id (query/feed/collection/stats/richText) with cursor-based continuation",
+          "Execute one section by id (query/stream/collection/stats/richText) with cursor-based continuation",
         tags: ["Zones"],
       },
     },

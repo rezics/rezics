@@ -7,7 +7,7 @@ import { RichTextSection } from "./RichTextSection";
 import { SourcesSection } from "./SourcesSection";
 import { StatsSection } from "./StatsSection";
 import type { ZonePortalContext } from "./shared";
-import { ZoneFeedSection } from "./ZoneFeedSection";
+import { ZoneStreamSection } from "./ZoneStreamSection";
 
 /**
  * Dispatch for the 7 content primitives. Containers (`tabs`, `columns`)
@@ -34,8 +34,8 @@ export function ZoneContentSectionView({
       return <CollectionSection section={section} ctx={ctx} />;
     case "query":
       return <QuerySection section={section} ctx={ctx} />;
-    case "feed":
-      return <ZoneFeedSection section={section} ctx={ctx} />;
+    case "stream":
+      return <ZoneStreamSection section={section} ctx={ctx} />;
     case "stats":
       return <StatsSection section={section} ctx={ctx} />;
     case "sources":

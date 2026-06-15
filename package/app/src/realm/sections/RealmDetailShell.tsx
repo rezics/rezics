@@ -9,11 +9,11 @@ import {
 } from "../models/realmDetailRoutes";
 import { useRealmDetail } from "../pages/realmDetailContext";
 
-// Realm detail tab routes. "feed" is the index route (empty path suffix); the
+// Realm detail tab routes. "stream" is the index route (empty path suffix); the
 // others are sibling sub-routes under the realm detail layout.
-// realm 详情标签路由。"feed" 为索引路由（路径后缀为空）；其余为详情布局下的
+// realm 详情标签路由。"stream" 为索引路由（路径后缀为空）；其余为详情布局下的
 // 同级子路由。
-const REALM_TABS = ["feed", "wiki", "tags", "about", "members"] as const;
+const REALM_TABS = ["stream", "wiki", "tags", "about", "members"] as const;
 
 /**
  * Tab navigation shell for realm detail. Renders the tab bar as route links and
@@ -38,7 +38,9 @@ export function RealmDetailShell({ children }: { children: ReactNode }) {
     <div>
       <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-4">
         <TabsList>
-          <TabsTrigger value="feed">{t("entity:realm_tab_feed")}</TabsTrigger>
+          <TabsTrigger value="stream">
+            {t("entity:realm_tab_stream")}
+          </TabsTrigger>
           <TabsTrigger value="wiki">{t("entity:realm_tab_wiki")}</TabsTrigger>
           <TabsTrigger value="tags">{t("entity:realm_tab_tags")}</TabsTrigger>
           <TabsTrigger value="about">{t("entity:realm_tab_about")}</TabsTrigger>
@@ -56,8 +58,8 @@ function useActiveTab(routeLocation: RealmDetailRouteLocation): RealmDetailTab {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const match = REALM_TABS.find(
     (key) =>
-      key !== "feed" &&
+      key !== "stream" &&
       pathname.startsWith(realmDetailHref(routeLocation, key)),
   );
-  return match ?? "feed";
+  return match ?? "stream";
 }

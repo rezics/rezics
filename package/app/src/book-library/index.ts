@@ -119,4 +119,4 @@ export {
   resolveCatalogEntryInteractionContext,
   shelfListFiltersForCatalogEntry,
 } from "./models/catalogEntryContext";
-export { resolvePostTargetVariantLabel } from "./models/communityFeed";
+export { resolvePostTargetVariantLabel } from "./models/communityStream";

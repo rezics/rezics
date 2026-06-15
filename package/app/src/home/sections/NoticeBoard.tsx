@@ -3,7 +3,7 @@ import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { Bell as NotificationsRoundedIcon } from "lucide-react";
 import type React from "react";
 import {
-  AnnouncementFeedSection,
+  AnnouncementStreamSection,
   type PinboardAnnouncementItem,
 } from "@/pinboard";
 import { TextLink } from "@/shared/ui/link";
@@ -54,7 +54,7 @@ export const NoticeBoard: React.FC = () => {
       <NoticeBoardHeader className="sticky top-0 z-10 rounded-lg" />
 
       <div className="flex-1 overflow-y-auto space-y-3 mt-3 p-2">
-        <AnnouncementFeedSection
+        <AnnouncementStreamSection
           loadingFallback={
             <div className="flex flex-col gap-2">
               <Skeleton className="h-4 rounded" />
@@ -82,7 +82,7 @@ export const NoticeBoard: React.FC = () => {
               </ul>
             );
           }}
-        </AnnouncementFeedSection>
+        </AnnouncementStreamSection>
       </div>
     </div>
   );

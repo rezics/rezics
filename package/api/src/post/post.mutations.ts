@@ -15,7 +15,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { commentKeys } from "../comment/comment.keys";
-import { feedKeys } from "../feed/feed.keys";
+import { streamKeys } from "../stream/stream.keys";
 import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { unitKeys } from "../unit/unit.keys";
 import { postApi } from "./post.api";
@@ -72,10 +72,10 @@ export async function syncPostMutationCache({
       queryKey: unitKeys.languages(resolvedUnitId),
     }),
     queryClient.invalidateQueries({ queryKey: postKeys.lists() }),
-    // Feed rows depend on post membership — invalidate so the home feed
-    // reflects creates, updates, and deletes.
-    // 动态行依赖帖子成员关系——使其失效，以便首页动态反映创建、更新和删除。
-    queryClient.invalidateQueries({ queryKey: feedKeys.root }),
+    // Stream rows depend on post membership — invalidate so mixed home streams
+    // reflect creates, updates, and deletes.
+    // Stream 行依赖帖子成员关系——使其失效，以便混合首页流反映创建、更新和删除。
+    queryClient.invalidateQueries({ queryKey: streamKeys.root }),
   ];
 
   for (const targetUnitId of compactIds([

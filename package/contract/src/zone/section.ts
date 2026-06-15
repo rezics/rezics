@@ -376,18 +376,18 @@ export const zoneQuerySectionSchema = t.Object(
 
 export type ZoneQuerySection = Static<typeof zoneQuerySectionSchema>;
 
-export const zoneFeedSectionSchema = t.Object(
+export const zoneStreamSectionSchema = t.Object(
   {
     ...zoneSectionBaseSchema.properties,
-    kind: t.Literal("feed"),
-    feedKind: t.Optional(
+    kind: t.Literal("stream"),
+    streamKind: t.Optional(
       t.Union([t.Literal("all"), t.Literal("updates"), t.Literal("reviews")]),
     ),
   },
   { additionalProperties: false },
 );
 
-export type ZoneFeedSection = Static<typeof zoneFeedSectionSchema>;
+export type ZoneStreamSection = Static<typeof zoneStreamSectionSchema>;
 
 export const zoneStatsMetricSchema = t.Union([
   t.Literal("articles"),
@@ -442,7 +442,7 @@ export const zoneContentSectionSchema = t.Union([
   zoneRichTextSectionSchema,
   zoneCollectionSectionSchema,
   zoneQuerySectionSchema,
-  zoneFeedSectionSchema,
+  zoneStreamSectionSchema,
   zoneStatsSectionSchema,
   zoneSourcesSectionSchema,
 ]);

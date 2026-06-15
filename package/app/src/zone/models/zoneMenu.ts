@@ -253,7 +253,7 @@ export function pickZoneMenu(
 const SECTION_TITLE_KEYS: Partial<Record<ZoneSectionKind, string>> = {
   query: "zone:section_title_query",
   collection: "zone:section_title_collection",
-  feed: "zone:section_title_feed",
+  stream: "zone:section_title_stream",
   richText: "zone:section_title_richText",
   stats: "zone:section_title_stats",
   sources: "zone:section_title_sources",

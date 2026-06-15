@@ -227,12 +227,12 @@ describe("zone manage JSON body editor", () => {
   it("validates JSON bodies with the contract schema before save", () => {
     const parsed = parseZoneManageJsonText(
       { kind: "theme" },
-      JSON.stringify({ images: { logoUrl: "http://example.com/logo.png" } }),
+      JSON.stringify({ images: { unknownUrl: "http://example.com/logo.png" } }),
     );
     expect(parsed.ok).toBe(false);
     if (!parsed.ok) {
       expect(
-        parsed.problems.some((problem) => problem.path.includes("logoUrl")),
+        parsed.problems.some((problem) => problem.path.includes("unknownUrl")),
       ).toBe(true);
     }
   });
@@ -345,7 +345,7 @@ describe("section ids", () => {
     const draft = sampleDraft();
     draft.pages = updateZonePageSections(draft.pages, "home", () => [
       ...draft.pages.home.sections,
-      createZoneSection("feed", "stats"),
+      createZoneSection("stats", "stats"),
     ]);
     expect(validateZoneManageDraft(draft)).toContainEqual({
       code: "section_id_duplicate",

@@ -345,7 +345,7 @@ export const ZONE_CONTENT_SECTION_KINDS = [
   "richText",
   "collection",
   "query",
-  "feed",
+  "stream",
   "stats",
   "sources",
 ] as const;
@@ -452,8 +452,8 @@ export function createZoneSection(
         },
         display: "list",
       };
-    case "feed":
-      return { id, kind: "feed" };
+    case "stream":
+      return { id, kind: "stream" };
     case "stats":
       return { id, kind: "stats", metrics: ["articles", "members"] };
     case "sources":

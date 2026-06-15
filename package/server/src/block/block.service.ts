@@ -175,7 +175,7 @@ export class BlockService {
     await this.repository.remove(blockerId, blockedId);
   }
 
-  /** unitIds the blocker has blocked — used to hide content in feeds. 拉黑者已拉黑的 unitId — 用于在信息流中隐藏内容。 */
+  /** unitIds the blocker has blocked — used to hide content in streams. 拉黑者已拉黑的 unitId — 用于在信息流中隐藏内容。 */
   async blockedUserIds(blockerId: string): Promise<string[]> {
     return this.repository.blockedUserIds(blockerId);
   }
