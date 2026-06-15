@@ -24,7 +24,9 @@ import {
 import { Link } from "@tanstack/react-router";
 import {
   Activity,
+  AppWindow,
   ArrowRight,
+  Cpu,
   Database,
   ExternalLink,
   History,
@@ -114,19 +116,21 @@ function SectionState({
 
 function StatusItemRow({ item }: { item: StatusItem }) {
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-border-whisper bg-surface-subtle p-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0">
+    <div className="flex min-w-0 flex-col gap-2 py-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-medium leading-[1.4]">{item.label}</p>
+          <p className="min-w-0 truncate text-sm font-medium leading-[1.4]">
+            {item.label}
+          </p>
           <StatusIndicator status={item.status} />
         </div>
         {item.reason ? (
-          <p className="mt-1 text-xs leading-[1.4] text-text-secondary">
+          <p className="mt-1 break-words text-xs leading-[1.4] text-text-secondary">
             {item.reason}
           </p>
         ) : null}
         {item.remediation ? (
-          <p className="mt-1 text-xs leading-[1.4] text-text-tertiary">
+          <p className="mt-1 break-words text-xs leading-[1.4] text-text-tertiary">
             建議：{item.remediation}
           </p>
         ) : null}
@@ -150,7 +154,7 @@ function StatusCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="border-border-whisper bg-surface-base">
+    <Card surface="contained" size="sm">
       <CardHeader className="p-4 pb-2">
         <div className="flex items-start gap-2">
           <span className="mt-0.5 text-text-secondary">{icon}</span>
@@ -169,24 +173,54 @@ function StatusCard({
   );
 }
 
+/**
+ * 服務連結是操作員的 quick links，不再做卡片內套卡片；每個入口是同一個
+ * contained 面板中的無邊框 row，URL 在窄寬兩端都截斷。
+ *
+ * Mobile
+ * +------------------------------+
+ * | Link row                     |
+ * | Link row                     |
+ * | Link row                     |
+ * +------------------------------+
+ *
+ * Tablet
+ * +------------------------------+
+ * | Link row      | Link row     |
+ * | Link row      | Link row     |
+ * +------------------------------+
+ *
+ * Desktop
+ * +------------------------------------------------+
+ * | Link row      | Link row      | Link row       |
+ * | Link row      | Link row      | Link row       |
+ * +------------------------------------------------+
+ *
+ * Ultra-wide
+ * +------------------------------------------------+
+ * | Parent shell centers; links keep three columns  |
+ * +------------------------------------------------+
+ */
 export function ServiceLinksPanel({ links }: { links: StatusLink[] }) {
+  const { t } = useTranslation(["admin"]);
+
   return (
     <StatusCard
-      title="服務連結"
-      description="只顯示已設定的非秘密服務 URL。"
+      title={t("admin:status_links_title")}
+      description={t("admin:status_links_description")}
       icon={<ExternalLink className="size-4" aria-hidden="true" />}
     >
       {links.length === 0 ? (
         <SectionState empty />
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-3">
           {links.map((link) => (
             <div
               key={link.id}
-              className="rounded-md border border-border-whisper bg-surface-subtle p-3"
+              className="min-w-0 rounded-sm p-3 transition-colors hover:bg-surface-sunken"
             >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-medium leading-[1.4]">
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <p className="min-w-0 truncate text-sm font-medium leading-[1.4]">
                   {link.label}
                 </p>
                 <StatusIndicator status={link.status} compact />
@@ -211,6 +245,37 @@ export function ServiceLinksPanel({ links }: { links: StatusLink[] }) {
   );
 }
 
+/**
+ * 服務頁按運維邊界分組，不把所有檢查壓成單列；每組內部用分隔線列表，
+ * 讓一屏內可掃描 app、worker、data、external 四類狀態。
+ *
+ * Mobile
+ * +------------------------------+
+ * | App / API rows               |
+ * | Worker rows                  |
+ * | Data rows                    |
+ * | External rows                |
+ * +------------------------------+
+ *
+ * Tablet
+ * +------------------------------+
+ * | App / API rows               |
+ * | Worker rows                  |
+ * | Data rows                    |
+ * | External rows                |
+ * +------------------------------+
+ *
+ * Desktop
+ * +------------------------------------------------+
+ * | App / API rows       | Worker rows             |
+ * | Data rows            | External rows           |
+ * +------------------------------------------------+
+ *
+ * Ultra-wide
+ * +------------------------------------------------+
+ * | Parent shell centers; two-column groups remain  |
+ * +------------------------------------------------+
+ */
 export function ServicesPanel({
   services,
   databases,
@@ -220,23 +285,86 @@ export function ServicesPanel({
   databases: StatusItem[];
   sequin: StatusItem;
 }) {
-  const items = [
-    ...services.filter((item) => item.id !== sequin.id),
-    ...databases,
-    sequin,
-  ];
+  const { t } = useTranslation(["admin"]);
+  const serviceById = new Map(services.map((item) => [item.id, item]));
+  const knownServiceIds = new Set([
+    "app",
+    "server",
+    "auth",
+    "job-runner-health",
+    "job-runner-ready",
+    "meili",
+    sequin.id,
+  ]);
+  const pickServices = (ids: string[]) =>
+    ids
+      .map((id) => serviceById.get(id))
+      .filter((item): item is StatusItem => Boolean(item));
+  const uncategorized = services.filter(
+    (item) => !knownServiceIds.has(item.id),
+  );
+  const groups = [
+    {
+      id: "app",
+      title: t("admin:status_services_group_app"),
+      icon: <AppWindow className="size-4" aria-hidden="true" />,
+      items: pickServices(["app", "server", "auth"]),
+    },
+    {
+      id: "worker",
+      title: t("admin:status_services_group_worker"),
+      icon: <Cpu className="size-4" aria-hidden="true" />,
+      items: pickServices(["job-runner-health", "job-runner-ready"]),
+    },
+    {
+      id: "data",
+      title: t("admin:status_services_group_data"),
+      icon: <Database className="size-4" aria-hidden="true" />,
+      items: [...pickServices(["meili"]), ...databases],
+    },
+    {
+      id: "external",
+      title: t("admin:status_services_group_external"),
+      icon: <ExternalLink className="size-4" aria-hidden="true" />,
+      items: [sequin, ...uncategorized],
+    },
+  ].filter((group) => group.items.length > 0);
+
   return (
     <StatusCard
-      title="服務與資料庫"
-      description="Server 端聚合服務健康狀態，瀏覽器不直接呼叫私有依賴。"
+      title={t("admin:status_services_title")}
+      description={t("admin:status_services_description")}
       icon={<Activity className="size-4" aria-hidden="true" />}
     >
-      {items.length === 0 ? (
+      {groups.length === 0 ? (
         <SectionState empty />
       ) : (
-        <div className="grid gap-2">
-          {items.map((item) => (
-            <StatusItemRow key={item.id} item={item} />
+        <div className="grid gap-3 lg:grid-cols-2">
+          {groups.map((group) => (
+            <Card
+              key={group.id}
+              surface="plain"
+              size="sm"
+              className="h-full gap-0 py-0"
+            >
+              <CardHeader className="px-0 pb-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="shrink-0 text-text-secondary">
+                    {group.icon}
+                  </span>
+                  <CardTitle className="min-w-0 truncate text-sm leading-[1.4]">
+                    {group.title}
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="px-0">
+                <div className="divide-y divide-border-whisper">
+                  {group.items.map((item) => (
+                    <StatusItemRow key={item.id} item={item} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
