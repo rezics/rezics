@@ -39,7 +39,7 @@ jobs:
             ${{ env.IMAGE_PREFIX }}-base:latest
             ${{ env.IMAGE_PREFIX }}-base:sha-${{ github.sha }}
           cache-from: type=gha,scope=base
-          cache-to: type=gha,mode=max,scope=base
+          cache-to: type=gha,mode=max,scope=base,ignore-error=true
 
   images:
     needs: base
@@ -87,7 +87,7 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ env.IMAGE_PREFIX }}-base:sha-${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }},ignore-error=true
 
       - name: Build & push migrate image
         if: matrix.migrate
