@@ -278,7 +278,6 @@ export function ZoneItemList({
         itemKey={(entry) => entry.key}
         itemClassName="!basis-auto pl-4"
         showArrows={isCarousel}
-        dragFree={!isCarousel}
         scrollSnap="start"
         wheelScroll
         renderItem={(entry) =>
