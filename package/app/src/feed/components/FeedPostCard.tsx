@@ -1,3 +1,4 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import {
   extractPollUnitIdsFromContentDoc,
   type ModerationActionDTO,
@@ -20,6 +21,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Shield, Star } from "lucide-react";
 import type React from "react";
+import { useMemo } from "react";
 import {
   type Action,
   type ActionPolicy,
@@ -47,6 +49,8 @@ type ClampStyle = React.CSSProperties & {
   WebkitBoxOrient?: "vertical";
   WebkitLineClamp?: number;
 };
+
+const EMPTY_REACTION_TARGET_IDS: readonly string[] = [];
 
 export interface FeedPostCardTargetUnit {
   unitId: string;
@@ -80,6 +84,13 @@ export interface FeedPostCardProps {
   reactionOverflow?: Action[];
   reactionActionPolicy?: ActionPolicy;
   reactionPolicy?: ReactionBarPolicy;
+  /**
+   * Direct card usages hydrate their own reaction cache. Stream renderers batch
+   * hydration and disable this per-card fallback to avoid duplicate requests.
+   * 直接使用卡片时由卡片自行预热 reaction cache。Stream renderer 会批量
+   * 预热，并关闭这个单卡 fallback 以避免重复请求。
+   */
+  hydrateReaction?: boolean;
   manageMode?: boolean;
   realmModerationStatus?: ModerationStatus;
   realmModerationAt?: string | Date | null;
@@ -127,6 +138,7 @@ export function FeedPostCard({
   mediaMode = "inline",
   mediaSlot,
   href,
+  hydrateReaction = true,
   moderationLatestAction,
   moderationMenuContent,
   onReplyInvoke,
@@ -155,6 +167,18 @@ export function FeedPostCard({
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
   const resolvedVariantContext = variantContext ?? post.variantContext;
   const resolvedTitle = title ?? post.title;
+  const reactionTargetIds = useMemo(
+    () =>
+      hydrateReaction && post.unitId
+        ? [post.unitId]
+        : EMPTY_REACTION_TARGET_IDS,
+    [hydrateReaction, post.unitId],
+  );
+
+  useReactionHydration(reactionTargetIds, {
+    summaryContextUnitId: summaryContextUnitId ?? null,
+    userContextUnitId: reactionContextUnitId ?? null,
+  });
 
   // Compute the canonical detail href from post kind.
   // 根据帖子类型计算规范的详情页链接。

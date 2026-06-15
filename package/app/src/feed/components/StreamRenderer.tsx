@@ -1,8 +1,15 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { StreamPostRow, StreamRow } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui/shadcn";
 import type React from "react";
+import { useMemo } from "react";
+import {
+  GLOBAL_REACTION_CONTEXT_KEY,
+  groupPostReactionTargets,
+  type ReactionHydrationGroup,
+} from "../models/streamReactionHydration";
 import { FeedBookCard } from "./FeedBookCard";
 import { FeedPostRowCard } from "./FeedPostRowCard";
 import { FeedShelfCard } from "./FeedShelfCard";
@@ -21,6 +28,32 @@ const STREAM_LOADING_ROW_KEYS = [
   "stream-loading-3",
   "stream-loading-4",
 ];
+
+function StreamReactionHydrationGroup({
+  contextUnitId,
+  targetIds,
+}: ReactionHydrationGroup) {
+  useReactionHydration(targetIds, {
+    summaryContextUnitId: contextUnitId,
+    userContextUnitId: contextUnitId,
+  });
+  return null;
+}
+
+function StreamReactionHydration({ rows }: { rows: readonly StreamRow[] }) {
+  const groups = useMemo(() => groupPostReactionTargets(rows), [rows]);
+  return (
+    <>
+      {groups.map((group) => (
+        <StreamReactionHydrationGroup
+          key={group.contextUnitId ?? GLOBAL_REACTION_CONTEXT_KEY}
+          contextUnitId={group.contextUnitId}
+          targetIds={group.targetIds}
+        />
+      ))}
+    </>
+  );
+}
 
 function StreamLoadingRows() {
   return (
@@ -77,13 +110,18 @@ export const StreamRenderer: React.FC<StreamRendererProps> = ({
 
   return (
     <div className="space-y-4">
+      <StreamReactionHydration rows={rows} />
       {rows.map((row) => {
         switch (row.type) {
           case "post":
             return renderPostRow ? (
               <div key={row.rowId}>{renderPostRow(row)}</div>
             ) : (
-              <FeedPostRowCard key={row.rowId} row={row} />
+              <FeedPostRowCard
+                key={row.rowId}
+                row={row}
+                hydrateReaction={false}
+              />
             );
           case "book":
             return <FeedBookCard key={row.rowId} row={row} />;

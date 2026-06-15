@@ -1,6 +1,7 @@
 import {
   type FeedPostRow,
   type FeedQuery,
+  type FeedRow,
   feedRowsInfiniteQuery,
 } from "@rezics/api/feed/feed";
 import { useTranslation } from "@rezics/i18n/react";
@@ -8,69 +9,91 @@ import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type React from "react";
+import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core";
 import { FeedRenderer } from "../components/FeedRenderer";
 
 interface FeedSectionProps {
   query?: FeedQuery;
+  enabled?: boolean;
   emptyTitle?: string;
   renderPostRow?: (row: FeedPostRow) => React.ReactNode;
 }
 
+export interface FeedSectionContentProps {
+  rows: FeedRow[];
+  loading?: boolean;
+  emptyTitle?: string;
+  renderPostRow?: (row: FeedPostRow) => React.ReactNode;
+  error: Error | null;
+  isError: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage?: boolean;
+  refetch: () => unknown;
+  fetchNextPage: () => unknown;
+}
+
+export function useFeedRows(
+  query?: FeedQuery,
+  options: { enabled?: boolean } = {},
+) {
+  const feedQuery = useInfiniteQuery({
+    ...feedRowsInfiniteQuery(query),
+    enabled: options.enabled ?? true,
+  });
+  const rows = useMemo(
+    () => feedQuery.data?.pages.flatMap((page) => page.rows) ?? [],
+    [feedQuery.data],
+  );
+
+  return { ...feedQuery, rows };
+}
+
 /**
- * Infinite-scrolling feed section that loads and displays paginated content rows.
- * 支持无限滚动的馈送区域，加载和显示分页内容行。
+ * Feed section content：共享信息流主体、错误恢复、加载状态和手动分页。
+ * 调用方负责提供 rows/query state；本组件只负责稳定的 feed chrome。
  *
- * Renders a feed with optional error recovery, loading states, and manual pagination.
- * 呈现具有可选错误恢复、加载状态和手动分页的馈送。
+ * Mobile
+ * +----------------+
+ * | Post 1         |
+ * | Post 2         |
+ * | [Load More]    |
+ * +----------------+
  *
- * Desktop (md+):
- * ┌────────────────────────────────────┐
- * │ Feed rows (FeedRenderer)           │
- * │ - Post 1                           │
- * │ - Post 2                           │
- * │ - Post 3                           │
- * │ [Load More]  or  [End of List]     │
- * └────────────────────────────────────┘
+ * Tablet
+ * +----------------------+
+ * | Feed rows            |
+ * | - Post 1             |
+ * | - Post 2             |
+ * | [Load More / Loading]|
+ * +----------------------+
  *
- * Tablet (sm-md):
- * ┌──────────────────────┐
- * │ Feed rows            │
- * │ - Post 1             │
- * │ - Post 2             │
- * │ [Load More / Loading]│
- * └──────────────────────┘
- *
- * Mobile (xs-sm):
- * ┌────────────────┐
- * │ Post 1         │
- * │ Post 2         │
- * │ [Load More]    │
- * └────────────────┘
- *
- * Error state (compact):
- * ┌────────────────────────────────────┐
- * │ [Error Message] [Retry]            │
- * │ Posts still visible if partial     │
- * └────────────────────────────────────┘
+ * Desktop
+ * +------------------------------------+
+ * | Feed rows (FeedRenderer)           |
+ * | - Post 1                           |
+ * | - Post 2                           |
+ * | - Post 3                           |
+ * | [Load More] or [End of List]       |
+ * +------------------------------------+
+ * Ultra-wide
+ * +------------------------------------+
+ * | Width inherited from parent layout |
+ * +------------------------------------+
  */
-export const FeedSection: React.FC<FeedSectionProps> = ({
-  query,
+export const FeedSectionContent: React.FC<FeedSectionContentProps> = ({
+  rows,
+  loading = false,
   emptyTitle,
   renderPostRow,
+  error,
+  isError,
+  isFetchingNextPage,
+  hasNextPage,
+  refetch,
+  fetchNextPage,
 }) => {
   const { t } = useTranslation(["common"]);
-  const {
-    data,
-    error,
-    hasNextPage,
-    isError,
-    isFetchingNextPage,
-    isLoading,
-    fetchNextPage,
-    refetch,
-  } = useInfiniteQuery(feedRowsInfiniteQuery(query));
-  const rows = data?.pages.flatMap((page) => page.rows) ?? [];
 
   if (isError && rows.length === 0) return <QueryErrorDisplay error={error} />;
 
@@ -78,7 +101,7 @@ export const FeedSection: React.FC<FeedSectionProps> = ({
     <div className="space-y-4">
       <FeedRenderer
         rows={rows}
-        loading={isLoading}
+        loading={loading}
         emptyTitle={emptyTitle}
         renderPostRow={renderPostRow}
       />
@@ -93,7 +116,7 @@ export const FeedSection: React.FC<FeedSectionProps> = ({
           </Button>
         </div>
       ) : null}
-      {!isLoading && !isError && hasNextPage ? (
+      {!loading && !isError && hasNextPage ? (
         <div className="flex justify-center">
           <Button
             type="button"
@@ -112,11 +135,69 @@ export const FeedSection: React.FC<FeedSectionProps> = ({
           </Button>
         </div>
       ) : null}
-      {!isLoading && !isError && rows.length > 0 && !hasNextPage ? (
+      {!loading && !isError && rows.length > 0 && !hasNextPage ? (
         <p className="text-center text-xs leading-dense text-text-tertiary">
           {t("common:end_of_list")}
         </p>
       ) : null}
     </div>
+  );
+};
+
+/**
+ * Infinite-scrolling feed section that loads and displays paginated content rows.
+ * 支持无限滚动的信息流区域；查询、reaction hydration、分页与错误恢复由
+ * 共享 feed 管线处理，调用方只提供 query 与可选行渲染覆盖。
+ *
+ * Mobile
+ * +----------------+
+ * | Post 1         |
+ * | Post 2         |
+ * | [Load More]    |
+ * +----------------+
+ *
+ * Tablet
+ * +----------------------+
+ * | Feed rows            |
+ * | - Post 1             |
+ * | - Post 2             |
+ * | [Load More / Loading]|
+ * +----------------------+
+ *
+ * Desktop
+ * +------------------------------------+
+ * | Feed rows (FeedRenderer)           |
+ * | - Post 1                           |
+ * | - Post 2                           |
+ * | - Post 3                           |
+ * | [Load More] or [End of List]       |
+ * +------------------------------------+
+ *
+ * Ultra-wide
+ * +------------------------------------+
+ * | Width inherited from parent layout |
+ * +------------------------------------+
+ */
+export const FeedSection: React.FC<FeedSectionProps> = ({
+  query,
+  enabled = true,
+  emptyTitle,
+  renderPostRow,
+}) => {
+  const feedQuery = useFeedRows(query, { enabled });
+
+  return (
+    <FeedSectionContent
+      rows={feedQuery.rows}
+      loading={feedQuery.isLoading}
+      emptyTitle={emptyTitle}
+      renderPostRow={renderPostRow}
+      error={feedQuery.error}
+      isError={feedQuery.isError}
+      isFetchingNextPage={feedQuery.isFetchingNextPage}
+      hasNextPage={feedQuery.hasNextPage}
+      refetch={feedQuery.refetch}
+      fetchNextPage={feedQuery.fetchNextPage}
+    />
   );
 };

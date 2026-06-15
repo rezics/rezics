@@ -7,6 +7,7 @@ export interface FeedPostRowCardProps {
   row: FeedPostRow;
   summaryContextUnitId?: string | null;
   reactionContextUnitId?: string | null;
+  hydrateReaction?: boolean;
   manageMode?: boolean;
   realmModerationStatus?: ModerationStatus;
   realmModerationAt?: string | Date | null;
@@ -24,6 +25,7 @@ export function FeedPostRowCard({
   row,
   summaryContextUnitId,
   reactionContextUnitId,
+  hydrateReaction,
   manageMode,
   realmModerationStatus,
   realmModerationAt,
@@ -52,6 +54,7 @@ export function FeedPostRowCard({
       href={row.href}
       summaryContextUnitId={resolvedSummaryContextUnitId}
       reactionContextUnitId={resolvedReactionContextUnitId}
+      hydrateReaction={hydrateReaction}
       variantContext={row.variantContext}
       targetUnit={targetUnit}
       media={
