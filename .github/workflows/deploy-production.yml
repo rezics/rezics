@@ -48,6 +48,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: production
+    outputs:
+      sha: ${{ steps.sha.outputs.sha }}
     permissions:
       contents: read
       deployments: write

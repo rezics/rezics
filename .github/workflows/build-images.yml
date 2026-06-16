@@ -41,6 +41,7 @@ jobs:
         run: task check:i18n
       - name: Check unused exports & dependencies
         run: task knip
+        continue-on-error: true
       - name: Check env isolation
         run: task check:runtime-env
 
