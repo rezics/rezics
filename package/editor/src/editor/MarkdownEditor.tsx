@@ -1,4 +1,4 @@
-import { languages } from "@codemirror/language-data";
+import type { LanguageDescription } from "@codemirror/language";
 import { placeholder as placeholderExtension } from "@codemirror/view";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fixedHeightEditor } from "../core/fixedHeight";
@@ -59,6 +59,21 @@ export function MarkdownEditor({
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
+  // Lazy-load @codemirror/language-data to break a Rolldown chunk
+  // initialization order bug (lang-javascript calls snippet() before
+  // the Snippet class is assigned in the main chunk).
+  // 延迟加载 @codemirror/language-data 以规避 Rolldown chunk
+  // 初始化顺序 bug（lang-javascript 在主 chunk 的 Snippet 类
+  // 赋值前就调用了 snippet()）。
+  const [codeLanguages, setCodeLanguages] = useState<
+    readonly LanguageDescription[]
+  >([]);
+  useEffect(() => {
+    import("@codemirror/language-data").then((mod) =>
+      setCodeLanguages(mod.languages),
+    );
+  }, []);
+
   const previewConfig = useMemo(
     () => (typeof preview === "object" ? preview : undefined),
     [preview],
@@ -86,7 +101,7 @@ export function MarkdownEditor({
   );
 
   const allPlugins = useMemo(() => {
-    const plugins: EditorPlugin[] = [markdown({ codeLanguages: languages })];
+    const plugins: EditorPlugin[] = [markdown({ codeLanguages })];
 
     if (mentionConfig) {
       plugins.push(mention(mentionConfig));
@@ -99,7 +114,7 @@ export function MarkdownEditor({
     }
 
     return plugins;
-  }, [mentionConfig, emojiConfig, extraPlugins]);
+  }, [codeLanguages, mentionConfig, emojiConfig, extraPlugins]);
 
   const toolbarEntries = useMemo((): ToolbarEntry[] => {
     if (toolbar === false) return [];

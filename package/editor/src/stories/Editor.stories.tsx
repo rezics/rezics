@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { EditorPlugin } from "../core/types";
 import { jsonFull } from "../json/index";
 import { markdownFull } from "../markdown/index";
 import { Editor } from "../react/Editor";
@@ -25,9 +26,13 @@ export const Markdown: Story = {
     const [value, setValue] = useState(
       "# Hello\n\nThis is the **rezics** editor.\n\n- markdown\n- syntax highlighting\n",
     );
+    const [plugins, setPlugins] = useState<EditorPlugin[]>([]);
+    useEffect(() => {
+      markdownFull().then(setPlugins);
+    }, []);
     return (
       <div style={{ width: 720, border: "1px solid #ddd", borderRadius: 8 }}>
-        <Editor value={value} onChange={setValue} plugins={markdownFull()} />
+        <Editor value={value} onChange={setValue} plugins={plugins} />
       </div>
     );
   },

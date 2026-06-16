@@ -55,15 +55,17 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       manifest: true,
-      sourcemap: true, // Enable sourcemap for production build for debugging tools like Sentry
-      rollupOptions: {
-        output: {},
-        treeshake: {
-          preset: "smallest",
-          moduleSideEffects: false,
-          propertyReadSideEffects: false,
-          tryCatchDeoptimization: false,
-          unknownGlobalSideEffects: false,
+      sourcemap: true,
+      rolldownOptions: {
+        output: {
+          // Force correct module execution order across chunks.
+          // Rolldown ≤1.0.x can split chunks with incorrect initialization
+          // order, causing cross-chunk imports to resolve to undefined
+          // at module-eval time (rolldown#8812).
+          // 强制跨 chunk 的正确模块执行顺序。
+          // Rolldown ≤1.0.x 拆 chunk 时可能导致初始化顺序错误，
+          // 使跨 chunk 导入在模块求值时解析为 undefined（rolldown#8812）。
+          strictExecutionOrder: true,
         },
       },
     },
