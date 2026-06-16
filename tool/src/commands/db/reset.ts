@@ -54,7 +54,18 @@ function runPostgresReset(databaseNames: readonly string[]): void {
 
   const result = spawnSync(
     "psql",
-    ["-v", "ON_ERROR_STOP=1", "-h", host, "-p", port, "-U", user, "-d", "postgres"],
+    [
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-h",
+      host,
+      "-p",
+      port,
+      "-U",
+      user,
+      "-d",
+      "postgres",
+    ],
     {
       env: { ...process.env, PGPASSWORD: password },
       input: renderResetDatabaseSql(databaseNames),
@@ -66,9 +77,7 @@ function runPostgresReset(databaseNames: readonly string[]): void {
     throw result.error;
   }
   if (result.status !== 0) {
-    throw new Error(
-      `psql failed with exit code ${result.status ?? "unknown"}`,
-    );
+    throw new Error(`psql failed with exit code ${result.status ?? "unknown"}`);
   }
 }
 

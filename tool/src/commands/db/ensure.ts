@@ -11,7 +11,18 @@ export function ensureLocalDatabases() {
 
   const result = spawnSync(
     "psql",
-    ["-v", "ON_ERROR_STOP=1", "-h", host, "-p", port, "-U", user, "-d", "postgres"],
+    [
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-h",
+      host,
+      "-p",
+      port,
+      "-U",
+      user,
+      "-d",
+      "postgres",
+    ],
     {
       env: { ...process.env, PGPASSWORD: password },
       input: sql,
@@ -23,9 +34,7 @@ export function ensureLocalDatabases() {
     throw result.error;
   }
   if (result.status !== 0) {
-    throw new Error(
-      `psql failed with exit code ${result.status ?? "unknown"}`,
-    );
+    throw new Error(`psql failed with exit code ${result.status ?? "unknown"}`);
   }
 }
 
