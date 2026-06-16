@@ -1,15 +1,22 @@
 import {
   DEFAULT_LANGUAGE,
   markdownContentDoc,
-  ZONE_CONFIG_SCHEMA,
-  ZONE_CONFIG_V1_VERSION,
+  type ZoneBoundary,
   type ZoneBoundaryFilter,
-  type ZoneConfigV1,
+  type ZoneNav,
+  type ZonePage as ZonePageConfig,
   type ZonePageSection,
+  type ZoneTheme,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
 import type { ServerDb } from "../../client";
-import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../../schema";
+import {
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+  Zone,
+  ZonePage,
+} from "../../schema";
 import type { SlugScopesMap } from "./seed-slug-scopes";
 
 type OfficialZoneSeedDb = Pick<ServerDb, "insert" | "select" | "transaction">;
@@ -20,66 +27,134 @@ interface OfficialZoneTranslation {
 }
 
 export interface OfficialZoneDefinition {
-  key: "book" | "realms" | "popular";
+  key: "book" | "realms" | "zones" | "popular";
   slug: string;
-  config: ZoneConfigV1;
+  config: OfficialZoneConfig;
   translations: Record<string, OfficialZoneTranslation>;
 }
 
+export type OfficialZoneConfig = {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  pages: Array<{
+    id: string;
+    slug: string;
+    position: number;
+    config: ZonePageConfig;
+  }>;
+  homePageId: string;
+};
+
 const MAIN_MENU_ID = "main";
 
+const OFFICIAL_PAGE_IDS = {
+  book: {
+    home: "00000000-0000-7000-8000-000000000101",
+    search: "00000000-0000-7000-8000-000000000102",
+    feed: "00000000-0000-7000-8000-000000000103",
+  },
+  realms: {
+    home: "00000000-0000-7000-8000-000000000201",
+    search: "00000000-0000-7000-8000-000000000202",
+    feed: "00000000-0000-7000-8000-000000000203",
+  },
+  popular: {
+    home: "00000000-0000-7000-8000-000000000301",
+    search: "00000000-0000-7000-8000-000000000302",
+    feed: "00000000-0000-7000-8000-000000000303",
+  },
+  zones: {
+    home: "00000000-0000-7000-8000-000000000401",
+    search: "00000000-0000-7000-8000-000000000402",
+    feed: "00000000-0000-7000-8000-000000000403",
+  },
+} as const;
+
 /**
- * Seeds bypass the zone service write path, so every config written here
- * must already satisfy `zoneConfigV1Schema`: the read path
- * (`parseZoneRowConfig`) throws on rows that fail the envelope union.
- * 种子绕过 zone service 的写入路径，因此这里写入的每个配置都必须已经
- * 满足 `zoneConfigV1Schema`：读取路径（`parseZoneRowConfig`）会对未通过
- * 信封联合校验的行抛错。
+ * Seeds bypass the zone service write path, so every shell/page envelope
+ * written here must already satisfy its contract schema: the read path throws
+ * on rows that fail envelope parsing.
+ * 种子绕过 zone service 的写入路径，因此这里写入的每个 shell/page 信封
+ * 都必须已经满足对应契约 schema：读取路径会对未通过信封解析的行抛错。
  */
 function officialConfig(input: {
   filters: ZoneBoundaryFilter;
   homeSections: ZonePageSection[];
   accent: string;
   density: "compact" | "comfortable";
-}): ZoneConfigV1 {
+  pageIds: { home: string; search: string; feed: string };
+}): OfficialZoneConfig {
+  const pageIds = input.pageIds;
   return {
-    schema: ZONE_CONFIG_SCHEMA,
-    version: ZONE_CONFIG_V1_VERSION,
-    // Official zones are owned by the rezics realm but aggregate the whole
-    // platform, so their interaction context stays global.
-    // 官方专区由 rezics realm 拥有，但聚合全平台内容，因此其交互语境
-    // 保持 global。
-    context: { kind: "global" },
-    filters: input.filters,
-    menus: [
+    boundary: {
+      schema: "rezics/zone-boundary",
+      version: 1,
+      // Official zones are owned by the rezics realm but aggregate the whole
+      // platform, so their interaction context stays global.
+      context: { kind: "global" },
+      filters: input.filters,
+    },
+    nav: {
+      schema: "rezics/zone-nav",
+      version: 1,
+      menus: [
+        {
+          id: MAIN_MENU_ID,
+          // Leaf nodes need only a target; zonePage labels resolve through
+          // the frontend's default i18n keys.
+          nodes: [
+            { id: "home", target: { kind: "zonePage", pageId: pageIds.home } },
+            {
+              id: "search",
+              target: { kind: "zonePage", pageId: pageIds.search },
+            },
+            { id: "feed", target: { kind: "zonePage", pageId: pageIds.feed } },
+          ],
+        },
+      ],
+      header: { menuId: MAIN_MENU_ID },
+    },
+    pages: [
       {
-        id: MAIN_MENU_ID,
-        // Leaf nodes need only a target; zonePage labels resolve through
-        // the frontend's default i18n keys.
-        // 叶子节点只需要 target；zonePage 标签通过前端默认 i18n key 解析。
-        nodes: [
-          { id: "home", target: { kind: "zonePage", pageId: "home" } },
-          { id: "search", target: { kind: "zonePage", pageId: "search" } },
-          { id: "feed", target: { kind: "zonePage", pageId: "feed" } },
-        ],
+        id: pageIds.home,
+        slug: "home",
+        position: 0,
+        config: {
+          schema: "rezics/zone-page",
+          version: 1,
+          sections: input.homeSections,
+        },
+      },
+      {
+        id: pageIds.search,
+        slug: "search",
+        position: 1,
+        config: { schema: "rezics/zone-page", version: 1, sections: [] },
+      },
+      {
+        id: pageIds.feed,
+        slug: "feed",
+        position: 2,
+        config: {
+          schema: "rezics/zone-page",
+          version: 1,
+          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
+        },
       },
     ],
-    header: { menuId: MAIN_MENU_ID },
-    pages: {
-      home: { sections: input.homeSections },
-      search: { sections: [] },
-      feed: {
-        sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
-      },
-    },
+    homePageId: pageIds.home,
     theme: {
+      schema: "rezics/zone-theme",
+      version: 1,
       tokens: { accent: input.accent, accentText: "#ffffff" },
-      layout: { contentWidth: "wide", density: input.density },
+      layout: { contentMaxWidth: 1440, density: input.density },
     },
   };
 }
 
 const bookConfig = officialConfig({
+  pageIds: OFFICIAL_PAGE_IDS.book,
   filters: { types: ["BOOK"] },
   homeSections: [
     { id: "hero", kind: "hero", showDescription: true },
@@ -125,11 +200,24 @@ const bookConfig = officialConfig({
 });
 
 const realmsConfig = officialConfig({
+  pageIds: OFFICIAL_PAGE_IDS.realms,
   filters: { types: ["REALM"] },
   homeSections: [
     { id: "hero", kind: "hero", showDescription: true },
     {
-      id: "featured-realms",
+      id: "latest-realms",
+      kind: "query",
+      display: "carousel",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["REALM"],
+        sort: { field: "createdAt", direction: "desc" },
+      },
+    },
+    {
+      id: "browse-realms",
       kind: "query",
       display: "tiles",
       limit: 24,
@@ -140,25 +228,48 @@ const realmsConfig = officialConfig({
         sort: { field: "qualityScore", direction: "desc" },
       },
     },
-    {
-      id: "active-realms",
-      kind: "query",
-      display: "list",
-      limit: 24,
-      loadMore: true,
-      query: {
-        target: "unit",
-        types: ["REALM"],
-        sort: { field: "trendingScore", direction: "desc" },
-      },
-    },
     { id: "realm-updates", kind: "feed", feedKind: "updates", limit: 20 },
   ],
   accent: "#0f766e",
   density: "compact",
 });
 
+const zonesConfig = officialConfig({
+  pageIds: OFFICIAL_PAGE_IDS.zones,
+  filters: { types: ["ZONE"] },
+  homeSections: [
+    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "latest-zones",
+      kind: "query",
+      display: "carousel",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["ZONE"],
+        sort: { field: "createdAt", direction: "desc" },
+      },
+    },
+    {
+      id: "all-zones",
+      kind: "query",
+      display: "grid",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["ZONE"],
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+    },
+  ],
+  accent: "#7c3aed",
+  density: "comfortable",
+});
+
 const popularConfig = officialConfig({
+  pageIds: OFFICIAL_PAGE_IDS.popular,
   filters: {},
   homeSections: [
     { id: "hero", kind: "hero", showDescription: true },
@@ -190,6 +301,13 @@ const popularConfig = officialConfig({
   density: "comfortable",
 });
 
+/**
+ * Official zones are either type libraries, one per major UnitType, or
+ * cross-cutting views. Libraries lead with browsable catalog sections and
+ * activity; trending-led discovery belongs to `popular`. ZONE units usually
+ * have sparse score signals early, so the zones library leads with recency
+ * and update sorts rather than qualityScore.
+ */
 export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
   {
     key: "book",
@@ -217,15 +335,37 @@ export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
     translations: {
       en: {
         title: "Realms",
-        description: "Discover communities that classify and discuss works.",
+        description:
+          "The Rezics realms library: communities that classify and discuss works.",
       },
       "zh-hant": {
         title: "Realms",
-        description: "探索共同分類與討論作品的社群。",
+        description: "Rezics 的 Realms 社群資料庫：共同分類與討論作品的地方。",
       },
       ja: {
         title: "Realms",
-        description: "作品を分類し語り合うコミュニティを見つける。",
+        description:
+          "Rezics の Realms ライブラリ。作品を分類し語り合うコミュニティ。",
+      },
+    },
+  },
+  {
+    key: "zones",
+    slug: "zones",
+    config: zonesConfig,
+    translations: {
+      en: {
+        title: "Zones",
+        description: "The Rezics zones library: curated portals across units.",
+      },
+      "zh-hant": {
+        title: "專區",
+        description: "Rezics 的專區資料庫：跨 Unit 的整理入口。",
+      },
+      ja: {
+        title: "ゾーン",
+        description:
+          "Rezics のゾーンライブラリ。ユニットを横断する整理ポータル。",
       },
     },
   },
@@ -264,17 +404,44 @@ async function upsertZoneRow(
     .values({
       unitId: input.unitId,
       ownerRealmUnitId: input.ownerRealmUnitId,
-      config: definition.config,
+      boundary: definition.config.boundary,
+      nav: definition.config.nav,
+      theme: definition.config.theme,
+      homePageId: definition.config.homePageId,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: Zone.unitId,
       set: {
         ownerRealmUnitId: input.ownerRealmUnitId,
-        config: definition.config,
+        boundary: definition.config.boundary,
+        nav: definition.config.nav,
+        theme: definition.config.theme,
+        homePageId: definition.config.homePageId,
         updatedAt: new Date(),
       },
     });
+  for (const page of definition.config.pages) {
+    await db
+      .insert(ZonePage)
+      .values({
+        id: page.id,
+        zoneUnitId: input.unitId,
+        slug: page.slug,
+        position: page.position,
+        config: page.config,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [ZonePage.zoneUnitId, ZonePage.slug],
+        set: {
+          slug: page.slug,
+          position: page.position,
+          config: page.config,
+          updatedAt: new Date(),
+        },
+      });
+  }
 }
 
 async function upsertTranslations(

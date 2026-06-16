@@ -16,31 +16,33 @@ export const zoneQueryOptions = (
 
 export const zonePortalQueryOptions = (
   unitId: string,
+  pageSlug: string,
   languages: readonly string[] = [],
 ) =>
   queryOptions({
-    queryKey: zoneKeys.portal(unitId, languages),
-    queryFn: () => zoneApi.getPortal(unitId, languages),
-    enabled: !!unitId,
+    queryKey: zoneKeys.portal(unitId, pageSlug, languages),
+    queryFn: () => zoneApi.getPortal(unitId, pageSlug, languages),
+    enabled: !!unitId && !!pageSlug,
     staleTime: 1000 * 60 * 5,
   });
 
 export const zoneSectionInfiniteQuery = (
   unitId: string,
+  pageId: string,
   sectionId: string,
   languages: readonly string[] = [],
 ) =>
   infiniteQueryOptions({
-    queryKey: zoneKeys.section(unitId, sectionId, languages),
+    queryKey: zoneKeys.section(unitId, pageId, sectionId, languages),
     queryFn: ({ pageParam }) =>
-      zoneApi.getSection(unitId, sectionId, {
+      zoneApi.getSection(unitId, pageId, sectionId, {
         cursor: pageParam ?? undefined,
         languages,
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: ZoneSectionData) =>
       lastPage.nextCursor ?? undefined,
-    enabled: !!unitId && !!sectionId,
+    enabled: !!unitId && !!pageId && !!sectionId,
     staleTime: 1000 * 60 * 5,
   });
 

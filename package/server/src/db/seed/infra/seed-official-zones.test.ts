@@ -1,5 +1,17 @@
 import { describe, expect, mock, test } from "bun:test";
-import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../../schema";
+import {
+  parseZoneBoundary,
+  parseZoneNav,
+  parseZonePage,
+  parseZoneTheme,
+} from "@rezics/contract";
+import {
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+  Zone,
+  ZonePage,
+} from "../../schema";
 import {
   OFFICIAL_ZONE_DEFINITIONS,
   seedOfficialZones,
@@ -75,8 +87,56 @@ function makeDb(selectRows: unknown[][] = []) {
 }
 
 describe("seedOfficialZones", () => {
-  test("creates Book, Realms, and Popular zones owned by the official realm", async () => {
-    const db = makeDb([[], [], []]);
+  test("frames Realms as a catalog library instead of trending discovery", () => {
+    const realms = OFFICIAL_ZONE_DEFINITIONS.find(
+      (definition) => definition.key === "realms",
+    );
+    expect(realms?.config.boundary.filters).toEqual({ types: ["REALM"] });
+    expect(realms?.config.pages[0]?.config.sections).toMatchObject([
+      { id: "hero", kind: "hero" },
+      {
+        id: "latest-realms",
+        kind: "query",
+        display: "carousel",
+        query: { types: ["REALM"], sort: { field: "createdAt" } },
+      },
+      {
+        id: "browse-realms",
+        kind: "query",
+        display: "tiles",
+        loadMore: true,
+        query: { types: ["REALM"], sort: { field: "qualityScore" } },
+      },
+      { id: "realm-updates", kind: "feed", feedKind: "updates" },
+    ]);
+  });
+
+  test("frames Zones as a ZONE unit catalog led by recency", () => {
+    const zones = OFFICIAL_ZONE_DEFINITIONS.find(
+      (definition) => definition.key === "zones",
+    );
+    expect(zones?.slug).toBe("zones");
+    expect(zones?.config.boundary.filters).toEqual({ types: ["ZONE"] });
+    expect(zones?.config.pages[0]?.config.sections).toMatchObject([
+      { id: "hero", kind: "hero" },
+      {
+        id: "latest-zones",
+        kind: "query",
+        display: "carousel",
+        query: { types: ["ZONE"], sort: { field: "createdAt" } },
+      },
+      {
+        id: "all-zones",
+        kind: "query",
+        display: "grid",
+        loadMore: true,
+        query: { types: ["ZONE"], sort: { field: "updatedAt" } },
+      },
+    ]);
+  });
+
+  test("creates official zones owned by the official realm", async () => {
+    const db = makeDb(OFFICIAL_ZONE_DEFINITIONS.map(() => []));
 
     const result = await seedOfficialZones(db as never, "realm-rezics", {
       zone: "zone-scope",
@@ -85,7 +145,8 @@ describe("seedOfficialZones", () => {
     expect(result).toEqual({
       book: "zone-0",
       realms: "zone-1",
-      popular: "zone-2",
+      zones: "zone-2",
+      popular: "zone-3",
     });
     expect(db.calls.transactions).toBe(OFFICIAL_ZONE_DEFINITIONS.length);
 
@@ -95,6 +156,7 @@ describe("seedOfficialZones", () => {
     expect(unitInserts.map((call: InsertCall) => call.value.slug)).toEqual([
       "book",
       "realms",
+      "zones",
       "popular",
     ]);
     expect(
@@ -112,17 +174,48 @@ describe("seedOfficialZones", () => {
       zoneInserts.every(
         (call: InsertCall) =>
           call.value.ownerRealmUnitId === "realm-rezics" &&
-          call.value.config?.schema === "rezics/zone-config" &&
-          call.value.config?.version === 1 &&
-          call.value.config?.pages?.home?.sections?.length > 0,
+          call.value.boundary?.schema === "rezics/zone-boundary" &&
+          call.value.nav?.schema === "rezics/zone-nav" &&
+          call.value.theme?.schema === "rezics/zone-theme" &&
+          typeof call.value.homePageId === "string",
       ),
     ).toBe(true);
+
+    const pageInserts = db.calls.inserts.filter(
+      (call: InsertCall) => call.table === ZonePage,
+    );
+    expect(pageInserts).toHaveLength(OFFICIAL_ZONE_DEFINITIONS.length * 3);
+    expect(
+      pageInserts.every(
+        (call: InsertCall) =>
+          call.value.config?.schema === "rezics/zone-page" &&
+          call.value.config?.version === 1,
+      ),
+    ).toBe(true);
+  });
+
+  test("keeps every official zone envelope contract-parseable", () => {
+    for (const definition of OFFICIAL_ZONE_DEFINITIONS) {
+      expect(parseZoneBoundary(definition.config.boundary)).toEqual(
+        definition.config.boundary,
+      );
+      expect(parseZoneNav(definition.config.nav)).toEqual(
+        definition.config.nav,
+      );
+      expect(parseZoneTheme(definition.config.theme)).toEqual(
+        definition.config.theme,
+      );
+      for (const page of definition.config.pages) {
+        expect(parseZonePage(page.config)).toEqual(page.config);
+      }
+    }
   });
 
   test("updates existing official zone rows idempotently", async () => {
     const db = makeDb([
       [{ id: "book-zone", type: "ZONE" }],
       [{ id: "realm-zone", type: "ZONE" }],
+      [{ id: "zones-zone", type: "ZONE" }],
       [{ id: "popular-zone", type: "ZONE" }],
     ]);
 
@@ -133,6 +226,7 @@ describe("seedOfficialZones", () => {
     expect(result).toEqual({
       book: "book-zone",
       realms: "realm-zone",
+      zones: "zones-zone",
       popular: "popular-zone",
     });
     expect(db.calls.transactions).toBe(0);
@@ -146,7 +240,11 @@ describe("seedOfficialZones", () => {
         (call: InsertCall) =>
           call.conflict &&
           call.conflict.set.ownerRealmUnitId === "realm-rezics" &&
-          (call.conflict.set.config as { version?: number } | undefined)
+          (call.conflict.set.boundary as { version?: number } | undefined)
+            ?.version === 1 &&
+          (call.conflict.set.nav as { version?: number } | undefined)
+            ?.version === 1 &&
+          (call.conflict.set.theme as { version?: number } | undefined)
             ?.version === 1,
       ),
     ).toBe(true);
@@ -165,7 +263,7 @@ describe("seedOfficialZones", () => {
   });
 
   test("keeps localized titles and language rows idempotent", async () => {
-    const db = makeDb([[], [], []]);
+    const db = makeDb(OFFICIAL_ZONE_DEFINITIONS.map(() => []));
 
     await seedOfficialZones(db as never, "realm-rezics", {
       zone: "zone-scope",

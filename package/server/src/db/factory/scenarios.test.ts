@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import {
   ZONE_MENU_MAX_DEPTH,
-  type ZoneConfigV1,
   type ZoneMenuNode,
-  zoneConfigV1Schema,
+  zoneBoundaryEnvelopeSchema,
+  zoneNavEnvelopeSchema,
+  zonePageEnvelopeSchema,
+  type ZonePage as ZonePageConfig,
+  zoneThemeEnvelopeSchema,
 } from "@rezics/contract";
 import { Value } from "@sinclair/typebox/value";
 import { OFFICIAL_ZONE_DEFINITIONS } from "../seed/infra/seed-official-zones";
@@ -27,32 +30,28 @@ import {
 } from "./zones";
 
 // Factory writes bypass the zone service's write validation while the read
-// path throws on invalid envelopes, so every config builder must produce
-// schema-valid output; these walkers re-check the structural invariants the
-// service enforces (unique section ids incl. nested, menu refs, depth).
+// path throws on invalid envelopes, so every split-envelope builder must
+// produce schema-valid output; these walkers re-check the structural
+// invariants the service enforces (page-local section ids, menu refs, depth).
 // 工厂写入绕过 zone service 的写入校验，而读取路径会对非法信封抛错，
-// 因此每个配置构造器都必须产出通过 schema 的结果；这些遍历器复查
-// service 强制的结构不变量（含嵌套的分区 id 唯一、菜单引用、深度）。
+// 因此每个拆分信封构造器都必须产出通过 schema 的结果；这些遍历器复查
+// service 强制的结构不变量（页面内分区 id、菜单引用、深度）。
 function collectSectionEntries(
-  config: ZoneConfigV1,
+  page: ZonePageConfig,
 ): Array<{ id: string; kind: string }> {
   const entries: Array<{ id: string; kind: string }> = [];
-  for (const page of [
-    config.pages.home,
-    config.pages.search,
-    config.pages.feed,
-  ]) {
-    for (const section of page?.sections ?? []) {
-      entries.push({ id: section.id, kind: section.kind });
-      if (section.kind === "tabs") {
-        for (const tab of section.tabs) {
-          for (const inner of tab.sections) {
-            entries.push({ id: inner.id, kind: inner.kind });
-          }
+  for (const section of page.sections) {
+    entries.push({ id: section.id, kind: section.kind });
+    if (section.kind === "tabs") {
+      for (const tab of section.tabs) {
+        for (const inner of tab.sections) {
+          entries.push({ id: inner.id, kind: inner.kind });
         }
       }
-      if (section.kind === "columns") {
-        for (const inner of [...section.side, ...section.main]) {
+    }
+    if (section.kind === "columns") {
+      for (const column of section.columns) {
+        for (const inner of column.sections) {
           entries.push({ id: inner.id, kind: inner.kind });
           if (inner.kind === "tabs") {
             for (const tab of inner.tabs) {
@@ -76,16 +75,35 @@ function menuDepth(nodes: readonly ZoneMenuNode[]): number {
   return depth;
 }
 
-function expectValidZoneConfig(config: ZoneConfigV1) {
-  expect(Value.Check(zoneConfigV1Schema, config)).toBe(true);
+function expectValidZoneConfig(config: {
+  boundary: unknown;
+  nav: {
+    menus: { id: string; nodes: ZoneMenuNode[] }[];
+    header: { menuId: string };
+  };
+  theme: unknown;
+  pages: Array<{ config: ZonePageConfig }>;
+  homePageId: string;
+}) {
+  expect(Value.Check(zoneBoundaryEnvelopeSchema, config.boundary)).toBe(true);
+  expect(Value.Check(zoneNavEnvelopeSchema, config.nav)).toBe(true);
+  expect(Value.Check(zoneThemeEnvelopeSchema, config.theme)).toBe(true);
+  expect(config.pages.some((page) => page.config === undefined)).toBe(false);
 
-  const sectionIds = collectSectionEntries(config).map((entry) => entry.id);
-  expect(new Set(sectionIds).size).toBe(sectionIds.length);
+  for (const page of config.pages) {
+    expect(Value.Check(zonePageEnvelopeSchema, page.config)).toBe(true);
+    const sectionIds = collectSectionEntries(page.config).map(
+      (entry) => entry.id,
+    );
+    expect(new Set(sectionIds).size).toBe(sectionIds.length);
+  }
 
-  const menuIds = config.menus.map((menu) => menu.id);
+  expect(config.pages.map((page) => page.config).length).toBeGreaterThan(0);
+
+  const menuIds = config.nav.menus.map((menu) => menu.id);
   expect(new Set(menuIds).size).toBe(menuIds.length);
-  expect(menuIds).toContain(config.header.menuId);
-  for (const menu of config.menus) {
+  expect(menuIds).toContain(config.nav.header.menuId);
+  for (const menu of config.nav.menus) {
     expect(menuDepth(menu.nodes)).toBeLessThanOrEqual(ZONE_MENU_MAX_DEPTH);
   }
 }
@@ -97,7 +115,7 @@ describe("factory scenarios", () => {
       "large-content-tree",
       "large-history",
       "complex-shelf",
-      "toaru-wiki",
+      "toaru",
       "showcase-feed",
     ]);
 
@@ -137,7 +155,9 @@ describe("buildToaruZoneConfig", () => {
     const ids = buildIds();
     const config = buildToaruZoneConfig(ids);
     const kinds = new Set(
-      collectSectionEntries(config).map((entry) => entry.kind),
+      config.pages.flatMap((page) =>
+        collectSectionEntries(page.config).map((entry) => entry.kind),
+      ),
     );
     expect([...kinds].toSorted()).toEqual([
       "collection",
@@ -146,6 +166,7 @@ describe("buildToaruZoneConfig", () => {
       "hero",
       "query",
       "richText",
+      "sources",
       "stats",
       "tabs",
     ]);
@@ -154,24 +175,26 @@ describe("buildToaruZoneConfig", () => {
     for (const fragmentId of Object.values(ids.fragments)) {
       expect(richTextRefs).toContain(fragmentId);
     }
+    expect(richTextRefs).toContain('"kind":"sources"');
+    expect(richTextRefs).not.toContain("toaru.fandom.com");
   });
 
-  test("scopes context and boundary to the wiki realm", () => {
+  test("scopes context and boundary to the Toaru realm", () => {
     const config = buildToaruZoneConfig(buildIds());
-    expect(config.context).toEqual({
+    expect(config.boundary.context).toEqual({
       kind: "realm",
       realmUnitId: "realm-toaru",
     });
-    expect(config.filters).toEqual({ realm: "context" });
+    expect(config.boundary.filters).toEqual({ realm: "context" });
   });
 });
 
 describe("official zone definitions", () => {
   test("every official zone config is schema-valid with a global context", () => {
-    expect(OFFICIAL_ZONE_DEFINITIONS).toHaveLength(3);
+    expect(OFFICIAL_ZONE_DEFINITIONS).toHaveLength(4);
     for (const definition of OFFICIAL_ZONE_DEFINITIONS) {
       expectValidZoneConfig(definition.config);
-      expect(definition.config.context).toEqual({ kind: "global" });
+      expect(definition.config.boundary.context).toEqual({ kind: "global" });
     }
   });
 });
@@ -202,10 +225,14 @@ describe("zone fixture configs", () => {
         ...refs,
         contextRealmUnitId: kind === "columns-portal" ? "realm-1" : null,
       });
-      for (const entry of collectSectionEntries(config)) kinds.add(entry.kind);
+      for (const page of config.pages) {
+        for (const entry of collectSectionEntries(page.config)) {
+          kinds.add(entry.kind);
+        }
+      }
     }
-    // richText needs WIKI fragment posts; the toaru-wiki scenario covers it.
-    // richText 需要 WIKI 片段帖子；由 toaru-wiki 情境覆盖。
+    // richText needs WIKI fragment posts; the toaru scenario covers it.
+    // richText 需要 WIKI 片段帖子；由 toaru 情境覆盖。
     expect([...kinds].toSorted()).toEqual([
       "collection",
       "columns",

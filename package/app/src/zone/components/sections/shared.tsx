@@ -22,6 +22,7 @@ import {
  */
 export type ZonePortalContext = {
   zone: ZoneDTO;
+  pageId: string;
   refUnits: ZoneRefUnitMap;
   languages: Language[];
 };
@@ -52,6 +53,8 @@ export function useZoneSectionTitle(
       return t("zone:section_title_richText");
     case "zone:section_title_stats":
       return t("zone:section_title_stats");
+    case "zone:section_title_sources":
+      return t("zone:section_title_sources");
     default:
       return null;
   }

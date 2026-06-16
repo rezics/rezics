@@ -7,9 +7,10 @@ import {
   realmReadQuerySchema,
   resolveRealmRuleQuerySchema,
 } from "./realm";
+import { realmExtraSchema, realmWikiSidebarSchema } from "./realm-extra";
 
 describe("RealmDTO", () => {
-  test("accepts wiki Zone id and viewer capability metadata", () => {
+  test("accepts featured Zone and viewer capability metadata", () => {
     expect(
       Value.Check(realmDTOSchema, {
         unitId: "realm-1",
@@ -18,7 +19,7 @@ describe("RealmDTO", () => {
         isOfficial: false,
         memberCount: 12,
         extra: {
-          wikiZoneUnitId: "zone-1",
+          featuredZoneUnitId: "zone-1",
         },
         viewerCapabilities: [
           {
@@ -42,6 +43,53 @@ describe("RealmDTO", () => {
         description: null,
       }),
     ).toBe(true);
+  });
+});
+
+describe("RealmExtra wiki sidebar", () => {
+  test("accepts absent wikiSidebar and both configured sidebar kinds", () => {
+    expect(
+      Value.Check(realmExtraSchema, { featuredZoneUnitId: "zone-1" }),
+    ).toBe(true);
+    expect(
+      Value.Check(realmWikiSidebarSchema, {
+        kind: "post",
+        postUnitId: "post-1",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(realmWikiSidebarSchema, {
+        kind: "zoneNav",
+        zoneUnitId: "zone-1",
+        menuId: "main",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(realmExtraSchema, {
+        wikiSidebar: { kind: "zoneNav", zoneUnitId: "zone-1" },
+      }),
+    ).toBe(true);
+  });
+
+  test("rejects malformed and extra-prop wikiSidebar values", () => {
+    expect(
+      Value.Check(realmWikiSidebarSchema, {
+        kind: "post",
+        zoneUnitId: "zone-1",
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(realmWikiSidebarSchema, {
+        kind: "zoneNav",
+        zoneUnitId: "zone-1",
+        extra: true,
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(realmWikiSidebarSchema, [
+        { kind: "post", postUnitId: "post-1" },
+      ]),
+    ).toBe(false);
   });
 });
 

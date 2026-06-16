@@ -54,10 +54,11 @@ import { canManageRealm } from "../models/canManageRealm";
 import {
   AvatarPicker,
   BannerPicker,
+  FeaturedZonePicker,
   SlotPicker,
   TagTreeEditor,
   TagViewPreferenceEditor,
-  WikiZonePicker,
+  WikiSidebarPicker,
 } from "../sections/RealmManageEditors";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 
@@ -332,9 +333,13 @@ export function RealmManagePage({
         </TabsContent>
 
         <TabsContent value="wiki" className="flex flex-col gap-6">
-          <WikiZonePicker
+          <FeaturedZonePicker
             realmId={realmId}
-            value={realm.extra?.wikiZoneUnitId ?? null}
+            value={realm.extra?.featuredZoneUnitId ?? null}
+          />
+          <WikiSidebarPicker
+            realmId={realmId}
+            value={realm.extra?.wikiSidebar ?? null}
           />
         </TabsContent>
 

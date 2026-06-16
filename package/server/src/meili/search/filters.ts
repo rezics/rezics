@@ -49,10 +49,10 @@ export interface FilterContext {
   // 已认证的查看者。仅用于查看者私有的搜索能力，例如仅所有者可见的书架
   // 条目备注。
   viewerUserId?: string | null;
-  // Zone scope only: the zone's unremovable `config.filters` boundary,
+  // Zone scope only: the zone's unremovable `boundary.filters` boundary,
   // pre-compiled per index by the caller (see `compileZoneSectionQuery`).
   // User filters only narrow within it.
-  // 仅 zone 作用域：专区不可移除的 `config.filters` 边界，由调用方按索引
+  // 仅 zone 作用域：专区不可移除的 `boundary.filters` 边界，由调用方按索引
   // 预编译（见 `compileZoneSectionQuery`）。用户过滤只能在其内部收窄。
   zoneBoundaryContentFilter?: string[];
   zoneBoundaryPostFilter?: string[];
@@ -153,7 +153,7 @@ function resolveBookScope(scope: SearchScope): {
 //   book   → contentSubtype must be "shelves" (BOOK/GAME/MEDIA/LINK excluded)
 //          → containedUnitIds = unitId AND type = "SHELF"
 //   realm  → realmIds = realmId
-//   zone   → the zone's pre-compiled `config.filters` boundary
+//   zone   → the zone's pre-compiled `boundary.filters` boundary
 //            (ctx.zoneBoundaryContentFilter) — unremovable, user filters
 //            only narrow within it
 //   user   → userId = userId
@@ -163,7 +163,7 @@ function resolveBookScope(scope: SearchScope): {
 //   book   → contentSubtype 必须为 "shelves"（排除 BOOK/GAME/MEDIA/LINK）
 //          → containedUnitIds = unitId AND type = "SHELF"
 //   realm  → realmIds = realmId
-//   zone   → 专区预编译的 `config.filters` 边界
+//   zone   → 专区预编译的 `boundary.filters` 边界
 //            （ctx.zoneBoundaryContentFilter）——不可移除，用户过滤只能
 //            在其内部收窄
 //   user   → userId = userId
@@ -282,14 +282,14 @@ export function buildContentFilter(
 //   global → no scope filter
 //   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
-//   zone   → the zone's pre-compiled `config.filters` boundary
+//   zone   → the zone's pre-compiled `boundary.filters` boundary
 //            (ctx.zoneBoundaryPostFilter)
 //   user   → authorUserId = userId
 // 帖子的作用域映射：
 //   global → 无作用域过滤
 //   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
-//   zone   → 专区预编译的 `config.filters` 边界（ctx.zoneBoundaryPostFilter）
+//   zone   → 专区预编译的 `boundary.filters` 边界（ctx.zoneBoundaryPostFilter）
 //   user   → authorUserId = userId
 
 export function buildPostFilter(

@@ -5,12 +5,15 @@
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
 - [ ] 可能的通用性能問題，如果 lazy import 同一個 @/entity index，可能會讓detail/edit/self-claim 被打進同一個 lazy chunk。 如果feature很小，這不一定是問題；但如果想保留 route-level split，可以在合併目錄使用薄 entry point，或者在整理 TanStack Router code splitting 策略時一起整理。
+- [ ] zone 未來支持 root page ，通過一個選項支持 zone/id/page-slug 的訪問
 - [ ] meilisearch admin 需要更多的東西，比如各個index的行數情況之類的數據，以及還有什麼數據有需要的，應該調查
 - [ ] about, donate, product page.
 - [ ] 確保項目的垂直複雜性不能過高，但是水平複雜性可以擴展因爲水平複雜性是可以獨立維護，甚至隨時拋棄的
 - [ ] 有沒有一個可以通過設定設定github倉庫，會自動clone到 某個文件夾，提取 skill，建立最新的版本 map，並對本地進行更新的工具？感覺還挺有用的，然後通過config還能配置 clone 清理策略，然後對於 agents skill 位置的 contract 維護，如果沒有 Package 也有價值
-- 
-
+- [ ] 只有在最底部的 feed 才支持自動加載，也就是 feed 的自動加載要主動啓用
+- [ ] SourceSite 應當 支持存儲 域名匹配方案並能夠搜索匹配，總而言之，管理外鏈的組件需要重構
+- [ ] SourceSite 應當支持廣義內容，比如 qq 群號之類的，他們的特徵就是可複製的代碼
+- [ ] 反正要重構 entity - source 體系，source 本身也有點小問題，更多的語義應當是 外鏈，而不是來源鏈接
 
 ## 搜索
 

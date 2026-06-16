@@ -1,21 +1,32 @@
 import type {
   Language,
-  ZoneConfig,
-  ZoneConfigV1,
+  ZoneBoundary,
   ZoneMenuNode,
-  ZonePageId,
+  ZoneNav,
+  ZonePage,
   ZonePageSection,
-  ZonePages,
   ZoneSectionQuery,
   ZoneSectionQuerySortField,
+  ZoneTheme,
   ZoneTranslation,
 } from "@rezics/contract";
 import {
   LANGUAGES,
-  ZONE_CONFIG_SCHEMA,
-  ZONE_CONFIG_V1_VERSION,
+  ZONE_BOUNDARY_SCHEMA,
+  ZONE_BOUNDARY_V1_VERSION,
   ZONE_MENU_MAX_DEPTH,
+  ZONE_NAV_SCHEMA,
+  ZONE_NAV_V1_VERSION,
+  ZONE_PAGE_SCHEMA,
+  ZONE_PAGE_V1_VERSION,
+  ZONE_THEME_SCHEMA,
+  ZONE_THEME_V1_VERSION,
+  zoneBoundaryV1Schema,
+  zoneNavV1Schema,
+  zonePageV1Schema,
+  zoneThemeV1Schema,
 } from "@rezics/contract";
+import { Value } from "@sinclair/typebox/value";
 
 // ANCHOR: Zone manage draft
 // ANCHOR: 专区管理草稿
@@ -29,23 +40,263 @@ import {
  * 内容）。草稿 → 信封必须是恒等往返：编辑器绝不归一化或改写服务端已
  * 校验过的内容。
  */
-export type ZoneManageDraft = Omit<ZoneConfigV1, "schema" | "version">;
+export type ZonePageId = string;
+export type ZonePages = Record<string, { sections: ZonePageSection[] }>;
+
+export type ZoneManageDraft = Omit<ZoneBoundary, "schema" | "version"> &
+  Omit<ZoneNav, "schema" | "version"> & {
+    theme: Omit<ZoneTheme, "schema" | "version">;
+    pages: ZonePages;
+  };
+
+export type ZoneManageJsonTarget =
+  | { kind: "boundary" }
+  | { kind: "nav" }
+  | { kind: "theme" }
+  | { kind: "page"; pageId: ZonePageId };
+
+export type ZoneManageJsonProblem = {
+  path: string;
+  message: string;
+};
 
 function deepClone<T>(value: T): T {
+  if (value === undefined) return value;
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-export function zoneConfigToDraft(config: ZoneConfig): ZoneManageDraft {
-  const { schema: _schema, version: _version, ...body } = config;
-  return deepClone(body);
+export function zoneShellToDraft(input: {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  page?: ZonePage;
+  pageId?: ZonePageId;
+}): ZoneManageDraft {
+  const {
+    schema: _boundarySchema,
+    version: _boundaryVersion,
+    ...boundary
+  } = input.boundary;
+  const { schema: _navSchema, version: _navVersion, ...nav } = input.nav;
+  const {
+    schema: _themeSchema,
+    version: _themeVersion,
+    ...theme
+  } = input.theme;
+  return deepClone({
+    ...boundary,
+    ...nav,
+    theme,
+    pages: input.page
+      ? { [input.pageId ?? "home"]: { sections: input.page.sections } }
+      : {},
+  });
 }
 
-export function zoneManageDraftToConfig(draft: ZoneManageDraft): ZoneConfigV1 {
+export function zoneManageDraftToBoundary(
+  draft: ZoneManageDraft,
+): ZoneBoundary {
   return {
-    schema: ZONE_CONFIG_SCHEMA,
-    version: ZONE_CONFIG_V1_VERSION,
-    ...deepClone(draft),
+    schema: "rezics/zone-boundary",
+    version: 1,
+    context: deepClone(draft.context),
+    filters: deepClone(draft.filters),
   };
+}
+
+export function zoneManageDraftToNav(draft: ZoneManageDraft): ZoneNav {
+  return {
+    schema: "rezics/zone-nav",
+    version: 1,
+    menus: deepClone(draft.menus),
+    header: deepClone(draft.header),
+  };
+}
+
+export function zoneManageDraftToTheme(draft: ZoneManageDraft): ZoneTheme {
+  return {
+    schema: "rezics/zone-theme",
+    version: 1,
+    tokens: deepClone(draft.theme.tokens),
+    images: deepClone(draft.theme.images),
+    layout: deepClone(draft.theme.layout),
+  };
+}
+
+export function zoneManageDraftToPage(
+  draft: ZoneManageDraft,
+  pageId: ZonePageId,
+): ZonePage {
+  return {
+    schema: "rezics/zone-page",
+    version: 1,
+    sections: deepClone(draft.pages[pageId]?.sections ?? []),
+  };
+}
+
+function stripEnvelopeMetadata(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const {
+    schema: _schema,
+    version: _version,
+    ...body
+  } = value as Record<string, unknown>;
+  return body;
+}
+
+function zoneManageJsonEnvelope(
+  target: ZoneManageJsonTarget,
+  body: unknown,
+): ZoneBoundary | ZoneNav | ZoneTheme | ZonePage {
+  const stripped = stripEnvelopeMetadata(body);
+  switch (target.kind) {
+    case "boundary":
+      return {
+        schema: ZONE_BOUNDARY_SCHEMA,
+        version: ZONE_BOUNDARY_V1_VERSION,
+        ...stripped,
+      } as ZoneBoundary;
+    case "nav":
+      return {
+        schema: ZONE_NAV_SCHEMA,
+        version: ZONE_NAV_V1_VERSION,
+        ...stripped,
+      } as ZoneNav;
+    case "theme":
+      return {
+        schema: ZONE_THEME_SCHEMA,
+        version: ZONE_THEME_V1_VERSION,
+        ...stripped,
+      } as ZoneTheme;
+    case "page":
+      return {
+        schema: ZONE_PAGE_SCHEMA,
+        version: ZONE_PAGE_V1_VERSION,
+        ...stripped,
+      } as ZonePage;
+  }
+}
+
+function zoneManageJsonSchema(target: ZoneManageJsonTarget) {
+  switch (target.kind) {
+    case "boundary":
+      return zoneBoundaryV1Schema;
+    case "nav":
+      return zoneNavV1Schema;
+    case "theme":
+      return zoneThemeV1Schema;
+    case "page":
+      return zonePageV1Schema;
+  }
+}
+
+export function zoneManageJsonKey(target: ZoneManageJsonTarget): string {
+  return target.kind === "page" ? `page:${target.pageId}` : target.kind;
+}
+
+/**
+ * JSON manage view edits envelope bodies only. Top-level `schema` and
+ * `version` keys are deliberately stripped before draft/application because
+ * those literals are system-owned at the write boundary.
+ */
+export function zoneManageJsonBody(
+  draft: ZoneManageDraft,
+  target: ZoneManageJsonTarget,
+): unknown {
+  switch (target.kind) {
+    case "boundary":
+      return deepClone({ context: draft.context, filters: draft.filters });
+    case "nav":
+      return deepClone({ menus: draft.menus, header: draft.header });
+    case "theme":
+      return deepClone(draft.theme);
+    case "page":
+      return deepClone({
+        sections: draft.pages[target.pageId]?.sections ?? [],
+      });
+  }
+}
+
+export function zoneManageJsonText(
+  draft: ZoneManageDraft,
+  target: ZoneManageJsonTarget,
+): string {
+  return JSON.stringify(zoneManageJsonBody(draft, target), null, 2);
+}
+
+export function validateZoneManageJsonBody(
+  target: ZoneManageJsonTarget,
+  body: unknown,
+): ZoneManageJsonProblem[] {
+  const schema = zoneManageJsonSchema(target);
+  const envelope = zoneManageJsonEnvelope(target, body);
+  if (Value.Check(schema, envelope)) return [];
+  return [...Value.Errors(schema, envelope)].map((error) => ({
+    path: error.path || "/",
+    message: error.message,
+  }));
+}
+
+export function parseZoneManageJsonText(
+  target: ZoneManageJsonTarget,
+  text: string,
+):
+  | { ok: true; body: Record<string, unknown> }
+  | { ok: false; problems: ZoneManageJsonProblem[] } {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    return {
+      ok: false,
+      problems: [
+        {
+          path: "/",
+          message: error instanceof Error ? error.message : "Invalid JSON",
+        },
+      ],
+    };
+  }
+  const body = stripEnvelopeMetadata(parsed);
+  const problems = validateZoneManageJsonBody(target, body);
+  if (problems.length > 0) return { ok: false, problems };
+  return { ok: true, body };
+}
+
+export function applyZoneManageJsonBody(
+  draft: ZoneManageDraft,
+  target: ZoneManageJsonTarget,
+  rawBody: unknown,
+): ZoneManageDraft {
+  const body = stripEnvelopeMetadata(rawBody);
+  switch (target.kind) {
+    case "boundary":
+      return {
+        ...draft,
+        context: deepClone(body.context) as ZoneManageDraft["context"],
+        filters: deepClone(body.filters) as ZoneManageDraft["filters"],
+      };
+    case "nav":
+      return {
+        ...draft,
+        menus: deepClone(body.menus) as ZoneManageDraft["menus"],
+        header: deepClone(body.header) as ZoneManageDraft["header"],
+      };
+    case "theme":
+      return {
+        ...draft,
+        theme: deepClone(body) as ZoneManageDraft["theme"],
+      };
+    case "page":
+      return {
+        ...draft,
+        pages: updateZonePageSections(
+          draft.pages,
+          target.pageId,
+          () => deepClone(body.sections) as ZonePageSection[],
+        ),
+      };
+  }
 }
 
 // ANCHOR: Section slots and nesting guards
@@ -58,6 +309,7 @@ export const ZONE_CONTENT_SECTION_KINDS = [
   "query",
   "feed",
   "stats",
+  "sources",
 ] as const;
 
 export const ZONE_PAGE_SECTION_KINDS = [
@@ -131,10 +383,19 @@ export function createZoneSection(
       return { id, kind: "feed" };
     case "stats":
       return { id, kind: "stats", metrics: ["articles", "members"] };
+    case "sources":
+      return { id, kind: "sources" };
     case "tabs":
       return { id, kind: "tabs", tabs: [] };
     case "columns":
-      return { id, kind: "columns", side: [], main: [] };
+      return {
+        id,
+        kind: "columns",
+        columns: [
+          { id: "main", ratio: 3, sections: [] },
+          { id: "side", ratio: 1, sections: [] },
+        ],
+      };
   }
 }
 
@@ -147,13 +408,12 @@ function* iterateSections(
       for (const tab of section.tabs) yield* iterateSections(tab.sections);
     }
     if (section.kind === "columns") {
-      yield* iterateSections(section.side);
-      yield* iterateSections(section.main);
+      for (const column of section.columns) {
+        yield* iterateSections(column.sections);
+      }
     }
   }
 }
-
-export const ZONE_PAGE_IDS = ["home", "search", "feed"] as const;
 
 function pageSections(
   pages: ZonePages,
@@ -163,14 +423,14 @@ function pageSections(
 }
 
 /**
- * Every section id across every page, containers and nested sections
- * included — the uniqueness scope the server validator enforces.
- * 跨所有页面的每个分区 id，包含容器与嵌套分区——即服务端校验器强制的
- * 唯一性范围。
+ * Every section id across the loaded page draft, containers and nested
+ * sections included. Section ids are page-local in the split ZonePage model.
+ * 已加载页面草稿中的每个分区 id，包含容器与嵌套分区。拆分后的
+ * ZonePage 模型中，分区 id 的唯一性是页面局部的。
  */
 export function collectZoneSectionIds(pages: ZonePages): string[] {
   const ids: string[] = [];
-  for (const pageId of ZONE_PAGE_IDS) {
+  for (const pageId of Object.keys(pages)) {
     for (const section of iterateSections(pageSections(pages, pageId))) {
       ids.push(section.id);
     }
@@ -527,7 +787,7 @@ export function validateZoneManageDraft(
   const issues: ZoneManageIssue[] = [];
 
   const sectionIds = new Set<string>();
-  for (const pageId of ZONE_PAGE_IDS) {
+  for (const pageId of Object.keys(draft.pages)) {
     for (const section of iterateSections(pageSections(draft.pages, pageId))) {
       if (sectionIds.has(section.id)) {
         issues.push({ code: "section_id_duplicate", id: section.id });
@@ -685,16 +945,15 @@ export function addZonePage(pages: ZonePages, pageId: ZonePageId): ZonePages {
   return { ...pages, [pageId]: { sections: [] } };
 }
 
-/**
- * `home` is required by the contract and cannot be removed.
- * 契约要求 `home` 必填，不可移除。
- */
 export function removeZonePage(
   pages: ZonePages,
   pageId: ZonePageId,
 ): ZonePages {
-  if (pageId === "home") return pages;
   const next = { ...pages };
   delete next[pageId];
   return next;
+}
+
+export function zonePageToDraftPage(page: ZonePage): ZonePages[string] {
+  return deepClone({ sections: page.sections });
 }

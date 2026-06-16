@@ -9,10 +9,14 @@ import { ZoneSectionList } from "../components/sections/ZoneSectionList";
 import { ZoneHeader } from "../components/ZoneHeader";
 import { useZonePortal } from "../hooks/useZone";
 import { canManageZone } from "../models/canManageZone";
-import { zoneContentWidthClass, zoneThemeCssVars } from "../models/zoneTheme";
+import {
+  ZONE_CONTENT_MAX_WIDTH_DEFAULT,
+  zoneThemeCssVars,
+} from "../models/zoneTheme";
 
 type ZonePortalPageProps = {
   slug: string;
+  pageSlug?: string;
 };
 
 /**
@@ -21,9 +25,15 @@ type ZonePortalPageProps = {
  * 单一的配置驱动门户：通过分区原语渲染 `config.pages.home.sections`
  * ——模板分发已废弃。
  */
-export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({ slug }) => {
+export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
+  slug,
+  pageSlug = "home",
+}) => {
   const { t } = useTranslation(["zone"]);
-  const { zone, refUnits, languages, isLoading, error } = useZonePortal(slug);
+  const { zone, page, refUnits, languages, isLoading, error } = useZonePortal(
+    slug,
+    pageSlug,
+  );
   const permission = useServerPermission();
   const membershipQuery = useQuery({
     ...myRealmMembershipQuery(zone?.ownerRealmUnitId ?? ""),
@@ -42,7 +52,7 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({ slug }) => {
     );
   }
 
-  if (error || !zone || !refUnits) {
+  if (error || !zone || !page || !refUnits) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-24 text-center">
         <h2 className="mb-2 text-2xl font-semibold leading-ui text-text-primary">
@@ -53,8 +63,10 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({ slug }) => {
     );
   }
 
-  const themeVars = zoneThemeCssVars(zone.config.theme) as CSSProperties;
-  const widthClass = zoneContentWidthClass(zone.config.theme);
+  const themeVars = zoneThemeCssVars(zone.theme) as CSSProperties;
+  const contentStyle = {
+    maxWidth: `var(--zone-content-max-width, ${ZONE_CONTENT_MAX_WIDTH_DEFAULT}px)`,
+  } satisfies CSSProperties;
 
   return (
     <div
@@ -68,7 +80,7 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({ slug }) => {
       className="min-h-full"
     >
       <ZoneHeader zone={zone} refUnits={refUnits} />
-      <div className={`mx-auto w-full ${widthClass} px-4 py-8`}>
+      <div className="mx-auto w-full px-4 py-8" style={contentStyle}>
         {showManage ? (
           <div className="mb-6 flex justify-end">
             <SafeLink
@@ -80,8 +92,8 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({ slug }) => {
           </div>
         ) : null}
         <ZoneSectionList
-          sections={zone.config.pages.home.sections}
-          ctx={{ zone, refUnits, languages }}
+          sections={page.config.sections}
+          ctx={{ zone, pageId: page.id, refUnits, languages }}
         />
       </div>
     </div>

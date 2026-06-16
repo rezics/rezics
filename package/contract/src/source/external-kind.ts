@@ -12,6 +12,7 @@ export const externalKinds = [
   "label",
   "series",
   "chapter",
+  "wiki",
 ] as const;
 
 export type ExternalKind = (typeof externalKinds)[number];
@@ -73,6 +74,11 @@ export const externalKindRegistry: Record<
     key: "chapter",
     label: "Chapter",
     suggestedUnitTypes: ["BOOK"],
+  },
+  wiki: {
+    key: "wiki",
+    label: "Wiki",
+    suggestedUnitTypes: ["ZONE"],
   },
 };
 

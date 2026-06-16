@@ -15,6 +15,7 @@ import { PinnedFeedSection } from "@/pinboard";
 import { RealmContentFeed } from "../components/RealmContentFeed";
 import { useRealmManageMode } from "../models/realmManageMode";
 import { AboutSection } from "./AboutSection";
+import { FeaturedZoneSection } from "./FeaturedZoneSection";
 import {
   type RealmFeedSort,
   RealmFeedSortSwitcher,
@@ -131,14 +132,13 @@ export function RealmFeedTab({
           />
         </FeedLayout>
       </div>
-      <aside className="min-w-0">
+      <aside className="flex min-w-0 flex-col gap-4">
+        <FeaturedZoneSection zoneUnitId={realm.extra?.featuredZoneUnitId} />
         <AboutSection postUnitId={realm.extra?.about ?? null} />
-        <div className="mt-4">
-          <RuleSection
-            realmUnitId={realmId}
-            postUnitId={realm.extra?.rule ?? null}
-          />
-        </div>
+        <RuleSection
+          realmUnitId={realmId}
+          postUnitId={realm.extra?.rule ?? null}
+        />
       </aside>
     </div>
   );

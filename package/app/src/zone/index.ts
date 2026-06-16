@@ -1,5 +1,7 @@
 export { ZoneHeader } from "./components/ZoneHeader";
+export { ZoneNavTree } from "./components/ZoneNavTree";
 export { canManageZone } from "./models/canManageZone";
+export { pickZoneMenu } from "./models/zoneMenu";
 export {
   OFFICIAL_ZONE_SLUGS,
   type OfficialZoneKey,

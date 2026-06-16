@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import type { ZoneMenuNode, ZoneRefUnitSummary } from "@rezics/contract";
 import {
+  pickZoneMenu,
   resolveZoneMenuNodes,
   zoneCreateHref,
   zoneDetailKindForRef,
@@ -37,7 +38,13 @@ const refUnits: Record<string, ZoneRefUnitSummary> = {
   "untitled-label": { unitId: "untitled-label", type: "LABEL", title: null },
 };
 
-const ctx = { zoneSlug: "toaru-wiki", refUnits };
+const pages = [
+  { id: "home", slug: "home", position: 0 },
+  { id: "search", slug: "search", position: 1 },
+  { id: "feed", slug: "feed", position: 2 },
+];
+
+const ctx = { zoneSlug: "toaru", pages, refUnits };
 
 describe("zoneDetailKindForRef", () => {
   it("routes WIKI posts to wiki, other posts to post, the rest to unit", () => {
@@ -51,22 +58,23 @@ describe("zoneDetailKindForRef", () => {
 describe("zoneLinkHref", () => {
   it("builds zone-framed unit detail hrefs", () => {
     expect(zoneLinkHref({ kind: "unit", unitId: "wiki-1" }, ctx)).toBe(
-      "/z/toaru-wiki/wiki/wiki-1",
+      "/z/toaru/wiki/wiki-1",
     );
     expect(zoneLinkHref({ kind: "unit", unitId: "post-1" }, ctx)).toBe(
-      "/z/toaru-wiki/post/post-1",
+      "/z/toaru/post/post-1",
     );
     expect(zoneLinkHref({ kind: "unit", unitId: "book-1" }, ctx)).toBe(
-      "/z/toaru-wiki/unit/book-1",
+      "/z/toaru/unit/book-1",
     );
   });
 
-  it("builds zone page hrefs (feed falls back to home until the route exists)", () => {
-    expect(zonePageHref("home", "toaru-wiki")).toBe("/z/toaru-wiki");
-    expect(zonePageHref("search", "toaru-wiki")).toBe("/z/toaru-wiki/search");
-    expect(zonePageHref("feed", "toaru-wiki")).toBe("/z/toaru-wiki");
+  it("builds zone page hrefs from page summaries", () => {
+    expect(zonePageHref("home", "toaru", pages)).toBe("/z/toaru");
+    expect(zonePageHref("search", "toaru", pages)).toBe("/z/toaru/page/search");
+    expect(zonePageHref("feed", "toaru", pages)).toBe("/z/toaru/page/feed");
+    expect(zonePageHref("missing", "toaru", pages)).toBeNull();
     expect(zoneLinkHref({ kind: "zonePage", pageId: "search" }, ctx)).toBe(
-      "/z/toaru-wiki/search",
+      "/z/toaru/page/search",
     );
   });
 
@@ -154,7 +162,7 @@ describe("resolveZoneMenuNodes", () => {
             id: "leaf",
             label: "上條當麻",
             labelKey: null,
-            href: "/z/toaru-wiki/wiki/wiki-1",
+            href: "/z/toaru/wiki/wiki-1",
             isExternal: false,
             children: [],
           },
@@ -162,7 +170,7 @@ describe("resolveZoneMenuNodes", () => {
             id: "page",
             label: null,
             labelKey: "zone:page_search",
-            href: "/z/toaru-wiki/search",
+            href: "/z/toaru/page/search",
             isExternal: false,
             children: [],
           },
@@ -198,6 +206,36 @@ describe("resolveZoneMenuNodes", () => {
   });
 });
 
+describe("pickZoneMenu", () => {
+  const nav = {
+    schema: "rezics/zone-nav" as const,
+    version: 1 as const,
+    header: { menuId: "main" },
+    menus: [
+      { id: "main", nodes: [] },
+      { id: "sidebar", nodes: [] },
+    ],
+  };
+
+  it("uses an explicit menu id when present", () => {
+    expect(pickZoneMenu(nav, "sidebar")?.id).toBe("sidebar");
+  });
+
+  it("falls back to the header menu when no explicit menu is selected", () => {
+    expect(pickZoneMenu(nav)?.id).toBe("main");
+  });
+
+  it("falls back to the header menu when the explicit id is unknown", () => {
+    expect(pickZoneMenu(nav, "missing")?.id).toBe("main");
+  });
+
+  it("returns null when neither explicit nor header menu resolves", () => {
+    expect(
+      pickZoneMenu({ ...nav, header: { menuId: "missing" } }, "unknown"),
+    ).toBeNull();
+  });
+});
+
 describe("section titles", () => {
   it("resolves explicit titleLabelUnitId through refUnits", () => {
     expect(
@@ -217,6 +255,7 @@ describe("section titles", () => {
     expect(zoneSectionTitleKey("feed")).toBe("zone:section_title_feed");
     expect(zoneSectionTitleKey("richText")).toBe("zone:section_title_richText");
     expect(zoneSectionTitleKey("stats")).toBe("zone:section_title_stats");
+    expect(zoneSectionTitleKey("sources")).toBe("zone:section_title_sources");
     expect(zoneSectionTitleKey("hero")).toBeNull();
     expect(zoneSectionTitleKey("tabs")).toBeNull();
     expect(zoneSectionTitleKey("columns")).toBeNull();

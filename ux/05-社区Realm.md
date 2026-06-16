@@ -76,7 +76,7 @@
 
 **关键数据流**：`/realm/$realmId/` → `RealmPage` → `realmDetailQuery()` + `myRealmMembershipQuery()` → `realmApi.get()` → 契约 `RealmResponse`。
 
-**边界/权限/异常**：不存在显示「Realm not found」（`:146`–`149`）；私有非成员仅见基本信息；wiki 需 `wikiZoneUnitId` 或管理员（`:158`）；管理员见 Manage/置顶/精华（`:182`–`191`）。
+**边界/权限/异常**：不存在显示「Realm not found」（`:146`–`149`）；私有非成员仅见基本信息；Wiki 标签始终可见并由空状态兜底；管理员见 Manage/置顶/精华（`:182`–`191`）。
 
 ## 场景 5：通过 Slug 进入社区（短链）
 
@@ -275,17 +275,17 @@
 
 **入口/触发**：主页 Wiki 标签；创建页 wiki 模式。
 
-**前置条件**：已创建并指定 `wikiZoneUnitId`。
+**前置条件**：已创建 realm；Wiki 侧栏可使用自动页面列表、侧栏帖或分区导览。
 
 **步骤**：
-1. `RealmWikiTab` — `package/app/src/realm/components/RealmWikiTab.tsx` 加载 Zone 下文档。
+1. `RealmWikiTab` — `package/app/src/realm/components/RealmWikiTab.tsx` 加载 realm 下 Wiki 文档，并按 `wikiSidebar` 配置渲染侧栏。
 2. 创建：`RealmCreatePage` wiki 模式 `WikiPostEditor` — `package/app/src/realm/pages/RealmCreatePage.tsx:41`–`42`、`:19`。
-3. 提交创建 Post(PostKind.WIKI) 关联 realm/wikiZoneUnitId。
+3. 提交创建 Post(PostKind.WIKI) 关联 realm。
 4. 编辑：`package/app/src/routes/_editor/realm/$realmId/post/$postUnitId/edit.tsx`。
 
 **关键数据流**：`RealmCreatePage`(wiki) → `WikiPostEditor` → `createRealmPost()` → post.service → 契约 `PostResponse`(WIKI)。
 
-**边界/权限/异常**：Wiki 独立 Zone；仅 owner/admin 创建编辑；支持版本/历史。
+**边界/权限/异常**：Wiki 不要求独立 Zone；仅 owner/admin 创建编辑；支持版本/历史。
 
 ## 场景 17：用户的社区成员列表（个人页）
 

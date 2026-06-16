@@ -3,8 +3,10 @@ import { t } from "elysia";
 import { contentDocSchema } from "../content/doc-v1";
 import { languageSchema } from "../language";
 import { unitTypeSchema } from "../unit/unit";
-import { zoneConfigV1Schema } from "./config-v1";
-import type { ZoneConfig } from "./upgrade";
+import { zoneBoundaryV1Schema, type ZoneBoundary } from "./boundary-v1";
+import { zoneNavV1Schema, type ZoneNav } from "./nav-v1";
+import { zonePageV1Schema, type ZonePage } from "./page-v1";
+import { zoneThemeV1Schema, type ZoneTheme } from "./theme-v1";
 
 // ANCHOR: Zone DTO
 // ANCHOR: 专区 DTO
@@ -20,6 +22,17 @@ export const zoneTranslationSchema = t.Object(
 
 export type ZoneTranslation = Static<typeof zoneTranslationSchema>;
 
+export const zonePageSummarySchema = t.Object(
+  {
+    id: t.String(),
+    slug: t.String(),
+    position: t.Number(),
+  },
+  { additionalProperties: false },
+);
+
+export type ZonePageSummary = Static<typeof zonePageSummarySchema>;
+
 export const zoneDTOSchema = t.Object({
   unitId: t.String(),
   ownerRealmUnitId: t.String(),
@@ -31,13 +44,22 @@ export const zoneDTOSchema = t.Object({
   // 完整译文数组，使管理页的资料编辑器可以编辑每个语言行，而不只是
   // 已解析的那一行。
   translations: t.Array(zoneTranslationSchema),
-  config: zoneConfigV1Schema,
+  boundary: zoneBoundaryV1Schema,
+  nav: zoneNavV1Schema,
+  theme: zoneThemeV1Schema,
+  homePageId: t.String(),
+  pages: t.Array(zonePageSummarySchema),
   startsAt: t.Optional(t.Nullable(t.String())),
   endsAt: t.Optional(t.Nullable(t.String())),
 });
 
-export type ZoneDTO = Omit<Static<typeof zoneDTOSchema>, "config"> & {
-  config: ZoneConfig;
+export type ZoneDTO = Omit<
+  Static<typeof zoneDTOSchema>,
+  "boundary" | "nav" | "theme"
+> & {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
 };
 
 // ANCHOR: Zone write inputs
@@ -48,7 +70,11 @@ export const createZoneInputSchema = t.Object(
     slug: t.String({ minLength: 1 }),
     ownerRealmUnitId: t.String(),
     translations: t.Array(zoneTranslationSchema, { minItems: 1 }),
-    config: zoneConfigV1Schema,
+    boundary: zoneBoundaryV1Schema,
+    nav: zoneNavV1Schema,
+    theme: zoneThemeV1Schema,
+    homePage: zonePageV1Schema,
+    homePageSlug: t.Optional(t.String({ minLength: 1 })),
     startsAt: t.Optional(t.Nullable(t.String())),
     endsAt: t.Optional(t.Nullable(t.String())),
   },
@@ -57,8 +83,13 @@ export const createZoneInputSchema = t.Object(
 
 export type CreateZoneInput = Omit<
   Static<typeof createZoneInputSchema>,
-  "config"
-> & { config: ZoneConfig };
+  "boundary" | "nav" | "theme" | "homePage"
+> & {
+  boundary: ZoneBoundary;
+  nav: ZoneNav;
+  theme: ZoneTheme;
+  homePage: ZonePage;
+};
 
 /**
  * Update edits zone identity too: `translations` upserts `UnitTranslation`
@@ -71,17 +102,71 @@ export const updateZoneInputSchema = t.Object(
   {
     ownerRealmUnitId: t.Optional(t.String()),
     translations: t.Optional(t.Array(zoneTranslationSchema, { minItems: 1 })),
-    config: t.Optional(zoneConfigV1Schema),
     startsAt: t.Optional(t.Nullable(t.String())),
     endsAt: t.Optional(t.Nullable(t.String())),
   },
   { additionalProperties: false },
 );
 
-export type UpdateZoneInput = Omit<
-  Static<typeof updateZoneInputSchema>,
+export type UpdateZoneInput = Static<typeof updateZoneInputSchema>;
+
+export const updateZoneBoundaryInputSchema = t.Object(
+  { boundary: zoneBoundaryV1Schema },
+  { additionalProperties: false },
+);
+
+export type UpdateZoneBoundaryInput = Omit<
+  Static<typeof updateZoneBoundaryInputSchema>,
+  "boundary"
+> & { boundary: ZoneBoundary };
+
+export const updateZoneNavInputSchema = t.Object(
+  { nav: zoneNavV1Schema },
+  { additionalProperties: false },
+);
+
+export type UpdateZoneNavInput = Omit<
+  Static<typeof updateZoneNavInputSchema>,
+  "nav"
+> & { nav: ZoneNav };
+
+export const updateZoneThemeInputSchema = t.Object(
+  { theme: zoneThemeV1Schema },
+  { additionalProperties: false },
+);
+
+export type UpdateZoneThemeInput = Omit<
+  Static<typeof updateZoneThemeInputSchema>,
+  "theme"
+> & { theme: ZoneTheme };
+
+export const createZonePageInputSchema = t.Object(
+  {
+    slug: t.String({ minLength: 1 }),
+    position: t.Number(),
+    config: zonePageV1Schema,
+  },
+  { additionalProperties: false },
+);
+
+export type CreateZonePageInput = Omit<
+  Static<typeof createZonePageInputSchema>,
   "config"
-> & { config?: ZoneConfig };
+> & { config: ZonePage };
+
+export const updateZonePageInputSchema = t.Object(
+  {
+    slug: t.Optional(t.String({ minLength: 1 })),
+    position: t.Optional(t.Number()),
+    config: t.Optional(zonePageV1Schema),
+  },
+  { additionalProperties: false },
+);
+
+export type UpdateZonePageInput = Omit<
+  Static<typeof updateZonePageInputSchema>,
+  "config"
+> & { config?: ZonePage };
 
 // ANCHOR: Zone portal read shapes
 // ANCHOR: 专区门户读取形态
@@ -109,13 +194,25 @@ export type ZoneRefUnitSummary = Static<typeof zoneRefUnitSummarySchema>;
 
 export const zonePortalResponseSchema = t.Object({
   zone: zoneDTOSchema,
+  page: t.Object(
+    {
+      id: t.String(),
+      slug: t.String(),
+      position: t.Number(),
+      config: zonePageV1Schema,
+    },
+    { additionalProperties: false },
+  ),
   refUnits: t.Record(t.String(), zoneRefUnitSummarySchema),
 });
 
 export type ZonePortalResponse = Omit<
   Static<typeof zonePortalResponseSchema>,
-  "zone"
-> & { zone: ZoneDTO };
+  "zone" | "page"
+> & {
+  zone: ZoneDTO;
+  page: ZonePageSummary & { config: ZonePage };
+};
 
 // ANCHOR: Zone section data
 // ANCHOR: 专区分区数据
@@ -144,6 +241,7 @@ export const zoneStatsDataSchema = t.Object({
 export type ZoneStatsData = Static<typeof zoneStatsDataSchema>;
 
 export const zoneSectionDataSchema = t.Object({
+  pageId: t.String(),
   sectionId: t.String(),
   items: t.Array(zoneSectionItemSchema),
   // richText sections only: the fragment's resolved ContentTranslation doc.

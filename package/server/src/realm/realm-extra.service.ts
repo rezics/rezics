@@ -1,13 +1,19 @@
 import type {
   RealmImageExtra,
   RealmTagView,
+  RealmWikiSidebar,
   RezicsSessionClaims,
   TagTreeNode,
 } from "@rezics/contract";
-import { LICENSE_SLUGS, realmTagViewStyleValues } from "@rezics/contract";
+import {
+  LICENSE_SLUGS,
+  realmTagViewStyleValues,
+  realmWikiSidebarSchema,
+} from "@rezics/contract";
+import { Value } from "@sinclair/typebox/value";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { hasAuthorityOver } from "@/unit/authority";
-import { Realm, RealmMember, Unit, Zone } from "../db/schema";
+import { Realm, RealmMember, Unit } from "../db/schema";
 
 export class RealmExtraError extends Error {
   constructor(
@@ -35,7 +41,8 @@ type SingleExtraKey =
   | "avatar"
   | "defaultLicenseSlug"
   | "tagView"
-  | "wikiZoneUnitId";
+  | "featuredZoneUnitId"
+  | "wikiSidebar";
 type UnitReferenceExtraKey = "rule" | "about";
 
 const SINGLE_EXTRA_KEYS = new Set<string>([
@@ -45,7 +52,8 @@ const SINGLE_EXTRA_KEYS = new Set<string>([
   "avatar",
   "defaultLicenseSlug",
   "tagView",
-  "wikiZoneUnitId",
+  "featuredZoneUnitId",
+  "wikiSidebar",
 ]);
 
 type RealmExtraRepository = {
@@ -65,7 +73,6 @@ type RealmExtraRepository = {
     unitId: string,
   ): Promise<{ id: string; type: string; status: string } | null>;
   findValidTagUnitIds(tagIds: string[]): Promise<Set<string>>;
-  zoneExists(unitId: string): Promise<boolean>;
   updateExtraWithLock(
     realmId: string,
     mutate: (extra: ExtraJson) => ExtraJson,
@@ -168,15 +175,6 @@ function createDrizzleRealmExtraRepository(): RealmExtraRepository {
           ),
         );
       return new Set(rows.map((row) => row.id));
-    },
-    async zoneExists(unitId) {
-      const db = await getServerDb();
-      const [zone] = await db
-        .select({ unitId: Zone.unitId })
-        .from(Zone)
-        .where(eq(Zone.unitId, unitId))
-        .limit(1);
-      return Boolean(zone);
     },
     async updateExtraWithLock(realmId, mutate) {
       const db = await getServerDb();
@@ -373,16 +371,6 @@ async function validateTagUnitIds(tagIds: Set<string>): Promise<void> {
   }
 }
 
-async function validateZoneUnit(unitId: string): Promise<void> {
-  if (!(await realmExtraRepository.zoneExists(unitId))) {
-    throw new RealmExtraError(
-      "INVALID_VALUE",
-      "wikiZoneUnitId must reference an existing Zone Unit",
-      400,
-    );
-  }
-}
-
 function collectTagTreeIds(value: unknown): Set<string> {
   if (!Array.isArray(value)) {
     throw new RealmExtraError("INVALID_VALUE", "tagTree must be an array", 400);
@@ -486,16 +474,37 @@ async function validateSingleExtraValue(
     return value;
   }
 
-  if (key === "wikiZoneUnitId") {
+  if (key === "featuredZoneUnitId") {
     if (typeof value !== "string" || value.length === 0) {
       throw new RealmExtraError(
         "INVALID_VALUE",
-        "wikiZoneUnitId must be a Zone Unit ID string",
+        "featuredZoneUnitId must be a Zone Unit ID string",
         400,
       );
     }
-    await validateZoneUnit(value);
+    // Weak link by design: no existence, ownership, or zone-type check here.
+    // The frontend resolves the target and omits the card when unresolved.
     return value;
+  }
+
+  if (key === "wikiSidebar") {
+    if (!Value.Check(realmWikiSidebarSchema, value)) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "wikiSidebar must be a supported sidebar source",
+        400,
+      );
+    }
+    const sidebar = value as RealmWikiSidebar;
+    // Weak links by design: the union is shape-validated only. Missing post or
+    // zone targets degrade in the reader/editor instead of failing writes.
+    return sidebar.kind === "post"
+      ? { kind: "post", postUnitId: sidebar.postUnitId }
+      : {
+          kind: "zoneNav",
+          zoneUnitId: sidebar.zoneUnitId,
+          ...(sidebar.menuId ? { menuId: sidebar.menuId } : {}),
+        };
   }
 
   if (key === "tagView") {

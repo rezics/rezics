@@ -1,8 +1,12 @@
-import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import {
   RealmMember,
   Subscription,
   Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+  Zone,
+  ZonePage,
   UserSubscriptionListEntry,
 } from "../../schema";
 // Static imports run before the `mock.module` calls below, so these bind
@@ -14,7 +18,6 @@ import {
 // 否则桩会泄漏到同一进程中之后的所有测试文件。
 import * as realSeedDefaultRealm from "./seed-default-realm";
 import * as realSeedGameMediaTaxonomy from "./seed-game-media-taxonomy";
-import * as realSeedOfficialZones from "./seed-official-zones";
 import * as realSeedRealmTaxonomy from "./seed-realm-taxonomy";
 import * as realSeedTags from "./seed-tags";
 
@@ -37,18 +40,6 @@ mock.module("./seed-default-realm", () => ({
   seedDefaultRealm: mock(async () => {
     calls.order.push("default-realm");
     return "realm-rezics";
-  }),
-}));
-
-mock.module("./seed-official-zones", () => ({
-  OFFICIAL_ZONE_DEFINITIONS: [],
-  seedOfficialZones: mock(async () => {
-    calls.order.push("official-zones");
-    return {
-      book: "zone-book",
-      realms: "zone-realms",
-      popular: "zone-popular",
-    };
   }),
 }));
 
@@ -117,6 +108,12 @@ describe("seedInfra", () => {
       },
       {
         userUnitId: "root-user",
+        subscribedUnitId: "zone-zones",
+        subscribedType: "ZONE",
+        state: "ACTIVE",
+      },
+      {
+        userUnitId: "root-user",
         subscribedUnitId: "zone-popular",
         subscribedType: "ZONE",
         state: "ACTIVE",
@@ -131,11 +128,10 @@ describe("seedInfra", () => {
   });
 });
 
-afterAll(() => {
+afterEach(() => {
   mock.restore();
   mock.module("./seed-tags", () => realSeedTags);
   mock.module("./seed-default-realm", () => realSeedDefaultRealm);
-  mock.module("./seed-official-zones", () => realSeedOfficialZones);
   mock.module("./seed-realm-taxonomy", () => realSeedRealmTaxonomy);
   mock.module("./seed-game-media-taxonomy", () => realSeedGameMediaTaxonomy);
 });
@@ -165,6 +161,13 @@ function createDefaultSubscriptionMemoryDb() {
         slugScope: "scope-zone",
         subscriberCount: 0,
       },
+      {
+        id: "zone-zones",
+        type: "ZONE",
+        slug: "zones",
+        slugScope: "scope-zone",
+        subscriberCount: 0,
+      },
     ],
     subscriptions: [] as Array<{
       id: string;
@@ -191,6 +194,7 @@ function createDefaultSubscriptionMemoryDb() {
     "realm-rezics",
     "zone-book",
     "zone-realms",
+    "zone-zones",
     "zone-popular",
   ];
   const markDefaultsStarted = () => {
@@ -254,6 +258,7 @@ function createDefaultSubscriptionMemoryDb() {
 
     private execute() {
       if (this.table === Unit) {
+        const values = conditionValues(this.condition);
         if ("slug" in this.selection) {
           return state.units
             .filter((unit) => unit.slugScope === "scope-zone")
@@ -262,6 +267,13 @@ function createDefaultSubscriptionMemoryDb() {
               slug: unit.slug ?? null,
               type: unit.type,
             }));
+        }
+        if (values.includes("scope-zone")) {
+          const zone = state.units.find(
+            (unit) =>
+              unit.slugScope === "scope-zone" && values.includes(unit.slug),
+          );
+          if (zone) return [{ id: zone.id, type: zone.type }];
         }
         return state.units.map((unit) => ({ type: unit.type }));
       }
@@ -357,6 +369,21 @@ function createDefaultSubscriptionMemoryDb() {
         return;
       }
 
+      if (this.table === Zone) {
+        if (!calls.order.includes("official-zones")) {
+          calls.order.push("official-zones");
+        }
+        return;
+      }
+
+      if (
+        this.table === ZonePage ||
+        this.table === UnitTranslation ||
+        this.table === UnitSupportLanguage
+      ) {
+        return;
+      }
+
       if (this.table !== UserSubscriptionListEntry) return;
       markDefaultsStarted();
       const existing = state.entries.find(
@@ -384,6 +411,9 @@ function createDefaultSubscriptionMemoryDb() {
     },
     insert(table: unknown) {
       return new InsertBuilder(table);
+    },
+    transaction(callback: (tx: unknown) => unknown) {
+      return callback(this);
     },
     update(_table: unknown) {
       return {

@@ -1,9 +1,10 @@
 import type {
-  ZoneConfig,
+  ZoneBoundary,
   ZoneLinkTarget,
   ZoneMenu,
   ZoneMenuNode,
   ZonePageId,
+  ZonePageSummary,
   ZoneRefUnitSummary,
   ZoneSectionKind,
 } from "@rezics/contract";
@@ -14,6 +15,7 @@ export type ZoneRefUnitMap = Record<string, ZoneRefUnitSummary>;
 
 export type ZoneLinkContext = {
   zoneSlug: string;
+  pages?: readonly ZonePageSummary[];
   refUnits: ZoneRefUnitMap;
 };
 
@@ -48,25 +50,22 @@ export function zoneSectionItemHref(
   }).href;
 }
 
-export function zonePageHref(pageId: ZonePageId, zoneSlug: string): string {
-  switch (pageId) {
-    case "home":
-      return `/z/${zoneSlug}`;
-    case "search":
-      return `/z/${zoneSlug}/search`;
-    case "feed":
-      // No dedicated /z/$slug/feed route exists yet; until it ships, the
-      // "feed" zone page resolves to the portal home.
-      // 尚不存在独立的 /z/$slug/feed 路由；在其落地前，"feed" 专区页面
-      // 解析到门户首页。
-      return `/z/${zoneSlug}`;
-  }
+export function zonePageHref(
+  pageId: ZonePageId,
+  zoneSlug: string,
+  pages: readonly ZonePageSummary[] = [],
+): string | null {
+  const page = pages.find((candidate) => candidate.id === pageId);
+  if (!page) return null;
+  return page.slug === "home"
+    ? `/z/${zoneSlug}`
+    : `/z/${zoneSlug}/page/${page.slug}`;
 }
 
 export function zoneLinkHref(
   target: ZoneLinkTarget,
   ctx: ZoneLinkContext,
-): string {
+): string | null {
   switch (target.kind) {
     case "unit":
       return zoneDetailRoute({
@@ -75,7 +74,7 @@ export function zoneLinkHref(
         unitId: target.unitId,
       }).href;
     case "zonePage":
-      return zonePageHref(target.pageId, ctx.zoneSlug);
+      return zonePageHref(target.pageId, ctx.zoneSlug, ctx.pages);
     case "external":
       return target.url;
   }
@@ -156,6 +155,15 @@ export function findZoneMenu(
   return menus.find((menu) => menu.id === menuId) ?? null;
 }
 
+export function pickZoneMenu(
+  nav: { menus: ZoneMenu[]; header: { menuId: string } },
+  menuId?: string | null,
+): ZoneMenu | null {
+  const explicit = menuId ? findZoneMenu(nav.menus, menuId) : null;
+  if (explicit) return explicit;
+  return findZoneMenu(nav.menus, nav.header.menuId);
+}
+
 // ANCHOR: Section titles
 // ANCHOR: 分区标题
 
@@ -165,6 +173,7 @@ const SECTION_TITLE_KEYS: Partial<Record<ZoneSectionKind, string>> = {
   feed: "zone:section_title_feed",
   richText: "zone:section_title_richText",
   stats: "zone:section_title_stats",
+  sources: "zone:section_title_sources",
 };
 
 /**
@@ -190,11 +199,11 @@ export function zoneSectionTitleKey(kind: ZoneSectionKind): string | null {
 // ANCHOR: Realm 语境 CTA 路由
 
 export function zoneContextRealmSlug(
-  config: Pick<ZoneConfig, "context">,
+  boundary: Pick<ZoneBoundary, "context">,
   refUnits: ZoneRefUnitMap,
 ): string | null {
-  if (config.context.kind !== "realm") return null;
-  return refUnits[config.context.realmUnitId]?.slug ?? null;
+  if (boundary.context.kind !== "realm") return null;
+  return refUnits[boundary.context.realmUnitId]?.slug ?? null;
 }
 
 /**
@@ -205,11 +214,11 @@ export function zoneContextRealmSlug(
  * 语境 realm 的创建流程。global 专区没有创建目标。
  */
 export function zoneCreateHref(
-  config: Pick<ZoneConfig, "context">,
+  boundary: Pick<ZoneBoundary, "context">,
   refUnits: ZoneRefUnitMap,
   mode: "wiki" | "post",
 ): string | null {
-  const slug = zoneContextRealmSlug(config, refUnits);
+  const slug = zoneContextRealmSlug(boundary, refUnits);
   return slug ? `/r/${slug}/create?mode=${mode}` : null;
 }
 
@@ -220,9 +229,9 @@ export function zoneCreateHref(
  * 入口的语境 realm 页面。
  */
 export function zoneJoinHref(
-  config: Pick<ZoneConfig, "context">,
+  boundary: Pick<ZoneBoundary, "context">,
   refUnits: ZoneRefUnitMap,
 ): string | null {
-  const slug = zoneContextRealmSlug(config, refUnits);
+  const slug = zoneContextRealmSlug(boundary, refUnits);
   return slug ? `/r/${slug}` : null;
 }

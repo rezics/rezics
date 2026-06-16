@@ -21,9 +21,9 @@ export const COMMENT_CONTEXT_ALL: CommentListContext = { kind: "all" };
 export const COMMENT_CONTEXT_ALL_OPTION_VALUE = "all";
 
 /**
- * Zone context mirrors `ZoneConfigV1["context"]` structurally so this model
- * stays decoupled from the zone config envelope type.
- * 专区语境在结构上对应 `ZoneConfigV1["context"]`，以使该模型与专区配置
+ * Zone context mirrors `ZoneBoundary["context"]` structurally so this model
+ * stays decoupled from the zone boundary envelope type.
+ * 专区语境在结构上对应 `ZoneBoundary["context"]`，以使该模型与专区边界
  * 信封类型解耦。
  */
 export type CommentContextSurface =

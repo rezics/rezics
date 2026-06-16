@@ -1,6 +1,12 @@
 import {
-  parseZoneConfig,
-  ZONE_CONFIG_SCHEMA,
+  parseZoneBoundary,
+  parseZoneNav,
+  parseZonePage,
+  parseZoneTheme,
+  ZONE_BOUNDARY_SCHEMA,
+  ZONE_NAV_SCHEMA,
+  ZONE_PAGE_SCHEMA,
+  ZONE_THEME_SCHEMA,
 } from "../../../../package/contract/src/zone";
 
 export type EnvelopeBackfillSpec = {
@@ -14,12 +20,36 @@ export type EnvelopeBackfillSpec = {
 
 export const envelopeBackfills = [
   {
-    schemaName: ZONE_CONFIG_SCHEMA,
+    schemaName: ZONE_BOUNDARY_SCHEMA,
     table: "Zone",
     cursorColumn: "unitId",
+    jsonColumn: "boundary",
+    latestVersion: 1,
+    upgrade: parseZoneBoundary,
+  },
+  {
+    schemaName: ZONE_NAV_SCHEMA,
+    table: "Zone",
+    cursorColumn: "unitId",
+    jsonColumn: "nav",
+    latestVersion: 1,
+    upgrade: parseZoneNav,
+  },
+  {
+    schemaName: ZONE_THEME_SCHEMA,
+    table: "Zone",
+    cursorColumn: "unitId",
+    jsonColumn: "theme",
+    latestVersion: 1,
+    upgrade: parseZoneTheme,
+  },
+  {
+    schemaName: ZONE_PAGE_SCHEMA,
+    table: "ZonePage",
+    cursorColumn: "id",
     jsonColumn: "config",
     latestVersion: 1,
-    upgrade: parseZoneConfig,
+    upgrade: parseZonePage,
   },
 ] satisfies EnvelopeBackfillSpec[];
 

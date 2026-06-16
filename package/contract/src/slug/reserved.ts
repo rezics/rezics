@@ -25,6 +25,8 @@ const RESERVED: readonly string[] = [
   "tags",
   "realm",
   "realms",
+  "zone",
+  "zones",
   "book",
   "books",
   "shelf",

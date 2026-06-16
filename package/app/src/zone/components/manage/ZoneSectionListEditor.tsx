@@ -1,5 +1,6 @@
 import type {
   ZoneCollectionItem,
+  ZoneColumn,
   ZoneColumnsSection,
   ZoneContentSection,
   ZonePageSection,
@@ -49,6 +50,7 @@ const KIND_KEYS = {
   query: "zone:manage_kind_query",
   feed: "zone:manage_kind_feed",
   stats: "zone:manage_kind_stats",
+  sources: "zone:manage_kind_sources",
   tabs: "zone:manage_kind_tabs",
   columns: "zone:manage_kind_columns",
 } as const satisfies Record<ZonePageSection["kind"], `zone:${string}`>;
@@ -60,6 +62,7 @@ const DISPLAY_KEYS = {
   carousel: "zone:manage_display_carousel",
   covers: "zone:manage_display_covers",
   featured: "zone:manage_display_featured",
+  "avatar-wall": "zone:manage_display_avatar_wall",
 } as const satisfies Record<ZoneSectionDisplay, `zone:${string}`>;
 
 const DISPLAY_OPTIONS = Object.keys(DISPLAY_KEYS) as ZoneSectionDisplay[];
@@ -76,6 +79,8 @@ const STATS_METRIC_KEYS = {
 } as const satisfies Record<ZoneStatsMetric, `zone:${string}`>;
 
 const NONE = "__none__";
+const ZONE_COLUMNS_MIN = 2;
+const ZONE_COLUMNS_MAX = 4;
 
 export type ZoneManageEditorContext = {
   refUnits: ZoneRefUnitMap;
@@ -345,23 +350,18 @@ function ZoneSectionKindFields({
           <div className="grid gap-4 md:grid-cols-2">
             <ManageField
               label={t("zone:manage_hero_banner")}
-              hint={
-                section.bannerImageUnitId
-                  ? (ctx.refUnits[section.bannerImageUnitId]?.title ??
-                    undefined)
-                  : undefined
-              }
+              hint={section.bannerImageUrl}
             >
               <Input
-                value={section.bannerImageUnitId ?? ""}
-                placeholder={t("common:unit_id")}
+                value={section.bannerImageUrl ?? ""}
+                placeholder="https://"
                 className="font-mono text-sm"
                 onChange={(event) => {
                   const next = { ...section };
                   if (event.target.value) {
-                    next.bannerImageUnitId = event.target.value;
+                    next.bannerImageUrl = event.target.value;
                   } else {
-                    delete next.bannerImageUnitId;
+                    delete next.bannerImageUrl;
                   }
                   onChange(next);
                 }}
@@ -369,22 +369,18 @@ function ZoneSectionKindFields({
             </ManageField>
             <ManageField
               label={t("zone:manage_hero_logo")}
-              hint={
-                section.logoImageUnitId
-                  ? (ctx.refUnits[section.logoImageUnitId]?.title ?? undefined)
-                  : undefined
-              }
+              hint={section.logoImageUrl}
             >
               <Input
-                value={section.logoImageUnitId ?? ""}
-                placeholder={t("common:unit_id")}
+                value={section.logoImageUrl ?? ""}
+                placeholder="https://"
                 className="font-mono text-sm"
                 onChange={(event) => {
                   const next = { ...section };
                   if (event.target.value) {
-                    next.logoImageUnitId = event.target.value;
+                    next.logoImageUrl = event.target.value;
                   } else {
-                    delete next.logoImageUnitId;
+                    delete next.logoImageUrl;
                   }
                   onChange(next);
                 }}
@@ -508,6 +504,9 @@ function ZoneSectionKindFields({
           renderOption={(metric) => t(STATS_METRIC_KEYS[metric])}
         />
       );
+
+    case "sources":
+      return null;
 
     case "tabs":
       return (
@@ -808,63 +807,132 @@ function ZoneColumnsSectionFields({
   onChange: (section: ZonePageSection) => void;
 }) {
   const { t } = useTranslation(["zone"]);
+  const updateColumns = (columns: ZoneColumn[]) =>
+    onChange({ ...section, columns });
+
   return (
     <div className="flex flex-col gap-4">
-      <ManageField label={t("zone:manage_side_position")}>
-        <Select
-          value={section.sidePosition ?? "right"}
-          onValueChange={(sidePosition) =>
-            onChange({
-              ...section,
-              sidePosition: sidePosition as "left" | "right",
-            })
-          }
+      {section.columns.map((column, index) => (
+        <div
+          // Column ids are editable, so positional keys keep input focus stable.
+          // column id 可编辑，因此位置键保持输入焦点稳定。
+          // biome-ignore lint/suspicious/noArrayIndexKey: positional rows
+          key={index}
+          className="flex flex-col gap-4 rounded-md bg-surface-subtle p-4"
         >
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="left">{t("zone:manage_side_left")}</SelectItem>
-            <SelectItem value="right">{t("zone:manage_side_right")}</SelectItem>
-          </SelectContent>
-        </Select>
-      </ManageField>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <ManageGroupHeading>
-            {t("zone:manage_columns_main")}
-          </ManageGroupHeading>
+          <div className="flex items-center justify-between gap-3">
+            <ManageGroupHeading>
+              {t("zone:manage_column", { number: index + 1 })}
+            </ManageGroupHeading>
+            <RowActions
+              onMoveUp={
+                index > 0
+                  ? () =>
+                      updateColumns(moveListItem(section.columns, index, "up"))
+                  : undefined
+              }
+              onMoveDown={
+                index < section.columns.length - 1
+                  ? () =>
+                      updateColumns(
+                        moveListItem(section.columns, index, "down"),
+                      )
+                  : undefined
+              }
+              onRemove={
+                section.columns.length > ZONE_COLUMNS_MIN
+                  ? () =>
+                      updateColumns(
+                        section.columns.filter(
+                          (_, currentIndex) => currentIndex !== index,
+                        ),
+                      )
+                  : undefined
+              }
+            />
+          </div>
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_8rem]">
+            <ManageField label={t("zone:manage_column_id")}>
+              <Input
+                value={column.id}
+                onChange={(event) =>
+                  updateColumns(
+                    section.columns.map((current, currentIndex) =>
+                      currentIndex === index
+                        ? { ...current, id: event.target.value }
+                        : current,
+                    ),
+                  )
+                }
+                className="font-mono text-sm"
+              />
+            </ManageField>
+            <ManageField label={t("zone:manage_column_ratio")}>
+              <Input
+                type="number"
+                min={1}
+                max={12}
+                value={column.ratio}
+                onChange={(event) => {
+                  if (event.target.value === "") return;
+                  const ratio = Number(event.target.value);
+                  if (!Number.isInteger(ratio) || ratio < 1 || ratio > 12) {
+                    return;
+                  }
+                  updateColumns(
+                    section.columns.map((current, currentIndex) =>
+                      currentIndex === index ? { ...current, ratio } : current,
+                    ),
+                  );
+                }}
+              />
+            </ManageField>
+          </div>
           {/* Columns panes accept content sections or tabs (slot="columns"). */}
           {/* columns 面板接受内容分区或 tabs（slot="columns"）。 */}
           <ZoneSectionListEditor
-            sections={section.main}
-            onChange={(main) =>
-              onChange({
-                ...section,
-                main: main as ZoneColumnsSection["main"],
-              })
+            sections={column.sections}
+            onChange={(sections) =>
+              updateColumns(
+                section.columns.map((current, currentIndex) =>
+                  currentIndex === index
+                    ? {
+                        ...current,
+                        sections: sections as ZoneColumn["sections"],
+                      }
+                    : current,
+                ),
+              )
             }
             slot="columns"
             ctx={ctx}
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <ManageGroupHeading>
-            {t("zone:manage_columns_side")}
-          </ManageGroupHeading>
-          <ZoneSectionListEditor
-            sections={section.side}
-            onChange={(side) =>
-              onChange({
-                ...section,
-                side: side as ZoneColumnsSection["side"],
-              })
-            }
-            slot="columns"
-            ctx={ctx}
-          />
-        </div>
+      ))}
+
+      <div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={section.columns.length >= ZONE_COLUMNS_MAX}
+          onClick={() =>
+            updateColumns([
+              ...section.columns,
+              {
+                id: nextZoneId(
+                  "column",
+                  section.columns.map((column) => column.id),
+                ),
+                ratio: 1,
+                sections: [],
+              },
+            ])
+          }
+        >
+          <Plus className="mr-1 size-4" aria-hidden />
+          {t("zone:manage_add_column")}
+        </Button>
       </div>
     </div>
   );

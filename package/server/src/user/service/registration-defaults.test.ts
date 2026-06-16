@@ -77,6 +77,13 @@ function createMemoryDb(input: {
         slugScope: ZONE_SCOPE,
         subscriberCount: 0,
       },
+      {
+        id: "zone-zones",
+        type: "ZONE",
+        slug: "zones",
+        slugScope: ZONE_SCOPE,
+        subscriberCount: 0,
+      },
     ],
     subscriptions: input.subscriptions ?? [],
     entries: input.entries ?? [],
@@ -85,6 +92,7 @@ function createMemoryDb(input: {
       DEFAULT_REALM,
       "zone-book",
       "zone-realms",
+      "zone-zones",
       "zone-popular",
     ],
   };
@@ -346,6 +354,7 @@ describe("ensureRegistrationDefaultSubscriptions", () => {
       { subscribedUnitId: DEFAULT_REALM, channels: ["*"] },
       { subscribedUnitId: "zone-book", channels: ["*"] },
       { subscribedUnitId: "zone-realms", channels: ["*"] },
+      { subscribedUnitId: "zone-zones", channels: ["*"] },
       { subscribedUnitId: "zone-popular", channels: ["*"] },
     ]);
     expect(
@@ -367,6 +376,11 @@ describe("ensureRegistrationDefaultSubscriptions", () => {
       },
       {
         subscribedUnitId: "zone-realms",
+        subscribedType: "ZONE",
+        state: "ACTIVE",
+      },
+      {
+        subscribedUnitId: "zone-zones",
         subscribedType: "ZONE",
         state: "ACTIVE",
       },
@@ -474,6 +488,7 @@ describe("ensureRegistrationDefaultSubscriptions", () => {
       { key: "realm:rezics", subscribedType: "REALM" },
       { key: "zone:book", subscribedType: "ZONE", slug: "book" },
       { key: "zone:realms", subscribedType: "ZONE", slug: "realms" },
+      { key: "zone:zones", subscribedType: "ZONE", slug: "zones" },
       { key: "zone:popular", subscribedType: "ZONE", slug: "popular" },
     ]);
   });

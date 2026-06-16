@@ -31,11 +31,11 @@ import { ZoneRealmSearchField } from "./ZoneRealmSearchField";
  * `translations`, the config `context` picker (global | realm), and the
  * read-only authority facts (owner realm, slug). Context is interaction
  * defaults only — authority stays on `ownerRealmUnitId`
- * (`package/contract/src/zone/config-v1.ts`).
+ * (`package/contract/src/zone/boundary-v1.ts`).
  * 资料标签页：基于专区 `translations` 的多语言标题/描述行、配置
  * `context` 选择器（global | realm），以及只读的权限事实（拥有者
  * realm、slug）。context 只承担交互默认值——权限归属仍在
- * `ownerRealmUnitId`（`package/contract/src/zone/config-v1.ts`）。
+ * `ownerRealmUnitId`（`package/contract/src/zone/boundary-v1.ts`）。
  */
 export function ZoneManageProfileTab({
   zone,
@@ -46,6 +46,7 @@ export function ZoneManageProfileTab({
   refUnits,
   onSave,
   saving,
+  saveDisabled,
 }: {
   zone: ZoneDTO;
   rows: ZoneTranslationRow[];
@@ -55,6 +56,7 @@ export function ZoneManageProfileTab({
   refUnits: ZoneRefUnitMap;
   onSave: () => void;
   saving: boolean;
+  saveDisabled?: boolean;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const ownerRealmQuery = useQuery(realmDetailQuery(zone.ownerRealmUnitId));
@@ -218,7 +220,7 @@ export function ZoneManageProfileTab({
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={onSave} disabled={saving}>
+          <Button onClick={onSave} disabled={saving || saveDisabled}>
             {t("common:save")}
           </Button>
         </div>

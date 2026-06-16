@@ -1,4 +1,14 @@
+import type {
+  CreateZonePageInput,
+  UpdateZonePageInput,
+} from "@rezics/contract";
 import {
+  useCreateZonePage,
+  useDeleteZonePage,
+  useUpdateZoneBoundary,
+  useUpdateZoneNav,
+  useUpdateZonePage,
+  useUpdateZoneTheme,
   useUpdateZone,
   zonePortalQueryOptions,
   zoneQueryOptions,
@@ -18,10 +28,11 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
+import { ZoneManageJsonFrame } from "../components/manage/ZoneManageJsonFrame";
 import { ZoneManageMenusTab } from "../components/manage/ZoneManageMenusTab";
 import { ZoneManageProfileTab } from "../components/manage/ZoneManageProfileTab";
 import { ZoneManageSectionsTab } from "../components/manage/ZoneManageSectionsTab";
@@ -33,8 +44,12 @@ import {
   type ZoneManageDraft,
   type ZoneManageIssue,
   type ZoneTranslationRow,
-  zoneConfigToDraft,
-  zoneManageDraftToConfig,
+  zoneManageDraftToBoundary,
+  zoneManageDraftToPage,
+  zoneManageDraftToNav,
+  zoneManageDraftToTheme,
+  zonePageToDraftPage,
+  zoneShellToDraft,
   zoneRowsToTranslations,
   zoneTranslationsToRows,
 } from "../models/zoneManageDraft";
@@ -83,15 +98,14 @@ function issueParams(issue: ZoneManageIssue): Record<string, string> {
 }
 
 /**
- * Structured zone manage surface over the v1 config envelope: Profile
- * (translations + context), Pages & Sections, Menus, Theme, Lifecycle. All
- * config tabs edit one shared draft (`models/zoneManageDraft.ts`); each
- * save validates the draft client-side first — the server's
- * `validateZoneConfig` stays the enforcement point.
- * 基于 v1 配置信封的结构化专区管理界面：资料（译文 + 语境）、页面与
- * 分区、菜单、主题、生命週期。所有配置标签页编辑同一份共享草稿
- * （`models/zoneManageDraft.ts`）；每次保存先在客户端校验草稿——服务端
- * 的 `validateZoneConfig` 仍是强制执行点。
+ * Structured zone manage surface over the split shell/page envelopes:
+ * Profile (translations + context), Pages & Sections, Menus, Theme,
+ * Lifecycle. Shell tabs save their own columns; section edits save the
+ * selected page envelope. The server remains the enforcement point for
+ * cross-envelope invariants.
+ * 基于拆分后的 shell/page 信封的结构化专区管理界面：资料（译文 + 语境）、
+ * 页面与分区、菜单、主题、生命週期。Shell 标签页分别保存自己的列；
+ * 分区编辑保存选中的页面信封。跨信封不变量仍由服务端强制执行。
  */
 export function ZoneManagePage({
   unitId,
@@ -105,12 +119,34 @@ export function ZoneManagePage({
     enabled: !unitId && !!slug,
   });
   const resolvedUnitId = unitId ?? bySlugQuery.data?.unitId ?? "";
+  const summaryZone = unitId ? undefined : bySlugQuery.data;
+  const sortedPages = useMemo(
+    () =>
+      [...(summaryZone?.pages ?? [])].sort(
+        (left, right) =>
+          left.position - right.position || left.slug.localeCompare(right.slug),
+      ),
+    [summaryZone?.pages],
+  );
+  const homePage =
+    sortedPages.find((page) => page.id === summaryZone?.homePageId) ??
+    sortedPages[0] ??
+    null;
+  const [selectedPageSlug, setSelectedPageSlug] = useState("home");
+
+  useEffect(() => {
+    if (!summaryZone || sortedPages.length === 0) return;
+    if (!sortedPages.some((page) => page.slug === selectedPageSlug)) {
+      setSelectedPageSlug(homePage?.slug ?? sortedPages[0]!.slug);
+    }
+  }, [homePage, selectedPageSlug, sortedPages, summaryZone]);
+
   // The portal read also returns `refUnits` summaries used for label/image
   // previews throughout the editors.
   // 门户读取同时返回 `refUnits` 摘要，供编辑器各处的标签/图片预览使用。
   const portalQuery = useQuery({
-    ...zonePortalQueryOptions(resolvedUnitId),
-    enabled: !!resolvedUnitId,
+    ...zonePortalQueryOptions(resolvedUnitId, selectedPageSlug),
+    enabled: !!resolvedUnitId && !!selectedPageSlug,
   });
   const zone =
     portalQuery.data?.zone ?? (unitId ? undefined : bySlugQuery.data);
@@ -134,39 +170,143 @@ export function ZoneManagePage({
     onSuccess: () => toast.success(t("zone:manage_saved")),
     onError: (mutationError) => toast.error(mutationError.message),
   });
+  const updateBoundary = useUpdateZoneBoundary({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const updateNav = useUpdateZoneNav({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const updateTheme = useUpdateZoneTheme({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const updatePage = useUpdateZonePage({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const createPage = useCreateZonePage({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const deletePage = useDeleteZonePage({
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
 
   const [draft, setDraft] = useState<ZoneManageDraft | null>(null);
   const [rows, setRows] = useState<ZoneTranslationRow[]>([]);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  const [jsonProblemsByKey, setJsonProblemsByKey] = useState<
+    Record<string, string[]>
+  >({});
 
   useEffect(() => {
-    if (!zone) return;
-    setDraft(zoneConfigToDraft(zone.config));
+    if (!zone || !portalQuery.data?.page) return;
+    const nextPage = portalQuery.data.page;
+    setDraft((current) => {
+      const fresh = zoneShellToDraft({
+        boundary: zone.boundary,
+        nav: zone.nav,
+        theme: zone.theme,
+        page: nextPage.config,
+        pageId: nextPage.id,
+      });
+      if (!current) return fresh;
+      return {
+        ...current,
+        pages: { [nextPage.id]: zonePageToDraftPage(nextPage.config) },
+      };
+    });
     setRows(zoneTranslationsToRows(zone.translations));
     setStartsAt(zone.startsAt ?? "");
     setEndsAt(zone.endsAt ?? "");
-  }, [zone]);
+  }, [zone, portalQuery.data?.page]);
 
-  const saving = updateZone.isPending;
+  const saving =
+    updateZone.isPending ||
+    updateBoundary.isPending ||
+    updateNav.isPending ||
+    updateTheme.isPending ||
+    updatePage.isPending ||
+    createPage.isPending ||
+    deletePage.isPending;
   const unitIdForSave = zone?.unitId ?? "";
   const issues = draft ? validateZoneManageDraft(draft) : [];
+  const hasJsonProblems = Object.values(jsonProblemsByKey).some(
+    (problems) => problems.length > 0,
+  );
+  const saveBlocked = issues.length > 0 || hasJsonProblems;
+  const setJsonProblems = useCallback((key: string, problems: string[]) => {
+    setJsonProblemsByKey((current) => {
+      if (problems.length === 0) {
+        const { [key]: _removed, ...rest } = current;
+        return rest;
+      }
+      return { ...current, [key]: problems };
+    });
+  }, []);
 
-  const saveDraftConfig = (withTranslations: boolean) => {
+  const saveProfile = () => {
     if (!draft) return;
-    if (issues.length > 0) {
+    if (saveBlocked) {
       toast.error(t("zone:manage_config_invalid"));
       return;
     }
     updateZone.mutate({
       unitId: unitIdForSave,
-      input: {
-        config: zoneManageDraftToConfig(draft),
-        ...(withTranslations
-          ? { translations: zoneRowsToTranslations(rows) }
-          : {}),
-      },
+      input: { translations: zoneRowsToTranslations(rows) },
     });
+    updateBoundary.mutate({
+      unitId: unitIdForSave,
+      input: { boundary: zoneManageDraftToBoundary(draft) },
+    });
+  };
+
+  const saveMenus = () => {
+    if (!draft) return;
+    if (saveBlocked) {
+      toast.error(t("zone:manage_config_invalid"));
+      return;
+    }
+    updateNav.mutate({
+      unitId: unitIdForSave,
+      input: { nav: zoneManageDraftToNav(draft) },
+    });
+  };
+
+  const saveTheme = () => {
+    if (!draft) return;
+    if (saveBlocked) {
+      toast.error(t("zone:manage_config_invalid"));
+      return;
+    }
+    updateNav.mutate({
+      unitId: unitIdForSave,
+      input: { nav: zoneManageDraftToNav(draft) },
+    });
+    updateTheme.mutate({
+      unitId: unitIdForSave,
+      input: { theme: zoneManageDraftToTheme(draft) },
+    });
+  };
+
+  const saveSelectedPage = () => {
+    if (!draft) return;
+    if (saveBlocked) {
+      toast.error(t("zone:manage_config_invalid"));
+      return;
+    }
+    const pageId = portalQuery.data?.page.id;
+    if (pageId) {
+      updatePage.mutate({
+        unitId: unitIdForSave,
+        pageId,
+        input: { config: zoneManageDraftToPage(draft, pageId) },
+      });
+    }
   };
 
   const saveLifecycle = () => {
@@ -230,6 +370,14 @@ export function ZoneManagePage({
 
   const contextRealmUnitId =
     draft.context.kind === "realm" ? draft.context.realmUnitId : null;
+  const managePages =
+    sortedPages.length > 0
+      ? sortedPages
+      : [...zone.pages].sort(
+          (left, right) =>
+            left.position - right.position ||
+            left.slug.localeCompare(right.slug),
+        );
   const editorCtx = {
     refUnits,
     allSectionIds: collectZoneSectionIds(draft.pages),
@@ -239,12 +387,48 @@ export function ZoneManagePage({
       : null,
   };
 
-  const configSaveRow = (
+  const selectPage = (page: (typeof managePages)[number]) => {
+    setSelectedPageSlug(page.slug);
+  };
+
+  const createSelectedPage = (input: CreateZonePageInput) => {
+    createPage.mutate(
+      { unitId: unitIdForSave, input },
+      { onSuccess: () => setSelectedPageSlug(input.slug) },
+    );
+  };
+
+  const updateSelectedPage = (pageId: string, input: UpdateZonePageInput) => {
+    updatePage.mutate(
+      { unitId: unitIdForSave, pageId, input },
+      {
+        onSuccess: () => {
+          if (input.slug) setSelectedPageSlug(input.slug);
+        },
+      },
+    );
+  };
+
+  const deleteSelectedPage = (page: (typeof managePages)[number]) => {
+    const remaining = managePages.filter(
+      (candidate) => candidate.id !== page.id,
+    );
+    const fallback =
+      remaining.find((candidate) => candidate.id === zone.homePageId) ??
+      remaining[0];
+    deletePage.mutate(
+      { unitId: unitIdForSave, pageId: page.id },
+      {
+        onSuccess: () => {
+          if (fallback) setSelectedPageSlug(fallback.slug);
+        },
+      },
+    );
+  };
+
+  const saveRow = (onSave: () => void) => (
     <div className="mt-4 flex justify-end">
-      <Button
-        onClick={() => saveDraftConfig(false)}
-        disabled={saving || issues.length > 0}
-      >
+      <Button onClick={onSave} disabled={saving || saveBlocked}>
         {t("common:save")}
       </Button>
     </div>
@@ -276,6 +460,21 @@ export function ZoneManagePage({
         </Alert>
       ) : null}
 
+      {hasJsonProblems ? (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>{t("zone:manage_json_invalid")}</AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc pl-4">
+              {Object.entries(jsonProblemsByKey).flatMap(([key, problems]) =>
+                problems.map((problem) => (
+                  <li key={`${key}:${problem}`}>{problem}</li>
+                )),
+              )}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <Tabs
         value={activeTab}
         onValueChange={(value) => onTabChange?.(value as ZoneManageTab)}
@@ -293,16 +492,24 @@ export function ZoneManagePage({
         </TabsList>
 
         <TabsContent value="profile">
-          <ZoneManageProfileTab
-            zone={zone}
-            rows={rows}
-            onRowsChange={setRows}
+          <ZoneManageJsonFrame
             draft={draft}
             onDraftChange={setDraft}
-            refUnits={refUnits}
-            onSave={() => saveDraftConfig(true)}
-            saving={saving}
-          />
+            target={{ kind: "boundary" }}
+            onProblemsChange={setJsonProblems}
+          >
+            <ZoneManageProfileTab
+              zone={zone}
+              rows={rows}
+              onRowsChange={setRows}
+              draft={draft}
+              onDraftChange={setDraft}
+              refUnits={refUnits}
+              onSave={saveProfile}
+              saving={saving}
+              saveDisabled={saveBlocked}
+            />
+          </ZoneManageJsonFrame>
         </TabsContent>
 
         <TabsContent value="sections">
@@ -310,26 +517,46 @@ export function ZoneManagePage({
             draft={draft}
             onDraftChange={setDraft}
             ctx={editorCtx}
+            pages={managePages}
+            homePageId={zone.homePageId}
+            selectedPageId={portalQuery.data?.page.id ?? null}
+            onSelectPage={selectPage}
+            onCreatePage={createSelectedPage}
+            onUpdatePage={updateSelectedPage}
+            onDeletePage={deleteSelectedPage}
+            onSaveSelectedPage={saveSelectedPage}
+            saving={saving}
+            saveDisabled={saveBlocked || !portalQuery.data?.page.id}
+            onJsonProblemsChange={setJsonProblems}
           />
-          {configSaveRow}
         </TabsContent>
 
         <TabsContent value="menus">
-          <ZoneManageMenusTab
+          <ZoneManageJsonFrame
             draft={draft}
             onDraftChange={setDraft}
-            refUnits={refUnits}
-          />
-          {configSaveRow}
+            target={{ kind: "nav" }}
+            onProblemsChange={setJsonProblems}
+          >
+            <ZoneManageMenusTab
+              draft={draft}
+              onDraftChange={setDraft}
+              refUnits={refUnits}
+            />
+            {saveRow(saveMenus)}
+          </ZoneManageJsonFrame>
         </TabsContent>
 
         <TabsContent value="theme">
-          <ZoneManageThemeTab
+          <ZoneManageJsonFrame
             draft={draft}
             onDraftChange={setDraft}
-            refUnits={refUnits}
-          />
-          {configSaveRow}
+            target={{ kind: "theme" }}
+            onProblemsChange={setJsonProblems}
+          >
+            <ZoneManageThemeTab draft={draft} onDraftChange={setDraft} />
+            {saveRow(saveTheme)}
+          </ZoneManageJsonFrame>
         </TabsContent>
 
         <TabsContent value="lifecycle">

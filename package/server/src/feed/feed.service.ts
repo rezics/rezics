@@ -9,7 +9,7 @@ import type {
   PostDTO,
   PostListQuery,
   ShelfSummaryDTO,
-  ZoneConfig,
+  ZoneBoundary,
 } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
 import { bookService } from "@/book";
@@ -80,8 +80,8 @@ function uniqueStrings(values: readonly (string | null | undefined)[]) {
   ];
 }
 
-function zoneBoundaryRealmUnitId(config: ZoneConfig): string | undefined {
-  const realm = config.filters.realm;
+function zoneBoundaryRealmUnitId(boundary: ZoneBoundary): string | undefined {
+  const realm = boundary.filters.realm;
   if (realm && realm !== "context") {
     // PostListQuery is single-realm; a multi-realm boundary is enforced fully
     // on the meili query-section path, not here.
@@ -89,22 +89,22 @@ function zoneBoundaryRealmUnitId(config: ZoneConfig): string | undefined {
     // 上强制执行，而不是这里。
     return realm.unitIds.length === 1 ? realm.unitIds[0] : undefined;
   }
-  return config.context.kind === "realm"
-    ? config.context.realmUnitId
+  return boundary.context.kind === "realm"
+    ? boundary.context.realmUnitId
     : undefined;
 }
 
 function withZoneFeedFilters(
   base: PostListQuery,
-  config: ZoneConfig,
+  boundaryEnvelope: ZoneBoundary,
 ): PostListQuery {
   // Zone feed is post-backed in this service; only PostListQuery-native
   // filters from the zone boundary are applied here. Content-only filters
   // such as type/rating belong to the meili query-section path.
   // 专区 feed 在本服务中基于帖子；这里只应用专区边界中 PostListQuery
   // 原生支持的过滤。type/rating 等仅内容侧的过滤属于 meili 查询分区路径。
-  const boundary = config.filters;
-  const realmUnitId = zoneBoundaryRealmUnitId(config);
+  const boundary = boundaryEnvelope.filters;
+  const realmUnitId = zoneBoundaryRealmUnitId(boundaryEnvelope);
   const kind =
     boundary.postKinds?.length === 1 ? boundary.postKinds[0] : undefined;
   const languages = Array.isArray(boundary.languages)
@@ -350,7 +350,7 @@ export class FeedService {
         throw new AppError(404, "Zone not found");
       }
       const posts = await postService.list(
-        withZoneFeedFilters(postQuery, zone.config),
+        withZoneFeedFilters(postQuery, zone.boundary),
         options,
       );
       return withSliceCursor(

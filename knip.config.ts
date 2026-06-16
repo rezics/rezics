@@ -26,11 +26,7 @@ const config: KnipConfig = {
   ignoreDependencies: ["concurrently"],
   workspaces: {
     tool: {
-      entry: [
-        "bin/*.ts",
-        "src/commands/**/*.ts",
-        "tests/**/*.test.ts",
-      ],
+      entry: ["bin/*.ts", "src/commands/**/*.ts", "tests/**/*.test.ts"],
       project: ["**/*.ts"],
     },
     // CLI entry scripts invoked by the Taskfile (and bin/deploy), not by any

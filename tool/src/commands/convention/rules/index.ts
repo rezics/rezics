@@ -23,3 +23,4 @@ export const ALL_RULES: RuleScanner[] = [
 
 export { scanI18nSourceForTest } from "./i18n-invariants";
 export { scanJsonPolicyForTest } from "./json-policy";
+export { scanFolderNamingForTest } from "./folder-naming";

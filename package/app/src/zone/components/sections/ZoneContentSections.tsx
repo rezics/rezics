@@ -3,15 +3,16 @@ import { CollectionSection } from "./CollectionSection";
 import { HeroSection } from "./HeroSection";
 import { QuerySection } from "./QuerySection";
 import { RichTextSection } from "./RichTextSection";
+import { SourcesSection } from "./SourcesSection";
 import { StatsSection } from "./StatsSection";
 import type { ZonePortalContext } from "./shared";
 import { ZoneFeedSection } from "./ZoneFeedSection";
 
 /**
- * Dispatch for the 6 content primitives. Containers (`tabs`, `columns`)
+ * Dispatch for the 7 content primitives. Containers (`tabs`, `columns`)
  * live one layer up so their panes can only nest content sections —
  * mirroring the contract's union layering.
- * 6 个内容原语的分发。容器（`tabs`、`columns`）位于上一层，使其面板
+ * 7 个内容原语的分发。容器（`tabs`、`columns`）位于上一层，使其面板
  * 只能嵌套内容分区——与契约中的联合分层一致。
  */
 export function ZoneContentSectionView({
@@ -34,6 +35,8 @@ export function ZoneContentSectionView({
       return <ZoneFeedSection section={section} ctx={ctx} />;
     case "stats":
       return <StatsSection section={section} ctx={ctx} />;
+    case "sources":
+      return <SourcesSection section={section} ctx={ctx} />;
   }
 }
 

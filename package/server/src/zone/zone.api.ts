@@ -1,8 +1,16 @@
 import {
   createZoneInputSchema,
+  createZonePageInputSchema,
   parseReadLanguages,
+  updateZoneBoundaryInputSchema,
   updateZoneInputSchema,
-  type ZoneConfig,
+  updateZoneNavInputSchema,
+  updateZonePageInputSchema,
+  updateZoneThemeInputSchema,
+  type ZoneBoundary,
+  type ZoneNav,
+  type ZonePage,
+  type ZoneTheme,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
@@ -102,20 +110,42 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
   )
 
   .get(
-    "/:unitId/portal",
+    "/:unitId/portal/:pageSlug",
     async ({ params, query, set }) => {
       const zone = await zoneService.getByUnitId(params.unitId);
       const resolved = resolvePublicZone(zone, set);
       if ("error" in resolved) return resolved;
+      const page = await zoneService.getPageBySlug(
+        params.unitId,
+        params.pageSlug,
+      );
+      if (!page) {
+        set.status = 404;
+        return {
+          error: { code: "NOT_FOUND", message: "Zone page not found" },
+        };
+      }
 
       const languages = preferredLanguages(query);
-      const refUnits = await zoneService.getPortalRefUnits(resolved, {
+      const refUnits = await zoneService.getPortalRefUnits(resolved, page, {
         preferredLanguages: languages,
       });
-      return { zone: mapZoneToDTO(resolved, languages), refUnits };
+      return {
+        zone: mapZoneToDTO(resolved, languages),
+        page: {
+          id: page.id,
+          slug: page.slug,
+          position: page.position,
+          config: page.config,
+        },
+        refUnits,
+      };
     },
     {
-      params: t.Object({ unitId: t.String({ minLength: 1 }) }),
+      params: t.Object({
+        unitId: t.String({ minLength: 1 }),
+        pageSlug: t.String({ minLength: 1 }),
+      }),
       query: t.Object({ languages: t.Optional(t.String()) }),
       detail: {
         summary: "Get zone portal data",
@@ -127,7 +157,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
   )
 
   .get(
-    "/:unitId/section/:sectionId",
+    "/:unitId/page/:pageId/section/:sectionId",
     async ({ params, query, set }) => {
       const zone = await zoneService.getByUnitId(params.unitId);
       const resolved = resolvePublicZone(zone, set);
@@ -135,6 +165,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
 
       const data = await zoneService.getSectionData(
         params.unitId,
+        params.pageId,
         params.sectionId,
         {
           cursor: query.cursor ?? null,
@@ -152,6 +183,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
     {
       params: t.Object({
         unitId: t.String({ minLength: 1 }),
+        pageId: t.String({ minLength: 1 }),
         sectionId: t.String({ minLength: 1 }),
       }),
       query: t.Object({
@@ -185,7 +217,11 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         slug: body.slug,
         translations: body.translations,
         ownerRealmUnitId: body.ownerRealmUnitId,
-        config: body.config as ZoneConfig,
+        boundary: body.boundary as ZoneBoundary,
+        nav: body.nav as ZoneNav,
+        theme: body.theme as ZoneTheme,
+        homePage: body.homePage as ZonePage,
+        homePageSlug: body.homePageSlug,
         startsAt: parseLifecycleDate(body.startsAt) ?? null,
         endsAt: parseLifecycleDate(body.endsAt) ?? null,
       });
@@ -239,7 +275,6 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
       const zone = await zoneService.update(params.unitId, {
         ownerRealmUnitId: body.ownerRealmUnitId,
         translations: body.translations,
-        config: body.config as ZoneConfig | undefined,
         startsAt: parseLifecycleDate(body.startsAt),
         endsAt: parseLifecycleDate(body.endsAt),
       });
@@ -254,6 +289,196 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         summary: "Update zone",
         description:
           "Update a zone's config, translations, or lifecycle using the owner realm's management policy",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .patch(
+    "/:unitId/boundary",
+    async ({ params, body, identity, set }) => {
+      const current = resolveMutableZone(
+        await zoneService.getByUnitId(params.unitId),
+        set,
+      );
+      if ("error" in current) return current;
+      const denied = await assertZoneManagePolicy({
+        identity,
+        set,
+        ownerRealmUnitId: current.ownerRealmUnitId,
+        zoneUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return mapZoneToDTO(
+        await zoneService.updateBoundary(
+          params.unitId,
+          body.boundary as ZoneBoundary,
+        ),
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String() }),
+      body: updateZoneBoundaryInputSchema,
+      detail: {
+        summary: "Update zone boundary shell",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .patch(
+    "/:unitId/nav",
+    async ({ params, body, identity, set }) => {
+      const current = resolveMutableZone(
+        await zoneService.getByUnitId(params.unitId),
+        set,
+      );
+      if ("error" in current) return current;
+      const denied = await assertZoneManagePolicy({
+        identity,
+        set,
+        ownerRealmUnitId: current.ownerRealmUnitId,
+        zoneUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return mapZoneToDTO(
+        await zoneService.updateNav(params.unitId, body.nav as ZoneNav),
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String() }),
+      body: updateZoneNavInputSchema,
+      detail: {
+        summary: "Update zone nav shell",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .patch(
+    "/:unitId/theme",
+    async ({ params, body, identity, set }) => {
+      const current = resolveMutableZone(
+        await zoneService.getByUnitId(params.unitId),
+        set,
+      );
+      if ("error" in current) return current;
+      const denied = await assertZoneManagePolicy({
+        identity,
+        set,
+        ownerRealmUnitId: current.ownerRealmUnitId,
+        zoneUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return mapZoneToDTO(
+        await zoneService.updateTheme(params.unitId, body.theme as ZoneTheme),
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String() }),
+      body: updateZoneThemeInputSchema,
+      detail: {
+        summary: "Update zone theme shell",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .post(
+    "/:unitId/pages",
+    async ({ params, body, identity, set }) => {
+      const current = resolveMutableZone(
+        await zoneService.getByUnitId(params.unitId),
+        set,
+      );
+      if ("error" in current) return current;
+      const denied = await assertZoneManagePolicy({
+        identity,
+        set,
+        ownerRealmUnitId: current.ownerRealmUnitId,
+        zoneUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return mapZoneToDTO(
+        await zoneService.createPage(params.unitId, {
+          slug: body.slug,
+          position: body.position,
+          config: body.config as ZonePage,
+        }),
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String() }),
+      body: createZonePageInputSchema,
+      detail: {
+        summary: "Create zone page",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .patch(
+    "/:unitId/pages/:pageId",
+    async ({ params, body, identity, set }) => {
+      const current = resolveMutableZone(
+        await zoneService.getByUnitId(params.unitId),
+        set,
+      );
+      if ("error" in current) return current;
+      const denied = await assertZoneManagePolicy({
+        identity,
+        set,
+        ownerRealmUnitId: current.ownerRealmUnitId,
+        zoneUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return mapZoneToDTO(
+        await zoneService.updatePage(params.unitId, params.pageId, {
+          slug: body.slug,
+          position: body.position,
+          config: body.config as ZonePage | undefined,
+        }),
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String(), pageId: t.String() }),
+      body: updateZonePageInputSchema,
+      detail: {
+        summary: "Update zone page",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .delete(
+    "/:unitId/pages/:pageId",
+    async ({ params, identity, set }) => {
+      const current = resolveMutableZone(
+        await zoneService.getByUnitId(params.unitId),
+        set,
+      );
+      if ("error" in current) return current;
+      const denied = await assertZoneManagePolicy({
+        identity,
+        set,
+        ownerRealmUnitId: current.ownerRealmUnitId,
+        zoneUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return mapZoneToDTO(
+        await zoneService.deletePage(params.unitId, params.pageId),
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String(), pageId: t.String() }),
+      detail: {
+        summary: "Delete zone page",
         tags: ["Zones"],
       },
     },

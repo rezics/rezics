@@ -1,5 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import type { ZoneConfig, ZoneMenuNode } from "@rezics/contract";
+import type {
+  ZoneBoundary,
+  ZoneMenuNode,
+  ZoneNav,
+  ZonePage,
+  ZoneTheme,
+} from "@rezics/contract";
 import {
   addZonePage,
   addZoneTranslationRow,
@@ -14,34 +20,46 @@ import {
   moveZoneMenuNodeAtPath,
   nextZoneId,
   outdentZoneMenuNodeAtPath,
+  applyZoneManageJsonBody,
+  parseZoneManageJsonText,
   removeZoneMenuNodeAtPath,
   removeZonePage,
   removeZoneTranslationRow,
+  updateZonePageSections,
   updateZoneTranslationRow,
   validateZoneManageDraft,
-  zoneConfigToDraft,
-  zoneManageDraftToConfig,
+  zoneManageDraftToBoundary,
+  zoneManageDraftToNav,
+  zoneManageDraftToPage,
+  zoneManageDraftToTheme,
+  zoneManageJsonBody,
+  zoneManageJsonText,
   zoneMenuNodeAtPath,
   zoneQueryUnsupportedFields,
   zoneRowsToTranslations,
+  zoneShellToDraft,
   zoneTranslationLanguageOptions,
   zoneTranslationsToRows,
 } from "./zoneManageDraft";
 
-function sampleConfig(): ZoneConfig {
+function sampleBoundary(): ZoneBoundary {
   return {
-    schema: "rezics/zone-config",
+    schema: "rezics/zone-boundary",
     version: 1,
     context: { kind: "realm", realmUnitId: "realm-1" },
     filters: { types: ["BOOK"] },
+  };
+}
+
+function sampleNav(): ZoneNav {
+  return {
+    schema: "rezics/zone-nav",
+    version: 1,
     menus: [
       {
         id: "main",
         nodes: [
-          {
-            id: "n-1",
-            target: { kind: "zonePage", pageId: "home" },
-          },
+          { id: "n-1", target: { kind: "zonePage", pageId: "page-home" } },
           {
             id: "n-2",
             labelUnitId: "label-1",
@@ -56,15 +74,32 @@ function sampleConfig(): ZoneConfig {
       },
     ],
     header: { menuId: "main" },
-    pages: {
-      home: {
-        sections: [
-          { id: "hero", kind: "hero" },
+  };
+}
+
+function sampleTheme(): ZoneTheme {
+  return {
+    schema: "rezics/zone-theme",
+    version: 1,
+    tokens: { accent: "oklch(0.7 0.1 20)" },
+    layout: { contentMaxWidth: 1440 },
+  };
+}
+
+function samplePage(): ZonePage {
+  return {
+    schema: "rezics/zone-page",
+    version: 1,
+    sections: [
+      { id: "hero", kind: "hero" },
+      {
+        id: "cols",
+        kind: "columns",
+        columns: [
           {
-            id: "cols",
-            kind: "columns",
-            side: [{ id: "stats", kind: "stats", metrics: ["members"] }],
-            main: [
+            id: "main",
+            ratio: 3,
+            sections: [
               {
                 id: "tabs",
                 kind: "tabs",
@@ -89,29 +124,130 @@ function sampleConfig(): ZoneConfig {
               },
             ],
           },
+          {
+            id: "side",
+            ratio: 1,
+            sections: [{ id: "stats", kind: "stats", metrics: ["members"] }],
+          },
         ],
       },
-      search: { sections: [] },
-    },
-    theme: {
-      tokens: { accent: "oklch(0.7 0.1 20)" },
-      layout: { contentWidth: "wide" },
-    },
+    ],
   };
 }
 
-describe("zoneManageDraft round-trip", () => {
-  it("envelope → draft → envelope is identity", () => {
-    const config = sampleConfig();
-    const draft = zoneConfigToDraft(config);
-    expect(zoneManageDraftToConfig(draft)).toEqual(config);
+function sampleDraft() {
+  return zoneShellToDraft({
+    boundary: sampleBoundary(),
+    nav: sampleNav(),
+    theme: sampleTheme(),
+    page: samplePage(),
+  });
+}
+
+describe("zoneManageDraft split round-trip", () => {
+  it("shell/page envelopes round-trip through the draft adapter", () => {
+    const draft = sampleDraft();
+    expect(zoneManageDraftToBoundary(draft)).toEqual(sampleBoundary());
+    expect(zoneManageDraftToNav(draft)).toEqual(sampleNav());
+    expect(zoneManageDraftToTheme(draft)).toEqual(sampleTheme());
+    expect(zoneManageDraftToPage(draft, "home")).toEqual(samplePage());
   });
 
-  it("draft edits do not leak into the source config", () => {
-    const config = sampleConfig();
-    const draft = zoneConfigToDraft(config);
+  it("draft edits do not leak into the source envelopes", () => {
+    const nav = sampleNav();
+    const draft = zoneShellToDraft({
+      boundary: sampleBoundary(),
+      nav,
+      theme: sampleTheme(),
+      page: samplePage(),
+    });
     draft.menus[0]!.id = "changed";
-    expect(config.menus[0]!.id).toBe("main");
+    expect(nav.menus[0]!.id).toBe("main");
+  });
+});
+
+describe("zone manage JSON body editor", () => {
+  it("edits envelope bodies without dropping page fields", () => {
+    const draft = sampleDraft();
+    const body = zoneManageJsonBody(draft, { kind: "page", pageId: "home" });
+    expect(body).toEqual({ sections: samplePage().sections });
+
+    const nextText = zoneManageJsonText(draft, {
+      kind: "page",
+      pageId: "home",
+    });
+    const parsed = parseZoneManageJsonText(
+      { kind: "page", pageId: "home" },
+      nextText,
+    );
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      const applied = applyZoneManageJsonBody(
+        draft,
+        {
+          kind: "page",
+          pageId: "home",
+        },
+        parsed.body,
+      );
+      expect(zoneManageDraftToPage(applied, "home")).toEqual(samplePage());
+    }
+  });
+
+  it("signals invalid JSON instead of mutating the draft", () => {
+    const parsed = parseZoneManageJsonText(
+      { kind: "theme" },
+      '{"tokens": {"accent":',
+    );
+    expect(parsed.ok).toBe(false);
+  });
+
+  it("validates JSON bodies with the contract schema before save", () => {
+    const parsed = parseZoneManageJsonText(
+      { kind: "theme" },
+      JSON.stringify({ images: { logoUrl: "http://example.com/logo.png" } }),
+    );
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) {
+      expect(
+        parsed.problems.some((problem) => problem.path.includes("logoUrl")),
+      ).toBe(true);
+    }
+  });
+
+  it("strips system-owned envelope metadata injected through JSON", () => {
+    const draft = sampleDraft();
+    const parsed = parseZoneManageJsonText(
+      { kind: "theme" },
+      JSON.stringify({
+        schema: "rezics/zone-config",
+        version: 99,
+        tokens: { accent: "rgb(219 81 92)" },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      const applied = applyZoneManageJsonBody(
+        draft,
+        { kind: "theme" },
+        parsed.body,
+      );
+      expect(zoneManageDraftToTheme(applied)).toEqual({
+        schema: "rezics/zone-theme",
+        version: 1,
+        tokens: { accent: "rgb(219 81 92)" },
+        images: undefined,
+        layout: undefined,
+      });
+    }
+  });
+
+  it("preserves non-hex CSS color strings in theme saves", () => {
+    const draft = sampleDraft();
+    draft.theme.tokens = { accent: "oklch(0.7 0.1 20)" };
+    expect(zoneManageDraftToTheme(draft).tokens?.accent).toBe(
+      "oklch(0.7 0.1 20)",
+    );
   });
 });
 
@@ -120,6 +256,7 @@ describe("section nesting guards", () => {
     expect(canInsertZoneSectionKind("tabs", "tabs")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "columns")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "query")).toBe(true);
+    expect(canInsertZoneSectionKind("tabs", "sources")).toBe(true);
   });
 
   it("rejects columns inside columns but allows tabs", () => {
@@ -135,20 +272,37 @@ describe("section nesting guards", () => {
 });
 
 describe("section ids", () => {
-  it("collects nested ids across pages and containers", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
-    expect(collectZoneSectionIds(draft.pages)).toEqual([
+  it("collects nested ids across the managed page and containers", () => {
+    expect(collectZoneSectionIds(sampleDraft().pages)).toEqual([
       "hero",
       "cols",
-      "stats",
       "tabs",
       "q-1",
+      "stats",
     ]);
   });
 
+  it("creates a valid two-column section by default", () => {
+    expect(createZoneSection("columns", "cols")).toEqual({
+      id: "cols",
+      kind: "columns",
+      columns: [
+        { id: "main", ratio: 3, sections: [] },
+        { id: "side", ratio: 1, sections: [] },
+      ],
+    });
+  });
+
+  it("creates a minimal sources section by default", () => {
+    expect(createZoneSection("sources", "sources-1")).toEqual({
+      id: "sources-1",
+      kind: "sources",
+    });
+  });
+
   it("flags duplicate section ids including nested ones", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
-    draft.pages = updatePages(draft.pages, [
+    const draft = sampleDraft();
+    draft.pages = updateZonePageSections(draft.pages, "home", () => [
       ...draft.pages.home.sections,
       createZoneSection("feed", "stats"),
     ]);
@@ -163,17 +317,10 @@ describe("section ids", () => {
   });
 });
 
-function updatePages(
-  pages: ReturnType<typeof zoneConfigToDraft>["pages"],
-  sections: ReturnType<typeof zoneConfigToDraft>["pages"]["home"]["sections"],
-) {
-  return { ...pages, home: { sections } };
-}
-
 describe("tabs invariants", () => {
   it("flags duplicate tab ids and missing default tab", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
-    draft.pages = updatePages(draft.pages, [
+    const draft = sampleDraft();
+    draft.pages = updateZonePageSections(draft.pages, "home", () => [
       {
         id: "t",
         kind: "tabs",
@@ -236,13 +383,13 @@ describe("query vocabulary", () => {
 
 describe("menu tree path operations", () => {
   const nodes = (): ZoneMenuNode[] => [
-    { id: "a", target: { kind: "zonePage", pageId: "home" } },
+    { id: "a", target: { kind: "zonePage", pageId: "page-home" } },
     {
       id: "b",
       labelUnitId: "label-1",
       children: [
-        { id: "b-1", target: { kind: "zonePage", pageId: "search" } },
-        { id: "b-2", target: { kind: "zonePage", pageId: "feed" } },
+        { id: "b-1", target: { kind: "zonePage", pageId: "page-search" } },
+        { id: "b-2", target: { kind: "zonePage", pageId: "page-feed" } },
       ],
     },
   ];
@@ -282,7 +429,6 @@ describe("menu tree path operations", () => {
     expect(zoneMenuNodeAtPath(removed, [1, 0])?.id).toBe("b-2");
     const moved = moveZoneMenuNodeAtPath(nodes(), [1, 1], "up");
     expect(zoneMenuNodeAtPath(moved, [1, 0])?.id).toBe("b-2");
-    // Edge moves are no-ops. 边界移动为空操作。
     const unmoved = moveZoneMenuNodeAtPath(nodes(), [0], "up");
     expect(zoneMenuNodeAtPath(unmoved, [0])?.id).toBe("a");
   });
@@ -291,8 +437,6 @@ describe("menu tree path operations", () => {
     const indented = indentZoneMenuNodeAtPath(nodes(), [1, 1]);
     expect(indented).not.toBeNull();
     expect(zoneMenuNodeAtPath(indented!, [1, 0, 0])?.id).toBe("b-2");
-    // Indenting a tall subtree past depth 3 is rejected.
-    // 将过高的子树缩进超过深度 3 会被拒绝。
     const tall: ZoneMenuNode[] = [
       { id: "x" },
       { id: "y", children: [{ id: "y-1", children: [{ id: "y-1-1" }] }] },
@@ -310,7 +454,7 @@ describe("menu tree path operations", () => {
 
 describe("menu validation", () => {
   it("flags depth, leaf, group, and header issues", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
+    const draft = sampleDraft();
     draft.menus = [
       {
         id: "main",
@@ -354,10 +498,8 @@ describe("menu validation", () => {
     });
   });
 
-  it("returns no issues for the sample config", () => {
-    expect(validateZoneManageDraft(zoneConfigToDraft(sampleConfig()))).toEqual(
-      [],
-    );
+  it("returns no issues for the sample draft", () => {
+    expect(validateZoneManageDraft(sampleDraft())).toEqual([]);
   });
 });
 
@@ -401,12 +543,14 @@ describe("translation rows", () => {
 });
 
 describe("page helpers", () => {
-  it("adds optional pages, never removes home", () => {
-    const draft = zoneConfigToDraft(sampleConfig());
-    const withFeed = addZonePage(draft.pages, "feed");
-    expect(withFeed.feed).toEqual({ sections: [] });
-    expect(removeZonePage(withFeed, "home").home).toBeDefined();
-    expect(removeZonePage(withFeed, "feed").feed).toBeUndefined();
+  it("adds and removes open page draft entries", () => {
+    const draft = sampleDraft();
+    const withCharacters = addZonePage(draft.pages, "page-characters");
+    expect(withCharacters["page-characters"]).toEqual({ sections: [] });
+    expect(removeZonePage(withCharacters, "home").home).toBeUndefined();
+    expect(
+      removeZonePage(withCharacters, "page-characters")["page-characters"],
+    ).toBeUndefined();
   });
 
   it("moveListItem reorders within bounds", () => {

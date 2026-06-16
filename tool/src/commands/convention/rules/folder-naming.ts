@@ -84,6 +84,7 @@ export const folderNamingRule: RuleScanner = {
       const relPath = relative(REPO_ROOT, dirPath);
       if (!/^package\/[^/]+\/(src|docs)/.test(relPath)) continue;
       if (/^package\/[^/]+\/(src|docs)$/.test(relPath)) continue;
+      if (isFileRouterSegmentPath(relPath)) continue;
 
       const name = basename(dirPath);
       if (PLURAL_CONTAINER_ALLOWLIST.has(name)) continue;
@@ -113,3 +114,13 @@ export const folderNamingRule: RuleScanner = {
     return violations;
   },
 };
+
+function isFileRouterSegmentPath(relPath: string): boolean {
+  return /^package\/(app|admin)\/src\/routes(?:\/|$)/.test(relPath);
+}
+
+export function scanFolderNamingForTest(
+  folderPaths: string[],
+): Violation[] {
+  return folderNamingRule.scan({ folderPaths });
+}

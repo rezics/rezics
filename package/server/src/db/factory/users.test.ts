@@ -56,6 +56,13 @@ function createDbStub() {
         slugScope: "scope-zone",
         subscriberCount: 0,
       },
+      {
+        id: "zone-zones",
+        type: "ZONE",
+        slug: "zones",
+        slugScope: "scope-zone",
+        subscriberCount: 0,
+      },
     ] as Array<{
       id: string;
       type: string;
@@ -90,6 +97,7 @@ function createDbStub() {
     "realm-rezics",
     "zone-book",
     "zone-realms",
+    "zone-zones",
     "zone-popular",
   ];
 
@@ -358,7 +366,7 @@ describe("factory seedUsers", () => {
     ).toHaveLength(2);
     expect(
       db.state.entries.filter((entry) => entry.subscribedType === "ZONE"),
-    ).toHaveLength(6);
+    ).toHaveLength(8);
     expect(db.state.realmMembers.map((member) => member.realmUnitId)).toEqual([
       "realm-rezics",
       "realm-rezics",

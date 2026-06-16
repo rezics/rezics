@@ -11,6 +11,7 @@ import type {
   RealmBannerExtra,
   RealmTagView,
   RealmTagViewStyle,
+  RealmWikiSidebar,
   TagTreeNode,
   UnitDTO,
 } from "@rezics/contract";
@@ -21,12 +22,10 @@ import {
   markdownContentDoc,
   normalizeLanguage,
 } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import {
   Button,
-  buttonVariants,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -59,7 +58,6 @@ import { Tree } from "react-arborist";
 import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import {
   clearTreeEditOpLog,
@@ -187,20 +185,19 @@ export function TagViewPreferenceEditor({
   );
 }
 
-export function WikiZonePicker({
+export function FeaturedZonePicker({
   realmId,
   value,
 }: {
   realmId: string;
   value?: string | null;
 }) {
-  const { t } = useTranslation(["zone"]);
   const [zoneId, setZoneId] = useState(value ?? "");
   const [error, setError] = useState<string | null>(null);
   const trimmedZoneId = zoneId.trim();
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
-  const zoneQuery = useQuery(zonePortalQueryOptions(trimmedZoneId));
+  const zoneQuery = useQuery(zonePortalQueryOptions(trimmedZoneId, "home"));
   const zone = zoneQuery.data?.zone;
 
   useEffect(() => {
@@ -213,13 +210,15 @@ export function WikiZonePicker({
       if (trimmedZoneId) {
         await setValue.mutateAsync({
           realmId,
-          key: "wikiZoneUnitId",
+          key: "featuredZoneUnitId",
           value: trimmedZoneId,
         });
       } else {
-        await clearValue.mutateAsync({ realmId, key: "wikiZoneUnitId" });
+        await clearValue.mutateAsync({ realmId, key: "featuredZoneUnitId" });
       }
-      toast.success(getI18nRuntime().i18n.t("entity:realm_wiki_zone_saved"));
+      toast.success(
+        getI18nRuntime().i18n.t("entity:realm_featured_zone_saved"),
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setError(message);
@@ -230,16 +229,16 @@ export function WikiZonePicker({
   return (
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
       <div>
-        <Label>{getI18nRuntime().i18n.t("entity:realm_wiki_zone")}</Label>
+        <Label>{getI18nRuntime().i18n.t("entity:realm_featured_zone")}</Label>
         <p className="mt-1 text-sm leading-body text-text-secondary">
-          {getI18nRuntime().i18n.t("entity:realm_wiki_zone_description")}
+          {getI18nRuntime().i18n.t("entity:realm_featured_zone_description")}
         </p>
       </div>
       <Input
         value={zoneId}
         onChange={(event) => setZoneId(event.target.value)}
         placeholder={getI18nRuntime().i18n.t(
-          "entity:realm_wiki_zone_unit_id_placeholder",
+          "entity:realm_zone_unit_id_placeholder",
         )}
       />
       {trimmedZoneId && (
@@ -256,11 +255,18 @@ export function WikiZonePicker({
               </span>
             </div>
           ) : (
-            <span className="text-text-secondary">
-              {getI18nRuntime().i18n.t("common:selected_id", {
-                id: trimmedZoneId,
-              })}
-            </span>
+            <div className="flex flex-col gap-1">
+              <span className="text-text-secondary">
+                {getI18nRuntime().i18n.t("common:selected_id", {
+                  id: trimmedZoneId,
+                })}
+              </span>
+              {!zoneQuery.isLoading ? (
+                <span className="text-error-text">
+                  {getI18nRuntime().i18n.t("entity:realm_zone_unresolved")}
+                </span>
+              ) : null}
+            </div>
           )}
         </div>
       )}
@@ -279,19 +285,237 @@ export function WikiZonePicker({
           {getI18nRuntime().i18n.t("common:save")}
         </Button>
       </div>
-      {zone && (
-        // Zone layout/menus/theme are edited on the zone's own manage page
-        // (versioned config envelope); the legacy inline wiki-zone editor
-        // is gone.
-        // 专区的布局/菜单/主题在专区自己的管理页编辑（版本化配置信封）；
-        // 旧的内联 wiki 专区编辑器已移除。
-        <div className="flex justify-end border-t border-border-default pt-3">
-          <SafeLink
-            href={`/z/${zone.slug}/manage`}
-            className={buttonVariants({ size: "sm", variant: "outline" })}
-          >
-            {t("zone:manage")}
-          </SafeLink>
+    </div>
+  );
+}
+
+export function WikiSidebarPicker({
+  realmId,
+  value,
+}: {
+  realmId: string;
+  value?: RealmWikiSidebar | null;
+}) {
+  const [kind, setKind] = useState<"auto" | RealmWikiSidebar["kind"]>(
+    value?.kind ?? "auto",
+  );
+  const [postUnitId, setPostUnitId] = useState(
+    value?.kind === "post" ? value.postUnitId : "",
+  );
+  const [zoneUnitId, setZoneUnitId] = useState(
+    value?.kind === "zoneNav" ? value.zoneUnitId : "",
+  );
+  const [menuId, setMenuId] = useState(
+    value?.kind === "zoneNav" ? (value.menuId ?? "") : "",
+  );
+  const [error, setError] = useState<string | null>(null);
+  const readContext = useReadLanguageContext();
+  const setValue = useSetRealmExtraValueMutation();
+  const clearValue = useClearRealmExtraValueMutation();
+  const trimmedPostUnitId = postUnitId.trim();
+  const trimmedZoneUnitId = zoneUnitId.trim();
+  const trimmedMenuId = menuId.trim();
+  const postQuery = useQuery({
+    ...unitDetailQuery(trimmedPostUnitId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    }),
+    enabled: readContext.ready && kind === "post" && Boolean(trimmedPostUnitId),
+  });
+  const zoneQuery = useQuery({
+    ...zonePortalQueryOptions(trimmedZoneUnitId, "home", readContext.languages),
+    enabled:
+      readContext.ready && kind === "zoneNav" && Boolean(trimmedZoneUnitId),
+  });
+
+  useEffect(() => {
+    setKind(value?.kind ?? "auto");
+    setPostUnitId(value?.kind === "post" ? value.postUnitId : "");
+    setZoneUnitId(value?.kind === "zoneNav" ? value.zoneUnitId : "");
+    setMenuId(value?.kind === "zoneNav" ? (value.menuId ?? "") : "");
+  }, [value]);
+
+  const save = async () => {
+    setError(null);
+    try {
+      if (kind === "auto") {
+        await clearValue.mutateAsync({ realmId, key: "wikiSidebar" });
+      } else if (kind === "post") {
+        if (!trimmedPostUnitId) throw new Error("Post Unit ID is required.");
+        await setValue.mutateAsync({
+          realmId,
+          key: "wikiSidebar",
+          value: { kind: "post", postUnitId: trimmedPostUnitId },
+        });
+      } else {
+        if (!trimmedZoneUnitId) throw new Error("Zone Unit ID is required.");
+        await setValue.mutateAsync({
+          realmId,
+          key: "wikiSidebar",
+          value: {
+            kind: "zoneNav",
+            zoneUnitId: trimmedZoneUnitId,
+            ...(trimmedMenuId ? { menuId: trimmedMenuId } : {}),
+          },
+        });
+      }
+      toast.success(getI18nRuntime().i18n.t("entity:realm_wiki_sidebar_saved"));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
+      <div>
+        <Label htmlFor="realm-wiki-sidebar-kind">
+          {getI18nRuntime().i18n.t("entity:realm_wiki_sidebar")}
+        </Label>
+        <p className="mt-1 text-sm leading-body text-text-secondary">
+          {getI18nRuntime().i18n.t("entity:realm_wiki_sidebar_description")}
+        </p>
+      </div>
+      <Select
+        value={kind}
+        onValueChange={(next) =>
+          setKind(next as "auto" | RealmWikiSidebar["kind"])
+        }
+      >
+        <SelectTrigger id="realm-wiki-sidebar-kind">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="auto">
+            {getI18nRuntime().i18n.t("entity:realm_wiki_sidebar_auto")}
+          </SelectItem>
+          <SelectItem value="post">
+            {getI18nRuntime().i18n.t("entity:realm_wiki_sidebar_post")}
+          </SelectItem>
+          <SelectItem value="zoneNav">
+            {getI18nRuntime().i18n.t("entity:realm_wiki_sidebar_zone_nav")}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      {kind === "post" ? (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="realm-wiki-sidebar-post">
+            {getI18nRuntime().i18n.t("entity:realm_wiki_sidebar_post_unit_id")}
+          </Label>
+          <Input
+            id="realm-wiki-sidebar-post"
+            value={postUnitId}
+            onChange={(event) => setPostUnitId(event.target.value)}
+            placeholder="Post Unit ID"
+          />
+          <ResolutionPreview
+            id={trimmedPostUnitId}
+            title={postQuery.data ? unitLabel(postQuery.data) : null}
+            loading={postQuery.isLoading}
+          />
+        </div>
+      ) : null}
+
+      {kind === "zoneNav" ? (
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem]">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="realm-wiki-sidebar-zone">
+              {getI18nRuntime().i18n.t(
+                "entity:realm_wiki_sidebar_zone_unit_id",
+              )}
+            </Label>
+            <Input
+              id="realm-wiki-sidebar-zone"
+              value={zoneUnitId}
+              onChange={(event) => setZoneUnitId(event.target.value)}
+              placeholder={getI18nRuntime().i18n.t(
+                "entity:realm_zone_unit_id_placeholder",
+              )}
+            />
+            <ResolutionPreview
+              id={trimmedZoneUnitId}
+              title={
+                zoneQuery.data?.zone
+                  ? zoneQuery.data.zone.name || zoneQuery.data.zone.slug
+                  : null
+              }
+              loading={zoneQuery.isLoading}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="realm-wiki-sidebar-menu">
+              {getI18nRuntime().i18n.t("entity:realm_wiki_sidebar_menu_id")}
+            </Label>
+            <Input
+              id="realm-wiki-sidebar-menu"
+              value={menuId}
+              onChange={(event) => setMenuId(event.target.value)}
+              placeholder="header"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex justify-end gap-2">
+        {error && (
+          <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
+        )}
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            setKind("auto");
+            setPostUnitId("");
+            setZoneUnitId("");
+            setMenuId("");
+          }}
+        >
+          {getI18nRuntime().i18n.t("common:clear")}
+        </Button>
+        <Button
+          type="button"
+          onClick={save}
+          disabled={setValue.isPending || clearValue.isPending}
+        >
+          {getI18nRuntime().i18n.t("common:save")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ResolutionPreview({
+  id,
+  title,
+  loading,
+}: {
+  id: string;
+  title: string | null;
+  loading: boolean;
+}) {
+  if (!id) return null;
+  return (
+    <div className="rounded-md border border-border-default bg-surface-base px-3 py-2 text-sm leading-ui">
+      {title ? (
+        <div className="flex flex-col gap-1">
+          <span className="font-medium text-text-primary">{title}</span>
+          <span className="text-text-secondary">
+            {getI18nRuntime().i18n.t("common:selected_id", { id })}
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <span className="text-text-secondary">
+            {getI18nRuntime().i18n.t("common:selected_id", { id })}
+          </span>
+          {!loading ? (
+            <span className="text-error-text">
+              {getI18nRuntime().i18n.t("entity:realm_reference_unresolved")}
+            </span>
+          ) : null}
         </div>
       )}
     </div>

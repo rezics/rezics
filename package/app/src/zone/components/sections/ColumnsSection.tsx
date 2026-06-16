@@ -3,7 +3,8 @@ import type {
   ZoneContentSection,
   ZoneTabsSection,
 } from "@rezics/contract";
-import { cn } from "@/shared/utils/css-util";
+import type { CSSProperties } from "react";
+import { zoneColumnsGridTemplate } from "../../models/zoneColumns";
 import type { ZonePortalContext } from "./shared";
 import { TabsSection } from "./TabsSection";
 import { ZoneContentSectionView } from "./ZoneContentSections";
@@ -33,11 +34,11 @@ function PaneSectionList({
 }
 
 /**
- * Side/main layout; the side column stacks under main on mobile regardless
- * of `sidePosition` (DOM order is main-first, desktop order flips via
- * grid order).
- * 边栏/主栏布局；移动端无论 `sidePosition` 为何，边栏都堆叠在主栏之下
- * （DOM 顺序主栏在前，桌面端通过 grid order 翻转）。
+ * Ordered column layout. Ratios are runtime data, so desktop tracks are passed
+ * through a native CSS variable instead of dynamic UnoCSS classes; smaller
+ * viewports stack in authored source order.
+ * 有序列布局。比例是运行时数据，因此桌面端轨道通过原生 CSS 变量传递，
+ * 而不是动态 UnoCSS class；较小视口按作者配置顺序堆叠。
  */
 export function ColumnsSection({
   section,
@@ -46,22 +47,22 @@ export function ColumnsSection({
   section: ZoneColumnsSection;
   ctx: ZonePortalContext;
 }) {
-  const sideLeft = section.sidePosition === "left";
+  const columnsTemplate = zoneColumnsGridTemplate(section.columns);
+
   return (
     <div
-      className={cn(
-        "grid gap-10",
-        sideLeft
-          ? "lg:grid-cols-[18rem_minmax(0,1fr)]"
-          : "lg:grid-cols-[minmax(0,1fr)_18rem]",
-      )}
+      className="zone-columns-section grid gap-10"
+      style={
+        {
+          "--zone-columns-template": columnsTemplate,
+        } as CSSProperties
+      }
     >
-      <div className={cn("min-w-0", sideLeft && "lg:order-last")}>
-        <PaneSectionList sections={section.main} ctx={ctx} />
-      </div>
-      <aside className={cn("min-w-0", sideLeft && "lg:order-first")}>
-        <PaneSectionList sections={section.side} ctx={ctx} />
-      </aside>
+      {section.columns.map((column) => (
+        <div key={column.id} className="min-w-0">
+          <PaneSectionList sections={column.sections} ctx={ctx} />
+        </div>
+      ))}
     </div>
   );
 }

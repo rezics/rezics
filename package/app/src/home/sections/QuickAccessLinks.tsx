@@ -10,12 +10,13 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { AppSafeLink } from "@/shared/ui/link";
-import { officialZoneSearchHref } from "@/zone";
+import { type OfficialZoneKey, officialZoneSearchHref } from "@/zone";
 
 import { DynamicIcon, type IconKey } from "./DynamicIcon";
 
 export type QuickAccessLinksProps = {
   key?: string;
+  zoneKey?: OfficialZoneKey;
 };
 
 type QuickTag = {
@@ -26,6 +27,7 @@ type QuickTag = {
 
 export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
   key = "book_search_tag_group_quick",
+  zoneKey = "book",
 }) => {
   const { data } = useQuery(echoKvGetQuery(key));
 
@@ -48,7 +50,7 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
         {items.map(({ name, icon }) => (
           <CarouselItem key={name} className="pl-2 basis-auto">
             <AppSafeLink
-              href={officialZoneSearchHref("book", { q: `[${name}]` })}
+              href={officialZoneSearchHref(zoneKey, { q: `[${name}]` })}
             >
               <Badge
                 variant="secondary"

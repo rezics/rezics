@@ -1,6 +1,7 @@
 export const OFFICIAL_ZONE_SLUGS = {
   book: "book",
   realms: "realms",
+  zones: "zones",
   popular: "popular",
 } as const;
 

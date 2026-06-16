@@ -29,6 +29,7 @@
     "@rezics/shared": "workspace:*",
     "@rezics/storybook-config": "workspace:*",
     "@rezics/ui": "workspace:*",
+    "@sinclair/typebox": "^0.34.41",
     "@tabler/icons-react": "^3.40.0",
     "@tanstack/query-broadcast-client-experimental": "^5.96.2",
     "@tanstack/query-sync-storage-persister": "^5.96.2",

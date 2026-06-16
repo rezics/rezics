@@ -226,7 +226,7 @@ export const backfillCommand = define({
       args: {
         schema: {
           type: "string",
-          description: "Envelope schema name, such as rezics/zone-config.",
+          description: "Envelope schema name, such as rezics/zone-boundary.",
         },
         targetVersion: {
           type: "string",
@@ -264,7 +264,7 @@ export const backfillCommand = define({
       args: {
         schema: {
           type: "string",
-          description: "Envelope schema name, such as rezics/zone-config.",
+          description: "Envelope schema name, such as rezics/zone-boundary.",
         },
       },
       run: async (ctx) => {
