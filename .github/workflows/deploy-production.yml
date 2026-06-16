@@ -86,6 +86,16 @@ jobs:
                   .Config.image = ((.Config.image | split(":")[0]) + ":" + $tag)
                 else . end
               )
+              |
+              # Fix job-runner-http ensure prestart: use ensure-job-db.ts (pg Client)
+              # instead of tool db:ensure (requires psql, absent from migrate image).
+              if .Name == "job-runner-http" then
+                .Tasks |= map(
+                  if .Name == "ensure" then
+                    .Config.args = ["until cd /repo && bun run package/job-runner/scripts/ensure-job-db.ts 2>&1; do echo \"Waiting for database...\"; sleep 2; done"]
+                  else . end
+                )
+              else . end
             ) | { Job: . }
           ' /tmp/job.json > /tmp/deploy.json
 
