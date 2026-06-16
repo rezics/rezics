@@ -1,9 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import * as React from "react";
 
-import { ThemeDemo } from "@/preference/sections/ThemeDemo.tsx";
+import { ThemeDemo } from "@/preference";
 
-export default function PersistentTabs() {
+export function PersistentTabs() {
   const [value, setValue] = React.useState<"1" | "2">("1");
 
   return (

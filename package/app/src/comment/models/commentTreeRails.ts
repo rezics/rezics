@@ -1,18 +1,18 @@
 import type { CommentDTO } from "@rezics/contract";
 
+export interface CommentTreeNodeModel {
+  post: CommentDTO;
+  displayDepth: number;
+  atMaxDepth: boolean;
+  children: CommentTreeNodeModel[];
+}
+
 export function getDisplayDepth(
   post: CommentDTO,
   baseDepth: number,
   visualMaxDepth: number,
 ): number {
   return Math.min(Math.max(0, (post.depth ?? 0) - baseDepth), visualMaxDepth);
-}
-
-export interface CommentTreeNodeModel {
-  post: CommentDTO;
-  displayDepth: number;
-  atMaxDepth: boolean;
-  children: CommentTreeNodeModel[];
 }
 
 function promotionRank(post: CommentDTO): number {

@@ -2,7 +2,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import type React from "react";
 import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
-import TagListEdit from "@/tag/components/Edit/TagListEdit";
+import { TagListEdit } from "@/tag";
 
 export const BookEditTagPage: React.FC = () => {
   const { bookId } = bookEditLayoutRoute.useParams();

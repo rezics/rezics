@@ -111,5 +111,3 @@ function ExcerptCardSource({ source }: { source?: ExcerptSource | string }) {
   if (typeof source === "string") return <>{source}</>;
   return <>{source.title}</>;
 }
-
-export default ExcerptCard;

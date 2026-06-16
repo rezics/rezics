@@ -12,11 +12,10 @@ import {
 } from "@rezics/ui/shadcn";
 import { Shield } from "lucide-react";
 import type React from "react";
-import { RemovedContentPlaceholder } from "@/components/RemovedContentPlaceholder";
+import { RemovedContentPlaceholder } from "@/components";
 import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
-import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
-import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
+import { PostAuthorHeader, PostBodyMarkdown } from "@/post";
 import {
   commentPolicy,
   commentRowActions,

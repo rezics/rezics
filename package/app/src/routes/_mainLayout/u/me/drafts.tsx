@@ -1,5 +1,5 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { routeBoundaries } from "@/core/routing/routeBoundaries";
+import { routeBoundaries } from "@/core";
 
 const DraftsPage = lazyRouteComponent(() => import("@/draft"), "DraftsPage");
 

@@ -9,13 +9,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { BookLibSortKey } from "@/search/components/SearchFilter";
-import { useInjectedTags } from "@/search/hooks/useInjectedTags";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import { parseSearchString } from "@/search/models/searchQuery";
+import type { BookLibSortKey } from "@/search";
+import { parseSearchString, useInjectedTags, useSearchQuery } from "@/search";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
+import { useAllowedRatings } from "@/user";
 
 import { BookLibSectionRef } from "../sections/BookLibSection";
 

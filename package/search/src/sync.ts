@@ -1320,7 +1320,10 @@ function toShelfItemDocumentRow(row: ShelfItemSyncRow): ShelfItemDocumentRow {
     itemSummary: row.itemSummary,
     itemText: row.itemText,
     searchText: row.searchText,
-    rootUnitId: row.rootUnitId,
+    rootUnitId:
+      row.parentItemType === "unit" && row.parentItemId
+        ? row.parentItemId
+        : row.rootUnitId,
     realmUnitId: row.realmUnitId,
     parentCommentId: row.parentCommentId,
     authorUserId: row.authorUserId,

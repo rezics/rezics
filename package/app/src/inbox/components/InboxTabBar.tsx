@@ -35,5 +35,3 @@ export const InboxTabBar: FC<InboxTabBarProps> = ({ active }) => {
     </nav>
   );
 };
-
-export default InboxTabBar;

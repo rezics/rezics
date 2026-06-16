@@ -1,8 +1,7 @@
 import type { ShelfItemKind, ShelfItemType } from "@rezics/api/shelf";
 import type React from "react";
-import { useCollectionModal } from "@/collection/hooks/useCollectionModal";
-import { useAuthModal } from "@/user/components/useAuthModal";
-import { useAuth } from "@/user/pages/useAuth";
+import { useCollectionModal } from "@/collection";
+import { useAuth, useAuthModal } from "@/user";
 
 export type UseShelfTriggerArgs = {
   targetUnitId: string;

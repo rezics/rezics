@@ -1,6 +1,10 @@
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -8,6 +12,9 @@ import {
 } from "@rezics/ui/shadcn";
 import {
   Plus as Add,
+  ChevronDown,
+  ListTree,
+  MoreHorizontal,
   SquareCheck as CheckBoxIcon,
   Tag as LabelIcon,
   Search,
@@ -30,7 +37,33 @@ interface BookTocEditorToolbarProps {
   onToggleSelectionMode: () => void;
   selectedCount: number;
   onBulkSetRating: () => void;
+  onBulkMoveTo: () => void;
+  onBulkMoveToFirst: () => void;
+  onBulkMoveToLast: () => void;
   onResyncOverrides: () => void;
+}
+
+type ToolbarTooltipButtonProps = React.ComponentProps<typeof Button> & {
+  tooltip: React.ReactNode;
+};
+
+function ToolbarTooltipButton({
+  tooltip,
+  children,
+  ...buttonProps
+}: ToolbarTooltipButtonProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={(props) => (
+          <span {...props} className="inline-flex">
+            <Button {...buttonProps}>{children}</Button>
+          </span>
+        )}
+      />
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  );
 }
 
 export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
@@ -45,6 +78,9 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
   onToggleSelectionMode,
   selectedCount,
   onBulkSetRating,
+  onBulkMoveTo,
+  onBulkMoveToFirst,
+  onBulkMoveToLast,
   onResyncOverrides,
 }) => {
   const { t } = useTranslation(["book", "common"]);
@@ -66,144 +102,113 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
           />
         </div>
 
-        <Tooltip>
-          <TooltipTrigger
-            render={(props) => (
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={onExpandAll}
-                {...props}
-              >
-                <UnfoldMore className="w-4 h-4" />
-              </Button>
-            )}
-          />
-          <TooltipContent>{t("book:edit_expand_all")}</TooltipContent>
-        </Tooltip>
+        <ToolbarTooltipButton
+          size="icon"
+          variant="ghost"
+          onClick={onExpandAll}
+          tooltip={t("book:edit_expand_all")}
+        >
+          <UnfoldMore className="w-4 h-4" />
+        </ToolbarTooltipButton>
 
-        <Tooltip>
-          <TooltipTrigger
-            render={(props) => (
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={onCollapseAll}
-                {...props}
-              >
-                <UnfoldLess className="w-4 h-4" />
-              </Button>
-            )}
-          />
-          <TooltipContent>{t("book:edit_collapse_all")}</TooltipContent>
-        </Tooltip>
+        <ToolbarTooltipButton
+          size="icon"
+          variant="ghost"
+          onClick={onCollapseAll}
+          tooltip={t("book:edit_collapse_all")}
+        >
+          <UnfoldLess className="w-4 h-4" />
+        </ToolbarTooltipButton>
 
-        <Tooltip>
-          <TooltipTrigger
-            render={(props) => (
-              <Button
-                size="icon"
-                variant={isSortingMode ? "secondary" : "ghost"}
-                onClick={onToggleSortingMode}
-                className={isSortingMode ? "text-primary" : undefined}
-                {...props}
-              >
-                <SwapVert className="w-4 h-4" />
-              </Button>
-            )}
-          />
-          <TooltipContent>
-            {isSortingMode
+        <ToolbarTooltipButton
+          size="icon"
+          variant={isSortingMode ? "secondary" : "ghost"}
+          onClick={onToggleSortingMode}
+          className={isSortingMode ? "text-primary" : undefined}
+          tooltip={
+            isSortingMode
               ? t("book:edit_exit_sorting_mode")
-              : t("book:edit_sorting_mode")}
-          </TooltipContent>
-        </Tooltip>
+              : t("book:edit_sorting_mode")
+          }
+        >
+          <SwapVert className="w-4 h-4" />
+        </ToolbarTooltipButton>
 
-        <Tooltip>
-          <TooltipTrigger
-            render={(props) => (
-              <Button
-                size="icon"
-                variant={isSelectionMode ? "secondary" : "ghost"}
-                onClick={onToggleSelectionMode}
-                className={isSelectionMode ? "text-primary" : undefined}
-                {...props}
-              >
-                <CheckBoxIcon className="w-4 h-4" />
-              </Button>
-            )}
-          />
-          <TooltipContent>
-            {isSelectionMode
+        <ToolbarTooltipButton
+          size="icon"
+          variant={isSelectionMode ? "secondary" : "ghost"}
+          onClick={onToggleSelectionMode}
+          className={isSelectionMode ? "text-primary" : undefined}
+          tooltip={
+            isSelectionMode
               ? t("book:edit_exit_selection_mode")
-              : t("book:edit_select_chapters")}
-          </TooltipContent>
-        </Tooltip>
+              : t("book:edit_select_chapters")
+          }
+        >
+          <CheckBoxIcon className="w-4 h-4" />
+        </ToolbarTooltipButton>
 
         {isSelectionMode && (
-          <Tooltip>
-            <TooltipTrigger
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              nativeButton
               render={(props) => (
-                <span {...props}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onBulkSetRating}
-                    disabled={selectedCount === 0}
-                    className="h-8"
-                  >
-                    <LabelIcon className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">
-                      {t("book:edit_rate_selected", {
-                        count: selectedCount,
-                      })}
-                    </span>
-                  </Button>
-                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={selectedCount === 0}
+                  className="h-8"
+                  {...props}
+                >
+                  <MoreHorizontal className="w-4 h-4 mr-2" aria-hidden />
+                  <span className="hidden sm:inline">
+                    Options
+                    {selectedCount > 0 ? ` (${selectedCount})` : ""}
+                  </span>
+                  <ChevronDown className="w-4 h-4 ml-1" aria-hidden />
+                </Button>
               )}
             />
-            <TooltipContent>
-              {t("book:edit_set_rating_for_selected")}
-            </TooltipContent>
-          </Tooltip>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onBulkSetRating}>
+                <LabelIcon className="size-4" aria-hidden />
+                {t("book:edit_rate_selected", {
+                  count: selectedCount,
+                })}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onBulkMoveTo}>
+                <ListTree className="size-4" aria-hidden />
+                Move to...
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onBulkMoveToFirst}>
+                Move to first
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onBulkMoveToLast}>
+                Move to last
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
 
-        <Tooltip>
-          <TooltipTrigger
-            render={(props) => (
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={onResyncOverrides}
-                {...props}
-              >
-                <SyncIcon className="w-4 h-4" />
-              </Button>
-            )}
-          />
-          <TooltipContent>
-            {t("book:edit_resync_index_overrides")}
-          </TooltipContent>
-        </Tooltip>
+        <ToolbarTooltipButton
+          size="icon"
+          variant="ghost"
+          onClick={onResyncOverrides}
+          tooltip={t("book:edit_resync_index_overrides")}
+        >
+          <SyncIcon className="w-4 h-4" />
+        </ToolbarTooltipButton>
 
-        <Tooltip>
-          <TooltipTrigger
-            render={(props) => (
-              <Button
-                size="sm"
-                onClick={onNewChapter}
-                className="h-8"
-                {...props}
-              >
-                <Add className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">{t("common:new")}</span>
-              </Button>
-            )}
-          />
-          <TooltipContent>
-            {t("book:edit_add_chapter_to_last_volume")}
-          </TooltipContent>
-        </Tooltip>
+        <ToolbarTooltipButton
+          size="sm"
+          onClick={onNewChapter}
+          className="h-8"
+          tooltip={t("book:edit_add_chapter_to_last_volume")}
+        >
+          <Add className="w-4 h-4 mr-2" />
+          <span className="hidden sm:inline">{t("common:new")}</span>
+        </ToolbarTooltipButton>
       </div>
     </TooltipProvider>
   );

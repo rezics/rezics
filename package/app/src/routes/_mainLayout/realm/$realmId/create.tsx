@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   normalizeRealmCreateMode,
   type RealmCreateMode,
-} from "@/realm/models/realmCreateMode";
-import { RealmCreatePage } from "@/realm/pages/RealmCreatePage";
+  RealmCreatePage,
+} from "@/realm";
 
 type RealmCreateSearch = {
   mode?: RealmCreateMode;

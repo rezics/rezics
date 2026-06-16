@@ -20,11 +20,6 @@ interface PostLanguageSwitcherProps {
   onAddTranslation?: () => void;
 }
 
-function languageLabel(code: string): string {
-  const meta = LANGUAGE_META[code as Language];
-  return meta?.nativeName ?? code;
-}
-
 export function PostLanguageSwitcher({
   currentUnitId,
   currentLanguage,
@@ -102,4 +97,9 @@ export function PostLanguageSwitcher({
       </div>
     </div>
   );
+}
+
+function languageLabel(code: string): string {
+  const meta = LANGUAGE_META[code as Language];
+  return meta?.nativeName ?? code;
 }

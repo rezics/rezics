@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   clearSearchHistory,
   pushSearchHistory,
@@ -21,17 +21,17 @@ export interface UseSearchHistoryReturn {
 export function useSearchHistory(): UseSearchHistoryReturn {
   const [entries, setEntries] = useState<string[]>(() => readSearchHistory());
 
-  const record = useCallback((term: string) => {
+  const record = (term: string) => {
     setEntries(pushSearchHistory(term));
-  }, []);
+  };
 
-  const remove = useCallback((term: string) => {
+  const remove = (term: string) => {
     setEntries(removeSearchHistory(term));
-  }, []);
+  };
 
-  const clear = useCallback(() => {
+  const clear = () => {
     setEntries(clearSearchHistory());
-  }, []);
+  };
 
   return { entries, record, remove, clear };
 }

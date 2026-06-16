@@ -4,7 +4,7 @@ import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useState } from "react";
-import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
+import { useEnsureChapterUnit } from "@/book-library";
 import { ReplyComposer } from "@/comment";
 import { PostListSection } from "@/post";
 

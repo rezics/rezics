@@ -7,7 +7,7 @@ import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import {
   getBookAuthorName,
   getBookCoverUrl,
@@ -77,5 +77,3 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
     </div>
   );
 };
-
-export default HomeEditorPicks;

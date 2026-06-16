@@ -44,17 +44,17 @@ import { ContentRatingPreferences } from "@/user/components/ContentRatingPrefere
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
-const SUPPORTED_LANGUAGES: Language[] = Object.values(LANGUAGES);
-
-function getLanguageLabel(code: Language): string {
-  return LANGUAGE_META[code].nativeName;
-}
-
 type SortableLangItemProps = {
   code: Language;
   onRemove: (code: Language) => void;
   disabled?: boolean;
 };
+
+const SUPPORTED_LANGUAGES: Language[] = Object.values(LANGUAGES);
+
+function getLanguageLabel(code: Language): string {
+  return LANGUAGE_META[code].nativeName;
+}
 
 const SortableLangItem: FC<SortableLangItemProps> = ({
   code,

@@ -2,7 +2,6 @@ import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";
-import { useCallback } from "react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
 import { BacklogRemoveConfirmModal } from "../components/BacklogRemoveConfirmModal";
 import { CompletedConfirmModal } from "../components/CompletedConfirmModal";
@@ -31,50 +30,6 @@ export type BookProgressStatusSectionProps = {
   bookUnitId: string;
 };
 
-function isReasonStatus(
-  status: UserUnitProgressStatus,
-): status is ReasonStatus {
-  return status === "PAUSED" || status === "DROPPED";
-}
-
-function usesChineseProgressLayout(language: string | undefined) {
-  return language?.toLowerCase().startsWith("zh") ?? false;
-}
-
-function getDefaultPrimaryAction(
-  status: UserUnitProgressStatus | null,
-  t: (key: string) => string,
-): {
-  status: ToggleGroupStatus;
-  label: string;
-} {
-  if (!status) {
-    return {
-      status: "BACKLOG",
-      label: t("book:hero_actions_want_to_read"),
-    };
-  }
-
-  if (status === "ACTIVE") {
-    return {
-      status: "COMPLETED",
-      label: t("book:hero_actions_mark_as_read"),
-    };
-  }
-
-  if (status === "COMPLETED") {
-    return {
-      status: "COMPLETED",
-      label: t("book:hero_actions_read_again"),
-    };
-  }
-
-  return {
-    status: "ACTIVE",
-    label: t("book:hero_actions_start_reading"),
-  };
-}
-
 export function BookProgressStatusSection({
   bookUnitId,
 }: BookProgressStatusSectionProps) {
@@ -95,129 +50,89 @@ export function BookProgressStatusSection({
   const openModal = useSetAtom(openStatusModalAtom);
   const closeModal = useSetAtom(closeStatusModalAtom);
 
-  const handleSelect = useCallback(
-    (next: ToggleGroupStatus) => {
-      if (next === "BACKLOG") {
-        if (currentStatus === "BACKLOG") {
-          openModal({ kind: "removeBacklog", status: "BACKLOG" });
-          return;
-        }
-        void transition({ to: "BACKLOG" });
+  const handleSelect = (next: ToggleGroupStatus) => {
+    if (next === "BACKLOG") {
+      if (currentStatus === "BACKLOG") {
+        openModal({ kind: "removeBacklog", status: "BACKLOG" });
         return;
       }
-      if (next === "ACTIVE") {
-        openModal({
-          kind: "active",
-          status: "ACTIVE",
-          draft: {
-            progress: progress.data?.progress ?? 0,
-            lastReadNodeId: progress.data?.lastReadNodeId ?? null,
-          },
-        });
-        return;
-      }
-      if (next === "COMPLETED") {
-        openModal({ kind: "completed", status: "COMPLETED" });
-        return;
-      }
-    },
-    [currentStatus, openModal, progress.data, transition],
-  );
-
-  const handleDropped = useCallback(() => {
-    openModal({ kind: "reason", status: "DROPPED" });
-  }, [openModal]);
-
-  const handlePaused = useCallback(() => {
-    openModal({ kind: "reason", status: "PAUSED" });
-  }, [openModal]);
-
-  const handleRemoveProgress = useCallback(() => {
-    void removeProgress();
-  }, [removeProgress]);
-
-  const handleRemoveBacklogConfirm = useCallback(async () => {
-    await removeProgress();
-  }, [removeProgress]);
-
-  const handleActiveSave = useCallback(
-    async (payload: { progress: number; lastReadNodeId: string | null }) => {
-      await transition({
-        to: "ACTIVE",
-        progress: payload.progress,
-        lastReadNodeId: payload.lastReadNodeId,
+      void transition({ to: "BACKLOG" });
+      return;
+    }
+    if (next === "ACTIVE") {
+      openModal({
+        kind: "active",
+        status: "ACTIVE",
+        draft: {
+          progress: progress.data?.progress ?? 0,
+          lastReadNodeId: progress.data?.lastReadNodeId ?? null,
+        },
       });
-      closeModal();
-    },
-    [closeModal, transition],
-  );
+      return;
+    }
+    if (next === "COMPLETED") {
+      openModal({ kind: "completed", status: "COMPLETED" });
+      return;
+    }
+  };
 
-  const handleReasonSkip = useCallback(async () => {
+  const handleDropped = () => {
+    openModal({ kind: "reason", status: "DROPPED" });
+  };
+
+  const handlePaused = () => {
+    openModal({ kind: "reason", status: "PAUSED" });
+  };
+
+  const handleRemoveProgress = () => {
+    void removeProgress();
+  };
+
+  const handleRemoveBacklogConfirm = async () => {
+    await removeProgress();
+  };
+
+  const handleActiveSave = async (payload: {
+    progress: number;
+    lastReadNodeId: string | null;
+  }) => {
+    await transition({
+      to: "ACTIVE",
+      progress: payload.progress,
+      lastReadNodeId: payload.lastReadNodeId,
+    });
+    closeModal();
+  };
+
+  const handleReasonSkip = async () => {
     if (!modal.status || !isReasonStatus(modal.status)) return;
     await transition({ to: modal.status });
     closeModal();
-  }, [closeModal, modal.status, transition]);
+  };
 
-  const handleReasonSave = useCallback(
-    async ({
-      body,
-      visibility,
-    }: {
-      body: string;
-      visibility: "PUBLIC" | "UNLISTED";
-    }) => {
-      if (!modal.status || !isReasonStatus(modal.status)) return;
-      const reasonStatus = modal.status;
-      const ids = getReasonPostIds(progress.data?.extra ?? null, reasonStatus);
-      const latestId = ids[ids.length - 1];
+  const handleReasonSave = async ({
+    body,
+    visibility,
+  }: {
+    body: string;
+    visibility: "PUBLIC" | "UNLISTED";
+  }) => {
+    if (!modal.status || !isReasonStatus(modal.status)) return;
+    const reasonStatus = modal.status;
+    const ids = getReasonPostIds(progress.data?.extra ?? null, reasonStatus);
+    const latestId = ids[ids.length - 1];
 
-      if (latestId) {
-        await updateReasonPost({
-          postUnitId: latestId,
-          body,
-          visibility,
-        });
-        await transition({
-          to: reasonStatus,
-          extra: progress.data?.extra ?? null,
-        });
-      } else {
-        const created = await createReasonPost({
-          unitId: bookUnitId,
-          body,
-          visibility,
-        });
-        const nextExtra = appendReasonPostId(
-          progress.data?.extra ?? null,
-          reasonStatus,
-          created.unitId,
-        );
-        await transition({ to: reasonStatus, extra: nextExtra });
-      }
-
-      closeModal();
-    },
-    [
-      bookUnitId,
-      closeModal,
-      createReasonPost,
-      modal.status,
-      progress.data?.extra,
-      transition,
-      updateReasonPost,
-    ],
-  );
-
-  const handleReasonAppend = useCallback(
-    async ({
-      body,
-      visibility,
-    }: {
-      body: string;
-      visibility: "PUBLIC" | "UNLISTED";
-    }) => {
-      if (!modal.status || !isReasonStatus(modal.status)) return;
-      const reasonStatus = modal.status;
+    if (latestId) {
+      await updateReasonPost({
+        postUnitId: latestId,
+        body,
+        visibility,
+      });
+      await transition({
+        to: reasonStatus,
+        extra: progress.data?.extra ?? null,
+      });
+    } else {
       const created = await createReasonPost({
         unitId: bookUnitId,
         body,
@@ -229,25 +144,41 @@ export function BookProgressStatusSection({
         created.unitId,
       );
       await transition({ to: reasonStatus, extra: nextExtra });
-      closeModal();
-    },
-    [
-      bookUnitId,
-      closeModal,
-      createReasonPost,
-      modal.status,
-      progress.data?.extra,
-      transition,
-    ],
-  );
+    }
 
-  const handleCompletedConfirm = useCallback(async () => {
+    closeModal();
+  };
+
+  const handleReasonAppend = async ({
+    body,
+    visibility,
+  }: {
+    body: string;
+    visibility: "PUBLIC" | "UNLISTED";
+  }) => {
+    if (!modal.status || !isReasonStatus(modal.status)) return;
+    const reasonStatus = modal.status;
+    const created = await createReasonPost({
+      unitId: bookUnitId,
+      body,
+      visibility,
+    });
+    const nextExtra = appendReasonPostId(
+      progress.data?.extra ?? null,
+      reasonStatus,
+      created.unitId,
+    );
+    await transition({ to: reasonStatus, extra: nextExtra });
+    closeModal();
+  };
+
+  const handleCompletedConfirm = async () => {
     await transition({
       to: "COMPLETED",
       progress: 1,
       completedCount: (progress.data?.completedCount ?? 0) + 1,
     });
-  }, [progress.data?.completedCount, transition]);
+  };
 
   const toggleValue: ToggleGroupStatus | null =
     currentStatus && isToggleGroupStatus(currentStatus) ? currentStatus : null;
@@ -350,4 +281,48 @@ export function BookProgressStatusSection({
       />
     </div>
   );
+}
+
+function isReasonStatus(
+  status: UserUnitProgressStatus,
+): status is ReasonStatus {
+  return status === "PAUSED" || status === "DROPPED";
+}
+
+function usesChineseProgressLayout(language: string | undefined) {
+  return language?.toLowerCase().startsWith("zh") ?? false;
+}
+
+function getDefaultPrimaryAction(
+  status: UserUnitProgressStatus | null,
+  t: (key: string) => string,
+): {
+  status: ToggleGroupStatus;
+  label: string;
+} {
+  if (!status) {
+    return {
+      status: "BACKLOG",
+      label: t("book:hero_actions_want_to_read"),
+    };
+  }
+
+  if (status === "ACTIVE") {
+    return {
+      status: "COMPLETED",
+      label: t("book:hero_actions_mark_as_read"),
+    };
+  }
+
+  if (status === "COMPLETED") {
+    return {
+      status: "COMPLETED",
+      label: t("book:hero_actions_read_again"),
+    };
+  }
+
+  return {
+    status: "ACTIVE",
+    label: t("book:hero_actions_start_reading"),
+  };
 }

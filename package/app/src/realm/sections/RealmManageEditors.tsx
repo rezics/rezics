@@ -35,11 +35,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   Input,
   Label,
   Select,
@@ -51,13 +46,10 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Download,
-  GripVertical,
   ListTree,
-  MoreHorizontal,
   Plus,
   Save,
   Tag,
@@ -72,6 +64,17 @@ import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import {
+  clearTreeEditOpLog,
+  ensureTreeChildren,
+  emptyTreeEditOpLog,
+  enqueueTreeEditOp,
+  TreeEditorFooter,
+  TreeEditorRow,
+  TreeMoveToDialog,
+  type TreeActionItem,
+  type TreeEditOpLog,
+} from "@/tree-edit";
 
 function nodeLabel(node: TagTreeNode) {
   const translations = node.labelTranslations?.translations;
@@ -121,6 +124,7 @@ const navPositionOptions = ["side", "top"] as const;
 const contentWidthOptions = ["normal", "wide"] as const;
 const infoboxPositionOptions = ["right", "inline"] as const;
 const labelInsertTargets = ["navigation", "homepage"] as const;
+const TREE_DROP_INDENT = 32;
 type DensityOption = (typeof densityOptions)[number];
 type NavPositionOption = (typeof navPositionOptions)[number];
 type ContentWidthOption = (typeof contentWidthOptions)[number];
@@ -829,7 +833,7 @@ export function TagTreeEditor({
         current.map((item) => ({
           ...item,
           id: makeEditorId(),
-          children: item.children?.length ? visit(item.children) : undefined,
+          children: item.children?.length ? visit(item.children) : [],
         }));
       return visit(items ?? []);
     },
@@ -847,10 +851,15 @@ export function TagTreeEditor({
   const [nodes, setNodes] = useState<EditorNode[]>(() =>
     toEditorNodes(initialValue),
   );
+  const [savedNodes, setSavedNodes] = useState<EditorNode[]>(() =>
+    toEditorNodes(initialValue),
+  );
+  const [opLog, setOpLog] = useState<TreeEditOpLog>(emptyTreeEditOpLog);
   const [labelLanguage, setLabelLanguage] = useState(DEFAULT_LANGUAGE);
   const [search, setSearch] = useState("");
   const [createTitle, setCreateTitle] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [moveToNodeId, setMoveToNodeId] = useState<string | null>(null);
   const [addTarget, setAddTarget] = useState<AddTreeNodeTarget>({
     kind: "root",
   });
@@ -920,8 +929,21 @@ export function TagTreeEditor({
   );
 
   useEffect(() => {
-    setNodes(toEditorNodes(initialValue));
+    const next = toEditorNodes(initialValue);
+    setNodes(next);
+    setSavedNodes(next);
+    setOpLog(emptyTreeEditOpLog);
   }, [initialValue, toEditorNodes]);
+
+  const enqueueOp = (
+    type: string,
+    targetId?: string,
+    options?: Record<string, unknown>,
+  ) => {
+    setOpLog((current) =>
+      enqueueTreeEditOp(current, { type, targetId, options }),
+    );
+  };
 
   const treeAreaCallbackRef = useCallback((el: HTMLDivElement | null) => {
     if (resizeObserverRef.current) {
@@ -972,6 +994,7 @@ export function TagTreeEditor({
         ];
       });
     setNodes((current) => visit(current));
+    enqueueOp("delete", id);
   };
 
   const insertSiblingAfter = (targetId: string, nextNode: EditorNode) => {
@@ -991,6 +1014,7 @@ export function TagTreeEditor({
       );
     };
     setNodes((current) => visit(current));
+    enqueueOp("addSiblingAfter", targetId);
   };
 
   const addChild = (parentId: string, nextNode: EditorNode) => {
@@ -999,11 +1023,13 @@ export function TagTreeEditor({
       children: [...(node.children ?? []), nextNode],
     }));
     window.setTimeout(() => treeRef.current?.open(parentId), 0);
+    enqueueOp("addChild", parentId);
   };
 
   const insertAtTarget = (target: AddTreeNodeTarget, nextNode: EditorNode) => {
     if (target.kind === "root") {
       setNodes((current) => [...current, nextNode]);
+      enqueueOp("addRoot");
       return;
     }
     if (target.kind === "siblingAfter") {
@@ -1103,42 +1129,40 @@ export function TagTreeEditor({
     insertAndClose(createLocalHeadingNode(title, labelLanguage));
   };
 
-  const onMove: MoveHandler<EditorNode> = useCallback(
-    ({ dragIds, parentId, index }) => {
-      const removed: EditorNode[] = [];
-      const remove = (items: EditorNode[]): EditorNode[] =>
-        items.flatMap((item) => {
-          if (dragIds.includes(item.id)) {
-            removed.push(item);
-            return [];
-          }
-          return [
-            item.children?.length
-              ? { ...item, children: remove(item.children) }
-              : item,
-          ];
-        });
-      const insert = (items: EditorNode[]): EditorNode[] => {
-        if (parentId === null) {
-          const next = [...items];
-          next.splice(index, 0, ...removed);
-          return next;
+  const onMove: MoveHandler<EditorNode> = ({ dragIds, parentId, index }) => {
+    const removed: EditorNode[] = [];
+    const remove = (items: EditorNode[]): EditorNode[] =>
+      items.flatMap((item) => {
+        if (dragIds.includes(item.id)) {
+          removed.push(item);
+          return [];
         }
-        return items.map((item) => {
-          if (item.id === parentId) {
-            const children = [...(item.children ?? [])];
-            children.splice(index, 0, ...removed);
-            return { ...item, children };
-          }
-          return item.children?.length
-            ? { ...item, children: insert(item.children) }
-            : item;
-        });
-      };
-      setNodes((current) => insert(remove(current)));
-    },
-    [],
-  );
+        return [
+          item.children?.length
+            ? { ...item, children: remove(item.children) }
+            : item,
+        ];
+      });
+    const insert = (items: EditorNode[]): EditorNode[] => {
+      if (parentId === null) {
+        const next = [...items];
+        next.splice(index, 0, ...removed);
+        return next;
+      }
+      return items.map((item) => {
+        if (item.id === parentId) {
+          const children = [...(item.children ?? [])];
+          children.splice(index, 0, ...removed);
+          return { ...item, children };
+        }
+        return item.children?.length
+          ? { ...item, children: insert(item.children) }
+          : item;
+      });
+    };
+    setNodes((current) => insert(remove(current)));
+    enqueueOp("move", dragIds[0], { parentId, index, count: dragIds.length });
+  };
 
   const moveDepth = (nodeId: string, direction: "indent" | "outdent") => {
     setNodes((current) => {
@@ -1182,6 +1206,66 @@ export function TagTreeEditor({
           ? clone
           : current;
     });
+    enqueueOp(direction, nodeId);
+  };
+
+  const moveNodeToParent = (
+    nodeId: string,
+    targetParentId: string | number | null,
+  ) => {
+    setNodes((current) => {
+      const removed: EditorNode[] = [];
+      const remove = (items: EditorNode[]): EditorNode[] =>
+        items.flatMap((item) => {
+          if (item.id === nodeId) {
+            removed.push(item);
+            return [];
+          }
+          return [
+            item.children ? { ...item, children: remove(item.children) } : item,
+          ];
+        });
+      const insert = (items: EditorNode[]): EditorNode[] => {
+        if (targetParentId === null) return [...items, ...removed];
+        return items.map((item) => {
+          if (item.id === targetParentId) {
+            return {
+              ...item,
+              children: [...(item.children ?? []), ...removed],
+            };
+          }
+          return item.children
+            ? { ...item, children: insert(item.children) }
+            : item;
+        });
+      };
+      return insert(remove(current));
+    });
+    enqueueOp("moveTo", nodeId, { parentId: targetParentId });
+    if (targetParentId !== null) {
+      window.setTimeout(() => treeRef.current?.open(String(targetParentId)), 0);
+    }
+  };
+
+  const moveSiblingToEdge = (nodeId: string, edge: "first" | "last") => {
+    setNodes((current) => {
+      const clone = structuredClone(current) as EditorNode[];
+
+      const visit = (items: EditorNode[]): boolean => {
+        const index = items.findIndex((item) => item.id === nodeId);
+        if (index >= 0) {
+          const [item] = items.splice(index, 1);
+          if (!item) return false;
+          if (edge === "first") items.unshift(item);
+          else items.push(item);
+          return true;
+        }
+        return items.some((item) => item.children && visit(item.children));
+      };
+
+      return visit(clone) ? clone : current;
+    });
+    enqueueOp(edge === "first" ? "moveToFirst" : "moveToLast", nodeId);
   };
 
   const save = async () => {
@@ -1192,6 +1276,8 @@ export function TagTreeEditor({
         key: "tagTree",
         value: serializedNodes,
       });
+      setSavedNodes(nodes);
+      setOpLog((current) => clearTreeEditOpLog(current));
       toast.success(getI18nRuntime().i18n.t("entity:realm_tag_tree_saved"));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -1221,7 +1307,10 @@ export function TagTreeEditor({
         throw new Error("Uploaded tagTree JSON must be an array.");
       }
       await setValue.mutateAsync({ realmId, key: "tagTree", value: parsed });
-      setNodes(toEditorNodes(parsed));
+      const next = toEditorNodes(parsed);
+      setNodes(next);
+      setSavedNodes(next);
+      setOpLog(emptyTreeEditOpLog);
       toast.success(getI18nRuntime().i18n.t("entity:realm_tag_tree_saved"));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -1246,169 +1335,104 @@ export function TagTreeEditor({
   };
 
   const pendingDeleteNode = findNode(nodes, pendingDeleteId);
+  const moveToNode = findNode(nodes, moveToNodeId);
   const confirmDeleteNode = () => {
     if (!pendingDeleteId) return;
     deleteNodeById(pendingDeleteId);
     setPendingDeleteId(null);
   };
+  const cancelPendingOps = () => {
+    setNodes(savedNodes);
+    setOpLog((current) => clearTreeEditOpLog(current));
+  };
 
   function Node({ node, style, dragHandle }: NodeRendererProps<EditorNode>) {
     const hasChildren = (node.children?.length ?? 0) > 0;
+    const isSubtreeEnd = !!(
+      node.parent &&
+      !node.parent.isRoot &&
+      (!node.next || !node.parent.isAncestorOf(node.next))
+    );
     const label = nodeLabel(node.data);
     const kind = node.data.tagId
       ? "Tag"
       : node.data.labelUnitId
         ? "Label"
         : "Local";
-    const actionItems = (
-      <>
-        <DropdownMenuItem
-          onClick={() =>
-            openAddDialog({ kind: "siblingAfter", nodeId: node.data.id })
-          }
-        >
-          Add sibling
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => openAddDialog({ kind: "child", nodeId: node.data.id })}
-        >
-          Add child
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => moveDepth(node.data.id, "indent")}>
-          Indent
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => moveDepth(node.data.id, "outdent")}>
-          Outdent
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => setPendingDeleteId(node.data.id)}
-        >
-          Delete
-        </DropdownMenuItem>
-      </>
-    );
+    const actionItems: TreeActionItem[] = [
+      {
+        key: "addSiblingAfter",
+        label: "Add sibling",
+        icon: <Plus className="size-4" aria-hidden />,
+        onSelect: () =>
+          openAddDialog({ kind: "siblingAfter", nodeId: node.data.id }),
+      },
+      {
+        key: "addChild",
+        label: "Add child",
+        icon: <ListTree className="size-4" aria-hidden />,
+        onSelect: () => openAddDialog({ kind: "child", nodeId: node.data.id }),
+      },
+      {
+        key: "moveTo",
+        label: "Move to...",
+        separatorBefore: true,
+        onSelect: () => setMoveToNodeId(node.data.id),
+      },
+      {
+        key: "indent",
+        label: "Indent",
+        icon: <ChevronRight className="size-4" aria-hidden />,
+        onSelect: () => moveDepth(node.data.id, "indent"),
+      },
+      {
+        key: "outdent",
+        label: "Outdent",
+        icon: <ChevronLeft className="size-4" aria-hidden />,
+        onSelect: () => moveDepth(node.data.id, "outdent"),
+      },
+      {
+        key: "moveToFirst",
+        label: "Move to first",
+        onSelect: () => moveSiblingToEdge(node.data.id, "first"),
+      },
+      {
+        key: "moveToLast",
+        label: "Move to last",
+        onSelect: () => moveSiblingToEdge(node.data.id, "last"),
+      },
+      {
+        key: "delete",
+        label: "Delete",
+        icon: <Trash2 className="size-4" aria-hidden />,
+        separatorBefore: true,
+        destructive: true,
+        onSelect: () => setPendingDeleteId(node.data.id),
+      },
+    ];
 
     return (
-      <div
-        style={style}
-        className="group flex h-full min-w-0 items-center gap-2 border-b border-border-whisper bg-surface-base px-2 text-sm leading-dense text-text-primary hover:bg-surface-subtle"
-      >
-        <span
-          ref={dragHandle}
-          className="flex size-7 cursor-grab items-center justify-center rounded-sm text-text-tertiary"
-        >
-          <GripVertical className="size-4" aria-hidden />
-        </span>
-        <button
-          type="button"
-          className="flex size-7 items-center justify-center rounded-sm text-text-tertiary hover:bg-surface-elevated hover:text-text-primary"
-          onClick={() => node.toggle()}
-          aria-label={hasChildren ? "Toggle children" : "No children"}
-        >
-          {hasChildren ? (
-            node.isOpen ? (
-              <ChevronDown className="size-4" aria-hidden />
+      <div style={{ ...style, paddingLeft: 0 }} className="h-full">
+        <TreeEditorRow
+          label={label}
+          meta={kind}
+          leadingIcon={
+            node.data.tagId ? (
+              <Tag className="size-4" aria-hidden />
+            ) : node.data.labelUnitId ? (
+              <Type className="size-4" aria-hidden />
             ) : (
-              <ChevronRight className="size-4" aria-hidden />
+              <ListTree className="size-4" aria-hidden />
             )
-          ) : (
-            <span className="size-4" />
-          )}
-        </button>
-        <span className="flex size-7 items-center justify-center rounded-sm bg-surface-subtle text-text-tertiary">
-          {node.data.tagId ? (
-            <Tag className="size-4" aria-hidden />
-          ) : node.data.labelUnitId ? (
-            <Type className="size-4" aria-hidden />
-          ) : (
-            <ListTree className="size-4" aria-hidden />
-          )}
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate font-medium leading-ui text-text-primary">
-            {label}
-          </span>
-          <span className="truncate text-xs leading-dense text-text-tertiary">
-            {kind}
-          </span>
-        </div>
-        <div className="ml-auto hidden shrink-0 items-center gap-1 sm:flex">
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-8"
-            onClick={() =>
-              openAddDialog({ kind: "siblingAfter", nodeId: node.data.id })
-            }
-            aria-label="Add sibling"
-          >
-            <Plus className="size-4" aria-hidden />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-8"
-            onClick={() =>
-              openAddDialog({ kind: "child", nodeId: node.data.id })
-            }
-            aria-label="Add child"
-          >
-            <ListTree className="size-4" aria-hidden />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-8"
-            onClick={() => moveDepth(node.data.id, "indent")}
-            aria-label="Indent"
-          >
-            <ChevronRight className="size-4" aria-hidden />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-8"
-            onClick={() => moveDepth(node.data.id, "outdent")}
-            aria-label="Outdent"
-          >
-            <ChevronLeft className="size-4" aria-hidden />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-8 text-error-text hover:text-error-text"
-            onClick={() => setPendingDeleteId(node.data.id)}
-            aria-label="Delete"
-          >
-            <Trash2 className="size-4" aria-hidden />
-          </Button>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            nativeButton
-            render={(props) => (
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="ml-auto size-8 shrink-0 sm:hidden"
-                aria-label="More actions"
-                {...props}
-              >
-                <MoreHorizontal className="size-4" aria-hidden />
-              </Button>
-            )}
-          />
-          <DropdownMenuContent align="end">{actionItems}</DropdownMenuContent>
-        </DropdownMenu>
+          }
+          actions={actionItems}
+          hasChildren={hasChildren}
+          expanded={node.isOpen}
+          draggable
+          dragHandle={dragHandle}
+          onToggle={() => node.toggle()}
+          subtreeEnd={isSubtreeEnd}
+        />
       </div>
     );
   }
@@ -1487,11 +1511,11 @@ export function TagTreeEditor({
         ) : (
           <Tree<EditorNode>
             ref={treeRef}
-            data={nodes}
             onMove={onMove}
+            data={ensureTreeChildren(nodes)}
             width={treeSize.width}
             height={treeSize.height}
-            indent={24}
+            indent={TREE_DROP_INDENT}
             rowHeight={46}
             idAccessor={(node) => node.id}
             childrenAccessor="children"
@@ -1502,15 +1526,32 @@ export function TagTreeEditor({
         )}
       </div>
 
-      <div className="flex shrink-0 justify-end">
-        {error && (
-          <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
-        )}
-        <Button onClick={save} disabled={setValue.isPending}>
-          <Save className="mr-2 size-4" aria-hidden />
-          {getI18nRuntime().i18n.t("entity:realm_save_tag_tree")}
-        </Button>
-      </div>
+      {error ? (
+        <p className="text-sm leading-ui text-error-text">{error}</p>
+      ) : null}
+      <TreeEditorFooter
+        pendingCount={opLog.entries.length}
+        saving={setValue.isPending}
+        onCancel={cancelPendingOps}
+        onSave={save}
+        summary={
+          <span>
+            {nodes.length} root {nodes.length === 1 ? "item" : "items"}
+          </span>
+        }
+        saveLabel={getI18nRuntime().i18n.t("entity:realm_save_tag_tree")}
+      />
+
+      <TreeMoveToDialog
+        open={moveToNode !== null}
+        nodes={nodes}
+        movingNode={moveToNode}
+        getLabel={nodeLabel}
+        onClose={() => setMoveToNodeId(null)}
+        onConfirm={(targetParentId) => {
+          if (moveToNodeId) moveNodeToParent(moveToNodeId, targetParentId);
+        }}
+      />
 
       <Dialog
         open={addOpen}

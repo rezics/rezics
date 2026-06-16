@@ -10,6 +10,11 @@ import { useLocalizedPollSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 type UsageFilter = "all" | "used" | "unused";
 type ClosedFilter = "all" | "open" | "closed";
 
+export interface PollLibrarySurfaceProps {
+  ownerUserId?: string | null;
+  renderAction?: (poll: PollSearchDocument) => React.ReactNode;
+}
+
 const usageFilterLabels = {
   all: "community:poll_library_filter_usage_all",
   used: "community:poll_library_filter_usage_used",
@@ -21,19 +26,6 @@ const closedFilterLabels = {
   open: "community:poll_library_filter_closed_open",
   closed: "community:poll_library_filter_closed_closed",
 } as const;
-
-export interface PollLibrarySurfaceProps {
-  ownerUserId?: string | null;
-  renderAction?: (poll: PollSearchDocument) => React.ReactNode;
-}
-
-function pollTitle(poll: PollSearchDocument) {
-  return poll.titles[0] || poll.unitId;
-}
-
-function pollDescription(poll: PollSearchDocument) {
-  return poll.descriptions[0] || poll.optionLabels.slice(0, 3).join(" · ");
-}
 
 export function PollLibrarySurface({
   ownerUserId,
@@ -162,4 +154,12 @@ export function PollLibrarySurface({
       )}
     </div>
   );
+}
+
+function pollTitle(poll: PollSearchDocument) {
+  return poll.titles[0] || poll.unitId;
+}
+
+function pollDescription(poll: PollSearchDocument) {
+  return poll.descriptions[0] || poll.optionLabels.slice(0, 3).join(" · ");
 }

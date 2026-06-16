@@ -29,17 +29,15 @@ import {
   useReactionBarModel,
 } from "@/engagement";
 import { PollEmbed } from "@/poll";
-import { PostAuthorHeader } from "@/post";
 import {
   ModerationBadge,
   moderationControlStateClass,
-} from "@/post/components/parts/ModerationBadge";
-import {
+  PostAuthorHeader,
   postCardActions,
   postCardOverflow,
   postPolicy,
-} from "@/post/models/postPolicy";
-import { reviewCardActions, reviewPolicy } from "@/review/models/reviewPolicy";
+} from "@/post";
+import { reviewCardActions, reviewPolicy } from "@/review";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { VariantContextLink } from "@/unit";
@@ -84,34 +82,6 @@ export interface FeedCardProps {
   realmModerationAt?: string | Date | null;
   moderationLatestAction?: ModerationActionDTO | null;
   moderationMenuContent?: React.ReactNode;
-}
-
-function clampStyle(lines: number): ClampStyle {
-  return {
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: lines,
-    overflow: "hidden",
-  };
-}
-
-function FeedReviewRating({ post }: { post: PostDTO }) {
-  const rating = (post.extra as { rating?: number } | null)?.rating;
-  if (post.kind !== PostKind.REVIEW) return null;
-
-  return (
-    <TextLink
-      to="/review/$reviewId"
-      params={{ reviewId: post.unitId }}
-      className="flex items-center gap-1 rounded p-1 text-inherit no-underline transition-colors hover:bg-surface-subtle"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <Star className="h-4 w-4 fill-current text-text-brand" aria-hidden />
-      <span className="text-xs leading-dense">
-        {rating !== undefined ? rating.toFixed(1) : "0.0"}/10
-      </span>
-    </TextLink>
-  );
 }
 
 /**
@@ -328,5 +298,33 @@ export function FeedCard({
         ) : null}
       </article>
     </Card>
+  );
+}
+
+function clampStyle(lines: number): ClampStyle {
+  return {
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    WebkitLineClamp: lines,
+    overflow: "hidden",
+  };
+}
+
+function FeedReviewRating({ post }: { post: PostDTO }) {
+  const rating = (post.extra as { rating?: number } | null)?.rating;
+  if (post.kind !== PostKind.REVIEW) return null;
+
+  return (
+    <TextLink
+      to="/review/$reviewId"
+      params={{ reviewId: post.unitId }}
+      className="flex items-center gap-1 rounded p-1 text-inherit no-underline transition-colors hover:bg-surface-subtle"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <Star className="h-4 w-4 fill-current text-text-brand" aria-hidden />
+      <span className="text-xs leading-dense">
+        {rating !== undefined ? rating.toFixed(1) : "0.0"}/10
+      </span>
+    </TextLink>
   );
 }

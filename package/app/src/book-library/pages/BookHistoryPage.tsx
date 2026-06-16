@@ -20,8 +20,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { editorialPathLabel, slotLabel } from "@/unit/models/lockFieldLabels";
+import { QueryErrorDisplay } from "@/core";
+import { editorialPathLabel, slotLabel } from "@/unit";
 import {
   compareRevisionPathSnapshots,
   type DiffPart,
@@ -29,6 +29,13 @@ import {
 } from "../models/historyCompare";
 
 type HistoryTab = "editorial" | "structure";
+
+type MarkdownDiffRow = {
+  content: string;
+  newLineNumber?: number;
+  oldLineNumber?: number;
+  type: DiffPart["type"];
+};
 
 export function BookHistoryPage() {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
@@ -805,13 +812,6 @@ function HistoryDiffStyles() {
     `}</style>
   );
 }
-
-type MarkdownDiffRow = {
-  content: string;
-  newLineNumber?: number;
-  oldLineNumber?: number;
-  type: DiffPart["type"];
-};
 
 function diffRowKey(row: MarkdownDiffRow) {
   return [

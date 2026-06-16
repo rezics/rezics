@@ -9,7 +9,7 @@ import {
 } from "@/dashboard";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
-import { useAuth } from "@/user/pages/useAuth";
+import { useAuth } from "@/user";
 
 /**
  * Signed-in continuation block on the home page. Signed-out (or not-yet-ready)

@@ -4,7 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
@@ -33,12 +33,12 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
     [],
   );
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setBody("");
     setTitle("");
     setScore(null);
     setExpanded(false);
-  }, []);
+  };
 
   const handleSubmit = () => {
     const trimmed = body.trim();

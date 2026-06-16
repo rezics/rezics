@@ -20,7 +20,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 
@@ -33,42 +33,6 @@ type FollowInfoPageProps = {
 
 const ITEMS_PER_PAGE = 20;
 const EXTERNAL_ITEMS_PER_PAGE = 20;
-
-function FollowUserList({ users }: { users: SimpleUser[] }) {
-  const { t } = useTranslation(["settings"]);
-  if (users.length === 0) {
-    return (
-      <div className="py-16 text-center text-text-secondary">
-        {t("settings:user_empty")}
-      </div>
-    );
-  }
-
-  return (
-    <ul className="divide-y divide-border-whisper">
-      {users.map((user) => (
-        <li key={user.unitId} className="flex items-center gap-3 py-3">
-          <Avatar>
-            <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
-            <AvatarFallback>
-              {user.name?.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <span className="block text-sm font-medium text-text-primary">
-              {user.name || user.slug || user.unitId}
-            </span>
-            {user.slug && (
-              <span className="block text-sm text-text-secondary">
-                @{user.slug}
-              </span>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   unitId,
@@ -239,4 +203,38 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   );
 };
 
-export default FollowInfoPage;
+function FollowUserList({ users }: { users: SimpleUser[] }) {
+  const { t } = useTranslation(["settings"]);
+  if (users.length === 0) {
+    return (
+      <div className="py-16 text-center text-text-secondary">
+        {t("settings:user_empty")}
+      </div>
+    );
+  }
+
+  return (
+    <ul className="divide-y divide-border-whisper">
+      {users.map((user) => (
+        <li key={user.unitId} className="flex items-center gap-3 py-3">
+          <Avatar>
+            <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+            <AvatarFallback>
+              {user.name?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <span className="block text-sm font-medium text-text-primary">
+              {user.name || user.slug || user.unitId}
+            </span>
+            {user.slug && (
+              <span className="block text-sm text-text-secondary">
+                @{user.slug}
+              </span>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}

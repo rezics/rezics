@@ -119,5 +119,3 @@ export const ContinueThreadPage: React.FC = () => {
     </div>
   );
 };
-
-export default ContinueThreadPage;

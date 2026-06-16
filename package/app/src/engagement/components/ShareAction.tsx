@@ -39,17 +39,6 @@ export type ShareActionProps = {
   targetId?: string;
 };
 
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 22;
-    default:
-      return 18;
-  }
-}
-
 export const ShareAction: React.FC<ShareActionProps> = ({
   size: sizeProp,
   href,
@@ -145,3 +134,14 @@ export const ShareAction: React.FC<ShareActionProps> = ({
     </>
   );
 };
+
+function sizeToIconPx(size: EngagementSize): number {
+  switch (size) {
+    case "sm":
+      return 16;
+    case "lg":
+      return 22;
+    default:
+      return 18;
+  }
+}

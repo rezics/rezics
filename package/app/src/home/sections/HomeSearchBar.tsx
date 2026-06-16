@@ -1,8 +1,10 @@
 import type React from "react";
-import { BookSearch } from "@/book-library/components/BookSearch/BookSearch";
-import { useHomeSearchNavigate } from "@/search/hooks/useHomeSearchNavigate";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import { parseSearchString } from "@/search/models/searchQuery";
+import { BookSearch } from "@/book-library";
+import {
+  parseSearchString,
+  useHomeSearchNavigate,
+  useSearchQuery,
+} from "@/search";
 
 export type HomeSearchBarProps = object;
 
@@ -33,5 +35,3 @@ export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
     />
   );
 };
-
-export default HomeSearchBar;

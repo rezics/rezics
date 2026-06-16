@@ -35,21 +35,6 @@ export interface AnnouncementFeedSectionProps {
   realmUnitId?: string;
 }
 
-function toItem(
-  entry: PinboardEntryView,
-  linkFor?: (unitId: string) => string,
-): PinboardAnnouncementItem {
-  return {
-    id: entry.unitId,
-    unitId: entry.unitId,
-    title: entry.title ?? "",
-    content: entry.summary ?? "",
-    date: entry.updatedAt ?? entry.createdAt ?? new Date().toISOString(),
-    pin: true,
-    link: linkFor?.(entry.unitId),
-  };
-}
-
 /**
  * Homepage announcement source. Returns the resolved announcements for
  * the default realm via render prop so existing consumers (the bar, the
@@ -84,3 +69,18 @@ export const AnnouncementFeedSection: React.FC<
   const items = entries.map((e) => toItem(e, linkFor));
   return <>{children(items)}</>;
 };
+
+function toItem(
+  entry: PinboardEntryView,
+  linkFor?: (unitId: string) => string,
+): PinboardAnnouncementItem {
+  return {
+    id: entry.unitId,
+    unitId: entry.unitId,
+    title: entry.title ?? "",
+    content: entry.summary ?? "",
+    date: entry.updatedAt ?? entry.createdAt ?? new Date().toISOString(),
+    pin: true,
+    link: linkFor?.(entry.unitId),
+  };
+}

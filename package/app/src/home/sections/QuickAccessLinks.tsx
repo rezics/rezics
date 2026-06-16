@@ -64,5 +64,3 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
     </Carousel>
   );
 };
-
-export default QuickAccessLinks;

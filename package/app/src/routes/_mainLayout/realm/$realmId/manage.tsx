@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RealmManagePage } from "@/realm/pages/RealmManagePage";
+import { RealmManagePage } from "@/realm";
 
 const manageTabs = [
   "profile",

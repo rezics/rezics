@@ -25,7 +25,7 @@ import { XCircle as CancelIcon, Save as SaveIcon } from "lucide-react";
 import type React from "react";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
 

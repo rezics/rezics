@@ -3,7 +3,7 @@ import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIc
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { ExcerptList } from "@/excerpt";
 import { Route as excerptByBookRoute } from "@/routes/_mainLayout/excerpt/book/$bookId";
-import UnitsPage from "@/unit/pages/UnitsPage";
+import { UnitsPage } from "@/unit";
 import { ExcerptNewPage } from "./ExcerptNewPage";
 
 export function ExcerptByBookPage() {

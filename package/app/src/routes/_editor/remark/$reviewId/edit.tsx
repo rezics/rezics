@@ -1,7 +1,6 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
-import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
+import { createMinimalEditConsoleConfig, EditConsoleLayout } from "@/core";
 
 const RemarkEditPage = lazyRouteComponent(
   () => import("@/remark/pages/RemarkEditPage"),

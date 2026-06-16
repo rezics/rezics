@@ -5,7 +5,7 @@ import {
   mainMarkdownSource,
 } from "@rezics/contract";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 export type TranslationDraft = {
   title: string;
@@ -65,16 +65,13 @@ export function useBookTranslationEditor(
 
   const [drafts, setDrafts] = useState<DraftMap>({});
 
-  const setSelectedLanguage = useCallback(
-    (lang: string) => {
-      navigate({
-        to: ".",
-        search: (prev: Record<string, unknown>) => ({ ...prev, lang }),
-        replace: true,
-      });
-    },
-    [navigate],
-  );
+  const setSelectedLanguage = (lang: string) => {
+    navigate({
+      to: ".",
+      search: (prev: Record<string, unknown>) => ({ ...prev, lang }),
+      replace: true,
+    });
+  };
 
   const existingTranslations = book?.translations ?? [];
   const translationByLang = useMemo(() => {
@@ -101,30 +98,30 @@ export function useBookTranslationEditor(
     );
   }, [drafts, selectedLanguage, currentTranslation]);
 
-  const updateField = useCallback(
-    <K extends keyof TranslationDraft>(key: K, value: TranslationDraft[K]) => {
-      setDrafts((prev) => {
-        const base =
-          prev[selectedLanguage] ??
-          translationToDraft(translationByLang.get(selectedLanguage));
-        return { ...prev, [selectedLanguage]: { ...base, [key]: value } };
-      });
-    },
-    [selectedLanguage, translationByLang],
-  );
+  const updateField = <K extends keyof TranslationDraft>(
+    key: K,
+    value: TranslationDraft[K],
+  ) => {
+    setDrafts((prev) => {
+      const base =
+        prev[selectedLanguage] ??
+        translationToDraft(translationByLang.get(selectedLanguage));
+      return { ...prev, [selectedLanguage]: { ...base, [key]: value } };
+    });
+  };
 
-  const replaceDraft = useCallback((lang: string, next: TranslationDraft) => {
+  const replaceDraft = (lang: string, next: TranslationDraft) => {
     setDrafts((prev) => ({ ...prev, [lang]: next }));
-  }, []);
+  };
 
-  const clearDraft = useCallback((lang: string) => {
+  const clearDraft = (lang: string) => {
     setDrafts((prev) => {
       if (!(lang in prev)) return prev;
       const next = { ...prev };
       delete next[lang];
       return next;
     });
-  }, []);
+  };
 
   return {
     selectedLanguage,

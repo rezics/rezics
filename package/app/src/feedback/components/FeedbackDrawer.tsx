@@ -8,7 +8,7 @@ import {
   SheetTitle,
 } from "@rezics/ui/shadcn";
 import type React from "react";
-import FeedbackForm from "./FeedbackForm";
+import { FeedbackForm } from "./FeedbackForm";
 
 type FeedbackDrawerProps = {
   open: boolean;
@@ -20,7 +20,7 @@ type FeedbackDrawerProps = {
   };
 };
 
-const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
+export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
   open,
   onClose,
   defaultValues,
@@ -48,5 +48,3 @@ const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
     </Sheet>
   );
 };
-
-export default FeedbackDrawer;

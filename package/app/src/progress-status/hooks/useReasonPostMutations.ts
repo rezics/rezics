@@ -7,7 +7,6 @@ import {
   markdownContentDoc,
   type PostResponse,
 } from "@rezics/contract";
-import { useCallback } from "react";
 
 export type ReasonPostVisibility = "PUBLIC" | "UNLISTED";
 
@@ -33,43 +32,45 @@ export function useReasonPostMutations(): UseReasonPostMutationsResult {
   const createPost = useCreatePostMutation();
   const updatePost = useUpdatePostMutation();
 
-  const createReasonPost = useCallback(
-    async ({ unitId, body, visibility }: CreateReasonPostInput) => {
-      // MOCK: post API does not yet expose `visibility` on create; tunnel through
-      // `extra.visibility` until the backend route accepts the field directly.
-      // MOCK: post API 尚未在创建时暴露 `visibility`；在后端路由直接接受该字段之前，
-      // 暂时通过 `extra.visibility` 透传。
-      return createPost.mutateAsync({
-        targetUnitId: unitId,
-        language: DEFAULT_LANGUAGE,
-        title: body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Reason",
-        content: markdownContentDoc(body),
-        kind: "POST",
-        extra: { visibility },
-      });
-    },
-    [createPost],
-  );
+  const createReasonPost = async ({
+    unitId,
+    body,
+    visibility,
+  }: CreateReasonPostInput) => {
+    // MOCK: post API does not yet expose `visibility` on create; tunnel through
+    // `extra.visibility` until the backend route accepts the field directly.
+    // MOCK: post API 尚未在创建时暴露 `visibility`；在后端路由直接接受该字段之前，
+    // 暂时通过 `extra.visibility` 透传。
+    return createPost.mutateAsync({
+      targetUnitId: unitId,
+      language: DEFAULT_LANGUAGE,
+      title: body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Reason",
+      content: markdownContentDoc(body),
+      kind: "POST",
+      extra: { visibility },
+    });
+  };
 
-  const updateReasonPost = useCallback(
-    async ({ postUnitId, body, visibility }: UpdateReasonPostInput) => {
-      // MOCK: same as createReasonPost — visibility goes via extra for now.
-      // MOCK: 与 createReasonPost 相同——visibility 目前通过 extra 传递。
-      return updatePost.mutateAsync({
-        unitId: postUnitId,
-        input: {
-          patch: {
-            post: {
-              language: DEFAULT_LANGUAGE,
-              content: markdownContentDoc(body),
-              extra: { visibility },
-            },
+  const updateReasonPost = async ({
+    postUnitId,
+    body,
+    visibility,
+  }: UpdateReasonPostInput) => {
+    // MOCK: same as createReasonPost — visibility goes via extra for now.
+    // MOCK: 与 createReasonPost 相同——visibility 目前通过 extra 传递。
+    return updatePost.mutateAsync({
+      unitId: postUnitId,
+      input: {
+        patch: {
+          post: {
+            language: DEFAULT_LANGUAGE,
+            content: markdownContentDoc(body),
+            extra: { visibility },
           },
         },
-      });
-    },
-    [updatePost],
-  );
+      },
+    });
+  };
 
   return {
     createReasonPost,

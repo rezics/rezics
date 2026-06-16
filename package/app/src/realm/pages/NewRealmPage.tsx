@@ -134,5 +134,3 @@ export function NewRealmPage() {
     </div>
   );
 }
-
-export default NewRealmPage;

@@ -14,7 +14,7 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { resolveCatalogEntryInteractionContext } from "@/book-library/models/catalogEntryContext";
+import { resolveCatalogEntryInteractionContext } from "@/book-library";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";

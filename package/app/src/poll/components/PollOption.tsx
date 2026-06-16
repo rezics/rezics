@@ -31,38 +31,6 @@ interface PollOptionProps {
   onSelect: (optionId: string) => void;
 }
 
-/**
- * Renders a referenced unit (the option's `unitId`) via the shared unit card.
- * 通过共享的 unit card 渲染被引用的 unit（选项的 `unitId`）。
- */
-function PollUnitOption({ unitId }: { unitId: string }) {
-  const { t } = useTranslation(["common"]);
-  const readContext = useReadLanguageContext();
-  const { data: unit, isLoading } = useQuery({
-    ...unitDetailQuery(unitId, {
-      languages: readContext.languages,
-      appLocale: readContext.appLocale,
-    }),
-    enabled: readContext.ready && Boolean(unitId),
-  });
-
-  if (isLoading) {
-    return (
-      <span className="text-sm leading-ui text-text-secondary">
-        {t("common:loading")}
-      </span>
-    );
-  }
-  if (!unit) {
-    return (
-      <span className="text-sm leading-ui text-text-tertiary">{unitId}</span>
-    );
-  }
-  return (
-    <UnitCard summary={unitDtoToUnitCardSummary(unit)} variant="compact" />
-  );
-}
-
 export const PollOption: React.FC<PollOptionProps> = ({
   option,
   voteMode,
@@ -136,3 +104,35 @@ export const PollOption: React.FC<PollOptionProps> = ({
     </div>
   );
 };
+
+/**
+ * Renders a referenced unit (the option's `unitId`) via the shared unit card.
+ * 通过共享的 unit card 渲染被引用的 unit（选项的 `unitId`）。
+ */
+function PollUnitOption({ unitId }: { unitId: string }) {
+  const { t } = useTranslation(["common"]);
+  const readContext = useReadLanguageContext();
+  const { data: unit, isLoading } = useQuery({
+    ...unitDetailQuery(unitId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && Boolean(unitId),
+  });
+
+  if (isLoading) {
+    return (
+      <span className="text-sm leading-ui text-text-secondary">
+        {t("common:loading")}
+      </span>
+    );
+  }
+  if (!unit) {
+    return (
+      <span className="text-sm leading-ui text-text-tertiary">{unitId}</span>
+    );
+  }
+  return (
+    <UnitCard summary={unitDtoToUnitCardSummary(unit)} variant="compact" />
+  );
+}

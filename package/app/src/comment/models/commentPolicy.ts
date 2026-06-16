@@ -1,5 +1,5 @@
 import type { Action, ReactionBarPolicy } from "@/engagement";
-import { getPostShareHref, postPolicy } from "@/post/models/postPolicy";
+import { getPostShareHref } from "@/post/models/postPolicy";
 
 export const commentRowActions: Action[] = ["vote", "reply", "shelf"];
 export const commentRowOverflow: Action[] = ["share"];
@@ -9,7 +9,7 @@ export const commentRowOverflow: Action[] = ["share"];
 export { getPostShareHref };
 
 export const commentPolicy: ReactionBarPolicy = {
-  ...postPolicy,
+  getShareHref: getPostShareHref,
   shelfItemType: "comment",
   shelfItemKind: "comment",
 };

@@ -21,24 +21,6 @@ import { parseSearchString } from "../models/searchQuery";
 
 export { isSearchCategory } from "../models/category";
 
-function countsFromResult(
-  result: FederatedSearchResult | undefined,
-): Partial<Record<SearchCategory, number>> {
-  if (!result || result.kind !== "grouped") return {};
-  const out: Partial<Record<SearchCategory, number>> = {};
-  const s = result.sections;
-  if (s.books) out.books = s.books.totalHits;
-  if (s.reviews) out.reviews = s.reviews.totalHits;
-  if (s.excerpts) out.excerpts = s.excerpts.totalHits;
-  if (s.remarks) out.remarks = s.remarks.totalHits;
-  if (s.posts) out.posts = s.posts.totalHits;
-  if (s.shelves) out.shelves = s.shelves.totalHits;
-  if (s.realms) out.realms = s.realms.totalHits;
-  if (s.users) out.users = s.users.totalHits;
-  if (s.entities) out.entities = s.entities.totalHits;
-  return out;
-}
-
 export type FederatedSearchPageProps = {
   scope: SearchScope;
   initialQuery?: SearchQuery;
@@ -155,4 +137,22 @@ export function FederatedSearchPage({
       />
     </div>
   );
+}
+
+function countsFromResult(
+  result: FederatedSearchResult | undefined,
+): Partial<Record<SearchCategory, number>> {
+  if (!result || result.kind !== "grouped") return {};
+  const out: Partial<Record<SearchCategory, number>> = {};
+  const s = result.sections;
+  if (s.books) out.books = s.books.totalHits;
+  if (s.reviews) out.reviews = s.reviews.totalHits;
+  if (s.excerpts) out.excerpts = s.excerpts.totalHits;
+  if (s.remarks) out.remarks = s.remarks.totalHits;
+  if (s.posts) out.posts = s.posts.totalHits;
+  if (s.shelves) out.shelves = s.shelves.totalHits;
+  if (s.realms) out.realms = s.realms.totalHits;
+  if (s.users) out.users = s.users.totalHits;
+  if (s.entities) out.entities = s.entities.totalHits;
+  return out;
 }

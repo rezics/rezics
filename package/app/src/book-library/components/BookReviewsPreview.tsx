@@ -5,7 +5,7 @@ import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIc
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { ReviewList } from "@/review/components/list/ReviewList";
+import { ReviewList } from "@/review";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 /**

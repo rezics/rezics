@@ -16,17 +16,6 @@ export type ReplyActionProps = {
   onInvoke?: () => void;
 };
 
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 22;
-    default:
-      return 18;
-  }
-}
-
 export const ReplyAction: React.FC<ReplyActionProps> = ({
   size: sizeProp,
   replyCount = 0,
@@ -67,3 +56,14 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
     </Button>
   );
 };
+
+function sizeToIconPx(size: EngagementSize): number {
+  switch (size) {
+    case "sm":
+      return 16;
+    case "lg":
+      return 22;
+    default:
+      return 18;
+  }
+}

@@ -1,12 +1,8 @@
 import type { SearchQuery } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
-import {
-  AppliedFilterChips,
-  KeywordInput,
-  TagPicker,
-} from "@/search/components/primitive";
-import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
+import type { UseSearchQueryReturn } from "@/search";
+import { AppliedFilterChips, KeywordInput, TagPicker } from "@/search";
 
 export type ReviewSearchProps = {
   query: UseSearchQueryReturn["query"];

@@ -34,7 +34,7 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { Plus as AddRoundedIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
 import { PinboardErrorState } from "../components/PinboardErrorState";
@@ -131,15 +131,15 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   const append = useAppendRealmExtraMutation();
   const removeMut = useRemoveRealmExtraMutation();
 
-  const openCreate = useCallback(() => {
+  const openCreate = () => {
     setEditorOpen(true);
-  }, []);
+  };
 
-  const closeEditor = useCallback(() => {
+  const closeEditor = () => {
     setEditorOpen(false);
-  }, []);
+  };
 
-  const confirmRemove = useCallback(async () => {
+  const confirmRemove = async () => {
     if (!pendingRemove) return;
     setRemoving(true);
     try {
@@ -159,38 +159,35 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     } finally {
       setRemoving(false);
     }
-  }, [removeMut, pendingRemove, realmUnitId, pinboardKey, t]);
+  };
 
-  const handleCreate = useCallback(
-    async (translations: TranslationEditorEntry[]) => {
-      const created = await unitApi.create({
-        type: "POST",
-        translations: translations.flatMap((tr) => {
-          const language = toLanguage(tr.language);
-          if (!language) return [];
-          return [
-            {
-              language,
-              title: tr.title,
-              subtitle: tr.subtitle,
-              summary: tr.summary,
-              description: tr.description
-                ? markdownContentDoc(tr.description)
-                : undefined,
-            },
-          ];
-        }),
-      });
-      await append.mutateAsync({
-        realmId: realmUnitId,
-        key: pinboardKey,
-        unitId: created.id,
-      });
-      toast.success(t("entity:pinboard_editor_created"));
-      refetch();
-    },
-    [append, realmUnitId, pinboardKey, refetch, t],
-  );
+  const handleCreate = async (translations: TranslationEditorEntry[]) => {
+    const created = await unitApi.create({
+      type: "POST",
+      translations: translations.flatMap((tr) => {
+        const language = toLanguage(tr.language);
+        if (!language) return [];
+        return [
+          {
+            language,
+            title: tr.title,
+            subtitle: tr.subtitle,
+            summary: tr.summary,
+            description: tr.description
+              ? markdownContentDoc(tr.description)
+              : undefined,
+          },
+        ];
+      }),
+    });
+    await append.mutateAsync({
+      realmId: realmUnitId,
+      key: pinboardKey,
+      unitId: created.id,
+    });
+    toast.success(t("entity:pinboard_editor_created"));
+    refetch();
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -308,7 +305,7 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
     setDrafts(initial);
   }, [initial]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     setSaving(true);
     try {
       await onCreate(drafts);
@@ -321,7 +318,7 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
     } finally {
       setSaving(false);
     }
-  }, [drafts, onCreate, t]);
+  };
 
   return (
     <Dialog

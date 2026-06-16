@@ -1,5 +1,4 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback } from "react";
 import type { InjectedTag } from "../models/injectedTags";
 
 /**
@@ -12,17 +11,14 @@ import type { InjectedTag } from "../models/injectedTags";
  */
 export function useNavigateToBookTagSearch() {
   const navigate = useNavigate();
-  return useCallback(
-    (tags: InjectedTag[]) => {
-      const slugs = tags
-        .map((t) => t.slug)
-        .filter((s): s is string => Boolean(s));
-      navigate({
-        to: "/book/search",
-        search: slugs.length ? { tags: slugs.join(",") } : {},
-        state: { injectedTags: tags } as never,
-      });
-    },
-    [navigate],
-  );
+  return (tags: InjectedTag[]) => {
+    const slugs = tags
+      .map((t) => t.slug)
+      .filter((s): s is string => Boolean(s));
+    navigate({
+      to: "/book/search",
+      search: slugs.length ? { tags: slugs.join(",") } : {},
+      state: { injectedTags: tags } as never,
+    });
+  };
 }

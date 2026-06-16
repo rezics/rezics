@@ -18,22 +18,6 @@ interface SessionListItemProps {
   revoking?: boolean;
 }
 
-function parseUserAgent(
-  ua: string | undefined,
-  unknownDeviceLabel: string,
-): string {
-  if (!ua) return unknownDeviceLabel;
-  const browser =
-    ua.match(/(?:Chrome|Firefox|Safari|Edge|Opera|MSIE|Trident)[/ ]\S+/)?.[0] ??
-    "";
-  const os =
-    ua.match(
-      /(?:Windows NT [\d.]+|Mac OS X [\d._]+|Linux|Android [\d.]+|iOS [\d.]+)/,
-    )?.[0] ?? "";
-  if (browser || os) return [browser, os].filter(Boolean).join(" on ");
-  return ua.slice(0, 60);
-}
-
 export const SessionListItem: FC<SessionListItemProps> = ({
   session,
   isCurrent,
@@ -83,3 +67,19 @@ export const SessionListItem: FC<SessionListItemProps> = ({
     </div>
   );
 };
+
+function parseUserAgent(
+  ua: string | undefined,
+  unknownDeviceLabel: string,
+): string {
+  if (!ua) return unknownDeviceLabel;
+  const browser =
+    ua.match(/(?:Chrome|Firefox|Safari|Edge|Opera|MSIE|Trident)[/ ]\S+/)?.[0] ??
+    "";
+  const os =
+    ua.match(
+      /(?:Windows NT [\d.]+|Mac OS X [\d._]+|Linux|Android [\d.]+|iOS [\d.]+)/,
+    )?.[0] ?? "";
+  if (browser || os) return [browser, os].filter(Boolean).join(" on ");
+  return ua.slice(0, 60);
+}

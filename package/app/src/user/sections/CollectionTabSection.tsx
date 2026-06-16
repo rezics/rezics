@@ -19,10 +19,6 @@ type SearchTagOption = {
   slug?: string | null;
 };
 
-function tagOptionLabel(option: SearchTagOption): string {
-  return option.label ?? option.slug ?? option.unitId;
-}
-
 export const CollectionTabSection: FC = () => {
   const locale = useLocale();
   const { t } = useTranslation(["common", "community", "entity"]);
@@ -176,6 +172,10 @@ export const CollectionTabSection: FC = () => {
   );
 };
 
+function tagOptionLabel(option: SearchTagOption): string {
+  return option.label ?? option.slug ?? option.unitId;
+}
+
 function CollectionUnitRow({
   unit,
   showPrivateText,
@@ -216,5 +216,3 @@ function CollectionUnitRow({
     </Link>
   );
 }
-
-export default CollectionTabSection;

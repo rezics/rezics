@@ -10,21 +10,18 @@ import {
   ChevronsUpDown as UnfoldMore,
 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
-import { v4 as uuidv4 } from "uuid";
-import {
-  insertSiblingAfter,
-  moveSiblingFirst,
-  moveSiblingLast,
-} from "@/shared/utils/arborist-tree";
 import type { Chapter, ChapterContextMenuState } from "./BookTocEditor";
 
 interface BookTocContextMenuProps {
   contextMenu: NonNullable<ChapterContextMenuState>;
   setContextMenu: (state: ChapterContextMenuState) => void;
-  setTreeData: React.Dispatch<React.SetStateAction<Chapter[]>>;
   handleCreate: (parentId: string | number) => void;
   onEditChapter: (chapter: Chapter) => void;
   onMoveToParent: (chapter: Chapter) => void;
+  onCreateSiblingAfter: (chapter: Chapter) => void;
+  onMoveToFirst: (chapter: Chapter) => void;
+  onMoveToLast: (chapter: Chapter) => void;
+  onDeleteChapter: (chapter: Chapter) => void;
 }
 
 interface MenuItemProps {
@@ -34,30 +31,16 @@ interface MenuItemProps {
   destructive?: boolean;
 }
 
-function MenuItem({ onClick, icon, children, destructive }: MenuItemProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-sm hover:bg-accent transition-colors ${
-        destructive ? "text-error-text" : ""
-      }`}
-    >
-      <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
-        {icon}
-      </span>
-      <span className="flex-1">{children}</span>
-    </button>
-  );
-}
-
 export const BookTocContextMenu = ({
   contextMenu,
   setContextMenu,
-  setTreeData,
   handleCreate,
   onEditChapter,
   onMoveToParent,
+  onCreateSiblingAfter,
+  onMoveToFirst,
+  onMoveToLast,
+  onDeleteChapter,
 }: BookTocContextMenuProps) => {
   const { node } = contextMenu;
   const ref = useRef<HTMLDivElement>(null);
@@ -123,14 +106,7 @@ export const BookTocContextMenu = ({
       <MenuItem
         icon={<ContentCopy className="w-4 h-4" />}
         onClick={() => {
-          const newNode: Chapter = {
-            id: uuidv4(),
-            title: "New Chapter",
-          };
-          setTreeData(
-            (current) =>
-              insertSiblingAfter(current, node.id, newNode) as Chapter[],
-          );
+          onCreateSiblingAfter(node.data);
           close();
         }}
       >
@@ -160,9 +136,7 @@ export const BookTocContextMenu = ({
       <MenuItem
         icon={<KeyboardArrowUp className="w-4 h-4" />}
         onClick={() => {
-          setTreeData(
-            (current) => moveSiblingFirst(current, node.id) as Chapter[],
-          );
+          onMoveToFirst(node.data);
           close();
         }}
       >
@@ -172,9 +146,7 @@ export const BookTocContextMenu = ({
       <MenuItem
         icon={<KeyboardArrowDown className="w-4 h-4" />}
         onClick={() => {
-          setTreeData(
-            (current) => moveSiblingLast(current, node.id) as Chapter[],
-          );
+          onMoveToLast(node.data);
           close();
         }}
       >
@@ -187,7 +159,7 @@ export const BookTocContextMenu = ({
         destructive
         icon={<Delete className="w-4 h-4" />}
         onClick={() => {
-          node.tree.delete(node.id);
+          onDeleteChapter(node.data);
           close();
         }}
       >
@@ -196,3 +168,20 @@ export const BookTocContextMenu = ({
     </div>
   );
 };
+
+function MenuItem({ onClick, icon, children, destructive }: MenuItemProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-sm hover:bg-accent transition-colors ${
+        destructive ? "text-error-text" : ""
+      }`}
+    >
+      <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+        {icon}
+      </span>
+      <span className="flex-1">{children}</span>
+    </button>
+  );
+}

@@ -11,7 +11,7 @@ import type {
   ShelfItemType,
 } from "@rezics/contract";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { appendAfter, betweenNeighbors } from "../models/positionMath";
 import {
   clear,
@@ -120,10 +120,10 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const loadMoreUnits = useCallback(async () => {
+  const loadMoreUnits = async () => {
     if (!hasNextPage || isFetchingNextPage) return;
     await fetchNextPage();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  };
 
   const { units: optimisticUnits, relations: optimisticRelations } = useMemo(
     () => applyLiveOps(serverUnits, serverRelations, log, shelfId),
@@ -139,68 +139,59 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
     return last;
   }, [serverUnits]);
 
-  const enqueueAdd = useCallback(
-    (input: AddInput) => {
-      setLog((current) => {
-        const pendingTop = lastPositionOfPendingAdds(current) ?? lastPosition;
-        const position = appendAfter(pendingTop);
-        const op: ShelfItemBatchOp = {
-          op: "add",
-          itemType: "unit",
-          itemId: input.unitId,
-          kind: input.kind,
-          position,
-        };
-        return enqueue(current, op);
-      });
-    },
-    [lastPosition],
-  );
+  const enqueueAdd = (input: AddInput) => {
+    setLog((current) => {
+      const pendingTop = lastPositionOfPendingAdds(current) ?? lastPosition;
+      const position = appendAfter(pendingTop);
+      const op: ShelfItemBatchOp = {
+        op: "add",
+        itemType: "unit",
+        itemId: input.unitId,
+        kind: input.kind,
+        position,
+      };
+      return enqueue(current, op);
+    });
+  };
 
-  const enqueueReorder = useCallback(
-    (unitId: string, between: ReorderBetween) => {
-      const position = betweenNeighbors(between.before, between.after);
-      setLog((current) =>
-        enqueue(current, {
-          op: "reorder",
-          itemType: "unit",
-          itemId: unitId,
-          position,
-        }),
-      );
-    },
-    [],
-  );
+  const enqueueReorder = (unitId: string, between: ReorderBetween) => {
+    const position = betweenNeighbors(between.before, between.after);
+    setLog((current) =>
+      enqueue(current, {
+        op: "reorder",
+        itemType: "unit",
+        itemId: unitId,
+        position,
+      }),
+    );
+  };
 
-  const enqueueCrossPageMove = useCallback(
-    (
-      unitId: string,
-      toPage: number,
-      pageSize: number,
-      order: ShelfSortOrder,
-    ) => {
-      setLog((current) =>
-        enqueue(current, {
-          op: "reorderToPage",
-          itemType: "unit",
-          itemId: unitId,
-          toPage,
-          edge: "first",
-          pageSize,
-          order,
-        }),
-      );
-    },
-    [],
-  );
+  const enqueueCrossPageMove = (
+    unitId: string,
+    toPage: number,
+    pageSize: number,
+    order: ShelfSortOrder,
+  ) => {
+    setLog((current) =>
+      enqueue(current, {
+        op: "reorderToPage",
+        itemType: "unit",
+        itemId: unitId,
+        toPage,
+        edge: "first",
+        pageSize,
+        order,
+      }),
+    );
+  };
 
-  const enqueueDelete = useCallback((unitId: string) => {
+  const enqueueDelete = (unitId: string) => {
     setLog((current) =>
       enqueue(current, { op: "delete", itemType: "unit", itemId: unitId }),
     );
-  }, []);
+  };
 
-  const enqueueAttach = useCallback((input: AttachInput) => {
+  const enqueueAttach = (input: AttachInput) => {
     setLog((current) =>
       enqueue(current, {
         op: "attach",
@@ -213,25 +204,26 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
         ...(input.position !== undefined ? { position: input.position } : {}),
       }),
     );
-  }, []);
+  };
 
-  const enqueueDetach = useCallback(
-    (parentItemId: string, childItemId: string, role: ShelfItemParentRole) => {
-      setLog((current) =>
-        enqueue(current, {
-          op: "detach",
-          parentItemType: "unit",
-          parentItemId,
-          childItemType: "unit",
-          childItemId,
-          role,
-        }),
-      );
-    },
-    [],
-  );
+  const enqueueDetach = (
+    parentItemId: string,
+    childItemId: string,
+    role: ShelfItemParentRole,
+  ) => {
+    setLog((current) =>
+      enqueue(current, {
+        op: "detach",
+        parentItemType: "unit",
+        parentItemId,
+        childItemType: "unit",
+        childItemId,
+        role,
+      }),
+    );
+  };
 
-  const enqueueSetChildren = useCallback((input: SetChildrenInput) => {
+  const enqueueSetChildren = (input: SetChildrenInput) => {
     setLog((current) =>
       enqueue(current, {
         op: "setChildren",
@@ -243,53 +235,50 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
         ...(input.childKind ? { childKind: input.childKind } : {}),
       }),
     );
-  }, []);
+  };
 
-  const submitOps = useCallback(
-    async (entries: ItemOpEntry[]): Promise<SaveResult> => {
-      if (entries.length === 0) {
-        const empty: SaveResult = { results: [], okCount: 0, failedCount: 0 };
-        setLastResult(empty);
-        return empty;
-      }
-      const ops = entries.map((e) => e.op);
-      const response = await batchMutation.mutateAsync({
-        shelfId,
-        ops,
+  const submitOps = async (entries: ItemOpEntry[]): Promise<SaveResult> => {
+    if (entries.length === 0) {
+      const empty: SaveResult = { results: [], okCount: 0, failedCount: 0 };
+      setLastResult(empty);
+      return empty;
+    }
+    const ops = entries.map((e) => e.op);
+    const response = await batchMutation.mutateAsync({
+      shelfId,
+      ops,
+    });
+    const succeededIds = new Set<string>();
+    let okCount = 0;
+    let failedCount = 0;
+    setLog((current) => {
+      let next = current;
+      response.results.forEach((res, idx) => {
+        const entry = entries[idx]!;
+        if (res.status === "ok") {
+          succeededIds.add(entry.id);
+          okCount += 1;
+        } else {
+          failedCount += 1;
+          next = markFailed(next, entry.id, res.reason);
+        }
       });
-      const succeededIds = new Set<string>();
-      let okCount = 0;
-      let failedCount = 0;
-      setLog((current) => {
-        let next = current;
-        response.results.forEach((res, idx) => {
-          const entry = entries[idx]!;
-          if (res.status === "ok") {
-            succeededIds.add(entry.id);
-            okCount += 1;
-          } else {
-            failedCount += 1;
-            next = markFailed(next, entry.id, res.reason);
-          }
-        });
-        return clearSucceeded(next, succeededIds);
-      });
-      const result: SaveResult = {
-        results: response.results,
-        okCount,
-        failedCount,
-      };
-      setLastResult(result);
-      return result;
-    },
-    [batchMutation, shelfId],
-  );
+      return clearSucceeded(next, succeededIds);
+    });
+    const result: SaveResult = {
+      results: response.results,
+      okCount,
+      failedCount,
+    };
+    setLastResult(result);
+    return result;
+  };
 
-  const save = useCallback(async (): Promise<SaveResult> => {
+  const save = async (): Promise<SaveResult> => {
     return submitOps(log.entries.filter((e) => !e.failedReason));
-  }, [log.entries, submitOps]);
+  };
 
-  const retryFailed = useCallback(async (): Promise<SaveResult> => {
+  const retryFailed = async (): Promise<SaveResult> => {
     const failed = log.entries.filter((e) => e.failedReason);
     setLog((current) => ({
       ...current,
@@ -298,12 +287,12 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
       ),
     }));
     return submitOps(failed);
-  }, [log.entries, submitOps]);
+  };
 
-  const discard = useCallback(() => {
+  const discard = () => {
     setLog((current) => clear(current));
     setLastResult(null);
-  }, []);
+  };
 
   return {
     log,

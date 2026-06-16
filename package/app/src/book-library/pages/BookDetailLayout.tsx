@@ -6,7 +6,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { BookDetailShell } from "../sections/BookDetailSection";
 import { BookHeroSection } from "../sections/BookHeroSection";

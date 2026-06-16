@@ -3,8 +3,8 @@ import { useTranslation } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
+import { QueryErrorDisplay } from "@/core";
+import { HorizontalShelfCarousel } from "@/shelf";
 
 export function ShelfByBookPreview({
   title,

@@ -10,10 +10,12 @@ import {
 import { BookOpenText } from "lucide-react";
 import type React from "react";
 import { useMemo } from "react";
-import { NavigationList } from "@/core/components/navigation/NavigationList";
-import type { NavigationItem } from "@/core/components/navigation/navigation";
-import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
-import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
+import {
+  createMinimalEditConsoleConfig,
+  EditConsoleLayout,
+  type NavigationItem,
+  NavigationList,
+} from "@/core";
 import { historyBookId } from "@/stories/fixtures/history";
 import { createBookEditConsoleConfig } from "./bookEditConsoleConfig";
 

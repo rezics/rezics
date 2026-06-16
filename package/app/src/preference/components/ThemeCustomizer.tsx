@@ -19,7 +19,12 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { useAppStore } from "@/app/states/appStore";
+import { useAppStore } from "@/app";
+
+interface ThemeCustomizerProps {
+  open: boolean;
+  onClose: () => void;
+}
 
 const BRAND_DEFAULT_COLOR = "#DB515C";
 
@@ -35,18 +40,6 @@ const PRESET_COLORS: string[] = [
   "#8b5cf6",
   "#ef4444",
 ];
-
-function applyAccentColor(color: string) {
-  if (typeof document === "undefined") return;
-  document.documentElement.style.setProperty("--colors-brand-fill", color);
-  document.documentElement.style.setProperty("--colors-primary", color);
-  document.documentElement.style.setProperty("--colors-primary-DEFAULT", color);
-}
-
-interface ThemeCustomizerProps {
-  open: boolean;
-  onClose: () => void;
-}
 
 export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   open,
@@ -238,3 +231,10 @@ export const ThemeQuickToggle: React.FC = () => {
     </>
   );
 };
+
+function applyAccentColor(color: string) {
+  if (typeof document === "undefined") return;
+  document.documentElement.style.setProperty("--colors-brand-fill", color);
+  document.documentElement.style.setProperty("--colors-primary", color);
+  document.documentElement.style.setProperty("--colors-primary-DEFAULT", color);
+}

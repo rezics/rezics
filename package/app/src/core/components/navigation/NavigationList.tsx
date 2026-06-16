@@ -24,39 +24,6 @@ interface NavigationListProps {
   ) => void;
 }
 
-function normalizePath(value: string) {
-  const normalized = value.startsWith("/") ? value : `/${value}`;
-  if (normalized.length > 1 && normalized.endsWith("/")) {
-    return normalized.slice(0, -1);
-  }
-  return normalized;
-}
-
-function matchesNavigationItem(
-  pathname: string,
-  item: Extract<NavigationItem, { kind: "item" }>,
-) {
-  if (item.isActive?.(pathname)) return true;
-
-  const normalizedPathname = normalizePath(pathname);
-  const itemPath = normalizePath(item.segment);
-
-  if (item.activeMatch === "prefix") {
-    return (
-      normalizedPathname === itemPath ||
-      normalizedPathname.startsWith(`${itemPath}/`)
-    );
-  }
-
-  return normalizedPathname === itemPath;
-}
-
-function itemKey(item: NavigationItem, fallback: number) {
-  if (item.kind === "item") return item.segment;
-  if (item.kind === "section" || item.kind === "status") return item.id;
-  return `divider-${fallback}`;
-}
-
 export const NavigationList = ({
   NAVIGATION,
   isMobile,
@@ -231,3 +198,36 @@ export const NavigationList = ({
 
   return renderItems(NAVIGATION);
 };
+
+function normalizePath(value: string) {
+  const normalized = value.startsWith("/") ? value : `/${value}`;
+  if (normalized.length > 1 && normalized.endsWith("/")) {
+    return normalized.slice(0, -1);
+  }
+  return normalized;
+}
+
+function matchesNavigationItem(
+  pathname: string,
+  item: Extract<NavigationItem, { kind: "item" }>,
+) {
+  if (item.isActive?.(pathname)) return true;
+
+  const normalizedPathname = normalizePath(pathname);
+  const itemPath = normalizePath(item.segment);
+
+  if (item.activeMatch === "prefix") {
+    return (
+      normalizedPathname === itemPath ||
+      normalizedPathname.startsWith(`${itemPath}/`)
+    );
+  }
+
+  return normalizedPathname === itemPath;
+}
+
+function itemKey(item: NavigationItem, fallback: number) {
+  if (item.kind === "item") return item.segment;
+  if (item.kind === "section" || item.kind === "status") return item.id;
+  return `divider-${fallback}`;
+}

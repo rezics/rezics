@@ -1,4 +1,4 @@
-import type { RealmListItemModel } from "@/user/models/realmListItem";
+import type { RealmListItemModel } from "@/user";
 
 export function toggleRealmSelection(
   selectedIds: ReadonlySet<string>,

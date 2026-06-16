@@ -84,5 +84,3 @@ export const TagEdit: React.FC<TagEditProps> = ({
     </form>
   );
 };
-
-export default TagEdit;

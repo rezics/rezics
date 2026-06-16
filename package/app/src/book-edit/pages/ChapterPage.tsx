@@ -35,33 +35,13 @@ import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import {
   contentUnitIdForNode,
   withBookContentStructureOccurrences,
-} from "@/book-library/models/bookContentStructurePath";
+} from "@/book-library";
 import { Route as bookEditChapterRoute } from "@/routes/_editor/book/$bookId/edit/$chapterId";
 import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
 import {
   RezicsMarkdownEditor,
   type ViewMode,
 } from "@/shared/ui/RezicsMarkdownEditor";
-
-function updateContentStructureNodeTitle(
-  nodes: BookContentStructureItem[],
-  contentUnitId: string,
-  title: string,
-): BookContentStructureItem[] {
-  return nodes.map((node) => ({
-    ...node,
-    ...(contentUnitIdForNode(node) === contentUnitId ? { title } : {}),
-    ...(node.children
-      ? {
-          children: updateContentStructureNodeTitle(
-            node.children,
-            contentUnitId,
-            title,
-          ),
-        }
-      : {}),
-  }));
-}
 
 /**
  * TODO After switching the Chapter List to Tree mode, editing still lacks validation.
@@ -288,3 +268,23 @@ export const BookEditChapterPage: React.FC = () => {
     </div>
   );
 };
+
+function updateContentStructureNodeTitle(
+  nodes: BookContentStructureItem[],
+  contentUnitId: string,
+  title: string,
+): BookContentStructureItem[] {
+  return nodes.map((node) => ({
+    ...node,
+    ...(contentUnitIdForNode(node) === contentUnitId ? { title } : {}),
+    ...(node.children
+      ? {
+          children: updateContentStructureNodeTitle(
+            node.children,
+            contentUnitId,
+            title,
+          ),
+        }
+      : {}),
+  }));
+}

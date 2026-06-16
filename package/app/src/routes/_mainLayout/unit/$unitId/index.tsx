@@ -1,12 +1,12 @@
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { createFileRoute } from "@tanstack/react-router";
-import { UnitPageById } from "@/unit/pages/UnitPage";
 import {
   resolveUnitRoute,
+  UnitPageById,
   validatePublicUnitIdParams,
   validatePublicUnitResolverSearch,
-} from "@/unit/unitResolver";
-import { useUserProfileStore } from "@/user/states";
+} from "@/unit";
+import { useUserProfileStore } from "@/user";
 
 export const Route = createFileRoute("/_mainLayout/unit/$unitId/")({
   validateSearch: validatePublicUnitResolverSearch,

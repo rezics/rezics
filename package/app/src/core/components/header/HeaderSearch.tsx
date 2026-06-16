@@ -17,7 +17,7 @@ import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useIsMobile } from "@/shared/utils/use-media-query";
-import { useUserProfileStore } from "@/user/states";
+import { useUserProfileStore } from "@/user";
 import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
 
 type HeaderSearchScope =
@@ -25,6 +25,85 @@ type HeaderSearchScope =
   | { kind: "realm"; realmId: string }
   | { kind: "userId"; userId: string }
   | { kind: "userSlug"; userSlug: string };
+
+export function HeaderSearch({ className }: { className?: string }) {
+  const { t } = useTranslation(["common"]);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isMobile = useIsMobile();
+  const isHomePage = pathname === "/";
+  const presentation = useHeaderSearchPresentation(pathname);
+  const navigate = useNavigate();
+  const [value, setValue] = useState("");
+
+  const submit = () => {
+    navigate({ to: buildHeaderSubmitPath(pathname, value) });
+  };
+
+  if (isMobile) {
+    if (isHomePage) return null;
+
+    return (
+      <Button
+        size="icon"
+        variant="ghost"
+        className={cn("h-9 w-9 shrink-0 text-text-primary", className)}
+        aria-label={t("common:accessibility_search")}
+        onClick={submit}
+      >
+        <SearchIcon className="h-5 w-5" />
+      </Button>
+    );
+  }
+
+  const leading =
+    presentation.kind === "general" ? (
+      <LogoIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+    ) : (
+      <SearchIcon className="h-4 w-4 shrink-0 text-text-secondary" />
+    );
+
+  return (
+    <form
+      className={cn(
+        "flex h-10 w-full max-w-[560px] items-center gap-2 rounded-full bg-surface-elevated px-4 md:px-5",
+        "border border-border-whisper focus-within:border-border-focus",
+        className,
+      )}
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+    >
+      {leading}
+      {presentation.badge && (
+        <span className="flex h-8 max-w-40 shrink-0 items-center gap-1.5 truncate rounded-full bg-surface-subtle px-2 text-xs leading-dense text-text-secondary">
+          {presentation.showAvatar && (
+            <Avatar size="sm" className="rounded-full">
+              {presentation.avatar && (
+                <AvatarImage
+                  src={presentation.avatar}
+                  alt={presentation.badge}
+                  className="rounded-full"
+                />
+              )}
+              <AvatarFallback className="rounded-full">
+                {presentation.fallback}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <span className="min-w-0 truncate">{presentation.badge}</span>
+        </span>
+      )}
+      <Input
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder={presentation.placeholder}
+        aria-label={t("common:accessibility_search")}
+        className="h-9 min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+      />
+    </form>
+  );
+}
 
 function firstRouteSegment(pathname: string, segment: string): string | null {
   const match = pathname.match(new RegExp(`^/${segment}/([^/]+)`));
@@ -124,83 +203,4 @@ function useHeaderSearchPresentation(pathname: string) {
       ? "搜尋書籍、書評、書單..."
       : "Find anything",
   };
-}
-
-export function HeaderSearch({ className }: { className?: string }) {
-  const { t } = useTranslation(["common"]);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isMobile = useIsMobile();
-  const isHomePage = pathname === "/";
-  const presentation = useHeaderSearchPresentation(pathname);
-  const navigate = useNavigate();
-  const [value, setValue] = useState("");
-
-  const submit = () => {
-    navigate({ to: buildHeaderSubmitPath(pathname, value) });
-  };
-
-  if (isMobile) {
-    if (isHomePage) return null;
-
-    return (
-      <Button
-        size="icon"
-        variant="ghost"
-        className={cn("h-9 w-9 shrink-0 text-text-primary", className)}
-        aria-label={t("common:accessibility_search")}
-        onClick={submit}
-      >
-        <SearchIcon className="h-5 w-5" />
-      </Button>
-    );
-  }
-
-  const leading =
-    presentation.kind === "general" ? (
-      <LogoIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
-    ) : (
-      <SearchIcon className="h-4 w-4 shrink-0 text-text-secondary" />
-    );
-
-  return (
-    <form
-      className={cn(
-        "flex h-10 w-full max-w-[560px] items-center gap-2 rounded-full bg-surface-elevated px-4 md:px-5",
-        "border border-border-whisper focus-within:border-border-focus",
-        className,
-      )}
-      onSubmit={(event) => {
-        event.preventDefault();
-        submit();
-      }}
-    >
-      {leading}
-      {presentation.badge && (
-        <span className="flex h-8 max-w-40 shrink-0 items-center gap-1.5 truncate rounded-full bg-surface-subtle px-2 text-xs leading-dense text-text-secondary">
-          {presentation.showAvatar && (
-            <Avatar size="sm" className="rounded-full">
-              {presentation.avatar && (
-                <AvatarImage
-                  src={presentation.avatar}
-                  alt={presentation.badge}
-                  className="rounded-full"
-                />
-              )}
-              <AvatarFallback className="rounded-full">
-                {presentation.fallback}
-              </AvatarFallback>
-            </Avatar>
-          )}
-          <span className="min-w-0 truncate">{presentation.badge}</span>
-        </span>
-      )}
-      <Input
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder={presentation.placeholder}
-        aria-label={t("common:accessibility_search")}
-        className="h-9 min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-      />
-    </form>
-  );
 }

@@ -3,7 +3,7 @@ import { FileText } from "lucide-react";
 import type * as React from "react";
 import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import { UserHoverPreview, type UserHoverPreviewUser } from "@/user/components";
+import { UserHoverPreview, type UserHoverPreviewUser } from "@/user";
 
 type ClampStyle = React.CSSProperties & {
   WebkitBoxOrient?: "vertical";
@@ -38,15 +38,6 @@ export interface SearchContentResultCardProps
   thumbnailSlot?: React.ReactNode;
   titleLines?: number;
   bodyLines?: number;
-}
-
-function clampStyle(lines: number): ClampStyle {
-  return {
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: lines,
-    overflow: "hidden",
-  };
 }
 
 export function SearchContentResultCard({
@@ -247,4 +238,13 @@ export function SearchContentResultCard({
       </article>
     </Card>
   );
+}
+
+function clampStyle(lines: number): ClampStyle {
+  return {
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    WebkitLineClamp: lines,
+    overflow: "hidden",
+  };
 }

@@ -1,7 +1,7 @@
 import type { BookDTO } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import { useAtom } from "jotai";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 import { bookLanguageAtom } from "../states/bookDetailAtoms";
@@ -93,10 +93,7 @@ export function useBookLanguage(
     [readContext.appLocale, readContext.languages, bookInfo, stored],
   );
 
-  const setSelectedLang = useCallback(
-    (lang: string) => setStored(lang),
-    [setStored],
-  );
+  const setSelectedLang = (lang: string) => setStored(lang);
 
   return [selectedLang, setSelectedLang];
 }

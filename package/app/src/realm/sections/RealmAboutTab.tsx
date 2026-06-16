@@ -8,7 +8,7 @@ import {
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { PostBodyMarkdown } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
@@ -17,6 +17,62 @@ interface RealmAboutTabProps {
   description?: string;
   membership?: RealmMembershipMeDTO | null;
   canManage: boolean;
+}
+
+export function RealmAboutTab({
+  realm,
+  description,
+  membership,
+  canManage,
+}: RealmAboutTabProps) {
+  const role = membership?.roleKey ?? "visitor";
+  const state =
+    membership?.state ?? (membership?.member ? "active" : "visitor");
+  const visibility = realm.isPublic ? "Public" : "Member only";
+  const moderatorContext = canManage
+    ? "Moderation tools are available from this realm."
+    : "Moderators manage reports, rules, and member safety for this realm.";
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="flex min-w-0 flex-col gap-6">
+        {description ? (
+          <section className="flex flex-col gap-2">
+            <h2 className="text-base font-semibold leading-ui text-text-primary">
+              Summary
+            </h2>
+            <p className="m-0 text-sm leading-body text-text-secondary">
+              {description}
+            </p>
+          </section>
+        ) : null}
+        <RealmMarkdownPanel
+          title="About"
+          postUnitId={realm.extra?.about ?? null}
+          emptyTitle="No about content"
+        />
+        <RealmRuleFullPanel realmUnitId={realm.unitId} />
+      </div>
+
+      <aside className="flex min-w-0 flex-col gap-3">
+        <InfoCard label="Members" value={String(realm.memberCount ?? 0)} />
+        <InfoCard label="Visibility" value={visibility} />
+        <InfoCard label="Your role" value={role} />
+        <InfoCard label="Membership" value={state} />
+        {realm.isOfficial ? <InfoCard label="Realm" value="Official" /> : null}
+        <Card surface="contained">
+          <CardContent className="p-4">
+            <p className="m-0 text-xs font-medium uppercase leading-ui text-text-tertiary">
+              Moderator context
+            </p>
+            <p className="m-0 mt-2 text-sm leading-body text-text-secondary">
+              {moderatorContext}
+            </p>
+          </CardContent>
+        </Card>
+      </aside>
+    </div>
+  );
 }
 
 function RealmMarkdownPanel({
@@ -125,61 +181,5 @@ function InfoCard({ label, value }: { label: string; value: string }) {
         </p>
       </CardContent>
     </Card>
-  );
-}
-
-export function RealmAboutTab({
-  realm,
-  description,
-  membership,
-  canManage,
-}: RealmAboutTabProps) {
-  const role = membership?.roleKey ?? "visitor";
-  const state =
-    membership?.state ?? (membership?.member ? "active" : "visitor");
-  const visibility = realm.isPublic ? "Public" : "Member only";
-  const moderatorContext = canManage
-    ? "Moderation tools are available from this realm."
-    : "Moderators manage reports, rules, and member safety for this realm.";
-
-  return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-      <div className="flex min-w-0 flex-col gap-6">
-        {description ? (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold leading-ui text-text-primary">
-              Summary
-            </h2>
-            <p className="m-0 text-sm leading-body text-text-secondary">
-              {description}
-            </p>
-          </section>
-        ) : null}
-        <RealmMarkdownPanel
-          title="About"
-          postUnitId={realm.extra?.about ?? null}
-          emptyTitle="No about content"
-        />
-        <RealmRuleFullPanel realmUnitId={realm.unitId} />
-      </div>
-
-      <aside className="flex min-w-0 flex-col gap-3">
-        <InfoCard label="Members" value={String(realm.memberCount ?? 0)} />
-        <InfoCard label="Visibility" value={visibility} />
-        <InfoCard label="Your role" value={role} />
-        <InfoCard label="Membership" value={state} />
-        {realm.isOfficial ? <InfoCard label="Realm" value="Official" /> : null}
-        <Card surface="contained">
-          <CardContent className="p-4">
-            <p className="m-0 text-xs font-medium uppercase leading-ui text-text-tertiary">
-              Moderator context
-            </p>
-            <p className="m-0 mt-2 text-sm leading-body text-text-secondary">
-              {moderatorContext}
-            </p>
-          </CardContent>
-        </Card>
-      </aside>
-    </div>
   );
 }

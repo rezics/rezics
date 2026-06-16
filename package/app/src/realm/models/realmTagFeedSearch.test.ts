@@ -1,30 +1,23 @@
 import { describe, expect, it } from "bun:test";
-import {
-  realmFeedSearchForSingleTag,
-  realmTagsTabSearch,
-} from "./realmTagFeedSearch";
+import { realmFeedSearchForSingleTag } from "./realmTagFeedSearch";
 
 describe("realm tag feed search", () => {
-  it("enters feed with exactly the selected tag", () => {
+  it("replaces the feed filter with exactly the selected tag", () => {
     expect(
       realmFeedSearchForSingleTag(
-        { tab: "tags", sort: "best", tags: "old-a,old-b" },
+        { sort: "best", tags: "old-a,old-b" },
         "tag-new",
       ),
     ).toEqual({
-      tab: "feed",
       sort: "best",
       tags: "tag-new",
     });
   });
 
-  it("opens the full tag tab without changing feed filters", () => {
-    expect(
-      realmTagsTabSearch({ tab: "feed", sort: "hot", tags: "tag-a,tag-b" }),
-    ).toEqual({
-      tab: "tags",
+  it("preserves the current sort while selecting a tag", () => {
+    expect(realmFeedSearchForSingleTag({ sort: "hot" }, "tag-a")).toEqual({
       sort: "hot",
-      tags: "tag-a,tag-b",
+      tags: "tag-a",
     });
   });
 });

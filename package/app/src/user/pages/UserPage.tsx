@@ -66,5 +66,3 @@ export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
     />
   );
 };
-
-export default UserPage;

@@ -4,7 +4,7 @@ import {
   lazyRouteComponent,
   useNavigate,
 } from "@tanstack/react-router";
-import { routeBoundaries } from "@/core/routing/routeBoundaries";
+import { routeBoundaries } from "@/core";
 
 const DashboardPage = lazyRouteComponent(
   () => import("@/dashboard"),

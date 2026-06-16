@@ -104,5 +104,3 @@ export function NewShelfPage() {
     </div>
   );
 }
-
-export default NewShelfPage;

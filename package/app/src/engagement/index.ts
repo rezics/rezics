@@ -2,6 +2,7 @@ export type { BlockPeerActionProps } from "./components/BlockPeerAction";
 export { BlockPeerAction } from "./components/BlockPeerAction";
 export type { DMActionProps } from "./components/DMAction";
 export { DMAction } from "./components/DMAction";
+export { FollowButton } from "./components/FollowButton";
 export type { OverflowMenuProps } from "./components/OverflowMenu";
 export { OverflowMenu } from "./components/OverflowMenu";
 export {
@@ -24,6 +25,7 @@ export {
 } from "./components/ReactionBarContext";
 export type { ReplyActionProps } from "./components/ReplyAction";
 export { ReplyAction } from "./components/ReplyAction";
+export { ScoreOverview } from "./components/ScoreOverview";
 export type {
   ReportActionProps,
   ReportTarget,
@@ -57,3 +59,5 @@ export type {
   EngagementSize,
   ReactionBarVariant,
 } from "./types";
+// Models / 模型
+export { buildInternalSharePostCreateInput } from "./models/sharePost";

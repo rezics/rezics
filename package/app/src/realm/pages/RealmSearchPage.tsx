@@ -6,36 +6,9 @@ import {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { KeywordInput, useSearchQuery } from "@/search";
 import { useLocalizedRealmSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { RealmCard } from "../components/RealmCard";
-
-function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
-  return {
-    unitId: doc.id,
-    userId: doc.userId,
-    isPublic: doc.isPublic,
-    isOfficial: doc.isOfficial,
-    memberCount: doc.memberCount,
-    extra: doc.extra as any,
-    resolvedLanguage: doc.resolvedLanguage,
-    title: doc.title,
-    description: doc.description
-      ? markdownContentDoc(contentDocMarkdownFallback(doc.description))
-      : undefined,
-    translations: doc.translations.map((tr) => ({
-      unitId: doc.id,
-      language: tr.language,
-      title: tr.title,
-      description: markdownContentDoc(
-        contentDocMarkdownFallback(tr.description),
-      ),
-    })),
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
-  };
-}
 
 export function RealmSearchPage() {
   const { t } = useTranslation(["entity"]);
@@ -81,4 +54,28 @@ export function RealmSearchPage() {
   );
 }
 
-export default RealmSearchPage;
+function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
+  return {
+    unitId: doc.id,
+    userId: doc.userId,
+    isPublic: doc.isPublic,
+    isOfficial: doc.isOfficial,
+    memberCount: doc.memberCount,
+    extra: doc.extra as any,
+    resolvedLanguage: doc.resolvedLanguage,
+    title: doc.title,
+    description: doc.description
+      ? markdownContentDoc(contentDocMarkdownFallback(doc.description))
+      : undefined,
+    translations: doc.translations.map((tr) => ({
+      unitId: doc.id,
+      language: tr.language,
+      title: tr.title,
+      description: markdownContentDoc(
+        contentDocMarkdownFallback(tr.description),
+      ),
+    })),
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}

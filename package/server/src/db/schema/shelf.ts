@@ -47,13 +47,6 @@ export const ShelfItem = pgTable(
     parentRole: varchar({ length: 32 }),
     position: varchar({ length: 64 }).notNull(),
     /**
-     * Weak edition/source/package context for the selected shelf item. The row
-     * identity remains (shelfId, itemType, itemId); this is only a lookup hint.
-     * 选中书架条目的弱版本/来源/包上下文。行标识仍为 (shelfId, itemType,
-     * itemId)；此字段仅作为查询提示。
-     */
-    variantUnitId: uuid(),
-    /**
      * User-authored indexing help only. Do not copy collected Unit content,
      * metadata, tags, or shelf metadata into this field or its search index.
      * 仅供用户自填的索引辅助信息。不要将被收藏的 Unit 内容、元数据、标签或书架
@@ -95,10 +88,6 @@ export const ShelfItem = pgTable(
       "btree",
       table.itemType.asc().nullsLast(),
       table.itemId.asc().nullsLast(),
-    ),
-    index("ShelfItem_variantUnitId_idx").using(
-      "btree",
-      table.variantUnitId.asc().nullsLast(),
     ),
     check(
       "ShelfItem_not_self_parent",

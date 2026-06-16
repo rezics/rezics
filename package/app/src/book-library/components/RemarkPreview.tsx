@@ -3,7 +3,7 @@ import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { RemarkList } from "@/remark";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 

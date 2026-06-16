@@ -21,12 +21,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import {
   BOOK_LOCK_FIELD_GROUPS,
   editorialPathLabel,
   lockMatchesPath,
-} from "@/unit/models/lockFieldLabels";
+} from "@/unit";
 
 const CUSTOM_LOCK_PATH = "__custom__";
 
@@ -223,7 +223,7 @@ export function BookAuthorityPanel({
           {BOOK_LOCK_FIELD_GROUPS.map((group) => (
             <section key={group.id} className="grid gap-3">
               <h2 className="text-base font-medium leading-ui text-text-primary">
-                {group.title}
+                {t(group.titleKey)}
               </h2>
               <ul className="grid gap-2">
                 {group.paths.map((path) => {

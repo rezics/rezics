@@ -17,8 +17,6 @@ import {
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 
-const ALL_LANGUAGES = Object.values(LANGUAGES);
-
 export interface AddUnitTranslationLanguageDialogProps {
   open: boolean;
   existingLanguages: string[];
@@ -30,10 +28,7 @@ export interface AddUnitTranslationLanguageDialogProps {
   submitLabel: React.ReactNode;
 }
 
-function languageLabel(lang: string): string {
-  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[lang];
-  return meta?.nativeName ? `${meta.nativeName} (${lang})` : lang;
-}
+const ALL_LANGUAGES = Object.values(LANGUAGES);
 
 export const AddUnitTranslationLanguageDialog: React.FC<
   AddUnitTranslationLanguageDialogProps
@@ -103,3 +98,8 @@ export const AddUnitTranslationLanguageDialog: React.FC<
     </Dialog>
   );
 };
+
+function languageLabel(lang: string): string {
+  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[lang];
+  return meta?.nativeName ? `${meta.nativeName} (${lang})` : lang;
+}

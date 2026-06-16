@@ -13,5 +13,3 @@ export const ExcerptPage: React.FC = () => {
     </div>
   );
 };
-
-export default ExcerptPage;

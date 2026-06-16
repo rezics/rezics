@@ -20,5 +20,3 @@ export const ReviewCardPair: React.FC<ReviewCardPairProps> = ({
     </div>
   );
 };
-
-export default ReviewCardPair;

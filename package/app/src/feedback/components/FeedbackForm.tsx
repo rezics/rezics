@@ -43,7 +43,7 @@ const typeOptions: {
   { value: "OTHER", label: i18nMessages.feedback_type_other },
 ];
 
-const FeedbackForm: React.FC<FeedbackFormProps> = ({
+export const FeedbackForm: React.FC<FeedbackFormProps> = ({
   defaultValues,
   onSubmitted,
 }) => {
@@ -167,5 +167,3 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
     </form>
   );
 };
-
-export default FeedbackForm;

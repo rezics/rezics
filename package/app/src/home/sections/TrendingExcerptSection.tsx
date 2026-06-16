@@ -3,8 +3,8 @@ import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { HorizontalExcerptCarousel } from "@/excerpt/components/list/HorizontalExcerptCarousel";
+import { QueryErrorDisplay } from "@/core";
+import { HorizontalExcerptCarousel } from "@/excerpt";
 import { useHomeExcerpts } from "./hooks/hooks";
 
 export type TrendingExcerptSectionProps = {
@@ -65,5 +65,3 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
     </div>
   );
 };
-
-export default TrendingExcerptSection;

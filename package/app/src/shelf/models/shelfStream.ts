@@ -38,6 +38,13 @@ export type ShelfStreamEntry =
   | ShelfStreamChildEntry
   | ShelfStreamPeerEntry;
 
+interface DerivationParts {
+  byId: Map<string, EnrichedShelfItem>;
+  childByParent: Map<string, EnrichedShelfItem[]>;
+  childIds: Set<string>;
+  roots: EnrichedShelfItem[];
+}
+
 const titleCollator = new Intl.Collator(undefined, {
   numeric: true,
   sensitivity: "base",
@@ -100,13 +107,6 @@ function sortedClone(
   const arr = [...units];
   arr.sort((a, b) => compareByMode(a, b, sort));
   return arr;
-}
-
-interface DerivationParts {
-  byId: Map<string, EnrichedShelfItem>;
-  childByParent: Map<string, EnrichedShelfItem[]>;
-  childIds: Set<string>;
-  roots: EnrichedShelfItem[];
 }
 
 function partition(

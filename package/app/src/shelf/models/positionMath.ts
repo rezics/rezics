@@ -1,6 +1,15 @@
 import { generateKeyBetween } from "@rezics/api/shared/fractional-index";
 import type { ShelfSortOrder } from "@rezics/api/shelf";
 
+export interface PositionedShelfRow {
+  position: string;
+}
+
+export interface ReorderBounds {
+  before?: string;
+  after?: string;
+}
+
 export function appendAfter(last: string | undefined): string {
   return generateKeyBetween(last, undefined);
 }
@@ -14,15 +23,6 @@ export function betweenNeighbors(
   after: string | undefined,
 ): string {
   return generateKeyBetween(before, after);
-}
-
-export interface PositionedShelfRow {
-  position: string;
-}
-
-export interface ReorderBounds {
-  before?: string;
-  after?: string;
 }
 
 export function visualReorderBounds<T extends PositionedShelfRow>(

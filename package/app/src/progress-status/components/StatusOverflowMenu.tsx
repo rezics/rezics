@@ -18,10 +18,6 @@ import {
 } from "lucide-react";
 import { type ReadStatus, readStatusLabel } from "../models/status";
 
-function cx(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 type StatusOverflowMenuProps = {
   onSelectBacklog?: () => void;
   onSelectActive?: () => void;
@@ -137,4 +133,8 @@ export function StatusOverflowMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
 }

@@ -7,21 +7,14 @@ import React from "react";
 
 export type IconKey = string;
 
-let iconsPromise: Promise<any> | null = null;
-
-async function loadIcons() {
-  if (!iconsPromise) {
-    iconsPromise = import("@react-symbols/icons");
-  }
-  return iconsPromise;
-}
-
 interface DynamicIconProps {
   name: IconKey;
   width?: number;
   height?: number;
   className?: string;
 }
+
+let iconsPromise: Promise<any> | null = null;
 
 export function DynamicIcon({
   name,
@@ -41,4 +34,11 @@ export function DynamicIcon({
   if (!IconComponent) return null;
 
   return <IconComponent width={width} height={height} className={className} />;
+}
+
+async function loadIcons() {
+  if (!iconsPromise) {
+    iconsPromise = import("@react-symbols/icons");
+  }
+  return iconsPromise;
 }

@@ -28,10 +28,10 @@ import {
   useState,
 } from "react";
 import { PollComposer, PollLibrarySurface } from "@/poll";
-import { RealmPostTagPicker } from "@/realm/components/RealmPostTagPicker";
+import { RealmPostTagPicker } from "@/realm";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import { useAuthGuard } from "@/user/hooks/useAuthGuard";
+import { useAuthGuard } from "@/user";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -67,17 +67,6 @@ export type ReplyComposerRealmPostModeProps = ReplyComposerBaseProps & {
 export type ReplyComposerProps =
   | ReplyComposerReplyModeProps
   | ReplyComposerRealmPostModeProps;
-
-/**
- * Blur-retain rule: if the body is empty, the composer should collapse on
- * blur; otherwise it retains the draft and stays expanded. Returning a
- * boolean here keeps the caller in charge of the actual open/closed state.
- * 失焦保留规则：若正文为空，编辑器应在失焦时折叠；否则保留草稿并保持展开。
- * 这里返回一个布尔值，让调用方掌控实际的展开/折叠状态。
- */
-export function useBlurRetain(body: string) {
-  return useCallback(() => body.trim().length > 0, [body]);
-}
 
 /**
  * Lightweight inline composer for replies and simple contextual posts. Realm
@@ -138,69 +127,52 @@ export const ReplyComposer = forwardRef<
   const submitting = postMutation.isPending || commentMutation.isPending;
   const derivedTitle =
     body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Post";
-  const reset = useCallback(() => {
+  const reset = () => {
     setBody("");
     setAttachingPoll(false);
     if (mode === "progressive") setExpanded(false);
-  }, [mode]);
+  };
 
-  const submitReply = useCallback(
-    (content: ReturnType<typeof markdownContentDoc>) => {
-      if (parentCommentId) {
-        if (!rootUnitId || !realmUnitId) return;
-        commentMutation.mutate(
-          {
-            rootUnitId,
-            realmUnitId,
-            parentCommentId:
-              parentCommentId === rootUnitId ? undefined : parentCommentId,
-            content,
-          },
-          {
-            onSuccess: (comment) => {
-              reset();
-              onSubmitted?.(comment);
-            },
-          },
-        );
-        return;
-      }
-
-      postMutation.mutate(
+  const submitReply = (content: ReturnType<typeof markdownContentDoc>) => {
+    if (parentCommentId) {
+      if (!rootUnitId || !realmUnitId) return;
+      commentMutation.mutate(
         {
-          targetUnitId,
-          variantUnitId,
-          realmUnitIds,
-          tagIds: selectedTagIds,
-          kind: PostKind.POST,
-          language: authoringLanguage,
-          title: derivedTitle,
+          rootUnitId,
+          realmUnitId,
+          parentCommentId:
+            parentCommentId === rootUnitId ? undefined : parentCommentId,
           content,
         },
         {
-          onSuccess: (post) => {
+          onSuccess: (comment) => {
             reset();
-            onSubmitted?.(post);
+            onSubmitted?.(comment);
           },
         },
       );
-    },
-    [
-      commentMutation.mutate,
-      onSubmitted,
-      derivedTitle,
-      authoringLanguage,
-      parentCommentId,
-      postMutation.mutate,
-      realmUnitId,
-      realmUnitIds,
-      reset,
-      rootUnitId,
-      selectedTagIds,
-      targetUnitId,
-      variantUnitId,
-    ],
-  );
+      return;
+    }
+
+    postMutation.mutate(
+      {
+        targetUnitId,
+        variantUnitId,
+        realmUnitIds,
+        tagIds: selectedTagIds,
+        kind: PostKind.POST,
+        language: authoringLanguage,
+        title: derivedTitle,
+        content,
+      },
+      {
+        onSuccess: (post) => {
+          reset();
+          onSubmitted?.(post);
+        },
+      },
+    );
+  };
 
   const resize = useMemo(
     () => ({ height: 150, minHeight: 100, maxHeight: 400 }),
@@ -488,3 +460,14 @@ export const ReplyComposer = forwardRef<
     </div>
   );
 });
+
+/**
+ * Blur-retain rule: if the body is empty, the composer should collapse on
+ * blur; otherwise it retains the draft and stays expanded. Returning a
+ * boolean here keeps the caller in charge of the actual open/closed state.
+ * 失焦保留规则：若正文为空，编辑器应在失焦时折叠；否则保留草稿并保持展开。
+ * 这里返回一个布尔值，让调用方掌控实际的展开/折叠状态。
+ */
+export function useBlurRetain(body: string) {
+  return () => body.trim().length > 0;
+}

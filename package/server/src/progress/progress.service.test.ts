@@ -424,7 +424,7 @@ describe("ProgressService", () => {
     });
   });
 
-  test("listLibrary surfaces shelves that directly contain the progress unit or store it as variant context", async () => {
+  test("listLibrary surfaces shelves that directly contain the progress unit", async () => {
     const { repository } = createHarness({
       progressRows: [
         {
@@ -444,23 +444,11 @@ describe("ProgressService", () => {
       shelfRows: [
         {
           unitId: "variant-1",
-          variantUnitId: null,
           shelfId: "direct-shelf",
           shelf: {
             unit: {
               defaultLanguage: "en",
               translations: [{ language: "en", title: "Direct Shelf" }],
-            },
-          },
-        },
-        {
-          unitId: "book-main-1",
-          variantUnitId: "variant-1",
-          shelfId: "context-shelf",
-          shelf: {
-            unit: {
-              defaultLanguage: "en",
-              translations: [{ language: "en", title: "Context Shelf" }],
             },
           },
         },
@@ -472,7 +460,6 @@ describe("ProgressService", () => {
 
     expect(result.rows[0]?.shelves).toEqual([
       { shelfId: "direct-shelf", title: "Direct Shelf" },
-      { shelfId: "context-shelf", title: "Context Shelf" },
     ]);
   });
 

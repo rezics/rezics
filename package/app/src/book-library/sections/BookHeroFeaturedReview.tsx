@@ -20,18 +20,6 @@ interface BookHeroFeaturedReviewProps {
 const QUOTE_OPEN = "“";
 const QUOTE_CLOSE = "”";
 
-// MOCK: reviewer star rating — not yet exposed on PostDTO; derive a stable
-// pseudo-score from the post id until score-per-post lands on the API.
-// MOCK：评论者星级评分——PostDTO 尚未暴露该字段；在 API 支持每条帖子的评分之前，
-// 从帖子 id 派生一个稳定的伪评分。
-function mockReviewScore(post: PostDTO): number | null {
-  const id = post.unitId ?? "";
-  if (!id) return null;
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
-  return ((Math.abs(h) % 10) + 1) / 2;
-}
-
 export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   bookId,
 }) => {
@@ -149,3 +137,15 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
     </div>
   );
 };
+
+// MOCK: reviewer star rating — not yet exposed on PostDTO; derive a stable
+// pseudo-score from the post id until score-per-post lands on the API.
+// MOCK：评论者星级评分——PostDTO 尚未暴露该字段；在 API 支持每条帖子的评分之前，
+// 从帖子 id 派生一个稳定的伪评分。
+function mockReviewScore(post: PostDTO): number | null {
+  const id = post.unitId ?? "";
+  if (!id) return null;
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return ((Math.abs(h) % 10) + 1) / 2;
+}

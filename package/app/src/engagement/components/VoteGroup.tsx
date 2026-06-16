@@ -19,36 +19,6 @@ export type VoteGroupProps = {
   size?: EngagementSize;
 };
 
-function formatScore(score: number): string {
-  const abs = Math.abs(score);
-  if (abs < 1000) return String(score);
-  const sign = score < 0 ? "-" : "";
-  const k = abs / 1000;
-  return `${sign}${k.toFixed(k < 10 ? 1 : 0).replace(/\.0$/, "")}K`;
-}
-
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 24;
-    default:
-      return 20;
-  }
-}
-
-function sizeToTextClass(size: EngagementSize): string {
-  switch (size) {
-    case "sm":
-      return "text-xs";
-    case "lg":
-      return "text-base";
-    default:
-      return "text-sm";
-  }
-}
-
 export const VoteGroup: React.FC<VoteGroupProps> = ({
   targetUnitId,
   summaryScopeKey,
@@ -156,3 +126,33 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
     </div>
   );
 };
+
+function formatScore(score: number): string {
+  const abs = Math.abs(score);
+  if (abs < 1000) return String(score);
+  const sign = score < 0 ? "-" : "";
+  const k = abs / 1000;
+  return `${sign}${k.toFixed(k < 10 ? 1 : 0).replace(/\.0$/, "")}K`;
+}
+
+function sizeToIconPx(size: EngagementSize): number {
+  switch (size) {
+    case "sm":
+      return 16;
+    case "lg":
+      return 24;
+    default:
+      return 20;
+  }
+}
+
+function sizeToTextClass(size: EngagementSize): string {
+  switch (size) {
+    case "sm":
+      return "text-xs";
+    case "lg":
+      return "text-base";
+    default:
+      return "text-sm";
+  }
+}

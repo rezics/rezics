@@ -26,14 +26,6 @@ interface EntityIdentityRowProps {
   className?: string;
 }
 
-export function getEntityIdentityTitle(
-  entity?: EntityIdentity | EntityDTO | null,
-  fallbackTitle = "",
-) {
-  const title = entity?.translations?.[0]?.title?.trim();
-  return title || fallbackTitle;
-}
-
 export function EntityIdentityRow({
   entity,
   fallbackTitle,
@@ -69,4 +61,12 @@ export function EntityIdentityRow({
       <EntityVerifiedIcon verified={entity.verified} />
     </span>
   );
+}
+
+export function getEntityIdentityTitle(
+  entity?: EntityIdentity | EntityDTO | null,
+  fallbackTitle = "",
+) {
+  const title = entity?.translations?.[0]?.title?.trim();
+  return title || fallbackTitle;
 }

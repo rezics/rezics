@@ -2,6 +2,11 @@ import { useTranslation } from "@rezics/i18n/react";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
 
+export type HomePartnerBrandsProps = {
+  logos?: string[];
+  title?: string;
+};
+
 const defaultBrands = [
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+A",
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+B",
@@ -9,11 +14,6 @@ const defaultBrands = [
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+D",
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+E",
 ];
-
-export type HomePartnerBrandsProps = {
-  logos?: string[];
-  title?: string;
-};
 
 export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
   logos = defaultBrands,
@@ -40,5 +40,3 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
     </div>
   );
 };
-
-export default HomePartnerBrands;

@@ -6,13 +6,20 @@ import {
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
-import { UserHoverPreview } from "@/user/components";
+import { UserHoverPreview } from "@/user";
 import { isEditedTimestamp } from "../../models/postMetadata";
 
 interface PostAuthorHeaderProps {
   post: PostDTO | CommentDTO;
   size?: "compact" | "default";
   showAvatar?: boolean;
+  avatarClassName?: string;
+}
+
+interface AnonymousAuthorProps {
+  size: "compact" | "default";
+  nameClassName: string;
+  showAvatar: boolean;
   avatarClassName?: string;
 }
 
@@ -102,13 +109,6 @@ export function PostAuthorAvatar({
       <AvatarFallback>?</AvatarFallback>
     </Avatar>
   );
-}
-
-interface AnonymousAuthorProps {
-  size: "compact" | "default";
-  nameClassName: string;
-  showAvatar: boolean;
-  avatarClassName?: string;
 }
 
 function AnonymousAuthor({

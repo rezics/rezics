@@ -6,8 +6,8 @@ import { buttonVariants } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { RealmCard } from "@/realm/components/RealmCard";
+import { QueryErrorDisplay } from "@/core";
+import { RealmCard } from "@/realm";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export const ActiveRealmsSection: React.FC = () => {

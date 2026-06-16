@@ -7,11 +7,9 @@ import type {
   ShelfItemType,
   ShelfMatchedUnitDTO,
   ShelfSummaryDTO,
-  VariantContextSummary,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
-import { variantContextForRow } from "@/unit/variant-context";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type {
   ShelfItemRow,
@@ -50,8 +48,6 @@ export function mapShelfItemToDTO(row: ShelfItemRow): ShelfItemDTO {
     shelfId: row.shelfId,
     itemType,
     itemId: row.itemId,
-    variantUnitId: row.variantUnitId ?? null,
-    variantContext: variantContextForRow(row, undefined),
     kind: row.kind as ShelfItemKind,
     parentItemType: (row.parentItemType as ShelfItemType | null) ?? null,
     parentItemId: row.parentItemId ?? null,
@@ -61,16 +57,6 @@ export function mapShelfItemToDTO(row: ShelfItemRow): ShelfItemDTO {
     createdByUserId: row.createdByUserId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-  };
-}
-
-export function mapShelfItemToDTOWithVariantContext(
-  row: ShelfItemRow,
-  variantContexts?: ReadonlyMap<string, VariantContextSummary>,
-): ShelfItemDTO {
-  return {
-    ...mapShelfItemToDTO(row),
-    variantContext: variantContextForRow(row, variantContexts),
   };
 }
 

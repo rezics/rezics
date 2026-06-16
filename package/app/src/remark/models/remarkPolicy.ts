@@ -9,12 +9,12 @@ export const remarkDetailActions: Action[] = [
   "share",
 ];
 
+export const remarkPolicy: ReactionBarPolicy = {
+  getShareHref: getRemarkShareHref,
+};
+
 export function getRemarkShareHref(
   post: Pick<ReactionBarPost, "unitId">,
 ): string {
   return `/remark/${post.unitId}`;
 }
-
-export const remarkPolicy: ReactionBarPolicy = {
-  getShareHref: getRemarkShareHref,
-};

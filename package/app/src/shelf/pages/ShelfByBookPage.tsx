@@ -7,7 +7,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   resolveCatalogEntryInteractionContext,
   shelfListFiltersForCatalogEntry,
-} from "@/book-library/models/catalogEntryContext";
+} from "@/book-library";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ShelfCard } from "../components/ShelfCard";
 
@@ -75,5 +75,3 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
     </div>
   );
 }
-
-export default ShelfByBookPage;

@@ -17,6 +17,11 @@ import {
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 import { type FC, useState } from "react";
 
+interface TokenCreateDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
   { domain: "user", perm: "write", label: "user:write" },
@@ -26,11 +31,6 @@ const AVAILABLE_SCOPES = [
     label: "dispatch:rezics-server-session",
   },
 ] as const;
-
-interface TokenCreateDialogProps {
-  open: boolean;
-  onClose: () => void;
-}
 
 export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
   open,

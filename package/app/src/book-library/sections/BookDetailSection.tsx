@@ -13,7 +13,7 @@ import {
 import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
-import { MainContentContainer } from "@/core/components/container/MainContentContainer";
+import { MainContentContainer } from "@/core";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 
 const TAB_ROUTES = [

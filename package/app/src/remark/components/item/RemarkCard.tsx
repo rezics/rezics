@@ -13,13 +13,16 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
-import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
-import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
+import { PostAuthorHeader, PostBodyMarkdown } from "@/post";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { remarkCardActions, remarkPolicy } from "../../models/remarkPolicy";
 
 interface RemarkRatingBadgeProps {
+  remark: PostDTO;
+}
+
+interface RemarkCardProps {
   remark: PostDTO;
 }
 
@@ -61,10 +64,6 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
     </TooltipProvider>
   );
 };
-
-interface RemarkCardProps {
-  remark: PostDTO;
-}
 
 export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
   const navigate = useNavigate();

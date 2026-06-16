@@ -39,7 +39,6 @@ import { getSeedTagId } from "@/infra/seed-tags";
 import { serverJobProducer } from "@/job/job-boundary";
 import { searchClient } from "@/meili/search-client";
 import { assertLicenseSlug } from "@/unit/publication-policy";
-import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { AppError } from "@/utils/errors";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -67,7 +66,6 @@ export const SHELF_ITEM_BATCH_OP_CAP = 200;
 import {
   mapShelfDetailToDTO,
   mapShelfItemToDTO,
-  mapShelfItemToDTOWithVariantContext,
   mapShelfListRowToDTO,
   mapShelfSummaryToDTO,
   mapShelfToDTO,
@@ -112,7 +110,6 @@ async function ensureShelfItem(
   itemId: string,
   kind: ShelfItemKind,
   itemType: ShelfItemType = "unit",
-  variantUnitId?: string | null,
   explicitPosition?: string,
   parentItemId?: string | null,
   parentItemType?: ShelfItemType | null,
@@ -126,7 +123,6 @@ async function ensureShelfItem(
       shelfId,
       itemType,
       itemId,
-      variantUnitId: variantUnitId ?? null,
       kind,
       parentItemType: parentItemId ? (parentItemType ?? "unit") : null,
       parentItemId: parentItemId ?? null,
@@ -137,15 +133,11 @@ async function ensureShelfItem(
     })
     .onConflictDoNothing()
     .returning({ itemId: ShelfItem.itemId });
-  if (
-    created.length === 0 &&
-    (variantUnitId !== undefined || searchText !== undefined)
-  ) {
+  if (created.length === 0 && searchText !== undefined) {
     await tx
       .update(ShelfItem)
       .set({
-        ...(variantUnitId !== undefined ? { variantUnitId } : {}),
-        ...(searchText !== undefined ? { searchText } : {}),
+        searchText,
         updatedAt: new Date(),
       })
       .where(
@@ -558,7 +550,8 @@ export class ShelfService {
       conditions.push(sql`exists (
         select 1 from "ShelfItem" su
         where su."shelfId" = ${Shelf.unitId}
-          and su."variantUnitId" = ${variantUnitId}
+          and su."itemId" = ${variantUnitId}
+          and su."parentRole" = 'variant'
       )`);
     }
 
@@ -643,7 +636,6 @@ export class ShelfService {
       .select({
         shelfId: ShelfItem.shelfId,
         unitId: ShelfItem.itemId,
-        variantUnitId: ShelfItem.variantUnitId,
         kind: ShelfItem.kind,
       })
       .from(ShelfItem)
@@ -652,15 +644,16 @@ export class ShelfService {
           inArray(ShelfItem.shelfId, shelfIds),
           containsUnitId ? eq(ShelfItem.itemId, containsUnitId) : undefined,
           variantUnitId
-            ? eq(ShelfItem.variantUnitId, variantUnitId)
+            ? and(
+                eq(ShelfItem.itemId, variantUnitId),
+                eq(ShelfItem.parentRole, "variant"),
+              )
             : undefined,
         ),
       )
       .orderBy(asc(ShelfItem.position));
 
-    const matchedUnitIds = [
-      ...new Set(shelfItems.map((row) => row.variantUnitId ?? row.unitId)),
-    ];
+    const matchedUnitIds = [...new Set(shelfItems.map((row) => row.unitId))];
     const units =
       matchedUnitIds.length > 0
         ? await db
@@ -697,7 +690,7 @@ export class ShelfService {
 
     for (const row of shelfItems) {
       if (out.has(row.shelfId)) continue;
-      const matchedUnitId = row.variantUnitId ?? row.unitId;
+      const matchedUnitId = row.unitId;
       const unit = unitById.get(matchedUnitId);
       const translations = unit?.translations ?? [];
       const title =
@@ -1097,7 +1090,6 @@ export class ShelfService {
         req.itemId,
         kind,
         req.itemType,
-        req.variantUnitId,
         undefined,
         req.parentItemId,
         req.parentItemType,
@@ -1275,7 +1267,14 @@ export class ShelfService {
           sql`${ShelfItem.parentItemId} is null`,
           query.itemType ? eq(ShelfItem.itemType, query.itemType) : undefined,
           query.variantUnitId?.trim()
-            ? eq(ShelfItem.variantUnitId, query.variantUnitId.trim())
+            ? sql`exists (
+                  select 1 from "ShelfItem" child
+                  where child."shelfId" = ${ShelfItem.shelfId}
+                    and child."parentItemType" = ${ShelfItem.itemType}
+                    and child."parentItemId" = ${ShelfItem.itemId}
+                    and child."itemId" = ${query.variantUnitId.trim()}
+                    and child."parentRole" = 'variant'
+                )`
             : undefined,
           searchIds ? inArray(ShelfItem.itemId, [...searchIds]) : undefined,
           query.cursor
@@ -1317,10 +1316,7 @@ export class ShelfService {
       seenItems.add(key);
       return true;
     });
-    const variantContexts = await hydrateVariantContextSummaries(allItems);
-    const itemDTOs = allItems.map((item) =>
-      mapShelfItemToDTOWithVariantContext(item, variantContexts),
-    );
+    const itemDTOs = allItems.map((item) => mapShelfItemToDTO(item));
     const relations = childRows
       .filter((row) => row.parentItemId && row.parentRole)
       .map((row) => ({
@@ -1369,7 +1365,6 @@ export class ShelfService {
           reviewUnitId,
           reviewKind,
           "unit",
-          null,
           undefined,
           parentItemId,
           "unit",
@@ -1439,7 +1434,6 @@ export class ShelfService {
             childId,
             kind,
             "unit",
-            null,
             undefined,
             parentItemId,
             "unit",
@@ -1521,7 +1515,6 @@ export class ShelfService {
                 op.itemId,
                 op.kind,
                 op.itemType,
-                op.variantUnitId,
                 op.position,
                 op.parentItemId,
                 op.parentItemType,
@@ -1667,7 +1660,6 @@ export class ShelfService {
                   op.childItemId,
                   op.childKind,
                   op.childItemType,
-                  op.childVariantUnitId,
                   op.position,
                   op.parentItemId,
                   op.parentItemType,
@@ -1735,7 +1727,6 @@ export class ShelfService {
                     childId,
                     kind,
                     op.childItemType,
-                    null,
                     undefined,
                     op.parentItemId,
                     op.parentItemType,

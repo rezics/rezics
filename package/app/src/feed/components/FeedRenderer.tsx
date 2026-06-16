@@ -11,15 +11,8 @@ import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx
 import { Card, CardContent, Skeleton } from "@rezics/ui/shadcn";
 import type React from "react";
 import { TextLink } from "@/shared/ui/link";
-import { ShelfCard } from "@/shelf/components/ShelfCard";
+import { ShelfCard } from "@/shelf";
 import { FeedContentCard } from "./FeedContentCard";
-
-const FEED_LOADING_ROW_KEYS = [
-  "feed-loading-1",
-  "feed-loading-2",
-  "feed-loading-3",
-  "feed-loading-4",
-];
 
 interface FeedRendererProps {
   rows: FeedRow[];
@@ -27,6 +20,13 @@ interface FeedRendererProps {
   emptyTitle?: string;
   renderContentRow?: (row: FeedContentRow) => React.ReactNode;
 }
+
+const FEED_LOADING_ROW_KEYS = [
+  "feed-loading-1",
+  "feed-loading-2",
+  "feed-loading-3",
+  "feed-loading-4",
+];
 
 function FeedLoadingRows() {
   return (

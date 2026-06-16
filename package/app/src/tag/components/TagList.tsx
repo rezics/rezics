@@ -2,7 +2,7 @@ import type { UnitTagDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
@@ -23,19 +23,16 @@ export function SingleTagChip({
   const [activeId, setActiveId] = useState<string | null>(
     autoSelectFirst ? tag.tagUnitId : null,
   );
-  const handleClick = useCallback(
-    (e: React.MouseEvent, tag: UnitTagDTO) => {
-      if (e.ctrlKey) {
-        window.open(
-          unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
-          "_blank",
-        );
-        return;
-      }
-      setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);
-    },
-    [activeId],
-  );
+  const handleClick = (e: React.MouseEvent, tag: UnitTagDTO) => {
+    if (e.ctrlKey) {
+      window.open(
+        unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
+        "_blank",
+      );
+      return;
+    }
+    setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);
+  };
 
   const label = tag.tagUnitId;
   const isActive = tag.tagUnitId === activeId;
@@ -69,19 +66,16 @@ export const TagList: React.FC<{
   );
   const activeTag = tags.find((t) => t.tagUnitId === activeId) || null;
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent, tag: UnitTagDTO) => {
-      if (e.ctrlKey) {
-        window.open(
-          unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
-          "_blank",
-        );
-        return;
-      }
-      setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);
-    },
-    [activeId],
-  );
+  const handleClick = (e: React.MouseEvent, tag: UnitTagDTO) => {
+    if (e.ctrlKey) {
+      window.open(
+        unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
+        "_blank",
+      );
+      return;
+    }
+    setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);
+  };
 
   if (tags.length === 0) {
     return (
@@ -120,5 +114,3 @@ export const TagList: React.FC<{
     </div>
   );
 };
-
-export default TagList;

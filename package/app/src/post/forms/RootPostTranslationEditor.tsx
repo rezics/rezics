@@ -48,10 +48,6 @@ export interface RootPostTranslationEditorProps {
   extraRight?: RezicsMarkdownEditorProps["extraRight"];
 }
 
-function readBody(content: unknown): string {
-  return mainMarkdownSource(content) ?? "";
-}
-
 export function RootPostTranslationEditor({
   post,
   language,
@@ -234,4 +230,8 @@ export function RootPostTranslationEditor({
       />
     </div>
   );
+}
+
+function readBody(content: unknown): string {
+  return mainMarkdownSource(content) ?? "";
 }

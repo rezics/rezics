@@ -24,151 +24,10 @@ import {
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { toast } from "sonner";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 
 interface RealmModerationQueueSectionProps {
   realmUnitId: string;
-}
-
-function caseStateVariant(state: string) {
-  if (state === "new" || state === "triaged") return "secondary";
-  if (state === "resolved" || state === "actioned") return "default";
-  return "outline";
-}
-
-function formatDate(value?: string | null) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString();
-}
-
-function RealmCaseCard({
-  item,
-  realmUnitId,
-}: {
-  item: ModerationCaseDTO;
-  realmUnitId: string;
-}) {
-  const summary = item.reason ?? item.safeSummary ?? "No summary recorded.";
-  const updatedAt = formatDate(item.updatedAt);
-  const decideCase = useDecideRealmCaseMutation({
-    onSuccess: () => toast.success("Case updated."),
-    onError: (error) => toast.error(error.message),
-  });
-  const isPendingReview = item.target.kind === "unit" && item.state === "new";
-  const decide = (actionKind: "approve" | "remove", reason: string) =>
-    decideCase.mutate({
-      realmUnitId,
-      caseId: item.id,
-      input: { actionKind, reason },
-    });
-
-  return (
-    <Card surface="plain">
-      <CardContent className="flex flex-col gap-3 p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={caseStateVariant(item.state)}>{item.state}</Badge>
-          <span className="text-sm font-medium leading-ui text-text-primary">
-            {item.target.kind}:{item.target.id}
-          </span>
-          {item.parentCaseId ? (
-            <Badge variant="outline">case linked</Badge>
-          ) : null}
-        </div>
-        <p className="m-0 text-sm leading-body text-text-secondary">
-          {summary}
-        </p>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs leading-ui text-text-tertiary">
-          {item.subjectUserId ? (
-            <Link
-              to="/staff/account/$targetUserId"
-              params={{ targetUserId: item.subjectUserId }}
-              className="underline-offset-2 hover:text-text-primary hover:underline"
-            >
-              Subject {item.subjectUserId}
-            </Link>
-          ) : null}
-          {item.assignedToUserId ? (
-            <span>Assigned {item.assignedToUserId}</span>
-          ) : null}
-          {updatedAt ? <span>Updated {updatedAt}</span> : null}
-        </div>
-        {isPendingReview || item.parentCaseId ? (
-          <div className="flex flex-wrap gap-2">
-            {isPendingReview ? (
-              <>
-                <Button
-                  variant="default"
-                  size="sm"
-                  disabled={decideCase.isPending}
-                  onClick={() => decide("approve", "approved_for_realm")}
-                >
-                  Approve
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={decideCase.isPending}
-                  onClick={() => decide("remove", "removed_from_realm")}
-                >
-                  Remove
-                </Button>
-              </>
-            ) : null}
-            {item.parentCaseId ? (
-              <Link
-                to="/staff/case/$caseId"
-                params={{ caseId: item.parentCaseId }}
-              >
-                <Button variant="outline" size="sm">
-                  Open case
-                </Button>
-              </Link>
-            ) : null}
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
-  );
-}
-
-function MetricCard({
-  icon: Icon,
-  title,
-  value,
-  detail,
-  children,
-}: {
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  title: string;
-  value: string;
-  detail: string;
-  children?: ReactNode;
-}) {
-  return (
-    <Card surface="contained">
-      <CardContent className="flex h-full flex-col gap-4 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="text-xs font-medium uppercase leading-ui text-text-tertiary">
-              {title}
-            </div>
-            <div className="mt-2 text-2xl font-semibold leading-ui text-text-primary">
-              {value}
-            </div>
-          </div>
-          <Icon className="h-5 w-5 text-text-tertiary" aria-hidden />
-        </div>
-        <p className="m-0 flex-1 text-sm leading-body text-text-secondary">
-          {detail}
-        </p>
-        {children ? (
-          <div className="flex flex-wrap gap-2">{children}</div>
-        ) : null}
-      </CardContent>
-    </Card>
-  );
 }
 
 export function RealmModerationQueueSection({
@@ -329,5 +188,146 @@ export function RealmModerationQueueSection({
         </section>
       ) : null}
     </section>
+  );
+}
+
+function caseStateVariant(state: string) {
+  if (state === "new" || state === "triaged") return "secondary";
+  if (state === "resolved" || state === "actioned") return "default";
+  return "outline";
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
+function RealmCaseCard({
+  item,
+  realmUnitId,
+}: {
+  item: ModerationCaseDTO;
+  realmUnitId: string;
+}) {
+  const summary = item.reason ?? item.safeSummary ?? "No summary recorded.";
+  const updatedAt = formatDate(item.updatedAt);
+  const decideCase = useDecideRealmCaseMutation({
+    onSuccess: () => toast.success("Case updated."),
+    onError: (error) => toast.error(error.message),
+  });
+  const isPendingReview = item.target.kind === "unit" && item.state === "new";
+  const decide = (actionKind: "approve" | "remove", reason: string) =>
+    decideCase.mutate({
+      realmUnitId,
+      caseId: item.id,
+      input: { actionKind, reason },
+    });
+
+  return (
+    <Card surface="plain">
+      <CardContent className="flex flex-col gap-3 p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={caseStateVariant(item.state)}>{item.state}</Badge>
+          <span className="text-sm font-medium leading-ui text-text-primary">
+            {item.target.kind}:{item.target.id}
+          </span>
+          {item.parentCaseId ? (
+            <Badge variant="outline">case linked</Badge>
+          ) : null}
+        </div>
+        <p className="m-0 text-sm leading-body text-text-secondary">
+          {summary}
+        </p>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs leading-ui text-text-tertiary">
+          {item.subjectUserId ? (
+            <Link
+              to="/staff/account/$targetUserId"
+              params={{ targetUserId: item.subjectUserId }}
+              className="underline-offset-2 hover:text-text-primary hover:underline"
+            >
+              Subject {item.subjectUserId}
+            </Link>
+          ) : null}
+          {item.assignedToUserId ? (
+            <span>Assigned {item.assignedToUserId}</span>
+          ) : null}
+          {updatedAt ? <span>Updated {updatedAt}</span> : null}
+        </div>
+        {isPendingReview || item.parentCaseId ? (
+          <div className="flex flex-wrap gap-2">
+            {isPendingReview ? (
+              <>
+                <Button
+                  variant="default"
+                  size="sm"
+                  disabled={decideCase.isPending}
+                  onClick={() => decide("approve", "approved_for_realm")}
+                >
+                  Approve
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={decideCase.isPending}
+                  onClick={() => decide("remove", "removed_from_realm")}
+                >
+                  Remove
+                </Button>
+              </>
+            ) : null}
+            {item.parentCaseId ? (
+              <Link
+                to="/staff/case/$caseId"
+                params={{ caseId: item.parentCaseId }}
+              >
+                <Button variant="outline" size="sm">
+                  Open case
+                </Button>
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function MetricCard({
+  icon: Icon,
+  title,
+  value,
+  detail,
+  children,
+}: {
+  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  title: string;
+  value: string;
+  detail: string;
+  children?: ReactNode;
+}) {
+  return (
+    <Card surface="contained">
+      <CardContent className="flex h-full flex-col gap-4 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-xs font-medium uppercase leading-ui text-text-tertiary">
+              {title}
+            </div>
+            <div className="mt-2 text-2xl font-semibold leading-ui text-text-primary">
+              {value}
+            </div>
+          </div>
+          <Icon className="h-5 w-5 text-text-tertiary" aria-hidden />
+        </div>
+        <p className="m-0 flex-1 text-sm leading-body text-text-secondary">
+          {detail}
+        </p>
+        {children ? (
+          <div className="flex flex-wrap gap-2">{children}</div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }

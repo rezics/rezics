@@ -1,14 +1,19 @@
 import type { ContentRating } from "@rezics/contract";
 import { RatingBadge } from "@rezics/ui";
-import { Badge, Button, Card, CardContent, Checkbox } from "@rezics/ui/shadcn";
+import { Badge } from "@rezics/ui/shadcn";
 import {
   GripVertical as DragIndicator,
-  ChevronDown as ExpandMore,
-  EllipsisVertical as MoreVert,
   Eye as Visibility,
+  FileText,
+  ListTree,
+  Move,
+  Pencil,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import type React from "react";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
+import { TreeEditorRow, type TreeActionItem } from "@/tree-edit";
 import { useLongPress } from "../hooks/useLongPress";
 import type { Chapter, ChapterContextMenuState } from "./BookTocEditor";
 
@@ -36,6 +41,9 @@ function hashCode(str: string): number {
 export function mockWordCount(node: Chapter): number {
   if (node.children?.length) {
     return node.children.reduce((sum, c) => sum + mockWordCount(c), 0);
+  }
+  if (node.noContent === true) {
+    return 0;
   }
   return (hashCode(String(node.id)) % 8000) + 500;
 }
@@ -91,7 +99,16 @@ export interface BookTocEditorNodeOptions {
   bookRating?: ContentRating;
   isSelectionMode: boolean;
   selectedIds: Set<string>;
-  onToggleSelect: (id: string) => void;
+  onToggleSelect: (
+    id: string,
+    event?: React.MouseEvent | React.KeyboardEvent,
+  ) => void;
+  onCreateChild: (node: Chapter) => void;
+  onCreateSiblingAfter: (node: Chapter) => void;
+  onDeleteChapter: (node: Chapter) => void;
+  onMoveToParent: (node: Chapter) => void;
+  onMoveToFirst: (node: Chapter) => void;
+  onMoveToLast: (node: Chapter) => void;
 }
 
 /**
@@ -108,6 +125,12 @@ export const createBookTocEditorNode = ({
   isSelectionMode,
   selectedIds,
   onToggleSelect,
+  onCreateChild,
+  onCreateSiblingAfter,
+  onDeleteChapter,
+  onMoveToParent,
+  onMoveToFirst,
+  onMoveToLast,
 }: BookTocEditorNodeOptions) => {
   return function BookTocEditorNode({
     node,
@@ -115,218 +138,177 @@ export const createBookTocEditorNode = ({
     dragHandle,
   }: NodeRendererProps<Chapter>) {
     const hasChildren = !!(node.children && node.children.length > 0);
+    const isSectionNode = node.data.noContent === true;
+    const isSubtreeEnd = !!(
+      node.parent &&
+      !node.parent.isRoot &&
+      (!node.next || !node.parent.isAncestorOf(node.next))
+    );
     const wordCount = mockWordCount(node.data);
+
+    const openContextMenuAt = (x: number, y: number) => {
+      treeRef.current?.select(String(node.id));
+      setContextMenu({ x, y, node });
+    };
 
     const handleContextMenu = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      treeRef.current?.select(String(node.id));
-      setContextMenu({ x: e.clientX, y: e.clientY, node });
+      openContextMenuAt(e.clientX, e.clientY);
     };
 
     const openContextMenuFromTouch = (e: React.TouchEvent) => {
       e.preventDefault();
       const touch = e.touches[0] ?? e.changedTouches[0];
       if (touch) {
-        treeRef.current?.select(String(node.id));
-        setContextMenu({
-          x: touch.clientX,
-          y: touch.clientY,
-          node,
-        });
+        openContextMenuAt(touch.clientX, touch.clientY);
       }
     };
 
     const longPress = useLongPress(openContextMenuFromTouch);
-
-    // ─── Parent / section node ───
-    // ─── 父级 / 章节分组节点 ───
-    if (hasChildren) {
-      return (
-        <div
-          role="treeitem"
-          tabIndex={0}
-          style={style}
-          ref={isSortingMode ? dragHandle : undefined}
-          className="group flex h-full cursor-pointer select-none items-center gap-2 px-2 transition-colors duration-150 hover:bg-surface-subtle active:bg-surface-subtle"
-          onClick={() => node.toggle()}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === "Enter") node.toggle();
-          }}
-          onContextMenu={handleContextMenu}
-          {...longPress}
-        >
-          {isSortingMode && (
-            <span className="flex-shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
-              <DragIndicator size={16} />
-            </span>
-          )}
-
-          <span className="flex-shrink-0 w-6 h-6 flex justify-center items-center text-muted-foreground">
-            <ExpandMore
-              size={20}
-              style={{
-                transition: "transform 200ms ease",
-                transform: node.isOpen ? "rotate(0deg)" : "rotate(-90deg)",
-              }}
-            />
-          </span>
-
-          <div className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold truncate">
-              {node.data.title}
-            </span>
-            <div className="flex items-center gap-3 mt-0.5">
-              <span className="text-xs text-muted-foreground">
-                {node.children?.length ?? 0} items
-              </span>
-              <span className="text-xs tabular-nums text-muted-foreground">
-                {formatCount(wordCount)} words
-              </span>
-            </div>
-          </div>
-
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleContextMenu(e);
-            }}
-            className="w-7 h-7"
-          >
-            <MoreVert size={18} />
-          </Button>
-        </div>
-      );
-    }
-
-    // ─── Leaf / chapter node ───
-    // ─── 叶子 / 章节节点 ───
-    // MOCK: publish status and view count
-    // MOCK：发布状态与浏览量
-    const status = mockPublishStatus(node.id);
-    const views = mockViewCount(node.id);
     const effectiveRating = node.data.rating ?? bookRating;
     const isOverride = node.data.rating !== undefined;
     const isChecked = selectedIds.has(String(node.id));
+    const actions: TreeActionItem[] = [
+      {
+        key: "edit",
+        label: isSectionNode ? "Edit" : "Edit metadata",
+        icon: <Pencil className="size-4" aria-hidden />,
+        onSelect: () => onEditChapter(node.data),
+      },
+      {
+        key: "moveTo",
+        label: "Move to...",
+        icon: <Move className="size-4" aria-hidden />,
+        onSelect: () => onMoveToParent(node.data),
+      },
+      {
+        key: "moveToFirst",
+        label: "Move to first",
+        onSelect: () => onMoveToFirst(node.data),
+      },
+      {
+        key: "moveToLast",
+        label: "Move to last",
+        onSelect: () => onMoveToLast(node.data),
+      },
+      {
+        key: "addChild",
+        label: "New child chapter",
+        icon: <Plus className="size-4" aria-hidden />,
+        separatorBefore: true,
+        onSelect: () => onCreateChild(node.data),
+      },
+      {
+        key: "addSiblingAfter",
+        label: "New sibling after",
+        icon: <Plus className="size-4" aria-hidden />,
+        onSelect: () => onCreateSiblingAfter(node.data),
+      },
+      {
+        key: "delete",
+        label: "Delete",
+        icon: <Trash2 className="size-4" aria-hidden />,
+        separatorBefore: true,
+        destructive: true,
+        onSelect: () => onDeleteChapter(node.data),
+      },
+    ];
 
-    const handleLeafClick = () => {
+    const sectionMeta = (
+      <span>
+        {node.children?.length ?? 0} items · {formatCount(wordCount)} words
+      </span>
+    );
+
+    const status = mockPublishStatus(node.id);
+    const views = mockViewCount(node.id);
+    const chapterMeta = (
+      <span className="flex flex-wrap items-center gap-2">
+        <Badge
+          variant="outline"
+          className={`h-5 text-[0.675rem] ${
+            status === "PUBLISHED"
+              ? "border-success-fill text-success-text"
+              : ""
+          }`}
+        >
+          {status}
+        </Badge>
+        <span>Updated {mockDate(node.id)}</span>
+        <span>{formatCount(wordCount)} words</span>
+        {hasChildren ? <span>{node.children?.length ?? 0} items</span> : null}
+        <span className="inline-flex items-center gap-0.5">
+          <Visibility size={12} />
+          {formatCount(views)}
+        </span>
+      </span>
+    );
+
+    const label = (
+      <span className="inline-flex min-w-0 items-center gap-2">
+        <span className="truncate">{node.data.title}</span>
+        {!isSectionNode && effectiveRating ? (
+          <RatingBadge
+            rating={effectiveRating}
+            size="sm"
+            variant={isOverride ? "filled" : "outlined"}
+          />
+        ) : null}
+      </span>
+    );
+
+    const activate = (event?: React.MouseEvent | React.KeyboardEvent) => {
       if (isSelectionMode) {
-        onToggleSelect(String(node.id));
+        onToggleSelect(String(node.id), event);
         return;
       }
-      if (!isSortingMode) {
-        onNavigateToChapter(node.data);
+      if (isSectionNode) {
+        onEditChapter(node.data);
+        return;
       }
+      if (!isSortingMode) onNavigateToChapter(node.data);
     };
 
     return (
       <div
         role="treeitem"
         tabIndex={0}
-        style={style}
-        ref={isSortingMode ? dragHandle : undefined}
-        className={`group select-none ${
-          isSortingMode ? "cursor-default" : "cursor-pointer"
-        }`}
-        onClick={handleLeafClick}
+        style={{ ...style, paddingLeft: 0 }}
+        className="h-full select-none"
+        onClick={(event) => activate(event)}
         onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === "Enter") handleLeafClick();
+          if (e.key === "Enter") activate(e);
         }}
-        onDoubleClick={
-          isSortingMode ? () => onEditChapter(node.data) : undefined
-        }
         onContextMenu={handleContextMenu}
         {...longPress}
       >
-        <Card
-          surface="plain"
-          className={`mx-2 mr-4 mt-px gap-0 py-0 transition-colors hover:bg-surface-subtle ${
-            isChecked ? "outline outline-2 outline-primary" : ""
-          }`}
-          style={{ height: "calc(100% - 2px)" }}
-        >
-          <CardContent className="py-3 px-4">
-            <div className="flex items-start justify-between gap-2">
-              {isSelectionMode && (
-                <Checkbox
-                  checked={isChecked}
-                  onClick={(e) => e.stopPropagation()}
-                  onCheckedChange={() => onToggleSelect(String(node.id))}
-                  className="mt-1"
-                />
-              )}
-              <div className="min-w-0 flex-1">
-                {/* Title row 标题行 */}
-                <div className="flex items-center gap-1.5">
-                  {isSortingMode && (
-                    <span className="flex-shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
-                      <DragIndicator size={14} />
-                    </span>
-                  )}
-                  <span className="font-medium text-sm truncate">
-                    {node.data.title}
-                  </span>
-                  {effectiveRating && (
-                    <RatingBadge
-                      rating={effectiveRating}
-                      size="sm"
-                      variant={isOverride ? "filled" : "outlined"}
-                    />
-                  )}
-                </div>
-
-                {/* Status & date line 状态与日期行 */}
-                <div
-                  className={`flex items-center gap-3 mt-2 ${isSortingMode ? "pl-6" : "pl-0"}`}
-                >
-                  {/* MOCK: publish status chip 模拟：发布状态标签 */}
-                  <Badge
-                    variant="outline"
-                    className={`h-5 text-[0.675rem] ${
-                      status === "PUBLISHED"
-                        ? "border-success-fill text-success-text"
-                        : ""
-                    }`}
-                  >
-                    {status}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    Updated {mockDate(node.id)}
-                  </span>
-                </div>
-
-                {/* Stats line 统计数据行 */}
-                <div
-                  className={`flex items-center gap-3 mt-1 ${isSortingMode ? "pl-6" : "pl-0"}`}
-                >
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {formatCount(wordCount)} words
-                  </span>
-                  {/* MOCK: view count 模拟：浏览量 */}
-                  <span className="text-xs text-muted-foreground tabular-nums flex items-center gap-0.5">
-                    <Visibility size={12} />
-                    {formatCount(views)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Kebab menu — always visible 三点菜单 — 始终可见 */}
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContextMenu(e);
-                }}
-                className="w-7 h-7"
-              >
-                <MoreVert size={18} />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <TreeEditorRow
+          label={label}
+          meta={isSectionNode ? sectionMeta : chapterMeta}
+          leadingIcon={
+            isSectionNode ? (
+              <ListTree className="size-4" aria-hidden />
+            ) : (
+              <FileText className="size-4" aria-hidden />
+            )
+          }
+          actions={actions}
+          hasChildren={hasChildren}
+          expanded={node.isOpen}
+          selectable={isSelectionMode}
+          selected={isChecked}
+          onSelect={(event) => onToggleSelect(String(node.id), event)}
+          draggable={isSortingMode}
+          dragHandle={isSortingMode ? dragHandle : undefined}
+          DragIcon={DragIndicator}
+          onToggle={(e?: React.MouseEvent) => {
+            e?.stopPropagation();
+            node.toggle();
+          }}
+          subtreeEnd={isSubtreeEnd}
+          className={isChecked ? "outline outline-2 outline-primary" : ""}
+        />
       </div>
     );
   };

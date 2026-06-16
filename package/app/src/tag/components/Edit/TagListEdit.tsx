@@ -192,5 +192,3 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
     </div>
   );
 };
-
-export default TagListEdit;

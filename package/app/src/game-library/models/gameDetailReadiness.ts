@@ -21,6 +21,12 @@ export const gameDetailHeroRegions = [
   "domain-media",
 ] as const;
 
+export const gameDetailDomainMediaPolicy = {
+  heroRegion: "domain-media",
+  sources: ["UnitExternalRef", "ContentDoc", "future-typed-media-asset"],
+  excludedGameColumns: ["trailerUrl", "screenshotUrls", "carouselUrls"],
+} as const;
+
 export function gameDetailData(unitId: string) {
   return {
     releaseSearch: contentSearchQueryOptions({
@@ -34,9 +40,3 @@ export function gameDetailData(unitId: string) {
     systemRequirements: gameSystemRequirementsByGameQueryOptions(unitId),
   };
 }
-
-export const gameDetailDomainMediaPolicy = {
-  heroRegion: "domain-media",
-  sources: ["UnitExternalRef", "ContentDoc", "future-typed-media-asset"],
-  excludedGameColumns: ["trailerUrl", "screenshotUrls", "carouselUrls"],
-} as const;

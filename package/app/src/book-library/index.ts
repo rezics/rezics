@@ -93,3 +93,30 @@ export {
   patchBookDetailAtomFamily,
   setBookDetailAtomFamily,
 } from "./states";
+
+// ============================================================================
+// Catalog Cards & Layouts (cross-feature reuse)
+// 目录卡片与布局（跨功能复用）
+// ============================================================================
+
+export { BookTocJsonEditor } from "./components/Chapter/BookTocJsonEditor";
+export { HorizontalBookCard } from "./components/item/HorizontalBookCard";
+export { BookCard } from "./components/item/VerticalBookCard";
+export { HorizontalBookCarousel } from "./components/list/HorizontalBookCarousel";
+export { ResponsiveBookGridLimited } from "./components/list/ResponsiveBookGridLimited";
+
+// ============================================================================
+// Domain Models (pure functions & types)
+// 领域模型（纯函数与类型）
+// ============================================================================
+
+export {
+  type BookContentStructureOccurrence,
+  contentUnitIdForNode,
+  withBookContentStructureOccurrences,
+} from "./models/bookContentStructurePath";
+export {
+  resolveCatalogEntryInteractionContext,
+  shelfListFiltersForCatalogEntry,
+} from "./models/catalogEntryContext";
+export { resolvePostTargetVariantLabel } from "./models/communityFeed";

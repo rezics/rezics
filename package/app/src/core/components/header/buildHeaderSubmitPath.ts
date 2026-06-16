@@ -1,3 +1,6 @@
+// Pure path util: import the leaf functions directly, not via the `@/search`
+// barrel, which would evaluate i18n-runtime-coupled feature modules at load.
+// 纯路径工具：直接引入叶子函数，避免经 `@/search` barrel 触发依赖 i18n 运行时的功能模块。
 import { resolveScope } from "@/search/models/scope";
 import { buildSearchPath } from "@/search/utils/searchQuery";
 

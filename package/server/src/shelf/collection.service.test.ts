@@ -38,6 +38,7 @@ function createRepositoryStub(
     findFavoritesShelfId: mock(async () => null),
     getUnitTarget: mock(async (_targetId: string) => ({
       type: "BOOK" as const,
+      catalogEntryKind: "MAIN" as const,
       targetUnitId: null,
       postKind: null,
     })),
@@ -45,6 +46,7 @@ function createRepositoryStub(
       targetIds.map((id) => ({
         id,
         type: "BOOK" as const,
+        catalogEntryKind: "MAIN" as const,
         targetUnitId: null,
         postKind: null,
       })),
@@ -52,10 +54,12 @@ function createRepositoryStub(
     applyCollectionMetadata: mock(async () => {}),
     collectToShelves: mock(async () => ({ savedTo: [], isNew: false })),
     hasShelfItem: mock(async () => false),
+    hasVariantShelfItem: mock(async () => false),
     removeFavorite: mock(async () => {}),
     addFavorite: mock(async () => {}),
     listDirectShelfIds: mock(async () => []),
     listReviewShelfIds: mock(async () => []),
+    listVariantShelfIds: mock(async () => []),
     listShelfTitles: mock(async () => []),
     ...overrides,
   };
@@ -127,14 +131,29 @@ describe("CollectionService — user collection metadata", () => {
         parentUnitId: "book-1",
         parentKind: "book",
       },
-      variantUnitId: undefined,
       searchText: "private alias",
       shelfIds: [],
     });
   });
 
-  test("collect stores variant context on the primary shelf item", async () => {
+  test("collect attaches a resolved variant under its main target", async () => {
     const repository = createRepositoryStub({
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "variant-1") {
+          return {
+            type: "BOOK" as const,
+            catalogEntryKind: "VARIANT" as const,
+            targetUnitId: "main-1",
+            postKind: null,
+          };
+        }
+        return {
+          type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
       collectToShelves: mock(async () => ({
         savedTo: ["shelf-1"],
         isNew: true,
@@ -154,11 +173,75 @@ describe("CollectionService — user collection metadata", () => {
       resolved: {
         parentUnitId: "main-1",
         parentKind: "book",
+        variantUnitId: "variant-1",
+        variantKind: "book",
       },
-      variantUnitId: "variant-1",
       shelfIds: ["shelf-1"],
     });
     expect(enqueueMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("collect rejects arbitrary variant hints instead of storing weak context", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "missing-variant") {
+          throw new Error("Unit not found: missing-variant");
+        }
+        return {
+          type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
+    });
+    const service = await createService(repository);
+
+    await expect(
+      service.collect("user-1", {
+        targetId: "main-1",
+        variantUnitId: "missing-variant",
+        shelfIds: ["shelf-1"],
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "invalid_variant_unit",
+    });
+    expect(repository.collectToShelves).not.toHaveBeenCalled();
+  });
+
+  test("collect rejects selected variants that do not point to the main target", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "variant-1") {
+          return {
+            type: "BOOK" as const,
+            catalogEntryKind: "VARIANT" as const,
+            targetUnitId: "other-main",
+            postKind: null,
+          };
+        }
+        return {
+          type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
+    });
+    const service = await createService(repository);
+
+    await expect(
+      service.collect("user-1", {
+        targetId: "main-1",
+        variantUnitId: "variant-1",
+        shelfIds: ["shelf-1"],
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "variant_target_mismatch",
+    });
+    expect(repository.collectToShelves).not.toHaveBeenCalled();
   });
 
   test("collect attaches review posts under their target work by default", async () => {
@@ -167,12 +250,14 @@ describe("CollectionService — user collection metadata", () => {
         if (targetId === "review-1") {
           return {
             type: "POST" as const,
+            catalogEntryKind: "NONE" as const,
             targetUnitId: "book-1",
             postKind: "REVIEW" as const,
           };
         }
         return {
           type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
           targetUnitId: null,
           postKind: null,
         };
@@ -193,7 +278,6 @@ describe("CollectionService — user collection metadata", () => {
         reviewUnitId: "review-1",
         reviewKind: "review",
       },
-      variantUnitId: undefined,
       searchText: undefined,
       shelfIds: ["shelf-1"],
     });
@@ -203,6 +287,7 @@ describe("CollectionService — user collection metadata", () => {
     const repository = createRepositoryStub({
       getUnitTarget: mock(async () => ({
         type: "SHELF" as const,
+        catalogEntryKind: "NONE" as const,
         targetUnitId: null,
         postKind: null,
       })),
@@ -221,9 +306,198 @@ describe("CollectionService — user collection metadata", () => {
         parentUnitId: "shelf-target",
         parentKind: "shelf",
       },
-      variantUnitId: undefined,
       searchText: "reference shelf",
       shelfIds: ["saved-shelf"],
+    });
+  });
+});
+
+describe("CollectionService — variant collection", () => {
+  test("direct VARIANT targets resolve to main root plus variant child", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "variant-1") {
+          return {
+            type: "BOOK" as const,
+            catalogEntryKind: "VARIANT" as const,
+            targetUnitId: "main-1",
+            postKind: null,
+          };
+        }
+        return {
+          type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
+    });
+    const service = await createService(repository);
+
+    await service.collect("user-1", {
+      targetId: "variant-1",
+      shelfIds: ["shelf-1"],
+    });
+
+    expect(repository.collectToShelves).toHaveBeenCalledWith({
+      userId: "user-1",
+      resolved: {
+        parentUnitId: "main-1",
+        parentKind: "book",
+        variantUnitId: "variant-1",
+        variantKind: "book",
+      },
+      searchText: undefined,
+      shelfIds: ["shelf-1"],
+    });
+  });
+
+  test("variant favorite toggles by child occurrence", async () => {
+    const repository = createRepositoryStub({
+      findFavoritesShelfId: mock(async () => "favorites-1"),
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "variant-1") {
+          return {
+            type: "BOOK" as const,
+            catalogEntryKind: "VARIANT" as const,
+            targetUnitId: "main-1",
+            postKind: null,
+          };
+        }
+        return {
+          type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
+      hasVariantShelfItem: mock(async () => true),
+    });
+    const service = await createService(repository);
+
+    const result = await service.toggleFavorite("user-1", "variant-1");
+
+    expect(result).toEqual({ isFavorited: false });
+    expect(repository.hasVariantShelfItem).toHaveBeenCalledWith(
+      "favorites-1",
+      "variant-1",
+    );
+    expect(repository.removeFavorite).toHaveBeenCalledWith({
+      shelfId: "favorites-1",
+      resolved: {
+        parentUnitId: "main-1",
+        parentKind: "book",
+        variantUnitId: "variant-1",
+        variantKind: "book",
+      },
+    });
+    expect(repository.hasShelfItem).not.toHaveBeenCalled();
+  });
+
+  test("variant status comes from variant child shelf rows", async () => {
+    const repository = createRepositoryStub({
+      findFavoritesShelfId: mock(async () => "favorites-1"),
+      getUnitTarget: mock(async (targetId: string) => {
+        if (targetId === "variant-1") {
+          return {
+            type: "BOOK" as const,
+            catalogEntryKind: "VARIANT" as const,
+            targetUnitId: "main-1",
+            postKind: null,
+          };
+        }
+        return {
+          type: "BOOK" as const,
+          catalogEntryKind: "MAIN" as const,
+          targetUnitId: null,
+          postKind: null,
+        };
+      }),
+      listVariantShelfIds: mock(async () => [
+        { childUnitId: "variant-1", shelfId: "favorites-1" },
+        { childUnitId: "variant-1", shelfId: "shelf-2" },
+      ]),
+      listShelfTitles: mock(async () => [
+        { id: "favorites-1", title: "Favorites" },
+        { id: "shelf-2", title: "Editions" },
+      ]),
+    });
+    const service = await createService(repository);
+
+    const result = await service.getCollectionStatus("user-1", "variant-1");
+
+    expect(result).toEqual({
+      isFavorited: true,
+      shelves: [
+        { id: "favorites-1", title: "Favorites" },
+        { id: "shelf-2", title: "Editions" },
+      ],
+    });
+    expect(repository.listVariantShelfIds).toHaveBeenCalledWith({
+      userId: "user-1",
+      variantUnitIds: ["variant-1"],
+    });
+    expect(repository.listDirectShelfIds).not.toHaveBeenCalled();
+  });
+
+  test("batch status separates main roots from variant children", async () => {
+    const repository = createRepositoryStub({
+      findFavoritesShelfId: mock(async () => "favorites-1"),
+      listUnitTargets: mock(async (targetIds: string[]) =>
+        targetIds.map((id) => {
+          if (id === "variant-1") {
+            return {
+              id,
+              type: "BOOK" as const,
+              catalogEntryKind: "VARIANT" as const,
+              targetUnitId: "main-1",
+              postKind: null,
+            };
+          }
+          return {
+            id,
+            type: "BOOK" as const,
+            catalogEntryKind: "MAIN" as const,
+            targetUnitId: null,
+            postKind: null,
+          };
+        }),
+      ),
+      listDirectShelfIds: mock(async () => [
+        { unitId: "main-1", shelfId: "main-shelf" },
+      ]),
+      listVariantShelfIds: mock(async () => [
+        { childUnitId: "variant-1", shelfId: "favorites-1" },
+      ]),
+      listShelfTitles: mock(async () => [
+        { id: "main-shelf", title: "Main" },
+        { id: "favorites-1", title: "Favorites" },
+      ]),
+    });
+    const service = await createService(repository);
+
+    const result = await service.getCollectionStatusBatch("user-1", [
+      "main-1",
+      "variant-1",
+    ]);
+
+    expect(result.statusesByTarget).toEqual({
+      "main-1": {
+        isFavorited: false,
+        shelves: [{ id: "main-shelf", title: "Main" }],
+      },
+      "variant-1": {
+        isFavorited: true,
+        shelves: [{ id: "favorites-1", title: "Favorites" }],
+      },
+    });
+    expect(repository.listDirectShelfIds).toHaveBeenCalledWith({
+      userId: "user-1",
+      unitIds: ["main-1"],
+    });
+    expect(repository.listVariantShelfIds).toHaveBeenCalledWith({
+      userId: "user-1",
+      variantUnitIds: ["variant-1"],
     });
   });
 });

@@ -2,7 +2,7 @@ import type { ShelfItemKind, ShelfItemType } from "@rezics/api/shelf";
 import { Button } from "@rezics/ui/shadcn";
 import { BookmarkPlus } from "lucide-react";
 import type React from "react";
-import { CollectionModal } from "@/collection/components/CollectionModal";
+import { CollectionModal } from "@/collection";
 import { cn } from "@/shared/utils/css-util";
 import { useShelfTrigger } from "../hooks/useShelfTrigger";
 import type { EngagementSize } from "../types";
@@ -18,17 +18,6 @@ export type ShelfActionProps = {
   /** When the target is a review, the collection modal surfaces the review-specific dual-mode UI. 当目标是评论时，收藏模态框会展示评论专属的双模式 UI。 */
   isReview?: boolean;
 };
-
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 22;
-    default:
-      return 18;
-  }
-}
 
 export const ShelfAction: React.FC<ShelfActionProps> = ({
   targetUnitId,
@@ -86,3 +75,14 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
     </>
   );
 };
+
+function sizeToIconPx(size: EngagementSize): number {
+  switch (size) {
+    case "sm":
+      return 16;
+    case "lg":
+      return 22;
+    default:
+      return 18;
+  }
+}

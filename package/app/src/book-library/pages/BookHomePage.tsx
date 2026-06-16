@@ -1,9 +1,11 @@
 import type React from "react";
-import { MainContentContainer } from "@/core/components/container/MainContentContainer";
-import { NewBookSection } from "@/home/sections/NewBookSection";
-import { QuickAccessLinks } from "@/home/sections/QuickAccessLinks";
-import { TrendingBookSection } from "@/home/sections/TrendingBookSection";
-import { TrendingExcerptSection } from "@/home/sections/TrendingExcerptSection";
+import { MainContentContainer } from "@/core";
+import {
+  NewBookSection,
+  QuickAccessLinks,
+  TrendingBookSection,
+  TrendingExcerptSection,
+} from "@/home";
 import { BookHomeHeroSection } from "../sections/BookHomeHeroSection";
 
 export const BookHomePage: React.FC = () => {

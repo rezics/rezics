@@ -21,12 +21,6 @@ export type NavigationVisibility =
   | "authenticated"
   | "unauthenticated";
 
-export const navigationRowClassName =
-  "flex h-10 min-h-10 items-center gap-3 w-full px-3 rounded-md text-left text-sm leading-ui transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus";
-
-export const navigationSectionHeaderClassName =
-  "flex h-10 min-h-10 items-center justify-start gap-2 w-full px-3 text-left text-xs font-medium uppercase leading-ui text-text-tertiary";
-
 export type NavigationEntry = {
   kind: "item";
   segment: string;
@@ -57,3 +51,9 @@ export type NavigationItem =
       title: string;
       tone?: "muted" | "danger";
     };
+
+export const navigationRowClassName =
+  "flex h-10 min-h-10 items-center gap-3 w-full px-3 rounded-md text-left text-sm leading-ui transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus";
+
+export const navigationSectionHeaderClassName =
+  "flex h-10 min-h-10 items-center justify-start gap-2 w-full px-3 text-left text-xs font-medium uppercase leading-ui text-text-tertiary";

@@ -6,12 +6,12 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 
-const HEADER_TOOLTIP_DELAY_MS = 500;
-
 interface HeaderTooltipProps {
   label: React.ReactNode;
   children: React.ReactElement;
 }
+
+const HEADER_TOOLTIP_DELAY_MS = 500;
 
 export function HeaderTooltip({ label, children }: HeaderTooltipProps) {
   return (

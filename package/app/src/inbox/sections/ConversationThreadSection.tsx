@@ -15,23 +15,11 @@ import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FC, type FormEvent, useEffect, useRef, useState } from "react";
 import { useRetryToast } from "@/shared/hooks/useRetryToast";
-import { useAuthSessionStore } from "@/user/states";
+import { useAuthSessionStore } from "@/user";
 
 interface ConversationThreadSectionProps {
   conversationId: string;
   peerId: string;
-}
-
-function isMine(message: DmMessage, myId: string | undefined): boolean {
-  return !!myId && message.senderId === myId;
-}
-
-/** The most recent message by `createdAt`, order-independent. 按 `createdAt` 取最新的消息，与顺序无关。 */
-function newestMessage(messages: DmMessage[]): DmMessage | undefined {
-  return messages.reduce<DmMessage | undefined>((latest, m) => {
-    if (!latest || m.createdAt > latest.createdAt) return m;
-    return latest;
-  }, undefined);
 }
 
 /**
@@ -250,4 +238,14 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   );
 };
 
-export default ConversationThreadSection;
+function isMine(message: DmMessage, myId: string | undefined): boolean {
+  return !!myId && message.senderId === myId;
+}
+
+/** The most recent message by `createdAt`, order-independent. 按 `createdAt` 取最新的消息，与顺序无关。 */
+function newestMessage(messages: DmMessage[]): DmMessage | undefined {
+  return messages.reduce<DmMessage | undefined>((latest, m) => {
+    if (!latest || m.createdAt > latest.createdAt) return m;
+    return latest;
+  }, undefined);
+}

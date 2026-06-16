@@ -6,7 +6,7 @@ import { PendingVerificationSection } from "@/core/sections/header/PendingVerifi
 import { UnauthenticatedSection } from "@/core/sections/header/UnauthenticatedSection.tsx";
 import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import { useAuth } from "@/user/pages/useAuth";
+import { useAuth } from "@/user";
 import { useLayoutStore } from "../../states/layoutStore.ts";
 import { DrawerToggler } from "./DrawerToggler.tsx";
 import { HeaderSearch } from "./HeaderSearch.tsx";

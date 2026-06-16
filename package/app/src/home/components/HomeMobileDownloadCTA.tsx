@@ -25,5 +25,3 @@ export const HomeMobileDownloadCTA: React.FC = () => {
     </div>
   );
 };
-
-export default HomeMobileDownloadCTA;

@@ -8,7 +8,7 @@ import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
-import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
+import { useNavigateToBookTagSearch } from "@/search";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import {
   type EntityTranslation,
@@ -25,6 +25,18 @@ import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
 import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
 import { BookYourScoreBlock } from "./BookYourScoreBlock";
 
+type Book = BookDTO;
+
+interface BookHeroSectionProps {
+  bookInfo: Book;
+  rating: number;
+  /** Number of users who rated; 0 hides the count line under the score. 打分的用户数；为 0 时隐藏分数下方的计数行。 */
+  ratingCount?: number;
+}
+
+type BriefPart = { id: string; text: string };
+type MetaRow = { key: string; label: string; credits: EntityTranslation[] };
+
 const i18nMessages = {
   book_hero_meta_author: () => getI18nRuntime().i18n.t("book:hero_meta_author"),
   book_hero_meta_co_author: () =>
@@ -39,18 +51,6 @@ const i18nMessages = {
   book_hero_meta_producer: () =>
     getI18nRuntime().i18n.t("book:hero_meta_producer"),
 } as const;
-
-type Book = BookDTO;
-
-interface BookHeroSectionProps {
-  bookInfo: Book;
-  rating: number;
-  /** Number of users who rated; 0 hides the count line under the score. 打分的用户数；为 0 时隐藏分数下方的计数行。 */
-  ratingCount?: number;
-}
-
-type BriefPart = { id: string; text: string };
-type MetaRow = { key: string; label: string; credits: EntityTranslation[] };
 
 const CREDIT_ROLES = [
   { role: "author", label: i18nMessages.book_hero_meta_author },

@@ -20,8 +20,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useState } from "react";
 import { withRouter } from "@/stories/decorators/withRouter";
-import { useAuthSessionStore } from "@/user/states";
-import { RealmPage, type RealmPageTab } from "./RealmPage";
+import { useAuthSessionStore } from "@/user";
+import { RealmAboutTab } from "../sections/RealmAboutTab";
+import { RealmFeedTab } from "../sections/RealmFeedTab";
+import { RealmDetailLayout } from "./RealmDetailLayout";
+import { useRealmDetail } from "./realmDetailContext";
 
 const REALM_ID = "realm-story-community";
 const ABOUT_POST_ID = "realm-about-post";
@@ -35,6 +38,11 @@ type RealmStoryState =
   | "pending"
   | "muted"
   | "banned";
+
+// Detail tabs exercised by these fixtures: the feed (manage chrome) and about
+// (role/membership readout).
+// 这些 fixture 演示的详情标签：信息流（管理外壳）与关于（角色/成员信息）。
+type RealmDetailStoryTab = "feed" | "about";
 
 function makePost(unitId: string, contentSource: string): PostDTO {
   return {
@@ -168,13 +176,11 @@ function setAuthState(state: RealmStoryState) {
   });
 }
 
-function SeededRealmPage({
+function SeededRealmDetail({
   state,
-  tab,
   children,
 }: {
   state: RealmStoryState;
-  tab: RealmPageTab;
   children: ReactNode;
 }) {
   const queryClient = useQueryClient();
@@ -263,28 +269,56 @@ function SeededRealmPage({
   return <div className="min-h-screen bg-surface-canvas">{children}</div>;
 }
 
+// Renders a single detail tab from inside the layout provider so the fixture
+// reads the same realm context the routed tabs do.
+// 在布局 provider 内部渲染单个详情标签，使 fixture 读取与路由标签相同的 realm 上下文。
+function DetailTab({ tab }: { tab: RealmDetailStoryTab }) {
+  const detail = useRealmDetail();
+  if (tab === "about") {
+    return (
+      <RealmAboutTab
+        realm={detail.realm}
+        description={detail.description}
+        membership={detail.membership}
+        canManage={detail.showManage}
+      />
+    );
+  }
+  return (
+    <RealmFeedTab
+      feedSort="best"
+      feedTagIds={[]}
+      onFeedSortChange={() => {}}
+      onFeedTagIdsChange={() => {}}
+      onOpenTagsTab={() => {}}
+    />
+  );
+}
+
 function RealmStateStory({
   state,
   tab = "about",
 }: {
   state: RealmStoryState;
-  tab?: RealmPageTab;
+  tab?: RealmDetailStoryTab;
 }) {
   return (
-    <SeededRealmPage state={state} tab={tab}>
-      <RealmPage realmId={REALM_ID} tab={tab} />
-    </SeededRealmPage>
+    <SeededRealmDetail state={state}>
+      <RealmDetailLayout realmId={REALM_ID}>
+        <DetailTab tab={tab} />
+      </RealmDetailLayout>
+    </SeededRealmDetail>
   );
 }
 
 const meta = {
-  title: "Domain/Realm/RealmPage",
-  component: RealmPage,
+  title: "Domain/Realm/RealmDetail",
+  component: RealmDetailLayout,
   decorators: [withRouter],
   parameters: {
     layout: "fullscreen",
   },
-} satisfies Meta<typeof RealmPage>;
+} satisfies Meta<typeof RealmDetailLayout>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

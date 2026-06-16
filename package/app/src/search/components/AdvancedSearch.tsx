@@ -3,7 +3,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
-import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
+import { useAllowedRatings } from "@/user";
 import type { UseSearchQueryReturn } from "../hooks/useSearchQuery";
 import {
   ContentTypeCheckboxes,

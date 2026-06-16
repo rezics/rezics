@@ -67,5 +67,3 @@ export function SeedTagChipGroup({
     </fieldset>
   );
 }
-
-export default SeedTagChipGroup;

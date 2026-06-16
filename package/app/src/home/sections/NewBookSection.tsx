@@ -2,7 +2,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
-import { HorizontalBookCarousel } from "@/book-library/components/list/HorizontalBookCarousel";
+import { HorizontalBookCarousel } from "@/book-library";
 import {
   getBookAuthorName,
   getBookCoverUrl,

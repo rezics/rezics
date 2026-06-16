@@ -7,10 +7,9 @@ import { normalizeLanguage } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useMemo, useState } from "react";
-import { AdvancedSearch, SearchResultList } from "@/search";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { AdvancedSearch, SearchResultList, useSearchQuery } from "@/search";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
-import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
+import { useAllowedRatings } from "@/user";
 import { useZone } from "../hooks/useZone";
 
 export type ZoneSearchPageProps = {

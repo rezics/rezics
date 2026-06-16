@@ -4,7 +4,7 @@ import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { ReplyComposer, useFocusReplyFromQuery } from "@/comment";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { PostListSection } from "@/post";
 import { PollView } from "../components/PollView";
 

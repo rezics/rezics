@@ -12,8 +12,8 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import FeedbackDrawer from "../components/FeedbackDrawer";
-import FeedbackList from "../components/FeedbackList";
+import { FeedbackDrawer } from "../components/FeedbackDrawer";
+import { FeedbackList } from "../components/FeedbackList";
 
 export const FeedbackAdminPage: React.FC = () => {
   const { t } = useTranslation(["common", "community", "search", "settings"]);

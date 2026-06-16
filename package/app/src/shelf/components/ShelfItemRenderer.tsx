@@ -20,15 +20,14 @@ import {
 } from "@rezics/contract";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
-import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
-import { BookCard } from "@/book-library/components/item/VerticalBookCard";
+import { BookCard, HorizontalBookCard } from "@/book-library";
 import { aspectRatioForKind } from "@/bookshelf-view";
-import { CommentReply } from "@/comment/components/item/CommentReply";
-import { ExcerptCard } from "@/excerpt/components/item/ExcerptCard";
+import { CommentReply } from "@/comment";
+import { ExcerptCard } from "@/excerpt";
 import { PostCard } from "@/post";
-import { ReviewCard } from "@/review/components/item/ReviewCard";
+import { ReviewCard } from "@/review";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
-import { SingleTagChip } from "@/tag/components/TagList";
+import { SingleTagChip } from "@/tag";
 import { shelfItemToUnitCardSummary, UnitCard } from "@/unit";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
@@ -126,7 +125,7 @@ function renderUnit(
           review={post}
           targetUnit={options?.targetUnit}
           showTargetUnit={options?.showTargetUnit}
-          variantContext={post.variantContext ?? unit.variantContext}
+          variantContext={post.variantContext}
         />
       );
     }
@@ -136,14 +135,14 @@ function renderUnit(
       return (
         <ExcerptCard
           excerpt={post as unknown as UnitDTO}
-          variantContext={post.variantContext ?? unit.variantContext}
+          variantContext={post.variantContext}
         />
       );
     }
     case "post": {
       const post = data as PostDTO | undefined;
       if (!post) return <ShelfItemCard unit={unit} />;
-      return <PostCard post={post} variantContext={unit.variantContext} />;
+      return <PostCard post={post} />;
     }
     case "shelf": {
       const shelf = data as ShelfDTO | undefined;
@@ -215,15 +214,19 @@ function NestedRootCard({
 }) {
   const [tab, setTab] = useState("0");
   const primary = renderUnit(root, "nested");
-  const reviewChildren = attachedChildren.filter(
-    (c) => c.unit.kind === "review",
+  const tabChildren = attachedChildren.filter(
+    (c) =>
+      c.unit.parentRole === "review" ||
+      c.unit.parentRole === "variant" ||
+      c.unit.kind === "review",
   );
 
-  if (reviewChildren.length === 0) {
+  if (tabChildren.length === 0) {
     return <>{primary}</>;
   }
 
   const activeIdx = Number(tab);
+  const activeChild = tabChildren[activeIdx];
 
   return (
     <div className="flex flex-col gap-2">
@@ -231,26 +234,28 @@ function NestedRootCard({
       <div>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="overflow-x-auto">
-            {reviewChildren.map((c, idx) => {
-              const post = c.data as PostDTO | undefined;
+            {tabChildren.map((c, idx) => {
+              const labelPrefix =
+                c.unit.parentRole === "variant" ? "Variant" : "Review";
               return (
                 <TabsTrigger
                   key={shelfItemIdentity(c.unit)}
                   value={String(idx)}
                 >
-                  {post?.title ?? `Review ${idx + 1}`}
+                  {labelPrefix} {idx + 1}
                 </TabsTrigger>
               );
             })}
           </TabsList>
         </Tabs>
-        {reviewChildren[activeIdx]?.data && (
+        {activeChild?.unit.kind === "review" && activeChild.data ? (
           <ReviewCard
-            review={reviewChildren[activeIdx]!.data as PostDTO}
+            review={activeChild.data as PostDTO}
             showTargetUnit={false}
-            variantContext={reviewChildren[activeIdx]!.unit.variantContext}
           />
-        )}
+        ) : activeChild ? (
+          renderUnit(activeChild, "nested")
+        ) : null}
       </div>
     </div>
   );

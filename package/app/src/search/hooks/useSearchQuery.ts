@@ -6,7 +6,7 @@ import type {
   SearchScope,
   TagRef,
 } from "@rezics/contract";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { serializeSearchString } from "../models/searchQuery";
 import { toContentSearchOptions } from "../models/toContentSearchOptions";
 
@@ -202,35 +202,29 @@ export function useSearchQuery(
 
   const query = useMemo(() => mergeEffective(implicit, user), [implicit, user]);
 
-  const patch = useCallback((p: Partial<SearchQuery>) => {
+  const patch = (p: Partial<SearchQuery>) => {
     setUser((prev) => mergeAppend(prev, p));
-  }, []);
+  };
 
-  const set = useCallback((p: Partial<SearchQuery>) => {
+  const set = (p: Partial<SearchQuery>) => {
     setUser((prev) => mergeOverwrite(prev, p));
-  }, []);
+  };
 
-  const bind = useCallback(
-    <F extends BindableField>(field: F) => ({
-      value: query[field],
-      onChange: (value: SearchQuery[F]) => {
-        setUser((prev) => ({ ...prev, [field]: value }));
-      },
-    }),
-    [query],
-  );
+  const bind = <F extends BindableField>(field: F) => ({
+    value: query[field],
+    onChange: (value: SearchQuery[F]) => {
+      setUser((prev) => ({ ...prev, [field]: value }));
+    },
+  });
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setUser(initial ?? {});
     setCategory(initialCategory);
-  }, [initial, initialCategory]);
+  };
 
-  const toOptions = useCallback(() => toContentSearchOptions(query), [query]);
+  const toOptions = () => toContentSearchOptions(query);
 
-  const toSearchParams = useCallback(
-    () => buildSearchParams(query, category),
-    [query, category],
-  );
+  const toSearchParams = () => buildSearchParams(query, category);
 
   return {
     query,

@@ -38,12 +38,6 @@ interface EntityEditPageProps {
 
 const NO_KIND = "__none__";
 
-function getExistingLanguages(entity: EntityDTO | undefined): string[] {
-  return (entity?.translations ?? [])
-    .map((translation) => translation.language as string | undefined)
-    .filter((language): language is string => Boolean(language));
-}
-
 export function EntityEditPage({ unitId }: EntityEditPageProps) {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
@@ -328,4 +322,10 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
       />
     </div>
   );
+}
+
+function getExistingLanguages(entity: EntityDTO | undefined): string[] {
+  return (entity?.translations ?? [])
+    .map((translation) => translation.language as string | undefined)
+    .filter((language): language is string => Boolean(language));
 }

@@ -126,10 +126,6 @@ describe("shelfItemToUnitCardSummary", () => {
     const unit = makeShelfItem({
       itemId: "book-1",
       kind: "book",
-      variantContext: {
-        unitId: "variant-1",
-        title: "Selected Edition",
-      },
     });
     const book: BookDTO = {
       unitId: "book-1",
@@ -155,11 +151,8 @@ describe("shelfItemToUnitCardSummary", () => {
       title: "Shelf Book",
       contentPreview: "Book description",
       addedAt: "2026-02-01T00:00:00.000Z",
-      variantContext: {
-        unitId: "variant-1",
-        title: "Selected Edition",
-      },
     });
+    expect(summary.variantContext).toBeUndefined();
   });
 
   test("attachmentCounts is forwarded when provided", () => {

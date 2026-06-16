@@ -1,6 +1,6 @@
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
-export default function TestLinksPage() {
+export function TestLinksPage() {
   return (
     <div className="mx-auto w-full max-w-sm py-8">
       <h2 className="text-2xl font-semibold mb-2">

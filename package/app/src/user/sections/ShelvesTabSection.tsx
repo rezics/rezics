@@ -15,21 +15,13 @@ import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { Link } from "@/shared/ui/link";
-import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
+import { systemShelfKindLabel } from "@/shelf";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-
-function isSystemKindKey(
-  kindKey: string | null | undefined,
-): kindKey is SystemShelfKindKey {
-  return (
-    !!kindKey && (SYSTEM_SHELF_KIND_KEYS as readonly string[]).includes(kindKey)
-  );
-}
 
 const SORT_OPTION_LABEL = {
   "createdAt:desc": i18nMessages.shelf_sort_newest,
@@ -144,6 +136,14 @@ export const ShelvesTabSection: FC = () => {
     </div>
   );
 };
+
+function isSystemKindKey(
+  kindKey: string | null | undefined,
+): kindKey is SystemShelfKindKey {
+  return (
+    !!kindKey && (SYSTEM_SHELF_KIND_KEYS as readonly string[]).includes(kindKey)
+  );
+}
 
 const ShelfCard: FC<{
   shelf: ShelfDTO;

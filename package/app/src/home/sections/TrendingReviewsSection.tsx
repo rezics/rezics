@@ -5,8 +5,8 @@ import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { HorizontalReviewCarousel } from "@/review/components/list/HorizontalReviewCarousel";
+import { QueryErrorDisplay } from "@/core";
+import { HorizontalReviewCarousel } from "@/review";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export type TrendingReviewsProps = {
@@ -56,5 +56,3 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
     </div>
   );
 };
-
-export default TrendingReviews;

@@ -4,11 +4,7 @@ import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
-import {
-  publicUserSchema,
-  unitTranslationDTOSchema,
-  variantContextSummarySchema,
-} from "../unit/unit";
+import { publicUserSchema, unitTranslationDTOSchema } from "../unit/unit";
 
 // ============================================================
 // SHELF EXTRA SCHEMA
@@ -65,6 +61,7 @@ export type ShelfItemKind = (typeof shelfItemKindSchema)["static"];
 
 export const shelfItemParentRoleSchema = t.Union([
   t.Literal("review"),
+  t.Literal("variant"),
   t.Literal("comment"),
   t.Literal("tag"),
   t.Literal("annotation"),
@@ -82,8 +79,6 @@ export const shelfItemDTOSchema = t.Object(
     shelfId: t.String(),
     itemType: shelfItemTypeSchema,
     itemId: t.String(),
-    variantUnitId: t.Optional(t.Nullable(t.String())),
-    variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
     kind: shelfItemKindSchema,
     parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
     parentItemId: t.Optional(t.Nullable(t.String())),
@@ -347,24 +342,19 @@ export type SetPinnedTagsResponse =
 // 货架条目增删改查
 // ============================================================
 
-export const addShelfItemSchema = t.Object({
-  itemType: shelfItemTypeSchema,
-  itemId: t.String(),
-  /**
-   * Weak selected VARIANT context. The ShelfItem row remains keyed by
-   * `(shelfId, itemType, itemId)` and this value is not validated as existing
-   * or VARIANT.
-   * 弱关联的所选 VARIANT 上下文。ShelfItem 行的主键仍为
-   * `(shelfId, itemType, itemId)`，此值不会校验其是否存在或为 VARIANT。
-   */
-  variantUnitId: t.Optional(t.String()),
-  kind: shelfItemKindSchema,
-  parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
-  parentItemId: t.Optional(t.Nullable(t.String())),
-  parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
-  tagUnitIds: t.Optional(t.Array(t.String())),
-  searchText: t.Optional(t.Nullable(t.String())),
-});
+export const addShelfItemSchema = t.Object(
+  {
+    itemType: shelfItemTypeSchema,
+    itemId: t.String(),
+    kind: shelfItemKindSchema,
+    parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
+    parentItemId: t.Optional(t.Nullable(t.String())),
+    parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
+    tagUnitIds: t.Optional(t.Array(t.String())),
+    searchText: t.Optional(t.Nullable(t.String())),
+  },
+  { additionalProperties: false },
+);
 
 export type AddShelfItemInput = (typeof addShelfItemSchema)["static"];
 
@@ -436,17 +426,19 @@ export type CleanupShelfOrphansInput =
 // 货架条目批量操作
 // ============================================================
 
-export const shelfItemBatchAddOpSchema = t.Object({
-  op: t.Literal("add"),
-  itemType: shelfItemTypeSchema,
-  itemId: t.String(),
-  variantUnitId: t.Optional(t.String()),
-  kind: shelfItemKindSchema,
-  parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
-  parentItemId: t.Optional(t.Nullable(t.String())),
-  parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
-  position: t.String(),
-});
+export const shelfItemBatchAddOpSchema = t.Object(
+  {
+    op: t.Literal("add"),
+    itemType: shelfItemTypeSchema,
+    itemId: t.String(),
+    kind: shelfItemKindSchema,
+    parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
+    parentItemId: t.Optional(t.Nullable(t.String())),
+    parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
+    position: t.String(),
+  },
+  { additionalProperties: false },
+);
 
 export type ShelfItemBatchAddOp = (typeof shelfItemBatchAddOpSchema)["static"];
 
@@ -488,7 +480,6 @@ export const shelfItemBatchAttachOpSchema = t.Object({
   parentItemId: t.String(),
   childItemType: shelfItemTypeSchema,
   childItemId: t.String(),
-  childVariantUnitId: t.Optional(t.String()),
   childKind: shelfItemKindSchema,
   role: shelfItemParentRoleSchema,
   position: t.Optional(t.String()),

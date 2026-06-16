@@ -5,7 +5,7 @@ import {
 import type { SystemShelfKindKey } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { toast } from "sonner";
-import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
+import { systemShelfKindLabel } from "@/shelf";
 
 export type SystemShelfRecoveryToast = {
   /**

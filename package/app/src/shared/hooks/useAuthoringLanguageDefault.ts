@@ -2,7 +2,7 @@ import { userQueries } from "@rezics/api/user/user.queries";
 import { DEFAULT_LANGUAGE, type Language } from "@rezics/contract";
 import { useLocale } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveAuthoringLanguageDefault } from "../utils/authoring-language";
 
 export function useAuthoringLanguageDefault(options?: {
@@ -48,18 +48,15 @@ export function useAuthoringLanguageState(options?: {
     setLanguageState(defaultLanguage);
   }, [defaultLanguage]);
 
-  const setLanguage = useCallback(
-    (nextLanguage: string) => {
-      userSelectedRef.current = true;
-      setLanguageState(
-        resolveAuthoringLanguageDefault({
-          explicitLanguage: nextLanguage,
-          fallbackLanguage: defaultLanguage,
-        }),
-      );
-    },
-    [defaultLanguage],
-  );
+  const setLanguage = (nextLanguage: string) => {
+    userSelectedRef.current = true;
+    setLanguageState(
+      resolveAuthoringLanguageDefault({
+        explicitLanguage: nextLanguage,
+        fallbackLanguage: defaultLanguage,
+      }),
+    );
+  };
 
   return { defaultLanguage, language, setLanguage };
 }

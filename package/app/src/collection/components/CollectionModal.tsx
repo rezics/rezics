@@ -24,22 +24,7 @@ import {
   Separator,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useCallback, useMemo, useState } from "react";
-
-// Backlog/Active/Completed are reached only via progress-status side-effects
-// (`user-unit-progress` spec). Surfacing them as collectable targets in the
-// modal would let users mis-route a unit through the wrong write path, so
-// the modal filters them out entirely. Favorites and Saved stay as
-// system-shelf collectable targets.
-// Backlog/Active/Completed 只能通过进度状态的副作用到达
-// （`user-unit-progress` 规范）。若在弹窗中将它们暴露为可收藏目标，
-// 会让用户经由错误的写入路径误导一个 unit，因此弹窗将其完全过滤掉。
-// Favorites 和 Saved 仍作为系统书架的可收藏目标保留。
-const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
-  "backlog",
-  "active",
-  "completed",
-]);
+import { useMemo, useState } from "react";
 
 interface CollectionModalProps {
   open: boolean;
@@ -55,6 +40,21 @@ interface CollectionModalProps {
   isLoading: boolean;
   isReview?: boolean;
 }
+
+// Backlog/Active/Completed are reached only via progress-status side-effects
+// (`user-unit-progress` spec). Surfacing them as collectable targets in the
+// modal would let users mis-route a unit through the wrong write path, so
+// the modal filters them out entirely. Favorites and Saved stay as
+// system-shelf collectable targets.
+// Backlog/Active/Completed 只能通过进度状态的副作用到达
+// （`user-unit-progress` 规范）。若在弹窗中将它们暴露为可收藏目标，
+// 会让用户经由错误的写入路径误导一个 unit，因此弹窗将其完全过滤掉。
+// Favorites 和 Saved 仍作为系统书架的可收藏目标保留。
+const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
+  "backlog",
+  "active",
+  "completed",
+]);
 
 export function CollectionModal({
   open,
@@ -98,33 +98,30 @@ export function CollectionModal({
     );
   }, [visibleShelves, filterTag]);
 
-  const shelfDisplayTitle = useCallback(
-    (shelf: ShelfSummaryDTO): string => {
-      if (shelf.kindKey === "favorites") {
-        return t("entity:shelf_system_favorites");
-      }
-      return shelf.title ?? t("common:untitled");
-    },
-    [t],
-  );
+  const shelfDisplayTitle = (shelf: ShelfSummaryDTO): string => {
+    if (shelf.kindKey === "favorites") {
+      return t("entity:shelf_system_favorites");
+    }
+    return shelf.title ?? t("common:untitled");
+  };
 
-  const toggleShelf = useCallback((shelfId: string) => {
+  const toggleShelf = (shelfId: string) => {
     setSelectedShelves((prev) => {
       const next = new Set(prev);
       if (next.has(shelfId)) next.delete(shelfId);
       else next.add(shelfId);
       return next;
     });
-  }, []);
+  };
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     const normalizedSearchText = searchText.trim();
     onCollect(
       [...selectedShelves],
       independent,
       normalizedSearchText.length > 0 ? normalizedSearchText : undefined,
     );
-  }, [selectedShelves, independent, searchText, onCollect]);
+  };
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>

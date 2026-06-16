@@ -18,8 +18,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { Link, unitHref } from "@/shared/ui/link";
-import { logout } from "@/user/models/handler";
-import { useUserProfileStore } from "@/user/states";
+import { logout, useUserProfileStore } from "@/user";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
 
 export type AccountMenuProps = {

@@ -65,7 +65,7 @@ import {
   getTranslation,
 } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
-import { useUserProfileStore } from "@/user/states";
+import { useUserProfileStore } from "@/user";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import {
   type ShelfSortChoice,

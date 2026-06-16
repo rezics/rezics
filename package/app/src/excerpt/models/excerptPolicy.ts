@@ -9,12 +9,12 @@ export const excerptDetailActions: Action[] = [
   "share",
 ];
 
+export const excerptPolicy: ReactionBarPolicy = {
+  getShareHref: getExcerptShareHref,
+};
+
 export function getExcerptShareHref(
   post: Pick<ReactionBarPost, "unitId">,
 ): string {
   return `/excerpt/${post.unitId}`;
 }
-
-export const excerptPolicy: ReactionBarPolicy = {
-  getShareHref: getExcerptShareHref,
-};

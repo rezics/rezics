@@ -12,29 +12,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-base font-bold text-text-primary mb-2">{children}</p>
-  );
-}
-
-function FooterLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      className="text-text-secondary hover:underline leading-[1.9] inline-block"
-    >
-      {children}
-    </a>
-  );
-}
-
 export function MainLayoutFooter({ className }: { className?: string }) {
   const { t } = useTranslation(["common", "shell"]);
   const year = new Date().getFullYear();
@@ -225,5 +202,28 @@ export function MainLayoutFooter({ className }: { className?: string }) {
         </div>
       </div>
     </footer>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-base font-bold text-text-primary mb-2">{children}</p>
+  );
+}
+
+function FooterLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      className="text-text-secondary hover:underline leading-[1.9] inline-block"
+    >
+      {children}
+    </a>
   );
 }

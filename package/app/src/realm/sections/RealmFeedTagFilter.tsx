@@ -20,21 +20,6 @@ export interface RealmFeedTagFilterProps {
   onOpenTagsTab: () => void;
 }
 
-function maxScrollLeft(element: HTMLElement) {
-  return Math.max(0, element.scrollWidth - element.clientWidth);
-}
-
-function canScrollHorizontally(element: HTMLElement) {
-  return maxScrollLeft(element) > 0;
-}
-
-function setScrollLeftImmediately(element: HTMLElement, scrollLeft: number) {
-  const previousScrollBehavior = element.style.scrollBehavior;
-  element.style.scrollBehavior = "auto";
-  element.scrollLeft = scrollLeft;
-  element.style.scrollBehavior = previousScrollBehavior;
-}
-
 export const RealmFeedTagFilter: React.FC<RealmFeedTagFilterProps> = ({
   tagTree,
   selectedTagIds,
@@ -221,3 +206,18 @@ export const RealmFeedTagFilter: React.FC<RealmFeedTagFilterProps> = ({
     </div>
   );
 };
+
+function maxScrollLeft(element: HTMLElement) {
+  return Math.max(0, element.scrollWidth - element.clientWidth);
+}
+
+function canScrollHorizontally(element: HTMLElement) {
+  return maxScrollLeft(element) > 0;
+}
+
+function setScrollLeftImmediately(element: HTMLElement, scrollLeft: number) {
+  const previousScrollBehavior = element.style.scrollBehavior;
+  element.style.scrollBehavior = "auto";
+  element.scrollLeft = scrollLeft;
+  element.style.scrollBehavior = previousScrollBehavior;
+}

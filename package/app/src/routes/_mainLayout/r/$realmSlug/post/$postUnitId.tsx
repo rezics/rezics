@@ -1,7 +1,7 @@
 import { slugApi } from "@rezics/api/slug";
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { PostThreadPage } from "@/post/pages/PostThreadPage";
+import { PostThreadPage } from "@/post";
 
 export const Route = createFileRoute(
   "/_mainLayout/r/$realmSlug/post/$postUnitId",

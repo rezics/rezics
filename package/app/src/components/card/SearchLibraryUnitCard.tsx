@@ -27,15 +27,6 @@ export interface SearchLibraryUnitCardProps
   descriptionLines?: number;
 }
 
-function clampStyle(lines: number): ClampStyle {
-  return {
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: lines,
-    overflow: "hidden",
-  };
-}
-
 export function SearchLibraryUnitCard({
   action,
   badge,
@@ -126,4 +117,13 @@ export function SearchLibraryUnitCard({
       </article>
     </Card>
   );
+}
+
+function clampStyle(lines: number): ClampStyle {
+  return {
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    WebkitLineClamp: lines,
+    overflow: "hidden",
+  };
 }

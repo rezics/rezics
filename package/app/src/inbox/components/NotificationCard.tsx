@@ -16,45 +16,6 @@ export interface NotificationCardProps {
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 
-/**
- * Map a notification kind to its (literal) community message, i18n-resolved.
- * 将通知类型映射到其（字面的）社区消息，经 i18n 解析。
- */
-function kindLabel(t: Translate, kind: string): string {
-  switch (kind) {
-    case "reaction.upvote":
-      return t("community:notification_kind_reaction_upvote");
-    case "reaction.favorite":
-      return t("community:notification_kind_reaction_favorite");
-    case "follow.new":
-      return t("community:notification_kind_follow");
-    case "comment.new":
-      return t("community:notification_kind_reply");
-    case "mention.new":
-      return t("community:notification_kind_mention");
-    case "invitation.new":
-      return t("community:notification_kind_realm_invite");
-    case "system.notice":
-      return t("community:notification_kind_system");
-    default:
-      return kind;
-  }
-}
-
-function relativeTime(t: Translate, iso: string): string {
-  const date = new Date(iso);
-  const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
-  if (minutes < 1) return t("community:notification_time_now");
-  if (minutes < 60)
-    return t("community:notification_time_minutes", { value: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24)
-    return t("community:notification_time_hours", { value: hours });
-  const days = Math.floor(hours / 24);
-  if (days < 7) return t("community:notification_time_days", { value: days });
-  return date.toLocaleDateString();
-}
-
 export function NotificationCard({ item, onClick }: NotificationCardProps) {
   const { t } = useTranslation(["community"]);
   const extra = (item.extra ?? null) as {
@@ -131,4 +92,43 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
       {body}
     </button>
   );
+}
+
+/**
+ * Map a notification kind to its (literal) community message, i18n-resolved.
+ * 将通知类型映射到其（字面的）社区消息，经 i18n 解析。
+ */
+function kindLabel(t: Translate, kind: string): string {
+  switch (kind) {
+    case "reaction.upvote":
+      return t("community:notification_kind_reaction_upvote");
+    case "reaction.favorite":
+      return t("community:notification_kind_reaction_favorite");
+    case "follow.new":
+      return t("community:notification_kind_follow");
+    case "comment.new":
+      return t("community:notification_kind_reply");
+    case "mention.new":
+      return t("community:notification_kind_mention");
+    case "invitation.new":
+      return t("community:notification_kind_realm_invite");
+    case "system.notice":
+      return t("community:notification_kind_system");
+    default:
+      return kind;
+  }
+}
+
+function relativeTime(t: Translate, iso: string): string {
+  const date = new Date(iso);
+  const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
+  if (minutes < 1) return t("community:notification_time_now");
+  if (minutes < 60)
+    return t("community:notification_time_minutes", { value: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24)
+    return t("community:notification_time_hours", { value: hours });
+  const days = Math.floor(hours / 24);
+  if (days < 7) return t("community:notification_time_days", { value: days });
+  return date.toLocaleDateString();
 }

@@ -22,14 +22,6 @@ export type RealmContentModerationActionsProps = {
   unitRealm?: UnitRealmDTO | null;
 };
 
-function stopAndConfirm(
-  event: { stopPropagation: () => void },
-  message: string,
-) {
-  event.stopPropagation();
-  return window.confirm(message);
-}
-
 export function RealmContentModerationActions({
   realmUnitId,
   targetUnitId,
@@ -192,4 +184,12 @@ export function RealmContentModerationActions({
       </DropdownMenuGroup>
     </>
   );
+}
+
+function stopAndConfirm(
+  event: { stopPropagation: () => void },
+  message: string,
+) {
+  event.stopPropagation();
+  return window.confirm(message);
 }

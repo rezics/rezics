@@ -1,7 +1,7 @@
 import type React from "react";
 import { useMemo } from "react";
 import { cn } from "@/shared/utils/css-util";
-import { useAuthGuard } from "@/user/hooks/useAuthGuard";
+import { useAuthGuard } from "@/user";
 import type {
   Action,
   ActionPolicy,

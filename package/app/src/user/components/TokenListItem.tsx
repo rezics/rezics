@@ -9,22 +9,6 @@ interface TokenListItemProps {
   onRevoke: (id: string) => void;
 }
 
-function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return "Never";
-  return new Date(date).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatScopes(scopes?: Record<string, string[]>): string[] {
-  if (!scopes) return [];
-  return Object.entries(scopes).flatMap(([domain, perms]) =>
-    perms.map((p) => `${domain}:${p}`),
-  );
-}
-
 export const TokenListItem: FC<TokenListItemProps> = ({
   token,
   onEdit,
@@ -68,3 +52,19 @@ export const TokenListItem: FC<TokenListItemProps> = ({
     </div>
   );
 };
+
+function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return "Never";
+  return new Date(date).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatScopes(scopes?: Record<string, string[]>): string[] {
+  if (!scopes) return [];
+  return Object.entries(scopes).flatMap(([domain, perms]) =>
+    perms.map((p) => `${domain}:${p}`),
+  );
+}

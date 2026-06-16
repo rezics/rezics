@@ -95,6 +95,42 @@ describe("ShelfItemSearchDocumentSchema", () => {
       }),
     ).toBe(true);
   });
+
+  test("accepts variant child shelf item records", () => {
+    expect(
+      Value.Check(ShelfItemSearchDocumentSchema, {
+        id: "shelf-1:unit:variant-1",
+        shelfId: "shelf-1",
+        shelfOwnerUserId: "user-1",
+        shelfVisibility: "private",
+        shelfStatus: "active",
+        shelfTitle: "Editions",
+        itemType: "unit",
+        itemId: "variant-1",
+        kind: "book",
+        rootItemType: "unit",
+        rootItemId: "main-1",
+        parentItemType: "unit",
+        parentItemId: "main-1",
+        parentRole: "variant",
+        position: "a1",
+        itemTitle: "Variant edition",
+        itemSummary: null,
+        itemText: null,
+        searchText: null,
+        rootUnitId: "main-1",
+        realmUnitId: null,
+        parentCommentId: null,
+        authorUserId: null,
+        authorName: null,
+        moderationStatus: "APPROVED",
+        isLocked: false,
+        deletedAt: null,
+        createdAt: 1,
+        updatedAt: 2,
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("ShelfItemSearchOptionsSchema", () => {

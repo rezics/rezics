@@ -5,9 +5,9 @@ import { buttonVariants } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
-import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
+import { HorizontalShelfCarousel } from "@/shelf";
 
 export type TrendingShelfSectionProps = {
   title?: string;
@@ -59,5 +59,3 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
     </div>
   );
 };
-
-export default TrendingShelfSection;

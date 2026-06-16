@@ -23,6 +23,44 @@ interface BookExtraEditorProps {
   onChange?: (value: BookExtraData) => void;
 }
 
+/**
+ * Book Extra Editor - Editor for book extra metadata.
+ * 书籍附加编辑器 —— 用于编辑书籍附加元数据。
+ */
+export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
+  value,
+  onChange,
+}) => {
+  const [extraData, setExtraData] = useState<BookExtraData>(value || {});
+
+  useEffect(() => {
+    setExtraData(value || {});
+  }, [value]);
+
+  const handleExtraChange = (newExtraData: BookExtraData) => {
+    setExtraData(newExtraData);
+    onChange?.(newExtraData);
+  };
+
+  return (
+    <div className="space-y-4">
+      <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
+      <div className="h-px bg-border-whisper" />
+      <RezicsJsonEditor
+        value={JSON.stringify(extraData, null, 2)}
+        onChange={(text) => {
+          try {
+            handleExtraChange(JSON.parse(text));
+          } catch {
+            // Invalid JSON — ignore until user fixes it
+            // 无效 JSON —— 忽略，等待用户修正
+          }
+        }}
+      />
+    </div>
+  );
+};
+
 function PublishURL({ value, onChange }: BookExtraEditorProps) {
   const { t } = useTranslation(["book", "common", "editor"]);
   const [newUrl, setNewUrl] = useState("");
@@ -109,41 +147,3 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
     </div>
   );
 }
-
-/**
- * Book Extra Editor - Editor for book extra metadata.
- * 书籍附加编辑器 —— 用于编辑书籍附加元数据。
- */
-export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
-  value,
-  onChange,
-}) => {
-  const [extraData, setExtraData] = useState<BookExtraData>(value || {});
-
-  useEffect(() => {
-    setExtraData(value || {});
-  }, [value]);
-
-  const handleExtraChange = (newExtraData: BookExtraData) => {
-    setExtraData(newExtraData);
-    onChange?.(newExtraData);
-  };
-
-  return (
-    <div className="space-y-4">
-      <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
-      <div className="h-px bg-border-whisper" />
-      <RezicsJsonEditor
-        value={JSON.stringify(extraData, null, 2)}
-        onChange={(text) => {
-          try {
-            handleExtraChange(JSON.parse(text));
-          } catch {
-            // Invalid JSON — ignore until user fixes it
-            // 无效 JSON —— 忽略，等待用户修正
-          }
-        }}
-      />
-    </div>
-  );
-};

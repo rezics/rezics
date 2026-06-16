@@ -162,5 +162,3 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     </div>
   );
 };
-
-export default PostThreadPage;

@@ -4,7 +4,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { Button, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { resolveCatalogEntryInteractionContext } from "@/book-library/models/catalogEntryContext";
+import { resolveCatalogEntryInteractionContext } from "@/book-library";
 import { Route as reviewByBookRoute } from "@/routes/_mainLayout/review/book/$bookId";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ReviewNewPage } from "./ReviewNewPage";

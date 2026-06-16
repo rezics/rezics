@@ -14,25 +14,10 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { QueryErrorDisplay } from "@/core";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink, unitHref } from "@/shared/ui/link";
-
-function formatMetadataValue(value: unknown): string {
-  if (value === null || value === undefined) return "-";
-
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch (_e) {
-    return String(value);
-  }
-}
 
 export function UnitPageById({ unitId }: { unitId: string }) {
   const { t } = useTranslation(["book", "common", "settings"]);
@@ -198,4 +183,19 @@ export function UnitPageById({ unitId }: { unitId: string }) {
 export function UnitPage() {
   const { unitId } = unitRoute.useParams();
   return <UnitPageById unitId={unitId || ""} />;
+}
+
+function formatMetadataValue(value: unknown): string {
+  if (value === null || value === undefined) return "-";
+
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (_e) {
+    return String(value);
+  }
 }
