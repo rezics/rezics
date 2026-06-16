@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
-import { initMeiliSearch } from "./init-meili-search";
+import { ensureMeiliIndexes, resetMeiliIndexes } from "./init-meili-search";
 
-describe("initMeiliSearch", () => {
+describe("Meili seed index helpers", () => {
   function makeSearchClient() {
     return {
       checkHealth: mock(async () => true),
@@ -22,7 +22,7 @@ describe("initMeiliSearch", () => {
     };
   }
 
-  test("clears known index documents before initializing when clean is requested", async () => {
+  test("reset deletes known indexes before ensuring schema", async () => {
     const calls: string[] = [];
     const searchClient = makeSearchClient();
     searchClient.resetKnownIndexes.mockImplementation(async () => {
@@ -32,17 +32,17 @@ describe("initMeiliSearch", () => {
       calls.push("init-content");
     });
 
-    await initMeiliSearch(searchClient as never, { clean: true });
+    await resetMeiliIndexes(searchClient as never);
 
     expect(searchClient.resetKnownIndexes).toHaveBeenCalledTimes(1);
     expect(calls[0]).toBe("clean");
     expect(calls).toContain("init-content");
   });
 
-  test("keeps existing documents when clean is not requested", async () => {
+  test("ensure keeps existing documents", async () => {
     const searchClient = makeSearchClient();
 
-    await initMeiliSearch(searchClient as never);
+    await ensureMeiliIndexes(searchClient as never);
 
     expect(searchClient.resetKnownIndexes).not.toHaveBeenCalled();
     expect(searchClient.initContentIndex).toHaveBeenCalledTimes(1);

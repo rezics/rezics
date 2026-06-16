@@ -5,7 +5,7 @@ import {
   Unit,
   UserSubscriptionListEntry,
 } from "../../db/schema";
-import { OFFICIAL_ZONE_DEFINITIONS } from "../../db/seed/infra";
+import { OFFICIAL_ZONE_DEFINITIONS } from "../../db/seed/infra/seed-official-zones";
 import { getDefaultRealmId } from "../../infra/default-realm";
 import { requireSlugScopeId } from "../../infra/slug-scopes";
 import { generateBetween } from "../../shelf/fractional-index";

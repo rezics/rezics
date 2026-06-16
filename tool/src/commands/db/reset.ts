@@ -136,6 +136,8 @@ export async function resetLocalDatabases(
     await runDbPreflight(pkg, "afterMigration");
   }
 
+  await runRootWorkflow(["seed", "reset-meili-search"]);
+
   if (flags.seed) {
     await runRootWorkflow(["seed", "--no-interactive"]);
   }

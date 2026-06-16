@@ -3,7 +3,9 @@ import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 const calls = {
   resetDatabase: 0,
   resetAuthDatabase: 0,
-  seedInfra: [] as Array<{ rootUserId: string; db: unknown }>,
+  seedInfra: [] as Array<{ rootUserId: string; db: unknown; sync?: unknown }>,
+  ensureMeiliIndexes: 0,
+  runtimeDispose: 0,
 };
 
 const seedUsers = [
@@ -39,6 +41,12 @@ mock.module("@rezics/server/db/seed/database", () => ({
   }),
 }));
 
+mock.module("@rezics/server/db/seed/init-meili-search", () => ({
+  ensureMeiliIndexes: mock(async () => {
+    calls.ensureMeiliIndexes += 1;
+  }),
+}));
+
 mock.module("@rezics/auth/seed", () => ({
   resetAuthDatabase: mock(async () => {
     calls.resetAuthDatabase += 1;
@@ -47,9 +55,11 @@ mock.module("@rezics/auth/seed", () => ({
 
 mock.module("./infra", () => ({
   seedSlugScopes: mock(async () => ({ user: "scope-user" })),
-  seedInfra: mock(async (rootUserId: string, opts: { db: unknown }) => {
-    calls.seedInfra.push({ rootUserId, db: opts.db });
-  }),
+  seedInfra: mock(
+    async (rootUserId: string, opts: { db: unknown; sync?: unknown }) => {
+      calls.seedInfra.push({ rootUserId, db: opts.db, sync: opts.sync });
+    },
+  ),
 }));
 
 mock.module("./users", () => ({
@@ -83,6 +93,10 @@ mock.module("./users", () => ({
 
     return {
       rootUserId: "root-user",
+      infraUserIds: {
+        rezics: "generated-rezics",
+        "rezics-wiki": "generated-rezics-wiki",
+      },
       results: [],
     };
   }),
@@ -137,6 +151,32 @@ mock.module("../lib/db-factory", () => ({
   createAuthDbClient: mock(() => authDb),
 }));
 
+mock.module("../lib/search", () => ({
+  createSeedSearchClient: mock(() => ({ kind: "search-client" })),
+}));
+
+const runtimeSync = {
+  content: mock(async () => {}),
+  post: mock(async () => {}),
+  realm: mock(async () => {}),
+  zone: mock(async () => {}),
+  tag: mock(async () => {}),
+  label: mock(async () => {}),
+  user: mock(async () => {}),
+  entity: mock(async () => {}),
+  contentContainedUnits: mock(async () => {}),
+};
+
+mock.module("./runtime", () => ({
+  createSeedRuntime: mock(() => ({
+    sync: runtimeSync,
+    state: { syncSummary: { total: 0, targets: {} } },
+    dispose: mock(async () => {
+      calls.runtimeDispose += 1;
+    }),
+  })),
+}));
+
 mock.module("@rezics/server/db/factory", () => ({
   createServerDb: mock(() => serverDb),
 }));
@@ -150,6 +190,11 @@ describe("seedBaseline", () => {
     calls.resetDatabase = 0;
     calls.resetAuthDatabase = 0;
     calls.seedInfra = [];
+    calls.ensureMeiliIndexes = 0;
+    calls.runtimeDispose = 0;
+    for (const fn of Object.values(runtimeSync)) {
+      fn.mockClear();
+    }
     serverDb.disconnect.mockClear();
     authDb.disconnect.mockClear();
   });
@@ -184,6 +229,32 @@ describe("seedBaseline", () => {
     );
   });
 
+  test("syncs seeded users and passes sync hooks to infra", async () => {
+    const syncedUsers: string[] = [];
+    const sync = {
+      ...runtimeSync,
+      user: mock(async (id: string) => {
+        syncedUsers.push(id);
+      }),
+    };
+    const serverSeedDb = {} as never;
+    const { seedBaseline } = await import("./index");
+
+    await seedBaseline({} as never, {
+      serverSeedDb,
+      sync,
+    });
+
+    expect(syncedUsers).toEqual(["generated-rezics", "generated-rezics-wiki"]);
+    expect(calls.seedInfra).toEqual([
+      {
+        rootUserId: "root-user",
+        db: serverSeedDb,
+        sync,
+      },
+    ]);
+  });
+
   test("reset-root reseeds infra so root default subscriptions are repaired", async () => {
     const { runResetRoot } = await import("./index");
 
@@ -193,9 +264,13 @@ describe("seedBaseline", () => {
       {
         rootUserId: "root-user",
         db: serverDb.db,
+        sync: runtimeSync,
       },
     ]);
+    expect(calls.ensureMeiliIndexes).toBe(1);
+    expect(runtimeSync.user).toHaveBeenCalledWith("root-user");
+    expect(calls.runtimeDispose).toBe(1);
     expect(serverDb.disconnect).toHaveBeenCalledTimes(1);
-    expect(authDb.disconnect).toHaveBeenCalledTimes(1);
+    expect(authDb.disconnect).not.toHaveBeenCalled();
   });
 });

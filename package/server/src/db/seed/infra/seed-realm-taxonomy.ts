@@ -26,6 +26,7 @@ import type { SlugScopesMap } from "./seed-slug-scopes";
 export interface RealmTaxonomySeedResult {
   communityRealmId: string;
   sharedTagIds: string[];
+  postIds: string[];
 }
 
 type RealmTaxonomySeedDb = Pick<
@@ -244,18 +245,8 @@ async function ensureCommunityRealm(
   rootUserId: string,
   slowBurnTagId: string,
   hardScifiTagId: string,
-): Promise<string> {
+): Promise<{ realmId: string; postIds: string[] }> {
   const slug = "seed-scifi-readers";
-  const existing = await findUnitByScopedSlug(db, realmScope, slug);
-  if (existing) {
-    if (existing.type !== "REALM") {
-      throw new Error(
-        `[Seed] Slug "${slug}" under realm scope is not a REALM.`,
-      );
-    }
-    return existing.id;
-  }
-
   const ruleId = await ensurePostUnit(
     db,
     rootUserId,
@@ -269,7 +260,17 @@ async function ensureCommunityRealm(
     "A community space for hard sci-fi, space opera, and slow-burn discovery.",
   );
 
-  return db.transaction(async (tx) => {
+  const existing = await findUnitByScopedSlug(db, realmScope, slug);
+  if (existing) {
+    if (existing.type !== "REALM") {
+      throw new Error(
+        `[Seed] Slug "${slug}" under realm scope is not a REALM.`,
+      );
+    }
+    return { realmId: existing.id, postIds: [ruleId, aboutId] };
+  }
+
+  const realmId = await db.transaction(async (tx) => {
     const now = new Date();
     const [realm] = await tx
       .insert(Unit)
@@ -346,6 +347,7 @@ async function ensureCommunityRealm(
 
     return realm.id;
   });
+  return { realmId, postIds: [ruleId, aboutId] };
 }
 
 async function ensureRealmTagApplication(
@@ -437,13 +439,14 @@ export async function seedRealmTaxonomy(
     "Hard sci-fi",
   );
 
-  const communityRealmId = await ensureCommunityRealm(
+  const communityRealm = await ensureCommunityRealm(
     db,
     realmScope,
     rootUserId,
     slowBurnTagId,
     hardScifiTagId,
   );
+  const communityRealmId = communityRealm.realmId;
 
   const contextUnitId = await ensurePostUnit(
     db,
@@ -521,5 +524,11 @@ export async function seedRealmTaxonomy(
   return {
     communityRealmId,
     sharedTagIds: [slowBurnTagId, hardScifiTagId],
+    postIds: [
+      ...communityRealm.postIds,
+      contextUnitId,
+      feedTargetId,
+      outsideTargetId,
+    ],
   };
 }

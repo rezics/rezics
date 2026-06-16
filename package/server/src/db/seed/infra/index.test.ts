@@ -18,6 +18,7 @@ import {
 // 否则桩会泄漏到同一进程中之后的所有测试文件。
 import * as realSeedDefaultRealm from "./seed-default-realm";
 import * as realSeedGameMediaTaxonomy from "./seed-game-media-taxonomy";
+import * as realSeedOfficialZones from "./seed-official-zones";
 import * as realSeedRealmTaxonomy from "./seed-realm-taxonomy";
 import * as realSeedTags from "./seed-tags";
 
@@ -28,11 +29,14 @@ const calls = {
 mock.module("./seed-tags", () => ({
   seedContentTypeTags: mock(async () => {
     calls.order.push("content-tags");
-    return {};
+    return {
+      tagMap: { book: "tag-book" },
+      officialQuestionTagId: "tag-question",
+    };
   }),
   seedSearchTagIds: mock(async () => {
     calls.order.push("search-tags");
-    return {};
+    return { genre: ["tag-genre"] };
   }),
 }));
 
@@ -43,17 +47,42 @@ mock.module("./seed-default-realm", () => ({
   }),
 }));
 
+mock.module("./seed-official-zones", () => ({
+  OFFICIAL_ZONE_DEFINITIONS: [
+    { key: "book", slug: "book" },
+    { key: "realms", slug: "realms" },
+    { key: "zones", slug: "zones" },
+    { key: "popular", slug: "popular" },
+  ],
+  seedOfficialZones: mock(async () => {
+    calls.order.push("official-zones");
+    return {
+      book: "zone-book",
+      realms: "zone-realms",
+      zones: "zone-zones",
+      popular: "zone-popular",
+    };
+  }),
+}));
+
 mock.module("./seed-realm-taxonomy", () => ({
   seedRealmTaxonomy: mock(async () => {
     calls.order.push("realm-taxonomy");
-    return {};
+    return {
+      communityRealmId: "realm-community",
+      sharedTagIds: ["tag-slow"],
+      postIds: ["post-rule"],
+    };
   }),
 }));
 
 mock.module("./seed-game-media-taxonomy", () => ({
   seedGameMediaTaxonomy: mock(async () => {
     calls.order.push("game-media-taxonomy");
-    return {};
+    return {
+      platformEntityIds: { web: "entity-web" },
+      ratingTagIds: { "esrb-everyone": "tag-rating" },
+    };
   }),
 }));
 
@@ -126,12 +155,65 @@ describe("seedInfra", () => {
       calls.order.indexOf("realm-taxonomy"),
     );
   });
+
+  test("syncs infra search targets from returned seed ids", async () => {
+    const { seedInfra } = await import("./index");
+    const db = createDefaultSubscriptionMemoryDb();
+    const synced = {
+      realm: [] as string[],
+      zone: [] as string[],
+      tag: [] as string[],
+      entity: [] as string[],
+      post: [] as string[],
+    };
+    const noop = async () => {};
+
+    await seedInfra("root-user", {
+      db: db as never,
+      slugScopes: {
+        user: "scope-user",
+        realm: "scope-realm",
+        tag: "scope-tag",
+        zone: "scope-zone",
+        entity: "scope-entity",
+      },
+      sync: {
+        content: noop,
+        post: async (id) => synced.post.push(id),
+        realm: async (id) => synced.realm.push(id),
+        zone: async (id) => synced.zone.push(id),
+        tag: async (id) => synced.tag.push(id),
+        label: noop,
+        user: noop,
+        entity: async (id) => synced.entity.push(id),
+        contentContainedUnits: noop,
+      },
+    });
+
+    expect(synced.realm).toEqual(["realm-rezics", "realm-community"]);
+    expect(synced.zone).toEqual([
+      "zone-book",
+      "zone-realms",
+      "zone-zones",
+      "zone-popular",
+    ]);
+    expect(synced.tag).toEqual([
+      "tag-book",
+      "tag-question",
+      "tag-genre",
+      "tag-slow",
+      "tag-rating",
+    ]);
+    expect(synced.entity).toEqual(["entity-web"]);
+    expect(synced.post).toEqual(["post-rule"]);
+  });
 });
 
 afterEach(() => {
   mock.restore();
   mock.module("./seed-tags", () => realSeedTags);
   mock.module("./seed-default-realm", () => realSeedDefaultRealm);
+  mock.module("./seed-official-zones", () => realSeedOfficialZones);
   mock.module("./seed-realm-taxonomy", () => realSeedRealmTaxonomy);
   mock.module("./seed-game-media-taxonomy", () => realSeedGameMediaTaxonomy);
 });

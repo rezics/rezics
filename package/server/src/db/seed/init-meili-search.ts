@@ -1,22 +1,12 @@
 import type { SearchClient } from "@rezics/search/client";
 
-export interface InitMeiliSearchOptions {
-  clean?: boolean;
-}
-
-export async function initMeiliSearch(
+export async function ensureMeiliIndexes(
   searchClient: SearchClient,
-  options: InitMeiliSearchOptions = {},
 ): Promise<void> {
   console.log("Initializing MeiliSearch indexes...");
   const healthy = await searchClient.checkHealth();
   if (!healthy) {
     throw new Error("MeiliSearch is not available");
-  }
-
-  if (options.clean) {
-    console.log("Resetting existing MeiliSearch indexes...");
-    await searchClient.resetKnownIndexes();
   }
 
   await Promise.all([
@@ -37,3 +27,17 @@ export async function initMeiliSearch(
 
   console.log("MeiliSearch indexes initialized.");
 }
+
+export async function resetMeiliIndexes(
+  searchClient: SearchClient,
+): Promise<void> {
+  console.log("Resetting existing MeiliSearch indexes...");
+  const healthy = await searchClient.checkHealth();
+  if (!healthy) {
+    throw new Error("MeiliSearch is not available");
+  }
+  await searchClient.resetKnownIndexes();
+  await ensureMeiliIndexes(searchClient);
+}
+
+export const initMeiliSearch = ensureMeiliIndexes;

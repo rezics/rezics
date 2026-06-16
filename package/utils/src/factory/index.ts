@@ -13,7 +13,6 @@ import {
   type SeedPreset,
   type SeedResult,
 } from "@rezics/server/db/seed-factory";
-import type { ServerDb } from "@rezics/server/db";
 import * as v from "valibot";
 import { createAuthDbClient } from "../lib/db-factory";
 import { getEnv } from "../lib/env";
@@ -23,7 +22,6 @@ import {
   createSeedRuntime,
   type ManifestFormat,
   type MeiliMode,
-  type SeedRuntime,
 } from "../seed/runtime";
 import { tweakPlan } from "./interactive";
 import { getPreset, listPresetNames, PRESETS } from "./presets";
@@ -255,30 +253,6 @@ async function runEchoKvOnly(): Promise<void> {
   }
 }
 
-async function syncExistingSearchVocabulary(input: {
-  runtime: SeedRuntime;
-  serverDb: Pick<ServerDb, "select">;
-}): Promise<void> {
-  const [{ Unit }, { and, eq, inArray }] = await Promise.all([
-    import("@rezics/server/db/schema"),
-    import("drizzle-orm"),
-  ]);
-  const rows = await input.serverDb
-    .select({ id: Unit.id, type: Unit.type })
-    .from(Unit)
-    .where(
-      and(inArray(Unit.type, ["TAG", "LABEL"]), eq(Unit.status, "PUBLISHED")),
-    );
-
-  for (const row of rows) {
-    if (row.type === "TAG") {
-      await input.runtime.sync.tag(row.id);
-    } else if (row.type === "LABEL") {
-      await input.runtime.sync.label(row.id);
-    }
-  }
-}
-
 export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   if (opts.only === "echokv") {
     await runEchoKvOnly();
@@ -337,15 +311,13 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   });
   try {
     if (meiliMode === "init-and-sync") {
-      const { initMeiliSearch } = await import("@rezics/server/db/seed");
-      await initMeiliSearch(searchClient, { clean: true });
+      const { ensureMeiliIndexes } = await import("@rezics/server/db/seed");
+      await ensureMeiliIndexes(searchClient);
     }
     const { credentials, slugScopes } = await seedBaseline(authDb, {
       serverSeedDb: serverDb.db,
+      sync: runtime.sync,
     });
-    if (meiliMode === "init-and-sync") {
-      await syncExistingSearchVocabulary({ runtime, serverDb: serverDb.db });
-    }
     const ctx = makeSeedCtx(
       serverDb.db,
       authDb,
@@ -353,9 +325,6 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       preset.mode,
       runtime.sync,
     );
-    for (const credential of credentials) {
-      await runtime.sync.user(credential.result.userId);
-    }
     const result = await runFactorySeed(ctx, plan);
     const scenarioResult = await runFactoryScenarios(ctx, scenarioNames);
     mergeSeedResults(result, scenarioResult);

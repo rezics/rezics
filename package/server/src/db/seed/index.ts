@@ -6,4 +6,8 @@ export {
   seedInfra as seedServerInfra,
   seedRealmTaxonomy,
 } from "./infra";
-export { initMeiliSearch } from "./init-meili-search";
+export {
+  ensureMeiliIndexes,
+  initMeiliSearch,
+  resetMeiliIndexes,
+} from "./init-meili-search";

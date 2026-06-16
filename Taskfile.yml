@@ -194,7 +194,7 @@ tasks:
     desc: Seed-driven database reset (pass args after --)
     cmd: bun run tool/bin/tool.ts seed database-reset {{.CLI_ARGS}}
   seed:init-meili-search:
-    desc: Initialize Meilisearch indexes
+    desc: Ensure Meilisearch indexes
     cmd: bun run tool/bin/tool.ts seed init-meili-search
 
   # ── Browser inspection workbench ───────────────────────────────────────

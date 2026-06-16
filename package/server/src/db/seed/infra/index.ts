@@ -1,4 +1,5 @@
 import type { SeedTagName, TagGroupIds } from "@rezics/contract";
+import type { SeedSyncHooks } from "../../factory/types";
 import { ensureRegistrationDefaultSubscriptions } from "../../../user/service/registration-defaults";
 import type { ServerDb } from "../../client";
 import { seedDefaultRealm } from "./seed-default-realm";
@@ -47,6 +48,29 @@ export interface SeedInfraResult {
 export interface SeedInfraOptions {
   db: Pick<ServerDb, "insert" | "select" | "transaction" | "update">;
   slugScopes: SlugScopesMap;
+  sync?: SeedSyncHooks;
+}
+
+function uniqueIds(ids: Iterable<string | undefined | null>): string[] {
+  return [...new Set([...ids].filter((id): id is string => Boolean(id)))];
+}
+
+async function syncAll(
+  sync: SeedSyncHooks | undefined,
+  target: keyof Pick<
+    SeedSyncHooks,
+    "realm" | "zone" | "tag" | "entity" | "post"
+  >,
+  ids: Iterable<string | undefined | null>,
+): Promise<void> {
+  if (!sync) return;
+  for (const id of uniqueIds(ids)) {
+    await sync[target](id);
+  }
+}
+
+function flattenTagGroupIds(tagIds: TagGroupIds): string[] {
+  return uniqueIds(Object.values(tagIds).flat());
 }
 
 /**
@@ -66,16 +90,23 @@ export async function seedInfra(
       "seedInfra requires a Drizzle db and slugScopes from the Drizzle seedSlugScopes() step.",
     );
   }
-  const { db, slugScopes } = opts;
-  const tagMap = await seedContentTypeTags(db, slugScopes);
+  const { db, slugScopes, sync } = opts;
+  const contentTypeTags = await seedContentTypeTags(db, slugScopes);
+  await syncAll(sync, "tag", [
+    ...Object.values(contentTypeTags.tagMap),
+    contentTypeTags.officialQuestionTagId,
+  ]);
   const searchTagIds = await seedSearchTagIds(db, slugScopes);
+  await syncAll(sync, "tag", flattenTagGroupIds(searchTagIds));
   const defaultRealmId = await seedDefaultRealm(db, rootUserId, slugScopes);
+  await syncAll(sync, "realm", [defaultRealmId]);
   const officialZoneIds = await seedOfficialZones(
     db,
     defaultRealmId,
     slugScopes,
     { searchTagIds },
   );
+  await syncAll(sync, "zone", Object.values(officialZoneIds));
   // Default sidebar entries are subscription-list rows. Seed them only after
   // the default realm and official zone Units exist.
   await ensureRegistrationDefaultSubscriptions(db, rootUserId, {
@@ -88,10 +119,19 @@ export async function seedInfra(
     defaultRealmId,
     slugScopes,
   );
+  await syncAll(sync, "tag", realmTaxonomy.sharedTagIds);
+  await syncAll(sync, "realm", [realmTaxonomy.communityRealmId]);
+  await syncAll(sync, "post", realmTaxonomy.postIds);
   const gameMediaTaxonomy = await seedGameMediaTaxonomy(db, slugScopes);
+  await syncAll(
+    sync,
+    "entity",
+    Object.values(gameMediaTaxonomy.platformEntityIds),
+  );
+  await syncAll(sync, "tag", Object.values(gameMediaTaxonomy.ratingTagIds));
   return {
     slugScopes,
-    tagMap,
+    tagMap: contentTypeTags.tagMap,
     defaultRealmId,
     officialZoneIds,
     realmTaxonomy,

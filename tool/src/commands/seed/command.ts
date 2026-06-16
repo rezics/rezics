@@ -6,6 +6,7 @@ type SeedWorkflow =
   | "reset-root"
   | "database-reset"
   | "init-meili-search"
+  | "reset-meili-search"
   | "exit";
 
 function cancel(): never {
@@ -68,6 +69,13 @@ async function runInitMeiliSearch() {
   await runInitMeili();
 }
 
+async function runResetMeiliSearch() {
+  const { runResetMeili } = await import(
+    "../../../../package/utils/src/db/command"
+  );
+  await runResetMeili();
+}
+
 async function pickSeedWorkflow(): Promise<SeedWorkflow> {
   const workflow = await p.select<SeedWorkflow>({
     message: "What seed workflow do you want to run?",
@@ -89,7 +97,13 @@ async function pickSeedWorkflow(): Promise<SeedWorkflow> {
       },
       {
         value: "init-meili-search",
-        label: "Initialize Meilisearch indexes",
+        label: "Ensure Meilisearch indexes",
+        hint: "non-destructive",
+      },
+      {
+        value: "reset-meili-search",
+        label: "Reset Meilisearch indexes",
+        hint: "destructive",
       },
       { value: "exit", label: "Exit" },
     ],
@@ -118,7 +132,11 @@ async function runInteractiveSeedWorkflow() {
     await runDatabaseReset();
     return;
   }
-  await runInitMeiliSearch();
+  if (workflow === "init-meili-search") {
+    await runInitMeiliSearch();
+    return;
+  }
+  await runResetMeiliSearch();
 }
 
 export const seedCommand = define({
@@ -154,9 +172,16 @@ export const seedCommand = define({
     }),
     "init-meili-search": define({
       name: "init-meili-search",
-      description: "Initialize Meilisearch indexes for seed data.",
+      description: "Ensure Meilisearch indexes for seed data.",
       run: async () => {
         await runInitMeiliSearch();
+      },
+    }),
+    "reset-meili-search": define({
+      name: "reset-meili-search",
+      description: "Reset and recreate Meilisearch indexes for seed data.",
+      run: async () => {
+        await runResetMeiliSearch();
       },
     }),
   },

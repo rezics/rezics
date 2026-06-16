@@ -66,7 +66,7 @@ Special target output includes `label`, `scenario`, `unitType`, `unitId`, and op
 Meilisearch modes:
 
 - `--meili=skip` skips index initialization and synchronization.
-- `--meili=init-and-sync` initializes indexes before seeding and synchronizes seeded Units through seed runtime hooks.
+- `--meili=init-and-sync` ensures indexes before seeding and synchronizes seeded Units through seed runtime hooks. It does not reset existing Meili documents; reset workflows own destructive cleanup.
 
 Factory Meilisearch synchronization is intentionally direct through
 `@rezics/search`. It is setup-time data projection, not runtime mutation

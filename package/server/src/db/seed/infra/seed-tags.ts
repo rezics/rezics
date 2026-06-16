@@ -27,6 +27,11 @@ import type { SlugScopesMap } from "./seed-slug-scopes";
 export const SEARCH_TAG_IDS_ECHOKV_KEY = "tagids";
 type TagSeedDb = Pick<ServerDb, "insert" | "select" | "transaction" | "update">;
 
+export interface ContentTypeTagsSeedResult {
+  tagMap: Record<SeedTagName, string>;
+  officialQuestionTagId: string;
+}
+
 async function findUnitByScopedSlug(
   db: TagSeedDb,
   slugScope: string,
@@ -104,7 +109,7 @@ async function createTagUnit(
 export async function seedContentTypeTags(
   db: TagSeedDb,
   slugScopes: SlugScopesMap,
-): Promise<Record<SeedTagName, string>> {
+): Promise<ContentTypeTagsSeedResult> {
   console.log("[Seed] Seeding content-type tags...");
 
   const tagScope = slugScopes.tag;
@@ -154,9 +159,9 @@ export async function seedContentTypeTags(
     }
   }
 
-  await seedOfficialQuestionTag(db, tagScope);
+  const officialQuestionTagId = await seedOfficialQuestionTag(db, tagScope);
 
-  return tagMap;
+  return { tagMap, officialQuestionTagId };
 }
 
 /**

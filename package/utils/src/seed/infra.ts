@@ -1,4 +1,5 @@
 import type { ServerDb } from "@rezics/server/db";
+import type { SeedSyncHooks } from "@rezics/server/db/seed-factory";
 
 export type ServerSeedDb = Pick<
   ServerDb,
@@ -17,6 +18,7 @@ export async function seedInfra(
   opts: {
     db: ServerSeedDb;
     slugScopes: Awaited<ReturnType<typeof seedSlugScopes>>;
+    sync?: SeedSyncHooks;
   },
 ): Promise<void> {
   const { seedInfra: seedServerInfra } = await import(
@@ -25,5 +27,6 @@ export async function seedInfra(
   await seedServerInfra(rootUserId, {
     db: opts.db,
     slugScopes: opts.slugScopes,
+    sync: opts.sync,
   });
 }
