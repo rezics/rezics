@@ -8,6 +8,8 @@ export const SEED_SYNC_TARGETS = [
   "post",
   "realm",
   "zone",
+  "tag",
+  "label",
   "user",
   "entity",
   "content-contained-units",
@@ -25,6 +27,8 @@ export interface SeedSyncHooks {
   post(unitId: string): Promise<void>;
   realm(unitId: string): Promise<void>;
   zone(unitId: string): Promise<void>;
+  tag(unitId: string): Promise<void>;
+  label(unitId: string): Promise<void>;
   user(unitId: string): Promise<void>;
   entity(unitId: string): Promise<void>;
   contentContainedUnits(unitId: string): Promise<void>;

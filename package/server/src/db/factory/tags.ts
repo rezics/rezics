@@ -79,5 +79,9 @@ export async function seedTags(
     ),
   );
 
+  for (const tag of tags) {
+    await ctx.sync.tag(tag.id);
+  }
+
   return tags.map((t) => ({ id: t.id, type: UnitType.TAG }));
 }

@@ -12,6 +12,8 @@ describe("initMeiliSearch", () => {
       initPostIndex: mock(async () => undefined),
       initRealmIndex: mock(async () => undefined),
       initZoneIndex: mock(async () => undefined),
+      initTagIndex: mock(async () => undefined),
+      initLabelIndex: mock(async () => undefined),
       initEntityIndex: mock(async () => undefined),
       initProgressIndex: mock(async () => undefined),
       initCommentIndex: mock(async () => undefined),
@@ -44,5 +46,7 @@ describe("initMeiliSearch", () => {
 
     expect(searchClient.resetKnownIndexes).not.toHaveBeenCalled();
     expect(searchClient.initContentIndex).toHaveBeenCalledTimes(1);
+    expect(searchClient.initTagIndex).toHaveBeenCalledTimes(1);
+    expect(searchClient.initLabelIndex).toHaveBeenCalledTimes(1);
   });
 });

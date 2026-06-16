@@ -1,11 +1,12 @@
 import {
+  meiliTagSearchQueryOptions,
   tagBatchTranslationsQuery,
-  tagSearchQuery,
   usePatchUserShelfItemMutation,
   userTagApplicationsForUnitQuery,
   userShelfItemForUnitQuery,
   useSetUserTagApplicationsMutation,
 } from "@rezics/api";
+import type { TagSearchDocument } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
@@ -33,6 +34,14 @@ type SearchTagOption = {
   slug?: string | null;
 };
 
+function tagSearchOptionFromDoc(doc: TagSearchDocument): SearchTagOption {
+  return {
+    unitId: doc.unitId,
+    label: doc.title ?? doc.titles[0] ?? null,
+    slug: doc.slug ?? null,
+  };
+}
+
 function tagOptionLabel(option: SearchTagOption): string {
   return option.label ?? option.slug ?? option.unitId;
 }
@@ -49,7 +58,11 @@ function ShelfItemMetadataDialogContent({
 
   const applicationsQuery = useQuery(userTagApplicationsForUnitQuery(unitId));
   const shelfItemQuery = useQuery(userShelfItemForUnitQuery(unitId));
-  const tagSearchQueryResult = useQuery(tagSearchQuery(tagSearchText.trim()));
+  const trimmedTagSearchText = tagSearchText.trim();
+  const tagSearchQueryResult = useQuery({
+    ...meiliTagSearchQueryOptions({ q: trimmedTagSearchText, limit: 20 }),
+    enabled: trimmedTagSearchText.length > 0,
+  });
   const tagTranslationsQuery = useQuery(
     tagBatchTranslationsQuery(selectedTagIds, locale),
   );
@@ -67,9 +80,9 @@ function ShelfItemMetadataDialogContent({
 
   const selectedTags = useMemo(() => new Set(selectedTagIds), [selectedTagIds]);
   const tagLabels = tagTranslationsQuery.data ?? {};
-  const searchOptions = (
-    (tagSearchQueryResult.data?.tags ?? []) as SearchTagOption[]
-  ).filter((tag) => !selectedTags.has(tag.unitId));
+  const searchOptions = (tagSearchQueryResult.data?.items ?? [])
+    .map(tagSearchOptionFromDoc)
+    .filter((tag) => !selectedTags.has(tag.unitId));
   const isSaving =
     setTagsMutation.isPending || patchShelfItemMutation.isPending;
   const loadError = applicationsQuery.error ?? shelfItemQuery.error;

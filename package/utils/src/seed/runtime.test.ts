@@ -81,6 +81,37 @@ function createZoneSyncDb() {
   ]);
 }
 
+function createTagLabelSyncDb() {
+  return createQueuedSelectDb([
+    [
+      {
+        id: "tag-1",
+        slug: "tag-one",
+        status: "PUBLISHED",
+        isLanguageNeutral: true,
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-02T00:00:00.000Z",
+      },
+    ],
+    [{ unitId: "tag-1", language: "en", title: "Tag One", description: null }],
+    [{ unitId: "tag-1", language: "en", isPrimary: true, position: "a0" }],
+    [],
+    [
+      {
+        id: "label-1",
+        slug: null,
+        status: "PUBLISHED",
+        isLanguageNeutral: true,
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-02T00:00:00.000Z",
+      },
+    ],
+    [{ unitId: "label-1", language: "en", title: "Label One" }],
+    [{ unitId: "label-1", language: "en", isPrimary: true, position: "a0" }],
+    [],
+  ]);
+}
+
 describe("createSeedRuntime", () => {
   test("stores special targets separately from sync state", async () => {
     const runtime = createSeedRuntime({
@@ -236,6 +267,42 @@ describe("createSeedRuntime", () => {
         ownerRealmUnitId: "realm-1",
         visibility: "PUBLIC",
       },
+    ]);
+  });
+
+  test("runs targeted tag and label sync for factory vocabulary units", async () => {
+    const syncedTags: unknown[] = [];
+    const syncedLabels: unknown[] = [];
+    const runtime = createSeedRuntime({
+      config: {
+        meiliMode: "init-and-sync",
+        manifestFormat: "human",
+        scenarioNames: [],
+      },
+      authDb: { disconnect: async () => {} } as never,
+      serverDb: createTagLabelSyncDb() as never,
+      searchClient: {
+        addOrUpdateTags: async (documents: unknown[]) => {
+          syncedTags.push(...documents);
+        },
+        deleteTags: async () => {},
+        addOrUpdateLabels: async (documents: unknown[]) => {
+          syncedLabels.push(...documents);
+        },
+        deleteLabels: async () => {},
+      } as never,
+    });
+
+    await runtime.sync.tag("tag-1");
+    await runtime.sync.label("label-1");
+
+    expect(runtime.state.syncSummary).toMatchObject({
+      targets: { tag: 1, label: 1 },
+      total: 2,
+    });
+    expect(syncedTags).toMatchObject([{ id: "tag-1", unitId: "tag-1" }]);
+    expect(syncedLabels).toMatchObject([
+      { id: "label-1", unitId: "label-1" },
     ]);
   });
 });

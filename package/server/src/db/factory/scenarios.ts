@@ -145,6 +145,7 @@ async function createScenarioTag(ctx: SeedCtx, title: string): Promise<string> {
       title,
     }),
   );
+  await ctx.sync.tag(id);
   return id;
 }
 
@@ -202,6 +203,7 @@ async function createScenarioLabel(
     }),
   );
   await insertScenarioTranslations(ctx, id, translations);
+  await ctx.sync.label(id);
   return id;
 }
 
