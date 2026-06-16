@@ -136,6 +136,18 @@ jobs:
                     exit 0
                   elif [ "$DEPLOY_STATUS" = "failed" ] || [ "$DEPLOY_STATUS" = "cancelled" ]; then
                     echo "Deployment $DEPLOY_STATUS"
+                    echo "--- Per-group status ---"
+                    echo "$DEPLOY" | jq -r '
+                      .TaskGroups | to_entries[] |
+                      "\(.key): desired=\(.value.DesiredTotal) placed=\(.value.PlacedAllocs) healthy=\(.value.HealthyAllocs) unhealthy=\(.value.UnhealthyAllocs)"'
+                    echo "--- Recent allocations ---"
+                    curl -sf \
+                      -H "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}" \
+                      -H "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}" \
+                      "${{ env.NOMAD_URL }}/v1/job/${{ env.NOMAD_JOB }}/allocations?all=true" \
+                    | jq -r '
+                      sort_by(.CreateTime) | reverse | .[0:20] |
+                      .[] | "\(.TaskGroup)/\(.ID[0:8]): client=\(.ClientStatus) desired=\(.DesiredStatus)"'
                     exit 1
                   fi
                   sleep 10
