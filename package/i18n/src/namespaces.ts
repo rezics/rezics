@@ -17,6 +17,7 @@ export const LAZY_NAMESPACES = [
   "settings",
   "editor",
   "admin",
+  "zone",
 ] as const;
 
 export const UI_NAMESPACES = ["ui"] as const;

@@ -1,11 +1,8 @@
 import {
+  createZoneInputSchema,
   parseReadLanguages,
-  wikiZoneConfigSchema,
-  ZoneFiltersSchema,
-  zoneConfigVersionSchema,
-  zonePagesSchema,
-  zoneSectionSchema,
-  zoneThemeSchema,
+  updateZoneInputSchema,
+  type ZoneConfig,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
@@ -17,7 +14,7 @@ import { zoneService } from "./zone.service";
 function resolvePublicZone(
   zone: ZoneWithRelations | null,
   set: { status?: unknown },
-) {
+): ZoneWithRelations | { error: { code: string; message: string } } {
   if (!zone || zone.unit?.visibility === "PRIVATE") {
     set.status = 404;
     return { error: { code: "NOT_FOUND", message: "Zone not found" } };
@@ -34,7 +31,7 @@ function resolvePublicZone(
     };
   }
 
-  return mapZoneToDTO(zone);
+  return zone;
 }
 
 function preferredLanguages(query: { languages?: string }) {
@@ -74,19 +71,29 @@ function resolveMutableZone(
   return zone;
 }
 
+function parseLifecycleDate(
+  value: string | null | undefined,
+): Date | null | undefined {
+  if (value === undefined) return undefined;
+  return value ? new Date(value) : null;
+}
+
 export const zoneApi = new Elysia({ prefix: "/zone" })
   .use(authMacro)
 
   .get(
     "/by-slug/:slug",
-    async ({ params, set }) => {
+    async ({ params, query, set }) => {
       const zone = await zoneService.getBySlug(params.slug);
-      return resolvePublicZone(zone, set);
+      const resolved = resolvePublicZone(zone, set);
+      if ("error" in resolved) return resolved;
+      return mapZoneToDTO(resolved, preferredLanguages(query));
     },
     {
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
+      query: t.Object({ languages: t.Optional(t.String()) }),
       detail: {
-        summary: "Get zone by slug (typed)",
+        summary: "Get zone by slug",
         description:
           "Look up a zone by its slug (404 if slug resolves to a non-zone unit)",
         tags: ["Zones"],
@@ -95,44 +102,66 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
   )
 
   .get(
-    "/:unitId/homepage",
+    "/:unitId/portal",
     async ({ params, query, set }) => {
       const zone = await zoneService.getByUnitId(params.unitId);
       const resolved = resolvePublicZone(zone, set);
       if ("error" in resolved) return resolved;
 
-      const data = await zoneService.getWikiHomepageData(params.unitId, {
-        preferredLanguages: preferredLanguages(query),
+      const languages = preferredLanguages(query);
+      const refUnits = await zoneService.getPortalRefUnits(resolved, {
+        preferredLanguages: languages,
       });
-      if (!data) {
-        set.status = 404;
-        return { error: { code: "NOT_FOUND", message: "Wiki Zone not found" } };
-      }
-      return data;
+      return { zone: mapZoneToDTO(resolved, languages), refUnits };
     },
     {
       params: t.Object({ unitId: t.String({ minLength: 1 }) }),
       query: t.Object({ languages: t.Optional(t.String()) }),
       detail: {
-        summary: "Get wiki zone homepage data",
+        summary: "Get zone portal data",
         description:
-          "Resolve typed homepage section data for a public wiki Zone",
+          "Zone DTO plus batch summaries of every unit referenced by its config; section list data hydrates lazily per section id",
         tags: ["Zones"],
       },
     },
   )
 
   .get(
-    "/:unitId",
-    async ({ params, set }) => {
+    "/:unitId/section/:sectionId",
+    async ({ params, query, set }) => {
       const zone = await zoneService.getByUnitId(params.unitId);
-      return resolvePublicZone(zone, set);
+      const resolved = resolvePublicZone(zone, set);
+      if ("error" in resolved) return resolved;
+
+      const data = await zoneService.getSectionData(
+        params.unitId,
+        params.sectionId,
+        {
+          cursor: query.cursor ?? null,
+          preferredLanguages: preferredLanguages(query),
+        },
+      );
+      if (!data) {
+        set.status = 404;
+        return {
+          error: { code: "NOT_FOUND", message: "Zone section not found" },
+        };
+      }
+      return data;
     },
     {
-      params: t.Object({ unitId: t.String({ minLength: 1 }) }),
+      params: t.Object({
+        unitId: t.String({ minLength: 1 }),
+        sectionId: t.String({ minLength: 1 }),
+      }),
+      query: t.Object({
+        languages: t.Optional(t.String()),
+        cursor: t.Optional(t.String()),
+      }),
       detail: {
-        summary: "Get zone",
-        description: "Get a single zone by Unit id",
+        summary: "Get zone section data",
+        description:
+          "Execute one section by id (query/feed/collection/stats/richText) with cursor-based continuation",
         tags: ["Zones"],
       },
     },
@@ -156,45 +185,16 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         slug: body.slug,
         translations: body.translations,
         ownerRealmUnitId: body.ownerRealmUnitId,
-        filters: body.filters,
-        configVersion: body.configVersion,
-        pages: body.pages,
-        sections: body.sections,
-        theme: body.theme,
-        primaryRealmUnitId: body.primaryRealmUnitId,
-        template: body.template,
-        styling: body.styling,
-        wiki: body.wiki,
-        startsAt: body.startsAt ? new Date(body.startsAt) : null,
-        endsAt: body.endsAt ? new Date(body.endsAt) : null,
+        config: body.config as ZoneConfig,
+        startsAt: parseLifecycleDate(body.startsAt) ?? null,
+        endsAt: parseLifecycleDate(body.endsAt) ?? null,
       });
 
       return mapZoneToDTO(zone);
     },
     {
       requireLogin: true,
-      body: t.Object({
-        slug: t.String(),
-        translations: t.Array(
-          t.Object({
-            language: t.String(),
-            title: t.Optional(t.String()),
-            description: t.Optional(t.String()),
-          }),
-        ),
-        ownerRealmUnitId: t.String(),
-        filters: ZoneFiltersSchema,
-        configVersion: t.Optional(zoneConfigVersionSchema),
-        pages: t.Optional(t.Union([zonePagesSchema, t.Null()])),
-        sections: t.Optional(t.Union([t.Array(zoneSectionSchema), t.Null()])),
-        theme: t.Optional(t.Union([zoneThemeSchema, t.Null()])),
-        primaryRealmUnitId: t.Optional(t.Union([t.String(), t.Null()])),
-        template: t.String(),
-        styling: t.Optional(t.Object({})),
-        wiki: t.Optional(t.Union([wikiZoneConfigSchema, t.Null()])),
-        startsAt: t.Optional(t.String()),
-        endsAt: t.Optional(t.String()),
-      }),
+      body: createZoneInputSchema,
       detail: {
         summary: "Create zone",
         description:
@@ -238,27 +238,10 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
 
       const zone = await zoneService.update(params.unitId, {
         ownerRealmUnitId: body.ownerRealmUnitId,
-        filters: body.filters,
-        configVersion: body.configVersion,
-        pages: body.pages,
-        sections: body.sections,
-        theme: body.theme,
-        primaryRealmUnitId: body.primaryRealmUnitId,
-        template: body.template,
-        styling: body.styling,
-        wiki: body.wiki,
-        startsAt:
-          body.startsAt !== undefined
-            ? body.startsAt
-              ? new Date(body.startsAt)
-              : null
-            : undefined,
-        endsAt:
-          body.endsAt !== undefined
-            ? body.endsAt
-              ? new Date(body.endsAt)
-              : null
-            : undefined,
+        translations: body.translations,
+        config: body.config as ZoneConfig | undefined,
+        startsAt: parseLifecycleDate(body.startsAt),
+        endsAt: parseLifecycleDate(body.endsAt),
       });
 
       return mapZoneToDTO(zone);
@@ -266,24 +249,11 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
     {
       requireLogin: true,
       params: t.Object({ unitId: t.String() }),
-      body: t.Object({
-        ownerRealmUnitId: t.Optional(t.String()),
-        filters: t.Optional(ZoneFiltersSchema),
-        configVersion: t.Optional(zoneConfigVersionSchema),
-        pages: t.Optional(t.Union([zonePagesSchema, t.Null()])),
-        sections: t.Optional(t.Union([t.Array(zoneSectionSchema), t.Null()])),
-        theme: t.Optional(t.Union([zoneThemeSchema, t.Null()])),
-        primaryRealmUnitId: t.Optional(t.Union([t.String(), t.Null()])),
-        template: t.Optional(t.String()),
-        styling: t.Optional(t.Union([t.Object({}), t.Null()])),
-        wiki: t.Optional(t.Union([wikiZoneConfigSchema, t.Null()])),
-        startsAt: t.Optional(t.Union([t.String(), t.Null()])),
-        endsAt: t.Optional(t.Union([t.String(), t.Null()])),
-      }),
+      body: updateZoneInputSchema,
       detail: {
         summary: "Update zone",
         description:
-          "Update a zone's configuration using the owner realm's management policy",
+          "Update a zone's config, translations, or lifecycle using the owner realm's management policy",
         tags: ["Zones"],
       },
     },

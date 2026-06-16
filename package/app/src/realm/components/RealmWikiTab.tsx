@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
-import { zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
+import { zonePortalQueryOptions } from "@rezics/api/zone/zone";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
@@ -35,9 +35,13 @@ export function RealmWikiTab({
     }),
     enabled: readContext.ready && Boolean(realmId),
   });
-  const zoneQuery = useQuery(zoneByUnitIdQueryOptions(wikiZoneUnitId ?? ""));
+  // Resolve the configured zone through the portal read (unitId-keyed);
+  // only the slug is needed to deep-link into the zone frame.
+  // 通过门户读取（以 unitId 为键）解析配置的专区；深链进专区框架只需要
+  // slug。
+  const zoneQuery = useQuery(zonePortalQueryOptions(wikiZoneUnitId ?? ""));
   const posts = wikiPostsQuery.data?.posts ?? [];
-  const zoneSlug = zoneQuery.data?.slug ?? null;
+  const zoneSlug = zoneQuery.data?.zone.slug ?? null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">

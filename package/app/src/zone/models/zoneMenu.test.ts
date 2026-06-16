@@ -1,0 +1,252 @@
+import { describe, expect, it } from "bun:test";
+import type { ZoneMenuNode, ZoneRefUnitSummary } from "@rezics/contract";
+import {
+  resolveZoneMenuNodes,
+  zoneCreateHref,
+  zoneDetailKindForRef,
+  zoneJoinHref,
+  zoneLinkFallbackKey,
+  zoneLinkHref,
+  zoneLinkLabel,
+  zonePageHref,
+  zoneSectionTitleKey,
+  zoneSectionTitleText,
+} from "./zoneMenu";
+
+const refUnits: Record<string, ZoneRefUnitSummary> = {
+  "label-1": { unitId: "label-1", type: "LABEL", title: "人物角色" },
+  "wiki-1": {
+    unitId: "wiki-1",
+    type: "POST",
+    postKind: "WIKI",
+    title: "上條當麻",
+  },
+  "post-1": {
+    unitId: "post-1",
+    type: "POST",
+    postKind: "REVIEW",
+    title: "Review",
+  },
+  "book-1": { unitId: "book-1", type: "BOOK", title: "とある魔術の禁書目録" },
+  "realm-1": {
+    unitId: "realm-1",
+    type: "REALM",
+    slug: "toaru",
+    title: "とある",
+  },
+  "untitled-label": { unitId: "untitled-label", type: "LABEL", title: null },
+};
+
+const ctx = { zoneSlug: "toaru-wiki", refUnits };
+
+describe("zoneDetailKindForRef", () => {
+  it("routes WIKI posts to wiki, other posts to post, the rest to unit", () => {
+    expect(zoneDetailKindForRef(refUnits["wiki-1"])).toBe("wiki");
+    expect(zoneDetailKindForRef(refUnits["post-1"])).toBe("post");
+    expect(zoneDetailKindForRef(refUnits["book-1"])).toBe("unit");
+    expect(zoneDetailKindForRef(undefined)).toBe("unit");
+  });
+});
+
+describe("zoneLinkHref", () => {
+  it("builds zone-framed unit detail hrefs", () => {
+    expect(zoneLinkHref({ kind: "unit", unitId: "wiki-1" }, ctx)).toBe(
+      "/z/toaru-wiki/wiki/wiki-1",
+    );
+    expect(zoneLinkHref({ kind: "unit", unitId: "post-1" }, ctx)).toBe(
+      "/z/toaru-wiki/post/post-1",
+    );
+    expect(zoneLinkHref({ kind: "unit", unitId: "book-1" }, ctx)).toBe(
+      "/z/toaru-wiki/unit/book-1",
+    );
+  });
+
+  it("builds zone page hrefs (feed falls back to home until the route exists)", () => {
+    expect(zonePageHref("home", "toaru-wiki")).toBe("/z/toaru-wiki");
+    expect(zonePageHref("search", "toaru-wiki")).toBe("/z/toaru-wiki/search");
+    expect(zonePageHref("feed", "toaru-wiki")).toBe("/z/toaru-wiki");
+    expect(zoneLinkHref({ kind: "zonePage", pageId: "search" }, ctx)).toBe(
+      "/z/toaru-wiki/search",
+    );
+  });
+
+  it("passes external urls through", () => {
+    expect(
+      zoneLinkHref(
+        { kind: "external", url: "https://example.com", text: "QQ 123" },
+        ctx,
+      ),
+    ).toBe("https://example.com");
+  });
+});
+
+describe("zoneLinkLabel", () => {
+  it("prefers the LABEL unit title", () => {
+    expect(
+      zoneLinkLabel(
+        { labelUnitId: "label-1", target: { kind: "unit", unitId: "wiki-1" } },
+        refUnits,
+      ),
+    ).toBe("人物角色");
+  });
+
+  it("falls back to the target unit title", () => {
+    expect(
+      zoneLinkLabel({ target: { kind: "unit", unitId: "wiki-1" } }, refUnits),
+    ).toBe("上條當麻");
+    expect(
+      zoneLinkLabel(
+        {
+          labelUnitId: "untitled-label",
+          target: { kind: "unit", unitId: "wiki-1" },
+        },
+        refUnits,
+      ),
+    ).toBe("上條當麻");
+  });
+
+  it("falls back to external text and finally null", () => {
+    expect(
+      zoneLinkLabel(
+        { target: { kind: "external", url: "https://x", text: "QQ 123" } },
+        refUnits,
+      ),
+    ).toBe("QQ 123");
+    expect(
+      zoneLinkLabel({ target: { kind: "zonePage", pageId: "home" } }, refUnits),
+    ).toBeNull();
+  });
+
+  it("exposes i18n fallback keys only for zone pages", () => {
+    expect(zoneLinkFallbackKey({ kind: "zonePage", pageId: "feed" })).toBe(
+      "zone:page_feed",
+    );
+    expect(zoneLinkFallbackKey({ kind: "unit", unitId: "wiki-1" })).toBeNull();
+    expect(zoneLinkFallbackKey(undefined)).toBeNull();
+  });
+});
+
+describe("resolveZoneMenuNodes", () => {
+  it("projects labels, hrefs, and children", () => {
+    const nodes: ZoneMenuNode[] = [
+      {
+        id: "group",
+        labelUnitId: "label-1",
+        children: [
+          { id: "leaf", target: { kind: "unit", unitId: "wiki-1" } },
+          {
+            id: "page",
+            target: { kind: "zonePage", pageId: "search" },
+          },
+        ],
+      },
+    ];
+    const resolved = resolveZoneMenuNodes(nodes, ctx);
+    expect(resolved).toEqual([
+      {
+        id: "group",
+        label: "人物角色",
+        labelKey: null,
+        href: null,
+        isExternal: false,
+        children: [
+          {
+            id: "leaf",
+            label: "上條當麻",
+            labelKey: null,
+            href: "/z/toaru-wiki/wiki/wiki-1",
+            isExternal: false,
+            children: [],
+          },
+          {
+            id: "page",
+            label: null,
+            labelKey: "zone:page_search",
+            href: "/z/toaru-wiki/search",
+            isExternal: false,
+            children: [],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("clamps the tree at depth 3", () => {
+    const nodes: ZoneMenuNode[] = [
+      {
+        id: "d1",
+        labelUnitId: "label-1",
+        children: [
+          {
+            id: "d2",
+            labelUnitId: "label-1",
+            children: [
+              {
+                id: "d3",
+                labelUnitId: "label-1",
+                children: [{ id: "d4", labelUnitId: "label-1" }],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const resolved = resolveZoneMenuNodes(nodes, ctx);
+    const d3 = resolved[0]?.children[0]?.children[0];
+    expect(d3?.id).toBe("d3");
+    expect(d3?.children).toEqual([]);
+  });
+});
+
+describe("section titles", () => {
+  it("resolves explicit titleLabelUnitId through refUnits", () => {
+    expect(
+      zoneSectionTitleText({ titleLabelUnitId: "label-1" }, refUnits),
+    ).toBe("人物角色");
+    expect(zoneSectionTitleText({}, refUnits)).toBeNull();
+    expect(
+      zoneSectionTitleText({ titleLabelUnitId: "missing" }, refUnits),
+    ).toBeNull();
+  });
+
+  it("maps content kinds to default i18n keys; hero and containers have none", () => {
+    expect(zoneSectionTitleKey("query")).toBe("zone:section_title_query");
+    expect(zoneSectionTitleKey("collection")).toBe(
+      "zone:section_title_collection",
+    );
+    expect(zoneSectionTitleKey("feed")).toBe("zone:section_title_feed");
+    expect(zoneSectionTitleKey("richText")).toBe("zone:section_title_richText");
+    expect(zoneSectionTitleKey("stats")).toBe("zone:section_title_stats");
+    expect(zoneSectionTitleKey("hero")).toBeNull();
+    expect(zoneSectionTitleKey("tabs")).toBeNull();
+    expect(zoneSectionTitleKey("columns")).toBeNull();
+  });
+});
+
+describe("context CTA routing", () => {
+  const realmContext = {
+    context: { kind: "realm", realmUnitId: "realm-1" } as const,
+  };
+  const globalContext = { context: { kind: "global" } as const };
+
+  it("routes create CTAs to the context realm create flow", () => {
+    expect(zoneCreateHref(realmContext, refUnits, "wiki")).toBe(
+      "/r/toaru/create?mode=wiki",
+    );
+    expect(zoneCreateHref(realmContext, refUnits, "post")).toBe(
+      "/r/toaru/create?mode=post",
+    );
+    expect(zoneCreateHref(globalContext, refUnits, "wiki")).toBeNull();
+  });
+
+  it("routes the join CTA to the context realm page", () => {
+    expect(zoneJoinHref(realmContext, refUnits)).toBe("/r/toaru");
+    expect(zoneJoinHref(globalContext, refUnits)).toBeNull();
+    expect(
+      zoneJoinHref(
+        { context: { kind: "realm", realmUnitId: "unknown" } },
+        refUnits,
+      ),
+    ).toBeNull();
+  });
+});

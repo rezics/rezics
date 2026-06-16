@@ -1,8 +1,4 @@
-export {
-  type CreateZoneInput,
-  type UpdateZoneInput,
-  zoneApi,
-} from "./zone.api";
+export { zoneApi } from "./zone.api";
 export { zoneKeys } from "./zone.keys";
 export {
   invalidateZoneQueries,
@@ -12,8 +8,9 @@ export {
   zoneMutations,
 } from "./zone.mutations";
 export {
-  zoneByUnitIdQueryOptions,
-  zoneHomepageByUnitIdQueryOptions,
+  zonePortalQueryOptions,
   zoneQueries,
   zoneQueryOptions,
+  zoneSectionInfiniteQuery,
 } from "./zone.queries";
+export { useZoneBySlug } from "./useZoneBySlug";

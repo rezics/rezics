@@ -49,6 +49,7 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
 // "progress-status"）。
 const SINGULAR_DOMAIN_EXCEPTIONS = new Set([
   "token",
+  "label",
   "status",
   "progress-status",
 ]);

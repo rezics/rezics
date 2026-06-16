@@ -6,6 +6,8 @@ import type {
   SearchCategory,
   SearchQuery,
   SearchScope,
+  ZoneBoundaryFilter,
+  ZoneSectionQuery,
 } from "@rezics/contract";
 import { normalizeLanguage } from "@rezics/contract";
 
@@ -47,6 +49,13 @@ export interface FilterContext {
   // 已认证的查看者。仅用于查看者私有的搜索能力，例如仅所有者可见的书架
   // 条目备注。
   viewerUserId?: string | null;
+  // Zone scope only: the zone's unremovable `config.filters` boundary,
+  // pre-compiled per index by the caller (see `compileZoneSectionQuery`).
+  // User filters only narrow within it.
+  // 仅 zone 作用域：专区不可移除的 `config.filters` 边界，由调用方按索引
+  // 预编译（见 `compileZoneSectionQuery`）。用户过滤只能在其内部收窄。
+  zoneBoundaryContentFilter?: string[];
+  zoneBoundaryPostFilter?: string[];
 }
 
 export interface ContentBuildOpts {
@@ -144,8 +153,9 @@ function resolveBookScope(scope: SearchScope): {
 //   book   → contentSubtype must be "shelves" (BOOK/GAME/MEDIA/LINK excluded)
 //          → containedUnitIds = unitId AND type = "SHELF"
 //   realm  → realmIds = realmId
-//   zone   → no index membership filter; zone config is applied as SearchQuery
-//            implicit filters by the caller
+//   zone   → the zone's pre-compiled `config.filters` boundary
+//            (ctx.zoneBoundaryContentFilter) — unremovable, user filters
+//            only narrow within it
 //   user   → userId = userId
 //   saved  → handled by the shelf-item grouped path, not direct content search
 // 按严格成员关系表将 SearchScope 映射到内容索引：
@@ -153,7 +163,9 @@ function resolveBookScope(scope: SearchScope): {
 //   book   → contentSubtype 必须为 "shelves"（排除 BOOK/GAME/MEDIA/LINK）
 //          → containedUnitIds = unitId AND type = "SHELF"
 //   realm  → realmIds = realmId
-//   zone   → 无索引成员关系过滤；zone 配置由调用方作为 SearchQuery 隐式过滤应用
+//   zone   → 专区预编译的 `config.filters` 边界
+//            （ctx.zoneBoundaryContentFilter）——不可移除，用户过滤只能
+//            在其内部收窄
 //   user   → userId = userId
 //   saved  → 由书架条目分组路径处理，而非直接的内容搜索
 
@@ -191,6 +203,8 @@ export function buildContentFilter(
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
     filter.push(`userId = "${scope.userId}"`);
+  } else if (scope.kind === "zone") {
+    filter.push(...(ctx.zoneBoundaryContentFilter ?? []));
   } else if (scope.kind === "saved") {
     filter.push('id = "__saved_shelf_scope_requires_shelf_items__"');
   }
@@ -268,14 +282,14 @@ export function buildContentFilter(
 //   global → no scope filter
 //   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
-//   zone   → no index membership filter; zone config is applied as SearchQuery
-//            implicit filters by the caller
+//   zone   → the zone's pre-compiled `config.filters` boundary
+//            (ctx.zoneBoundaryPostFilter)
 //   user   → authorUserId = userId
 // 帖子的作用域映射：
 //   global → 无作用域过滤
 //   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
-//   zone   → 无索引成员关系过滤；zone 配置由调用方作为 SearchQuery 隐式过滤应用
+//   zone   → 专区预编译的 `config.filters` 边界（ctx.zoneBoundaryPostFilter）
 //   user   → authorUserId = userId
 
 export function buildPostFilter(
@@ -308,6 +322,8 @@ export function buildPostFilter(
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
     filter.push(`authorUserId = "${scope.userId}"`);
+  } else if (scope.kind === "zone") {
+    filter.push(...(_ctx.zoneBoundaryPostFilter ?? []));
   } else if (scope.kind === "saved") {
     filter.push('id = "__saved_shelf_scope_requires_shelf_items__"');
   }
@@ -445,4 +461,287 @@ export function buildShelfItemFilter(
   }
 
   return filter;
+}
+
+// ANCHOR: compileZoneSectionQuery
+// ANCHOR: compileZoneSectionQuery（编译专区分区查询）
+// Compiles a typed `ZoneSectionQuery` (intersected with the zone-level
+// `ZoneBoundaryFilter`) into content/posts index filter + sort expressions.
+// Only fields the target index can actually filter/sort are accepted —
+// `zoneSectionQueryUnsupportedFields` is the shared validation surface used
+// both here and by zone config validation. The sync layer indexes PUBLIC
+// units only, so UNLISTED zone fragments never appear in query results; the
+// explicit content visibility filter below documents that boundary.
+// 将类型化的 `ZoneSectionQuery`（与专区级 `ZoneBoundaryFilter` 取交集）
+// 编译为 content/posts 索引的过滤 + 排序表达式。只接受目标索引实际可
+// 过滤/排序的字段——`zoneSectionQueryUnsupportedFields` 是这里与专区配置
+// 校验共用的校验面。同步层只索引 PUBLIC Unit，因此 UNLISTED 专区片段
+// 绝不会出现在查询结果中；下方显式的 content 可见性过滤记录了该边界。
+
+export interface ZoneQueryCompileContext {
+  // Resolved from `config.context`; null when the zone context is global.
+  // 从 `config.context` 解析；专区语境为 global 时为 null。
+  contextRealmUnitId?: string | null;
+  // The reader's language candidate chain for `languages: "viewer"`.
+  // 供 `languages: "viewer"` 使用的读者语言候选链。
+  viewerLanguageCandidates?: readonly string[];
+}
+
+export interface CompiledZoneSectionQuery {
+  index: "content" | "posts";
+  filter: string[];
+  sort: string[];
+}
+
+const ZONE_QUERY_FILTERABLE: Record<
+  "unit" | "post",
+  Set<keyof Omit<ZoneSectionQuery, "target" | "sort">>
+> = {
+  unit: new Set([
+    "types",
+    "postKinds",
+    "realm",
+    "tagUnitIds",
+    "realmTagUnitIds",
+    "subjects",
+    "targetUnitId",
+    "languages",
+    "ratings",
+  ]),
+  post: new Set(["postKinds", "realm", "targetUnitId", "languages"]),
+};
+
+const ZONE_QUERY_SORTABLE: Record<"unit" | "post", Set<string>> = {
+  unit: new Set([
+    "createdAt",
+    "updatedAt",
+    "publishedAt",
+    "bestScore",
+    "hotScore",
+    "topScore",
+    "risingScore",
+    "controversyScore",
+    "trendingScore",
+    "qualityScore",
+  ]),
+  post: new Set([
+    "createdAt",
+    "updatedAt",
+    "replyCount",
+    "bestScore",
+    "hotScore",
+    "topScore",
+    "risingScore",
+    "controversyScore",
+    "trendingScore",
+    "qualityScore",
+  ]),
+};
+
+export function zoneSectionQueryUnsupportedFields(
+  query: ZoneSectionQuery,
+): string[] {
+  const filterable = ZONE_QUERY_FILTERABLE[query.target];
+  const unsupported: string[] = [];
+  for (const key of Object.keys(query) as (keyof ZoneSectionQuery)[]) {
+    if (key === "target" || key === "sort") continue;
+    if (query[key] === undefined) continue;
+    if (!filterable.has(key)) unsupported.push(key);
+  }
+  if (!ZONE_QUERY_SORTABLE[query.target].has(query.sort.field)) {
+    unsupported.push(`sort.${query.sort.field}`);
+  }
+  return unsupported;
+}
+
+// Marker filter that matches nothing: emitted when the boundary ∩ query
+// intersection is empty, because the boundary is unremovable.
+// 不匹配任何内容的标记过滤：当边界与查询的交集为空时发出，因为边界
+// 不可移除。
+const ZONE_EMPTY_INTERSECTION_FILTER =
+  'id = "__zone_boundary_empty_intersection__"';
+
+function intersectLists(
+  a: readonly string[] | undefined,
+  b: readonly string[] | undefined,
+): string[] | undefined {
+  if (!a) return b ? [...b] : undefined;
+  if (!b) return [...a];
+  const bSet = new Set(b);
+  return a.filter((value) => bSet.has(value));
+}
+
+function unionLists(
+  a: readonly string[] | undefined,
+  b: readonly string[] | undefined,
+): string[] | undefined {
+  if (!a && !b) return undefined;
+  return [...new Set([...(a ?? []), ...(b ?? [])])];
+}
+
+function resolveZoneRealmIds(
+  realm: ZoneSectionQuery["realm"],
+  ctx: ZoneQueryCompileContext,
+): string[] | undefined {
+  if (realm === undefined) return undefined;
+  if (realm === "context") {
+    // Global-context zones leave "context" unscoped rather than empty.
+    // 全局语境的专区将 "context" 视为不限定，而不是空集。
+    return ctx.contextRealmUnitId ? [ctx.contextRealmUnitId] : undefined;
+  }
+  return realm.unitIds;
+}
+
+function resolveZoneLanguages(
+  languages: ZoneSectionQuery["languages"],
+  ctx: ZoneQueryCompileContext,
+): string[] | undefined {
+  if (languages === undefined) return undefined;
+  if (languages === "viewer") {
+    const candidates = readLanguageFilterCandidates({
+      languages: ctx.viewerLanguageCandidates ?? [],
+    });
+    return candidates.length > 0 ? candidates : undefined;
+  }
+  return [...languages];
+}
+
+export function compileZoneSectionQuery(
+  query: ZoneSectionQuery,
+  boundary: ZoneBoundaryFilter | undefined,
+  ctx: ZoneQueryCompileContext = {},
+): CompiledZoneSectionQuery {
+  const unsupported = zoneSectionQueryUnsupportedFields(query);
+  if (unsupported.length > 0) {
+    throw new Error(
+      `ZoneSectionQuery uses fields unsupported on the ${query.target} index: ${unsupported.join(", ")}`,
+    );
+  }
+
+  const filter: string[] = [];
+  let empty = false;
+  const pushIntersected = (
+    field: string,
+    values: string[] | undefined,
+    intersected: boolean,
+  ) => {
+    if (values === undefined) return;
+    if (values.length === 0) {
+      if (intersected) empty = true;
+      return;
+    }
+    filter.push(
+      values.length === 1
+        ? `${field} = "${values[0]}"`
+        : `${field} IN [${quoteList(values)}]`,
+    );
+  };
+
+  const types = intersectLists(query.types, boundary?.types);
+  const postKinds = intersectLists(query.postKinds, boundary?.postKinds);
+  const realmIds = intersectLists(
+    resolveZoneRealmIds(query.realm, ctx),
+    resolveZoneRealmIds(boundary?.realm, ctx),
+  );
+  // Tag filters are AND-ed per tag, so boundary tags compose by union.
+  // 标签过滤逐个 AND，因此边界标签按并集组合。
+  const tagUnitIds = unionLists(
+    unionLists(query.tagUnitIds, query.realmTagUnitIds),
+    unionLists(boundary?.tagUnitIds, boundary?.realmTagUnitIds),
+  );
+  const subjectEntityIds = intersectLists(
+    query.subjects?.entityUnitIds,
+    boundary?.subjects?.entityUnitIds,
+  );
+  const subjectRoles = intersectLists(
+    query.subjects?.roles,
+    boundary?.subjects?.roles,
+  );
+  const ratings = intersectLists(query.ratings, boundary?.ratings);
+  const languages = intersectLists(
+    resolveZoneLanguages(query.languages, ctx),
+    resolveZoneLanguages(boundary?.languages, ctx),
+  );
+
+  if (query.target === "unit") {
+    pushIntersected("type", types, Boolean(query.types && boundary?.types));
+    pushIntersected(
+      "postKind",
+      postKinds,
+      Boolean(query.postKinds && boundary?.postKinds),
+    );
+    pushIntersected(
+      "realmIds",
+      realmIds,
+      query.realm !== undefined && boundary?.realm !== undefined,
+    );
+    for (const tagId of tagUnitIds ?? []) {
+      filter.push(`tagIds = "${tagId}"`);
+    }
+    pushIntersected(
+      "subjectEntityIds",
+      subjectEntityIds,
+      Boolean(
+        query.subjects?.entityUnitIds && boundary?.subjects?.entityUnitIds,
+      ),
+    );
+    pushIntersected(
+      "subjectRoles",
+      subjectRoles,
+      Boolean(query.subjects?.roles && boundary?.subjects?.roles),
+    );
+    pushIntersected(
+      "rating",
+      ratings,
+      Boolean(query.ratings && boundary?.ratings),
+    );
+    filter.push('visibility = "PUBLIC"');
+  } else {
+    pushIntersected(
+      "kind",
+      postKinds,
+      Boolean(query.postKinds && boundary?.postKinds),
+    );
+    pushIntersected(
+      "realmIds",
+      realmIds,
+      query.realm !== undefined && boundary?.realm !== undefined,
+    );
+    filter.push("isLocked = false");
+  }
+
+  if (
+    query.targetUnitId !== undefined ||
+    boundary?.targetUnitId !== undefined
+  ) {
+    if (
+      query.targetUnitId !== undefined &&
+      boundary?.targetUnitId !== undefined &&
+      query.targetUnitId !== boundary.targetUnitId
+    ) {
+      empty = true;
+    } else {
+      filter.push(
+        `targetUnitId = "${query.targetUnitId ?? boundary?.targetUnitId}"`,
+      );
+    }
+  }
+
+  if (languages !== undefined) {
+    if (languages.length === 0) {
+      empty = true;
+    } else {
+      filter.push(
+        `(isLanguageNeutral = true OR languages IN [${quoteList(languages)}])`,
+      );
+    }
+  }
+
+  if (empty) filter.push(ZONE_EMPTY_INTERSECTION_FILTER);
+
+  return {
+    index: query.target === "unit" ? "content" : "posts",
+    filter,
+    sort: [`${query.sort.field}:${query.sort.direction ?? "desc"}`],
+  };
 }

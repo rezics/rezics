@@ -1,6 +1,6 @@
 import { postQueries } from "@rezics/api/post/post";
 import { zoneKeys } from "@rezics/api/zone/zone";
-import type { PostDTO, ZoneDTO } from "@rezics/contract";
+import type { PostDTO, ZonePortalResponse } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect } from "react";
@@ -15,19 +15,26 @@ const WIKI_FILTERS = {
   limit: 24,
 } as const;
 
-const wikiZone: ZoneDTO = {
-  unitId: WIKI_ZONE_ID,
-  ownerRealmUnitId: REALM_ID,
-  slug: "fixture-wiki-zone",
-  name: "Fixture Wiki Zone",
-  template: "wiki-classic",
-  filters: {},
-  configVersion: 1,
-  pages: null,
-  sections: null,
-  theme: null,
-  primaryRealmUnitId: REALM_ID,
-} as ZoneDTO;
+const wikiZonePortal: ZonePortalResponse = {
+  zone: {
+    unitId: WIKI_ZONE_ID,
+    ownerRealmUnitId: REALM_ID,
+    slug: "fixture-wiki-zone",
+    name: "Fixture Wiki Zone",
+    translations: [{ language: "en", title: "Fixture Wiki Zone" }],
+    config: {
+      schema: "rezics/zone-config",
+      version: 1,
+      context: { kind: "realm", realmUnitId: REALM_ID },
+      filters: { realm: "context" },
+      menus: [{ id: "main", nodes: [] }],
+      header: { menuId: "main" },
+      pages: { home: { sections: [] } },
+      theme: {},
+    },
+  },
+  refUnits: {},
+};
 
 const wikiPosts = postFlat.map(
   (post, index) =>
@@ -42,11 +49,11 @@ const wikiPosts = postFlat.map(
 
 function Seeded({
   posts,
-  zone = wikiZone,
+  portal = wikiZonePortal,
   children,
 }: {
   posts: PostDTO[];
-  zone?: ZoneDTO | null;
+  portal?: ZonePortalResponse | null;
   children: ReactNode;
 }) {
   const qc = useQueryClient();
@@ -56,10 +63,10 @@ function Seeded({
       posts,
       total: posts.length,
     });
-    if (zone) {
-      qc.setQueryData(zoneKeys.byUnitId(zone.unitId), zone);
+    if (portal) {
+      qc.setQueryData(zoneKeys.portal(portal.zone.unitId), portal);
     }
-  }, [posts, qc, zone]);
+  }, [posts, qc, portal]);
 
   return <div className="max-w-5xl p-6">{children}</div>;
 }
@@ -89,7 +96,7 @@ export const WithConfiguredZone: Story = {
 export const EmptyWithSetup: Story = {
   args: { wikiZoneUnitId: null },
   render: (args) => (
-    <Seeded posts={[]} zone={null}>
+    <Seeded posts={[]} portal={null}>
       <RealmWikiTab {...args} />
     </Seeded>
   ),

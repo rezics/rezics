@@ -13,6 +13,11 @@ export {
 } from "./hooks/useCommentTreeCollapse";
 export { useFocusReplyFromQuery } from "./hooks/useFocusReplyFromQuery";
 export {
+  COMMENT_CONTEXT_ALL,
+  resolveDefaultCommentContext,
+  toCommentWriteRealmUnitId,
+} from "./models/commentContext";
+export {
   commentRowActions,
   commentRowOverflow,
 } from "./models/commentPolicy";

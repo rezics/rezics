@@ -2,9 +2,16 @@ import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
   DEFAULT_LANGUAGE,
-  type ZoneFilters,
-  type ZonePages,
-  type ZoneSection,
+  ZONE_CONFIG_SCHEMA,
+  ZONE_CONFIG_V1_VERSION,
+  type ZoneBoundaryFilter,
+  type ZoneCollectionItem,
+  type ZoneConfigV1,
+  type ZoneContentSection,
+  type ZoneMenu,
+  type ZonePageSection,
+  type ZoneSectionQuery,
+  type ZoneSectionQuerySortField,
   type ZoneTheme,
 } from "@rezics/contract";
 import { Unit, UnitSupportLanguage, UnitTranslation, Zone } from "../schema";
@@ -12,23 +19,58 @@ import { generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit } from "./types.js";
-import {
-  pickN,
-  randomBoolean,
-  withUpdatedAt,
-  withUpdatedAtRows,
-} from "./utils.js";
+import { pickN, withUpdatedAt, withUpdatedAtRows } from "./utils.js";
 
-const ZONE_FIXTURE_KINDS = [
-  "content-latest",
-  "content-popular",
-  "feed-pulse",
-  "wiki-collection",
+/**
+ * Fixture shapes covering every zone section kind except `richText`: the
+ * synthetic seeder has no WIKI fragment posts to reference, so `richText`
+ * coverage lives in the deterministic `toaru-wiki` factory scenario.
+ * 覆盖除 `richText` 外所有专区分区 kind 的 fixture 形态：合成播种器没有
+ * 可引用的 WIKI 片段帖子，因此 `richText` 的覆盖由确定性的 `toaru-wiki`
+ * 工厂情境承担。
+ */
+export const ZONE_FIXTURE_KINDS = [
+  "book-portal",
+  "pulse-board",
+  "tabbed-portal",
+  "columns-portal",
   "realm-directory",
 ] as const;
 
+export type ZoneFixtureKind = (typeof ZONE_FIXTURE_KINDS)[number];
+
+export interface ZoneFixtureRefs {
+  // null → global context; the boundary may then not use realm: "context".
+  // null → global 语境；此时边界不得使用 realm: "context"。
+  contextRealmUnitId: string | null;
+  workUnitIds: string[];
+  tagUnitIds: string[];
+  realmUnitIds: string[];
+}
+
 const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
-type ZoneFixtureKind = (typeof ZONE_FIXTURE_KINDS)[number];
+
+// Per-target sort vocabularies mirror `ZONE_QUERY_SORTABLE` in
+// `meili/search/filters.ts`: unit queries may not sort by replyCount, post
+// queries may not sort by publishedAt.
+// 按目标的排序词汇表与 `meili/search/filters.ts` 的 `ZONE_QUERY_SORTABLE`
+// 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序。
+const UNIT_SORT_FIELDS: ZoneSectionQuerySortField[] = [
+  "createdAt",
+  "updatedAt",
+  "publishedAt",
+  "trendingScore",
+  "qualityScore",
+  "topScore",
+];
+const POST_SORT_FIELDS: ZoneSectionQuerySortField[] = [
+  "createdAt",
+  "updatedAt",
+  "replyCount",
+  "hotScore",
+  "bestScore",
+  "topScore",
+];
 
 interface ZoneTemporalState {
   startsAt: Date | null;
@@ -54,144 +96,37 @@ function pickTemporalState(): ZoneTemporalState {
   return { startsAt, endsAt };
 }
 
-function label(text: string) {
-  return {
-    translations: { en: text },
-    fallbackLanguage: DEFAULT_LANGUAGE,
-  };
+function unitItems(unitIds: string[], max: number): ZoneCollectionItem[] {
+  const picked =
+    unitIds.length > 0 ? pickN(unitIds, Math.min(max, unitIds.length)) : [];
+  return picked.map((unitId) => ({ target: { kind: "unit", unitId } }));
 }
 
-function buildFilters(fixture: ZoneFixtureKind): ZoneFilters {
-  const contentType = faker.helpers.arrayElement(WORK_TYPE_FILTERS);
-
-  switch (fixture) {
-    case "content-latest":
-    case "content-popular":
-      return { type: contentType };
-    case "feed-pulse":
-      return { postKind: "POST" };
-    case "wiki-collection":
-      return { type: contentType, postKind: "WIKI" };
-    case "realm-directory":
-      return { type: UnitType.REALM };
+function fixtureMenus(refs: ZoneFixtureRefs): ZoneMenu[] {
+  const nodes: ZoneMenu["nodes"] = [
+    { id: "home", target: { kind: "zonePage", pageId: "home" } },
+    { id: "search", target: { kind: "zonePage", pageId: "search" } },
+    { id: "feed", target: { kind: "zonePage", pageId: "feed" } },
+  ];
+  // A unit-target group node resolves its label from the target unit, so it
+  // is valid without a labelUnitId.
+  // 指向 Unit 的分组节点从目标 Unit 解析标签，因此无需 labelUnitId。
+  const groupChildren = unitItems(refs.realmUnitIds, 3);
+  if (groupChildren.length > 1) {
+    const [head, ...rest] = groupChildren;
+    nodes.push({
+      id: "related",
+      target: head!.target,
+      children: rest.map((item, index) => ({
+        id: `related-${index}`,
+        target: item.target,
+      })),
+    });
   }
+  return [{ id: "main", nodes }];
 }
 
-function buildSections(
-  fixture: ZoneFixtureKind,
-  filters: ZoneFilters,
-  workIds: string[],
-  tagIds: string[],
-  realms: CreatedUnit[],
-): ZoneSection[] {
-  switch (fixture) {
-    case "content-latest":
-      return [
-        {
-          id: "latest",
-          kind: "latestContent",
-          source: "unit",
-          title: label("Latest content"),
-          filters,
-          limit: 24,
-        },
-        {
-          id: "reviews",
-          kind: "reviewStream",
-          title: label("Recent reviews"),
-          filters,
-          limit: 12,
-        },
-      ];
-    case "content-popular":
-      return [
-        {
-          id: "popular",
-          kind: "popularContent",
-          metric: faker.helpers.arrayElement([
-            "views",
-            "bookmarks",
-            "rating",
-            "discussion",
-          ]),
-          title: label("Popular content"),
-          filters,
-          limit: 24,
-        },
-      ];
-    case "feed-pulse":
-      return [
-        {
-          id: "feed",
-          kind: "feed",
-          feedKind: faker.helpers.arrayElement(["all", "updates", "reviews"]),
-          title: label("Feed"),
-          filters,
-          limit: 30,
-        },
-      ];
-    case "wiki-collection": {
-      const wikiUnitIds =
-        workIds.length > 0 ? pickN(workIds, Math.min(8, workIds.length)) : [];
-      return [
-        {
-          id: "wiki",
-          kind: "wikiCollection",
-          title: label("Wiki collection"),
-          wikiUnitIds,
-          filters: { ...filters, wikiUnitIds },
-          limit: 24,
-        },
-        {
-          id: "tags",
-          kind: "tagNavigation",
-          title: label("Topics"),
-          tagUnitIds:
-            tagIds.length > 0 ? pickN(tagIds, Math.min(8, tagIds.length)) : [],
-        },
-      ];
-    }
-    case "realm-directory":
-      return [
-        {
-          id: "realms",
-          kind: "realmList",
-          title: label("Realms"),
-          realmUnitIds: realms.map((realm) => realm.id).slice(0, 12),
-          limit: 12,
-        },
-        {
-          id: "activity",
-          kind: "popularContent",
-          metric: "discussion",
-          title: label("Active discussions"),
-          filters,
-          limit: 20,
-        },
-      ];
-  }
-}
-
-function buildPages(title: string, sections: ZoneSection[]): ZonePages {
-  return {
-    home: { title: label(title), sections },
-    search: { title: label("Search"), sections: [] },
-    feed: {
-      title: label("Feed"),
-      sections: [
-        {
-          id: "feed",
-          kind: "feed",
-          feedKind: "all",
-          title: label("Feed"),
-          limit: 30,
-        },
-      ],
-    },
-  };
-}
-
-function buildTheme(): ZoneTheme {
+function fixtureTheme(): ZoneTheme {
   return {
     tokens: {
       accent: faker.helpers.arrayElement([
@@ -204,9 +139,224 @@ function buildTheme(): ZoneTheme {
     },
     layout: {
       contentWidth: faker.helpers.arrayElement(["normal", "wide"]),
-      navPosition: faker.helpers.arrayElement(["side", "top"]),
       density: faker.helpers.arrayElement(["compact", "comfortable"]),
     },
+  };
+}
+
+function fixtureBoundary(
+  kind: ZoneFixtureKind,
+  refs: ZoneFixtureRefs,
+): ZoneBoundaryFilter {
+  const contentType = faker.helpers.arrayElement(WORK_TYPE_FILTERS);
+  switch (kind) {
+    case "book-portal":
+    case "tabbed-portal":
+      return { types: [contentType] };
+    case "pulse-board":
+      return { postKinds: ["POST", "REVIEW", "REMARK"] };
+    case "columns-portal":
+      return refs.contextRealmUnitId ? { realm: "context" } : {};
+    case "realm-directory":
+      return { types: [UnitType.REALM] };
+  }
+}
+
+function unitQuerySection(input: {
+  id: string;
+  types?: ZoneSectionQuery["types"];
+  tagUnitIds?: string[];
+  limit: number;
+}): ZoneContentSection {
+  return {
+    id: input.id,
+    kind: "query",
+    display: faker.helpers.arrayElement(["grid", "covers", "tiles", "list"]),
+    limit: input.limit,
+    loadMore: true,
+    query: {
+      target: "unit",
+      ...(input.types ? { types: input.types } : {}),
+      ...(input.tagUnitIds && input.tagUnitIds.length > 0
+        ? { tagUnitIds: input.tagUnitIds }
+        : {}),
+      sort: {
+        field: faker.helpers.arrayElement(UNIT_SORT_FIELDS),
+        direction: "desc",
+      },
+    },
+  };
+}
+
+function postQuerySection(input: {
+  id: string;
+  limit: number;
+}): ZoneContentSection {
+  return {
+    id: input.id,
+    kind: "query",
+    display: "list",
+    limit: input.limit,
+    loadMore: true,
+    query: {
+      target: "post",
+      postKinds: ["POST", "REVIEW"],
+      sort: {
+        field: faker.helpers.arrayElement(POST_SORT_FIELDS),
+        direction: "desc",
+      },
+    },
+  };
+}
+
+function fixtureHomeSections(
+  kind: ZoneFixtureKind,
+  refs: ZoneFixtureRefs,
+): ZonePageSection[] {
+  switch (kind) {
+    case "book-portal":
+      return [
+        { id: "hero", kind: "hero", showDescription: true },
+        unitQuerySection({
+          id: "latest",
+          tagUnitIds:
+            refs.tagUnitIds.length > 0
+              ? pickN(refs.tagUnitIds, Math.min(2, refs.tagUnitIds.length))
+              : undefined,
+          limit: 24,
+        }),
+        postQuerySection({ id: "discussions", limit: 12 }),
+      ];
+    case "pulse-board":
+      return [
+        postQuerySection({ id: "pulse", limit: 30 }),
+        {
+          id: "home-feed",
+          kind: "feed",
+          feedKind: faker.helpers.arrayElement(["all", "updates", "reviews"]),
+          limit: 30,
+        },
+      ];
+    case "tabbed-portal":
+      return [
+        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "portal-tabs",
+          kind: "tabs",
+          defaultTabId: "works",
+          tabs: [
+            {
+              id: "works",
+              sections: [unitQuerySection({ id: "tab-works", limit: 12 })],
+            },
+            {
+              id: "posts",
+              sections: [postQuerySection({ id: "tab-posts", limit: 12 })],
+            },
+            {
+              id: "activity",
+              sections: [
+                {
+                  id: "tab-feed",
+                  kind: "feed",
+                  feedKind: "updates",
+                  limit: 12,
+                },
+              ],
+            },
+          ],
+        },
+      ];
+    case "columns-portal":
+      return [
+        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "layout",
+          kind: "columns",
+          sidePosition: faker.helpers.arrayElement(["left", "right"]),
+          main: [
+            unitQuerySection({ id: "main-works", limit: 18 }),
+            {
+              id: "main-tabs",
+              kind: "tabs",
+              tabs: [
+                {
+                  id: "hot",
+                  sections: [postQuerySection({ id: "main-hot", limit: 10 })],
+                },
+                {
+                  id: "recent",
+                  sections: [
+                    {
+                      id: "main-feed",
+                      kind: "feed",
+                      feedKind: "all",
+                      limit: 10,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          side: [
+            {
+              id: "side-picks",
+              kind: "collection",
+              display: "list",
+              items: unitItems(refs.workUnitIds, 6),
+            },
+            {
+              id: "side-stats",
+              kind: "stats",
+              metrics: ["articles", "members"],
+            },
+          ],
+        },
+      ];
+    case "realm-directory":
+      return [
+        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "featured",
+          kind: "collection",
+          display: "tiles",
+          items: unitItems(refs.realmUnitIds, 12),
+        },
+        unitQuerySection({ id: "all-realms", types: ["REALM"], limit: 24 }),
+      ];
+  }
+}
+
+/**
+ * Pure config builder for one fixture shape. The factory writes Zone rows
+ * directly (bypassing the service write validation), while the read path
+ * throws on invalid envelopes — so every generated config must pass
+ * `zoneConfigV1Schema`; tests assert this for each fixture kind.
+ * 单个 fixture 形态的纯配置构造器。工厂直接写入 Zone 行（绕过 service
+ * 写入校验），而读取路径会对非法信封抛错——因此生成的每个配置都必须
+ * 通过 `zoneConfigV1Schema`；测试对每种 fixture 形态断言这一点。
+ */
+export function buildZoneFixtureConfig(
+  kind: ZoneFixtureKind,
+  refs: ZoneFixtureRefs,
+): ZoneConfigV1 {
+  return {
+    schema: ZONE_CONFIG_SCHEMA,
+    version: ZONE_CONFIG_V1_VERSION,
+    context: refs.contextRealmUnitId
+      ? { kind: "realm", realmUnitId: refs.contextRealmUnitId }
+      : { kind: "global" },
+    filters: fixtureBoundary(kind, refs),
+    menus: fixtureMenus(refs),
+    header: { menuId: "main" },
+    pages: {
+      home: { sections: fixtureHomeSections(kind, refs) },
+      search: { sections: [] },
+      feed: {
+        sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 30 }],
+      },
+    },
+    theme: fixtureTheme(),
   };
 }
 
@@ -242,11 +392,16 @@ export async function seedZones(
     const fixture = fixtureSchedule[i]!;
     const translations = generateTranslations(UnitType.ZONE);
     const { startsAt, endsAt } = pickTemporalState();
-    const filters = buildFilters(fixture);
-    const sections = buildSections(fixture, filters, workIds, tagIds, realms);
-    const pages = buildPages(translations[0]?.title ?? "Zone", sections);
-    const theme = randomBoolean(0.8) ? buildTheme() : null;
-    const template = filters.type === UnitType.BOOK ? "book" : "default";
+    const config = buildZoneFixtureConfig(fixture, {
+      // columns-portal exercises the realm context + "context" boundary;
+      // the other shapes stay global like the official zones.
+      // columns-portal 演练 realm 语境与 "context" 边界；其余形态与官方
+      // 专区一样保持 global。
+      contextRealmUnitId: fixture === "columns-portal" ? ownerRealm.id : null,
+      workUnitIds: workIds,
+      tagUnitIds: tagIds,
+      realmUnitIds: realms.map((realm) => realm.id),
+    });
 
     const id = randomUUID();
     await ctx.db.insert(Unit).values(
@@ -263,13 +418,7 @@ export async function seedZones(
       withUpdatedAt({
         unitId: id,
         ownerRealmUnitId: ownerRealm.id,
-        template,
-        filters,
-        configVersion: 1,
-        pages,
-        sections,
-        theme,
-        styling: null,
+        config,
         startsAt,
         endsAt,
       }),

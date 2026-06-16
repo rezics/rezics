@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ZoneHomePage } from "@/zone";
+import { ZonePortalPage } from "@/zone";
 
-function ZoneHomeRoute() {
+function ZonePortalRoute() {
   const { slug } = Route.useParams();
-  return <ZoneHomePage slug={slug} />;
+  return <ZonePortalPage slug={slug} />;
 }
 
 export const Route = createFileRoute("/_mainLayout/z/$slug/")({
-  component: ZoneHomeRoute,
+  component: ZonePortalRoute,
 });

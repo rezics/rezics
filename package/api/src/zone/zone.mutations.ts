@@ -1,24 +1,20 @@
-import type { ZoneDTO } from "@rezics/contract";
+import type {
+  CreateZoneInput,
+  UpdateZoneInput,
+  ZoneDTO,
+} from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  type CreateZoneInput,
-  type UpdateZoneInput,
-  zoneApi,
-} from "./zone.api";
+import { zoneApi } from "./zone.api";
 import { zoneKeys } from "./zone.keys";
 
 export function invalidateZoneQueries(
   queryClient: Pick<ReturnType<typeof useQueryClient>, "invalidateQueries">,
-  zone?: Pick<ZoneDTO, "slug">,
 ) {
   queryClient.invalidateQueries({ queryKey: zoneKeys.details() });
-  if (zone) {
-    queryClient.invalidateQueries({ queryKey: zoneKeys.detail(zone.slug) });
-  }
 }
 
 export function useCreateZone(
@@ -32,8 +28,7 @@ export function useCreateZone(
     mutationFn: (input: CreateZoneInput) => zoneApi.create(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(zoneKeys.detail(data.slug), data);
-      invalidateZoneQueries(queryClient, data);
+      invalidateZoneQueries(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -54,9 +49,11 @@ export function useUpdateZone(
     mutationFn: ({ unitId, input }) => zoneApi.update(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(zoneKeys.detail(data.slug), data);
-      queryClient.setQueryData(zoneKeys.byUnitId(variables.unitId), data);
-      invalidateZoneQueries(queryClient, data);
+      // Invalidate everything zone-shaped (detail, portal, sections) — a
+      // config update can change any section's data.
+      // 使所有专区形态的查询（详情、门户、分区）失效——配置更新可能改变
+      // 任何分区的数据。
+      invalidateZoneQueries(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

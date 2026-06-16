@@ -69,6 +69,10 @@ function createRepositoryStub(
       depth: 1,
       isLocked: false,
     })),
+    getRealmContextForCreate: mock(async () => ({
+      moderationStatus: "APPROVED" as const,
+      isLocked: false,
+    })),
     create: mock(async (input) =>
       commentRow({
         id: "comment-1",
@@ -119,7 +123,7 @@ describe("CommentService", () => {
 
     const result = await searchBacked.list({
       rootUnitId: "root-1",
-      realmUnitId: null,
+      context: { kind: "direct" },
       parentCommentId: "comment-parent",
       sort: "top",
       limit: 3,
@@ -158,7 +162,7 @@ describe("CommentService", () => {
 
     const result = await searchBacked.list({
       rootUnitId: "root-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       cursor: { id: "comment-cursor" },
       sort: "best",
       limit: 3,
@@ -173,13 +177,13 @@ describe("CommentService", () => {
     ]);
   });
 
-  test("lists direct children within one root and realm partition", async () => {
+  test("lists direct children within one root and realm context", async () => {
     const repository = createRepositoryStub();
     const service = await createService(repository);
 
     await service.list({
       rootUnitId: "root-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       mode: "children",
       parentCommentId: "parent-1",
       limit: 20,
@@ -187,7 +191,7 @@ describe("CommentService", () => {
 
     expect(repository.list).toHaveBeenCalledWith({
       rootUnitId: "root-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       authorUserId: undefined,
       state: undefined,
       parentCommentId: "parent-1",
@@ -196,6 +200,94 @@ describe("CommentService", () => {
       cursor: undefined,
       limit: 21,
     });
+  });
+
+  test("all-mode reads interleave direct and realm comments without realm constraint", async () => {
+    const repository = createRepositoryStub({
+      list: mock(async () => ({
+        comments: [
+          commentRow({ id: "comment-direct", realmUnitId: null }),
+          commentRow({ id: "comment-realm", realmUnitId: "realm-1" }),
+          commentRow({ id: "comment-direct-2", realmUnitId: null }),
+        ],
+        total: 3,
+      })),
+    });
+    const service = await createService(repository);
+
+    const result = await service.list({
+      rootUnitId: "root-1",
+      mode: "discovery",
+      limit: 20,
+    });
+
+    expect(repository.list).toHaveBeenCalledWith(
+      expect.objectContaining({ context: { kind: "all" } }),
+    );
+    expect(result.comments.map((comment) => comment.id)).toEqual([
+      "comment-direct",
+      "comment-realm",
+      "comment-direct-2",
+    ]);
+  });
+
+  test("direct context constrains the repository to null-realm comments", async () => {
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
+
+    await service.list({
+      rootUnitId: "root-1",
+      context: { kind: "direct" },
+      mode: "discovery",
+      limit: 20,
+    });
+
+    expect(repository.list).toHaveBeenCalledWith(
+      expect.objectContaining({ context: { kind: "direct" } }),
+    );
+  });
+
+  test("search-backed all-mode reads omit the realm filter entirely", async () => {
+    searchCommentsMock.mockClear();
+    const repository = createRepositoryStub();
+    const { createSearchBackedCommentRepository } = await import(
+      "./comment.service"
+    );
+    const searchBacked = createSearchBackedCommentRepository(repository);
+
+    await searchBacked.list({
+      rootUnitId: "root-1",
+      context: { kind: "all" },
+      sort: "new",
+      limit: 5,
+    });
+
+    const options = searchCommentsMock.mock.calls[0]?.[0] as Record<
+      string,
+      unknown
+    >;
+    expect(options).not.toHaveProperty("realmUnitId");
+    expect(options.rootUnitId).toBe("root-1");
+  });
+
+  test("search-backed realm reads filter by realm equality", async () => {
+    searchCommentsMock.mockClear();
+    const repository = createRepositoryStub();
+    const { createSearchBackedCommentRepository } = await import(
+      "./comment.service"
+    );
+    const searchBacked = createSearchBackedCommentRepository(repository);
+
+    await searchBacked.list({
+      rootUnitId: "root-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
+      sort: "new",
+      limit: 5,
+    });
+
+    expect(searchCommentsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ realmUnitId: "realm-1" }),
+    );
   });
 
   test("lists one extra row and returns a slice cursor", async () => {
@@ -225,7 +317,7 @@ describe("CommentService", () => {
 
     const result = await service.list({
       rootUnitId: "root-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       mode: "discovery",
       sort: "best",
       limit: 2,
@@ -246,12 +338,39 @@ describe("CommentService", () => {
     expect(result.total).toBe(3);
   });
 
-  test("creates a direct root comment and enqueues search sync", async () => {
+  test("creates a direct root comment without realm validation", async () => {
     enqueueMock.mockClear();
     const repository = createRepositoryStub();
     const service = await createService(repository);
 
     const comment = await service.create(
+      {
+        rootUnitId: "post-1",
+        realmUnitId: null,
+        content: markdownContentDoc("hello"),
+      },
+      "user-1",
+    );
+
+    expect(repository.create).toHaveBeenCalledWith({
+      rootUnitId: "post-1",
+      realmUnitId: null,
+      parentCommentId: undefined,
+      authorUserId: "user-1",
+      content: markdownContentDoc("hello"),
+      depth: 1,
+      parentId: undefined,
+    });
+    expect(repository.getRealmContextForCreate).not.toHaveBeenCalled();
+    expect(enqueueMock).toHaveBeenCalledTimes(1);
+    expect(comment.id).toBe("comment-1");
+  });
+
+  test("creates a realm-context root comment after membership validation", async () => {
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
+
+    await service.create(
       {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
@@ -260,20 +379,57 @@ describe("CommentService", () => {
       "user-1",
     );
 
-    expect(repository.create).toHaveBeenCalledWith({
-      rootUnitId: "post-1",
+    expect(repository.getRealmContextForCreate).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      parentCommentId: undefined,
-      authorUserId: "user-1",
-      content: markdownContentDoc("hello"),
-      depth: 1,
-      parentId: undefined,
+      rootUnitId: "post-1",
     });
-    expect(enqueueMock).toHaveBeenCalledTimes(1);
-    expect(comment.id).toBe("comment-1");
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ realmUnitId: "realm-1" }),
+    );
   });
 
-  test("replies inherit the parent realm when omitted", async () => {
+  test("rejects realm-context root comments outside the root unit's realm set", async () => {
+    const repository = createRepositoryStub({
+      getRealmContextForCreate: mock(async () => null),
+    });
+    const service = await createService(repository);
+
+    await expect(
+      service.create(
+        {
+          rootUnitId: "post-1",
+          realmUnitId: "realm-9",
+          content: markdownContentDoc("hello"),
+        },
+        "user-1",
+      ),
+    ).rejects.toThrow("Realm is not an approved context");
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  test("rejects realm-context root comments when the realm membership is locked", async () => {
+    const repository = createRepositoryStub({
+      getRealmContextForCreate: mock(async () => ({
+        moderationStatus: "APPROVED" as const,
+        isLocked: true,
+      })),
+    });
+    const service = await createService(repository);
+
+    await expect(
+      service.create(
+        {
+          rootUnitId: "post-1",
+          realmUnitId: "realm-1",
+          content: markdownContentDoc("hello"),
+        },
+        "user-1",
+      ),
+    ).rejects.toThrow("locked in this realm context");
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  test("replies inherit the parent realm context", async () => {
     const repository = createRepositoryStub({
       getParentForCreate: mock(async (id) => ({
         id,
@@ -288,6 +444,7 @@ describe("CommentService", () => {
     await service.create(
       {
         rootUnitId: "post-1",
+        realmUnitId: "realm-1",
         parentCommentId: "comment-parent",
         content: markdownContentDoc("reply"),
       },
@@ -302,6 +459,34 @@ describe("CommentService", () => {
         depth: 3,
         parentId: "comment-parent",
       }),
+    );
+    expect(repository.getRealmContextForCreate).not.toHaveBeenCalled();
+  });
+
+  test("replies to direct parents stay direct", async () => {
+    const repository = createRepositoryStub({
+      getParentForCreate: mock(async (id) => ({
+        id,
+        rootUnitId: "post-1",
+        realmUnitId: null,
+        depth: 1,
+        isLocked: false,
+      })),
+    });
+    const service = await createService(repository);
+
+    await service.create(
+      {
+        rootUnitId: "post-1",
+        realmUnitId: null,
+        parentCommentId: "comment-parent",
+        content: markdownContentDoc("reply"),
+      },
+      "user-1",
+    );
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ realmUnitId: null, depth: 2 }),
     );
   });
 
@@ -347,7 +532,7 @@ describe("CommentService", () => {
 
     const result = await service.list({
       rootUnitId: "root-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       mode: "discovery",
       limit: 20,
     });
@@ -355,7 +540,7 @@ describe("CommentService", () => {
     expect(repository.list).toHaveBeenCalledWith(
       expect.objectContaining({
         rootUnitId: "root-1",
-        realmUnitId: "realm-1",
+        context: { kind: "realm", realmUnitId: "realm-1" },
       }),
     );
     const args = (repository.list as any).mock.calls[0]?.[0] as Record<
@@ -393,7 +578,6 @@ describe("CommentService", () => {
 
     const result = await service.list({
       rootUnitId: "root-1",
-      realmUnitId: "realm-1",
       mode: "discovery",
       limit: 20,
     });
@@ -431,7 +615,7 @@ describe("CommentService", () => {
 
     const result = await service.list({
       rootUnitId: "root-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       mode: "root",
       rootCommentId: "comment-root",
       limit: 20,
@@ -446,6 +630,44 @@ describe("CommentService", () => {
     expect(result.comments.map((comment) => comment.id)).toEqual([
       "comment-child",
     ]);
+  });
+
+  test("root slices reject a realm root comment under direct context", async () => {
+    const repository = createRepositoryStub({
+      getById: mock(async () =>
+        commentRow({ id: "comment-root", realmUnitId: "realm-1" }),
+      ),
+    });
+    const service = await createService(repository);
+
+    await expect(
+      service.list({
+        rootUnitId: "root-1",
+        context: { kind: "direct" },
+        mode: "root",
+        rootCommentId: "comment-root",
+        limit: 20,
+      }),
+    ).rejects.toThrow("Root comment is outside");
+    expect(repository.list).not.toHaveBeenCalled();
+  });
+
+  test("root slices accept any partition under all-mode context", async () => {
+    const repository = createRepositoryStub({
+      getById: mock(async () =>
+        commentRow({ id: "comment-root", realmUnitId: "realm-2" }),
+      ),
+    });
+    const service = await createService(repository);
+
+    const result = await service.list({
+      rootUnitId: "root-1",
+      mode: "root",
+      rootCommentId: "comment-root",
+      limit: 20,
+    });
+
+    expect(result.rootComment?.id).toBe("comment-root");
   });
 
   test("delete uses the soft-delete path", async () => {

@@ -26,7 +26,7 @@ describe("commentApi", () => {
 
     await commentApi.list({
       rootUnitId: "post-1",
-      realmUnitId: "realm-1",
+      context: { kind: "realm", realmUnitId: "realm-1" },
       mode: "discovery",
       limit: 20,
     });
@@ -46,6 +46,13 @@ describe("commentApi", () => {
     await commentApi.delete("comment-1");
 
     expect(calls[0]?.url).toContain("/comment/list?");
+    // GET context rides the query string as a JSON-encoded object.
+    // GET 的 context 以 JSON 编码对象的形式放在查询字符串中。
+    expect(calls[0]?.url).toContain(
+      `context=${encodeURIComponent(
+        JSON.stringify({ kind: "realm", realmUnitId: "realm-1" }),
+      )}`,
+    );
     expect(calls[1]?.url).toBe("/comment/");
     expect(calls[1]?.init?.method).toBe("POST");
     expect(calls[2]?.url).toBe("/comment/comment-1");

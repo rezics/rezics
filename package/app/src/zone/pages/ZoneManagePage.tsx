@@ -1,43 +1,50 @@
-import { useServerPermission } from "@rezics/api/hooks";
-import { myRealmMembershipQuery } from "@rezics/api/realm/realm";
 import {
   useUpdateZone,
-  zoneByUnitIdQueryOptions,
+  zonePortalQueryOptions,
   zoneQueryOptions,
-} from "@rezics/api/zone/zone";
-import type {
-  ZoneFilters,
-  ZonePages,
-  ZoneSection,
-  ZoneTheme,
-} from "@rezics/contract";
+} from "@rezics/api";
+import { useServerPermission } from "@rezics/api/hooks";
+import { myRealmMembershipQuery } from "@rezics/api/realm/realm";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-  Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
+import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
+import { ZoneManageMenusTab } from "../components/manage/ZoneManageMenusTab";
+import { ZoneManageProfileTab } from "../components/manage/ZoneManageProfileTab";
+import { ZoneManageSectionsTab } from "../components/manage/ZoneManageSectionsTab";
+import { ZoneManageThemeTab } from "../components/manage/ZoneManageThemeTab";
 import { canManageZone } from "../models/canManageZone";
 import {
-  formatJsonDraft,
-  nullableText,
-  optionalText,
-  parseJsonDraft,
+  collectZoneSectionIds,
+  validateZoneManageDraft,
+  type ZoneManageDraft,
+  type ZoneManageIssue,
+  type ZoneTranslationRow,
+  zoneConfigToDraft,
+  zoneManageDraftToConfig,
+  zoneRowsToTranslations,
+  zoneTranslationsToRows,
 } from "../models/zoneManageDraft";
 
-type ZoneManageTab = "profile" | "sections" | "theme" | "lifecycle";
+export type ZoneManageTab =
+  | "profile"
+  | "sections"
+  | "menus"
+  | "theme"
+  | "lifecycle";
 
 type ZoneManagePageProps = {
   activeTab?: ZoneManageTab;
@@ -53,18 +60,66 @@ type ZoneManagePageProps = {
     }
 );
 
+const ISSUE_KEYS = {
+  section_id_duplicate: "zone:manage_issue_section_id_duplicate",
+  tab_id_duplicate: "zone:manage_issue_tab_id_duplicate",
+  tab_default_invalid: "zone:manage_issue_tab_default_invalid",
+  query_field_unsupported: "zone:manage_issue_query_field_unsupported",
+  menu_id_duplicate: "zone:manage_issue_menu_id_duplicate",
+  menu_too_deep: "zone:manage_issue_menu_too_deep",
+  menu_leaf_missing_target: "zone:manage_issue_menu_leaf_missing_target",
+  menu_group_missing_label: "zone:manage_issue_menu_group_missing_label",
+  header_menu_invalid: "zone:manage_issue_header_menu_invalid",
+} as const satisfies Record<ZoneManageIssue["code"], `zone:${string}`>;
+
+function issueParams(issue: ZoneManageIssue): Record<string, string> {
+  const { code: _code, ...rest } = issue;
+  return Object.fromEntries(
+    Object.entries(rest).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? value.join(", ") : String(value),
+    ]),
+  );
+}
+
+/**
+ * Structured zone manage surface over the v1 config envelope: Profile
+ * (translations + context), Pages & Sections, Menus, Theme, Lifecycle. All
+ * config tabs edit one shared draft (`models/zoneManageDraft.ts`); each
+ * save validates the draft client-side first — the server's
+ * `validateZoneConfig` stays the enforcement point.
+ * 基于 v1 配置信封的结构化专区管理界面：资料（译文 + 语境）、页面与
+ * 分区、菜单、主题、生命週期。所有配置标签页编辑同一份共享草稿
+ * （`models/zoneManageDraft.ts`）；每次保存先在客户端校验草稿——服务端
+ * 的 `validateZoneConfig` 仍是强制执行点。
+ */
 export function ZoneManagePage({
   unitId,
   slug,
   activeTab = "profile",
   onTabChange,
 }: ZoneManagePageProps) {
-  const byUnitIdQuery = useQuery(zoneByUnitIdQueryOptions(unitId ?? ""));
-  const bySlugQuery = useQuery(zoneQueryOptions(slug ?? ""));
-  const zone = unitId ? byUnitIdQuery.data : bySlugQuery.data;
-  const isLoading = unitId ? byUnitIdQuery.isLoading : bySlugQuery.isLoading;
-  const isError = unitId ? byUnitIdQuery.isError : bySlugQuery.isError;
-  const error = unitId ? byUnitIdQuery.error : bySlugQuery.error;
+  const { t } = useTranslation(["zone", "common"]);
+  const bySlugQuery = useQuery({
+    ...zoneQueryOptions(slug ?? ""),
+    enabled: !unitId && !!slug,
+  });
+  const resolvedUnitId = unitId ?? bySlugQuery.data?.unitId ?? "";
+  // The portal read also returns `refUnits` summaries used for label/image
+  // previews throughout the editors.
+  // 门户读取同时返回 `refUnits` 摘要，供编辑器各处的标签/图片预览使用。
+  const portalQuery = useQuery({
+    ...zonePortalQueryOptions(resolvedUnitId),
+    enabled: !!resolvedUnitId,
+  });
+  const zone =
+    portalQuery.data?.zone ?? (unitId ? undefined : bySlugQuery.data);
+  const refUnits = portalQuery.data?.refUnits ?? {};
+  const isLoading = unitId
+    ? portalQuery.isLoading
+    : bySlugQuery.isLoading || portalQuery.isLoading;
+  const isError = unitId ? portalQuery.isError : bySlugQuery.isError;
+  const error = unitId ? portalQuery.error : bySlugQuery.error;
 
   const membershipQuery = useQuery({
     ...myRealmMembershipQuery(zone?.ownerRealmUnitId ?? ""),
@@ -76,66 +131,40 @@ export function ZoneManagePage({
     ownerRealmMemberRoleKey: membershipQuery.data?.roleKey,
   });
   const updateZone = useUpdateZone({
-    onSuccess: () => toast.success("Zone settings saved."),
-    onError: (error) => toast.error(error.message),
+    onSuccess: () => toast.success(t("zone:manage_saved")),
+    onError: (mutationError) => toast.error(mutationError.message),
   });
 
-  const [template, setTemplate] = useState("");
-  const [ownerRealmUnitId, setOwnerRealmUnitId] = useState("");
-  const [primaryRealmUnitId, setPrimaryRealmUnitId] = useState("");
-  const [filtersDraft, setFiltersDraft] = useState("{}");
-  const [pagesDraft, setPagesDraft] = useState("null");
-  const [sectionsDraft, setSectionsDraft] = useState("null");
-  const [themeDraft, setThemeDraft] = useState("null");
+  const [draft, setDraft] = useState<ZoneManageDraft | null>(null);
+  const [rows, setRows] = useState<ZoneTranslationRow[]>([]);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
 
   useEffect(() => {
     if (!zone) return;
-    setTemplate(zone.template);
-    setOwnerRealmUnitId(zone.ownerRealmUnitId);
-    setPrimaryRealmUnitId(zone.primaryRealmUnitId ?? "");
-    setFiltersDraft(formatJsonDraft(zone.filters ?? {}));
-    setPagesDraft(formatJsonDraft(zone.pages));
-    setSectionsDraft(formatJsonDraft(zone.sections));
-    setThemeDraft(formatJsonDraft(zone.theme));
+    setDraft(zoneConfigToDraft(zone.config));
+    setRows(zoneTranslationsToRows(zone.translations));
     setStartsAt(zone.startsAt ?? "");
     setEndsAt(zone.endsAt ?? "");
   }, [zone]);
 
   const saving = updateZone.isPending;
   const unitIdForSave = zone?.unitId ?? "";
+  const issues = draft ? validateZoneManageDraft(draft) : [];
 
-  const saveProfile = () => {
+  const saveDraftConfig = (withTranslations: boolean) => {
+    if (!draft) return;
+    if (issues.length > 0) {
+      toast.error(t("zone:manage_config_invalid"));
+      return;
+    }
     updateZone.mutate({
       unitId: unitIdForSave,
       input: {
-        ownerRealmUnitId: ownerRealmUnitId.trim(),
-        primaryRealmUnitId: nullableText(primaryRealmUnitId),
-        template: template.trim(),
-        filters: parseJsonDraft<ZoneFilters>("Filters", filtersDraft),
-      },
-    });
-  };
-
-  const saveSections = () => {
-    updateZone.mutate({
-      unitId: unitIdForSave,
-      input: {
-        pages: parseJsonDraft<ZonePages | null>("Pages", pagesDraft),
-        sections: parseJsonDraft<ZoneSection[] | null>(
-          "Sections",
-          sectionsDraft,
-        ),
-      },
-    });
-  };
-
-  const saveTheme = () => {
-    updateZone.mutate({
-      unitId: unitIdForSave,
-      input: {
-        theme: parseJsonDraft<ZoneTheme | null>("Theme", themeDraft),
+        config: zoneManageDraftToConfig(draft),
+        ...(withTranslations
+          ? { translations: zoneRowsToTranslations(rows) }
+          : {}),
       },
     });
   };
@@ -144,13 +173,11 @@ export function ZoneManagePage({
     updateZone.mutate({
       unitId: unitIdForSave,
       input: {
-        startsAt: optionalText(startsAt) ?? null,
-        endsAt: optionalText(endsAt) ?? null,
+        startsAt: startsAt.trim() ? startsAt.trim() : null,
+        endsAt: endsAt.trim() ? endsAt.trim() : null,
       },
     });
   };
-
-  const title = useMemo(() => zone?.name ?? zone?.slug ?? "Zone", [zone]);
 
   if (isLoading || membershipQuery.isLoading) {
     return (
@@ -172,7 +199,7 @@ export function ZoneManagePage({
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
-          Zone settings are unavailable for this zone.
+          {t("zone:not_found_description")}
         </div>
       </div>
     );
@@ -183,192 +210,139 @@ export function ZoneManagePage({
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
         <div className="rounded-md bg-surface-subtle p-6">
           <h1 className="text-lg font-semibold leading-ui text-text-primary">
-            Zone management unavailable
+            {t("zone:manage")}
           </h1>
           <p className="mt-2 text-sm leading-body text-text-secondary">
-            You need owner-realm manager or staff permissions to manage this
-            zone.
+            {t("zone:manage_denied")}
           </p>
         </div>
       </div>
     );
   }
 
+  if (!draft) {
+    return (
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
+    );
+  }
+
+  const contextRealmUnitId =
+    draft.context.kind === "realm" ? draft.context.realmUnitId : null;
+  const editorCtx = {
+    refUnits,
+    allSectionIds: collectZoneSectionIds(draft.pages),
+    contextRealmUnitId,
+    contextRealmSlug: contextRealmUnitId
+      ? (refUnits[contextRealmUnitId]?.slug ?? null)
+      : null,
+  };
+
+  const configSaveRow = (
+    <div className="mt-4 flex justify-end">
+      <Button
+        onClick={() => saveDraftConfig(false)}
+        disabled={saving || issues.length > 0}
+      >
+        {t("common:save")}
+      </Button>
+    </div>
+  );
+
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold leading-ui text-text-primary">
-          Manage {title}
+          {t("zone:manage")} · {zone.name || zone.slug}
         </h1>
-        <p className="mt-2 text-sm leading-body text-text-secondary">
-          Owner realm: {zone.ownerRealmUnitId}
-        </p>
       </div>
+
+      {issues.length > 0 ? (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>{t("zone:manage_issues")}</AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc pl-4">
+              {issues.map((issue, index) => (
+                <li
+                  // biome-ignore lint/suspicious/noArrayIndexKey: display list
+                  key={index}
+                >
+                  {t(ISSUE_KEYS[issue.code], issueParams(issue))}
+                </li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <Tabs
         value={activeTab}
         onValueChange={(value) => onTabChange?.(value as ZoneManageTab)}
       >
         <TabsList className="mb-6 flex flex-wrap">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="sections">Sections</TabsTrigger>
-          <TabsTrigger value="theme">Theme</TabsTrigger>
-          <TabsTrigger value="lifecycle">Lifecycle</TabsTrigger>
+          <TabsTrigger value="profile">{t("zone:manage_profile")}</TabsTrigger>
+          <TabsTrigger value="sections">
+            {t("zone:manage_sections")}
+          </TabsTrigger>
+          <TabsTrigger value="menus">{t("zone:manage_menus")}</TabsTrigger>
+          <TabsTrigger value="theme">{t("zone:manage_theme")}</TabsTrigger>
+          <TabsTrigger value="lifecycle">
+            {t("zone:manage_lifecycle")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Template" htmlFor="zone-template">
-                  <Input
-                    id="zone-template"
-                    value={template}
-                    onChange={(event) => setTemplate(event.target.value)}
-                  />
-                </Field>
-                <Field label="Owner realm Unit id" htmlFor="zone-owner-realm">
-                  <Input
-                    id="zone-owner-realm"
-                    value={ownerRealmUnitId}
-                    onChange={(event) =>
-                      setOwnerRealmUnitId(event.target.value)
-                    }
-                  />
-                </Field>
-                <Field
-                  label="Primary realm Unit id"
-                  htmlFor="zone-primary-realm"
-                >
-                  <Input
-                    id="zone-primary-realm"
-                    value={primaryRealmUnitId}
-                    onChange={(event) =>
-                      setPrimaryRealmUnitId(event.target.value)
-                    }
-                  />
-                </Field>
-              </div>
-              <Field label="Filters JSON" htmlFor="zone-filters">
-                <Textarea
-                  id="zone-filters"
-                  value={filtersDraft}
-                  onChange={(event) => setFiltersDraft(event.target.value)}
-                  rows={12}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <div className="flex justify-end">
-                <Button onClick={saveProfile} disabled={saving}>
-                  Save profile
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ZoneManageProfileTab
+            zone={zone}
+            rows={rows}
+            onRowsChange={setRows}
+            draft={draft}
+            onDraftChange={setDraft}
+            refUnits={refUnits}
+            onSave={() => saveDraftConfig(true)}
+            saving={saving}
+          />
         </TabsContent>
 
         <TabsContent value="sections">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <Field label="Pages JSON" htmlFor="zone-pages">
-                <Textarea
-                  id="zone-pages"
-                  value={pagesDraft}
-                  onChange={(event) => setPagesDraft(event.target.value)}
-                  rows={16}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <Field label="Legacy sections JSON" htmlFor="zone-sections">
-                <Textarea
-                  id="zone-sections"
-                  value={sectionsDraft}
-                  onChange={(event) => setSectionsDraft(event.target.value)}
-                  rows={10}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <div className="flex justify-end">
-                <Button onClick={saveSections} disabled={saving}>
-                  Save sections
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ZoneManageSectionsTab
+            draft={draft}
+            onDraftChange={setDraft}
+            ctx={editorCtx}
+          />
+          {configSaveRow}
+        </TabsContent>
+
+        <TabsContent value="menus">
+          <ZoneManageMenusTab
+            draft={draft}
+            onDraftChange={setDraft}
+            refUnits={refUnits}
+          />
+          {configSaveRow}
         </TabsContent>
 
         <TabsContent value="theme">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <Field label="Theme JSON" htmlFor="zone-theme">
-                <Textarea
-                  id="zone-theme"
-                  value={themeDraft}
-                  onChange={(event) => setThemeDraft(event.target.value)}
-                  rows={16}
-                  spellCheck={false}
-                  className="font-mono text-sm leading-body"
-                />
-              </Field>
-              <div className="flex justify-end">
-                <Button onClick={saveTheme} disabled={saving}>
-                  Save theme
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ZoneManageThemeTab
+            draft={draft}
+            onDraftChange={setDraft}
+            refUnits={refUnits}
+          />
+          {configSaveRow}
         </TabsContent>
 
         <TabsContent value="lifecycle">
-          <Card surface="contained">
-            <CardContent className="flex flex-col gap-5 p-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Starts at" htmlFor="zone-starts-at">
-                  <Input
-                    id="zone-starts-at"
-                    value={startsAt}
-                    onChange={(event) => setStartsAt(event.target.value)}
-                    placeholder="2026-06-09T00:00:00.000Z"
-                  />
-                </Field>
-                <Field label="Ends at" htmlFor="zone-ends-at">
-                  <Input
-                    id="zone-ends-at"
-                    value={endsAt}
-                    onChange={(event) => setEndsAt(event.target.value)}
-                    placeholder="2026-06-30T00:00:00.000Z"
-                  />
-                </Field>
-              </div>
-              <div className="flex justify-end">
-                <Button onClick={saveLifecycle} disabled={saving}>
-                  Save lifecycle
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ZoneManageLifecycleTab
+            startsAt={startsAt}
+            endsAt={endsAt}
+            onStartsAtChange={setStartsAt}
+            onEndsAtChange={setEndsAt}
+            onSave={saveLifecycle}
+            saving={saving}
+          />
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
-      {children}
     </div>
   );
 }

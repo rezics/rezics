@@ -1,10 +1,11 @@
 import {
   DEFAULT_LANGUAGE,
   markdownContentDoc,
-  type ZoneFilters,
-  type ZonePages,
-  type ZoneSection,
-  type ZoneTheme,
+  ZONE_CONFIG_SCHEMA,
+  ZONE_CONFIG_V1_VERSION,
+  type ZoneBoundaryFilter,
+  type ZoneConfigV1,
+  type ZonePageSection,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
 import type { ServerDb } from "../../client";
@@ -21,149 +22,179 @@ interface OfficialZoneTranslation {
 export interface OfficialZoneDefinition {
   key: "book" | "realms" | "popular";
   slug: string;
-  template: "book" | "default";
-  filters: ZoneFilters;
-  sections: ZoneSection[];
-  pages: ZonePages;
-  theme: ZoneTheme;
+  config: ZoneConfigV1;
   translations: Record<string, OfficialZoneTranslation>;
 }
 
-const label = (en: string, zhHant: string, ja: string) => ({
-  translations: { en, "zh-hant": zhHant, ja },
-  fallbackLanguage: DEFAULT_LANGUAGE,
-});
+const MAIN_MENU_ID = "main";
 
-const feedSection = (id: string, titleEn: string): ZoneSection => ({
-  id,
-  kind: "feed",
-  feedKind: "all",
-  title: label(titleEn, titleEn, titleEn),
-  limit: 20,
-});
-
-const bookSections: ZoneSection[] = [
-  {
-    id: "latest-books",
-    kind: "latestContent",
-    source: "unit",
-    title: label("Latest Books", "最新書籍", "新着書籍"),
-    filters: { type: "BOOK" },
-    limit: 24,
-  },
-  {
-    id: "popular-books",
-    kind: "popularContent",
-    metric: "rating",
-    title: label("Popular Books", "熱門書籍", "人気の本"),
-    filters: { type: "BOOK" },
-    limit: 24,
-  },
-  {
-    id: "book-reviews",
-    kind: "reviewStream",
-    title: label("Book Reviews", "書評", "ブックレビュー"),
-    filters: { type: "BOOK" },
-    limit: 20,
-  },
-];
-
-const realmSections: ZoneSection[] = [
-  {
-    id: "official-realms",
-    kind: "realmList",
-    title: label("Featured Realms", "精選 Realm", "注目の Realm"),
-    limit: 24,
-  },
-  {
-    id: "active-realms",
-    kind: "popularContent",
-    metric: "discussion",
-    title: label("Active Realms", "活躍 Realm", "活発な Realm"),
-    filters: { type: "REALM" },
-    limit: 24,
-  },
-  feedSection("realm-updates", "Realm Updates"),
-];
-
-const popularSections: ZoneSection[] = [
-  {
-    id: "popular-now",
-    kind: "popularContent",
-    metric: "discussion",
-    title: label("Popular Now", "當下熱門", "今話題"),
-    limit: 30,
-  },
-  {
-    id: "latest-content",
-    kind: "latestContent",
-    source: "unit",
-    title: label("Latest Content", "最新內容", "新着コンテンツ"),
-    limit: 30,
-  },
-  feedSection("popular-feed", "Popular Feed"),
-];
-
-function pages(
-  title: OfficialZoneDefinition["translations"],
-  sections: ZoneSection[],
-): ZonePages {
+/**
+ * Seeds bypass the zone service write path, so every config written here
+ * must already satisfy `zoneConfigV1Schema`: the read path
+ * (`parseZoneRowConfig`) throws on rows that fail the envelope union.
+ * 种子绕过 zone service 的写入路径，因此这里写入的每个配置都必须已经
+ * 满足 `zoneConfigV1Schema`：读取路径（`parseZoneRowConfig`）会对未通过
+ * 信封联合校验的行抛错。
+ */
+function officialConfig(input: {
+  filters: ZoneBoundaryFilter;
+  homeSections: ZonePageSection[];
+  accent: string;
+  density: "compact" | "comfortable";
+}): ZoneConfigV1 {
   return {
-    home: {
-      title: {
-        translations: Object.fromEntries(
-          Object.entries(title).map(([language, value]) => [
-            language,
-            value.title,
-          ]),
-        ),
-        fallbackLanguage: DEFAULT_LANGUAGE,
+    schema: ZONE_CONFIG_SCHEMA,
+    version: ZONE_CONFIG_V1_VERSION,
+    // Official zones are owned by the rezics realm but aggregate the whole
+    // platform, so their interaction context stays global.
+    // 官方专区由 rezics realm 拥有，但聚合全平台内容，因此其交互语境
+    // 保持 global。
+    context: { kind: "global" },
+    filters: input.filters,
+    menus: [
+      {
+        id: MAIN_MENU_ID,
+        // Leaf nodes need only a target; zonePage labels resolve through
+        // the frontend's default i18n keys.
+        // 叶子节点只需要 target；zonePage 标签通过前端默认 i18n key 解析。
+        nodes: [
+          { id: "home", target: { kind: "zonePage", pageId: "home" } },
+          { id: "search", target: { kind: "zonePage", pageId: "search" } },
+          { id: "feed", target: { kind: "zonePage", pageId: "feed" } },
+        ],
       },
-      sections,
+    ],
+    header: { menuId: MAIN_MENU_ID },
+    pages: {
+      home: { sections: input.homeSections },
+      search: { sections: [] },
+      feed: {
+        sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
+      },
     },
-    search: {
-      title: label("Search", "搜尋", "検索"),
-      sections: [],
-    },
-    feed: {
-      title: label("Feed", "動態", "フィード"),
-      sections: [feedSection("feed", "Feed")],
+    theme: {
+      tokens: { accent: input.accent, accentText: "#ffffff" },
+      layout: { contentWidth: "wide", density: input.density },
     },
   };
 }
+
+const bookConfig = officialConfig({
+  filters: { types: ["BOOK"] },
+  homeSections: [
+    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "latest-books",
+      kind: "query",
+      display: "covers",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["BOOK"],
+        sort: { field: "publishedAt", direction: "desc" },
+      },
+    },
+    {
+      id: "popular-books",
+      kind: "query",
+      display: "grid",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["BOOK"],
+        sort: { field: "qualityScore", direction: "desc" },
+      },
+    },
+    {
+      id: "book-reviews",
+      kind: "query",
+      display: "list",
+      limit: 20,
+      loadMore: true,
+      query: {
+        target: "post",
+        postKinds: ["REVIEW"],
+        sort: { field: "createdAt", direction: "desc" },
+      },
+    },
+  ],
+  accent: "#2563eb",
+  density: "comfortable",
+});
+
+const realmsConfig = officialConfig({
+  filters: { types: ["REALM"] },
+  homeSections: [
+    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "featured-realms",
+      kind: "query",
+      display: "tiles",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["REALM"],
+        sort: { field: "qualityScore", direction: "desc" },
+      },
+    },
+    {
+      id: "active-realms",
+      kind: "query",
+      display: "list",
+      limit: 24,
+      loadMore: true,
+      query: {
+        target: "unit",
+        types: ["REALM"],
+        sort: { field: "trendingScore", direction: "desc" },
+      },
+    },
+    { id: "realm-updates", kind: "feed", feedKind: "updates", limit: 20 },
+  ],
+  accent: "#0f766e",
+  density: "compact",
+});
+
+const popularConfig = officialConfig({
+  filters: {},
+  homeSections: [
+    { id: "hero", kind: "hero", showDescription: true },
+    {
+      id: "popular-now",
+      kind: "query",
+      display: "grid",
+      limit: 30,
+      loadMore: true,
+      query: {
+        target: "unit",
+        sort: { field: "trendingScore", direction: "desc" },
+      },
+    },
+    {
+      id: "latest-content",
+      kind: "query",
+      display: "list",
+      limit: 30,
+      loadMore: true,
+      query: {
+        target: "unit",
+        sort: { field: "publishedAt", direction: "desc" },
+      },
+    },
+    { id: "popular-feed", kind: "feed", feedKind: "all", limit: 20 },
+  ],
+  accent: "#c2410c",
+  density: "comfortable",
+});
 
 export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
   {
     key: "book",
     slug: "book",
-    template: "book",
-    filters: { type: "BOOK" },
-    sections: bookSections,
-    pages: pages(
-      {
-        en: {
-          title: "Books",
-          description: "The Rezics book library and reading community.",
-        },
-        "zh-hant": {
-          title: "書籍",
-          description: "Rezics 的書籍資料庫與閱讀社群。",
-        },
-        ja: {
-          title: "本",
-          description: "Rezics の本ライブラリと読書コミュニティ。",
-        },
-      },
-      bookSections,
-    ),
-    theme: {
-      tokens: { accent: "#2563eb", accentText: "#ffffff" },
-      layout: {
-        contentWidth: "wide",
-        navPosition: "top",
-        density: "comfortable",
-      },
-    },
+    config: bookConfig,
     translations: {
       en: {
         title: "Books",
@@ -182,30 +213,7 @@ export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
   {
     key: "realms",
     slug: "realms",
-    template: "default",
-    filters: { type: "REALM" },
-    sections: realmSections,
-    pages: pages(
-      {
-        en: {
-          title: "Realms",
-          description: "Discover communities that classify and discuss works.",
-        },
-        "zh-hant": {
-          title: "Realms",
-          description: "探索共同分類與討論作品的社群。",
-        },
-        ja: {
-          title: "Realms",
-          description: "作品を分類し語り合うコミュニティを見つける。",
-        },
-      },
-      realmSections,
-    ),
-    theme: {
-      tokens: { accent: "#0f766e", accentText: "#ffffff" },
-      layout: { contentWidth: "wide", navPosition: "top", density: "compact" },
-    },
+    config: realmsConfig,
     translations: {
       en: {
         title: "Realms",
@@ -224,35 +232,7 @@ export const OFFICIAL_ZONE_DEFINITIONS: OfficialZoneDefinition[] = [
   {
     key: "popular",
     slug: "popular",
-    template: "default",
-    filters: {},
-    sections: popularSections,
-    pages: pages(
-      {
-        en: {
-          title: "Popular",
-          description:
-            "Trending works, posts, reviews, and community activity.",
-        },
-        "zh-hant": {
-          title: "熱門",
-          description: "熱門作品、貼文、書評與社群活動。",
-        },
-        ja: {
-          title: "人気",
-          description: "話題の作品、投稿、レビュー、コミュニティ活動。",
-        },
-      },
-      popularSections,
-    ),
-    theme: {
-      tokens: { accent: "#c2410c", accentText: "#ffffff" },
-      layout: {
-        contentWidth: "wide",
-        navPosition: "top",
-        density: "comfortable",
-      },
-    },
+    config: popularConfig,
     translations: {
       en: {
         title: "Popular",
@@ -284,26 +264,14 @@ async function upsertZoneRow(
     .values({
       unitId: input.unitId,
       ownerRealmUnitId: input.ownerRealmUnitId,
-      filters: definition.filters,
-      configVersion: 1,
-      pages: definition.pages,
-      sections: definition.sections,
-      theme: definition.theme,
-      template: definition.template,
-      styling: null,
+      config: definition.config,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: Zone.unitId,
       set: {
         ownerRealmUnitId: input.ownerRealmUnitId,
-        filters: definition.filters,
-        configVersion: 1,
-        pages: definition.pages,
-        sections: definition.sections,
-        theme: definition.theme,
-        template: definition.template,
-        styling: null,
+        config: definition.config,
         updatedAt: new Date(),
       },
     });

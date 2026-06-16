@@ -27,10 +27,13 @@ export const ContinueThreadPage: React.FC = () => {
   const composerRef = useFocusReplyFromQuery();
   const commentAnchorQuery = useQuery(commentQuery(unitId));
   const anchor = commentAnchorQuery.data;
+  // No context filter: a subtree is already a single partition because every
+  // descendant inherits the anchor comment's context server-side.
+  // 不加语境过滤：子树本就是单一分区，因为所有后代在服务端继承锚点评论
+  // 的语境。
   const commentSubtreeQuery = useInfiniteQuery(
     commentRootChildrenInfiniteQuery({
       rootUnitId: rootPostUnitId,
-      realmUnitId: anchor?.realmUnitId ?? null,
       rootCommentId: unitId,
       sort: "best",
       limit: 50,
@@ -86,7 +89,7 @@ export const ContinueThreadPage: React.FC = () => {
           mode="progressive"
           targetUnitId={rootPostUnitId}
           rootUnitId={rootPostUnitId}
-          realmUnitId={rootComment.realmUnitId}
+          realmUnitId={rootComment.realmUnitId ?? null}
           parentCommentId={rootComment.unitId}
         />
       )}

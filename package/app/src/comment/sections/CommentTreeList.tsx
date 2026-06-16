@@ -21,6 +21,13 @@ export interface CommentTreeListProps {
   summaryScopeKey?: string | null;
   reactionScopeKey?: string | null;
   renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
+  /**
+   * Optional per-comment context badge (realm/direct) rendered by mixed
+   * "All" views; single-context views omit it.
+   * 可选的逐评论语境徽章（realm/直接），由混合“全部”视图渲染；单一语境
+   * 视图省略。
+   */
+  renderContextBadge?: (post: CommentDTO) => React.ReactNode;
 }
 
 export function CommentTreeList({
@@ -35,6 +42,7 @@ export function CommentTreeList({
   summaryScopeKey,
   reactionScopeKey,
   renderOverflowContent,
+  renderContextBadge,
 }: CommentTreeListProps) {
   const allUnitIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
@@ -152,6 +160,7 @@ export function CommentTreeList({
           summaryScopeKey={summaryScopeKey}
           reactionScopeKey={reactionScopeKey}
           renderOverflowContent={renderOverflowContent}
+          renderContextBadge={renderContextBadge}
           onComposerSubmitted={handleComposerSubmitted}
           onComposerDone={handleComposerDone}
           onThreadHoverChange={handleThreadHoverChange}

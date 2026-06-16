@@ -1,4 +1,5 @@
 import type { SeedTagName, TagGroupIds } from "@rezics/contract";
+import { ensureRegistrationDefaultSubscriptions } from "../../../user/service/registration-defaults";
 import type { ServerDb } from "../../client";
 import { seedDefaultRealm } from "./seed-default-realm";
 import {
@@ -72,6 +73,12 @@ export async function seedInfra(
     defaultRealmId,
     slugScopes,
   );
+  // Default sidebar entries are subscription-list rows. Seed them only after
+  // the default realm and official zone Units exist.
+  await ensureRegistrationDefaultSubscriptions(db, rootUserId, {
+    defaultRealmUnitId: defaultRealmId,
+    zoneSlugScopeId: slugScopes.zone,
+  });
   const realmTaxonomy = await seedRealmTaxonomy(
     db,
     rootUserId,

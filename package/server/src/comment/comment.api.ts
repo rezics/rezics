@@ -1,7 +1,9 @@
 import {
+  type CommentListContext,
   type CommentListResponse,
   type CommentResponse,
   commentListBodySchema,
+  commentListContextSchema,
   commentListQuerySchema,
   commentListResponseSchema,
   commentModerationInputSchema,
@@ -10,12 +12,41 @@ import {
   createCommentSchema,
   updateCommentSchema,
 } from "@rezics/contract";
+import { Value } from "@sinclair/typebox/value";
 import { Elysia, t } from "elysia";
 import { governanceModerationService } from "@/governance";
 import { authMacro, tryResolveIdentity } from "@/middleware";
 import { postService } from "@/post/post.service";
+import { AppError } from "@/utils/errors";
 import { mapCommentToDTO } from "./comment.mapper";
 import { commentService } from "./comment.service";
+
+// Elysia cannot coerce a JSON-encoded query param into the context union
+// (it validates against the first member only), so the GET route accepts the
+// raw JSON string and parses it here. POST /comment/list stays fully typed.
+// Elysia 无法把 JSON 编码的查询参数强制转换为 context 联合类型（只会按第一个
+// 成员校验），所以 GET 路由接受原始 JSON 字符串并在此解析。POST /comment/list
+// 保持完整类型化。
+const commentListGetQuerySchema = t.Composite([
+  t.Omit(commentListQuerySchema, ["context"]),
+  t.Object({ context: t.Optional(t.String()) }),
+]);
+
+function parseCommentListContext(
+  raw: string | undefined,
+): CommentListContext | undefined {
+  if (raw === undefined) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new AppError(422, "context must be a JSON-encoded list context");
+  }
+  if (!Value.Check(commentListContextSchema, parsed)) {
+    throw new AppError(422, "context must be a valid comment list context");
+  }
+  return parsed;
+}
 
 export const commentApi = new Elysia({ prefix: "/comment" })
   .use(authMacro)
@@ -40,9 +71,10 @@ export const commentApi = new Elysia({ prefix: "/comment" })
         headers["authorization"],
         headers["cookie"],
       );
-      const result = await commentService.list(query, {
-        viewerUserId: identity?.userId,
-      });
+      const result = await commentService.list(
+        { ...query, context: parseCommentListContext(query.context) },
+        { viewerUserId: identity?.userId },
+      );
       const signals = await postService.getThreadPromotionSignals(
         query.rootUnitId,
         identity,
@@ -60,7 +92,7 @@ export const commentApi = new Elysia({ prefix: "/comment" })
       };
     },
     {
-      query: commentListQuerySchema,
+      query: commentListGetQuerySchema,
       response: commentListResponseSchema,
       detail: {
         summary: "List comments",
