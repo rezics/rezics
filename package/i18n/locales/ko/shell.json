@@ -84,5 +84,7 @@
   "theme_customizer_static_theme": "정적 테마",
   "theme_customizer_preset_colors": "사전 설정된 색상",
   "theme_customizer_custom_color": "맞춤 색상",
-  "theme_customizer_hex_format": "형식: #RRGGBB"
+  "theme_customizer_hex_format": "형식: #RRGGBB",
+  "create_menu_new_book": "새 도서",
+  "create_menu_new_shelf": "새 선반"
 }

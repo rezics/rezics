@@ -197,30 +197,45 @@ export const env = createEnv({
     OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.string()),
 
     /**
-     * Cloudflare R2 S3 API endpoint URL.
-     * Cloudflare R2 的 S3 API 端点 URL。
+     * S3-compatible API endpoint URL.
+     * S3 兼容的 API 端点 URL。
      */
-    R2_ENDPOINT: v.optional(v.string()),
+    S3_ENDPOINT: v.optional(v.string()),
     /**
-     * Cloudflare R2 access key ID.
-     * Cloudflare R2 访问密钥 ID。
+     * S3 access key ID.
+     * S3 访问密钥 ID。
      */
-    R2_ACCESS_KEY_ID: v.optional(v.string()),
+    S3_ACCESS_KEY_ID: v.optional(v.string()),
     /**
-     * Cloudflare R2 secret access key.
-     * Cloudflare R2 私有访问密钥。
+     * S3 secret access key.
+     * S3 私有访问密钥。
      */
-    R2_SECRET_ACCESS_KEY: v.optional(v.string()),
+    S3_SECRET_ACCESS_KEY: v.optional(v.string()),
     /**
-     * Cloudflare R2 bucket name.
-     * Cloudflare R2 存储桶名称。
+     * S3 bucket name.
+     * S3 存储桶名称。
      */
-    R2_BUCKET: v.optional(v.string()),
+    S3_BUCKET: v.optional(v.string()),
     /**
-     * Public base URL for serving uploaded images from R2.
-     * 从 R2 提供上传图片的公开基础 URL。
+     * S3 region. Defaults to "auto" for Cloudflare R2.
+     * S3 区域。Cloudflare R2 默认为 "auto"。
      */
-    R2_PUBLIC_URL: v.optional(v.string()),
+    S3_REGION: v.optional(v.string()),
+    /**
+     * Public base URL for serving uploaded media.
+     * 上传媒体文件的公开基础 URL。
+     */
+    MEDIA_PUBLIC_BASE_URL: v.optional(v.string()),
+    /**
+     * Max upload size in bytes. Defaults to 10 MB.
+     * 最大上传字节数。默认 10 MB。
+     */
+    MEDIA_MAX_UPLOAD_SIZE: v.optional(v.pipe(v.string(), v.transform(Number))),
+    /**
+     * Presigned URL expiry in seconds. Defaults to 600.
+     * 预签名 URL 过期秒数。默认 600。
+     */
+    MEDIA_PRESIGN_EXPIRY: v.optional(v.pipe(v.string(), v.transform(Number))),
 
     /**
      * Base URL of the Notify service for internal calls.

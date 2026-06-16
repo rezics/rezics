@@ -381,5 +381,10 @@
   "work_link_claim_modal_reject_title": "Reject claim",
   "work_link_claim_modal_withdraw_description": "This will remove your pending claim. You can submit again later.",
   "work_link_claim_modal_withdraw_done": "Claim withdrawn.",
-  "work_link_claim_modal_withdraw_title": "Withdraw claim"
+  "work_link_claim_modal_withdraw_title": "Withdraw claim",
+  "seed_tag_book": "Book",
+  "seed_tag_game": "Game",
+  "seed_tag_media": "Media",
+  "seed_tag_post": "Post",
+  "seed_tag_link": "Link"
 }

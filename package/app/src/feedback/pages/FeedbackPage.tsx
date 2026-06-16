@@ -24,6 +24,12 @@ export const FeedbackPage: React.FC = () => {
   const resolvedValue =
     resolvedFilter === "all" ? undefined : resolvedFilter === "resolved";
 
+  const resolvedFilterLabel = {
+    all: t("search:category_all"),
+    unresolved: t("community:feedback_status_unresolved"),
+    resolved: t("community:feedback_status_resolved"),
+  }[resolvedFilter];
+
   return (
     <div className="max-w-5xl mx-auto p-4">
       <div className="flex flex-row items-center justify-between mb-4">
@@ -57,7 +63,7 @@ export const FeedbackPage: React.FC = () => {
             }
           >
             <SelectTrigger id="feedback-resolved">
-              <SelectValue />
+              <SelectValue>{resolvedFilterLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("search:category_all")}</SelectItem>

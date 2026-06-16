@@ -1,24 +1,22 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { PresignUploadBody, PresignUploadResponse } from "@rezics/contract";
 import { authMacro } from "@/middleware";
-import { isR2Configured, uploadImage } from "./upload.service";
+import { isStorageConfigured, createPresignedUpload } from "./upload.service";
 
 export const uploadApi = new Elysia({ prefix: "/upload" }).use(authMacro).post(
-  "/image",
-  async ({ body, set }) => {
-    if (!isR2Configured()) {
+  "/presign",
+  async ({ body, identity, set }) => {
+    if (!isStorageConfigured()) {
       set.status = 503;
       return { message: "Storage not configured" };
     }
 
-    const file = body.image;
-    if (!file) {
-      set.status = 400;
-      return { message: "Missing image field" };
-    }
-
     try {
-      const result = await uploadImage(file);
-      return result;
+      return await createPresignedUpload(
+        body.contentType,
+        body.size,
+        identity!.userId,
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
       if (message.includes("too large")) {
@@ -33,16 +31,12 @@ export const uploadApi = new Elysia({ prefix: "/upload" }).use(authMacro).post(
   },
   {
     requireLogin: true,
-    body: t.Object({
-      image: t.File({
-        maxSize: "5m",
-        type: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-      }),
-    }),
+    body: PresignUploadBody,
+    response: { 200: PresignUploadResponse },
     detail: {
-      summary: "Upload image",
+      summary: "Request presigned upload URL",
       description:
-        "Upload an image to R2 storage. Max 5MB, supports JPEG, PNG, WebP, GIF.",
+        "Request a presigned S3 URL for direct browser upload. Supports JPEG, PNG, WebP, GIF, AVIF, SVG.",
       tags: ["Upload"],
     },
   },

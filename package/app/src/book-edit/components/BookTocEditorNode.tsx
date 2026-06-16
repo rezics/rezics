@@ -221,12 +221,18 @@ export const createBookTocEditorNode = ({
 
     const sectionMeta = (
       <span>
-        {node.children?.length ?? 0} items · {formatCount(wordCount)} words
+        {node.children?.length ?? 0} {t("book:chapter_items")} · {formatCount(wordCount)} {t("book:chapter_words")}
       </span>
     );
 
     const status = mockPublishStatus(node.id);
     const views = mockViewCount(node.id);
+    const statusLabel =
+      status === "PUBLISHED"
+        ? t("book:chapter_status_published")
+        : status === "DRAFT"
+          ? t("book:chapter_status_draft")
+          : t("book:chapter_status_archived");
     const chapterMeta = (
       <span className="flex flex-wrap items-center gap-2">
         <Badge
@@ -237,11 +243,11 @@ export const createBookTocEditorNode = ({
               : ""
           }`}
         >
-          {status}
+          {statusLabel}
         </Badge>
-        <span>Updated {mockDate(node.id)}</span>
-        <span>{formatCount(wordCount)} words</span>
-        {hasChildren ? <span>{node.children?.length ?? 0} items</span> : null}
+        <span>{t("book:chapter_updated")} {mockDate(node.id)}</span>
+        <span>{formatCount(wordCount)} {t("book:chapter_words")}</span>
+        {hasChildren ? <span>{node.children?.length ?? 0} {t("book:chapter_items")}</span> : null}
         <span className="inline-flex items-center gap-0.5">
           <Visibility size={12} />
           {formatCount(views)}

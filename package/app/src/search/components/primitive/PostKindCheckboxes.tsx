@@ -1,8 +1,18 @@
 import { PostKind } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Checkbox } from "@rezics/ui/shadcn";
 import type React from "react";
 
 const POST_KIND_OPTIONS = Object.values(PostKind);
+
+const POST_KIND_I18N_KEYS: Record<PostKind, string> = {
+  [PostKind.REVIEW]: "post_kind_review",
+  [PostKind.REMARK]: "post_kind_remark",
+  [PostKind.EXCERPT]: "post_kind_excerpt",
+  [PostKind.POST]: "post_kind_post",
+  [PostKind.CHAPTER]: "post_kind_chapter",
+  [PostKind.WIKI]: "post_kind_wiki",
+};
 
 export type PostKindCheckboxesProps = {
   value: PostKind[];
@@ -15,6 +25,8 @@ export const PostKindCheckboxes: React.FC<PostKindCheckboxesProps> = ({
   onChange,
   label,
 }) => {
+  const { t } = useTranslation("search");
+
   const toggle = (kind: PostKind, checked: boolean) => {
     if (checked) {
       if (value.includes(kind)) return;
@@ -33,9 +45,9 @@ export const PostKindCheckboxes: React.FC<PostKindCheckboxesProps> = ({
             <Checkbox
               checked={value.includes(kind)}
               onCheckedChange={(checked) => toggle(kind, checked === true)}
-              aria-label={kind}
+              aria-label={t(POST_KIND_I18N_KEYS[kind])}
             />
-            <span className="text-sm">{kind}</span>
+            <span className="text-sm">{t(POST_KIND_I18N_KEYS[kind])}</span>
           </div>
         ))}
       </div>

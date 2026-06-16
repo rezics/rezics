@@ -15,6 +15,9 @@
   "chapter_bulk_rating_description": "Dadurch wird die Bewertung für{count}ausgewählte Kapitel überschrieben.",
   "chapter_bulk_rating_title": "Bewertung für ausgewählte festlegen",
   "chapter_chapter_label": "Kapitel",
+  "chapter_items": "Elemente",
+  "chapter_words": "Wörter",
+  "chapter_updated": "Aktualisiert",
   "chapter_content_required": "Inhalt ist erforderlich",
   "chapter_create_failed": "Kapitel konnte nicht erstellt werden: {error}",
   "chapter_double_click_rename": "Doppelklicken Sie auf „Umbenennen“.",
@@ -215,5 +218,10 @@
   "source_evidence_open_source": "Quelle öffnen",
   "tag_domain_alert": "Die Domain-Registrierung ist derzeit nicht verfügbar. Bitte suchen und fügen Sie Tags aus der Hauptdomäne hinzu.",
   "tag_edit_description": "Tags für dieses Buch verwalten: Neue Tags erstellen und nach Liste oder Domänengruppierung anzeigen und entfernen.",
-  "tag_edit_title": "Tag-Editor"
+  "tag_edit_title": "Tag-Editor",
+  "creation_path_title": "Erstellungspfad",
+  "creation_path_catalog_entry": "Katalogeintrag",
+  "creation_path_catalog_entry_description": "Im Besitz des Gemeinschaftskatalogs und offen für gemeinsame Bearbeitung.",
+  "creation_path_personal_work": "Persönliches Werk",
+  "creation_path_personal_work_description": "Ihr Konto gehört und standardmäßig für Gemeinschaftsbearbeitung geschlossen."
 }

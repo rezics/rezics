@@ -84,5 +84,7 @@
   "theme_customizer_static_theme": "静的テーマ",
   "theme_customizer_preset_colors": "プリセットカラー",
   "theme_customizer_custom_color": "カスタムカラー",
-  "theme_customizer_hex_format": "形式: #RRGGBB"
+  "theme_customizer_hex_format": "形式: #RRGGBB",
+  "create_menu_new_book": "新しい本",
+  "create_menu_new_shelf": "新しい棚"
 }

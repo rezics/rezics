@@ -725,7 +725,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         {newBook && (
           <section>
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Creation path
+              {getI18nRuntime().i18n.t("book:creation_path_title")}
             </h3>
             <Separator className="mb-6" />
             <div className="grid gap-3 sm:grid-cols-2">
@@ -739,11 +739,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 onClick={() => setCreationMode(CreationModeValue.WIKI)}
               >
                 <span className="block text-sm font-medium leading-ui">
-                  Catalog entry
+                  {getI18nRuntime().i18n.t("book:creation_path_catalog_entry")}
                 </span>
                 <span className="mt-1 block text-xs leading-dense opacity-80">
-                  Owned by the community catalog and open to collaborative
-                  edits.
+                  {getI18nRuntime().i18n.t(
+                    "book:creation_path_catalog_entry_description"
+                  )}
                 </span>
               </button>
               <button
@@ -756,11 +757,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 onClick={() => setCreationMode(CreationModeValue.PERSONAL)}
               >
                 <span className="block text-sm font-medium leading-ui">
-                  Personal work
+                  {getI18nRuntime().i18n.t("book:creation_path_personal_work")}
                 </span>
                 <span className="mt-1 block text-xs leading-dense opacity-80">
-                  Owned by your account and closed to community edits by
-                  default.
+                  {getI18nRuntime().i18n.t(
+                    "book:creation_path_personal_work_description"
+                  )}
                 </span>
               </button>
             </div>
