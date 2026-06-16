@@ -1,3 +1,18 @@
 {
-  "recommendations": ["biomejs.biome"]
+  "recommendations": [
+    "antfu.unocss",
+    "astro-build.astro-vscode",
+    "bierner.markdown-mermaid",
+    "biomejs.biome",
+    "docker.docker",
+    "editorconfig.editorconfig",
+    "github.vscode-github-actions",
+    "hashicorp.hcl",
+    "mikestead.dotenv",
+    "oven.bun-vscode"
+  ],
+  "unwantedRecommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ]
 }

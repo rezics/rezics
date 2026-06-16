@@ -8,6 +8,7 @@ name: Build and Push Images
 
 on:
   push:
+    branches: [main]
 
 concurrency:
   group: build-${{ github.ref }}

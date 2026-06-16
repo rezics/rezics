@@ -1,11 +1,19 @@
 # Build and deploy the static frontends to Cloudflare Pages.
+# 构建静态前端并部署到 Cloudflare Pages。
 #
-# package/app and package/admin are static Vite SPAs — no Docker, no SSR. VITE_*
-# values are build-time public config (never secrets). Deploy backends BEFORE
-# frontends so the API contract a new bundle expects already exists.
+# Auto-triggers after a successful "Build and Push Images" run on main
+# (backends deploy first, so the API contract a new frontend expects
+# already exists). Can also be dispatched manually to redeploy or to
+# deploy a single frontend.
+# 在 main 分支的 "Build and Push Images" 成功后自动触发（后端先部署，
+# 前端所需的 API 契约已就绪）。也可手动触发以重新部署或选择性部署。
 name: Deploy Frontend
 
 on:
+  workflow_run:
+    workflows: ["Build and Push Images"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       target:
@@ -21,6 +29,9 @@ concurrency:
 
 jobs:
   deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     name: Build & deploy
     runs-on: ubuntu-latest
     environment: production
@@ -40,6 +51,7 @@ jobs:
       - run: bun install --frozen-lockfile
 
       - name: Skip unselected app
+        if: github.event_name == 'workflow_dispatch'
         id: gate
         run: |
           if [ "${{ inputs.target }}" != "both" ] && \
@@ -47,7 +59,6 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # VITE_* are public build-time config provided as Cloudflare/Actions vars.
       - name: Build ${{ matrix.app }}
         if: steps.gate.outputs.skip != 'true'
         run: task ${{ matrix.app }}:build
@@ -64,5 +75,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: bun
           workingDirectory: package/${{ matrix.app }}
           command: pages deploy dist --project-name=rezics-${{ matrix.app }}
