@@ -1,0 +1,20 @@
+{
+  "nav": {
+    "home": "Rezics について",
+    "product": "製品",
+    "app": "Rezics を開く",
+    "language": "言語"
+  },
+  "cta": {
+    "enterApp": "作品カタログを開く",
+    "readProduct": "製品を見る",
+    "backHome": "概要へ戻る"
+  },
+  "footer": {
+    "originNote": "対話型の索引、棚、コミュニティの操作は Rezics 本体アプリで開きます。"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "body": "この公開サイトには現在、概要ページと製品ページがあります。ローカライズされたナビゲーションから続行してください。"
+  }
+}

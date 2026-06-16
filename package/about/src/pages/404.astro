@@ -1,34 +1,29 @@
 ---
-import { DEFAULT_LOCALE, getCanonicalUrl, getPagePath } from "../i18n/locales";
-import { uiDictionaries } from "../i18n/ui";
-import "../styles/site.css";
+import { getCommonCopy } from "../content/aboutContent";
+import { DEFAULT_LOCALE, getPagePath } from "../i18n/locales";
+import AboutLayout from "../layouts/AboutLayout.astro";
 
-const ui = uiDictionaries[DEFAULT_LOCALE];
+const common = getCommonCopy(DEFAULT_LOCALE);
+const meta = {
+  title: `${common.notFound.title} | Rezics`,
+  description: common.notFound.body,
+};
 ---
 
-<!doctype html>
-<html lang="zh-Hant">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{ui.notFound.title} | Rezics</title>
-    <meta name="description" content={ui.notFound.body} />
-    <link rel="canonical" href={getCanonicalUrl(DEFAULT_LOCALE, "home")} />
-  </head>
-  <body>
-    <main>
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">404</p>
-          <h1>{ui.notFound.title}</h1>
-          <p>{ui.notFound.body}</p>
-          <div class="hero-actions">
-            <a class="button primary" href={getPagePath(DEFAULT_LOCALE, "home")}>
-              {ui.cta.backHome}
-            </a>
-          </div>
-        </div>
-      </section>
-    </main>
-  </body>
-</html>
+<AboutLayout locale={DEFAULT_LOCALE} page="home" common={common} meta={meta}>
+  <section class="w-full max-w-4xl mx-auto px-6 py-24 sm:px-8">
+    <p class="m-0 mb-3 text-sm font-medium leading-[1.4] text-text-brand">404</p>
+    <h1 class="m-0 mb-5 text-3xl font-medium leading-[1.3] text-text-primary">
+      {common.notFound.title}
+    </h1>
+    <p class="m-0 max-w-2xl text-base leading-[1.55] text-text-secondary">
+      {common.notFound.body}
+    </p>
+    <a
+      class="mt-8 inline-flex min-h-11 items-center justify-center rounded-md bg-brand-fill px-4 py-2 text-sm font-medium leading-[1.4] text-text-on-brand no-underline transition-colors hover:bg-brand-fill-hover"
+      href={getPagePath(DEFAULT_LOCALE, "home")}
+    >
+      {common.cta.backHome}
+    </a>
+  </section>
+</AboutLayout>

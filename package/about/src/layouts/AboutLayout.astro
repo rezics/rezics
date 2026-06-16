@@ -1,5 +1,5 @@
 ---
-import type { AboutPageFrontmatter } from "../content/types";
+import type { AboutCommonCopy, AboutPageMeta } from "../content/types";
 import {
   ABOUT_LOCALE_META,
   ABOUT_LOCALES,
@@ -10,31 +10,25 @@ import {
   getCanonicalUrl,
   getPagePath,
 } from "../i18n/locales";
-import { uiDictionaries } from "../i18n/ui";
+import "virtual:uno.css";
+import "@rezics/ui/config/base.css";
 import "../styles/site.css";
 
 type Props = {
   locale: AboutLocale;
   page: AboutPageId;
-  frontmatter: AboutPageFrontmatter;
+  common: AboutCommonCopy;
+  meta: AboutPageMeta;
 };
 
-const { locale, page, frontmatter } = Astro.props;
+const { locale, page, common, meta } = Astro.props;
 const localeMeta = ABOUT_LOCALE_META[locale];
-const ui = uiDictionaries[locale];
-const primaryHref = frontmatter.primaryCtaPage
-  ? getPagePath(locale, frontmatter.primaryCtaPage)
-  : getAppEntryUrl(locale);
-const primaryLabel = frontmatter.primaryCtaPage
-  ? ui.cta.readProduct
-  : ui.cta.enterApp;
 const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
   locale: alternateLocale,
   href: getPagePath(alternateLocale, page),
   canonical: getCanonicalUrl(alternateLocale, page),
   meta: ABOUT_LOCALE_META[alternateLocale],
 }));
-const hasProducts = Boolean(frontmatter.products?.length);
 ---
 
 <!doctype html>
@@ -42,8 +36,9 @@ const hasProducts = Boolean(frontmatter.products?.length);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{frontmatter.title}</title>
-    <meta name="description" content={frontmatter.description} />
+    <meta name="color-scheme" content="light dark" />
+    <title>{meta.title}</title>
+    <meta name="description" content={meta.description} />
     {
       alternateLinks.map((link) => (
         <link rel="alternate" hreflang={link.meta.htmlLang} href={link.canonical} />
@@ -57,147 +52,88 @@ const hasProducts = Boolean(frontmatter.products?.length);
     <link rel="canonical" href={getCanonicalUrl(locale, page)} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Rezics" />
-    <meta property="og:title" content={frontmatter.title} />
-    <meta property="og:description" content={frontmatter.description} />
+    <meta property="og:title" content={meta.title} />
+    <meta property="og:description" content={meta.description} />
     <meta property="og:url" content={getCanonicalUrl(locale, page)} />
   </head>
-  <body>
-    <header class="site-header">
-      <a class="brand" href={getPagePath(locale, "home")}>
-        <img class="brand-mark" src="/logo.svg" alt="" width="40" height="28" />
-        <span class="brand-wordmark">REZICS</span>
-      </a>
-      <nav aria-label="Primary navigation">
-        <a aria-current={page === "home" ? "page" : undefined} href={getPagePath(locale, "home")}>
-          {ui.nav.home}
+  <body class="min-h-screen bg-surface-canvas text-text-primary font-sans antialiased">
+    <header class="sticky top-0 z-10 border-b border-border-whisper bg-surface-canvas">
+      <div class="w-full max-w-7xl mx-auto flex flex-wrap items-center gap-4 px-6 py-4 sm:px-8 lg:flex-nowrap lg:gap-8">
+        <a
+          class="shrink-0 inline-flex items-center gap-3 text-text-brand no-underline"
+          href={getPagePath(locale, "home")}
+        >
+          <img class="h-7 w-auto" src="/logo.svg" alt="" width="40" height="28" />
+          <span class="text-xl font-medium leading-[1.4] tracking-normal">REZICS</span>
         </a>
-        <a aria-current={page === "product" ? "page" : undefined} href={getPagePath(locale, "product")}>
-          {ui.nav.product}
-        </a>
-      </nav>
-      <div class="header-actions">
-        <a class="app-link" href={getAppEntryUrl(locale)}>{ui.nav.app}</a>
-        <details class="language-switcher">
-          <summary>{ui.nav.language}</summary>
-          <div>
-            {
-              alternateLinks.map((link) => (
-                <a
-                  aria-current={link.locale === locale ? "true" : undefined}
-                  lang={link.meta.htmlLang}
-                  href={link.href}
-                >
-                  {link.meta.nativeName}
-                </a>
-              ))
-            }
-          </div>
-        </details>
+        <nav class="min-w-0 flex flex-1 items-center gap-2 lg:justify-center" aria-label="Primary navigation">
+          <a
+            class:list={[
+              "rounded-md px-3 py-2 text-sm leading-[1.4] no-underline transition-colors",
+              page === "home"
+                ? "bg-surface-subtle text-text-brand"
+                : "text-text-secondary hover:text-text-primary",
+            ]}
+            aria-current={page === "home" ? "page" : undefined}
+            href={getPagePath(locale, "home")}
+          >
+            {common.nav.home}
+          </a>
+          <a
+            class:list={[
+              "rounded-md px-3 py-2 text-sm leading-[1.4] no-underline transition-colors",
+              page === "product"
+                ? "bg-surface-subtle text-text-brand"
+                : "text-text-secondary hover:text-text-primary",
+            ]}
+            aria-current={page === "product" ? "page" : undefined}
+            href={getPagePath(locale, "product")}
+          >
+            {common.nav.product}
+          </a>
+        </nav>
+        <div class="flex min-w-0 shrink-0 items-center gap-2">
+          <a
+            class="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-border-defined px-3 text-sm font-medium leading-[1.4] text-text-primary no-underline transition-colors hover:bg-surface-subtle"
+            href={getAppEntryUrl(locale)}
+          >
+            {common.nav.app}
+          </a>
+          <details class="language-switcher relative">
+            <summary class="flex h-10 cursor-pointer list-none items-center rounded-md px-3 text-sm leading-[1.4] text-text-secondary">
+              {common.nav.language}
+            </summary>
+            <div class="absolute right-0 top-[calc(100%+0.5rem)] z-20 grid min-w-42 gap-1 rounded-md border border-border-whisper bg-surface-base p-2 shadow-modal">
+              {
+                alternateLinks.map((link) => (
+                  <a
+                    class:list={[
+                      "rounded-sm px-3 py-2 text-sm leading-[1.4] no-underline",
+                      link.locale === locale
+                        ? "bg-surface-subtle text-text-brand"
+                        : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary",
+                    ]}
+                    aria-current={link.locale === locale ? "true" : undefined}
+                    lang={link.meta.htmlLang}
+                    href={link.href}
+                  >
+                    {link.meta.nativeName}
+                  </a>
+                ))
+              }
+            </div>
+          </details>
+        </div>
       </div>
     </header>
-    <main>
-      <section class={`hero hero-${page}`}>
-        <div class="hero-copy">
-          <p class="eyebrow">{frontmatter.hero.eyebrow}</p>
-          <h1>{frontmatter.hero.heading}</h1>
-          <div class="hero-body">
-            {frontmatter.hero.body.map((paragraph) => <p>{paragraph}</p>)}
-          </div>
-          <div class="hero-actions">
-            <a class="button primary" href={primaryHref}>{primaryLabel}</a>
-            {
-              frontmatter.primaryCtaPage ? (
-                <a class="button secondary" href={getAppEntryUrl(locale)}>
-                  {ui.cta.enterApp}
-                </a>
-              ) : null
-            }
-          </div>
-        </div>
-      </section>
-      {
-        page === "product" && hasProducts ? (
-          <div class="product-directory">
-            {frontmatter.products?.map((product) => (
-              // Planned entries keep the directory shape visible before every surface is live.
-              <article class="product-card">
-                <div class="product-card-main">
-                  <div class="product-card-meta">
-                    <span>{product.category}</span>
-                    <span data-status={product.status}>{product.statusLabel}</span>
-                  </div>
-                  <h2>{product.name}</h2>
-                  <p>{product.summary}</p>
-                </div>
-                <div class="product-card-detail">
-                  <ul>
-                    {product.features.map((feature) => (
-                      <li>{feature}</li>
-                    ))}
-                  </ul>
-                  {product.href && product.ctaLabel ? (
-                    <a class="product-card-cta" href={product.href}>
-                      {product.ctaLabel}
-                    </a>
-                  ) : null}
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : null
-      }
-      <div class="section-grid">
-        {
-          frontmatter.sections.map((section) => (
-            <section class="narrative-section">
-              <p class="eyebrow">{section.eyebrow}</p>
-              <h2>{section.title}</h2>
-              <p>{section.body}</p>
-            </section>
-          ))
-        }
-      </div>
-      {
-        frontmatter.storySections?.length ? (
-          <div class="story-stack">
-            {frontmatter.storySections.map((section) => (
-              <section class="story-section">
-                <p class="eyebrow">{section.eyebrow}</p>
-                <h2>{section.title}</h2>
-                <p>{section.body}</p>
-              </section>
-            ))}
-          </div>
-        ) : null
-      }
-      {
-        page !== "product" && hasProducts ? (
-          <div class="product-stack">
-            {frontmatter.products.map((product) => (
-              <section class="product-section">
-                <div class="product-section-header">
-                  <h2>{product.name}</h2>
-                  <p>{product.summary}</p>
-                </div>
-                <div class="product-feature-grid">
-                  {product.features.map((feature) => (
-                    <article class="product-feature">
-                      <h3>{feature}</h3>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        ) : null
-      }
-      <article class="mdx-prose">
-        <slot />
-      </article>
+    <main class="w-full">
+      <slot />
     </main>
-    <footer class="site-footer">
-      <p>Rezics</p>
-      <p>{ui.footer.originNote}</p>
+    <footer class="w-full border-t border-border-whisper">
+      <div class="w-full max-w-6xl mx-auto grid gap-3 px-6 py-8 text-sm leading-[1.55] text-text-tertiary sm:px-8 md:grid-cols-[auto_minmax(0,1fr)] md:justify-between md:gap-8">
+        <p class="m-0 text-text-primary">Rezics</p>
+        <p class="m-0 md:text-right">{common.footer.originNote}</p>
+      </div>
     </footer>
   </body>
 </html>

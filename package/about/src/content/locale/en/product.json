@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "title": "Rezics Products | Rezics",
+    "description": "Explore the Rezics product family: catalog, web app, realms, wiki, shelves, and graph surfaces built on one shared work identity."
+  },
+  "hero": {
+    "eyebrow": "Products",
+    "heading": "Rezics products"
+  },
+  "sections": [
+    {
+      "eyebrow": "Shared foundation",
+      "title": "Every surface starts from the same work identity.",
+      "body": "Catalog entries, reviews, shelves, tags, wiki pages, and realm discussions point back to shared Work Units instead of becoming separate databases."
+    },
+    {
+      "eyebrow": "Product boundary",
+      "title": "This site introduces the products; the app owns interaction.",
+      "body": "Search, saving, voting, editing, realm membership, wiki authoring, and other signed-in workflows stay in the main Rezics app."
+    }
+  ],
+  "storySections": [
+    {
+      "eyebrow": "Directory logic",
+      "title": "Products can be split without splitting the graph.",
+      "body": "Rezics Web, Realms, Wiki, Shelves, and Graph can become separate product surfaces while still sharing catalog identity, source facts, and community classification."
+    },
+    {
+      "eyebrow": "Status",
+      "title": "The list is allowed to show future-facing surfaces.",
+      "body": "A planned status means the product name is directional, not a claim that the full workflow is already available."
+    }
+  ],
+  "products": [
+    {
+      "name": "Rezics Catalog",
+      "category": "Catalog",
+      "status": "available",
+      "statusLabel": "Available",
+      "summary": "The public cross-language index for works, aliases, sources, relationships, and media-specific metadata.",
+      "href": "https://book.rezics.com/en/",
+      "ctaLabel": "Open catalog",
+      "features": [
+        "Shared Work Units for books, games, media, posts, and mixed works",
+        "Facts, aliases, source links, translations, and related works",
+        "One work identity across languages, platforms, editions, and communities"
+      ]
+    },
+    {
+      "name": "Rezics Web",
+      "category": "App",
+      "status": "preview",
+      "statusLabel": "Preview",
+      "summary": "The main web app for browsing, reviewing, collecting, and contributing to the catalog.",
+      "href": "https://book.rezics.com/en/",
+      "ctaLabel": "Open app",
+      "features": [
+        "Interactive search and work detail pages",
+        "Review, shelf, tag, and collection workflows",
+        "Signed-in contribution flows for catalog and community work"
+      ]
+    },
+    {
+      "name": "Rezics Realms",
+      "category": "Community",
+      "status": "planned",
+      "statusLabel": "Planned",
+      "summary": "Community spaces that classify, discuss, and curate works without forking the public catalog.",
+      "features": [
+        "Realm membership and local discussion",
+        "Community-scoped tag applications",
+        "Feeds and portals around shared interests"
+      ]
+    },
+    {
+      "name": "Rezics Wiki",
+      "category": "Knowledge",
+      "status": "planned",
+      "statusLabel": "Planned",
+      "summary": "Collaborative knowledge pages and realm wiki portals that keep context near the works and communities that need it.",
+      "features": [
+        "Wiki posts for background, timelines, examples, and interpretation",
+        "Realm wiki zones for community-maintained context",
+        "Knowledge attached to works instead of scattered across tools"
+      ]
+    },
+    {
+      "name": "Rezics Shelves",
+      "category": "Discovery",
+      "status": "planned",
+      "statusLabel": "Planned",
+      "summary": "Curated paths through works, reviews, tags, realms, and other shelf items.",
+      "features": [
+        "Explainable collections instead of opaque recommendation lists",
+        "Shelf items that can carry reviews and classification context",
+        "Reader and community curation around shared work identity"
+      ]
+    },
+    {
+      "name": "Rezics Graph",
+      "category": "Platform",
+      "status": "planned",
+      "statusLabel": "Planned",
+      "summary": "The shared product graph behind catalog identity, source facts, community classification, and knowledge surfaces.",
+      "features": [
+        "Work, tag, realm, shelf, review, and wiki relationships",
+        "Contract-first data shapes for product surfaces",
+        "A foundation for future Rezics tools without duplicating facts"
+      ]
+    }
+  ]
+}

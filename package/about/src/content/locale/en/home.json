@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "title": "Rezics | inherited · create · spread",
+    "description": "Rezics is a community for works, knowledge, and creativity to be inherited, created anew, and spread onward across platforms, languages, and communities."
+  },
+  "hero": {
+    "eyebrow": "Encounter the stories you love.",
+    "heading": "inherited · create · spread"
+  },
+  "primaryCtaPage": "product",
+  "sections": [
+    {
+      "eyebrow": "Where it starts",
+      "title": "Web novels and born-digital books have already outgrown old catalogs.",
+      "body": "Serialized fiction, independent writing, and platform-native books move too quickly and across too many sites for legacy shelves and single-language databases to organize them well."
+    },
+    {
+      "eyebrow": "Where it goes",
+      "title": "As creation gets easier, every medium will need a better public index.",
+      "body": "The same pressure is coming for games, media, posts, worlds, and mixed forms of work. Rezics is built for that future from the start."
+    }
+  ],
+  "storySections": [
+    {
+      "eyebrow": "Across platforms",
+      "title": "People need one place to find the work, not just one platform's copy of it.",
+      "body": "A work can appear through many publishers, languages, aliases, editions, and communities. Rezics gives it one shared identity so readers can cross those boundaries and still arrive at the same context."
+    },
+    {
+      "eyebrow": "Tag-shelf discovery",
+      "title": "Tags and shelves should help people find what actually fits them.",
+      "body": "Rezics combines shared tags, realm-scoped classification, and shelves that can carry reviews. Browsing can show both what a work is and why someone thought it belonged there."
+    },
+    {
+      "eyebrow": "For creators",
+      "title": "Better classification helps creators meet the right readers.",
+      "body": "When readers can describe works in community language, creators get clearer signals about who a work reaches, where it resonates, and which nearby audiences may care."
+    },
+    {
+      "eyebrow": "Realms",
+      "title": "Communities should not have to split the catalog, discussion, and wiki.",
+      "body": "Realms gather people around what they love and let them classify, discuss, curate, and document works beside the shared public index instead of scattering context across separate tools."
+    }
+  ]
+}

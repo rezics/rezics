@@ -1,0 +1,25 @@
+---
+import type { AboutLocale, AboutPageId } from "../i18n/locales";
+import type { MarkdownFragmentSlug } from "../content/types";
+
+type Props = {
+  locale: AboutLocale;
+  page: AboutPageId;
+  slug: MarkdownFragmentSlug;
+};
+
+const { locale, page, slug } = Astro.props;
+const fragments = import.meta.glob("../content/markdown/*/*/*.md", {
+  eager: true,
+});
+const fragmentPath = `../content/markdown/${locale}/${page}/${slug}.md`;
+const fragment = fragments[fragmentPath] as { default: any } | undefined;
+
+if (!fragment) {
+  throw new Error(`Missing about markdown fragment: ${fragmentPath}`);
+}
+
+const Fragment = fragment.default;
+---
+
+<Fragment />

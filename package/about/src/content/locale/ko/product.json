@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "title": "Rezics Products | Rezics",
+    "description": "Rezics 제품군을 둘러보세요. 카탈로그, 웹 앱, Realms, Wiki, 서가, 공유 그래프 표면은 하나의 작품 정체성 위에 세워집니다."
+  },
+  "hero": {
+    "eyebrow": "제품",
+    "heading": "Rezics 제품"
+  },
+  "sections": [
+    {
+      "eyebrow": "공유 기반",
+      "title": "모든 제품 표면은 같은 작품 정체성에서 시작합니다.",
+      "body": "카탈로그 항목, 리뷰, 서가, 태그, wiki 페이지, realm 토론은 서로 다른 데이터베이스가 아니라 공유 Work Unit으로 돌아갑니다."
+    },
+    {
+      "eyebrow": "제품 경계",
+      "title": "이 사이트는 제품을 소개하고, 상호작용은 기본 앱이 담당합니다.",
+      "body": "검색, 저장, 투표, 편집, realm 멤버십, wiki 작성과 로그인 상태가 필요한 흐름은 Rezics 기본 앱에 남습니다."
+    }
+  ],
+  "storySections": [
+    {
+      "eyebrow": "목록 원칙",
+      "title": "제품은 나눌 수 있지만 그래프는 나누지 않습니다.",
+      "body": "Rezics Web, Realms, Wiki, Shelves, Graph는 서로 다른 제품 표면이 될 수 있지만 카탈로그 정체성, 출처 사실, 커뮤니티 분류는 공유합니다."
+    },
+    {
+      "eyebrow": "상태",
+      "title": "이 목록은 미래 지향적인 표면도 보여 줄 수 있습니다.",
+      "body": "계획 중 상태는 제품 이름이 방향을 나타낸다는 뜻이며, 전체 workflow가 이미 제공된다는 뜻은 아닙니다."
+    }
+  ],
+  "products": [
+    {
+      "name": "Rezics Catalog",
+      "category": "카탈로그",
+      "status": "available",
+      "statusLabel": "사용 가능",
+      "summary": "작품, 별칭, 출처, 관계, 매체별 metadata를 정리하는 공개 다국어 작품 색인입니다.",
+      "href": "https://book.rezics.com/ko/",
+      "ctaLabel": "카탈로그 열기",
+      "features": [
+        "도서, 게임, 미디어, 게시물, 혼합형 작품을 위한 공유 Work Unit",
+        "사실, 별칭, 출처 링크, 번역, 관련 작품",
+        "언어, 플랫폼, 판본, 커뮤니티를 넘는 하나의 작품 정체성"
+      ]
+    },
+    {
+      "name": "Rezics Web",
+      "category": "앱",
+      "status": "preview",
+      "statusLabel": "미리보기",
+      "summary": "카탈로그를 탐색하고, 리뷰하고, 수집하고, 기여하는 기본 웹 앱입니다.",
+      "href": "https://book.rezics.com/ko/",
+      "ctaLabel": "앱 열기",
+      "features": [
+        "상호작용형 검색과 작품 상세 페이지",
+        "리뷰, 서가, 태그, 컬렉션 workflow",
+        "로그인한 사용자의 카탈로그와 커뮤니티 기여"
+      ]
+    },
+    {
+      "name": "Rezics Realms",
+      "category": "커뮤니티",
+      "status": "planned",
+      "statusLabel": "계획 중",
+      "summary": "공개 카탈로그를 fork하지 않고 커뮤니티가 작품을 분류하고, 토론하고, 큐레이션하는 공간입니다.",
+      "features": [
+        "Realm 멤버십과 지역 토론",
+        "커뮤니티 맥락의 태그 적용",
+        "공통 관심사를 중심으로 한 feed와 포털"
+      ]
+    },
+    {
+      "name": "Rezics Wiki",
+      "category": "지식",
+      "status": "planned",
+      "statusLabel": "계획 중",
+      "summary": "맥락을 필요한 작품과 커뮤니티 곁에 두는 협업 지식 페이지와 realm wiki 포털입니다.",
+      "features": [
+        "배경, 타임라인, 예시, 해석을 기록하는 wiki 게시물",
+        "커뮤니티가 유지하는 Realm wiki zones",
+        "지식을 다른 도구에 흩뜨리지 않고 작품에 연결하는 구조"
+      ]
+    },
+    {
+      "name": "Rezics Shelves",
+      "category": "발견",
+      "status": "planned",
+      "statusLabel": "계획 중",
+      "summary": "작품, 리뷰, 태그, realms, 다른 서가 항목을 지나는 큐레이션 경로입니다.",
+      "features": [
+        "불투명한 추천 목록이 아닌 설명 가능한 컬렉션",
+        "리뷰와 분류 맥락을 담을 수 있는 서가 항목",
+        "공유 작품 정체성을 중심으로 한 독자와 커뮤니티의 큐레이션"
+      ]
+    },
+    {
+      "name": "Rezics Graph",
+      "category": "플랫폼",
+      "status": "planned",
+      "statusLabel": "계획 중",
+      "summary": "카탈로그 정체성, 출처 사실, 커뮤니티 분류, 지식 표면을 지탱하는 공유 제품 그래프입니다.",
+      "features": [
+        "작품, 태그, realm, 서가, 리뷰, wiki 관계",
+        "제품 표면을 위한 contract-first 데이터 형태",
+        "미래 Rezics 도구가 사실을 중복하지 않게 하는 기반"
+      ]
+    }
+  ]
+}

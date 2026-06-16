@@ -19,16 +19,55 @@ export type ProductEntry = {
   features: string[];
 };
 
-export type AboutPageFrontmatter = {
+export type AboutCommonCopy = {
+  nav: {
+    home: string;
+    product: string;
+    app: string;
+    language: string;
+  };
+  cta: {
+    enterApp: string;
+    readProduct: string;
+    backHome: string;
+  };
+  footer: {
+    originNote: string;
+  };
+  notFound: {
+    title: string;
+    body: string;
+  };
+};
+
+export type AboutPageMeta = {
   title: string;
   description: string;
-  hero: {
-    eyebrow: string;
-    heading: string;
-    body: string[];
-  };
-  primaryCtaPage?: AboutPageId;
-  sections: ContentSection[];
-  storySections?: ContentSection[];
-  products?: ProductEntry[];
 };
+
+export type AboutHeroCopy = {
+  eyebrow: string;
+  heading: string;
+};
+
+export type BaseAboutPageCopy = {
+  meta: AboutPageMeta;
+  hero: AboutHeroCopy;
+  sections: ContentSection[];
+  storySections: ContentSection[];
+};
+
+export type HomePageCopy = BaseAboutPageCopy & {
+  primaryCtaPage: AboutPageId;
+};
+
+export type ProductPageCopy = BaseAboutPageCopy & {
+  products: ProductEntry[];
+};
+
+export type AboutPageCopyByPage = {
+  home: HomePageCopy;
+  product: ProductPageCopy;
+};
+
+export type MarkdownFragmentSlug = "hero" | "closing";
