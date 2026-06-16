@@ -1,7 +1,7 @@
+import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { tagApi } from "@rezics/api/tag/tag";
-import { tagQueries } from "@rezics/api/tag/tag.queries";
-import type { ZoneDynamicTags } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import type { TagSearchDocument, ZoneDynamicTags } from "@rezics/contract";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Checkbox, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, X } from "lucide-react";
@@ -29,6 +29,7 @@ type TagSearchResult = {
   unitId?: string;
   tagUnitId?: string;
   label?: string;
+  title?: string | null;
   slug?: string;
 };
 
@@ -247,27 +248,34 @@ function DynamicTagOptionRow({
   onRemove: () => void;
 }) {
   const { t } = useTranslation(["zone"]);
+  const locale = useLocale();
   const [rawTags, setRawTags] = useState("");
   const [searchText, setSearchText] = useState("");
   const [resolving, setResolving] = useState(false);
   const debouncedSearch = useDebouncedValue(searchText.trim(), 200);
   const search = useQuery({
-    ...tagQueries.search(debouncedSearch, 8),
+    ...meiliTagSearchQueryOptions({
+      keyword: debouncedSearch,
+      limit: 8,
+      appLocale: locale,
+    }),
     enabled: debouncedSearch.length > 0,
   });
   const results = useMemo(
     () =>
-      ((search.data?.tags ?? []) as TagSearchResult[]).flatMap((tag) => {
+      (
+        (search.data?.items ?? []) as Array<TagSearchDocument & TagSearchResult>
+      ).flatMap((tag) => {
         const tagUnitId = tag.tagUnitId ?? tag.unitId;
         if (!tagUnitId || option.tagUnitIds.includes(tagUnitId)) return [];
         return [
           {
             tagUnitId,
-            label: tag.label ?? tag.slug ?? tagUnitId,
+            label: tag.title ?? tag.label ?? tag.slug ?? tagUnitId,
           },
         ];
       }),
-    [option.tagUnitIds, search.data?.tags],
+    [option.tagUnitIds, search.data?.items],
   );
 
   const addRawTags = async () => {

@@ -1,6 +1,6 @@
 import { realmQueries } from "@rezics/api/realm/realm";
-import { tagQueries } from "@rezics/api/tag/tag";
-import type { TagTreeNode } from "@rezics/contract";
+import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import type { TagSearchDocument, TagTreeNode } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -33,6 +33,7 @@ type TagSearchResult = {
   unitId?: string;
   tagUnitId?: string;
   label?: string;
+  title?: string | null;
   slug?: string;
 };
 
@@ -115,24 +116,32 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
   }, [open, selectedTagIds]);
 
   const trimmedGlobalSearch = globalSearchTerm.trim();
-  const { data: searchData, isLoading: isSearching } = useQuery(
-    tagQueries.search(trimmedGlobalSearch),
-  );
+  const { data: searchData, isLoading: isSearching } = useQuery({
+    ...meiliTagSearchQueryOptions({
+      keyword: trimmedGlobalSearch,
+      limit: 20,
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && trimmedGlobalSearch.length > 0,
+  });
   const searchResults = useMemo(() => {
     const treeTagIds = new Set(
       flatTreeRows.map((row) => row.tagId).filter(Boolean) as string[],
     );
-    return ((searchData?.tags ?? []) as TagSearchResult[])
+    return (
+      (searchData?.items ?? []) as Array<TagSearchDocument & TagSearchResult>
+    )
       .map((tag) => {
         const tagId = tag.unitId ?? tag.tagUnitId;
         if (!tagId || treeTagIds.has(tagId)) return null;
         return {
           tagId,
-          label: getTagLabel(tagId, tag.label ?? tag.slug),
+          label: getTagLabel(tagId, tag.title ?? tag.label ?? tag.slug),
         };
       })
       .filter(Boolean) as TagOption[];
-  }, [flatTreeRows, searchData?.tags]);
+  }, [flatTreeRows, searchData?.items]);
 
   const selectedLabels = useMemo(() => {
     const labels = selectedRealmTagLabels(

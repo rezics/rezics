@@ -1,10 +1,11 @@
+import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import {
   tagQueries,
   useAttachTagMutation,
   useDetachTagMutation,
 } from "@rezics/api/tag/tag";
-import type { UnitTagDTO } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import type { TagSearchDocument, UnitTagDTO } from "@rezics/contract";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -34,6 +35,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["common", "community", "entity"]);
+  const locale = useLocale();
   const { data, isLoading, error, refetch } = useQuery(
     tagQueries.forUnit(objectUnitId),
   );
@@ -56,12 +58,19 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
     data: searchData,
     isLoading: isSearching,
     error: searchError,
-  } = useQuery(tagQueries.search(searchTerm));
+  } = useQuery({
+    ...meiliTagSearchQueryOptions({
+      keyword: searchTerm,
+      limit: 20,
+      appLocale: locale,
+    }),
+    enabled: searchTerm.length > 0,
+  });
 
-  const searchResults: UnitTagDTO[] = useMemo(
+  const searchResults: TagSearchDocument[] = useMemo(
     () =>
-      (searchData?.tags ?? []).filter(
-        (t) => !list.some((attached) => attached.tagUnitId === t.tagUnitId),
+      (searchData?.items ?? []).filter(
+        (tag) => !list.some((attached) => attached.tagUnitId === tag.unitId),
       ),
     [searchData, list],
   );
@@ -172,14 +181,16 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
           <div className="space-y-1">
             {searchResults.map((tag) => (
               <div
-                key={tag.tagUnitId}
+                key={tag.unitId}
                 className="flex items-center justify-between gap-2"
               >
-                <Badge variant="secondary">{tag.tagUnitId}</Badge>
+                <Badge variant="secondary">
+                  {tag.title ?? tag.slug ?? tag.unitId}
+                </Badge>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleAttach(tag.tagUnitId)}
+                  onClick={() => handleAttach(tag.unitId)}
                   disabled={attachMutation.isPending}
                 >
                   {t("common:add")}

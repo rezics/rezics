@@ -13,12 +13,16 @@ import type {
   ContentSearchResult,
   FeedbackListQuery,
   FeedbackSearchResult,
+  LabelSearchOptions,
+  LabelSearchResult,
   PollSearchOptions,
   PollSearchResult,
   PostSearchOptions,
   PostSearchResult,
   RealmSearchOptions,
   RealmSearchResult,
+  TagSearchOptions,
+  TagSearchResult,
   UserDTO,
   UserListQuery,
   ZoneSearchOptions,
@@ -104,6 +108,28 @@ export const meiliRealmApi = {
 export const meiliZoneApi = {
   zoneSearch: async (opts: ZoneSearchOptions): Promise<ZoneSearchResult> => {
     return apiFetch<ZoneSearchResult>(`/meili/zones/search`, {
+      method: "POST",
+      body: JSON.stringify(opts),
+    });
+  },
+};
+
+// ANCHOR: Tag search 标签搜索
+
+export const meiliTagApi = {
+  tagSearch: async (opts: TagSearchOptions): Promise<TagSearchResult> => {
+    return apiFetch<TagSearchResult>(`/meili/tags/search`, {
+      method: "POST",
+      body: JSON.stringify(opts),
+    });
+  },
+};
+
+// ANCHOR: Label search 标签文本搜索
+
+export const meiliLabelApi = {
+  labelSearch: async (opts: LabelSearchOptions): Promise<LabelSearchResult> => {
+    return apiFetch<LabelSearchResult>(`/meili/labels/search`, {
       method: "POST",
       body: JSON.stringify(opts),
     });

@@ -13,6 +13,7 @@ export const SEARCH_COMMAND_KINDS = {
   contentPatchCredits: "search.content.patchCredits",
   contentPatchSubjects: "search.content.patchSubjects",
   contentPatchTranslations: "search.content.patchTranslations",
+  contentPatchTagFanout: "search.content.patchTagFanout",
   contentPatchRealmIds: "search.content.patchRealmIds",
   contentPatchRealmTagKeys: "search.content.patchRealmTagKeys",
   contentPatchContainedUnitIds: "search.content.patchContainedUnitIds",
@@ -47,6 +48,16 @@ export const SEARCH_COMMAND_KINDS = {
   zoneSync: "search.zone.sync",
   zoneDelete: "search.zone.delete",
   zoneFullSync: "search.zone.fullSync",
+
+  tagSync: "search.tag.sync",
+  tagDelete: "search.tag.delete",
+  tagPatchAliases: "search.tag.patchAliases",
+  tagFullSync: "search.tag.fullSync",
+
+  labelSync: "search.label.sync",
+  labelDelete: "search.label.delete",
+  labelPatchAliases: "search.label.patchAliases",
+  labelFullSync: "search.label.fullSync",
 
   entitySync: "search.entity.sync",
   entityDelete: "search.entity.delete",
@@ -84,6 +95,8 @@ const CommentTargetPayloadSchema = v.strictObject({ commentId: v.string() });
 const PollTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const RealmTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const ZoneTargetPayloadSchema = v.strictObject({ unitId: v.string() });
+const TagTargetPayloadSchema = v.strictObject({ unitId: v.string() });
+const LabelTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const EntityTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const UserTargetPayloadSchema = v.strictObject({ userId: v.string() });
 const FeedbackTargetPayloadSchema = v.strictObject({ feedbackId: v.string() });
@@ -160,6 +173,11 @@ export const ContentPatchTranslationsCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.contentPatchTranslations,
   JOB_LANES.searchSyncSlow,
   UnitTargetPayloadSchema,
+);
+export const ContentPatchTagFanoutCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.contentPatchTagFanout,
+  JOB_LANES.searchSyncSlow,
+  FanoutPayloadSchema,
 );
 export const ContentPatchRealmIdsCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.contentPatchRealmIds,
@@ -310,6 +328,48 @@ export const ZoneFullSyncCommandSchema = commandSchema(
   FullSyncPayloadSchema,
 );
 
+export const TagSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.tagSync,
+  JOB_LANES.searchSyncFast,
+  TagTargetPayloadSchema,
+);
+export const TagDeleteCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.tagDelete,
+  JOB_LANES.searchSyncFast,
+  TagTargetPayloadSchema,
+);
+export const TagPatchAliasesCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.tagPatchAliases,
+  JOB_LANES.searchSyncSlow,
+  TagTargetPayloadSchema,
+);
+export const TagFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.tagFullSync,
+  JOB_LANES.maintenance,
+  FullSyncPayloadSchema,
+);
+
+export const LabelSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.labelSync,
+  JOB_LANES.searchSyncFast,
+  LabelTargetPayloadSchema,
+);
+export const LabelDeleteCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.labelDelete,
+  JOB_LANES.searchSyncFast,
+  LabelTargetPayloadSchema,
+);
+export const LabelPatchAliasesCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.labelPatchAliases,
+  JOB_LANES.searchSyncSlow,
+  LabelTargetPayloadSchema,
+);
+export const LabelFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.labelFullSync,
+  JOB_LANES.maintenance,
+  FullSyncPayloadSchema,
+);
+
 export const EntitySyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.entitySync,
   JOB_LANES.searchSyncFast,
@@ -428,6 +488,7 @@ export const SearchCommandSchema = v.union([
   ContentPatchCreditsCommandSchema,
   ContentPatchSubjectsCommandSchema,
   ContentPatchTranslationsCommandSchema,
+  ContentPatchTagFanoutCommandSchema,
   ContentPatchRealmIdsCommandSchema,
   ContentPatchRealmTagKeysCommandSchema,
   ContentPatchContainedUnitIdsCommandSchema,
@@ -457,6 +518,14 @@ export const SearchCommandSchema = v.union([
   ZoneSyncCommandSchema,
   ZoneDeleteCommandSchema,
   ZoneFullSyncCommandSchema,
+  TagSyncCommandSchema,
+  TagDeleteCommandSchema,
+  TagPatchAliasesCommandSchema,
+  TagFullSyncCommandSchema,
+  LabelSyncCommandSchema,
+  LabelDeleteCommandSchema,
+  LabelPatchAliasesCommandSchema,
+  LabelFullSyncCommandSchema,
   EntitySyncCommandSchema,
   EntityDeleteCommandSchema,
   EntityPatchAliasesCommandSchema,

@@ -22,6 +22,10 @@ function searchSyncKindForTarget(targetType: string) {
       return SEARCH_COMMAND_KINDS.realmSync;
     case "zone":
       return SEARCH_COMMAND_KINDS.zoneSync;
+    case "tag":
+      return SEARCH_COMMAND_KINDS.tagSync;
+    case "label":
+      return SEARCH_COMMAND_KINDS.labelSync;
     case "entity":
       return SEARCH_COMMAND_KINDS.entitySync;
     case "user":
@@ -47,6 +51,12 @@ function fullSyncKindForIndex(index: string) {
       return SEARCH_COMMAND_KINDS.realmFullSync;
     case "zone":
       return SEARCH_COMMAND_KINDS.zoneFullSync;
+    case "tag":
+    case "tags":
+      return SEARCH_COMMAND_KINDS.tagFullSync;
+    case "label":
+    case "labels":
+      return SEARCH_COMMAND_KINDS.labelFullSync;
     case "entity":
       return SEARCH_COMMAND_KINDS.entityFullSync;
     case "user":
@@ -125,6 +135,12 @@ function replayTargetFromKey(scope: string, key: string) {
     case "Realm":
     case "realm":
       return { targetType: "realm", targetId: id };
+    case "Tag":
+    case "tag":
+      return { targetType: "tag", targetId: id };
+    case "Label":
+    case "label":
+      return { targetType: "label", targetId: id };
     case "Entity":
     case "entity":
       return { targetType: "entity", targetId: id };

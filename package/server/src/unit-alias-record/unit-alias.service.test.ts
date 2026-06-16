@@ -119,6 +119,8 @@ describe("UnitAliasService", () => {
       "search.content.patchAliases",
       "search.entity.patchAliases",
       "search.realm.patchAliases",
+      "search.tag.patchAliases",
+      "search.label.patchAliases",
     ]);
   });
 

@@ -16,16 +16,12 @@ describe("labelApi", () => {
     globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
-  test("unwraps label search response items", async () => {
+  test("creates a label through the label service endpoint", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
-          items: [
-            {
-              unitId: "label-1",
-              translations: [{ language: "en", title: "Characters" }],
-            },
-          ],
+          unitId: "label-1",
+          translations: [{ language: "en", title: "Characters" }],
         }),
         {
           status: 200,
@@ -34,16 +30,14 @@ describe("labelApi", () => {
       ),
     );
 
-    const labels = await labelApi.search("char", 12);
+    const label = await labelApi.create({
+      translations: [{ language: "en", title: "Characters" }],
+    });
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/label/search?q=char&limit=12",
-    );
-    expect(labels).toEqual([
-      {
-        unitId: "label-1",
-        translations: [{ language: "en", title: "Characters" }],
-      },
-    ]);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("http://api.example/label/");
+    expect(label).toEqual({
+      unitId: "label-1",
+      translations: [{ language: "en", title: "Characters" }],
+    });
   });
 });

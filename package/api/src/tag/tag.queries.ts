@@ -37,17 +37,6 @@ export const tagBySlugQuery = (slug: string) =>
   });
 
 /**
- * Query options for searching tags by a keyword (default limit 20).
- */
-export const tagSearchQuery = (searchTerm: string, limit = 20) =>
-  queryOptions({
-    queryKey: tagKeys.search(searchTerm),
-    queryFn: () => tagApi.list({ q: searchTerm, limit }),
-    enabled: searchTerm.length > 0,
-    staleTime: 1000 * 60 * 2,
-  });
-
-/**
  * Query options for getting scored tags for a specific unit
  */
 export const tagsForUnitQuery = (
@@ -120,7 +109,6 @@ export const tagQueries = {
   list: tagListQuery,
   detail: tagDetailQuery,
   bySlug: tagBySlugQuery,
-  search: tagSearchQuery,
   forUnit: tagsForUnitQuery,
   context: tagContextQuery,
   batchTranslations: tagBatchTranslationsQuery,

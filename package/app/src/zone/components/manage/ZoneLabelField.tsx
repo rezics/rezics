@@ -1,6 +1,11 @@
-import { labelSearchQueryOptions, useCreateLabel } from "@rezics/api";
-import { LANGUAGE_META, type LabelDTO, type Language } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { meiliLabelSearchQueryOptions, useCreateLabel } from "@rezics/api";
+import {
+  LANGUAGE_META,
+  type LabelDTO,
+  type LabelSearchDocument,
+  type Language,
+} from "@rezics/contract";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -30,11 +35,8 @@ import {
 import type { ZoneRefUnitMap } from "../../models/zoneMenu";
 import { ManageField } from "./ZoneManageFields";
 
-function labelTitle(label: LabelDTO, language: string): string {
-  const exact = label.translations.find(
-    (translation) => translation.language === language && translation.title,
-  );
-  if (exact?.title) return exact.title;
+function labelTitle(label: LabelDTO | LabelSearchDocument): string {
+  if ("title" in label && label.title) return label.title;
   const first = label.translations.find((translation) => translation.title);
   return first?.title ?? label.unitId;
 }
@@ -59,7 +61,8 @@ export function ZoneLabelField({
   onChange: (value: string | undefined) => void;
   refUnits: ZoneRefUnitMap;
 }) {
-  const { t, i18n } = useTranslation(["zone", "common"]);
+  const { t } = useTranslation(["zone", "common"]);
+  const appLocale = useLocale();
   const [open, setOpen] = useState(false);
   const [pickedTitles, setPickedTitles] = useState<Record<string, string>>({});
 
@@ -102,7 +105,7 @@ export function ZoneLabelField({
               }
             : undefined
         }
-        language={i18n.language}
+        appLocale={appLocale}
       />
     </ManageField>
   );
@@ -113,20 +116,27 @@ function ZoneLabelPickerDialog({
   onOpenChange,
   onPick,
   onClear,
-  language,
+  appLocale,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPick: (unitId: string, title: string) => void;
   onClear?: () => void;
-  language: string;
+  appLocale: string;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const debouncedQuery = useDebouncedValue(query.trim(), 200);
-  const searchQuery = useQuery(labelSearchQueryOptions(debouncedQuery, 12));
-  const results = searchQuery.data ?? [];
+  const searchQuery = useQuery({
+    ...meiliLabelSearchQueryOptions({
+      keyword: debouncedQuery,
+      limit: 12,
+      appLocale,
+    }),
+    enabled: debouncedQuery.length > 0,
+  });
+  const results = searchQuery.data?.items ?? [];
 
   return (
     <Dialog
@@ -172,11 +182,9 @@ function ZoneLabelPickerDialog({
               key={result.unitId}
               type="button"
               className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
-              onClick={() =>
-                onPick(result.unitId, labelTitle(result, language))
-              }
+              onClick={() => onPick(result.unitId, labelTitle(result))}
             >
-              <span className="truncate">{labelTitle(result, language)}</span>
+              <span className="truncate">{labelTitle(result)}</span>
               <span className="shrink-0 font-mono text-xs text-text-tertiary">
                 {result.unitId.slice(0, 8)}
               </span>
@@ -187,7 +195,7 @@ function ZoneLabelPickerDialog({
           {creating ? (
             <ZoneLabelCreateForm
               initialTitle={query.trim()}
-              language={language}
+              language={appLocale}
               onCreated={onPick}
               onCancel={() => setCreating(false)}
             />
