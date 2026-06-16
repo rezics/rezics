@@ -1,6 +1,12 @@
 export { RealmCreatePage } from "./pages/RealmCreatePage";
-export { RealmManagePage } from "./pages/RealmManagePage";
+export { RealmManageLayout } from "./layouts/RealmManageLayout";
 export { RealmDetailLayout } from "./pages/RealmDetailLayout";
+export { RealmManageDangerPage } from "./pages/manage/RealmManageDangerPage";
+export { RealmManageMembersPage } from "./pages/manage/RealmManageMembersPage";
+export { RealmManageModerationPage } from "./pages/manage/RealmManageModerationPage";
+export { RealmManageOrganizationPage } from "./pages/manage/RealmManageOrganizationPage";
+export { RealmManageProfilePage } from "./pages/manage/RealmManageProfilePage";
+export { RealmManageWikiPage } from "./pages/manage/RealmManageWikiPage";
 export {
   type RealmDetailContextValue,
   useRealmDetail,

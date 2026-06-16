@@ -8,9 +8,12 @@ export {
   officialZoneHref,
   officialZoneSearchHref,
 } from "./models/officialZoneRoutes";
-export {
-  ZoneManagePage,
-  type ZoneManageTab,
-} from "./pages/ZoneManagePage";
+export { ZoneManageLayout } from "./layouts/ZoneManageLayout";
+export { ZoneManageLifecyclePage } from "./pages/manage/ZoneManageLifecyclePage";
+export { ZoneManageMenusPage } from "./pages/manage/ZoneManageMenusPage";
+export { ZoneManagePagesPage } from "./pages/manage/ZoneManagePagesPage";
+export { ZoneManageProfilePage } from "./pages/manage/ZoneManageProfilePage";
+export { ZoneManageSourcesPage } from "./pages/manage/ZoneManageSourcesPage";
+export { ZoneManageThemePage } from "./pages/manage/ZoneManageThemePage";
 export { ZonePortalPage } from "./pages/ZonePortalPage";
 export { ZoneSearchPage } from "./pages/ZoneSearchPage";
