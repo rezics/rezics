@@ -2,11 +2,13 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 import { contentDocSchema } from "../content/doc-v1";
 import { languageSchema } from "../language";
+import { readLanguageGetQueryBase } from "../list-query-base";
+import { paginationLimitSchema } from "../pagination";
 import { unitTypeSchema } from "../unit/unit";
-import { zoneBoundaryV1Schema, type ZoneBoundary } from "./boundary-v1";
-import { zoneNavV1Schema, type ZoneNav } from "./nav-v1";
-import { zonePageV1Schema, type ZonePage } from "./page-v1";
-import { zoneThemeV1Schema, type ZoneTheme } from "./theme-v1";
+import { type ZoneBoundary, zoneBoundaryV1Schema } from "./boundary-v1";
+import { type ZoneNav, zoneNavV1Schema } from "./nav-v1";
+import { type ZonePage, zonePageV1Schema } from "./page-v1";
+import { type ZoneTheme, zoneThemeV1Schema } from "./theme-v1";
 
 // ANCHOR: Zone DTO
 // ANCHOR: 专区 DTO
@@ -60,6 +62,34 @@ export type ZoneDTO = Omit<
   boundary: ZoneBoundary;
   nav: ZoneNav;
   theme: ZoneTheme;
+};
+
+export const zoneListViewSchema = t.Union([
+  t.Literal("subscribed"),
+  t.Literal("managing"),
+]);
+
+export type ZoneListView = Static<typeof zoneListViewSchema>;
+
+export const zoneListQuerySchema = t.Object({
+  ...readLanguageGetQueryBase.properties,
+  view: t.Optional(zoneListViewSchema),
+  start: t.Optional(t.Numeric()),
+  limit: paginationLimitSchema,
+});
+
+export type ZoneListQuery = Static<typeof zoneListQuerySchema>;
+
+export const zoneListResponseSchema = t.Object({
+  zones: t.Array(zoneDTOSchema),
+  total: t.Optional(t.Number()),
+});
+
+export type ZoneListResponse = Omit<
+  Static<typeof zoneListResponseSchema>,
+  "zones"
+> & {
+  zones: ZoneDTO[];
 };
 
 // ANCHOR: Zone write inputs

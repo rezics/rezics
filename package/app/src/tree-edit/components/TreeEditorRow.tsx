@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Checkbox } from "@rezics/ui/shadcn";
 import {
   ChevronDown,
@@ -46,11 +47,12 @@ export function TreeEditorRow({
   DragIcon = GripVertical,
   subtreeEnd = false,
 }: TreeEditorRowProps) {
+  const { t } = useTranslation("common");
   const toggleLabel = hasChildren
     ? expanded
-      ? "Collapse"
-      : "Expand"
-    : "No children";
+      ? t("collapse")
+      : t("expand")
+    : t("no_children");
 
   return (
     <div
@@ -71,7 +73,7 @@ export function TreeEditorRow({
               event.stopPropagation();
               onSelect?.(event);
             }}
-            aria-label="Select row"
+            aria-label={t("select_row")}
           />
         </span>
       ) : null}
@@ -83,7 +85,7 @@ export function TreeEditorRow({
           <button
             type="button"
             className="flex size-8 cursor-grab items-center justify-center rounded-sm text-text-tertiary active:cursor-grabbing"
-            aria-label="Drag row"
+            aria-label={t("drag_row")}
             onClick={(event) => event.stopPropagation()}
             onDoubleClick={(event) => event.stopPropagation()}
           >

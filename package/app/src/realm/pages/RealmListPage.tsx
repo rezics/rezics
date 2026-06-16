@@ -1,5 +1,5 @@
-import { myRealmsQuery } from "@rezics/api/realm/realm.queries";
 import { useLeaveRealmMutation } from "@rezics/api/realm/realm.mutations";
+import { realmQueries } from "@rezics/api/realm/realm.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
@@ -12,10 +12,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link, unitHref } from "@/shared/ui/link";
 import {
@@ -24,32 +28,48 @@ import {
   selectHasMemberSession,
   useAuthSessionStore,
 } from "@/user";
+import { useUserScopedWorkspaceTarget } from "@/user/hooks/useUserScopedWorkspaceTarget";
 import {
   selectedRealmItems,
   toggleRealmSelection,
 } from "../models/realmBulkLeaveSelection";
 
+type RealmWorkspaceTab = "joined" | "administered";
+
 export function RealmListPage() {
   const { t } = useTranslation(["common", "entity", "settings"]);
   const navigate = useNavigate();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
+  const target = useUserScopedWorkspaceTarget();
   const readContext = useReadLanguageContext();
+  const [activeTab, setActiveTab] = useState<RealmWorkspaceTab>("joined");
   const [manageMode, setManageMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const canManageList = target.isCurrentUser && activeTab === "joined";
   const leaveRealm = useLeaveRealmMutation({
     onSuccess: () => {
       setSelectedIds(new Set());
     },
   });
 
+  useEffect(() => {
+    if (!canManageList) {
+      setManageMode(false);
+      setSelectedIds(new Set());
+    }
+  }, [canManageList]);
+
   const query = useQuery({
-    ...myRealmsQuery({
+    ...realmQueries.byMember(target.targetUserId ?? "", {
+      view: activeTab === "administered" ? "managing" : "joined",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
       languageMode: readContext.languageMode,
+      limit: 50,
     }),
-    enabled: hasMemberSession && readContext.ready,
+    enabled:
+      Boolean(target.targetUserId) && readContext.ready && !target.isLoading,
   });
 
   const realms = useMemo(
@@ -72,7 +92,7 @@ export function RealmListPage() {
     setManageMode(false);
   };
 
-  if (!hasMemberSession) {
+  if (!target.targetUserId && !target.isLoading && !hasMemberSession) {
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-12">
         <h1 className="text-2xl font-semibold leading-ui">
@@ -108,60 +128,84 @@ export function RealmListPage() {
           >
             {t("common:search")}
           </Button>
-          <Button
-            variant={manageMode ? "outline" : "ghost"}
-            onClick={() => {
-              setManageMode((value) => !value);
-              setSelectedIds(new Set());
-            }}
-          >
-            {manageMode ? t("common:cancel") : t("entity:realm_list_manage")}
-          </Button>
-          <Button onClick={() => navigate({ to: "/realm/new" })}>
-            {t("entity:realm_new_title")}
-          </Button>
+          {canManageList && (
+            <label className="flex items-center gap-2 rounded-md px-2 text-sm leading-ui text-text-secondary">
+              <Checkbox
+                checked={manageMode}
+                onCheckedChange={(checked) => {
+                  setManageMode(Boolean(checked));
+                  setSelectedIds(new Set());
+                }}
+              />
+              {t("entity:realm_list_manage")}
+            </label>
+          )}
+          {hasMemberSession && (
+            <Button onClick={() => navigate({ to: "/realm/new" })}>
+              {t("entity:realm_new_title")}
+            </Button>
+          )}
         </div>
       </div>
 
-      {query.isLoading ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      ) : query.error ? (
-        <p className="py-8 text-center text-sm leading-ui text-error-text">
-          {t("settings:profile_realms_load_failed")}
-        </p>
-      ) : realms.length === 0 ? (
-        <p className="py-8 text-center text-sm leading-ui text-text-secondary">
-          {t("settings:profile_realms_none_joined")}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {manageMode && (
-            <div className="flex items-center justify-between gap-3 border-y border-border-whisper py-3">
-              <p className="text-sm leading-ui text-text-secondary">
-                {t("entity:realm_list_selected_count", { count: selectedCount })}
-              </p>
-              <Button
-                variant="destructive"
-                disabled={selectedCount === 0 || isLeaving}
-                onClick={() => setConfirmOpen(true)}
-              >
-                {t("entity:realm_leave")}
-              </Button>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as RealmWorkspaceTab)}
+      >
+        <TabsList className="mb-4">
+          <TabsTrigger value="joined">
+            {t("entity:realm_list_tab_joined")}
+          </TabsTrigger>
+          <TabsTrigger value="administered">
+            {t("entity:realm_list_tab_administered")}
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value={activeTab}>
+          {target.isLoading || query.isLoading ? (
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
+          ) : target.error || query.error ? (
+            <p className="py-8 text-center text-sm leading-ui text-error-text">
+              {t("settings:profile_realms_load_failed")}
+            </p>
+          ) : realms.length === 0 ? (
+            <p className="py-8 text-center text-sm leading-ui text-text-secondary">
+              {activeTab === "joined"
+                ? t("settings:profile_realms_none_joined")
+                : t("settings:profile_realms_none_managing")}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {manageMode && (
+                <div className="flex items-center justify-between gap-3 border-y border-border-whisper py-3">
+                  <p className="text-sm leading-ui text-text-secondary">
+                    {t("entity:realm_list_selected_count", {
+                      count: selectedCount,
+                    })}
+                  </p>
+                  <Button
+                    variant="destructive"
+                    disabled={selectedCount === 0 || isLeaving}
+                    onClick={() => setConfirmOpen(true)}
+                  >
+                    {t("entity:realm_leave")}
+                  </Button>
+                </div>
+              )}
+              {realms.map((realm) => (
+                <RealmManagementListItem
+                  key={realm.unitId}
+                  realm={realm}
+                  manageMode={manageMode}
+                  selected={selectedIds.has(realm.unitId)}
+                  onToggle={() => handleToggleRealm(realm.unitId)}
+                />
+              ))}
             </div>
           )}
-          {realms.map((realm) => (
-            <RealmManagementListItem
-              key={realm.unitId}
-              realm={realm}
-              manageMode={manageMode}
-              selected={selectedIds.has(realm.unitId)}
-              onToggle={() => handleToggleRealm(realm.unitId)}
-            />
-          ))}
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
@@ -170,7 +214,9 @@ export function RealmListPage() {
               {t("entity:realm_list_leave_confirm_title")}
             </DialogTitle>
             <DialogDescription>
-              {t("entity:realm_list_leave_confirm_description", { count: selectedCount })}
+              {t("entity:realm_list_leave_confirm_description", {
+                count: selectedCount,
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter showCloseButton>

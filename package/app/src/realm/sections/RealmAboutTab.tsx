@@ -5,6 +5,7 @@ import {
   type RealmDTO,
   type RealmMembershipMeDTO,
 } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -25,13 +26,16 @@ export function RealmAboutTab({
   membership,
   canManage,
 }: RealmAboutTabProps) {
+  const { t } = useTranslation("entity");
   const role = membership?.roleKey ?? "visitor";
   const state =
     membership?.state ?? (membership?.member ? "active" : "visitor");
-  const visibility = realm.isPublic ? "Public" : "Member only";
+  const visibility = realm.isPublic
+    ? t("realm_about_visibility_public")
+    : t("realm_about_visibility_member_only");
   const moderatorContext = canManage
-    ? "Moderation tools are available from this realm."
-    : "Moderators manage reports, rules, and member safety for this realm.";
+    ? t("realm_about_moderator_has_tools")
+    : t("realm_about_moderator_description");
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
@@ -39,7 +43,7 @@ export function RealmAboutTab({
         {description ? (
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-semibold leading-ui text-text-primary">
-              Summary
+              {t("realm_about_summary")}
             </h2>
             <p className="m-0 text-sm leading-body text-text-secondary">
               {description}
@@ -47,23 +51,31 @@ export function RealmAboutTab({
           </section>
         ) : null}
         <RealmMarkdownPanel
-          title="About"
+          title={t("realm_tab_about")}
           postUnitId={realm.extra?.about ?? null}
-          emptyTitle="No about content"
+          emptyTitle={t("realm_about_no_content")}
         />
         <RealmRuleFullPanel realmUnitId={realm.unitId} />
       </div>
 
       <aside className="flex min-w-0 flex-col gap-3">
-        <InfoCard label="Members" value={String(realm.memberCount ?? 0)} />
-        <InfoCard label="Visibility" value={visibility} />
-        <InfoCard label="Your role" value={role} />
-        <InfoCard label="Membership" value={state} />
-        {realm.isOfficial ? <InfoCard label="Realm" value="Official" /> : null}
+        <InfoCard
+          label={t("realm_tab_members")}
+          value={String(realm.memberCount ?? 0)}
+        />
+        <InfoCard label={t("realm_about_visibility")} value={visibility} />
+        <InfoCard label={t("realm_about_your_role")} value={role} />
+        <InfoCard label={t("realm_about_membership")} value={state} />
+        {realm.isOfficial ? (
+          <InfoCard
+            label={t("realm_title")}
+            value={t("realm_official")}
+          />
+        ) : null}
         <Card surface="contained">
           <CardContent className="p-4">
             <p className="m-0 text-xs font-medium uppercase leading-ui text-text-tertiary">
-              Moderator context
+              {t("realm_about_moderator_context")}
             </p>
             <p className="m-0 mt-2 text-sm leading-body text-text-secondary">
               {moderatorContext}
@@ -127,6 +139,7 @@ function RealmMarkdownPanel({
 }
 
 function RealmRuleFullPanel({ realmUnitId }: { realmUnitId: string }) {
+  const { t } = useTranslation("entity");
   const readContext = useReadLanguageContext();
   const ruleQuery = useQuery({
     ...realmRuleResolvedQuery(realmUnitId, undefined, {
@@ -153,13 +166,13 @@ function RealmRuleFullPanel({ realmUnitId }: { realmUnitId: string }) {
   }
 
   if (!content || !mainMarkdownSource(content)) {
-    return <EmptyState title="No realm rules" />;
+    return <EmptyState title={t("realm_no_rules")} />;
   }
 
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-base font-semibold leading-ui text-text-primary">
-        Rules
+        {t("realm_rules")}
       </h2>
       <PostBodyMarkdown
         content={content}

@@ -7,6 +7,8 @@ import type {
   UpdateZonePageInput,
   UpdateZoneThemeInput,
   ZoneDTO,
+  ZoneListQuery,
+  ZoneListResponse,
   ZonePortalResponse,
   ZoneSectionData,
 } from "@rezics/contract";
@@ -14,6 +16,19 @@ import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 
 export const zoneApi = {
+  mine: async (query?: ZoneListQuery): Promise<ZoneListResponse> => {
+    return apiFetch<ZoneListResponse>(`/zone/me${buildQueryString(query)}`);
+  },
+
+  byUser: async (
+    userId: string,
+    query?: ZoneListQuery,
+  ): Promise<ZoneListResponse> => {
+    return apiFetch<ZoneListResponse>(
+      `/zone/user/${encodeURIComponent(userId)}${buildQueryString(query)}`,
+    );
+  },
+
   getBySlug: async (
     slug: string,
     languages: readonly string[] = [],

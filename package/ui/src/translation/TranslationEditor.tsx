@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useId, useState } from "react";
 import { Button } from "#/shadcn/button";
@@ -41,6 +42,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   translations,
   onChange,
 }) => {
+  const { t } = useTranslation("common");
   const [activeTab, setActiveTab] = useState(
     translations[0]?.language ?? DEFAULT_TRANSLATION_LANGUAGE,
   );
@@ -83,25 +85,25 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </TabsList>
         </Tabs>
         <Button type="button" size="sm" variant="ghost" onClick={addLanguage}>
-          + Language
+          + {t("language")}
         </Button>
       </div>
       <div className="flex flex-col gap-4 mt-4">
-        <FieldRow htmlFor={`${idPrefix}-title`} label="Title">
+        <FieldRow htmlFor={`${idPrefix}-title`} label={t("title")}>
           <Input
             id={`${idPrefix}-title`}
             value={activeTranslation.title ?? ""}
             onChange={(e) => updateField("title", e.target.value)}
           />
         </FieldRow>
-        <FieldRow htmlFor={`${idPrefix}-subtitle`} label="Subtitle">
+        <FieldRow htmlFor={`${idPrefix}-subtitle`} label={t("subtitle")}>
           <Input
             id={`${idPrefix}-subtitle`}
             value={activeTranslation.subtitle ?? ""}
             onChange={(e) => updateField("subtitle", e.target.value)}
           />
         </FieldRow>
-        <FieldRow htmlFor={`${idPrefix}-summary`} label="Summary">
+        <FieldRow htmlFor={`${idPrefix}-summary`} label={t("summary")}>
           <textarea
             id={`${idPrefix}-summary`}
             rows={2}
@@ -110,7 +112,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
           />
         </FieldRow>
-        <FieldRow htmlFor={`${idPrefix}-description`} label="Description">
+        <FieldRow htmlFor={`${idPrefix}-description`} label={t("description")}>
           <textarea
             id={`${idPrefix}-description`}
             rows={4}

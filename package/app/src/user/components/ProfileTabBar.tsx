@@ -7,8 +7,6 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("settings:profile_tab_content"),
   profile_tab_shelves: () =>
     getI18nRuntime().i18n.t("settings:profile_tab_shelves"),
-  profile_tab_realms: () =>
-    getI18nRuntime().i18n.t("settings:profile_tab_realms"),
   profile_tab_followers: () =>
     getI18nRuntime().i18n.t("settings:profile_tab_followers"),
   profile_tab_reactions: () =>
@@ -35,7 +33,6 @@ const PROFILE_TAB_BY_PATH = {
   "": { label: i18nMessages.profile_tab_overview, path: "" },
   "/content": { label: i18nMessages.profile_tab_content, path: "/content" },
   "/shelves": { label: i18nMessages.profile_tab_shelves, path: "/shelves" },
-  "/realms": { label: i18nMessages.profile_tab_realms, path: "/realms" },
   "/followers": {
     label: i18nMessages.profile_tab_followers,
     path: "/followers",

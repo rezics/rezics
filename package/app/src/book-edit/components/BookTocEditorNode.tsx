@@ -1,4 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingBadge } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
 import {
@@ -137,6 +138,7 @@ export const createBookTocEditorNode = ({
     style,
     dragHandle,
   }: NodeRendererProps<Chapter>) {
+    const { t } = useTranslation(["book", "common"]);
     const hasChildren = !!(node.children && node.children.length > 0);
     const isSectionNode = node.data.noContent === true;
     const isSubtreeEnd = !!(
@@ -172,42 +174,44 @@ export const createBookTocEditorNode = ({
     const actions: TreeActionItem[] = [
       {
         key: "edit",
-        label: isSectionNode ? "Edit" : "Edit metadata",
+        label: isSectionNode
+          ? t("common:edit")
+          : t("book:chapter_edit_metadata"),
         icon: <Pencil className="size-4" aria-hidden />,
         onSelect: () => onEditChapter(node.data),
       },
       {
         key: "moveTo",
-        label: "Move to...",
+        label: t("book:chapter_move_dialog_title"),
         icon: <Move className="size-4" aria-hidden />,
         onSelect: () => onMoveToParent(node.data),
       },
       {
         key: "moveToFirst",
-        label: "Move to first",
+        label: t("book:chapter_move_to_first"),
         onSelect: () => onMoveToFirst(node.data),
       },
       {
         key: "moveToLast",
-        label: "Move to last",
+        label: t("book:chapter_move_to_last"),
         onSelect: () => onMoveToLast(node.data),
       },
       {
         key: "addChild",
-        label: "New child chapter",
+        label: t("book:chapter_new_child"),
         icon: <Plus className="size-4" aria-hidden />,
         separatorBefore: true,
         onSelect: () => onCreateChild(node.data),
       },
       {
         key: "addSiblingAfter",
-        label: "New sibling after",
+        label: t("book:chapter_new_sibling_after"),
         icon: <Plus className="size-4" aria-hidden />,
         onSelect: () => onCreateSiblingAfter(node.data),
       },
       {
         key: "delete",
-        label: "Delete",
+        label: t("common:delete"),
         icon: <Trash2 className="size-4" aria-hidden />,
         separatorBefore: true,
         destructive: true,

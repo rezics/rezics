@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import type { FC, ReactNode } from "react";
 import { Button } from "#/shadcn/button";
 
@@ -21,10 +22,11 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
   policyLabel,
   onAccept,
   onPolicyClick,
-  acceptLabel = "Accept",
+  acceptLabel,
   secondaryAction,
   policyAction,
 }) => {
+  const { t } = useTranslation("common");
   return (
     <section aria-label={title}>
       <section className="flex flex-col gap-4 rounded-lg border border-border-whisper p-4 bg-rezics-surface-base">
@@ -48,7 +50,7 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
             </Button>
           ) : null}
           <Button type="button" variant="default" onClick={onAccept}>
-            {acceptLabel}
+            {acceptLabel ?? t("ok")}
           </Button>
         </div>
       </section>

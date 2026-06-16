@@ -526,6 +526,7 @@ export type LowScoreTagsResponse =
 export const realmListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   ...readLanguageGetQueryBase.properties,
+  view: t.Optional(t.Union([t.Literal("joined"), t.Literal("managing")])),
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
@@ -541,6 +542,7 @@ export const realmListQuerySchema = t.Object({
 });
 
 export type RealmListQuery = (typeof realmListQuerySchema)["static"];
+export type RealmListView = NonNullable<RealmListQuery["view"]>;
 
 export const realmListBodySchema = t.Object({
   ...listPostBodyBase.properties,

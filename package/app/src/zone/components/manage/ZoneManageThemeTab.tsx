@@ -296,7 +296,7 @@ function ImageUrlInput({
               type="button"
               size="icon"
               variant="outline"
-              aria-label="Upload image"
+              aria-label={t("common:upload_image")}
             />
           }
         >

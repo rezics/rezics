@@ -99,7 +99,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                   {t("page:book_tabs_community")}
                 </TabsTrigger>
                 <TabsTrigger value="history" className="flex-none snap-start">
-                  History
+                  {t("page:book_tabs_history")}
                 </TabsTrigger>
               </TabsList>
             </Tabs>

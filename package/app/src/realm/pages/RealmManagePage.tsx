@@ -81,7 +81,7 @@ export function RealmManagePage({
   activeTab = "profile",
   onTabChange,
 }: RealmManagePageProps) {
-  const { t } = useTranslation(["common", "entity"]);
+  const { t } = useTranslation(["common", "entity", "community"]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const readContext = useReadLanguageContext();
@@ -102,7 +102,7 @@ export function RealmManagePage({
   );
   const permission = useServerPermission();
   const updateRealm = useUpdateRealmMutation({
-    onSuccess: () => toast.success("Realm settings saved."),
+    onSuccess: () => toast.success(t("community:realm_settings_saved")),
     onError: (error) => toast.error(error.message),
   });
 
@@ -200,7 +200,7 @@ export function RealmManagePage({
         queryKey: realmKeys.detail(realmId),
       });
 
-      toast.success("Realm profile saved.");
+      toast.success(t("community:realm_profile_saved"));
     } finally {
       setSaving(false);
     }
@@ -412,7 +412,7 @@ function RealmOwnershipSection({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const deleteRealm = useDeleteRealmMutation({
     onSuccess: () => {
-      toast.success("Realm deleted.");
+      toast.success(t("community:realm_deleted"));
       onDeleted();
     },
     onError: (error) => {

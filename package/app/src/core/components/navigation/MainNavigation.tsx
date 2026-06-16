@@ -43,6 +43,8 @@ export interface MainSidebarSubscriptionItem {
 }
 
 export interface NavigationBuildOptions {
+  currentUserId?: string | null;
+  currentUserSlug?: string | null;
   zones?: {
     items: MainSidebarSubscriptionItem[];
     isLoading?: boolean;
@@ -53,6 +55,20 @@ export interface NavigationBuildOptions {
     isLoading?: boolean;
     errorMessage?: string | null;
   };
+}
+
+function userScopedListSegment(
+  options: NavigationBuildOptions,
+  list: "realms" | "zones",
+  fallback: string,
+) {
+  if (options.currentUserSlug) {
+    return `/u/${encodeURIComponent(options.currentUserSlug)}/${list}`;
+  }
+  if (options.currentUserId) {
+    return `/user/${encodeURIComponent(options.currentUserId)}/${list}`;
+  }
+  return fallback;
 }
 
 export type NavigationTranslateFn = (
@@ -226,7 +242,7 @@ function buildRealmSection(
     sectionId: "realms",
     title: t("shell:navigation_realms"),
     allTitle: t("shell:navigation_all_realms"),
-    allSegment: "/realm",
+    allSegment: userScopedListSegment(options, "realms", "/realm"),
     icon: GroupsOutlinedIcon,
     entries: options.realms,
     emptyTitle: t("shell:navigation_no_subscribed_realms"),
@@ -246,7 +262,7 @@ function buildZoneSection(
     sectionId: "zones",
     title: t("shell:navigation_zones"),
     allTitle: t("shell:navigation_all_zones"),
-    allSegment: "/z",
+    allSegment: userScopedListSegment(options, "zones", "/z"),
     icon: CompassOutlinedIcon,
     entries: options.zones,
     emptyTitle: t("shell:navigation_no_subscribed_zones"),

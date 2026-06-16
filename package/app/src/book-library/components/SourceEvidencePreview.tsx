@@ -1,4 +1,5 @@
 import type { CreditAttributionEvidenceSummary } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Popover,
@@ -30,6 +31,7 @@ export function SourceEvidencePreview({
   evidence,
   className,
 }: SourceEvidencePreviewProps) {
+  const { t } = useTranslation("book");
   const firstEvidence = evidence?.[0];
   const entityHref = unitHref({
     type: "ENTITY",
@@ -93,7 +95,7 @@ export function SourceEvidencePreview({
             <div className="mt-1 font-mono">{firstEvidence.claimPath}</div>
           ) : null}
           <div className="mt-1">
-            Observed {new Date(firstEvidence.observedAt).toLocaleString()}
+            {t("source_evidence_observed", { date: new Date(firstEvidence.observedAt).toLocaleString() })}
           </div>
         </div>
 
@@ -105,7 +107,7 @@ export function SourceEvidencePreview({
             variant="outline"
             render={(props) => (
               <Link to={entityHref} {...props}>
-                View Entity
+                {t("source_evidence_view_entity")}
               </Link>
             )}
           />
@@ -121,7 +123,7 @@ export function SourceEvidencePreview({
                 }
                 {...props}
               >
-                Open Source
+                {t("source_evidence_open_source")}
               </SafeLink>
             )}
           />

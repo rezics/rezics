@@ -49,6 +49,7 @@ export function MarkdownEditor({
   toolbar,
   resize,
   viewRef,
+  labels,
   onViewModeChange,
 }: MarkdownEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("write");
@@ -296,7 +297,7 @@ export function MarkdownEditor({
               data-active={viewMode === "write"}
               onClick={() => setViewMode("write")}
             >
-              Write
+              {labels?.write ?? "Write"}
             </button>
             <button
               type="button"
@@ -305,7 +306,7 @@ export function MarkdownEditor({
               data-active={viewMode === "preview"}
               onClick={() => setViewMode("preview")}
             >
-              Preview
+              {labels?.preview ?? "Preview"}
             </button>
           </div>
         )}

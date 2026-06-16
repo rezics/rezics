@@ -1,4 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Label } from "#/shadcn/label";
 import {
   Select,
@@ -28,16 +29,19 @@ export interface RatingSelectorProps {
 export function RatingSelector({
   value,
   onChange,
-  label = "Content rating",
+  label,
   helperText,
   disabled,
   fullWidth = true,
   size = "sm",
 }: RatingSelectorProps) {
+  const { t } = useTranslation("book");
+  const effectiveLabel = label ?? t("fields_rating");
+
   return (
     <div className={`flex flex-col gap-1 ${fullWidth ? "w-full" : ""}`}>
       <Label htmlFor="rating-selector" className="text-sm text-rezics-fg-muted">
-        {label}
+        {effectiveLabel}
       </Label>
       <Select
         value={value}
@@ -49,7 +53,7 @@ export function RatingSelector({
           size={size}
           className={fullWidth ? "w-full" : undefined}
         >
-          <SelectValue placeholder={label} />
+          <SelectValue placeholder={effectiveLabel} />
         </SelectTrigger>
         <SelectContent>
           {RATING_OPTIONS.map((opt) => (

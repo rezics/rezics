@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 import { useId } from "react";
 import { cn } from "#/shared/lib/utils";
@@ -49,6 +50,7 @@ export function ColorField<TToken extends string = string>({
   disabled,
   className,
 }: ColorFieldProps<TToken>) {
+  const { t } = useTranslation("common");
   const pickerColor = normalizeHex(value) ?? FALLBACK_PICKER_COLOR;
   const generatedId = useId();
   const inputId = label ? generatedId : undefined;
@@ -65,7 +67,7 @@ export function ColorField<TToken extends string = string>({
                 size="icon"
                 variant="outline"
                 disabled={disabled}
-                aria-label={label ? `${label} color picker` : "Color picker"}
+                aria-label={label ? `${label} ${t("color_picker")}` : t("color_picker")}
               />
             }
           >

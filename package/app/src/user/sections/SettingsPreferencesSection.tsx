@@ -276,12 +276,14 @@ export const SettingsPreferencesSection: FC = () => {
       </SettingsSection>
 
       <SettingsSection
-        title="Realm moderation"
-        description="Choose whether realm manage mode starts enabled on feeds you moderate."
+        title={t("settings:preferences_moderation_title")}
+        description={t("settings:preferences_moderation_description")}
       >
         {moderationSuccess && (
           <Alert className="mb-3 text-success-text">
-            <AlertDescription>Moderation preference saved.</AlertDescription>
+            <AlertDescription>
+              {t("settings:preferences_moderation_saved")}
+            </AlertDescription>
           </Alert>
         )}
         <label
@@ -299,10 +301,10 @@ export const SettingsPreferencesSection: FC = () => {
           />
           <span className="flex flex-col">
             <span className="text-sm font-medium">
-              Start realm manage mode enabled
+              {t("settings:preferences_moderation_manage_mode")}
             </span>
             <span className="text-sm text-text-secondary">
-              Per-realm changes are kept only for the current visit.
+              {t("settings:preferences_moderation_manage_mode_hint")}
             </span>
           </span>
         </label>

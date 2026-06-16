@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -14,10 +15,9 @@ interface TreeActionMenuProps {
   label?: string;
 }
 
-export function TreeActionMenu({
-  actions,
-  label = "More actions",
-}: TreeActionMenuProps) {
+export function TreeActionMenu({ actions, label }: TreeActionMenuProps) {
+  const { t } = useTranslation("common");
+  const effectiveLabel = label ?? t("more_actions");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -28,7 +28,7 @@ export function TreeActionMenu({
             size="icon"
             variant="ghost"
             className="size-8 shrink-0"
-            aria-label={label}
+            aria-label={effectiveLabel}
             {...props}
             onClick={(event) => {
               event.stopPropagation();

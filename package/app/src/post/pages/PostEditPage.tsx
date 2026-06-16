@@ -52,7 +52,7 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
   }, [languageContent, locale, post]);
 
   const handleSaved = () => {
-    toast.success("Saved.");
+    toast.success(t("common:saved"));
     navigate({ to: returnTo });
   };
 

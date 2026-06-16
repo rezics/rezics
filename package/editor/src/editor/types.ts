@@ -58,11 +58,20 @@ export interface BaseEditorProps {
 
 export type ViewMode = "write" | "preview" | "dual";
 
+export interface MarkdownEditorLabels {
+  write?: string;
+  preview?: string;
+  resizeEditor?: string;
+}
+
 export interface MarkdownEditorProps extends BaseEditorProps {
   preview?: boolean | PreviewConfig;
   mention?: MentionConfig;
   emoji?: EmojiConfig;
   toolbar?: false | ToolbarOverride;
+  /** Localized labels for built-in UI text (tabs, resize handle).
+   *  内建 UI 文字（标签、调整手柄）的本地化标签。 */
+  labels?: MarkdownEditorLabels;
   /** Called when the editor view mode changes (write / preview / dual).
    *  编辑器视图模式改变（write / preview / dual）时调用。 */
   onViewModeChange?: (mode: ViewMode) => void;

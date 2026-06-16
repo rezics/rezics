@@ -48,7 +48,7 @@ export function WikiPostEditor({
     [],
   );
   const handleSaved = (savedPost: PostDTO) => {
-    toast.success("Saved.");
+    toast.success(t("common:saved"));
     onSaved?.(savedPost);
   };
   const handleError = (error: Error) => {

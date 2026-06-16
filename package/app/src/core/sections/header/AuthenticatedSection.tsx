@@ -1,4 +1,5 @@
 import { useDmStream } from "@rezics/api/dm/dm";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   useNotificationStream,
   useUnreadCount,
@@ -16,6 +17,7 @@ export function AuthenticatedSection() {
   // on each incoming `dm.message` or `dm.read` event.
   // 实时通知 + 私信流——在已认证的 shell 层级仅挂载一次。
   // 每当收到 `dm.message` 或 `dm.read` 事件时，DM 流会使会话/线程缓存失效。
+  const { t } = useTranslation(["shell"]);
   useNotificationStream();
   useDmStream();
   const { data } = useUnreadCount();
@@ -25,12 +27,14 @@ export function AuthenticatedSection() {
   return (
     <div className="flex items-center gap-1 md:gap-2">
       <Link to="/inbox/notification">
-        <HeaderTooltip label="Open inbox">
+        <HeaderTooltip label={t("shell:app_inbox_tooltip")}>
           <Button
             variant="ghost"
             size="icon"
             aria-label={
-              unread > 0 ? `notifications (${unread} unread)` : "notifications"
+              unread > 0
+                ? t("shell:app_notifications_unread", { count: unread })
+                : t("shell:app_notifications_aria_label")
             }
             className="relative h-9 min-w-9 rounded-full bg-transparent md:h-10 md:min-w-10"
           >

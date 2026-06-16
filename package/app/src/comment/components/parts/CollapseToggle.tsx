@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { Plus as AddIcon, Minus as RemoveIcon } from "lucide-react";
 import type React from "react";
 import { useThreadingHover } from "./ThreadingContext";
@@ -13,6 +14,7 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({
   onToggle,
   highlighted = false,
 }) => {
+  const { t } = useTranslation("common");
   const { hovered, setHovered } = useThreadingHover();
   const isActive = highlighted || hovered;
 
@@ -25,7 +27,7 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({
   return (
     <button
       type="button"
-      aria-label={isCollapsed ? "Expand replies" : "Collapse replies"}
+      aria-label={isCollapsed ? t("expand_replies") : t("collapse_replies")}
       onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

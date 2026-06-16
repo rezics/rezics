@@ -1,5 +1,10 @@
 export const zoneKeys = {
   all: () => ["zones"] as const,
+  lists: () => [...zoneKeys.all(), "list"] as const,
+  mine: (query?: unknown) =>
+    [...zoneKeys.lists(), "mine", query ?? null] as const,
+  byUser: (userId: string, query?: unknown) =>
+    [...zoneKeys.lists(), "user", userId, query ?? null] as const,
   details: () => [...zoneKeys.all(), "detail"] as const,
   detail: (slug: string, languages: readonly string[] = []) =>
     [...zoneKeys.details(), slug, [...languages]] as const,

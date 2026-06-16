@@ -4,6 +4,7 @@ import {
   useUpdateMemberRoleMutation,
 } from "@rezics/api/realm/realm";
 import type { RealmMemberDTO } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -36,17 +37,18 @@ const ROLE_OPTIONS = ["owner", "admin", "moderator", "member"] as const;
 export const RealmMemberList: React.FC<RealmMemberListProps> = ({
   realmId,
 }) => {
+  const { t } = useTranslation(["community", "common"]);
   const queryClient = useQueryClient();
   const [cursor, setCursor] = useState<string | undefined>();
   const { data, error, isError, isLoading } = useQuery(
     realmMembersQuery(realmId, { cursor, limit: 50 }),
   );
   const updateRole = useUpdateMemberRoleMutation({
-    onSuccess: () => toast.success("Member role updated."),
+    onSuccess: () => toast.success(t("community:member_role_updated")),
     onError: (error) => toast.error(error.message),
   });
   const removeMember = useRemoveMemberMutation({
-    onSuccess: () => toast.success("Member removed."),
+    onSuccess: () => toast.success(t("community:member_removed")),
     onError: (error) => toast.error(error.message),
   });
   const [pendingRemove, setPendingRemove] = useState<RealmMemberDTO | null>(
@@ -61,11 +63,11 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
     <div className="flex flex-col gap-3">
       {isLoading ? (
         <p className="py-4 text-sm leading-body text-text-secondary">
-          Loading members...
+          {t("community:member_loading")}
         </p>
       ) : members.length === 0 ? (
         <p className="py-4 text-sm leading-body text-text-secondary">
-          No members found.
+          {t("community:member_empty")}
         </p>
       ) : (
         members.map((member) => (
@@ -100,7 +102,7 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
               }
               disabled={updateRole.isPending}
             >
-              <SelectTrigger aria-label="Member role">
+              <SelectTrigger aria-label={t("community:member_role_aria")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -116,7 +118,7 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
               variant="destructive"
               onClick={() => setPendingRemove(member)}
             >
-              Remove
+              {t("common:remove")}
             </Button>
           </div>
         ))
@@ -128,7 +130,7 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
             variant="outline"
             onClick={() => setCursor(data.cursor)}
           >
-            Load more
+            {t("common:load_more")}
           </Button>
         </div>
       ) : null}
@@ -141,14 +143,14 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove member?</DialogTitle>
+            <DialogTitle>{t("community:member_remove_title")}</DialogTitle>
             <DialogDescription>
-              This removes the member from the realm roster.
+              {t("community:member_remove_description")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setPendingRemove(null)}>
-              Cancel
+              {t("common:cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -165,7 +167,7 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
                 });
               }}
             >
-              Remove
+              {t("common:remove")}
             </Button>
           </DialogFooter>
         </DialogContent>

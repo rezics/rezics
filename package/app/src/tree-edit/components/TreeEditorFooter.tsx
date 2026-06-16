@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { RotateCcw, Save } from "lucide-react";
 import type React from "react";
@@ -18,16 +19,19 @@ export function TreeEditorFooter({
   summary,
   onCancel,
   onSave,
-  saveLabel = "Save",
-  cancelLabel = "Cancel",
+  saveLabel,
+  cancelLabel,
 }: TreeEditorFooterProps) {
+  const { t } = useTranslation("common");
   const dirty = pendingCount > 0;
+  const effectiveSaveLabel = saveLabel ?? t("save");
+  const effectiveCancelLabel = cancelLabel ?? t("cancel");
   return (
     <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border-whisper py-3 text-sm leading-ui text-text-secondary">
       <div className="min-w-0">
         {dirty ? (
           <span className="text-text-primary">
-            {pendingCount} pending {pendingCount === 1 ? "op" : "ops"}
+            {t("pending_ops", { count: pendingCount })}
           </span>
         ) : (
           summary
@@ -42,7 +46,7 @@ export function TreeEditorFooter({
           disabled={!dirty || saving}
         >
           <RotateCcw className="mr-2 size-4" aria-hidden />
-          {cancelLabel}
+          {effectiveCancelLabel}
         </Button>
         <Button
           type="button"
@@ -51,7 +55,7 @@ export function TreeEditorFooter({
           disabled={!dirty || saving}
         >
           <Save className="mr-2 size-4" aria-hidden />
-          {saving ? "Saving" : saveLabel}
+          {saving ? t("saving") : effectiveSaveLabel}
         </Button>
       </div>
     </div>

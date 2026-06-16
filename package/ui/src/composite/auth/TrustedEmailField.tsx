@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import type { ChangeEvent, FC } from "react";
 import { Button } from "#/shadcn/button";
 import { Input } from "#/shadcn/input";
@@ -18,16 +19,17 @@ export const TrustedEmailField: FC<TrustedEmailFieldProps> = ({
   value,
   locked,
   required = true,
-  label = "Email",
+  label,
   lockedHelperText,
   editableHelperText,
   onChange,
   onUnlock,
 }) => {
+  const { t } = useTranslation("common");
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor="email" className="text-sm text-rezics-fg-muted">
-        {label}
+        {label ?? t("email")}
         {required ? <span aria-hidden="true"> *</span> : null}
       </Label>
       <Input
@@ -47,7 +49,7 @@ export const TrustedEmailField: FC<TrustedEmailFieldProps> = ({
       {locked ? (
         <div>
           <Button type="button" variant="ghost" onClick={onUnlock}>
-            Edit Email
+            {t("edit")} {t("email")}
           </Button>
         </div>
       ) : null}

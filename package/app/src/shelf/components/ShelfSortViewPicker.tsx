@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import type {
   ShelfSortField,
   ShelfSortOrder,
@@ -66,10 +67,13 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
   viewOptions,
   onSortChange,
   onViewChange,
-  sortHeading = "Sort by",
-  viewHeading = "View",
+  sortHeading,
+  viewHeading,
   className,
 }: ShelfSortViewPickerProps<TView>) {
+  const { t } = useTranslation("common");
+  const effectiveSortHeading = sortHeading ?? t("sort_method");
+  const effectiveViewHeading = viewHeading ?? t("view");
   const selectedSortLabel =
     sortOptions
       .find(
@@ -88,14 +92,14 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
       >
         <SelectTrigger
           size="sm"
-          aria-label={sortHeading}
+          aria-label={effectiveSortHeading}
           className="border-0 bg-surface-subtle shadow-none hover:bg-surface-elevated"
         >
           <SelectValue>{selectedSortLabel}</SelectValue>
         </SelectTrigger>
         <SelectContent align="end" alignItemWithTrigger={false}>
           <SelectGroup>
-            <SelectLabel>{sortHeading}</SelectLabel>
+            <SelectLabel>{effectiveSortHeading}</SelectLabel>
             {sortOptions.map((option) => (
               <SelectItem
                 key={`${option.field}:${option.order}`}
@@ -118,14 +122,14 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
       >
         <SelectTrigger
           size="sm"
-          aria-label={viewHeading}
+          aria-label={effectiveViewHeading}
           className="border-0 bg-surface-subtle shadow-none hover:bg-surface-elevated"
         >
           <SelectValue>{selectedViewLabel}</SelectValue>
         </SelectTrigger>
         <SelectContent align="end" alignItemWithTrigger={false}>
           <SelectGroup>
-            <SelectLabel>{viewHeading}</SelectLabel>
+            <SelectLabel>{effectiveViewHeading}</SelectLabel>
             {viewOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label()}

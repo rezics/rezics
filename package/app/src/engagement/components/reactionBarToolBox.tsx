@@ -87,7 +87,7 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
         </div>
         <DialogFooter>
           <Button onClick={onClose} variant="ghost">
-            Close
+            {t("close")}
           </Button>
         </DialogFooter>
       </DialogContent>

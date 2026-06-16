@@ -223,10 +223,10 @@ export const UserEditPage: FC<UserEditPageProps> = ({
               </div>
               <PasswordField
                 className="w-full"
-                label="New Password (optional)"
+                label={t("settings:profile_password_label")}
                 value={formData.password || ""}
                 setValue={(value) => handleChange("password", value)}
-                helperText="Leave empty to keep current password"
+                helperText={t("settings:profile_password_helper")}
                 required={false}
               />
               <div className="flex gap-2 justify-end mt-8">

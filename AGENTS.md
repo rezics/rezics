@@ -85,6 +85,9 @@ flag them.
 
 - Load the `rezics-design` skill before editing or reviewing JSX, CSS, UnoCSS
   classes, tokens, typography, spacing, component selection, icons, or copy.
+- Frontend user-facing product copy must go through `@rezics/i18n`; do not
+  hard-code display strings in React components. Add or reuse locale keys under
+  `package/i18n/locales/` and validate with `task check:i18n`.
 - Authoritative UI rules live in `rezics-design`, the `@rezics/ui` Storybook, and
   the `check:convention` / `check:tokens` rules; do not duplicate those details
   here.

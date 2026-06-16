@@ -21,9 +21,19 @@ import {
   type ZoneSectionItem,
   type ZoneSectionQuery,
   type ZoneTheme,
+  type ZoneListView,
   type ZoneTranslation,
 } from "@rezics/contract";
-import { and, count, eq, inArray, ne, notInArray } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  ne,
+  notInArray,
+} from "drizzle-orm";
 import {
   compileZoneSectionQuery,
   zoneSectionQueryUnsupportedFields,
@@ -35,10 +45,12 @@ import {
   Entity,
   Post,
   Realm,
+  RealmMember,
   Unit,
   UnitRealm,
   UnitSupportLanguage,
   UnitTranslation,
+  UserSubscriptionListEntry,
   Zone,
   ZonePage,
 } from "../db/schema";
@@ -130,6 +142,18 @@ export type ZoneRepository = {
     unitIds: string[],
   ): Promise<Array<{ unitId: string; kind: string }>>;
   getByUnitId(unitId: string): Promise<ZoneWithRelations | null>;
+  listSubscribedZoneIds(input: {
+    userUnitId: string;
+    publicOnly?: boolean;
+    offset: number;
+    limit: number;
+  }): Promise<{ unitIds: string[]; total: number }>;
+  listManageableZoneIds(input: {
+    userUnitId: string;
+    publicOnly?: boolean;
+    offset: number;
+    limit: number;
+  }): Promise<{ unitIds: string[]; total: number }>;
   findPageBySlug(
     zoneUnitId: string,
     slug: string,
@@ -610,6 +634,81 @@ function createDrizzleZoneRepository(): ZoneRepository {
         .where(eq(Zone.unitId, unitId))
         .limit(1);
       return zone ? hydrateZone(zone) : null;
+    },
+    async listSubscribedZoneIds(input) {
+      const db = await getServerDb();
+      const where = and(
+        eq(UserSubscriptionListEntry.userUnitId, input.userUnitId),
+        eq(UserSubscriptionListEntry.state, "ACTIVE"),
+        eq(UserSubscriptionListEntry.subscribedType, "ZONE"),
+        input.publicOnly ? ne(Unit.visibility, "PRIVATE") : undefined,
+      );
+      const [rows, totalRows] = await Promise.all([
+        db
+          .select({ unitId: UserSubscriptionListEntry.subscribedUnitId })
+          .from(UserSubscriptionListEntry)
+          .innerJoin(
+            Unit,
+            eq(UserSubscriptionListEntry.subscribedUnitId, Unit.id),
+          )
+          .where(where)
+          .orderBy(
+            desc(UserSubscriptionListEntry.pinned),
+            asc(UserSubscriptionListEntry.position),
+            asc(UserSubscriptionListEntry.createdAt),
+          )
+          .offset(input.offset)
+          .limit(input.limit),
+        db
+          .select({ total: count() })
+          .from(UserSubscriptionListEntry)
+          .innerJoin(
+            Unit,
+            eq(UserSubscriptionListEntry.subscribedUnitId, Unit.id),
+          )
+          .where(where),
+      ]);
+      return {
+        unitIds: rows.map((row) => row.unitId),
+        total: totalRows[0]?.total ?? 0,
+      };
+    },
+    async listManageableZoneIds(input) {
+      const db = await getServerDb();
+      const manageRoles = ["owner", "admin", "moderator"] as const;
+      const where = and(
+        eq(RealmMember.userId, input.userUnitId),
+        eq(RealmMember.state, "ACTIVE"),
+        inArray(RealmMember.roleKey, [...manageRoles]),
+        input.publicOnly ? ne(Unit.visibility, "PRIVATE") : undefined,
+      );
+      const [rows, totalRows] = await Promise.all([
+        db
+          .select({ unitId: Zone.unitId })
+          .from(Zone)
+          .innerJoin(
+            RealmMember,
+            eq(Zone.ownerRealmUnitId, RealmMember.realmUnitId),
+          )
+          .innerJoin(Unit, eq(Zone.unitId, Unit.id))
+          .where(where)
+          .orderBy(desc(Unit.createdAt), asc(Zone.unitId))
+          .offset(input.offset)
+          .limit(input.limit),
+        db
+          .select({ total: count() })
+          .from(Zone)
+          .innerJoin(
+            RealmMember,
+            eq(Zone.ownerRealmUnitId, RealmMember.realmUnitId),
+          )
+          .innerJoin(Unit, eq(Zone.unitId, Unit.id))
+          .where(where),
+      ]);
+      return {
+        unitIds: rows.map((row) => row.unitId),
+        total: totalRows[0]?.total ?? 0,
+      };
     },
     async findPageBySlug(zoneUnitId, slug) {
       const db = await getServerDb();
@@ -1128,6 +1227,37 @@ export class ZoneService {
 
   async getByUnitId(unitId: string): Promise<ZoneWithRelations | null> {
     return this.repository.getByUnitId(unitId);
+  }
+
+  async listByUser(input: {
+    userUnitId: string;
+    view?: ZoneListView | null;
+    publicOnly?: boolean;
+    start?: number | string | null;
+    limit?: number | string | null;
+  }): Promise<{ zones: ZoneWithRelations[]; total: number }> {
+    const offset = Math.max(0, Number(input.start ?? 0) || 0);
+    const limit = Math.min(Math.max(Number(input.limit ?? 50) || 50, 1), 100);
+    const list =
+      (input.view ?? "subscribed") === "managing"
+        ? await this.repository.listManageableZoneIds({
+            userUnitId: input.userUnitId,
+            publicOnly: input.publicOnly,
+            offset,
+            limit,
+          })
+        : await this.repository.listSubscribedZoneIds({
+            userUnitId: input.userUnitId,
+            publicOnly: input.publicOnly,
+            offset,
+            limit,
+          });
+    const zones = (
+      await Promise.all(
+        list.unitIds.map((unitId) => this.repository.getByUnitId(unitId)),
+      )
+    ).filter((zone): zone is ZoneWithRelations => Boolean(zone));
+    return { zones, total: list.total };
   }
 
   async getBySlug(slug: string): Promise<ZoneWithRelations | null> {

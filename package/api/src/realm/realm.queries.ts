@@ -9,6 +9,7 @@ import { realmKeys } from "./realm.keys";
 import type { RealmFilters } from "./realm.types";
 
 type RealmReadQuery = {
+  view?: "joined" | "managing";
   explicitLanguage?: string;
   languages?: string | readonly string[];
   appLocale?: string;

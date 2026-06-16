@@ -14,9 +14,11 @@ export {
   zoneMutations,
 } from "./zone.mutations";
 export {
+  myZonesQuery,
   zonePortalQueryOptions,
   zoneQueries,
   zoneQueryOptions,
   zoneSectionInfiniteQuery,
+  zonesByUserQuery,
 } from "./zone.queries";
 export { useZoneBySlug } from "./useZoneBySlug";

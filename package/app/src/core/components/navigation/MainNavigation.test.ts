@@ -37,6 +37,8 @@ describe("NAVIGATION", () => {
     const navigation = NAVIGATION(
       { isAuthenticated: true, isAdmin: false },
       {
+        currentUserId: "user-root",
+        currentUserSlug: "root-user",
         zones: {
           items: [{ unitId: "zone-1", title: "Books", href: "/z/books" }],
         },
@@ -76,6 +78,12 @@ describe("NAVIGATION", () => {
           )
         : [],
     ).toEqual(["All Zones", "Books"]);
+    expect(
+      navigation[2].kind === "section" &&
+        navigation[2].children[0]?.kind === "item"
+        ? navigation[2].children[0].segment
+        : "unexpected",
+    ).toBe("/u/root-user/zones");
 
     expect(navigation[3]).toMatchObject({
       kind: "section",
@@ -91,6 +99,41 @@ describe("NAVIGATION", () => {
           )
         : [],
     ).toEqual(["All Realms", "Fiction"]);
+    expect(
+      navigation[3].kind === "section" &&
+        navigation[3].children[0]?.kind === "item"
+        ? navigation[3].children[0].segment
+        : "unexpected",
+    ).toBe("/u/root-user/realms");
+  });
+
+  test("falls back to user id for scoped All links when the current user has no slug", () => {
+    const navigation = NAVIGATION(
+      { isAuthenticated: true, isAdmin: false },
+      {
+        currentUserId: "user-root",
+        zones: { items: [] },
+        realms: { items: [] },
+      },
+      t,
+    );
+    const zones = navigation.find(
+      (item) => item.kind === "section" && item.id === "zones",
+    );
+    const realms = navigation.find(
+      (item) => item.kind === "section" && item.id === "realms",
+    );
+
+    expect(
+      zones?.kind === "section" && zones.children[0]?.kind === "item"
+        ? zones.children[0].segment
+        : "unexpected",
+    ).toBe("/user/user-root/zones");
+    expect(
+      realms?.kind === "section" && realms.children[0]?.kind === "item"
+        ? realms.children[0].segment
+        : "unexpected",
+    ).toBe("/user/user-root/realms");
   });
 
   test("removes sidebar-only entry points without encoding route removal", () => {

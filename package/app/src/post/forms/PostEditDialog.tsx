@@ -51,7 +51,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const isWikiPost = !isComment && post.kind === PostKind.WIKI;
 
   const handleSuccess = () => {
-    toast.success("Saved.");
+    toast.success(t("common:saved"));
     onClose();
   };
 

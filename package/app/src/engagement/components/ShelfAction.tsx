@@ -1,4 +1,5 @@
 import type { ShelfItemKind, ShelfItemType } from "@rezics/api/shelf";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { BookmarkPlus } from "lucide-react";
 import type React from "react";
@@ -27,6 +28,7 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
   size: sizeProp,
   isReview,
 }) => {
+  const { t } = useTranslation("entity");
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const isPill = ctx.variant === "pill";
@@ -56,7 +58,7 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
         )}
       >
         <BookmarkPlus size={sizeToIconPx(size)} strokeWidth={2} />
-        Shelf
+        {t("shelf_title")}
       </Button>
       {isAuthenticated ? (
         <CollectionModal

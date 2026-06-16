@@ -1,18 +1,4 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
-
-const i18nMessages = {
-  realm_feed_sort_best: () =>
-    getI18nRuntime().i18n.t("entity:realm_feed_sort_best"),
-  realm_feed_sort_new: () =>
-    getI18nRuntime().i18n.t("entity:realm_feed_sort_new"),
-  realm_feed_sort_top: () =>
-    getI18nRuntime().i18n.t("entity:realm_feed_sort_top"),
-  realm_feed_sort_hot: () =>
-    getI18nRuntime().i18n.t("entity:realm_feed_sort_hot"),
-  realm_feed_sort_rising: () =>
-    getI18nRuntime().i18n.t("entity:realm_feed_sort_rising"),
-} as const;
-
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Select,
   SelectContent,
@@ -26,38 +12,50 @@ import type React from "react";
 
 export type RealmFeedSort = "best" | "hot" | "new" | "top" | "rising";
 
+const SORT_KEYS: readonly RealmFeedSort[] = [
+  "best",
+  "hot",
+  "new",
+  "top",
+  "rising",
+] as const;
+
+const SORT_I18N_KEY: Record<RealmFeedSort, string> = {
+  best: "realm_feed_sort_best",
+  hot: "realm_feed_sort_hot",
+  new: "realm_feed_sort_new",
+  top: "realm_feed_sort_top",
+  rising: "realm_feed_sort_rising",
+};
+
 export interface RealmFeedSortSwitcherProps {
   value: RealmFeedSort;
   onChange: (value: RealmFeedSort) => void;
 }
 
-const OPTIONS = {
-  best: i18nMessages.realm_feed_sort_best,
-  hot: i18nMessages.realm_feed_sort_hot,
-  new: i18nMessages.realm_feed_sort_new,
-  top: i18nMessages.realm_feed_sort_top,
-  rising: i18nMessages.realm_feed_sort_rising,
-} as const satisfies Record<RealmFeedSort, () => string>;
-
 export const RealmFeedSortSwitcher: React.FC<RealmFeedSortSwitcherProps> = ({
   value,
   onChange,
 }) => {
+  const { t } = useTranslation("entity");
   return (
     <div className="flex w-full">
       <Select
         value={value}
         onValueChange={(next) => onChange(next as RealmFeedSort)}
       >
-        <SelectTrigger className="w-full sm:w-52" aria-label="Sort by">
-          <SelectValue />
+        <SelectTrigger
+          className="w-full sm:w-52"
+          aria-label={t("realm_feed_sort_label")}
+        >
+          <SelectValue>{t(SORT_I18N_KEY[value])}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>Sort by</SelectLabel>
-            {Object.entries(OPTIONS).map(([optionValue, label]) => (
-              <SelectItem key={optionValue} value={optionValue}>
-                {label()}
+            <SelectLabel>{t("realm_feed_sort_label")}</SelectLabel>
+            {SORT_KEYS.map((key) => (
+              <SelectItem key={key} value={key}>
+                {t(SORT_I18N_KEY[key])}
               </SelectItem>
             ))}
           </SelectGroup>

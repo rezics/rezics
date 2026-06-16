@@ -56,7 +56,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
       },
       {
         onSuccess: () => {
-          toast.success("Saved.");
+          toast.success(t("common:saved"));
           reset();
           onSuccess?.();
         },

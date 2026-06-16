@@ -241,7 +241,10 @@ export const SettingsAccountSection: FC = () => {
         )}
       </SettingsSection>
 
-      <DangerZone description={t("settings:account_delete_warning")}>
+      <DangerZone
+        title={t("settings:danger_zone")}
+        description={t("settings:account_delete_warning")}
+      >
         <Button
           variant="outline"
           className="text-error-text"

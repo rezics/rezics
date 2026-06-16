@@ -48,7 +48,7 @@ export function RealmExistingPostSubmitSection({
   detailHref = `/realm/${realmId}`,
   postHref = (postUnitId) => `/realm/${realmId}/post/${postUnitId}`,
 }: RealmExistingPostSubmitSectionProps) {
-  const { t } = useTranslation(["common", "entity"]);
+  const { t } = useTranslation(["common", "entity", "community"]);
   const navigate = useNavigate();
   const userId = useCurrentUserId();
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
@@ -68,11 +68,11 @@ export function RealmExistingPostSubmitSection({
   const submitMutation = useSubmitPostToRealmMutation({
     onSuccess: (post) => {
       if (contentRequiresApproval) {
-        toast.success("Submitted for review.");
+        toast.success(t("community:post_submitted_for_review"));
         navigate({ to: detailHref });
         return;
       }
-      toast.success("Post published to realm.");
+      toast.success(t("community:post_published_to_realm"));
       navigate({ to: postHref(post.unitId) });
     },
   });

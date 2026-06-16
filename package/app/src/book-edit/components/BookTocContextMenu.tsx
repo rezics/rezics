@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Network as AccountTree,
   Copy as ContentCopy,
@@ -42,6 +43,7 @@ export const BookTocContextMenu = ({
   onMoveToLast,
   onDeleteChapter,
 }: BookTocContextMenuProps) => {
+  const { t } = useTranslation(["book", "common"]);
   const { node } = contextMenu;
   const ref = useRef<HTMLDivElement>(null);
 
@@ -78,7 +80,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        Edit
+        {t("common:edit")}
       </MenuItem>
 
       <MenuItem
@@ -88,7 +90,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        Move to...
+        {t("book:chapter_move_dialog_title")}
       </MenuItem>
 
       <div className="my-1 h-px bg-border-whisper" />
@@ -100,7 +102,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        New Child Chapter
+        {t("book:chapter_new_child")}
       </MenuItem>
 
       <MenuItem
@@ -110,7 +112,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        New Sibling After
+        {t("book:chapter_new_sibling_after")}
       </MenuItem>
 
       <div className="my-1 h-px bg-border-whisper" />
@@ -130,7 +132,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        {node.isOpen ? "Collapse" : "Expand"}
+        {node.isOpen ? t("common:collapse") : t("common:expand")}
       </MenuItem>
 
       <MenuItem
@@ -140,7 +142,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        Move to First
+        {t("book:chapter_move_to_first")}
       </MenuItem>
 
       <MenuItem
@@ -150,7 +152,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        Move to Last
+        {t("book:chapter_move_to_last")}
       </MenuItem>
 
       <div className="my-1 h-px bg-border-whisper" />
@@ -163,7 +165,7 @@ export const BookTocContextMenu = ({
           close();
         }}
       >
-        Delete
+        {t("common:delete")}
       </MenuItem>
     </div>
   );

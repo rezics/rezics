@@ -47,7 +47,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
 
   const updateMutation = useUpdatePostMutation({
     onSuccess: () => {
-      toast.success("Saved.");
+      toast.success(t("common:saved"));
       onClose();
     },
     onError: (error) => {

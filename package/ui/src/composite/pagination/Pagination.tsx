@@ -44,16 +44,17 @@ const SortControls: React.FC<SortControlsProps> = ({
   sortOrder,
   onSortChange,
 }) => {
+  const { t } = useTranslation(["common"]);
   const sortOptions = [
-    { value: "time", label: "按时间" },
-    { value: "name", label: "按名称" },
-    { value: "popular", label: "按热度" },
-    { value: "agree", label: "按赞同数" },
+    { value: "time", label: t("common:sort_by_time") },
+    { value: "name", label: t("common:sort_by_name") },
+    { value: "popular", label: t("common:sort_by_popularity") },
+    { value: "agree", label: t("common:sort_by_votes") },
   ];
   return (
     <div className="rounded-md p-2 mb-2 flex flex-wrap items-center gap-2">
       <div className="flex flex-col gap-1 min-w-[150px]">
-        <Label htmlFor="sort-type">排序方式</Label>
+        <Label htmlFor="sort-type">{t("common:sort_method")}</Label>
         <Select
           value={sortType}
           onValueChange={(v) => {
@@ -61,7 +62,7 @@ const SortControls: React.FC<SortControlsProps> = ({
           }}
         >
           <SelectTrigger id="sort-type" size="sm" className="w-full">
-            <SelectValue placeholder="排序方式" />
+            <SelectValue placeholder={t("common:sort_method")} />
           </SelectTrigger>
           <SelectContent>
             {sortOptions.map((opt) => (
@@ -80,13 +81,13 @@ const SortControls: React.FC<SortControlsProps> = ({
         }
         variant="outline"
       >
-        <ToggleGroupItem value="desc" aria-label="降序">
+        <ToggleGroupItem value="desc" aria-label={t("common:sort_descending")}>
           <ArrowDownward className="size-4" />
-          <span className="ml-1">降序</span>
+          <span className="ml-1">{t("common:sort_descending")}</span>
         </ToggleGroupItem>
-        <ToggleGroupItem value="asc" aria-label="升序">
+        <ToggleGroupItem value="asc" aria-label={t("common:sort_ascending")}>
           <ArrowUpward className="size-4" />
-          <span className="ml-1">升序</span>
+          <span className="ml-1">{t("common:sort_ascending")}</span>
         </ToggleGroupItem>
       </ToggleGroup>
     </div>
@@ -118,7 +119,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   onPageChange,
   tipsLabel,
 }) => {
-  const { t } = useTranslation(["ui"]);
+  const { t } = useTranslation(["common"]);
   useEffect(() => {
     console.log(
       "PaginationBar",
@@ -147,7 +148,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="第一页"
+          aria-label={t("common:first_page")}
           disabled={page <= 1}
           onClick={() => go(1)}
         >
@@ -157,7 +158,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="上一页"
+          aria-label={t("common:previous_page")}
           disabled={page <= 1}
           onClick={() => go(page - 1)}
         >
@@ -186,7 +187,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="下一页"
+          aria-label={t("common:next_page")}
           disabled={page >= visibleTotal}
           onClick={() => go(page + 1)}
         >
@@ -196,16 +197,16 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="最后一页"
+          aria-label={t("common:last_page")}
           disabled={page >= visibleTotal}
           onClick={() => go(visibleTotal)}
         >
           <ChevronsRight className="size-4" />
         </Button>
       </div>
-      <div className="text-sm text-gray-500 text-center">
-        {tipsLabel ?? t("ui:pagination_tips")}
-      </div>
+      {tipsLabel ? (
+        <div className="text-sm text-gray-500 text-center">{tipsLabel}</div>
+      ) : null}
     </div>
   );
 };
@@ -261,6 +262,7 @@ export const UniversalPaginator = <T,>({
   setCurrentPage,
   paginationTipsLabel,
 }: UniversalPaginatorProps<T>) => {
+  const { t } = useTranslation(["common"]);
   const [paginationPageNumber, setPaginationPageNumber] = useState<number>(
     externalItemsPerPage / itemsPerPage,
   );
@@ -408,7 +410,7 @@ export const UniversalPaginator = <T,>({
         )}
         {children(currentPageItems)}
         {!isLoading && currentPageItems.length === 0 && (
-          <p className="text-center p-5">没有内容。</p>
+          <p className="text-center p-5">{t("common:no_data")}</p>
         )}
       </div>
       <PaginationBar

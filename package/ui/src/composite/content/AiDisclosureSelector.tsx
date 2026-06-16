@@ -1,4 +1,5 @@
 import type { AiDisclosureMode } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Label } from "#/shadcn/label";
 import {
   Select,
@@ -16,14 +17,6 @@ const AI_DISCLOSURE_OPTIONS: readonly AiDisclosureMode[] = [
   "MACHINE_GENERATED",
 ];
 
-const DEFAULT_AI_DISCLOSURE_LABELS: Record<AiDisclosureMode, string> = {
-  UNKNOWN: "Unknown",
-  NONE: "No AI use",
-  AI_ASSISTED: "AI-assisted",
-  AI_ORIGINATED: "AI-originated",
-  MACHINE_GENERATED: "Machine-generated",
-};
-
 export interface AiDisclosureSelectorProps {
   value: AiDisclosureMode;
   onChange: (next: AiDisclosureMode) => void;
@@ -38,20 +31,31 @@ export interface AiDisclosureSelectorProps {
 export function AiDisclosureSelector({
   value,
   onChange,
-  label = "AI disclosure",
+  label,
   labels,
   helperText,
   disabled,
   fullWidth = true,
   size = "sm",
 }: AiDisclosureSelectorProps) {
+  const { t } = useTranslation("book");
+  const effectiveLabel = label ?? t("fields_ai_disclosure");
+
+  const aiDisclosureLabels: Record<AiDisclosureMode, string> = {
+    UNKNOWN: t("ai_disclosure_unknown"),
+    NONE: t("ai_disclosure_none"),
+    AI_ASSISTED: t("ai_disclosure_assisted"),
+    AI_ORIGINATED: t("ai_disclosure_originated"),
+    MACHINE_GENERATED: t("ai_disclosure_machine_generated"),
+  };
+
   return (
     <div className={`flex flex-col gap-1 ${fullWidth ? "w-full" : ""}`}>
       <Label
         htmlFor="ai-disclosure-selector"
         className="text-sm text-rezics-fg-muted"
       >
-        {label}
+        {effectiveLabel}
       </Label>
       <Select
         value={value}
@@ -63,12 +67,12 @@ export function AiDisclosureSelector({
           size={size}
           className={fullWidth ? "w-full" : undefined}
         >
-          <SelectValue placeholder={label} />
+          <SelectValue placeholder={effectiveLabel} />
         </SelectTrigger>
         <SelectContent>
           {AI_DISCLOSURE_OPTIONS.map((mode) => (
             <SelectItem key={mode} value={mode}>
-              {labels?.[mode] ?? DEFAULT_AI_DISCLOSURE_LABELS[mode]}
+              {labels?.[mode] ?? aiDisclosureLabels[mode]}
             </SelectItem>
           ))}
         </SelectContent>

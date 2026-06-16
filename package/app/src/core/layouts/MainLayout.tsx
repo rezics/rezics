@@ -60,6 +60,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     useUserProfileStore((state) =>
       state.user?.permission?.role?.includes("ADMIN"),
     ) ?? false;
+  const currentUserSlug = useUserProfileStore((state) => state.user?.slug);
+  const currentUserId = useUserProfileStore((state) => state.user?.unitId);
   const entryNavigationItems = (
     entries: UserSubscriptionListEntryDTO[] | undefined,
   ) =>
@@ -118,6 +120,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               isAdmin,
             },
             {
+              currentUserId,
+              currentUserSlug,
               zones: {
                 items: entryNavigationItems(zonesQuery.data?.entries),
                 isLoading: hasMemberSession && zonesQuery.isLoading,

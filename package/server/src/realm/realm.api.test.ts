@@ -38,6 +38,10 @@ const listMembersMock = mock(async () => ({
   ],
   hasMore: false,
 }));
+const listByMemberMock = mock(async () => ({
+  realms: [],
+  total: 0,
+}));
 const createRealmMock = mock(async () => ({
   unitId: "realm-created",
   isPublic: true,
@@ -152,6 +156,7 @@ mock.module("./realm.service", () => ({
     getRulePolicy: getRulePolicyMock,
     getMember: getMemberMock,
     listMembers: listMembersMock,
+    listByMember: listByMemberMock,
     removeMember: removeMemberMock,
     resolveRule: resolveRuleMock,
     updateRulePolicy: updateRulePolicyMock,
@@ -178,8 +183,46 @@ describe("realmApi", () => {
     updateRulePolicyMock.mockClear();
     getMemberMock.mockClear();
     listMembersMock.mockClear();
+    listByMemberMock.mockClear();
     removeMemberMock.mockClear();
     updateMemberRoleMock.mockClear();
+  });
+
+  test("passes view through my realm list queries", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request(
+        "http://localhost/realm/me?view=managing&languages=en&start=5&limit=30",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(listByMemberMock).toHaveBeenCalledWith("moderator-1", {
+      languages: ["en"],
+      appLocale: undefined,
+      view: "managing",
+      languageMode: undefined,
+      start: 5,
+      limit: 30,
+    });
+  });
+
+  test("passes view through public member realm list queries", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/member/user-2?view=joined&limit=25"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(listByMemberMock).toHaveBeenCalledWith("user-2", {
+      publicOnly: true,
+      languages: [],
+      appLocale: undefined,
+      view: "joined",
+      languageMode: undefined,
+      start: undefined,
+      limit: 25,
+    });
   });
 
   test("denies realm creation rejected by policy", async () => {

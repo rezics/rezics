@@ -256,7 +256,7 @@ export function FeedCard({
                           type="button"
                           size="sm"
                           variant="ghost"
-                          aria-label="Realm moderation actions"
+                          aria-label={t("community:realm_moderation_actions")}
                           className={cn(
                             "h-8 w-8 p-0 text-text-secondary",
                             moderationControlStateClass,
