@@ -103,6 +103,10 @@ tasks:
     desc: Database smoke test
     cmd: bun run tool/bin/tool.ts db smoke {{.CLI_ARGS}}
 
+  backfill:
+    desc: Resumable persisted JSON envelope backfills
+    cmd: bun run tool/bin/tool.ts backfill {{.CLI_ARGS}}
+
   # ── Seed / factory (tool/ CLI) ─────────────────────────────────────────
   seed:
     desc: Interactive seeder (pass args after --)
@@ -134,6 +138,11 @@ tasks:
   seed:init-meili-search:
     desc: Initialize Meilisearch indexes
     cmd: bun run tool/bin/tool.ts seed init-meili-search
+
+  # ── Browser inspection workbench ───────────────────────────────────────
+  browser:inspect:
+    desc: "Run a headed browser inspect scratch script from tool/browser-inspect/work"
+    cmd: bun run tool/browser-inspect/run-work.ts {{.CLI_ARGS}}
 
   # ── Local service stack (Docker Compose via tool/ CLI) ─────────────────
   service:

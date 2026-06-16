@@ -56,9 +56,12 @@ export type UnitTypeStorage = (typeof unitTypeStorageValues)[number];
 /**
  * Unified persisted Unit types. USER rows are type-extension markers whose
  * `User.unitId` equals `Unit.id`; SCOPE rows back named slug namespaces and
- * use null slugs.
+ * use null slugs. IMAGE rows are cataloged image works with attribution, tags,
+ * and discussion; ordinary/decorative images remain URL strings on their owner.
  * 统一持久化的 Unit 类型。USER 行是类型扩展标记，其 `User.unitId` 等于
- * `Unit.id`；SCOPE 行支撑具名 slug 命名空间并使用空 slug。
+ * `Unit.id`；SCOPE 行支撑具名 slug 命名空间并使用空 slug。IMAGE 行表示
+ * 可编目的图片作品，拥有归属、标签与讨论；普通/装饰图片仍是其所属对象上的
+ * URL 字符串。
  */
 export const UnitType = pgEnum("UnitType", unitTypeStorageValues);
 

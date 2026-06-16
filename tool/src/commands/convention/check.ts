@@ -14,6 +14,7 @@
  * - R12 — no fallback-string args or contract i18nKey fields
  * - R13 — core @rezics/ui cannot import host runtime deps
  * - R14 — contract / Paraglide / catalogs share the same locale set with exact key parity
+ * - R15 — persisted JSON columns are classified and never mutated in-database
  *
  * Usage:
  *   bun run check:convention               # full scan

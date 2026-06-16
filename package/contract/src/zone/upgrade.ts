@@ -1,6 +1,6 @@
-import { Value } from "@sinclair/typebox/value";
 import type { Static } from "elysia";
 import { t } from "elysia";
+import { createVersionedEnvelopeParser } from "../envelope/envelope";
 import { type ZoneConfigV1, zoneConfigV1Schema } from "./config-v1";
 
 // ANCHOR: Zone config upgrade chain
@@ -22,6 +22,19 @@ export type ZoneConfigEnvelope = Static<typeof zoneConfigEnvelopeSchema>;
 /** The latest in-memory zone config type. 最新的内存中专区配置类型。 */
 export type ZoneConfig = ZoneConfigV1;
 
+const zoneConfigParser = createVersionedEnvelopeParser<ZoneConfig>({
+  schemaName: "rezics/zone-config",
+  latestVersion: 1,
+  latestSchema: zoneConfigV1Schema,
+  versions: [
+    {
+      version: 1,
+      schema: zoneConfigV1Schema,
+      upgrade: (config) => config as ZoneConfig,
+    },
+  ],
+});
+
 /**
  * Normalize any historical envelope version to the latest. v1 is the
  * identity today; a future v2 extends the chain here (v1 → v2 → ...),
@@ -37,6 +50,7 @@ export function upgradeZoneConfig(config: ZoneConfigEnvelope): ZoneConfig {
 }
 
 export function parseZoneConfig(value: unknown): ZoneConfig | null {
-  if (!Value.Check(zoneConfigEnvelopeSchema, value)) return null;
-  return upgradeZoneConfig(value as ZoneConfigEnvelope);
+  // Version is visible only at this parse boundary; business code receives the
+  // latest in-memory type and must not branch on stored JSON versions.
+  return zoneConfigParser.parse(value);
 }

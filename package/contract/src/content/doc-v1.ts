@@ -60,6 +60,8 @@ export const contentDocSchema = t.Object(
   { additionalProperties: false },
 );
 
+export const contentDocEnvelopeSchema = t.Union([contentDocSchema]);
+
 export type MarkdownContentBlock =
   (typeof markdownContentBlockSchema)["static"];
 export type PollContentBlock = (typeof pollContentBlockSchema)["static"];
@@ -68,6 +70,12 @@ export type ContentBlock = (typeof contentBlockSchema)["static"];
 export type ContentDocRegionBlock =
   (typeof contentDocRegionBlockSchema)["static"];
 export type ContentDoc = (typeof contentDocSchema)["static"];
+
+// Content docs are enveloped JSON. Backend reads mostly store them opaquely and
+// derive projections on write; when content versions advance, the shared
+// envelope module owns the pure upgrade-chain shape that can also run client-side.
+// Content doc 是信封化 JSON。后端读取路径大多不透明存储，并在写入时派生投影；
+// 当内容版本演进时，共享 envelope 模块负责也可在客户端运行的纯升级链形态。
 
 // Server write paths intentionally accept opaque ContentDoc-shaped JSON. They
 // persist the object as submitted and only interpret supported fields such as

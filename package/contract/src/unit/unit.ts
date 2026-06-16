@@ -14,6 +14,13 @@ import {
 // 枚举
 // ============================================================
 
+/**
+ * Unit type contract. IMAGE units are cataloged image works, such as
+ * Pixiv-like artworks with attribution, tags, and discussion. Ordinary or
+ * decorative images are plain URL strings on the object that owns them.
+ * Unit 类型契约。IMAGE unit 表示可编目的图片作品，例如带有归属、标签与讨论的
+ * Pixiv 类作品。普通图片或装饰图片只是其所属对象上的 URL 字符串。
+ */
 export const UnitType = {
   BOOK: "BOOK",
   GAME: "GAME",

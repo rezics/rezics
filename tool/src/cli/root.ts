@@ -1,4 +1,5 @@
 import { type Command, cli, define } from "gunshi";
+import { backfillCommand } from "../commands/backfill/command";
 import { dbCommand } from "../commands/db/command";
 import { factoryCommand } from "../commands/factory/command";
 import { i18nCommand } from "../commands/i18n/command";
@@ -8,6 +9,7 @@ import { assertKnownCliInput } from "./validation";
 
 export const toolSubCommands = {
   service: serviceCommand,
+  backfill: backfillCommand,
   db: dbCommand,
   seed: seedCommand,
   factory: factoryCommand,

@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { isExemptPackage, isExemptPath, REPO_ROOT } from "./paths";
 import type { ScanContext } from "./types";
 import {
@@ -18,6 +18,7 @@ export function collectContext({ staged }: { staged: boolean }): ScanContext {
   const apiFiles: string[] = [];
   const tsxFiles: string[] = [];
   const tsAndTsxFiles: string[] = [];
+  const schemaFiles: string[] = [];
   const r9CandidateFiles: string[] = [];
 
   for (const filePath of inputFiles) {
@@ -30,6 +31,11 @@ export function collectContext({ staged }: { staged: boolean }): ScanContext {
     }
     if (/\.(ts|tsx)$/.test(filePath)) {
       tsAndTsxFiles.push(filePath);
+    }
+    if (
+      /^package\/(server|auth)\/src\/db\/schema\/.*\.ts$/.test(toRel(filePath))
+    ) {
+      schemaFiles.push(filePath);
     }
     if (ANY_SCANNABLE.test(filePath)) {
       r9CandidateFiles.push(filePath);
@@ -49,5 +55,16 @@ export function collectContext({ staged }: { staged: boolean }): ScanContext {
     folderPaths.push(...walkDirectories(packagesRoot));
   }
 
-  return { apiFiles, tsxFiles, tsAndTsxFiles, r9CandidateFiles, folderPaths };
+  return {
+    apiFiles,
+    tsxFiles,
+    tsAndTsxFiles,
+    schemaFiles,
+    r9CandidateFiles,
+    folderPaths,
+  };
+}
+
+function toRel(filePath: string): string {
+  return relative(REPO_ROOT, filePath).replace(/\\/g, "/");
 }

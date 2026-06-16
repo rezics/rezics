@@ -67,6 +67,24 @@ service manually or override the published port in `tool/.env`.
 
 Use `task service -- ...` for the repo-managed local Docker workflow.
 
+## Browser Inspect Workbench
+
+`tool/browser-inspect` is a headed Playwright workbench for agent-led live URL
+inspection when normal fetch/headless access is blocked by Cloudflare, login,
+captcha, consent, or other browser-state flows.
+
+Reusable helpers live in `tool/browser-inspect/src/`; one-off investigation
+scripts go in the ignored `tool/browser-inspect/work/` directory.
+
+```sh
+task browser:inspect -- current.ts
+```
+
+The browser profile is stored in the ignored `tool/browser-inspect/profile/`
+directory so user-completed verification and login state can be reused. The
+default helper flow leaves the browser open for screenshots, DevTools, and
+manual DOM/CSS copying.
+
 ## Deploy
 
 Production deploys as Docker images via [Kamal](https://kamal-deploy.org) (config

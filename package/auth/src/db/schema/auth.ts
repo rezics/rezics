@@ -124,7 +124,9 @@ export const jwks = p.pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    // Exempt JSON: JOSE/JWK owns the key object shape.
     publicJwk: p.jsonb("publicJwk").notNull(),
+    // Exempt JSON: JOSE/JWK owns the key object shape.
     privateJwk: p.jsonb("privateJwk").notNull(),
     alg: p.text("alg"),
     createdAt: createdAt(),
@@ -168,6 +170,7 @@ export const oauthClients = p.pgTable(
     public: p.boolean("public"),
     type: p.text("type"),
     requirePKCE: p.boolean("requirePKCE"),
+    // Exempt JSON: OAuth provider/client metadata owns this generic shape.
     metadata: p.jsonb("metadata"),
   },
   (table) => [
