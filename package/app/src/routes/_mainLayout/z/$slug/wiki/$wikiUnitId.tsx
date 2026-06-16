@@ -3,26 +3,33 @@ import { zoneQueries } from "@rezics/api/zone/zone";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { resolveDefaultCommentContext } from "@/comment";
 import {
-  titleLabel,
-  titleMeta,
+  titleContext,
   titleOfPost,
   titleOfZone,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 import { PostThreadPage } from "@/post";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
+import { zonePresentationContext } from "@/unit";
 
-// Zone framing affects interaction defaults only: the zone's configured
-// `boundary.context` seeds the comment-context selector, while the wiki post
-// itself stays a plain (non realm-routed) detail page.
-// 专区框架只影响交互默认值：专区配置的 `boundary.context` 作为评论语境
-// 选择器的默认值，而 wiki 帖子本身仍是普通（非 realm 路由）的详情页。
+// Zone framing is presentation context; the zone's configured
+// `boundary.context` independently seeds the interaction selector.
+// 专区框架是展示语境；专区配置的 `boundary.context` 则独立作为互动选择器
+// 的默认值。
 function ZoneWikiThreadRoute() {
   const { zone } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const presentationContext = zonePresentationContext({
+    zoneUnitId: zone.unitId,
+    zoneSlug: slug,
+  });
 
   return (
     <PostThreadPage
+      presentationContext={presentationContext}
       defaultCommentContext={resolveDefaultCommentContext({
         kind: "zone",
+        presentationContext,
         zoneContext: zone.boundary.context,
       })}
     />
@@ -47,10 +54,8 @@ export const Route = createFileRoute("/_mainLayout/z/$slug/wiki/$wikiUnitId")({
     return { zone, post, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(
-      loaderData ? titleOfPost(loaderData.post) : null,
-      titleLabel("entity:realm_tab_wiki"),
-      loaderData ? titleOfZone(loaderData.zone) : null,
-    ),
+    unitTitleMeta("post", loaderData ? titleOfPost(loaderData.post) : null, [
+      titleContext("zone", loaderData ? titleOfZone(loaderData.zone) : null),
+    ]),
   component: ZoneWikiThreadRoute,
 });

@@ -1,6 +1,6 @@
 import { zoneQueries } from "@rezics/api/zone/zone";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { titleMeta, titleOfZone } from "@/core/routing/documentTitle";
+import { titleOfZone, unitTitleMeta } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 import { ZonePortalPage } from "@/zone";
 
@@ -31,8 +31,8 @@ export const Route = createFileRoute("/_mainLayout/z/$slug/page/$pageSlug")({
     return { portal, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(
-      loaderData?.portal.page.slug,
+    unitTitleMeta(
+      "zone",
       loaderData ? titleOfZone(loaderData.portal.zone) : null,
     ),
   component: ZoneCustomPageRoute,

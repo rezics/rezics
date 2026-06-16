@@ -1,6 +1,11 @@
-export type PostDetailContext =
-  | { kind: "direct" }
-  | { kind: "realm"; realmUnitId: string };
+import {
+  hiddenUnitPresentationContext,
+  realmPresentationContext,
+  type UnitInteractionContext,
+  type UnitPresentationContext,
+} from "../../unit/models/unitPresentationContext";
+
+export type PostDetailContext = UnitInteractionContext;
 
 export type PostDetailRouteParams = {
   rootPostUnitId?: string;
@@ -12,6 +17,8 @@ export type PostDetailRouteParams = {
 export type ResolvedPostDetailContext = {
   rootPostUnitId: string;
   context: PostDetailContext;
+  interactionContext: UnitInteractionContext;
+  presentationContext: UnitPresentationContext;
   realmUnitId: string | null;
   reactionContextUnitId: string | null;
 };
@@ -19,6 +26,7 @@ export type ResolvedPostDetailContext = {
 export function resolvePostDetailContext(input: {
   params: PostDetailRouteParams;
   realmUnitId?: string | null;
+  presentationContext?: UnitPresentationContext | null;
 }): ResolvedPostDetailContext {
   const rootPostUnitId =
     input.params.rootPostUnitId ??
@@ -29,10 +37,17 @@ export function resolvePostDetailContext(input: {
   const context: PostDetailContext = realmUnitId
     ? { kind: "realm", realmUnitId }
     : { kind: "direct" };
+  const presentationContext =
+    input.presentationContext ??
+    (context.kind === "realm"
+      ? realmPresentationContext(context.realmUnitId)
+      : hiddenUnitPresentationContext("post", rootPostUnitId));
 
   return {
     rootPostUnitId,
     context,
+    interactionContext: context,
+    presentationContext,
     realmUnitId,
     reactionContextUnitId:
       context.kind === "realm" ? context.realmUnitId : null,

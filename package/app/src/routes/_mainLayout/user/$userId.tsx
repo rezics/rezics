@@ -2,9 +2,9 @@ import { userDetailQuery } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {
-  loaderDataByRouteId,
-  titleMeta,
+  parentRouteLoaderData,
   titleOfUser,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 
 /**
@@ -27,17 +27,16 @@ export const Route = createFileRoute("/_mainLayout/user/$userId")({
       });
   },
   head: ({ loaderData }) =>
-    titleMeta(loaderData ? titleOfUser(loaderData) : null),
+    unitTitleMeta("user", loaderData ? titleOfUser(loaderData) : null),
   component: Outlet,
 });
 
 export type UserIdRouteLoaderData = UserDTO;
 
-export function userIdRouteLoaderData(
-  matches: readonly { routeId: string; loaderData?: unknown }[],
-) {
-  return loaderDataByRouteId<UserIdRouteLoaderData>(
-    matches,
-    "/_mainLayout/user/$userId",
-  );
+export function userIdChildRouteLoader({
+  parentMatchPromise,
+}: {
+  parentMatchPromise: Promise<{ loaderData?: unknown }>;
+}) {
+  return parentRouteLoaderData<UserIdRouteLoaderData>(parentMatchPromise);
 }

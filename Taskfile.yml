@@ -41,6 +41,10 @@ tasks:
           alloc=$(nomad job allocs -json rezics-dev | jq -r '.[] | select(.TaskGroup == "app") | .ID' | head -1)
           exec nomad alloc logs -f "$alloc" server
 
+  dev:zellij:
+    desc: Start lightweight app services in a Zellij session
+    cmd: bun run tool/dev-script/dev.ts
+
   dev:stop:
     desc: Stop all services
     cmd: nomad job stop rezics-dev || true

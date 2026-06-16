@@ -2,9 +2,9 @@ import { zoneQueries } from "@rezics/api/zone/zone";
 import type { ZoneDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {
-  loaderDataByRouteId,
-  titleMeta,
+  parentRouteLoaderData,
   titleOfZone,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 import {
   type ResolvedReadLanguageContext,
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_mainLayout/z/$slug")({
     return { zone, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(loaderData ? titleOfZone(loaderData.zone) : null),
+    unitTitleMeta("zone", loaderData ? titleOfZone(loaderData.zone) : null),
   component: Outlet,
 });
 
@@ -36,11 +36,10 @@ export type ZoneSlugRouteLoaderData = {
   readContext: ResolvedReadLanguageContext;
 };
 
-export function zoneSlugRouteLoaderData(
-  matches: readonly { routeId: string; loaderData?: unknown }[],
-) {
-  return loaderDataByRouteId<ZoneSlugRouteLoaderData>(
-    matches,
-    "/_mainLayout/z/$slug",
-  );
+export function zoneSlugChildRouteLoader({
+  parentMatchPromise,
+}: {
+  parentMatchPromise: Promise<{ loaderData?: unknown }>;
+}) {
+  return parentRouteLoaderData<ZoneSlugRouteLoaderData>(parentMatchPromise);
 }

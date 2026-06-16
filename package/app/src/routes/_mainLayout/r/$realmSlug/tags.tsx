@@ -1,10 +1,6 @@
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import {
-  titleLabel,
-  titleMeta,
-  titleOfRealm,
-} from "@/core/routing/documentTitle";
+import { titleOfRealm, unitTitleMeta } from "@/core/routing/documentTitle";
 import {
   realmStreamSearchForSingleTag,
   RealmDetailLayout,
@@ -55,9 +51,11 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/tags")({
     });
   },
   head: ({ loaderData }) =>
-    titleMeta(
-      loaderData ? titleOfRealm(loaderData.realm) : null,
-      titleLabel("entity:realm_tab_tags"),
+    unitTitleMeta(
+      "realm",
+      loaderData
+        ? titleOfRealm(loaderData.realm, loaderData.readContext)
+        : null,
     ),
   component: RealmSlugTagsRoute,
 });

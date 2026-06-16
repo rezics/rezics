@@ -1,6 +1,6 @@
 import { shelfDetailQuery } from "@rezics/api/shelf";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { titleMeta, titleOfShelf } from "@/core/routing/documentTitle";
+import { titleOfShelf, unitTitleMeta } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 import { ShelfPage } from "@/shelf";
 
@@ -20,7 +20,8 @@ export const Route = createFileRoute("/_mainLayout/shelf/$shelfId/")({
     return { shelf, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(
+    unitTitleMeta(
+      "shelf",
       loaderData
         ? titleOfShelf(loaderData.shelf, loaderData.readContext)
         : null,

@@ -20,6 +20,7 @@ import {
 import { QueryErrorDisplay } from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink } from "@/shared/ui/link";
+import type { UnitPresentationContext } from "@/unit";
 import { PostDetail } from "../components/detail/PostDetail";
 import { resolvePostDetailContext } from "../models/postDetailContext";
 
@@ -33,6 +34,7 @@ export type PostThreadPageProps = {
    * 则从解析出的帖子详情语境推导默认值。
    */
   defaultCommentContext?: CommentListContext;
+  presentationContext?: UnitPresentationContext;
 };
 
 /**
@@ -94,6 +96,7 @@ export type PostThreadPageProps = {
 export const PostThreadPage: React.FC<PostThreadPageProps> = ({
   realmUnitId,
   defaultCommentContext,
+  presentationContext,
 }) => {
   const { t } = useTranslation(["common"]);
   const navigate = useNavigate();
@@ -107,7 +110,7 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     context,
     realmUnitId: contextRealmUnitId,
     reactionContextUnitId,
-  } = resolvePostDetailContext({ params, realmUnitId });
+  } = resolvePostDetailContext({ params, realmUnitId, presentationContext });
   const defaultContext =
     defaultCommentContext ?? resolveDefaultCommentContext(context);
   // Mirrors the thread section's uncontrolled selector so the root composer

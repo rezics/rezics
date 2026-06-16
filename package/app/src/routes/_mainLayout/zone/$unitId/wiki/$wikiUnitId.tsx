@@ -4,14 +4,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { resolveDefaultCommentContext } from "@/comment";
 import { PostThreadPage } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { zonePresentationContext } from "@/unit";
 
-// UnitId zone framing mirrors the slug-framed wiki route: the zone boundary
-// seeds the comment-context selector while the wiki post stays direct.
-// unitId 专区框架与 slug wiki 路由一致：专区 boundary 只作为评论语境默认值，
-// wiki 帖子本身仍是普通详情页。
+// UnitId zone framing mirrors the slug-framed wiki route: presentation remains
+// the zone frame while `boundary.context` seeds the interaction selector.
+// unitId 专区框架与 slug wiki 路由一致：展示语境仍是专区框架，而
+// `boundary.context` 作为互动选择器默认值。
 function ZoneUnitWikiThreadRoute() {
   const { unitId } = Route.useParams();
   const readContext = useReadLanguageContext();
+  const presentationContext = zonePresentationContext({ zoneUnitId: unitId });
   const zoneQuery = useQuery({
     ...zonePortalQueryOptions(unitId, "home", {
       languages: readContext.languages,
@@ -22,8 +24,10 @@ function ZoneUnitWikiThreadRoute() {
 
   return (
     <PostThreadPage
+      presentationContext={presentationContext}
       defaultCommentContext={resolveDefaultCommentContext({
         kind: "zone",
+        presentationContext,
         zoneContext: zoneQuery.data?.zone.boundary.context,
       })}
     />

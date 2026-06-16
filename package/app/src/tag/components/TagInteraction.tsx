@@ -9,7 +9,7 @@ import type {
   UnitTagDTO,
 } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
-import type { InjectedTag } from "@/search";
+import { type InjectedTag, useNavigateToTagSearch } from "@/search";
 import { TagVoteChipGroup } from "./TagVoteChipGroup";
 
 export type TagInteractionProps = {
@@ -22,32 +22,34 @@ export type TagInteractionProps = {
    */
   bookUnit?: BookDTO;
   /**
-   * Kept for compatibility with older callers. Tag detail navigation is now
-   * handled in the shared chip popover.
-   * 保留给旧调用点兼容。标签详情导航现在由共享 chip 浮层处理。
+   * Override the search navigation target. Defaults to global `/search`.
+   * 覆盖搜索导航目标。默认为全局 `/search`。
    */
   onSearchTags?: (tags: InjectedTag[]) => void;
   className?: string;
 };
 
 /**
- * TagInteraction 现在是书籍页对共享 TagVoteChipGroup 的薄包装：书籍页与编辑页
- * 使用同一套 chip、popover、赞成/反对/撤销投票交互。
+ * TagInteraction 是书籍详情页的 tag 探索入口：chip 云展示投票色彩，点击后
+ * 可投票、编辑、查看定义，也可搜索单个或多个已选标签。
  *
  * Mobile
  * +------------------------------+
- * | [tag chips wrap]             |
- * | tap chip -> vote popover     |
+ * | [tag chips wrap by parent]   |
+ * | popover action rows wrap     |
+ * | selected bar when multi      |
  * +------------------------------+
  *
  * Tablet
  * +------------------------------------------+
- * | chips wrap, popover anchored to chip     |
+ * | parent width, not viewport, decides rows |
+ * | search selected appears below chips      |
  * +------------------------------------------+
  *
  * Desktop
  * +------------------------------------------------+
  * | dense inline chips with vote color state       |
+ * | up/down/edit grouped; search/info grouped      |
  * +------------------------------------------------+
  *
  * Ultra-wide
@@ -60,10 +62,13 @@ export function TagInteraction({
   translations,
   bookUnitId,
   bookUnit,
+  onSearchTags,
   className,
 }: TagInteractionProps) {
   const userId = useCurrentUserId();
   const navigate = useNavigate();
+  const defaultNavigateToSearch = useNavigateToTagSearch();
+  const navigateToTagSearch = onSearchTags ?? defaultNavigateToSearch;
   const canEditTags = useCanEdit({ resource: "tag", ownerUnit: bookUnit });
   const voteMutation = useCastTagVoteMutation();
   const withdrawMutation = useWithdrawUnitTagVoteMutation();
@@ -90,6 +95,7 @@ export function TagInteraction({
           ? () => navigate({ to: `/book/${bookUnitId}/edit/tag` })
           : undefined
       }
+      onSearchTags={navigateToTagSearch}
     />
   );
 }

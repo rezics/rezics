@@ -1,6 +1,6 @@
 import { entityDetailQueryOptions } from "@rezics/api/entity";
 import { isPublicUnitIdRouteParams } from "@rezics/contract";
-import { titleMeta, titleOfEntity } from "@/core/routing/documentTitle";
+import { titleOfEntity, unitTitleMeta } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 
 import {
@@ -32,7 +32,8 @@ export const Route = createFileRoute("/_mainLayout/entity/$unitId/")({
     return { entity, readContext, unitId: entity.unitId };
   },
   head: ({ loaderData }) =>
-    titleMeta(
+    unitTitleMeta(
+      "entity",
       loaderData
         ? titleOfEntity(loaderData.entity, loaderData.readContext)
         : null,

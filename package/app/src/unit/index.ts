@@ -29,6 +29,19 @@ export {
   unitDtoToUnitCardSummary,
 } from "./models/unitCardSummary";
 export {
+  hiddenUnitPresentationContext,
+  realmPresentationContext,
+  shouldDisplayPresentationContext,
+  unitPresentationContext,
+  zonePresentationContext,
+} from "./models/unitPresentationContext";
+export type {
+  UnitInteractionContext,
+  UnitPresentationContext,
+  UnitPresentationKind,
+  UnitPresentationVisibility,
+} from "./models/unitPresentationContext";
+export {
   resolveUnitRoute,
   validatePublicUnitIdParams,
   validatePublicUnitResolverSearch,

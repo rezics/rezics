@@ -1,6 +1,9 @@
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { createFileRoute } from "@tanstack/react-router";
-import { titleMeta, titleOfTranslatedUnit } from "@/core/routing/documentTitle";
+import {
+  titleOfTranslatedUnit,
+  unitTitleMeta,
+} from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 import {
   resolveUnitRoute,
@@ -38,7 +41,8 @@ export const Route = createFileRoute("/_mainLayout/unit/$unitId/")({
   },
   loaderDeps: ({ search }) => search,
   head: ({ loaderData }) =>
-    titleMeta(
+    unitTitleMeta(
+      "unit",
       loaderData
         ? titleOfTranslatedUnit(loaderData.unit, loaderData.readContext)
         : null,

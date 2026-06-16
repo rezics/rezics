@@ -1,11 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  titleLabel,
-  titleMeta,
-  titleOfZone,
-} from "@/core/routing/documentTitle";
+import { titleOfZone, unitTitleMeta } from "@/core/routing/documentTitle";
 import { ZoneManagePage, type ZoneManageTab } from "@/zone";
-import { zoneSlugRouteLoaderData } from "./route";
+import { zoneSlugChildRouteLoader } from "./route";
 
 const manageTabs = [
   "profile",
@@ -26,13 +22,8 @@ export const Route = createFileRoute("/_mainLayout/z/$slug/manage")({
   ): { tab?: ZoneManageTab } => ({
     tab: isZoneManageTab(search.tab) ? search.tab : undefined,
   }),
-  head: ({ matches }) => {
-    const data = zoneSlugRouteLoaderData(matches);
-    return titleMeta(
-      data ? titleOfZone(data.zone) : null,
-      titleLabel("zone:manage"),
-    );
-  },
+  loader: zoneSlugChildRouteLoader,
+  head: ({ loaderData }) => unitTitleMeta("zone", titleOfZone(loaderData.zone)),
   component: ZoneSlugManageRoute,
 });
 

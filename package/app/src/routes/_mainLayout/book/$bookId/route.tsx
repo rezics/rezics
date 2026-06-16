@@ -7,9 +7,9 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import {
-  loaderDataByRouteId,
-  titleMeta,
+  parentRouteLoaderData,
   titleOfBook,
+  unitTitleMeta,
 } from "@/core/routing/documentTitle";
 import {
   type ResolvedReadLanguageContext,
@@ -37,7 +37,8 @@ export const Route = createFileRoute("/_mainLayout/book/$bookId")({
     return { book, readContext };
   },
   head: ({ loaderData }) =>
-    titleMeta(
+    unitTitleMeta(
+      "book",
       loaderData ? titleOfBook(loaderData.book, loaderData.readContext) : null,
     ),
   component: () => (
@@ -56,11 +57,10 @@ export type BookRouteLoaderData = {
   readContext: ResolvedReadLanguageContext;
 };
 
-export function bookRouteLoaderData(
-  matches: readonly { routeId: string; loaderData?: unknown }[],
-) {
-  return loaderDataByRouteId<BookRouteLoaderData>(
-    matches,
-    "/_mainLayout/book/$bookId",
-  );
+export function bookChildRouteLoader({
+  parentMatchPromise,
+}: {
+  parentMatchPromise: Promise<{ loaderData?: unknown }>;
+}) {
+  return parentRouteLoaderData<BookRouteLoaderData>(parentMatchPromise);
 }

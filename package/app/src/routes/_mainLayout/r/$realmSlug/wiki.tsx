@@ -1,10 +1,6 @@
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import {
-  titleLabel,
-  titleMeta,
-  titleOfRealm,
-} from "@/core/routing/documentTitle";
+import { titleOfRealm, unitTitleMeta } from "@/core/routing/documentTitle";
 import { RealmDetailLayout, useRealmDetail } from "@/realm";
 import { RealmWikiTab } from "@/realm/components/RealmWikiTab";
 import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
@@ -43,9 +39,11 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/wiki")({
     });
   },
   head: ({ loaderData }) =>
-    titleMeta(
-      loaderData ? titleOfRealm(loaderData.realm) : null,
-      titleLabel("entity:realm_tab_wiki"),
+    unitTitleMeta(
+      "realm",
+      loaderData
+        ? titleOfRealm(loaderData.realm, loaderData.readContext)
+        : null,
     ),
   component: RealmSlugWikiRoute,
 });

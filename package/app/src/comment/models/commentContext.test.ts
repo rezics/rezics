@@ -46,6 +46,36 @@ describe("resolveDefaultCommentContext", () => {
       kind: "all",
     });
   });
+
+  it("defaults a hidden post self-context to All", () => {
+    expect(
+      resolveDefaultCommentContext({
+        kind: "unit",
+        presentationContext: {
+          kind: "unit",
+          unitKind: "post",
+          unitId: "post-1",
+          visibility: "hidden",
+        },
+        interactionContext: { kind: "direct" },
+      }),
+    ).toEqual({ kind: "all" });
+  });
+
+  it("defaults a unit surface with realm interaction to that realm", () => {
+    expect(
+      resolveDefaultCommentContext({
+        kind: "unit",
+        presentationContext: {
+          kind: "zone",
+          zoneUnitId: "zone-1",
+          zoneSlug: null,
+          visibility: "visible",
+        },
+        interactionContext: { kind: "realm", realmUnitId: "realm-3" },
+      }),
+    ).toEqual({ kind: "realm", realmUnitId: "realm-3" });
+  });
 });
 
 describe("buildCommentContextRealmOptions", () => {
