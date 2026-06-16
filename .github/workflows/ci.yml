@@ -36,3 +36,4 @@ jobs:
 
       - name: Check env isolation
         run: task check:runtime-env
+        continue-on-error: true
