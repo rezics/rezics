@@ -1,10 +1,9 @@
 import {
   type LastReadAnchor,
-  PROGRESS_EXTRA_KNOWN_KEYS,
-  type ProgressExtra,
+  type ProgressPostLinkDTO,
   type UnitProgressRowDTO,
 } from "@rezics/contract";
-import type { UserUnitProgress } from "../db/schema";
+import type { UserUnitProgress, UserUnitProgressPost } from "../db/schema";
 
 export type ProgressStorageRow = Omit<
   typeof UserUnitProgress.$inferSelect,
@@ -23,30 +22,6 @@ function sanitizeAnchor(raw: unknown): LastReadAnchor | null {
   return { text };
 }
 
-function sanitizeExtra(raw: unknown): ProgressExtra | null {
-  if (raw === null || raw === undefined) return null;
-  if (typeof raw !== "object" || Array.isArray(raw)) return null;
-  const source = raw as Record<string, unknown>;
-  const out: ProgressExtra = {};
-  for (const key of PROGRESS_EXTRA_KNOWN_KEYS) {
-    const value = source[key];
-    if (
-      value &&
-      typeof value === "object" &&
-      !Array.isArray(value) &&
-      Array.isArray(
-        (value as { reasonPostUnitIds?: unknown }).reasonPostUnitIds,
-      )
-    ) {
-      const ids = (value as { reasonPostUnitIds: unknown[] }).reasonPostUnitIds;
-      if (ids.every((id) => typeof id === "string")) {
-        out[key] = { reasonPostUnitIds: ids as string[] };
-      }
-    }
-  }
-  return out;
-}
-
 export function mapProgressToDTO(row: ProgressStorageRow): UnitProgressRowDTO {
   return {
     userId: row.userId,
@@ -60,6 +35,16 @@ export function mapProgressToDTO(row: ProgressStorageRow): UnitProgressRowDTO {
     lastReadAnchor: sanitizeAnchor(row.lastReadAnchor),
     firstSeenAt: row.firstSeenAt.toISOString(),
     lastSeenAt: row.lastSeenAt.toISOString(),
-    extra: sanitizeExtra(row.extra),
+  };
+}
+
+export function mapProgressPostLinkToDTO(
+  row: typeof UserUnitProgressPost.$inferSelect,
+): ProgressPostLinkDTO {
+  return {
+    progressId: row.progressId,
+    postUnitId: row.postUnitId,
+    status: row.status,
+    createdAt: row.createdAt.toISOString(),
   };
 }

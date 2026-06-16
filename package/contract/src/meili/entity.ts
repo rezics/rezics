@@ -3,7 +3,7 @@ import { t } from "elysia";
 import { creditAttributionRoleKeySchema } from "../entity/credit-attribution";
 import { entityKindKeySchema } from "../entity/entity";
 import { subjectAttributionRoleKeySchema } from "../entity/subject-attribution";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 
 // ANCHOR: Entity Search Document
 // ANCHOR: 实体搜索文档
@@ -36,7 +36,7 @@ export const EntitySearchDocumentSchema = t.Object({
   // 用于展示渲染的结构化翻译
   translations: t.Array(
     t.Object({
-      language: languageSchema,
+      language: contentLanguageSchema,
       title: t.Union([t.String(), t.Null()]),
       subtitle: t.Union([t.String(), t.Null()]),
       summary: t.Union([t.String(), t.Null()]),

@@ -3,7 +3,6 @@ import {
   index,
   integer,
   pgTable,
-  primaryKey,
   text,
   uniqueIndex,
   uuid,
@@ -13,7 +12,6 @@ import {
   createdAt,
   jsonData,
   nullableTimestamp,
-  timestampMs,
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
@@ -39,9 +37,24 @@ export const User = pgTable(
      * 但此后不再与 auth.User.email 同步。
      */
     email: varchar({ length: 320 }),
+    /**
+     * Canonical fallback profile fields for USER units.
+     *
+     * These language-neutral defaults serve account/profile flows, actor
+     * snapshots, and search sync. If USER translations are enabled later,
+     * UnitTranslation.title/summary/description may override them at read time
+     * for localized presentation, while these columns remain the fallback
+     * source.
+     *
+     * USER Unit 的规范兜底资料字段。
+     *
+     * 这些语言中立默认值服务账户/资料流程、行为者快照与搜索同步。若日后启用
+     * USER 翻译，读取路径可用 UnitTranslation.title/summary/description
+     * 覆盖本地化展示，而这些列继续作为兜底来源。
+     */
     name: text(),
     avatar: text(),
-    bio: text(),
+    summary: text(),
     /**
      * Rich ContentDoc JSON. Search projections such as descriptionText are
      * Meilisearch-only and must not be added as PostgreSQL columns.

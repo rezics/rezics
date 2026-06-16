@@ -3,7 +3,7 @@ import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 export type ShelfContainmentFilters = Omit<ShelfFilters, "containsUnitId">;
 export type ShelfVariantFilters = Omit<ShelfFilters, "variantUnitId">;
 
-export const normalizeCollectionIds = (ids: readonly string[]): string[] =>
+export const normalizeShelfItemStatusIds = (ids: readonly string[]): string[] =>
   Array.from(new Set(ids.filter(Boolean))).sort();
 
 export const shelfKeys = {
@@ -18,21 +18,22 @@ export const shelfKeys = {
   detail: (unitId: string) => [...shelfKeys.details(), unitId] as const,
   byUser: (userId: string, filters?: ShelfFilters) =>
     [...shelfKeys.all(), "user", userId, filters] as const,
-  mine: () => [...shelfKeys.all(), "mine"] as const,
+  mine: (filters?: ShelfFilters) =>
+    [...shelfKeys.all(), "mine", filters ?? null] as const,
   items: (unitId: string) => [...shelfKeys.all(), "items", unitId] as const,
   itemsPage: (unitId: string, query?: ShelfItemsQuery) =>
     [...shelfKeys.items(unitId), query] as const,
 } as const;
 
-export const collectionKeys = {
-  all: () => ["collection"] as const,
+export const shelfItemStatusKeys = {
+  all: () => ["shelf-item-status"] as const,
   status: (targetId: string) =>
-    [...collectionKeys.all(), "status", targetId] as const,
+    [...shelfItemStatusKeys.all(), "status", targetId] as const,
   statusBatch: (targetIds: readonly string[]) =>
     [
-      ...collectionKeys.all(),
+      ...shelfItemStatusKeys.all(),
       "status",
       "batch",
-      normalizeCollectionIds(targetIds),
+      normalizeShelfItemStatusIds(targetIds),
     ] as const,
 } as const;

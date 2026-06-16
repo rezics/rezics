@@ -2,10 +2,12 @@ import {
   type ContinueReadingItem,
   type ContinueReadingListQuery,
   type ContinueReadingListResponse,
-  PROGRESS_EXTRA_KNOWN_KEYS,
+  type LinkProgressPostBody,
   type ProgressLibraryListResponse,
   type ProgressLibraryRow,
   type ProgressLibraryUnitSummary,
+  type ProgressPostLinksResponse,
+  type UpdateProgressPostLinkBody,
   parseReadLanguages,
   readCoverUrlFromExtra,
   resolveReadLanguage,
@@ -32,13 +34,15 @@ import { searchClient } from "@/meili/search-client";
 import { AppError } from "@/utils/errors";
 import {
   ContentStructureNode,
+  Post,
   ShelfItem,
   Unit,
   UnitTranslation,
   UserContentNodeProgress,
   UserUnitProgress,
+  UserUnitProgressPost,
 } from "../db/schema";
-import { mapProgressToDTO } from "./progress.mapper";
+import { mapProgressPostLinkToDTO, mapProgressToDTO } from "./progress.mapper";
 import type {
   ProgressCursor,
   ProgressListInput,
@@ -52,6 +56,7 @@ const CONTINUE_READING_LIMIT = 12;
 const ANCHOR_PREVIEW_MAX = 200;
 
 type UserUnitProgressRow = typeof UserUnitProgress.$inferSelect;
+type UserUnitProgressPostRow = typeof UserUnitProgressPost.$inferSelect;
 type ProgressStatus = UserUnitProgressRow["status"];
 
 type TranslationRow = {
@@ -94,7 +99,6 @@ type ProgressCreateData = {
   totalTimeMs: number;
   lastReadNodeId?: string | null;
   lastReadAnchor?: unknown;
-  extra?: unknown;
   firstSeenAt: Date;
   lastSeenAt: Date;
 };
@@ -107,7 +111,6 @@ type ProgressUpdateData = {
   completedCount?: number;
   lastReadNodeId?: string | null;
   lastReadAnchor?: unknown;
-  extra?: unknown;
   totalTimeMsIncrement?: number;
 };
 
@@ -138,6 +141,21 @@ export type ProgressRepository = {
     userId: string,
     unitId: string,
   ): Promise<UserUnitProgressRow | null>;
+  findPostOwner(postUnitId: string): Promise<{ authorUserId: string } | null>;
+  listProgressPostLinks(progressId: string): Promise<UserUnitProgressPostRow[]>;
+  upsertProgressPostLink(input: {
+    progressId: string;
+    postUnitId: string;
+    status: ProgressStatus;
+    now: Date;
+  }): Promise<UserUnitProgressPostRow>;
+  updateProgressPostLinkStatus(input: {
+    progressId: string;
+    postUnitId: string;
+    status: ProgressStatus;
+    now: Date;
+  }): Promise<UserUnitProgressPostRow | null>;
+  deleteProgressPostLink(progressId: string, postUnitId: string): Promise<void>;
   findContentNode(nodeId: string): Promise<ContentNodeSummary | null>;
   upsertProgress(input: {
     userId: string;
@@ -205,17 +223,6 @@ function validateInput(input: ProgressUpsertInput): void {
   if (input.completedCount !== undefined && input.completedCount < 0) {
     throw new AppError(400, "completedCount must be non-negative");
   }
-
-  if (input.extra !== undefined && input.extra !== null) {
-    if (typeof input.extra !== "object" || Array.isArray(input.extra)) {
-      throw new AppError(400, "extra must be an object");
-    }
-    for (const key of Object.keys(input.extra)) {
-      if (!PROGRESS_EXTRA_KNOWN_KEYS.includes(key as never)) {
-        throw new AppError(400, `extra contains unknown key: ${key}`);
-      }
-    }
-  }
 }
 
 function readFacetCount(
@@ -246,7 +253,6 @@ function orderedTranslations(
   readLanguage: ProgressListInput = {},
 ): TranslationRow[] {
   const resolvedLanguage = resolveReadLanguage({
-    explicitLanguage: readLanguage.explicitLanguage,
     appLocale: readLanguage.appLocale,
     languages: parseReadLanguages(readLanguage.languages),
     availableLanguages: unit.translations.map((t) => t.language),
@@ -430,6 +436,72 @@ function createDrizzleProgressRepository(): ProgressRepository {
         .limit(1);
       return row ?? null;
     },
+    async findPostOwner(postUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ authorUserId: Post.authorUserId })
+        .from(Post)
+        .where(eq(Post.unitId, postUnitId))
+        .limit(1);
+      return row ?? null;
+    },
+    async listProgressPostLinks(progressId) {
+      const db = await getServerDb();
+      return db
+        .select()
+        .from(UserUnitProgressPost)
+        .where(eq(UserUnitProgressPost.progressId, progressId))
+        .orderBy(
+          asc(UserUnitProgressPost.createdAt),
+          asc(UserUnitProgressPost.postUnitId),
+        );
+    },
+    async upsertProgressPostLink({ progressId, postUnitId, status, now }) {
+      const db = await getServerDb();
+      const [row] = await db
+        .insert(UserUnitProgressPost)
+        .values({ progressId, postUnitId, status, updatedAt: now })
+        .onConflictDoUpdate({
+          target: [
+            UserUnitProgressPost.progressId,
+            UserUnitProgressPost.postUnitId,
+          ],
+          set: { status, updatedAt: now },
+        })
+        .returning();
+      if (!row) throw new AppError(500, "Failed to link progress post");
+      return row;
+    },
+    async updateProgressPostLinkStatus({
+      progressId,
+      postUnitId,
+      status,
+      now,
+    }) {
+      const db = await getServerDb();
+      const [row] = await db
+        .update(UserUnitProgressPost)
+        .set({ status, updatedAt: now })
+        .where(
+          and(
+            eq(UserUnitProgressPost.progressId, progressId),
+            eq(UserUnitProgressPost.postUnitId, postUnitId),
+          ),
+        )
+        .returning();
+      return row ?? null;
+    },
+    async deleteProgressPostLink(progressId, postUnitId) {
+      const db = await getServerDb();
+      await db
+        .delete(UserUnitProgressPost)
+        .where(
+          and(
+            eq(UserUnitProgressPost.progressId, progressId),
+            eq(UserUnitProgressPost.postUnitId, postUnitId),
+          ),
+        );
+    },
     async findContentNode(nodeId) {
       const db = await getServerDb();
       const [node] = await db
@@ -459,7 +531,6 @@ function createDrizzleProgressRepository(): ProgressRepository {
       if (update.lastReadAnchor !== undefined) {
         set.lastReadAnchor = update.lastReadAnchor;
       }
-      if (update.extra !== undefined) set.extra = update.extra;
       if (update.totalTimeMsIncrement !== undefined) {
         set.totalTimeMs = sql`${UserUnitProgress.totalTimeMs} + ${update.totalTimeMsIncrement}`;
       }
@@ -754,7 +825,6 @@ export class ProgressService {
         input.lastReadAnchor !== undefined
           ? (input.lastReadAnchor ?? null)
           : undefined,
-      extra: input.extra !== undefined ? (input.extra ?? null) : undefined,
       firstSeenAt: now,
       lastSeenAt: now,
     };
@@ -771,7 +841,6 @@ export class ProgressService {
       ...(input.lastReadAnchor !== undefined
         ? { lastReadAnchor: input.lastReadAnchor ?? null }
         : {}),
-      ...(input.extra !== undefined ? { extra: input.extra ?? null } : {}),
       ...(input.addTimeMs !== undefined
         ? { totalTimeMsIncrement: addTimeMs }
         : {}),
@@ -799,6 +868,84 @@ export class ProgressService {
   ): Promise<UserUnitProgressRow | null> {
     const row = await this.repository.findProgress(userId, unitId);
     return row?.isDeleted ? null : row;
+  }
+
+  private async getOwnedProgress(
+    userId: string,
+    unitId: string,
+  ): Promise<UserUnitProgressRow> {
+    const row = await this.get(userId, unitId);
+    if (!row) throw new AppError(404, "Progress not found");
+    return row;
+  }
+
+  private async assertPostOwner(
+    userId: string,
+    postUnitId: string,
+  ): Promise<void> {
+    const post = await this.repository.findPostOwner(postUnitId);
+    if (!post) throw new AppError(404, "Post not found");
+    if (post.authorUserId !== userId) {
+      throw new AppError(403, "Cannot link another user's post to progress");
+    }
+  }
+
+  async listPostLinks(
+    userId: string,
+    unitId: string,
+  ): Promise<ProgressPostLinksResponse> {
+    const progress = await this.get(userId, unitId);
+    if (!progress) return { links: [] };
+    const rows = await this.repository.listProgressPostLinks(progress.id);
+    return { links: rows.map(mapProgressPostLinkToDTO) };
+  }
+
+  async linkPost(
+    userId: string,
+    unitId: string,
+    input: LinkProgressPostBody,
+  ): Promise<ProgressPostLinksResponse["links"][number]> {
+    await this.assertPostOwner(userId, input.postUnitId);
+    let progress = await this.get(userId, unitId);
+    if (!progress) {
+      progress = await this.upsert(userId, unitId, {
+        status: input.status ?? "BACKLOG",
+      });
+    }
+    const row = await this.repository.upsertProgressPostLink({
+      progressId: progress.id,
+      postUnitId: input.postUnitId,
+      status: input.status ?? progress.status,
+      now: new Date(),
+    });
+    return mapProgressPostLinkToDTO(row);
+  }
+
+  async updatePostLink(
+    userId: string,
+    unitId: string,
+    postUnitId: string,
+    input: UpdateProgressPostLinkBody,
+  ): Promise<ProgressPostLinksResponse["links"][number]> {
+    const progress = await this.getOwnedProgress(userId, unitId);
+    await this.assertPostOwner(userId, postUnitId);
+    const row = await this.repository.updateProgressPostLinkStatus({
+      progressId: progress.id,
+      postUnitId,
+      status: input.status,
+      now: new Date(),
+    });
+    if (!row) throw new AppError(404, "Progress post link not found");
+    return mapProgressPostLinkToDTO(row);
+  }
+
+  async unlinkPost(
+    userId: string,
+    unitId: string,
+    postUnitId: string,
+  ): Promise<void> {
+    const progress = await this.getOwnedProgress(userId, unitId);
+    await this.repository.deleteProgressPostLink(progress.id, postUnitId);
   }
 
   private async listRows(

@@ -1,10 +1,10 @@
 import type {
   AddShelfItemInput,
   CleanupShelfOrphansInput,
-  CollectInput,
-  CollectionStatusBatchResponse,
-  CollectionStatusResponse,
-  CollectResponse,
+  AddToShelvesInput,
+  ShelfItemStatusBatchResponse,
+  ShelfItemStatusResponse,
+  AddToShelvesResponse,
   CreateShelfInput,
   ReorderShelfItemInput,
   SetShelfItemChildrenInput,
@@ -29,10 +29,10 @@ import type {
 export type {
   AddShelfItemInput,
   CleanupShelfOrphansInput,
-  CollectInput,
-  CollectionStatusBatchResponse,
-  CollectionStatusResponse,
-  CollectResponse,
+  AddToShelvesInput,
+  ShelfItemStatusBatchResponse,
+  ShelfItemStatusResponse,
+  AddToShelvesResponse,
   CreateShelfInput,
   ReorderShelfItemInput,
   SetShelfItemChildrenInput,
@@ -58,7 +58,13 @@ export type ShelfFormData = CreateShelfInput;
 export type ShelfFilters = Partial<ShelfListQuery>;
 export type ShelfView = "nested" | "flat" | "masonry" | "bookshelf";
 
-export type ShelfSortField = "manual" | "addedAt" | "title";
+export type ShelfSortField =
+  | "manual"
+  | "addedAt"
+  | "title"
+  | "createdAt"
+  | "updatedAt"
+  | "itemCount";
 export type ShelfSortOrder = "asc" | "desc";
 export type ShelfSortState = {
   field: ShelfSortField;

@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { readLanguageBodyBase } from "../list-query-base";
 
 // ANCHOR: Post Search Document
@@ -54,12 +54,12 @@ export const PostSearchDocumentSchema = t.Object({
   // Extra
   // 额外字段
   extra: t.Optional(t.Any()),
-  languages: t.Optional(t.Array(languageSchema)),
+  languages: t.Optional(t.Array(contentLanguageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
   supportLanguages: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         isPrimary: t.Optional(t.Boolean()),
         position: t.Optional(t.String()), // Fractional Indexing
       }),
@@ -68,13 +68,13 @@ export const PostSearchDocumentSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Union([t.String(), t.Null()]),
         content: t.Union([t.Any(), t.Null()]),
       }),
     ),
   ),
-  resolvedLanguage: t.Optional(t.Union([languageSchema, t.Null()])),
+  resolvedLanguage: t.Optional(t.Union([contentLanguageSchema, t.Null()])),
   title: t.Optional(t.Union([t.String(), t.Null()])),
   content: t.Optional(t.Union([t.Any(), t.Null()])),
 });

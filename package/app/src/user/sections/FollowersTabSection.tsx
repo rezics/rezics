@@ -8,9 +8,9 @@
  * │ │ [Followers: 234] [Following: 89]        │
  * │ ├─────────────────────────────────────────┤
  * │ │ [Avatar] Jane Doe @jane               │
- * │ │          Bio: Love reading...          │
+ * │ │          Summary: Love reading...          │
  * │ │ [Avatar] John Smith @john  [Follow]   │
- * │ │          Bio: Tech enthusiast          │
+ * │ │          Summary: Tech enthusiast          │
  * │ │ [Avatar] Alice Chen @alice  [Follow]  │
  * │ │ [Prev] Page 1 of 12 [Next]             │
  * │ └─────────────────────────────────────────┘
@@ -196,9 +196,9 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
             </span>
           )}
         </Link>
-        {user.bio && (
+        {user.summary && (
           <span className="block text-xs text-text-secondary truncate mt-0.5">
-            {user.bio}
+            {user.summary}
           </span>
         )}
       </div>

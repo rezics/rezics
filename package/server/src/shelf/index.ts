@@ -1,5 +1,8 @@
-export { collectionApi } from "./collection.api";
-export { CollectionService, collectionService } from "./collection.service";
+export { shelfItemActionApi } from "./shelf-item-action.api";
+export {
+  ShelfItemActionService,
+  shelfItemActionService,
+} from "./shelf-item-action.service";
 export { shelfApi } from "./shelf.api";
 export {
   mapShelfItemToDTO,
@@ -9,11 +12,13 @@ export {
 } from "./shelf.mapper";
 export { ShelfService, shelfService } from "./shelf.service";
 export {
+  bootstrapReservedShelves,
   bootstrapSystemShelves,
+  ensureReservedShelf,
   ensureSystemShelf,
-  findSystemShelf,
-  isSystemKindKey,
-  SYSTEM_KIND_KEYS,
+  findReservedShelfBySlug,
+  isReservedShelfSlug,
+  RESERVED_SHELF_SLUG_SET,
 } from "./system-shelves";
 export * from "./types";
-export { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";
+export { applyUserShelfItemMetadata } from "./user-shelf-item.service";

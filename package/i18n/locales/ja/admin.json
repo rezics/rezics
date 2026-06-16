@@ -419,7 +419,7 @@
   "user_admin_login_description": "管理コンソールにアクセスするにはログインしてください。",
   "user_admin_login_title": "管理者ログイン",
   "user_avatar_url_label": "アバター URL",
-  "user_bio_label": "プロフィール",
+  "user_summary_label": "概要",
   "user_create_description": "管理コンソールから新しいユーザーを作成します。",
   "user_create_failed": "作成に失敗しました",
   "user_create_note": "管理者が作成するユーザーには確認コードは不要です。バックエンドが slug、Rezics Email、slug の一意性を検証し、パスワードをハッシュ化します。",

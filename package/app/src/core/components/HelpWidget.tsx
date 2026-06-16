@@ -40,7 +40,6 @@ export const HelpFab: React.FC<HelpFabProps> = ({
 
   const list = actions ?? getDefaultHelpActions(t);
   const resolvedAriaLabel = ariaLabel ?? t("shell:app_help_aria_label");
-  if (!list.length) return null;
 
   const handleToggle = () => {
     setOpen((prev) => !prev);
@@ -65,6 +64,7 @@ export const HelpFab: React.FC<HelpFabProps> = ({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  if (!list.length) return null;
   if (!visible) return null;
 
   return (

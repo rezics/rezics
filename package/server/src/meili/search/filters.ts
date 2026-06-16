@@ -1,6 +1,6 @@
 import type {
+  ContentLanguage,
   ContentRating,
-  Language,
   ListLanguageMode,
   PostKind,
   SearchCategory,
@@ -9,9 +9,10 @@ import type {
   ZoneBoundaryFilter,
   ZoneSectionQuery,
   ZoneSectionQueryFilterField,
+  ZoneSectionQuerySortField,
 } from "@rezics/contract";
 import {
-  normalizeLanguage,
+  normalizeContentLanguage,
   ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
   ZONE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
@@ -118,9 +119,11 @@ export function readLanguageFilterCandidates(
     ...new Set(
       [input.appLocale, ...(input.languages ?? [])]
         .map((language) =>
-          typeof language === "string" ? normalizeLanguage(language) : null,
+          typeof language === "string"
+            ? normalizeContentLanguage(language)
+            : null,
         )
-        .filter((language): language is Language => !!language),
+        .filter((language): language is ContentLanguage => !!language),
     ),
   ];
 }
@@ -524,7 +527,10 @@ export interface CompiledZoneSectionQuery {
 export function zoneSectionQueryUnsupportedFields(
   query: ZoneSectionQuery,
 ): string[] {
-  const filterable = ZONE_SECTION_QUERY_FILTERABLE_FIELDS[query.target];
+  const filterable: readonly ZoneSectionQueryFilterField[] =
+    ZONE_SECTION_QUERY_FILTERABLE_FIELDS[query.target];
+  const sortable: readonly ZoneSectionQuerySortField[] =
+    ZONE_SECTION_QUERY_SORT_FIELDS[query.target];
   const unsupported: string[] = [];
   for (const key of Object.keys(query) as (keyof ZoneSectionQuery)[]) {
     if (key === "target" || key === "sort") continue;
@@ -533,9 +539,7 @@ export function zoneSectionQueryUnsupportedFields(
       unsupported.push(key);
     }
   }
-  if (
-    !ZONE_SECTION_QUERY_SORT_FIELDS[query.target].includes(query.sort.field)
-  ) {
+  if (!sortable.includes(query.sort.field)) {
     unsupported.push(`sort.${query.sort.field}`);
   }
   return unsupported;

@@ -1,6 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
+import { contentLanguageSchema } from "../language";
 import { paginationLimitSchema } from "../pagination";
 import { pinKindLiterals } from "../post/post";
 import {
@@ -22,6 +23,7 @@ export const commentDTOSchema = t.Object({
   authorUserId: t.Optional(t.Nullable(t.String())),
   author: t.Optional(publicUserSchema),
   content: t.Optional(t.Nullable(contentDocSchema)),
+  language: contentLanguageSchema,
   moderationStatus: moderationStatusSchema,
   removedReason: t.Optional(t.Nullable(t.String())),
   removedByAuthority: t.Optional(t.Nullable(moderationAuthoritySchema)),
@@ -107,6 +109,7 @@ export const commentListQuerySchema = t.Object({
   rootCommentId: t.Optional(t.String()),
   parentCommentId: t.Optional(t.Nullable(t.String())),
   authorUserId: t.Optional(t.String()),
+  language: t.Optional(contentLanguageSchema),
   state: t.Optional(t.String()),
   sort: t.Optional(commentSortModeSchema),
   cursor: t.Optional(commentSliceCursorSchema),
@@ -122,6 +125,7 @@ export const commentListBodySchema = t.Object({
   rootCommentId: t.Optional(t.String()),
   parentCommentId: t.Optional(t.Nullable(t.String())),
   authorUserId: t.Optional(t.String()),
+  language: t.Optional(contentLanguageSchema),
   state: t.Optional(t.String()),
   sort: t.Optional(commentSortModeSchema),
   cursor: t.Optional(commentSliceCursorSchema),
@@ -173,12 +177,14 @@ export const createCommentSchema = t.Object({
   realmUnitId: t.Nullable(t.String()),
   parentCommentId: t.Optional(t.String()),
   content: contentDocWriteSchema,
+  language: contentLanguageSchema,
 });
 
 export type CreateCommentInput = Static<typeof createCommentSchema>;
 
 export const updateCommentSchema = t.Object({
   content: t.Optional(contentDocWriteSchema),
+  language: t.Optional(contentLanguageSchema),
   isLocked: t.Optional(t.Boolean()),
   state: t.Optional(t.Nullable(t.String())),
 });

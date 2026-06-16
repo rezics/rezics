@@ -1,4 +1,4 @@
-import type { SystemShelfKindKey } from "@rezics/contract";
+import type { ReservedShelfSlug } from "@rezics/contract";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useCurrentUserId } from "../hooks/useCurrentUserId";
@@ -7,7 +7,7 @@ import { slugResolveQuery } from "../slug/slug.queries";
 import { useSystemShelfRecovery } from "./useSystemShelfRecovery";
 
 export type UseSystemShelfIdResolverResult = {
-  resolve: (kindKey: SystemShelfKindKey) => Promise<string>;
+  resolve: (slug: ReservedShelfSlug) => Promise<string>;
   isPending: boolean;
 };
 
@@ -21,14 +21,14 @@ export function useSystemShelfIdResolver(): UseSystemShelfIdResolverResult {
   const { ensure, isPending } = useSystemShelfRecovery();
 
   const resolve = useCallback(
-    async (kindKey: SystemShelfKindKey): Promise<string> => {
+    async (slug: ReservedShelfSlug): Promise<string> => {
       if (!viewerUnitId) {
-        throw new Error(`No viewer id for ${kindKey}`);
+        throw new Error(`No viewer id for ${slug}`);
       }
 
       try {
         const resolved = await queryClient.fetchQuery({
-          ...slugResolveQuery({ scope: viewerUnitId, slug: kindKey }),
+          ...slugResolveQuery({ scope: viewerUnitId, slug }),
           retry: false,
         });
         return resolved.unitId;
@@ -37,7 +37,7 @@ export function useSystemShelfIdResolver(): UseSystemShelfIdResolverResult {
           throw error;
         }
 
-        const ensured = await ensure(kindKey);
+        const ensured = await ensure(slug);
         return ensured.unitId;
       }
     },

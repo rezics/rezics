@@ -35,7 +35,6 @@ export type ShelfWithMetadata = typeof Shelf.$inferSelect & {
 // 用于列表查询的轻量 select（不含 units/relations）
 export const shelfListSelect = {
   unitId: true,
-  kindKey: true,
   extra: true,
   rootItemCount: true,
   itemCount: true,
@@ -61,13 +60,7 @@ export const shelfListSelect = {
 
 export type ShelfListSelected = Pick<
   typeof Shelf.$inferSelect,
-  | "unitId"
-  | "kindKey"
-  | "extra"
-  | "rootItemCount"
-  | "itemCount"
-  | "createdAt"
-  | "updatedAt"
+  "unitId" | "extra" | "rootItemCount" | "itemCount" | "createdAt" | "updatedAt"
 > & {
   unit: Pick<
     typeof Unit.$inferSelect,

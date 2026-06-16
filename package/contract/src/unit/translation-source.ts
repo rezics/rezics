@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 
 // ============================================================
 // PATH PARAMS - PATCH /units/:unitId/translations/:lang/source
@@ -8,7 +8,7 @@ import { languageSchema } from "../language";
 
 export const translationSourcePathParamsSchema = t.Object({
   unitId: t.String(),
-  lang: languageSchema,
+  lang: contentLanguageSchema,
 });
 
 export type TranslationSourcePathParams =
@@ -42,7 +42,7 @@ export type TranslationSourceBody =
 
 export const translationSourceResponseSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
   sourceUnitId: t.Nullable(t.String()),
 });
 

@@ -152,8 +152,12 @@ export function ZoneListPage() {
           </p>
         </div>
         {canManageList && (
-          <label className="flex items-center gap-2 rounded-md px-2 text-sm leading-ui text-text-secondary">
+          <label
+            htmlFor="zone-list-manage-mode"
+            className="flex items-center gap-2 rounded-md px-2 text-sm leading-ui text-text-secondary"
+          >
             <Checkbox
+              id="zone-list-manage-mode"
               checked={manageMode}
               onCheckedChange={(checked) => {
                 setManageMode(Boolean(checked));
@@ -290,20 +294,13 @@ const ZoneManagementListItem: FC<{
 
   if (manageMode) {
     return (
-      <div
-        role="button"
-        tabIndex={0}
-        className="text-left"
+      <button
+        type="button"
+        className="w-full border-0 bg-transparent p-0 text-left"
         onClick={onToggle}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onToggle();
-          }
-        }}
       >
         {content}
-      </div>
+      </button>
     );
   }
 

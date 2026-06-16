@@ -21,11 +21,11 @@ export const register = async (
   email: string,
   password: string,
   avatar?: string,
-  bio?: string,
+  summary?: string,
 ) => {
   try {
     void avatar;
-    void bio;
+    void summary;
     await authApi.signUp({ email, password });
     await hydrateAuthSessionState({ requirePresence: false });
     return { token: null };

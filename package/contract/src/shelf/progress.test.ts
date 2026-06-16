@@ -3,31 +3,26 @@ import { Value } from "@sinclair/typebox/value";
 import {
   continueReadingListResponseSchema,
   lastReadAnchorSchema,
+  linkProgressPostBodySchema,
   nodeCompletionToggleBodySchema,
-  progressExtraSchema,
   progressLibraryListResponseSchema,
-  SYSTEM_SHELF_KIND_KEYS,
+  progressPostLinkDTOSchema,
+  progressPostLinksResponseSchema,
   unitProgressListResponseSchema,
   unitProgressRowDTOSchema,
   unitProgressUpsertBodySchema,
+  updateProgressPostLinkBodySchema,
   userUnitProgressStatusValues,
 } from "./progress";
 
 describe("progress contract schemas", () => {
-  test("exposes status values and system shelf kind keys", () => {
+  test("exposes status values", () => {
     expect(userUnitProgressStatusValues).toEqual([
       "BACKLOG",
       "ACTIVE",
       "PAUSED",
       "COMPLETED",
       "DROPPED",
-    ]);
-    expect(SYSTEM_SHELF_KIND_KEYS).toEqual([
-      "favorites",
-      "saved",
-      "backlog",
-      "active",
-      "completed",
     ]);
   });
 
@@ -40,7 +35,6 @@ describe("progress contract schemas", () => {
         lastReadNodeId: "node-1",
         lastReadAnchor: { text: "Chapter opening" },
         addTimeMs: 1000,
-        extra: { paused: { reasonPostUnitIds: ["post-1"] } },
       }),
     ).toBe(true);
     expect(Value.Check(unitProgressUpsertBodySchema, { progress: 1.1 })).toBe(
@@ -105,7 +99,6 @@ describe("progress contract schemas", () => {
       lastReadAnchor: null,
       firstSeenAt: "2026-01-01T00:00:00.000Z",
       lastSeenAt: "2026-01-02T00:00:00.000Z",
-      extra: null,
     };
 
     expect(Value.Check(unitProgressRowDTOSchema, row)).toBe(true);
@@ -138,7 +131,6 @@ describe("progress contract schemas", () => {
       lastReadAnchor: { text: "Resume here" },
       firstSeenAt: "2026-01-01T00:00:00.000Z",
       lastSeenAt: "2026-01-02T00:00:00.000Z",
-      extra: null,
     };
 
     expect(
@@ -177,7 +169,6 @@ describe("progress contract schemas", () => {
       lastReadAnchor: null,
       firstSeenAt: "2026-01-01T00:00:00.000Z",
       lastSeenAt: "2026-01-02T00:00:00.000Z",
-      extra: null,
     };
 
     expect(
@@ -209,67 +200,47 @@ describe("progress contract schemas", () => {
     ).toBe(true);
   });
 
-  test("progressExtraSchema accepts narrow shapes and rejects unknown keys", () => {
-    expect(Value.Check(progressExtraSchema, {})).toBe(true);
+  test("validates progress post link shapes", () => {
     expect(
-      Value.Check(progressExtraSchema, {
-        paused: { reasonPostUnitIds: ["p-1", "p-2"] },
+      Value.Check(progressPostLinkDTOSchema, {
+        progressId: "progress-1",
+        postUnitId: "post-1",
+        status: "PAUSED",
+        createdAt: "2026-01-01T00:00:00.000Z",
       }),
     ).toBe(true);
     expect(
-      Value.Check(progressExtraSchema, {
-        dropped: { reasonPostUnitIds: [] },
+      Value.Check(progressPostLinksResponseSchema, {
+        links: [
+          {
+            progressId: "progress-1",
+            postUnitId: "post-1",
+            status: "DROPPED",
+            createdAt: "2026-01-01T00:00:00.000Z",
+          },
+        ],
       }),
     ).toBe(true);
     expect(
-      Value.Check(progressExtraSchema, {
-        paused: { reasonPostUnitIds: ["p-1"] },
-        dropped: { reasonPostUnitIds: ["p-2"] },
-      }),
-    ).toBe(true);
-
-    // Unknown top-level keys rejected
-    // 拒绝未知的顶层键
-    expect(
-      Value.Check(progressExtraSchema, {
-        device: "web",
-      }),
-    ).toBe(false);
-    expect(
-      Value.Check(progressExtraSchema, {
-        paused: { reasonPostUnitIds: ["p-1"] },
-        unknownBucket: { foo: 1 },
-      }),
-    ).toBe(false);
-    // Unknown sub-keys rejected
-    // 拒绝未知的子键
-    expect(
-      Value.Check(progressExtraSchema, {
-        paused: { reasonPostUnitIds: ["p-1"], extra: 1 },
-      }),
-    ).toBe(false);
-    // Wrong types rejected
-    // 拒绝错误的类型
-    expect(
-      Value.Check(progressExtraSchema, {
-        paused: { reasonPostUnitIds: [123] },
-      }),
-    ).toBe(false);
-  });
-
-  test("upsert body accepts null extra and empty extra", () => {
-    expect(Value.Check(unitProgressUpsertBodySchema, { extra: null })).toBe(
-      true,
-    );
-    expect(Value.Check(unitProgressUpsertBodySchema, { extra: {} })).toBe(true);
-    expect(
-      Value.Check(unitProgressUpsertBodySchema, {
-        extra: { paused: { reasonPostUnitIds: [] } },
+      Value.Check(linkProgressPostBodySchema, {
+        postUnitId: "post-1",
+        status: "PAUSED",
       }),
     ).toBe(true);
     expect(
-      Value.Check(unitProgressUpsertBodySchema, {
-        extra: { device: "web" },
+      Value.Check(updateProgressPostLinkBodySchema, {
+        status: "DROPPED",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(linkProgressPostBodySchema, {
+        postUnitId: "post-1",
+        unknown: true,
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(updateProgressPostLinkBodySchema, {
+        status: "READING",
       }),
     ).toBe(false);
   });

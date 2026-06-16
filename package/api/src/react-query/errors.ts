@@ -7,7 +7,7 @@ export interface ApiErrorDetail {
     constraint?: string;
   };
   /** Set when `code === "system_shelf_missing"`. 当 `code === "system_shelf_missing"` 时设置。 */
-  kindKey?: string;
+  slug?: string;
   blockedPaths?: string[];
   offendingLockPath?: string;
   offendingPatchPath?: string;

@@ -73,11 +73,6 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
 
         {/* Right: text — 右侧：文本 */}
         <div className="flex flex-col flex-1 min-w-0">
-          {author.bio && (
-            <p className="text-sm leading-relaxed line-clamp-3 overflow-hidden">
-              {author.bio}
-            </p>
-          )}
           {description && (
             <p className="text-sm leading-relaxed mt-2 line-clamp-4 overflow-hidden">
               {description}
@@ -149,13 +144,11 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
 
               {/* Right text — 右侧文本 */}
               <div className="flex-1 !text-md">
-                <p>
-                  {t("book:author_info_bio_label")}:{author.bio}
-                </p>
-                <br />
-                <p>
-                  {t("book:author_info_description_label")}:{description}
-                </p>
+                {description && (
+                  <p>
+                    {t("book:author_info_description_label")}:{description}
+                  </p>
+                )}
               </div>
             </div>
           </div>

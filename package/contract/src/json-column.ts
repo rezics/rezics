@@ -171,29 +171,7 @@ export const genericMetadataJsonSchema = emptyCompatObjectSchema;
  */
 export const gameSystemRequirementHardwareJsonSchema = emptyCompatObjectSchema;
 
-/**
- * @compat additive-only
- * Progress status extras store optional reason Post Unit IDs. Missing status
- * blocks mean no structured reasons are attached.
- * 阅读进度状态 extra 存储可选原因 Post Unit ID。缺失状态块表示没有结构化原因。
- */
-export const userUnitProgressExtraJsonSchema = t.Object(
-  {
-    paused: t.Optional(
-      t.Object(
-        { reasonPostUnitIds: t.Optional(t.Array(t.String())) },
-        openObjectOptions,
-      ),
-    ),
-    dropped: t.Optional(
-      t.Object(
-        { reasonPostUnitIds: t.Optional(t.Array(t.String())) },
-        openObjectOptions,
-      ),
-    ),
-  },
-  openObjectOptions,
-);
+export const userUnitProgressExtraJsonSchema = emptyCompatObjectSchema;
 
 /**
  * @compat additive-only

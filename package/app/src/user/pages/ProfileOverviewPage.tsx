@@ -4,7 +4,7 @@
  * ┌───────────────────────────────────────┐
  * │ Overview (desktop 1024px+)            │
  * │ ┌─────────────────────────────────────┐
- * │ │ User bio / description section      │
+ * │ │ User summary / description section      │
  * │ ├─────────────────────────────────────┤
  * │ │ Recent Activity                     │
  * │ │ • Unit 1 — May 15, 2024            │
@@ -16,7 +16,7 @@
  * ┌─────────────────────────┐
  * │ Overview (tablet 768px) │
  * │ ┌─────────────────────┐ │
- * │ │ Bio box             │ │
+ * │ │ Summary box             │ │
  * │ ├─────────────────────┤ │
  * │ │ Recent Activity     │ │
  * │ │ • Unit 1 — May 15   │ │
@@ -32,7 +32,7 @@
  * │ │ [Followers:2]│ │
  * │ │ [Following:1]│ │
  * │ ├──────────────┤ │
- * │ │ Bio box      │ │
+ * │ │ Summary box      │ │
  * │ ├──────────────┤ │
  * │ │ Recent Items │ │
  * │ │ • Unit 1     │ │
@@ -98,7 +98,7 @@ export const ProfileOverviewPage: FC = () => {
         <ProfileStatLink
           label={t("settings:profile_tab_shelves")}
           count={shelvesCountQuery.data?.total}
-          to={`${profileBasePath}/shelves`}
+          to={`${profileBasePath}/shelf`}
           variant="compact"
         />
         <ProfileStatLink

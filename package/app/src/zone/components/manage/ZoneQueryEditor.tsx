@@ -71,7 +71,8 @@ export function ZoneQueryEditor({
   refUnits: ZoneRefUnitMap;
 }) {
   const { t } = useTranslation(["zone", "common"]);
-  const filterable = ZONE_QUERY_FILTERABLE_FIELDS[query.target];
+  const filterable: readonly ZoneQueryFilterField[] =
+    ZONE_QUERY_FILTERABLE_FIELDS[query.target];
   const has = (field: ZoneQueryFilterField) => filterable.includes(field);
 
   const setField = <K extends keyof ZoneSectionQuery>(

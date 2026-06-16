@@ -73,11 +73,6 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
               <div className="font-medium truncate" title={a.name}>
                 {a.name}
               </div>
-              {a.bio && (
-                <div className="text-xs text-gray-500 truncate" title={a.bio}>
-                  {a.bio}
-                </div>
-              )}
             </div>
           </div>
         ))}

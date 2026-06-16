@@ -6,6 +6,7 @@ export {
   useSystemStatusQuery,
 } from "./status.queries";
 export type {
+  CdcSourceStatus,
   CdcStatus,
   ExpectedMeiliIndexSchema,
   FailedJobSummary,

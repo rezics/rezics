@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentDocWriteSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
@@ -136,7 +136,6 @@ export const shelfDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(shelfExtraSchema)),
   rootItemCount: t.Optional(t.Number()),
@@ -151,15 +150,14 @@ export const shelfDTOSchema = t.Object({
 export type ShelfDTO = (typeof shelfDTOSchema)["static"];
 
 // ============================================================
-// SHELF SUMMARY DTO (for collection modal shelf list)
-// 货架摘要 DTO（用于收藏弹窗的货架列表）
+// SHELF SUMMARY DTO (for compact shelf pickers)
+// 货架摘要 DTO（用于紧凑书架选择器）
 // ============================================================
 
 export const shelfSummaryDTOSchema = t.Object({
   unitId: t.String(),
   slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
-  kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   title: t.Optional(t.Nullable(t.String())),
   itemCount: t.Number(),
@@ -203,10 +201,11 @@ export type ShelfDetailDTO = (typeof shelfDetailDTOSchema)["static"];
 const shelfListCommonProperties = {
   ...listGetQueryBase.properties,
   userId: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
+  q: t.Optional(t.String()),
+  tagIds: t.Optional(t.Array(t.String())),
   containsUnitId: t.Optional(t.String()),
   variantUnitId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -226,10 +225,11 @@ const shelfListCommonProperties = {
 const shelfListBodyCommonProperties = {
   ...listPostBodyBase.properties,
   userId: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
+  q: t.Optional(t.String()),
+  tagIds: t.Optional(t.Array(t.String())),
   containsUnitId: t.Optional(t.String()),
   variantUnitId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -282,7 +282,6 @@ export type ShelfResponse = (typeof shelfResponseSchema)["static"];
 
 export const createShelfSchema = t.Object({
   title: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   tagIds: t.Optional(t.Array(t.String())),
@@ -291,7 +290,7 @@ export const createShelfSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),
@@ -305,7 +304,6 @@ export type CreateShelfInput = (typeof createShelfSchema)["static"];
 
 export const updateShelfSchema = t.Object({
   title: t.Optional(t.String()),
-  kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
@@ -559,11 +557,11 @@ export type ShelfItemBatchResponse =
   (typeof shelfItemBatchResponseSchema)["static"];
 
 // ============================================================
-// COLLECTION API
-// 收藏 API
+// ADD TO SHELVES API
+// 加入書架 API
 // ============================================================
 
-export const collectInputSchema = t.Object({
+export const addToShelvesInputSchema = t.Object({
   targetId: t.String(),
   variantUnitId: t.Optional(t.String()),
   shelfIds: t.Array(t.String()),
@@ -572,14 +570,15 @@ export const collectInputSchema = t.Object({
   searchText: t.Optional(t.Nullable(t.String())),
 });
 
-export type CollectInput = (typeof collectInputSchema)["static"];
+export type AddToShelvesInput = (typeof addToShelvesInputSchema)["static"];
 
-export const collectResponseSchema = t.Object({
+export const addToShelvesResponseSchema = t.Object({
   savedTo: t.Array(t.String()),
   isNew: t.Boolean(),
 });
 
-export type CollectResponse = (typeof collectResponseSchema)["static"];
+export type AddToShelvesResponse =
+  (typeof addToShelvesResponseSchema)["static"];
 
 export const toggleFavoriteInputSchema = t.Object({
   targetId: t.String(),
@@ -594,7 +593,7 @@ export const toggleFavoriteResponseSchema = t.Object({
 export type ToggleFavoriteResponse =
   (typeof toggleFavoriteResponseSchema)["static"];
 
-export const collectionStatusResponseSchema = t.Object({
+export const shelfItemStatusResponseSchema = t.Object({
   isFavorited: t.Boolean(),
   shelves: t.Array(
     t.Object({
@@ -604,26 +603,26 @@ export const collectionStatusResponseSchema = t.Object({
   ),
 });
 
-export type CollectionStatusResponse =
-  (typeof collectionStatusResponseSchema)["static"];
+export type ShelfItemStatusResponse =
+  (typeof shelfItemStatusResponseSchema)["static"];
 
-export const collectionStatusBatchRequestSchema = t.Object({
+export const shelfItemStatusBatchRequestSchema = t.Object({
   targetIds: t.Array(t.String()),
 });
 
-export type CollectionStatusBatchRequest =
-  (typeof collectionStatusBatchRequestSchema)["static"];
+export type ShelfItemStatusBatchRequest =
+  (typeof shelfItemStatusBatchRequestSchema)["static"];
 
-export const collectionStatusBatchResponseSchema = t.Object({
-  statusesByTarget: t.Record(t.String(), collectionStatusResponseSchema),
+export const shelfItemStatusBatchResponseSchema = t.Object({
+  statusesByTarget: t.Record(t.String(), shelfItemStatusResponseSchema),
 });
 
-export type CollectionStatusBatchResponse =
-  (typeof collectionStatusBatchResponseSchema)["static"];
+export type ShelfItemStatusBatchResponse =
+  (typeof shelfItemStatusBatchResponseSchema)["static"];
 
 // ============================================================
-// USER UNIT COLLECTION METADATA
-// 用户单元收藏元数据
+// USER SHELF ITEM METADATA
+// 使用者書架條目元資料
 // ============================================================
 
 export const userTagApplicationDTOSchema = t.Object(
@@ -659,7 +658,7 @@ export const reorderUserTagApplicationSchema = t.Object({
 export type ReorderUserTagApplicationInput =
   (typeof reorderUserTagApplicationSchema)["static"];
 
-export const userUnitCollectionDTOSchema = t.Object({
+export const userShelfItemMetadataDTOSchema = t.Object({
   userId: t.String(),
   unitId: t.String(),
   searchText: t.Optional(t.Nullable(t.String())),
@@ -667,19 +666,19 @@ export const userUnitCollectionDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type UserUnitCollectionDTO =
-  (typeof userUnitCollectionDTOSchema)["static"];
+export type UserShelfItemMetadataDTO =
+  (typeof userShelfItemMetadataDTOSchema)["static"];
 
-export const patchUserUnitCollectionSchema = t.Object({
+export const patchUserShelfItemMetadataSchema = t.Object({
   unitId: t.String(),
   tagUnitIds: t.Optional(t.Array(t.String())),
   searchText: t.Optional(t.Nullable(t.String())),
 });
 
-export type PatchUserUnitCollectionInput =
-  (typeof patchUserUnitCollectionSchema)["static"];
+export type PatchUserShelfItemMetadataInput =
+  (typeof patchUserShelfItemMetadataSchema)["static"];
 
-export const collectionSearchQuerySchema = t.Object({
+export const userShelfItemsSearchQuerySchema = t.Object({
   q: t.Optional(t.String()),
   tagUnitIds: t.Optional(t.Array(t.String())),
   userId: t.Optional(t.String()),
@@ -687,10 +686,10 @@ export const collectionSearchQuerySchema = t.Object({
   limit: paginationLimitSchema,
 });
 
-export type CollectionSearchQuery =
-  (typeof collectionSearchQuerySchema)["static"];
+export type UserShelfItemsSearchQuery =
+  (typeof userShelfItemsSearchQuerySchema)["static"];
 
-export const collectionUnitDTOSchema = t.Object({
+export const userShelfItemDTOSchema = t.Object({
   userId: t.String(),
   unitId: t.String(),
   shelfIds: t.Array(t.String()),
@@ -700,12 +699,12 @@ export const collectionUnitDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type CollectionUnitDTO = (typeof collectionUnitDTOSchema)["static"];
+export type UserShelfItemDTO = (typeof userShelfItemDTOSchema)["static"];
 
-export const collectionSearchResponseSchema = t.Object({
-  units: t.Array(collectionUnitDTOSchema),
+export const userShelfItemsSearchResponseSchema = t.Object({
+  units: t.Array(userShelfItemDTOSchema),
   hasMore: t.Boolean(),
 });
 
-export type CollectionSearchResponse =
-  (typeof collectionSearchResponseSchema)["static"];
+export type UserShelfItemsSearchResponse =
+  (typeof userShelfItemsSearchResponseSchema)["static"];

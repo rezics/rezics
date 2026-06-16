@@ -419,7 +419,7 @@
   "user_admin_login_description": "Sign in to access the admin console.",
   "user_admin_login_title": "Admin Login",
   "user_avatar_url_label": "Avatar URL",
-  "user_bio_label": "Bio",
+  "user_summary_label": "Summary",
   "user_create_description": "Create a new user from the admin console.",
   "user_create_failed": "Create failed",
   "user_create_note": "Admin-created users do not need a verification code. The backend validates slug, Rezics Email, and slug uniqueness, then hashes the password.",

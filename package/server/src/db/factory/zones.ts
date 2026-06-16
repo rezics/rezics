@@ -647,6 +647,7 @@ export async function seedZones(
       ),
     );
 
+    await ctx.sync.zone(id);
     results.push({ id, type: UnitType.ZONE });
   }
 

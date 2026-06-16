@@ -1,4 +1,4 @@
-import { SYSTEM_SHELF_SLUGS } from "./system-slugs";
+import { RESERVED_SHELF_SLUGS } from "./system-slugs";
 
 /**
  * Platform-wide reserved slugs.
@@ -43,8 +43,6 @@ const RESERVED: readonly string[] = [
   "library",
   "catalog",
   "catalogue",
-  "collection",
-  "collections",
   "reading",
   "readlist",
   "readlists",
@@ -358,5 +356,5 @@ const RESERVED: readonly string[] = [
 
 export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   ...RESERVED,
-  ...SYSTEM_SHELF_SLUGS,
+  ...RESERVED_SHELF_SLUGS,
 ]);

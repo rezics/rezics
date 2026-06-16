@@ -1,6 +1,6 @@
 import type { ShelfItemKind, ShelfItemType } from "@rezics/api/shelf";
 import type React from "react";
-import { useCollectionModal } from "@/collection";
+import { useAddToShelfDialog } from "@/shelf";
 import { useAuth, useAuthModal } from "@/user";
 
 export type UseShelfTriggerArgs = {
@@ -12,23 +12,16 @@ export type UseShelfTriggerArgs = {
 
 export type UseShelfTriggerReturn = {
   isAuthenticated: boolean;
-  collection: ReturnType<typeof useCollectionModal>;
+  addToShelf: ReturnType<typeof useAddToShelfDialog>;
   auth: ReturnType<typeof useAuthModal>;
   handleClick: (event: React.MouseEvent) => void;
 };
 
-export function useShelfTrigger({
-  targetUnitId,
-  variantUnitId,
-  targetItemType,
-  targetKind,
-}: UseShelfTriggerArgs): UseShelfTriggerReturn {
+export function useShelfTrigger(
+  _args: UseShelfTriggerArgs,
+): UseShelfTriggerReturn {
   const { isAuthenticated } = useAuth();
-  const collection = useCollectionModal(targetUnitId, {
-    variantUnitId,
-    targetItemType,
-    targetKind,
-  });
+  const addToShelf = useAddToShelfDialog();
   const auth = useAuthModal("login");
 
   const handleClick = (event: React.MouseEvent) => {
@@ -37,12 +30,12 @@ export function useShelfTrigger({
       auth.openLogin();
       return;
     }
-    collection.handleOpen();
+    addToShelf.handleOpen();
   };
 
   return {
     isAuthenticated,
-    collection,
+    addToShelf,
     auth,
     handleClick,
   };

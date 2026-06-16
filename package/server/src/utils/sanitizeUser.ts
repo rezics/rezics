@@ -8,7 +8,7 @@ export const publicUserSelect = {
   unitId: true,
   name: true,
   avatar: true,
-  bio: true,
+  summary: true,
   description: true,
   followersCount: true,
   followingsCount: true,
@@ -19,7 +19,7 @@ export type PublicUserSelected = {
   slug?: string | null;
   name: string | null;
   avatar: string | null;
-  bio?: string | null;
+  summary?: string | null;
   description?: unknown;
   followersCount?: number;
   followingsCount?: number;
@@ -34,7 +34,7 @@ export function mapPublicUser(
     slug: user.slug ?? undefined,
     name: user.name ?? undefined,
     avatar: user.avatar ?? null,
-    bio: user.bio ?? undefined,
+    summary: user.summary ?? undefined,
     description: user.description as PublicUser["description"],
     followersCount: user.followersCount,
     followingsCount: user.followingsCount,

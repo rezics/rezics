@@ -25,6 +25,9 @@ async function getServerDb() {
   return db;
 }
 
+type ServerDb = Awaited<ReturnType<typeof getServerDb>>;
+type ServerTx = Parameters<Parameters<ServerDb["transaction"]>[0]>[0];
+
 async function appendPosition(
   dbOrTx: any,
   userUnitId: string,
@@ -196,7 +199,7 @@ export class SubscriptionListEntryService {
         asc(UserSubscriptionListEntry.createdAt),
       );
     const seen = new Set<string>();
-    return rows.flatMap((row) => {
+    return rows.flatMap((row: (typeof rows)[number]) => {
       if (seen.has(row.entry.id)) return [];
       seen.add(row.entry.id);
       return [
@@ -305,7 +308,7 @@ export class SubscriptionListEntryService {
         }
       }
     }
-    return db.transaction(async (tx) => {
+    return db.transaction(async (tx: ServerTx) => {
       const [subscription] = await tx
         .select({ id: Subscription.id })
         .from(Subscription)

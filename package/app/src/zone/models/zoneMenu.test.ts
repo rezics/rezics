@@ -92,10 +92,7 @@ describe("zoneLinkHref", () => {
       "/book/book-1",
     );
     expect(
-      zoneSectionItemHref(
-        { unitId: "poll-1", type: "POLL", title: "Vote" },
-        "toaru",
-      ),
+      zoneSectionItemHref({ unitId: "poll-1", type: "POLL" }, "toaru"),
     ).toBe("/poll/poll-1");
   });
 

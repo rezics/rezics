@@ -120,5 +120,12 @@ function isFileRouterSegmentPath(relPath: string): boolean {
 }
 
 export function scanFolderNamingForTest(folderPaths: string[]): Violation[] {
-  return folderNamingRule.scan({ folderPaths });
+  return folderNamingRule.scan({
+    apiFiles: [],
+    tsxFiles: [],
+    tsAndTsxFiles: [],
+    schemaFiles: [],
+    r9CandidateFiles: [],
+    folderPaths,
+  });
 }

@@ -92,7 +92,10 @@ async function resolveRegistrationDefaults(
         ),
       ),
     );
-  const zoneBySlug = new Map(zoneRows.map((row: any) => [row.slug, row]));
+  const zoneBySlug = new Map<string, (typeof zoneRows)[number]>();
+  for (const row of zoneRows) {
+    if (row.slug) zoneBySlug.set(row.slug, row);
+  }
 
   for (const item of zoneDefaults) {
     const zone = zoneBySlug.get(item.slug);

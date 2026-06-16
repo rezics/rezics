@@ -47,7 +47,8 @@ export const LongDisplayData: Story = {
       slug: "reader-of-very-long-serials-and-annotated-editions",
       name: "Alexandria Theodora Penelope Versewright-Liang",
       avatar: null,
-      bio: "Writes unusually long reading notes about marginalia, serialized publication schedules, translation drift, and how editions change the shape of a reader's memory across decades.",
+      summary:
+        "Writes unusually long reading notes about marginalia, serialized publication schedules, translation drift, and how editions change the shape of a reader's memory across decades.",
       followersCount: 987654,
       followingsCount: 12345,
     },

@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { readLanguageBodyBase } from "../list-query-base";
 import { pollResultVisibilitySchema, pollVoteModeSchema } from "../post/poll";
 
@@ -19,7 +19,7 @@ export const PollSearchDocumentSchema = t.Object({
   closed: t.Boolean(),
   usageCount: t.Number(),
   used: t.Boolean(),
-  languages: t.Array(languageSchema),
+  languages: t.Array(contentLanguageSchema),
   isLanguageNeutral: t.Boolean(),
   createdAt: t.String(),
   updatedAt: t.String(),

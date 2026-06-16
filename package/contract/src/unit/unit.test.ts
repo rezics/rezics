@@ -4,13 +4,20 @@ import {
   AiDisclosureMode,
   aiDisclosureDetailsSchema,
   aiDisclosureModeSchema,
+  type CatalogUnitType,
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
+  CATALOG_UNIT_TYPES,
   catalogEntryKindSchema,
+  catalogUnitTypeSchema,
   createUnitSchema,
+  isCatalogUnitType,
   unitDTOSchema,
   unitListBodySchema,
   unitListQuerySchema,
+  UnitType,
   unitTypeSchema,
   updateUnitSchema,
+  WIKI_TYPES,
   wikiTypeSchema,
 } from "./unit";
 
@@ -202,6 +209,26 @@ describe("UnitType", () => {
 
   test("rejects LABEL where a work-capable catalog type is required", () => {
     expect(Value.Check(wikiTypeSchema, "LABEL")).toBe(false);
+  });
+});
+
+describe("CatalogUnitType", () => {
+  test("defines the catalog work Unit types and cover ratios", () => {
+    expect(CATALOG_UNIT_TYPES).toEqual([
+      UnitType.BOOK,
+      UnitType.GAME,
+      UnitType.MEDIA,
+    ]);
+    expect(WIKI_TYPES).toBe(CATALOG_UNIT_TYPES);
+    expect(Value.Check(catalogUnitTypeSchema, UnitType.BOOK)).toBe(true);
+    expect(Value.Check(catalogUnitTypeSchema, UnitType.LABEL)).toBe(false);
+    expect(isCatalogUnitType(UnitType.GAME)).toBe(true);
+    expect(isCatalogUnitType(UnitType.ZONE)).toBe(false);
+    expect(CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE).toEqual({
+      [UnitType.BOOK]: 2 / 3,
+      [UnitType.GAME]: 2 / 3,
+      [UnitType.MEDIA]: 2 / 3,
+    } satisfies Record<CatalogUnitType, number>);
   });
 });
 

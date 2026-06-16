@@ -1816,6 +1816,11 @@ export class ZoneService {
           code: "ZONE_SECTION_NO_DATA",
           details: { sectionId },
         });
+      default:
+        throw new AppError(400, "Unsupported section data kind", {
+          code: "ZONE_SECTION_NO_DATA",
+          details: { sectionId, kind: section.kind },
+        });
     }
   }
 

@@ -1,6 +1,6 @@
 import type {
   ContentSearchOptions,
-  Language,
+  ContentLanguage,
   SearchCategory,
   SearchQuery,
   SearchScope,
@@ -74,7 +74,10 @@ export function unionStrings(a: string[], b: string[]): string[] {
   return [...new Set([...a, ...b])];
 }
 
-function unionLanguages(a: Language[], b: Language[]): Language[] {
+function unionLanguages(
+  a: ContentLanguage[],
+  b: ContentLanguage[],
+): ContentLanguage[] {
   return [...new Set([...a, ...b])];
 }
 

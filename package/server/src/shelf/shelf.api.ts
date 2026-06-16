@@ -8,7 +8,6 @@ import type {
   ShelfItemDTO,
   ShelfItemsResponse,
   ShelfListResponse,
-  ShelfSummaryDTO,
 } from "@rezics/contract";
 import {
   addShelfItemSchema,
@@ -62,15 +61,20 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   // --- Shelf CRUD ---
   .get(
     "/me",
-    async ({ identity }): Promise<ShelfSummaryDTO[]> => {
-      return shelfService.listUserShelves(identity.userId);
+    async ({ query, identity }): Promise<ShelfListResponse> => {
+      const { shelves, total } = await shelfService.listMine(
+        identity.userId,
+        query as any,
+      );
+      return { shelves, total };
     },
     {
       requireLogin: true,
+      query: shelfListQuerySchema,
       detail: {
         summary: "List my shelves",
         description:
-          "List the current user's shelves with item counts and tags (for collection modal)",
+          "List the current user's shelves with search, tag filters, sorting, and pagination.",
         tags: ["Shelves"],
       },
     },
@@ -88,7 +92,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       const { unitId, created } = await ensureSystemShelf(
         identity.userId,
         user.slug,
-        body.kindKey,
+        body.slug,
       );
       return { unitId, created };
     },
@@ -114,9 +118,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
             code: "invalid_body",
           });
         }
-        const extraneousKeys = Object.keys(parsed).filter(
-          (k) => k !== "kindKey",
-        );
+        const extraneousKeys = Object.keys(parsed).filter((k) => k !== "slug");
         if (extraneousKeys.length > 0) {
           throw new AppError(
             400,

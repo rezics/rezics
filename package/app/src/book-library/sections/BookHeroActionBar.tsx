@@ -24,8 +24,9 @@ import {
   Send,
 } from "lucide-react";
 import type React from "react";
-import { useShareMenu } from "@/engagement";
+import { useShareMenu, useShelfTrigger } from "@/engagement";
 import { BookProgressStatusSection } from "@/progress-status";
+import { AddToShelfDialog } from "@/shelf";
 
 interface BookHeroActionBarProps {
   bookInfo: BookDTO;
@@ -54,11 +55,11 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
     targetId: bookId || undefined,
   });
 
-  const handleAddToShelf = () => {
-    // MOCK: route to the shelves-by-book page until a shelf-picker dialog exists.
-    // MOCK：在书架选择器对话框出现之前，先跳转到按书查看书架的页面。
-    navigate({ to: "/shelf/book/$bookId", params: { bookId } });
-  };
+  const shelfTrigger = useShelfTrigger({
+    targetUnitId: bookId,
+    targetItemType: "unit",
+    targetKind: "book",
+  });
 
   const handleEdit = () => {
     if (bookId) navigate({ to: "/book/$bookId/edit", params: { bookId } });
@@ -68,7 +69,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
     <div className="flex flex-col gap-3 w-full">
       <Button
         size="lg"
-        onClick={handleAddToShelf}
+        onClick={shelfTrigger.handleClick}
         className="rounded-full font-medium"
         style={{
           backgroundColor: "var(--colors-brand-fill, #DB515C)",
@@ -78,6 +79,17 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
         <BookmarkAddOutlined className="w-4 h-4 mr-2" />
         {t("book:hero_actions_add_to_shelf")}
       </Button>
+      {bookId && shelfTrigger.isAuthenticated ? (
+        <AddToShelfDialog
+          open={shelfTrigger.addToShelf.open}
+          onOpenChange={shelfTrigger.addToShelf.setOpen}
+          targetUnitId={bookId}
+          targetItemType="unit"
+          targetKind="book"
+        />
+      ) : (
+        shelfTrigger.auth.AuthModal({})
+      )}
 
       {bookId ? <BookProgressStatusSection bookUnitId={bookId} /> : null}
 

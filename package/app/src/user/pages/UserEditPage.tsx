@@ -62,7 +62,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   const [formData, setFormData] = useState<UserEditFormData>({
     name: "",
     avatar: "",
-    bio: "",
+    summary: "",
     password: "",
     description: "",
   });
@@ -73,7 +73,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       setFormData({
         name: data.name,
         avatar: data.avatar || "",
-        bio: data.bio || "",
+        summary: data.summary || "",
         password: "",
         description: contentDocMarkdownFallback(data.description),
       });
@@ -93,7 +93,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       const updateData: UpdateUser = {
         name: trimmedName,
         avatar: formData.avatar || undefined,
-        bio: formData.bio || undefined,
+        summary: formData.summary || undefined,
         description: markdownContentDoc(formData.description),
       };
 
@@ -191,14 +191,14 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 </p>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user-edit-bio">
-                  {t("settings:profile_bio")}
+                <Label htmlFor="user-edit-summary">
+                  {t("settings:profile_summary")}
                 </Label>
                 <textarea
-                  id="user-edit-bio"
+                  id="user-edit-summary"
                   className="flex w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:ring-2 focus:ring-brand-fill"
-                  value={formData.bio ?? ""}
-                  onChange={(e) => handleChange("bio", e.target.value)}
+                  value={formData.summary ?? ""}
+                  onChange={(e) => handleChange("summary", e.target.value)}
                   rows={4}
                 />
                 <p className="text-xs text-text-secondary">

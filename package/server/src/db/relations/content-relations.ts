@@ -91,6 +91,7 @@ export function contentRelations(r: ServerRelationsBuilder) {
         from: r.UserUnitProgress.lastReadNodeId,
         to: r.ContentStructureNode.id,
       }),
+      UserUnitProgressPosts: r.many.UserUnitProgressPost(),
       Unit: r.one.Unit({
         from: r.UserUnitProgress.unitId,
         to: r.Unit.id,
@@ -98,6 +99,16 @@ export function contentRelations(r: ServerRelationsBuilder) {
       User: r.one.User({
         from: r.UserUnitProgress.userId,
         to: r.User.unitId,
+      }),
+    },
+    UserUnitProgressPost: {
+      UserUnitProgress: r.one.UserUnitProgress({
+        from: r.UserUnitProgressPost.progressId,
+        to: r.UserUnitProgress.id,
+      }),
+      Post: r.one.Post({
+        from: r.UserUnitProgressPost.postUnitId,
+        to: r.Post.unitId,
       }),
     },
   };

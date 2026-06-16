@@ -33,6 +33,7 @@ describe("commentApi", () => {
     await commentApi.create({
       rootUnitId: "post-1",
       realmUnitId: "realm-1",
+      language: "en",
       content: { runtime: "doc-v1", source: { markdown: "hello" } },
     });
     await commentApi.update("comment-1", {

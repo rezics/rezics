@@ -2,24 +2,6 @@ import { t } from "elysia";
 import { readLanguageGetQueryBase } from "../list-query-base";
 import { catalogEntryKindSchema, unitTypeSchema } from "../unit/unit";
 
-export const SYSTEM_SHELF_KIND_KEYS = [
-  "favorites",
-  "saved",
-  "backlog",
-  "active",
-  "completed",
-] as const;
-
-export const systemShelfKindKeySchema = t.Union([
-  t.Literal("favorites"),
-  t.Literal("saved"),
-  t.Literal("backlog"),
-  t.Literal("active"),
-  t.Literal("completed"),
-]);
-
-export type SystemShelfKindKey = (typeof systemShelfKindKeySchema)["static"];
-
 export const userUnitProgressStatusValues = [
   "BACKLOG",
   "ACTIVE",
@@ -56,28 +38,6 @@ export const nodeCompletionToggleBodySchema = t.Object({
 export type NodeCompletionToggleBody =
   (typeof nodeCompletionToggleBodySchema)["static"];
 
-export const progressExtraSchema = t.Object(
-  {
-    paused: t.Optional(
-      t.Object(
-        { reasonPostUnitIds: t.Array(t.String()) },
-        { additionalProperties: false },
-      ),
-    ),
-    dropped: t.Optional(
-      t.Object(
-        { reasonPostUnitIds: t.Array(t.String()) },
-        { additionalProperties: false },
-      ),
-    ),
-  },
-  { additionalProperties: false },
-);
-
-export type ProgressExtra = (typeof progressExtraSchema)["static"];
-
-export const PROGRESS_EXTRA_KNOWN_KEYS = ["paused", "dropped"] as const;
-
 export const unitProgressUpsertBodySchema = t.Object({
   progress: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
   status: t.Optional(userUnitProgressStatusSchema),
@@ -85,7 +45,6 @@ export const unitProgressUpsertBodySchema = t.Object({
   lastReadNodeId: t.Optional(t.Nullable(t.String())),
   lastReadAnchor: t.Optional(t.Nullable(lastReadAnchorSchema)),
   addTimeMs: t.Optional(t.Integer({ minimum: 0 })),
-  extra: t.Optional(t.Nullable(progressExtraSchema)),
 });
 
 export type UnitProgressUpsertBody =
@@ -109,10 +68,53 @@ export const unitProgressRowDTOSchema = t.Object({
   lastReadAnchor: t.Nullable(lastReadAnchorSchema),
   firstSeenAt: t.String(),
   lastSeenAt: t.String(),
-  extra: t.Nullable(progressExtraSchema),
 });
 
 export type UnitProgressRowDTO = (typeof unitProgressRowDTOSchema)["static"];
+
+export const progressPostLinkDTOSchema = t.Object({
+  progressId: t.String(),
+  postUnitId: t.String(),
+  status: userUnitProgressStatusSchema,
+  createdAt: t.String(),
+});
+
+export type ProgressPostLinkDTO = (typeof progressPostLinkDTOSchema)["static"];
+
+export const progressPostLinksResponseSchema = t.Object({
+  links: t.Array(progressPostLinkDTOSchema),
+});
+
+export type ProgressPostLinksResponse =
+  (typeof progressPostLinksResponseSchema)["static"];
+
+export const linkProgressPostBodySchema = t.Object(
+  {
+    postUnitId: t.String(),
+    status: t.Optional(userUnitProgressStatusSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type LinkProgressPostBody =
+  (typeof linkProgressPostBodySchema)["static"];
+
+export const progressPostParamsSchema = t.Object({
+  unitId: t.String(),
+  postUnitId: t.String(),
+});
+
+export type ProgressPostParams = (typeof progressPostParamsSchema)["static"];
+
+export const updateProgressPostLinkBodySchema = t.Object(
+  {
+    status: userUnitProgressStatusSchema,
+  },
+  { additionalProperties: false },
+);
+
+export type UpdateProgressPostLinkBody =
+  (typeof updateProgressPostLinkBodySchema)["static"];
 
 export const unitProgressListQuerySchema = t.Object({
   cursor: t.Optional(t.String()),

@@ -1,7 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { contentDocSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { readLanguageGetQueryBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { unitTypeSchema } from "../unit/unit";
@@ -15,7 +15,7 @@ import { type ZoneTheme, zoneThemeV1Schema } from "./theme-v1";
 
 export const zoneTranslationSchema = t.Object(
   {
-    language: languageSchema,
+    language: contentLanguageSchema,
     title: t.Optional(t.String()),
     description: t.Optional(t.String()),
   },
@@ -214,7 +214,7 @@ export const zoneRefUnitSummarySchema = t.Object({
   slug: t.Optional(t.Nullable(t.String())),
   title: t.Nullable(t.String()),
   summary: t.Optional(t.Nullable(t.String())),
-  language: t.Optional(t.Nullable(languageSchema)),
+  language: t.Optional(t.Nullable(contentLanguageSchema)),
   imageUrl: t.Optional(t.Nullable(t.String())),
   postKind: t.Optional(t.Nullable(t.String())),
   entityKind: t.Optional(t.Nullable(t.String())),
@@ -253,7 +253,7 @@ export const zoneSectionItemSchema = t.Object({
   slug: t.Optional(t.Nullable(t.String())),
   title: t.Nullable(t.String()),
   summary: t.Optional(t.Nullable(t.String())),
-  language: t.Optional(t.Nullable(languageSchema)),
+  language: t.Optional(t.Nullable(contentLanguageSchema)),
   imageUrl: t.Optional(t.Nullable(t.String())),
   postKind: t.Optional(t.Nullable(t.String())),
   entityKind: t.Optional(t.Nullable(t.String())),
@@ -277,7 +277,7 @@ export const zoneSectionDataSchema = t.Object({
   // richText sections only: the fragment's resolved ContentTranslation doc.
   // 仅 richText 分区：片段已解析的 ContentTranslation 文档。
   doc: t.Optional(t.Nullable(contentDocSchema)),
-  docLanguage: t.Optional(t.Nullable(languageSchema)),
+  docLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   // stats sections only.
   // 仅 stats 分区。
   stats: t.Optional(zoneStatsDataSchema),

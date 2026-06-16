@@ -1,4 +1,4 @@
-import type { Language } from "@rezics/contract";
+import type { ContentLanguage } from "@rezics/contract";
 import { and, asc, eq, ilike, inArray, ne } from "drizzle-orm";
 import { unitService } from "@/unit";
 import { Unit, UnitTranslation } from "../db/schema";
@@ -109,7 +109,7 @@ export class LabelService {
 
   async create(input: {
     userId: string;
-    translations: Array<{ language: Language; title: string }>;
+    translations: Array<{ language: ContentLanguage; title: string }>;
   }): Promise<LabelWithTranslations> {
     const unit = await unitService.create({
       userId: input.userId,

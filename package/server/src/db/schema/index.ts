@@ -183,13 +183,17 @@ export type NewUserTagApplicationRow =
 export type UserUnitProgressRow = typeof schema.UserUnitProgress.$inferSelect;
 export type NewUserUnitProgressRow =
   typeof schema.UserUnitProgress.$inferInsert;
+export type UserUnitProgressPostRow =
+  typeof schema.UserUnitProgressPost.$inferSelect;
+export type NewUserUnitProgressPostRow =
+  typeof schema.UserUnitProgressPost.$inferInsert;
 export type ZoneRow = typeof schema.Zone.$inferSelect;
 export type NewZoneRow = typeof schema.Zone.$inferInsert;
 export * from "../relations";
 export * from "./alias";
 export * from "./attribution";
 export * from "./book";
-export * from "./collection";
+export * from "./progress";
 export * from "./columns";
 export * from "./comment";
 export * from "./content-structure";

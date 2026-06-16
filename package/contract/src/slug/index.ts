@@ -28,9 +28,10 @@ export {
   SlugRefSchema,
 } from "./slug-ref";
 export {
-  SYSTEM_SHELF_SLUG_SET,
-  SYSTEM_SHELF_SLUGS,
-  type SystemShelfSlug,
+  FAVORITES_SHELF_SLUG,
+  RESERVED_SHELF_SLUG_SET,
+  RESERVED_SHELF_SLUGS,
+  type ReservedShelfSlug,
 } from "./system-slugs";
 export type { SlugValidationResult, ValidateSlugOptions } from "./validate";
 export { validateSlug } from "./validate";

@@ -2,7 +2,9 @@ import { useCreateCommentMutation } from "@rezics/api/comment/comment";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { realmDetailQuery } from "@rezics/api/realm/realm";
 import {
+  CONTENT_LANGUAGE_SLUGS,
   type CommentDTO,
+  LANGUAGE_META,
   markdownContentDoc,
   markdownContentDocWithPoll,
   type PollDTO,
@@ -13,6 +15,12 @@ import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Input,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Tabs,
   TabsContent,
   TabsList,
@@ -31,7 +39,7 @@ import {
 } from "react";
 import { PollComposer, PollLibrarySurface } from "@/poll";
 import { RealmPostTagPicker } from "@/realm";
-import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
+import { useAutoDetectedAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user";
 
@@ -90,7 +98,6 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
-  const authoringLanguage = useAuthoringLanguageDefault();
   const { t } = useTranslation([
     "auth",
     "common",
@@ -146,6 +153,9 @@ export const ReplyComposer = forwardRef<
   const startsExpanded = mode === "expanded" || autoFocus;
   const [expanded, setExpanded] = useState<boolean>(startsExpanded);
   const [body, setBody] = useState("");
+  const { language, setLanguage } = useAutoDetectedAuthoringLanguageState({
+    text: body,
+  });
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     initialTagIds ?? [],
   );
@@ -173,6 +183,7 @@ export const ReplyComposer = forwardRef<
           parentCommentId:
             parentCommentId === rootUnitId ? undefined : parentCommentId,
           content,
+          language,
         },
         {
           onSuccess: (comment) => {
@@ -191,7 +202,7 @@ export const ReplyComposer = forwardRef<
         realmUnitIds,
         tagIds: selectedTagIds,
         kind: PostKind.POST,
-        language: authoringLanguage,
+        language,
         title: derivedTitle,
         content,
       },
@@ -267,7 +278,7 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          language: authoringLanguage,
+          language,
           title: derivedTitle,
           content: markdownContentDocWithPoll(trimmed, poll.unitId),
         },
@@ -294,7 +305,7 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          language: authoringLanguage,
+          language,
           title: derivedTitle,
           content: markdownContentDocWithPoll(trimmed, pollUnitId),
         },
@@ -322,7 +333,7 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          language: authoringLanguage,
+          language,
           title: derivedTitle,
           content: markdownContentDoc(trimmed),
         },
@@ -417,21 +428,38 @@ export const ReplyComposer = forwardRef<
           onSelectedTagIdsChange={setSelectedTagIds}
         />
       )}
-      <div className="flex flex-row items-center justify-between gap-2">
-        {canAttachPoll ? (
-          <Button
-            size="sm"
-            variant={attachingPoll ? "secondary" : "ghost"}
-            onClick={() => setAttachingPoll((value) => !value)}
-            disabled={submitting}
-          >
-            <BarChart3 className="mr-1 h-4 w-4" />
-            {t("community:poll_attach")}
-          </Button>
-        ) : (
-          <span />
-        )}
-        <div className="flex flex-row gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-row flex-wrap items-center gap-2">
+          {canAttachPoll ? (
+            <Button
+              size="sm"
+              variant={attachingPoll ? "secondary" : "ghost"}
+              onClick={() => setAttachingPoll((value) => !value)}
+              disabled={submitting}
+            >
+              <BarChart3 className="mr-1 h-4 w-4" />
+              {t("community:poll_attach")}
+            </Button>
+          ) : null}
+          <Select value={language} onValueChange={setLanguage}>
+            <SelectTrigger
+              aria-label={t("common:language")}
+              className="h-9 w-[9.5rem] max-w-full"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {CONTENT_LANGUAGE_SLUGS.map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {languageLabel(lang)}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-row justify-end gap-2">
           <Button
             size="sm"
             variant="ghost"
@@ -509,4 +537,11 @@ export const ReplyComposer = forwardRef<
  */
 export function useBlurRetain(body: string) {
   return () => body.trim().length > 0;
+}
+
+function languageLabel(language: string): string {
+  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[
+    language
+  ];
+  return meta?.nativeName ? `${meta.nativeName} (${language})` : language;
 }

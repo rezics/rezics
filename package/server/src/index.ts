@@ -54,7 +54,7 @@ import {
 } from "./realm";
 import { scoreApi } from "./score/score.api";
 import { seriesApi } from "./series-unit";
-import { collectionApi, shelfApi } from "./shelf";
+import { shelfApi, shelfItemActionApi } from "./shelf";
 import { slugApi } from "./slug";
 import { statsAdminApi } from "./stat";
 import { subjectAttributionApi } from "./subject-attribution";
@@ -72,7 +72,7 @@ import { unitExternalLinkApi } from "./unit-external-link";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { userTagApplicationApi } from "./user-tag-application";
-import { userUnitCollectionApi } from "./user-unit-collection";
+import { userShelfItemApi } from "./user-shelf-item";
 import { readDatabaseErrorDetails } from "./utils/database-error";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
@@ -220,8 +220,8 @@ routeApp
   .use(progressApi)
   .use(draftApi)
   .use(activityApi)
+  .use(shelfItemActionApi)
   .use(shelfApi)
-  .use(collectionApi)
   .use(linkApi)
   .use(zoneApi)
   .use(labelApi)
@@ -240,7 +240,7 @@ routeApp
   .use(subscriptionApi)
   .use(userApi)
   .use(userBriefApi)
-  .use(userUnitCollectionApi)
+  .use(userShelfItemApi)
   .use(userTagApplicationApi)
   .use(meiliApi)
   .use(federatedSearchApi)

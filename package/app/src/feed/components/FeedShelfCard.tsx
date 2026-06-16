@@ -14,35 +14,6 @@ const feedShelfReactionPolicy: ReactionBarPolicy = {
   shelfItemKind: "shelf",
 };
 
-function shelfKindLabel(kindKey: string, t: (key: string) => string): string {
-  switch (kindKey) {
-    case "favorites":
-      return t("entity:shelf_system_favorites");
-    case "saved":
-      return t("entity:shelf_system_saved");
-    case "backlog":
-      return t("entity:shelf_system_backlog");
-    case "active":
-      return t("entity:shelf_system_active");
-    case "completed":
-      return t("entity:shelf_system_completed");
-    case "CUSTOM":
-      return t("entity:shelf_kind_custom");
-    case "FAVORITES":
-      return t("entity:shelf_kind_favorites");
-    case "PLAYLIST":
-      return t("entity:shelf_kind_playlist");
-    case "READING_LIST":
-      return t("entity:shelf_kind_reading_list");
-    case "WATCHLIST":
-      return t("entity:shelf_kind_watchlist");
-    default:
-      return kindKey
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase());
-  }
-}
-
 interface FeedShelfCardProps {
   row: FeedShelfRow;
   className?: string;
@@ -56,7 +27,6 @@ interface FeedShelfCardProps {
  * +------------------------------+
  * | [cover] Shelf title          |
  * |         Item count           |
- * |         Shelf kind           |
  * |         (flex spacer)        |
  * |         [vote][shelf][share] |
  * +------------------------------+
@@ -64,7 +34,7 @@ interface FeedShelfCardProps {
  * Tablet (640px-1023px)
  * +--------------------------------------+
  * | [cover] Title two lines max          |
- * |         Count / kind; footer bottom  |
+ * |         Count; footer bottom         |
  * +--------------------------------------+
  *
  * Desktop (1024px-1535px)
@@ -131,12 +101,6 @@ export function FeedShelfCard({ row, className }: FeedShelfCardProps) {
               {t("entity:shelf_items_count", { count: row.shelf.itemCount })}
             </p>
           </div>
-
-          {row.shelf.kindKey ? (
-            <p className="line-clamp-2 text-sm leading-ui text-text-secondary">
-              {shelfKindLabel(row.shelf.kindKey, t)}
-            </p>
-          ) : null}
 
           <ReactionBar
             size="md"

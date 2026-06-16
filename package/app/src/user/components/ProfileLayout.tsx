@@ -13,6 +13,9 @@ interface ProfileContextValue {
   user: UserDTO;
   isCurrentUser: boolean;
   userId: string;
+  profileRoute:
+    | { kind: "id"; userId: string }
+    | { kind: "slug"; userSlug: string };
   profileBasePath: string;
 }
 
@@ -69,6 +72,10 @@ export const ProfileLayout: FC = () => {
       ? `/u/${userSlug}`
       : "";
   const profileBasePath = `${userSpaceBasePath}/profile`;
+  const profileRoute =
+    routeUserId !== undefined
+      ? ({ kind: "id", userId: routeUserId } as const)
+      : ({ kind: "slug", userSlug: userSlug ?? "" } as const);
   const currentUser = useUserProfileStore((s) => s.user);
   const isCurrentUser = routeUserId
     ? currentUser?.unitId === routeUserId
@@ -120,7 +127,13 @@ export const ProfileLayout: FC = () => {
 
   return (
     <ProfileContext.Provider
-      value={{ user, isCurrentUser, userId: user.unitId, profileBasePath }}
+      value={{
+        user,
+        isCurrentUser,
+        userId: user.unitId,
+        profileRoute,
+        profileBasePath,
+      }}
     >
       <div className="w-full max-w-12/16 mx-auto">
         <div className="flex flex-col lg:flex-row lg:gap-12 px-4 pb-12">

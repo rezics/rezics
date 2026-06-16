@@ -6,7 +6,7 @@ import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import {
   markdownContentDoc,
-  normalizeLanguage,
+  normalizeContentLanguage,
   PostKind,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -19,7 +19,7 @@ import { resolveCatalogEntryInteractionContext } from "@/book-library";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
-import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
+import { useAutoDetectedAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
 
 /**
  * 新建评论或备注页面 - 允许用户为指定书籍创建新的评论或备注
@@ -46,7 +46,6 @@ import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguage
  */
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["common", "community", "page"]);
-  const authoringLanguage = useAuthoringLanguageDefault();
   const search = useRouterState({ select: (s) => s.location.search });
   const searchParams =
     typeof search === "string"
@@ -74,6 +73,11 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const primaryTargetUnitId = catalogContext?.primaryTargetUnitId ?? bookUnitId;
   const variantUnitId =
     searchParams.get("variantUnitId") ?? catalogContext?.variantUnitId;
+  const { language: authoringLanguage } = useAutoDetectedAuthoringLanguageState(
+    {
+      text: `${reviewData._editTitle}\n${reviewData.contentSource}`,
+    },
+  );
 
   const scoreMutation = useUpsertScoreMutation();
   const postMutation = useCreatePostMutation({
@@ -140,7 +144,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       variantUnitId,
       kind,
       language:
-        normalizeLanguage(reviewData.language ?? authoringLanguage) ??
+        normalizeContentLanguage(reviewData.language ?? authoringLanguage) ??
         authoringLanguage,
       title: reviewData._editTitle.trim(),
       status,

@@ -1,13 +1,17 @@
 import type {
   ContinueReadingListQuery,
   ContinueReadingListResponse,
+  LinkProgressPostBody,
   NodeCompletionToggleBody,
   ProgressLibraryListResponse,
+  ProgressPostLinkDTO,
+  ProgressPostLinksResponse,
   UnitProgressListQuery,
   UnitProgressListResponse,
   UnitProgressRowDTO,
   UnitProgressStatsResponse,
   UnitProgressUpsertBody,
+  UpdateProgressPostLinkBody,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
@@ -27,6 +31,48 @@ export const progressApi = {
       method: "PUT",
       body: JSON.stringify(input),
     });
+  },
+
+  listProgressPosts: async (
+    unitId: string,
+  ): Promise<ProgressPostLinksResponse> => {
+    return apiFetch<ProgressPostLinksResponse>(
+      `/me/units/${unitId}/progress/posts`,
+    );
+  },
+
+  linkProgressPost: async (
+    unitId: string,
+    input: LinkProgressPostBody,
+  ): Promise<ProgressPostLinkDTO> => {
+    return apiFetch<ProgressPostLinkDTO>(`/me/units/${unitId}/progress/posts`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  updateProgressPostLink: async (
+    unitId: string,
+    postUnitId: string,
+    input: UpdateProgressPostLinkBody,
+  ): Promise<ProgressPostLinkDTO> => {
+    return apiFetch<ProgressPostLinkDTO>(
+      `/me/units/${unitId}/progress/posts/${postUnitId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  unlinkProgressPost: async (
+    unitId: string,
+    postUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/me/units/${unitId}/progress/posts/${postUnitId}`,
+      { method: "DELETE" },
+    );
   },
 
   listMyProgress: async (

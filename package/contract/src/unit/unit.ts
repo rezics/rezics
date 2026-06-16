@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import {
   listGetQueryBase,
@@ -90,18 +90,51 @@ export const unitTypeSchema = t.Union([
 ]);
 
 /**
+ * Unit types that represent cataloged works. These are the Unit-level source
+ * of truth for work cover presentation and collaborative catalog/wiki editing.
+ * 表示可编目作品的 Unit 类型。这是作品封面展示与协作式目录/wiki 编辑的
+ * Unit 级事实来源。
+ */
+export const CATALOG_UNIT_TYPES = [
+  UnitType.BOOK,
+  UnitType.GAME,
+  UnitType.MEDIA,
+] as const;
+
+export type CatalogUnitType = (typeof CATALOG_UNIT_TYPES)[number];
+
+export const catalogUnitTypeSchema = t.Union([
+  t.Literal(UnitType.BOOK),
+  t.Literal(UnitType.GAME),
+  t.Literal(UnitType.MEDIA),
+]);
+
+export function isCatalogUnitType(type: string): type is CatalogUnitType {
+  return (CATALOG_UNIT_TYPES as readonly string[]).includes(type);
+}
+
+/**
+ * Catalog work cover aspect ratio (width / height) by Unit type. Keep values
+ * independent even where they match so a single catalog type can change without
+ * affecting the others.
+ * 按 Unit 类型定义的目录作品封面宽高比（宽 / 高）。即使数值相同也保持
+ * 独立，以便单一目录类型可以更改而不影响其他类型。
+ */
+export const CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE = {
+  [UnitType.BOOK]: 2 / 3,
+  [UnitType.GAME]: 2 / 3,
+  [UnitType.MEDIA]: 2 / 3,
+} as const satisfies Record<CatalogUnitType, number>;
+
+/**
  * Unit types that participate in collaborative catalog/wiki editing.
  * 参与协作式目录/wiki 编辑的 Unit 类型。
  */
-export const WIKI_TYPES = ["BOOK", "GAME", "MEDIA"] as const;
+export const WIKI_TYPES = CATALOG_UNIT_TYPES;
 
-export type WikiType = (typeof WIKI_TYPES)[number];
+export type WikiType = CatalogUnitType;
 
-export const wikiTypeSchema = t.Union([
-  t.Literal("BOOK"),
-  t.Literal("GAME"),
-  t.Literal("MEDIA"),
-]);
+export const wikiTypeSchema = catalogUnitTypeSchema;
 
 export const unitStatusSchema = t.Union([
   t.Literal("DRAFT"),
@@ -231,7 +264,7 @@ export const publicUserSchema = t.Object({
   slug: t.Optional(t.String()),
   name: t.Optional(t.String()),
   avatar: t.Optional(t.Nullable(t.String())),
-  bio: t.Optional(t.Nullable(t.String())),
+  summary: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(contentDocSchema)),
   followersCount: t.Optional(t.Number()),
   followingsCount: t.Optional(t.Number()),
@@ -246,7 +279,7 @@ export type PublicUser = (typeof publicUserSchema)["static"];
 
 export const unitTranslationDTOSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
@@ -288,7 +321,7 @@ export type PublishableUnitInput =
 
 export const unitSupportLanguageDTOSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
   isPrimary: t.Boolean(),
   position: t.String(), // Fractional Indexing
 });
@@ -333,7 +366,7 @@ export type BaseUnit = (typeof baseUnitSchema)["static"];
 
 export const unitDTOSchema = t.Object({
   ...baseUnitSchema.properties,
-  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
@@ -364,7 +397,7 @@ export const unitListQuerySchema = t.Object({
   visibility: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
@@ -405,7 +438,7 @@ export const unitListBodySchema = t.Object({
   visibility: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
@@ -472,7 +505,7 @@ export const createUnitSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: languageSchema,
+        language: contentLanguageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),
@@ -508,7 +541,7 @@ export type UpdateUnitInput = (typeof updateUnitSchema)["static"];
 // ============================================================
 
 export const createTranslationSchema = t.Object({
-  language: languageSchema,
+  language: contentLanguageSchema,
   title: t.Optional(t.String()),
   subtitle: t.Optional(t.String()),
   summary: t.Optional(t.String()),
@@ -532,7 +565,7 @@ export type UpdateTranslationInput = (typeof updateTranslationSchema)["static"];
 
 export const translationParamsSchema = t.Object({
   unitId: t.String(),
-  language: languageSchema,
+  language: contentLanguageSchema,
 });
 
 export type TranslationParams = (typeof translationParamsSchema)["static"];

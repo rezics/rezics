@@ -3,7 +3,7 @@ import {
   type ContentStructureItem,
   contentStructureNodeSchema,
 } from "../content/structure";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import {
@@ -46,7 +46,7 @@ export const seriesDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
-  defaultLanguage: t.Optional(t.Nullable(languageSchema)),
+  defaultLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
   licenseSlug: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -74,7 +74,7 @@ export const seriesDetailDTOSchema = t.Object({
 export type SeriesDetailDTO = (typeof seriesDetailDTOSchema)["static"];
 
 const seriesTranslationInputSchema = t.Object({
-  language: languageSchema,
+  language: contentLanguageSchema,
   title: t.Optional(t.String()),
   subtitle: t.Optional(t.String()),
   summary: t.Optional(t.String()),
@@ -86,7 +86,7 @@ const seriesTranslationInputSchema = t.Object({
 export const createSeriesSchema = t.Object({
   userId: t.Optional(t.String()),
   kindKey: seriesKindSchema,
-  defaultLanguage: t.Optional(languageSchema),
+  defaultLanguage: t.Optional(contentLanguageSchema),
   visibility: t.Optional(t.String()),
   status: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
@@ -99,7 +99,7 @@ export type CreateSeriesInput = (typeof createSeriesSchema)["static"];
 
 export const updateSeriesSchema = t.Object({
   kindKey: t.Optional(seriesKindSchema),
-  defaultLanguage: t.Optional(t.Nullable(languageSchema)),
+  defaultLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   visibility: t.Optional(t.String()),
   status: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
@@ -114,7 +114,7 @@ export const seriesListQuerySchema = t.Object({
   q: t.Optional(t.String()),
   kindKey: t.Optional(seriesKindSchema),
   containsReleaseUnitId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   start: t.Optional(t.Number()),
@@ -128,7 +128,7 @@ export const seriesListBodySchema = t.Object({
   q: t.Optional(t.String()),
   kindKey: t.Optional(seriesKindSchema),
   containsReleaseUnitId: t.Optional(t.String()),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   start: t.Optional(t.Number()),

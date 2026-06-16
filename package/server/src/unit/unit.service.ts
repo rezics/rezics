@@ -255,7 +255,7 @@ function publicUserColumns() {
     unitId: User.unitId,
     name: User.name,
     avatar: User.avatar,
-    bio: User.bio,
+    summary: User.summary,
     description: User.description,
     followersCount: User.followersCount,
     followingsCount: User.followingsCount,

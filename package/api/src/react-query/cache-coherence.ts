@@ -31,7 +31,7 @@ export const CACHE_NAMESPACE_ROOTS = {
   bookNodeCompletionList: ["progress", "nodeCompletion"],
   progress: ["progress"],
   shelves: ["shelves"],
-  collection: ["collection"],
+  shelfItemStatus: ["shelf-item-status"],
   reactions: ["reactions"],
   subscription: ["subscription"],
   notifications: ["notifications"],
@@ -46,7 +46,7 @@ export type CacheNamespace = keyof typeof CACHE_NAMESPACE_ROOTS;
  * 触发横切缓存失效的 mutation 面。
  */
 export type CacheMutationDomain =
-  | "collect"
+  | "shelf-item"
   | "follow"
   | "reaction"
   | "progress"
@@ -66,7 +66,7 @@ export type CacheMutationDomain =
  *（`UserUnitProgress` 写入不会改变按节点的行）。
  */
 export const CACHE_COHERENCE_MAP = {
-  collect: ["detail", "profile", "search", "shelves", "collection"],
+  "shelf-item": ["detail", "profile", "search", "shelves", "shelfItemStatus"],
   follow: ["detail", "profile", "subscription"],
   reaction: ["detail", "profile", "realmFeed", "search"],
   progress: ["detail", "profile", "progress"],

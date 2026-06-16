@@ -8,6 +8,16 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import { useMemo } from "react";
 
+// Map seed tag names to i18n keys for content type labels.
+// 将 seed tag 名称映射到 i18n 键用于内容类型标签。
+const seedTagI18nKeys: Record<SeedTagName, string> = {
+  book: "entity:seed_tag_book",
+  game: "entity:seed_tag_game",
+  media: "entity:seed_tag_media",
+  post: "entity:seed_tag_post",
+  link: "entity:seed_tag_link",
+};
+
 export interface SeedTagChipGroupProps {
   value: string[];
   onChange: (next: string[]) => void;
@@ -20,16 +30,6 @@ export function SeedTagChipGroup({
   disabled = false,
 }: SeedTagChipGroupProps) {
   const { t } = useTranslation(["entity"]);
-  // Map seed tag names to i18n keys for content type labels.
-  // 将 seed tag 名称映射到 i18n 键用于内容类型标签。
-  const seedTagI18nKeys: Record<SeedTagName, string> = {
-    book: "entity:seed_tag_book",
-    game: "entity:seed_tag_game",
-    media: "entity:seed_tag_media",
-    post: "entity:seed_tag_post",
-    link: "entity:seed_tag_link",
-  };
-
   const chips = useMemo(
     () =>
       SEED_TAG_NAMES.map((name) => {

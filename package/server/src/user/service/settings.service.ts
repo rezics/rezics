@@ -1,8 +1,8 @@
-import type { Language, UserSettings } from "@rezics/contract";
+import type { ContentLanguage, UserSettings } from "@rezics/contract";
 import {
   FALLBACK_LANGUAGE,
   LICENSE_SLUGS,
-  normalizeLanguage,
+  normalizeContentLanguage,
   OPT_IN_RATINGS,
 } from "@rezics/contract";
 import { eq } from "drizzle-orm";
@@ -66,14 +66,16 @@ function deepMerge(target: any, source: any): any {
 
 export function normalizePreferredLanguages(
   input: readonly (string | null | undefined)[] | null | undefined,
-): Language[] {
+): ContentLanguage[] {
   const normalized = [
     ...new Set(
       (input ?? [])
         .map((language) =>
-          typeof language === "string" ? normalizeLanguage(language) : null,
+          typeof language === "string"
+            ? normalizeContentLanguage(language)
+            : null,
         )
-        .filter((language): language is Language => !!language),
+        .filter((language): language is ContentLanguage => !!language),
     ),
   ];
   return normalized.length > 0 ? normalized : [FALLBACK_LANGUAGE];

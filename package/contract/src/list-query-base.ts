@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { languageSchema } from "./language";
+import { appLanguageSchema, contentLanguageSchema } from "./language";
 
 /**
  * Shared bases for list / batch-by-id endpoints. GET and POST use different
@@ -61,8 +61,8 @@ export const listLanguageModeSchema = t.Union([
 export type ListLanguageMode = (typeof listLanguageModeSchema)["static"];
 
 export const readLanguageBodyBase = t.Object({
-  languages: t.Optional(t.Array(languageSchema)),
-  appLocale: t.Optional(languageSchema),
+  languages: t.Optional(t.Array(contentLanguageSchema)),
+  appLocale: t.Optional(appLanguageSchema),
   languageMode: t.Optional(listLanguageModeSchema),
 });
 
@@ -74,7 +74,7 @@ export const readLanguageGetQueryBase = t.Object({
   // `languages` 是回退 / 偏好候选列表。将本地应用语言保留在 `appLocale` 中，
   // 以便解析优先级仍由 contract 掌控。
   languages: t.Optional(t.String()),
-  appLocale: t.Optional(languageSchema),
+  appLocale: t.Optional(appLanguageSchema),
   languageMode: t.Optional(listLanguageModeSchema),
 });
 

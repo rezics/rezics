@@ -21,7 +21,7 @@ export const userDataExportSchema = t.Object({
     handle: t.Optional(t.Nullable(t.String())),
     name: t.Optional(t.Nullable(t.String())),
     email: t.Optional(t.Nullable(t.String())),
-    bio: t.Optional(t.Nullable(t.String())),
+    summary: t.Optional(t.Nullable(t.String())),
     avatar: t.Optional(t.Nullable(t.String())),
     joinDate: t.Optional(t.Nullable(t.String())),
   }),
@@ -41,7 +41,7 @@ export const userDataExportSchema = t.Object({
       updatedAt: t.String(),
     }),
   ),
-  userUnitCollections: t.Array(
+  userShelfItems: t.Array(
     t.Object({
       unitId: t.String(),
       searchText: t.Optional(t.Nullable(t.String())),

@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentStructureDTOSchema } from "../content/structure";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { unitTranslationDTOSchema } from "../unit/unit";
 
 export const RATING_TAGS = [
@@ -70,7 +70,7 @@ export type GameSystemRequirementHardware =
 export const gameSystemRequirementSummarySchema = t.Object({
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: gameSystemRequirementTierSchema,
-  language: t.Optional(t.Nullable(languageSchema)),
+  language: t.Optional(t.Nullable(contentLanguageSchema)),
   hardware: gameSystemRequirementHardwareSchema,
 });
 
@@ -82,7 +82,7 @@ export const gameSystemRequirementDTOSchema = t.Object({
   gameUnitId: t.String(),
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: gameSystemRequirementTierSchema,
-  language: t.Optional(t.Nullable(languageSchema)),
+  language: t.Optional(t.Nullable(contentLanguageSchema)),
   sourceExternalLinkId: t.Optional(t.Nullable(t.String())),
   hardware: gameSystemRequirementHardwareSchema,
   rawText: t.Optional(t.Nullable(t.String())),
@@ -104,7 +104,7 @@ export const createGameSystemRequirementSchema = t.Object({
   gameUnitId: t.String(),
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: gameSystemRequirementTierSchema,
-  language: t.Optional(t.Nullable(languageSchema)),
+  language: t.Optional(t.Nullable(contentLanguageSchema)),
   sourceExternalLinkId: t.Optional(t.Nullable(t.String())),
   hardware: gameSystemRequirementHardwareSchema,
   rawText: t.Optional(t.Nullable(t.String())),
@@ -116,7 +116,7 @@ export type CreateGameSystemRequirementInput =
 export const updateGameSystemRequirementSchema = t.Object({
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: t.Optional(gameSystemRequirementTierSchema),
-  language: t.Optional(t.Nullable(languageSchema)),
+  language: t.Optional(t.Nullable(contentLanguageSchema)),
   sourceExternalLinkId: t.Optional(t.Nullable(t.String())),
   hardware: t.Optional(gameSystemRequirementHardwareSchema),
   rawText: t.Optional(t.Nullable(t.String())),
@@ -129,7 +129,7 @@ export const gameSystemRequirementListFiltersSchema = t.Object({
   gameUnitId: t.Optional(t.String()),
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: t.Optional(gameSystemRequirementTierSchema),
-  language: t.Optional(languageSchema),
+  language: t.Optional(contentLanguageSchema),
   sourceExternalLinkId: t.Optional(t.String()),
 });
 

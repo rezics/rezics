@@ -1,3 +1,4 @@
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import {
   boolean,
   foreignKey,
@@ -49,6 +50,7 @@ export const Comment = pgTable(
      * Meilisearch-only and must not be added as PostgreSQL columns.
      */
     content: jsonData(),
+    language: text().default(DEFAULT_LANGUAGE).notNull(),
     depth: integer().default(1).notNull(),
     replyCount: integer().default(0).notNull(),
     directReplyCount: integer().default(0).notNull(),
@@ -84,6 +86,10 @@ export const Comment = pgTable(
     index("Comment_moderationStatus_idx").using(
       "btree",
       table.moderationStatus.asc().nullsLast(),
+    ),
+    index("Comment_language_idx").using(
+      "btree",
+      table.language.asc().nullsLast(),
     ),
     index("Comment_parentCommentId_createdAt_idx").using(
       "btree",

@@ -12,7 +12,7 @@ function env(fetchImpl: typeof fetch): EdgeEnv {
 
 describe("edge handler", () => {
   test("sends human traffic to static assets", async () => {
-    const assetFetch = mock(async () => new Response("spa"));
+    const assetFetch = mock(async () => new Response("asset"));
 
     const response = await handleRequest(
       new Request("https://rezics.com/book/book-1", {
@@ -21,12 +21,12 @@ describe("edge handler", () => {
       env(assetFetch as unknown as typeof fetch),
     );
 
-    expect(await response.text()).toBe("spa");
+    expect(await response.text()).toBe("asset");
     expect(assetFetch).toHaveBeenCalled();
   });
 
   test("sends bot traffic on eligible paths to preview", async () => {
-    const assetFetch = mock(async () => new Response("spa"));
+    const assetFetch = mock(async () => new Response("asset"));
     const response = await handleRequest(
       new Request("https://rezics.com/book/book-1", {
         headers: { "user-agent": "Twitterbot" },

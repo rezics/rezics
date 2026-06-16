@@ -18,7 +18,7 @@ export const UserSearchDocumentSchema = t.Object({
   email: t.Optional(t.String()),
   slug: t.Optional(t.Union([t.String(), t.Null()])),
   avatar: t.Optional(t.Union([t.String(), t.Null()])),
-  bio: t.Optional(t.Union([t.String(), t.Null()])),
+  summary: t.Optional(t.Union([t.String(), t.Null()])),
   description: t.Optional(t.Union([contentDocSchema, t.Null()])),
   descriptionText: t.Optional(t.Union([t.String(), t.Null()])),
   followersCount: t.Optional(t.Union([t.Number(), t.Null()])),

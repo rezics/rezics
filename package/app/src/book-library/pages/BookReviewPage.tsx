@@ -143,7 +143,6 @@ export const BookReviewPage: React.FC = () => {
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
             languages: readContext.languages,
-            appLocale: readContext.appLocale,
             languageMode: readContext.languageMode,
           })
         : {
@@ -151,7 +150,6 @@ export const BookReviewPage: React.FC = () => {
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
             languages: readContext.languages,
-            appLocale: readContext.appLocale,
             languageMode: readContext.languageMode,
           },
     ),

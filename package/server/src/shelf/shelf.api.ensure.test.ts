@@ -149,7 +149,7 @@ describe("POST /shelf/system/ensure", () => {
     currentIdentity = null;
     const app = await makeApp();
 
-    const res = await app.handle(buildRequest({ kindKey: "favorites" }));
+    const res = await app.handle(buildRequest({ slug: "favorites" }));
 
     expect(res.status).toBe(401);
     expect(ensureSystemShelfMock).not.toHaveBeenCalled();
@@ -158,7 +158,7 @@ describe("POST /shelf/system/ensure", () => {
   test("returns 200 with created: true when shelf was created", async () => {
     const app = await makeApp();
 
-    const res = await app.handle(buildRequest({ kindKey: "favorites" }));
+    const res = await app.handle(buildRequest({ slug: "favorites" }));
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -177,17 +177,17 @@ describe("POST /shelf/system/ensure", () => {
     });
     const app = await makeApp();
 
-    const res = await app.handle(buildRequest({ kindKey: "favorites" }));
+    const res = await app.handle(buildRequest({ slug: "favorites" }));
 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual({ unitId: "existing-shelf", created: false });
   });
 
-  test("returns 422 when kindKey is unknown", async () => {
+  test("returns 422 when slug is unknown", async () => {
     const app = await makeApp();
 
-    const res = await app.handle(buildRequest({ kindKey: "custom_list" }));
+    const res = await app.handle(buildRequest({ slug: "custom_list" }));
 
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
@@ -198,7 +198,7 @@ describe("POST /shelf/system/ensure", () => {
     const app = await makeApp();
 
     const res = await app.handle(
-      buildRequest({ kindKey: "favorites", visibility: "PUBLIC" }),
+      buildRequest({ slug: "favorites", visibility: "PUBLIC" }),
     );
 
     expect(res.status).toBeGreaterThanOrEqual(400);

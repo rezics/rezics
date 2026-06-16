@@ -25,20 +25,15 @@ import {
   shelfDetailQuery,
   shelfItemsInfiniteQuery,
   useCleanupOrphansMutation,
-  useCollectionStatusHydration,
   useHydratedShelfItems,
+  useShelfItemStatusHydration,
 } from "@rezics/api/shelf";
-import { userQueries } from "@rezics/api/user/user.queries";
 import {
-  type BookDTO,
   contentDocMarkdownFallback,
-  isLibraryKind,
   type ShelfItemChildDTO,
-  type SystemShelfKindKey,
   shelfCoverImageSpec,
   shelfItemIdentity,
   shelfItemReference,
-  shelfItemUnitId,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -53,24 +48,11 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  applyReadableFilter,
-  BookshelfGrid,
-  type BookshelfItem,
-  resolveBookshelfConfig,
-} from "@/bookshelf-view";
 import { QueryErrorDisplay } from "@/core";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
-import {
-  getBookAuthorName,
-  getTranslation,
-} from "@/shared/utils/translation-helpers";
+import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
-import {
-  selectHasMemberSession,
-  useAuthSessionStore,
-  useUserProfileStore,
-} from "@/user";
+import { useUserProfileStore } from "@/user";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import {
   type ShelfSortChoice,
@@ -130,11 +112,6 @@ const VIEW_OPTIONS: ShelfViewChoice[] = [
 ];
 
 const PAGE_SIZE = 20;
-const PROGRESS_SHELF_KIND_KEYS = new Set<SystemShelfKindKey>([
-  "backlog",
-  "active",
-  "completed",
-]);
 
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
   if (entry.kind === "root")
@@ -142,45 +119,6 @@ function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
   if (entry.kind === "child")
     return `${prefix}:c:${entry.parentUnitId}:${shelfItemIdentity(entry.unit.unit)}`;
   return `${prefix}:p:${shelfItemIdentity(entry.unit.unit)}`;
-}
-
-function isProgressShelfKind(
-  kindKey: string | null | undefined,
-): kindKey is SystemShelfKindKey {
-  return PROGRESS_SHELF_KIND_KEYS.has(kindKey as SystemShelfKindKey);
-}
-
-function shelfItemToBookshelfItem(
-  enriched: EnrichedShelfItem,
-): BookshelfItem | null {
-  const kind = enriched.unit.kind;
-  if (!isLibraryKind(kind)) return null;
-
-  if (kind === "book") {
-    const book = enriched.data as BookDTO | undefined;
-    const unitId =
-      shelfItemUnitId(enriched.unit) ?? shelfItemReference(enriched.unit);
-    return {
-      unitId,
-      kind,
-      title: book?.title ?? unitId,
-      coverUrl: book?.coverUrl ?? "",
-      author: book ? getBookAuthorName(book) || undefined : undefined,
-      isLicensed: book?.isLicensed,
-      href: `/book/${unitId}`,
-    };
-  }
-
-  const unitId =
-    shelfItemUnitId(enriched.unit) ?? shelfItemReference(enriched.unit);
-  return {
-    unitId,
-    kind,
-    title: unitId,
-    coverUrl: "",
-    isLicensed: true,
-    href: `/unit/${unitId}`,
-  };
 }
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
@@ -204,12 +142,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
-  const isAuthed = useAuthSessionStore(selectHasMemberSession);
   const detailQuery = useQuery(shelfDetailQuery(unitId));
-  const { data: settings } = useQuery({
-    ...userQueries.settings(),
-    enabled: isAuthed,
-  });
   const normalizedItemSearchText = itemSearchText.trim();
   const shelfItemsQuery = useMemo(
     () => ({
@@ -311,15 +244,16 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     });
   }, [totalPages, unitId]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the normalized search text intentionally resets pagination when it changes.
   useEffect(() => {
     setPageState({ unitId, page: 1 });
-  }, [unitId]);
+  }, [normalizedItemSearchText, unitId]);
 
   // Reset to first page when item search text changes.
   // 当搜索文本变化时重置到第一页。
   useEffect(() => {
     setPageState({ unitId, page: 1 });
-  }, [normalizedItemSearchText, unitId]);
+  }, [unitId]);
 
   useEffect(() => {
     if (waitingForPageData && !isFetchingNextPage) {
@@ -341,7 +275,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     return [...ids];
   }, [shelf?.unitId, visibleStream]);
   useReactionHydration(reactionTargetIds);
-  useCollectionStatusHydration(reactionTargetIds, {
+  useShelfItemStatusHydration(reactionTargetIds, {
     enabled: !!currentUser,
   });
 
@@ -349,22 +283,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     () => (shelf?.unitId ? { unitId: shelf.unitId } : null),
     [shelf?.unitId],
   );
-  const isProgressShelf = isProgressShelfKind(shelf?.kindKey);
-  const bookshelfConfig = useMemo(
-    () =>
-      resolveBookshelfConfig({
-        viewer: settings?.library?.bookshelf ?? null,
-      }),
-    [settings?.library?.bookshelf],
-  );
-  const bookshelfItems = useMemo(() => {
-    const items = visibleStream.flatMap((entry) => {
-      const item = shelfItemToBookshelfItem(entry.unit);
-      return item ? [item] : [];
-    });
-    return applyReadableFilter(items, readableOnly);
-  }, [readableOnly, visibleStream]);
-
   const showSortScopeToggle =
     (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
     sortState.field !== "manual";
@@ -547,80 +465,76 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         )}
 
-        {!isProgressShelf && (
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <div className="relative min-w-[min(100%,16rem)] flex-1 sm:flex-none">
-                <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 h-4 w-4 text-text-tertiary" />
-                <Input
-                  value={itemSearchText}
-                  onChange={(event) => setItemSearchText(event.target.value)}
-                  placeholder={t("entity:shelf_item_search_placeholder")}
-                  aria-label={t("common:search")}
-                  className="h-9 pl-9"
-                />
-              </div>
-              <ShelfSortViewPicker
-                sort={sortState}
-                sortOptions={SORT_OPTIONS}
-                view={effectiveViewMode}
-                viewOptions={VIEW_OPTIONS}
-                onSortChange={setSortState}
-                onViewChange={(value) => setViewModeOverride({ unitId, value })}
-                sortHeading={t("entity:shelf_controls_sort_by")}
-                viewHeading={t("entity:shelf_controls_view")}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <div className="relative min-w-[min(100%,16rem)] flex-1 sm:flex-none">
+              <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 h-4 w-4 text-text-tertiary" />
+              <Input
+                value={itemSearchText}
+                onChange={(event) => setItemSearchText(event.target.value)}
+                placeholder={t("entity:shelf_item_search_placeholder")}
+                aria-label={t("common:search")}
+                className="h-9 pl-9"
               />
-              {showSortScopeToggle && (
-                <Label className="flex min-w-0 items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={sortPrimeOnly}
-                    onCheckedChange={(checked) =>
-                      setSortPrimeOnly(checked === true)
-                    }
-                  />
-                  <span className="whitespace-nowrap">
-                    {t("entity:shelf_sort_prime_only")}
-                  </span>
-                </Label>
-              )}
+            </div>
+            <ShelfSortViewPicker
+              sort={sortState}
+              sortOptions={SORT_OPTIONS}
+              view={effectiveViewMode}
+              viewOptions={VIEW_OPTIONS}
+              onSortChange={setSortState}
+              onViewChange={(value) => setViewModeOverride({ unitId, value })}
+              sortHeading={t("entity:shelf_controls_sort_by")}
+              viewHeading={t("entity:shelf_controls_view")}
+            />
+            {showSortScopeToggle && (
               <Label className="flex min-w-0 items-center gap-2 text-sm">
                 <Checkbox
-                  checked={readableOnly}
+                  checked={sortPrimeOnly}
                   onCheckedChange={(checked) =>
-                    setReadableOnly(checked === true)
+                    setSortPrimeOnly(checked === true)
                   }
                 />
                 <span className="whitespace-nowrap">
-                  {t("entity:shelf_readable_only")}
+                  {t("entity:shelf_sort_prime_only")}
                 </span>
               </Label>
-              {hydration.orphanUnitIds.length > 0 && (
-                <>
-                  <span className="text-xs text-warning-text">
-                    {t("entity:shelf_orphan_count", {
-                      count: hydration.orphanUnitIds.length,
-                    })}
-                  </span>
-                  {isOwner && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={cleanupMutation.isPending}
-                      onClick={() =>
-                        cleanupMutation.mutate({
-                          shelfId: unitId,
-                          input: { orphanItemIds: hydration.orphanUnitIds },
-                        })
-                      }
-                    >
-                      {t("entity:shelf_cleanup_orphans")}
-                    </Button>
-                  )}
-                </>
-              )}
-            </div>
+            )}
+            <Label className="flex min-w-0 items-center gap-2 text-sm">
+              <Checkbox
+                checked={readableOnly}
+                onCheckedChange={(checked) => setReadableOnly(checked === true)}
+              />
+              <span className="whitespace-nowrap">
+                {t("entity:shelf_readable_only")}
+              </span>
+            </Label>
+            {hydration.orphanUnitIds.length > 0 && (
+              <>
+                <span className="text-xs text-warning-text">
+                  {t("entity:shelf_orphan_count", {
+                    count: hydration.orphanUnitIds.length,
+                  })}
+                </span>
+                {isOwner && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={cleanupMutation.isPending}
+                    onClick={() =>
+                      cleanupMutation.mutate({
+                        shelfId: unitId,
+                        input: { orphanItemIds: hydration.orphanUnitIds },
+                      })
+                    }
+                  >
+                    {t("entity:shelf_cleanup_orphans")}
+                  </Button>
+                )}
+              </>
+            )}
           </div>
-        )}
+        </div>
 
         {isItemsLoading || waitingForPageData || isFetchingNextPage ? (
           <div className="flex justify-center py-8">
@@ -630,18 +544,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <p className="py-8 text-center text-error">
             {t("entity:shelf_items_load_failed")}
           </p>
-        ) : isProgressShelf ? (
-          <BookshelfGrid
-            items={bookshelfItems}
-            config={bookshelfConfig}
-            emptyState={
-              <p className="py-8 text-center text-text-secondary">
-                {normalizedItemSearchText
-                  ? t("entity:shelf_item_no_search_matches")
-                  : t("entity:shelf_empty_items")}
-              </p>
-            }
-          />
         ) : visibleStream.length === 0 ? (
           <p className="py-8 text-center text-text-secondary">
             {normalizedItemSearchText

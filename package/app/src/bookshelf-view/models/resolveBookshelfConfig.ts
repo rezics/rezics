@@ -1,9 +1,11 @@
 import {
   type BookshelfViewConfig,
+  type CatalogUnitType,
+  CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
   DEFAULT_BOOKSHELF_CONFIG,
   isLibraryKind,
-  LIBRARY_KIND_ASPECT_RATIO,
   type LibraryKind,
+  UnitType,
 } from "@rezics/contract";
 
 /**
@@ -62,11 +64,21 @@ export function columnsForWidth(
 }
 
 /**
- * Aspect ratio for a library kind, defaulting to the book ratio.
- * 给定书库类型的宽高比，默认采用书籍比例。
+ * Cover aspect ratio for a shelf library kind, defaulting to the book cover
+ * ratio. Shelf payloads use lowercase kinds, so this adapts them to the
+ * Unit-level catalog cover contract.
+ * 给定 shelf library 类型的封面宽高比，默认采用书籍封面比例。Shelf payload
+ * 使用小写 kind，因此这里将其适配到 Unit 级目录封面 contract。
  */
-export function aspectRatioForKind(kind: string): number {
-  return isLibraryKind(kind)
-    ? LIBRARY_KIND_ASPECT_RATIO[kind as LibraryKind]
-    : LIBRARY_KIND_ASPECT_RATIO.book;
+export function coverAspectRatioForLibraryKind(kind: string): number {
+  const catalogType = isLibraryKind(kind)
+    ? catalogUnitTypeForLibraryKind(kind)
+    : null;
+  return CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[catalogType ?? UnitType.BOOK];
+}
+
+function catalogUnitTypeForLibraryKind(kind: LibraryKind): CatalogUnitType {
+  if (kind === "game") return UnitType.GAME;
+  if (kind === "media") return UnitType.MEDIA;
+  return UnitType.BOOK;
 }

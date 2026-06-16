@@ -145,7 +145,7 @@ const sampleUser: UserSearchDocument = {
   id: "user-1",
   unitId: "user-1",
   name: "Alice Reviewer",
-  bio: "Reads everything magical.",
+  summary: "Reads everything magical.",
   avatar: null,
   followersCount: 12,
   followingsCount: 8,

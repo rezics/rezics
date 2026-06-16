@@ -21,7 +21,7 @@ const createUserProfileSchema = t.Object({
     pattern: "^[a-zA-Z0-9](?:[a-zA-Z0-9-_]*[a-zA-Z0-9])?$",
   }),
   avatar: t.Optional(t.String()),
-  bio: t.Optional(t.String()),
+  summary: t.Optional(t.String()),
   type: t.Optional(
     t.Union([
       t.Literal("USER"),

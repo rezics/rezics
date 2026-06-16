@@ -739,7 +739,9 @@ async function upsertOfficialSectionLabels(
   slugScopes: SlugScopesMap,
 ) {
   for (const label of Object.values(OFFICIAL_SECTION_LABELS)) {
-    const languages = Object.keys(label.translations);
+    const languages = Object.keys(label.translations) as Array<
+      keyof typeof label.translations & string
+    >;
     await db
       .insert(Unit)
       .values({

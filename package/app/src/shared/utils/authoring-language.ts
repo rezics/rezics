@@ -1,6 +1,7 @@
 import {
+  type ContentLanguage,
   DEFAULT_LANGUAGE,
-  type Language,
+  normalizeContentLanguage,
   normalizeLanguage,
   resolveAuthoringLanguage,
 } from "@rezics/contract";
@@ -20,18 +21,18 @@ export type AuthoringLanguageDefaultInput = {
  */
 export function resolveAuthoringLanguageDefault(
   input: AuthoringLanguageDefaultInput,
-): Language {
+): ContentLanguage {
   return resolveAuthoringLanguage({
     explicitLanguage: normalizeLanguageInput(input.explicitLanguage),
     preferredLanguages: input.preferredLanguages
       ?.map(normalizeLanguageInput)
-      .filter((language): language is Language => Boolean(language)),
-    appLocale: normalizeLanguageInput(input.appLocale),
+      .filter((language): language is ContentLanguage => Boolean(language)),
+    appLocale: input.appLocale ? normalizeLanguage(input.appLocale) : null,
     fallbackLanguage:
       normalizeLanguageInput(input.fallbackLanguage) ?? DEFAULT_LANGUAGE,
   });
 }
 
 function normalizeLanguageInput(language: string | null | undefined) {
-  return language ? normalizeLanguage(language) : null;
+  return language ? normalizeContentLanguage(language) : null;
 }

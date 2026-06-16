@@ -59,7 +59,7 @@ import {
   POSITION_LENGTH_THRESHOLD,
   rebalance,
 } from "./fractional-index";
-import { enqueueShelfItemSourceSearchSync } from "./user-unit-collection.service";
+import { enqueueShelfItemSourceSearchSync } from "./user-shelf-item.service";
 
 export const SHELF_ITEM_BATCH_OP_CAP = 200;
 
@@ -70,7 +70,7 @@ import {
   mapShelfSummaryToDTO,
   mapShelfToDTO,
 } from "./shelf.mapper";
-import { isSystemKindKey } from "./system-shelves";
+import { isReservedShelfSlug } from "./system-shelves";
 
 const REBALANCE_WINDOW = 50;
 const SHELF_SEARCH_HIT_LIMIT = 1000;
@@ -200,7 +200,7 @@ async function deleteShelfItem(
   return deleted.length;
 }
 
-async function applyCollectionMetadataDrizzle(
+async function applyShelfItemMetadataDrizzle(
   tx: DbLike,
   userId: string,
   unitId: string,
@@ -386,7 +386,7 @@ const publicUserColumns = {
   unitId: User.unitId,
   name: User.name,
   avatar: User.avatar,
-  bio: User.bio,
+  summary: User.summary,
   description: User.description,
   followersCount: User.followersCount,
   followingsCount: User.followingsCount,
@@ -464,7 +464,7 @@ export class ShelfService {
     let allowedIds: Set<string> | null = null;
 
     if (q) {
-      const [contentResp, collectionResp] = await Promise.all([
+      const [contentResp, shelfItemResp] = await Promise.all([
         searchClient.contentIndex.search(q, {
           limit: SHELF_SEARCH_HIT_LIMIT,
           attributesToRetrieve: ["id"],
@@ -482,7 +482,7 @@ export class ShelfService {
         ...(contentResp.hits as any[])
           .map((hit) => hit.id)
           .filter((id): id is string => typeof id === "string"),
-        ...(collectionResp.hits as any[])
+        ...(shelfItemResp.hits as any[])
           .map((hit) => hit.itemId)
           .filter((id): id is string => typeof id === "string"),
       ]);
@@ -520,20 +520,48 @@ export class ShelfService {
     return allowedIds ?? null;
   }
 
-  private buildWhere(options: ShelfListQuery): SQL | undefined {
-    const conditions: SQL[] = [
-      eq(Unit.type, "SHELF"),
-      eq(Unit.status, "PUBLISHED"),
-      eq(Unit.visibility, "PUBLIC"),
-      eq(Unit.moderationStatus, "APPROVED"),
-    ];
+  private buildWhere(
+    options: ShelfListQuery,
+    scope: { ownerUserId?: string; publicOnly?: boolean } = {
+      publicOnly: true,
+    },
+  ): SQL | undefined {
+    const conditions: SQL[] = [eq(Unit.type, "SHELF")];
+
+    if (scope.publicOnly ?? true) {
+      conditions.push(
+        eq(Unit.status, "PUBLISHED"),
+        eq(Unit.visibility, "PUBLIC"),
+        eq(Unit.moderationStatus, "APPROVED"),
+      );
+    }
+
+    if (scope.ownerUserId) {
+      conditions.push(eq(Unit.userId, scope.ownerUserId));
+    }
 
     if (options.userId?.trim()) {
       conditions.push(eq(Unit.userId, options.userId));
     }
 
-    if (options.kindKey?.trim()) {
-      conditions.push(eq(Shelf.kindKey, options.kindKey));
+    const q = options.q?.trim();
+    if (q) {
+      conditions.push(sql`exists (
+        select 1 from "UnitTranslation" st
+        where st."unitId" = ${Shelf.unitId}
+          and st."title" ilike ${`%${q}%`}
+      )`);
+    }
+
+    const tagIds = Array.from(
+      new Set((options.tagIds ?? []).map((id) => id.trim()).filter(Boolean)),
+    );
+    for (const tagId of tagIds) {
+      conditions.push(sql`exists (
+        select 1 from "UnitTag" sut
+        where sut."unitId" = ${Shelf.unitId}
+          and sut."tagUnitId" = ${tagId}
+      )`);
     }
 
     const containsUnitId = options.containsUnitId?.trim();
@@ -567,6 +595,9 @@ export class ShelfService {
     const order = (options.sort?.order ?? "desc") as "asc" | "desc";
     const direction = order === "asc" ? asc : desc;
     const field = options.sort?.field ?? "createdAt";
+    if (field === "itemCount") {
+      return [direction(Shelf.itemCount), desc(Shelf.unitId)];
+    }
     return [
       direction(field === "updatedAt" ? Unit.updatedAt : Unit.createdAt),
       desc(Shelf.unitId),
@@ -579,7 +610,7 @@ export class ShelfService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const hasCursor = Boolean(options.cursor?.unitId);
     const skipNum = hasCursor ? 1 : (options.start ?? 0);
-    const where = this.buildWhere(options);
+    const where = this.buildWhere(options, { publicOnly: true });
     const orderBy = this.buildOrderBy(options);
     const db = await getServerDb();
 
@@ -613,6 +644,45 @@ export class ShelfService {
       shelves: hydratedRows.map((row) =>
         mapShelfListRowToDTO(row, matchedByShelfId.get(row.unitId)),
       ),
+      total: totalRows[0]?.total ?? 0,
+    };
+  }
+
+  async listMine(
+    userId: string,
+    options: ShelfListQuery = {},
+  ): Promise<{ shelves: ShelfDTO[]; total: number }> {
+    const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
+    const hasCursor = Boolean(options.cursor?.unitId);
+    const skipNum = hasCursor ? 1 : (options.start ?? 0);
+    const where = this.buildWhere(options, {
+      ownerUserId: userId,
+      publicOnly: false,
+    });
+    const orderBy = this.buildOrderBy(options);
+    const db = await getServerDb();
+
+    const [rows, totalRows] = await Promise.all([
+      db
+        .select({ unitId: Shelf.unitId })
+        .from(Shelf)
+        .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
+        .where(where)
+        .orderBy(...orderBy)
+        .offset(skipNum)
+        .limit(limitNum),
+      db
+        .select({ total: count() })
+        .from(Shelf)
+        .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
+        .where(where),
+    ]);
+
+    const hydratedRows = await hydrateUnitOwnerUserSlugs(
+      await hydrateShelfRows(rows.map((row) => row.unitId)),
+    );
+    return {
+      shelves: hydratedRows.map((row) => mapShelfListRowToDTO(row)),
       total: totalRows[0]?.total ?? 0,
     };
   }
@@ -732,12 +802,11 @@ export class ShelfService {
   }
 
   /**
-   * Resolve `{ ownerUserId, slug }` under the owner scope. Only system shelf
-   * slugs ('favorites' | 'saved' | 'backlog' | 'active' | 'completed') are accepted in
-   * v1 — every other slug returns null per `SHELF_CUSTOM_SLUG_DISABLED`.
-   * 在所有者作用域下解析 `{ ownerUserId, slug }`。v1 仅接受系统书架的
-   * slug（'favorites' | 'saved' | 'backlog' | 'active' | 'completed'）—
-   * 其他 slug 一律按 `SHELF_CUSTOM_SLUG_DISABLED` 返回 null。
+   * Resolve `{ ownerUserId, slug }` under the owner scope. Only reserved shelf
+   * slugs are accepted in v1 — every other slug returns null per
+   * `SHELF_CUSTOM_SLUG_DISABLED`.
+   * 在所有者作用域下解析 `{ ownerUserId, slug }`。v1 仅接受保留书架
+   * slug；其他 slug 一律按 `SHELF_CUSTOM_SLUG_DISABLED` 返回 null。
    *
    * Lookup goes through the Unit slug index `(slugScope = ownerUserId,
    * slug)` so the resolver shares the path used by every other slug-bearing
@@ -748,7 +817,7 @@ export class ShelfService {
     ownerUserId: string,
     slug: string,
   ): Promise<ShelfDetailDTO | null> {
-    if (!isSystemKindKey(slug)) return null;
+    if (!isReservedShelfSlug(slug)) return null;
     const db = await getServerDb();
     const [unit] = await db
       .select({ id: Unit.id })
@@ -770,22 +839,7 @@ export class ShelfService {
   }
 
   async create(req: CreateShelfInput, userId: string): Promise<ShelfDTO> {
-    const {
-      title,
-      kindKey,
-      coverUrl,
-      visibility,
-      tagIds,
-      extra,
-      translations,
-    } = req;
-
-    if (isSystemKindKey(kindKey)) {
-      throw new AppError(
-        400,
-        `kindKey '${kindKey}' is reserved for system shelves`,
-      );
-    }
+    const { title, coverUrl, visibility, tagIds, extra, translations } = req;
 
     // v1 rejects any client-supplied slug for user-created shelves
     // (schema-enforced) — system shelves only. Custom slugs are a deliberate
@@ -881,7 +935,6 @@ export class ShelfService {
 
     await db.insert(Shelf).values({
       unitId: unit.id,
-      ...(kindKey !== undefined ? { kindKey } : {}),
       ...(extra !== undefined ? { extra: extra ?? null } : {}),
       updatedAt: new Date(),
     });
@@ -897,7 +950,7 @@ export class ShelfService {
         "Custom shelf slugs are disabled (SHELF_CUSTOM_SLUG_DISABLED).",
       );
     }
-    const { kindKey, coverUrl, visibility, extra, title } = req;
+    const { coverUrl, visibility, extra, title } = req;
     const db = await getServerDb();
 
     if (visibility !== undefined || req.licenseSlug !== undefined) {
@@ -961,7 +1014,6 @@ export class ShelfService {
     const [updated] = await db
       .update(Shelf)
       .set({
-        ...(kindKey !== undefined ? { kindKey } : {}),
         ...(extra !== undefined ? { extra: extra ?? null } : {}),
         updatedAt: new Date(),
       })
@@ -1097,7 +1149,7 @@ export class ShelfService {
         req.searchText,
       );
       if (userId && req.itemType === "unit") {
-        await applyCollectionMetadataDrizzle(tx, userId, req.itemId, {
+        await applyShelfItemMetadataDrizzle(tx, userId, req.itemId, {
           tagUnitIds: req.tagUnitIds,
           searchText: req.searchText,
         });

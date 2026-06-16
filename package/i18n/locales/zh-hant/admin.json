@@ -419,7 +419,7 @@
   "user_admin_login_description": "登入以存取管理後台。",
   "user_admin_login_title": "管理員登入",
   "user_avatar_url_label": "頭像 URL",
-  "user_bio_label": "簡介",
+  "user_summary_label": "簡介",
   "user_create_description": "從管理後台建立新使用者。",
   "user_create_failed": "建立失敗",
   "user_create_note": "管理員建立的使用者不需要驗證碼。後端會驗證 slug、Rezics Email 與 slug 唯一性，並雜湊密碼。",

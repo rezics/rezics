@@ -2,18 +2,21 @@
  * React Query configurations for Realm queries
  */
 
-import type { RealmMemberListQuery } from "@rezics/contract";
+import type {
+  RealmListQuery,
+  RealmMemberListQuery,
+  RealmReadQuery,
+} from "@rezics/contract";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
 import type { RealmFilters } from "./realm.types";
 
-type RealmReadQuery = {
-  view?: "joined" | "managing";
-  explicitLanguage?: string;
+type RealmReadQueryInput = Omit<RealmReadQuery, "languages"> & {
   languages?: string | readonly string[];
-  appLocale?: string;
-  languageMode?: "preferred" | "all";
+};
+type RealmListQueryInput = Omit<RealmListQuery, "languages"> & {
+  languages?: string | readonly string[];
 };
 
 /**
@@ -29,7 +32,7 @@ export const realmListQuery = (filters?: RealmFilters) =>
 /**
  * Query options for getting a single realm
  */
-export const realmDetailQuery = (unitId: string, query?: RealmReadQuery) =>
+export const realmDetailQuery = (unitId: string, query?: RealmReadQueryInput) =>
   queryOptions({
     queryKey: realmKeys.detail(unitId, query),
     queryFn: () => realmApi.get(unitId, query),
@@ -106,14 +109,17 @@ export const realmRuleResolvedQuery = (
 /**
  * Combined query options export
  */
-export const myRealmsQuery = (query?: RealmReadQuery) =>
+export const myRealmsQuery = (query?: RealmListQueryInput) =>
   queryOptions({
     queryKey: realmKeys.mine(query),
     queryFn: () => realmApi.mine(query),
     staleTime: 1000 * 60 * 2,
   });
 
-export const realmsByMemberQuery = (userId: string, query?: RealmReadQuery) =>
+export const realmsByMemberQuery = (
+  userId: string,
+  query?: RealmListQueryInput,
+) =>
   queryOptions({
     queryKey: realmKeys.byMember(userId, query),
     queryFn: () => realmApi.byMember(userId, query),

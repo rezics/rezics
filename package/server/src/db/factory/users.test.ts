@@ -156,6 +156,7 @@ function createDbStub() {
       return Promise.resolve(this.execute().slice(0, count));
     }
 
+    // biome-ignore lint/suspicious/noThenProperty: this mock intentionally implements Drizzle's thenable query builder contract.
     then(resolve: (value: unknown[]) => unknown) {
       return Promise.resolve(this.execute()).then(resolve);
     }
@@ -240,6 +241,7 @@ function createDbStub() {
       );
     }
 
+    // biome-ignore lint/suspicious/noThenProperty: this mock intentionally implements Drizzle's thenable query builder contract.
     then(resolve: (value: unknown[]) => unknown) {
       return Promise.resolve([]).then(resolve);
     }

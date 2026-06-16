@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { readLanguageGetQueryBase } from "../list-query-base";
 import { postDTOSchema } from "../post/post";
 import { moderationStatusSchema } from "../realm/governance";
@@ -58,7 +58,7 @@ export const feedQuerySchema = t.Object({
   realmModerationStatus: t.Optional(
     t.Union([moderationStatusSchema, t.Literal("all")]),
   ),
-  languages: t.Optional(t.Union([t.String(), t.Array(languageSchema)])),
+  languages: t.Optional(t.Union([t.String(), t.Array(contentLanguageSchema)])),
   sort: t.Optional(feedSortSchema),
   filterType: t.Optional(feedFilterTypeSchema),
   cursor: t.Optional(feedCursorSchema),

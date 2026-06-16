@@ -29,6 +29,7 @@ function commentRow(
     parentCommentId: null,
     authorUserId: "user-1",
     content: null,
+    language: "en",
     depth: 1,
     replyCount: 0,
     directReplyCount: 0,

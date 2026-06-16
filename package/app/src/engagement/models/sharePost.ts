@@ -1,4 +1,8 @@
-import type { CreatePostInput, Language, UnitType } from "@rezics/contract";
+import type {
+  ContentLanguage,
+  CreatePostInput,
+  UnitType,
+} from "@rezics/contract";
 import {
   markdownContentDoc,
   PostKind,
@@ -33,7 +37,7 @@ export function buildInternalSharePostCreateInput(input: {
   targetUnitType?: UnitType;
   title?: string | null;
   body?: string | null;
-  language: Language;
+  language: ContentLanguage;
   status?: "DRAFT" | "PUBLISHED";
 }): CreatePostInput {
   return {

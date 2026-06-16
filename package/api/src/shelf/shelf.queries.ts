@@ -5,17 +5,17 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { collectionApi, shelfApi } from "./shelf.api";
+import { shelfItemActionApi, shelfApi } from "./shelf.api";
 import {
-  collectionKeys,
-  normalizeCollectionIds,
+  normalizeShelfItemStatusIds,
   type ShelfContainmentFilters,
   type ShelfVariantFilters,
+  shelfItemStatusKeys,
   shelfKeys,
 } from "./shelf.keys";
 import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
-const COLLECTION_STATUS_BATCH_LIMIT = 100;
+const SHELF_ITEM_STATUS_BATCH_LIMIT = 100;
 
 export const shelfListQuery = (filters?: ShelfFilters) =>
   queryOptions({
@@ -61,10 +61,27 @@ export const shelvesByUserQuery = (userId: string, filters?: ShelfFilters) =>
     staleTime: 1000 * 60 * 5,
   });
 
-export const userShelvesQuery = () =>
+export const userShelvesQuery = (filters?: ShelfFilters) =>
   queryOptions({
-    queryKey: shelfKeys.mine(),
-    queryFn: () => shelfApi.mine(),
+    queryKey: shelfKeys.mine(filters),
+    queryFn: () => shelfApi.mine(filters),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export const userShelvesInfiniteQuery = (
+  filters?: Omit<ShelfFilters, "start">,
+) =>
+  infiniteQueryOptions({
+    queryKey: shelfKeys.mine(filters),
+    queryFn: ({ pageParam = 0 }) =>
+      shelfApi.mine({ ...filters, start: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      const { shelves } = lastPage;
+      const limit = filters?.limit || 50;
+      const hasMore = shelves.length === limit;
+      return hasMore ? lastPageParam + limit : undefined;
+    },
     staleTime: 1000 * 60 * 2,
   });
 
@@ -108,38 +125,38 @@ export const shelfInfiniteListQuery = (filters?: Omit<ShelfFilters, "start">) =>
     staleTime: 1000 * 60 * 5,
   });
 
-export const collectionStatusQuery = (targetId: string) =>
+export const shelfItemStatusQuery = (targetId: string) =>
   queryOptions({
-    queryKey: collectionKeys.status(targetId),
-    queryFn: () => collectionApi.status(targetId),
+    queryKey: shelfItemStatusKeys.status(targetId),
+    queryFn: () => shelfItemActionApi.status(targetId),
     enabled: !!targetId,
     staleTime: 1000 * 60 * 1,
   });
 
-export const collectionStatusBatchQuery = (targetIds: readonly string[]) => {
-  const normalized = normalizeCollectionIds(targetIds).slice(
+export const shelfItemStatusBatchQuery = (targetIds: readonly string[]) => {
+  const normalized = normalizeShelfItemStatusIds(targetIds).slice(
     0,
-    COLLECTION_STATUS_BATCH_LIMIT,
+    SHELF_ITEM_STATUS_BATCH_LIMIT,
   );
   return queryOptions({
-    queryKey: collectionKeys.statusBatch(normalized),
-    queryFn: () => collectionApi.statusBatch(normalized),
+    queryKey: shelfItemStatusKeys.statusBatch(normalized),
+    queryFn: () => shelfItemActionApi.statusBatch(normalized),
     enabled: normalized.length > 0,
     staleTime: 1000 * 60 * 1,
   });
 };
 
-export function useCollectionStatusHydration(
+export function useShelfItemStatusHydration(
   targetIds: readonly string[],
   options?: { enabled?: boolean },
 ) {
   const queryClient = useQueryClient();
-  const normalized = normalizeCollectionIds(targetIds).slice(
+  const normalized = normalizeShelfItemStatusIds(targetIds).slice(
     0,
-    COLLECTION_STATUS_BATCH_LIMIT,
+    SHELF_ITEM_STATUS_BATCH_LIMIT,
   );
   const query = useQuery({
-    ...collectionStatusBatchQuery(normalized),
+    ...shelfItemStatusBatchQuery(normalized),
     enabled: (options?.enabled ?? true) && normalized.length > 0,
   });
 
@@ -148,7 +165,7 @@ export function useCollectionStatusHydration(
     for (const [targetId, status] of Object.entries(
       query.data.statusesByTarget,
     )) {
-      queryClient.setQueryData(collectionKeys.status(targetId), status);
+      queryClient.setQueryData(shelfItemStatusKeys.status(targetId), status);
     }
   }, [query.data, queryClient]);
 
@@ -162,12 +179,13 @@ export const shelfQueries = {
   detail: shelfDetailQuery,
   byUser: shelvesByUserQuery,
   mine: userShelvesQuery,
+  infiniteMine: userShelvesInfiniteQuery,
   items: shelfItemsQuery,
   infiniteItems: shelfItemsInfiniteQuery,
   infiniteList: shelfInfiniteListQuery,
 };
 
-export const collectionQueries = {
-  status: collectionStatusQuery,
-  statusBatch: collectionStatusBatchQuery,
+export const shelfItemStatusQueries = {
+  status: shelfItemStatusQuery,
+  statusBatch: shelfItemStatusBatchQuery,
 };

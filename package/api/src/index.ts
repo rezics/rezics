@@ -34,5 +34,5 @@ export * from "./unit/unit";
 export * from "./unit-alias-record/unit-alias";
 export * from "./unit-external-link";
 export * from "./user-tag-application/user-tag-application";
-export * from "./user-unit-collection/user-unit-collection";
+export * from "./user-shelf-item/user-shelf-item";
 export * from "./zone/zone";

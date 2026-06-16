@@ -69,7 +69,6 @@ export function mapShelfToDTO(row: ShelfWithMetadata): ShelfDTO {
     status: row.unit?.status,
     visibility: row.unit?.visibility,
     licenseSlug: resolveStoredLicenseSlug(row.unit?.licenseSlug),
-    kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,
       row.unit?.translations,
@@ -112,7 +111,6 @@ export function mapShelfListRowToDTO(
     status: row.unit?.status,
     visibility: row.unit?.visibility,
     licenseSlug: resolveStoredLicenseSlug(row.unit?.licenseSlug),
-    kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,
       row.unit?.translations,
@@ -134,7 +132,6 @@ export function mapShelfSummaryToDTO(row: ShelfListSelected): ShelfSummaryDTO {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
-    kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,
       row.unit?.translations,

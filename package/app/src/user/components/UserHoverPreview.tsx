@@ -21,7 +21,7 @@ export interface UserHoverPreviewUser {
   slug?: string | null;
   name?: string | null;
   avatar?: string | null;
-  bio?: string | null;
+  summary?: string | null;
   description?: string | null;
   followersCount?: number | null;
   followingsCount?: number | null;
@@ -61,7 +61,7 @@ export function UserHoverPreview({
   const displayName =
     getOptionalText(user.name) ?? slug ?? t("settings:profile_default_name");
   const profileText =
-    getOptionalText(user.bio) ?? getOptionalText(user.description);
+    getOptionalText(user.summary) ?? getOptionalText(user.description);
   const avatarFallback = getAvatarFallback(displayName, slug, userId);
   const avatarTriggerId = `${idPrefix}-avatar`;
   const nameTriggerId = `${idPrefix}-name`;

@@ -7,8 +7,8 @@ import {
 } from "@rezics/contract";
 import { applyReadableFilter } from "../models";
 import {
-  aspectRatioForKind,
   columnsForWidth,
+  coverAspectRatioForLibraryKind,
   resolveBookshelfConfig,
 } from "./resolveBookshelfConfig";
 
@@ -63,14 +63,14 @@ describe("columnsForWidth", () => {
   });
 });
 
-describe("aspectRatioForKind", () => {
-  test("returns the per-kind ratio for library kinds", () => {
-    expect(aspectRatioForKind("book")).toBe(BOOK_ASPECT_RATIO);
-    expect(aspectRatioForKind("game")).toBe(GAME_ASPECT_RATIO);
+describe("coverAspectRatioForLibraryKind", () => {
+  test("returns the per-kind cover ratio for library kinds", () => {
+    expect(coverAspectRatioForLibraryKind("book")).toBe(BOOK_ASPECT_RATIO);
+    expect(coverAspectRatioForLibraryKind("game")).toBe(GAME_ASPECT_RATIO);
   });
 
   test("non-library kinds fall back to the book ratio", () => {
-    expect(aspectRatioForKind("review")).toBe(BOOK_ASPECT_RATIO);
+    expect(coverAspectRatioForLibraryKind("review")).toBe(BOOK_ASPECT_RATIO);
   });
 });
 

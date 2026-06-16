@@ -73,7 +73,7 @@ export const userApi = {
     password: string;
     slug: string;
     avatar?: string;
-    bio?: string;
+    summary?: string;
   }): Promise<UserDTO> => {
     return apiFetch(`/user/admin`, {
       method: "POST",

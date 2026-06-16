@@ -15,7 +15,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
-import { useAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
+import { useAutoDetectedAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { isPostEditorSurfaceSubmittable } from "../models/postEditorSurface";
 import { PostEditorSurface } from "./PostEditorSurface";
 
@@ -36,11 +36,14 @@ export function WikiPostEditor({
 }: WikiPostEditorProps) {
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
-  const { defaultLanguage, language, setLanguage } = useAuthoringLanguageState({
-    initialLanguage: post?.resolvedLanguage,
-  });
   const [title, setTitle] = useState(post?.title ?? "");
   const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
+  const { defaultLanguage, language, setLanguage } =
+    useAutoDetectedAuthoringLanguageState({
+      text: `${title}\n${body}`,
+      initialLanguage: post?.resolvedLanguage,
+      enabled: !post,
+    });
   const [lockedError, setLockedError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const resize = useMemo(

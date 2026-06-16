@@ -333,13 +333,13 @@ export function renderUserSearchCard(
         name: item.name,
         slug: item.slug,
         avatar: item.avatar,
-        bio: item.bio,
+        summary: item.summary,
         description: item.descriptionText,
         followersCount: item.followersCount,
         followingsCount: item.followingsCount,
       }}
       kind={badge ?? getI18nRuntime().i18n.t("search:origin_user")}
-      body={item.bio ?? item.descriptionText ?? undefined}
+      body={item.summary ?? item.descriptionText ?? undefined}
       meta={profileMeta(item.followersCount)}
     />
   );

@@ -143,7 +143,7 @@ export function RezicsMarkdownEditor({
         return result;
       },
     };
-  }, [callerToolbar]);
+  }, [callerToolbar, t]);
 
   // ---- Layout ----
   // ---- 布局 ----

@@ -48,7 +48,12 @@ describe("expected Meilisearch index settings", () => {
     const comments = getExpectedMeiliIndexSchema("comments");
 
     expect(comments.filterableAttributes).toEqual(
-      expect.arrayContaining(["rootUnitId", "realmUnitId", "parentCommentId"]),
+      expect.arrayContaining([
+        "rootUnitId",
+        "realmUnitId",
+        "parentCommentId",
+        "language",
+      ]),
     );
     expect(comments.searchableAttributes).toEqual(
       expect.arrayContaining(["contentText", "authorName"]),

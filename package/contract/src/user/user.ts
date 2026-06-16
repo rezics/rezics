@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
-import { languageSchema } from "../language";
+import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
@@ -19,7 +19,7 @@ export const userDTOSchema = t.Object({
   slug: t.Optional(t.String()),
   name: t.Optional(t.String()),
   avatar: t.Optional(t.String()),
-  bio: t.Optional(t.String()),
+  summary: t.Optional(t.String()),
   description: t.Optional(t.Nullable(contentDocSchema)),
   followersCount: t.Optional(t.Number()),
   followingsCount: t.Optional(t.Number()),
@@ -72,7 +72,7 @@ export const createUserSchema = t.Object({
     pattern: "^[a-zA-Z0-9](?:[a-zA-Z0-9-_]*[a-zA-Z0-9])?$",
   }),
   avatar: t.Optional(t.String()),
-  bio: t.Optional(t.String()),
+  summary: t.Optional(t.String()),
   verificationCode: t.Optional(t.String()),
 });
 
@@ -87,7 +87,7 @@ export type CreateUserFull = (typeof createUserFullSchema)["static"];
 export const updateUserSchema = t.Object({
   name: t.Optional(t.String({ minLength: 1 })),
   avatar: t.Optional(t.Nullable(t.String())),
-  bio: t.Optional(t.Nullable(t.String())),
+  summary: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(contentDocWriteSchema)),
   password: t.Optional(t.String({ minLength: 6 })),
 });
@@ -213,7 +213,7 @@ export const userSettingsSchema = t.Object({
   realmTagPreferences: t.Optional(
     t.Record(t.String(), realmTagPreferenceSchema),
   ),
-  preferredLanguages: t.Optional(t.Array(languageSchema)),
+  preferredLanguages: t.Optional(t.Array(contentLanguageSchema)),
   content: t.Optional(contentPreferenceSchema),
   publishing: t.Optional(publishingPreferenceSchema),
   moderation: t.Optional(moderationPreferenceSchema),
@@ -238,7 +238,7 @@ export const userBriefSchema = t.Object({
   unitId: t.String(),
   name: t.Optional(t.String()),
   slug: t.Optional(t.String()),
-  bio: t.Optional(t.String()),
+  summary: t.Optional(t.String()),
   avatar: t.Optional(t.String()),
 });
 

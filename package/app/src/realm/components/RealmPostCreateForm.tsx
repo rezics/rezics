@@ -25,7 +25,7 @@ import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { PollComposer, PollLibrarySurface } from "@/poll";
 import { isPostEditorSurfaceSubmittable, PostEditorSurface } from "@/post";
-import { useAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
+import { useAutoDetectedAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { buildRealmPostCreateInput } from "../models/realmCreateMode";
 import { RealmPostTagPicker } from "./RealmPostTagPicker";
 
@@ -46,11 +46,13 @@ export function RealmPostCreateForm({
 }: RealmPostCreateFormProps) {
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
-  const { defaultLanguage, language, setLanguage } =
-    useAuthoringLanguageState();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const { defaultLanguage, language, setLanguage } =
+    useAutoDetectedAuthoringLanguageState({
+      text: `${title}\n${body}`,
+    });
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [pollDialogOpen, setPollDialogOpen] = useState(false);
   const [attachedPoll, setAttachedPoll] = useState<PollDTO | null>(null);

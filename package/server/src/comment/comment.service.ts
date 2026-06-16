@@ -35,6 +35,7 @@ type CommentListRepositoryInput = {
   rootUnitId: string;
   context: CommentListContext;
   authorUserId?: string;
+  language?: string;
   state?: string;
   parentCommentId?: string | null;
   blockedAuthorIds?: string[];
@@ -76,6 +77,7 @@ export type CommentRepository = {
     parentCommentId?: string | null;
     authorUserId: string;
     content: unknown;
+    language: string;
     depth: number;
     parentId?: string;
   }): Promise<CommentWithRelations>;
@@ -95,7 +97,7 @@ function publicAuthorColumns() {
     unitId: User.unitId,
     name: User.name,
     avatar: User.avatar,
-    bio: User.bio,
+    summary: User.summary,
     description: User.description,
     followersCount: User.followersCount,
     followingsCount: User.followingsCount,
@@ -185,6 +187,7 @@ function createDrizzleCommentRepository(): CommentRepository {
       if (input.authorUserId) {
         conditions.push(eq(Comment.authorUserId, input.authorUserId));
       }
+      if (input.language) conditions.push(eq(Comment.language, input.language));
       if (input.state) conditions.push(eq(Comment.state, input.state));
       if ("parentCommentId" in input) {
         conditions.push(
@@ -337,6 +340,7 @@ function createDrizzleCommentRepository(): CommentRepository {
             parentCommentId: input.parentCommentId ?? null,
             authorUserId: input.authorUserId,
             content: input.content,
+            language: input.language,
             depth: input.depth,
             moderationStatus: "APPROVED",
             updatedAt: now,
@@ -390,6 +394,7 @@ function createDrizzleCommentRepository(): CommentRepository {
         .update(Comment)
         .set({
           ...(input.content !== undefined ? { content: input.content } : {}),
+          ...(input.language !== undefined ? { language: input.language } : {}),
           ...(input.isLocked !== undefined ? { isLocked: input.isLocked } : {}),
           ...(input.state !== undefined ? { state: input.state } : {}),
           updatedAt: new Date(),
@@ -650,6 +655,7 @@ export class CommentService {
       rootUnitId: query.rootUnitId,
       context,
       authorUserId: query.authorUserId,
+      language: query.language,
       state: query.state,
       ...(parentCommentId !== undefined ? { parentCommentId } : {}),
       blockedAuthorIds: blockedIds,
@@ -728,6 +734,7 @@ export class CommentService {
       parentCommentId: input.parentCommentId,
       authorUserId,
       content: input.content,
+      language: input.language,
       depth,
       parentId: parent?.id,
     });

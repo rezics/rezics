@@ -804,7 +804,6 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
   await ctx.db.insert(Shelf).values(
     withUpdatedAt({
       unitId: shelfId,
-      kindKey: "factory-complex",
       extra: { viewMode: "nested", sortBy: "manual" },
     }),
   );
@@ -1230,7 +1229,6 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
     await ctx.db.insert(Shelf).values(
       withUpdatedAt({
         unitId: shelf.unitId,
-        kindKey: "showcase",
         rootItemCount: shelf.itemUnitIds.length,
         itemCount: shelf.itemUnitIds.length,
         extra: { scenario: "showcase-feed" },
@@ -2306,7 +2304,7 @@ async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
 
   await Promise.all([
     ctx.sync.realm(realmUnitId),
-    ctx.sync.content(zoneUnitId),
+    ctx.sync.zone(zoneUnitId),
     ...bookUnitIds.map((unitId) => ctx.sync.content(unitId)),
   ]);
 

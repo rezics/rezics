@@ -1,5 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
+import { contentLanguageSchema } from "../language";
 
 // ANCHOR: Comment Search Document
 // ANCHOR: 评论搜索文档
@@ -7,6 +8,7 @@ import { t } from "elysia";
 export const CommentSearchDocumentSchema = t.Object({
   id: t.String(),
   contentText: t.Union([t.String(), t.Null()]),
+  language: t.Optional(t.Union([contentLanguageSchema, t.Null()])),
   rootUnitId: t.String(),
   realmUnitId: t.Union([t.String(), t.Null()]),
   parentCommentId: t.Union([t.String(), t.Null()]),
@@ -46,6 +48,7 @@ export const CommentSearchOptionsSchema = t.Object({
   realmUnitId: t.Optional(t.Nullable(t.String())),
   parentCommentId: t.Optional(t.Nullable(t.String())),
   authorUserId: t.Optional(t.String()),
+  language: t.Optional(contentLanguageSchema),
   depth: t.Optional(t.Number()),
   isLocked: t.Optional(t.Boolean()),
   state: t.Optional(t.String()),

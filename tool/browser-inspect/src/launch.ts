@@ -31,7 +31,7 @@ export async function openInvestigationPage({
   // other human verification should survive repeated investigation scripts.
   const context = await chromium.launchPersistentContext(profileDir, {
     headless: false,
-    devtools,
+    args: devtools ? ["--auto-open-devtools-for-tabs"] : [],
   });
   const page = context.pages()[0] ?? (await context.newPage());
 

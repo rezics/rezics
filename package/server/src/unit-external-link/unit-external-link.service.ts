@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type {
   CreateUnitExternalLinkInput,
+  UnitExternalLinkDTO,
   UnitExternalLinkListQuery,
   UpdateUnitExternalLinkInput,
 } from "@rezics/contract";
@@ -386,15 +387,18 @@ export class UnitExternalLinkService {
 
   async externalLinksForUnits(unitIds: readonly string[]) {
     const links = await this.repository.listExternalLinksForUnits(unitIds);
-    const byUnitId = Object.fromEntries(
-      unitIds.map((unitId) => [unitId, { unitId, links: [] as any[] }]),
+    const byUnitId: Record<
+      string,
+      { unitId: string; links: UnitExternalLinkDTO[] }
+    > = Object.fromEntries(
+      unitIds.map((unitId) => [unitId, { unitId, links: [] }]),
     );
     const { mapUnitExternalLinkToDTO } = await import(
       "./unit-external-link.mapper"
     );
     for (const link of links) {
       byUnitId[link.unitId] ??= { unitId: link.unitId, links: [] };
-      byUnitId[link.unitId].links.push(mapUnitExternalLinkToDTO(link));
+      byUnitId[link.unitId]!.links.push(mapUnitExternalLinkToDTO(link));
     }
     return { byUnitId };
   }
