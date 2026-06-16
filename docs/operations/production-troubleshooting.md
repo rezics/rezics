@@ -3,9 +3,9 @@
 ## Logs
 
 - Every backend emits **structured JSON** to the container log stream
-  (`OBSERVABILITY_LOG_FORMAT=json`): `kamal app logs -d <unit>` /
-  `docker logs rezics-<unit>-…`.
-- When the `infra-observability` unit is up, services also export **OTLP** to
+  (`OBSERVABILITY_LOG_FORMAT=json`): `nomad alloc logs <alloc-id>` /
+  `docker logs <container>`.
+- When the `infra-otel` job is up, services also export **OTLP** to
   the Collector (`OTEL_EXPORTER_OTLP_ENDPOINT` + `OBSERVABILITY_TELEMETRY=enabled`);
   query traces in ClickStack.
 
@@ -13,10 +13,9 @@
 
 - `/health` = liveness, `/ready` = readiness (queue/db wiring). A unit that
   boots but fails `/ready` usually cannot reach its database or a dependency.
-- kamal-proxy will not promote a container that fails `/health`; the previous
-  container keeps serving. Inspect `kamal app logs -d <unit>` for the boot
-  error, fix env/secrets, redeploy.
-- Check the env gate first: `bin/deploy <sha> validate`.
+- Nomad will not promote an allocation that fails health checks; the previous
+  allocation keeps serving (`auto_revert = true`). Inspect
+  `nomad alloc logs <alloc-id>` for the boot error, fix env/secrets, redeploy.
 
 ## Migration failures
 
@@ -34,11 +33,11 @@
 
 ## Proxy routing
 
-- Public hosts (`api`, `auth`, `notify`, `reaction`) route through kamal-proxy
-  with TLS; `history` is internal-proxied; `ranking` and all workers have **no**
-  proxy route (container DNS only). A 404/502 on an internal name usually means
-  calling it by the wrong container alias — services resolve each other as
-  `rezics-<service>:<port>` on the `kamal` network.
+- Public hosts (`api`, `auth`, `notify`, `reaction`) route through the reverse
+  proxy with TLS; `history` is internal-proxied; `ranking` and all workers have
+  **no** proxy route (Nomad service discovery only). A 404/502 on an internal
+  name usually means calling it by the wrong address — services resolve each
+  other via Nomad service discovery or Docker networking.
 
 ## Replication-slot lag (both CDC sources)
 
@@ -68,9 +67,9 @@ which can fill disk.
 
 ## Worker queue readiness
 
-- `job-runner` (HTTP) ingests Sequin webhooks and the enqueue API;
+- `job-runner-http` ingests Sequin webhooks and the enqueue API;
   `job-runner-worker` consumes the default lanes; `ranking-worker` consumes only
   the `ranking` lane. If ranking recompute is backed up but search/history are
   fine, scale `ranking-worker` independently — the lanes are isolated by design.
-- Confirm `SEQUIN_HEALTH_URL` is reachable from `job-runner`; a failing Sequin
-  preflight blocks HTTP-role startup.
+- Confirm `SEQUIN_HEALTH_URL` is reachable from `job-runner-http`; a failing
+  Sequin preflight blocks HTTP-role startup.

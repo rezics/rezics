@@ -15,7 +15,7 @@ age-keygen -o sops-age.key
 # 2. Put the PUBLIC key into .sops.yaml `age:` (replace the placeholder).
 
 # 3. Encrypt each unit's secrets from its template:
-for unit in common server auth notify reaction history ranking job-runner; do
+for unit in common server auth notify reaction history ranking job-runner infra; do
   cp "config/secrets/${unit}.env.example" "config/secrets/${unit}.enc.env"
   $EDITOR "config/secrets/${unit}.enc.env"          # fill real values
   sops --encrypt --in-place "config/secrets/${unit}.enc.env"
@@ -33,9 +33,9 @@ export SOPS_AGE_KEY_FILE=$PWD/sops-age.key      # operator
 # or, in GitHub Actions, SOPS_AGE_KEY is a protected Environment secret.
 ```
 
-`.kamal/secrets-common` and `.kamal/secrets.<unit>` call `sops --decrypt` and
-feed the values to Kamal. `bin/deploy <sha> validate` confirms every required
-key is present before any service is touched.
+`bin/nomad-sync-secrets` decrypts each `config/secrets/<unit>.enc.env` and syncs
+the values to Nomad Variables. `bin/nomad-deploy <sha> secrets` runs this step
+as part of the deploy sequence.
 
 ## Rotation
 
@@ -56,8 +56,8 @@ key is present before any service is touched.
 - **Lost private key:** you cannot decrypt existing files. Generate a new key,
   update `.sops.yaml`, and recreate each `*.enc.env` from the live secret
   sources (DB passwords, provider keys). Until then, deploys that need secrets
-  will fail at the validation gate — runtime services already running are
-  unaffected.
+  will fail — runtime services already running are unaffected (Nomad Variables
+  persist independently).
 - **Leaked private key:** rotate every secret value (treat all as exposed),
   generate a fresh age key, `sops updatekeys`, and force-redeploy all units.
 - Keep at least two recipients (CI + an offline operator key) so a single lost

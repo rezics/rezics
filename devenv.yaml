@@ -2,3 +2,7 @@
 inputs:
   nixpkgs:
     url: github:cachix/devenv-nixpkgs/rolling
+  hashicorp:
+    url: github:nmnmcc/HashiCorpNix
+nixpkgs:
+  allowUnfree: true

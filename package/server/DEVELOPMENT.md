@@ -54,9 +54,9 @@ psql -U postgres
 
 ## Production
 
-Production runs as Docker images via Kamal — see
+Production runs as Docker images via Nomad — see
 [`docs/guide/deployment.md`](../../docs/guide/deployment.md). Use
-`kamal app logs -r server` for logs instead of `journalctl`.
+`nomad alloc logs <alloc-id>` for logs instead of `journalctl`.
 
 ## Bun Cache
 

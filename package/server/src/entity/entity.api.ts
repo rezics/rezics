@@ -126,7 +126,8 @@ export const entityApi = new Elysia({ prefix: "/entity" })
         !Array.isArray(body.patch.entity)
           ? (body.patch.entity as Record<string, unknown>)
           : {};
-      if (entity.avatar !== undefined) assertMediaUrl(entity.avatar as string | null);
+      if (entity.avatar !== undefined)
+        assertMediaUrl(entity.avatar as string | null);
       const translations =
         body.patch.translations &&
         typeof body.patch.translations === "object" &&

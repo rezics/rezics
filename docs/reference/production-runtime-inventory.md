@@ -3,8 +3,8 @@
 Authoritative inventory of the packages that make up a production deployment:
 their runtime role, ports, health surface, Drizzle-schema ownership, required
 environment, and external dependencies. This is the factual baseline the
-`establish-production-deployment-foundation` work builds Docker images, Kamal
-units, and migration jobs on top of.
+`establish-production-deployment-foundation` work builds Docker images, Nomad
+jobs, and migration jobs on top of.
 
 Snapshot date: 2026-05-29. Verify against `package/*/package.json` and each
 service's `src/env.ts` before relying on a specific value.
@@ -176,7 +176,7 @@ is a possible refinement.
 
 Spec-assumption corrections surfaced by this inventory:
 
-- There is **no** separate `job-runner-http` / `job-runner-worker` binary — the split is the `JOB_RUNNER_ROLE` env switch on one image. Kamal should run two roles off the same image rather than two build targets.
+- There is **no** separate `job-runner-http` / `job-runner-worker` binary — the split is the `JOB_RUNNER_ROLE` env switch on one image. Nomad runs two jobs off the same image rather than two build targets.
 - There is **no** standalone `ranking-worker` today. Ranking is a single internal HTTP service; ranking jobs are dispatched through `job-runner`'s ranking runtime. A dedicated `ranking-worker` role (task 2.4) would be net-new.
 - `notify` and `reaction` have **no in-code default port**; deployment env must set `PORT` explicitly for them.
 - Cross-package database reads go through explicit `@rezics/server/db/*`

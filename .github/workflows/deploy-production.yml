@@ -1,8 +1,9 @@
-# Production deploy via Kamal — manual, behind a GitHub Environment approval.
+# Production deploy via Nomad — manual, behind a GitHub Environment approval.
+# Nomad 生产部署 — 手动触发，受 GitHub Environment 审批保护。
 #
-# Pulls the immutable git-SHA image tags built by build-images.yml and rolls
-# them out with kamal-proxy health-gated zero-downtime swaps. Never builds
-# images. Rollback is `kamal rollback` (previous image tag) per unit.
+# Pulls the immutable git-SHA image tags built by build-images.yml and submits
+# Nomad jobs with health-gated rolling updates. Never builds images. Rollback
+# is automatic (auto_revert) or manual (nomad deployment fail).
 name: Deploy Production
 
 on:
@@ -16,7 +17,7 @@ on:
         required: true
         default: all
         type: choice
-        options: [all, migrations, services, workers, backfill]
+        options: [all, secrets, infra, configs, migrations, services, workers, backfill]
 
 concurrency:
   group: deploy-production
@@ -24,46 +25,31 @@ concurrency:
 
 jobs:
   deploy:
-    name: Kamal deploy (${{ inputs.phase }})
+    name: Nomad deploy (${{ inputs.phase }})
     runs-on: ubuntu-latest
-    # Environment approval gate + holds DEPLOY_SSH_KEY / SOPS_AGE_KEY /
-    # KAMAL_REGISTRY_PASSWORD as protected secrets.
     environment: production
     permissions:
       contents: read
       packages: read
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - uses: cachix/install-nix-action@v31
+      - uses: cachix/devenv-action@v2
       - run: bun install --frozen-lockfile
 
-      - name: Install Kamal + SOPS + age
-        run: |
-          gem install kamal -v '~> 2.0'
-          sudo apt-get update && sudo apt-get install -y age
-          curl -fsSL -o /usr/local/bin/sops \
-            https://github.com/getsops/sops/releases/latest/download/sops-linux-amd64
-          sudo chmod +x /usr/local/bin/sops
-
-      - name: Configure SSH
+      - name: Configure SSH tunnel to Nomad
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ vars.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          ssh -fN -L 4646:127.0.0.1:4646 "${{ vars.DEPLOY_SSH_USER }}@${{ vars.DEPLOY_HOST }}"
 
       - name: Deploy
         env:
-          # age private key for SOPS decryption (held only by this runner).
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          NOMAD_ADDR: http://127.0.0.1:4646
+          NOMAD_TOKEN: ${{ secrets.NOMAD_TOKEN }}
           DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
           DEPLOY_SSH_USER: ${{ vars.DEPLOY_SSH_USER }}
-        run: bin/deploy "${{ inputs.version }}" "${{ inputs.phase }}"
-
-      # The deploy log already surfaces image tags, migration status, rollout
-      # targets, and healthcheck results (task 7.6). On a failed health-gated
-      # swap kamal keeps the previous container; roll back explicitly with:
-      #   kamal rollback -d <unit> --version <previous-sha>
+        run: bin/nomad-deploy "${{ inputs.version }}" "${{ inputs.phase }}"

@@ -92,12 +92,10 @@ manual DOM/CSS copying.
 
 ## Deploy
 
-Production deploys as Docker images via [Kamal](https://kamal-deploy.org) (config
-in `config/`, workflows in `.github/workflows/`), with static frontends on
-Cloudflare Pages. See [`docs/guide/deployment.md`](../docs/guide/deployment.md).
+Production deploys as Docker images via Nomad (job specs in `nomad/jobs/`,
+workflows in `.github/workflows/`), with static frontends on Cloudflare Pages.
+See [`docs/guide/deployment.md`](../docs/guide/deployment.md).
 
 ```sh
-bin/deploy <git-sha>   # validate → infra → migrate → services → workers → backfill
+bin/nomad-deploy <git-sha>   # secrets → infra → migrate → services → workers → backfill
 ```
-
-The previous systemd + rsync single-host path is retired.
