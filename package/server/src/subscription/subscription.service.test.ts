@@ -99,6 +99,7 @@ describe("subscriptionService.subscribe", () => {
     expect(repository.createWithCounters).toHaveBeenCalledWith({
       subscriberUnitId: SUBSCRIBER,
       subscribedUnitId: TARGET,
+      subscribedType: "BOOK",
       channels: ["*"],
       isUserToUser: false,
     });

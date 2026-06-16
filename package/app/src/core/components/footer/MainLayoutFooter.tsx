@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import type React from "react";
+import { officialZoneHref } from "@/zone";
 
 export function MainLayoutFooter({ className }: { className?: string }) {
   const { t } = useTranslation(["common", "shell"]);
@@ -108,7 +109,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                 {t("shell:layout_footer_product_title")}
               </SectionTitle>
               <div className="flex flex-col gap-1">
-                <FooterLink href="/book">
+                <FooterLink href={officialZoneHref("book")}>
                   {t("shell:layout_footer_product_discover")}
                 </FooterLink>
                 <FooterLink href="/shelf">

@@ -31,6 +31,12 @@ export type NavigationEntry = {
   isActive?: (pathname: string) => boolean;
   visibility?: NavigationVisibility;
   children?: NavigationItem[];
+  subscriptionListEntry?: {
+    subscribedUnitId: string;
+    subscribedType: "ZONE" | "REALM";
+    pinned: boolean;
+    position: string;
+  };
 };
 
 export type NavigationItem =

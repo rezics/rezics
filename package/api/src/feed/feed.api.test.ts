@@ -54,4 +54,30 @@ describe("feedApi", () => {
     expect(requestUrl).toContain("tagIds=tag-1&tagIds=tag-2");
     expect(requestUrl).not.toContain("%5B%22tag-1%22%2C%22tag-2%22%5D");
   });
+
+  test("serializes zone feed scope with the zone Unit id", async () => {
+    const fetchMock = mock(async (_input: Parameters<typeof fetch>[0]) => {
+      return new Response(
+        JSON.stringify({
+          scope: "zone",
+          sort: "new",
+          rows: [],
+          nextCursor: null,
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await feedApi.rows({
+      scope: "zone",
+      zoneUnitId: "zone-1",
+      sort: "new",
+    });
+
+    const requestUrl = fetchMock.mock.calls[0]?.[0]?.toString() ?? "";
+    expect(requestUrl).toContain("scope=zone");
+    expect(requestUrl).toContain("zoneUnitId=zone-1");
+    expect(requestUrl).toContain("sort=new");
+  });
 });

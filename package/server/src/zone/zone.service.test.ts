@@ -63,11 +63,19 @@ const hydratedUnitRows = new Map<string, any>([
     },
   ],
 ]);
+let slugLookupResult: { id: string; type: string; visibility: string } | null =
+  null;
 
 const updateZoneMock = mock(
   async (): Promise<any> => ({
     unitId: "zone-1",
+    ownerRealmUnitId: "realm-1",
     filters: {},
+    configVersion: 1,
+    pages: null,
+    sections: null,
+    theme: null,
+    primaryRealmUnitId: null,
     template: "default",
     styling: null,
     wiki: null,
@@ -79,7 +87,13 @@ const updateZoneMock = mock(
 
 const zoneRow: any = {
   unitId: "zone-1",
+  ownerRealmUnitId: "realm-1",
   filters: {},
+  configVersion: 1,
+  pages: null,
+  sections: null,
+  theme: null,
+  primaryRealmUnitId: null,
   template: "default",
   styling: null,
   wiki: {
@@ -138,7 +152,7 @@ const repository: ZoneRepository = {
     }),
   ),
   getByUnitId: mock(async () => zoneRow),
-  findUnitBySlug: mock(async () => null),
+  findUnitBySlug: mock(async () => slugLookupResult),
   createZone: mock(async (data) => ({
     ...data,
     unit: { translations: [], supportLanguages: [] },
@@ -170,6 +184,22 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 
+mock.module("@/utils/errors", () => ({
+  AppError: class AppError extends Error {
+    constructor(
+      public readonly statusCode: number,
+      message: string,
+      public readonly data?: unknown,
+    ) {
+      super(message);
+    }
+  },
+}));
+
+mock.module("@/infra/slug-scopes", () => ({
+  getSlugScopeId: (scope: string) => (scope === "zone" ? "zone-scope" : null),
+}));
+
 const { ZoneService } = await import(
   "./zone.service.ts?zone-service-test-actual" as string
 );
@@ -186,6 +216,7 @@ describe("ZoneService wiki config validation", () => {
     }
     updateZoneMock.mockClear();
     findWikiPostsMock.mockClear();
+    slugLookupResult = null;
   });
 
   test("persists wiki config when references are valid", async () => {
@@ -239,6 +270,81 @@ describe("ZoneService wiki config validation", () => {
     expect(updateZoneMock).toHaveBeenCalled();
   });
 
+  test("persists owner realm and versioned zone config when references are valid", async () => {
+    await service.create({
+      userId: "user-1",
+      slug: "library",
+      translations: [{ language: "en", title: "Library" }],
+      ownerRealmUnitId: "realm-1",
+      filters: { type: "BOOK" },
+      configVersion: 1,
+      pages: {
+        home: {
+          titleLabelUnitId: "label-1",
+          sections: [
+            {
+              id: "latest",
+              kind: "latestContent",
+              filters: { type: "BOOK" },
+            },
+            {
+              id: "wiki",
+              kind: "wikiCollection",
+              wikiFilters: { realmUnitId: "realm-1" },
+              wikiUnitIds: ["wiki-zh"],
+            },
+          ],
+        },
+      },
+      sections: [
+        {
+          id: "realms",
+          kind: "realmList",
+          realmUnitIds: ["realm-1"],
+        },
+      ],
+      theme: {
+        images: { bannerUnitId: "image-1" },
+        layout: { contentWidth: "wide", navPosition: "side" },
+      },
+      primaryRealmUnitId: "realm-1",
+      template: "default",
+    });
+
+    expect(repository.createZone).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ownerRealmUnitId: "realm-1",
+        configVersion: 1,
+        filters: { type: "BOOK" },
+        primaryRealmUnitId: "realm-1",
+      }),
+    );
+    const payload = (repository.createZone as any).mock.calls[0][0];
+    expect(payload.pages.home.sections[1]).toMatchObject({
+      kind: "wikiCollection",
+      wikiUnitIds: ["wiki-zh"],
+    });
+    expect(payload.theme.layout).toEqual({
+      contentWidth: "wide",
+      navPosition: "side",
+    });
+  });
+
+  test("rejects a zone owner that is not a realm", async () => {
+    await expect(
+      service.create({
+        userId: "user-1",
+        slug: "library",
+        translations: [{ language: "en", title: "Library" }],
+        ownerRealmUnitId: "tag-1",
+        filters: {},
+        template: "default",
+      }),
+    ).rejects.toThrow("Zone config references invalid Realms");
+
+    expect(repository.createZone).not.toHaveBeenCalled();
+  });
+
   test("rejects invalid LABEL references", async () => {
     await expect(
       service.update("zone-1", {
@@ -256,6 +362,22 @@ describe("ZoneService wiki config validation", () => {
         },
       }),
     ).rejects.toThrow("Wiki Zone config references invalid Units");
+
+    expect(updateZoneMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects invalid typed section references", async () => {
+    await expect(
+      service.update("zone-1", {
+        sections: [
+          {
+            id: "tags",
+            kind: "tagNavigation",
+            tagUnitIds: ["unit-1"],
+          },
+        ],
+      }),
+    ).rejects.toThrow("Zone config references invalid Tags");
 
     expect(updateZoneMock).not.toHaveBeenCalled();
   });
@@ -279,6 +401,45 @@ describe("ZoneService wiki config validation", () => {
     ).rejects.toThrow("Wiki Zone manual labels require translations");
 
     expect(updateZoneMock).not.toHaveBeenCalled();
+  });
+
+  test("looks up zones by slug only when the slug target is a ZONE", async () => {
+    slugLookupResult = { id: "zone-1", type: "ZONE", visibility: "PUBLIC" };
+
+    await expect(service.getBySlug("library")).resolves.toBe(zoneRow);
+    expect(repository.findUnitBySlug).toHaveBeenCalledWith(
+      "zone-scope",
+      "library",
+    );
+
+    slugLookupResult = { id: "unit-1", type: "POST", visibility: "PUBLIC" };
+    await expect(service.getBySlug("library")).resolves.toBeNull();
+  });
+
+  test("enforces lifecycle windows", () => {
+    const now = Date.now();
+
+    expect(
+      service.checkLifecycle({
+        ...zoneRow,
+        startsAt: new Date(now + 60_000),
+        endsAt: null,
+      }),
+    ).toBe("not_started");
+    expect(
+      service.checkLifecycle({
+        ...zoneRow,
+        startsAt: null,
+        endsAt: new Date(now - 60_000),
+      }),
+    ).toBe("ended");
+    expect(
+      service.checkLifecycle({
+        ...zoneRow,
+        startsAt: new Date(now - 60_000),
+        endsAt: new Date(now + 60_000),
+      }),
+    ).toBeNull();
   });
 
   test("hydrates wiki homepage sections with public section queries", async () => {

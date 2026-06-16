@@ -33,6 +33,7 @@ import { RuleSection } from "../sections/RuleSection";
 export interface RealmCreatePageProps {
   realmId: string;
   mode?: RealmCreateMode;
+  detailHref?: string;
   onModeChange?: (mode: RealmCreateMode) => void;
 }
 
@@ -46,6 +47,7 @@ const modeIcons = {
 export function RealmCreatePage({
   realmId,
   mode,
+  detailHref = `/realm/${realmId}`,
   onModeChange,
 }: RealmCreatePageProps) {
   const { t } = useTranslation(["common", "entity"]);
@@ -88,12 +90,13 @@ export function RealmCreatePage({
   const title = realm.title ?? t("entity:realm_untitled");
   const description = contentDocMarkdownFallback(realm.description);
   const isMember = Boolean(membership);
+  const postHref = (postUnitId: string) => `${detailHref}/post/${postUnitId}`;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-6">
       <div className="flex flex-col gap-5">
         <div>
-          <Link to="/realm/$realmId" params={{ realmId }}>
+          <Link to={detailHref}>
             <Button variant="ghost" size="sm" className="gap-2 px-0">
               <ArrowLeft className="h-4 w-4" />
               {title}
@@ -151,6 +154,8 @@ export function RealmCreatePage({
             <RealmPostCreateForm
               realmId={realmId}
               contentRequiresApproval={realm.contentRequiresApproval}
+              detailHref={detailHref}
+              postHref={postHref}
             />
           </TabsContent>
           <TabsContent value="wiki">
@@ -165,6 +170,8 @@ export function RealmCreatePage({
             <RealmExistingPostSubmitSection
               realmId={realmId}
               contentRequiresApproval={realm.contentRequiresApproval}
+              detailHref={detailHref}
+              postHref={postHref}
             />
           </TabsContent>
         </Tabs>

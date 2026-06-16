@@ -4,6 +4,7 @@ import type {
   TagTreeNode,
 } from "@rezics/contract";
 import { createContext, useContext } from "react";
+import type { RealmDetailRouteLocation } from "../models/realmDetailRoutes";
 
 // Shared realm-detail state for the tabbed detail shell and its tab routes.
 // The layout fetches the realm once and derives the permission/visibility
@@ -14,6 +15,7 @@ import { createContext, useContext } from "react";
 // 而非在每个标签里重新推导 showManage 与重新拉取 realm。
 export interface RealmDetailContextValue {
   realmId: string;
+  routeLocation: RealmDetailRouteLocation;
   realm: RealmDTO;
   membership: RealmMembershipMeDTO | null | undefined;
   isMember: boolean;

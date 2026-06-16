@@ -1,14 +1,15 @@
 import { useTranslation } from "@rezics/i18n/react";
-import { Button } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
+import { buttonVariants } from "@rezics/ui/shadcn";
 import React from "react";
 import { ResponsiveBookGridLimited } from "@/book-library";
+import { AppSafeLink } from "@/shared/ui/link";
 import {
   getBookAuthorName,
   getBookCoverUrl,
   getBookDescription,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import { officialZoneHref } from "@/zone";
 import { useHomeBooks } from "./hooks/hooks";
 
 export interface TrendingBookSectionProps {
@@ -21,7 +22,6 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["page"]);
-  const navigate = useNavigate();
   const { items = [], isLoading } = useHomeBooks(limit);
 
   const bookList = React.useMemo(() => {
@@ -41,9 +41,12 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
         <h2 className="font-semibold">
           {t("page:home_sections_trending_book_title")}
         </h2>
-        <Button variant="ghost" onClick={() => navigate({ to: "/book" })}>
+        <AppSafeLink
+          href={officialZoneHref("book")}
+          className={buttonVariants({ variant: "ghost" })}
+        >
           {t("page:home_sections_trending_book_more")}
-        </Button>
+        </AppSafeLink>
       </div>
       {isLoading ? (
         <div className="text-slate-400 text-sm">

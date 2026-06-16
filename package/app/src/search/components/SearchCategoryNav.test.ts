@@ -29,6 +29,19 @@ describe("permittedCategoriesForScope", () => {
     expect(out).toContain("shelves");
   });
 
+  test("zone scope omits realms, users, and entities", () => {
+    const out = permittedCategoriesForScope({
+      kind: "zone",
+      zoneUnitId: "zone-1",
+    });
+    expect(out).not.toContain("realms");
+    expect(out).not.toContain("users");
+    expect(out).not.toContain("entities");
+    expect(out).toContain("books");
+    expect(out).toContain("comments");
+    expect(out).toContain("shelves");
+  });
+
   test("user scope omits users", () => {
     const out = permittedCategoriesForScope({ kind: "user", userId: "u" });
     expect(out).not.toContain("users");

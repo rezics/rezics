@@ -24,6 +24,7 @@ export { isSearchCategory } from "../models/category";
 export type FederatedSearchPageProps = {
   scope: SearchScope;
   initialQuery?: SearchQuery;
+  implicitInitial?: SearchQuery;
   initialCategory?: SearchCategory;
   onCategoryChange: (next: SearchCategory) => void;
   /**
@@ -39,6 +40,7 @@ export type FederatedSearchPageProps = {
 export function FederatedSearchPage({
   scope,
   initialQuery,
+  implicitInitial,
   initialCategory = "all",
   onCategoryChange,
   onQueryChange,
@@ -63,6 +65,7 @@ export function FederatedSearchPage({
 
   const search = useSearchQuery({
     initial,
+    implicitInitial,
     middleware: parseSearchString,
     scope,
     initialCategory,

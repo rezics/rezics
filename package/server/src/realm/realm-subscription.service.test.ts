@@ -8,6 +8,7 @@ import {
   UnitSupportLanguage,
   UnitTranslation,
   User,
+  UserSubscriptionListEntry,
 } from "../db/schema";
 
 const legacyDbMock: Record<string, any> = {};
@@ -88,6 +89,7 @@ mock.module("@/post/post.mapper", () => ({
   mapPostToDTO: (row: unknown) => row,
 }));
 mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageInput: () => ({ language: "ja" }),
   resolveEffectiveReadLanguageCandidates: () => ["ja", "en"],
 }));
 mock.module("@/unit/mapper", () => ({
@@ -262,6 +264,24 @@ function createFakeSelect(selection?: Record<string, unknown>) {
         });
         return row ? [row] : [];
       }
+      if (table === UserSubscriptionListEntry) {
+        if (selection?.position && !selection?.state) {
+          const rows =
+            (await legacyDbMock.userSubscriptionListEntry?.findMany?.({
+              where: {},
+            })) ?? [];
+          return rows.map((row: any) => ({ position: row.position }));
+        }
+        const row = await legacyDbMock.userSubscriptionListEntry?.findUnique?.({
+          where: {
+            userUnitId_subscribedUnitId: {
+              userUnitId: values[0],
+              subscribedUnitId: values[1],
+            },
+          },
+        });
+        return row ? [row] : [];
+      }
       if (table === RealmRuleAcknowledgement) {
         const finder =
           legacyDbMock.realmRuleAcknowledgement?.findUnique ??
@@ -285,7 +305,7 @@ function createFakeSelect(selection?: Record<string, unknown>) {
       if (table === User) return [];
       return [];
     },
-    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
     ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
@@ -298,15 +318,33 @@ function createFakeSelect(selection?: Record<string, unknown>) {
 
 function createFakeInsert(table: unknown) {
   let data: Record<string, unknown> = {};
+  let conflictSet: Record<string, unknown> = {};
   const query = {
     values: mock((nextData: Record<string, unknown>) => {
       data = nextData;
       return query;
     }),
-    onConflictDoUpdate: mock(() => query),
+    onConflictDoUpdate: mock((input: { set?: Record<string, unknown> }) => {
+      conflictSet = input.set ?? {};
+      return query;
+    }),
     returning: mock(async () => {
       if (table === RealmMember) {
         return [await legacyDbMock.realmMember.create({ data })];
+      }
+      if (table === UserSubscriptionListEntry) {
+        return [
+          await legacyDbMock.userSubscriptionListEntry.upsert({
+            where: {
+              userUnitId_subscribedUnitId: {
+                userUnitId: data.userUnitId,
+                subscribedUnitId: data.subscribedUnitId,
+              },
+            },
+            create: data,
+            update: conflictSet,
+          }),
+        ];
       }
       if (table === RealmRuleAcknowledgement) {
         return [
@@ -332,7 +370,7 @@ function createFakeInsert(table: unknown) {
       }
       return [];
     },
-    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
     ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
@@ -374,9 +412,12 @@ function createFakeUpdate(table: unknown) {
       if (table === Unit) {
         await legacyDbMock.unit.update({ data: normalizeCounterData(data) });
       }
+      if (table === UserSubscriptionListEntry) {
+        await legacyDbMock.userSubscriptionListEntry.update({ data });
+      }
       return [];
     },
-    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
     ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
@@ -395,7 +436,7 @@ function createFakeDelete(table: unknown) {
       if (table === Subscription) await legacyDbMock.subscription.delete({});
       return [];
     },
-    // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+    // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
     ["then"](
       resolve: (value: unknown[]) => unknown,
       reject?: (error: unknown) => unknown,
@@ -496,6 +537,10 @@ interface TxOps {
   unitUpdate?: ReturnType<typeof mock>;
   moderationActionCreate?: ReturnType<typeof mock>;
   moderationActionFindUnique?: ReturnType<typeof mock>;
+  listEntryFindMany?: ReturnType<typeof mock>;
+  listEntryFindUnique?: ReturnType<typeof mock>;
+  listEntryUpdate?: ReturnType<typeof mock>;
+  listEntryUpsert?: ReturnType<typeof mock>;
 }
 
 function installTx(ops: TxOps) {
@@ -531,6 +576,20 @@ function installTx(ops: TxOps) {
   legacyDbMock.unit = {
     update: ops.unitUpdate ?? mock(async () => ({})),
   };
+  legacyDbMock.userSubscriptionListEntry = {
+    findMany: ops.listEntryFindMany ?? mock(async () => []),
+    findUnique: ops.listEntryFindUnique ?? mock(async () => null),
+    update: ops.listEntryUpdate ?? mock(async () => ({})),
+    upsert:
+      ops.listEntryUpsert ??
+      mock(async ({ create, update }: any) => ({
+        id: "subscription-list-entry-1",
+        ...create,
+        ...update,
+        createdAt: new Date("2026-05-28T00:00:00.000Z"),
+        updatedAt: new Date("2026-05-28T00:00:00.000Z"),
+      })),
+  };
   legacyDbMock.moderationAction = {
     create:
       ops.moderationActionCreate ??
@@ -555,6 +614,7 @@ afterEach(() => {
   delete legacyDbMock.realmMember;
   delete legacyDbMock.realm;
   delete legacyDbMock.subscription;
+  delete legacyDbMock.userSubscriptionListEntry;
   delete legacyDbMock.staffGrant;
   delete legacyDbMock.realmCapabilityGrant;
   delete legacyDbMock.realmRuleAcknowledgement;
@@ -625,6 +685,26 @@ describe("realmService.joinRealm", () => {
     expect(subArgs.data.channels).toEqual(["*"]);
     expect(subArgs.data.subscriberUnitId).toBe(USER);
     expect(subArgs.data.subscribedUnitId).toBe(REALM);
+    expect(legacyDbMock.userSubscriptionListEntry.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userUnitId_subscribedUnitId: {
+            userUnitId: USER,
+            subscribedUnitId: REALM,
+          },
+        },
+        create: expect.objectContaining({
+          userUnitId: USER,
+          subscribedUnitId: REALM,
+          subscribedType: "REALM",
+          state: "ACTIVE",
+        }),
+        update: expect.objectContaining({
+          subscribedType: "REALM",
+          state: "ACTIVE",
+        }),
+      }),
+    );
   });
 
   test("preserves existing Subscription (lurker→member) without double-bumping subscriberCount", async () => {
@@ -636,6 +716,9 @@ describe("realmService.joinRealm", () => {
     expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++ still — 成员数仍自增
     expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(0); // no new sub — 不创建新订阅
     expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0); // subscriberCount NOT bumped — 订阅者数不增加
+    expect(legacyDbMock.userSubscriptionListEntry.upsert).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   test("requires current rule acknowledgement before joining when configured", async () => {
@@ -707,6 +790,12 @@ describe("realmService.removeMember", () => {
     expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount-- — 成员数自减
     expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(1);
     expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount-- — 订阅者数自减
+    expect(legacyDbMock.userSubscriptionListEntry.update).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        state: "REMOVED",
+        pinned: false,
+      }),
+    });
   });
 
   test("idempotent for missing member — no decrement of memberCount", async () => {
@@ -720,6 +809,12 @@ describe("realmService.removeMember", () => {
     expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(0);
     expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(0);
     expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.userSubscriptionListEntry.update).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        state: "REMOVED",
+        pinned: false,
+      }),
+    });
   });
 
   test("idempotent for missing subscription (already muted) — only member side affected", async () => {
@@ -777,6 +872,12 @@ describe("realmService.muteRealm", () => {
       data: { subscriberCount: { decrement: number } };
     };
     expect(unitArgs.data.subscriberCount).toEqual({ decrement: 1 });
+    expect(legacyDbMock.userSubscriptionListEntry.update).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        state: "REMOVED",
+        pinned: false,
+      }),
+    });
   });
 
   test("idempotent — no-op when already muted", async () => {
@@ -786,6 +887,12 @@ describe("realmService.muteRealm", () => {
     await realmService.muteRealm(REALM, USER);
     expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(0);
     expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.userSubscriptionListEntry.update).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        state: "REMOVED",
+        pinned: false,
+      }),
+    });
   });
 });
 
@@ -805,6 +912,16 @@ describe("realmService.unmuteRealm", () => {
       data: { subscriberCount: { increment: number } };
     };
     expect(unitArgs.data.subscriberCount).toEqual({ increment: 1 });
+    expect(legacyDbMock.userSubscriptionListEntry.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          userUnitId: USER,
+          subscribedUnitId: REALM,
+          subscribedType: "REALM",
+          state: "ACTIVE",
+        }),
+      }),
+    );
   });
 
   test("idempotent — no-op when subscription already exists", async () => {
@@ -814,6 +931,9 @@ describe("realmService.unmuteRealm", () => {
     await realmService.unmuteRealm(REALM, USER);
     expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(0);
     expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0);
+    expect(legacyDbMock.userSubscriptionListEntry.upsert).toHaveBeenCalledTimes(
+      1,
+    );
   });
 });
 

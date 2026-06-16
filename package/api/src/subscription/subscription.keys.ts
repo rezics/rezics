@@ -7,6 +7,8 @@ export const subscriptionKeys = {
   all: () => ["subscription"] as const,
   mine: (filter?: { subscribedType?: string }) =>
     [...subscriptionKeys.all(), "mine", filter ?? {}] as const,
+  entries: (filter?: { subscribedType?: string; state?: string }) =>
+    [...subscriptionKeys.all(), "entries", filter ?? {}] as const,
   check: (subscribedUnitId: string) =>
     [...subscriptionKeys.all(), "check", subscribedUnitId] as const,
   count: (subscribedUnitId: string) =>

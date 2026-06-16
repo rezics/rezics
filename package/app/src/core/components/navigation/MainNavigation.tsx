@@ -1,22 +1,20 @@
 // MainNavigation.tsx
 //
 // Single source for product navigation. The main app sidebar intentionally
-// stays compact: a primary unlabelled catalog group plus a Realms group.
+// stays compact: fixed app entries plus subscription-backed Zone and Realm groups.
 // Existing routes such as search/reviews/shelves remain available from page
 // affordances and direct URLs; they are simply not sidebar entry points.
-// 产品导航的唯一来源。主应用侧边栏刻意保持精简：一个无标签的主目录分组
-// 加上一个 Realms 分组。诸如 search/reviews/shelves 等既有路由仍可通过页面
-// 内的入口和直接 URL 访问；它们只是不作为侧边栏的入口。
+// 产品导航的唯一来源。主应用侧边栏刻意保持精简：固定应用入口加上由订阅
+// 驱动的 Zone 和 Realm 分组。诸如 search/reviews/shelves 等既有路由仍可通
+// 过页面内的入口和直接 URL 访问；它们只是不作为侧边栏的入口。
 
 import {
+  Compass as CompassOutlinedIcon,
   MessageCircleQuestion as FeedbackOutlinedIcon,
-  Gamepad2 as GamepadOutlinedIcon,
   Users as GroupsOutlinedIcon,
   Home as HomeOutlinedIcon,
   UserCheck as HowToRegOutlinedIcon,
   LogIn as LoginOutlinedIcon,
-  BookOpen as MenuBookOutlinedIcon,
-  Clapperboard as MovieOutlinedIcon,
   Palette as PaletteOutlinedIcon,
   Headset as SupportAgentOutlinedIcon,
 } from "lucide-react";
@@ -33,15 +31,25 @@ export interface NavigationContext {
   isAdmin: boolean;
 }
 
-export interface MainSidebarRealmItem {
+export interface MainSidebarSubscriptionItem {
   unitId: string;
   title: string;
   href: string;
+  subscribedType?: "ZONE" | "REALM";
+  pinned?: boolean;
+  position?: string;
+  state?: "ACTIVE" | "REMOVED";
+  createdAt?: string | Date;
 }
 
 export interface NavigationBuildOptions {
+  zones?: {
+    items: MainSidebarSubscriptionItem[];
+    isLoading?: boolean;
+    errorMessage?: string | null;
+  };
   realms?: {
-    items: MainSidebarRealmItem[];
+    items: MainSidebarSubscriptionItem[];
     isLoading?: boolean;
     errorMessage?: string | null;
   };
@@ -72,30 +80,9 @@ function isVisible(
 
 const NAVIGATION_GROUPS: NavigationGroup[] = [
   {
-    id: "primary",
+    id: "home",
     items: [
       { kind: "item", segment: "/", title: "Home", icon: HomeOutlinedIcon },
-      {
-        kind: "item",
-        segment: "/book",
-        title: "Books",
-        icon: MenuBookOutlinedIcon,
-        activeMatch: "prefix",
-      },
-      {
-        kind: "item",
-        segment: "/game",
-        title: "Games",
-        icon: GamepadOutlinedIcon,
-        activeMatch: "prefix",
-      },
-      {
-        kind: "item",
-        segment: "/media",
-        title: "Media",
-        icon: MovieOutlinedIcon,
-        activeMatch: "prefix",
-      },
     ],
   },
   {
@@ -121,55 +108,69 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
   },
 ];
 
-function buildRealmSection(
-  context: NavigationContext,
-  options: NavigationBuildOptions,
-): NavigationItem | null {
-  if (!context.isAuthenticated) return null;
+function buildSubscriptionSection(input: {
+  context: NavigationContext;
+  sectionId: string;
+  title: string;
+  allTitle: string;
+  allSegment: string;
+  icon: NavigationEntry["icon"];
+  entries?: {
+    items: MainSidebarSubscriptionItem[];
+    isLoading?: boolean;
+    errorMessage?: string | null;
+  };
+  emptyTitle: string;
+}): NavigationItem | null {
+  if (!input.context.isAuthenticated) return null;
 
   const children: NavigationItem[] = [
     {
       kind: "item",
-      segment: "/realm",
-      title: "All Realms",
-      icon: GroupsOutlinedIcon,
+      segment: input.allSegment,
+      title: input.allTitle,
+      icon: input.icon,
       activeMatch: "exact",
     },
   ];
 
-  if (options.realms?.isLoading) {
+  if (input.entries?.isLoading) {
     children.push({
       kind: "status",
-      id: "realms-loading",
-      title: "Loading realms...",
+      id: `${input.sectionId}-loading`,
+      title: `Loading ${input.title.toLowerCase()}...`,
     });
-  } else if (options.realms?.errorMessage) {
+  } else if (input.entries?.errorMessage) {
     children.push({
       kind: "status",
-      id: "realms-error",
-      title: options.realms.errorMessage,
+      id: `${input.sectionId}-error`,
+      title: input.entries.errorMessage,
       tone: "danger",
     });
   } else {
-    const joinedRealms = options.realms?.items ?? [];
-    if (joinedRealms.length === 0) {
+    const items = sortSidebarSubscriptionItems(input.entries?.items ?? []);
+    if (items.length === 0) {
       children.push({
         kind: "status",
-        id: "realms-empty",
-        title: "No joined realms",
+        id: `${input.sectionId}-empty`,
+        title: input.emptyTitle,
       });
     } else {
-      // Keep this as an ordinary scrollable list until measured sidebar
-      // rendering shows 40px realm rows are a real bottleneck.
-      // 在实测的侧边栏渲染表明 40px 的 realm 行确实成为瓶颈之前，
-      // 将其保持为普通的可滚动列表。
       children.push(
-        ...joinedRealms.map(
-          (realm): NavigationEntry => ({
+        ...items.map(
+          (item): NavigationEntry => ({
             kind: "item",
-            segment: realm.href,
-            title: realm.title,
+            segment: item.href,
+            title: item.title,
             activeMatch: "prefix",
+            subscriptionListEntry: item.subscribedType
+              ? {
+                  subscribedUnitId: item.unitId,
+                  subscribedType: item.subscribedType,
+                  pinned: item.pinned ?? false,
+                  position: item.position ?? "",
+                }
+              : undefined,
           }),
         ),
       );
@@ -178,13 +179,61 @@ function buildRealmSection(
 
   return {
     kind: "section",
-    id: "realms",
-    title: "Realms",
+    id: input.sectionId,
+    title: input.title,
     collapsible: true,
     defaultOpen: true,
     visibility: "authenticated",
     children,
   };
+}
+
+function sortSidebarSubscriptionItems(items: MainSidebarSubscriptionItem[]) {
+  return items
+    .filter((item) => item.state !== "REMOVED")
+    .slice()
+    .sort((a, b) => {
+      const pinnedA = a.pinned ?? false;
+      const pinnedB = b.pinned ?? false;
+      if (pinnedA !== pinnedB) return pinnedA ? -1 : 1;
+      const position = (a.position ?? "").localeCompare(b.position ?? "");
+      if (position !== 0) return position;
+      const createdAtA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const createdAtB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return createdAtA - createdAtB;
+    });
+}
+
+function buildRealmSection(
+  context: NavigationContext,
+  options: NavigationBuildOptions,
+): NavigationItem | null {
+  return buildSubscriptionSection({
+    context,
+    sectionId: "realms",
+    title: "Realms",
+    allTitle: "All Realms",
+    allSegment: "/realm",
+    icon: GroupsOutlinedIcon,
+    entries: options.realms,
+    emptyTitle: "No subscribed realms",
+  });
+}
+
+function buildZoneSection(
+  context: NavigationContext,
+  options: NavigationBuildOptions,
+): NavigationItem | null {
+  return buildSubscriptionSection({
+    context,
+    sectionId: "zones",
+    title: "Zones",
+    allTitle: "All Zones",
+    allSegment: "/z",
+    icon: CompassOutlinedIcon,
+    entries: options.zones,
+    emptyTitle: "No subscribed zones",
+  });
 }
 
 const ADMIN_GROUP: NavigationGroup = {
@@ -266,6 +315,9 @@ export const NAVIGATION = (
     });
     if (index === 0) result.push({ kind: "divider" });
   });
+
+  const zoneSection = buildZoneSection(context, options);
+  if (zoneSection) result.push(zoneSection);
 
   const realmSection = buildRealmSection(context, options);
   if (realmSection) result.push(realmSection);

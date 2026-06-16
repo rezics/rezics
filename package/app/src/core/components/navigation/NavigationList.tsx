@@ -6,9 +6,9 @@ import {
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import {
+  type NavigationItem,
   navigationRowClassName,
   navigationSectionHeaderClassName,
-  type NavigationItem,
 } from "./navigation";
 
 interface NavigationListProps {
@@ -121,6 +121,13 @@ export const NavigationList = ({
                   isActive && "bg-surface-subtle",
                 )}
                 aria-current={isActive ? "page" : undefined}
+                data-subscription-unit-id={
+                  item.subscriptionListEntry?.subscribedUnitId
+                }
+                data-subscription-type={
+                  item.subscriptionListEntry?.subscribedType
+                }
+                data-subscription-pinned={item.subscriptionListEntry?.pinned}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
                 }
@@ -146,6 +153,13 @@ export const NavigationList = ({
                   isActive && "bg-surface-subtle",
                 )}
                 aria-current={isActive ? "page" : undefined}
+                data-subscription-unit-id={
+                  item.subscriptionListEntry?.subscribedUnitId
+                }
+                data-subscription-type={
+                  item.subscriptionListEntry?.subscribedType
+                }
+                data-subscription-pinned={item.subscriptionListEntry?.pinned}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
                 }

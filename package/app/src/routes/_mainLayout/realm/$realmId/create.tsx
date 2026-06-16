@@ -1,15 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
   normalizeRealmCreateMode,
   type RealmCreateMode,
   RealmCreatePage,
 } from "@/realm";
+import { isRealmUnitIdParam } from "@/realm/models/realmDetailRoutes";
 
 type RealmCreateSearch = {
   mode?: RealmCreateMode;
 };
 
 export const Route = createFileRoute("/_mainLayout/realm/$realmId/create")({
+  loader: ({ params }) => {
+    if (!isRealmUnitIdParam(params.realmId)) throw notFound();
+  },
   validateSearch: (search: Record<string, unknown>): RealmCreateSearch => ({
     mode: normalizeRealmCreateMode(search.mode),
   }),

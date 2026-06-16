@@ -1,6 +1,7 @@
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { KeywordInput, useSearchQuery } from "@/search";
+import { ZoneSectionList } from "../components/ZoneSectionRenderer";
 import type { ZoneTemplateProps } from "./types";
 
 /**
@@ -55,16 +56,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
         />
       </div>
 
-      {/* Book sections 图书区块 */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">
-          {t("search:zone_books_title")}
-        </h2>
-        {/* MOCK: book listing sections with zone.filters pre-applied will be wired here 预先应用 zone.filters 的图书列表区块将在此处接入 */}
-        <p className="text-text-secondary">
-          {t("search:zone_book_content_placeholder")}
-        </p>
-      </div>
+      <ZoneSectionList zone={zone} />
     </div>
   );
 };

@@ -1,4 +1,5 @@
-import { myRealmsQuery } from "@rezics/api/realm/realm.queries";
+import { mySubscriptionListEntriesQuery } from "@rezics/api/subscription/subscription";
+import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
@@ -6,6 +7,8 @@ import type React from "react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { unitHref } from "@/shared/ui/link";
 import {
   selectHasAuthIdentity,
   selectHasMemberSession,
@@ -15,8 +18,6 @@ import {
   useSyncUserProfile,
   useUserProfileStore,
 } from "@/user";
-import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { unitHref } from "@/shared/ui/link";
 import { MainLayoutFooter } from "../components/footer/MainLayoutFooter";
 import { HelpFab } from "../components/HelpWidget";
 import { Header } from "../components/header/MainLayoutHeader";
@@ -41,13 +42,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     (state) => state.registration.complete,
   );
   const readContext = useReadLanguageContext();
-  const realmReadQuery = {
-    languages: readContext.languages,
-    appLocale: readContext.appLocale,
-    languageMode: readContext.languageMode,
-  } as const;
+  const zonesQuery = useQuery({
+    ...mySubscriptionListEntriesQuery({ subscribedType: "ZONE" }),
+    enabled: hasMemberSession && readContext.ready,
+  });
   const realmsQuery = useQuery({
-    ...myRealmsQuery(realmReadQuery),
+    ...mySubscriptionListEntriesQuery({ subscribedType: "REALM" }),
     enabled: hasMemberSession && readContext.ready,
   });
   const canRenderChrome = shouldRenderNormalAppChrome({
@@ -60,14 +60,27 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     useUserProfileStore((state) =>
       state.user?.permission?.role?.includes("ADMIN"),
     ) ?? false;
-  const realmNavigationItems =
-    realmsQuery.data?.realms.map((realm) => ({
-      unitId: realm.unitId,
-      title: realm.title ?? realm.unitId,
+  const entryNavigationItems = (
+    entries: UserSubscriptionListEntryDTO[] | undefined,
+  ) =>
+    entries?.map((entry) => ({
+      unitId: entry.subscribedUnitId,
+      title: entry.subscribedTitle ?? entry.subscribedUnitId,
+      subscribedType:
+        entry.subscribedType === "ZONE" || entry.subscribedType === "REALM"
+          ? entry.subscribedType
+          : undefined,
+      pinned: entry.pinned,
+      position: entry.position,
+      state: entry.state,
+      createdAt:
+        entry.createdAt instanceof Date
+          ? entry.createdAt.toISOString()
+          : entry.createdAt,
       href: unitHref({
-        type: "REALM",
-        unitId: realm.unitId,
-        slug: realm.slug ?? null,
+        type: entry.subscribedType as any,
+        unitId: entry.subscribedUnitId,
+        slug: entry.subscribedSlug ?? null,
       }),
     })) ?? [];
 
@@ -105,8 +118,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               isAdmin,
             },
             {
+              zones: {
+                items: entryNavigationItems(zonesQuery.data?.entries),
+                isLoading: hasMemberSession && zonesQuery.isLoading,
+                errorMessage: zonesQuery.error ? "Failed to load zones" : null,
+              },
               realms: {
-                items: realmNavigationItems,
+                items: entryNavigationItems(realmsQuery.data?.entries),
                 isLoading: hasMemberSession && realmsQuery.isLoading,
                 errorMessage: realmsQuery.error
                   ? "Failed to load realms"

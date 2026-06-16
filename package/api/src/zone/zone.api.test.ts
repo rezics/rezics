@@ -62,6 +62,50 @@ describe("zoneApi", () => {
     });
   });
 
+  test("sends owner realm and versioned config on zone create", async () => {
+    await zoneApi.create({
+      slug: "library",
+      translations: [{ language: "en", title: "Library" }],
+      ownerRealmUnitId: "realm-1",
+      filters: { type: "BOOK" },
+      configVersion: 1,
+      pages: {
+        home: {
+          sections: [{ id: "latest", kind: "latestContent" }],
+        },
+      },
+      theme: {
+        tokens: { accent: "#2f6fef" },
+        layout: { contentWidth: "wide" },
+      },
+      primaryRealmUnitId: "realm-1",
+      template: "default",
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("http://api.example/zone");
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+      method: "POST",
+      body: JSON.stringify({
+        slug: "library",
+        translations: [{ language: "en", title: "Library" }],
+        ownerRealmUnitId: "realm-1",
+        filters: { type: "BOOK" },
+        configVersion: 1,
+        pages: {
+          home: {
+            sections: [{ id: "latest", kind: "latestContent" }],
+          },
+        },
+        theme: {
+          tokens: { accent: "#2f6fef" },
+          layout: { contentWidth: "wide" },
+        },
+        primaryRealmUnitId: "realm-1",
+        template: "default",
+      }),
+    });
+  });
+
   test("builds stable slug and Unit id keys", () => {
     expect(zoneKeys.detail("wiki-zone")).toEqual([
       "zones",

@@ -204,6 +204,34 @@ describe("federatedSearch", () => {
     expect(commentQuery?.filter).toContain('realmUnitId = "r-1"');
   });
 
+  test("zone scope permits content, posts, comments, and shelves without realm partition filters", async () => {
+    const { client, multi } = makeFakeClient();
+    const opts: FederatedSearchOptions = {
+      scope: { kind: "zone", zoneUnitId: "zone-1" },
+      category: "all",
+      query: { type: ["BOOK"] },
+    };
+
+    await federatedSearch(client, opts);
+
+    const queries = multi[0]!.queries;
+    const indexUids = queries.map((q) => q.indexUid);
+    expect(indexUids).toContain("content");
+    expect(indexUids).toContain("posts");
+    expect(indexUids).toContain("comments");
+    expect(indexUids).not.toContain("realms");
+    expect(indexUids).not.toContain("users");
+    expect(indexUids).not.toContain("entities");
+    for (const q of queries.filter(
+      (qq) => qq.indexUid === "content" || qq.indexUid === "posts",
+    )) {
+      expect(q.filter).not.toContain('realmIds = "zone-1"');
+      expect(q.filter).not.toContain('zoneUnitId = "zone-1"');
+    }
+    const commentQuery = queries.find((q) => q.indexUid === "comments");
+    expect(commentQuery?.filter).toBe("isLocked = false");
+  });
+
   test("user scope filters content by userId, posts by authorUserId, and entities by ownerUnitId", async () => {
     const { client, multi } = makeFakeClient();
     const opts: FederatedSearchOptions = {

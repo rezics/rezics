@@ -23,6 +23,8 @@ import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
 type HeaderSearchScope =
   | { kind: "general" }
   | { kind: "realm"; realmId: string }
+  | { kind: "zoneId"; zoneId: string }
+  | { kind: "zoneSlug"; zoneSlug: string }
   | { kind: "userId"; userId: string }
   | { kind: "userSlug"; userSlug: string };
 
@@ -127,6 +129,16 @@ function resolveScope(pathname: string): HeaderSearchScope {
     return { kind: "userSlug", userSlug };
   }
 
+  const zoneId = firstRouteSegment(pathname, "zone");
+  if (zoneId && zoneId !== "search" && zoneId !== "new") {
+    return { kind: "zoneId", zoneId };
+  }
+
+  const zoneSlug = firstRouteSegment(pathname, "z");
+  if (zoneSlug && zoneSlug !== "search" && zoneSlug !== "new") {
+    return { kind: "zoneSlug", zoneSlug };
+  }
+
   return { kind: "general" };
 }
 
@@ -168,6 +180,18 @@ function useHeaderSearchPresentation(pathname: string) {
       fallback: null,
       showAvatar: false,
       placeholder: "搜尋此 realm",
+    };
+  }
+
+  if (scope.kind === "zoneId" || scope.kind === "zoneSlug") {
+    const label = scope.kind === "zoneId" ? scope.zoneId : scope.zoneSlug;
+    return {
+      kind: "scoped" as const,
+      badge: `z/${label}`,
+      avatar: null,
+      fallback: null,
+      showAvatar: false,
+      placeholder: "搜尋此 zone",
     };
   }
 

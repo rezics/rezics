@@ -9,6 +9,10 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { Realm, RealmMember, Subscription, Unit, User } from "../db/schema";
 import { broadcast } from "../notify-boundary/notify-boundary.client";
 import { AppError } from "../utils/errors";
+import {
+  activateSubscriptionListEntryInTx,
+  markSubscriptionListEntryRemovedInTx,
+} from "./subscription-list-entry.service";
 import { mapSubscriptionToDTO } from "./subscription.mapper";
 
 const DEFAULT_CHANNELS = ["*"] as const;
@@ -24,6 +28,7 @@ export type SubscriptionRepository = {
   createWithCounters(input: {
     subscriberUnitId: string;
     subscribedUnitId: string;
+    subscribedType: SubscribableUnitType;
     channels: string[];
     isUserToUser: boolean;
   }): Promise<SubscriptionRow>;
@@ -98,6 +103,7 @@ function createDrizzleSubscriptionRepository(): SubscriptionRepository {
     async createWithCounters({
       subscriberUnitId,
       subscribedUnitId,
+      subscribedType,
       channels,
       isUserToUser,
     }) {
@@ -124,6 +130,11 @@ function createDrizzleSubscriptionRepository(): SubscriptionRepository {
             updatedAt: new Date(),
           })
           .where(eq(Unit.id, subscribedUnitId));
+        await activateSubscriptionListEntryInTx(tx, {
+          userUnitId: subscriberUnitId,
+          subscribedUnitId,
+          subscribedType,
+        });
         if (isUserToUser) {
           await tx
             .update(User)
@@ -179,6 +190,10 @@ function createDrizzleSubscriptionRepository(): SubscriptionRepository {
             .set({ followingsCount: sql`${User.followingsCount} - 1` })
             .where(eq(User.unitId, subscriberUnitId));
         }
+        await markSubscriptionListEntryRemovedInTx(tx, {
+          userUnitId: subscriberUnitId,
+          subscribedUnitId,
+        });
       });
     },
 
@@ -348,6 +363,7 @@ export class SubscriptionService {
     const row = await this.repository.createWithCounters({
       subscriberUnitId,
       subscribedUnitId,
+      subscribedType,
       channels: effectiveChannels,
       isUserToUser,
     });

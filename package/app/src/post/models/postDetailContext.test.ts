@@ -15,6 +15,29 @@ describe("resolvePostDetailContext", () => {
     });
   });
 
+  test("resolves zone-framed post and wiki routes as direct interaction context", () => {
+    expect(
+      resolvePostDetailContext({
+        params: { postUnitId: "post-1" },
+      }),
+    ).toEqual({
+      rootPostUnitId: "post-1",
+      context: { kind: "direct" },
+      realmUnitId: null,
+      reactionScopeKey: undefined,
+    });
+    expect(
+      resolvePostDetailContext({
+        params: { wikiUnitId: "wiki-1" },
+      }),
+    ).toEqual({
+      rootPostUnitId: "wiki-1",
+      context: { kind: "direct" },
+      realmUnitId: null,
+      reactionScopeKey: undefined,
+    });
+  });
+
   test("uses explicit realm context for realm post routes", () => {
     expect(
       resolvePostDetailContext({

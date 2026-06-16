@@ -1,0 +1,42 @@
+import { isPublicRealmSlugRouteParams } from "@rezics/contract";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { RealmDetailLayout, useRealmDetail } from "@/realm";
+import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
+import { realmDetailLocationFromSlugParams } from "@/realm/models/realmDetailRoutes";
+import { RealmAboutTab } from "@/realm/sections/RealmAboutTab";
+
+function RealmSlugAboutRoute() {
+  const params = Route.useParams();
+  const { realm } = Route.useLoaderData();
+  return (
+    <RealmDetailLayout
+      realmId={realm.unitId}
+      routeLocation={realmDetailLocationFromSlugParams(params)}
+    >
+      <RealmSlugAboutTab />
+    </RealmDetailLayout>
+  );
+}
+
+function RealmSlugAboutTab() {
+  const { realm, description, membership, showManage } = useRealmDetail();
+  return (
+    <RealmAboutTab
+      realm={realm}
+      description={description}
+      membership={membership}
+      canManage={showManage}
+    />
+  );
+}
+
+export const Route = createFileRoute("/_mainLayout/r/$realmSlug/about")({
+  loader: async ({ params, context }) => {
+    if (!isPublicRealmSlugRouteParams(params)) throw notFound();
+    return loadRealmSlugRoute({
+      params,
+      queryClient: context.qc,
+    });
+  },
+  component: RealmSlugAboutRoute,
+});

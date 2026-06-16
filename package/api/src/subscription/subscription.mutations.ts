@@ -1,4 +1,10 @@
-import type { SubscriptionCreateBody, SubscriptionDTO } from "@rezics/contract";
+import type {
+  SubscriptionCreateBody,
+  SubscriptionDTO,
+  UserSubscriptionListEntryDTO,
+  UserSubscriptionListEntryPinBody,
+  UserSubscriptionListEntryReorderBody,
+} from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,
@@ -16,6 +22,10 @@ function invalidateForTarget(
   qc.invalidateQueries({ queryKey: subscriptionKeys.count(subscribedUnitId) });
   qc.invalidateQueries({ queryKey: subscriptionKeys.all() });
   void invalidateForCacheDomain(qc, "follow");
+}
+
+function invalidateEntries(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: subscriptionKeys.all() });
 }
 
 export function useSubscribeMutation(
@@ -76,6 +86,86 @@ export function useUpdateSubscriptionChannelsMutation(
   });
 }
 
+export function usePinSubscriptionListEntryMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UserSubscriptionListEntryDTO,
+      Error,
+      { subscribedUnitId: string; input: UserSubscriptionListEntryPinBody }
+    >,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ subscribedUnitId, input }) =>
+      subscriptionApi.pinEntry(subscribedUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateEntries(qc);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useReorderSubscriptionListEntryMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UserSubscriptionListEntryDTO,
+      Error,
+      { subscribedUnitId: string; input: UserSubscriptionListEntryReorderBody }
+    >,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ subscribedUnitId, input }) =>
+      subscriptionApi.reorderEntry(subscribedUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateEntries(qc);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useRemoveSubscriptionListEntryMutation(
+  options?: Omit<
+    UseMutationOptions<{ removed: boolean }, Error, string>,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (subscribedUnitId: string) =>
+      subscriptionApi.removeEntry(subscribedUnitId),
+    ...options,
+    onSuccess: (data, subscribedUnitId, onMutateResult, context) => {
+      invalidateEntries(qc);
+      options?.onSuccess?.(data, subscribedUnitId, onMutateResult, context);
+    },
+  });
+}
+
+export function useRecoverSubscriptionListEntryMutation(
+  options?: Omit<
+    UseMutationOptions<UserSubscriptionListEntryDTO, Error, string>,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (subscribedUnitId: string) =>
+      subscriptionApi.recoverEntry(subscribedUnitId),
+    ...options,
+    onSuccess: (data, subscribedUnitId, onMutateResult, context) => {
+      invalidateForTarget(qc, subscribedUnitId);
+      options?.onSuccess?.(data, subscribedUnitId, onMutateResult, context);
+    },
+  });
+}
+
 // Conventional hook names exposed under the subscription namespace.
 // `useSubscribe` and `useUnsubscribe` default to channels=['*'] (full
 // subscription) — the channel-picker UI passes explicit channels to
@@ -92,4 +182,8 @@ export const subscriptionMutations = {
   useSubscribe: useSubscribeMutation,
   useUnsubscribe: useUnsubscribeMutation,
   useUpdateChannels: useUpdateSubscriptionChannelsMutation,
+  usePinEntry: usePinSubscriptionListEntryMutation,
+  useReorderEntry: useReorderSubscriptionListEntryMutation,
+  useRemoveEntry: useRemoveSubscriptionListEntryMutation,
+  useRecoverEntry: useRecoverSubscriptionListEntryMutation,
 };

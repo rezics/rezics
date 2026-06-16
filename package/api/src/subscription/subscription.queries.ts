@@ -1,4 +1,5 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import type { UserSubscriptionListEntryListQuery } from "@rezics/contract";
 import { subscriptionApi } from "./subscription.api";
 import { subscriptionKeys } from "./subscription.keys";
 
@@ -29,6 +30,15 @@ export const subscriberCountQuery = (subscribedUnitId: string) =>
     staleTime: 1000 * 30,
   });
 
+export const mySubscriptionListEntriesQuery = (
+  filter?: UserSubscriptionListEntryListQuery,
+) =>
+  queryOptions({
+    queryKey: subscriptionKeys.entries(filter),
+    queryFn: () => subscriptionApi.listEntries(filter),
+    staleTime: 1000 * 30,
+  });
+
 export function useMySubscriptions(filter?: { subscribedType?: string }) {
   return useQuery(mySubscriptionsQuery(filter));
 }
@@ -41,8 +51,15 @@ export function useSubscriberCount(subscribedUnitId: string) {
   return useQuery(subscriberCountQuery(subscribedUnitId));
 }
 
+export function useMySubscriptionListEntries(
+  filter?: UserSubscriptionListEntryListQuery,
+) {
+  return useQuery(mySubscriptionListEntriesQuery(filter));
+}
+
 export const subscriptionQueries = {
   mine: mySubscriptionsQuery,
+  entries: mySubscriptionListEntriesQuery,
   check: subscriptionCheckQuery,
   count: subscriberCountQuery,
 };

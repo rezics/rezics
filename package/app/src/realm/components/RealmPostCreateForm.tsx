@@ -32,12 +32,16 @@ import { RealmPostTagPicker } from "./RealmPostTagPicker";
 export interface RealmPostCreateFormProps {
   realmId: string;
   contentRequiresApproval?: boolean;
+  detailHref?: string;
+  postHref?: (postUnitId: string) => string;
   onCreated?: (post: PostDTO) => void;
 }
 
 export function RealmPostCreateForm({
   realmId,
   contentRequiresApproval = false,
+  detailHref = `/realm/${realmId}`,
+  postHref = (postUnitId) => `/realm/${realmId}/post/${postUnitId}`,
   onCreated,
 }: RealmPostCreateFormProps) {
   const { t } = useTranslation(["common"]);
@@ -101,16 +105,10 @@ export function RealmPostCreateForm({
           }
           if (contentRequiresApproval) {
             toast.success("Submitted for review.");
-            navigate({
-              to: "/realm/$realmId",
-              params: { realmId },
-            });
+            navigate({ to: detailHref });
           } else {
             toast.success("Post published.");
-            navigate({
-              to: "/realm/$realmId/post/$postUnitId",
-              params: { realmId, postUnitId: post.unitId },
-            });
+            navigate({ to: postHref(post.unitId) });
           }
         },
         onError: (error) => {

@@ -248,6 +248,30 @@ describe("governance policy", () => {
       decide({
         actorUserId: "moderator-1",
         permission: { role: "USER" },
+        action: "zone.manage",
+        capabilities: [],
+        realmMembership: {
+          realmUnitId: "realm-1",
+          role: "moderator",
+          capabilities: [
+            {
+              capability: "queue.realm.decide",
+              scope: { kind: "realm", realmUnitId: "realm-1" },
+            },
+          ],
+        },
+        target: {
+          kind: "zone",
+          id: "zone-1",
+          realmUnitId: "realm-1",
+        },
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
+
+    expect(
+      decide({
+        actorUserId: "moderator-1",
+        permission: { role: "USER" },
         action: "realm.member.moderate",
         capabilities: [],
         realmMembership: {
@@ -270,6 +294,30 @@ describe("governance policy", () => {
   });
 
   test("denies cross-realm realm-family decisions", () => {
+    expect(
+      decide({
+        actorUserId: "moderator-1",
+        permission: { role: "USER" },
+        action: "zone.manage",
+        capabilities: [],
+        realmMembership: {
+          realmUnitId: "realm-1",
+          role: "moderator",
+          capabilities: [
+            {
+              capability: "queue.realm.decide",
+              scope: { kind: "realm", realmUnitId: "realm-1" },
+            },
+          ],
+        },
+        target: {
+          kind: "zone",
+          id: "zone-1",
+          realmUnitId: "realm-2",
+        },
+      }),
+    ).toMatchObject({ allowed: false, code: "CROSS_REALM_DENIED" });
+
     expect(
       decide({
         actorUserId: "moderator-1",

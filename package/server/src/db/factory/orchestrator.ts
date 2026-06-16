@@ -190,6 +190,7 @@ export async function runFactorySeed(
     plan.zones,
     allWorkIds,
     tags.map((t) => t.id),
+    realms,
   );
   console.log(`[Seed]   ${zones.length} zones`);
   done();

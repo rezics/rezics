@@ -14,11 +14,13 @@ import { RealmPostTagPicker } from "./RealmPostTagPicker";
 
 export interface RealmPollPostCreateFormProps {
   realmId: string;
+  postHref?: (postUnitId: string) => string;
   onCreated?: (post: PostDTO) => void;
 }
 
 export function RealmPollPostCreateForm({
   realmId,
+  postHref = (postUnitId) => `/realm/${realmId}/post/${postUnitId}`,
   onCreated,
 }: RealmPollPostCreateFormProps) {
   const { t } = useTranslation(["common", "community"]);
@@ -56,10 +58,7 @@ export function RealmPollPostCreateForm({
           onCreated?.(post);
           if (status === "PUBLISHED") {
             toast.success("Post published.");
-            navigate({
-              to: "/realm/$realmId/post/$postUnitId",
-              params: { realmId, postUnitId: post.unitId },
-            });
+            navigate({ to: postHref(post.unitId) });
           } else {
             toast.success(t("common:save_draft"));
           }

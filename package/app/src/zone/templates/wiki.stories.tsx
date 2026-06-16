@@ -55,12 +55,18 @@ const navigationUnits = [
 
 const baseZone: ZoneDTO = {
   unitId: "zone-wiki-template-fixture",
+  ownerRealmUnitId: "realm-wiki-fixture",
   slug: "fixture-wiki-template",
   name: "Archive of the Glass City",
   description:
     "A seeded wiki portal covering characters, places, factions, and translated entries.",
   template: "wiki-classic",
   filters: {},
+  configVersion: 1,
+  pages: null,
+  sections: null,
+  theme: null,
+  primaryRealmUnitId: "realm-wiki-fixture",
   wiki: {
     filters: { realmUnitId: "realm-wiki-fixture", postKind: "WIKI" },
     navigation: {

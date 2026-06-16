@@ -40,16 +40,6 @@ import {
 // `POST /meili/search/federated` 使用的唯一入口。根据请求的 `category` 分支，
 // 并计算 scope 允许访问的索引白名单。
 
-const POST_KIND_BY_CATEGORY: Record<
-  "reviews" | "excerpts" | "remarks" | "posts",
-  string
-> = {
-  reviews: "REVIEW",
-  excerpts: "EXCERPT",
-  remarks: "REMARK",
-  posts: "POST",
-};
-
 interface PermittedIndexes {
   // BOOK | GAME | MEDIA | LINK content surface
   // BOOK | GAME | MEDIA | LINK 内容面
@@ -91,6 +81,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         entities: false,
       };
     case "realm":
+    case "zone":
       return {
         contentBooks: true,
         contentShelves: true,
@@ -174,7 +165,7 @@ export async function federatedSearch(
   opts: FederatedSearchOptions,
   ctx: FilterContext = {},
 ): Promise<FederatedSearchResult> {
-  const { scope, category, query } = opts;
+  const { category, query } = opts;
   const q = query.keyword ?? "";
   const page = opts.page ?? 1;
   const hitsPerPage = opts.hitsPerPage ?? DEFAULT_PAGE_HITS_PER_PAGE;

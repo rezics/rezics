@@ -144,6 +144,8 @@ function resolveBookScope(scope: SearchScope): {
 //   book   → contentSubtype must be "shelves" (BOOK/GAME/MEDIA/LINK excluded)
 //          → containedUnitIds = unitId AND type = "SHELF"
 //   realm  → realmIds = realmId
+//   zone   → no index membership filter; zone config is applied as SearchQuery
+//            implicit filters by the caller
 //   user   → userId = userId
 //   saved  → handled by the shelf-item grouped path, not direct content search
 // 按严格成员关系表将 SearchScope 映射到内容索引：
@@ -151,6 +153,7 @@ function resolveBookScope(scope: SearchScope): {
 //   book   → contentSubtype 必须为 "shelves"（排除 BOOK/GAME/MEDIA/LINK）
 //          → containedUnitIds = unitId AND type = "SHELF"
 //   realm  → realmIds = realmId
+//   zone   → 无索引成员关系过滤；zone 配置由调用方作为 SearchQuery 隐式过滤应用
 //   user   → userId = userId
 //   saved  → 由书架条目分组路径处理，而非直接的内容搜索
 
@@ -265,11 +268,14 @@ export function buildContentFilter(
 //   global → no scope filter
 //   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
+//   zone   → no index membership filter; zone config is applied as SearchQuery
+//            implicit filters by the caller
 //   user   → authorUserId = userId
 // 帖子的作用域映射：
 //   global → 无作用域过滤
 //   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
+//   zone   → 无索引成员关系过滤；zone 配置由调用方作为 SearchQuery 隐式过滤应用
 //   user   → authorUserId = userId
 
 export function buildPostFilter(
@@ -324,11 +330,14 @@ export function buildPostFilter(
 //   global → no scope filter
 //   book   → rootUnitId = unitId
 //   realm  → realmUnitId = realmId
+//   zone   → no comment partition filter unless a later zone config explicitly
+//            defines direct-content comment boundaries
 //   user   → authorUserId = userId
 // 评论的作用域映射：
 //   global → 无作用域过滤
 //   book   → rootUnitId = unitId
 //   realm  → realmUnitId = realmId
+//   zone   → 不使用评论分区过滤，除非后续 zone 配置显式定义直接内容评论边界
 //   user   → authorUserId = userId
 
 export function buildCommentFilter(

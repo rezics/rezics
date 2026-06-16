@@ -163,8 +163,35 @@ describe("CatalogEntryKind", () => {
 });
 
 describe("UnitType", () => {
-  test("accepts LABEL as a base Unit type", () => {
-    expect(Value.Check(unitTypeSchema, "LABEL")).toBe(true);
+  test("accepts all persisted Unit types as base Unit types", () => {
+    const persistedUnitTypes = [
+      "BOOK",
+      "GAME",
+      "MEDIA",
+      "POST",
+      "TAG",
+      "REALM",
+      "SHELF",
+      "IMAGE",
+      "VIDEO",
+      "QUOTE",
+      "LINK",
+      "ENTITY",
+      "ZONE",
+      "USER",
+      "SCOPE",
+      "SERIES",
+      "LABEL",
+      "POLL",
+      "COMMENT",
+    ] as const;
+
+    for (const type of persistedUnitTypes) {
+      expect(Value.Check(unitTypeSchema, type)).toBe(true);
+    }
+  });
+
+  test("accepts LABEL as a create Unit type", () => {
     expect(
       Value.Check(createUnitSchema, {
         type: "LABEL",

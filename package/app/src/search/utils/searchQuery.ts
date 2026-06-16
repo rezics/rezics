@@ -16,6 +16,8 @@ function scopeToBasePath(scope: SearchScope): string {
       return "/search";
     case "realm":
       return `/realm/${scope.realmId}/search`;
+    case "zone":
+      return `/zone/${scope.zoneUnitId}/search`;
     case "user":
       return `/user/${scope.userId}/search`;
     case "book":

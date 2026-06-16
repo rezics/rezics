@@ -1,8 +1,12 @@
 import type {
   WikiZoneConfig,
   WikiZoneHomepageData,
+  ZoneConfigVersion,
   ZoneDTO,
   ZoneFilters,
+  ZonePages,
+  ZoneSection,
+  ZoneTheme,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
@@ -13,7 +17,13 @@ export type CreateZoneInput = {
     title?: string;
     description?: string;
   }>;
+  ownerRealmUnitId: string;
   filters: ZoneFilters;
+  configVersion?: ZoneConfigVersion;
+  pages?: ZonePages | null;
+  sections?: ZoneSection[] | null;
+  theme?: ZoneTheme | null;
+  primaryRealmUnitId?: string | null;
   template: string;
   styling?: Record<string, unknown>;
   wiki?: WikiZoneConfig | null;
@@ -22,7 +32,13 @@ export type CreateZoneInput = {
 };
 
 export type UpdateZoneInput = {
+  ownerRealmUnitId?: string;
   filters?: ZoneFilters;
+  configVersion?: ZoneConfigVersion;
+  pages?: ZonePages | null;
+  sections?: ZoneSection[] | null;
+  theme?: ZoneTheme | null;
+  primaryRealmUnitId?: string | null;
   template?: string;
   styling?: Record<string, unknown> | null;
   wiki?: WikiZoneConfig | null;

@@ -7,8 +7,8 @@ function findRepoRoot(start: string): string {
   while (true) {
     if (
       existsSync(join(dir, "package.json")) &&
-      existsSync(join(dir, "packages")) &&
-      statSync(join(dir, "packages")).isDirectory()
+      existsSync(join(dir, "package")) &&
+      statSync(join(dir, "package")).isDirectory()
     ) {
       return dir;
     }

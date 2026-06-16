@@ -9,6 +9,7 @@ import { variantContextSummarySchema } from "../unit/unit";
 export const feedScopeSchema = t.Union([
   t.Literal("home"),
   t.Literal("realm"),
+  t.Literal("zone"),
   t.Literal("library"),
 ]);
 
@@ -36,6 +37,7 @@ export const feedQuerySchema = t.Object({
   ...readLanguageGetQueryBase.properties,
   scope: t.Optional(feedScopeSchema),
   realmUnitId: t.Optional(t.String()),
+  zoneUnitId: t.Optional(t.String()),
   libraryKind: t.Optional(t.String()),
   targetUnitId: t.Optional(t.String()),
   variantUnitId: t.Optional(t.String()),

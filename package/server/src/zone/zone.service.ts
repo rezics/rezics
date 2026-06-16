@@ -9,9 +9,13 @@ import {
   type WikiZoneHomepageSection,
   type WikiZoneNavigationItem,
   type WikiZoneTranslatedLabel,
+  type ZoneConfigVersion,
   type ZoneFilters,
+  type ZonePages,
+  type ZoneSection,
+  type ZoneTheme,
 } from "@rezics/contract";
-import { and, asc, desc, eq, inArray, ne, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
 import {
@@ -64,7 +68,13 @@ type TranslatedUnitRow = {
 
 type ZoneCreateData = {
   unitId: string;
+  ownerRealmUnitId: string;
   filters: ZoneFilters;
+  configVersion: ZoneConfigVersion;
+  pages: ZonePages | null;
+  sections: ZoneSection[] | null;
+  theme: ZoneTheme | null;
+  primaryRealmUnitId: string | null;
   template: string;
   styling: Record<string, unknown> | null;
   wiki: WikiZoneConfig | null;
@@ -73,7 +83,13 @@ type ZoneCreateData = {
 };
 
 type ZoneUpdateData = Partial<{
+  ownerRealmUnitId: string;
   filters: ZoneFilters;
+  configVersion: ZoneConfigVersion;
+  pages: ZonePages | null;
+  sections: ZoneSection[] | null;
+  theme: ZoneTheme | null;
+  primaryRealmUnitId: string | null;
   template: string;
   styling: Record<string, unknown> | null;
   wiki: WikiZoneConfig | null;
@@ -317,7 +333,6 @@ async function hydrateZone(
     unit: unit
       ? ({
           ...unit,
-          slug: null,
         } as unknown as ZoneWithRelations["unit"])
       : null,
   };
@@ -492,6 +507,7 @@ export class ZoneService {
     refs: Set<string>,
     expectedType: string,
     code: string,
+    message = "Wiki Zone config references invalid Units",
   ): Promise<void> {
     if (refs.size === 0) return;
     const ids = [...refs];
@@ -499,22 +515,26 @@ export class ZoneService {
     const byId = new Map(rows.map((row: UnitRef) => [row.id, row]));
     const invalid = ids.filter((id) => byId.get(id)?.type !== expectedType);
     if (invalid.length > 0) {
-      throw new AppError(400, "Wiki Zone config references invalid Units", {
+      throw new AppError(400, message, {
         code,
         details: { ids: invalid, expectedType },
       });
     }
   }
 
-  private async assertAnyUnitRefs(refs: Set<string>): Promise<void> {
+  private async assertAnyUnitRefs(
+    refs: Set<string>,
+    message = "Wiki Zone config references missing Units",
+    code = "WIKI_ZONE_UNIT_REF_INVALID",
+  ): Promise<void> {
     if (refs.size === 0) return;
     const ids = [...refs];
     const rows = await this.repository.findUnitRefs(ids);
     const found = new Set(rows.map((row: { id: string }) => row.id));
     const invalid = ids.filter((id) => !found.has(id));
     if (invalid.length > 0) {
-      throw new AppError(400, "Wiki Zone config references missing Units", {
-        code: "WIKI_ZONE_UNIT_REF_INVALID",
+      throw new AppError(400, message, {
+        code,
         details: { ids: invalid },
       });
     }
@@ -606,6 +626,171 @@ export class ZoneService {
     ]);
   }
 
+  private collectZoneFilterRefs(
+    filters: ZoneFilters | undefined,
+    refs: {
+      entityIds: Set<string>;
+      unitIds: Set<string>;
+      realmUnitIds: Set<string>;
+    },
+  ) {
+    pushIfPresent(refs.realmUnitIds, filters?.realmUnitId);
+    for (const filter of filters?.subjectFilters ?? []) {
+      for (const id of filter.entityIds ?? []) refs.entityIds.add(id);
+    }
+    for (const id of filters?.wikiUnitIds ?? []) refs.unitIds.add(id);
+  }
+
+  private collectWikiFilterRefs(
+    filters: WikiZoneConfig["filters"] | undefined,
+    refs: {
+      entityIds: Set<string>;
+      tagUnitIds: Set<string>;
+      unitIds: Set<string>;
+      realmUnitIds: Set<string>;
+    },
+  ) {
+    pushIfPresent(refs.realmUnitIds, filters?.realmUnitId);
+    for (const id of filters?.tagUnitIds ?? []) refs.tagUnitIds.add(id);
+    for (const id of filters?.realmTagUnitIds ?? []) refs.tagUnitIds.add(id);
+    for (const filter of filters?.subjectFilters ?? []) {
+      for (const id of filter.entityIds ?? []) refs.entityIds.add(id);
+    }
+    for (const id of filters?.wikiUnitIds ?? []) refs.unitIds.add(id);
+  }
+
+  private collectZoneSectionRefs(
+    section: ZoneSection,
+    refs: {
+      entityIds: Set<string>;
+      tagUnitIds: Set<string>;
+      unitIds: Set<string>;
+      labelUnitIds: Set<string>;
+      realmUnitIds: Set<string>;
+    },
+  ) {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    assertTranslatedLabel(section.title);
+    this.collectZoneFilterRefs(section.filters, refs);
+
+    if (section.kind === "shelfCarousel") {
+      for (const id of section.shelfUnitIds ?? []) refs.unitIds.add(id);
+      return;
+    }
+
+    if (section.kind === "realmList") {
+      for (const id of section.realmUnitIds ?? []) refs.realmUnitIds.add(id);
+      return;
+    }
+
+    if (section.kind === "tagNavigation") {
+      for (const id of section.tagUnitIds ?? []) refs.tagUnitIds.add(id);
+      for (const id of section.realmTagUnitIds ?? []) refs.tagUnitIds.add(id);
+      return;
+    }
+
+    if (section.kind === "wikiCollection") {
+      for (const id of section.wikiUnitIds ?? []) refs.unitIds.add(id);
+      this.collectWikiFilterRefs(section.wikiFilters, refs);
+    }
+  }
+
+  private collectZonePageRefs(
+    page: ZonePages[keyof ZonePages] | undefined,
+    refs: Parameters<ZoneService["collectZoneSectionRefs"]>[1],
+  ) {
+    if (!page) return;
+    pushIfPresent(refs.labelUnitIds, page.titleLabelUnitId);
+    assertTranslatedLabel(page.title);
+    for (const section of page.sections) {
+      this.collectZoneSectionRefs(section, refs);
+    }
+  }
+
+  private async validateZoneConfig(input: {
+    ownerRealmUnitId?: string;
+    primaryRealmUnitId?: string | null;
+    pages?: ZonePages | null;
+    sections?: ZoneSection[] | null;
+    theme?: ZoneTheme | null;
+  }) {
+    const entityIds = new Set<string>();
+    const tagUnitIds = new Set<string>();
+    const unitIds = new Set<string>();
+    const labelUnitIds = new Set<string>();
+    const realmUnitIds = new Set<string>();
+
+    // Ownership controls management authority only. Realm interaction context
+    // must come from explicit realm routes, not from visiting a zone.
+    pushIfPresent(realmUnitIds, input.ownerRealmUnitId);
+    pushIfPresent(realmUnitIds, input.primaryRealmUnitId);
+    this.collectZonePageRefs(input.pages?.home, {
+      entityIds,
+      tagUnitIds,
+      unitIds,
+      labelUnitIds,
+      realmUnitIds,
+    });
+    this.collectZonePageRefs(input.pages?.search, {
+      entityIds,
+      tagUnitIds,
+      unitIds,
+      labelUnitIds,
+      realmUnitIds,
+    });
+    this.collectZonePageRefs(input.pages?.feed, {
+      entityIds,
+      tagUnitIds,
+      unitIds,
+      labelUnitIds,
+      realmUnitIds,
+    });
+    for (const section of input.sections ?? []) {
+      this.collectZoneSectionRefs(section, {
+        entityIds,
+        tagUnitIds,
+        unitIds,
+        labelUnitIds,
+        realmUnitIds,
+      });
+    }
+    pushIfPresent(unitIds, input.theme?.images?.logoUnitId);
+    pushIfPresent(unitIds, input.theme?.images?.bannerUnitId);
+    pushIfPresent(unitIds, input.theme?.images?.backgroundUnitId);
+
+    await Promise.all([
+      this.assertUnitRefs(
+        realmUnitIds,
+        "REALM",
+        "ZONE_REALM_REF_INVALID",
+        "Zone config references invalid Realms",
+      ),
+      this.assertUnitRefs(
+        entityIds,
+        "ENTITY",
+        "ZONE_ENTITY_REF_INVALID",
+        "Zone config references invalid Entities",
+      ),
+      this.assertUnitRefs(
+        tagUnitIds,
+        "TAG",
+        "ZONE_TAG_REF_INVALID",
+        "Zone config references invalid Tags",
+      ),
+      this.assertUnitRefs(
+        labelUnitIds,
+        "LABEL",
+        "ZONE_LABEL_REF_INVALID",
+        "Zone config references invalid Labels",
+      ),
+      this.assertAnyUnitRefs(
+        unitIds,
+        "Zone config references missing Units",
+        "ZONE_UNIT_REF_INVALID",
+      ),
+    ]);
+  }
+
   async getByUnitId(unitId: string): Promise<ZoneWithRelations | null> {
     return this.repository.getByUnitId(unitId);
   }
@@ -647,13 +832,26 @@ export class ZoneService {
       title?: string;
       description?: string;
     }>;
+    ownerRealmUnitId: string;
     filters: ZoneFilters;
+    configVersion?: ZoneConfigVersion;
+    pages?: ZonePages | null;
+    sections?: ZoneSection[] | null;
+    theme?: ZoneTheme | null;
+    primaryRealmUnitId?: string | null;
     template: string;
     styling?: Record<string, unknown> | null;
     wiki?: WikiZoneConfig | null;
     startsAt?: Date | null;
     endsAt?: Date | null;
   }): Promise<ZoneWithRelations> {
+    await this.validateZoneConfig({
+      ownerRealmUnitId: input.ownerRealmUnitId,
+      primaryRealmUnitId: input.primaryRealmUnitId,
+      pages: input.pages,
+      sections: input.sections,
+      theme: input.theme,
+    });
     await this.validateWikiConfig(input.wiki);
 
     const unit = await unitService.create({
@@ -673,7 +871,13 @@ export class ZoneService {
 
     const zone = await this.repository.createZone({
       unitId: unit.id,
+      ownerRealmUnitId: input.ownerRealmUnitId,
       filters: input.filters,
+      configVersion: input.configVersion ?? 1,
+      pages: input.pages ?? null,
+      sections: input.sections ?? null,
+      theme: input.theme ?? null,
+      primaryRealmUnitId: input.primaryRealmUnitId ?? null,
       template: input.template,
       styling: input.styling ?? null,
       wiki: input.wiki ?? null,
@@ -687,7 +891,13 @@ export class ZoneService {
   async update(
     unitId: string,
     input: {
+      ownerRealmUnitId?: string;
       filters?: ZoneFilters;
+      configVersion?: ZoneConfigVersion;
+      pages?: ZonePages | null;
+      sections?: ZoneSection[] | null;
+      theme?: ZoneTheme | null;
+      primaryRealmUnitId?: string | null;
       template?: string;
       styling?: Record<string, unknown> | null;
       wiki?: WikiZoneConfig | null;
@@ -695,6 +905,7 @@ export class ZoneService {
       endsAt?: Date | null;
     },
   ): Promise<ZoneWithRelations> {
+    await this.validateZoneConfig(input);
     await this.validateWikiConfig(input.wiki);
 
     const zone = await this.repository.updateZone(unitId, input);

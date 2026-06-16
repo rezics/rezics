@@ -6,7 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core";
-import { Link } from "@/shared/ui/link";
+import { AppSafeLink } from "@/shared/ui/link";
+import { officialZoneSearchHref } from "@/zone";
 
 export type HomeTagExploreProps = {
   title?: string;
@@ -52,11 +53,16 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
           const label = translations?.[id]?.name ?? id;
           const slug = translations?.[id]?.slug ?? "";
           return (
-            <Link key={id} to="/book" search={{ tags: slug || label }}>
+            <AppSafeLink
+              key={id}
+              href={officialZoneSearchHref("book", {
+                q: `[${slug || label}]`,
+              })}
+            >
               <Badge variant="outline" className="cursor-pointer">
                 {label}
               </Badge>
-            </Link>
+            </AppSafeLink>
           );
         })}
       </div>

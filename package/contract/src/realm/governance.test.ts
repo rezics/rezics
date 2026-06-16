@@ -58,6 +58,7 @@ describe("governance contract registry", () => {
     expect(Value.Check(policyActionSchema, "comment.moderate")).toBe(true);
     expect(Value.Check(policyActionSchema, "realm.rules.update")).toBe(true);
     expect(Value.Check(policyActionSchema, "realm.member.moderate")).toBe(true);
+    expect(Value.Check(policyActionSchema, "zone.manage")).toBe(true);
     expect(Value.Check(policyActionSchema, "tag.vote")).toBe(true);
     expect(Value.Check(policyActionSchema, "reaction.destroy")).toBe(false);
   });

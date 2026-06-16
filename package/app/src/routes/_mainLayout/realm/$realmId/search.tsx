@@ -1,8 +1,9 @@
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { FederatedSearchPage, isSearchCategory } from "@/search";
 import { parseSearchString } from "@/search";
+import { isRealmUnitIdParam } from "@/realm/models/realmDetailRoutes";
 
 type SearchRouteParams = {
   q?: string;
@@ -39,6 +40,9 @@ function RealmScopedSearchPage() {
 }
 
 export const Route = createFileRoute("/_mainLayout/realm/$realmId/search")({
+  loader: ({ params }) => {
+    if (!isRealmUnitIdParam(params.realmId)) throw notFound();
+  },
   validateSearch: (search: Record<string, unknown>): SearchRouteParams => ({
     q: typeof search.q === "string" ? search.q : undefined,
     category:

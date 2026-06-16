@@ -336,6 +336,196 @@ export const wikiZoneConfigSchema = t.Object(
 
 export type WikiZoneConfig = Static<typeof wikiZoneConfigSchema>;
 
+// ANCHOR: Zone Config
+// ANCHOR: 专区配置
+
+export const zoneConfigVersionSchema = t.Literal(1);
+export type ZoneConfigVersion = Static<typeof zoneConfigVersionSchema>;
+
+const zoneSectionBaseSchema = t.Object(
+  {
+    id: t.String(),
+    titleLabelUnitId: t.Optional(t.String()),
+    title: t.Optional(wikiZoneTranslatedLabelSchema),
+    filters: t.Optional(ZoneFiltersSchema),
+    limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+    emptyState: t.Optional(wikiZoneEmptyStatePolicySchema),
+  },
+  { additionalProperties: false },
+);
+
+export const zoneSectionSchema = t.Union([
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("latestContent"),
+      source: t.Optional(
+        t.Union([t.Literal("content"), t.Literal("post"), t.Literal("unit")]),
+      ),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("popularContent"),
+      metric: t.Optional(
+        t.Union([
+          t.Literal("views"),
+          t.Literal("bookmarks"),
+          t.Literal("rating"),
+          t.Literal("discussion"),
+        ]),
+      ),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("feed"),
+      feedKind: t.Optional(
+        t.Union([t.Literal("all"), t.Literal("updates"), t.Literal("reviews")]),
+      ),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("reviewStream"),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("shelfCarousel"),
+      shelfUnitIds: t.Optional(t.Array(t.String())),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("realmList"),
+      realmUnitIds: t.Optional(t.Array(t.String())),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("tagNavigation"),
+      tagUnitIds: t.Optional(t.Array(t.String())),
+      realmTagUnitIds: t.Optional(t.Array(t.String())),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("wikiCollection"),
+      wikiUnitIds: t.Optional(t.Array(t.String())),
+      wikiFilters: t.Optional(wikiZoneFiltersSchema),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("manualContent"),
+      body: t.Object(
+        {
+          kind: t.Literal("markdown"),
+          markdown: t.String(),
+        },
+        { additionalProperties: false },
+      ),
+    },
+    { additionalProperties: false },
+  ),
+  t.Object(
+    {
+      ...zoneSectionBaseSchema.properties,
+      kind: t.Literal("manualLinks"),
+      links: t.Array(wikiZoneNavigationItemSchema),
+    },
+    { additionalProperties: false },
+  ),
+]);
+
+export type ZoneSection = Static<typeof zoneSectionSchema>;
+
+export const zonePageSchema = t.Object(
+  {
+    titleLabelUnitId: t.Optional(t.String()),
+    title: t.Optional(wikiZoneTranslatedLabelSchema),
+    sections: t.Array(zoneSectionSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type ZonePage = Static<typeof zonePageSchema>;
+
+export const zonePagesSchema = t.Object(
+  {
+    home: zonePageSchema,
+    search: t.Optional(zonePageSchema),
+    feed: t.Optional(zonePageSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type ZonePages = Static<typeof zonePagesSchema>;
+
+export const zoneThemeSchema = t.Object(
+  {
+    tokens: t.Optional(
+      t.Object(
+        {
+          background: t.Optional(t.String()),
+          surface: t.Optional(t.String()),
+          text: t.Optional(t.String()),
+          mutedText: t.Optional(t.String()),
+          accent: t.Optional(t.String()),
+          accentText: t.Optional(t.String()),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+    images: t.Optional(
+      t.Object(
+        {
+          logoUnitId: t.Optional(t.String()),
+          bannerUnitId: t.Optional(t.String()),
+          backgroundUnitId: t.Optional(t.String()),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+    layout: t.Optional(
+      t.Object(
+        {
+          contentWidth: t.Optional(
+            t.Union([t.Literal("normal"), t.Literal("wide")]),
+          ),
+          navPosition: t.Optional(
+            t.Union([t.Literal("side"), t.Literal("top")]),
+          ),
+          density: t.Optional(
+            t.Union([t.Literal("compact"), t.Literal("comfortable")]),
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneTheme = Static<typeof zoneThemeSchema>;
+
 export const wikiZoneHomepageEntityItemSchema = t.Object({
   kind: t.Literal("entity"),
   entityUnitId: t.String(),
@@ -396,10 +586,16 @@ export type WikiZoneHomepageData = Static<typeof wikiZoneHomepageDataSchema>;
 
 export const ZoneDTOSchema = t.Object({
   unitId: t.String(),
+  ownerRealmUnitId: t.String(),
   slug: t.String(),
   name: t.String(),
   description: t.Optional(t.Union([t.String(), t.Null()])),
   filters: ZoneFiltersSchema,
+  configVersion: zoneConfigVersionSchema,
+  pages: t.Optional(t.Union([zonePagesSchema, t.Null()])),
+  sections: t.Optional(t.Union([t.Array(zoneSectionSchema), t.Null()])),
+  theme: t.Optional(t.Union([zoneThemeSchema, t.Null()])),
+  primaryRealmUnitId: t.Optional(t.Union([t.String(), t.Null()])),
   template: t.String(),
   styling: t.Optional(t.Union([t.Object({}), t.Null()])),
   wiki: t.Optional(t.Union([wikiZoneConfigSchema, t.Null()])),

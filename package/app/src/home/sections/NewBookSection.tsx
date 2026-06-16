@@ -1,14 +1,15 @@
 import { useTranslation } from "@rezics/i18n/react";
-import { Button, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
+import { buttonVariants, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import React from "react";
 import { HorizontalBookCarousel } from "@/book-library";
+import { AppSafeLink } from "@/shared/ui/link";
 import {
   getBookAuthorName,
   getBookCoverUrl,
   getBookDescription,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import { officialZoneHref } from "@/zone";
 import { useHomeBooks } from "./hooks/hooks";
 
 type TabKey = "latest" | "new" | "completed";
@@ -24,7 +25,6 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
 }) => {
   const { t } = useTranslation(["page"]);
   const [tab, setTab] = React.useState<TabKey>("latest");
-  const navigate = useNavigate();
 
   const { items = [], isLoading } = useHomeBooks(limit);
 
@@ -45,9 +45,12 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
         <h2 className="font-semibold">
           {t("page:home_sections_new_book_title")}
         </h2>
-        <Button variant="ghost" onClick={() => navigate({ to: "/book" })}>
+        <AppSafeLink
+          href={officialZoneHref("book")}
+          className={buttonVariants({ variant: "ghost" })}
+        >
           {t("page:home_sections_new_book_more")}
-        </Button>
+        </AppSafeLink>
       </div>
 
       <div className="mb-4 max-w-full overflow-hidden">

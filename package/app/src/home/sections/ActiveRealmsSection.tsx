@@ -4,11 +4,12 @@ import { Spinner } from "@rezics/ui";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { buttonVariants } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core";
 import { RealmCard } from "@/realm";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { AppSafeLink } from "@/shared/ui/link";
+import { officialZoneHref } from "@/zone";
 
 export const ActiveRealmsSection: React.FC = () => {
   const { t } = useTranslation(["page"]);
@@ -37,9 +38,12 @@ export const ActiveRealmsSection: React.FC = () => {
         <h2 className="font-semibold">
           {t("page:home_sections_active_realms_title")}
         </h2>
-        <Link to="/realm" className={buttonVariants({ variant: "ghost" })}>
+        <AppSafeLink
+          href={officialZoneHref("realms")}
+          className={buttonVariants({ variant: "ghost" })}
+        >
           {t("page:home_sections_active_realms_more")}
-        </Link>
+        </AppSafeLink>
       </div>
       {isLoading ? (
         <Spinner size="sm" />

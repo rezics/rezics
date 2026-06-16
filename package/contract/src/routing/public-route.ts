@@ -273,6 +273,12 @@ export function isPublicEntitySlugRouteParams(
   return Value.Check(publicEntitySlugRouteParamsSchema, value);
 }
 
+export function isPublicRealmIdRouteParams(
+  value: unknown,
+): value is PublicRealmIdRouteParams {
+  return Value.Check(publicRealmIdRouteParamsSchema, value);
+}
+
 export function isPublicUserShelfSlugRouteParams(
   value: unknown,
 ): value is PublicUserShelfSlugRouteParams {

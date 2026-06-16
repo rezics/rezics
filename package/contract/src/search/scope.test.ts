@@ -23,6 +23,15 @@ describe("SearchScopeSchema", () => {
       }),
     ).toBe(true);
   });
+
+  test("accepts zone scopes with the concrete zone Unit id", () => {
+    expect(
+      Value.Check(SearchScopeSchema, {
+        kind: "zone",
+        zoneUnitId: "zone-1",
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("SearchCategorySchema", () => {

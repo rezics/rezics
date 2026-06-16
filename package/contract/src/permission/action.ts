@@ -28,6 +28,7 @@ export const policyActionKeys = [
   "realm.member.capability.change",
   "realm.member.moderate",
   "realm.report.escalate",
+  "zone.manage",
   "dm.send",
   "reaction.create",
   "tag.vote",
