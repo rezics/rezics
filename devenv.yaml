@@ -4,5 +4,8 @@ inputs:
     url: github:cachix/devenv-nixpkgs/rolling
   hashicorp:
     url: github:nmnmcc/HashiCorpNix
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
 nixpkgs:
   allowUnfree: true

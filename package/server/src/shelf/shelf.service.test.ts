@@ -1,9 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
-  Post,
   Shelf,
   ShelfItem,
   Unit,
+  UnitSupportLanguage,
   UnitTag,
   UnitTranslation,
   User,
@@ -33,6 +33,9 @@ mock.module("@/unit/publication-policy", () => ({
     typeof value === "string" ? value : null,
   resolveStoredLicenseSlug: (value: unknown) =>
     typeof value === "string" ? value : null,
+}));
+mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageInput: (input: unknown) => input ?? {},
 }));
 mock.module("@/unit/variant-context", () => ({
   hydrateVariantContextSummaries: async (rows: unknown) => rows,
@@ -346,6 +349,16 @@ function createFakeDrizzleDb(oldTx?: any): any {
             return unit?.translations ?? [];
           }
 
+          if (table === UnitSupportLanguage) {
+            const unitId =
+              values.find(
+                (value): value is string => typeof value === "string",
+              ) ?? "shelf-1";
+            const unit =
+              lastUnitRows.get(unitId) ?? lastShelfRows.get(unitId)?.unit;
+            return unit?.supportLanguages ?? [];
+          }
+
           if (table === UnitTag) {
             const select = selection?.score
               ? { tagUnitId: true, score: true }
@@ -467,6 +480,12 @@ function createFakeDrizzleDb(oldTx?: any): any {
           }
           if (table === UnitTranslation) {
             await legacy.unitTranslation?.createMany?.({ data });
+          }
+          if (table === UnitSupportLanguage) {
+            await legacy.unitSupportLanguage?.createMany?.({
+              data: Array.isArray(data) ? data : [data],
+              skipDuplicates: true,
+            });
           }
           if (table === UnitTag) {
             const rows = Array.isArray(data) ? data : [data];
@@ -1373,10 +1392,30 @@ describe("ShelfService", () => {
   });
 
   test("create persists tagIds as pinned UnitTag rows", async () => {
-    const captured: { unitTagsCreate?: any[] } = {};
+    const captured: {
+      unitCreate?: any;
+      unitTagsCreate?: any[];
+      translationsCreate?: any[];
+      supportLanguagesCreate?: any[];
+    } = {};
     Object.assign(legacyDbMock, {
       unit: {
-        create: async () => ({ id: "shelf-new" }),
+        create: async ({ data }: any) => {
+          captured.unitCreate = data;
+          return { id: "shelf-new" };
+        },
+      },
+      unitTranslation: {
+        createMany: async ({ data }: any) => {
+          captured.translationsCreate = data;
+          return { count: data.length };
+        },
+      },
+      unitSupportLanguage: {
+        createMany: async ({ data }: any) => {
+          captured.supportLanguagesCreate = data;
+          return { count: data.length };
+        },
       },
       unitTag: {
         createMany: async ({ data }: any) => {
@@ -1417,6 +1456,23 @@ describe("ShelfService", () => {
     expect(captured.unitTagsCreate).toHaveLength(2);
     expect(captured.unitTagsCreate![0]!.pinned).toBe(true);
     expect(captured.unitTagsCreate![1]!.pinned).toBe(true);
+    expect(captured.unitCreate.defaultLanguage).toBe("en");
+    expect(captured.translationsCreate).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          unitId: "shelf-new",
+          language: "en",
+          title: "My Shelf",
+        }),
+      ]),
+    );
+    expect(captured.supportLanguagesCreate).toEqual([
+      expect.objectContaining({
+        unitId: "shelf-new",
+        language: "en",
+        isPrimary: true,
+      }),
+    ]);
   });
 
   test("create rejects non-seed tagIds", async () => {

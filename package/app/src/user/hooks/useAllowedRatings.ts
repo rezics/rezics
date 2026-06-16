@@ -9,8 +9,8 @@ const BASELINE: ContentRating[] = ["GENERAL", "R_15"];
 /**
  * Single source of truth for a caller's allowed ratings.
  *
- * Rule: `{GENERAL, R_15} ∪ user.settings.content.optedInRatings` when
- * authenticated; baseline only when not.
+ * Rule: `{GENERAL, R_15} ∪ settings API content opt-ins` when authenticated;
+ * baseline only when not.
  */
 export function useAllowedRatings(): {
   allowed: ContentRating[];

@@ -251,23 +251,20 @@ describe("Unit list filters", () => {
     expect(Value.Check(unitListBodySchema, filters)).toBe(true);
   });
 
-  test("accepts ordered read candidates and language visibility mode", () => {
+  test("accepts ordered read candidates without a visibility mode", () => {
     expect(
       Value.Check(unitListQuerySchema, {
         languages: "ja,en",
         appLocale: "zh-hant",
-        languageMode: "preferred",
       }),
     ).toBe(true);
     expect(
       Value.Check(unitListBodySchema, {
         languages: ["ja", "en"],
         appLocale: "zh-hant",
-        languageMode: "all",
       }),
     ).toBe(true);
-    expect(
-      Value.Check(unitListQuerySchema, { languageMode: "only-mine" }),
-    ).toBe(false);
+    expect("languageMode" in unitListQuerySchema.properties).toBe(false);
+    expect("languageMode" in unitListBodySchema.properties).toBe(false);
   });
 });

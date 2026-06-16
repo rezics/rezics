@@ -18,11 +18,10 @@ export interface BookshelfItem {
   href: string;
   /**
    * Per-book chapter-completion counter, sourced from a server-aggregated DTO
-   * (e.g. `ContinueReadingItem`). Present only when the book has
-   * countable chapters and the viewer has progress; absent otherwise so cards
-   * omit the counter rather than render "0/0".
-   * 单本书的章节完成计数，来自服务端聚合的 DTO
-   * （例如 `ContinueReadingItem`）。仅当书籍有可计数的章节
+   * progress data. Present only when the book has countable chapters and the
+   * viewer has progress; absent otherwise so cards omit the counter rather
+   * than render "0/0".
+   * 单本书的章节完成计数，来自服务端聚合的进度数据。仅当书籍有可计数的章节
    * 且查看者有进度时才存在；否则缺失，使卡片省略该计数而非渲染 "0/0"。
    */
   chaptersCompleted?: number;

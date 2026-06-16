@@ -1,8 +1,13 @@
 import { t } from "elysia";
-import { contentDocWriteSchema } from "../content/doc-v1";
+import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
-import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import {
+  listGetQueryBase,
+  listPostBodyBase,
+  readLanguageBodyBase,
+  readLanguageGetQueryBase,
+} from "../list-query-base";
 import { mediaUrlSchema } from "../media-url";
 import { paginationLimitSchema } from "../pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "../unit/unit";
@@ -137,6 +142,10 @@ export const shelfDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  defaultLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
+  title: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocSchema)),
   coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(shelfExtraSchema)),
   rootItemCount: t.Optional(t.Number()),
@@ -159,6 +168,8 @@ export const shelfSummaryDTOSchema = t.Object({
   unitId: t.String(),
   slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
+  defaultLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   coverUrl: t.Optional(t.Nullable(t.String())),
   title: t.Optional(t.Nullable(t.String())),
   itemCount: t.Number(),
@@ -200,58 +211,40 @@ export type ShelfDetailDTO = (typeof shelfDetailDTOSchema)["static"];
 // ============================================================
 
 const shelfListCommonProperties = {
+  userId: t.Optional(t.String()),
+  q: t.Optional(t.String()),
+  tagIds: t.Optional(t.Array(t.String())),
+  containsUnitId: t.Optional(t.String()),
+  variantUnitId: t.Optional(t.String()),
+  sort: t.Optional(
+    t.Object({
+      field: t.Optional(t.String()),
+      order: t.Optional(t.String()),
+    }),
+  ),
+  start: t.Optional(t.Number()),
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+    }),
+  ),
+  limit: paginationLimitSchema,
+};
+
+export const shelfListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
-  userId: t.Optional(t.String()),
-  q: t.Optional(t.String()),
-  tagIds: t.Optional(t.Array(t.String())),
-  containsUnitId: t.Optional(t.String()),
-  variantUnitId: t.Optional(t.String()),
-  language: t.Optional(contentLanguageSchema),
-  sort: t.Optional(
-    t.Object({
-      field: t.Optional(t.String()),
-      order: t.Optional(t.String()),
-    }),
-  ),
-  start: t.Optional(t.Number()),
-  cursor: t.Optional(
-    t.Object({
-      unitId: t.Optional(t.String()),
-      createdAt: t.Optional(t.String()),
-    }),
-  ),
-  limit: paginationLimitSchema,
-};
-
-const shelfListBodyCommonProperties = {
-  ...listPostBodyBase.properties,
-  userId: t.Optional(t.String()),
-  q: t.Optional(t.String()),
-  tagIds: t.Optional(t.Array(t.String())),
-  containsUnitId: t.Optional(t.String()),
-  variantUnitId: t.Optional(t.String()),
-  language: t.Optional(contentLanguageSchema),
-  sort: t.Optional(
-    t.Object({
-      field: t.Optional(t.String()),
-      order: t.Optional(t.String()),
-    }),
-  ),
-  start: t.Optional(t.Number()),
-  cursor: t.Optional(
-    t.Object({
-      unitId: t.Optional(t.String()),
-      createdAt: t.Optional(t.String()),
-    }),
-  ),
-  limit: paginationLimitSchema,
-};
-
-export const shelfListQuerySchema = t.Object(shelfListCommonProperties);
+  ...readLanguageGetQueryBase.properties,
+  ...shelfListCommonProperties,
+});
 
 export type ShelfListQuery = (typeof shelfListQuerySchema)["static"];
 
-export const shelfListBodySchema = t.Object(shelfListBodyCommonProperties);
+export const shelfListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  ...readLanguageBodyBase.properties,
+  ...shelfListCommonProperties,
+});
 
 export type ShelfListBody = (typeof shelfListBodySchema)["static"];
 
@@ -304,9 +297,6 @@ export const createShelfSchema = t.Object({
 export type CreateShelfInput = (typeof createShelfSchema)["static"];
 
 export const updateShelfSchema = t.Object({
-  title: t.Optional(t.String()),
-  kindKey: t.Optional(t.Nullable(t.String())),
-  coverUrl: t.Optional(t.Nullable(mediaUrlSchema)),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),

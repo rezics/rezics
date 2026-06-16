@@ -56,9 +56,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MoveHandler, NodeRendererProps, TreeApi } from "react-arborist";
 import { Tree } from "react-arborist";
 import { toast } from "sonner";
-import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import {
   clearTreeEditOpLog,
@@ -205,10 +205,16 @@ export function FeaturedZonePicker({
 }) {
   const [zoneId, setZoneId] = useState(value ?? "");
   const [error, setError] = useState<string | null>(null);
+  const readContext = useReadLanguageContext();
   const trimmedZoneId = zoneId.trim();
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
-  const zoneQuery = useQuery(zonePortalQueryOptions(trimmedZoneId, "home"));
+  const zoneQuery = useQuery(
+    zonePortalQueryOptions(trimmedZoneId, "home", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+  );
   const zone = zoneQuery.data?.zone;
 
   useEffect(() => {
@@ -330,12 +336,14 @@ export function WikiSidebarPicker({
     ...unitDetailQuery(trimmedPostUnitId, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: readContext.ready && kind === "post" && Boolean(trimmedPostUnitId),
   });
   const zoneQuery = useQuery({
-    ...zonePortalQueryOptions(trimmedZoneUnitId, "home", readContext.languages),
+    ...zonePortalQueryOptions(trimmedZoneUnitId, "home", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled:
       readContext.ready && kind === "zoneNav" && Boolean(trimmedZoneUnitId),
   });
@@ -602,7 +610,6 @@ export function TagTreeEditor({
       type: "LABEL",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(searchTerm),
@@ -612,7 +619,6 @@ export function TagTreeEditor({
       type: "TAG",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(searchTerm),
@@ -1485,7 +1491,6 @@ export function SlotPicker({
       type: "POST",
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(searchTerm),

@@ -2,63 +2,6 @@ import { define } from "gunshi";
 import { runServiceCommand } from "./commands";
 
 export const serviceSubCommands = {
-  up: define({
-    name: "up",
-    description: "Start repo-managed external services.",
-    run: () => runServiceCommand({ kind: "up" }),
-  }),
-  down: define({
-    name: "down",
-    description: "Stop repo-managed external services.",
-    run: () => runServiceCommand({ kind: "down" }),
-  }),
-  logs: define({
-    name: "logs",
-    description: "Show or follow managed service logs.",
-    args: {
-      service: {
-        type: "positional",
-        multiple: true,
-        description: "Optional Compose service names.",
-      },
-      tail: {
-        type: "number",
-        description: "Print this many recent log lines and exit.",
-      },
-    },
-    run: (ctx) =>
-      runServiceCommand({
-        kind: "logs",
-        services: (ctx.values.service ?? []) as string[],
-        tail: ctx.values.tail as number | undefined,
-      }),
-  }),
-  ps: define({
-    name: "ps",
-    description: "Show managed service containers.",
-    run: () => runServiceCommand({ kind: "ps" }),
-  }),
-  health: define({
-    name: "health",
-    description: "Check managed service health.",
-    run: () => runServiceCommand({ kind: "health" }),
-  }),
-  config: define({
-    name: "config",
-    description: "Inspect or apply managed service configuration.",
-    subCommands: {
-      plan: define({
-        name: "plan",
-        description: "Render the Docker Compose plan.",
-        run: () => runServiceCommand({ kind: "config-plan" }),
-      }),
-      apply: define({
-        name: "apply",
-        description: "Recreate Sequin so its config file is applied.",
-        run: () => runServiceCommand({ kind: "config-apply" }),
-      }),
-    },
-  }),
   cdc: define({
     name: "cdc",
     description: "Verify or repair every Sequin CDC source.",
@@ -128,7 +71,7 @@ export const serviceSubCommands = {
       recover: define({
         name: "recover",
         description:
-          "Recover local Sequin CDC end-to-end by stopping Sequin, repairing source objects, restarting, and verifying.",
+          "Recover local Sequin CDC end-to-end by repairing source objects, restarting Sequin via Nomad, and verifying.",
         args: {
           source: {
             type: "string",
@@ -218,7 +161,6 @@ export const serviceSubCommands = {
 
 export const serviceCommand = define({
   name: "service",
-  description:
-    "Start, stop, inspect, and repair repo-managed development services.",
+  description: "Verify and repair Sequin CDC source databases.",
   subCommands: serviceSubCommands,
 });

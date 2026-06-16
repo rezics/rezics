@@ -66,7 +66,6 @@ export const User = pgTable(
     permission: jsonData(),
     followersCount: integer().default(0).notNull(),
     followingsCount: integer().default(0).notNull(),
-    settings: jsonData(),
     extra: jsonData(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

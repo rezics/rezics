@@ -1,61 +1,30 @@
 import { spawnSync } from "node:child_process";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { createToolConfig } from "../../env";
 import { renderCreateDatabaseSql } from "../../env/repo-database-registry";
-import { DOCKER_COMPOSE_COMMAND } from "../service/runtime";
-
-const TOOL_DIR = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../..",
-);
-const SERVICE_DIR = path.join(TOOL_DIR, "service");
 
 export function ensureLocalDatabases() {
   const config = createToolConfig();
-  // Managed startup may create empty databases for convenience; Drizzle migrations remain the schema authority.
-  // 托管启动可能会为方便起见创建空数据库；Drizzle 迁移仍是 schema 的权威来源。
+  // Nomad dev maps postgres to loopback; connect directly via psql.
+  // Nomad 开发环境将 postgres 映射到 loopback；直接通过 psql 连接。
   const sql = renderCreateDatabaseSql(config.managedDatabaseNames);
-  const args = [
-    ...DOCKER_COMPOSE_COMMAND,
-    "-p",
-    config.services.composeProjectName,
-    "-f",
-    "compose.yml",
-    "exec",
-    "-T",
-    "source-postgres",
+  const { host, port, user, password } = config.postgres;
+
+  const result = spawnSync(
     "psql",
-    "-v",
-    "ON_ERROR_STOP=1",
-    "-U",
-    config.sourceVerifyEnv.SOURCE_DB_USER,
-    "-d",
-    "postgres",
-  ];
-
-  const [command, ...commandArgs] = args;
-  if (!command) {
-    throw new Error("Docker Compose command is empty.");
-  }
-
-  const result = spawnSync(command, commandArgs, {
-    cwd: SERVICE_DIR,
-    env: {
-      ...process.env,
-      ...config.composeEnv,
-      PGPASSWORD: config.sourceVerifyEnv.SOURCE_DB_PASSWORD,
+    ["-v", "ON_ERROR_STOP=1", "-h", host, "-p", port, "-U", user, "-d", "postgres"],
+    {
+      env: { ...process.env, PGPASSWORD: password },
+      input: sql,
+      stdio: ["pipe", "inherit", "inherit"],
     },
-    input: sql,
-    stdio: ["pipe", "inherit", "inherit"],
-  });
+  );
 
   if (result.error) {
     throw result.error;
   }
   if (result.status !== 0) {
     throw new Error(
-      `Command failed with exit code ${result.status ?? "unknown"}: ${args.join(" ")}`,
+      `psql failed with exit code ${result.status ?? "unknown"}`,
     );
   }
 }

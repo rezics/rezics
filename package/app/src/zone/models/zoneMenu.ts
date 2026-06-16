@@ -15,7 +15,6 @@ import {
   type ZoneRouteLocation,
   zoneDetailRoute,
   zoneRouteBaseHref,
-  zoneRouteLocationFromZone,
 } from "./zoneDetailRoutes";
 
 export {
@@ -179,7 +178,21 @@ export function zoneLinkFallbackKey(
   target: ZoneLinkTarget | undefined,
 ): string | null {
   if (target?.kind !== "zonePage") return null;
-  return `zone:page_${target.pageId}`;
+  return zonePageFallbackKey(target.pageId);
+}
+
+const ZONE_PAGE_FALLBACK_KEYS: Record<string, string> = {
+  home: "zone:page_home",
+  search: "zone:page_search",
+  feed: "zone:page_feed",
+};
+
+function zonePageFallbackKey(
+  pageId: ZonePageId,
+  pages: readonly ZonePageSummary[] = [],
+): string | null {
+  const page = pages.find((candidate) => candidate.id === pageId);
+  return ZONE_PAGE_FALLBACK_KEYS[page?.slug ?? pageId] ?? null;
 }
 
 export type ResolvedZoneMenuNode = {
@@ -208,7 +221,10 @@ export function resolveZoneMenuNodes(
   return nodes.map((node) => ({
     id: node.id,
     label: zoneLinkLabel(node, ctx.refUnits),
-    labelKey: zoneLinkFallbackKey(node.target),
+    labelKey:
+      node.target?.kind === "zonePage"
+        ? zonePageFallbackKey(node.target.pageId, ctx.pages)
+        : zoneLinkFallbackKey(node.target),
     href: node.target ? zoneLinkHref(node.target, ctx) : null,
     isExternal: node.target?.kind === "external",
     children: resolveZoneMenuNodes(node.children ?? [], ctx, depth + 1),
@@ -237,7 +253,7 @@ export function pickZoneMenu(
 const SECTION_TITLE_KEYS: Partial<Record<ZoneSectionKind, string>> = {
   query: "zone:section_title_query",
   collection: "zone:section_title_collection",
-  feed: "zone:section_title_feed",
+  stream: "zone:section_title_stream",
   richText: "zone:section_title_richText",
   stats: "zone:section_title_stats",
   sources: "zone:section_title_sources",

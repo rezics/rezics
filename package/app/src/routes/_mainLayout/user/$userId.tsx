@@ -1,4 +1,11 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { userDetailQuery } from "@rezics/api/user/user.queries";
+import type { UserDTO } from "@rezics/contract";
+import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
+import {
+  loaderDataByRouteId,
+  titleMeta,
+  titleOfUser,
+} from "@/core/routing/documentTitle";
 
 /**
  * Id-based user-space fallback root, not the profile surface.
@@ -12,5 +19,25 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
  * either render the public home here or keep replace-redirecting to `/profile`.
  */
 export const Route = createFileRoute("/_mainLayout/user/$userId")({
+  loader: async ({ params, context }) => {
+    return context.qc
+      .ensureQueryData(userDetailQuery(params.userId))
+      .catch(() => {
+        throw notFound();
+      });
+  },
+  head: ({ loaderData }) =>
+    titleMeta(loaderData ? titleOfUser(loaderData) : null),
   component: Outlet,
 });
+
+export type UserIdRouteLoaderData = UserDTO;
+
+export function userIdRouteLoaderData(
+  matches: readonly { routeId: string; loaderData?: unknown }[],
+) {
+  return loaderDataByRouteId<UserIdRouteLoaderData>(
+    matches,
+    "/_mainLayout/user/$userId",
+  );
+}

@@ -74,23 +74,14 @@ describe("buildContentFilter", () => {
     expect(filter).toContain('rating IN ["GENERAL", "R_15"]');
   });
 
-  test("languages list emits any-of filter", () => {
+  test("read-language candidates do not filter content visibility", () => {
     const filter = buildContentFilter(
       { languages: ["en", "ja"] },
       { kind: "global" },
     );
-    expect(filter).toContain(
-      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
-    );
+    expect(filter).toEqual(['visibility = "PUBLIC"']);
     expect(filter).not.toContain('languages = "en"');
     expect(filter).not.toContain('languages = "ja"');
-  });
-
-  test("languageMode all skips preferred filtering", () => {
-    const filter = buildContentFilter(
-      { languages: ["en"], languageMode: "all" },
-      { kind: "global" },
-    );
     expect(filter).not.toContain(
       '(isLanguageNeutral = true OR languages IN ["en"])',
     );
@@ -179,14 +170,12 @@ describe("buildPostFilter", () => {
     expect(filter).toContain("isLocked = false");
   });
 
-  test("preferred language filter includes neutral posts", () => {
+  test("read-language candidates do not filter posts", () => {
     const filter = buildPostFilter(
       { languages: ["ja"], appLocale: "en" },
       { kind: "global" },
     );
-    expect(filter).toContain(
-      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
-    );
+    expect(filter).toEqual(["isLocked = false"]);
   });
 
   test("query.postKind list emits IN clause when no postCategory hint", () => {
@@ -233,9 +222,9 @@ describe("buildRealmFilter", () => {
     ]);
   });
 
-  test("preferred language filter includes neutral realms", () => {
+  test("read-language candidates do not filter realms", () => {
     expect(buildRealmFilter({ languages: ["ko"] }, { kind: "global" })).toEqual(
-      ["isPublic = true", '(isLanguageNeutral = true OR languages IN ["ko"])'],
+      ["isPublic = true"],
     );
   });
 });
@@ -313,7 +302,7 @@ describe("buildShelfItemFilter", () => {
 });
 
 describe("compileZoneSectionQuery", () => {
-  test("compiles a unit query with context realm and viewer languages", () => {
+  test("compiles a unit query with context realm and viewer languages for display only", () => {
     const compiled = compileZoneSectionQuery(
       {
         target: "unit",
@@ -325,15 +314,30 @@ describe("compileZoneSectionQuery", () => {
       undefined,
       {
         contextRealmUnitId: "realm-1",
-        viewerLanguageCandidates: ["zh-hant", "en"],
       },
     );
     expect(compiled.index).toBe("content");
     expect(compiled.filter).toContain('type = "BOOK"');
     expect(compiled.filter).toContain('realmIds = "realm-1"');
-    expect(compiled.filter).toContain(
-      '(isLanguageNeutral = true OR languages IN ["zh-hant", "en"])',
-    );
+    expect(
+      compiled.filter.some((clause) => clause.includes("languages IN")),
+    ).toBe(false);
+    expect(
+      compiled.filter.some((clause) => clause.includes("isLanguageNeutral")),
+    ).toBe(false);
+    // Viewer language is a display preference; explicit arrays remain filters.
+    // viewer 语言是展示偏好；显式配置的数组才是过滤条件。
+    expect(
+      compileZoneSectionQuery(
+        {
+          target: "unit",
+          languages: ["zh-hant", "en"],
+          sort: { field: "publishedAt", direction: "desc" },
+        },
+        undefined,
+        {},
+      ).filter,
+    ).toContain('(isLanguageNeutral = true OR languages IN ["zh-hant", "en"])');
     // UNLISTED units never reach the index; PUBLIC documents the boundary
     expect(compiled.filter).toContain('visibility = "PUBLIC"');
     expect(compiled.sort).toEqual(["publishedAt:desc"]);
@@ -365,14 +369,26 @@ describe("compileZoneSectionQuery", () => {
         sort: { field: "memberCount", direction: "desc" },
       },
       { types: ["REALM"] },
-      { viewerLanguageCandidates: ["en", "ja"] },
+      {},
     );
 
     expect(compiled.index).toBe("realms");
     expect(compiled.filter).toContain("isPublic = true");
-    expect(compiled.filter).toContain(
-      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
-    );
+    expect(
+      compiled.filter.some((clause) => clause.includes("languages IN")),
+    ).toBe(false);
+    expect(
+      compileZoneSectionQuery(
+        {
+          target: "realm",
+          types: ["REALM"],
+          languages: ["en", "ja"],
+          sort: { field: "memberCount", direction: "desc" },
+        },
+        { types: ["REALM"] },
+        {},
+      ).filter,
+    ).toContain('(isLanguageNeutral = true OR languages IN ["en", "ja"])');
     expect(compiled.filter.some((clause) => clause.startsWith("type"))).toBe(
       false,
     );
@@ -411,17 +427,45 @@ describe("compileZoneSectionQuery", () => {
       { types: ["ZONE"] },
       {
         contextRealmUnitId: "realm-1",
-        viewerLanguageCandidates: ["zh-hant"],
       },
     );
 
     expect(compiled.index).toBe("zones");
     expect(compiled.filter).toContain('ownerRealmUnitId = "realm-1"');
     expect(compiled.filter).toContain('visibility = "PUBLIC"');
-    expect(compiled.filter).toContain(
-      '(isLanguageNeutral = true OR languages IN ["zh-hant"])',
-    );
+    expect(
+      compiled.filter.some((clause) => clause.includes("languages IN")),
+    ).toBe(false);
+    expect(
+      compileZoneSectionQuery(
+        {
+          target: "zone",
+          types: ["ZONE"],
+          languages: ["zh-hant"],
+          sort: { field: "updatedAt", direction: "desc" },
+        },
+        { types: ["ZONE"] },
+        {},
+      ).filter,
+    ).toContain('(isLanguageNeutral = true OR languages IN ["zh-hant"])');
     expect(compiled.sort).toEqual(["updatedAt:desc"]);
+  });
+
+  test("viewer languages never filter zone sections", () => {
+    const compiled = compileZoneSectionQuery(
+      {
+        target: "zone",
+        types: ["ZONE"],
+        languages: "viewer",
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+      undefined,
+      {},
+    );
+
+    expect(
+      compiled.filter.some((clause) => clause.includes("languages IN")),
+    ).toBe(false);
   });
 
   test("zone queries cannot widen an incompatible zone boundary", () => {

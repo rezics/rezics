@@ -24,8 +24,10 @@ list everything.
 
 ```bash
 task                     # list every task (task --list)
-task dev                 # start all dev processes (zellij)
-task devenv:up           # start all dev processes (devenv process-compose)
+task dev                 # start full dev environment (Nomad: infra + app)
+task dev:stop            # stop all services
+task dev:status          # show service status
+task dev:logs -- server  # follow logs for a specific task
 task app:dev             # frontend app, Vite
 task server:dev          # main Elysia API
 task auth:dev            # auth service
@@ -61,12 +63,8 @@ task ui:storybook        # UI Storybook, port 6007
 
 ## Workflows
 
-- For multi-file, architectural, or ambiguous work, explore first and present a
-  plan before editing.
-- Planning is code-first: capture context, durable constraints, and a task
-  checklist in `plan/proposal/<change>.md` via `/rezics-propose`, then implement
-  with `/rezics-apply`, routing each durable item into code (types/tests/comments)
-  and letting the plan file become disposable. No spec corpus.
+- For ambiguous, architectural, or high-blast-radius work, clarify the intended
+  outcome and editing scope before changing files.
 - In this development-stage project, internal renames are clear cutovers: update
   all internal callsites in the same change unless a plan explicitly says
   otherwise.

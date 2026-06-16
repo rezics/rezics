@@ -26,6 +26,7 @@ export type ZonePortalContext = {
   pageId: string;
   refUnits: ZoneRefUnitMap;
   languages: Language[];
+  appLocale: Language;
   dynamicTagSelections?: ZoneDynamicTagSelectionMap;
 };
 
@@ -49,8 +50,8 @@ export function useZoneSectionTitle(
       return t("zone:section_title_query");
     case "zone:section_title_collection":
       return t("zone:section_title_collection");
-    case "zone:section_title_feed":
-      return t("zone:section_title_feed");
+    case "zone:section_title_stream":
+      return t("zone:section_title_stream");
     case "zone:section_title_richText":
       return t("zone:section_title_richText");
     case "zone:section_title_stats":

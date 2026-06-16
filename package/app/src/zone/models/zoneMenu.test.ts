@@ -231,6 +231,18 @@ describe("resolveZoneMenuNodes", () => {
     ]);
   });
 
+  it("uses page slugs rather than opaque page ids for built-in page labels", () => {
+    const resolved = resolveZoneMenuNodes(
+      [{ id: "home-node", target: { kind: "zonePage", pageId: "page-home" } }],
+      {
+        ...ctx,
+        pages: [{ id: "page-home", slug: "home", position: "a" }],
+      },
+    );
+
+    expect(resolved[0]?.labelKey).toBe("zone:page_home");
+  });
+
   it("clamps the tree at depth 3", () => {
     const nodes: ZoneMenuNode[] = [
       {
@@ -304,7 +316,7 @@ describe("section titles", () => {
     expect(zoneSectionTitleKey("collection")).toBe(
       "zone:section_title_collection",
     );
-    expect(zoneSectionTitleKey("feed")).toBe("zone:section_title_feed");
+    expect(zoneSectionTitleKey("stream")).toBe("zone:section_title_stream");
     expect(zoneSectionTitleKey("richText")).toBe("zone:section_title_richText");
     expect(zoneSectionTitleKey("stats")).toBe("zone:section_title_stats");
     expect(zoneSectionTitleKey("sources")).toBe("zone:section_title_sources");

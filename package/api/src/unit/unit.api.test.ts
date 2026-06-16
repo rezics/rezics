@@ -35,11 +35,10 @@ describe("unitApi language reads", () => {
     await unitApi.list({
       languages: ["zh-Hant", "ja", "en"],
       appLocale: "zh-hant",
-      languageMode: "preferred",
     });
 
     expect(calls[0]?.url).toBe(
-      "/unit/list?languages=zh-Hant%2Cja%2Cen&appLocale=zh-hant&languageMode=preferred",
+      "/unit/list?languages=zh-Hant%2Cja%2Cen&appLocale=zh-hant",
     );
   });
 });

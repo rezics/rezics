@@ -10,7 +10,6 @@ describe("realm membership mutation cache sync", () => {
     const languageMineKey = realmKeys.mine({
       languages: ["zh-hant", "en"],
       appLocale: "zh-hant",
-      languageMode: "preferred",
     });
     const membershipKey = realmKeys.members("realm-1");
     const detailKey = realmKeys.detail("realm-1");

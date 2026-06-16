@@ -67,7 +67,6 @@ export const ActiveRealmsSection: React.FC = () => {
       limit: 5,
       languages: readLanguage.languages,
       appLocale: readLanguage.appLocale,
-      languageMode: readLanguage.languageMode,
     }),
     enabled: readLanguage.ready,
   });

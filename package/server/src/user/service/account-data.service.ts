@@ -10,10 +10,18 @@ import {
   UnitTranslation,
   User,
   UserBlock,
+  UserContentRatingPreference,
+  UserNotificationPreference,
+  UserPreference,
+  UserPreferredLanguage,
+  UserPrivacyPreference,
+  UserRealmTagDisplayPreference,
+  UserSubscriptionListPreference,
   UserTagApplication,
 } from "../../db/schema";
 import { requireSlugScopeId } from "../../infra/slug-scopes";
 import { subscriptionService } from "../../subscription/subscription.service";
+import { getSettings } from "./settings.service";
 
 type ExportUserRow = {
   unitId: string;
@@ -22,7 +30,6 @@ type ExportUserRow = {
   summary: string | null;
   avatar: string | null;
   joinDate: Date | null;
-  settings: unknown;
 };
 
 type ExportPostRow = {
@@ -67,6 +74,7 @@ type ExportBlockRow = {
 export interface AccountDataRepository {
   getHandle(userId: string): Promise<string | null>;
   getExportUser(userId: string): Promise<ExportUserRow>;
+  getExportSettings(userId: string): Promise<unknown>;
   listExportPosts(userId: string): Promise<ExportPostRow[]>;
   listExportShelves(userId: string): Promise<ExportShelfRow[]>;
   listUserShelfItems(userId: string): Promise<ExportUserShelfItemRow[]>;
@@ -131,7 +139,6 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
           summary: User.summary,
           avatar: User.avatar,
           joinDate: User.joinDate,
-          settings: User.settings,
         })
         .from(User)
         .where(eq(User.unitId, userId))
@@ -140,6 +147,10 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
         throw new Error(`User not found: ${userId}`);
       }
       return user;
+    },
+
+    async getExportSettings(userId) {
+      return getSettings(userId);
     },
 
     async listExportPosts(userId) {
@@ -263,7 +274,6 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
             avatar: null,
             summary: null,
             description: null,
-            settings: null,
             authUserId: null,
             followersCount: 0,
             followingsCount: 0,
@@ -271,6 +281,27 @@ function createDrizzleAccountDataRepository(): AccountDataRepository {
             updatedAt: deletedAt,
           })
           .where(eq(User.unitId, userId));
+        await tx
+          .delete(UserPreference)
+          .where(eq(UserPreference.userId, userId));
+        await tx
+          .delete(UserPreferredLanguage)
+          .where(eq(UserPreferredLanguage.userId, userId));
+        await tx
+          .delete(UserContentRatingPreference)
+          .where(eq(UserContentRatingPreference.userId, userId));
+        await tx
+          .delete(UserSubscriptionListPreference)
+          .where(eq(UserSubscriptionListPreference.userId, userId));
+        await tx
+          .delete(UserNotificationPreference)
+          .where(eq(UserNotificationPreference.userId, userId));
+        await tx
+          .delete(UserPrivacyPreference)
+          .where(eq(UserPrivacyPreference.userId, userId));
+        await tx
+          .delete(UserRealmTagDisplayPreference)
+          .where(eq(UserRealmTagDisplayPreference.userId, userId));
         await tx
           .update(Unit)
           .set({
@@ -326,6 +357,7 @@ export async function exportUserData(
 ): Promise<UserDataExport> {
   const [
     user,
+    settings,
     handle,
     posts,
     shelves,
@@ -335,6 +367,7 @@ export async function exportUserData(
     blocks,
   ] = await Promise.all([
     repository.getExportUser(userId),
+    repository.getExportSettings(userId),
     getHandle(userId, repository),
     repository.listExportPosts(userId),
     repository.listExportShelves(userId),
@@ -355,7 +388,7 @@ export async function exportUserData(
       avatar: user.avatar,
       joinDate: user.joinDate ? user.joinDate.toISOString() : null,
     },
-    settings: user.settings ?? {},
+    settings,
     posts: posts.map((p) => ({
       unitId: p.unitId,
       kind: p.kind ?? "",

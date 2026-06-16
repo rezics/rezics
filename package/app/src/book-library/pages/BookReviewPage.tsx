@@ -143,14 +143,12 @@ export const BookReviewPage: React.FC = () => {
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
             languages: readContext.languages,
-            languageMode: readContext.languageMode,
           })
         : {
             targetUnitId: bookId,
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
             languages: readContext.languages,
-            languageMode: readContext.languageMode,
           },
     ),
     enabled: readContext.ready && Boolean(catalogContext?.pageUnitId ?? bookId),

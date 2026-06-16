@@ -37,11 +37,10 @@ describe("bookApi read language queries", () => {
     await bookApi.list({
       appLocale: "zh-hant",
       languages: ["en", "ja"],
-      languageMode: "preferred",
     });
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/book/list?appLocale=zh-hant&languages=en%2Cja&languageMode=preferred",
+      "http://api.example/book/list?appLocale=zh-hant&languages=en%2Cja",
     );
   });
 });

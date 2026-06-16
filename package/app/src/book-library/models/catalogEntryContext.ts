@@ -23,10 +23,7 @@ export function resolveCatalogEntryInteractionContext(
 
 export function postListFiltersForCatalogEntry(
   context: CatalogEntryInteractionContext,
-  filters: Pick<
-    PostListBody,
-    "kind" | "languageMode" | "languages" | "limit"
-  > = {},
+  filters: Pick<PostListBody, "kind" | "languages" | "limit"> = {},
 ) {
   return context.variantUnitId
     ? { variantUnitId: context.variantUnitId, ...filters }

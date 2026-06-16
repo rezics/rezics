@@ -9,14 +9,14 @@ import { EmptyState, Spinner } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core";
-import { FeedPostCard } from "@/feed";
+import { StreamPostCard } from "@/stream";
 import { PostBodyMarkdown } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { pickZoneMenu, ZoneNavTree } from "@/zone";
 import {
-  realmDetailBaseHref,
   type RealmDetailRouteLocation,
+  realmDetailBaseHref,
 } from "../models/realmDetailRoutes";
 
 interface RealmWikiTabProps {
@@ -37,7 +37,6 @@ export function RealmWikiTab({
       sort: { field: "updatedAt", order: "desc" },
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 24,
     }),
     enabled: readContext.ready && Boolean(realmId),
@@ -59,7 +58,7 @@ export function RealmWikiTab({
         ) : (
           <div>
             {posts.map((post) => (
-              <FeedPostCard key={post.unitId} post={post} />
+              <StreamPostCard key={post.unitId} post={post} />
             ))}
           </div>
         )}
@@ -175,7 +174,10 @@ function WikiZoneNavSidebar({
 }) {
   const readContext = useReadLanguageContext();
   const zoneQuery = useQuery({
-    ...zonePortalQueryOptions(zoneUnitId, "home", readContext.languages),
+    ...zonePortalQueryOptions(zoneUnitId, "home", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: readContext.ready && Boolean(zoneUnitId),
   });
   const data = zoneQuery.data;

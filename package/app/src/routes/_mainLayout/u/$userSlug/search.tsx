@@ -4,6 +4,12 @@ import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
+import {
+  titleLabel,
+  titleMeta,
+  titleOfUser,
+} from "@/core/routing/documentTitle";
+import { userSlugRouteLoaderData } from "@/routes/_mainLayout/u/$userSlug";
 import { FederatedSearchPage, isSearchCategory } from "@/search";
 import { parseSearchString } from "@/search";
 
@@ -58,5 +64,12 @@ export const Route = createFileRoute("/_mainLayout/u/$userSlug/search")({
         ? search.category
         : undefined,
   }),
+  head: ({ matches }) => {
+    const userData = userSlugRouteLoaderData(matches);
+    return titleMeta(
+      userData ? titleOfUser(userData) : null,
+      titleLabel("common:search"),
+    );
+  },
   component: UserSlugScopedSearchPage,
 });

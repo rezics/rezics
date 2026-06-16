@@ -184,7 +184,7 @@ Spec-assumption corrections surfaced by this inventory:
 
 ## Image Build Status
 
-Verified locally (`docker build` from repo root, after building `docker/base.Dockerfile`):
+Verified locally (`docker build` from repo root, after building `Dockerfile.base`):
 
 | Image | Builds | Boots (no real DB) | Notes |
 |---|---|---|---|

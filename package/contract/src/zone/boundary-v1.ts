@@ -26,7 +26,7 @@ export type ZoneContext = Static<typeof zoneContextSchema>;
 /**
  * The `ZoneSectionQuery` filter vocabulary minus `sort` and `target`. An
  * unremovable boundary intersected with every zone query section, zone search,
- * and zone feed; section queries and user filters only narrow within it.
+ * and zone streams; section queries and user filters only narrow within it.
  */
 export const zoneBoundaryFilterSchema = t.Object(
   {

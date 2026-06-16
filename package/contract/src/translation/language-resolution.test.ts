@@ -45,6 +45,16 @@ describe("language resolution helpers", () => {
     ).toBe("de");
   });
 
+  test("falls back to content language priority when preferences do not match", () => {
+    expect(
+      resolveReadLanguage({
+        preferredLanguages: ["zh-hans"],
+        languages: ["zh-hant"],
+        supportLanguages,
+      }),
+    ).toBe("en");
+  });
+
   test("app locale outranks preferred languages when both are supported", () => {
     expect(
       resolveReadLanguage({

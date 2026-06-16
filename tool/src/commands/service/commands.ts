@@ -1,27 +1,16 @@
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import {
-  assertSequinRuntimeEnv,
-  createToolConfig,
-  type ToolConfig,
-} from "../../env";
-import { runCommand, runCompose } from "./runtime";
+import { createToolConfig, type ToolConfig } from "../../env";
+import { runCommand } from "./runtime";
 
 const TOOL_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../..",
 );
 const REPO_ROOT = path.resolve(TOOL_DIR, "..");
-const SERVICE_DIR = path.join(TOOL_DIR, "service");
 
 export type ServiceCommand =
-  | { kind: "up" }
-  | { kind: "down" }
-  | { kind: "logs"; services: string[]; tail?: number }
-  | { kind: "ps" }
-  | { kind: "health" }
-  | { kind: "config-plan" }
-  | { kind: "config-apply" }
   | {
       kind: "cdc-verify";
       source?: "source" | "reaction";
@@ -46,10 +35,6 @@ export type ServiceCommand =
   | { kind: "source-verify"; url?: string }
   | { kind: "source-repair"; url?: string; forceActiveSlot?: boolean };
 
-function composeBaseArgs(config: ToolConfig) {
-  return ["-p", config.services.composeProjectName, "-f", "compose.yml"];
-}
-
 function processEnv(
   input: Record<string, string | undefined>,
 ): NodeJS.ProcessEnv {
@@ -58,40 +43,6 @@ function processEnv(
       Boolean(entry[1]),
     ),
   );
-}
-
-function printLikelyPortConflict(command: ServiceCommand["kind"]) {
-  if (command !== "up") {
-    return;
-  }
-
-  console.error(
-    [
-      "",
-      "If Docker reported that a port is already allocated, another process or container is likely using one of the managed defaults:",
-      "  - source PostgreSQL: 127.0.0.1:5432",
-      "  - Meilisearch:       127.0.0.1:7700",
-      "  - Sequin:            127.0.0.1:7376",
-      "Stop the conflicting service manually or override the published port in tool/.env.",
-      "This workflow does not stop or reconfigure user-managed services.",
-    ].join("\n"),
-  );
-}
-
-function runManagedCompose(
-  command: ServiceCommand["kind"],
-  args: string[],
-  config: ToolConfig,
-) {
-  try {
-    runCompose([...composeBaseArgs(config), ...args], {
-      cwd: SERVICE_DIR,
-      env: processEnv(config.composeEnv),
-    });
-  } catch (error) {
-    printLikelyPortConflict(command);
-    throw error;
-  }
 }
 
 async function fetchHealth(label: string, url: string) {
@@ -119,48 +70,29 @@ async function waitForHealth(label: string, url: string) {
     : new Error(`${label} health check timed out`);
 }
 
-function execHealth(
-  label: string,
-  service: string,
-  args: string[],
-  config: ToolConfig,
-) {
-  console.log(`check ${label}`);
-  runManagedCompose("health", ["exec", "-T", service, ...args], config);
+function findSequinAllocId(): string | undefined {
+  const result = spawnSync(
+    "nomad",
+    ["job", "allocs", "-json", "rezics-dev"],
+    { stdio: ["ignore", "pipe", "ignore"] },
+  );
+  if (result.status !== 0) return undefined;
+  try {
+    const allocs = JSON.parse(result.stdout.toString());
+    const alloc = allocs.find(
+      (a: { TaskGroup: string; ClientStatus: string }) =>
+        a.TaskGroup === "sequin" && a.ClientStatus === "running",
+    );
+    return alloc?.ID;
+  } catch {
+    return undefined;
+  }
 }
 
-async function checkHealth(config: ToolConfig) {
-  execHealth(
-    "source PostgreSQL",
-    "source-postgres",
-    ["pg_isready", "-U", "postgres", "-d", "rezics_server"],
-    config,
-  );
-  await fetchHealth("Meilisearch", config.services.meiliHealthUrl);
-  execHealth(
-    "Sequin state PostgreSQL",
-    "sequin-postgres",
-    ["pg_isready", "-U", "sequin", "-d", "sequin"],
-    config,
-  );
-  execHealth("Sequin Redis", "sequin-redis", ["redis-cli", "ping"], config);
-  await fetchHealth("Sequin", config.services.sequinHealthUrl);
-}
-
-function sourceScriptArgs(
-  command: Extract<ServiceCommand, { kind: "source-verify" | "source-repair" }>,
-) {
-  const args: string[] = [];
-  if (command.kind === "source-repair") {
-    args.push("--apply", "--dev-reset");
-  }
-  if (command.url) {
-    args.push(`--url=${command.url}`);
-  }
-  if (command.kind === "source-repair" && command.forceActiveSlot) {
-    args.push("--force-active-slot");
-  }
-  return args;
+function restartSequinTask(allocId: string) {
+  spawnSync("nomad", ["alloc", "restart", "-task", "sequin", allocId], {
+    stdio: "inherit",
+  });
 }
 
 function cdcScriptArgs(
@@ -207,34 +139,45 @@ async function runCdcRecover(
   command: Extract<ServiceCommand, { kind: "cdc-recover" }>,
   config: ToolConfig,
 ) {
-  assertSequinRuntimeEnv();
   const sources = command.source ? command.source : "all sources";
   console.log(
-    `Recovering Sequin CDC for ${sources}: stop Sequin, repair source objects, restart Sequin, verify.`,
+    `Recovering Sequin CDC for ${sources}: restart Sequin via Nomad, repair source objects, verify.`,
   );
+
+  const allocId = findSequinAllocId();
+  if (!allocId) {
+    throw new Error(
+      "No running Sequin allocation found. Ensure `task dev` is running.",
+    );
+  }
+
   try {
-    runManagedCompose("down", ["stop", "sequin"], config);
     runCdcScript({ ...command, kind: "cdc-repair" }, config);
-    runManagedCompose("config-apply", ["up", "-d", "sequin"], config);
+    console.log("Restarting Sequin via Nomad...");
+    restartSequinTask(allocId);
     await waitForHealth("Sequin", config.services.sequinHealthUrl);
     runCdcScript({ ...command, kind: "cdc-verify" }, config);
   } catch (error) {
-    const tail = command.logTail ?? 200;
     console.error("");
-    console.error(
-      `CDC recovery failed. Recent Sequin logs (tail ${tail}) follow:`,
-    );
-    try {
-      runManagedCompose(
-        "logs",
-        ["logs", "--tail", String(tail), "sequin"],
-        config,
-      );
-    } catch {
-      // Preserve the original recovery failure.
-    }
+    console.error("CDC recovery failed.");
     throw error;
   }
+}
+
+function sourceScriptArgs(
+  command: Extract<ServiceCommand, { kind: "source-verify" | "source-repair" }>,
+) {
+  const args: string[] = [];
+  if (command.kind === "source-repair") {
+    args.push("--apply", "--dev-reset");
+  }
+  if (command.url) {
+    args.push(`--url=${command.url}`);
+  }
+  if (command.kind === "source-repair" && command.forceActiveSlot) {
+    args.push("--force-active-slot");
+  }
+  return args;
 }
 
 function runSourceScript(
@@ -259,11 +202,6 @@ export async function runServiceCommand(
   command: ServiceCommand,
   config = createToolConfig(),
 ) {
-  if (command.kind === "health") {
-    await checkHealth(config);
-    return;
-  }
-
   if (command.kind === "cdc-verify") {
     runCdcScript(command, config);
     return;
@@ -288,41 +226,4 @@ export async function runServiceCommand(
     runSourceScript(command, config);
     return;
   }
-
-  if (command.kind === "up") {
-    assertSequinRuntimeEnv();
-    runManagedCompose("up", ["up", "-d"], config);
-    return;
-  }
-
-  if (command.kind === "down") {
-    runManagedCompose("down", ["down"], config);
-    return;
-  }
-
-  if (command.kind === "logs") {
-    runManagedCompose(
-      "logs",
-      [
-        "logs",
-        ...(command.tail ? ["--tail", String(command.tail)] : ["-f"]),
-        ...command.services,
-      ],
-      config,
-    );
-    return;
-  }
-
-  if (command.kind === "ps") {
-    runManagedCompose("ps", ["ps"], config);
-    return;
-  }
-
-  if (command.kind === "config-plan") {
-    runManagedCompose("config-plan", ["config"], config);
-    return;
-  }
-
-  assertSequinRuntimeEnv();
-  runManagedCompose("config-apply", ["up", "-d", "sequin"], config);
 }

@@ -60,7 +60,10 @@ export function FeaturedZoneSection({ zoneUnitId }: FeaturedZoneSectionProps) {
   const { t } = useTranslation(["common", "entity", "zone"]);
   const readContext = useReadLanguageContext();
   const zoneQuery = useQuery({
-    ...zonePortalQueryOptions(zoneUnitId ?? "", "home", readContext.languages),
+    ...zonePortalQueryOptions(zoneUnitId ?? "", "home", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: readContext.ready && Boolean(zoneUnitId),
   });
   const zone = zoneQuery.data?.zone;

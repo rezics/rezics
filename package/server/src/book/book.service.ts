@@ -37,7 +37,6 @@ import {
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
 import { assertLicenseSlug } from "@/unit/publication-policy";
 import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import {
@@ -220,25 +219,6 @@ function bookListWhere(options: BookListOptions) {
       SELECT 1 FROM "UnitTranslation" tr
       WHERE tr."unitId" = ${Book.unitId}
         AND tr."language" = ${options.language}
-    )`);
-  }
-
-  const readLanguages = resolveEffectiveReadLanguageCandidates({
-    languages: options.languages,
-    appLocale: options.appLocale,
-  });
-  if (options.languageMode === "preferred" && readLanguages.length > 0) {
-    const languages = sql.join(
-      readLanguages.map((language) => sql`${language}`),
-      sql`, `,
-    );
-    conditions.push(sql`(
-      ${Unit.isLanguageNeutral} = true
-      OR EXISTS (
-        SELECT 1 FROM "UnitSupportLanguage" sl
-        WHERE sl."unitId" = ${Book.unitId}
-          AND sl."language" IN (${languages})
-      )
     )`);
   }
 

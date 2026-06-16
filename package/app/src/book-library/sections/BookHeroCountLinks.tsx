@@ -37,7 +37,6 @@ export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
       kind: PostKind.REVIEW,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 1,
     }),
     enabled: readContext.ready && Boolean(bookId),

@@ -1,7 +1,5 @@
 import type {
-  ContentLanguage,
   ContentRating,
-  ListLanguageMode,
   PostKind,
   SearchCategory,
   SearchQuery,
@@ -12,7 +10,6 @@ import type {
   ZoneSectionQuerySortField,
 } from "@rezics/contract";
 import {
-  normalizeContentLanguage,
   ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
   ZONE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
@@ -106,37 +103,6 @@ function quoteList(values: readonly string[]): string {
   return values.map((v) => `"${v}"`).join(", ");
 }
 
-export type ReadLanguageFilterInput = {
-  languages?: readonly (string | null | undefined)[] | null;
-  appLocale?: string | null;
-  languageMode?: ListLanguageMode | null;
-};
-
-export function readLanguageFilterCandidates(
-  input: ReadLanguageFilterInput,
-): string[] {
-  return [
-    ...new Set(
-      [input.appLocale, ...(input.languages ?? [])]
-        .map((language) =>
-          typeof language === "string"
-            ? normalizeContentLanguage(language)
-            : null,
-        )
-        .filter((language): language is ContentLanguage => !!language),
-    ),
-  ];
-}
-
-export function buildPreferredLanguageFilter(
-  input: ReadLanguageFilterInput,
-): string | null {
-  if (input.languageMode === "all") return null;
-  const candidates = readLanguageFilterCandidates(input);
-  if (candidates.length === 0) return null;
-  return `(isLanguageNeutral = true OR languages IN [${quoteList(candidates)}])`;
-}
-
 const BOOK_CONTENT_TYPES = ["BOOK", "GAME", "MEDIA", "LINK", "SERIES"];
 
 const BOOK_CONTENT_CATALOG_FILTER = [
@@ -228,15 +194,6 @@ export function buildContentFilter(
   // 4. Tag ID（已从 SlugRef 解析）
   for (const tagId of ctx.resolvedTagIds ?? []) {
     filter.push(`tagIds = "${tagId}"`);
-  }
-
-  // 5. Preferred read languages. Visibility filtering is separate from
-  // resolved-display selection, which happens after each hit is returned.
-  // 5. 偏好的阅读语言。可见性过滤独立于已解析的显示选择，后者在每条命中
-  // 返回后才进行。
-  const languageFilter = buildPreferredLanguageFilter(query);
-  if (languageFilter) {
-    filter.push(languageFilter);
   }
 
   // 6. Ratings — intersect query.ratings with allowedRatings if both provided
@@ -341,11 +298,6 @@ export function buildPostFilter(
   // 3. 默认排除已锁定的帖子（依据 content-search-api 的默认过滤）。
   filter.push("isLocked = false");
 
-  const languageFilter = buildPreferredLanguageFilter(query);
-  if (languageFilter) {
-    filter.push(languageFilter);
-  }
-
   return filter;
 }
 
@@ -401,12 +353,8 @@ export function buildRealmFilter(
 ): string[] {
   // Default visibility filter for realms: public only.
   // realm 的默认可见性过滤：仅公开。
-  const filter = ["isPublic = true"];
-  const languageFilter = buildPreferredLanguageFilter(query);
-  if (languageFilter) {
-    filter.push(languageFilter);
-  }
-  return filter;
+  void query;
+  return ["isPublic = true"];
 }
 
 // ANCHOR: buildZoneFilter
@@ -424,10 +372,7 @@ export function buildZoneFilter(
   const filter =
     scope.kind === "zone" ? [...(ctx.zoneBoundaryZoneFilter ?? [])] : [];
   filter.push('visibility = "PUBLIC"');
-  const languageFilter = buildPreferredLanguageFilter(query);
-  if (languageFilter) {
-    filter.push(languageFilter);
-  }
+  void query;
   return filter;
 }
 
@@ -513,9 +458,6 @@ export interface ZoneQueryCompileContext {
   // Resolved from `config.context`; null when the zone context is global.
   // 从 `config.context` 解析；专区语境为 global 时为 null。
   contextRealmUnitId?: string | null;
-  // The reader's language candidate chain for `languages: "viewer"`.
-  // 供 `languages: "viewer"` 使用的读者语言候选链。
-  viewerLanguageCandidates?: readonly string[];
 }
 
 export interface CompiledZoneSectionQuery {
@@ -587,12 +529,13 @@ function resolveZoneLanguages(
   languages: ZoneSectionQuery["languages"],
   ctx: ZoneQueryCompileContext,
 ): string[] | undefined {
+  void ctx;
   if (languages === undefined) return undefined;
   if (languages === "viewer") {
-    const candidates = readLanguageFilterCandidates({
-      languages: ctx.viewerLanguageCandidates ?? [],
-    });
-    return candidates.length > 0 ? candidates : undefined;
+    // Viewer language is display preference, not zone-section visibility.
+    // Explicit configured language arrays remain real filters.
+    // viewer 语言只影响展示解析，不影响专区分区可见性；显式配置的语言数组才是过滤条件。
+    return undefined;
   }
   return [...languages];
 }

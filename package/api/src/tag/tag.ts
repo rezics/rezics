@@ -37,6 +37,7 @@ export {
   useDetachTagMutation,
   usePatchUnitTagMutation,
   useUpdateTagMutation,
+  useWithdrawUnitTagVoteMutation,
 } from "./tag.mutations";
 // Queries
 // 查询。

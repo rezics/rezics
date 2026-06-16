@@ -8,8 +8,8 @@ import {
   withCoverUrl,
 } from "@rezics/contract";
 import { and, desc, eq, isNull } from "drizzle-orm";
-import type { ServerDb } from "../client.js";
 import { rebalance } from "../../shelf/fractional-index.js";
+import type { ServerDb } from "../client.js";
 import {
   Book,
   ContentStructureNode,
@@ -165,7 +165,14 @@ export async function seedBooks(
         });
       }
       for (const t of pickN(tags, randomInt(1, 5))) {
-        allTagLinks.push(withUpdatedAt({ unitId: unit.id, tagUnitId: t.id }));
+        allTagLinks.push(
+          withUpdatedAt({
+            unitId: unit.id,
+            tagUnitId: t.id,
+            score: 1,
+            voteCount: 1,
+          }),
+        );
       }
 
       return unit;

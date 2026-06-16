@@ -17,6 +17,7 @@ import {
   ensureSystemShelfBodySchema,
   hasPermissionToDeleteShelf,
   hasPermissionToUpdateShelf,
+  readLanguageGetQueryBase,
   reorderShelfItemSchema,
   setPinnedTagsBodySchema,
   setShelfItemChildrenSchema,
@@ -167,11 +168,12 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   )
   .get(
     "/:unitId",
-    async ({ params }): Promise<ShelfDetailDTO> => {
-      return shelfService.getByUnitId(params.unitId);
+    async ({ params, query }): Promise<ShelfDetailDTO> => {
+      return shelfService.getByUnitId(params.unitId, query);
     },
     {
       params: shelfParamsSchema,
+      query: readLanguageGetQueryBase,
       detail: {
         summary: "Get shelf",
         description: "Get a single shelf with metadata",
@@ -249,7 +251,6 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to update this shelf",
         );
       }
-      assertMediaUrl(body.coverUrl);
       return shelfService.update(params.unitId, body);
     },
     {

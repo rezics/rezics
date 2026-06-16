@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
   DEFAULT_LANGUAGE,
+  ZONE_SECTION_QUERY_SORT_FIELDS,
   type ZoneBoundary,
   type ZoneBoundaryFilter,
   type ZoneCollectionItem,
@@ -13,7 +14,6 @@ import {
   type ZonePageSection,
   type ZoneSectionQuery,
   type ZoneTheme,
-  ZONE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
 import { rebalance } from "../../shelf/fractional-index.js";
 import {
@@ -212,6 +212,7 @@ function unitQuerySection(input: {
     loadMore: true,
     query: {
       target: "unit",
+      languages: "viewer",
       ...(input.types ? { types: input.types } : {}),
       ...(input.tagUnitIds && input.tagUnitIds.length > 0
         ? { tagUnitIds: input.tagUnitIds }
@@ -237,6 +238,7 @@ function postQuerySection(input: {
     query: {
       target: "post",
       postKinds: ["POST", "REVIEW"],
+      languages: "viewer",
       sort: {
         field: faker.helpers.arrayElement(POST_SORT_FIELDS),
         direction: "desc",
@@ -258,6 +260,7 @@ function realmQuerySection(input: {
     query: {
       target: "realm",
       types: ["REALM"],
+      languages: "viewer",
       sort: {
         field: faker.helpers.arrayElement(REALM_SORT_FIELDS),
         direction: "desc",
@@ -279,6 +282,7 @@ function zoneQuerySection(input: {
     query: {
       target: "zone",
       types: ["ZONE"],
+      languages: "viewer",
       sort: {
         field: faker.helpers.arrayElement(ZONE_SORT_FIELDS),
         direction: "desc",
@@ -308,6 +312,7 @@ function fixtureHomeSections(
           query: {
             target: "unit",
             types: [UnitType.BOOK],
+            languages: "viewer",
             sort: { field: "publishedAt", direction: "desc" },
           },
         },
@@ -320,6 +325,7 @@ function fixtureHomeSections(
           query: {
             target: "unit",
             types: [UnitType.BOOK],
+            languages: "viewer",
             sort: { field: "qualityScore", direction: "desc" },
           },
           dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
@@ -333,6 +339,7 @@ function fixtureHomeSections(
           query: {
             target: "unit",
             types: [UnitType.BOOK],
+            languages: "viewer",
             sort: { field: "risingScore", direction: "desc" },
           },
           dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
@@ -346,6 +353,7 @@ function fixtureHomeSections(
           query: {
             target: "unit",
             types: [UnitType.BOOK],
+            languages: "viewer",
             sort: { field: "trendingScore", direction: "desc" },
           },
           dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
@@ -359,6 +367,7 @@ function fixtureHomeSections(
           query: {
             target: "unit",
             types: [UnitType.BOOK],
+            languages: "viewer",
             sort: { field: "hotScore", direction: "desc" },
           },
         },
@@ -369,8 +378,8 @@ function fixtureHomeSections(
         postQuerySection({ id: "pulse", limit: 30 }),
         {
           id: "home-feed",
-          kind: "feed",
-          feedKind: faker.helpers.arrayElement(["all", "updates", "reviews"]),
+          kind: "stream",
+          streamKind: faker.helpers.arrayElement(["all", "updates", "reviews"]),
           limit: 30,
         },
       ];
@@ -399,8 +408,8 @@ function fixtureHomeSections(
               sections: [
                 {
                   id: "tab-feed",
-                  kind: "feed",
-                  feedKind: "updates",
+                  kind: "stream",
+                  streamKind: "updates",
                   limit: 12,
                 },
               ],
@@ -439,8 +448,8 @@ function fixtureHomeSections(
                       sections: [
                         {
                           id: "main-feed",
-                          kind: "feed",
-                          feedKind: "all",
+                          kind: "stream",
+                          streamKind: "all",
                           limit: 10,
                         },
                       ],
@@ -560,7 +569,9 @@ export function buildZoneFixtureConfig(
         config: {
           schema: "rezics/zone-page",
           version: 1,
-          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 30 }],
+          sections: [
+            { id: "feed", kind: "stream", streamKind: "all", limit: 30 },
+          ],
         },
       },
     ],

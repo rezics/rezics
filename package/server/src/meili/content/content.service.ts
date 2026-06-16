@@ -3,7 +3,6 @@ import type {
   ContentSearchResult,
 } from "@rezics/contract";
 import { resolveSlugRefs } from "../../shared/slug-ref";
-import { buildPreferredLanguageFilter } from "../search/filters";
 import { resolveContentHitDisplay } from "../search/read-language";
 import { searchClient } from "../search-client";
 
@@ -160,11 +159,6 @@ export async function searchContent(
     } else {
       filter.push(`(${realmTagFilters.join(" OR ")})`);
     }
-  }
-
-  const languageFilter = buildPreferredLanguageFilter(opts);
-  if (languageFilter) {
-    filter.push(languageFilter);
   }
 
   // Rating filter — set-based (ratings: ContentRating[]). When the caller

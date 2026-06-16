@@ -31,6 +31,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { UnitExternalLinkEditor } from "@/unit-external-link";
 import { ZoneManageJsonFrame } from "../components/manage/ZoneManageJsonFrame";
 import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
@@ -122,9 +123,14 @@ export function ZoneManagePage({
   onTabChange,
 }: ZoneManagePageProps) {
   const { t, i18n } = useTranslation(["zone", "common"]);
+  const readContext = useReadLanguageContext();
+  const readQuery = {
+    languages: readContext.languages,
+    appLocale: readContext.appLocale,
+  };
   const bySlugQuery = useQuery({
-    ...zoneQueryOptions(slug ?? ""),
-    enabled: !unitId && !!slug,
+    ...zoneQueryOptions(slug ?? "", readQuery),
+    enabled: readContext.ready && !unitId && !!slug,
   });
   const resolvedUnitId = unitId ?? bySlugQuery.data?.unitId ?? "";
   const summaryZone = unitId ? undefined : bySlugQuery.data;
@@ -154,8 +160,8 @@ export function ZoneManagePage({
   // previews throughout the editors.
   // 门户读取同时返回 `refUnits` 摘要，供编辑器各处的标签/图片预览使用。
   const portalQuery = useQuery({
-    ...zonePortalQueryOptions(resolvedUnitId, selectedPageSlug),
-    enabled: !!resolvedUnitId && !!selectedPageSlug,
+    ...zonePortalQueryOptions(resolvedUnitId, selectedPageSlug, readQuery),
+    enabled: readContext.ready && !!resolvedUnitId && !!selectedPageSlug,
   });
   const zone =
     portalQuery.data?.zone ?? (unitId ? undefined : bySlugQuery.data);

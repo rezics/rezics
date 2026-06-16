@@ -4,7 +4,20 @@ import { Elysia } from "elysia";
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
-process.env.AUTH_BASE_URL ??= "http://localhost:3001";
+process.env.AUTH_INTERNAL_BASE_URL ??= "http://localhost:3001";
+process.env.AUTH_PUBLIC_BASE_URL ??= "http://localhost:3001";
+process.env.AUTH_PUBLIC_ISSUER_URL ??= "http://localhost:3001";
+process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "secret";
+process.env.SMTP_HOST ??= "localhost";
+process.env.SMTP_USER ??= "smtp";
+process.env.SMTP_PASSWORD ??= "smtp";
+process.env.TURNSTILE_SECRET ??= "turnstile";
+process.env.MEILI_HOST ??= "http://localhost:7700";
+process.env.MEILI_MASTER_KEY ??= "masterKey";
+process.env.NOTIFY_BASE_URL ??= "http://localhost:3010";
+process.env.NOTIFY_INTERNAL_SECRET ??= "notify";
+process.env.REACTION_BASE_URL ??= "http://localhost:3011";
+process.env.REACTION_INTERNAL_SECRET ??= "reaction";
 
 let currentIdentity = {
   sub: "user-1",
@@ -310,6 +323,27 @@ describe("GET /zone/:unitId/page/:pageId/section/:sectionId", () => {
         cursor: "12",
         preferredLanguages: ["en"],
         dynamicTagUnitIds: ["tag-a", "tag-b"],
+      },
+    );
+  });
+
+  test("passes read-language candidates through to section execution", async () => {
+    sectionDataMock.mockClear();
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request(
+        "http://localhost/zone/zone-1/page/page-home/section/s-known?languages=ja",
+      ),
+    );
+    expect(res.status).toBe(200);
+    expect(sectionDataMock).toHaveBeenCalledWith(
+      "zone-1",
+      "page-home",
+      "s-known",
+      {
+        preferredLanguages: ["ja"],
+        dynamicTagUnitIds: [],
+        cursor: null,
       },
     );
   });

@@ -5,6 +5,7 @@ export {
   usePinSubscriptionListEntryMutation,
   useRecoverSubscriptionListEntryMutation,
   useRemoveSubscriptionListEntryMutation,
+  useReorderSubscriptionListEntriesMutation,
   useReorderSubscriptionListEntryMutation,
   useSubscribe,
   useSubscribeMutation,

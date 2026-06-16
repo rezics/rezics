@@ -22,7 +22,6 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
       sort: { type: "createdAt", order: "desc" },
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     }),
     enabled: readContext.ready,
   });

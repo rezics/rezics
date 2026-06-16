@@ -13,13 +13,13 @@ already exists.
 ## 2. Secret sync
 
 ```bash
-bin/nomad-deploy <sha> secrets   # decrypts SOPS, syncs to Nomad Variables
+deploy/bin/nomad-deploy <sha> secrets   # decrypts SOPS, syncs to Nomad Variables
 ```
 
 ## 3. Migration jobs
 
 ```bash
-bin/nomad-deploy <sha> migrations
+deploy/bin/nomad-deploy <sha> migrations
 ```
 
 One-shot jobs dispatched from `migrate-<unit>` parameterized jobs. A failure
@@ -50,7 +50,7 @@ job       → package/job-runner db:ensure     (pg-boss queue prep, no schema)
 ## 4. Service rollout
 
 ```bash
-bin/nomad-deploy <sha> services   # server, auth, notify, reaction, history, ranking, preview
+deploy/bin/nomad-deploy <sha> services   # server, auth, notify, reaction, history, ranking, preview
 ```
 
 Nomad health-gates each deployment; an unhealthy new allocation is auto-reverted
@@ -59,7 +59,7 @@ and the previous one keeps serving.
 ## 5. Worker rollout
 
 ```bash
-bin/nomad-deploy <sha> workers    # job-runner-http + job-runner-worker + ranking-worker
+deploy/bin/nomad-deploy <sha> workers    # job-runner-http + job-runner-worker + ranking-worker
 ```
 
 Worker units scale independently of HTTP services (replica count + `WORKERS`).
@@ -92,7 +92,7 @@ and confirm the affected indexes have no settings drift or failed Meili tasks.
 After ranking-relevant schema or index-settings changes:
 
 ```bash
-bin/nomad-deploy <sha> backfill   # enqueues ranking.fullSync (idempotent)
+deploy/bin/nomad-deploy <sha> backfill   # enqueues ranking.fullSync (idempotent)
 ```
 
 ## 8. Preview and Edge

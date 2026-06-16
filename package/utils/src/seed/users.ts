@@ -4,7 +4,7 @@ import {
   slugify,
 } from "@rezics/auth/seed";
 import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
-import { Unit, User } from "@rezics/server/db/schema";
+import { Unit, User, UserPreference } from "@rezics/server/db/schema";
 import type { SlugScopesMap } from "@rezics/server/db/seed/infra/seed-slug-scopes";
 import {
   bootstrapSystemShelves,
@@ -80,6 +80,15 @@ export const INFRA_USERS: InfraUserSeedInput[] = [
   },
 ];
 
+function defaultLicenseSlugFromSettings(
+  settings: unknown,
+): string | null | undefined {
+  const value = (
+    settings as { publishing?: { defaultLicenseSlug?: unknown } } | null
+  )?.publishing?.defaultLicenseSlug;
+  return typeof value === "string" || value === null ? value : undefined;
+}
+
 export function getServerRole(input: CrossSeedUserInput): string {
   return (input.permission as { role: string[] }).role[0]!;
 }
@@ -135,7 +144,6 @@ async function seedServerUser(
       avatar: input.avatar ?? null,
       summary: input.summary ?? null,
       permission: input.permission,
-      settings: input.settings,
       updatedAt: now,
     };
 
@@ -150,6 +158,21 @@ async function seedServerUser(
         target: User.unitId,
         set: userData,
       });
+
+    const defaultLicenseSlug = defaultLicenseSlugFromSettings(input.settings);
+    if (defaultLicenseSlug !== undefined) {
+      await tx
+        .insert(UserPreference)
+        .values({
+          userId: input.unitId,
+          defaultLicenseSlug,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: UserPreference.userId,
+          set: { defaultLicenseSlug, updatedAt: now },
+        });
+    }
 
     await bootstrapSystemShelves(
       input.unitId,
@@ -235,7 +258,6 @@ export async function seedInfraUsers(
       name: input.name,
       summary: input.summary,
       permission: null,
-      settings: null,
       updatedAt: now,
     };
     await db
@@ -450,7 +472,6 @@ export async function resetRootUser(
     name: authResult.name,
     summary: rootInput.summary ?? null,
     permission: rootInput.permission,
-    settings: rootInput.settings,
     updatedAt: now,
   };
 
@@ -465,6 +486,21 @@ export async function resetRootUser(
       target: User.unitId,
       set: data,
     });
+
+  const defaultLicenseSlug = defaultLicenseSlugFromSettings(rootInput.settings);
+  if (defaultLicenseSlug !== undefined) {
+    await serverDb
+      .insert(UserPreference)
+      .values({
+        userId: targetUnitId,
+        defaultLicenseSlug,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: UserPreference.userId,
+        set: { defaultLicenseSlug, updatedAt: now },
+      });
+  }
 
   return {
     result: { ...authResult, slug },

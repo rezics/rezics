@@ -10,12 +10,12 @@ import { ZoneSectionList } from "../components/sections/ZoneSectionList";
 import { ZoneHeader } from "../components/ZoneHeader";
 import { useZonePortal } from "../hooks/useZone";
 import { canManageZone } from "../models/canManageZone";
+import { selectZoneDynamicTags } from "../models/zoneDynamicTags";
 import {
   type ZoneRouteLocation,
   zoneManageHref,
   zoneRouteLocationFromZone,
 } from "../models/zoneMenu";
-import { selectZoneDynamicTags } from "../models/zoneDynamicTags";
 import {
   ZONE_CONTENT_MAX_WIDTH_DEFAULT,
   zoneThemeCssVars,
@@ -156,10 +156,8 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
 }) => {
   const { t } = useTranslation(["zone"]);
   const locator = slug ? { slug } : { unitId: unitId ?? "" };
-  const { zone, page, refUnits, languages, isLoading, error } = useZonePortal(
-    locator,
-    pageSlug,
-  );
+  const { zone, page, refUnits, languages, appLocale, isLoading, error } =
+    useZonePortal(locator, pageSlug);
   const [dynamicTagSeed] = useState(() => `${Date.now()}:${Math.random()}`);
   const dynamicTagSelections = useMemo(
     () =>
@@ -237,6 +235,7 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
             pageId: page.id,
             refUnits,
             languages,
+            appLocale,
             dynamicTagSelections,
           }}
         />

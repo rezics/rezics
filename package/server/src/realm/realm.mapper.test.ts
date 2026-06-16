@@ -1,7 +1,10 @@
 import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
 
-mock.module("@/unit/language-resolution", () => ({}));
+mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageInput: (input: unknown) => input,
+  resolveEffectiveReadLanguageCandidates: () => [],
+}));
 mock.module("@/utils/sanitizeUser", () => ({
   mapPublicUser: (user: unknown) => user,
 }));

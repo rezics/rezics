@@ -55,29 +55,8 @@ missing. pg-boss owns its internal schema and migrations inside that database;
 the job-runner package only creates/verifies queues and queue policies at
 startup.
 
-Start Sequin explicitly when testing CDC or running job-runner HTTP ingress:
-
-```bash
-cp tool/.env.example tool/.env
-
-# Generate real local secrets before first startup.
-openssl rand -base64 48 # SECRET_KEY_BASE
-openssl rand -base64 32 # VAULT_KEY
-
-task service:up
-task service:health
-```
-
-The managed runtime uses Docker Compose v2 through `tool/service`.
-It starts source PostgreSQL, Meilisearch, Sequin state services, and Sequin in
-one repo compose project. Its checked-in config delivers only to this service at
-`/webhooks/sequin` with the `x-internal-secret` value from
-`SEQUIN_WEBHOOK_SECRET`. It does not target `@rezics/history` directly; history
-ingestion is enqueued by the job-runner `history.outbox.ingest` worker lane.
-
-Tool-owned Sequin runtime settings live in `tool/.env`. The
-`SEQUIN_WEBHOOK_SECRET` value in `tool/.env` must match
-`package/job-runner/.env`.
+Sequin runs as part of the Nomad dev environment. Start it with `task dev`
+before testing CDC or running job-runner HTTP ingress.
 
 Run locally with:
 
@@ -85,11 +64,9 @@ Run locally with:
 task job-runner:dev
 ```
 
-Use `JOB_RUNNER_ROLE=all` for local development when Sequin is running. The root
-`task dev` zellij session starts the `job-runner` process automatically
-because runtime server mutations enqueue queue-backed search and history
-synchronization work. If this service is not running, those runtime writes
-either fail while enqueueing or leave derived state stale.
+Use `JOB_RUNNER_ROLE=all` for local development when Sequin is running.
+`task dev` starts `job-runner` automatically via Nomad because runtime server
+mutations enqueue queue-backed search and history synchronization work.
 
 ## Roles
 
@@ -101,9 +78,9 @@ Production may split HTTP and worker roles into separate processes using the
 same package.
 
 `all` and `http` require `SEQUIN_HEALTH_URL` to return 2xx during startup. This
-fails before webhook ingress is exposed and points operators at
-`task service:up`. `worker` skips the Sequin health check so it can
-drain already-enqueued pg-boss jobs while Sequin is stopped or restarting.
+fails before webhook ingress is exposed; ensure `task dev` is running.
+`worker` skips the Sequin health check so it can drain already-enqueued
+pg-boss jobs while Sequin is stopped or restarting.
 
 ## Producer Configuration
 

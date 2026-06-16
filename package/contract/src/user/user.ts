@@ -6,6 +6,7 @@ import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { mediaUrlSchema } from "../media-url";
 import { paginationLimitSchema } from "../pagination";
 import { bookshelfViewConfigSchema } from "../shelf/bookshelf";
+import { userSubscriptionListSortSchema } from "../subscription";
 import type { ContentRating } from "../unit/unit";
 
 // ============================================================
@@ -109,7 +110,13 @@ export type LoginUser = (typeof loginSchema)["static"];
 
 export const realmTagPreferenceSchema = t.Object({
   realmIds: t.Array(t.String(), { maxItems: 50 }),
-  maxDisplay: t.Number(),
+  /**
+   * Optional display cap for the filtered realm tag list. Missing/null means
+   * unlimited; callers truncate after applying any realm filter/order.
+   * 过滤后的 realm tag 列表显示上限。缺失/null 表示不限制；调用方先应用 realm
+   * 过滤/排序，再截断。
+   */
+  maxDisplay: t.Optional(t.Nullable(t.Number({ minimum: 0 }))),
 });
 
 export const contentPreferenceSchema = t.Object({
@@ -146,6 +153,21 @@ export const moderationPreferenceSchema = t.Object({
 export type ModerationPreference =
   (typeof moderationPreferenceSchema)["static"];
 
+export const subscriptionListPreferenceSchema = t.Object({
+  defaultSort: t.Optional(userSubscriptionListSortSchema),
+});
+
+export type SubscriptionListPreference =
+  (typeof subscriptionListPreferenceSchema)["static"];
+
+export const subscriptionListsPreferenceSchema = t.Object({
+  zones: t.Optional(subscriptionListPreferenceSchema),
+  realms: t.Optional(subscriptionListPreferenceSchema),
+});
+
+export type SubscriptionListsPreference =
+  (typeof subscriptionListsPreferenceSchema)["static"];
+
 /** Ratings a user may opt into; GENERAL/R_15 are always on. 用户可主动选择的分级；GENERAL/R_15 始终开启。 */
 export const OPT_IN_RATINGS: readonly ContentRating[] = ["R_18", "R_18G"];
 
@@ -161,11 +183,18 @@ export type LibrarySettings = (typeof librarySettingsSchema)["static"];
 
 export const USER_TAG_PRIVACY_FIELD_KEY = "userTags" as const;
 
-export const profileFieldVisibilitySchema = t.Union([
-  t.Literal("private"),
-  t.Literal("followers"),
-  t.Literal("public"),
-]);
+export const PROFILE_FIELD_VISIBILITIES = [
+  "private",
+  "followers",
+  "public",
+] as const;
+
+export const profileFieldVisibilitySchema = t.Union(
+  PROFILE_FIELD_VISIBILITIES.map((visibility) => t.Literal(visibility)) as [
+    ReturnType<typeof t.Literal>,
+    ...ReturnType<typeof t.Literal>[],
+  ],
+);
 
 export type ProfileFieldVisibility =
   (typeof profileFieldVisibilitySchema)["static"];
@@ -218,6 +247,7 @@ export const userSettingsSchema = t.Object({
   content: t.Optional(contentPreferenceSchema),
   publishing: t.Optional(publishingPreferenceSchema),
   moderation: t.Optional(moderationPreferenceSchema),
+  subscriptionLists: t.Optional(subscriptionListsPreferenceSchema),
   library: t.Optional(librarySettingsSchema),
   notifications: t.Optional(notificationPreferenceSchema),
   privacy: t.Optional(userProfilePrivacySchema),

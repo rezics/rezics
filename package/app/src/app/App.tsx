@@ -11,7 +11,6 @@ import { ExternalLinkModal } from "@rezics/ui";
 import { RouterProvider } from "@tanstack/react-router";
 import { type ReactNode, StrictMode, Suspense, useEffect, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "sonner";
 import { router } from "@/router";
 import { WindowAlert } from "./components/WindowAlert";
@@ -54,18 +53,16 @@ function AppProviders({ children }: { children: ReactNode }) {
       <ErrorBoundary
         fallback={<div>{t("shell:app_error_boundary_message")}</div>}
       >
-        <HelmetProvider>
-          <PersistentSettingsLoader />
-          <ReactQueryProvider>
-            <AppInit>
-              <AuthProvider />
-              <WindowAlert />
-              <ExternalLinkModal />
-              <Toaster position="bottom-right" richColors />
-              {children}
-            </AppInit>
-          </ReactQueryProvider>
-        </HelmetProvider>
+        <PersistentSettingsLoader />
+        <ReactQueryProvider>
+          <AppInit>
+            <AuthProvider />
+            <WindowAlert />
+            <ExternalLinkModal />
+            <Toaster position="bottom-right" richColors />
+            {children}
+          </AppInit>
+        </ReactQueryProvider>
       </ErrorBoundary>
     </StrictMode>
   );

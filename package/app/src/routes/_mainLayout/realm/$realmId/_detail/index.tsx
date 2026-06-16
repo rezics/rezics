@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { type RealmFeedSort, RealmFeedTab } from "@/realm";
+import { type RealmStreamSort, RealmStreamTab } from "@/realm";
 
-type RealmFeedRouteSearch = {
-  sort?: RealmFeedSort;
+type RealmStreamRouteSearch = {
+  sort?: RealmStreamSort;
   tags?: string;
 };
 
-function isRealmFeedSort(value: unknown): value is RealmFeedSort {
+function isRealmStreamSort(value: unknown): value is RealmStreamSort {
   return (
     value === "best" ||
     value === "hot" ||
@@ -17,8 +17,10 @@ function isRealmFeedSort(value: unknown): value is RealmFeedSort {
 }
 
 export const Route = createFileRoute("/_mainLayout/realm/$realmId/_detail/")({
-  validateSearch: (search: Record<string, unknown>): RealmFeedRouteSearch => ({
-    sort: isRealmFeedSort(search.sort) ? search.sort : "best",
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): RealmStreamRouteSearch => ({
+    sort: isRealmStreamSort(search.sort) ? search.sort : "best",
     tags: typeof search.tags === "string" ? search.tags : undefined,
   }),
   component: () => {
@@ -28,13 +30,13 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/_detail/")({
     const tagIds = search.tags?.split(",").filter(Boolean) ?? [];
 
     return (
-      <RealmFeedTab
-        feedSort={search.sort ?? "best"}
-        feedTagIds={tagIds}
-        onFeedSortChange={(sort) =>
+      <RealmStreamTab
+        streamSort={search.sort ?? "best"}
+        streamTagIds={tagIds}
+        onStreamSortChange={(sort) =>
           navigate({ search: (prev) => ({ ...prev, sort }) })
         }
-        onFeedTagIdsChange={(nextTagIds) =>
+        onStreamTagIdsChange={(nextTagIds) =>
           navigate({
             search: (prev) => ({
               ...prev,

@@ -1,6 +1,7 @@
 import type {
   SubscriptionCreateBody,
   SubscriptionDTO,
+  UserSubscriptionListEntryBatchReorderBody,
   UserSubscriptionListEntryDTO,
   UserSubscriptionListEntryPinBody,
   UserSubscriptionListEntryReorderBody,
@@ -130,6 +131,28 @@ export function useReorderSubscriptionListEntryMutation(
   });
 }
 
+export function useReorderSubscriptionListEntriesMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UserSubscriptionListEntryDTO[],
+      Error,
+      UserSubscriptionListEntryBatchReorderBody
+    >,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UserSubscriptionListEntryBatchReorderBody) =>
+      subscriptionApi.reorderEntries(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateEntries(qc);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export function useRemoveSubscriptionListEntryMutation(
   options?: Omit<
     UseMutationOptions<{ removed: boolean }, Error, string>,
@@ -184,6 +207,7 @@ export const subscriptionMutations = {
   useUpdateChannels: useUpdateSubscriptionChannelsMutation,
   usePinEntry: usePinSubscriptionListEntryMutation,
   useReorderEntry: useReorderSubscriptionListEntryMutation,
+  useReorderEntries: useReorderSubscriptionListEntriesMutation,
   useRemoveEntry: useRemoveSubscriptionListEntryMutation,
   useRecoverEntry: useRecoverSubscriptionListEntryMutation,
 };

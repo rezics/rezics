@@ -6,6 +6,7 @@ import type {
   Shelf,
   ShelfItem,
   Unit,
+  UnitSupportLanguage,
   UnitTag,
   UnitTranslation,
 } from "../db/schema";
@@ -17,6 +18,7 @@ export const shelfInclude = {
   unit: {
     include: {
       user: { select: publicUserSelect },
+      supportLanguages: true,
       translations: true,
       unitTags: { orderBy: { score: "desc" as const } },
     },
@@ -26,6 +28,7 @@ export const shelfInclude = {
 export type ShelfWithMetadata = typeof Shelf.$inferSelect & {
   unit: typeof Unit.$inferSelect & {
     user?: PublicUserSelected | null;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
     translations: Array<typeof UnitTranslation.$inferSelect>;
     unitTags: Array<typeof UnitTag.$inferSelect>;
   };
@@ -49,6 +52,7 @@ export const shelfListSelect = {
       visibility: true,
       licenseSlug: true,
       defaultLanguage: true,
+      supportLanguages: true,
       createdAt: true,
       updatedAt: true,
       user: { select: publicUserSelect },
@@ -75,6 +79,7 @@ export type ShelfListSelected = Pick<
     | "updatedAt"
   > & {
     user?: PublicUserSelected | null;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
     translations: Array<typeof UnitTranslation.$inferSelect>;
     unitTags: Array<typeof UnitTag.$inferSelect>;
   };

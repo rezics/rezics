@@ -33,6 +33,7 @@ const setUnitTagPin = mock(async () => ({
 }));
 const deleteUnitTag = mock(async () => undefined);
 const castVote = mock(async () => undefined);
+const withdrawVote = mock(async () => undefined);
 const getTagsForUnit = mock(async () => []);
 const listLowScoreUnitTags = mock(async () => []);
 const batchTranslations = mock(async () => ({}));
@@ -47,6 +48,7 @@ const repository = {
   setUnitTagPin,
   deleteUnitTag,
   castVote,
+  withdrawVote,
   getTagsForUnit,
   listLowScoreUnitTags,
   batchTranslations,
@@ -96,13 +98,28 @@ describe("TagService tag writes", () => {
   beforeEach(() => {
     enqueueMock.mockClear();
     castVote.mockClear();
+    withdrawVote.mockClear();
     castVote.mockResolvedValue(undefined);
+    withdrawVote.mockResolvedValue(undefined);
   });
 
   test("castVote enqueues content tag projection", async () => {
     await service.castVote("user-1", "unit-1", "tag-1", 1);
 
     expect(castVote).toHaveBeenCalledWith("user-1", "unit-1", "tag-1", 1);
+    expect(enqueueMock.mock.calls.map((call) => call[0])).toMatchObject([
+      {
+        kind: "search.content.patchTags",
+        payload: { unitId: "unit-1" },
+        source: { type: "server", service: "tag" },
+      },
+    ]);
+  });
+
+  test("withdrawVote enqueues content tag projection", async () => {
+    await service.withdrawVote("user-1", "unit-1", "tag-1");
+
+    expect(withdrawVote).toHaveBeenCalledWith("user-1", "unit-1", "tag-1");
     expect(enqueueMock.mock.calls.map((call) => call[0])).toMatchObject([
       {
         kind: "search.content.patchTags",

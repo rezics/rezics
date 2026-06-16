@@ -5,7 +5,7 @@ import { Spinner } from "@rezics/ui";
 import { Button, Skeleton } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core";
-import { StreamRenderer } from "@/feed";
+import { StreamRenderer } from "@/stream";
 import {
   zoneRouteLocationFromZone,
   zoneSectionItemHref,
@@ -43,7 +43,10 @@ export function QuerySection({
       zone.unitId,
       ctx.pageId,
       section.id,
-      ctx.languages,
+      {
+        languages: ctx.languages,
+        appLocale: ctx.appLocale,
+      },
       { dynamicTagUnitIds },
     ),
   );

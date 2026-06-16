@@ -1,18 +1,22 @@
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { type RealmFeedSort, RealmDetailLayout, RealmFeedTab } from "@/realm";
+import {
+  type RealmStreamSort,
+  RealmDetailLayout,
+  RealmStreamTab,
+} from "@/realm";
 import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
 import {
   realmDetailHref,
   realmDetailLocationFromSlugParams,
 } from "@/realm/models/realmDetailRoutes";
 
-type RealmFeedRouteSearch = {
-  sort?: RealmFeedSort;
+type RealmStreamRouteSearch = {
+  sort?: RealmStreamSort;
   tags?: string;
 };
 
-function isRealmFeedSort(value: unknown): value is RealmFeedSort {
+function isRealmStreamSort(value: unknown): value is RealmStreamSort {
   return (
     value === "best" ||
     value === "hot" ||
@@ -22,7 +26,7 @@ function isRealmFeedSort(value: unknown): value is RealmFeedSort {
   );
 }
 
-function RealmSlugFeedRoute() {
+function RealmSlugStreamRoute() {
   const params = Route.useParams();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -31,13 +35,13 @@ function RealmSlugFeedRoute() {
   const tagIds = search.tags?.split(",").filter(Boolean) ?? [];
   return (
     <RealmDetailLayout realmId={realm.unitId} routeLocation={routeLocation}>
-      <RealmFeedTab
-        feedSort={search.sort ?? "best"}
-        feedTagIds={tagIds}
-        onFeedSortChange={(sort) =>
+      <RealmStreamTab
+        streamSort={search.sort ?? "best"}
+        streamTagIds={tagIds}
+        onStreamSortChange={(sort) =>
           navigate({ search: (prev) => ({ ...prev, sort }) })
         }
-        onFeedTagIdsChange={(nextTagIds) =>
+        onStreamTagIdsChange={(nextTagIds) =>
           navigate({
             search: (prev) => ({
               ...prev,
@@ -54,8 +58,10 @@ function RealmSlugFeedRoute() {
 }
 
 export const Route = createFileRoute("/_mainLayout/r/$realmSlug/")({
-  validateSearch: (search: Record<string, unknown>): RealmFeedRouteSearch => ({
-    sort: isRealmFeedSort(search.sort) ? search.sort : "best",
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): RealmStreamRouteSearch => ({
+    sort: isRealmStreamSort(search.sort) ? search.sort : "best",
     tags: typeof search.tags === "string" ? search.tags : undefined,
   }),
   loader: async ({ params, context }) => {
@@ -65,5 +71,5 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/")({
       queryClient: context.qc,
     });
   },
-  component: RealmSlugFeedRoute,
+  component: RealmSlugStreamRoute,
 });

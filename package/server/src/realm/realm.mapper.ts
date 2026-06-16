@@ -10,13 +10,13 @@ import type {
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
 import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
-import { mapPublicUser, type PublicUserSelected } from "@/utils/sanitizeUser";
 import type {
   RealmMember,
   RealmTagApplication,
   RealmTagContext,
   UnitRealm,
 } from "../db/schema";
+import { mapPublicUser, type PublicUserSelected } from "../utils/sanitizeUser";
 import type { RealmListSelected, RealmWithRelations } from "./types";
 
 type RealmMemberRow = typeof RealmMember.$inferSelect;
@@ -144,7 +144,7 @@ export function mapUnitRealmToDTO(row: UnitRealmRow): UnitRealmDTO {
 
 export function mapRealmTagApplicationToDTO(
   row: RealmTagApplicationRow,
-  options?: { belowVisibilityThreshold?: boolean },
+  options?: { belowVisibilityThreshold?: boolean; viewerVote?: number | null },
 ): RealmTagApplicationDTO {
   return {
     realmUnitId: row.realmUnitId,
@@ -152,6 +152,7 @@ export function mapRealmTagApplicationToDTO(
     unitId: row.unitId,
     score: row.score,
     voteCount: row.voteCount,
+    ...(options?.viewerVote != null ? { viewerVote: options.viewerVote } : {}),
     pinned: row.pinned,
     position: row.position ?? null,
     ...(options?.belowVisibilityThreshold

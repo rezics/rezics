@@ -6,9 +6,10 @@ import type {
 } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
-import { Unit, UnitTranslation } from "../db/schema";
+import { Unit, UnitSupportLanguage, UnitTranslation } from "../db/schema";
+import { generateBetween } from "../shelf/fractional-index";
 import {
   applySparsePatch,
   assertCanEditCollaborativeMetadata,
@@ -33,6 +34,7 @@ type TranslationTx = {
     create: Partial<UnitTranslationRow>,
     update: Partial<UnitTranslationRow>,
   ): Promise<UnitTranslationRow>;
+  ensureSupportLanguage?(unitId: string, language: string): Promise<void>;
   unit?: unknown;
   unitCollaborator?: unknown;
   unitFieldLock?: unknown;
@@ -96,6 +98,27 @@ function createDrizzleTranslationTx(db: any): TranslationTx {
         .returning();
       if (!row) throw new Error("Failed to upsert UnitTranslation");
       return row;
+    },
+    async ensureSupportLanguage(unitId, language) {
+      const [last] = await db
+        .select({
+          language: UnitSupportLanguage.language,
+          position: UnitSupportLanguage.position,
+        })
+        .from(UnitSupportLanguage)
+        .where(eq(UnitSupportLanguage.unitId, unitId))
+        .orderBy(desc(UnitSupportLanguage.position))
+        .limit(1);
+      await db
+        .insert(UnitSupportLanguage)
+        .values({
+          unitId,
+          language,
+          isPrimary: !last,
+          position: generateBetween(last?.position, undefined),
+          updatedAt: new Date(),
+        })
+        .onConflictDoNothing();
     },
   };
 }
@@ -258,6 +281,7 @@ export class TranslationService {
         createPayload,
         updatePayload,
       );
+      await tx.ensureSupportLanguage?.(unitId, language);
       didMutate = true;
       if (actor) {
         await writeEditorialMetadataHistory(tx as any, {

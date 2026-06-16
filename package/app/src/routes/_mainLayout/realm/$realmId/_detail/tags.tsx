@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { realmFeedSearchForSingleTag, useRealmDetail } from "@/realm";
+import { realmStreamSearchForSingleTag, useRealmDetail } from "@/realm";
 import { RealmTagBrowser } from "@/realm/components/RealmTagBrowser";
 
 export const Route = createFileRoute(
@@ -17,7 +17,7 @@ export const Route = createFileRoute(
           navigate({
             to: "/realm/$realmId",
             params: { realmId },
-            search: realmFeedSearchForSingleTag({}, tagId),
+            search: realmStreamSearchForSingleTag({}, tagId),
           })
         }
       />

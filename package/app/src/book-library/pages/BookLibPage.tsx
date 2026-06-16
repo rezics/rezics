@@ -85,7 +85,6 @@ export const BookLibPage: React.FC = () => {
       limit: EXTERNAL_PAGE_SIZE,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     };
   }
 

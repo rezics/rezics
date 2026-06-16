@@ -1,4 +1,11 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
+import { postQueries } from "@rezics/api/post/post";
+import {
+  createFileRoute,
+  lazyRouteComponent,
+  notFound,
+} from "@tanstack/react-router";
+import { titleMeta, titleOfPost } from "@/core/routing/documentTitle";
+import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 
 type PostThreadSearch = {
   focus?: string;
@@ -24,5 +31,21 @@ export const Route = createFileRoute("/_mainLayout/post/$rootPostUnitId/")({
 
     return { focus, focusPostUnitId };
   },
+  loader: async ({ params, context }) => {
+    const readContext = await resolveRouteReadLanguageContext(context.qc);
+    const post = await context.qc
+      .ensureQueryData(
+        postQueries.detail(params.rootPostUnitId, {
+          languages: readContext.languages,
+          appLocale: readContext.appLocale,
+        }),
+      )
+      .catch(() => {
+        throw notFound();
+      });
+    return { post, readContext };
+  },
+  head: ({ loaderData }) =>
+    titleMeta(loaderData ? titleOfPost(loaderData.post) : null),
   component: PostThreadPage,
 });

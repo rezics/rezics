@@ -26,7 +26,7 @@ import { echoKvApi } from "./echokv";
 import { entityApi } from "./entity";
 import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
-import { feedApi } from "./feed";
+import { streamApi } from "./stream";
 import { feedbackApi } from "./feedback";
 import { gameSystemRequirementApi } from "./game-system-requirement";
 import { governanceApi } from "./governance";
@@ -50,6 +50,7 @@ import {
   realmExtraApi,
   realmTagApplicationApi,
   realmTagApplicationVoteApi,
+  realmTagApplicationVoteWithdrawApi,
   realmTagContextApi,
 } from "./realm";
 import { scoreApi } from "./score/score.api";
@@ -71,8 +72,8 @@ import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
 import { unitExternalLinkApi } from "./unit-external-link";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
-import { userTagApplicationApi } from "./user-tag-application";
 import { userShelfItemApi } from "./user-shelf-item";
+import { userTagApplicationApi } from "./user-tag-application";
 import { readDatabaseErrorDetails } from "./utils/database-error";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
@@ -216,7 +217,7 @@ routeApp
   .use(chapterApi)
   .use(pollApi)
   .use(postApi)
-  .use(feedApi)
+  .use(streamApi)
   .use(progressApi)
   .use(draftApi)
   .use(activityApi)
@@ -230,6 +231,7 @@ routeApp
   .use(realmTagContextApi)
   .use(realmTagApplicationApi)
   .use(realmTagApplicationVoteApi)
+  .use(realmTagApplicationVoteWithdrawApi)
   .use(creditAttributionApi)
   .use(subjectAttributionApi)
   .use(entityAttributionApi)

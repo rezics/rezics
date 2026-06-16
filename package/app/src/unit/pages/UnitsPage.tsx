@@ -226,7 +226,6 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
       limit: EXTERNAL_PAGE_SIZE,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
     };
   }
 

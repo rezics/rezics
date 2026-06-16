@@ -20,9 +20,10 @@ import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import {
   CONTENT_LANGUAGE_SLUGS,
-  LANGUAGE_META,
   type ContentLanguage,
+  LANGUAGE_META,
   normalizeContentLanguage,
+  type UserSubscriptionListSort,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -42,6 +43,10 @@ import { GripVerticalIcon, XIcon } from "lucide-react";
 import { type FC, useState } from "react";
 import { ContentRatingPreferences } from "@/user/components/ContentRatingPreferences";
 import { SettingsSection } from "@/user/components/SettingsSection";
+import {
+  normalizeSubscriptionListSort,
+  SUBSCRIPTION_LIST_SORTS,
+} from "@/user/models/subscriptionListOrdering";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
 type SortableLangItemProps = {
@@ -51,6 +56,22 @@ type SortableLangItemProps = {
 };
 
 const SUPPORTED_LANGUAGES: ContentLanguage[] = CONTENT_LANGUAGE_SLUGS;
+
+function subscriptionListSortLabel(
+  t: (key: string) => string,
+  sort: UserSubscriptionListSort,
+): string {
+  switch (sort) {
+    case "manualDesc":
+      return t("settings:preferences_subscription_lists_sort_manualDesc");
+    case "addedDesc":
+      return t("settings:preferences_subscription_lists_sort_addedDesc");
+    case "addedAsc":
+      return t("settings:preferences_subscription_lists_sort_addedAsc");
+    default:
+      return t("settings:preferences_subscription_lists_sort_manualAsc");
+  }
+}
 
 function getLanguageLabel(code: ContentLanguage): string {
   return LANGUAGE_META[code].nativeName;
@@ -202,6 +223,7 @@ export const SettingsPreferencesSection: FC = () => {
 
   const [langSuccess, setLangSuccess] = useState(false);
   const [moderationSuccess, setModerationSuccess] = useState(false);
+  const [subscriptionListSuccess, setSubscriptionListSuccess] = useState(false);
 
   const preferredLangs: ContentLanguage[] = settings?.preferredLanguages ?? [];
   const availableToAdd = SUPPORTED_LANGUAGES.filter(
@@ -257,6 +279,25 @@ export const SettingsPreferencesSection: FC = () => {
         onSuccess: () => {
           setModerationSuccess(true);
           setTimeout(() => setModerationSuccess(false), 2000);
+        },
+      },
+    );
+  };
+
+  const handleSubscriptionListSortChange = (
+    list: "zones" | "realms",
+    value: string,
+  ) => {
+    updateSettings.mutate(
+      {
+        subscriptionLists: {
+          [list]: { defaultSort: normalizeSubscriptionListSort(value) },
+        },
+      },
+      {
+        onSuccess: () => {
+          setSubscriptionListSuccess(true);
+          setTimeout(() => setSubscriptionListSuccess(false), 2000);
         },
       },
     );
@@ -386,6 +427,86 @@ export const SettingsPreferencesSection: FC = () => {
             </span>
           </span>
         </label>
+      </SettingsSection>
+
+      <SettingsSection
+        title={t("settings:preferences_subscription_lists_title")}
+        description={t("settings:preferences_subscription_lists_description")}
+      >
+        {subscriptionListSuccess && (
+          <Alert className="mb-3 text-success-text">
+            <AlertDescription>
+              {t("settings:preferences_subscription_lists_saved")}
+            </AlertDescription>
+          </Alert>
+        )}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-2">
+            <label
+              htmlFor="settings-zone-list-default-sort"
+              className="text-sm font-medium leading-ui"
+            >
+              {t("settings:preferences_subscription_lists_zones")}
+            </label>
+            <Select
+              value={normalizeSubscriptionListSort(
+                settings?.subscriptionLists?.zones?.defaultSort,
+              )}
+              onValueChange={(value) =>
+                handleSubscriptionListSortChange("zones", value)
+              }
+              disabled={updateSettings.isPending}
+            >
+              <SelectTrigger
+                id="settings-zone-list-default-sort"
+                className="w-full"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SUBSCRIPTION_LIST_SORTS.map((sort) => (
+                  <SelectItem key={sort} value={sort}>
+                    {subscriptionListSortLabel(t, sort)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex min-w-0 flex-col gap-2">
+            <label
+              htmlFor="settings-realm-list-default-sort"
+              className="text-sm font-medium leading-ui"
+            >
+              {t("settings:preferences_subscription_lists_realms")}
+            </label>
+            <Select
+              value={normalizeSubscriptionListSort(
+                settings?.subscriptionLists?.realms?.defaultSort,
+              )}
+              onValueChange={(value) =>
+                handleSubscriptionListSortChange("realms", value)
+              }
+              disabled={updateSettings.isPending}
+            >
+              <SelectTrigger
+                id="settings-realm-list-default-sort"
+                className="w-full"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SUBSCRIPTION_LIST_SORTS.map((sort) => (
+                  <SelectItem key={sort} value={sort}>
+                    {subscriptionListSortLabel(t, sort)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <p className="mt-3 text-sm leading-ui text-text-secondary">
+          {t("settings:preferences_subscription_lists_hint")}
+        </p>
       </SettingsSection>
 
       <SettingsSection

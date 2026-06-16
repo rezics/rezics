@@ -4,6 +4,7 @@ import type {
   UnitType,
 } from "@rezics/contract";
 import type { BookshelfItem } from "@/bookshelf-view";
+import { resumeRouteToHref } from "./resumeRoute";
 
 function libraryKindFromUnitType(unitType: UnitType): LibraryKind | null {
   if (unitType === "BOOK") return "book";
@@ -23,12 +24,11 @@ export function progressLibraryRowToBookshelfItem(
     kind,
     title: row.progressUnit.title || row.progressUnit.unitId,
     coverUrl: row.progressUnit.coverUrl ?? "",
-    href:
-      row.resumeRoute?.kind === "node"
-        ? `/book/${row.resumeRoute.bookId}/node/${row.resumeRoute.nodeId}`
-        : kind === "book"
-          ? `/book/${row.progressUnit.unitId}`
-          : `/unit/${row.progressUnit.unitId}`,
+    href: row.resumeRoute
+      ? resumeRouteToHref(row.resumeRoute)
+      : kind === "book"
+        ? `/book/${row.progressUnit.unitId}`
+        : `/unit/${row.progressUnit.unitId}`,
     isLicensed: true,
   };
   if (kind === "book" && row.progress.completedCount > 0) {

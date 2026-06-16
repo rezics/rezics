@@ -11,13 +11,13 @@ import {
 } from "@rezics/auth/db/schema";
 import { seedAuthUser } from "@rezics/auth/seed/seed-auth-user";
 import {
-  DEFAULT_REALM,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
+  DEFAULT_REALM,
   markdownContentDoc,
 } from "@rezics/contract";
 import { and, eq, inArray, like } from "drizzle-orm";
 import { ensureRegistrationDefaultSubscriptions } from "../../user/service/registration-defaults";
-import { Unit, User } from "../schema";
+import { Unit, User, UserPreference } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import {
   bootstrapSystemShelves,
@@ -169,10 +169,25 @@ export async function seedUsers(
           summary: plan.summary,
           description: markdownContentDoc(plan.description),
           joinDate: plan.joinDate,
-          settings: plan.settings,
           ...(plan.permission ? { permission: plan.permission } : {}),
         }),
       );
+
+      if (plan.settings?.publishing?.defaultLicenseSlug !== undefined) {
+        await ctx.db
+          .insert(UserPreference)
+          .values({
+            userId: authResult.userId,
+            defaultLicenseSlug: plan.settings.publishing.defaultLicenseSlug,
+          })
+          .onConflictDoUpdate({
+            target: UserPreference.userId,
+            set: {
+              defaultLicenseSlug: plan.settings.publishing.defaultLicenseSlug,
+              updatedAt: new Date(),
+            },
+          });
+      }
 
       await bootstrapSystemShelves(
         authResult.userId,

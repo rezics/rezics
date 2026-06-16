@@ -63,6 +63,7 @@ export {
   useUpdateRealmMutation,
   useUpdateRealmRulePolicyMutation,
   useUpdateRealmTagContextMutation,
+  useWithdrawRealmTagApplicationVoteMutation,
 } from "./realm.mutations";
 // Query Configurations
 // 查询配置
@@ -77,9 +78,9 @@ export {
   realmRulePolicyQuery,
   realmRuleResolvedQuery,
   realmSearchQuery,
+  realmTagApplicationsForUnitQuery,
   realmTagContextQuery,
 } from "./realm.queries";
-export { realmBySlugQuery, useRealmBySlug } from "./useRealmBySlug";
 // Types
 // 类型
 export type {
@@ -112,3 +113,4 @@ export type {
   UpdateRealmInput,
   UpdateRealmRulePolicyInput,
 } from "./realm.types";
+export { realmBySlugQuery, useRealmBySlug } from "./useRealmBySlug";

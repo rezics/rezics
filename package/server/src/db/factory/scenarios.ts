@@ -1867,8 +1867,8 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                           sections: [
                             {
                               id: "latest-edits-feed",
-                              kind: "feed",
-                              feedKind: "updates",
+                              kind: "stream",
+                              streamKind: "updates",
                               limit: 12,
                             },
                           ],
@@ -1886,6 +1886,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                               query: {
                                 target: "post",
                                 realm: "context",
+                                languages: "viewer",
                                 sort: { field: "hotScore", direction: "desc" },
                               },
                             },
@@ -1904,6 +1905,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                                 target: "unit",
                                 types: ["BOOK"],
                                 realm: "context",
+                                languages: "viewer",
                                 sort: {
                                   field: "publishedAt",
                                   direction: "desc",
@@ -2022,7 +2024,9 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
         config: {
           schema: "rezics/zone-page",
           version: 1,
-          sections: [{ id: "feed", kind: "feed", feedKind: "all", limit: 20 }],
+          sections: [
+            { id: "feed", kind: "stream", streamKind: "all", limit: 20 },
+          ],
         },
       },
     ],
@@ -2150,7 +2154,12 @@ async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
     .insert(UnitTag)
     .values(
       withUpdatedAtRows(
-        entityWikiPostIds.map((unitId) => ({ unitId, tagUnitId: seriesTagId })),
+        entityWikiPostIds.map((unitId) => ({
+          unitId,
+          tagUnitId: seriesTagId,
+          score: 1,
+          voteCount: 1,
+        })),
       ),
     )
     .onConflictDoNothing();

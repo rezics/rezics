@@ -16,11 +16,7 @@ const i18nMessages = {
 
 import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type {
-  EnrichedShelfItem,
-  ShelfSortState,
-  ShelfView,
-} from "@rezics/api/shelf";
+import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
   shelfItemsInfiniteQuery,
@@ -50,7 +46,7 @@ import { Pencil as EditIcon, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
@@ -141,8 +137,15 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const [readableOnly, setReadableOnly] = useState<boolean>(false);
   const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
+  const readContext = useReadLanguageContext();
 
-  const detailQuery = useQuery(shelfDetailQuery(unitId));
+  const detailQuery = useQuery({
+    ...shelfDetailQuery(unitId, {
+      languages: readContext.languages.join(",") || undefined,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && Boolean(unitId),
+  });
   const normalizedItemSearchText = itemSearchText.trim();
   const shelfItemsQuery = useMemo(
     () => ({
@@ -175,9 +178,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
       dedupeRelations(itemsData?.pages.flatMap((page) => page.relations) ?? []),
     [itemsData?.pages],
   );
-  const translation = shelf ? getTranslation(shelf.translations) : undefined;
-  const title = translation?.title ?? t("entity:shelf_title");
-  const description = contentDocMarkdownFallback(translation?.description);
+  const title = shelf?.title ?? t("entity:shelf_title");
+  const description = contentDocMarkdownFallback(shelf?.description);
 
   const savedViewMode = normalizePersistedViewMode(
     (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,

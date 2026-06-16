@@ -137,6 +137,18 @@ export const realmTagContextQuery = (realmUnitId: string, tagUnitId: string) =>
     staleTime: 1000 * 60 * 5,
   });
 
+export const realmTagApplicationsForUnitQuery = (
+  realmUnitId: string,
+  unitId: string,
+) =>
+  queryOptions({
+    queryKey: realmKeys.tagApplicationsForUnit(realmUnitId, unitId),
+    queryFn: () =>
+      realmApi.listRealmTagApplicationsForUnit(realmUnitId, unitId),
+    enabled: Boolean(realmUnitId && unitId),
+    staleTime: 1000 * 60,
+  });
+
 export const realmQueries = {
   list: realmListQuery,
   detail: realmDetailQuery,
@@ -149,4 +161,5 @@ export const realmQueries = {
   rulePolicy: realmRulePolicyQuery,
   ruleResolved: realmRuleResolvedQuery,
   tagContext: realmTagContextQuery,
+  tagApplicationsForUnit: realmTagApplicationsForUnitQuery,
 };

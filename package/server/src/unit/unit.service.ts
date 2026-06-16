@@ -29,10 +29,7 @@ import {
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
 import { Unit, UnitSupportLanguage, UnitTranslation, User } from "../db/schema";
-import {
-  primarySupportLanguageCreate,
-  resolveEffectiveReadLanguageCandidates,
-} from "./language-resolution";
+import { primarySupportLanguageCreate } from "./language-resolution";
 import {
   assertLicenseSlug,
   publicUnitEligibilityWhere,
@@ -169,22 +166,6 @@ export function buildUnitWhereClause(options: UnitListQuery): UnitFilterShape {
       translations: {
         some: { language: options.language },
       },
-    });
-  }
-
-  const readLanguages = resolveEffectiveReadLanguageCandidates({
-    languages: (options as { languages?: string | readonly string[] })
-      .languages,
-    appLocale: (options as { appLocale?: string }).appLocale,
-  });
-  if (options.languageMode === "preferred" && readLanguages.length > 0) {
-    andWhere.push({
-      OR: [
-        { isLanguageNeutral: true },
-        {
-          supportLanguages: { some: { language: { in: readLanguages } } },
-        },
-      ],
     });
   }
 
@@ -381,24 +362,6 @@ function createUnitListConditions(options: UnitListQuery) {
       WHERE tr."unitId" = ${Unit.id}
         AND tr."language" = ${options.language}
     )`);
-  }
-
-  const readLanguages = resolveEffectiveReadLanguageCandidates({
-    languages: (options as { languages?: string | readonly string[] })
-      .languages,
-    appLocale: (options as { appLocale?: string }).appLocale,
-  });
-  if (options.languageMode === "preferred" && readLanguages.length > 0) {
-    conditions.push(
-      or(
-        eq(Unit.isLanguageNeutral, true),
-        sql`EXISTS (
-          SELECT 1 FROM "UnitSupportLanguage" lang
-          WHERE lang."unitId" = ${Unit.id}
-            AND lang."language" IN ${readLanguages}
-        )`,
-      ),
-    );
   }
 
   if (options.rating) conditions.push(eq(Unit.rating, options.rating as never));

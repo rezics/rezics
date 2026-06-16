@@ -4,73 +4,29 @@ Repo-level automation lives under `tool/`. Application packages may expose env
 contracts and health checks, but runtime application code must not import helper
 modules from `tool/`.
 
-## Dev External Services
+## Dev Environment
 
-`tool/service` owns the repo-managed local dependency stack for
-PostgreSQL, Meilisearch, Sequin state PostgreSQL, Sequin Redis, and Sequin.
-This workflow requires Docker Compose v2 through `docker compose`; Podman,
-podman-compose, and docker-compose v1 are not supported.
-
-```sh
-cp tool/.env.example tool/.env
-```
-
-Set real local values for `SECRET_KEY_BASE` and `VAULT_KEY` before starting
-Sequin. `SEQUIN_WEBHOOK_SECRET` must match `package/job-runner/.env`.
+The local development stack (PostgreSQL, Meilisearch, Redis, RustFS, Sequin)
+is managed by Nomad through `deploy/dev/`. `task dev` starts everything —
+infrastructure as Docker containers plus application dev servers as raw_exec
+tasks.
 
 ```sh
-task service:up
-task service:health
-task service:ps
-task service:logs
-task service -- logs --tail=200 sequin
-task service:down
+task dev                 # start full dev environment
+task dev:stop            # stop all services
+task dev:status          # show service status
+task dev:logs -- server  # follow logs for a specific task
 ```
 
-The managed source Postgres container starts with logical replication enabled:
-`wal_level=logical`, `max_replication_slots=10`, and `max_wal_senders=10`.
-On a fresh Docker volume it also creates the local development databases used
-by package env examples: `rezics_server`, `rezics_auth`, `rezics_jobs`,
-`rezics_history`, `rezics_notify`, and `reaction`. Schema-owning package
-migrations run through the repo `db:*` tooling; `job-runner` only runs
-`db:ensure` because pg-boss owns its internal schema.
-
-Validate the compose plan without starting services:
-
-```sh
-task service -- config plan
-```
+### CDC Verification
 
 Verify every Sequin CDC source database after startup:
 
 ```sh
-task service -- cdc verify
+task cdc:verify
+task cdc:repair -- --source=reaction
+task cdc:recover           # repair + restart Sequin via Nomad + verify
 ```
-
-Use recovery for existing, external, or broken local CDC sources. Recovery stops
-Sequin, repairs the selected source publication/slot, starts Sequin again, and
-verifies the source state:
-
-```sh
-task service -- cdc recover
-task service -- cdc recover --source=reaction
-task service -- cdc recover --source=reaction --force-active-slot
-```
-
-`task service -- source repair` is a legacy main/source-only repair command;
-prefer `cdc recover` so reaction CDC is not skipped. Low-level repair can
-recreate local Sequin publications and replication slots. If it changes
-Postgres settings with `ALTER SYSTEM`, restart that Postgres instance and verify
-again. The repair path is not part of the fresh managed Docker happy path.
-
-User-managed PostgreSQL, Meilisearch, Redis, or Sequin instances remain manual.
-Point package env files at them yourself and avoid `service` commands for
-those services. The managed Docker workflow only starts, stops, inspects, and
-repairs the repo Docker Compose project; it will not stop host services or
-unrelated containers. If a default port is already in use, stop the conflicting
-service manually or override the published port in `tool/.env`.
-
-Use `task service -- ...` for the repo-managed local Docker workflow.
 
 ## Browser Inspect Workbench
 
@@ -92,10 +48,5 @@ manual DOM/CSS copying.
 
 ## Deploy
 
-Production deploys as Docker images via Nomad (job specs in `nomad/jobs/`,
-workflows in `.github/workflows/`), with static frontends on Cloudflare Pages.
+Docker images are built and pushed to GHCR by `.github/workflows/build-images.yml`.
 See [`docs/guide/deployment.md`](../docs/guide/deployment.md).
-
-```sh
-bin/nomad-deploy <git-sha>   # secrets → infra → migrate → services → workers → backfill
-```

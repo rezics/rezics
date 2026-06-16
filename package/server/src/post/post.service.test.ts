@@ -67,44 +67,13 @@ const postFindUniqueOrThrowMock = mock(
 );
 const postFindFirstMock = mock(async () => null);
 const postUpdateManyMock = mock(async () => ({ count: 1 }));
-let lastReadLanguageCandidates: string[] = [];
 
 mock.module("@/unit/language-resolution", () => ({
-  preferredLanguageVisibilityWhere: (input: {
-    languageMode?: string | null;
-    languages?: readonly string[] | null;
-  }) =>
-    input.languageMode === "preferred" && input.languages?.length
-      ? {
-          OR: [
-            { isLanguageNeutral: true },
-            {
-              supportLanguages: {
-                some: { language: { in: [...input.languages] } },
-              },
-            },
-          ],
-        }
-      : undefined,
   primarySupportLanguageCreate: (language: string) => ({
     language,
     isPrimary: true,
     position: "a",
   }),
-  resolveEffectiveReadLanguageCandidates: (input: {
-    explicitLanguage?: string | null;
-    language?: string | null;
-    languages?: string | readonly string[] | null;
-  }) => {
-    const raw = input.languages ?? input.explicitLanguage ?? input.language;
-    const parts = typeof raw === "string" ? raw.split(",") : [...(raw ?? [])];
-    lastReadLanguageCandidates = [
-      ...new Set(
-        parts.map((language) => language.trim().toLowerCase()).filter(Boolean),
-      ),
-    ];
-    return lastReadLanguageCandidates;
-  },
   resolveUnitAuthoringLanguage: (input: {
     explicitLanguage?: string | null;
     appLocale?: string | null;
@@ -482,25 +451,6 @@ function pseudoPostQueryArgs(input: {
   if (targetUnitId) unitWhere.targetUnitId = targetUnitId;
 
   if (strings.includes("variant-1")) where.variantUnitId = "variant-1";
-
-  const languageValues =
-    lastReadLanguageCandidates.length > 0
-      ? lastReadLanguageCandidates
-      : strings.filter((value) => ["ja", "en"].includes(value));
-  if (languageValues.length > 0) {
-    unitWhere.AND = [
-      {
-        OR: [
-          { isLanguageNeutral: true },
-          {
-            supportLanguages: {
-              some: { language: { in: [...new Set(languageValues)] } },
-            },
-          },
-        ],
-      },
-    ];
-  }
 
   const tagFilterValues =
     lastTagFilterForRecorder.length > 0
@@ -947,7 +897,7 @@ function createFakeSelect(
               )) ?? 0,
           },
         ];
-      if (keys.length === 1 && selection?.unitId) {
+      if (selection?.unitId) {
         const rows =
           (await legacy.post?.findMany?.(
             pseudoPostQueryArgs({
@@ -958,7 +908,12 @@ function createFakeSelect(
               take,
             }),
           )) ?? [];
-        return rows.map((row: any) => ({ unitId: row.unitId ?? "post-1" }));
+        return rows.map((row: any) => ({
+          unitId: row.unitId ?? "post-1",
+          ...(selection.sortValue
+            ? { sortValue: row.streamSortValue ?? 0 }
+            : {}),
+        }));
       }
       const ids =
         strings.length > 0
@@ -1318,7 +1273,6 @@ function resetMocks() {
   lastPostRows.clear();
   lastRealmRead = null;
   lastPostPollReferenceIds = [];
-  lastReadLanguageCandidates = [];
   lastBlockedAuthorIds = [];
   lastStateBucketForRecorder = null;
   lastTagFilterForRecorder = [];
@@ -1867,7 +1821,7 @@ describe("PostService.byRealm", () => {
     });
   });
 
-  test("regular callers cannot read private realm feeds without membership", async () => {
+  test("regular callers cannot read private realm streams without membership", async () => {
     resetMocks();
     realmFindUniqueMock.mockResolvedValueOnce({
       isPublic: false,
@@ -1882,7 +1836,7 @@ describe("PostService.byRealm", () => {
     expect(postCountMock).not.toHaveBeenCalled();
   });
 
-  test("active members can read private realm feeds", async () => {
+  test("active members can read private realm streams", async () => {
     resetMocks();
     realmFindUniqueMock.mockResolvedValueOnce({
       isPublic: false,
@@ -1916,7 +1870,7 @@ describe("PostService.byRealm", () => {
     expect(postFindManyMock).not.toHaveBeenCalled();
   });
 
-  test("admin realm feed can include every relation moderation state", async () => {
+  test("admin realm stream can include every relation moderation state", async () => {
     resetMocks();
 
     await service.byRealm("realm-1", {}, { isAdmin: true });
@@ -1926,7 +1880,7 @@ describe("PostService.byRealm", () => {
     });
   });
 
-  test("admin realm feed can filter pending relation moderation rows", async () => {
+  test("admin realm stream can filter pending relation moderation rows", async () => {
     resetMocks();
 
     await service.byRealm(
@@ -1940,7 +1894,7 @@ describe("PostService.byRealm", () => {
     });
   });
 
-  test("admin realm feed can filter approved relation moderation rows", async () => {
+  test("admin realm stream can filter approved relation moderation rows", async () => {
     resetMocks();
 
     await service.byRealm(
@@ -1979,52 +1933,28 @@ describe("PostService.byRealm", () => {
     expect(where.variantUnitId).toBe("variant-1");
   });
 
-  test("preferred post list filtering uses Unit support-language availability", async () => {
+  test("post list read-language candidates do not filter support-language availability", async () => {
     resetMocks();
 
     await service.list({
-      languageMode: "preferred",
       languages: "ja,en",
     });
 
-    expect(firstPostFindManyArgs().where.unit.AND).toEqual([
-      {
-        OR: [
-          { isLanguageNeutral: true },
-          {
-            supportLanguages: {
-              some: { language: { in: ["ja", "en"] } },
-            },
-          },
-        ],
-      },
-    ]);
+    expect(firstPostFindManyArgs().where.unit?.AND).toBeUndefined();
     expect((postCountMock.mock.calls as any[])[0]?.[0].where).toEqual(
       firstPostFindManyArgs().where,
     );
   });
 
-  test("realm feed preferred filtering composes with UnitRealm visibility", async () => {
+  test("realm stream read-language candidates do not filter UnitRealm visibility", async () => {
     resetMocks();
 
     await service.byRealm("realm-1", {
-      languageMode: "preferred",
       languages: ["ja", "en"] as any,
     });
 
     const unitWhere = firstPostFindManyArgs().where.unit;
-    expect(unitWhere.AND).toEqual([
-      {
-        OR: [
-          { isLanguageNeutral: true },
-          {
-            supportLanguages: {
-              some: { language: { in: ["ja", "en"] } },
-            },
-          },
-        ],
-      },
-    ]);
+    expect(unitWhere.AND).toBeUndefined();
     expect(unitWhere.inRealms).toEqual({
       some: {
         realmUnitId: "realm-1",
@@ -2036,7 +1966,7 @@ describe("PostService.byRealm", () => {
     );
   });
 
-  test("general post feeds do not carry root-only guards", async () => {
+  test("general post lists do not carry root-only guards", async () => {
     resetMocks();
 
     await service.list({});
@@ -2092,7 +2022,7 @@ describe("PostService.byRealm", () => {
     ]);
   });
 
-  test("hides blocked authors in realm feeds", async () => {
+  test("hides blocked authors in realm streams", async () => {
     resetMocks();
     blockedUserIdsMock.mockResolvedValueOnce(["blocked-user-1"]);
 

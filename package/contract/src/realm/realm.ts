@@ -335,6 +335,7 @@ export const realmTagApplicationDTOSchema = t.Object({
   unitId: t.String(),
   score: t.Number(),
   voteCount: t.Number(),
+  viewerVote: t.Optional(t.Nullable(t.Number())),
   pinned: t.Boolean(),
   position: t.Optional(t.Nullable(t.String())),
   belowVisibilityThreshold: t.Optional(t.Boolean()),

@@ -17,8 +17,9 @@ import { FALLBACK_LANGUAGE, mainMarkdownSource } from "@rezics/contract";
 /**
  * Get the user's preferred languages from settings.
  * 从设置中获取用户的首选语言。
- * Returns empty array as placeholder — will be wired to User.settings.preferredLanguages.
- * 当前返回空数组作为占位 —— 将来会接入 User.settings.preferredLanguages。
+ * Returns empty array as placeholder — will be wired to the user settings API's
+ * preferred language list.
+ * 当前返回空数组作为占位 —— 将来会接入 user settings API 的首选语言列表。
  */
 export function getUserPreferredLanguages(): string[] {
   return [];

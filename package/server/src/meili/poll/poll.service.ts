@@ -1,5 +1,4 @@
 import type { PollSearchOptions, PollSearchResult } from "@rezics/contract";
-import { buildPreferredLanguageFilter } from "../search/filters";
 import { searchClient } from "../search-client";
 
 export async function searchPolls(
@@ -17,11 +16,6 @@ export async function searchPolls(
   if (typeof opts.closed === "boolean") {
     filter.push(`closed = ${opts.closed}`);
   }
-  const languageFilter = buildPreferredLanguageFilter(opts);
-  if (languageFilter) {
-    filter.push(languageFilter);
-  }
-
   const sort: string[] = [];
   if (opts.sort?.field && opts.sort.field !== "relevance") {
     const order = opts.sort.order ?? "desc";

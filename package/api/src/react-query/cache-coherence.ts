@@ -7,13 +7,13 @@ import type { QueryClient, QueryKey } from "@tanstack/react-query";
 //
 // A single source of truth declaring which query-key namespaces each
 // mutation domain must invalidate so detail, profile, progress, search,
-// realm-feed, and the per-book node-completion list stay consistent after
+// realm-stream, and the per-book node-completion list stay consistent after
 // a write. Mutations route their `onSuccess` invalidation through
 // `invalidateForCacheDomain` instead of hand-listing keys, so adding a new
 // cross-cutting surface only requires editing this map.
 //
 // 单一事实来源，声明每个 mutation 域必须失效哪些 query-key 命名空间，
-// 以便写入后 detail、profile、progress、search、realm-feed 以及按书的
+// 以便写入后 detail、profile、progress、search、realm-stream 以及按书的
 // node-completion 列表保持一致。Mutations 通过 `invalidateForCacheDomain`
 // 路由其 `onSuccess` 失效，而非手工列举各 key，因此新增一个横切面只需
 // 编辑此 map。
@@ -26,7 +26,7 @@ export const CACHE_NAMESPACE_ROOTS = {
   detail: ["books"],
   profile: ["users"],
   search: ["search"],
-  realmFeed: ["realms"],
+  realmStream: ["realms"],
   realmMembership: ["realms"],
   bookNodeCompletionList: ["progress", "nodeCompletion"],
   progress: ["progress"],
@@ -68,7 +68,7 @@ export type CacheMutationDomain =
 export const CACHE_COHERENCE_MAP = {
   "shelf-item": ["detail", "profile", "search", "shelves", "shelfItemStatus"],
   follow: ["detail", "profile", "subscription"],
-  reaction: ["detail", "profile", "realmFeed", "search"],
+  reaction: ["detail", "profile", "realmStream", "search"],
   progress: ["detail", "profile", "progress"],
   "node-completion": [
     "detail",
@@ -78,7 +78,7 @@ export const CACHE_COHERENCE_MAP = {
   ],
   draft: ["drafts"],
   dm: ["dm"],
-  "realm-membership": ["profile", "realmFeed", "realmMembership"],
+  "realm-membership": ["profile", "realmStream", "realmMembership"],
   report: ["notifications"],
 } as const satisfies Record<CacheMutationDomain, readonly CacheNamespace[]>;
 

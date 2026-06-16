@@ -1,5 +1,7 @@
 import { entityBySlugQueryOptions } from "@rezics/api/entity";
 import { isPublicEntitySlugRouteParams } from "@rezics/contract";
+import { titleMeta, titleOfEntity } from "@/core/routing/documentTitle";
+import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 import {
   createFileRoute,
   lazyRouteComponent,
@@ -19,13 +21,20 @@ const EntityDetailPage = lazyRouteComponent(
 export const Route = createFileRoute("/_mainLayout/e/$entitySlug")({
   loader: async ({ params, context }) => {
     if (!isPublicEntitySlugRouteParams(params)) throw notFound();
+    const readContext = await resolveRouteReadLanguageContext(context.qc);
     const entity = await context.qc
       .ensureQueryData(entityBySlugQueryOptions(params.entitySlug))
       .catch(() => {
         throw notFound();
       });
-    return { unitId: entity.unitId };
+    return { entity, readContext, unitId: entity.unitId };
   },
+  head: ({ loaderData }) =>
+    titleMeta(
+      loaderData
+        ? titleOfEntity(loaderData.entity, loaderData.readContext)
+        : null,
+    ),
   component: () => {
     const { unitId } = Route.useLoaderData();
     return <EntityDetailPage unitId={unitId} />;

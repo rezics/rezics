@@ -11,40 +11,32 @@ workspaces; packages live under `package/`.
 
 ## Development Setup
 
-**Prerequisites:** Bun, Zellij, Nomad (local agent for dev infrastructure)
+**Prerequisites:** Bun, Docker, devenv (provides Nomad + Nomad Pack via Nix)
 
 ```bash
 bun install              # install workspace deps (Bun is the package manager)
 task                     # list every task (task --list)
-task dev                 # Start all dev processes (zellij)
-task devenv:up           # Start all dev processes (devenv process-compose)
-task app:dev             # Frontend only (Vite, port 35001)
-task server:dev          # Backend only (Elysia with --watch)
-task history:dev         # History service only (Elysia, port 3004)
+task dev                 # start full dev environment (Nomad: infra + app services)
+task dev:stop            # stop all services
+task dev:status          # show service status
+task dev:logs -- server  # follow logs for a specific task
+task app:dev             # frontend only (Vite, port 35001)
+task server:dev          # backend only (Elysia with --watch)
 ```
 
-`task dev` starts application processes only. It does not provision external
-dependencies such as PostgreSQL, Meilisearch, Redis, object storage, or Sequin.
-Infrastructure runs as Nomad jobs (`nomad/jobs/infra-*.nomad.hcl`) on a local
-Nomad agent.
+`task dev` starts the full development environment through Nomad
+(`deploy/dev/`). Infrastructure (PostgreSQL, Meilisearch, Redis, RustFS,
+Sequin) runs as Docker containers managed by Nomad. Application dev servers
+(server, auth, notify, etc.) run as raw_exec tasks with filesystem watch.
 
 If the source database comes from an old or manually modified volume, verify CDC
 readiness first:
 
 ```bash
 task cdc:verify
-task cdc:repair                        # repair publications and replication slots
 task cdc:repair -- --source=reaction   # repair reaction source only
+task cdc:recover                       # end-to-end: repair + restart Sequin + verify
 ```
-
-Start any other required external services first, then start the dependent
-application process. A service failing fast because an external dependency is
-unavailable is expected behavior when the error points at the missing service
-and setup command.
-
-The local dev layout keeps `@rezics/job-runner` eligible to auto-start. If its
-`http` or `all` role needs Sequin, start the managed services first or use
-`JOB_RUNNER_ROLE=worker` for queue draining without webhook ingress.
 
 ## Git Workflow
 

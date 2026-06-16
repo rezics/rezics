@@ -1,4 +1,4 @@
-import type { FeedQuery } from "@rezics/api/feed/feed";
+import type { StreamQuery } from "@rezics/api/stream/stream";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Select,
@@ -12,14 +12,14 @@ import {
 import type React from "react";
 import { useMemo, useState } from "react";
 import { MainContentContainer } from "@/core";
-import { FeedLayout, FeedSection } from "@/feed";
+import { StreamLayout, StreamSection } from "@/stream";
 
 export type HomeProps = object;
 
-type HomeFeedSort = NonNullable<FeedQuery["sort"]>;
-type HomeFeedType = NonNullable<FeedQuery["filterType"]>;
+type HomeStreamSort = NonNullable<StreamQuery["sort"]>;
+type HomeStreamType = NonNullable<StreamQuery["filterType"]>;
 
-const HOME_FEED_SORT_OPTIONS: readonly HomeFeedSort[] = [
+const HOME_STREAM_SORT_OPTIONS: readonly HomeStreamSort[] = [
   "best",
   "hot",
   "new",
@@ -27,7 +27,7 @@ const HOME_FEED_SORT_OPTIONS: readonly HomeFeedSort[] = [
   "rising",
 ];
 
-const HOME_FEED_TYPE_OPTIONS: readonly HomeFeedType[] = [
+const HOME_STREAM_TYPE_OPTIONS: readonly HomeStreamType[] = [
   "all",
   "book",
   "game",
@@ -38,43 +38,43 @@ const HOME_FEED_TYPE_OPTIONS: readonly HomeFeedType[] = [
   "zone",
 ];
 
-const SORT_I18N_KEYS: Record<HomeFeedSort, string> = {
-  best: "entity:realm_feed_sort_best",
-  hot: "entity:realm_feed_sort_hot",
-  new: "entity:realm_feed_sort_new",
-  top: "entity:realm_feed_sort_top",
-  rising: "entity:realm_feed_sort_rising",
+const SORT_I18N_KEYS: Record<HomeStreamSort, string> = {
+  best: "entity:stream_sort_best",
+  hot: "entity:stream_sort_hot",
+  new: "entity:stream_sort_new",
+  top: "entity:stream_sort_top",
+  rising: "entity:stream_sort_rising",
 };
 
-const TYPE_I18N_KEYS: Record<HomeFeedType, string> = {
-  all: "page:home_feed_type_all",
-  book: "page:home_feed_type_book",
-  game: "page:home_feed_type_game",
-  media: "page:home_feed_type_media",
-  post: "page:home_feed_type_post",
-  review: "page:home_feed_type_review",
-  realm: "page:home_feed_type_realm",
-  zone: "page:home_feed_type_zone",
+const TYPE_I18N_KEYS: Record<HomeStreamType, string> = {
+  all: "page:home_stream_type_all",
+  book: "page:home_stream_type_book",
+  game: "page:home_stream_type_game",
+  media: "page:home_stream_type_media",
+  post: "page:home_stream_type_post",
+  review: "page:home_stream_type_review",
+  realm: "page:home_stream_type_realm",
+  zone: "page:home_stream_type_zone",
 };
 
 export const Home: React.FC<HomeProps> = () => {
   const { t } = useTranslation(["entity", "page"]);
-  const [sort, setSort] = useState<HomeFeedSort>("best");
-  const [type, setType] = useState<HomeFeedType>("all");
-  const feedQuery = useMemo(
+  const [sort, setSort] = useState<HomeStreamSort>("best");
+  const [type, setType] = useState<HomeStreamType>("all");
+  const streamQuery = useMemo(
     () =>
       ({
         scope: "home",
         sort,
         filterType: type,
         limit: 12,
-      }) satisfies FeedQuery,
+      }) satisfies StreamQuery,
     [sort, type],
   );
 
   return (
     <MainContentContainer className="mb-16 space-y-6 pt-6 md:pt-8">
-      <FeedLayout>
+      <StreamLayout>
         <section>
           <div className="w-full">
             <div className="space-y-2 mb-4">
@@ -89,24 +89,24 @@ export const Home: React.FC<HomeProps> = () => {
             </div>
           </div>
         </section>
-      </FeedLayout>
+      </StreamLayout>
 
-      <FeedLayout>
+      <StreamLayout>
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-start">
           <Select
             value={sort}
-            onValueChange={(next) => setSort(next as HomeFeedSort)}
+            onValueChange={(next) => setSort(next as HomeStreamSort)}
           >
             <SelectTrigger
               className="w-full sm:w-40"
-              aria-label={t("entity:realm_feed_sort_label")}
+              aria-label={t("entity:stream_sort_label")}
             >
               <SelectValue>{t(SORT_I18N_KEYS[sort])}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>{t("entity:realm_feed_sort_label")}</SelectLabel>
-                {HOME_FEED_SORT_OPTIONS.map((option) => (
+                <SelectLabel>{t("entity:stream_sort_label")}</SelectLabel>
+                {HOME_STREAM_SORT_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
                     {t(SORT_I18N_KEYS[option])}
                   </SelectItem>
@@ -116,18 +116,18 @@ export const Home: React.FC<HomeProps> = () => {
           </Select>
           <Select
             value={type}
-            onValueChange={(next) => setType(next as HomeFeedType)}
+            onValueChange={(next) => setType(next as HomeStreamType)}
           >
             <SelectTrigger
               className="w-full sm:w-40"
-              aria-label={t("page:home_feed_type_label")}
+              aria-label={t("page:home_stream_type_label")}
             >
               <SelectValue>{t(TYPE_I18N_KEYS[type])}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>{t("page:home_feed_type_label")}</SelectLabel>
-                {HOME_FEED_TYPE_OPTIONS.map((option) => (
+                <SelectLabel>{t("page:home_stream_type_label")}</SelectLabel>
+                {HOME_STREAM_TYPE_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
                     {t(TYPE_I18N_KEYS[option])}
                   </SelectItem>
@@ -136,8 +136,8 @@ export const Home: React.FC<HomeProps> = () => {
             </SelectContent>
           </Select>
         </div>
-        <FeedSection query={feedQuery} />
-      </FeedLayout>
+        <StreamSection query={streamQuery} />
+      </StreamLayout>
     </MainContentContainer>
   );
 };

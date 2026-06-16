@@ -8,10 +8,13 @@ import {
   contentTranslationStatusValues,
   feedbackTypeValues,
   mainEmailVerificationContractStatusValues,
+  NOTIFICATION_PREFERENCE_KEYS,
+  PROFILE_FIELD_VISIBILITIES,
   pinKindValues,
   pollResultVisibilityValues,
   pollVoteModeValues,
   postKindValues,
+  USER_SUBSCRIPTION_LIST_SORTS,
   unitAliasKindValues,
   unitAliasStatusValues,
   unitStatusValues,
@@ -111,7 +114,21 @@ const expectedSchemaExports = [
   "UnitVisibility",
   "User",
   "UserBlock",
+  "UserContentRatingPreference",
   "UserContentNodeProgress",
+  "UserNotificationPreference",
+  "UserNotificationPreferenceChannel",
+  "UserNotificationPreferenceKind",
+  "UserPreference",
+  "UserPreferredLanguage",
+  "UserPrivacyPreference",
+  "UserPrivacyPreferenceField",
+  "UserProfileFieldVisibility",
+  "UserRealmTagDisplayPreference",
+  "UserRealmTagDisplayRealm",
+  "UserSubscriptionListPreference",
+  "UserSubscriptionListPreferenceKind",
+  "UserSubscriptionListSortPreference",
   "UserSubscriptionListEntry",
   "UserSubscriptionListEntryState",
   "UserTagApplication",
@@ -217,6 +234,15 @@ describe("server Drizzle schema exports", () => {
     ]);
     expect(schema.ContentTranslationStatus.enumValues).toEqual([
       ...contentTranslationStatusValues,
+    ]);
+    expect(schema.UserNotificationPreferenceKind.enumValues).toEqual([
+      ...NOTIFICATION_PREFERENCE_KEYS,
+    ]);
+    expect(schema.UserProfileFieldVisibility.enumValues).toEqual([
+      ...PROFILE_FIELD_VISIBILITIES,
+    ]);
+    expect(schema.UserSubscriptionListSortPreference.enumValues).toEqual([
+      ...USER_SUBSCRIPTION_LIST_SORTS,
     ]);
   });
 

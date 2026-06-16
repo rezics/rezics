@@ -1,0 +1,36 @@
+# Main API server image. Owns the primary schema; compiles the cluster
+# entrypoint (src/cluster.ts). Drizzle migrations run through db tooling,
+# not during image build.
+#
+#   docker build -f Dockerfile.base -t rezics-base:dev .
+#   docker build -f Dockerfile.server -t rezics-server:dev .
+
+# --- build stage -----------------------------------------------------------
+ARG BASE_IMAGE=rezics-base:dev
+FROM ${BASE_IMAGE} AS build
+WORKDIR /repo/package/server
+
+# Compile the linux-x64 binary inline (mirrors `task server:build:linux`).
+RUN bun build src/cluster.ts --compile --minify-whitespace --minify-syntax \
+  --target bun-linux-x64 --outfile server
+
+# --- runtime stage ---------------------------------------------------------
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd --system --uid 10001 --no-create-home rezics
+WORKDIR /app
+
+COPY --from=build /repo/package/server/server /app/server
+
+USER rezics
+ENV PORT=3000
+# Cluster worker count; the cluster entrypoint defaults sensibly when unset.
+ENV WORKERS=""
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS "http://127.0.0.1:${PORT}/health" || exit 1
+
+ENTRYPOINT ["/app/server"]

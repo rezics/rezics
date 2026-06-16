@@ -273,7 +273,6 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           limit: EXTERNAL_PAGE_SIZE,
           languages: readContext.languages,
           appLocale: readContext.appLocale,
-          languageMode: readContext.languageMode,
         }),
       );
       return result?.items?.length ?? 0;
@@ -289,7 +288,6 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           limit: EXTERNAL_PAGE_SIZE,
           languages: readContext.languages,
           appLocale: readContext.appLocale,
-          languageMode: readContext.languageMode,
         }),
       );
       return result?.items?.length ?? 0;
@@ -315,7 +313,6 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         limit: EXTERNAL_PAGE_SIZE,
         languages: readContext.languages,
         appLocale: readContext.appLocale,
-        languageMode: readContext.languageMode,
       }),
     );
     return result?.items?.length ?? 0;

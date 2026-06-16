@@ -8,7 +8,6 @@ type PostReadQuery = {
   explicitLanguage?: string;
   languages?: string | readonly string[];
   appLocale?: string;
-  languageMode?: "preferred" | "all";
 };
 
 export type PostByTargetFilters = Omit<PostFilters, "targetUnitId">;

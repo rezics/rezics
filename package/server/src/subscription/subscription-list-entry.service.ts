@@ -1,14 +1,16 @@
 import type {
   UserSubscriptionListEntryDTO,
   UserSubscriptionListEntryState,
+  UserSubscriptionListSort,
 } from "@rezics/contract";
-import { isSubscribableUnitType } from "@rezics/contract";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { isSubscribableUnitType, resolveReadLanguage } from "@rezics/contract";
+import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
 import {
   Realm,
   RealmMember,
   Subscription,
   Unit,
+  UnitSupportLanguage,
   UnitTranslation,
   User,
   UserSubscriptionListEntry,
@@ -19,6 +21,10 @@ import { mapUserSubscriptionListEntryToDTO } from "./subscription.mapper";
 
 type EntryRow = typeof UserSubscriptionListEntry.$inferSelect;
 type UnitType = typeof Unit.$inferSelect.type;
+type ListEntryRow = EntryRow & {
+  subscribedSlug?: string | null;
+  subscribedTitle?: string | null;
+};
 
 async function getServerDb() {
   const { db } = await import("../db/client");
@@ -62,6 +68,38 @@ async function getSubscribedType(
     });
   }
   return unit.type;
+}
+
+function orderSubscriptionListEntries(
+  sort: UserSubscriptionListSort = "manualAsc",
+) {
+  const pinnedFirst = desc(UserSubscriptionListEntry.pinned);
+  switch (sort) {
+    case "manualDesc":
+      return [
+        pinnedFirst,
+        desc(UserSubscriptionListEntry.position),
+        desc(UserSubscriptionListEntry.createdAt),
+      ];
+    case "addedDesc":
+      return [
+        pinnedFirst,
+        desc(UserSubscriptionListEntry.createdAt),
+        desc(UserSubscriptionListEntry.position),
+      ];
+    case "addedAsc":
+      return [
+        pinnedFirst,
+        asc(UserSubscriptionListEntry.createdAt),
+        asc(UserSubscriptionListEntry.position),
+      ];
+    default:
+      return [
+        pinnedFirst,
+        asc(UserSubscriptionListEntry.position),
+        asc(UserSubscriptionListEntry.createdAt),
+      ];
+  }
 }
 
 export async function activateSubscriptionListEntryInTx(
@@ -169,8 +207,14 @@ export class SubscriptionListEntryService {
     userUnitId: string;
     subscribedType?: UnitType;
     state?: UserSubscriptionListEntryState;
-  }): Promise<UserSubscriptionListEntryDTO[]> {
+    sort?: UserSubscriptionListSort;
+    start?: number | string | null;
+    limit?: number | string | null;
+    preferredLanguages?: readonly string[];
+  }): Promise<{ entries: UserSubscriptionListEntryDTO[]; total: number }> {
     const db = await this.dbProvider();
+    const offset = Math.max(0, Number(input.start ?? 0) || 0);
+    const limit = Math.min(Math.max(Number(input.limit ?? 100) || 100, 1), 100);
     const conditions = [
       eq(UserSubscriptionListEntry.userUnitId, input.userUnitId),
       eq(UserSubscriptionListEntry.state, input.state ?? "ACTIVE"),
@@ -180,35 +224,176 @@ export class SubscriptionListEntryService {
         eq(UserSubscriptionListEntry.subscribedType, input.subscribedType),
       );
     }
-    const rows = await db
+    const where = and(...conditions);
+    const [entryRows, totalRows] = await Promise.all([
+      db
+        .select({
+          entry: UserSubscriptionListEntry,
+          subscribedSlug: Unit.slug,
+        })
+        .from(UserSubscriptionListEntry)
+        .innerJoin(
+          Unit,
+          eq(UserSubscriptionListEntry.subscribedUnitId, Unit.id),
+        )
+        .where(where)
+        .orderBy(...orderSubscriptionListEntries(input.sort))
+        .offset(offset)
+        .limit(limit),
+      db
+        .select({ total: count() })
+        .from(UserSubscriptionListEntry)
+        .innerJoin(
+          Unit,
+          eq(UserSubscriptionListEntry.subscribedUnitId, Unit.id),
+        )
+        .where(where),
+    ]);
+
+    if (entryRows.length === 0) {
+      return { entries: [], total: totalRows[0]?.total ?? 0 };
+    }
+
+    const subscribedUnitIds = entryRows.map(
+      (row) => row.entry.subscribedUnitId,
+    );
+    const detailRows = await db
       .select({
-        entry: UserSubscriptionListEntry,
-        subscribedSlug: Unit.slug,
+        subscribedUnitId: UserSubscriptionListEntry.subscribedUnitId,
+        subscribedLanguage: UnitTranslation.language,
         subscribedTitle: UnitTranslation.title,
+        supportLanguage: UnitSupportLanguage.language,
+        supportLanguageIsPrimary: UnitSupportLanguage.isPrimary,
+        supportLanguagePosition: UnitSupportLanguage.position,
       })
       .from(UserSubscriptionListEntry)
-      .innerJoin(Unit, eq(UserSubscriptionListEntry.subscribedUnitId, Unit.id))
       .leftJoin(
         UnitTranslation,
         eq(UnitTranslation.unitId, UserSubscriptionListEntry.subscribedUnitId),
       )
-      .where(and(...conditions))
-      .orderBy(
-        desc(UserSubscriptionListEntry.pinned),
-        asc(UserSubscriptionListEntry.position),
-        asc(UserSubscriptionListEntry.createdAt),
+      .leftJoin(
+        UnitSupportLanguage,
+        eq(
+          UnitSupportLanguage.unitId,
+          UserSubscriptionListEntry.subscribedUnitId,
+        ),
+      )
+      .where(
+        and(
+          eq(UserSubscriptionListEntry.userUnitId, input.userUnitId),
+          inArray(
+            UserSubscriptionListEntry.subscribedUnitId,
+            subscribedUnitIds,
+          ),
+        ),
       );
+    const grouped = new Map<
+      string,
+      {
+        entry: ListEntryRow;
+        subscribedSlug: string | null;
+        translations: Map<string, string | null>;
+        supportLanguages: Map<
+          string,
+          {
+            language: string;
+            isPrimary?: boolean | null;
+            position?: string | null;
+          }
+        >;
+      }
+    >();
+
+    for (const row of entryRows) {
+      grouped.set(row.entry.id, {
+        entry: row.entry,
+        subscribedSlug: row.subscribedSlug,
+        translations: new Map(),
+        supportLanguages: new Map(),
+      });
+    }
+
+    const groupBySubscribedId = new Map(
+      [...grouped.values()].map((group) => [
+        group.entry.subscribedUnitId,
+        group,
+      ]),
+    );
+
+    for (const row of detailRows) {
+      const group = groupBySubscribedId.get(row.subscribedUnitId);
+      if (!group) continue;
+      if (row.subscribedLanguage) {
+        group.translations.set(row.subscribedLanguage, row.subscribedTitle);
+      }
+      if (row.supportLanguage) {
+        group.supportLanguages.set(row.supportLanguage, {
+          language: row.supportLanguage,
+          isPrimary: row.supportLanguageIsPrimary,
+          position: row.supportLanguagePosition,
+        });
+      }
+    }
+
+    return {
+      entries: [...grouped.values()].map((group) => {
+        const resolvedLanguage = resolveReadLanguage({
+          languages: input.preferredLanguages,
+          supportLanguages: [...group.supportLanguages.values()],
+          availableLanguages: [...group.translations.keys()],
+        });
+        return mapUserSubscriptionListEntryToDTO({
+          ...group.entry,
+          subscribedSlug: group.subscribedSlug,
+          subscribedTitle: resolvedLanguage
+            ? (group.translations.get(resolvedLanguage) ?? null)
+            : null,
+        });
+      }),
+      total: totalRows[0]?.total ?? 0,
+    };
+  }
+
+  async reorderBatch(input: {
+    userUnitId: string;
+    entries: Array<{ subscribedUnitId: string; position: string }>;
+  }): Promise<UserSubscriptionListEntryDTO[]> {
+    const db = await this.dbProvider();
     const seen = new Set<string>();
-    return rows.flatMap((row: (typeof rows)[number]) => {
-      if (seen.has(row.entry.id)) return [];
-      seen.add(row.entry.id);
-      return [
-        mapUserSubscriptionListEntryToDTO({
-          ...row.entry,
-          subscribedSlug: row.subscribedSlug,
-          subscribedTitle: row.subscribedTitle,
-        }),
-      ];
+    for (const entry of input.entries) {
+      if (seen.has(entry.subscribedUnitId)) {
+        throw new AppError(400, "Duplicate subscription list entry", {
+          code: "subscription_list_entry_duplicate_reorder",
+        });
+      }
+      seen.add(entry.subscribedUnitId);
+    }
+
+    return db.transaction(async (tx: ServerTx) => {
+      const rows: EntryRow[] = [];
+      for (const entryInput of input.entries) {
+        const [entry] = await tx
+          .update(UserSubscriptionListEntry)
+          .set({ position: entryInput.position, updatedAt: new Date() })
+          .where(
+            and(
+              eq(UserSubscriptionListEntry.userUnitId, input.userUnitId),
+              eq(
+                UserSubscriptionListEntry.subscribedUnitId,
+                entryInput.subscribedUnitId,
+              ),
+              eq(UserSubscriptionListEntry.state, "ACTIVE"),
+            ),
+          )
+          .returning();
+        if (!entry) {
+          throw new AppError(404, "Subscription list entry not found", {
+            code: "subscription_list_entry_not_found",
+          });
+        }
+        rows.push(entry);
+      }
+      return rows.map((row) => mapUserSubscriptionListEntryToDTO(row));
     });
   }
 

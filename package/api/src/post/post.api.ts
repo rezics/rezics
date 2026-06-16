@@ -28,7 +28,6 @@ type PostReadQuery = {
   explicitLanguage?: string;
   languages?: string | readonly string[];
   appLocale?: string;
-  languageMode?: "preferred" | "all";
 };
 
 function normalizeOptionalId(value: string | undefined): string | undefined {

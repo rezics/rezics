@@ -1,31 +1,20 @@
 import { userQueries } from "@rezics/api/user/user.queries";
-import {
-  type Language,
-  type ListLanguageMode,
-  normalizeLanguage,
-} from "@rezics/contract";
+import type { Language } from "@rezics/contract";
 import { LOCALE_STORAGE_KEY, setLocale, useLocale } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
+import {
+  resolveReadLanguageContext,
+  storedLocale,
+  uniqueReadLanguages,
+} from "@/shared/models/readLanguageContext";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
 export type ReadLanguageContext = {
   languages: Language[];
   appLocale: Language;
-  languageMode: ListLanguageMode;
   ready: boolean;
 };
-
-function uniqueLanguages(languages: readonly (string | null | undefined)[]) {
-  return [
-    ...new Set(
-      languages
-        .map((language) => language?.trim())
-        .map((language) => (language ? normalizeLanguage(language) : null))
-        .filter((language): language is Language => !!language),
-    ),
-  ];
-}
 
 export function appLocaleSeedFromPreferred(input: {
   hasMemberSession: boolean;
@@ -34,13 +23,17 @@ export function appLocaleSeedFromPreferred(input: {
 }): Language | null {
   if (!input.hasMemberSession || input.storedLocale) return null;
   const firstPreferred = input.preferredLanguages[0];
-  return firstPreferred ? (normalizeLanguage(firstPreferred) ?? null) : null;
+  return uniqueReadLanguages([firstPreferred])[0] ?? null;
 }
 
 export function useReadLanguageContext(): ReadLanguageContext {
   const locale = useLocale();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
-  const { data: settings } = useQuery({
+  const {
+    data: settings,
+    isFetched: settingsFetched,
+    isError: settingsError,
+  } = useQuery({
     ...userQueries.settings(),
     enabled: hasMemberSession,
     retry: false,
@@ -65,17 +58,24 @@ export function useReadLanguageContext(): ReadLanguageContext {
   }, [hasMemberSession, preferredLanguages]);
 
   return useMemo(() => {
-    const languages = hasMemberSession
-      ? uniqueLanguages(preferredLanguages)
-      : [];
-    const normalizedLocale = normalizeLanguage(locale) ?? "zh-hant";
+    const resolved = resolveReadLanguageContext({
+      activeLocale: locale,
+      hasMemberSession,
+      preferredLanguages,
+      storedLocale: storedLocale(),
+    });
     return {
-      languages,
-      appLocale: normalizedLocale,
-      languageMode: "preferred",
-      ready: !hasMemberSession || preferredLanguages.length > 0,
+      languages: resolved.languages,
+      appLocale: resolved.appLocale,
+      ready: !hasMemberSession || settingsFetched || settingsError,
     };
-  }, [hasMemberSession, locale, preferredLanguages]);
+  }, [
+    hasMemberSession,
+    locale,
+    preferredLanguages,
+    settingsError,
+    settingsFetched,
+  ]);
 }
 
 export function useReadLanguageCandidates(): Language[] {

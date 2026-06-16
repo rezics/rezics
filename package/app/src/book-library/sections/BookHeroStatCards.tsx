@@ -51,7 +51,6 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
       kind: PostKind.REVIEW,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: 1,
     }),
     enabled: readContext.ready && Boolean(bookId),

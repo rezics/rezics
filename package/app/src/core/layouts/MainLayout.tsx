@@ -1,4 +1,5 @@
 import { mySubscriptionListEntriesQuery } from "@rezics/api/subscription/subscription";
+import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
@@ -6,10 +7,11 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { unitHref } from "@/shared/ui/link";
 import {
+  DEFAULT_SUBSCRIPTION_LIST_SORT,
+  normalizeSubscriptionListSort,
   selectHasAuthIdentity,
   selectHasMemberSession,
   selectShouldRedirectToCompleteRegistration,
@@ -42,12 +44,38 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     (state) => state.registration.complete,
   );
   const readContext = useReadLanguageContext();
+  const settingsQuery = useQuery({
+    ...userQueries.settings(),
+    enabled: hasMemberSession,
+  });
+  const zoneSort = normalizeSubscriptionListSort(
+    settingsQuery.data?.subscriptionLists?.zones?.defaultSort ??
+      DEFAULT_SUBSCRIPTION_LIST_SORT,
+  );
+  const realmSort = normalizeSubscriptionListSort(
+    settingsQuery.data?.subscriptionLists?.realms?.defaultSort ??
+      DEFAULT_SUBSCRIPTION_LIST_SORT,
+  );
   const zonesQuery = useQuery({
-    ...mySubscriptionListEntriesQuery({ subscribedType: "ZONE" }),
+    ...mySubscriptionListEntriesQuery({
+      subscribedType: "ZONE",
+      sort: zoneSort,
+      languages: readContext.languages.length
+        ? readContext.languages.join(",")
+        : undefined,
+      appLocale: readContext.appLocale,
+    }),
     enabled: hasMemberSession && readContext.ready,
   });
   const realmsQuery = useQuery({
-    ...mySubscriptionListEntriesQuery({ subscribedType: "REALM" }),
+    ...mySubscriptionListEntriesQuery({
+      subscribedType: "REALM",
+      sort: realmSort,
+      languages: readContext.languages.length
+        ? readContext.languages.join(",")
+        : undefined,
+      appLocale: readContext.appLocale,
+    }),
     enabled: hasMemberSession && readContext.ready,
   });
   const canRenderChrome = shouldRenderNormalAppChrome({
@@ -93,22 +121,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }, [location.pathname, navigate, pendingRegistration]);
 
   if (!canRenderChrome) {
-    return (
-      <div className="min-h-screen bg-surface-canvas">
-        <Helmet>
-          <title>{t("shell:app_document_title_account_settings")}</title>
-        </Helmet>
-        {children}
-      </div>
-    );
+    return <div className="min-h-screen bg-surface-canvas">{children}</div>;
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Helmet>
-        <title>{t("shell:app_document_title_library")}</title>
-      </Helmet>
-
       <Header />
 
       <div className="flex flex-1">
@@ -124,6 +141,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               currentUserSlug,
               zones: {
                 items: entryNavigationItems(zonesQuery.data?.entries),
+                sort: zoneSort,
                 isLoading: hasMemberSession && zonesQuery.isLoading,
                 errorMessage: zonesQuery.error
                   ? t("shell:navigation_zones_error")
@@ -131,6 +149,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               },
               realms: {
                 items: entryNavigationItems(realmsQuery.data?.entries),
+                sort: realmSort,
                 isLoading: hasMemberSession && realmsQuery.isLoading,
                 errorMessage: realmsQuery.error
                   ? t("shell:navigation_realms_error")

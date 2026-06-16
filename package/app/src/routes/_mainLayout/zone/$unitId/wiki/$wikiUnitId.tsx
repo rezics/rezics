@@ -13,7 +13,10 @@ function ZoneUnitWikiThreadRoute() {
   const { unitId } = Route.useParams();
   const readContext = useReadLanguageContext();
   const zoneQuery = useQuery({
-    ...zonePortalQueryOptions(unitId, "home", readContext.languages),
+    ...zonePortalQueryOptions(unitId, "home", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
     enabled: readContext.ready && Boolean(unitId),
   });
 

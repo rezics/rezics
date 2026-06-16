@@ -41,7 +41,6 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
       kind: PostKind.REVIEW,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
-      languageMode: readContext.languageMode,
       limit: reviewNumber,
     }),
     enabled: readContext.ready && !!bookId,

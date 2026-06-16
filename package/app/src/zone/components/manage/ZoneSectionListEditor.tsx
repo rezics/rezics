@@ -56,7 +56,7 @@ const KIND_KEYS = {
   richText: "zone:manage_kind_richText",
   collection: "zone:manage_kind_collection",
   query: "zone:manage_kind_query",
-  feed: "zone:manage_kind_feed",
+  stream: "zone:manage_kind_stream",
   stats: "zone:manage_kind_stats",
   sources: "zone:manage_kind_sources",
   tabs: "zone:manage_kind_tabs",
@@ -76,10 +76,10 @@ const DISPLAY_KEYS = {
 
 const DISPLAY_OPTIONS = Object.keys(DISPLAY_KEYS) as ZoneSectionDisplay[];
 
-const FEED_KIND_KEYS = {
-  all: "zone:manage_feed_all",
-  updates: "zone:manage_feed_updates",
-  reviews: "zone:manage_feed_reviews",
+const STREAM_KIND_KEYS = {
+  all: "zone:manage_stream_all",
+  updates: "zone:manage_stream_updates",
+  reviews: "zone:manage_stream_reviews",
 } as const;
 
 const STATS_METRIC_KEYS = {
@@ -581,15 +581,15 @@ function ZoneSectionKindFields({
         </div>
       );
 
-    case "feed":
+    case "stream":
       return (
-        <ManageField label={t("zone:manage_feed_kind")}>
+        <ManageField label={t("zone:manage_stream_kind")}>
           <Select
-            value={section.feedKind ?? "all"}
-            onValueChange={(feedKind) =>
+            value={section.streamKind ?? "all"}
+            onValueChange={(streamKind) =>
               onChange({
                 ...section,
-                feedKind: feedKind as "all" | "updates" | "reviews",
+                streamKind: streamKind as "all" | "updates" | "reviews",
               })
             }
           >
@@ -597,9 +597,9 @@ function ZoneSectionKindFields({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {(["all", "updates", "reviews"] as const).map((feedKind) => (
-                <SelectItem key={feedKind} value={feedKind}>
-                  {t(FEED_KIND_KEYS[feedKind])}
+              {(["all", "updates", "reviews"] as const).map((streamKind) => (
+                <SelectItem key={streamKind} value={streamKind}>
+                  {t(STREAM_KIND_KEYS[streamKind])}
                 </SelectItem>
               ))}
             </SelectContent>

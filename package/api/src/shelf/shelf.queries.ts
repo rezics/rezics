@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { shelfItemActionApi, shelfApi } from "./shelf.api";
+import { shelfApi, shelfItemActionApi } from "./shelf.api";
 import {
   normalizeShelfItemStatusIds,
   type ShelfContainmentFilters,
@@ -46,10 +46,15 @@ export const shelvesByVariantContextQuery = (
     staleTime: 1000 * 60 * 5,
   });
 
-export const shelfDetailQuery = (unitId: string) =>
+export const shelfDetailQuery = (
+  unitId: string,
+  filters?: Pick<ShelfFilters, "languages" | "appLocale">,
+) =>
   queryOptions({
-    queryKey: shelfKeys.detail(unitId),
-    queryFn: () => shelfApi.get(unitId),
+    queryKey: filters
+      ? ([...shelfKeys.detail(unitId), filters] as const)
+      : shelfKeys.detail(unitId),
+    queryFn: () => shelfApi.get(unitId, filters),
     staleTime: 1000 * 60 * 10,
   });
 
