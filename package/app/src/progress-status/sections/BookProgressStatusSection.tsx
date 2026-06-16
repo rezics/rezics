@@ -190,9 +190,9 @@ export function BookProgressStatusSection({
   const isChineseLayout = usesChineseProgressLayout(language);
   const primaryAction = getDefaultPrimaryAction(currentStatus, t);
 
-  // Surface the same reading-progress fact-source the dashboard uses, as a
+  // Surface the same reading-progress fact-source used by progress lists, as a
   // hint while a read is in progress.
-  // 复用仪表盘所用的同一阅读进度事实来源，在阅读进行中作为提示展示。
+  // 复用进度列表所用的同一阅读进度事实来源，在阅读进行中作为提示展示。
   const showProgressHint =
     currentStatus === "ACTIVE" || currentStatus === "PAUSED";
   const progressValue = progress.data?.progress ?? 0;

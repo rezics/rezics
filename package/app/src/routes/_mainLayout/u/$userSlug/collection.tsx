@@ -1,10 +1,10 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-
-const CollectionTabSection = lazyRouteComponent(
-  () => import("@/user/sections/CollectionTabSection"),
-  "CollectionTabSection",
-);
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_mainLayout/u/$userSlug/collection")({
-  component: CollectionTabSection,
+  loader: ({ params }) => {
+    throw redirect({
+      to: "/u/$userSlug/shelves/search",
+      params: { userSlug: params.userSlug },
+    });
+  },
 });

@@ -6,8 +6,8 @@ import { DraftList } from "../components/DraftList";
 
 /**
  * `u/me/drafts` — the unified cross-type draft inbox. Drafts are not part of
- * the dashboard summary aggregate (they change as the user edits), so this
- * page reads them through the dedicated `useDrafts` hook.
+ * a shared aggregate (they change as the user edits), so this page reads them
+ * through the dedicated `useDrafts` hook.
  */
 export const DraftsPage: React.FC = () => {
   const { t } = useTranslation(["page", "common"]);

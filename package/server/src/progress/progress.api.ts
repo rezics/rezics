@@ -1,4 +1,6 @@
 import {
+  continueReadingListQuerySchema,
+  continueReadingListResponseSchema,
   nodeCompletionToggleBodySchema,
   progressLibraryListResponseSchema,
   unitProgressListQuerySchema,
@@ -77,6 +79,23 @@ export const progressApi = new Elysia()
       response: unitProgressListResponseSchema,
       detail: {
         summary: "List my unit progress",
+        tags: ["Progress"],
+      },
+    },
+  )
+  .get(
+    "/me/progress/continue-reading",
+    async ({ query, identity }) => {
+      // This endpoint is intentionally `/me`-scoped: reading progress stays
+      // viewer-owned until a public progress/privacy model exists.
+      return progressService.continueReading(identity.userId, query);
+    },
+    {
+      requireLogin: true,
+      query: continueReadingListQuerySchema,
+      response: continueReadingListResponseSchema,
+      detail: {
+        summary: "List my continue-reading items",
         tags: ["Progress"],
       },
     },

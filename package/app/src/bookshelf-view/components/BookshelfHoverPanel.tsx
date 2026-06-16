@@ -57,7 +57,7 @@ export const BookshelfHoverPanel: React.FC<BookshelfHoverPanelProps> = ({
           ) : null}
           {hasProgress ? (
             <div className="mt-1 text-xs text-text-secondary">
-              {t("page:dashboard_chapters_progress", {
+              {t("page:progress_chapters_progress", {
                 completed: item.chaptersCompleted ?? 0,
                 total: item.chaptersTotal,
               })}

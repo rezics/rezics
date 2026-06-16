@@ -2,10 +2,9 @@ import type { ContinueReadingItem, ResumeRoute } from "@rezics/contract";
 
 /**
  * Map a server-resolved `resumeRoute` to an app href. The server already
- * chose the route kind (node preserves multi-link TOC disambiguation); the
- * client only formats the URL.
- * 将服务端解析的 `resumeRoute` 映射为应用内的 href。服务端已选定路由类型
- * （node 保留多链接目录的消歧）；客户端仅负责格式化 URL。
+ * chose the route kind; the client only formats the URL.
+ * 将服务端解析的 `resumeRoute` 映射为应用内的 href。服务端已选定路由类型；
+ * 客户端仅负责格式化 URL。
  */
 export function resumeRouteToHref(route: ResumeRoute): string {
   switch (route.kind) {

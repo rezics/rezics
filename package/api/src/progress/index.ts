@@ -7,11 +7,13 @@ export {
   useUpdateUnitProgress,
 } from "./progress.mutations";
 export {
+  myContinueReadingQuery,
   myProgressLibraryQuery,
   myProgressListQuery,
   progressQueries,
   unitProgressQuery,
   unitProgressStatsQuery,
+  useMyContinueReading,
   useMyProgressLibrary,
   useMyProgressList,
   useUnitProgress,

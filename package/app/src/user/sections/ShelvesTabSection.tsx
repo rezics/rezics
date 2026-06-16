@@ -12,7 +12,9 @@ import {
   type SystemShelfKindKey,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { Card } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronRight, Search } from "lucide-react";
 import { type FC, useMemo, useState } from "react";
 import { Link } from "@/shared/ui/link";
 import { systemShelfKindLabel } from "@/shelf";
@@ -97,6 +99,8 @@ export const ShelvesTabSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
+      <ShelfContentsSearchEntry userId={userId} userSlug={user.slug} />
+
       <InnerFilterPanel
         chips={kindChips}
         activeValue={kindKey}
@@ -134,6 +138,50 @@ export const ShelvesTabSection: FC = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const ShelfContentsSearchEntry: FC<{
+  userId: string;
+  userSlug?: string;
+}> = ({ userId, userSlug }) => {
+  const { t } = useTranslation(["entity"]);
+  const card = (
+    <Card
+      surface="plain"
+      interactive
+      className="flex-row items-center justify-between gap-3 px-4 py-3"
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <Search className="h-4 w-4 shrink-0 text-text-secondary" />
+        <span className="min-w-0 truncate text-sm font-medium text-text-primary">
+          {t("entity:shelf_contents_search_entry_title")}
+        </span>
+      </div>
+      <ChevronRight className="h-4 w-4 shrink-0 text-text-secondary" />
+    </Card>
+  );
+
+  if (userSlug) {
+    return (
+      <Link
+        to="/u/$userSlug/shelves/search"
+        params={{ userSlug }}
+        className="no-underline"
+      >
+        {card}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/user/$userId/shelves/search"
+      params={{ userId }}
+      className="no-underline"
+    >
+      {card}
+    </Link>
   );
 };
 

@@ -74,6 +74,9 @@ function createHarness(
     progressState?: any;
     progressRows?: any[];
     shelfRows?: any[];
+    continueRows?: any[];
+    chapterTotals?: Map<string, number>;
+    completedOwnerUnitIds?: string[];
     contentNode?: any;
   } = {},
 ) {
@@ -84,6 +87,11 @@ function createHarness(
     upsertProgress: mock(async () => input.upsertRow ?? baseRow),
     listProgressRows: mock(async () => input.progressRows ?? []),
     findShelfLinks: mock(async () => input.shelfRows ?? []),
+    listContinueReading: mock(async () => input.continueRows ?? []),
+    countChaptersTotal: mock(async () => input.chapterTotals ?? new Map()),
+    listCompletedChapterOwnerUnitIds: mock(
+      async () => input.completedOwnerUnitIds ?? [],
+    ),
     softDeleteProgress: mock(async () => {}),
     upsertNodeCompletion: mock(async () => {}),
     deleteNodeCompletion: mock(async () => {}),
@@ -497,6 +505,60 @@ describe("ProgressService", () => {
       bookId: "variant-1",
       nodeId: "node-1",
     });
+  });
+
+  test("continueReading resolves titles and chapter completion counts", async () => {
+    const { repository } = createHarness({
+      continueRows: [
+        {
+          unitId: "book-1",
+          lastReadNodeId: "node-1",
+          lastReadAnchor: { text: "Opening paragraph" },
+          unit: {
+            defaultLanguage: "zh-hant",
+            translations: [
+              { language: "zh-hant", title: "中文標題" },
+              {
+                language: "en",
+                title: "English Title",
+                extra: { coverUrl: "https://cdn.example/book.jpg" },
+              },
+            ],
+          },
+          lastReadNode: {
+            id: "node-1",
+            title: "Chapter One",
+            isDeleted: false,
+          },
+        },
+      ],
+      chapterTotals: new Map([["book-1", 3]]),
+      completedOwnerUnitIds: ["book-1"],
+    });
+    const service = await createService(repository);
+
+    const result = await service.continueReading("user-1", {
+      appLocale: "en",
+      languages: "zh-hant",
+    });
+
+    expect(repository.listContinueReading).toHaveBeenCalledWith({
+      userId: "user-1",
+      take: 12,
+    });
+    expect(result.items).toEqual([
+      {
+        bookUnitId: "book-1",
+        bookTitle: "English Title",
+        bookCoverUrl: "https://cdn.example/book.jpg",
+        lastReadNodeId: "node-1",
+        lastReadNodeTitle: "Chapter One",
+        lastReadAnchorText: "Opening paragraph",
+        chaptersCompleted: 1,
+        chaptersTotal: 3,
+        resumeRoute: { kind: "node", bookId: "book-1", nodeId: "node-1" },
+      },
+    ]);
   });
 
   test("toggleNodeCompletion (on) upserts a progress row", async () => {

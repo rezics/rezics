@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "../config";
-import { dashboardApi } from "./dashboard.api";
+import { progressApi } from "./progress.api";
 
 const fetchMock = mock();
 
@@ -10,11 +10,11 @@ configureApi({
   reactionServiceUrl: "http://reaction.example",
 });
 
-describe("dashboardApi read language queries", () => {
+describe("progressApi read language queries", () => {
   beforeEach(() => {
     fetchMock.mockReset();
     fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({}), {
+      new Response(JSON.stringify({ items: [] }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }),
@@ -22,15 +22,15 @@ describe("dashboardApi read language queries", () => {
     globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
-  test("serializes dashboard read language context", async () => {
-    await dashboardApi.getSummary({
+  test("serializes continue-reading read language context", async () => {
+    await progressApi.listMyContinueReading({
       appLocale: "en",
       languages: "zh-hant,en",
       languageMode: "preferred",
     });
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/me/dashboard?appLocale=en&languages=zh-hant%2Cen&languageMode=preferred",
+      "http://api.example/me/progress/continue-reading?appLocale=en&languages=zh-hant%2Cen&languageMode=preferred",
     );
   });
 });

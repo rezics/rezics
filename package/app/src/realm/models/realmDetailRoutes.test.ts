@@ -36,7 +36,7 @@ describe("realm detail route helpers", () => {
     );
   });
 
-  test("dashboard realm summaries prefer slug links when available", () => {
+  test("realm summaries prefer slug links when available", () => {
     expect(
       realmSummaryHref({
         realmId: "018f9326-8d80-7b86-bc9f-ccceec9a43f5",
