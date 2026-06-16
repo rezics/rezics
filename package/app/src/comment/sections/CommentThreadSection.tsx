@@ -80,6 +80,8 @@ interface CommentThreadSectionProps {
   /**
    * When supplied, overrides the built-in "mount an inline composer" behaviour
    * (used by surfaces that need to navigate or otherwise intercept replies).
+   * 提供时，会覆盖内置的“挂载内联编辑器”行为
+   * （供需要跳转或以其他方式拦截回复的界面使用）。
    */
   onReply?: (postUnitId: string) => void;
 }
@@ -134,6 +136,9 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
   // Viewer-derived signals from the thread read. The server is the single
   // authorization source; these only gate the affordance. A stale 403 is
   // handled by the mutations re-syncing the thread on settle.
+  // 从线程读取派生出的浏览者信号。服务端是唯一的授权来源；
+  // 这些信号仅用于控制交互可见性。过期的 403 由变更操作在结算时
+  // 重新同步线程来处理。
   const viewerCanPromote = Boolean(signalData?.viewerCanPromote);
   const isQuestionThread = Boolean(signalData?.isQuestionThread);
 
@@ -200,6 +205,8 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
 
     // Mirror the server's promotion rules: pin/unpin on any reply, accept on a
     // direct (`depth === 1`) reply of a question thread.
+    // 镜像服务端的提升规则：任意回复可置顶/取消置顶，
+    // 问题线程的直接（`depth === 1`）回复可被采纳。
     const { canPin, canAccept } = decidePromotionControls({
       viewerCanPromote,
       isQuestionThread,

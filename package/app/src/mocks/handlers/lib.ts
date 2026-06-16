@@ -1,4 +1,5 @@
 // Shared mock utilities: parsing, pagination, id generation
+// 共享的 mock 工具：解析、分页、id 生成
 
 export const toInt = (v: unknown, fallback: number): number => {
   const n = Number(v);
@@ -9,6 +10,7 @@ export const safeString = (v: unknown, fallback = ""): string =>
   v === undefined || v === null ? fallback : String(v);
 
 // Allow 0, clamp to >= 0
+// 允许 0，钳制为 >= 0
 export const toNonNegativeInt = (v: unknown, fallback: number): number => {
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 ? n : fallback;

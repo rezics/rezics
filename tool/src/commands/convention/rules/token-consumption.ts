@@ -11,15 +11,23 @@ const SPEC =
 // `--colors-*` / `--radius-*` / `--shadow-*` / `--font-*` / `--duration-*` /
 // `--easing-*` surface emitted by `package/ui/src/config/uno-config.ts` is the
 // only sanctioned form.
+// 匹配任何 `--rezics-*` CSS 变量引用。整个命名空间已废弃；唯一被认可的形式是
+// `package/ui/src/config/uno-config.ts` 输出的扁平
+// `--colors-*` / `--radius-*` / `--shadow-*` / `--font-*` / `--duration-*` /
+// `--easing-*` 变量集。
 const REZICS_VAR_PATTERN = /var\(\s*--rezics-[a-zA-Z0-9_-]+/;
 
 // `package/ui/src/config/tokens.css` SHALL NOT exist — the tokens TS source is
 // authoritative and uno-config.ts emits the runtime CSS variables.
+// `package/ui/src/config/tokens.css` 不应存在——tokens 的 TS 源才是权威，
+// 由 uno-config.ts 输出运行时 CSS 变量。
 const TOKENS_CSS_PATH = join(REPO_ROOT, "package/ui/src/config/tokens.css");
 
 // SVG-inline / chart-fill exceptions. Each entry SHALL include a comment
 // explaining why a UnoCSS shortcut cannot yet replace it. Reviewed quarterly;
 // SHALL shrink over time.
+// SVG 内联 / 图表填充例外。每个条目都应附带注释说明为何 UnoCSS shortcut
+// 暂时无法替代它。每季度审查；条目应随时间减少。
 const FILE_ALLOWLIST = new Set<string>([]);
 
 function isTarget(absPath: string): boolean {

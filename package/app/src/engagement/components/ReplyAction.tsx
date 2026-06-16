@@ -6,7 +6,10 @@ import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ReplyActionProps = {
-  /** Override the size from context. Rarely needed; prefer setting on the bar. */
+  /**
+   * Override the size from context. Rarely needed; prefer setting on the bar.
+   * 覆盖来自 context 的尺寸。很少需要；优先在 bar 上设置。
+   */
   size?: EngagementSize;
   replyCount?: number;
   mode?: "count" | "label";

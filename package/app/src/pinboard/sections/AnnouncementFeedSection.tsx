@@ -18,12 +18,20 @@ export interface AnnouncementFeedSectionProps {
   /**
    * Render the announcement list. Invoked with `null` while loading
    * unless a custom `loadingFallback` is provided.
+   * 渲染公告列表。加载期间会以 `null` 调用，除非提供了自定义的
+   * `loadingFallback`。
    */
   children: (items: PinboardAnnouncementItem[]) => React.ReactNode;
   loadingFallback?: React.ReactNode;
-  /** When provided, used as the link target for each announcement. */
+  /**
+   * When provided, used as the link target for each announcement.
+   * 提供时，作为每条公告的链接目标。
+   */
   linkFor?: (unitId: string) => string;
-  /** Realm override — defaults to the bootstrapped default realm id. */
+  /**
+   * Realm override — defaults to the bootstrapped default realm id.
+   * realm 覆盖项——默认使用引导得到的默认 realm id。
+   */
   realmUnitId?: string;
 }
 
@@ -49,6 +57,11 @@ function toItem(
  *
  * Falls back to rendering nothing when the default realm id has not
  * bootstrapped yet — the infra hook populates it on first load.
+ * 首页公告数据源。通过 render prop 返回默认 realm 已解析的公告，
+ * 让现有的消费方（顶栏、公告板）继续掌控各自的展示。
+ *
+ * 当默认 realm id 尚未引导完成时回退为不渲染任何内容——infra hook
+ * 会在首次加载时填充它。
  */
 export const AnnouncementFeedSection: React.FC<
   AnnouncementFeedSectionProps

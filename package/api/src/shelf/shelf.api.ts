@@ -79,6 +79,7 @@ export const shelfApi = {
   },
 
   // Shelf items
+  // 货架条目
   listItems: async (
     shelfId: string,
     query?: ShelfItemsQuery,

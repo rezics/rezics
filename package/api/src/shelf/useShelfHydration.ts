@@ -39,6 +39,7 @@ const KIND_TO_BUCKET: Record<ShelfItemKind, HydrationBucket | null> = {
 };
 
 // Runtime shape returned by the server's `mapTagUnitToDTO`.
+// 服务端 `mapTagUnitToDTO` 返回的运行时结构。
 export interface TagListEntryDTO {
   unitId: string;
   slug?: string;
@@ -85,7 +86,10 @@ export type BucketResult =
 
 export interface ShelfHydrationResult {
   buckets: BucketResult[];
-  /** Unit ids whose underlying unit was not returned by its batch call. */
+  /**
+   * Unit ids whose underlying unit was not returned by its batch call.
+   * 其底层 unit 未被对应批量调用返回的 unit id。
+   */
   orphanUnitIds: string[];
   isLoading: boolean;
 }
@@ -99,7 +103,10 @@ export type ShelfPrimaryDTO =
 
 export interface EnrichedShelfItem {
   unit: ShelfItemDTO;
-  /** Hydrated DTO for this shelf item, if any. */
+  /**
+   * Hydrated DTO for this shelf item, if any.
+   * 此书架项的已填充 DTO（若有）。
+   */
   data: ShelfPrimaryDTO | undefined;
 }
 
@@ -166,6 +173,9 @@ interface Group {
  * Hydrate a page of shelf items: groups by kind into batched list calls,
  * seeds each package's detail cache via `queryClient.setQueryData`, and
  * reports unit ids whose underlying unit was not returned.
+ * 填充一页书架项：按 kind 分组为批量 list 调用，通过
+ * `queryClient.setQueryData` 预热各包的 detail 缓存，并报告其底层 unit
+ * 未被返回的 unit id。
  */
 export function useShelfHydration(units: ShelfItemDTO[]): ShelfHydrationResult {
   const queryClient = useQueryClient();
@@ -283,6 +293,7 @@ export function useShelfHydration(units: ShelfItemDTO[]): ShelfHydrationResult {
 
 /**
  * Maps each `ShelfItem` to its hydrated DTO from the kind-grouped batch.
+ * 将每个 `ShelfItem` 映射到来自按 kind 分组批量结果的已填充 DTO。
  */
 export function useHydratedShelfItems(
   units: ShelfItemDTO[],

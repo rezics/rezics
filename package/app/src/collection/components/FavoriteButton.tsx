@@ -35,6 +35,8 @@ export function FavoriteButton({
     onError: (error) => {
       // If the favorites shelf is missing, surface the recovery toast.
       // The user retriggers the heart click themselves after retry succeeds.
+      // 若收藏书架缺失，则弹出恢复提示。
+      // 用户在重试成功后自行再次点击爱心。
       recovery.handleError(error);
     },
   });

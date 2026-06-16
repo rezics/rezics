@@ -72,6 +72,9 @@ export type ContentDoc = (typeof contentDocSchema)["static"];
 // Server write paths intentionally accept opaque ContentDoc-shaped JSON. They
 // persist the object as submitted and only interpret supported fields such as
 // `main.source` after storage; preferred-shape reporting lives in helpers.
+// 服务端写入路径有意接受不透明的 ContentDoc 形态 JSON。它们按提交原样持久化
+// 该对象，仅在存储后解析诸如 `main.source` 等受支持的字段；首选形态的校验
+// 逻辑位于辅助函数中。
 export const contentDocWriteSchema = t.Record(t.String(), t.Any());
 
 export function mainMarkdownSource(value: unknown): string | null {

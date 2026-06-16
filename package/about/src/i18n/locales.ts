@@ -23,10 +23,13 @@ export const ABOUT_PAGE_PATHS = {
 
 export const ABOUT_SITE_ORIGIN = "https://about.rezics.com";
 // The about site is static; signed-in catalog workflows live at the product origin.
+// about 站点是静态的；登录后的目录工作流位于 product origin。
 export const REZICS_APP_ORIGIN = "https://book.rezics.com";
 
 // Keep these values aligned with package/contract/src/language-core.ts while
 // avoiding a dependency on shared app runtime i18n namespaces.
+// 保持这些值与 package/contract/src/language-core.ts 一致，同时避免依赖共享的应用
+// 运行时 i18n 命名空间。
 export const ABOUT_LOCALE_META: Record<
   AboutLocale,
   { name: string; nativeName: string; htmlLang: string }

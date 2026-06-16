@@ -1,4 +1,5 @@
 // Type only used in server, otherwise use contract
+// 仅在服务端使用的类型，其他情况请使用 contract
 
 import {
   type PublicUserSelected,
@@ -15,6 +16,7 @@ import type {
 
 /**
  * Relation shape mirrored by book hydration.
+ * 书籍水合（hydration）所镜像的关系结构。
  */
 export const bookInclude = {
   unit: {
@@ -36,6 +38,7 @@ export const bookInclude = {
 
 /**
  * Internal book type with relations
+ * 带关系的内部书籍类型
  */
 export type BookWithRelations = typeof Book.$inferSelect & {
   unit: typeof Unit.$inferSelect & {

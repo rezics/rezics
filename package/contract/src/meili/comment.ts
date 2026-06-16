@@ -2,6 +2,7 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 
 // ANCHOR: Comment Search Document
+// ANCHOR: 评论搜索文档
 
 export const CommentSearchDocumentSchema = t.Object({
   id: t.String(),
@@ -28,6 +29,7 @@ export const CommentSearchDocumentSchema = t.Object({
   rankUpdatedAt: t.Union([t.String(), t.Null()]),
 
   // Denormalized author
+  // 反规范化的作者信息
   authorName: t.Union([t.String(), t.Null()]),
   authorSlug: t.Union([t.String(), t.Null()]),
   authorAvatar: t.Union([t.String(), t.Null()]),
@@ -36,6 +38,7 @@ export const CommentSearchDocumentSchema = t.Object({
 export type CommentSearchDocument = Static<typeof CommentSearchDocumentSchema>;
 
 // ANCHOR: Comment Search Options
+// ANCHOR: 评论搜索选项
 
 export const CommentSearchOptionsSchema = t.Object({
   keyword: t.Optional(t.String()),
@@ -71,6 +74,7 @@ export const CommentSearchOptionsSchema = t.Object({
 export type CommentSearchOptions = Static<typeof CommentSearchOptionsSchema>;
 
 // ANCHOR: Comment Search Result
+// ANCHOR: 评论搜索结果
 
 export const CommentSearchResultSchema = t.Object({
   items: t.Array(CommentSearchDocumentSchema),

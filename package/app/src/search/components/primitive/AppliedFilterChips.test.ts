@@ -4,6 +4,8 @@ import i18next from "i18next";
 // The chip builder resolves labels through the shared i18n runtime. Provide a
 // backend-free i18next instance (inline `en` resources, synchronous init) and
 // mock the runtime module so labels resolve without any network fetch.
+// chip 构建器通过共享的 i18n 运行时解析标签。提供一个无后端的 i18next 实例
+//（内联 `en` 资源、同步初始化），并 mock 该运行时模块，使标签无需任何网络请求即可解析。
 const i18n = i18next.createInstance();
 i18n.init({
   lng: "en",

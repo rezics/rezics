@@ -100,6 +100,7 @@ export function Turnstile({
           window.turnstile.remove(widgetIdRef.current);
         } catch {
           // Widget already removed
+          // 控件已被移除
         }
       }
       widgetIdRef.current = null;

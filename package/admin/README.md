@@ -16,10 +16,9 @@ A standalone React SPA built with Vite and shadcn primitives. Connects to the au
 ## Scripts
 
 ```bash
-bun run dev           # Start Vite dev server
-bun run build         # Production build
-bun run preview       # Preview production build
-bun run cosmos        # Launch React Cosmos for component development
+task admin:dev           # Start Vite dev server
+task admin:build         # Production build
+task admin:preview       # Preview production build
 ```
 
 ## Tech Stack

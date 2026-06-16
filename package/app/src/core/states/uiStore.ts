@@ -3,12 +3,14 @@ import { pipe } from "effect/Function";
 import { create } from "zustand";
 
 interface UIState {
-  // 状态
+  // State.
+  // 状态。
   sidebarOpen: boolean;
   currentPage: string;
   notifications: ReadonlyArray<string>;
 
-  // Actions
+  // Actions.
+  // 操作。
   toggleSidebar: () => void;
   setCurrentPage: (page: string) => void;
   addNotification: (message: string) => void;
@@ -17,11 +19,13 @@ interface UIState {
 }
 
 /**
- * 状态管理工具
+ * State management utilities.
+ * 状态管理工具。
  */
 const stateUtils = {
   /**
-   * 安全地添加通知到数组
+   * Safely append a notification to the array.
+   * 安全地将通知追加到数组。
    */
   addNotification:
     (message: string) =>
@@ -29,7 +33,8 @@ const stateUtils = {
       pipe(notifications, EffectArray.append(message)),
 
   /**
-   * 安全地移除指定索引的通知
+   * Safely remove the notification at the given index.
+   * 安全地移除指定索引的通知。
    */
   removeNotification:
     (index: number) =>
@@ -37,23 +42,27 @@ const stateUtils = {
       pipe(notifications, (arr) => arr.filter((_, i) => i !== index)),
 
   /**
-   * 清空通知数组
+   * Clear the notifications array.
+   * 清空通知数组。
    */
   clearNotifications: (): ReadonlyArray<string> => [],
 
   /**
-   * 切换布尔值状态
+   * Toggle a boolean value.
+   * 切换布尔值。
    */
   toggle: (value: boolean): boolean => !value,
 };
 
 export const useUiStore = create<UIState>((set) => ({
-  // 初始状态
+  // Initial state.
+  // 初始状态。
   sidebarOpen: true,
   currentPage: "home",
   notifications: [],
 
-  // Actions
+  // Actions.
+  // 操作。
   toggleSidebar: () =>
     set((state) => ({
       sidebarOpen: stateUtils.toggle(state.sidebarOpen),

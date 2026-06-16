@@ -1,5 +1,5 @@
-// contentInit.ts
-// Initialize the Meilisearch content index and run a sample search
+// Initialize the Meilisearch content index and run a sample search.
+// 初始化 Meilisearch 的 content 索引并运行一次示例搜索。
 
 import { SearchClient } from "../client";
 

@@ -23,6 +23,9 @@ import { BookLibSectionRef } from "../sections/BookLibSection";
  * Book Library Page - Route-level entry point for book list.
  *
  * Uses the unified content search index filtered to BOOK type.
+ * 图书馆页面——书籍列表的路由级入口。
+ *
+ * 使用统一内容搜索索引，过滤为 BOOK 类型。
  */
 export const BookLibPage: React.FC = () => {
   const ref = useRef<UniversalPaginatorHandle>(null);
@@ -107,6 +110,7 @@ export const BookLibPage: React.FC = () => {
   }, []);
 
   // Map ContentSearchDocument to the BookDTO shape consumed by this page
+  // 将 ContentSearchDocument 映射为本页面所需的 BookDTO 形状
   const books = useMemo(
     () =>
       (data?.items ?? []).map((item: ContentSearchDocument) => ({

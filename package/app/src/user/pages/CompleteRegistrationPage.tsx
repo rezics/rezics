@@ -72,6 +72,7 @@ function uniqueLanguages(languages: readonly (string | null | undefined)[]) {
 }
 
 // --- Vertical Stepper primitives (shadcn replacement for MUI Stepper) ---
+// --- 垂直步进器基础组件（用 shadcn 替代 MUI Stepper） ---
 
 type StepDefinition = {
   id: string;
@@ -88,7 +89,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
       const isLast = idx === steps.length - 1;
       return (
         <li key={step.id} className="relative flex gap-3">
-          {/* connector line */}
+          {/* connector line — 连接线 */}
           {!isLast && (
             <span
               className={`absolute left-[11px] top-7 bottom-0 w-px ${
@@ -96,7 +97,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
               }`}
             />
           )}
-          {/* indicator */}
+          {/* indicator — 指示器 */}
           <span
             className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
               step.completed
@@ -108,7 +109,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
           >
             {step.completed ? <CheckIcon className="w-3.5 h-3.5" /> : idx + 1}
           </span>
-          {/* label + content */}
+          {/* label + content — 标签 + 内容 */}
           <div className="flex-1 pb-6 min-w-0">
             <div className="flex flex-col">
               <span
@@ -135,6 +136,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
 );
 
 // --- Step 2: Account Setup Form ---
+// --- 第 2 步：账户设置表单 ---
 
 function IdentityStep({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation(["auth", "common"]);
@@ -154,6 +156,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
   const [error, setError] = useState<string>();
 
   // Pre-fill from auth account state (OAuth name)
+  // 从认证账户状态预填充（OAuth 名称）
   useEffect(() => {
     if (auth.authAccountState && !displayName) {
       setDisplayName(auth.authAccountState.email.split("@")[0] ?? "");
@@ -161,6 +164,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
   }, [auth.authAccountState, displayName]);
 
   // Auto-derive slug from username if user hasn't manually edited slug
+  // 若用户尚未手动编辑 slug，则自动从用户名推导 slug
   useEffect(() => {
     if (!slugTouched) {
       setSlug(deriveSlugFromName(displayName));
@@ -184,6 +188,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
   }, []);
 
   // Slug availability check
+  // slug 可用性检查
   const { data: slugCheck, isFetching: checkingSlug } = useQuery({
     ...authQueries.slugAvailability(slug),
     enabled: slug.length >= 6,
@@ -303,6 +308,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
 }
 
 // --- Step 1: Email Verification ---
+// --- 第 1 步：邮箱验证 ---
 
 function EmailVerificationStep({
   email,
@@ -510,6 +516,7 @@ function EmailVerificationStep({
 }
 
 // --- Main Page ---
+// --- 主页面 ---
 
 export const CompleteRegistrationPage: FC = () => {
   const { t } = useTranslation(["auth", "common"]);
@@ -544,6 +551,7 @@ export const CompleteRegistrationPage: FC = () => {
       sessionProbeStatus !== "done");
 
   // Derive active step index for the Stepper
+  // 为步进器推导当前激活的步骤索引
   const activeStep =
     effectiveRegistrationStage === "verify-email"
       ? 0
@@ -639,6 +647,7 @@ export const CompleteRegistrationPage: FC = () => {
   }, [auth.authAccountState, authSessionStatus, sessionProbeStatus]);
 
   // Redirect once both steps complete
+  // 两个步骤都完成后重定向
   useEffect(() => {
     if (auth.registrationComplete && !auth.loading) {
       navigate({ to: "/" });
@@ -698,6 +707,7 @@ export const CompleteRegistrationPage: FC = () => {
   }
 
   // Not authenticated at all
+  // 完全未认证
   if (!auth.authenticated && !auth.authAccountState) {
     return (
       <Layout

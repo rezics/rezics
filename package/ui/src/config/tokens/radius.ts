@@ -1,4 +1,5 @@
 // Foundation v1 radius tokens. Source: brief §5.
+// Foundation v1 圆角 token。来源：brief §5。
 
 export const radius = {
   xs: "4px",

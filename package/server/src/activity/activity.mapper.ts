@@ -1,6 +1,6 @@
 import type { ActivityItem, ActivityKind } from "@rezics/contract";
 
-/** Map a stored `PostKind` to the activity item kind. */
+/** Map a stored `PostKind` to the activity item kind. 将存储的 `PostKind` 映射为活动条目的 kind。 */
 export function postActivityKind(kind: string | null): ActivityKind {
   switch (kind) {
     case "REVIEW":
@@ -12,7 +12,7 @@ export function postActivityKind(kind: string | null): ActivityKind {
   }
 }
 
-/** App route for a post-derived activity item. */
+/** App route for a post-derived activity item. 由 post 派生的活动条目的应用路由。 */
 export function postActivityHref(kind: ActivityKind, unitId: string): string {
   switch (kind) {
     case "review":
@@ -24,7 +24,7 @@ export function postActivityHref(kind: ActivityKind, unitId: string): string {
   }
 }
 
-/** App route for a shelf-update activity item. */
+/** App route for a shelf-update activity item. 书架更新活动条目的应用路由。 */
 export function shelfActivityHref(unitId: string): string {
   return `/shelf/${unitId}`;
 }
@@ -66,6 +66,9 @@ export function resolvePostActivityTitle(input: {
  * Merge heterogeneous activity items into a single time-descending page.
  * `nextCursor` is the `at` of the last returned item when more remain, so the
  * caller re-queries every source with `before = nextCursor`.
+ * 将异构的活动条目合并为单个按时间降序的分页。
+ * 当仍有更多条目时，`nextCursor` 是最后一条返回条目的 `at`，因此调用方会以
+ * `before = nextCursor` 重新查询每个数据源。
  */
 export function mergeActivity(
   items: ActivityItem[],

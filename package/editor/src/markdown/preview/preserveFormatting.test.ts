@@ -18,6 +18,7 @@ describe("emptyLinesPlugin", () => {
 
   test("two empty lines produce one empty_lines token with count 2", () => {
     // A\n\n\nB = 2 empty lines between A and B
+    // A\n\n\nB = A 与 B 之间有 2 个空行。
     const { tokens } = setup("Hello\n\n\nWorld");
     const empties = tokens.filter((t) => t.type === "empty_lines");
     expect(empties).toHaveLength(1);
@@ -44,6 +45,7 @@ describe("emptyLinesPlugin", () => {
 
   test("three empty lines produce one empty_lines token with count 3", () => {
     // A\n\n\n\nB = 3 empty lines between A and B
+    // A\n\n\n\nB = A 与 B 之间有 3 个空行。
     const { tokens } = setup("A\n\n\n\nB");
     const empties = tokens.filter((t) => t.type === "empty_lines");
     expect(empties).toHaveLength(1);

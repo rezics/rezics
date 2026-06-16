@@ -82,7 +82,6 @@ export const SettingsSecuritySection: FC = () => {
   const passwordMismatch =
     confirmPassword.length > 0 && newPassword !== confirmPassword;
 
-  // Current session token from sessionState
   const currentSessionToken = sessionState?.session?.token;
   const sessions = (sessionsData as any)?.sessions ?? sessionsData ?? [];
 

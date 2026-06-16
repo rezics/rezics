@@ -29,6 +29,7 @@ export const FeedbackAdminPage: React.FC = () => {
     resolvedFilter === "all" ? undefined : resolvedFilter === "resolved";
 
   // Prefetch general list for smoother UX
+  // 预取通用列表以获得更流畅的 UX
   useQuery(feedbackListQuery());
 
   return (

@@ -1,7 +1,3 @@
-/**
- * React Query mutations for Post operations
- */
-
 import type {
   AcceptAnswerInput,
   CommentPromotionDTO,
@@ -45,6 +41,9 @@ function compactIds(ids: readonly (string | null | undefined)[] = []) {
  * Scoped list prefixes are intentionally over-invalidated: latest ordering and
  * membership depend on filters, moderation, language, realm, target, and time,
  * so refetching is safer than per-sort cache surgery.
+ * 在拆分的 post/unit 读取面之间保持 post 写入的一致性。
+ * 受范围限制的列表前缀被有意地过度失效：最新排序和成员关系依赖于过滤器、审核、
+ * 语言、realm、target 和时间，因此重新获取比按排序逐一修改缓存更安全。
  */
 export async function syncPostMutationCache({
   queryClient,
@@ -118,9 +117,6 @@ export async function syncPostMutationCache({
   await Promise.all(invalidations);
 }
 
-/**
- * Mutation for creating a post
- */
 export function useCreatePostMutation(
   options?: Omit<
     UseMutationOptions<PostResponse, Error, CreateRootPostInput>,
@@ -144,6 +140,7 @@ export function useCreatePostMutation(
 
       // A draft create adds to the drafts list / dashboard; route through the
       // draft cache domain so both refresh.
+      // 创建草稿会将其加入草稿列表 / 仪表盘；通过 draft 缓存域路由，使两者都刷新。
       if (variables.status === "DRAFT") {
         await invalidateForCacheDomain(queryClient, "draft");
       }
@@ -178,6 +175,7 @@ export function useCreateWikiPostMutation(
         realmUnitIds: variables.realmUnitIds,
       });
       // A draft wiki create surfaces in the drafts list / dashboard.
+      // 创建 wiki 草稿会出现在草稿列表 / 仪表盘中。
       if (variables.status === "DRAFT") {
         await invalidateForCacheDomain(queryClient, "draft");
       }
@@ -186,9 +184,6 @@ export function useCreateWikiPostMutation(
   });
 }
 
-/**
- * Mutation for updating a post
- */
 export function useUpdatePostMutation(
   options?: Omit<
     UseMutationOptions<
@@ -247,9 +242,6 @@ export function useUpdateWikiPostContentMutation(
   });
 }
 
-/**
- * Mutation for deleting a post
- */
 export function useDeletePostMutation(
   options?: Omit<
     UseMutationOptions<{ message: string }, Error, string>,
@@ -276,6 +268,8 @@ export function useDeletePostMutation(
  * Publish a draft post or revert a published post to draft. Routes
  * invalidation through the `draft` cache domain (dashboard + drafts list) and
  * refreshes post lists/detail so the post appears/disappears consistently.
+ * 发布草稿 post，或将已发布的 post 还原为草稿。通过 `draft` 缓存域
+ *（仪表盘 + 草稿列表）路由失效，并刷新 post 列表/详情，使 post 一致地出现/消失。
  */
 export function useSetPostPublicationMutation(
   options?: Omit<
@@ -342,6 +336,9 @@ export function useSubmitPostToRealmMutation(
  * against the post's schema; on success we refresh the post detail (badge
  * rendering) and its thread (a root-post close/reopen changes thread-level
  * affordances), plus lists so bucket filters (active/closed) recompute.
+ * 转换 post 的生命周期状态。服务器会根据 post 的 schema 校验该转换；成功后我们刷新
+ * post 详情（徽章渲染）及其 thread（根 post 的关闭/重开会改变 thread 级别的可操作项），
+ * 以及列表，使分桶过滤器（active/closed）重新计算。
  */
 export function useSetPostStateMutation(
   options?: Omit<
@@ -384,12 +381,23 @@ export function useSetPostStateMutation(
  * thread to the server's view rather than leaving a falsely-applied control. The server gate
  * (`assertCanPromoteInThread`) remains the single authorization source; these
  * hooks never re-implement it.
+ *
+ * 提升类 mutation（pin / unpin / accept / unaccept）。
+ *
+ * 每个 mutation 针对 thread 范围内的某个回复，并在 settle 时刷新 thread 查询，
+ * 使提升徽章（`CommentPromotionBadge`）和兄弟节点排序（`orderSiblingsByPromotion`）
+ * 从服务器的真实状态重新计算。在 settle 而非仅 success 时失效，意味着过时的 `403`
+ * 会将 thread 重新同步到服务器的视图，而非留下一个被错误应用的控件。服务器端的
+ * 鉴权关口（`assertCanPromoteInThread`）仍是唯一的授权来源；这些 hook 绝不会重新实现它。
  */
 function refreshCommentThreads(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: commentKeys.all() });
 }
 
-/** Pin a reply (`kind = PINNED`) within its thread scope. */
+/**
+ * Pin a reply (`kind = PINNED`) within its thread scope.
+ * 在某个回复所属的 thread 范围内将其置顶（`kind = PINNED`）。
+ */
 export function usePinCommentMutation(
   options?: Omit<
     UseMutationOptions<CommentPromotionDTO, Error, PinCommentInput>,
@@ -408,7 +416,10 @@ export function usePinCommentMutation(
   });
 }
 
-/** Remove a `PINNED` promotion from a reply. */
+/**
+ * Remove a `PINNED` promotion from a reply.
+ * 从某个回复移除 `PINNED` 提升。
+ */
 export function useUnpinCommentMutation(
   options?: Omit<
     UseMutationOptions<
@@ -432,7 +443,10 @@ export function useUnpinCommentMutation(
   });
 }
 
-/** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
+/**
+ * Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread.
+ * 在问答 thread 中将某个直接回复采纳为答案（`kind = ACCEPTED_ANSWER`）。
+ */
 export function useAcceptAnswerMutation(
   options?: Omit<
     UseMutationOptions<CommentPromotionDTO, Error, AcceptAnswerInput>,
@@ -451,7 +465,10 @@ export function useAcceptAnswerMutation(
   });
 }
 
-/** Remove an `ACCEPTED_ANSWER` promotion from a reply. */
+/**
+ * Remove an `ACCEPTED_ANSWER` promotion from a reply.
+ * 从某个回复移除 `ACCEPTED_ANSWER` 提升。
+ */
 export function useUnacceptAnswerMutation(
   options?: Omit<
     UseMutationOptions<
@@ -475,9 +492,6 @@ export function useUnacceptAnswerMutation(
   });
 }
 
-/**
- * Combined mutations export
- */
 export const postMutations = {
   useCreate: useCreatePostMutation,
   useCreateWiki: useCreateWikiPostMutation,

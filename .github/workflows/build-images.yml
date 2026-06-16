@@ -27,12 +27,17 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Setup go-task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: bun install --frozen-lockfile
-      - run: bun run check:convention
-      - run: bun run check:i18n
-      - run: bun run knip
+      - run: task check:convention
+      - run: task check:i18n
+      - run: task knip
       - name: Targeted tests
-        run: bun test
+        run: task test
 
   images:
     name: Build & Push (${{ github.sha }})

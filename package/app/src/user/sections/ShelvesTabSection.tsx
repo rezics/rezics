@@ -56,6 +56,7 @@ export const ShelvesTabSection: FC = () => {
   const shelves: ShelfDTO[] = (data as any)?.shelves ?? data ?? [];
 
   // Build dynamic kind chips from data
+  // 从数据动态构建 kind chips
   const kindChips = useMemo<ChipDefinition[]>(() => {
     const kindSet = new Set<string>();
     for (const s of shelves) {
@@ -72,7 +73,6 @@ export const ShelvesTabSection: FC = () => {
     return chips;
   }, [shelves, isCurrentUser, t]);
 
-  // Filter shelves
   const filtered = useMemo(() => {
     let result = shelves;
     if (kindKey !== "all") {

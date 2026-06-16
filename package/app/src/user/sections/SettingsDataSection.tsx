@@ -40,6 +40,7 @@ export const SettingsDataSection: FC = () => {
     exportData.mutate(undefined, {
       onSuccess: (payload) => {
         // Download the assembled payload as a JSON file in the browser.
+        // 在浏览器中将组装好的 payload 作为 JSON 文件下载。
         const blob = new Blob([JSON.stringify(payload, null, 2)], {
           type: "application/json",
         });

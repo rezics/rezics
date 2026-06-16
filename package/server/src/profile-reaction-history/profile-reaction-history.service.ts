@@ -290,6 +290,9 @@ async function loadActors(
  * this enforces existence (404) and otherwise allows access. The hook is
  * intentionally pluggable: when `permission`/`settings` gain a privacy bit,
  * branch here and `throw forbidden(...)`.
+ * 资料可见性检查。目前 User schema 没有隐私字段，因此这里只强制存在性（404），
+ * 否则一律允许访问。该钩子刻意设计为可插拔：当 `permission`/`settings` 引入隐私位时，
+ * 在此分支并 `throw forbidden(...)`。
  */
 export async function assertProfileViewable(
   profileUserId: string,
@@ -301,6 +304,7 @@ export async function assertProfileViewable(
     throw notFound("User");
   }
   // No privacy bit yet — all profiles are publicly viewable.
+  // 尚无隐私位——所有资料均可公开查看。
 }
 
 export class ProfileReactionHistoryService {
@@ -374,6 +378,8 @@ export class ProfileReactionHistoryService {
 
     // Fetch (limit+1) rows from each chunk in parallel using the same client
     // cursor; merge in-memory so the global ordering across chunks is correct.
+    // 使用相同的客户端游标并行地从每个分块拉取 (limit+1) 行；在内存中合并，
+    // 以保证跨分块的全局排序正确。
     const perChunk = await Promise.all(
       chunks.map((targetIds) =>
         listByUser({
@@ -433,6 +439,9 @@ export class ProfileReactionHistoryService {
  * service emits. We need to mint our own cursor for the merged Received view
  * because the reaction service's per-chunk responses each carry their own
  * `nextCursor`, but the client sees a single merged stream.
+ * 以 reaction 服务发出的同样不透明形态重新编码 `(createdAt, id)` 游标。我们需要为
+ * 合并后的 Received 视图生成自己的游标，因为 reaction 服务的每个分块响应都各自携带
+ * 自己的 `nextCursor`，而客户端看到的是单一的合并流。
  */
 function encodeMergedCursor(createdAtIso: string, id: string): string {
   const payload = JSON.stringify({ t: createdAtIso, i: id });

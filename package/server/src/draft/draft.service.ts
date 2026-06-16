@@ -13,7 +13,8 @@ import {
 } from "../db/schema";
 import { postKindToDraftKind, toDraftMetadata } from "./draft.mapper";
 
-/** Draft-eligible post kinds (reply/excerpt/chapter never become drafts). */
+/** Draft-eligible post kinds (reply/excerpt/chapter never become drafts).
+ * 可作为草稿的 post 类型（reply/excerpt/chapter 永远不会成为草稿）。 */
 const DRAFT_POST_KINDS = ["REVIEW", "REMARK", "POST", "WIKI"] as const;
 const DRAFT_UNIT_STATUS = "DRAFT";
 
@@ -137,7 +138,8 @@ function createDrizzleDraftRepository(): DraftRepository {
   };
 }
 
-/** Collapse a ContentDoc to a single line of plain text, trimmed. */
+/** Collapse a ContentDoc to a single line of plain text, trimmed.
+ * 将 ContentDoc 折叠为单行纯文本，并去除首尾空白。 */
 function plainText(content: unknown): string {
   return (mainMarkdownSource(content) ?? contentDocMarkdownFallback(content))
     .replace(/[#*_>`~-]/g, " ")
@@ -173,6 +175,8 @@ export class DraftService {
    * List the user's draft-status posts across draft-eligible kinds, newest
    * first. Reuses the existing `Unit.status = DRAFT` storage; no separate
    * draft table.
+   * 列出用户在所有可作为草稿的类型下处于草稿状态的 post，按最新优先排序。
+   * 复用既有的 `Unit.status = DRAFT` 存储，不使用单独的草稿表。
    */
   async listMine(
     userId: string,

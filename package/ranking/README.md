@@ -22,7 +22,7 @@ Required runtime env:
 Run migrations:
 
 ```bash
-bun --filter=@rezics/ranking run db:migrate
+task ranking:db:migrate
 ```
 
 ## Meili Rollout

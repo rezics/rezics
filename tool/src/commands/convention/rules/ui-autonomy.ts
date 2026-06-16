@@ -67,6 +67,7 @@ export const uiAutonomyRule: RuleScanner = {
       }
     } catch {
       // Missing barrel in partial worktrees: ignore.
+      // 部分工作树中缺失 barrel：忽略。
     }
 
     return violations;

@@ -1,4 +1,5 @@
 // MOCK: Storybook shelf fixtures, hand-authored against `ShelfDTO`.
+// MOCK：Storybook 书架夹具，依据 `ShelfDTO` 手工编写。
 import type { ShelfDTO } from "@rezics/contract";
 import { LANGUAGES } from "@rezics/contract";
 import { userAlice } from "./user.ts";

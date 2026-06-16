@@ -8,6 +8,7 @@ export type HomePromotionStripProps = {
 /**
  * HomePromotionStrip
  * A simple horizontal strip for announcements/promotions.
+ * 用于公告/推广的简单横向条带。
  */
 export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
   items,

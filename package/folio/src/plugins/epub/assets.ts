@@ -22,6 +22,7 @@ export function createAssetTracker(): AssetTracker {
 
 function resolveRelativePath(basePath: string, relative: string): string {
   // Remove the file name from basePath to get directory
+  // 从 basePath 中去掉文件名以得到目录
   const dir = basePath.includes("/")
     ? basePath.slice(0, basePath.lastIndexOf("/") + 1)
     : "";
@@ -66,6 +67,7 @@ export function resolveAssets(
 ): string {
   return html.replace(ASSET_ATTR_REGEX, (match, relativePath: string) => {
     // Skip external URLs and data URIs
+    // 跳过外部 URL 和 data URI
     if (
       relativePath.startsWith("http://") ||
       relativePath.startsWith("https://") ||
@@ -79,6 +81,7 @@ export function resolveAssets(
 
     if (!data) {
       // Asset not found — leave reference unchanged
+      // 未找到资源——保持引用不变
       return match;
     }
 
@@ -89,6 +92,7 @@ export function resolveAssets(
     tracker.blobUrls.push(blobUrl);
 
     // Replace the relative path with the blob URL
+    // 用 blob URL 替换相对路径
     const attr = match.startsWith("src") ? "src" : "href";
     return `${attr}="${blobUrl}"`;
   });

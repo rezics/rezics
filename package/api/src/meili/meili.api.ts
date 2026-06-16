@@ -1,7 +1,9 @@
 /**
  * Meilisearch API client
+ * Meilisearch API 客户端
  *
  * Frontend wrapper around the backend Meili search endpoints.
+ * 后端 Meili 搜索端点的前端封装。
  */
 
 import type {
@@ -23,7 +25,7 @@ import type {
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 
-// ANCHOR: Content search
+// ANCHOR: Content search 内容搜索
 
 export const meiliContentApi = {
   contentSearch: async (
@@ -36,7 +38,7 @@ export const meiliContentApi = {
   },
 };
 
-// ANCHOR: Feedback search
+// ANCHOR: Feedback search 反馈搜索
 
 export const meiliFeedbackApi = {
   feedbackSearch: async (
@@ -49,7 +51,7 @@ export const meiliFeedbackApi = {
   },
 };
 
-// ANCHOR: Post search
+// ANCHOR: Post search 帖子搜索
 
 export const meiliPostApi = {
   postSearch: async (opts: PostSearchOptions): Promise<PostSearchResult> => {
@@ -60,7 +62,7 @@ export const meiliPostApi = {
   },
 };
 
-// ANCHOR: Poll search
+// ANCHOR: Poll search 投票搜索
 
 export const meiliPollApi = {
   pollSearch: async (opts: PollSearchOptions): Promise<PollSearchResult> => {
@@ -71,7 +73,7 @@ export const meiliPollApi = {
   },
 };
 
-// ANCHOR: Comment search
+// ANCHOR: Comment search 评论搜索
 
 export const meiliCommentApi = {
   commentSearch: async (
@@ -84,7 +86,7 @@ export const meiliCommentApi = {
   },
 };
 
-// ANCHOR: Realm search
+// ANCHOR: Realm search realm 搜索
 
 export const meiliRealmApi = {
   realmSearch: async (opts: RealmSearchOptions): Promise<RealmSearchResult> => {
@@ -95,7 +97,7 @@ export const meiliRealmApi = {
   },
 };
 
-// ANCHOR: User search
+// ANCHOR: User search 用户搜索
 
 export type UserSearchResponse = {
   users: Omit<UserDTO, "email">[];

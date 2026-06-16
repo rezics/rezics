@@ -11,9 +11,12 @@ import { federatedSearch } from "./federated.service";
 import type { FilterContext } from "./filters";
 
 // ANCHOR: POST /meili/search/federated
+// ANCHOR: POST /meili/search/federated（联邦搜索接口）
 // Single federated entry point for `SearchScope × SearchCategory × SearchQuery`.
 // The route validates the body, resolves SlugRef inputs to unitIds, then
 // delegates to `federatedSearch`.
+// `SearchScope × SearchCategory × SearchQuery` 的单一联合入口。
+// 该路由校验请求体，将 SlugRef 输入解析为 unitId，然后委托给 `federatedSearch`。
 
 export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
   "/search/federated",

@@ -19,6 +19,7 @@ interface TokenSecretDialogProps {
 }
 
 /**
+ * TokenSecretDialog - shows the newly created token secret (displayed only once).
  * TokenSecretDialog - 显示新创建的 token secret（仅显示一次）
  */
 export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
@@ -32,7 +33,8 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
     try {
       await navigator.clipboard.writeText(secret);
     } catch (_) {
-      // ignore
+      // Intentionally ignore clipboard write failures.
+      // 有意忽略剪贴板写入失败。
     }
   };
 

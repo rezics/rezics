@@ -13,6 +13,7 @@ import {
 const legacyDbMock: Record<string, any> = {};
 
 // Stub fire-and-forget meili sync so it doesn't reach into real env.
+// 桩掉 fire-and-forget 的 meili 同步，避免触及真实环境变量。
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const appendToListMock = mock(async () => ({
   unitIds: ["unit-1", "unit-2"],
@@ -611,9 +612,9 @@ describe("realmService.joinRealm", () => {
     await realmService.joinRealm(REALM, USER);
     expect(legacyDbMock.$transaction).toHaveBeenCalledTimes(1);
     expect(legacyDbMock.realmMember.create).toHaveBeenCalledTimes(1);
-    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++ — 成员数自增
     expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(1);
-    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount++
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount++ — 订阅者数自增
     const subArgs = legacyDbMock.subscription.create.mock.calls[0]?.[0] as {
       data: {
         channels: string[];
@@ -632,9 +633,9 @@ describe("realmService.joinRealm", () => {
     });
     await realmService.joinRealm(REALM, USER);
     expect(legacyDbMock.realmMember.create).toHaveBeenCalledTimes(1);
-    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++ still
-    expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(0); // no new sub
-    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0); // subscriberCount NOT bumped
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++ still — 成员数仍自增
+    expect(legacyDbMock.subscription.create).toHaveBeenCalledTimes(0); // no new sub — 不创建新订阅
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(0); // subscriberCount NOT bumped — 订阅者数不增加
   });
 
   test("requires current rule acknowledgement before joining when configured", async () => {
@@ -703,9 +704,9 @@ describe("realmService.removeMember", () => {
     });
     await realmService.removeMember(REALM, USER);
     expect(legacyDbMock.realmMember.delete).toHaveBeenCalledTimes(1);
-    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount--
+    expect(legacyDbMock.realm.update).toHaveBeenCalledTimes(1); // memberCount-- — 成员数自减
     expect(legacyDbMock.subscription.delete).toHaveBeenCalledTimes(1);
-    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount--
+    expect(legacyDbMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount-- — 订阅者数自减
   });
 
   test("idempotent for missing member — no decrement of memberCount", async () => {

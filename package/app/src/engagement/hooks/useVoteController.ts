@@ -14,14 +14,14 @@ export { decideVoteAction };
 export type UseVoteControllerArgs = {
   targetUnitId: string;
   scopeKey?: string;
-  /** Current user vote derived from the React Query cache by the caller. */
+  /** Current user vote derived from the React Query cache by the caller. 由调用方从 React Query 缓存派生的当前用户投票。 */
   userVote: VoteValue;
 };
 
 export type UseVoteControllerReturn = {
   toggleUp: () => void;
   toggleDown: () => void;
-  /** Modal helper. Consumers MUST render `auth.AuthModal({})` to surface the login UI. */
+  /** Modal helper. Consumers MUST render `auth.AuthModal({})` to surface the login UI. 模态框辅助对象。使用方必须渲染 `auth.AuthModal({})` 才能显示登录 UI。 */
   auth: ReturnType<typeof useAuthModal>;
 };
 

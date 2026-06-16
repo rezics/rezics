@@ -5,7 +5,7 @@
 > sort) for cache stability. Components, pages, hooks, and selectors must not
 > write `queryKey: [` literals inline — only `.keys.ts` / `.queries.ts` /
 > `.mutations.ts` files under `package/api/src` may construct key arrays.
-> Enforced by `bun run check:convention` (fails on `queryKey: [` outside the
+> Enforced by `task check:convention` (fails on `queryKey: [` outside the
 > allowed API files).
 
 好问题。这玩意儿看着像“黑魔法”，其实是 TypeScript 的泛型 + `queryOptions` 的类型设计在后面做了很多工，确保 key、queryFn、select、error 等类型能沿着 `queryOptions(...)` 一路被推断和记录，用在 `useQuery(...)`、`getQueryData(...)` 等 API 上都类型安全。下面我详细拆解 `ReturnType<typeof userKeys.byId>` 的作用，以及为什么要这么写。

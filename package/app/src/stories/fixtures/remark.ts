@@ -1,5 +1,6 @@
 // MOCK: Storybook remark fixtures, hand-authored against `PostDTO` (remarks are
 // posts of kind=REMARK).
+// MOCK：Storybook 短评夹具，手工依据 `PostDTO` 编写（短评是 kind=REMARK 的帖子）。
 import { markdownContentDoc, type PostDTO } from "@rezics/contract";
 import { userAlice, userBen, userCora } from "./user.ts";
 

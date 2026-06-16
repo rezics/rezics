@@ -1395,6 +1395,7 @@ export function MotionSample({
 }
 
 // Density / state-layer / depth / inverse-surface demos for Foundation/Patterns.
+// 用于 Foundation/Patterns 的密度 / 状态层 / 层级 / 反色表面演示。
 
 const densityRows = [
   {

@@ -1,4 +1,5 @@
-// Foundation v1 motion tokens. Source: brief §6.
+// Foundation v1 motion tokens, from design brief §6.
+// 基础 v1 动效 tokens，来自设计简报 §6。
 
 export const duration = {
   fast: "120ms",

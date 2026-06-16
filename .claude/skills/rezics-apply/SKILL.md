@@ -75,7 +75,7 @@ Rules:
    item in the real files before moving it.
 2. **Route each item** with the table above: land the types, write the tests,
    write the comments at the owning code.
-3. **Verify** — run the package's tests and `bun run check:*` as relevant.
+3. **Verify** — run the package's tests and `task check:*` as relevant.
 4. **Update plan progress.** Mark every completed `## Tasks` checkbox as
    `- [x]`. Leave unfinished or deliberately skipped work unchecked and call it
    out in the final response.

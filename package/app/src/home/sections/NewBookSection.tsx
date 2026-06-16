@@ -41,7 +41,6 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
 
   return (
     <section className={className}>
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">
           {t("page:home_sections_new_book_title")}
@@ -51,7 +50,6 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
         </Button>
       </div>
 
-      {/* Tabs */}
       <div className="mb-4 max-w-full overflow-hidden">
         <Tabs
           value={tab}
@@ -72,7 +70,6 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
         </Tabs>
       </div>
 
-      {/* Content */}
       <div>
         {isLoading ? (
           <div className="text-slate-400 text-sm">

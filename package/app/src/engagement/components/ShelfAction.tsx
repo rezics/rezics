@@ -13,9 +13,9 @@ export type ShelfActionProps = {
   variantUnitId?: string;
   targetItemType?: ShelfItemType;
   targetKind?: ShelfItemKind;
-  /** Override the size from context. Rarely needed; prefer setting on the bar. */
+  /** Override the size from context. Rarely needed; prefer setting on the bar. 覆盖来自 context 的 size。很少需要；优先在 bar 上设置。 */
   size?: EngagementSize;
-  /** When the target is a review, the collection modal surfaces the review-specific dual-mode UI. */
+  /** When the target is a review, the collection modal surfaces the review-specific dual-mode UI. 当目标是评论时，收藏模态框会展示评论专属的双模式 UI。 */
   isReview?: boolean;
 };
 

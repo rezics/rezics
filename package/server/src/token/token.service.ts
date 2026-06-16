@@ -93,18 +93,25 @@ function createDrizzleTokenRepository(): TokenRepository {
 
 /**
  * API Token Service
+ * API Token 服务
  *
  * Responsible for:
+ * 负责：
  * - Managing API tokens for users (create/list/update/revoke)
+ *   管理用户的 API token（创建/列出/更新/吊销）
  * - Authenticating incoming API tokens from the Authorization header
+ *   认证来自 Authorization 头的传入 API token
  * - Enforcing simple scope-based access control
+ *   实施基于 scope 的简单访问控制
  */
 export class TokenService {
   constructor(private readonly repository = createDrizzleTokenRepository()) {}
 
   /**
    * Generate and persist a new API token for the given user.
+   * 为指定用户生成并持久化一个新的 API token。
    * Returns the raw token string (to be shown once) and its DTO.
+   * 返回原始 token 字符串（仅展示一次）及其 DTO。
    */
   async createToken(
     userId: string,
@@ -136,6 +143,7 @@ export class TokenService {
 
   /**
    * List all non-revoked tokens for a user.
+   * 列出某用户所有未吊销的 token。
    */
   async listTokens(userId: string): Promise<ApiTokenDTO[]> {
     const tokens = await this.repository.listActiveForUser(userId);
@@ -144,7 +152,9 @@ export class TokenService {
 
   /**
    * Update basic metadata of a token.
+   * 更新 token 的基础元数据。
    * Only the owner of the token is allowed to update it.
+   * 仅 token 的拥有者才允许更新它。
    */
   async updateToken(
     userId: string,
@@ -172,6 +182,7 @@ export class TokenService {
 
   /**
    * Soft-revoke a token so it can no longer be used.
+   * 软吊销 token，使其不再可用。
    */
   async revokeToken(userId: string, id: string): Promise<void> {
     const existing = await this.repository.getById(id);
@@ -189,7 +200,9 @@ export class TokenService {
 
   /**
    * Extract the raw API token value from an Authorization header.
+   * 从 Authorization 头中提取原始 API token 值。
    * Accepts either:
+   * 接受以下任一形式：
    * - "Bearer api_xxx"
    * - "api_xxx"
    */
@@ -205,7 +218,9 @@ export class TokenService {
 
   /**
    * Authenticate a request using an API token from the Authorization header.
+   * 使用 Authorization 头中的 API token 认证请求。
    * Throws on failure; otherwise returns the token owner and scopes.
+   * 失败时抛出异常；否则返回 token 拥有者和 scopes。
    */
   async authenticateFromHeader(
     authorization: string | undefined,
@@ -219,6 +234,7 @@ export class TokenService {
     }
 
     // We hash the raw token value and look it up by hash.
+    // 我们对原始 token 值进行哈希，并按哈希查找。
     const hashed = hashToken(rawToken);
     const record = await this.repository.getByHash(hashed);
 
@@ -228,12 +244,14 @@ export class TokenService {
     }
 
     // Double-check hash using timingSafeEqual to avoid subtle timing attacks.
+    // 使用 timingSafeEqual 复核哈希，以避免微妙的时序攻击。
     if (!verifyTokenHash(rawToken, record.tokenHash)) {
       set.status = 401;
       throw new Error("Unauthorized: Invalid API token");
     }
 
     // Check revoked / expiry
+    // 检查吊销状态 / 过期情况
     if (record.revoked) {
       set.status = 401;
       throw new Error("Unauthorized: API token has been revoked");
@@ -244,8 +262,11 @@ export class TokenService {
     }
 
     // Update usage metadata in the background (non-blocking best-effort).
+    // 在后台更新使用元数据（非阻塞、尽力而为）。
     // We may need this later, but now disabled for performance reasons.
+    // 以后可能需要，但出于性能原因目前已禁用。
     // When re-enabled, persist lastUsedAt/lastIP/userAgent via the repository.
+    // 重新启用时，通过 repository 持久化 lastUsedAt/lastIP/userAgent。
     // const tokenDto = mapApiTokenToDTO(record as ApiTokenWithScopes);
 
     const scopes =
@@ -260,8 +281,10 @@ export class TokenService {
 
   /**
    * Check whether a scope map grants the given permission.
+   * 检查 scope 映射是否授予了给定权限。
    *
    * Example:
+   * 示例：
    *  hasScope(scopes, 'book', 'read')
    */
   hasScope(

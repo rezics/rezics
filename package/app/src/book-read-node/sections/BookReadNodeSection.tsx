@@ -41,6 +41,7 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
   });
 
   // Chapter Unit deletion check piggybacks on chapter detail fetch
+  // 章节 Unit 删除检查搭载在章节详情请求上。
   const contentUnitId =
     state.kind === "reading" ? state.contentUnitId : undefined;
   const { data: chapterData } = useQuery({

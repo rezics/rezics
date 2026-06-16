@@ -1,5 +1,6 @@
 /**
  * React Query configurations for Meilisearch content queries
+ * 用于 Meilisearch 内容查询的 React Query 配置
  */
 
 import type {
@@ -28,7 +29,7 @@ import {
   meiliUserApi,
 } from "./meili.api";
 
-// ANCHOR: Content search
+// ANCHOR: Content search 内容搜索
 
 export const contentSearchQueryOptions = (opts: ContentSearchOptions) =>
   queryOptions({
@@ -41,7 +42,7 @@ export function useContentSearch(opts: ContentSearchOptions) {
   return useQuery(contentSearchQueryOptions(opts));
 }
 
-// ANCHOR: User search
+// ANCHOR: User search 用户搜索
 
 export const userSearchQueryOptions = (opts: UserListQuery) =>
   queryOptions({
@@ -54,7 +55,7 @@ export function useUserSearchQuery(opts: UserListQuery) {
   return useQuery(userSearchQueryOptions(opts));
 }
 
-// ANCHOR: Feedback search
+// ANCHOR: Feedback search 反馈搜索
 
 type FeedbackExtraFilterOptions = {
   userId?: string;
@@ -101,7 +102,7 @@ export const buildMeiliFeedbackQuery = (
   } as const;
 };
 
-// ANCHOR: Post search
+// ANCHOR: Post search 帖子搜索
 
 export const postSearchQueryOptions = (opts: PostSearchOptions) =>
   queryOptions({
@@ -114,7 +115,7 @@ export function usePostSearchQuery(opts: PostSearchOptions) {
   return useQuery(postSearchQueryOptions(opts));
 }
 
-// ANCHOR: Poll search
+// ANCHOR: Poll search 投票搜索
 
 export const pollSearchQueryOptions = (opts: PollSearchOptions) =>
   queryOptions({
@@ -144,7 +145,7 @@ export function usePostSearchInfiniteQuery(
   });
 }
 
-// ANCHOR: Comment search
+// ANCHOR: Comment search 评论搜索
 
 export const commentSearchQueryOptions = (opts: CommentSearchOptions) =>
   queryOptions({
@@ -174,7 +175,7 @@ export function useCommentSearchInfiniteQuery(
   });
 }
 
-// ANCHOR: Realm search
+// ANCHOR: Realm search 领域搜索
 
 export const realmSearchQueryOptions = (opts: RealmSearchOptions) =>
   queryOptions({

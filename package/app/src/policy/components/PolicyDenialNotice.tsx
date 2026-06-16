@@ -13,6 +13,8 @@ export interface PolicyDenialNoticeProps {
  * Inline denial banner for forms. Renders nothing when there is no denial,
  * so callers can mount it unconditionally next to the submit affordance and
  * pass the result of `policyDenialFromError(mutation.error)`.
+ * 用于表单的内联拒绝横幅。当没有拒绝时不渲染任何内容，因此调用方可以无条件地
+ * 将其挂载在提交控件旁边，并传入 `policyDenialFromError(mutation.error)` 的结果。
  */
 export const PolicyDenialNotice: React.FC<PolicyDenialNoticeProps> = ({
   denial,
@@ -37,7 +39,7 @@ export const PolicyDenialNotice: React.FC<PolicyDenialNoticeProps> = ({
   );
 };
 
-/** Localized copy per decision code. Literal `t` calls keep R12 satisfied. */
+/** Localized copy per decision code. Literal `t` calls keep R12 satisfied. 按 decision code 提供的本地化文案。字面量 `t` 调用以满足 R12。 */
 function denialMessage(t: (key: string) => string, code: DecisionCode): string {
   switch (code) {
     case "MISSING_CAPABILITY":

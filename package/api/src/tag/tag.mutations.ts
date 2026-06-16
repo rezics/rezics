@@ -1,5 +1,6 @@
 /**
  * React Query mutations for Tag operations
+ * Tag 操作的 React Query mutation
  */
 
 import type {
@@ -23,6 +24,7 @@ import { tagKeys } from "./tag.keys";
 
 /**
  * Mutation for creating a tag
+ * 创建标签的 mutation
  */
 export function useCreateTagMutation(
   options?: Omit<
@@ -44,6 +46,7 @@ export function useCreateTagMutation(
 
 /**
  * Mutation for updating a tag
+ * 更新标签的 mutation
  */
 export function useUpdateTagMutation(
   options?: Omit<
@@ -70,6 +73,7 @@ export function useUpdateTagMutation(
 
 /**
  * Mutation for deleting a tag
+ * 删除标签的 mutation
  */
 export function useDeleteTagMutation(
   options?: Omit<
@@ -92,6 +96,7 @@ export function useDeleteTagMutation(
 
 /**
  * Mutation for attaching a tag to a unit
+ * 将标签附加到 unit 的 mutation
  */
 export function useAttachTagMutation(
   options?: Omit<
@@ -119,6 +124,7 @@ export function useAttachTagMutation(
 
 /**
  * Mutation for detaching a tag from a unit
+ * 将标签从 unit 分离的 mutation
  */
 export function useDetachTagMutation(
   options?: Omit<
@@ -146,6 +152,7 @@ export function useDetachTagMutation(
 
 /**
  * Mutation for voting on a tag-unit association
+ * 对 tag-unit 关联投票的 mutation
  */
 export function useCastTagVoteMutation(
   options?: Omit<
@@ -160,6 +167,7 @@ export function useCastTagVoteMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate the tag's scored association for the unit
+      // 让该 unit 的标签计分关联失效
       queryClient.invalidateQueries({
         queryKey: tagKeys.forUnit(variables.unitId),
       });
@@ -172,9 +180,11 @@ export function useCastTagVoteMutation(
 }
 
 // ---- New endpoints (creation-as-vote, pin/position, delete) ----
+// ---- 新端点（创建即投票、置顶/排序、删除） ----
 
 /**
  * Create a UnitTag (creation-as-vote, idempotent per user).
+ * 创建 UnitTag（创建即投票，每用户幂等）。
  * POST /unit-tag
  */
 export function useCreateUnitTagMutation(
@@ -200,6 +210,7 @@ export function useCreateUnitTagMutation(
 
 /**
  * Pin/unpin or reposition a UnitTag (admin or unit owner).
+ * 置顶/取消置顶或重新排序 UnitTag（管理员或 unit 所有者）。
  * PATCH /unit-tag/:unitId/:tagUnitId
  */
 export function usePatchUnitTagMutation(
@@ -230,6 +241,7 @@ export function usePatchUnitTagMutation(
 
 /**
  * Delete a UnitTag (admin or unit owner).
+ * 删除 UnitTag（管理员或 unit 所有者）。
  * DELETE /unit-tag/:unitId/:tagUnitId
  */
 export function useDeleteUnitTagMutation(
@@ -260,6 +272,7 @@ export function useDeleteUnitTagMutation(
 
 /**
  * Combined mutations export
+ * 合并导出的 mutation 集合
  */
 export const tagMutations = {
   useCreate: useCreateTagMutation,

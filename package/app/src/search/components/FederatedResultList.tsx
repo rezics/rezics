@@ -172,6 +172,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
   }
 
   // single
+  // single（单一类别结果）
   if (result.items.length === 0) {
     return <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />;
   }

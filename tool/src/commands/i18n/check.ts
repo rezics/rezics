@@ -1,19 +1,31 @@
 #!/usr/bin/env bun
 /**
  * Static validation of i18next namespace JSON against frontend call sites.
+ * 针对前端调用点对 i18next 命名空间 JSON 进行静态校验。
  *
  * Reports:
+ * 报告：
  *  - **Missing keys**: `t('<ns>:<key>')` referenced in source but absent from
  *    the namespace JSON for `en` (the base locale).
+ *    **缺失的键**：源码中引用了 `t('<ns>:<key>')`，但在基准语言 `en` 的命名空间
+ *    JSON 中不存在。
  *  - **Per-locale gaps**: a key present in `en/<ns>.json` but missing in
  *    another locale's `<ns>.json`.
+ *    **各语言缺口**：某个键存在于 `en/<ns>.json`，但在另一语言的 `<ns>.json`
+ *    中缺失。
  *  - **Unused keys**: a key present in `en/<ns>.json` not referenced from any
  *    scanned source file (advisory, made fatal by `--strict-unused`).
+ *    **未使用的键**：某个键存在于 `en/<ns>.json`，但未被任何扫描到的源文件引用
+ *    （仅作提示，加 `--strict-unused` 时变为致命错误）。
  *  - **Dynamic key usage**: `t(varKey)` patterns where `varKey` is not a
  *    string literal — flagged for manual review.
+ *    **动态键用法**：`t(varKey)` 模式中 `varKey` 不是字符串字面量 —— 标记以供
+ *    人工审查。
  *
  * Exit codes: 0 on success; 1 on missing/gap errors; 2 on dynamic-key
  * findings; 3 on unused keys when `--strict-unused` is set.
+ * 退出码：成功为 0；缺失/缺口错误为 1；动态键发现为 2；设置 `--strict-unused`
+ * 时存在未使用的键为 3。
  */
 
 import { readdir, readFile, stat } from "node:fs/promises";
@@ -84,6 +96,7 @@ async function loadCatalog(): Promise<{
     }
   }
   // UI namespace lives in `package/ui/locales/{locale}.ts`.
+  // UI 命名空间位于 `package/ui/locales/{locale}.ts`。
   try {
     for (const lng of locales) {
       const path = join(UI_LOCALES_ROOT, `${lng}.ts`);
@@ -97,6 +110,7 @@ async function loadCatalog(): Promise<{
     }
   } catch {
     // ignore
+    // 忽略
   }
   return { catalog, locales, namespaces: Array.from(namespaces).sort() };
 }
@@ -107,6 +121,8 @@ const T_CALL_RE = /\bt\(\s*["'`]([a-z][a-z0-9_-]*)\s*:\s*([^"'`)]+)["'`]/g;
 // Dynamic-key detection. `t(MAP[slug])` is the blessed pattern (typed maps),
 // so we only flag bare identifiers and template literals — not bracketed
 // indexing.
+// 动态键检测。`t(MAP[slug])` 是认可的模式（类型化的映射表），因此我们只标记
+// 裸标识符和模板字面量 —— 不标记方括号索引。
 const T_DYNAMIC_RE = /\bt\(\s*([A-Za-z_]\w*)\s*[,)]/g;
 const T_TEMPLATE_RE = /\bt\(\s*`([^`]*\$\{[^`]*)`/g;
 

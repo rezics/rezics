@@ -10,6 +10,7 @@ import {
 
 export const bookHttpHandlers = [
   // GET /api/book?offset=&limit=
+  // 列出书籍，支持 offset 与 limit 分页。
   http.get("/api/book/list", ({ request }) => {
     const url = new URL(request.url);
     const offset = toNonNegativeInt(url.searchParams.get("offset"), 0);
@@ -19,6 +20,7 @@ export const bookHttpHandlers = [
   }),
 
   // GET /api/book/:id
+  // 按 id 获取单本书籍。
   http.get("/api/book/:id", ({ params }) => {
     const id = safeString((params as any).id);
     const payload = getBookById(id);
@@ -26,6 +28,7 @@ export const bookHttpHandlers = [
   }),
 
   // POST /api/book
+  // 创建一本书籍。
   http.post("/api/book", async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as any;
     const created = createBook({
@@ -37,6 +40,7 @@ export const bookHttpHandlers = [
   }),
 
   // PATCH /api/book/:id
+  // 按 id 更新书籍。
   http.patch("/api/book/:id", async ({ params, request }) => {
     const id = safeString((params as any).id);
     const body = (await request.json().catch(() => ({}))) as any;
@@ -45,6 +49,7 @@ export const bookHttpHandlers = [
   }),
 
   // DELETE /api/book/:id
+  // 按 id 删除书籍。
   http.delete("/api/book/:id", ({ params }) => {
     const id = safeString((params as any).id);
     removeBook(id);

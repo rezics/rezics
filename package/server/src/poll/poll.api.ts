@@ -25,6 +25,8 @@ function handlePollError(error: unknown): never {
 /**
  * Resolve poll results for a caller, applying owner/admin privilege so
  * AFTER_CLOSE tallies are visible to the poll owner before close.
+ * 为调用者解析投票结果，应用所有者/管理员特权，使 AFTER_CLOSE 的票数统计
+ * 在关闭前对投票所有者可见。
  */
 async function readResults(
   pollUnitId: string,
@@ -60,6 +62,7 @@ export const pollApi = new Elysia({ prefix: "/poll" })
   .use(authMacro)
 
   // POST /poll — create a poll with options (login)
+  // POST /poll —— 创建带选项的投票（需登录）
   .post(
     "/",
     async ({ body, identity }): Promise<PollDTO> => {
@@ -83,6 +86,7 @@ export const pollApi = new Elysia({ prefix: "/poll" })
   )
 
   // GET /poll/:pollUnitId — read poll, options, and gated tallies
+  // GET /poll/:pollUnitId —— 读取投票、选项及受限的票数统计
   .get(
     "/:pollUnitId",
     async ({ params, headers }): Promise<PollResultsDTO> => {
@@ -108,6 +112,7 @@ export const pollApi = new Elysia({ prefix: "/poll" })
   )
 
   // POST /poll/:pollUnitId/vote — cast or change a vote (login)
+  // POST /poll/:pollUnitId/vote —— 投票或更改投票（需登录）
   .post(
     "/:pollUnitId/vote",
     async ({ params, body, identity }): Promise<PollResultsDTO> => {
@@ -135,6 +140,7 @@ export const pollApi = new Elysia({ prefix: "/poll" })
   )
 
   // DELETE /poll/:pollUnitId/vote — withdraw a vote (login)
+  // DELETE /poll/:pollUnitId/vote —— 撤回投票（需登录）
   .delete(
     "/:pollUnitId/vote",
     async ({ params, query, identity }): Promise<PollResultsDTO> => {

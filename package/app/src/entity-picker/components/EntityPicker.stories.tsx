@@ -8,6 +8,8 @@ import { EntityPicker } from "./EntityPicker";
 
 // MOCK: deterministic fixture entities used to seed the QueryClient cache so
 // useEntitySearch() returns results without hitting the network.
+// MOCK：用于填充 QueryClient 缓存的确定性夹具实体，使 useEntitySearch()
+// 无需访问网络即可返回结果。
 const fixtureEntities: EntityDTO[] = [
   {
     unitId: "00000000-0000-4000-8000-000000000001",
@@ -46,6 +48,8 @@ const fixtureEntities: EntityDTO[] = [
 
 // MOCK: a hosted QueryClient that returns the fixture entities for any
 // `useEntitySearch` call regardless of the query payload.
+// MOCK：一个托管的 QueryClient，无论查询载荷如何，都为任意
+// `useEntitySearch` 调用返回夹具实体。
 const withMockedSearch: Decorator = (Story) => {
   const [qc] = useState(
     () =>

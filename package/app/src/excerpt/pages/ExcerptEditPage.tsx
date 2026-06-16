@@ -55,6 +55,7 @@ export function ExcerptEditPage({
       },
     });
     // TODO: update translation (title, description) via translation API
+    // TODO：通过翻译 API 更新译文（title、description）。
   }
 
   function handleSourceChange(next: ExcerptSource | undefined) {

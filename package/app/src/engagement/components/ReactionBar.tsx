@@ -24,11 +24,20 @@ export type ReactionBarPost = {
 };
 
 export type ReactionBarPolicy = {
-  /** Builds the absolute-or-relative URL used by the Share popover. */
+  /**
+   * Builds the absolute-or-relative URL used by the Share popover.
+   * 构建 Share 弹出框使用的绝对或相对 URL。
+   */
   getShareHref: (post: ReactionBarPost) => string;
-  /** Optional hint so `ShelfAction` can render the review-specific dual-mode UI. */
+  /**
+   * Optional hint so `ShelfAction` can render the review-specific dual-mode UI.
+   * 可选提示，使 `ShelfAction` 能渲染评论专用的双模式 UI。
+   */
   isReview?: boolean;
-  /** Optional shelf item target override for non-Unit-backed surfaces. */
+  /**
+   * Optional shelf item target override for non-Unit-backed surfaces.
+   * 针对非 Unit 支撑的界面，可选的书架条目目标覆盖。
+   */
   shelfItemType?: "unit" | "comment";
   shelfItemKind?:
     | "book"
@@ -39,7 +48,10 @@ export type ReactionBarPolicy = {
     | "tag"
     | "shelf"
     | "comment";
-  /** Optional title forwarded to the Web Share API. */
+  /**
+   * Optional title forwarded to the Web Share API.
+   * 可选标题，转发给 Web Share API。
+   */
   getShareTitle?: (post: ReactionBarPost) => string | undefined;
 };
 
@@ -48,23 +60,43 @@ export type ReactionBarProps = {
   policy: ReactionBarPolicy;
   summaryScopeKey?: string | null;
   reactionScopeKey?: string | null;
-  /** Explicit action list — overrides `actionPolicy.actions` when provided. */
+  /**
+   * Explicit action list — overrides `actionPolicy.actions` when provided.
+   * 显式动作列表 — 提供时会覆盖 `actionPolicy.actions`。
+   */
   actions?: Action[];
-  /** Explicit overflow list — overrides `actionPolicy.overflow` when provided. */
+  /**
+   * Explicit overflow list — overrides `actionPolicy.overflow` when provided.
+   * 显式溢出列表 — 提供时会覆盖 `actionPolicy.overflow`。
+   */
   overflow?: Action[];
-  /** Alternative to `actions` + `overflow` when the caller already has a policy object. */
+  /**
+   * Alternative to `actions` + `overflow` when the caller already has a policy object.
+   * 当调用方已有策略对象时，可替代 `actions` + `overflow`。
+   */
   actionPolicy?: ActionPolicy;
   size?: EngagementSize;
   /**
    * Visual treatment. Defaults to `"plain"` (transparent chrome). Use `"pill"`
    * for the segmented capsule that fuses with the host card surface.
+   * 视觉处理。默认为 `"plain"`（透明外观）。使用 `"pill"` 可得到与宿主
+   * 卡片表面融合的分段胶囊样式。
    */
   variant?: ReactionBarVariant;
-  /** Reply-click handler. Fires on main-bar reply and on overflow-menu reply. */
+  /**
+   * Reply-click handler. Fires on main-bar reply and on overflow-menu reply.
+   * 回复点击处理器。在主栏回复和溢出菜单回复时触发。
+   */
   onReplyInvoke?: () => void;
-  /** Render mode for the Reply atom. `"count"` shows number when > 0, `"label"` always shows "Reply". */
+  /**
+   * Render mode for the Reply atom. `"count"` shows number when > 0, `"label"` always shows "Reply".
+   * Reply 原子的渲染模式。`"count"` 在大于 0 时显示数字，`"label"` 始终显示 "Reply"。
+   */
   replyMode?: "count" | "label";
-  /** Extra caller-owned items rendered in the overflow menu. */
+  /**
+   * Extra caller-owned items rendered in the overflow menu.
+   * 在溢出菜单中渲染的由调用方自有的额外条目。
+   */
   overflowContent?: React.ReactNode;
   className?: string;
 };
@@ -164,6 +196,9 @@ export function useReactionBarModel({
         // share / shelf require their popover roots; if they appear in
         // overflow without dedicated menu renderers, surface them by moving
         // the token to `actions` at the call site.
+        // share / shelf 需要各自的弹出框根节点；若它们出现在 overflow
+        // 中却没有专用菜单渲染器，则需在调用处把对应 token 移到 `actions`
+        // 才能显示出来。
         break;
     }
   };

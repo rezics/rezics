@@ -37,8 +37,8 @@ describe("flattenTree", () => {
     ];
 
     const flat = flattenTree(tree);
-    expect(flat[0].depth).toBe(1); // part1 > ch1
-    expect(flat[1].depth).toBe(2); // part2 > section > ch2
+    expect(flat[0].depth).toBe(1); // part1 > ch1 — part1 下的 ch1
+    expect(flat[1].depth).toBe(2); // part2 > section > ch2 — part2 下 section 下的 ch2
   });
 
   it("records correct path for each leaf", () => {
@@ -48,9 +48,9 @@ describe("flattenTree", () => {
     ];
 
     const flat = flattenTree(tree);
-    expect(flat[0].path).toEqual([0, 0]); // part1[0] > ch1[0]
-    expect(flat[1].path).toEqual([0, 1]); // part1[0] > ch2[1]
-    expect(flat[2].path).toEqual([1, 0]); // part2[1] > ch3[0]
+    expect(flat[0].path).toEqual([0, 0]); // part1[0] > ch1[0] — part1[0] 下的 ch1[0]
+    expect(flat[1].path).toEqual([0, 1]); // part1[0] > ch2[1] — part1[0] 下的 ch2[1]
+    expect(flat[2].path).toEqual([1, 0]); // part2[1] > ch3[0] — part2[1] 下的 ch3[0]
   });
 
   it("handles a flat tree (no branches)", () => {

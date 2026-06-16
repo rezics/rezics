@@ -8,6 +8,7 @@ import { subjectAttributionRoleKeySchema } from "./subject-attribution.roles";
 
 // ============================================================
 // KIND REGISTRY
+// 种类注册表
 // ============================================================
 
 export const entityKinds = [
@@ -89,6 +90,7 @@ export const entityKindKeySchema = t.Union(
 
 // ============================================================
 // ENTITY DTO
+// 实体 DTO
 // ============================================================
 
 export const entityDTOSchema = t.Object({
@@ -99,7 +101,10 @@ export const entityDTOSchema = t.Object({
   eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),
   eligibleSubjectRoles: t.Array(subjectAttributionRoleKeySchema),
   slug: t.Optional(t.Nullable(t.String())),
-  /** Owner Unit.userId (the creator's USER unitId) — exposed for /me/entities filtering. */
+  /**
+   * Owner Unit.userId (the creator's USER unitId) — exposed for /me/entities filtering.
+   * 所有者 Unit.userId（创建者的 USER unitId）——暴露以供 /me/entities 过滤。
+   */
   ownerUnitId: t.Optional(t.Nullable(t.String())),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -110,6 +115,7 @@ export type EntityDTO = (typeof entityDTOSchema)["static"];
 
 // ============================================================
 // CREATE / UPDATE / PARAMS
+// 创建 / 更新 / 参数
 // ============================================================
 
 export const entityParamsSchema = t.Object({
@@ -132,9 +138,15 @@ export const createEntitySchema = t.Object({
   avatar: t.Optional(t.Nullable(t.String())),
   eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),
   eligibleSubjectRoles: t.Array(subjectAttributionRoleKeySchema),
-  /** Admin-only-after-verified — rejected for non-admin callers. */
+  /**
+   * Admin-only-after-verified — rejected for non-admin callers.
+   * 验证后仅限管理员——对非管理员调用者拒绝。
+   */
   slug: t.Optional(t.Nullable(t.String())),
-  /** Admin-only — rejected for non-admin callers. */
+  /**
+   * Admin-only — rejected for non-admin callers.
+   * 仅限管理员——对非管理员调用者拒绝。
+   */
   verified: t.Optional(t.Boolean()),
   translations: t.Array(createEntityTranslationSchema, { minItems: 1 }),
 });
@@ -146,9 +158,15 @@ export const updateEntitySchema = t.Object({
   avatar: t.Optional(t.Nullable(t.String())),
   eligibleCreditRoles: t.Optional(t.Array(creditAttributionRoleKeySchema)),
   eligibleSubjectRoles: t.Optional(t.Array(subjectAttributionRoleKeySchema)),
-  /** Admin-only AND only when target Entity has `verified = true`. */
+  /**
+   * Admin-only AND only when target Entity has `verified = true`.
+   * 仅限管理员，且仅当目标 Entity 的 `verified = true` 时。
+   */
   slug: t.Optional(t.Nullable(t.String())),
-  /** Admin-only. */
+  /**
+   * Admin-only.
+   * 仅限管理员。
+   */
   verified: t.Optional(t.Boolean()),
   translations: t.Optional(t.Array(createEntityTranslationSchema)),
 });
@@ -157,13 +175,17 @@ export type UpdateEntityInput = (typeof updateEntitySchema)["static"];
 
 // ============================================================
 // LIST
+// 列表
 // ============================================================
 
 export const entityListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   kind: t.Optional(entityKindKeySchema),
   q: t.Optional(t.String()),
-  /** Filter to entities owned by this USER unitId. */
+  /**
+   * Filter to entities owned by this USER unitId.
+   * 过滤为由此 USER unitId 拥有的实体。
+   */
   ownerUnitId: t.Optional(t.String()),
   verified: t.Optional(t.Boolean()),
   page: t.Optional(t.Numeric()),

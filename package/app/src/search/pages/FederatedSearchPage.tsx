@@ -48,6 +48,8 @@ export type FederatedSearchPageProps = {
    * Called whenever the effective query changes so the host route can persist
    * filter state to the URL (making it shareable and reversible). Optional —
    * scopes that do not back filters with the URL can omit it.
+   * 每当有效查询发生变化时调用，以便宿主路由将筛选状态持久化到 URL
+   *（使其可分享且可逆）。可选——不将筛选状态写入 URL 的 scope 可以省略它。
    */
   onQueryChange?: (query: SearchQuery) => void;
 };
@@ -95,6 +97,8 @@ export function FederatedSearchPage({
 
   // Persist effective filter state to the host route (URL) so it is shareable
   // and reversible. The query hook owns local state; this mirrors it outward.
+  // 将有效筛选状态持久化到宿主路由（URL），使其可分享且可逆。query hook
+  // 拥有本地状态；此处将其向外镜像。
   useEffect(() => {
     onQueryChange?.(search.query);
   }, [search.query, onQueryChange]);

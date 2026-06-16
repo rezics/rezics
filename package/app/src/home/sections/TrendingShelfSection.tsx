@@ -27,6 +27,7 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
   });
 
   // Content search items cast to ShelfDTO shape (Meilisearch content index)
+  // 将内容搜索结果断言为 ShelfDTO 形状（Meilisearch 内容索引）
   const items = useMemo<ShelfDTO[]>(
     () => (data?.items ?? []) as unknown as ShelfDTO[],
     [data],

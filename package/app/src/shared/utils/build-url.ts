@@ -14,6 +14,8 @@ export function buildUnitUrl(unit: UnitDTO): string {
     case "SHELF":
       // SHELF helper needs owner context; UnitDTO does not carry it. Until the
       // owner slug is plumbed through, fall back to the canonical unitId form.
+      // SHELF 辅助函数需要 owner 上下文；UnitDTO 并不携带它。在 owner slug 接入之前，
+      // 回退到规范的 unitId 形式。
       return `/shelf/${unit.id}`;
     case "TAG":
       return unitHref({

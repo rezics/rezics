@@ -31,6 +31,7 @@ import { useEffect, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
 
 // MOCK: publish statuses — replace with contract enum when backend is ready
+// MOCK：发布状态——后端就绪后替换为契约枚举
 const PUBLISH_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
 type PublishStatus = (typeof PUBLISH_STATUSES)[number];
 
@@ -66,6 +67,7 @@ export function EditChapterDialog({
     if (open && chapter) {
       setTitle(chapter.title);
       // Mock: read status from chapter metadata if available, default DRAFT
+      // Mock：如有则从章节元数据读取状态，默认 DRAFT
       setStatus((chapter as any).status ?? "DRAFT");
       setRating(chapter.rating ?? "GENERAL");
     }

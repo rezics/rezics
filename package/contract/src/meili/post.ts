@@ -4,6 +4,7 @@ import { languageSchema } from "../language";
 import { readLanguageBodyBase } from "../list-query-base";
 
 // ANCHOR: Post Search Document
+// ANCHOR: 帖子搜索文档
 
 export const PostSearchDocumentSchema = t.Object({
   id: t.String(),
@@ -26,6 +27,7 @@ export const PostSearchDocumentSchema = t.Object({
   rankUpdatedAt: t.Union([t.String(), t.Null()]),
 
   // Foreign keys (filterable)
+  // 外键（可过滤）
   targetUnitId: t.Union([t.String(), t.Null()]),
   variantUnitId: t.Optional(t.Union([t.String(), t.Null()])),
   realmIds: t.Array(t.String()),
@@ -33,20 +35,24 @@ export const PostSearchDocumentSchema = t.Object({
   scoreEntryId: t.Union([t.String(), t.Null()]),
 
   // Denormalized author
+  // 反范式化的作者信息
   authorName: t.Union([t.String(), t.Null()]),
   authorSlug: t.Union([t.String(), t.Null()]),
   authorAvatar: t.Union([t.String(), t.Null()]),
 
   // Denormalized target unit
+  // 反范式化的目标 unit 信息
   targetTitles: t.Union([t.Array(t.String()), t.Null()]),
   targetType: t.Union([t.String(), t.Null()]),
   targetCoverUrl: t.Union([t.String(), t.Null()]),
 
   // Denormalized score
+  // 反范式化的评分信息
   scoreValue: t.Union([t.Number(), t.Null()]),
   scoreFields: t.Union([t.Record(t.String(), t.Number()), t.Null()]),
 
   // Extra
+  // 额外字段
   extra: t.Optional(t.Any()),
   languages: t.Optional(t.Array(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
@@ -76,6 +82,7 @@ export const PostSearchDocumentSchema = t.Object({
 export type PostSearchDocument = Static<typeof PostSearchDocumentSchema>;
 
 // ANCHOR: Post Search Options
+// ANCHOR: 帖子搜索选项
 
 export const PostSearchOptionsSchema = t.Object({
   ...readLanguageBodyBase.properties,
@@ -111,6 +118,7 @@ export const PostSearchOptionsSchema = t.Object({
 export type PostSearchOptions = Static<typeof PostSearchOptionsSchema>;
 
 // ANCHOR: Post Search Result
+// ANCHOR: 帖子搜索结果
 
 export const PostSearchResultSchema = t.Object({
   items: t.Array(PostSearchDocumentSchema),

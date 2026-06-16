@@ -73,6 +73,7 @@ describe("BlockService", () => {
       "peer-b",
     ]);
     // Directional: peer-a has blocked nobody.
+    // 有方向性：peer-a 没有屏蔽任何人。
     expect(await blockService.blockedUserIds("peer-a")).toEqual([]);
   });
 
@@ -89,6 +90,7 @@ describe("BlockService", () => {
 
     expect(await blockService.isBlockedEitherWay("me", "peer")).toBe(true);
     // Reverse direction is also blocked even though only `me` blocked `peer`.
+    // 即便只有 `me` 屏蔽了 `peer`，反方向也视为已屏蔽。
     expect(await blockService.isBlockedEitherWay("peer", "me")).toBe(true);
     expect(await blockService.isBlockedEitherWay("me", "stranger")).toBe(false);
   });
@@ -102,6 +104,7 @@ describe("BlockService", () => {
     await blockService.remove("me", "peer");
 
     // On next fetch the peer is no longer hidden and DM is permitted again.
+    // 下次获取时该 peer 不再被隐藏，私信也重新被允许。
     expect(await blockService.blockedUserIds("me")).toEqual([]);
     expect(await blockService.isBlockedEitherWay("me", "peer")).toBe(false);
   });
@@ -117,6 +120,7 @@ describe("BlockService", () => {
     expect(await blockService.blockedUserIds("gone")).toEqual([]);
     expect(await blockService.blockedUserIds("peer-b")).toEqual([]);
     // Unrelated blocks survive.
+    // 无关的屏蔽记录保留。
     expect(await blockService.blockedUserIds("peer-c")).toEqual(["peer-d"]);
   });
 });

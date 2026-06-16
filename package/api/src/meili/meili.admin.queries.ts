@@ -1,7 +1,9 @@
 /**
  * Meilisearch admin API wrapper and React Query hooks.
+ * Meilisearch 管理端 API 封装及 React Query hooks。
  *
  * Backend routes:
+ * 后端路由：
  * - /meili/health
  * - /meili/content|feedbacks|users|posts|polls|realms|entities/(init|sync)
  * - /meili/content|feedbacks|users|posts|polls|realms|entities/deleteAll
@@ -50,6 +52,7 @@ export type MeiliKeyListResponse = {
 
 /**
  * Pure HTTP wrappers (no React Query dependency).
+ * 纯 HTTP 封装（不依赖 React Query）。
  */
 export const meiliAdminApi = {
   health: async (): Promise<MeiliHealthResponse> => {
@@ -60,6 +63,7 @@ export const meiliAdminApi = {
   },
 
   // Index initialization
+  // 索引初始化
   initContentIndex: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/content/init", {
       method: "POST",
@@ -98,6 +102,7 @@ export const meiliAdminApi = {
   },
 
   // Full sync
+  // 全量同步
   syncAllContent: async (): Promise<MeiliTaskResponse> => {
     return apiFetch<MeiliTaskResponse>("/meili/content/sync", {
       method: "POST",
@@ -136,6 +141,7 @@ export const meiliAdminApi = {
   },
 
   // Dangerous operations
+  // 危险操作
   deleteAllContent: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/content/deleteAll");
   },
@@ -176,6 +182,7 @@ export const meiliAdminApi = {
   },
 
   // Key management
+  // 密钥管理
   createAdminKey: async (): Promise<MeiliKey> => {
     return apiFetch<MeiliKey>("/meili/keys/admin", {
       method: "POST",
@@ -193,6 +200,7 @@ export const meiliAdminApi = {
 
 /**
  * React Query options.
+ * React Query 配置项。
  */
 export const meiliAdminQueries = {
   health: () =>
@@ -218,6 +226,7 @@ export const meiliAdminQueries = {
 
 /**
  * Mutation hooks for admin operations.
+ * 管理操作的 mutation hooks。
  */
 
 export function useMeiliInitContentIndexMutation(

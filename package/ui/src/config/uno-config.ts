@@ -16,6 +16,21 @@
  * `theme.colors` (`text-primary`, `bg-surface-elevated`, …). R9 in
  * `tool/src/commands/convention/check.ts` bans any `var(--rezics-*)` reference in
  * source files; the `--rezics-*` namespace is retired.
+ *
+ * uno-config.ts — rezics 设计 token 的单一消费入口。
+ *
+ * 所有 token 都来自 `package/ui/src/config/tokens/` 中的 TS 模块。不要引入
+ * `--rezics-*` 命名空间或并行的 token CSS 文件——只存在一个消费入口。
+ *
+ * `theme.colors` 由 `tokens/colors.ts`（`lightColors`）设置。UnoCSS preset-wind4
+ * 按需在 `:root, :host` 下生成对应的 `--colors-*` CSS 自定义属性。preflight 从
+ * `darkColors` 生成 `.dark { --colors-* }` 覆盖，并生成消费者直接引用的静态辅助
+ * token（`--font-*`、`--radius-*`、`--shadow-*`、`--duration-*`、`--easing-*`、
+ * 状态不透明度）。
+ *
+ * 作者通过 `theme.colors` 暴露的精选短名称（`text-primary`、`bg-surface-elevated`
+ * 等）消费 token。`tool/src/commands/convention/check.ts` 中的 R9 禁止源文件中出现
+ * 任何 `var(--rezics-*)` 引用；`--rezics-*` 命名空间已废弃。
  */
 import presetWind4 from "@unocss/preset-wind4";
 import { container as defaultContainer } from "@unocss/preset-wind4/theme";
@@ -48,6 +63,7 @@ const RADIUS = {
 } as const;
 
 // MD3 16-step duration ladder (50ms–1000ms).
+// MD3 的 16 级时长阶梯（50ms–1000ms）。
 const DURATION = {
   short1: "50ms",
   short2: "100ms",
@@ -72,6 +88,7 @@ const DURATION = {
 } as const;
 
 // MD3 easing set + rezics spring.
+// MD3 缓动集 + rezics 弹簧曲线。
 const EASING = {
   linear: "cubic-bezier(0, 0, 1, 1)",
   standard: "cubic-bezier(0.2, 0, 0, 1)",
@@ -127,6 +144,24 @@ const STATE_OPACITY = {
 // - tab-item-y: 4px; Luma horizontal TabsTrigger uses py-1.
 // - command-item-y: 8px; Luma CommandItem uses py-2.
 // - list-item-y: keep 12px; rezics composite, no Luma equivalent.
+//
+// 固有密度词汇表：密度是每种组件类型的设计期属性，而非运行时/用户开关，因此这些
+// 是固定值（无 `calc()`，无 `--density-step`）。
+//
+// 这些固定值的组件层级 token 只适用于 rezics 自建的重复行和 chrome。引入的 shadcn
+// 原语保留各自的间距；opt-out 界面（hero、阅读视图、对话框内容、营销页）使用本地
+// 间距工具类。
+//
+// Luma 校准：
+// - breadcrumb-y：保持 4px；Luma 面包屑是文本相邻，而非行内边距。
+// - menu-item-y：8px；Luma menu/context/select 条目使用 py-2。
+// - table-row-y：12px；Luma 表格单元格使用 p-3。
+// - toolbar-y：保持 8px；rezics 自建 chrome，无 Luma 行对应。
+// - formfield-y：4px；Luma Input 在 h-9 内使用 py-1。
+// - sidebar-item-y：保持 8px；sidebar.tsx 是 Path-P 例外。
+// - tab-item-y：4px；Luma 横向 TabsTrigger 使用 py-1。
+// - command-item-y：8px；Luma CommandItem 使用 py-2。
+// - list-item-y：保持 12px；rezics 组合件，无 Luma 对应。
 const PADDING_BASE = {
   "table-row-y": "12px",
   "list-item-y": "12px",
@@ -151,6 +186,9 @@ function flattenColorVars(
       // preset-wind4 generates utilities (e.g. `bg-popover`) that reference
       // `--colors-{name}-DEFAULT` rather than the collapsed `--colors-{name}`.
       // Emit both so the dark override actually overrides what the utility reads.
+      // preset-wind4 生成的工具类（如 `bg-popover`）引用的是
+      // `--colors-{name}-DEFAULT`，而非折叠后的 `--colors-{name}`。两者都生成，
+      // 这样 dark 覆盖才能真正覆盖工具类实际读取的值。
       if (key === "DEFAULT") {
         out.push([`--${parent}-DEFAULT`, value]);
       }
@@ -252,7 +290,7 @@ export function createUnoConfig() {
       presetAttributify({
         prefix: "un-",
         prefixedOnly: true,
-      }), // support <div un-text="red-500">
+      }), // support <div un-text="red-500"> — 支持 <div un-text="red-500">
       presetScrollbarHide(),
     ],
     transformers: [transformerDirectives()],
@@ -279,6 +317,9 @@ export function createUnoConfig() {
       // aesthetic (no MD3 ripple). Apply to elements that own `relative` and an
       // `on-*` foreground; the overlay uses `currentColor` so contrast tracks
       // the element's text color in either mode.
+      // 状态层叠加——遵循 rezics 无边框美学的低调矩形着色（无 MD3 涟漪）。应用于
+      // 拥有 `relative` 和 `on-*` 前景色的元素；叠加使用 `currentColor`，因此对比度
+      // 在两种模式下都跟随元素的文本颜色。
       "state-hover":
         "before:content-[''] before:absolute before:inset-0 before:bg-current before:opacity-0 before:pointer-events-none hover:before:opacity-[var(--state-hover-opacity)] before:transition-opacity",
       "state-focus":
@@ -364,6 +405,9 @@ export function createUnoConfig() {
       // The shadcn 32 + rezics extensions live here as a single, unified shape.
       // wind4 emits each leaf as a flat `--colors-<path>` custom property under
       // `:root, :host`; the dark override is emitted by the preflight above.
+      // shadcn 的 32 个颜色 + rezics 扩展在此作为单一、统一的结构存在。wind4 将每个
+      // 叶子节点生成为 `:root, :host` 下扁平的 `--colors-<path>` 自定义属性；dark
+      // 覆盖由上面的 preflight 生成。
       colors: lightColors as unknown as Record<string, unknown>,
     },
   });

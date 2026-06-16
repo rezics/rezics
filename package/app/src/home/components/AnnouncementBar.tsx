@@ -18,7 +18,7 @@ export interface Announcement {
 interface AnnouncementBarProps {
   announcements: Announcement[];
   max?: number;
-  interval?: number; // ms
+  interval?: number; // ms — 毫秒
 }
 
 export function AnnouncementBar({

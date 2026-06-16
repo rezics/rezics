@@ -68,10 +68,12 @@ run_migration() {
 
 run_migrations() {
   for unit in "${MIGRATIONS[@]}"; do
-    run_migration "${unit}" "bun run --cwd package/${unit} db:deploy"
+    # The per-unit migrate image has WORKDIR /repo/package/<unit>, so drizzle-kit
+    # auto-detects that unit's drizzle.config.ts. Mirrors `task <unit>:db:deploy`.
+    run_migration "${unit}" "bun drizzle-kit migrate"
   done
   # job-runner owns no schema: ensure the pg-boss queue database instead.
-  run_migration "job-runner" "bun run --cwd package/job-runner db:ensure"
+  run_migration "job-runner" "bun run scripts/ensure-job-db.ts"
 }
 
 # --- Phase: services + workers --------------------------------------------

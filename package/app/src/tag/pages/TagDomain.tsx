@@ -9,6 +9,7 @@ import { TagWrapper } from "../components/TagWrapper";
 export function TagDomainPage() {
   const { t } = useTranslation(["common", "community"]);
   // Keep both route shapes available while the tag routes are being migrated.
+  // 在标签路由迁移期间，同时保留两种路由形态。
   const withTitleMatch = tagDomainTitleRoute.useMatch({ shouldThrow: true });
   const baseMatch = tagDomainRoute.useMatch({ shouldThrow: true });
   const unitId =

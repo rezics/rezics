@@ -13,6 +13,7 @@ export type UserSearchAdapter = (query: string) => Promise<MentionUserOption[]>;
 
 // ---------------------------------------------------------------------------
 // Shared search hook
+// 共享搜索 hook
 // ---------------------------------------------------------------------------
 
 const useUserSearchQuery = (query: string, userSearch?: UserSearchAdapter) => {
@@ -49,6 +50,7 @@ const useUserSearchQuery = (query: string, userSearch?: UserSearchAdapter) => {
 
 // ---------------------------------------------------------------------------
 // Editor mention trigger detection
+// 编辑器 mention 触发检测
 // ---------------------------------------------------------------------------
 
 export interface MentionTriggerState {
@@ -58,7 +60,10 @@ export interface MentionTriggerState {
   anchorPos: { top: number; left: number };
 }
 
-/** Read the cursor position and check for an active `@query` pattern. */
+/**
+ * Read the cursor position and check for an active `@query` pattern.
+ * 读取光标位置并检查是否存在活跃的 `@query` 模式。
+ */
 function detectMentionTrigger(view: any): MentionTriggerState | null {
   if (!view) return null;
   try {
@@ -86,6 +91,7 @@ function detectMentionTrigger(view: any): MentionTriggerState | null {
 
 // ---------------------------------------------------------------------------
 // useMentionPanel — drives trigger detection, search, keyboard & selection
+// useMentionPanel —— 驱动触发检测、搜索、键盘与选择
 // ---------------------------------------------------------------------------
 
 export function useMentionPanel(view: any, userSearch?: UserSearchAdapter) {
@@ -99,6 +105,7 @@ export function useMentionPanel(view: any, userSearch?: UserSearchAdapter) {
   );
 
   // Refs for use inside event handlers (stable, no stale closures)
+  // 供事件处理器内部使用的 ref（稳定，无过期闭包）
   const triggerRef = React.useRef(trigger);
   const optionsRef = React.useRef(options);
   const activeIndexRef = React.useRef(activeIndex);
@@ -210,6 +217,7 @@ export function useMentionPanel(view: any, userSearch?: UserSearchAdapter) {
 
 // ---------------------------------------------------------------------------
 // Mention Panel — portal-rendered floating list
+// Mention Panel —— 通过 portal 渲染的浮动列表
 // ---------------------------------------------------------------------------
 
 export interface MentionPanelProps {

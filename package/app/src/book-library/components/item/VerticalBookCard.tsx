@@ -10,11 +10,13 @@ export type BookProps = {
   href?: string;
   onClick?: () => void;
   className?: string;
-  /** When false, the title/author block is hidden (cover-only grids). */
+  /** When false, the title/author block is hidden (cover-only grids). 为 false 时隐藏标题/作者块（仅封面网格）。 */
   showTitle?: boolean;
   /**
    * Cover aspect ratio (width / height). When set, the cover box reserves
    * the ratio so grid rows align before images load.
+   * 封面宽高比（width / height）。设置后封面框会预留该比例，
+   * 使图片加载前网格行即可对齐。
    */
   aspectRatio?: number;
 };

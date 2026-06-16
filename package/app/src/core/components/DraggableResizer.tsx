@@ -4,11 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 
 interface DraggableResizerProps {
-  /** Id of the sidebar wrapper element whose width will be controlled. */
+  /**
+   * Id of the sidebar wrapper element whose width will be controlled.
+   * 将被控制宽度的 sidebar 包装元素的 id。
+   */
   targetId: string;
-  /** Setter called with the new sidebar width while dragging. */
+  /**
+   * Setter called with the new sidebar width while dragging.
+   * 拖拽过程中以新的 sidebar 宽度调用的 setter。
+   */
   setSidebarWidth: (width: number) => void;
-  /** Callback to notify whether the user is currently dragging. */
+  /**
+   * Callback to notify whether the user is currently dragging.
+   * 通知用户当前是否正在拖拽的回调。
+   */
   onDragging: (dragging: boolean) => void;
   minWidth?: number;
   maxWidth?: number;
@@ -33,13 +42,15 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
   const throttledRef = useRef<any>(null);
 
   useEffect(() => {
-    // 创建一个新的节流函数
+    // Create a new throttled function.
+    // 创建一个新的节流函数。
     throttledRef.current = throttle((newW: number) => {
       setSidebarWidth(newW);
     }, throttleInterval);
     // console.log("throttledRef.current", throttledRef.current);
     return () => {
-      // 卸载时取消任何待执行的调用
+      // Cancel any pending invocation on unmount.
+      // 卸载时取消任何待执行的调用。
       throttledRef.current!.cancel();
     };
   }, [setSidebarWidth, throttleInterval]);
@@ -53,14 +64,16 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
     }
     if (!resizer || !target) return;
 
-    // 保证容器相对定位
+    // Ensure the container is relatively positioned.
+    // 保证容器相对定位。
     if (getComputedStyle(target).position === "static") {
       target.style.position = "relative";
     }
 
     const onPointerDown = (e: PointerEvent | any) => {
       e.preventDefault();
-      // 捕获后续所有指针事件
+      // Capture all subsequent pointer events.
+      // 捕获后续所有指针事件。
       (resizer as any).setPointerCapture(e.pointerId);
       setIsDragging(true);
       document.body.style.userSelect = "none";
@@ -108,11 +121,13 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
       }
     };
 
-    // Run on mount and window resize
+    // Run on mount and window resize.
+    // 在挂载时以及 window resize 时运行。
     updatePosition();
     globalThis.addEventListener("resize", updatePosition);
 
-    // Cleanup event listener on unmount
+    // Cleanup event listener on unmount.
+    // 卸载时清理事件监听器。
     return () => {
       globalThis.removeEventListener("resize", updatePosition);
     };

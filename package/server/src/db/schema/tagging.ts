@@ -82,6 +82,11 @@ export const TagVote = pgTable(
 export const RealmTagApplication = pgTable(
   "RealmTagApplication",
   {
+    /**
+     * Realm-scoped application of an existing global TAG Unit to a target Unit.
+     * This does not create a realm-scoped tag and does not require the target
+     * to be posted into the realm through UnitRealm.
+     */
     realmUnitId: uuid()
       .notNull()
       .references(() => Realm.unitId, {
@@ -135,6 +140,11 @@ export const RealmTagApplication = pgTable(
   ],
 );
 
+/**
+ * Member vote on a RealmTagApplication. The business target is the
+ * (realmUnitId, tagUnitId, unitId) application, not three independent Unit
+ * roles.
+ */
 export const RealmTagApplicationVote = pgTable(
   "RealmTagApplicationVote",
   {
@@ -177,6 +187,10 @@ export const UserTagApplication = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    /**
+     * User tags apply to the resolved interaction target Unit, not shelf-item
+     * pairs or exact edition/source context.
+     */
     unitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),

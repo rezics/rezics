@@ -10,12 +10,14 @@ export function ResponsiveCarouselNotice() {
   const noticeRef = useRef<HTMLDivElement>(null);
   const [isWide, setIsWide] = useState(window.innerWidth >= 1200);
 
+  // Sync height and the wide/narrow layout mode.
   // 同步高度和宽度布局模式
   useEffect(() => {
     const updateLayout = () => {
       const w = window.innerWidth;
       setIsWide(w >= 1200);
 
+      // Sync height.
       // 同步高度
       if (carouselRef.current && noticeRef.current) {
         const h = carouselRef.current.getBoundingClientRect().height;
@@ -41,7 +43,7 @@ export function ResponsiveCarouselNotice() {
         isWide ? "flex-row items-start" : "flex-col"
       }`}
     >
-      {/* 左侧：BookCarousel */}
+      {/* Left: BookCarousel — 左侧：BookCarousel */}
       <div ref={carouselRef} className={`${isWide ? "w-2/3" : "w-full"}`}>
         <div className="space-y-2 mb-4">
           <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
@@ -60,7 +62,7 @@ export function ResponsiveCarouselNotice() {
         <BookCarousel autoplayIntervalNum={3000} />
       </div>
 
-      {/* 右侧：NoticeBoard */}
+      {/* Right: NoticeBoard — 右侧：NoticeBoard */}
       <div
         ref={noticeRef}
         className={`${isWide ? "w-1/3" : "w-full"} overflow-auto max-h-[32rem]`}

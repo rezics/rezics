@@ -1,7 +1,10 @@
 import type { EntityDTO, Language, UnitTranslationDTO } from "@rezics/contract";
 import type { EntityWithRelations } from "./entity.types";
 
-/** Project an Entity + Unit + translations row into the public DTO. */
+/**
+ * Project an Entity + Unit + translations row into the public DTO.
+ * 将 Entity + Unit + translations 行投影为公开 DTO。
+ */
 export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
   return {
     unitId: row.unitId,

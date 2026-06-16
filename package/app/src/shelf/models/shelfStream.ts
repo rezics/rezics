@@ -14,7 +14,10 @@ import { titleOf } from "./titleOf";
 export interface ShelfStreamRootEntry {
   kind: "root";
   unit: EnrichedShelfItem;
-  /** Children grouped under this root (review/tag), pre-sorted. */
+  /**
+   * Children grouped under this root (review/tag), pre-sorted.
+   * 归组在该 root 下的子项（review/tag），已预先排序。
+   */
   children: EnrichedShelfItem[];
 }
 
@@ -159,18 +162,28 @@ function partition(
 
 /**
  * Pure derivation of the rendered stream from ShelfItem parent fields.
+ * 基于 ShelfItem 的 parent 字段对渲染流进行的纯派生。
  *
  * - Roots = items that do not have a parent item.
+ *   Roots = 没有父项的项。
  * - In nested mode: returns root entries; consumers render attached children
  *   inside each root via `entry.children`.
+ *   nested 模式：返回 root 条目；消费方通过 `entry.children` 在每个 root 内
+ *   渲染附属子项。
  * - In flat/masonry + `sortPrimeOnly=true`: roots sorted first, each root's
  *   children sorted by the same comparator, emitted immediately after the root.
+ *   flat/masonry + `sortPrimeOnly=true`：先排序 roots，每个 root 的子项用
+ *   同一比较器排序，并紧跟在该 root 之后输出。
  * - In flat/masonry + `sortPrimeOnly=false`: every ShelfItem is emitted once as
  *   a peer, all participating in one comparator.
+ *   flat/masonry + `sortPrimeOnly=false`：每个 ShelfItem 作为 peer 输出一次，
+ *   全部参与同一个比较器。
  *
  * Multi-step cycles in the relation graph cannot infinitely recurse because
  * the nested entry shape is one level deep (children only); two-step cycles
  * just render each affected unit under its parent(s) and not as a root.
+ * 关系图中的多步环不会无限递归，因为 nested 条目结构只有一层深（仅含子项）；
+ * 两步环只会把受影响的每个 unit 渲染在其父项下，而不作为 root。
  */
 export function deriveShelfStream(
   units: EnrichedShelfItem[],
@@ -263,6 +276,8 @@ export function findChildren(
 
 // Lightweight rehydration helper for callsites that have a plain unit list and
 // need the partition utilities for tests.
+// 轻量级重建辅助函数，供持有普通 unit 列表、并在测试中需要 partition 工具的
+// 调用方使用。
 export function partitionForTest(
   units: EnrichedShelfItem[],
   relations: ShelfItemChildDTO[],

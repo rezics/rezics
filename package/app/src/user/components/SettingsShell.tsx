@@ -13,11 +13,13 @@ export const SettingsShell: FC = () => {
       </h5>
 
       {/* Mobile: horizontal tabs */}
+      {/* 移动端：水平标签栏 */}
       <div className="md:hidden">
         <SettingsTabBar />
       </div>
 
       {/* Desktop: sidebar + content */}
+      {/* 桌面端：侧边栏 + 内容 */}
       <div className="flex flex-col md:flex-row md:gap-12 px-4 pt-4">
         <aside className="hidden md:block w-[220px] shrink-0">
           <SettingsSidebar />

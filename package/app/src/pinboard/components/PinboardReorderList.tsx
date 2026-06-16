@@ -81,7 +81,7 @@ interface PinboardReorderListProps {
   entries: PinboardEntryView[];
   staleIds?: string[];
   onDelete?: (entry: PinboardEntryView) => void;
-  /** Called after a 409 so the parent can re-sync. */
+  /** Called after a 409 so the parent can re-sync. 在 409 之后调用，以便父组件重新同步。 */
   onConflict?: () => void;
 }
 

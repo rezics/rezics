@@ -31,7 +31,10 @@ export class PollError extends Error {
   }
 }
 
-/** Reject an option whose `label`/`unitId` are not in exactly-one (xor) form. */
+/**
+ * Reject an option whose `label`/`unitId` are not in exactly-one (xor) form.
+ * 拒绝 `label`/`unitId` 不满足恰好其一（xor）形式的选项。
+ */
 function assertOptionXor(option: { label?: string; unitId?: string }): void {
   const hasLabel = option.label != null && option.label.trim().length > 0;
   const hasUnit = option.unitId != null && option.unitId.length > 0;
@@ -352,6 +355,9 @@ export class PollService {
    * Create a poll: a `Unit(type=POLL)` plus its `Poll` extension and ≥2
    * `PollOption` rows. Validates the label-xor-unitId invariant per option and
    * assigns fractional positions in request order when not supplied.
+   * 创建投票：一个 `Unit(type=POLL)` 加上其 `Poll` 扩展以及至少 2 行
+   * `PollOption`。校验每个选项的 label-xor-unitId 不变式，未提供时按请求顺序
+   * 分配分数式 position。
    */
   async createPoll(
     userId: string,
@@ -394,7 +400,10 @@ export class PollService {
     });
   }
 
-  /** Fetch a poll with its options, or throw if it is not a poll. */
+  /**
+   * Fetch a poll with its options, or throw if it is not a poll.
+   * 获取投票及其选项，若不是投票则抛出异常。
+   */
   async getPoll(pollUnitId: string): Promise<PollWithOptions> {
     const poll = await this.repository.findPoll(pollUnitId);
     if (!poll) {
@@ -406,6 +415,8 @@ export class PollService {
   /**
    * Change a poll's vote mode. Rejected once any vote exists, because the two
    * modes carry incompatible exclusivity constraints.
+   * 修改投票的投票模式。一旦存在任何投票即被拒绝，因为两种模式带有互不兼容的
+   * 互斥约束。
    */
   async changeVoteMode(
     pollUnitId: string,
@@ -443,6 +454,11 @@ export class PollService {
    *   partial unique index guarantees no duplicate row at the DB layer.
    * - MULTI: each (user, option) is an independent row; re-casting the same
    *   option is a no-op.
+   * 投票或改票，在每次变更时维护 `PollOption.voteCount`。
+   *
+   * - SINGLE：用户最多持有一票；投给不同选项会迁移该票（删除旧行、插入新行）
+   *   并同时调整两边计数。部分唯一索引在数据库层保证不存在重复行。
+   * - MULTI：每个 (user, option) 是独立的一行；重复投同一选项是无操作。
    */
   async castVote(
     userId: string,
@@ -475,7 +491,7 @@ export class PollService {
       if (poll.voteMode === "SINGLE") {
         const existing = await tx.findAnyVoteForUser(pollUnitId, userId);
         if (existing) {
-          if (existing.optionId === optionId) return; // no-op
+          if (existing.optionId === optionId) return; // no-op — 无操作
           await tx.deleteVote({
             pollUnitId,
             userId,
@@ -495,12 +511,13 @@ export class PollService {
       }
 
       // MULTI
+      // 多选模式
       const existing = await tx.findVote({
         pollUnitId,
         userId,
         optionId,
       });
-      if (existing) return; // already voted for this option
+      if (existing) return; // already voted for this option — 已对该选项投过票
       await tx.createVote({
         pollUnitId,
         userId,
@@ -516,6 +533,8 @@ export class PollService {
    * Withdraw a vote, decrementing the option tally and removing the row.
    * SINGLE polls ignore `optionId` (the user holds one vote); MULTI polls
    * require it.
+   * 撤回投票，递减选项计数并删除该行。SINGLE 投票忽略 `optionId`（用户仅持有
+   * 一票）；MULTI 投票则要求提供。
    */
   async withdrawVote(
     userId: string,
@@ -548,7 +567,7 @@ export class PollService {
         ? await tx.findVote({ pollUnitId, userId, optionId })
         : await tx.findAnyVoteForUser(pollUnitId, userId);
 
-      if (!target) return; // nothing to withdraw
+      if (!target) return; // nothing to withdraw — 无可撤回的投票
 
       await tx.deleteVote({
         pollUnitId,
@@ -567,6 +586,12 @@ export class PollService {
    * - `myVote` is the calling user's own selection and is always returned,
    *   even for anonymous or pre-close polls. The voter↔option mapping for other
    *   users is never read here.
+   * 读取投票结果，并施加结果可见性与匿名性的门控。
+   *
+   * - `resultsVisible` 对 LIVE 投票为 true；对 AFTER_CLOSE 投票仅在已关闭或调用
+   *   方具有特权（投票所有者 / 管理员）时为 true。
+   * - `myVote` 是调用用户自身的选择，始终返回，即使是匿名或关闭前的投票。这里
+   *   绝不读取其他用户的 voter↔option 映射。
    */
   async getResults(
     pollUnitId: string,

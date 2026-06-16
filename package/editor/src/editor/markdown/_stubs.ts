@@ -19,6 +19,7 @@ export const stubEmojiConfig: EmojiConfig = {
   renderPicker: (onSelect, onClose) => {
     const emojis = ["😀", "👍", "❤️", "🎉", "🔥"];
     // Minimal inline picker for fixture demonstration
+    // 用于 fixture 演示的极简内联选择器
     const container = document.createElement("div");
     container.style.cssText =
       "display:flex;gap:4px;padding:8px;background:#fff;border:1px solid #ddd;border-radius:6px;";
@@ -33,6 +34,6 @@ export const stubEmojiConfig: EmojiConfig = {
       };
       container.appendChild(btn);
     }
-    return null; // React-rendered; the DOM approach is just for reference
+    return null; // React-rendered; the DOM approach is just for reference — 由 React 渲染；上述 DOM 方式仅作参考
   },
 };

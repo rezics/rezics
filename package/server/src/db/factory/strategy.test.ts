@@ -38,6 +38,7 @@ describe("makeCountProvider", () => {
         counts.set(v, (counts.get(v) ?? 0) + 1);
       }
       // Every integer in [0, 20] should appear at least 100 times.
+      // [0, 20] 范围内的每个整数都应至少出现 100 次。
       for (let i = 0; i <= 20; i++) {
         expect(counts.get(i) ?? 0).toBeGreaterThanOrEqual(100);
       }
@@ -63,6 +64,7 @@ describe("makeCountProvider", () => {
         if (provider.draw(spec) <= 5) nearMin++;
       }
       // Uniform would give ~5/51 ≈ 980. Power-law at alpha=1.8 lands near 30%.
+      // 均匀分布约为 5/51 ≈ 980。alpha=1.8 的幂律分布落在约 30%。
       expect(nearMin).toBeGreaterThan(2500);
     });
   });

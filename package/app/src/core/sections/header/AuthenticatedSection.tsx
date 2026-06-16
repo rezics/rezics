@@ -14,6 +14,8 @@ export function AuthenticatedSection() {
   // Live notification + DM streams — mounted once at the authenticated
   // shell level. The DM stream invalidates conversation/thread caches
   // on each incoming `dm.message` or `dm.read` event.
+  // 实时通知 + 私信流——在已认证的 shell 层级仅挂载一次。
+  // 每当收到 `dm.message` 或 `dm.read` 事件时，DM 流会使会话/线程缓存失效。
   useNotificationStream();
   useDmStream();
   const { data } = useUnreadCount();

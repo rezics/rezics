@@ -12,6 +12,10 @@ const { filterRecipientsByPreference, resolveRecipients } = await import(
  * these tests verify the resolver's union/dedup logic without a DB.
  * Integration coverage of the three-tier GIN-indexed match query lives
  * with the migration verification scripts.
+ *
+ * 收件人解析器的单元测试。存储支撑的 `defaultFindSubscriptionMatches` 被替换为注入的
+ * 桩函数，使这些测试在不依赖数据库的情况下验证解析器的并集 / 去重逻辑。三层 GIN 索引
+ * 匹配查询的集成测试覆盖随迁移验证脚本一起维护。
  */
 
 function evt(partial: Partial<BroadcastEvent> = {}): BroadcastEvent {
@@ -120,11 +124,13 @@ describe("filterRecipientsByPreference", () => {
       }),
     );
     // "default" has no stored preference -> enabled by default.
+    // "default" 没有存储偏好 -> 默认启用。
     expect(result.sort()).toEqual(["default", "opted-in"]);
   });
 
   test("other kinds still deliver when an unrelated toggle is off", async () => {
     // Same recipient who disabled follow still receives a reply notification.
+    // 同一个关闭了 follow 的收件人仍会收到回复通知。
     const result = await filterRecipientsByPreference(
       ["user-1"],
       "comment.new",

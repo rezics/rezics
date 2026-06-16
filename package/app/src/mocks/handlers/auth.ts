@@ -2,8 +2,10 @@ import { HttpResponse, http } from "msw";
 import { mockTokens, mockUsers } from "../data/auth.ts";
 
 // Align with src/api/auth.ts (base `/auth/...`)
+// 与 src/api/auth.ts 对齐（基础路径 `/auth/...`）
 export const authHttpHandlers = [
   // Login
+  // 登录
   http.post("/auth/login", async ({ request }) => {
     const { email, password } = (await request.json()) as {
       email: string;
@@ -34,6 +36,7 @@ export const authHttpHandlers = [
   }),
 
   // Refresh token
+  // 刷新令牌
   http.post("/auth/refresh", async ({ request }) => {
     const { refreshToken } = (await request.json()) as {
       refreshToken?: string;

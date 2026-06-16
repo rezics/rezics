@@ -26,6 +26,8 @@ const SHELF_ID = "fixture-shelf-1";
 // MOCK: story-only shelf + book fixtures so the section renders without
 // network. The real flow loads these via shelfItemsQuery and the hydration
 // useQueries cache; we pre-populate both.
+// MOCK：仅用于 story 的 shelf + book fixtures，使该 section 无需网络即可渲染。
+// 真实流程通过 shelfItemsQuery 和 hydration useQueries 缓存加载它们；这里两者都预填充。
 function makeBook(idx: number): BookDTO {
   const id = `fixture-book-${idx}`;
   return {
@@ -284,6 +286,9 @@ function StoryShell({ itemCount, viewMode, enqueue, mixed }: StoryShellProps) {
 // MOCK: storybook router stub. The section embeds UnitPicker which calls
 // useRouter().getMatchedRoutes(); we declare the same unit-bearing route
 // templates so parser hits don't blow up.
+// MOCK：storybook 路由桩。该 section 内嵌的 UnitPicker 会调用
+// useRouter().getMatchedRoutes()；这里声明相同的承载 unit 的路由
+// 模板，使解析命中时不会崩溃。
 function StoryRouterHost({ children }: { children: React.ReactNode }) {
   const router = useMemo(() => {
     const rootRoute = createRootRoute({

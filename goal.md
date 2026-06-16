@@ -54,10 +54,10 @@ Goal: Complete every actionable proposal currently in `plan/proposal/` using the
   Verification:
   - Run targeted tests for every changed package/domain.
   - Run proposal-required checks where relevant:
-    - `bun run check:convention`
-    - `bun run format:check`
-    - `bun run check:tokens` if JSX/CSS/token-sensitive styling changed
-    - package-specific tests such as `bun --filter=@rezics/app test`, ranking/search/server/reaction/admin tests as appropriate
+    - `task check:convention`
+    - `task format:check`
+    - `task check:tokens` if JSX/CSS/token-sensitive styling changed
+    - package-specific tests such as `bun test package/app`, ranking/search/server/reaction/admin tests as appropriate
   - Fix failures caused by this work.
   - If a verification step cannot be run locally or requires external infrastructure, leave the related proposal task unchecked and
   report it.

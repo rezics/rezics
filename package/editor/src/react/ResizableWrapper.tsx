@@ -32,6 +32,7 @@ export function ResizableWrapper({
   const dragStartRef = useRef<{ y: number; height: number } | null>(null);
 
   // Sync when config.height changes externally
+  // 当 config.height 在外部变化时同步。
   useEffect(() => {
     setCurrentHeight(clampHeight(config.height, minH, maxH));
   }, [config.height, minH, maxH]);

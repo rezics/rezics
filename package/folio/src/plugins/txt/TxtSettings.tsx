@@ -48,7 +48,6 @@ function TxtSettingsInner({
     ruleUsed: currentResult.ruleUsed?.source ?? null,
   });
 
-  // Test preview
   const testPreview = useMemo(() => {
     if (!testInput.trim()) return null;
     try {
@@ -96,6 +95,7 @@ function TxtSettingsInner({
       }
     } catch (_e) {
       // Invalid regex in rules
+      // 规则中存在无效正则，静默忽略。
     }
   }, [rules, onResplit, requestTreeChange]);
 
@@ -108,7 +108,7 @@ function TxtSettingsInner({
         Text Split Settings
       </h4>
 
-      {/* Current rules */}
+      {/* Current rules — 当前规则。 */}
       <div style={{ marginBottom: "12px" }}>
         <div style={{ fontWeight: 600, marginBottom: "4px" }}>Split Rules</div>
         {rules.length === 0 && (
@@ -176,7 +176,7 @@ function TxtSettingsInner({
         ))}
       </div>
 
-      {/* Test input */}
+      {/* Test input — 测试输入。 */}
       <div style={{ marginBottom: "12px" }}>
         <div style={{ fontWeight: 600, marginBottom: "4px" }}>Test Regex</div>
         <div style={{ display: "flex", gap: "4px" }}>
@@ -243,7 +243,7 @@ function TxtSettingsInner({
         )}
       </div>
 
-      {/* Result info */}
+      {/* Result info — 结果信息。 */}
       <div
         style={{
           padding: "8px",
@@ -262,7 +262,7 @@ function TxtSettingsInner({
         {!splitInfo.ruleUsed && <div>Single chapter (no rule matched)</div>}
       </div>
 
-      {/* Re-split button */}
+      {/* Re-split button — 重新切分按钮。 */}
       <button
         type="button"
         onClick={handleResplit}

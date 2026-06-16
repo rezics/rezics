@@ -19,10 +19,24 @@ export const UnitAliasKind = pgEnum("UnitAliasKind", unitAliasKindValues);
 
 export const UnitAliasStatus = pgEnum("UnitAliasStatus", unitAliasStatusValues);
 
+/**
+ * Maps named top-level slug scopes to placeholder SCOPE units. Owner-scoped
+ * sub-resources bypass this table and use the owner Unit id as `slugScope`.
+ * 将具名的顶级 slug scope 映射到占位的 SCOPE unit。归属者作用域下的子资源会
+ * 绕过此表，直接用归属者 Unit id 作为 `slugScope`。
+ */
 export const SlugScope = pgTable(
   "SlugScope",
   {
+    /**
+     * Named scope key seeded once during infra bootstrap.
+     * 在基础设施引导期间一次性写入的具名 scope key。
+     */
     slug: text().primaryKey(),
+    /**
+     * Placeholder Unit whose id is the slugScope value for this top-level scope.
+     * 占位 Unit，其 id 即为该顶级 scope 的 slugScope 值。
+     */
     unitId: uuid().notNull(),
   },
   (table) => [

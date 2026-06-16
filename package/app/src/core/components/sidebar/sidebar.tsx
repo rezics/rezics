@@ -4,7 +4,7 @@ import type React from "react";
 import { useEffect } from "react";
 import { cn } from "@/shared/utils/css-util";
 
-// --- 类型定义 ---
+// --- Type definitions / 类型定义 ---
 export type SidebarMode = "fixed" | "inline";
 
 interface SidebarProps {
@@ -28,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { t } = useTranslation(["shell"]);
   // handle escape key
+  // 处理 escape 键
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (mode === "fixed" && isOpen && e.key === "Escape") {
@@ -38,11 +39,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [mode, isOpen, onClose]);
 
-  // --- Fixed 模式渲染逻辑 ---
+  // --- Fixed mode render logic / Fixed 模式渲染逻辑 ---
   if (mode === "fixed") {
     return (
       <div className="bg-surface-canvas">
-        {/* 背景遮罩 (Backdrop) - 处理淡入淡出 */}
+        {/* Backdrop — handles fade in/out. 背景遮罩 (Backdrop) - 处理淡入淡出 */}
         <div
           className={cn(
             "fixed inset-0 z-40 transition-opacity duration-300 ease-in-out",
@@ -52,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           aria-hidden="true"
         />
 
-        {/* 侧边栏面板 - 处理滑入滑出 */}
+        {/* Sidebar panel — handles slide in/out. 侧边栏面板 - 处理滑入滑出 */}
         <aside
           className={cn(
             "fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out border-r border-border-whisper",
@@ -66,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className,
             )}
           >
-            {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
+            {/* Only in Fixed mode is an explicit close button usually needed. 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
               type="button"
               onClick={onClose}
@@ -83,6 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }
 
   /**
+   * Inline mode render logic.
    * Inline 模式渲染逻辑
    */
   return (

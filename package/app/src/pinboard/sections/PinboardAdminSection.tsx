@@ -46,7 +46,10 @@ import type { PinboardEntryView, PinboardListKey } from "../models/types";
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;
-  /** When true, the `announcement` tab is included alongside `pinboard`. */
+  /**
+   * When true, the `announcement` tab is included alongside `pinboard`.
+   * 为 true 时，`announcement` 选项卡会与 `pinboard` 一起显示。
+   */
   isDefaultRealm?: boolean;
 }
 
@@ -60,6 +63,9 @@ const PINBOARD_ADMIN_TAB_LABEL = {
  * the caller (`pinboard` always; `announcement` only on the default realm).
  * Each tab renders the reorder/open list, stale banner, create button, and
  * delegates to the editor dialog.
+ * 带选项卡的管理界面。为调用方可用的每个 Realm.extra 列表键显示一个选项卡
+ * （`pinboard` 始终存在；`announcement` 仅在默认 realm 上）。每个选项卡
+ * 渲染重排序/打开列表、过期横幅、创建按钮，并委托给编辑器对话框。
  */
 export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   realmUnitId,
@@ -279,6 +285,8 @@ interface PinboardEntryEditorDialogProps {
 /**
  * Editor dialog for creating pinboard entries. Existing entries open their
  * public page, where content-specific editing and permissions live.
+ * 用于创建 pinboard 条目的编辑器对话框。已存在的条目会打开其公共页面，
+ * 内容相关的编辑和权限都在那里。
  */
 const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
   open,
@@ -295,6 +303,7 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
   const [saving, setSaving] = useState(false);
 
   // Keep the dialog draft resettable if its initial create template changes.
+  // 当初始创建模板变化时，保持对话框草稿可被重置。
   useEffect(() => {
     setDrafts(initial);
   }, [initial]);

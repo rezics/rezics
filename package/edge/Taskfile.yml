@@ -1,0 +1,13 @@
+# @rezics/edge — Cloudflare Worker. Aggregated as `edge:*`.
+version: '3'
+
+tasks:
+  dev:
+    desc: Wrangler dev
+    cmd: bun wrangler dev
+  deploy:
+    desc: Wrangler deploy
+    cmd: bun wrangler deploy
+  test:
+    desc: Run tests
+    cmd: bun test src

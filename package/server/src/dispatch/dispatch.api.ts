@@ -45,6 +45,7 @@ export const dispatchApi = new Elysia({ prefix: "/dispatch" }).post(
     const result = await dispatchService.processResult(body, userId);
 
     // Fire-and-forget hub notification
+    // 即发即弃的 hub 通知
     void dispatchService.notifyHub([body.taskId], body.project);
 
     return { unitId: result.unitId };

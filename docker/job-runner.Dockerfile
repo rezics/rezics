@@ -11,7 +11,9 @@
 FROM rezics-base:dev AS build
 
 WORKDIR /repo/package/job-runner
-RUN bun run build:linux
+# Compile the linux-x64 binary inline (mirrors `task job-runner:build:linux`).
+RUN bun build src/index.ts --compile --minify-whitespace --minify-syntax \
+  --target bun-linux-x64 --outfile job-runner
 
 # --- runtime stage ---------------------------------------------------------
 FROM debian:bookworm-slim AS runtime

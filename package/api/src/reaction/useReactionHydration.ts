@@ -5,6 +5,12 @@
  *
  * Returns only loading/hydration flags. Reaction data is read elsewhere via
  * `useReactionData(unitId)`.
+ *
+ * useReactionHydration —— 副作用 hook，为给定的一组 target ID 预热 React Query
+ * 缓存，写入 summary 批次以及（已认证时）my-reaction 批次。
+ *
+ * 仅返回 loading/hydration 标志。Reaction 数据在别处通过
+ * `useReactionData(unitId)` 读取。
  */
 
 import { selectHasAuthIdentity } from "../states/authSessionModel";
@@ -16,7 +22,7 @@ import {
 } from "./reaction.queries";
 
 export type UseReactionHydrationOptions = {
-  /** Override the default auth-derived enabled state for the my-reaction batch. */
+  /** Override the default auth-derived enabled state for the my-reaction batch. 覆盖 my-reaction 批次默认由认证状态推导的 enabled 值。 */
   authenticated?: boolean;
   summaryScopeKey?: string | null;
   userScopeKey?: string | null;

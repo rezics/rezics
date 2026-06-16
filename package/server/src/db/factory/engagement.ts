@@ -207,6 +207,8 @@ async function seedFollows(
 
   // Bump Unit.subscriberCount for every USER unit that gained followers
   // so the denormalized counter aligns with the seeded subscriptions.
+  // 为每个新增关注者的 USER unit 递增 Unit.subscriberCount，
+  // 使去规范化的计数器与种子订阅数据保持一致。
   const unitsToBump = Array.from(subscriberCounts.entries()).filter(
     ([, n]) => n > 0,
   );

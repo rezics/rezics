@@ -7,6 +7,7 @@ const HEARTBEAT_INTERVAL = 30_000;
 export const streamApi = new Elysia({ prefix: "/stream" })
   .use(authMacro)
   // @convention:root-list-ok — SSE stream, not a collection
+  // @convention:root-list-ok — SSE 流，而非集合
   .get(
     "/",
     ({ userId, set }) => {
@@ -27,7 +28,6 @@ export const streamApi = new Elysia({ prefix: "/stream" })
 
             subscribe(userId, connection);
 
-            // Heartbeat
             const heartbeat = setInterval(() => {
               try {
                 controller.enqueue(encoder.encode(":heartbeat\n\n"));
@@ -37,6 +37,7 @@ export const streamApi = new Elysia({ prefix: "/stream" })
             }, HEARTBEAT_INTERVAL);
 
             // Cleanup on cancel
+            // 取消时清理
             const checkClosed = setInterval(() => {
               try {
                 controller.enqueue(new Uint8Array(0));
@@ -49,6 +50,7 @@ export const streamApi = new Elysia({ prefix: "/stream" })
           },
           cancel() {
             // Stream cancelled by client — cleanup handled by interval checks
+            // 流被客户端取消——清理由 interval 检查负责
           },
         }),
         {

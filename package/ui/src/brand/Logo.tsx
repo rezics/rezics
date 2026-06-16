@@ -4,14 +4,18 @@ export interface LogoProps extends Omit<SVGProps<SVGSVGElement>, "color"> {
   /**
    * Pixel size of the bounding box. The logo's intrinsic ratio (780×550)
    * is preserved; height is computed from `size`.
+   * 边界框的像素尺寸。保持 logo 的固有比例（780×550），height 由 `size` 计算得出。
    */
   size?: number;
   /**
    * Fill color. Defaults to the brand fill token. Pass `"currentColor"` to
    * follow surrounding text color (useful inside buttons or coloured headers).
+   * 填充颜色。默认使用品牌填充 token。传入 `"currentColor"` 可跟随周围文本颜色
+   * （在按钮或彩色页头内很有用）。
    */
   color?: CSSProperties["color"];
-  /** Accessible name rendered as `<title>`. Pass empty string to omit. */
+  /** Accessible name rendered as `<title>`. Pass empty string to omit.
+   * 渲染为 `<title>` 的无障碍名称。传入空字符串可省略。 */
   title?: string;
 }
 

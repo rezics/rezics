@@ -160,7 +160,7 @@ export const SettingsTokensSection: FC = () => {
         onClose={() => setCreateOpen(false)}
       />
 
-      {/* Edit dialog */}
+      {/* Edit dialog — 编辑对话框 */}
       <Dialog open={!!editToken} onOpenChange={(o) => !o && setEditToken(null)}>
         <DialogContent className="sm:max-w-[640px]">
           <DialogHeader>
@@ -224,7 +224,7 @@ export const SettingsTokensSection: FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Revoke confirmation dialog */}
+      {/* Revoke confirmation dialog — 撤销确认对话框 */}
       <Dialog open={!!revokeId} onOpenChange={(o) => !o && setRevokeId(null)}>
         <DialogContent>
           <DialogHeader>

@@ -26,7 +26,10 @@ const DRAFTS: DraftMetadata[] = [
   },
 ];
 
-/** Seed the drafts list into the query cache, then render the real page. */
+/**
+ * Seed the drafts list into the query cache, then render the real page.
+ * 将草稿列表注入查询缓存，然后渲染真实页面。
+ */
 function StoryHost({
   drafts,
   children,
@@ -57,7 +60,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Drafts of mixed kinds list with kind labels and resume links. */
+/**
+ * Drafts of mixed kinds list with kind labels and resume links.
+ * 混合类型的草稿列表，带类型标签和恢复链接。
+ */
 export const WithDrafts: Story = {
   render: () => (
     <StoryHost drafts={DRAFTS}>
@@ -71,15 +77,20 @@ export const WithDrafts: Story = {
     );
     expect(canvas.getByText("Arrakis")).toBeInTheDocument();
     // Per-kind label (zh-hant default locale): review -> 書評, wiki -> 百科.
+    // 按类型的标签（zh-hant 默认 locale）：review -> 書評，wiki -> 百科。
     expect(canvas.getByText("書評")).toBeInTheDocument();
     expect(canvas.getByText("百科")).toBeInTheDocument();
     // The row links to the server-resolved resume route (recover).
+    // 该行链接到服务端解析出的恢复路由（recover）。
     const link = canvas.getByText("Thoughts on Dune").closest("a");
     expect(link).toHaveAttribute("href", "/review/post-1/edit");
   },
 };
 
-/** No drafts: the list is absent and the empty copy shows. */
+/**
+ * No drafts: the list is absent and the empty copy shows.
+ * 无草稿：列表不存在，显示空状态文案。
+ */
 export const Empty: Story = {
   render: () => (
     <StoryHost drafts={[]}>

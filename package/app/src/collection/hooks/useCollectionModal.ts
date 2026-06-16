@@ -82,6 +82,8 @@ export function useCollectionModal(
       } catch {
         // onError surfaces the recovery toast; the user re-opens the modal
         // and re-clicks Save themselves after retry succeeds.
+        // onError 弹出恢复提示；用户在重试成功后自行重新打开弹窗
+        // 并再次点击保存。
       }
     },
     [

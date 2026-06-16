@@ -1,13 +1,12 @@
-// src/stores/useLayoutStore.ts
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 /**
- * TODO 换到统一媒体查询设置
+ * TODO: switch to unified media-query settings. TODO 换到统一媒体查询设置。
  * @returns
  */
 function getInitialSidebarOpen() {
-  if (typeof window === "undefined") return true; // SSR 期间保持稳定
+  if (typeof window === "undefined") return true; // Stay stable during SSR — SSR 期间保持稳定
   return !window.matchMedia("(max-width: 960px)").matches;
 }
 
@@ -16,7 +15,7 @@ interface LayoutState {
   sidebarHeightBelow: number;
   openItems: Record<string, boolean>;
   drawerWidth: number;
-  // actions
+  // actions — 操作
   toggleSidebar: () => void;
   closeSidebar: () => void;
   setSidebarHeightBelow: (h: number) => void;
@@ -26,13 +25,13 @@ interface LayoutState {
 export const useLayoutStore = create<LayoutState>()(
   devtools(
     (set: any) => ({
-      // 初始 state
+      // Initial state — 初始 state
       sidebarOpen: getInitialSidebarOpen(),
       sidebarHeightBelow: 0,
       drawerWidth: 280,
       openItems: {},
 
-      // actions
+      // actions — 操作
       toggleSidebar: () =>
         set((state: any) => ({
           sidebarOpen: !state.sidebarOpen,

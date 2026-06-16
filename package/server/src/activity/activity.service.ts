@@ -192,6 +192,13 @@ export const activityService = {
    * Reactions live in a separate service with an opaque cursor; v1 overlays
    * the most recent reaction window and filters it by the `before` watermark,
    * so reaction history deeper than that window is not paginated yet.
+   *
+   * 按时间排序的个人主页公开动态：用户的 posts/reviews/remarks、给出的 reactions
+   * 以及书架更新。每个来源都过滤为公开可见（已发布 + 公开）的对象，因此被移除或私密的
+   * 内容在服务端被省略，而不会以空缺形式泄露。
+   *
+   * Reactions 位于带有不透明游标的独立服务中；v1 叠加最近的 reaction 窗口，并按
+   * `before` 水位线过滤，因此超出该窗口的更早 reaction 历史尚未分页。
    */
   async listForUser(opts: {
     profileUserId: string;
@@ -216,6 +223,7 @@ export const activityService = {
         take: limit + 1,
       }),
       // Asserts profile viewability and hydrates target title/href.
+      // 断言个人主页可见性，并填充目标的 title/href。
       profileReactionHistoryService.listGiven({
         profileUserId: opts.profileUserId,
         viewerUserId: opts.viewerUserId,

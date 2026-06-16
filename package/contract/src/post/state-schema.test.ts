@@ -49,11 +49,14 @@ describe("post state schema registry", () => {
   test("write-strict: illegal values and disallowed transitions are rejected", () => {
     const schema = getStateSchema(OFFICIAL_QUESTION_TAG_SLUG)!;
     // Unknown value.
+    // 未知值。
     expect(isLegalStateValue(schema, "banana")).toBe(false);
     // open → solved is allowed; closed → closed (solved → duplicate) is not.
+    // open → solved 允许；closed → closed（solved → duplicate）不允许。
     expect(isLegalTransition(schema, "open", "solved")).toBe(true);
     expect(isLegalTransition(schema, "solved", "duplicate")).toBe(false);
     // Reopen: any closed reason → initial open.
+    // 重新打开：任意关闭原因 → 初始的 open。
     expect(isLegalTransition(schema, "not-planned", "open")).toBe(true);
     expect(isLegalTransition(schema, "duplicate", "open")).toBe(true);
   });
@@ -70,8 +73,10 @@ describe("post state schema registry", () => {
     const schema = getStateSchema(OFFICIAL_QUESTION_TAG_SLUG)!;
     const solved = schema.values.find((value) => value.slug === "solved")!;
     // No tagSlug override → renders through the tag whose slug is the value slug.
+    // 没有 tagSlug 覆盖 → 通过 slug 等于该值 slug 的标签来渲染。
     expect(resolveValueTagSlug(solved)).toBe("solved");
     // An explicit override is honored when present.
+    // 存在显式覆盖时优先使用该覆盖。
     expect(
       resolveValueTagSlug({ slug: "x", bucket: "closed", tagSlug: "y" }),
     ).toBe("y");

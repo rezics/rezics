@@ -214,7 +214,7 @@ export default function AuthEmailPage() {
       )}
 
       <div className="flex gap-6 flex-wrap">
-        {/* Left panel: controls */}
+        {/* Left panel: controls — 左侧面板：控件 */}
         <div className="flex-1 min-w-[360px] basis-[400px]">
           <div className="flex flex-col gap-1 mb-4">
             <Label>{t("admin:auth_email_template")}</Label>
@@ -386,7 +386,7 @@ export default function AuthEmailPage() {
           )}
         </div>
 
-        {/* Right panel: preview */}
+        {/* Right panel: preview — 右侧面板：预览 */}
         <div className="flex-1 min-w-[400px] basis-[500px] rounded-md border border-border-whisper overflow-hidden">
           <p className="text-sm font-semibold p-2 bg-surface-elevated border-b border-border-whisper">
             {t("admin:auth_email_preview")}

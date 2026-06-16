@@ -15,16 +15,22 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup go-task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - run: bun install --frozen-lockfile
 
       - name: Check convention (routes & folders)
-        run: bun run check:convention
+        run: task check:convention
 
       - name: Check i18n keys & namespaces
-        run: bun run check:i18n
+        run: task check:i18n
 
       - name: Check unused exports & dependencies
-        run: bun run knip
+        run: task knip
 
       - name: Check env isolation
-        run: bun run check:runtime-env
+        run: task check:runtime-env

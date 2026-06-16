@@ -1,4 +1,5 @@
 // MOCK: Storybook excerpt fixtures, hand-authored against `UnitDTO`.
+// MOCK: 针对 `UnitDTO` 手工编写的 Storybook excerpt fixtures。
 import type { UnitDTO } from "@rezics/contract";
 import { LANGUAGES } from "@rezics/contract";
 import { userAlice, userBen } from "./user.ts";

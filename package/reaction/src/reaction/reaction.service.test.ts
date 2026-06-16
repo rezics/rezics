@@ -517,6 +517,7 @@ describe("reactionService scoped reactions", () => {
 });
 
 // Round-trip the encode helper to keep the cursor predicate honest.
+// 往返测试 encode 辅助函数，以保证游标判定逻辑可靠。
 test("encodeCursor produces a string consumable by listGiven", async () => {
   seed([
     row(5, { id: "id-e", userId: "u" }),

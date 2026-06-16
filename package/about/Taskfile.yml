@@ -1,0 +1,19 @@
+# @rezics/about — Astro site. Aggregated by the root Taskfile as `about:*`.
+version: '3'
+
+env:
+  ASTRO_TELEMETRY_DISABLED: '1'
+
+tasks:
+  dev:
+    desc: Dev server (Astro)
+    cmd: bun astro dev --host 0.0.0.0 --port 4174
+  build:
+    desc: Production build (Astro)
+    cmd: bun astro build
+  preview:
+    desc: Preview the built site (Astro)
+    cmd: bun astro preview --host 0.0.0.0 --port 4174
+  test:
+    desc: Run tests
+    cmd: bun test

@@ -44,6 +44,9 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
 // Singular folder names permitted even when their plural form sits on
 // PLURAL_CONTAINER_ALLOWLIST, or compounds whose head noun is genuinely
 // singular but ends in `s` (e.g. "status", "progress-status").
+// 即使其复数形式位于 PLURAL_CONTAINER_ALLOWLIST 上，这些单数文件夹名仍被允许；
+// 或者那些中心词本身为单数但以 `s` 结尾的复合词（例如 "status"、
+// "progress-status"）。
 const SINGULAR_DOMAIN_EXCEPTIONS = new Set([
   "token",
   "status",

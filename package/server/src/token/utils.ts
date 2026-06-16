@@ -7,6 +7,8 @@ export function generateSecureToken(bytes = 32): string {
 /**
  * Compute SHA3-256 hash of a token
  * Output: hex-encoded string
+ * 计算 token 的 SHA3-256 哈希
+ * 输出：十六进制编码的字符串
  */
 export function hashToken(token: string | Buffer): string {
   return createHash("sha3-256").update(token).digest("hex");
@@ -15,6 +17,8 @@ export function hashToken(token: string | Buffer): string {
 /**
  * Validate a token against a known hash using timingSafeEqual
  * Prevents timing attacks
+ * 使用 timingSafeEqual 将 token 与已知哈希进行比对校验
+ * 防止时序攻击
  */
 export function verifyTokenHash(
   token: string | Buffer,
@@ -25,6 +29,7 @@ export function verifyTokenHash(
 
   if (tokenHash.length !== expected.length) {
     // Prevent leaking length info in error case
+    // 防止在出错情况下泄露长度信息
     return false;
   }
 

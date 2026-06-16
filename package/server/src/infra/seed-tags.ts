@@ -18,6 +18,9 @@ async function getServerDb() {
  * Look up all content-type tags by `(tagScope, slug)` and cache their IDs
  * in memory. Called once at server startup, after `initSlugScopesCache`.
  * Missing tags are logged and omitted.
+ * 通过 `(tagScope, slug)` 查询所有内容类型的 tag 并将其 ID 缓存到内存中。
+ * 在服务启动时调用一次，位于 `initSlugScopesCache` 之后。
+ * 缺失的 tag 会被记录并忽略。
  */
 export async function initSeedTagsCache(): Promise<void> {
   const tagScope = getSlugScopeId("tag");
@@ -64,12 +67,14 @@ export async function initSeedTagsCache(): Promise<void> {
   );
 }
 
-/** Return the cached unitId for the given seed tag name, or `null` if unavailable. */
+/** Return the cached unitId for the given seed tag name, or `null` if unavailable.
+ * 返回给定 seed tag 名称对应的已缓存 unitId，若不可用则返回 `null`。 */
 export function getSeedTagId(name: SeedTagName): string | null {
   return cache.get(name) ?? null;
 }
 
-/** Snapshot of all cached seed tag IDs (omits missing entries). */
+/** Snapshot of all cached seed tag IDs (omits missing entries).
+ * 所有已缓存 seed tag ID 的快照（忽略缺失项）。 */
 export function getSeedTagsSnapshot(): Partial<Record<SeedTagName, string>> {
   const snapshot: Partial<Record<SeedTagName, string>> = {};
   for (const [name, id] of cache) {

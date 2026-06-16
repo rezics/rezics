@@ -41,7 +41,10 @@ export const readLanguageQuerySchema = t.Object({
 
 export type ReadLanguageQuery = (typeof readLanguageQuerySchema)["static"];
 
-/** Return primary support languages in stable support-language sort order. */
+/**
+ * Return primary support languages in stable support-language sort order.
+ * 以稳定的支持语言排序返回主要支持语言。
+ */
 export function primaryLanguages(
   supportLanguages: readonly SupportLanguageLike[] = [],
 ): Language[] {
@@ -53,7 +56,10 @@ export function primaryLanguages(
   );
 }
 
-/** Return the first primary support language, then the first supported language. */
+/**
+ * Return the first primary support language, then the first supported language.
+ * 返回第一个主要支持语言，否则返回第一个受支持语言。
+ */
 export function defaultSupportLanguage(
   supportLanguages: readonly SupportLanguageLike[] | null | undefined = [],
 ): Language | null {
@@ -69,10 +75,13 @@ export function defaultSupportLanguage(
 
 /**
  * Build the ordered candidate list for localized reads.
+ * 为本地化读取构建有序的候选语言列表。
  *
  * App locale is the user's local runtime choice and outranks account-level
  * content preferences. Support languages and the platform fallback fill in only
  * after request/app/user candidates.
+ * appLocale 是用户本地运行时的选择，优先级高于账户级别的内容偏好。支持语言和
+ * 平台兜底语言仅在请求/应用/用户候选之后才参与补位。
  */
 export function readLanguageCandidates(input: {
   explicitLanguage?: string | null;
@@ -103,9 +112,12 @@ export function readLanguageCandidates(input: {
 
 /**
  * Build the ordered candidate list for a new localized write.
+ * 为新的本地化写入构建有序的候选语言列表。
  *
  * Existing content updates should pass an explicit language instead of using
  * this as fallback resolution; create surfaces use it to seed the first draft.
+ * 更新已有内容时应传入明确的语言，而不是依赖此处的兜底解析；创建场景用它来初始化
+ * 首个草稿。
  */
 export function authoringLanguageCandidates(input: {
   explicitLanguage?: string | null;
@@ -132,6 +144,8 @@ export function resolveAuthoringLanguage(
  * languages. Missing rows/fields in the resolved language intentionally remain
  * missing; availability is the supported-language set, not translation
  * completeness.
+ * 根据候选顺序和受支持语言为读取响应解析出单个语言。已解析语言中缺失的行/字段
+ * 会被有意保留为缺失；可用性由受支持语言集合决定，而非翻译的完整程度。
  */
 export function resolveReadLanguage(input: {
   explicitLanguage?: string | null;

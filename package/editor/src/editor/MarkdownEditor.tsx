@@ -326,7 +326,10 @@ export function MarkdownEditor({
       <div style={contentStyle}>
         {/* Keep the mount node as a block flex item.
             Making this node itself a flex container can cause .cm-editor
-            to size to its intrinsic width instead of filling the pane. */}
+            to size to its intrinsic width instead of filling the pane.
+            将挂载节点保持为块级 flex 项。
+            若把该节点本身设为 flex 容器，可能导致 .cm-editor
+            按其固有宽度而非填满该 pane 来计算尺寸。 */}
         <div ref={containerRef} style={editorPaneStyle} />
 
         {preview && (

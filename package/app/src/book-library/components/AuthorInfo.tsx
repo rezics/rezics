@@ -10,14 +10,14 @@ import { FollowButton } from "@/engagement/components/FollowButton.tsx";
 import { unitHref } from "@/shared/ui/link";
 import { useIsMobile } from "@/shared/utils/use-media-query.ts";
 
-// --------- Types ---------
+// --------- Types 类型 ---------
 export type Author = PublicUser;
 
 export type AuthorInfoProps = {
   author: Author;
-  /** Whether to show the edit button (routes to author edit page). */
+  /** Whether to show the edit button (routes to author edit page). 是否显示编辑按钮（跳转到作者编辑页面）。 */
   showEditButton?: boolean;
-  /** Optional click handler for edit button. */
+  /** Optional click handler for edit button. 编辑按钮的可选点击处理函数。 */
   onEdit?: () => void;
 };
 
@@ -27,7 +27,7 @@ type AuthorInfoLayoutProps = {
   onEdit: () => void;
 };
 
-// --------- AuthorInfo.Mobile ---------
+// --------- AuthorInfo.Mobile 移动端布局 ---------
 const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   author,
   showEditButton,
@@ -54,7 +54,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
         <EditButtonFloatRightShow onClick={onEdit} text={t("common:edit")} />
       )}
       <div className="flex items-start gap-4 px-4 pt-8">
-        {/* Left: Avatar + Follow */}
+        {/* Left: Avatar + Follow — 左侧：头像 + 关注 */}
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           <LazyLoadImage
             src={author.avatar || ""}
@@ -71,7 +71,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
           </div>
         </div>
 
-        {/* Right: text */}
+        {/* Right: text — 右侧：文本 */}
         <div className="flex flex-col flex-1 min-w-0">
           {author.bio && (
             <p className="text-sm leading-relaxed line-clamp-3 overflow-hidden">
@@ -89,7 +89,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   );
 };
 
-// --------- AuthorInfo.Desktop ---------
+// --------- AuthorInfo.Desktop 桌面端布局 ---------
 const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   author,
   showEditButton,
@@ -127,7 +127,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
         <div className="whitespace-pre-line">
           <div>
             <div className="mb-4 mt-2 flex">
-              {/* Left image area */}
+              {/* Left image area — 左侧图片区域 */}
               <div className="w-1/5 flex-row justify-center">
                 <LazyLoadImage
                   src={author.avatar || ""}
@@ -144,10 +144,10 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
                 </div>
               </div>
 
-              {/* Divider */}
+              {/* Divider — 分隔线 */}
               <div className="h-auto border-l border-gray-300 mx-4" />
 
-              {/* Right text */}
+              {/* Right text — 右侧文本 */}
               <div className="flex-1 !text-md">
                 <p>
                   {t("book:author_info_bio_label")}:{author.bio}
@@ -165,7 +165,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   );
 };
 
-// --------- AuthorInfo ---------
+// --------- AuthorInfo 入口组件 ---------
 export const AuthorInfo: React.FC<AuthorInfoProps> = ({
   author,
   showEditButton,

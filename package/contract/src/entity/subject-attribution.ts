@@ -14,6 +14,7 @@ export {
 
 // ============================================================
 // ROLE REGISTRY
+// 角色注册表
 // ============================================================
 
 export const subjectAttributionRoleRegistry = {
@@ -87,6 +88,7 @@ export const subjectAttributionRoleRegistry = {
 
 // ============================================================
 // SUBJECT ATTRIBUTION DTO
+// 主题归属 DTO
 // ============================================================
 
 export const subjectAttributionDTOSchema = t.Object({
@@ -104,6 +106,7 @@ export type SubjectAttributionDTO =
 
 // ============================================================
 // SUBJECT ATTRIBUTION LINK/UNLINK
+// 主题归属 关联/解除关联
 // ============================================================
 
 export const linkSubjectAttributionSchema = t.Object({
@@ -146,6 +149,7 @@ export type EntityAttributionBatchSetSubjectsOp =
 
 // ============================================================
 // LIST QUERIES
+// 列表查询
 // ============================================================
 
 export const subjectAttributionByUnitQuerySchema = t.Object({

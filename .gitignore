@@ -1,3 +1,5 @@
+.ref
+
 # Claude Code
 .claude/worktrees/
 .claude/settings.local.json
@@ -67,3 +69,15 @@ example-gitignore/
 install/
 tailwind.config.js
 git-staged.txt
+.temp
+
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml

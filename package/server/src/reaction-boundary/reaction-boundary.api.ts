@@ -140,6 +140,7 @@ export function createReactionBoundaryApi(deps: ReactionBoundaryDeps = {}) {
         set.status = result.created ? 201 : 200;
 
         // Downvotes are private ranking signals; only upvotes notify target owners.
+        // 反对票是私有的排序信号；只有赞同票才会通知目标所有者。
         if (result.created && body.reaction === "upvote") {
           findTargetOwner(body.targetId)
             .then((ownerUserId) => {

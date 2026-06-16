@@ -1,0 +1,19 @@
+# @rezics/admin — static Vite SPA. Aggregated by the root Taskfile as `admin:*`.
+version: '3'
+
+tasks:
+  dev:
+    desc: Dev server (Vite)
+    cmd: bun vite
+  build:
+    desc: Production build (Vite)
+    cmd: bun vite build
+  preview:
+    desc: Preview the built app
+    cmd: bun vite preview
+  storybook:
+    desc: Storybook (port 6010)
+    cmd: bun storybook dev -p 6010 --no-open {{.CLI_ARGS}}
+  build-storybook:
+    desc: Build the static Storybook
+    cmd: bun storybook build -o storybook-static

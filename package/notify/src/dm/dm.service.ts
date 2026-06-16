@@ -140,7 +140,10 @@ async function isParticipant(
   return (await getPeerId(conversationId, userId)) !== null;
 }
 
-/** The other participant in a conversation, or null if `userId` isn't in it. */
+/**
+ * The other participant in a conversation, or null if `userId` isn't in it.
+ * 会话中的另一位参与者，若 `userId` 不在其中则为 null。
+ */
 export async function getPeerId(
   conversationId: string,
   userId: string,
@@ -156,6 +159,8 @@ export async function getPeerId(
  * Mark the peer's messages up to (and including) `upToMessageId` as read for
  * `userId`. Returns the resulting read receipt, or `null` when `userId` is not
  * a participant or the target message is missing.
+ * 为 `userId` 将对方截至（且包含）`upToMessageId` 的消息标记为已读。返回生成的
+ * 已读回执，若 `userId` 不是参与者或目标消息缺失则返回 `null`。
  */
 export async function markReadUpTo(
   conversationId: string,
@@ -201,6 +206,8 @@ export async function markReadUpTo(
  * The peer's read state in a conversation: the latest message `userId` sent
  * that the peer has read. `lastReadMessageId` is null when the peer has read
  * nothing yet.
+ * 对方在会话中的已读状态：`userId` 发出的、对方已读的最新一条消息。当对方尚未
+ * 读取任何消息时，`lastReadMessageId` 为 null。
  */
 export async function getReadReceipt(
   conversationId: string,
@@ -228,7 +235,10 @@ export async function getReadReceipt(
   };
 }
 
-/** Block or unblock a peer for `blockerId`. Returns the resulting block state. */
+/**
+ * Block or unblock a peer for `blockerId`. Returns the resulting block state.
+ * 为 `blockerId` 屏蔽或解除屏蔽某位对方。返回生成的屏蔽状态。
+ */
 export async function setBlock(
   blockerId: string,
   blockedId: string,
@@ -271,7 +281,10 @@ async function findBlock(
   return Boolean(row);
 }
 
-/** Resolve the mutual block state between `userId` and `peerId`. */
+/**
+ * Resolve the mutual block state between `userId` and `peerId`.
+ * 解析 `userId` 与 `peerId` 之间的相互屏蔽状态。
+ */
 export async function getBlockState(userId: string, peerId: string) {
   const [peerBlocked, blockedByPeer] = await Promise.all([
     findBlock(userId, peerId),
@@ -284,7 +297,10 @@ export async function getBlockState(userId: string, peerId: string) {
   };
 }
 
-/** True when either party has blocked the other. */
+/**
+ * True when either party has blocked the other.
+ * 当任一方屏蔽了对方时为 true。
+ */
 export async function isBlockedEitherWay(
   userId: string,
   peerId: string,
@@ -296,6 +312,7 @@ export async function isBlockedEitherWay(
 /**
  * Per-conversation viewer-facing summary fields: unread count (messages from
  * the peer not yet read) and mutual block flags.
+ * 面向查看者的每会话汇总字段：未读数（对方发来但尚未读取的消息）和相互屏蔽标志。
  */
 export async function getConversationViewerState(
   conversationId: string,

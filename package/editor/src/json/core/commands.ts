@@ -11,11 +11,13 @@ export function formatJson(view: EditorView): boolean {
       });
     }
   } catch {
-    // Invalid JSON — trigger lint to show the error if lint plugin is available
+    // Invalid JSON — trigger lint to show the error if lint plugin is available.
+    // 无效的 JSON —— 若 lint 插件可用，则触发 lint 以显示错误。
     try {
       forceLinting(view);
     } catch {
-      // Lint plugin not installed, ignore
+      // Lint plugin not installed, ignore.
+      // 未安装 lint 插件，忽略。
     }
   }
   return true;

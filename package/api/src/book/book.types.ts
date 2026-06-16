@@ -1,5 +1,6 @@
 /**
  * Book-related TypeScript types and interfaces for the frontend
+ * 面向前端的书籍相关 TypeScript 类型与接口
  */
 
 import type {
@@ -14,7 +15,6 @@ import type {
   UpdateBookInput,
 } from "@rezics/contract";
 
-// Re-export contract types
 export type {
   BookContentStructureItem,
   BookContentStructureResponse,
@@ -29,6 +29,7 @@ export type {
 
 /**
  * Extended frontend types
+ * 扩展的前端类型
  */
 export type BookFormData = Omit<CreateBookInput, "userId">;
 

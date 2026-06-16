@@ -30,6 +30,8 @@ type AggregatedRow = {
 /**
  * Persist one notification row per recipient and return the inserted rows for
  * SSE fan-out. IDs stay database-generated through PostgreSQL 18 `uuidv7()`.
+ * 为每个收件人持久化一条通知行，并返回插入的行用于 SSE 扇出。ID 始终由数据库
+ * 通过 PostgreSQL 18 的 `uuidv7()` 生成。
  */
 export async function broadcastNotifications(input: {
   kind: string;
@@ -286,4 +288,5 @@ export async function deleteNotification(
 }
 
 // Re-export the predicate for callers that import via this service.
+// 为通过本服务导入的调用方重新导出该谓词。
 export { isAggregatable };

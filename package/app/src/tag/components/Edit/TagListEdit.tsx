@@ -21,6 +21,8 @@ import { SingleTagChip } from "../TagList";
 /**
  * TagListEdit - now uses UnitTagDTO (scored tags) instead of old TagDetailDTO.
  * Attach/detach use tagUnitId + unitId (the target object).
+ * TagListEdit —— 现在使用 UnitTagDTO（带分值的标签）而非旧的 TagDetailDTO。
+ * 关联/解除关联使用 tagUnitId + unitId（目标对象）。
  */
 export type TagListEditProps = {
   objectUnitId: string;
@@ -141,7 +143,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
 
       {!isLoading && !error && renderListView()}
 
-      {/* Search and attach existing tags */}
+      {/* Search and attach existing tags — 搜索并关联已有标签 */}
       <div className="mt-8 pt-4 border-t border-border-whisper">
         <div className="text-sm font-semibold text-text-primary mb-2">
           {t("community:tag_search_and_add")}

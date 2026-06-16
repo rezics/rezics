@@ -349,6 +349,7 @@ describe("GET /profile/:userId/reaction/received", () => {
     users.set("u1", { userId: "u1" });
     users.set("alice", { userId: "alice", slug: "alice" });
     // Synthesise 1500 owned units to force two ownership chunks.
+    // 合成 1500 个拥有的 unit，以触发两个所有权分块。
     for (let i = 0; i < 1500; i++) {
       const id = `u-${String(i).padStart(5, "0")}`;
       units.set(id, {

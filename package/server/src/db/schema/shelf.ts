@@ -14,6 +14,10 @@ import { createdAt, jsonData, updatedAt } from "./columns";
 import { User } from "./identity";
 import { Unit } from "./unit";
 
+/**
+ * General user-curated collections. Series is a separate first-class model.
+ * 通用的用户自建收藏夹。Series 是独立的一等模型。
+ */
 export const Shelf = pgTable("Shelf", {
   unitId: uuid()
     .primaryKey()
@@ -42,7 +46,19 @@ export const ShelfItem = pgTable(
     parentItemId: uuid("parentItemId"),
     parentRole: varchar({ length: 32 }),
     position: varchar({ length: 64 }).notNull(),
+    /**
+     * Weak edition/source/package context for the selected shelf item. The row
+     * identity remains (shelfId, itemType, itemId); this is only a lookup hint.
+     * 选中书架条目的弱版本/来源/包上下文。行标识仍为 (shelfId, itemType,
+     * itemId)；此字段仅作为查询提示。
+     */
     variantUnitId: uuid(),
+    /**
+     * User-authored indexing help only. Do not copy collected Unit content,
+     * metadata, tags, or shelf metadata into this field or its search index.
+     * 仅供用户自填的索引辅助信息。不要将被收藏的 Unit 内容、元数据、标签或书架
+     * 元数据复制到此字段或其搜索索引中。
+     */
     searchText: text(),
     createdByUserId: uuid().references(() => User.unitId, {
       onDelete: "set null",

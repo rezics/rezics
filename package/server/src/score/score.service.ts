@@ -26,6 +26,7 @@ async function getServerDb() {
 export class ScoreService {
   // ============================================================
   // SCORE ENTRY + AGGREGATE OPERATIONS
+  // 评分条目 + 聚合操作
   // ============================================================
 
   async upsertScore(
@@ -42,6 +43,7 @@ export class ScoreService {
     }
 
     // Validate fields against realm field registry
+    // 根据 realm 字段注册表校验各字段
     if (fields && Object.keys(fields).length > 0) {
       const db = await getServerDb();
       const realmFields = await db
@@ -126,6 +128,7 @@ export class ScoreService {
       if (!entry) throw new Error("ScoreEntry not found");
 
       // Check for linked posts (reviews/remarks)
+      // 检查关联的 post（评论/短评）
       const linkedPosts = await tx
         .select({ unitId: Post.unitId })
         .from(Post)
@@ -140,9 +143,11 @@ export class ScoreService {
       }
 
       // Admin: delete linked posts first
+      // 管理员：先删除关联的 post
       if (linkedPosts.length > 0) {
         await tx.delete(Post).where(eq(Post.scoreEntryId, id));
         // Also delete the Unit records for those posts
+        // 同时删除这些 post 对应的 Unit 记录
         await tx.delete(Unit).where(
           inArray(
             Unit.id,
@@ -242,6 +247,7 @@ export class ScoreService {
 
   // ============================================================
   // REALM FIELD OPERATIONS
+  // realm 字段操作
   // ============================================================
 
   async listRealmFields(realmId: string) {
@@ -307,6 +313,7 @@ export class ScoreService {
 
   // ============================================================
   // PRIVATE: AGGREGATE UPDATE LOGIC
+  // 私有：聚合更新逻辑
   // ============================================================
 
   private async updateAggregate(
@@ -327,6 +334,7 @@ export class ScoreService {
       .limit(1);
 
     // Deletion case: removing the last entry
+    // 删除情形：移除最后一个条目
     if (newValue === null && existing) {
       const nextCount = existing.totalCount - 1;
       if (nextCount <= 0) {
@@ -371,6 +379,7 @@ export class ScoreService {
     }
 
     // Creation case: no existing aggregate
+    // 创建情形：尚不存在聚合
     if (!existing && newValue !== null) {
       const distribution: Distribution = { [String(newValue)]: 1 };
       let fields: FieldsAggregate | null = null;
@@ -394,6 +403,7 @@ export class ScoreService {
     }
 
     // Update case: existing aggregate, changing value
+    // 更新情形：已存在聚合，变更其值
     if (existing && newValue !== null) {
       const deltaScore = newValue - (oldValue ?? 0);
       const deltaCount = oldValue === null ? 1 : 0;

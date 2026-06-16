@@ -34,8 +34,11 @@ import {
 } from "./read-language";
 
 // ANCHOR: federatedSearch
+// ANCHOR: federatedSearch（联邦搜索入口）
 // Single entry point used by `POST /meili/search/federated`. Branches on the
 // requested `category` and computes the scope-permitted index allowlist.
+// `POST /meili/search/federated` 使用的唯一入口。根据请求的 `category` 分支，
+// 并计算 scope 允许访问的索引白名单。
 
 const POST_KIND_BY_CATEGORY: Record<
   "reviews" | "excerpts" | "remarks" | "posts",
@@ -49,8 +52,10 @@ const POST_KIND_BY_CATEGORY: Record<
 
 interface PermittedIndexes {
   // BOOK | GAME | MEDIA | LINK content surface
+  // BOOK | GAME | MEDIA | LINK 内容面
   contentBooks: boolean;
   // SHELF content surface
+  // SHELF 内容面
   contentShelves: boolean;
   posts: boolean;
   comments: boolean;
@@ -74,6 +79,8 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
     case "book":
       // BOOK-side excluded; SHELF allowed via containedUnitIds; posts via
       // targetUnitId. Realms & users excluded.
+      // 排除 BOOK 侧；SHELF 通过 containedUnitIds 允许；posts 通过
+      // targetUnitId 允许。排除 realms 与 users。
       return {
         contentBooks: false,
         contentShelves: true,
@@ -138,6 +145,7 @@ interface BuiltQuery {
   q: string;
   filter: string[];
   // Optional weight key for federation-mode multi-search.
+  // 联合（federation）模式多重搜索的可选权重键。
   weightKey?: keyof typeof federationWeights;
 }
 
@@ -172,20 +180,24 @@ export async function federatedSearch(
   const hitsPerPage = opts.hitsPerPage ?? DEFAULT_PAGE_HITS_PER_PAGE;
 
   // ANCHOR: single category → one-element drill-down
+  // ANCHOR: 单一分类 → 单元素下钻
   if (category !== "all" && category !== "mixed") {
     return federatedSingle(client, opts, ctx, q, page, hitsPerPage);
   }
 
   // ANCHOR: mixed → federated multi-search with weights
+  // ANCHOR: mixed → 带权重的联邦多重搜索
   if (category === "mixed") {
     return federatedRanked(client, opts, ctx, q, page, hitsPerPage);
   }
 
   // ANCHOR: all → grouped sections (per-index totals + capped items)
+  // ANCHOR: all → 分组分区（每索引总数 + 截断条目）
   return federatedGrouped(client, opts, ctx, q);
 }
 
 // ANCHOR: single
+// ANCHOR: 单一
 async function federatedSingle(
   client: SearchClient,
   opts: FederatedSearchOptions,
@@ -330,6 +342,7 @@ async function federatedSingle(
 }
 
 // ANCHOR: ranked (mixed)
+// ANCHOR: 排序（mixed）
 async function federatedRanked(
   client: SearchClient,
   opts: FederatedSearchOptions,
@@ -388,6 +401,7 @@ async function federatedRanked(
 }
 
 // ANCHOR: grouped (all)
+// ANCHOR: 分组（all）
 async function federatedGrouped(
   client: SearchClient,
   opts: FederatedSearchOptions,
@@ -594,12 +608,17 @@ async function searchShelfItemGroups(
 }
 
 // ANCHOR: buildAllSubQueries
+// ANCHOR: buildAllSubQueries（构造全部子查询）
 // Constructs the full set of permitted sub-queries for grouped/ranked modes.
 // For `all` (grouped), each post-kind becomes its own section.
 // For `mixed` (ranked), posts are queried as one bucket with no kind filter.
+// 为 grouped/ranked 模式构造完整的允许子查询集合。
+// 对 `all`（grouped），每个 post-kind 成为独立分区。
+// 对 `mixed`（ranked），posts 作为单一桶查询，不带 kind 过滤。
 
 interface BuiltSubQuery extends BuiltQuery {
   // Section name in the grouped variant (`books`, `reviews`, ...).
+  // grouped 变体中的分区名（`books`、`reviews` 等）。
   sectionKey?:
     | "books"
     | "reviews"
@@ -639,6 +658,7 @@ function buildAllSubQueries(
   if (permitted.posts) {
     if (mode === "all") {
       // One section per post-kind category
+      // 每个 post-kind 类别一个分区。
       (["reviews", "excerpts", "remarks", "posts"] as const).forEach((cat) => {
         const filter = buildPostFilter(query, scope, ctx, {
           postCategory: cat,
@@ -730,9 +750,13 @@ function buildAllSubQueries(
 }
 
 // ANCHOR: mapIndexToCategory
+// ANCHOR: mapIndexToCategory（索引映射到分类）
 // In ranked (federated multi-search) the response is a flat hits[] without
 // per-query metadata for posts kinds. Map index → coarse category; for
 // post-index hits, refine by document.kind when available.
+// 在 ranked（联合多重搜索）中，响应是扁平的 hits[]，对 posts kinds 没有
+// 逐查询元数据。将 index → 粗粒度 category 映射；对 post 索引的命中，
+// 在可用时通过 document.kind 进一步细化。
 
 function mapIndexToCategory(indexUid: string, hit: any): SearchCategory {
   if (indexUid === "posts") {
@@ -752,5 +776,6 @@ function mapIndexToCategory(indexUid: string, hit: any): SearchCategory {
   if (indexUid === "users") return "users";
   if (indexUid === "entities") return "entities";
   // Fallback for unmapped index uids — treat as posts so the union resolves.
+  // 未映射 index uid 的兜底——视作 posts 以便联合类型可解析。
   return "posts";
 }

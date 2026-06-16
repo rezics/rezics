@@ -1,4 +1,5 @@
 // MOCK: Storybook tag fixtures.
+// MOCK：Storybook 标签夹具。
 export interface TagFixture {
   unitId: string;
   name: string;

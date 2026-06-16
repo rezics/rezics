@@ -29,6 +29,7 @@ const x = 1;
     const result = md.render(sample);
 
     // Check key elements have data-source-line
+    // 检查关键元素带有 data-source-line
     expect(result).toMatch(/<h1[^>]*data-source-line="\d+"/);
     expect(result).toMatch(/<h2[^>]*data-source-line="\d+"/);
     expect(result).toMatch(/<p[^>]*data-source-line="\d+"/);
@@ -37,6 +38,7 @@ const x = 1;
     expect(result).toMatch(/<blockquote[^>]*data-source-line="\d+"/);
 
     // fence token - attr ends up on <code> inside <pre>
+    // fence 令牌——属性最终落在 <pre> 内的 <code> 上
     expect(result).toMatch(/<code data-source-line="11"/);
   });
 
@@ -45,9 +47,11 @@ const x = 1;
       "Line one\n\n\n\nLine after gaps\n\n  double  spaces",
     );
     // novelModePlugin features should still work
+    // novelModePlugin 的功能应当仍然有效
     expect(result).toContain("preserved-empty-lines");
     expect(result).toContain("&nbsp;");
     // source-line attrs should also be present
+    // source-line 属性也应当存在
     expect(result).toMatch(/data-source-line/);
   });
 });

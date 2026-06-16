@@ -1,4 +1,5 @@
 // MOCK: Storybook notification fixtures, hand-authored against `NotificationItem`.
+// MOCK：Storybook 通知夹具，手工依据 `NotificationItem` 编写。
 import type { NotificationItem } from "@rezics/contract";
 
 export const notificationUpvote: NotificationItem = {

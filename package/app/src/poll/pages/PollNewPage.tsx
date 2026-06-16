@@ -2,7 +2,10 @@ import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { PollComposer } from "../components/PollComposer";
 
-/** Route-level entry for `/poll/new`: mounts the standalone poll composer. */
+/**
+ * Route-level entry for `/poll/new`: mounts the standalone poll composer.
+ * `/poll/new` 的路由级入口：挂载独立的投票编辑器。
+ */
 export const PollNewPage: React.FC = () => {
   const { t } = useTranslation(["community"]);
   return (

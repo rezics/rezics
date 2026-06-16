@@ -32,6 +32,11 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Setup go-task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: bun install --frozen-lockfile
 
       - name: Skip unselected app
@@ -45,7 +50,7 @@ jobs:
       # VITE_* are public build-time config provided as Cloudflare/Actions vars.
       - name: Build ${{ matrix.app }}
         if: steps.gate.outputs.skip != 'true'
-        run: bun --filter=@rezics/${{ matrix.app }} run build
+        run: task ${{ matrix.app }}:build
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_NOTIFY_BASE_URL: ${{ vars.VITE_NOTIFY_BASE_URL }}

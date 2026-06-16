@@ -21,6 +21,7 @@ function getSmtpSender() {
   if (!env.SMTP_HOST) return null;
 
   // Pool/maxConnections/maxMessages come from @rezics/email defaults.
+  // Pool/maxConnections/maxMessages 取自 @rezics/email 的默认值。
   smtpSender = createEmailSender({
     defaultFrom: {
       email: env.SMTP_FROM ?? "no-reply@rezics.com",

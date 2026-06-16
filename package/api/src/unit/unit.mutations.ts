@@ -1,5 +1,6 @@
 /**
  * React Query mutations for Unit operations
+ * 用于 Unit 操作的 React Query mutations
  */
 
 import type {
@@ -102,6 +103,7 @@ export async function syncDeleteTranslationMutationCache({
 
 /**
  * Mutation for creating a unit
+ * 用于创建 unit 的 mutation
  */
 export function useCreateUnitMutation(
   options?: Omit<
@@ -116,9 +118,11 @@ export function useCreateUnitMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch unit lists
+      // 使 unit 列表失效并重新拉取
       queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
 
       // Pre-populate the cache with the new unit
+      // 用新建的 unit 预填充缓存
       if (data?.id) {
         queryClient.setQueryData(unitKeys.detail(data.id), data);
       }
@@ -130,6 +134,7 @@ export function useCreateUnitMutation(
 
 /**
  * Mutation for updating a unit
+ * 用于更新 unit 的 mutation
  */
 export function useUpdateUnitMutation(
   options?: Omit<
@@ -148,9 +153,11 @@ export function useUpdateUnitMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific unit
+      // 更新该 unit 对应的缓存
       queryClient.setQueryData(unitKeys.detail(variables.unitId), data);
 
       // Invalidate lists to ensure they're refreshed
+      // 使列表失效以确保其刷新
       queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
@@ -160,6 +167,7 @@ export function useUpdateUnitMutation(
 
 /**
  * Mutation for deleting a unit
+ * 用于删除 unit 的 mutation
  */
 export function useDeleteUnitMutation(
   options?: Omit<
@@ -174,9 +182,11 @@ export function useDeleteUnitMutation(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
+      // 从缓存中移除
       queryClient.removeQueries({ queryKey: unitKeys.detail(unitId) });
 
       // Invalidate all lists
+      // 使所有列表失效
       queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
 
       options?.onSuccess?.(data, unitId, onMutateResult, context);
@@ -186,6 +196,7 @@ export function useDeleteUnitMutation(
 
 /**
  * Mutation for upserting a translation row on a unit
+ * 用于在 unit 上 upsert 一行翻译的 mutation
  */
 export function useUpsertTranslationMutation(
   options?: UpsertTranslationMutationOptions,
@@ -211,6 +222,7 @@ export function useUpsertTranslationMutation(
 
 /**
  * Mutation for deleting a translation row on a unit
+ * 用于删除 unit 上一行翻译的 mutation
  */
 export function useDeleteTranslationMutation(
   options?: DeleteTranslationMutationOptions,
@@ -236,6 +248,7 @@ export function useDeleteTranslationMutation(
 
 /**
  * Combined mutations export
+ * 组合后的 mutations 导出
  */
 export const unitMutations = {
   useCreate: useCreateUnitMutation,

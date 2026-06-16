@@ -4,19 +4,19 @@
 
 ```sh
 # Run migrations (dev)
-bun run db:migrate
+task server:db:migrate
 
 # Generate Drizzle migrations
-bun run db:generate
+task server:db:generate
 
 # Seed database
-bun run seed
+task seed
 
 # Deploy migrations (production)
-bun run db:deploy
+task server:db:deploy
 
 # Reset database (destructive)
-bun run ../../tool/bin/tool.ts db ensure
+task db:ensure
 ```
 
 ### Auth/Main Account Boundary Cutover
@@ -29,8 +29,8 @@ email verification is represented by `EmailVerificationContract` rows.
 For local development data, prefer a reset after applying the schema change:
 
 ```sh
-bun run ../../tool/bin/tool.ts db ensure
-bun run db:migrate
+task db:ensure
+task server:db:migrate
 ```
 
 If a local database must be kept, migrate one way by creating verified

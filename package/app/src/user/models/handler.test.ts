@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "@rezics/api/config";
 
 // Required for @rezics/app env.ts validation
+// @rezics/app env.ts 校验所必需。
 process.env.VITE_API_URL ??= "http://api.example";
 process.env.VITE_REACTION_SERVICE_URL ??= "http://reaction.example";
 process.env.VITE_TURNSTILE_SITE_KEY ??= "turnstile-test-key";

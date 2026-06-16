@@ -43,6 +43,9 @@ export type AdminNavItem = {
    * `to` (which resolves to a route rendering `PlaceholderPage`); the nav adds
    * a muted "soon" affordance. Not a disabled item — the spine stays
    * deep-linkable while the feature lands behind it.
+   * 标记一个已配置路由但尚未构建的目标。该项正常链接到其 `to`（会解析到渲染
+   * `PlaceholderPage` 的路由）；导航会添加一个淡化的“即将上线”提示。它不是禁用项——
+   * 在功能落地之前，主干仍可深链接访问。
    */
   placeholder?: true;
 };
@@ -71,6 +74,17 @@ export type AdminNavEntry = AdminNavItem | AdminNavGroup;
 //   3. "Create" is an action, not a destination: `/unit/create` and
 //      `/user/create` stay routable and are reached from their list pages, so
 //      they are deliberately absent here.
+// 顶层主干按*运营者意图*分组（Content / Governance / Accounts & Access /
+// Operations / System），而非按目标恰好所在的服务分组。这一分组轴是刻意的信息架构
+// 选择：随着各界面陆续落地，它能让产品形态保持稳定且可深链接。这里重申三条手工
+// 编辑时容易违反的不变量：
+//   1. 在扁平化后的树中每个 `to` 都唯一——没有两个条目拥有相同路由（这正是主干成为
+//      导航地图而非列表的原因）。由 `adminNavConfig.test.ts` 强制保证。
+//   2. 每个 `label` thunk 都通过 admin 命名空间用完整字面量 key 解析——不允许硬编码
+//      显示字符串（以保证主干可翻译），也不允许动态/模板 key（约定 R11）。同样由
+//      `adminNavConfig.test.ts` 强制保证。
+//   3. “Create”是动作而非目标：`/unit/create` 与 `/user/create` 仍保持可路由，并从各自
+//      的列表页进入，因此它们在此处被刻意省略。
 export const adminNav = {
   drawerWidth: 260,
   items: [
@@ -124,6 +138,8 @@ export const adminNav = {
         {
           // Tags has no index route yet; it points at the existing low-score
           // view on purpose (see plan out-of-scope), not by oversight.
+          // Tags 尚无索引路由；它有意指向现有的 low-score 视图（见计划的 out-of-scope），
+          // 而非疏忽所致。
           id: "content.tags",
           label: () => getI18nRuntime().i18n.t("admin:nav_tags"),
           icon: <StyleOutlinedIcon fontSize="small" />,
@@ -226,6 +242,9 @@ export const adminNav = {
           // auth-service registry of trusted JWT *consumers*. Distinct system
           // from `system.jwt-services` (/jwt-services, main-server) below —
           // both stay; do not "dedupe" them.
+          // auth-service 维护的受信任 JWT *消费方*注册表。与下方的
+          // `system.jwt-services`（/jwt-services，main-server）是不同的系统——
+          // 两者都保留；不要将它们“去重”。
           id: "accounts.auth-jwt-services",
           label: () => getI18nRuntime().i18n.t("admin:nav_auth_jwt_services"),
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
@@ -337,6 +356,9 @@ export const adminNav = {
           // main-server registry of issued JWT *services*. Distinct system from
           // `accounts.auth-jwt-services` (/auth/jwt-services, auth-service)
           // above — both stay; do not "dedupe" them.
+          // main-server 维护的已签发 JWT *服务*注册表。与上方的
+          // `accounts.auth-jwt-services`（/auth/jwt-services，auth-service）是不同的
+          // 系统——两者都保留；不要将它们“去重”。
           id: "system.jwt-services",
           label: () => getI18nRuntime().i18n.t("admin:nav_jwt_services"),
           icon: <VpnKeyOutlinedIcon fontSize="small" />,

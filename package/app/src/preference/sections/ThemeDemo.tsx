@@ -21,6 +21,7 @@ import type React from "react";
 import { useAppStore } from "@/app/states/appStore";
 
 // MOCK: local preview palette for demo cards (used to be PRESET_COLORS from ui).
+// MOCK：演示卡片的本地预览调色板（曾经是 ui 中的 PRESET_COLORS）。
 const DEMO_COLORS: Array<{ name: string; color: string }> = [
   { name: "Brand", color: "#DB515C" },
   { name: "Blue", color: "#3b82f6" },
@@ -44,7 +45,7 @@ export const ThemeDemo: React.FC = () => {
 
   return (
     <div className="p-6 mx-auto max-w-[1200px]">
-      {/* 标题区域 */}
+      {/* Header area. 标题区域。 */}
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-semibold mb-2 text-brand-fill">
           主题演示
@@ -63,7 +64,7 @@ export const ThemeDemo: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-6">
-        {/* 颜色系统演示 */}
+        {/* Color system demo. 颜色系统演示。 */}
         <div className="col-span-12 md:col-span-6">
           <Card surface="contained">
             <CardContent>
@@ -105,7 +106,7 @@ export const ThemeDemo: React.FC = () => {
           </Card>
         </div>
 
-        {/* 组件演示 */}
+        {/* Component demo. 组件演示。 */}
         <div className="col-span-12 md:col-span-6">
           <Card surface="contained">
             <CardContent>
@@ -149,7 +150,7 @@ export const ThemeDemo: React.FC = () => {
           </Card>
         </div>
 
-        {/* 卡片组合演示 */}
+        {/* Card composition demo. 卡片组合演示。 */}
         <div className="col-span-12">
           <h2 className="text-2xl font-semibold mb-6 text-brand-fill">
             卡片组合演示
@@ -205,7 +206,7 @@ export const ThemeDemo: React.FC = () => {
         </div>
       </div>
 
-      {/* 浮动操作按钮 */}
+      {/* Floating action button. 浮动操作按钮。 */}
       <Button
         size="icon"
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"

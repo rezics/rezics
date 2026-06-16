@@ -11,6 +11,7 @@ import { SearchCategorySchema, SearchScopeSchema } from "./scope";
 import { SearchQuerySchema } from "./search";
 
 // ANCHOR: Federated Search Options
+// ANCHOR: 联邦搜索选项
 
 export const FederatedSearchOptionsSchema = t.Object({
   scope: SearchScopeSchema,
@@ -25,10 +26,15 @@ export type FederatedSearchOptions = Static<
 >;
 
 // ANCHOR: Federated Search Result
+// ANCHOR: 联邦搜索结果
 // Discriminated on `kind`:
 //   - "grouped"  → category === "all": one section per index/post-kind
 //   - "ranked"   → category === "mixed": single hits[] from Meilisearch federation
 //   - "single"   → any one category: paginated items[] for that category
+// 以 `kind` 作为判别字段：
+//   - "grouped"  → category === "all"：每个索引/post-kind 一个区块
+//   - "ranked"   → category === "mixed"：来自 Meilisearch 联邦的单一 hits[]
+//   - "single"   → 任一单个 category：该 category 的分页 items[]
 
 const FederatedSectionSchema = <T extends TSchema>(itemSchema: T) =>
   t.Object({
@@ -70,6 +76,7 @@ export type FederatedOrigin = Static<typeof FederatedOriginSchema>;
 
 // A ranked hit is any document shape with an `_origin` discriminator attached
 // by the server so the client can render the right card.
+// 排名命中是任意文档形态，由服务端附加 `_origin` 判别字段，使客户端能渲染正确的卡片。
 const FederatedRankedHitSchema = t.Intersect([
   t.Union([
     ContentSearchDocumentSchema,
@@ -87,6 +94,7 @@ export type FederatedRankedHit = Static<typeof FederatedRankedHitSchema>;
 
 // Items in a single-category response. Concrete narrowing is done client-side
 // by branching on `category`.
+// 单一 category 响应中的条目。具体的类型收窄在客户端通过对 `category` 分支完成。
 const FederatedSingleItemSchema = t.Union([
   ContentSearchDocumentSchema,
   PostSearchDocumentSchema,

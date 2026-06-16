@@ -61,6 +61,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   // ANCHOR: Public search endpoints
+  // ANCHOR: 公开搜索端点
   .post(
     "/content/search",
     async ({ body }) => {
@@ -187,6 +188,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   // ANCHOR: Admin — index init
+  // ANCHOR: 管理员 — 索引初始化
   .post(
     "/content/init",
     async ({ identity, set }) => {
@@ -372,6 +374,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   // ANCHOR: Admin — full sync
+  // ANCHOR: 管理员 — 全量同步
   .post(
     "/content/sync",
     async ({ identity, set }) => {
@@ -534,6 +537,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   // ANCHOR: Admin — dangerous operations
+  // ANCHOR: 管理员 — 危险操作
   .get(
     "/content/deleteAll",
     async ({ identity, set }) => {
@@ -719,6 +723,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   // ANCHOR: Admin — key management
+  // ANCHOR: 管理员 — 密钥管理
   .post(
     "/keys/admin",
     async ({ identity, set }) => {

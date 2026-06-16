@@ -9,10 +9,11 @@ import type { ContentRating } from "../unit/unit";
 
 // ============================================================
 // USER DTO (UserType removed — no AUTHOR/PRESS/PRODUCER)
+// USER DTO（已移除 UserType — 不再有 AUTHOR/PRESS/PRODUCER）
 // ============================================================
 
 export const userDTOSchema = t.Object({
-  /** Canonical user identifier — the USER `Unit.id`. */
+  /** Canonical user identifier — the USER `Unit.id`. 用户的规范标识符 — USER 的 `Unit.id`。 */
   unitId: t.String(),
   email: t.Optional(t.String()),
   slug: t.Optional(t.String()),
@@ -102,6 +103,7 @@ export type LoginUser = (typeof loginSchema)["static"];
 
 // ============================================================
 // USER SETTINGS
+// USER SETTINGS — 用户设置
 // ============================================================
 
 export const realmTagPreferenceSchema = t.Object({
@@ -113,6 +115,8 @@ export const contentPreferenceSchema = t.Object({
   /**
    * Age-rating opt-ins. Only R_18 / R_18G are valid values — GENERAL and R_15
    * are always-on baseline and MUST NOT appear here.
+   * 年龄分级的主动选择。仅 R_18 / R_18G 为有效值 — GENERAL 和 R_15 是始终开启的
+   * 基线，绝不能出现在此处。
    */
   optedInRatings: t.Optional(
     t.Array(t.Union([t.Literal("R_18"), t.Literal("R_18G")])),
@@ -132,6 +136,8 @@ export const moderationPreferenceSchema = t.Object({
   /**
    * Account-level default for realm feed management mode. Missing means true;
    * per-realm toggles are session-only UI state.
+   * realm feed 管理模式的账户级默认值。缺失即视为 true；按 realm 的开关仅为会话
+   * 级的 UI 状态。
    */
   realmManageModeDefault: t.Optional(t.Boolean()),
 });
@@ -139,13 +145,13 @@ export const moderationPreferenceSchema = t.Object({
 export type ModerationPreference =
   (typeof moderationPreferenceSchema)["static"];
 
-/** Ratings a user may opt into; GENERAL/R_15 are always on. */
+/** Ratings a user may opt into; GENERAL/R_15 are always on. 用户可主动选择的分级；GENERAL/R_15 始终开启。 */
 export const OPT_IN_RATINGS: readonly ContentRating[] = ["R_18", "R_18G"];
 
-/** Always-on baseline ratings available to every caller, signed in or not. */
+/** Always-on baseline ratings available to every caller, signed in or not. 对每个调用方（无论是否登录）始终开启的基线分级。 */
 export const BASELINE_RATINGS: readonly ContentRating[] = ["GENERAL", "R_15"];
 
-/** Library-surface display preferences (bookshelf grid, etc.). */
+/** Library-surface display preferences (bookshelf grid, etc.). 书库界面的展示偏好（书架网格等）。 */
 export const librarySettingsSchema = t.Object({
   bookshelf: t.Optional(bookshelfViewConfigSchema),
 });
@@ -175,6 +181,9 @@ export type UserProfilePrivacy = (typeof userProfilePrivacySchema)["static"];
  * notification module). A toggle is enabled by default when absent — only an
  * explicit `false` suppresses delivery. Enforced in the dispatch pipeline at
  * creation time (feed + push), not merely at read time.
+ * 面向用户的按类型通知开关。每个键控制一组通知类型（参见 notification 模块中的
+ * `notificationPreferenceKeyForKind`）。开关缺失时默认启用 — 只有显式的 `false`
+ * 才会抑制投递。在分发流水线的创建时刻（feed + push）强制执行，而非仅在读取时。
  */
 export const NOTIFICATION_PREFERENCE_KEYS = [
   "reply",
@@ -221,10 +230,11 @@ export type UpdateUserSettings = (typeof updateUserSettingsSchema)["static"];
 
 // ============================================================
 // USER BRIEF (lightweight — card/mention contexts)
+// USER BRIEF（轻量 — 卡片/提及场景）
 // ============================================================
 
 export const userBriefSchema = t.Object({
-  /** Canonical user identifier — the USER `Unit.id`. */
+  /** Canonical user identifier — the USER `Unit.id`. 用户的规范标识符 — USER 的 `Unit.id`。 */
   unitId: t.String(),
   name: t.Optional(t.String()),
   slug: t.Optional(t.String()),
@@ -235,7 +245,7 @@ export const userBriefSchema = t.Object({
 export type UserBrief = (typeof userBriefSchema)["static"];
 
 export const userBriefBatchRequestSchema = t.Object({
-  /** Batch lookup keys — each entry is a USER `Unit.id`. */
+  /** Batch lookup keys — each entry is a USER `Unit.id`. 批量查询键 — 每个条目是一个 USER 的 `Unit.id`。 */
   unitIds: t.Array(t.String(), { maxItems: 200 }),
 });
 

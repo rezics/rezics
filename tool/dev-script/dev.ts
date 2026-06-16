@@ -98,21 +98,19 @@ if (!commandExists("zellij")) {
 const layout = path.join(TOOL_DIR, "dev-script", "layouts", "dev.kdl");
 const sessionName = "rezics-dev";
 
-let compiledLayoutPath: string | undefined;
 let cleanup: (() => Promise<void>) | undefined;
 
 try {
   clearExistingZellijSession(sessionName);
 
   const compiledLayout = await compileLayout(layout);
-  compiledLayoutPath = compiledLayout.compiledLayoutPath;
   cleanup = compiledLayout.cleanup;
 
   const proc = Bun.spawn(
     [
       "zellij",
       "--new-session-with-layout",
-      compiledLayoutPath,
+      compiledLayout.compiledLayoutPath,
       "--session",
       sessionName,
     ],

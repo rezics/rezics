@@ -1,4 +1,5 @@
 // Foundation v1 typography tokens. Source: brief §3.
+// Foundation v1 排版令牌。来源：设计简报 §3。
 
 export const fontFamilies = {
   sans: `'Inter', 'rezics-sans', var(--font-sans-cjk, 'Source Han Sans TC'), system-ui, -apple-system, 'Segoe UI', sans-serif`,
@@ -38,6 +39,7 @@ export const letterSpacing = {
 } as const;
 
 // Inter's x-height normalized to ~52.2% to match Source Han Sans baseline.
+// 将 Inter 的 x-height 归一化至约 52.2%，以匹配 Source Han Sans 的基线。
 export const fontSizeAdjust = {
   sans: "ex-height 0.522",
 } as const;

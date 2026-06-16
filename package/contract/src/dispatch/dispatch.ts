@@ -2,6 +2,7 @@ import { t } from "elysia";
 
 // ============================================================
 // DISPATCH TYPE ENUM
+// 派发类型枚举
 // ============================================================
 
 export const DispatchType = {
@@ -19,6 +20,7 @@ export const dispatchTypeSchema = t.Union([
 
 // ============================================================
 // DISPATCH RESULT ENVELOPE
+// 派发结果信封
 // ============================================================
 
 export const dispatchResultSchema = t.Object({
@@ -32,6 +34,7 @@ export type DispatchResult = (typeof dispatchResultSchema)["static"];
 
 // ============================================================
 // DISPATCH SCOPE CONSTANTS
+// 派发作用域常量
 // ============================================================
 
 export const DispatchScope = {

@@ -115,6 +115,8 @@ export const contentDocLayoutEntrySchema = t.Object({
 
 // V2 is a draft schema for researched dynamic layout and slot behavior. Runtime
 // write/read paths still enable v1 only.
+// V2 是用于研究动态布局和插槽行为的草案 schema。运行时的写入/读取路径
+// 目前仍只启用 v1。
 export const contentDocV2Schema = t.Object({
   schema: t.Literal(CONTENT_DOC_SCHEMA),
   version: t.Literal(CONTENT_DOC_V2_VERSION),

@@ -14,6 +14,16 @@ import { getNotifyStreamUrl } from "./notify-fetch";
  * we invalidate the list + unread-count queries so they re-fetch.
  *
  * Pass `enabled: false` (or omit when not authenticated) to skip the stream.
+ *
+ * 订阅 notify 的 SSE `/stream` 端点，并在每个到来的事件上刷新通知缓存。
+ * 通过在设置 `withCredentials: true` 时自动发送的 `rezics-session-token`
+ * cookie 进行鉴权（处于 `subdomain-trust-boundary` cookie 作用域下）。
+ *
+ * 每个已鉴权的应用外壳挂载一次（通常在 `MainNavigation` 中）。
+ * 自动重连由浏览器处理；在每次重连或新事件上，我们失效列表 + 未读计数
+ * 查询，使其重新拉取。
+ *
+ * 传入 `enabled: false`（或在未鉴权时省略）以跳过该流。
  */
 export function useNotificationStream(input?: { enabled?: boolean }): void {
   const enabled = input?.enabled ?? true;
@@ -38,6 +48,8 @@ export function useNotificationStream(input?: { enabled?: boolean }): void {
     const handleError = () => {
       // EventSource auto-reconnects on transient failure. On the next open,
       // invalidating queries will backfill any events missed during the gap.
+      // EventSource 在瞬时失败时自动重连。在下一次打开时，失效查询会回填
+      // 间隙期间错过的任何事件。
     };
 
     es.addEventListener("message", handleMessage);

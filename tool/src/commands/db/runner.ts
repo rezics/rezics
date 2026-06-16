@@ -8,7 +8,10 @@ export async function runDbPackageScript(
   pkg: DbSchemaPackage,
   script: DbScript,
 ): Promise<DbStepResult> {
-  const proc = Bun.spawn(["bun", "run", script], {
+  // `db:generate` / `db:migrate` / `db:deploy` are go-task tasks defined in each
+  // package's Taskfile (via the shared tool/taskfiles/drizzle.yml include), not
+  // package.json scripts — so drive them through `task`, run in the package dir.
+  const proc = Bun.spawn(["task", script], {
     cwd: getPackageDir(pkg),
     stdout: "inherit",
     stderr: "inherit",

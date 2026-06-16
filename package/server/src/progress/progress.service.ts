@@ -756,6 +756,8 @@ export class ProgressService {
               : null,
           // Progress rows are anchored to the exact unit the user touched.
           // Even when that unit is a VARIANT, resume routes keep that id.
+          // 进度行锚定到用户实际操作的那个 unit。
+          // 即使该 unit 是 VARIANT，恢复阅读的路由仍保留该 id。
           resumeRoute:
             unit.type === "BOOK"
               ? lastReadNodeId

@@ -49,6 +49,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .use(authMacro)
 
   // GET /list - list tags (search by name in language)
+  // GET /list - 列出标签（按语言中的名称搜索）
   .get(
     "/list",
     async ({ query }) => {
@@ -71,6 +72,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // POST /list - list tags via POST body
+  // POST /list - 通过 POST 请求体列出标签
   .post(
     "/list",
     async ({ body }) => {
@@ -93,6 +95,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // GET /batch-translations - resolve translations for a batch of tag unit IDs
+  // GET /batch-translations - 解析一批标签 unit ID 的翻译
   .get(
     "/batch-translations",
     async ({ query }): Promise<BatchTagTranslationResult> => {
@@ -114,6 +117,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // GET /by-slug/:slug - get tag by slug (404 if slug resolves to a non-tag)
+  // GET /by-slug/:slug - 按 slug 获取标签（若 slug 解析为非标签则返回 404）
   .get(
     "/by-slug/:slug",
     async ({ params, set }) => {
@@ -137,6 +141,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // GET /:unitId - get tag by unitId
+  // GET /:unitId - 按 unitId 获取标签
   .get(
     "/:unitId",
     async ({ params }) => {
@@ -150,6 +155,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // POST / - create tag (requires login)
+  // POST / - 创建标签（需要登录）
   .post(
     "/",
     async ({ body, identity }) => {
@@ -167,6 +173,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // PUT /:unitId - update tag (admin)
+  // PUT /:unitId - 更新标签（管理员）
   .put(
     "/:unitId",
     async ({ params, body, identity }) => {
@@ -194,6 +201,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // DELETE /:unitId - delete tag (admin)
+  // DELETE /:unitId - 删除标签（管理员）
   .delete(
     "/:unitId",
     async ({ params, identity }) => {
@@ -218,6 +226,8 @@ export const tagApi = new Elysia({ prefix: "/tag" })
 
   // POST /attach - attach tag to unit (admin); records the attach as the
   // admin actor's +1 vote so score derivation stays uniform.
+  // POST /attach - 将标签附加到 unit（管理员）；将该附加操作记录为管理员
+  // 操作者的 +1 投票，使得分推导保持一致。
   .post(
     "/attach",
     async ({ body, identity }) => {
@@ -242,6 +252,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // POST /detach - detach tag from unit (admin)
+  // POST /detach - 从 unit 解除标签（管理员）
   .post(
     "/detach",
     async ({ body, identity }) => {
@@ -266,6 +277,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // POST /vote - cast tag vote (requires login)
+  // POST /vote - 对标签投票（需要登录）
   .post(
     "/vote",
     async ({ body, identity }) => {
@@ -283,6 +295,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // GET /for-unit/:unitId/context - get tag context for a unit
+  // GET /for-unit/:unitId/context - 获取某个 unit 的标签上下文
   .get(
     "/for-unit/:unitId/context",
     async ({ headers, params }) => {
@@ -310,6 +323,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   )
 
   // GET /for-unit/:unitId - get tags for a specific unit
+  // GET /for-unit/:unitId - 获取特定 unit 的标签
   .get(
     "/for-unit/:unitId",
     async ({ headers, params }): Promise<{ tags: UnitTagDTO[] }> => {

@@ -7,7 +7,7 @@ import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
 export interface BlockPeerActionProps {
-  /** The peer's canonical user id (`USER` Unit id). */
+  /** The peer's canonical user id (`USER` Unit id). 对方的规范用户 id（`USER` Unit id）。 */
   peerUserId: string;
   showLabel?: boolean;
   className?: string;
@@ -17,6 +17,9 @@ export interface BlockPeerActionProps {
  * Block/unblock a peer's direct messages. Shared between the profile DM action
  * area and the DM thread header. Hidden when signed out. Reflects and toggles
  * the viewer's own block (`peerBlocked`) via the typed DM block mutation.
+ * 屏蔽/取消屏蔽某位对方的私信。在个人资料的私信操作区与私信会话头部之间共享。
+ * 未登录时隐藏。通过带类型的 DM block mutation 反映并切换浏览者自己的屏蔽状态
+ * （`peerBlocked`）。
  */
 export const BlockPeerAction: React.FC<BlockPeerActionProps> = ({
   peerUserId,

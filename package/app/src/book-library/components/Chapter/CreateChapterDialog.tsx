@@ -44,6 +44,7 @@ export function CreateChapterDialog({
   const [content, setContent] = useState("");
 
   // Reset form when dialog is opened
+  // 对话框打开时重置表单
   useEffect(() => {
     if (open) {
       setTitle("");
@@ -102,6 +103,7 @@ export function CreateChapterDialog({
       onClose();
     } catch (e) {
       // Error already surfaced via onError
+      // 错误已通过 onError 呈现
       console.error("Create chapter failed", e);
     }
   }

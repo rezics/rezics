@@ -318,9 +318,11 @@ async function loadContinueReading(
   const bookIds = rows.map((row) => row.unitId);
 
   // chaptersTotal: non-deleted content nodes that carry a content Unit.
+  // chaptersTotal：携带内容 Unit 的未删除内容节点。
   const totalByBook = await repository.countChaptersTotal(bookIds);
 
   // chaptersCompleted: per-node completions for this user within these books.
+  // chaptersCompleted：该用户在这些书籍内的逐节点完成情况。
   const completedRows = await repository.listCompletedChapterOwnerUnitIds(
     userId,
     bookIds,
@@ -401,6 +403,10 @@ export const dashboardService = {
    * notify-service sections (notifications, dms) and per-type drafts/activity
    * are reported as `NOT_AGGREGATED`; the client fetches those through their
    * dedicated hooks rather than scattering them here.
+   * 扇出到服务端拥有的领域，并容忍单个分区的失败。notify-service 分区
+   * （notifications、dms）以及按类型的 drafts/activity 报告为
+   * `NOT_AGGREGATED`；客户端通过各自专用的 hook 获取这些数据，而不是
+   * 把它们散落在这里。
    */
   async summary(
     userId: string,
@@ -414,6 +420,8 @@ export const dashboardService = {
     ]);
     // Progress library rows are progress-owned; shelf links are optional
     // projections for sharing/organization, not the source of truth.
+    // 进度库行由 progress 拥有；shelf 链接只是用于分享/组织的可选投影，
+    // 而非数据来源。
     const libraryProgress = await section(async () => {
       const page = await progressService.listLibrary(userId, {
         limit: CONTINUE_READING_LIMIT,

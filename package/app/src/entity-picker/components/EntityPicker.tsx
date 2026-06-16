@@ -46,27 +46,54 @@ export interface EntityPickerSelection {
 export interface EntityPickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Invoked with the selected entity's unitId (existing or just-created). */
+  /**
+   * Invoked with the selected entity's unitId (existing or just-created).
+   * 以所选 entity 的 unitId（已存在或刚创建的）调用。
+   */
   onSelect: (
     unitId: string,
     selection: EntityPickerSelection,
   ) => boolean | undefined;
-  /** Catalog creates wiki entities; personal creates current-user entities. */
+  /**
+   * Catalog creates wiki entities; personal creates current-user entities.
+   * catalog 创建 wiki entity；personal 创建当前用户的 entity。
+   */
   creationContext?: "catalog" | "personal";
-  /** Optional current USER unitId for personal-context owner bias. */
+  /**
+   * Optional current USER unitId for personal-context owner bias.
+   * 可选的当前 USER unitId，用于 personal 上下文下的 owner 偏置。
+   */
   ownerUnitId?: string;
-  /** Soft kind hints for ranking and inline-create defaults. */
+  /**
+   * Soft kind hints for ranking and inline-create defaults.
+   * 用于排序以及内联创建默认值的软性 kind 提示。
+   */
   kindHints?: readonly EntityKind[];
   kindHint?: EntityKind;
-  /** Credit roles shown as search filters in the picker modal. */
+  /**
+   * Credit roles shown as search filters in the picker modal.
+   * 在选择器弹窗中作为搜索过滤项展示的 credit role。
+   */
   creditRoleOptions?: readonly CreditAttributionRole[];
-  /** Subject roles shown as search filters in the picker modal. */
+  /**
+   * Subject roles shown as search filters in the picker modal.
+   * 在选择器弹窗中作为搜索过滤项展示的 subject role。
+   */
   subjectRoleOptions?: readonly SubjectAttributionRole[];
-  /** Locks the picker to a single credit role and hides the role filter. */
+  /**
+   * Locks the picker to a single credit role and hides the role filter.
+   * 将选择器锁定为单一 credit role 并隐藏 role 过滤项。
+   */
   lockedCreditRole?: CreditAttributionRole;
-  /** Locks the picker to a single subject role and hides the role filter. */
+  /**
+   * Locks the picker to a single subject role and hides the role filter.
+   * 将选择器锁定为单一 subject role 并隐藏 role 过滤项。
+   */
   lockedSubjectRole?: SubjectAttributionRole;
-  /** Prevents selection while the role filter is set to `all`. */
+  /**
+   * Prevents selection while the role filter is set to `all`.
+   * 当 role 过滤项设为 `all` 时禁止选择。
+   */
   requireCreditRoleForSelect?: boolean;
 }
 
@@ -125,6 +152,8 @@ export function EntityPicker({
 
   // When the kindHint is provided we soft-sort matches of that kind first,
   // emulating a Meili `filter` weight without dropping other matches.
+  // 提供 kindHint 时，我们将该 kind 的匹配项软性地排在前面，
+  // 以此模拟 Meili 的 `filter` 权重，同时不丢弃其他匹配项。
   const orderedResults = useMemo(() => {
     if (effectiveKindHints.length === 0 && !ownerUnitId) return results;
     return [...results].sort((a, b) => {

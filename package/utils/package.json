@@ -16,9 +16,6 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {
-    "cli": "bun run bin/cli.ts"
-  },
   "devDependencies": {
     "@types/bun": "^1.3.0"
   },

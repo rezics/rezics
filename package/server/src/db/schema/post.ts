@@ -15,8 +15,16 @@ import { Unit } from "./unit";
 
 export const PostKind = pgEnum("PostKind", postKindValues);
 
+/**
+ * Why a post is promoted within a thread. HIGHLIGHT is reserved for future use;
+ * only ACCEPTED_ANSWER and PINNED are produced today.
+ */
 export const PinKind = pgEnum("PinKind", pinKindValues);
 
+/**
+ * Post extension for review, excerpt, remark, chapter, wiki, and generic post
+ * content rows.
+ */
 export const Post = pgTable(
   "Post",
   {
@@ -36,7 +44,15 @@ export const Post = pgTable(
     extra: jsonData(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
+    /**
+     * Lifecycle label. It is behaviorally inert: reply permission reads
+     * `isLocked`, visibility reads Unit.status, and null means no lifecycle.
+     */
     state: text(),
+    /**
+     * Weak edition/source/package context selected by the author. The Post
+     * still aggregates through Unit.targetUnitId; this is only a lookup hint.
+     */
     variantUnitId: uuid(),
   },
   (table) => [
@@ -61,6 +77,10 @@ export const Post = pgTable(
   ],
 );
 
+/**
+ * Weak reference table rebuilt from post ContentDoc poll blocks. It is a
+ * maintenance aid for usage/search, not the render source of truth.
+ */
 export const PostPollReference = pgTable(
   "PostPollReference",
   {

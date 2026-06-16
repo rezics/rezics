@@ -53,6 +53,7 @@ export async function tweakPlan(preset: SeedPreset): Promise<SeedPlan> {
       rmSync(editDir, { recursive: true, force: true });
     } catch {
       // ignore
+      // 忽略
     }
   };
 

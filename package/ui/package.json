@@ -42,12 +42,6 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "scripts": {
-    "test": "bun test",
-    "dev": "bun run --watch src/index.ts",
-    "storybook": "storybook dev -p 6007 --no-open",
-    "build-storybook": "storybook build -o storybook-static"
-  },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
     "@dnd-kit/core": "^6.3.1",

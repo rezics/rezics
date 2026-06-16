@@ -23,13 +23,25 @@ import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
 export interface ReportTarget {
-  /** Closed moderation target discriminator for the reported entity. */
+  /**
+   * Closed moderation target discriminator for the reported entity.
+   * 被举报实体的封闭式审核目标判别符。
+   */
   kind: ModerationTargetKind;
-  /** Stable id of the reported entity. */
+  /**
+   * Stable id of the reported entity.
+   * 被举报实体的稳定 id。
+   */
   id: string;
-  /** Backing Unit id when the target is Unit-shaped. */
+  /**
+   * Backing Unit id when the target is Unit-shaped.
+   * 当目标为 Unit 形态时对应的 Unit id。
+   */
   unitId?: string | null;
-  /** The reported user, when applicable. */
+  /**
+   * The reported user, when applicable.
+   * 被举报的用户（如适用）。
+   */
   subjectUserId?: string | null;
 }
 
@@ -39,9 +51,14 @@ export interface ReportActionProps {
    * Realm the report is filed against. Reports create a scoped moderation case,
    * so a realm context is required; surfaces without one should not
    * render the action.
+   * 举报所针对的 realm。举报会创建带作用域的审核案例，因此必须有 realm 上下文；
+   * 没有该上下文的界面不应渲染此操作。
    */
   realmUnitId: string;
-  /** Optional override for the trigger button label visibility. */
+  /**
+   * Optional override for the trigger button label visibility.
+   * 用于覆盖触发按钮标签可见性的可选项。
+   */
   showLabel?: boolean;
   className?: string;
 }
@@ -53,6 +70,10 @@ export interface ReportActionProps {
  *
  * States: signed-out (prompts sign-in), allowed (reason form), rate-limited or
  * otherwise denied (inline `PolicyDenialNotice`), and submitted (confirmation).
+ * 由 realm 作用域审核案例（`useCreateRealmCaseMutation`）支撑的举报入口。
+ * 这是审核而非产品反馈——有意不复用 `feedback/FeedbackDialog`。
+ * 状态：未登录（提示登录）、允许（理由表单）、被限流或以其他方式拒绝
+ *（内联 `PolicyDenialNotice`）、以及已提交（确认）。
  */
 export const ReportAction: React.FC<ReportActionProps> = ({
   target,
@@ -77,6 +98,7 @@ export const ReportAction: React.FC<ReportActionProps> = ({
     setOpen(next);
     if (!next) {
       // Reset transient state when the dialog fully closes.
+      // 对话框完全关闭时重置瞬态状态。
       setReason("");
       setSubmitted(false);
       mutation.reset();

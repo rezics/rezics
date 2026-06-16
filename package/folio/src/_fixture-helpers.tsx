@@ -10,6 +10,7 @@ import { WRAPPER_STYLE } from "./_stubs";
 
 // ---------------------------------------------------------------------------
 // File upload hook
+// 文件上传 hook
 // ---------------------------------------------------------------------------
 
 export function useFileUpload(accept: string) {
@@ -47,6 +48,7 @@ export function useFileUpload(accept: string) {
 
 // ---------------------------------------------------------------------------
 // Theme styles (mirrors THEME_STYLES from styles/theme.ts)
+// 主题样式（镜像 styles/theme.ts 中的 THEME_STYLES）
 // ---------------------------------------------------------------------------
 
 export const THEMES: Record<string, React.CSSProperties> = {
@@ -57,6 +59,7 @@ export const THEMES: Record<string, React.CSSProperties> = {
 
 // ---------------------------------------------------------------------------
 // StateOverride — dispatches actions on mount inside FolioProvider
+// StateOverride —— 在 FolioProvider 内挂载时派发 actions
 // ---------------------------------------------------------------------------
 
 export function StateOverride({ actions }: { actions: FolioAction[] }) {
@@ -69,6 +72,7 @@ export function StateOverride({ actions }: { actions: FolioAction[] }) {
 
 // ---------------------------------------------------------------------------
 // FixtureReader — minimal reader surface using public APIs
+// FixtureReader —— 使用公共 API 的最小阅读器界面
 // ---------------------------------------------------------------------------
 
 export function FixtureReader() {
@@ -140,6 +144,7 @@ export function FixtureReader() {
 
 // ---------------------------------------------------------------------------
 // FixtureShell — FolioProvider + FixtureReader with optional overrides
+// FixtureShell —— FolioProvider + FixtureReader，带可选的覆盖项
 // ---------------------------------------------------------------------------
 
 export function FixtureShell({

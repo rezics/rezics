@@ -10,7 +10,7 @@ Three files together define how every consumer references rezics design tokens:
 
 ## Consumption rule
 
-Application code SHALL consume tokens via the curated short names exposed by `uno-config.ts` `theme.colors`. R9 in `bun run check:convention` bans every `var(--rezics-*)` reference in source files (`.css`, `.ts`, `.tsx`, `.js`, `.jsx`, `.mdx`); the `--rezics-*` namespace is retired in favor of the single-source flat `--colors-*` cascade. R9 also asserts that `package/ui/src/config/tokens.css` does not exist.
+Application code SHALL consume tokens via the curated short names exposed by `uno-config.ts` `theme.colors`. R9 in `task check:convention` bans every `var(--rezics-*)` reference in source files (`.css`, `.ts`, `.tsx`, `.js`, `.jsx`, `.mdx`); the `--rezics-*` namespace is retired in favor of the single-source flat `--colors-*` cascade. R9 also asserts that `package/ui/src/config/tokens.css` does not exist.
 
 For raw CSS and inline style cases, reference the flat tokens directly (`var(--colors-text-primary)`, `var(--shadow-modal)`, etc.). When ≥3 callsites share an inline-style need, prefer promoting it to a UnoCSS shortcut in `uno-config.ts`.
 
@@ -20,7 +20,7 @@ Dark mode is class-based: set `class="dark"` on `<html>`. The `.dark` selector i
 
 ## Adding or removing a short name
 
-Add or remove a curated short name by editing the `shortcuts` layer and `theme.colors` tree in `uno-config.ts`; the leaf must exist in `tokens/colors.ts` (`lightColors` / `darkColors`) so the `--colors-*` cascade resolves. `bun run check:tokens` enforces token consistency.
+Add or remove a curated short name by editing the `shortcuts` layer and `theme.colors` tree in `uno-config.ts`; the leaf must exist in `tokens/colors.ts` (`lightColors` / `darkColors`) so the `--colors-*` cascade resolves. `task check:tokens` enforces token consistency.
 
 ## Where to look first
 

@@ -12,6 +12,7 @@ import {
 
 // ============================================================
 // SHELF EXTRA SCHEMA
+// 货架额外字段 schema
 // ============================================================
 
 export const shelfExtraSchema = t.Object({
@@ -28,6 +29,7 @@ export const shelfCoverImageSpec = {
 
 // ============================================================
 // SHELF ITEM KIND
+// 货架条目种类
 // ============================================================
 
 export const shelfItemTypeSchema = t.Union([
@@ -58,6 +60,7 @@ export type ShelfItemKind = (typeof shelfItemKindSchema)["static"];
 
 // ============================================================
 // SHELF ITEM PARENT ROLE
+// 货架条目父级角色
 // ============================================================
 
 export const shelfItemParentRoleSchema = t.Union([
@@ -71,6 +74,7 @@ export type ShelfItemParentRole = (typeof shelfItemParentRoleSchema)["static"];
 
 // ============================================================
 // SHELF ITEM DTO
+// 货架条目 DTO
 // ============================================================
 
 export const shelfItemDTOSchema = t.Object(
@@ -97,6 +101,7 @@ export type ShelfItemDTO = (typeof shelfItemDTOSchema)["static"];
 
 // ============================================================
 // SHELF ITEM CHILD CONTEXT DTO
+// 货架条目子级上下文 DTO
 // ============================================================
 
 export const shelfItemChildDTOSchema = t.Object(
@@ -125,6 +130,7 @@ export type ShelfMatchedUnitDTO = (typeof shelfMatchedUnitDTOSchema)["static"];
 
 // ============================================================
 // SHELF DTO
+// 货架 DTO
 // ============================================================
 
 export const shelfDTOSchema = t.Object({
@@ -151,6 +157,7 @@ export type ShelfDTO = (typeof shelfDTOSchema)["static"];
 
 // ============================================================
 // SHELF SUMMARY DTO (for collection modal shelf list)
+// 货架摘要 DTO（用于收藏弹窗的货架列表）
 // ============================================================
 
 export const shelfSummaryDTOSchema = t.Object({
@@ -175,6 +182,7 @@ export type ShelfSummaryDTO = (typeof shelfSummaryDTOSchema)["static"];
 
 // ============================================================
 // SHELF DETAIL DTO
+// 货架详情 DTO
 // ============================================================
 
 export const shelfDetailDTOSchema = t.Object({
@@ -194,6 +202,7 @@ export type ShelfDetailDTO = (typeof shelfDetailDTOSchema)["static"];
 
 // ============================================================
 // SHELF LIST/QUERY
+// 货架列表/查询
 // ============================================================
 
 const shelfListCommonProperties = {
@@ -259,6 +268,7 @@ export type ShelfListResponse = (typeof shelfListResponseSchema)["static"];
 
 // ============================================================
 // SHELF PARAMS/RESPONSE
+// 货架路径参数/响应
 // ============================================================
 
 export const shelfParamsSchema = t.Object({
@@ -272,6 +282,7 @@ export type ShelfResponse = (typeof shelfResponseSchema)["static"];
 
 // ============================================================
 // CREATE/UPDATE SHELF
+// 创建/更新货架
 // ============================================================
 
 export const createShelfSchema = t.Object({
@@ -310,6 +321,7 @@ export type UpdateShelfInput = (typeof updateShelfSchema)["static"];
 
 // ============================================================
 // SHELF PINNED TAGS
+// 货架置顶标签
 // ============================================================
 
 export const setPinnedTagsBodySchema = t.Object({
@@ -332,6 +344,7 @@ export type SetPinnedTagsResponse =
 
 // ============================================================
 // SHELF ITEM CRUD
+// 货架条目增删改查
 // ============================================================
 
 export const addShelfItemSchema = t.Object({
@@ -341,6 +354,8 @@ export const addShelfItemSchema = t.Object({
    * Weak selected VARIANT context. The ShelfItem row remains keyed by
    * `(shelfId, itemType, itemId)` and this value is not validated as existing
    * or VARIANT.
+   * 弱关联的所选 VARIANT 上下文。ShelfItem 行的主键仍为
+   * `(shelfId, itemType, itemId)`，此值不会校验其是否存在或为 VARIANT。
    */
   variantUnitId: t.Optional(t.String()),
   kind: shelfItemKindSchema,
@@ -418,6 +433,7 @@ export type CleanupShelfOrphansInput =
 
 // ============================================================
 // SHELF ITEM BATCH OPS
+// 货架条目批量操作
 // ============================================================
 
 export const shelfItemBatchAddOpSchema = t.Object({
@@ -553,6 +569,7 @@ export type ShelfItemBatchResponse =
 
 // ============================================================
 // COLLECTION API
+// 收藏 API
 // ============================================================
 
 export const collectInputSchema = t.Object({
@@ -615,6 +632,7 @@ export type CollectionStatusBatchResponse =
 
 // ============================================================
 // USER UNIT COLLECTION METADATA
+// 用户单元收藏元数据
 // ============================================================
 
 export const userTagApplicationDTOSchema = t.Object(

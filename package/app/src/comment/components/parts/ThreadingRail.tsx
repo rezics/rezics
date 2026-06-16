@@ -12,7 +12,7 @@ export interface ThreadingRailProps {
   elbowTopPx?: number;
   continuesAfterElbow?: boolean;
   toggleSlot?: React.ReactNode;
-  /** Horizontal position of the rail within the indent gutter (px). */
+  /** Horizontal position of the rail within the indent gutter (px). 轨线在缩进沟槽内的水平位置（px）。 */
   leftPx?: number;
   highlighted?: boolean;
   useSharedHover?: boolean;
@@ -27,6 +27,8 @@ const RAIL_RADIUS_PX = 10;
  * A CSS-painted thread rail inside a reply row's indent gutter. Each row owns
  * its local rail segment, so vertical lines follow normal layout height instead
  * of depending on a tree-wide overlay measurement.
+ * 在回复行缩进沟槽内由 CSS 绘制的会话轨线。每一行拥有自己的局部轨线段，
+ * 因此竖线跟随正常布局高度，而非依赖整树范围的覆盖层测量。
  */
 export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   isCollapsed = false,

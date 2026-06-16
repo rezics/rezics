@@ -15,6 +15,7 @@ import { SCORE_MAX, SCORE_MIN } from "./score.types";
 
 // ============================================================
 // DTO MAPPERS
+// DTO 映射器
 // ============================================================
 
 export function mapScoreEntryToDTO(entry: ScoreEntryRow): ScoreEntryDTO {
@@ -59,6 +60,7 @@ export function mapScoreRealmFieldToDTO(
 
 // ============================================================
 // VALIDATION
+// 校验
 // ============================================================
 
 export function validateScore(value: number): boolean {
@@ -82,6 +84,7 @@ export function validateFields(
 
 // ============================================================
 // AGGREGATE DELTA COMPUTATION
+// 聚合增量计算
 // ============================================================
 
 export function emptyDistribution(): Distribution {

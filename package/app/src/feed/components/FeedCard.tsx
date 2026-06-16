@@ -117,6 +117,8 @@ function FeedReviewRating({ post }: { post: PostDTO }) {
 /**
  * Feed previews own card navigation and truncation; full post/review surfaces
  * keep their richer detail behavior outside the feed stream.
+ * 信息流预览自行负责卡片导航与截断；完整的帖子/评论页面
+ * 在信息流之外保留其更丰富的详情行为。
  */
 export function FeedCard({
   bodyLines = 4,

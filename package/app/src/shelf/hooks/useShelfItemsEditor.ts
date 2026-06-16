@@ -113,6 +113,7 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   const batchMutation = useBatchUpdateShelfItemsMutation();
 
   // This is a compromise made to provide comprehensive background information for the editing environment; do not change it until a solution is found.
+  // 这是为给编辑环境提供完整背景信息而做出的折中方案；在找到解决方案之前不要改动它。
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();
@@ -429,6 +430,7 @@ function applyLiveOps(
         );
       }
       // reorderToPage: server-resolved; no optimistic position
+      // reorderToPage：由服务端解析；不做乐观位置更新
       continue;
     }
 

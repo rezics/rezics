@@ -45,6 +45,7 @@ export type RealmTagTreeLabel = (typeof realmTagTreeLabelSchema)["static"];
 
 // ============================================================
 // REALM EXTRA — typed shape of `Realm.extra`
+// REALM EXTRA — `Realm.extra` 的类型化结构
 // ============================================================
 
 export const realmImageExtraSchema = t.Object(
@@ -91,16 +92,25 @@ export type TagTreeNode = {
  * Typed shape of `Realm.extra`. Two well-known keys carry curated ordered Unit
  * ID lists for realm-level surfaces:
  *
+ * `Realm.extra` 的类型化结构。两个约定键承载用于 realm 级展示的有序 Unit ID 列表：
+ *
  * - `pinboard` — an ordered list of Unit IDs pinned within the realm. Surfaced
  *   on the realm page above the feed; entries are usually POST Releases of
  *   Work entries authored by the realm's contributors.
+ *   在 realm 内置顶的 Unit ID 有序列表。展示在 realm 页面 feed 上方；条目通常是
+ *   realm 贡献者发布的 Work 条目的 POST Release。
  * - `announcement` — an ordered list of Unit IDs reserved for special pages
  *   like the homepage announcement bar. **Not for general forum
  *   notifications** — use the realm's normal posting flow for those.
+ *   预留给首页公告栏等特殊页面的 Unit ID 有序列表。**不用于一般论坛通知** —
+ *   那些应使用 realm 的常规发帖流程。
  *
  * Additional unspecified keys may coexist on `Realm.extra` (the trust
  * strategy applies — clients may store arbitrary JSON-serializable values
  * under any other key without contract enforcement).
+ *
+ * `Realm.extra` 上可同时存在其他未指定的键（适用信任策略 — 客户端可在任意其他键下
+ * 存储任意可 JSON 序列化的值，不受 contract 强制约束）。
  */
 export const realmExtraSchema = t.Object(
   {
@@ -108,6 +118,8 @@ export const realmExtraSchema = t.Object(
      * Ordered list of Unit IDs pinned within the realm. Surfaced on the realm
      * page above the feed; entries are usually POST Releases of Work entries
      * authored by the realm's contributors.
+     * 在 realm 内置顶的 Unit ID 有序列表。展示在 realm 页面 feed 上方；条目通常是
+     * realm 贡献者发布的 Work 条目的 POST Release。
      */
     pinboard: t.Optional(t.Array(t.String())),
 
@@ -115,51 +127,63 @@ export const realmExtraSchema = t.Object(
      * Ordered list of Unit IDs reserved for special pages like the homepage
      * announcement bar. Not for general forum notifications; reserved for
      * special pages like the homepage announcement bar.
+     * 预留给首页公告栏等特殊页面的 Unit ID 有序列表。不用于一般论坛通知；仅预留给
+     * 首页公告栏等特殊页面。
      */
     announcement: t.Optional(t.Array(t.String())),
 
     /**
      * Single Post Unit ID that holds the realm's rule content shown before
      * joining.
+     * 承载 realm 规则内容（加入前展示）的单个 Post Unit ID。
      */
     rule: t.Optional(t.String()),
 
     /**
      * Single Post Unit ID that holds the realm's about or sidebar content.
+     * 承载 realm 简介或侧边栏内容的单个 Post Unit ID。
      */
     about: t.Optional(t.String()),
 
     /**
      * Direct image URL used as the realm's banner.
+     * 用作 realm 横幅的直接图片 URL。
      */
     banner: t.Optional(realmBannerExtraSchema),
 
     /**
      * Direct image URL used as the realm's avatar.
+     * 用作 realm 头像的直接图片 URL。
      */
     avatar: t.Optional(realmAvatarExtraSchema),
 
     /**
      * Ordered tag picker tree used as a realm posting UX hint; it does not
      * constrain tagging.
+     * 用作 realm 发帖 UX 提示的有序标签选择树；它不约束实际打标签。
      */
     tagTree: t.Optional(t.Array(tagTreeNodeSchema)),
 
     /**
      * Preferred realm Tags tab navigation style. New realms default to flat
      * when this preference is absent.
+     * realm Tags 标签页的首选导航样式。此偏好缺失时新 realm 默认为 flat。
      */
     tagView: t.Optional(realmTagViewSchema),
 
     /**
      * Advisory default Unit publication license for composer prefill in this
      * realm. Created Units store their selected license explicitly.
+     * 用于本 realm 编辑器预填的建议性默认 Unit 发布许可。已创建的 Unit 显式存储
+     * 各自选定的许可。
      */
     defaultLicenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
 
     /**
      * Optional Zone Unit id for the realm's themed wiki portal. The realm Wiki
      * tab remains app-themed and links into this Zone when configured.
+     * 用于 realm 主题化 wiki 门户的可选 Zone Unit id。realm Wiki 标签页保持应用
+     * 主题，配置后会链接进入该 Zone。
      */
     wikiZoneUnitId: t.Optional(t.Nullable(t.String())),
   },
@@ -172,6 +196,8 @@ export type RealmExtra = (typeof realmExtraSchema)["static"];
  * Whitelist of well-known Realm.extra list keys recognised by the typed
  * primitives. Other keys are accepted at runtime but are not type-checked
  * via `RealmExtra`.
+ * 类型化原语识别的约定 Realm.extra 列表键白名单。其他键在运行时被接受，但不会
+ * 通过 `RealmExtra` 进行类型检查。
  */
 export const REALM_EXTRA_LIST_KEYS = ["pinboard", "announcement"] as const;
 
@@ -184,6 +210,7 @@ export const realmExtraListKeySchema = t.Union([
 
 // ============================================================
 // PATH PARAMS
+// PATH PARAMS — 路径参数
 // ============================================================
 
 export const realmExtraListPathParamsSchema = t.Object({
@@ -205,6 +232,7 @@ export type RealmExtraEntryPathParams =
 
 // ============================================================
 // REQUEST BODIES
+// REQUEST BODIES — 请求体
 // ============================================================
 
 export const realmExtraAppendBodySchema = t.Object({
@@ -223,11 +251,13 @@ export type RealmExtraReorderBody =
 
 // ============================================================
 // READ RESPONSES
+// READ RESPONSES — 读取响应
 // ============================================================
 
 /**
  * Public read shape: stale IDs are filtered out before the array is returned.
  * `unitIds` reflects only currently-visible Units.
+ * 公开读取结构：返回数组前会过滤掉失效 ID。`unitIds` 仅反映当前可见的 Unit。
  */
 export const realmExtraReadResponseSchema = t.Object({
   realmId: t.String(),
@@ -242,6 +272,8 @@ export type RealmExtraReadResponse =
  * Admin read shape: returns the full stored array plus a parallel `staleIds`
  * list flagging entries the caller's view would otherwise drop. Surfaces
  * deleted/missing units so moderators can clean up entries.
+ * 管理读取结构：返回完整的存储数组，外加一个并行的 `staleIds` 列表，标记调用方
+ * 视图本会丢弃的条目。暴露已删除/缺失的 unit，便于管理员清理条目。
  */
 export const realmExtraAdminReadResponseSchema = t.Object({
   realmId: t.String(),

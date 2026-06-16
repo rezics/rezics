@@ -78,7 +78,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Eligible: subscribed with the DM channel — renders a link to the inbox. */
+/**
+ * Eligible: subscribed with the DM channel — renders a link to the inbox.
+ * 符合条件：已订阅且包含 DM 频道 —— 渲染指向收件箱的链接。
+ */
 export const Eligible: Story = {
   render: () => (
     <StoryHost isAuthenticated subscribed withDmChannel>
@@ -90,7 +93,10 @@ export const Eligible: Story = {
   },
 };
 
-/** Not DM-eligible: subscribed without the DM channel — disabled with a reason. */
+/**
+ * Not DM-eligible: subscribed without the DM channel — disabled with a reason.
+ * 不符合 DM 条件：已订阅但不含 DM 频道 —— 禁用并附带原因。
+ */
 export const Ineligible: Story = {
   render: () => (
     <StoryHost isAuthenticated subscribed withDmChannel={false}>
@@ -104,7 +110,10 @@ export const Ineligible: Story = {
   },
 };
 
-/** Signed-out: the action is not offered at all. */
+/**
+ * Signed-out: the action is not offered at all.
+ * 未登录：完全不提供该操作。
+ */
 export const SignedOut: Story = {
   render: () => (
     <StoryHost isAuthenticated={false} subscribed={false} withDmChannel={false}>

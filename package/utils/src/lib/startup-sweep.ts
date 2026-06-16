@@ -22,6 +22,7 @@ export function sweepStaleEditDirs(now: number = Date.now()): void {
       rmSync(path, { recursive: true, force: true });
     } catch {
       // ignore — best-effort cleanup
+      // 忽略 —— 尽力而为的清理
     }
   }
 }

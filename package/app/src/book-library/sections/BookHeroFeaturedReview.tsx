@@ -22,6 +22,8 @@ const QUOTE_CLOSE = "”";
 
 // MOCK: reviewer star rating — not yet exposed on PostDTO; derive a stable
 // pseudo-score from the post id until score-per-post lands on the API.
+// MOCK：评论者星级评分——PostDTO 尚未暴露该字段；在 API 支持每条帖子的评分之前，
+// 从帖子 id 派生一个稳定的伪评分。
 function mockReviewScore(post: PostDTO): number | null {
   const id = post.unitId ?? "";
   if (!id) return null;
@@ -37,6 +39,8 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   const readContext = useReadLanguageContext();
   // MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
+  // MOCK：一旦 postsByTarget 支持，应按反应数排序。
+  // 目前先取最新的一条评论。
   const { data, isLoading } = useQuery({
     ...postQueries.list({
       targetUnitId: bookId,

@@ -1,4 +1,5 @@
 // MOCK: Storybook post fixtures, hand-authored against `PostDTO`.
+// MOCK：Storybook 帖子夹具，手工依据 `PostDTO` 编写。
 import { markdownContentDoc, type PostDTO } from "@rezics/contract";
 import { userAlice, userBen, userCora } from "./user.ts";
 

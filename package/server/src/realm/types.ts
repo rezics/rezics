@@ -11,6 +11,7 @@ import type {
 } from "../db/schema";
 
 // Relation payload shape for realm metadata.
+// realm 元数据的关联载荷结构。
 export const realmInclude = {
   unit: {
     include: {
@@ -23,6 +24,7 @@ export const realmInclude = {
 } as const;
 
 // Internal realm type with relations
+// 携带关联关系的内部 realm 类型
 export type RealmWithRelations = typeof Realm.$inferSelect & {
   unit: typeof Unit.$inferSelect & {
     user?: PublicUserSelected | null;
@@ -33,6 +35,7 @@ export type RealmWithRelations = typeof Realm.$inferSelect & {
 };
 
 // Lighter select for list queries (no members)
+// 用于列表查询的精简 select（不含 members）
 export const realmListSelect = {
   unitId: true,
   isPublic: true,

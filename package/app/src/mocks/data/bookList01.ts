@@ -1,6 +1,7 @@
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 
 // MOCK: book list data using new BookDTO shape with translations
+// MOCK：采用新的 BookDTO 结构并包含 translations 的图书列表数据。
 export const bookList01 = [
   {
     unitId: "1",

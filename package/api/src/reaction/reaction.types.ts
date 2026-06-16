@@ -2,6 +2,7 @@ import type { AllowedReactionKind } from "@rezics/contract/reaction";
 
 /**
  * Types for Reaction API (aligned with @rezics/contract/reaction)
+ * Reaction API 的类型（与 @rezics/contract/reaction 保持一致）。
  */
 
 export type ReactionDTO = {
@@ -25,7 +26,10 @@ export type ReactionDeleteQuery = {
   scopeKey?: string;
 };
 
-/** Response shape for GET /reactions/summary */
+/**
+ * Response shape for GET /reactions/summary
+ * GET /reactions/summary 的响应结构。
+ */
 export type ReactionSummaryResponse = {
   summaries: Record<string, Record<string, number>>;
 };
@@ -44,13 +48,19 @@ export type ShareCreateResponse = {
   created: boolean;
 };
 
-/** Response shape for GET /reactions/my */
+/**
+ * Response shape for GET /reactions/my
+ * GET /reactions/my 的响应结构。
+ */
 export type ReactionMyResponse = {
   userId: string;
   reactionsByTarget: Record<string, string[]>;
 };
 
-/** Hydrated target metadata returned by `/profile/:userId/reactions/{given,received}`. */
+/**
+ * Hydrated target metadata returned by `/profile/:userId/reactions/{given,received}`.
+ * `/profile/:userId/reactions/{given,received}` 返回的已填充目标元数据。
+ */
 export type ReactionHistoryTarget = {
   unitId: string;
   kind: string;
@@ -59,7 +69,10 @@ export type ReactionHistoryTarget = {
   href: string;
 };
 
-/** Hydrated actor metadata returned by `/profile/:userId/reactions/received`. */
+/**
+ * Hydrated actor metadata returned by `/profile/:userId/reactions/received`.
+ * `/profile/:userId/reactions/received` 返回的已填充行为者元数据。
+ */
 export type ReactionHistoryActor = {
   userId: string;
   displayName: string;

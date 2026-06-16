@@ -21,30 +21,54 @@ import { realmExtraSchema } from "./realm-extra";
 
 // ============================================================
 // DEFAULT REALM
+// 默认 REALM
 // ============================================================
 
-/** Translation entry for a realm with title and description. */
+/**
+ * Translation entry for a realm with title and description.
+ * 包含标题和描述的 realm 翻译条目。
+ */
 interface DefaultRealmTranslation {
-  /** Display name of the realm. */
+  /**
+   * Display name of the realm.
+   * realm 的显示名称。
+   */
   title: string;
-  /** Short description of the realm's purpose. */
+  /**
+   * Short description of the realm's purpose.
+   * realm 用途的简短描述。
+   */
   description: string;
 }
 
 /**
  * The default realm definition — single source of truth for the official
  * "rezics" realm's slug, flags, and localized content.
+ * 默认 realm 定义 —— 官方 "rezics" realm 的 slug、标志位和本地化内容的单一可信来源。
  *
  * Consumed by the seed script, server cache, and frontend infra bootstrap.
+ * 由 seed 脚本、服务端缓存和前端基础设施引导流程消费。
  */
 export const DEFAULT_REALM = {
-  /** Stable slug identifier, consistent across environments. */
+  /**
+   * Stable slug identifier, consistent across environments.
+   * 稳定的 slug 标识符，在各环境间保持一致。
+   */
   slug: "rezics",
-  /** Visible to all users. */
+  /**
+   * Visible to all users.
+   * 对所有用户可见。
+   */
   isPublic: true,
-  /** Marked as the platform's official realm. */
+  /**
+   * Marked as the platform's official realm.
+   * 标记为平台的官方 realm。
+   */
   isOfficial: true,
-  /** Localized title and description keyed by language code. */
+  /**
+   * Localized title and description keyed by language code.
+   * 按语言代码索引的本地化标题和描述。
+   */
   translations: {
     en: {
       title: "rezics",
@@ -61,15 +85,20 @@ export const DEFAULT_REALM = {
   } satisfies Record<string, DefaultRealmTranslation>,
 } as const;
 
-/** Type of the {@link DEFAULT_REALM} constant for typed parameter passing. */
+/**
+ * Type of the {@link DEFAULT_REALM} constant for typed parameter passing.
+ * {@link DEFAULT_REALM} 常量的类型，用于带类型的参数传递。
+ */
 export type DefaultRealmDefinition = typeof DEFAULT_REALM;
 
 // ============================================================
 // REALM EXTRA (typed JSON payload)
+// REALM EXTRA（带类型的 JSON 载荷）
 // ============================================================
 
 // ============================================================
 // REALM DTO
+// REALM 数据传输对象
 // ============================================================
 
 export const realmDTOSchema = t.Object({
@@ -95,6 +124,7 @@ export type RealmDTO = (typeof realmDTOSchema)["static"];
 
 // ============================================================
 // REALM MEMBER DTO
+// REALM 成员数据传输对象
 // ============================================================
 
 export const realmMemberStateValues = [
@@ -147,6 +177,7 @@ export type RealmMemberListResponse =
 
 // ============================================================
 // REALM RULE ACKNOWLEDGEMENT DTO
+// REALM 规则确认数据传输对象
 // ============================================================
 
 export const realmRuleReferenceDTOSchema = t.Object({
@@ -246,6 +277,7 @@ export type RealmMembershipMeDTO =
 
 // ============================================================
 // REALM UNIT DTO (content feed)
+// REALM UNIT 数据传输对象（内容 feed）
 // ============================================================
 
 /**
@@ -253,10 +285,16 @@ export type RealmMembershipMeDTO =
  * tagging and is not a prerequisite for RealmTagApplication. `moderationStatus`
  * is the realm-local moderation snapshot; it is not feed ranking or
  * recommendation state.
+ * UnitRealm 表示某个 Unit 在 realm 中的社区成员关系。它不是语义标签，也不是
+ * RealmTagApplication 的前提条件。`moderationStatus` 是 realm 本地的审核快照；
+ * 它不是 feed 排名或推荐状态。
  *
  * Future card-presentation hints such as realm-scoped `spoiler` belong on this
  * junction as typed `extra`, not on Unit.extra and not in the open tag system.
  * Keep this dormant until the storage field and write API are enabled.
+ * 未来的卡片展示提示（例如 realm 作用域的 `spoiler`）应作为带类型的 `extra` 放在
+ * 此关联表上，而不是放在 Unit.extra 或开放标签系统中。在存储字段和写入 API 启用前，
+ * 保持此功能处于休眠状态。
  */
 export const unitRealmDTOSchema = t.Object({
   realmUnitId: t.String(),
@@ -281,12 +319,15 @@ export type UnitRealmDTO = (typeof unitRealmDTOSchema)["static"];
 
 // ============================================================
 // REALM TAG UNIT DTO (scoped classification)
+// REALM TAG UNIT 数据传输对象（作用域内分类）
 // ============================================================
 
 /**
  * RealmTagApplication records a realm-scoped application of an existing global TAG
  * Unit to a target Unit. It does not create a realm-local tag and does not
  * require the target Unit to appear in the realm feed through UnitRealm.
+ * RealmTagApplication 记录将已存在的全局 TAG Unit 在 realm 作用域内应用到目标 Unit 上。
+ * 它不会创建 realm 本地标签，也不要求目标 Unit 通过 UnitRealm 出现在 realm feed 中。
  */
 export const realmTagApplicationDTOSchema = t.Object({
   realmUnitId: t.String(),
@@ -306,11 +347,14 @@ export type RealmTagApplicationDTO =
 
 // ============================================================
 // REALM TAG VOTE DTO
+// REALM TAG 投票数据传输对象
 // ============================================================
 
 /**
  * RealmTagApplicationVote is a member vote on a single RealmTagApplication. Its
  * identity is `(realmUnitId, tagUnitId, unitId, userId)`.
+ * RealmTagApplicationVote 是成员对单个 RealmTagApplication 的投票。其标识为
+ * `(realmUnitId, tagUnitId, unitId, userId)`。
  */
 export const realmTagApplicationVoteDTOSchema = t.Object({
   realmUnitId: t.String(),
@@ -326,6 +370,7 @@ export type RealmTagApplicationVoteDTO =
 
 // ============================================================
 // REALM TAG CONTEXT DTO (pair-level interpretation)
+// REALM TAG CONTEXT 数据传输对象（对级别的解释）
 // ============================================================
 
 /**
@@ -333,6 +378,9 @@ export type RealmTagApplicationVoteDTO =
  * tagUnitId)` pair. The pair is the identity; `contextUnitId` is only a
  * materialized content carrier. This DTO is not a Tag, not a Unit identity,
  * and not a realm-local tag.
+ * RealmTagContext 存储 `(realmUnitId, tagUnitId)` 对的解释性内容。该对是标识；
+ * `contextUnitId` 仅是物化的内容载体。此 DTO 不是 Tag、不是 Unit 标识，
+ * 也不是 realm 本地标签。
  */
 export const realmTagContextDTOSchema = t.Object({
   realmUnitId: t.String(),
@@ -396,6 +444,7 @@ export const realmTagContextMaterializeContractSchema = {
 
 // ============================================================
 // REALM TAG UNIT MUTATIONS (pin / position / cast / create)
+// REALM TAG UNIT 变更操作（pin / position / cast / create）
 // ============================================================
 
 export const createRealmTagApplicationSchema = t.Object({
@@ -407,7 +456,10 @@ export const createRealmTagApplicationSchema = t.Object({
 export type CreateRealmTagApplicationInput =
   (typeof createRealmTagApplicationSchema)["static"];
 
-/** Body for PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId */
+/**
+ * Body for PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId
+ * PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId 的请求体。
+ */
 export const patchRealmTagApplicationSchema = t.Object({
   pinned: t.Optional(t.Boolean()),
   position: t.Optional(t.Nullable(t.String())),
@@ -437,6 +489,7 @@ export type CastRealmTagApplicationVoteInput =
 
 // ============================================================
 // ADMIN: LOW-SCORE TAG DISCOVERY
+// ADMIN：低分标签发现
 // ============================================================
 
 export const lowScoreTagsScopeSchema = t.Union([
@@ -467,6 +520,7 @@ export type LowScoreTagsResponse =
 
 // ============================================================
 // REALM LIST/QUERY
+// REALM 列表/查询
 // ============================================================
 
 export const realmListQuerySchema = t.Object({
@@ -516,6 +570,7 @@ export type RealmListResponse = (typeof realmListResponseSchema)["static"];
 
 // ============================================================
 // REALM PARAMS/RESPONSE
+// REALM 参数/响应
 // ============================================================
 
 export const realmParamsSchema = t.Object({
@@ -536,6 +591,7 @@ export type RealmResponse = (typeof realmResponseSchema)["static"];
 
 // ============================================================
 // CREATE/UPDATE REALM
+// 创建/更新 REALM
 // ============================================================
 
 export const createRealmSchema = t.Object({
@@ -568,6 +624,7 @@ export type UpdateRealmInput = (typeof updateRealmSchema)["static"];
 
 // ============================================================
 // REALM MEMBERSHIP
+// REALM 成员关系
 // ============================================================
 
 export const joinRealmSchema = t.Object({
@@ -591,6 +648,7 @@ export type RealmMemberParams = (typeof realmMemberParamsSchema)["static"];
 
 // ============================================================
 // REALM CONTENT MANAGEMENT
+// REALM 内容管理
 // ============================================================
 
 export const addUnitRealmSchema = t.Object({

@@ -12,6 +12,7 @@ import {
 } from "./translation-source.service";
 
 // Param name `unitId` matches `unitApi`'s — memoirist requires param names to agree at the same trie position.
+// 参数名 `unitId` 与 `unitApi` 的一致 —— memoirist 要求同一 trie 位置上的参数名必须保持一致。
 const workTranslationPathParamsSchema = t.Object({
   unitId: t.String(),
   lang: languageSchema,

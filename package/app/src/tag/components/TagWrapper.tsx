@@ -67,6 +67,8 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
 
   // For grouped mode, score-based grouping (no domain concept in new model)
   // Render as flat list for now
+  // 分组模式下采用基于分数的分组（新模型中没有 domain 概念）
+  // 目前先以扁平列表渲染
   return (
     <div className={className}>
       <TagList tags={tags} />

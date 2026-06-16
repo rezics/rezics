@@ -42,11 +42,20 @@ function enqueueEntitySearch(
   );
 }
 
-/** Caller-context flags consumed by the slug + verified gates. */
+/**
+ * Caller-context flags consumed by the slug + verified gates.
+ * 由 slug 与 verified 校验门控消费的调用方上下文标志。
+ */
 export interface EntityCallerContext {
-  /** Caller's USER unitId. Stamped onto `Unit.userId` for v1 creator ownership. */
+  /**
+   * Caller's USER unitId. Stamped onto `Unit.userId` for v1 creator ownership.
+   * 调用方的 USER unitId。写入 `Unit.userId`，作为 v1 创建者归属。
+   */
   callerUnitId: string;
-  /** Whether the caller has the global admin role (ADMIN or ROOT). */
+  /**
+   * Whether the caller has the global admin role (ADMIN or ROOT).
+   * 调用方是否拥有全局管理员角色（ADMIN 或 ROOT）。
+   */
   isAdmin: boolean;
   actor?: RezicsSessionClaims;
 }
@@ -402,6 +411,7 @@ function createDrizzleEntityRepository(): EntityRepository {
 
 /**
  * Entity Service - Business logic for generic Entity units.
+ * Entity Service - 通用 Entity 单元的业务逻辑。
  */
 export class EntityService {
   constructor(
@@ -417,6 +427,15 @@ export class EntityService {
    *
    * Slug acceptance requires admin AND `verified=true` in the same payload.
    * Verified acceptance requires admin.
+   *
+   * 在事务中创建一个 Entity 单元：
+   *
+   *  1. 插入 `Unit { type: ENTITY, slugScope: <entity-scope>, userId: caller }`。
+   *  2. 插入 `Entity { unitId, kind, verified }`。
+   *  3. 插入 `UnitTranslation[]` 行。
+   *
+   * 接受 slug 需要管理员身份且同一载荷中 `verified=true`。
+   * 接受 verified 需要管理员身份。
    */
   async create(
     input: CreateEntityInput,
@@ -453,6 +472,9 @@ export class EntityService {
    * Update an Entity's fields, parent Unit slug, verified flag, and/or
    * translations. Slug acceptance requires admin AND the entity currently
    * has `verified=true` (or `verified: true` is part of the same payload).
+   * 更新 Entity 的字段、父 Unit 的 slug、verified 标志以及/或翻译。
+   * 接受 slug 需要管理员身份且该实体当前 `verified=true`（或同一载荷中包含
+   * `verified: true`）。
    */
   async update(
     unitId: string,

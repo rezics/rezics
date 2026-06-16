@@ -5,9 +5,15 @@ import { cn } from "../../shared/lib/utils";
 export interface EmptyStateProps {
   title: string;
   description?: string;
-  /** A `lucide-react` (or `@tabler/icons-react`) icon node, or any custom React node. */
+  /**
+   * A `lucide-react` (or `@tabler/icons-react`) icon node, or any custom React node.
+   * 一个 `lucide-react`（或 `@tabler/icons-react`）图标节点，或任意自定义 React 节点。
+   */
   icon?: ReactNode;
-  /** Optional action affordance — typically a shadcn `Button`. */
+  /**
+   * Optional action affordance — typically a shadcn `Button`.
+   * 可选的操作控件——通常是一个 shadcn `Button`。
+   */
   action?: ReactNode;
   className?: string;
 }

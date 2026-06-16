@@ -52,7 +52,7 @@ seeded `rezics-wiki` user on the server.
 For manual review of existing wiki-shaped rows, run:
 
 ```bash
-bun --filter=@rezics/server run scripts/list-wiki-shaped-rows.ts
+bun run --cwd package/server scripts/list-wiki-shaped-rows.ts
 ```
 
 Review the output before any one-off data repair. Do not bulk rewrite owners

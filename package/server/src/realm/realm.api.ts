@@ -48,7 +48,10 @@ import { unitService } from "@/unit/unit.service";
 import { mapRealmTagApplicationToDTO } from "./realm.mapper";
 import { realmService } from "./realm.service";
 
-/** Realm roles that can moderate (update members, manage tags). */
+/**
+ * Realm roles that can moderate (update members, manage tags).
+ * 可进行管理操作（更新成员、管理标签）的 realm 角色。
+ */
 const MODERATOR_ROLES = ["owner", "admin", "moderator"];
 
 function realmRoleCapabilities(actorMember: RealmMemberDTO | null) {
@@ -794,6 +797,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     },
   )
   // --- Membership routes ---
+  // --- 成员关系路由 ---
   .get(
     "/:unitId/members/me",
     async ({ params, identity }): Promise<RealmMembershipMeDTO> => {
@@ -1033,6 +1037,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       const isSelf = params.userId === identity.userId;
       if (!isSelf) {
         // Only moderator+ or admin can remove others
+        // 仅 moderator 及以上或 admin 可移除他人
         const actorMember = await realmService.getMember(
           params.unitId,
           identity.userId,
@@ -1074,6 +1079,8 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   // --- Subscription / mute (RealmMember and Subscription are orthogonal
   // edges: mute removes only the Subscription, leaving membership intact) ---
+  // --- 订阅 / 静音（RealmMember 与 Subscription 是正交的边：静音仅移除
+  // Subscription，保留成员关系不变）---
   .post(
     "/:unitId/mute",
     async ({ params, identity }): Promise<{ muted: boolean }> => {
@@ -1109,6 +1116,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     },
   )
   // --- Content feed routes ---
+  // --- 内容流路由 ---
   .post(
     "/:unitId/content",
     async ({ params, body, identity, set }): Promise<UnitRealmDTO> => {
@@ -1171,6 +1179,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     },
   )
   // --- Realm tag application routes ---
+  // --- Realm 标签应用路由 ---
   .post(
     "/:unitId/tags",
     async ({
@@ -1189,6 +1198,8 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       // Any realm member may add a tag inside a realm; creation acts as a
       // vote. Pin/delete is restricted to admin/realm-owner via the
       // separate `/realm-tag-application` route.
+      // 任何 realm 成员都可在 realm 内添加标签；创建即视为一次投票。置顶/删除
+      // 通过单独的 `/realm-tag-application` 路由限定给 admin/realm-owner。
       const isAdmin = BasicAdminPermission(identity.permission);
       if (!isAdmin) {
         const actorMember = await realmService.getMember(
@@ -1226,6 +1237,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     "/:unitId/tags/:tagUnitId/:contentUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       // Pin/delete is restricted to platform admin or `Realm.owner`.
+      // 置顶/删除仅限平台 admin 或 `Realm.owner`。
       if (!BasicAdminPermission(identity.permission)) {
         const realm = await unitService.getByUnitId(params.unitId);
         if (!realm?.userId || realm.userId !== identity.userId) {

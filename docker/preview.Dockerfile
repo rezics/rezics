@@ -8,7 +8,9 @@
 FROM rezics-base:dev AS build
 WORKDIR /repo/package/preview
 
-RUN bun run build:linux
+# Compile the linux-x64 binary inline (mirrors `task preview:build:linux`).
+RUN bun build src/index.ts --compile --minify-whitespace --minify-syntax \
+  --target bun-linux-x64 --outfile preview
 
 # --- runtime stage ---------------------------------------------------------
 FROM debian:bookworm-slim AS runtime

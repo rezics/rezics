@@ -83,6 +83,7 @@ function previewContent(
 
 /**
  * Map a hydrated post row to the public PostDTO.
+ * 将水合后的帖子记录映射为对外的 PostDTO。
  */
 export function mapPostToDTO(
   post: PostWithRelations,
@@ -126,7 +127,10 @@ export function mapPostToDTO(
   };
 }
 
-/** Map the current promotion storage row to its public comment promotion DTO. */
+/**
+ * Map the current promotion storage row to its public comment promotion DTO.
+ * 将当前的推荐存储记录映射为对外的评论推荐 DTO。
+ */
 export function mapCommentPromotionToDTO(
   pin: CommentPromotionRow,
 ): CommentPromotionDTO {

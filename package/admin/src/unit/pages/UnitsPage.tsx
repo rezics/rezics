@@ -29,7 +29,10 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
-/** Extract the best title from the translations array on a UnitDTO. */
+/**
+ * Extract the best title from the translations array on a UnitDTO.
+ * 从 UnitDTO 的 translations 数组中提取最合适的标题。
+ */
 function extractUnitTitle(unit: UnitDTO): string {
   const translations = unit.translations;
   if (!translations?.length)

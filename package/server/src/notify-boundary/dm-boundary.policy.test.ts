@@ -17,6 +17,7 @@ const getSubscriptionChannels = mock(async () => ["dm.message"]);
 let isBlocked = false;
 // Drives the inline user-to-user block check on the DM send path, consulted
 // before the policy/subscription gates.
+// 驱动 DM 发送路径上的用户间屏蔽内联检查，在策略/订阅关卡之前被查询。
 const isBlockedEitherWay = mock(async () => isBlocked);
 
 mock.module("@/middleware", () => ({
@@ -102,6 +103,7 @@ describe("dmBoundaryApi policy", () => {
       error: "You cannot message this user",
     });
     // Block wins ahead of the policy and subscription gates.
+    // 屏蔽优先于策略和订阅关卡生效。
     expect(decideForIdentityMock).not.toHaveBeenCalled();
     expect(getSubscriptionChannels).not.toHaveBeenCalled();
     expect(sendDmMock).not.toHaveBeenCalled();

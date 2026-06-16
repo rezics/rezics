@@ -228,6 +228,7 @@ describe("progress contract schemas", () => {
     ).toBe(true);
 
     // Unknown top-level keys rejected
+    // 拒绝未知的顶层键
     expect(
       Value.Check(progressExtraSchema, {
         device: "web",
@@ -240,12 +241,14 @@ describe("progress contract schemas", () => {
       }),
     ).toBe(false);
     // Unknown sub-keys rejected
+    // 拒绝未知的子键
     expect(
       Value.Check(progressExtraSchema, {
         paused: { reasonPostUnitIds: ["p-1"], extra: 1 },
       }),
     ).toBe(false);
     // Wrong types rejected
+    // 拒绝错误的类型
     expect(
       Value.Check(progressExtraSchema, {
         paused: { reasonPostUnitIds: [123] },

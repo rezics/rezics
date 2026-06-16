@@ -4,9 +4,6 @@
   "private": true,
   "type": "module",
   "license": "AGPL-3.0-only",
-  "scripts": {
-    "check:i18n": "bun run ../../tool/src/commands/i18n/check.ts"
-  },
   "exports": {
     ".": {
       "types": "./src/index.ts",

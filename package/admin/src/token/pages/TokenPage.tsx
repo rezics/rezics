@@ -24,7 +24,12 @@ import {
 } from "../components";
 
 /**
- * TokenPage - 管理当前用户的 API tokens
+ * TokenPage - manage the current user's API tokens.
+ * - list view
+ * - create token (raw token returned only once)
+ * - edit token (update scopes, etc.)
+ * - revoke token
+ * TokenPage - 管理当前用户的 API tokens。
  * - 列表展示
  * - 新建 token（仅返回一次的原始 token）
  * - 编辑 token（更新权限等）
@@ -49,11 +54,13 @@ export const TokenPage: FC = () => {
   const [revokingIds, setRevokingIds] = useState<Record<string, boolean>>({});
 
   // Create dialog state
+  // 新建对话框状态
   const [openCreate, setOpenCreate] = useState(false);
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
   const [creatingError, setCreatingError] = useState<string | null>(null);
 
   // Edit dialog state
+  // 编辑对话框状态
   const [openEdit, setOpenEdit] = useState(false);
   const [editingToken, setEditingToken] = useState<ApiTokenDTO | null>(null);
   const [updatingError, setUpdatingError] = useState<string | null>(null);
@@ -148,7 +155,6 @@ export const TokenPage: FC = () => {
         />
       )}
 
-      {/* Create dialog */}
       <CreateTokenDialog
         open={openCreate}
         onClose={() => setOpenCreate(false)}
@@ -157,7 +163,6 @@ export const TokenPage: FC = () => {
         error={creatingError}
       />
 
-      {/* Edit dialog */}
       <EditTokenDialog
         open={openEdit}
         token={editingToken}
@@ -170,7 +175,7 @@ export const TokenPage: FC = () => {
         error={updatingError}
       />
 
-      {/* Created secret dialog (shown once) */}
+      {/* Created secret dialog (shown once). 新建密钥对话框（仅展示一次）。 */}
       <TokenSecretDialog
         open={!!createdSecret}
         secret={createdSecret}

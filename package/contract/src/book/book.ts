@@ -29,6 +29,7 @@ import {
 
 // ============================================================
 // BOOK EXTRA SCHEMA
+// 图书扩展 SCHEMA
 // ============================================================
 
 export const bookExtraSchema = t.Object({
@@ -39,6 +40,7 @@ export type BookExtra = (typeof bookExtraSchema)["static"];
 
 // ============================================================
 // BOOK DTO
+// 图书 DTO
 // ============================================================
 
 export const bookDTOSchema = t.Object({
@@ -64,6 +66,7 @@ export const bookDTOSchema = t.Object({
   shareCount: t.Optional(t.Number()),
 
   // Book extension fields
+  // 图书扩展字段
   isbn13: t.Optional(t.Nullable(t.String())),
   publicationDate: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   pageCount: t.Optional(t.Nullable(t.Number())),
@@ -75,9 +78,11 @@ export const bookDTOSchema = t.Object({
   extra: t.Optional(t.Nullable(bookExtraSchema)),
 
   // Translation layer
+  // 翻译层
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
 
   // Credit attribution
+  // 署名信息
   creditAttributions: t.Optional(t.Array(creditAttributionBriefSchema)),
 
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -89,6 +94,7 @@ export type BookDTO = (typeof bookDTOSchema)["static"];
 
 // ============================================================
 // BOOK LIST/QUERY
+// 图书列表/查询
 // ============================================================
 
 export const bookListQuerySchema = t.Object({
@@ -160,6 +166,7 @@ export type BookListResponse = (typeof bookListResponseSchema)["static"];
 
 // ============================================================
 // BOOK PARAMS/RESPONSE
+// 图书参数/响应
 // ============================================================
 
 export const bookParamsSchema = t.Object({
@@ -180,6 +187,7 @@ export type BookResponse = (typeof bookResponseSchema)["static"];
 
 // ============================================================
 // CREATE/UPDATE BOOK
+// 创建/更新图书
 // ============================================================
 
 export const createBookSchema = t.Object({
@@ -236,6 +244,7 @@ export type UpdateBookInput = (typeof updateBookSchema)["static"];
 
 // ============================================================
 // BOOK CONTENT STRUCTURE / CHAPTER TREE TYPES
+// 图书内容结构 / 章节树类型
 // ============================================================
 
 export const bookContentStructureNodeSchema = contentStructureNodeSchema;
@@ -246,6 +255,12 @@ export const bookContentStructureNodeSchema = contentStructureNodeSchema;
  * `[2, 4, 0]` means the first child of the fifth child of the third root node.
  * A path locates a node in the current JSON structure only; it is not a stable
  * global identity and may become stale after TOC edits or reordering.
+ *
+ * 指向当前 BookContentStructure 森林中某个节点出现位置的路径。
+ *
+ * `[2, 4, 0]` 表示第三个根节点的第五个子节点的第一个子节点。
+ * 路径仅在当前 JSON 结构内定位节点；它不是稳定的全局标识，在目录
+ * 编辑或重排序后可能失效。
  */
 export type BookContentStructurePath = ContentStructurePath;
 

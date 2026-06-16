@@ -11,6 +11,7 @@ export const HomeNewsletterSignup: React.FC = () => {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Placeholder: integrate backend later
+    // 占位逻辑：稍后接入后端
     console.log("newsletter signup", email);
     setSubmitted(true);
   };

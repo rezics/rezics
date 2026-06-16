@@ -1,9 +1,12 @@
 /**
  * Build query string from filters (generic)
  * Accepts any plain object where values can be primitives, arrays, or objects.
+ * 从过滤器构建查询字符串（通用）
+ * 接受任意普通对象，其值可以是原始类型、数组或对象。
  */
 export function buildQueryString(
   // Use a broad type to keep this utility reusable across API domains
+  // 使用宽泛的类型，使此工具可在各 API 领域间复用
   filters?: Record<string, unknown>,
 ): string {
   if (!filters) return "";

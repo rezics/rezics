@@ -22,6 +22,7 @@ export const SettingsNotificationsSection: FC = () => {
 
   // Labels/descriptions are looked up with static literal keys (never a
   // variable) so the i18n checker can resolve every one.
+  // 标签/描述使用静态字面量键（绝不用变量）查找，以便 i18n 检查器能解析每一个。
   const labels: Record<NotificationPreferenceKey, string> = {
     reply: t("settings:notification_prefs_kind_reply"),
     follow: t("settings:notification_prefs_kind_follow"),

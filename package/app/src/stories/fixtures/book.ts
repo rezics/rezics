@@ -1,6 +1,9 @@
 // MOCK: Storybook book fixtures. Hand-authored against `BookDTO` runtime types;
 // CJK + Latin variants pull from `@rezics/shared/text` to stay drift-free with
 // the curated corpus that production seed data uses.
+// MOCK: Storybook book fixtures。针对 `BookDTO` 运行时类型手工编写；
+// CJK + Latin 变体从 `@rezics/shared/text` 取数，以与生产 seed 数据所用的
+// 精选语料保持一致、避免漂移。
 import type { BookDTO } from "@rezics/contract";
 import { LANGUAGES } from "@rezics/contract";
 import { getDescriptionPool, getTitlePool } from "@rezics/shared/text";

@@ -17,11 +17,13 @@ interface Chunk {
 
 function splitByRule(raw: string, rule: RegExp): Chunk[] {
   // Ensure the regex has the multiline flag and is global for splitting
+  // 确保正则带有 multiline 标志且为 global，以便用于切分。
   const globalRule = new RegExp(
     rule.source,
     rule.flags.includes("g") ? rule.flags : `${rule.flags}g`,
   );
   // Also ensure multiline
+  // 同时确保启用 multiline。
   const mlRule = new RegExp(
     globalRule.source,
     globalRule.flags.includes("m") ? globalRule.flags : `${globalRule.flags}m`,
@@ -33,11 +35,13 @@ function splitByRule(raw: string, rule: RegExp): Chunk[] {
 
   while (m !== null) {
     // Extract the full line containing the match for a better title
+    // 提取包含该匹配的整行，作为更好的标题。
     const lineStart = raw.lastIndexOf("\n", m.index - 1) + 1;
     const lineEnd = raw.indexOf("\n", m.index);
     const fullLine = raw.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
     matches.push({ index: m.index, match: fullLine });
     // Prevent infinite loops on zero-width matches
+    // 防止零宽匹配导致死循环。
     if (m.index === mlRule.lastIndex) mlRule.lastIndex++;
     m = mlRule.exec(raw);
   }
@@ -47,6 +51,7 @@ function splitByRule(raw: string, rule: RegExp): Chunk[] {
   const chunks: Chunk[] = [];
 
   // Content before first match (if any)
+  // 第一个匹配之前的内容（若有）。
   if (matches[0].index > 0) {
     const before = raw.slice(0, matches[0].index).trim();
     if (before) {
@@ -90,6 +95,7 @@ export function splitTxt(
   }
 
   // Fallback: single chapter
+  // 兜底：单一章节。
   return {
     tree: [
       {

@@ -5,13 +5,13 @@ import { CircleCheck, CircleX, Pin, PinOff } from "lucide-react";
 import type React from "react";
 
 interface CommentPromotionControlsProps {
-  /** Current promotion overlay of the reply (drives Pin↔Unpin / Accept↔Unaccept). */
+  /** Current promotion overlay of the reply (drives Pin↔Unpin / Accept↔Unaccept). 回复的当前置顶状态（驱动 Pin↔Unpin / Accept↔Unaccept）。 */
   pinKind: CommentDTO["pinKind"];
-  /** Whether the pin/unpin control may render (viewer authority + `depth >= 1`). */
+  /** Whether the pin/unpin control may render (viewer authority + `depth >= 1`). 是否可渲染 pin/unpin 控件（查看者权限 + `depth >= 1`）。 */
   canPin: boolean;
-  /** Whether accept/unaccept may render (authority + Q&A thread + `depth === 1`). */
+  /** Whether accept/unaccept may render (authority + Q&A thread + `depth === 1`). 是否可渲染 accept/unaccept（权限 + 问答帖 + `depth === 1`）。 */
   canAccept: boolean;
-  /** Disable entries while a mutation is in flight. */
+  /** Disable entries while a mutation is in flight. 当存在进行中的变更时禁用各条目。 */
   disabled?: boolean;
   onPin: () => void;
   onUnpin: () => void;
@@ -26,6 +26,11 @@ interface CommentPromotionControlsProps {
  * nothing when no action applies — authority and thread-context gating belong to
  * the caller (`CommentThreadSection`) via `canPin` / `canAccept`, keeping this
  * component free of session or authorization logic.
+ * 回复溢出菜单的展示型置顶条目。渲染用于反转回复当前 `pinKind` 的单一操作
+ * （Pin↔Unpin、Accept↔Unaccept），或为未置顶的回复同时渲染 Pin 和 Accept。
+ * 当无操作适用时不渲染任何内容——权限与帖子上下文的门控由调用方
+ * （`CommentThreadSection`）通过 `canPin` / `canAccept` 负责，使本组件不含
+ * 会话或鉴权逻辑。
  */
 export function CommentPromotionControls({
   pinKind,

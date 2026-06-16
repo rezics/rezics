@@ -46,10 +46,10 @@ export function MainLayoutFooter({ className }: { className?: string }) {
       <Separator />
 
       <div className="mx-auto w-full max-w-screen-xl px-4">
-        {/* Top content */}
+        {/* Top content 顶部内容 */}
         <div className="py-24">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
-            {/* Brand / Intro */}
+            {/* Brand / Intro 品牌 / 简介 */}
             <div className="md:col-span-1">
               <div className="flex items-center gap-2 mt-2">
                 <LazyLoadImage
@@ -122,7 +122,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               </TooltipProvider>
             </div>
 
-            {/* Navigation */}
+            {/* Navigation 导航 */}
             <nav
               aria-label={t("shell:layout_footer_product_aria")}
               className="md:col-span-1"
@@ -166,7 +166,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               </div>
             </nav>
 
-            {/* Newsletter */}
+            {/* Newsletter 邮件订阅 */}
             <div className="md:col-span-1">
               <SectionTitle>
                 {t("shell:layout_footer_newsletter_title")}
@@ -196,7 +196,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
 
         <Separator />
 
-        {/* Bottom bar */}
+        {/* Bottom bar 底部栏 */}
         <div className="py-8 flex items-center justify-between flex-wrap gap-y-3">
           <p className="text-xs text-text-secondary m-0">
             {t("shell:layout_footer_copyright", { year })}

@@ -45,7 +45,7 @@ type Book = BookDTO;
 interface BookHeroSectionProps {
   bookInfo: Book;
   rating: number;
-  /** Number of users who rated; 0 hides the count line under the score. */
+  /** Number of users who rated; 0 hides the count line under the score. 打分的用户数；为 0 时隐藏分数下方的计数行。 */
   ratingCount?: number;
 }
 
@@ -109,6 +109,8 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
 
   // Lifted review query — drives both the centre review card and the dynamic
   // right-column layout. React Query dedupes with the child component.
+  // 上提的评价查询——同时驱动中部评价卡片和动态的右栏布局。
+  // React Query 会与子组件去重。
   const { data: reviewData } = useQuery({
     ...postQueries.list({
       targetUnitId: bookId,
@@ -125,6 +127,8 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   // When the centre review card renders, the right column has ~4 cols of width
   // and stacks 2 stat cards. Otherwise the stat column takes the centre+right
   // span and promotes all available stats so the stack fills the freed area.
+  // 当中部评价卡片渲染时，右栏约有 4 列宽并堆叠 2 张统计卡片。否则统计列占据
+  // 中部+右栏的跨度，并提升所有可用统计项，使堆叠填满腾出的区域。
   const statCardKeys: BookHeroStatKey[] = hasReview
     ? ["reviews", "shelves"]
     : ["reviews", "shelves", "tags"];
@@ -176,7 +180,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
       <div aria-hidden="true" className="absolute inset-0 bg-black/65" />
       <div className="relative w-full">
         <div className="container mx-auto max-w-[1280px] px-4 py-8 lg:py-10">
-          {/* Title row + inline score (count stacks below the score). */}
+          {/* Title row + inline score (count stacks below the score). 标题行 + 内联分数（计数堆叠在分数下方）。 */}
           <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
             <h1 className="text-white font-serif text-3xl lg:text-5xl font-semibold leading-tight tracking-tight break-words flex-1 min-w-[12rem]">
               {title}
@@ -191,7 +195,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Brief info strip: Book · {wordCount} words · ISBN ... */}
+          {/* Brief info strip: Book · {wordCount} words · ISBN ... 简要信息条：Book · {wordCount} words · ISBN ... */}
           <p className="mt-2 text-white/70 text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
             {briefParts.map((part, i) => (
               <span key={part.id} className="flex items-center gap-2">
@@ -201,7 +205,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
             ))}
           </p>
 
-          {/* Body row: cover + (optional review card) + stat cards. */}
+          {/* Body row: cover + (optional review card) + stat cards. 主体行：封面 +（可选的评价卡片）+ 统计卡片。 */}
           <div className="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
             <div className="flex justify-center lg:justify-start lg:shrink-0">
               <LazyLoadImage
@@ -228,7 +232,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Bottom row: metadata block (left) | action cluster (right). */}
+          {/* Bottom row: metadata block (left) | action cluster (right). 底部行：元数据块（左）| 操作集群（右）。 */}
           <div className="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-10">
             <div className="flex-1 min-w-0 space-y-4">
               {summary && (

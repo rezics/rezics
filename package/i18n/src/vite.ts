@@ -3,6 +3,10 @@
  * `/locales/*` for dev server and copies the tree into `dist/locales/` for
  * production builds. Consumers add it to their `vite.config.ts` plugins
  * array; no other configuration is needed.
+ * 该 Vite 插件在开发服务器上以 `/locales/*` 暴露共享的
+ * `package/i18n/locales/` 目录树，并在生产构建时将该目录树复制到
+ * `dist/locales/`。使用方将其加入各自 `vite.config.ts` 的 plugins
+ * 数组即可；无需其他配置。
  */
 
 import { readdir, readFile, stat } from "node:fs/promises";
@@ -40,6 +44,7 @@ export function rezicsI18nLocales(): Plugin {
         if (!urlPath) return next();
         const target = normalize(join(localesRoot, urlPath));
         // Containment check against directory traversal.
+        // 防止目录遍历的包含性校验。
         const rel = relative(localesRoot, target);
         if (rel.startsWith("..") || rel.includes(`..${sep}`)) {
           res.statusCode = 403;

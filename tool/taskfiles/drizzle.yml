@@ -1,0 +1,20 @@
+# Shared Drizzle tasks for schema-owning services. Each service Taskfile pulls
+# this in as the `db` namespace, so tasks surface as e.g. `server:db:migrate`.
+# Tasks run in the including package's directory, where drizzle.config.ts (the
+# drizzle-kit default) lives — so no --config flag is needed.
+version: '3'
+
+tasks:
+  generate:
+    desc: Generate Drizzle migrations
+    cmd: bun drizzle-kit generate
+  migrate:
+    desc: Apply Drizzle migrations
+    cmd: bun drizzle-kit migrate
+  deploy:
+    desc: Apply Drizzle migrations (deploy alias of migrate)
+    cmds:
+      - task: migrate
+  studio:
+    desc: Open Drizzle Studio
+    cmd: bun drizzle-kit studio

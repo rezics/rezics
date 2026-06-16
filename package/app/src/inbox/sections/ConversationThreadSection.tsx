@@ -26,7 +26,7 @@ function isMine(message: DmMessage, myId: string | undefined): boolean {
   return !!myId && message.senderId === myId;
 }
 
-/** The most recent message by `createdAt`, order-independent. */
+/** The most recent message by `createdAt`, order-independent. 按 `createdAt` 取最新的消息，与顺序无关。 */
 function newestMessage(messages: DmMessage[]): DmMessage | undefined {
   return messages.reduce<DmMessage | undefined>((latest, m) => {
     if (!latest || m.createdAt > latest.createdAt) return m;
@@ -39,6 +39,9 @@ function newestMessage(messages: DmMessage[]): DmMessage | undefined {
  * anchored to the bottom. Surfaces read receipts on the viewer's latest
  * message, the peer's live typing indicator, and block/unblock controls in the
  * thread header. Sending is disabled when either party has blocked the other.
+ * 会话线程 —— 分页的消息列表（最新消息在底部），发送框固定在底部。
+ * 在查看者最新消息上显示已读回执，展示对方的实时输入指示器，以及线程头部的
+ * 拉黑/取消拉黑控件。当任一方拉黑了另一方时，发送将被禁用。
  */
 export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   conversationId,
@@ -67,6 +70,8 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
 
   // The peer's most-recent message (drives mark-read) and whether the peer has
   // read the viewer's latest message (drives the read receipt).
+  // 对方最新的消息（驱动标记已读），以及对方是否已读查看者的最新消息
+  //（驱动已读回执）。
   const newest = newestMessage(messages);
   const newestId = newest?.id;
   const newestMine = !!newest && isMine(newest, myUnitId);
@@ -76,6 +81,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   useEffect(() => {
     if (messageCount === 0) return;
     // Honor the user's reduced-motion preference for the auto-scroll.
+    // 自动滚动时遵循用户的 reduced-motion 偏好。
     const prefersReducedMotion =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -86,6 +92,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   }, [messageCount]);
 
   // Mark the peer's messages read whenever the newest message is theirs.
+  // 每当最新消息来自对方时，将对方的消息标记为已读。
   const markRead = markReadMutation.mutate;
   useEffect(() => {
     if (!newestId || newestMine) return;
@@ -109,6 +116,8 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
     } catch {
       // Keep the failed text in the composer and offer a retry that re-sends
       // the same payload without forcing the user to re-type it.
+      // 将发送失败的文本保留在输入框中，并提供重试，重新发送相同的内容，
+      // 无需用户重新输入。
       setDraft((current) => (current.trim() ? current : content));
       showRetryToast(
         `dm:${conversationId}:send`,

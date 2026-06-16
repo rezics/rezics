@@ -48,6 +48,7 @@ export function useFolioGesture({
               index: state.chapterIndex - 1,
             });
             // Will need to set to last page after content loads
+            // 内容加载后需要跳转到最后一页
           }
         }
       });

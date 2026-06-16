@@ -77,22 +77,29 @@ export interface UnitsPageProps {
    * Mode of the page:
    * - 'tab': show tabs to switch between multiple unit types
    * - 'single': only query and render a single `type`, no tabs UI
+   * 页面模式：
+   * - 'tab'：显示标签页以在多个 unit 类型之间切换
+   * - 'single'：仅查询并渲染单个 `type`，无标签页 UI
    */
   mode?: UnitsPageMode;
   /**
    * The unit type to query when `mode` is 'single'
+   * `mode` 为 'single' 时要查询的 unit 类型
    */
   type?: string;
   /**
    * Unit types to display when `mode` is 'tab'
+   * `mode` 为 'tab' 时要显示的 unit 类型
    */
   types?: string[];
   /**
    * Optional user filter
+   * 可选的用户筛选条件
    */
   userId?: string;
   /**
    * Optional target unit filter (e.g., bookId)
+   * 可选的目标 unit 筛选条件（如 bookId）
    */
   targetUnitId?: string;
 
@@ -132,6 +139,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   const [startMap, setStartMap] = useState<Record<string, number>>({});
 
   // initialize tab from URL (only in tab mode)
+  // 从 URL 初始化标签页（仅在 tab 模式下）
   useEffect(() => {
     if (isSingle) {
       if (type && types.includes(type)) {
@@ -158,6 +166,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   ]);
 
   // ensure startMap has keys for current tabTypes
+  // 确保 startMap 为当前的 tabTypes 都有对应的键
   useEffect(() => {
     setStartMap((prev) => {
       const next = { ...prev };

@@ -83,9 +83,8 @@ Accessible primitives built on Radix UI: Avatar, Checkbox, Dialog, Dropdown Menu
 ## Scripts
 
 ```bash
-bun run dev      # Watch mode build
-bun run test     # Run tests
-bun run cosmos   # Launch React Cosmos for component development
+task ui:dev      # Watch mode build
+task ui:test     # Run tests
 ```
 
 ## Tech Stack

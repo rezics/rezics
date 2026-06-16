@@ -22,8 +22,10 @@ export interface UserListPageProps {
 }
 
 /**
- * UserListPage - 用户列表页面
- * 显示所有用户，支持搜索和分页
+ * UserListPage - user list page.
+ * UserListPage - 用户列表页面。
+ * Shows all users with search and pagination support.
+ * 显示所有用户，支持搜索和分页。
  */
 export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   const { t } = useTranslation(["settings"]);
@@ -35,11 +37,12 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
 
   const itemsPerPage = 20;
 
-  // Debounce search query
+  // Debounce search query.
+  // 对搜索查询进行防抖。
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
-      setPage(1); // Reset to first page on search
+      setPage(1); // Reset to first page on search — 搜索时重置回第一页
     }, 500);
 
     return () => clearTimeout(timer);

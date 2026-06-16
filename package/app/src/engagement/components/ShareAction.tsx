@@ -17,13 +17,25 @@ import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ShareActionProps = {
-  /** Override the size from context. Rarely needed; prefer setting on the bar. */
+  /**
+   * Override the size from context. Rarely needed; prefer setting on the bar.
+   * 覆盖来自 context 的尺寸。很少需要；更建议在 bar 上设置。
+   */
   size?: EngagementSize;
-  /** Absolute or relative URL to share. Resolved via `getShareHref` at the call site. */
+  /**
+   * Absolute or relative URL to share. Resolved via `getShareHref` at the call site.
+   * 要分享的绝对或相对 URL。在调用处通过 `getShareHref` 解析。
+   */
   href: string;
-  /** Optional title for the Web Share API. */
+  /**
+   * Optional title for the Web Share API.
+   * 用于 Web Share API 的可选标题。
+   */
   title?: string;
-  /** Target Unit id whose authenticated share intent should be counted. */
+  /**
+   * Target Unit id whose authenticated share intent should be counted.
+   * 目标 Unit id，其经过身份验证的分享意图应被计数。
+   */
   targetId?: string;
 };
 

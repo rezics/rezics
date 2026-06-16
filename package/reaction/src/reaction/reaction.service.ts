@@ -106,7 +106,10 @@ export class ReactionService {
     private readonly repository: ReactionRepository = new DrizzleReactionRepository(),
   ) {}
 
-  /** Get aggregated reaction counts for one or more targets. */
+  /**
+   * Get aggregated reaction counts for one or more targets.
+   * 获取一个或多个目标的聚合反应计数。
+   */
   async getSummary(
     targetIds: string[],
     scopeKey?: string,
@@ -133,7 +136,10 @@ export class ReactionService {
     return result;
   }
 
-  /** Get current user's reaction types for one or more targets. */
+  /**
+   * Get current user's reaction types for one or more targets.
+   * 获取当前用户对一个或多个目标的反应类型。
+   */
   async getUserReactions(
     userId: string,
     targetIds: string[],
@@ -161,6 +167,8 @@ export class ReactionService {
   /**
    * Create a reaction (idempotent).
    * Returns the reaction and whether it was newly created.
+   * 创建一个反应（幂等）。
+   * 返回该反应以及它是否为新创建的。
    */
   async create(
     userId: string,
@@ -188,6 +196,7 @@ export class ReactionService {
   /**
    * List a user's own reaction events in reverse-chronological order,
    * paged with an opaque `(createdAt, id)` cursor.
+   * 按时间倒序列出用户自己的反应事件，使用不透明的 `(createdAt, id)` 游标分页。
    */
   async listGiven(input: ListGivenInput): Promise<ReactionListResult> {
     const limit = clampLimit(input.limit);
@@ -217,6 +226,8 @@ export class ReactionService {
   /**
    * List reactions placed on a given set of target ids, optionally excluding
    * a specific user. Used by the main server to render Received history.
+   * 列出针对给定一组目标 id 的反应，可选地排除某个特定用户。主服务器用它
+   * 来渲染“收到的”历史记录。
    */
   async listByUser(input: ListByUserInput): Promise<ReactionListResult> {
     if (input.targetIds.length > MAX_TARGET_IDS) {
@@ -251,7 +262,10 @@ export class ReactionService {
     return { items: sliced.map(rowToDto), nextCursor };
   }
 
-  /** Delete a reaction (idempotent). Decrements summary if deleted. */
+  /**
+   * Delete a reaction (idempotent). Decrements summary if deleted.
+   * 删除一个反应（幂等）。若已删除则递减汇总计数。
+   */
   async remove(
     userId: string,
     targetId: string,

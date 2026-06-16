@@ -10,7 +10,10 @@ import type {
 } from "@rezics/contract";
 
 type FeedPost = PostDTO & {
-  /** Internal cursor value produced by the selected feed source. */
+  /**
+   * Internal cursor value produced by the selected feed source.
+   * 由所选 feed 来源生成的内部游标值。
+   */
   feedSortValue?: number | string | null;
 };
 

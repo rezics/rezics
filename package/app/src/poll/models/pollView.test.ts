@@ -121,6 +121,7 @@ describe("selectPollView — anonymity", () => {
     expect(view.anonymous).toBe(true);
     // Only aggregate counts + the caller's selection are present; the view has
     // no field that could carry a voter↔option mapping.
+    // 视图只包含聚合计数与调用方自身的选择；不存在任何能承载投票者↔选项映射的字段。
     expect(view.options.find((o) => o.optionId === "opt-b")?.selected).toBe(
       true,
     );

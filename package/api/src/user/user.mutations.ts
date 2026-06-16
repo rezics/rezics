@@ -42,6 +42,7 @@ type AdminCreateUserInput = {
 };
 
 // MOCK: pairs with userApi.adminCreate; remove the MOCK marker once backend endpoint exists
+// MOCK：与 userApi.adminCreate 配对；后端端点就绪后移除 MOCK 标记
 export function useAdminCreateUserMutation(
   options?: Omit<
     UseMutationOptions<UserDTO, Error, AdminCreateUserInput>,
@@ -102,6 +103,10 @@ export function useDeleteMeMutation(
 // POST/DELETE endpoints are retired. UI consumers go through
 // `useSubscribe` / `useUnsubscribe` from `@rezics/api` (subscription
 // module) with default `channels=['*']`.
+// useFollowMutation / useUnfollowMutation 已被 `engagement-subscription`
+// 改动移除——底层的 `/user/follow/:id` POST/DELETE 端点已停用。UI 消费者改用
+// `@rezics/api`（subscription 模块）的 `useSubscribe` / `useUnsubscribe`，
+// 默认 `channels=['*']`。
 
 export function useUpdateSettingsMutation(
   options?: Omit<

@@ -77,6 +77,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const [startExcerpt, setStartExcerpt] = useState<number>(0);
 
   // ======= Shelves =======
+  // ======= 书架 =======
 
   const shelfSearchOptions = {
     type: "SHELF",
@@ -106,6 +107,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const totalShelves: number = shelfDataRaw?.total ?? 0;
 
   // ======= Books =======
+  // ======= 书籍 =======
 
   const {
     data: bookData,
@@ -121,6 +123,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   );
 
   // ======= Reviews / Remarks =======
+  // ======= 评论 / 短评 =======
 
   const reviewSearchOptions = {
     kind: PostKind.REVIEW,
@@ -171,6 +174,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     (tab === "review" ? reviewData?.total : remarkData?.total) ?? 0;
 
   // ======= Excerpts =======
+  // ======= 摘录 =======
 
   const excerptSearchOptions = {
     type: UnitType.QUOTE,
@@ -190,6 +194,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   );
 
   // ======= Pagination control =======
+  // ======= 分页控制 =======
 
   const handleNeedMoreData = useCallback(
     (page: number) => {
@@ -281,6 +286,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   );
 
   // Select data source by current tab
+  // 根据当前标签页选择数据源。
   let isLoading: boolean;
   let items: (ShelfDTO | PostDTO | UnitDTO | BookDTO)[];
   let totalItems: number;

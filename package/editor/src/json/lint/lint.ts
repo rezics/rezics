@@ -12,6 +12,7 @@ function jsonLinter() {
     } catch (e) {
       const message = e instanceof SyntaxError ? e.message : "Invalid JSON";
       // Try to extract position from error message
+      // 尝试从错误信息中提取位置。
       const posMatch = message.match(/position\s+(\d+)/i);
       const pos = posMatch ? parseInt(posMatch[1], 10) : 0;
       const from = Math.min(pos, text.length);

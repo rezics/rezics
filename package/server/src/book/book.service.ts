@@ -636,6 +636,7 @@ function enqueueContentDelete(unitId: string) {
 
 /**
  * Book Service - Business logic layer
+ * 图书服务 - 业务逻辑层
  */
 export class BookService {
   constructor(
@@ -644,6 +645,7 @@ export class BookService {
 
   /**
    * List books with filters and pagination
+   * 使用过滤条件和分页列出图书
    */
   async list(options: BookListOptions = {}): Promise<{
     books: BookWithRelations[];
@@ -652,9 +654,6 @@ export class BookService {
     return this.repository.list(options);
   }
 
-  /**
-   * Get book by unitId
-   */
   async getByUnitId(unitId: string): Promise<BookWithRelations> {
     return this.repository.getByUnitId(unitId);
   }
@@ -662,6 +661,8 @@ export class BookService {
   /**
    * Get content structure by bookUnitId. Reads all node rows for the book and
    * adapts the generic ContentStructure tree to the book-domain response shape.
+   * 按 bookUnitId 获取内容结构。读取该图书的所有节点行，并将通用的
+   * ContentStructure 树适配为图书领域的响应结构。
    */
   async getContentStructureByBookUnitId(
     bookUnitId: string,
@@ -677,15 +678,13 @@ export class BookService {
     };
   }
 
-  /**
-   * Get book by ISBN13
-   */
   async getByIsbn13(isbn13: string): Promise<BookWithRelations | null> {
     return this.repository.getByIsbn13(isbn13);
   }
 
   /**
    * Create new book (Unit + Book extension + translations in one transaction)
+   * 创建新图书（在单个事务中创建 Unit + Book 扩展 + 翻译）
    */
   async create(req: CreateBookInput): Promise<BookWithRelations> {
     const book = await this.repository.create(req);
@@ -693,9 +692,6 @@ export class BookService {
     return book;
   }
 
-  /**
-   * Update book
-   */
   async update(
     unitId: string,
     req: UpdateBookInput,
@@ -729,6 +725,13 @@ export class BookService {
    * transaction. Preserves existing `position` values when sibling order is
    * unchanged so a no-op save produces zero row mutations. The container
    * `updatedAt` is bumped only when at least one node actually changed.
+   *
+   * 更新内容结构（基于差异的目录保存）。
+   *
+   * 遍历提交的树，与当前的 ContentStructureNode 行做差异比较，并在单个事务中
+   * 应用最小集合的 INSERT / UPDATE / DELETE。当兄弟节点顺序未变时保留现有的
+   * `position` 值，因此空操作保存不会产生任何行变更。仅当至少有一个节点确实
+   * 发生变化时才更新容器的 `updatedAt`。
    */
   async updateContentStructure(
     unitId: string,
@@ -756,21 +759,18 @@ export class BookService {
 
   /**
    * Delete book by unitId (cascades via Unit delete)
+   * 按 unitId 删除图书（通过 Unit 删除级联）
    */
   async delete(unitId: string): Promise<void> {
     await this.repository.delete(unitId);
     await enqueueContentDelete(unitId);
   }
 
-  /**
-   * Check if book exists by unitId
-   */
   async exists(unitId: string): Promise<boolean> {
     return this.repository.exists(unitId);
   }
 }
 
-// Export singleton instance
 export const bookService = new BookService();
 
 export function buildBookCreatePatch(

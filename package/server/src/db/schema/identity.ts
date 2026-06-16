@@ -17,15 +17,37 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns";
+
+/**
+ * Main-owned user profile extension; unitId equals the matching USER Unit id.
+ * Main 库拥有的用户资料扩展；unitId 等于对应 USER Unit 的 id。
+ */
 export const User = pgTable(
   "User",
   {
+    /**
+     * Canonical user identifier. Equals Unit.id for the matching USER Unit.
+     * 规范的用户标识符。等于对应 USER Unit 的 Unit.id。
+     */
     unitId: uuid().primaryKey(),
     authUserId: uuid(),
+    /**
+     * Main-owned Rezics product email. It may be initialized from a verified
+     * auth login email during materialization, but is not synchronized with
+     * auth.User.email after that point.
+     * Main 库拥有的 Rezics 产品邮箱。可在物化期间用已验证的 auth 登录邮箱初始化，
+     * 但此后不再与 auth.User.email 同步。
+     */
     email: varchar({ length: 320 }),
     name: text(),
     avatar: text(),
     bio: text(),
+    /**
+     * Rich ContentDoc JSON. Search projections such as descriptionText are
+     * Meilisearch-only and must not be added as PostgreSQL columns.
+     * 富文本 ContentDoc JSON。诸如 descriptionText 之类的搜索投影仅存在于
+     * Meilisearch，不得作为 PostgreSQL 列添加。
+     */
     description: jsonData(),
     joinDate: nullableTimestamp(),
     permission: jsonData(),

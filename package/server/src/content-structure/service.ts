@@ -414,6 +414,9 @@ export class ContentStructureService {
         // (insert/delete/move/rename, rating or noContent toggle) — never on
         // chapter body edits, which propagate to the node's own `updatedAt`
         // separately.
+        // 容器的 `updatedAt` 仅在节点结构变更时更新
+        //（插入/删除/移动/重命名、rating 或 noContent 切换）——绝不在
+        // 章节正文编辑时更新，正文编辑会单独传播到节点自身的 `updatedAt`。
         await tx.updateContainer(ownerUnitId);
         await rebuildContentStructureAnchors(tx, ownerUnitId);
         await options.afterMutate?.(tx.mutationTx, { ownerUnitId, submitted });

@@ -8,21 +8,28 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
-/** Props for BookTocJsonEditor component. */
 interface BookTocJsonEditorProps {
-  /** Book unit ID. */
+  /**
+   * Book unit ID.
+   * 书籍 unit ID。
+   */
   bookId: string;
 }
 
-/** JSON structure for the table-of-contents editor. */
+/**
+ * JSON structure for the table-of-contents editor.
+ * 目录编辑器使用的 JSON 结构。
+ */
 type BookTocJsonData = {
   nodes: BookContentStructureItem[];
 };
 
 /**
  * Raw JSON editor for the table of contents.
+ * 目录的原始 JSON 编辑器。
  *
  * Note: This feature is currently disabled.
+ * 注意：此功能目前处于禁用状态。
  */
 export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
   bookId,
@@ -58,7 +65,8 @@ export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
           try {
             onChange(JSON.parse(text));
           } catch {
-            // Invalid JSON
+            // Invalid JSON — swallow parse errors while the user is typing.
+            // 无效的 JSON —— 用户输入过程中吞掉解析错误。
           }
         }}
       />

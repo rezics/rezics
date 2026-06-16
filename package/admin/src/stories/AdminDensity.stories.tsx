@@ -29,6 +29,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // MOCK: placeholder admin row data until wired to a real query
+// MOCK：占位的管理后台行数据，接入真实查询前临时使用
 const rows = [
   { id: 1, email: "ada@rezics.local", role: "admin", status: "active" },
   { id: 2, email: "bell@rezics.local", role: "editor", status: "active" },

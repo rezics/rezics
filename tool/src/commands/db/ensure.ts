@@ -14,6 +14,7 @@ const SERVICE_DIR = path.join(TOOL_DIR, "service");
 export function ensureLocalDatabases() {
   const config = createToolConfig();
   // Managed startup may create empty databases for convenience; Drizzle migrations remain the schema authority.
+  // 托管启动可能会为方便起见创建空数据库；Drizzle 迁移仍是 schema 的权威来源。
   const sql = renderCreateDatabaseSql(config.managedDatabaseNames);
   const args = [
     ...DOCKER_COMPOSE_COMMAND,

@@ -301,6 +301,7 @@ describe("deriveShelfStream — flat emission", () => {
     expect(stream).toHaveLength(5);
     expect(stream.every((entry) => entry.kind === "peer")).toBe(true);
     // titles: Alpha, Apple, Banana, Cherry, Zebra
+    // 标题顺序：Alpha, Apple, Banana, Cherry, Zebra
     expect(idsOf(stream)).toEqual([
       "r-b1",
       "book-a",
@@ -392,6 +393,7 @@ describe("deriveShelfStream — sort scope and invariants", () => {
       false,
     );
     // sortPrimeOnly=true keeps children right after their root.
+    // sortPrimeOnly=true 让子项紧跟在各自的 root 之后。
     expect(idsOf(withOn)).toEqual([
       "book-a",
       "r-a1",
@@ -400,6 +402,7 @@ describe("deriveShelfStream — sort scope and invariants", () => {
       "book-c",
     ]);
     // sortPrimeOnly=false emits all peers by position.
+    // sortPrimeOnly=false 按 position 输出所有 peer。
     expect(idsOf(withOff)).toEqual([
       "book-a",
       "r-a1",

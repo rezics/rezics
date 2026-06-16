@@ -8,16 +8,17 @@ Short navigation, footer, and button strings live in `src/i18n/ui.ts`.
 ## Commands
 
 ```bash
-bun --filter=@rezics/about run dev
-bun --filter=@rezics/about run build
-bun --filter=@rezics/about run preview
-bun --filter=@rezics/about run test
+task about:dev
+task about:build
+task about:preview
+task about:test
 ```
 
 ## Cloudflare Pages
 
 - Project path: `package/about`
-- Build command: `bun run build`
+- Build command: `bun astro build` (Pages-native build runs in `package/about`;
+  no per-package script, so invoke Astro directly)
 - Build output directory: `dist`
 - Custom domain: `about.rezics.com`
 

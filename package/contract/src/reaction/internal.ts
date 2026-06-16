@@ -50,7 +50,10 @@ export const internalCreateShareResponseSchema = t.Object({
 export type InternalCreateShareResponse =
   (typeof internalCreateShareResponseSchema)["static"];
 
-/** POST /internal/by-user request body. */
+/**
+ * POST /internal/by-user request body.
+ * POST /internal/by-user 请求体。
+ */
 export const internalByUserBodySchema = t.Object({
   targetIds: t.Array(t.String()),
   reactions: t.Optional(t.Array(t.String())),

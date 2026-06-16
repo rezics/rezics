@@ -26,6 +26,10 @@ import {
 } from "./columns";
 import { Unit } from "./unit";
 
+/**
+ * Poll voting follows the scored-junction plus per-user vote-row pattern used
+ * by tags. Only the act of polling is a Unit; options and votes are plain rows.
+ */
 export const PollVoteMode = pgEnum("PollVoteMode", pollVoteModeValues);
 
 export const PollResultVisibility = pgEnum(
@@ -39,13 +43,26 @@ export const Poll = pgTable("Poll", {
     .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
   voteMode: PollVoteMode().default("SINGLE").notNull(),
   resultVisibility: PollResultVisibility().default("LIVE").notNull(),
+  /**
+   * Anonymity is a read-path/presentation guarantee, not reduced storage:
+   * PollVote still records userId. No read path may expose the user-option
+   * mapping when this is true.
+   */
   anonymous: boolean().default(false).notNull(),
+  /**
+   * When the poll stops accepting votes and, for AFTER_CLOSE, reveals tallies.
+   * Null means open indefinitely until explicitly closed.
+   */
   closesAt: nullableTimestamp(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
   usageCount: integer().default(0).notNull(),
 });
 
+/**
+ * One poll option. Dual-form: exactly one of label or unitId is set. This is
+ * not a Unit; voteCount is the denormalized tally maintained on vote changes.
+ */
 export const PollOption = pgTable(
   "PollOption",
   {
@@ -83,6 +100,11 @@ export const PollOption = pgTable(
   ],
 );
 
+/**
+ * A per-user vote. Always stores userId, even for anonymous polls, to guarantee
+ * one-vote-per-user and allow vote changes. SINGLE exclusivity is enforced by
+ * the partial unique index below.
+ */
 export const PollVote = pgTable(
   "PollVote",
   {
@@ -97,6 +119,10 @@ export const PollVote = pgTable(
     voteMode: PollVoteMode().notNull(),
     createdAt: createdAt(),
     id: uuidv7PrimaryKey(),
+    /**
+     * Optional voting context for statistics and future realm-aware voting. It
+     * is metadata, not poll ownership.
+     */
     realmUnitId: uuid(),
   },
   (table) => [

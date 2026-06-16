@@ -6,6 +6,7 @@ const apply = process.argv.includes("--apply");
 
 function countTopLevelDuplicates(raw: string): Map<string, number> {
   // Top-level keys only: lines like `  "key": ...` at two-space indent.
+  // 仅限顶层键：形如 `  "key": ...` 且为两空格缩进的行。
   const counts = new Map<string, number>();
   for (const line of raw.split("\n")) {
     const m = line.match(/^ {2}"((?:[^"\\]|\\.)*)":/);

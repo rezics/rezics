@@ -23,7 +23,7 @@ import type {
   RendererPlugin,
 } from "./types";
 
-// ── Context ─────────────────────────────────────────────────
+// ── Context（上下文）─────────────────────────────────────────
 
 interface FolioContextValue {
   state: FolioState;
@@ -44,7 +44,7 @@ export function useFolio(): FolioContextValue {
   return ctx;
 }
 
-// ── Position Restoration ────────────────────────────────────
+// ── Position Restoration（位置恢复）─────────────────────────
 
 function resolveInitialChapterIndex(
   flatChapters: FlatChapter[],
@@ -62,7 +62,7 @@ function resolveInitialChapterIndex(
   return Math.min(position.chapterIndex, flatChapters.length - 1);
 }
 
-// ── Provider ────────────────────────────────────────────────
+// ── Provider（提供者）────────────────────────────────────────
 
 interface FolioProviderProps {
   tree: FolioNode[];
@@ -93,6 +93,7 @@ export function FolioProvider({
   const initialChapterIndex = useMemo(
     () => resolveInitialChapterIndex(flatChapters, initialPosition),
     // Only compute on mount
+    // 仅在挂载时计算。
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [flatChapters, initialPosition],
   );
@@ -104,7 +105,7 @@ export function FolioProvider({
     scrollOffset: initialPosition?.scrollOffset ?? 0,
   });
 
-  // ── Content Loading ─────────────────────────────────────
+  // ── Content Loading（内容加载）───────────────────────────
 
   const contentCache = useRef<Map<string, FolioContent>>(new Map());
   const [content, setContent] = useState<FolioContent | null>(null);
@@ -161,7 +162,7 @@ export function FolioProvider({
     return () => controller.abort();
   }, [currentChapter, state.chapterIndex]);
 
-  // ── Prefetch ────────────────────────────────────────────
+  // ── Prefetch（预取）──────────────────────────────────────
 
   useEffect(() => {
     if (state.readMode !== "page") return;
@@ -189,6 +190,7 @@ export function FolioProvider({
       })
       .catch(() => {
         // Prefetch failures are silent
+        // 预取失败时静默处理。
       });
 
     return () => controller.abort();
@@ -201,7 +203,7 @@ export function FolioProvider({
     prefetchThreshold,
   ]);
 
-  // ── Progress Reporting ──────────────────────────────────
+  // ── Progress Reporting（进度上报）─────────────────────────
 
   const onProgressChangeRef = useRef(onProgressChange);
   onProgressChangeRef.current = onProgressChange;
@@ -238,7 +240,7 @@ export function FolioProvider({
     currentChapter,
   ]);
 
-  // ── Context Value ───────────────────────────────────────
+  // ── Context Value（上下文值）──────────────────────────────
 
   const value = useMemo<FolioContextValue>(
     () => ({

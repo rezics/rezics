@@ -1,4 +1,5 @@
 // MOCK: Storybook history fixtures for content-history v2 UI states.
+// MOCK: 用于 content-history v2 UI 状态的 Storybook history fixtures。
 import type {
   HistoryActorResolution,
   HistoryUnitReferenceResolution,

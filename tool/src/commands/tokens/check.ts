@@ -1,12 +1,16 @@
 #!/usr/bin/env bun
 /**
  * check-tokens.ts — contrast-invariant verification for rezics design tokens.
+ * check-tokens.ts — 对 rezics 设计 token 的对比度不变量校验。
  *
  * Reads `package/ui/src/config/tokens/colors.ts` (the single source of truth)
  * and asserts WCAG contrast invariants against the curated key paths in both
  * light and dark modes. The runtime CSS variables emitted by uno-config.ts
  * mirror this object, so passing here implies the runtime cascade meets the
  * same thresholds.
+ * 读取 `package/ui/src/config/tokens/colors.ts`（唯一事实来源），并针对精选的
+ * 键路径在 light 和 dark 两种模式下断言 WCAG 对比度不变量。uno-config.ts 输出的
+ * 运行时 CSS 变量与该对象一致，因此此处通过即意味着运行时级联满足相同阈值。
  */
 import {
   type ColorTokens,
@@ -80,6 +84,8 @@ function contrast(a: RGB, b: RGB): number {
 // Walks a key path like `surface.elevated` or `semantic.success.fill` and
 // returns the string value at that location. Bracketed segments support
 // kebab-case keys (e.g. `surface["container-low"]`).
+// 沿着形如 `surface.elevated` 或 `semantic.success.fill` 的键路径遍历，返回该
+// 位置上的字符串值。方括号段支持 kebab-case 键（例如 `surface["container-low"]`）。
 function pick(root: ColorTokens, path: string): string | null {
   let cursor: unknown = root;
   for (const segment of path.split(".")) {
@@ -111,6 +117,8 @@ const SURFACE_TEXT_PAIRS: Pair[] = [
   // Brand text is reserved for short stable chrome (wordmark, hero labels,
   // accent labels), not reading content. Keep it above AA-large instead of
   // treating it like paragraph text.
+  // brand 文本仅用于短小、稳定的界面框架元素（wordmark、hero 标签、accent 标签），
+  // 而非阅读内容。保持其在 AA-large 之上，而不是按段落文本对待。
   { fg: "text.brand", bg: "surface.canvas", min: 3.0 },
   { fg: "link.DEFAULT", bg: "surface.canvas", min: 4.5 },
   { fg: "inverse.on-surface", bg: "inverse.surface", min: 4.5 },
@@ -119,6 +127,8 @@ const SURFACE_TEXT_PAIRS: Pair[] = [
 const ROLE_PAIRS: Pair[] = [
   // primary / destructive carry a brand-fill background; the foreground is a
   // large-text label (button copy, badge text). WCAG AA-large is 3:1.
+  // primary / destructive 带有 brand-fill 背景；前景是大字号标签（按钮文案、徽章
+  // 文本）。WCAG AA-large 标准为 3:1。
   { fg: "primary.foreground", bg: "primary.DEFAULT", min: 3.0 },
   { fg: "destructive.foreground", bg: "destructive.DEFAULT", min: 3.0 },
   { fg: "secondary.foreground", bg: "secondary.DEFAULT", min: 4.5 },
@@ -149,6 +159,8 @@ const CONTAINER_PAIRS: Pair[] = [
 const BORDER_PAIRS: Pair[] = [
   // border-whisper is intentionally subtle (8% / 10% alpha overlay); the only
   // invariant is that it remains *visible* (>1:1) on canvas in both modes.
+  // border-whisper 刻意做得很微弱（8% / 10% 的 alpha 叠加）；唯一的不变量是它在
+  // 两种模式下相对 canvas 仍保持 *可见*（>1:1）。
   { fg: "border.whisper", bg: "surface.canvas", min: 1.05, composite: true },
   { fg: "border.defined", bg: "surface.canvas", min: 1.2 },
 ];

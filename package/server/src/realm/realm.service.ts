@@ -95,7 +95,10 @@ import {
 } from "./realm-extra.service";
 import type { RealmWithRelations } from "./types";
 
-/** Score at or below this threshold hides a RealmTagApplication from regular users. */
+/**
+ * Score at or below this threshold hides a RealmTagApplication from regular users.
+ * 分数低于或等于此阈值时，会对普通用户隐藏该 RealmTagApplication。
+ */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 
 function normalizedLanguage(language: string | null | undefined) {
@@ -307,6 +310,7 @@ export class RealmService {
   }
 
   // --- Realm CRUD ---
+  // --- Realm 增删改查 ---
 
   private async resolveViewerCapabilities(
     realmUnitId: string,
@@ -560,6 +564,7 @@ export class RealmService {
   }
 
   // --- Membership ---
+  // --- 成员关系 ---
 
   /**
    * Join the realm as a member. Atomically writes BOTH the `RealmMember`
@@ -569,6 +574,11 @@ export class RealmService {
    * transaction. If a Subscription row already exists (the user was
    * lurking on a public realm and is now joining), the upsert keeps it
    * intact and the subscriberCount stays accurate.
+   * 以成员身份加入 realm。在同一事务中原子地写入 `RealmMember` 权限边
+   * 和 `Subscription` 关注边（channels=['*']），并同时递增两个去规范化
+   * 计数器（`Realm.memberCount` 和 `Unit.subscriberCount`）。若 Subscription
+   * 行已存在（用户先前在公开 realm 上潜水、现在才加入），upsert 会保留它，
+   * 使 subscriberCount 保持准确。
    */
   async joinRealm(
     realmUnitId: string,
@@ -767,6 +777,8 @@ export class RealmService {
    * transaction. Idempotent for partial state — if either
    * row is missing the corresponding counter is not decremented, so a
    * second call doesn't double-decrement.
+   * 在同一事务中移除成员关系及其对应的订阅。对部分状态幂等——若任一行
+   * 缺失，则不递减对应计数器，因此重复调用不会重复递减。
    */
   async removeMember(
     realmUnitId: string,
@@ -870,6 +882,8 @@ export class RealmService {
    * Mute a realm — remove the Subscription row only (keeps RealmMember).
    * Idempotent for missing subscription. Muting preserves posting rights
    * and role, only suppresses inbound activity.
+   * 静音某 realm——仅移除 Subscription 行（保留 RealmMember）。订阅缺失时
+   * 幂等。静音保留发帖权限与角色，只抑制入站动态。
    */
   async muteRealm(realmUnitId: string, userId: string): Promise<void> {
     const db = await getServerDb();
@@ -902,6 +916,9 @@ export class RealmService {
    * no-op. The caller does not need to be a member to unmute, since
    * lurking subscriptions are also valid (in which case
    * "unmute" is just a generic subscribe).
+   * 取消静音某 realm——以 `channels=['*']` 重新添加 Subscription 行。幂等：
+   * 若订阅已存在（调用方未被静音），则为空操作。取消静音无需调用方是成员，
+   * 因为潜水订阅同样有效（此时“取消静音”只是普通的订阅）。
    */
   async unmuteRealm(realmUnitId: string, userId: string): Promise<void> {
     const db = await getServerDb();
@@ -1040,6 +1057,8 @@ export class RealmService {
   // TODO(openspec-retired): an earlier spec intended NO per-user
   // rule-acknowledgement record, yet RealmRuleAcknowledgement exists and is
   // written here. Revisit whether the table should exist.
+  // 早先的规范本不打算保留按用户的规则确认记录，但 RealmRuleAcknowledgement
+  // 仍存在并在此处写入。需重新评估该表是否应当存在。
   async acknowledgeCurrentRule(
     realmUnitId: string,
     userId: string,
@@ -1345,6 +1364,7 @@ export class RealmService {
   }
 
   // --- Content feed ---
+  // --- 内容流 ---
 
   async addUnitRealm(
     realmUnitId: string,
@@ -1386,10 +1406,14 @@ export class RealmService {
   }
 
   // --- Realm tag applications ---
+  // --- Realm 标签应用 ---
   //
   // RealmTagApplication and UnitTag remain independent score layers. The standard
   // RealmTagApplication write path contributes the caller's global TagVote once, but
   // later RealmTagApplication deletion never deletes or decrements UnitTag.
+  // RealmTagApplication 与 UnitTag 仍是相互独立的分数层。标准的
+  // RealmTagApplication 写入路径只贡献调用方的全局 TagVote 一次，但后续删除
+  // RealmTagApplication 时绝不会删除或递减 UnitTag。
 
   /**
    * Create a RealmTagApplication with creation-as-vote semantics.
@@ -1406,6 +1430,20 @@ export class RealmService {
    * - Idempotent for the same user: existing RealmTagApplicationVote left untouched.
    * - The caller's global TagVote(userId, unitId, tagUnitId, +1) is created
    *   once or preserved, then UnitTag aggregates are recomputed.
+   *
+   * 创建 RealmTagApplication，采用“创建即投票”的语义。
+   *
+   * 调用方必须是该 realm 的成员；路由负责强制成员检查并透传操作者的 userId。
+   * realm 只应用已有的全局标签：`realmUnitId` 必须是 REALM，`tagUnitId` 必须是
+   * TAG。此操作不会铸造 realm 本地标签，也不要求存在
+   * UnitRealm(realmUnitId, unitId)。
+   *
+   * - 首次调用：写入 RealmTagApplication（score=1、voteCount=1）以及一条 +1 的
+   *   RealmTagApplicationVote。
+   * - 后续来自不同成员的调用：插入一条 RealmTagApplicationVote 并重新计算。
+   * - 对同一用户幂等：已有的 RealmTagApplicationVote 保持不变。
+   * - 调用方的全局 TagVote(userId, unitId, tagUnitId, +1) 会被创建一次或保留，
+   *   随后重新计算 UnitTag 聚合值。
    */
   async createRealmTagApplication(
     userId: string,
@@ -1557,6 +1595,8 @@ export class RealmService {
   /**
    * Set pin/position on a RealmTagApplication. The route enforces admin OR
    * `Realm.owner` authorization.
+   * 设置 RealmTagApplication 的置顶/位置。路由负责强制 admin 或
+   * `Realm.owner` 授权。
    */
   async setRealmTagApplicationPin(
     realmUnitId: string,
@@ -1593,6 +1633,8 @@ export class RealmService {
   /**
    * Delete a RealmTagApplication and the underlying RealmTagApplicationVote rows for that triple.
    * Does NOT cascade to UnitTag.
+   * 删除某 RealmTagApplication 及该三元组下层的 RealmTagApplicationVote 行。
+   * 不会级联到 UnitTag。
    */
   async deleteRealmTagApplication(
     realmUnitId: string,
@@ -1619,6 +1661,9 @@ export class RealmService {
    * Cast a RealmTagApplicationVote upsert and recompute the parent RealmTagApplication's
    * `score` and `voteCount`. Membership check is enforced by the route at
    * write time; votes are retained even if the member later leaves.
+   * upsert 一条 RealmTagApplicationVote，并重新计算父级 RealmTagApplication 的
+   * `score` 与 `voteCount`。成员检查由路由在写入时强制执行；即使成员之后退出，
+   * 票数仍会保留。
    */
   async castRealmTagApplicationVote(
     userId: string,
@@ -1685,6 +1730,9 @@ export class RealmService {
    * then score-desc. Regular callers do not see rows below the visibility
    * threshold; privileged callers (admin / realm owner) see them so the
    * route can flag them.
+   * 列出给定 (realm, unit) 的 RealmTagApplication 行，先按置顶、再按分数降序
+   * 排序。普通调用方看不到低于可见性阈值的行；特权调用方（admin / realm
+   * owner）可看到，以便路由对其作标记。
    */
   async listRealmTagsForUnit(
     realmUnitId: string,
@@ -1719,6 +1767,8 @@ export class RealmService {
    * Admin-only discovery: list RealmTagApplication rows at or below the given
    * score threshold, optionally constrained to a single realm. Ordered
    * ascending so the worst offenders surface first.
+   * 仅限 admin 的发现接口：列出分数低于或等于给定阈值的 RealmTagApplication
+   * 行，可选地限定在单个 realm 内。按升序排序，使问题最严重的行最先出现。
    */
   async listLowScoreRealmTagApplications(
     threshold: number,

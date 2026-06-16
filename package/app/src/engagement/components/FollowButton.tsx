@@ -28,22 +28,42 @@ type ButtonVariant =
 type ButtonSize = "sm" | "default" | "lg" | "icon";
 
 type FollowButtonProps = {
-  /** Target user's userId. */
+  /**
+   * Target user's userId.
+   * 目标用户的 userId。
+   */
   userId: string | undefined;
-  /** 初始关注状态；真实状态加载后会同步覆盖。 */
+  /**
+   * Initial follow state; overwritten once the real state loads.
+   * 初始关注状态；真实状态加载后会同步覆盖。
+   */
   initialIsFollowing?: boolean;
   /**
+   * Initial followers count, used for immediate local display updates.
+   * If omitted, only the follow state is shown without statistics.
    * 初始粉丝数，用于本地即时更新显示。
    * 若不传，则仅展示「是否关注」状态，不显示统计。
    */
   initialFollowersCount?: number;
-  /** 是否显示粉丝统计文案，例如 "123 followers" */
+  /**
+   * Whether to show the followers count text, e.g. "123 followers".
+   * 是否显示粉丝统计文案，例如 "123 followers"。
+   */
   showFollowersText?: boolean;
-  /** 覆盖 Button 尺寸 */
+  /**
+   * Override the Button size.
+   * 覆盖 Button 尺寸。
+   */
   size?: ButtonSize;
-  /** 覆盖 Button 变体 */
+  /**
+   * Override the Button variant.
+   * 覆盖 Button 变体。
+   */
   variant?: ButtonVariant;
-  /** 是否铺满宽度 */
+  /**
+   * Whether to span full width.
+   * 是否铺满宽度。
+   */
   fullWidth?: boolean;
   className?: string;
 };

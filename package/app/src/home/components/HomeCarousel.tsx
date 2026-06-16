@@ -135,7 +135,6 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
     }
   }, [data, showAlert, t]);
 
-  // autoplay using carousel api
   useEmblaAutoplay(carouselApi, {
     interval: autoplayIntervalNum,
     enabled: true,

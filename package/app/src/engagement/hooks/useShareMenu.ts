@@ -83,6 +83,7 @@ export function useShareMenu({
       await navigator.clipboard.writeText(absolute(href));
     } catch {
       // swallow — clipboard write can fail in insecure contexts
+      // 吞掉错误 —— 在不安全上下文中剪贴板写入可能失败
     }
     setAnchorEl(null);
   };
@@ -100,6 +101,7 @@ export function useShareMenu({
       });
     } catch {
       // user-cancelled or unsupported; nothing to do
+      // 用户取消或不支持；无需处理
     }
     setAnchorEl(null);
   };

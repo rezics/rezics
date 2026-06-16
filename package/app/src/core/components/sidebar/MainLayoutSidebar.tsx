@@ -77,6 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   );
 
   // Desktop: simple flex-based sidebar that pushes content by taking width.
+  // 桌面端：基于 flex 的简单侧边栏，通过占据宽度来推开内容。
   return (
     <UiSidebar
       isOpen={sidebarOpen}

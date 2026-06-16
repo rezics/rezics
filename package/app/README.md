@@ -38,10 +38,9 @@ feature/
 ## Scripts
 
 ```bash
-bun run dev           # Start Vite dev server (port 35001)
-bun run build         # Production build
-bun run preview       # Preview production build
-bun run cosmos        # Launch React Cosmos for component development
+task app:dev           # Start Vite dev server (port 35001)
+task app:build         # Production build
+task app:preview       # Preview production build
 ```
 
 ## Tech Stack

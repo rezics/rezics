@@ -47,6 +47,7 @@ export function parseOpf(fileMap: FileMap, opfPath: string): OpfData {
   }
 
   // Parse manifest
+  // 解析 manifest
   const manifestItems = ensureArray(pkg.manifest?.item);
   const manifest = new Map<string, ManifestItem>();
 
@@ -65,6 +66,7 @@ export function parseOpf(fileMap: FileMap, opfPath: string): OpfData {
   }
 
   // Parse spine
+  // 解析 spine
   const spineItems = ensureArray(pkg.spine?.itemref);
   const spine: SpineItem[] = spineItems.map((item: Record<string, string>) => ({
     idref: item["@_idref"],
@@ -72,9 +74,11 @@ export function parseOpf(fileMap: FileMap, opfPath: string): OpfData {
   }));
 
   // Spine toc attribute (NCX)
+  // spine 的 toc 属性（NCX）
   const tocId = pkg.spine?.["@_toc"];
 
   // Parse metadata
+  // 解析 metadata
   const meta = pkg.metadata ?? {};
   const metadata: EpubMetadata = {
     title:

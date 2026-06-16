@@ -22,6 +22,9 @@ export interface BookshelfGridProps {
  * container width against the config breakpoints. On pointer devices a
  * hover preview panel appears; on touch devices tapping navigates to the
  * item detail (no preview).
+ * 用于书库条目的响应式封面网格。列数根据容器宽度与 config 断点解析得出。
+ * 在指针设备上会显示悬停预览面板；在触摸设备上点击会跳转到条目详情
+ *（无预览）。
  */
 export const BookshelfGrid: React.FC<BookshelfGridProps> = ({
   items,

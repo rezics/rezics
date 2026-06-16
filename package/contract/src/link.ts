@@ -3,6 +3,7 @@ import { unitTranslationDTOSchema } from "./unit/unit";
 
 // ============================================================
 // LINK DTO
+// LINK DTO 链接数据传输对象
 // ============================================================
 
 export const linkDTOSchema = t.Object({
@@ -20,6 +21,7 @@ export type LinkDTO = (typeof linkDTOSchema)["static"];
 
 // ============================================================
 // CREATE/UPDATE LINK
+// CREATE/UPDATE LINK 创建/更新链接
 // ============================================================
 
 export const createLinkSchema = t.Object({

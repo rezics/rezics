@@ -10,7 +10,7 @@ Shared product and domain translations for Rezics frontends. The runtime is
   `entity`, `community`, `search`, `settings`, `editor`, `admin`
   (route-lazy, `admin` admin-only); `ui` (bundled with `@rezics/ui`). New
   keys use the namespace matching the closest existing prefix; cross-domain
-  generic words go in `common`. `bun run check:i18n` enforces coverage.
+  generic words go in `common`. `task check:i18n` enforces coverage.
 - Vite serves the tree at `/locales/<lng>/<ns>.json` via the
   `rezicsI18nLocales()` plugin from `@rezics/i18n/vite`.
 
@@ -89,5 +89,5 @@ new locale, and persists the selection to
 1. Add the key to `package/i18n/locales/en/<ns>.json` and every other
    locale file.
 2. Reference it from React with `t('<ns>:<key>')`.
-3. Run `bun run check:i18n` to catch missing entries or unused keys
+3. Run `task check:i18n` to catch missing entries or unused keys
    before commit; the same check runs in lefthook pre-commit.

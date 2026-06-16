@@ -141,7 +141,10 @@ function readRealmRuleUnitId(extra: unknown | null): string | null {
   return typeof rule === "string" && rule.length > 0 ? rule : null;
 }
 
-/** Read the snapshotted governing-schema tag slug from a post's `extra`. */
+/**
+ * Read the snapshotted governing-schema tag slug from a post's `extra`.
+ * 从帖子的 `extra` 中读取快照的治理 schema 标签 slug。
+ */
 function readStateSchemaTag(extra: unknown | null): string | null {
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
   const tag = (extra as Record<string, unknown>).stateSchemaTag;
@@ -153,6 +156,9 @@ function readStateSchemaTag(extra: unknown | null): string | null {
  * or a derived bucket (`active`/`closed`) expanded to its slug set across the
  * registered schemas. A cheap indexed `IN`-list — never an anti-join. `state`
  * is a presentation label and gates nothing; this is filtering only.
+ * 为帖子查询应用生命周期 `state` 过滤：精确匹配 `state`，或将派生分组
+ * （`active`/`closed`）展开为已注册 schema 中的 slug 集合。这是一个廉价的
+ * 索引 `IN` 列表，绝非反连接。`state` 只是展示标签，不控制任何权限；此处仅做过滤。
  */
 function applyStateFilter(
   conditions: SQL[],
@@ -639,13 +645,19 @@ async function applyBlockedAuthorFilter(
   conditions.push(notInArray(Post.authorUserId, blockedIds));
 }
 
-/** Realm roles that may pin/accept within a realm's threads. */
+/**
+ * Realm roles that may pin/accept within a realm's threads.
+ * 可在 realm 讨论串中执行置顶/采纳的 realm 角色。
+ */
 const PROMOTION_ROLES = ["owner", "admin", "moderator"] as const;
 
 /**
  * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A
  * comment is promoted at most once per scope and its scope is always its own
  * thread root, so the target comment unit maps to at most one promotion row.
+ * 为讨论串行附加提升覆盖层（`pinKind`/`pinPosition`）。一条评论在每个 scope 内
+ * 至多被提升一次，且其 scope 始终是自身的讨论串根，因此目标评论 unit 至多对应
+ * 一条提升记录。
  */
 async function attachPinKinds<
   T extends {
@@ -748,6 +760,7 @@ export class PostService {
   /**
    * List root submissions only. Reply tree reads live in the comment domain;
    * Post no longer stores discussion topology.
+   * 仅列出根级提交。回复树的读取位于 comment 域；Post 不再存储讨论拓扑。
    */
   async list(
     query: PostListQuery = {},
@@ -772,6 +785,7 @@ export class PostService {
     if (languageVisibility) conditions.push(languageVisibility);
     // Weak context lookup only: do not resolve through Unit.targetUnitId and do
     // not validate that the value names a VARIANT.
+    // 仅作弱上下文查找：不通过 Unit.targetUnitId 解析，也不校验该值是否指向 VARIANT。
     if (query.variantUnitId)
       conditions.push(eq(Post.variantUnitId, query.variantUnitId));
     if (query.authorUserId)
@@ -828,7 +842,10 @@ export class PostService {
     };
   }
 
-  /** List posts associated with a realm through the UnitRealm junction. */
+  /**
+   * List posts associated with a realm through the UnitRealm junction.
+   * 通过 UnitRealm 关联表列出与某个 realm 相关的帖子。
+   */
   async byRealm(
     realmUnitId: string,
     opts: Omit<PostListQuery, "realmUnitId" | "targetUnitId"> = {},
@@ -901,6 +918,8 @@ export class PostService {
     if (sort === "hot") {
       // Phase-1 approximation from design.md Decision 5: rank as top posts
       // within the last 7 days instead of the full decay formula.
+      // design.md 决策 5 的第一阶段近似：按最近 7 天内的热门帖子排序，
+      // 而非使用完整的衰减公式。
       const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       conditions.push(gt(Post.createdAt, since));
     }
@@ -1016,7 +1035,6 @@ export class PostService {
     return memberState === "ACTIVE" || memberState === "MUTED";
   }
 
-  /** Get a single post by unit ID. */
   async getByUnitId(
     unitId: string,
     options?: { isAdmin?: boolean; allowTombstone?: boolean },
@@ -1127,6 +1145,7 @@ export class PostService {
   /**
    * Create a top-level post. Comment replies are created through the comment
    * domain; this path writes no post topology.
+   * 创建顶层帖子。评论回复通过 comment 域创建；此路径不写入任何帖子拓扑。
    */
   async create(
     input: CreatePostInput,
@@ -1147,6 +1166,8 @@ export class PostService {
     // Chapters always publish. A draft is owner-only and stays out of
     // feeds/search until published (see publication-policy
     // `publicUnitEligibilityWhere`).
+    // 章节始终发布。草稿仅作者可见，发布前不会进入信息流/搜索
+    // （参见发布策略 `publicUnitEligibilityWhere`）。
     const asDraft = input.status === "DRAFT" && kind !== PostKindEnum.CHAPTER;
     const targetUnitId =
       typeof inputTargetUnitId === "string" && inputTargetUnitId.trim()
@@ -1203,6 +1224,9 @@ export class PostService {
       // ids, and derive the lifecycle initialization from the same rows: a
       // stateful tag snapshots its slug into `extra.stateSchemaTag` and seeds
       // `state` to the schema's initial value. At most one stateful tag.
+      // 一次性校验请求的标签（选取 slug），拒绝未知 id，并从同一批行派生生命周期
+      // 初始化：有状态标签会将其 slug 快照到 `extra.stateSchemaTag`，并将 `state`
+      // 初始化为 schema 的初始值。至多一个有状态标签。
       let statefulInit: { tagSlug: string; initial: string } | null = null;
       if (tagIdsToWrite.length > 0) {
         const validTags = (await tx
@@ -1284,6 +1308,7 @@ export class PostService {
       if (tagIdsToWrite.length > 0) {
         // Tags were validated above (before the post insert); just write the
         // UnitTag junction rows here.
+        // 标签已在上方校验（在插入帖子之前）；此处仅写入 UnitTag 关联表行。
         await Promise.all(
           tagIdsToWrite.map((tagUnitId) =>
             tx.insert(UnitTag).values({
@@ -1335,6 +1360,8 @@ export class PostService {
 
     // Drafts are owner-only and must not enter the search index until they are
     // published; `setPublicationState` enqueues the sync on publish.
+    // 草稿仅作者可见，发布前不得进入搜索索引；`setPublicationState` 在发布时
+    // 将同步任务入队。
     if (!asDraft) {
       await Promise.all([
         enqueuePostSync(post.unitId),
@@ -1350,6 +1377,9 @@ export class PostService {
    * `publishedAt` once (first publication is preserved) and indexes the post;
    * reverting to draft removes it from feeds/search via the publication policy
    * and re-syncs the index to de-list it.
+   * 在已发布与草稿之间切换帖子。仅作者可操作。发布时只设置一次 `publishedAt`
+   * （保留首次发布时间）并为帖子建立索引；回退为草稿时，通过发布策略将其从
+   * 信息流/搜索中移除，并重新同步索引以将其下架。
    */
   async setPublicationState(
     unitId: string,
@@ -1371,6 +1401,7 @@ export class PostService {
       .set({
         status: publish ? "PUBLISHED" : "DRAFT",
         // Preserve the first-publication timestamp; set it on first publish.
+        // 保留首次发布时间戳；仅在首次发布时设置。
         publishedAt: publish
           ? (existing.unit.publishedAt ?? new Date())
           : existing.unit.publishedAt,
@@ -1388,6 +1419,8 @@ export class PostService {
 
     // Re-sync either way: publish indexes; unpublish de-lists (the indexer
     // honours `publicUnitEligibilityWhere`).
+    // 无论哪种情况都重新同步：发布会建立索引；取消发布会下架（索引器遵循
+    // `publicUnitEligibilityWhere`）。
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
 
     const updated = await getPostByUnitId(unitId, db);
@@ -1460,6 +1493,8 @@ export class PostService {
       // This is author/member publishing, not realm admin content management.
       // Keep it in the post domain so ownership and post-to-realm policy stay
       // aligned with new realm post creation.
+      // 这是作者/成员的发布行为，而非 realm 管理员的内容管理。将其保留在 post 域，
+      // 以使所有权和发帖到 realm 的策略与新建 realm 帖子保持一致。
       const initialStatuses = await this.initialUnitRealmModerationStatuses(
         tx,
         [input.realmUnitId],
@@ -1521,7 +1556,10 @@ export class PostService {
     return hydrateUnitOwnerUserSlugRow(updated);
   }
 
-  /** Update post content, isLocked, and/or extra. */
+  /**
+   * Update post content, isLocked, and/or extra.
+   * 更新帖子的 content、isLocked 和/或 extra。
+   */
   async update(
     unitId: string,
     input: UpdatePostInput,
@@ -1701,7 +1739,10 @@ export class PostService {
     return hydrateUnitOwnerUserSlugRow(updated);
   }
 
-  /** Delete a root submission. Comment reply counters are owned by Comment. */
+  /**
+   * Delete a root submission. Comment reply counters are owned by Comment.
+   * 删除一条根级提交。评论回复计数器由 Comment 拥有。
+   */
   async delete(unitId: string): Promise<void> {
     const db = await getServerDb();
     await db.transaction(async (tx: DbLike) => {
@@ -1709,6 +1750,7 @@ export class PostService {
       if (!existing) throw new AppError(404, `Post not found: ${unitId}`);
 
       // Soft-delete: mark the unit as DELETED
+      // 软删除：将 unit 标记为 DELETED
       await tx
         .update(Unit)
         .set({ status: "DELETED", updatedAt: new Date() })
@@ -1725,6 +1767,7 @@ export class PostService {
 
   // ============================================================
   // LIFECYCLE STATE — schema-driven, behaviorally inert
+  // 生命周期 STATE —— 由 schema 驱动，对行为无影响
   // ============================================================
 
   /**
@@ -1732,6 +1775,9 @@ export class PostService {
    * Picks out stateful tags (those keying a schema) and enforces **at most one**.
    * Returns the governing tag slug and the schema's initial state, or `null`
    * when no stateful tag is present.
+   * 从帖子（已校验的）标签派生生命周期初始化。挑出有状态标签（即关联某个 schema
+   * 的标签）并强制 **至多一个**。返回治理标签的 slug 与 schema 的初始状态，若不存在
+   * 有状态标签则返回 `null`。
    */
   private resolveStatefulTagInit(
     tags: { slug: string | null }[],
@@ -1763,6 +1809,14 @@ export class PostService {
    * never on `state` — `state` is user-influenced presentation data (per-realm
    * rendering today, custom schemas later) and must never control authorization.
    * This only changes the label; authorization is the caller's concern.
+   * 将帖子的生命周期 `state` 转换到 `target`。写入严格：目标会被规范化，除非它是
+   * 帖子 schema 的合法值且允许从当前状态进行该转换，否则被拒绝。当帖子已处于目标
+   * 状态时为无操作。
+   *
+   * ⚠ 安全关键：`state` 不控制任何行为。授权和硬性门控只取决于 `Post.isLocked`
+   * （回复权限）和 `Unit.status`（可见性），绝不取决于 `state` —— `state` 是受用户
+   * 影响的展示数据（当前用于按 realm 渲染，未来用于自定义 schema），绝不能控制授权。
+   * 此方法只改变标签；授权由调用方负责。
    */
   async setState(unitId: string, target: string): Promise<PostWithRelations> {
     const db = await getServerDb();
@@ -1805,6 +1859,9 @@ export class PostService {
    * The `ACCEPTED_ANSWER` pin stays the source of truth; this is a denormalized
    * shadow (precedent: `replyCount`/`lastReplyAt`). A manually-set closed reason
    * is never overwritten — only the schema's initial (`open`) advances.
+   * 在答案被采纳时维护 `solved` 缓存：`open` ⇒ `solved`。`ACCEPTED_ANSWER` 置顶
+   * 始终是真实来源；此处只是去规范化的影子（先例：`replyCount`/`lastReplyAt`）。
+   * 手动设置的关闭原因绝不会被覆盖 —— 只有 schema 的初始值（`open`）会推进。
    */
   private async maintainSolvedCacheOnAccept(
     scopeUnitId: string,
@@ -1832,6 +1889,8 @@ export class PostService {
    * Maintain the `solved` cache when an answer is unaccepted: when no accepted
    * answer remains and the cached state is still `solved`, revert to the
    * schema's initial (`open`). A manual closed reason is left untouched.
+   * 在答案被取消采纳时维护 `solved` 缓存：当不再有已采纳答案且缓存状态仍为
+   * `solved` 时，回退到 schema 的初始值（`open`）。手动设置的关闭原因保持不变。
    */
   private async maintainSolvedCacheOnUnaccept(
     scopeUnitId: string,
@@ -1868,11 +1927,14 @@ export class PostService {
 
   // ============================================================
   // PROMOTION OVERLAY — pinning & accepted answers
+  // 提升覆盖层 —— 置顶与已采纳答案
   // ============================================================
 
   /**
    * A thread is a Q&A thread when its root post bears the platform-reserved
    * question tag (a `Unit(type=TAG)` whose slug is `OFFICIAL_QUESTION_TAG_SLUG`).
+   * 当讨论串的根帖带有平台保留的问题标签（slug 为 `OFFICIAL_QUESTION_TAG_SLUG`
+   * 的 `Unit(type=TAG)`）时，该讨论串即为问答讨论串。
    */
   async isQuestionThread(rootPostUnitId: string): Promise<boolean> {
     const db = await getServerDb();
@@ -1894,7 +1956,10 @@ export class PostService {
     return !!applied;
   }
 
-  /** Pin a reply within its thread scope (`kind = PINNED`). */
+  /**
+   * Pin a reply within its thread scope (`kind = PINNED`).
+   * 在讨论串 scope 内置顶一条回复（`kind = PINNED`）。
+   */
   async pin(
     input: PinCommentInput,
     caller: RezicsSessionClaims,
@@ -1916,7 +1981,10 @@ export class PostService {
     );
   }
 
-  /** Remove a `PINNED` promotion. */
+  /**
+   * Remove a `PINNED` promotion.
+   * 移除 `PINNED` 提升。
+   */
   async unpin(
     scopeUnitId: string,
     commentId: string,
@@ -1930,6 +1998,8 @@ export class PostService {
    * Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`). Gated on a
    * Q&A thread, the target being a direct comment reply, and OP/moderator
    * authorization.
+   * 将一条直接回复采纳为答案（`kind = ACCEPTED_ANSWER`）。受以下条件门控：必须是
+   * 问答讨论串、目标须为直接评论回复，以及 OP/版主的授权。
    */
   async acceptAnswer(
     input: AcceptAnswerInput,
@@ -1969,7 +2039,10 @@ export class PostService {
     return pin;
   }
 
-  /** Remove an `ACCEPTED_ANSWER` promotion. */
+  /**
+   * Remove an `ACCEPTED_ANSWER` promotion.
+   * 移除 `ACCEPTED_ANSWER` 提升。
+   */
   async unacceptAnswer(
     scopeUnitId: string,
     commentId: string,
@@ -1985,6 +2058,9 @@ export class PostService {
    * thread author (OP), a platform admin, or a moderator/owner of a realm the
    * thread belongs to. Also validates that the scope IS a thread root post
    * (never a realm — that is `Realm.extra.pinboard`'s job).
+   * 由置顶和采纳共享的单一 scope 能力门控：允许讨论串作者（OP）、平台管理员，或讨论串
+   * 所属 realm 的版主/拥有者。同时校验该 scope 确实是讨论串根帖（绝不是 realm —— 那是
+   * `Realm.extra.pinboard` 的职责）。
    */
   private async assertCanPromoteInThread(
     scopeUnitId: string,
@@ -2032,6 +2108,11 @@ export class PostService {
    * thread root, not a realm) stays in the guard. Returns `true` for the thread
    * author (OP), a platform admin, or a moderator/owner of a realm the thread
    * belongs to.
+   * 由写入守卫（`assertCanPromoteInThread`，在 `false` 时抛错）和讨论串读取路径
+   * （将其暴露为 `viewerCanPromote`）共享的纯授权判定。单一代码路径，因此 UI 可操作
+   * 控件永远不会偏离服务端的实际强制。接收一个已加载的讨论串根形状 —— 结构性校验
+   * （scope 是真实的讨论串根，而非 realm）仍保留在守卫中。对讨论串作者（OP）、平台
+   * 管理员，或讨论串所属 realm 的版主/拥有者返回 `true`。
    */
   private async canPromoteInThread(
     scope: { authorUserId: string; realmUnitIds: string[] },
@@ -2077,6 +2158,11 @@ export class PostService {
    * callers always get `viewerCanPromote = false`; `viewerCanPromote` reuses the
    * same `canPromoteInThread` decision the write guard enforces, so a shown
    * control mirrors server truth.
+   * 讨论串读取路径的讨论串级查看者信号：调用方是否可在此讨论串中置顶/采纳
+   * （`viewerCanPromote`），以及讨论串是否为问答讨论串（`isQuestionThread`）。每次
+   * 讨论串读取计算一次。匿名调用方始终得到 `viewerCanPromote = false`；
+   * `viewerCanPromote` 复用写入守卫所强制的同一 `canPromoteInThread` 判定，因此显示的
+   * 控件与服务端真实情况一致。
    */
   async getThreadPromotionSignals(
     rootPostUnitId: string,
@@ -2090,6 +2176,7 @@ export class PostService {
     const scope = await getPostByUnitId(rootPostUnitId);
 
     // Only a real thread root post can be promoted into; anything else -> false.
+    // 只有真实的讨论串根帖才能被提升；其他一律返回 false。
     if (!scope) {
       return { viewerCanPromote: false, isQuestionThread: isQuestion };
     }
@@ -2104,7 +2191,10 @@ export class PostService {
     return { viewerCanPromote, isQuestionThread: isQuestion };
   }
 
-  /** Validate the target is a reply within the scope thread; return its shape. */
+  /**
+   * Validate the target is a reply within the scope thread; return its shape.
+   * 校验目标是 scope 讨论串内的一条回复；返回其形状。
+   */
   private async loadPromotableTarget(
     scopeUnitId: string,
     commentId: string,
@@ -2141,6 +2231,9 @@ export class PostService {
    * Mint a fractional `position` within the `(scope, kind)` group. Explicit
    * before/after anchors place precisely; otherwise the pin appends after the
    * current last pin in the group. Reordering one pin never renumbers others.
+   * 在 `(scope, kind)` 组内生成一个分数型 `position`。显式的 before/after 锚点用于
+   * 精确定位；否则该置顶追加到组内当前最后一个置顶之后。重排一个置顶绝不会重新
+   * 编号其他置顶。
    */
   private async mintPinPosition(
     scopeUnitId: string,
@@ -2264,6 +2357,7 @@ export class PostService {
       }
     } catch {
       // Fall back to comma-separated query values for hand-authored URLs.
+      // 对于手写的 URL，回退到逗号分隔的查询值。
     }
 
     return tagIds

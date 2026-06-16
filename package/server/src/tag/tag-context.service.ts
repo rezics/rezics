@@ -42,6 +42,8 @@ export async function getTagContext(
   const db = await getServerDb();
   // Get global tags for this unit, pin-first then score-desc.
   // Regular callers do not see rows at/below the visibility threshold.
+  // 获取该 unit 的全局标签，先按置顶排序，再按 score 降序。
+  // 普通调用方看不到处于或低于可见性阈值的行。
   const unitTags = await db
     .select()
     .from(UnitTag)
@@ -82,6 +84,7 @@ export async function getTagContext(
 
   if (userId) {
     // Get user's preferred realms (first 5 memberships)
+    // 获取用户偏好的 realm（前 5 个成员关系）。
     const memberships = await db
       .select({ realmUnitId: RealmMember.realmUnitId })
       .from(RealmMember)

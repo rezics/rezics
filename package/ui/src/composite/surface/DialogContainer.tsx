@@ -7,17 +7,17 @@ import {
 } from "#/shadcn/dialog";
 
 export interface DialogContainerProps {
-  /** 控制对话框显示 */
+  /** Controls dialog visibility. 控制对话框显示。 */
   open: boolean;
-  /** 关闭回调 */
+  /** Close callback. 关闭回调。 */
   onClose: () => void;
-  /** 状态栏标题 */
+  /** Status bar title. 状态栏标题。 */
   title?: string;
-  /** 内容区域 */
+  /** Content area. 内容区域。 */
   children?: React.ReactNode;
-  /** 对话框宽度，可选 xs, sm, md, lg, xl */
+  /** Dialog width; one of xs, sm, md, lg, xl. 对话框宽度，可选 xs, sm, md, lg, xl。 */
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
-  /** 是否全屏 */
+  /** Whether to render full screen. 是否全屏。 */
   fullScreen?: boolean;
 }
 
@@ -33,8 +33,10 @@ const MAX_WIDTH_CLASS: Record<
 };
 
 /**
+ * Generic dialog container with a status bar (title + close button) and a
+ * content area. Closes on Esc or the close button, calling onClose on close.
  * 通用弹窗容器，包含状态栏（标题+关闭按钮）和内容展示区。
- * 支持Esc键或点击关闭按钮关闭，对话框关闭时调用 onClose。
+ * 支持 Esc 键或点击关闭按钮关闭，对话框关闭时调用 onClose。
  */
 const DialogContainer: React.FC<DialogContainerProps> = ({
   open,

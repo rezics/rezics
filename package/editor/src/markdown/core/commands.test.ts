@@ -8,6 +8,7 @@ import {
 } from "./commands";
 
 // Use a minimal mock that captures dispatches without needing DOM
+// 使用最小化的 mock 捕获 dispatch，无需依赖 DOM。
 function runCommand(
   doc: string,
   from: number,

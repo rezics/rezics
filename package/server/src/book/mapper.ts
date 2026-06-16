@@ -41,6 +41,7 @@ function pickCoverUrl(
 
 /**
  * Map UnitTranslation to DTO (local helper)
+ * 将 UnitTranslation 映射为 DTO（本地辅助函数）。
  */
 function mapTranslation(
   tr: BookWithRelations["unit"]["translations"][number],
@@ -61,6 +62,7 @@ function mapTranslation(
 
 /**
  * Map internal Book model to BookDTO (base version for list responses)
+ * 将内部 Book 模型映射为 BookDTO（用于列表响应的基础版本）。
  */
 export function mapBaseBookToDTO(
   book: BookWithRelations,
@@ -106,6 +108,7 @@ export function mapBaseBookToDTO(
     shareCount: optionalCount(unit, "shareCount"),
 
     // Book extension fields
+    // Book 扩展字段。
     isbn13: book.isbn13 ?? undefined,
     publicationDate: book.publicationDate ?? undefined,
     pageCount: book.pageCount ?? undefined,
@@ -117,9 +120,11 @@ export function mapBaseBookToDTO(
     extra: (book.extra as Record<string, unknown>) ?? undefined,
 
     // Translation layer
+    // 翻译层。
     translations: unit.translations?.map(mapTranslation) ?? [],
 
     // Credit attribution
+    // 署名归属。
     creditAttributions: (unit.creditAttributions?.map((a) => {
       const entityRecord = (a as any).entity ?? {};
       const innerEntity = entityRecord.entity ?? {};
@@ -159,6 +164,7 @@ export function mapBaseBookToDTO(
 
 /**
  * Map internal Book model to BookDTO (full version for single-item responses)
+ * 将内部 Book 模型映射为 BookDTO（用于单条响应的完整版本）。
  */
 export function mapBookToDTO(
   book: BookWithRelations,

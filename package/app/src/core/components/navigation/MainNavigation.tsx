@@ -4,6 +4,9 @@
 // stays compact: a primary unlabelled catalog group plus a Realms group.
 // Existing routes such as search/reviews/shelves remain available from page
 // affordances and direct URLs; they are simply not sidebar entry points.
+// 产品导航的唯一来源。主应用侧边栏刻意保持精简：一个无标签的主目录分组
+// 加上一个 Realms 分组。诸如 search/reviews/shelves 等既有路由仍可通过页面
+// 内的入口和直接 URL 访问；它们只是不作为侧边栏的入口。
 
 import {
   MessageCircleQuestion as FeedbackOutlinedIcon,
@@ -24,9 +27,9 @@ import type {
 } from "./navigation";
 
 export interface NavigationContext {
-  /** A member session exists (signed in and registration complete enough). */
+  /** A member session exists (signed in and registration complete enough). 存在成员会话（已登录且注册完成度足够）。 */
   isAuthenticated: boolean;
-  /** Holds the ADMIN role; reveals the developer/diagnostics section. */
+  /** Holds the ADMIN role; reveals the developer/diagnostics section. 拥有 ADMIN 角色；显示开发者/诊断分区。 */
   isAdmin: boolean;
 }
 
@@ -158,6 +161,8 @@ function buildRealmSection(
     } else {
       // Keep this as an ordinary scrollable list until measured sidebar
       // rendering shows 40px realm rows are a real bottleneck.
+      // 在实测的侧边栏渲染表明 40px 的 realm 行确实成为瓶颈之前，
+      // 将其保持为普通的可滚动列表。
       children.push(
         ...joinedRealms.map(
           (realm): NavigationEntry => ({
@@ -231,6 +236,7 @@ export const REMOVED_MAIN_SIDEBAR_SEGMENTS = [
 
 /**
  * Build the visible navigation for the current session.
+ * 为当前会话构建可见的导航。
  */
 export const NAVIGATION = (
   context: NavigationContext,

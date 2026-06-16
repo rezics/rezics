@@ -32,6 +32,7 @@ export function publish(userId: string, event: unknown) {
       conn.send(data);
     } catch {
       // Connection dead — will be cleaned up on disconnect
+      // 连接已失效——将在断开连接时清理
     }
   }
 }

@@ -9,6 +9,8 @@ const SPEC =
 // `t(variableExpression)` — bare identifier, not a typed map lookup — is the
 // dynamic-key anti-pattern. Bracketed indexing (`t(MAP[slug])`) is the
 // blessed pattern and SHALL NOT be flagged.
+// `t(variableExpression)`——裸标识符而非带类型的映射查找——属于动态键反模式。
+// 方括号索引（`t(MAP[slug])`）是认可的模式，绝不应被标记。
 const dynamicTranslateKeyPattern = /\bt\(\s*[A-Za-z_]\w*\s*[,)]/;
 const dynamicTemplateKeyPattern = /\bt\(\s*`[^`]*\$\{[^`]*`/;
 const contractI18nKeyPattern = /\bi18nKey\s*:/;

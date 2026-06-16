@@ -21,6 +21,11 @@ import { ModerationStatus } from "./moderation";
 import { PinKind } from "./post";
 import { Unit } from "./unit";
 
+/**
+ * Lightweight reply tree node. `rootUnitId` is the generic discussion root; a
+ * non-null `realmUnitId` makes the comment a realm asset that realm moderators
+ * may manage directly.
+ */
 export const Comment = pgTable(
   "Comment",
   {
@@ -39,6 +44,10 @@ export const Comment = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    /**
+     * Canonical ContentDoc JSON. Search projections such as contentText are
+     * Meilisearch-only and must not be added as PostgreSQL columns.
+     */
     content: jsonData(),
     depth: integer().default(1).notNull(),
     replyCount: integer().default(0).notNull(),
@@ -48,6 +57,10 @@ export const Comment = pgTable(
     state: text(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
+    /**
+     * Author self-delete is separate from moderator removal and is never
+     * appended to ModerationAction.
+     */
     deletedAt: nullableTimestamp(),
     moderationStatus: ModerationStatus().default("APPROVED").notNull(),
   },
@@ -95,6 +108,11 @@ export const Comment = pgTable(
   ],
 );
 
+/**
+ * Generic in-thread promotion of a comment. `scopeUnitId` is always the thread
+ * root post, and `commentId` is always a comment within that thread; realm-level
+ * featuring of whole units belongs to Realm.extra pinboard data.
+ */
 export const CommentPromotion = pgTable(
   "CommentPromotion",
   {

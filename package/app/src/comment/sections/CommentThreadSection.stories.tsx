@@ -23,6 +23,7 @@ const COMMENT_SORTS: CommentSortMode[] = [
 ];
 
 // MOCK: deterministic post fixtures used to seed the React Query cache for stories.
+// MOCK: 用于为 stories 填充 React Query 缓存的确定性帖子 fixtures。
 function makePost(
   overrides: Partial<CommentDTO> &
     Pick<CommentDTO, "unitId" | "depth"> & { contentSource?: string },

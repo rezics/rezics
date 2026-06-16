@@ -114,6 +114,7 @@ export async function seedZones(
   const results: CreatedUnit[] = [];
 
   // Ensure every template appears at least once when total >= templates count
+  // 当 total >= 模板数量时，确保每个模板至少出现一次
   const templateSchedule: (typeof ZONE_TEMPLATES)[number][] = [];
   for (let i = 0; i < total; i++) {
     if (i < ZONE_TEMPLATES.length) {

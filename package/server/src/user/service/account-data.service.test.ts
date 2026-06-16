@@ -150,6 +150,7 @@ describe("deleteAccount", () => {
     await deleteAccount("me", "alice", repo);
 
     // PII scrubbed; profile hidden; blocks + follow edges removed.
+    // PII 已清除；资料已隐藏；屏蔽与关注关系边已移除。
     expect(scrubDeletedAccount).toHaveBeenCalledWith("me", expect.any(Date));
     expect(removeAllForUser).toHaveBeenCalledWith("me");
     expect(unsubscribe).toHaveBeenCalledWith("me", "peer");

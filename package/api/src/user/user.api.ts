@@ -1,6 +1,8 @@
 /**
  * User API client functions
  * Direct API communication layer
+ * 用户 API 客户端函数
+ * 直接的 API 通信层
  */
 
 import type {
@@ -45,6 +47,7 @@ export const userApi = {
 
   /**
    * Admin: list users (includes email).
+   * 管理员：列出用户（包含 email）。
    */
   adminList: async (
     query?: Record<string, unknown>,
@@ -61,8 +64,10 @@ export const userApi = {
 
   /**
    * Admin: create user.
+   * 管理员：创建用户。
    */
   // MOCK: backend admin-create-user endpoint not yet implemented; replace POST body once contract lands
+  // MOCK：后端的 admin-create-user 端点尚未实现；待契约落地后替换 POST 请求体
   adminCreate: async (input: {
     email: string;
     password: string;
@@ -78,6 +83,7 @@ export const userApi = {
 
   /**
    * Admin: update user.
+   * 管理员：更新用户。
    */
   adminUpdate: async (userId: string, input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/user/admin/${userId}`, {

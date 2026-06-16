@@ -135,6 +135,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     type="button"
                     onMouseDown={(e) => {
                       // prevent blur stealing focus
+                      // 防止失焦事件抢走焦点
                       e.preventDefault();
                       addSuggestion(item);
                     }}

@@ -8,7 +8,10 @@ import { ExcerptCard } from "../item/ExcerptCard";
 
 interface ExcerptListProps {
   units: UnitDTO[];
-  /** MUI-style spacing scale (1 = 8px). Defaults to 2 (16px). */
+  /**
+   * MUI-style spacing scale (1 = 8px). Defaults to 2 (16px).
+   * MUI 风格的间距比例（1 = 8px）。默认为 2（16px）。
+   */
   spacing?: number;
 }
 
