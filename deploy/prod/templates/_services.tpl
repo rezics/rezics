@@ -58,6 +58,7 @@
 
       env {
         PORT                               = "3000"
+        WORKERS                            = "2"
         NODE_ENV                           = "production"
         DATABASE_URL                       = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_server"
         AUTH_INTERNAL_BASE_URL             = "http://auth:3001"
@@ -155,6 +156,7 @@
 
       env {
         PORT                               = "3001"
+        WORKERS                            = "2"
         NODE_ENV                           = "production"
         DATABASE_URL                       = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_auth"
         BETTER_AUTH_URL                    = "[[ var "auth_public_url" . ]]"
@@ -246,6 +248,7 @@
 
       env {
         PORT                     = "3002"
+        WORKERS                  = "2"
         NODE_ENV                 = "production"
         NOTIFY_DATABASE_URL      = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_notify"
         NOTIFY_INTERNAL_SECRET   = "[[ var "notify_internal_secret" . ]]"
@@ -325,6 +328,7 @@
 
       env {
         PORT                     = "3003"
+        WORKERS                  = "2"
         NODE_ENV                 = "production"
         REACTION_DATABASE_URL    = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_reaction"
         REACTION_INTERNAL_SECRET = "[[ var "reaction_internal_secret" . ]]"
@@ -401,6 +405,7 @@
 
       env {
         PORT                     = "3004"
+        WORKERS                  = "2"
         NODE_ENV                 = "production"
         HISTORY_DATABASE_URL     = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_history"
         SERVER_DATABASE_URL      = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_server"
@@ -476,6 +481,7 @@
 
       env {
         PORT                     = "3006"
+        WORKERS                  = "2"
         NODE_ENV                 = "production"
         RANKING_DATABASE_URL     = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_ranking"
         SERVER_DATABASE_URL      = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_server"
@@ -528,13 +534,35 @@
       }
 
       env {
-        SERVER_PORT              = "3007"
-        NODE_ENV                 = "production"
-        DATABASE_URL             = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_server"
-        MEILI_HOST               = "http://meilisearch:7700"
-        MEILI_MASTER_KEY         = "[[ var "meili_master_key" . ]]"
-        PREVIEW_INTERNAL_SECRET  = "[[ var "preview_internal_secret" . ]]"
-        OBSERVABILITY_LOG_FORMAT = "json"
+        PORT                               = "3007"
+        NODE_ENV                           = "production"
+        DATABASE_URL                       = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@postgres:5432/rezics_server"
+        AUTH_INTERNAL_BASE_URL             = "http://auth:3001"
+        AUTH_PUBLIC_BASE_URL               = "[[ var "auth_public_url" . ]]"
+        AUTH_PUBLIC_ISSUER_URL             = "[[ var "auth_public_url" . ]]"
+        AUTH_INTERNAL_TOKEN_GATEWAY_SECRET = "[[ var "auth_internal_token_gateway_secret" . ]]"
+        SMTP_HOST                          = "[[ var "smtp_host" . ]]"
+        SMTP_USER                          = "[[ var "smtp_user" . ]]"
+        SMTP_PASSWORD                      = "[[ var "smtp_password" . ]]"
+        TURNSTILE_SECRET                   = "[[ var "turnstile_secret" . ]]"
+        MEILI_HOST                         = "http://meilisearch:7700"
+        MEILI_MASTER_KEY                   = "[[ var "meili_master_key" . ]]"
+        NOTIFY_BASE_URL                    = "http://notify:3002"
+        NOTIFY_INTERNAL_SECRET             = "[[ var "notify_internal_secret" . ]]"
+        REACTION_BASE_URL                  = "http://reaction:3003"
+        REACTION_INTERNAL_SECRET           = "[[ var "reaction_internal_secret" . ]]"
+        HISTORY_BASE_URL                   = "http://history:3004"
+        HISTORY_INTERNAL_SECRET            = "[[ var "history_internal_secret" . ]]"
+        JOB_RUNNER_BASE_URL                = "http://job-runner-http:3005"
+        JOB_RUNNER_INTERNAL_SECRET         = "[[ var "job_runner_internal_secret" . ]]"
+        S3_ENDPOINT                        = "[[ var "s3_endpoint" . ]]"
+        S3_ACCESS_KEY_ID                   = "[[ var "s3_access_key_id" . ]]"
+        S3_SECRET_ACCESS_KEY               = "[[ var "s3_secret_access_key" . ]]"
+        S3_BUCKET                          = "[[ var "s3_bucket" . ]]"
+        S3_REGION                          = "[[ var "s3_region" . ]]"
+        MEDIA_PUBLIC_BASE_URL              = "[[ var "media_public_base_url" . ]]"
+        PREVIEW_INTERNAL_SECRET            = "[[ var "preview_internal_secret" . ]]"
+        OBSERVABILITY_LOG_FORMAT           = "json"
       }
 
       resources {
