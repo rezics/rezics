@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { zoneSectionDataSchema } from "../zone/zone";
 import { feedQuerySchema, feedResponseSchema } from "./feed";
 
 describe("feedQuerySchema", () => {
@@ -19,6 +20,31 @@ describe("feedQuerySchema", () => {
         scope: "home",
         filterType: "zone",
         limit: 20,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("zoneSectionDataSchema stream rows", () => {
+  test("accepts renderable stream rows alongside compact items", () => {
+    expect(
+      Value.Check(zoneSectionDataSchema, {
+        pageId: "page-1",
+        sectionId: "section-1",
+        items: [],
+        rows: [
+          {
+            type: "book",
+            rowId: "book:book-1",
+            href: "/book/book-1",
+            book: {
+              unitId: "book-1",
+              kind: "book",
+              title: "Book",
+            },
+          },
+        ],
+        nextCursor: null,
       }),
     ).toBe(true);
   });

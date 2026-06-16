@@ -1,6 +1,7 @@
 import type { ZoneContentSection } from "@rezics/contract";
+import { ActionsSection } from "./ActionsSection";
 import { CollectionSection } from "./CollectionSection";
-import { HeroSection } from "./HeroSection";
+import { ImageSection } from "./ImageSection";
 import { QuerySection } from "./QuerySection";
 import { RichTextSection } from "./RichTextSection";
 import { SourcesSection } from "./SourcesSection";
@@ -23,8 +24,10 @@ export function ZoneContentSectionView({
   ctx: ZonePortalContext;
 }) {
   switch (section.kind) {
-    case "hero":
-      return <HeroSection section={section} ctx={ctx} />;
+    case "image":
+      return <ImageSection section={section} ctx={ctx} />;
+    case "actions":
+      return <ActionsSection section={section} ctx={ctx} />;
     case "richText":
       return <RichTextSection section={section} ctx={ctx} />;
     case "collection":

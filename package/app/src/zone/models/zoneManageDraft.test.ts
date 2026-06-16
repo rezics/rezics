@@ -8,6 +8,7 @@ import type {
 } from "@rezics/contract";
 import {
   addZonePage,
+  addZonePageDraftIfMissing,
   addZoneTranslationRow,
   applyZoneManageJsonBody,
   canAddZoneMenuChild,
@@ -22,12 +23,16 @@ import {
   nextZoneId,
   outdentZoneMenuNodeAtPath,
   parseZoneManageJsonText,
+  removeZoneMenuAtIndex,
   removeZoneMenuNodeAtPath,
   removeZonePage,
   removeZoneTranslationRow,
+  updateZoneManageJsonProblems,
+  updateZoneMenuAtIndex,
   updateZonePageSections,
   updateZoneTranslationRow,
   validateZoneManageDraft,
+  ZONE_TRANSLATION_LANGUAGES,
   zoneDynamicTagsFallbackProbability,
   zoneManageDraftToBoundary,
   zoneManageDraftToNav,
@@ -92,7 +97,11 @@ function samplePage(): ZonePage {
     schema: "rezics/zone-page",
     version: 1,
     sections: [
-      { id: "hero", kind: "hero" },
+      {
+        id: "stage",
+        kind: "stage",
+        sections: [{ id: "zone-info", kind: "zoneInfo" }],
+      },
       {
         id: "cols",
         kind: "columns",
@@ -168,6 +177,18 @@ describe("zoneManageDraft split round-trip", () => {
 });
 
 describe("zone manage JSON body editor", () => {
+  it("keeps repeated empty diagnostics as a state no-op", () => {
+    const empty = {};
+    expect(updateZoneManageJsonProblems(empty, "nav", [])).toBe(empty);
+
+    const withProblem = updateZoneManageJsonProblems(empty, "nav", ["bad"]);
+    expect(withProblem).toEqual({ nav: ["bad"] });
+    expect(updateZoneManageJsonProblems(withProblem, "nav", ["bad"])).toBe(
+      withProblem,
+    );
+    expect(updateZoneManageJsonProblems(withProblem, "nav", [])).toEqual({});
+  });
+
   it("edits envelope bodies without dropping page fields", () => {
     const draft = sampleDraft();
     const body = zoneManageJsonBody(draft, { kind: "page", pageId: "home" });
@@ -256,17 +277,20 @@ describe("section nesting guards", () => {
   it("rejects containers inside tabs panes", () => {
     expect(canInsertZoneSectionKind("tabs", "tabs")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "columns")).toBe(false);
+    expect(canInsertZoneSectionKind("tabs", "stage")).toBe(false);
     expect(canInsertZoneSectionKind("tabs", "query")).toBe(true);
     expect(canInsertZoneSectionKind("tabs", "sources")).toBe(true);
   });
 
-  it("rejects columns inside columns but allows tabs", () => {
+  it("rejects stage and columns inside columns but allows tabs", () => {
     expect(canInsertZoneSectionKind("columns", "columns")).toBe(false);
+    expect(canInsertZoneSectionKind("columns", "stage")).toBe(false);
     expect(canInsertZoneSectionKind("columns", "tabs")).toBe(true);
-    expect(canInsertZoneSectionKind("columns", "hero")).toBe(true);
+    expect(canInsertZoneSectionKind("columns", "image")).toBe(true);
   });
 
-  it("allows every kind at page level", () => {
+  it("allows stage and containers at page level", () => {
+    expect(canInsertZoneSectionKind("page", "stage")).toBe(true);
     expect(canInsertZoneSectionKind("page", "columns")).toBe(true);
     expect(canInsertZoneSectionKind("page", "tabs")).toBe(true);
   });
@@ -275,12 +299,28 @@ describe("section nesting guards", () => {
 describe("section ids", () => {
   it("collects nested ids across the managed page and containers", () => {
     expect(collectZoneSectionIds(sampleDraft().pages)).toEqual([
-      "hero",
+      "stage",
+      "zone-info",
       "cols",
       "tabs",
       "q-1",
       "stats",
     ]);
+  });
+
+  it("creates a stage with zoneInfo by default", () => {
+    expect(createZoneSection("stage", "stage", ["stage"])).toEqual({
+      id: "stage",
+      kind: "stage",
+      sections: [
+        {
+          id: "stage-info-1",
+          kind: "zoneInfo",
+          showTitle: true,
+          showDescription: true,
+        },
+      ],
+    });
   });
 
   it("creates a valid two-column section by default", () => {
@@ -591,6 +631,28 @@ describe("menu tree path operations", () => {
 });
 
 describe("menu validation", () => {
+  it("keeps header.menuId aligned when the referenced menu id changes", () => {
+    const draft = sampleDraft();
+    const renamed = updateZoneMenuAtIndex(draft, 0, {
+      ...draft.menus[0]!,
+      id: "renamed",
+    });
+    expect(renamed.header.menuId).toBe("renamed");
+    expect(renamed.menus[0]?.id).toBe("renamed");
+  });
+
+  it("falls header.menuId back when the referenced menu is removed", () => {
+    const draft = sampleDraft();
+    draft.menus = [
+      { id: "main", nodes: [] },
+      { id: "secondary", nodes: [] },
+    ];
+    draft.header = { menuId: "main" };
+    const removed = removeZoneMenuAtIndex(draft, 0);
+    expect(removed.header.menuId).toBe("secondary");
+    expect(removed.menus).toEqual([{ id: "secondary", nodes: [] }]);
+  });
+
   it("flags depth, leaf, group, and header issues", () => {
     const draft = sampleDraft();
     draft.menus = [
@@ -665,11 +727,11 @@ describe("translation rows", () => {
     expect(options).toContain("zh-hant");
     expect(options).not.toContain("zh-hans");
     const full = zoneTranslationsToRows(
-      ["zh-hant", "zh-hans", "en", "ja", "de", "ko"].map((language) => ({
+      ZONE_TRANSLATION_LANGUAGES.map((language) => ({
         language: language as never,
       })),
     );
-    expect(addZoneTranslationRow(full)).toHaveLength(6);
+    expect(addZoneTranslationRow(full)).toHaveLength(full.length);
   });
 
   it("edits and removes rows by index", () => {
@@ -681,6 +743,27 @@ describe("translation rows", () => {
 });
 
 describe("page helpers", () => {
+  it("adds fetched page drafts without overwriting local page edits", () => {
+    const draft = sampleDraft();
+    draft.pages.home = {
+      sections: [{ id: "local", kind: "stage", sections: [] }],
+    };
+    const samePage = addZonePageDraftIfMissing(draft, "home", samplePage());
+    expect(samePage).toBe(draft);
+    expect(samePage.pages.home.sections).toEqual([
+      { id: "local", kind: "stage", sections: [] },
+    ]);
+
+    const nextPage = addZonePageDraftIfMissing(
+      draft,
+      "page-extra",
+      samplePage(),
+    );
+    expect(nextPage.pages["page-extra"]).toEqual({
+      sections: samplePage().sections,
+    });
+  });
+
   it("adds and removes open page draft entries", () => {
     const draft = sampleDraft();
     const withCharacters = addZonePage(draft.pages, "page-characters");

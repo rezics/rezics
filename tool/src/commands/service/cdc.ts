@@ -77,6 +77,7 @@ function usage(): never {
       "Usage:",
       "  bun run service cdc verify [--source=source|reaction] [--source-url=postgresql://...] [--reaction-url=postgresql://...]",
       "  bun run service cdc repair [--source=source|reaction] [--source-url=postgresql://...] [--reaction-url=postgresql://...] [--force-active-slot]",
+      "  bun run service cdc recover [--source=source|reaction] [--force-active-slot]",
       "",
       "Legacy direct usage:",
       "  bun run tool/src/commands/service/cdc.ts [--apply --dev-reset] [--source=source|reaction] [--force-active-slot]",
@@ -84,6 +85,7 @@ function usage(): never {
       "Checks every Sequin CDC source database used by local managed services.",
       "",
       "Verification mode is read-only.",
+      "Repair mode is a low-level local source-object repair. Prefer `service cdc recover` for normal local recovery.",
       "Repair mode is local-development scoped and runs with --apply --dev-reset to:",
       "  - ALTER SYSTEM wal_level=logical",
       "  - ensure max_replication_slots/max_wal_senders",
@@ -445,6 +447,11 @@ async function main() {
   }
 
   console.log(args.apply ? "Mode: apply dev reset" : "Mode: check only");
+  if (args.apply) {
+    warn(
+      "low-level source-object repair only; use `task service -- cdc recover` to stop/restart Sequin and verify the runtime chain",
+    );
+  }
   for (const source of cdcSources(args)) {
     await checkSource(args, source);
   }

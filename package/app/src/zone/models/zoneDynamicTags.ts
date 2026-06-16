@@ -1,4 +1,8 @@
-import type { ZoneDynamicTags, ZonePageSection } from "@rezics/contract";
+import type {
+  ZoneDynamicTags,
+  ZonePageSection,
+  ZoneStageChildSection,
+} from "@rezics/contract";
 
 export type ZoneDynamicTagSelection = {
   sectionId: string;
@@ -71,16 +75,18 @@ function weightedPick(candidates: readonly Candidate[], seed: string) {
 }
 
 function* orderedQuerySections(
-  sections: readonly ZonePageSection[],
+  sections: readonly (ZonePageSection | ZoneStageChildSection)[],
   parentPath = "",
 ): Generator<{
-  section: Extract<ZonePageSection, { kind: "query" }>;
+  section: Extract<ZoneStageChildSection, { kind: "query" }>;
   path: string;
 }> {
   for (const [index, section] of sections.entries()) {
     const path = parentPath ? `${parentPath}.${index}` : String(index);
     if (section.kind === "query") {
       yield { section, path };
+    } else if (section.kind === "stage") {
+      yield* orderedQuerySections(section.sections, `${path}.stage`);
     } else if (section.kind === "tabs") {
       for (const [tabIndex, tab] of section.tabs.entries()) {
         yield* orderedQuerySections(tab.sections, `${path}.tabs.${tabIndex}`);

@@ -1,8 +1,8 @@
 import type {
   ContentLanguage,
-  Language,
   ZoneBoundary,
   ZoneDynamicTags,
+  ZoneMenu,
   ZoneMenuNode,
   ZoneNav,
   ZonePage,
@@ -10,6 +10,7 @@ import type {
   ZoneSectionQuery,
   ZoneSectionQueryFilterField,
   ZoneSectionQuerySortField,
+  ZoneStageChildSection,
   ZoneTheme,
   ZoneTranslation,
 } from "@rezics/contract";
@@ -65,9 +66,40 @@ export type ZoneManageJsonProblem = {
   message: string;
 };
 
+export type ZoneManageJsonProblemsByKey = Record<string, string[]>;
+
 function deepClone<T>(value: T): T {
   if (value === undefined) return value;
   return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function stringArraysEqual(
+  left: readonly string[] | undefined,
+  right: readonly string[],
+): boolean {
+  if (!left || left.length !== right.length) return false;
+  return left.every((value, index) => value === right[index]);
+}
+
+/**
+ * Parent-level JSON diagnostics are keyed by envelope. Returning the previous
+ * object for semantic no-ops is important because every JSON frame reports
+ * during effects; empty/unchanged reports must not drive a parent render loop.
+ * 父级 JSON 诊断按信封分组。语义为空操作时返回旧对象很重要，因为每个
+ * JSON frame 都会在 effect 中报告；空/未变化报告不得驱动父级渲染循环。
+ */
+export function updateZoneManageJsonProblems(
+  current: ZoneManageJsonProblemsByKey,
+  key: string,
+  problems: readonly string[],
+): ZoneManageJsonProblemsByKey {
+  if (problems.length === 0) {
+    if (!(key in current)) return current;
+    const { [key]: _removed, ...rest } = current;
+    return rest;
+  }
+  if (stringArraysEqual(current[key], problems)) return current;
+  return { ...current, [key]: [...problems] };
 }
 
 export function zoneShellToDraft(input: {
@@ -308,7 +340,8 @@ export function applyZoneManageJsonBody(
 // ANCHOR: 分区插槽与嵌套守卫
 
 export const ZONE_CONTENT_SECTION_KINDS = [
-  "hero",
+  "image",
+  "actions",
   "richText",
   "collection",
   "query",
@@ -317,13 +350,23 @@ export const ZONE_CONTENT_SECTION_KINDS = [
   "sources",
 ] as const;
 
-export const ZONE_PAGE_SECTION_KINDS = [
+export const ZONE_STAGE_CHILD_SECTION_KINDS = [
+  "zoneInfo",
   ...ZONE_CONTENT_SECTION_KINDS,
   "tabs",
   "columns",
 ] as const;
 
-export type ZoneSectionSlot = "page" | "tabs" | "columns";
+export const ZONE_PAGE_SECTION_KINDS = [
+  "stage",
+  ...ZONE_CONTENT_SECTION_KINDS,
+  "tabs",
+  "columns",
+] as const;
+
+export type ZoneEditableSection = ZonePageSection | ZoneStageChildSection;
+
+export type ZoneSectionSlot = "page" | "stage" | "tabs" | "columns";
 
 /**
  * Client-side mirror of the contract's container nesting rules (see
@@ -336,10 +379,12 @@ export type ZoneSectionSlot = "page" | "tabs" | "columns";
  */
 export function zoneSectionSlotAllowedKinds(
   slot: ZoneSectionSlot,
-): readonly ZonePageSection["kind"][] {
+): readonly ZoneEditableSection["kind"][] {
   switch (slot) {
     case "page":
       return ZONE_PAGE_SECTION_KINDS;
+    case "stage":
+      return ZONE_STAGE_CHILD_SECTION_KINDS;
     case "tabs":
       return ZONE_CONTENT_SECTION_KINDS;
     case "columns":
@@ -349,7 +394,7 @@ export function zoneSectionSlotAllowedKinds(
 
 export function canInsertZoneSectionKind(
   slot: ZoneSectionSlot,
-  kind: ZonePageSection["kind"],
+  kind: ZoneEditableSection["kind"],
 ): boolean {
   return (zoneSectionSlotAllowedKinds(slot) as readonly string[]).includes(
     kind,
@@ -364,12 +409,35 @@ export function canInsertZoneSectionKind(
  * 排序的字段填充必填的 `sort`。
  */
 export function createZoneSection(
-  kind: ZonePageSection["kind"],
+  kind: ZoneEditableSection["kind"],
   id: string,
-): ZonePageSection {
+  existingIds: readonly string[] = [],
+): ZoneEditableSection {
   switch (kind) {
-    case "hero":
-      return { id, kind: "hero" };
+    case "stage":
+      return {
+        id,
+        kind: "stage",
+        sections: [
+          {
+            id: nextZoneId(`${id}-info`, existingIds),
+            kind: "zoneInfo",
+            showTitle: true,
+            showDescription: true,
+          },
+        ],
+      };
+    case "zoneInfo":
+      return {
+        id,
+        kind: "zoneInfo",
+        showTitle: true,
+        showDescription: true,
+      };
+    case "image":
+      return { id, kind: "image", url: "https://", variant: "inline" };
+    case "actions":
+      return { id, kind: "actions", items: [] };
     case "richText":
       return { id, kind: "richText", contentUnitId: "" };
     case "collection":
@@ -405,10 +473,13 @@ export function createZoneSection(
 }
 
 function* iterateSections(
-  sections: readonly ZonePageSection[],
-): Generator<ZonePageSection> {
+  sections: readonly ZoneEditableSection[],
+): Generator<ZoneEditableSection> {
   for (const section of sections) {
     yield section;
+    if (section.kind === "stage") {
+      yield* iterateSections(section.sections);
+    }
     if (section.kind === "tabs") {
       for (const tab of section.tabs) yield* iterateSections(tab.sections);
     }
@@ -468,6 +539,21 @@ export function moveListItem<T>(
   const [moved] = next.splice(index, 1);
   next.splice(target, 0, moved as T);
   return next;
+}
+
+export function addZonePageDraftIfMissing(
+  draft: ZoneManageDraft,
+  pageId: ZonePageId,
+  page: ZonePage,
+): ZoneManageDraft {
+  if (draft.pages[pageId]) return draft;
+  return {
+    ...draft,
+    pages: {
+      ...draft.pages,
+      [pageId]: zonePageToDraftPage(page),
+    },
+  };
 }
 
 // ANCHOR: Query vocabulary
@@ -618,6 +704,42 @@ function zoneMenuSubtreeHeight(node: ZoneMenuNode): number {
 
 export function canAddZoneMenuChild(parentPath: ZoneMenuNodePath): boolean {
   return parentPath.length + 1 <= ZONE_MENU_MAX_DEPTH;
+}
+
+export function updateZoneMenuAtIndex(
+  draft: ZoneManageDraft,
+  index: number,
+  menu: ZoneMenu,
+): ZoneManageDraft {
+  const previousMenu = draft.menus[index];
+  if (!previousMenu) return draft;
+  return {
+    ...draft,
+    header:
+      draft.header.menuId === previousMenu.id
+        ? { ...draft.header, menuId: menu.id }
+        : draft.header,
+    menus: draft.menus.map((current, currentIndex) =>
+      currentIndex === index ? menu : current,
+    ),
+  };
+}
+
+export function removeZoneMenuAtIndex(
+  draft: ZoneManageDraft,
+  index: number,
+): ZoneManageDraft {
+  const removed = draft.menus[index];
+  if (!removed) return draft;
+  const menus = draft.menus.filter((_, currentIndex) => currentIndex !== index);
+  return {
+    ...draft,
+    header:
+      draft.header.menuId === removed.id
+        ? { ...draft.header, menuId: menus[0]?.id ?? "" }
+        : draft.header,
+    menus,
+  };
 }
 
 /**

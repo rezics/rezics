@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { mediaUrlSchema } from "../media-url";
 
 // ============================================================
 // UNIT TRANSLATION EXTRA SCHEMA
@@ -17,7 +18,7 @@ import { t } from "elysia";
 // 作为扁平的 DTO 字段被暴露出来。
 
 export const unitTranslationExtraSchema = t.Object({
-  coverUrl: t.Optional(t.String({ format: "uri" })),
+  coverUrl: t.Optional(mediaUrlSchema),
 });
 
 export type UnitTranslationExtra =

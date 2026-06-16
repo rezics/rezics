@@ -3,6 +3,7 @@ import { contentDocWriteSchema } from "../content/doc-v1";
 import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import { mediaUrlSchema } from "../media-url";
 import { paginationLimitSchema } from "../pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "../unit/unit";
 
@@ -285,7 +286,7 @@ export const createShelfSchema = t.Object({
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   tagIds: t.Optional(t.Array(t.String())),
-  coverUrl: t.Optional(t.String()),
+  coverUrl: t.Optional(mediaUrlSchema),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   translations: t.Optional(
     t.Array(
@@ -304,7 +305,8 @@ export type CreateShelfInput = (typeof createShelfSchema)["static"];
 
 export const updateShelfSchema = t.Object({
   title: t.Optional(t.String()),
-  coverUrl: t.Optional(t.Nullable(t.String())),
+  kindKey: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(mediaUrlSchema)),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),

@@ -16,6 +16,7 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import { chapterService } from "./chapter.service";
 import {
   mapChapterPostToDetailDTO,
@@ -93,6 +94,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
   .post(
     "/",
     async ({ body, identity }) => {
+      assertMediaUrl(body.coverUrl);
       const post = await chapterService.create({
         userId: identity.userId,
         title: body.title,
@@ -201,6 +203,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         set.status = 403;
         throw new Error("Forbidden: you do not have permission to update");
       }
+      assertMediaUrl(body.coverUrl);
       const post = await chapterService.update(params.unitId, body);
       return mapChapterPostToDetailDTO(post);
     },

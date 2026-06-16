@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { fixedHeightEditor } from "../core/fixedHeight";
 import { resolvePlugins } from "../core/plugin";
 import { jsonFull } from "../json/index";
 import { EditorContext } from "../react/context";
@@ -28,6 +29,11 @@ export function JsonEditor({
     return extraPlugins ? [...jsonPlugins, ...extraPlugins] : jsonPlugins;
   }, [lint, extraPlugins]);
 
+  const editorExtensions = useMemo(
+    () => (resize ? [fixedHeightEditor] : undefined),
+    [resize],
+  );
+
   const toolbarItems = useMemo(() => {
     if (toolbar === false) return [];
     const resolved = resolvePlugins(allPlugins).toolbar;
@@ -40,6 +46,7 @@ export function JsonEditor({
     plugins: allPlugins,
     keybindings,
     theme,
+    extraExtensions: editorExtensions,
     onChange,
   });
 

@@ -1,10 +1,27 @@
 import { t } from "elysia";
 import { contentLanguageSchema } from "../language";
 import { readLanguageGetQueryBase } from "../list-query-base";
-import { postDTOSchema } from "../post/post";
 import { moderationStatusSchema } from "../realm/governance";
-import { shelfSummaryDTOSchema } from "../shelf/shelf";
-import { unitTypeSchema, variantContextSummarySchema } from "../unit/unit";
+import {
+  streamBookRowSchema,
+  streamCreditSummarySchema,
+  streamPostRowSchema,
+  streamRowSchema,
+  streamShelfRowSchema,
+  streamTagSummarySchema,
+  streamUnitRowSchema,
+  streamUnitSummarySchema,
+  streamWorkSummarySchema,
+  type StreamBookRow,
+  type StreamCreditSummary,
+  type StreamPostRow,
+  type StreamRow,
+  type StreamShelfRow,
+  type StreamTagSummary,
+  type StreamUnitRow,
+  type StreamUnitSummary,
+  type StreamWorkSummary,
+} from "../stream/stream";
 
 export const feedScopeSchema = t.Union([
   t.Literal("home"),
@@ -72,107 +89,41 @@ export const feedTitleSchema = t.Object({
   params: t.Optional(t.Record(t.String(), t.String())),
 });
 
-export const feedCreditSummarySchema = t.Object({
-  unitId: t.String(),
-  name: t.String(),
-  role: t.Optional(t.String()),
-});
+export const feedCreditSummarySchema = streamCreditSummarySchema;
 
-export type FeedCreditSummary = (typeof feedCreditSummarySchema)["static"];
+export type FeedCreditSummary = StreamCreditSummary;
 
-export const feedTagSummarySchema = t.Object({
-  unitId: t.String(),
-  label: t.String(),
-  slug: t.Optional(t.Nullable(t.String())),
-});
+export const feedTagSummarySchema = streamTagSummarySchema;
 
-export type FeedTagSummary = (typeof feedTagSummarySchema)["static"];
+export type FeedTagSummary = StreamTagSummary;
 
-export const feedWorkSummarySchema = t.Object({
-  unitId: t.String(),
-  kind: t.Optional(t.String()),
-  title: t.Optional(t.Nullable(t.String())),
-  subtitle: t.Optional(t.Nullable(t.String())),
-  coverUrl: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
-  primaryAuthor: t.Optional(t.Nullable(feedCreditSummarySchema)),
-  tags: t.Optional(t.Array(feedTagSummarySchema)),
-});
+export const feedWorkSummarySchema = streamWorkSummarySchema;
 
-export type FeedWorkSummary = (typeof feedWorkSummarySchema)["static"];
+export type FeedWorkSummary = StreamWorkSummary;
 
-export const feedUnitSummarySchema = t.Object({
-  unitId: t.String(),
-  type: unitTypeSchema,
-  slug: t.Optional(t.Nullable(t.String())),
-  title: t.Optional(t.Nullable(t.String())),
-  coverUrl: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
-  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
-});
+export const feedUnitSummarySchema = streamUnitSummarySchema;
 
-export type FeedUnitSummary = (typeof feedUnitSummarySchema)["static"];
+export type FeedUnitSummary = StreamUnitSummary;
 
-export const feedPostRowSchema = t.Object({
-  type: t.Literal("post"),
-  rowId: t.String(),
-  post: postDTOSchema,
-  href: t.String(),
-  contextUnitId: t.Nullable(t.String()),
-  realm: t.Optional(
-    t.Nullable(
-      t.Object({
-        unitId: t.String(),
-        slug: t.Optional(t.Nullable(t.String())),
-        title: t.Optional(t.Nullable(t.String())),
-      }),
-    ),
-  ),
-  targetUnit: t.Optional(t.Nullable(feedWorkSummarySchema)),
-  variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
-  recommendationReason: t.Optional(t.Nullable(t.String())),
-});
+export const feedPostRowSchema = streamPostRowSchema;
 
-export type FeedPostRow = (typeof feedPostRowSchema)["static"];
+export type FeedPostRow = StreamPostRow;
 
-export const feedBookRowSchema = t.Object({
-  type: t.Literal("book"),
-  rowId: t.String(),
-  book: feedWorkSummarySchema,
-  href: t.String(),
-  recommendationReason: t.Optional(t.Nullable(t.String())),
-});
+export const feedBookRowSchema = streamBookRowSchema;
 
-export type FeedBookRow = (typeof feedBookRowSchema)["static"];
+export type FeedBookRow = StreamBookRow;
 
-export const feedShelfRowSchema = t.Object({
-  type: t.Literal("shelf"),
-  rowId: t.String(),
-  shelf: shelfSummaryDTOSchema,
-  href: t.String(),
-  recommendationReason: t.Optional(t.Nullable(t.String())),
-});
+export const feedShelfRowSchema = streamShelfRowSchema;
 
-export type FeedShelfRow = (typeof feedShelfRowSchema)["static"];
+export type FeedShelfRow = StreamShelfRow;
 
-export const feedUnitRowSchema = t.Object({
-  type: t.Literal("unit"),
-  rowId: t.String(),
-  unit: feedUnitSummarySchema,
-  href: t.String(),
-  recommendationReason: t.Optional(t.Nullable(t.String())),
-});
+export const feedUnitRowSchema = streamUnitRowSchema;
 
-export type FeedUnitRow = (typeof feedUnitRowSchema)["static"];
+export type FeedUnitRow = StreamUnitRow;
 
-export const feedRowSchema = t.Union([
-  feedPostRowSchema,
-  feedBookRowSchema,
-  feedShelfRowSchema,
-  feedUnitRowSchema,
-]);
+export const feedRowSchema = streamRowSchema;
 
-export type FeedRow = (typeof feedRowSchema)["static"];
+export type FeedRow = StreamRow;
 
 export const feedResponseSchema = t.Object({
   scope: feedScopeSchema,

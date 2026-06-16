@@ -218,6 +218,7 @@ export const zoneSectionDisplaySchema = t.Union([
   t.Literal("tiles"),
   t.Literal("grid"),
   t.Literal("list"),
+  t.Literal("stream"),
   t.Literal("carousel"),
   t.Literal("covers"),
   t.Literal("featured"),
@@ -225,6 +226,8 @@ export const zoneSectionDisplaySchema = t.Union([
 ]);
 
 export type ZoneSectionDisplay = Static<typeof zoneSectionDisplaySchema>;
+
+const httpsUrlSchema = t.String({ pattern: "^https://" });
 
 /**
  * Section title resolution chain: `titleLabelUnitId` (LABEL unit) →
@@ -257,24 +260,74 @@ export const zoneCollectionItemSchema = t.Object(
 export type ZoneCollectionItem = Static<typeof zoneCollectionItemSchema>;
 
 /**
- * `hero` owns no text: it renders the zone unit's own `UnitTranslation`
- * title/description; there is no separate hero title storage.
- * `hero` 不拥有文本：它渲染专区 Unit 自身的 `UnitTranslation`
- * 标题/描述；不存在单独的 hero 标题存储。
+ * `zoneInfo` is stage-only profile chrome: it makes zone title/description
+ * rendering explicit instead of letting a container implicitly read profile
+ * fields. Authoring UIs may insert one by default when adding a stage, but the
+ * contract does not require it.
+ * `zoneInfo` 是仅供 stage 使用的资料组件：它显式声明专区标题/描述的渲染，
+ * 而不是让容器隐式读取 profile 字段。编辑器可以在新增 stage 时默认插入
+ * 一个，但契约不强制要求。
  */
-export const zoneHeroSectionSchema = t.Object(
+export const zoneInfoSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
-    kind: t.Literal("hero"),
+    id: t.String(),
+    kind: t.Literal("zoneInfo"),
+    showTitle: t.Optional(t.Boolean()),
     showDescription: t.Optional(t.Boolean()),
-    bannerImageUrl: t.Optional(t.String({ pattern: "^https://" })),
-    logoImageUrl: t.Optional(t.String({ pattern: "^https://" })),
-    ctas: t.Optional(t.Array(zoneCollectionItemSchema)),
   },
   { additionalProperties: false },
 );
 
-export type ZoneHeroSection = Static<typeof zoneHeroSectionSchema>;
+export type ZoneInfoSection = Static<typeof zoneInfoSectionSchema>;
+
+export const zoneImageVariantSchema = t.Union([
+  t.Literal("inline"),
+  t.Literal("banner"),
+  t.Literal("logo"),
+]);
+
+export type ZoneImageVariant = Static<typeof zoneImageVariantSchema>;
+
+/**
+ * Images are first-class ordered sections, not hidden banner/logo fields on a
+ * stage. A target makes the image interactive; without a target it is purely
+ * presentational.
+ * 图片是一等可排序分区，不再是 stage 上隐藏的横幅/标识字段。带 target
+ * 时图片可交互；没有 target 时只做展示。
+ */
+export const zoneImageSectionSchema = t.Object(
+  {
+    ...zoneSectionBaseSchema.properties,
+    kind: t.Literal("image"),
+    url: httpsUrlSchema,
+    variant: t.Optional(zoneImageVariantSchema),
+    altLabelUnitId: t.Optional(t.String()),
+    target: t.Optional(zoneLinkTargetSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneImageSection = Static<typeof zoneImageSectionSchema>;
+
+export const zoneActionBuiltInSchema = t.Union([
+  t.Literal("joinRealm"),
+  t.Literal("createWiki"),
+  t.Literal("createPost"),
+]);
+
+export type ZoneActionBuiltIn = Static<typeof zoneActionBuiltInSchema>;
+
+export const zoneActionsSectionSchema = t.Object(
+  {
+    ...zoneSectionBaseSchema.properties,
+    kind: t.Literal("actions"),
+    items: t.Optional(t.Array(zoneCollectionItemSchema)),
+    builtIns: t.Optional(t.Array(zoneActionBuiltInSchema)),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneActionsSection = Static<typeof zoneActionsSectionSchema>;
 
 /**
  * `contentUnitId` references a "zone fragment": a POST unit with
@@ -374,19 +427,18 @@ export const zoneSourcesSectionSchema = t.Object(
 export type ZoneSourcesSection = Static<typeof zoneSourcesSectionSchema>;
 
 /**
- * The 7 content primitives. Container nesting rules are encoded in the
- * union layering below: `tabs` panes hold content sections only; `columns`
- * panes hold content sections or `tabs`; `columns` itself appears only at
- * page top level. No tabs-in-tabs, no columns-in-anything. This keeps
- * `columns` as an ordered page layout primitive instead of an arbitrary grid
- * builder.
- * 7 个内容原语。容器嵌套规则编码在下方的联合分层中：`tabs` 面板只容纳
- * 内容分区；`columns` 面板容纳内容分区或 `tabs`；`columns` 自身只出现
- * 在页面顶层。不允许 tabs 套 tabs，不允许任何东西套 columns。这使
- * `columns` 保持为有序页面布局原语，而不是任意网格构建器。
+ * Content primitives own their own rendered content and data needs. Container
+ * nesting rules are encoded in the union layering below: `tabs` panes hold
+ * content sections only; `columns` panes hold content sections or `tabs`;
+ * `stage` panes hold content sections, `tabs`, or `columns`, but never another
+ * `stage`.
+ * 内容原语拥有自身渲染内容与数据需求。容器嵌套规则编码在下方的联合分层
+ * 中：`tabs` 面板只容纳内容分区；`columns` 面板容纳内容分区或 `tabs`；
+ * `stage` 面板容纳内容分区、`tabs` 或 `columns`，但不能再套 `stage`。
  */
 export const zoneContentSectionSchema = t.Union([
-  zoneHeroSectionSchema,
+  zoneImageSectionSchema,
+  zoneActionsSectionSchema,
   zoneRichTextSectionSchema,
   zoneCollectionSectionSchema,
   zoneQuerySectionSchema,
@@ -442,7 +494,59 @@ export const zoneColumnsSectionSchema = t.Object(
 
 export type ZoneColumnsSection = Static<typeof zoneColumnsSectionSchema>;
 
+export const zoneStageBackgroundSchema = t.Object(
+  {
+    color: t.Optional(t.String()),
+    imageUrl: t.Optional(httpsUrlSchema),
+    fit: t.Optional(t.Union([t.Literal("cover"), t.Literal("contain")])),
+    position: t.Optional(t.String()),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneStageBackground = Static<typeof zoneStageBackgroundSchema>;
+
+export const zoneStageMaskSchema = t.Object(
+  {
+    color: t.Optional(t.String()),
+    opacity: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneStageMask = Static<typeof zoneStageMaskSchema>;
+
+export const zoneStageChildSectionSchema = t.Union([
+  zoneInfoSectionSchema,
+  zoneContentSectionSchema,
+  zoneTabsSectionSchema,
+  zoneColumnsSectionSchema,
+]);
+
+export type ZoneStageChildSection = Static<typeof zoneStageChildSectionSchema>;
+
+/**
+ * A stage is decorated page chrome: background, mask, and an ordered child
+ * section list. It owns no layout vocabulary of its own; use existing
+ * `columns`/`tabs` child sections for composition. Stages cannot nest.
+ * stage 是带装饰的页面容器：背景、蒙板与有序子分区列表。它不拥有独立布局
+ * 词汇；组合仍使用已有的 `columns`/`tabs` 子分区。stage 不能嵌套。
+ */
+export const zoneStageSectionSchema = t.Object(
+  {
+    ...zoneSectionBaseSchema.properties,
+    kind: t.Literal("stage"),
+    background: t.Optional(zoneStageBackgroundSchema),
+    mask: t.Optional(zoneStageMaskSchema),
+    sections: t.Array(zoneStageChildSectionSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneStageSection = Static<typeof zoneStageSectionSchema>;
+
 export const zonePageSectionSchema = t.Union([
+  zoneStageSectionSchema,
   zoneContentSectionSchema,
   zoneTabsSectionSchema,
   zoneColumnsSectionSchema,

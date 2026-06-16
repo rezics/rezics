@@ -28,7 +28,7 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 import { UnitExternalLinkEditor } from "@/unit-external-link";
@@ -40,16 +40,18 @@ import { ZoneManageSectionsTab } from "../components/manage/ZoneManageSectionsTa
 import { ZoneManageThemeTab } from "../components/manage/ZoneManageThemeTab";
 import { canManageZone } from "../models/canManageZone";
 import {
+  addZonePageDraftIfMissing,
   collectZoneSectionIds,
+  updateZoneManageJsonProblems,
   validateZoneManageDraft,
   type ZoneManageDraft,
   type ZoneManageIssue,
+  type ZoneManageJsonProblemsByKey,
   type ZoneTranslationRow,
   zoneManageDraftToBoundary,
   zoneManageDraftToNav,
   zoneManageDraftToPage,
   zoneManageDraftToTheme,
-  zonePageToDraftPage,
   zoneRowsToTranslations,
   zoneShellToDraft,
   zoneTranslationsToRows,
@@ -206,13 +208,14 @@ export function ZoneManagePage({
   const [rows, setRows] = useState<ZoneTranslationRow[]>([]);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
-  const [jsonProblemsByKey, setJsonProblemsByKey] = useState<
-    Record<string, string[]>
-  >({});
+  const [jsonProblemsByKey, setJsonProblemsByKey] =
+    useState<ZoneManageJsonProblemsByKey>({});
+  const draftSourceUnitIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!zone || !portalQuery.data?.page) return;
     const nextPage = portalQuery.data.page;
+    const sourceChanged = draftSourceUnitIdRef.current !== zone.unitId;
     setDraft((current) => {
       const fresh = zoneShellToDraft({
         boundary: zone.boundary,
@@ -221,15 +224,15 @@ export function ZoneManagePage({
         page: nextPage.config,
         pageId: nextPage.id,
       });
-      if (!current) return fresh;
-      return {
-        ...current,
-        pages: { [nextPage.id]: zonePageToDraftPage(nextPage.config) },
-      };
+      if (!current || sourceChanged) return fresh;
+      return addZonePageDraftIfMissing(current, nextPage.id, nextPage.config);
     });
-    setRows(zoneTranslationsToRows(zone.translations));
-    setStartsAt(zone.startsAt ?? "");
-    setEndsAt(zone.endsAt ?? "");
+    if (sourceChanged) {
+      setRows(zoneTranslationsToRows(zone.translations));
+      setStartsAt(zone.startsAt ?? "");
+      setEndsAt(zone.endsAt ?? "");
+      draftSourceUnitIdRef.current = zone.unitId;
+    }
   }, [zone, portalQuery.data?.page]);
 
   const saving =
@@ -247,13 +250,9 @@ export function ZoneManagePage({
   );
   const saveBlocked = issues.length > 0 || hasJsonProblems;
   const setJsonProblems = useCallback((key: string, problems: string[]) => {
-    setJsonProblemsByKey((current) => {
-      if (problems.length === 0) {
-        const { [key]: _removed, ...rest } = current;
-        return rest;
-      }
-      return { ...current, [key]: problems };
-    });
+    setJsonProblemsByKey((current) =>
+      updateZoneManageJsonProblems(current, key, problems),
+    );
   }, []);
 
   const saveProfile = () => {
@@ -384,16 +383,16 @@ export function ZoneManagePage({
 
   const contextRealmUnitId =
     draft.context.kind === "realm" ? draft.context.realmUnitId : null;
-  const localizedHeroRow =
+  const localizedZoneInfoRow =
     rows.find(
       (row) =>
         row.language === i18n.language &&
         (row.title.trim() || row.description.trim()),
     ) ?? rows.find((row) => row.title.trim() || row.description.trim());
-  const heroTitle =
-    localizedHeroRow?.title.trim() || zone.name || zone.slug || null;
-  const heroDescription =
-    localizedHeroRow?.description.trim() || zone.description || null;
+  const zoneTitle =
+    localizedZoneInfoRow?.title.trim() || zone.name || zone.slug || null;
+  const zoneDescription =
+    localizedZoneInfoRow?.description.trim() || zone.description || null;
   const themeImages = draft.theme.images ?? zone.theme.images ?? {};
   const managePages =
     sortedPages.length > 0
@@ -405,13 +404,18 @@ export function ZoneManagePage({
         );
   const editorCtx = {
     refUnits,
+    pages: managePages,
+    defaultPageId:
+      managePages.find((page) => page.id === zone.homePageId)?.id ??
+      managePages[0]?.id ??
+      null,
     allSectionIds: collectZoneSectionIds(draft.pages),
     contextRealmUnitId,
     contextRealmSlug: contextRealmUnitId
       ? (refUnits[contextRealmUnitId]?.slug ?? null)
       : null,
-    heroTitle,
-    heroDescription,
+    zoneTitle,
+    zoneDescription,
     themeBannerUrl: themeImages.bannerUrl ?? null,
     themeLogoUrl: themeImages.logoUrl ?? null,
   };
@@ -580,6 +584,8 @@ export function ZoneManagePage({
               draft={draft}
               onDraftChange={setDraft}
               refUnits={refUnits}
+              pages={managePages}
+              defaultPageId={editorCtx.defaultPageId}
             />
             {saveRow(saveMenus)}
           </ZoneManageJsonFrame>

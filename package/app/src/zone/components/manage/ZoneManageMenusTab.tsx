@@ -25,13 +25,18 @@ import {
   moveZoneMenuNodeAtPath,
   nextZoneId,
   outdentZoneMenuNodeAtPath,
+  removeZoneMenuAtIndex,
   removeZoneMenuNodeAtPath,
+  updateZoneMenuAtIndex,
   updateZoneMenuNodeAtPath,
   type ZoneMenuNodePath,
 } from "../../models/zoneManageDraft";
 import type { ZoneRefUnitMap } from "../../models/zoneMenu";
 import { ZoneLabelField } from "./ZoneLabelField";
-import { ZoneLinkTargetField } from "./ZoneLinkTargetField";
+import {
+  ZoneLinkTargetField,
+  type ZoneLinkTargetPageOption,
+} from "./ZoneLinkTargetField";
 import { ManageField, RowActions } from "./ZoneManageFields";
 
 function collectNodeIds(nodes: readonly ZoneMenuNode[], out: string[] = []) {
@@ -57,20 +62,24 @@ export function ZoneManageMenusTab({
   draft,
   onDraftChange,
   refUnits,
+  pages,
+  defaultPageId,
 }: {
   draft: ZoneManageDraft;
   onDraftChange: (draft: ZoneManageDraft) => void;
   refUnits: ZoneRefUnitMap;
+  pages: readonly ZoneLinkTargetPageOption[];
+  defaultPageId: string | null;
 }) {
   const { t } = useTranslation(["zone", "common"]);
+  const fallbackPageId = defaultPageId ?? "home";
 
   const updateMenu = (index: number, menu: ZoneMenu) => {
-    onDraftChange({
-      ...draft,
-      menus: draft.menus.map((current, currentIndex) =>
-        currentIndex === index ? menu : current,
-      ),
-    });
+    onDraftChange(updateZoneMenuAtIndex(draft, index, menu));
+  };
+
+  const removeMenu = (index: number) => {
+    onDraftChange(removeZoneMenuAtIndex(draft, index));
   };
 
   return (
@@ -107,7 +116,11 @@ export function ZoneManageMenusTab({
       </Card>
 
       {draft.menus.map((menu, index) => (
-        <Card surface="contained" key={menu.id}>
+        <Card
+          // biome-ignore lint/suspicious/noArrayIndexKey: menu ids are editable; index keeps the card mounted while the id input changes.
+          key={index}
+          surface="contained"
+        >
           <CardContent className="flex flex-col gap-4 p-4">
             <div className="flex items-end justify-between gap-3">
               <ManageField label={t("zone:manage_menu_id")}>
@@ -119,16 +132,7 @@ export function ZoneManageMenusTab({
                   }
                 />
               </ManageField>
-              <RowActions
-                onRemove={() =>
-                  onDraftChange({
-                    ...draft,
-                    menus: draft.menus.filter(
-                      (_, currentIndex) => currentIndex !== index,
-                    ),
-                  })
-                }
-              />
+              <RowActions onRemove={() => removeMenu(index)} />
             </div>
 
             <ZoneMenuNodeList
@@ -137,6 +141,8 @@ export function ZoneManageMenusTab({
               rootNodes={menu.nodes}
               onNodesChange={(nodes) => updateMenu(index, { ...menu, nodes })}
               refUnits={refUnits}
+              zonePages={pages}
+              defaultPageId={fallbackPageId}
             />
 
             <p className="text-xs leading-dense text-text-tertiary">
@@ -181,12 +187,16 @@ function ZoneMenuNodeList({
   rootNodes,
   onNodesChange,
   refUnits,
+  zonePages,
+  defaultPageId,
 }: {
   nodes: readonly ZoneMenuNode[];
   parentPath: ZoneMenuNodePath;
   rootNodes: readonly ZoneMenuNode[];
   onNodesChange: (nodes: ZoneMenuNode[]) => void;
   refUnits: ZoneRefUnitMap;
+  zonePages: readonly ZoneLinkTargetPageOption[];
+  defaultPageId: string;
 }) {
   const { t } = useTranslation(["zone", "common"]);
 
@@ -194,7 +204,7 @@ function ZoneMenuNodeList({
     const id = nextZoneId("item", collectNodeIds(rootNodes));
     const inserted = insertZoneMenuNode(rootNodes, parentPath, {
       id,
-      target: { kind: "zonePage", pageId: "home" },
+      target: { kind: "zonePage", pageId: defaultPageId },
     });
     if (inserted) onNodesChange(inserted);
   };
@@ -209,13 +219,15 @@ function ZoneMenuNodeList({
     >
       {nodes.map((node, index) => (
         <ZoneMenuNodeEditor
-          key={node.id}
+          key={[...parentPath, index].join(".")}
           node={node}
           path={[...parentPath, index]}
           siblingCount={nodes.length}
           rootNodes={rootNodes}
           onNodesChange={onNodesChange}
           refUnits={refUnits}
+          zonePages={zonePages}
+          defaultPageId={defaultPageId}
         />
       ))}
       <div>
@@ -241,6 +253,8 @@ function ZoneMenuNodeEditor({
   rootNodes,
   onNodesChange,
   refUnits,
+  zonePages,
+  defaultPageId,
 }: {
   node: ZoneMenuNode;
   path: ZoneMenuNodePath;
@@ -248,6 +262,8 @@ function ZoneMenuNodeEditor({
   rootNodes: readonly ZoneMenuNode[];
   onNodesChange: (nodes: ZoneMenuNode[]) => void;
   refUnits: ZoneRefUnitMap;
+  zonePages: readonly ZoneLinkTargetPageOption[];
+  defaultPageId: string;
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const index = path[path.length - 1] as number;
@@ -342,6 +358,8 @@ function ZoneMenuNodeEditor({
           )
         }
         refUnits={refUnits}
+        zonePages={zonePages}
+        defaultPageId={defaultPageId}
         allowNone
       />
 
@@ -355,6 +373,8 @@ function ZoneMenuNodeEditor({
           rootNodes={rootNodes}
           onNodesChange={onNodesChange}
           refUnits={refUnits}
+          zonePages={zonePages}
+          defaultPageId={defaultPageId}
         />
       ) : null}
     </div>

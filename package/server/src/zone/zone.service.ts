@@ -7,6 +7,7 @@ import {
   parseZonePage,
   parseZoneTheme,
   resolveReadLanguage,
+  type StreamRow,
   type UnitType,
   ZONE_MENU_MAX_DEPTH,
   type ZoneBoundary,
@@ -21,6 +22,7 @@ import {
   type ZoneSectionData,
   type ZoneSectionItem,
   type ZoneSectionQuery,
+  type ZoneStageChildSection,
   type ZoneTheme,
   type ZoneTranslation,
 } from "@rezics/contract";
@@ -57,6 +59,11 @@ import {
   ZonePage,
 } from "../db/schema";
 import { generateBetween, rebalance } from "../shelf/fractional-index";
+import {
+  mapBookToStreamRow,
+  mapPostToStreamRow,
+  mapUnitToStreamRow,
+} from "../stream";
 
 const SECTION_DEFAULT_LIMIT = 12;
 
@@ -303,6 +310,18 @@ function mapUnitToSectionItem(
   };
 }
 
+function sectionItemToStreamUnit(item: ZoneSectionItem) {
+  return {
+    unitId: item.unitId,
+    type: item.type,
+    slug: item.slug ?? null,
+    title: item.title ?? null,
+    coverUrl: item.imageUrl ?? null,
+    description: item.summary ?? null,
+    createdAt: item.createdAt,
+  };
+}
+
 // ANCHOR: zone reference collection
 // ANCHOR: 专区引用收集
 
@@ -330,6 +349,13 @@ function collectCollectionItemRefs(
   }
 }
 
+function collectLinkTargetRefs(
+  target: ZoneCollectionItem["target"] | undefined,
+  refs: ZoneRefAccumulator,
+) {
+  if (target?.kind === "unit") refs.targetUnitIds.add(target.unitId);
+}
+
 function collectQueryRefs(query: ZoneSectionQuery, refs: ZoneRefAccumulator) {
   if (query.realm && query.realm !== "context") {
     for (const id of query.realm.unitIds) refs.realmUnitIds.add(id);
@@ -342,8 +368,12 @@ function collectContentSectionRefs(
 ) {
   pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
   switch (section.kind) {
-    case "hero":
-      collectCollectionItemRefs(section.ctas, refs);
+    case "image":
+      pushIfPresent(refs.labelUnitIds, section.altLabelUnitId);
+      collectLinkTargetRefs(section.target, refs);
+      break;
+    case "actions":
+      collectCollectionItemRefs(section.items, refs);
       break;
     case "richText":
       refs.fragmentUnitIds.add(section.contentUnitId);
@@ -361,14 +391,51 @@ function collectContentSectionRefs(
       break;
     case "feed":
     case "stats":
+    case "sources":
       break;
   }
+}
+
+function collectStageChildSectionRefs(
+  section: ZoneStageChildSection,
+  refs: ZoneRefAccumulator,
+) {
+  if (section.kind === "zoneInfo") return;
+  if (section.kind === "tabs") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const tab of section.tabs) {
+      pushIfPresent(refs.labelUnitIds, tab.titleLabelUnitId);
+      for (const inner of tab.sections) collectContentSectionRefs(inner, refs);
+    }
+    return;
+  }
+  if (section.kind === "columns") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const column of section.columns) {
+      for (const inner of column.sections) {
+        if (inner.kind === "tabs") {
+          collectStageChildSectionRefs(inner, refs);
+        } else {
+          collectContentSectionRefs(inner, refs);
+        }
+      }
+    }
+    return;
+  }
+  collectContentSectionRefs(section, refs);
 }
 
 function collectPageSectionRefs(
   section: ZonePageSection,
   refs: ZoneRefAccumulator,
 ) {
+  if (section.kind === "stage") {
+    pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
+    for (const child of section.sections) {
+      collectStageChildSectionRefs(child, refs);
+    }
+    return;
+  }
   if (section.kind === "tabs") {
     pushIfPresent(refs.labelUnitIds, section.titleLabelUnitId);
     for (const tab of section.tabs) {
@@ -435,17 +502,76 @@ export function collectZoneRefs(input: {
 
 type LocatedSection =
   | { kind: "content"; section: ZoneContentSection }
-  | { kind: "container"; section: ZonePageSection };
+  | { kind: "container"; section: ZonePageSection | ZoneStageChildSection };
+
+function isZoneContentSection(
+  section: ZonePageSection | ZoneStageChildSection,
+): section is ZoneContentSection {
+  switch (section.kind) {
+    case "image":
+    case "actions":
+    case "richText":
+    case "collection":
+    case "query":
+    case "feed":
+    case "stats":
+    case "sources":
+      return true;
+    case "stage":
+    case "zoneInfo":
+    case "tabs":
+    case "columns":
+      return false;
+  }
+}
+
+function* iterateColumnSections(
+  sections: readonly (
+    | ZoneContentSection
+    | Extract<ZonePageSection, { kind: "tabs" }>
+  )[],
+): Generator<{
+  section: ZoneContentSection | Extract<ZonePageSection, { kind: "tabs" }>;
+  container: boolean;
+}> {
+  for (const inner of sections) {
+    yield { section: inner, container: inner.kind === "tabs" };
+    if (inner.kind === "tabs") {
+      for (const tab of inner.tabs) {
+        for (const paneSection of tab.sections) {
+          yield { section: paneSection, container: false };
+        }
+      }
+    }
+  }
+}
 
 function* iteratePageSections(page: ZonePageConfig): Generator<{
-  section: ZonePageSection | ZoneContentSection;
+  section: ZonePageSection | ZoneStageChildSection;
   container: boolean;
 }> {
   for (const section of page.sections) {
     yield {
       section,
-      container: section.kind === "tabs" || section.kind === "columns",
+      container: !isZoneContentSection(section),
     };
+    if (section.kind === "stage") {
+      for (const child of section.sections) {
+        yield { section: child, container: !isZoneContentSection(child) };
+        if (child.kind === "tabs") {
+          for (const tab of child.tabs) {
+            for (const inner of tab.sections) {
+              yield { section: inner, container: false };
+            }
+          }
+        }
+        if (child.kind === "columns") {
+          yield* iterateColumnSections(
+            child.columns.flatMap((c) => c.sections),
+          );
+        }
+      }
+    }
     if (section.kind === "tabs") {
       for (const tab of section.tabs) {
         for (const inner of tab.sections) {
@@ -455,16 +581,7 @@ function* iteratePageSections(page: ZonePageConfig): Generator<{
     }
     if (section.kind === "columns") {
       for (const column of section.columns) {
-        for (const inner of column.sections) {
-          yield { section: inner, container: inner.kind === "tabs" };
-          if (inner.kind === "tabs") {
-            for (const tab of inner.tabs) {
-              for (const paneSection of tab.sections) {
-                yield { section: paneSection, container: false };
-              }
-            }
-          }
-        }
+        yield* iterateColumnSections(column.sections);
       }
     }
   }
@@ -1646,6 +1763,7 @@ export class ZoneService {
     pageId: string;
     sectionId: string;
     query: ZoneSectionQuery;
+    output?: "items" | "stream";
     limit: number;
     cursor?: string | null;
     preferredLanguages?: string[];
@@ -1690,12 +1808,95 @@ export class ZoneService {
       return row ? [mapUnitToSectionItem(row, input.preferredLanguages)] : [];
     });
     const nextOffset = offset + input.limit;
+    if (input.output === "stream") {
+      return {
+        pageId: input.pageId,
+        sectionId: input.sectionId,
+        items: [],
+        rows: await this.mapSectionItemsToStreamRows({
+          ids: result.ids,
+          items,
+          query: input.query,
+          preferredLanguages: input.preferredLanguages,
+        }),
+        nextCursor: nextOffset < result.total ? String(nextOffset) : null,
+      };
+    }
     return {
       pageId: input.pageId,
       sectionId: input.sectionId,
       items,
       nextCursor: nextOffset < result.total ? String(nextOffset) : null,
     };
+  }
+
+  private async mapSectionItemsToStreamRows(input: {
+    ids: string[];
+    items: ZoneSectionItem[];
+    query: ZoneSectionQuery;
+    preferredLanguages?: string[];
+  }): Promise<StreamRow[]> {
+    if (input.ids.length === 0 || input.items.length === 0) return [];
+    const listLanguages = input.preferredLanguages?.join(",");
+
+    if (input.query.target === "post") {
+      const [{ postService }, { mapPostToDTO }] = await Promise.all([
+        import("../post"),
+        import("../post/post.mapper"),
+      ]);
+      const posts = await postService.list({
+        ids: input.ids.join(","),
+        limit: input.ids.length,
+        languages: listLanguages,
+      });
+      const postById = new Map(posts.posts.map((post) => [post.unitId, post]));
+      return input.ids.flatMap((id) => {
+        const post = postById.get(id);
+        return post
+          ? [
+              mapPostToStreamRow(
+                mapPostToDTO(post, undefined, input.preferredLanguages ?? []),
+                { reason: "zone-stream-post" },
+              ),
+            ]
+          : [];
+      });
+    }
+
+    const bookIds = input.items
+      .filter((item) => item.type === "BOOK")
+      .map((item) => item.unitId);
+    const { bookService, mapBookToDTO } =
+      bookIds.length > 0
+        ? await import("../book")
+        : { bookService: null, mapBookToDTO: null };
+    const books =
+      bookIds.length > 0 && bookService
+        ? await bookService.list({
+            ids: bookIds.join(","),
+            limit: bookIds.length,
+            languages: listLanguages,
+          })
+        : { books: [] };
+    const bookById = new Map(books.books.map((book) => [book.unitId, book]));
+
+    const streamRows: StreamRow[] = [];
+    for (const item of input.items) {
+      const book = bookById.get(item.unitId);
+      if (book && mapBookToDTO) {
+        streamRows.push(
+          mapBookToStreamRow(
+            mapBookToDTO(book, { languages: input.preferredLanguages ?? [] }),
+            "zone-stream-book",
+          ),
+        );
+        continue;
+      }
+      streamRows.push(
+        mapUnitToStreamRow(sectionItemToStreamUnit(item), "zone-stream-unit"),
+      );
+    }
+    return streamRows;
   }
 
   async getSectionData(
@@ -1732,6 +1933,7 @@ export class ZoneService {
           pageId,
           sectionId,
           query: section.query,
+          output: section.display === "stream" ? "stream" : "items",
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
@@ -1743,6 +1945,7 @@ export class ZoneService {
           pageId,
           sectionId,
           query: this.feedSectionQuery(section.feedKind),
+          output: "stream",
           limit: sectionLimit(section),
           cursor: options.cursor,
           preferredLanguages: options.preferredLanguages,
@@ -1811,10 +2014,12 @@ export class ZoneService {
         }
         return { pageId, sectionId, items: [], stats, nextCursor: null };
       }
-      case "hero":
-        throw new AppError(400, "Hero sections have no section data", {
+      case "image":
+      case "actions":
+      case "sources":
+        throw new AppError(400, "Display sections have no section data", {
           code: "ZONE_SECTION_NO_DATA",
-          details: { sectionId },
+          details: { sectionId, kind: section.kind },
         });
       default:
         throw new AppError(400, "Unsupported section data kind", {

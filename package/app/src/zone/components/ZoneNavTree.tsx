@@ -41,7 +41,7 @@ export function ZoneNavTree({
   const nodes = useMemo(
     () =>
       resolveZoneMenuNodes(menu.nodes, {
-        zoneSlug,
+        routeLocation: { kind: "slug", zoneSlug },
         pages,
         refUnits,
       }),

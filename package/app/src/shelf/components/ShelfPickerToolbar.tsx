@@ -5,6 +5,8 @@ import {
   Button,
   Input,
   Label,
+  Popover,
+  PopoverContent,
   Select,
   SelectContent,
   SelectItem,
@@ -13,7 +15,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 export type ShelfPickerSortValue =
   | "updatedAt:desc"
@@ -49,7 +51,8 @@ function tagOptionLabel(option: SearchTagOption): string {
  * Mobile:
  * +----------------------+
  * | Search shelf         |
- * | Tag filter           |
+ * | Tag filter [x]       |
+ * |   floating results   |
  * | [selected tags wrap] |
  * | Sort                 |
  * +----------------------+
@@ -57,13 +60,15 @@ function tagOptionLabel(option: SearchTagOption): string {
  * Tablet:
  * +--------------------------------+
  * | Search shelf        | Sort     |
- * | Tag filter + selected tags     |
+ * | Tag filter [x] + selected tags |
+ * | floating results overlay list  |
  * +--------------------------------+
  *
  * Desktop:
  * +------------------------------------------------+
  * | Search shelf                         | Sort     |
- * | Tag filter + selected tags, left aligned       |
+ * | Tag filter [x] + selected tags, left aligned   |
+ * |   dropdown overlays list; toolbar height fixed |
  * +------------------------------------------------+
  *
  * Ultra-wide:
@@ -80,8 +85,10 @@ export function ShelfPickerToolbar({
   onSortChange,
 }: ShelfPickerToolbarProps) {
   const locale = useLocale();
-  const { t } = useTranslation(["common", "entity"]);
+  const { t } = useTranslation(["common", "community", "entity"]);
   const [tagSearchText, setTagSearchText] = useState("");
+  const tagSearchAnchorRef = useRef<HTMLDivElement | null>(null);
+  const tagSearchInputRef = useRef<HTMLInputElement | null>(null);
   const tagSearchQueryResult = useQuery(tagSearchQuery(tagSearchText.trim()));
   const tagTranslationsQuery = useQuery(
     tagBatchTranslationsQuery(tagIds, locale),
@@ -99,6 +106,7 @@ export function ShelfPickerToolbar({
       tagIds.includes(tagUnitId) ? tagIds : [...tagIds, tagUnitId],
     );
     setTagSearchText("");
+    tagSearchInputRef.current?.focus();
   }
 
   function removeTag(tagUnitId: string) {
@@ -158,12 +166,71 @@ export function ShelfPickerToolbar({
           <Label htmlFor="add-to-shelf-tag-search">
             {t("entity:shelf_picker_tag_filter_label")}
           </Label>
-          <Input
-            id="add-to-shelf-tag-search"
-            value={tagSearchText}
-            onChange={(event) => setTagSearchText(event.target.value)}
-            placeholder={t("entity:shelf_picker_tag_filter_placeholder")}
-          />
+          <Popover open={Boolean(tagSearchText.trim())}>
+            <div ref={tagSearchAnchorRef} className="relative min-w-0">
+              <Input
+                id="add-to-shelf-tag-search"
+                ref={tagSearchInputRef}
+                value={tagSearchText}
+                onChange={(event) => setTagSearchText(event.target.value)}
+                className={tagSearchText ? "pr-9" : undefined}
+                placeholder={t("entity:shelf_picker_tag_filter_placeholder")}
+              />
+              {tagSearchText ? (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                  aria-label={t("community:tag_clear")}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    setTagSearchText("");
+                    tagSearchInputRef.current?.focus();
+                  }}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              ) : null}
+            </div>
+            <PopoverContent
+              anchor={tagSearchAnchorRef.current}
+              align="start"
+              sideOffset={4}
+              initialFocus={false}
+              finalFocus={false}
+              className="max-h-40 w-[min(42rem,calc(100vw-2rem))] gap-0 overflow-auto rounded-md border border-border-whisper bg-surface-base p-0 shadow-lg"
+            >
+              {tagSearchQueryResult.isLoading ? (
+                <div className="px-3 py-2 text-sm text-text-secondary">
+                  {t("common:loading")}
+                </div>
+              ) : searchOptions.length > 0 ? (
+                <ul>
+                  {searchOptions.map((tag) => (
+                    <li key={tag.unitId}>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        className="flex w-full min-w-0 items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => addTag(tag.unitId)}
+                      >
+                        <span className="min-w-0 truncate">
+                          {tagOptionLabel(tag)}
+                        </span>
+                        <Plus className="h-4 w-4 shrink-0 text-text-secondary" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="px-3 py-2 text-sm text-text-secondary">
+                  {t("entity:shelf_picker_tag_empty")}
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
           {tagIds.length > 0 ? (
             <div className="flex min-w-0 flex-wrap gap-2">
               {tagIds.map((tagUnitId) => (
@@ -187,36 +254,6 @@ export function ShelfPickerToolbar({
                   </Button>
                 </Badge>
               ))}
-            </div>
-          ) : null}
-          {tagSearchText.trim() ? (
-            <div className="max-h-40 overflow-auto rounded-md border border-border-whisper">
-              {tagSearchQueryResult.isLoading ? (
-                <div className="px-3 py-2 text-sm text-text-secondary">
-                  {t("common:loading")}
-                </div>
-              ) : searchOptions.length > 0 ? (
-                <ul>
-                  {searchOptions.map((tag) => (
-                    <li key={tag.unitId}>
-                      <button
-                        type="button"
-                        className="flex w-full min-w-0 items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-surface-subtle"
-                        onClick={() => addTag(tag.unitId)}
-                      >
-                        <span className="min-w-0 truncate">
-                          {tagOptionLabel(tag)}
-                        </span>
-                        <Plus className="h-4 w-4 shrink-0 text-text-secondary" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="px-3 py-2 text-sm text-text-secondary">
-                  {t("entity:shelf_picker_tag_empty")}
-                </div>
-              )}
             </div>
           ) : null}
         </div>

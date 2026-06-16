@@ -7,6 +7,7 @@ import { Elysia, t } from "elysia";
 import { mapUserToDTO, userService } from "@/user";
 import { mapUserSearchDocToDTO } from "../meili/mapper";
 import { meiliService } from "../meili/meili.service";
+import { assertMediaUrl } from "../upload/media-url.guard";
 import {
   hasPermissionToCreateUser,
   hasPermissionToReadUser,
@@ -108,6 +109,7 @@ export const userRoute = new Elysia()
         throw new Error("Forbidden: token does not have user:write scope");
       }
 
+      assertMediaUrl(body.avatar);
       const created = await userService.create({
         ...body,
         userId: body.userId!,
@@ -230,6 +232,7 @@ export const userRoute = new Elysia()
         throw new Error("Forbidden: you can only update your own profile");
       }
 
+      assertMediaUrl(body.avatar);
       const updated = await userService.update(params.userId, body);
       return mapUserToDTO(updated);
     },

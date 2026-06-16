@@ -81,6 +81,18 @@ or drop the publication and let Sequin recreate it on the next config apply:
 DROP PUBLICATION rezics_sequin_pub_development;
 ```
 
+For local development recovery, prefer the repo wrapper instead of ad hoc SQL:
+
+```bash
+task service -- cdc recover --source=source
+task service -- cdc recover --source=reaction
+```
+
+`recover` stops Sequin before repairing source objects, starts Sequin again,
+and verifies the selected source. This matters for repeated
+`replication slot ... does not exist` failures: leaving Sequin running can
+create reconnect loops that consume WAL sender capacity.
+
 ## Initial Backfill
 
 The checked-in config intentionally omits `initial_backfill`. Operators may add
@@ -246,4 +258,6 @@ Before enabling Sequin in a non-production environment:
 ```sql
 SELECT pg_drop_replication_slot('rezics_sequin_slot_development');
 DROP PUBLICATION rezics_sequin_pub_development;
+SELECT pg_drop_replication_slot('rezics_reaction_sequin_slot_development');
+DROP PUBLICATION rezics_reaction_sequin_pub_development;
 ```

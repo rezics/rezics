@@ -21,6 +21,8 @@ import {
 } from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { cn } from "@/shared/utils/css-util";
+import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useSystemShelfRecoveryToast } from "../hooks/useSystemShelfRecoveryToast";
 import {
   ShelfItemAnnotationPanel,
@@ -58,41 +60,42 @@ function parseSort(sort: ShelfPickerSortValue): {
 /**
  * Add to shelf dialog.
  *
- * 通用 shelf feature 入口：上方只搜尋/篩選/排序 shelf，中間固定高度虛擬列表
- * 選 shelf，下方標註被加入的 item。`form` 直接接住 dialog 高度約束。
+ * 通用 shelf feature 入口。窄屏或矮視口用全屏 page modal，讓整個流程像一個
+ * 頁面；一般桌面用 bounded dialog，header/footer 固定，只有 shelf 結果區
+ * 消化剩餘高度並滾動，避免 dialog body 與列表形成雙滾動條。
  *
  * Mobile:
  * +----------------------+
- * | Add to shelf         |
+ * | Header               |
  * | Search / Tags / Sort |
- * | [fixed shelf list]   |
+ * | Shelf results        |
  * | Annotation panel     |
- * | Cancel        Save   |
+ * | Footer actions       |
  * +----------------------+
  *
  * Tablet:
  * +--------------------------------+
- * | Add to shelf                   |
+ * | Header                         |
  * | Search shelf        | Sort     |
  * | [tags wrap]                    |
- * | [fixed virtual shelf list]     |
+ * | [shelf results scroll]         |
  * | Annotation panel               |
- * |                Cancel   Save   |
+ * | Footer actions                 |
  * +--------------------------------+
  *
  * Desktop:
  * +------------------------------------------------+
- * | Add to shelf                                   |
+ * | Header                                         |
  * | Search shelf                         | Sort     |
  * | [tags wrap]                                    |
- * | [fixed virtual shelf list]                     |
+ * | [shelf results fill remaining height]          |
  * | Annotation panel                               |
- * |                            Cancel   Save       |
+ * | Footer actions                                 |
  * +------------------------------------------------+
  *
  * Ultra-wide:
  * +------------------------------------------------+
- * | Dialog is capped; content stretches within cap. |
+ * | Dialog stays capped; shelf results stretch only.|
  * +------------------------------------------------+
  */
 export function AddToShelfDialog({
@@ -105,6 +108,7 @@ export function AddToShelfDialog({
   isReview = false,
 }: AddToShelfDialogProps) {
   const { t } = useTranslation(["common", "entity"]);
+  const isPageModal = useMediaQuery("(max-width: 639px), (max-height: 700px)");
   const [selectedShelfIds, setSelectedShelfIds] = useState<Set<string>>(
     new Set(),
   );
@@ -215,12 +219,29 @@ export function AddToShelfDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[min(42rem,calc(100vh-2rem))] w-full max-w-3xl flex-col">
-        <DialogHeader className="shrink-0">
+      <DialogContent
+        className={cn(
+          "flex w-full flex-col overflow-hidden",
+          isPageModal
+            ? "h-[100dvh] max-h-[100dvh] max-w-none gap-0 rounded-none p-0 sm:max-w-none"
+            : "h-[min(48rem,calc(100vh-2rem))] max-h-[calc(100vh-2rem)] max-w-3xl",
+        )}
+      >
+        <DialogHeader
+          className={cn(
+            "shrink-0 pr-12",
+            isPageModal && "border-b border-border-whisper px-4 py-4",
+          )}
+        >
           <DialogTitle>{t("entity:add_to_shelf_title")}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col gap-4",
+            isPageModal ? "overflow-y-auto px-4 py-4" : "overflow-hidden",
+          )}
+        >
           <ShelfPickerToolbar
             query={query}
             onQueryChange={setQuery}
@@ -233,6 +254,7 @@ export function AddToShelfDialog({
             shelves={shelves}
             selectedShelfIds={selectedShelfIds}
             onToggleShelf={toggleShelf}
+            fillHeight={!isPageModal}
             isLoading={shelvesQuery.isLoading || statusQuery.isLoading}
             hasMore={shelvesQuery.hasNextPage}
             isFetchingMore={shelvesQuery.isFetchingNextPage}
@@ -248,11 +270,18 @@ export function AddToShelfDialog({
           />
         </div>
 
-        <DialogFooter className="shrink-0">
+        <DialogFooter
+          className={cn(
+            "shrink-0",
+            isPageModal &&
+              "border-t border-border-whisper bg-popover px-4 py-3",
+          )}
+        >
           <Button
             type="button"
             variant="ghost"
             onClick={() => onOpenChange(false)}
+            className={cn(isPageModal && "w-full sm:w-auto")}
           >
             {t("common:cancel")}
           </Button>
@@ -260,6 +289,7 @@ export function AddToShelfDialog({
             type="button"
             onClick={() => void handleSave()}
             disabled={isSaving || selectedShelfIds.size === 0}
+            className={cn(isPageModal && "w-full sm:w-auto")}
           >
             {isSaving
               ? t("entity:add_to_shelf_saving")

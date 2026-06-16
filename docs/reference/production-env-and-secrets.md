@@ -65,7 +65,15 @@ in-code fallbacks; everything else must be supplied.
 | `NOTIFY_INTERNAL_SECRET`, `REACTION_INTERNAL_SECRET` | ✓ | ✓ | — |
 | `HISTORY_BASE_URL`, `JOB_RUNNER_BASE_URL` | — | — | — |
 | `JOB_RUNNER_INTERNAL_SECRET` | — | ✓ | — |
+| `STATUS_JOB_RUNNER_URL` | — | — | `JOB_RUNNER_BASE_URL` |
+| `STATUS_SEQUIN_UI_URL`, `STATUS_SEQUIN_HEALTH_URL` | — | — | — |
+| `STATUS_SEQUIN_WEBHOOK_TARGET_NAME` | — | — | — |
+| `STATUS_CDC_PUBLICATION_NAME` | — | — | `rezics_sequin_pub_<NODE_ENV>` |
+| `STATUS_CDC_REPLICATION_SLOT_NAME` | — | — | `rezics_sequin_slot_<NODE_ENV>` |
 | `STATUS_REACTION_DATABASE_URL` | — | ✓ | — |
+| `STATUS_REACTION_CDC_PUBLICATION_NAME` | — | — | `rezics_reaction_sequin_pub_<NODE_ENV>` |
+| `STATUS_REACTION_CDC_REPLICATION_SLOT_NAME` | — | — | `rezics_reaction_sequin_slot_<NODE_ENV>` |
+| `STATUS_CDC_LAG_WARNING_BYTES` | — | — | `268435456` |
 | `PORT` | — | — | `3000` |
 | `WORKERS` | — | — | (cluster default) |
 

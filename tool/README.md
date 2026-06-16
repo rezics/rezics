@@ -23,6 +23,7 @@ task service:up
 task service:health
 task service:ps
 task service:logs
+task service -- logs --tail=200 sequin
 task service:down
 ```
 
@@ -40,23 +41,27 @@ Validate the compose plan without starting services:
 task service -- config plan
 ```
 
-Verify the managed source database after startup:
+Verify every Sequin CDC source database after startup:
 
 ```sh
-task service -- source verify
+task service -- cdc verify
 ```
 
-Use repair only for existing, external, or broken local source databases:
+Use recovery for existing, external, or broken local CDC sources. Recovery stops
+Sequin, repairs the selected source publication/slot, starts Sequin again, and
+verifies the source state:
 
 ```sh
-task service -- source repair
-task service -- source repair --force-active-slot
+task service -- cdc recover
+task service -- cdc recover --source=reaction
+task service -- cdc recover --source=reaction --force-active-slot
 ```
 
-Repair can recreate the local Sequin publication and replication slot. If it
-changes Postgres settings with `ALTER SYSTEM`, restart that Postgres instance
-and verify again. The repair path is not part of the fresh managed Docker
-happy path.
+`task service -- source repair` is a legacy main/source-only repair command;
+prefer `cdc recover` so reaction CDC is not skipped. Low-level repair can
+recreate local Sequin publications and replication slots. If it changes
+Postgres settings with `ALTER SYSTEM`, restart that Postgres instance and verify
+again. The repair path is not part of the fresh managed Docker happy path.
 
 User-managed PostgreSQL, Meilisearch, Redis, or Sequin instances remain manual.
 Point package env files at them yourself and avoid `service` commands for

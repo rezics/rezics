@@ -11,6 +11,8 @@ import {
   Checkbox,
   Input,
   Label,
+  Popover,
+  PopoverContent,
   Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -50,7 +52,8 @@ function tagOptionLabel(option: SearchTagOption): string {
  * Mobile:
  * +----------------------+
  * | User tags            |
- * | [search tag...]      |
+ * | [search tag...][x]   |
+ * |   floating results   |
  * | [Long tag x] [tag x] |
  * | Private text         |
  * | [textarea          ] |
@@ -60,7 +63,8 @@ function tagOptionLabel(option: SearchTagOption): string {
  * Tablet:
  * +--------------------------------+
  * | User tags                      |
- * | [search tag...]                |
+ * | [search tag...][x]             |
+ * | floating results overlay fields|
  * | [Long tag x] [tag x] [tag x]   |
  * | Private text                   |
  * | [textarea                    ] |
@@ -69,7 +73,8 @@ function tagOptionLabel(option: SearchTagOption): string {
  * Desktop:
  * +------------------------------------------------+
  * | User tags                                      |
- * | [search tag...]                                |
+ * | [search tag...][x]                             |
+ * |   dropdown overlays panel content, no reflow   |
  * | [chips wrap, input width fixed by parent]      |
  * | Private text                                   |
  * +------------------------------------------------+
@@ -91,6 +96,8 @@ export function ShelfItemAnnotationPanel({
   const { t } = useTranslation(["common", "community", "entity"]);
   const [tagSearchText, setTagSearchText] = useState("");
   const hydratedRef = useRef(false);
+  const tagSearchAnchorRef = useRef<HTMLDivElement | null>(null);
+  const tagSearchInputRef = useRef<HTMLInputElement | null>(null);
 
   const applicationsQuery = useQuery(userTagApplicationsForUnitQuery(unitId));
   const metadataQuery = useQuery(userShelfItemForUnitQuery(unitId));
@@ -133,6 +140,7 @@ export function ShelfItemAnnotationPanel({
         : [...value.tagUnitIds, tagUnitId],
     });
     setTagSearchText("");
+    tagSearchInputRef.current?.focus();
   }
 
   function removeTag(tagUnitId: string) {
@@ -148,12 +156,71 @@ export function ShelfItemAnnotationPanel({
         <Label htmlFor={`add-to-shelf-tags-${unitId}`}>
           {t("entity:shelf_item_user_tags_label")}
         </Label>
-        <Input
-          id={`add-to-shelf-tags-${unitId}`}
-          value={tagSearchText}
-          onChange={(event) => setTagSearchText(event.target.value)}
-          placeholder={t("community:tag_search_placeholder")}
-        />
+        <Popover open={Boolean(tagSearchText.trim())}>
+          <div ref={tagSearchAnchorRef} className="relative min-w-0">
+            <Input
+              id={`add-to-shelf-tags-${unitId}`}
+              ref={tagSearchInputRef}
+              value={tagSearchText}
+              onChange={(event) => setTagSearchText(event.target.value)}
+              className={tagSearchText ? "pr-9" : undefined}
+              placeholder={t("community:tag_search_placeholder")}
+            />
+            {tagSearchText ? (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+                aria-label={t("community:tag_clear")}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  setTagSearchText("");
+                  tagSearchInputRef.current?.focus();
+                }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            ) : null}
+          </div>
+          <PopoverContent
+            anchor={tagSearchAnchorRef.current}
+            align="start"
+            sideOffset={4}
+            initialFocus={false}
+            finalFocus={false}
+            className="max-h-40 w-[min(42rem,calc(100vw-2rem))] gap-0 overflow-auto rounded-md border border-border-whisper bg-surface-base p-0 shadow-lg"
+          >
+            {tagSearchQueryResult.isLoading ? (
+              <div className="px-3 py-2 text-sm text-text-secondary">
+                {t("common:loading")}
+              </div>
+            ) : searchOptions.length > 0 ? (
+              <ul>
+                {searchOptions.map((tag) => (
+                  <li key={tag.unitId}>
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      className="flex w-full min-w-0 items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => addTag(tag.unitId)}
+                    >
+                      <span className="min-w-0 truncate">
+                        {tagOptionLabel(tag)}
+                      </span>
+                      <Plus className="h-4 w-4 shrink-0 text-text-secondary" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="px-3 py-2 text-sm text-text-secondary">
+                {t("community:post_tag_picker_no_matches")}
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
         {value.tagUnitIds.length > 0 ? (
           <div className="flex min-w-0 flex-wrap gap-2">
             {value.tagUnitIds.map((tagUnitId) => (
@@ -177,36 +244,6 @@ export function ShelfItemAnnotationPanel({
                 </Button>
               </Badge>
             ))}
-          </div>
-        ) : null}
-        {tagSearchText.trim() ? (
-          <div className="max-h-40 overflow-auto rounded-md border border-border-whisper bg-surface-base">
-            {tagSearchQueryResult.isLoading ? (
-              <div className="px-3 py-2 text-sm text-text-secondary">
-                {t("common:loading")}
-              </div>
-            ) : searchOptions.length > 0 ? (
-              <ul>
-                {searchOptions.map((tag) => (
-                  <li key={tag.unitId}>
-                    <button
-                      type="button"
-                      className="flex w-full min-w-0 items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-surface-subtle"
-                      onClick={() => addTag(tag.unitId)}
-                    >
-                      <span className="min-w-0 truncate">
-                        {tagOptionLabel(tag)}
-                      </span>
-                      <Plus className="h-4 w-4 shrink-0 text-text-secondary" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="px-3 py-2 text-sm text-text-secondary">
-                {t("community:post_tag_picker_no_matches")}
-              </div>
-            )}
           </div>
         ) : null}
       </div>

@@ -67,14 +67,20 @@ const page: ZonePage = {
   version: 1,
   sections: [
     {
-      id: "hero",
-      kind: "hero",
-      showDescription: true,
-      bannerImageUrl: "https://cdn.example.test/hero.png",
-      ctas: [
+      id: "stage",
+      kind: "stage",
+      background: { imageUrl: "https://cdn.example.test/hero.png" },
+      sections: [
+        { id: "zone-info", kind: "zoneInfo" },
         {
-          target: { kind: "zonePage", pageId: "page-characters" },
-          displayUnitId: "character-1",
+          id: "actions",
+          kind: "actions",
+          items: [
+            {
+              target: { kind: "zonePage", pageId: "page-characters" },
+              displayUnitId: "character-1",
+            },
+          ],
         },
       ],
     },
@@ -130,9 +136,10 @@ describe("zone split envelopes", () => {
         ...page,
         sections: [
           {
-            id: "hero",
-            kind: "hero",
-            bannerImageUrl: "http://cdn.example.test/hero.png",
+            id: "stage",
+            kind: "stage",
+            background: { imageUrl: "http://cdn.example.test/hero.png" },
+            sections: [],
           },
         ],
       }),

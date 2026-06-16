@@ -3,6 +3,8 @@ import {
   ZONE_MENU_MAX_DEPTH,
   type ZoneMenuNode,
   type ZonePage as ZonePageConfig,
+  type ZonePageSection,
+  type ZoneStageChildSection,
   zoneBoundaryEnvelopeSchema,
   zoneNavEnvelopeSchema,
   zonePageEnvelopeSchema,
@@ -38,10 +40,25 @@ import {
 // service 强制的结构不变量（页面内分区 id、菜单引用、深度）。
 function collectSectionEntries(
   page: ZonePageConfig,
-): ZonePageConfig["sections"] {
-  const entries: ZonePageConfig["sections"] = [];
+): Array<ZonePageSection | ZoneStageChildSection> {
+  const entries: Array<ZonePageSection | ZoneStageChildSection> = [];
   for (const section of page.sections) {
     entries.push(section);
+    if (section.kind === "stage") {
+      for (const child of section.sections) {
+        entries.push(child);
+        if (child.kind === "tabs") {
+          for (const tab of child.tabs) {
+            for (const inner of tab.sections) entries.push(inner);
+          }
+        }
+        if (child.kind === "columns") {
+          for (const column of child.columns) {
+            for (const inner of column.sections) entries.push(inner);
+          }
+        }
+      }
+    }
     if (section.kind === "tabs") {
       for (const tab of section.tabs) {
         for (const inner of tab.sections) {
@@ -160,15 +177,17 @@ describe("buildToaruZoneConfig", () => {
       ),
     );
     expect([...kinds].toSorted()).toEqual([
+      "actions",
       "collection",
       "columns",
       "feed",
-      "hero",
       "query",
       "richText",
       "sources",
+      "stage",
       "stats",
       "tabs",
+      "zoneInfo",
     ]);
 
     const richTextRefs = JSON.stringify(config);
@@ -237,10 +256,11 @@ describe("zone fixture configs", () => {
       "collection",
       "columns",
       "feed",
-      "hero",
       "query",
+      "stage",
       "stats",
       "tabs",
+      "zoneInfo",
     ]);
   });
 
@@ -275,7 +295,7 @@ describe("zone fixture configs", () => {
 
     expect(config.boundary.filters).toEqual({ types: ["BOOK"] });
     expect(sections.map((section) => section.kind)).toEqual([
-      "hero",
+      "stage",
       "query",
       "query",
       "query",

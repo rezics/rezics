@@ -294,7 +294,11 @@ function fixtureHomeSections(
   switch (kind) {
     case "book-portal": {
       return [
-        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "stage",
+          kind: "stage",
+          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+        },
         {
           id: "latest",
           kind: "query",
@@ -349,7 +353,7 @@ function fixtureHomeSections(
         {
           id: "hot-feed",
           kind: "query",
-          display: "list",
+          display: "stream",
           limit: 24,
           loadMore: true,
           query: {
@@ -372,7 +376,11 @@ function fixtureHomeSections(
       ];
     case "tabbed-portal":
       return [
-        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "stage",
+          kind: "stage",
+          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+        },
         {
           id: "portal-tabs",
           kind: "tabs",
@@ -402,7 +410,11 @@ function fixtureHomeSections(
       ];
     case "columns-portal":
       return [
-        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "stage",
+          kind: "stage",
+          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+        },
         {
           id: "layout",
           kind: "columns",
@@ -459,7 +471,11 @@ function fixtureHomeSections(
       ];
     case "realm-directory":
       return [
-        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "stage",
+          kind: "stage",
+          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+        },
         {
           id: "featured",
           kind: "collection",
@@ -470,7 +486,11 @@ function fixtureHomeSections(
       ];
     case "zone-directory":
       return [
-        { id: "hero", kind: "hero", showDescription: true },
+        {
+          id: "stage",
+          kind: "stage",
+          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+        },
         zoneQuerySection({ id: "latest-zones", limit: 24 }),
         {
           id: "featured-realms",

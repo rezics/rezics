@@ -57,7 +57,7 @@ function communityInitial(label: string): string {
 }
 
 function ZoneSubscriptionButton({ zoneUnitId }: { zoneUnitId: string }) {
-  const { t } = useTranslation(["entity"]);
+  const { t } = useTranslation(["zone"]);
   const auth = useAuthModal("login");
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const authSessionLoading = useAuthSessionStore(
@@ -68,7 +68,7 @@ function ZoneSubscriptionButton({ zoneUnitId }: { zoneUnitId: string }) {
   );
   const subscribe = useSubscribeMutation();
   const unsubscribe = useUnsubscribeMutation();
-  const isJoined = subscription?.subscribed === true;
+  const isSubscribed = subscription?.subscribed === true;
   const isPending =
     authSessionLoading ||
     isLoading ||
@@ -81,7 +81,7 @@ function ZoneSubscriptionButton({ zoneUnitId }: { zoneUnitId: string }) {
       auth.openLogin();
       return;
     }
-    if (isJoined) {
+    if (isSubscribed) {
       unsubscribe.mutate(zoneUnitId);
     } else {
       subscribe.mutate({ subscribedUnitId: zoneUnitId });
@@ -92,13 +92,13 @@ function ZoneSubscriptionButton({ zoneUnitId }: { zoneUnitId: string }) {
     <>
       <Button
         type="button"
-        variant={isJoined ? "outline" : "default"}
+        variant={isSubscribed ? "outline" : "default"}
         size="sm"
         disabled={isPending}
         onClick={handleClick}
         className="h-8 shrink-0 px-3"
       >
-        {isJoined ? t("entity:realm_leave") : t("entity:realm_join")}
+        {isSubscribed ? t("zone:unsubscribe") : t("zone:subscribe")}
       </Button>
       {!hasMemberSession && auth.AuthModal({})}
     </>

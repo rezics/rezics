@@ -139,6 +139,47 @@ const searchSectionMock = mock(
     total: 1,
   }),
 );
+const postListMock = mock(async () => ({
+  posts: [{ unitId: "post-1", kind: "REMARK" }],
+  total: 1,
+}));
+const bookListMock = mock(
+  async (): Promise<{ books: any[]; total: number }> => ({
+    books: [],
+    total: 0,
+  }),
+);
+const mapBookToDTOMock = mock((book: any) => book);
+const mapPostToDTOMock = mock((post: { unitId: string; kind?: string }) => ({
+  unitId: post.unitId,
+  authorUserId: "user-1",
+  author: null,
+  targetUnitId: null,
+  variantUnitId: null,
+  variantContext: null,
+  realmUnitId: null,
+  referenceCount: 0,
+  resolvedLanguage: "en",
+  title: "Hot thread",
+  content: null,
+  kind: post.kind ?? null,
+  status: "PUBLISHED",
+  visibility: "PUBLIC",
+  licenseSlug: null,
+  moderationStatus: "normal",
+  isTombstone: false,
+  scoreEntryId: null,
+  replyCount: 0,
+  directReplyCount: 0,
+  lastReplyAt: null,
+  isLocked: false,
+  state: null,
+  pinKind: null,
+  pinPosition: null,
+  extra: null,
+  createdAt: "2026-02-01T00:00:00.000Z",
+  updatedAt: "2026-02-02T00:00:00.000Z",
+}));
 const replaceTranslationsMock = mock(async (..._args: unknown[]) => undefined);
 const updateZoneDataMock = mock(async (): Promise<void> => undefined);
 const listSubscribedZoneIdsMock = mock(async () => ({
@@ -194,9 +235,13 @@ function basePage(): ZonePageConfig {
     version: 1,
     sections: [
       {
-        id: "s-hero",
-        kind: "hero",
-        bannerImageUrl: "https://example.com/a.jpg",
+        id: "s-stage",
+        kind: "stage",
+        background: { imageUrl: "https://example.com/a.jpg" },
+        sections: [
+          { id: "s-zone-info", kind: "zoneInfo" },
+          { id: "s-image", kind: "image", url: "https://example.com/logo.jpg" },
+        ],
       },
       {
         id: "s-columns",
@@ -416,6 +461,16 @@ beforeAll(async () => {
     },
   }));
   mock.module("@/unit", () => ({ unitService: {} }));
+  mock.module("../post", () => ({
+    postService: { list: postListMock },
+  }));
+  mock.module("../post/post.mapper", () => ({
+    mapPostToDTO: mapPostToDTOMock,
+  }));
+  mock.module("../book", () => ({
+    bookService: { list: bookListMock },
+    mapBookToDTO: mapBookToDTOMock,
+  }));
   mock.module("@/utils/errors", () => ({
     AppError: class AppError extends Error {
       public readonly code?: string;
@@ -441,6 +496,10 @@ beforeAll(async () => {
 
 beforeEach(() => {
   searchSectionMock.mockClear();
+  postListMock.mockClear();
+  bookListMock.mockClear();
+  mapBookToDTOMock.mockClear();
+  mapPostToDTOMock.mockClear();
   replaceTranslationsMock.mockClear();
   updateZoneDataMock.mockClear();
   listSubscribedZoneIdsMock.mockClear();
@@ -806,11 +865,67 @@ describe("section data execution", () => {
     ]);
   });
 
+  test("stream query sections return renderable rows", async () => {
+    const page = {
+      schema: "rezics/zone-page",
+      version: 1,
+      sections: [
+        {
+          id: "s-stream",
+          kind: "query",
+          display: "stream",
+          query: {
+            target: "unit",
+            types: ["BOOK"],
+            sort: { field: "hotScore", direction: "desc" },
+          },
+        },
+      ],
+    } satisfies ZonePageConfig;
+    currentPage = pageRow(page);
+    currentZone = zoneRow({ page });
+    searchSectionMock.mockResolvedValueOnce({ ids: ["book-1"], total: 1 });
+    bookListMock.mockResolvedValueOnce({
+      books: [
+        {
+          unitId: "book-1",
+          kind: "book",
+          title: "A Certain Index",
+          summary: "Magic and science.",
+          coverUrl: "https://example.com/cover.jpg",
+        },
+      ],
+      total: 1,
+    });
+
+    const data = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      "s-stream",
+    );
+
+    expect(data?.items).toEqual([]);
+    expect(data?.rows?.[0]).toMatchObject({
+      type: "book",
+      rowId: "book:book-1",
+      book: {
+        unitId: "book-1",
+        title: "A Certain Index",
+        description: "Magic and science.",
+      },
+    });
+  });
+
   test("feed, collection, stats, and richText sections execute by page id", async () => {
     searchSectionMock.mockResolvedValueOnce({ ids: ["post-1"], total: 1 });
     const feed = await service.getSectionData("zone-1", "page-home", "s-feed");
     expect(searchSectionMock.mock.calls[0]![0].index).toBe("posts");
-    expect(feed?.items[0]?.postKind).toBe("REMARK");
+    expect(feed?.items).toEqual([]);
+    expect(feed?.rows?.[0]).toMatchObject({
+      type: "post",
+      rowId: "post:post-1",
+      post: { kind: "REMARK" },
+    });
 
     const collection = await service.getSectionData(
       "zone-1",
@@ -836,13 +951,16 @@ describe("section data execution", () => {
     expect((richText?.doc as any)?.main?.source).toBe("歡迎");
   });
 
-  test("container and hero sections expose no data endpoint", async () => {
+  test("container and display sections expose no data endpoint", async () => {
     expect(
       service.getSectionData("zone-1", "page-home", "s-tabs"),
     ).rejects.toThrow("Container sections have no section data");
     expect(
-      service.getSectionData("zone-1", "page-home", "s-hero"),
-    ).rejects.toThrow("Hero sections have no section data");
+      service.getSectionData("zone-1", "page-home", "s-stage"),
+    ).rejects.toThrow("Container sections have no section data");
+    expect(
+      service.getSectionData("zone-1", "page-home", "s-image"),
+    ).rejects.toThrow("Display sections have no section data");
   });
 });
 

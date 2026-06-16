@@ -17,7 +17,7 @@ const SERVICE_DIR = path.join(TOOL_DIR, "service");
 export type ServiceCommand =
   | { kind: "up" }
   | { kind: "down" }
-  | { kind: "logs"; services: string[] }
+  | { kind: "logs"; services: string[]; tail?: number }
   | { kind: "ps" }
   | { kind: "health" }
   | { kind: "config-plan" }
@@ -34,6 +34,14 @@ export type ServiceCommand =
       sourceUrl?: string;
       reactionUrl?: string;
       forceActiveSlot?: boolean;
+    }
+  | {
+      kind: "cdc-recover";
+      source?: "source" | "reaction";
+      sourceUrl?: string;
+      reactionUrl?: string;
+      forceActiveSlot?: boolean;
+      logTail?: number;
     }
   | { kind: "source-verify"; url?: string }
   | { kind: "source-repair"; url?: string; forceActiveSlot?: boolean };
@@ -92,6 +100,23 @@ async function fetchHealth(label: string, url: string) {
     throw new Error(`${label} health check failed: HTTP ${response.status}`);
   }
   console.log(`ok    ${label}: ${url}`);
+}
+
+async function waitForHealth(label: string, url: string) {
+  const deadline = Date.now() + 30_000;
+  let lastError: unknown;
+  while (Date.now() < deadline) {
+    try {
+      await fetchHealth(label, url);
+      return;
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error(`${label} health check timed out`);
 }
 
 function execHealth(
@@ -178,6 +203,40 @@ function runCdcScript(
   );
 }
 
+async function runCdcRecover(
+  command: Extract<ServiceCommand, { kind: "cdc-recover" }>,
+  config: ToolConfig,
+) {
+  assertSequinRuntimeEnv();
+  const sources = command.source ? command.source : "all sources";
+  console.log(
+    `Recovering Sequin CDC for ${sources}: stop Sequin, repair source objects, restart Sequin, verify.`,
+  );
+  try {
+    runManagedCompose("down", ["stop", "sequin"], config);
+    runCdcScript({ ...command, kind: "cdc-repair" }, config);
+    runManagedCompose("config-apply", ["up", "-d", "sequin"], config);
+    await waitForHealth("Sequin", config.services.sequinHealthUrl);
+    runCdcScript({ ...command, kind: "cdc-verify" }, config);
+  } catch (error) {
+    const tail = command.logTail ?? 200;
+    console.error("");
+    console.error(
+      `CDC recovery failed. Recent Sequin logs (tail ${tail}) follow:`,
+    );
+    try {
+      runManagedCompose(
+        "logs",
+        ["logs", "--tail", String(tail), "sequin"],
+        config,
+      );
+    } catch {
+      // Preserve the original recovery failure.
+    }
+    throw error;
+  }
+}
+
 function runSourceScript(
   command: Extract<ServiceCommand, { kind: "source-verify" | "source-repair" }>,
   config: ToolConfig,
@@ -215,6 +274,11 @@ export async function runServiceCommand(
     return;
   }
 
+  if (command.kind === "cdc-recover") {
+    await runCdcRecover(command, config);
+    return;
+  }
+
   if (command.kind === "source-verify") {
     runSourceScript(command, config);
     return;
@@ -237,7 +301,15 @@ export async function runServiceCommand(
   }
 
   if (command.kind === "logs") {
-    runManagedCompose("logs", ["logs", "-f", ...command.services], config);
+    runManagedCompose(
+      "logs",
+      [
+        "logs",
+        ...(command.tail ? ["--tail", String(command.tail)] : ["-f"]),
+        ...command.services,
+      ],
+      config,
+    );
     return;
   }
 

@@ -1,11 +1,10 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { createVersionedEnvelopeParser } from "../envelope/envelope";
+import { mediaUrlSchema } from "../media-url";
 
 export const ZONE_THEME_SCHEMA = "rezics/zone-theme" as const;
 export const ZONE_THEME_V1_VERSION = 1 as const;
-
-const httpsUrlSchema = t.String({ pattern: "^https://" });
 
 export const zoneThemeV1Schema = t.Object(
   {
@@ -27,9 +26,9 @@ export const zoneThemeV1Schema = t.Object(
     images: t.Optional(
       t.Object(
         {
-          logoUrl: t.Optional(httpsUrlSchema),
-          bannerUrl: t.Optional(httpsUrlSchema),
-          backgroundUrl: t.Optional(httpsUrlSchema),
+          logoUrl: t.Optional(mediaUrlSchema),
+          bannerUrl: t.Optional(mediaUrlSchema),
+          backgroundUrl: t.Optional(mediaUrlSchema),
         },
         { additionalProperties: false },
       ),

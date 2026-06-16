@@ -494,8 +494,8 @@ function queueTotals(queue: QueueStatus) {
   );
 }
 
-function cdcRepairTargets(cdc: CdcStatus) {
-  const targets = cdc.detectedIssues.map(
+function cdcSourceRepairTargets(source: CdcSourceStatus) {
+  const targets = source.detectedIssues.map(
     (issue) => `${issue.sourceId}:${issue.code}`,
   );
   return targets.length ? targets.join(",") : undefined;
@@ -510,8 +510,9 @@ function CdcSourceBlock({
 }) {
   const hasPublicationDrift =
     source.missingTables.length > 0 || (source.extraTables?.length ?? 0) > 0;
+  const repairTargets = cdcSourceRepairTargets(source);
   return (
-    <div className="rounded-md border border-border-whisper bg-surface-subtle p-3">
+    <div className="flex min-w-0 flex-col rounded-md border border-border-defined bg-surface-base p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-sm font-medium leading-[1.4]">{source.label}</p>
@@ -615,10 +616,62 @@ function CdcSourceBlock({
           ))}
         </div>
       ) : null}
+      {repairTargets ? (
+        <Link
+          to="/repair"
+          search={repairSearch({
+            scope: "cdc",
+            targetIds: repairTargets,
+          })}
+          className={`${buttonVariants({
+            variant: "outline",
+            size: "xs",
+          })} mt-3 w-fit`}
+        >
+          <Wrench className="size-3" aria-hidden="true" />
+          {t("admin:repair_open")}
+        </Link>
+      ) : null}
     </div>
   );
 }
 
+/**
+ * CDC 狀態頁的主要運維面板。設計意圖是先呈現整條鏈路，再把 main source
+ * 與 reaction source 拆成兩張同等權重的狀態卡；每張卡只提供自己的修復入口。
+ *
+ * Mobile
+ * +------------------------------+
+ * | Chain rows                   |
+ * | Metrics                      |
+ * | Source CDC card              |
+ * | Reaction CDC card            |
+ * | History replay warning       |
+ * | Infra note                   |
+ * +------------------------------+
+ *
+ * Tablet
+ * +------------------------------+
+ * | Chain rows 2 columns         |
+ * | Metrics grid                 |
+ * | Source CDC card              |
+ * | Reaction CDC card            |
+ * +------------------------------+
+ *
+ * Desktop
+ * +------------------------------------------------+
+ * | Chain rows 2 columns                           |
+ * | Metrics grid                                   |
+ * | Source CDC card      | Reaction CDC card       |
+ * | History / infra notes full width               |
+ * +------------------------------------------------+
+ *
+ * Ultra-wide
+ * +------------------------------------------------+
+ * | Centered shell from parent, same two-card grid  |
+ * | Source and reaction cards keep equal width      |
+ * +------------------------------------------------+
+ */
 export function CdcPanel({
   cdc,
   historyOutbox,
@@ -632,7 +685,6 @@ export function CdcPanel({
 }) {
   const { t } = useTranslation(["admin"]);
   const totals = queueTotals(queue);
-  const repairTargets = cdcRepairTargets(cdc);
   return (
     <StatusCard
       title={t("admin:status_cdc_chain_title")}
@@ -678,7 +730,7 @@ export function CdcPanel({
           },
         ]}
       />
-      <div className="grid gap-3">
+      <div className="grid min-w-0 gap-3 xl:grid-cols-2">
         {cdc.sources.map((source) => (
           <CdcSourceBlock key={source.id} source={source} t={t} />
         ))}
@@ -691,20 +743,6 @@ export function CdcPanel({
           <p className="mt-1 text-xs leading-[1.4] text-warning-text">
             {t("admin:status_cdc_detected_description")}
           </p>
-          <Link
-            to="/repair"
-            search={repairSearch({
-              scope: "cdc",
-              targetIds: repairTargets,
-            })}
-            className={`${buttonVariants({
-              variant: "outline",
-              size: "xs",
-            })} mt-3`}
-          >
-            <Wrench className="size-3" aria-hidden="true" />
-            {t("admin:repair_open")}
-          </Link>
         </div>
       ) : null}
       {historyOutbox.pendingWithoutIngestJob ? (

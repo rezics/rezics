@@ -38,13 +38,14 @@ interface FeedBookCardProps {
 
 /**
  * Feed book card：列表中的作品推荐项，封面负责第一识别，右上角 badge 只
- * 标注 kind。封面比例来自 catalog Unit contract，图片填满该比例；窄屏时
- * 封面固定宽度、正文 `min-w-0` 截断；宽屏时正文伸展、card 保持
- * `w-full`，右上角 badge 固定不挤压标题。
+ * 标注 kind。封面比例来自 catalog Unit contract，封面框 `self-start`
+ * 避免被右侧内容高度拉伸；图片 `object-fit: contain` 保持原比例，允许
+ * 留白。窄屏时封面固定宽度、正文 `min-w-0` 截断；宽屏时正文伸展、
+ * card 保持 `w-full`，右上角 badge 固定不挤压标题。
  *
  * Mobile (<640px)
  * +--------------------------------+
- * | [cover] Title line...... [Book]|
+ * | [cover 96px] Title line [Book]|
  * |         Subtitle line          |
  * |         Author                 |
  * |         #tag #tag #tag         |
@@ -55,7 +56,7 @@ interface FeedBookCardProps {
  *
  * Tablet (640px-1023px)
  * +------------------------------------------+
- * | [cover] Title two lines max        [Book]|
+ * | [cover 112px] Title two lines      [Book]|
  * |         Subtitle / Author                |
  * |         #tag #tag #tag #tag #tag         |
  * |         Summary clamped to 3 lines        |
@@ -132,7 +133,7 @@ export function FeedBookCard({ row, className }: FeedBookCardProps) {
 
       <article className="flex min-w-0 items-stretch gap-4 p-4 pr-16">
         <CardMedia
-          className="w-18 shrink-0 rounded-sm bg-surface-subtle text-text-tertiary sm:w-22"
+          className="w-24 shrink-0 self-start rounded-sm bg-surface-subtle text-text-tertiary sm:w-28"
           style={{
             aspectRatio: CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[UnitType.BOOK],
           }}
@@ -142,7 +143,8 @@ export function FeedBookCard({ row, className }: FeedBookCardProps) {
               src={row.book.coverUrl}
               alt=""
               loading="lazy"
-              className="h-full w-full object-fill"
+              className="h-full w-full"
+              style={{ objectFit: "contain" }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">

@@ -10,6 +10,11 @@ import { ZoneSectionList } from "../components/sections/ZoneSectionList";
 import { ZoneHeader } from "../components/ZoneHeader";
 import { useZonePortal } from "../hooks/useZone";
 import { canManageZone } from "../models/canManageZone";
+import {
+  type ZoneRouteLocation,
+  zoneManageHref,
+  zoneRouteLocationFromZone,
+} from "../models/zoneMenu";
 import { selectZoneDynamicTags } from "../models/zoneDynamicTags";
 import {
   ZONE_CONTENT_MAX_WIDTH_DEFAULT,
@@ -17,9 +22,17 @@ import {
 } from "../models/zoneTheme";
 
 type ZonePortalPageProps = {
-  slug: string;
   pageSlug?: string;
-};
+} & (
+  | {
+      slug: string;
+      unitId?: never;
+    }
+  | {
+      slug?: never;
+      unitId: string;
+    }
+);
 
 /**
  * Single config-driven portal: renders `config.pages.home.sections`
@@ -138,11 +151,13 @@ type ZonePortalPageProps = {
  */
 export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
   slug,
+  unitId,
   pageSlug = "home",
 }) => {
   const { t } = useTranslation(["zone"]);
+  const locator = slug ? { slug } : { unitId: unitId ?? "" };
   const { zone, page, refUnits, languages, isLoading, error } = useZonePortal(
-    slug,
+    locator,
     pageSlug,
   );
   const [dynamicTagSeed] = useState(() => `${Date.now()}:${Math.random()}`);
@@ -181,6 +196,9 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
   }
 
   const themeVars = zoneThemeCssVars(zone.theme) as CSSProperties;
+  const routeLocation: ZoneRouteLocation = zoneRouteLocationFromZone(
+    slug ? { ...zone, slug } : { ...zone, slug: null },
+  );
   const contentStyle = {
     maxWidth: `var(--zone-content-max-width, ${ZONE_CONTENT_MAX_WIDTH_DEFAULT}px)`,
   } satisfies CSSProperties;
@@ -196,12 +214,16 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
       }}
       className="min-h-full"
     >
-      <ZoneHeader zone={zone} refUnits={refUnits} />
+      <ZoneHeader
+        zone={zone}
+        refUnits={refUnits}
+        routeLocation={routeLocation}
+      />
       <div className="mx-auto w-full px-4 py-8" style={contentStyle}>
         {showManage ? (
           <div className="mb-6 flex justify-end">
             <SafeLink
-              href={`/z/${zone.slug}/manage`}
+              href={zoneManageHref(routeLocation)}
               className="rounded-md bg-surface-subtle px-3 py-2 text-sm font-medium leading-ui text-text-primary transition-colors hover:bg-surface-sunken"
             >
               {t("zone:manage")}

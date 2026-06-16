@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { creationModeSchema } from "../content/authority";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
+import { mediaUrlSchema } from "../media-url";
 import {
   type ContentStructureItem,
   type ContentStructurePath,
@@ -204,7 +205,7 @@ export const createBookSchema = t.Object({
   formatKey: t.Optional(t.String()),
   isLicensed: t.Optional(t.Boolean()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  coverUrl: t.Optional(t.String()),
+  coverUrl: t.Optional(mediaUrlSchema),
   rating: t.Optional(contentRatingSchema),
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
@@ -235,7 +236,7 @@ export const updateBookSchema = t.Object({
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  coverUrl: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(mediaUrlSchema)),
   rating: t.Optional(contentRatingSchema),
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),

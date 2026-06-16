@@ -50,6 +50,7 @@ import { Route as MainLayoutBookSearchRouteImport } from './routes/_mainLayout/b
 import { Route as MainLayoutBookNewRouteImport } from './routes/_mainLayout/book/new'
 import { Route as MainLayoutUserMeRouteRouteImport } from './routes/_mainLayout/user/me/route'
 import { Route as MainLayoutBookBookIdRouteRouteImport } from './routes/_mainLayout/book/$bookId/route'
+import { Route as MainLayoutZoneUnitIdIndexRouteImport } from './routes/_mainLayout/zone/$unitId/index'
 import { Route as MainLayoutZSlugIndexRouteImport } from './routes/_mainLayout/z/$slug/index'
 import { Route as MainLayoutUserMeIndexRouteImport } from './routes/_mainLayout/user/me/index'
 import { Route as MainLayoutUserUserIdIndexRouteImport } from './routes/_mainLayout/user/$userId/index'
@@ -127,6 +128,10 @@ import { Route as MainLayoutTagDomainUnitIdIndexRouteImport } from './routes/_ma
 import { Route as MainLayoutTagBookBookIdIndexRouteImport } from './routes/_mainLayout/tag/book/$bookId/index'
 import { Route as MainLayoutRealmRealmIdDetailIndexRouteImport } from './routes/_mainLayout/realm/$realmId/_detail/index'
 import { Route as EditorBookBookIdEditIndexRouteImport } from './routes/_editor/book/$bookId/edit/index'
+import { Route as MainLayoutZoneUnitIdWikiWikiUnitIdRouteImport } from './routes/_mainLayout/zone/$unitId/wiki/$wikiUnitId'
+import { Route as MainLayoutZoneUnitIdUnitDetailUnitIdRouteImport } from './routes/_mainLayout/zone/$unitId/unit/$detailUnitId'
+import { Route as MainLayoutZoneUnitIdPostPostUnitIdRouteImport } from './routes/_mainLayout/zone/$unitId/post/$postUnitId'
+import { Route as MainLayoutZoneUnitIdPagePageSlugRouteImport } from './routes/_mainLayout/zone/$unitId/page/$pageSlug'
 import { Route as MainLayoutZSlugWikiWikiUnitIdRouteImport } from './routes/_mainLayout/z/$slug/wiki/$wikiUnitId'
 import { Route as MainLayoutZSlugUnitUnitIdRouteImport } from './routes/_mainLayout/z/$slug/unit/$unitId'
 import { Route as MainLayoutZSlugPostPostUnitIdRouteImport } from './routes/_mainLayout/z/$slug/post/$postUnitId'
@@ -384,6 +389,12 @@ const MainLayoutBookBookIdRouteRoute =
   MainLayoutBookBookIdRouteRouteImport.update({
     id: '/book/$bookId',
     path: '/book/$bookId',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
+const MainLayoutZoneUnitIdIndexRoute =
+  MainLayoutZoneUnitIdIndexRouteImport.update({
+    id: '/zone/$unitId/',
+    path: '/zone/$unitId/',
     getParentRoute: () => MainLayoutRoute,
   } as any)
 const MainLayoutZSlugIndexRoute = MainLayoutZSlugIndexRouteImport.update({
@@ -836,6 +847,30 @@ const EditorBookBookIdEditIndexRoute =
     path: '/',
     getParentRoute: () => EditorBookBookIdEditRouteRoute,
   } as any)
+const MainLayoutZoneUnitIdWikiWikiUnitIdRoute =
+  MainLayoutZoneUnitIdWikiWikiUnitIdRouteImport.update({
+    id: '/zone/$unitId/wiki/$wikiUnitId',
+    path: '/zone/$unitId/wiki/$wikiUnitId',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
+const MainLayoutZoneUnitIdUnitDetailUnitIdRoute =
+  MainLayoutZoneUnitIdUnitDetailUnitIdRouteImport.update({
+    id: '/zone/$unitId/unit/$detailUnitId',
+    path: '/zone/$unitId/unit/$detailUnitId',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
+const MainLayoutZoneUnitIdPostPostUnitIdRoute =
+  MainLayoutZoneUnitIdPostPostUnitIdRouteImport.update({
+    id: '/zone/$unitId/post/$postUnitId',
+    path: '/zone/$unitId/post/$postUnitId',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
+const MainLayoutZoneUnitIdPagePageSlugRoute =
+  MainLayoutZoneUnitIdPagePageSlugRouteImport.update({
+    id: '/zone/$unitId/page/$pageSlug',
+    path: '/zone/$unitId/page/$pageSlug',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutZSlugWikiWikiUnitIdRoute =
   MainLayoutZSlugWikiWikiUnitIdRouteImport.update({
     id: '/z/$slug/wiki/$wikiUnitId',
@@ -1256,6 +1291,7 @@ export interface FileRoutesByFullPath {
   '/user/$userId/': typeof MainLayoutUserUserIdIndexRoute
   '/user/me/': typeof MainLayoutUserMeIndexRoute
   '/z/$slug/': typeof MainLayoutZSlugIndexRoute
+  '/zone/$unitId/': typeof MainLayoutZoneUnitIdIndexRoute
   '/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
   '/book/$bookId/edit/$chapterId': typeof EditorBookBookIdEditChapterIdRoute
   '/book/$bookId/edit/authority': typeof EditorBookBookIdEditAuthorityRoute
@@ -1296,6 +1332,10 @@ export interface FileRoutesByFullPath {
   '/z/$slug/post/$postUnitId': typeof MainLayoutZSlugPostPostUnitIdRoute
   '/z/$slug/unit/$unitId': typeof MainLayoutZSlugUnitUnitIdRoute
   '/z/$slug/wiki/$wikiUnitId': typeof MainLayoutZSlugWikiWikiUnitIdRoute
+  '/zone/$unitId/page/$pageSlug': typeof MainLayoutZoneUnitIdPagePageSlugRoute
+  '/zone/$unitId/post/$postUnitId': typeof MainLayoutZoneUnitIdPostPostUnitIdRoute
+  '/zone/$unitId/unit/$detailUnitId': typeof MainLayoutZoneUnitIdUnitDetailUnitIdRoute
+  '/zone/$unitId/wiki/$wikiUnitId': typeof MainLayoutZoneUnitIdWikiWikiUnitIdRoute
   '/book/$bookId/edit/': typeof EditorBookBookIdEditIndexRoute
   '/realm/$realmId/': typeof MainLayoutRealmRealmIdDetailIndexRoute
   '/tag/book/$bookId/': typeof MainLayoutTagBookBookIdIndexRoute
@@ -1414,6 +1454,7 @@ export interface FileRoutesByTo {
   '/user/$userId': typeof MainLayoutUserUserIdIndexRoute
   '/user/me': typeof MainLayoutUserMeIndexRoute
   '/z/$slug': typeof MainLayoutZSlugIndexRoute
+  '/zone/$unitId': typeof MainLayoutZoneUnitIdIndexRoute
   '/book/$bookId/edit/$chapterId': typeof EditorBookBookIdEditChapterIdRoute
   '/book/$bookId/edit/authority': typeof EditorBookBookIdEditAuthorityRoute
   '/book/$bookId/edit/chapter': typeof EditorBookBookIdEditChapterRoute
@@ -1452,6 +1493,10 @@ export interface FileRoutesByTo {
   '/z/$slug/post/$postUnitId': typeof MainLayoutZSlugPostPostUnitIdRoute
   '/z/$slug/unit/$unitId': typeof MainLayoutZSlugUnitUnitIdRoute
   '/z/$slug/wiki/$wikiUnitId': typeof MainLayoutZSlugWikiWikiUnitIdRoute
+  '/zone/$unitId/page/$pageSlug': typeof MainLayoutZoneUnitIdPagePageSlugRoute
+  '/zone/$unitId/post/$postUnitId': typeof MainLayoutZoneUnitIdPostPostUnitIdRoute
+  '/zone/$unitId/unit/$detailUnitId': typeof MainLayoutZoneUnitIdUnitDetailUnitIdRoute
+  '/zone/$unitId/wiki/$wikiUnitId': typeof MainLayoutZoneUnitIdWikiWikiUnitIdRoute
   '/book/$bookId/edit': typeof EditorBookBookIdEditIndexRoute
   '/realm/$realmId': typeof MainLayoutRealmRealmIdDetailIndexRoute
   '/tag/book/$bookId': typeof MainLayoutTagBookBookIdIndexRoute
@@ -1585,6 +1630,7 @@ export interface FileRoutesById {
   '/_mainLayout/user/$userId/': typeof MainLayoutUserUserIdIndexRoute
   '/_mainLayout/user/me/': typeof MainLayoutUserMeIndexRoute
   '/_mainLayout/z/$slug/': typeof MainLayoutZSlugIndexRoute
+  '/_mainLayout/zone/$unitId/': typeof MainLayoutZoneUnitIdIndexRoute
   '/_mainLayout/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
   '/_editor/book/$bookId/edit/$chapterId': typeof EditorBookBookIdEditChapterIdRoute
   '/_editor/book/$bookId/edit/authority': typeof EditorBookBookIdEditAuthorityRoute
@@ -1625,6 +1671,10 @@ export interface FileRoutesById {
   '/_mainLayout/z/$slug/post/$postUnitId': typeof MainLayoutZSlugPostPostUnitIdRoute
   '/_mainLayout/z/$slug/unit/$unitId': typeof MainLayoutZSlugUnitUnitIdRoute
   '/_mainLayout/z/$slug/wiki/$wikiUnitId': typeof MainLayoutZSlugWikiWikiUnitIdRoute
+  '/_mainLayout/zone/$unitId/page/$pageSlug': typeof MainLayoutZoneUnitIdPagePageSlugRoute
+  '/_mainLayout/zone/$unitId/post/$postUnitId': typeof MainLayoutZoneUnitIdPostPostUnitIdRoute
+  '/_mainLayout/zone/$unitId/unit/$detailUnitId': typeof MainLayoutZoneUnitIdUnitDetailUnitIdRoute
+  '/_mainLayout/zone/$unitId/wiki/$wikiUnitId': typeof MainLayoutZoneUnitIdWikiWikiUnitIdRoute
   '/_editor/book/$bookId/edit/': typeof EditorBookBookIdEditIndexRoute
   '/_mainLayout/realm/$realmId/_detail/': typeof MainLayoutRealmRealmIdDetailIndexRoute
   '/_mainLayout/tag/book/$bookId/': typeof MainLayoutTagBookBookIdIndexRoute
@@ -1757,6 +1807,7 @@ export interface FileRouteTypes {
     | '/user/$userId/'
     | '/user/me/'
     | '/z/$slug/'
+    | '/zone/$unitId/'
     | '/tag/book/$bookId/tag'
     | '/book/$bookId/edit/$chapterId'
     | '/book/$bookId/edit/authority'
@@ -1797,6 +1848,10 @@ export interface FileRouteTypes {
     | '/z/$slug/post/$postUnitId'
     | '/z/$slug/unit/$unitId'
     | '/z/$slug/wiki/$wikiUnitId'
+    | '/zone/$unitId/page/$pageSlug'
+    | '/zone/$unitId/post/$postUnitId'
+    | '/zone/$unitId/unit/$detailUnitId'
+    | '/zone/$unitId/wiki/$wikiUnitId'
     | '/book/$bookId/edit/'
     | '/realm/$realmId/'
     | '/tag/book/$bookId/'
@@ -1915,6 +1970,7 @@ export interface FileRouteTypes {
     | '/user/$userId'
     | '/user/me'
     | '/z/$slug'
+    | '/zone/$unitId'
     | '/book/$bookId/edit/$chapterId'
     | '/book/$bookId/edit/authority'
     | '/book/$bookId/edit/chapter'
@@ -1953,6 +2009,10 @@ export interface FileRouteTypes {
     | '/z/$slug/post/$postUnitId'
     | '/z/$slug/unit/$unitId'
     | '/z/$slug/wiki/$wikiUnitId'
+    | '/zone/$unitId/page/$pageSlug'
+    | '/zone/$unitId/post/$postUnitId'
+    | '/zone/$unitId/unit/$detailUnitId'
+    | '/zone/$unitId/wiki/$wikiUnitId'
     | '/book/$bookId/edit'
     | '/realm/$realmId'
     | '/tag/book/$bookId'
@@ -2085,6 +2145,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/$userId/'
     | '/_mainLayout/user/me/'
     | '/_mainLayout/z/$slug/'
+    | '/_mainLayout/zone/$unitId/'
     | '/_mainLayout/tag/book/$bookId/tag'
     | '/_editor/book/$bookId/edit/$chapterId'
     | '/_editor/book/$bookId/edit/authority'
@@ -2125,6 +2186,10 @@ export interface FileRouteTypes {
     | '/_mainLayout/z/$slug/post/$postUnitId'
     | '/_mainLayout/z/$slug/unit/$unitId'
     | '/_mainLayout/z/$slug/wiki/$wikiUnitId'
+    | '/_mainLayout/zone/$unitId/page/$pageSlug'
+    | '/_mainLayout/zone/$unitId/post/$postUnitId'
+    | '/_mainLayout/zone/$unitId/unit/$detailUnitId'
+    | '/_mainLayout/zone/$unitId/wiki/$wikiUnitId'
     | '/_editor/book/$bookId/edit/'
     | '/_mainLayout/realm/$realmId/_detail/'
     | '/_mainLayout/tag/book/$bookId/'
@@ -2441,6 +2506,13 @@ declare module '@tanstack/react-router' {
       path: '/book/$bookId'
       fullPath: '/book/$bookId'
       preLoaderRoute: typeof MainLayoutBookBookIdRouteRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/zone/$unitId/': {
+      id: '/_mainLayout/zone/$unitId/'
+      path: '/zone/$unitId'
+      fullPath: '/zone/$unitId/'
+      preLoaderRoute: typeof MainLayoutZoneUnitIdIndexRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/z/$slug/': {
@@ -2981,6 +3053,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/book/$bookId/edit/'
       preLoaderRoute: typeof EditorBookBookIdEditIndexRouteImport
       parentRoute: typeof EditorBookBookIdEditRouteRoute
+    }
+    '/_mainLayout/zone/$unitId/wiki/$wikiUnitId': {
+      id: '/_mainLayout/zone/$unitId/wiki/$wikiUnitId'
+      path: '/zone/$unitId/wiki/$wikiUnitId'
+      fullPath: '/zone/$unitId/wiki/$wikiUnitId'
+      preLoaderRoute: typeof MainLayoutZoneUnitIdWikiWikiUnitIdRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/zone/$unitId/unit/$detailUnitId': {
+      id: '/_mainLayout/zone/$unitId/unit/$detailUnitId'
+      path: '/zone/$unitId/unit/$detailUnitId'
+      fullPath: '/zone/$unitId/unit/$detailUnitId'
+      preLoaderRoute: typeof MainLayoutZoneUnitIdUnitDetailUnitIdRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/zone/$unitId/post/$postUnitId': {
+      id: '/_mainLayout/zone/$unitId/post/$postUnitId'
+      path: '/zone/$unitId/post/$postUnitId'
+      fullPath: '/zone/$unitId/post/$postUnitId'
+      preLoaderRoute: typeof MainLayoutZoneUnitIdPostPostUnitIdRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/zone/$unitId/page/$pageSlug': {
+      id: '/_mainLayout/zone/$unitId/page/$pageSlug'
+      path: '/zone/$unitId/page/$pageSlug'
+      fullPath: '/zone/$unitId/page/$pageSlug'
+      preLoaderRoute: typeof MainLayoutZoneUnitIdPagePageSlugRouteImport
+      parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/z/$slug/wiki/$wikiUnitId': {
       id: '/_mainLayout/z/$slug/wiki/$wikiUnitId'
@@ -3807,12 +3907,17 @@ interface MainLayoutRouteChildren {
   MainLayoutShelfShelfIdIndexRoute: typeof MainLayoutShelfShelfIdIndexRoute
   MainLayoutUnitUnitIdIndexRoute: typeof MainLayoutUnitUnitIdIndexRoute
   MainLayoutZSlugIndexRoute: typeof MainLayoutZSlugIndexRoute
+  MainLayoutZoneUnitIdIndexRoute: typeof MainLayoutZoneUnitIdIndexRoute
   MainLayoutPostRootPostUnitIdContinueUnitIdRoute: typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
   MainLayoutRealmRealmIdPostPostUnitIdRoute: typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
   MainLayoutZSlugPagePageSlugRoute: typeof MainLayoutZSlugPagePageSlugRoute
   MainLayoutZSlugPostPostUnitIdRoute: typeof MainLayoutZSlugPostPostUnitIdRoute
   MainLayoutZSlugUnitUnitIdRoute: typeof MainLayoutZSlugUnitUnitIdRoute
   MainLayoutZSlugWikiWikiUnitIdRoute: typeof MainLayoutZSlugWikiWikiUnitIdRoute
+  MainLayoutZoneUnitIdPagePageSlugRoute: typeof MainLayoutZoneUnitIdPagePageSlugRoute
+  MainLayoutZoneUnitIdPostPostUnitIdRoute: typeof MainLayoutZoneUnitIdPostPostUnitIdRoute
+  MainLayoutZoneUnitIdUnitDetailUnitIdRoute: typeof MainLayoutZoneUnitIdUnitDetailUnitIdRoute
+  MainLayoutZoneUnitIdWikiWikiUnitIdRoute: typeof MainLayoutZoneUnitIdWikiWikiUnitIdRoute
 }
 
 const MainLayoutRouteChildren: MainLayoutRouteChildren = {
@@ -3889,6 +3994,7 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutShelfShelfIdIndexRoute: MainLayoutShelfShelfIdIndexRoute,
   MainLayoutUnitUnitIdIndexRoute: MainLayoutUnitUnitIdIndexRoute,
   MainLayoutZSlugIndexRoute: MainLayoutZSlugIndexRoute,
+  MainLayoutZoneUnitIdIndexRoute: MainLayoutZoneUnitIdIndexRoute,
   MainLayoutPostRootPostUnitIdContinueUnitIdRoute:
     MainLayoutPostRootPostUnitIdContinueUnitIdRoute,
   MainLayoutRealmRealmIdPostPostUnitIdRoute:
@@ -3897,6 +4003,13 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutZSlugPostPostUnitIdRoute: MainLayoutZSlugPostPostUnitIdRoute,
   MainLayoutZSlugUnitUnitIdRoute: MainLayoutZSlugUnitUnitIdRoute,
   MainLayoutZSlugWikiWikiUnitIdRoute: MainLayoutZSlugWikiWikiUnitIdRoute,
+  MainLayoutZoneUnitIdPagePageSlugRoute: MainLayoutZoneUnitIdPagePageSlugRoute,
+  MainLayoutZoneUnitIdPostPostUnitIdRoute:
+    MainLayoutZoneUnitIdPostPostUnitIdRoute,
+  MainLayoutZoneUnitIdUnitDetailUnitIdRoute:
+    MainLayoutZoneUnitIdUnitDetailUnitIdRoute,
+  MainLayoutZoneUnitIdWikiWikiUnitIdRoute:
+    MainLayoutZoneUnitIdWikiWikiUnitIdRoute,
 }
 
 const MainLayoutRouteWithChildren = MainLayoutRoute._addFileChildren(

@@ -3,6 +3,10 @@ import {
   directPostHref,
   realmPostRoute,
   zoneDetailRoute,
+  zoneManageHref,
+  zoneRouteBaseHref,
+  zoneRouteLocationFromZone,
+  zoneSearchHref,
 } from "./zoneDetailRoutes";
 
 describe("zone detail route models", () => {
@@ -27,19 +31,52 @@ describe("zone detail route models", () => {
     });
   });
 
+  test("builds parallel zone slug and unitId route locations", () => {
+    const slugLocation = zoneRouteLocationFromZone({
+      unitId: "zone-1",
+      slug: "book",
+    });
+    const unitLocation = zoneRouteLocationFromZone({
+      unitId: "zone-1",
+      slug: null,
+    });
+
+    expect(zoneRouteBaseHref(slugLocation)).toBe("/z/book");
+    expect(zoneRouteBaseHref(unitLocation)).toBe("/zone/zone-1");
+    expect(zoneSearchHref(unitLocation)).toBe("/zone/zone-1/search");
+    expect(zoneManageHref(unitLocation)).toBe("/zone/zone-1/manage");
+    expect(
+      zoneDetailRoute({
+        location: unitLocation,
+        kind: "post",
+        unitId: "post-1",
+      }),
+    ).toEqual({
+      href: "/zone/zone-1/post/post-1",
+      presentationContext: { kind: "zone", routeLocation: unitLocation },
+      interactionContext: { kind: "direct" },
+    });
+  });
+
   test("builds zone-framed wiki and unit links with zone presentation only", () => {
     expect(
       zoneDetailRoute({ zoneSlug: "wiki", kind: "wiki", unitId: "wiki-1" }),
     ).toEqual({
       href: "/z/wiki/wiki/wiki-1",
-      presentationContext: { kind: "zone", zoneSlug: "wiki" },
+      presentationContext: {
+        kind: "zone",
+        routeLocation: { kind: "slug", zoneSlug: "wiki" },
+      },
       interactionContext: { kind: "direct" },
     });
     expect(
       zoneDetailRoute({ zoneSlug: "book", kind: "unit", unitId: "unit-1" }),
     ).toEqual({
       href: "/z/book/unit/unit-1",
-      presentationContext: { kind: "zone", zoneSlug: "book" },
+      presentationContext: {
+        kind: "zone",
+        routeLocation: { kind: "slug", zoneSlug: "book" },
+      },
       interactionContext: { kind: "direct" },
     });
   });

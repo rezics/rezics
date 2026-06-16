@@ -10,9 +10,6 @@ import { Spinner } from "@rezics/ui";
 import {
   Alert,
   AlertDescription,
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
   Button,
   Input,
   Label,
@@ -20,6 +17,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Save as SaveIcon } from "lucide-react";
 import { type FC, useEffect, useState } from "react";
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
@@ -204,25 +202,12 @@ export const SettingsProfileSection: FC = () => {
           </Alert>
         )}
 
-        <div className="flex items-center gap-4 mb-8">
-          <Avatar className="w-[72px] h-[72px] rounded-md">
-            <AvatarImage
-              src={formData.avatar || undefined}
-              alt={formData.name ?? ""}
-            />
-            <AvatarFallback>
-              {formData.name?.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 flex flex-col gap-1.5">
-            <Label htmlFor="avatar-url">{t("entity:avatar_url")}</Label>
-            <Input
-              id="avatar-url"
-              value={formData.avatar}
-              onChange={(e) => handleChange("avatar", e.target.value)}
-              placeholder={t("settings:profile_avatar_placeholder")}
-            />
-          </div>
+        <div className="mb-8">
+          <ImageUploadField
+            value={formData.avatar || null}
+            onChange={(url) => handleChange("avatar", url ?? "")}
+            label={t("entity:avatar_url")}
+          />
         </div>
 
         <div className="space-y-6">

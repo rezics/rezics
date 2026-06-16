@@ -1,8 +1,14 @@
-import type { ZoneCollectionSection } from "@rezics/contract";
+import type {
+  StreamRow,
+  UnitType,
+  ZoneCollectionSection,
+} from "@rezics/contract";
+import { StreamRenderer } from "@/feed";
 import {
   zoneLinkFallbackKey,
   zoneLinkHref,
   zoneLinkLabel,
+  zoneRouteLocationFromZone,
 } from "../../models/zoneMenu";
 import {
   useZoneLabelResolver,
@@ -12,6 +18,27 @@ import {
   ZoneSectionShell,
 } from "./shared";
 import { ZoneItemList, type ZoneListEntry } from "./ZoneItemList";
+
+function entriesToStreamRows(entries: ZoneListEntry[]): StreamRow[] {
+  return entries.flatMap((entry) => {
+    if (!entry.unitId || !entry.type) return [];
+    return [
+      {
+        type: "unit",
+        rowId: `unit:${entry.unitId}`,
+        href: entry.href,
+        recommendationReason: "zone-collection-stream",
+        unit: {
+          unitId: entry.unitId,
+          type: entry.type as UnitType,
+          title: entry.label,
+          coverUrl: entry.imageUrl ?? null,
+          description: entry.summary ?? null,
+        },
+      },
+    ];
+  });
+}
 
 /**
  * Collection items are config-side `{target, labelUnitId?}`; labels and
@@ -30,7 +57,11 @@ export function CollectionSection({
   const { zone, refUnits } = ctx;
   const title = useZoneSectionTitle(section, refUnits);
   const resolveLabel = useZoneLabelResolver();
-  const linkCtx = { zoneSlug: zone.slug, pages: zone.pages, refUnits };
+  const linkCtx = {
+    routeLocation: zoneRouteLocationFromZone(zone),
+    pages: zone.pages,
+    refUnits,
+  };
 
   const entries: ZoneListEntry[] = section.items.flatMap((item, index) => {
     const href = zoneLinkHref(item.target, linkCtx);
@@ -63,7 +94,11 @@ export function CollectionSection({
 
   return (
     <ZoneSectionShell title={title}>
-      <ZoneItemList entries={entries} display={section.display} />
+      {section.display === "stream" ? (
+        <StreamRenderer rows={entriesToStreamRows(entries)} />
+      ) : (
+        <ZoneItemList entries={entries} display={section.display} />
+      )}
     </ZoneSectionShell>
   );
 }

@@ -7,6 +7,7 @@ export interface FeedPostRowCardProps {
   row: FeedPostRow;
   summaryContextUnitId?: string | null;
   reactionContextUnitId?: string | null;
+  hydrateReaction?: boolean;
   manageMode?: boolean;
   realmModerationStatus?: ModerationStatus;
   realmModerationAt?: string | Date | null;
@@ -24,6 +25,7 @@ export function FeedPostRowCard({
   row,
   summaryContextUnitId,
   reactionContextUnitId,
+  hydrateReaction,
   manageMode,
   realmModerationStatus,
   realmModerationAt,
@@ -38,6 +40,13 @@ export function FeedPostRowCard({
     reactionContextUnitId !== undefined
       ? reactionContextUnitId
       : (row.contextUnitId ?? null);
+  const targetUnit = row.targetUnit?.unitId
+    ? {
+        unitId: row.targetUnit.unitId,
+        title: row.targetUnit.title ?? row.targetUnit.unitId,
+        coverUrl: row.targetUnit.coverUrl ?? null,
+      }
+    : undefined;
 
   return (
     <FeedPostCard
@@ -45,13 +54,12 @@ export function FeedPostRowCard({
       href={row.href}
       summaryContextUnitId={resolvedSummaryContextUnitId}
       reactionContextUnitId={resolvedReactionContextUnitId}
+      hydrateReaction={hydrateReaction}
       variantContext={row.variantContext}
-      targetUnit={
-        row.targetUnit?.unitId
-          ? {
-              unitId: row.targetUnit.unitId,
-              title: row.targetUnit.title ?? row.targetUnit.unitId,
-            }
+      targetUnit={targetUnit}
+      media={
+        targetUnit?.coverUrl
+          ? { src: targetUnit.coverUrl, alt: targetUnit.title }
           : undefined
       }
       manageMode={manageMode}

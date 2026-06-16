@@ -143,6 +143,15 @@ describe("zone section nesting rules", () => {
     display: "list",
   };
 
+  test("query sections can opt into stream display", () => {
+    expect(
+      Value.Check(zoneContentSectionSchema, {
+        ...querySection,
+        display: "stream",
+      }),
+    ).toBe(true);
+  });
+
   const tabsSection = {
     id: "s-tabs",
     kind: "tabs",
@@ -242,27 +251,62 @@ describe("zone section nesting rules", () => {
     ).toBe(false);
   });
 
-  test("hero owns no text fields", () => {
+  test("stage composes explicit profile, image, actions, and columns", () => {
     expect(
       Value.Check(zonePageSectionSchema, {
-        id: "s-hero",
-        kind: "hero",
-        showDescription: true,
-        bannerImageUrl: "https://cdn.example/banner.png",
-        ctas: [
-          { target: { kind: "zonePage", pageId: "feed" } },
+        id: "s-stage",
+        kind: "stage",
+        background: {
+          color: "var(--colors-surface-subtle)",
+          imageUrl: "https://cdn.example/banner.png",
+          fit: "cover",
+          position: "center",
+        },
+        mask: { color: "black", opacity: 0.35 },
+        sections: [
+          { id: "zone-info", kind: "zoneInfo", showDescription: true },
           {
-            target: { kind: "unit", unitId: "unit-1" },
-            labelUnitId: "label-1",
+            id: "logo",
+            kind: "image",
+            url: "https://cdn.example/logo.png",
+            variant: "logo",
+            altLabelUnitId: "label-logo",
+          },
+          {
+            id: "actions",
+            kind: "actions",
+            builtIns: ["joinRealm", "createWiki"],
+            items: [
+              { target: { kind: "zonePage", pageId: "feed" } },
+              {
+                target: { kind: "unit", unitId: "unit-1" },
+                labelUnitId: "label-1",
+              },
+            ],
+          },
+          {
+            id: "stage-columns",
+            kind: "columns",
+            columns: [
+              { id: "main", ratio: 2, sections: [querySection] },
+              { id: "side", ratio: 1, sections: [] },
+            ],
           },
         ],
       }),
     ).toBe(true);
     expect(
       Value.Check(zonePageSectionSchema, {
+        id: "s-stage",
+        kind: "stage",
+        background: { imageUrl: "http://cdn.example/banner.png" },
+        sections: [],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zonePageSectionSchema, {
         id: "s-hero",
         kind: "hero",
-        title: "Toaru",
       }),
     ).toBe(false);
   });
