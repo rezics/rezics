@@ -71,11 +71,11 @@ export const jsonColumnRegistry = [
   {
     database: "server",
     table: "Realm",
-    column: "sidebar",
+    column: "dock",
     category: "enveloped",
     contractSchema: {
-      symbol: "realmSidebarEnvelopeSchema",
-      path: "package/contract/src/realm/realm-sidebar.ts",
+      symbol: "realmDockEnvelopeSchema",
+      path: "package/contract/src/realm/realm-dock.ts",
     },
   },
   {

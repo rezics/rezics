@@ -31,8 +31,8 @@ describe("realm detail route helpers", () => {
     expect(realmDetailHref(location)).toBe(
       "/realm/018f9326-8d80-7b86-bc9f-ccceec9a43f5",
     );
-    expect(realmDetailHref(location, "members")).toBe(
-      "/realm/018f9326-8d80-7b86-bc9f-ccceec9a43f5/members",
+    expect(realmDetailHref(location, "dock")).toBe(
+      "/realm/018f9326-8d80-7b86-bc9f-ccceec9a43f5/dock",
     );
   });
 

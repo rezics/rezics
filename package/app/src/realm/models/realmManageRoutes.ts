@@ -6,7 +6,7 @@ import {
 export type RealmManagePageKey =
   | "profile"
   | "organization"
-  | "wiki"
+  | "dock"
   | "moderation"
   | "members"
   | "danger";
@@ -21,8 +21,8 @@ export const REALM_MANAGE_PAGES = [
     labelKey: "community:realm_manage_tab_organization",
   },
   {
-    key: "wiki",
-    labelKey: "community:realm_manage_tab_wiki",
+    key: "dock",
+    labelKey: "community:realm_manage_tab_dock",
   },
   {
     key: "moderation",

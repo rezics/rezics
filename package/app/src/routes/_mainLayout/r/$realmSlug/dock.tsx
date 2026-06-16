@@ -1,12 +1,12 @@
 import { isPublicRealmSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { titleOfRealm, unitTitleMeta } from "@/core/routing/documentTitle";
+import { RealmDock } from "@/realm-dock";
 import { RealmDetailLayout, useRealmDetail } from "@/realm";
-import { RealmMemberList } from "@/realm/components/RealmMemberList";
 import { loadRealmSlugRoute } from "@/realm/models/realmSlugRoute";
 import { realmDetailLocationFromSlugParams } from "@/realm/models/realmDetailRoutes";
 
-function RealmSlugMembersRoute() {
+function RealmSlugDockRoute() {
   const params = Route.useParams();
   const { realm } = Route.useLoaderData();
   return (
@@ -14,17 +14,17 @@ function RealmSlugMembersRoute() {
       realmId={realm.unitId}
       routeLocation={realmDetailLocationFromSlugParams(params)}
     >
-      <RealmSlugMembersTab />
+      <RealmSlugDockTab />
     </RealmDetailLayout>
   );
 }
 
-function RealmSlugMembersTab() {
-  const { realmId } = useRealmDetail();
-  return <RealmMemberList realmId={realmId} />;
+function RealmSlugDockTab() {
+  const { realm } = useRealmDetail();
+  return <RealmDock realm={realm} placement="main" variant="page" />;
 }
 
-export const Route = createFileRoute("/_mainLayout/r/$realmSlug/members")({
+export const Route = createFileRoute("/_mainLayout/r/$realmSlug/dock")({
   loader: async ({ params, context }) => {
     if (!isPublicRealmSlugRouteParams(params)) throw notFound();
     return loadRealmSlugRoute({
@@ -39,5 +39,5 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/members")({
         ? titleOfRealm(loaderData.realm, loaderData.readContext)
         : null,
     ),
-  component: RealmSlugMembersRoute,
+  component: RealmSlugDockRoute,
 });

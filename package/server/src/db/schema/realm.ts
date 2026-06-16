@@ -48,12 +48,12 @@ export const Realm = pgTable("Realm", {
   isOfficial: boolean().default(false).notNull(),
   memberCount: integer().default(0).notNull(),
   extra: jsonData(),
-  sidebar: jsonData(),
+  dock: jsonData(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
   /**
    * Versioned rule policy for the POST Unit shown before realm joins/posts.
-   * Sidebar widgets render this policy; they do not own a second rule pointer.
+   * Dock widgets render this policy; they do not own a second rule pointer.
    */
   ruleUnitId: uuid().references(() => Unit.id, {
     onDelete: "set null",

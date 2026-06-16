@@ -9,11 +9,11 @@ import {
 } from "../models/realmDetailRoutes";
 import { useRealmDetail } from "../pages/realmDetailContext";
 
-// Realm detail tab routes. "stream" is the index route (empty path suffix); the
-// others are sibling sub-routes under the realm detail layout.
-// realm 详情标签路由。"stream" 为索引路由（路径后缀为空）；其余为详情布局下的
-// 同级子路由。
-const REALM_TABS = ["stream", "wiki", "tags", "about", "members"] as const;
+// Realm detail tab routes. "stream" is the index route; Dock is a small-screen
+// tab because large screens render the main Dock as a side rail.
+// realm 详情标签路由。"stream" 为索引路由；Dock 只作为小屏标签，大屏会将
+// main Dock 渲染为侧边停靠区。
+const REALM_TABS = ["stream", "wiki", "tags", "dock"] as const;
 
 /**
  * Tab navigation shell for realm detail. Renders the tab bar as route links and
@@ -43,9 +43,8 @@ export function RealmDetailShell({ children }: { children: ReactNode }) {
           </TabsTrigger>
           <TabsTrigger value="wiki">{t("entity:realm_tab_wiki")}</TabsTrigger>
           <TabsTrigger value="tags">{t("entity:realm_tab_tags")}</TabsTrigger>
-          <TabsTrigger value="about">{t("entity:realm_tab_about")}</TabsTrigger>
-          <TabsTrigger value="members">
-            {t("entity:realm_tab_members")}
+          <TabsTrigger value="dock" className="lg:hidden">
+            {t("entity:realm_tab_dock")}
           </TabsTrigger>
         </TabsList>
       </Tabs>

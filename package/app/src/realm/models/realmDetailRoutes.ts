@@ -3,7 +3,7 @@ import {
   type PublicRealmSlugRouteParams,
 } from "@rezics/contract";
 
-export type RealmDetailTab = "stream" | "wiki" | "tags" | "about" | "members";
+export type RealmDetailTab = "stream" | "wiki" | "tags" | "dock";
 
 export type RealmDetailRouteLocation =
   | { kind: "unitId"; realmId: string }
@@ -13,8 +13,7 @@ const TAB_SUFFIXES = {
   stream: "",
   wiki: "/wiki",
   tags: "/tags",
-  about: "/about",
-  members: "/members",
+  dock: "/dock",
 } as const satisfies Record<RealmDetailTab, string>;
 
 export function realmDetailLocationFromSlugParams(

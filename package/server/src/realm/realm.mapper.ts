@@ -8,7 +8,11 @@ import type {
   UnitRealmDTO,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import { resolveReadLanguage } from "@rezics/contract";
+import {
+  emptyRealmDock,
+  parseRealmDock,
+  resolveReadLanguage,
+} from "@rezics/contract";
 import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
 import type {
   RealmMember,
@@ -74,7 +78,7 @@ export function mapRealmToDTO(
     contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    sidebar: (row.sidebar as RealmDTO["sidebar"]) ?? undefined,
+    dock: parseRealmDock(row.dock) ?? emptyRealmDock(),
     ruleUnitId: row.ruleUnitId ?? null,
     resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
     title: translation?.title ?? null,
@@ -105,7 +109,7 @@ export function mapRealmListRowToDTO(
     contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    sidebar: (row.sidebar as RealmDTO["sidebar"]) ?? undefined,
+    dock: parseRealmDock(row.dock) ?? emptyRealmDock(),
     ruleUnitId: row.ruleUnitId ?? null,
     resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
     title: translation?.title ?? null,

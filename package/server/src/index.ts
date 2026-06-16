@@ -48,8 +48,8 @@ import { progressApi } from "./progress";
 import { reactionBoundaryApi } from "./reaction-boundary";
 import {
   realmApi,
+  realmDockApi,
   realmExtraApi,
-  realmSidebarApi,
   realmTagApplicationApi,
   realmTagApplicationVoteApi,
   realmTagApplicationVoteWithdrawApi,
@@ -230,8 +230,8 @@ routeApp
   .use(labelApi)
   .use(pinboardApi)
   .use(realmApi)
+  .use(realmDockApi)
   .use(realmExtraApi)
-  .use(realmSidebarApi)
   .use(realmTagContextApi)
   .use(realmTagApplicationApi)
   .use(realmTagApplicationVoteApi)

@@ -10,7 +10,7 @@ import {
 import { realmExtraSchema } from "./realm-extra";
 
 describe("RealmDTO", () => {
-  test("accepts sidebar, rule policy, and viewer capability metadata", () => {
+  test("accepts dock, rule policy, and viewer capability metadata", () => {
     expect(
       Value.Check(realmDTOSchema, {
         unitId: "realm-1",
@@ -18,11 +18,18 @@ describe("RealmDTO", () => {
         isPublic: true,
         isOfficial: false,
         memberCount: 12,
-        sidebar: {
-          schema: "rezics/realm-sidebar",
+        dock: {
+          schema: "rezics/realm-dock",
           version: 1,
           placements: {
-            home: [{ id: "rules", kind: "rules" }],
+            main: [
+              { slot: "builtin", id: "description" },
+              { slot: "builtin", id: "subscriptionStat" },
+              { slot: "builtin", id: "realmFacts" },
+              { slot: "builtin", id: "bookmarks", items: [] },
+              { slot: "builtin", id: "rules" },
+              { slot: "builtin", id: "moderators" },
+            ],
           },
         },
         ruleUnitId: "rule-1",
@@ -52,7 +59,7 @@ describe("RealmDTO", () => {
 });
 
 describe("RealmExtra", () => {
-  test("rejects composed surface keys now owned by sidebar and Pinboard", () => {
+  test("rejects composed surface keys now owned by Dock and Pinboard", () => {
     expect(
       Value.Check(realmExtraSchema, { featuredZoneUnitId: "zone-1" }),
     ).toBe(false);

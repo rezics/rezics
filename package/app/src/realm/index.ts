@@ -6,7 +6,7 @@ export { RealmManageMembersPage } from "./pages/manage/RealmManageMembersPage";
 export { RealmManageModerationPage } from "./pages/manage/RealmManageModerationPage";
 export { RealmManageOrganizationPage } from "./pages/manage/RealmManageOrganizationPage";
 export { RealmManageProfilePage } from "./pages/manage/RealmManageProfilePage";
-export { RealmManageWikiPage } from "./pages/manage/RealmManageWikiPage";
+export { RealmManageDockPage } from "./pages/manage/RealmManageDockPage";
 export {
   type RealmDetailContextValue,
   useRealmDetail,

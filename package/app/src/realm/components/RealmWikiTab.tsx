@@ -4,9 +4,9 @@ import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core";
+import { RealmDock } from "@/realm-dock";
 import { StreamPostCard } from "@/stream";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { RealmSidebar } from "../sections/RealmSidebar";
 
 interface RealmWikiTabProps {
   realm: RealmDTO;
@@ -28,7 +28,8 @@ export function RealmWikiTab({ realm, realmId }: RealmWikiTabProps) {
   const posts = wikiPostsQuery.data?.posts ?? [];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+    <div className="flex min-w-0 flex-col gap-6">
+      <RealmDock realm={realm} placement="wiki" variant="wiki" />
       <div className="min-w-0">
         {wikiPostsQuery.isLoading ? (
           <div className="flex items-center gap-2 py-8 text-sm leading-ui text-text-secondary">
@@ -47,10 +48,6 @@ export function RealmWikiTab({ realm, realmId }: RealmWikiTabProps) {
           </div>
         )}
       </div>
-
-      <aside className="min-w-0">
-        <RealmSidebar realm={realm} placement="wiki" />
-      </aside>
     </div>
   );
 }

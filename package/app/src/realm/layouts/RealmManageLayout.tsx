@@ -38,21 +38,21 @@ type RealmManageLayoutProps = {
  * Mobile (<640px):
  * ┌──────────────────────────┐
  * │ Realm Management         │
- * │ [Profile][Org][Wiki] ->  │
+ * │ [Profile][Org][Dock] ->  │
  * │ [Outlet page content]    │
  * └──────────────────────────┘
  *
  * Tablet (640-1023px):
  * ┌────────────────────────────────────┐
  * │ Realm Management                   │
- * │ [Profile][Org][Wiki][Mod] ->       │
+ * │ [Profile][Org][Dock][Mod] ->       │
  * │ [Outlet page content]              │
  * └────────────────────────────────────┘
  *
  * Desktop (1024-1535px):
  * ┌────────────────────────────────────────────┐
  * │ Realm Management                           │
- * │ [Profile][Organization][Wiki][Moderation] │
+ * │ [Profile][Organization][Dock][Moderation] │
  * │ [Outlet page content - max width 5xl]      │
  * └────────────────────────────────────────────┘
  *

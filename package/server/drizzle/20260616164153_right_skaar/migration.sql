@@ -1,0 +1,1 @@
+ALTER TABLE "Realm" RENAME COLUMN "sidebar" TO "dock";

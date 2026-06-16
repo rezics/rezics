@@ -456,7 +456,7 @@
   "moderation_filter_all": "모든 검토 상태",
   "realm_manage_tab_profile": "프로필",
   "realm_manage_tab_organization": "구성",
-  "realm_manage_tab_wiki": "위키",
+  "realm_manage_tab_dock": "도크",
   "realm_manage_tab_moderation": "관리",
   "realm_manage_tab_members": "멤버",
   "realm_manage_tab_danger": "위험",

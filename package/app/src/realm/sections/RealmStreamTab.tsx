@@ -12,10 +12,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PinnedStreamSection } from "@/pinboard";
+import { RealmDock } from "@/realm-dock";
 import { StreamLayout } from "@/stream";
 import { RealmContentStream } from "../components/RealmContentStream";
 import { useRealmManageMode } from "../models/realmManageMode";
-import { RealmSidebar } from "./RealmSidebar";
 import {
   type RealmStreamSort,
   RealmStreamSortSwitcher,
@@ -133,8 +133,8 @@ export function RealmStreamTab({
           />
         </StreamLayout>
       </div>
-      <aside className="min-w-0">
-        <RealmSidebar realm={realm} placement="home" />
+      <aside className="hidden min-w-0 lg:block">
+        <RealmDock realm={realm} placement="main" variant="rail" />
       </aside>
     </div>
   );

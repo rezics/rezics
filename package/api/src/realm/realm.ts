@@ -35,11 +35,11 @@ export type {
 // API Client
 // API 客户端
 export { realmApi } from "./realm.api";
-export { realmSidebarApi } from "./realm-sidebar.api";
+export { realmDockApi } from "./realm-dock.api";
 // Query Keys
 // 查询键
 export { realmKeys } from "./realm.keys";
-export { realmSidebarKeys } from "./realm-sidebar.keys";
+export { realmDockKeys } from "./realm-dock.keys";
 // Mutation Hooks
 // 变更 hooks
 export {
@@ -66,7 +66,7 @@ export {
   useUpdateRealmTagContextMutation,
   useWithdrawRealmTagApplicationVoteMutation,
 } from "./realm.mutations";
-export { useUpdateRealmSidebarMutation } from "./realm-sidebar.mutations";
+export { useUpdateRealmDockMutation } from "./realm-dock.mutations";
 // Query Configurations
 // 查询配置
 export {
@@ -83,7 +83,7 @@ export {
   realmTagApplicationsForUnitQuery,
   realmTagContextQuery,
 } from "./realm.queries";
-export { realmSidebarQuery } from "./realm-sidebar.queries";
+export { realmDockQuery } from "./realm-dock.queries";
 // Types
 // 类型
 export type {

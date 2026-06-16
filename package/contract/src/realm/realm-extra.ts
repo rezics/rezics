@@ -89,11 +89,11 @@ export type TagTreeNode = {
  * Typed shape of `Realm.extra`. Two well-known keys carry curated ordered Unit
  * `Realm.extra` only keeps profile chrome and low-level realm preferences that
  * have not yet been promoted to explicit columns. Composed display surfaces
- * live in `Realm.sidebar`, ordered promoted content lives in Pinboard tables,
+ * live in `Realm.dock`, ordered promoted content lives in Pinboard tables,
  * and rule governance lives on `Realm.ruleUnitId`.
  *
  * `Realm.extra` 只保留尚未提升为显式栏位的资料外观与底层偏好。组合展示界面
- * 属于 `Realm.sidebar`，有序推广内容属于 Pinboard 表，规则治理属于
+ * 属于 `Realm.dock`，有序推广内容属于 Pinboard 表，规则治理属于
  * `Realm.ruleUnitId`。
  */
 export const realmExtraSchema = t.Object(

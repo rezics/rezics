@@ -3,7 +3,7 @@ import {
   myRealmMembershipQuery,
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
-import { contentDocMarkdownFallback, type TagTreeNode } from "@rezics/contract";
+import type { TagTreeNode } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
@@ -85,7 +85,6 @@ export function RealmDetailLayout({
   }
 
   const title = realm.title ?? t("entity:realm_untitled");
-  const description = contentDocMarkdownFallback(realm.description);
   const avatarUrl =
     realm.extra?.avatar?.kind === "url" ? realm.extra.avatar.url : undefined;
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
@@ -105,7 +104,7 @@ export function RealmDetailLayout({
         isMember,
         showManage,
         tagTree,
-        description,
+        description: "",
       }}
     >
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
@@ -156,26 +155,6 @@ export function RealmDetailLayout({
                 <JoinButton realmId={realmId} />
               )}
             </div>
-          </div>
-          {description && (
-            <p className="text-base text-text-secondary">{description}</p>
-          )}
-          <div className="flex flex-row gap-4">
-            <span className="text-xs text-text-secondary">
-              {t("entity:realm_member_count", {
-                count: realm.memberCount ?? 0,
-              })}
-            </span>
-            {realm.isPublic && (
-              <span className="text-xs text-text-brand">
-                {t("entity:realm_public")}
-              </span>
-            )}
-            {realm.isOfficial && (
-              <span className="text-xs text-text-secondary">
-                {t("entity:realm_official")}
-              </span>
-            )}
           </div>
         </div>
 

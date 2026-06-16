@@ -19,15 +19,14 @@ import {
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useState } from "react";
+import { RealmDock } from "@/realm-dock";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { useAuthSessionStore } from "@/user";
-import { RealmAboutTab } from "../sections/RealmAboutTab";
 import { RealmStreamTab } from "../sections/RealmStreamTab";
 import { RealmDetailLayout } from "./RealmDetailLayout";
 import { useRealmDetail } from "./realmDetailContext";
 
 const REALM_ID = "realm-story-community";
-const ABOUT_POST_ID = "realm-about-post";
 const RULE_POST_ID = "realm-rule-post";
 
 type RealmStoryState =
@@ -39,10 +38,10 @@ type RealmStoryState =
   | "muted"
   | "banned";
 
-// Detail tabs exercised by these fixtures: the stream (manage chrome) and about
-// (role/membership readout).
-// 这些 fixture 演示的详情标签：信息流（管理外壳）与关于（角色/成员信息）。
-type RealmDetailStoryTab = "stream" | "about";
+// Detail tabs exercised by these fixtures: the stream (manage chrome) and Dock
+// (mobile tab / desktop rail content).
+// 这些 fixture 演示的详情标签：信息流（管理外壳）与 Dock（移动端标签 / 桌面侧栏内容）。
+type RealmDetailStoryTab = "stream" | "dock";
 
 function makePost(unitId: string, contentSource: string): PostDTO {
   return {
@@ -68,7 +67,6 @@ function makeRealm(): RealmDTO {
     title: "Story Realm",
     description: "A fixture realm for community governance states.",
     extra: {
-      about: ABOUT_POST_ID,
       rule: RULE_POST_ID,
       tagTree: [
         {
@@ -86,6 +84,20 @@ function makeRealm(): RealmDTO {
         description: "A fixture realm for community governance states.",
       },
     ],
+    dock: {
+      schema: "rezics/realm-dock",
+      version: 1,
+      placements: {
+        main: [
+          { slot: "builtin", id: "description", maxLines: 4 },
+          { slot: "builtin", id: "subscriptionStat" },
+          { slot: "builtin", id: "realmFacts" },
+          { slot: "builtin", id: "bookmarks", items: [] },
+          { slot: "builtin", id: "rules", mode: "summary" },
+          { slot: "builtin", id: "moderators", limit: 5 },
+        ],
+      },
+    },
   } as RealmDTO;
 }
 
@@ -208,13 +220,6 @@ function SeededRealmDetail({
       subscribed: true,
     });
     queryClient.setQueryData(
-      postQueries.detail(ABOUT_POST_ID).queryKey,
-      makePost(
-        ABOUT_POST_ID,
-        "This realm coordinates book lists, reviews, and sourced recommendations.",
-      ),
-    );
-    queryClient.setQueryData(
       postQueries.detail(RULE_POST_ID).queryKey,
       rulePost,
     );
@@ -274,14 +279,8 @@ function SeededRealmDetail({
 // 在布局 provider 内部渲染单个详情标签，使 fixture 读取与路由标签相同的 realm 上下文。
 function DetailTab({ tab }: { tab: RealmDetailStoryTab }) {
   const detail = useRealmDetail();
-  if (tab === "about") {
-    return (
-      <RealmAboutTab
-        realm={detail.realm}
-        membership={detail.membership}
-        canManage={detail.showManage}
-      />
-    );
+  if (tab === "dock") {
+    return <RealmDock realm={detail.realm} placement="main" variant="page" />;
   }
   return (
     <RealmStreamTab
@@ -296,7 +295,7 @@ function DetailTab({ tab }: { tab: RealmDetailStoryTab }) {
 
 function RealmStateStory({
   state,
-  tab = "about",
+  tab = "dock",
 }: {
   state: RealmStoryState;
   tab?: RealmDetailStoryTab;

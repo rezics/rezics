@@ -77,8 +77,8 @@ const baseRealm: RealmDTO = {
   isPublic: true,
   isOfficial: false,
   memberCount: 12,
-  sidebar: {
-    schema: "rezics/realm-sidebar",
+  dock: {
+    schema: "rezics/realm-dock",
     version: 1,
     placements: {},
   },
@@ -135,16 +135,20 @@ export const AutoPageList: Story = {
   ),
 };
 
-export const SidebarPost: Story = {
+export const DockText: Story = {
   args: {
     realm: {
       ...baseRealm,
-      sidebar: {
-        schema: "rezics/realm-sidebar",
+      dock: {
+        schema: "rezics/realm-dock",
         version: 1,
         placements: {
           wiki: [
-            { id: "wiki-text", kind: "text", contentUnitId: "wiki-post-1" },
+            {
+              slot: "widget",
+              id: "wiki-text",
+              widget: { kind: "text", contentUnitId: "wiki-post-1" },
+            },
           ],
         },
       },
@@ -161,11 +165,17 @@ export const ZoneNavigation: Story = {
   args: {
     realm: {
       ...baseRealm,
-      sidebar: {
-        schema: "rezics/realm-sidebar",
+      dock: {
+        schema: "rezics/realm-dock",
         version: 1,
         placements: {
-          wiki: [{ id: "wiki-nav", kind: "zoneNav", zoneUnitId: WIKI_ZONE_ID }],
+          wiki: [
+            {
+              slot: "widget",
+              id: "wiki-nav",
+              widget: { kind: "zoneNav", zoneUnitId: WIKI_ZONE_ID },
+            },
+          ],
         },
       },
     },
