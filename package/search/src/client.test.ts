@@ -120,6 +120,8 @@ describe("SearchClient", () => {
       "shelf_items",
       "realms",
       "zones",
+      "tags",
+      "labels",
       "entities",
       "user_unit_progress",
     ] satisfies ExpectedMeiliIndexUid[]);

@@ -11,6 +11,8 @@ export type ExpectedMeiliIndexUid =
   | typeof SHELF_ITEM_INDEX_NAME
   | "realms"
   | "zones"
+  | "tags"
+  | "labels"
   | "entities"
   | typeof PROGRESS_INDEX_NAME;
 
@@ -305,6 +307,43 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     supportsFullSync: true,
     domain: "Zones",
     description: "Zone directory records.",
+  },
+  {
+    uid: "tags",
+    primaryKey: "id",
+    searchableAttributes: ["titles", "descriptions", "aliasValues", "slug"],
+    filterableAttributes: [
+      "id",
+      "unitId",
+      "slug",
+      "status",
+      "languages",
+      "isLanguageNeutral",
+    ],
+    sortableAttributes: ["createdAt", "updatedAt"],
+    facetableSummaryFields: ["status"],
+    supportsFullSync: true,
+    domain: "Tags",
+    description: "Global multilingual TAG units for classification search.",
+  },
+  {
+    uid: "labels",
+    primaryKey: "id",
+    searchableAttributes: ["titles", "aliasValues", "slug"],
+    filterableAttributes: [
+      "id",
+      "unitId",
+      "slug",
+      "status",
+      "languages",
+      "isLanguageNeutral",
+    ],
+    sortableAttributes: ["createdAt", "updatedAt"],
+    facetableSummaryFields: ["status"],
+    supportsFullSync: true,
+    domain: "Labels",
+    description:
+      "Global multilingual LABEL units used as shared i18n label references.",
   },
   {
     uid: "entities",

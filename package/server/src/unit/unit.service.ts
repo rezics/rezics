@@ -50,6 +50,50 @@ function enqueueContentCommand(
   );
 }
 
+function enqueueUnitKindSearchCommand(
+  unit: Pick<typeof Unit.$inferSelect, "id" | "type">,
+) {
+  if (unit.type === "TAG") {
+    return serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.tagSync,
+        { unitId: unit.id },
+        { type: "server", service: "unit" },
+      ),
+    );
+  }
+  if (unit.type === "LABEL") {
+    return serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.labelSync,
+        { unitId: unit.id },
+        { type: "server", service: "unit" },
+      ),
+    );
+  }
+  return enqueueContentCommand(SEARCH_COMMAND_KINDS.contentSync, unit.id);
+}
+
+function enqueueUnitKindDeleteCommand(unitId: string) {
+  return Promise.all([
+    enqueueContentCommand(SEARCH_COMMAND_KINDS.contentDelete, unitId),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.tagDelete,
+        { unitId },
+        { type: "server", service: "unit" },
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.labelDelete,
+        { unitId },
+        { type: "server", service: "unit" },
+      ),
+    ),
+  ]);
+}
+
 function enqueueContentMetadataCommand(
   unitId: string,
   fields: Record<string, unknown>,
@@ -587,7 +631,7 @@ export class UnitService {
   /** Create a Unit with optional translations. 创建 Unit，可选附带译文。 */
   async create(input: CreateUnitInput): Promise<UnitWithRelations> {
     const unit = await this.repository.create(input);
-    await enqueueContentCommand(SEARCH_COMMAND_KINDS.contentSync, unit.id);
+    await enqueueUnitKindSearchCommand(unit);
     return unit;
   }
 
@@ -627,6 +671,7 @@ export class UnitService {
         : null;
     }
     await enqueueContentMetadataCommand(unitId, patchFields);
+    await enqueueUnitKindSearchCommand(unit);
 
     return unit;
   }
@@ -655,7 +700,7 @@ export class UnitService {
   /** Delete a Unit by id (cascades). 按 id 删除 Unit（级联删除）。 */
   async delete(unitId: string): Promise<void> {
     await this.repository.delete(unitId);
-    await enqueueContentCommand(SEARCH_COMMAND_KINDS.contentDelete, unitId);
+    await enqueueUnitKindDeleteCommand(unitId);
     cleanupReactions(unitId).catch(() => {});
   }
 }

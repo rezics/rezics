@@ -1,4 +1,4 @@
-import { realmSearchQuery } from "@rezics/api/realm/realm";
+import { realmSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";
@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useId, useState } from "react";
 import { useDebouncedValue } from "@/entity-picker";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 type PickedRealm = {
   unitId: string;
@@ -38,6 +39,7 @@ export function RealmSearchField({
   placeholder,
 }: RealmSearchFieldProps) {
   const { t } = useTranslation("common");
+  const readContext = useReadLanguageContext();
   const fieldId = id ?? "realm-search-field";
   const listboxId = `${fieldId}-listbox`;
   const autoId = useId();
@@ -49,10 +51,15 @@ export function RealmSearchField({
   const debouncedQuery = useDebouncedValue(query.trim(), 200);
 
   const searchQuery = useQuery({
-    ...realmSearchQuery(debouncedQuery, { limit: 8 }),
-    enabled: debouncedQuery.length > 0,
+    ...realmSearchQueryOptions({
+      keyword: debouncedQuery,
+      limit: 8,
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && debouncedQuery.length > 0,
   });
-  const results = searchQuery.data?.realms ?? [];
+  const results = searchQuery.data?.items ?? [];
   const isListOpen = results.length > 0;
 
   const handlePick = (realm: PickedRealm) => {
@@ -126,7 +133,7 @@ export function RealmSearchField({
             >
               {results.map((realm, index) => (
                 <button
-                  key={realm.unitId}
+                  key={realm.id}
                   id={`${autoId}-option-${index}`}
                   type="button"
                   role="option"
@@ -134,22 +141,18 @@ export function RealmSearchField({
                   className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
                   onClick={() =>
                     handlePick({
-                      unitId: realm.unitId,
+                      unitId: realm.id,
                       title: realm.title ?? null,
-                      slug: realm.slug ?? null,
+                      slug: null,
                     })
                   }
                   onMouseEnter={() => setActiveIndex(index)}
                   onMouseLeave={() => setActiveIndex(-1)}
                 >
-                  <span className="truncate">
-                    {realm.title ?? realm.unitId}
+                  <span className="truncate">{realm.title ?? realm.id}</span>
+                  <span className="shrink-0 font-mono text-xs text-text-tertiary">
+                    {realm.id.slice(0, 8)}
                   </span>
-                  {realm.slug ? (
-                    <span className="shrink-0 font-mono text-xs text-text-tertiary">
-                      {realm.slug}
-                    </span>
-                  ) : null}
                 </button>
               ))}
             </div>

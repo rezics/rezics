@@ -54,12 +54,9 @@ const DEFAULT_MANAGED_DATABASE_NAMES = {
 } as const;
 
 export function createToolConfig(input: ToolEnv = env) {
-  const sourceDbHost =
-    input.SOURCE_DB_HOST ?? DEFAULT_TOOL_ENV.SOURCE_DB_HOST;
-  const sourceDbPort =
-    input.SOURCE_DB_PORT ?? DEFAULT_TOOL_ENV.SOURCE_DB_PORT;
-  const sourceDbUser =
-    input.SOURCE_DB_USER ?? DEFAULT_TOOL_ENV.SOURCE_DB_USER;
+  const sourceDbHost = input.SOURCE_DB_HOST ?? DEFAULT_TOOL_ENV.SOURCE_DB_HOST;
+  const sourceDbPort = input.SOURCE_DB_PORT ?? DEFAULT_TOOL_ENV.SOURCE_DB_PORT;
+  const sourceDbUser = input.SOURCE_DB_USER ?? DEFAULT_TOOL_ENV.SOURCE_DB_USER;
   const sourceDbPassword =
     input.SOURCE_DB_PASSWORD ?? DEFAULT_TOOL_ENV.SOURCE_DB_PASSWORD;
   const sourceDbName = input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME;

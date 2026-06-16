@@ -1,5 +1,5 @@
 import type { ContentLanguage } from "@rezics/contract";
-import { and, asc, eq, ilike, inArray, ne } from "drizzle-orm";
+import { and, asc, eq, inArray, ne } from "drizzle-orm";
 import { unitService } from "@/unit";
 import { Unit, UnitTranslation } from "../db/schema";
 
@@ -9,10 +9,6 @@ export type LabelWithTranslations = {
 };
 
 export type LabelRepository = {
-  searchByTitle(input: {
-    keyword: string;
-    limit: number;
-  }): Promise<LabelWithTranslations[]>;
   getByUnitIds(unitIds: string[]): Promise<LabelWithTranslations[]>;
 };
 
@@ -45,22 +41,6 @@ function createDrizzleLabelRepository(): LabelRepository {
   }
 
   return {
-    async searchByTitle(input) {
-      const db = await getServerDb();
-      const rows = await db
-        .selectDistinct({ unitId: Unit.id })
-        .from(Unit)
-        .innerJoin(UnitTranslation, eq(UnitTranslation.unitId, Unit.id))
-        .where(
-          and(
-            eq(Unit.type, "LABEL"),
-            ne(Unit.status, "DELETED"),
-            ilike(UnitTranslation.title, `%${input.keyword}%`),
-          ),
-        )
-        .limit(input.limit);
-      return hydrate(rows.map((row) => row.unitId));
-    },
     async getByUnitIds(unitIds) {
       if (unitIds.length === 0) return [];
       const db = await getServerDb();
@@ -81,27 +61,15 @@ function createDrizzleLabelRepository(): LabelRepository {
 
 /**
  * Curated short labels (LABEL units) back every translated string in zone
- * configs (section titles, menu labels). This service is the manage-picker
- * surface: search by name, create with multilingual translations.
+ * configs (section titles, menu labels). Search is served by the dedicated
+ * Meili `labels` index; this service owns create and id hydration.
  * 精选短标签（LABEL Unit）支撑专区配置中的所有可翻译字符串（分区标题、
- * 菜单标签）。本服务是管理选择器的接口：按名称搜索、以多语言译文创建。
+ * 菜单标签）。搜索由专用 Meili `labels` 索引提供；本服务负责创建与按 id 水合。
  */
 export class LabelService {
   constructor(
     private readonly repository: LabelRepository = createDrizzleLabelRepository(),
   ) {}
-
-  async search(input: {
-    keyword: string;
-    limit?: number;
-  }): Promise<LabelWithTranslations[]> {
-    const limit = Math.min(Math.max(input.limit ?? 20, 1), 50);
-    if (!input.keyword.trim()) return [];
-    return this.repository.searchByTitle({
-      keyword: input.keyword.trim(),
-      limit,
-    });
-  }
 
   async getByUnitIds(unitIds: string[]): Promise<LabelWithTranslations[]> {
     return this.repository.getByUnitIds(unitIds);

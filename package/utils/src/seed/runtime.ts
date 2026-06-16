@@ -4,8 +4,10 @@ import {
   setSearchDb,
   syncSingleContent,
   syncSingleEntity,
+  syncSingleLabel,
   syncSinglePost,
   syncSingleRealm,
+  syncSingleTag,
   syncSingleUser,
   syncSingleZone,
 } from "@rezics/search/sync";
@@ -52,6 +54,8 @@ export function createEmptySyncSummary(): SeedSyncSummary {
       post: 0,
       realm: 0,
       zone: 0,
+      tag: 0,
+      label: 0,
       user: 0,
       entity: 0,
       "content-contained-units": 0,
@@ -72,6 +76,8 @@ function createNoopSyncHooks(): SeedSyncHooks {
     post: noop,
     realm: noop,
     zone: noop,
+    tag: noop,
+    label: noop,
     user: noop,
     entity: noop,
     contentContainedUnits: noop,
@@ -102,6 +108,14 @@ function createActiveSyncHooks(input: {
     async zone(unitId) {
       await syncSingleZone(searchClient, unitId);
       recordSync(summary, "zone");
+    },
+    async tag(unitId) {
+      await syncSingleTag(searchClient, unitId);
+      recordSync(summary, "tag");
+    },
+    async label(unitId) {
+      await syncSingleLabel(searchClient, unitId);
+      recordSync(summary, "label");
     },
     async user(unitId) {
       await syncSingleUser(searchClient, unitId);

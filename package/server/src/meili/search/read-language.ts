@@ -1,10 +1,14 @@
 import type {
   ContentSearchDocument,
   ContentSearchOptions,
+  LabelSearchDocument,
+  LabelSearchOptions,
   PostSearchDocument,
   PostSearchOptions,
   RealmSearchDocument,
   RealmSearchOptions,
+  TagSearchDocument,
+  TagSearchOptions,
   ZoneSearchDocument,
   ZoneSearchOptions,
 } from "@rezics/contract";
@@ -113,5 +117,46 @@ export function resolveZoneHitDisplay(
     resolvedLanguage,
     title: translation?.title ?? null,
     description: translation?.description ?? null,
+  };
+}
+
+export function resolveTagHitDisplay(
+  hit: TagSearchDocument,
+  opts: TagSearchOptions,
+): TagSearchDocument {
+  const resolvedLanguage = resolveReadLanguage({
+    languages: opts.languages,
+    appLocale: opts.appLocale,
+    supportLanguages: availableSupportLanguages(hit),
+  });
+  const translation = resolvedLanguage
+    ? hit.translations?.find((item) => item.language === resolvedLanguage)
+    : undefined;
+
+  return {
+    ...hit,
+    resolvedLanguage,
+    title: translation?.title ?? null,
+    description: translation?.description ?? null,
+  };
+}
+
+export function resolveLabelHitDisplay(
+  hit: LabelSearchDocument,
+  opts: LabelSearchOptions,
+): LabelSearchDocument {
+  const resolvedLanguage = resolveReadLanguage({
+    languages: opts.languages,
+    appLocale: opts.appLocale,
+    supportLanguages: availableSupportLanguages(hit),
+  });
+  const translation = resolvedLanguage
+    ? hit.translations?.find((item) => item.language === resolvedLanguage)
+    : undefined;
+
+  return {
+    ...hit,
+    resolvedLanguage,
+    title: translation?.title ?? null,
   };
 }

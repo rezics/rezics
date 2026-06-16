@@ -9,9 +9,11 @@ import type {
   ContentSearchResult,
   FeedbackListResponse,
   FeedbackType,
+  LabelSearchOptions,
   PollSearchOptions,
   PostSearchOptions,
   RealmSearchOptions,
+  TagSearchOptions,
   UserListQuery,
   ZoneSearchOptions,
 } from "@rezics/contract";
@@ -24,9 +26,11 @@ import {
   meiliCommentApi,
   meiliContentApi,
   meiliFeedbackApi,
+  meiliLabelApi,
   meiliPollApi,
   meiliPostApi,
   meiliRealmApi,
+  meiliTagApi,
   meiliUserApi,
   meiliZoneApi,
 } from "./meili.api";
@@ -235,4 +239,30 @@ export function useZoneSearchInfiniteQuery(
     },
     staleTime: 1000 * 60 * 2,
   });
+}
+
+// ANCHOR: Tag search 标签搜索
+
+export const meiliTagSearchQueryOptions = (opts: TagSearchOptions) =>
+  queryOptions({
+    queryKey: ["meili", "tags", opts],
+    queryFn: () => meiliTagApi.tagSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function useTagSearchQuery(opts: TagSearchOptions) {
+  return useQuery(meiliTagSearchQueryOptions(opts));
+}
+
+// ANCHOR: Label search 标签文本搜索
+
+export const meiliLabelSearchQueryOptions = (opts: LabelSearchOptions) =>
+  queryOptions({
+    queryKey: ["meili", "labels", opts],
+    queryFn: () => meiliLabelApi.labelSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function useLabelSearchQuery(opts: LabelSearchOptions) {
+  return useQuery(meiliLabelSearchQueryOptions(opts));
 }

@@ -106,6 +106,26 @@ function enqueueContentTagsSync(unitId: string) {
   );
 }
 
+function enqueueTagSearchSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.tagSync,
+      { unitId },
+      { type: "server", service: "tag" },
+    ),
+  );
+}
+
+function enqueueTagSearchDelete(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.tagDelete,
+      { unitId },
+      { type: "server", service: "tag" },
+    ),
+  );
+}
+
 async function loadTagTranslations(
   db: any,
   tagUnitIds: readonly string[],
@@ -577,11 +597,13 @@ export class TagService {
 
     const { requireSlugScopeId } = await import("@/infra/slug-scopes");
     const tagScope = requireSlugScopeId("tag");
-    return this.repository.createTag(
+    const tag = await this.repository.createTag(
       userId,
       { ...input, slug: normalizedSlug },
       tagScope,
     );
+    await enqueueTagSearchSync(tag.id);
+    return tag;
   }
 
   /**
@@ -593,7 +615,9 @@ export class TagService {
     input: UpdateTagInput,
   ): Promise<TagWithTranslations> {
     await this.repository.updateTranslations(unitId, input);
-    return this.getByUnitId(unitId);
+    const tag = await this.getByUnitId(unitId);
+    await enqueueTagSearchSync(unitId);
+    return tag;
   }
 
   /**
@@ -602,6 +626,7 @@ export class TagService {
    */
   async delete(unitId: string): Promise<void> {
     await this.repository.deleteTag(unitId);
+    await enqueueTagSearchDelete(unitId);
   }
 
   /**

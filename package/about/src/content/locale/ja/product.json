@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "title": "Rezics Products | Rezics",
+    "description": "Rezics 製品ファミリーを紹介します。カタログ、Web アプリ、Realms、Wiki、棚、共有グラフは、同じ作品 ID の上にあります。"
+  },
+  "hero": {
+    "eyebrow": "製品",
+    "heading": "Rezics 製品"
+  },
+  "sections": [
+    {
+      "eyebrow": "共有基盤",
+      "title": "すべての製品表面は、同じ作品 ID から始まります。",
+      "body": "カタログ項目、レビュー、棚、タグ、wiki ページ、realm の議論は、別々のデータベースではなく共有 Work Unit に戻ります。"
+    },
+    {
+      "eyebrow": "製品境界",
+      "title": "このサイトは製品を紹介し、操作は本体アプリが担います。",
+      "body": "検索、保存、投票、編集、realm 参加、wiki 執筆など、ログイン状態を必要とする操作は Rezics 本体アプリで行います。"
+    }
+  ],
+  "storySections": [
+    {
+      "eyebrow": "一覧の考え方",
+      "title": "製品は分けられても、グラフは分けません。",
+      "body": "Rezics Web、Realms、Wiki、Shelves、Graph は別々の製品表面になり得ますが、カタログ ID、出典事実、コミュニティ分類は共有します。"
+    },
+    {
+      "eyebrow": "状態",
+      "title": "この一覧は、将来向けの表面も表示できます。",
+      "body": "計画中という状態は、名前が方向性を示すものであり、完全なワークフローがすでに利用可能という意味ではありません。"
+    }
+  ],
+  "products": [
+    {
+      "name": "Rezics Catalog",
+      "category": "カタログ",
+      "status": "available",
+      "statusLabel": "利用可能",
+      "summary": "作品、別名、出典、関係、媒体 metadata を整理する、公開された言語横断の作品索引。",
+      "href": "https://book.rezics.com/ja/",
+      "ctaLabel": "カタログを開く",
+      "features": [
+        "本、ゲーム、メディア、投稿、混合型作品の共有 Work Unit",
+        "事実、別名、出典リンク、翻訳、関連作品",
+        "言語、プラットフォーム、版、コミュニティを越えるひとつの作品 ID"
+      ]
+    },
+    {
+      "name": "Rezics Web",
+      "category": "アプリ",
+      "status": "preview",
+      "statusLabel": "プレビュー",
+      "summary": "カタログを閲覧、レビュー、収集、編集するための主要 Web アプリ。",
+      "href": "https://book.rezics.com/ja/",
+      "ctaLabel": "アプリを開く",
+      "features": [
+        "インタラクティブな検索と作品詳細",
+        "レビュー、棚、タグ、コレクション操作",
+        "ログインした利用者によるカタログとコミュニティへの貢献"
+      ]
+    },
+    {
+      "name": "Rezics Realms",
+      "category": "コミュニティ",
+      "status": "planned",
+      "statusLabel": "計画中",
+      "summary": "公開カタログを fork せず、コミュニティが作品を分類、議論、キュレーションする空間。",
+      "features": [
+        "Realm メンバーシップとローカルな議論",
+        "コミュニティ文脈でのタグ適用",
+        "共有された関心を中心にした feed と入口"
+      ]
+    },
+    {
+      "name": "Rezics Wiki",
+      "category": "知識",
+      "status": "planned",
+      "statusLabel": "計画中",
+      "summary": "作品とコミュニティのそばに文脈を置く、協働知識ページと realm wiki ポータル。",
+      "features": [
+        "背景、時系列、例、解釈を記録する wiki 投稿",
+        "コミュニティが維持する Realm wiki zones",
+        "知識を別ツールに散らさず、作品に接続する構造"
+      ]
+    },
+    {
+      "name": "Rezics Shelves",
+      "category": "発見",
+      "status": "planned",
+      "statusLabel": "計画中",
+      "summary": "作品、レビュー、タグ、realms、その他の棚項目を通るキュレーションされた道筋。",
+      "features": [
+        "不透明な推薦リストではなく、説明可能なコレクション",
+        "レビューと分類文脈を持てる棚項目",
+        "共有作品 ID を中心にした読者とコミュニティのキュレーション"
+      ]
+    },
+    {
+      "name": "Rezics Graph",
+      "category": "プラットフォーム",
+      "status": "planned",
+      "statusLabel": "計画中",
+      "summary": "カタログ ID、出典事実、コミュニティ分類、知識表面を支える共有製品グラフ。",
+      "features": [
+        "作品、タグ、realm、棚、レビュー、wiki の関係",
+        "製品表面のための contract-first なデータ形状",
+        "将来の Rezics ツールが事実を重複させないための基盤"
+      ]
+    }
+  ]
+}

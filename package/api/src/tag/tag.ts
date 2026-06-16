@@ -50,7 +50,6 @@ export {
   tagInfiniteListQuery,
   tagListQuery,
   tagQueries,
-  tagSearchQuery,
   tagsForUnitQuery,
 } from "./tag.queries";
 

@@ -316,6 +316,31 @@ export class TranslationService {
           { type: "server", service: "unit-translation" },
         ),
       );
+    } else if (type === "TAG") {
+      await Promise.all([
+        serverJobProducer.enqueue(
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.tagSync,
+            { unitId },
+            { type: "server", service: "unit-translation" },
+          ),
+        ),
+        serverJobProducer.enqueue(
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.contentPatchTagFanout,
+            { targetId: unitId },
+            { type: "server", service: "unit-translation" },
+          ),
+        ),
+      ]);
+    } else if (type === "LABEL") {
+      await serverJobProducer.enqueue(
+        createSearchCommand(
+          SEARCH_COMMAND_KINDS.labelSync,
+          { unitId },
+          { type: "server", service: "unit-translation" },
+        ),
+      );
     } else {
       await Promise.all([
         serverJobProducer.enqueue(

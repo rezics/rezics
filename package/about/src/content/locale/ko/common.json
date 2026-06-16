@@ -1,0 +1,20 @@
+{
+  "nav": {
+    "home": "소개",
+    "product": "제품",
+    "app": "Rezics 열기",
+    "language": "언어"
+  },
+  "cta": {
+    "enterApp": "작품 카탈로그 열기",
+    "readProduct": "제품 보기",
+    "backHome": "소개로 돌아가기"
+  },
+  "footer": {
+    "originNote": "상호작용형 카탈로그, 서가, 커뮤니티 작업은 Rezics 기본 앱에서 열립니다."
+  },
+  "notFound": {
+    "title": "페이지를 찾을 수 없습니다",
+    "body": "이 공개 사이트에는 현재 소개와 제품 페이지만 있습니다. 현지화된 탐색을 사용해 계속하세요."
+  }
+}

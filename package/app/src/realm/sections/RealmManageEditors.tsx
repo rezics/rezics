@@ -3,7 +3,12 @@ import {
   useSetRealmExtraValueMutation,
 } from "@rezics/api/realm/realm-extra.mutations";
 import { tagApi } from "@rezics/api/tag/tag";
-import { unitApi, unitQueries } from "@rezics/api/unit/unit";
+import {
+  meiliLabelSearchQueryOptions,
+  meiliTagSearchQueryOptions,
+  postSearchQueryOptions,
+} from "@rezics/api/meili/meili.queries";
+import { unitApi } from "@rezics/api/unit/unit";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { zonePortalQueryOptions } from "@rezics/api/zone/zone";
 import type {
@@ -12,6 +17,9 @@ import type {
   RealmTagView,
   RealmTagViewStyle,
   RealmWikiSidebar,
+  LabelSearchDocument,
+  PostSearchDocument,
+  TagSearchDocument,
   TagTreeNode,
   UnitDTO,
 } from "@rezics/contract";
@@ -97,6 +105,12 @@ function unitLabel(unit: UnitDTO) {
       undefined,
   );
   return unit.title ?? tr?.title ?? unit.slug ?? unit.id;
+}
+
+function searchDocLabel(
+  doc: LabelSearchDocument | TagSearchDocument | PostSearchDocument,
+) {
+  return doc.title ?? doc.id;
 }
 
 const TREE_DROP_INDENT = 32;
@@ -606,8 +620,8 @@ export function TagTreeEditor({
   const readContext = useReadLanguageContext();
   const searchTerm = search.trim();
   const { data: labelSearchData, isLoading: labelSearchLoading } = useQuery({
-    ...unitQueries.search(searchTerm, {
-      type: "LABEL",
+    ...meiliLabelSearchQueryOptions({
+      keyword: searchTerm,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
       limit: 8,
@@ -615,8 +629,8 @@ export function TagTreeEditor({
     enabled: readContext.ready && Boolean(searchTerm),
   });
   const { data: tagSearchData, isLoading: tagSearchLoading } = useQuery({
-    ...unitQueries.search(searchTerm, {
-      type: "TAG",
+    ...meiliTagSearchQueryOptions({
+      keyword: searchTerm,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
       limit: 8,
@@ -644,17 +658,17 @@ export function TagTreeEditor({
 
   const labelResults = useMemo(
     () =>
-      (labelSearchData?.units ?? []).filter(
-        (unit) => unit.id && !existingUnitRefs.labelUnitIds.has(unit.id),
+      (labelSearchData?.items ?? []).filter(
+        (unit) => !existingUnitRefs.labelUnitIds.has(unit.id),
       ),
-    [existingUnitRefs.labelUnitIds, labelSearchData?.units],
+    [existingUnitRefs.labelUnitIds, labelSearchData?.items],
   );
   const tagResults = useMemo(
     () =>
-      (tagSearchData?.units ?? []).filter(
-        (unit) => unit.id && !existingUnitRefs.tagIds.has(unit.id),
+      (tagSearchData?.items ?? []).filter(
+        (unit) => !existingUnitRefs.tagIds.has(unit.id),
       ),
-    [existingUnitRefs.tagIds, tagSearchData?.units],
+    [existingUnitRefs.tagIds, tagSearchData?.items],
   );
 
   useEffect(() => {
@@ -1343,11 +1357,13 @@ export function TagTreeEditor({
                     className="h-auto justify-start px-2 py-2 text-left"
                     onClick={() =>
                       insertAndClose(
-                        createPublicLabelNode(unit.id, unitLabel(unit)),
+                        createPublicLabelNode(unit.id, searchDocLabel(unit)),
                       )
                     }
                   >
-                    <span className="min-w-0 truncate">{unitLabel(unit)}</span>
+                    <span className="min-w-0 truncate">
+                      {searchDocLabel(unit)}
+                    </span>
                   </Button>
                 ))}
               </div>
@@ -1377,12 +1393,14 @@ export function TagTreeEditor({
                       insertAndClose(
                         createTagNode({
                           tagId: unit.id,
-                          label: unitLabel(unit),
+                          label: searchDocLabel(unit),
                         }),
                       )
                     }
                   >
-                    <span className="min-w-0 truncate">{unitLabel(unit)}</span>
+                    <span className="min-w-0 truncate">
+                      {searchDocLabel(unit)}
+                    </span>
                   </Button>
                 ))}
               </div>
@@ -1487,8 +1505,8 @@ export function SlotPicker({
   const readContext = useReadLanguageContext();
   const searchTerm = search.trim();
   const { data } = useQuery({
-    ...unitQueries.search(searchTerm, {
-      type: "POST",
+    ...postSearchQueryOptions({
+      keyword: searchTerm,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
       limit: 8,
@@ -1534,9 +1552,9 @@ export function SlotPicker({
           "community:post_search_placeholder",
         )}
       />
-      {searchTerm && data?.units?.length ? (
+      {searchTerm && data?.items?.length ? (
         <div className="flex flex-col gap-2">
-          {data.units.map((unit) => (
+          {data.items.map((unit) => (
             <Button
               key={unit.id}
               type="button"
@@ -1545,7 +1563,7 @@ export function SlotPicker({
               className="justify-start"
               onClick={() => setSelected(unit.id)}
             >
-              {unitLabel(unit)}
+              {searchDocLabel(unit)}
             </Button>
           ))}
         </div>

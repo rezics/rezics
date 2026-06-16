@@ -11,6 +11,7 @@ import {
   useCreateUnitTagMutation,
   useWithdrawUnitTagVoteMutation,
 } from "@rezics/api/tag/tag";
+import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import {
   useDeleteUserTagApplicationMutation,
   userTagApplicationQueries,
@@ -18,6 +19,7 @@ import {
 } from "@rezics/api/user-tag-application/user-tag-application";
 import type {
   BatchTagTranslationResult,
+  TagSearchDocument,
   UserTagApplicationDTO,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
@@ -34,6 +36,7 @@ type TagSearchResult = {
   unitId?: string;
   tagUnitId?: string;
   label?: string;
+  title?: string | null;
   slug?: string;
 };
 
@@ -54,7 +57,7 @@ function tagResultToOption(
   if (!tagUnitId) return null;
   return {
     tagUnitId,
-    label: result.label ?? result.slug ?? fallbackLabel,
+    label: result.title ?? result.label ?? result.slug ?? fallbackLabel,
     slug: result.slug,
   };
 }
@@ -124,19 +127,24 @@ function useTagSearchOptions(
   excludeIds: Set<string>,
   fallbackLabel: string,
 ) {
+  const locale = useLocale();
   const debouncedQuery = useDebouncedValue(query.trim(), 200);
   const search = useQuery({
-    ...tagQueries.search(debouncedQuery, 8),
+    ...meiliTagSearchQueryOptions({
+      keyword: debouncedQuery,
+      limit: 8,
+      appLocale: locale,
+    }),
     enabled: debouncedQuery.length > 0,
   });
   const options = useMemo(
     () =>
-      ((search.data?.tags ?? []) as TagSearchResult[])
+      ((search.data?.items ?? []) as Array<TagSearchDocument & TagSearchResult>)
         .map((result) => tagResultToOption(result, fallbackLabel))
         .filter((option): option is TagOption =>
           Boolean(option && !excludeIds.has(option.tagUnitId)),
         ),
-    [excludeIds, fallbackLabel, search.data?.tags],
+    [excludeIds, fallbackLabel, search.data?.items],
   );
   return { ...search, options, debouncedQuery };
 }

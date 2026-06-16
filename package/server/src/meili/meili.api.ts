@@ -5,9 +5,11 @@ import {
   type FeedbackListQuery,
   feedbackListQuerySchema,
   isRoot,
+  LabelSearchOptionsSchema,
   PollSearchOptionsSchema,
   PostSearchOptionsSchema,
   RealmSearchOptionsSchema,
+  TagSearchOptionsSchema,
   type UserListQuery,
   userListQuerySchema,
   ZoneSearchOptionsSchema,
@@ -203,6 +205,35 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       },
     },
   )
+  .post(
+    "/tags/search",
+    async ({ body }) => {
+      return meiliService.searchTags(body);
+    },
+    {
+      body: TagSearchOptionsSchema,
+      detail: {
+        summary: "Search tags (Meilisearch)",
+        description: "Full-text search over global multilingual TAG units.",
+        tags: ["Meili", "Tags", "Search"],
+      },
+    },
+  )
+  .post(
+    "/labels/search",
+    async ({ body }) => {
+      return meiliService.searchLabels(body);
+    },
+    {
+      body: LabelSearchOptionsSchema,
+      detail: {
+        summary: "Search labels (Meilisearch)",
+        description:
+          "Full-text search over global multilingual LABEL units used as shared i18n references.",
+        tags: ["Meili", "Labels", "Search"],
+      },
+    },
+  )
   // ANCHOR: Admin — index init
   // ANCHOR: 管理员 — 索引初始化
   .post(
@@ -362,6 +393,52 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Init zones index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/tags/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init tags index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init tags index");
+      }
+      await meiliService.initTagsIndex();
+      return { message: "tags index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init tags index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/labels/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init labels index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init labels index");
+      }
+      await meiliService.initLabelsIndex();
+      return { message: "labels index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init labels index",
         tags: ["Meili", "Admin"],
       },
     },
@@ -571,6 +648,52 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Sync all zones to Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/tags/sync",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync tags");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync tags");
+      }
+      const task = await meiliService.syncAllTags();
+      return { task };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Sync all tags to Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/labels/sync",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync labels");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync labels");
+      }
+      const task = await meiliService.syncAllLabels();
+      return { task };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Sync all labels to Meilisearch",
         tags: ["Meili", "Admin"],
       },
     },

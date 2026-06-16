@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "title": "Rezics Products | Rezics",
+    "description": "Entdecke die Rezics-Produktfamilie: Katalog, Web-App, Realms, Wiki, Regale und Graph-Oberflächen auf einer gemeinsamen Werkidentität."
+  },
+  "hero": {
+    "eyebrow": "Produkte",
+    "heading": "Rezics-Produkte"
+  },
+  "sections": [
+    {
+      "eyebrow": "Gemeinsame Grundlage",
+      "title": "Jede Oberfläche beginnt mit derselben Werkidentität.",
+      "body": "Katalogeinträge, Reviews, Regale, Tags, Wiki-Seiten und Realm-Diskussionen zeigen auf gemeinsame Work Units zurück, statt getrennte Datenbanken zu werden."
+    },
+    {
+      "eyebrow": "Produktgrenze",
+      "title": "Diese Site stellt Produkte vor; die App besitzt Interaktion.",
+      "body": "Suche, Speichern, Abstimmen, Bearbeiten, Realm-Mitgliedschaft, Wiki-Autorschaft und andere angemeldete Abläufe bleiben in der Rezics-Hauptanwendung."
+    }
+  ],
+  "storySections": [
+    {
+      "eyebrow": "Verzeichnislogik",
+      "title": "Produkte können getrennt werden, ohne den Graphen zu trennen.",
+      "body": "Rezics Web, Realms, Wiki, Shelves und Graph können eigene Produktoberflächen werden und trotzdem Katalogidentität, Quellenfakten und Community-Klassifikation teilen."
+    },
+    {
+      "eyebrow": "Status",
+      "title": "Die Liste darf zukunftsgerichtete Oberflächen zeigen.",
+      "body": "Geplant bedeutet, dass der Produktname eine Richtung beschreibt, nicht dass der vollständige Workflow bereits verfügbar ist."
+    }
+  ],
+  "products": [
+    {
+      "name": "Rezics Catalog",
+      "category": "Katalog",
+      "status": "available",
+      "statusLabel": "Verfügbar",
+      "summary": "Der öffentliche sprachübergreifende Index für Werke, Aliase, Quellen, Beziehungen und medienbezogene Metadaten.",
+      "href": "https://book.rezics.com/de/",
+      "ctaLabel": "Katalog öffnen",
+      "features": [
+        "Gemeinsame Work Units für Bücher, Spiele, Medien, Posts und gemischte Werke",
+        "Fakten, Aliase, Quellenlinks, Übersetzungen und verwandte Werke",
+        "Eine Werkidentität über Sprachen, Plattformen, Fassungen und Communities hinweg"
+      ]
+    },
+    {
+      "name": "Rezics Web",
+      "category": "App",
+      "status": "preview",
+      "statusLabel": "Vorschau",
+      "summary": "Die Haupt-Web-App zum Browsen, Reviewen, Sammeln und Beitragen zum Katalog.",
+      "href": "https://book.rezics.com/de/",
+      "ctaLabel": "App öffnen",
+      "features": [
+        "Interaktive Suche und Werkdetailseiten",
+        "Review-, Regal-, Tag- und Sammlungsabläufe",
+        "Angemeldete Beiträge zu Katalog und Community"
+      ]
+    },
+    {
+      "name": "Rezics Realms",
+      "category": "Community",
+      "status": "planned",
+      "statusLabel": "Geplant",
+      "summary": "Community-Räume zum Klassifizieren, Diskutieren und Kuratieren von Werken, ohne den öffentlichen Katalog zu forken.",
+      "features": [
+        "Realm-Mitgliedschaft und lokale Diskussion",
+        "Community-spezifische Tag-Anwendungen",
+        "Feeds und Portale rund um gemeinsame Interessen"
+      ]
+    },
+    {
+      "name": "Rezics Wiki",
+      "category": "Wissen",
+      "status": "planned",
+      "statusLabel": "Geplant",
+      "summary": "Gemeinsame Wissensseiten und Realm-Wiki-Portale, die Kontext bei den Werken und Communities halten, die ihn brauchen.",
+      "features": [
+        "Wiki-Beiträge für Hintergründe, Zeitlinien, Beispiele und Deutung",
+        "Von Communities gepflegte Realm wiki zones",
+        "Wissen bleibt mit Werken verbunden statt über Werkzeuge verstreut"
+      ]
+    },
+    {
+      "name": "Rezics Shelves",
+      "category": "Entdeckung",
+      "status": "planned",
+      "statusLabel": "Geplant",
+      "summary": "Kuratierte Pfade durch Werke, Reviews, Tags, Realms und weitere Regal-Einträge.",
+      "features": [
+        "Erklärbare Sammlungen statt undurchsichtiger Empfehlungslisten",
+        "Regal-Einträge mit Review- und Klassifikationskontext",
+        "Kuration durch Leser und Communities rund um gemeinsame Werkidentität"
+      ]
+    },
+    {
+      "name": "Rezics Graph",
+      "category": "Plattform",
+      "status": "planned",
+      "statusLabel": "Geplant",
+      "summary": "Der gemeinsame Produktgraph hinter Katalogidentität, Quellenfakten, Community-Klassifikation und Wissensoberflächen.",
+      "features": [
+        "Beziehungen zwischen Werk, Tag, Realm, Regal, Review und Wiki",
+        "Contract-first Datenformen für Produktoberflächen",
+        "Eine Grundlage für künftige Rezics-Werkzeuge ohne doppelte Fakten"
+      ]
+    }
+  ]
+}

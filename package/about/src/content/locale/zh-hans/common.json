@@ -1,0 +1,20 @@
+{
+  "nav": {
+    "home": "关于",
+    "product": "产品",
+    "app": "进入 Rezics",
+    "language": "语言"
+  },
+  "cta": {
+    "enterApp": "进入作品索引",
+    "readProduct": "查看产品",
+    "backHome": "回到关于页"
+  },
+  "footer": {
+    "originNote": "互动索引、书架与社区工作流在 Rezics 主应用中开启。"
+  },
+  "notFound": {
+    "title": "找不到这个页面",
+    "body": "这个关于站点目前只有关于与产品页。你可以切回本语言的公开导览。"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "nav": {
+    "home": "About",
+    "product": "Product",
+    "app": "Open Rezics",
+    "language": "Language"
+  },
+  "cta": {
+    "enterApp": "Open the catalog",
+    "readProduct": "Explore products",
+    "backHome": "Back to about"
+  },
+  "footer": {
+    "originNote": "Interactive catalog, shelf, and community workflows open in the main Rezics app."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This public site currently includes the about and product pages. Use the localized navigation to continue."
+  }
+}

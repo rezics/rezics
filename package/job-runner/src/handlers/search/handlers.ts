@@ -14,9 +14,11 @@ import {
   patchContentRealmTagKeys,
   patchContentSubjects,
   patchContentTags,
+  patchContentTagsByTagSegment,
   patchContentTranslations,
   patchEntityAliases,
   patchFeedbackResolutionFromDb,
+  patchLabelAliases,
   patchPostFields,
   patchPostsTargetSegment,
   patchRealmAliases,
@@ -24,6 +26,7 @@ import {
   patchRealmMemberCountFromDb,
   patchRealmMetadata,
   patchRealmTranslations,
+  patchTagAliases,
   patchUserFields,
   removeProgress,
   removeShelfItem,
@@ -34,6 +37,7 @@ import {
   syncContentSegment,
   syncEntitySegment,
   syncFeedbackSegment,
+  syncLabelSegment,
   syncPostRealmIdsSegment,
   syncPostSegment,
   syncPostsByAuthorSegment,
@@ -43,6 +47,7 @@ import {
   syncShelfItemSegment,
   syncShelfItemsByShelfSegment,
   syncShelfItemsBySourceItemSegment,
+  syncSingleLabel,
   syncSingleComment,
   syncSingleContent,
   syncSingleEntity,
@@ -52,10 +57,12 @@ import {
   syncSingleProgress,
   syncSingleRealm,
   syncSingleShelfItem,
+  syncSingleTag,
   syncSingleUser,
   syncSingleZone,
   syncUserSegment,
   syncZoneSegment,
+  syncTagSegment,
 } from "@rezics/search/sync";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
@@ -271,6 +278,10 @@ export function createSearchHandlers(client: SearchClient) {
       "unitId" in command.payload
         ? patchContentTranslations(client, command.payload.unitId)
         : undefined,
+    [SEARCH_COMMAND_KINDS.contentPatchTagFanout]: async (command, context) =>
+      runFanoutSegment(command, context, (targetId, options) =>
+        patchContentTagsByTagSegment(client, targetId, options),
+      ),
     [SEARCH_COMMAND_KINDS.contentPatchRealmIds]: async (command) =>
       "unitId" in command.payload
         ? patchContentRealmIds(client, command.payload.unitId)
@@ -394,6 +405,42 @@ export function createSearchHandlers(client: SearchClient) {
       runFullSyncSegment(command, context, {
         deleteAll: () => client.deleteAllZones(),
         syncSegment: (options) => syncZoneSegment(client, options),
+      }),
+
+    [SEARCH_COMMAND_KINDS.tagSync]: async (command) =>
+      "unitId" in command.payload
+        ? syncSingleTag(client, command.payload.unitId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.tagDelete]: async (command) =>
+      "unitId" in command.payload
+        ? client.deleteTags([command.payload.unitId])
+        : undefined,
+    [SEARCH_COMMAND_KINDS.tagPatchAliases]: async (command) =>
+      "unitId" in command.payload
+        ? patchTagAliases(client, command.payload.unitId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.tagFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllTags(),
+        syncSegment: (options) => syncTagSegment(client, options),
+      }),
+
+    [SEARCH_COMMAND_KINDS.labelSync]: async (command) =>
+      "unitId" in command.payload
+        ? syncSingleLabel(client, command.payload.unitId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.labelDelete]: async (command) =>
+      "unitId" in command.payload
+        ? client.deleteLabels([command.payload.unitId])
+        : undefined,
+    [SEARCH_COMMAND_KINDS.labelPatchAliases]: async (command) =>
+      "unitId" in command.payload
+        ? patchLabelAliases(client, command.payload.unitId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.labelFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllLabels(),
+        syncSegment: (options) => syncLabelSegment(client, options),
       }),
 
     [SEARCH_COMMAND_KINDS.entitySync]: async (command) =>

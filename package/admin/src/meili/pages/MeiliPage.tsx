@@ -150,6 +150,30 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
+  const initTagsMutation = meiliAdminMutations.useInitTagsIndex({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_tags_index_initialized"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const initLabelsMutation = meiliAdminMutations.useInitLabelsIndex({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_labels_index_initialized"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
   const initEntitiesMutation = meiliAdminMutations.useInitEntitiesIndex({
     onSuccess: (res) => {
       setMessage({
@@ -227,6 +251,26 @@ export function MeiliPage() {
       setMessage({
         type: "success",
         text: getI18nRuntime().i18n.t("admin:meili_zones_sync_started"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const syncTagsMutation = meiliAdminMutations.useSyncTags({
+    onSuccess: () => {
+      setMessage({
+        type: "success",
+        text: getI18nRuntime().i18n.t("admin:meili_tags_sync_started"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const syncLabelsMutation = meiliAdminMutations.useSyncLabels({
+    onSuccess: () => {
+      setMessage({
+        type: "success",
+        text: getI18nRuntime().i18n.t("admin:meili_labels_sync_started"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -435,6 +479,20 @@ export function MeiliPage() {
       onClick: () => initZonesMutation.mutate(),
     },
     {
+      id: "tags",
+      label: getI18nRuntime().i18n.t("admin:meili_init_tags_index"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_initializing"),
+      isPending: initTagsMutation.isPending,
+      onClick: () => initTagsMutation.mutate(),
+    },
+    {
+      id: "labels",
+      label: getI18nRuntime().i18n.t("admin:meili_init_labels_index"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_initializing"),
+      isPending: initLabelsMutation.isPending,
+      onClick: () => initLabelsMutation.mutate(),
+    },
+    {
       id: "entities",
       label: getI18nRuntime().i18n.t("admin:meili_init_entities_index"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_initializing"),
@@ -498,6 +556,22 @@ export function MeiliPage() {
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_syncing"),
       isPending: syncZonesMutation.isPending,
       onClick: () => syncZonesMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "tags",
+      label: getI18nRuntime().i18n.t("admin:meili_sync_all_tags"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_syncing"),
+      isPending: syncTagsMutation.isPending,
+      onClick: () => syncTagsMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "labels",
+      label: getI18nRuntime().i18n.t("admin:meili_sync_all_labels"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_syncing"),
+      isPending: syncLabelsMutation.isPending,
+      onClick: () => syncLabelsMutation.mutate(),
       variant: "outline",
     },
     {

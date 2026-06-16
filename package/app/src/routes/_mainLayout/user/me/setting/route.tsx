@@ -2,7 +2,7 @@ import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_mainLayout/user/me/setting")({
   component: lazyRouteComponent(
-    () => import("@/user/components/SettingsShell"),
+    () => import("@/user/layouts/SettingsShell"),
     "SettingsShell",
   ),
 });

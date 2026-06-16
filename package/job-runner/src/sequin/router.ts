@@ -91,6 +91,20 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
         source,
       ),
       createSearchCommand(
+        isDelete
+          ? SEARCH_COMMAND_KINDS.tagDelete
+          : SEARCH_COMMAND_KINDS.tagSync,
+        { unitId },
+        source,
+      ),
+      createSearchCommand(
+        isDelete
+          ? SEARCH_COMMAND_KINDS.labelDelete
+          : SEARCH_COMMAND_KINDS.labelSync,
+        { unitId },
+        source,
+      ),
+      createSearchCommand(
         SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
         { itemType: "unit", itemId: unitId },
         source,
@@ -112,6 +126,13 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
         { targetId: unitId },
         source,
       ),
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentPatchTagFanout,
+        { targetId: unitId },
+        source,
+      ),
+      createSearchCommand(SEARCH_COMMAND_KINDS.tagSync, { unitId }, source),
+      createSearchCommand(SEARCH_COMMAND_KINDS.labelSync, { unitId }, source),
       createSearchCommand(
         SEARCH_COMMAND_KINDS.shelfItemSourceFanout,
         { itemType: "unit", itemId: unitId },
@@ -149,6 +170,16 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
           ),
           createSearchCommand(
             SEARCH_COMMAND_KINDS.realmPatchAliases,
+            { unitId },
+            source,
+          ),
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.tagPatchAliases,
+            { unitId },
+            source,
+          ),
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.labelPatchAliases,
             { unitId },
             source,
           ),

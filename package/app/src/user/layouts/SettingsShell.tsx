@@ -1,0 +1,64 @@
+import { useTranslation } from "@rezics/i18n/react";
+import { Outlet } from "@tanstack/react-router";
+import type { FC } from "react";
+import { SettingsSidebar } from "../components/SettingsSidebar";
+import { SettingsTabBar } from "../components/SettingsTabBar";
+
+/**
+ * Account settings route shell. It owns the persistent settings title,
+ * responsive navigation, and nested route outlet.
+ *
+ * 账号设置共享布局：持有设置标题、响应式导航与子路由出口。
+ *
+ * Mobile (<640px):
+ * ┌──────────────────────────┐
+ * │ Settings                 │
+ * │ [Profile][Account] ->    │
+ * │ [Outlet page content]    │
+ * └──────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ Settings                           │
+ * │ Sidebar │ Outlet content           │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌────────────────────────────────────────────┐
+ * │ Settings                                   │
+ * │ 220px nav │ flexible settings page         │
+ * └────────────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌────────────────────────────────────────────┐
+ * │        centered max width 6xl              │
+ * │ 220px nav │ flexible settings page         │
+ * └────────────────────────────────────────────┘
+ */
+export const SettingsShell: FC = () => {
+  const { t } = useTranslation(["settings"]);
+  return (
+    <div className="w-full max-w-6xl mx-auto pb-12">
+      <h5 className="text-xl font-semibold px-4 pt-8 pb-4">
+        {t("settings:title")}
+      </h5>
+
+      {/* Mobile: horizontal tabs */}
+      {/* 移动端：水平标签栏 */}
+      <div className="md:hidden">
+        <SettingsTabBar />
+      </div>
+
+      {/* Desktop: sidebar + content */}
+      {/* 桌面端：侧边栏 + 内容 */}
+      <div className="flex flex-col md:flex-row md:gap-12 px-4 pt-4">
+        <aside className="hidden md:block w-[220px] shrink-0">
+          <SettingsSidebar />
+        </aside>
+        <div className="min-w-0 flex-1">
+          <Outlet />
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -7,12 +7,16 @@ import type {
   EntitySearchResult,
   FeedbackListQuery,
   FeedbackSearchResult,
+  LabelSearchOptions,
+  LabelSearchResult,
   PollSearchOptions,
   PollSearchResult,
   PostSearchOptions,
   PostSearchResult,
   RealmSearchOptions,
   RealmSearchResult,
+  TagSearchOptions,
+  TagSearchResult,
   UserListQuery,
   UserSearchResult,
   ZoneSearchOptions,
@@ -23,9 +27,11 @@ import {
   syncAllContent,
   syncAllEntities,
   syncAllFeedbacks,
+  syncAllLabels,
   syncAllPolls,
   syncAllPosts,
   syncAllRealms,
+  syncAllTags,
   syncAllUsers,
   syncAllZones,
   syncSingleContent,
@@ -34,10 +40,12 @@ import { searchComments } from "./comment/comment.service";
 import { searchContent } from "./content/content.service";
 import { searchEntities } from "./entity/entity.service";
 import { searchFeedbacks } from "./feedback/feedback.api";
+import { searchLabels } from "./label/label.service";
 import { searchPolls } from "./poll/poll.service";
 import { searchPosts } from "./post/post.service";
 import { searchRealms } from "./realm/realm.service";
 import { searchClient } from "./search-client";
+import { searchTags } from "./tag/tag.service";
 import { searchUsers } from "./user/user.api";
 import { searchZones } from "./zone/zone.service";
 
@@ -80,6 +88,14 @@ export class MeiliService {
     return searchZones(options);
   }
 
+  async searchTags(options: TagSearchOptions): Promise<TagSearchResult> {
+    return searchTags(options);
+  }
+
+  async searchLabels(options: LabelSearchOptions): Promise<LabelSearchResult> {
+    return searchLabels(options);
+  }
+
   async searchEntities(
     options: EntitySearchOptions,
   ): Promise<EntitySearchResult> {
@@ -116,6 +132,14 @@ export class MeiliService {
 
   async initZonesIndex(): Promise<void> {
     await searchClient.initZoneIndex();
+  }
+
+  async initTagsIndex(): Promise<void> {
+    await searchClient.initTagIndex();
+  }
+
+  async initLabelsIndex(): Promise<void> {
+    await searchClient.initLabelIndex();
   }
 
   async initEntitiesIndex(): Promise<void> {
@@ -162,6 +186,14 @@ export class MeiliService {
     return syncAllZones(searchClient);
   }
 
+  async syncAllTags(): Promise<unknown> {
+    return syncAllTags(searchClient);
+  }
+
+  async syncAllLabels(): Promise<unknown> {
+    return syncAllLabels(searchClient);
+  }
+
   async syncAllEntities(): Promise<unknown> {
     return syncAllEntities(searchClient);
   }
@@ -188,6 +220,14 @@ export class MeiliService {
 
   async deleteAllZones() {
     return searchClient.deleteAllZones();
+  }
+
+  async deleteAllTags() {
+    return searchClient.deleteAllTags();
+  }
+
+  async deleteAllLabels() {
+    return searchClient.deleteAllLabels();
   }
 
   async deleteAllEntities() {

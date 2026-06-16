@@ -76,11 +76,15 @@ POST /meili/content/init
 POST /meili/posts/init
 POST /meili/polls/init
 POST /meili/realms/init
+POST /meili/tags/init
+POST /meili/labels/init
 
 POST /meili/content/sync
 POST /meili/posts/sync
 POST /meili/polls/sync
 POST /meili/realms/sync
+POST /meili/tags/sync
+POST /meili/labels/sync
 ```
 
 Federated search sections read from those same indexes, so no separate

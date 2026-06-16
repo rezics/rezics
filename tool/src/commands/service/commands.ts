@@ -71,11 +71,9 @@ async function waitForHealth(label: string, url: string) {
 }
 
 function findSequinAllocId(): string | undefined {
-  const result = spawnSync(
-    "nomad",
-    ["job", "allocs", "-json", "rezics-dev"],
-    { stdio: ["ignore", "pipe", "ignore"] },
-  );
+  const result = spawnSync("nomad", ["job", "allocs", "-json", "rezics-dev"], {
+    stdio: ["ignore", "pipe", "ignore"],
+  });
   if (result.status !== 0) return undefined;
   try {
     const allocs = JSON.parse(result.stdout.toString());

@@ -5,7 +5,7 @@
  * Backend routes:
  * 后端路由：
  * - /meili/health
- * - /meili/content|feedbacks|users|posts|polls|realms|zones|entities/(init|sync)
+ * - /meili/content|feedbacks|users|posts|polls|realms|zones|tags|labels|entities/(init|sync)
  * - /meili/content|feedbacks|users|posts|polls|realms|zones|entities/deleteAll
  * - /meili/keys/admin|(list|delete)
  */
@@ -100,6 +100,16 @@ export const meiliAdminApi = {
       method: "POST",
     });
   },
+  initTagsIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/tags/init", {
+      method: "POST",
+    });
+  },
+  initLabelsIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/labels/init", {
+      method: "POST",
+    });
+  },
   initEntitiesIndex: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/entities/init", {
       method: "POST",
@@ -141,6 +151,16 @@ export const meiliAdminApi = {
   },
   syncAllZones: async (): Promise<MeiliTaskResponse> => {
     return apiFetch<MeiliTaskResponse>("/meili/zones/sync", {
+      method: "POST",
+    });
+  },
+  syncAllTags: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>("/meili/tags/sync", {
+      method: "POST",
+    });
+  },
+  syncAllLabels: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>("/meili/labels/sync", {
       method: "POST",
     });
   },
@@ -328,6 +348,30 @@ export function useMeiliInitZonesIndexMutation(
   });
 }
 
+export function useMeiliInitTagsIndexMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.initTagsIndex(),
+    ...options,
+  });
+}
+
+export function useMeiliInitLabelsIndexMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.initLabelsIndex(),
+    ...options,
+  });
+}
+
 export function useMeiliInitEntitiesIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
@@ -420,6 +464,30 @@ export function useMeiliSyncZonesMutation(
 ) {
   return useMutation({
     mutationFn: () => meiliAdminApi.syncAllZones(),
+    ...options,
+  });
+}
+
+export function useMeiliSyncTagsMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliTaskResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.syncAllTags(),
+    ...options,
+  });
+}
+
+export function useMeiliSyncLabelsMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliTaskResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.syncAllLabels(),
     ...options,
   });
 }
@@ -579,6 +647,8 @@ export const meiliAdminMutations = {
   useInitPollsIndex: useMeiliInitPollsIndexMutation,
   useInitRealmsIndex: useMeiliInitRealmsIndexMutation,
   useInitZonesIndex: useMeiliInitZonesIndexMutation,
+  useInitTagsIndex: useMeiliInitTagsIndexMutation,
+  useInitLabelsIndex: useMeiliInitLabelsIndexMutation,
   useInitEntitiesIndex: useMeiliInitEntitiesIndexMutation,
   useSyncContent: useMeiliSyncContentMutation,
   useSyncFeedbacks: useMeiliSyncFeedbacksMutation,
@@ -587,6 +657,8 @@ export const meiliAdminMutations = {
   useSyncPolls: useMeiliSyncPollsMutation,
   useSyncRealms: useMeiliSyncRealmsMutation,
   useSyncZones: useMeiliSyncZonesMutation,
+  useSyncTags: useMeiliSyncTagsMutation,
+  useSyncLabels: useMeiliSyncLabelsMutation,
   useSyncEntities: useMeiliSyncEntitiesMutation,
   useDeleteAllContent: useMeiliDeleteAllContentMutation,
   useDeleteAllFeedbacks: useMeiliDeleteAllFeedbacksMutation,

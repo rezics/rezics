@@ -1,4 +1,4 @@
-import { unitQueries } from "@rezics/api/unit/unit";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UnitDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -16,6 +16,7 @@ import { Link as LinkIcon, Search } from "lucide-react";
 import { type ReactNode, useId, useState } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useUnitCandidates } from "../hooks/useUnitCandidates";
+import { mapContentSearchDocToUnitDTO } from "../models/contentSearchDocToUnitDTO";
 import type { Candidate } from "../models/types";
 import { UnitCandidateRow } from "./UnitPicker/UnitCandidateRow";
 
@@ -111,14 +112,17 @@ export function UnitSearchSelect({
   const trimmedQuery = query.trim();
   const readContext = useReadLanguageContext();
   const { data, isLoading, error } = useQuery({
-    ...unitQueries.search(trimmedQuery, {
+    ...contentSearchQueryOptions({
+      keyword: trimmedQuery,
       languages: readContext.languages,
       appLocale: readContext.appLocale,
       limit: 8,
     }),
     enabled: readContext.ready && Boolean(trimmedQuery),
   });
-  const units = (data?.units ?? []) as UnitDTO[];
+  const units = (data?.items ?? []).map(
+    mapContentSearchDocToUnitDTO,
+  ) as UnitDTO[];
 
   return (
     <div className="flex flex-col gap-2">

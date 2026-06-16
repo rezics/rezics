@@ -51,12 +51,12 @@
  */
 
 import {
+  meiliTagSearchQueryOptions,
   tagBatchTranslationsQuery,
-  tagSearchQuery,
   userShelfItemSearchMineQuery,
   userShelfItemSearchUserQuery,
 } from "@rezics/api";
-import type { UserShelfItemDTO } from "@rezics/contract";
+import type { TagSearchDocument, UserShelfItemDTO } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -70,6 +70,14 @@ type SearchTagOption = {
   label?: string | null;
   slug?: string | null;
 };
+
+function tagSearchOptionFromDoc(doc: TagSearchDocument): SearchTagOption {
+  return {
+    unitId: doc.unitId,
+    label: doc.title ?? doc.titles[0] ?? null,
+    slug: doc.slug ?? null,
+  };
+}
 
 export const ShelfContentsSearchSection: FC = () => {
   const locale = useLocale();
@@ -93,13 +101,18 @@ export const ShelfContentsSearchSection: FC = () => {
     enabled: !isCurrentUser && Boolean(userId),
   });
   const shelfItems = isCurrentUser ? ownShelfItems : publicShelfItems;
-  const tagSearch = useQuery(tagSearchQuery(tagSearchText.trim()));
+  const trimmedTagSearchText = tagSearchText.trim();
+  const tagSearch = useQuery({
+    ...meiliTagSearchQueryOptions({ q: trimmedTagSearchText, limit: 8 }),
+    enabled: trimmedTagSearchText.length > 0,
+  });
   const tagTranslations = useQuery(
     tagBatchTranslationsQuery(selectedTagIds, locale),
   );
 
   const selectedTags = useMemo(() => new Set(selectedTagIds), [selectedTagIds]);
-  const searchOptions = ((tagSearch.data?.tags ?? []) as SearchTagOption[])
+  const searchOptions = (tagSearch.data?.items ?? [])
+    .map(tagSearchOptionFromDoc)
     .filter((tag) => !selectedTags.has(tag.unitId))
     .slice(0, 8);
   const tagLabels = tagTranslations.data ?? {};

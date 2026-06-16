@@ -3,9 +3,11 @@ import type {
   ContentSearchDocument,
   EntitySearchDocument,
   FeedbackSearchDocument,
+  LabelSearchDocument,
   PollSearchDocument,
   PostSearchDocument,
   RealmSearchDocument,
+  TagSearchDocument,
   UserSearchDocument,
   ZoneSearchDocument,
 } from "@rezics/contract";
@@ -1590,6 +1592,31 @@ export async function patchContentTags(client: SearchClient, unitId: string) {
     tagScores,
     tagLabels,
   });
+}
+
+export async function patchContentTagsByTagSegment(
+  client: SearchClient,
+  tagUnitId: string,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const query = getSearchDb()
+    .select({ unitId: UnitTag.unitId })
+    .from(UnitTag)
+    .where(
+      options.cursor
+        ? and(
+            eq(UnitTag.tagUnitId, tagUnitId),
+            gt(UnitTag.unitId, options.cursor),
+          )
+        : eq(UnitTag.tagUnitId, tagUnitId),
+    )
+    .orderBy(asc(UnitTag.unitId))
+    .limit(limit + 1);
+  const rows = await query;
+  const { current, nextCursor } = segmentRows(rows, limit, "unitId");
+  await Promise.all(current.map((row) => patchContentTags(client, row.unitId)));
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
 export async function patchContentAliases(
@@ -3924,6 +3951,288 @@ export async function syncZoneSegment(
   const docs = current.filter(isPublicIndexableZoneUnit).map(buildZoneDocument);
   if (docs.length > 0) {
     await client.addOrUpdateZones(docs);
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
+// ANCHOR: Tag / Label Unit document builders + sync
+// ANCHOR: Tag / Label Unit 文档构建器 + 同步
+
+type SearchUnitKind = "TAG" | "LABEL";
+
+function unitKindDocumentBase(unit: any) {
+  const translations: any[] = unit?.translations ?? [];
+  const aliases: any[] = (unit?.aliases ?? []).filter(isSearchVisibleScoredRow);
+  const supportLanguages = indexedSupportLanguages(unit ?? {});
+  const languages = supportLanguages.length
+    ? indexedLanguages(unit ?? {})
+    : [
+        ...new Set(
+          translations
+            .map((translation) =>
+              translation.language
+                ? normalizeContentLanguage(translation.language)
+                : null,
+            )
+            .filter((language): language is ContentLanguage => !!language),
+        ),
+      ];
+
+  return {
+    id: unit.id,
+    unitId: unit.id,
+    slug: unit.slug ?? null,
+    status: unit.status,
+    titles: translations
+      .map((translation) => translation.title)
+      .filter(Boolean),
+    aliasValues: aliases.map((alias) => alias.value).filter(Boolean),
+    languages,
+    isLanguageNeutral: Boolean(unit.isLanguageNeutral),
+    supportLanguages,
+    createdAt: toIsoString(unit.createdAt) ?? "",
+    updatedAt: toIsoString(unit.updatedAt) ?? "",
+  };
+}
+
+export function buildTagDocument(unit: any): TagSearchDocument {
+  const translations: any[] = unit?.translations ?? [];
+  return {
+    ...unitKindDocumentBase(unit),
+    descriptions: translations
+      .map((translation) => searchDescriptionText(translation.description))
+      .filter(isNonEmptyString),
+    translations: translations.map((translation) => ({
+      language: translation.language,
+      title: translation.title ?? null,
+      description: searchDescriptionText(translation.description),
+    })),
+  };
+}
+
+export function buildLabelDocument(unit: any): LabelSearchDocument {
+  const translations: any[] = unit?.translations ?? [];
+  return {
+    ...unitKindDocumentBase(unit),
+    translations: translations.map((translation) => ({
+      language: translation.language,
+      title: translation.title ?? null,
+    })),
+  };
+}
+
+async function hydrateSearchUnitKindRows(rows: any[]) {
+  if (rows.length === 0) return [];
+  const unitIds = rows.map((row) => row.id);
+  const [translations, supportLanguages, aliases] = await Promise.all([
+    getSearchDb()
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, unitIds)),
+    getSearchDb()
+      .select()
+      .from(UnitAlias)
+      .where(
+        and(
+          inArray(UnitAlias.unitId, unitIds),
+          eq(UnitAlias.status, "ACTIVE"),
+          or(
+            gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+            eq(UnitAlias.pinned, true),
+          ),
+        ),
+      )
+      .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score)),
+  ]);
+  const translationsByUnitId = groupRowsByKey(translations as any[], "unitId");
+  const supportLanguagesByUnitId = groupRowsByKey(
+    supportLanguages as any[],
+    "unitId",
+  );
+  const aliasesByUnitId = groupRowsByKey(aliases as any[], "unitId");
+  return rows.map((row) => ({
+    ...row,
+    translations: translationsByUnitId.get(row.id) ?? [],
+    supportLanguages: supportLanguagesByUnitId.get(row.id) ?? [],
+    aliases: aliasesByUnitId.get(row.id) ?? [],
+  }));
+}
+
+async function findSearchUnitKindRow(unitId: string, type: SearchUnitKind) {
+  const [row] = await getSearchDb()
+    .select()
+    .from(Unit)
+    .where(and(eq(Unit.id, unitId), eq(Unit.type, type)))
+    .limit(1);
+  const [unit] = await hydrateSearchUnitKindRows(row ? [row] : []);
+  return unit ?? null;
+}
+
+async function listSearchUnitKindRows(input: {
+  type: SearchUnitKind;
+  limit: number;
+  cursor?: string;
+}) {
+  const where = input.cursor
+    ? and(
+        eq(Unit.type, input.type),
+        eq(Unit.status, "PUBLISHED"),
+        gt(Unit.id, input.cursor),
+      )
+    : and(eq(Unit.type, input.type), eq(Unit.status, "PUBLISHED"));
+  const rows = await getSearchDb()
+    .select()
+    .from(Unit)
+    .where(where)
+    .orderBy(asc(Unit.id))
+    .limit(input.limit);
+  return hydrateSearchUnitKindRows(rows);
+}
+
+async function visibleSearchUnitAliasValues(unitId: string): Promise<string[]> {
+  const rows = await getSearchDb()
+    .select({ value: UnitAlias.value })
+    .from(UnitAlias)
+    .where(
+      and(
+        eq(UnitAlias.unitId, unitId),
+        eq(UnitAlias.status, "ACTIVE"),
+        or(
+          gt(UnitAlias.score, VISIBILITY_THRESHOLD),
+          eq(UnitAlias.pinned, true),
+        ),
+      ),
+    )
+    .orderBy(desc(UnitAlias.pinned), desc(UnitAlias.score));
+  return rows.map((alias) => alias.value).filter(isNonEmptyString);
+}
+
+export async function syncSingleTag(client: SearchClient, unitId: string) {
+  const unit = await findSearchUnitKindRow(unitId, "TAG");
+  if (!unit || unit.status !== "PUBLISHED") {
+    await client.deleteTags([unitId]);
+    return;
+  }
+  await client.addOrUpdateTags([buildTagDocument(unit)]);
+}
+
+export async function syncSingleLabel(client: SearchClient, unitId: string) {
+  const unit = await findSearchUnitKindRow(unitId, "LABEL");
+  if (!unit || unit.status !== "PUBLISHED") {
+    await client.deleteLabels([unitId]);
+    return;
+  }
+  await client.addOrUpdateLabels([buildLabelDocument(unit)]);
+}
+
+export async function patchTagAliases(client: SearchClient, unitId: string) {
+  const unit = await findSearchUnitKindRow(unitId, "TAG");
+  if (!unit || unit.status !== "PUBLISHED") {
+    await client.deleteTags([unitId]);
+    return;
+  }
+  await client.patchTags([
+    { id: unitId, aliasValues: await visibleSearchUnitAliasValues(unitId) },
+  ]);
+}
+
+export async function patchLabelAliases(client: SearchClient, unitId: string) {
+  const unit = await findSearchUnitKindRow(unitId, "LABEL");
+  if (!unit || unit.status !== "PUBLISHED") {
+    await client.deleteLabels([unitId]);
+    return;
+  }
+  await client.patchLabels([
+    { id: unitId, aliasValues: await visibleSearchUnitAliasValues(unitId) },
+  ]);
+}
+
+export async function syncAllTags(client: SearchClient) {
+  const deleteResult = await client.deleteAllTags();
+  console.log("syncAllTags: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const tags = await listSearchUnitKindRows({
+      type: "TAG",
+      limit: BATCH_SIZE,
+      cursor,
+    });
+
+    if (tags.length === 0) break;
+
+    const docs = tags.map(buildTagDocument);
+    await client.addOrUpdateTags(docs);
+
+    total += docs.length;
+    cursor = tags[tags.length - 1]!.id;
+  }
+
+  return { message: "syncAllTags success", totalSynced: total };
+}
+
+export async function syncAllLabels(client: SearchClient) {
+  const deleteResult = await client.deleteAllLabels();
+  console.log("syncAllLabels: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const labels = await listSearchUnitKindRows({
+      type: "LABEL",
+      limit: BATCH_SIZE,
+      cursor,
+    });
+
+    if (labels.length === 0) break;
+
+    const docs = labels.map(buildLabelDocument);
+    await client.addOrUpdateLabels(docs);
+
+    total += docs.length;
+    cursor = labels[labels.length - 1]!.id;
+  }
+
+  return { message: "syncAllLabels success", totalSynced: total };
+}
+
+export async function syncTagSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const tags = await listSearchUnitKindRows({
+    type: "TAG",
+    limit: limit + 1,
+    cursor: options.cursor,
+  });
+  const { current, nextCursor } = segmentRows(tags, limit, "id");
+  if (current.length > 0) {
+    await client.addOrUpdateTags(current.map(buildTagDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
+export async function syncLabelSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const labels = await listSearchUnitKindRows({
+    type: "LABEL",
+    limit: limit + 1,
+    cursor: options.cursor,
+  });
+  const { current, nextCursor } = segmentRows(labels, limit, "id");
+  if (current.length > 0) {
+    await client.addOrUpdateLabels(current.map(buildLabelDocument));
   }
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }

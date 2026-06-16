@@ -1,4 +1,6 @@
-import { tagBatchTranslationsQuery, tagSearchQuery } from "@rezics/api/tag/tag";
+import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
+import type { TagSearchDocument } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
@@ -37,6 +39,14 @@ type SearchTagOption = {
   label?: string | null;
   slug?: string | null;
 };
+
+function tagSearchOptionFromDoc(doc: TagSearchDocument): SearchTagOption {
+  return {
+    unitId: doc.unitId,
+    label: doc.title ?? doc.titles[0] ?? null,
+    slug: doc.slug ?? null,
+  };
+}
 
 function tagOptionLabel(option: SearchTagOption): string {
   return option.label ?? option.slug ?? option.unitId;
@@ -89,15 +99,18 @@ export function ShelfPickerToolbar({
   const [tagSearchText, setTagSearchText] = useState("");
   const tagSearchAnchorRef = useRef<HTMLDivElement | null>(null);
   const tagSearchInputRef = useRef<HTMLInputElement | null>(null);
-  const tagSearchQueryResult = useQuery(tagSearchQuery(tagSearchText.trim()));
+  const trimmedTagSearchText = tagSearchText.trim();
+  const tagSearchQueryResult = useQuery({
+    ...meiliTagSearchQueryOptions({ q: trimmedTagSearchText, limit: 8 }),
+    enabled: trimmedTagSearchText.length > 0,
+  });
   const tagTranslationsQuery = useQuery(
     tagBatchTranslationsQuery(tagIds, locale),
   );
   const selectedTags = useMemo(() => new Set(tagIds), [tagIds]);
   const tagLabels = tagTranslationsQuery.data ?? {};
-  const searchOptions = (
-    (tagSearchQueryResult.data?.tags ?? []) as SearchTagOption[]
-  )
+  const searchOptions = (tagSearchQueryResult.data?.items ?? [])
+    .map(tagSearchOptionFromDoc)
     .filter((tag) => !selectedTags.has(tag.unitId))
     .slice(0, 8);
 

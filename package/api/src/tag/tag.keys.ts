@@ -19,11 +19,6 @@ export const tagKeys = {
   detail: (unitId: string) => [...tagKeys.details(), unitId] as const,
   bySlug: (slug: string) => [...tagKeys.details(), "slug", slug] as const,
 
-  // search
-  // 搜索
-  searches: () => [...tagKeys.all(), "search"] as const,
-  search: (q: string) => [...tagKeys.searches(), q] as const,
-
   // tags for a specific unit (scored associations)
   // 某个 unit 的标签（带评分的关联）
   forUnit: (unitId: string) => [...tagKeys.all(), "forUnit", unitId] as const,

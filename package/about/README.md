@@ -2,8 +2,14 @@
 
 Static public about/product site for `about.rezics.com`.
 
-Long-form page copy lives in localized MDX files under `src/content/<locale>/`.
-Short navigation, footer, and button strings live in `src/i18n/ui.ts`.
+Page structure lives in Astro templates. Localized short copy lives in JSON
+files under `src/content/locale/<locale>/`; each locale has `common.json`,
+`home.json`, and `product.json`. Long prose lives in Markdown fragments under
+`src/content/markdown/<locale>/<page>/<slug>.md`.
+
+Keep JSON for metadata, navigation, CTA labels, headings, product rows, and
+short section text. Use Markdown fragments for multi-paragraph prose only; do
+not put layout directives in Markdown.
 
 ## Commands
 
@@ -27,5 +33,5 @@ database access, or shared app runtime state. `rezics.com` and
 `book.rezics.com` remain product origins; the about site links users into those
 origins for interactive catalog workflows.
 
-The site uses Astro static output with MDX page sources. Visual storytelling is
-implemented with Astro components and CSS rather than exported image assets.
+The site uses Astro static output with fixed page templates, slug-matched JSON
+and Markdown content, and the shared Rezics UnoCSS design token config.

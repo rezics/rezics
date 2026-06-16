@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "title": "Rezics Products | Rezics",
+    "description": "瀏覽 Rezics 產品家族：目錄、Web 應用、Realms、Wiki、書架與共享圖譜，都建立在同一個作品身份之上。"
+  },
+  "hero": {
+    "eyebrow": "產品",
+    "heading": "Rezics 產品"
+  },
+  "sections": [
+    {
+      "eyebrow": "共享基礎",
+      "title": "每個產品表面都從同一個作品身份開始。",
+      "body": "目錄項、評論、書架、標籤、wiki 頁面與 realm 討論，都回到共享的 Work Unit，而不是變成彼此分離的資料庫。"
+    },
+    {
+      "eyebrow": "產品邊界",
+      "title": "這個站點介紹產品；互動工作流留在主應用。",
+      "body": "搜尋、收藏、投票、編輯、加入 realm、wiki 創作，以及其他需要登入狀態的流程，都在 Rezics 主應用中完成。"
+    }
+  ],
+  "storySections": [
+    {
+      "eyebrow": "列表邏輯",
+      "title": "產品可以拆開，但圖譜不應該拆開。",
+      "body": "Rezics Web、Realms、Wiki、Shelves 與 Graph 可以成為不同產品表面，但仍然共享目錄身份、來源事實與社群分類。"
+    },
+    {
+      "eyebrow": "狀態",
+      "title": "這個列表可以展示面向未來的產品表面。",
+      "body": "「計畫中」代表這個產品名稱是方向性的，而不是宣稱完整工作流已經上線。"
+    }
+  ],
+  "products": [
+    {
+      "name": "Rezics Catalog",
+      "category": "目錄",
+      "status": "available",
+      "statusLabel": "可用",
+      "summary": "公開的跨語言作品索引，整理作品、別名、來源、關聯與媒介 metadata。",
+      "href": "https://book.rezics.com/zh-hant/",
+      "ctaLabel": "開啟目錄",
+      "features": [
+        "為書籍、遊戲、媒體、貼文與混合型作品建立共享 Work Unit",
+        "保存事實、別名、來源連結、翻譯與關聯作品",
+        "讓作品在語言、平台、版本與社群之間維持同一個身份"
+      ]
+    },
+    {
+      "name": "Rezics Web",
+      "category": "應用",
+      "status": "preview",
+      "statusLabel": "預覽",
+      "summary": "用來瀏覽、評論、收藏與貢獻目錄的主要 Web 應用。",
+      "href": "https://book.rezics.com/zh-hant/",
+      "ctaLabel": "開啟應用",
+      "features": [
+        "互動搜尋與作品詳情頁",
+        "評論、書架、標籤與收藏工作流",
+        "需要登入的目錄與社群貢獻流程"
+      ]
+    },
+    {
+      "name": "Rezics Realms",
+      "category": "社群",
+      "status": "planned",
+      "statusLabel": "計畫中",
+      "summary": "讓社群分類、討論與策展作品，而不必 fork 公開目錄的社群空間。",
+      "features": [
+        "Realm 成員與本地討論",
+        "社群語境中的標籤應用",
+        "圍繞共同興趣的動態與入口"
+      ]
+    },
+    {
+      "name": "Rezics Wiki",
+      "category": "知識",
+      "status": "planned",
+      "statusLabel": "計畫中",
+      "summary": "協作知識頁與 realm wiki 入口，讓脈絡留在需要它的作品與社群旁邊。",
+      "features": [
+        "用 wiki 貼文記錄背景、時間線、範例與解讀",
+        "由社群維護的 Realm wiki 專區",
+        "讓知識接在作品旁邊，而不是散落到不同工具"
+      ]
+    },
+    {
+      "name": "Rezics Shelves",
+      "category": "發現",
+      "status": "planned",
+      "statusLabel": "計畫中",
+      "summary": "穿過作品、評論、標籤、realms 與其他書架項目的策展路徑。",
+      "features": [
+        "用可解釋的收藏取代黑箱推薦列表",
+        "書架項目可以承載評論與分類脈絡",
+        "讓讀者與社群圍繞共享作品身份策展"
+      ]
+    },
+    {
+      "name": "Rezics Graph",
+      "category": "平台",
+      "status": "planned",
+      "statusLabel": "計畫中",
+      "summary": "支撐目錄身份、來源事實、社群分類與知識表面的共享產品圖譜。",
+      "features": [
+        "作品、標籤、realm、書架、評論與 wiki 的關係",
+        "面向產品表面的 contract-first 資料形狀",
+        "讓未來 Rezics 工具不必重複建立事實"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,12 @@ import {
   REZICS_ARCHITECTURE_NODE_LABELS,
 } from "./components/rezicsArchitectureGraph";
 import {
+  ABOUT_MARKDOWN_FRAGMENTS,
+  getCommonCopy,
+  getHomePageCopy,
+  getProductPageCopy,
+} from "./content/aboutContent";
+import {
   ABOUT_LOCALES,
   ABOUT_PAGES,
   type AboutLocale,
@@ -13,41 +19,25 @@ import {
   getCanonicalUrl,
   getPagePath,
 } from "./i18n/locales";
-import { uiDictionaries } from "./i18n/ui";
 
 const packageRoot = new URL("..", import.meta.url).pathname;
 
-async function readMdxSource(
+async function readMarkdownFragment(
   locale: AboutLocale,
   page: AboutPageId,
+  slug: string,
 ): Promise<string> {
-  const filename = page === "home" ? "index.mdx" : `${page}.mdx`;
-  return readFile(join(packageRoot, "src/content", locale, filename), "utf8");
-}
-
-function frontmatterBlock(source: string): string {
-  const match = source.match(/^---\n(?<frontmatter>[\s\S]*?)\n---\n/);
-  if (!match?.groups?.frontmatter) {
-    throw new Error("MDX source is missing frontmatter");
-  }
-  return match.groups.frontmatter;
-}
-
-function frontmatterValue(source: string, key: string): string | null {
-  const match = frontmatterBlock(source).match(
-    new RegExp(`^${key}:\\s*"(?<value>.+)"$`, "m"),
+  return readFile(
+    join(packageRoot, "src/content/markdown", locale, page, `${slug}.md`),
+    "utf8",
   );
-  return match?.groups?.value ?? null;
 }
 
-function heroBlock(source: string): string {
-  const match = frontmatterBlock(source).match(
-    /^hero:\n(?<hero>(?: {2}.+\n?)+)/m,
-  );
-  if (!match?.groups?.hero) {
-    throw new Error("MDX source is missing hero frontmatter");
-  }
-  return match.groups.hero;
+function markdownParagraphCount(source: string): number {
+  return source
+    .trim()
+    .split(/\n{2,}/)
+    .filter((paragraph) => paragraph.trim().length > 0).length;
 }
 
 describe("@rezics/about locale contract", () => {
@@ -62,19 +52,32 @@ describe("@rezics/about locale contract", () => {
     ]);
   });
 
-  test("has localized MDX page sources for every supported route", async () => {
+  test("has common, page, and markdown content for every locale", async () => {
     for (const locale of ABOUT_LOCALES) {
+      const common = getCommonCopy(locale);
+
+      expect(common.nav.home.length).toBeGreaterThan(1);
+      expect(common.nav.product.length).toBeGreaterThan(1);
+      expect(common.cta.enterApp.length).toBeGreaterThan(4);
+      expect(common.notFound.body.length).toBeGreaterThan(20);
+
       for (const page of ABOUT_PAGES) {
-        const source = await readMdxSource(locale, page);
-        expect(frontmatterValue(source, "title")?.length).toBeGreaterThan(12);
-        expect(frontmatterValue(source, "description")?.length).toBeGreaterThan(
-          40,
-        );
-        expect(frontmatterBlock(source)).toContain("hero:");
-        expect(frontmatterBlock(source)).toContain("sections:");
-        expect(frontmatterBlock(source)).toContain("storySections:");
-        expect(heroBlock(source)).toContain("  body:\n    - ");
-        expect(source).toContain("\n## ");
+        const copy =
+          page === "home"
+            ? getHomePageCopy(locale)
+            : getProductPageCopy(locale);
+
+        expect(copy.meta.title.length).toBeGreaterThan(12);
+        expect(copy.meta.description.length).toBeGreaterThan(40);
+        expect(copy.hero.eyebrow.length).toBeGreaterThan(1);
+        expect(copy.hero.heading.length).toBeGreaterThan(4);
+        expect(copy.sections.length).toBeGreaterThanOrEqual(1);
+        expect(copy.storySections.length).toBeGreaterThanOrEqual(1);
+
+        for (const slug of ABOUT_MARKDOWN_FRAGMENTS[page]) {
+          const fragment = await readMarkdownFragment(locale, page, slug);
+          expect(fragment.trim().length).toBeGreaterThan(20);
+        }
       }
     }
   });
@@ -90,43 +93,51 @@ describe("@rezics/about locale contract", () => {
     };
 
     for (const locale of ABOUT_LOCALES) {
-      const source = await readMdxSource(locale, "home");
-      expect(heroBlock(source)).toContain(
-        `  eyebrow: "${expectedEyebrows[locale]}"`,
+      expect(getHomePageCopy(locale).hero.eyebrow).toBe(
+        expectedEyebrows[locale],
       );
-    }
 
-    for (const locale of ABOUT_LOCALES) {
-      const source = await readMdxSource(locale, "home");
-      expect(heroBlock(source).match(/^ {4}- /gm)?.length).toBe(2);
+      const heroMarkdown = await readMarkdownFragment(locale, "home", "hero");
+      expect(markdownParagraphCount(heroMarkdown)).toBe(2);
     }
   });
 
   test("keeps home pages wired to the product directory", async () => {
     for (const locale of ABOUT_LOCALES) {
-      const source = await readMdxSource(locale, "home");
-      expect(frontmatterBlock(source)).toContain('primaryCtaPage: "product"');
-      expect(source).toContain("inherited · create · spread");
-      expect(source.toLowerCase()).toContain("wiki");
+      const copy = getHomePageCopy(locale);
+      const closing = await readMarkdownFragment(locale, "home", "closing");
+
+      expect(copy.primaryCtaPage).toBe("product");
+      expect(copy.hero.heading).toContain("inherited · create · spread");
+      expect(`${JSON.stringify(copy)}\n${closing}`.toLowerCase()).toContain(
+        "wiki",
+      );
     }
   });
 
-  test("keeps home and product narratives structurally distinct", async () => {
+  test("keeps home and product narratives structurally distinct", () => {
     for (const locale of ABOUT_LOCALES) {
-      const homeSource = await readMdxSource(locale, "home");
-      const productSource = await readMdxSource(locale, "product");
+      const home = getHomePageCopy(locale);
+      const product = getProductPageCopy(locale);
 
-      expect(frontmatterBlock(homeSource)).not.toContain("products:");
-      expect(frontmatterBlock(productSource)).toContain("products:");
-      expect(productSource).toContain('name: "Rezics Catalog"');
-      expect(productSource).toContain("category:");
-      expect(productSource).toContain("status:");
-      expect(productSource).toContain("statusLabel:");
+      expect("products" in home).toBe(false);
+      expect(product.products.length).toBeGreaterThanOrEqual(6);
+      expect(product.products[0]?.name).toBe("Rezics Catalog");
+      expect(product.products.every((entry) => entry.category.length > 0)).toBe(
+        true,
+      );
+      expect(
+        product.products.every((entry) => entry.statusLabel.length > 0),
+      ).toBe(true);
     }
   });
 
   test("keeps home narrative focused on born-digital indexing pressure", async () => {
-    const source = await readMdxSource("en", "home");
+    const source = `${JSON.stringify(getHomePageCopy("en"))}\n${await readMarkdownFragment(
+      "en",
+      "home",
+      "closing",
+    )}`;
 
     expect(source).toContain("Web novels");
     expect(source).toContain("born-digital books");
@@ -134,8 +145,8 @@ describe("@rezics/about locale contract", () => {
     expect(source).toContain("Tag-shelf discovery");
   });
 
-  test("keeps product page focused on the Rezics product directory", async () => {
-    const source = await readMdxSource("en", "product");
+  test("keeps product page focused on the Rezics product directory", () => {
+    const source = JSON.stringify(getProductPageCopy("en"));
 
     for (const expected of [
       "Rezics Catalog",
@@ -145,19 +156,20 @@ describe("@rezics/about locale contract", () => {
       "Rezics Shelves",
       "Rezics Graph",
     ]) {
-      expect(source).toContain(`name: "${expected}"`);
+      expect(source).toContain(expected);
     }
 
-    expect(source).toContain('status: "available"');
-    expect(source).toContain('status: "preview"');
-    expect(source).toContain('status: "planned"');
+    expect(source).toContain('"status":"available"');
+    expect(source).toContain('"status":"preview"');
+    expect(source).toContain('"status":"planned"');
   });
 
-  test("does not describe the product directory CTA as a story", () => {
+  test("keeps long prose in markdown fragments instead of page json", async () => {
     for (const locale of ABOUT_LOCALES) {
-      expect(
-        uiDictionaries[locale].cta.readProduct.toLowerCase(),
-      ).not.toContain("story");
+      for (const page of ABOUT_PAGES) {
+        const closing = await readMarkdownFragment(locale, page, "closing");
+        expect(closing).toContain("\n## ");
+      }
     }
   });
 });

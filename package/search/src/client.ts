@@ -30,6 +30,8 @@ export class SearchClient {
   readonly shelfItemIndex: Index;
   readonly realmIndex: Index;
   readonly zoneIndex: Index;
+  readonly tagIndex: Index;
+  readonly labelIndex: Index;
   readonly entityIndex: Index;
   readonly progressIndex: Index;
 
@@ -44,6 +46,8 @@ export class SearchClient {
     this.shelfItemIndex = this.meili.index(SHELF_ITEM_INDEX_NAME);
     this.realmIndex = this.meili.index("realms");
     this.zoneIndex = this.meili.index("zones");
+    this.tagIndex = this.meili.index("tags");
+    this.labelIndex = this.meili.index("labels");
     this.entityIndex = this.meili.index("entities");
     this.progressIndex = this.meili.index(PROGRESS_INDEX_NAME);
   }
@@ -100,6 +104,10 @@ export class SearchClient {
         return this.realmIndex;
       case "zones":
         return this.zoneIndex;
+      case "tags":
+        return this.tagIndex;
+      case "labels":
+        return this.labelIndex;
       case "entities":
         return this.entityIndex;
       case PROGRESS_INDEX_NAME:
@@ -158,6 +166,14 @@ export class SearchClient {
 
   async initZoneIndex(): Promise<void> {
     await this.initIndexFromSchema(getExpectedMeiliIndexSchema("zones"));
+  }
+
+  async initTagIndex(): Promise<void> {
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("tags"));
+  }
+
+  async initLabelIndex(): Promise<void> {
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("labels"));
   }
 
   async initEntityIndex(): Promise<void> {
@@ -303,6 +319,36 @@ export class SearchClient {
   }
   deleteAllZones() {
     return this.zoneIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Tag document operations — tag 文档操作
+
+  addOrUpdateTags(docs: any[]) {
+    return this.tagIndex.addDocuments(docs);
+  }
+  patchTags(docs: any[]) {
+    return this.tagIndex.updateDocuments(docs);
+  }
+  deleteTags(ids: string[]) {
+    return this.tagIndex.deleteDocuments(ids);
+  }
+  deleteAllTags() {
+    return this.tagIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Label document operations — label 文档操作
+
+  addOrUpdateLabels(docs: any[]) {
+    return this.labelIndex.addDocuments(docs);
+  }
+  patchLabels(docs: any[]) {
+    return this.labelIndex.updateDocuments(docs);
+  }
+  deleteLabels(ids: string[]) {
+    return this.labelIndex.deleteDocuments(ids);
+  }
+  deleteAllLabels() {
+    return this.labelIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Entity document operations — 实体文档操作

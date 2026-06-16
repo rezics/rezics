@@ -97,6 +97,8 @@ export function createNoopSeedSyncHooks(): SeedSyncHooks {
     post: noop,
     realm: noop,
     zone: noop,
+    tag: noop,
+    label: noop,
     user: noop,
     entity: noop,
     contentContainedUnits: noop,

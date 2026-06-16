@@ -45,6 +45,20 @@ async function patchAliasSearchDocuments(unitId: string): Promise<void> {
         { type: "server", service: "unit-alias-record" },
       ),
     ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.tagPatchAliases,
+        { unitId },
+        { type: "server", service: "unit-alias-record" },
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.labelPatchAliases,
+        { unitId },
+        { type: "server", service: "unit-alias-record" },
+      ),
+    ),
   ]);
 }
 
