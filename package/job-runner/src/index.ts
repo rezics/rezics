@@ -114,20 +114,7 @@ if ((role === "all" || role === "http") && boss) {
     queue: boss as never,
     internalSecret: env.JOB_RUNNER_INTERNAL_SECRET,
     sequinWebhookSecret: env.SEQUIN_WEBHOOK_SECRET,
-    readiness: async () => {
-      if (!boss) return false;
-      if (roleRequiresSequinHealth(role) && env.SEQUIN_HEALTH_URL) {
-        try {
-          const res = await fetch(env.SEQUIN_HEALTH_URL, {
-            signal: AbortSignal.timeout(2000),
-          });
-          if (!res.ok) return false;
-        } catch {
-          return false;
-        }
-      }
-      return true;
-    },
+    readiness: () => Boolean(boss),
     observability,
   });
   app.listen(port);
