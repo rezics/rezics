@@ -46,7 +46,7 @@
   "authority_path_authors": "Autoren",
   "authority_path_entity_kind": "Entitätsart",
   "authority_path_entity_verified": "Verifizierte Entität",
-  "authority_path_slug": "Schnecke",
+  "authority_path_slug": "Slug",
   "authority_path_avatar": "Avatar",
   "authority_edit_form_locked_notice": "Gesperrte Felder in diesem Abschnitt:{fields}.",
   "authority_edit_form_all_locked_notice": "Alle bearbeitbaren Felder sind für normale Community-Mitwirkende gesperrt.",

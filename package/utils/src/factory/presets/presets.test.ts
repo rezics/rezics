@@ -24,4 +24,15 @@ describe("presets", () => {
       expect(() => v.parse(SeedPresetSchema, preset)).not.toThrow();
     });
   }
+
+  for (const name of ["fast", "realistic"]) {
+    test(`${name} keeps required dependency pools non-empty`, () => {
+      const preset = PRESETS[name]!;
+      expect(preset.mode).toBe("realistic");
+      expect(preset.plan.users.min).toBeGreaterThanOrEqual(1);
+      expect(preset.plan.tags.min).toBeGreaterThanOrEqual(1);
+      expect(preset.plan.personEntities.min).toBeGreaterThanOrEqual(1);
+      expect(preset.plan.organizationEntities.min).toBeGreaterThanOrEqual(1);
+    });
+  }
 });

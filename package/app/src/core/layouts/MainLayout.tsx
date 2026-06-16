@@ -131,6 +131,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   : null,
               },
             },
+            t,
           )}
         />
         <main className="flex flex-col flex-1 min-w-0 pt-[49px] md:pt-14 transition-all duration-300 h-screen w-full">

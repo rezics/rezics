@@ -1,0 +1,12 @@
+{
+  "_note": "TEMPORARY BASELINE. This snapshot exists only to block NEW violations from accumulating while a migration is in progress. Delete this file once the migration lands.",
+  "total": 2,
+  "byRule": {
+    "R4": 1,
+    "R3": 1
+  },
+  "keys": [
+    "R3  package/web/src/components/layout",
+    "R4  package/web/src/app/(main)/book/[bookId]/variants"
+  ]
+}

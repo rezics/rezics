@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import { Link } from "@tanstack/react-router";
 import type { FC } from "react";
 
@@ -5,13 +6,8 @@ interface InboxTabBarProps {
   active: "notifications" | "dm";
 }
 
-/**
- * Two-tab switcher between the Notifications view and the DM inbox.
- * Engagement-subscription introduces DM as a peer surface to the
- * existing notification stream; this bar lets users move between them
- * without losing their inbox context.
- */
 export const InboxTabBar: FC<InboxTabBarProps> = ({ active }) => {
+  const { t } = useTranslation();
   const tab = (key: "notifications" | "dm", label: string, to: string) => {
     const isActive = key === active;
     return (
@@ -30,8 +26,8 @@ export const InboxTabBar: FC<InboxTabBarProps> = ({ active }) => {
 
   return (
     <nav className="flex items-center gap-2 border-b border-border-whisper">
-      {tab("notifications", "Notifications", "/inbox/notification")}
-      {tab("dm", "Direct Messages", "/inbox/dm")}
+      {tab("notifications", t("community:dm_notifications_tab"), "/inbox/notification")}
+      {tab("dm", t("community:dm_dm_tab"), "/inbox/dm")}
     </nav>
   );
 };

@@ -79,10 +79,12 @@ export function RealmListPage() {
           {t("entity:realm_list_title")}
         </h1>
         <p className="text-sm leading-ui text-text-secondary">
-          Sign in to see and manage the realms you have joined.
+          {t("entity:realm_list_sign_in_prompt")}
         </p>
         <div>
-          <Button onClick={() => navigate({ to: "/login" })}>Sign in</Button>
+          <Button onClick={() => navigate({ to: "/login" })}>
+            {t("common:sign_in")}
+          </Button>
         </div>
       </div>
     );
@@ -96,7 +98,7 @@ export function RealmListPage() {
             {t("entity:realm_list_title")}
           </h1>
           <p className="mt-1 text-sm leading-ui text-text-secondary">
-            Realms you have joined.
+            {t("entity:realm_list_subtitle")}
           </p>
         </div>
         <div className="flex flex-row gap-2">
@@ -113,7 +115,7 @@ export function RealmListPage() {
               setSelectedIds(new Set());
             }}
           >
-            {manageMode ? t("common:cancel") : "Manage"}
+            {manageMode ? t("common:cancel") : t("entity:realm_list_manage")}
           </Button>
           <Button onClick={() => navigate({ to: "/realm/new" })}>
             {t("entity:realm_new_title")}
@@ -138,7 +140,7 @@ export function RealmListPage() {
           {manageMode && (
             <div className="flex items-center justify-between gap-3 border-y border-border-whisper py-3">
               <p className="text-sm leading-ui text-text-secondary">
-                {selectedCount} selected
+                {t("entity:realm_list_selected_count", { count: selectedCount })}
               </p>
               <Button
                 variant="destructive"
@@ -164,10 +166,11 @@ export function RealmListPage() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Leave selected realms?</DialogTitle>
+            <DialogTitle>
+              {t("entity:realm_list_leave_confirm_title")}
+            </DialogTitle>
             <DialogDescription>
-              You will leave {selectedCount} selected realm
-              {selectedCount === 1 ? "" : "s"}. This does not delete the realms.
+              {t("entity:realm_list_leave_confirm_description", { count: selectedCount })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter showCloseButton>

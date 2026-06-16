@@ -3,5 +3,6 @@
   "showThinkingSummaries": true,
   "permissions": {
     "defaultMode": "bypassPermissions"
-  }
+  },
+  "enabledMcpjsonServers": ["playwright"]
 }

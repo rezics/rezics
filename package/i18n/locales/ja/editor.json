@@ -46,7 +46,7 @@
   "authority_path_authors": "著者",
   "authority_path_entity_kind": "エンティティの種類",
   "authority_path_entity_verified": "検証されたエンティティ",
-  "authority_path_slug": "ナメクジ",
+  "authority_path_slug": "Slug",
   "authority_path_avatar": "アバター",
   "authority_edit_form_locked_notice": "このセクションのロックされたフィールド:{fields}。",
   "authority_edit_form_all_locked_notice": "すべての編集可能なフィールドは、一般のコミュニティ投稿者に対してロックされています。",

@@ -12,7 +12,11 @@ import type {
   ZoneBoundary,
 } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
+import { eq, inArray } from "drizzle-orm";
 import { bookService } from "@/book";
+import { db } from "@/db";
+import { UnitTranslation } from "@/db/schema/translation";
+import { Unit } from "@/db/schema/unit";
 import { postService } from "@/post";
 import { mapPostToDTO } from "@/post/post.mapper";
 import { realmService } from "@/realm";
@@ -281,6 +285,42 @@ async function hydrateRealmSummaries(
   );
 }
 
+async function hydrateTargetUnitSummaries(
+  targetUnitIds: string[],
+  query: FeedQuery,
+): Promise<Map<string, FeedWorkSummary>> {
+  const uniqueIds = [...new Set(targetUnitIds.filter(Boolean))];
+  if (uniqueIds.length === 0) return new Map();
+  const languages = resolveEffectiveReadLanguageCandidates({
+    languages: query.languages,
+    appLocale: query.appLocale,
+  });
+  const [units, translations] = await Promise.all([
+    db.select({ id: Unit.id, type: Unit.type }).from(Unit).where(inArray(Unit.id, uniqueIds)),
+    db.select({ unitId: UnitTranslation.unitId, language: UnitTranslation.language, title: UnitTranslation.title })
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, uniqueIds)),
+  ]);
+  const unitTypeMap = new Map(units.map((u) => [u.id, u.type]));
+  const titlesByUnit = new Map<string, string | null>();
+  for (const unitId of uniqueIds) {
+    const unitTranslations = translations.filter((t) => t.unitId === unitId);
+    const preferred = languages.length > 0
+      ? unitTranslations.find((t) => languages.includes(t.language))
+      : undefined;
+    titlesByUnit.set(unitId, preferred?.title ?? unitTranslations[0]?.title ?? null);
+  }
+  const result = new Map<string, FeedWorkSummary>();
+  for (const unitId of uniqueIds) {
+    result.set(unitId, {
+      unitId,
+      kind: unitTypeMap.get(unitId)?.toLowerCase() ?? null,
+      title: titlesByUnit.get(unitId) ?? null,
+    });
+  }
+  return result;
+}
+
 async function mapPostsToFeedRows(
   posts: FeedPostSource[],
   query: FeedQuery,
@@ -290,13 +330,20 @@ async function mapPostsToFeedRows(
   const realmIds = dtos
     .map((post) => realmIdForFeedPost(post, input.realmUnitId))
     .filter((unitId): unitId is string => Boolean(unitId));
-  const realms = await hydrateRealmSummaries(realmIds, query);
+  const targetUnitIds = dtos
+    .map((post) => post.targetUnitId)
+    .filter((unitId): unitId is string => Boolean(unitId));
+  const [realms, targetUnits] = await Promise.all([
+    hydrateRealmSummaries(realmIds, query),
+    hydrateTargetUnitSummaries(targetUnitIds, query),
+  ]);
   return dtos.map((post) => {
     const realmUnitId = realmIdForFeedPost(post, input.realmUnitId);
     return mapPostToFeedRow(post, {
       realmUnitId,
       realm: realmUnitId ? (realms.get(realmUnitId) ?? null) : null,
       reason: input.reason,
+      resolvedTargetUnit: post.targetUnitId ? (targetUnits.get(post.targetUnitId) ?? null) : null,
     });
   });
 }

@@ -55,6 +55,11 @@ export interface NavigationBuildOptions {
   };
 }
 
+export type NavigationTranslateFn = (
+  key: string,
+  params?: Record<string, string>,
+) => string;
+
 interface NavigationGroup {
   id: string;
   title?: string;
@@ -78,35 +83,41 @@ function isVisible(
   }
 }
 
-const NAVIGATION_GROUPS: NavigationGroup[] = [
-  {
-    id: "home",
-    items: [
-      { kind: "item", segment: "/", title: "Home", icon: HomeOutlinedIcon },
-    ],
-  },
-  {
-    id: "account",
-    title: "Account",
-    visibility: "unauthenticated",
-    items: [
-      {
-        kind: "item",
-        segment: "/login",
-        title: "Sign in",
-        icon: LoginOutlinedIcon,
-        visibility: "unauthenticated",
-      },
-      {
-        kind: "item",
-        segment: "/register",
-        title: "Create account",
-        icon: HowToRegOutlinedIcon,
-        visibility: "unauthenticated",
-      },
-    ],
-  },
-];
+function navigationGroups(t: NavigationTranslateFn): NavigationGroup[] {
+  return [
+    {
+      id: "home",
+      items: [
+        {
+          kind: "item",
+          segment: "/",
+          title: t("shell:navigation_home"),
+          icon: HomeOutlinedIcon,
+        },
+      ],
+    },
+    {
+      id: "account",
+      visibility: "unauthenticated",
+      items: [
+        {
+          kind: "item",
+          segment: "/login",
+          title: t("shell:navigation_login"),
+          icon: LoginOutlinedIcon,
+          visibility: "unauthenticated",
+        },
+        {
+          kind: "item",
+          segment: "/register",
+          title: t("shell:navigation_create_account"),
+          icon: HowToRegOutlinedIcon,
+          visibility: "unauthenticated",
+        },
+      ],
+    },
+  ];
+}
 
 function buildSubscriptionSection(input: {
   context: NavigationContext;
@@ -121,6 +132,7 @@ function buildSubscriptionSection(input: {
     errorMessage?: string | null;
   };
   emptyTitle: string;
+  loadingTitle: string;
 }): NavigationItem | null {
   if (!input.context.isAuthenticated) return null;
 
@@ -138,7 +150,7 @@ function buildSubscriptionSection(input: {
     children.push({
       kind: "status",
       id: `${input.sectionId}-loading`,
-      title: `Loading ${input.title.toLowerCase()}...`,
+      title: input.loadingTitle,
     });
   } else if (input.entries?.errorMessage) {
     children.push({
@@ -207,32 +219,40 @@ function sortSidebarSubscriptionItems(items: MainSidebarSubscriptionItem[]) {
 function buildRealmSection(
   context: NavigationContext,
   options: NavigationBuildOptions,
+  t: NavigationTranslateFn,
 ): NavigationItem | null {
   return buildSubscriptionSection({
     context,
     sectionId: "realms",
-    title: "Realms",
-    allTitle: "All Realms",
+    title: t("shell:navigation_realms"),
+    allTitle: t("shell:navigation_all_realms"),
     allSegment: "/realm",
     icon: GroupsOutlinedIcon,
     entries: options.realms,
-    emptyTitle: "No subscribed realms",
+    emptyTitle: t("shell:navigation_no_subscribed_realms"),
+    loadingTitle: t("shell:navigation_loading", {
+      section: t("shell:navigation_realms").toLowerCase(),
+    }),
   });
 }
 
 function buildZoneSection(
   context: NavigationContext,
   options: NavigationBuildOptions,
+  t: NavigationTranslateFn,
 ): NavigationItem | null {
   return buildSubscriptionSection({
     context,
     sectionId: "zones",
-    title: "Zones",
-    allTitle: "All Zones",
+    title: t("shell:navigation_zones"),
+    allTitle: t("shell:navigation_all_zones"),
     allSegment: "/z",
     icon: CompassOutlinedIcon,
     entries: options.zones,
-    emptyTitle: "No subscribed zones",
+    emptyTitle: t("shell:navigation_no_subscribed_zones"),
+    loadingTitle: t("shell:navigation_loading", {
+      section: t("shell:navigation_zones").toLowerCase(),
+    }),
   });
 }
 
@@ -290,8 +310,9 @@ export const REMOVED_MAIN_SIDEBAR_SEGMENTS = [
 export const NAVIGATION = (
   context: NavigationContext,
   options: NavigationBuildOptions = {},
+  t: NavigationTranslateFn = (key) => key.split(":").pop() ?? key,
 ): NavigationItem[] => {
-  const groups = [...NAVIGATION_GROUPS];
+  const groups = [...navigationGroups(t)];
   if (context.isAdmin) groups.push(ADMIN_GROUP);
 
   const visibleGroups = groups
@@ -316,10 +337,10 @@ export const NAVIGATION = (
     if (index === 0) result.push({ kind: "divider" });
   });
 
-  const zoneSection = buildZoneSection(context, options);
+  const zoneSection = buildZoneSection(context, options, t);
   if (zoneSection) result.push(zoneSection);
 
-  const realmSection = buildRealmSection(context, options);
+  const realmSection = buildRealmSection(context, options, t);
   if (realmSection) result.push(realmSection);
 
   return result;
