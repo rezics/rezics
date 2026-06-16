@@ -27,7 +27,7 @@ import {
 } from "./handlers/search/runtime";
 import { resolveWorkerLanes } from "./lanes";
 import { createBoss } from "./queue/boss";
-import { assertSequinHealthAvailable } from "./sequin/preflight";
+import { roleRequiresSequinHealth } from "./sequin/preflight";
 import { registerWorkers } from "./worker";
 
 const port = env.PORT ? Number(env.PORT) : 3005;
@@ -64,10 +64,13 @@ if (role === "all" || role === "worker" || role === "http") {
   boss = await createBoss();
 }
 
-await assertSequinHealthAvailable({
-  role,
-  healthUrl: env.SEQUIN_HEALTH_URL,
-});
+// Fail fast on missing config; actual Sequin reachability is a readiness probe.
+// 缺少配置时立即失败；实际 Sequin 可达性通过就绪探测检查。
+if (roleRequiresSequinHealth(role) && !env.SEQUIN_HEALTH_URL) {
+  throw new Error(
+    `JOB_RUNNER_ROLE=${role} requires SEQUIN_HEALTH_URL to be set.`,
+  );
+}
 
 if ((role === "all" || role === "worker") && boss) {
   searchRuntime = createSearchRuntime({
@@ -111,7 +114,20 @@ if ((role === "all" || role === "http") && boss) {
     queue: boss as never,
     internalSecret: env.JOB_RUNNER_INTERNAL_SECRET,
     sequinWebhookSecret: env.SEQUIN_WEBHOOK_SECRET,
-    readiness: () => Boolean(boss),
+    readiness: async () => {
+      if (!boss) return false;
+      if (roleRequiresSequinHealth(role) && env.SEQUIN_HEALTH_URL) {
+        try {
+          const res = await fetch(env.SEQUIN_HEALTH_URL, {
+            signal: AbortSignal.timeout(2000),
+          });
+          if (!res.ok) return false;
+        } catch {
+          return false;
+        }
+      }
+      return true;
+    },
     observability,
   });
   app.listen(port);
