@@ -141,6 +141,9 @@
   "files.exclude": {
     "package/database/dbschema/migrations": true
   },
+  "files.associations": {
+    "*.tpl": "hcl"
+  },
   "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
