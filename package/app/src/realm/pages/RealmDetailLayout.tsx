@@ -11,15 +11,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 import type { ReactNode } from "react";
-import {
-  realmCreateHref,
-  type RealmDetailRouteLocation,
-  realmManageHref,
-} from "../models/realmDetailRoutes";
+import { RealmMembershipSettingsDialog } from "@/realm-tag-preference";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
-import { RealmMuteButton } from "../components/RealmMuteButton";
 import { canManageRealm } from "../models/canManageRealm";
+import {
+  type RealmDetailRouteLocation,
+  realmCreateHref,
+  realmManageHref,
+} from "../models/realmDetailRoutes";
 import { BannerSection } from "../sections/BannerSection";
 import { RealmDetailShell } from "../sections/RealmDetailShell";
 import { RealmDetailProvider } from "./realmDetailContext";
@@ -93,7 +93,7 @@ export function RealmDetailLayout({
     permission,
     memberRoleKey: membership?.roleKey,
   });
-  const isMember = Boolean(membership);
+  const isMember = Boolean(membership?.member);
 
   return (
     <RealmDetailProvider
@@ -147,8 +147,14 @@ export function RealmDetailLayout({
                   {t("entity:realm_join_to_post")}
                 </Button>
               )}
-              <JoinButton realmId={realmId} />
-              <RealmMuteButton realmUnitId={realmId} />
+              {isMember ? (
+                <RealmMembershipSettingsDialog
+                  realmId={realmId}
+                  realmTitle={title}
+                />
+              ) : (
+                <JoinButton realmId={realmId} />
+              )}
             </div>
           </div>
           {description && (

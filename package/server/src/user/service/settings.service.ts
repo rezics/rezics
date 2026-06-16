@@ -11,6 +11,7 @@ import type {
 } from "@rezics/contract";
 import {
   FALLBACK_LANGUAGE,
+  isCatalogUnitType,
   LICENSE_SLUGS,
   NOTIFICATION_PREFERENCE_KEYS,
   normalizeContentLanguage,
@@ -269,6 +270,7 @@ function materializeSettings(rows: SettingsRows): UserSettings {
   if (rows.realmTagDisplays.length > 0) {
     settings.realmTagPreferences = {};
     for (const row of rows.realmTagDisplays) {
+      if (!isCatalogUnitType(row.targetKey)) continue;
       settings.realmTagPreferences[row.targetKey] = {
         realmIds: row.realms.map((realm) => realm.realmId),
         maxDisplay: row.maxVisibleTags ?? undefined,
@@ -342,6 +344,9 @@ async function replaceRealmTagDisplays(
   userId: string,
   preferences: NonNullable<UpdateUserSettings["realmTagPreferences"]>,
 ) {
+  // Realm tag display preferences are independent from subscriptions. Detail
+  // pages may use subscriptions as discovery context, but settings can keep any
+  // visible realm until the realm Unit itself is deleted.
   await db
     .delete(UserRealmTagDisplayPreference)
     .where(eq(UserRealmTagDisplayPreference.userId, userId));

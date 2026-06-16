@@ -219,17 +219,29 @@ describe("settings preferences", () => {
 
     const result = await updateSettings("user-1", {
       realmTagPreferences: {
-        BOOK: { realmIds: ["00000000-0000-0000-0000-000000000001"] },
+        BOOK: {
+          realmIds: [
+            "00000000-0000-0000-0000-000000000002",
+            "00000000-0000-0000-0000-000000000001",
+          ],
+        },
       },
     });
 
     expect(result.realmTagPreferences?.BOOK).toEqual({
-      realmIds: ["00000000-0000-0000-0000-000000000001"],
+      realmIds: [
+        "00000000-0000-0000-0000-000000000002",
+        "00000000-0000-0000-0000-000000000001",
+      ],
       maxDisplay: undefined,
     });
     expect(rows(UserRealmTagDisplayPreference)[0]).toMatchObject({
       targetKey: "BOOK",
       maxVisibleTags: null,
     });
+    expect(rows(UserRealmTagDisplayRealm)).toMatchObject([
+      { realmId: "00000000-0000-0000-0000-000000000002", position: 0 },
+      { realmId: "00000000-0000-0000-0000-000000000001", position: 1 },
+    ]);
   });
 });

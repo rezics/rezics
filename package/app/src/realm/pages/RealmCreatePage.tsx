@@ -184,7 +184,7 @@ export function RealmCreatePage({
 
   const title = realm.title ?? t("entity:realm_untitled");
   const description = contentDocMarkdownFallback(realm.description);
-  const isMember = Boolean(membership);
+  const isMember = Boolean(membership?.member);
   const postHref = (postUnitId: string) => `${detailHref}/post/${postUnitId}`;
 
   return (

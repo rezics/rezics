@@ -41,6 +41,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { GripVerticalIcon, XIcon } from "lucide-react";
 import { type FC, useState } from "react";
+import { RealmTagPreferenceEditor } from "@/realm-tag-preference";
 import { ContentRatingPreferences } from "@/user/components/ContentRatingPreferences";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import {
@@ -449,8 +450,10 @@ export const SettingsPreferencesSection: FC = () => {
               {t("settings:preferences_subscription_lists_zones")}
             </label>
             <Select
-              value={normalizeSubscriptionListSort(
-                settings?.subscriptionLists?.zones?.defaultSort,
+              value={String(
+                normalizeSubscriptionListSort(
+                  settings?.subscriptionLists?.zones?.defaultSort,
+                ),
               )}
               onValueChange={(value) =>
                 handleSubscriptionListSortChange("zones", value)
@@ -465,7 +468,7 @@ export const SettingsPreferencesSection: FC = () => {
               </SelectTrigger>
               <SelectContent>
                 {SUBSCRIPTION_LIST_SORTS.map((sort) => (
-                  <SelectItem key={sort} value={sort}>
+                  <SelectItem key={String(sort)} value={String(sort)}>
                     {subscriptionListSortLabel(t, sort)}
                   </SelectItem>
                 ))}
@@ -480,8 +483,10 @@ export const SettingsPreferencesSection: FC = () => {
               {t("settings:preferences_subscription_lists_realms")}
             </label>
             <Select
-              value={normalizeSubscriptionListSort(
-                settings?.subscriptionLists?.realms?.defaultSort,
+              value={String(
+                normalizeSubscriptionListSort(
+                  settings?.subscriptionLists?.realms?.defaultSort,
+                ),
               )}
               onValueChange={(value) =>
                 handleSubscriptionListSortChange("realms", value)
@@ -496,7 +501,7 @@ export const SettingsPreferencesSection: FC = () => {
               </SelectTrigger>
               <SelectContent>
                 {SUBSCRIPTION_LIST_SORTS.map((sort) => (
-                  <SelectItem key={sort} value={sort}>
+                  <SelectItem key={String(sort)} value={String(sort)}>
                     {subscriptionListSortLabel(t, sort)}
                   </SelectItem>
                 ))}
@@ -514,28 +519,7 @@ export const SettingsPreferencesSection: FC = () => {
         description={t("settings:preferences_realm_tags_description")}
         divider={false}
       >
-        {settings?.realmTagPreferences &&
-        Object.keys(settings.realmTagPreferences).length > 0 ? (
-          <div className="space-y-2">
-            {Object.entries(settings.realmTagPreferences).map(
-              ([realm, pref]) => (
-                <div key={realm} className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{realm}</span>
-                  <span className="text-xs text-text-secondary">
-                    {t("settings:preferences_realm_tags_meta", {
-                      max: pref.maxDisplay,
-                      realms: pref.realmIds.join(", "),
-                    })}
-                  </span>
-                </div>
-              ),
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-text-secondary">
-            {t("settings:preferences_realm_tags_empty")}
-          </p>
-        )}
+        <RealmTagPreferenceEditor settings={settings} />
       </SettingsSection>
     </div>
   );

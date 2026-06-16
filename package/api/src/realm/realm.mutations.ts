@@ -12,6 +12,7 @@ import type {
   JoinRealmInput,
   PatchRealmTagApplicationInput,
   RealmExtraOkResponse,
+  RealmMembershipMeDTO,
   RealmMemberDTO,
   RealmResponse,
   RealmRuleAcknowledgementDTO,
@@ -32,6 +33,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { subscriptionKeys } from "../subscription/subscription.keys";
 import { tagKeys } from "../tag/tag.keys";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
@@ -200,6 +202,21 @@ export function useLeaveRealmMutation(
     mutationFn: (realmUnitId: string) => realmApi.leave(realmUnitId),
     ...options,
     onSuccess: async (data, realmUnitId, onMutateResult, context) => {
+      queryClient.setQueryData<RealmMembershipMeDTO | undefined>(
+        realmKeys.members(realmUnitId),
+        (current) =>
+          current
+            ? {
+                ...current,
+                member: null,
+                roleKey: null,
+                state: null,
+                capabilities: [],
+                muted: false,
+                banned: false,
+              }
+            : current,
+      );
       await syncRealmMembershipMutationCache({ queryClient, realmUnitId });
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
@@ -228,6 +245,12 @@ export function useMuteRealmMutation(
         queryKey: realmKeys.detail(realmUnitId),
       });
       queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
+      queryClient.invalidateQueries({
+        queryKey: subscriptionKeys.check(realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: subscriptionKeys.mine(),
+      });
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
   });
@@ -254,6 +277,12 @@ export function useUnmuteRealmMutation(
         queryKey: realmKeys.detail(realmUnitId),
       });
       queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
+      queryClient.invalidateQueries({
+        queryKey: subscriptionKeys.check(realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: subscriptionKeys.mine(),
+      });
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
   });
