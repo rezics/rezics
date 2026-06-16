@@ -15,8 +15,7 @@ import { PinnedStreamSection } from "@/pinboard";
 import { StreamLayout } from "@/stream";
 import { RealmContentStream } from "../components/RealmContentStream";
 import { useRealmManageMode } from "../models/realmManageMode";
-import { AboutSection } from "./AboutSection";
-import { FeaturedZoneSection } from "./FeaturedZoneSection";
+import { RealmSidebar } from "./RealmSidebar";
 import {
   type RealmStreamSort,
   RealmStreamSortSwitcher,
@@ -73,7 +72,7 @@ export function RealmStreamTab({
       <div className="flex min-w-0 flex-col gap-4">
         <RuleSection
           realmUnitId={realmId}
-          postUnitId={realm.extra?.rule ?? null}
+          postUnitId={realm.ruleUnitId ?? null}
         />
         <div className="flex flex-col gap-3">
           <RealmStreamTagFilter
@@ -134,13 +133,8 @@ export function RealmStreamTab({
           />
         </StreamLayout>
       </div>
-      <aside className="flex min-w-0 flex-col gap-4">
-        <FeaturedZoneSection zoneUnitId={realm.extra?.featuredZoneUnitId} />
-        <AboutSection postUnitId={realm.extra?.about ?? null} />
-        <RuleSection
-          realmUnitId={realmId}
-          postUnitId={realm.extra?.rule ?? null}
-        />
+      <aside className="min-w-0">
+        <RealmSidebar realm={realm} placement="home" />
       </aside>
     </div>
   );

@@ -16,13 +16,6 @@ const legacyDbMock: Record<string, any> = {};
 // Stub fire-and-forget meili sync so it doesn't reach into real env.
 // 桩掉 fire-and-forget 的 meili 同步，避免触及真实环境变量。
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
-const appendToListMock = mock(async () => ({
-  unitIds: ["unit-1", "unit-2"],
-}));
-const reorderListMock = mock(async (_caller, _realmId, _key, unitIds) => ({
-  unitIds,
-}));
-const removeFromListMock = mock(async () => ({ unitIds: ["unit-2"] }));
 const setSingleExtraKeyMock = mock(async () => undefined);
 const clearSingleExtraKeyMock = mock(async () => undefined);
 const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
@@ -107,12 +100,7 @@ mock.module("@/infra/slug-scopes", () => ({
   requireSlugScopeId: () => "realm-scope",
 }));
 mock.module("./realm-extra.service", () => ({
-  appendToList: appendToListMock,
   filterRealmExtraPublic: mock(async (extra: unknown) => extra),
-  readListAdmin: mock(async () => ({ unitIds: ["unit-1"], staleIds: [] })),
-  readListPublic: mock(async () => ["unit-1"]),
-  removeFromList: removeFromListMock,
-  reorderList: reorderListMock,
   setSingleExtraKey: setSingleExtraKeyMock,
   clearSingleExtraKey: clearSingleExtraKeyMock,
 }));
@@ -577,9 +565,6 @@ function installTx(ops: TxOps) {
 
 afterEach(() => {
   enqueueMock.mockClear();
-  appendToListMock.mockClear();
-  reorderListMock.mockClear();
-  removeFromListMock.mockClear();
   setSingleExtraKeyMock.mockClear();
   clearSingleExtraKeyMock.mockClear();
   auditPrivilegedMutationMock.mockClear();
@@ -685,7 +670,7 @@ describe("realmService.joinRealm", () => {
   test("requires current rule acknowledgement before joining when configured", async () => {
     installTx({
       realmFindUnique: mock(async () => ({
-        extra: { rule: "rule-unit-1" },
+        ruleUnitId: "rule-unit-1",
         ruleVersion: 2,
         ruleRequireOnJoin: true,
         joinRequiresApproval: false,
@@ -974,7 +959,7 @@ describe("realmService.getMembershipMe", () => {
     };
     legacyDbMock.realm = {
       findUnique: mock(async () => ({
-        extra: { rule: "rule-unit-2" },
+        ruleUnitId: "rule-unit-2",
         ruleVersion: 1,
         ruleRequireOnJoin: false,
         ruleRequireOnPost: true,
@@ -1056,7 +1041,7 @@ describe("realmService.acknowledgeCurrentRule", () => {
     const acceptedAt = new Date("2026-05-28T00:00:00.000Z");
     legacyDbMock.realm = {
       findUnique: mock(async () => ({
-        extra: { rule: "rule-unit-1" },
+        ruleUnitId: "rule-unit-1",
         ruleVersion: 3,
       })),
     };
@@ -1105,7 +1090,7 @@ describe("realmService.getRulePolicy", () => {
     legacyDbMock.realm = {
       findUnique: mock(async () => ({
         unitId: REALM,
-        extra: { rule: "rule-unit-1" },
+        ruleUnitId: "rule-unit-1",
         ruleVersion: 3,
         ruleRequireOnJoin: true,
         ruleRequireOnPost: false,
@@ -1132,7 +1117,7 @@ describe("realmService.resolveRule", () => {
     legacyDbMock.realm = {
       findUnique: mock(async () => ({
         unitId: REALM,
-        extra: { rule: "rule-unit-1" },
+        ruleUnitId: "rule-unit-1",
         ruleVersion: 3,
         ruleRequireOnJoin: true,
         ruleRequireOnPost: false,
@@ -1245,7 +1230,7 @@ describe("realmService.updateRulePolicy", () => {
     legacyDbMock.realm = {
       update: mock(async () => ({
         unitId: REALM,
-        extra: { rule: "rule-unit-2" },
+        ruleUnitId: "rule-unit-2",
         ruleVersion: 4,
         ruleRequireOnJoin: true,
         ruleRequireOnPost: true,
@@ -1272,16 +1257,11 @@ describe("realmService.updateRulePolicy", () => {
       updatedAt,
     });
 
-    expect(setSingleExtraKeyMock).toHaveBeenCalledWith(
-      currentIdentity,
-      REALM,
-      "rule",
-      "rule-unit-2",
-    );
     expect(legacyDbMock.realm.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { unitId: REALM },
         data: expect.objectContaining({
+          ruleUnitId: "rule-unit-2",
           ruleVersion: 4,
           ruleRequireOnJoin: true,
           ruleRequireOnPost: true,
@@ -1320,7 +1300,7 @@ describe("realmService.updateRulePolicy", () => {
     legacyDbMock.realm = {
       update: mock(async () => ({
         unitId: REALM,
-        extra: {},
+        ruleUnitId: null,
         ruleVersion: 5,
         ruleRequireOnJoin: false,
         ruleRequireOnPost: false,
@@ -1339,83 +1319,7 @@ describe("realmService.updateRulePolicy", () => {
       version: 5,
     });
 
-    expect(clearSingleExtraKeyMock).toHaveBeenCalledWith(
-      currentIdentity,
-      REALM,
-      "rule",
-    );
+    expect(clearSingleExtraKeyMock).not.toHaveBeenCalled();
     expect(setSingleExtraKeyMock).not.toHaveBeenCalled();
-  });
-});
-
-describe("realmService community list wrappers", () => {
-  test("appends to pinboard through Realm.extra and writes audit metadata", async () => {
-    await expect(
-      realmService.appendCommunityList(
-        currentIdentity,
-        REALM,
-        "pinboard",
-        "unit-2",
-      ),
-    ).resolves.toEqual({ ok: true, unitIds: ["unit-1", "unit-2"] });
-
-    expect(appendToListMock).toHaveBeenCalledWith(
-      currentIdentity,
-      REALM,
-      "pinboard",
-      "unit-2",
-    );
-    expect(auditPrivilegedMutationMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        actorUserId: USER,
-        action: "content.pin",
-        targetKind: "realm-pinboard",
-        targetId: REALM,
-        metadata: expect.objectContaining({
-          key: "pinboard",
-          operation: "append",
-          unitId: "unit-2",
-        }),
-      }),
-    );
-  });
-
-  test("reorders and removes announcement entries through Realm.extra", async () => {
-    await expect(
-      realmService.reorderCommunityList(
-        currentIdentity,
-        REALM,
-        "announcement",
-        ["unit-2", "unit-1"],
-      ),
-    ).resolves.toEqual({ ok: true, unitIds: ["unit-2", "unit-1"] });
-    await expect(
-      realmService.removeCommunityListEntry(
-        currentIdentity,
-        REALM,
-        "announcement",
-        "unit-1",
-      ),
-    ).resolves.toEqual({ ok: true, unitIds: ["unit-2"] });
-
-    expect(reorderListMock).toHaveBeenCalledWith(
-      currentIdentity,
-      REALM,
-      "announcement",
-      ["unit-2", "unit-1"],
-    );
-    expect(removeFromListMock).toHaveBeenCalledWith(
-      currentIdentity,
-      REALM,
-      "announcement",
-      "unit-1",
-    );
-    expect(auditPrivilegedMutationMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action: "content.pin",
-        targetKind: "realm-announcement",
-        metadata: expect.objectContaining({ operation: "remove" }),
-      }),
-    );
   });
 });

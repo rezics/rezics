@@ -16,18 +16,14 @@ import {
   UnitTranslationLanguageBar,
 } from "@/unit";
 import { useRealmManage } from "../../layouts/realmManageContext";
-import {
-  AvatarPicker,
-  BannerPicker,
-  SlotPicker,
-} from "../../sections/RealmManageEditors";
+import { AvatarPicker, BannerPicker } from "../../sections/RealmManageEditors";
 
 /**
- * Realm profile management page for translations, description, slots, avatar,
+ * Realm profile management page for translations, description, avatar,
  * and banner. The language toolbar can overflow horizontally while the form
  * remains full-width within the management shell.
  *
- * Realm 资料管理页：编辑译文、简介、slot、头像与横幅。语言工具栏在窄屏可横向
+ * Realm 资料管理页：编辑译文、简介、头像与横幅。语言工具栏在窄屏可横向
  * 处理，表单在管理布局中占满可用宽度。
  *
  * Mobile (<640px):
@@ -184,14 +180,8 @@ export function RealmManageProfilePage() {
           {t("common:save")}
         </Button>
       </div>
-      <SlotPicker
-        realmId={realmId}
-        slotKey="about"
-        value={realm.extra?.about}
-      />
       <AvatarPicker realmId={realmId} value={realm.extra?.avatar ?? null} />
       <BannerPicker realmId={realmId} value={realm.extra?.banner ?? null} />
-      <SlotPicker realmId={realmId} slotKey="rule" value={realm.extra?.rule} />
       <AddUnitTranslationLanguageDialog
         open={addOpen}
         existingLanguages={editableLanguages}

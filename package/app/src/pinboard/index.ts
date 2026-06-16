@@ -11,11 +11,12 @@ export type {
 } from "./components/PinboardEntryCard";
 export { PinboardEntryCard } from "./components/PinboardEntryCard";
 export type {
-  AnnouncementStreamSectionProps,
-  PinboardAnnouncementItem,
-} from "./sections/AnnouncementStreamSection";
-export { AnnouncementStreamSection } from "./sections/AnnouncementStreamSection";
+  NoticeStreamSectionProps,
+  PinboardNoticeItem,
+} from "./sections/NoticeStreamSection";
+export { NoticeStreamSection } from "./sections/NoticeStreamSection";
 export type { PinboardAdminSectionProps } from "./sections/PinboardAdminSection";
 export { PinboardAdminSection } from "./sections/PinboardAdminSection";
 export type { PinnedStreamSectionProps } from "./sections/PinnedStreamSection";
 export { PinnedStreamSection } from "./sections/PinnedStreamSection";
+export { usePinboardList } from "./hooks/usePinboard";

@@ -4,7 +4,7 @@ import {
   useRestoreRealmContentMutation,
   useSetRealmContentLockMutation,
 } from "@rezics/api/governance/governance";
-import { useAppendRealmPinboardMutation } from "@rezics/api/realm/realm";
+import { useAppendPinboardMutation } from "@rezics/api/pinboard/pinboard.mutations";
 import type { UnitRealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { ConfirmDialog } from "@rezics/ui";
@@ -53,7 +53,7 @@ export function RealmContentModerationActions({
       ),
     onError: (error) => toast.error(error.message),
   });
-  const pin = useAppendRealmPinboardMutation({
+  const pin = useAppendPinboardMutation({
     onSuccess: () => toast.success(t("community:moderation_pin_success")),
     onError: (error) => toast.error(error.message),
   });
@@ -86,7 +86,8 @@ export function RealmContentModerationActions({
     pinRequestedRef.current = true;
     pin.mutate(
       {
-        realmUnitId,
+        realmId: realmUnitId,
+        key: "home",
         unitId: targetUnitId,
       },
       {

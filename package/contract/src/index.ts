@@ -28,6 +28,7 @@ export * from "./notification";
 export * from "./notify";
 export * from "./pagination";
 export * from "./permission";
+export * from "./pinboard/index";
 export * from "./post/index";
 export * from "./reaction/index";
 export * from "./realm/index";

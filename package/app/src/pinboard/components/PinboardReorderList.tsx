@@ -16,7 +16,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
+import { useReorderPinboardMutation } from "@rezics/api/pinboard/pinboard.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
@@ -55,7 +55,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
     [entries],
   );
 
-  const reorder = useReorderRealmExtraMutation();
+  const reorder = useReorderPinboardMutation();
 
   const sensors = useSensors(
     useSensor(PointerSensor),

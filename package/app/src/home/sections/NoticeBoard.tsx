@@ -2,10 +2,7 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { Bell as NotificationsRoundedIcon } from "lucide-react";
 import type React from "react";
-import {
-  AnnouncementStreamSection,
-  type PinboardAnnouncementItem,
-} from "@/pinboard";
+import { NoticeStreamSection, type PinboardNoticeItem } from "@/pinboard";
 import { TextLink } from "@/shared/ui/link";
 
 /**
@@ -54,7 +51,7 @@ export const NoticeBoard: React.FC = () => {
       <NoticeBoardHeader className="sticky top-0 z-10 rounded-lg" />
 
       <div className="flex-1 overflow-y-auto space-y-3 mt-3 p-2">
-        <AnnouncementStreamSection
+        <NoticeStreamSection
           loadingFallback={
             <div className="flex flex-col gap-2">
               <Skeleton className="h-4 rounded" />
@@ -82,7 +79,7 @@ export const NoticeBoard: React.FC = () => {
               </ul>
             );
           }}
-        </AnnouncementStreamSection>
+        </NoticeStreamSection>
       </div>
     </div>
   );
@@ -120,7 +117,7 @@ function NoticeBoardHeader({ className }: { className?: string }) {
   );
 }
 
-function NoticeBoardItem({ item }: { item: PinboardAnnouncementItem }) {
+function NoticeBoardItem({ item }: { item: PinboardNoticeItem }) {
   return (
     <div className="mb-1">
       <a

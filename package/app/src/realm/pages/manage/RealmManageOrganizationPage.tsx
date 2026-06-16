@@ -1,4 +1,3 @@
-import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import type { TagTreeNode } from "@rezics/contract";
 import { PinboardAdminSection } from "@/pinboard";
 import { useRealmManage } from "../../layouts/realmManageContext";
@@ -37,7 +36,6 @@ import {
  */
 export function RealmManageOrganizationPage() {
   const { realmId, realm } = useRealmManage();
-  const isDefaultRealm = realmId === getDefaultRealmId();
 
   return (
     <div className="flex flex-col gap-6">
@@ -49,10 +47,7 @@ export function RealmManageOrganizationPage() {
         realmId={realmId}
         initialValue={realm.extra?.tagView}
       />
-      <PinboardAdminSection
-        realmUnitId={realmId}
-        isDefaultRealm={isDefaultRealm}
-      />
+      <PinboardAdminSection realmUnitId={realmId} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
+import { useRemovePinboardMutation } from "@rezics/api/pinboard/pinboard.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
 import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
@@ -22,7 +22,7 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   const { t } = useTranslation(["common", "entity"]);
   const [dismissed, setDismissed] = useState(false);
   const [working, setWorking] = useState(false);
-  const remove = useRemoveRealmExtraMutation();
+  const remove = useRemovePinboardMutation();
 
   if (dismissed || staleIds.length === 0) return null;
 

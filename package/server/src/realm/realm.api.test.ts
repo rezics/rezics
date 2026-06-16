@@ -62,10 +62,6 @@ const createRealmTagApplicationMock = mock(async () => ({
   voteCount: 1,
   pinned: false,
 }));
-const appendCommunityListMock = mock(async () => ({
-  ok: true,
-  unitIds: ["unit-1"],
-}));
 const updateRulePolicyMock = mock(async () => ({
   realmUnitId: "realm-1",
   ruleUnitId: "rule-unit-1",
@@ -174,7 +170,6 @@ mock.module("./realm.service", () => ({
     create: createRealmMock,
     addUnitRealm: addUnitRealmMock,
     createRealmTagApplication: createRealmTagApplicationMock,
-    appendCommunityList: appendCommunityListMock,
     getRulePolicy: getRulePolicyMock,
     getMember: getMemberMock,
     listMembers: listMembersMock,
@@ -199,7 +194,6 @@ describe("realmApi", () => {
     getUnitByUnitIdMock.mockClear();
     addUnitRealmMock.mockClear();
     createRealmTagApplicationMock.mockClear();
-    appendCommunityListMock.mockClear();
     getRulePolicyMock.mockClear();
     resolveRuleMock.mockClear();
     updateRulePolicyMock.mockClear();
@@ -381,56 +375,6 @@ describe("realmApi", () => {
     expect(listMembersMock).toHaveBeenCalledWith("realm-1", {
       limit: 25,
     });
-  });
-
-  test("denies pinboard append rejected by content pin policy", async () => {
-    const { realmApi } = await import("./realm.api");
-    const response = await realmApi.handle(
-      new Request("http://localhost/realm/realm-1/pinboard", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ unitId: "unit-1" }),
-      }),
-    );
-
-    expect(response.status).toBe(403);
-    expect(await response.text()).toBe("Denied by policy");
-    expect(decideForIdentityMock).toHaveBeenCalledWith({
-      identity: currentIdentity,
-      action: "content.pin",
-      realmMembership: {
-        realmUnitId: "realm-1",
-        role: "moderator",
-        capabilities: [],
-      },
-      target: {
-        kind: "realm-content-list",
-        id: "realm-1:pinboard",
-        realmUnitId: "realm-1",
-      },
-    });
-    expect(appendCommunityListMock).not.toHaveBeenCalled();
-  });
-
-  test("allows pinboard append approved by content pin policy", async () => {
-    policyAllowed = true;
-
-    const { realmApi } = await import("./realm.api");
-    const response = await realmApi.handle(
-      new Request("http://localhost/realm/realm-1/pinboard", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ unitId: "unit-1" }),
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expect(appendCommunityListMock).toHaveBeenCalledWith(
-      currentIdentity,
-      "realm-1",
-      "pinboard",
-      "unit-1",
-    );
   });
 
   test("keeps realm content feed route admin-scoped", async () => {

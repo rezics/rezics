@@ -2020,10 +2020,10 @@ export class PostService {
    * Single scope-capability gate shared by pin and accept: permitted to the
    * thread author (OP), a platform admin, or a moderator/owner of a realm the
    * thread belongs to. Also validates that the scope IS a thread root post
-   * (never a realm — that is `Realm.extra.pinboard`'s job).
+   * (never a realm — realm-level featuring belongs to the Pinboard domain).
    * 由置顶和采纳共享的单一 scope 能力门控：允许讨论串作者（OP）、平台管理员，或讨论串
    * 所属 realm 的版主/拥有者。同时校验该 scope 确实是讨论串根帖（绝不是 realm —— 那是
-   * `Realm.extra.pinboard` 的职责）。
+   * Pinboard domain 的职责）。
    */
   private async assertCanPromoteInThread(
     scopeUnitId: string,
@@ -2041,7 +2041,7 @@ export class PostService {
       if (unit?.type === "REALM") {
         throw new AppError(
           400,
-          "A realm cannot be a comment promotion scope; realm-level featuring belongs to Realm.extra.pinboard",
+          "A realm cannot be a comment promotion scope; realm-level featuring belongs to Pinboard",
         );
       }
       throw new AppError(404, `Thread root post not found: ${scopeUnitId}`);

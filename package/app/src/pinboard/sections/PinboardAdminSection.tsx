@@ -1,23 +1,13 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
-
-const i18nMessages = {
-  pinboard_admin_tabs_announcement: () =>
-    getI18nRuntime().i18n.t("entity:pinboard_admin_tabs_announcement"),
-  pinboard_admin_tabs_pinboard: () =>
-    getI18nRuntime().i18n.t("entity:pinboard_admin_tabs_pinboard"),
-} as const;
-
 import {
-  useAppendRealmExtraMutation,
-  useRemoveRealmExtraMutation,
-} from "@rezics/api/realm/realm-extra.mutations";
+  useAppendPinboardMutation,
+  useRemovePinboardMutation,
+} from "@rezics/api/pinboard/pinboard.mutations";
 import { unitApi } from "@rezics/api/unit/unit";
 import {
   DEFAULT_LANGUAGE,
   type Language,
   markdownContentDoc,
   normalizeLanguage,
-  type RealmExtraListKey,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
@@ -29,12 +19,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Tabs,
-  TabsList,
-  TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { Plus as AddRoundedIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
 import { PinboardErrorState } from "../components/PinboardErrorState";
@@ -46,61 +33,23 @@ import type { PinboardEntryView, PinboardListKey } from "../models/types";
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;
-  /**
-   * When true, the `announcement` tab is included alongside `pinboard`.
-   * 为 true 时，`announcement` 选项卡会与 `pinboard` 一起显示。
-   */
-  isDefaultRealm?: boolean;
 }
 
-const PINBOARD_ADMIN_TAB_LABEL = {
-  announcement: i18nMessages.pinboard_admin_tabs_announcement,
-  pinboard: i18nMessages.pinboard_admin_tabs_pinboard,
-} as const satisfies Record<PinboardListKey, () => string>;
-
 /**
- * Tabbed admin surface. Shows one tab per Realm.extra list key available to
- * the caller (`pinboard` always; `announcement` only on the default realm).
- * Each tab renders the reorder/open list, stale banner, create button, and
- * delegates to the editor dialog.
- * 带选项卡的管理界面。为调用方可用的每个 Realm.extra 列表键显示一个选项卡
- * （`pinboard` 始终存在；`announcement` 仅在默认 realm 上）。每个选项卡
- * 渲染重排序/打开列表、过期横幅、创建按钮，并委托给编辑器对话框。
+ * Pinboard admin surface for the realm home Pinboard.
+ * Realm 首页 Pinboard 的管理界面。
  */
 export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   realmUnitId,
-  isDefaultRealm,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-  const availableKeys = useMemo<PinboardListKey[]>(
-    () => (isDefaultRealm ? ["announcement", "pinboard"] : ["pinboard"]),
-    [isDefaultRealm],
-  );
-  const [activeKey, setActiveKey] = useState<PinboardListKey>(availableKeys[0]);
 
   return (
     <div>
       <h2 className="text-lg font-semibold mb-2">
         {t("entity:pinboard_admin_title")}
       </h2>
-      {availableKeys.length > 1 ? (
-        <Tabs
-          value={activeKey}
-          onValueChange={(v) => setActiveKey(v as RealmExtraListKey)}
-          aria-label={t("entity:pinboard_admin_tabs_aria")}
-          className="mb-4"
-        >
-          <TabsList>
-            {availableKeys.map((key) => (
-              <TabsTrigger key={key} value={key}>
-                {PINBOARD_ADMIN_TAB_LABEL[key]()}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      ) : null}
-
-      <PinboardAdminBoard realmUnitId={realmUnitId} pinboardKey={activeKey} />
+      <PinboardAdminBoard realmUnitId={realmUnitId} pinboardKey="home" />
     </div>
   );
 };
@@ -128,8 +77,8 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   );
   const [removing, setRemoving] = useState(false);
 
-  const append = useAppendRealmExtraMutation();
-  const removeMut = useRemoveRealmExtraMutation();
+  const append = useAppendPinboardMutation();
+  const removeMut = useRemovePinboardMutation();
 
   const openCreate = () => {
     setEditorOpen(true);

@@ -1,30 +1,30 @@
 import { Skeleton } from "@rezics/ui/shadcn";
-import { AnnouncementStreamSection } from "@/pinboard";
-import { AnnouncementBar } from "../components/AnnouncementBar";
+import { NoticeStreamSection } from "@/pinboard";
+import { NoticeBar } from "../components/NoticeBar";
 
 /**
- * Announcement bar section displaying up to 4 pinned announcements.
- * 公告栏部分最多显示4条固定的公告。
+ * Notice bar section displaying up to 4 pinned notices.
+ * 通知栏最多显示 4 条固定通知。
  *
- * Loads announcements via AnnouncementStreamSection and renders them
+ * Loads notices via NoticeStreamSection and renders them
  * in a full-width bar with optional links and rotation/scrolling.
- * 通过 AnnouncementStreamSection 加载公告，并在全宽栏中呈现，
+ * 通过 NoticeStreamSection 加载通知，并在全宽栏中呈现，
  * 带有可选链接和旋转/滚动。
  *
  * Desktop (md+):
  * ┌────────────────────────────────────────────┐
- * │ [📢] Announcement 1 - Subtitle        [→] │
+ * │ [icon] Notice 1 - Subtitle            [>] │
  * └────────────────────────────────────────────┘
  *
  * Tablet (sm-md):
  * ┌──────────────────────────────────┐
- * │ [📢] Announcement 1      [→]      │
+ * │ [icon] Notice 1          [>]      │
  * └──────────────────────────────────┘
  *
  * Mobile (xs-sm):
  * ┌──────────────────────┐
- * │ [📢] Announcement 1  │
- * │ Short text...    [→]│
+ * │ [icon] Notice 1      │
+ * │ Short text...    [>] │
  * └──────────────────────┘
  *
  * Empty state:
@@ -37,16 +37,16 @@ import { AnnouncementBar } from "../components/AnnouncementBar";
  * │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ (h-10 skeleton)      │
  * └────────────────────────────────────────────┘
  */
-export const AnnouncementBarSection = () => {
+export const NoticeBarSection = () => {
   return (
-    <AnnouncementStreamSection
+    <NoticeStreamSection
       loadingFallback={<Skeleton className="h-10 w-full rounded-none" />}
     >
       {(items) => {
         if (items.length === 0) return null;
         return (
-          <AnnouncementBar
-            announcements={items.map((item) => ({
+          <NoticeBar
+            notices={items.map((item) => ({
               id: item.id,
               title: item.title,
               content: item.content || item.title,
@@ -58,6 +58,6 @@ export const AnnouncementBarSection = () => {
           />
         );
       }}
-    </AnnouncementStreamSection>
+    </NoticeStreamSection>
   );
 };

@@ -7,10 +7,10 @@ import {
   realmReadQuerySchema,
   resolveRealmRuleQuerySchema,
 } from "./realm";
-import { realmExtraSchema, realmWikiSidebarSchema } from "./realm-extra";
+import { realmExtraSchema } from "./realm-extra";
 
 describe("RealmDTO", () => {
-  test("accepts featured Zone and viewer capability metadata", () => {
+  test("accepts sidebar, rule policy, and viewer capability metadata", () => {
     expect(
       Value.Check(realmDTOSchema, {
         unitId: "realm-1",
@@ -18,9 +18,14 @@ describe("RealmDTO", () => {
         isPublic: true,
         isOfficial: false,
         memberCount: 12,
-        extra: {
-          featuredZoneUnitId: "zone-1",
+        sidebar: {
+          schema: "rezics/realm-sidebar",
+          version: 1,
+          placements: {
+            home: [{ id: "rules", kind: "rules" }],
+          },
         },
+        ruleUnitId: "rule-1",
         viewerCapabilities: [
           {
             capability: "queue.realm.decide",
@@ -46,50 +51,18 @@ describe("RealmDTO", () => {
   });
 });
 
-describe("RealmExtra wiki sidebar", () => {
-  test("accepts absent wikiSidebar and both configured sidebar kinds", () => {
+describe("RealmExtra", () => {
+  test("rejects composed surface keys now owned by sidebar and Pinboard", () => {
     expect(
       Value.Check(realmExtraSchema, { featuredZoneUnitId: "zone-1" }),
-    ).toBe(true);
-    expect(
-      Value.Check(realmWikiSidebarSchema, {
-        kind: "post",
-        postUnitId: "post-1",
-      }),
-    ).toBe(true);
-    expect(
-      Value.Check(realmWikiSidebarSchema, {
-        kind: "zoneNav",
-        zoneUnitId: "zone-1",
-        menuId: "main",
-      }),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       Value.Check(realmExtraSchema, {
         wikiSidebar: { kind: "zoneNav", zoneUnitId: "zone-1" },
       }),
-    ).toBe(true);
-  });
-
-  test("rejects malformed and extra-prop wikiSidebar values", () => {
-    expect(
-      Value.Check(realmWikiSidebarSchema, {
-        kind: "post",
-        zoneUnitId: "zone-1",
-      }),
     ).toBe(false);
-    expect(
-      Value.Check(realmWikiSidebarSchema, {
-        kind: "zoneNav",
-        zoneUnitId: "zone-1",
-        extra: true,
-      }),
-    ).toBe(false);
-    expect(
-      Value.Check(realmWikiSidebarSchema, [
-        { kind: "post", postUnitId: "post-1" },
-      ]),
-    ).toBe(false);
+    expect(Value.Check(realmExtraSchema, { rule: "rule-1" })).toBe(false);
+    expect(Value.Check(realmExtraSchema, { pinboard: ["post-1"] })).toBe(false);
   });
 });
 

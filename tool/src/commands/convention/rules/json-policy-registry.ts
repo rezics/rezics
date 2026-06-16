@@ -70,6 +70,16 @@ export const jsonColumnRegistry = [
   },
   {
     database: "server",
+    table: "Realm",
+    column: "sidebar",
+    category: "enveloped",
+    contractSchema: {
+      symbol: "realmSidebarEnvelopeSchema",
+      path: "package/contract/src/realm/realm-sidebar.ts",
+    },
+  },
+  {
+    database: "server",
     table: "UnitTranslation",
     column: "description",
     category: "enveloped",

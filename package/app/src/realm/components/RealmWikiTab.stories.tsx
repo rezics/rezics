@@ -1,6 +1,6 @@
 import { postQueries } from "@rezics/api/post/post";
 import { zoneKeys } from "@rezics/api/zone/zone";
-import type { PostDTO, ZonePortalResponse } from "@rezics/contract";
+import type { PostDTO, RealmDTO, ZonePortalResponse } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect } from "react";
@@ -72,6 +72,18 @@ const wikiPosts = postFlat.map(
     }) as PostDTO,
 );
 
+const baseRealm: RealmDTO = {
+  unitId: REALM_ID,
+  isPublic: true,
+  isOfficial: false,
+  memberCount: 12,
+  sidebar: {
+    schema: "rezics/realm-sidebar",
+    version: 1,
+    placements: {},
+  },
+};
+
 function Seeded({
   posts,
   portal = wikiZonePortal,
@@ -107,9 +119,8 @@ const meta = {
   component: RealmWikiTab,
   decorators: [withRouter],
   args: {
+    realm: baseRealm,
     realmId: REALM_ID,
-    routeLocation: { kind: "unitId", realmId: REALM_ID },
-    wikiSidebar: null,
   },
 } satisfies Meta<typeof RealmWikiTab>;
 
@@ -126,7 +137,18 @@ export const AutoPageList: Story = {
 
 export const SidebarPost: Story = {
   args: {
-    wikiSidebar: { kind: "post", postUnitId: "wiki-post-1" },
+    realm: {
+      ...baseRealm,
+      sidebar: {
+        schema: "rezics/realm-sidebar",
+        version: 1,
+        placements: {
+          wiki: [
+            { id: "wiki-text", kind: "text", contentUnitId: "wiki-post-1" },
+          ],
+        },
+      },
+    },
   },
   render: (args) => (
     <Seeded posts={wikiPosts}>
@@ -137,7 +159,16 @@ export const SidebarPost: Story = {
 
 export const ZoneNavigation: Story = {
   args: {
-    wikiSidebar: { kind: "zoneNav", zoneUnitId: WIKI_ZONE_ID },
+    realm: {
+      ...baseRealm,
+      sidebar: {
+        schema: "rezics/realm-sidebar",
+        version: 1,
+        placements: {
+          wiki: [{ id: "wiki-nav", kind: "zoneNav", zoneUnitId: WIKI_ZONE_ID }],
+        },
+      },
+    },
   },
   render: (args) => (
     <Seeded posts={wikiPosts}>

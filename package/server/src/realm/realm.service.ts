@@ -3,9 +3,6 @@ import type {
   AddUnitRealmInput,
   CreateRealmInput,
   RealmDTO,
-  RealmExtraAdminReadResponse,
-  RealmExtraOkResponse,
-  RealmExtraReadResponse,
   RealmListQuery,
   RealmListView,
   RealmMemberDTO,
@@ -81,16 +78,7 @@ import {
   mapRealmToDTO,
   mapUnitRealmToDTO,
 } from "./realm.mapper";
-import {
-  appendToList,
-  clearSingleExtraKey,
-  filterRealmExtraPublic,
-  readListAdmin,
-  readListPublic,
-  removeFromList,
-  reorderList,
-  setSingleExtraKey,
-} from "./realm-extra.service";
+import { filterRealmExtraPublic } from "./realm-extra.service";
 import type { RealmWithRelations } from "./types";
 
 /**
@@ -208,18 +196,6 @@ function enqueueRealmMetadata(unitId: string, fields: Record<string, unknown>) {
       { type: "server", service: "realm" },
     ),
   );
-}
-
-function getRuleUnitIdFromExtra(extra: unknown): string | null {
-  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
-  const rule = (extra as Record<string, unknown>).rule;
-  return typeof rule === "string" && rule.length > 0 ? rule : null;
-}
-
-type RealmCommunityListKey = "pinboard" | "announcement";
-
-function communityListTargetKind(key: RealmCommunityListKey) {
-  return key === "pinboard" ? "realm-pinboard" : "realm-announcement";
 }
 
 const REALM_JOIN_APPROVAL_ROLES = ["owner", "admin", "moderator"] as const;
@@ -566,7 +542,7 @@ export class RealmService {
     const { member } = await db.transaction(async (tx) => {
       const [realmPolicy] = await tx
         .select({
-          extra: Realm.extra,
+          ruleUnitId: Realm.ruleUnitId,
           ruleVersion: Realm.ruleVersion,
           ruleRequireOnJoin: Realm.ruleRequireOnJoin,
           joinRequiresApproval: Realm.joinRequiresApproval,
@@ -574,7 +550,7 @@ export class RealmService {
         .from(Realm)
         .where(eq(Realm.unitId, realmUnitId))
         .limit(1);
-      const ruleUnitId = getRuleUnitIdFromExtra(realmPolicy?.extra ?? null);
+      const ruleUnitId = realmPolicy?.ruleUnitId ?? null;
       if (realmPolicy?.ruleRequireOnJoin && ruleUnitId) {
         const [acknowledgement] = await tx
           .select({ realmUnitId: RealmRuleAcknowledgement.realmUnitId })
@@ -985,7 +961,7 @@ export class RealmService {
       this.getMember(realmUnitId, userId),
       db
         .select({
-          extra: Realm.extra,
+          ruleUnitId: Realm.ruleUnitId,
           ruleVersion: Realm.ruleVersion,
           ruleRequireOnJoin: Realm.ruleRequireOnJoin,
           ruleRequireOnPost: Realm.ruleRequireOnPost,
@@ -1012,7 +988,7 @@ export class RealmService {
         .then((rows) => rows[0] ?? null),
     ]);
 
-    const currentRuleUnitId = getRuleUnitIdFromExtra(realm?.extra ?? null);
+    const currentRuleUnitId = realm?.ruleUnitId ?? null;
     const requiredVersion = currentRuleUnitId
       ? (realm?.ruleVersion ?? null)
       : null;
@@ -1065,11 +1041,11 @@ export class RealmService {
   ): Promise<RealmRuleAcknowledgementDTO> {
     const db = await getServerDb();
     const [realm] = await db
-      .select({ extra: Realm.extra, ruleVersion: Realm.ruleVersion })
+      .select({ ruleUnitId: Realm.ruleUnitId, ruleVersion: Realm.ruleVersion })
       .from(Realm)
       .where(eq(Realm.unitId, realmUnitId))
       .limit(1);
-    const ruleUnitId = getRuleUnitIdFromExtra(realm?.extra ?? null);
+    const ruleUnitId = realm?.ruleUnitId ?? null;
     if (!realm || !ruleUnitId) {
       throw new Error("Realm does not have a current rule Unit");
     }
@@ -1113,7 +1089,7 @@ export class RealmService {
     const [row] = await db
       .select({
         unitId: Realm.unitId,
-        extra: Realm.extra,
+        ruleUnitId: Realm.ruleUnitId,
         ruleVersion: Realm.ruleVersion,
         ruleRequireOnJoin: Realm.ruleRequireOnJoin,
         ruleRequireOnPost: Realm.ruleRequireOnPost,
@@ -1129,7 +1105,7 @@ export class RealmService {
 
     const result = {
       realmUnitId: row.unitId,
-      ruleUnitId: getRuleUnitIdFromExtra(row.extra),
+      ruleUnitId: row.ruleUnitId,
       version: row.ruleVersion,
       requireOnJoin: row.ruleRequireOnJoin,
       requireOnPost: row.ruleRequireOnPost,
@@ -1217,18 +1193,12 @@ export class RealmService {
     realmUnitId: string,
     input: UpdateRealmRulePolicyInput,
   ): Promise<RealmRuleReferenceDTO> {
-    if (input.ruleUnitId !== undefined) {
-      if (input.ruleUnitId) {
-        await setSingleExtraKey(caller, realmUnitId, "rule", input.ruleUnitId);
-      } else {
-        await clearSingleExtraKey(caller, realmUnitId, "rule");
-      }
-    }
-
     const db = await getServerDb();
     const [row] = await db
       .update(Realm)
       .set({
+        ruleUnitId:
+          input.ruleUnitId !== undefined ? input.ruleUnitId : undefined,
         ruleVersion: input.version,
         ruleRequireOnJoin: input.requireOnJoin,
         ruleRequireOnPost: input.requireOnPost,
@@ -1239,7 +1209,7 @@ export class RealmService {
       .where(eq(Realm.unitId, realmUnitId))
       .returning({
         unitId: Realm.unitId,
-        extra: Realm.extra,
+        ruleUnitId: Realm.ruleUnitId,
         ruleVersion: Realm.ruleVersion,
         ruleRequireOnJoin: Realm.ruleRequireOnJoin,
         ruleRequireOnPost: Realm.ruleRequireOnPost,
@@ -1256,7 +1226,7 @@ export class RealmService {
       reason: "Realm rule policy update",
       correlationId: crypto.randomUUID(),
       metadata: {
-        ruleUnitId: getRuleUnitIdFromExtra(row.extra),
+        ruleUnitId: row.ruleUnitId,
         version: row.ruleVersion,
         requireOnJoin: row.ruleRequireOnJoin,
         requireOnPost: row.ruleRequireOnPost,
@@ -1266,7 +1236,7 @@ export class RealmService {
 
     const result = {
       realmUnitId: row.unitId,
-      ruleUnitId: getRuleUnitIdFromExtra(row.extra),
+      ruleUnitId: row.ruleUnitId,
       version: row.ruleVersion,
       requireOnJoin: row.ruleRequireOnJoin,
       requireOnPost: row.ruleRequireOnPost,
@@ -1280,86 +1250,6 @@ export class RealmService {
       version: result.version,
     });
     return result;
-  }
-
-  async readCommunityList(
-    caller: RezicsSessionClaims | null,
-    realmUnitId: string,
-    key: RealmCommunityListKey,
-  ): Promise<RealmExtraReadResponse> {
-    return {
-      realmId: realmUnitId,
-      key,
-      unitIds: await readListPublic(caller, realmUnitId, key),
-    };
-  }
-
-  async readCommunityListAdmin(
-    caller: RezicsSessionClaims,
-    realmUnitId: string,
-    key: RealmCommunityListKey,
-  ): Promise<RealmExtraAdminReadResponse> {
-    const { unitIds, staleIds } = await readListAdmin(caller, realmUnitId, key);
-    return { realmId: realmUnitId, key, unitIds, staleIds };
-  }
-
-  async appendCommunityList(
-    caller: RezicsSessionClaims,
-    realmUnitId: string,
-    key: RealmCommunityListKey,
-    unitId: string,
-  ): Promise<RealmExtraOkResponse> {
-    const { unitIds } = await appendToList(caller, realmUnitId, key, unitId);
-    await this.auditCommunityListMutation(caller, realmUnitId, key, "append", {
-      unitId,
-      unitIds,
-    });
-    return { ok: true, unitIds };
-  }
-
-  async reorderCommunityList(
-    caller: RezicsSessionClaims,
-    realmUnitId: string,
-    key: RealmCommunityListKey,
-    unitIds: string[],
-  ): Promise<RealmExtraOkResponse> {
-    const result = await reorderList(caller, realmUnitId, key, unitIds);
-    await this.auditCommunityListMutation(caller, realmUnitId, key, "reorder", {
-      unitIds: result.unitIds,
-    });
-    return { ok: true, unitIds: result.unitIds };
-  }
-
-  async removeCommunityListEntry(
-    caller: RezicsSessionClaims,
-    realmUnitId: string,
-    key: RealmCommunityListKey,
-    unitId: string,
-  ): Promise<RealmExtraOkResponse> {
-    const { unitIds } = await removeFromList(caller, realmUnitId, key, unitId);
-    await this.auditCommunityListMutation(caller, realmUnitId, key, "remove", {
-      unitId,
-      unitIds,
-    });
-    return { ok: true, unitIds };
-  }
-
-  private auditCommunityListMutation(
-    caller: RezicsSessionClaims,
-    realmUnitId: string,
-    key: RealmCommunityListKey,
-    operation: "append" | "reorder" | "remove",
-    metadata: Record<string, unknown>,
-  ) {
-    return governanceAuditService.appendPrivilegedMutation({
-      actorUserId: caller.userId,
-      action: realmPolicyActions.contentPin,
-      targetKind: communityListTargetKind(key),
-      targetId: realmUnitId,
-      reason: `Realm ${key} ${operation}`,
-      correlationId: crypto.randomUUID(),
-      metadata: { key, operation, ...metadata },
-    });
   }
 
   // --- Content feed ---

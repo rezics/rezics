@@ -74,6 +74,8 @@ export function mapRealmToDTO(
     contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    sidebar: (row.sidebar as RealmDTO["sidebar"]) ?? undefined,
+    ruleUnitId: row.ruleUnitId ?? null,
     resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
     title: translation?.title ?? null,
     description:
@@ -103,6 +105,8 @@ export function mapRealmListRowToDTO(
     contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    sidebar: (row.sidebar as RealmDTO["sidebar"]) ?? undefined,
+    ruleUnitId: row.ruleUnitId ?? null,
     resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
     title: translation?.title ?? null,
     description:

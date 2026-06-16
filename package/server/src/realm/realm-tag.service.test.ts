@@ -416,13 +416,8 @@ mock.module("@/infra/slug-scopes", () => ({
   requireSlugScopeId: () => "realm-scope",
 }));
 mock.module("./realm-extra.service", () => ({
-  appendToList: mock(async () => ({ unitIds: [] })),
   clearSingleExtraKey: mock(async () => undefined),
   filterRealmExtraPublic: mock(async (extra: unknown) => extra),
-  readListAdmin: mock(async () => ({ unitIds: [], staleIds: [] })),
-  readListPublic: mock(async () => []),
-  removeFromList: mock(async () => ({ unitIds: [] })),
-  reorderList: mock(async (_caller, _realmId, _key, unitIds) => ({ unitIds })),
   setSingleExtraKey: mock(async () => undefined),
 }));
 mock.module("../db/client", () => ({

@@ -11,7 +11,6 @@ import type {
   CreateRealmTagApplicationInput,
   JoinRealmInput,
   PatchRealmTagApplicationInput,
-  RealmExtraOkResponse,
   RealmMembershipMeDTO,
   RealmMemberDTO,
   RealmResponse,
@@ -37,23 +36,6 @@ import { subscriptionKeys } from "../subscription/subscription.keys";
 import { tagKeys } from "../tag/tag.keys";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
-import { realmExtraKeys } from "./realm-extra.keys";
-
-function invalidateRealmCommunityList(
-  queryClient: ReturnType<typeof useQueryClient>,
-  realmUnitId: string,
-  key: "pinboard" | "announcement",
-) {
-  queryClient.invalidateQueries({
-    queryKey: realmExtraKeys.list(realmUnitId, key),
-  });
-  queryClient.invalidateQueries({
-    queryKey: realmExtraKeys.admin(realmUnitId, key),
-  });
-  queryClient.invalidateQueries({
-    queryKey: realmKeys.detail(realmUnitId),
-  });
-}
 
 export async function syncRealmMembershipMutationCache({
   queryClient,
@@ -474,170 +456,6 @@ export function useRemoveUnitRealmMutation(
   });
 }
 
-// ---- Pinboard / announcement mutations ----
-
-export function useAppendRealmPinboardMutation(
-  options?: Omit<
-    UseMutationOptions<
-      RealmExtraOkResponse,
-      Error,
-      { realmUnitId: string; unitId: string }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, unitId }) =>
-      realmApi.appendPinboard(realmUnitId, unitId),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCommunityList(
-        queryClient,
-        variables.realmUnitId,
-        "pinboard",
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useReorderRealmPinboardMutation(
-  options?: Omit<
-    UseMutationOptions<
-      RealmExtraOkResponse,
-      Error,
-      { realmUnitId: string; unitIds: string[] }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, unitIds }) =>
-      realmApi.reorderPinboard(realmUnitId, unitIds),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCommunityList(
-        queryClient,
-        variables.realmUnitId,
-        "pinboard",
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useRemoveRealmPinboardEntryMutation(
-  options?: Omit<
-    UseMutationOptions<
-      RealmExtraOkResponse,
-      Error,
-      { realmUnitId: string; unitId: string }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, unitId }) =>
-      realmApi.removePinboardEntry(realmUnitId, unitId),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCommunityList(
-        queryClient,
-        variables.realmUnitId,
-        "pinboard",
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useAppendRealmAnnouncementMutation(
-  options?: Omit<
-    UseMutationOptions<
-      RealmExtraOkResponse,
-      Error,
-      { realmUnitId: string; unitId: string }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, unitId }) =>
-      realmApi.appendAnnouncement(realmUnitId, unitId),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCommunityList(
-        queryClient,
-        variables.realmUnitId,
-        "announcement",
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useReorderRealmAnnouncementsMutation(
-  options?: Omit<
-    UseMutationOptions<
-      RealmExtraOkResponse,
-      Error,
-      { realmUnitId: string; unitIds: string[] }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, unitIds }) =>
-      realmApi.reorderAnnouncements(realmUnitId, unitIds),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCommunityList(
-        queryClient,
-        variables.realmUnitId,
-        "announcement",
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useRemoveRealmAnnouncementMutation(
-  options?: Omit<
-    UseMutationOptions<
-      RealmExtraOkResponse,
-      Error,
-      { realmUnitId: string; unitId: string }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, unitId }) =>
-      realmApi.removeAnnouncement(realmUnitId, unitId),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCommunityList(
-        queryClient,
-        variables.realmUnitId,
-        "announcement",
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
 // ---- Tag classification mutations ----
 
 /**
@@ -973,12 +791,6 @@ export const realmMutations = {
   useRemoveMember: useRemoveMemberMutation,
   useAddUnit: useAddUnitRealmMutation,
   useRemoveUnit: useRemoveUnitRealmMutation,
-  useAppendPinboard: useAppendRealmPinboardMutation,
-  useReorderPinboard: useReorderRealmPinboardMutation,
-  useRemovePinboardEntry: useRemoveRealmPinboardEntryMutation,
-  useAppendAnnouncement: useAppendRealmAnnouncementMutation,
-  useReorderAnnouncements: useReorderRealmAnnouncementsMutation,
-  useRemoveAnnouncement: useRemoveRealmAnnouncementMutation,
   useAddTagApplication: useAddRealmTagApplicationMutation,
   useRemoveTagApplication: useRemoveRealmTagApplicationMutation,
   useCreateRealmTagApplication: useCreateRealmTagApplicationMutation,

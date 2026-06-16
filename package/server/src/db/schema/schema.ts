@@ -21,6 +21,7 @@ export * from "./link";
 export * from "./media";
 export * from "./misc";
 export * from "./moderation";
+export * from "./pinboard";
 export * from "./poll";
 export * from "./post";
 export * from "./realm";

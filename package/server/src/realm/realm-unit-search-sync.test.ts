@@ -91,13 +91,8 @@ mock.module("@/utils/userSlugHydration", () => ({
 }));
 
 mock.module("./realm-extra.service", () => ({
-  appendToList: (value: unknown) => value,
   clearSingleExtraKey: (value: unknown) => value,
   filterRealmExtraPublic: (value: unknown) => value,
-  readListAdmin: () => [],
-  readListPublic: () => [],
-  removeFromList: (value: unknown) => value,
-  reorderList: (value: unknown) => value,
   setSingleExtraKey: (value: unknown) => value,
 }));
 

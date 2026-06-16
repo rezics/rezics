@@ -6,7 +6,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { TextLink } from "@/shared/ui/link";
 
-export interface Announcement {
+export interface NoticeBarItem {
   id: string;
   title: string;
   content: string;
@@ -15,18 +15,18 @@ export interface Announcement {
   link?: string;
 }
 
-interface AnnouncementBarProps {
-  announcements: Announcement[];
+interface NoticeBarProps {
+  notices: NoticeBarItem[];
   max?: number;
   interval?: number; // ms — 毫秒
 }
 
-export function AnnouncementBar({
-  announcements,
+export function NoticeBar({
+  notices,
   max = 5,
   interval = 4000,
-}: AnnouncementBarProps) {
-  const items = announcements.slice(0, max);
+}: NoticeBarProps) {
+  const items = notices.slice(0, max);
 
   const [index, setIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);

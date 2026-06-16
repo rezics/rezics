@@ -1,17 +1,11 @@
 import type {
   RealmImageExtra,
   RealmTagView,
-  RealmWikiSidebar,
   RezicsSessionClaims,
   TagTreeNode,
 } from "@rezics/contract";
-import {
-  LICENSE_SLUGS,
-  realmTagViewStyleValues,
-  realmWikiSidebarSchema,
-} from "@rezics/contract";
-import { Value } from "@sinclair/typebox/value";
-import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
+import { LICENSE_SLUGS, realmTagViewStyleValues } from "@rezics/contract";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { hasAuthorityOver } from "@/unit/authority";
 import { Realm, RealmMember, Unit } from "../db/schema";
 
@@ -20,7 +14,6 @@ export class RealmExtraError extends Error {
     public code:
       | "REALM_NOT_FOUND"
       | "FORBIDDEN"
-      | "INVALID_REORDER"
       | "INVALID_KEY"
       | "INVALID_VALUE",
     message: string,
@@ -34,33 +27,16 @@ export class RealmExtraError extends Error {
 const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 
 type ExtraJson = Record<string, unknown>;
-type SingleExtraKey =
-  | "rule"
-  | "about"
-  | "banner"
-  | "avatar"
-  | "defaultLicenseSlug"
-  | "tagView"
-  | "featuredZoneUnitId"
-  | "wikiSidebar";
-type UnitReferenceExtraKey = "rule" | "about";
+type SingleExtraKey = "banner" | "avatar" | "defaultLicenseSlug" | "tagView";
 
 const SINGLE_EXTRA_KEYS = new Set<string>([
-  "rule",
-  "about",
   "banner",
   "avatar",
   "defaultLicenseSlug",
   "tagView",
-  "featuredZoneUnitId",
-  "wikiSidebar",
 ]);
 
 type RealmExtraRepository = {
-  findLiveUnitReferenceIds(
-    ids: string[],
-    caller?: RezicsSessionClaims | null,
-  ): Promise<Set<string>>;
   findRealmAuthorityUnit(
     realmId: string,
   ): Promise<{ id: string; userId: string | null; type: string } | null>;
@@ -68,20 +44,11 @@ type RealmExtraRepository = {
     realmId: string,
     userId: string | undefined,
   ): Promise<{ realmUnitId: string } | null>;
-  loadExtra(realmId: string): Promise<ExtraJson>;
-  findPostUnit(
-    unitId: string,
-  ): Promise<{ id: string; type: string; status: string } | null>;
   findValidTagUnitIds(tagIds: string[]): Promise<Set<string>>;
   updateExtraWithLock(
     realmId: string,
     mutate: (extra: ExtraJson) => ExtraJson,
   ): Promise<ExtraJson>;
-  findVisibleUnitIds(
-    ids: string[],
-    caller?: RezicsSessionClaims | null,
-  ): Promise<Set<string>>;
-  findLiveUnitIds(ids: string[]): Promise<Set<string>>;
 };
 
 async function getServerDb() {
@@ -96,25 +63,6 @@ function callerUserId(caller?: RezicsSessionClaims | null): string | undefined {
 
 function createDrizzleRealmExtraRepository(): RealmExtraRepository {
   return {
-    async findLiveUnitReferenceIds(ids, caller) {
-      if (ids.length === 0) return new Set();
-      const db = await getServerDb();
-      const visibilityClauses = [eq(Unit.visibility, "PUBLIC")];
-      const userId = callerUserId(caller);
-      if (userId) visibilityClauses.push(eq(Unit.userId, userId));
-      const rows = await db
-        .select({ id: Unit.id })
-        .from(Unit)
-        .where(
-          and(
-            inArray(Unit.id, ids),
-            eq(Unit.type, "POST"),
-            ne(Unit.status, "DELETED"),
-            or(...visibilityClauses),
-          ),
-        );
-      return new Set(rows.map((unit) => unit.id));
-    },
     async findRealmAuthorityUnit(realmId) {
       const db = await getServerDb();
       const [realm] = await db
@@ -140,40 +88,13 @@ function createDrizzleRealmExtraRepository(): RealmExtraRepository {
         .limit(1);
       return member ?? null;
     },
-    async loadExtra(realmId) {
-      const db = await getServerDb();
-      const [realm] = await db
-        .select({ extra: Realm.extra })
-        .from(Realm)
-        .where(eq(Realm.unitId, realmId))
-        .limit(1);
-      if (!realm) {
-        throw new RealmExtraError("REALM_NOT_FOUND", "Realm not found", 404);
-      }
-      return (realm.extra ?? {}) as ExtraJson;
-    },
-    async findPostUnit(unitId) {
-      const db = await getServerDb();
-      const [unit] = await db
-        .select({ id: Unit.id, type: Unit.type, status: Unit.status })
-        .from(Unit)
-        .where(eq(Unit.id, unitId))
-        .limit(1);
-      return unit ?? null;
-    },
     async findValidTagUnitIds(tagIds) {
       if (tagIds.length === 0) return new Set();
       const db = await getServerDb();
       const rows = await db
         .select({ id: Unit.id })
         .from(Unit)
-        .where(
-          and(
-            inArray(Unit.id, tagIds),
-            eq(Unit.type, "TAG"),
-            ne(Unit.status, "DELETED"),
-          ),
-        );
+        .where(and(inArray(Unit.id, tagIds), eq(Unit.type, "TAG")));
       return new Set(rows.map((row) => row.id));
     },
     async updateExtraWithLock(realmId, mutate) {
@@ -193,37 +114,10 @@ function createDrizzleRealmExtraRepository(): RealmExtraRepository {
         const next = mutate((realm.extra ?? {}) as ExtraJson);
         await tx
           .update(Realm)
-          .set({ extra: next })
+          .set({ extra: next, updatedAt: new Date() })
           .where(eq(Realm.unitId, realmId));
         return next;
       });
-    },
-    async findVisibleUnitIds(ids, caller) {
-      if (ids.length === 0) return new Set();
-      const db = await getServerDb();
-      const visibilityClauses = [eq(Unit.visibility, "PUBLIC")];
-      const userId = callerUserId(caller);
-      if (userId) visibilityClauses.push(eq(Unit.userId, userId));
-      const rows = await db
-        .select({ id: Unit.id })
-        .from(Unit)
-        .where(
-          and(
-            inArray(Unit.id, ids),
-            ne(Unit.status, "DELETED"),
-            or(...visibilityClauses),
-          ),
-        );
-      return new Set(rows.map((unit) => unit.id));
-    },
-    async findLiveUnitIds(ids) {
-      if (ids.length === 0) return new Set();
-      const db = await getServerDb();
-      const rows = await db
-        .select({ id: Unit.id })
-        .from(Unit)
-        .where(and(inArray(Unit.id, ids), ne(Unit.status, "DELETED")));
-      return new Set(rows.map((unit) => unit.id));
     },
   };
 }
@@ -237,51 +131,14 @@ export function setRealmExtraRepositoryForTest(
   realmExtraRepository = repository;
 }
 
-function readList(extra: unknown, key: string): string[] {
-  if (!extra || typeof extra !== "object") return [];
-  const value = (extra as ExtraJson)[key];
-  if (!Array.isArray(value)) return [];
-  return value.filter((v): v is string => typeof v === "string");
-}
-
-function readUnitReference(extra: unknown, key: string): string | null {
-  if (!extra || typeof extra !== "object") return null;
-  const value = (extra as ExtraJson)[key];
-  if ((key === "rule" || key === "about") && typeof value === "string") {
-    return value;
-  }
-  return null;
-}
-
-async function findLiveUnitReferenceIds(
-  ids: string[],
-  caller?: RezicsSessionClaims | null,
-): Promise<Set<string>> {
-  return realmExtraRepository.findLiveUnitReferenceIds(ids, caller);
-}
-
 export async function filterRealmExtraPublic(
   extra: unknown,
-  caller: RezicsSessionClaims | null = null,
 ): Promise<ExtraJson | undefined> {
   if (!extra || typeof extra !== "object") return undefined;
   const next = { ...(extra as ExtraJson) };
-  const refs = new Map<UnitReferenceExtraKey, string>();
 
   for (const key of ["banner", "avatar"] as const) {
     if (key in next && !isValidImageExtra(next[key])) {
-      delete next[key];
-    }
-  }
-
-  for (const key of ["rule", "about"] as const) {
-    const id = readUnitReference(next, key);
-    if (id) refs.set(key, id);
-  }
-
-  const liveIds = await findLiveUnitReferenceIds([...refs.values()], caller);
-  for (const [key, id] of refs) {
-    if (!liveIds.has(id)) {
       delete next[key];
     }
   }
@@ -294,13 +151,6 @@ function isValidImageExtra(value: unknown): value is RealmImageExtra {
   const image = value as RealmImageExtra;
   if (image.kind !== "url" || typeof image.url !== "string") return false;
   return isHttpUrl(image.url.trim());
-}
-
-function writeList(extra: unknown, key: string, list: string[]): ExtraJson {
-  const base: ExtraJson =
-    extra && typeof extra === "object" ? { ...(extra as ExtraJson) } : {};
-  base[key] = list;
-  return base;
 }
 
 function writeValue(extra: unknown, key: string, value: unknown): ExtraJson {
@@ -339,21 +189,6 @@ async function authorizeForRealm(
       "FORBIDDEN",
       "Caller lacks moderator authority over this realm",
       403,
-    );
-  }
-}
-
-async function loadExtra(realmId: string): Promise<ExtraJson> {
-  return realmExtraRepository.loadExtra(realmId);
-}
-
-async function validatePostUnit(unitId: string, label: string): Promise<void> {
-  const unit = await realmExtraRepository.findPostUnit(unitId);
-  if (!unit || unit.type !== "POST" || unit.status === "DELETED") {
-    throw new RealmExtraError(
-      "INVALID_VALUE",
-      `${label} must reference an existing Post Unit`,
-      400,
     );
   }
 }
@@ -405,13 +240,6 @@ function collectTagTreeIds(value: unknown): Set<string> {
       );
     }
     const item = node as TagTreeNode;
-    if ("disabled" in item) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        "tagTree nodes do not support disabled visibility flags",
-        400,
-      );
-    }
     if (item.tagId !== undefined) {
       if (typeof item.tagId !== "string" || item.tagId.length === 0) {
         throw new RealmExtraError(
@@ -460,51 +288,6 @@ async function validateSingleExtraValue(
       );
     }
     return value;
-  }
-
-  if (key === "rule" || key === "about") {
-    if (typeof value !== "string" || value.length === 0) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        `${key} must be a Post Unit ID string`,
-        400,
-      );
-    }
-    await validatePostUnit(value, key);
-    return value;
-  }
-
-  if (key === "featuredZoneUnitId") {
-    if (typeof value !== "string" || value.length === 0) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        "featuredZoneUnitId must be a Zone Unit ID string",
-        400,
-      );
-    }
-    // Weak link by design: no existence, ownership, or zone-type check here.
-    // The frontend resolves the target and omits the card when unresolved.
-    return value;
-  }
-
-  if (key === "wikiSidebar") {
-    if (!Value.Check(realmWikiSidebarSchema, value)) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        "wikiSidebar must be a supported sidebar source",
-        400,
-      );
-    }
-    const sidebar = value as RealmWikiSidebar;
-    // Weak links by design: the union is shape-validated only. Missing post or
-    // zone targets degrade in the reader/editor instead of failing writes.
-    return sidebar.kind === "post"
-      ? { kind: "post", postUnitId: sidebar.postUnitId }
-      : {
-          kind: "zoneNav",
-          zoneUnitId: sidebar.zoneUnitId,
-          ...(sidebar.menuId ? { menuId: sidebar.menuId } : {}),
-        };
   }
 
   if (key === "tagView") {
@@ -592,84 +375,7 @@ async function updateExtraWithLock(
   mutate: (extra: ExtraJson) => ExtraJson,
 ): Promise<ExtraJson> {
   await authorizeForRealm(caller, realmId);
-
-  return await realmExtraRepository.updateExtraWithLock(realmId, mutate);
-}
-
-/**
- * Append `unitId` to `Realm.extra[key]` if absent (idempotent). Realm row is
- * locked `FOR UPDATE` for the duration of the transaction to serialize
- * concurrent appends.
- */
-export async function appendToList(
-  caller: RezicsSessionClaims,
-  realmId: string,
-  key: string,
-  unitId: string,
-): Promise<{ unitIds: string[] }> {
-  await authorizeForRealm(caller, realmId);
-
-  let unitIds: string[] = [];
-  await updateExtraWithLock(caller, realmId, (extra) => {
-    const current = readList(extra, key);
-    unitIds = current.includes(unitId) ? current : [...current, unitId];
-    return unitIds === current ? extra : writeList(extra, key, unitIds);
-  });
-  return { unitIds };
-}
-
-/**
- * Reorder `Realm.extra[key]` to the requested permutation. Rejects if the
- * incoming list is not a permutation of the stored list (set-equality check).
- */
-export async function reorderList(
-  caller: RezicsSessionClaims,
-  realmId: string,
-  key: string,
-  unitIds: string[],
-): Promise<{ unitIds: string[] }> {
-  await authorizeForRealm(caller, realmId);
-
-  await updateExtraWithLock(caller, realmId, (extra) => {
-    const current = readList(extra, key);
-    const currentSet = new Set(current);
-    const incomingSet = new Set(unitIds);
-    if (
-      currentSet.size !== incomingSet.size ||
-      currentSet.size !== unitIds.length ||
-      [...currentSet].some((id) => !incomingSet.has(id))
-    ) {
-      throw new RealmExtraError(
-        "INVALID_REORDER",
-        "Reorder must be a permutation of the existing list",
-        400,
-      );
-    }
-    return writeList(extra, key, unitIds);
-  });
-  return { unitIds };
-}
-
-/**
- * Remove `unitId` from `Realm.extra[key]` (idempotent).
- */
-export async function removeFromList(
-  caller: RezicsSessionClaims,
-  realmId: string,
-  key: string,
-  unitId: string,
-): Promise<{ unitIds: string[] }> {
-  await authorizeForRealm(caller, realmId);
-
-  let unitIds: string[] = [];
-  await updateExtraWithLock(caller, realmId, (extra) => {
-    const current = readList(extra, key);
-    unitIds = current.filter((id) => id !== unitId);
-    return unitIds.length === current.length
-      ? extra
-      : writeList(extra, key, unitIds);
-  });
-  return { unitIds };
+  return realmExtraRepository.updateExtraWithLock(realmId, mutate);
 }
 
 export async function setSingleExtraKey(
@@ -720,54 +426,4 @@ export async function setTagTreeExtra(
     writeValue(current, "tagTree", value),
   );
   return { extra };
-}
-
-/**
- * Public read: filters out IDs that no longer exist, are soft-deleted, or
- * are not visible to the caller. Stored array is preserved unchanged.
- */
-export async function readListPublic(
-  caller: RezicsSessionClaims | null,
-  realmId: string,
-  key: string,
-): Promise<string[]> {
-  const extra = await loadExtra(realmId);
-  const unitReference = readUnitReference(extra, key);
-  if (unitReference) {
-    const liveIds = await findLiveUnitReferenceIds([unitReference], caller);
-    return liveIds.has(unitReference) ? [unitReference] : [];
-  }
-  const stored = readList(extra, key);
-  if (stored.length === 0) return [];
-  const visibleSet = await realmExtraRepository.findVisibleUnitIds(
-    stored,
-    caller,
-  );
-  return stored.filter((id) => visibleSet.has(id));
-}
-
-/**
- * Admin read: returns the full stored array plus a parallel `staleIds` list
- * with entries the public view would otherwise drop.
- */
-export async function readListAdmin(
-  caller: RezicsSessionClaims,
-  realmId: string,
-  key: string,
-): Promise<{ unitIds: string[]; staleIds: string[] }> {
-  await authorizeForRealm(caller, realmId);
-  const extra = await loadExtra(realmId);
-  const unitReference = readUnitReference(extra, key);
-  if (unitReference) {
-    const liveIds = await findLiveUnitReferenceIds([unitReference], null);
-    return {
-      unitIds: [unitReference],
-      staleIds: liveIds.has(unitReference) ? [] : [unitReference],
-    };
-  }
-  const stored = readList(extra, key);
-  if (stored.length === 0) return { unitIds: [], staleIds: [] };
-  const liveSet = await realmExtraRepository.findLiveUnitIds(stored);
-  const staleIds = stored.filter((id) => !liveSet.has(id));
-  return { unitIds: stored, staleIds };
 }

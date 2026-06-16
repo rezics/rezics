@@ -83,7 +83,7 @@ function SeedJoinButton({
       qc.setQueryData(postKeys.detail(post.unitId), post);
       qc.setQueryData(realmRuleResolvedQuery(realm.unitId).queryKey, {
         realmUnitId: realm.unitId,
-        ruleUnitId: realm.extra?.rule ?? post.unitId,
+        ruleUnitId: realm.ruleUnitId ?? post.unitId,
         version: 1,
         requireOnJoin: true,
         requireOnPost: true,

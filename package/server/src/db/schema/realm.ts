@@ -48,12 +48,17 @@ export const Realm = pgTable("Realm", {
   isOfficial: boolean().default(false).notNull(),
   memberCount: integer().default(0).notNull(),
   extra: jsonData(),
+  sidebar: jsonData(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
   /**
-   * Versioned rule policy for the POST Unit referenced by Realm.extra.rule.
-   * 由 Realm.extra.rule 引用的 POST Unit 的带版本号规则策略。
+   * Versioned rule policy for the POST Unit shown before realm joins/posts.
+   * Sidebar widgets render this policy; they do not own a second rule pointer.
    */
+  ruleUnitId: uuid().references(() => Unit.id, {
+    onDelete: "set null",
+    onUpdate: "cascade",
+  }),
   ruleVersion: integer().default(1).notNull(),
   ruleRequireOnJoin: boolean().default(false).notNull(),
   ruleRequireOnPost: boolean().default(false).notNull(),

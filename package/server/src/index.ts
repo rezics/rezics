@@ -41,6 +41,7 @@ import { linkApi } from "./link";
 import { federatedSearchApi, meiliApi } from "./meili";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
 import { pollApi } from "./poll";
+import { pinboardApi } from "./pinboard";
 import { postApi } from "./post";
 import { profileReactionHistoryApi } from "./profile-reaction-history";
 import { progressApi } from "./progress";
@@ -48,6 +49,7 @@ import { reactionBoundaryApi } from "./reaction-boundary";
 import {
   realmApi,
   realmExtraApi,
+  realmSidebarApi,
   realmTagApplicationApi,
   realmTagApplicationVoteApi,
   realmTagApplicationVoteWithdrawApi,
@@ -226,8 +228,10 @@ routeApp
   .use(linkApi)
   .use(zoneApi)
   .use(labelApi)
+  .use(pinboardApi)
   .use(realmApi)
   .use(realmExtraApi)
+  .use(realmSidebarApi)
   .use(realmTagContextApi)
   .use(realmTagApplicationApi)
   .use(realmTagApplicationVoteApi)

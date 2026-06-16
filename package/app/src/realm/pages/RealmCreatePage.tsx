@@ -215,7 +215,7 @@ export function RealmCreatePage({
 
       <RuleSection
         realmUnitId={realmId}
-        postUnitId={realm.extra?.rule ?? null}
+        postUnitId={realm.ruleUnitId ?? null}
       />
 
       {!isMember ? (

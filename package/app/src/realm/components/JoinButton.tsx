@@ -38,7 +38,7 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
   const leaveMutation = useLeaveRealmMutation();
 
   const isMember = myMembership?.member != null;
-  const rulePostId = realm?.extra?.rule ?? undefined;
+  const rulePostId = realm?.ruleUnitId ?? undefined;
   const {
     data: rule,
     isLoading: ruleLoading,

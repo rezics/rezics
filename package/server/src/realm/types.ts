@@ -43,6 +43,8 @@ export const realmListSelect = {
   contentRequiresApproval: true,
   memberCount: true,
   extra: true,
+  sidebar: true,
+  ruleUnitId: true,
   createdAt: true,
   updatedAt: true,
   unit: {
@@ -67,6 +69,8 @@ export type RealmListSelected = Pick<
   | "contentRequiresApproval"
   | "memberCount"
   | "extra"
+  | "sidebar"
+  | "ruleUnitId"
   | "createdAt"
   | "updatedAt"
 > & {

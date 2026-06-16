@@ -1,19 +1,18 @@
 /**
  * Pinboard view-model types.
  *
- * Pure types only — no React imports. Phase G aligns this module with the
- * new contract: a Realm.extra ordered list of Unit IDs is the source of
+ * Pure types only — no React imports. A first-class Pinboard is the source of
  * truth, and per-Unit titles/summaries are resolved at read time from the
  * Unit's translations.
  */
 
-import type { RealmExtraListKey } from "@rezics/contract";
+import type { PinboardKey } from "@rezics/contract";
 
 /**
- * Well-known Realm.extra list keys this feature renders. Mirrored in the
- * contract's `RealmExtraListKey` so downstream switches stay exhaustive.
+ * Pinboard key this feature renders. The current product surface manages only
+ * the realm home Pinboard; homepage notices are presentation, not a data key.
  */
-export type PinboardListKey = RealmExtraListKey;
+export type PinboardListKey = PinboardKey;
 
 /**
  * Resolved entry passed to the presentation layer. Derived at read time from

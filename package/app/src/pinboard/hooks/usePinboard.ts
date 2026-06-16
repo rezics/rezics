@@ -2,9 +2,9 @@
  * Pinboard read hooks.
  *
  * Composes two layers:
- *   1. `realmExtraReadQuery` / `realmExtraAdminReadQuery` returns the ordered
- *      Unit-ID list stored under `Realm.extra.<key>` (with stale filtering
- *      applied for the public read).
+ *   1. `pinboardReadQuery` / `pinboardAdminReadQuery` returns the ordered
+ *      Unit-ID list stored in the first-class Pinboard tables (with stale
+ *      filtering applied for the public read).
  *   2. `unitDetailQuery` is fetched per ID so we can derive title/summary
  *      from the Unit's translations.
  *   3. POST units additionally hydrate `PostDTO.content` because reviews and
@@ -14,9 +14,9 @@
 
 import { postDetailQuery } from "@rezics/api/post/post.queries";
 import {
-  realmExtraAdminReadQuery,
-  realmExtraReadQuery,
-} from "@rezics/api/realm/realm-extra.queries";
+  pinboardAdminReadQuery,
+  pinboardReadQuery,
+} from "@rezics/api/pinboard/pinboard.queries";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import {
   contentDocMarkdownFallback,
@@ -61,11 +61,11 @@ export function usePinboardList(
   const enabled = input.enabled ?? true;
 
   const adminQuery = useQuery({
-    ...realmExtraAdminReadQuery(input.realmUnitId, input.pinboardKey),
+    ...pinboardAdminReadQuery(input.realmUnitId, input.pinboardKey),
     enabled: enabled && adminView && Boolean(input.realmUnitId),
   });
   const publicQuery = useQuery({
-    ...realmExtraReadQuery(input.realmUnitId, input.pinboardKey),
+    ...pinboardReadQuery(input.realmUnitId, input.pinboardKey),
     enabled: enabled && !adminView && Boolean(input.realmUnitId),
   });
 

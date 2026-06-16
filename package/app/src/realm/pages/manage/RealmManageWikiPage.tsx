@@ -1,8 +1,5 @@
 import { useRealmManage } from "../../layouts/realmManageContext";
-import {
-  FeaturedZonePicker,
-  WikiSidebarPicker,
-} from "../../sections/RealmManageEditors";
+import { RealmSidebarWidgetEditor } from "../../sections/RealmSidebarWidgetEditor";
 
 /**
  * Realm wiki management page for featured zone and sidebar slot selection.
@@ -31,18 +28,11 @@ import {
  * └────────────────────────────────────────────┘
  */
 export function RealmManageWikiPage() {
-  const { realmId, realm } = useRealmManage();
+  const { realmId } = useRealmManage();
 
   return (
     <div className="flex flex-col gap-6">
-      <FeaturedZonePicker
-        realmId={realmId}
-        value={realm.extra?.featuredZoneUnitId ?? null}
-      />
-      <WikiSidebarPicker
-        realmId={realmId}
-        value={realm.extra?.wikiSidebar ?? null}
-      />
+      <RealmSidebarWidgetEditor realmId={realmId} />
     </div>
   );
 }

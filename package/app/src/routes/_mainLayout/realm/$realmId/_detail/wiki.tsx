@@ -6,13 +6,7 @@ export const Route = createFileRoute(
   "/_mainLayout/realm/$realmId/_detail/wiki",
 )({
   component: () => {
-    const { realmId, routeLocation, realm } = useRealmDetail();
-    return (
-      <RealmWikiTab
-        realmId={realmId}
-        routeLocation={routeLocation}
-        wikiSidebar={realm.extra?.wikiSidebar ?? null}
-      />
-    );
+    const { realmId, realm } = useRealmDetail();
+    return <RealmWikiTab realm={realm} realmId={realmId} />;
   },
 });

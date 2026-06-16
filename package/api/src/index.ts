@@ -19,6 +19,7 @@ export * from "./governance/governance";
 export * from "./history/history";
 export * from "./label/label";
 export * from "./meili/meili";
+export * from "./pinboard";
 export * from "./progress";
 export {
   ApiError,

@@ -18,6 +18,7 @@ import {
 } from "../unit/unit";
 import { moderationStatusSchema } from "./publication";
 import { realmExtraSchema } from "./realm-extra";
+import { realmSidebarEnvelopeSchema } from "./realm-sidebar";
 
 // ============================================================
 // DEFAULT REALM
@@ -111,6 +112,8 @@ export const realmDTOSchema = t.Object({
   contentRequiresApproval: t.Optional(t.Boolean()),
   memberCount: t.Number(),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
+  sidebar: t.Optional(t.Nullable(realmSidebarEnvelopeSchema)),
+  ruleUnitId: t.Optional(t.Nullable(t.String())),
   viewerCapabilities: t.Optional(t.Array(capabilityHintSchema)),
   resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   title: t.Optional(t.Nullable(t.String())),
@@ -601,6 +604,7 @@ export const createRealmSchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
   contentRequiresApproval: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
+  sidebar: t.Optional(t.Nullable(realmSidebarEnvelopeSchema)),
   translations: t.Optional(
     t.Array(
       t.Object({
@@ -621,6 +625,7 @@ export const updateRealmSchema = t.Object({
   isOfficial: t.Optional(t.Boolean()),
   contentRequiresApproval: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
+  sidebar: t.Optional(t.Nullable(realmSidebarEnvelopeSchema)),
 });
 
 export type UpdateRealmInput = (typeof updateRealmSchema)["static"];

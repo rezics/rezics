@@ -20,14 +20,8 @@ function RealmSlugWikiRoute() {
 }
 
 function RealmSlugWikiTab() {
-  const { routeLocation, realmId, realm } = useRealmDetail();
-  return (
-    <RealmWikiTab
-      realmId={realmId}
-      routeLocation={routeLocation}
-      wikiSidebar={realm.extra?.wikiSidebar ?? null}
-    />
-  );
+  const { realmId, realm } = useRealmDetail();
+  return <RealmWikiTab realm={realm} realmId={realmId} />;
 }
 
 export const Route = createFileRoute("/_mainLayout/r/$realmSlug/wiki")({

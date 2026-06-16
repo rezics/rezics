@@ -15,9 +15,6 @@ import type {
   CreateRealmTagApplicationInput,
   JoinRealmInput,
   PatchRealmTagApplicationInput,
-  RealmExtraAdminReadResponse,
-  RealmExtraOkResponse,
-  RealmExtraReadResponse,
   RealmListQuery,
   RealmListResponse,
   RealmMemberDTO,
@@ -134,107 +131,6 @@ export const realmApi = {
     return apiFetch<{ message: string }>(`/realm/${unitId}`, {
       method: "DELETE",
     });
-  },
-
-  // ---- Pinboard / Announcements ----
-
-  readPinboard: async (
-    realmUnitId: string,
-  ): Promise<RealmExtraReadResponse> => {
-    return apiFetch<RealmExtraReadResponse>(`/realm/${realmUnitId}/pinboard`);
-  },
-
-  readPinboardAdmin: async (
-    realmUnitId: string,
-  ): Promise<RealmExtraAdminReadResponse> => {
-    return apiFetch<RealmExtraAdminReadResponse>(
-      `/realm/${realmUnitId}/pinboard/admin`,
-    );
-  },
-
-  appendPinboard: async (
-    realmUnitId: string,
-    unitId: string,
-  ): Promise<RealmExtraOkResponse> => {
-    return apiFetch<RealmExtraOkResponse>(`/realm/${realmUnitId}/pinboard`, {
-      method: "POST",
-      body: JSON.stringify({ unitId }),
-    });
-  },
-
-  reorderPinboard: async (
-    realmUnitId: string,
-    unitIds: string[],
-  ): Promise<RealmExtraOkResponse> => {
-    return apiFetch<RealmExtraOkResponse>(
-      `/realm/${realmUnitId}/pinboard/reorder`,
-      {
-        method: "POST",
-        body: JSON.stringify({ unitIds }),
-      },
-    );
-  },
-
-  removePinboardEntry: async (
-    realmUnitId: string,
-    unitId: string,
-  ): Promise<RealmExtraOkResponse> => {
-    return apiFetch<RealmExtraOkResponse>(
-      `/realm/${realmUnitId}/pinboard/${unitId}`,
-      { method: "DELETE" },
-    );
-  },
-
-  readAnnouncements: async (
-    realmUnitId: string,
-  ): Promise<RealmExtraReadResponse> => {
-    return apiFetch<RealmExtraReadResponse>(
-      `/realm/${realmUnitId}/announcements`,
-    );
-  },
-
-  readAnnouncementsAdmin: async (
-    realmUnitId: string,
-  ): Promise<RealmExtraAdminReadResponse> => {
-    return apiFetch<RealmExtraAdminReadResponse>(
-      `/realm/${realmUnitId}/announcements/admin`,
-    );
-  },
-
-  appendAnnouncement: async (
-    realmUnitId: string,
-    unitId: string,
-  ): Promise<RealmExtraOkResponse> => {
-    return apiFetch<RealmExtraOkResponse>(
-      `/realm/${realmUnitId}/announcements`,
-      {
-        method: "POST",
-        body: JSON.stringify({ unitId }),
-      },
-    );
-  },
-
-  reorderAnnouncements: async (
-    realmUnitId: string,
-    unitIds: string[],
-  ): Promise<RealmExtraOkResponse> => {
-    return apiFetch<RealmExtraOkResponse>(
-      `/realm/${realmUnitId}/announcements/reorder`,
-      {
-        method: "POST",
-        body: JSON.stringify({ unitIds }),
-      },
-    );
-  },
-
-  removeAnnouncement: async (
-    realmUnitId: string,
-    unitId: string,
-  ): Promise<RealmExtraOkResponse> => {
-    return apiFetch<RealmExtraOkResponse>(
-      `/realm/${realmUnitId}/announcements/${unitId}`,
-      { method: "DELETE" },
-    );
   },
 
   // ---- Membership ----

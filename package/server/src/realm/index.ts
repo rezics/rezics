@@ -13,6 +13,7 @@ export {
   realmService,
 } from "./realm.service";
 export { realmExtraApi } from "./realm-extra.api";
+export { realmSidebarApi } from "./realm-sidebar.api";
 export {
   realmTagApplicationApi,
   realmTagApplicationVoteApi,
