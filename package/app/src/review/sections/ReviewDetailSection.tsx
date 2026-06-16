@@ -3,6 +3,7 @@ import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import type { CommentListContext } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +26,73 @@ interface ReviewDetailSectionProps {
   reviewId: string;
 }
 
+/**
+ * Review detail section.
+ *
+ * Displays a book review with target book metadata, edit button (if authorized),
+ * reply composer, and nested comment thread. Comment context selector defaults to All.
+ *
+ * 评论详情区域，显示评论内容、目标书籍元数据、编辑按钮（如有权限）、
+ * 回复框和评论线程。评论分区选择器默认为"全部"。
+ *
+ * Desktop (1200px):
+ * +-----------------------------------------------+
+ * | [Edit icon]                                  |
+ * +-----------------------------------------------+
+ * | [Book Cover] | Book Title                    |
+ * |              | Author                        |
+ * | Review Title                                 |
+ * | Reviewer | Rating ★★★★★ | 2 weeks ago       |
+ * | Review body text here...                     |
+ * +-----------------------------------------------+
+ * | Comments                                     |
+ * | [All] [Realm A] [Realm B]                    |
+ * | + Reply Composer                             |
+ * | [____________________________]                |
+ * | - Comment 1 Author | Date                    |
+ * |   - Reply 1                                  |
+ * +-----------------------------------------------+
+ *
+ * Tablet (768px):
+ * +---------------------------------+
+ * | [Edit]                          |
+ * +---------------------------------+
+ * | [Book] | Title                  |
+ * |        | Author                 |
+ * | Review Title                    |
+ * | Author | ★★★★★                 |
+ * | Review body...                  |
+ * +---------------------------------+
+ * | Comments                        |
+ * | [All] [Realm A]                 |
+ * | [_____________________]         |
+ * | - Comment 1                     |
+ * +---------------------------------+
+ *
+ * Mobile (360px):
+ * +----------+
+ * | [Edit]   |
+ * +----------+
+ * | Book     |
+ * | Title    |
+ * | Author   |
+ * +----------+
+ * | Review   |
+ * | Author   |
+ * | ★★★★★   |
+ * +----------+
+ * | Comments |
+ * | [All]    |
+ * | [___]    |
+ * | Cmts...  |
+ * +----------+
+ *
+ * Loading/Error State:
+ * +----------+
+ * | Loading...|
+ * | or Error |
+ * +----------+
+ */
 export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   reviewId,
 }) => {
@@ -65,7 +133,12 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
     useState<CommentListContext | null>(null);
   const commentContext = pickedCommentContext ?? COMMENT_CONTEXT_ALL;
 
-  if (isLoading) return <div>{t("common:loading")}</div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
+    );
   if (error) return <QueryErrorDisplay error={error} />;
   if (!review) return <div>{t("common:no_data")}</div>;
 

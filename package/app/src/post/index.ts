@@ -4,7 +4,6 @@ export { PostEditDialog } from "./forms/PostEditDialog";
 export { PostEditorSurface } from "./forms/PostEditorSurface";
 export { RootPostTranslationEditor } from "./forms/RootPostTranslationEditor";
 export { WikiPostEditor } from "./forms/WikiPostEditor";
-export { PostCard } from "./components/item/PostCard";
 export {
   ModerationBadge,
   moderationControlStateClass,

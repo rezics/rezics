@@ -47,8 +47,9 @@ export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
     });
   }, [data]);
 
-  function onChange(value: BookTocJsonData) {
-    console.log(value);
+  function onChange(_value: BookTocJsonData) {
+    // TODO: persist updated TOC structure
+    // TODO：持久化更新后的目录结构
   }
 
   if (isLoading) return <div>{t("common:loading")}</div>;

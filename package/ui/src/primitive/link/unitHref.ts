@@ -5,6 +5,11 @@
  * long-prefix unitId URL otherwise. short=slug is the canonical browser-facing
  * identity; long-prefix unitId URLs must not be rendered when a slug is known.
  *
+ * For USER units this returns the user-space root (`/u/:slug`), not the profile
+ * surface. App code that specifically links to profile should use the app-level
+ * user profile route helper so `/profile` is explicit and never reached via
+ * root redirects.
+ *
  * Pure and synchronous — usable from route loaders, prefetchers, search-result
  * generators, and tests. Use {@link useUnitHref} for the React-side ergonomic
  * wrapper.

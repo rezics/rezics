@@ -260,5 +260,12 @@
   "subscription_recovery_other_description": "Vom Nutzer hinzugefügte Abonnements können wiederhergestellt werden, wenn das Ziel noch sichtbar und abonnierbar ist.",
   "subscription_recovery_other_empty": "Keine anderen entfernten Abonnements.",
   "subscription_recovery_restore_error": "Dieses Abonnement kann derzeit nicht wiederhergestellt werden.",
-  "subscription_recovery_restore": "Wiederherstellen"
+  "subscription_recovery_restore": "Wiederherstellen",
+  "tokens_created_date": "Erstellt {date}",
+  "tokens_expires_date": "Läuft ab {date}",
+  "tokens_last_used_date": "Zuletzt verwendet {date}",
+  "tokens_last_used_from_ip": "von {ip}",
+  "tokens_never_used": "Nie",
+  "security_current_session": "Aktuelle Sitzung",
+  "profile_content_on_target": "zu {title}"
 }

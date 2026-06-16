@@ -203,7 +203,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     <div className="flex items-center gap-2">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger render={button} />
+          <TooltipTrigger render={button} className="shrink-0" />
           <TooltipContent>{followersText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>

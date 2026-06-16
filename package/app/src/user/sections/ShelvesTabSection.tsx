@@ -1,5 +1,62 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 
+/**
+ * ShelvesTabSection — 用户资料页内的书架标签页，支持按种类过滤和按名称搜索，
+ * 展示用户的所有书架（系统书架和自定义书架），支持排序和搜索功能。
+ *
+ * ┌────────────────────────────────────────────┐
+ * │ Shelves Tab (desktop 1024px+)              │
+ * │ ┌──────────────────────────────────────────┐
+ * │ │ [Search Contents...]                     │
+ * │ │ [All] [Reading] [Read] [ToRead] [DNF]    │
+ * │ │ [Search shelf..]  [Sort: Newest ▼]       │
+ * │ ├──────────────────────────────────────────┤
+ * │ │ ┌──────────┐ ┌──────────┐ ┌──────────┐   │
+ * │ │ │[Cover]   │ │[Cover]   │ │ Custom 1 │   │
+ * │ │ │Reading   │ │ My Books │ │ 7 items  │   │
+ * │ │ │45 items  │ │ 23 items │ └──────────┘   │
+ * │ │ └──────────┘ └──────────┘                │
+ * │ └──────────────────────────────────────────┘
+ * └────────────────────────────────────────────┘
+ *
+ * ┌──────────────────────────┐
+ * │ Shelves (tablet 768px)   │
+ * │ ┌────────────────────────┐
+ * │ │ [Search Content]       │
+ * │ │ [All] [Reading] [Read] │
+ * │ │ [Search..] [Newest ▼]  │
+ * │ ├────────────────────────┤
+ * │ │ ┌──────────┐ ┌──────────┐
+ * │ │ │ Reading  │ │ My Books │
+ * │ │ │ 45 items │ │ 23 items │
+ * │ │ └──────────┘ └──────────┘
+ * │ └────────────────────────┘
+ * └──────────────────────────┘
+ *
+ * ┌──────────────────┐
+ * │ Shelves (mobile) │
+ * │ ┌────────────────┐
+ * │ │ [Search..]     │
+ * │ │ All Reading... │
+ * │ │ [Search] [▼]   │
+ * │ ├────────────────┤
+ * │ │ ┌────────────┐ │
+ * │ │ │ Reading 45 │ │
+ * │ │ └────────────┘ │
+ * │ │ ┌────────────┐ │
+ * │ │ │ My Books23 │ │
+ * │ │ └────────────┘ │
+ * │ └────────────────┘
+ * └──────────────────┘
+ *
+ * ┌──────────────────────┐
+ * │ Empty (no shelves)   │
+ * │ ┌────────────────────┐
+ * │ │ No shelves yet     │
+ * │ └────────────────────┘
+ * └──────────────────────┘
+ */
+
 const i18nMessages = {
   shelf_sort_newest: () => getI18nRuntime().i18n.t("entity:shelf_sort_newest"),
   shelf_sort_oldest: () => getI18nRuntime().i18n.t("entity:shelf_sort_oldest"),
@@ -32,7 +89,7 @@ const SORT_OPTION_LABEL = {
 
 export const ShelvesTabSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "search"]);
-  const { user, userId, isCurrentUser } = useProfileContext();
+  const { user, userId, isCurrentUser, profileBasePath } = useProfileContext();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -99,7 +156,7 @@ export const ShelvesTabSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
-      <ShelfContentsSearchEntry userId={userId} userSlug={user.slug} />
+      <ShelfContentsSearchEntry profileBasePath={profileBasePath} />
 
       <InnerFilterPanel
         chips={kindChips}
@@ -142,9 +199,8 @@ export const ShelvesTabSection: FC = () => {
 };
 
 const ShelfContentsSearchEntry: FC<{
-  userId: string;
-  userSlug?: string;
-}> = ({ userId, userSlug }) => {
+  profileBasePath: string;
+}> = ({ profileBasePath }) => {
   const { t } = useTranslation(["entity"]);
   const card = (
     <Card
@@ -162,24 +218,8 @@ const ShelfContentsSearchEntry: FC<{
     </Card>
   );
 
-  if (userSlug) {
-    return (
-      <Link
-        to="/u/$userSlug/shelves/search"
-        params={{ userSlug }}
-        className="no-underline"
-      >
-        {card}
-      </Link>
-    );
-  }
-
   return (
-    <Link
-      to="/user/$userId/shelves/search"
-      params={{ userId }}
-      className="no-underline"
-    >
+    <Link to={`${profileBasePath}/shelves/search`} className="no-underline">
       {card}
     </Link>
   );

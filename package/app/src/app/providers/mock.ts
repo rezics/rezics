@@ -16,7 +16,8 @@ export const setupMock = async () => {
 
         // Otherwise, print an unhandled request warning.
         // 否则，打印一条未处理请求的警告。
-        console.log("MSW bypass:", request.url);
+        // Unhandled request — ignored during dev.
+        // 未处理的请求——在开发环境中忽略。
       },
     });
   }

@@ -3,21 +3,18 @@ import type { FC } from "react";
 import { ProfileTabBar } from "./ProfileTabBar";
 
 interface ProfileShellProps {
-  userId: string;
-  userSlug?: string;
   isCurrentUser?: boolean;
+  profileBasePath: string;
 }
 
 export const ProfileShell: FC<ProfileShellProps> = ({
-  userId,
-  userSlug,
   isCurrentUser = false,
+  profileBasePath,
 }) => (
-  <div className="min-w-0 flex-1">
+  <div className="min-w-0 flex-1 max-w-4xl">
     <ProfileTabBar
-      userId={userId}
-      userSlug={userSlug}
       isCurrentUser={isCurrentUser}
+      profileBasePath={profileBasePath}
     />
     <div className="pt-4">
       <Outlet />

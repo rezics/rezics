@@ -13,12 +13,14 @@ interface ProfileBasicInfoProps {
   user: UserDTO;
   isCurrentUser: boolean;
   userId: string;
+  profileBasePath?: string;
 }
 
 export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   user,
   isCurrentUser,
   userId,
+  profileBasePath = `/user/${userId}/profile`,
 }) => {
   const { t } = useTranslation(["settings"]);
   const canEdit = useCanEdit({
@@ -38,12 +40,13 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
     sort: { field: "createdAt", order: "desc" },
     limit: 0,
   });
+  const canEditOwnProfile = isCurrentUser && canEdit;
 
   return (
     <>
       {/* Mobile: compact horizontal layout */}
       {/* 移动端：紧凑的横向布局 */}
-      <div className="relative flex items-start gap-4 py-4 px-4 md:hidden">
+      <div className="relative flex items-start gap-4 py-4 px-4 lg:hidden">
         {isCurrentUser && (
           <Link to="/user/me/setting" className="absolute top-3 right-3">
             <Button
@@ -63,8 +66,8 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
             <h6 className="text-base font-semibold">{user.name}</h6>
-            {canEdit && (
-              <Link to="/user/$userId/edit" params={{ userId }}>
+            {canEditOwnProfile && (
+              <Link to="/user/me/setting/profile">
                 <Button
                   size="icon"
                   variant="ghost"
@@ -113,7 +116,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
       {/* Desktop: generous vertical layout */}
       {/* 桌面端：宽松的纵向布局 */}
-      <div className="hidden md:flex flex-col items-start gap-4 py-12 px-4">
+      <div className="hidden lg:flex flex-col items-start gap-4 py-12 px-4">
         <Avatar className="w-full h-auto aspect-square rounded-lg text-5xl">
           <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
           <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
@@ -132,25 +135,9 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           <p className="text-sm text-text-secondary max-w-xs">{user.bio}</p>
         )}
 
-        <div className="flex items-center gap-3 text-sm text-text-secondary">
-          <span>
-            <strong className="font-medium text-text-primary">
-              {user.followersCount ?? 0}
-            </strong>{" "}
-            {t("settings:profile_tab_followers")}
-          </span>
-          <span aria-hidden="true">&middot;</span>
-          <span>
-            <strong className="font-medium text-text-primary">
-              {user.followingsCount ?? 0}
-            </strong>{" "}
-            {t("settings:profile_following")}
-          </span>
-        </div>
-
         <div className="w-full">
-          {canEdit ? (
-            <Link to="/user/$userId/edit" params={{ userId }} className="block">
+          {canEditOwnProfile ? (
+            <Link to="/user/me/setting/profile" className="block">
               <Button variant="outline" size="sm" className="w-full">
                 {t("settings:profile_edit_title")}
               </Button>
@@ -185,22 +172,22 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           <ProfileStatLink
             label={t("settings:profile_tab_shelves")}
             count={shelvesCountQuery.data?.total}
-            to={`/user/${userId}/shelves`}
+            to={`${profileBasePath}/shelves`}
           />
           <ProfileStatLink
             label={t("settings:profile_tab_content")}
             count={reviewsCountQuery.data?.total}
-            to={`/user/${userId}/content`}
+            to={`${profileBasePath}/content`}
           />
           <ProfileStatLink
             label={t("settings:profile_tab_followers")}
             count={user.followersCount ?? 0}
-            to={`/user/${userId}/followers`}
+            to={`${profileBasePath}/followers`}
           />
           <ProfileStatLink
             label={t("settings:profile_following")}
             count={user.followingsCount ?? 0}
-            to={`/user/${userId}/followers?filter=following`}
+            to={`${profileBasePath}/followers?filter=following`}
           />
         </div>
       </div>

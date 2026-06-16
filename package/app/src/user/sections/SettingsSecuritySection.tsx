@@ -20,6 +20,95 @@ import { SessionListItem } from "@/user/components/SessionListItem";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
+/**
+ * 安全部分：管理登录电子邮件、密码和活跃会话。
+ * 用户可以更改登录电子邮件、设置或更改密码、查看活跃会话并从远程设备撤销会话。
+ *
+ * Desktop (≥1024px):
+ * ┌─────────────────────────────────────┐
+ * │ Change Login Email                  │
+ * │ Current: user@example.com           │
+ * │ Success: Confirmation sent!         │
+ * │ [new-login-email@...] [Change]     │
+ * │                                     │
+ * │ Set/Change Password                 │
+ * │ Success: Password updated!          │
+ * │ New Password:  [password....]       │
+ * │ Confirm:      [password....]       │
+ * │ Passwords do not match!             │
+ * │ [Set Password]                      │
+ * │                                     │
+ * │ Active Sessions                     │
+ * │ Device Name • Location              │
+ * │ Browser/OS info        [Revoke]    │
+ * │ ────────────────────────────────   │
+ * │ Another Device • Another Location   │
+ * │ Browser/OS info        [Revoke]    │
+ * └─────────────────────────────────────┘
+ *
+ * Tablet (768px-1023px):
+ * ┌──────────────────────────────┐
+ * │ Change Login Email           │
+ * │ Current: user@example.com    │
+ * │ [new-email@...]              │
+ * │ [Change Email]               │
+ * │                              │
+ * │ Set/Change Password          │
+ * │ New Password: [password...]  │
+ * │ Confirm:     [password...]   │
+ * │ [Set Password]               │
+ * │                              │
+ * │ Active Sessions              │
+ * │ Device Name • Location       │
+ * │ Browser/OS   [Revoke]        │
+ * │ ──────────────────────────── │
+ * │ Another Device               │
+ * │ Browser/OS   [Revoke]        │
+ * └──────────────────────────────┘
+ *
+ * Mobile (480px-767px):
+ * ┌──────────────────┐
+ * │Security          │
+ * │                  │
+ * │Change Email      │
+ * │user@example.com  │
+ * │[new-email...]    │
+ * │[Change]          │
+ * │                  │
+ * │Password          │
+ * │[new-pwd...]      │
+ * │[confirm...]      │
+ * │[Set Password]    │
+ * │                  │
+ * │Active Sessions   │
+ * │Device • Location │
+ * │[Revoke]          │
+ * │────────────────  │
+ * │Another Device    │
+ * │[Revoke]          │
+ * └──────────────────┘
+ *
+ * Small Mobile (<480px):
+ * ┌──────────┐
+ * │Security  │
+ * │          │
+ * │Email     │
+ * │[email]   │
+ * │[Change]  │
+ * │          │
+ * │Password  │
+ * │[pwd]     │
+ * │[confirm] │
+ * │[Set]     │
+ * │          │
+ * │Sessions  │
+ * │Device    │
+ * │[Revoke]  │
+ * │──────    │
+ * │Device2   │
+ * │[Revoke]  │
+ * └──────────┘
+ */
 export const SettingsSecuritySection: FC = () => {
   const { t } = useTranslation(["settings"]);
   useRequireAuth();

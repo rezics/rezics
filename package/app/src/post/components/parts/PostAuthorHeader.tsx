@@ -42,7 +42,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
     // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent post card click when nested author content is used.
     // biome-ignore lint/a11y/useKeyWithClickEvents: the container itself is not an activation target.
     <div
-      className="flex items-center gap-2"
+      className="flex min-w-0 items-center gap-2"
       onClick={(e) => e.stopPropagation()}
     >
       {author ? (
@@ -65,7 +65,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
         />
       )}
       {dateStr && (
-        <span className="text-xs text-text-secondary">
+        <span className="shrink-0 whitespace-nowrap text-xs text-text-secondary">
           {dateStr}
           {edited ? ` · ${t("community:post_metadata_edited")}` : ""}
         </span>

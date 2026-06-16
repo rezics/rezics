@@ -25,6 +25,7 @@ import type {
   RenameHandler,
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
+import { toast } from "sonner";
 import {
   type BookContentStructureOccurrence,
   contentUnitIdForNode,
@@ -256,6 +257,7 @@ export const BookTocEditor = forwardRef<
   >(null);
   const [bulkRatingOpen, setBulkRatingOpen] = useState(false);
   const [bulkRating, setBulkRating] = useState<ContentRating>("GENERAL");
+  const [bulkRatingPending, setBulkRatingPending] = useState(false);
   const [bulkMoveDialogOpen, setBulkMoveDialogOpen] = useState(false);
 
   // Edit chapter dialog state
@@ -339,7 +341,7 @@ export const BookTocEditor = forwardRef<
       setSavedTreeData(data);
       setOpLog((current) => clearTreeEditOpLog(current));
     } catch (error) {
-      showAlert(`Failed to save: ${error}`);
+      showAlert(t("book:toc_save_failed", { error: String(error) }));
     }
   }
 
@@ -394,9 +396,7 @@ export const BookTocEditor = forwardRef<
     async (chapter: Chapter) => {
       const contentUnitId = contentUnitIdForNode(chapter);
       if (!contentUnitId && !chapter.nodeId) {
-        showAlert(
-          "Cannot open a chapter before the table of contents is saved.",
-        );
+        showAlert(t("book:toc_chapter_unsaved_warning"));
         return;
       }
       const targetContentUnitId = await ensureChapterUnit({
@@ -479,7 +479,7 @@ export const BookTocEditor = forwardRef<
     (chapter: Chapter) => {
       const newNode: Chapter = {
         id: `draft-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`,
-        title: "New Chapter",
+        title: t("book:toc_new_chapter_title"),
       };
       setTreeData(
         (current) =>
@@ -674,39 +674,44 @@ export const BookTocEditor = forwardRef<
    * chapter content.
    */
   async function applyBulkRating(rating: ContentRating) {
-    const ids = selectedIds;
-    const materializedChapterIds: string[] = [];
-    function walk(nodes: Chapter[]): Chapter[] {
-      return nodes.map((node) => {
-        const next: Chapter = { ...node };
-        if (ids.has(String(node.id)) && node.noContent !== true) {
-          const contentUnitId = contentUnitIdForNode(node);
-          if (contentUnitId) {
-            materializedChapterIds.push(contentUnitId);
+    setBulkRatingPending(true);
+    try {
+      const ids = selectedIds;
+      const materializedChapterIds: string[] = [];
+      function walk(nodes: Chapter[]): Chapter[] {
+        return nodes.map((node) => {
+          const next: Chapter = { ...node };
+          if (ids.has(String(node.id)) && node.noContent !== true) {
+            const contentUnitId = contentUnitIdForNode(node);
+            if (contentUnitId) {
+              materializedChapterIds.push(contentUnitId);
+            }
+            next.rating = rating;
           }
-          next.rating = rating;
-        }
-        if (node.children) {
-          next.children = walk(node.children);
-        }
-        return next;
-      });
+          if (node.children) {
+            next.children = walk(node.children);
+          }
+          return next;
+        });
+      }
+      const updated = walk(treeData);
+      await Promise.all(
+        [...new Set(materializedChapterIds)].map((unitId) =>
+          updateChapterMutation.mutateAsync({
+            unitId,
+            input: { rating },
+          }),
+        ),
+      );
+      setTreeData(updated);
+      enqueueOp("bulkRating", undefined, { count: selectedIds.size });
+      await saveTree(updated);
+      setBulkRatingOpen(false);
+      setSelectedIds(new Set());
+      setIsSelectionMode(false);
+    } finally {
+      setBulkRatingPending(false);
     }
-    const updated = walk(treeData);
-    await Promise.all(
-      [...new Set(materializedChapterIds)].map((unitId) =>
-        updateChapterMutation.mutateAsync({
-          unitId,
-          input: { rating },
-        }),
-      ),
-    );
-    setTreeData(updated);
-    enqueueOp("bulkRating", undefined, { count: selectedIds.size });
-    await saveTree(updated);
-    setBulkRatingOpen(false);
-    setSelectedIds(new Set());
-    setIsSelectionMode(false);
   }
 
   /**
@@ -714,49 +719,57 @@ export const BookTocEditor = forwardRef<
    * 重新同步：根据当前已落地章节的分级重新计算索引覆盖项。
    */
   async function handleResyncOverrides() {
-    const ratingByChapterId = new Map<string, ContentRating | undefined>();
+    try {
+      const ratingByChapterId = new Map<string, ContentRating | undefined>();
 
-    async function collect(nodes: Chapter[]) {
-      for (const node of nodes) {
-        const contentUnitId = contentUnitIdForNode(node);
-        if (contentUnitId && !ratingByChapterId.has(contentUnitId)) {
-          const chapter = await queryClient.ensureQueryData(
-            chapterDetailQuery(contentUnitId),
-          );
-          ratingByChapterId.set(
-            contentUnitId,
-            chapter.rating as ContentRating | undefined,
-          );
-        }
-        if (node.children) await collect(node.children);
-      }
-    }
-
-    function rewrite(nodes: Chapter[]): Chapter[] {
-      return nodes.map((node) => {
-        const next: Chapter = { ...node };
-        if (node.children) {
-          next.children = rewrite(node.children);
-        }
-        const contentUnitId = contentUnitIdForNode(node);
-        if (contentUnitId) {
-          const chapterRating = ratingByChapterId.get(contentUnitId);
-          if (chapterRating === undefined || chapterRating === bookRating) {
-            delete next.rating;
-          } else {
-            next.rating = chapterRating;
+      async function collect(nodes: Chapter[]) {
+        for (const node of nodes) {
+          const contentUnitId = contentUnitIdForNode(node);
+          if (contentUnitId && !ratingByChapterId.has(contentUnitId)) {
+            const chapter = await queryClient.ensureQueryData(
+              chapterDetailQuery(contentUnitId),
+            );
+            ratingByChapterId.set(
+              contentUnitId,
+              chapter.rating as ContentRating | undefined,
+            );
           }
-        } else if (next.rating === bookRating) {
-          delete next.rating;
+          if (node.children) await collect(node.children);
         }
-        return next;
-      });
-    }
+      }
 
-    await collect(treeData);
-    const updated = rewrite(treeData);
-    setTreeData(updated);
-    await saveTree(updated);
+      function rewrite(nodes: Chapter[]): Chapter[] {
+        return nodes.map((node) => {
+          const next: Chapter = { ...node };
+          if (node.children) {
+            next.children = rewrite(node.children);
+          }
+          const contentUnitId = contentUnitIdForNode(node);
+          if (contentUnitId) {
+            const chapterRating = ratingByChapterId.get(contentUnitId);
+            if (chapterRating === undefined || chapterRating === bookRating) {
+              delete next.rating;
+            } else {
+              next.rating = chapterRating;
+            }
+          } else if (next.rating === bookRating) {
+            delete next.rating;
+          }
+          return next;
+        });
+      }
+
+      await collect(treeData);
+      const updated = rewrite(treeData);
+      setTreeData(updated);
+      await saveTree(updated);
+    } catch (err) {
+      toast.error(
+        t("book:toc_resync_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+    }
   }
 
   const chapterCount = useMemo(() => countChapters(treeData), [treeData]);
@@ -921,6 +934,7 @@ export const BookTocEditor = forwardRef<
         value={bulkRating}
         onChange={setBulkRating}
         onConfirm={() => void applyBulkRating(bulkRating)}
+        isPending={bulkRatingPending}
       />
     </div>
   );

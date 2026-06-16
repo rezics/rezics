@@ -29,6 +29,7 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   SortableContext,
+  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
@@ -88,6 +89,73 @@ interface ShelfEditorItemsSectionProps {
   onViewModeChange: (viewMode: ShelfView) => void;
   editor: ReturnType<typeof useShelfItemsEditor>;
 }
+
+/**
+ * Shelf editor items section.
+ *
+ * Comprehensive shelf content editor supporting three modes: edit (add/reorder/delete),
+ * multi-select (bulk delete), and preview. Handles nested/flat views, multiple sort
+ * strategies, drag-and-drop reordering, and cross-page item moves with pagination.
+ *
+ * 书架编辑项目区域。完整的书架内容编辑器，支持三种模式：编辑（添加/重排/删除）、
+ * 多选（批量删除）和预览。支持嵌套/平铺视图、多种排序策略、拖放重排和分页跨页
+ * 移动项目的操作。
+ *
+ * Desktop Edit Mode (1200px):
+ * +---------------------------------------------------+
+ * | Items                    |Edit|Multiselect|Prev| |
+ * | Add Item [+]             | Sort: [Manual ▼]      |
+ * | [Item 1 - Book]    [≡]                           |
+ * |   Content preview...                             |
+ * | [Item 2 - Review]  [≡]                           |
+ * |   Content preview...                             |
+ * | Pagination: [Prev] 1/5 [Next]                    |
+ * | Pending: 2 changes [Discard] [Save 2 changes]    |
+ * +---------------------------------------------------+
+ *
+ * Desktop Multi-Select Mode (1200px):
+ * +---------------------------------------------------+
+ * | Items                    |Edit|Multiselect|Prev| |
+ * | [☑] Item 1  [☑] Item 2  [☑] Item 3             |
+ * | [☑] Item 4  [☑] Item 5                          |
+ * | Delete Selected (2)                              |
+ * | Pagination: [Prev] 1/5 [Next]                    |
+ * +---------------------------------------------------+
+ *
+ * Tablet Edit Mode (768px):
+ * +---------------------------+
+ * | Items  |Edit|Multi|Prev|   |
+ * | [+] Add | Sort: [Manual▼]  |
+ * | [Item 1]    [≡]            |
+ * | Content...                 |
+ * | [Item 2]    [≡]            |
+ * | [1/3]                      |
+ * | [Save 2 ops]               |
+ * +---------------------------+
+ *
+ * Mobile Edit Mode (360px):
+ * +---------+
+ * | [≡][+]  |
+ * +---------+
+ * | Items   |
+ * | [Item 1]|
+ * | [≡]     |
+ * |         |
+ * | [Item 2]|
+ * | [≡]     |
+ * | [1/3]   |
+ * | [Save]  |
+ * +---------+
+ *
+ * Preview Mode (1200px):
+ * +---------------------------------------------+
+ * | Items                          |Prev|       |
+ * | Item 1 - Book                  |    |       |
+ * | Full content view...           |    |       |
+ * | Item 2 - Review                |    |       |
+ * | Full content view...           |    |       |
+ * +---------------------------------------------+
+ */
 
 const SORT_OPTIONS: ShelfSortChoice[] = [
   { field: "manual", order: "desc", label: i18nMessages.shelf_sort_manual },
@@ -193,7 +261,9 @@ export function ShelfEditorItemsSection({
     useSensor(TouchSensor, {
       activationConstraint: { delay: 150, tolerance: 5 },
     }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const canReorder = canUseShelfReorder(mode === "edit", sortState);

@@ -59,13 +59,18 @@ import {
   type BookshelfItem,
   resolveBookshelfConfig,
 } from "@/bookshelf-view";
+import { QueryErrorDisplay } from "@/core";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import {
   getBookAuthorName,
   getTranslation,
 } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
-import { useUserProfileStore } from "@/user";
+import {
+  selectHasMemberSession,
+  useAuthSessionStore,
+  useUserProfileStore,
+} from "@/user";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import {
   type ShelfSortChoice,
@@ -199,8 +204,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
+  const isAuthed = useAuthSessionStore(selectHasMemberSession);
   const detailQuery = useQuery(shelfDetailQuery(unitId));
-  const { data: settings } = useQuery(userQueries.settings());
+  const { data: settings } = useQuery({
+    ...userQueries.settings(),
+    enabled: isAuthed,
+  });
   const normalizedItemSearchText = itemSearchText.trim();
   const shelfItemsQuery = useMemo(
     () => ({
@@ -306,6 +315,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     setPageState({ unitId, page: 1 });
   }, [unitId]);
 
+  // Reset to first page when item search text changes.
+  // 当搜索文本变化时重置到第一页。
+  useEffect(() => {
+    setPageState({ unitId, page: 1 });
+  }, [normalizedItemSearchText, unitId]);
+
   useEffect(() => {
     if (waitingForPageData && !isFetchingNextPage) {
       void fetchNextPage();
@@ -364,6 +379,16 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
       params: { shelfId: shelf.unitId },
     });
   };
+
+  // Shelf detail query failed — show error before content
+  // 书架详情查询失败 —— 在内容之前显示错误
+  if (detailQuery.isError) {
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+        <QueryErrorDisplay error={detailQuery.error} />
+      </div>
+    );
+  }
 
   if (detailQuery.isLoading) {
     return (

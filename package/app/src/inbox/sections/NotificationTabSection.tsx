@@ -5,6 +5,56 @@ import {
 import { useTranslation } from "@rezics/i18n/react";
 import { NotificationCard } from "../components/NotificationCard.tsx";
 
+/**
+ * Notification tab section displaying paginated notifications with mark-as-read functionality.
+ * 通知标签页部分显示分页通知，带有标记为已读功能。
+ *
+ * Fetches notifications for page 1, limit 10 items.
+ * Each notification is clickable to mark as read, with loading/error states.
+ * 获取第1页的通知，限制10项。
+ * 每个通知都可点击以标记为已读，带有加载/错误状态。
+ *
+ * Desktop (md+) - Fixed width dropdown:
+ * ┌──────────────────────────┐
+ * │ Notifications (header)    │
+ * │ ┌────────────────────────┐│
+ * │ │ [Icon] Title           ││
+ * │ │ Subtitle / time  [→]   ││
+ * │ ├────────────────────────┤│
+ * │ │ [Icon] Title 2         ││
+ * │ │ Description        [→] ││
+ * │ ├────────────────────────┤│
+ * │ │ [Icon] Title 3         ││
+ * │ └────────────────────────┘│
+ * └──────────────────────────┘
+ *
+ * Mobile (xs-sm):
+ * ┌────────────────────┐
+ * │ Notifications      │
+ * │ ┌────────────────┐ │
+ * │ │ [Icon] Title   │ │
+ * │ │ Time: 2h ago   │ │
+ * │ │ (clickable)    │ │
+ * │ ├────────────────┤ │
+ * │ │ [Icon] Title 2 │ │
+ * │ └────────────────┘ │
+ * └────────────────────┘
+ *
+ * Loading state:
+ * ┌──────────────────────────┐
+ * │ Loading...               │
+ * └──────────────────────────┘
+ *
+ * Empty state:
+ * ┌──────────────────────────┐
+ * │ No new notifications     │
+ * └──────────────────────────┘
+ *
+ * Error state:
+ * ┌──────────────────────────┐
+ * │ Failed to load notifs    │
+ * └──────────────────────────┘
+ */
 export function NotificationTabSection() {
   const { t } = useTranslation(["common", "settings"]);
   const { data, isLoading, isError } = useNotifications(1, 10);

@@ -8,6 +8,40 @@ import { Route as tagBookRoute } from "@/routes/_mainLayout/tag/book/$bookId/rou
 import { TextLink } from "@/shared/ui/link";
 import { TagWrapper } from "../components/TagWrapper";
 
+/**
+ * 按书籍单位的标签页面。显示给定书籍的分组标签概览和完整列表链接。
+ *
+ * 布局结构：
+ *
+ * Overview (首屏):
+ * ┌──────────────────────────────────────┐
+ * │ ═════════════════════════════════    │
+ * │ Tags / 标签                           │
+ * │ ═════════════════════════════════    │
+ * │ [TagWrapper - grouped mode]          │
+ * │ [Tag] [Tag] [Tag] [Tag]              │
+ * │ [Tag] [Tag] [Tag]                    │
+ * └──────────────────────────────────────┘
+ *
+ * Full Listing (以 "/tag/book/$bookId/tag" 链接):
+ * ┌──────────────────────────────────────┐
+ * │ ═════════════════════════════════    │
+ * │ Tags / 标签                           │
+ * │ ═════════════════════════════════    │
+ * │ [TagWrapper - grouped mode, render]  │
+ * │ [Tag] [Tag] [Tag] [Tag] [Tag] ...    │
+ * │ [Tag] [Tag] [Tag] [Tag] [Tag] ...    │
+ * └──────────────────────────────────────┘
+ *
+ * Mobile:
+ * ┌──────────────────────┐
+ * │ Tag Header           │
+ * │ TagWrapper (full)    │
+ * │ [Tag] [Tag]          │
+ * │ [Tag] [Tag]          │
+ * │ View all link        │
+ * └──────────────────────┘
+ */
 export function TagByBookPage() {
   const { t } = useTranslation(["common", "community"]);
   const { bookId } = tagBookRoute.useParams();
@@ -31,7 +65,7 @@ export function TagByBookPage() {
   const showSeeAll = total > pageSize;
 
   return (
-    <div className="w-11/12 mx-auto mt-16">
+    <div className="w-full px-4 mt-16">
       <AccentBarWithText text={t("community:tag_title")} />
 
       {isLoading && <div>{t("common:loading")}</div>}
@@ -91,7 +125,7 @@ export function TagByBookFullPage() {
   const total = listData?.tags?.length ?? 0;
 
   return (
-    <div className="w-11/12 mx-auto mt-16">
+    <div className="w-full px-4 mt-16">
       <AccentBarWithText text={t("community:tag_title")} />
 
       {isLoading && <div>{t("common:loading")}</div>}

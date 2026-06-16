@@ -14,12 +14,36 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { resolveCatalogEntryInteractionContext } from "@/book-library";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 
+/**
+ * 新建评论或备注页面 - 允许用户为指定书籍创建新的评论或备注
+ *
+ * 布局结构：
+ * - 移动端 (<640px)：全宽卡片 max-w-4xl，垂直堆叠，mt-4（顶部间距）
+ * - 平板 (640-1023px)：mx-auto 中心，max-w-4xl，mt-4
+ * - 桌面 (1024-1535px)：mx-auto 中心，max-w-4xl，mt-4
+ * - 超宽 (>=1536px)：mx-auto 中心，max-w-4xl，mt-4
+ *
+ * ASCII 布局示意:
+ *
+ * Mobile (<640px)          Tablet (640-1023px)      Desktop (1024-1535px)    Ultra-wide (>=1536px)
+ * +--+                     +------+                  +----------+              +----------+
+ * |TL|                     |TITLE |                  | TITLE    |              | TITLE    |
+ * +--+                     +------+                  +----------+              +----------+
+ * |BK|                     |BOOK  |                  |BOOK      |              |BOOK      |
+ * +--+                     |      |                  |          |              |          |
+ * |FM|                     |FORM  |                  |FORM      |              |FORM      |
+ * |..                      |      |                  |          |              |          |
+ * +--+                     +------+                  +----------+              +----------+
+ *
+ * TL=Title, BK=BookId, FM=ReviewForm (title, rating, content)
+ */
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["common", "community", "page"]);
   const authoringLanguage = useAuthoringLanguageDefault();
@@ -54,25 +78,29 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const scoreMutation = useUpsertScoreMutation();
   const postMutation = useCreatePostMutation({
     onSuccess: (data) => {
-      show("Review created successfully");
+      show(t("community:review_messages_create_success"));
       navigate({ to: "/review/$reviewId", params: { reviewId: data.unitId } });
     },
     onError: (error) => {
       // A recognized policy denial renders inline below; other errors toast.
       // 已识别的策略拒绝会在下方内联渲染；其他错误则以 toast 提示。
       if (!policyDenialFromError(error)) {
-        show(`Create review failed: ${error}`);
+        show(
+          t("community:review_messages_create_failed", {
+            error: String(error),
+          }),
+        );
       }
     },
   });
 
   async function handleSave(status: "DRAFT" | "PUBLISHED") {
     if (!userId) {
-      show("Please login first");
+      show(t("common:please_login_first"));
       return;
     }
     if (!reviewData._editTitle.trim()) {
-      show("Review title is required");
+      show(t("community:review_messages_title_required"));
       return;
     }
 
@@ -83,19 +111,28 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       kind === PostKind.REVIEW &&
       (reviewData.contentSource?.length ?? 0) < 200
     ) {
-      show("Reviews must be at least 200 characters");
+      show(t("community:review_validation_min_chars"));
       return;
     }
 
     let scoreEntryId: string | undefined;
 
     if (reviewData._editRating > 0) {
-      const scoreEntry = await scoreMutation.mutateAsync({
-        unitId: bookUnitId,
-        realm: getDefaultRealmId() ?? "default",
-        value: reviewData._editRating,
-      });
-      scoreEntryId = scoreEntry.id;
+      try {
+        const scoreEntry = await scoreMutation.mutateAsync({
+          unitId: bookUnitId,
+          realm: getDefaultRealmId() ?? "default",
+          value: reviewData._editRating,
+        });
+        scoreEntryId = scoreEntry.id;
+      } catch (err) {
+        toast.error(
+          t("community:review_messages_score_failed", {
+            error: err instanceof Error ? err.message : String(err),
+          }),
+        );
+        return;
+      }
     }
 
     postMutation.mutate({
@@ -117,7 +154,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
 
   return (
     <div>
-      <div className="max-w-4xl mx-auto mt-4">
+      <div className="w-full max-w-4xl mx-auto mt-4">
         <h1 className="text-xl font-semibold">
           {kind === PostKind.REMARK
             ? t("page:remark_new_title")

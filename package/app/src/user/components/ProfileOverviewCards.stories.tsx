@@ -68,23 +68,23 @@ export const StatCards: Story = {
       <ProfileStatLink
         label="Shelves"
         count={18}
-        to="/user/user-alice/shelves"
+        to="/user/user-alice/profile/shelves"
       />
       <ProfileStatLink
         label="Content"
         count={124}
-        to="/user/user-alice/content"
+        to="/user/user-alice/profile/content"
       />
       <ProfileStatLink
         label="Followers"
         count={4096}
-        to="/user/user-alice/followers"
+        to="/user/user-alice/profile/followers"
         variant="compact"
       />
       <ProfileStatLink
         label="Following"
         count={72}
-        to="/user/user-alice/followers?filter=following"
+        to="/user/user-alice/profile/followers?filter=following"
         variant="compact"
       />
     </div>

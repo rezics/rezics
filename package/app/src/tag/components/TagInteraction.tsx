@@ -1,4 +1,4 @@
-import { useCanEdit } from "@rezics/api/hooks";
+import { useCanEdit, useCurrentUserId } from "@rezics/api/hooks";
 import { useCastTagVoteMutation } from "@rezics/api/tag/tag.mutations";
 import type {
   BatchTagTranslationResult,
@@ -71,6 +71,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["common", "community"]);
+  const userId = useCurrentUserId();
   const [state, dispatch] = useTagInteractionReducer();
   const defaultNavigate = useNavigateToTagSearch();
   const navigateToTagSearch = onSearchTags ?? defaultNavigate;
@@ -149,6 +150,9 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   };
 
   const handleVote = (tagUnitId: string, value: 1 | -1) => {
+    // Require auth before casting a vote.
+    // 投票前需要认证。
+    if (!userId) return;
     voteMutation.mutate({ tagUnitId, unitId: bookUnitId, value });
   };
 

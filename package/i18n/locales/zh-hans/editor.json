@@ -55,6 +55,7 @@
   "authority_edit_form_all_locked_notice": "所有可编辑字段均对普通社区贡献者锁定。",
   "authority_edit_form_privileged_notice": "如果您拥有所有者、维护者或管理员权限，服务器仍可能接受您的更改。",
   "authority_edit_form_locked_error": "保存被字段锁阻止：{paths}。您未保存的输入仍在该页面上。",
+  "chapter_unsaved_changes_confirm": "你有未保存的更改。仍要离开吗？",
   "placeholders_chapter_title": "请输入章节标题",
   "placeholders_enter_search_term": "输入搜索词",
   "placeholders_enter_url": "输入网址",

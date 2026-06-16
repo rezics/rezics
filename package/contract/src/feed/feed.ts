@@ -4,7 +4,7 @@ import { readLanguageGetQueryBase } from "../list-query-base";
 import { postDTOSchema } from "../post/post";
 import { moderationStatusSchema } from "../realm/governance";
 import { shelfSummaryDTOSchema } from "../shelf/shelf";
-import { variantContextSummarySchema } from "../unit/unit";
+import { unitTypeSchema, variantContextSummarySchema } from "../unit/unit";
 
 export const feedScopeSchema = t.Union([
   t.Literal("home"),
@@ -24,6 +24,19 @@ export const feedSortSchema = t.Union([
 ]);
 
 export type FeedSort = (typeof feedSortSchema)["static"];
+
+export const feedFilterTypeSchema = t.Union([
+  t.Literal("all"),
+  t.Literal("book"),
+  t.Literal("game"),
+  t.Literal("media"),
+  t.Literal("post"),
+  t.Literal("review"),
+  t.Literal("realm"),
+  t.Literal("zone"),
+]);
+
+export type FeedFilterType = (typeof feedFilterTypeSchema)["static"];
 
 export const feedCursorSchema = t.Object({
   rowId: t.String(),
@@ -47,6 +60,7 @@ export const feedQuerySchema = t.Object({
   ),
   languages: t.Optional(t.Union([t.String(), t.Array(languageSchema)])),
   sort: t.Optional(feedSortSchema),
+  filterType: t.Optional(feedFilterTypeSchema),
   cursor: t.Optional(feedCursorSchema),
   limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
 });
@@ -63,12 +77,25 @@ export const feedWorkSummarySchema = t.Object({
   kind: t.Optional(t.String()),
   title: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
 });
 
 export type FeedWorkSummary = (typeof feedWorkSummarySchema)["static"];
 
-export const feedContentRowSchema = t.Object({
-  type: t.Literal("content"),
+export const feedUnitSummarySchema = t.Object({
+  unitId: t.String(),
+  type: unitTypeSchema,
+  slug: t.Optional(t.Nullable(t.String())),
+  title: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type FeedUnitSummary = (typeof feedUnitSummarySchema)["static"];
+
+export const feedPostRowSchema = t.Object({
+  type: t.Literal("post"),
   rowId: t.String(),
   post: postDTOSchema,
   href: t.String(),
@@ -86,22 +113,43 @@ export const feedContentRowSchema = t.Object({
   recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
-export type FeedContentRow = (typeof feedContentRowSchema)["static"];
+export type FeedPostRow = (typeof feedPostRowSchema)["static"];
 
-export const feedCarouselRowSchema = t.Object({
-  type: t.Literal("carousel"),
+export const feedBookRowSchema = t.Object({
+  type: t.Literal("book"),
   rowId: t.String(),
-  carouselKind: t.Union([t.Literal("works"), t.Literal("shelves")]),
-  title: feedTitleSchema,
-  works: t.Optional(t.Array(feedWorkSummarySchema)),
-  shelves: t.Optional(t.Array(shelfSummaryDTOSchema)),
+  book: feedWorkSummarySchema,
+  href: t.String(),
+  recommendationReason: t.Optional(t.Nullable(t.String())),
 });
 
-export type FeedCarouselRow = (typeof feedCarouselRowSchema)["static"];
+export type FeedBookRow = (typeof feedBookRowSchema)["static"];
+
+export const feedShelfRowSchema = t.Object({
+  type: t.Literal("shelf"),
+  rowId: t.String(),
+  shelf: shelfSummaryDTOSchema,
+  href: t.String(),
+  recommendationReason: t.Optional(t.Nullable(t.String())),
+});
+
+export type FeedShelfRow = (typeof feedShelfRowSchema)["static"];
+
+export const feedUnitRowSchema = t.Object({
+  type: t.Literal("unit"),
+  rowId: t.String(),
+  unit: feedUnitSummarySchema,
+  href: t.String(),
+  recommendationReason: t.Optional(t.Nullable(t.String())),
+});
+
+export type FeedUnitRow = (typeof feedUnitRowSchema)["static"];
 
 export const feedRowSchema = t.Union([
-  feedContentRowSchema,
-  feedCarouselRowSchema,
+  feedPostRowSchema,
+  feedBookRowSchema,
+  feedShelfRowSchema,
+  feedUnitRowSchema,
 ]);
 
 export type FeedRow = (typeof feedRowSchema)["static"];

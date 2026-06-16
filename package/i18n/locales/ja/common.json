@@ -5,7 +5,11 @@
   "accessibility_favorite": "お気に入り",
   "accessibility_hot": "注目",
   "accessibility_open_drawer": "ドロワーを開く",
+  "accessibility_add_to_favorites": "お気に入りに追加",
+  "accessibility_clear_selection": "選択を解除",
+  "accessibility_remove_from_favorites": "お気に入りから削除",
   "accessibility_search": "検索",
+  "accessibility_search_results": "検索結果",
   "action": "アクション",
   "actions": "アクション",
   "active": "有効",
@@ -186,5 +190,15 @@
   "route_denied_title": "アクセスが制限されています",
   "route_denied_description": "このページを表示する権限がありません。",
   "route_unauthenticated_title": "続行するにはログインしてください",
-  "route_unauthenticated_description": "このページを表示するにはログインが必要です。"
+  "route_unauthenticated_description": "このページを表示するにはログインが必要です。",
+  "please_login_first": "先にログインしてください",
+  "relative_time_just_now": "たった今",
+  "relative_time_minutes_ago": "{value}分前",
+  "relative_time_hours_ago": "{value}時間前",
+  "relative_time_days_ago": "{value}日前",
+  "relative_time_weeks_ago": "{value}週間前",
+  "mutation_error_generic": "問題が発生しました。もう一度お試しください。",
+  "showing_range": "{total}件中 {start}–{end}件を表示",
+  "link_copied": "リンクをコピーしました",
+  "clipboard_failed": "コピーに失敗しました。手動で選択してコピーしてください。"
 }

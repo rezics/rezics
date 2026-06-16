@@ -13,7 +13,7 @@ import {
   markdownContentDoc,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
+import { ConfirmDialog, Spinner } from "@rezics/ui";
 import {
   Button,
   DropdownMenu,
@@ -23,6 +23,7 @@ import {
   Input,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useBlocker } from "@tanstack/react-router";
 import {
   Network as AccountTree,
   Ellipsis as MoreHoriz,
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import {
@@ -44,11 +46,65 @@ import {
 } from "@/shared/ui/RezicsMarkdownEditor";
 
 /**
+ * BookEditChapterPage — markdown editor for individual chapter content.
+ * BookEditChapterPage — 单个章节内容的 markdown 编辑器。
+ *
+ * Displays title input and full-featured markdown editor with dual-mode
+ * preview. Responsive layout: single column on mobile, wider container
+ * on desktop. Dual-mode expands max-width to 7xl.
+ * 显示标题输入和全功能 markdown 编辑器，带有双模式预览。
+ * 响应式布局：移动设备上单列，桌面上更宽。
+ * 双模式将 max-width 扩展到 7xl。
+ *
+ * Mobile <640px (write mode):
+ * +-----------------------+
+ * | Title input (full)    |
+ * | border-b border-error |
+ * +-----------------------+
+ * | Markdown Editor       |
+ * | - flex-1 min-h-0      |
+ * | - write mode only     |
+ * +-----------------------+
+ * | Dialogs (modals)      |
+ * +- - - - - - - - - - - -+
+ *
+ * Tablet 640-1023px:
+ * +--------------------+
+ * | Title + Menu       |
+ * | flex items-center  |
+ * +--------------------+
+ * | Editor (min-h-0)   |
+ * | - RezicsMarkdown   |
+ * +--------------------+
+ * (px-8, pt-4, pb-8)
+ *
+ * Desktop 1024-1535px (write):
+ * +-----------------------+
+ * | max-w-4xl centered    |
+ * | Title + DropdownMenu  |
+ * | flex gap-2 mb-4       |
+ * +-----------------------+
+ * | flex-1 min-h-0        |
+ * | RezicsMarkdownEditor  |
+ * +-----------------------+
+ * | h-[calc(100vh-5rem)]  |
+ * (px-8 centered)
+ *
+ * Ultra-wide >=1536px (dual):
+ * +---------------------------+
+ * | max-w-7xl centered        |
+ * | Title + DropdownMenu      |
+ * | flex gap-2 mb-4           |
+ * +---------------------------+
+ * | Dual-split editor         |
+ * | - write | preview (50/50) |
+ * +---------------------------+
+ *
  * TODO After switching the Chapter List to Tree mode, editing still lacks validation.
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
  */
 export const BookEditChapterPage: React.FC = () => {
-  const { t } = useTranslation(["book", "editor"]);
+  const { t } = useTranslation(["book", "common", "editor"]);
   const { bookId } = bookEditLayoutRoute.useParams();
   const { chapterId } = bookEditChapterRoute.useParams();
   // `$chapterId` is the existing route param name; current logic treats it as
@@ -110,27 +166,45 @@ export const BookEditChapterPage: React.FC = () => {
     return !title.trim() || !content.trim();
   }, [title, content]);
 
+  const blocker = useBlocker({
+    shouldBlockFn: () => isDirty,
+    withResolver: true,
+    enableBeforeUnload: () => isDirty,
+  });
+
   const handleSubmit = useCallback(async () => {
     if (isInvalid) return;
-    await updateMutation.mutateAsync({
-      unitId: contentUnitId,
-      input: {
-        title,
-        content: markdownContentDoc(content),
-      } as any,
-    });
-    const contentStructure = await queryClient.fetchQuery(
-      bookContentStructureQuery(bookId),
-    );
-    if (contentStructure) {
-      updateContentStructureMutation.mutateAsync({
-        bookUnitId: bookId,
-        nodes: updateContentStructureNodeTitle(
-          contentStructure.nodes,
-          contentUnitId,
+    // Guard against double-submit from the editor button path
+    // 防止从编辑器按钮路径重复提交
+    if (updateMutation.isPending || updateContentStructureMutation.isPending)
+      return;
+    try {
+      await updateMutation.mutateAsync({
+        unitId: contentUnitId,
+        input: {
           title,
-        ),
+          content: markdownContentDoc(content),
+        } as any,
       });
+      const contentStructure = await queryClient.fetchQuery(
+        bookContentStructureQuery(bookId),
+      );
+      if (contentStructure) {
+        await updateContentStructureMutation.mutateAsync({
+          bookUnitId: bookId,
+          nodes: updateContentStructureNodeTitle(
+            contentStructure.nodes,
+            contentUnitId,
+            title,
+          ),
+        });
+      }
+    } catch (err) {
+      toast.error(
+        t("book:chapter_save_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
     }
   }, [
     isInvalid,
@@ -141,6 +215,7 @@ export const BookEditChapterPage: React.FC = () => {
     queryClient,
     updateContentStructureMutation,
     bookId,
+    t,
   ]);
 
   // Ctrl/Cmd+S to save
@@ -151,14 +226,25 @@ export const BookEditChapterPage: React.FC = () => {
         (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s";
       if (isSaveHotkey) {
         e.preventDefault();
-        if (!isInvalid && isDirty && !updateMutation.isPending) {
+        if (
+          !isInvalid &&
+          isDirty &&
+          !updateMutation.isPending &&
+          !updateContentStructureMutation.isPending
+        ) {
           handleSubmit();
         }
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isInvalid, isDirty, updateMutation.isPending, handleSubmit]);
+  }, [
+    isInvalid,
+    isDirty,
+    updateMutation.isPending,
+    updateContentStructureMutation.isPending,
+    handleSubmit,
+  ]);
 
   if (isLoading) {
     return (
@@ -170,8 +256,8 @@ export const BookEditChapterPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="max-w-xl mx-auto p-8 text-destructive">
-        {(error as Error)?.message || "Failed to load chapter"}
+      <div className="w-full max-w-xl mx-auto p-8 text-destructive">
+        {(error as Error)?.message || t("book:chapter_load_failed")}
       </div>
     );
   }
@@ -180,7 +266,7 @@ export const BookEditChapterPage: React.FC = () => {
 
   return (
     <div
-      className={`mx-auto px-8 pt-4 pb-8 flex flex-col h-[calc(100vh-5rem)] transition-all duration-300 ${isDual ? "max-w-7xl" : "max-w-4xl"}`}
+      className={`w-full mx-auto px-8 pt-4 pb-8 flex flex-col h-[calc(100vh-5rem)] transition-all duration-300 ${isDual ? "max-w-7xl" : "max-w-4xl"}`}
     >
       <div className="flex items-center gap-2 mb-4">
         <Input
@@ -196,7 +282,13 @@ export const BookEditChapterPage: React.FC = () => {
           <DropdownMenuTrigger
             nativeButton
             render={(props) => (
-              <Button type="button" size="icon" variant="ghost" {...props}>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label={t("common:more_actions")}
+                {...props}
+              >
                 <MoreHoriz className="w-4 h-4" />
               </Button>
             )}
@@ -227,6 +319,9 @@ export const BookEditChapterPage: React.FC = () => {
           value={content}
           onChange={setContent}
           onSubmit={handleSubmit}
+          submitDisabled={
+            updateMutation.isPending || updateContentStructureMutation.isPending
+          }
           onViewModeChange={setViewMode}
           fillHeight
         />
@@ -236,11 +331,10 @@ export const BookEditChapterPage: React.FC = () => {
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
         chapter={data ? { id: contentUnitId, title, children: [] } : null}
-        onSave={({ title: newTitle, status }) => {
+        onSave={({ title: newTitle, status: _status }) => {
           setTitle(newTitle);
           // TODO: persist status change via API
           // TODO: 通过 API 持久化状态变更
-          console.log("Chapter status update:", status);
         }}
       />
       <MoveToParentDialog
@@ -259,11 +353,19 @@ export const BookEditChapterPage: React.FC = () => {
               }
             : null
         }
-        onConfirm={(targetParentId) => {
+        onConfirm={(_targetParentId) => {
           // TODO: move chapter to new parent via API
           // TODO: 通过 API 将章节移动到新的父节点
-          console.log("Move chapter to:", targetParentId);
         }}
+      />
+      <ConfirmDialog
+        open={blocker.status === "blocked"}
+        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => blocker.reset?.()}
+        title={t("editor:chapter_unsaved_changes_confirm")}
+        confirmLabel={t("common:confirm")}
+        cancelLabel={t("common:cancel")}
+        variant="destructive"
       />
     </div>
   );

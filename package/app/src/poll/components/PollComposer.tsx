@@ -18,7 +18,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, Link2, Plus, Trash2 } from "lucide-react";
 import type React from "react";
-import { useId, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { UnitPicker } from "@/unit";
 
 type DraftOption =
@@ -53,6 +53,13 @@ export const PollComposer: React.FC<PollComposerProps> = ({
   const titleId = useId();
   const descriptionId = useId();
   const keyRef = useRef(2);
+  // Compute min datetime once on mount to avoid re-renders shifting the floor
+  // 挂载时计算一次最小日期时间，避免重渲染导致下限漂移
+  const closesAtMin = useMemo(() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  }, []);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -314,6 +321,7 @@ export const PollComposer: React.FC<PollComposerProps> = ({
             id={closesAtId}
             type="datetime-local"
             value={closesAt}
+            min={closesAtMin}
             onChange={(event) => setClosesAt(event.target.value)}
           />
         </div>

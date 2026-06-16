@@ -30,6 +30,7 @@ import {
   UNIT_FIELD_LOCK_ALL,
 } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { ConfirmDialog } from "@rezics/ui";
 import {
   Alert,
   AlertDescription,
@@ -222,6 +223,65 @@ export interface BookEditMainPageProps {
  * 布局：图书级元数据（isbn/cover 等）只编辑一次，通过 `updateBook` 保存。
  * 每种语言的字段（title/subtitle/summary/description）存放于 `translations[]`，
  * 通过 `upsertTranslation` 以语言栏中选中的语言为键保存。
+ *
+ * Mobile <640px:
+ * +----------------------+
+ * | Header (flex col)    |
+ * | - Title (text-2xl)   |
+ * | - Back | Submit btn  |
+ * +----------------------+
+ * | Creation Path        |
+ * | (newBook only)       |
+ * | - Options (full w)   |
+ * +----------------------+
+ * | Translation Section  |
+ * | - Language bar       |
+ * | - Fields (1 col)     |
+ * | - Sync actions       |
+ * +----------------------+
+ * | Metadata Section     |
+ * | - Editors (stacked)  |
+ * +----------------------+
+ * | Extra (collapsed)    |
+ * +----------------------+
+ *
+ * Tablet 640-1023px:
+ * +-----------------------+
+ * | Header flex-between   |
+ * | - Title | Buttons     |
+ * +-----------------------+
+ * | Creation Path         |
+ * | - Options (2 col)     |
+ * +-----------------------+
+ * | Translations          |
+ * | - Language bar        |
+ * | - Fields grid         |
+ * +-----------------------+
+ * | Metadata              |
+ * | - Multi-field layout  |
+ * +-----------------------+
+ *
+ * Desktop 1024-1535px:
+ * +---------------------+
+ * | mx-auto max-w-3xl   |
+ * | mt-16 pb-16         |
+ * +---------------------+
+ * | Header flex between |
+ * | - Title | Buttons   |
+ * +---------------------+
+ * | space-y-16 sections |
+ * | - Creation (2 col)  |
+ * | - Languages flex-col|
+ * | - Metadata editor   |
+ * | - Extra toggle      |
+ * +---------------------+
+ *
+ * Ultra-wide >=1536px:
+ * +---------------------+
+ * | max-w-3xl centered  |
+ * | Same responsive     |
+ * | layout as 1024px    |
+ * +---------------------+
  */
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
@@ -267,6 +327,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     React.useState<UpdateBookDialogState>(null);
   const [extraOpen, setExtraOpen] = React.useState(true);
   const [addOpen, setAddOpen] = React.useState(false);
+  const [deleteTranslationConfirmOpen, setDeleteTranslationConfirmOpen] =
+    React.useState(false);
   const [authorPickerOpen, setAuthorPickerOpen] = React.useState(false);
   const [creationMode, setCreationMode] = React.useState<CreationMode>(
     CreationModeValue.WIKI,
@@ -563,19 +625,24 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       },
     };
 
-    if (Object.keys(metadataPatch).length > 0) {
-      await updateBookMutation.mutateAsync({
-        unitId: bookId,
-        input: applyRestoreSource({ patch: metadataPatch }),
-      });
-    }
+    try {
+      if (Object.keys(metadataPatch).length > 0) {
+        await updateBookMutation.mutateAsync({
+          unitId: bookId,
+          input: applyRestoreSource({ patch: metadataPatch }),
+        });
+      }
 
-    await upsertTranslationMutation.mutateAsync({
-      unitId: bookId,
-      language: editor.selectedLanguage,
-      input: applyRestoreSource({ patch: translationPatch }),
-    });
-    editor.clearDraft(editor.selectedLanguage);
+      await upsertTranslationMutation.mutateAsync({
+        unitId: bookId,
+        language: editor.selectedLanguage,
+        input: applyRestoreSource({ patch: translationPatch }),
+      });
+      editor.clearDraft(editor.selectedLanguage);
+    } catch {
+      // Each mutation has its own onError that shows UI feedback; catch only prevents unhandled rejection.
+      // 各 mutation 已有各自 onError 显示 UI 反馈；此处仅捕获以防止未处理的 rejection。
+    }
   }
 
   function handleAddTranslation(params: {
@@ -603,17 +670,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   function handleDeleteCurrentTranslation() {
     if (!bookId) return;
     if (!editor.currentTranslation) return;
-    if (
-      !window.confirm(
-        getI18nRuntime().i18n.t(
-          "page:book_edit_info_translation_delete_confirm",
-          {
-            lang: editor.selectedLanguage,
-          },
-        ),
-      )
-    )
-      return;
+    setDeleteTranslationConfirmOpen(true);
+  }
+
+  function confirmDeleteCurrentTranslation() {
+    if (!bookId) return;
+    setDeleteTranslationConfirmOpen(false);
     deleteTranslationMutation.mutate(
       { unitId: bookId, language: editor.selectedLanguage },
       {
@@ -626,19 +688,19 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
   if (isLoading)
     return (
-      <div className="mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
+      <div className="w-full mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
         {getI18nRuntime().i18n.t("common:loading")}
       </div>
     );
   if (error)
     return (
-      <div className="mt-16 mx-auto max-w-3xl px-4">
+      <div className="w-full mt-16 mx-auto max-w-3xl px-4">
         <QueryErrorDisplay error={error} />
       </div>
     );
   if (!data && !newBook)
     return (
-      <div className="mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
+      <div className="w-full mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
         {getI18nRuntime().i18n.t("common:no_data")}
       </div>
     );
@@ -669,7 +731,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   ];
 
   return (
-    <div className="mt-16 mx-auto max-w-3xl px-4 pb-16">
+    <div className="w-full mt-16 mx-auto max-w-3xl px-4 pb-16">
       {isRestoreMode ? (
         <div className="mb-8 space-y-3">
           <Alert>
@@ -713,7 +775,13 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
             </Button>
           )}
           <Button
-            disabled={restoreSubmitDisabled}
+            disabled={
+              restoreSubmitDisabled ||
+              createBookMutation.isPending ||
+              updateBookMutation.isPending ||
+              upsertTranslationMutation.isPending ||
+              deleteTranslationMutation.isPending
+            }
             onClick={() => handleSubmit()}
           >
             {getI18nRuntime().i18n.t("common:submit")}
@@ -743,7 +811,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 </span>
                 <span className="mt-1 block text-xs leading-dense opacity-80">
                   {getI18nRuntime().i18n.t(
-                    "book:creation_path_catalog_entry_description"
+                    "book:creation_path_catalog_entry_description",
                   )}
                 </span>
               </button>
@@ -761,7 +829,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 </span>
                 <span className="mt-1 block text-xs leading-dense opacity-80">
                   {getI18nRuntime().i18n.t(
-                    "book:creation_path_personal_work_description"
+                    "book:creation_path_personal_work_description",
                   )}
                 </span>
               </button>
@@ -942,6 +1010,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         existingLanguages={editor.existingLanguages}
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddTranslation}
+        isPending={upsertTranslationMutation.isPending}
       />
 
       {bookId ? (
@@ -985,6 +1054,20 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         open={updateBookErrorOpen}
         onClose={() => setUpdateBookErrorOpen(false)}
         state={dialogState}
+      />
+
+      <ConfirmDialog
+        open={deleteTranslationConfirmOpen}
+        onConfirm={confirmDeleteCurrentTranslation}
+        onCancel={() => setDeleteTranslationConfirmOpen(false)}
+        title={getI18nRuntime().i18n.t(
+          "page:book_edit_info_translation_delete_confirm",
+          { lang: editor.selectedLanguage },
+        )}
+        confirmLabel={getI18nRuntime().i18n.t("common:delete")}
+        cancelLabel={getI18nRuntime().i18n.t("common:cancel")}
+        variant="destructive"
+        isPending={deleteTranslationMutation.isPending}
       />
     </div>
   );

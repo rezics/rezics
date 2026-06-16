@@ -87,7 +87,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
         type="button"
         size="icon"
         variant="ghost"
-        className="h-7 w-7 cursor-grab touch-none"
+        className="h-10 w-10 cursor-grab touch-none"
         {...attributes}
         {...listeners}
         aria-label={t("settings:preferences_drag_handle")}
@@ -99,7 +99,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
         type="button"
         size="icon"
         variant="ghost"
-        className="h-7 w-7"
+        className="h-10 w-10"
         onClick={() => onRemove(code)}
         disabled={disabled}
         aria-label={t("settings:preferences_remove_language", { code })}
@@ -110,6 +110,84 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
   );
 };
 
+/**
+ * 偏好部分：管理首选语言、内容评级偏好、审核设置和领域标签显示选项。
+ * 用户可以拖放排序首选语言、设置内容评级过滤器、启用领域管理模式，以及配置标签显示。
+ *
+ * Desktop (≥1024px):
+ * ┌─────────────────────────────────────┐
+ * │ Language Preferences       Saved!   │
+ * │ [Grip] English    [X]               │
+ * │ [Grip] Spanish    [X]               │
+ * │ [Grip] French     [X]               │
+ * │                                     │
+ * │ Add Language: [Select...]  [Add]   │
+ * │                                     │
+ * │ Content Rating Preferences          │
+ * │ [Rating controls...]                │
+ * │                                     │
+ * │ Moderation Settings                │
+ * │ [X] Realm Manage Mode Default      │
+ * │     ...description...              │
+ * │                                     │
+ * │ Realm Tag Preferences               │
+ * │ realm1: max 5 [realm1, realm2]     │
+ * └─────────────────────────────────────┘
+ *
+ * Tablet (768px-1023px):
+ * ┌──────────────────────────────┐
+ * │ Language Preferences  [Saved]│
+ * │ [Grip] English    [X]        │
+ * │ [Grip] Spanish    [X]        │
+ * │                              │
+ * │ Add Language:                │
+ * │ [Select...]       [Add]      │
+ * │                              │
+ * │ Content Rating                │
+ * │ [Rating controls...]         │
+ * │                              │
+ * │ Moderation Settings          │
+ * │ [X] Manage Mode Default      │
+ * │                              │
+ * │ Realm Tag Preferences        │
+ * │ realm1: max 5 [...]          │
+ * └──────────────────────────────┘
+ *
+ * Mobile (480px-767px):
+ * ┌──────────────────┐
+ * │Languages [Saved] │
+ * │[Grip]English[X]  │
+ * │[Grip]Spanish[X]  │
+ * │                  │
+ * │Add: [Select] [+] │
+ * │                  │
+ * │Content Rating    │
+ * │[controls...]     │
+ * │                  │
+ * │Moderation        │
+ * │[X]Manage Mode    │
+ * │                  │
+ * │Realm Tags        │
+ * │realm1: max 5     │
+ * └──────────────────┘
+ *
+ * Small Mobile (<480px):
+ * ┌──────────┐
+ * │Languages │
+ * │[G]En [X] │
+ * │[G]Es [X] │
+ * │[Select]  │
+ * │[Add]     │
+ * │          │
+ * │Ratings   │
+ * │[...]     │
+ * │          │
+ * │[X]Manage │
+ * │          │
+ * │Tags:em   │
+ * │realm1    │
+ * └──────────┘
+ */
 export const SettingsPreferencesSection: FC = () => {
   // TODO(openspec-retired): a keyword-vocabulary preference (PATCH /users/me/keywords) was specified but never built.
   // TODO(openspec-retired)：曾规划过关键词词表偏好（PATCH /users/me/keywords），但从未实现。
@@ -236,14 +314,14 @@ export const SettingsPreferencesSection: FC = () => {
         )}
 
         {availableToAdd.length > 0 && (
-          <div className="flex flex-row items-center gap-2">
+          <div className="flex flex-row flex-wrap items-center gap-2">
             <Select
               value={addPick}
               onValueChange={(value) =>
                 setAddPick(normalizeLanguage(value) ?? "")
               }
             >
-              <SelectTrigger className="min-w-[220px] h-9">
+              <SelectTrigger className="min-w-0 flex-1 h-9">
                 <SelectValue
                   placeholder={t("settings:preferences_add_language")}
                 />

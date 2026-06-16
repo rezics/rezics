@@ -1,5 +1,4 @@
 import { userQueries } from "@rezics/api/user/user.queries";
-import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
@@ -15,11 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Search as SearchIcon } from "lucide-react";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { Link, unitHref } from "@/shared/ui/link";
 import { UserError, UserLoading } from "./UserState";
-
-export interface UserListPageProps {
-  onUserClick?: (unitId: string) => void;
-}
 
 /**
  * UserListPage - user list page.
@@ -27,11 +23,9 @@ export interface UserListPageProps {
  * Shows all users with search and pagination support.
  * 显示所有用户，支持搜索和分页。
  */
-export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
-  const { t } = useTranslation(["settings"]);
-  const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
+export const UserListPage: FC = () => {
+  const { t } = useTranslation(["common", "settings"]);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -58,31 +52,18 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   }, [page, debouncedQuery]);
 
   const { data, isLoading, error } = useQuery(userQueries.list(queryParams));
-
-  useEffect(() => {
-    if (data) {
-      setUsers(data.users);
-      setTotal(data.total);
-    }
-  }, [data]);
+  const users = data?.users ?? [];
+  const total = data?.total ?? 0;
 
   const handlePageChange = (value: number) => {
     setPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleUserClick = (unitId: string) => {
-    if (onUserClick) {
-      onUserClick(unitId);
-    } else {
-      window.location.href = `/users/${unitId}`;
-    }
-  };
-
   const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
-    <div className="w-11/12 mx-auto mt-16">
+    <div className="w-full px-4 mt-16">
       <h3 className="text-3xl font-bold mb-8">
         {t("settings:user_list_title")}
       </h3>
@@ -113,40 +94,50 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {users.map((user) => (
-              <Card
+              <Link
                 key={user.unitId}
-                surface="contained"
-                className="cursor-pointer transition-colors hover:bg-surface-subtle"
-                onClick={() => handleUserClick(user.unitId)}
+                to={unitHref({
+                  type: "USER",
+                  unitId: user.unitId,
+                  slug: user.slug ?? null,
+                })}
+                className="no-underline"
               >
-                <CardContent className="text-center pt-6">
-                  <Avatar className="w-16 h-16 mx-auto mb-3">
-                    <AvatarImage
-                      src={user.avatar ?? undefined}
-                      alt={user.name ?? ""}
-                    />
-                    <AvatarFallback>
-                      {user.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h6 className="text-base font-semibold mb-2">{user.name}</h6>
-                  {user.slug && (
-                    <Badge variant="outline" className="mb-2">
-                      @{user.slug}
-                    </Badge>
-                  )}
-                  {user.bio && (
-                    <p className="text-sm text-text-secondary line-clamp-2">
-                      {user.bio}
-                    </p>
-                  )}
-                  {!user.bio && (
-                    <p className="text-sm text-text-secondary italic">
-                      {t("settings:user_no_bio")}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+                <Card
+                  surface="contained"
+                  className="h-full cursor-pointer transition-colors hover:bg-surface-subtle"
+                >
+                  <CardContent className="text-center pt-6">
+                    <Avatar className="w-16 h-16 mx-auto mb-3">
+                      <AvatarImage
+                        src={user.avatar ?? undefined}
+                        alt={user.name ?? ""}
+                      />
+                      <AvatarFallback>
+                        {user.name?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h6 className="text-base font-semibold mb-2">
+                      {user.name}
+                    </h6>
+                    {user.slug && (
+                      <Badge variant="outline" className="mb-2">
+                        @{user.slug}
+                      </Badge>
+                    )}
+                    {user.bio && (
+                      <p className="text-sm text-text-secondary line-clamp-2">
+                        {user.bio}
+                      </p>
+                    )}
+                    {!user.bio && (
+                      <p className="text-sm text-text-secondary italic">
+                        {t("settings:user_no_bio")}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
@@ -158,10 +149,10 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                 disabled={page === 1}
                 onClick={() => handlePageChange(Math.max(1, page - 1))}
               >
-                Previous
+                {t("common:previous_page")}
               </Button>
               <span className="text-sm text-text-secondary px-2">
-                Page {page} of {totalPages}
+                {t("common:page_of", { page, total: totalPages })}
               </span>
               <Button
                 variant="outline"
@@ -169,15 +160,18 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                 disabled={page >= totalPages}
                 onClick={() => handlePageChange(page + 1)}
               >
-                Next
+                {t("common:next_page")}
               </Button>
             </div>
           )}
 
           <div className="mt-4 text-center">
             <p className="text-sm text-text-secondary">
-              Showing {(page - 1) * itemsPerPage + 1} -{" "}
-              {Math.min(page * itemsPerPage, total)} of {total} users
+              {t("common:showing_range", {
+                start: (page - 1) * itemsPerPage + 1,
+                end: Math.min(page * itemsPerPage, total),
+                total,
+              })}
             </p>
           </div>
         </>

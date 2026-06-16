@@ -162,31 +162,39 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   };
 
   const handleCreate = async (translations: TranslationEditorEntry[]) => {
-    const created = await unitApi.create({
-      type: "POST",
-      translations: translations.flatMap((tr) => {
-        const language = toLanguage(tr.language);
-        if (!language) return [];
-        return [
-          {
-            language,
-            title: tr.title,
-            subtitle: tr.subtitle,
-            summary: tr.summary,
-            description: tr.description
-              ? markdownContentDoc(tr.description)
-              : undefined,
-          },
-        ];
-      }),
-    });
-    await append.mutateAsync({
-      realmId: realmUnitId,
-      key: pinboardKey,
-      unitId: created.id,
-    });
-    toast.success(t("entity:pinboard_editor_created"));
-    refetch();
+    try {
+      const created = await unitApi.create({
+        type: "POST",
+        translations: translations.flatMap((tr) => {
+          const language = toLanguage(tr.language);
+          if (!language) return [];
+          return [
+            {
+              language,
+              title: tr.title,
+              subtitle: tr.subtitle,
+              summary: tr.summary,
+              description: tr.description
+                ? markdownContentDoc(tr.description)
+                : undefined,
+            },
+          ];
+        }),
+      });
+      await append.mutateAsync({
+        realmId: realmUnitId,
+        key: pinboardKey,
+        unitId: created.id,
+      });
+      toast.success(t("entity:pinboard_editor_created"));
+      refetch();
+    } catch (err) {
+      toast.error(
+        t("entity:pinboard_admin_create_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+    }
   };
 
   return (

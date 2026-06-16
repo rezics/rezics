@@ -10,6 +10,32 @@ import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates
 import { ReviewNewPage } from "./ReviewNewPage";
 import { ReviewsPage } from "./ReviewsPage";
 
+/**
+ * 按书籍显示评论页面 - 显示所有评论、新建评论表单、评论列表
+ *
+ * 布局结构：
+ * - 移动端 (<640px)：w-11/12（边距留出），max-w-4xl 约束，mt-16（顶部间距）
+ * - 平板 (640-1023px)：mx-auto（中心），max-w-4xl，mt-16
+ * - 桌面 (1024-1535px)：mx-auto（中心），max-w-4xl，mt-16
+ * - 超宽 (>=1536px)：mx-auto（中心），max-w-4xl，mt-16
+ *
+ * ASCII 布局示意:
+ *
+ * All Viewports (centered with max-w-4xl)
+ * +----------+
+ * |TITLE  BK |
+ * +----------+
+ * +----------+
+ * |NEW FORM  |
+ * +----------+
+ * +__SPLIT___+
+ * +----------+
+ * |REVIEW    |
+ * |LIST PAGE |
+ * +----------+
+ *
+ * BK=BackButton
+ */
 export function ReviewByBookPage() {
   const { t } = useTranslation(["book", "common"]);
   const { bookId } = reviewByBookRoute.useParams();
@@ -27,12 +53,12 @@ export function ReviewByBookPage() {
     : null;
   const primaryTargetUnitId = catalogContext?.primaryTargetUnitId ?? bookId;
   return (
-    <div className="w-11/12 max-w-4xl mx-auto mt-16">
+    <div className="w-full px-4 max-w-4xl mx-auto mt-16">
       <div className="flex items-center justify-between">
         <AccentBarWithText text={`${t("book:pages_review_page")}`} />
         <Button
           variant="outline"
-          onClick={() => navigate({ to: `/book/${bookId}` })}
+          onClick={() => navigate({ to: "/book/$bookId", params: { bookId } })}
         >
           {t("common:back")}
         </Button>

@@ -98,7 +98,7 @@ export const BookLibSection = (
 
   if (error) {
     return (
-      <div className="mx-auto max-w-7xl p-4">
+      <div className="w-full mx-auto max-w-7xl p-4">
         <BookSearch
           query={search.query}
           bind={search.bind}
@@ -113,7 +113,7 @@ export const BookLibSection = (
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-4">
+    <div className="w-full mx-auto max-w-7xl p-4">
       <UniversalPaginator<BookDTO>
         ref={universalPaginatorRef}
         data={books}

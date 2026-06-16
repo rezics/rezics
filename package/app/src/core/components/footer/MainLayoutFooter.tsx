@@ -11,8 +11,67 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import type React from "react";
+import { Link } from "@/shared/ui/link";
 import { officialZoneHref } from "@/zone";
 
+/**
+ * Site-wide footer rendered by the main shell layout below all page content.
+ * 全站页脚，由主 shell 布局渲染于所有页面内容下方。
+ *
+ * Structure / 结构:
+ *   Separator → top grid (brand + 2 nav columns + newsletter) → Separator → bottom bar
+ *
+ * The outer container mirrors `MainContentContainer width="wide"`: `max-w-screen-xl`
+ * centered with `px-4`. / 外层容器与 `MainContentContainer width="wide"` 保持一致：
+ * `max-w-screen-xl` 居中，`px-4` 内边距。
+ *
+ * ---
+ *
+ * Mobile (<768 px) — single column stack / 移动端：单列堆叠
+ * ```
+ * |<-------- 100vw -------->|
+ * | ======================== |  <- Separator
+ * | px-4                     |
+ * |  [Brand + social icons]  |
+ * |  [Product nav]           |
+ * |  [Resources nav]         |
+ * |  [Newsletter form]       |  <- col + col stacked
+ * | ======================== |  <- Separator
+ * |  [copyright] [legal links]|  <- flex-wrap, stacked if narrow
+ * ```
+ *
+ * Tablet (768 px – 1023 px) — 4-column grid, newsletter form is row / 平板：4 列网格，订阅表单横排
+ * ```
+ * |<-------------- vw -------------->|
+ * | ================================= |  <- Separator
+ * | px-4                              |
+ * |  [Brand]  [Product]  [Resources]  [Newsletter   ]  |
+ * |           [nav    ]  [nav      ]  [email] [submit]  |
+ * | ================================= |  <- Separator
+ * |  [copyright]        [privacy] [terms] [contact]  |
+ * ```
+ *
+ * Desktop (1024 px – 1535 px) — same 4-column grid, more horizontal space / 桌面：同 4 列网格，水平空间更宽
+ * ```
+ * |<----------------- vw ----------------->|
+ * | ======================================= |  <- Separator
+ * | px-4                                    |
+ * |  [Brand+social] [Product] [Res] [News]  |
+ * | ======================================= |  <- Separator
+ * |  [copyright]       [privacy] [terms] [contact]  |
+ * ```
+ *
+ * Ultra-wide (≥1280 px) — capped at 1280 px, centered / 超宽屏：固定 1280 px，居中
+ * ```
+ * |<----------------- vw ---------------------->|
+ * |  auto  |<-------- 1280px -------->|  auto   |
+ *          | ========================= |  <- Separator
+ *          | px-4                      |
+ *          |  [Brand] [Prod] [Res] [News]  |
+ *          | ========================= |  <- Separator
+ *          |  [copyright]  [legal links]   |
+ * ```
+ */
 export function MainLayoutFooter({ className }: { className?: string }) {
   const { t } = useTranslation(["common", "shell"]);
   const year = new Date().getFullYear();
@@ -189,25 +248,25 @@ export function MainLayoutFooter({ className }: { className?: string }) {
             {t("shell:layout_footer_copyright", { year })}
           </p>
 
-          <div className="flex flex-row items-center gap-4">
-            <a
-              href="/privacy"
+          <div className="flex flex-row items-center gap-4 pr-20">
+            <Link
+              to="/privacy"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_privacy")}
-            </a>
-            <a
-              href="/terms"
+            </Link>
+            <Link
+              to="/terms"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_terms")}
-            </a>
-            <a
-              href="/contact"
+            </Link>
+            <Link
+              to="/contact"
               className="text-xs text-text-secondary hover:underline"
             >
               {t("shell:layout_footer_legal_contact")}
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -229,11 +288,11 @@ function FooterLink({
   children: React.ReactNode;
 }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className="text-text-secondary hover:underline leading-[1.9] inline-block"
     >
       {children}
-    </a>
+    </Link>
   );
 }

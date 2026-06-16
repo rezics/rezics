@@ -1,5 +1,6 @@
 import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { useTranslation } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -27,8 +28,14 @@ export function ShelfByBookPreview({
     enabled: Boolean(variantUnitId || bookId),
   });
 
+  // Show spinner while loading
+  // 加载中显示加载指示器
   if (isLoading) {
-    return <div>{t("common:loading")}</div>;
+    return (
+      <div className="flex justify-center py-6">
+        <Spinner size="sm" />
+      </div>
+    );
   }
   if (error) return <QueryErrorDisplay error={error} />;
 

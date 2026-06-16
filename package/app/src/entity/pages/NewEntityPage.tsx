@@ -10,8 +10,31 @@ import {
   suggestSubjectEligibility,
 } from "@/entity-picker";
 import { unitHref } from "@/shared/ui/link";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
+/**
+ * 新建实体页面。提供表单用于创建新的目录实体（书籍、游戏、媒体等），
+ * 包含标题、语言、类型和头像字段。
+ * New entity page. Provides form for creating new catalog entities (books, games, media, etc.),
+ * includes title, language, kind, and avatar fields.
+ *
+ * Mobile:            Tablet:             Desktop:            Ultra-wide:
+ * ┌──────────────────┐ ┌────────────────────────┐ ┌────────────────────────┐ ┌──────────────────────────┐
+ * │ New Entity       │ │ New Entity             │ │ New Entity             │ │ New Entity               │
+ * │ Description      │ │ Description            │ │ Description            │ │ Description              │
+ * │                  │ │                        │ │                        │ │                          │
+ * │ Title:           │ │ Title:                 │ │ Title:                 │ │ Title:                   │
+ * │ [input]          │ │ [input field]          │ │ [input field]          │ │ [input field]            │
+ * │                  │ │ Lng: [en]  Kind: [Book]│ │ Lng: [en]  Kind: [Book]│ │ Lng: [en]  Kind: [Book]  │
+ * │ Lng: [en]        │ │                        │ │                        │ │                          │
+ * │ Kind: [Book ▼]   │ │ Avatar: [url]          │ │ Avatar: [url]          │ │ Avatar: [url]            │
+ * │ Avatar: [input]  │ │                        │ │                        │ │                          │
+ * │                  │ │ [Cancel] [Create]      │ │ [Cancel] [Create]      │ │ [Cancel] [Create]        │
+ * │ [Cancel] [Creat] │ │                        │ │                        │ │                          │
+ * └──────────────────┘ └────────────────────────┘ └────────────────────────┘ └──────────────────────────┘
+ */
 export function NewEntityPage() {
+  useRequireAuth();
   const { t } = useTranslation(["common", "entity", "shell"]);
   const navigate = useNavigate();
   const [title, setTitle] = useState("");

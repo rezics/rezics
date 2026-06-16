@@ -236,6 +236,7 @@ function DesktopMenuNode({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        nativeButton
         render={(props) => (
           <Button {...props} type="button" variant="ghost" size="sm">
             {label}

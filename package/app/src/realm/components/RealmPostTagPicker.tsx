@@ -91,9 +91,20 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
     [draftSelectedTagIds],
   );
 
+  // Sync parent state when the authoritative `tagIds` prop changes, but only
+  // when the values actually differ to avoid infinite re-render loops.
+  // 当权威的 `tagIds` prop 变化时同步父状态，但仅在值确实不同时才触发，
+  // 以避免无限重渲染循环。
   useEffect(() => {
-    onSelectedTagIdsChange(tagIds ?? []);
-  }, [onSelectedTagIdsChange, tagIds]);
+    const next = tagIds ?? [];
+    if (
+      next.length === selectedTagIds.length &&
+      next.every((id, i) => id === selectedTagIds[i])
+    ) {
+      return;
+    }
+    onSelectedTagIdsChange(next);
+  }, [onSelectedTagIdsChange, selectedTagIds, tagIds]);
 
   useEffect(() => {
     if (!open) return;

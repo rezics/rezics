@@ -3,6 +3,16 @@ import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { logout } from "@/user";
 
+/**
+ * 待验证用户的头部部分。显示完成注册和退出登录按钮。
+ * Pending verification user header section. Displays complete registration and logout buttons.
+ *
+ * Mobile:            Tablet:             Desktop:            Ultra-wide:
+ * ┌────────────────────┐ ┌──────────────────────────┐ ┌──────────────────────────┐ ┌────────────────────────┐
+ * │ [Complete] [Logout]│ │ [Complete Register]      │ │ [Complete Register]      │ │ [Complete Register]    │
+ * │                    │ │ [Logout]                 │ │ [Logout]                 │ │ [Logout]               │
+ * └────────────────────┘ └──────────────────────────┘ └──────────────────────────┘ └────────────────────────┘
+ */
 export function PendingVerificationSection() {
   const { t } = useTranslation(["auth"]);
   const handleLogout = async () => {

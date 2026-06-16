@@ -8,7 +8,7 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 export function NewBookByUrl() {
@@ -16,24 +16,20 @@ export function NewBookByUrl() {
   const [url, setUrl] = useState("");
   function handleCreateBook() {
     // TODO 对接爬虫
-    console.log("create book", url);
   }
   const supportedSitesQuery = useQuery(
     echoKvGetQuery("crawler.supportedSites"),
   );
-  const [supportedSitesList, setSupportedSitesList] = useState<
-    { name: string; url: string }[]
-  >([]);
-  useEffect(() => {
-    if (
+  const supportedSitesList = useMemo<{ name: string; url: string }[]>(
+    () =>
       supportedSitesQuery.data?.value &&
       Array.isArray(supportedSitesQuery.data.value)
-    ) {
-      setSupportedSitesList(supportedSitesQuery.data.value);
-    }
-  }, [supportedSitesQuery]);
+        ? supportedSitesQuery.data.value
+        : [],
+    [supportedSitesQuery.data],
+  );
   return (
-    <div className="mt-16 mx-auto w-11/12">
+    <div className="mt-16 w-full px-4">
       <div className="text-2xl font-bold mb-4">
         {t("book:edit_create_book_by_url_title")}
       </div>

@@ -54,7 +54,9 @@ export const ContentTypeCheckboxes: React.FC<ContentTypeCheckboxesProps> = ({
               onCheckedChange={(checked) => toggle(type, checked === true)}
               aria-label={t(CONTENT_TYPE_I18N_KEYS[type as ContentType])}
             />
-            <span className="text-sm">{t(CONTENT_TYPE_I18N_KEYS[type as ContentType])}</span>
+            <span className="text-sm">
+              {t(CONTENT_TYPE_I18N_KEYS[type as ContentType])}
+            </span>
           </div>
         ))}
       </div>

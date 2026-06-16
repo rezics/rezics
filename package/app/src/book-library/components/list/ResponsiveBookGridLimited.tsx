@@ -14,7 +14,44 @@ interface ResponsiveBookGridLimitedProps {
 }
 
 /**
- * 每个 breakpoint 下的布局规则
+ * Responsive Book Grid Limited - Responsive grid with breakpoint-based layout.
+ * 响应式图书网格有限版——带有断点感知布局的响应式网格。
+ *
+ * Displays a limited (row × column) grid of books, automatically adjusting
+ * layout based on current breakpoint. Prevents CLS via fixed column counts.
+ *
+ * Mobile <640px (xs/xsm):
+ * +-----+
+ * |Book | 4 rows
+ * |     | 1 col
+ * | ... |
+ * +-----+
+ *
+ * Tablet 640-1023px (sm):
+ * +-----+-----+
+ * |Book | Book| 3 rows
+ * |     |     | 2 cols
+ * | ... | ... |
+ * +-----+-----+
+ *
+ * Desktop 1024-1535px (md):
+ * +-----+-----+-----+
+ * |Book | Book| Book| 3 rows
+ * |     |     |     | 3 cols
+ * | ... | ... | ... |
+ * +-----+-----+-----+
+ *
+ * Large Desktop (lg):
+ * +---+---+---+---+
+ * |Bk | Bk| Bk| Bk| 2 rows
+ * |   |   |   |   | 4 cols
+ * +---+---+---+---+
+ *
+ * Ultra-wide >=1536px (xl):
+ * +---+---+---+---+---+
+ * |Bk | Bk| Bk| Bk| Bk| 2 rows
+ * |   |   |   |   |   | 5 cols
+ * +---+---+---+---+---+
  */
 const layoutConfig: Record<Breakpoint, { rows: number; columns: number }> = {
   xs: { rows: 4, columns: 1 },
@@ -36,6 +73,13 @@ const columnClassMap: Record<number, string> = {
   5: "grid-cols-5",
 };
 
+/**
+ * ResponsiveBookGridLimited - Render limited grid of books per breakpoint.
+ * 响应式图书网格有限版——按断点渲染有限数量的图书网格。
+ *
+ * Slices bookList to maxItems (rows × columns), then renders via grid layout.
+ * Uses explicit column class to prevent UnoCSS/Tailwind purge issues.
+ */
 export function ResponsiveBookGridLimited({
   bookList,
   className,

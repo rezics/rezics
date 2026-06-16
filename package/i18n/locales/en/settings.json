@@ -260,5 +260,12 @@
   "subscription_recovery_other_description": "User-added subscriptions can be restored when the target is still visible and subscribable.",
   "subscription_recovery_other_empty": "No other removed subscriptions.",
   "subscription_recovery_restore_error": "This subscription cannot be restored right now.",
-  "subscription_recovery_restore": "Restore"
+  "subscription_recovery_restore": "Restore",
+  "tokens_created_date": "Created {date}",
+  "tokens_expires_date": "Expires {date}",
+  "tokens_last_used_date": "Last used {date}",
+  "tokens_last_used_from_ip": "from {ip}",
+  "tokens_never_used": "Never",
+  "security_current_session": "Current session",
+  "profile_content_on_target": "on {title}"
 }

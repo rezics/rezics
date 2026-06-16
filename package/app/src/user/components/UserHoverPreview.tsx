@@ -58,7 +58,8 @@ export function UserHoverPreview({
   const idPrefix = useId();
   const userId = getOptionalText(user.unitId);
   const slug = getOptionalText(user.slug);
-  const displayName = getOptionalText(user.name) ?? slug ?? t("settings:profile_default_name");
+  const displayName =
+    getOptionalText(user.name) ?? slug ?? t("settings:profile_default_name");
   const profileText =
     getOptionalText(user.bio) ?? getOptionalText(user.description);
   const avatarFallback = getAvatarFallback(displayName, slug, userId);
@@ -127,7 +128,9 @@ export function UserHoverPreview({
             render={
               <Link
                 to={profileHref}
-                aria-label={t("settings:profile_open_aria", { name: displayName })}
+                aria-label={t("settings:profile_open_aria", {
+                  name: displayName,
+                })}
                 className="inline-flex shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
               />
             }

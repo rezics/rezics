@@ -4,18 +4,82 @@ import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { QueryErrorDisplay } from "@/core";
 import { ShelfCard } from "../components/ShelfCard";
 
+/**
+ * Shelf list page.
+ *
+ * Main shelf browse page displaying all shelves sorted by creation date (newest first).
+ * Provides navigation to shelf search and shelf creation. Supports infinite scroll.
+ *
+ * 书架列表页面。显示按创建日期（最新优先）排序的所有书架的主浏览页。
+ * 提供导航到书架搜索和创建新书架的功能。支持无限滚动。
+ *
+ * Desktop (1200px):
+ * +---------------------------------------------+
+ * | All Shelves              [Search] [+ Create] |
+ * +---------------------------------------------+
+ * | [Shelf 1]      [Shelf 2]    [Shelf 3]       |
+ * | Cover          Cover         Cover          |
+ * | Title 1        Title 2       Title 3        |
+ * | 12 items       8 items      15 items        |
+ * |                                             |
+ * | [Shelf 4]      [Shelf 5]    [Shelf 6]       |
+ * | [Load More]                                 |
+ * +---------------------------------------------+
+ *
+ * Tablet (768px):
+ * +---------------------------------+
+ * | All Shelves [Search][+ Create]  |
+ * +---------------------------------+
+ * | [Shelf 1]      [Shelf 2]       |
+ * | Cover          Cover           |
+ * | Title 1        Title 2         |
+ * | 12 items       8 items         |
+ * |                                 |
+ * | [Shelf 3]      [Shelf 4]       |
+ * | [Load More]                    |
+ * +---------------------------------+
+ *
+ * Mobile (360px):
+ * +----------+
+ * | Shelves  |
+ * | [Search] |
+ * | [Create] |
+ * +----------+
+ * | [Shelf]  |
+ * | Cover    |
+ * | Title 1  |
+ * | 12 items |
+ * |          |
+ * | [Shelf]  |
+ * | [More]   |
+ * +----------+
+ *
+ * Error State:
+ * +----------+
+ * | Error    |
+ * | Try again|
+ * +----------+
+ */
 export function ShelfListPage() {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery(
-      shelfInfiniteListQuery({
-        sort: { field: "createdAt", order: "desc" },
-        limit: 20,
-      }),
-    );
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+  } = useInfiniteQuery(
+    shelfInfiniteListQuery({
+      sort: { field: "createdAt", order: "desc" },
+      limit: 20,
+    }),
+  );
 
   const shelves = data?.pages.flatMap((page) => page.shelves) ?? [];
 
@@ -42,6 +106,8 @@ export function ShelfListPage() {
         <div className="flex justify-center py-12">
           <Spinner />
         </div>
+      ) : isError ? (
+        <QueryErrorDisplay error={error} />
       ) : shelves.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">
           {t("entity:shelf_empty_yet")}

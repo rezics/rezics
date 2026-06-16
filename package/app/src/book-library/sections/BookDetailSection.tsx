@@ -16,13 +16,7 @@ import { useMemo } from "react";
 import { MainContentContainer } from "@/core";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 
-const TAB_ROUTES = [
-  "info",
-  "review",
-  "content",
-  "discussion",
-  "history",
-] as const;
+const TAB_ROUTES = ["info", "review", "content", "discussion"] as const;
 type TabRoute = (typeof TAB_ROUTES)[number];
 
 function useActiveTabRoute(): TabRoute {
@@ -97,9 +91,6 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                   className="flex-none snap-start"
                 >
                   {t("page:book_tabs_community")}
-                </TabsTrigger>
-                <TabsTrigger value="history" className="flex-none snap-start">
-                  {t("page:book_tabs_history")}
                 </TabsTrigger>
               </TabsList>
             </Tabs>

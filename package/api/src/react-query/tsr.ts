@@ -1,9 +1,21 @@
-import { QueryClient } from "@tanstack/react-query";
+import { MutationCache, QueryClient } from "@tanstack/react-query";
 import { ApiError } from "./errors";
 
+export interface CreateQueryClientOptions {
+  onMutationError?: (error: Error) => void;
+}
+
 // === 基础 QueryClient（必选） ===
-export function createQueryClient() {
+export function createQueryClient(options?: CreateQueryClientOptions) {
   return new QueryClient({
+    mutationCache: new MutationCache({
+      onError(error, _variables, _context, mutation) {
+        // Skip if the callsite already handles errors via its own onError
+        // 如果调用点已通过自身 onError 处理错误，则跳过
+        if (mutation.options.onError) return;
+        options?.onMutationError?.(error);
+      },
+    }),
     defaultOptions: {
       queries: {
         // 统一“不过度打扰”的策略：你可以按接口 TTL 全局设 30s~5min

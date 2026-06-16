@@ -48,6 +48,13 @@ export function useCreateCommentMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: commentKeys.all() });
+      // Invalidate the parent post so replyCount stays in sync.
+      // 使父帖失效以保持 replyCount 同步。
+      if (data.rootUnitId) {
+        queryClient.invalidateQueries({
+          queryKey: postKeys.detail(data.rootUnitId),
+        });
+      }
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

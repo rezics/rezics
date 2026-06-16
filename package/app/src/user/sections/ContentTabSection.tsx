@@ -1,5 +1,60 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 
+/**
+ * ContentTabSection — 用户资料页内容标签页，支持评论/短评/摘录分类与搜索排序，
+ * 动态加载分页列表，展示用户创建的所有内容条目。
+ *
+ * ┌───────────────────────────────────────────┐
+ * │ Content Tab (desktop 1024px+)             │
+ * │ ┌─────────────────────────────────────────┐
+ * │ │ [Review] [Remark] [Excerpt] [Post]      │
+ * │ ├─────────────────────────────────────────┤
+ * │ │ [Search...]  [Sort: Newest ▼]           │
+ * │ ├─────────────────────────────────────────┤
+ * │ │ ★★★★★ on "Book Title" — May 15         │
+ * │ │ Great read! Really enjoyed this...      │
+ * │ │ 5 replies                               │
+ * │ │                                         │
+ * │ │ ★★★★☆ on "Another Book" — May 10      │
+ * │ │ Worth reading for sure.                 │
+ * │ │ [Prev] Page 1 of 3 [Next]               │
+ * │ └─────────────────────────────────────────┘
+ * └───────────────────────────────────────────┘
+ *
+ * ┌───────────────────────┐
+ * │ Content (tablet 768)  │
+ * │ ┌─────────────────────┐
+ * │ │ [Review] [Remark]   │
+ * │ ├─────────────────────┤
+ * │ │ [Search...]         │
+ * │ │ [Sort: Newest ▼]    │
+ * │ ├─────────────────────┤
+ * │ │ ★★★★★ Book Title    │
+ * │ │ Great read!         │
+ * │ │ [Prev] 1 of 2[Next] │
+ * │ └─────────────────────┘
+ * └───────────────────────┘
+ *
+ * ┌──────────────────┐
+ * │ Content (mobile) │
+ * │ ┌────────────────┐
+ * │ │ Reviews...     │
+ * │ ├────────────────┤
+ * │ │ [Search..]     │
+ * │ │ ★★★ Title..    │
+ * │ │ Great read...  │
+ * │ │ [Prev] 1 [Nxt] │
+ * │ └────────────────┘
+ * └──────────────────┘
+ *
+ * ┌──────────────────┐
+ * │ Empty (no data)  │
+ * │ ┌────────────────┐
+ * │ │ No items found │
+ * │ └────────────────┘
+ * └──────────────────┘
+ */
+
 const i18nMessages = {
   search_category_reviews: () =>
     getI18nRuntime().i18n.t("search:category_reviews"),
@@ -43,7 +98,13 @@ const SORT_OPTION_LABEL = {
 } as const satisfies Record<string, () => string>;
 
 export const ContentTabSection: FC = () => {
-  const { t } = useTranslation(["common", "entity", "search", "settings"]);
+  const { t } = useTranslation([
+    "common",
+    "community",
+    "entity",
+    "search",
+    "settings",
+  ]);
   const { userId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({
@@ -169,6 +230,7 @@ export const ContentTabSection: FC = () => {
 };
 
 const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
+  const { t } = useTranslation(["community", "settings"]);
   const targetTitle = post.targetTitles?.[0];
   const date = new Date(post.createdAt).toLocaleDateString();
   const scoreDisplay =
@@ -203,11 +265,15 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
                   search={{ view: "auto" }}
                   className="text-sm text-text-secondary no-underline hover:text-text-primary"
                 >
-                  on {targetTitle}
+                  {t("settings:profile_content_on_target", {
+                    title: targetTitle,
+                  })}
                 </Link>
               ) : (
                 <span className="text-sm text-text-secondary">
-                  on {targetTitle}
+                  {t("settings:profile_content_on_target", {
+                    title: targetTitle,
+                  })}
                 </span>
               ))}
             <span className="text-xs text-text-secondary">{date}</span>
@@ -216,7 +282,11 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
             <p className="text-sm mt-1 line-clamp-3">{post.contentText}</p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs text-text-secondary">
-            {post.replyCount > 0 && <span>{post.replyCount} replies</span>}
+            {post.replyCount > 0 && (
+              <span>
+                {t("community:reply_count", { count: post.replyCount })}
+              </span>
+            )}
           </div>
         </div>
       </div>

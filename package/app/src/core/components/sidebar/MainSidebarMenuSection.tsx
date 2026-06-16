@@ -18,6 +18,20 @@ interface MainSidebarMenuSectionProps {
   openItems: Record<string, boolean>;
 }
 
+/**
+ * 主侧栏菜单部分。渲染导航列表和抽屉标题，根据布局类型应用分隔符。
+ * Main sidebar menu section. Renders navigation list and drawer header, applies separator per layout type.
+ *
+ * Mobile (Drawer):   Tablet (Sidebar):    Desktop (Sidebar):  Ultra-wide (Sidebar):
+ * ┌──────────────┐   ┌────────┐           ┌────────┐           ┌────────┐
+ * │ [≡] Close    │   │ [≡]    │           │ [≡]    │           │ [≡]    │
+ * │ ─────────────│   │ ──────│           │ ──────│           │ ──────│
+ * │ Home         │   │ Home   │           │ Home   │           │ Home   │
+ * │ Browse       │   │ Browse │           │ Browse │           │ Browse │
+ * │ › Shelves    │   │ › Shel │           │ › Shel │           │ › Shel │
+ * │ Messages     │   │ Msgs   │           │ Msgs   │           │ Msgs   │
+ * └──────────────┘   └────────┘           └────────┘           └────────┘
+ */
 export function MainSidebarMenuSection({
   handleDrawerToggle,
   handleItemClick,

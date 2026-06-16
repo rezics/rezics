@@ -17,6 +17,7 @@ interface BulkRatingDialogProps {
   value: ContentRating;
   onChange: (rating: ContentRating) => void;
   onConfirm: () => void;
+  isPending?: boolean;
 }
 
 export function BulkRatingDialog({
@@ -26,6 +27,7 @@ export function BulkRatingDialog({
   value,
   onChange,
   onConfirm,
+  isPending,
 }: BulkRatingDialogProps) {
   const { t } = useTranslation(["book", "common"]);
   return (
@@ -44,7 +46,7 @@ export function BulkRatingDialog({
           <Button variant="ghost" onClick={onClose}>
             {t("common:cancel")}
           </Button>
-          <Button onClick={onConfirm} disabled={count === 0}>
+          <Button onClick={onConfirm} disabled={count === 0 || isPending}>
             {t("common:apply")}
           </Button>
         </DialogFooter>

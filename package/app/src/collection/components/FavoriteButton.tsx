@@ -2,6 +2,7 @@ import {
   collectionStatusQuery,
   useToggleFavoriteMutation,
 } from "@rezics/api/shelf";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Tooltip,
@@ -25,6 +26,7 @@ export function FavoriteButton({
   size = "small",
   color,
 }: FavoriteButtonProps) {
+  const { t } = useTranslation("common");
   const { isAuthenticated } = useAuth();
   const auth = useAuthModal("login");
   const statusQuery = useQuery(collectionStatusQuery(unitId));
@@ -65,7 +67,9 @@ export function FavoriteButton({
                 disabled={toggleMutation.isPending}
                 style={color ? { color } : undefined}
                 aria-label={
-                  isFavorited ? "Remove from favorites" : "Add to favorites"
+                  isFavorited
+                    ? t("accessibility_remove_from_favorites")
+                    : t("accessibility_add_to_favorites")
                 }
                 {...props}
               >
@@ -82,7 +86,9 @@ export function FavoriteButton({
             )}
           />
           <TooltipContent>
-            {isFavorited ? "Remove from favorites" : "Add to favorites"}
+            {isFavorited
+              ? t("accessibility_remove_from_favorites")
+              : t("accessibility_add_to_favorites")}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

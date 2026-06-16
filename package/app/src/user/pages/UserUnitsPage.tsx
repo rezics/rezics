@@ -1,3 +1,54 @@
+/**
+ * UserUnitsPage — 用户内容总览页面，支持多标签页（书架、书籍、评论、短评、摘录）分类展示，
+ * 具有搜索和分页功能，适配多屏幕尺寸。
+ *
+ * ┌────────────────────────────────────────────────┐
+ * │ User Units (desktop 1024px+)                   │
+ * │ ┌────────────────────────────────────────────┐ │
+ * │ │ [Search Bar]                               │ │
+ * │ │ [Shelves] [Reviews] [Books] [Remarks]...   │ │
+ * │ ├────────────────────────────────────────────┤ │
+ * │ │ ┌──────────────┐ ┌──────────────┐         │ │
+ * │ │ │ Shelf 1      │ │ Shelf 2      │         │ │
+ * │ │ │ 5 items      │ │ 3 items      │         │ │
+ * │ │ └──────────────┘ └──────────────┘         │ │
+ * │ │ [Prev] Page 1 of 10 [Next]                 │ │
+ * │ └────────────────────────────────────────────┘ │
+ * └────────────────────────────────────────────────┘
+ *
+ * ┌──────────────────────────────┐
+ * │ User Units (tablet 768px)    │
+ * │ ┌──────────────────────────┐ │
+ * │ │ [Search Bar]             │ │
+ * │ │ [Shelves] [Reviews]...   │ │
+ * │ ├──────────────────────────┤ │
+ * │ │ ┌──────────┐ ┌──────────┐│ │
+ * │ │ │Shelf 1   │ │Shelf 2   ││ │
+ * │ │ └──────────┘ └──────────┘│ │
+ * │ │ [Prev] 1 of 5 [Next]     │ │
+ * │ └──────────────────────────┘ │
+ * └──────────────────────────────┘
+ *
+ * ┌─────────────────┐
+ * │ Mobile (375px)  │
+ * │ ┌───────────────┐│
+ * │ │ [Search Bar]  ││
+ * │ │ Shelves Rev.. ││
+ * │ ├───────────────┤│
+ * │ │ [Shelf Card]  ││
+ * │ │ [Shelf Card]  ││
+ * │ │ [Prev] 1[Next]││
+ * │ └───────────────┘│
+ * └─────────────────┘
+ *
+ * ┌──────────────────────┐
+ * │ Empty State (search) │
+ * │ ┌──────────────────┐ │
+ * │ │ No search match  │ │
+ * │ └──────────────────┘ │
+ * └──────────────────────┘
+ */
+
 import { bookQueries } from "@rezics/api/book/book";
 import {
   contentSearchQueryOptions,
@@ -36,7 +87,8 @@ import {
   useLocalizedPostSearch,
 } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { ShelfCard } from "@/shelf";
+import { mapContentSearchDocToShelfDTO, ShelfCard } from "@/shelf";
+import { mapContentSearchDocToUnitDTO } from "@/unit/models/contentSearchDocToUnitDTO";
 
 export interface UserUnitsPageProps {
   userId: string;
@@ -98,7 +150,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   useReactionHydration(shelfTargetIds);
 
   const shelves = useMemo(
-    () => (shelfDataRaw?.items ?? []) as unknown as ShelfDTO[],
+    () => (shelfDataRaw?.items ?? []).map(mapContentSearchDocToShelfDTO),
     [shelfDataRaw],
   );
 
@@ -187,7 +239,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   } = useLocalizedContentSearch(excerptSearchOptions);
 
   const excerptUnits: UnitDTO[] = useMemo(
-    () => (excerptData?.items ?? []) as unknown as UnitDTO[],
+    () => (excerptData?.items ?? []).map(mapContentSearchDocToUnitDTO),
     [excerptData],
   );
 
@@ -309,7 +361,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         <div className="border-b border-border-whisper mt-4 mb-4">
           <Tabs
             value={tab}
-            onValueChange={(v) => setTab(v as TabKey)}
+            onValueChange={(v) => {
+              setTab(v as TabKey);
+              setCurrentPage(1);
+              ref.current?.resetPaginationPageNumber?.();
+            }}
             aria-label={t("settings:profile_unit_tabs_label")}
           >
             <TabsList>

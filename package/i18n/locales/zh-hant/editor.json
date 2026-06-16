@@ -55,6 +55,7 @@
   "authority_edit_form_all_locked_notice": "所有可編輯欄位已對一般社群貢獻者鎖定。",
   "authority_edit_form_privileged_notice": "若你具備擁有者、維護者或管理員權限，伺服器仍可能接受你的變更。",
   "authority_edit_form_locked_error": "儲存被欄位鎖定阻擋：{paths}。未儲存輸入仍保留在此頁面。",
+  "chapter_unsaved_changes_confirm": "你有未儲存的變更。仍要離開嗎？",
   "placeholders_chapter_title": "請輸入章節標題",
   "placeholders_enter_search_term": "輸入搜尋詞",
   "placeholders_enter_url": "輸入 URL 地址",

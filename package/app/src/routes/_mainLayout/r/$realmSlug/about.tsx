@@ -19,11 +19,10 @@ function RealmSlugAboutRoute() {
 }
 
 function RealmSlugAboutTab() {
-  const { realm, description, membership, showManage } = useRealmDetail();
+  const { realm, membership, showManage } = useRealmDetail();
   return (
     <RealmAboutTab
       realm={realm}
-      description={description}
       membership={membership}
       canManage={showManage}
     />

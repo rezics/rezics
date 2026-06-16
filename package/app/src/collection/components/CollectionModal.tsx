@@ -24,7 +24,7 @@ import {
   Separator,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface CollectionModalProps {
   open: boolean;
@@ -76,11 +76,21 @@ export function CollectionModal({
 
   // Initialize selected shelves from status
   // 根据 status 初始化已选中的书架
-  useMemo(() => {
+  useEffect(() => {
     if (status?.shelves) {
       setSelectedShelves(new Set(status.shelves.map((s) => s.id)));
     }
   }, [status]);
+
+  // Reset transient filter state when modal opens
+  // 弹窗打开时重置临时筛选状态
+  useEffect(() => {
+    if (open) {
+      setFilterTag(null);
+      setSearchText("");
+      setIndependent(false);
+    }
+  }, [open]);
 
   const visibleShelves = useMemo(() => {
     return shelves.filter((s) => {
@@ -139,18 +149,34 @@ export function CollectionModal({
             {/* Content-type filter chips 内容类型筛选标签 */}
             <div className="flex flex-wrap gap-1">
               <Badge
+                role="button"
+                tabIndex={0}
                 variant={filterTag === null ? "default" : "outline"}
                 className="cursor-pointer"
                 onClick={() => setFilterTag(null)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setFilterTag(null);
+                  }
+                }}
               >
                 {t("common:all")}
               </Badge>
               {SEED_TAG_NAMES.map((name) => (
                 <Badge
                   key={name}
+                  role="button"
+                  tabIndex={0}
                   variant={filterTag === name ? "default" : "outline"}
                   className="cursor-pointer"
                   onClick={() => setFilterTag(filterTag === name ? null : name)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setFilterTag(filterTag === name ? null : name);
+                    }
+                  }}
                 >
                   {SEED_TAG_TITLES[name]}
                 </Badge>
@@ -176,7 +202,6 @@ export function CollectionModal({
                       >
                         <Checkbox
                           checked={selectedShelves.has(shelf.unitId)}
-                          tabIndex={-1}
                           aria-label={t("entity:collection_select_shelf", {
                             title: displayTitle,
                           })}

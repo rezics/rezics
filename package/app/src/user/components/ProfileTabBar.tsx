@@ -20,13 +20,11 @@ const i18nMessages = {
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
-import { unitHref } from "@/shared/ui/link";
 import { profileTabPaths } from "@/user/models/profileTabs";
 
 interface ProfileTabBarProps {
-  userId: string;
-  userSlug?: string;
   isCurrentUser?: boolean;
+  profileBasePath: string;
 }
 
 const PROFILE_TAB_BY_PATH = {
@@ -46,9 +44,8 @@ const PROFILE_TAB_BY_PATH = {
 } as const;
 
 export const ProfileTabBar: FC<ProfileTabBarProps> = ({
-  userId,
-  userSlug,
   isCurrentUser = false,
+  profileBasePath,
 }) => {
   const navigate = useNavigate();
   const routerState = useRouterState();
@@ -56,24 +53,14 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({
   const tabs = profileTabPaths(isCurrentUser).map(
     (path) => PROFILE_TAB_BY_PATH[path as keyof typeof PROFILE_TAB_BY_PATH],
   );
-  const basePath = unitHref({
-    type: "USER",
-    unitId: userId,
-    slug: userSlug ?? null,
-  });
-  const activeBasePaths =
-    basePath === `/user/${userId}` ? [basePath] : [basePath, `/user/${userId}`];
-
   const activeTab =
     tabs.find((tab, i) => {
       if (i === 0) {
-        return activeBasePaths.some(
-          (base) => pathname === base || pathname === `${base}/`,
+        return (
+          pathname === profileBasePath || pathname === `${profileBasePath}/`
         );
       }
-      return activeBasePaths.some((base) =>
-        pathname.startsWith(`${base}${tab.path}`),
-      );
+      return pathname.startsWith(`${profileBasePath}${tab.path}`);
     }) ?? tabs[0];
 
   return (
@@ -82,7 +69,7 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({
         value={activeTab.path}
         className="min-w-0 max-w-full"
         onValueChange={(value) => {
-          void navigate({ to: `${basePath}${value}` });
+          void navigate({ to: `${profileBasePath}${value}` });
         }}
       >
         <TabsList className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain bg-transparent">

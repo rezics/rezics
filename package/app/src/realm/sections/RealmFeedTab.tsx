@@ -1,5 +1,6 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { PostListQuery } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Checkbox,
   Select,
@@ -57,6 +58,7 @@ export function RealmFeedTab({
   onFeedTagIdsChange,
   onOpenTagsTab,
 }: RealmFeedTabProps) {
+  const { t } = useTranslation("community");
   const { realmId, realm, showManage, tagTree } = useRealmDetail();
   const { data: settings } = useQuery({
     ...userQueries.settings(),
@@ -95,7 +97,7 @@ export function RealmFeedTab({
                   checked={manageMode}
                   onCheckedChange={(checked) => setManageMode(checked === true)}
                 />
-                Manage mode
+                {t("manage_mode")}
               </label>
               {manageMode ? (
                 <Select
@@ -110,7 +112,7 @@ export function RealmFeedTab({
                   <SelectContent>
                     {realmModerationFilters.map((value) => (
                       <SelectItem key={value} value={value}>
-                        {realmModerationFilterLabel(value)}
+                        {realmModerationFilterLabel(value, t)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -144,15 +146,22 @@ export function RealmFeedTab({
   );
 }
 
-function realmModerationFilterLabel(value: RealmModerationFilter) {
+/**
+ * Resolve a human-readable label for a realm moderation filter value.
+ * 将 realm 审核筛选值解析为可读标签。
+ */
+function realmModerationFilterLabel(
+  value: RealmModerationFilter,
+  t: (key: string) => string,
+) {
   switch (value) {
     case "all":
-      return "All moderation states";
+      return t("moderation_filter_all");
     case "pending":
-      return "Pending review";
+      return t("moderation_status_pending");
     case "approved":
-      return "Approved";
+      return t("moderation_status_approved");
     case "removed":
-      return "Removed";
+      return t("moderation_status_removed");
   }
 }

@@ -9,6 +9,49 @@ import {
   resumeRouteToHref,
 } from "../models/resumeRoute";
 
+/**
+ * Section displaying books the user is currently reading or has read previously.
+ * 显示用户正在阅读或已读过的书籍的部分。
+ *
+ * Layout:
+ * Mobile (<640px):
+ * ┌─────────────────────────┐
+ * │ Continue Reading        │
+ * ├─────────────────────────┤
+ * │ ┌─────────────────────┐ │
+ * │ │ [Cover] Title       │ │
+ * │ │         Chapter N/M │ │
+ * │ │         [Progress]  │ │
+ * │ └─────────────────────┘ │
+ * │ ┌─────────────────────┐ │
+ * │ │ [Cover] Title       │ │
+ * │ │         Chapter N/M │ │
+ * │ │         [Progress]  │ │
+ * │ └─────────────────────┘ │
+ * └─────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌─────────────────────────────────────────┐
+ * │ Continue Reading                        │
+ * ├─────────────────────────────────────────┤
+ * │ ┌──────────────────┐ ┌──────────────────┐
+ * │ │ [Cover] Title    │ │ [Cover] Title    │
+ * │ │        Chapter   │ │        Chapter   │
+ * │ │        [Progress]│ │        [Progress]│
+ * │ └──────────────────┘ └──────────────────┘
+ * │ ┌──────────────────┐ ┌──────────────────┐
+ * │ │ [Cover] Title    │ │ [Cover] Title    │
+ * │ │        Chapter   │ │        Chapter   │
+ * │ │        [Progress]│ │        [Progress]│
+ * │ └──────────────────┘ └──────────────────┘
+ * └─────────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * Same as Tablet - 2 column grid
+ *
+ * Ultra-wide (>=1536px):
+ * Same as Tablet - 2 column grid (max-width container)
+ */
 export interface ContinueReadingSectionProps {
   items: readonly ContinueReadingItem[];
   title?: React.ReactNode | false;

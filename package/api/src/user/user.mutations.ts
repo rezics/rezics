@@ -26,8 +26,16 @@ export function useUpdateMeMutation(
     mutationFn: (input: UpdateUser) => userApi.updateMe(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.setQueryData(userKeys.detail("me"), data);
+      qc.setQueryData(userKeys.meDetail(), data);
       qc.invalidateQueries({ queryKey: userKeys.lists() });
+      // Profile changes (display name, avatar, slug) make slug-based and
+      // ID-based detail caches stale — invalidate broadly by prefix.
+      // 个人资料变更（显示名、头像、slug）会使基于 slug 和基于 ID 的
+      // 详情缓存过时——按前缀广泛失效。
+      qc.invalidateQueries({
+        queryKey: [...userKeys.all(), "by-slug"],
+      });
+      qc.invalidateQueries({ queryKey: userKeys.details() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -91,7 +99,7 @@ export function useDeleteMeMutation(
     mutationFn: () => userApi.deleteMe(),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.removeQueries({ queryKey: userKeys.detail("me") });
+      qc.removeQueries({ queryKey: userKeys.meDetail() });
       qc.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -190,7 +198,7 @@ export function useDeleteAccountMutation(
     mutationFn: (input: DeleteAccountBody) => userApi.deleteAccount(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.removeQueries({ queryKey: userKeys.detail("me") });
+      qc.removeQueries({ queryKey: userKeys.meDetail() });
       qc.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

@@ -116,6 +116,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
         resize={resize}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
+        submitDisabled={postMutation.isPending}
         submitLabel={
           postMutation.isPending
             ? t("common:submitting")

@@ -5,7 +5,11 @@
   "accessibility_favorite": "즐겨찾기",
   "accessibility_hot": "인기",
   "accessibility_open_drawer": "서랍 열기",
+  "accessibility_add_to_favorites": "즐겨찾기에 추가",
+  "accessibility_clear_selection": "선택 해제",
+  "accessibility_remove_from_favorites": "즐겨찾기에서 제거",
   "accessibility_search": "검색",
+  "accessibility_search_results": "검색 결과",
   "action": "행동",
   "actions": "작업",
   "active": "활성",
@@ -186,5 +190,15 @@
   "route_denied_title": "접근이 제한됨",
   "route_denied_description": "이 페이지를 볼 수 있는 권한이 없습니다.",
   "route_unauthenticated_title": "계속하려면 로그인하세요",
-  "route_unauthenticated_description": "이 페이지를 보려면 로그인해야 합니다."
+  "route_unauthenticated_description": "이 페이지를 보려면 로그인해야 합니다.",
+  "please_login_first": "먼저 로그인해 주세요",
+  "relative_time_just_now": "방금",
+  "relative_time_minutes_ago": "{value}분 전",
+  "relative_time_hours_ago": "{value}시간 전",
+  "relative_time_days_ago": "{value}일 전",
+  "relative_time_weeks_ago": "{value}주 전",
+  "mutation_error_generic": "문제가 발생했습니다. 다시 시도해 주세요.",
+  "showing_range": "{total}개 중 {start}–{end}개 표시",
+  "link_copied": "링크 복사됨",
+  "clipboard_failed": "복사에 실패했습니다. 직접 선택하여 복사해 주세요."
 }

@@ -117,6 +117,31 @@ export const scoreApi = new Elysia({ prefix: "/score" })
     },
   )
 
+  // GET /score/user/:userId/:unitId/:realm — user's score for a specific realm
+  // GET /score/user/:userId/:unitId/:realm —— 用户在特定 realm 中的评分
+  .get(
+    "/user/:userId/:unitId/:realm",
+    async ({ params }) => {
+      const entry = await scoreService.getUserScoreForRealm(
+        params.userId,
+        params.unitId,
+        params.realm,
+      );
+      return entry ? mapScoreEntryToDTO(entry) : null;
+    },
+    {
+      params: t.Object({
+        userId: t.String(),
+        unitId: t.String(),
+        realm: t.String(),
+      }),
+      detail: {
+        summary: "Get user's score for a specific realm",
+        tags: ["Score"],
+      },
+    },
+  )
+
   // POST /score/recalculate — admin recalculation endpoint
   // POST /score/recalculate —— 管理员触发的重新计算端点
   .post(

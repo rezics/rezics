@@ -145,12 +145,14 @@ export function TagViewPreferenceEditor({
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
       <div>
         <h3 className="text-sm font-medium leading-ui text-text-primary">
-          Tags tab view
+          {getI18nRuntime().i18n.t("community:tag_view_heading")}
         </h3>
       </div>
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
         <div className="flex flex-col gap-1">
-          <Label htmlFor="realm-tag-view-style">{getI18nRuntime().i18n.t("community:tag_view_default")}</Label>
+          <Label htmlFor="realm-tag-view-style">
+            {getI18nRuntime().i18n.t("community:tag_view_default")}
+          </Label>
           <Select
             value={defaultStyle}
             onValueChange={(value) =>
@@ -161,9 +163,15 @@ export function TagViewPreferenceEditor({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="flat">{getI18nRuntime().i18n.t("community:tag_view_flat")}</SelectItem>
-              <SelectItem value="grouped">{getI18nRuntime().i18n.t("community:tag_view_grouped")}</SelectItem>
-              <SelectItem value="tree">{getI18nRuntime().i18n.t("community:tag_view_tree")}</SelectItem>
+              <SelectItem value="flat">
+                {getI18nRuntime().i18n.t("community:tag_view_flat")}
+              </SelectItem>
+              <SelectItem value="grouped">
+                {getI18nRuntime().i18n.t("community:tag_view_grouped")}
+              </SelectItem>
+              <SelectItem value="tree">
+                {getI18nRuntime().i18n.t("community:tag_view_tree")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -172,7 +180,9 @@ export function TagViewPreferenceEditor({
           variant={allowViewerSwitch ? "secondary" : "outline"}
           onClick={() => setAllowViewerSwitch((value) => !value)}
         >
-          {allowViewerSwitch ? getI18nRuntime().i18n.t("community:tag_view_viewer_switch_on") : getI18nRuntime().i18n.t("community:tag_view_viewer_switch_off")}
+          {allowViewerSwitch
+            ? getI18nRuntime().i18n.t("community:tag_view_viewer_switch_on")
+            : getI18nRuntime().i18n.t("community:tag_view_viewer_switch_off")}
         </Button>
         <Button type="button" onClick={save} disabled={setValue.isPending}>
           {getI18nRuntime().i18n.t("common:save")}
@@ -1166,7 +1176,9 @@ export function TagTreeEditor({
 
       <div className="grid shrink-0 gap-2 md:grid-cols-[10rem_minmax(0,1fr)_auto_auto_auto] md:items-end">
         <div>
-          <Label htmlFor="realm-tag-tree-label-language">{getI18nRuntime().i18n.t("community:tag_tree_label_language")}</Label>
+          <Label htmlFor="realm-tag-tree-label-language">
+            {getI18nRuntime().i18n.t("community:tag_tree_label_language")}
+          </Label>
           <Input
             id="realm-tag-tree-label-language"
             value={labelLanguage}
@@ -1271,7 +1283,9 @@ export function TagTreeEditor({
       >
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{getI18nRuntime().i18n.t("community:tag_tree_add_title")}</DialogTitle>
+            <DialogTitle>
+              {getI18nRuntime().i18n.t("community:tag_tree_add_title")}
+            </DialogTitle>
             <DialogDescription>
               Search existing labels or tags first. Create a new item only when
               the catalog does not already have the term you need.
@@ -1280,7 +1294,9 @@ export function TagTreeEditor({
 
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="realm-tag-tree-add-search">{getI18nRuntime().i18n.t("common:search")}</Label>
+              <Label htmlFor="realm-tag-tree-add-search">
+                {getI18nRuntime().i18n.t("common:search")}
+              </Label>
               <Input
                 id="realm-tag-tree-add-search"
                 value={search}
@@ -1288,7 +1304,9 @@ export function TagTreeEditor({
                   setSearch(event.target.value);
                   setCreateTitle(event.target.value);
                 }}
-                placeholder={getI18nRuntime().i18n.t("community:tag_tree_search_placeholder")}
+                placeholder={getI18nRuntime().i18n.t(
+                  "community:tag_tree_search_placeholder",
+                )}
               />
             </div>
 
@@ -1371,7 +1389,9 @@ export function TagTreeEditor({
                 id="realm-tag-tree-create-title"
                 value={createTitle}
                 onChange={(event) => setCreateTitle(event.target.value)}
-                placeholder={getI18nRuntime().i18n.t("community:tag_tree_name_placeholder")}
+                placeholder={getI18nRuntime().i18n.t(
+                  "community:tag_tree_name_placeholder",
+                )}
               />
               <div className="grid gap-2 sm:grid-cols-3">
                 <Button
@@ -1380,7 +1400,9 @@ export function TagTreeEditor({
                   disabled={!createTitle.trim()}
                   onClick={() => void createPublicLabel()}
                 >
-                  {getI18nRuntime().i18n.t("community:tag_tree_create_public_label")}
+                  {getI18nRuntime().i18n.t(
+                    "community:tag_tree_create_public_label",
+                  )}
                 </Button>
                 <Button
                   type="button"
@@ -1396,7 +1418,9 @@ export function TagTreeEditor({
                   disabled={!createTitle.trim()}
                   onClick={createLocalHeading}
                 >
-                  {getI18nRuntime().i18n.t("community:tag_tree_use_local_heading")}
+                  {getI18nRuntime().i18n.t(
+                    "community:tag_tree_use_local_heading",
+                  )}
                 </Button>
               </div>
             </div>
@@ -1418,7 +1442,9 @@ export function TagTreeEditor({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{getI18nRuntime().i18n.t("community:tag_tree_delete_title")}</DialogTitle>
+            <DialogTitle>
+              {getI18nRuntime().i18n.t("community:tag_tree_delete_title")}
+            </DialogTitle>
             <DialogDescription>
               {getI18nRuntime().i18n.t("community:tag_tree_delete_description")}
             </DialogDescription>

@@ -25,7 +25,21 @@ export function DynamicIcon({
   const [Icons, setIcons] = React.useState<any>(null);
 
   React.useEffect(() => {
-    loadIcons().then(setIcons);
+    let cancelled = false;
+    loadIcons()
+      .then((icons) => {
+        if (!cancelled) setIcons(icons);
+      })
+      .catch((error) => {
+        // Log import failures in development; render nothing.
+        // 开发环境下记录导入失败；不渲染任何内容。
+        if (import.meta.env.DEV) {
+          console.error("[DynamicIcon] Failed to load icon library:", error);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!Icons) return null;
@@ -38,7 +52,12 @@ export function DynamicIcon({
 
 async function loadIcons() {
   if (!iconsPromise) {
-    iconsPromise = import("@react-symbols/icons");
+    iconsPromise = import("@react-symbols/icons").catch((error) => {
+      // Reset cache so a subsequent mount can retry the import.
+      // 重置缓存，以便后续挂载可以重试导入。
+      iconsPromise = null;
+      throw error;
+    });
   }
   return iconsPromise;
 }

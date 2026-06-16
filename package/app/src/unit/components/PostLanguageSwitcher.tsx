@@ -3,6 +3,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Skeleton } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
+import type React from "react";
 
 type Sibling = {
   unitId: string;
@@ -61,16 +62,28 @@ export function PostLanguageSwitcher({
               key={sibling.unitId}
               variant={isCurrent ? "default" : "outline"}
               className={isCurrent ? undefined : "cursor-pointer"}
-              onClick={
-                isCurrent
-                  ? undefined
-                  : () =>
+              {...(isCurrent
+                ? {}
+                : {
+                    role: "button" as const,
+                    tabIndex: 0,
+                    onClick: () =>
                       navigate({
                         to: "/unit/$unitId",
                         params: { unitId: sibling.unitId },
                         search: { view: "auto" },
-                      })
-              }
+                      }),
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        navigate({
+                          to: "/unit/$unitId",
+                          params: { unitId: sibling.unitId },
+                          search: { view: "auto" },
+                        });
+                      }
+                    },
+                  })}
               title={sibling.translationSnippet ?? undefined}
             >
               {label}

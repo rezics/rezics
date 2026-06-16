@@ -6,8 +6,11 @@ export {
   feedRowsQuery,
 } from "./feed.queries";
 export type {
-  FeedContentRow,
+  FeedBookRow,
+  FeedPostRow,
   FeedQuery,
   FeedResponse,
   FeedRow,
+  FeedShelfRow,
+  FeedUnitRow,
 } from "./feed.types";

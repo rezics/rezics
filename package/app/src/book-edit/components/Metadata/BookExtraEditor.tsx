@@ -64,7 +64,11 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
 function PublishURL({ value, onChange }: BookExtraEditorProps) {
   const { t } = useTranslation(["book", "common", "editor"]);
   const [newUrl, setNewUrl] = useState("");
-  const urls: string[] = Array.isArray(value) ? value : [];
+  // Read publishURL from the extra data object, not the object itself.
+  // 从附加数据对象中读取 publishURL，而非对象本身。
+  const urls: string[] = Array.isArray(value?.publishURL)
+    ? value.publishURL
+    : [];
 
   const handleAdd = () => {
     if (newUrl.trim() && onChange) {
@@ -111,6 +115,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
                 size="icon"
                 variant="ghost"
                 onClick={() => handleRemove(index)}
+                aria-label={t("common:delete")}
                 className="w-7 h-7 text-error-text hover:text-error-text"
               >
                 <Delete size={14} />
@@ -123,6 +128,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
       <div className="flex gap-2">
         <input
           type="url"
+          aria-label={t("editor:placeholders_enter_url")}
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
           onKeyDown={(e) => {

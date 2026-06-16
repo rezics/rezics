@@ -1,18 +1,22 @@
 import type {
-  FeedCarouselRow,
-  FeedContentRow,
+  FeedBookRow,
+  FeedFilterType,
+  FeedPostRow,
   FeedQuery,
   FeedResponse,
   FeedRow,
+  FeedShelfRow,
   FeedSort,
+  FeedUnitRow,
   FeedWorkSummary,
   PostDTO,
+  PostKind as PostKindValue,
   PostListQuery,
   ShelfSummaryDTO,
   ZoneBoundary,
 } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
-import { eq, inArray } from "drizzle-orm";
+import { mainMarkdownSource, PostKind } from "@rezics/contract";
+import { and, desc, eq, inArray, lt } from "drizzle-orm";
 import { bookService } from "@/book";
 import { db } from "@/db";
 import { UnitTranslation } from "@/db/schema/translation";
@@ -25,12 +29,16 @@ import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resoluti
 import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { AppError } from "@/utils/errors";
 import { zoneService } from "@/zone";
-import { feedResponse, mapPostToFeedRow } from "./feed.mapper";
+import {
+  feedResponse,
+  mapPostToFeedRow,
+  mapUnitToFeedRow,
+} from "./feed.mapper";
 
 const FEED_LIMIT_CAP = 50;
-const CAROUSEL_ITEM_LIMIT = 8;
-const FIRST_CAROUSEL_AFTER = 4;
-const CAROUSEL_SPACING = 6;
+const RECOMMENDATION_ITEM_LIMIT = 8;
+const FIRST_RECOMMENDATION_AFTER = 4;
+const RECOMMENDATION_SPACING = 6;
 
 function normalizeSort(sort: FeedQuery["sort"]): FeedSort {
   return sort ?? "best";
@@ -129,15 +137,49 @@ function withZoneFeedFilters(
   };
 }
 
-function countContentRows(rows: FeedRow[]): number {
-  return rows.filter((row) => row.type === "content").length;
+function countPostRows(rows: FeedRow[]): number {
+  return rows.filter((row) => row.type === "post").length;
 }
 
 function withSliceCursor(response: FeedResponse, limit: number): FeedResponse {
-  if (countContentRows(response.rows) < limit) {
+  if (countPostRows(response.rows) < limit) {
     return { ...response, nextCursor: null };
   }
   return response;
+}
+
+const UNIT_FILTER_TYPES = {
+  book: "BOOK",
+  game: "GAME",
+  media: "MEDIA",
+  realm: "REALM",
+  zone: "ZONE",
+} as const satisfies Partial<
+  Record<FeedFilterType, FeedUnitRow["unit"]["type"]>
+>;
+
+function unitTypeForFeedFilter(
+  filterType: FeedFilterType,
+): FeedUnitRow["unit"]["type"] | null {
+  return (
+    UNIT_FILTER_TYPES[filterType as keyof typeof UNIT_FILTER_TYPES] ?? null
+  );
+}
+
+function postKindForFeedFilter(
+  filterType: FeedFilterType,
+): PostKindValue | null {
+  if (filterType === "post") return PostKind.POST;
+  if (filterType === "review") return PostKind.REVIEW;
+  return null;
+}
+
+function unitCursorForFeed(cursor: FeedQuery["cursor"]): Date | null {
+  if (!cursor?.rowId || !cursor.createdAt) return null;
+  const [type] = cursor.rowId.split(":");
+  if (type !== "unit") return null;
+  const createdAt = new Date(cursor.createdAt);
+  return Number.isNaN(createdAt.getTime()) ? null : createdAt;
 }
 
 function titleFromTranslations(
@@ -157,12 +199,28 @@ function titleFromTranslations(
   );
 }
 
+function preferredTranslation<T extends { language: string }>(
+  translations: T[],
+  languages: string[],
+): T | undefined {
+  if (languages.length === 0) return translations[0];
+  return (
+    languages
+      .map((language) =>
+        translations.find((translation) => translation.language === language),
+      )
+      .find(Boolean) ?? translations[0]
+  );
+}
+
 function mapBookToWorkSummary(book: unknown): FeedWorkSummary {
   const source = book as {
     unitId?: string;
     kind?: string | null;
     title?: string | null;
     coverUrl?: string | null;
+    summary?: string | null;
+    description?: string | null;
     unit?: { translations?: Array<{ title?: string | null }> };
   };
   return {
@@ -170,6 +228,7 @@ function mapBookToWorkSummary(book: unknown): FeedWorkSummary {
     kind: source.kind ?? "book",
     title: titleFromTranslations(source),
     coverUrl: source.coverUrl ?? null,
+    description: source.summary ?? source.description ?? null,
   };
 }
 
@@ -187,30 +246,59 @@ function mapShelfToSummary(shelf: unknown): ShelfSummaryDTO {
   };
 }
 
+function mapBookToFeedRow(book: unknown): FeedBookRow {
+  const summary = mapBookToWorkSummary(book);
+  return {
+    type: "book",
+    rowId: `book:${summary.unitId}`,
+    book: summary,
+    href: `/book/${summary.unitId}`,
+    recommendationReason: "home-book-recommendation",
+  };
+}
+
+function mapShelfToFeedRow(shelf: unknown): FeedShelfRow {
+  const summary = mapShelfToSummary(shelf);
+  return {
+    type: "shelf",
+    rowId: `shelf:${summary.unitId}`,
+    shelf: summary,
+    href: `/shelf/${summary.unitId}`,
+    recommendationReason: "home-shelf-recommendation",
+  };
+}
+
 function scheduleFeedRows(
-  contentRows: FeedRow[],
-  carouselRows: FeedCarouselRow[],
+  postRows: FeedRow[],
+  recommendationRows: FeedRow[],
 ): FeedRow[] {
-  if (contentRows.length === 0 || carouselRows.length === 0) {
-    return contentRows;
+  if (postRows.length === 0) {
+    return recommendationRows;
+  }
+  if (recommendationRows.length === 0) {
+    return postRows;
   }
 
   const out: FeedRow[] = [];
-  let nextCarouselAt = FIRST_CAROUSEL_AFTER;
-  let carouselIndex = 0;
+  let nextRecommendationAt = FIRST_RECOMMENDATION_AFTER;
+  let recommendationIndex = 0;
 
-  for (let index = 0; index < contentRows.length; index += 1) {
-    out.push(contentRows[index]!);
+  for (let index = 0; index < postRows.length; index += 1) {
+    out.push(postRows[index]!);
     const contentPosition = index + 1;
     if (
-      carouselIndex < carouselRows.length &&
-      contentPosition >= nextCarouselAt &&
-      out.at(-1)?.type !== "carousel"
+      recommendationIndex < recommendationRows.length &&
+      contentPosition >= nextRecommendationAt
     ) {
-      out.push(carouselRows[carouselIndex]!);
-      carouselIndex += 1;
-      nextCarouselAt = contentPosition + CAROUSEL_SPACING;
+      out.push(recommendationRows[recommendationIndex]!);
+      recommendationIndex += 1;
+      nextRecommendationAt = contentPosition + RECOMMENDATION_SPACING;
     }
+  }
+
+  while (recommendationIndex < recommendationRows.length) {
+    out.push(recommendationRows[recommendationIndex]!);
+    recommendationIndex += 1;
   }
 
   return out;
@@ -224,7 +312,11 @@ type FeedPostDTO = PostDTO & {
   feedSortValue?: number | string | null;
 };
 
-type FeedRealmSummary = NonNullable<FeedContentRow["realm"]>;
+type FeedRealmSummary = NonNullable<FeedPostRow["realm"]>;
+
+function hasEmbeddedTargetSummary(post: FeedPostDTO): boolean {
+  return Boolean(post.extra?.book?.title);
+}
 
 function realmIdForFeedPost(
   post: PostDTO,
@@ -296,8 +388,16 @@ async function hydrateTargetUnitSummaries(
     appLocale: query.appLocale,
   });
   const [units, translations] = await Promise.all([
-    db.select({ id: Unit.id, type: Unit.type }).from(Unit).where(inArray(Unit.id, uniqueIds)),
-    db.select({ unitId: UnitTranslation.unitId, language: UnitTranslation.language, title: UnitTranslation.title })
+    db
+      .select({ id: Unit.id, type: Unit.type })
+      .from(Unit)
+      .where(inArray(Unit.id, uniqueIds)),
+    db
+      .select({
+        unitId: UnitTranslation.unitId,
+        language: UnitTranslation.language,
+        title: UnitTranslation.title,
+      })
       .from(UnitTranslation)
       .where(inArray(UnitTranslation.unitId, uniqueIds)),
   ]);
@@ -305,10 +405,14 @@ async function hydrateTargetUnitSummaries(
   const titlesByUnit = new Map<string, string | null>();
   for (const unitId of uniqueIds) {
     const unitTranslations = translations.filter((t) => t.unitId === unitId);
-    const preferred = languages.length > 0
-      ? unitTranslations.find((t) => languages.includes(t.language))
-      : undefined;
-    titlesByUnit.set(unitId, preferred?.title ?? unitTranslations[0]?.title ?? null);
+    const preferred =
+      languages.length > 0
+        ? unitTranslations.find((t) => languages.includes(t.language))
+        : undefined;
+    titlesByUnit.set(
+      unitId,
+      preferred?.title ?? unitTranslations[0]?.title ?? null,
+    );
   }
   const result = new Map<string, FeedWorkSummary>();
   for (const unitId of uniqueIds) {
@@ -325,12 +429,13 @@ async function mapPostsToFeedRows(
   posts: FeedPostSource[],
   query: FeedQuery,
   input: { realmUnitId?: string | null; reason?: string | null } = {},
-): Promise<FeedContentRow[]> {
+): Promise<FeedPostRow[]> {
   const dtos = await mapPostsToDTOs(posts, query);
   const realmIds = dtos
     .map((post) => realmIdForFeedPost(post, input.realmUnitId))
     .filter((unitId): unitId is string => Boolean(unitId));
   const targetUnitIds = dtos
+    .filter((post) => !hasEmbeddedTargetSummary(post))
     .map((post) => post.targetUnitId)
     .filter((unitId): unitId is string => Boolean(unitId));
   const [realms, targetUnits] = await Promise.all([
@@ -343,7 +448,9 @@ async function mapPostsToFeedRows(
       realmUnitId,
       realm: realmUnitId ? (realms.get(realmUnitId) ?? null) : null,
       reason: input.reason,
-      resolvedTargetUnit: post.targetUnitId ? (targetUnits.get(post.targetUnitId) ?? null) : null,
+      resolvedTargetUnit: post.targetUnitId
+        ? (targetUnits.get(post.targetUnitId) ?? null)
+        : null,
     });
   });
 }
@@ -440,52 +547,158 @@ export class FeedService {
       );
     }
 
-    const [posts, carousels] = await Promise.all([
+    const filterType = query.filterType ?? "all";
+    const postKind = postKindForFeedFilter(filterType);
+    if (postKind) {
+      const posts = await postService.list(
+        {
+          ...postQuery,
+          kind: postKind,
+        },
+        options,
+      );
+      return withSliceCursor(
+        feedResponse({
+          scope,
+          sort,
+          rows: await mapPostsToFeedRows(posts.posts, query, {
+            reason:
+              postKind === PostKind.REVIEW
+                ? "global-review-rank"
+                : "global-post-rank",
+          }),
+        }),
+        limit,
+      );
+    }
+
+    const unitType = unitTypeForFeedFilter(filterType);
+    if (unitType) {
+      const unitRows = await this.homeUnitRows(query, unitType, limit);
+      const response = feedResponse({
+        scope,
+        sort,
+        rows: unitRows.rows,
+      });
+      return unitRows.hasMore ? response : { ...response, nextCursor: null };
+    }
+
+    const [posts, recommendations] = await Promise.all([
       postService.list(postQuery, options),
-      query.cursor ? Promise.resolve([]) : this.homeCarouselRows(),
+      query.cursor ? Promise.resolve([]) : this.homeRecommendationRows(),
     ]);
-    const contentRows = await mapPostsToFeedRows(posts.posts, query, {
+    const postRows = await mapPostsToFeedRows(posts.posts, query, {
       reason: "global-post-rank",
     });
     return withSliceCursor(
       feedResponse({
         scope,
         sort,
-        rows: scheduleFeedRows(contentRows, carousels),
+        rows: scheduleFeedRows(postRows, recommendations),
       }),
       limit,
     );
   }
 
-  private async homeCarouselRows(): Promise<FeedCarouselRow[]> {
+  private async homeUnitRows(
+    query: FeedQuery,
+    unitType: FeedUnitRow["unit"]["type"],
+    limit: number,
+  ): Promise<{ rows: FeedUnitRow[]; hasMore: boolean }> {
+    const cursorCreatedAt = unitCursorForFeed(query.cursor);
+    const conditions = [
+      eq(Unit.type, unitType),
+      eq(Unit.status, "PUBLISHED"),
+      eq(Unit.visibility, "PUBLIC"),
+      ...(cursorCreatedAt ? [lt(Unit.createdAt, cursorCreatedAt)] : []),
+    ];
+    const rows = await db
+      .select({
+        unitId: Unit.id,
+        type: Unit.type,
+        slug: Unit.slug,
+        extra: Unit.extra,
+        createdAt: Unit.createdAt,
+      })
+      .from(Unit)
+      .where(and(...conditions))
+      .orderBy(desc(Unit.createdAt))
+      .limit(limit + 1);
+    const visibleRows = rows.slice(0, limit);
+    if (visibleRows.length === 0) {
+      return { rows: [], hasMore: false };
+    }
+    const translations = await db
+      .select({
+        unitId: UnitTranslation.unitId,
+        language: UnitTranslation.language,
+        title: UnitTranslation.title,
+        summary: UnitTranslation.summary,
+        description: UnitTranslation.description,
+      })
+      .from(UnitTranslation)
+      .where(
+        inArray(
+          UnitTranslation.unitId,
+          visibleRows.map((row) => row.unitId),
+        ),
+      );
+    const languages = resolveEffectiveReadLanguageCandidates({
+      languages: query.languages,
+      appLocale: query.appLocale,
+    });
+    const translationsByUnit = new Map<string, typeof translations>();
+    for (const translation of translations) {
+      const current = translationsByUnit.get(translation.unitId) ?? [];
+      current.push(translation);
+      translationsByUnit.set(translation.unitId, current);
+    }
+
+    return {
+      hasMore: rows.length > limit,
+      rows: visibleRows.map((row) => {
+        const translation = preferredTranslation(
+          translationsByUnit.get(row.unitId) ?? [],
+          languages,
+        );
+        const extra = row.extra as { coverUrl?: string | null } | null;
+        return mapUnitToFeedRow({
+          unitId: row.unitId,
+          type: row.type as FeedUnitRow["unit"]["type"],
+          slug: row.slug ?? null,
+          title: translation?.title ?? null,
+          coverUrl: extra?.coverUrl ?? null,
+          description:
+            translation?.summary ??
+            mainMarkdownSource(translation?.description) ??
+            null,
+          createdAt: row.createdAt.toISOString(),
+        });
+      }),
+    };
+  }
+
+  private async homeRecommendationRows(): Promise<FeedRow[]> {
     const [books, shelves] = await Promise.all([
-      bookService.list({ limit: CAROUSEL_ITEM_LIMIT }),
-      shelfService.list({ limit: CAROUSEL_ITEM_LIMIT }),
+      bookService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
+      shelfService.list({ limit: RECOMMENDATION_ITEM_LIMIT }),
     ]);
 
-    const workItems = books.books.map(mapBookToWorkSummary);
-    const shelfItems = shelves.shelves.map(mapShelfToSummary);
-    const rows: FeedCarouselRow[] = [];
-    if (workItems.length >= 2) {
-      rows.push({
-        type: "carousel",
-        rowId: "carousel:home:works",
-        carouselKind: "works",
-        title: { key: "feed.carousel.works" },
-        works: workItems,
-      });
-    }
-    if (shelfItems.length >= 2) {
-      rows.push({
-        type: "carousel",
-        rowId: "carousel:home:shelves",
-        carouselKind: "shelves",
-        title: { key: "feed.carousel.shelves" },
-        shelves: shelfItems,
-      });
-    }
-    return rows;
+    return interleaveRows(
+      books.books.map(mapBookToFeedRow),
+      shelves.shelves.map(mapShelfToFeedRow),
+    );
   }
 }
 
 export const feedService = new FeedService();
+
+function interleaveRows(left: FeedRow[], right: FeedRow[]): FeedRow[] {
+  const rows: FeedRow[] = [];
+  const max = Math.max(left.length, right.length);
+  for (let index = 0; index < max; index += 1) {
+    if (left[index]) rows.push(left[index]);
+    if (right[index]) rows.push(right[index]);
+  }
+  return rows;
+}

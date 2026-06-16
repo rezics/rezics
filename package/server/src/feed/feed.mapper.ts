@@ -1,10 +1,11 @@
 import type {
-  FeedContentRow,
   FeedCursor,
+  FeedPostRow,
   FeedResponse,
   FeedRow,
   FeedScope,
   FeedSort,
+  FeedUnitRow,
   FeedWorkSummary,
   PostDTO,
 } from "@rezics/contract";
@@ -37,14 +38,14 @@ function targetUnitForPost(
 export function mapPostToFeedRow(
   post: PostDTO,
   input: {
-    realm?: FeedContentRow["realm"];
+    realm?: FeedPostRow["realm"];
     realmUnitId?: string | null;
     reason?: string | null;
     resolvedTargetUnit?: FeedWorkSummary | null;
   } = {},
-): FeedContentRow {
+): FeedPostRow {
   return {
-    type: "content",
+    type: "post",
     rowId: `post:${post.unitId}`,
     post,
     href: postHrefForFeed(post, input.realmUnitId),
@@ -55,11 +56,44 @@ export function mapPostToFeedRow(
   };
 }
 
+export function mapUnitToFeedRow(unit: FeedUnitRow["unit"]): FeedUnitRow {
+  return {
+    type: "unit",
+    rowId: `unit:${unit.unitId}`,
+    unit,
+    href: hrefForFeedUnit(unit),
+    recommendationReason: "home-unit-feed",
+  };
+}
+
+function hrefForFeedUnit(unit: FeedUnitRow["unit"]): string {
+  if (unit.type === "BOOK") return `/book/${unit.unitId}`;
+  if (unit.type === "REALM") {
+    return unit.slug ? `/r/${unit.slug}` : `/realm/${unit.unitId}`;
+  }
+  if (unit.type === "ZONE") {
+    return unit.slug ? `/z/${unit.slug}` : `/zone/${unit.unitId}/search`;
+  }
+  return `/unit/${unit.unitId}`;
+}
+
 export function cursorForFeedRows(rows: FeedRow[]): FeedCursor | null {
   const last = rows
-    .filter((row): row is FeedContentRow => row.type === "content")
-    .at(-1) as (FeedContentRow & { post: FeedPost }) | undefined;
+    .filter(
+      (row): row is (FeedPostRow & { post: FeedPost }) | FeedUnitRow =>
+        row.type === "post" || row.type === "unit",
+    )
+    .at(-1) as (FeedPostRow & { post: FeedPost }) | FeedUnitRow | undefined;
   if (!last) return null;
+  if (last.type === "unit") {
+    return {
+      rowId: last.rowId,
+      createdAt:
+        typeof last.unit.createdAt === "string"
+          ? last.unit.createdAt
+          : last.unit.createdAt?.toISOString(),
+    };
+  }
   return {
     rowId: last.rowId,
     ...(last.post.feedSortValue !== undefined &&

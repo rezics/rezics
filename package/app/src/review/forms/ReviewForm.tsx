@@ -53,7 +53,9 @@ export function ReviewForm({
   const language = data.language ?? defaultLanguage ?? "en";
   const actionLabel =
     (data.contentSource?.length ?? 0) < 200
-      ? `${200 - (data.contentSource?.length ?? 0)} chars remaining`
+      ? t("community:review_chars_remaining", {
+          count: 200 - (data.contentSource?.length ?? 0),
+        })
       : (primaryAction?.label ?? submitLabel);
   const actionSubmit = primaryAction?.onClick ?? onSubmit;
   const actionDisabled = primaryAction?.disabled;
@@ -103,7 +105,10 @@ export function ReviewForm({
         />
         <div className="flex justify-between mt-1">
           <span className="text-xs text-muted-foreground">
-            {data.contentSource?.length ?? 0} / 200 min characters
+            {t("community:review_char_count", {
+              current: data.contentSource?.length ?? 0,
+              min: 200,
+            })}
           </span>
           {(data.contentSource?.length ?? 0) < 200 && (
             <span className="text-xs text-red-500">

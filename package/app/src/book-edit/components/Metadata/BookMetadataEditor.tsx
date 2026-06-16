@@ -143,6 +143,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <input
             id="book-pagecount"
             type="number"
+            min={1}
             value={currentPageCount}
             onChange={(e) =>
               onChange?.({
@@ -160,6 +161,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <input
             id="book-textlength"
             type="number"
+            min={0}
             value={currentTextLength}
             onChange={(e) =>
               onChange?.({

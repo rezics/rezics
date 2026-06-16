@@ -20,6 +20,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link, unitHref } from "@/shared/ui/link";
 import {
@@ -36,6 +37,78 @@ import {
 
 type RealmWorkspaceTab = "joined" | "administered";
 
+/**
+ * Realm list page with tabbed workspace view (joined/administered) and bulk leave management.
+ * 专区列表页，带标签页工作区视图（已加入/已管理）和批量离开管理。
+ *
+ * Layout responsive design:
+ * - Mobile (<640px): Single-column layout, full-width header and content
+ * - Tablet (640-1023px): Header flex row with search/action buttons stacked, tab content full-width
+ * - Desktop (1024-1535px): Three-column max-width container, header row with inline buttons, realm items in flexbox column
+ * - Ultra-wide (≥1536px): Same as desktop with additional side padding
+ *
+ * Mobile (<640px):
+ * ┌─────────────────────────┐
+ * │ Realms                  │ (stacked title + subtitle)
+ * │ My community spaces     │
+ * ├─────────────────────────┤
+ * │ [Search] [Manage] [New] │ (vertical stack)
+ * ├─────────────────────────┤
+ * │ [Joined] [Administr...] │ (tab list)
+ * ├─────────────────────────┤
+ * │ ☐ Realm 1              │ (list item)
+ * │   Description...        │
+ * │          5 members      │
+ * ├─────────────────────────┤
+ * │ ☐ Realm 2              │
+ * │   Description...        │
+ * │        12 members       │
+ * └─────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌───────────────────────────────────────┐
+ * │ Realms    [Search] [Manage] [New]    │ (flex row)
+ * │ My community spaces                   │
+ * ├───────────────────────────────────────┤
+ * │ [Joined] [Administered]               │ (tab list)
+ * ├───────────────────────────────────────┤
+ * │ ☐ Realm 1                            │
+ * │   Description preview...              │
+ * │              5 members                │
+ * ├───────────────────────────────────────┤
+ * │ ☐ Realm 2                            │
+ * │   Description preview...              │
+ * │             12 members                │
+ * └───────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌──────────────────────────────────────────────────┐
+ * │ Realms              [Search] [Manage] [New]      │ (flex row, justify-between)
+ * │ My community spaces                              │
+ * ├──────────────────────────────────────────────────┤
+ * │ [Joined] [Administered]                          │
+ * ├──────────────────────────────────────────────────┤
+ * │ ┌────────────────────────────────────────────┐  │
+ * │ │ ☐ [Logo] Realm 1        [OFFICIAL] 5 members│ │
+ * │ │      Description preview line 1...        │  │
+ * │ │      Description preview line 2...        │  │
+ * │ └────────────────────────────────────────────┘  │
+ * │ ┌────────────────────────────────────────────┐  │
+ * │ │ ☐ [Logo] Realm 2        [PRIVATE]  12 members│ │
+ * │ │      Description preview line 1...        │  │
+ * │ └────────────────────────────────────────────┘  │
+ * └──────────────────────────────────────────────────┘
+ *
+ * Ultra-wide (≥1536px):
+ * ┌────────────────────────────────────────────────────────────┐
+ * │ [Padding] Realms         [Search] [Manage] [New]  [Padding]│
+ * │          My community spaces                               │
+ * ├────────────────────────────────────────────────────────────┤
+ * │ [Padding] [Joined] [Administered]                          │
+ * ├────────────────────────────────────────────────────────────┤
+ * │ [Padding] Realm items (same layout as desktop)  [Padding]  │
+ * └────────────────────────────────────────────────────────────┘
+ */
 export function RealmListPage() {
   const { t } = useTranslation(["common", "entity", "settings"]);
   const navigate = useNavigate();
@@ -85,11 +158,17 @@ export function RealmListPage() {
   };
 
   const handleLeaveSelected = async () => {
-    await Promise.all(
-      selectedRealms.map((realm) => leaveRealm.mutateAsync(realm.unitId)),
-    );
-    setConfirmOpen(false);
-    setManageMode(false);
+    try {
+      await Promise.all(
+        selectedRealms.map((realm) => leaveRealm.mutateAsync(realm.unitId)),
+      );
+      setConfirmOpen(false);
+      setManageMode(false);
+    } catch (error) {
+      // Show toast on partial or total failure; keep dialog open for retry.
+      // 部分或全部失败时弹出提示；保持对话框打开以便重试。
+      toast.error(t("entity:realm_list_leave_failed"));
+    }
   };
 
   if (!target.targetUserId && !target.isLoading && !hasMemberSession) {

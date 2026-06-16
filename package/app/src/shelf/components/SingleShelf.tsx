@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { shelfKindLabel } from "../models/systemShelfLabel";
 
 interface SingleShelfProps {
   shelf: ShelfDTO;
@@ -14,7 +15,11 @@ interface SingleShelfProps {
 export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
   const { t } = useTranslation(["common", "entity"]);
   const translation = getTranslation(shelf.translations);
-  const title = translation?.title ?? t("entity:shelf_untitled");
+  const title =
+    translation?.title ||
+    (shelf.kindKey
+      ? shelfKindLabel(shelf.kindKey)
+      : t("entity:shelf_untitled"));
   const description = contentDocMarkdownFallback(translation?.description);
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "shelf", ownerUnit: shelf });
@@ -31,7 +36,9 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
             variant="ghost"
             size="icon"
             aria-label={t("common:edit")}
-            onClick={() => navigate({ to: `/shelf/${shelfId}/edit` })}
+            onClick={() =>
+              navigate({ to: "/shelf/$shelfId/edit", params: { shelfId } })
+            }
             className="h-7 w-7"
           >
             <EditOutlined className="h-4 w-4" />

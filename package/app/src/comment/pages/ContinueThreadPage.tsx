@@ -6,6 +6,7 @@ import { useEditorEntry } from "@rezics/api/hooks";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
+import { QueryErrorDisplay } from "@/core";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { Pencil } from "lucide-react";
@@ -17,6 +18,21 @@ import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { mergeCommentChildSliceRows } from "../models/commentTreeRails";
 import { CommentTreeList } from "../sections/CommentTreeList";
 
+/**
+ * 继续讨论线程页面。显示单个评论及其回复树，支持无限滚动加载更多回复。
+ * Continue thread page. Displays a single comment and its reply tree, supports infinite scroll loading.
+ *
+ * Mobile:            Tablet:             Desktop:            Ultra-wide:
+ * ┌──────────────┐   ┌────────────────────┐ ┌────────────────────┐ ┌──────────────────────┐
+ * │ [← back]     │   │ [← back]           │ │ [← back]           │ │ [← back]             │
+ * │ Root Comment │   │ Root Comment       │ │ Root Comment       │ │ Root Comment         │
+ * │ [Edit][Reply]│   │ [Edit] [Reply]     │ │ [Edit]  [Reply]    │ │ [Edit]   [Reply]     │
+ * │ Composer     │   │ Composer input     │ │ Composer input     │ │ Composer input       │
+ * │ Reply 1      │   │ Reply 1 Reply 2    │ │ Reply 1 Reply 2    │ │ Reply 1 Reply 2      │
+ * │ Reply 2      │   │ Reply 3 [Load +]   │ │ Reply 3 [Load +]   │ │ Reply 3 [Load +]     │
+ * │ [Load More]  │   │                    │ │                    │ │                      │
+ * └──────────────┘   └────────────────────┘ └────────────────────┘ └──────────────────────┘
+ */
 export const ContinueThreadPage: React.FC = () => {
   const { t } = useTranslation(["common", "community"]);
   const navigate = useNavigate();
@@ -93,7 +109,11 @@ export const ContinueThreadPage: React.FC = () => {
           parentCommentId={rootComment.unitId}
         />
       )}
-      {isLoading ? (
+      {commentAnchorQuery.isError ? (
+        <QueryErrorDisplay error={commentAnchorQuery.error} />
+      ) : commentSubtreeQuery.isError ? (
+        <QueryErrorDisplay error={commentSubtreeQuery.error} />
+      ) : isLoading ? (
         <div className="flex justify-center py-6">
           <Spinner size="sm" />
         </div>

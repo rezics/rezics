@@ -86,5 +86,7 @@
   "theme_customizer_custom_color": "自訂顏色",
   "theme_customizer_hex_format": "輸入格式：#RRGGBB",
   "create_menu_new_book": "新建書籍",
-  "create_menu_new_shelf": "新建書架"
+  "create_menu_new_shelf": "新建書架",
+  "navigation_zones_error": "載入區域失敗",
+  "navigation_realms_error": "載入領域失敗"
 }

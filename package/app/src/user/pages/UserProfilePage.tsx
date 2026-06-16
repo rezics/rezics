@@ -68,7 +68,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   }
 
   return (
-    <div className="w-11/12 mx-auto max-w-4xl mt-16">
+    <div className="w-full px-4 mx-auto max-w-4xl mt-16">
       <Card surface="contained">
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">

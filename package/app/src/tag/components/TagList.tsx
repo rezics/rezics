@@ -40,9 +40,17 @@ export function SingleTagChip({
   return (
     <div className={className}>
       <Badge
+        role="button"
+        tabIndex={0}
         variant={isActive ? "default" : "secondary"}
         className="cursor-pointer"
         onClick={(e) => handleClick(e, tag)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent, tag);
+          }
+        }}
       >
         {label} ({tag.score})
       </Badge>
@@ -96,9 +104,17 @@ export const TagList: React.FC<{
           return (
             <div key={tag.tagUnitId} className="flex items-center">
               <Badge
+                role="button"
+                tabIndex={0}
                 variant={isActive ? "default" : "secondary"}
                 className={cn("cursor-pointer")}
                 onClick={(e) => handleClick(e, tag)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleClick(e as unknown as React.MouseEvent, tag);
+                  }
+                }}
               >
                 {label} ({tag.score})
               </Badge>

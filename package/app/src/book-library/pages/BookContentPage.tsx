@@ -34,6 +34,65 @@ const ContentSidebar: React.FC<{ textLength: number; pageCount?: number }> = ({
   );
 };
 
+/**
+ * 书籍内容页面。展示书籍的章节列表和阅读统计信息。
+ * Book Content Page: displays chapter list and reading statistics (text length, page count).
+ *
+ * Layout breakpoints:
+ *
+ * Mobile (<640px):
+ * ┌──────────────────────┐
+ * │ Content Stats        │
+ * │ [Reading info card]  │
+ * │ Text: 123,456 chars  │
+ * │ Pages: 450           │
+ * ├──────────────────────┤
+ * │ Chapter List         │
+ * │ [Chapter 1]          │
+ * │ [Chapter 2]          │
+ * │ [Chapter 3]          │
+ * │ [... more]           │
+ * │ (scrollable)         │
+ * └──────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ Content Stats (inline, at top)     │
+ * │ [Reading info card - wider]        │
+ * │ Text: 123,456 chars | Pages: 450   │
+ * ├────────────────────────────────────┤
+ * │ Chapter List (full width)          │
+ * │ [Chapter 1      ] | [Chapter 4]    │
+ * │ [Chapter 2      ] | [Chapter 5]    │
+ * │ [Chapter 3      ] | [... more]     │
+ * │ (two-column or list view)          │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌─────────────────────────────────────────────┐
+ * │ [Sidebar (hidden)]  │ Main Content area     │
+ * │                     │ Content Stats         │
+ * │                     │ [Card with info]      │
+ * │                     ├─────────────────────┤
+ * │                     │ Chapter List         │
+ * │                     │ [Complete list]      │
+ * │                     │ [Chapter 1]          │
+ * │                     │ [Chapter 2]          │
+ * │                     │ [Chapter 3]          │
+ * │                     │ [... scrollable]     │
+ * └─────────────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌──────────────────────────────────────────────────────┐
+ * │ [Sidebar]           │ Main Content (optimal width)   │
+ * │ Stats Card (sticky) │ Chapter List                   │
+ * │ [Reading info]      │ [Spacious layout]              │
+ * │                     │ [Chapter 1 - large]            │
+ * │                     │ [Chapter 2 - large]            │
+ * │                     │ [Chapter 3 - large]            │
+ * │                     │ [... with descriptions]        │
+ * └──────────────────────────────────────────────────────┘
+ */
 export const BookContentPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const readContext = useReadLanguageContext();

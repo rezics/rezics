@@ -6,6 +6,52 @@ import { ArrowRight } from "lucide-react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
+/**
+ * Highlights a featured zone/collection for a realm.
+ * Displays zone name, description preview, and "Open" button linking to zone detail.
+ * Returns null if zone ID missing, query error, or zone not found.
+ *
+ * 突出显示社区的特色区域/合集。
+ * 显示区域名称、描述预览和链接到区域详情的"打开"按钮。
+ * 如果区域ID缺失、查询错误或区域未找到，返回null。
+ *
+ * Layout:
+ * Mobile (<640px):
+ * ┌──────────────────────────┐
+ * │ Featured Zone            │
+ * ├──────────────────────────┤
+ * │ Zone Name / Slug         │
+ * │ Zone description preview │
+ * │ clamped to 2 lines       │
+ * │                          │
+ * │ [Open ─→ Button]         │
+ * └──────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ Featured Zone                      │
+ * ├────────────────────────────────────┤
+ * │ Zone Name / Slug                   │
+ * │ Zone description preview clamped   │
+ * │ to 2 lines                         │
+ * │                                    │
+ * │ [Open ─→ Button - full width]      │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌──────────────────────────────────────┐
+ * │ Featured Zone                        │
+ * ├──────────────────────────────────────┤
+ * │ Zone Name / Slug                     │
+ * │ Zone description preview clamped     │
+ * │ to 2 lines                           │
+ * │                                      │
+ * │ [Open ─→ Button - full width]        │
+ * └──────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * Same as Desktop - contained card
+ */
 export interface FeaturedZoneSectionProps {
   zoneUnitId?: string | null;
 }

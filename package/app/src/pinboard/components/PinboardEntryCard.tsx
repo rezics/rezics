@@ -205,9 +205,11 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           </p>
         ) : null}
         <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-          <span className="truncate text-xs leading-dense text-text-tertiary">
-            {entry.subtitle ?? entry.language}
-          </span>
+          {entry.subtitle ? (
+            <span className="truncate text-xs leading-dense text-text-tertiary">
+              {entry.subtitle}
+            </span>
+          ) : null}
           <span className="shrink-0 text-xs leading-dense text-text-tertiary">
             {entry.language}
           </span>

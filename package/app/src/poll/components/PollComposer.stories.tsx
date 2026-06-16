@@ -8,7 +8,7 @@ const meta = {
   decorators: [
     withRouter,
     (Story) => (
-      <div className="mx-auto max-w-xl p-6">
+      <div className="w-full mx-auto max-w-xl p-6">
         <Story />
       </div>
     ),

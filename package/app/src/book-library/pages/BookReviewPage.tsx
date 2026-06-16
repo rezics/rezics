@@ -1,6 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Button, Separator } from "@rezics/ui/shadcn";
@@ -25,7 +26,100 @@ import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 const REVIEW_PREVIEW_LIMIT = 5;
 const SHELF_PREVIEW_LIMIT = 5;
 
+/**
+ * 书籍评论页面。展示书籍的评分概览、相关书架和用户评论列表，支持撰写新评论。
+ * Book Review Page: displays book ratings, related shelves, user reviews (max 5), and write review button.
+ *
+ * Layout breakpoints:
+ *
+ * Mobile (<640px):
+ * ┌──────────────────────┐
+ * │ Score Overview       │
+ * │ [★★★★☆ 4.2]        │
+ * │ 128 ratings          │
+ * ├──────────────────────┤
+ * │ Related Shelves      │
+ * │ [Shelf 1]            │
+ * │ [Shelf 2]            │
+ * │ [Shelf 3]            │
+ * │ [Shelf 4]            │
+ * │ [Shelf 5]            │
+ * ├──────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━  │
+ * ├──────────────────────┤
+ * │ Reviews [Write] →    │
+ * │ "Book Title Reviews" │
+ * ├──────────────────────┤
+ * │ [Review 1]           │
+ * │ [Review 2]           │
+ * │ [Review 3]           │
+ * │ [Review 4]           │
+ * │ [Review 5]           │
+ * └──────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ Score Overview (more visible)      │
+ * │ [★★★★☆ 4.2] 128 ratings           │
+ * ├────────────────────────────────────┤
+ * │ Related Shelves (2 columns)        │
+ * │ [Shelf 1]        [Shelf 3]         │
+ * │ [Shelf 2]        [Shelf 4]         │
+ * │ [Shelf 5]        ...               │
+ * ├────────────────────────────────────┤
+ * │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+ * ├────────────────────────────────────┤
+ * │ Reviews [Write Review →]           │
+ * │ "Book Title Reviews"               │
+ * ├────────────────────────────────────┤
+ * │ [Review 1 (wider)]                 │
+ * │ [Review 2 (wider)]                 │
+ * │ [Review 3 (wider)]                 │
+ * │ [Review 4 (wider)]                 │
+ * │ [Review 5 (wider)]                 │
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌─────────────────────────────────────────────┐
+ * │ [Sidebar]           │ Main Content          │
+ * │ Score Overview      │ Related Shelves       │
+ * │ [★★★★☆ 4.2]       │ [Shelf 1] [Shelf 2]   │
+ * │ 128 ratings         │ [Shelf 3] [Shelf 4]   │
+ * │                     │ [Shelf 5] ...         │
+ * │                     ├─────────────────────┤
+ * │                     │ ━━━━━━━━━━━━━━━  │
+ * │                     ├─────────────────────┤
+ * │                     │ "Book Title Reviews" │
+ * │                     │ [Write Review →]    │
+ * │                     ├─────────────────────┤
+ * │                     │ [Review 1]          │
+ * │                     │ [Review 2]          │
+ * │                     │ [Review 3]          │
+ * │                     │ [Review 4]          │
+ * │                     │ [Review 5]          │
+ * └─────────────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌──────────────────────────────────────────────────────┐
+ * │ [Sidebar (sticky)]  │ Main Content (optimal width)   │
+ * │ Score Overview      │ Related Shelves (3+ columns)   │
+ * │ [★★★★☆ 4.2]       │ [Shelf 1] [Shelf 2] [Shelf 3]   │
+ * │ 128 ratings         │ [Shelf 4] [Shelf 5] ...        │
+ * │ [Sticky position]   ├────────────────────────────────┤
+ * │                     │ ━━━━━━━━━━━━━━━━━━━━━━━  │
+ * │                     ├────────────────────────────────┤
+ * │                     │ "Book Title - Full Reviews"     │
+ * │                     │ [Write Review Button →]        │
+ * │                     ├────────────────────────────────┤
+ * │                     │ [Review 1 (full width)]        │
+ * │                     │ [Review 2 (full width)]        │
+ * │                     │ [Review 3 (full width)]        │
+ * │                     │ [Review 4 (full width)]        │
+ * │                     │ [Review 5 (full width)]        │
+ * └──────────────────────────────────────────────────────┘
+ */
 export const BookReviewPage: React.FC = () => {
+  const { t } = useTranslation("book");
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const navigate = useNavigate();
   const readContext = useReadLanguageContext();
@@ -106,7 +200,7 @@ export const BookReviewPage: React.FC = () => {
       <div>
         <div className="flex flex-row justify-between items-center mb-2">
           <ArrowForwardIcon size={16} to={`/review/book/${bookId}`}>
-            <AccentBarWithText text={`Reviews of ${title}`} />
+            <AccentBarWithText text={t("reviews_of_book", { title })} />
           </ArrowForwardIcon>
           <Button
             variant="ghost"
@@ -124,7 +218,7 @@ export const BookReviewPage: React.FC = () => {
               })
             }
           >
-            Write a Review
+            {t("write_a_review")}
           </Button>
         </div>
         <ReviewList reviews={reviews} />

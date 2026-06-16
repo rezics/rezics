@@ -260,5 +260,12 @@
   "subscription_recovery_other_description": "用户添加的订阅在目标仍然可见且可订阅时可以恢复。",
   "subscription_recovery_other_empty": "没有其他已移除的订阅。",
   "subscription_recovery_restore_error": "此订阅目前无法恢复。",
-  "subscription_recovery_restore": "恢复"
+  "subscription_recovery_restore": "恢复",
+  "tokens_created_date": "创建于 {date}",
+  "tokens_expires_date": "过期于 {date}",
+  "tokens_last_used_date": "最后使用 {date}",
+  "tokens_last_used_from_ip": "来自 {ip}",
+  "tokens_never_used": "从未使用",
+  "security_current_session": "当前会话",
+  "profile_content_on_target": "关于{title}"
 }

@@ -57,18 +57,18 @@ export function useMasonryParameters(): MasonryParams {
   return params;
 }
 
-// Lightweight throttle.
-// 轻量 throttle。
+// Lightweight throttle with cancel support.
+// 支持取消的轻量 throttle。
 function throttle<T extends (...args: any[]) => void>(fn: T, wait: number) {
   let last = 0;
-  let timer: any = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
 
-  return (...args: Parameters<T>) => {
+  const throttled = (...args: Parameters<T>) => {
     const now = Date.now();
     const remaining = wait - (now - last);
 
     if (remaining <= 0) {
-      clearTimeout(timer);
+      clearTimeout(timer!);
       timer = null;
       last = now;
       fn(...args);
@@ -80,6 +80,17 @@ function throttle<T extends (...args: any[]) => void>(fn: T, wait: number) {
       }, remaining);
     }
   };
+
+  // Clear any pending trailing timer.
+  // 清除待执行的尾部定时器。
+  throttled.cancel = () => {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  };
+
+  return throttled;
 }
 
 export function useThrottleMasonryParameters(throttleMs = 1000): MasonryParams {
@@ -104,7 +115,12 @@ export function useThrottleMasonryParameters(throttleMs = 1000): MasonryParams {
     throttledResize();
 
     window.addEventListener("resize", throttledResize);
-    return () => window.removeEventListener("resize", throttledResize);
+    return () => {
+      window.removeEventListener("resize", throttledResize);
+      // Cancel any pending trailing timer to avoid setState after unmount.
+      // 取消待执行的尾部定时器，避免卸载后 setState。
+      throttledResize.cancel();
+    };
   }, [throttleMs]);
 
   return params;

@@ -20,13 +20,11 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useMatch } from "@tanstack/react-router";
 import { XCircle as CancelIcon, Save as SaveIcon } from "lucide-react";
 import type React from "react";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core";
-import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
 
 export interface UserEditPageProps {
@@ -51,8 +49,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   userId,
 }) => {
   const { t } = useTranslation(["common", "entity", "settings"]);
-  const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
-  const resolvedUserId = userId ?? routeMatch?.params.userId;
+  const resolvedUserId = userId;
   const [user, setUser] = useState<UserDTO | null>(null);
   const {
     data,
@@ -88,11 +85,13 @@ export const UserEditPage: FC<UserEditPageProps> = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const trimmedName = (formData.name ?? "").trim();
+    if (!trimmedName) return;
     setSaving(true);
 
     try {
       const updateData: UpdateUser = {
-        name: formData.name,
+        name: trimmedName,
         avatar: formData.avatar || undefined,
         bio: formData.bio || undefined,
         description: markdownContentDoc(formData.description),
@@ -142,7 +141,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   }
 
   return (
-    <div className="w-11/12 max-w-2xl mx-auto mt-16">
+    <div className="w-full px-4 max-w-2xl mx-auto mt-16">
       <Card surface="contained">
         <CardContent className="pt-6">
           <div className="flex items-center gap-4 mb-6">

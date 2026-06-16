@@ -18,8 +18,74 @@ import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { unitHref } from "@/shared/ui/link";
 
+/**
+ * Full-page form for creating a new realm (community).
+ * Collects title, description, tag view style preference, and viewer switch setting.
+ * Navigates to the new realm on successful creation.
+ *
+ * 用于创建新社区的整页表单。
+ * 收集标题、描述、标签视图样式偏好和查看者切换设置。
+ * 成功创建后导航到新社区。
+ *
+ * Layout:
+ * Mobile (<640px):
+ * ┌──────────────────────────┐
+ * │ Create Realm             │
+ * ├──────────────────────────┤
+ * │ Name                     │
+ * │ [Input field]            │
+ * │                          │
+ * │ Description              │
+ * │ [Text area - 4 rows]     │
+ * │                          │
+ * │ Tag View                 │
+ * │ [Dropdown]               │
+ * │ [Toggle Viewer Switch]   │
+ * │                          │
+ * │ [Policy denial notice]   │
+ * │                          │
+ * │                 [Create] │
+ * └──────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌────────────────────────────────────┐
+ * │ Create Realm                       │
+ * ├────────────────────────────────────┤
+ * │ Name                               │
+ * │ [Input field]                      │
+ * │                                    │
+ * │ Description                        │
+ * │ [Text area - 4 rows]               │
+ * │                                    │
+ * │ Tag View                           │
+ * │ [Dropdown]         [Toggle]        │
+ * │                                    │
+ * │ [Policy denial notice]             │
+ * │                              [Create]
+ * └────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌──────────────────────────────────────┐
+ * │ Create Realm                         │
+ * ├──────────────────────────────────────┤
+ * │ Name                                 │
+ * │ [Input field]                        │
+ * │                                      │
+ * │ Description                          │
+ * │ [Text area - 4 rows]                 │
+ * │                                      │
+ * │ Tag View                             │
+ * │ [Dropdown]                [Toggle]   │
+ * │                                      │
+ * │ [Policy denial notice]               │
+ * │                                 [Create]
+ * └──────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * Same as Desktop - max-width 3xl container centered
+ */
 export function NewRealmPage() {
-  const { t } = useTranslation(["common", "entity"]);
+  const { t } = useTranslation(["common", "community", "entity"]);
   const authoringLanguage = useAuthoringLanguageDefault();
   const navigate = useNavigate();
   const createMutation = useCreateRealmMutation();
@@ -88,12 +154,14 @@ export function NewRealmPage() {
         <section className="flex flex-col gap-3">
           <div>
             <h2 className="text-base font-semibold leading-ui text-text-primary">
-              Tags tab view
+              {t("community:tag_view_heading")}
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
             <div className="flex flex-col gap-1">
-              <Label htmlFor="new-realm-tag-view-style">Default view</Label>
+              <Label htmlFor="new-realm-tag-view-style">
+                {t("community:tag_view_default")}
+              </Label>
               <Select
                 value={tagViewStyle}
                 onValueChange={(value) =>
@@ -104,9 +172,15 @@ export function NewRealmPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="flat">Flat</SelectItem>
-                  <SelectItem value="grouped">Grouped</SelectItem>
-                  <SelectItem value="tree">Tree</SelectItem>
+                  <SelectItem value="flat">
+                    {t("community:tag_view_flat")}
+                  </SelectItem>
+                  <SelectItem value="grouped">
+                    {t("community:tag_view_grouped")}
+                  </SelectItem>
+                  <SelectItem value="tree">
+                    {t("community:tag_view_tree")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -115,7 +189,9 @@ export function NewRealmPage() {
               variant={allowTagViewSwitch ? "secondary" : "outline"}
               onClick={() => setAllowTagViewSwitch((value) => !value)}
             >
-              {allowTagViewSwitch ? "Viewer switch on" : "Viewer switch off"}
+              {allowTagViewSwitch
+                ? t("community:tag_view_viewer_switch_on")
+                : t("community:tag_view_viewer_switch_off")}
             </Button>
           </div>
         </section>

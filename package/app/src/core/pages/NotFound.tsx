@@ -52,7 +52,7 @@ export const NotFoundContainer: React.FC<NotFoundContainerProps> = () => {
   const navigate = useNavigate();
   const router = useRouter();
   const path = useRouterState({
-    select: (s) => s.location.href,
+    select: (s) => s.location.pathname,
   });
 
   const handleBack = () => {

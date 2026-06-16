@@ -92,6 +92,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
 
   const myResult = useQuery(
     buildMeiliFeedbackQuery(startMine, EXTERNAL_PAGE_SIZE, search ?? "", {
+      userId: userId ?? undefined,
       type: typeFilter,
       resolved,
     }),
@@ -108,8 +109,15 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
   const resolveMutation = useSetFeedbackResolvedMutation();
 
   const handleResolve = (id: string) => {
-    resolveMutation.mutate({ id, resolved: true });
-    showAlert(getI18nRuntime().i18n.t("community:feedback_resolve_success"));
+    resolveMutation.mutate(
+      { id, resolved: true },
+      {
+        onSuccess: () =>
+          showAlert(
+            getI18nRuntime().i18n.t("community:feedback_resolve_success"),
+          ),
+      },
+    );
   };
 
   const activeResult =
@@ -134,7 +142,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
     }
 
     paginatorRef.current?.resetPaginationPageNumber?.();
-  }, [queryType]);
+  }, [queryType, search, typeFilter, resolved]);
 
   const handleNeedMoreData = (externalPage: number) => {
     const offset = (externalPage - 1) * EXTERNAL_PAGE_SIZE;
@@ -157,6 +165,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
         limit,
         search ?? "",
         {
+          userId: userId ?? undefined,
           type: typeFilter,
           resolved,
         },
@@ -295,7 +304,10 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
                               )}
                             </div>
 
-                            <Button onClick={() => handleResolve(item.id)}>
+                            <Button
+                              onClick={() => handleResolve(item.id)}
+                              disabled={resolveMutation.isPending}
+                            >
                               {getI18nRuntime().i18n.t("common:confirm")}
                             </Button>
                           </div>

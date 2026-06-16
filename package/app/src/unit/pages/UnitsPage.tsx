@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +24,7 @@ import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearc
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
+import { mapContentSearchDocToUnitDTO } from "../models/contentSearchDocToUnitDTO";
 
 type Unit = UnitDTO;
 
@@ -63,6 +64,78 @@ export interface UnitsPageProps {
   children?: (units: any[]) => React.ReactNode;
 }
 
+/**
+ * Searchable units page with keyword input, multi-type tabs, and paginated
+ * results. Supports custom filters by user and target unit, with optional
+ * children renderer for custom result layouts.
+ * 可搜索的 unit 页面，包含关键词输入、多类型标签和分页结果。支持按用户和目标 unit 的自定义筛选，
+ * 具有可选的子渲染器用于自定义结果布局。
+ *
+ * Mobile <640px:
+ * +--[max-w-7xl]--+
+ * | KeywordInput |
+ * | [Tab][Tab]   |
+ * | +----------+ |
+ * | |Unit Item | |
+ * | |Badge Type| |
+ * | |Title     | |
+ * | |Descr...  | |
+ * | +----------+ |
+ * | +----------+ |
+ * | |Unit Item | |
+ * | +----------+ |
+ * | [Pagination] |
+ * +-------------+
+ *
+ * Tablet 640-1023px:
+ * +-----[max-w-7xl]-----+
+ * | KeywordInput        |
+ * | [Tab][Tab][Tab]     |
+ * | +-------+-------+   |
+ * | |Badge |Title   |   |
+ * | |Type  |Description |
+ * | |      |...      |   |
+ * | +-------+-------+   |
+ * | +-------+-------+   |
+ * | |Badge |Title   |   |
+ * | |Type  |Description |
+ * | +-------+-------+   |
+ * | [Pagination]        |
+ * +---------------------+
+ *
+ * Desktop 1024-1535px:
+ * +----------[max-w-7xl]----------+
+ * | KeywordInput                 |
+ * | [Tab][Tab][Tab][Tab]         |
+ * | +-----------+---------------+ |
+ * | |Badge Type | Title         | |
+ * | |           | Description   | |
+ * | |           | ...           | |
+ * | +-----------+---------------+ |
+ * | +-----------+---------------+ |
+ * | |Badge Type | Title         | |
+ * | |           | Description   | |
+ * | +-----------+---------------+ |
+ * | [Pagination]                 |
+ * +------------------------------+
+ *
+ * Ultra-wide >=1536px:
+ * +----------[max-w-7xl]----------+
+ * | KeywordInput                 |
+ * | [Tab][Tab][Tab][Tab]         |
+ * | +-----------+---------------+ |
+ * | |Badge Type | Title         | |
+ * | |           | Description   | |
+ * | |           | Full text...  | |
+ * | +-----------+---------------+ |
+ * | +-----------+---------------+ |
+ * | |Badge Type | Title         | |
+ * | |           | Description   | |
+ * | |           | Full text...  | |
+ * | +-----------+---------------+ |
+ * | [Pagination]                 |
+ * +------------------------------+
+ */
 export const UnitsPage: React.FC<UnitsPageProps> = ({
   mode = "tab",
   type,
@@ -95,8 +168,13 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   const [tab, setTab] = useState<string>(types[0] ?? "");
   const [startMap, setStartMap] = useState<Record<string, number>>({});
 
-  // initialize tab from URL (only in tab mode)
-  // 从 URL 初始化标签页（仅在 tab 模式下）
+  // Stable serialization of `types` for use as a dependency.
+  // 将 `types` 稳定序列化，用作依赖项。
+  const typesKey = JSON.stringify(types);
+
+  // Initialize tab from URL (only in tab mode).
+  // 从 URL 初始化标签页（仅在 tab 模式下）。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: typesKey is a stable serialization of types — listing types directly would cause infinite re-renders.
   useEffect(() => {
     if (isSingle) {
       if (type && types.includes(type)) {
@@ -112,28 +190,20 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     } else if (types.length > 0) {
       setTab(types[0]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isSingle,
-    types.includes,
-    types.length,
-    type,
-    types[0],
-    searchParams.get,
-  ]);
+  }, [isSingle, typesKey, type, searchParams]);
 
-  // ensure startMap has keys for current tabTypes
-  // 确保 startMap 为当前的 tabTypes 都有对应的键
+  // Ensure startMap has keys for current tabTypes.
+  // 确保 startMap 为当前的 tabTypes 都有对应的键。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: typesKey is a stable serialization of types — listing types directly would cause infinite re-renders.
   useEffect(() => {
     setStartMap((prev) => {
       const next = { ...prev };
-      types.forEach((t) => {
+      for (const t of types) {
         if (next[t] == null) next[t] = 0;
-      });
+      }
       return next;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [types.forEach]);
+  }, [typesKey]);
 
   const searchOptions = {
     type: tab === "UNIT" ? undefined : tab,
@@ -180,13 +250,13 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   }, []);
 
   const units: Unit[] = useMemo(
-    () => (activeData?.items ?? []) as unknown as Unit[],
+    () => (activeData?.items ?? []).map(mapContentSearchDocToUnitDTO),
     [activeData],
   );
   const totalItems: number = activeData?.total ?? 0;
 
   return (
-    <div className="mx-auto max-w-7xl p-4 mt-4">
+    <div className="w-full mx-auto max-w-7xl p-4 mt-4">
       <UniversalPaginator<Unit>
         ref={ref}
         data={units}
@@ -212,9 +282,9 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
               <div className="mt-4 mb-4 border-b border-border-whisper">
                 <Tabs value={tab} onValueChange={(v) => setTab(v)}>
                   <TabsList aria-label={t("book:unit_type_tabs_label")}>
-                    {types.map((t) => (
-                      <TabsTrigger key={t} value={t}>
-                        {t}
+                    {types.map((type) => (
+                      <TabsTrigger key={type} value={type}>
+                        {type}
                       </TabsTrigger>
                     ))}
                   </TabsList>

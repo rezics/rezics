@@ -125,13 +125,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               zones: {
                 items: entryNavigationItems(zonesQuery.data?.entries),
                 isLoading: hasMemberSession && zonesQuery.isLoading,
-                errorMessage: zonesQuery.error ? "Failed to load zones" : null,
+                errorMessage: zonesQuery.error
+                  ? t("shell:navigation_zones_error")
+                  : null,
               },
               realms: {
                 items: entryNavigationItems(realmsQuery.data?.entries),
                 isLoading: hasMemberSession && realmsQuery.isLoading,
                 errorMessage: realmsQuery.error
-                  ? "Failed to load realms"
+                  ? t("shell:navigation_realms_error")
                   : null,
               },
             },

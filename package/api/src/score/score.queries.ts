@@ -23,6 +23,17 @@ export const userScoresQuery = (userId: string, unitId: string) =>
     staleTime: 1000 * 60 * 2,
   });
 
+export const userScoreForRealmQuery = (
+  userId: string,
+  unitId: string,
+  realm: string,
+) =>
+  queryOptions({
+    queryKey: scoreKeys.userScoreForRealm(userId, unitId, realm),
+    queryFn: () => scoreApi.getUserScoreForRealm(userId, unitId, realm),
+    staleTime: 1000 * 60 * 2,
+  });
+
 export const realmFieldsQuery = (realmId: string) =>
   queryOptions({
     queryKey: scoreKeys.realmFieldsForRealm(realmId),
@@ -34,5 +45,6 @@ export const scoreQueries = {
   aggregates: scoreAggregatesQuery,
   aggregate: scoreAggregateQuery,
   userScores: userScoresQuery,
+  userScoreForRealm: userScoreForRealmQuery,
   realmFields: realmFieldsQuery,
 };

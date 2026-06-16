@@ -1,3 +1,52 @@
+/**
+ * ProfileOverviewPage — 用户资料概览页面，展示用户描述、最近活动和移动端统计信息。
+ *
+ * ┌───────────────────────────────────────┐
+ * │ Overview (desktop 1024px+)            │
+ * │ ┌─────────────────────────────────────┐
+ * │ │ User bio / description section      │
+ * │ ├─────────────────────────────────────┤
+ * │ │ Recent Activity                     │
+ * │ │ • Unit 1 — May 15, 2024            │
+ * │ │ • Unit 2 — May 10, 2024            │
+ * │ │ • Unit 3 — May 5, 2024             │
+ * │ └─────────────────────────────────────┘
+ * └───────────────────────────────────────┘
+ *
+ * ┌─────────────────────────┐
+ * │ Overview (tablet 768px) │
+ * │ ┌─────────────────────┐ │
+ * │ │ Bio box             │ │
+ * │ ├─────────────────────┤ │
+ * │ │ Recent Activity     │ │
+ * │ │ • Unit 1 — May 15   │ │
+ * │ │ • Unit 2 — May 10   │ │
+ * │ └─────────────────────┘ │
+ * └─────────────────────────┘
+ *
+ * ┌──────────────────┐
+ * │ Overview (mobile)│
+ * │ ┌──────────────┐ │
+ * │ │ [Shelves: 5] │ │
+ * │ │ [Content: 3] │ │
+ * │ │ [Followers:2]│ │
+ * │ │ [Following:1]│ │
+ * │ ├──────────────┤ │
+ * │ │ Bio box      │ │
+ * │ ├──────────────┤ │
+ * │ │ Recent Items │ │
+ * │ │ • Unit 1     │ │
+ * │ └──────────────┘ │
+ * └──────────────────┘
+ *
+ * ┌────────────────────────┐
+ * │ Empty State (no items) │
+ * │ ┌────────────────────┐ │
+ * │ │ No recent activity │ │
+ * │ └────────────────────┘ │
+ * └────────────────────────┘
+ */
+
 import {
   type ContentSearchDocument,
   contentDocMarkdownFallback,
@@ -9,21 +58,12 @@ import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 import {
   ProfileActivityCard,
-  ProfilePinnedItemCard,
   ProfileStatLink,
 } from "@/user/components/ProfileOverviewCards";
 
 export const ProfileOverviewPage: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-  const { user, userId } = useProfileContext();
-
-  // MOCK: pinned items — first 6 published units by this user
-  // MOCK：置顶项 —— 该用户发布的前 6 个单元
-  const pinnedQuery = useLocalizedContentSearch({
-    userId,
-    sort: { field: "publishedAt", order: "desc" },
-    limit: 6,
-  });
+  const { user, userId, profileBasePath } = useProfileContext();
 
   // MOCK: recent activity — latest published units
   // MOCK：最近动态 —— 最新发布的单元
@@ -47,7 +87,6 @@ export const ProfileOverviewPage: FC = () => {
     limit: 0,
   });
 
-  const pinned = pinnedQuery.data?.items ?? [];
   const recent = recentQuery.data?.items ?? [];
   const description = contentDocMarkdownFallback(user.description);
 
@@ -59,25 +98,25 @@ export const ProfileOverviewPage: FC = () => {
         <ProfileStatLink
           label={t("settings:profile_tab_shelves")}
           count={shelvesCountQuery.data?.total}
-          to={`/user/${userId}/shelves`}
+          to={`${profileBasePath}/shelves`}
           variant="compact"
         />
         <ProfileStatLink
           label={t("settings:profile_tab_content")}
           count={reviewsCountQuery.data?.total}
-          to={`/user/${userId}/content`}
+          to={`${profileBasePath}/content`}
           variant="compact"
         />
         <ProfileStatLink
           label={t("settings:profile_tab_followers")}
           count={user.followersCount ?? 0}
-          to={`/user/${userId}/followers`}
+          to={`${profileBasePath}/followers`}
           variant="compact"
         />
         <ProfileStatLink
           label={t("settings:profile_following")}
           count={user.followingsCount ?? 0}
-          to={`/user/${userId}/followers?filter=following`}
+          to={`${profileBasePath}/followers?filter=following`}
           variant="compact"
         />
       </div>
@@ -85,25 +124,6 @@ export const ProfileOverviewPage: FC = () => {
       {/* DESCRIPTION.md */}
       {/* DESCRIPTION.md —— 个人简介 */}
       {description.trim() !== "" && <DescriptionBox content={description} />}
-
-      <div>
-        <h6 className="text-sm font-semibold mb-3">{t("common:pinned")}</h6>
-        {pinned.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {pinned.map((item: ContentSearchDocument) => (
-              <ProfilePinnedItemCard
-                key={item.id}
-                item={item}
-                untitledLabel={t("common:untitled")}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-text-secondary">
-            {t("settings:profile_no_pinned_items")}
-          </p>
-        )}
-      </div>
 
       <div>
         <h6 className="text-sm font-semibold mb-3">

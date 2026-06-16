@@ -11,6 +11,37 @@ import {
   ZoneSectionShell,
 } from "./shared";
 
+/**
+ * 领域统计部分。显示领域指标的关键统计数据（文章数、成员数等）。
+ *
+ * 布局结构：
+ *
+ * Loading State:
+ * ┌────────────────────────────┐
+ * │ [Skeleton bar]             │
+ * └────────────────────────────┘
+ *
+ * Success State (2 metrics):
+ * ┌────────────────────────────┐
+ * │ Articles    │ Members      │
+ * │ 1,234       │ 567          │
+ * └────────────────────────────┘
+ *
+ * Success State (full width):
+ * ┌──────────────────────────────────────┐
+ * │ Articles    │ Members      │ Views    │
+ * │ 1,234       │ 567          │ 8,901    │
+ * └──────────────────────────────────────┘
+ *
+ * Mobile:
+ * ┌─────────────────┐
+ * │ Metric    │ Val │
+ * │ ──────────────── │
+ * │ Metric    │ Val │
+ * │ ──────────────── │
+ * │ Metric    │ Val │
+ * └─────────────────┘
+ */
 export function StatsSection({
   section,
   ctx,

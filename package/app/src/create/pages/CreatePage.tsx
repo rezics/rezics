@@ -25,6 +25,44 @@ import type { CreatePageSearch } from "../models/shareCreateSearch";
  * `{ path, title }`). This menu must neither duplicate that flow nor hide it:
  * the empty-node CTA remains the recognized chapter-creation entry at
  * `/book/:bookId/node/:nodeId`.
+ *
+ * 统一创建入口。呈现独立的创建流程（书籍、书架、realm、实体）的单一类型选择
+ * 界面；每个方块链接到该流程的现有路由。
+ *
+ * @layout
+ *
+ * Mobile <640px (1 column, p-4):
+ * +---------+
+ * | Title   |
+ * | Subtitle|
+ * +---------+
+ * | Card    |
+ * | (Icon)  |
+ * +---------+
+ * | Card    |
+ * | (Icon)  |
+ * +---------+
+ *
+ * Tablet 640–1023px (2 columns, grid-cols-2, md:p-6):
+ * +---------+---------+
+ * | Title             |
+ * | Subtitle          |
+ * +---------+---------+
+ * | Card    | Card    |
+ * |(Icon)   |(Icon)   |
+ * +---------+---------+
+ * | Card    | Card    |
+ * |(Icon)   |(Icon)   |
+ * +---------+---------+
+ * | Card    |
+ * |(Icon)   |
+ * +---------+
+ *
+ * Desktop 1024–1535px (2 columns, max-w-3xl, md:p-6):
+ * Centered grid same as tablet, constrained to max-w-3xl
+ *
+ * Ultra-wide ≥1536px (2 columns, max-w-3xl):
+ * Centered grid same as tablet, constrained to max-w-3xl
  */
 export const CreatePage: React.FC = () => {
   const { t } = useTranslation(["common", "page"]);

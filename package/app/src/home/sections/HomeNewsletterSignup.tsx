@@ -12,7 +12,6 @@ export const HomeNewsletterSignup: React.FC = () => {
     e.preventDefault();
     // Placeholder: integrate backend later
     // 占位逻辑：稍后接入后端
-    console.log("newsletter signup", email);
     setSubmitted(true);
   };
 

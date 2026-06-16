@@ -260,5 +260,12 @@
   "subscription_recovery_other_description": "ユーザーが追加したサブスクリプションは、対象がまだ表示可能で購読可能な場合に復元できます。",
   "subscription_recovery_other_empty": "その他の削除済みサブスクリプションはありません。",
   "subscription_recovery_restore_error": "このサブスクリプションは現在復元できません。",
-  "subscription_recovery_restore": "復元"
+  "subscription_recovery_restore": "復元",
+  "tokens_created_date": "作成日 {date}",
+  "tokens_expires_date": "有効期限 {date}",
+  "tokens_last_used_date": "最終使用 {date}",
+  "tokens_last_used_from_ip": "{ip} から",
+  "tokens_never_used": "未使用",
+  "security_current_session": "現在のセッション",
+  "profile_content_on_target": "{title}について"
 }

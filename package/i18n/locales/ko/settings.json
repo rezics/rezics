@@ -260,5 +260,12 @@
   "subscription_recovery_other_description": "사용자가 추가한 구독은 대상이 여전히 표시되고 구독 가능한 경우 복원할 수 있습니다.",
   "subscription_recovery_other_empty": "제거된 기타 구독이 없습니다.",
   "subscription_recovery_restore_error": "이 구독은 현재 복원할 수 없습니다.",
-  "subscription_recovery_restore": "복원"
+  "subscription_recovery_restore": "복원",
+  "tokens_created_date": "생성일 {date}",
+  "tokens_expires_date": "만료일 {date}",
+  "tokens_last_used_date": "마지막 사용 {date}",
+  "tokens_last_used_from_ip": "{ip}에서",
+  "tokens_never_used": "사용 안 함",
+  "security_current_session": "현재 세션",
+  "profile_content_on_target": "{title}에 대해"
 }

@@ -74,6 +74,63 @@ const CREDIT_ROLES = [
   { role: "producer", label: i18nMessages.book_hero_meta_producer },
 ] as const;
 
+/**
+ * Book Hero Section - Full-width header with cover, title, rating, and metadata.
+ * 图书英雄部分——包含封面、标题、评分和元数据的全宽标题。
+ *
+ * Renders a dramatic dark background hero with book cover, dynamic stat cards,
+ * featured review (if available), and metadata rows.
+ *
+ * Mobile <640px:
+ * +-----------------+
+ * | Title           |
+ * | Score (inline)  |
+ * | Brief info      |
+ * +-----------------+
+ * | Cover centered  |
+ * +-----------------+
+ * | Review (opt)    |
+ * | Stat cards      |
+ * +-----------------+
+ * | Metadata        |
+ * | Tags            |
+ * | Actions         |
+ * +-----------------+
+ *
+ * Tablet 640-1023px:
+ * +-----------------+
+ * | Title + Score   |
+ * | Brief info      |
+ * +-----------------+
+ * | Cover | Stacked |
+ * |       | cards   |
+ * +-----------------+
+ * | Metadata + Tags |
+ * | Actions (right) |
+ * +-----------------+
+ *
+ * Desktop 1024-1535px:
+ * +-----+---+-----+
+ * | Title (full) + Score + Your Score |
+ * | Brief info                        |
+ * +-----+---+-----+
+ * | Cov | Rev | Stat |
+ * | er  | iew | Cards|
+ * +-----+---+-----+
+ * | Metadata (left) | Actions (right) |
+ * +-----------------+-----------------+
+ *
+ * Ultra-wide >=1536px:
+ * +-----+----+------+
+ * | Title (full) + Score + Your Score |
+ * | Brief info                        |
+ * +-----+----+------+
+ * | Cov | Review   | Stat Cards |
+ * | er  |          | (promoted) |
+ * +-----+----------+------------+
+ * | Metadata (left) | Actions (right) |
+ * +-----------------+-----------------+
+ */
 export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   bookInfo,
   rating,
@@ -179,7 +236,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
       />
       <div aria-hidden="true" className="absolute inset-0 bg-black/65" />
       <div className="relative w-full">
-        <div className="container mx-auto max-w-[1280px] px-4 py-8 lg:py-10">
+        <div className="w-full mx-auto max-w-[1280px] px-4 py-8 lg:py-10">
           {/* Title row + inline score (count stacks below the score). 标题行 + 内联分数（计数堆叠在分数下方）。 */}
           <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
             <h1 className="text-white font-serif text-3xl lg:text-5xl font-semibold leading-tight tracking-tight break-words flex-1 min-w-[12rem]">
@@ -211,7 +268,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
               <LazyLoadImage
                 src={coverUrl}
                 alt={title}
-                className="max-h-[320px] rounded-lg shadow-xl"
+                className="max-h-[320px] rounded-lg object-contain shadow-xl"
               />
             </div>
 

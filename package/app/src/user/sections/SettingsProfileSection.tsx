@@ -34,6 +34,98 @@ type SettingsProfileFormData = Omit<
   name: string;
 };
 
+/**
+ * 个人资料部分：编辑用户的公开资料包括头像、显示名称、简历和详细描述。
+ * 用户可以上传头像 URL、输入显示名称、编辑简短简历，以及使用富格式 Markdown 编辑器编写详细描述。
+ *
+ * Desktop (≥1024px):
+ * ┌─────────────────────────────────────┐
+ * │ Edit Profile          Success saved!│
+ * │                                     │
+ * │ [Avatar] Avatar URL:                │
+ * │ 72x72 [https://.....................│
+ * │                                     │
+ * │ Display Name *                      │
+ * │ [John Doe......................]    │
+ * │                                     │
+ * │ Username (read-only)                │
+ * │ @johndoe                            │
+ * │                                     │
+ * │ Bio                                 │
+ * │ [Short bio text..................    │
+ * │                                     │
+ * │ Description (Markdown)              │
+ * │ [Markdown Editor..................   │
+ * │                                     │
+ * │ [Save] button (right-aligned)      │
+ * └─────────────────────────────────────┘
+ *
+ * Tablet (768px-1023px):
+ * ┌──────────────────────────────┐
+ * │ Edit Profile      [Success]  │
+ * │                              │
+ * │ [Avatar] Avatar URL:         │
+ * │ [https://...............]    │
+ * │                              │
+ * │ Display Name *               │
+ * │ [John Doe..................]  │
+ * │                              │
+ * │ Username (read-only)         │
+ * │ @johndoe                     │
+ * │                              │
+ * │ Bio                          │
+ * │ [Short bio text............]  │
+ * │                              │
+ * │ Description (Markdown)       │
+ * │ [Markdown Editor...]         │
+ * │                              │
+ * │ [Save]                       │
+ * └──────────────────────────────┘
+ *
+ * Mobile (480px-767px):
+ * ┌──────────────────┐
+ * │Edit Profile      │
+ * │[Success]         │
+ * │                  │
+ * │[Avatar]Avatar    │
+ * │[https://...]     │
+ * │                  │
+ * │Display Name *    │
+ * │[John Doe....]    │
+ * │                  │
+ * │Username          │
+ * │@johndoe          │
+ * │                  │
+ * │Bio               │
+ * │[bio text...]     │
+ * │                  │
+ * │Description       │
+ * │[Markdown Edit]   │
+ * │                  │
+ * │[Save]            │
+ * └──────────────────┘
+ *
+ * Small Mobile (<480px):
+ * ┌──────────┐
+ * │Edit      │
+ * │[Success] │
+ * │          │
+ * │[A]Avatar │
+ * │[url]     │
+ * │          │
+ * │Display   │
+ * │[John...] │
+ * │          │
+ * │@johndoe  │
+ * │          │
+ * │Bio       │
+ * │[bio]     │
+ * │          │
+ * │Desc      │
+ * │[Markdown]│
+ * │[Save]    │
+ * └──────────┘
+ */
 export const SettingsProfileSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "settings"]);
   useRequireAuth();
@@ -82,10 +174,15 @@ export const SettingsProfileSection: FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedName = formData.name.trim();
+    const trimmedBio = formData.bio.trim();
+    // Reject whitespace-only display names
+    // 拒绝纯空白的显示名称
+    if (!trimmedName) return;
     updateMe.mutate({
-      name: formData.name || undefined,
+      name: trimmedName || undefined,
       avatar: formData.avatar || undefined,
-      bio: formData.bio || undefined,
+      bio: trimmedBio || undefined,
       description: markdownContentDoc(formData.description),
     });
   };

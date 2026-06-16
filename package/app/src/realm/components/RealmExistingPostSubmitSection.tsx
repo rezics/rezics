@@ -28,6 +28,54 @@ import { policyDenialFromError } from "@/policy";
 import { buildRealmExistingPostSubmitInput } from "../models/realmCreateMode";
 import { RealmPostTagPicker } from "./RealmPostTagPicker";
 
+/**
+ * Allows users to submit existing drafts or published posts to a realm.
+ * Displays a grid of selectable draft/post candidates, optionally with tag picker
+ * and submission confirmation. Shows loading state and requires user authentication.
+ *
+ * 允许用户将现有草稿或已发布帖子提交到社区。
+ * 显示可选草稿/帖子候选的网格，可选择带标签选择器和提交确认。
+ * 显示加载状态，需要用户身份验证。
+ *
+ * Layout:
+ * Mobile (<640px):
+ * ┌──────────────────────────┐
+ * │ [Loading...] or          │
+ * │ ┌────────────────────────┤
+ * │ │ [Draft/Post] Title      │
+ * │ │ "excerpt preview..."    │
+ * │ ├────────────────────────┤
+ * │ │ [Draft/Post] Title      │
+ * │ │ "excerpt preview..."    │
+ * │ └────────────────────────┘
+ * │                          │
+ * │ [Tag Picker if selected] │
+ * │ [Submit Button] ----→    │
+ * └──────────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌──────────────────────────────────────┐
+ * │ [Draft/Post]    | [Draft/Post]       │
+ * │ Title           | Title               │
+ * │ "excerpt..."    | "excerpt..."        │
+ * ├──────────────────────────────────────┤
+ * │ [Tag Picker if selected]             │
+ * │ [Submit Button] ----→                │
+ * └──────────────────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌────────────────────────────────────────────┐
+ * │ [Draft/Post]   | [Draft/Post]   | [D/P]   │
+ * │ Title          | Title          | Title   │
+ * │ "excerpt..."   | "excerpt..."   | "..."   │
+ * ├────────────────────────────────────────────┤
+ * │ [Tag Picker if selected]                  │
+ * │ [Submit Button] ----→                     │
+ * └────────────────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * Same as Desktop - responsive grid with max-width
+ */
 type ExistingSubmitCandidate = {
   unitId: string;
   title: string;

@@ -181,9 +181,7 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({
       onEdit();
       return;
     }
-    if (author?.unitId) {
-      navigate({ to: `/user/${author?.unitId}/edit` });
-    }
+    navigate({ to: "/user/me/setting/profile" });
   };
 
   if (isMobile) {

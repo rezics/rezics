@@ -6,7 +6,71 @@ import { useMemo, useState } from "react";
 import { KeywordInput, useSearchQuery } from "@/search";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { ShelfCard } from "../components/ShelfCard";
+import { mapContentSearchDocToShelfDTO } from "../models/contentSearchDocToShelfDTO";
 
+/**
+ * Shelf search page.
+ *
+ * Keyword-based full-text search for shelves via Meilisearch with optional filters.
+ * Supports pagination and respects user's language context.
+ *
+ * 书架搜索页面。基于关键词的全文搜索，通过 Meilisearch 实现。
+ * 支持分页和可选过滤器。尊重用户的语言上下文。
+ *
+ * Desktop (1200px):
+ * +------------------------------------------+
+ * | Search Shelves                           |
+ * +------------------------------------------+
+ * | [Search keyword...] [Search]             |
+ * | Filters: [Type ▼] [Sort ▼]               |
+ * +------------------------------------------+
+ * | [Shelf 1]      [Shelf 2]    [Shelf 3]    |
+ * | Cover          Cover        Cover        |
+ * | Title 1        Title 2      Title 3      |
+ * | 12 items       8 items     15 items      |
+ * |                                          |
+ * | [Shelf 4]      [Shelf 5]    [Shelf 6]    |
+ * | [Prev] 1/12 [Next]                       |
+ * +------------------------------------------+
+ *
+ * Tablet (768px):
+ * +----------------------------+
+ * | Search Shelves             |
+ * +----------------------------+
+ * | [Search...] [Search]       |
+ * | [Type ▼] [Sort ▼]          |
+ * +----------------------------+
+ * | [Shelf 1]      [Shelf 2]   |
+ * | Cover          Cover       |
+ * | Title 1        Title 2     |
+ * | 12 items       8 items     |
+ * |                            |
+ * | [Prev] 1/6 [Next]          |
+ * +----------------------------+
+ *
+ * Mobile (360px):
+ * +----------+
+ * | Search   |
+ * +----------+
+ * | [___]    |
+ * | [Search] |
+ * | [Filters]|
+ * +----------+
+ * | [Shelf]  |
+ * | Cover    |
+ * | Title    |
+ * | 12 items |
+ * +----------+
+ * | [Prev]   |
+ * | 1/6      |
+ * | [Next]   |
+ * +----------+
+ *
+ * Empty State:
+ * +-----------+
+ * | No results|
+ * +-----------+
+ */
 export function ShelfSearchPage() {
   const { t } = useTranslation(["common", "entity"]);
   const search = useSearchQuery({
@@ -24,7 +88,7 @@ export function ShelfSearchPage() {
   });
 
   const shelves = useMemo<ShelfDTO[]>(
-    () => (data?.items ?? []) as unknown as ShelfDTO[],
+    () => (data?.items ?? []).map(mapContentSearchDocToShelfDTO),
     [data],
   );
   const total = data?.total ?? 0;

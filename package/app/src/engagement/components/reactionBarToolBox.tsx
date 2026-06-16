@@ -56,28 +56,28 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
           <div>{itemUrl}</div>
           <div className="flex items-center gap-2 mt-2">
             <a
-              href={`https://t.me/share/url?url=${itemFullUrl}&text=${itemText}`}
+              href={`https://t.me/share/url?url=${encodeURIComponent(itemFullUrl)}&text=${encodeURIComponent(itemText)}`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <TelegramIcon />
             </a>
             <a
-              href={`https://x.com/intent/tweet?url=${itemFullUrl}`}
+              href={`https://x.com/intent/tweet?url=${encodeURIComponent(itemFullUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <XIcon />
             </a>
             <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${itemFullUrl}`}
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(itemFullUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <FacebookIcon />
             </a>
             <a
-              href={`https://www.instagram.com/share?url=${itemFullUrl}`}
+              href={`https://www.instagram.com/share?url=${encodeURIComponent(itemFullUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
             >

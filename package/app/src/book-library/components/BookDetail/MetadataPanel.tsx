@@ -13,7 +13,52 @@ export type MetadataPanelProps = {
 
 /**
  * Compact book metadata: ISBN, text length, page count, format.
+ * 紧凑的图书元数据：ISBN、字数、页数、格式。
+ *
  * Used as a sidebar section on desktop and inline on mobile.
+ * 在桌面上用作边栏部分，在移动设备上内联使用。
+ *
+ * Mobile <640px:
+ * +----------+
+ * | Title    |
+ * | ISBN     |
+ * | Length   |
+ * | Chapters |
+ * | License  |
+ * | AI Info  |
+ * +----------+
+ *
+ * Tablet 640-1023px:
+ * +----------+
+ * | Title    |
+ * | ISBN     |
+ * | Length   |
+ * | Chapters |
+ * | License  |
+ * | AI Info  |
+ * +----------+
+ *
+ * Desktop 1024-1535px:
+ * +--panel--+
+ * |Title    |
+ * |---------|
+ * | ISBN    |
+ * | Length  |
+ * | Chapter |
+ * | License |
+ * | AI Info |
+ * +---------|
+ *
+ * Ultra-wide >=1536px:
+ * +--panel--+
+ * |Title    |
+ * |---------|
+ * | ISBN    |
+ * | Length  |
+ * | Chapter |
+ * | License |
+ * | AI Info |
+ * +---------|
  */
 export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   bookInfo,

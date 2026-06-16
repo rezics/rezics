@@ -14,6 +14,39 @@ import {
   useStaffConsoleAccess,
 } from "./shared";
 
+/**
+ * 审查案件详情页面。展示案件状态及附加的审查账本操作列表。
+ *
+ * 布局结构：
+ *
+ * Case Header:
+ * ┌────────────────────────────────────────┐
+ * │ [Badge: state]                         │
+ * │ [Badge: severity] [Badge: assigned]    │
+ * │ Target: unit:unit-id                   │
+ * │ Subject: user-123                      │
+ * │ Reporter: user-456                     │
+ * │ Updated: 2024-01-15                    │
+ * ├────────────────────────────────────────┤
+ * │ Case reason or summary text...         │
+ * └────────────────────────────────────────┘
+ *
+ * Desktop & Tablet:
+ * ┌────────────────────────────────────────┐
+ * │ Ledger Actions (grid, 1 column)        │
+ * │ ─────────────────────────────────────  │
+ * │ [Action Card] [Action Card]            │
+ * │ [Action Card] [Action Card]            │
+ * └────────────────────────────────────────┘
+ *
+ * Mobile:
+ * ┌──────────────────────┐
+ * │ Case Header (full)   │
+ * │ Ledger (stacked)     │
+ * │ [Action Card]        │
+ * │ [Action Card]        │
+ * └──────────────────────┘
+ */
 export function StaffCaseDetailPage({ caseId }: { caseId: string }) {
   const { status, allowed } = useStaffConsoleAccess();
   const caseQuery = useQuery({

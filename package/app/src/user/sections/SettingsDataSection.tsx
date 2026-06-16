@@ -24,6 +24,69 @@ import { DangerZone } from "@/user/components/DangerZone";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
+/**
+ * 数据部分：允许用户导出其个人数据为 JSON 文件，或永久删除其账户及所有关联数据。
+ * 提供数据导出功能以便备份，以及危险区域操作用于完全账户删除（需要确认）。
+ *
+ * Desktop (≥1024px):
+ * ┌─────────────────────────────────────┐
+ * │ Export Your Data                    │
+ * │ [Download Icon] Export Data         │
+ * │ Success: Data ready for download   │
+ * │                                     │
+ * │ DANGER ZONE                         │
+ * │ Delete Account Warning              │
+ * │ Data Handling Notice                │
+ * │ [Delete My Account]                 │
+ * │                                     │
+ * │ Confirm: [type-username...]         │
+ * │ [Cancel] [Delete]                   │
+ * └─────────────────────────────────────┘
+ *
+ * Tablet (768px-1023px):
+ * ┌──────────────────────────────┐
+ * │ Export Your Data             │
+ * │ [Export Data]                │
+ * │ Success message              │
+ * │                              │
+ * │ DANGER ZONE                  │
+ * │ Delete Account Warning       │
+ * │ [Delete My Account]          │
+ * │                              │
+ * │ Confirm username:            │
+ * │ [username...]                │
+ * │ [Cancel]  [Delete]           │
+ * └──────────────────────────────┘
+ *
+ * Mobile (480px-767px):
+ * ┌──────────────────┐
+ * │Export Your Data  │
+ * │[Export Data]     │
+ * │                  │
+ * │DANGER ZONE       │
+ * │Delete Account    │
+ * │Risk Warning      │
+ * │[Delete Account]  │
+ * │                  │
+ * │Confirm:          │
+ * │[username...]     │
+ * │[Cancel][Delete]  │
+ * └──────────────────┘
+ *
+ * Small Mobile (<480px):
+ * ┌──────────┐
+ * │Export    │
+ * │[Export]  │
+ * │          │
+ * │DANGER    │
+ * │Delete    │
+ * │[Delete]  │
+ * │          │
+ * │Confirm:  │
+ * │[user...] │
+ * │[C][Del]  │
+ * └──────────┘
+ */
 export const SettingsDataSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
   useRequireAuth();

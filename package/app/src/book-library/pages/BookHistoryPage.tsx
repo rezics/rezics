@@ -37,6 +37,45 @@ type MarkdownDiffRow = {
   type: DiffPart["type"];
 };
 
+/**
+ * Book History Page - Editorial and structure revision timeline.
+ * 图书历史页面——编辑和结构修订时间线。
+ *
+ * Displays tabbed view of editorial revisions and structure events,
+ * with diff compare and restore functionality.
+ *
+ * Mobile <640px:
+ * +------------------+
+ * | Header + Tabs    |
+ * +------------------+
+ * | Timeline entries |
+ * | (stacked, full)  |
+ * +------------------+
+ *
+ * Tablet 640-1023px:
+ * +------------------+
+ * | Header + Tabs    |
+ * +------------------+
+ * | Timeline entries |
+ * | (stacked, wider) |
+ * +------------------+
+ *
+ * Desktop 1024-1535px:
+ * +------------------+
+ * | Header + Tabs    |
+ * +------------------+
+ * | Timeline entries |
+ * | (columns: auto)  |
+ * +------------------+
+ *
+ * Ultra-wide >=1536px:
+ * +------------------+
+ * | Header + Tabs    |
+ * +------------------+
+ * | Timeline entries |
+ * | (columns: auto)  |
+ * +------------------+
+ */
 export function BookHistoryPage() {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const [tab, setTab] = useState<HistoryTab>("editorial");
@@ -156,7 +195,7 @@ export function BookHistoryPage() {
 
 export function BookEditHistoryPage() {
   return (
-    <main className="mx-auto mt-16 max-w-5xl px-4 pb-16">
+    <main className="w-full mx-auto mt-16 max-w-5xl px-4 pb-16">
       <BookHistoryPage />
     </main>
   );
@@ -182,8 +221,8 @@ function HistoryTabButton({
       aria-selected={active}
       className={
         active
-          ? "rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand"
-          : "rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle"
+          ? "rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          : "rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       }
       onClick={onClick}
     >

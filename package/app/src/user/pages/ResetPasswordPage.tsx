@@ -13,7 +13,7 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { type FC, useMemo, useState } from "react";
+import { type FC, type FormEvent, useMemo, useState } from "react";
 import { Layout } from "../layouts/Layout.tsx";
 import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { validateEmail, validatePassword } from "../models/validate.ts";
@@ -22,6 +22,69 @@ export interface ResetPasswordPageProps {
   isModal?: boolean;
   onClose?: () => void;
 }
+
+/**
+ * Password reset flow page supporting two modes: email request form and token-based
+ * password reset form. Can render as a standalone page or within a modal dialog.
+ * 密码重置流程页面，支持两种模式：邮箱请求表单和基于令牌的密码重置表单。可作为独立页面或模态对话框呈现。
+ *
+ * Layout (Standalone Mode):
+ *
+ * Mobile (<640px):
+ * ┌──────────────────────┐
+ * │ Reset Password       │
+ * ├──────────────────────┤
+ * │ [Error/Message]      │
+ * │                      │
+ * │ Email Request:       │
+ * │ [Email Input]        │
+ * │ [Back to Login Link] │
+ * │                      │
+ * │ [Send Reset Link]    │
+ * └──────────────────────┘
+ *
+ * Tablet (640-1023px):
+ * ┌───────────────────────────┐
+ * │ Reset Your Password       │
+ * ├───────────────────────────┤
+ * │ [Error or Success Alert]  │
+ * │                           │
+ * │ [Email Input - full w]    │
+ * │ [Back to Login Link]      │
+ * │                           │
+ * │ [Send Reset Link Button]  │
+ * └───────────────────────────┘
+ *
+ * Desktop (1024-1535px):
+ * ┌─────────────────────────────────┐
+ * │ Reset Password                  │
+ * ├─────────────────────────────────┤
+ * │ [Error/Success Alert]           │
+ * │                                 │
+ * │ Email Input:                    │
+ * │ [Email Input Field]             │
+ * │                                 │
+ * │ [Back to Login Link]            │
+ * │                                 │
+ * │              [Send Reset Link]  │
+ * └─────────────────────────────────┘
+ *
+ * Ultra-wide (>=1536px):
+ * ┌──────────────────────────────────────┐
+ * │ Reset Your Password                  │
+ * ├──────────────────────────────────────┤
+ * │ [Error/Success Alert - full width]   │
+ * │                                      │
+ * │ Enter your email to receive link:    │
+ * │ [Email Input Field]                  │
+ * │                                      │
+ * │ [Back to Login Link]                 │
+ * │                                      │
+ * │                  [Send Reset Link]   │
+ * └──────────────────────────────────────┘
+ *
+ * Modal Mode: Renders within Dialog with same content, optimized for center alignment.
+ */
 export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   isModal = false,
   onClose,
@@ -44,9 +107,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>(
-    linkError === "INVALID_TOKEN"
-      ? "This password reset link is invalid or expired."
-      : undefined,
+    linkError === "INVALID_TOKEN" ? t("auth:reset_invalid_token") : undefined,
   );
 
   const handleLoginClick = () => {
@@ -118,6 +179,15 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
     }
   };
 
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (resetToken) {
+      handleResetPassword();
+    } else {
+      handleRequestReset();
+    }
+  };
+
   const LayoutComponent = isModal ? ModalLayout : Layout;
 
   const content = (
@@ -163,12 +233,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
 
   const actions = (
     <>
-      <Button
-        type="button"
-        disabled={loading}
-        onClick={resetToken ? handleResetPassword : handleRequestReset}
-        className="gap-2"
-      >
+      <Button type="submit" disabled={loading} className="gap-2">
         {loading && <Spinner size="sm" />}
         {loading
           ? resetToken
@@ -186,6 +251,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
       title={t("auth:reset_title")}
       content={content}
       actions={actions}
+      onSubmit={handleSubmit}
     />
   );
 };

@@ -13,6 +13,44 @@ import {
   useStaffConsoleAccess,
 } from "./shared";
 
+/**
+ * 账户安全审查页面。展示指定用户的执法状态、历史记录和审计时间线。
+ *
+ * 布局结构：
+ *
+ * Desktop (lg):
+ * ┌─────────────────────────────────────────────────┐
+ * │  Current State     │    Enforcement History      │
+ * │  (320px sidebar)   │   (1fr flexible)            │
+ * ├────────────────────┼─────────────────────────────┤
+ * │ - User ID          │  [Card] [Card] [Card]       │
+ * │ - Active Kinds     │  [Card] [Card] [Card]       │
+ * │ - Expires At       │                             │
+ * └─────────────────────────────────────────────────┘
+ *
+ * Audit Timeline (full width):
+ * ┌─────────────────────────────────────────────────┐
+ * │ [Card] [Card]     [Card] [Card]                 │
+ * │ [Card] [Card]     [Card] [Card]                 │
+ * └─────────────────────────────────────────────────┘
+ *
+ * Tablet (md):
+ * ┌─────────────────────────────────────────┐
+ * │ Current State                           │
+ * │ ───────────────────────────────────────│
+ * │ Enforcement History                     │
+ * │ ───────────────────────────────────────│
+ * │ Audit Timeline (2-col grid)             │
+ * └─────────────────────────────────────────┘
+ *
+ * Mobile:
+ * ┌──────────────────────┐
+ * │ Current State        │
+ * │ Enforcement History  │
+ * │ Audit Timeline       │
+ * │ (single column)      │
+ * └──────────────────────┘
+ */
 export function StaffAccountSafetyPage({
   targetUserId,
 }: {

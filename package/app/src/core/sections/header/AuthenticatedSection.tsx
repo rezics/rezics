@@ -11,6 +11,18 @@ import { Link } from "@/shared/ui/link";
 import { CreateMenu } from "../../components/create-menu/CreateMenu.tsx";
 import { AccountMenu } from "./AccountMenu.tsx";
 
+/**
+ * 已认证用户的头部部分。显示通知徽章、创建菜单和账户菜单，
+ * 同时初始化实时通知和私信流。
+ * Authenticated user header section. Displays notification badge, create menu, and account menu,
+ * while initializing live notification and DM streams.
+ *
+ * Mobile:            Tablet:             Desktop:            Ultra-wide:
+ * ┌─────────────────┐ ┌───────────────────────┐ ┌───────────────────────┐ ┌─────────────────────┐
+ * │ [≡] [🔔99+] [+] │ │ [≡]    [🔔 99+] [+ ▼] │ │ [≡]    [🔔 99+] [+ ▼] │ │ [≡]    [🔔 99+]     │
+ * │                 │ │        [@] [▼]       │ │        [@] [▼]       │ │   [+ ▼]   [@] [▼]   │
+ * └─────────────────┘ └───────────────────────┘ └───────────────────────┘ └─────────────────────┘
+ */
 export function AuthenticatedSection() {
   // Live notification + DM streams — mounted once at the authenticated
   // shell level. The DM stream invalidates conversation/thread caches
@@ -51,7 +63,7 @@ export function AuthenticatedSection() {
         </HeaderTooltip>
       </Link>
       <CreateMenu />
-      <AccountMenu onLogout={() => console.log("Logout")} />
+      <AccountMenu />
     </div>
   );
 }

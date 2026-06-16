@@ -5,7 +5,11 @@
   "accessibility_favorite": "Favorit",
   "accessibility_hot": "Heiß",
   "accessibility_open_drawer": "Schublade öffnen",
+  "accessibility_add_to_favorites": "Zu Favoriten hinzufügen",
+  "accessibility_clear_selection": "Auswahl löschen",
+  "accessibility_remove_from_favorites": "Aus Favoriten entfernen",
   "accessibility_search": "Suchen",
+  "accessibility_search_results": "Suchergebnisse",
   "action": "Aktion",
   "actions": "Aktionen",
   "active": "Aktiv",
@@ -186,5 +190,15 @@
   "route_denied_title": "Zugriff eingeschränkt",
   "route_denied_description": "Du hast keine Berechtigung, diese Seite anzuzeigen.",
   "route_unauthenticated_title": "Zum Fortfahren anmelden",
-  "route_unauthenticated_description": "Du musst angemeldet sein, um diese Seite anzuzeigen."
+  "route_unauthenticated_description": "Du musst angemeldet sein, um diese Seite anzuzeigen.",
+  "please_login_first": "Bitte melden Sie sich zuerst an",
+  "relative_time_just_now": "gerade eben",
+  "relative_time_minutes_ago": "vor {value} Minuten",
+  "relative_time_hours_ago": "vor {value} Stunden",
+  "relative_time_days_ago": "vor {value} Tagen",
+  "relative_time_weeks_ago": "vor {value} Wochen",
+  "mutation_error_generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+  "showing_range": "Zeige {start}–{end} von {total}",
+  "link_copied": "Link kopiert",
+  "clipboard_failed": "Kopieren fehlgeschlagen. Bitte manuell auswählen und kopieren."
 }

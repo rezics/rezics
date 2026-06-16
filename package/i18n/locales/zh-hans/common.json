@@ -5,7 +5,11 @@
   "accessibility_favorite": "收藏",
   "accessibility_hot": "热门",
   "accessibility_open_drawer": "打开侧边栏",
+  "accessibility_add_to_favorites": "添加到收藏",
+  "accessibility_clear_selection": "清除选择",
+  "accessibility_remove_from_favorites": "从收藏中移除",
   "accessibility_search": "搜索",
+  "accessibility_search_results": "搜索结果",
   "action": "行动",
   "actions": "行动",
   "active": "启用",
@@ -186,5 +190,15 @@
   "route_denied_title": "访问受限",
   "route_denied_description": "你没有查看此页面的权限。",
   "route_unauthenticated_title": "请先登录",
-  "route_unauthenticated_description": "你需要登录才能查看此页面。"
+  "route_unauthenticated_description": "你需要登录才能查看此页面。",
+  "please_login_first": "请先登录",
+  "relative_time_just_now": "刚刚",
+  "relative_time_minutes_ago": "{value} 分钟前",
+  "relative_time_hours_ago": "{value} 小时前",
+  "relative_time_days_ago": "{value} 天前",
+  "relative_time_weeks_ago": "{value} 周前",
+  "mutation_error_generic": "出了点问题，请重试。",
+  "showing_range": "显示第 {start}–{end} 项，共 {total} 项",
+  "link_copied": "链接已复制",
+  "clipboard_failed": "复制失败，请手动选择并复制。"
 }

@@ -7,6 +7,7 @@ import {
 import { useAppendRealmPinboardMutation } from "@rezics/api/realm/realm";
 import type { UnitRealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { ConfirmDialog } from "@rezics/ui";
 import {
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -14,6 +15,7 @@ import {
   DropdownMenuSeparator,
 } from "@rezics/ui/shadcn";
 import { CheckCircle2, Lock, Pin, RotateCcw, ShieldX } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export type RealmContentModerationActionsProps = {
@@ -27,7 +29,7 @@ export function RealmContentModerationActions({
   targetUnitId,
   unitRealm,
 }: RealmContentModerationActionsProps) {
-  const { t } = useTranslation(["community"]);
+  const { t } = useTranslation(["community", "common"]);
   const moderationStatus = unitRealm?.moderationStatus ?? "approved";
   const isLocked = unitRealm?.isLocked ?? false;
   const approve = useApproveRealmContentMutation({
@@ -61,6 +63,22 @@ export function RealmContentModerationActions({
   const showRemove = moderationStatus !== "removed";
   const showRestore = moderationStatus === "removed";
 
+  const [pendingAction, setPendingAction] = useState<{
+    execute: () => void;
+    message: string;
+    variant: "default" | "destructive";
+  } | null>(null);
+
+  const requestConfirm = (
+    event: { stopPropagation: () => void },
+    message: string,
+    execute: () => void,
+    variant: "default" | "destructive" = "default",
+  ) => {
+    event.stopPropagation();
+    setPendingAction({ execute, message, variant });
+  };
+
   return (
     <>
       <DropdownMenuGroup>
@@ -71,19 +89,16 @@ export function RealmContentModerationActions({
           <DropdownMenuItem
             disabled={approve.isPending}
             onSelect={(event) => {
-              if (
-                !stopAndConfirm(
-                  event,
-                  t("community:moderation_approve_confirm"),
-                )
-              ) {
-                return;
-              }
-              approve.mutate({
-                realmUnitId,
-                targetUnitId,
-                input: relationInput,
-              });
+              requestConfirm(
+                event,
+                t("community:moderation_approve_confirm"),
+                () =>
+                  approve.mutate({
+                    realmUnitId,
+                    targetUnitId,
+                    input: relationInput,
+                  }),
+              );
             }}
           >
             <CheckCircle2 className="h-4 w-4" aria-hidden />
@@ -94,16 +109,17 @@ export function RealmContentModerationActions({
           <DropdownMenuItem
             disabled={remove.isPending}
             onSelect={(event) => {
-              if (
-                !stopAndConfirm(event, t("community:moderation_remove_confirm"))
-              ) {
-                return;
-              }
-              remove.mutate({
-                realmUnitId,
-                targetUnitId,
-                input: relationInput,
-              });
+              requestConfirm(
+                event,
+                t("community:moderation_remove_confirm"),
+                () =>
+                  remove.mutate({
+                    realmUnitId,
+                    targetUnitId,
+                    input: relationInput,
+                  }),
+                "destructive",
+              );
             }}
           >
             <ShieldX className="h-4 w-4" aria-hidden />
@@ -114,19 +130,16 @@ export function RealmContentModerationActions({
           <DropdownMenuItem
             disabled={restore.isPending}
             onSelect={(event) => {
-              if (
-                !stopAndConfirm(
-                  event,
-                  t("community:moderation_restore_confirm"),
-                )
-              ) {
-                return;
-              }
-              restore.mutate({
-                realmUnitId,
-                targetUnitId,
-                input: relationInput,
-              });
+              requestConfirm(
+                event,
+                t("community:moderation_restore_confirm"),
+                () =>
+                  restore.mutate({
+                    realmUnitId,
+                    targetUnitId,
+                    input: relationInput,
+                  }),
+              );
             }}
           >
             <RotateCcw className="h-4 w-4" aria-hidden />
@@ -137,22 +150,20 @@ export function RealmContentModerationActions({
           disabled={setLock.isPending}
           onSelect={(event) => {
             const nextLocked = !isLocked;
-            if (
-              !stopAndConfirm(
-                event,
-                nextLocked
-                  ? t("community:moderation_lock_confirm")
-                  : t("community:moderation_unlock_confirm"),
-              )
-            ) {
-              return;
-            }
-            setLock.mutate({
-              realmUnitId,
-              targetUnitId,
-              isLocked: nextLocked,
-              input: relationInput,
-            });
+            requestConfirm(
+              event,
+              nextLocked
+                ? t("community:moderation_lock_confirm")
+                : t("community:moderation_unlock_confirm"),
+              () =>
+                setLock.mutate({
+                  realmUnitId,
+                  targetUnitId,
+                  isLocked: nextLocked,
+                  input: relationInput,
+                }),
+              nextLocked ? "default" : "default",
+            );
           }}
         >
           <Lock className="h-4 w-4" aria-hidden />
@@ -169,27 +180,30 @@ export function RealmContentModerationActions({
         <DropdownMenuItem
           disabled={pin.isPending}
           onSelect={(event) => {
-            if (!stopAndConfirm(event, t("community:moderation_pin_confirm"))) {
-              return;
-            }
-            pin.mutate({
-              realmUnitId,
-              unitId: targetUnitId,
-            });
+            requestConfirm(event, t("community:moderation_pin_confirm"), () =>
+              pin.mutate({
+                realmUnitId,
+                unitId: targetUnitId,
+              }),
+            );
           }}
         >
           <Pin className="h-4 w-4" aria-hidden />
           {t("community:moderation_pin_action")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onConfirm={() => {
+          pendingAction?.execute();
+          setPendingAction(null);
+        }}
+        onCancel={() => setPendingAction(null)}
+        title={pendingAction?.message ?? ""}
+        confirmLabel={t("common:confirm")}
+        cancelLabel={t("common:cancel")}
+        variant={pendingAction?.variant ?? "default"}
+      />
     </>
   );
-}
-
-function stopAndConfirm(
-  event: { stopPropagation: () => void },
-  message: string,
-) {
-  event.stopPropagation();
-  return window.confirm(message);
 }

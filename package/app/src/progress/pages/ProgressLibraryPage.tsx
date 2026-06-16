@@ -18,6 +18,7 @@ import {
   UseMySettingsButton,
 } from "@/bookshelf-view";
 import { readStatusLabel } from "@/progress-status/models/status";
+import { useRequireAuth } from "@/user/pages/useAuth";
 import { progressLibraryRowToBookshelfItem } from "../models/progressBookshelf";
 import { ContinueReadingSection } from "../sections/ContinueReadingSection";
 
@@ -28,15 +29,75 @@ export interface ProgressLibraryPageProps {
   onResetLibraryUrlConfig?: () => void;
 }
 
+/**
+ * User progress library page displaying continue reading section and
+ * responsive bookshelf grid with progress status overview tabs.
+ * 用户进度书库页面，展示继续阅读部分和带进度状态概览标签的响应式书架网格。
+ *
+ * Mobile <640px:
+ * +--[Title]---[⚙]--+
+ * |  Subtitle      |
+ * |  ContinueRead  |
+ * |  +--+--+      |
+ * |  |st |st|      |
+ * |  |at |at|      |
+ * |  |us |us|      |
+ * |  +--+--+      |
+ * |  Library Title |
+ * |  +--+--+ Grid  |
+ * |  |  |  |       |
+ * +----------------+
+ *
+ * Tablet 640-1023px:
+ * +------[Title] [⚙]------+
+ * |  Subtitle            |
+ * |  ContinueRead        |
+ * |  +--+--+--+--+--+   |
+ * |  |st |st |st |st|   |
+ * |  |at |at |at |at|   |
+ * |  |us |us |us |us|   |
+ * |  +--+--+--+--+--+   |
+ * |  Library Title       |
+ * |  +--+--+--+ Grid     |
+ * |  |  |  |  |          |
+ * +------------------------+
+ *
+ * Desktop 1024-1535px:
+ * +-------[Title] [⚙]-------+
+ * |  Subtitle              |
+ * |  ContinueRead          |
+ * |  +--+--+--+--+--+     |
+ * |  |st |st |st |st|     |
+ * |  |at |at |at |at|     |
+ * |  |us |us |us |us|     |
+ * |  +--+--+--+--+--+     |
+ * |  Library Title         |
+ * |  +--+--+--+--+ Grid    |
+ * |  |  |  |  |  |         |
+ * +------------------------+
+ *
+ * Ultra-wide >=1536px:
+ * +-------[Title] [⚙]-------+
+ * |  Subtitle              |
+ * |  ContinueRead          |
+ * |  +--+--+--+--+--+     |
+ * |  |st |st |st |st|     |
+ * |  |at |at |at |at|     |
+ * |  |us |us |us |us|     |
+ * |  +--+--+--+--+--+     |
+ * |  Library Title         |
+ * |  +--+--+--+--+--+ Grid |
+ * |  |  |  |  |  |  |     |
+ * +------------------------+
+ */
 export function ProgressLibraryPage({
   libraryUrlConfig,
   onResetLibraryUrlConfig,
 }: ProgressLibraryPageProps) {
+  useRequireAuth();
   const { t } = useTranslation(["common", "page", "book"]);
   const continueReadingQuery = useQuery(myContinueReadingQuery({ limit: 12 }));
-  const libraryQuery = useQuery(
-    myProgressPageQuery({ limit: 50 }),
-  );
+  const libraryQuery = useQuery(myProgressPageQuery({ limit: 50 }));
   const { data: settings } = useQuery(userQueries.settings());
   const rows = libraryQuery.data?.rows ?? [];
   const continueReadingItems = continueReadingQuery.data?.items ?? [];

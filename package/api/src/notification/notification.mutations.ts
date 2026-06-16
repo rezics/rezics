@@ -16,11 +16,13 @@ export function useMarkAsReadMutation(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: MarkReadBody) => notificationApi.markAsRead(input),
+    // Spread caller options first so our onSuccess is not overwritten.
+    // 先展开调用方选项，确保自定义 onSuccess 不会被覆盖。
+    ...options,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -33,11 +35,13 @@ export function useMarkAllAsReadMutation(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => notificationApi.markAllAsRead(),
+    // Spread caller options first so our onSuccess is not overwritten.
+    // 先展开调用方选项，确保自定义 onSuccess 不会被覆盖。
+    ...options,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 
@@ -50,11 +54,13 @@ export function useDeleteNotificationMutation(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => notificationApi.remove(id),
+    // Spread caller options first so our onSuccess is not overwritten.
+    // 先展开调用方选项，确保自定义 onSuccess 不会被覆盖。
+    ...options,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
       options?.onSuccess?.(...args);
     },
-    ...options,
   });
 }
 

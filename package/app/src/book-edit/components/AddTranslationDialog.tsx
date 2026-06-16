@@ -24,6 +24,7 @@ export interface AddTranslationDialogProps {
   existingLanguages: string[];
   onClose: () => void;
   onSubmit: (params: { language: string; sourceUnitId: string | null }) => void;
+  isPending?: boolean;
 }
 
 const ALL_LANGS = Object.values(LANGUAGES);
@@ -34,6 +35,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
   existingLanguages,
   onClose,
   onSubmit,
+  isPending,
 }) => {
   const { t } = useTranslation(["common", "page"]);
   const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
@@ -120,7 +122,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
           <Button variant="ghost" onClick={onClose}>
             {t("common:cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!language}>
+          <Button onClick={handleSubmit} disabled={!language || isPending}>
             {t("page:book_edit_info_translation_add_dialog_submit")}
           </Button>
         </DialogFooter>

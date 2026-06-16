@@ -21,7 +21,7 @@ import {
   type CommentSortMode,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
+import { ConfirmDialog, Spinner } from "@rezics/ui";
 import {
   Badge,
   Button,
@@ -38,6 +38,7 @@ import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { Pencil, RotateCcw, ShieldX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { QueryErrorDisplay } from "@/core";
 import { PostEditDialog } from "@/post";
 import { hasGovernanceCapabilityHint, useAuthSessionStore } from "@/user";
 import { CommentContextSelect } from "../components/parts/CommentContextSelect";
@@ -63,7 +64,7 @@ interface CommentThreadSectionProps {
    * value until the user picks — it is a reactive default, not a controlled
    * value, so a late-loading zone config still lands before interaction.
    * 该界面的语境选择器默认值（专区配置的 realm、realm 路由的 realm，或
-   * 直接 Unit 路由的“全部”）。在用户做出选择前，选择器跟随此值——它是
+   * 直接 Unit 路由的"全部"）。在用户做出选择前，选择器跟随此值——它是
    * 响应式默认值而非受控值，因此延迟加载的专区配置仍能在交互前生效。
    */
   defaultContext?: CommentListContext;
@@ -93,7 +94,7 @@ interface CommentThreadSectionProps {
   /**
    * When supplied, overrides the built-in "mount an inline composer" behaviour
    * (used by surfaces that need to navigate or otherwise intercept replies).
-   * 提供时，会覆盖内置的“挂载内联编辑器”行为
+   * 提供时，会覆盖内置的"挂载内联编辑器"行为
    * （供需要跳转或以其他方式拦截回复的界面使用）。
    */
   onReply?: (postUnitId: string) => void;
@@ -117,6 +118,65 @@ const COMMENT_SORT_LABEL_KEYS: Record<CommentSortMode, string> = {
   old: "community:comment_sort_old",
 };
 
+/**
+ * 评论线程区块：展示嵌套评论树，支持语境和排序过滤、模运营、提升操作
+ * Comment thread section — displays a nested tree of comments with filtering,
+ * moderation, and promotion controls. Responsive two-row header: context selector
+ * and sort dropdown stack on mobile, inline on wider screens. Infinite-scroll
+ * comment tree with edit/moderation actions, pin/accept buttons for questions.
+ *
+ * Layout Structure:
+ *
+ * Mobile (<640px):
+ *  +---------+
+ *  | Context | (full width)
+ *  | Selector|
+ *  +---------+
+ *  | Sort    | (full width)
+ *  | Dropdown|
+ *  +---------+
+ *  | Comment | (tree, left-indented)
+ *  | Thread  | (scrollable)
+ *  +---------+
+ *  | Load... | (centered)
+ *  +---------+
+ *
+ * Tablet (640-1023px):
+ *  +---------------+
+ *  | Context | Sort| (flex row)
+ *  | Selector| DD  |
+ *  +---------------+
+ *  | Comment Tree  | (nested, indented)
+ *  |               |
+ *  +---------------+
+ *  | Load More     | (centered)
+ *  +---------------+
+ *
+ * Desktop (1024-1535px):
+ *  +-------------------+
+ *  | Context   | Sort  | (flex row, gap)
+ *  | Selector  | Opt.. |
+ *  +-------------------+
+ *  | Comment Tree      | (full tree, hoverable)
+ *  | (nested threads,  |
+ *  |  edit/mod/promote)|
+ *  +-------------------+
+ *  | Load More Button  | (centered)
+ *  +-------------------+
+ *
+ * Ultra-wide (>=1536px):
+ *  +----------------------------+
+ *  | Context Selector | Sort    | (flex row, full space)
+ *  |                  | Options |
+ *  +----------------------------+
+ *  | Comment Thread (full tree) |
+ *  | - Nested structure (5+ lvl)|
+ *  | - Edit/Moderate/Promote    |
+ *  |   actions in overflow menu |
+ *  +----------------------------+
+ *  | Load More (if paginated)   |
+ *  +----------------------------+
+ */
 export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
   rootUnitId,
   defaultContext,
@@ -150,7 +210,7 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
   // Moderation affordances follow the selected realm context; the All view
   // falls back to the global capability only. The server stays the single
   // authorization source.
-  // 审核入口跟随所选 realm 语境；“全部”视图仅回退到全局能力。服务端仍是
+  // 审核入口跟随所选 realm 语境；"全部"视图仅回退到全局能力。服务端仍是
   // 唯一授权来源。
   const contextRealmUnitId =
     context.kind === "realm" ? context.realmUnitId : null;
@@ -167,6 +227,10 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
         : false),
   );
   const [editingPost, setEditingPost] = useState<CommentDTO | null>(null);
+  const [moderationPending, setModerationPending] = useState<{
+    post: CommentDTO;
+    action: "remove" | "restore";
+  } | null>(null);
   const commentThreadQuery = useInfiniteQuery(
     commentDiscoveryInfiniteQuery({
       rootUnitId,
@@ -176,6 +240,8 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
     }),
   );
   const isLoading = commentThreadQuery.isLoading;
+  const isError = commentThreadQuery.isError;
+  const queryError = commentThreadQuery.error;
   const posts = useMemo(
     () => mergeCommentDiscoveryRows(commentThreadQuery.data?.pages ?? []),
     [commentThreadQuery.data?.pages],
@@ -253,16 +319,13 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
   );
 
   const moderateComment = (post: CommentDTO, action: "remove" | "restore") => {
-    if (
-      !window.confirm(
-        action === "restore"
-          ? t("community:comment_restore_confirm")
-          : t("community:comment_remove_confirm"),
-      )
-    ) {
-      return;
-    }
+    setModerationPending({ post, action });
+  };
 
+  const confirmModerateComment = () => {
+    if (!moderationPending) return;
+    const { post, action } = moderationPending;
+    setModerationPending(null);
     commentModeration.mutate({
       id: post.id,
       input: {
@@ -398,6 +461,10 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
     );
   }
 
+  if (isError) {
+    return <QueryErrorDisplay error={queryError} />;
+  }
+
   return (
     <>
       <div className="mb-3 flex w-full flex-col gap-2 sm:flex-row">
@@ -463,6 +530,22 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
           onClose={() => setEditingPost(null)}
         />
       ) : null}
+      <ConfirmDialog
+        open={moderationPending !== null}
+        onConfirm={confirmModerateComment}
+        onCancel={() => setModerationPending(null)}
+        title={
+          moderationPending?.action === "restore"
+            ? t("community:comment_restore_confirm")
+            : t("community:comment_remove_confirm")
+        }
+        confirmLabel={t("common:confirm")}
+        cancelLabel={t("common:cancel")}
+        variant={
+          moderationPending?.action === "remove" ? "destructive" : "default"
+        }
+        isPending={commentModeration.isPending}
+      />
     </>
   );
 };

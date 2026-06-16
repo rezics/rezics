@@ -147,7 +147,9 @@ export function EntityPicker({
     [activeCreditRole, activeSubjectRole, debouncedQuery],
   );
 
-  const { data, isFetching } = useEntitySearch(searchQuery);
+  // Skip the search query while the dialog is closed to avoid unnecessary network requests.
+  // 对话框关闭时跳过搜索查询，避免不必要的网络请求。
+  const { data, isFetching } = useEntitySearch(open ? searchQuery : undefined);
   const results = data?.entities ?? [];
 
   // When the kindHint is provided we soft-sort matches of that kind first,

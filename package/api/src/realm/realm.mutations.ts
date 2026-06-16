@@ -93,6 +93,9 @@ export function useCreateRealmMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: realmKeys.lists() });
       queryClient.setQueryData(realmKeys.detail(data.unitId), data);
+      // The creator is auto-joined, so "my realms" must refresh.
+      // 创建者被自动加入，因此"我的 realm"列表必须刷新。
+      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -119,6 +122,9 @@ export function useUpdateRealmMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(realmKeys.detail(variables.unitId), data);
       queryClient.invalidateQueries({ queryKey: realmKeys.lists() });
+      // Realm metadata (name/slug/avatar) shown in "my realms" may have changed.
+      // "我的 realm"列表中显示的 realm 元数据（名称/slug/头像）可能已更改。
+      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -141,6 +147,9 @@ export function useDeleteRealmMutation(
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({ queryKey: realmKeys.detail(unitId) });
       queryClient.invalidateQueries({ queryKey: realmKeys.lists() });
+      // Deleted realm must leave "my realms" — symmetric with create/update.
+      // 已删除的 realm 必须从"我的 realm"列表中移除——与 create/update 对称。
+      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });
@@ -335,6 +344,11 @@ export function useUpdateMemberRoleMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.members(variables.realmUnitId),
       });
+      // Realm detail may surface role counts or admin badges — refresh it.
+      // Realm 详情可能展示角色计数或管理员徽章——刷新它。
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.detail(variables.realmUnitId),
+      });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -359,12 +373,14 @@ export function useRemoveMemberMutation(
     mutationFn: ({ realmUnitId, userId }) =>
       realmApi.removeMember(realmUnitId, userId),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.members(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(variables.realmUnitId),
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      // Reuse the shared helper to invalidate members, detail, mine, and
+      // the realm-membership cache domain — symmetric with join/leave.
+      // 复用共享辅助函数来使 members、detail、mine 和 realm-membership
+      // 缓存域失效——与 join/leave 对称。
+      await syncRealmMembershipMutationCache({
+        queryClient,
+        realmUnitId: variables.realmUnitId,
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

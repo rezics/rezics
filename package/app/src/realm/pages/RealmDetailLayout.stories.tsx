@@ -278,7 +278,6 @@ function DetailTab({ tab }: { tab: RealmDetailStoryTab }) {
     return (
       <RealmAboutTab
         realm={detail.realm}
-        description={detail.description}
         membership={detail.membership}
         canManage={detail.showManage}
       />

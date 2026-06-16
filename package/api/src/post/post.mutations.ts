@@ -15,6 +15,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { commentKeys } from "../comment/comment.keys";
+import { feedKeys } from "../feed/feed.keys";
 import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { unitKeys } from "../unit/unit.keys";
 import { postApi } from "./post.api";
@@ -71,6 +72,10 @@ export async function syncPostMutationCache({
       queryKey: unitKeys.languages(resolvedUnitId),
     }),
     queryClient.invalidateQueries({ queryKey: postKeys.lists() }),
+    // Feed rows depend on post membership — invalidate so the home feed
+    // reflects creates, updates, and deletes.
+    // 动态行依赖帖子成员关系——使其失效，以便首页动态反映创建、更新和删除。
+    queryClient.invalidateQueries({ queryKey: feedKeys.root }),
   ];
 
   for (const targetUnitId of compactIds([
@@ -259,6 +264,11 @@ export function useDeletePostMutation(
         unitId,
         removeDetail: true,
       });
+      // Delete only has the bare unitId — no target/realm/author context — so
+      // broadly invalidate all scoped post lists that may have contained it.
+      // 删除时只有裸 unitId——无 target/realm/author 上下文——因此广泛失效
+      // 所有可能包含该帖子的受限 post 列表。
+      await queryClient.invalidateQueries({ queryKey: postKeys.all() });
       await options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });

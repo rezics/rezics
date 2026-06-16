@@ -1,5 +1,5 @@
 import {
-  myRealmsQuery,
+  myRealmMembershipQuery,
   realmDetailQuery,
   realmRuleResolvedQuery,
   useJoinRealmMutation,
@@ -26,9 +26,9 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
     languages: readContext.languages,
     appLocale: readContext.appLocale,
   };
-  const { data: myRealms } = useQuery({
-    ...myRealmsQuery(readQuery),
-    enabled: readContext.ready,
+  const { data: myMembership } = useQuery({
+    ...myRealmMembershipQuery(realmId),
+    enabled: readContext.ready && Boolean(realmId),
   });
   const { data: realm } = useQuery({
     ...realmDetailQuery(realmId, readQuery),
@@ -37,7 +37,7 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
   const joinMutation = useJoinRealmMutation();
   const leaveMutation = useLeaveRealmMutation();
 
-  const isMember = myRealms?.realms?.some((r) => r.unitId === realmId) ?? false;
+  const isMember = myMembership?.member != null;
   const rulePostId = realm?.extra?.rule ?? undefined;
   const {
     data: rule,

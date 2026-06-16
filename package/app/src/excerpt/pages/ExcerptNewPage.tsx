@@ -9,6 +9,30 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { ExcerptEditPage } from "./ExcerptEditPage";
 
+/**
+ * 新建摘录页面 - 允许用户为指定书籍创建新摘录
+ *
+ * 布局结构：
+ * - 移动端 (<640px)：全宽卡片，垂直堆叠
+ * - 平板 (640-1023px)：最宽 max-w-4xl，边距 mx-auto
+ * - 桌面 (1024-1535px)：最宽 max-w-4xl，居中
+ * - 超宽 (>=1536px)：最宽 max-w-4xl，居中
+ *
+ * ASCII 布局示意:
+ *
+ * Mobile (<640px)          Tablet (640-1023px)      Desktop (1024-1535px)    Ultra-wide (>=1536px)
+ * +--+                     +------+                  +----------+              +----------+
+ * |TL|                     |TITLE |                  | TITLE    |              | TITLE    |
+ * +--+                     +------+                  +----------+              +----------+
+ * |BK|                     |BOOK  |                  |BOOK      |              |BOOK      |
+ * +--+                     |      |                  |          |              |          |
+ * |FM|                     |FORM  |                  |FORM      |              |FORM      |
+ * +--+                     |      |                  |          |              |          |
+ * |BT|                     |      |                  |          |              |          |
+ * +--+                     |BTN   |                  |BTN       |              |BTN       |
+ *
+ * TL=Title, BK=BookId, FM=Form, BT=Button
+ */
 export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["auth", "common", "community"]);
   const [excerptData, setExcerptData] = useState<UnitFormData>(
@@ -18,13 +42,11 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   const userId = useCurrentUserId();
 
   const { mutate, isPending } = useCreateUnitMutation({
-    onSuccess: (data) => {
+    onSuccess: () => {
       show(t("community:excerpt_created_success"));
-      console.log("create excerpt success", data);
     },
     onError: (error) => {
       show(t("community:excerpt_create_failed", { error: String(error) }));
-      console.error("create excerpt failed", error);
     },
   });
 
@@ -53,7 +75,7 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
 
   return (
     <div>
-      <div className="max-w-4xl mx-auto mt-4">
+      <div className="w-full max-w-4xl mx-auto mt-4">
         <h1 className="text-xl font-semibold">
           {t("community:excerpt_new_title")}
         </h1>

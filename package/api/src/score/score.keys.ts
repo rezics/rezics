@@ -10,6 +10,8 @@ export const scoreKeys = {
   userScores: () => [...scoreKeys.all(), "user"] as const,
   userScoresForUnit: (userId: string, unitId: string) =>
     [...scoreKeys.userScores(), userId, unitId] as const,
+  userScoreForRealm: (userId: string, unitId: string, realm: string) =>
+    [...scoreKeys.userScores(), userId, unitId, realm] as const,
 
   realmFields: () => [...scoreKeys.all(), "realm-fields"] as const,
   realmFieldsForRealm: (realmId: string) =>

@@ -36,7 +36,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
+        <h2 className="text-base font-semibold mb-3">{resolvedTitle}</h2>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -45,7 +45,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        <h2 className="text-base font-semibold m-0">{resolvedTitle}</h2>
         {isLoading && <Spinner size="sm" />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">

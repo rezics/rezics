@@ -1,3 +1,55 @@
+/**
+ * ShelfContentsSearchSection — 书架内容搜索页面，支持按标题和标签过滤书架内的单元，
+ * 展示私有/公开书架中的条目列表，支持返回书架列表。
+ *
+ * ┌────────────────────────────────────────────┐
+ * │ Shelf Search (desktop 1024px+)             │
+ * │ ┌──────────────────────────────────────────┐
+ * │ │ [< Back]                                 │
+ * │ │ [Search Title...]                        │
+ * │ │ [Tags: [] + Tag Search...]               │
+ * │ │ Selected: [Design] [Featured] [x] [x]    │
+ * │ ├──────────────────────────────────────────┤
+ * │ │ [Unit Title] 5 shelves, 3 tags          │
+ * │ │ [Unit Title] 2 shelves, 1 tags          │
+ * │ │ [Unit Title] 8 shelves, 4 tags          │
+ * │ └──────────────────────────────────────────┘
+ * └────────────────────────────────────────────┘
+ *
+ * ┌──────────────────────────┐
+ * │ Shelf Search (tablet)    │
+ * │ ┌────────────────────────┐
+ * │ │ [Back]                 │
+ * │ │ [Search...]            │
+ * │ │ [Tags +Tag Search...]  │
+ * │ │ [Design] [Featured]    │
+ * │ ├────────────────────────┤
+ * │ │ [Unit] 5 shelves 3 tags│
+ * │ │ [Unit] 2 shelves 1 tag │
+ * │ └────────────────────────┘
+ * └──────────────────────────┘
+ *
+ * ┌────────────────────┐
+ * │ Shelf (mobile 375) │
+ * │ ┌──────────────────┐
+ * │ │ [< Back]         │
+ * │ │ [Search..]       │
+ * │ │ [Tags..]         │
+ * │ │ [Tag1] [x] [x]   │
+ * │ ├──────────────────┤
+ * │ │ [Unit]           │
+ * │ │ 5 shelves, 3 tg. │
+ * │ └──────────────────┘
+ * └────────────────────┘
+ *
+ * ┌────────────────────┐
+ * │ Empty State (none) │
+ * │ ┌──────────────────┐
+ * │ │ No items found   │
+ * │ └──────────────────┘
+ * └────────────────────┘
+ */
+
 import {
   tagBatchTranslationsQuery,
   tagSearchQuery,
@@ -22,7 +74,7 @@ type SearchTagOption = {
 export const ShelfContentsSearchSection: FC = () => {
   const locale = useLocale();
   const { t } = useTranslation(["common", "community", "entity"]);
-  const { user, userId, isCurrentUser } = useProfileContext();
+  const { userId, isCurrentUser, profileBasePath } = useProfileContext();
   const [queryText, setQueryText] = useState("");
   const [tagSearchText, setTagSearchText] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -66,29 +118,12 @@ export const ShelfContentsSearchSection: FC = () => {
 
   return (
     <div className="flex flex-col gap-4 py-4">
-      {user.slug ? (
-        <Link
-          to="/u/$userSlug/shelves"
-          params={{ userSlug: user.slug }}
-          className="w-fit no-underline"
-        >
-          <Button type="button" variant="ghost" size="sm" className="gap-2">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            {t("common:back")}
-          </Button>
-        </Link>
-      ) : (
-        <Link
-          to="/user/$userId/shelves"
-          params={{ userId }}
-          className="w-fit no-underline"
-        >
-          <Button type="button" variant="ghost" size="sm" className="gap-2">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            {t("common:back")}
-          </Button>
-        </Link>
-      )}
+      <Link to={`${profileBasePath}/shelves`} className="w-fit no-underline">
+        <Button type="button" variant="ghost" size="sm" className="gap-2">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          {t("common:back")}
+        </Button>
+      </Link>
 
       <div className="flex flex-col gap-3">
         <Label htmlFor="shelf-contents-search-input">

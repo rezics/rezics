@@ -9,9 +9,11 @@ export {
 } from "./dm.mutations";
 export {
   dmBlockStateQuery,
+  dmConversationQuery,
   dmConversationsQuery,
   dmMessagesQuery,
   dmQueries,
+  useConversation,
   useConversations,
   useDmBlockState,
   useMessages,

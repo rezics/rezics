@@ -19,6 +19,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Clock } from "lucide-react";
 import { useMemo, useState } from "react";
+import { UserSearchField } from "@/shared/ui/UserSearchField";
 import {
   formatStaffDate,
   StaffForbiddenState,
@@ -27,6 +28,41 @@ import {
   useStaffConsoleAccess,
 } from "./shared";
 
+/**
+ * 审计时间线页面。检查特权审计记录或目标范围的审查账本操作。
+ *
+ * 布局结构：
+ *
+ * Filter Bar (3 cols on md+):
+ * ┌────────────┬────────────┬────────────┐
+ * │  Action    │Target Kind │ Target ID  │
+ * │ [Input]    │ [Input]    │ [Input]    │
+ * └────────────┴────────────┴────────────┘
+ *
+ * Desktop (lg):
+ * ┌──────────────────────────┬─────────────┐
+ * │ Table (scrollable)       │ Latest      │
+ * │ ──────────────────────── │ Reasons     │
+ * │ [Header]                 │ ─────────── │
+ * │ [Row] [Row] [Row] ...    │ [Card]      │
+ * │ [Row] [Row] [Row] ...    │ [Card]      │
+ * │                          │ [Card]      │
+ * └──────────────────────────┴─────────────┘
+ *
+ * Tablet (md):
+ * ┌──────────────────────────────────────┐
+ * │ Table (scrollable, full width)       │
+ * │ ──────────────────────────────────── │
+ * │ [Header]                             │
+ * │ [Row] [Row] [Row] ...                │
+ * │ [Row] [Row] [Row] ...                │
+ * └──────────────────────────────────────┘
+ *
+ * Mobile:
+ * ┌──────────────────────────┐
+ * │ Table (horizontal scroll)│
+ * └──────────────────────────┘
+ */
 export function StaffAuditPage({
   initialAction = "",
   initialTargetKind = "",
@@ -102,13 +138,27 @@ export function StaffAuditPage({
           />
         </div>
         <div className="flex flex-col gap-1">
-          <Label htmlFor="staff-audit-target-id">Target id</Label>
-          <Input
-            id="staff-audit-target-id"
-            value={targetId}
-            onChange={(event) => setTargetId(event.target.value)}
-            placeholder="target id"
-          />
+          {targetKind.trim() === "account" ? (
+            // Account target: pick a user by search. 账户目标：通过搜索选择用户。
+            <UserSearchField
+              id="staff-audit-target-id"
+              value={targetId}
+              onChange={setTargetId}
+              label="Target id"
+              placeholder="search by name or slug"
+            />
+          ) : (
+            // Other target kinds: raw id input. 其他目标类型：原始 id 输入框。
+            <>
+              <Label htmlFor="staff-audit-target-id">Target id</Label>
+              <Input
+                id="staff-audit-target-id"
+                value={targetId}
+                onChange={(event) => setTargetId(event.target.value)}
+                placeholder="target id"
+              />
+            </>
+          )}
         </div>
       </section>
 

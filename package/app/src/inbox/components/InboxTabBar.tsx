@@ -26,7 +26,11 @@ export const InboxTabBar: FC<InboxTabBarProps> = ({ active }) => {
 
   return (
     <nav className="flex items-center gap-2 border-b border-border-whisper">
-      {tab("notifications", t("community:dm_notifications_tab"), "/inbox/notification")}
+      {tab(
+        "notifications",
+        t("community:dm_notifications_tab"),
+        "/inbox/notification",
+      )}
       {tab("dm", t("community:dm_dm_tab"), "/inbox/dm")}
     </nav>
   );

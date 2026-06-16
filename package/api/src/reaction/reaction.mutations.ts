@@ -366,6 +366,11 @@ export function useDeleteReactionMutation(
       options?.onError?.(error, variables, context, mutationCtx);
     },
     onSuccess: (data, variables, context, mutationCtx) => {
+      // Mirror create-reaction: flush cross-cutting surfaces (detail/profile/
+      // realm-feed/search) so counts and badges stay consistent after removal.
+      // 与 create-reaction 镜像：刷新横切面（detail/profile/realm-feed/search），
+      // 使计数和徽章在删除后保持一致。
+      void invalidateForCacheDomain(queryClient, "reaction");
       options?.onSuccess?.(data, variables, context, mutationCtx);
     },
   });

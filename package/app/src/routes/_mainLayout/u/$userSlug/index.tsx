@@ -1,10 +1,11 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-
-const ProfileOverviewPage = lazyRouteComponent(
-  () => import("@/user/pages/ProfileOverviewPage"),
-  "ProfileOverviewPage",
-);
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_mainLayout/u/$userSlug/")({
-  component: ProfileOverviewPage,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: "/u/$userSlug/profile",
+      params,
+      replace: true,
+    });
+  },
 });

@@ -213,7 +213,7 @@ describe("FeedService", () => {
       undefined,
     );
     expect(result.rows[0]).toMatchObject({
-      type: "content",
+      type: "post",
       rowId: "post:post-1",
       href: "/post/post-1",
     });
@@ -223,7 +223,7 @@ describe("FeedService", () => {
     });
   });
 
-  test("schedules home carousels sparsely from bounded work and shelf rows", async () => {
+  test("schedules home recommendation rows from bounded work and shelf rows", async () => {
     listResult = {
       posts: Array.from({ length: 8 }, (_, index) => ({
         unitId: `post-${index + 1}`,
@@ -245,30 +245,30 @@ describe("FeedService", () => {
     expect(bookListMock).toHaveBeenCalledWith({ limit: 8 });
     expect(shelfListMock).toHaveBeenCalledWith({ limit: 8 });
     expect(result.rows.map((row) => row.type)).toEqual([
-      "content",
-      "content",
-      "content",
-      "content",
-      "carousel",
-      "content",
-      "content",
-      "content",
-      "content",
+      "post",
+      "post",
+      "post",
+      "post",
+      "book",
+      "post",
+      "post",
+      "post",
+      "post",
+      "shelf",
+      "book",
+      "shelf",
     ]);
     expect(result.rows[4]).toMatchObject({
-      type: "carousel",
-      carouselKind: "works",
+      type: "book",
+      book: { unitId: "book-1", title: "Book One" },
     });
-    expect(
-      result.rows[4]?.type === "carousel" && result.rows[4].works?.[0],
-    ).toMatchObject({ unitId: "book-1", title: "Book One" });
     expect(result.nextCursor).toEqual({
       rowId: "post:post-8",
       createdAt: "2026-06-05T00:07:00.000Z",
     });
   });
 
-  test("skips carousels on cursor pages and when data is insufficient", async () => {
+  test("skips home recommendation rows on cursor pages", async () => {
     listResult = {
       posts: Array.from({ length: 5 }, (_, index) => ({
         unitId: `post-${index + 1}`,
@@ -293,8 +293,8 @@ describe("FeedService", () => {
       cursor: { rowId: "post:post-5" },
     });
 
-    expect(firstPage.rows.every((row) => row.type === "content")).toBe(true);
-    expect(cursorPage.rows.every((row) => row.type === "content")).toBe(true);
+    expect(firstPage.rows.some((row) => row.type === "book")).toBe(true);
+    expect(cursorPage.rows.every((row) => row.type === "post")).toBe(true);
     expect(bookListMock).toHaveBeenCalledTimes(1);
     expect(shelfListMock).toHaveBeenCalledTimes(1);
   });
@@ -380,7 +380,7 @@ describe("FeedService", () => {
     );
     expect(result.scope).toBe("zone");
     expect(result.rows[0]).toMatchObject({
-      type: "content",
+      type: "post",
       rowId: "post:post-1",
       recommendationReason: "zone-feed-activity",
     });

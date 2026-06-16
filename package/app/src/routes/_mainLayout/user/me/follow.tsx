@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_mainLayout/user/me/follow")({
     const userId = useUserProfileStore.getState().user?.unitId;
     if (userId) {
       throw redirect({
-        to: "/user/$userId/followers",
+        to: "/user/$userId/profile/followers",
         params: { userId },
       });
     }

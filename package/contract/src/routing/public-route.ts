@@ -7,8 +7,15 @@ import { t } from "elysia";
 // ============================================================
 
 /**
- * Canonical public browser path: `/u/:userSlug`.
- * 规范的公共浏览器路径：`/u/:userSlug`。
+ * Canonical public user-space root: `/u/:userSlug`.
+ * 规范的公共用户空间根路径：`/u/:userSlug`。
+ *
+ * This root is not the profile surface. Profile is an explicit child route
+ * (`/u/:userSlug/profile`) so the root can later render a themed public home
+ * based on the user's display preference.
+ * 该根路径不是个人资料页。个人资料是显式子路由
+ * （`/u/:userSlug/profile`），这样根路径以后可以根据用户展示偏好渲染
+ * 对外主题主页。
  *
  * Resolves `(slugScope = <user-scope-unit-id>, slug = :userSlug)` on `Unit`.
  * It NEVER resolves `Unit.id`; callers holding a unit id must use the
@@ -81,8 +88,14 @@ export const publicEntitySlugRouteParamsSchema = t.Object({
 // ============================================================
 
 /**
- * Canonical public browser path: `/user/:unitId`.
- * 规范的公共浏览器路径：`/user/:unitId`。
+ * Id-based public user-space fallback root: `/user/:unitId`.
+ * 基于 id 的公共用户空间兜底根路径：`/user/:unitId`。
+ *
+ * This root intentionally does not imply a slug redirect. Profile is an
+ * explicit child route (`/user/:unitId/profile`) so id links remain a stable
+ * fallback for callers that do not hold a slug.
+ * 该根路径有意不隐含 slug 跳转。个人资料是显式子路由
+ * （`/user/:unitId/profile`），因此持有 id 的调用方可继续使用稳定兜底链接。
  *
  * Resolves only `Unit.id` where `type = USER`. Returns 404 for type
  * mismatch. It NEVER resolves a slug.

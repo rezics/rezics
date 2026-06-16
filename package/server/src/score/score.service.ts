@@ -201,6 +201,24 @@ export class ScoreService {
       .where(and(eq(ScoreEntry.userId, userId), eq(ScoreEntry.unitId, unitId)));
   }
 
+  // Return the single score entry for a user in a specific realm, or null.
+  // 返回用户在特定 realm 中的单个评分条目，如不存在则为 null。
+  async getUserScoreForRealm(userId: string, unitId: string, realm: string) {
+    const db = await getServerDb();
+    const [row] = await db
+      .select()
+      .from(ScoreEntry)
+      .where(
+        and(
+          eq(ScoreEntry.userId, userId),
+          eq(ScoreEntry.unitId, unitId),
+          eq(ScoreEntry.realm, realm),
+        ),
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
   async recalculateAggregate(unitId: string, realm: string) {
     const db = await getServerDb();
     const entries = await db

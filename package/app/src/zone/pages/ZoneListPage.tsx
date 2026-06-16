@@ -26,6 +26,45 @@ import { useUserScopedWorkspaceTarget } from "@/user/hooks/useUserScopedWorkspac
 
 type ZoneWorkspaceTab = "subscribed" | "administered";
 
+/**
+ * 领域列表页面。用户查看已订阅和管理的领域，支持批量退订功能。
+ *
+ * 布局结构：
+ *
+ * Header (with manage toggle):
+ * ┌──────────────────────────────────────────┐
+ * │ My Zones                          [Manage]│
+ * │ Your subscribed realms                   │
+ * └──────────────────────────────────────────┘
+ *
+ * Tab Navigation:
+ * ┌──────────────────────────────────────────┐
+ * │ [Subscribed]  [Administered]             │
+ * └──────────────────────────────────────────┘
+ *
+ * Normal Mode (manage=false):
+ * ┌──────────────────────────────────────────┐
+ * │ [Link] Zone Name 1                 slug1 │
+ * │ [Link] Zone Name 2                 slug2 │
+ * │ [Link] Zone Name 3                 slug3 │
+ * └──────────────────────────────────────────┘
+ *
+ * Manage Mode (manage=true):
+ * ┌──────────────────────────────────────────┐
+ * │ Selected 2 zones    [Unsubscribe Button] │
+ * ├──────────────────────────────────────────┤
+ * │ [X] Zone Name 1                    slug1 │
+ * │ [X] Zone Name 2                    slug2 │
+ * │ [ ] Zone Name 3                    slug3 │
+ * └──────────────────────────────────────────┘
+ *
+ * Confirmation Dialog:
+ * ┌──────────────────────────────────────────┐
+ * │ Unsubscribe?                             │
+ * │ Remove 2 zones from your subscriptions.  │
+ * │                      [Cancel] [Confirm] │
+ * └──────────────────────────────────────────┘
+ */
 export function ZoneListPage() {
   const { t } = useTranslation(["common", "settings", "zone"]);
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);

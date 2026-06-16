@@ -22,9 +22,17 @@ export const TagGroupSuggestions: React.FC<TagGroupSuggestionsProps> = ({
             {tags.map((tag) => (
               <Badge
                 key={tag}
+                role="button"
+                tabIndex={0}
                 variant="outline"
                 className="cursor-pointer"
                 onClick={() => onAddTag(tag)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onAddTag(tag);
+                  }
+                }}
               >
                 {tag}
               </Badge>
