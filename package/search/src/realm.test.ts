@@ -180,7 +180,7 @@ describe("realm search full sync", () => {
             description: markdownContentDoc("Book club"),
           },
         ],
-        [{ unitId: "realm-1", language: "en", isPrimary: true, sortOrder: 0 }],
+        [{ unitId: "realm-1", language: "en", isPrimary: true, position: "a" }],
         [
           {
             unitId: "realm-1",

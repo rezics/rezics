@@ -19,13 +19,13 @@ describe("entity attribution edit queue", () => {
           unitId: "book-1",
           entityId: "entity-b",
           role: "author",
-          sortOrder: 1,
+          position: "b",
         },
         {
           unitId: "book-1",
           entityId: "entity-a",
           role: "author",
-          sortOrder: 0,
+          position: "a",
         },
       ],
       subjects: [
@@ -33,7 +33,7 @@ describe("entity attribution edit queue", () => {
           unitId: "book-1",
           entityId: "character-1",
           role: "primary_character",
-          sortOrder: 0,
+          position: "a",
           weight: 0.8,
         },
       ],
@@ -53,7 +53,7 @@ describe("entity attribution edit queue", () => {
           unitId: "book-1",
           entityId: "entity-a",
           role: "author",
-          sortOrder: 0,
+          position: "a",
         },
       ],
     });
@@ -71,8 +71,8 @@ describe("entity attribution edit queue", () => {
         op: "setCredits",
         role: "author",
         entries: [
-          { entityId: "entity-c", sortOrder: 0 },
-          { entityId: "entity-b", sortOrder: 1 },
+          { entityId: "entity-c", position: "V" },
+          { entityId: "entity-b", position: "W" },
         ],
       },
     ]);
@@ -92,7 +92,7 @@ describe("entity attribution edit queue", () => {
       {
         op: "setSubjects",
         role: "primary_character",
-        entries: [{ entityId: "character-1", sortOrder: 0, weight: 0.5 }],
+        entries: [{ entityId: "character-1", position: "V", weight: 0.5 }],
       },
     ]);
   });

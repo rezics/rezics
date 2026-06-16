@@ -83,7 +83,7 @@ export const shelfItemDTOSchema = t.Object(
     parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
     parentItemId: t.Optional(t.Nullable(t.String())),
     parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
-    position: t.String(),
+    position: t.String(), // Fractional Indexing
     searchText: t.Optional(t.Nullable(t.String())),
     createdByUserId: t.Optional(t.Nullable(t.String())),
     createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -435,7 +435,7 @@ export const shelfItemBatchAddOpSchema = t.Object(
     parentItemType: t.Optional(t.Nullable(shelfItemTypeSchema)),
     parentItemId: t.Optional(t.Nullable(t.String())),
     parentRole: t.Optional(t.Nullable(shelfItemParentRoleSchema)),
-    position: t.String(),
+    position: t.String(), // Fractional Indexing
   },
   { additionalProperties: false },
 );
@@ -446,7 +446,7 @@ export const shelfItemBatchReorderOpSchema = t.Object({
   op: t.Literal("reorder"),
   itemType: shelfItemTypeSchema,
   itemId: t.String(),
-  position: t.String(),
+  position: t.String(), // Fractional Indexing
 });
 
 export type ShelfItemBatchReorderOp =
@@ -482,7 +482,7 @@ export const shelfItemBatchAttachOpSchema = t.Object({
   childItemId: t.String(),
   childKind: shelfItemKindSchema,
   role: shelfItemParentRoleSchema,
-  position: t.Optional(t.String()),
+  position: t.Optional(t.String()), // Fractional Indexing
 });
 
 export type ShelfItemBatchAttachOp =

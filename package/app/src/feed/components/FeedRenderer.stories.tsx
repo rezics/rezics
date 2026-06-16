@@ -43,8 +43,21 @@ const bookRows = bookMany.slice(0, 2).map((book) => ({
     unitId: book.unitId,
     kind: "book",
     title: book.title,
+    subtitle: book.subtitle ?? "A catalog entry with community context",
     coverUrl: book.coverUrl,
     description: book.summary,
+    primaryAuthor: {
+      unitId: `author-${book.unitId}`,
+      name: book.author ?? "Mira Hoshino",
+      role: "author",
+    },
+    tags: [
+      { unitId: `${book.unitId}-tag-1`, label: "Urban Fantasy" },
+      { unitId: `${book.unitId}-tag-2`, label: "Archive" },
+      { unitId: `${book.unitId}-tag-3`, label: "Translation" },
+      { unitId: `${book.unitId}-tag-4`, label: "Community Pick" },
+      { unitId: `${book.unitId}-tag-5`, label: "Longform" },
+    ],
   },
   recommendationReason: "home-book-recommendation",
 })) satisfies FeedRow[];

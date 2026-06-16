@@ -11,8 +11,12 @@ describe("initMeiliSearch", () => {
       initUserIndex: mock(async () => undefined),
       initPostIndex: mock(async () => undefined),
       initRealmIndex: mock(async () => undefined),
+      initZoneIndex: mock(async () => undefined),
       initEntityIndex: mock(async () => undefined),
       initProgressIndex: mock(async () => undefined),
+      initCommentIndex: mock(async () => undefined),
+      initPollIndex: mock(async () => undefined),
+      initShelfItemIndex: mock(async () => undefined),
     };
   }
 

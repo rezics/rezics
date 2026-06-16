@@ -49,6 +49,7 @@ export function mapPostToFeedRow(
     rowId: `post:${post.unitId}`,
     post,
     href: postHrefForFeed(post, input.realmUnitId),
+    contextUnitId: input.realmUnitId ?? null,
     realm: input.realm ?? null,
     targetUnit: targetUnitForPost(post, input.resolvedTargetUnit),
     variantContext: post.variantContext ?? null,

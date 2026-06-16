@@ -8,6 +8,7 @@ import {
 import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
 import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
 import { getLockedFieldError } from "@rezics/api/react-query/errors";
+import { positionForNewBottomPin } from "@rezics/api/tag/fractional-index";
 import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,
@@ -52,6 +53,7 @@ import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguage
 import { TextLink } from "@/shared/ui/link";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
 import { editorialPathLabel } from "@/unit";
+import { UnitExternalLinkEditor } from "@/unit-external-link";
 import { AddTranslationDialog } from "../components/AddTranslationDialog";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
 import {
@@ -71,10 +73,6 @@ import {
   isRestoreEditSubmitDisabled,
   withRestoreSource,
 } from "../models/restoreEdit";
-
-function validatePublishURL(publishURL: string[]) {
-  return publishURL.every((url) => url.startsWith("https://"));
-}
 
 type UpdateBookDialogState = {
   title: string;
@@ -531,24 +529,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           },
         ],
       };
-      const publishURL = metadataState?.extra?.publishURL;
-      if (
-        createBookData.isLicensed ||
-        (publishURL && validatePublishURL(publishURL))
-      ) {
-        await createBookMutation.mutateAsync(createBookData);
-      } else {
-        setDialogState({
-          title: getI18nRuntime().i18n.t(
-            "page:book_edit_info_toast_create_failed_title",
-          ),
-          message: getI18nRuntime().i18n.t(
-            "page:book_edit_info_validation_publish_url_required",
-          ),
-          error: true,
-        });
-        setUpdateBookErrorOpen(true);
-      }
+      await createBookMutation.mutateAsync(createBookData);
       return;
     }
 
@@ -976,6 +957,18 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           </div>
         </section>
 
+        {bookId ? (
+          <section>
+            <UnitExternalLinkEditor
+              unitId={bookId}
+              title={getI18nRuntime().i18n.t("common:external_links_title")}
+              description={getI18nRuntime().i18n.t(
+                "common:external_links_book_description",
+              )}
+            />
+          </section>
+        ) : null}
+
         <section>
           <button
             type="button"
@@ -1020,11 +1013,16 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           creationContext="catalog"
           lockedCreditRole="author"
           onSelect={(entityId) => {
-            const existingAuthors =
+            const existingAuthors = (
               authorCreditsQuery.data?.filter(
                 (credit) =>
                   credit.role === "author" && credit.entityId !== entityId,
-              ) ?? [];
+              ) ?? []
+            ).sort(
+              (left, right) =>
+                left.position.localeCompare(right.position) ||
+                left.entityId.localeCompare(right.entityId),
+            );
             batchAuthorMutation.mutate({
               unitId: bookId,
               request: {
@@ -1033,13 +1031,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                     op: "setCredits",
                     role: "author",
                     entries: [
-                      ...existingAuthors.map((credit, index) => ({
+                      ...existingAuthors.map((credit) => ({
                         entityId: credit.entityId,
-                        sortOrder: index,
+                        position: credit.position,
                       })),
                       {
                         entityId,
-                        sortOrder: existingAuthors.length,
+                        position: positionForNewBottomPin(
+                          existingAuthors.at(-1)?.position,
+                        ),
                       },
                     ],
                   },

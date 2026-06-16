@@ -31,6 +31,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
+import { UnitExternalLinkEditor } from "@/unit-external-link";
 import { ZoneManageLifecycleTab } from "../components/manage/ZoneManageLifecycleTab";
 import { ZoneManageJsonFrame } from "../components/manage/ZoneManageJsonFrame";
 import { ZoneManageMenusTab } from "../components/manage/ZoneManageMenusTab";
@@ -57,6 +58,7 @@ import {
 export type ZoneManageTab =
   | "profile"
   | "sections"
+  | "sources"
   | "menus"
   | "theme"
   | "lifecycle";
@@ -124,7 +126,8 @@ export function ZoneManagePage({
     () =>
       [...(summaryZone?.pages ?? [])].sort(
         (left, right) =>
-          left.position - right.position || left.slug.localeCompare(right.slug),
+          left.position.localeCompare(right.position) ||
+          left.slug.localeCompare(right.slug),
       ),
     [summaryZone?.pages],
   );
@@ -382,7 +385,7 @@ export function ZoneManagePage({
       ? sortedPages
       : [...zone.pages].sort(
           (left, right) =>
-            left.position - right.position ||
+            left.position.localeCompare(right.position) ||
             left.slug.localeCompare(right.slug),
         );
   const editorCtx = {
@@ -491,6 +494,7 @@ export function ZoneManagePage({
           <TabsTrigger value="sections">
             {t("zone:manage_sections")}
           </TabsTrigger>
+          <TabsTrigger value="sources">{t("zone:manage_sources")}</TabsTrigger>
           <TabsTrigger value="menus">{t("zone:manage_menus")}</TabsTrigger>
           <TabsTrigger value="theme">{t("zone:manage_theme")}</TabsTrigger>
           <TabsTrigger value="lifecycle">
@@ -535,6 +539,14 @@ export function ZoneManagePage({
             saving={saving}
             saveDisabled={saveBlocked || !portalQuery.data?.page.id}
             onJsonProblemsChange={setJsonProblems}
+          />
+        </TabsContent>
+
+        <TabsContent value="sources">
+          <UnitExternalLinkEditor
+            unitId={zone.unitId}
+            title={t("common:external_links_title")}
+            description={t("common:external_links_zone_description")}
           />
         </TabsContent>
 

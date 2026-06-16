@@ -45,7 +45,6 @@ import {
   Shelf,
   ShelfItem,
   SlugScope,
-  SourceSite,
   StaffAuditLog,
   StaffGrant,
   SubjectAttribution,
@@ -55,7 +54,7 @@ import {
   UnitAlias,
   UnitAliasVote,
   UnitCollaborator,
-  UnitExternalRef,
+  UnitExternalLink,
   UnitFieldLock,
   UnitHistoryClock,
   UnitRealm,
@@ -65,9 +64,11 @@ import {
   User,
   UserBlock,
   UserContentNodeProgress,
+  UserSubscriptionListEntry,
   UserTagApplication,
   UserUnitProgress,
   Zone,
+  ZonePage,
 } from "../schema";
 
 type ResetDatabaseDb = Pick<ServerDb, "delete">;
@@ -85,6 +86,7 @@ export const RESET_DATABASE_TABLES = [
   ["UnitAliasVote", UnitAliasVote],
   ["PollVote", PollVote],
   ["Subscription", Subscription],
+  ["UserSubscriptionListEntry", UserSubscriptionListEntry],
   ["UserContentNodeProgress", UserContentNodeProgress],
   ["UserUnitProgress", UserUnitProgress],
   ["UserTagApplication", UserTagApplication],
@@ -104,7 +106,7 @@ export const RESET_DATABASE_TABLES = [
 
   ["CreditAttributionEvidence", CreditAttributionEvidence],
   ["GameSystemRequirement", GameSystemRequirement],
-  ["UnitExternalRef", UnitExternalRef],
+  ["UnitExternalLink", UnitExternalLink],
   ["SubjectAttribution", SubjectAttribution],
   ["CreditAttribution", CreditAttribution],
 
@@ -126,7 +128,6 @@ export const RESET_DATABASE_TABLES = [
   ["ContentStructureAnchor", ContentStructureAnchor],
   ["ContentStructureNode", ContentStructureNode],
   ["ContentStructure", ContentStructure],
-  ["SourceSite", SourceSite],
 
   ["CommentPromotion", CommentPromotion],
   ["Comment", Comment],
@@ -140,6 +141,7 @@ export const RESET_DATABASE_TABLES = [
   ["Game", Game],
   ["Media", Media],
   ["Link", Link],
+  ["ZonePage", ZonePage],
   ["Zone", Zone],
   ["Entity", Entity],
 
@@ -180,7 +182,7 @@ export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
 
   // Group 1: Leaf tables with no dependents or only id-shaped references.
   // 第 1 组：没有依赖者、或仅含 id 形式引用的叶子表。
-  await deleteTables(db, RESET_DATABASE_TABLES.slice(0, 20));
+  await deleteTables(db, RESET_DATABASE_TABLES.slice(0, 21));
 
   // Group 2: Moderation and feedback records.
   // 第 2 组：审核与反馈记录。
@@ -189,14 +191,14 @@ export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
   await db.delete(ModerationCase);
   await db.delete(Feedback);
 
-  // Group 3: Attribution and external-reference leaves.
-  // 第 3 组：归属与外部引用叶子表。
+  // Group 3: Attribution and external-link leaves.
+  // 第 3 组：归属与外部链接叶子表。
   await deleteTables(db, [
     ["CreditAttributionEvidence", CreditAttributionEvidence],
     ["GameSystemRequirement", GameSystemRequirement],
+    ["UnitExternalLink", UnitExternalLink],
   ]);
   await deleteTables(db, [
-    ["UnitExternalRef", UnitExternalRef],
     ["SubjectAttribution", SubjectAttribution],
     ["CreditAttribution", CreditAttribution],
   ]);
@@ -234,10 +236,7 @@ export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
   await db.delete(SeriesContentIndex);
   await db.delete(ContentStructureAnchor);
   await db.delete(ContentStructureNode);
-  await deleteTables(db, [
-    ["ContentStructure", ContentStructure],
-    ["SourceSite", SourceSite],
-  ]);
+  await db.delete(ContentStructure);
 
   // Group 8: Type extensions (1:1 with Unit).
   // Post must be deleted before ScoreEntry (FK constraint)
@@ -256,6 +255,7 @@ export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
     ["Game", Game],
     ["Media", Media],
     ["Link", Link],
+    ["ZonePage", ZonePage],
     ["Zone", Zone],
     ["Entity", Entity],
   ]);

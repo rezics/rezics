@@ -5,8 +5,8 @@
  * Backend routes:
  * 后端路由：
  * - /meili/health
- * - /meili/content|feedbacks|users|posts|polls|realms|entities/(init|sync)
- * - /meili/content|feedbacks|users|posts|polls|realms|entities/deleteAll
+ * - /meili/content|feedbacks|users|posts|polls|realms|zones|entities/(init|sync)
+ * - /meili/content|feedbacks|users|posts|polls|realms|zones|entities/deleteAll
  * - /meili/keys/admin|(list|delete)
  */
 
@@ -95,6 +95,11 @@ export const meiliAdminApi = {
       method: "POST",
     });
   },
+  initZonesIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/zones/init", {
+      method: "POST",
+    });
+  },
   initEntitiesIndex: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/entities/init", {
       method: "POST",
@@ -134,6 +139,11 @@ export const meiliAdminApi = {
       method: "POST",
     });
   },
+  syncAllZones: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>("/meili/zones/sync", {
+      method: "POST",
+    });
+  },
   syncAllEntities: async (): Promise<MeiliTaskResponse> => {
     return apiFetch<MeiliTaskResponse>("/meili/entities/sync", {
       method: "POST",
@@ -167,6 +177,11 @@ export const meiliAdminApi = {
   },
   deleteAllRealms: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/realms/deleteAll", {
+      method: "DELETE",
+    });
+  },
+  deleteAllZones: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/zones/deleteAll", {
       method: "DELETE",
     });
   },
@@ -301,6 +316,18 @@ export function useMeiliInitRealmsIndexMutation(
   });
 }
 
+export function useMeiliInitZonesIndexMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.initZonesIndex(),
+    ...options,
+  });
+}
+
 export function useMeiliInitEntitiesIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
@@ -381,6 +408,18 @@ export function useMeiliSyncRealmsMutation(
 ) {
   return useMutation({
     mutationFn: () => meiliAdminApi.syncAllRealms(),
+    ...options,
+  });
+}
+
+export function useMeiliSyncZonesMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliTaskResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.syncAllZones(),
     ...options,
   });
 }
@@ -469,6 +508,18 @@ export function useMeiliDeleteAllRealmsMutation(
   });
 }
 
+export function useMeiliDeleteAllZonesMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.deleteAllZones(),
+    ...options,
+  });
+}
+
 export function useMeiliDeleteAllEntitiesMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
@@ -527,6 +578,7 @@ export const meiliAdminMutations = {
   useInitPostsIndex: useMeiliInitPostsIndexMutation,
   useInitPollsIndex: useMeiliInitPollsIndexMutation,
   useInitRealmsIndex: useMeiliInitRealmsIndexMutation,
+  useInitZonesIndex: useMeiliInitZonesIndexMutation,
   useInitEntitiesIndex: useMeiliInitEntitiesIndexMutation,
   useSyncContent: useMeiliSyncContentMutation,
   useSyncFeedbacks: useMeiliSyncFeedbacksMutation,
@@ -534,6 +586,7 @@ export const meiliAdminMutations = {
   useSyncPosts: useMeiliSyncPostsMutation,
   useSyncPolls: useMeiliSyncPollsMutation,
   useSyncRealms: useMeiliSyncRealmsMutation,
+  useSyncZones: useMeiliSyncZonesMutation,
   useSyncEntities: useMeiliSyncEntitiesMutation,
   useDeleteAllContent: useMeiliDeleteAllContentMutation,
   useDeleteAllFeedbacks: useMeiliDeleteAllFeedbacksMutation,
@@ -541,6 +594,7 @@ export const meiliAdminMutations = {
   useDeleteAllPosts: useMeiliDeleteAllPostsMutation,
   useDeleteAllPolls: useMeiliDeleteAllPollsMutation,
   useDeleteAllRealms: useMeiliDeleteAllRealmsMutation,
+  useDeleteAllZones: useMeiliDeleteAllZonesMutation,
   useDeleteAllEntities: useMeiliDeleteAllEntitiesMutation,
   useResetAllIndexes: useMeiliResetAllIndexesMutation,
   useCreateAdminKey: useMeiliCreateAdminKeyMutation,

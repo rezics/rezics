@@ -40,7 +40,7 @@ describe("media detail readiness", () => {
   });
 
   test("keeps hero media as domain media instead of raw media columns", () => {
-    expect(mediaDetailDomainMediaPolicy.sources).toContain("UnitExternalRef");
+    expect(mediaDetailDomainMediaPolicy.sources).toContain("UnitExternalLink");
     expect(mediaDetailDomainMediaPolicy.excludedMediaColumns).toContain(
       "trailerUrl",
     );

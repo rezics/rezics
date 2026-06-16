@@ -1,9 +1,4 @@
 import { t } from "elysia";
-import {
-  DIRECT_REACTION_SCOPE_KEY,
-  REALM_REACTION_SCOPE_PREFIX,
-  type ReactionScopeKey,
-} from "./reaction.scope";
 
 /**
  * Development cutover: no `like`/`dislike` aliases are accepted. Existing rows
@@ -29,23 +24,23 @@ export type KnownReactionKind = (typeof knownReactionKindSchema)["static"];
 export const createSchema = t.Object({
   targetId: t.String(),
   reaction: allowedReactionKindSchema,
-  scopeKey: t.Optional(t.String()),
+  contextUnitId: t.Optional(t.Nullable(t.String())),
 });
 
 export const deleteQuerySchema = t.Object({
   targetId: t.String(),
   reaction: allowedReactionKindSchema,
-  scopeKey: t.Optional(t.String()),
+  contextUnitId: t.Optional(t.Nullable(t.String())),
 });
 
 export const summaryQuerySchema = t.Object({
   targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-  scopeKey: t.Optional(t.String()),
+  contextUnitId: t.Optional(t.Nullable(t.String())),
 });
 
 export const myQuerySchema = t.Object({
   targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-  scopeKey: t.Optional(t.String()),
+  contextUnitId: t.Optional(t.Nullable(t.String())),
 });
 
 export const createShareSchema = t.Object({
@@ -82,7 +77,7 @@ export type CreateShareResponse = (typeof createShareResponseSchema)["static"];
 export const givenQuerySchema = t.Object({
   userId: t.String(),
   reactions: t.Optional(t.String()),
-  scopeKey: t.Optional(t.String()),
+  contextUnitId: t.Optional(t.Nullable(t.String())),
   cursor: t.Optional(t.String()),
   limit: t.Optional(t.Numeric()),
 });
@@ -92,7 +87,7 @@ const reactionRowSchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
   reaction: t.String(),
-  scopeKey: t.String(),
+  contextUnitId: t.Nullable(t.String()),
   createdAt: t.String(),
 });
 
@@ -102,16 +97,9 @@ export const givenResponseSchema = t.Object({
 });
 export type GivenResponse = (typeof givenResponseSchema)["static"];
 
-export function normalizeReactionScopeKey(
-  scopeKey: string | null | undefined,
-): ReactionScopeKey {
-  const normalized = scopeKey?.trim();
-  if (!normalized) return DIRECT_REACTION_SCOPE_KEY;
-  if (normalized === DIRECT_REACTION_SCOPE_KEY)
-    return DIRECT_REACTION_SCOPE_KEY;
-  if (normalized.startsWith(REALM_REACTION_SCOPE_PREFIX)) {
-    const realmUnitId = normalized.slice(REALM_REACTION_SCOPE_PREFIX.length);
-    if (realmUnitId.length > 0) return normalized as ReactionScopeKey;
-  }
-  throw new Error(`Invalid reaction scope: ${normalized}`);
+export function normalizeReactionContextUnitId(
+  contextUnitId: string | null | undefined,
+): string | null {
+  const normalized = contextUnitId?.trim();
+  return normalized ? normalized : null;
 }

@@ -34,11 +34,16 @@ const findUnit = mock(async (unitId: string) => {
 });
 
 const fetchMock = mock(
-  async (_input: RequestInfo | URL, _init?: RequestInit) =>
-    new Response(JSON.stringify({ revisions: [], nextCursor: null }), {
+  async (input: RequestInfo | URL, _init?: RequestInit) => {
+    const url = String(input);
+    const body = url.includes("/structure-events")
+      ? { events: [], nextCursor: null }
+      : { revisions: [], nextCursor: null };
+    return new Response(JSON.stringify(body), {
       status: 200,
       headers: { "content-type": "application/json" },
-    }),
+    });
+  },
 );
 
 function repository(): HistoryProxyRepository {
@@ -57,14 +62,58 @@ describe("historyProxyApi", () => {
     const historyProxyApi = createHistoryProxyApi(repository());
     const response = await historyProxyApi.handle(
       new Request(
-        "http://localhost/history/unit/unit-public/revisions?limit=10&includeContent=true",
+        "http://localhost/history/unit/unit-public/revisions?limit=10",
       ),
     );
 
     expect(response.status).toBe(200);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://history.example/history/unit/unit-public/revisions?includeContent=true&limit=10",
+      "http://history.example/history/unit/unit-public/revisions?limit=10",
     );
+  });
+
+  test("blocks public raw revision content for non-owners before proxying", async () => {
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository());
+    const response = await historyProxyApi.handle(
+      new Request(
+        "http://localhost/history/unit/unit-public/revisions?includeContent=true",
+      ),
+    );
+
+    expect(response.status).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test("allows raw revision content for the owner", async () => {
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository());
+    const response = await historyProxyApi.handle(
+      new Request(
+        "http://localhost/history/unit/unit-public/revisions?includeContent=true",
+        {
+          headers: { authorization: "Bearer owner" },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://history.example/history/unit/unit-public/revisions?includeContent=true",
+    );
+  });
+
+  test("blocks structure event payloads for public non-owners", async () => {
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository());
+    const response = await historyProxyApi.handle(
+      new Request(
+        "http://localhost/history/unit/unit-public/structure-events?includePayload=true",
+      ),
+    );
+
+    expect(response.status).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   test("blocks private Unit history for non-owners before proxying", async () => {

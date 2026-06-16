@@ -9,12 +9,12 @@ import { zoneLinkTargetSchema } from "./link-target";
 // ANCHOR: 专区分区查询
 
 /**
- * `ZoneSectionQuery` compiles only to fields the Meilisearch `content` /
- * `posts` indexes can filter or sort; the server-side compiler rejects
+ * `ZoneSectionQuery` compiles only to fields the Meilisearch `content`,
+ * `posts`, `realms`, or `zones` indexes can filter or sort; the server-side compiler rejects
  * combinations outside that vocabulary (e.g. `tagUnitIds` on the posts
  * index). Semantic section variants ("latest", "popular", "recent wiki")
  * are query presets plus default-title i18n keys, never new section kinds.
- * `ZoneSectionQuery` 只编译为 Meilisearch `content` / `posts` 索引可
+ * `ZoneSectionQuery` 只编译为 Meilisearch `content`、`posts`、`realms` 或 `zones` 索引可
  * 过滤或排序的字段；服务端编译器会拒绝词汇表之外的组合（例如 posts
  * 索引上的 `tagUnitIds`）。语义化的分区变体（“最新”“热门”“最近 wiki”）
  * 是查询预设加默认标题 i18n key，绝不是新的分区 kind。
@@ -59,6 +59,7 @@ export const zoneSectionQuerySortFieldSchema = t.Union([
   t.Literal("controversyScore"),
   t.Literal("trendingScore"),
   t.Literal("qualityScore"),
+  t.Literal("memberCount"),
 ]);
 
 export type ZoneSectionQuerySortField = Static<
@@ -89,7 +90,12 @@ export type ZoneSectionQuerySubjects = Static<
 
 export const zoneSectionQuerySchema = t.Object(
   {
-    target: t.Union([t.Literal("unit"), t.Literal("post")]),
+    target: t.Union([
+      t.Literal("unit"),
+      t.Literal("post"),
+      t.Literal("realm"),
+      t.Literal("zone"),
+    ]),
     types: t.Optional(t.Array(unitTypeSchema)),
     postKinds: t.Optional(t.Array(postKindLiterals)),
     realm: t.Optional(zoneSectionQueryRealmSchema),
@@ -257,11 +263,11 @@ export type ZoneStatsSection = Static<typeof zoneStatsSectionSchema>;
 
 /**
  * `sources` renders external presences attached to the zone Unit itself:
- * a ZONE is a Unit, so its `UnitExternalRef`s mean "this portal's
+ * a ZONE is a Unit, so its `UnitExternalLink`s mean "this portal's
  * counterparts elsewhere". There is intentionally no section `unitId`;
  * readers always query the owning zone unit.
  * `sources` 渲染挂在专区 Unit 自身上的外部存在：ZONE 本身就是 Unit，
- * 其 `UnitExternalRef` 表示“这个门户在其他地方的对应站点”。这里刻意
+ * 其 `UnitExternalLink` 表示“这个门户在其他地方的对应站点”。这里刻意
  * 没有分区级 `unitId`；读取方始终查询所属专区 Unit。
  */
 export const zoneSourcesSectionSchema = t.Object(

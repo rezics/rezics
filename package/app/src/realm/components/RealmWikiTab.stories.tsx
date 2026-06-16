@@ -46,12 +46,12 @@ const wikiZonePortal: ZonePortalResponse = {
     },
     theme: { schema: "rezics/zone-theme", version: 1 },
     homePageId: "wiki-home-page",
-    pages: [{ id: "wiki-home-page", slug: "home", position: 0 }],
+    pages: [{ id: "wiki-home-page", slug: "home", position: "a" }],
   },
   page: {
     id: "wiki-home-page",
     slug: "home",
-    position: 0,
+    position: "a",
     config: {
       schema: "rezics/zone-page",
       version: 1,

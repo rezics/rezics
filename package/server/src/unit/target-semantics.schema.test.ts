@@ -15,9 +15,10 @@ import {
 } from "../db/schema";
 
 const schemaSource = [
-  "catalog",
+  "unit",
+  "post",
+  "comment",
   "content-structure",
-  "discussion",
   "engagement",
   "governance",
   "realm",
@@ -96,7 +97,6 @@ describe("Unit target semantics in Drizzle schema", () => {
     expectColumn(Comment, "realmUnitId");
     expectColumn(Comment, "parentCommentId");
     expectColumn(Comment, "depth");
-    expectColumn(Comment, "path");
     expectColumn(Comment, "moderationStatus");
     expectColumn(Comment, "deletedAt");
     expectNoColumn(Comment, "targetUnitId");

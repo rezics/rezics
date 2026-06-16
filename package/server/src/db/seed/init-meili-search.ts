@@ -25,6 +25,7 @@ export async function initMeiliSearch(
     searchClient.initUserIndex(),
     searchClient.initPostIndex(),
     searchClient.initRealmIndex(),
+    searchClient.initZoneIndex(),
     searchClient.initEntityIndex(),
     searchClient.initProgressIndex(),
     searchClient.initCommentIndex(),

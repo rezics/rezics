@@ -51,6 +51,7 @@ describe("maintenance handlers", () => {
     ["comment", "search.comment.fullSync"],
     ["poll", "search.poll.fullSync"],
     ["realm", "search.realm.fullSync"],
+    ["zone", "search.zone.fullSync"],
     ["entity", "search.entity.fullSync"],
     ["user", "search.user.fullSync"],
     ["feedback", "search.feedback.fullSync"],

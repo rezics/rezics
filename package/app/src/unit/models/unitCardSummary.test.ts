@@ -19,7 +19,7 @@ describe("unitDtoToUnitCardSummary", () => {
       type: "BOOK",
       user: { unitId: "user-1", name: "Mina" },
       supportLanguages: [
-        { unitId: "unit-1", language: "en", isPrimary: true, sortOrder: 0 },
+        { unitId: "unit-1", language: "en", isPrimary: true, position: "a" },
       ],
       translations: [
         {

@@ -27,8 +27,8 @@ export interface CommentTreeNodeProps {
   highlightedFocusPostUnitId?: string;
   highlightedThreadUnitId?: string;
   onReplyClick: (postUnitId: string) => void;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
   renderContextBadge?: (post: CommentDTO) => React.ReactNode;
   onComposerSubmitted: (parentCommentId: string, post: CommentDTO) => void;
@@ -47,8 +47,8 @@ export function CommentTreeNode({
   highlightedFocusPostUnitId,
   highlightedThreadUnitId,
   onReplyClick,
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
   renderOverflowContent,
   renderContextBadge,
   onComposerSubmitted,
@@ -135,8 +135,8 @@ export function CommentTreeNode({
             post={post}
             showAvatar
             onReply={() => onReplyClick(post.unitId)}
-            summaryScopeKey={summaryScopeKey}
-            reactionScopeKey={reactionScopeKey}
+            summaryContextUnitId={summaryContextUnitId}
+            reactionContextUnitId={reactionContextUnitId}
             overflowContent={renderOverflowContent?.(post)}
             contextBadge={renderContextBadge?.(post)}
             replyComposerSlot={
@@ -195,8 +195,8 @@ export function CommentTreeNode({
                 highlightedFocusPostUnitId={highlightedFocusPostUnitId}
                 highlightedThreadUnitId={highlightedThreadUnitId}
                 onReplyClick={onReplyClick}
-                summaryScopeKey={summaryScopeKey}
-                reactionScopeKey={reactionScopeKey}
+                summaryContextUnitId={summaryContextUnitId}
+                reactionContextUnitId={reactionContextUnitId}
                 renderOverflowContent={renderOverflowContent}
                 renderContextBadge={renderContextBadge}
                 onComposerSubmitted={onComposerSubmitted}

@@ -50,7 +50,7 @@ export type PollResultVisibility =
 export const pollOptionDTOSchema = t.Object({
   pollUnitId: t.String(),
   optionId: t.String(),
-  position: t.String(),
+  position: t.String(), // Fractional Indexing
   label: t.Optional(t.Nullable(t.String())),
   unitId: t.Optional(t.Nullable(t.String())),
   voteCount: t.Optional(t.Number()),
@@ -105,7 +105,7 @@ export type PollDTO = (typeof pollDTOSchema)["static"];
 export const createPollOptionSchema = t.Object({
   label: t.Optional(t.String()),
   unitId: t.Optional(t.String()),
-  position: t.Optional(t.String()),
+  position: t.Optional(t.String()), // Fractional Indexing
 });
 
 export type CreatePollOptionInput = (typeof createPollOptionSchema)["static"];

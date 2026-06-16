@@ -45,7 +45,7 @@ export const ShelfItem = pgTable(
     parentItemType: varchar({ length: 32 }),
     parentItemId: uuid("parentItemId"),
     parentRole: varchar({ length: 32 }),
-    position: varchar({ length: 64 }).notNull(),
+    position: varchar({ length: 64 }).notNull(), // Fractional Indexing
     /**
      * User-authored indexing help only. Do not copy collected Unit content,
      * metadata, tags, or shelf metadata into this field or its search index.

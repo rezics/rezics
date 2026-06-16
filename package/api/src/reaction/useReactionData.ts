@@ -1,10 +1,10 @@
 /**
  * useReactionData — selector hook that reads the per-target reaction summary
- * and current user reactions for a single `unitId` from the React Query batch
+ * and current user reactions for a single `targetId` from the React Query batch
  * caches populated by `useReactionHydration`.
  *
  * Strategy: scan the active `summaryBatch` / `myBatch` cache entries for the
- * one whose normalised id list contains `unitId`, and pick the largest such
+ * one whose normalised id list contains `targetId`, and pick the largest such
  * batch (so a section that hydrated 30 ids supersedes a smaller overlapping
  * batch). The hook re-renders whenever any reaction query in the cache
  * changes — typical batch caches update at the same rate as the underlying
@@ -28,8 +28,8 @@ export type UseReactionDataReturn = {
 };
 
 export type UseReactionDataOptions = {
-  summaryScopeKey?: string | null;
-  userScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  userContextUnitId?: string | null;
 };
 
 const EMPTY_SUMMARY: Record<string, number> = Object.freeze({});
@@ -38,7 +38,7 @@ const EMPTY_USER_REACTIONS = Object.freeze([] as string[]) as string[];
 function readBatchEntries<T>(
   cacheEntries: ReadonlyArray<[readonly unknown[], T | undefined]>,
   prefix: ReadonlyArray<unknown>,
-  scopeKey?: string | null,
+  contextUnitId?: string | null,
 ): Array<{ ids: readonly string[]; data: T }> {
   const matches: Array<{ ids: readonly string[]; data: T }> = [];
   for (const [key, data] of cacheEntries) {
@@ -56,14 +56,14 @@ function readBatchEntries<T>(
     if (!Array.isArray(tail) && (!tail || typeof tail !== "object")) continue;
     const objectTail = tail as {
       targetIds?: unknown;
-      scopeKey?: string | null;
+      contextUnitId?: string | null;
     };
     const ids = Array.isArray(tail) ? tail : objectTail.targetIds;
     if (!Array.isArray(ids)) continue;
     const entryScopeKey = Array.isArray(tail)
       ? null
-      : (objectTail.scopeKey ?? null);
-    if (entryScopeKey !== (scopeKey ?? null)) continue;
+      : (objectTail.contextUnitId ?? null);
+    if (entryScopeKey !== (contextUnitId ?? null)) continue;
     matches.push({ ids, data });
   }
   return matches;
@@ -71,11 +71,11 @@ function readBatchEntries<T>(
 
 function pickLargestContaining<T>(
   matches: Array<{ ids: readonly string[]; data: T }>,
-  unitId: string,
+  targetId: string,
 ): T | undefined {
   let best: { ids: readonly string[]; data: T } | undefined;
   for (const match of matches) {
-    if (!match.ids.includes(unitId)) continue;
+    if (!match.ids.includes(targetId)) continue;
     if (!best || match.ids.length > best.ids.length) {
       best = match;
     }
@@ -84,7 +84,7 @@ function pickLargestContaining<T>(
 }
 
 export function useReactionData(
-  unitId: string,
+  targetId: string,
   options: UseReactionDataOptions = {},
 ): UseReactionDataReturn {
   const queryClient = useQueryClient();
@@ -105,7 +105,7 @@ export function useReactionData(
 
   return useMemo(() => {
     void version;
-    if (!unitId) {
+    if (!targetId) {
       return {
         summary: EMPTY_SUMMARY,
         shareCount: 0,
@@ -131,34 +131,34 @@ export function useReactionData(
     const summaryBatches = readBatchEntries<ReactionSummaryResponse>(
       summaryEntries,
       summaryPrefix,
-      options.summaryScopeKey,
+      options.summaryContextUnitId ?? null,
     );
     const myBatches = readBatchEntries<ReactionMyResponse>(
       myEntries,
       myPrefix,
-      options.userScopeKey,
+      options.userContextUnitId ?? null,
     );
     const shareBatches = readBatchEntries<ShareSummaryResponse>(
       shareEntries,
       sharePrefix,
     );
 
-    const summaryData = pickLargestContaining(summaryBatches, unitId);
-    const myData = pickLargestContaining(myBatches, unitId);
-    const shareData = pickLargestContaining(shareBatches, unitId);
+    const summaryData = pickLargestContaining(summaryBatches, targetId);
+    const myData = pickLargestContaining(myBatches, targetId);
+    const shareData = pickLargestContaining(shareBatches, targetId);
 
-    const summary = summaryData?.summaries?.[unitId] ?? EMPTY_SUMMARY;
-    const shareCount = shareData?.summaries?.[unitId]?.shareCount ?? 0;
+    const summary = summaryData?.summaries?.[targetId] ?? EMPTY_SUMMARY;
+    const shareCount = shareData?.summaries?.[targetId]?.shareCount ?? 0;
     const userReactions =
-      myData?.reactionsByTarget?.[unitId] ?? EMPTY_USER_REACTIONS;
+      myData?.reactionsByTarget?.[targetId] ?? EMPTY_USER_REACTIONS;
 
     const isHydrated = summaryData !== undefined;
 
     return { summary, shareCount, userReactions, isHydrated };
   }, [
-    unitId,
-    options.summaryScopeKey,
-    options.userScopeKey,
+    targetId,
+    options.summaryContextUnitId,
+    options.userContextUnitId,
     queryClient,
     version,
   ]);

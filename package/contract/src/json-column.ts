@@ -148,16 +148,11 @@ export const contentTranslationProvenanceJsonSchema = t.Object(
 
 /**
  * @compat additive-only
- * Book extra currently exposes `publishURL`; missing means no known publication
- * URLs. Existing unknown keys are preserved for tolerant reads.
- * Book extra 当前暴露 `publishURL`；缺失表示没有已知发布 URL。已有未知键会被读取方容忍。
+ * Book extra currently has no authoritative typed fields. External references
+ * belong to UnitExternalLink.
+ * Book extra 当前没有权威类型化字段。外部引用归属 UnitExternalLink。
  */
-export const bookExtraJsonSchema = t.Object(
-  {
-    publishURL: t.Optional(t.Array(t.String())),
-  },
-  openObjectOptions,
-);
+export const bookExtraJsonSchema = emptyCompatObjectSchema;
 
 /**
  * @compat additive-only
@@ -175,26 +170,6 @@ export const genericMetadataJsonSchema = emptyCompatObjectSchema;
  * 硬件需求当前以对象存储，尚无稳定类型化字段。缺失键表示未说明对应需求。
  */
 export const gameSystemRequirementHardwareJsonSchema = emptyCompatObjectSchema;
-
-/**
- * @compat additive-only
- * Source-site reference rules are an append-only list of rule objects. Missing
- * optional fields default to no crawler action and no crawl support override.
- * Source site 引用规则是追加式规则对象列表。缺失的可选字段默认表示无 crawler action 且无 crawl support 覆盖。
- */
-export const sourceSiteRefRulesJsonSchema = t.Array(
-  t.Object(
-    {
-      externalKind: t.Optional(t.String()),
-      externalIdName: t.Optional(t.String()),
-      urlTemplate: t.Optional(t.String()),
-      urlMatchPattern: t.Optional(t.String()),
-      crawlerActionKey: t.Optional(t.Nullable(t.String())),
-      crawlSupported: t.Optional(t.Boolean()),
-    },
-    openObjectOptions,
-  ),
-);
 
 /**
  * @compat additive-only

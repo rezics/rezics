@@ -3,8 +3,13 @@ import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
-import type React from "react";
-import { useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
@@ -14,10 +19,42 @@ interface RemarkInlineFormProps {
   onSuccess?: () => void;
 }
 
-export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
-  bookUnitId,
-  onSuccess,
-}) => {
+export interface RemarkInlineFormHandle {
+  focus: () => void;
+}
+
+/**
+ * Inline remark composer：折叠时是一行输入，聚焦后展开评分、标题和正文。
+ * 窄屏下所有控件纵向等宽；宽屏保持 `w-full` 由父级决定宽度。
+ *
+ * Mobile (<640px)
+ * +----------------------+
+ * | [Write remark input] |
+ * | Rating               |
+ * | Title input          |
+ * | Markdown editor      |
+ * +----------------------+
+ *
+ * Tablet (640px-1023px)
+ * +--------------------------------+
+ * | [Write remark input full row]  |
+ * | Rating / title / editor stack  |
+ * +--------------------------------+
+ *
+ * Desktop (1024px-1535px)
+ * +------------------------------------------+
+ * | Composer fills overview content column   |
+ * +------------------------------------------+
+ *
+ * Ultra-wide (>=1536px)
+ * +------------------------------------------------+
+ * | Width remains constrained by book detail shell  |
+ * +------------------------------------------------+
+ */
+export const RemarkInlineForm = forwardRef<
+  RemarkInlineFormHandle,
+  RemarkInlineFormProps
+>(({ bookUnitId, onSuccess }, ref) => {
   const { t } = useTranslation(["common", "community", "page"]);
   const authoringLanguage = useAuthoringLanguageDefault();
   const [expanded, setExpanded] = useState(false);
@@ -82,6 +119,10 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
     });
   };
 
+  useImperativeHandle(ref, () => ({
+    focus: handleExpand,
+  }));
+
   if (!expanded) {
     return (
       <div ref={wrapperRef}>
@@ -125,4 +166,6 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
       />
     </div>
   );
-};
+});
+
+RemarkInlineForm.displayName = "RemarkInlineForm";

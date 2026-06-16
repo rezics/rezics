@@ -30,26 +30,26 @@ export const WithEvidence: Story = {
         unitId: "book-1",
         entityId: "publisher-1",
         role: "publisher",
-        sourceRefId: "ref-1",
-        sourceSiteEntityUnitId: "source-site-1",
-        externalKind: "book",
-        externalId: "123",
-        canonicalUrl: "https://book.qidian.com/info/123",
+        sourceExternalLinkId: "link-1",
+        url: "https://book.qidian.com/info/123",
         claimPath: "$.bookInfo.publisher",
         observedUrl: "https://book.qidian.com/info/123",
         observedAt: "2026-05-25T00:00:00.000Z",
-        sourceSite: {
-          entityUnitId: "source-site-1",
-          key: "qidian",
-          entity: {
-            unitId: "source-site-1",
+        sourceExternalLink: {
+          id: "link-1",
+          unitId: "book-1",
+          sourceEntityUnitId: "qidian-entity",
+          url: "https://book.qidian.com/info/123",
+          role: "source",
+          sourceEntity: {
+            unitId: "qidian-entity",
             verified: true,
             eligibleCreditRoles: [],
             eligibleSubjectRoles: [],
             slug: "qidian",
             translations: [
               {
-                unitId: "source-site-1",
+                unitId: "qidian-entity",
                 language: "zh-Hant",
                 title: "起點中文網",
               },

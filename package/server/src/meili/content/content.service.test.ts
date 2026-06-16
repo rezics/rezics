@@ -145,8 +145,8 @@ describe("searchContent catalog behavior", () => {
           targetUnitId: null,
           isLanguageNeutral: false,
           supportLanguages: [
-            { language: "ja", isPrimary: true, sortOrder: 0 },
-            { language: "en", isPrimary: false, sortOrder: 1 },
+            { language: "ja", isPrimary: true, position: "a" },
+            { language: "en", isPrimary: false, position: "b" },
           ],
           translations: [
             {

@@ -2,9 +2,8 @@ import type {
   CreditAttribution,
   CreditAttributionEvidence,
   Entity,
-  SourceSite,
   Unit,
-  UnitExternalRef,
+  UnitExternalLink,
   UnitTranslation,
 } from "../db/schema";
 
@@ -17,17 +16,13 @@ export const creditAttributionInclude = {
   },
   evidence: {
     include: {
-      sourceRef: {
+      sourceExternalLink: {
         include: {
-          sourceSite: {
+          sourceEntity: {
             include: {
-              entity: {
+              unit: {
                 include: {
-                  unit: {
-                    include: {
-                      translations: true,
-                    },
-                  },
+                  translations: true,
                 },
               },
             },
@@ -49,19 +44,13 @@ export type CreditAttributionWithRelations =
       | null;
     evidence?: Array<
       typeof CreditAttributionEvidence.$inferSelect & {
-        sourceRef?:
-          | (typeof UnitExternalRef.$inferSelect & {
-              sourceSite?:
-                | (typeof SourceSite.$inferSelect & {
-                    entity?:
-                      | (typeof Entity.$inferSelect & {
-                          unit?: typeof Unit.$inferSelect & {
-                            translations?: Array<
-                              typeof UnitTranslation.$inferSelect
-                            >;
-                          };
-                        })
-                      | null;
+        sourceExternalLink?:
+          | (typeof UnitExternalLink.$inferSelect & {
+              sourceEntity?:
+                | (typeof Entity.$inferSelect & {
+                    unit?: typeof Unit.$inferSelect & {
+                      translations?: Array<typeof UnitTranslation.$inferSelect>;
+                    };
                   })
                 | null;
             })

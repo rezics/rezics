@@ -1,4 +1,4 @@
-import { normalizeReactionScopeKey } from "@rezics/contract/reaction";
+import { normalizeReactionContextUnitId } from "@rezics/contract/reaction";
 import type { ReactionRow } from "../db/schema";
 import { allowedReactionTypes } from "../env";
 import {
@@ -66,7 +66,7 @@ function rowToDto(row: ReactionRow): {
   userId: string;
   targetId: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
   createdAt: string;
 } {
   return {
@@ -74,7 +74,7 @@ function rowToDto(row: ReactionRow): {
     userId: row.userId,
     targetId: row.targetId,
     reaction: row.reaction,
-    scopeKey: row.scopeKey,
+    contextUnitId: row.contextUnitId,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -82,7 +82,7 @@ function rowToDto(row: ReactionRow): {
 export interface ListGivenInput {
   userId: string;
   reactions?: string[];
-  scopeKey?: string;
+  contextUnitId?: string | null;
   cursor?: string;
   limit?: number;
 }
@@ -90,7 +90,7 @@ export interface ListGivenInput {
 export interface ListByUserInput {
   targetIds: string[];
   reactions?: string[];
-  scopeKey?: string;
+  contextUnitId?: string | null;
   excludeUserId?: string;
   cursor?: string;
   limit?: number;
@@ -112,7 +112,7 @@ export class ReactionService {
    */
   async getSummary(
     targetIds: string[],
-    scopeKey?: string,
+    contextUnitId?: string | null,
   ): Promise<Record<string, Record<string, number>>> {
     if (!targetIds.length) return {};
 
@@ -121,11 +121,13 @@ export class ReactionService {
       result[id] = {};
     }
 
-    const normalizedScopeKey =
-      scopeKey === undefined ? undefined : normalizeReactionScopeKey(scopeKey);
+    const normalizedContextUnitId =
+      contextUnitId === undefined
+        ? undefined
+        : normalizeReactionContextUnitId(contextUnitId);
     const rows = await this.repository.getSummaryRows(
       targetIds,
-      normalizedScopeKey,
+      normalizedContextUnitId,
     );
 
     for (const row of rows) {
@@ -143,15 +145,16 @@ export class ReactionService {
   async getUserReactions(
     userId: string,
     targetIds: string[],
-    scopeKey?: string,
+    contextUnitId?: string | null,
   ): Promise<Record<string, string[]>> {
     if (!targetIds.length) return {};
-    const normalizedScopeKey = normalizeReactionScopeKey(scopeKey);
+    const normalizedContextUnitId =
+      normalizeReactionContextUnitId(contextUnitId);
 
     const rows = await this.repository.getUserReactionRows(
       userId,
       targetIds,
-      normalizedScopeKey,
+      normalizedContextUnitId,
     );
 
     const result: Record<string, string[]> = {};
@@ -174,18 +177,19 @@ export class ReactionService {
     userId: string,
     targetId: string,
     reaction: string,
-    scopeKey?: string,
+    contextUnitId?: string | null,
   ): Promise<{ reaction: ReactionRow; created: boolean }> {
     if (!allowedReactionTypes.has(reaction)) {
       throw new Error(`Invalid reaction type: ${reaction}`);
     }
-    const normalizedScopeKey = normalizeReactionScopeKey(scopeKey);
+    const normalizedContextUnitId =
+      normalizeReactionContextUnitId(contextUnitId);
 
     const result = await this.repository.createReaction({
       userId,
       targetId,
       reaction,
-      scopeKey: normalizedScopeKey,
+      contextUnitId: normalizedContextUnitId,
       defaultQuota: DEFAULT_ACTIVE_REACTION_QUOTA,
     });
 
@@ -204,9 +208,10 @@ export class ReactionService {
 
     const rows = await this.repository.listRows({
       userId: input.userId,
-      scopeKey: input.scopeKey
-        ? normalizeReactionScopeKey(input.scopeKey)
-        : undefined,
+      contextUnitId:
+        input.contextUnitId === undefined
+          ? undefined
+          : normalizeReactionContextUnitId(input.contextUnitId),
       reactions: input.reactions,
       cursor,
       take: limit + 1,
@@ -242,9 +247,10 @@ export class ReactionService {
 
     const rows = await this.repository.listRows({
       targetIds: input.targetIds,
-      scopeKey: input.scopeKey
-        ? normalizeReactionScopeKey(input.scopeKey)
-        : undefined,
+      contextUnitId:
+        input.contextUnitId === undefined
+          ? undefined
+          : normalizeReactionContextUnitId(input.contextUnitId),
       reactions: input.reactions,
       excludeUserId: input.excludeUserId,
       cursor,
@@ -270,13 +276,13 @@ export class ReactionService {
     userId: string,
     targetId: string,
     reaction: string,
-    scopeKey?: string,
+    contextUnitId?: string | null,
   ): Promise<{ deleted: boolean }> {
     return await this.repository.removeReaction({
       userId,
       targetId,
       reaction,
-      scopeKey: normalizeReactionScopeKey(scopeKey),
+      contextUnitId: normalizeReactionContextUnitId(contextUnitId),
     });
   }
 

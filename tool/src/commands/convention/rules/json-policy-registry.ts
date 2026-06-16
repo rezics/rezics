@@ -207,7 +207,6 @@ export const jsonColumnRegistry = [
     "titlePath",
     "contentStructureTitlePathJsonSchema",
   ),
-  compat("server", "SourceSite", "refRules", "sourceSiteRefRulesJsonSchema"),
   compat(
     "server",
     "ScoreAggregate",

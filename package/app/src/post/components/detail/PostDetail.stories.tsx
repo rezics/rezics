@@ -51,8 +51,8 @@ const meta = {
   component: PostDetail,
   args: {
     post,
-    summaryScopeKey: "realm:realm-1",
-    reactionScopeKey: "realm:realm-1",
+    summaryContextUnitId: "realm-1",
+    reactionContextUnitId: "realm-1",
   },
 } satisfies Meta<typeof PostDetail>;
 

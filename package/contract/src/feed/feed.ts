@@ -72,12 +72,31 @@ export const feedTitleSchema = t.Object({
   params: t.Optional(t.Record(t.String(), t.String())),
 });
 
+export const feedCreditSummarySchema = t.Object({
+  unitId: t.String(),
+  name: t.String(),
+  role: t.Optional(t.String()),
+});
+
+export type FeedCreditSummary = (typeof feedCreditSummarySchema)["static"];
+
+export const feedTagSummarySchema = t.Object({
+  unitId: t.String(),
+  label: t.String(),
+  slug: t.Optional(t.Nullable(t.String())),
+});
+
+export type FeedTagSummary = (typeof feedTagSummarySchema)["static"];
+
 export const feedWorkSummarySchema = t.Object({
   unitId: t.String(),
   kind: t.Optional(t.String()),
   title: t.Optional(t.Nullable(t.String())),
+  subtitle: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(t.String())),
+  primaryAuthor: t.Optional(t.Nullable(feedCreditSummarySchema)),
+  tags: t.Optional(t.Array(feedTagSummarySchema)),
 });
 
 export type FeedWorkSummary = (typeof feedWorkSummarySchema)["static"];
@@ -99,6 +118,7 @@ export const feedPostRowSchema = t.Object({
   rowId: t.String(),
   post: postDTOSchema,
   href: t.String(),
+  contextUnitId: t.Nullable(t.String()),
   realm: t.Optional(
     t.Nullable(
       t.Object({

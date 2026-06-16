@@ -192,7 +192,7 @@ describe("@rezics/job command contract", () => {
   test("validates ranking reaction bucket commands", () => {
     const command = createRankingCommand(RANKING_COMMAND_KINDS.reactionBucket, {
       targetId: "unit-1",
-      scopeKey: "realm:realm-1",
+      contextUnitId: "realm-1",
       reaction: "upvote",
       count: 1,
       at: "2026-02-01T10:25:00.000Z",
@@ -201,7 +201,7 @@ describe("@rezics/job command contract", () => {
     expect(command.kind).toBe("ranking.reactionBucket");
     expect(command.lane).toBe(JOB_LANES.ranking);
     expect(command.idempotencyKey).toBe(
-      "ranking.reactionBucket:unit-1:realm_realm-1:upvote:2026-02-01T10_25_00.000Z",
+      "ranking.reactionBucket:unit-1:realm-1:upvote:2026-02-01T10_25_00.000Z",
     );
     expect(v.parse(JobCommandSchema, command)).toEqual(command);
   });

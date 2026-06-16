@@ -9,6 +9,7 @@ import type {
   HistoryOutboxRepairStatus,
 } from "@rezics/contract";
 import {
+  createHistoryOutboxIngestBatchCommand,
   createHistoryOutboxIngestCommand,
   createMaintenanceCommand,
   type EnqueueResult,
@@ -49,6 +50,7 @@ const SEARCH_INDEX_REBUILD_TARGETS = {
   comments: "comment",
   polls: "poll",
   realms: "realm",
+  zones: "zone",
   entities: "entity",
   user_unit_progress: "progress",
   shelf_items: "shelf-item",
@@ -358,14 +360,29 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
             });
           }
         } else if (input.scope === "history-outbox-replay") {
-          for (const target of targetIds) {
-            const command = createHistoryOutboxIngestCommand(target, {
-              type: "server",
-              service: "admin-repair-job",
-            });
+          if (targetIds.length === 0) {
+            const command = createHistoryOutboxIngestBatchCommand(
+              {},
+              {
+                type: "server",
+                service: "admin-repair-job",
+              },
+            );
             queuedOperations.push(
               operationFromEnqueue(await options.jobProducer.enqueue(command)),
             );
+          } else {
+            for (const target of targetIds) {
+              const command = createHistoryOutboxIngestCommand(target, {
+                type: "server",
+                service: "admin-repair-job",
+              });
+              queuedOperations.push(
+                operationFromEnqueue(
+                  await options.jobProducer.enqueue(command),
+                ),
+              );
+            }
           }
         } else {
           const failureAudit = await appendRepairAudit(options, {

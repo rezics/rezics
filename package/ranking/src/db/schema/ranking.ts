@@ -50,6 +50,9 @@ export const unitRankProjections = p.pgTable(
     unitId: p.uuid("unitId").notNull(),
     scopeKind: rankingScopeKind("scopeKind").notNull(),
     scopeId: p.uuid("scopeId"),
+    // Ranking scope keys are denormalized serving keys, not reaction contexts.
+    // Reaction context is stored separately as nullable contextUnitId on
+    // RankingReactionBucket.
     scopeKey: p.varchar("scopeKey", { length: 64 }).notNull(),
     rankKind: rankingRankKind("rankKind").notNull(),
     bestScore: p.doublePrecision("bestScore").notNull().default(0),
@@ -127,7 +130,7 @@ export const rankingReactionBuckets = p.pgTable(
   {
     id: p.uuid("id").primaryKey().default(sql`uuidv7()`),
     targetId: p.uuid("targetId").notNull(),
-    scopeKey: p.varchar("scopeKey", { length: 128 }).notNull(),
+    contextUnitId: p.uuid("contextUnitId"),
     reaction: rankingReactionKind("reaction").notNull(),
     bucketStart: timestamp().notNull(),
     bucketEnd: timestamp().notNull(),
@@ -138,12 +141,24 @@ export const rankingReactionBuckets = p.pgTable(
   (table) => [
     p
       .uniqueIndex(
-        "RankingReactionBucket_target_scope_reaction_bucketStart_key",
+        "RankingReactionBucket_target_direct_reaction_bucketStart_key",
       )
-      .on(table.targetId, table.scopeKey, table.reaction, table.bucketStart),
+      .on(table.targetId, table.reaction, table.bucketStart)
+      .where(sql`${table.contextUnitId} is null`),
     p
-      .index("RankingReactionBucket_target_scope_bucketStart_idx")
-      .on(table.targetId, table.scopeKey, table.bucketStart),
+      .uniqueIndex(
+        "RankingReactionBucket_target_context_reaction_bucketStart_key",
+      )
+      .on(
+        table.targetId,
+        table.contextUnitId,
+        table.reaction,
+        table.bucketStart,
+      )
+      .where(sql`${table.contextUnitId} is not null`),
+    p
+      .index("RankingReactionBucket_target_context_bucketStart_idx")
+      .on(table.targetId, table.contextUnitId, table.bucketStart),
     p
       .index("RankingReactionBucket_reaction_bucketStart_idx")
       .on(table.reaction, table.bucketStart),

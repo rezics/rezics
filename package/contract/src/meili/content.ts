@@ -106,7 +106,7 @@ export const ContentSearchDocumentSchema = t.Object({
       t.Object({
         language: languageSchema,
         isPrimary: t.Optional(t.Boolean()),
-        sortOrder: t.Optional(t.Number()),
+        position: t.Optional(t.String()), // Fractional Indexing
       }),
     ),
   ),

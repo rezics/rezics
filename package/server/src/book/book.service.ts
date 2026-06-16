@@ -116,7 +116,10 @@ async function hydrateBook(
       .select()
       .from(UnitSupportLanguage)
       .where(eq(UnitSupportLanguage.unitId, unitId))
-      .orderBy(asc(UnitSupportLanguage.sortOrder)),
+      .orderBy(
+        asc(UnitSupportLanguage.position),
+        asc(UnitSupportLanguage.language),
+      ),
     database
       .select({
         credit: CreditAttribution,
@@ -127,7 +130,10 @@ async function hydrateBook(
       .innerJoin(Unit, eq(CreditAttribution.entityId, Unit.id))
       .leftJoin(Entity, eq(CreditAttribution.entityId, Entity.unitId))
       .where(eq(CreditAttribution.unitId, unitId))
-      .orderBy(asc(CreditAttribution.sortOrder)),
+      .orderBy(
+        asc(CreditAttribution.position),
+        asc(CreditAttribution.entityId),
+      ),
   ]);
 
   const entityUnitIds = creditRows.map((credit) => credit.entityUnit.id);

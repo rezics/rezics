@@ -83,7 +83,7 @@ export const gameSystemRequirementDTOSchema = t.Object({
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: gameSystemRequirementTierSchema,
   language: t.Optional(t.Nullable(languageSchema)),
-  sourceRefId: t.Optional(t.Nullable(t.String())),
+  sourceExternalLinkId: t.Optional(t.Nullable(t.String())),
   hardware: gameSystemRequirementHardwareSchema,
   rawText: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -105,7 +105,7 @@ export const createGameSystemRequirementSchema = t.Object({
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: gameSystemRequirementTierSchema,
   language: t.Optional(t.Nullable(languageSchema)),
-  sourceRefId: t.Optional(t.Nullable(t.String())),
+  sourceExternalLinkId: t.Optional(t.Nullable(t.String())),
   hardware: gameSystemRequirementHardwareSchema,
   rawText: t.Optional(t.Nullable(t.String())),
 });
@@ -117,7 +117,7 @@ export const updateGameSystemRequirementSchema = t.Object({
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: t.Optional(gameSystemRequirementTierSchema),
   language: t.Optional(t.Nullable(languageSchema)),
-  sourceRefId: t.Optional(t.Nullable(t.String())),
+  sourceExternalLinkId: t.Optional(t.Nullable(t.String())),
   hardware: t.Optional(gameSystemRequirementHardwareSchema),
   rawText: t.Optional(t.Nullable(t.String())),
 });
@@ -130,7 +130,7 @@ export const gameSystemRequirementListFiltersSchema = t.Object({
   platformEntityId: t.Optional(t.Nullable(t.String())),
   tier: t.Optional(gameSystemRequirementTierSchema),
   language: t.Optional(languageSchema),
-  sourceRefId: t.Optional(t.String()),
+  sourceExternalLinkId: t.Optional(t.String()),
 });
 
 export type GameSystemRequirementListFilters =

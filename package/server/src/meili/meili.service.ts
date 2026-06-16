@@ -15,6 +15,8 @@ import type {
   RealmSearchResult,
   UserListQuery,
   UserSearchResult,
+  ZoneSearchOptions,
+  ZoneSearchResult,
 } from "@rezics/contract";
 import {
   syncAllComments,
@@ -25,6 +27,7 @@ import {
   syncAllPosts,
   syncAllRealms,
   syncAllUsers,
+  syncAllZones,
   syncSingleContent,
 } from "@rezics/search";
 import { searchComments } from "./comment/comment.service";
@@ -36,6 +39,7 @@ import { searchPosts } from "./post/post.service";
 import { searchRealms } from "./realm/realm.service";
 import { searchClient } from "./search-client";
 import { searchUsers } from "./user/user.api";
+import { searchZones } from "./zone/zone.service";
 
 export class MeiliService {
   async searchContent(
@@ -72,6 +76,10 @@ export class MeiliService {
     return searchRealms(options);
   }
 
+  async searchZones(options: ZoneSearchOptions): Promise<ZoneSearchResult> {
+    return searchZones(options);
+  }
+
   async searchEntities(
     options: EntitySearchOptions,
   ): Promise<EntitySearchResult> {
@@ -104,6 +112,10 @@ export class MeiliService {
 
   async initRealmsIndex(): Promise<void> {
     await searchClient.initRealmIndex();
+  }
+
+  async initZonesIndex(): Promise<void> {
+    await searchClient.initZoneIndex();
   }
 
   async initEntitiesIndex(): Promise<void> {
@@ -146,6 +158,10 @@ export class MeiliService {
     return syncAllRealms(searchClient);
   }
 
+  async syncAllZones(): Promise<unknown> {
+    return syncAllZones(searchClient);
+  }
+
   async syncAllEntities(): Promise<unknown> {
     return syncAllEntities(searchClient);
   }
@@ -168,6 +184,10 @@ export class MeiliService {
 
   async deleteAllRealms() {
     return searchClient.deleteAllRealms();
+  }
+
+  async deleteAllZones() {
+    return searchClient.deleteAllZones();
   }
 
   async deleteAllEntities() {

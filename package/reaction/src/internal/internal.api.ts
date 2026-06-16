@@ -45,7 +45,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
           body.userId,
           body.targetId,
           body.reaction,
-          body.scopeKey,
+          body.contextUnitId,
         );
         set.status = result.created ? 201 : 200;
         const r = result.reaction;
@@ -54,7 +54,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
           userId: r.userId,
           targetId: r.targetId,
           reaction: r.reaction,
-          scopeKey: r.scopeKey,
+          contextUnitId: r.contextUnitId,
           createdAt: r.createdAt.toISOString(),
           created: result.created,
         };
@@ -87,7 +87,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         body.userId,
         body.targetId,
         body.reaction,
-        body.scopeKey,
+        body.contextUnitId,
       );
     },
     {

@@ -39,6 +39,8 @@ export const searchIdempotency = {
 export const historyIdempotency = {
   outboxIngest: (outboxId: string) =>
     createIdempotencyKey("history.outbox.ingest", outboxId),
+  outboxIngestBatch: (batchSize?: number | null) =>
+    createIdempotencyKey("history.outbox.ingestBatch", batchSize),
 };
 
 export type RankingIdempotencyScope = {
@@ -68,14 +70,14 @@ export const rankingIdempotency = {
     createIdempotencyKey("ranking.viewBucketFlush", cursor),
   reactionBucket: (
     targetId: string,
-    scopeKey: string,
+    contextUnitId: string | null | undefined,
     reaction: string,
     at?: string | null,
   ) =>
     createIdempotencyKey(
       "ranking.reactionBucket",
       targetId,
-      scopeKey,
+      contextUnitId ?? "direct",
       reaction,
       at,
     ),

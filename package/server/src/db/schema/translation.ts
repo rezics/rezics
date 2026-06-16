@@ -2,7 +2,6 @@ import { contentTranslationStatusValues } from "@rezics/contract";
 import {
   boolean,
   index,
-  integer,
   pgEnum,
   pgTable,
   primaryKey,
@@ -63,7 +62,7 @@ export const UnitSupportLanguage = pgTable(
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     language: varchar({ length: 16 }).notNull(),
     isPrimary: boolean().default(false).notNull(),
-    sortOrder: integer().default(0).notNull(),
+    position: varchar({ length: 64 }).default("V").notNull(), // Fractional Indexing
   },
   (table) => [
     primaryKey({
@@ -74,6 +73,12 @@ export const UnitSupportLanguage = pgTable(
       "btree",
       table.language.asc().nullsLast(),
       table.unitId.asc().nullsLast(),
+    ),
+    index("UnitSupportLanguage_unitId_position_language_idx").using(
+      "btree",
+      table.unitId.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.language.asc().nullsLast(),
     ),
   ],
 );

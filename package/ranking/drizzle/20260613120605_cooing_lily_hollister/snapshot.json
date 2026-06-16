@@ -1,0 +1,1411 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "5b82c503-fb38-4f80-9d56-28fd17382869",
+  "prevIds": ["c10ab3aa-4a4f-4e05-a1b5-1fcb0bb82130"],
+  "ddl": [
+    {
+      "values": ["pending", "patched", "failed", "skipped"],
+      "name": "RankingPatchStatus",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": ["content", "post", "comment"],
+      "name": "RankingRankKind",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": ["upvote", "downvote"],
+      "name": "RankingReactionKind",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": ["global", "realm", "work", "tag", "parent"],
+      "name": "RankingScopeKind",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": ["view", "read"],
+      "name": "RankingSignalKind",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "RankingFormulaVersion",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "RankingReactionBucket",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "RankingSignalBucket",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "ServingPatchStatus",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "UnitRankProjection",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "version",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingFormulaVersion"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 1,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "rankKinds",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingFormulaVersion"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingFormulaVersion"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "config",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingFormulaVersion"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "active",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingFormulaVersion"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingFormulaVersion"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "targetId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "contextUnitId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "RankingReactionKind",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reaction",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "bucketStart",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "bucketEnd",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "count",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "unitId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "RankingSignalKind",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "signalKind",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "bucketStart",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "bucketEnd",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "count",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "metadata",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "flushedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "projectionId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "unitId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "indexName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "documentId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "RankingPatchStatus",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'pending'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "patchedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastAttemptAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "retryCount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastError",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "source",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "unitId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "RankingScopeKind",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "scopeKind",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "scopeId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "scopeKey",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "RankingRankKind",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "rankKind",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "bestScore",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "hotScore",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "topScore",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "risingScore",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "controversyScore",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "trendingScore",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "qualityScore",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "formulaVersion",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "signalSnapshot",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "computedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "rankUpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "type": "timestamp(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "bucketStart",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"contextUnitId\" is null",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RankingReactionBucket_target_direct_reaction_bucketStart_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "contextUnitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "bucketStart",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"contextUnitId\" is not null",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RankingReactionBucket_target_context_reaction_bucketStart_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "contextUnitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "bucketStart",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RankingReactionBucket_target_context_bucketStart_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "bucketStart",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RankingReactionBucket_reaction_bucketStart_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RankingReactionBucket"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "signalKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "bucketStart",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RankingSignalBucket_unitId_signalKind_bucketStart_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "signalKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "bucketStart",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RankingSignalBucket_signalKind_bucketStart_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "flushedAt",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RankingSignalBucket_unitId_flushedAt_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RankingSignalBucket"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ServingPatchStatus_unitId_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "indexName",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "documentId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ServingPatchStatus_indexName_documentId_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "lastAttemptAt",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ServingPatchStatus_status_lastAttemptAt_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scopeKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scopeKey",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "rankKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_unitId_scopeKind_scopeKey_rankKind_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unitId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_unitId_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "scopeKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scopeId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "rankKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_scopeKind_scopeId_rankKind_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "rankKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "bestScore",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_rankKind_bestScore_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "rankKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "hotScore",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_rankKind_hotScore_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "rankKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "risingScore",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_rankKind_risingScore_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "rankKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "controversyScore",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_rankKind_controversyScore_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "rankKind",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "trendingScore",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UnitRankProjection_rankKind_trendingScore_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UnitRankProjection"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["projectionId"],
+      "schemaTo": "public",
+      "tableTo": "UnitRankProjection",
+      "columnsTo": ["id"],
+      "onUpdate": "CASCADE",
+      "onDelete": "CASCADE",
+      "name": "ServingPatchStatus_projectionId_UnitRankProjection_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "ServingPatchStatus"
+    },
+    {
+      "columns": ["version"],
+      "nameExplicit": false,
+      "name": "RankingFormulaVersion_pkey",
+      "schema": "public",
+      "table": "RankingFormulaVersion",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "RankingReactionBucket_pkey",
+      "schema": "public",
+      "table": "RankingReactionBucket",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "RankingSignalBucket_pkey",
+      "schema": "public",
+      "table": "RankingSignalBucket",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "ServingPatchStatus_pkey",
+      "schema": "public",
+      "table": "ServingPatchStatus",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "UnitRankProjection_pkey",
+      "schema": "public",
+      "table": "UnitRankProjection",
+      "entityType": "pks"
+    }
+  ],
+  "renames": [
+    "public.RankingReactionBucket.scopeKey->public.RankingReactionBucket.contextUnitId"
+  ]
+}

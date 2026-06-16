@@ -66,7 +66,7 @@ export const ScoreRealmField = pgTable(
     realm: uuid().notNull(),
     key: varchar({ length: 64 }).notNull(),
     label: text(),
-    sortOrder: integer().default(0).notNull(),
+    position: varchar({ length: 64 }).default("V").notNull(), // Fractional Indexing
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -75,10 +75,11 @@ export const ScoreRealmField = pgTable(
       columns: [table.realm, table.key],
       name: "ScoreRealmField_pkey",
     }),
-    index("ScoreRealmField_realm_sortOrder_idx").using(
+    index("ScoreRealmField_realm_position_key_idx").using(
       "btree",
       table.realm.asc().nullsLast(),
-      table.sortOrder.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.key.asc().nullsLast(),
     ),
   ],
 );

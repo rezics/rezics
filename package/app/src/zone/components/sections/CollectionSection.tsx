@@ -47,10 +47,12 @@ export function CollectionSection({
     return [
       {
         key: `${section.id}:${index}`,
+        unitId: ref?.unitId,
         href,
         label,
         summary: ref?.summary,
         imageUrl: ref?.imageUrl,
+        type: ref?.type,
       },
     ];
   });

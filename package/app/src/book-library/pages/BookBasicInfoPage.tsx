@@ -6,11 +6,11 @@ import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIc
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
-import { useMemo } from "react";
-import { RemarkInlineForm } from "@/remark";
+import { useEffect, useMemo, useRef } from "react";
+import { RemarkInlineForm, type RemarkInlineFormHandle } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -116,6 +116,12 @@ export const BookBasicInfoPage: React.FC = () => {
   const { t } = useTranslation(["book"]);
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const readContext = useReadLanguageContext();
+  const search = useSearch({ strict: false }) as
+    | { focus?: string | null }
+    | undefined;
+  const navigate = useNavigate();
+  const remarkSectionRef = useRef<HTMLDivElement>(null);
+  const remarkFormRef = useRef<RemarkInlineFormHandle>(null);
   const { data } = useQuery({
     ...bookQueries.detail(bookId, {
       languages: readContext.languages,
@@ -146,6 +152,20 @@ export const BookBasicInfoPage: React.FC = () => {
     );
   }, [bookInfo]);
   useBookDetailSidebar(sidebar);
+
+  useEffect(() => {
+    if (search?.focus !== "remark") return;
+    remarkSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+    remarkFormRef.current?.focus();
+    navigate({
+      to: ".",
+      search: (prev) => ({ ...prev, focus: undefined }),
+      replace: true,
+    });
+  }, [search?.focus, navigate]);
 
   if (!bookInfo) return null;
 
@@ -195,7 +215,7 @@ export const BookBasicInfoPage: React.FC = () => {
 
       <Separator />
 
-      <div>
+      <div ref={remarkSectionRef}>
         <div>
           <ArrowForwardIcon
             size={16}
@@ -205,7 +225,10 @@ export const BookBasicInfoPage: React.FC = () => {
           </ArrowForwardIcon>
         </div>
         <div className="mt-3 mb-4">
-          <RemarkInlineForm bookUnitId={bookInfo.unitId || ""} />
+          <RemarkInlineForm
+            ref={remarkFormRef}
+            bookUnitId={bookInfo.unitId || ""}
+          />
         </div>
         <RemarkPreview bookId={bookInfo.unitId || ""} />
       </div>

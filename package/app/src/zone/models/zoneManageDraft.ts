@@ -499,6 +499,7 @@ export const ZONE_QUERY_FILTERABLE_FIELDS: Record<
     "ratings",
   ],
   post: ["postKinds", "realm", "targetUnitId", "languages"],
+  realm: ["types", "languages"],
 };
 
 export const ZONE_QUERY_SORT_FIELDS: Record<
@@ -529,6 +530,7 @@ export const ZONE_QUERY_SORT_FIELDS: Record<
     "trendingScore",
     "qualityScore",
   ],
+  realm: ["createdAt", "updatedAt", "memberCount"],
 };
 
 export function zoneQueryUnsupportedFields(query: ZoneSectionQuery): string[] {

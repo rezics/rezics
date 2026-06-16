@@ -42,8 +42,8 @@ const basePost = {
     user: null,
     inRealms: [],
     supportLanguages: [
-      { unitId: "post-1", language: "en", isPrimary: true, sortOrder: 0 },
-      { unitId: "post-1", language: "ja", isPrimary: false, sortOrder: 1 },
+      { unitId: "post-1", language: "en", isPrimary: true, position: "a" },
+      { unitId: "post-1", language: "ja", isPrimary: false, position: "b" },
     ],
     translations: [],
     contentTranslations: [],

@@ -8,6 +8,7 @@ import type {
   SearchCategory,
   ShelfItemShelfGroup,
   UserSearchDocument,
+  ZoneSearchDocument,
 } from "@rezics/contract";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
@@ -286,6 +287,41 @@ export function renderRealmSearchCard(
   );
 }
 
+export function renderZoneSearchCard(
+  item: ZoneSearchDocument,
+  badge?: CardBadge,
+) {
+  const title =
+    item.resolvedLanguage !== undefined
+      ? (item.title ?? item.id)
+      : pickSearchTitle(item.titles) || item.id;
+  const description =
+    item.resolvedLanguage !== undefined
+      ? (item.description ?? "")
+      : firstText(
+          item.translations.map((translation) => translation.description ?? ""),
+          item.descriptions,
+        );
+  const ownerRealm = firstText(item.ownerRealmTitles);
+
+  return (
+    <SearchContentResultCard
+      kind={badge ?? getI18nRuntime().i18n.t("search:origin_zone")}
+      title={title}
+      titleHref={unitHref({ type: "ZONE", unitId: item.id, slug: item.slug })}
+      body={description || undefined}
+      meta={compactParts([
+        ownerRealm
+          ? getI18nRuntime().i18n.t("search:zone_owner_realm", {
+              realm: ownerRealm,
+            })
+          : null,
+        formatDate(item.updatedAt),
+      ])}
+    />
+  );
+}
+
 export function renderUserSearchCard(
   item: UserSearchDocument,
   badge?: CardBadge,
@@ -364,6 +400,9 @@ export function renderFederatedSearchCard(
   }
   if (category === "realms") {
     return renderRealmSearchCard(item as RealmSearchDocument, badge);
+  }
+  if (category === "zones") {
+    return renderZoneSearchCard(item as ZoneSearchDocument, badge);
   }
   if (category === "users") {
     return renderUserSearchCard(item as UserSearchDocument, badge);

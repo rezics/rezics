@@ -33,6 +33,7 @@ export {
   buildPollDocument,
   buildPostDocument,
   buildRealmDocument,
+  buildZoneDocument,
   patchCommentRankingFields,
   patchContentAliases,
   patchContentContainedUnitIds,
@@ -75,6 +76,7 @@ export {
   syncAllRealms,
   syncAllShelfItems,
   syncAllUsers,
+  syncAllZones,
   syncCommentSegment,
   syncContentSegment,
   syncEntitySegment,
@@ -103,5 +105,7 @@ export {
   syncSingleRealm,
   syncSingleShelfItem,
   syncSingleUser,
+  syncSingleZone,
   syncUserSegment,
+  syncZoneSegment,
 } from "./sync";

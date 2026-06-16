@@ -5,6 +5,7 @@ import {
   markdownContentDoc,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
+import { rebalance } from "../../../shelf/fractional-index";
 import type { ServerDb } from "../../client";
 import {
   Realm,
@@ -112,7 +113,9 @@ export async function seedDefaultRealm(
         unitId: unit.id,
         language: lang,
         isPrimary: lang === DEFAULT_LANGUAGE,
-        sortOrder: index,
+        position: rebalance(Object.keys(DEFAULT_REALM.translations).length)[
+          index
+        ]!,
       });
     }
 

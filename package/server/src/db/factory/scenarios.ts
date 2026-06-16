@@ -4,18 +4,20 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LANGUAGES,
   markdownContentDoc,
+  withCoverUrl,
   type ZoneBoundary,
   type ZoneNav,
   type ZonePage as ZonePageConfig,
   type ZoneTheme,
 } from "@rezics/contract";
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { generateBetween } from "../../shelf/fractional-index";
+import { generateBetween, rebalance } from "../../shelf/fractional-index";
 import {
   Book,
   Comment,
   ContentStructure,
   ContentTranslation,
+  CreditAttribution,
   Entity,
   HistoryOutbox,
   Post,
@@ -25,7 +27,7 @@ import {
   ShelfItem,
   SubjectAttribution,
   Unit,
-  UnitExternalRef,
+  UnitExternalLink,
   UnitHistoryClock,
   UnitRealm,
   UnitSupportLanguage,
@@ -36,8 +38,8 @@ import {
   ZonePage,
 } from "../schema";
 import { seedChaptersForBook } from "./books.js";
+import { ensureFandomSourceEntity } from "./external-links.js";
 import { addSpecialSeedTarget, createSeedResult } from "./result.js";
-import { ensureFandomSourceSite } from "./source-sites.js";
 import {
   PostKind,
   UnitStatus,
@@ -177,7 +179,7 @@ async function insertScenarioTranslations(
         unitId,
         language: item.language,
         isPrimary: index === 0,
-        sortOrder: index,
+        position: rebalance(translations.length)[index]!,
       })),
     ),
   );
@@ -292,6 +294,11 @@ async function getWorkIds(ctx: SeedCtx): Promise<string[]> {
 interface ShowcaseFeedWorkPlan {
   unitId: string;
   title: string;
+  subtitle: string;
+  coverUrl: string;
+  authorEntityUnitId: string;
+  authorName: string;
+  tags: Array<{ unitId: string; title: string }>;
   textLength: number;
 }
 
@@ -347,16 +354,43 @@ export function buildShowcaseFeedPlan(input: {
     {
       unitId: id(),
       title: "Showcase Feed: The Long Harbor",
+      subtitle: "A cartographic fantasy of tides, gates, and borrowed names",
+      coverUrl: "https://picsum.photos/seed/rezics-long-harbor/360/540",
+      authorEntityUnitId: id(),
+      authorName: "Mira Hoshino",
+      tags: [
+        { unitId: id(), title: "Urban Fantasy" },
+        { unitId: id(), title: "Archive Mystery" },
+        { unitId: id(), title: "Sea Cities" },
+      ],
       textLength: 132000,
     },
     {
       unitId: id(),
       title: "Showcase Feed: Signal Garden",
+      subtitle: "Letters, antennas, and a city that answers in flowers",
+      coverUrl: "https://picsum.photos/seed/rezics-signal-garden/360/540",
+      authorEntityUnitId: id(),
+      authorName: "Ren Calder",
+      tags: [
+        { unitId: id(), title: "Speculative" },
+        { unitId: id(), title: "Epistolary" },
+        { unitId: id(), title: "Botanical Tech" },
+      ],
       textLength: 88000,
     },
     {
       unitId: id(),
       title: "Showcase Feed: Index of Blue Cities",
+      subtitle: "A catalog of impossible places and the readers who map them",
+      coverUrl: "https://picsum.photos/seed/rezics-blue-cities/360/540",
+      authorEntityUnitId: id(),
+      authorName: "Chen Yue",
+      tags: [
+        { unitId: id(), title: "Catalog Fiction" },
+        { unitId: id(), title: "Metafiction" },
+        { unitId: id(), title: "Blue Cities" },
+      ],
       textLength: 104000,
     },
   ];
@@ -881,7 +915,7 @@ async function createWikiScenarioPost(
         unitId: postUnitId,
         language: item.language,
         isPrimary: item.language === input.defaultLanguage,
-        sortOrder: index,
+        position: rebalance(input.translations.length)[index]!,
       })),
     ),
   );
@@ -974,6 +1008,53 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
   for (const work of plan.works) {
     await ctx.db.insert(Unit).values(
       withUpdatedAt({
+        id: work.authorEntityUnitId,
+        type: UnitType.ENTITY,
+        slugScope: ctx.slugScopes.entity,
+        status: UnitStatus.PUBLISHED,
+        visibility: UnitVisibility.PUBLIC,
+        defaultLanguage: DEFAULT_LANGUAGE,
+      }),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAt({
+        unitId: work.authorEntityUnitId,
+        language: DEFAULT_LANGUAGE,
+        title: work.authorName,
+      }),
+    );
+    await ctx.db.insert(Entity).values(
+      withUpdatedAt({
+        unitId: work.authorEntityUnitId,
+        kind: "person",
+        verified: true,
+        eligibleCreditRoles: ["author"],
+      }),
+    );
+    await ctx.db.insert(Unit).values(
+      withUpdatedAtRows(
+        work.tags.map((tag) => ({
+          id: tag.unitId,
+          type: UnitType.TAG,
+          slugScope: ctx.slugScopes.tag,
+          status: UnitStatus.PUBLISHED,
+          visibility: UnitVisibility.PUBLIC,
+          defaultLanguage: DEFAULT_LANGUAGE,
+          isLanguageNeutral: true,
+        })),
+      ),
+    );
+    await ctx.db.insert(UnitTranslation).values(
+      withUpdatedAtRows(
+        work.tags.map((tag) => ({
+          unitId: tag.unitId,
+          language: DEFAULT_LANGUAGE,
+          title: tag.title,
+        })),
+      ),
+    );
+    await ctx.db.insert(Unit).values(
+      withUpdatedAt({
         id: work.unitId,
         type: UnitType.BOOK,
         userId: user.userId,
@@ -999,7 +1080,9 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
         unitId: work.unitId,
         language: DEFAULT_LANGUAGE,
         title: work.title,
+        subtitle: work.subtitle,
         summary: `${work.title} deterministic showcase work.`,
+        extra: withCoverUrl(undefined, work.coverUrl) as never,
       }),
     );
     await ctx.db.insert(UnitSupportLanguage).values(
@@ -1012,6 +1095,22 @@ async function runShowcaseFeed(ctx: SeedCtx): Promise<SeedResult> {
     await ctx.db
       .insert(ContentStructure)
       .values(withUpdatedAt({ ownerUnitId: work.unitId }));
+    await ctx.db.insert(CreditAttribution).values({
+      unitId: work.unitId,
+      entityId: work.authorEntityUnitId,
+      role: "author",
+      position: generateBetween(undefined, undefined),
+    });
+    await ctx.db.insert(UnitTag).values(
+      withUpdatedAtRows(
+        work.tags.map((tag, index) => ({
+          unitId: work.unitId,
+          tagUnitId: tag.unitId,
+          score: 10 - index,
+          voteCount: 10 - index,
+        })),
+      ),
+    );
   }
 
   await ctx.db.insert(Unit).values(
@@ -1500,7 +1599,7 @@ export type ToaruZoneConfig = {
   pages: Array<{
     id: string;
     slug: string;
-    position: number;
+    position: string;
     config: ZonePageConfig;
   }>;
   homePageId: string;
@@ -1536,6 +1635,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
     feed: "00000000-0000-7000-8000-000000001003",
     characters: "00000000-0000-7000-8000-000000001004",
   };
+  const pagePositions = rebalance(4);
   return {
     boundary: {
       schema: "rezics/zone-boundary",
@@ -1692,7 +1792,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       {
         id: pageIds.home,
         slug: "home",
-        position: 0,
+        position: pagePositions[0]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -1881,7 +1981,7 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       {
         id: pageIds.characters,
         slug: "characters",
-        position: 1,
+        position: pagePositions[1]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -1908,13 +2008,13 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       {
         id: pageIds.search,
         slug: "search",
-        position: 2,
+        position: pagePositions[2]!,
         config: { schema: "rezics/zone-page", version: 1, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
-        position: 3,
+        position: pagePositions[3]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -2160,31 +2260,21 @@ async function runToaru(ctx: SeedCtx): Promise<SeedResult> {
       },
     ),
   );
-  const fandomSourceSiteEntityUnitId = await ensureFandomSourceSite(ctx);
+  const fandomSourceEntityUnitId = await ensureFandomSourceEntity(ctx);
   await ctx.db
-    .insert(UnitExternalRef)
+    .insert(UnitExternalLink)
     .values(
       withUpdatedAt({
         unitId: zoneUnitId,
-        sourceSiteEntityUnitId: fandomSourceSiteEntityUnitId,
-        externalKind: "wiki",
-        externalId: "toaru",
-        canonicalUrl: "https://toaru.fandom.com/",
-        originalUrl: "https://toaru.fandom.com/",
+        sourceEntityUnitId: fandomSourceEntityUnitId,
+        url: "https://toaru.fandom.com/",
+        normalizedUrl: "https://toaru.fandom.com/",
+        normalizedUrlHash:
+          "815d1333159a3a5a444554d82a293593fa2fa334d15d96a41526eecff8735090",
+        role: "wiki",
       }),
     )
-    .onConflictDoUpdate({
-      target: [
-        UnitExternalRef.sourceSiteEntityUnitId,
-        UnitExternalRef.externalKind,
-        UnitExternalRef.externalId,
-      ],
-      set: {
-        unitId: zoneUnitId,
-        canonicalUrl: "https://toaru.fandom.com/",
-        originalUrl: "https://toaru.fandom.com/",
-      },
-    });
+    .onConflictDoNothing();
   const toaruZoneConfig = buildToaruZoneConfig({
     realmUnitId,
     labels: labelIds,

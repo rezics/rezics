@@ -18,7 +18,10 @@ import { Unit } from "../db/schema";
 import { env } from "../env";
 import { tryResolveIdentity } from "../middleware";
 import { AppError, forbidden, notFound } from "../utils/errors";
-import { canViewHistoryMetadata } from "./history-authority";
+import {
+  canViewHistoryMetadata,
+  canViewRawHistoryPayload,
+} from "./history-authority";
 
 const unitHistoryParamsSchema = t.Object({
   unitId: t.String(),
@@ -124,6 +127,7 @@ async function assertCanReadHistory(
   if (!canViewHistoryMetadata(identity, unit)) {
     throw forbidden("you cannot view history for this Unit");
   }
+  return { identity, unit };
 }
 
 async function fetchHistoryJson<T>(path: string): Promise<T> {
@@ -158,7 +162,17 @@ export function createHistoryProxyApi(
     .get(
       "/unit/:unitId/revisions",
       async ({ headers, params, query }): Promise<UnitRevisionTimelinePage> => {
-        await assertCanReadHistory(repository, params.unitId, headers);
+        const context = await assertCanReadHistory(
+          repository,
+          params.unitId,
+          headers,
+        );
+        if (
+          query.includeContent &&
+          !canViewRawHistoryPayload(context.identity, context.unit)
+        ) {
+          throw forbidden("you cannot view raw history payloads for this Unit");
+        }
         return fetchHistoryJson<UnitRevisionTimelinePage>(
           appendQuery(
             `/history/unit/${encodePathPart(params.unitId)}/revisions`,
@@ -204,11 +218,22 @@ export function createHistoryProxyApi(
         params,
         query,
       }): Promise<SingleUnitRevisionResponse> => {
-        await assertCanReadHistory(repository, params.unitId, headers);
+        const context = await assertCanReadHistory(
+          repository,
+          params.unitId,
+          headers,
+        );
+        const includeContent = query.includeContent ?? false;
+        if (
+          includeContent &&
+          !canViewRawHistoryPayload(context.identity, context.unit)
+        ) {
+          throw forbidden("you cannot view raw history payloads for this Unit");
+        }
         return fetchHistoryJson<SingleUnitRevisionResponse>(
           appendQuery(
             `/history/unit/${encodePathPart(params.unitId)}/revisions/${encodePathPart(params.sequence)}`,
-            { includeContent: query.includeContent },
+            { includeContent },
           ),
         );
       },
@@ -229,7 +254,17 @@ export function createHistoryProxyApi(
         params,
         query,
       }): Promise<StructureEventTimelinePage> => {
-        await assertCanReadHistory(repository, params.unitId, headers);
+        const context = await assertCanReadHistory(
+          repository,
+          params.unitId,
+          headers,
+        );
+        if (
+          query.includePayload &&
+          !canViewRawHistoryPayload(context.identity, context.unit)
+        ) {
+          throw forbidden("you cannot view raw history payloads for this Unit");
+        }
         return fetchHistoryJson<StructureEventTimelinePage>(
           appendQuery(
             `/history/unit/${encodePathPart(params.unitId)}/structure-events`,
@@ -259,11 +294,22 @@ export function createHistoryProxyApi(
         params,
         query,
       }): Promise<SingleStructureEventResponse> => {
-        await assertCanReadHistory(repository, params.unitId, headers);
+        const context = await assertCanReadHistory(
+          repository,
+          params.unitId,
+          headers,
+        );
+        const includePayload = query.includePayload ?? false;
+        if (
+          includePayload &&
+          !canViewRawHistoryPayload(context.identity, context.unit)
+        ) {
+          throw forbidden("you cannot view raw history payloads for this Unit");
+        }
         return fetchHistoryJson<SingleStructureEventResponse>(
           appendQuery(
             `/history/unit/${encodePathPart(params.unitId)}/structure-events/${encodePathPart(params.sequence)}/${encodePathPart(params.eventType)}`,
-            { includePayload: query.includePayload },
+            { includePayload },
           ),
         );
       },

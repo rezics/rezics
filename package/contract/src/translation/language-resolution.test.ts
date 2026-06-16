@@ -11,10 +11,10 @@ import {
 
 describe("language resolution helpers", () => {
   const supportLanguages = [
-    { language: "de", isPrimary: false, sortOrder: 3 },
-    { language: "ja", isPrimary: true, sortOrder: 1 },
-    { language: "en", isPrimary: true, sortOrder: 0 },
-    { language: "ko", isPrimary: false, sortOrder: 2 },
+    { language: "de", isPrimary: false, position: "d" },
+    { language: "ja", isPrimary: true, position: "b" },
+    { language: "en", isPrimary: true, position: "a" },
+    { language: "ko", isPrimary: false, position: "c" },
   ];
 
   test("derives multiple primary languages from support languages", () => {

@@ -1,5 +1,4 @@
 import { t } from "elysia";
-import { externalKindKeySchema } from "../source/external-kind";
 import { unitTranslationDTOSchema, type unitTypeSchema } from "../unit/unit";
 import {
   type CreditAttributionRole,
@@ -145,10 +144,14 @@ export const creditAttributionRoleRegistry = {
 // 署名归属 DTO
 // ============================================================
 
-export const creditAttributionEvidenceSourceSiteSummarySchema = t.Object({
-  entityUnitId: t.String(),
-  key: t.String(),
-  entity: t.Optional(entityDTOSchema),
+export const creditAttributionEvidenceExternalLinkSummarySchema = t.Object({
+  id: t.String(),
+  unitId: t.String(),
+  sourceEntityUnitId: t.String(),
+  url: t.String(),
+  normalizedUrl: t.Optional(t.Nullable(t.String())),
+  role: t.String(),
+  sourceEntity: t.Optional(entityDTOSchema),
 });
 
 export const creditAttributionEvidenceSummarySchema = t.Object({
@@ -156,17 +159,15 @@ export const creditAttributionEvidenceSummarySchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: creditAttributionRoleKeySchema,
-  sourceRefId: t.String(),
-  sourceSiteEntityUnitId: t.String(),
-  externalKind: externalKindKeySchema,
-  externalId: t.String(),
-  canonicalUrl: t.String(),
-  originalUrl: t.Optional(t.Nullable(t.String())),
+  sourceExternalLinkId: t.String(),
+  url: t.String(),
   claimPath: t.Optional(t.Nullable(t.String())),
   observedUrl: t.Optional(t.Nullable(t.String())),
   observedAt: t.Union([t.String(), t.Date()]),
   confidence: t.Optional(t.Nullable(t.Number({ minimum: 0, maximum: 1 }))),
-  sourceSite: t.Optional(creditAttributionEvidenceSourceSiteSummarySchema),
+  sourceExternalLink: t.Optional(
+    creditAttributionEvidenceExternalLinkSummarySchema,
+  ),
 });
 
 export type CreditAttributionEvidenceSummary =
@@ -177,7 +178,7 @@ export const createCreditAttributionEvidenceSchema = t.Object(
     unitId: t.String(),
     entityId: t.String(),
     role: creditAttributionRoleKeySchema,
-    sourceRefId: t.String(),
+    sourceExternalLinkId: t.String(),
     claimPath: t.Optional(t.Nullable(t.String())),
     observedUrl: t.Optional(t.Nullable(t.String())),
     observedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -191,7 +192,7 @@ export type CreateCreditAttributionEvidenceInput =
 
 export const updateCreditAttributionEvidenceSchema = t.Object(
   {
-    sourceRefId: t.Optional(t.String()),
+    sourceExternalLinkId: t.Optional(t.String()),
     claimPath: t.Optional(t.Nullable(t.String())),
     observedUrl: t.Optional(t.Nullable(t.String())),
     observedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -207,7 +208,7 @@ export const creditAttributionDTOSchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: creditAttributionRoleKeySchema,
-  sortOrder: t.Number(),
+  position: t.String(), // Fractional Indexing
   entity: t.Optional(entityDTOSchema),
   evidence: t.Optional(t.Array(creditAttributionEvidenceSummarySchema)),
 });
@@ -224,7 +225,7 @@ export const linkCreditAttributionSchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: creditAttributionRoleKeySchema,
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
 });
 
 export type LinkCreditAttributionInput =
@@ -232,7 +233,7 @@ export type LinkCreditAttributionInput =
 
 export const entityAttributionBatchSetCreditsEntrySchema = t.Object({
   entityId: t.String(),
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
 });
 
 export type EntityAttributionBatchSetCreditsEntry =
@@ -264,7 +265,7 @@ export const creditAttributionBriefSchema = t.Object({
   entityId: t.String(),
   name: t.String(),
   role: creditAttributionRoleKeySchema,
-  sortOrder: t.Optional(t.Number()),
+  position: t.Optional(t.String()), // Fractional Indexing
   entity: t.Optional(creditAttributionBriefEntitySchema),
   evidence: t.Optional(t.Array(creditAttributionEvidenceSummarySchema)),
 });

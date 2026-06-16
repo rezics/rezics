@@ -5,7 +5,7 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   withCoverUrl,
 } from "@rezics/contract";
-import { generateBetween } from "../../shelf/fractional-index";
+import { generateBetween, rebalance } from "../../shelf/fractional-index";
 import {
   Shelf,
   ShelfItem,
@@ -176,7 +176,7 @@ export async function seedShelves(
             unitId: unit.id,
             language: t.language,
             isPrimary: i === 0,
-            sortOrder: i,
+            position: rebalance(translations.length)[i]!,
           })),
         ),
       );

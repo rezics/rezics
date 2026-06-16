@@ -58,8 +58,8 @@ export type ReactionBarPolicy = {
 export type ReactionBarProps = {
   post: ReactionBarPost;
   policy: ReactionBarPolicy;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   /**
    * Explicit action list — overrides `actionPolicy.actions` when provided.
    * 显式动作列表 — 提供时会覆盖 `actionPolicy.actions`。
@@ -94,6 +94,11 @@ export type ReactionBarProps = {
    */
   replyMode?: "count" | "label";
   /**
+   * Optional visible label for the reply/comment action when no count is shown.
+   * 当没有显示计数时，回复/评论动作的可选显示文案。
+   */
+  replyLabel?: string;
+  /**
    * Extra caller-owned items rendered in the overflow menu.
    * 在溢出菜单中渲染的由调用方自有的额外条目。
    */
@@ -111,9 +116,10 @@ export type ReactionBarModel = {
   hasOverflow: boolean;
   size: EngagementSize;
   variant: ReactionBarVariant;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   onReplyInvoke?: () => void;
+  replyLabel?: string;
   replyMode: "count" | "label";
   overflowContent?: React.ReactNode;
   authModal: React.ReactNode;
@@ -170,9 +176,10 @@ export function useReactionBarModel({
   actionPolicy,
   size = "md",
   variant = "plain",
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
   onReplyInvoke,
+  replyLabel,
   replyMode = "count",
   overflowContent,
 }: ReactionBarModelArgs): ReactionBarModel {
@@ -211,9 +218,10 @@ export function useReactionBarModel({
     hasOverflow,
     size,
     variant,
-    summaryScopeKey,
-    reactionScopeKey,
+    summaryContextUnitId,
+    reactionContextUnitId,
     onReplyInvoke,
+    replyLabel,
     replyMode,
     overflowContent,
     authModal: authGuard.AuthModal({}),
@@ -235,8 +243,9 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
     hidden,
     size,
     variant,
-    summaryScopeKey,
-    reactionScopeKey,
+    summaryContextUnitId,
+    reactionContextUnitId,
+    replyLabel,
     replyMode,
     shareHref,
     shareTitle,
@@ -251,6 +260,10 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
     event.stopPropagation();
   };
 
+  const handleBarKeyDown = (event: React.KeyboardEvent) => {
+    event.stopPropagation();
+  };
+
   const ctx = useMemo<ReactionBarContextValue>(
     () => ({ variant, size }),
     [variant, size],
@@ -261,7 +274,6 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
   return (
     <ReactionBarProvider value={ctx}>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: delegated click handling lets nested actions stop propagation. */}
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents: the container itself is not an activation target. */}
       <div
         className={cn(
           "flex flex-row items-center",
@@ -270,6 +282,7 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
           className,
         )}
         onClick={handleBarClick}
+        onKeyDown={handleBarKeyDown}
       >
         {visible.map((token) => {
           switch (token) {
@@ -277,15 +290,16 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
               return (
                 <VoteGroup
                   key="vote"
-                  targetUnitId={post.unitId}
-                  summaryScopeKey={summaryScopeKey}
-                  userScopeKey={reactionScopeKey}
+                  targetId={post.unitId}
+                  summaryContextUnitId={summaryContextUnitId}
+                  userContextUnitId={reactionContextUnitId}
                 />
               );
             case "reply":
               return (
                 <ReplyAction
                   key="reply"
+                  label={replyLabel}
                   replyCount={post.replyCount ?? 0}
                   mode={replyMode}
                   onInvoke={handleReplyInvoke}

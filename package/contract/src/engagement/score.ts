@@ -81,7 +81,7 @@ export const scoreRealmFieldDTOSchema = t.Object({
   realm: t.String(),
   key: t.String(),
   label: t.Optional(t.Nullable(t.String())),
-  sortOrder: t.Integer(),
+  position: t.String(), // Fractional Indexing
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -96,7 +96,7 @@ export type ScoreRealmFieldDTO = (typeof scoreRealmFieldDTOSchema)["static"];
 export const addRealmFieldInputSchema = t.Object({
   key: t.String({ pattern: "^[a-z][a-z0-9-]*$" }),
   label: t.Optional(t.String()),
-  sortOrder: t.Optional(t.Integer()),
+  position: t.Optional(t.String()), // Fractional Indexing
 });
 
 export type AddRealmFieldInput = (typeof addRealmFieldInputSchema)["static"];

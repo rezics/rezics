@@ -38,25 +38,25 @@ import {
 // service 强制的结构不变量（页面内分区 id、菜单引用、深度）。
 function collectSectionEntries(
   page: ZonePageConfig,
-): Array<{ id: string; kind: string }> {
-  const entries: Array<{ id: string; kind: string }> = [];
+): ZonePageConfig["sections"] {
+  const entries: ZonePageConfig["sections"] = [];
   for (const section of page.sections) {
-    entries.push({ id: section.id, kind: section.kind });
+    entries.push(section);
     if (section.kind === "tabs") {
       for (const tab of section.tabs) {
         for (const inner of tab.sections) {
-          entries.push({ id: inner.id, kind: inner.kind });
+          entries.push(inner);
         }
       }
     }
     if (section.kind === "columns") {
       for (const column of section.columns) {
         for (const inner of column.sections) {
-          entries.push({ id: inner.id, kind: inner.kind });
+          entries.push(inner);
           if (inner.kind === "tabs") {
             for (const tab of inner.tabs) {
               for (const pane of tab.sections) {
-                entries.push({ id: pane.id, kind: pane.kind });
+                entries.push(pane);
               }
             }
           }
@@ -242,6 +242,25 @@ describe("zone fixture configs", () => {
       "stats",
       "tabs",
     ]);
+  });
+
+  test("fixture query sections cover dedicated realm and zone indexes", () => {
+    const targets = new Set<string>();
+    for (const kind of ZONE_FIXTURE_KINDS) {
+      const config = buildZoneFixtureConfig(kind, {
+        ...refs,
+        contextRealmUnitId: kind === "columns-portal" ? "realm-1" : null,
+      });
+      for (const page of config.pages) {
+        for (const entry of collectSectionEntries(page.config)) {
+          if (entry.kind === "query") {
+            targets.add(entry.query.target);
+          }
+        }
+      }
+    }
+    expect(targets).toContain("realm");
+    expect(targets).toContain("zone");
   });
 });
 

@@ -18,8 +18,8 @@ export interface CommentTreeListProps {
   focusPostUnitId?: string;
   highlightFocusedPost?: boolean;
   onReply?: (postUnitId: string) => void;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
   /**
    * Optional per-comment context badge (realm/direct) rendered by mixed
@@ -39,8 +39,8 @@ export function CommentTreeList({
   focusPostUnitId,
   highlightFocusedPost = false,
   onReply,
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
   renderOverflowContent,
   renderContextBadge,
 }: CommentTreeListProps) {
@@ -49,8 +49,8 @@ export function CommentTreeList({
     [posts],
   );
   useReactionHydration(allUnitIds, {
-    summaryScopeKey,
-    userScopeKey: reactionScopeKey,
+    summaryContextUnitId,
+    userContextUnitId: reactionContextUnitId,
   });
   const [submittedPostUnitId, setSubmittedPostUnitId] = useState<
     string | undefined
@@ -157,8 +157,8 @@ export function CommentTreeList({
           highlightedFocusPostUnitId={highlightedFocusPostUnitId}
           highlightedThreadUnitId={highlightedThreadUnitId}
           onReplyClick={handleReplyClick}
-          summaryScopeKey={summaryScopeKey}
-          reactionScopeKey={reactionScopeKey}
+          summaryContextUnitId={summaryContextUnitId}
+          reactionContextUnitId={reactionContextUnitId}
           renderOverflowContent={renderOverflowContent}
           renderContextBadge={renderContextBadge}
           onComposerSubmitted={handleComposerSubmitted}

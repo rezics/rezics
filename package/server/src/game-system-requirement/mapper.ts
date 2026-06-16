@@ -10,7 +10,7 @@ export function mapGameSystemRequirementToDTO(
     platformEntityId: row.platformEntityId,
     tier: row.tier as GameSystemRequirementDTO["tier"],
     language: row.language as GameSystemRequirementDTO["language"],
-    sourceRefId: row.sourceRefId,
+    sourceExternalLinkId: row.sourceExternalLinkId,
     hardware: row.hardware as unknown as GameSystemRequirementDTO["hardware"],
     rawText: row.rawText,
     createdAt: row.createdAt,

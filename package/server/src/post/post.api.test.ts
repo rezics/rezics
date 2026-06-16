@@ -94,7 +94,7 @@ mock.module("@/unit/language-resolution", () => ({
   primarySupportLanguageCreate: mock((language: string) => ({
     language,
     isPrimary: true,
-    sortOrder: 0,
+    position: "a",
   })),
   resolveEffectiveReadLanguageCandidates: mock((input: any) => {
     const languages = Array.isArray(input.languages)

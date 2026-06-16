@@ -29,7 +29,20 @@ let byRealmResult = {
 
 let bookListResult = {
   books: [
-    { unitId: "book-1", title: "Book One", coverUrl: "book-1.jpg" },
+    {
+      unitId: "book-1",
+      title: "Book One",
+      subtitle: "First subtitle",
+      coverUrl: "book-1.jpg",
+      creditAttributions: [
+        {
+          entityId: "author-1",
+          name: "Author One",
+          role: "author",
+          position: "a",
+        },
+      ],
+    },
     { unitId: "book-2", title: "Book Two", coverUrl: "book-2.jpg" },
   ],
   total: 2,
@@ -72,6 +85,24 @@ const realmGetByUnitIdMock = mock(async (unitId: string) => ({
   unitId,
   slug: "realm-one",
   title: "Realm One",
+}));
+
+function emptyDbSelectChain() {
+  const chain = {
+    from: mock(() => chain),
+    where: mock(() => chain),
+    orderBy: mock(() => Promise.resolve([])),
+    limit: mock(() => Promise.resolve([])),
+  };
+  return chain;
+}
+
+const dbSelectMock = mock(() => emptyDbSelectChain());
+
+mock.module("@/db", () => ({
+  db: {
+    select: dbSelectMock,
+  },
 }));
 
 mock.module("@/post", () => ({
@@ -157,7 +188,20 @@ beforeEach(() => {
   };
   bookListResult = {
     books: [
-      { unitId: "book-1", title: "Book One", coverUrl: "book-1.jpg" },
+      {
+        unitId: "book-1",
+        title: "Book One",
+        subtitle: "First subtitle",
+        coverUrl: "book-1.jpg",
+        creditAttributions: [
+          {
+            entityId: "author-1",
+            name: "Author One",
+            role: "author",
+            position: "a",
+          },
+        ],
+      },
       { unitId: "book-2", title: "Book Two", coverUrl: "book-2.jpg" },
     ],
     total: 2,
@@ -191,6 +235,7 @@ beforeEach(() => {
   hydrateVariantContextSummariesMock.mockClear();
   resolveEffectiveReadLanguageCandidatesMock.mockClear();
   realmGetByUnitIdMock.mockClear();
+  dbSelectMock.mockClear();
 });
 
 describe("FeedService", () => {
@@ -260,7 +305,12 @@ describe("FeedService", () => {
     ]);
     expect(result.rows[4]).toMatchObject({
       type: "book",
-      book: { unitId: "book-1", title: "Book One" },
+      book: {
+        unitId: "book-1",
+        title: "Book One",
+        subtitle: "First subtitle",
+        primaryAuthor: { unitId: "author-1", name: "Author One" },
+      },
     });
     expect(result.nextCursor).toEqual({
       rowId: "post:post-8",

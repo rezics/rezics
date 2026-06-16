@@ -62,7 +62,7 @@ export const UnitAlias = pgTable(
     score: integer().default(0).notNull(),
     voteCount: integer().default(0).notNull(),
     pinned: boolean().default(false).notNull(),
-    position: text(),
+    position: text(), // Fractional Indexing
     createdById: uuid().references(() => User.unitId, {
       onDelete: "set null",
       onUpdate: "cascade",

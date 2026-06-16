@@ -25,7 +25,7 @@ export const UnitTag = pgTable(
     score: integer().default(0).notNull(),
     voteCount: integer().default(0).notNull(),
     pinned: boolean().default(false).notNull(),
-    position: text(),
+    position: text(), // Fractional Indexing
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -102,7 +102,7 @@ export const RealmTagApplication = pgTable(
     score: integer().default(0).notNull(),
     voteCount: integer().default(0).notNull(),
     pinned: boolean().default(false).notNull(),
-    position: text(),
+    position: text(), // Fractional Indexing
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -197,7 +197,7 @@ export const UserTagApplication = pgTable(
     tagUnitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    position: text(),
+    position: text(), // Fractional Indexing
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

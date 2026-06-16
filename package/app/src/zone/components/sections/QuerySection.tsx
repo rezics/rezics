@@ -68,10 +68,12 @@ export function QuerySection({
 
   const entries: ZoneListEntry[] = items.map((item) => ({
     key: item.unitId,
+    unitId: item.unitId,
     href: zoneSectionItemHref(item, zone.slug),
     label: item.title ?? item.slug ?? item.unitId,
     summary: item.summary,
     imageUrl: item.imageUrl,
+    type: item.type,
   }));
 
   const explicitTitle = zoneSectionTitleText(section, refUnits);

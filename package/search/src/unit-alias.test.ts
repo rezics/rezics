@@ -34,7 +34,7 @@ const baseUnit = {
   translations: [
     { language: "en", title: "The Three-Body Problem", extra: null },
   ],
-  supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+  supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
   aliases: [],
   unitTags: [],
   inRealms: [],
@@ -134,7 +134,7 @@ describe("alias and pinned tag search projection", () => {
       unit: {
         userId: "user-1",
         translations: [{ language: "en", title: "rezics", description: null }],
-        supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
+        supportLanguages: [{ language: "en", isPrimary: true, position: "a" }],
         aliases: [
           {
             value: "Library.Book",
@@ -167,8 +167,8 @@ describe("alias and pinned tag search projection", () => {
       unit: {
         userId: "user-1",
         supportLanguages: [
-          { language: "en", isPrimary: true, sortOrder: 0 },
-          { language: "zh-hant", isPrimary: false, sortOrder: 1 },
+          { language: "en", isPrimary: true, position: "a" },
+          { language: "zh-hant", isPrimary: false, position: "b" },
         ],
         translations: [
           {
@@ -211,8 +211,8 @@ describe("alias and pinned tag search projection", () => {
       unit: {
         userId: "user-1",
         supportLanguages: [
-          { language: "ja", isPrimary: true, sortOrder: 0 },
-          { language: "en", isPrimary: false, sortOrder: 1 },
+          { language: "ja", isPrimary: true, position: "a" },
+          { language: "en", isPrimary: false, position: "b" },
         ],
         translations: [
           { language: "en", title: "English realm", description: null },
@@ -228,8 +228,8 @@ describe("alias and pinned tag search projection", () => {
 
     expect(doc.languages).toEqual(["ja", "en"]);
     expect(doc.supportLanguages).toEqual([
-      { language: "ja", isPrimary: true, sortOrder: 0 },
-      { language: "en", isPrimary: false, sortOrder: 1 },
+      { language: "ja", isPrimary: true, position: "a" },
+      { language: "en", isPrimary: false, position: "b" },
     ]);
   });
 });

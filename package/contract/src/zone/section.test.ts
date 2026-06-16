@@ -31,6 +31,14 @@ describe("zone section query", () => {
       }),
     ).toBe(true);
     expect(Value.Check(zoneSectionQuerySchema, latestWikiQuery)).toBe(true);
+    expect(
+      Value.Check(zoneSectionQuerySchema, {
+        target: "realm",
+        types: ["REALM"],
+        languages: ["en"],
+        sort: { field: "memberCount", direction: "desc" },
+      }),
+    ).toBe(true);
   });
 
   test("requires a sort and rejects unknown fields", () => {

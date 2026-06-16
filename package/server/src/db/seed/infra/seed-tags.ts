@@ -15,6 +15,7 @@ import {
   type TagSlug,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
+import { rebalance } from "../../../shelf/fractional-index";
 import type { ServerDb } from "../../client";
 import {
   EchoKV,
@@ -53,7 +54,7 @@ async function createTagUnit(
     supportLanguages: Array<{
       language: string;
       isPrimary: boolean;
-      sortOrder: number;
+      position: string;
     }>;
   },
 ): Promise<string> {
@@ -89,7 +90,7 @@ async function createTagUnit(
         unitId: unit.id,
         language: supportLanguage.language,
         isPrimary: supportLanguage.isPrimary,
-        sortOrder: supportLanguage.sortOrder,
+        position: supportLanguage.position,
       });
     }
 
@@ -136,8 +137,16 @@ export async function seedContentTypeTags(
           { language: FALLBACK_LANGUAGE, title },
         ],
         supportLanguages: [
-          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
-          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
+          {
+            language: DEFAULT_LANGUAGE,
+            isPrimary: true,
+            position: rebalance(2)[0]!,
+          },
+          {
+            language: FALLBACK_LANGUAGE,
+            isPrimary: false,
+            position: rebalance(2)[1]!,
+          },
         ],
       });
       tagMap[name] = id;
@@ -200,8 +209,16 @@ async function seedOfficialQuestionTag(
       { language: FALLBACK_LANGUAGE, title: "Question" },
     ],
     supportLanguages: [
-      { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
-      { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
+      {
+        language: DEFAULT_LANGUAGE,
+        isPrimary: true,
+        position: rebalance(2)[0]!,
+      },
+      {
+        language: FALLBACK_LANGUAGE,
+        isPrimary: false,
+        position: rebalance(2)[1]!,
+      },
     ],
   });
   console.log(`[Seed]   Created official question tag (${id})`);
@@ -216,7 +233,7 @@ async function syncTagTranslations(
   const entry = TAGS[slug];
 
   await Promise.all(
-    TAG_REGISTRY_LANGUAGES.map((language, sortOrder) =>
+    TAG_REGISTRY_LANGUAGES.map((language, index) =>
       Promise.all([
         db
           .insert(UnitTranslation)
@@ -236,13 +253,13 @@ async function syncTagTranslations(
             unitId,
             language,
             isPrimary: language === DEFAULT_LANGUAGE,
-            sortOrder,
+            position: rebalance(TAG_REGISTRY_LANGUAGES.length)[index]!,
           })
           .onConflictDoUpdate({
             target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
             set: {
               isPrimary: language === DEFAULT_LANGUAGE,
-              sortOrder,
+              position: rebalance(TAG_REGISTRY_LANGUAGES.length)[index]!,
             },
           }),
       ]),
@@ -285,10 +302,10 @@ async function ensureSearchTag(
       language,
       title: TAGS[slug][language],
     })),
-    supportLanguages: TAG_REGISTRY_LANGUAGES.map((language, sortOrder) => ({
+    supportLanguages: TAG_REGISTRY_LANGUAGES.map((language, index) => ({
       language,
       isPrimary: language === DEFAULT_LANGUAGE,
-      sortOrder,
+      position: rebalance(TAG_REGISTRY_LANGUAGES.length)[index]!,
     })),
   });
 }

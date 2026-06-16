@@ -28,7 +28,7 @@ type DraftPostRow = {
     supportLanguages: Array<{
       language: string;
       isPrimary: boolean;
-      sortOrder: number;
+      position: string;
     }>;
     translations: Array<{ language: string; title: string | null }>;
     contentTranslations: Array<{ language: string; content: unknown }>;
@@ -109,11 +109,14 @@ function createDrizzleDraftRepository(): DraftRepository {
               unitId: UnitSupportLanguage.unitId,
               language: UnitSupportLanguage.language,
               isPrimary: UnitSupportLanguage.isPrimary,
-              sortOrder: UnitSupportLanguage.sortOrder,
+              position: UnitSupportLanguage.position,
             })
             .from(UnitSupportLanguage)
             .where(inArray(UnitSupportLanguage.unitId, unitIds))
-            .orderBy(asc(UnitSupportLanguage.sortOrder)),
+            .orderBy(
+              asc(UnitSupportLanguage.position),
+              asc(UnitSupportLanguage.language),
+            ),
         ]);
 
       const translationsByUnitId = groupRowsByUnitId(translations);
@@ -224,14 +227,14 @@ function orderByPostLanguage<T extends { language: string }>(
   supportLanguages: Array<{
     language: string;
     isPrimary: boolean;
-    sortOrder: number;
+    position: string;
   }>,
 ): T[] {
   const order = [
     defaultLanguage,
     supportLanguages.find((language) => language.isPrimary)?.language,
     ...supportLanguages
-      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .sort((a, b) => a.position.localeCompare(b.position))
       .map((language) => language.language),
     ...rows.map((row) => row.language),
   ];

@@ -77,13 +77,6 @@ const repairScopes: RepairScopeConfig[] = [
     link: { to: "/entity", label: "Open Entities" },
   },
   {
-    scope: "source-site",
-    title: "Source-site data",
-    description:
-      "Dry-run contract for source-site and external reference repair. Detector wiring is pending.",
-    link: { to: "/source-site", label: "Open source sites" },
-  },
-  {
     scope: "counters",
     title: "Denormalized counters",
     description:

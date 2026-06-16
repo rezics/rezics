@@ -10,6 +10,7 @@ export type ExpectedMeiliIndexUid =
   | "polls"
   | typeof SHELF_ITEM_INDEX_NAME
   | "realms"
+  | "zones"
   | "entities"
   | typeof PROGRESS_INDEX_NAME;
 
@@ -273,6 +274,30 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     supportsFullSync: true,
     domain: "Realms",
     description: "Realm directory records.",
+  },
+  {
+    uid: "zones",
+    primaryKey: "id",
+    searchableAttributes: [
+      "titles",
+      "descriptions",
+      "aliasValues",
+      "slug",
+      "ownerRealmTitles",
+    ],
+    filterableAttributes: [
+      "visibility",
+      "ownerRealmUnitId",
+      "languages",
+      "isLanguageNeutral",
+      "startsAt",
+      "endsAt",
+    ],
+    sortableAttributes: ["createdAt", "updatedAt"],
+    facetableSummaryFields: ["visibility"],
+    supportsFullSync: true,
+    domain: "Zones",
+    description: "Zone directory records.",
   },
   {
     uid: "entities",

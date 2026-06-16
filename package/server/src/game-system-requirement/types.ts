@@ -9,7 +9,7 @@ export const gameSystemRequirementSelect = {
   platformEntityId: true,
   tier: true,
   language: true,
-  sourceRefId: true,
+  sourceExternalLinkId: true,
   hardware: true,
   rawText: true,
   createdAt: true,

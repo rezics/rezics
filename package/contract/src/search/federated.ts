@@ -7,6 +7,7 @@ import { PostSearchDocumentSchema } from "../meili/post";
 import { RealmSearchDocumentSchema } from "../meili/realm";
 import { ShelfItemShelfGroupSchema } from "../meili/shelf-item";
 import { UserSearchDocumentSchema } from "../meili/user";
+import { ZoneSearchDocumentSchema } from "../meili/zone";
 import { SearchCategorySchema, SearchScopeSchema } from "./scope";
 import { SearchQuerySchema } from "./search";
 
@@ -59,6 +60,7 @@ const FederatedGroupedSectionsSchema = t.Object({
   comments: t.Optional(FederatedSectionSchema(CommentSearchDocumentSchema)),
   shelves: t.Optional(FederatedSectionSchema(ShelfSearchDocumentSchema)),
   realms: t.Optional(FederatedSectionSchema(RealmSearchDocumentSchema)),
+  zones: t.Optional(FederatedSectionSchema(ZoneSearchDocumentSchema)),
   users: t.Optional(FederatedSectionSchema(UserSearchDocumentSchema)),
   entities: t.Optional(FederatedSectionSchema(EntitySearchDocumentSchema)),
 });
@@ -84,6 +86,7 @@ const FederatedRankedHitSchema = t.Intersect([
     PostSearchDocumentSchema,
     CommentSearchDocumentSchema,
     RealmSearchDocumentSchema,
+    ZoneSearchDocumentSchema,
     UserSearchDocumentSchema,
     EntitySearchDocumentSchema,
   ]),
@@ -100,6 +103,7 @@ const FederatedSingleItemSchema = t.Union([
   PostSearchDocumentSchema,
   CommentSearchDocumentSchema,
   RealmSearchDocumentSchema,
+  ZoneSearchDocumentSchema,
   UserSearchDocumentSchema,
   EntitySearchDocumentSchema,
 ]);

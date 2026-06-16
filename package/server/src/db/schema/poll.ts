@@ -73,7 +73,7 @@ export const PollOption = pgTable(
         onUpdate: "cascade",
       }),
     optionId: uuid().default(sql`uuidv7()`).notNull(),
-    position: varchar({ length: 64 }).notNull(),
+    position: varchar({ length: 64 }).notNull(), // Fractional Indexing
     voteCount: integer().default(0).notNull(),
     label: text(),
     unitId: uuid().references(() => Unit.id, {

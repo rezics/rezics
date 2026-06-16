@@ -89,14 +89,12 @@ describe("updatedAt database defaults", () => {
       const rankingResult = await rankingPool.query(
         `insert into "RankingReactionBucket" (
           "targetId",
-          "scopeKey",
           "reaction",
           "bucketStart",
           "bucketEnd"
         )
         values (
           $1,
-          'direct',
           'upvote',
           '2026-01-01T00:00:00.000Z',
           '2026-01-01T01:00:00.000Z'

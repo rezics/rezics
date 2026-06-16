@@ -118,12 +118,6 @@ export const adminNav = {
           to: "/entity",
         },
         {
-          id: "content.source-sites",
-          label: () => getI18nRuntime().i18n.t("admin:nav_source_sites"),
-          icon: <NetworkIcon fontSize="small" />,
-          to: "/source-site",
-        },
-        {
           id: "content.realms",
           label: () => getI18nRuntime().i18n.t("admin:nav_realms"),
           icon: <ForumIcon fontSize="small" />,

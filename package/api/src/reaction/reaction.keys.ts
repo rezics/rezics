@@ -5,26 +5,29 @@
 export const normalizeIds = (ids: readonly string[]): string[] =>
   Array.from(new Set(ids)).sort();
 
-export const normalizeScopeForKey = (
-  scopeKey?: string | null,
-): string | null => (scopeKey && scopeKey.length > 0 ? scopeKey : null);
+export const normalizeContextForKey = (
+  contextUnitId?: string | null,
+): string | null | undefined => {
+  if (contextUnitId === undefined) return undefined;
+  return contextUnitId && contextUnitId.length > 0 ? contextUnitId : null;
+};
 
 export const reactionKeys = {
   all: () => ["reactions"] as const,
 
   summaries: () => [...reactionKeys.all(), "summary"] as const,
-  summary: (targetId: string, scopeKey?: string | null) =>
+  summary: (targetId: string, contextUnitId?: string | null) =>
     [
       ...reactionKeys.summaries(),
-      { targetId, scopeKey: normalizeScopeForKey(scopeKey) },
+      { targetId, contextUnitId: normalizeContextForKey(contextUnitId) },
     ] as const,
-  summaryBatch: (targetIds: readonly string[], scopeKey?: string | null) =>
+  summaryBatch: (targetIds: readonly string[], contextUnitId?: string | null) =>
     [
       ...reactionKeys.summaries(),
       "batch",
       {
         targetIds: normalizeIds(targetIds),
-        scopeKey: normalizeScopeForKey(scopeKey),
+        contextUnitId: normalizeContextForKey(contextUnitId),
       },
     ] as const,
 
@@ -37,30 +40,30 @@ export const reactionKeys = {
     ] as const,
 
   mine: () => [...reactionKeys.all(), "my"] as const,
-  my: (targetId: string, scopeKey?: string | null) =>
+  my: (targetId: string, contextUnitId?: string | null) =>
     [
       ...reactionKeys.mine(),
-      { targetId, scopeKey: normalizeScopeForKey(scopeKey) },
+      { targetId, contextUnitId: normalizeContextForKey(contextUnitId) },
     ] as const,
-  myBatch: (targetIds: readonly string[], scopeKey?: string | null) =>
+  myBatch: (targetIds: readonly string[], contextUnitId?: string | null) =>
     [
       ...reactionKeys.mine(),
       "batch",
       {
         targetIds: normalizeIds(targetIds),
-        scopeKey: normalizeScopeForKey(scopeKey),
+        contextUnitId: normalizeContextForKey(contextUnitId),
       },
     ] as const,
 
   histories: () => [...reactionKeys.all(), "history"] as const,
-  given: (userId: string, reactions?: string, scopeKey?: string | null) =>
+  given: (userId: string, reactions?: string, contextUnitId?: string | null) =>
     [
       ...reactionKeys.histories(),
       "given",
       {
         userId,
         reactions: reactions ?? null,
-        scopeKey: normalizeScopeForKey(scopeKey),
+        contextUnitId: normalizeContextForKey(contextUnitId),
       },
     ] as const,
   received: (userId: string, reactions?: string) =>

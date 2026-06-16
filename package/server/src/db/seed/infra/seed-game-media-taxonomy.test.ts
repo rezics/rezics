@@ -129,31 +129,23 @@ describe("seedGameMediaTaxonomy", () => {
 });
 
 describe("GameSystemRequirement migration", () => {
-  test("creates source-aware platform/tier requirement storage", () => {
+  test("renames requirement evidence links to UnitExternalLink", () => {
     const migration = readFileSync(
       new URL(
-        "../../../../drizzle/20260604061845_server_baseline/migration.sql",
+        "../../../../drizzle/20260612170022_lying_sentry/migration.sql",
         import.meta.url,
       ),
       "utf8",
     );
 
-    expect(migration).toContain('CREATE TABLE "GameSystemRequirement"');
-    expect(migration).toContain('"gameUnitId" uuid NOT NULL');
-    expect(migration).toContain('"platformEntityId" uuid');
-    expect(migration).toContain('"sourceRefId" uuid');
-    expect(migration).toContain('"hardware" jsonb NOT NULL');
+    expect(migration).toContain('CREATE TABLE "UnitExternalLink"');
+    expect(migration).toContain('INSERT INTO "UnitExternalLink"');
     expect(migration).toContain(
-      'CREATE INDEX "GameSystemRequirement_gameUnitId_idx"',
+      'ALTER TABLE "GameSystemRequirement" RENAME COLUMN "sourceRefId" TO "sourceExternalLinkId"',
     );
     expect(migration).toContain(
-      'CREATE INDEX "GameSystemRequirement_platformEntityId_idx"',
+      'ALTER INDEX "GameSystemRequirement_sourceRefId_idx" RENAME TO "GameSystemRequirement_sourceExternalLinkId_idx"',
     );
-    expect(migration).toContain(
-      'CREATE INDEX "GameSystemRequirement_tier_idx"',
-    );
-    expect(migration).toContain(
-      'CREATE INDEX "GameSystemRequirement_sourceRefId_idx"',
-    );
+    expect(migration).toContain('REFERENCES "UnitExternalLink"("id")');
   });
 });

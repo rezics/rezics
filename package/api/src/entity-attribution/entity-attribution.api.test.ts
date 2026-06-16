@@ -35,7 +35,7 @@ describe("entityAttributionApi", () => {
         {
           op: "setCredits",
           role: "author",
-          entries: [{ entityId: "entity-1", sortOrder: 0 }],
+          entries: [{ entityId: "entity-1", position: "a" }],
         },
       ],
     });
@@ -50,7 +50,7 @@ describe("entityAttributionApi", () => {
           {
             op: "setCredits",
             role: "author",
-            entries: [{ entityId: "entity-1", sortOrder: 0 }],
+            entries: [{ entityId: "entity-1", position: "a" }],
           },
         ],
       }),

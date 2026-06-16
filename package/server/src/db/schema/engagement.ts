@@ -130,7 +130,7 @@ export const UserSubscriptionListEntry = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     subscribedType: UnitType().notNull(),
-    position: varchar({ length: 64 }).notNull(),
+    position: varchar({ length: 64 }).notNull(), // Fractional Indexing
     pinned: boolean().default(false).notNull(),
     state: UserSubscriptionListEntryState().default("ACTIVE").notNull(),
     createdAt: createdAt(),

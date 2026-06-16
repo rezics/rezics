@@ -33,8 +33,8 @@ const baseUnit = {
   referenceCount: 7,
   shareCount: 8,
   supportLanguages: [
-    { unitId: "book-1", language: "ja", isPrimary: true, sortOrder: 0 },
-    { unitId: "book-1", language: "en", isPrimary: false, sortOrder: 1 },
+    { unitId: "book-1", language: "ja", isPrimary: true, position: "a" },
+    { unitId: "book-1", language: "en", isPrimary: false, position: "b" },
   ],
   translations: [
     {
@@ -70,12 +70,12 @@ describe("mapUnitListItemToDTO", () => {
       {
         ...baseUnit,
         supportLanguages: [
-          { unitId: "book-1", language: "en", isPrimary: true, sortOrder: 0 },
+          { unitId: "book-1", language: "en", isPrimary: true, position: "a" },
           {
             unitId: "book-1",
             language: "zh-hant",
             isPrimary: false,
-            sortOrder: 1,
+            position: "b",
           },
         ],
         translations: [

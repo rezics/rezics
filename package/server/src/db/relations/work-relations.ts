@@ -13,7 +13,9 @@ export function workRelations(r: ServerRelationsBuilder) {
         from: r.Entity.unitId,
         to: r.Unit.id,
       }),
-      SourceSites: r.many.SourceSite(),
+      SourceExternalLinks: r.many.UnitExternalLink({
+        alias: "UnitExternalLink_sourceEntityUnitId_Entity_unitId",
+      }),
     },
     Game: {
       Unit: r.one.Unit({
@@ -31,9 +33,9 @@ export function workRelations(r: ServerRelationsBuilder) {
         from: r.GameSystemRequirement.platformEntityId,
         to: r.Unit.id,
       }),
-      UnitExternalRef: r.one.UnitExternalRef({
-        from: r.GameSystemRequirement.sourceRefId,
-        to: r.UnitExternalRef.id,
+      UnitExternalLink: r.one.UnitExternalLink({
+        from: r.GameSystemRequirement.sourceExternalLinkId,
+        to: r.UnitExternalLink.id,
       }),
     },
     Link: {

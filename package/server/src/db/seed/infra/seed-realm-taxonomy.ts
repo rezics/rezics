@@ -4,6 +4,7 @@ import {
   markdownContentDoc,
 } from "@rezics/contract";
 import { and, eq, sql } from "drizzle-orm";
+import { rebalance } from "../../../shelf/fractional-index";
 import type { ServerDb } from "../../client";
 import {
   ContentTranslation,
@@ -58,7 +59,8 @@ async function syncUnitTranslations(
     description?: unknown;
   }>,
 ): Promise<void> {
-  for (const [sortOrder, translation] of translations.entries()) {
+  const positions = rebalance(translations.length);
+  for (const [index, translation] of translations.entries()) {
     await db
       .insert(UnitTranslation)
       .values({
@@ -82,13 +84,13 @@ async function syncUnitTranslations(
         unitId,
         language: translation.language,
         isPrimary: translation.language === DEFAULT_LANGUAGE,
-        sortOrder,
+        position: positions[index]!,
       })
       .onConflictDoUpdate({
         target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
         set: {
           isPrimary: translation.language === DEFAULT_LANGUAGE,
-          sortOrder,
+          position: positions[index]!,
         },
       });
   }
@@ -130,10 +132,9 @@ async function ensureGlobalTag(
       .returning({ id: Unit.id });
     if (!tag) throw new Error(`Failed to create tag Unit "${slug}"`);
 
-    for (const [sortOrder, language] of [
-      DEFAULT_LANGUAGE,
-      FALLBACK_LANGUAGE,
-    ].entries()) {
+    const languages = [DEFAULT_LANGUAGE, FALLBACK_LANGUAGE];
+    const positions = rebalance(languages.length);
+    for (const [index, language] of languages.entries()) {
       await tx.insert(UnitTranslation).values({
         unitId: tag.id,
         language,
@@ -144,7 +145,7 @@ async function ensureGlobalTag(
         unitId: tag.id,
         language,
         isPrimary: language === DEFAULT_LANGUAGE,
-        sortOrder,
+        position: positions[index]!,
       });
     }
 
@@ -215,7 +216,7 @@ async function ensurePostUnit(
       unitId: unit.id,
       language: DEFAULT_LANGUAGE,
       isPrimary: true,
-      sortOrder: 0,
+      position: rebalance(1)[0]!,
     });
     await tx.insert(Post).values({
       unitId: unit.id,
@@ -313,7 +314,10 @@ async function ensureCommunityRealm(
         unitId: realm.id,
         language: translation.language,
         isPrimary: translation.language === DEFAULT_LANGUAGE,
-        sortOrder: translation.language === DEFAULT_LANGUAGE ? 0 : 1,
+        position:
+          translation.language === DEFAULT_LANGUAGE
+            ? rebalance(2)[0]!
+            : rebalance(2)[1]!,
       });
     }
 

@@ -14,6 +14,7 @@ import {
   type ZoneSectionQuerySortField,
   type ZoneTheme,
 } from "@rezics/contract";
+import { rebalance } from "../../shelf/fractional-index.js";
 import {
   Unit,
   UnitSupportLanguage,
@@ -41,6 +42,7 @@ export const ZONE_FIXTURE_KINDS = [
   "tabbed-portal",
   "columns-portal",
   "realm-directory",
+  "zone-directory",
 ] as const;
 
 export type ZoneFixtureKind = (typeof ZONE_FIXTURE_KINDS)[number];
@@ -61,7 +63,7 @@ export type ZoneFixtureConfig = {
   pages: Array<{
     id: string;
     slug: string;
-    position: number;
+    position: string;
     config: ZonePageConfig;
   }>;
   homePageId: string;
@@ -77,9 +79,11 @@ const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 
 // Per-target sort vocabularies mirror `ZONE_QUERY_SORTABLE` in
 // `meili/search/filters.ts`: unit queries may not sort by replyCount, post
-// queries may not sort by publishedAt.
+// queries may not sort by publishedAt, and realm/zone queries use their
+// dedicated indexes.
 // 按目标的排序词汇表与 `meili/search/filters.ts` 的 `ZONE_QUERY_SORTABLE`
-// 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序。
+// 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序，
+// realm/zone 查询使用各自的专用索引。
 const UNIT_SORT_FIELDS: ZoneSectionQuerySortField[] = [
   "createdAt",
   "updatedAt",
@@ -95,6 +99,15 @@ const POST_SORT_FIELDS: ZoneSectionQuerySortField[] = [
   "hotScore",
   "bestScore",
   "topScore",
+];
+const REALM_SORT_FIELDS: ZoneSectionQuerySortField[] = [
+  "createdAt",
+  "updatedAt",
+  "memberCount",
+];
+const ZONE_SORT_FIELDS: ZoneSectionQuerySortField[] = [
+  "createdAt",
+  "updatedAt",
 ];
 
 interface ZoneTemporalState {
@@ -189,6 +202,8 @@ function fixtureBoundary(
       return refs.contextRealmUnitId ? { realm: "context" } : {};
     case "realm-directory":
       return { types: [UnitType.REALM] };
+    case "zone-directory":
+      return { types: [UnitType.ZONE] };
   }
 }
 
@@ -233,6 +248,48 @@ function postQuerySection(input: {
       postKinds: ["POST", "REVIEW"],
       sort: {
         field: faker.helpers.arrayElement(POST_SORT_FIELDS),
+        direction: "desc",
+      },
+    },
+  };
+}
+
+function realmQuerySection(input: {
+  id: string;
+  limit: number;
+}): ZoneContentSection {
+  return {
+    id: input.id,
+    kind: "query",
+    display: faker.helpers.arrayElement(["tiles", "list", "avatar-wall"]),
+    limit: input.limit,
+    loadMore: true,
+    query: {
+      target: "realm",
+      types: ["REALM"],
+      sort: {
+        field: faker.helpers.arrayElement(REALM_SORT_FIELDS),
+        direction: "desc",
+      },
+    },
+  };
+}
+
+function zoneQuerySection(input: {
+  id: string;
+  limit: number;
+}): ZoneContentSection {
+  return {
+    id: input.id,
+    kind: "query",
+    display: faker.helpers.arrayElement(["tiles", "list"]),
+    limit: input.limit,
+    loadMore: true,
+    query: {
+      target: "zone",
+      types: ["ZONE"],
+      sort: {
+        field: faker.helpers.arrayElement(ZONE_SORT_FIELDS),
         direction: "desc",
       },
     },
@@ -363,7 +420,18 @@ function fixtureHomeSections(
           display: "tiles",
           items: unitItems(refs.realmUnitIds, 12),
         },
-        unitQuerySection({ id: "all-realms", types: ["REALM"], limit: 24 }),
+        realmQuerySection({ id: "all-realms", limit: 24 }),
+      ];
+    case "zone-directory":
+      return [
+        { id: "hero", kind: "hero", showDescription: true },
+        zoneQuerySection({ id: "latest-zones", limit: 24 }),
+        {
+          id: "featured-realms",
+          kind: "collection",
+          display: "tiles",
+          items: unitItems(refs.realmUnitIds, 12),
+        },
       ];
   }
 }
@@ -386,6 +454,7 @@ export function buildZoneFixtureConfig(
     search: randomUUID(),
     feed: randomUUID(),
   };
+  const pagePositions = rebalance(3);
   return {
     boundary: {
       schema: "rezics/zone-boundary",
@@ -405,7 +474,7 @@ export function buildZoneFixtureConfig(
       {
         id: pageIds.home,
         slug: "home",
-        position: 0,
+        position: pagePositions[0]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -415,13 +484,13 @@ export function buildZoneFixtureConfig(
       {
         id: pageIds.search,
         slug: "search",
-        position: 1,
+        position: pagePositions[1]!,
         config: { schema: "rezics/zone-page", version: 1, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
-        position: 2,
+        position: pagePositions[2]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -527,7 +596,7 @@ export async function seedZones(
           unitId: id,
           language: t.language,
           isPrimary: idx === 0,
-          sortOrder: idx,
+          position: rebalance(translations.length)[idx]!,
         })),
       ),
     );

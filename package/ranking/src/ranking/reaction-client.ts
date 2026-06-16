@@ -14,12 +14,14 @@ export class ReactionSummaryClient {
 
   async getSummaries(
     targetIds: string[],
-    options: { scopeKey?: string | null } = {},
+    options: { contextUnitId?: string | null } = {},
   ): Promise<ReactionSummaryMap> {
     if (targetIds.length === 0) return {};
     const params = new URLSearchParams();
     for (const id of targetIds) params.append("targetIds", id);
-    if (options.scopeKey) params.set("scopeKey", options.scopeKey);
+    if (options.contextUnitId !== undefined) {
+      params.set("contextUnitId", options.contextUnitId ?? "");
+    }
 
     const response = await fetch(
       joinUrl(this.options.baseUrl, `/reaction/summary?${params.toString()}`),

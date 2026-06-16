@@ -4,7 +4,7 @@ import {
   givenQuerySchema,
   givenResponseSchema,
   myQuerySchema,
-  normalizeReactionScopeKey,
+  normalizeReactionContextUnitId,
   shareSummaryQuerySchema,
   shareSummaryResponseSchema,
   summaryQuerySchema,
@@ -71,7 +71,9 @@ export const reactionApi = new Elysia({ prefix: "/reaction" })
       const targetIds = normalizeIds(query.targetIds);
       const summaries = await reactionService.getSummary(
         targetIds,
-        query.scopeKey,
+        query.contextUnitId === undefined
+          ? undefined
+          : normalizeReactionContextUnitId(query.contextUnitId),
       );
       return { summaries };
     },
@@ -92,7 +94,7 @@ export const reactionApi = new Elysia({ prefix: "/reaction" })
       const reactionsByTarget = await reactionService.getUserReactions(
         userId,
         targetIds,
-        normalizeReactionScopeKey(query.scopeKey),
+        normalizeReactionContextUnitId(query.contextUnitId),
       );
       return { userId, reactionsByTarget };
     },
@@ -115,7 +117,10 @@ export const reactionApi = new Elysia({ prefix: "/reaction" })
         return await reactionService.listGiven({
           userId: query.userId,
           reactions: parseReactionFilter(query.reactions),
-          scopeKey: query.scopeKey,
+          contextUnitId:
+            query.contextUnitId === undefined
+              ? undefined
+              : normalizeReactionContextUnitId(query.contextUnitId),
           cursor: query.cursor,
           limit: query.limit,
         });

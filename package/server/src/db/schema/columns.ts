@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { jsonb, pgSequence, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const uuidv7 = () => uuid().default(sql`uuidv7()`);
 
@@ -31,12 +31,3 @@ export const jsonData = () => jsonb();
 export const textArray = () => text().array();
 
 export const pgEnumName = (name: string) => name;
-
-export const post_path_label_seq = pgSequence("post_path_label_seq", {
-  startWith: "1",
-  increment: "1",
-  minValue: "1",
-  maxValue: "9223372036854775807",
-  cache: "1",
-  cycle: false,
-});

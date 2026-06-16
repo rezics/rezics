@@ -16,7 +16,6 @@ import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core";
 import { FeedPostRowCard, FeedRenderer } from "@/feed";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { realmContextReactionScopeKey } from "../models/realmPostContext";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
 import { RealmContentModerationActions } from "./RealmContentModerationActions";
 
@@ -64,8 +63,12 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     () => rows.filter((row): row is FeedPostRow => row.type === "post"),
     [rows],
   );
-  const reactionScopeKey = realmContextReactionScopeKey(realmId);
+  const reactionContextUnitId = realmId;
   const postReactionTargetIds = useMemo(
+    () => postRows.map((row) => row.post.unitId),
+    [postRows],
+  );
+  const moderationTargetIds = useMemo(
     () =>
       postRows
         .filter((row) => row.post.kind !== PostKind.REVIEW)
@@ -73,8 +76,8 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     [postRows],
   );
   const moderationOverlayQuery = useQuery({
-    ...postQueries.moderationOverlays(postReactionTargetIds, realmId),
-    enabled: manageMode && postReactionTargetIds.length > 0,
+    ...postQueries.moderationOverlays(moderationTargetIds, realmId),
+    enabled: manageMode && moderationTargetIds.length > 0,
   });
   const unitRealmByUnitId = useMemo(() => {
     const map = new Map<string, UnitRealmDTO>();
@@ -98,8 +101,8 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   }, [moderationOverlayQuery.data]);
 
   useReactionHydration(postReactionTargetIds, {
-    summaryScopeKey: reactionScopeKey,
-    userScopeKey: reactionScopeKey,
+    summaryContextUnitId: reactionContextUnitId,
+    userContextUnitId: reactionContextUnitId,
   });
 
   if (isError && rows.length === 0) return <QueryErrorDisplay error={error} />;
@@ -122,8 +125,8 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     return (
       <FeedPostRowCard
         row={row}
-        summaryScopeKey={reactionScopeKey}
-        reactionScopeKey={reactionScopeKey}
+        summaryContextUnitId={reactionContextUnitId}
+        reactionContextUnitId={reactionContextUnitId}
         manageMode={manageMode}
         realmModerationStatus={
           manageMode ? unitRealm.moderationStatus : undefined

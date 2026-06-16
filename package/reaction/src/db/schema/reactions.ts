@@ -8,23 +8,25 @@ export const reactions = p.pgTable(
     userId: p.uuid("userId").notNull(),
     targetId: p.uuid("targetId").notNull(),
     reaction: p.varchar("reaction", { length: 32 }).notNull(),
-    scopeKey: p
-      .varchar("scopeKey", { length: 128 })
-      .notNull()
-      .default("direct"),
+    contextUnitId: p.uuid("contextUnitId"),
     createdAt: p.timestamp("createdAt").notNull().defaultNow(),
   },
   (table) => [
     p
-      .uniqueIndex("Reaction_userId_targetId_reaction_scopeKey_key")
-      .on(table.userId, table.targetId, table.reaction, table.scopeKey),
+      .uniqueIndex("Reaction_userId_targetId_reaction_direct_key")
+      .on(table.userId, table.targetId, table.reaction)
+      .where(sql`${table.contextUnitId} is null`),
+    p
+      .uniqueIndex("Reaction_userId_targetId_reaction_context_key")
+      .on(table.userId, table.targetId, table.reaction, table.contextUnitId)
+      .where(sql`${table.contextUnitId} is not null`),
     p.index("Reaction_targetId_idx").on(table.targetId),
     p
       .index("Reaction_targetId_reaction_idx")
       .on(table.targetId, table.reaction),
     p
-      .index("Reaction_targetId_reaction_scopeKey_idx")
-      .on(table.targetId, table.reaction, table.scopeKey),
+      .index("Reaction_targetId_reaction_contextUnitId_idx")
+      .on(table.targetId, table.reaction, table.contextUnitId),
     p.index("Reaction_userId_reaction_idx").on(table.userId, table.reaction),
     p.index("Reaction_userId_targetId_idx").on(table.userId, table.targetId),
     p.index("Reaction_userId_createdAt_idx").on(table.userId, table.createdAt),
@@ -36,21 +38,25 @@ export const reactionSummaries = p.pgTable(
   {
     targetId: p.uuid("targetId").notNull(),
     reaction: p.varchar("reaction", { length: 32 }).notNull(),
-    scopeKey: p
-      .varchar("scopeKey", { length: 128 })
-      .notNull()
-      .default("direct"),
+    contextUnitId: p.uuid("contextUnitId"),
     count: p.integer("count").notNull().default(0),
   },
   (table) => [
-    p.primaryKey({
-      name: "ReactionSummary_pkey",
-      columns: [table.targetId, table.reaction, table.scopeKey],
-    }),
+    p
+      .uniqueIndex("ReactionSummary_targetId_reaction_direct_key")
+      .on(table.targetId, table.reaction)
+      .where(sql`${table.contextUnitId} is null`),
+    p
+      .uniqueIndex("ReactionSummary_targetId_reaction_context_key")
+      .on(table.targetId, table.reaction, table.contextUnitId)
+      .where(sql`${table.contextUnitId} is not null`),
     p.index("ReactionSummary_targetId_idx").on(table.targetId),
     p
       .index("ReactionSummary_targetId_reaction_idx")
       .on(table.targetId, table.reaction),
+    p
+      .index("ReactionSummary_targetId_reaction_contextUnitId_idx")
+      .on(table.targetId, table.reaction, table.contextUnitId),
   ],
 );
 

@@ -9,6 +9,7 @@ import {
 } from "@rezics/contract";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import type { ServerDb } from "../client.js";
+import { rebalance } from "../../shelf/fractional-index.js";
 import {
   Book,
   ContentStructureNode,
@@ -137,26 +138,30 @@ export async function seedBooks(
             unitId: unit.id,
             language: t.language,
             isPrimary: i === 0,
-            sortOrder: i,
+            position: rebalance(translations.length)[i]!,
           })),
         ),
       );
       await ensureFactoryContentStructure(ctx.db, unit.id);
 
-      for (const [i, p] of pickN(people, randomInt(1, 3)).entries()) {
+      const pickedPeople = pickN(people, randomInt(1, 3));
+      const peoplePositions = rebalance(pickedPeople.length);
+      for (const [i, p] of pickedPeople.entries()) {
         allCreditAttributions.push({
           unitId: unit.id,
           entityId: p.unitId,
           role: faker.helpers.arrayElement(BOOK_PERSON_ROLES),
-          sortOrder: i,
+          position: peoplePositions[i]!,
         });
       }
-      for (const [i, o] of pickN(organizations, randomInt(0, 2)).entries()) {
+      const pickedOrganizations = pickN(organizations, randomInt(0, 2));
+      const organizationPositions = rebalance(pickedOrganizations.length);
+      for (const [i, o] of pickedOrganizations.entries()) {
         allCreditAttributions.push({
           unitId: unit.id,
           entityId: o.unitId,
           role: faker.helpers.arrayElement(BOOK_ORG_ROLES),
-          sortOrder: i,
+          position: organizationPositions[i]!,
         });
       }
       for (const t of pickN(tags, randomInt(1, 5))) {
@@ -336,7 +341,7 @@ export async function seedChaptersForBook(
             unitId: r.id,
             language: DEFAULT_LANGUAGE,
             isPrimary: true,
-            sortOrder: 0,
+            position: rebalance(1)[0]!,
           })),
         ),
       );

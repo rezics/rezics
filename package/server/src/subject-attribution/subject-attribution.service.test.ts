@@ -18,7 +18,7 @@ function makeSubjectRow(overrides: Record<string, any> = {}) {
     unitId: overrides.unitId ?? "work-1",
     entityId: overrides.entityId ?? "character-1",
     role: overrides.role ?? "primary_character",
-    sortOrder: overrides.sortOrder ?? 0,
+    position: overrides.position ?? "a",
     weight: overrides.weight ?? null,
     entity: {
       id: overrides.entityId ?? "character-1",
@@ -97,7 +97,7 @@ function createRepository() {
         unitId: input.unitId,
         entityId: input.entityId,
         role: input.role,
-        sortOrder: input.sortOrder,
+        position: input.position,
         weight: input.weight,
       }),
     ),
@@ -146,7 +146,7 @@ describe("SubjectAttributionService.link", () => {
       unitId: "work-1",
       entityId: "character-1",
       role: "primary_character",
-      sortOrder: 2,
+      position: "c",
       weight: 0.8,
     });
 

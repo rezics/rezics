@@ -1,4 +1,15 @@
-import { and, desc, eq, inArray, lt, ne, or, type SQL, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  inArray,
+  isNull,
+  lt,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import { db, type ReactionDb } from "../db";
 import {
   type ReactionRow,
@@ -14,7 +25,7 @@ export interface ListReactionRowsInput {
   userId?: string;
   targetIds?: string[];
   reactions?: string[];
-  scopeKey?: string;
+  contextUnitId?: string | null;
   excludeUserId?: string;
   cursor: ReactionCursor | null;
   take: number;
@@ -24,7 +35,7 @@ export interface CreateReactionInput {
   userId: string;
   targetId: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
   defaultQuota: number;
 }
 
@@ -32,18 +43,18 @@ export interface RemoveReactionInput {
   userId: string;
   targetId: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
 }
 
 export interface ReactionRepository {
   getSummaryRows(
     targetIds: string[],
-    scopeKey: string | undefined,
+    contextUnitId: string | null | undefined,
   ): Promise<Array<{ targetId: string; reaction: string; count: number }>>;
   getUserReactionRows(
     userId: string,
     targetIds: string[],
-    scopeKey: string,
+    contextUnitId: string | null,
   ): Promise<Array<{ targetId: string; reaction: string }>>;
   listRows(input: ListReactionRowsInput): Promise<ReactionRow[]>;
   createReaction(input: CreateReactionInput): Promise<{
@@ -81,14 +92,30 @@ function definedConditions(
   return and(...defined);
 }
 
+function reactionContextCondition(
+  contextUnitId: string | null | undefined,
+): SQL | undefined {
+  if (contextUnitId === undefined) return undefined;
+  if (contextUnitId === null) return isNull(reactions.contextUnitId);
+  return eq(reactions.contextUnitId, contextUnitId);
+}
+
+function summaryContextCondition(
+  contextUnitId: string | null | undefined,
+): SQL | undefined {
+  if (contextUnitId === undefined) return undefined;
+  if (contextUnitId === null) return isNull(reactionSummaries.contextUnitId);
+  return eq(reactionSummaries.contextUnitId, contextUnitId);
+}
+
 export class DrizzleReactionRepository implements ReactionRepository {
   constructor(private readonly database: ReactionDb = db) {}
 
   async getSummaryRows(
     targetIds: string[],
-    scopeKey: string | undefined,
+    contextUnitId: string | null | undefined,
   ): Promise<Array<{ targetId: string; reaction: string; count: number }>> {
-    if (scopeKey === undefined) {
+    if (contextUnitId === undefined) {
       const rows = await this.database
         .select({
           targetId: reactionSummaries.targetId,
@@ -111,7 +138,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
       .where(
         and(
           inArray(reactionSummaries.targetId, targetIds),
-          eq(reactionSummaries.scopeKey, scopeKey),
+          summaryContextCondition(contextUnitId),
         ),
       );
   }
@@ -119,7 +146,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
   async getUserReactionRows(
     userId: string,
     targetIds: string[],
-    scopeKey: string,
+    contextUnitId: string | null,
   ): Promise<Array<{ targetId: string; reaction: string }>> {
     return await this.database
       .select({ targetId: reactions.targetId, reaction: reactions.reaction })
@@ -128,7 +155,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
         and(
           eq(reactions.userId, userId),
           inArray(reactions.targetId, targetIds),
-          eq(reactions.scopeKey, scopeKey),
+          reactionContextCondition(contextUnitId),
         ),
       );
   }
@@ -143,7 +170,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
           input.targetIds && input.targetIds.length > 0
             ? inArray(reactions.targetId, input.targetIds)
             : undefined,
-          input.scopeKey ? eq(reactions.scopeKey, input.scopeKey) : undefined,
+          reactionContextCondition(input.contextUnitId),
           input.reactions && input.reactions.length > 0
             ? inArray(reactions.reaction, input.reactions)
             : undefined,
@@ -171,7 +198,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
             eq(reactions.userId, input.userId),
             eq(reactions.targetId, input.targetId),
             eq(reactions.reaction, input.reaction),
-            eq(reactions.scopeKey, input.scopeKey),
+            reactionContextCondition(input.contextUnitId),
           ),
         )
         .limit(1);
@@ -221,29 +248,36 @@ export class DrizzleReactionRepository implements ReactionRepository {
           userId: input.userId,
           targetId: input.targetId,
           reaction: input.reaction,
-          scopeKey: input.scopeKey,
+          contextUnitId: input.contextUnitId,
         })
         .returning();
       if (!created) {
         throw new Error("Reaction insert returned no row");
       }
 
-      await tx
-        .insert(reactionSummaries)
-        .values({
+      const summaryWhere = and(
+        eq(reactionSummaries.targetId, input.targetId),
+        eq(reactionSummaries.reaction, input.reaction),
+        summaryContextCondition(input.contextUnitId),
+      );
+      const [summary] = await tx
+        .select({ targetId: reactionSummaries.targetId })
+        .from(reactionSummaries)
+        .where(summaryWhere)
+        .limit(1);
+      if (summary) {
+        await tx
+          .update(reactionSummaries)
+          .set({ count: sql`${reactionSummaries.count} + 1` })
+          .where(summaryWhere);
+      } else {
+        await tx.insert(reactionSummaries).values({
           targetId: input.targetId,
           reaction: input.reaction,
-          scopeKey: input.scopeKey,
+          contextUnitId: input.contextUnitId,
           count: 1,
-        })
-        .onConflictDoUpdate({
-          target: [
-            reactionSummaries.targetId,
-            reactionSummaries.reaction,
-            reactionSummaries.scopeKey,
-          ],
-          set: { count: sql`${reactionSummaries.count} + 1` },
         });
+      }
 
       return { reaction: created, created: true, quotaExceeded: false };
     });
@@ -261,7 +295,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
             eq(reactions.userId, input.userId),
             eq(reactions.targetId, input.targetId),
             eq(reactions.reaction, input.reaction),
-            eq(reactions.scopeKey, input.scopeKey),
+            reactionContextCondition(input.contextUnitId),
           ),
         )
         .limit(1);
@@ -274,7 +308,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
             eq(reactions.userId, input.userId),
             eq(reactions.targetId, input.targetId),
             eq(reactions.reaction, input.reaction),
-            eq(reactions.scopeKey, input.scopeKey),
+            reactionContextCondition(input.contextUnitId),
           ),
         );
 
@@ -285,7 +319,7 @@ export class DrizzleReactionRepository implements ReactionRepository {
           and(
             eq(reactionSummaries.targetId, input.targetId),
             eq(reactionSummaries.reaction, input.reaction),
-            eq(reactionSummaries.scopeKey, input.scopeKey),
+            summaryContextCondition(input.contextUnitId),
           ),
         );
       await tx

@@ -140,6 +140,9 @@ export function ZoneQueryEditor({
               <SelectItem value="post">
                 {t("zone:manage_query_target_post")}
               </SelectItem>
+              <SelectItem value="realm">
+                {t("zone:manage_query_target_realm")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </ManageField>

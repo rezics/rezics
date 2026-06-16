@@ -1,5 +1,3 @@
-import { realmReactionScopeKey } from "@rezics/contract";
-
 export function realmContextPostHref(input: {
   realmId: string;
   postUnitId: string;
@@ -12,8 +10,4 @@ export function realmContextPostEditHref(input: {
   postUnitId: string;
 }): string {
   return `${realmContextPostHref(input)}/edit`;
-}
-
-export function realmContextReactionScopeKey(realmId: string): string {
-  return realmReactionScopeKey(realmId);
 }

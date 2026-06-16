@@ -13,6 +13,7 @@ import {
   Unit,
   UnitTranslation,
 } from "../db/schema";
+import { rebalance } from "../shelf/fractional-index";
 import type { DispatchConfig } from "./dispatch.types";
 
 type DispatchTranslationInput = {
@@ -27,7 +28,7 @@ type DispatchTranslationInput = {
 type DispatchCreditInput = {
   entityId: string;
   role: string;
-  sortOrder?: number;
+  position: string;
 };
 
 type DispatchTranslationMutation = {
@@ -45,7 +46,7 @@ type DispatchCreditMutation = {
   unitId: string;
   entityId: string;
   role: string;
-  sortOrder: number;
+  position: string;
 };
 
 type BookMutation = Partial<
@@ -208,7 +209,8 @@ function readCreditInputs(
   const explicit = data.creditAttributions ?? data.credits;
 
   if (Array.isArray(explicit)) {
-    return explicit.flatMap((item) => {
+    const positions = rebalance(explicit.length);
+    return explicit.flatMap((item, index) => {
       if (!item || typeof item !== "object" || Array.isArray(item)) return [];
       const record = item as Record<string, unknown>;
       if (
@@ -220,8 +222,10 @@ function readCreditInputs(
         {
           entityId: record.entityId,
           role: record.role,
-          sortOrder:
-            typeof record.sortOrder === "number" ? record.sortOrder : undefined,
+          position:
+            typeof record.position === "string"
+              ? record.position
+              : positions[index]!,
         },
       ];
     });
@@ -232,9 +236,10 @@ function readCreditInputs(
   return Object.entries(explicit as Record<string, unknown>).flatMap(
     ([role, entries]) => {
       if (!Array.isArray(entries)) return [];
+      const positions = rebalance(entries.length);
       return entries.flatMap((entry, index) => {
         if (typeof entry === "string") {
-          return [{ entityId: entry, role, sortOrder: index }];
+          return [{ entityId: entry, role, position: positions[index]! }];
         }
         if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
           return [];
@@ -245,8 +250,10 @@ function readCreditInputs(
           {
             entityId: record.entityId,
             role,
-            sortOrder:
-              typeof record.sortOrder === "number" ? record.sortOrder : index,
+            position:
+              typeof record.position === "string"
+                ? record.position
+                : positions[index]!,
           },
         ];
       });
@@ -332,7 +339,7 @@ function createDrizzleDispatchRepository(): DispatchRepository {
             CreditAttribution.entityId,
             CreditAttribution.role,
           ],
-          set: { sortOrder: input.sortOrder },
+          set: { position: input.position },
         });
     },
     async updateBook(unitId, data) {
@@ -474,7 +481,7 @@ async function persistCreditAttributions(
       unitId,
       entityId: credit.entityId,
       role: credit.role,
-      sortOrder: credit.sortOrder ?? 0,
+      position: credit.position,
     });
   }
 }

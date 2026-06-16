@@ -160,7 +160,7 @@ describe("dispatch service - GAME/MEDIA shared metadata", () => {
           coverUrl: "https://example.test/box.jpg",
           releaseDate: "2024-03-15",
           creditAttributions: [
-            { entityId: "studio-1", role: "developer", sortOrder: 2 },
+            { entityId: "studio-1", role: "developer", position: "c" },
           ],
         },
       },
@@ -190,7 +190,7 @@ describe("dispatch service - GAME/MEDIA shared metadata", () => {
       unitId: "game-1",
       entityId: "studio-1",
       role: "developer",
-      sortOrder: 2,
+      position: "c",
     });
   });
 
@@ -209,7 +209,7 @@ describe("dispatch service - GAME/MEDIA shared metadata", () => {
           translations: [{ language: "ja", title: "映画", summary: "概要" }],
           credits: {
             studio: ["studio-1"],
-            actor: [{ entityId: "actor-1", sortOrder: 3 }],
+            actor: [{ entityId: "actor-1", position: "d" }],
           },
         },
       },
@@ -235,13 +235,13 @@ describe("dispatch service - GAME/MEDIA shared metadata", () => {
       unitId: "media-1",
       entityId: "studio-1",
       role: "studio",
-      sortOrder: 0,
+      position: "a",
     });
     expect(repository.upsertCredit).toHaveBeenNthCalledWith(2, {
       unitId: "media-1",
       entityId: "actor-1",
       role: "actor",
-      sortOrder: 3,
+      position: "d",
     });
   });
 });

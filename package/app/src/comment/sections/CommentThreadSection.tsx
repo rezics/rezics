@@ -89,8 +89,8 @@ interface CommentThreadSectionProps {
   focusPostUnitId?: string;
   rootAuthorUserId?: string | null;
   highlightFocusedPost?: boolean;
-  summaryScopeKey?: string | null;
-  reactionScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  reactionContextUnitId?: string | null;
   /**
    * When supplied, overrides the built-in "mount an inline composer" behaviour
    * (used by surfaces that need to navigate or otherwise intercept replies).
@@ -187,8 +187,8 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
   focusPostUnitId,
   rootAuthorUserId,
   highlightFocusedPost,
-  summaryScopeKey,
-  reactionScopeKey,
+  summaryContextUnitId,
+  reactionContextUnitId,
   onReply,
 }) => {
   const { t } = useTranslation(["common", "community"]);
@@ -503,8 +503,8 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
         focusPostUnitId={focusPostUnitId}
         highlightFocusedPost={highlightFocusedPost}
         onReply={onReply}
-        summaryScopeKey={summaryScopeKey}
-        reactionScopeKey={reactionScopeKey}
+        summaryContextUnitId={summaryContextUnitId}
+        reactionContextUnitId={reactionContextUnitId}
         renderOverflowContent={renderOverflowContent}
         renderContextBadge={renderContextBadge}
       />

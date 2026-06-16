@@ -73,6 +73,7 @@ describe("SearchClient", () => {
     ["polls", "pollIndex", "initPollIndex"],
     [SHELF_ITEM_INDEX_NAME, "shelfItemIndex", "initShelfItemIndex"],
     ["realms", "realmIndex", "initRealmIndex"],
+    ["zones", "zoneIndex", "initZoneIndex"],
     ["entities", "entityIndex", "initEntityIndex"],
     [PROGRESS_INDEX_NAME, "progressIndex", "initProgressIndex"],
   ] as const)("initializes %s from the expected schema registry", async (uid, indexProperty, initMethod) => {
@@ -118,6 +119,7 @@ describe("SearchClient", () => {
       "polls",
       "shelf_items",
       "realms",
+      "zones",
       "entities",
       "user_unit_progress",
     ] satisfies ExpectedMeiliIndexUid[]);

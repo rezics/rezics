@@ -8,8 +8,10 @@ const SEARCH_CATEGORIES: SearchCategory[] = [
   "excerpts",
   "remarks",
   "posts",
+  "comments",
   "shelves",
   "realms",
+  "zones",
   "users",
   "entities",
 ];

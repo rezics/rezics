@@ -120,7 +120,7 @@ const homePageStub = {
   id: "page-home",
   zoneUnitId: "zone-1",
   slug: "home",
-  position: 0,
+  position: "a",
   config: zonePageStub,
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),

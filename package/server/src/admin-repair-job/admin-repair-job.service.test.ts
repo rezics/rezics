@@ -114,6 +114,7 @@ describe("adminRepairJobService", () => {
       "poll",
       "shelf-item",
       "realm",
+      "zone",
       "entity",
       "progress",
     ]);
@@ -128,6 +129,7 @@ describe("adminRepairJobService", () => {
       "job-8",
       "job-9",
       "job-10",
+      "job-11",
     ]);
   });
 
@@ -274,6 +276,56 @@ describe("adminRepairJobService", () => {
         kind: "history.outbox.ingest",
         status: "coalesced",
         idempotencyKey: "history.outbox.ingest:outbox-2",
+      },
+    ]);
+  });
+
+  test("queues batch history outbox recovery when no exact targets are provided", async () => {
+    const enqueued: any[] = [];
+    const { createAdminRepairJobService } = await import(
+      "./admin-repair-job.service"
+    );
+    const service = createAdminRepairJobService({
+      jobProducer: {
+        enqueue: mock(async (command: any): Promise<EnqueueResult> => {
+          enqueued.push(command);
+          return {
+            kind: command.kind,
+            idempotencyKey: command.idempotencyKey,
+            lane: command.lane,
+            status: "created",
+            jobId: "job-batch",
+          };
+        }),
+      },
+      database: historyOutboxDatabase(),
+      fetchImpl: fetch,
+      auditService: auditService(),
+    });
+
+    const job = await service.start({
+      scope: "history-outbox-replay",
+      reason: "recover pending history outbox rows",
+    });
+
+    expect(enqueued.map((command) => command.kind)).toEqual([
+      "history.outbox.ingestBatch",
+    ]);
+    expect(enqueued[0]).toMatchObject({
+      lane: "history.ingest",
+      payload: {},
+      source: {
+        type: "server",
+        service: "admin-repair-job",
+      },
+    });
+    expect(job.queuedOperations).toEqual([
+      {
+        jobId: "job-batch",
+        lane: "history.ingest",
+        kind: "history.outbox.ingestBatch",
+        status: "created",
+        idempotencyKey: "history.outbox.ingestBatch",
       },
     ]);
   });

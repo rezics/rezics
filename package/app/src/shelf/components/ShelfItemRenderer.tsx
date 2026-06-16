@@ -161,12 +161,7 @@ function renderUnit(
       const comment = data as CommentDTO | undefined;
       if (!comment) return <ShelfItemCard unit={unit} />;
       return (
-        <CommentReply
-          post={comment}
-          showAvatar={viewMode !== "masonry"}
-          summaryScopeKey={`shelf-item:${unit.itemId}`}
-          reactionScopeKey={`shelf-item:${unit.itemId}`}
-        />
+        <CommentReply post={comment} showAvatar={viewMode !== "masonry"} />
       );
     }
     default:

@@ -13,11 +13,13 @@ export type ReplyActionProps = {
    */
   size?: EngagementSize;
   replyCount?: number;
+  label?: string;
   mode?: "count" | "label";
   onInvoke?: () => void;
 };
 
 export const ReplyAction: React.FC<ReplyActionProps> = ({
+  label: labelProp,
   size: sizeProp,
   replyCount = 0,
   mode = "count",
@@ -34,7 +36,9 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
   };
 
   const showCount = mode === "count" && replyCount > 0;
-  const label = showCount ? String(replyCount) : t("common:reply");
+  const label = showCount
+    ? String(replyCount)
+    : (labelProp ?? t("common:reply"));
 
   return (
     <Button

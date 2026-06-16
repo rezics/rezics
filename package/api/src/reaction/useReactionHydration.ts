@@ -24,8 +24,8 @@ import {
 export type UseReactionHydrationOptions = {
   /** Override the default auth-derived enabled state for the my-reaction batch. 覆盖 my-reaction 批次默认由认证状态推导的 enabled 值。 */
   authenticated?: boolean;
-  summaryScopeKey?: string | null;
-  userScopeKey?: string | null;
+  summaryContextUnitId?: string | null;
+  userContextUnitId?: string | null;
 };
 
 export type UseReactionHydrationReturn = {
@@ -41,12 +41,12 @@ export function useReactionHydration(
   const isAuthenticated = options?.authenticated ?? isAuthenticatedFromStore;
 
   const summaryQuery = useBatchReactionSummary(targetIds, {
-    scopeKey: options?.summaryScopeKey,
+    contextUnitId: options?.summaryContextUnitId ?? null,
   });
   const shareSummaryQuery = useBatchShareSummary(targetIds);
   const myQuery = useBatchUserReactions(targetIds, {
     enabled: isAuthenticated,
-    scopeKey: options?.userScopeKey,
+    contextUnitId: options?.userContextUnitId ?? null,
   });
 
   const hasIds = targetIds.length > 0;

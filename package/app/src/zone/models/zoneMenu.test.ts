@@ -10,6 +10,7 @@ import {
   zoneLinkHref,
   zoneLinkLabel,
   zonePageHref,
+  zoneSectionItemHref,
   zoneSectionTitleKey,
   zoneSectionTitleText,
 } from "./zoneMenu";
@@ -29,6 +30,12 @@ const refUnits: Record<string, ZoneRefUnitSummary> = {
     title: "Review",
   },
   "book-1": { unitId: "book-1", type: "BOOK", title: "とある魔術の禁書目録" },
+  "zone-1": {
+    unitId: "zone-1",
+    type: "ZONE",
+    slug: "book",
+    title: "Books",
+  },
   "realm-1": {
     unitId: "realm-1",
     type: "REALM",
@@ -39,9 +46,9 @@ const refUnits: Record<string, ZoneRefUnitSummary> = {
 };
 
 const pages = [
-  { id: "home", slug: "home", position: 0 },
-  { id: "search", slug: "search", position: 1 },
-  { id: "feed", slug: "feed", position: 2 },
+  { id: "home", slug: "home", position: "a" },
+  { id: "search", slug: "search", position: "b" },
+  { id: "feed", slug: "feed", position: "c" },
 ];
 
 const ctx = { zoneSlug: "toaru", pages, refUnits };
@@ -56,7 +63,7 @@ describe("zoneDetailKindForRef", () => {
 });
 
 describe("zoneLinkHref", () => {
-  it("builds zone-framed unit detail hrefs", () => {
+  it("keeps posts in the zone frame and routes catalog units canonically", () => {
     expect(zoneLinkHref({ kind: "unit", unitId: "wiki-1" }, ctx)).toBe(
       "/z/toaru/wiki/wiki-1",
     );
@@ -64,8 +71,32 @@ describe("zoneLinkHref", () => {
       "/z/toaru/post/post-1",
     );
     expect(zoneLinkHref({ kind: "unit", unitId: "book-1" }, ctx)).toBe(
-      "/z/toaru/unit/book-1",
+      "/book/book-1",
     );
+    expect(zoneLinkHref({ kind: "unit", unitId: "realm-1" }, ctx)).toBe(
+      "/r/toaru",
+    );
+    expect(zoneLinkHref({ kind: "unit", unitId: "zone-1" }, ctx)).toBe(
+      "/z/book",
+    );
+  });
+
+  it("builds canonical hrefs for hydrated section items", () => {
+    expect(zoneSectionItemHref(refUnits["wiki-1"]!, "toaru")).toBe(
+      "/z/toaru/wiki/wiki-1",
+    );
+    expect(zoneSectionItemHref(refUnits["post-1"]!, "toaru")).toBe(
+      "/z/toaru/post/post-1",
+    );
+    expect(zoneSectionItemHref(refUnits["book-1"]!, "toaru")).toBe(
+      "/book/book-1",
+    );
+    expect(
+      zoneSectionItemHref(
+        { unitId: "poll-1", type: "POLL", title: "Vote" },
+        "toaru",
+      ),
+    ).toBe("/poll/poll-1");
   });
 
   it("builds zone page hrefs from page summaries", () => {

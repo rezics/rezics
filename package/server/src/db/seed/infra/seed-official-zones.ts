@@ -9,6 +9,7 @@ import {
   type ZoneTheme,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
+import { rebalance } from "../../../shelf/fractional-index";
 import type { ServerDb } from "../../client";
 import {
   Unit,
@@ -26,6 +27,10 @@ interface OfficialZoneTranslation {
   description: string;
 }
 
+type OfficialLabelTranslation = {
+  title: string;
+};
+
 export interface OfficialZoneDefinition {
   key: "book" | "realms" | "zones" | "popular";
   slug: string;
@@ -40,7 +45,7 @@ export type OfficialZoneConfig = {
   pages: Array<{
     id: string;
     slug: string;
-    position: number;
+    position: string;
     config: ZonePageConfig;
   }>;
   homePageId: string;
@@ -71,6 +76,103 @@ const OFFICIAL_PAGE_IDS = {
   },
 } as const;
 
+export const OFFICIAL_SECTION_LABELS = {
+  bookLatest: {
+    id: "00000000-0000-7000-8000-000000000501",
+    translations: {
+      en: { title: "Latest Books" },
+      "zh-hant": { title: "最新書籍" },
+      ja: { title: "新着書籍" },
+    },
+  },
+  bookPopular: {
+    id: "00000000-0000-7000-8000-000000000502",
+    translations: {
+      en: { title: "Popular Books" },
+      "zh-hant": { title: "熱門書籍" },
+      ja: { title: "人気の本" },
+    },
+  },
+  bookReviews: {
+    id: "00000000-0000-7000-8000-000000000503",
+    translations: {
+      en: { title: "Recent Reviews" },
+      "zh-hant": { title: "最新書評" },
+      ja: { title: "最新レビュー" },
+    },
+  },
+  realmsLatest: {
+    id: "00000000-0000-7000-8000-000000000504",
+    translations: {
+      en: { title: "New Realms" },
+      "zh-hant": { title: "最新 Realm" },
+      ja: { title: "新着 Realm" },
+    },
+  },
+  realmsBrowse: {
+    id: "00000000-0000-7000-8000-000000000505",
+    translations: {
+      en: { title: "Featured Realms" },
+      "zh-hant": { title: "精選 Realm" },
+      ja: { title: "注目の Realm" },
+    },
+  },
+  realmsUpdates: {
+    id: "00000000-0000-7000-8000-000000000506",
+    translations: {
+      en: { title: "Realm Updates" },
+      "zh-hant": { title: "Realm 動態" },
+      ja: { title: "Realm 更新" },
+    },
+  },
+  zonesLatest: {
+    id: "00000000-0000-7000-8000-000000000507",
+    translations: {
+      en: { title: "New Zones" },
+      "zh-hant": { title: "最新專區" },
+      ja: { title: "新着ゾーン" },
+    },
+  },
+  zonesAll: {
+    id: "00000000-0000-7000-8000-000000000508",
+    translations: {
+      en: { title: "All Zones" },
+      "zh-hant": { title: "所有專區" },
+      ja: { title: "すべてのゾーン" },
+    },
+  },
+  popularNow: {
+    id: "00000000-0000-7000-8000-000000000509",
+    translations: {
+      en: { title: "Popular Now" },
+      "zh-hant": { title: "此刻熱門" },
+      ja: { title: "いま人気" },
+    },
+  },
+  popularLatest: {
+    id: "00000000-0000-7000-8000-000000000510",
+    translations: {
+      en: { title: "Latest Content" },
+      "zh-hant": { title: "最新內容" },
+      ja: { title: "最新コンテンツ" },
+    },
+  },
+  popularFeed: {
+    id: "00000000-0000-7000-8000-000000000511",
+    translations: {
+      en: { title: "Community Activity" },
+      "zh-hant": { title: "社群動態" },
+      ja: { title: "コミュニティ活動" },
+    },
+  },
+} satisfies Record<
+  string,
+  {
+    id: string;
+    translations: Record<string, OfficialLabelTranslation>;
+  }
+>;
+
 /**
  * Seeds bypass the zone service write path, so every shell/page envelope
  * written here must already satisfy its contract schema: the read path throws
@@ -86,6 +188,7 @@ function officialConfig(input: {
   pageIds: { home: string; search: string; feed: string };
 }): OfficialZoneConfig {
   const pageIds = input.pageIds;
+  const pagePositions = rebalance(3);
   return {
     boundary: {
       schema: "rezics/zone-boundary",
@@ -119,7 +222,7 @@ function officialConfig(input: {
       {
         id: pageIds.home,
         slug: "home",
-        position: 0,
+        position: pagePositions[0]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -129,13 +232,13 @@ function officialConfig(input: {
       {
         id: pageIds.search,
         slug: "search",
-        position: 1,
+        position: pagePositions[1]!,
         config: { schema: "rezics/zone-page", version: 1, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
-        position: 2,
+        position: pagePositions[2]!,
         config: {
           schema: "rezics/zone-page",
           version: 1,
@@ -161,6 +264,7 @@ const bookConfig = officialConfig({
     {
       id: "latest-books",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookLatest.id,
       display: "covers",
       limit: 24,
       loadMore: true,
@@ -173,6 +277,7 @@ const bookConfig = officialConfig({
     {
       id: "popular-books",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
       display: "grid",
       limit: 24,
       loadMore: true,
@@ -185,6 +290,7 @@ const bookConfig = officialConfig({
     {
       id: "book-reviews",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookReviews.id,
       display: "list",
       limit: 20,
       loadMore: true,
@@ -207,11 +313,12 @@ const realmsConfig = officialConfig({
     {
       id: "latest-realms",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsLatest.id,
       display: "carousel",
       limit: 24,
       loadMore: true,
       query: {
-        target: "unit",
+        target: "realm",
         types: ["REALM"],
         sort: { field: "createdAt", direction: "desc" },
       },
@@ -219,16 +326,29 @@ const realmsConfig = officialConfig({
     {
       id: "browse-realms",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsBrowse.id,
       display: "tiles",
       limit: 24,
       loadMore: true,
       query: {
-        target: "unit",
+        target: "realm",
         types: ["REALM"],
-        sort: { field: "qualityScore", direction: "desc" },
+        sort: { field: "memberCount", direction: "desc" },
       },
     },
-    { id: "realm-updates", kind: "feed", feedKind: "updates", limit: 20 },
+    {
+      id: "realm-updates",
+      kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsUpdates.id,
+      display: "list",
+      limit: 20,
+      loadMore: true,
+      query: {
+        target: "realm",
+        types: ["REALM"],
+        sort: { field: "updatedAt", direction: "desc" },
+      },
+    },
   ],
   accent: "#0f766e",
   density: "compact",
@@ -242,11 +362,12 @@ const zonesConfig = officialConfig({
     {
       id: "latest-zones",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesLatest.id,
       display: "carousel",
       limit: 24,
       loadMore: true,
       query: {
-        target: "unit",
+        target: "zone",
         types: ["ZONE"],
         sort: { field: "createdAt", direction: "desc" },
       },
@@ -254,11 +375,12 @@ const zonesConfig = officialConfig({
     {
       id: "all-zones",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
       display: "grid",
       limit: 24,
       loadMore: true,
       query: {
-        target: "unit",
+        target: "zone",
         types: ["ZONE"],
         sort: { field: "updatedAt", direction: "desc" },
       },
@@ -276,6 +398,7 @@ const popularConfig = officialConfig({
     {
       id: "popular-now",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.popularNow.id,
       display: "grid",
       limit: 30,
       loadMore: true,
@@ -287,6 +410,7 @@ const popularConfig = officialConfig({
     {
       id: "latest-content",
       kind: "query",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.popularLatest.id,
       display: "list",
       limit: 30,
       loadMore: true,
@@ -295,7 +419,13 @@ const popularConfig = officialConfig({
         sort: { field: "publishedAt", direction: "desc" },
       },
     },
-    { id: "popular-feed", kind: "feed", feedKind: "all", limit: 20 },
+    {
+      id: "popular-feed",
+      kind: "feed",
+      titleLabelUnitId: OFFICIAL_SECTION_LABELS.popularFeed.id,
+      feedKind: "all",
+      limit: 20,
+    },
   ],
   accent: "#c2410c",
   density: "comfortable",
@@ -475,15 +605,83 @@ async function upsertTranslations(
         unitId,
         language,
         isPrimary: language === DEFAULT_LANGUAGE,
-        sortOrder: index,
+        position: rebalance(translations.length)[index]!,
       })
       .onConflictDoUpdate({
         target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
         set: {
           isPrimary: language === DEFAULT_LANGUAGE,
-          sortOrder: index,
+          position: rebalance(translations.length)[index]!,
         },
       });
+  }
+}
+
+async function upsertOfficialSectionLabels(
+  db: OfficialZoneSeedDb,
+  slugScopes: SlugScopesMap,
+) {
+  for (const label of Object.values(OFFICIAL_SECTION_LABELS)) {
+    const languages = Object.keys(label.translations);
+    await db
+      .insert(Unit)
+      .values({
+        id: label.id,
+        type: "LABEL",
+        slug: null,
+        slugScope: slugScopes.zone,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        defaultLanguage: DEFAULT_LANGUAGE,
+        isLanguageNeutral: true,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: Unit.id,
+        set: {
+          type: "LABEL",
+          slug: null,
+          slugScope: slugScopes.zone,
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          defaultLanguage: DEFAULT_LANGUAGE,
+          isLanguageNeutral: true,
+          updatedAt: new Date(),
+        },
+      });
+    for (const [index, language] of languages.entries()) {
+      const translation = label.translations[language]!;
+      await db
+        .insert(UnitTranslation)
+        .values({
+          unitId: label.id,
+          language,
+          title: translation.title,
+          updatedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          target: [UnitTranslation.unitId, UnitTranslation.language],
+          set: {
+            title: translation.title,
+            updatedAt: new Date(),
+          },
+        });
+      await db
+        .insert(UnitSupportLanguage)
+        .values({
+          unitId: label.id,
+          language,
+          isPrimary: language === DEFAULT_LANGUAGE,
+          position: rebalance(translations.length)[index]!,
+        })
+        .onConflictDoUpdate({
+          target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
+          set: {
+            isPrimary: language === DEFAULT_LANGUAGE,
+            position: rebalance(translations.length)[index]!,
+          },
+        });
+    }
   }
 }
 
@@ -541,6 +739,7 @@ export async function seedOfficialZones(
   slugScopes: SlugScopesMap,
 ): Promise<Record<OfficialZoneDefinition["key"], string>> {
   console.log("[Seed] Seeding official zones...");
+  await upsertOfficialSectionLabels(db, slugScopes);
   const result = {} as Record<OfficialZoneDefinition["key"], string>;
 
   for (const definition of OFFICIAL_ZONE_DEFINITIONS) {

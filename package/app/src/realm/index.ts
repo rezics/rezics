@@ -12,6 +12,7 @@ export {
   RealmFeedSortSwitcher,
 } from "./sections/RealmFeedSortSwitcher";
 export { RealmCard } from "./components/RealmCard";
+export { JoinButton } from "./components/JoinButton";
 export { RealmPostTagPicker } from "./components/RealmPostTagPicker";
 export {
   type RealmCreateMode,

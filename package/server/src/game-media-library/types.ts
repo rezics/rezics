@@ -16,7 +16,7 @@ export const gameLibraryInclude = {
       translations: true,
       subjectAttributions: {
         where: { role: "available_on" },
-        orderBy: { sortOrder: "asc" as const },
+        orderBy: { position: "asc" as const },
       },
       unitTags: {
         include: {

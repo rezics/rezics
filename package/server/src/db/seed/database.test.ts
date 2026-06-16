@@ -58,10 +58,10 @@ describe("resetDatabase", () => {
       index("ContentStructure"),
     );
     expect(index("CreditAttributionEvidence")).toBeLessThan(
-      index("UnitExternalRef"),
+      index("UnitExternalLink"),
     );
-    expect(index("UnitExternalRef")).toBeLessThan(index("SourceSite"));
-    expect(index("SourceSite")).toBeLessThan(index("Entity"));
+    expect(index("UnitExternalLink")).toBeLessThan(index("Unit"));
+    expect(index("UnitExternalLink")).toBeLessThan(index("Entity"));
     expect(index("CommentPromotion")).toBeLessThan(index("Comment"));
     expect(index("Comment")).toBeLessThan(index("Unit"));
     expect(index("Unit")).toBeLessThan(index("User"));

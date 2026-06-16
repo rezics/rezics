@@ -6,7 +6,6 @@ export const adminRepairJobScopeSchema = t.Union([
   t.Literal("history-outbox-replay"),
   t.Literal("slug"),
   t.Literal("attribution"),
-  t.Literal("source-site"),
   t.Literal("counters"),
 ]);
 

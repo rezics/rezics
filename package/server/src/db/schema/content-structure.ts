@@ -74,12 +74,12 @@ export const ContentStructureAnchor = pgTable(
     path: jsonData().notNull(),
     depth: integer().notNull(),
     /**
-     * Projected from ContentStructureNode Fractional Indexing values, not an
+     * Fractional Indexing. Projected from ContentStructureNode values, not an
      * independent placement state.
-     * 由 ContentStructureNode 的 Fractional Indexing 值投影而来，并非独立的排列状态。
+     * Fractional Indexing。由 ContentStructureNode 的值投影而来，并非独立的排列状态。
      */
     position: text().notNull(),
-    positionPath: text().notNull(),
+    positionPath: text().notNull(), // Fractional Indexing
     titlePath: jsonData().notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

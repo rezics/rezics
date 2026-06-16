@@ -134,7 +134,7 @@ export function mapBaseBookToDTO(
         entityId: a.entityId,
         name,
         role: a.role,
-        sortOrder: a.sortOrder,
+        position: a.position,
         entity: {
           unitId: innerEntity.unitId ?? a.entityId,
           kind: innerEntity.kind ?? undefined,

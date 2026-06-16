@@ -4,6 +4,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
+import { rebalance } from "../../shelf/fractional-index.js";
 import { Media, Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
 import {
   type FactoryCreditAttributionInsert,
@@ -97,25 +98,29 @@ export async function seedMedia(
             unitId: unit.id,
             language: t.language,
             isPrimary: i === 0,
-            sortOrder: i,
+            position: rebalance(translations.length)[i]!,
           })),
         ),
       );
 
-      for (const [i, p] of pickN(people, randomInt(1, 4)).entries()) {
+      const pickedPeople = pickN(people, randomInt(1, 4));
+      const peoplePositions = rebalance(pickedPeople.length);
+      for (const [i, p] of pickedPeople.entries()) {
         allCreditAttributions.push({
           unitId: unit.id,
           entityId: p.unitId,
           role: faker.helpers.arrayElement(MEDIA_PERSON_ROLES),
-          sortOrder: i,
+          position: peoplePositions[i]!,
         });
       }
-      for (const [i, o] of pickN(organizations, randomInt(1, 2)).entries()) {
+      const pickedOrganizations = pickN(organizations, randomInt(1, 2));
+      const organizationPositions = rebalance(pickedOrganizations.length);
+      for (const [i, o] of pickedOrganizations.entries()) {
         allCreditAttributions.push({
           unitId: unit.id,
           entityId: o.unitId,
           role: faker.helpers.arrayElement(MEDIA_ORG_ROLES),
-          sortOrder: i,
+          position: organizationPositions[i]!,
         });
       }
       for (const t of pickN(tags, randomInt(1, 5))) {

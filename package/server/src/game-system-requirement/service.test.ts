@@ -11,7 +11,7 @@ function requirementRow(overrides: Record<string, unknown> = {}) {
     platformEntityId: "platform-windows",
     tier: "minimum",
     language: "en",
-    sourceRefId: "source-ref-1",
+    sourceExternalLinkId: "source-link-1",
     hardware: { memory: "8 GB" },
     rawText: "Requires a 64-bit processor and operating system.",
     createdAt: now,
@@ -37,9 +37,12 @@ function freshRepository() {
           eligibleSubjectRoles: ["available_on"],
         };
       },
-      async findSourceRef(sourceRefId: string) {
-        calls.push({ method: "findSourceRef", input: sourceRefId });
-        return { id: sourceRefId, unitId: "game-1" };
+      async findSourceExternalLink(sourceExternalLinkId: string) {
+        calls.push({
+          method: "findSourceExternalLink",
+          input: sourceExternalLinkId,
+        });
+        return { id: sourceExternalLinkId, unitId: "game-1" };
       },
       async list(filters: unknown) {
         calls.push({ method: "list", input: filters });
@@ -78,7 +81,7 @@ describe("GameSystemRequirementService", () => {
       platformEntityId: "platform-windows",
       tier: "minimum",
       language: "en",
-      sourceRefId: "source-ref-1",
+      sourceExternalLinkId: "source-link-1",
     } as const;
     const rows = await service.list(filters);
 
@@ -86,7 +89,7 @@ describe("GameSystemRequirementService", () => {
     expect(calls).toContainEqual({ method: "list", input: filters });
   });
 
-  test("creates a requirement only for valid game, platform, and source refs", async () => {
+  test("creates a requirement only for valid game, platform, and source external links", async () => {
     const { repository, calls } = freshRepository();
     const service = new GameSystemRequirementService(repository);
 
@@ -95,7 +98,7 @@ describe("GameSystemRequirementService", () => {
       platformEntityId: "platform-windows",
       tier: "recommended",
       language: "en",
-      sourceRefId: "source-ref-1",
+      sourceExternalLinkId: "source-link-1",
       hardware: { memory: "16 GB" },
       rawText: "Recommended specs",
     } as const;
@@ -107,8 +110,8 @@ describe("GameSystemRequirementService", () => {
       input: "platform-windows",
     });
     expect(calls).toContainEqual({
-      method: "findSourceRef",
-      input: "source-ref-1",
+      method: "findSourceExternalLink",
+      input: "source-link-1",
     });
     expect(calls).toContainEqual({ method: "create", input });
   });
@@ -131,10 +134,12 @@ describe("GameSystemRequirementService", () => {
     ).rejects.toThrow(/game_platform/);
   });
 
-  test("rejects requirement source refs for another unit", async () => {
+  test("rejects requirement source external links for another unit", async () => {
     const { repository } = freshRepository();
-    repository.findSourceRef = async (sourceRefId: string) => ({
-      id: sourceRefId,
+    repository.findSourceExternalLink = async (
+      sourceExternalLinkId: string,
+    ) => ({
+      id: sourceExternalLinkId,
       unitId: "other-game",
     });
     const service = new GameSystemRequirementService(repository);
@@ -144,7 +149,7 @@ describe("GameSystemRequirementService", () => {
         gameUnitId: "game-1",
         platformEntityId: "platform-windows",
         tier: "minimum",
-        sourceRefId: "source-ref-1",
+        sourceExternalLinkId: "source-link-1",
         hardware: {},
       }),
     ).rejects.toThrow(/same game Unit/);
@@ -159,7 +164,7 @@ describe("GameSystemRequirementService", () => {
       platformEntityId: "platform-windows",
       tier: "minimum",
       language: "en",
-      sourceRefId: "source-ref-1",
+      sourceExternalLinkId: "source-link-1",
       hardware: { memory: "8 GB" },
       rawText: "Requires a 64-bit processor and operating system.",
       createdAt: now,

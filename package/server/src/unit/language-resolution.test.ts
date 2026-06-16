@@ -39,8 +39,8 @@ function createRepository(): UnitLanguageRepository {
     getAvailabilityUnit: mock(async () => ({
       id: "post-1",
       supportLanguages: [
-        { unitId: "post-1", language: "ja", isPrimary: true, sortOrder: 0 },
-        { unitId: "post-1", language: "en", isPrimary: false, sortOrder: 1 },
+        { unitId: "post-1", language: "ja", isPrimary: true, position: "a" },
+        { unitId: "post-1", language: "en", isPrimary: false, position: "b" },
       ],
       translations: [{ language: "en" }],
       contentTranslations: [{ language: "en" }],
@@ -48,8 +48,8 @@ function createRepository(): UnitLanguageRepository {
     getContentUnit: mock(async () => ({
       id: "post-1",
       supportLanguages: [
-        { unitId: "post-1", language: "ja", isPrimary: true, sortOrder: 0 },
-        { unitId: "post-1", language: "en", isPrimary: false, sortOrder: 1 },
+        { unitId: "post-1", language: "ja", isPrimary: true, position: "a" },
+        { unitId: "post-1", language: "en", isPrimary: false, position: "b" },
       ],
       translations: [
         {

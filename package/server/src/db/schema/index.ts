@@ -125,8 +125,6 @@ export type ShelfItemRow = typeof schema.ShelfItem.$inferSelect;
 export type NewShelfItemRow = typeof schema.ShelfItem.$inferInsert;
 export type SlugScopeRow = typeof schema.SlugScope.$inferSelect;
 export type NewSlugScopeRow = typeof schema.SlugScope.$inferInsert;
-export type SourceSiteRow = typeof schema.SourceSite.$inferSelect;
-export type NewSourceSiteRow = typeof schema.SourceSite.$inferInsert;
 export type StaffAuditLogRow = typeof schema.StaffAuditLog.$inferSelect;
 export type NewStaffAuditLogRow = typeof schema.StaffAuditLog.$inferInsert;
 export type StaffGrantRow = typeof schema.StaffGrant.$inferSelect;
@@ -152,8 +150,9 @@ export type NewUnitAliasVoteRow = typeof schema.UnitAliasVote.$inferInsert;
 export type UnitCollaboratorRow = typeof schema.UnitCollaborator.$inferSelect;
 export type NewUnitCollaboratorRow =
   typeof schema.UnitCollaborator.$inferInsert;
-export type UnitExternalRefRow = typeof schema.UnitExternalRef.$inferSelect;
-export type NewUnitExternalRefRow = typeof schema.UnitExternalRef.$inferInsert;
+export type UnitExternalLinkRow = typeof schema.UnitExternalLink.$inferSelect;
+export type NewUnitExternalLinkRow =
+  typeof schema.UnitExternalLink.$inferInsert;
 export type UnitFieldLockRow = typeof schema.UnitFieldLock.$inferSelect;
 export type NewUnitFieldLockRow = typeof schema.UnitFieldLock.$inferInsert;
 export type UnitHistoryClockRow = typeof schema.UnitHistoryClock.$inferSelect;
@@ -212,7 +211,6 @@ export * from "./realm";
 export * from "./score";
 export * from "./series";
 export * from "./shelf";
-export * from "./source";
 export * from "./tagging";
 export * from "./translation";
 export * from "./unit";

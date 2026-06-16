@@ -20,9 +20,17 @@ import type {
   ShareSummaryResponse,
 } from "./reaction.types";
 
-type ReactionScopeQuery = {
-  scopeKey?: string | null;
+type ReactionContextQuery = {
+  contextUnitId?: string | null;
 };
+
+function appendContextQuery(
+  qs: URLSearchParams,
+  contextUnitId: string | null | undefined,
+) {
+  if (contextUnitId === undefined) return;
+  qs.set("contextUnitId", contextUnitId ?? "");
+}
 
 function getReactionBaseUrl(): string {
   return getApiConfig().reactionServiceUrl;
@@ -63,11 +71,11 @@ export const reactionApi = {
    */
   summary: async (
     targetIds: string[],
-    options: ReactionScopeQuery = {},
+    options: ReactionContextQuery = { contextUnitId: null },
   ): Promise<ReactionSummaryResponse> => {
     const qs = new URLSearchParams();
     for (const id of targetIds) qs.append("targetIds", id);
-    if (options.scopeKey) qs.set("scopeKey", options.scopeKey);
+    appendContextQuery(qs, options.contextUnitId);
     const queryString = qs.toString();
     return reactionFetch<ReactionSummaryResponse>(
       `/reaction/summary${queryString ? `?${queryString}` : ""}`,
@@ -88,11 +96,11 @@ export const reactionApi = {
    */
   my: async (
     targetIds: string[],
-    options: ReactionScopeQuery = {},
+    options: ReactionContextQuery = { contextUnitId: null },
   ): Promise<ReactionMyResponse> => {
     const qs = new URLSearchParams();
     for (const id of targetIds) qs.append("targetIds", id);
-    if (options.scopeKey) qs.set("scopeKey", options.scopeKey);
+    appendContextQuery(qs, options.contextUnitId);
     const queryString = qs.toString();
     return reactionFetch<ReactionMyResponse>(
       `/reaction/my${queryString ? `?${queryString}` : ""}`,
@@ -126,7 +134,7 @@ export const reactionApi = {
       targetId: query.targetId,
       reaction: query.reaction,
     });
-    if (query.scopeKey) qs.set("scopeKey", query.scopeKey);
+    appendContextQuery(qs, query.contextUnitId ?? null);
     return apiFetch<{ deleted: boolean }>(`/reaction?${qs.toString()}`, {
       method: "DELETE",
     });
@@ -142,7 +150,7 @@ export const reactionApi = {
   ): Promise<ReactionHistoryPage<ReactionHistoryGivenItem>> => {
     const qs = new URLSearchParams();
     if (query.reactions) qs.set("reactions", query.reactions);
-    if (query.scopeKey) qs.set("scopeKey", query.scopeKey);
+    appendContextQuery(qs, query.contextUnitId);
     if (query.cursor) qs.set("cursor", query.cursor);
     if (query.limit !== undefined) qs.set("limit", String(query.limit));
     const search = qs.toString();

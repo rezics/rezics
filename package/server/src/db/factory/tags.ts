@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import { rebalance } from "../../shelf/fractional-index.js";
 import { Unit, UnitSupportLanguage, UnitTranslation } from "../schema";
 import { generateTranslations } from "./generators.js";
 import { UnitStatus, UnitType } from "./storage-values.js";
@@ -72,7 +73,7 @@ export async function seedTags(
           unitId: t.id,
           language: tr.language,
           isPrimary: i === 0,
-          sortOrder: i,
+          position: rebalance(t.translations.length)[i]!,
         })),
       ),
     ),

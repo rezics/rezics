@@ -62,7 +62,12 @@ export function unitRelations(r: ServerRelationsBuilder) {
       }),
       UnitAliases: r.many.UnitAlias(),
       UnitCollaborators: r.many.UnitCollaborator(),
-      SourceSites: r.many.SourceSite(),
+      UnitExternalLinks: r.many.UnitExternalLink({
+        alias: "UnitExternalLink_unitId_Unit_id",
+      }),
+      UnitExternalLinks_asLabel: r.many.UnitExternalLink({
+        alias: "UnitExternalLink_labelUnitId_Unit_id",
+      }),
       Users_via_UnitFieldLock: r.many.User({
         alias: "User_unitId_Unit_id_via_UnitFieldLock",
       }),

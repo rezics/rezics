@@ -53,7 +53,9 @@ import {
   syncSingleRealm,
   syncSingleShelfItem,
   syncSingleUser,
+  syncSingleZone,
   syncUserSegment,
+  syncZoneSegment,
 } from "@rezics/search/sync";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
@@ -378,6 +380,20 @@ export function createSearchHandlers(client: SearchClient) {
       runFullSyncSegment(command, context, {
         deleteAll: () => client.deleteAllRealms(),
         syncSegment: (options) => syncRealmSegment(client, options),
+      }),
+
+    [SEARCH_COMMAND_KINDS.zoneSync]: async (command) =>
+      "unitId" in command.payload
+        ? syncSingleZone(client, command.payload.unitId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.zoneDelete]: async (command) =>
+      "unitId" in command.payload
+        ? client.deleteZones([command.payload.unitId])
+        : undefined,
+    [SEARCH_COMMAND_KINDS.zoneFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllZones(),
+        syncSegment: (options) => syncZoneSegment(client, options),
       }),
 
     [SEARCH_COMMAND_KINDS.entitySync]: async (command) =>

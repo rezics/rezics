@@ -1,5 +1,4 @@
 import { mainMarkdownSource } from "@rezics/contract";
-import { parseReactionScopeKey } from "@rezics/contract/reaction";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { Unit, UnitTranslation, User } from "../db/schema";
 import { requireSlugScopeId } from "../infra/slug-scopes";
@@ -155,7 +154,7 @@ export interface ProfileReactionActor {
 export interface ProfileReactionGivenItem {
   id: string;
   reaction: string;
-  scopeKey: string;
+  contextUnitId: string | null;
   createdAt: string;
   target: ProfileReactionTarget | null;
 }
@@ -172,15 +171,14 @@ export interface ProfileReactionListResult<T> {
 function buildHref(
   type: UnitType,
   id: string,
-  scopeKey?: string,
+  contextUnitId?: string | null,
   realmSlugById?: Map<string, string | null>,
 ): string {
-  const scope = scopeKey ? parseReactionScopeKey(scopeKey) : null;
-  if (type === "POST" && scope?.kind === "realm") {
-    const realmSlug = realmSlugById?.get(scope.realmUnitId);
+  if (type === "POST" && contextUnitId) {
+    const realmSlug = realmSlugById?.get(contextUnitId);
     return realmSlug
       ? `/r/${realmSlug}/post/${id}`
-      : `/realm/${scope.realmUnitId}/post/${id}`;
+      : `/realm/${contextUnitId}/post/${id}`;
   }
   switch (type) {
     case "BOOK":
@@ -204,8 +202,11 @@ function unitKind(type: UnitType): string {
   return type.toLowerCase();
 }
 
-function targetScopeMapKey(targetId: string, scopeKey?: string): string {
-  return `${targetId}:${scopeKey ?? ""}`;
+function targetContextMapKey(
+  targetId: string,
+  contextUnitId?: string | null,
+): string {
+  return `${targetId}:${contextUnitId ?? ""}`;
 }
 
 function snippet(text: string | null | undefined): string | undefined {
@@ -217,7 +218,7 @@ function snippet(text: string | null | undefined): string | undefined {
 }
 
 async function loadTargets(
-  rows: Array<{ targetId: string; scopeKey?: string }>,
+  rows: Array<{ targetId: string; contextUnitId?: string | null }>,
   repository: ProfileReactionHistoryRepository = defaultRepository,
 ) {
   const unitIds = Array.from(new Set(rows.map((row) => row.targetId)));
@@ -225,10 +226,9 @@ async function loadTargets(
   if (unitIds.length === 0) return map;
   const realmIds = Array.from(
     new Set(
-      rows.flatMap((row) => {
-        const scope = row.scopeKey ? parseReactionScopeKey(row.scopeKey) : null;
-        return scope?.kind === "realm" ? [scope.realmUnitId] : [];
-      }),
+      rows
+        .map((row) => row.contextUnitId)
+        .filter((id): id is string => Boolean(id)),
     ),
   );
 
@@ -237,11 +237,11 @@ async function loadTargets(
     repository.listRealmRows(realmIds),
   ]);
   const realmSlugById = new Map(realms.map((realm) => [realm.id, realm.slug]));
-  const scopeKeysByTargetId = new Map<string, Set<string | undefined>>();
+  const contextIdsByTargetId = new Map<string, Set<string | null>>();
   for (const row of rows) {
-    const scopeKeys = scopeKeysByTargetId.get(row.targetId) ?? new Set();
-    scopeKeys.add(row.scopeKey);
-    scopeKeysByTargetId.set(row.targetId, scopeKeys);
+    const contextIds = contextIdsByTargetId.get(row.targetId) ?? new Set();
+    contextIds.add(row.contextUnitId ?? null);
+    contextIdsByTargetId.set(row.targetId, contextIds);
   }
 
   for (const u of units) {
@@ -251,10 +251,10 @@ async function loadTargets(
       title: u.title ?? undefined,
       snippet: snippet(mainMarkdownSource(u.description)),
     };
-    for (const scopeKey of scopeKeysByTargetId.get(u.id) ?? [undefined]) {
-      map.set(targetScopeMapKey(u.id, scopeKey), {
+    for (const contextUnitId of contextIdsByTargetId.get(u.id) ?? [null]) {
+      map.set(targetContextMapKey(u.id, contextUnitId), {
         ...base,
-        href: buildHref(u.type, u.id, scopeKey, realmSlugById),
+        href: buildHref(u.type, u.id, contextUnitId, realmSlugById),
       });
     }
   }
@@ -338,9 +338,10 @@ export class ProfileReactionHistoryService {
       items: raw.items.map((r) => ({
         id: r.id,
         reaction: r.reaction,
-        scopeKey: r.scopeKey,
+        contextUnitId: r.contextUnitId,
         createdAt: r.createdAt,
-        target: targets.get(targetScopeMapKey(r.targetId, r.scopeKey)) ?? null,
+        target:
+          targets.get(targetContextMapKey(r.targetId, r.contextUnitId)) ?? null,
       })),
       nextCursor: raw.nextCursor,
     };
@@ -421,11 +422,12 @@ export class ProfileReactionHistoryService {
         {
           id: r.id,
           reaction: r.reaction,
-          scopeKey: r.scopeKey,
+          contextUnitId: r.contextUnitId,
           createdAt: r.createdAt,
           actor,
           target:
-            targets.get(targetScopeMapKey(r.targetId, r.scopeKey)) ?? null,
+            targets.get(targetContextMapKey(r.targetId, r.contextUnitId)) ??
+            null,
         },
       ];
     });
