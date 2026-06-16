@@ -45,6 +45,7 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
         align: "start",
         dragFree: true,
       }}
+      wheelScroll
     >
       <CarouselContent className="-ml-2">
         {items.map(({ name, icon }) => (

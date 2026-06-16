@@ -22,6 +22,19 @@ export type ServiceCommand =
   | { kind: "health" }
   | { kind: "config-plan" }
   | { kind: "config-apply" }
+  | {
+      kind: "cdc-verify";
+      source?: "source" | "reaction";
+      sourceUrl?: string;
+      reactionUrl?: string;
+    }
+  | {
+      kind: "cdc-repair";
+      source?: "source" | "reaction";
+      sourceUrl?: string;
+      reactionUrl?: string;
+      forceActiveSlot?: boolean;
+    }
   | { kind: "source-verify"; url?: string }
   | { kind: "source-repair"; url?: string; forceActiveSlot?: boolean };
 
@@ -125,6 +138,46 @@ function sourceScriptArgs(
   return args;
 }
 
+function cdcScriptArgs(
+  command: Extract<ServiceCommand, { kind: "cdc-verify" | "cdc-repair" }>,
+) {
+  const args: string[] = [];
+  if (command.kind === "cdc-repair") {
+    args.push("--apply", "--dev-reset");
+  }
+  if (command.source) {
+    args.push(`--source=${command.source}`);
+  }
+  if (command.sourceUrl) {
+    args.push(`--source-url=${command.sourceUrl}`);
+  }
+  if (command.reactionUrl) {
+    args.push(`--reaction-url=${command.reactionUrl}`);
+  }
+  if (command.kind === "cdc-repair" && command.forceActiveSlot) {
+    args.push("--force-active-slot");
+  }
+  return args;
+}
+
+function runCdcScript(
+  command: Extract<ServiceCommand, { kind: "cdc-verify" | "cdc-repair" }>,
+  config: ToolConfig,
+) {
+  runCommand(
+    [
+      "bun",
+      "run",
+      "tool/src/commands/service/cdc.ts",
+      ...cdcScriptArgs(command),
+    ],
+    {
+      cwd: REPO_ROOT,
+      env: processEnv(config.sourceVerifyEnv),
+    },
+  );
+}
+
 function runSourceScript(
   command: Extract<ServiceCommand, { kind: "source-verify" | "source-repair" }>,
   config: ToolConfig,
@@ -149,6 +202,16 @@ export async function runServiceCommand(
 ) {
   if (command.kind === "health") {
     await checkHealth(config);
+    return;
+  }
+
+  if (command.kind === "cdc-verify") {
+    runCdcScript(command, config);
+    return;
+  }
+
+  if (command.kind === "cdc-repair") {
+    runCdcScript(command, config);
     return;
   }
 

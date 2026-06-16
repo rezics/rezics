@@ -362,6 +362,26 @@ export const env = createEnv({
     STATUS_CDC_REPLICATION_SLOT_NAME: v.optional(v.string()),
 
     /**
+     * Optional reaction database URL used only by internal CDC diagnostics.
+     * Omit it to mark reaction CDC as unknown instead of probing a private DB.
+     * 僅供內部 CDC 診斷使用的 reaction 資料庫 URL。
+     * 省略時 reaction CDC 會顯示為 unknown，而不是探測私有資料庫。
+     */
+    STATUS_REACTION_DATABASE_URL: v.optional(v.string()),
+
+    /**
+     * Reaction database publication expected by Sequin CDC diagnostics.
+     * CDC 診斷期望的 reaction 資料庫 publication。
+     */
+    STATUS_REACTION_CDC_PUBLICATION_NAME: v.optional(v.string()),
+
+    /**
+     * Reaction database replication slot expected by Sequin CDC diagnostics.
+     * CDC 診斷期望的 reaction 資料庫 replication slot。
+     */
+    STATUS_REACTION_CDC_REPLICATION_SLOT_NAME: v.optional(v.string()),
+
+    /**
      * Byte threshold where replication slot lag degrades CDC status.
      * replication slot 滞后导致 CDC 状态降级的字节阈值。
      */

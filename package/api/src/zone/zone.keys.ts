@@ -24,6 +24,7 @@ export const zoneKeys = {
     pageId: string,
     sectionId: string,
     languages: readonly string[] = [],
+    dynamicTagUnitIds: readonly string[] = [],
   ) =>
     [
       ...zoneKeys.byUnitId(unitId),
@@ -31,5 +32,6 @@ export const zoneKeys = {
       pageId,
       sectionId,
       [...languages],
+      [...dynamicTagUnitIds],
     ] as const,
 } as const;

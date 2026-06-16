@@ -14,7 +14,32 @@ mock.module("@/diagnostic", () => ({
   getSystemStatusSummary: mock(async () => ({
     meili: { indexes: [] },
     queue: { failedJobs: [] },
+    cdc: {
+      detectedIssues: [
+        {
+          sourceId: "reaction",
+          code: "slot_missing",
+          message: "replication slot does not exist",
+          remediation: "Run task service -- cdc repair --source=reaction.",
+        },
+      ],
+    },
+    historyOutbox: {
+      pendingWithoutIngestJob: true,
+      failed: 1,
+      retryReady: 1,
+    },
   })),
+}));
+
+mock.module("@/db", () => ({
+  db: {},
+  HistoryOutbox: {
+    id: "id",
+    status: "status",
+    unitId: "unitId",
+    createdAt: "createdAt",
+  },
 }));
 
 mock.module("@/job/job-boundary", () => ({
@@ -328,6 +353,70 @@ describe("adminRepairJobService", () => {
         idempotencyKey: "history.outbox.ingestBatch",
       },
     ]);
+  });
+
+  test("dry-runs CDC issues and includes safe replay target", async () => {
+    const { createAdminRepairJobService } = await import(
+      "./admin-repair-job.service"
+    );
+    const service = createAdminRepairJobService({
+      jobProducer: {
+        enqueue: mock(async () => {
+          throw new Error("unexpected enqueue");
+        }),
+      },
+      database: historyOutboxDatabase(),
+      fetchImpl: fetch,
+      auditService: auditService(),
+    });
+
+    const dryRun = await service.dryRun({
+      scope: "cdc",
+      reason: "diagnose cdc drift",
+    });
+
+    expect(dryRun.targetIds).toEqual([
+      "reaction:slot_missing",
+      "history:outbox-replay",
+    ]);
+    expect(dryRun.warnings.join("\n")).toContain("task service -- cdc repair");
+  });
+
+  test("queues only safe downstream repair for CDC scope", async () => {
+    const enqueued: any[] = [];
+    const { createAdminRepairJobService } = await import(
+      "./admin-repair-job.service"
+    );
+    const service = createAdminRepairJobService({
+      jobProducer: {
+        enqueue: mock(async (command: any): Promise<EnqueueResult> => {
+          enqueued.push(command);
+          return {
+            kind: command.kind,
+            idempotencyKey: command.idempotencyKey,
+            lane: command.lane,
+            status: "created",
+            jobId: "job-cdc",
+          };
+        }),
+      },
+      database: historyOutboxDatabase(),
+      fetchImpl: fetch,
+      auditService: auditService(),
+    });
+
+    const job = await service.start({
+      scope: "cdc",
+      targetIds: ["reaction:slot_missing", "history:outbox-replay"],
+      reason: "recover cdc delivery",
+    });
+
+    expect(enqueued.map((command) => command.kind)).toEqual([
+      "history.outbox.ingestBatch",
+    ]);
+    expect(job.safeSummary).toContain(
+      "task service -- cdc repair --source=reaction",
+    );
   });
 
   test("returns a safe failed status when a durable command is unavailable", async () => {

@@ -16,6 +16,7 @@ export interface DomainCarouselProps<TItem> {
   showArrows?: boolean;
   scrollSnap?: "start" | "center";
   dragFree?: boolean;
+  wheelScroll?: boolean;
   ariaLabel?: string;
   emptyFallback?: ReactNode;
 }
@@ -29,6 +30,7 @@ export function DomainCarousel<TItem>({
   showArrows = true,
   scrollSnap = "start",
   dragFree = true,
+  wheelScroll = false,
   ariaLabel,
   emptyFallback = null,
 }: DomainCarouselProps<TItem>) {
@@ -40,6 +42,7 @@ export function DomainCarousel<TItem>({
       className={["w-full", className ?? ""].join(" ")}
       aria-label={ariaLabel}
       opts={{ align: scrollSnap, dragFree }}
+      wheelScroll={wheelScroll}
     >
       <CarouselContent className="-ml-4">
         {items.map((item, index) => (

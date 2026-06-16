@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import {
   canInsertZoneSectionKind,
@@ -93,6 +93,10 @@ export type ZoneManageEditorContext = {
   allSectionIds: string[];
   contextRealmUnitId: string | null;
   contextRealmSlug: string | null;
+  heroTitle: string | null;
+  heroDescription: string | null;
+  themeBannerUrl: string | null;
+  themeLogoUrl: string | null;
 };
 
 /**
@@ -103,6 +107,31 @@ export type ZoneManageEditorContext = {
  * 单个插槽（页面顶层、tabs 面板或 columns 面板）的分区列表编辑器。
  * 新增 kind 选择按插槽收窄，使契约的嵌套规则在 UI 中不可表达：tabs
  * 面板内无容器，columns 内无 columns。
+ *
+ * 视觉结构：每个分区是紧凑管理卡片，标题行承担展开/收起；左侧图标
+ * 显示状态，文案标题优先，技术 id 作为次级信息。窄屏时标题截断、
+ * 元信息换行、操作按钮保持固定宽度；宽屏时内容区域占满列表宽度。
+ *
+ * Mobile:
+ * | Card row                         |
+ * | > Title text                     |
+ * |   Kind badge section-id          |
+ * |                        actions   |
+ * | Expanded form                    |
+ *
+ * Tablet:
+ * | > Title text        actions      |
+ * |   Kind badge section-id          |
+ * | Expanded grid fields             |
+ *
+ * Desktop:
+ * | > Title text / Kind badge id              actions |
+ * | Expanded three-column fields and kind editor       |
+ *
+ * Ultra-wide:
+ * | Full-width card inside centered manage column       |
+ * | > Title text / Kind badge id              actions   |
+ * | Expanded editor keeps readable field grids          |
  */
 export function ZoneSectionListEditor({
   sections,
@@ -120,20 +149,53 @@ export function ZoneSectionListEditor({
   const [addKind, setAddKind] = useState<ZonePageSection["kind"]>(
     allowedKinds[0] as ZonePageSection["kind"],
   );
+  const keyCounterRef = useRef(0);
+  const sectionKeysRef = useRef<number[]>([]);
+
+  if (sectionKeysRef.current.length < sections.length) {
+    sectionKeysRef.current = [
+      ...sectionKeysRef.current,
+      ...Array.from(
+        { length: sections.length - sectionKeysRef.current.length },
+        () => ++keyCounterRef.current,
+      ),
+    ];
+  } else if (sectionKeysRef.current.length > sections.length) {
+    sectionKeysRef.current = sectionKeysRef.current.slice(0, sections.length);
+  }
 
   const add = () => {
     // Defense in depth on top of the constrained select.
     // 在收窄的选择器之上的纵深防御。
     if (!canInsertZoneSectionKind(slot, addKind)) return;
     const id = nextZoneId(addKind, ctx.allSectionIds);
+    sectionKeysRef.current = [
+      ...sectionKeysRef.current,
+      ++keyCounterRef.current,
+    ];
     onChange([...sections, createZoneSection(addKind, id)]);
+  };
+
+  const removeAt = (index: number) => {
+    sectionKeysRef.current = sectionKeysRef.current.filter(
+      (_, currentIndex) => currentIndex !== index,
+    );
+    onChange(sections.filter((_, currentIndex) => currentIndex !== index));
+  };
+
+  const moveAt = (index: number, direction: "up" | "down") => {
+    const target = direction === "up" ? index - 1 : index + 1;
+    const nextKeys = [...sectionKeysRef.current];
+    [nextKeys[index], nextKeys[target]] = [nextKeys[target], nextKeys[index]];
+    sectionKeysRef.current = nextKeys;
+    onChange(moveListItem(sections, index, direction));
   };
 
   return (
     <div className="flex flex-col gap-3">
       {sections.map((section, index) => (
         <ZoneSectionEditor
-          key={section.id}
+          key={sectionKeysRef.current[index]}
           section={section}
           slot={slot}
           ctx={ctx}
@@ -144,19 +206,11 @@ export function ZoneSectionListEditor({
               ),
             )
           }
-          onRemove={() =>
-            onChange(
-              sections.filter((_, currentIndex) => currentIndex !== index),
-            )
-          }
-          onMoveUp={
-            index > 0
-              ? () => onChange(moveListItem(sections, index, "up"))
-              : undefined
-          }
+          onRemove={() => removeAt(index)}
+          onMoveUp={index > 0 ? () => moveAt(index, "up") : undefined}
           onMoveDown={
             index < sections.length - 1
-              ? () => onChange(moveListItem(sections, index, "down"))
+              ? () => moveAt(index, "down")
               : undefined
           }
         />
@@ -205,33 +259,55 @@ function ZoneSectionEditor({
 }) {
   const { t } = useTranslation(["zone", "common"]);
   const [expanded, setExpanded] = useState(false);
+  const titleText = section.titleLabelUnitId
+    ? (ctx.refUnits[section.titleLabelUnitId]?.title ??
+      section.titleLabelUnitId)
+    : null;
 
   return (
     <Card surface="contained">
-      <CardContent className="flex flex-col gap-4 p-4">
-        <div className="flex items-center justify-between gap-3">
+      <CardContent className="flex flex-col gap-0 p-0">
+        <div className="flex items-stretch gap-2 p-3">
           <button
             type="button"
-            className="flex min-w-0 items-center gap-2 text-left"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-surface-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
             onClick={() => setExpanded((current) => !current)}
             aria-expanded={expanded}
           >
-            <span className="shrink-0 rounded-sm bg-surface-subtle px-2 py-0.5 text-xs font-medium leading-dense text-text-secondary">
-              {t(KIND_KEYS[section.kind])}
-            </span>
-            <span className="truncate font-mono text-xs leading-dense text-text-tertiary">
-              {section.id}
+            <ChevronRight
+              className={[
+                "size-4 shrink-0 text-text-tertiary transition-transform",
+                expanded ? "rotate-90" : "",
+              ].join(" ")}
+              aria-hidden
+            />
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              {titleText ? (
+                <span className="truncate text-sm font-medium leading-ui text-text-primary">
+                  {titleText}
+                </span>
+              ) : null}
+              <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="shrink-0 rounded-sm bg-surface-subtle px-2 py-0.5 text-xs font-medium leading-dense text-text-secondary">
+                  {t(KIND_KEYS[section.kind])}
+                </span>
+                <span className="min-w-0 truncate font-mono text-xs leading-dense text-text-tertiary">
+                  {section.id}
+                </span>
+              </span>
             </span>
           </button>
-          <RowActions
-            onMoveUp={onMoveUp}
-            onMoveDown={onMoveDown}
-            onRemove={onRemove}
-          />
+          <div className="flex shrink-0 items-center">
+            <RowActions
+              onMoveUp={onMoveUp}
+              onMoveDown={onMoveDown}
+              onRemove={onRemove}
+            />
+          </div>
         </div>
 
         {expanded ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 border-t border-border-whisper p-4">
             <div className="grid gap-4 md:grid-cols-3">
               <ManageField label={t("zone:manage_section_id")}>
                 <Input
@@ -328,61 +404,111 @@ function ZoneSectionKindFields({
     case "hero":
       return (
         <div className="flex flex-col gap-4">
-          <label
-            htmlFor={`${baseId}-show-description`}
-            className="flex items-center gap-2 text-sm leading-ui text-text-primary"
-          >
-            <Checkbox
-              id={`${baseId}-show-description`}
-              checked={section.showDescription !== false}
-              onCheckedChange={(checked) => {
-                const next = { ...section };
-                if (checked) delete next.showDescription;
-                else next.showDescription = false;
-                onChange(next);
-              }}
-            />
-            {t("zone:manage_hero_show_description")}
-          </label>
-          <div className="grid gap-4 md:grid-cols-2">
-            <ManageField
-              label={t("zone:manage_hero_banner")}
-              hint={section.bannerImageUrl}
+          <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3">
+            <ManageGroupHeading>
+              {t("zone:manage_hero_text")}
+            </ManageGroupHeading>
+            <dl className="grid gap-3 md:grid-cols-2">
+              <div className="min-w-0">
+                <dt className="flex items-center gap-2 text-xs font-medium leading-dense text-text-tertiary">
+                  <span>{t("common:title")}</span>
+                  <span className="rounded-sm bg-surface-base px-1.5 py-0.5 leading-dense">
+                    {t("zone:manage_profile")}
+                  </span>
+                </dt>
+                <dd className="mt-1 truncate text-sm leading-ui text-text-primary">
+                  {ctx.heroTitle ?? t("common:none")}
+                </dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="flex items-center gap-2 text-xs font-medium leading-dense text-text-tertiary">
+                  <span>{t("common:description")}</span>
+                  <span className="rounded-sm bg-surface-base px-1.5 py-0.5 leading-dense">
+                    {t("zone:manage_profile")}
+                  </span>
+                </dt>
+                <dd className="mt-1 line-clamp-2 text-sm leading-ui text-text-primary">
+                  {ctx.heroDescription ?? t("common:none")}
+                </dd>
+              </div>
+            </dl>
+            <label
+              htmlFor={`${baseId}-show-description`}
+              className="flex items-center gap-2 text-sm leading-ui text-text-primary"
             >
-              <Input
-                value={section.bannerImageUrl ?? ""}
-                placeholder="https://"
-                className="font-mono text-sm"
-                onChange={(event) => {
+              <Checkbox
+                id={`${baseId}-show-description`}
+                checked={section.showDescription !== false}
+                onCheckedChange={(checked) => {
                   const next = { ...section };
-                  if (event.target.value) {
-                    next.bannerImageUrl = event.target.value;
-                  } else {
-                    delete next.bannerImageUrl;
-                  }
+                  if (checked) delete next.showDescription;
+                  else next.showDescription = false;
                   onChange(next);
                 }}
               />
-            </ManageField>
-            <ManageField
-              label={t("zone:manage_hero_logo")}
-              hint={section.logoImageUrl}
-            >
-              <Input
-                value={section.logoImageUrl ?? ""}
-                placeholder="https://"
-                className="font-mono text-sm"
-                onChange={(event) => {
-                  const next = { ...section };
-                  if (event.target.value) {
-                    next.logoImageUrl = event.target.value;
-                  } else {
-                    delete next.logoImageUrl;
-                  }
-                  onChange(next);
-                }}
-              />
-            </ManageField>
+              {t("zone:manage_hero_show_description")}
+            </label>
+          </div>
+          <div className="flex flex-col gap-3">
+            <ManageGroupHeading>
+              {t("zone:manage_hero_images")}
+            </ManageGroupHeading>
+            <div className="grid gap-4 md:grid-cols-2">
+              <ManageField
+                label={t("zone:manage_hero_banner")}
+                hint={
+                  section.bannerImageUrl
+                    ? section.bannerImageUrl
+                    : ctx.themeBannerUrl
+                      ? t("zone:manage_hero_theme_fallback", {
+                          value: ctx.themeBannerUrl,
+                        })
+                      : undefined
+                }
+              >
+                <Input
+                  value={section.bannerImageUrl ?? ""}
+                  placeholder="https://"
+                  className="font-mono text-sm"
+                  onChange={(event) => {
+                    const next = { ...section };
+                    if (event.target.value) {
+                      next.bannerImageUrl = event.target.value;
+                    } else {
+                      delete next.bannerImageUrl;
+                    }
+                    onChange(next);
+                  }}
+                />
+              </ManageField>
+              <ManageField
+                label={t("zone:manage_hero_logo")}
+                hint={
+                  section.logoImageUrl
+                    ? section.logoImageUrl
+                    : ctx.themeLogoUrl
+                      ? t("zone:manage_hero_theme_fallback", {
+                          value: ctx.themeLogoUrl,
+                        })
+                      : undefined
+                }
+              >
+                <Input
+                  value={section.logoImageUrl ?? ""}
+                  placeholder="https://"
+                  className="font-mono text-sm"
+                  onChange={(event) => {
+                    const next = { ...section };
+                    if (event.target.value) {
+                      next.logoImageUrl = event.target.value;
+                    } else {
+                      delete next.logoImageUrl;
+                    }
+                    onChange(next);
+                  }}
+                />
+              </ManageField>
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <ManageGroupHeading>
@@ -460,6 +586,13 @@ function ZoneSectionKindFields({
           <ZoneQueryEditor
             query={section.query}
             onChange={(query) => onChange({ ...section, query })}
+            dynamicTags={section.dynamicTags}
+            onDynamicTagsChange={(dynamicTags) => {
+              const next = { ...section };
+              if (dynamicTags) next.dynamicTags = dynamicTags;
+              else delete next.dynamicTags;
+              onChange(next);
+            }}
             refUnits={ctx.refUnits}
           />
         </div>

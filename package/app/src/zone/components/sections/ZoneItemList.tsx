@@ -240,6 +240,7 @@ export function ZoneItemList({
         showArrows={isCarousel}
         dragFree={!isCarousel}
         scrollSnap="start"
+        wheelScroll
         renderItem={(entry) =>
           isCommunityEntry(entry) ? (
             <div className="w-72 sm:w-80">

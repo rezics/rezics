@@ -111,9 +111,101 @@ export const zoneSectionQuerySchema = t.Object(
 );
 
 export type ZoneSectionQuery = Static<typeof zoneSectionQuerySchema>;
+export type ZoneSectionQueryTarget = ZoneSectionQuery["target"];
+export type ZoneSectionQueryFilterField = keyof Omit<
+  ZoneSectionQuery,
+  "target" | "sort"
+>;
+
+/**
+ * Per-target Meilisearch field vocabulary for zone query sections. The
+ * contract owns this table because server compilation and app-side management
+ * editors must stay in lockstep when a query target is added.
+ * 专区查询分区按目标划分的 Meilisearch 字段词汇表。契约拥有此表，因为
+ * 服务端编译与应用端管理编辑器在新增查询目标时必须保持同步。
+ */
+export const ZONE_SECTION_QUERY_FILTERABLE_FIELDS = {
+  unit: [
+    "types",
+    "postKinds",
+    "realm",
+    "tagUnitIds",
+    "realmTagUnitIds",
+    "subjects",
+    "targetUnitId",
+    "languages",
+    "ratings",
+  ],
+  post: ["postKinds", "realm", "targetUnitId", "languages"],
+  realm: ["types", "languages"],
+  zone: ["types", "realm", "languages"],
+} as const satisfies Record<
+  ZoneSectionQueryTarget,
+  readonly ZoneSectionQueryFilterField[]
+>;
+
+export const ZONE_SECTION_QUERY_SORT_FIELDS = {
+  unit: [
+    "createdAt",
+    "updatedAt",
+    "publishedAt",
+    "bestScore",
+    "hotScore",
+    "topScore",
+    "risingScore",
+    "controversyScore",
+    "trendingScore",
+    "qualityScore",
+  ],
+  post: [
+    "createdAt",
+    "updatedAt",
+    "replyCount",
+    "bestScore",
+    "hotScore",
+    "topScore",
+    "risingScore",
+    "controversyScore",
+    "trendingScore",
+    "qualityScore",
+  ],
+  realm: ["createdAt", "updatedAt", "memberCount"],
+  zone: ["createdAt", "updatedAt"],
+} as const satisfies Record<
+  ZoneSectionQueryTarget,
+  readonly ZoneSectionQuerySortField[]
+>;
 
 // ANCHOR: Zone section primitives
 // ANCHOR: 专区分区原语
+
+export const zoneDynamicTagOptionSchema = t.Object(
+  {
+    tagUnitIds: t.Array(t.String(), { minItems: 1 }),
+    probability: t.Number({ minimum: 0, maximum: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneDynamicTagOption = Static<typeof zoneDynamicTagOptionSchema>;
+
+/**
+ * Dynamic tags are a query-section modifier, not a section kind. Random
+ * selection is frontend-owned; saved config only stores canonical tag unit ids
+ * and probabilities.
+ * 动态标签是 query 分区的修饰项，而不是新的分区类型。随机选择由前端负责；
+ * 持久化配置只保存规范化后的 tag unit id 与概率。
+ */
+export const zoneDynamicTagsSchema = t.Object(
+  {
+    groupId: t.Optional(t.String()),
+    fallback: t.Optional(t.Boolean()),
+    options: t.Array(zoneDynamicTagOptionSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type ZoneDynamicTags = Static<typeof zoneDynamicTagsSchema>;
 
 export const zoneSectionEmptyStateSchema = t.Union([
   t.Literal("hide"),
@@ -224,6 +316,7 @@ export const zoneQuerySectionSchema = t.Object(
     query: zoneSectionQuerySchema,
     display: zoneSectionDisplaySchema,
     loadMore: t.Optional(t.Boolean()),
+    dynamicTags: t.Optional(zoneDynamicTagsSchema),
   },
   { additionalProperties: false },
 );

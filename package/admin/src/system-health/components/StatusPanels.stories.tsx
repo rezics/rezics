@@ -1,4 +1,5 @@
 import type {
+  CdcSourceStatus,
   CdcStatus,
   HistoryOutboxStatus,
   QueueStatus,
@@ -22,8 +23,10 @@ function item(
   };
 }
 
-const healthyCdc: CdcStatus = {
-  item: item("cdc", "來源資料庫 CDC", "available"),
+const healthySourceCdc: CdcSourceStatus = {
+  id: "source",
+  label: "Server source CDC",
+  item: item("cdc-source", "Server source CDC", "available"),
   walLevel: "logical",
   publicationName: "sequin_pub",
   publicationExists: true,
@@ -44,6 +47,26 @@ const healthyCdc: CdcStatus = {
   activeWalSenders: 1,
   availableWalSenders: 9,
   lagBytes: 0,
+  detectedIssues: [],
+};
+
+const healthyReactionCdc: CdcSourceStatus = {
+  ...healthySourceCdc,
+  id: "reaction",
+  label: "Reaction CDC",
+  item: item("cdc-reaction", "Reaction CDC", "available"),
+  publicationName: "reaction_sequin_pub",
+  slotName: "reaction_sequin_slot",
+  routedTables: ["ReactionSummary"],
+  publicationTables: ["ReactionSummary"],
+};
+
+const healthyCdc: CdcStatus = {
+  ...healthySourceCdc,
+  id: "cdc",
+  label: "Sequin CDC",
+  item: item("cdc", "Sequin CDC", "available"),
+  sources: [healthySourceCdc, healthyReactionCdc],
 };
 
 const healthyHistoryOutbox: HistoryOutboxStatus = {
@@ -85,12 +108,35 @@ const degradedCdc: CdcStatus = {
     "degraded",
     "publication 缺少已路由資料表，replication slot inactive",
   ),
-  publicationTables: ["Unit", "Post"],
-  missingTables: ["HistoryOutbox"],
-  slotActive: false,
-  slotActivePid: null,
-  lagBytes: 422_144,
-  availableWalSenders: 0,
+  detectedIssues: [
+    {
+      sourceId: "reaction",
+      code: "slot_inactive",
+      message: "replication slot is inactive",
+      remediation: "Confirm Sequin is running.",
+    },
+  ],
+  sources: [
+    healthySourceCdc,
+    {
+      ...healthyReactionCdc,
+      item: item("cdc-reaction", "Reaction CDC", "degraded"),
+      publicationTables: [],
+      missingTables: ["ReactionSummary"],
+      slotActive: false,
+      slotActivePid: null,
+      lagBytes: 422_144,
+      availableWalSenders: 0,
+      detectedIssues: [
+        {
+          sourceId: "reaction",
+          code: "publication_missing_tables",
+          message: "publication is missing routed tables",
+          remediation: "Run task service -- cdc repair --source=reaction.",
+        },
+      ],
+    },
+  ],
 };
 
 const degradedHistoryOutbox: HistoryOutboxStatus = {
@@ -213,6 +259,30 @@ export const SlotMissing: Story = {
       slotExists: false,
       slotActive: null,
       slotActivePid: null,
+      detectedIssues: [
+        {
+          sourceId: "source",
+          code: "slot_missing",
+          message: "replication slot does not exist",
+        },
+      ],
+      sources: [
+        {
+          ...healthySourceCdc,
+          item: item("cdc-source", "Server source CDC", "degraded"),
+          slotExists: false,
+          slotActive: null,
+          slotActivePid: null,
+          detectedIssues: [
+            {
+              sourceId: "source",
+              code: "slot_missing",
+              message: "replication slot does not exist",
+            },
+          ],
+        },
+        healthyReactionCdc,
+      ],
     },
     historyOutbox: healthyHistoryOutbox,
     queue: healthyQueue,

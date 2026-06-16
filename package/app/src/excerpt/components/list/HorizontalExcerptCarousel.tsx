@@ -32,6 +32,7 @@ export const HorizontalExcerptCarousel: React.FC<
       itemClassName="pl-4 basis-[100%] lg:basis-[50%] xl:basis-[40%]"
       className={className}
       ariaLabel={t("excerpts")}
+      wheelScroll
       renderItem={(item) => <ExcerptCard excerpt={item} />}
     />
   );

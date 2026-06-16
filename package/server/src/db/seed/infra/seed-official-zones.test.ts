@@ -13,8 +13,9 @@ import {
   ZonePage,
 } from "../../schema";
 import {
-  OFFICIAL_ZONE_DEFINITIONS,
+  buildOfficialZoneDefinitions,
   OFFICIAL_SECTION_LABELS,
+  OFFICIAL_ZONE_DEFINITIONS,
   seedOfficialZones,
 } from "./seed-official-zones";
 
@@ -88,6 +89,76 @@ function makeDb(selectRows: unknown[][] = []) {
 }
 
 describe("seedOfficialZones", () => {
+  test("builds the Books home from latest, dynamic topic rails, and a hot feed", () => {
+    const [book] = buildOfficialZoneDefinitions({
+      bookDynamicTagUnitIds: ["tag-sci-fi", "tag-fantasy", "tag-mystery"],
+    }).filter((definition) => definition.key === "book");
+
+    expect(book?.config.boundary.filters).toEqual({ types: ["BOOK"] });
+    expect(book?.config.pages[0]?.config.sections).toMatchObject([
+      { id: "hero", kind: "hero" },
+      {
+        id: "latest-books",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookLatest.id,
+        display: "carousel",
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "publishedAt" },
+        },
+      },
+      {
+        id: "topic-books-a",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicOne.id,
+        display: "carousel",
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "qualityScore" },
+        },
+        dynamicTags: {
+          groupId: "official-book-topics",
+          fallback: true,
+          options: [
+            { tagUnitIds: ["tag-sci-fi"], probability: 0.1 },
+            { tagUnitIds: ["tag-fantasy"], probability: 0.1 },
+            { tagUnitIds: ["tag-mystery"], probability: 0.1 },
+          ],
+        },
+      },
+      {
+        id: "topic-books-b",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicTwo.id,
+        display: "carousel",
+        dynamicTags: { groupId: "official-book-topics" },
+      },
+      {
+        id: "topic-books-c",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicThree.id,
+        display: "carousel",
+        dynamicTags: { groupId: "official-book-topics" },
+      },
+      {
+        id: "hot-books",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
+        display: "list",
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "hotScore" },
+        },
+      },
+    ]);
+    expect(
+      book?.config.pages[0]?.config.sections.map((section) => section.kind),
+    ).toEqual(["hero", "query", "query", "query", "query", "query"]);
+  });
+
   test("frames Realms as a catalog library instead of trending discovery", () => {
     const realms = OFFICIAL_ZONE_DEFINITIONS.find(
       (definition) => definition.key === "realms",
@@ -155,8 +226,19 @@ describe("seedOfficialZones", () => {
         id: "all-zones",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
-        display: "grid",
+        display: "tiles",
         loadMore: true,
+        query: {
+          target: "zone",
+          types: ["ZONE"],
+          sort: { field: "updatedAt" },
+        },
+      },
+      {
+        id: "zone-updates",
+        kind: "query",
+        titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesUpdates.id,
+        display: "list",
         query: {
           target: "zone",
           types: ["ZONE"],

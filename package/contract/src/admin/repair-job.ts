@@ -4,6 +4,7 @@ export const adminRepairJobScopeSchema = t.Union([
   t.Literal("search"),
   t.Literal("queue-failed-job"),
   t.Literal("history-outbox-replay"),
+  t.Literal("cdc"),
   t.Literal("slug"),
   t.Literal("attribution"),
   t.Literal("counters"),

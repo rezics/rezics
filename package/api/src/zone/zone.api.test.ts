@@ -84,11 +84,12 @@ describe("zoneApi", () => {
     await zoneApi.getSection("zone-1", "page-home", "s-latest", {
       cursor: "24",
       languages: ["en"],
+      dynamicTagUnitIds: ["tag-a", "tag-b"],
     });
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
       "http://api.example/zone/zone-1/portal/home?languages=en",
-      "http://api.example/zone/zone-1/page/page-home/section/s-latest?cursor=24&languages=en",
+      "http://api.example/zone/zone-1/page/page-home/section/s-latest?cursor=24&languages=en&dynamicTagUnitIds=tag-a%2Ctag-b",
     ]);
   });
 
@@ -191,7 +192,21 @@ describe("zoneApi", () => {
         "page-home",
         "s-latest",
         ["en"],
+        [],
       ],
     );
+    expect(
+      zoneKeys.section("zone-1", "page-home", "s-latest", ["en"], ["tag-a"]),
+    ).toEqual([
+      "zones",
+      "detail",
+      "unit",
+      "zone-1",
+      "section",
+      "page-home",
+      "s-latest",
+      ["en"],
+      ["tag-a"],
+    ]);
   });
 });

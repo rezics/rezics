@@ -65,6 +65,7 @@ in-code fallbacks; everything else must be supplied.
 | `NOTIFY_INTERNAL_SECRET`, `REACTION_INTERNAL_SECRET` | ✓ | ✓ | — |
 | `HISTORY_BASE_URL`, `JOB_RUNNER_BASE_URL` | — | — | — |
 | `JOB_RUNNER_INTERNAL_SECRET` | — | ✓ | — |
+| `STATUS_REACTION_DATABASE_URL` | — | ✓ | — |
 | `PORT` | — | — | `3000` |
 | `WORKERS` | — | — | (cluster default) |
 

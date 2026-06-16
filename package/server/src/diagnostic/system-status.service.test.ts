@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import { REACTION_SEQUIN_TABLES, SOURCE_SEQUIN_TABLES } from "@rezics/job";
 import { EXPECTED_MEILI_INDEX_SCHEMAS } from "@rezics/search";
 import type { MeiliStatusSummary } from "./status.types";
 
@@ -92,7 +93,7 @@ function queryClient(options?: {
       }
       if (queryText.includes("pg_publication")) {
         return {
-          rows: (options?.publicationTables ?? ["Unit", "User", "Post"]).map(
+          rows: (options?.publicationTables ?? SOURCE_SEQUIN_TABLES).map(
             (tablename) => ({ tablename }),
           ),
         };
@@ -234,25 +235,10 @@ describe("getSystemStatusSummary", () => {
     const summary = await getSystemStatusSummary({
       fetchImpl: fetchImpl as unknown as typeof fetch,
       queryClient: queryClient({
-        publicationTables: [
-          "HistoryOutbox",
-          "Unit",
-          "UnitTranslation",
-          "UnitTag",
-          "TagVote",
-          "UnitAlias",
-          "CreditAttribution",
-          "SubjectAttribution",
-          "UnitRealm",
-          "RealmTagApplication",
-          "ShelfItem",
-          "Post",
-          "ScoreEntry",
-          "ScoreAggregate",
-          "User",
-          "UserUnitProgress",
-          "Feedback",
-        ],
+        publicationTables: [...SOURCE_SEQUIN_TABLES],
+      }),
+      reactionQueryClient: queryClient({
+        publicationTables: [...REACTION_SEQUIN_TABLES],
       }),
       authHealthUrl: "http://auth/health",
       jobRunnerBaseUrl: "http://jobs",
@@ -276,6 +262,9 @@ describe("getSystemStatusSummary", () => {
         publicationTables: ["Unit"],
         lagBytes: 999,
       }),
+      reactionQueryClient: queryClient({
+        publicationTables: [...REACTION_SEQUIN_TABLES],
+      }),
       jobRunnerBaseUrl: undefined,
       sequinHealthUrl: undefined,
       lagWarningBytes: 10,
@@ -283,7 +272,11 @@ describe("getSystemStatusSummary", () => {
     });
 
     expect(summary.cdc.item.status).toBe("degraded");
-    expect(summary.cdc.missingTables).toContain("User");
+    expect(summary.cdc.missingTables).toContain("source:User");
+    expect(
+      summary.cdc.sources.find((source) => source.id === "source")
+        ?.missingTables,
+    ).toContain("User");
     expect(summary.cdc.lagBytes).toBe(999);
     expect(summary.cdc.maxReplicationSlots).toBe(10);
     expect(summary.cdc.usedReplicationSlots).toBe(1);
@@ -293,6 +286,33 @@ describe("getSystemStatusSummary", () => {
     expect(summary.cdc.availableWalSenders).toBe(9);
     expect(summary.cdc.slotActivePid).toBe(123);
     expect(summary.cdc.restartLsn).toBe("0/16B6C40");
+  });
+
+  test("reports reaction CDC setup remediation when the status database is not configured", async () => {
+    const { getSystemStatusSummary } = await import("./system-status.service");
+    const summary = await getSystemStatusSummary({
+      fetchImpl: (async () =>
+        jsonResponse({ status: "ok" })) as unknown as typeof fetch,
+      queryClient: queryClient({
+        publicationTables: [...SOURCE_SEQUIN_TABLES],
+      }),
+      reactionQueryClient: null,
+      meiliSummary,
+    });
+
+    const reactionSource = summary.cdc.sources.find(
+      (source) => source.id === "reaction",
+    );
+    expect(reactionSource?.item.status).toBe("unknown");
+    expect(reactionSource?.item.reason).toBe(
+      "STATUS_REACTION_DATABASE_URL is not configured",
+    );
+    expect(reactionSource?.item.remediation).toContain(
+      "Set STATUS_REACTION_DATABASE_URL on @rezics/server",
+    );
+    expect(reactionSource?.item.remediation).toContain(
+      "task service -- cdc verify --source=reaction",
+    );
   });
 
   test("reports CDC degradation for extra publication tables and walsender pressure", async () => {
@@ -305,13 +325,20 @@ describe("getSystemStatusSummary", () => {
         maxWalSenders: 1,
         activeWalSenders: 1,
       }),
+      reactionQueryClient: queryClient({
+        publicationTables: [...REACTION_SEQUIN_TABLES],
+      }),
       meiliSummary,
     });
 
-    expect(summary.cdc.extraTables).toContain("UnexpectedTable");
+    expect(summary.cdc.extraTables).toContain("source:UnexpectedTable");
     expect(summary.cdc.availableWalSenders).toBe(0);
-    expect(summary.cdc.item.reason).toContain("publication 包含未路由資料表");
-    expect(summary.cdc.item.reason).toContain("walsender 已無可用容量");
+    expect(summary.cdc.item.reason).toContain(
+      "publication includes unrouted tables",
+    );
+    expect(summary.cdc.item.reason).toContain(
+      "no WAL sender capacity is available",
+    );
   });
 
   test("reports CDC degradation for missing or inactive replication slots", async () => {
@@ -320,19 +347,27 @@ describe("getSystemStatusSummary", () => {
       fetchImpl: (async () =>
         jsonResponse({ status: "ok" })) as unknown as typeof fetch,
       queryClient: queryClient({ slotExists: false }),
+      reactionQueryClient: queryClient({
+        publicationTables: [...REACTION_SEQUIN_TABLES],
+      }),
       meiliSummary,
     });
     const inactive = await getSystemStatusSummary({
       fetchImpl: (async () =>
         jsonResponse({ status: "ok" })) as unknown as typeof fetch,
       queryClient: queryClient({ slotActive: false }),
+      reactionQueryClient: queryClient({
+        publicationTables: [...REACTION_SEQUIN_TABLES],
+      }),
       meiliSummary,
     });
 
     expect(missing.cdc.slotExists).toBe(false);
-    expect(missing.cdc.item.reason).toContain("replication slot 不存在");
+    expect(missing.cdc.item.reason).toContain(
+      "replication slot does not exist",
+    );
     expect(inactive.cdc.slotActive).toBe(false);
-    expect(inactive.cdc.item.reason).toContain("replication slot 未啟用");
+    expect(inactive.cdc.item.reason).toContain("replication slot is inactive");
   });
 
   test("failed jobs degrade queue status with safe metadata", async () => {

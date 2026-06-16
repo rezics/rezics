@@ -1,8 +1,12 @@
-import { ROUTED_SEQUIN_TABLES } from "@rezics/job";
+import { REACTION_SEQUIN_TABLES, SOURCE_SEQUIN_TABLES } from "@rezics/job";
 import { type SQL, sql } from "drizzle-orm";
 import { db } from "../db/client";
+import { createServerDb } from "../db/factory";
 import { env } from "../env";
 import type {
+  CdcDetectedIssue,
+  CdcIssueCode,
+  CdcSourceStatus,
   CdcStatus,
   FailedJobSummary,
   HistoryOutboxStatus,
@@ -260,23 +264,70 @@ function defaultSlotName() {
   return `rezics_sequin_slot_${envName()}`;
 }
 
-async function getCdcStatus(options: {
-  queryClient: QueryClient;
+function defaultReactionPublicationName() {
+  return `rezics_reaction_sequin_pub_${envName()}`;
+}
+
+function defaultReactionSlotName() {
+  return `rezics_reaction_sequin_slot_${envName()}`;
+}
+
+type CdcSourceOptions = {
+  id: string;
+  label: string;
+  queryClient?: QueryClient | null;
   timeoutMs: number;
-  publicationName?: string;
-  slotName?: string;
-  lagWarningBytes?: number;
-}): Promise<CdcStatus> {
-  const publicationName = options.publicationName ?? defaultPublicationName();
-  const slotName = options.slotName ?? defaultSlotName();
-  const lagWarningBytes = options.lagWarningBytes ?? DEFAULT_LAG_WARNING_BYTES;
+  trackedTables: readonly string[];
+  publicationName: string;
+  slotName: string;
+  lagWarningBytes: number;
+  unconfiguredReason?: string;
+  unconfiguredRemediation?: string;
+};
+
+function cdcIssue(
+  source: CdcSourceOptions,
+  code: CdcIssueCode,
+  message: string,
+  remediation?: string,
+): CdcDetectedIssue {
+  return { sourceId: source.id, code, message, remediation };
+}
+
+async function getCdcSourceStatus(
+  options: CdcSourceOptions,
+): Promise<CdcSourceStatus> {
   const base = {
-    routedTables: [...ROUTED_SEQUIN_TABLES],
+    id: options.id,
+    label: options.label,
+    routedTables: [...options.trackedTables],
     publicationTables: [],
-    missingTables: [...ROUTED_SEQUIN_TABLES],
-    publicationName,
-    slotName,
+    missingTables: [...options.trackedTables],
+    publicationName: options.publicationName,
+    slotName: options.slotName,
   };
+
+  if (!options.queryClient) {
+    const issue = cdcIssue(
+      options,
+      "source_unconfigured",
+      options.unconfiguredReason ?? "CDC diagnostic database is not configured",
+      options.unconfiguredRemediation ??
+        "Set the source diagnostic database URL or verify it with task service -- cdc verify.",
+    );
+    return {
+      item: {
+        id: `cdc-${options.id}`,
+        label: options.label,
+        status: "unknown",
+        checkedAt: checkedAt(),
+        reason: issue.message,
+        remediation: issue.remediation,
+      },
+      ...base,
+      detectedIssues: [issue],
+    };
+  }
 
   try {
     const [
@@ -332,7 +383,7 @@ async function getCdcStatus(options: {
            FROM pg_publication p
            JOIN pg_publication_rel pr ON pr.prpubid = p.oid
            JOIN pg_class c ON c.oid = pr.prrelid
-           WHERE p.pubname = ${publicationName}`,
+           WHERE p.pubname = ${options.publicationName}`,
         ),
         options.timeoutMs,
       ),
@@ -350,7 +401,7 @@ async function getCdcStatus(options: {
                   confirmed_flush_lsn::text AS confirmed_flush_lsn,
                   pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)::bigint AS lag_bytes
            FROM pg_replication_slots
-           WHERE slot_name = ${slotName}`,
+           WHERE slot_name = ${options.slotName}`,
         ),
         options.timeoutMs,
       ),
@@ -358,11 +409,11 @@ async function getCdcStatus(options: {
 
     const walLevel = walRows[0]?.wal_level ?? null;
     const publicationTables = publicationRows.map((row) => row.tablename);
-    const missingTables = ROUTED_SEQUIN_TABLES.filter(
+    const missingTables = options.trackedTables.filter(
       (table) => !publicationTables.includes(table),
     );
     const extraTables = publicationTables.filter(
-      (table) => !ROUTED_SEQUIN_TABLES.includes(table as any),
+      (table) => !options.trackedTables.includes(table),
     );
     const slot = slotRows[0];
     const lagBytes =
@@ -386,28 +437,82 @@ async function getCdcStatus(options: {
       Number.isFinite(maxWalSenders) && activeWalSenders !== null
         ? Math.max(maxWalSenders - activeWalSenders, 0)
         : null;
-    const warnings = [
-      walLevel !== "logical" ? "wal_level 不是 logical" : null,
-      publicationRows.length === 0 ? "publication 不存在或沒有資料表" : null,
-      missingTables.length > 0 ? "publication 缺少已路由資料表" : null,
-      extraTables.length > 0 ? "publication 包含未路由資料表" : null,
-      !slot ? "replication slot 不存在" : null,
-      slot && slot.active === false ? "replication slot 未啟用" : null,
-      typeof lagBytes === "number" && lagBytes > lagWarningBytes
-        ? "replication slot lag 過高"
+
+    const issues = [
+      walLevel !== "logical"
+        ? cdcIssue(
+            options,
+            "wal_level_not_logical",
+            "wal_level is not logical",
+            "Run task service -- cdc repair, restart Postgres if requested, then verify again.",
+          )
+        : null,
+      publicationRows.length === 0
+        ? cdcIssue(
+            options,
+            "publication_missing",
+            "publication does not exist or has no tables",
+            "Run task service -- cdc repair for this source.",
+          )
+        : null,
+      missingTables.length > 0
+        ? cdcIssue(
+            options,
+            "publication_missing_tables",
+            "publication is missing routed tables",
+            "Run task service -- cdc repair for this source.",
+          )
+        : null,
+      extraTables.length > 0
+        ? cdcIssue(
+            options,
+            "publication_extra_tables",
+            "publication includes unrouted tables",
+            "Review the publication with task service -- cdc verify.",
+          )
+        : null,
+      !slot
+        ? cdcIssue(
+            options,
+            "slot_missing",
+            "replication slot does not exist",
+            "Run task service -- cdc repair for this source.",
+          )
+        : null,
+      slot && slot.active === false
+        ? cdcIssue(
+            options,
+            "slot_inactive",
+            "replication slot is inactive",
+            "Confirm Sequin is running and the source configuration references this slot.",
+          )
+        : null,
+      typeof lagBytes === "number" && lagBytes > options.lagWarningBytes
+        ? cdcIssue(
+            options,
+            "slot_lag_high",
+            "replication slot lag is high",
+            "Check Sequin delivery and job-runner ingest throughput before replaying downstream queues.",
+          )
         : null,
       availableWalSenders !== null && availableWalSenders <= 0
-        ? "walsender 已無可用容量"
+        ? cdcIssue(
+            options,
+            "wal_senders_exhausted",
+            "no WAL sender capacity is available",
+            "Stop duplicate Sequin consumers or increase max_wal_senders, then restart Postgres if required.",
+          )
         : null,
-    ].filter(Boolean);
+    ].filter((issue): issue is CdcDetectedIssue => Boolean(issue));
 
     return {
       item: {
-        id: "source-db-cdc",
-        label: "來源資料庫 CDC",
-        status: warnings.length > 0 ? "degraded" : "available",
+        id: `cdc-${options.id}`,
+        label: options.label,
+        status: issues.length > 0 ? "degraded" : "available",
         checkedAt: checkedAt(),
-        reason: warnings.join("；") || undefined,
+        reason: issues.map((issue) => issue.message).join("; ") || undefined,
+        remediation: issues[0]?.remediation,
       },
       ...base,
       walLevel,
@@ -429,24 +534,98 @@ async function getCdcStatus(options: {
       availableWalSenders,
       confirmedFlushLsn: slot?.confirmed_flush_lsn ?? null,
       lagBytes,
+      detectedIssues: issues,
     };
   } catch (error) {
     return {
       item: {
-        id: "source-db-cdc",
-        label: "來源資料庫 CDC",
+        id: `cdc-${options.id}`,
+        label: options.label,
         status: "unknown",
         checkedAt: checkedAt(),
         reason: safeFailureReason(error),
       },
       ...base,
+      detectedIssues: [],
     };
   }
 }
 
-function normalizeStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string");
+function mergeCdcStatus(sources: CdcSourceStatus[]): CdcStatus {
+  const primary = sources[0];
+  const status = statusFromParts(sources.map((source) => source.item.status));
+  const detectedIssues = sources.flatMap((source) => source.detectedIssues);
+  const reason = sources
+    .filter((source) => source.item.reason)
+    .map((source) => `${source.label}: ${source.item.reason}`)
+    .join("; ");
+
+  return {
+    ...primary,
+    item: {
+      id: "cdc",
+      label: "Sequin CDC",
+      status,
+      checkedAt: checkedAt(),
+      reason: reason || undefined,
+      remediation: detectedIssues[0]?.remediation,
+    },
+    id: "cdc",
+    label: "Sequin CDC",
+    routedTables: sources.flatMap((source) => source.routedTables),
+    publicationTables: sources.flatMap((source) =>
+      source.publicationTables.map((table) => `${source.id}:${table}`),
+    ),
+    missingTables: sources.flatMap((source) =>
+      source.missingTables.map((table) => `${source.id}:${table}`),
+    ),
+    extraTables: sources.flatMap((source) =>
+      (source.extraTables ?? []).map((table) => `${source.id}:${table}`),
+    ),
+    detectedIssues,
+    sources,
+  };
+}
+
+async function getCdcStatus(options: {
+  queryClient: QueryClient;
+  timeoutMs: number;
+  reactionQueryClient?: QueryClient | null;
+  publicationName?: string;
+  slotName?: string;
+  reactionPublicationName?: string;
+  reactionSlotName?: string;
+  lagWarningBytes?: number;
+}): Promise<CdcStatus> {
+  const lagWarningBytes = options.lagWarningBytes ?? DEFAULT_LAG_WARNING_BYTES;
+  const sources = await Promise.all([
+    getCdcSourceStatus({
+      id: "source",
+      label: "Server source CDC",
+      queryClient: options.queryClient,
+      timeoutMs: options.timeoutMs,
+      trackedTables: SOURCE_SEQUIN_TABLES,
+      publicationName: options.publicationName ?? defaultPublicationName(),
+      slotName: options.slotName ?? defaultSlotName(),
+      lagWarningBytes,
+    }),
+    getCdcSourceStatus({
+      id: "reaction",
+      label: "Reaction CDC",
+      queryClient: options.reactionQueryClient,
+      timeoutMs: options.timeoutMs,
+      trackedTables: REACTION_SEQUIN_TABLES,
+      publicationName:
+        options.reactionPublicationName ?? defaultReactionPublicationName(),
+      slotName: options.reactionSlotName ?? defaultReactionSlotName(),
+      lagWarningBytes,
+      unconfiguredReason: "STATUS_REACTION_DATABASE_URL is not configured",
+      unconfiguredRemediation:
+        "Set STATUS_REACTION_DATABASE_URL on @rezics/server to the reaction Postgres URL, then verify reaction CDC with task service -- cdc verify --source=reaction.",
+    }),
+  ]);
+
+  return mergeCdcStatus(sources);
 }
 
 function numberField(row: Record<string, unknown>, key: string) {
@@ -707,6 +886,9 @@ export async function getSystemStatusSummary(options?: {
   authHealthUrl?: string;
   publicationName?: string;
   slotName?: string;
+  reactionQueryClient?: QueryClient | null;
+  reactionPublicationName?: string;
+  reactionSlotName?: string;
   lagWarningBytes?: number;
   meiliSummary?: MeiliStatusSummary;
 }): Promise<SystemStatusSummary> {
@@ -724,6 +906,13 @@ export async function getSystemStatusSummary(options?: {
       (env.AUTH_PUBLIC_BASE_URL
         ? joinUrl(env.AUTH_PUBLIC_BASE_URL, "/health")
         : undefined));
+  const externalReactionDb =
+    options?.reactionQueryClient === undefined &&
+    env.STATUS_REACTION_DATABASE_URL
+      ? createServerDb(env.STATUS_REACTION_DATABASE_URL, 2)
+      : null;
+  const reactionQueryClient =
+    options?.reactionQueryClient ?? externalReactionDb?.db ?? null;
 
   const [
     meili,
@@ -779,10 +968,17 @@ export async function getSystemStatusSummary(options?: {
     }),
     getCdcStatus({
       queryClient: options?.queryClient ?? db,
+      reactionQueryClient,
       timeoutMs,
       publicationName:
         options?.publicationName ?? env.STATUS_CDC_PUBLICATION_NAME,
       slotName: options?.slotName ?? env.STATUS_CDC_REPLICATION_SLOT_NAME,
+      reactionPublicationName:
+        options?.reactionPublicationName ??
+        env.STATUS_REACTION_CDC_PUBLICATION_NAME,
+      reactionSlotName:
+        options?.reactionSlotName ??
+        env.STATUS_REACTION_CDC_REPLICATION_SLOT_NAME,
       lagWarningBytes:
         options?.lagWarningBytes ??
         Number(env.STATUS_CDC_LAG_WARNING_BYTES ?? DEFAULT_LAG_WARNING_BYTES),
@@ -791,7 +987,9 @@ export async function getSystemStatusSummary(options?: {
       queryClient: options?.queryClient ?? db,
       timeoutMs,
     }),
-  ]);
+  ]).finally(async () => {
+    await externalReactionDb?.disconnect();
+  });
 
   const correlatedHistoryOutbox = correlateHistoryOutboxWithQueue(
     historyOutbox,

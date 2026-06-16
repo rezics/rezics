@@ -161,6 +161,9 @@ show links and reach optional dependencies:
 | `STATUS_SEQUIN_WEBHOOK_TARGET_NAME` | `job-runner /webhooks/sequin` | Safe display name for the configured sink target. |
 | `STATUS_CDC_PUBLICATION_NAME` | `rezics_sequin_pub_development` | Expected source DB publication. |
 | `STATUS_CDC_REPLICATION_SLOT_NAME` | `rezics_sequin_slot_development` | Expected source DB replication slot. |
+| `STATUS_REACTION_DATABASE_URL` | `postgresql://.../rezics_reaction` | Optional reaction DB URL used only for CDC diagnostics. |
+| `STATUS_REACTION_CDC_PUBLICATION_NAME` | `rezics_reaction_sequin_pub_development` | Expected reaction DB publication. |
+| `STATUS_REACTION_CDC_REPLICATION_SLOT_NAME` | `rezics_reaction_sequin_slot_development` | Expected reaction DB replication slot. |
 | `STATUS_CDC_LAG_WARNING_BYTES` | `268435456` | Lag threshold that marks CDC degraded. |
 
 Do not configure database URLs, passwords, API keys, or internal secrets as

@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 
 import { ArrowButton } from "#/primitive/carousel/ArrowButton";
+import { resolveCarouselWheelScroll } from "#/primitive/carousel/wheel-scroll";
 import { Button } from "#/shadcn/button";
 import { cn } from "#/shared/lib/utils";
 
@@ -21,6 +22,7 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
+  wheelScroll?: boolean;
 };
 
 type CarouselContextProps = {
@@ -49,6 +51,7 @@ function Carousel({
   opts,
   setApi,
   plugins,
+  wheelScroll = false,
   className,
   children,
   ...props
@@ -105,6 +108,43 @@ function Carousel({
       api?.off("select", onSelect);
     };
   }, [api, onSelect]);
+
+  React.useEffect(() => {
+    if (!api || !wheelScroll) return;
+
+    const element = api.rootNode();
+
+    function handleNativeWheel(event: WheelEvent) {
+      if (!api || event.defaultPrevented) return;
+
+      const engine = api.internalEngine();
+      const { consume, distance } = resolveCarouselWheelScroll({
+        axis: orientation === "horizontal" ? "x" : "y",
+        deltaX: event.deltaX,
+        deltaY: event.deltaY,
+        directionSign: engine.axis.direction(1),
+        loop: engine.options.loop,
+        max: engine.limit.max,
+        min: engine.limit.min,
+        target: engine.target.get(),
+      });
+      if (!consume) return;
+
+      // biome-ignore lint/correctness/useHookAtTopLevel: Embla uses use* method names for scroll physics, not React hooks.
+      engine.scrollBody.useDuration(0);
+      // biome-ignore lint/correctness/useHookAtTopLevel: Embla uses use* method names for scroll physics, not React hooks.
+      engine.scrollBody.useFriction(0);
+      engine.scrollTo.distance(distance, false);
+      onSelect(api);
+      event.preventDefault();
+    }
+
+    element.addEventListener("wheel", handleNativeWheel, { passive: false });
+
+    return () => {
+      element.removeEventListener("wheel", handleNativeWheel);
+    };
+  }, [api, onSelect, orientation, wheelScroll]);
 
   return (
     <CarouselContext.Provider

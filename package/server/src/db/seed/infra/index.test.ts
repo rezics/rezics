@@ -5,9 +5,9 @@ import {
   Unit,
   UnitSupportLanguage,
   UnitTranslation,
+  UserSubscriptionListEntry,
   Zone,
   ZonePage,
-  UserSubscriptionListEntry,
 } from "../../schema";
 // Static imports run before the `mock.module` calls below, so these bind
 // the real module namespaces for the afterAll restore: `mock.restore()`

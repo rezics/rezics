@@ -17,7 +17,7 @@ type CardStyle = React.CSSProperties & {
 
 const cardSurfaceClasses: Record<CardSurface, string> = {
   plain: "bg-transparent text-text-primary shadow-none ring-0",
-  contained: "bg-surface-base text-text-primary shadow-none ring-0",
+  contained: "bg-surface-subtle text-text-primary shadow-none ring-0",
   elevated:
     "bg-surface-canvas text-text-primary ring-0 [box-shadow:var(--card-elevation-shadow)]",
 };
@@ -25,7 +25,7 @@ const cardSurfaceClasses: Record<CardSurface, string> = {
 const cardInteractiveClasses: Record<CardSurface, string> = {
   plain:
     "p-2 hover:bg-surface-subtle data-[size=sm]:p-2 has-[>img:first-child]:pt-2 has-[>[data-slot=card-media]:first-child]:pt-2 has-[>img:last-child]:pb-2 has-[>[data-slot=card-media]:last-child]:pb-2",
-  contained: "hover:bg-surface-elevated",
+  contained: "hover:bg-surface-sunken",
   elevated:
     "hover:[box-shadow:var(--card-elevation-hover-shadow)] hover:[transform:var(--card-elevation-hover-transform)]",
 };

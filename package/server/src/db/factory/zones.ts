@@ -6,13 +6,14 @@ import {
   type ZoneBoundaryFilter,
   type ZoneCollectionItem,
   type ZoneContentSection,
+  type ZoneDynamicTags,
   type ZoneMenu,
   type ZoneNav,
   type ZonePage as ZonePageConfig,
   type ZonePageSection,
   type ZoneSectionQuery,
-  type ZoneSectionQuerySortField,
   type ZoneTheme,
+  ZONE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
 import { rebalance } from "../../shelf/fractional-index.js";
 import {
@@ -77,38 +78,10 @@ type ZoneFixturePageIds = {
 
 const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 
-// Per-target sort vocabularies mirror `ZONE_QUERY_SORTABLE` in
-// `meili/search/filters.ts`: unit queries may not sort by replyCount, post
-// queries may not sort by publishedAt, and realm/zone queries use their
-// dedicated indexes.
-// 按目标的排序词汇表与 `meili/search/filters.ts` 的 `ZONE_QUERY_SORTABLE`
-// 一致：unit 查询不可按 replyCount 排序，post 查询不可按 publishedAt 排序，
-// realm/zone 查询使用各自的专用索引。
-const UNIT_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-  "publishedAt",
-  "trendingScore",
-  "qualityScore",
-  "topScore",
-];
-const POST_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-  "replyCount",
-  "hotScore",
-  "bestScore",
-  "topScore",
-];
-const REALM_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-  "memberCount",
-];
-const ZONE_SORT_FIELDS: ZoneSectionQuerySortField[] = [
-  "createdAt",
-  "updatedAt",
-];
+const UNIT_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.unit;
+const POST_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.post;
+const REALM_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.realm;
+const ZONE_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.zone;
 
 interface ZoneTemporalState {
   startsAt: Date | null;
@@ -194,6 +167,7 @@ function fixtureBoundary(
   const contentType = faker.helpers.arrayElement(WORK_TYPE_FILTERS);
   switch (kind) {
     case "book-portal":
+      return { types: [UnitType.BOOK] };
     case "tabbed-portal":
       return { types: [contentType] };
     case "pulse-board":
@@ -205,6 +179,23 @@ function fixtureBoundary(
     case "zone-directory":
       return { types: [UnitType.ZONE] };
   }
+}
+
+function fixtureBookDynamicTags(
+  tagUnitIds: readonly string[],
+): ZoneDynamicTags {
+  const options = pickN(tagUnitIds, Math.min(8, tagUnitIds.length)).map(
+    (tagUnitId) => ({
+      tagUnitIds: [tagUnitId],
+      probability:
+        tagUnitIds.length > 0 ? 0.8 / Math.min(8, tagUnitIds.length) : 0,
+    }),
+  );
+  return {
+    groupId: "book-portal-topics",
+    fallback: true,
+    options,
+  };
 }
 
 function unitQuerySection(input: {
@@ -301,19 +292,74 @@ function fixtureHomeSections(
   refs: ZoneFixtureRefs,
 ): ZonePageSection[] {
   switch (kind) {
-    case "book-portal":
+    case "book-portal": {
       return [
         { id: "hero", kind: "hero", showDescription: true },
-        unitQuerySection({
+        {
           id: "latest",
-          tagUnitIds:
-            refs.tagUnitIds.length > 0
-              ? pickN(refs.tagUnitIds, Math.min(2, refs.tagUnitIds.length))
-              : undefined,
+          kind: "query",
+          display: "carousel",
           limit: 24,
-        }),
-        postQuerySection({ id: "discussions", limit: 12 }),
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "publishedAt", direction: "desc" },
+          },
+        },
+        {
+          id: "topic-a",
+          kind: "query",
+          display: "carousel",
+          limit: 18,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "qualityScore", direction: "desc" },
+          },
+          dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
+        },
+        {
+          id: "topic-b",
+          kind: "query",
+          display: "carousel",
+          limit: 18,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "risingScore", direction: "desc" },
+          },
+          dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
+        },
+        {
+          id: "topic-c",
+          kind: "query",
+          display: "carousel",
+          limit: 18,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "trendingScore", direction: "desc" },
+          },
+          dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
+        },
+        {
+          id: "hot-feed",
+          kind: "query",
+          display: "list",
+          limit: 24,
+          loadMore: true,
+          query: {
+            target: "unit",
+            types: [UnitType.BOOK],
+            sort: { field: "hotScore", direction: "desc" },
+          },
+        },
       ];
+    }
     case "pulse-board":
       return [
         postQuerySection({ id: "pulse", limit: 30 }),

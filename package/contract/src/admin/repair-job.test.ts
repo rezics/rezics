@@ -64,6 +64,23 @@ describe("admin repair job contracts", () => {
     ).toBe(true);
   });
 
+  test("accepts CDC repair dry-run and start requests", () => {
+    expect(
+      Value.Check(adminRepairJobDryRunRequestSchema, {
+        scope: "cdc",
+        targetIds: ["reaction:slot_missing", "history:outbox-replay"],
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(adminRepairJobStartRequestSchema, {
+        scope: "cdc",
+        reason: "repair CDC delivery",
+        targetIds: ["reaction:slot_missing", "history:outbox-replay"],
+        dryRunId: "dryrun-1",
+      }),
+    ).toBe(true);
+  });
+
   test("accepts queued repair job status", () => {
     expect(
       Value.Check(adminRepairJobSchema, {

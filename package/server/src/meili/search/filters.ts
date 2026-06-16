@@ -8,8 +8,13 @@ import type {
   SearchScope,
   ZoneBoundaryFilter,
   ZoneSectionQuery,
+  ZoneSectionQueryFilterField,
 } from "@rezics/contract";
-import { normalizeLanguage } from "@rezics/contract";
+import {
+  normalizeLanguage,
+  ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
+  ZONE_SECTION_QUERY_SORT_FIELDS,
+} from "@rezics/contract";
 
 // ANCHOR: shared filter builders for federated search
 // ANCHOR: 联合搜索的共享过滤器构造器
@@ -516,66 +521,21 @@ export interface CompiledZoneSectionQuery {
   sort: string[];
 }
 
-const ZONE_QUERY_FILTERABLE: Record<
-  ZoneSectionQuery["target"],
-  Set<keyof Omit<ZoneSectionQuery, "target" | "sort">>
-> = {
-  unit: new Set([
-    "types",
-    "postKinds",
-    "realm",
-    "tagUnitIds",
-    "realmTagUnitIds",
-    "subjects",
-    "targetUnitId",
-    "languages",
-    "ratings",
-  ]),
-  post: new Set(["postKinds", "realm", "targetUnitId", "languages"]),
-  realm: new Set(["types", "languages"]),
-  zone: new Set(["types", "realm", "languages"]),
-};
-
-const ZONE_QUERY_SORTABLE: Record<ZoneSectionQuery["target"], Set<string>> = {
-  unit: new Set([
-    "createdAt",
-    "updatedAt",
-    "publishedAt",
-    "bestScore",
-    "hotScore",
-    "topScore",
-    "risingScore",
-    "controversyScore",
-    "trendingScore",
-    "qualityScore",
-  ]),
-  post: new Set([
-    "createdAt",
-    "updatedAt",
-    "replyCount",
-    "bestScore",
-    "hotScore",
-    "topScore",
-    "risingScore",
-    "controversyScore",
-    "trendingScore",
-    "qualityScore",
-  ]),
-  realm: new Set(["createdAt", "updatedAt", "memberCount"]),
-  zone: new Set(["createdAt", "updatedAt"]),
-};
-
 export function zoneSectionQueryUnsupportedFields(
   query: ZoneSectionQuery,
 ): string[] {
-  const filterable = ZONE_QUERY_FILTERABLE[query.target];
+  const filterable = ZONE_SECTION_QUERY_FILTERABLE_FIELDS[query.target];
   const unsupported: string[] = [];
   for (const key of Object.keys(query) as (keyof ZoneSectionQuery)[]) {
     if (key === "target" || key === "sort") continue;
     if (query[key] === undefined) continue;
-    if (!filterable.has(key)) unsupported.push(key);
+    if (!filterable.includes(key as ZoneSectionQueryFilterField)) {
+      unsupported.push(key);
+    }
   }
-  if (!ZONE_QUERY_SORTABLE[query.target].has(query.sort.field)) {
+  if (
+    !ZONE_SECTION_QUERY_SORT_FIELDS[query.target].includes(query.sort.field)
+  ) {
     unsupported.push(`sort.${query.sort.field}`);
   }
   return unsupported;

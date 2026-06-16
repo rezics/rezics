@@ -147,6 +147,22 @@ function baseFailedJobLane(lane: string) {
   return lane.endsWith(".dead") ? lane.slice(0, -".dead".length) : lane;
 }
 
+function cdcIssueTarget(sourceId: string, code: string) {
+  return `${sourceId}:${code}`;
+}
+
+function isHistoryOutboxReplayTarget(target: string) {
+  return target === "history:outbox-replay";
+}
+
+function cdcRepairCommandForTarget(target: string) {
+  const [sourceId] = target.split(":");
+  if (sourceId === "source" || sourceId === "reaction") {
+    return `task service -- cdc repair --source=${sourceId}`;
+  }
+  return "task service -- cdc repair";
+}
+
 async function retryFailedJob(
   options: AdminRepairJobServiceOptions,
   target: string,
@@ -261,6 +277,32 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
           .filter((target): target is string => Boolean(target));
       } else if (input.scope === "history-outbox-replay") {
         targets = await findHistoryOutboxReplayTargets(options.database, input);
+      } else if (input.scope === "cdc") {
+        targets = system.cdc.detectedIssues.map((issue) =>
+          cdcIssueTarget(issue.sourceId, issue.code),
+        );
+        if (
+          system.historyOutbox?.pendingWithoutIngestJob ||
+          (system.historyOutbox?.failed ?? 0) > 0 ||
+          (system.historyOutbox?.retryReady ?? 0) > 0
+        ) {
+          targets.push("history:outbox-replay");
+        }
+        warnings.push(
+          ...system.cdc.detectedIssues.map((issue) =>
+            [
+              `${issue.sourceId}:${issue.code} - ${issue.message}`,
+              issue.remediation ? `Remediation: ${issue.remediation}` : null,
+            ]
+              .filter(Boolean)
+              .join(" "),
+          ),
+        );
+        if (targets.some((target) => !isHistoryOutboxReplayTarget(target))) {
+          warnings.push(
+            "CDC publication and replication slot repairs are infrastructure operations. Run task service -- cdc repair from the repo root after stopping duplicate Sequin consumers.",
+          );
+        }
       } else {
         warnings.push(
           `${input.scope} dry-run contract is available; detector implementation is pending.`,
@@ -384,6 +426,43 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
               );
             }
           }
+        } else if (input.scope === "cdc") {
+          const replayRequested =
+            targetIds.length === 0 ||
+            targetIds.some(isHistoryOutboxReplayTarget);
+          if (replayRequested) {
+            const command = createHistoryOutboxIngestBatchCommand(
+              {},
+              {
+                type: "server",
+                service: "admin-repair-job",
+              },
+            );
+            queuedOperations.push(
+              operationFromEnqueue(await options.jobProducer.enqueue(command)),
+            );
+          }
+          const infrastructureTargets = targetIds.filter(
+            (target) => !isHistoryOutboxReplayTarget(target),
+          );
+          if (infrastructureTargets.length > 0) {
+            await appendRepairAudit(options, {
+              actorUserId: input.actorUserId,
+              action: "repair.infrastructure-required",
+              targetId: input.scope,
+              reason: input.reason,
+              correlationId,
+              metadata: {
+                scope: input.scope,
+                targets: infrastructureTargets,
+                commands: [
+                  ...new Set(
+                    infrastructureTargets.map(cdcRepairCommandForTarget),
+                  ),
+                ],
+              },
+            });
+          }
         } else {
           const failureAudit = await appendRepairAudit(options, {
             actorUserId: input.actorUserId,
@@ -429,15 +508,31 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
           },
         });
 
+        const infrastructureTargets =
+          input.scope === "cdc"
+            ? targetIds.filter((target) => !isHistoryOutboxReplayTarget(target))
+            : [];
+        const safeSummary =
+          infrastructureTargets.length > 0
+            ? `${queuedOperations.length} safe downstream repair operation(s) queued. CDC infrastructure target(s) require operator CLI repair: ${[
+                ...new Set(
+                  infrastructureTargets.map(cdcRepairCommandForTarget),
+                ),
+              ].join(", ")}.`
+            : `${queuedOperations.length} durable repair operation(s) queued. Job-runner retry policy will handle transient failures.`;
+
         return {
           id: queuedOperations[0]?.jobId ?? buildId("repair"),
           scope: input.scope,
-          status: "pending",
+          status: queuedOperations.length > 0 ? "pending" : "succeeded",
           progress: {
-            completed: 0,
-            total: queuedOperations.length,
+            completed: queuedOperations.length > 0 ? 0 : targetIds.length,
+            total:
+              input.scope === "cdc" && queuedOperations.length === 0
+                ? targetIds.length
+                : queuedOperations.length,
           },
-          safeSummary: `${queuedOperations.length} durable repair operation(s) queued. Job-runner retry policy will handle transient failures.`,
+          safeSummary,
           auditLogId: startAudit?.id ?? completionAudit?.id ?? null,
           dryRunId: input.dryRunId ?? null,
           queuedOperations,

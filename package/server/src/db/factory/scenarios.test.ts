@@ -2,10 +2,10 @@ import { describe, expect, test } from "bun:test";
 import {
   ZONE_MENU_MAX_DEPTH,
   type ZoneMenuNode,
+  type ZonePage as ZonePageConfig,
   zoneBoundaryEnvelopeSchema,
   zoneNavEnvelopeSchema,
   zonePageEnvelopeSchema,
-  type ZonePage as ZonePageConfig,
   zoneThemeEnvelopeSchema,
 } from "@rezics/contract";
 import { Value } from "@sinclair/typebox/value";
@@ -261,6 +261,37 @@ describe("zone fixture configs", () => {
     }
     expect(targets).toContain("realm");
     expect(targets).toContain("zone");
+  });
+
+  test("book portal fixture uses dynamic query rails for topic variety", () => {
+    const config = buildZoneFixtureConfig("book-portal", refs);
+    const sections = config.pages[0]!.config.sections;
+    const querySections = collectSectionEntries(config.pages[0]!.config).filter(
+      (section) => section.kind === "query",
+    );
+    const dynamicSections = querySections.filter(
+      (section) => section.kind === "query" && section.dynamicTags,
+    );
+
+    expect(config.boundary.filters).toEqual({ types: ["BOOK"] });
+    expect(sections.map((section) => section.kind)).toEqual([
+      "hero",
+      "query",
+      "query",
+      "query",
+      "query",
+      "query",
+    ]);
+    expect(dynamicSections).toHaveLength(3);
+    expect(
+      dynamicSections.every(
+        (section) =>
+          section.kind === "query" &&
+          section.display === "carousel" &&
+          section.query.target === "unit" &&
+          section.dynamicTags?.groupId === "book-portal-topics",
+      ),
+    ).toBe(true);
   });
 });
 

@@ -17,6 +17,7 @@ export const tagKeys = {
   // 详情
   details: () => [...tagKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...tagKeys.details(), unitId] as const,
+  bySlug: (slug: string) => [...tagKeys.details(), "slug", slug] as const,
 
   // search
   // 搜索

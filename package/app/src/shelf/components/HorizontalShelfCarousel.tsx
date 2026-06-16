@@ -30,6 +30,7 @@ export const HorizontalShelfCarousel: React.FC<
       itemClassName={SHELF_ITEM_CLASS}
       className={className}
       ariaLabel={t("entity:shelf_list_title")}
+      wheelScroll
       renderItem={(item) => <ShelfCard shelf={item} />}
     />
   );

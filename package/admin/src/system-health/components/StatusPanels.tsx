@@ -1,4 +1,5 @@
 import type {
+  CdcSourceStatus,
   CdcStatus,
   HistoryOutboxStatus,
   MeiliIndexStatus,
@@ -7,6 +8,7 @@ import type {
   StatusItem,
   StatusLink,
 } from "@rezics/api";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -52,6 +54,7 @@ function repairSearch({
 }: {
   scope:
     | "search"
+    | "cdc"
     | "slug"
     | "queue-failed-job"
     | "history-outbox-replay"
@@ -491,6 +494,131 @@ function queueTotals(queue: QueueStatus) {
   );
 }
 
+function cdcRepairTargets(cdc: CdcStatus) {
+  const targets = cdc.detectedIssues.map(
+    (issue) => `${issue.sourceId}:${issue.code}`,
+  );
+  return targets.length ? targets.join(",") : undefined;
+}
+
+function CdcSourceBlock({
+  source,
+  t,
+}: {
+  source: CdcSourceStatus;
+  t: (key: string, values?: Record<string, unknown>) => string;
+}) {
+  const hasPublicationDrift =
+    source.missingTables.length > 0 || (source.extraTables?.length ?? 0) > 0;
+  return (
+    <div className="rounded-md border border-border-whisper bg-surface-subtle p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-sm font-medium leading-[1.4]">{source.label}</p>
+          <p className="mt-1 break-all text-xs text-text-secondary">
+            {source.publicationName ?? t("admin:status_value_not_configured")} ·{" "}
+            {source.slotName ?? t("admin:status_value_not_configured")}
+          </p>
+        </div>
+        <StatusIndicator status={source.item.status} />
+      </div>
+      {source.item.reason ? (
+        <p className="mt-2 text-xs leading-[1.4] text-text-secondary">
+          {source.item.reason}
+        </p>
+      ) : null}
+      <MetricGrid
+        items={[
+          {
+            label: t("admin:status_cdc_metric_wal_level"),
+            value: source.walLevel ?? t("admin:status_value_unknown"),
+          },
+          {
+            label: t("admin:status_cdc_metric_publication_exists"),
+            value: formatBooleanState(source.publicationExists),
+            state: source.publicationExists === false ? "degraded" : undefined,
+          },
+          {
+            label: t("admin:status_cdc_metric_slot_active"),
+            value: `${formatBooleanState(source.slotActive)}${
+              source.slotActivePid ? ` · pid ${source.slotActivePid}` : ""
+            }`,
+            state: source.slotActive === false ? "degraded" : undefined,
+          },
+          {
+            label: t("admin:status_cdc_metric_lag_bytes"),
+            value: source.lagBytes ?? t("admin:status_value_unknown"),
+            state:
+              source.lagBytes && source.lagBytes > 0 ? "degraded" : undefined,
+          },
+          {
+            label: t("admin:status_cdc_metric_replication_slots"),
+            value:
+              source.maxReplicationSlots == null
+                ? t("admin:status_value_unknown")
+                : t("admin:status_cdc_metric_capacity", {
+                    used: source.usedReplicationSlots ?? 0,
+                    max: source.maxReplicationSlots,
+                    available: source.availableReplicationSlots ?? 0,
+                  }),
+            state:
+              source.availableReplicationSlots === 0 ? "degraded" : undefined,
+          },
+          {
+            label: t("admin:status_cdc_metric_wal_senders"),
+            value:
+              source.maxWalSenders == null
+                ? t("admin:status_value_unknown")
+                : t("admin:status_cdc_metric_wal_sender_capacity", {
+                    active: source.activeWalSenders ?? 0,
+                    max: source.maxWalSenders,
+                    available: source.availableWalSenders ?? 0,
+                  }),
+            state: source.availableWalSenders === 0 ? "degraded" : undefined,
+          },
+        ]}
+      />
+      <TableDriftList
+        title={t("admin:status_cdc_missing_tables")}
+        tables={source.missingTables}
+        state="degraded"
+      />
+      <TableDriftList
+        title={t("admin:status_cdc_extra_tables")}
+        tables={source.extraTables ?? []}
+        state="unknown"
+      />
+      {!hasPublicationDrift && source.item.status === "available" ? (
+        <p className="mt-2 text-xs leading-[1.4] text-success-text">
+          {t("admin:status_cdc_source_schema_ok")}
+        </p>
+      ) : null}
+      {source.detectedIssues.length > 0 ? (
+        <div className="mt-3 space-y-2">
+          {source.detectedIssues.map((issue) => (
+            <div
+              key={`${issue.sourceId}-${issue.code}`}
+              className="rounded-sm border border-warning-border bg-warning-surface p-2"
+            >
+              <p className="text-xs font-medium text-warning-text">
+                {issue.code}
+              </p>
+              <p className="mt-1 text-xs leading-[1.4] text-warning-text">
+                {issue.message}
+              </p>
+              {issue.remediation ? (
+                <p className="mt-1 text-xs leading-[1.4] text-warning-text">
+                  {issue.remediation}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function CdcPanel({
   cdc,
   historyOutbox,
@@ -502,13 +630,13 @@ export function CdcPanel({
   queue: QueueStatus;
   sequin: StatusItem;
 }) {
+  const { t } = useTranslation(["admin"]);
   const totals = queueTotals(queue);
-  const hasPublicationDrift =
-    cdc.missingTables.length > 0 || (cdc.extraTables?.length ?? 0) > 0;
+  const repairTargets = cdcRepairTargets(cdc);
   return (
     <StatusCard
-      title="Sequin / CDC / Database"
-      description="來源資料庫、Sequin、job-runner 與 HistoryOutbox 的 CDC 鏈路狀態。"
+      title={t("admin:status_cdc_chain_title")}
+      description={t("admin:status_cdc_chain_description")}
       icon={<Database className="size-4" aria-hidden="true" />}
     >
       <div className="grid gap-2 lg:grid-cols-2">
@@ -519,93 +647,73 @@ export function CdcPanel({
       </div>
       <MetricGrid
         items={[
-          { label: "wal_level", value: cdc.walLevel ?? "未回報" },
           {
-            label: "publication",
-            value: cdc.publicationName ?? "未設定",
-            state: cdc.publicationExists === false ? "degraded" : undefined,
+            label: t("admin:status_cdc_metric_sources"),
+            value: cdc.sources.length,
           },
           {
-            label: "publication exists",
-            value: formatBooleanState(cdc.publicationExists),
-            state: cdc.publicationExists === false ? "degraded" : undefined,
+            label: t("admin:status_cdc_metric_detected_issues"),
+            value: cdc.detectedIssues.length,
+            state: cdc.detectedIssues.length > 0 ? "degraded" : undefined,
           },
           {
-            label: "slot",
-            value: cdc.slotName ?? "未設定",
-            state: cdc.slotExists === false ? "degraded" : undefined,
-          },
-          {
-            label: "slot active",
-            value: `${formatBooleanState(cdc.slotActive)}${
-              cdc.slotActivePid ? ` · pid ${cdc.slotActivePid}` : ""
-            }`,
-            state: cdc.slotActive === false ? "degraded" : undefined,
-          },
-          {
-            label: "lag bytes",
-            value: cdc.lagBytes ?? "未回報",
-            state: cdc.lagBytes && cdc.lagBytes > 0 ? "degraded" : undefined,
-          },
-          { label: "restart LSN", value: cdc.restartLsn ?? "未回報" },
-          {
-            label: "confirmed flush LSN",
-            value: cdc.confirmedFlushLsn ?? "未回報",
-          },
-          {
-            label: "replication slots",
-            value:
-              cdc.maxReplicationSlots == null
-                ? "未回報"
-                : `${cdc.usedReplicationSlots ?? 0}/${cdc.maxReplicationSlots} used · ${cdc.availableReplicationSlots ?? 0} available`,
-            state: cdc.availableReplicationSlots === 0 ? "degraded" : undefined,
-          },
-          {
-            label: "WAL senders",
-            value:
-              cdc.maxWalSenders == null
-                ? "未回報"
-                : `${cdc.activeWalSenders ?? 0}/${cdc.maxWalSenders} active · ${cdc.availableWalSenders ?? 0} available`,
-            state: cdc.availableWalSenders === 0 ? "degraded" : undefined,
-          },
-          {
-            label: "HistoryOutbox pending",
-            value: `${historyOutbox.pending} pending · ${historyOutbox.retryReady} retry-ready`,
+            label: t("admin:status_cdc_metric_history_pending"),
+            value: t("admin:status_cdc_metric_history_pending_value", {
+              pending: historyOutbox.pending,
+              retryReady: historyOutbox.retryReady,
+            }),
             state:
               historyOutbox.pendingWithoutIngestJob || historyOutbox.failed > 0
                 ? "degraded"
                 : undefined,
           },
           {
-            label: "job-runner queue",
-            value: `${totals.active} active · ${totals.retry} retry · ${totals.failed} failed`,
+            label: t("admin:status_cdc_metric_job_runner_queue"),
+            value: t("admin:status_cdc_metric_job_runner_queue_value", {
+              active: totals.active,
+              retry: totals.retry,
+              failed: totals.failed,
+            }),
             state: totals.failed > 0 ? "degraded" : undefined,
           },
         ]}
       />
-      <TableDriftList
-        title="publication 缺少資料表"
-        tables={cdc.missingTables}
-        state="degraded"
-      />
-      <TableDriftList
-        title="publication 額外資料表"
-        tables={cdc.extraTables ?? []}
-        state="unknown"
-      />
-      {!hasPublicationDrift ? (
-        <p className="text-xs leading-[1.4] text-success-text">
-          已路由資料表都有 publication 覆蓋，未偵測到額外 publication 資料表。
-        </p>
+      <div className="grid gap-3">
+        {cdc.sources.map((source) => (
+          <CdcSourceBlock key={source.id} source={source} t={t} />
+        ))}
+      </div>
+      {cdc.detectedIssues.length > 0 ? (
+        <div className="rounded-sm border border-warning-border bg-warning-surface p-3">
+          <p className="text-sm font-medium leading-[1.4] text-warning-text">
+            {t("admin:status_cdc_detected_title")}
+          </p>
+          <p className="mt-1 text-xs leading-[1.4] text-warning-text">
+            {t("admin:status_cdc_detected_description")}
+          </p>
+          <Link
+            to="/repair"
+            search={repairSearch({
+              scope: "cdc",
+              targetIds: repairTargets,
+            })}
+            className={`${buttonVariants({
+              variant: "outline",
+              size: "xs",
+            })} mt-3`}
+          >
+            <Wrench className="size-3" aria-hidden="true" />
+            {t("admin:repair_open")}
+          </Link>
+        </div>
       ) : null}
       {historyOutbox.pendingWithoutIngestJob ? (
         <div className="rounded-sm border border-warning-border bg-warning-surface p-3">
           <p className="text-sm font-medium leading-[1.4] text-warning-text">
-            HistoryOutbox pending 但沒有 history.ingest 佇列活動
+            {t("admin:status_cdc_history_pending_title")}
           </p>
           <p className="mt-1 text-xs leading-[1.4] text-warning-text">
-            先確認 Sequin 與 job-runner 入口健康，再到修復頁對 HistoryOutbox
-            replay 做 dry-run。
+            {t("admin:status_cdc_history_pending_description")}
           </p>
           <Link
             to="/repair"
@@ -621,25 +729,23 @@ export function CdcPanel({
             })} mt-3`}
           >
             <Wrench className="size-3" aria-hidden="true" />
-            開啟修復
+            {t("admin:repair_open")}
           </Link>
         </div>
       ) : null}
       <div className="rounded-sm border border-border-whisper bg-surface-subtle p-3">
         <p className="text-sm font-medium leading-[1.4]">
-          Slot recreation is a deployment operation
+          {t("admin:status_cdc_infra_title")}
         </p>
         <p className="mt-1 text-xs leading-[1.4] text-text-secondary">
-          This admin surface only diagnoses CDC state and queues bounded repair
-          jobs. Replication slot drop/recreate, active slot termination, and
-          Sequin deployment changes stay in runbook-controlled operations.
+          {t("admin:status_cdc_infra_description")}
         </p>
         {sequin.url ? (
           <AdminSafeLink
             href={sequin.url}
             className="mt-2 inline-block text-xs text-link"
           >
-            Open Sequin UI
+            {t("admin:status_cdc_open_sequin")}
           </AdminSafeLink>
         ) : null}
       </div>

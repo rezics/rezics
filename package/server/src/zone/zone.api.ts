@@ -7,12 +7,12 @@ import {
   updateZoneNavInputSchema,
   updateZonePageInputSchema,
   updateZoneThemeInputSchema,
-  zoneListQuerySchema,
-  type ZoneListResponse,
   type ZoneBoundary,
+  type ZoneListResponse,
   type ZoneNav,
   type ZonePage,
   type ZoneTheme,
+  zoneListQuerySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
@@ -122,8 +122,8 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
     "/user/:userId",
     async ({ params, headers, query }): Promise<ZoneListResponse> => {
       const identity = await tryResolveIdentity(
-        headers["authorization"],
-        headers["cookie"],
+        headers.authorization,
+        headers.cookie,
       );
       const canSeePrivate =
         identity?.userId === params.userId || isAdminRole(identity);
@@ -233,6 +233,10 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         {
           cursor: query.cursor ?? null,
           preferredLanguages: preferredLanguages(query),
+          dynamicTagUnitIds: (query.dynamicTagUnitIds ?? "")
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean),
         },
       );
       if (!data) {
@@ -252,6 +256,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
       query: t.Object({
         languages: t.Optional(t.String()),
         cursor: t.Optional(t.String()),
+        dynamicTagUnitIds: t.Optional(t.String()),
       }),
       detail: {
         summary: "Get zone section data",

@@ -47,6 +47,13 @@ export const tagApi = {
   },
 
   /**
+   * Get tag detail by slug (tag is a Unit with type=TAG).
+   */
+  getBySlug: async (slug: string): Promise<UnitTagDTO> => {
+    return apiFetch<UnitTagDTO>(`/tag/by-slug/${encodeURIComponent(slug)}`);
+  },
+
+  /**
    * Create a tag (requires auth)
    * Input: translations array with language + title
    */

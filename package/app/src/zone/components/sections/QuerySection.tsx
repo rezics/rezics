@@ -34,12 +34,14 @@ export function QuerySection({
   const { t } = useTranslation(["zone"]);
   const { zone, refUnits } = ctx;
   const title = useZoneSectionTitle(section, refUnits);
+  const dynamicTagUnitIds = ctx.dynamicTagSelections?.[section.id] ?? [];
   const query = useInfiniteQuery(
     zoneSectionInfiniteQuery(
       zone.unitId,
       ctx.pageId,
       section.id,
       ctx.languages,
+      { dynamicTagUnitIds },
     ),
   );
 

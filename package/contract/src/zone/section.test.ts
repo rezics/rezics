@@ -3,7 +3,10 @@ import { Value } from "@sinclair/typebox/value";
 import {
   zoneColumnsSectionSchema,
   zoneContentSectionSchema,
+  zoneDynamicTagsSchema,
   zonePageSectionSchema,
+  ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
+  ZONE_SECTION_QUERY_SORT_FIELDS,
   zoneSectionQuerySchema,
   zoneSourcesSectionSchema,
   zoneTabsSectionSchema,
@@ -39,6 +42,27 @@ describe("zone section query", () => {
         sort: { field: "memberCount", direction: "desc" },
       }),
     ).toBe(true);
+    expect(
+      Value.Check(zoneSectionQuerySchema, {
+        target: "zone",
+        types: ["ZONE"],
+        realm: "context",
+        languages: "viewer",
+        sort: { field: "updatedAt", direction: "desc" },
+      }),
+    ).toBe(true);
+  });
+
+  test("publishes per-target filter and sort vocabularies", () => {
+    expect(ZONE_SECTION_QUERY_FILTERABLE_FIELDS.zone).toEqual([
+      "types",
+      "realm",
+      "languages",
+    ]);
+    expect(ZONE_SECTION_QUERY_SORT_FIELDS.zone).toEqual([
+      "createdAt",
+      "updatedAt",
+    ]);
   });
 
   test("requires a sort and rejects unknown fields", () => {
@@ -53,6 +77,59 @@ describe("zone section query", () => {
       Value.Check(zoneSectionQuerySchema, {
         ...latestWikiQuery,
         sort: { field: "viewCount" },
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("zone dynamic tags", () => {
+  test("accepts weighted canonical tag unit id options on query sections", () => {
+    const dynamicTags = {
+      groupId: "book-home-topics",
+      fallback: true,
+      options: [
+        { tagUnitIds: ["tag-sci-fi"], probability: 0.4 },
+        { tagUnitIds: ["tag-history", "tag-biography"], probability: 0.3 },
+      ],
+    };
+
+    expect(Value.Check(zoneDynamicTagsSchema, dynamicTags)).toBe(true);
+    expect(
+      Value.Check(zoneContentSectionSchema, {
+        id: "s-dynamic",
+        kind: "query",
+        query: {
+          target: "unit",
+          types: ["BOOK"],
+          sort: { field: "hotScore", direction: "desc" },
+        },
+        display: "carousel",
+        dynamicTags,
+      }),
+    ).toBe(true);
+  });
+
+  test("rejects option ids, empty tag rows, and non-query placement", () => {
+    expect(
+      Value.Check(zoneDynamicTagsSchema, {
+        options: [{ id: "x", tagUnitIds: ["tag-1"], probability: 1 }],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneDynamicTagsSchema, {
+        options: [{ tagUnitIds: [], probability: 1 }],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneDynamicTagsSchema, {
+        options: [{ tagUnitIds: ["tag-1"], probability: 1.2 }],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneContentSectionSchema, {
+        id: "s-feed",
+        kind: "feed",
+        dynamicTags: { options: [{ tagUnitIds: ["tag-1"], probability: 1 }] },
       }),
     ).toBe(false);
   });
