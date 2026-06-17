@@ -15,6 +15,7 @@ import type {
   LowScoreTagsQuery,
   LowScoreTagsResponse,
   PatchUnitTagInput,
+  TagUnitDTO,
   TagVoteDTO,
   UnitTagDTO,
   UpdateTagInput,
@@ -33,8 +34,8 @@ export const tagApi = {
    */
   list: async (
     filters?: TagFilters,
-  ): Promise<{ tags: UnitTagDTO[]; total: number }> => {
-    return apiFetch<{ tags: UnitTagDTO[]; total: number }>(
+  ): Promise<{ tags: TagUnitDTO[]; total: number }> => {
+    return apiFetch<{ tags: TagUnitDTO[]; total: number }>(
       `/tag/list${buildQueryString(filters)}`,
     );
   },
@@ -42,23 +43,23 @@ export const tagApi = {
   /**
    * Get tag detail by unitId (tag is a Unit with type=TAG)
    */
-  get: async (unitId: string): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/tag/${unitId}`);
+  get: async (unitId: string): Promise<TagUnitDTO> => {
+    return apiFetch<TagUnitDTO>(`/tag/${unitId}`);
   },
 
   /**
    * Get tag detail by slug (tag is a Unit with type=TAG).
    */
-  getBySlug: async (slug: string): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/tag/by-slug/${encodeURIComponent(slug)}`);
+  getBySlug: async (slug: string): Promise<TagUnitDTO> => {
+    return apiFetch<TagUnitDTO>(`/tag/by-slug/${encodeURIComponent(slug)}`);
   },
 
   /**
    * Create a tag (requires auth)
    * Input: translations array with language + title
    */
-  create: async (input: CreateTagInput): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/tag`, {
+  create: async (input: CreateTagInput): Promise<TagUnitDTO> => {
+    return apiFetch<TagUnitDTO>(`/tag`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -70,8 +71,8 @@ export const tagApi = {
   update: async (
     unitId: string,
     input: UpdateTagInput,
-  ): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/tag/${unitId}`, {
+  ): Promise<TagUnitDTO> => {
+    return apiFetch<TagUnitDTO>(`/tag/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });

@@ -26,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ListFilter, Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { GlobalPolicyTagManager } from "@/realm";
 import { RealmSearchField } from "@/shared/ui/RealmSearchField";
 import { UserSearchField } from "@/shared/ui/UserSearchField";
 import {
@@ -183,6 +184,8 @@ export function StaffConsolePage({
           />
         </div>
       </section>
+
+      <GlobalPolicyTagManager />
 
       <section className="flex flex-col gap-3">
         <div className="flex items-center gap-2">

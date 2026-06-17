@@ -13,11 +13,15 @@ export const Route = createFileRoute(
         realmId={realmId}
         tagTree={tagTree}
         tagView={realm.extra?.tagView ?? null}
-        onTagSelect={(tagId) =>
+        onTagSelect={(selection) =>
           navigate({
             to: "/realm/$realmId",
             params: { realmId },
-            search: realmStreamSearchForSingleTag({}, tagId),
+            search: realmStreamSearchForSingleTag(
+              {},
+              selection.tagId,
+              selection.querySource,
+            ),
           })
         }
       />

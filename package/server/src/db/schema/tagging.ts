@@ -3,15 +3,28 @@ import {
   foreignKey,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { createdAt, updatedAt } from "./columns";
+import { sql } from "drizzle-orm";
+import { createdAt, jsonData, updatedAt, uuidv7PrimaryKey } from "./columns";
 import { User } from "./identity";
 import { Realm } from "./realm";
 import { Unit } from "./unit";
+
+export const policyTagRuleStateStorageValues = ["ACTIVE", "ARCHIVED"] as const;
+
+export type PolicyTagRuleStateStorage =
+  (typeof policyTagRuleStateStorageValues)[number];
+
+export const PolicyTagRuleState = pgEnum(
+  "PolicyTagRuleState",
+  policyTagRuleStateStorageValues,
+);
 
 export const UnitTag = pgTable(
   "UnitTag",
@@ -83,9 +96,9 @@ export const RealmTagApplication = pgTable(
   "RealmTagApplication",
   {
     /**
-     * Realm-scoped application of an existing global TAG Unit to a target Unit.
-     * This does not create a realm-scoped tag and does not require the target
-     * to be posted into the realm through UnitRealm.
+     * Realm collective voting attitude on a (target Unit, TAG Unit) pair.
+     * This is not the policy-managed tag application table and does not create
+     * a realm-local tag identity.
      */
     realmUnitId: uuid()
       .notNull()
@@ -222,6 +235,111 @@ export const UserTagApplication = pgTable(
       table.userId.asc().nullsLast(),
       table.unitId.asc().nullsLast(),
       table.position.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const PolicyTagRule = pgTable(
+  "PolicyTagRule",
+  {
+    id: uuidv7PrimaryKey(),
+    /**
+     * Sparse policy-control marker. Query strategy is owned by callers such as
+     * realm tag pickers and list filters, not by this rule row.
+     */
+    scopeKind: text().notNull(),
+    realmUnitId: uuid().references(() => Realm.unitId, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+    tagUnitId: uuid()
+      .notNull()
+      .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    state: PolicyTagRuleState().default("ACTIVE").notNull(),
+    createdByUserId: uuid()
+      .notNull()
+      .references(() => User.unitId, {
+        onDelete: "restrict",
+        onUpdate: "cascade",
+      }),
+    updatedByUserId: uuid().references(() => User.unitId, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    reason: text(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("PolicyTagRule_global_active_tagUnitId_key")
+      .using("btree", table.tagUnitId.asc().nullsLast())
+      .where(sql`("scopeKind" = 'global' AND "state" = 'ACTIVE')`),
+    uniqueIndex("PolicyTagRule_realm_active_realmUnitId_tagUnitId_key")
+      .using(
+        "btree",
+        table.realmUnitId.asc().nullsLast(),
+        table.tagUnitId.asc().nullsLast(),
+      )
+      .where(sql`("scopeKind" = 'realm' AND "state" = 'ACTIVE')`),
+    index("PolicyTagRule_scope_state_idx").using(
+      "btree",
+      table.scopeKind.asc().nullsLast(),
+      table.realmUnitId.asc().nullsLast(),
+      table.state.asc().nullsLast(),
+    ),
+    index("PolicyTagRule_tagUnitId_state_idx").using(
+      "btree",
+      table.tagUnitId.asc().nullsLast(),
+      table.state.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const PolicyTagApplication = pgTable(
+  "PolicyTagApplication",
+  {
+    id: uuidv7PrimaryKey(),
+    ruleId: uuid()
+      .notNull()
+      .references(() => PolicyTagRule.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    unitId: uuid()
+      .notNull()
+      .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    position: text(),
+    metadata: jsonData(),
+    appliedByUserId: uuid()
+      .notNull()
+      .references(() => User.unitId, {
+        onDelete: "restrict",
+        onUpdate: "cascade",
+      }),
+    updatedByUserId: uuid().references(() => User.unitId, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("PolicyTagApplication_ruleId_unitId_key").using(
+      "btree",
+      table.ruleId.asc().nullsLast(),
+      table.unitId.asc().nullsLast(),
+    ),
+    index("PolicyTagApplication_ruleId_position_createdAt_unitId_idx").using(
+      "btree",
+      table.ruleId.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.createdAt.asc().nullsLast(),
+      table.unitId.asc().nullsLast(),
+    ),
+    index("PolicyTagApplication_unitId_ruleId_idx").using(
+      "btree",
+      table.unitId.asc().nullsLast(),
+      table.ruleId.asc().nullsLast(),
     ),
   ],
 );

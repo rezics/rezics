@@ -1,28 +1,23 @@
 import {
+  meiliLabelSearchQueryOptions,
+  meiliTagSearchQueryOptions,
+} from "@rezics/api/meili/meili.queries";
+import {
   useClearRealmExtraValueMutation,
   useSetRealmExtraValueMutation,
 } from "@rezics/api/realm/realm-extra.mutations";
 import { tagApi } from "@rezics/api/tag/tag";
-import {
-  meiliLabelSearchQueryOptions,
-  meiliTagSearchQueryOptions,
-} from "@rezics/api/meili/meili.queries";
 import { unitApi } from "@rezics/api/unit/unit";
 import type {
+  LabelSearchDocument,
   RealmAvatarExtra,
   RealmBannerExtra,
   RealmTagView,
   RealmTagViewStyle,
-  LabelSearchDocument,
   TagSearchDocument,
   TagTreeNode,
-  UnitDTO,
 } from "@rezics/contract";
-import {
-  DEFAULT_LANGUAGE,
-  defaultSupportLanguage,
-  normalizeLanguage,
-} from "@rezics/contract";
+import { DEFAULT_LANGUAGE, normalizeLanguage } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Button,
@@ -59,7 +54,6 @@ import { toast } from "sonner";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ImageUploadField } from "@/shared/ui/ImageUploadField";
-import { getTranslation } from "@/shared/utils/translation-helpers";
 import {
   clearTreeEditOpLog,
   emptyTreeEditOpLog,
@@ -86,17 +80,6 @@ function nodeLabel(node: TagTreeNode) {
     node.tagId?.slice(0, 8) ||
     getI18nRuntime().i18n.t("common:untitled")
   );
-}
-
-function unitLabel(unit: UnitDTO) {
-  const tr = getTranslation(
-    unit.translations,
-    undefined,
-    defaultSupportLanguage(unit.supportLanguages) ??
-      unit.resolvedLanguage ??
-      undefined,
-  );
-  return unit.title ?? tr?.title ?? unit.slug ?? unit.id;
 }
 
 function searchDocLabel(doc: LabelSearchDocument | TagSearchDocument) {
@@ -437,6 +420,20 @@ export function TagTreeEditor({
     label: tag.label,
   });
 
+  const setTagNodeQuerySource = (
+    nodeId: string,
+    querySource: "normal" | "policy",
+  ) => {
+    updateNodeById(nodeId, (node) => {
+      if (!node.tagId) return node;
+      return {
+        ...node,
+        querySource: querySource === "policy" ? "policy" : undefined,
+      };
+    });
+    enqueueOp("setQuerySource", nodeId, { querySource });
+  };
+
   const createPublicLabelNode = (labelUnitId: string, label?: string) => ({
     id: makeEditorId(),
     labelUnitId,
@@ -723,7 +720,6 @@ export function TagTreeEditor({
     return null;
   };
 
-  const pendingDeleteNode = findNode(nodes, pendingDeleteId);
   const moveToNode = findNode(nodes, moveToNodeId);
   const confirmDeleteNode = () => {
     if (!pendingDeleteId) return;
@@ -748,6 +744,11 @@ export function TagTreeEditor({
       : node.data.labelUnitId
         ? getI18nRuntime().i18n.t("community:tag_tree_type_label")
         : getI18nRuntime().i18n.t("community:tag_tree_type_local");
+    const sourceLabel = node.data.tagId
+      ? node.data.querySource === "policy"
+        ? getI18nRuntime().i18n.t("community:tag_tree_source_policy")
+        : getI18nRuntime().i18n.t("community:tag_tree_source_normal")
+      : null;
     const actionItems: TreeActionItem[] = [
       {
         key: "addSiblingAfter",
@@ -768,6 +769,25 @@ export function TagTreeEditor({
         separatorBefore: true,
         onSelect: () => setMoveToNodeId(node.data.id),
       },
+      ...(node.data.tagId
+        ? ([
+            {
+              key: "setNormalSource",
+              label: getI18nRuntime().i18n.t(
+                "community:tag_tree_source_normal",
+              ),
+              separatorBefore: true,
+              onSelect: () => setTagNodeQuerySource(node.data.id, "normal"),
+            },
+            {
+              key: "setPolicySource",
+              label: getI18nRuntime().i18n.t(
+                "community:tag_tree_source_policy",
+              ),
+              onSelect: () => setTagNodeQuerySource(node.data.id, "policy"),
+            },
+          ] satisfies TreeActionItem[])
+        : []),
       {
         key: "indent",
         label: getI18nRuntime().i18n.t("community:tag_tree_indent"),
@@ -804,7 +824,7 @@ export function TagTreeEditor({
       <div style={{ ...style, paddingLeft: 0 }} className="h-full">
         <TreeEditorRow
           label={label}
-          meta={kind}
+          meta={sourceLabel ? `${kind} · ${sourceLabel}` : kind}
           leadingIcon={
             node.data.tagId ? (
               <Tag className="size-4" aria-hidden />
@@ -836,8 +856,7 @@ export function TagTreeEditor({
           {getI18nRuntime().i18n.t("entity:realm_tag_tree_description")}
         </p>
         <p className="mt-1 text-xs leading-dense text-text-tertiary">
-          Deleting a node is the supported way to remove it from tag tree
-          surfaces; hidden disabled nodes are not preserved.
+          {getI18nRuntime().i18n.t("community:tag_tree_delete_note")}
         </p>
       </div>
 

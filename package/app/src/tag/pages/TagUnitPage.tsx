@@ -1,5 +1,4 @@
 import { tagQueries } from "@rezics/api/tag/tag";
-import type { UnitTagDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -64,7 +63,7 @@ export function TagUnitPage() {
     <div className="w-full px-4 mt-16">
       <AccentBarWithText text={t("community:tag_unit_title", { id: unitId })} />
       <div className="mt-4">
-        <TagDetailCard tag={data as UnitTagDTO} />
+        <TagDetailCard tag={data} />
       </div>
     </div>
   );

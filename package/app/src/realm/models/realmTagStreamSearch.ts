@@ -6,14 +6,24 @@
 export type RealmStreamSearch = {
   sort?: "best" | "hot" | "new" | "top" | "rising";
   tags?: string;
+  policyTags?: string;
 };
 
 export function realmStreamSearchForSingleTag(
   previous: RealmStreamSearch,
   tagId: string,
+  querySource: "normal" | "policy" = "normal",
 ): RealmStreamSearch {
+  if (querySource === "policy") {
+    return {
+      ...previous,
+      tags: undefined,
+      policyTags: tagId,
+    };
+  }
   return {
     ...previous,
     tags: tagId,
+    policyTags: undefined,
   };
 }

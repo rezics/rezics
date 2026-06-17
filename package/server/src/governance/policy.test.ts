@@ -374,4 +374,57 @@ describe("governance policy", () => {
       }),
     ).toMatchObject({ allowed: false, code: "MISSING_CAPABILITY" });
   });
+
+  test("policy tag actions require scoped tag curate capability", () => {
+    expect(
+      decide({
+        actorUserId: "curator-1",
+        permission: { role: "USER" },
+        action: "tag.policy.rule.manage",
+        capabilities: [
+          {
+            capability: "tag.curate",
+            scope: { kind: "realm", realmUnitId: "realm-1" },
+          },
+        ],
+        target: {
+          kind: "policy-tag-rule",
+          id: "rule-1",
+          realmUnitId: "realm-1",
+        },
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
+
+    expect(
+      decide({
+        actorUserId: "curator-1",
+        permission: { role: "USER" },
+        action: "tag.policy.application.manage",
+        capabilities: [
+          {
+            capability: "tag.curate",
+            scope: { kind: "realm", realmUnitId: "realm-1" },
+          },
+        ],
+        target: {
+          kind: "policy-tag-application",
+          id: "rule-1:unit-1",
+          realmUnitId: "realm-2",
+        },
+      }),
+    ).toMatchObject({ allowed: false, code: "MISSING_CAPABILITY" });
+
+    expect(
+      decide({
+        actorUserId: "root-1",
+        permission: { role: "ROOT" },
+        action: "tag.policy.application.manage",
+        capabilities: [],
+        target: {
+          kind: "policy-tag-application",
+          id: "global-rule:unit-1",
+        },
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
+  });
 });

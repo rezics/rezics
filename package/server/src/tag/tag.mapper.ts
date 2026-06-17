@@ -1,4 +1,4 @@
-import type { UnitTagDTO } from "@rezics/contract";
+import type { TagUnitDTO, TagVisual, UnitTagDTO } from "@rezics/contract";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
 
 /**
@@ -15,6 +15,22 @@ function resolveLabel(
     if (match?.title) return match.title;
   }
   return translations.find((t) => t.title)?.title ?? undefined;
+}
+
+function readTagVisual(extra: unknown): TagVisual | null {
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) {
+    return null;
+  }
+  const visual = (extra as { tagVisual?: unknown }).tagVisual;
+  if (!visual || typeof visual !== "object" || Array.isArray(visual)) {
+    return null;
+  }
+  const source = visual as Record<string, unknown>;
+  const result: TagVisual = {};
+  if (typeof source.color === "string") result.color = source.color;
+  if (typeof source.avatarUrl === "string") result.avatarUrl = source.avatarUrl;
+  if (typeof source.iconSvg === "string") result.iconSvg = source.iconSvg;
+  return Object.keys(result).length > 0 ? result : null;
 }
 
 /**
@@ -48,16 +64,12 @@ export function mapUnitTagToDTO(
 export function mapTagUnitToDTO(
   tag: TagWithTranslations,
   language?: string,
-): {
-  unitId: string;
-  slug: string | undefined;
-  label: string | undefined;
-  translations: { language: string; title: string | null }[];
-} {
+): TagUnitDTO {
   return {
     unitId: tag.id,
     slug: tag.slug ?? undefined,
     label: resolveLabel(tag.translations, language),
+    visual: readTagVisual(tag.extra),
     translations: tag.translations.map((t) => ({
       language: t.language,
       title: t.title,

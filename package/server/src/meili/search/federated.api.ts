@@ -24,10 +24,44 @@ export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
   async ({ body, headers }) => {
     const ctx: FilterContext = {};
     if (body.query.tags?.length) {
-      ctx.resolvedTagIds = await resolveSlugRefs(body.query.tags);
+      const normalTags = body.query.tags.filter(
+        (tag) => tag.source !== "policy",
+      );
+      const policyTags = body.query.tags.filter(
+        (tag) => tag.source === "policy",
+      );
+      ctx.resolvedTagIds = await resolveSlugRefs(normalTags);
+      if (policyTags.length > 0) {
+        const policyTagUnitIds = await resolveSlugRefs(policyTags);
+        const { policyTagService } = await import("@/policy-tag");
+        const policyScope =
+          body.scope.kind === "realm"
+            ? { kind: "realm" as const, realmUnitId: body.scope.realmId }
+            : { kind: "global" as const };
+        ctx.policyTagUnitIds =
+          await policyTagService.listAppliedUnitIdsForSearch({
+            scope: policyScope,
+            tagUnitIds: policyTagUnitIds,
+          });
+      }
     }
     if (body.query.realm) {
       ctx.resolvedRealmId = await resolveSlugRef(body.query.realm);
+      if (
+        ctx.resolvedRealmId &&
+        body.scope.kind !== "realm" &&
+        body.query.tags?.some((tag) => tag.source === "policy")
+      ) {
+        const policyTagUnitIds = await resolveSlugRefs(
+          body.query.tags.filter((tag) => tag.source === "policy"),
+        );
+        const { policyTagService } = await import("@/policy-tag");
+        ctx.policyTagUnitIds =
+          await policyTagService.listAppliedUnitIdsForSearch({
+            scope: { kind: "realm", realmUnitId: ctx.resolvedRealmId },
+            tagUnitIds: policyTagUnitIds,
+          });
+      }
     }
     const identity = await tryResolveIdentity(
       (headers as Record<string, string | undefined>)["authorization"],

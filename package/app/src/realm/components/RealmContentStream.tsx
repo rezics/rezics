@@ -23,6 +23,7 @@ interface RealmContentStreamProps {
   realmId: string;
   sort?: RealmStreamSort;
   tagIds?: string[];
+  policyTagIds?: string[];
   realmModerationStatus?: PostListQuery["realmModerationStatus"];
   manageMode?: boolean;
 }
@@ -31,6 +32,7 @@ export const RealmContentStream: React.FC<RealmContentStreamProps> = ({
   realmId,
   sort = "new",
   tagIds = [],
+  policyTagIds = [],
   realmModerationStatus,
   manageMode = false,
 }) => {
@@ -44,6 +46,7 @@ export const RealmContentStream: React.FC<RealmContentStreamProps> = ({
       languages: readContext.languages,
       appLocale: readContext.appLocale,
       ...(tagIds.length > 0 ? { tagIds } : {}),
+      ...(policyTagIds.length > 0 ? { policyTagIds } : {}),
       ...(realmModerationStatus ? { realmModerationStatus } : {}),
     },
     { enabled: readContext.ready && Boolean(realmId) },

@@ -77,9 +77,14 @@ function Render({
     mode === "update"
       ? {
           unitId: "tag_existing_1",
-          tagUnitId: "tag_existing_1",
-          score: 0,
-          voteCount: 0,
+          slug: "existing-tag",
+          label: "Existing tag",
+          visual: {
+            color: "#DB515C",
+            avatarUrl: null,
+            iconSvg: null,
+          },
+          translations: [{ language: "zh-Hant", title: "Existing tag" }],
         }
       : null;
 

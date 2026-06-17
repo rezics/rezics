@@ -114,7 +114,7 @@ describe("GovernanceCapabilityService", () => {
     expect(listRealmGrantsForUser).not.toHaveBeenCalled();
   });
 
-  test("realm moderator roles imply comment and member moderation capabilities", async () => {
+  test("realm moderator roles imply moderation and tag curation capabilities", async () => {
     getRealmMember.mockResolvedValueOnce({
       realmUnitId: "realm-1",
       userId: "mod-1",
@@ -133,6 +133,10 @@ describe("GovernanceCapabilityService", () => {
     });
     expect(membership?.capabilities).toContainEqual({
       capability: "realm.member.moderate",
+      scope: { kind: "realm", realmUnitId: "realm-1" },
+    });
+    expect(membership?.capabilities).toContainEqual({
+      capability: "tag.curate",
       scope: { kind: "realm", realmUnitId: "realm-1" },
     });
   });

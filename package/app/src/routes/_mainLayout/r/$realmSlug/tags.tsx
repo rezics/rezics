@@ -32,10 +32,14 @@ function RealmSlugTagsTab() {
       realmId={realmId}
       tagTree={tagTree}
       tagView={realm.extra?.tagView ?? null}
-      onTagSelect={(tagId) =>
+      onTagSelect={(selection) =>
         navigate({
           to: realmDetailHref(routeLocation),
-          search: realmStreamSearchForSingleTag({}, tagId),
+          search: realmStreamSearchForSingleTag(
+            {},
+            selection.tagId,
+            selection.querySource,
+          ),
         })
       }
     />

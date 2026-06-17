@@ -13,7 +13,10 @@ interface RealmTagBrowserProps {
   realmId: string;
   tagTree?: TagTreeNode[];
   tagView?: RealmTagView | null;
-  onTagSelect?: (tagId: string) => void;
+  onTagSelect?: (selection: {
+    tagId: string;
+    querySource: "normal" | "policy";
+  }) => void;
 }
 
 type TagEntry = {
@@ -21,6 +24,7 @@ type TagEntry = {
   label: string;
   depth: number;
   groupLabel?: string;
+  querySource: "normal" | "policy";
 };
 
 export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
@@ -85,7 +89,7 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
               <div className="flex flex-wrap gap-2">
                 {items.map((entry) => (
                   <TagChip
-                    key={entry.tagId}
+                    key={`${entry.querySource}:${entry.tagId}`}
                     entry={entry}
                     onTagSelect={onTagSelect}
                   />
@@ -98,7 +102,7 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
         <div className="grid gap-2">
           {entries.map((entry) => (
             <div
-              key={entry.tagId}
+              key={`${entry.querySource}:${entry.tagId}`}
               className="flex"
               style={{ paddingInlineStart: `${entry.depth * 1.25}rem` }}
             >
@@ -110,7 +114,7 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
         <div className="flex flex-wrap gap-2">
           {entries.map((entry) => (
             <TagChip
-              key={entry.tagId}
+              key={`${entry.querySource}:${entry.tagId}`}
               entry={entry}
               onTagSelect={onTagSelect}
             />
@@ -150,6 +154,7 @@ function collectTags(nodes: TagTreeNode[] | undefined, language: string) {
           label,
           depth,
           groupLabel,
+          querySource: item.querySource ?? "normal",
         });
       }
       if (item.children?.length) visit(item.children, depth + 1, nextGroup);
@@ -179,7 +184,10 @@ function TagChip({
   onTagSelect,
 }: {
   entry: TagEntry;
-  onTagSelect?: (tagId: string) => void;
+  onTagSelect?: (selection: {
+    tagId: string;
+    querySource: "normal" | "policy";
+  }) => void;
 }) {
   if (!onTagSelect) {
     return (
@@ -194,7 +202,12 @@ function TagChip({
       type="button"
       size="sm"
       variant="secondary"
-      onClick={() => onTagSelect(entry.tagId)}
+      onClick={() =>
+        onTagSelect({
+          tagId: entry.tagId,
+          querySource: entry.querySource,
+        })
+      }
     >
       {entry.label}
     </Button>

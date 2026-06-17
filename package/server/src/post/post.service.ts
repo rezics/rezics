@@ -62,6 +62,8 @@ import {
   Post,
   PostPollReference,
   PostUnitReference,
+  PolicyTagApplication,
+  PolicyTagRule,
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
@@ -828,6 +830,7 @@ export class PostService {
     const skipNum = opts.start ?? 0;
     const sort = opts.sort === "top" || opts.sort === "hot" ? opts.sort : "new";
     const tagIds = this.normalizeTagIds(opts.tagIds);
+    const policyTagIds = this.normalizeTagIds(opts.policyTagIds);
     const moderationStatus = toUnitRealmModerationStatus(
       opts.realmModerationStatus,
     );
@@ -864,6 +867,18 @@ export class PostService {
           )`,
       );
       if (tagCondition) conditions.push(tagCondition);
+    }
+    if (policyTagIds.length > 0) {
+      conditions.push(sql`exists (
+        select 1
+        from ${PolicyTagApplication} pta
+        inner join ${PolicyTagRule} ptr on ptr."id" = pta."ruleId"
+        where pta."unitId" = ${Post.unitId}
+          and ptr."scopeKind" = 'realm'
+          and ptr."realmUnitId" = ${realmUnitId}
+          and ptr."state" = 'ACTIVE'
+          and ptr."tagUnitId" in ${sqlInList(policyTagIds)}
+      )`);
     }
 
     if (opts.authorUserId)

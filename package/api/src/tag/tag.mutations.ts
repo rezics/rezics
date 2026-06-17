@@ -10,6 +10,7 @@ import type {
   CreateUnitTagInput,
   DetachTagInput,
   PatchUnitTagInput,
+  TagUnitDTO,
   TagVoteDTO,
   UnitTagDTO,
   UpdateTagInput,
@@ -28,7 +29,7 @@ import { tagKeys } from "./tag.keys";
  */
 export function useCreateTagMutation(
   options?: Omit<
-    UseMutationOptions<UnitTagDTO, Error, CreateTagInput>,
+    UseMutationOptions<TagUnitDTO, Error, CreateTagInput>,
     "mutationFn"
   >,
 ) {
@@ -51,7 +52,7 @@ export function useCreateTagMutation(
 export function useUpdateTagMutation(
   options?: Omit<
     UseMutationOptions<
-      UnitTagDTO,
+      TagUnitDTO,
       Error,
       { unitId: string; input: UpdateTagInput }
     >,

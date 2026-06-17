@@ -62,6 +62,13 @@ export const streamQuerySchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   variantUnitId: t.Optional(t.String()),
   tagIds: t.Optional(t.Array(t.String())),
+  /**
+   * Policy-tag source filter for realm/global stream surfaces. This is separate
+   * from `tagIds` so ordinary UnitTag/TagVote filters never read policy rows.
+   * realm/global 信息流的政策标签来源过滤。它与 `tagIds` 分离，确保普通
+   * UnitTag/TagVote 过滤不会读取 policy 行。
+   */
+  policyTagIds: t.Optional(t.Array(t.String())),
   realmModerationStatus: t.Optional(
     t.Union([moderationStatusSchema, t.Literal("all")]),
   ),

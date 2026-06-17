@@ -60,6 +60,11 @@ export interface FilterContext {
   zoneBoundaryContentFilter?: string[];
   zoneBoundaryPostFilter?: string[];
   zoneBoundaryZoneFilter?: string[];
+  // Unit ids resolved from explicit policy-tag source filters. Undefined means
+  // no policy source was requested; an empty array means requested but no match.
+  // 从显式 policy-tag 来源过滤解析出的 Unit id。undefined 表示未请求 policy
+  // 来源；空数组表示已请求但没有匹配项。
+  policyTagUnitIds?: string[];
 }
 
 export interface ContentBuildOpts {
@@ -112,6 +117,16 @@ const BOOK_CONTENT_CATALOG_FILTER = [
   'type = "LINK"',
   'type = "SERIES"',
 ].join(" OR ");
+
+const EMPTY_POLICY_TAG_FILTER = 'id = "__policy_tag_source_no_match__"';
+
+function policyTagUnitIdFilter(ctx: FilterContext): string | null {
+  if (!ctx.policyTagUnitIds) return null;
+  if (ctx.policyTagUnitIds.length === 0) return EMPTY_POLICY_TAG_FILTER;
+  return ctx.policyTagUnitIds.length === 1
+    ? `id = "${ctx.policyTagUnitIds[0]}"`
+    : `id IN [${quoteList(ctx.policyTagUnitIds)}]`;
+}
 
 function resolveBookScope(scope: SearchScope): {
   mode: "exact";
@@ -195,6 +210,8 @@ export function buildContentFilter(
   for (const tagId of ctx.resolvedTagIds ?? []) {
     filter.push(`tagIds = "${tagId}"`);
   }
+  const policyFilter = policyTagUnitIdFilter(ctx);
+  if (policyFilter) filter.push(policyFilter);
 
   // 6. Ratings — intersect query.ratings with allowedRatings if both provided
   // 6. 评级——若同时提供了 query.ratings 与 allowedRatings 则取交集
@@ -297,6 +314,8 @@ export function buildPostFilter(
   // 3. Locked posts excluded by default (per content-search-api default filters).
   // 3. 默认排除已锁定的帖子（依据 content-search-api 的默认过滤）。
   filter.push("isLocked = false");
+  const policyFilter = policyTagUnitIdFilter(_ctx);
+  if (policyFilter) filter.push(policyFilter);
 
   return filter;
 }
@@ -350,11 +369,15 @@ export function buildCommentFilter(
 export function buildRealmFilter(
   query: SearchQuery,
   _scope: SearchScope,
+  ctx: FilterContext = {},
 ): string[] {
   // Default visibility filter for realms: public only.
   // realm 的默认可见性过滤：仅公开。
   void query;
-  return ["isPublic = true"];
+  const filter = ["isPublic = true"];
+  const policyFilter = policyTagUnitIdFilter(ctx);
+  if (policyFilter) filter.push(policyFilter);
+  return filter;
 }
 
 // ANCHOR: buildZoneFilter
@@ -371,6 +394,8 @@ export function buildZoneFilter(
 ): string[] {
   const filter =
     scope.kind === "zone" ? [...(ctx.zoneBoundaryZoneFilter ?? [])] : [];
+  const policyFilter = policyTagUnitIdFilter(ctx);
+  if (policyFilter) filter.push(policyFilter);
   filter.push('visibility = "PUBLIC"');
   void query;
   return filter;

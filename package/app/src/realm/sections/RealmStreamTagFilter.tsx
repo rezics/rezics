@@ -1,5 +1,5 @@
 import type { TagTreeNode } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { type PointerEvent, useEffect, useMemo, useRef } from "react";
@@ -16,17 +16,20 @@ import {
 export interface RealmStreamTagFilterProps {
   tagTree?: TagTreeNode[];
   selectedTagIds: string[];
-  onChange: (tagIds: string[]) => void;
+  selectedPolicyTagIds?: string[];
+  onChange: (next: { tagIds: string[]; policyTagIds: string[] }) => void;
   onOpenTagsTab: () => void;
 }
 
 export const RealmStreamTagFilter: React.FC<RealmStreamTagFilterProps> = ({
   tagTree,
   selectedTagIds,
+  selectedPolicyTagIds = [],
   onChange,
   onOpenTagsTab,
 }) => {
   const locale = useLocale();
+  const { t } = useTranslation(["community"]);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef({
     isDown: false,
@@ -42,10 +45,14 @@ export const RealmStreamTagFilter: React.FC<RealmStreamTagFilterProps> = ({
     [locale, tagTree],
   );
   const orderedChips = useMemo(
-    () => orderRealmStreamTagChips(chips, selectedTagIds),
-    [chips, selectedTagIds],
+    () => orderRealmStreamTagChips(chips, selectedTagIds, selectedPolicyTagIds),
+    [chips, selectedPolicyTagIds, selectedTagIds],
   );
   const selected = useMemo(() => new Set(selectedTagIds), [selectedTagIds]);
+  const selectedPolicy = useMemo(
+    () => new Set(selectedPolicyTagIds),
+    [selectedPolicyTagIds],
+  );
 
   useEffect(() => {
     const row = rowRef.current;
@@ -91,8 +98,18 @@ export const RealmStreamTagFilter: React.FC<RealmStreamTagFilterProps> = ({
 
   if (chips.length === 0) return null;
 
-  const toggle = (tagId: string) => {
-    onChange(toggleRealmStreamTagId(selectedTagIds, tagId));
+  const toggle = (tagId: string, querySource: "normal" | "policy") => {
+    if (querySource === "policy") {
+      onChange({
+        tagIds: selectedTagIds,
+        policyTagIds: toggleRealmStreamTagId(selectedPolicyTagIds, tagId),
+      });
+      return;
+    }
+    onChange({
+      tagIds: toggleRealmStreamTagId(selectedTagIds, tagId),
+      policyTagIds: selectedPolicyTagIds,
+    });
   };
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
@@ -183,13 +200,22 @@ export const RealmStreamTagFilter: React.FC<RealmStreamTagFilterProps> = ({
     >
       {orderedChips.map((chip) => (
         <Button
-          key={chip.tagId}
+          key={`${chip.querySource}:${chip.tagId}`}
           type="button"
           size="sm"
-          variant={selected.has(chip.tagId) ? "default" : "secondary"}
+          variant={
+            (chip.querySource === "policy" ? selectedPolicy : selected).has(
+              chip.tagId,
+            )
+              ? "default"
+              : "secondary"
+          }
           className="shrink-0"
-          aria-pressed={selected.has(chip.tagId)}
-          onClick={() => toggle(chip.tagId)}
+          aria-pressed={(chip.querySource === "policy"
+            ? selectedPolicy
+            : selected
+          ).has(chip.tagId)}
+          onClick={() => toggle(chip.tagId, chip.querySource)}
         >
           {chip.label}
         </Button>
@@ -201,7 +227,7 @@ export const RealmStreamTagFilter: React.FC<RealmStreamTagFilterProps> = ({
         className="shrink-0"
         onClick={onOpenTagsTab}
       >
-        All tags
+        {t("community:tag_filter_all_tags")}
       </Button>
     </div>
   );

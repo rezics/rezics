@@ -1,6 +1,75 @@
 import { t } from "elysia";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import { mediaUrlSchema } from "../media-url";
 import { paginationLimitSchema } from "../pagination";
+
+// ============================================================
+// TAG UNIT DTO (tag identity)
+// TAG UNIT DTO（tag 身份）
+// ============================================================
+
+export const tagUnitTranslationSchema = t.Object(
+  {
+    language: t.String(),
+    title: t.Optional(t.Nullable(t.String())),
+  },
+  { additionalProperties: false },
+);
+
+export type TagUnitTranslation = (typeof tagUnitTranslationSchema)["static"];
+
+export const tagVisualSchema = t.Object(
+  {
+    color: t.Optional(t.Nullable(t.String())),
+    avatarUrl: t.Optional(t.Nullable(mediaUrlSchema)),
+    /**
+     * Native SVG icon markup. This intentionally does not use mediaUrlSchema:
+     * Cloudflare-backed media URLs are useful for images, while small symbolic
+     * tag icons need first-class SVG text so renderers can sanitize and inline
+     * them without losing themeability.
+     */
+    iconSvg: t.Optional(t.Nullable(t.String())),
+  },
+  { additionalProperties: false },
+);
+
+export type TagVisual = (typeof tagVisualSchema)["static"];
+
+export const tagUnitDTOSchema = t.Object(
+  {
+    unitId: t.String(),
+    slug: t.Optional(t.Nullable(t.String())),
+    label: t.Optional(t.Nullable(t.String())),
+    visual: t.Optional(t.Nullable(tagVisualSchema)),
+    translations: t.Optional(t.Array(tagUnitTranslationSchema)),
+  },
+  { additionalProperties: false },
+);
+
+export type TagUnitDTO = (typeof tagUnitDTOSchema)["static"];
+
+// ============================================================
+// TAG QUERY SOURCE
+// TAG 查询来源
+// ============================================================
+
+export const tagQuerySourceValues = ["normal", "policy"] as const;
+export type TagQuerySource = (typeof tagQuerySourceValues)[number];
+
+export const tagQuerySourceSchema = t.Union([
+  t.Literal("normal"),
+  t.Literal("policy"),
+]);
+
+export const tagFilterSchema = t.Object(
+  {
+    tagUnitId: t.String(),
+    source: t.Optional(tagQuerySourceSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type TagFilter = (typeof tagFilterSchema)["static"];
 
 // ============================================================
 // UNIT TAG DTO (scored junction)
@@ -144,6 +213,7 @@ export const createTagSchema = t.Object({
       title: t.String(),
     }),
   ),
+  visual: t.Optional(t.Nullable(tagVisualSchema)),
 });
 
 export type CreateTagInput = (typeof createTagSchema)["static"];
@@ -157,6 +227,7 @@ export const updateTagSchema = t.Object({
       }),
     ),
   ),
+  visual: t.Optional(t.Nullable(tagVisualSchema)),
 });
 
 export type UpdateTagInput = (typeof updateTagSchema)["static"];

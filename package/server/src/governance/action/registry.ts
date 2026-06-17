@@ -11,7 +11,8 @@ export type GovernanceActionFamily =
   | "content"
   | "operation"
   | "realm"
-  | "staff-console";
+  | "staff-console"
+  | "tag";
 
 export type GovernanceActionDefinition = {
   action: PolicyAction;

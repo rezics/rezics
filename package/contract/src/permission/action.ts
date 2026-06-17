@@ -33,6 +33,8 @@ export const policyActionKeys = [
   "reaction.create",
   "tag.vote",
   "tag.curate",
+  "tag.policy.rule.manage",
+  "tag.policy.application.manage",
   "audit.read",
   "staff.console.access",
   "operation.repair.run",

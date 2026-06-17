@@ -49,6 +49,10 @@ type TagRepository = {
     slugScope: string,
   ): Promise<TagWithTranslations>;
   updateTranslations(unitId: string, input: UpdateTagInput): Promise<void>;
+  updateVisual(
+    unitId: string,
+    input: Pick<UpdateTagInput, "visual">,
+  ): Promise<void>;
   deleteTag(unitId: string): Promise<void>;
   createUnitTag(
     userId: string,
@@ -259,6 +263,7 @@ function createDrizzleTagRepository(): TagRepository {
             isLanguageNeutral: true,
             userId,
             slug: input.slug,
+            extra: input.visual ? { tagVisual: input.visual } : null,
             updatedAt: new Date(),
           })
           .returning();
@@ -298,6 +303,33 @@ function createDrizzleTagRepository(): TagRepository {
             }),
         ),
       );
+    },
+
+    async updateVisual(unitId, input) {
+      if (input.visual === undefined) return;
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ extra: Unit.extra })
+        .from(Unit)
+        .where(and(eq(Unit.id, unitId), eq(Unit.type, "TAG")))
+        .limit(1);
+      if (!row) throw new Error(`No Unit found for ${unitId}`);
+      const current =
+        row.extra && typeof row.extra === "object" && !Array.isArray(row.extra)
+          ? { ...(row.extra as Record<string, unknown>) }
+          : {};
+      if (input.visual === null) {
+        delete current.tagVisual;
+      } else {
+        current.tagVisual = input.visual;
+      }
+      await db
+        .update(Unit)
+        .set({
+          extra: Object.keys(current).length > 0 ? current : null,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(Unit.id, unitId), eq(Unit.type, "TAG")));
     },
 
     async deleteTag(unitId) {
@@ -615,6 +647,7 @@ export class TagService {
     input: UpdateTagInput,
   ): Promise<TagWithTranslations> {
     await this.repository.updateTranslations(unitId, input);
+    await this.repository.updateVisual(unitId, input);
     const tag = await this.getByUnitId(unitId);
     await enqueueTagSearchSync(unitId);
     return tag;

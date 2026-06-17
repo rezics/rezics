@@ -80,6 +80,7 @@ function postQueryForStream(query: StreamQuery, limit: number): PostListQuery {
     ...(query.variantUnitId ? { variantUnitId: query.variantUnitId } : {}),
     ...(query.languages ? { languages: query.languages as string } : {}),
     ...(query.tagIds?.length ? { tagIds: query.tagIds } : {}),
+    ...(query.policyTagIds?.length ? { policyTagIds: query.policyTagIds } : {}),
     ...(query.realmModerationStatus
       ? { realmModerationStatus: query.realmModerationStatus }
       : {}),

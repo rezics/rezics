@@ -260,6 +260,12 @@ export const jsonColumnRegistry = [
   compat("server", "StaffAuditLog", "metadata", "genericMetadataJsonSchema"),
   compat("server", "Link", "extra", "genericMetadataJsonSchema"),
   compat("server", "Book", "extra", "bookExtraJsonSchema"),
+  compat(
+    "server",
+    "PolicyTagApplication",
+    "metadata",
+    "genericMetadataJsonSchema",
+  ),
 ] satisfies JsonColumnRegistryEntry[];
 
 function compat(
