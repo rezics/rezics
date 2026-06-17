@@ -112,8 +112,11 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   const [lastResult, setLastResult] = useState<SaveResult | null>(null);
   const batchMutation = useBatchUpdateShelfItemsMutation();
 
-  // This is a compromise made to provide comprehensive background information for the editing environment; do not change it until a solution is found.
-  // 这是为给编辑环境提供完整背景信息而做出的折中方案；在找到解决方案之前不要改动它。
+  // Editing needs complete shelf context for cross-page reorder and relation
+  // summaries. This relies on shelf item pages advancing by root-safe cursors;
+  // appended child rows must never become the next-page boundary.
+  // 编辑需要完整的 shelf 上下文以支持跨页重排与关系摘要。这里依赖 shelf item
+  // 分页按 root-safe cursor 前进；附加的 child row 绝不能成为下一页边界。
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();

@@ -167,10 +167,21 @@ describe("shelfItemToUnitCardSummary", () => {
 
     const summary = shelfItemToUnitCardSummary(unit, book, undefined, {
       reviews: 3,
+      variants: 1,
+      comments: 1,
       tags: 2,
+      annotations: 1,
+      total: 8,
     });
 
-    expect(summary.attachmentCounts).toEqual({ reviews: 3, tags: 2 });
+    expect(summary.attachmentCounts).toEqual({
+      reviews: 3,
+      variants: 1,
+      comments: 1,
+      tags: 2,
+      annotations: 1,
+      total: 8,
+    });
   });
 
   test("omits attachmentCounts when none provided", () => {

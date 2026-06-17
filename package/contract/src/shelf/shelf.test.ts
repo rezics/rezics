@@ -11,6 +11,7 @@ import {
   shelfItemChildDTOSchema,
   shelfItemDTOSchema,
   shelfItemsQuerySchema,
+  shelfItemsResponseSchema,
   shelfListBodySchema,
   shelfListQuerySchema,
 } from "./shelf";
@@ -200,6 +201,40 @@ describe("shelf containment contract fields", () => {
         childItemId: "comment-1",
         childUnitId: "comment-1",
         role: "comment",
+      }),
+    ).toBe(false);
+  });
+
+  test("shelf item pages expose an explicit nullable root cursor", () => {
+    expect(
+      Value.Check(shelfItemsResponseSchema, {
+        items: [
+          {
+            shelfId: "shelf-1",
+            itemType: "unit",
+            itemId: "book-1",
+            kind: "book",
+            position: "a0",
+          },
+        ],
+        relations: [],
+        hasMore: true,
+        nextCursor: "book-1",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shelfItemsResponseSchema, {
+        items: [],
+        relations: [],
+        hasMore: false,
+        nextCursor: null,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shelfItemsResponseSchema, {
+        items: [],
+        relations: [],
+        hasMore: false,
       }),
     ).toBe(false);
   });

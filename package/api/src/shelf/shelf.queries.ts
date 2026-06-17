@@ -109,7 +109,7 @@ export const shelfItemsInfiniteQuery = (
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
       if (!lastPage.hasMore) return undefined;
-      return lastPage.items.at(-1)?.itemId;
+      return lastPage.nextCursor ?? undefined;
     },
     enabled: !!unitId,
     staleTime: 1000 * 60 * 2,

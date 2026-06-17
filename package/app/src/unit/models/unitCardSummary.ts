@@ -26,8 +26,12 @@ export interface UnitCardTranslationMeta {
 }
 
 export interface UnitCardAttachmentCounts {
-  reviews: number;
-  tags: number;
+  reviews?: number;
+  variants?: number;
+  comments?: number;
+  tags?: number;
+  annotations?: number;
+  total?: number;
 }
 
 export interface UnitCardSummary {

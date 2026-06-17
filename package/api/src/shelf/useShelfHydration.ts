@@ -32,6 +32,11 @@ const KIND_TO_BUCKET: Record<ShelfItemKind, HydrationBucket | null> = {
   realm: null,
   image: null,
   video: null,
+  // Game/media have no shelf batch hydration endpoint yet. They remain valid
+  // library rows; consumers such as bookshelf view must render their item
+  // identity fallback instead of treating them as orphans.
+  // game/media 尚无 shelf 批量 hydration 端点。它们仍是有效的 library 行；
+  // bookshelf 等消费者必须渲染其 item identity fallback，而不是当成孤儿项隐藏。
   media: null,
   game: null,
   link: null,

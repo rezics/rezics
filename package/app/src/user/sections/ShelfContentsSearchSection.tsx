@@ -245,6 +245,11 @@ export const ShelfContentsSearchSection: FC = () => {
               showPrivateText={isCurrentUser}
             />
           ))}
+          {/* This profile summary intentionally stays non-paginated; full shelf
+              browsing happens on the shelf detail page where root-safe cursors
+              and local view pagination are available.
+              这个个人页摘要有意不做分页；完整书架浏览在 shelf 详情页完成，
+              那里具备 root-safe cursor 与本地视图分页。 */}
           {shelfItems.data?.hasMore && (
             <p className="py-2 text-center text-sm text-text-secondary">
               {t("entity:shelf_contents_search_has_more")}

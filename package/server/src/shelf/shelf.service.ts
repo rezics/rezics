@@ -1349,6 +1349,7 @@ export class ShelfService {
                 from "ShelfItem" su
                 where su."shelfId" = ${shelfId}
                   and su."itemId" = ${query.cursor}
+                  and su."parentItemId" is null
                 limit 1
               )`
             : undefined,
@@ -1359,6 +1360,7 @@ export class ShelfService {
 
     const hasMore = items.length > limit;
     const page = hasMore ? items.slice(0, limit) : items;
+    const nextCursor = hasMore ? (page.at(-1)?.itemId ?? null) : null;
     const pageItemIds = page.map((p) => p.itemId);
 
     const childRows =
@@ -1398,6 +1400,7 @@ export class ShelfService {
       items: itemDTOs,
       relations,
       hasMore,
+      nextCursor,
     };
   }
 

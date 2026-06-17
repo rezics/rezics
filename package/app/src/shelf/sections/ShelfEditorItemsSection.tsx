@@ -12,6 +12,8 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("entity:shelf_sort_title_za"),
   shelf_view_nested: () => getI18nRuntime().i18n.t("entity:shelf_view_nested"),
   shelf_view_list: () => getI18nRuntime().i18n.t("entity:shelf_view_list"),
+  shelf_view_bookshelf: () =>
+    getI18nRuntime().i18n.t("entity:shelf_view_bookshelf"),
 } as const;
 
 import {
@@ -170,9 +172,10 @@ const SORT_OPTIONS: ShelfSortChoice[] = [
   { field: "title", order: "desc", label: i18nMessages.shelf_sort_title_za },
 ];
 
-const VIEW_OPTIONS: ShelfViewChoice<"nested" | "flat">[] = [
+const VIEW_OPTIONS: ShelfViewChoice[] = [
   { value: "nested", label: i18nMessages.shelf_view_nested },
   { value: "flat", label: i18nMessages.shelf_view_list },
+  { value: "bookshelf", label: i18nMessages.shelf_view_bookshelf },
 ];
 
 function candidateKindToShelfItemKind(kind: string): ShelfItemKind {
@@ -208,7 +211,6 @@ function isEditorMode(value: string | undefined): value is EditorMode {
 }
 
 export function ShelfEditorItemsSection({
-  shelf,
   viewMode,
   onViewModeChange,
   editor,
@@ -245,16 +247,26 @@ export function ShelfEditorItemsSection({
     [hydration.enriched, editor.relations, viewMode, sortState, sortPrimeOnly],
   );
 
-  const totalItemCount = Math.max(stream.length, shelf.itemCount ?? 0);
-  const totalPages = Math.max(1, Math.ceil(totalItemCount / PAGE_SIZE));
+  const loadedPages = Math.max(1, Math.ceil(stream.length / PAGE_SIZE));
+  const finalPageCount = editor.hasMoreUnits ? null : loadedPages;
   const pageStart = (page - 1) * PAGE_SIZE;
   const visibleStream = stream.slice(pageStart, pageStart + PAGE_SIZE);
   const waitingForPageData =
     editor.hasMoreUnits && pageStart >= stream.length && stream.length > 0;
+  const canPageBackward = page > 1;
+  const canPageForward = page < loadedPages || editor.hasMoreUnits;
 
   useEffect(() => {
-    setPage((current) => Math.min(current, totalPages));
-  }, [totalPages]);
+    if (finalPageCount) {
+      setPage((current) => Math.min(current, finalPageCount));
+    }
+  }, [finalPageCount]);
+
+  useEffect(() => {
+    if (waitingForPageData && !editor.isLoadingMoreUnits) {
+      void editor.loadMoreUnits();
+    }
+  }, [editor.isLoadingMoreUnits, editor.loadMoreUnits, waitingForPageData]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
@@ -392,7 +404,7 @@ export function ShelfEditorItemsSection({
               canMoveCrossPage={
                 !isMultiSelect &&
                 canEditEntryOrder &&
-                totalPages > 1 &&
+                loadedPages > 1 &&
                 mode === "edit"
               }
               canDelete={!isMultiSelect && canEditEntryOrder}
@@ -565,24 +577,26 @@ export function ShelfEditorItemsSection({
         </DndContext>
       )}
 
-      {totalPages > 1 && (
+      {(canPageBackward || canPageForward) && (
         <div className="flex items-center justify-center gap-2 py-2">
           <Button
             size="sm"
             variant="ghost"
-            disabled={page === 1}
+            disabled={!canPageBackward}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             {t("common:prev")}
           </Button>
           <span className="text-sm text-text-secondary">
-            {page} / {totalPages}
+            {finalPageCount
+              ? `${page} / ${finalPageCount}`
+              : `${page} / ${loadedPages}+`}
           </span>
           <Button
             size="sm"
             variant="ghost"
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={!canPageForward}
+            onClick={() => setPage((p) => p + 1)}
           >
             {t("common:next")}
           </Button>
@@ -613,7 +627,7 @@ export function ShelfEditorItemsSection({
       <CrossPageMoveModal
         open={moveTargetId !== null}
         onOpenChange={(open) => !open && setMoveTargetId(null)}
-        pageCount={totalPages}
+        pageCount={loadedPages}
         currentPage={page}
         onPick={handleMovePick}
       />
