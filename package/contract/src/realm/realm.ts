@@ -19,6 +19,7 @@ import {
 import { moderationStatusSchema } from "./publication";
 import { realmExtraSchema } from "./realm-extra";
 import { realmDockEnvelopeSchema } from "./realm-dock";
+import { realmTagTreeEnvelopeSchema } from "./realm-tag-tree";
 
 // ============================================================
 // DEFAULT REALM
@@ -113,7 +114,8 @@ export const realmDTOSchema = t.Object({
   memberCount: t.Number(),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
   dock: t.Optional(t.Nullable(realmDockEnvelopeSchema)),
-  ruleUnitId: t.Optional(t.Nullable(t.String())),
+  tagTree: t.Optional(t.Nullable(realmTagTreeEnvelopeSchema)),
+  rulePolicyId: t.Optional(t.Nullable(t.String())),
   viewerCapabilities: t.Optional(t.Array(capabilityHintSchema)),
   resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
   title: t.Optional(t.Nullable(t.String())),
@@ -179,40 +181,113 @@ export type RealmMemberListResponse =
   (typeof realmMemberListResponseSchema)["static"];
 
 // ============================================================
-// REALM RULE ACKNOWLEDGEMENT DTO
-// REALM 规则确认数据传输对象
+// REALM RULE POLICY DTO
+// REALM 规则策略数据传输对象
 // ============================================================
 
-export const realmRuleReferenceDTOSchema = t.Object({
+export const realmRuleRequirementSchema = t.Object(
+  {
+    requireOnJoin: t.Boolean(),
+    requireOnPost: t.Boolean(),
+    requireOnUpdate: t.Boolean(),
+  },
+  { additionalProperties: false },
+);
+
+export type RealmRuleRequirement =
+  (typeof realmRuleRequirementSchema)["static"];
+
+export const realmRuleItemDTOSchema = t.Object(
+  {
+    id: t.String(),
+    policyId: t.String(),
+    revisionId: t.String(),
+    rulePostUnitId: t.String(),
+    position: t.String(),
+    appliesTo: t.Optional(t.Nullable(t.String())),
+    reportReasonUnitId: t.Optional(t.Nullable(t.String())),
+    createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+    updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  },
+  { additionalProperties: false },
+);
+
+export type RealmRuleItemDTO = (typeof realmRuleItemDTOSchema)["static"];
+
+export const realmRuleRevisionDTOSchema = t.Object(
+  {
+    id: t.String(),
+    policyId: t.String(),
+    version: t.Number(),
+    items: t.Array(realmRuleItemDTOSchema),
+    createdByUserId: t.Optional(t.Nullable(t.String())),
+    createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  },
+  { additionalProperties: false },
+);
+
+export type RealmRuleRevisionDTO =
+  (typeof realmRuleRevisionDTOSchema)["static"];
+
+export const realmRulePolicyDTOSchema = t.Object({
   realmUnitId: t.String(),
-  ruleUnitId: t.Nullable(t.String()),
-  version: t.Nullable(t.Number()),
-  requireOnJoin: t.Optional(t.Boolean()),
-  requireOnPost: t.Optional(t.Boolean()),
-  requireOnUpdate: t.Optional(t.Boolean()),
+  policyId: t.Nullable(t.String()),
+  currentRevisionId: t.Nullable(t.String()),
+  currentVersion: t.Nullable(t.Number()),
+  requirements: realmRuleRequirementSchema,
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type RealmRuleReferenceDTO =
-  (typeof realmRuleReferenceDTOSchema)["static"];
+export type RealmRulePolicyDTO = (typeof realmRulePolicyDTOSchema)["static"];
 
-export const realmRuleResolvedDTOSchema = t.Object({
-  realmUnitId: t.String(),
-  ruleUnitId: t.Nullable(t.String()),
-  version: t.Nullable(t.Number()),
-  requireOnJoin: t.Optional(t.Boolean()),
-  requireOnPost: t.Optional(t.Boolean()),
-  requireOnUpdate: t.Optional(t.Boolean()),
-  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
-  requestedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
-  resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
-  translation: t.Optional(t.Nullable(unitTranslationDTOSchema)),
-  sourceRulePostUnitId: t.Optional(t.Nullable(t.String())),
-  sourceRulePost: t.Optional(t.Nullable(postDTOSchema)),
-});
+export const realmRuleResolvedItemDTOSchema = t.Object(
+  {
+    id: t.String(),
+    rulePostUnitId: t.String(),
+    position: t.String(),
+    appliesTo: t.Optional(t.Nullable(t.String())),
+    reportReasonUnitId: t.Optional(t.Nullable(t.String())),
+    requestedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
+    resolvedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),
+    sourceRulePost: t.Optional(t.Nullable(postDTOSchema)),
+  },
+  { additionalProperties: false },
+);
+
+export type RealmRuleResolvedItemDTO =
+  (typeof realmRuleResolvedItemDTOSchema)["static"];
+
+export const realmRuleResolvedDTOSchema = t.Object(
+  {
+    policy: realmRulePolicyDTOSchema,
+    revision: t.Optional(t.Nullable(realmRuleRevisionDTOSchema)),
+    items: t.Array(realmRuleResolvedItemDTOSchema),
+  },
+  { additionalProperties: false },
+);
 
 export type RealmRuleResolvedDTO =
   (typeof realmRuleResolvedDTOSchema)["static"];
+
+export const createRealmRuleRevisionSchema = t.Object(
+  {
+    items: t.Array(
+      t.Object(
+        {
+          rulePostUnitId: t.String(),
+          position: t.String(),
+          appliesTo: t.Optional(t.Nullable(t.String())),
+          reportReasonUnitId: t.Optional(t.Nullable(t.String())),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+  },
+  { additionalProperties: false },
+);
+
+export type CreateRealmRuleRevisionInput =
+  (typeof createRealmRuleRevisionSchema)["static"];
 
 export const resolveRealmRuleQuerySchema = t.Object({
   language: t.Optional(contentLanguageSchema),
@@ -222,7 +297,8 @@ export const resolveRealmRuleQuerySchema = t.Object({
 
 export const realmRuleAcknowledgementDTOSchema = t.Object({
   realmUnitId: t.String(),
-  ruleUnitId: t.String(),
+  policyId: t.String(),
+  revisionId: t.String(),
   version: t.Number(),
   userId: t.String(),
   acceptedAt: t.Union([t.String(), t.Date()]),
@@ -240,8 +316,6 @@ export type AcknowledgeRealmRuleInput =
   (typeof acknowledgeRealmRuleSchema)["static"];
 
 export const updateRealmRulePolicySchema = t.Object({
-  ruleUnitId: t.Optional(t.Nullable(t.String())),
-  version: t.Optional(t.Number()),
   requireOnJoin: t.Optional(t.Boolean()),
   requireOnPost: t.Optional(t.Boolean()),
   requireOnUpdate: t.Optional(t.Boolean()),
@@ -251,9 +325,11 @@ export type UpdateRealmRulePolicyInput =
   (typeof updateRealmRulePolicySchema)["static"];
 
 export const realmRuleAcknowledgementStatusSchema = t.Object({
-  currentRuleUnitId: t.Nullable(t.String()),
+  currentPolicyId: t.Nullable(t.String()),
+  currentRevisionId: t.Nullable(t.String()),
   requiredVersion: t.Nullable(t.Number()),
-  acceptedRuleUnitId: t.Optional(t.Nullable(t.String())),
+  acceptedPolicyId: t.Optional(t.Nullable(t.String())),
+  acceptedRevisionId: t.Optional(t.Nullable(t.String())),
   acceptedVersion: t.Optional(t.Nullable(t.Number())),
   acceptedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   acceptedLanguage: t.Optional(t.Nullable(contentLanguageSchema)),

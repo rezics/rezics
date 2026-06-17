@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { policyActionSchema } from "../permission";
-import { tagTreeNodeSchema } from "../realm/realm-extra";
+import { realmTagTreeNodeSchema } from "../realm/realm-tag-tree";
 import {
   createPolicyTagRuleSchema,
   policyTagAuthoritySchema,
@@ -85,8 +85,9 @@ describe("policy tag contracts", () => {
 
   test("tag tree may hint policy query source without constraining tagging", () => {
     expect(
-      Value.Check(tagTreeNodeSchema, {
-        tagId: "tag-1",
+      Value.Check(realmTagTreeNodeSchema, {
+        kind: "tag",
+        tagUnitId: "tag-1",
         querySource: "policy",
       }),
     ).toBe(true);

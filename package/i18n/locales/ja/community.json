@@ -512,5 +512,12 @@
   "post_variant_badge": "バリアント: {label}",
   "review_messages_delete_failed": "レビューの削除に失敗しました",
   "wiki_locked_path": "ロック中のパス: {path}",
-  "wiki_locked_paths": "ロック中のパス: {paths}"
+  "wiki_locked_paths": "ロック中のパス: {paths}",
+  "realm_rule_require_on_join": "参加時に確認必須",
+  "realm_rule_require_on_post": "投稿時に確認必須",
+  "realm_rule_require_on_update": "更新後に再確認必須",
+  "realm_rule_toggle_on": "オン",
+  "realm_rule_toggle_off": "オフ",
+  "realm_rule_post_search": "投稿を検索",
+  "realm_tag_tree_policy_source": "ポリシー"
 }

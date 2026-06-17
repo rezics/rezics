@@ -464,5 +464,6 @@
   "unit_variant_count": "{count} 个变体",
   "unit_tag_count": "{count} 个标签",
   "unit_override_label": "覆盖：{title}",
-  "unit_source_label": "来源：{title}"
+  "unit_source_label": "来源：{title}",
+  "realm_tab_rules": "规则"
 }

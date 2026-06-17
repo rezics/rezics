@@ -1,7 +1,7 @@
 import type {
   RealmDTO,
   RealmMembershipMeDTO,
-  TagTreeNode,
+  RealmTagTree,
 } from "@rezics/contract";
 import { createContext, useContext } from "react";
 import type { RealmDetailRouteLocation } from "../models/realmDetailRoutes";
@@ -20,7 +20,8 @@ export interface RealmDetailContextValue {
   membership: RealmMembershipMeDTO | null | undefined;
   isMember: boolean;
   showManage: boolean;
-  tagTree: TagTreeNode[] | undefined;
+  tagTree: RealmTagTree | null | undefined;
+  tagTreeDisplayNames: ReadonlyMap<string, string>;
   description: string;
 }
 

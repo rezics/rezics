@@ -1,4 +1,5 @@
 import { draftListQuery } from "@rezics/api/draft";
+import { labelListQuery } from "@rezics/api/label/label";
 import { postListQuery } from "@rezics/api/post/post";
 import {
   myRealmMembershipQuery,
@@ -6,14 +7,21 @@ import {
   realmDetailQuery,
   realmRuleResolvedQuery,
 } from "@rezics/api/realm/realm";
+import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
+import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
 import {
   type DraftMetadata,
+  emptyRealmTagTree,
   LANGUAGES,
   markdownContentDoc,
+  type BatchTagTranslationResult,
+  type LabelDTO,
   type PostDTO,
   PostKind,
   type RealmDTO,
   type RealmMembershipMeDTO,
+  type RealmRuleResolvedDTO,
+  type RealmTagTree,
 } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,8 +32,14 @@ import type { RealmCreateMode } from "../models/realmCreateMode";
 import { RealmCreatePage } from "./RealmCreatePage";
 
 const REALM_ID = "realm-create-story";
+const RULE_POLICY_ID = "realm-create-rule-policy";
+const RULE_REVISION_ID = "realm-create-rule-revision";
+const RULE_ITEM_ID = "realm-create-rule-item";
 const RULE_POST_ID = "realm-create-rule";
 const STORY_USER_ID = "story-user";
+const TAG_DISCUSSION_ID = "tag-discussion";
+const TAG_GUIDE_ID = "tag-guide";
+const LABEL_FORMAT_ID = "label-format";
 
 function makeRealm(): RealmDTO {
   return {
@@ -40,18 +54,7 @@ function makeRealm(): RealmDTO {
     description: markdownContentDoc(
       "A fixture realm for the page-level authoring surface.",
     ),
-    extra: {
-      rule: RULE_POST_ID,
-      tagTree: [
-        {
-          label: "Format",
-          children: [
-            { tagId: "tag-discussion", label: "Discussion" },
-            { tagId: "tag-guide", label: "Guide" },
-          ],
-        },
-      ],
-    },
+    extra: {},
     translations: [
       {
         unitId: REALM_ID,
@@ -82,9 +85,11 @@ function makeMembership(): RealmMembershipMeDTO {
     banned: false,
     capabilities: [],
     ruleAcknowledgement: {
-      currentRuleUnitId: RULE_POST_ID,
+      currentPolicyId: RULE_POLICY_ID,
+      currentRevisionId: RULE_REVISION_ID,
       requiredVersion: 1,
-      acceptedRuleUnitId: RULE_POST_ID,
+      acceptedPolicyId: RULE_POLICY_ID,
+      acceptedRevisionId: RULE_REVISION_ID,
       acceptedVersion: 1,
       acceptedAt: "2026-06-02T08:00:00.000Z",
       acceptedLanguage: LANGUAGES.EN,
@@ -109,6 +114,81 @@ function makePost(
     updatedAt: "2026-06-02T08:00:00.000Z",
   } as PostDTO;
 }
+
+function makeResolvedRule(rulePost: PostDTO): RealmRuleResolvedDTO {
+  return {
+    policy: {
+      realmUnitId: REALM_ID,
+      policyId: RULE_POLICY_ID,
+      currentRevisionId: RULE_REVISION_ID,
+      currentVersion: 1,
+      requirements: {
+        requireOnJoin: true,
+        requireOnPost: true,
+        requireOnUpdate: true,
+      },
+    },
+    revision: {
+      id: RULE_REVISION_ID,
+      policyId: RULE_POLICY_ID,
+      version: 1,
+      items: [
+        {
+          id: RULE_ITEM_ID,
+          policyId: RULE_POLICY_ID,
+          revisionId: RULE_REVISION_ID,
+          rulePostUnitId: rulePost.unitId,
+          position: "a0",
+        },
+      ],
+      createdByUserId: STORY_USER_ID,
+      createdAt: "2026-06-02T08:00:00.000Z",
+    },
+    items: [
+      {
+        id: RULE_ITEM_ID,
+        rulePostUnitId: rulePost.unitId,
+        position: "a0",
+        requestedLanguage: null,
+        resolvedLanguage: LANGUAGES.EN,
+        sourceRulePost: rulePost,
+      },
+    ],
+  };
+}
+
+function tag(name: string): BatchTagTranslationResult[string] {
+  return {
+    name,
+    slug: name.toLowerCase().replaceAll(" ", "-"),
+    description: "",
+  };
+}
+
+const tagTree: RealmTagTree = {
+  ...emptyRealmTagTree(),
+  view: { defaultMode: "tree", allowViewerSwitch: true },
+  nodes: [
+    {
+      kind: "label",
+      labelUnitId: LABEL_FORMAT_ID,
+      children: [
+        { kind: "tag", tagUnitId: TAG_DISCUSSION_ID },
+        { kind: "tag", tagUnitId: TAG_GUIDE_ID },
+      ],
+    },
+  ],
+};
+const tagTranslations: BatchTagTranslationResult = {
+  [TAG_DISCUSSION_ID]: tag("Discussion"),
+  [TAG_GUIDE_ID]: tag("Guide"),
+};
+const labels: LabelDTO[] = [
+  {
+    unitId: LABEL_FORMAT_ID,
+    translations: [{ language: LANGUAGES.EN, title: "Format" }],
+  },
+];
 
 const drafts: DraftMetadata[] = [
   {
@@ -161,7 +241,7 @@ function setAuthState(hasMemberSession: boolean) {
 
 function SeedRealmCreatePage({
   member,
-  mode,
+  mode: _mode,
   children,
 }: {
   member: boolean;
@@ -185,19 +265,28 @@ function SeedRealmCreatePage({
     queryClient.setQueryData(myRealmsQuery().queryKey, {
       realms: member ? [realm] : [],
     });
-    queryClient.setQueryData(realmRuleResolvedQuery(REALM_ID).queryKey, {
+    queryClient.setQueryData(realmTagTreeQuery(REALM_ID).queryKey, {
       realmUnitId: REALM_ID,
-      ruleUnitId: RULE_POST_ID,
-      version: 1,
-      requireOnJoin: true,
-      requireOnPost: true,
-      requireOnUpdate: true,
-      requestedLanguage: null,
-      resolvedLanguage: LANGUAGES.EN,
-      translation: null,
-      sourceRulePostUnitId: RULE_POST_ID,
-      sourceRulePost: rulePost,
+      tree: tagTree,
     });
+    queryClient.setQueryData(
+      tagBatchTranslationsQuery([TAG_DISCUSSION_ID, TAG_GUIDE_ID], LANGUAGES.EN)
+        .queryKey,
+      tagTranslations,
+    );
+    queryClient.setQueryData(labelListQuery([LABEL_FORMAT_ID]).queryKey, {
+      labels,
+    });
+    queryClient.setQueryData(realmRuleResolvedQuery(REALM_ID).queryKey, {
+      ...makeResolvedRule(rulePost),
+    });
+    queryClient.setQueryData(
+      realmRuleResolvedQuery(REALM_ID, undefined, {
+        languages: [LANGUAGES.EN],
+        appLocale: LANGUAGES.EN,
+      }).queryKey,
+      makeResolvedRule(rulePost),
+    );
     queryClient.setQueryData(draftListQuery({ limit: 25 }).queryKey, {
       drafts,
     });

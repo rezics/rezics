@@ -1,7 +1,9 @@
-import { realmQueries } from "@rezics/api/realm/realm";
+import { labelListQuery } from "@rezics/api/label/label";
 import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import type { TagSearchDocument, TagTreeNode } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
+import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
+import type { TagSearchDocument } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -16,6 +18,10 @@ import { ArrowLeft, Check, ChevronRight, Plus, X } from "lucide-react";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import {
+  buildRealmTagTreeDisplayNames,
+  collectRealmTagTreeUnitIds,
+} from "../models/realmTagTreeHydration";
 import {
   buildRealmTagTreePickerRows,
   flattenRealmTagTreePickerRows,
@@ -51,7 +57,6 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
   onSelectedTagIdsChange,
 }) => {
   const { t } = useTranslation(["common", "community", "page"]);
-  const locale = useLocale();
   const readContext = useReadLanguageContext();
   const firstRealmId = realmUnitIds.length === 1 ? realmUnitIds[0] : undefined;
   const [open, setOpen] = useState(false);
@@ -62,19 +67,33 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
   const [globalLabels, setGlobalLabels] = useState<Map<string, string>>(
     () => new Map(),
   );
-  const { data: realm } = useQuery({
-    ...realmQueries.detail(firstRealmId ?? "", {
-      languages: readContext.languages,
-      appLocale: readContext.appLocale,
-    }),
-    enabled: readContext.ready && Boolean(firstRealmId),
+  const { data: tagTreeResponse } = useQuery({
+    ...realmTagTreeQuery(firstRealmId ?? ""),
+    enabled: Boolean(firstRealmId),
   });
-  const tagTree = firstRealmId
-    ? (realm?.extra?.tagTree as TagTreeNode[] | undefined)
-    : undefined;
+  const tagTree = tagTreeResponse?.tree ?? null;
+  const tagTreeRefs = useMemo(
+    () => collectRealmTagTreeUnitIds(tagTree),
+    [tagTree],
+  );
+  const { data: tagTranslations } = useQuery(
+    tagBatchTranslationsQuery(tagTreeRefs.tagUnitIds, readContext.appLocale),
+  );
+  const { data: labelResponse } = useQuery(
+    labelListQuery(tagTreeRefs.labelUnitIds),
+  );
+  const tagTreeDisplayNames = useMemo(
+    () =>
+      buildRealmTagTreeDisplayNames({
+        tagTranslations,
+        labels: labelResponse?.labels,
+        language: readContext.appLocale,
+      }),
+    [labelResponse?.labels, readContext.appLocale, tagTranslations],
+  );
   const treeRows = useMemo(
-    () => buildRealmTagTreePickerRows(tagTree, locale),
-    [locale, tagTree],
+    () => buildRealmTagTreePickerRows(tagTree?.nodes, tagTreeDisplayNames),
+    [tagTree?.nodes, tagTreeDisplayNames],
   );
   const flatTreeRows = useMemo(
     () => flattenRealmTagTreePickerRows(treeRows),

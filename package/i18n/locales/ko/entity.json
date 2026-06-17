@@ -464,5 +464,6 @@
   "unit_variant_count": "변형 {count}개",
   "unit_tag_count": "태그 {count}개",
   "unit_override_label": "오버라이드: {title}",
-  "unit_source_label": "출처: {title}"
+  "unit_source_label": "출처: {title}",
+  "realm_tab_rules": "규칙"
 }

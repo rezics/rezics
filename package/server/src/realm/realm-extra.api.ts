@@ -9,7 +9,6 @@ import {
   clearSingleExtraKey,
   RealmExtraError,
   setSingleExtraKey,
-  setTagTreeExtra,
 } from "./realm-extra.service";
 
 const paramsSchema = t.Object({
@@ -45,16 +44,12 @@ export const realmExtraApi = new Elysia()
         assertMediaUrl(body.value.url);
       }
       try {
-        if (params.key === "tagTree") {
-          await setTagTreeExtra(identity, params.unitId, body.value);
-        } else {
-          await setSingleExtraKey(
-            identity,
-            params.unitId,
-            params.key,
-            body.value,
-          );
-        }
+        await setSingleExtraKey(
+          identity,
+          params.unitId,
+          params.key,
+          body.value,
+        );
         return { ok: true };
       } catch (error) {
         handleError(error);

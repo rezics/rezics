@@ -37,6 +37,9 @@ export function identityRelations(r: ServerRelationsBuilder) {
         alias: "RealmCapabilityGrant_revokedById_User_unitId",
       }),
       RealmRuleAcknowledgements: r.many.RealmRuleAcknowledgement(),
+      RealmRuleRevisions_createdByUserId: r.many.RealmRuleRevision({
+        alias: "RealmRuleRevision_createdByUserId_User_unitId",
+      }),
       StaffAuditLogs: r.many.StaffAuditLog(),
       StaffGrants_grantedById: r.many.StaffGrant({
         alias: "StaffGrant_grantedById_User_unitId",

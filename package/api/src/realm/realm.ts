@@ -45,6 +45,7 @@ export { realmDockKeys } from "./realm-dock.keys";
 export {
   realmMutations,
   useAddRealmTagApplicationMutation,
+  useAcknowledgeRealmRulesMutation,
   useAddUnitRealmMutation,
   useCastRealmTagApplicationVoteMutation,
   useCreateRealmMutation,
@@ -63,6 +64,7 @@ export {
   useUpdateMemberRoleMutation,
   useUpdateRealmMutation,
   useUpdateRealmRulePolicyMutation,
+  useCreateRealmRuleRevisionMutation,
   useUpdateRealmTagContextMutation,
   useWithdrawRealmTagApplicationVoteMutation,
 } from "./realm.mutations";
@@ -91,6 +93,7 @@ export type {
   AddRealmTagApplicationInput,
   AddUnitRealmInput,
   CreateRealmInput,
+  CreateRealmRuleRevisionInput,
   JoinRealmInput,
   ModerationStatus,
   RealmDTO,
@@ -104,7 +107,7 @@ export type {
   RealmMembershipMeDTO,
   RealmResponse,
   RealmRuleAcknowledgementDTO,
-  RealmRuleReferenceDTO,
+  RealmRulePolicyDTO,
   RealmRuleResolvedDTO,
   RealmSortOption,
   RealmTagApplicationDTO,

@@ -512,5 +512,12 @@
   "post_variant_badge": "Variant: {label}",
   "review_messages_delete_failed": "Failed to delete review",
   "wiki_locked_path": "Locked path: {path}",
-  "wiki_locked_paths": "Locked paths: {paths}"
+  "wiki_locked_paths": "Locked paths: {paths}",
+  "realm_rule_require_on_join": "Require on join",
+  "realm_rule_require_on_post": "Require on post",
+  "realm_rule_require_on_update": "Require after update",
+  "realm_rule_toggle_on": "On",
+  "realm_rule_toggle_off": "Off",
+  "realm_rule_post_search": "Search posts",
+  "realm_tag_tree_policy_source": "Policy"
 }

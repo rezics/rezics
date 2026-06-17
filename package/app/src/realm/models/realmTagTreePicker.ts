@@ -1,4 +1,8 @@
-import type { TagTreeNode } from "@rezics/contract";
+import type { RealmTagTreeNode } from "@rezics/contract";
+import {
+  realmTagTreeNodeDisplayLabel,
+  type RealmTagTreeDisplayNames,
+} from "./realmTagTreeHydration";
 
 export type RealmTagTreePickerRow = {
   id: string;
@@ -15,48 +19,19 @@ export type RealmTagTreeSearchMatch = RealmTagTreePickerRow & {
   matchText: string;
 };
 
-type MaybeDescribedNode = TagTreeNode & {
-  description?: string;
-  labelDescription?: string;
-};
-
-function text(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
-}
-
-export function realmTagTreeNodeLabel(
-  node: TagTreeNode,
-  language: string,
-): string {
-  const translations = node.labelTranslations?.translations;
-  const fallbackLanguage = node.labelTranslations?.fallbackLanguage;
-  return (
-    text(translations?.[language]) ??
-    (fallbackLanguage ? text(translations?.[fallbackLanguage]) : undefined) ??
-    text(node.label) ??
-    (node.tagId ? node.tagId.slice(0, 8) : undefined) ??
-    "Untitled"
-  );
-}
-
-function nodeDescription(node: TagTreeNode): string | undefined {
-  const described = node as MaybeDescribedNode;
-  return text(described.description) ?? text(described.labelDescription);
-}
-
 export function buildRealmTagTreePickerRows(
-  nodes: TagTreeNode[] | undefined,
-  language: string,
+  nodes: RealmTagTreeNode[] | undefined,
+  displayNames?: RealmTagTreeDisplayNames,
 ): RealmTagTreePickerRow[] {
   const visit = (
-    items: TagTreeNode[],
+    items: RealmTagTreeNode[],
     path: string[],
     keyPath: string[],
   ): RealmTagTreePickerRow[] =>
     items.map((node, index) => {
-      const label = realmTagTreeNodeLabel(node, language);
+      const label = realmTagTreeNodeDisplayLabel(node, displayNames);
       const nextPath = [...path, label];
-      const nodeKey = node.tagId ?? node.label ?? "node";
+      const nodeKey = node.kind === "tag" ? node.tagUnitId : node.labelUnitId;
       const id = [...keyPath, `${index}:${nodeKey}`].join("/");
       const children = visit(node.children ?? [], nextPath, [
         ...keyPath,
@@ -64,13 +39,12 @@ export function buildRealmTagTreePickerRows(
       ]);
       return {
         id,
-        tagId: node.tagId,
+        tagId: node.kind === "tag" ? node.tagUnitId : undefined,
         label,
-        description: nodeDescription(node),
         path: nextPath,
         pathLabel: path.join(" / "),
         children,
-        selectable: Boolean(node.tagId),
+        selectable: node.kind === "tag",
       };
     });
 

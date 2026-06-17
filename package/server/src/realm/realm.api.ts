@@ -5,13 +5,14 @@ import type {
   RealmMemberListResponse,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
-  RealmRuleReferenceDTO,
+  RealmRulePolicyDTO,
   RealmRuleResolvedDTO,
   RealmTagApplicationDTO,
   UnitRealmDTO,
 } from "@rezics/contract";
 import {
   acknowledgeRealmRuleSchema,
+  createRealmRuleRevisionSchema,
   addRealmTagApplicationSchema,
   addUnitRealmSchema,
   BasicAdminPermission,
@@ -525,7 +526,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       detail: {
         summary: "Get realm rule policy",
         description:
-          "Read the realm's current rule Unit reference, version, and acknowledgement requirements",
+          "Read the realm's current rule policy, revision pointer, and acknowledgement requirements",
         tags: ["Realms"],
       },
     },
@@ -537,7 +538,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       body,
       identity,
       status,
-    }): Promise<RealmRuleReferenceDTO | string> => {
+    }): Promise<RealmRulePolicyDTO | string> => {
       const denied = await assertRealmRulesUpdatePolicy({
         identity,
         status,
@@ -557,7 +558,39 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       detail: {
         summary: "Update realm rule policy",
         description:
-          "Update the realm's current rule Unit reference, version, and acknowledgement requirements",
+          "Update the realm's current rule acknowledgement requirements",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/rules/revisions",
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmRuleResolvedDTO | string> => {
+      const denied = await assertRealmRulesUpdatePolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return realmService.createRuleRevision(identity, params.unitId, body);
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      body: createRealmRuleRevisionSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
+      detail: {
+        summary: "Create realm rule revision",
+        description:
+          "Create a versioned list of rule items backed by POST Units and make it current",
         tags: ["Realms"],
       },
     },

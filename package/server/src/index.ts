@@ -43,6 +43,7 @@ import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
 import { pollApi } from "./poll";
 import { pinboardApi } from "./pinboard";
 import { policyTagApi } from "./policy-tag";
+import { realmTagTreeApi } from "./realm-tag-tree";
 import { postApi } from "./post";
 import { profileReactionHistoryApi } from "./profile-reaction-history";
 import { progressApi } from "./progress";
@@ -231,6 +232,7 @@ routeApp
   .use(labelApi)
   .use(pinboardApi)
   .use(policyTagApi)
+  .use(realmTagTreeApi)
   .use(realmApi)
   .use(realmDockApi)
   .use(realmExtraApi)

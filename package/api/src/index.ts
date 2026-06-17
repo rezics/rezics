@@ -21,6 +21,7 @@ export * from "./label/label";
 export * from "./meili/meili";
 export * from "./pinboard";
 export * from "./policy-tag";
+export * from "./realm-tag-tree";
 export * from "./progress";
 export {
   ApiError,

@@ -464,5 +464,6 @@
   "unit_variant_count": "{count}件のバリアント",
   "unit_tag_count": "{count}件のタグ",
   "unit_override_label": "オーバーライド: {title}",
-  "unit_source_label": "ソース: {title}"
+  "unit_source_label": "ソース: {title}",
+  "realm_tab_rules": "ルール"
 }

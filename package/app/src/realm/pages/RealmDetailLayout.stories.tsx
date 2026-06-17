@@ -1,4 +1,5 @@
 import { governanceRealmCaseListQuery } from "@rezics/api/governance/governance";
+import { labelListQuery } from "@rezics/api/label/label";
 import { postQueries } from "@rezics/api/post/post";
 import {
   myRealmMembershipQuery,
@@ -6,15 +7,22 @@ import {
   realmDetailQuery,
   realmRuleResolvedQuery,
 } from "@rezics/api/realm/realm";
+import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
 import { subscriptionCheckQuery } from "@rezics/api/subscription/subscription";
+import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
 import {
+  emptyRealmTagTree,
   LANGUAGES,
   markdownContentDoc,
+  type BatchTagTranslationResult,
+  type LabelDTO,
   type PostDTO,
   PostKind,
   type RealmDTO,
   type RealmMemberState,
   type RealmMembershipMeDTO,
+  type RealmRuleResolvedDTO,
+  type RealmTagTree,
 } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,7 +35,12 @@ import { RealmDetailLayout } from "./RealmDetailLayout";
 import { useRealmDetail } from "./realmDetailContext";
 
 const REALM_ID = "realm-story-community";
+const RULE_POLICY_ID = "realm-rule-policy";
+const RULE_REVISION_ID = "realm-rule-revision";
+const RULE_ITEM_ID = "realm-rule-item";
 const RULE_POST_ID = "realm-rule-post";
+const TAG_REVIEW_ID = "tag-review";
+const LABEL_FORMAT_ID = "label-format";
 
 type RealmStoryState =
   | "owner"
@@ -38,9 +51,6 @@ type RealmStoryState =
   | "muted"
   | "banned";
 
-// Detail tabs exercised by these fixtures: the stream (manage chrome) and Dock
-// (mobile tab / desktop rail content).
-// 这些 fixture 演示的详情标签：信息流（管理外壳）与 Dock（移动端标签 / 桌面侧栏内容）。
 type RealmDetailStoryTab = "stream" | "dock";
 
 function makePost(unitId: string, contentSource: string): PostDTO {
@@ -66,16 +76,7 @@ function makeRealm(): RealmDTO {
     resolvedLanguage: LANGUAGES.EN,
     title: "Story Realm",
     description: "A fixture realm for community governance states.",
-    extra: {
-      rule: RULE_POST_ID,
-      tagTree: [
-        {
-          label: "Format",
-          children: [{ tagId: "tag-review", label: "Review" }],
-        },
-      ],
-      tagView: { defaultStyle: "grouped", allowViewerSwitch: true },
-    },
+    extra: {},
     translations: [
       {
         unitId: REALM_ID,
@@ -99,6 +100,77 @@ function makeRealm(): RealmDTO {
       },
     },
   } as RealmDTO;
+}
+
+function tag(name: string): BatchTagTranslationResult[string] {
+  return {
+    name,
+    slug: name.toLowerCase().replaceAll(" ", "-"),
+    description: "",
+  };
+}
+
+const tagTree: RealmTagTree = {
+  ...emptyRealmTagTree(),
+  view: { defaultMode: "grouped", allowViewerSwitch: true },
+  nodes: [
+    {
+      kind: "label",
+      labelUnitId: LABEL_FORMAT_ID,
+      children: [{ kind: "tag", tagUnitId: TAG_REVIEW_ID }],
+    },
+  ],
+};
+const tagTranslations: BatchTagTranslationResult = {
+  [TAG_REVIEW_ID]: tag("Review"),
+};
+const labels: LabelDTO[] = [
+  {
+    unitId: LABEL_FORMAT_ID,
+    translations: [{ language: LANGUAGES.EN, title: "Format" }],
+  },
+];
+
+function makeResolvedRule(rulePost: PostDTO): RealmRuleResolvedDTO {
+  return {
+    policy: {
+      realmUnitId: REALM_ID,
+      policyId: RULE_POLICY_ID,
+      currentRevisionId: RULE_REVISION_ID,
+      currentVersion: 1,
+      requirements: {
+        requireOnJoin: true,
+        requireOnPost: true,
+        requireOnUpdate: true,
+      },
+    },
+    revision: {
+      id: RULE_REVISION_ID,
+      policyId: RULE_POLICY_ID,
+      version: 1,
+      items: [
+        {
+          id: RULE_ITEM_ID,
+          policyId: RULE_POLICY_ID,
+          revisionId: RULE_REVISION_ID,
+          rulePostUnitId: RULE_POST_ID,
+          position: "a0",
+        },
+      ],
+      createdByUserId: "story-owner",
+      createdAt: "2026-05-27T08:30:00.000Z",
+    },
+    items: [
+      {
+        id: RULE_ITEM_ID,
+        rulePostUnitId: RULE_POST_ID,
+        position: "a0",
+        requestedLanguage: null,
+        resolvedLanguage: LANGUAGES.EN,
+        sourceRulePost: rulePost,
+      },
+    ],
+  };
 }
 
 function stateMembership(
@@ -139,9 +211,11 @@ function stateMembership(
           ]
         : [],
     ruleAcknowledgement: {
-      currentRuleUnitId: RULE_POST_ID,
+      currentPolicyId: RULE_POLICY_ID,
+      currentRevisionId: RULE_REVISION_ID,
       requiredVersion: 1,
-      acceptedRuleUnitId: RULE_POST_ID,
+      acceptedPolicyId: RULE_POLICY_ID,
+      acceptedRevisionId: RULE_REVISION_ID,
       acceptedVersion: 1,
       acceptedAt: "2026-05-27T08:30:00.000Z",
       acceptedLanguage: LANGUAGES.EN,
@@ -219,23 +293,28 @@ function SeededRealmDetail({
     queryClient.setQueryData(subscriptionCheckQuery(REALM_ID).queryKey, {
       subscribed: true,
     });
+    queryClient.setQueryData(realmTagTreeQuery(REALM_ID).queryKey, {
+      realmUnitId: REALM_ID,
+      tree: tagTree,
+    });
+    queryClient.setQueryData(
+      tagBatchTranslationsQuery([TAG_REVIEW_ID], LANGUAGES.EN).queryKey,
+      tagTranslations,
+    );
+    queryClient.setQueryData(labelListQuery([LABEL_FORMAT_ID]).queryKey, {
+      labels,
+    });
     queryClient.setQueryData(
       postQueries.detail(RULE_POST_ID).queryKey,
       rulePost,
     );
-    queryClient.setQueryData(realmRuleResolvedQuery(REALM_ID).queryKey, {
-      realmUnitId: REALM_ID,
-      ruleUnitId: RULE_POST_ID,
-      version: 1,
-      requireOnJoin: true,
-      requireOnPost: true,
-      requireOnUpdate: true,
-      requestedLanguage: null,
-      resolvedLanguage: LANGUAGES.EN,
-      translation: null,
-      sourceRulePostUnitId: RULE_POST_ID,
-      sourceRulePost: rulePost,
-    });
+    queryClient.setQueryData(
+      realmRuleResolvedQuery(REALM_ID, undefined, {
+        languages: [LANGUAGES.EN],
+        appLocale: LANGUAGES.EN,
+      }).queryKey,
+      makeResolvedRule(rulePost),
+    );
     queryClient.setQueryData(
       governanceRealmCaseListQuery(REALM_ID, { limit: 25 }).queryKey,
       [
@@ -274,9 +353,6 @@ function SeededRealmDetail({
   return <div className="min-h-screen bg-surface-canvas">{children}</div>;
 }
 
-// Renders a single detail tab from inside the layout provider so the fixture
-// reads the same realm context the routed tabs do.
-// 在布局 provider 内部渲染单个详情标签，使 fixture 读取与路由标签相同的 realm 上下文。
 function DetailTab({ tab }: { tab: RealmDetailStoryTab }) {
   const detail = useRealmDetail();
   if (tab === "dock") {

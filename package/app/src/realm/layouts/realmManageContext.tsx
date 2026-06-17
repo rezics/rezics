@@ -1,4 +1,4 @@
-import type { RealmDTO, TagTreeNode } from "@rezics/contract";
+import type { RealmDTO } from "@rezics/contract";
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import type { RealmDetailRouteLocation } from "../models/realmDetailRoutes";
@@ -9,7 +9,6 @@ export type RealmManageContextValue = {
   realm: RealmDTO;
   memberRoleKey?: string;
   canDeleteRealm: boolean;
-  tagTree?: TagTreeNode[];
 };
 
 const RealmManageContext = createContext<RealmManageContextValue | null>(null);

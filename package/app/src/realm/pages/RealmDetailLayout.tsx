@@ -1,20 +1,26 @@
 import { useServerPermission } from "@rezics/api/hooks";
+import { labelListQuery } from "@rezics/api/label/label";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
-import type { TagTreeNode } from "@rezics/contract";
+import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
+import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { RealmMembershipSettingsDialog } from "@/realm-tag-preference";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
 import { canManageRealm } from "../models/canManageRealm";
+import {
+  buildRealmTagTreeDisplayNames,
+  collectRealmTagTreeUnitIds,
+} from "../models/realmTagTreeHydration";
 import {
   type RealmDetailRouteLocation,
   realmCreateHref,
@@ -60,6 +66,27 @@ export function RealmDetailLayout({
     enabled: readContext.ready,
   });
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
+  const { data: tagTreeResponse } = useQuery(realmTagTreeQuery(realmId));
+  const tagTree = tagTreeResponse?.tree ?? null;
+  const tagTreeRefs = useMemo(
+    () => collectRealmTagTreeUnitIds(tagTree),
+    [tagTree],
+  );
+  const { data: tagTranslations } = useQuery(
+    tagBatchTranslationsQuery(tagTreeRefs.tagUnitIds, readContext.appLocale),
+  );
+  const { data: labelResponse } = useQuery(
+    labelListQuery(tagTreeRefs.labelUnitIds),
+  );
+  const tagTreeDisplayNames = useMemo(
+    () =>
+      buildRealmTagTreeDisplayNames({
+        tagTranslations,
+        labels: labelResponse?.labels,
+        language: readContext.appLocale,
+      }),
+    [labelResponse?.labels, readContext.appLocale, tagTranslations],
+  );
   const permission = useServerPermission();
 
   if (isLoading) {
@@ -87,7 +114,6 @@ export function RealmDetailLayout({
   const title = realm.title ?? t("entity:realm_untitled");
   const avatarUrl =
     realm.extra?.avatar?.kind === "url" ? realm.extra.avatar.url : undefined;
-  const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const showManage = canManageRealm({
     permission,
     memberRoleKey: membership?.roleKey,
@@ -104,6 +130,7 @@ export function RealmDetailLayout({
         isMember,
         showManage,
         tagTree,
+        tagTreeDisplayNames,
         description: "",
       }}
     >

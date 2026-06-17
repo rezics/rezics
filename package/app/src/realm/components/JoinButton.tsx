@@ -1,16 +1,15 @@
 import {
   myRealmMembershipQuery,
-  realmDetailQuery,
   realmRuleResolvedQuery,
+  useAcknowledgeRealmRulesMutation,
   useJoinRealmMutation,
   useLeaveRealmMutation,
 } from "@rezics/api/realm/realm";
-import { mainMarkdownSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { RealmRuleDialog } from "../sections/RealmRuleDialog";
 
@@ -30,35 +29,23 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
     ...myRealmMembershipQuery(realmId),
     enabled: readContext.ready && Boolean(realmId),
   });
-  const { data: realm } = useQuery({
-    ...realmDetailQuery(realmId, readQuery),
-    enabled: readContext.ready,
-  });
   const joinMutation = useJoinRealmMutation();
   const leaveMutation = useLeaveRealmMutation();
+  const acknowledgeRules = useAcknowledgeRealmRulesMutation();
 
   const isMember = myMembership?.member != null;
-  const rulePostId = realm?.ruleUnitId ?? undefined;
-  const {
-    data: rule,
-    isLoading: ruleLoading,
-    isError: ruleError,
-  } = useQuery({
+  const acknowledgementRequired = Boolean(
+    myMembership?.ruleAcknowledgement.acknowledgementRequired,
+  );
+  const { data: rule, isLoading: ruleLoading } = useQuery({
     ...realmRuleResolvedQuery(realmId, undefined, readQuery),
-    enabled: readContext.ready && Boolean(rulePostId) && !isMember,
+    enabled: readContext.ready && acknowledgementRequired && !isMember,
   });
-  const ruleContent =
-    rule?.sourceRulePost?.content ?? rule?.translation?.description ?? null;
   const isPending =
     joinMutation.isPending ||
     leaveMutation.isPending ||
-    (Boolean(rulePostId) && ruleLoading);
-
-  useEffect(() => {
-    if (ruleOpen && ruleContent && !mainMarkdownSource(ruleContent)?.trim()) {
-      console.error("Join rule modal opened with empty post content.");
-    }
-  }, [ruleContent, ruleOpen]);
+    acknowledgeRules.isPending ||
+    (acknowledgementRequired && ruleLoading);
 
   const join = () => {
     joinMutation.mutate(
@@ -69,10 +56,15 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
     );
   };
 
+  const acknowledgeAndJoin = async () => {
+    await acknowledgeRules.mutateAsync({ realmUnitId: realmId, input: {} });
+    join();
+  };
+
   const handleToggle = () => {
     if (isMember) {
       leaveMutation.mutate(realmId);
-    } else if (rulePostId && ruleContent && !ruleError) {
+    } else if (acknowledgementRequired) {
       setRuleOpen(true);
     } else {
       join();
@@ -91,11 +83,11 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
       </Button>
       <RealmRuleDialog
         open={ruleOpen}
-        content={ruleContent}
+        rules={rule?.items}
         joining
-        joinPending={joinMutation.isPending}
+        joinPending={joinMutation.isPending || acknowledgeRules.isPending}
         onOpenChange={setRuleOpen}
-        onAgree={join}
+        onAgree={() => void acknowledgeAndJoin()}
       />
     </>
   );

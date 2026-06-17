@@ -213,10 +213,7 @@ export function RealmCreatePage({
         </div>
       </div>
 
-      <RuleSection
-        realmUnitId={realmId}
-        postUnitId={realm.ruleUnitId ?? null}
-      />
+      <RuleSection realmUnitId={realmId} />
 
       {!isMember ? (
         <div className="flex flex-col gap-4 rounded-md bg-surface-subtle p-6 md:flex-row md:items-center md:justify-between">

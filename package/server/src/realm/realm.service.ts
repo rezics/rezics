@@ -10,7 +10,7 @@ import type {
   RealmMemberListResponse,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
-  RealmRuleReferenceDTO,
+  RealmRulePolicyDTO,
   RealmRuleResolvedDTO,
   RezicsSessionClaims,
   UnitRealmDTO,
@@ -18,7 +18,6 @@ import type {
   UpdateRealmRulePolicyInput,
 } from "@rezics/contract";
 import {
-  normalizeContentLanguage,
   parseIdsCsv,
   resolveReadLanguage,
   validateSlug,
@@ -39,16 +38,12 @@ import {
 } from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/json-write";
 import { realmPolicyActions } from "@/governance/action/realm";
-import { governanceAuditService } from "@/governance/audit.service";
 import { governanceCapabilityService } from "@/governance/capability.service";
 import { moderationActionService } from "@/governance/moderation-action.service";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
-import { mapPostToDTO } from "@/post/post.mapper";
-import { postService } from "@/post/post.service";
 import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
 import { resolveEffectiveReadLanguageInput } from "@/unit/language-resolution";
-import { mapTranslationToDTO } from "@/unit/mapper";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -59,7 +54,6 @@ import type { ServerDb } from "../db/client";
 import {
   Realm,
   RealmMember,
-  RealmRuleAcknowledgement,
   RealmTagApplication as RealmTagApplicationTable,
   RealmTagApplicationVote,
   Subscription,
@@ -73,6 +67,7 @@ import {
   activateSubscriptionListEntryInTx,
   markSubscriptionListEntryRemovedInTx,
 } from "../subscription/subscription-list-entry.service";
+import { realmRuleService } from "../realm-rule";
 import {
   mapRealmMemberToDTO,
   mapRealmToDTO,
@@ -86,10 +81,6 @@ import type { RealmWithRelations } from "./types";
  * 分数低于或等于此阈值时，会对普通用户隐藏该 RealmTagApplication。
  */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
-
-function normalizedLanguage(language: string | null | undefined) {
-  return language ? normalizeContentLanguage(language) : null;
-}
 
 async function getServerDb() {
   const { db } = await import("../db/client");
@@ -200,23 +191,6 @@ function enqueueRealmMetadata(unitId: string, fields: Record<string, unknown>) {
 
 const REALM_JOIN_APPROVAL_ROLES = ["owner", "admin", "moderator"] as const;
 const REALM_MANAGE_ROLES = REALM_JOIN_APPROVAL_ROLES;
-
-function notifyRealmRuleUpdated(input: {
-  actorUserId: string;
-  realmUnitId: string;
-  ruleUnitId: string | null;
-  version: number;
-}) {
-  void broadcast({
-    kind: "realm.rules.updated",
-    sourceUnitId: input.realmUnitId,
-    actorId: input.actorUserId,
-    extra: {
-      ruleUnitId: input.ruleUnitId,
-      version: input.version,
-    },
-  }).catch(() => {});
-}
 
 export class RealmService {
   private async notifyJoinApprovalRequested(input: {
@@ -542,32 +516,16 @@ export class RealmService {
     const { member } = await db.transaction(async (tx) => {
       const [realmPolicy] = await tx
         .select({
-          ruleUnitId: Realm.ruleUnitId,
-          ruleVersion: Realm.ruleVersion,
-          ruleRequireOnJoin: Realm.ruleRequireOnJoin,
           joinRequiresApproval: Realm.joinRequiresApproval,
         })
         .from(Realm)
         .where(eq(Realm.unitId, realmUnitId))
         .limit(1);
-      const ruleUnitId = realmPolicy?.ruleUnitId ?? null;
-      if (realmPolicy?.ruleRequireOnJoin && ruleUnitId) {
-        const [acknowledgement] = await tx
-          .select({ realmUnitId: RealmRuleAcknowledgement.realmUnitId })
-          .from(RealmRuleAcknowledgement)
-          .where(
-            and(
-              eq(RealmRuleAcknowledgement.realmUnitId, realmUnitId),
-              eq(RealmRuleAcknowledgement.ruleUnitId, ruleUnitId),
-              eq(RealmRuleAcknowledgement.version, realmPolicy.ruleVersion),
-              eq(RealmRuleAcknowledgement.userId, userId),
-            ),
-          )
-          .limit(1);
-        if (!acknowledgement) {
-          throw new Error("Realm rules must be acknowledged before joining");
-        }
-      }
+      await realmRuleService.assertAcknowledgedForAction(
+        realmUnitId,
+        userId,
+        "join",
+      );
 
       const [member] = await tx
         .insert(RealmMember)
@@ -956,55 +914,7 @@ export class RealmService {
     realmUnitId: string,
     userId: string,
   ): Promise<RealmMembershipMeDTO> {
-    const db = await getServerDb();
-    const [member, realm, latestAcknowledgement] = await Promise.all([
-      this.getMember(realmUnitId, userId),
-      db
-        .select({
-          ruleUnitId: Realm.ruleUnitId,
-          ruleVersion: Realm.ruleVersion,
-          ruleRequireOnJoin: Realm.ruleRequireOnJoin,
-          ruleRequireOnPost: Realm.ruleRequireOnPost,
-          ruleRequireOnUpdate: Realm.ruleRequireOnUpdate,
-        })
-        .from(Realm)
-        .where(eq(Realm.unitId, realmUnitId))
-        .limit(1)
-        .then((rows) => rows[0] ?? null),
-      db
-        .select()
-        .from(RealmRuleAcknowledgement)
-        .where(
-          and(
-            eq(RealmRuleAcknowledgement.realmUnitId, realmUnitId),
-            eq(RealmRuleAcknowledgement.userId, userId),
-          ),
-        )
-        .orderBy(
-          desc(RealmRuleAcknowledgement.acceptedAt),
-          desc(RealmRuleAcknowledgement.version),
-        )
-        .limit(1)
-        .then((rows) => rows[0] ?? null),
-    ]);
-
-    const currentRuleUnitId = realm?.ruleUnitId ?? null;
-    const requiredVersion = currentRuleUnitId
-      ? (realm?.ruleVersion ?? null)
-      : null;
-    const requiresAcknowledgement = Boolean(
-      currentRuleUnitId &&
-        (realm?.ruleRequireOnJoin ||
-          realm?.ruleRequireOnPost ||
-          realm?.ruleRequireOnUpdate),
-    );
-    const acceptedCurrentRule = Boolean(
-      currentRuleUnitId &&
-        latestAcknowledgement?.ruleUnitId === currentRuleUnitId &&
-        requiredVersion !== null &&
-        latestAcknowledgement.version >= requiredVersion,
-    );
-
+    const member = await this.getMember(realmUnitId, userId);
     return {
       realmUnitId,
       userId,
@@ -1014,105 +924,23 @@ export class RealmService {
       muted: member?.state === "muted",
       banned: member?.state === "banned",
       capabilities: member?.capabilities ?? [],
-      ruleAcknowledgement: {
-        currentRuleUnitId,
-        requiredVersion,
-        acceptedRuleUnitId: latestAcknowledgement?.ruleUnitId ?? null,
-        acceptedVersion: latestAcknowledgement?.version ?? null,
-        acceptedAt: latestAcknowledgement?.acceptedAt ?? null,
-        acceptedLanguage: normalizedLanguage(
-          latestAcknowledgement?.acceptedLanguage,
-        ),
-        acknowledgementRequired:
-          requiresAcknowledgement && !acceptedCurrentRule,
-      },
+      ruleAcknowledgement: await realmRuleService.getAcknowledgementStatus(
+        realmUnitId,
+        userId,
+      ),
     };
   }
 
-  // TODO(openspec-retired): an earlier spec intended NO per-user
-  // rule-acknowledgement record, yet RealmRuleAcknowledgement exists and is
-  // written here. Revisit whether the table should exist.
-  // 早先的规范本不打算保留按用户的规则确认记录，但 RealmRuleAcknowledgement
-  // 仍存在并在此处写入。需重新评估该表是否应当存在。
   async acknowledgeCurrentRule(
     realmUnitId: string,
     userId: string,
     input: AcknowledgeRealmRuleInput = {},
   ): Promise<RealmRuleAcknowledgementDTO> {
-    const db = await getServerDb();
-    const [realm] = await db
-      .select({ ruleUnitId: Realm.ruleUnitId, ruleVersion: Realm.ruleVersion })
-      .from(Realm)
-      .where(eq(Realm.unitId, realmUnitId))
-      .limit(1);
-    const ruleUnitId = realm?.ruleUnitId ?? null;
-    if (!realm || !ruleUnitId) {
-      throw new Error("Realm does not have a current rule Unit");
-    }
-
-    const [row] = await db
-      .insert(RealmRuleAcknowledgement)
-      .values({
-        realmUnitId,
-        ruleUnitId,
-        version: realm.ruleVersion,
-        userId,
-        acceptedLanguage: normalizedLanguage(input.acceptedLanguage),
-      })
-      .onConflictDoUpdate({
-        target: [
-          RealmRuleAcknowledgement.realmUnitId,
-          RealmRuleAcknowledgement.ruleUnitId,
-          RealmRuleAcknowledgement.version,
-          RealmRuleAcknowledgement.userId,
-        ],
-        set: {
-          acceptedAt: new Date(),
-          acceptedLanguage: normalizedLanguage(input.acceptedLanguage),
-        },
-      })
-      .returning();
-    if (!row) throw new Error("Failed to acknowledge realm rule");
-
-    return {
-      realmUnitId: row.realmUnitId,
-      ruleUnitId: row.ruleUnitId,
-      version: row.version,
-      userId: row.userId,
-      acceptedAt: row.acceptedAt,
-      acceptedLanguage: normalizedLanguage(row.acceptedLanguage),
-    };
+    return realmRuleService.acknowledgeCurrent(realmUnitId, userId, input);
   }
 
-  async getRulePolicy(realmUnitId: string): Promise<RealmRuleReferenceDTO> {
-    const db = await getServerDb();
-    const [row] = await db
-      .select({
-        unitId: Realm.unitId,
-        ruleUnitId: Realm.ruleUnitId,
-        ruleVersion: Realm.ruleVersion,
-        ruleRequireOnJoin: Realm.ruleRequireOnJoin,
-        ruleRequireOnPost: Realm.ruleRequireOnPost,
-        ruleRequireOnUpdate: Realm.ruleRequireOnUpdate,
-        rulePolicyUpdatedAt: Realm.rulePolicyUpdatedAt,
-      })
-      .from(Realm)
-      .where(eq(Realm.unitId, realmUnitId))
-      .limit(1);
-    if (!row) {
-      throw new Error("Realm not found");
-    }
-
-    const result = {
-      realmUnitId: row.unitId,
-      ruleUnitId: row.ruleUnitId,
-      version: row.ruleVersion,
-      requireOnJoin: row.ruleRequireOnJoin,
-      requireOnPost: row.ruleRequireOnPost,
-      requireOnUpdate: row.ruleRequireOnUpdate,
-      updatedAt: row.rulePolicyUpdatedAt ?? undefined,
-    };
-    return result;
+  async getRulePolicy(realmUnitId: string): Promise<RealmRulePolicyDTO> {
+    return realmRuleService.getPolicy(realmUnitId);
   }
 
   async resolveRule(
@@ -1120,136 +948,23 @@ export class RealmService {
     language?: string,
     languages: readonly string[] = [],
   ): Promise<RealmRuleResolvedDTO> {
-    const policy = await this.getRulePolicy(realmUnitId);
-    const requestedLanguage = normalizedLanguage(language ?? languages[0]);
-    if (!policy.ruleUnitId) {
-      return {
-        ...policy,
-        requestedLanguage,
-        resolvedLanguage: null,
-        translation: null,
-        sourceRulePostUnitId: null,
-        sourceRulePost: null,
-      };
-    }
-
-    const db = await getServerDb();
-    const [ruleUnit] = await db
-      .select()
-      .from(Unit)
-      .where(eq(Unit.id, policy.ruleUnitId))
-      .limit(1);
-    if (!ruleUnit || ruleUnit.type !== "POST") {
-      return {
-        ...policy,
-        requestedLanguage,
-        resolvedLanguage: null,
-        translation: null,
-        sourceRulePostUnitId: null,
-        sourceRulePost: null,
-      };
-    }
-
-    const resolvedLanguage = resolveReadLanguage({
-      explicitLanguage: language,
-      languages,
-      supportLanguages: await db
-        .select()
-        .from(UnitSupportLanguage)
-        .where(eq(UnitSupportLanguage.unitId, ruleUnit.id)),
-    });
-    const translations = await db
-      .select()
-      .from(UnitTranslation)
-      .where(eq(UnitTranslation.unitId, ruleUnit.id));
-    const translation = resolvedLanguage
-      ? translations.find((item) => item.language === resolvedLanguage)
-      : undefined;
-    const sourceRulePostUnitId = translation?.sourceUnitId ?? null;
-    const sourceRulePost = sourceRulePostUnitId
-      ? await postService.getByUnitId(sourceRulePostUnitId, {
-          allowTombstone: true,
-        })
-      : null;
-
-    return {
-      ...policy,
-      requestedLanguage,
-      resolvedLanguage: normalizedLanguage(resolvedLanguage),
-      translation: translation ? mapTranslationToDTO(translation) : null,
-      sourceRulePostUnitId,
-      sourceRulePost: sourceRulePost
-        ? mapPostToDTO(
-            sourceRulePost,
-            undefined,
-            [language, ...languages].filter((item): item is string => !!item),
-          )
-        : null,
-    };
+    return realmRuleService.resolve(realmUnitId, language, languages);
   }
 
   async updateRulePolicy(
     caller: RezicsSessionClaims,
     realmUnitId: string,
     input: UpdateRealmRulePolicyInput,
-  ): Promise<RealmRuleReferenceDTO> {
-    const db = await getServerDb();
-    const [row] = await db
-      .update(Realm)
-      .set({
-        ruleUnitId:
-          input.ruleUnitId !== undefined ? input.ruleUnitId : undefined,
-        ruleVersion: input.version,
-        ruleRequireOnJoin: input.requireOnJoin,
-        ruleRequireOnPost: input.requireOnPost,
-        ruleRequireOnUpdate: input.requireOnUpdate,
-        rulePolicyUpdatedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(Realm.unitId, realmUnitId))
-      .returning({
-        unitId: Realm.unitId,
-        ruleUnitId: Realm.ruleUnitId,
-        ruleVersion: Realm.ruleVersion,
-        ruleRequireOnJoin: Realm.ruleRequireOnJoin,
-        ruleRequireOnPost: Realm.ruleRequireOnPost,
-        ruleRequireOnUpdate: Realm.ruleRequireOnUpdate,
-        rulePolicyUpdatedAt: Realm.rulePolicyUpdatedAt,
-      });
-    if (!row) throw new Error("Realm not found");
+  ): Promise<RealmRulePolicyDTO> {
+    return realmRuleService.updatePolicy(caller, realmUnitId, input);
+  }
 
-    await governanceAuditService.appendPrivilegedMutation({
-      actorUserId: caller.userId,
-      action: realmPolicyActions.rulesUpdate,
-      targetKind: "realm-rules",
-      targetId: realmUnitId,
-      reason: "Realm rule policy update",
-      correlationId: crypto.randomUUID(),
-      metadata: {
-        ruleUnitId: row.ruleUnitId,
-        version: row.ruleVersion,
-        requireOnJoin: row.ruleRequireOnJoin,
-        requireOnPost: row.ruleRequireOnPost,
-        requireOnUpdate: row.ruleRequireOnUpdate,
-      },
-    });
-
-    const result = {
-      realmUnitId: row.unitId,
-      ruleUnitId: row.ruleUnitId,
-      version: row.ruleVersion,
-      requireOnJoin: row.ruleRequireOnJoin,
-      requireOnPost: row.ruleRequireOnPost,
-      requireOnUpdate: row.ruleRequireOnUpdate,
-      updatedAt: row.rulePolicyUpdatedAt ?? undefined,
-    };
-    notifyRealmRuleUpdated({
-      actorUserId: caller.userId,
-      realmUnitId,
-      ruleUnitId: result.ruleUnitId,
-      version: result.version,
-    });
-    return result;
+  async createRuleRevision(
+    caller: RezicsSessionClaims,
+    realmUnitId: string,
+    input: import("@rezics/contract").CreateRealmRuleRevisionInput,
+  ): Promise<RealmRuleResolvedDTO> {
+    return realmRuleService.createRevision(caller, realmUnitId, input);
   }
 
   // --- Content feed ---

@@ -97,6 +97,15 @@ export type NewPostUnitReferenceRow =
   typeof schema.PostUnitReference.$inferInsert;
 export type RealmRow = typeof schema.Realm.$inferSelect;
 export type NewRealmRow = typeof schema.Realm.$inferInsert;
+export type RealmTagTreeRow = typeof schema.RealmTagTree.$inferSelect;
+export type NewRealmTagTreeRow = typeof schema.RealmTagTree.$inferInsert;
+export type RealmRulePolicyRow = typeof schema.RealmRulePolicy.$inferSelect;
+export type NewRealmRulePolicyRow = typeof schema.RealmRulePolicy.$inferInsert;
+export type RealmRuleRevisionRow = typeof schema.RealmRuleRevision.$inferSelect;
+export type NewRealmRuleRevisionRow =
+  typeof schema.RealmRuleRevision.$inferInsert;
+export type RealmRuleItemRow = typeof schema.RealmRuleItem.$inferSelect;
+export type NewRealmRuleItemRow = typeof schema.RealmRuleItem.$inferInsert;
 export type RealmCapabilityGrantRow =
   typeof schema.RealmCapabilityGrant.$inferSelect;
 export type NewRealmCapabilityGrantRow =

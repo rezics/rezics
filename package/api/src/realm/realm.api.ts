@@ -12,6 +12,7 @@ import type {
   AddUnitRealmInput,
   CastRealmTagApplicationVoteInput,
   CreateRealmInput,
+  CreateRealmRuleRevisionInput,
   CreateRealmTagApplicationInput,
   JoinRealmInput,
   PatchRealmTagApplicationInput,
@@ -24,7 +25,7 @@ import type {
   RealmReadQuery,
   RealmResponse,
   RealmRuleAcknowledgementDTO,
-  RealmRuleReferenceDTO,
+  RealmRulePolicyDTO,
   RealmRuleResolvedDTO,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
@@ -169,10 +170,8 @@ export const realmApi = {
     );
   },
 
-  getRulePolicy: async (
-    realmUnitId: string,
-  ): Promise<RealmRuleReferenceDTO> => {
-    return apiFetch<RealmRuleReferenceDTO>(`/realm/${realmUnitId}/rules`);
+  getRulePolicy: async (realmUnitId: string): Promise<RealmRulePolicyDTO> => {
+    return apiFetch<RealmRulePolicyDTO>(`/realm/${realmUnitId}/rules`);
   },
 
   resolveRule: async (
@@ -191,11 +190,24 @@ export const realmApi = {
   updateRulePolicy: async (
     realmUnitId: string,
     input: UpdateRealmRulePolicyInput,
-  ): Promise<RealmRuleReferenceDTO> => {
-    return apiFetch<RealmRuleReferenceDTO>(`/realm/${realmUnitId}/rules`, {
+  ): Promise<RealmRulePolicyDTO> => {
+    return apiFetch<RealmRulePolicyDTO>(`/realm/${realmUnitId}/rules`, {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  createRuleRevision: async (
+    realmUnitId: string,
+    input: CreateRealmRuleRevisionInput,
+  ): Promise<RealmRuleResolvedDTO> => {
+    return apiFetch<RealmRuleResolvedDTO>(
+      `/realm/${realmUnitId}/rules/revisions`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
   },
 
   /**

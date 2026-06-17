@@ -464,5 +464,6 @@
   "unit_variant_count": "{count} 個變體",
   "unit_tag_count": "{count} 個標籤",
   "unit_override_label": "覆寫：{title}",
-  "unit_source_label": "來源：{title}"
+  "unit_source_label": "來源：{title}",
+  "realm_tab_rules": "規則"
 }

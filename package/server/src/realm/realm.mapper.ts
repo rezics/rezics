@@ -79,7 +79,6 @@ export function mapRealmToDTO(
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     dock: parseRealmDock(row.dock) ?? emptyRealmDock(),
-    ruleUnitId: row.ruleUnitId ?? null,
     resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
     title: translation?.title ?? null,
     description:
@@ -110,7 +109,6 @@ export function mapRealmListRowToDTO(
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     dock: parseRealmDock(row.dock) ?? emptyRealmDock(),
-    ruleUnitId: row.ruleUnitId ?? null,
     resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
     title: translation?.title ?? null,
     description:

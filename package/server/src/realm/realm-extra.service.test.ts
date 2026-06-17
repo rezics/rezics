@@ -11,7 +11,6 @@ const {
   filterRealmExtraPublic,
   setRealmExtraRepositoryForTest,
   setSingleExtraKey,
-  setTagTreeExtra,
 } = await import("./realm-extra.service");
 
 let storedExtra: Record<string, unknown> = {};
@@ -28,38 +27,13 @@ const updateExtraWithLockMock = mock(
 );
 
 const repository = {
-  findLiveUnitReferenceIds: mock(async (ids: string[]) => {
-    return new Set(ids.filter((id) => id.startsWith("post-")));
-  }),
   findRealmAuthorityUnit: mock(async (realmId: string) =>
     realmId === "realm-1"
       ? { id: realmId, userId: "owner-1", type: "REALM" }
       : null,
   ),
   findRealmAuthorityMember: mock(async () => memberRow),
-  loadExtra: mock(async () => storedExtra),
-  findPostUnit: mock(async (id: string) => {
-    if (id.startsWith("post-")) {
-      return { id, type: "POST", status: "PUBLISHED" };
-    }
-    if (id === "book-1") {
-      return { id, type: "BOOK", status: "PUBLISHED" };
-    }
-    if (id === "deleted-post") {
-      return { id, type: "POST", status: "DELETED" };
-    }
-    return null;
-  }),
-  findValidTagUnitIds: mock(async (ids: string[]) => {
-    return new Set(ids.filter((id) => id.startsWith("tag-")));
-  }),
   updateExtraWithLock: updateExtraWithLockMock,
-  findVisibleUnitIds: mock(async (ids: string[]) => {
-    return new Set(ids.filter((id) => id.startsWith("post-")));
-  }),
-  findLiveUnitIds: mock(async (ids: string[]) => {
-    return new Set(ids.filter((id) => id.startsWith("post-")));
-  }),
 };
 
 setRealmExtraRepositoryForTest(repository);
@@ -83,7 +57,7 @@ describe("realm extra single-key service", () => {
     }
   });
 
-  test("sets and replaces banner/avatar/tag view keys", async () => {
+  test("sets and replaces supported extra keys", async () => {
     await setSingleExtraKey(caller, "realm-1", "banner", {
       kind: "url",
       url: "https://example.com/banner.png",
@@ -102,38 +76,47 @@ describe("realm extra single-key service", () => {
       url: "https://example.com/avatar.png",
     });
 
-    await setSingleExtraKey(caller, "realm-1", "tagView", {
-      defaultStyle: "grouped",
-      allowViewerSwitch: false,
-    });
-    expect(storedExtra.tagView).toEqual({
-      defaultStyle: "grouped",
-      allowViewerSwitch: false,
-    });
+    await setSingleExtraKey(
+      caller,
+      "realm-1",
+      "defaultLicenseSlug",
+      "cc-by-nc-sa-4.0",
+    );
+    expect(storedExtra.defaultLicenseSlug).toBe("cc-by-nc-sa-4.0");
   });
 
   test("clears each supported key", async () => {
     storedExtra = {
       avatar: { kind: "url", url: "https://example.com/avatar.png" },
       banner: { kind: "url", url: "https://example.com/banner.png" },
-      tagView: { defaultStyle: "tree", allowViewerSwitch: true },
-      tagTree: [{ tagId: "tag-action" }],
+      defaultLicenseSlug: "cc-by-nc-sa-4.0",
     };
 
     await clearSingleExtraKey(caller, "realm-1", "avatar");
     await clearSingleExtraKey(caller, "realm-1", "banner");
-    await clearSingleExtraKey(caller, "realm-1", "tagView");
-    await clearSingleExtraKey(caller, "realm-1", "tagTree");
+    await clearSingleExtraKey(caller, "realm-1", "defaultLicenseSlug");
 
     expect(storedExtra).toEqual({});
   });
 
-  test("rejects nonexistent ids and bad shapes", async () => {
+  test("rejects old composed-surface keys and bad values", async () => {
     await expect(
       setSingleExtraKey(caller, "realm-1", "rule", "missing-post"),
     ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
     await expect(
       setSingleExtraKey(caller, "realm-1", "about", "book-1"),
+    ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "tagView", {
+        defaultStyle: "flat",
+        allowViewerSwitch: true,
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "tagTree", [{ tagId: "tag-a" }]),
+    ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "pinboard", []),
     ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
     await expect(
       setSingleExtraKey(caller, "realm-1", "banner", { kind: "post" }),
@@ -145,82 +128,8 @@ describe("realm extra single-key service", () => {
       }),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
-      setSingleExtraKey(caller, "realm-1", "featuredZoneUnitId", ""),
-    ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
-    await expect(
-      setSingleExtraKey(caller, "realm-1", "wikiSidebar", {
-        kind: "post",
-        zoneUnitId: "zone-wiki",
-      }),
-    ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
-    await expect(
-      setSingleExtraKey(caller, "realm-1", "wikiSidebar", {
-        kind: "zoneNav",
-        zoneUnitId: "zone-wiki",
-        extra: true,
-      }),
-    ).rejects.toMatchObject({ code: "INVALID_KEY", httpStatus: 400 });
-    await expect(
-      setSingleExtraKey(caller, "realm-1", "tagView", {
-        defaultStyle: "columns",
-        allowViewerSwitch: true,
-      }),
+      setSingleExtraKey(caller, "realm-1", "defaultLicenseSlug", "unknown"),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
-    await expect(
-      setSingleExtraKey(caller, "realm-1", "tagView", {
-        defaultStyle: "flat",
-      }),
-    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
-    await expect(
-      setTagTreeExtra(caller, "realm-1", [{ children: [{ tagId: "tag-a" }] }]),
-    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
-    await expect(
-      setTagTreeExtra(caller, "realm-1", [{ tagId: "missing-tag" }]),
-    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
-  });
-
-  test("sets tagTree with label-only nodes and tag-backed nodes at any depth", async () => {
-    await setTagTreeExtra(caller, "realm-1", [
-      {
-        label: "Genre",
-        children: [
-          {
-            tagId: "tag-action",
-            children: [
-              {
-                labelTranslations: {
-                  translations: { en: "Mood" },
-                  fallbackLanguage: "en",
-                },
-                children: [{ tagId: "tag-drama" }],
-              },
-            ],
-          },
-        ],
-      },
-      { labelUnitId: "label-unit-1" },
-    ]);
-
-    expect(storedExtra.tagTree).toEqual([
-      {
-        label: "Genre",
-        children: [
-          {
-            tagId: "tag-action",
-            children: [
-              {
-                labelTranslations: {
-                  translations: { en: "Mood" },
-                  fallbackLanguage: "en",
-                },
-                children: [{ tagId: "tag-drama" }],
-              },
-            ],
-          },
-        ],
-      },
-      { labelUnitId: "label-unit-1" },
-    ]);
   });
 
   test("rejects non-moderator callers", async () => {
@@ -247,27 +156,27 @@ describe("realm extra single-key service", () => {
     expect(updateExtraWithLockMock).toHaveBeenCalledTimes(2);
   });
 
-  test("public filtering keeps supported preference values", async () => {
+  test("public filtering keeps supported keys", async () => {
     const extra = await filterRealmExtraPublic({
       banner: { kind: "url", url: "https://example.com/banner.png" },
-      tagTree: [{ tagId: "tag-action" }],
+      defaultLicenseSlug: "cc-by-nc-sa-4.0",
     });
 
     expect(extra).toEqual({
       banner: { kind: "url", url: "https://example.com/banner.png" },
-      tagTree: [{ tagId: "tag-action" }],
+      defaultLicenseSlug: "cc-by-nc-sa-4.0",
     });
   });
 
-  test("public stale filtering removes invalid banner and avatar shapes", async () => {
+  test("public stale filtering removes invalid and no-longer-owned keys", async () => {
     const extra = await filterRealmExtraPublic({
       banner: { kind: "post", unitId: "post-banner" },
       avatar: { kind: "url", url: "file:///tmp/avatar.png" },
+      tagTree: [{ tagId: "tag-action" }],
       tagView: { defaultStyle: "flat", allowViewerSwitch: true },
+      rule: "post-1",
     });
 
-    expect(extra).toEqual({
-      tagView: { defaultStyle: "flat", allowViewerSwitch: true },
-    });
+    expect(extra).toEqual({});
   });
 });
