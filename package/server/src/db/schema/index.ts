@@ -77,6 +77,12 @@ export type PinboardRow = typeof schema.Pinboard.$inferSelect;
 export type NewPinboardRow = typeof schema.Pinboard.$inferInsert;
 export type PinboardEntryRow = typeof schema.PinboardEntry.$inferSelect;
 export type NewPinboardEntryRow = typeof schema.PinboardEntry.$inferInsert;
+export type PolicyTagRuleRow = typeof schema.PolicyTagRule.$inferSelect;
+export type NewPolicyTagRuleRow = typeof schema.PolicyTagRule.$inferInsert;
+export type PolicyTagApplicationRow =
+  typeof schema.PolicyTagApplication.$inferSelect;
+export type NewPolicyTagApplicationRow =
+  typeof schema.PolicyTagApplication.$inferInsert;
 export type PollOptionRow = typeof schema.PollOption.$inferSelect;
 export type NewPollOptionRow = typeof schema.PollOption.$inferInsert;
 export type PollVoteRow = typeof schema.PollVote.$inferSelect;

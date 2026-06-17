@@ -14,6 +14,8 @@ export const realmPolicyActions = {
   contentPin: "content.pin",
   tagVote: "tag.vote",
   tagCurate: "tag.curate",
+  tagPolicyRuleManage: "tag.policy.rule.manage",
+  tagPolicyApplicationManage: "tag.policy.application.manage",
 } as const satisfies Record<string, PolicyAction>;
 
 export const realmActionDefinitions = [
@@ -81,6 +83,18 @@ export const realmActionDefinitions = [
     action: realmPolicyActions.tagCurate,
     requiredCapability: "tag.curate",
     family: "realm",
+    realmScoped: true,
+  },
+  {
+    action: realmPolicyActions.tagPolicyRuleManage,
+    requiredCapability: "tag.curate",
+    family: "tag",
+    realmScoped: true,
+  },
+  {
+    action: realmPolicyActions.tagPolicyApplicationManage,
+    requiredCapability: "tag.curate",
+    family: "tag",
     realmScoped: true,
   },
 ] as const satisfies readonly GovernanceActionDefinition[];

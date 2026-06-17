@@ -287,7 +287,7 @@ async function federatedSingle(
     }
     case "realms": {
       if (!permitted.realms) break;
-      const filter = buildRealmFilter(query, scope);
+      const filter = buildRealmFilter(query, scope, ctx);
       const resp = await client.realmIndex.search<RealmSearchDocument>(q, {
         filter: joinFilter(filter),
         offset,
@@ -730,7 +730,7 @@ function buildAllSubQueries(
   }
 
   if (permitted.realms) {
-    const filter = buildRealmFilter(query, scope);
+    const filter = buildRealmFilter(query, scope, ctx);
     out.push({
       indexUid: "realms",
       q: query.keyword ?? "",

@@ -3,6 +3,7 @@ import type {
   BatchTagTranslationResult,
   CastTagVoteInput,
   CreateTagInput,
+  TagUnitDTO,
   TagListQuery,
   UnitTagDTO,
   UpdateTagInput,
@@ -52,7 +53,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // GET /list - 列出标签（按语言中的名称搜索）
   .get(
     "/list",
-    async ({ query }) => {
+    async ({ query }): Promise<{ tags: TagUnitDTO[]; total: number }> => {
       const q = query as TagListQuery;
       const { tags, total } = await tagService.list(q);
       return {
@@ -75,7 +76,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // POST /list - 通过 POST 请求体列出标签
   .post(
     "/list",
-    async ({ body }) => {
+    async ({ body }): Promise<{ tags: TagUnitDTO[]; total: number }> => {
       const q = { ...body, ids: body.ids?.join(",") } as TagListQuery;
       const { tags, total } = await tagService.list(q);
       return {
@@ -120,7 +121,10 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // GET /by-slug/:slug - 按 slug 获取标签（若 slug 解析为非标签则返回 404）
   .get(
     "/by-slug/:slug",
-    async ({ params, set }) => {
+    async ({
+      params,
+      set,
+    }): Promise<TagUnitDTO | { error: { code: string; message: string } }> => {
       const unit = await unitService.getBySlug("tag", params.slug);
       if (!unit || unit.type !== "TAG") {
         set.status = 404;
@@ -144,7 +148,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // GET /:unitId - 按 unitId 获取标签
   .get(
     "/:unitId",
-    async ({ params }) => {
+    async ({ params }): Promise<TagUnitDTO> => {
       const tag = await tagService.getByUnitId(params.unitId);
       return mapTagUnitToDTO(tag);
     },
@@ -158,7 +162,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // POST / - 创建标签（需要登录）
   .post(
     "/",
-    async ({ body, identity }) => {
+    async ({ body, identity }): Promise<TagUnitDTO> => {
       const created = await tagService.create(
         identity.userId,
         body as CreateTagInput,
@@ -176,7 +180,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // PUT /:unitId - 更新标签（管理员）
   .put(
     "/:unitId",
-    async ({ params, body, identity }) => {
+    async ({ params, body, identity }): Promise<TagUnitDTO | string> => {
       if (
         identity.permission.role !== "ADMIN" &&
         identity.permission.role !== "ROOT"

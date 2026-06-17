@@ -60,6 +60,12 @@ describe("governance contract registry", () => {
     expect(Value.Check(policyActionSchema, "realm.member.moderate")).toBe(true);
     expect(Value.Check(policyActionSchema, "zone.manage")).toBe(true);
     expect(Value.Check(policyActionSchema, "tag.vote")).toBe(true);
+    expect(Value.Check(policyActionSchema, "tag.policy.rule.manage")).toBe(
+      true,
+    );
+    expect(
+      Value.Check(policyActionSchema, "tag.policy.application.manage"),
+    ).toBe(true);
     expect(Value.Check(policyActionSchema, "reaction.destroy")).toBe(false);
   });
 

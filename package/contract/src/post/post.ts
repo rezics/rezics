@@ -290,6 +290,13 @@ export const postListQuerySchema = t.Object({
    */
   tagIds: t.Optional(t.Array(t.String())),
   /**
+   * Any-of policy-tag filter for realm feed queries. This reads
+   * PolicyTagApplication only and never falls back to UnitTag/TagVote.
+   * realm 信息流查询的任一 policy 标签匹配过滤器。它只读取
+   * PolicyTagApplication，绝不回退到 UnitTag/TagVote。
+   */
+  policyTagIds: t.Optional(t.Array(t.String())),
+  /**
    * Moderator UnitRealm moderation filter. Regular callers are always approved.
    * 版主的 UnitRealm 审核过滤器。普通调用者始终为已批准状态。
    */
@@ -359,6 +366,13 @@ export const postListBodySchema = t.Object({
    * realm 信息流查询的任一标签匹配过滤器。
    */
   tagIds: t.Optional(t.Array(t.String())),
+  /**
+   * Any-of policy-tag filter for realm feed queries. This reads
+   * PolicyTagApplication only and never falls back to UnitTag/TagVote.
+   * realm 信息流查询的任一 policy 标签匹配过滤器。它只读取
+   * PolicyTagApplication，绝不回退到 UnitTag/TagVote。
+   */
+  policyTagIds: t.Optional(t.Array(t.String())),
   /**
    * Moderator UnitRealm moderation filter. Regular callers are always approved.
    * 版主的 UnitRealm 审核过滤器。普通调用者始终为已批准状态。

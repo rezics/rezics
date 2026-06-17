@@ -62,6 +62,7 @@ export type {
   DetachTagInput,
   TagFilters,
   TagFormData,
+  TagUnitDTO,
   TagView,
   TagVoteDTO,
   UnitTagDTO,

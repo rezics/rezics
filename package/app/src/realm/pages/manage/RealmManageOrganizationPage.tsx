@@ -5,6 +5,7 @@ import {
   TagTreeEditor,
   TagViewPreferenceEditor,
 } from "../../sections/RealmManageEditors";
+import { RealmPolicyTagManager } from "../../sections/RealmPolicyTagManager";
 
 /**
  * Realm organization management page for tag tree, tag display preferences,
@@ -15,6 +16,7 @@ import {
  * Mobile (<640px):
  * ┌──────────────────────────┐
  * │ Tag tree editor          │
+ * │ Policy tag manager       │
  * │ Tag view preferences     │
  * │ Pinboard admin           │
  * └──────────────────────────┘
@@ -43,6 +45,7 @@ export function RealmManageOrganizationPage() {
         realmId={realmId}
         initialValue={realm.extra?.tagTree as TagTreeNode[] | undefined}
       />
+      <RealmPolicyTagManager realmId={realmId} />
       <TagViewPreferenceEditor
         realmId={realmId}
         initialValue={realm.extra?.tagView}

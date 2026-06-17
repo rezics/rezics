@@ -218,6 +218,10 @@ export class GovernanceCapabilityService {
             capability: "realm.member.moderate",
             scope: { kind: "realm", realmUnitId },
           },
+          {
+            capability: "tag.curate",
+            scope: { kind: "realm", realmUnitId },
+          },
         ]
       : [];
 

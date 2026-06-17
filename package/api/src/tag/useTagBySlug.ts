@@ -1,4 +1,4 @@
-import type { UnitTagDTO } from "@rezics/contract";
+import type { TagUnitDTO } from "@rezics/contract";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../react-query/http";
 import { tagKeys } from "./tag.keys";
@@ -11,7 +11,7 @@ export function tagBySlugQuery(tagSlug: string) {
   return queryOptions({
     queryKey: tagBySlugKeys.bySlug(tagSlug),
     queryFn: () =>
-      apiFetch<UnitTagDTO>(`/tag/by-slug/${encodeURIComponent(tagSlug)}`),
+      apiFetch<TagUnitDTO>(`/tag/by-slug/${encodeURIComponent(tagSlug)}`),
     enabled: !!tagSlug,
     staleTime: 1000 * 60 * 10,
   });

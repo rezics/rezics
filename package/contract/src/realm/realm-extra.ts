@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { contentLanguageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { mediaUrlSchema } from "../media-url";
+import { tagQuerySourceSchema } from "../tag/tag";
 
 export const realmBannerExtraNote =
   "Direct image URL used as the realm's banner.";
@@ -71,6 +72,7 @@ export const tagTreeNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
         label: t.Optional(t.String()),
         labelUnitId: t.Optional(t.String()),
         labelTranslations: t.Optional(realmTagTreeLabelSchema),
+        querySource: t.Optional(tagQuerySourceSchema),
         children: t.Optional(t.Array(self)),
       },
       { additionalProperties: false },
@@ -82,6 +84,7 @@ export type TagTreeNode = {
   label?: string;
   labelUnitId?: string;
   labelTranslations?: RealmTagTreeLabel;
+  querySource?: "normal" | "policy";
   children?: TagTreeNode[];
 };
 

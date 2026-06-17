@@ -14,6 +14,7 @@ import {
 type RealmStreamRouteSearch = {
   sort?: RealmStreamSort;
   tags?: string;
+  policyTags?: string;
 };
 
 function isRealmStreamSort(value: unknown): value is RealmStreamSort {
@@ -33,19 +34,24 @@ function RealmSlugStreamRoute() {
   const { realm } = Route.useLoaderData();
   const routeLocation = realmDetailLocationFromSlugParams(params);
   const tagIds = search.tags?.split(",").filter(Boolean) ?? [];
+  const policyTagIds = search.policyTags?.split(",").filter(Boolean) ?? [];
   return (
     <RealmDetailLayout realmId={realm.unitId} routeLocation={routeLocation}>
       <RealmStreamTab
         streamSort={search.sort ?? "best"}
         streamTagIds={tagIds}
+        streamPolicyTagIds={policyTagIds}
         onStreamSortChange={(sort) =>
           navigate({ search: (prev) => ({ ...prev, sort }) })
         }
-        onStreamTagIdsChange={(nextTagIds) =>
+        onStreamTagIdsChange={(next) =>
           navigate({
             search: (prev) => ({
               ...prev,
-              tags: nextTagIds.length ? nextTagIds.join(",") : undefined,
+              tags: next.tagIds.length ? next.tagIds.join(",") : undefined,
+              policyTags: next.policyTagIds.length
+                ? next.policyTagIds.join(",")
+                : undefined,
             }),
           })
         }
@@ -63,6 +69,8 @@ export const Route = createFileRoute("/_mainLayout/r/$realmSlug/")({
   ): RealmStreamRouteSearch => ({
     sort: isRealmStreamSort(search.sort) ? search.sort : "best",
     tags: typeof search.tags === "string" ? search.tags : undefined,
+    policyTags:
+      typeof search.policyTags === "string" ? search.policyTags : undefined,
   }),
   loader: async ({ params, context }) => {
     if (!isPublicRealmSlugRouteParams(params)) throw notFound();

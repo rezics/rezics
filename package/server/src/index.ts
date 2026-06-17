@@ -42,6 +42,7 @@ import { federatedSearchApi, meiliApi } from "./meili";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
 import { pollApi } from "./poll";
 import { pinboardApi } from "./pinboard";
+import { policyTagApi } from "./policy-tag";
 import { postApi } from "./post";
 import { profileReactionHistoryApi } from "./profile-reaction-history";
 import { progressApi } from "./progress";
@@ -229,6 +230,7 @@ routeApp
   .use(zoneApi)
   .use(labelApi)
   .use(pinboardApi)
+  .use(policyTagApi)
   .use(realmApi)
   .use(realmDockApi)
   .use(realmExtraApi)

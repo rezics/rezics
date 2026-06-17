@@ -31,8 +31,12 @@ type RealmModerationFilter = NonNullable<
 export interface RealmStreamTabProps {
   streamSort: RealmStreamSort;
   streamTagIds: string[];
+  streamPolicyTagIds: string[];
   onStreamSortChange: (sort: RealmStreamSort) => void;
-  onStreamTagIdsChange: (tagIds: string[]) => void;
+  onStreamTagIdsChange: (next: {
+    tagIds: string[];
+    policyTagIds: string[];
+  }) => void;
   onOpenTagsTab: () => void;
 }
 
@@ -53,6 +57,7 @@ const realmModerationFilters = [
 export function RealmStreamTab({
   streamSort,
   streamTagIds,
+  streamPolicyTagIds,
   onStreamSortChange,
   onStreamTagIdsChange,
   onOpenTagsTab,
@@ -78,7 +83,8 @@ export function RealmStreamTab({
           <RealmStreamTagFilter
             tagTree={tagTree}
             selectedTagIds={streamTagIds}
-            onChange={(tagIds) => onStreamTagIdsChange(tagIds)}
+            selectedPolicyTagIds={streamPolicyTagIds}
+            onChange={onStreamTagIdsChange}
             onOpenTagsTab={onOpenTagsTab}
           />
           <RealmStreamSortSwitcher
@@ -126,6 +132,7 @@ export function RealmStreamTab({
             realmId={realmId}
             sort={streamSort}
             tagIds={streamTagIds}
+            policyTagIds={streamPolicyTagIds}
             manageMode={showManage && manageMode}
             realmModerationStatus={
               showManage && manageMode ? realmModerationStatus : undefined

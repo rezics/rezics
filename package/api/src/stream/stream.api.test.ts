@@ -55,6 +55,32 @@ describe("streamApi", () => {
     expect(requestUrl).not.toContain("%5B%22tag-1%22%2C%22tag-2%22%5D");
   });
 
+  test("serializes policy tag filters separately from normal tags", async () => {
+    const fetchMock = mock(async (_input: Parameters<typeof fetch>[0]) => {
+      return new Response(
+        JSON.stringify({
+          scope: "realm",
+          sort: "best",
+          rows: [],
+          nextCursor: null,
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await streamApi.rows({
+      scope: "realm",
+      realmUnitId: "realm-1",
+      tagIds: ["tag-1"],
+      policyTagIds: ["tag-2"],
+    });
+
+    const requestUrl = fetchMock.mock.calls[0]?.[0]?.toString() ?? "";
+    expect(requestUrl).toContain("tagIds=tag-1");
+    expect(requestUrl).toContain("policyTagIds=tag-2");
+  });
+
   test("serializes zone stream scope with the zone Unit id", async () => {
     const fetchMock = mock(async (_input: Parameters<typeof fetch>[0]) => {
       return new Response(

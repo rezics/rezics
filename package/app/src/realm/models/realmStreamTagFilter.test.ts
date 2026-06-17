@@ -33,9 +33,9 @@ const tagTree = [
 describe("realm stream tag filter helpers", () => {
   it("collects tag chips in tree order with localized labels", () => {
     expect(collectRealmStreamTagChips(tagTree, "zh-Hant")).toEqual([
-      { tagId: "tag-a", label: "Alpha" },
-      { tagId: "tag-b", label: "Beta" },
-      { tagId: "tag-c", label: "伽瑪" },
+      { tagId: "tag-a", label: "Alpha", querySource: "normal" },
+      { tagId: "tag-b", label: "Beta", querySource: "normal" },
+      { tagId: "tag-c", label: "伽瑪", querySource: "normal" },
     ]);
   });
 
@@ -43,7 +43,7 @@ describe("realm stream tag filter helpers", () => {
     const chips = collectRealmStreamTagChips(tagTree, "en");
 
     expect(
-      orderRealmStreamTagChips(chips, ["tag-c", "tag-a"], 12).map(
+      orderRealmStreamTagChips(chips, ["tag-c", "tag-a"], [], 12).map(
         (chip) => chip.tagId,
       ),
     ).toEqual(["tag-a", "tag-c", "tag-b"]);
@@ -55,6 +55,7 @@ describe("realm stream tag filter helpers", () => {
       (_, index) => ({
         tagId: `tag-${index + 1}`,
         label: `Tag ${index + 1}`,
+        querySource: "normal" as const,
       }),
     );
 

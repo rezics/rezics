@@ -1,8 +1,8 @@
 ---
 title: Policy tag applications
-status: active
+status: completed
 created: 2026-06-17
-completed:
+completed: 2026-06-17
 supersededBy:
 tags: [contract, server, api, app, tag, realm, governance]
 ---
@@ -63,132 +63,132 @@ that query-source choice is not stored on the tag itself.
   Tag CRUD and tag detail routes return tag-unit-shaped data, not `UnitTagDTO`.
 
 ## 1. Contract Shape
-- [ ] 1.1 Add `package/contract/src/tag/policy-tag.ts` with
+- [x] 1.1 Add `package/contract/src/tag/policy-tag.ts` with
   `policyTagScopeSchema`, `policyTagRuleDTOSchema`,
   `policyTagApplicationDTOSchema`, list responses, path params, and mutation
   bodies.
-- [ ] 1.2 Add policy-tag rule state values, starting with `active` and
+- [x] 1.2 Add policy-tag rule state values, starting with `active` and
   `archived`, so policy rules can be retired without deleting application
   history during normal operation.
-- [ ] 1.3 Add `policyTagAuthoritySchema` as read-only DTO data containing the
+- [x] 1.3 Add `policyTagAuthoritySchema` as read-only DTO data containing the
   rule-management action, application-management action, and derived effective
   capability.
-- [ ] 1.4 Add policy actions to
+- [x] 1.4 Add policy actions to
   `package/contract/src/permission/action.ts`: rule management and application
   management for policy tags.
-- [ ] 1.5 Add `tagQuerySourceSchema` and a reusable tag filter shape that can
+- [x] 1.5 Add `tagQuerySourceSchema` and a reusable tag filter shape that can
   express `{ tagUnitId, source?: "normal" | "policy" }`, with `normal` as the
   default when source is absent.
-- [ ] 1.6 Extend `tagTreeNodeSchema` in
+- [x] 1.6 Extend `tagTreeNodeSchema` in
   `package/contract/src/realm/realm-extra.ts` with optional `querySource`, and
   keep the contract text clear that tagTree remains a picker hint.
-- [ ] 1.7 Add a tag Unit DTO contract separate from `UnitTagDTO`, then update
+- [x] 1.7 Add a tag Unit DTO contract separate from `UnitTagDTO`, then update
   tag CRUD/detail/list contracts that currently conflate tag identity with
   scored tag application rows.
-- [ ] 1.8 Add contract tests for policy-tag scope validation, read-only
+- [x] 1.8 Add contract tests for policy-tag scope validation, read-only
   authority shape, rejected arbitrary capability input, tag query-source
   defaults, and tag Unit DTO separation.
-- [ ] 1.9 Export the new policy-tag contract from
+- [x] 1.9 Export the new policy-tag contract from
   `package/contract/src/tag/index.ts` and `package/contract/src/index.ts`.
 
 ## 2. Governance
-- [ ] 2.1 Add policy-tag rule/application actions to the governance action
+- [x] 2.1 Add policy-tag rule/application actions to the governance action
   registry under the existing tag governance family, both requiring
   `tag.curate`.
-- [ ] 2.2 Confirm whether realm owner/admin/moderator should imply
+- [x] 2.2 Confirm whether realm owner/admin/moderator should imply
   `tag.curate`; if product behavior says moderators maintain policy tags by
   default, add the implied realm capability in
   `package/server/src/governance/capability.service.ts`.
-- [ ] 2.3 Add governance tests proving global `tag.curate`, realm-scoped
+- [x] 2.3 Add governance tests proving global `tag.curate`, realm-scoped
   `tag.curate`, ROOT, missing capability, and cross-realm capability behavior
   for policy-tag actions.
 
 ## 3. Database Model
-- [ ] 3.1 Add `PolicyTagRule` and `PolicyTagApplication` to an appropriate
+- [x] 3.1 Add `PolicyTagRule` and `PolicyTagApplication` to an appropriate
   server schema file, likely `package/server/src/db/schema/tagging.ts` unless
   the implementation extracts a policy-tag schema unit.
-- [ ] 3.2 Model `PolicyTagRule` with `id`, `scopeKind`, nullable
+- [x] 3.2 Model `PolicyTagRule` with `id`, `scopeKind`, nullable
   `realmUnitId`, `tagUnitId`, `state`, creator/updater user ids, reason, and
   timestamps.
-- [ ] 3.3 Model `PolicyTagApplication` with `id`, `ruleId`, `unitId`,
+- [x] 3.3 Model `PolicyTagApplication` with `id`, `ruleId`, `unitId`,
   `position`, optional metadata, actor user ids, and timestamps.
-- [ ] 3.4 Add partial unique indexes for active policy-tag rules:
+- [x] 3.4 Add partial unique indexes for active policy-tag rules:
   global unique by `tagUnitId`, realm unique by `(realmUnitId, tagUnitId)`.
-- [ ] 3.5 Add `unique(ruleId, unitId)`, ordered list lookup on
+- [x] 3.5 Add `unique(ruleId, unitId)`, ordered list lookup on
   `(ruleId, position, createdAt, unitId)`, and hydration lookup on
   `(unitId, ruleId)` for `PolicyTagApplication`.
-- [ ] 3.6 Add relations/schema exports for the new tables.
-- [ ] 3.7 Generate Drizzle migrations from schema changes. Do not hand-author
+- [x] 3.6 Add relations/schema exports for the new tables.
+- [x] 3.7 Generate Drizzle migrations from schema changes. Do not hand-author
   ordinary generated migration SQL.
 
 ## 4. Server Domain
-- [ ] 4.1 Add a `package/server/src/policy-tag/` domain with
+- [x] 4.1 Add a `package/server/src/policy-tag/` domain with
   `policy-tag.api.ts`, `.service.ts`, `.mapper.ts`, and `.types.ts`.
-- [ ] 4.2 Implement rule create/read/update/archive operations. Rule writes
+- [x] 4.2 Implement rule create/read/update/archive operations. Rule writes
   require the policy-tag rule management action in the requested scope.
-- [ ] 4.3 Implement application upsert/list/patch/delete operations.
+- [x] 4.3 Implement application upsert/list/patch/delete operations.
   Application writes require the policy-tag application management action for
   the rule scope.
-- [ ] 4.4 Validate that every `tagUnitId` points to a live `Unit(type=TAG)`.
-- [ ] 4.5 Keep policy-tag application writes independent from `UnitTag`,
+- [x] 4.4 Validate that every `tagUnitId` points to a live `Unit(type=TAG)`.
+- [x] 4.5 Keep policy-tag application writes independent from `UnitTag`,
   `TagVote`, `RealmTagApplication`, and `UnitRealm`.
-- [ ] 4.6 Add list reads for `(scope, tagUnitId)` that return paginated
+- [x] 4.6 Add list reads for `(scope, tagUnitId)` that return paginated
   `PolicyTagApplicationDTO` rows ordered by `position`, then stable fallback
   columns.
-- [ ] 4.7 Add per-unit hydration reads so card/detail surfaces can request
+- [x] 4.7 Add per-unit hydration reads so card/detail surfaces can request
   policy applications only when the surface explicitly wants them.
-- [ ] 4.8 Mount the policy-tag API from `package/server/src/index.ts`.
-- [ ] 4.9 Add focused server tests for rule uniqueness, rule archive behavior,
+- [x] 4.8 Mount the policy-tag API from `package/server/src/index.ts`.
+- [x] 4.9 Add focused server tests for rule uniqueness, rule archive behavior,
   application uniqueness, application ordering, authorization, and separation
   from ordinary tag votes.
 
 ## 5. Search and List Integration
-- [ ] 5.1 Update the relevant list/search contract types to accept tag filters
+- [x] 5.1 Update the relevant list/search contract types to accept tag filters
   with `source?: "normal" | "policy"` where tag filtering is exposed.
-- [ ] 5.2 Keep `source=normal` routed to existing UnitTag/Meilisearch tag id
+- [x] 5.2 Keep `source=normal` routed to existing UnitTag/Meilisearch tag id
   behavior.
-- [ ] 5.3 Route `source=policy` through DB lookup of `PolicyTagApplication`
+- [x] 5.3 Route `source=policy` through DB lookup of `PolicyTagApplication`
   Unit ids, then hydrate through existing list/content flows.
-- [ ] 5.4 Add tests proving policy-source filters do not read `UnitTag` and
+- [x] 5.4 Add tests proving policy-source filters do not read `UnitTag` and
   normal-source filters do not read `PolicyTagApplication`.
-- [ ] 5.5 Leave Meilisearch `policyTagKeys` out of the implementation unless
+- [x] 5.5 Leave Meilisearch `policyTagKeys` out of the implementation unless
   apply-time investigation shows the DB-first path cannot support the target
   list sizes.
 
 ## 6. API Package
-- [ ] 6.1 Add `package/api/src/policy-tag/` with API functions, query keys,
+- [x] 6.1 Add `package/api/src/policy-tag/` with API functions, query keys,
   queries, mutations, and index exports matching the server route names.
-- [ ] 6.2 Add API tests for rule CRUD, application CRUD, list pagination, and
+- [x] 6.2 Add API tests for rule CRUD, application CRUD, list pagination, and
   URL/query serialization of policy-tag scopes.
-- [ ] 6.3 Update tag API client typings so tag identity routes return the new
+- [x] 6.3 Update tag API client typings so tag identity routes return the new
   tag Unit DTO rather than `UnitTagDTO`.
-- [ ] 6.4 Export policy-tag API helpers from `package/api/src/index.ts`.
+- [x] 6.4 Export policy-tag API helpers from `package/api/src/index.ts`.
 
 ## 7. App Management Surfaces
-- [ ] 7.1 Add a realm tag policy management surface under realm settings or the
+- [x] 7.1 Add a realm tag policy management surface under realm settings or the
   existing realm tag preferences area. It must use tag search/picker UI and
   never ask users to paste raw tag or Unit ids.
-- [ ] 7.2 Let managers create/archive policy-tag rules for a realm and manage
+- [x] 7.2 Let managers create/archive policy-tag rules for a realm and manage
   ordered `PolicyTagApplication` rows for each rule.
-- [ ] 7.3 Add global policy-tag management only behind the existing platform
+- [x] 7.3 Add global policy-tag management only behind the existing platform
   admin/staff surface, not inside ordinary realm settings.
-- [ ] 7.4 Update realm tag picker/tagTree editing so a node may choose normal
+- [x] 7.4 Update realm tag picker/tagTree editing so a node may choose normal
   or policy query source when configuring list/filter behavior.
-- [ ] 7.5 Keep feed cards rendering ordinary `UnitTag` chips by default. Policy
+- [x] 7.5 Keep feed cards rendering ordinary `UnitTag` chips by default. Policy
   tags render only on surfaces that explicitly request policy applications.
-- [ ] 7.6 Repair tag page/editor data usage so tag identity display and tag
+- [x] 7.6 Repair tag page/editor data usage so tag identity display and tag
   application voting data are not conflated.
-- [ ] 7.7 If tag color/avatar/icon editing is touched in this work, keep native
+- [x] 7.7 If tag color/avatar/icon editing is touched in this work, keep native
   SVG support documented as a storage/rendering requirement but do not depend
   on the current Cloudflare media path until that pipeline is verified.
 
 ## 8. Cleanup and Naming
-- [ ] 8.1 Correct misleading `RealmTagApplication` comments in contract and
+- [x] 8.1 Correct misleading `RealmTagApplication` comments in contract and
   schema files so future readers do not confuse it with policy-tag
   applications.
-- [ ] 8.2 Update imports/exports and schema export tests for new policy-tag
+- [x] 8.2 Update imports/exports and schema export tests for new policy-tag
   contracts and tables.
-- [ ] 8.3 Add or update seed/factory helpers only if tests need policy-tag
+- [x] 8.3 Add or update seed/factory helpers only if tests need policy-tag
   fixtures; do not seed broad default policy tags.
 
 ## Out of scope

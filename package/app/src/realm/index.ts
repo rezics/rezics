@@ -7,6 +7,7 @@ export { RealmManageModerationPage } from "./pages/manage/RealmManageModerationP
 export { RealmManageOrganizationPage } from "./pages/manage/RealmManageOrganizationPage";
 export { RealmManageProfilePage } from "./pages/manage/RealmManageProfilePage";
 export { RealmManageDockPage } from "./pages/manage/RealmManageDockPage";
+export { GlobalPolicyTagManager } from "./sections/RealmPolicyTagManager";
 export {
   type RealmDetailContextValue,
   useRealmDetail,

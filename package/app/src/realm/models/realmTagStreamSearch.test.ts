@@ -20,4 +20,17 @@ describe("realm tag stream search", () => {
       tags: "tag-a",
     });
   });
+
+  it("uses policyTags for policy-source tag tree selections", () => {
+    expect(
+      realmStreamSearchForSingleTag(
+        { sort: "hot", tags: "tag-a" },
+        "tag-policy",
+        "policy",
+      ),
+    ).toEqual({
+      sort: "hot",
+      policyTags: "tag-policy",
+    });
+  });
 });
