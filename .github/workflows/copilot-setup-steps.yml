@@ -1,0 +1,46 @@
+# Development environment for GitHub Copilot cloud agent.
+# GitHub Copilot cloud agent 的开发环境。
+#
+# Uses devenv to provide the same toolchain as local development
+# (bun, go-task, postgresql, openssl, jq, etc.).
+# 使用 devenv 提供与本地开发一致的工具链
+# （bun、go-task、postgresql、openssl、jq 等）。
+name: "Copilot Setup Steps"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # Nix + devenv: full project toolchain
+      # Nix + devenv：完整项目工具链
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: accept-flake-config = true
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Install devenv
+        run: nix profile install --accept-flake-config github:cachix/devenv/latest
+
+      - name: Build devenv environment
+        run: |
+          devenv ci
+          echo "$PWD/.devenv/profile/bin" >> $GITHUB_PATH
+
+      # Project dependencies / 项目依赖
+      - run: bun install --frozen-lockfile
+      - run: cd tool && bun install --frozen-lockfile
