@@ -7,7 +7,9 @@
     "postinstall": "lefthook install || true"
   },
   "workspaces": [
-    "./package/*"
+    "./package/*",
+    "./tool",
+    "./docs"
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
