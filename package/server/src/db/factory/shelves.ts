@@ -75,7 +75,7 @@ export async function seedShelves(
       const extra = randomBoolean(0.3)
         ? {
             sortBy: faker.helpers.arrayElement(["manual", "time", "title"]),
-            viewMode: faker.helpers.arrayElement(["nested", "flat", "masonry"]),
+            viewMode: faker.helpers.arrayElement(["nested", "flat"]),
             theme: faker.helpers.arrayElement(["default", "dark", "accent"]),
           }
         : null;

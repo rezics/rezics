@@ -170,13 +170,13 @@ function partition(
  *   inside each root via `entry.children`.
  *   nested 模式：返回 root 条目；消费方通过 `entry.children` 在每个 root 内
  *   渲染附属子项。
- * - In flat/masonry + `sortPrimeOnly=true`: roots sorted first, each root's
+ * - In flat + `sortPrimeOnly=true`: roots sorted first, each root's
  *   children sorted by the same comparator, emitted immediately after the root.
- *   flat/masonry + `sortPrimeOnly=true`：先排序 roots，每个 root 的子项用
+ *   flat + `sortPrimeOnly=true`：先排序 roots，每个 root 的子项用
  *   同一比较器排序，并紧跟在该 root 之后输出。
- * - In flat/masonry + `sortPrimeOnly=false`: every ShelfItem is emitted once as
+ * - In flat + `sortPrimeOnly=false`: every ShelfItem is emitted once as
  *   a peer, all participating in one comparator.
- *   flat/masonry + `sortPrimeOnly=false`：每个 ShelfItem 作为 peer 输出一次，
+ *   flat + `sortPrimeOnly=false`：每个 ShelfItem 作为 peer 输出一次，
  *   全部参与同一个比较器。
  *
  * Multi-step cycles in the relation graph cannot infinitely recurse because

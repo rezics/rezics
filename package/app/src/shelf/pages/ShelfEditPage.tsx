@@ -108,7 +108,6 @@ const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
     value: "bookshelf",
     label: getI18nRuntime().i18n.t("entity:shelf_view_bookshelf"),
   },
-  // { value: "masonry", label: "Masonry" },
 ];
 
 type ShelfTranslationDraft = {

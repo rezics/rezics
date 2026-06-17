@@ -460,23 +460,6 @@ describe("deriveShelfStream — sort scope and invariants", () => {
     ]);
   });
 
-  test("flat and masonry produce identical stream order for the same inputs", () => {
-    const { units, relations } = defaultScene();
-    for (const sort of [manualAsc, addedAtDesc, titleAsc] as const) {
-      for (const scope of [true, false]) {
-        const flat = deriveShelfStream(units, relations, "flat", sort, scope);
-        const masonry = deriveShelfStream(
-          units,
-          relations,
-          "masonry",
-          sort,
-          scope,
-        );
-        expect(idsOf(masonry)).toEqual(idsOf(flat));
-      }
-    }
-  });
-
   test("derivation is pure — two calls return deep-equal arrays", () => {
     const { units, relations } = defaultScene();
     const a = deriveShelfStream(units, relations, "flat", titleAsc, true);

@@ -8,12 +8,7 @@ import type { ShelfView } from "@rezics/api/shelf";
  * nested，并会在下次元数据保存时被覆盖。
  */
 export function normalizeShelfViewMode(raw: unknown): ShelfView {
-  if (
-    raw === "flat" ||
-    raw === "nested" ||
-    raw === "masonry" ||
-    raw === "bookshelf"
-  ) {
+  if (raw === "flat" || raw === "nested" || raw === "bookshelf") {
     return raw;
   }
   return "nested";

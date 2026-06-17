@@ -71,14 +71,6 @@ interface ShelfPageProps {
   unitId: string;
 }
 
-// MOCK: masonry layout uses CSS column-count as a placeholder until the real
-// masonry primitive lands. The column breaks are browser-driven and not
-// height-balanced; the emitted stream and the enum value are real.
-// MOCK：masonry 布局使用 CSS column-count 作为占位，直到真正的 masonry 基础组件落地。
-// 列断点由浏览器驱动且不做高度平衡；但发出的 stream 和枚举值是真实的。
-const MASONRY_COLUMN_CLASS =
-  "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
-
 const SORT_OPTIONS: ShelfSortChoice[] = [
   { field: "manual", order: "desc", label: i18nMessages.shelf_sort_manual },
   {
@@ -96,7 +88,6 @@ const VIEW_OPTIONS: ShelfViewChoice[] = [
   { value: "nested", label: i18nMessages.shelf_view_nested },
   { value: "flat", label: i18nMessages.shelf_view_list },
   { value: "bookshelf", label: i18nMessages.shelf_view_bookshelf },
-  // { value: "masonry", label: "Grid" },
 ];
 
 const PAGE_SIZE = 20;
@@ -294,8 +285,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     [shelf?.unitId],
   );
   const showSortScopeToggle =
-    (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
-    sortState.field !== "manual";
+    effectiveViewMode === "flat" && sortState.field !== "manual";
   const streamKeyPrefix = `${effectiveViewMode}:${sortState.field}:${
     sortState.order
   }:${sortPrimeOnly ? "prime" : "all"}`;
@@ -573,16 +563,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 ? t("entity:shelf_bookshelf_empty")
                 : t("entity:shelf_empty_items")}
           </p>
-        ) : effectiveViewMode === "masonry" ? (
-          <div className={MASONRY_COLUMN_CLASS}>
-            {visibleStream.map((entry) => (
-              <ShelfItemRenderer
-                key={streamEntryKey(streamKeyPrefix, entry)}
-                entry={entry}
-                viewMode={effectiveViewMode}
-              />
-            ))}
-          </div>
         ) : effectiveViewMode === "bookshelf" ? (
           <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {visibleStream.map((entry) => (

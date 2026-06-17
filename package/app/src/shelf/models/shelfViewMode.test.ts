@@ -5,7 +5,6 @@ describe("normalizeShelfViewMode", () => {
   test("keeps current shelf view modes including bookshelf", () => {
     expect(normalizeShelfViewMode("nested")).toBe("nested");
     expect(normalizeShelfViewMode("flat")).toBe("flat");
-    expect(normalizeShelfViewMode("masonry")).toBe("masonry");
     expect(normalizeShelfViewMode("bookshelf")).toBe("bookshelf");
   });
 

@@ -439,7 +439,7 @@ export function ShelfEditorItemsSection({
           <ShelfSortViewPicker
             sort={sortState}
             sortOptions={SORT_OPTIONS}
-            view={viewMode === "masonry" ? "nested" : viewMode}
+            view={viewMode}
             viewOptions={VIEW_OPTIONS}
             onSortChange={setSortState}
             onViewChange={onViewModeChange}

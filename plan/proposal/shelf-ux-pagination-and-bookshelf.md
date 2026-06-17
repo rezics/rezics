@@ -176,8 +176,6 @@ instead of a half-integrated branch. Traditional Chinese UI copy should use
 - Replacing the full shelf information architecture or inventing a new shelf
   taxonomy beyond the current parent-role model.
 - Adding arbitrary custom shelf slugs.
-- Building a new masonry primitive; existing masonry placeholder behavior can
-  remain unless directly affected by the shared pagination/view-mode changes.
 - Changing database schema unless the root-safe cursor work proves the response
   contract alone is insufficient.
 - Running browser automation for layout verification unless implementation work

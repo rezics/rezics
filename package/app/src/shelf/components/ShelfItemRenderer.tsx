@@ -98,16 +98,6 @@ function renderUnit(
       const author = getBookAuthorName(book) || undefined;
       const coverUrl = book.coverUrl ?? "";
       const href = `/book/${unitId}`;
-      if (viewMode === "masonry") {
-        return (
-          <BookCard
-            title={title}
-            author={author}
-            coverUrl={coverUrl}
-            href={href}
-          />
-        );
-      }
       return (
         <HorizontalBookCard
           title={title}
@@ -167,9 +157,7 @@ function renderUnit(
     case "comment": {
       const comment = data as CommentDTO | undefined;
       if (!comment) return <ShelfItemCard unit={unit} />;
-      return (
-        <CommentReply post={comment} showAvatar={viewMode !== "masonry"} />
-      );
+      return <CommentReply post={comment} showAvatar />;
     }
     default:
       return <ShelfItemCard unit={unit} />;
