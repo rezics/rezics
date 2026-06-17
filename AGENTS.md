@@ -65,6 +65,9 @@ task ui:storybook        # UI Storybook, port 6007
 
 - For ambiguous, architectural, or high-blast-radius work, clarify the intended
   outcome and editing scope before changing files.
+- Do not frame new work as an MVP, v1, or temporary baseline; v1 already exists,
+  and current implementation work should target the best long-term solution,
+  including any necessary systemic adjustments.
 - In this development-stage project, internal renames are clear cutovers: update
   all internal callsites in the same change unless a plan explicitly says
   otherwise.
