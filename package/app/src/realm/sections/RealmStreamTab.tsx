@@ -63,7 +63,7 @@ export function RealmStreamTab({
   onOpenTagsTab,
 }: RealmStreamTabProps) {
   const { t } = useTranslation("community");
-  const { realmId, showManage, tagTree, tagTreeDisplayNames } =
+  const { realm, realmId, showManage, tagTree, tagTreeDisplayNames } =
     useRealmDetail();
   const { data: settings } = useQuery({
     ...userQueries.settings(),
