@@ -301,8 +301,6 @@ describe("createSeedRuntime", () => {
       total: 2,
     });
     expect(syncedTags).toMatchObject([{ id: "tag-1", unitId: "tag-1" }]);
-    expect(syncedLabels).toMatchObject([
-      { id: "label-1", unitId: "label-1" },
-    ]);
+    expect(syncedLabels).toMatchObject([{ id: "label-1", unitId: "label-1" }]);
   });
 });

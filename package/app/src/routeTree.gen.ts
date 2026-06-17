@@ -93,6 +93,7 @@ import { Route as MainLayoutRealmRealmIdDetailRouteImport } from './routes/_main
 import { Route as MainLayoutRRealmSlugWikiRouteImport } from './routes/_mainLayout/r/$realmSlug/wiki'
 import { Route as MainLayoutRRealmSlugTagsRouteImport } from './routes/_mainLayout/r/$realmSlug/tags'
 import { Route as MainLayoutRRealmSlugSearchRouteImport } from './routes/_mainLayout/r/$realmSlug/search'
+import { Route as MainLayoutRRealmSlugRulesRouteImport } from './routes/_mainLayout/r/$realmSlug/rules'
 import { Route as MainLayoutRRealmSlugDockRouteImport } from './routes/_mainLayout/r/$realmSlug/dock'
 import { Route as MainLayoutRRealmSlugCreateRouteImport } from './routes/_mainLayout/r/$realmSlug/create'
 import { Route as MainLayoutInboxDmConversationIdRouteImport } from './routes/_mainLayout/inbox/dm/$conversationId'
@@ -183,6 +184,7 @@ import { Route as MainLayoutRealmRealmIdManageDockRouteImport } from './routes/_
 import { Route as MainLayoutRealmRealmIdManageDangerRouteImport } from './routes/_mainLayout/realm/$realmId/manage/danger'
 import { Route as MainLayoutRealmRealmIdDetailWikiRouteImport } from './routes/_mainLayout/realm/$realmId/_detail/wiki'
 import { Route as MainLayoutRealmRealmIdDetailTagsRouteImport } from './routes/_mainLayout/realm/$realmId/_detail/tags'
+import { Route as MainLayoutRealmRealmIdDetailRulesRouteImport } from './routes/_mainLayout/realm/$realmId/_detail/rules'
 import { Route as MainLayoutRealmRealmIdDetailDockRouteImport } from './routes/_mainLayout/realm/$realmId/_detail/dock'
 import { Route as MainLayoutRRealmSlugShelfSlugRouteImport } from './routes/_mainLayout/r/$realmSlug/shelf/$slug'
 import { Route as MainLayoutRRealmSlugPostPostUnitIdRouteImport } from './routes/_mainLayout/r/$realmSlug/post/$postUnitId'
@@ -665,6 +667,12 @@ const MainLayoutRRealmSlugSearchRoute =
   MainLayoutRRealmSlugSearchRouteImport.update({
     id: '/search',
     path: '/search',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
+const MainLayoutRRealmSlugRulesRoute =
+  MainLayoutRRealmSlugRulesRouteImport.update({
+    id: '/rules',
+    path: '/rules',
     getParentRoute: () => MainLayoutRRealmSlugRoute,
   } as any)
 const MainLayoutRRealmSlugDockRoute =
@@ -1204,6 +1212,12 @@ const MainLayoutRealmRealmIdDetailTagsRoute =
     path: '/tags',
     getParentRoute: () => MainLayoutRealmRealmIdDetailRoute,
   } as any)
+const MainLayoutRealmRealmIdDetailRulesRoute =
+  MainLayoutRealmRealmIdDetailRulesRouteImport.update({
+    id: '/rules',
+    path: '/rules',
+    getParentRoute: () => MainLayoutRealmRealmIdDetailRoute,
+  } as any)
 const MainLayoutRealmRealmIdDetailDockRoute =
   MainLayoutRealmRealmIdDetailDockRouteImport.update({
     id: '/dock',
@@ -1439,6 +1453,7 @@ export interface FileRoutesByFullPath {
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
   '/r/$realmSlug/create': typeof MainLayoutRRealmSlugCreateRoute
   '/r/$realmSlug/dock': typeof MainLayoutRRealmSlugDockRoute
+  '/r/$realmSlug/rules': typeof MainLayoutRRealmSlugRulesRoute
   '/r/$realmSlug/search': typeof MainLayoutRRealmSlugSearchRoute
   '/r/$realmSlug/tags': typeof MainLayoutRRealmSlugTagsRoute
   '/r/$realmSlug/wiki': typeof MainLayoutRRealmSlugWikiRoute
@@ -1497,6 +1512,7 @@ export interface FileRoutesByFullPath {
   '/r/$realmSlug/post/$postUnitId': typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   '/r/$realmSlug/shelf/$slug': typeof MainLayoutRRealmSlugShelfSlugRoute
   '/realm/$realmId/dock': typeof MainLayoutRealmRealmIdDetailDockRoute
+  '/realm/$realmId/rules': typeof MainLayoutRealmRealmIdDetailRulesRoute
   '/realm/$realmId/tags': typeof MainLayoutRealmRealmIdDetailTagsRoute
   '/realm/$realmId/wiki': typeof MainLayoutRealmRealmIdDetailWikiRoute
   '/realm/$realmId/manage/danger': typeof MainLayoutRealmRealmIdManageDangerRoute
@@ -1625,6 +1641,7 @@ export interface FileRoutesByTo {
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
   '/r/$realmSlug/create': typeof MainLayoutRRealmSlugCreateRoute
   '/r/$realmSlug/dock': typeof MainLayoutRRealmSlugDockRoute
+  '/r/$realmSlug/rules': typeof MainLayoutRRealmSlugRulesRoute
   '/r/$realmSlug/search': typeof MainLayoutRRealmSlugSearchRoute
   '/r/$realmSlug/tags': typeof MainLayoutRRealmSlugTagsRoute
   '/r/$realmSlug/wiki': typeof MainLayoutRRealmSlugWikiRoute
@@ -1680,6 +1697,7 @@ export interface FileRoutesByTo {
   '/r/$realmSlug/post/$postUnitId': typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   '/r/$realmSlug/shelf/$slug': typeof MainLayoutRRealmSlugShelfSlugRoute
   '/realm/$realmId/dock': typeof MainLayoutRealmRealmIdDetailDockRoute
+  '/realm/$realmId/rules': typeof MainLayoutRealmRealmIdDetailRulesRoute
   '/realm/$realmId/tags': typeof MainLayoutRealmRealmIdDetailTagsRoute
   '/realm/$realmId/wiki': typeof MainLayoutRealmRealmIdDetailWikiRoute
   '/realm/$realmId/manage/danger': typeof MainLayoutRealmRealmIdManageDangerRoute
@@ -1827,6 +1845,7 @@ export interface FileRoutesById {
   '/_mainLayout/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
   '/_mainLayout/r/$realmSlug/create': typeof MainLayoutRRealmSlugCreateRoute
   '/_mainLayout/r/$realmSlug/dock': typeof MainLayoutRRealmSlugDockRoute
+  '/_mainLayout/r/$realmSlug/rules': typeof MainLayoutRRealmSlugRulesRoute
   '/_mainLayout/r/$realmSlug/search': typeof MainLayoutRRealmSlugSearchRoute
   '/_mainLayout/r/$realmSlug/tags': typeof MainLayoutRRealmSlugTagsRoute
   '/_mainLayout/r/$realmSlug/wiki': typeof MainLayoutRRealmSlugWikiRoute
@@ -1885,6 +1904,7 @@ export interface FileRoutesById {
   '/_mainLayout/r/$realmSlug/post/$postUnitId': typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   '/_mainLayout/r/$realmSlug/shelf/$slug': typeof MainLayoutRRealmSlugShelfSlugRoute
   '/_mainLayout/realm/$realmId/_detail/dock': typeof MainLayoutRealmRealmIdDetailDockRoute
+  '/_mainLayout/realm/$realmId/_detail/rules': typeof MainLayoutRealmRealmIdDetailRulesRoute
   '/_mainLayout/realm/$realmId/_detail/tags': typeof MainLayoutRealmRealmIdDetailTagsRoute
   '/_mainLayout/realm/$realmId/_detail/wiki': typeof MainLayoutRealmRealmIdDetailWikiRoute
   '/_mainLayout/realm/$realmId/manage/danger': typeof MainLayoutRealmRealmIdManageDangerRoute
@@ -2031,6 +2051,7 @@ export interface FileRouteTypes {
     | '/inbox/dm/$conversationId'
     | '/r/$realmSlug/create'
     | '/r/$realmSlug/dock'
+    | '/r/$realmSlug/rules'
     | '/r/$realmSlug/search'
     | '/r/$realmSlug/tags'
     | '/r/$realmSlug/wiki'
@@ -2089,6 +2110,7 @@ export interface FileRouteTypes {
     | '/r/$realmSlug/post/$postUnitId'
     | '/r/$realmSlug/shelf/$slug'
     | '/realm/$realmId/dock'
+    | '/realm/$realmId/rules'
     | '/realm/$realmId/tags'
     | '/realm/$realmId/wiki'
     | '/realm/$realmId/manage/danger'
@@ -2217,6 +2239,7 @@ export interface FileRouteTypes {
     | '/inbox/dm/$conversationId'
     | '/r/$realmSlug/create'
     | '/r/$realmSlug/dock'
+    | '/r/$realmSlug/rules'
     | '/r/$realmSlug/search'
     | '/r/$realmSlug/tags'
     | '/r/$realmSlug/wiki'
@@ -2272,6 +2295,7 @@ export interface FileRouteTypes {
     | '/r/$realmSlug/post/$postUnitId'
     | '/r/$realmSlug/shelf/$slug'
     | '/realm/$realmId/dock'
+    | '/realm/$realmId/rules'
     | '/realm/$realmId/tags'
     | '/realm/$realmId/wiki'
     | '/realm/$realmId/manage/danger'
@@ -2418,6 +2442,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/inbox/dm/$conversationId'
     | '/_mainLayout/r/$realmSlug/create'
     | '/_mainLayout/r/$realmSlug/dock'
+    | '/_mainLayout/r/$realmSlug/rules'
     | '/_mainLayout/r/$realmSlug/search'
     | '/_mainLayout/r/$realmSlug/tags'
     | '/_mainLayout/r/$realmSlug/wiki'
@@ -2476,6 +2501,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/r/$realmSlug/post/$postUnitId'
     | '/_mainLayout/r/$realmSlug/shelf/$slug'
     | '/_mainLayout/realm/$realmId/_detail/dock'
+    | '/_mainLayout/realm/$realmId/_detail/rules'
     | '/_mainLayout/realm/$realmId/_detail/tags'
     | '/_mainLayout/realm/$realmId/_detail/wiki'
     | '/_mainLayout/realm/$realmId/manage/danger'
@@ -3150,6 +3176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutRRealmSlugSearchRouteImport
       parentRoute: typeof MainLayoutRRealmSlugRoute
     }
+    '/_mainLayout/r/$realmSlug/rules': {
+      id: '/_mainLayout/r/$realmSlug/rules'
+      path: '/rules'
+      fullPath: '/r/$realmSlug/rules'
+      preLoaderRoute: typeof MainLayoutRRealmSlugRulesRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
     '/_mainLayout/r/$realmSlug/dock': {
       id: '/_mainLayout/r/$realmSlug/dock'
       path: '/dock'
@@ -3780,6 +3813,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutRealmRealmIdDetailTagsRouteImport
       parentRoute: typeof MainLayoutRealmRealmIdDetailRoute
     }
+    '/_mainLayout/realm/$realmId/_detail/rules': {
+      id: '/_mainLayout/realm/$realmId/_detail/rules'
+      path: '/rules'
+      fullPath: '/realm/$realmId/rules'
+      preLoaderRoute: typeof MainLayoutRealmRealmIdDetailRulesRouteImport
+      parentRoute: typeof MainLayoutRealmRealmIdDetailRoute
+    }
     '/_mainLayout/realm/$realmId/_detail/dock': {
       id: '/_mainLayout/realm/$realmId/_detail/dock'
       path: '/dock'
@@ -4231,6 +4271,7 @@ interface MainLayoutRRealmSlugRouteChildren {
   MainLayoutRRealmSlugManageRouteRoute: typeof MainLayoutRRealmSlugManageRouteRouteWithChildren
   MainLayoutRRealmSlugCreateRoute: typeof MainLayoutRRealmSlugCreateRoute
   MainLayoutRRealmSlugDockRoute: typeof MainLayoutRRealmSlugDockRoute
+  MainLayoutRRealmSlugRulesRoute: typeof MainLayoutRRealmSlugRulesRoute
   MainLayoutRRealmSlugSearchRoute: typeof MainLayoutRRealmSlugSearchRoute
   MainLayoutRRealmSlugTagsRoute: typeof MainLayoutRRealmSlugTagsRoute
   MainLayoutRRealmSlugWikiRoute: typeof MainLayoutRRealmSlugWikiRoute
@@ -4244,6 +4285,7 @@ const MainLayoutRRealmSlugRouteChildren: MainLayoutRRealmSlugRouteChildren = {
     MainLayoutRRealmSlugManageRouteRouteWithChildren,
   MainLayoutRRealmSlugCreateRoute: MainLayoutRRealmSlugCreateRoute,
   MainLayoutRRealmSlugDockRoute: MainLayoutRRealmSlugDockRoute,
+  MainLayoutRRealmSlugRulesRoute: MainLayoutRRealmSlugRulesRoute,
   MainLayoutRRealmSlugSearchRoute: MainLayoutRRealmSlugSearchRoute,
   MainLayoutRRealmSlugTagsRoute: MainLayoutRRealmSlugTagsRoute,
   MainLayoutRRealmSlugWikiRoute: MainLayoutRRealmSlugWikiRoute,
@@ -4484,6 +4526,7 @@ const MainLayoutZoneUnitIdManageRouteRouteWithChildren =
 
 interface MainLayoutRealmRealmIdDetailRouteChildren {
   MainLayoutRealmRealmIdDetailDockRoute: typeof MainLayoutRealmRealmIdDetailDockRoute
+  MainLayoutRealmRealmIdDetailRulesRoute: typeof MainLayoutRealmRealmIdDetailRulesRoute
   MainLayoutRealmRealmIdDetailTagsRoute: typeof MainLayoutRealmRealmIdDetailTagsRoute
   MainLayoutRealmRealmIdDetailWikiRoute: typeof MainLayoutRealmRealmIdDetailWikiRoute
   MainLayoutRealmRealmIdDetailIndexRoute: typeof MainLayoutRealmRealmIdDetailIndexRoute
@@ -4493,6 +4536,8 @@ const MainLayoutRealmRealmIdDetailRouteChildren: MainLayoutRealmRealmIdDetailRou
   {
     MainLayoutRealmRealmIdDetailDockRoute:
       MainLayoutRealmRealmIdDetailDockRoute,
+    MainLayoutRealmRealmIdDetailRulesRoute:
+      MainLayoutRealmRealmIdDetailRulesRoute,
     MainLayoutRealmRealmIdDetailTagsRoute:
       MainLayoutRealmRealmIdDetailTagsRoute,
     MainLayoutRealmRealmIdDetailWikiRoute:

@@ -88,7 +88,6 @@ describe("publishing default schemas", () => {
     expect(
       Value.Check(realmExtraSchema, {
         defaultLicenseSlug: "cc-by-nc-sa-4.0",
-        featuredZoneUnitId: "zone-1",
       }),
     ).toBe(true);
   });

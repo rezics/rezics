@@ -38,7 +38,12 @@ export function unitRelations(r: ServerRelationsBuilder) {
       }),
       ScoreEntries: r.many.ScoreEntry(),
       Realms: r.many.Realm(),
-      RealmRuleAcknowledgements: r.many.RealmRuleAcknowledgement(),
+      RealmRuleItems_rulePostUnitId: r.many.RealmRuleItem({
+        alias: "RealmRuleItem_rulePostUnitId_Unit_id",
+      }),
+      RealmRuleItems_reportReasonUnitId: r.many.RealmRuleItem({
+        alias: "RealmRuleItem_reportReasonUnitId_Unit_id",
+      }),
       RealmTagApplications_tagUnitId: r.many.RealmTagApplication({
         alias: "RealmTagApplication_tagUnitId_Unit_id",
       }),

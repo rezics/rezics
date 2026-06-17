@@ -1,9 +1,20 @@
+import { labelListQuery } from "@rezics/api/label/label";
+import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { realmKeys } from "@rezics/api/realm/realm";
-import { tagKeys } from "@rezics/api/tag/tag";
-import { LANGUAGES, type RealmDTO } from "@rezics/contract";
+import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
+import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
+import {
+  emptyRealmTagTree,
+  LANGUAGES,
+  type BatchTagTranslationResult,
+  type LabelDTO,
+  type RealmDTO,
+  type RealmTagTree,
+  type RealmTagTreeNode,
+} from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { ReplyComposer } from "./ReplyComposer";
@@ -27,7 +38,41 @@ type Story = StoryObj;
 const REALM_WITH_TAG_TREE_ID = "fixture-realm-with-tag-tree";
 const REALM_EMPTY_TAG_TREE_ID = "fixture-realm-empty-tag-tree";
 
-function makeRealm(unitId: string, extra: RealmDTO["extra"]): RealmDTO {
+type NamedTree = {
+  tree: RealmTagTree;
+  tags: BatchTagTranslationResult;
+  labels: LabelDTO[];
+};
+
+function label(unitId: string, title: string): LabelDTO {
+  return { unitId, translations: [{ language: LANGUAGES.EN, title }] };
+}
+
+function tag(name: string): BatchTagTranslationResult[string] {
+  return {
+    name,
+    slug: name.toLowerCase().replaceAll(" ", "-"),
+    description: "",
+  };
+}
+
+function makeTree(
+  nodes: RealmTagTreeNode[],
+  tags: BatchTagTranslationResult,
+  labels: LabelDTO[],
+): NamedTree {
+  return {
+    tree: {
+      ...emptyRealmTagTree(),
+      view: { defaultMode: "tree", allowViewerSwitch: true },
+      nodes,
+    },
+    tags,
+    labels,
+  };
+}
+
+function makeRealm(unitId: string): RealmDTO {
   return {
     unitId,
     slug: unitId,
@@ -35,7 +80,7 @@ function makeRealm(unitId: string, extra: RealmDTO["extra"]): RealmDTO {
     isPublic: true,
     isOfficial: false,
     memberCount: 18,
-    extra,
+    extra: {},
     translations: [
       {
         unitId,
@@ -49,36 +94,98 @@ function makeRealm(unitId: string, extra: RealmDTO["extra"]): RealmDTO {
 
 function SeedRealmComposer({
   realmId,
-  extra,
+  fixture,
   children,
 }: {
   realmId: string;
-  extra: RealmDTO["extra"];
+  fixture: NamedTree;
   children: ReactNode;
 }) {
   const qc = useQueryClient();
+  const tagUnitIds = useMemo(() => Object.keys(fixture.tags), [fixture.tags]);
+  const labelUnitIds = useMemo(
+    () => fixture.labels.map((item) => item.unitId),
+    [fixture.labels],
+  );
 
   useEffect(() => {
-    qc.setQueryData(realmKeys.detail(realmId), makeRealm(realmId, extra));
-    qc.setQueryData(tagKeys.search("art"), {
-      total: 2,
-      tags: [
-        {
-          unitId: "tag-art-history",
-          label: "Art history",
-          slug: "art-history",
-        },
-        {
-          unitId: "tag-visual-culture",
-          label: "Visual culture",
-          slug: "visual-culture",
-        },
-      ],
+    qc.setQueryData(realmKeys.detail(realmId), makeRealm(realmId));
+    qc.setQueryData(realmTagTreeQuery(realmId).queryKey, {
+      realmUnitId: realmId,
+      tree: fixture.tree,
     });
-  }, [extra, qc, realmId]);
+    qc.setQueryData(
+      tagBatchTranslationsQuery(tagUnitIds, LANGUAGES.EN).queryKey,
+      fixture.tags,
+    );
+    qc.setQueryData(labelListQuery(labelUnitIds).queryKey, {
+      labels: fixture.labels,
+    });
+    qc.setQueryData(
+      meiliTagSearchQueryOptions({
+        keyword: "art",
+        limit: 20,
+        languages: [LANGUAGES.EN],
+        appLocale: LANGUAGES.EN,
+      }).queryKey,
+      {
+        items: [
+          {
+            unitId: "tag-art-history",
+            title: "Art history",
+            slug: "art-history",
+          },
+          {
+            unitId: "tag-visual-culture",
+            title: "Visual culture",
+            slug: "visual-culture",
+          },
+        ],
+        total: 2,
+      },
+    );
+  }, [fixture, labelUnitIds, qc, realmId, tagUnitIds]);
 
   return <div className="p-4">{children}</div>;
 }
+
+const emptyFixture = makeTree([], {}, []);
+const readingFixture = makeTree(
+  [
+    {
+      kind: "label",
+      labelUnitId: "label-reading-mode",
+      children: [
+        { kind: "tag", tagUnitId: "tag-close-reading" },
+        { kind: "tag", tagUnitId: "tag-reread" },
+      ],
+    },
+    { kind: "tag", tagUnitId: "tag-question" },
+  ],
+  {
+    "tag-close-reading": tag("Close reading"),
+    "tag-reread": tag("Re-read"),
+    "tag-question": tag("Question"),
+  },
+  [label("label-reading-mode", "Reading mode")],
+);
+const formatFixture = makeTree(
+  [
+    {
+      kind: "label",
+      labelUnitId: "label-format",
+      children: [
+        { kind: "tag", tagUnitId: "tag-note" },
+        { kind: "tag", tagUnitId: "tag-review" },
+      ],
+    },
+  ],
+  {
+    "tag-note": tag("Note"),
+    "tag-review": tag("Review"),
+  },
+  [label("label-format", "Format")],
+);
 
 export const Default: Story = {
   render: () => (
@@ -122,19 +229,7 @@ export const RealmPostWithTagTree: Story = {
   render: () => (
     <SeedRealmComposer
       realmId={REALM_WITH_TAG_TREE_ID}
-      extra={{
-        tagTree: [
-          {
-            disabled: true,
-            label: "Reading mode",
-            children: [
-              { tagId: "tag-close-reading", label: "Close reading" },
-              { tagId: "tag-reread", label: "Re-read" },
-            ],
-          },
-          { tagId: "tag-question", label: "Question" },
-        ],
-      }}
+      fixture={readingFixture}
     >
       <ReplyComposer
         mode="expanded"
@@ -147,10 +242,7 @@ export const RealmPostWithTagTree: Story = {
 
 export const RealmPostSearchOnly: Story = {
   render: () => (
-    <SeedRealmComposer
-      realmId={REALM_EMPTY_TAG_TREE_ID}
-      extra={{ tagTree: [] }}
-    >
+    <SeedRealmComposer realmId={REALM_EMPTY_TAG_TREE_ID} fixture={emptyFixture}>
       <ReplyComposer mode="expanded" realmUnitIds={[REALM_EMPTY_TAG_TREE_ID]} />
     </SeedRealmComposer>
   ),
@@ -165,21 +257,7 @@ export const RealmPostSearchOnly: Story = {
 
 export const RealmPostDisabledHeader: Story = {
   render: () => (
-    <SeedRealmComposer
-      realmId={REALM_WITH_TAG_TREE_ID}
-      extra={{
-        tagTree: [
-          {
-            disabled: true,
-            label: "Format",
-            children: [
-              { tagId: "tag-note", label: "Note" },
-              { tagId: "tag-review", label: "Review" },
-            ],
-          },
-        ],
-      }}
-    >
+    <SeedRealmComposer realmId={REALM_WITH_TAG_TREE_ID} fixture={formatFixture}>
       <ReplyComposer mode="expanded" realmUnitIds={[REALM_WITH_TAG_TREE_ID]} />
     </SeedRealmComposer>
   ),
@@ -198,19 +276,11 @@ export const HappyPath: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const trigger = canvas.getByPlaceholderText(/start a discussion/i);
-    await userEvent.click(trigger);
+    await userEvent.type(trigger, "This reply adds a concrete observation.");
     await waitFor(() => {
-      const editor = canvasElement.querySelector<HTMLElement>(
-        "textarea, [contenteditable='true']",
-      );
-      expect(editor).not.toBeNull();
+      expect(
+        canvas.queryByText("This reply adds a concrete observation."),
+      ).not.toBeNull();
     });
-    const editor = canvasElement.querySelector<HTMLElement>(
-      "textarea, [contenteditable='true']",
-    );
-    if (editor) {
-      editor.focus();
-      await userEvent.keyboard("Looks good!");
-    }
   },
 };

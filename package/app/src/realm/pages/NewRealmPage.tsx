@@ -1,17 +1,7 @@
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
-import { markdownContentDoc, type RealmTagViewStyle } from "@rezics/contract";
+import { markdownContentDoc } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import {
-  Button,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from "@rezics/ui/shadcn";
+import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
@@ -20,11 +10,11 @@ import { unitHref } from "@/shared/ui/link";
 
 /**
  * Full-page form for creating a new realm (community).
- * Collects title, description, tag view style preference, and viewer switch setting.
+ * Collects title and description.
  * Navigates to the new realm on successful creation.
  *
  * 用于创建新社区的整页表单。
- * 收集标题、描述、标签视图样式偏好和查看者切换设置。
+ * 收集标题和描述。
  * 成功创建后导航到新社区。
  *
  * Layout:
@@ -37,10 +27,6 @@ import { unitHref } from "@/shared/ui/link";
  * │                          │
  * │ Description              │
  * │ [Text area - 4 rows]     │
- * │                          │
- * │ Tag View                 │
- * │ [Dropdown]               │
- * │ [Toggle Viewer Switch]   │
  * │                          │
  * │ [Policy denial notice]   │
  * │                          │
@@ -57,9 +43,6 @@ import { unitHref } from "@/shared/ui/link";
  * │ Description                        │
  * │ [Text area - 4 rows]               │
  * │                                    │
- * │ Tag View                           │
- * │ [Dropdown]         [Toggle]        │
- * │                                    │
  * │ [Policy denial notice]             │
  * │                              [Create]
  * └────────────────────────────────────┘
@@ -73,9 +56,6 @@ import { unitHref } from "@/shared/ui/link";
  * │                                      │
  * │ Description                          │
  * │ [Text area - 4 rows]                 │
- * │                                      │
- * │ Tag View                             │
- * │ [Dropdown]                [Toggle]   │
  * │                                      │
  * │ [Policy denial notice]               │
  * │                                 [Create]
@@ -91,8 +71,6 @@ export function NewRealmPage() {
   const createMutation = useCreateRealmMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [tagViewStyle, setTagViewStyle] = useState<RealmTagViewStyle>("flat");
-  const [allowTagViewSwitch, setAllowTagViewSwitch] = useState(true);
 
   const handleCreate = () => {
     createMutation.mutate(
@@ -106,12 +84,6 @@ export function NewRealmPage() {
               : null,
           },
         ],
-        extra: {
-          tagView: {
-            defaultStyle: tagViewStyle,
-            allowViewerSwitch: allowTagViewSwitch,
-          },
-        },
       },
       {
         onSuccess: (data) =>
@@ -151,50 +123,6 @@ export function NewRealmPage() {
             rows={4}
           />
         </div>
-        <section className="flex flex-col gap-3">
-          <div>
-            <h2 className="text-base font-semibold leading-ui text-text-primary">
-              {t("community:tag_view_heading")}
-            </h2>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="new-realm-tag-view-style">
-                {t("community:tag_view_default")}
-              </Label>
-              <Select
-                value={tagViewStyle}
-                onValueChange={(value) =>
-                  setTagViewStyle(value as RealmTagViewStyle)
-                }
-              >
-                <SelectTrigger id="new-realm-tag-view-style">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="flat">
-                    {t("community:tag_view_flat")}
-                  </SelectItem>
-                  <SelectItem value="grouped">
-                    {t("community:tag_view_grouped")}
-                  </SelectItem>
-                  <SelectItem value="tree">
-                    {t("community:tag_view_tree")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              type="button"
-              variant={allowTagViewSwitch ? "secondary" : "outline"}
-              onClick={() => setAllowTagViewSwitch((value) => !value)}
-            >
-              {allowTagViewSwitch
-                ? t("community:tag_view_viewer_switch_on")
-                : t("community:tag_view_viewer_switch_off")}
-            </Button>
-          </div>
-        </section>
         <PolicyDenialNotice
           denial={policyDenialFromError(createMutation.error)}
         />

@@ -2,7 +2,6 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 import {
   Realm,
   RealmMember,
-  RealmRuleAcknowledgement,
   Subscription,
   Unit,
   UnitSupportLanguage,
@@ -20,6 +19,76 @@ const setSingleExtraKeyMock = mock(async () => undefined);
 const clearSingleExtraKeyMock = mock(async () => undefined);
 const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
 const broadcastMock = mock(async (_event: any) => ({ ok: true }));
+const defaultRuleAcknowledgementStatus = () => ({
+  currentPolicyId: null,
+  currentRevisionId: null,
+  requiredVersion: null,
+  acceptedPolicyId: null,
+  acceptedRevisionId: null,
+  acceptedVersion: null,
+  acceptedAt: null,
+  acceptedLanguage: null,
+  acknowledgementRequired: false,
+});
+const assertAcknowledgedForActionMock = mock(async () => undefined);
+const getRuleAcknowledgementStatusMock = mock(async () =>
+  defaultRuleAcknowledgementStatus(),
+);
+const acknowledgeCurrentRuleMock = mock(async () => ({
+  realmUnitId: "realm-unit-id",
+  policyId: "policy-1",
+  revisionId: "revision-3",
+  version: 3,
+  userId: "user-unit-id",
+  acceptedAt: new Date("2026-05-28T00:00:00.000Z"),
+  acceptedLanguage: "ja",
+}));
+const getRulePolicyMock = mock(async () => ({
+  realmUnitId: "realm-unit-id",
+  policyId: "policy-1",
+  currentRevisionId: "revision-3",
+  currentVersion: 3,
+  requirements: {
+    requireOnJoin: true,
+    requireOnPost: false,
+    requireOnUpdate: true,
+  },
+}));
+const resolveRuleMock = mock(async () => ({
+  policy: await getRulePolicyMock(),
+  revision: {
+    id: "revision-3",
+    policyId: "policy-1",
+    version: 3,
+    createdByUserId: "user-unit-id",
+    createdAt: "2026-05-28T00:00:00.000Z",
+    items: [],
+  },
+  items: [],
+}));
+const updateRulePolicyMock = mock(async () => ({
+  realmUnitId: "realm-unit-id",
+  policyId: "policy-1",
+  currentRevisionId: "revision-4",
+  currentVersion: 4,
+  requirements: {
+    requireOnJoin: true,
+    requireOnPost: true,
+    requireOnUpdate: false,
+  },
+}));
+const createRuleRevisionMock = mock(async () => ({
+  policy: await updateRulePolicyMock(),
+  revision: {
+    id: "revision-4",
+    policyId: "policy-1",
+    version: 4,
+    createdByUserId: "user-unit-id",
+    createdAt: "2026-05-28T00:00:00.000Z",
+    items: [],
+  },
+  items: [],
+}));
 const appendModerationActionMock = mock(async (_tx: any, input: any) =>
   legacyDbMock.moderationAction?.create?.({ data: input }),
 );
@@ -80,6 +149,17 @@ mock.module("@/post/post.service", () => ({
 }));
 mock.module("@/post/post.mapper", () => ({
   mapPostToDTO: (row: unknown) => row,
+}));
+mock.module("../realm-rule", () => ({
+  realmRuleService: {
+    acknowledgeCurrent: acknowledgeCurrentRuleMock,
+    assertAcknowledgedForAction: assertAcknowledgedForActionMock,
+    createRevision: createRuleRevisionMock,
+    getAcknowledgementStatus: getRuleAcknowledgementStatusMock,
+    getPolicy: getRulePolicyMock,
+    resolve: resolveRuleMock,
+    updatePolicy: updateRulePolicyMock,
+  },
 }));
 mock.module("@/unit/language-resolution", () => ({
   resolveEffectiveReadLanguageInput: () => ({ language: "ja" }),
@@ -244,13 +324,6 @@ function createFakeSelect(selection?: Record<string, unknown>) {
         });
         return row ? [row] : [];
       }
-      if (table === RealmRuleAcknowledgement) {
-        const finder =
-          legacyDbMock.realmRuleAcknowledgement?.findUnique ??
-          legacyDbMock.realmRuleAcknowledgement?.findFirst;
-        const row = await finder?.({ where: {} });
-        return row ? [row] : [];
-      }
       if (table === Unit) {
         const row = await legacyDbMock.unit?.findUnique?.({
           where: { id: values[0] },
@@ -305,22 +378,6 @@ function createFakeInsert(table: unknown) {
             },
             create: data,
             update: conflictSet,
-          }),
-        ];
-      }
-      if (table === RealmRuleAcknowledgement) {
-        return [
-          await legacyDbMock.realmRuleAcknowledgement.upsert({
-            where: {
-              realmUnitId_ruleUnitId_version_userId: {
-                realmUnitId: data.realmUnitId,
-                ruleUnitId: data.ruleUnitId,
-                version: data.version,
-                userId: data.userId,
-              },
-            },
-            create: data,
-            update: data,
           }),
         ];
       }
@@ -569,6 +626,17 @@ afterEach(() => {
   clearSingleExtraKeyMock.mockClear();
   auditPrivilegedMutationMock.mockClear();
   broadcastMock.mockClear();
+  assertAcknowledgedForActionMock.mockClear();
+  assertAcknowledgedForActionMock.mockResolvedValue(undefined);
+  getRuleAcknowledgementStatusMock.mockClear();
+  getRuleAcknowledgementStatusMock.mockResolvedValue(
+    defaultRuleAcknowledgementStatus(),
+  );
+  acknowledgeCurrentRuleMock.mockClear();
+  getRulePolicyMock.mockClear();
+  resolveRuleMock.mockClear();
+  updateRulePolicyMock.mockClear();
+  createRuleRevisionMock.mockClear();
   delete legacyDbMock.$transaction;
   delete legacyDbMock.realmMember;
   delete legacyDbMock.realm;
@@ -576,7 +644,6 @@ afterEach(() => {
   delete legacyDbMock.userSubscriptionListEntry;
   delete legacyDbMock.staffGrant;
   delete legacyDbMock.realmCapabilityGrant;
-  delete legacyDbMock.realmRuleAcknowledgement;
   delete legacyDbMock.unit;
   delete legacyDbMock.moderationAction;
   delete legacyDbMock.unitTranslation;
@@ -670,16 +737,20 @@ describe("realmService.joinRealm", () => {
   test("requires current rule acknowledgement before joining when configured", async () => {
     installTx({
       realmFindUnique: mock(async () => ({
-        ruleUnitId: "rule-unit-1",
-        ruleVersion: 2,
-        ruleRequireOnJoin: true,
         joinRequiresApproval: false,
       })),
-      ruleAckFindUnique: mock(async () => null),
     });
+    assertAcknowledgedForActionMock.mockRejectedValueOnce(
+      new Error("Realm rules must be acknowledged before joining"),
+    );
 
     await expect(realmService.joinRealm(REALM, USER)).rejects.toThrow(
       "Realm rules must be acknowledged before joining",
+    );
+    expect(assertAcknowledgedForActionMock).toHaveBeenCalledWith(
+      REALM,
+      USER,
+      "join",
     );
     expect(legacyDbMock.realmMember.create).not.toHaveBeenCalled();
   });
@@ -698,8 +769,6 @@ describe("realmService.joinRealm", () => {
       ]),
       realmFindUnique: mock(async () => ({
         extra: {},
-        ruleVersion: 1,
-        ruleRequireOnJoin: false,
         joinRequiresApproval: true,
       })),
     });
@@ -940,7 +1009,7 @@ describe("realmService.getMember", () => {
 });
 
 describe("realmService.getMembershipMe", () => {
-  test("returns state, capability hints, and stale rule acknowledgement metadata", async () => {
+  test("returns state, capability hints, and rule acknowledgement status", async () => {
     legacyDbMock.realmMember = {
       findUnique: mock(async () => ({
         realmUnitId: REALM,
@@ -951,31 +1020,19 @@ describe("realmService.getMembershipMe", () => {
         updatedAt: new Date("2026-05-28T00:00:00.000Z"),
       })),
     };
-    legacyDbMock.staffGrant = {
-      findMany: mock(async () => []),
-    };
-    legacyDbMock.realmCapabilityGrant = {
-      findMany: mock(async () => []),
-    };
-    legacyDbMock.realm = {
-      findUnique: mock(async () => ({
-        ruleUnitId: "rule-unit-2",
-        ruleVersion: 1,
-        ruleRequireOnJoin: false,
-        ruleRequireOnPost: true,
-        ruleRequireOnUpdate: true,
-      })),
-    };
-    legacyDbMock.realmRuleAcknowledgement = {
-      findFirst: mock(async () => ({
-        realmUnitId: REALM,
-        ruleUnitId: "rule-unit-1",
-        version: 4,
-        userId: USER,
-        acceptedAt: new Date("2026-05-28T00:00:00.000Z"),
-        acceptedLanguage: "en",
-      })),
-    };
+    legacyDbMock.staffGrant = { findMany: mock(async () => []) };
+    legacyDbMock.realmCapabilityGrant = { findMany: mock(async () => []) };
+    getRuleAcknowledgementStatusMock.mockResolvedValueOnce({
+      currentPolicyId: "policy-2",
+      currentRevisionId: "revision-1",
+      requiredVersion: 1,
+      acceptedPolicyId: "policy-1",
+      acceptedRevisionId: "revision-4",
+      acceptedVersion: 4,
+      acceptedAt: new Date("2026-05-28T00:00:00.000Z"),
+      acceptedLanguage: "en",
+      acknowledgementRequired: true,
+    });
 
     await expect(
       realmService.getMembershipMe(REALM, USER),
@@ -987,32 +1044,21 @@ describe("realmService.getMembershipMe", () => {
       muted: true,
       banned: false,
       ruleAcknowledgement: {
-        currentRuleUnitId: "rule-unit-2",
+        currentPolicyId: "policy-2",
+        currentRevisionId: "revision-1",
         requiredVersion: 1,
-        acceptedRuleUnitId: "rule-unit-1",
+        acceptedPolicyId: "policy-1",
+        acceptedRevisionId: "revision-4",
         acceptedVersion: 4,
         acceptedLanguage: "en",
         acknowledgementRequired: true,
       },
     });
+    expect(getRuleAcknowledgementStatusMock).toHaveBeenCalledWith(REALM, USER);
   });
 
   test("returns non-member metadata without requiring acknowledgement when no rule is configured", async () => {
-    legacyDbMock.realmMember = {
-      findUnique: mock(async () => null),
-    };
-    legacyDbMock.realm = {
-      findUnique: mock(async () => ({
-        extra: {},
-        ruleVersion: 1,
-        ruleRequireOnJoin: false,
-        ruleRequireOnPost: false,
-        ruleRequireOnUpdate: true,
-      })),
-    };
-    legacyDbMock.realmRuleAcknowledgement = {
-      findFirst: mock(async () => null),
-    };
+    legacyDbMock.realmMember = { findUnique: mock(async () => null) };
 
     await expect(
       realmService.getMembershipMe(REALM, USER),
@@ -1026,9 +1072,11 @@ describe("realmService.getMembershipMe", () => {
       banned: false,
       capabilities: [],
       ruleAcknowledgement: {
-        currentRuleUnitId: null,
+        currentPolicyId: null,
+        currentRevisionId: null,
         requiredVersion: null,
-        acceptedRuleUnitId: null,
+        acceptedPolicyId: null,
+        acceptedRevisionId: null,
         acceptedVersion: null,
         acknowledgementRequired: false,
       },
@@ -1036,290 +1084,77 @@ describe("realmService.getMembershipMe", () => {
   });
 });
 
-describe("realmService.acknowledgeCurrentRule", () => {
-  test("upserts acknowledgement for current rule unit and version", async () => {
-    const acceptedAt = new Date("2026-05-28T00:00:00.000Z");
-    legacyDbMock.realm = {
-      findUnique: mock(async () => ({
-        ruleUnitId: "rule-unit-1",
-        ruleVersion: 3,
-      })),
-    };
-    legacyDbMock.realmRuleAcknowledgement = {
-      upsert: mock(async () => ({
-        realmUnitId: REALM,
-        ruleUnitId: "rule-unit-1",
-        version: 3,
-        userId: USER,
-        acceptedAt,
-        acceptedLanguage: "ja",
-      })),
-    };
-
+describe("realmService rule policy proxies", () => {
+  test("acknowledges the current rule revision through realm-rule service", async () => {
     await expect(
       realmService.acknowledgeCurrentRule(REALM, USER, {
         acceptedLanguage: "ja",
       }),
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       realmUnitId: REALM,
-      ruleUnitId: "rule-unit-1",
+      policyId: "policy-1",
+      revisionId: "revision-3",
       version: 3,
       userId: USER,
-      acceptedAt,
       acceptedLanguage: "ja",
     });
-
-    expect(legacyDbMock.realmRuleAcknowledgement.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          realmUnitId_ruleUnitId_version_userId: {
-            realmUnitId: REALM,
-            ruleUnitId: "rule-unit-1",
-            version: 3,
-            userId: USER,
-          },
-        },
-      }),
-    );
-  });
-});
-
-describe("realmService.getRulePolicy", () => {
-  test("returns the current rule reference and gates", async () => {
-    const updatedAt = new Date("2026-05-28T00:00:00.000Z");
-    legacyDbMock.realm = {
-      findUnique: mock(async () => ({
-        unitId: REALM,
-        ruleUnitId: "rule-unit-1",
-        ruleVersion: 3,
-        ruleRequireOnJoin: true,
-        ruleRequireOnPost: false,
-        ruleRequireOnUpdate: true,
-        rulePolicyUpdatedAt: updatedAt,
-      })),
-    };
-
-    await expect(realmService.getRulePolicy(REALM)).resolves.toEqual({
-      realmUnitId: REALM,
-      ruleUnitId: "rule-unit-1",
-      version: 3,
-      requireOnJoin: true,
-      requireOnPost: false,
-      requireOnUpdate: true,
-      updatedAt,
+    expect(acknowledgeCurrentRuleMock).toHaveBeenCalledWith(REALM, USER, {
+      acceptedLanguage: "ja",
     });
   });
-});
 
-describe("realmService.resolveRule", () => {
-  test("resolves the requested translation and source rule post", async () => {
-    const now = new Date("2026-05-28T00:00:00.000Z");
-    legacyDbMock.realm = {
-      findUnique: mock(async () => ({
-        unitId: REALM,
-        ruleUnitId: "rule-unit-1",
-        ruleVersion: 3,
-        ruleRequireOnJoin: true,
-        ruleRequireOnPost: false,
-        ruleRequireOnUpdate: true,
-        rulePolicyUpdatedAt: now,
-      })),
-    };
-    legacyDbMock.unit = {
-      findUnique: mock(async () => ({
-        id: "rule-unit-1",
-        type: "POST",
-        supportLanguages: [
-          {
-            unitId: "rule-unit-1",
-            language: "ja",
-            isPrimary: true,
-            position: "a",
-          },
-          {
-            unitId: "rule-unit-1",
-            language: "en",
-            isPrimary: false,
-            position: "b",
-          },
-        ],
-        translations: [
-          {
-            unitId: "rule-unit-1",
-            language: "ja",
-            title: "ルール",
-            subtitle: null,
-            summary: null,
-            description: null,
-            extra: null,
-            sourceUnitId: "rule-post-ja",
-            createdAt: now,
-            updatedAt: now,
-          },
-        ],
-      })),
-    };
-    legacyDbMock.post = {
-      findUnique: mock(async () => ({
-        unitId: "rule-post-ja",
-        authorUserId: USER,
-        subscribedUnitId: null,
-        content: { type: "doc", content: [] },
-        rootPostUnitId: "rule-post-ja",
-        parentPostUnitId: null,
-        kind: "POST",
-        scoreEntryId: null,
-        depth: 0,
-        replyCount: 0,
-        directReplyCount: 0,
-        lastReplyAt: null,
-        isLocked: false,
-        extra: null,
-        createdAt: now,
-        updatedAt: now,
-        unit: {
-          targetUnitId: null,
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-          moderationStatus: "APPROVED",
-          licenseSlug: null,
-          inRealms: [],
-          supportLanguages: [
-            {
-              unitId: "rule-post-ja",
-              language: "ja",
-              isPrimary: true,
-              position: "a",
-            },
-          ],
-          translations: [],
-          contentTranslations: [],
-          user: {
-            unitId: USER,
-            slug: "owner",
-            name: "Owner",
-            avatar: null,
-          },
-        },
-      })),
-    };
-
-    await expect(realmService.resolveRule(REALM, "ja")).resolves.toMatchObject({
+  test("reads rule policy through realm-rule service", async () => {
+    await expect(realmService.getRulePolicy(REALM)).resolves.toMatchObject({
       realmUnitId: REALM,
-      ruleUnitId: "rule-unit-1",
-      requestedLanguage: "ja",
-      resolvedLanguage: "ja",
-      translation: {
-        unitId: "rule-unit-1",
-        language: "ja",
-        title: "ルール",
-        sourceUnitId: "rule-post-ja",
-      },
-      sourceRulePostUnitId: "rule-post-ja",
-      sourceRulePost: {
-        unitId: "rule-post-ja",
-        authorUserId: USER,
-      },
+      policyId: "policy-1",
+      currentVersion: 3,
+      requirements: { requireOnJoin: true },
     });
+    expect(getRulePolicyMock).toHaveBeenCalledWith(REALM);
   });
-});
 
-describe("realmService.updateRulePolicy", () => {
-  test("updates the rule reference and acknowledgement gates", async () => {
-    const updatedAt = new Date("2026-05-28T00:00:00.000Z");
-    legacyDbMock.realm = {
-      update: mock(async () => ({
-        unitId: REALM,
-        ruleUnitId: "rule-unit-2",
-        ruleVersion: 4,
-        ruleRequireOnJoin: true,
-        ruleRequireOnPost: true,
-        ruleRequireOnUpdate: false,
-        rulePolicyUpdatedAt: updatedAt,
-      })),
-    };
-
+  test("resolves rule page content through realm-rule service", async () => {
     await expect(
-      realmService.updateRulePolicy(currentIdentity, REALM, {
-        ruleUnitId: "rule-unit-2",
-        version: 4,
-        requireOnJoin: true,
-        requireOnPost: true,
-        requireOnUpdate: false,
-      }),
-    ).resolves.toEqual({
-      realmUnitId: REALM,
-      ruleUnitId: "rule-unit-2",
-      version: 4,
+      realmService.resolveRule(REALM, "ja", ["ja", "en"]),
+    ).resolves.toMatchObject({
+      policy: { policyId: "policy-1", currentVersion: 3 },
+      revision: { id: "revision-3", version: 3 },
+    });
+    expect(resolveRuleMock).toHaveBeenCalledWith(REALM, "ja", ["ja", "en"]);
+  });
+
+  test("updates rule policy through realm-rule service", async () => {
+    const input = {
       requireOnJoin: true,
       requireOnPost: true,
       requireOnUpdate: false,
-      updatedAt,
+    };
+    await expect(
+      realmService.updateRulePolicy(currentIdentity, REALM, input),
+    ).resolves.toMatchObject({
+      policyId: "policy-1",
+      currentVersion: 4,
+      requirements: { requireOnPost: true },
     });
-
-    expect(legacyDbMock.realm.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { unitId: REALM },
-        data: expect.objectContaining({
-          ruleUnitId: "rule-unit-2",
-          ruleVersion: 4,
-          ruleRequireOnJoin: true,
-          ruleRequireOnPost: true,
-          ruleRequireOnUpdate: false,
-          rulePolicyUpdatedAt: expect.any(Date),
-        }),
-      }),
+    expect(updateRulePolicyMock).toHaveBeenCalledWith(
+      currentIdentity,
+      REALM,
+      input,
     );
-    expect(auditPrivilegedMutationMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        actorUserId: USER,
-        action: "realm.rules.update",
-        targetKind: "realm-rules",
-        targetId: REALM,
-        metadata: expect.objectContaining({
-          ruleUnitId: "rule-unit-2",
-          version: 4,
-          requireOnJoin: true,
-          requireOnPost: true,
-          requireOnUpdate: false,
-        }),
-      }),
-    );
-    expect(broadcastMock).toHaveBeenCalledWith({
-      kind: "realm.rules.updated",
-      sourceUnitId: REALM,
-      actorId: USER,
-      extra: {
-        ruleUnitId: "rule-unit-2",
-        version: 4,
-      },
-    });
   });
 
-  test("clears the rule reference when ruleUnitId is null", async () => {
-    legacyDbMock.realm = {
-      update: mock(async () => ({
-        unitId: REALM,
-        ruleUnitId: null,
-        ruleVersion: 5,
-        ruleRequireOnJoin: false,
-        ruleRequireOnPost: false,
-        ruleRequireOnUpdate: true,
-        rulePolicyUpdatedAt: null,
-      })),
-    };
-
+  test("creates rule revisions through realm-rule service", async () => {
+    const input = { items: [{ rulePostUnitId: "post-rule-1" }] };
     await expect(
-      realmService.updateRulePolicy(currentIdentity, REALM, {
-        ruleUnitId: null,
-      }),
+      realmService.createRuleRevision(currentIdentity, REALM, input),
     ).resolves.toMatchObject({
-      realmUnitId: REALM,
-      ruleUnitId: null,
-      version: 5,
+      policy: { policyId: "policy-1", currentVersion: 4 },
+      revision: { id: "revision-4", version: 4 },
     });
-
-    expect(clearSingleExtraKeyMock).not.toHaveBeenCalled();
-    expect(setSingleExtraKeyMock).not.toHaveBeenCalled();
+    expect(createRuleRevisionMock).toHaveBeenCalledWith(
+      currentIdentity,
+      REALM,
+      input,
+    );
   });
 });

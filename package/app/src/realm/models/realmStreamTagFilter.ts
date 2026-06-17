@@ -1,4 +1,8 @@
-import type { TagTreeNode } from "@rezics/contract";
+import type { RealmTagTreeNode } from "@rezics/contract";
+import {
+  realmTagTreeNodeDisplayLabel,
+  type RealmTagTreeDisplayNames,
+} from "./realmTagTreeHydration";
 
 export type RealmStreamTagChip = {
   tagId: string;
@@ -8,30 +12,18 @@ export type RealmStreamTagChip = {
 
 export const REALM_STREAM_TAG_SHORTCUT_LIMIT = 12;
 
-export function realmTagNodeLabel(node: TagTreeNode, language: string) {
-  const translations = node.labelTranslations?.translations;
-  const fallbackLanguage = node.labelTranslations?.fallbackLanguage;
-  return (
-    translations?.[language] ??
-    (fallbackLanguage ? translations?.[fallbackLanguage] : undefined) ??
-    node.label?.trim() ??
-    node.tagId?.slice(0, 8) ??
-    "Untitled"
-  );
-}
-
 export function collectRealmStreamTagChips(
-  nodes: TagTreeNode[] | undefined,
-  language: string,
+  nodes: RealmTagTreeNode[] | undefined,
+  displayNames?: RealmTagTreeDisplayNames,
 ): RealmStreamTagChip[] {
   const chips: RealmStreamTagChip[] = [];
 
-  const visit = (items: TagTreeNode[]) => {
+  const visit = (items: RealmTagTreeNode[]) => {
     for (const item of items) {
-      if (item.tagId) {
+      if (item.kind === "tag") {
         chips.push({
-          tagId: item.tagId,
-          label: realmTagNodeLabel(item, language),
+          tagId: item.tagUnitId,
+          label: realmTagTreeNodeDisplayLabel(item, displayNames),
           querySource: item.querySource ?? "normal",
         });
       }

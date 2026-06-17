@@ -25,13 +25,14 @@ function RealmSlugTagsRoute() {
 }
 
 function RealmSlugTagsTab() {
-  const { routeLocation, realmId, realm, tagTree } = useRealmDetail();
+  const { routeLocation, realmId, tagTree, tagTreeDisplayNames } =
+    useRealmDetail();
   const navigate = Route.useNavigate();
   return (
     <RealmTagBrowser
       realmId={realmId}
       tagTree={tagTree}
-      tagView={realm.extra?.tagView ?? null}
+      displayNames={tagTreeDisplayNames}
       onTagSelect={(selection) =>
         navigate({
           to: realmDetailHref(routeLocation),

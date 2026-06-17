@@ -1,8 +1,8 @@
 ---
 title: Realm tag tree and rule policy extraction
-status: active
+status: completed
 created: 2026-06-17
-completed:
+completed: 2026-06-17
 supersededBy:
 tags: [realm, tag, policy-tag, rule, dock, contract, server, app]
 ---
@@ -60,148 +60,148 @@ expand/collapse views.
   rule POST.
 
 ## 1. Contract Shape
-- [ ] 1.1 Add `package/contract/src/realm/realm-tag-tree.ts` with
+- [x] 1.1 Add `package/contract/src/realm/realm-tag-tree.ts` with
   `REALM_TAG_TREE_SCHEMA`, v1 envelope schema, view mode schema, tag node
   schema, label node schema, parser helpers, and exported types.
-- [ ] 1.2 Move `RealmTagViewStyle` / view preferences from
+- [x] 1.2 Move `RealmTagViewStyle` / view preferences from
   `package/contract/src/realm/realm-extra.ts` into the new realm tag tree
   contract.
-- [ ] 1.3 Remove `TagTreeNode`, `realmTagTreeLabelSchema`, and inline label
+- [x] 1.3 Remove `TagTreeNode`, `realmTagTreeLabelSchema`, and inline label
   translation types from `realm-extra.ts`; keep only profile extras that still
   belong to `Realm.extra`.
-- [ ] 1.4 Add contract tests in
+- [x] 1.4 Add contract tests in
   `package/contract/src/realm/realm-tag-tree.test.ts` for valid tag/label
   nodes, valid view modes, rejected inline label fields, rejected unknown node
   kinds, rejected node IDs, and rejected `querySource` on label nodes.
-- [ ] 1.5 Export realm tag tree contracts from
+- [x] 1.5 Export realm tag tree contracts from
   `package/contract/src/realm/index.ts` and `package/contract/src/index.ts`.
-- [ ] 1.6 Add rule policy contract shapes for `RealmRulePolicyDTO`,
+- [x] 1.6 Add rule policy contract shapes for `RealmRulePolicyDTO`,
   `RealmRuleRevisionDTO`, `RealmRuleItemDTO`, acknowledgement status, update
   inputs, and resolved rule item content.
-- [ ] 1.7 Update realm DTO contracts so realm detail can expose the current
+- [x] 1.7 Update realm DTO contracts so realm detail can expose the current
   tag tree envelope and current rule policy reference without `Realm.extra`
   tag/rule keys.
 
 ## 2. Database Model
-- [ ] 2.1 Add a Drizzle schema table for `RealmTagTree` with
+- [x] 2.1 Add a Drizzle schema table for `RealmTagTree` with
   `realmUnitId` primary key, `tree` JSONB envelope, `createdAt`, and
   `updatedAt`.
-- [ ] 2.2 Register the `RealmTagTree.tree` JSON column in the repo JSON
+- [x] 2.2 Register the `RealmTagTree.tree` JSON column in the repo JSON
   convention registry so `task check:convention` accepts the envelope.
-- [ ] 2.3 Generate Drizzle migrations for `RealmTagTree`. Do not hand-author
+- [x] 2.3 Generate Drizzle migrations for `RealmTagTree`. Do not hand-author
   ordinary generated SQL.
-- [ ] 2.4 Add `RealmRulePolicy`, `RealmRuleRevision`, and `RealmRuleItem`
+- [x] 2.4 Add `RealmRulePolicy`, `RealmRuleRevision`, and `RealmRuleItem`
   schema tables. Use DB-generated UUIDv7 primary keys for durable row IDs.
-- [ ] 2.5 Model rule policy current state with a single current revision
+- [x] 2.5 Model rule policy current state with a single current revision
   pointer and requirement booleans (`requireOnJoin`, `requireOnPost`,
   `requireOnUpdate`) outside the `Realm` table.
-- [ ] 2.6 Move `RealmRuleAcknowledgement` to bind to the current rule revision
+- [x] 2.6 Move `RealmRuleAcknowledgement` to bind to the current rule revision
   identity while preserving realm/user lookup indexes.
-- [ ] 2.7 Generate Drizzle migrations for rule policy tables and removal of
+- [x] 2.7 Generate Drizzle migrations for rule policy tables and removal of
   rule policy columns from `Realm`.
 
 ## 3. Realm Tag Tree Server/API
-- [ ] 3.1 Add `package/server/src/realm-tag-tree/` with
+- [x] 3.1 Add `package/server/src/realm-tag-tree/` with
   `realm-tag-tree.service.ts`, `.api.ts`, `.mapper.ts`, `.types.ts`, and
   `index.ts`.
-- [ ] 3.2 Implement public read for a realm's tag tree, returning an empty
+- [x] 3.2 Implement public read for a realm's tag tree, returning an empty
   default envelope when none exists.
-- [ ] 3.3 Implement full-envelope update with realm manage authority and row
+- [x] 3.3 Implement full-envelope update with realm manage authority and row
   locking on the `RealmTagTree` row, not mutation of `Realm.extra`.
-- [ ] 3.4 Validate all tag nodes against live TAG Units and all label references
+- [x] 3.4 Validate all tag nodes against live TAG Units and all label references
   against live LABEL Units.
-- [ ] 3.5 Enforce tree safety limits in the service: maximum node count,
+- [x] 3.5 Enforce tree safety limits in the service: maximum node count,
   maximum depth, and recursive shape validation before persistence.
-- [ ] 3.6 Add focused service/API tests for read defaulting, update authority,
+- [x] 3.6 Add focused service/API tests for read defaulting, update authority,
   TAG/LABEL validation, safety limits, and rejection of old inline label
   payloads.
-- [ ] 3.7 Add `package/api/src/realm-tag-tree/` with API functions, query keys,
+- [x] 3.7 Add `package/api/src/realm-tag-tree/` with API functions, query keys,
   queries, mutations, and exports.
 
 ## 4. Policy-Tag Integration
-- [ ] 4.1 Keep `package/server/src/policy-tag/` and existing policy-tag tables
+- [x] 4.1 Keep `package/server/src/policy-tag/` and existing policy-tag tables
   independent from `RealmTagTree`; no policy table should reference tree node
   paths or frontend temporary keys.
-- [ ] 4.2 Add or adjust policy-tag list helpers so app management screens can
+- [x] 4.2 Add or adjust policy-tag list helpers so app management screens can
   fetch active global and realm-scoped rules by `tagUnitId` efficiently.
-- [ ] 4.3 Add tests ensuring policy-tag search/list behavior continues to use
+- [x] 4.3 Add tests ensuring policy-tag search/list behavior continues to use
   `PolicyTagRule` and `PolicyTagApplication` and does not depend on tree
   presence.
-- [ ] 4.4 Update stream/search tests so `querySource: "policy"` selections
+- [x] 4.4 Update stream/search tests so `querySource: "policy"` selections
   continue to flow into `policyTagIds`, while normal tree selections flow into
   ordinary `tagIds`.
 
 ## 5. App Realm Tag Tree Cutover
-- [ ] 5.1 Update `RealmDetailLayout` and `realmDetailContext` to load and
+- [x] 5.1 Update `RealmDetailLayout` and `realmDetailContext` to load and
   provide `RealmTagTree` from the new API rather than `realm.extra.tagTree`.
-- [ ] 5.2 Update `RealmTagBrowser`, `RealmStreamTagFilter`, and
+- [x] 5.2 Update `RealmTagBrowser`, `RealmStreamTagFilter`, and
   `RealmPostTagPicker` to consume explicit `kind: "tag" | "label"` nodes and
   LABEL-resolved display text.
-- [ ] 5.3 Replace inline label fallback behavior with LABEL Unit resolution and
+- [x] 5.3 Replace inline label fallback behavior with LABEL Unit resolution and
   existing language fallback utilities.
-- [ ] 5.4 Keep flat/grouped/tree rendering as view projections over the same
+- [x] 5.4 Keep flat/grouped/tree rendering as view projections over the same
   nodes; grouped view remains a display projection, not a stored `group` node.
-- [ ] 5.5 Build a realm tag tree management surface that edits the full tree
+- [x] 5.5 Build a realm tag tree management surface that edits the full tree
   envelope, uses search/picker UI for TAG and LABEL Units, and never asks users
   to paste raw IDs.
-- [ ] 5.6 In the tag tree management surface, fetch policy-tag rules separately
+- [x] 5.6 In the tag tree management surface, fetch policy-tag rules separately
   and join them by `tagUnitId` to show create/archive/manage policy actions on
   tag nodes only.
-- [ ] 5.7 Remove app reads/writes of `realm.extra.tagTree` and
+- [x] 5.7 Remove app reads/writes of `realm.extra.tagTree` and
   `realm.extra.tagView`, including routes, settings placeholders, stories, and
   tests.
-- [ ] 5.8 Add focused app tests for tree flattening, picker rows, normal vs
+- [x] 5.8 Add focused app tests for tree flattening, picker rows, normal vs
   policy query selection, label nodes being non-selectable, and policy status
   joining by `tagUnitId`.
 
 ## 6. Realm Rule Policy Server/API
-- [ ] 6.1 Add `package/server/src/realm-rule/` with rule policy service, API,
+- [x] 6.1 Add `package/server/src/realm-rule/` with rule policy service, API,
   mapper, types, and exports.
-- [ ] 6.2 Implement current policy read, resolved rule item read, update policy
+- [x] 6.2 Implement current policy read, resolved rule item read, update policy
   requirements, create revision, and acknowledge current revision.
-- [ ] 6.3 Validate each rule item `rulePostUnitId` points to a POST Unit and
+- [x] 6.3 Validate each rule item `rulePostUnitId` points to a POST Unit and
   resolve content through existing post/translation language fallback.
-- [ ] 6.4 Update join/post/update gates to read `RealmRulePolicy` instead of
+- [x] 6.4 Update join/post/update gates to read `RealmRulePolicy` instead of
   `Realm.ruleUnitId` columns.
-- [ ] 6.5 Update audit and notification payloads to target the rule policy or
+- [x] 6.5 Update audit and notification payloads to target the rule policy or
   revision identity rather than the realm row.
-- [ ] 6.6 Add focused server tests for revision acknowledgement, outdated
+- [x] 6.6 Add focused server tests for revision acknowledgement, outdated
   acknowledgement invalidation, POST Unit validation, ordered rule item reads,
   and absence of dock-owned rule pointers.
-- [ ] 6.7 Add `package/api/src/realm-rule/` with API functions, query keys,
+- [x] 6.7 Add `package/api/src/realm-rule/` with API functions, query keys,
   queries, mutations, and exports.
 
 ## 7. App Rule Rendering
-- [ ] 7.1 Update `RuleSection`, `RealmRuleSummaryCard`, and `RealmRuleDialog`
+- [x] 7.1 Update `RuleSection`, `RealmRuleSummaryCard`, and `RealmRuleDialog`
   to read ordered resolved rule items from the new rule API.
-- [ ] 7.2 Render dock rule summaries as Reddit-style numbered rule rows with
+- [x] 7.2 Render dock rule summaries as Reddit-style numbered rule rows with
   independent expand/collapse state per item.
-- [ ] 7.3 Add a rule page for realm routes that shows the full ordered rule list
+- [x] 7.3 Add a rule page for realm routes that shows the full ordered rule list
   and resolved markdown content for each rule item.
-- [ ] 7.4 Update `JoinButton` and rule acknowledgement flows to acknowledge the
+- [x] 7.4 Update `JoinButton` and rule acknowledgement flows to acknowledge the
   current rule revision and show the same per-rule item UI before join.
-- [ ] 7.5 Add a management surface for rule policy requirements and ordered
+- [x] 7.5 Add a management surface for rule policy requirements and ordered
   rule items, using POST search/picker UI for each rule item content reference.
-- [ ] 7.6 Remove app reads of `realm.ruleUnitId` and fallback single-rule post
+- [x] 7.6 Remove app reads of `realm.ruleUnitId` and fallback single-rule post
   rendering after the new rule API is wired.
-- [ ] 7.7 Add focused app tests for per-item collapse state, rule page ordering,
+- [x] 7.7 Add focused app tests for per-item collapse state, rule page ordering,
   language fallback rendering, and join acknowledgement gating.
 
 ## 8. Cleanup and Verification
-- [ ] 8.1 Remove `tagTree` and `tagView` support from `realm-extra` server/API
+- [x] 8.1 Remove `tagTree` and `tagView` support from `realm-extra` server/API
   after all callers use `realm-tag-tree`.
-- [ ] 8.2 Remove rule policy fields from `Realm` mapper/types and any leftover
+- [x] 8.2 Remove rule policy fields from `Realm` mapper/types and any leftover
   `Realm.ruleUnitId` app/server references.
-- [ ] 8.3 Update seed/factory code to create `RealmTagTree` rows and
+- [x] 8.3 Update seed/factory code to create `RealmTagTree` rows and
   `RealmRulePolicy`/revision/item rows instead of writing `Realm.extra.tagTree`
   or `Realm.ruleUnitId`.
-- [ ] 8.4 Run focused contract tests for realm tag tree, policy-tag, realm
+- [x] 8.4 Run focused contract tests for realm tag tree, policy-tag, realm
   rules, and realm DTO changes.
-- [ ] 8.5 Run focused server tests for realm-tag-tree, policy-tag search/list,
+- [x] 8.5 Run focused server tests for realm-tag-tree, policy-tag search/list,
   realm-rule, and affected realm membership/post gates.
-- [ ] 8.6 Run focused app tests for realm tag browsing/filtering, tag tree
+- [x] 8.6 Run focused app tests for realm tag browsing/filtering, tag tree
   management, rule summary/dialog/page, and join acknowledgement.
-- [ ] 8.7 Run `task check:convention`, `task check:i18n`, and relevant package
+- [x] 8.7 Run `task check:convention`, `task check:i18n`, and relevant package
   builds after the cutover.
 
 ## Out of scope

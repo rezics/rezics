@@ -1,18 +1,22 @@
 import type {
-  RealmTagView,
-  RealmTagViewStyle,
-  TagTreeNode,
+  RealmTagTree,
+  RealmTagTreeView,
+  RealmTagViewMode,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
+import {
+  realmTagTreeNodeDisplayLabel,
+  type RealmTagTreeDisplayNames,
+} from "../models/realmTagTreeHydration";
 import { useEffect, useMemo, useState } from "react";
 
 interface RealmTagBrowserProps {
   realmId: string;
-  tagTree?: TagTreeNode[];
-  tagView?: RealmTagView | null;
+  tagTree?: RealmTagTree | null;
+  displayNames: RealmTagTreeDisplayNames;
   onTagSelect?: (selection: {
     tagId: string;
     querySource: "normal" | "policy";
@@ -30,30 +34,31 @@ type TagEntry = {
 export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
   realmId: _realmId,
   tagTree,
-  tagView,
+  displayNames,
   onTagSelect,
 }) => {
   const { t } = useTranslation("community");
   const locale = useLocale();
-  const viewLabels: Record<RealmTagViewStyle, string> = {
+  const treeView: RealmTagTreeView | undefined = tagTree?.view;
+  const viewLabels: Record<RealmTagViewMode, string> = {
     flat: t("tag_view_flat"),
     grouped: t("tag_view_grouped"),
     tree: t("tag_view_tree"),
   };
   const entries = useMemo(
-    () => collectTags(tagTree, locale),
-    [locale, tagTree],
+    () => collectTags(tagTree, displayNames),
+    [displayNames, tagTree],
   );
-  const [selectedView, setSelectedView] = useState<RealmTagViewStyle>(
-    tagView?.defaultStyle ?? "flat",
+  const [selectedView, setSelectedView] = useState<RealmTagViewMode>(
+    treeView?.defaultMode ?? "flat",
   );
   useEffect(() => {
-    setSelectedView(tagView?.defaultStyle ?? "flat");
-  }, [tagView?.defaultStyle]);
+    setSelectedView(treeView?.defaultMode ?? "flat");
+  }, [treeView?.defaultMode]);
 
-  const view = tagView?.allowViewerSwitch
+  const view = treeView?.allowViewerSwitch
     ? selectedView
-    : (tagView?.defaultStyle ?? "flat");
+    : (treeView?.defaultMode ?? "flat");
 
   if (entries.length === 0) {
     return <EmptyState title={t("tag_empty")} />;
@@ -63,7 +68,7 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
 
   return (
     <div className="flex flex-col gap-4 py-4">
-      {tagView?.allowViewerSwitch ? (
+      {treeView?.allowViewerSwitch ? (
         <div className="flex flex-wrap gap-2">
           {(["flat", "grouped", "tree"] as const).map((option) => (
             <Button
@@ -125,32 +130,23 @@ export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
   );
 };
 
-function nodeLabel(node: TagTreeNode, language: string) {
-  const translations = node.labelTranslations?.translations;
-  const fallbackLanguage = node.labelTranslations?.fallbackLanguage;
-  return (
-    translations?.[language] ??
-    (fallbackLanguage ? translations?.[fallbackLanguage] : undefined) ??
-    node.label?.trim() ??
-    node.tagId?.slice(0, 8) ??
-    "Untitled"
-  );
-}
-
-function collectTags(nodes: TagTreeNode[] | undefined, language: string) {
+function collectTags(
+  tree: RealmTagTree | null | undefined,
+  displayNames: RealmTagTreeDisplayNames,
+) {
   const entries: TagEntry[] = [];
 
   const visit = (
-    items: TagTreeNode[],
+    items: NonNullable<RealmTagTree["nodes"]>,
     depth: number,
     groupLabel: string | undefined,
   ) => {
     for (const item of items) {
-      const label = nodeLabel(item, language);
+      const label = realmTagTreeNodeDisplayLabel(item, displayNames);
       const nextGroup = depth === 0 ? label : groupLabel;
-      if (item.tagId) {
+      if (item.kind === "tag") {
         entries.push({
-          tagId: item.tagId,
+          tagId: item.tagUnitId,
           label,
           depth,
           groupLabel,
@@ -161,7 +157,7 @@ function collectTags(nodes: TagTreeNode[] | undefined, language: string) {
     }
   };
 
-  visit(nodes ?? [], 0, undefined);
+  visit(tree?.nodes ?? [], 0, undefined);
   return entries;
 }
 

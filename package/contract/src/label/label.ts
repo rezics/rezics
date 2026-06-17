@@ -46,3 +46,21 @@ export const createLabelInputSchema = t.Object(
 );
 
 export type CreateLabelInput = Static<typeof createLabelInputSchema>;
+
+export const labelListQuerySchema = t.Object(
+  {
+    ids: t.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export type LabelListQuery = Static<typeof labelListQuerySchema>;
+
+export const labelListResponseSchema = t.Object(
+  {
+    labels: t.Array(labelDTOSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type LabelListResponse = Static<typeof labelListResponseSchema>;

@@ -117,7 +117,7 @@ export const Comment = pgTable(
 /**
  * Generic in-thread promotion of a comment. `scopeUnitId` is always the thread
  * root post, and `commentId` is always a comment within that thread; realm-level
- * featuring of whole units belongs to Realm.extra pinboard data.
+ * featuring of whole units belongs to first-class Pinboard tables.
  */
 export const CommentPromotion = pgTable(
   "CommentPromotion",

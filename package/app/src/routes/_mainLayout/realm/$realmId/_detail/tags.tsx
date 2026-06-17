@@ -6,13 +6,13 @@ export const Route = createFileRoute(
   "/_mainLayout/realm/$realmId/_detail/tags",
 )({
   component: () => {
-    const { realmId, realm, tagTree } = useRealmDetail();
+    const { realmId, tagTree, tagTreeDisplayNames } = useRealmDetail();
     const navigate = Route.useNavigate();
     return (
       <RealmTagBrowser
         realmId={realmId}
         tagTree={tagTree}
-        tagView={realm.extra?.tagView ?? null}
+        displayNames={tagTreeDisplayNames}
         onTagSelect={(selection) =>
           navigate({
             to: "/realm/$realmId",

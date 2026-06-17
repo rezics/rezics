@@ -67,6 +67,8 @@ import {
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
+  RealmRulePolicy,
+  RealmRuleRevision,
   ScoreEntry,
   Unit,
   UnitRealm,
@@ -132,12 +134,6 @@ function enqueuePostFields(unitId: string, fields: Record<string, unknown>) {
       { type: "server", service: "post" },
     ),
   );
-}
-
-function readRealmRuleUnitId(extra: unknown | null): string | null {
-  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
-  const rule = (extra as Record<string, unknown>).rule;
-  return typeof rule === "string" && rule.length > 0 ? rule : null;
 }
 
 /**
@@ -1041,58 +1037,80 @@ export class PostService {
     if (realmUnitIds.length === 0) return;
     const db = await getServerDb();
 
-    const [realms, memberships, acknowledgements] = (await Promise.all([
-      db
-        .select({
-          unitId: Realm.unitId,
-          extra: Realm.extra,
-          ruleVersion: Realm.ruleVersion,
-          ruleRequireOnPost: Realm.ruleRequireOnPost,
-        })
-        .from(Realm)
-        .where(inArray(Realm.unitId, realmUnitIds)),
-      db
-        .select({
-          realmUnitId: RealmMember.realmUnitId,
-          state: RealmMember.state,
-        })
-        .from(RealmMember)
-        .where(
-          and(
-            inArray(RealmMember.realmUnitId, realmUnitIds),
-            eq(RealmMember.userId, userId),
+    const [realms, memberships, rulePolicies, acknowledgements] =
+      (await Promise.all([
+        db
+          .select({ unitId: Realm.unitId })
+          .from(Realm)
+          .where(inArray(Realm.unitId, realmUnitIds)),
+        db
+          .select({
+            realmUnitId: RealmMember.realmUnitId,
+            state: RealmMember.state,
+          })
+          .from(RealmMember)
+          .where(
+            and(
+              inArray(RealmMember.realmUnitId, realmUnitIds),
+              eq(RealmMember.userId, userId),
+            ),
           ),
-        ),
-      db
-        .select({
-          realmUnitId: RealmRuleAcknowledgement.realmUnitId,
-          ruleUnitId: RealmRuleAcknowledgement.ruleUnitId,
-          version: RealmRuleAcknowledgement.version,
-        })
-        .from(RealmRuleAcknowledgement)
-        .where(
-          and(
-            inArray(RealmRuleAcknowledgement.realmUnitId, realmUnitIds),
-            eq(RealmRuleAcknowledgement.userId, userId),
+        db
+          .select({
+            realmUnitId: RealmRulePolicy.realmUnitId,
+            policyId: RealmRulePolicy.id,
+            revisionId: RealmRuleRevision.id,
+            version: RealmRuleRevision.version,
+            requireOnPost: RealmRulePolicy.requireOnPost,
+          })
+          .from(RealmRulePolicy)
+          .innerJoin(
+            RealmRuleRevision,
+            eq(RealmRuleRevision.id, RealmRulePolicy.currentRevisionId),
+          )
+          .where(inArray(RealmRulePolicy.realmUnitId, realmUnitIds)),
+        db
+          .select({
+            realmUnitId: RealmRuleAcknowledgement.realmUnitId,
+            policyId: RealmRuleAcknowledgement.policyId,
+            revisionId: RealmRuleAcknowledgement.revisionId,
+            version: RealmRuleAcknowledgement.version,
+          })
+          .from(RealmRuleAcknowledgement)
+          .where(
+            and(
+              inArray(RealmRuleAcknowledgement.realmUnitId, realmUnitIds),
+              eq(RealmRuleAcknowledgement.userId, userId),
+            ),
           ),
-        ),
-    ])) as [
-      Array<{
-        unitId: string;
-        extra: unknown;
-        ruleVersion: number;
-        ruleRequireOnPost: boolean;
-      }>,
-      Array<{ realmUnitId: string; state: string }>,
-      Array<{ realmUnitId: string; ruleUnitId: string; version: number }>,
-    ];
+      ])) as [
+        Array<{ unitId: string }>,
+        Array<{ realmUnitId: string; state: string }>,
+        Array<{
+          realmUnitId: string;
+          policyId: string;
+          revisionId: string;
+          version: number;
+          requireOnPost: boolean;
+        }>,
+        Array<{
+          realmUnitId: string;
+          policyId: string;
+          revisionId: string;
+          version: number;
+        }>,
+      ];
 
     const memberByRealm = new Map(
       memberships.map((member) => [member.realmUnitId, member]),
     );
+    const policyByRealm = new Map(
+      rulePolicies.map((policy) => [policy.realmUnitId, policy]),
+    );
     const acknowledgementKeys = new Set(
       acknowledgements.map(
-        (ack) => `${ack.realmUnitId}:${ack.ruleUnitId}:${ack.version}`,
+        (ack) =>
+          `${ack.realmUnitId}:${ack.policyId}:${ack.revisionId}:${ack.version}`,
       ),
     );
 
@@ -1107,12 +1125,11 @@ export class PostService {
         );
       }
 
-      const ruleUnitId = readRealmRuleUnitId(realm.extra);
+      const policy = policyByRealm.get(realm.unitId);
       if (
-        realm.ruleRequireOnPost &&
-        ruleUnitId &&
+        policy?.requireOnPost &&
         !acknowledgementKeys.has(
-          `${realm.unitId}:${ruleUnitId}:${realm.ruleVersion}`,
+          `${realm.unitId}:${policy.policyId}:${policy.revisionId}:${policy.version}`,
         )
       ) {
         throw new Error("Realm rules must be acknowledged before posting");

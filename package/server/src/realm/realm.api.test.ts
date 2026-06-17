@@ -62,39 +62,70 @@ const createRealmTagApplicationMock = mock(async () => ({
   voteCount: 1,
   pinned: false,
 }));
-const updateRulePolicyMock = mock(async () => ({
+const rulePolicy = {
   realmUnitId: "realm-1",
-  ruleUnitId: "rule-unit-1",
+  policyId: "policy-1",
+  currentRevisionId: "revision-2",
+  currentVersion: 2,
+  requirements: {
+    requireOnJoin: true,
+    requireOnPost: false,
+    requireOnUpdate: true,
+  },
+};
+const ruleRevision = {
+  id: "revision-2",
+  policyId: "policy-1",
   version: 2,
-  requireOnJoin: true,
-  requireOnPost: false,
-  requireOnUpdate: true,
+  createdByUserId: "moderator-1",
+  createdAt: "2026-05-28T00:00:00.000Z",
+  items: [
+    {
+      id: "item-1",
+      policyId: "policy-1",
+      revisionId: "revision-2",
+      rulePostUnitId: "rule-post-ja",
+      position: "0001",
+      appliesTo: null,
+      reportReasonUnitId: null,
+    },
+  ],
+};
+const updateRulePolicyMock = mock(async () => rulePolicy);
+const createRuleRevisionMock = mock(async () => ({
+  policy: rulePolicy,
+  revision: ruleRevision,
+  items: [
+    {
+      ...ruleRevision.items[0],
+      sourceRulePost: {
+        unitId: "rule-post-ja",
+        authorUserId: "owner-1",
+      },
+    },
+  ],
 }));
-const getRulePolicyMock = mock(async () => ({
+const acknowledgeCurrentRuleMock = mock(async () => ({
   realmUnitId: "realm-1",
-  ruleUnitId: "rule-unit-1",
+  policyId: "policy-1",
+  revisionId: "revision-2",
   version: 2,
-  requireOnJoin: true,
-  requireOnPost: false,
-  requireOnUpdate: true,
+  userId: "moderator-1",
+  acceptedAt: "2026-05-28T00:00:00.000Z",
 }));
+const getRulePolicyMock = mock(async () => rulePolicy);
 const resolveRuleMock = mock(async () => ({
-  realmUnitId: "realm-1",
-  ruleUnitId: "rule-unit-1",
-  version: 2,
-  requestedLanguage: "ja",
-  resolvedLanguage: "ja",
-  translation: {
-    unitId: "rule-unit-1",
-    language: "ja",
-    title: "ルール",
-    sourceUnitId: "rule-post-ja",
-  },
-  sourceRulePostUnitId: "rule-post-ja",
-  sourceRulePost: {
-    unitId: "rule-post-ja",
-    authorUserId: "owner-1",
-  },
+  policy: rulePolicy,
+  revision: ruleRevision,
+  items: [
+    {
+      ...ruleRevision.items[0],
+      sourceRulePost: {
+        unitId: "rule-post-ja",
+        authorUserId: "owner-1",
+      },
+    },
+  ],
 }));
 
 mock.module("@/middleware", () => ({
@@ -170,6 +201,8 @@ mock.module("./realm.service", () => ({
     create: createRealmMock,
     addUnitRealm: addUnitRealmMock,
     createRealmTagApplication: createRealmTagApplicationMock,
+    acknowledgeCurrentRule: acknowledgeCurrentRuleMock,
+    createRuleRevision: createRuleRevisionMock,
     getRulePolicy: getRulePolicyMock,
     getMember: getMemberMock,
     listMembers: listMembersMock,
@@ -194,6 +227,8 @@ describe("realmApi", () => {
     getUnitByUnitIdMock.mockClear();
     addUnitRealmMock.mockClear();
     createRealmTagApplicationMock.mockClear();
+    acknowledgeCurrentRuleMock.mockClear();
+    createRuleRevisionMock.mockClear();
     getRulePolicyMock.mockClear();
     resolveRuleMock.mockClear();
     updateRulePolicyMock.mockClear();
@@ -404,8 +439,9 @@ describe("realmApi", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
       realmUnitId: "realm-1",
-      ruleUnitId: "rule-unit-1",
-      version: 2,
+      policyId: "policy-1",
+      currentVersion: 2,
+      requirements: { requireOnJoin: true },
     });
     expect(getRulePolicyMock).toHaveBeenCalledWith("realm-1");
     expect(decideForIdentityMock).not.toHaveBeenCalled();
@@ -419,10 +455,14 @@ describe("realmApi", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      realmUnitId: "realm-1",
-      requestedLanguage: "ja",
-      resolvedLanguage: "ja",
-      sourceRulePostUnitId: "rule-post-ja",
+      policy: { policyId: "policy-1", currentVersion: 2 },
+      revision: { id: "revision-2", version: 2 },
+      items: [
+        {
+          rulePostUnitId: "rule-post-ja",
+          sourceRulePost: { unitId: "rule-post-ja" },
+        },
+      ],
     });
     expect(resolveRuleMock).toHaveBeenCalledWith("realm-1", "ja", ["ja"]);
     expect(decideForIdentityMock).not.toHaveBeenCalled();
@@ -434,7 +474,7 @@ describe("realmApi", () => {
       new Request("http://localhost/realm/realm-1/rules", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ruleUnitId: "rule-unit-1", version: 2 }),
+        body: JSON.stringify({ requireOnJoin: true }),
       }),
     );
 
@@ -465,11 +505,7 @@ describe("realmApi", () => {
       new Request("http://localhost/realm/realm-1/rules", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          ruleUnitId: "rule-unit-1",
-          version: 2,
-          requireOnJoin: true,
-        }),
+        body: JSON.stringify({ requireOnJoin: true }),
       }),
     );
 
@@ -477,11 +513,47 @@ describe("realmApi", () => {
     expect(updateRulePolicyMock).toHaveBeenCalledWith(
       currentIdentity,
       "realm-1",
-      {
-        ruleUnitId: "rule-unit-1",
-        version: 2,
-        requireOnJoin: true,
-      },
+      { requireOnJoin: true },
+    );
+  });
+
+  test("allows rule revision creation approved by policy", async () => {
+    policyAllowed = true;
+
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/rules/revisions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          items: [{ rulePostUnitId: "rule-post-ja", position: "0001" }],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(createRuleRevisionMock).toHaveBeenCalledWith(
+      currentIdentity,
+      "realm-1",
+      { items: [{ rulePostUnitId: "rule-post-ja", position: "0001" }] },
+    );
+  });
+
+  test("acknowledges the current rule revision", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/rules/acknowledgement", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({}),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(acknowledgeCurrentRuleMock).toHaveBeenCalledWith(
+      "realm-1",
+      "moderator-1",
+      {},
     );
   });
 });

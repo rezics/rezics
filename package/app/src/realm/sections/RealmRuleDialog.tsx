@@ -1,4 +1,4 @@
-import type { PostDTO } from "@rezics/contract";
+import type { PostDTO, RealmRuleResolvedItemDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -15,6 +15,7 @@ export interface RealmRuleDialogProps {
   open: boolean;
   post?: PostDTO | null;
   content?: unknown;
+  rules?: RealmRuleResolvedItemDTO[];
   joining?: boolean;
   joinPending?: boolean;
   onOpenChange: (open: boolean) => void;
@@ -25,6 +26,7 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
   open,
   post,
   content,
+  rules,
   joining = false,
   joinPending = false,
   onOpenChange,
@@ -39,7 +41,23 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
           <DialogTitle>{t("entity:realm_rules_title")}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto">
-          <PostBodyMarkdown content={body} clamp={false} />
+          {rules?.length ? (
+            <div className="divide-y divide-border-subtle">
+              {rules.map((rule, index) => (
+                <section key={rule.id} className="py-3 first:pt-0 last:pb-0">
+                  <h3 className="mb-2 text-sm font-medium leading-ui text-text-primary">
+                    {index + 1}
+                  </h3>
+                  <PostBodyMarkdown
+                    content={rule.sourceRulePost?.content}
+                    clamp={false}
+                  />
+                </section>
+              ))}
+            </div>
+          ) : (
+            <PostBodyMarkdown content={body} clamp={false} />
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>

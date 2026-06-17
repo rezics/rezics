@@ -1,10 +1,5 @@
-import type {
-  RealmImageExtra,
-  RealmTagView,
-  RezicsSessionClaims,
-  TagTreeNode,
-} from "@rezics/contract";
-import { LICENSE_SLUGS, realmTagViewStyleValues } from "@rezics/contract";
+import type { RealmImageExtra, RezicsSessionClaims } from "@rezics/contract";
+import { LICENSE_SLUGS } from "@rezics/contract";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { hasAuthorityOver } from "@/unit/authority";
 import { Realm, RealmMember, Unit } from "../db/schema";
@@ -27,13 +22,12 @@ export class RealmExtraError extends Error {
 const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 
 type ExtraJson = Record<string, unknown>;
-type SingleExtraKey = "banner" | "avatar" | "defaultLicenseSlug" | "tagView";
+type SingleExtraKey = "banner" | "avatar" | "defaultLicenseSlug";
 
 const SINGLE_EXTRA_KEYS = new Set<string>([
   "banner",
   "avatar",
   "defaultLicenseSlug",
-  "tagView",
 ]);
 
 type RealmExtraRepository = {
@@ -44,7 +38,6 @@ type RealmExtraRepository = {
     realmId: string,
     userId: string | undefined,
   ): Promise<{ realmUnitId: string } | null>;
-  findValidTagUnitIds(tagIds: string[]): Promise<Set<string>>;
   updateExtraWithLock(
     realmId: string,
     mutate: (extra: ExtraJson) => ExtraJson,
@@ -88,15 +81,6 @@ function createDrizzleRealmExtraRepository(): RealmExtraRepository {
         .limit(1);
       return member ?? null;
     },
-    async findValidTagUnitIds(tagIds) {
-      if (tagIds.length === 0) return new Set();
-      const db = await getServerDb();
-      const rows = await db
-        .select({ id: Unit.id })
-        .from(Unit)
-        .where(and(inArray(Unit.id, tagIds), eq(Unit.type, "TAG")));
-      return new Set(rows.map((row) => row.id));
-    },
     async updateExtraWithLock(realmId, mutate) {
       const db = await getServerDb();
       return db.transaction(async (tx) => {
@@ -135,12 +119,20 @@ export async function filterRealmExtraPublic(
   extra: unknown,
 ): Promise<ExtraJson | undefined> {
   if (!extra || typeof extra !== "object") return undefined;
-  const next = { ...(extra as ExtraJson) };
+  const source = extra as ExtraJson;
+  const next: ExtraJson = {};
 
   for (const key of ["banner", "avatar"] as const) {
-    if (key in next && !isValidImageExtra(next[key])) {
-      delete next[key];
+    if (key in source && isValidImageExtra(source[key])) {
+      next[key] = source[key];
     }
+  }
+
+  if (
+    typeof source.defaultLicenseSlug === "string" &&
+    (LICENSE_SLUGS as readonly string[]).includes(source.defaultLicenseSlug)
+  ) {
+    next.defaultLicenseSlug = source.defaultLicenseSlug;
   }
 
   return next;
@@ -193,85 +185,6 @@ async function authorizeForRealm(
   }
 }
 
-async function validateTagUnitIds(tagIds: Set<string>): Promise<void> {
-  if (tagIds.size === 0) return;
-  const found = await realmExtraRepository.findValidTagUnitIds([...tagIds]);
-  const missing = [...tagIds].filter((id) => !found.has(id));
-  if (missing.length > 0) {
-    throw new RealmExtraError(
-      "INVALID_VALUE",
-      `Invalid tagTree tagId values: ${missing.join(", ")}`,
-      400,
-    );
-  }
-}
-
-function collectTagTreeIds(value: unknown): Set<string> {
-  if (!Array.isArray(value)) {
-    throw new RealmExtraError("INVALID_VALUE", "tagTree must be an array", 400);
-  }
-  const tagIds = new Set<string>();
-
-  const hasUsableLabelSource = (item: TagTreeNode): boolean => {
-    if (typeof item.label === "string" && item.label.trim().length > 0) {
-      return true;
-    }
-    if (
-      typeof item.labelUnitId === "string" &&
-      item.labelUnitId.trim().length > 0
-    ) {
-      return true;
-    }
-    const translations = item.labelTranslations?.translations;
-    return (
-      !!translations &&
-      Object.values(translations).some(
-        (value) => typeof value === "string" && value.trim().length > 0,
-      )
-    );
-  };
-
-  function visit(node: unknown): void {
-    if (!node || typeof node !== "object" || Array.isArray(node)) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        "tagTree nodes must be objects",
-        400,
-      );
-    }
-    const item = node as TagTreeNode;
-    if (item.tagId !== undefined) {
-      if (typeof item.tagId !== "string" || item.tagId.length === 0) {
-        throw new RealmExtraError(
-          "INVALID_VALUE",
-          "tagTree tagId must be a non-empty string",
-          400,
-        );
-      }
-      tagIds.add(item.tagId);
-    } else if (!hasUsableLabelSource(item)) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        "tagTree nodes without tagId must include a label source",
-        400,
-      );
-    }
-    if (item.children !== undefined) {
-      if (!Array.isArray(item.children)) {
-        throw new RealmExtraError(
-          "INVALID_VALUE",
-          "tagTree children must be an array",
-          400,
-        );
-      }
-      item.children.forEach(visit);
-    }
-  }
-
-  value.forEach(visit);
-  return tagIds;
-}
-
 async function validateSingleExtraValue(
   key: SingleExtraKey,
   value: unknown,
@@ -288,31 +201,6 @@ async function validateSingleExtraValue(
       );
     }
     return value;
-  }
-
-  if (key === "tagView") {
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        "tagView must be an object",
-        400,
-      );
-    }
-    const tagView = value as RealmTagView;
-    if (
-      !realmTagViewStyleValues.includes(tagView.defaultStyle) ||
-      typeof tagView.allowViewerSwitch !== "boolean"
-    ) {
-      throw new RealmExtraError(
-        "INVALID_VALUE",
-        "tagView must include a valid defaultStyle and allowViewerSwitch boolean",
-        400,
-      );
-    }
-    return {
-      defaultStyle: tagView.defaultStyle,
-      allowViewerSwitch: tagView.allowViewerSwitch,
-    };
   }
 
   if (key === "banner" || key === "avatar") {
@@ -406,24 +294,11 @@ export async function clearSingleExtraKey(
   realmId: string,
   key: string,
 ): Promise<{ extra: ExtraJson }> {
-  if (!SINGLE_EXTRA_KEYS.has(key) && key !== "tagTree") {
+  if (!SINGLE_EXTRA_KEYS.has(key)) {
     throw new RealmExtraError("INVALID_KEY", "Unsupported extra key", 400);
   }
   const extra = await updateExtraWithLock(caller, realmId, (current) =>
     clearValue(current, key),
-  );
-  return { extra };
-}
-
-export async function setTagTreeExtra(
-  caller: RezicsSessionClaims,
-  realmId: string,
-  value: unknown,
-): Promise<{ extra: ExtraJson }> {
-  const tagIds = collectTagTreeIds(value);
-  await validateTagUnitIds(tagIds);
-  const extra = await updateExtraWithLock(caller, realmId, (current) =>
-    writeValue(current, "tagTree", value),
   );
   return { extra };
 }

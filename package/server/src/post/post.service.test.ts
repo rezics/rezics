@@ -18,6 +18,8 @@ import {
   Realm,
   RealmMember,
   RealmRuleAcknowledgement,
+  RealmRulePolicy,
+  RealmRuleRevision,
   ScoreEntry,
   Unit,
   UnitRealm,
@@ -122,9 +124,7 @@ const realmFindManyMock = mock(
   async (args: any): Promise<any[]> =>
     (args.where.unitId.in as string[]).map((unitId) => ({
       unitId,
-      extra: {},
-      ruleVersion: 1,
-      ruleRequireOnPost: false,
+      contentRequiresApproval: false,
     })),
 );
 const realmFindUniqueMock = mock(
@@ -135,6 +135,7 @@ const realmFindUniqueMock = mock(
   }),
 );
 const realmMemberFindManyMock = mock(async (): Promise<any[]> => []);
+const realmRulePolicyFindManyMock = mock(async (): Promise<any[]> => []);
 const realmRuleAcknowledgementFindManyMock = mock(
   async (): Promise<any[]> => [],
 );
@@ -237,6 +238,7 @@ const transactionMock = mock(async (fn: any) =>
     },
     realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
     realmMember: { findMany: realmMemberFindManyMock },
+    realmRulePolicy: { findMany: realmRulePolicyFindManyMock },
     realmRuleAcknowledgement: {
       findMany: realmRuleAcknowledgementFindManyMock,
     },
@@ -341,6 +343,7 @@ Object.assign(legacyDbMock, {
     findMany: realmMemberFindManyMock,
     findFirst: realmMemberFindFirstMock,
   },
+  realmRulePolicy: { findMany: realmRulePolicyFindManyMock },
   realmRuleAcknowledgement: {
     findMany: realmRuleAcknowledgementFindManyMock,
   },
@@ -1066,9 +1069,7 @@ function createFakeSelect(
           where: { unitId: { in: strings.length ? strings : ["realm-1"] } },
           select: {
             unitId: true,
-            extra: true,
-            ruleVersion: true,
-            ruleRequireOnPost: true,
+            unitId: true,
             contentRequiresApproval: true,
           },
         }) ?? []
@@ -1089,6 +1090,9 @@ function createFakeSelect(
         }));
       }
       return legacy.realmMember?.findMany?.({ where: {} }) ?? [];
+    }
+    if (table === RealmRulePolicy) {
+      return legacy.realmRulePolicy?.findMany?.({ where: {} }) ?? [];
     }
     if (table === RealmRuleAcknowledgement) {
       return legacy.realmRuleAcknowledgement?.findMany?.({ where: {} }) ?? [];
@@ -1328,9 +1332,7 @@ function resetMocks() {
   realmFindManyMock.mockImplementation(async (args: any) =>
     (args.where.unitId.in as string[]).map((unitId) => ({
       unitId,
-      extra: {},
-      ruleVersion: 1,
-      ruleRequireOnPost: false,
+      contentRequiresApproval: false,
       contentRequiresApproval: false,
     })),
   );
@@ -1342,6 +1344,8 @@ function resetMocks() {
   });
   realmMemberFindManyMock.mockClear();
   realmMemberFindManyMock.mockImplementation(async () => []);
+  realmRulePolicyFindManyMock.mockClear();
+  realmRulePolicyFindManyMock.mockResolvedValue([]);
   realmRuleAcknowledgementFindManyMock.mockClear();
   realmRuleAcknowledgementFindManyMock.mockResolvedValue([]);
   realmUnitCreateMock.mockClear();
@@ -1448,9 +1452,7 @@ describe("PostService.create realm/tag junction writes", () => {
     realmFindManyMock.mockImplementation(async (args: any) =>
       (args.where.unitId.in as string[]).map((unitId) => ({
         unitId,
-        extra: {},
-        ruleVersion: 1,
-        ruleRequireOnPost: false,
+        contentRequiresApproval: false,
         contentRequiresApproval: true,
       })),
     );
@@ -1564,9 +1566,16 @@ describe("PostService.create realm/tag junction writes", () => {
     realmFindManyMock.mockResolvedValueOnce([
       {
         unitId: "realm-1",
-        extra: { rule: "rule-unit-1" },
-        ruleVersion: 2,
-        ruleRequireOnPost: true,
+        contentRequiresApproval: false,
+      },
+    ]);
+    realmRulePolicyFindManyMock.mockResolvedValueOnce([
+      {
+        realmUnitId: "realm-1",
+        policyId: "policy-1",
+        revisionId: "revision-2",
+        version: 2,
+        requireOnPost: true,
       },
     ]);
 
@@ -1582,15 +1591,23 @@ describe("PostService.create realm/tag junction writes", () => {
     realmFindManyMock.mockResolvedValueOnce([
       {
         unitId: "realm-1",
-        extra: { rule: "rule-unit-1" },
-        ruleVersion: 2,
-        ruleRequireOnPost: true,
+        contentRequiresApproval: false,
+      },
+    ]);
+    realmRulePolicyFindManyMock.mockResolvedValueOnce([
+      {
+        realmUnitId: "realm-1",
+        policyId: "policy-1",
+        revisionId: "revision-2",
+        version: 2,
+        requireOnPost: true,
       },
     ]);
     realmRuleAcknowledgementFindManyMock.mockResolvedValueOnce([
       {
         realmUnitId: "realm-1",
-        ruleUnitId: "rule-unit-1",
+        policyId: "policy-1",
+        revisionId: "revision-2",
         version: 2,
       },
     ]);
@@ -1697,9 +1714,7 @@ describe("PostService.submitToRealm", () => {
     realmFindManyMock.mockImplementation(async (args: any) =>
       (args.where.unitId.in as string[]).map((unitId) => ({
         unitId,
-        extra: {},
-        ruleVersion: 1,
-        ruleRequireOnPost: false,
+        contentRequiresApproval: false,
         contentRequiresApproval: true,
       })),
     );
@@ -1789,9 +1804,16 @@ describe("PostService.submitToRealm", () => {
     realmFindManyMock.mockResolvedValueOnce([
       {
         unitId: "realm-1",
-        extra: { rule: "rule-unit-1" },
-        ruleVersion: 2,
-        ruleRequireOnPost: true,
+        contentRequiresApproval: false,
+      },
+    ]);
+    realmRulePolicyFindManyMock.mockResolvedValueOnce([
+      {
+        realmUnitId: "realm-1",
+        policyId: "policy-1",
+        revisionId: "revision-2",
+        version: 2,
+        requireOnPost: true,
       },
     ]);
 
@@ -3027,7 +3049,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
     await expect(
       service.pin({ scopeUnitId: "realm-1", commentId: "reply-1" }, op),
-    ).rejects.toThrow(/pinboard/);
+    ).rejects.toThrow(/Pinboard/);
   });
 
   test("accept is rejected outside a Q&A thread", async () => {

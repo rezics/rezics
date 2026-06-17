@@ -34,6 +34,10 @@ import {
   RealmCapabilityGrant,
   RealmMember,
   RealmRuleAcknowledgement,
+  RealmRuleItem,
+  RealmRulePolicy,
+  RealmRuleRevision,
+  RealmTagTree,
   RealmTagApplication,
   RealmTagApplicationVote,
   RealmTagContext,
@@ -92,6 +96,10 @@ export const RESET_DATABASE_TABLES = [
   ["UserTagApplication", UserTagApplication],
   ["RealmTagApplicationVote", RealmTagApplicationVote],
   ["RealmRuleAcknowledgement", RealmRuleAcknowledgement],
+  ["RealmRuleItem", RealmRuleItem],
+  ["RealmRuleRevision", RealmRuleRevision],
+  ["RealmRulePolicy", RealmRulePolicy],
+  ["RealmTagTree", RealmTagTree],
   ["StaffGrant", StaffGrant],
   ["RealmCapabilityGrant", RealmCapabilityGrant],
   ["UnitCollaborator", UnitCollaborator],
@@ -217,6 +225,11 @@ export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
   // 第 5 组：聚合 / 关联表叶子表。
   await db.delete(RealmTagApplication);
   await db.delete(RealmTagContext);
+  await db.delete(RealmRuleAcknowledgement);
+  await db.delete(RealmRuleItem);
+  await db.delete(RealmRuleRevision);
+  await db.delete(RealmRulePolicy);
+  await db.delete(RealmTagTree);
 
   // Group 6: Realm + shelf + tag junctions.
   // 第 6 组：realm + 书架 + 标签关联表。

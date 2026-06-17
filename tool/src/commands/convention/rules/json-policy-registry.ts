@@ -80,6 +80,16 @@ export const jsonColumnRegistry = [
   },
   {
     database: "server",
+    table: "RealmTagTree",
+    column: "tree",
+    category: "enveloped",
+    contractSchema: {
+      symbol: "realmTagTreeEnvelopeSchema",
+      path: "package/contract/src/realm/realm-tag-tree.ts",
+    },
+  },
+  {
+    database: "server",
     table: "UnitTranslation",
     column: "description",
     category: "enveloped",

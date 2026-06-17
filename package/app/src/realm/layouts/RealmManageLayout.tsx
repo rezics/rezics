@@ -3,7 +3,6 @@ import {
   myRealmMembershipQuery,
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
-import type { TagTreeNode } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
@@ -160,7 +159,6 @@ export function RealmManageLayout({
         realm,
         memberRoleKey: membership?.roleKey ?? undefined,
         canDeleteRealm,
-        tagTree: realm.extra?.tagTree as TagTreeNode[] | undefined,
       }}
     >
       <div className="mx-auto w-full max-w-5xl px-4 py-6">

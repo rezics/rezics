@@ -185,13 +185,7 @@ function RealmDockBuiltinView({
     case "bookmarks":
       return <DockBookmarks item={item} labels={labels} />;
     case "rules":
-      return (
-        <RuleSection
-          realmUnitId={realm.unitId}
-          postUnitId={realm.ruleUnitId ?? null}
-          empty="hidden"
-        />
-      );
+      return <RuleSection realmUnitId={realm.unitId} empty="hidden" />;
     case "moderators":
       return <DockModerators realmId={realm.unitId} item={item} />;
   }

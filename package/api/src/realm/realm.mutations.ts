@@ -8,6 +8,7 @@ import type {
   AddUnitRealmInput,
   CastRealmTagApplicationVoteInput,
   CreateRealmInput,
+  CreateRealmRuleRevisionInput,
   CreateRealmTagApplicationInput,
   JoinRealmInput,
   PatchRealmTagApplicationInput,
@@ -15,7 +16,8 @@ import type {
   RealmMemberDTO,
   RealmResponse,
   RealmRuleAcknowledgementDTO,
-  RealmRuleReferenceDTO,
+  RealmRulePolicyDTO,
+  RealmRuleResolvedDTO,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
   RealmTagContextUpdateResponse,
@@ -301,7 +303,8 @@ export function useAcknowledgeRealmRulesMutation(
 export function useUpdateRealmRulePolicyMutation(
   options?: Omit<
     UseMutationOptions<
-      RealmRuleReferenceDTO,
+      RealmRulePolicyDTO,
+      RealmRuleResolvedDTO,
       Error,
       { realmUnitId: string; input: UpdateRealmRulePolicyInput }
     >,
@@ -313,6 +316,40 @@ export function useUpdateRealmRulePolicyMutation(
   return useMutation({
     mutationFn: ({ realmUnitId, input }) =>
       realmApi.updateRulePolicy(realmUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.detail(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.rules(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.ruleResolveds(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.members(variables.realmUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useCreateRealmRuleRevisionMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RealmRuleResolvedDTO,
+      Error,
+      { realmUnitId: string; input: CreateRealmRuleRevisionInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, input }) =>
+      realmApi.createRuleRevision(realmUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -787,6 +824,7 @@ export const realmMutations = {
   useUnmute: useUnmuteRealmMutation,
   useAcknowledgeRules: useAcknowledgeRealmRulesMutation,
   useUpdateRulePolicy: useUpdateRealmRulePolicyMutation,
+  useCreateRuleRevision: useCreateRealmRuleRevisionMutation,
   useUpdateMemberRole: useUpdateMemberRoleMutation,
   useRemoveMember: useRemoveMemberMutation,
   useAddUnit: useAddUnitRealmMutation,

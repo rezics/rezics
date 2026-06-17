@@ -512,5 +512,12 @@
   "post_variant_badge": "변형: {label}",
   "review_messages_delete_failed": "리뷰 삭제에 실패했습니다",
   "wiki_locked_path": "잠긴 경로: {path}",
-  "wiki_locked_paths": "잠긴 경로: {paths}"
+  "wiki_locked_paths": "잠긴 경로: {paths}",
+  "realm_rule_require_on_join": "가입 시 확인 필요",
+  "realm_rule_require_on_post": "게시 시 확인 필요",
+  "realm_rule_require_on_update": "업데이트 후 재확인 필요",
+  "realm_rule_toggle_on": "켬",
+  "realm_rule_toggle_off": "끔",
+  "realm_rule_post_search": "게시글 검색",
+  "realm_tag_tree_policy_source": "정책"
 }

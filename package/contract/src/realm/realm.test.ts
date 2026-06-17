@@ -32,7 +32,7 @@ describe("RealmDTO", () => {
             ],
           },
         },
-        ruleUnitId: "rule-1",
+        rulePolicyId: "policy-1",
         viewerCapabilities: [
           {
             capability: "queue.realm.decide",
@@ -69,6 +69,10 @@ describe("RealmExtra", () => {
       }),
     ).toBe(false);
     expect(Value.Check(realmExtraSchema, { rule: "rule-1" })).toBe(false);
+    expect(Value.Check(realmExtraSchema, { tagTree: [] })).toBe(false);
+    expect(
+      Value.Check(realmExtraSchema, { tagView: { defaultMode: "tree" } }),
+    ).toBe(false);
     expect(Value.Check(realmExtraSchema, { pinboard: ["post-1"] })).toBe(false);
   });
 });

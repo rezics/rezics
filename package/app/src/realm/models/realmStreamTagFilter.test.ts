@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { TagTreeNode } from "@rezics/contract";
+import type { RealmTagTreeNode } from "@rezics/contract";
 import {
   collectRealmStreamTagChips,
   orderRealmStreamTagChips,
@@ -9,41 +9,42 @@ import {
 
 const tagTree = [
   {
-    tagId: "tag-a",
-    label: "Alpha",
+    kind: "tag",
+    tagUnitId: "tag-a",
     children: [
       {
-        tagId: "tag-b",
-        label: "Beta",
+        kind: "tag",
+        tagUnitId: "tag-b",
       },
     ],
   },
   {
-    tagId: "tag-c",
-    labelTranslations: {
-      fallbackLanguage: "en",
-      translations: {
-        en: "Gamma",
-        "zh-Hant": "伽瑪",
-      },
-    },
+    kind: "tag",
+    tagUnitId: "tag-c",
+    querySource: "policy",
   },
-] satisfies TagTreeNode[];
+] satisfies RealmTagTreeNode[];
+
+const displayNames = new Map<string, string>([
+  ["tag-a", "Alpha"],
+  ["tag-b", "Beta"],
+  ["tag-c", "Gamma"],
+]);
 
 describe("realm stream tag filter helpers", () => {
-  it("collects tag chips in tree order with localized labels", () => {
-    expect(collectRealmStreamTagChips(tagTree, "zh-Hant")).toEqual([
+  it("collects tag chips in tree order with hydrated labels", () => {
+    expect(collectRealmStreamTagChips(tagTree, displayNames)).toEqual([
       { tagId: "tag-a", label: "Alpha", querySource: "normal" },
       { tagId: "tag-b", label: "Beta", querySource: "normal" },
-      { tagId: "tag-c", label: "伽瑪", querySource: "normal" },
+      { tagId: "tag-c", label: "Gamma", querySource: "policy" },
     ]);
   });
 
   it("orders selected tags first without changing relative tree order", () => {
-    const chips = collectRealmStreamTagChips(tagTree, "en");
+    const chips = collectRealmStreamTagChips(tagTree, displayNames);
 
     expect(
-      orderRealmStreamTagChips(chips, ["tag-c", "tag-a"], [], 12).map(
+      orderRealmStreamTagChips(chips, ["tag-a"], ["tag-c"], 12).map(
         (chip) => chip.tagId,
       ),
     ).toEqual(["tag-a", "tag-c", "tag-b"]);
@@ -53,21 +54,20 @@ describe("realm stream tag filter helpers", () => {
     const chips = Array.from(
       { length: REALM_STREAM_TAG_SHORTCUT_LIMIT + 3 },
       (_, index) => ({
-        tagId: `tag-${index + 1}`,
-        label: `Tag ${index + 1}`,
+        tagId: "tag-" + (index + 1),
+        label: "Tag " + (index + 1),
         querySource: "normal" as const,
       }),
     );
+    const selected = "tag-" + (REALM_STREAM_TAG_SHORTCUT_LIMIT + 3);
 
     expect(
-      orderRealmStreamTagChips(chips, [
-        `tag-${REALM_STREAM_TAG_SHORTCUT_LIMIT + 3}`,
-      ]).map((chip) => chip.tagId),
+      orderRealmStreamTagChips(chips, [selected]).map((chip) => chip.tagId),
     ).toEqual([
-      `tag-${REALM_STREAM_TAG_SHORTCUT_LIMIT + 3}`,
+      selected,
       ...Array.from(
         { length: REALM_STREAM_TAG_SHORTCUT_LIMIT },
-        (_, index) => `tag-${index + 1}`,
+        (_, index) => "tag-" + (index + 1),
       ),
     ]);
   });

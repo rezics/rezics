@@ -7,7 +7,11 @@ import { mediaUrlSchema } from "../media-url";
 import { paginationLimitSchema } from "../pagination";
 import { bookshelfViewConfigSchema } from "../shelf/bookshelf";
 import { userSubscriptionListSortSchema } from "../subscription";
-import { UnitType, type CatalogUnitType, type ContentRating } from "../unit/unit";
+import {
+  UnitType,
+  type CatalogUnitType,
+  type ContentRating,
+} from "../unit/unit";
 
 // ============================================================
 // USER DTO (UserType removed — no AUTHOR/PRESS/PRODUCER)
@@ -182,8 +186,7 @@ export const realmTagPreferencesSchema = t.Object({
   [UnitType.MEDIA]: t.Optional(realmTagPreferenceSchema),
 });
 
-export type RealmTagPreferences =
-  (typeof realmTagPreferencesSchema)["static"];
+export type RealmTagPreferences = (typeof realmTagPreferencesSchema)["static"];
 
 /** Ratings a user may opt into; GENERAL/R_15 are always on. 用户可主动选择的分级；GENERAL/R_15 始终开启。 */
 export const OPT_IN_RATINGS: readonly ContentRating[] = ["R_18", "R_18G"];

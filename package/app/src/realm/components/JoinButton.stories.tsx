@@ -1,11 +1,17 @@
 import { postKeys } from "@rezics/api/post/post";
-import { realmKeys, realmRuleResolvedQuery } from "@rezics/api/realm/realm";
+import {
+  myRealmMembershipQuery,
+  realmKeys,
+  realmRuleResolvedQuery,
+} from "@rezics/api/realm/realm";
 import {
   LANGUAGES,
   markdownContentDoc,
   type PostDTO,
   PostKind,
   type RealmDTO,
+  type RealmMembershipMeDTO,
+  type RealmRuleResolvedDTO,
 } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,9 +38,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const REALM_ID = "realm-default";
+const RULE_POLICY_ID = "rule-policy";
+const RULE_REVISION_ID = "rule-revision";
+const RULE_ITEM_ID = "rule-item";
 const RULE_POST_ID = "rule-post";
 
-function makeRealm(extra: RealmDTO["extra"]): RealmDTO {
+function makeRealm(): RealmDTO {
   return {
     unitId: REALM_ID,
     isPublic: true,
@@ -43,7 +52,7 @@ function makeRealm(extra: RealmDTO["extra"]): RealmDTO {
     resolvedLanguage: LANGUAGES.EN,
     title: "Fixture Realm",
     description: "A fixture realm.",
-    extra,
+    extra: {},
     translations: [
       {
         unitId: REALM_ID,
@@ -53,6 +62,44 @@ function makeRealm(extra: RealmDTO["extra"]): RealmDTO {
       },
     ],
   } as RealmDTO;
+}
+
+function makeMembership(
+  acknowledgementRequired: boolean,
+): RealmMembershipMeDTO {
+  return {
+    realmUnitId: REALM_ID,
+    userId: "fixture-user",
+    member: null,
+    roleKey: null,
+    state: null,
+    muted: false,
+    banned: false,
+    capabilities: [],
+    ruleAcknowledgement: acknowledgementRequired
+      ? {
+          currentPolicyId: RULE_POLICY_ID,
+          currentRevisionId: RULE_REVISION_ID,
+          requiredVersion: 1,
+          acceptedPolicyId: null,
+          acceptedRevisionId: null,
+          acceptedVersion: null,
+          acceptedAt: null,
+          acceptedLanguage: null,
+          acknowledgementRequired: true,
+        }
+      : {
+          currentPolicyId: null,
+          currentRevisionId: null,
+          requiredVersion: null,
+          acceptedPolicyId: null,
+          acceptedRevisionId: null,
+          acceptedVersion: null,
+          acceptedAt: null,
+          acceptedLanguage: null,
+          acknowledgementRequired: false,
+        },
+  };
 }
 
 function makePost(contentSource: string): PostDTO {
@@ -65,44 +112,82 @@ function makePost(contentSource: string): PostDTO {
   } as PostDTO;
 }
 
+function makeResolvedRule(post: PostDTO): RealmRuleResolvedDTO {
+  return {
+    policy: {
+      realmUnitId: REALM_ID,
+      policyId: RULE_POLICY_ID,
+      currentRevisionId: RULE_REVISION_ID,
+      currentVersion: 1,
+      requirements: {
+        requireOnJoin: true,
+        requireOnPost: true,
+        requireOnUpdate: true,
+      },
+    },
+    revision: {
+      id: RULE_REVISION_ID,
+      policyId: RULE_POLICY_ID,
+      version: 1,
+      items: [
+        {
+          id: RULE_ITEM_ID,
+          policyId: RULE_POLICY_ID,
+          revisionId: RULE_REVISION_ID,
+          rulePostUnitId: post.unitId,
+          position: "a0",
+        },
+      ],
+      createdByUserId: "fixture-user",
+    },
+    items: [
+      {
+        id: RULE_ITEM_ID,
+        rulePostUnitId: post.unitId,
+        position: "a0",
+        requestedLanguage: null,
+        resolvedLanguage: LANGUAGES.EN,
+        sourceRulePost: post,
+      },
+    ],
+  };
+}
+
 function SeedJoinButton({
-  realm,
   post,
   children,
 }: {
-  realm: RealmDTO;
   post?: PostDTO;
   children: ReactNode;
 }) {
   const qc = useQueryClient();
 
   useEffect(() => {
+    const realm = makeRealm();
     qc.setQueryData(realmKeys.mine(), { realms: [] });
     qc.setQueryData(realmKeys.detail(realm.unitId), realm);
+    qc.setQueryData(
+      myRealmMembershipQuery(realm.unitId).queryKey,
+      makeMembership(Boolean(post)),
+    );
     if (post) {
       qc.setQueryData(postKeys.detail(post.unitId), post);
-      qc.setQueryData(realmRuleResolvedQuery(realm.unitId).queryKey, {
-        realmUnitId: realm.unitId,
-        ruleUnitId: realm.ruleUnitId ?? post.unitId,
-        version: 1,
-        requireOnJoin: true,
-        requireOnPost: true,
-        requireOnUpdate: true,
-        requestedLanguage: null,
-        resolvedLanguage: LANGUAGES.EN,
-        translation: null,
-        sourceRulePostUnitId: post.unitId,
-        sourceRulePost: post,
-      });
+      qc.setQueryData(
+        realmRuleResolvedQuery(realm.unitId, undefined, {
+          languages: [LANGUAGES.EN],
+          appLocale: LANGUAGES.EN,
+        }).queryKey,
+        makeResolvedRule(post),
+      );
     }
-  }, [post, qc, realm]);
+  }, [post, qc]);
 
   return <div className="p-4">{children}</div>;
 }
 
 export const Default: Story = {
   render: () => (
-    <SeedJoinButton realm={makeRealm({})}>
+    <SeedJoinButton>
       <JoinButton realmId={REALM_ID} />
     </SeedJoinButton>
   ),
@@ -111,7 +196,6 @@ export const Default: Story = {
 export const WithRule: Story = {
   render: () => (
     <SeedJoinButton
-      realm={makeRealm({ rule: RULE_POST_ID })}
       post={makePost("Please keep posts specific, sourced, and civil.")}
     >
       <JoinButton realmId={REALM_ID} />
@@ -129,7 +213,6 @@ export const WithRule: Story = {
 export const WithMultilingualRule: Story = {
   render: () => (
     <SeedJoinButton
-      realm={makeRealm({ rule: RULE_POST_ID })}
       post={makePost(
         [
           "## English",
@@ -146,7 +229,7 @@ export const WithMultilingualRule: Story = {
 
 export const DeletedRuleReference: Story = {
   render: () => (
-    <SeedJoinButton realm={makeRealm({})}>
+    <SeedJoinButton>
       <JoinButton realmId={REALM_ID} />
     </SeedJoinButton>
   ),

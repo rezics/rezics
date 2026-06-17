@@ -8,8 +8,14 @@ import { rebalance } from "../../../shelf/fractional-index";
 import type { ServerDb } from "../../client";
 import {
   ContentTranslation,
+  Pinboard,
+  PinboardEntry,
   Post,
   Realm,
+  RealmRuleItem,
+  RealmRulePolicy,
+  RealmRuleRevision,
+  RealmTagTree,
   RealmMember,
   RealmTagApplication,
   RealmTagApplicationVote,
@@ -327,17 +333,62 @@ async function ensureCommunityRealm(
       isPublic: true,
       isOfficial: false,
       memberCount: 1,
-      extra: {
-        rule: ruleId,
-        about: aboutId,
-        pinboard: [aboutId, ruleId],
-        tagTree: [
-          { tagUnitId: hardScifiTagId, title: "Hard sci-fi" },
-          { tagUnitId: slowBurnTagId, title: "Slow burn" },
-        ],
-      },
       updatedAt: now,
     });
+    const [rulePolicy] = await tx
+      .insert(RealmRulePolicy)
+      .values({
+        realmUnitId: realm.id,
+        requireOnJoin: true,
+        requireOnPost: true,
+        requireOnUpdate: true,
+      })
+      .returning({ id: RealmRulePolicy.id });
+    if (rulePolicy) {
+      const [revision] = await tx
+        .insert(RealmRuleRevision)
+        .values({
+          policyId: rulePolicy.id,
+          version: 1,
+          createdByUserId: rootUserId,
+        })
+        .returning({ id: RealmRuleRevision.id });
+      if (revision) {
+        await tx.insert(RealmRuleItem).values({
+          policyId: rulePolicy.id,
+          revisionId: revision.id,
+          rulePostUnitId: ruleId,
+          position: "0001",
+        });
+        await tx
+          .update(RealmRulePolicy)
+          .set({ currentRevisionId: revision.id })
+          .where(eq(RealmRulePolicy.id, rulePolicy.id));
+      }
+    }
+    await tx.insert(RealmTagTree).values({
+      realmUnitId: realm.id,
+      tree: {
+        schema: "rezics/realm-tag-tree",
+        version: 1,
+        view: { defaultMode: "flat", allowViewerSwitch: true },
+        nodes: [
+          { kind: "tag", tagUnitId: hardScifiTagId },
+          { kind: "tag", tagUnitId: slowBurnTagId },
+        ],
+      },
+    });
+    const [pinboard] = await tx
+      .insert(Pinboard)
+      .values({ realmUnitId: realm.id, key: "home", title: "Home" })
+      .onConflictDoNothing()
+      .returning({ id: Pinboard.id });
+    if (pinboard) {
+      await tx.insert(PinboardEntry).values([
+        { pinboardId: pinboard.id, unitId: aboutId, position: "0001" },
+        { pinboardId: pinboard.id, unitId: ruleId, position: "0002" },
+      ]);
+    }
     await tx.insert(RealmMember).values({
       realmUnitId: realm.id,
       userId: rootUserId,

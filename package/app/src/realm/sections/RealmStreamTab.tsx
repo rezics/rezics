@@ -63,7 +63,8 @@ export function RealmStreamTab({
   onOpenTagsTab,
 }: RealmStreamTabProps) {
   const { t } = useTranslation("community");
-  const { realmId, realm, showManage, tagTree } = useRealmDetail();
+  const { realmId, showManage, tagTree, tagTreeDisplayNames } =
+    useRealmDetail();
   const { data: settings } = useQuery({
     ...userQueries.settings(),
     enabled: showManage,
@@ -75,13 +76,11 @@ export function RealmStreamTab({
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="flex min-w-0 flex-col gap-4">
-        <RuleSection
-          realmUnitId={realmId}
-          postUnitId={realm.ruleUnitId ?? null}
-        />
+        <RuleSection realmUnitId={realmId} />
         <div className="flex flex-col gap-3">
           <RealmStreamTagFilter
             tagTree={tagTree}
+            displayNames={tagTreeDisplayNames}
             selectedTagIds={streamTagIds}
             selectedPolicyTagIds={streamPolicyTagIds}
             onChange={onStreamTagIdsChange}

@@ -1,39 +1,33 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { markdownContentDoc } from "../content/doc-v1";
+import { realmTagTreeV1Schema } from "./realm-tag-tree";
 import {
   realmMemberDTOSchema,
   realmMembershipMeDTOSchema,
   realmRuleAcknowledgementDTOSchema,
   realmRuleAcknowledgementStatusSchema,
-  realmRuleReferenceDTOSchema,
+  realmRulePolicyDTOSchema,
   realmRuleResolvedDTOSchema,
 } from "./realm";
-import { realmExtraSchema } from "./realm-extra";
 
 describe("realm community contract schemas", () => {
-  test("realm extra accepts recursive label-only and tag-backed tag tree nodes", () => {
+  test("realm tag tree accepts label and tag nodes without durable node ids", () => {
     expect(
-      Value.Check(realmExtraSchema, {
-        tagView: {
-          defaultStyle: "grouped",
-          allowViewerSwitch: true,
-        },
-        tagTree: [
+      Value.Check(realmTagTreeV1Schema, {
+        schema: "rezics/realm-tag-tree",
+        version: 1,
+        view: { defaultMode: "tree", allowViewerSwitch: true },
+        nodes: [
           {
-            labelUnitId: "group-label-unit-1",
-            labelTranslations: {
-              translations: {
-                en: "Reading order",
-                "zh-hant": "閱讀順序",
-              },
-              fallbackLanguage: "en",
-            },
+            kind: "label",
+            labelUnitId: "label-unit-1",
             children: [
               {
-                tagId: "tag-unit-1",
-                label: "Review",
-                children: [{ label: "Nested group" }],
+                kind: "tag",
+                tagUnitId: "tag-unit-1",
+                labelUnitId: "label-unit-2",
+                querySource: "policy",
               },
             ],
           },
@@ -42,21 +36,13 @@ describe("realm community contract schemas", () => {
     ).toBe(true);
   });
 
-  test("realm extra tag tree nodes reject disabled visibility flags", () => {
+  test("realm tag tree rejects node ids and inline labels", () => {
     expect(
-      Value.Check(realmExtraSchema, {
-        tagTree: [{ label: "Genre", disabled: true }],
-      }),
-    ).toBe(false);
-  });
-
-  test("realm extra rejects unknown tag view styles", () => {
-    expect(
-      Value.Check(realmExtraSchema, {
-        tagView: {
-          defaultStyle: "cards",
-          allowViewerSwitch: true,
-        },
+      Value.Check(realmTagTreeV1Schema, {
+        schema: "rezics/realm-tag-tree",
+        version: 1,
+        view: { defaultMode: "tree", allowViewerSwitch: true },
+        nodes: [{ kind: "label", id: "node-1", label: "Genre" }],
       }),
     ).toBe(false);
   });
@@ -83,19 +69,24 @@ describe("realm community contract schemas", () => {
 
   test("realm rule acknowledgement identity is versioned and locale invariant", () => {
     expect(
-      Value.Check(realmRuleReferenceDTOSchema, {
+      Value.Check(realmRulePolicyDTOSchema, {
         realmUnitId: "realm-1",
-        ruleUnitId: "rule-unit-2",
-        version: 3,
-        requireOnJoin: true,
-        requireOnPost: true,
+        policyId: "policy-1",
+        currentRevisionId: "revision-3",
+        currentVersion: 3,
+        requirements: {
+          requireOnJoin: true,
+          requireOnPost: true,
+          requireOnUpdate: true,
+        },
       }),
     ).toBe(true);
 
     expect(
       Value.Check(realmRuleAcknowledgementDTOSchema, {
         realmUnitId: "realm-1",
-        ruleUnitId: "rule-unit-1",
+        policyId: "policy-1",
+        revisionId: "revision-2",
         version: 2,
         userId: "user-1",
         acceptedAt: "2026-05-28T00:00:00.000Z",
@@ -105,9 +96,11 @@ describe("realm community contract schemas", () => {
 
     expect(
       Value.Check(realmRuleAcknowledgementStatusSchema, {
-        currentRuleUnitId: "rule-unit-2",
+        currentPolicyId: "policy-1",
+        currentRevisionId: "revision-3",
         requiredVersion: 3,
-        acceptedRuleUnitId: "rule-unit-1",
+        acceptedPolicyId: "policy-1",
+        acceptedRevisionId: "revision-2",
         acceptedVersion: 2,
         acceptedAt: "2026-05-28T00:00:00.000Z",
         acceptedLanguage: "ja",
@@ -117,23 +110,45 @@ describe("realm community contract schemas", () => {
 
     expect(
       Value.Check(realmRuleResolvedDTOSchema, {
-        realmUnitId: "realm-1",
-        ruleUnitId: "rule-unit-2",
-        version: 3,
-        requestedLanguage: "ja",
-        resolvedLanguage: "en",
-        translation: {
-          unitId: "rule-unit-2",
-          language: "en",
-          title: "Realm rules",
-          sourceUnitId: "rule-post-en",
+        policy: {
+          realmUnitId: "realm-1",
+          policyId: "policy-1",
+          currentRevisionId: "revision-3",
+          currentVersion: 3,
+          requirements: {
+            requireOnJoin: true,
+            requireOnPost: true,
+            requireOnUpdate: true,
+          },
         },
-        sourceRulePostUnitId: "rule-post-en",
-        sourceRulePost: {
-          unitId: "rule-post-en",
-          authorUserId: "owner-1",
-          content: markdownContentDoc("Follow the rules"),
+        revision: {
+          id: "revision-3",
+          policyId: "policy-1",
+          version: 3,
+          items: [
+            {
+              id: "item-1",
+              policyId: "policy-1",
+              revisionId: "revision-3",
+              rulePostUnitId: "rule-post-en",
+              position: "0001",
+            },
+          ],
         },
+        items: [
+          {
+            id: "item-1",
+            rulePostUnitId: "rule-post-en",
+            position: "0001",
+            requestedLanguage: "ja",
+            resolvedLanguage: "en",
+            sourceRulePost: {
+              unitId: "rule-post-en",
+              authorUserId: "owner-1",
+              content: markdownContentDoc("Follow the rules"),
+            },
+          },
+        ],
       }),
     ).toBe(true);
   });
@@ -160,9 +175,11 @@ describe("realm community contract schemas", () => {
           },
         ],
         ruleAcknowledgement: {
-          currentRuleUnitId: "rule-unit-2",
+          currentPolicyId: "policy-1",
+          currentRevisionId: "revision-1",
           requiredVersion: 1,
-          acceptedRuleUnitId: "rule-unit-1",
+          acceptedPolicyId: "policy-1",
+          acceptedRevisionId: "revision-0",
           acceptedVersion: 4,
           acknowledgementRequired: true,
         },

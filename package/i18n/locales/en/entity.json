@@ -464,5 +464,6 @@
   "unit_variant_count": "{count} variants",
   "unit_tag_count": "{count} tags",
   "unit_override_label": "Override: {title}",
-  "unit_source_label": "Source: {title}"
+  "unit_source_label": "Source: {title}",
+  "realm_tab_rules": "Rules"
 }

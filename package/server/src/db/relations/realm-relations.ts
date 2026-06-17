@@ -10,6 +10,8 @@ export function realmRelations(r: ServerRelationsBuilder) {
       RealmCapabilityGrants: r.many.RealmCapabilityGrant(),
       RealmMembers: r.many.RealmMember(),
       RealmRuleAcknowledgements: r.many.RealmRuleAcknowledgement(),
+      RealmRulePolicies: r.many.RealmRulePolicy(),
+      RealmTagTree: r.one.RealmTagTree(),
       RealmTagApplications: r.many.RealmTagApplication(),
       RealmTagContexts: r.many.RealmTagContext(),
     },
@@ -48,13 +50,65 @@ export function realmRelations(r: ServerRelationsBuilder) {
         from: r.RealmRuleAcknowledgement.realmUnitId,
         to: r.Realm.unitId,
       }),
-      Unit: r.one.Unit({
-        from: r.RealmRuleAcknowledgement.ruleUnitId,
-        to: r.Unit.id,
+      RealmRulePolicy: r.one.RealmRulePolicy({
+        from: r.RealmRuleAcknowledgement.policyId,
+        to: r.RealmRulePolicy.id,
+      }),
+      RealmRuleRevision: r.one.RealmRuleRevision({
+        from: r.RealmRuleAcknowledgement.revisionId,
+        to: r.RealmRuleRevision.id,
       }),
       User: r.one.User({
         from: r.RealmRuleAcknowledgement.userId,
         to: r.User.unitId,
+      }),
+    },
+    RealmRulePolicy: {
+      Realm: r.one.Realm({
+        from: r.RealmRulePolicy.realmUnitId,
+        to: r.Realm.unitId,
+      }),
+      RealmRuleRevisions: r.many.RealmRuleRevision(),
+      RealmRuleItems: r.many.RealmRuleItem(),
+      RealmRuleAcknowledgements: r.many.RealmRuleAcknowledgement(),
+    },
+    RealmRuleRevision: {
+      RealmRulePolicy: r.one.RealmRulePolicy({
+        from: r.RealmRuleRevision.policyId,
+        to: r.RealmRulePolicy.id,
+      }),
+      User_createdByUserId: r.one.User({
+        from: r.RealmRuleRevision.createdByUserId,
+        to: r.User.unitId,
+        alias: "RealmRuleRevision_createdByUserId_User_unitId",
+      }),
+      RealmRuleItems: r.many.RealmRuleItem(),
+      RealmRuleAcknowledgements: r.many.RealmRuleAcknowledgement(),
+    },
+    RealmRuleItem: {
+      RealmRulePolicy: r.one.RealmRulePolicy({
+        from: r.RealmRuleItem.policyId,
+        to: r.RealmRulePolicy.id,
+      }),
+      RealmRuleRevision: r.one.RealmRuleRevision({
+        from: r.RealmRuleItem.revisionId,
+        to: r.RealmRuleRevision.id,
+      }),
+      Unit_rulePostUnitId: r.one.Unit({
+        from: r.RealmRuleItem.rulePostUnitId,
+        to: r.Unit.id,
+        alias: "RealmRuleItem_rulePostUnitId_Unit_id",
+      }),
+      Unit_reportReasonUnitId: r.one.Unit({
+        from: r.RealmRuleItem.reportReasonUnitId,
+        to: r.Unit.id,
+        alias: "RealmRuleItem_reportReasonUnitId_Unit_id",
+      }),
+    },
+    RealmTagTree: {
+      Realm: r.one.Realm({
+        from: r.RealmTagTree.realmUnitId,
+        to: r.Realm.unitId,
       }),
     },
     RealmTagApplication: {

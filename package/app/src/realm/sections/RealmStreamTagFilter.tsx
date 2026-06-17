@@ -1,8 +1,9 @@
-import type { TagTreeNode } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import type { RealmTagTree } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { type PointerEvent, useEffect, useMemo, useRef } from "react";
+import type { RealmTagTreeDisplayNames } from "../models/realmTagTreeHydration";
 import {
   collectRealmStreamTagChips,
   orderRealmStreamTagChips,
@@ -14,7 +15,8 @@ import {
 } from "../models/realmStreamTagRowInteraction";
 
 export interface RealmStreamTagFilterProps {
-  tagTree?: TagTreeNode[];
+  tagTree?: RealmTagTree | null;
+  displayNames: RealmTagTreeDisplayNames;
   selectedTagIds: string[];
   selectedPolicyTagIds?: string[];
   onChange: (next: { tagIds: string[]; policyTagIds: string[] }) => void;
@@ -23,12 +25,12 @@ export interface RealmStreamTagFilterProps {
 
 export const RealmStreamTagFilter: React.FC<RealmStreamTagFilterProps> = ({
   tagTree,
+  displayNames,
   selectedTagIds,
   selectedPolicyTagIds = [],
   onChange,
   onOpenTagsTab,
 }) => {
-  const locale = useLocale();
   const { t } = useTranslation(["community"]);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef({
@@ -41,8 +43,8 @@ export const RealmStreamTagFilter: React.FC<RealmStreamTagFilterProps> = ({
   });
   const suppressClickRef = useRef(false);
   const chips = useMemo(
-    () => collectRealmStreamTagChips(tagTree, locale),
-    [locale, tagTree],
+    () => collectRealmStreamTagChips(tagTree?.nodes, displayNames),
+    [displayNames, tagTree?.nodes],
   );
   const orderedChips = useMemo(
     () => orderRealmStreamTagChips(chips, selectedTagIds, selectedPolicyTagIds),

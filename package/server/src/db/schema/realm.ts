@@ -7,6 +7,7 @@ import {
   pgEnum,
   pgTable,
   primaryKey,
+  text,
   uniqueIndex,
   uuid,
   varchar,
@@ -52,19 +53,6 @@ export const Realm = pgTable("Realm", {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
   /**
-   * Versioned rule policy for the POST Unit shown before realm joins/posts.
-   * Dock widgets render this policy; they do not own a second rule pointer.
-   */
-  ruleUnitId: uuid().references(() => Unit.id, {
-    onDelete: "set null",
-    onUpdate: "cascade",
-  }),
-  ruleVersion: integer().default(1).notNull(),
-  ruleRequireOnJoin: boolean().default(false).notNull(),
-  ruleRequireOnPost: boolean().default(false).notNull(),
-  ruleRequireOnUpdate: boolean().default(true).notNull(),
-  rulePolicyUpdatedAt: nullableTimestamp(),
-  /**
    * New joins are stored as pending until a realm moderator approves them.
    * 新加入的成员以待处理状态存储，直到 realm 版主批准。
    */
@@ -75,6 +63,122 @@ export const Realm = pgTable("Realm", {
    */
   contentRequiresApproval: boolean().default(false).notNull(),
 });
+
+export const RealmTagTree = pgTable("RealmTagTree", {
+  realmUnitId: uuid()
+    .primaryKey()
+    .references(() => Realm.unitId, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+  tree: jsonData().notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+export const RealmRulePolicy = pgTable(
+  "RealmRulePolicy",
+  {
+    id: uuidv7PrimaryKey(),
+    realmUnitId: uuid()
+      .notNull()
+      .references(() => Realm.unitId, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    currentRevisionId: uuid(),
+    requireOnJoin: boolean().default(false).notNull(),
+    requireOnPost: boolean().default(false).notNull(),
+    requireOnUpdate: boolean().default(true).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("RealmRulePolicy_realmUnitId_key").using(
+      "btree",
+      table.realmUnitId.asc().nullsLast(),
+    ),
+    index("RealmRulePolicy_currentRevisionId_idx").using(
+      "btree",
+      table.currentRevisionId.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const RealmRuleRevision = pgTable(
+  "RealmRuleRevision",
+  {
+    id: uuidv7PrimaryKey(),
+    policyId: uuid()
+      .notNull()
+      .references(() => RealmRulePolicy.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    version: integer().notNull(),
+    createdByUserId: uuid().references(() => User.unitId, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    uniqueIndex("RealmRuleRevision_policyId_version_key").using(
+      "btree",
+      table.policyId.asc().nullsLast(),
+      table.version.asc().nullsLast(),
+    ),
+    index("RealmRuleRevision_policyId_createdAt_idx").using(
+      "btree",
+      table.policyId.asc().nullsLast(),
+      table.createdAt.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const RealmRuleItem = pgTable(
+  "RealmRuleItem",
+  {
+    id: uuidv7PrimaryKey(),
+    policyId: uuid()
+      .notNull()
+      .references(() => RealmRulePolicy.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    revisionId: uuid()
+      .notNull()
+      .references(() => RealmRuleRevision.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    rulePostUnitId: uuid()
+      .notNull()
+      .references(() => Unit.id, {
+        onDelete: "restrict",
+        onUpdate: "cascade",
+      }),
+    position: text().notNull(),
+    appliesTo: varchar({ length: 32 }),
+    reportReasonUnitId: uuid().references(() => Unit.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("RealmRuleItem_revisionId_position_idx").using(
+      "btree",
+      table.revisionId.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+    ),
+    index("RealmRuleItem_rulePostUnitId_idx").using(
+      "btree",
+      table.rulePostUnitId.asc().nullsLast(),
+    ),
+  ],
+);
 
 export const RealmMember = pgTable(
   "RealmMember",
@@ -189,9 +293,18 @@ export const RealmRuleAcknowledgement = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    ruleUnitId: uuid()
+    policyId: uuid()
       .notNull()
-      .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => RealmRulePolicy.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    revisionId: uuid()
+      .notNull()
+      .references(() => RealmRuleRevision.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     version: integer().notNull(),
     userId: uuid()
       .notNull()
@@ -207,8 +320,8 @@ export const RealmRuleAcknowledgement = pgTable(
     primaryKey({
       columns: [
         table.realmUnitId,
-        table.ruleUnitId,
-        table.version,
+        table.policyId,
+        table.revisionId,
         table.userId,
       ],
       name: "RealmRuleAcknowledgement_pkey",

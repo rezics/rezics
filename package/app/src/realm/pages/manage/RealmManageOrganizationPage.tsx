@@ -1,10 +1,7 @@
-import type { TagTreeNode } from "@rezics/contract";
 import { PinboardAdminSection } from "@/pinboard";
 import { useRealmManage } from "../../layouts/realmManageContext";
-import {
-  TagTreeEditor,
-  TagViewPreferenceEditor,
-} from "../../sections/RealmManageEditors";
+import { RealmRuleManager } from "../../sections/RealmRuleManager";
+import { RealmTagTreeEditor } from "../../sections/RealmTagTreeEditor";
 import { RealmPolicyTagManager } from "../../sections/RealmPolicyTagManager";
 
 /**
@@ -37,19 +34,13 @@ import { RealmPolicyTagManager } from "../../sections/RealmPolicyTagManager";
  * └────────────────────────────────────────────┘
  */
 export function RealmManageOrganizationPage() {
-  const { realmId, realm } = useRealmManage();
+  const { realmId } = useRealmManage();
 
   return (
     <div className="flex flex-col gap-6">
-      <TagTreeEditor
-        realmId={realmId}
-        initialValue={realm.extra?.tagTree as TagTreeNode[] | undefined}
-      />
+      <RealmRuleManager realmId={realmId} />
+      <RealmTagTreeEditor realmId={realmId} />
       <RealmPolicyTagManager realmId={realmId} />
-      <TagViewPreferenceEditor
-        realmId={realmId}
-        initialValue={realm.extra?.tagView}
-      />
       <PinboardAdminSection realmUnitId={realmId} />
     </div>
   );

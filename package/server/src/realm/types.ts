@@ -44,7 +44,6 @@ export const realmListSelect = {
   memberCount: true,
   extra: true,
   dock: true,
-  ruleUnitId: true,
   createdAt: true,
   updatedAt: true,
   unit: {
@@ -70,7 +69,6 @@ export type RealmListSelected = Pick<
   | "memberCount"
   | "extra"
   | "dock"
-  | "ruleUnitId"
   | "createdAt"
   | "updatedAt"
 > & {

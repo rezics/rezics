@@ -1,34 +1,44 @@
 import { describe, expect, test } from "bun:test";
-import type { TagTreeNode } from "@rezics/contract";
+import type { RealmTagTreeNode } from "@rezics/contract";
 import {
   buildRealmTagTreePickerRows,
   searchRealmTagTreePickerRows,
   selectedRealmTagLabels,
 } from "./realmTagTreePicker";
 
+const displayNames = new Map<string, string>([
+  ["label-works", "Works"],
+  ["tag-road", "The Road"],
+  ["tag-road-ending", "Ending"],
+  ["tag-other-road", "The Road"],
+]);
+
 describe("realm tag tree picker model", () => {
-  const tree: TagTreeNode[] = [
+  const tree: RealmTagTreeNode[] = [
     {
-      label: "Works",
+      kind: "label",
+      labelUnitId: "label-works",
       children: [
         {
-          tagId: "tag-road",
-          label: "The Road",
-          children: [{ tagId: "tag-road-ending", label: "Ending" }],
+          kind: "tag",
+          tagUnitId: "tag-road",
+          children: [{ kind: "tag", tagUnitId: "tag-road-ending" }],
         },
         {
-          tagId: "tag-untitled-work",
+          kind: "tag",
+          tagUnitId: "tag-untitled-work",
         },
       ],
     },
     {
-      label: "Works",
-      children: [{ tagId: "tag-other-road", label: "The Road" }],
+      kind: "label",
+      labelUnitId: "label-works",
+      children: [{ kind: "tag", tagUnitId: "tag-other-road" }],
     },
   ];
 
-  test("derives label-only group rows and selectable tag-backed rows", () => {
-    const rows = buildRealmTagTreePickerRows(tree, "en");
+  test("derives label rows and selectable global tag rows", () => {
+    const rows = buildRealmTagTreePickerRows(tree, displayNames);
     expect(rows[0]).toMatchObject({
       label: "Works",
       selectable: false,
@@ -47,19 +57,19 @@ describe("realm tag tree picker model", () => {
   });
 
   test("keeps duplicated labels addressable with stable path ids", () => {
-    const rows = buildRealmTagTreePickerRows(tree, "en");
-    expect(rows[0]?.id).toBe("0:Works");
-    expect(rows[1]?.id).toBe("1:Works");
-    expect(rows[0]?.children[0]?.id).toBe("0:Works/0:tag-road");
+    const rows = buildRealmTagTreePickerRows(tree, displayNames);
+    expect(rows[0]?.id).toBe("0:label-works");
+    expect(rows[1]?.id).toBe("1:label-works");
+    expect(rows[0]?.children[0]?.id).toBe("0:label-works/0:tag-road");
   });
 
-  test("uses tag id fallback labels when a node has no label", () => {
-    const rows = buildRealmTagTreePickerRows(tree, "en");
+  test("uses tag id fallback labels when a node has no hydrated name", () => {
+    const rows = buildRealmTagTreePickerRows(tree, displayNames);
     expect(rows[0]?.children[1]?.label).toBe("tag-unti");
   });
 
   test("searches loaded realm tree rows and preserves path context", () => {
-    const rows = buildRealmTagTreePickerRows(tree, "en");
+    const rows = buildRealmTagTreePickerRows(tree, displayNames);
     const matches = searchRealmTagTreePickerRows(rows, "ending");
     expect(matches).toHaveLength(1);
     expect(matches[0]).toMatchObject({
@@ -70,11 +80,11 @@ describe("realm tag tree picker model", () => {
   });
 
   test("derives selected labels from tree rows with fallback for global tags", () => {
-    const rows = buildRealmTagTreePickerRows(tree, "en");
+    const rows = buildRealmTagTreePickerRows(tree, displayNames);
     const labels = selectedRealmTagLabels(
       rows,
       ["tag-road", "tag-global"],
-      (tagId) => `fallback:${tagId}`,
+      (tagId) => "fallback:" + tagId,
     );
     expect(labels.get("tag-road")).toBe("The Road");
     expect(labels.get("tag-global")).toBe("fallback:tag-global");
