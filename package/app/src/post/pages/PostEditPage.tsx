@@ -18,7 +18,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { PostEditorSurface } from "../forms/PostEditorSurface";
 import { isPostEditorSurfaceSubmittable } from "../models/postEditorSurface";
 
@@ -192,8 +196,14 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
 
   if (isLoading || isLanguageContentLoading)
     return <div>{t("common:loading")}</div>;
-  if (error) return <QueryErrorDisplay error={error} />;
-  if (!post) return null;
+  if (error) {
+    return isApiNotFoundError(error) ? (
+      <ResourceNotFoundState variant="section" />
+    ) : (
+      <QueryErrorDisplay error={error} />
+    );
+  }
+  if (!post) return <ResourceNotFoundState variant="section" />;
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-6 py-8">

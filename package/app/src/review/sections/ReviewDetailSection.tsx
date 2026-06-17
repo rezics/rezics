@@ -17,7 +17,11 @@ import {
   toCommentWriteRealmUnitId,
   useFocusReplyFromQuery,
 } from "@/comment";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
@@ -139,8 +143,14 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
         <Spinner />
       </div>
     );
-  if (error) return <QueryErrorDisplay error={error} />;
-  if (!review) return <div>{t("common:no_data")}</div>;
+  if (error) {
+    return isApiNotFoundError(error) ? (
+      <ResourceNotFoundState variant="section" />
+    ) : (
+      <QueryErrorDisplay error={error} />
+    );
+  }
+  if (!review) return <ResourceNotFoundState variant="section" />;
 
   const handleReplyInvoke = () => {
     composerRef.current?.focus();

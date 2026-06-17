@@ -38,6 +38,11 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { EntityHero } from "../components/EntityHero";
 import { useEntityWorks } from "../hooks/useEntityWorks";
 import { getEntityLanguages, getEntityTranslation } from "../models/types";
@@ -97,15 +102,12 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
   }
 
   if (error || !entity) {
-    return (
+    return error && !isApiNotFoundError(error) ? (
       <div className="w-full mx-auto max-w-3xl px-4 py-12">
-        <h1 className="text-lg font-semibold text-text-primary">
-          {t("entity:not_found")}
-        </h1>
-        <p className="mt-2 text-sm text-text-secondary">
-          {t("entity:not_found_description")}
-        </p>
+        <QueryErrorDisplay error={error} />
       </div>
+    ) : (
+      <ResourceNotFoundState variant="section" />
     );
   }
 

@@ -7,6 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import type React from "react";
 import { ReplyComposer, useFocusReplyFromQuery } from "@/comment";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { PostListSection } from "@/post";
 import { Link } from "@/shared/ui/link";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
@@ -36,19 +41,26 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
 }) => {
   const { t } = useTranslation(["common", "community"]);
   const composerRef = useFocusReplyFromQuery();
-  const { data: excerpt, isLoading } = useQuery(excerptQueries.detail(unitId));
+  const {
+    data: excerpt,
+    isLoading,
+    error,
+  } = useQuery(excerptQueries.detail(unitId));
   const editorEntry = useEditorEntry({
     surface: "excerpt",
     ownerUnit: { user: excerpt?.user },
   });
 
   if (isLoading) return <div>{t("common:loading")}</div>;
-  if (!excerpt?.id) {
-    return (
-      <div className="text-center py-16 text-error-text">
-        {t("community:excerpt_not_found")}
-      </div>
+  if (error) {
+    return isApiNotFoundError(error) ? (
+      <ResourceNotFoundState variant="section" />
+    ) : (
+      <QueryErrorDisplay error={error} />
     );
+  }
+  if (!excerpt?.id) {
+    return <ResourceNotFoundState variant="section" />;
   }
 
   const title = excerpt.translations?.[0]?.title;

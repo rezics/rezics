@@ -11,6 +11,11 @@ import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_editor/review/$reviewId/edit";
 
@@ -41,7 +46,9 @@ export function ReviewEditPageContainer() {
   const { t } = useTranslation(["common", "community"]);
   const locale = useLocale();
   const { reviewId } = reviewEditRoute.useParams();
-  const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
+  const { data, isLoading, isError, error } = useQuery(
+    postQueries.detail(reviewId),
+  );
   const { data: languageContent, isLoading: isLanguageContentLoading } =
     useQuery(unitQueries.languageContent(reviewId, { appLocale: locale }));
   const navigate = useNavigate();
@@ -146,7 +153,11 @@ export function ReviewEditPageContainer() {
   }
 
   if (isError || !data) {
-    return <div>{t("community:review_messages_failed_load")}</div>;
+    return isApiNotFoundError(error) || !data ? (
+      <ResourceNotFoundState variant="section" />
+    ) : (
+      <QueryErrorDisplay error={error} />
+    );
   }
 
   return (

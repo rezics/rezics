@@ -14,6 +14,11 @@ import {
   toCommentWriteRealmUnitId,
   useFocusReplyFromQuery,
 } from "@/comment";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
@@ -94,7 +99,11 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   const { t } = useTranslation(["common"]);
   const composerRef = useFocusReplyFromQuery();
   const readContext = useReadLanguageContext();
-  const { data: remark, isLoading } = useQuery({
+  const {
+    data: remark,
+    isLoading,
+    error,
+  } = useQuery({
     ...postQueries.detail(remarkId, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
@@ -114,7 +123,14 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   const commentContext = pickedCommentContext ?? COMMENT_CONTEXT_ALL;
 
   if (isLoading) return <div>{t("common:loading")}</div>;
-  if (!remark) return <div>{t("common:no_data")}</div>;
+  if (error) {
+    return isApiNotFoundError(error) ? (
+      <ResourceNotFoundState variant="section" />
+    ) : (
+      <QueryErrorDisplay error={error} />
+    );
+  }
+  if (!remark) return <ResourceNotFoundState variant="section" />;
 
   const handleReplyInvoke = () => {
     composerRef.current?.focus();

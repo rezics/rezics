@@ -1,6 +1,12 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { postQueries } from "@rezics/api/post/post";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { createMinimalEditConsoleConfig, EditConsoleLayout } from "@/core";
+import {
+  createMinimalEditConsoleConfig,
+  EditConsoleLayout,
+  routeQueryOrNotFound,
+} from "@/core";
+import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 
 const PostEditPage = lazyRouteComponent(
   () => import("@/post/pages/PostEditPage"),
@@ -8,6 +14,16 @@ const PostEditPage = lazyRouteComponent(
 );
 
 export const Route = createFileRoute("/_editor/post/$rootPostUnitId/edit")({
+  loader: async ({ params, context }) => {
+    const readContext = await resolveRouteReadLanguageContext(context.qc);
+    await routeQueryOrNotFound(
+      context.qc,
+      postQueries.detail(params.rootPostUnitId, {
+        languages: readContext.languages,
+        appLocale: readContext.appLocale,
+      }),
+    );
+  },
   component: () => {
     const { rootPostUnitId } = Route.useParams();
     return (

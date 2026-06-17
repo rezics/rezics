@@ -1,6 +1,11 @@
+import { excerptQueries } from "@rezics/api/excerpt/excerpt.queries";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { createMinimalEditConsoleConfig, EditConsoleLayout } from "@/core";
+import {
+  createMinimalEditConsoleConfig,
+  EditConsoleLayout,
+  routeQueryOrNotFound,
+} from "@/core";
 
 const ExcerptEditPageContainer = lazyRouteComponent(
   () => import("@/excerpt/pages/ExcerptEditPage"),
@@ -8,6 +13,12 @@ const ExcerptEditPageContainer = lazyRouteComponent(
 );
 
 export const Route = createFileRoute("/_editor/excerpt/$unitId/edit")({
+  loader: async ({ params, context }) => {
+    await routeQueryOrNotFound(
+      context.qc,
+      excerptQueries.detail(params.unitId),
+    );
+  },
   component: () => {
     const { unitId } = Route.useParams();
     return (

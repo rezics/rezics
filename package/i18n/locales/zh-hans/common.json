@@ -213,6 +213,8 @@
   "external_links_remove_success": "已移除外部链接。",
   "external_links_source_required": "请选择来源 Entity 并输入有效 URL。",
   "external_links_invalid_url": "请输入有效 URL。",
+  "resource_not_found_title": "此项目已不可用",
+  "resource_not_found_description": "它可能已被移除、隐藏或移动。",
   "link_copied": "链接已复制",
   "clipboard_failed": "复制失败，请手动选择并复制。"
 }

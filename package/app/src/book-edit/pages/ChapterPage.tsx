@@ -38,6 +38,11 @@ import {
   contentUnitIdForNode,
   withBookContentStructureOccurrences,
 } from "@/book-library";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { Route as bookEditChapterRoute } from "@/routes/_editor/book/$bookId/edit/$chapterId";
 import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
 import {
@@ -256,8 +261,14 @@ export const BookEditChapterPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="w-full max-w-xl mx-auto p-8 text-destructive">
-        {(error as Error)?.message || t("book:chapter_load_failed")}
+      <div className="w-full max-w-xl mx-auto p-8">
+        {isApiNotFoundError(error) ? (
+          <ResourceNotFoundState variant="section" />
+        ) : (
+          <QueryErrorDisplay
+            error={error instanceof Error ? error : new Error(String(error))}
+          />
+        )}
       </div>
     );
   }

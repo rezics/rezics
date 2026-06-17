@@ -11,6 +11,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 
 type ReadingNodeViewProps = {
   bookUnitId: string;
@@ -62,8 +67,14 @@ export const ReadingNodeView: React.FC<ReadingNodeViewProps> = ({
   if (isPending) return <div>{t("common:loading")}</div>;
   if (isError)
     return (
-      <div>
-        {t("book:reading_error_loading_chapter", { error: String(error) })}
+      <div className="px-4 py-8">
+        {isApiNotFoundError(error) ? (
+          <ResourceNotFoundState variant="inline" />
+        ) : (
+          <QueryErrorDisplay
+            error={error instanceof Error ? error : new Error(String(error))}
+          />
+        )}
       </div>
     );
 

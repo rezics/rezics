@@ -47,7 +47,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronDown as ExpandMore, LockKeyhole, Plus } from "lucide-react";
 import React from "react";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { EntityPicker } from "@/entity-picker";
 import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { TextLink } from "@/shared/ui/link";
@@ -676,13 +680,17 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   if (error)
     return (
       <div className="w-full mt-16 mx-auto max-w-3xl px-4">
-        <QueryErrorDisplay error={error} />
+        {isApiNotFoundError(error) ? (
+          <ResourceNotFoundState variant="section" />
+        ) : (
+          <QueryErrorDisplay error={error} />
+        )}
       </div>
     );
   if (!data && !newBook)
     return (
-      <div className="w-full mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
-        {getI18nRuntime().i18n.t("common:no_data")}
+      <div className="w-full mt-16 mx-auto max-w-3xl px-4">
+        <ResourceNotFoundState variant="section" />
       </div>
     );
 

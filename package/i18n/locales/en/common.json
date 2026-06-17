@@ -213,6 +213,8 @@
   "external_links_remove_success": "External link removed.",
   "external_links_source_required": "Choose a source entity and enter a valid URL.",
   "external_links_invalid_url": "Enter a valid URL.",
+  "resource_not_found_title": "This item is no longer available",
+  "resource_not_found_description": "It may have been removed, hidden, or moved.",
   "link_copied": "Link copied",
   "clipboard_failed": "Copy failed. Please select and copy manually."
 }

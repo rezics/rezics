@@ -1,9 +1,12 @@
 import { zonePortalQueryOptions } from "@rezics/api";
+import { postQueries } from "@rezics/api/post/post";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { resolveDefaultCommentContext } from "@/comment";
+import { routeQueryOrNotFound } from "@/core";
 import { PostThreadPage } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 import { zonePresentationContext } from "@/unit";
 
 // UnitId zone framing mirrors the slug-framed wiki route: presentation remains
@@ -37,5 +40,22 @@ function ZoneUnitWikiThreadRoute() {
 export const Route = createFileRoute(
   "/_mainLayout/zone/$unitId/wiki/$wikiUnitId",
 )({
+  loader: async ({ params, context }) => {
+    const readContext = await resolveRouteReadLanguageContext(context.qc);
+    const readQuery = {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    };
+    await Promise.all([
+      routeQueryOrNotFound(
+        context.qc,
+        zonePortalQueryOptions(params.unitId, "home", readQuery),
+      ),
+      routeQueryOrNotFound(
+        context.qc,
+        postQueries.detail(params.wikiUnitId, readQuery),
+      ),
+    ]);
+  },
   component: ZoneUnitWikiThreadRoute,
 });

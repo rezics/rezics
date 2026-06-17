@@ -1,6 +1,12 @@
+import { shelfDetailQuery } from "@rezics/api/shelf";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { createMinimalEditConsoleConfig, EditConsoleLayout } from "@/core";
+import {
+  createMinimalEditConsoleConfig,
+  EditConsoleLayout,
+  routeQueryOrNotFound,
+} from "@/core";
+import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 
 const ShelfEditPage = lazyRouteComponent(
   () => import("@/shelf/pages/ShelfEditPage"),
@@ -8,6 +14,16 @@ const ShelfEditPage = lazyRouteComponent(
 );
 
 export const Route = createFileRoute("/_editor/shelf/$shelfId/edit")({
+  loader: async ({ params, context }) => {
+    const readContext = await resolveRouteReadLanguageContext(context.qc);
+    await routeQueryOrNotFound(
+      context.qc,
+      shelfDetailQuery(params.shelfId, {
+        languages: readContext.languages.join(",") || undefined,
+        appLocale: readContext.appLocale,
+      }),
+    );
+  },
   component: () => {
     const { shelfId } = Route.useParams();
     return (

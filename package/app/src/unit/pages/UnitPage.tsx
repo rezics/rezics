@@ -14,7 +14,11 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink, unitHref } from "@/shared/ui/link";
@@ -136,15 +140,15 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   }
 
   if (error) {
-    return <QueryErrorDisplay error={error} className="mt-8" />;
+    return isApiNotFoundError(error) ? (
+      <ResourceNotFoundState variant="section" className="mt-8" />
+    ) : (
+      <QueryErrorDisplay error={error} className="mt-8" />
+    );
   }
 
   if (!unit) {
-    return (
-      <div className="mt-8 text-center text-sm text-gray-500">
-        {t("common:no_data")}
-      </div>
-    );
+    return <ResourceNotFoundState variant="section" className="mt-8" />;
   }
 
   const title = unit.title;

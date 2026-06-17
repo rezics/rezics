@@ -90,6 +90,11 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import {
   AddUnitTranslationLanguageDialog,
@@ -241,12 +246,12 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
   }
 
   if (error || !entity) {
-    return (
+    return error && !isApiNotFoundError(error) ? (
       <div className="w-full mx-auto max-w-3xl px-4 py-12">
-        <h1 className="text-lg font-semibold text-text-primary">
-          {t("entity:not_found")}
-        </h1>
+        <QueryErrorDisplay error={error} />
       </div>
+    ) : (
+      <ResourceNotFoundState variant="section" />
     );
   }
 

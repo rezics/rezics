@@ -83,7 +83,11 @@ import { useBlocker, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
   AddUnitTranslationLanguageDialog,
@@ -340,15 +344,26 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   if (isError) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-6">
-        <QueryErrorDisplay error={error} />
+        {isApiNotFoundError(error) ? (
+          <ResourceNotFoundState variant="section" />
+        ) : (
+          <QueryErrorDisplay error={error} />
+        )}
       </div>
     );
   }
 
-  if (isLoading || !shelf) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Spinner />
+      </div>
+    );
+  }
+  if (!shelf) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-6">
+        <ResourceNotFoundState variant="section" />
       </div>
     );
   }

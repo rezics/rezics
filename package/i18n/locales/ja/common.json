@@ -213,6 +213,8 @@
   "external_links_remove_success": "外部リンクを削除しました。",
   "external_links_source_required": "ソース Entity を選択し、有効な URL を入力してください。",
   "external_links_invalid_url": "有効な URL を入力してください。",
+  "resource_not_found_title": "この項目は利用できなくなりました",
+  "resource_not_found_description": "削除、非表示、または移動された可能性があります。",
   "link_copied": "リンクをコピーしました",
   "clipboard_failed": "コピーに失敗しました。手動で選択してコピーしてください。"
 }

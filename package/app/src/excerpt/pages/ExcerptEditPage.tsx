@@ -11,7 +11,11 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { Route as excerptEditRoute } from "@/routes/_editor/excerpt/$unitId/edit";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";
@@ -188,7 +192,14 @@ export function ExcerptEditPageContainer() {
     return <div>{t("common:loading")}</div>;
   }
   if (error) {
-    return <QueryErrorDisplay error={error} />;
+    return isApiNotFoundError(error) ? (
+      <ResourceNotFoundState variant="section" />
+    ) : (
+      <QueryErrorDisplay error={error} />
+    );
+  }
+  if (!unitData) {
+    return <ResourceNotFoundState variant="section" />;
   }
 
   return (

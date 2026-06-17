@@ -5,6 +5,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { ResourceNotFoundState } from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { DeletedNodeView } from "../components/DeletedNodeView";
 import { EmptyNodeView } from "../components/EmptyNodeView";
@@ -71,7 +72,11 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
   if (state.kind === "loading")
     return <div className="p-4">{t("loading")}</div>;
   if (state.kind === "not-found")
-    return <div className="p-4">{t("not_found")}</div>;
+    return (
+      <div className="p-4">
+        <ResourceNotFoundState variant="inline" />
+      </div>
+    );
 
   if (state.kind === "deleted" || chapterDeleted) {
     const node = state.kind === "deleted" ? state.node : null;

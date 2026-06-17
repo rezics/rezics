@@ -213,6 +213,8 @@
   "external_links_remove_success": "已移除外部連結。",
   "external_links_source_required": "請選擇來源 Entity 並輸入有效 URL。",
   "external_links_invalid_url": "請輸入有效 URL。",
+  "resource_not_found_title": "此項目已不可用",
+  "resource_not_found_description": "它可能已被移除、隱藏或移動。",
   "link_copied": "連結已複製",
   "clipboard_failed": "複製失敗，請手動選取並複製。"
 }

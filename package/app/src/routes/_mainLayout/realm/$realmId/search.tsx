@@ -1,9 +1,12 @@
+import { realmDetailQuery } from "@rezics/api/realm/realm";
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
+import { routeQueryOrNotFound } from "@/core";
 import { FederatedSearchPage, isSearchCategory } from "@/search";
 import { parseSearchString } from "@/search";
 import { isRealmUnitIdParam } from "@/realm/models/realmDetailRoutes";
+import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 
 type SearchRouteParams = {
   q?: string;
@@ -40,8 +43,16 @@ function RealmScopedSearchPage() {
 }
 
 export const Route = createFileRoute("/_mainLayout/realm/$realmId/search")({
-  loader: ({ params }) => {
+  loader: async ({ params, context }) => {
     if (!isRealmUnitIdParam(params.realmId)) throw notFound();
+    const readContext = await resolveRouteReadLanguageContext(context.qc);
+    await routeQueryOrNotFound(
+      context.qc,
+      realmDetailQuery(params.realmId, {
+        languages: readContext.languages,
+        appLocale: readContext.appLocale,
+      }),
+    );
   },
   validateSearch: (search: Record<string, unknown>): SearchRouteParams => ({
     q: typeof search.q === "string" ? search.q : undefined,

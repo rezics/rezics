@@ -1,9 +1,12 @@
 import { zonePortalQueryOptions } from "@rezics/api";
+import { postQueries } from "@rezics/api/post/post";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { resolveDefaultCommentContext } from "@/comment";
+import { routeQueryOrNotFound } from "@/core";
 import { PostThreadPage } from "@/post";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";
 import { zonePresentationContext } from "@/unit";
 
 // UnitId zone framing mirrors the slug-framed route: presentation remains the
@@ -37,5 +40,22 @@ function ZoneUnitPostThreadRoute() {
 export const Route = createFileRoute(
   "/_mainLayout/zone/$unitId/post/$postUnitId",
 )({
+  loader: async ({ params, context }) => {
+    const readContext = await resolveRouteReadLanguageContext(context.qc);
+    const readQuery = {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    };
+    await Promise.all([
+      routeQueryOrNotFound(
+        context.qc,
+        zonePortalQueryOptions(params.unitId, "home", readQuery),
+      ),
+      routeQueryOrNotFound(
+        context.qc,
+        postQueries.detail(params.postUnitId, readQuery),
+      ),
+    ]);
+  },
   component: ZoneUnitPostThreadRoute,
 });

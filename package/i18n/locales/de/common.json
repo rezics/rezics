@@ -213,6 +213,8 @@
   "external_links_remove_success": "Externer Link entfernt.",
   "external_links_source_required": "Wähle eine Quell-Entity und gib eine gültige URL ein.",
   "external_links_invalid_url": "Gib eine gültige URL ein.",
+  "resource_not_found_title": "Dieses Element ist nicht mehr verfügbar",
+  "resource_not_found_description": "Es wurde möglicherweise entfernt, ausgeblendet oder verschoben.",
   "link_copied": "Link kopiert",
   "clipboard_failed": "Kopieren fehlgeschlagen. Bitte manuell auswählen und kopieren."
 }

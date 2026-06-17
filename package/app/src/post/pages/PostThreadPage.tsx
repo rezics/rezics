@@ -17,7 +17,11 @@ import {
   toCommentWriteRealmUnitId,
   useFocusReplyFromQuery,
 } from "@/comment";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink } from "@/shared/ui/link";
 import type { UnitPresentationContext } from "@/unit";
@@ -126,6 +130,7 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
   const readContext = useReadLanguageContext();
   const {
     data: root,
+    isLoading: isRootLoading,
     isError: isRootError,
     error: rootError,
   } = useQuery({
@@ -161,7 +166,18 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
   if (isRootError) {
     return (
       <div className="w-full max-w-3xl mx-auto mt-8 px-4">
-        <QueryErrorDisplay error={rootError} />
+        {isApiNotFoundError(rootError) ? (
+          <ResourceNotFoundState variant="section" />
+        ) : (
+          <QueryErrorDisplay error={rootError} />
+        )}
+      </div>
+    );
+  }
+  if (!isRootLoading && !root) {
+    return (
+      <div className="w-full max-w-3xl mx-auto mt-8 px-4">
+        <ResourceNotFoundState variant="section" />
       </div>
     );
   }

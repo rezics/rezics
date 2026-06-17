@@ -1,6 +1,11 @@
+import { entityDetailQueryOptions } from "@rezics/api/entity";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { createMinimalEditConsoleConfig, EditConsoleLayout } from "@/core";
+import {
+  createMinimalEditConsoleConfig,
+  EditConsoleLayout,
+  routeQueryOrNotFound,
+} from "@/core";
 
 const EntityEditPage = lazyRouteComponent(
   () => import("@/entity"),
@@ -8,6 +13,12 @@ const EntityEditPage = lazyRouteComponent(
 );
 
 export const Route = createFileRoute("/_editor/entity/$unitId/edit")({
+  loader: async ({ params, context }) => {
+    await routeQueryOrNotFound(
+      context.qc,
+      entityDetailQueryOptions(params.unitId),
+    );
+  },
   component: () => {
     const { unitId } = Route.useParams();
     return (

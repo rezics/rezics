@@ -47,7 +47,11 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { QueryErrorDisplay } from "@/core";
+import {
+  isApiNotFoundError,
+  QueryErrorDisplay,
+  ResourceNotFoundState,
+} from "@/core";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
@@ -303,7 +307,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   if (detailQuery.isError) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        <QueryErrorDisplay error={detailQuery.error} />
+        {isApiNotFoundError(detailQuery.error) ? (
+          <ResourceNotFoundState variant="section" />
+        ) : (
+          <QueryErrorDisplay error={detailQuery.error} />
+        )}
       </div>
     );
   }
@@ -312,6 +320,13 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     return (
       <div className="flex justify-center py-12">
         <Spinner />
+      </div>
+    );
+  }
+  if (!shelf) {
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+        <ResourceNotFoundState variant="section" />
       </div>
     );
   }
