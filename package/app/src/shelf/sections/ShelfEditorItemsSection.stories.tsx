@@ -139,9 +139,10 @@ function useSeededShelf({
   const qc = useQueryClient();
   useEffect(() => {
     qc.setQueryData(shelfKeys.itemsPage(SHELF_ID, undefined), {
-      units,
+      items: units,
       relations,
       hasMore: false,
+      nextCursor: null,
     });
     const ids = books.map((b) => b.unitId);
     qc.setQueryData(

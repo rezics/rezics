@@ -3,7 +3,13 @@ import type {
   ShelfView,
   TagListEntryDTO,
 } from "@rezics/api/shelf";
-import type { BookDTO, CommentDTO, PostDTO, ShelfDTO } from "@rezics/contract";
+import type {
+  BookDTO,
+  CommentDTO,
+  PostDTO,
+  ShelfDTO,
+  ShelfItemParentRole,
+} from "@rezics/contract";
 import {
   contentDocMarkdownFallback,
   isLibraryKind,
@@ -18,10 +24,10 @@ import { BookCard, HorizontalBookCard } from "@/book-library";
 import { coverAspectRatioForLibraryKind } from "@/bookshelf-view";
 import { CommentReply } from "@/comment";
 import { ExcerptCard, mapPostToExcerptUnit } from "@/excerpt";
-import { StreamPostCard } from "@/stream";
 import { ReviewCard } from "@/review";
-import { getBookAuthorName } from "@/shared/utils/translation-helpers";
 import { Link, unitHref } from "@/shared/ui/link";
+import { getBookAuthorName } from "@/shared/utils/translation-helpers";
+import { StreamPostCard } from "@/stream";
 import { shelfItemToUnitCardSummary, UnitCard } from "@/unit";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
@@ -66,14 +72,15 @@ function renderUnit(
   // 封面。
   if (viewMode === "bookshelf") {
     if (!isLibraryKind(unit.kind)) return null;
-    const book = data as BookDTO | undefined;
+    const summary = shelfItemToUnitCardSummary(unit, data);
     const unitId = shelfItemUnitId(unit) ?? shelfItemReference(unit);
+    const href = unit.kind === "book" ? `/book/${unitId}` : `/unit/${unitId}`;
     return (
       <BookCard
-        title={book?.title ?? unitId}
-        author={book ? getBookAuthorName(book) || undefined : undefined}
-        coverUrl={book?.coverUrl ?? ""}
-        href={`/book/${unitId}`}
+        title={summary.title}
+        author={summary.author?.name ?? undefined}
+        coverUrl={summary.imageUrl ?? ""}
+        href={href}
         showTitle
         aspectRatio={coverAspectRatioForLibraryKind(unit.kind)}
       />
@@ -188,19 +195,52 @@ function targetUnitFromParent(
 
 function attachmentCountsForEntry(entry: ShelfStreamEntry):
   | {
-      reviews: number;
-      tags: number;
+      reviews?: number;
+      variants?: number;
+      comments?: number;
+      tags?: number;
+      annotations?: number;
+      total?: number;
     }
   | undefined {
   if (entry.kind !== "root") return undefined;
-  let reviews = 0;
-  let tags = 0;
+  const counts = {
+    reviews: 0,
+    variants: 0,
+    comments: 0,
+    tags: 0,
+    annotations: 0,
+    total: entry.children.length,
+  };
   for (const child of entry.children) {
-    if (child.unit.kind === "review") reviews += 1;
-    if (child.unit.kind === "tag") tags += 1;
+    const role = child.unit.parentRole;
+    if (role === "review" || child.unit.kind === "review") counts.reviews += 1;
+    else if (role === "variant") counts.variants += 1;
+    else if (role === "comment" || child.unit.kind === "comment")
+      counts.comments += 1;
+    else if (role === "tag" || child.unit.kind === "tag") counts.tags += 1;
+    else if (role === "annotation") counts.annotations += 1;
   }
-  if (reviews === 0 && tags === 0) return undefined;
-  return { reviews, tags };
+  if (counts.total === 0) return undefined;
+  return counts;
+}
+
+function childRoleLabel(
+  role: ShelfItemParentRole | null | undefined,
+  t: (key: string) => string,
+): string {
+  switch (role) {
+    case "variant":
+      return t("shelf_child_role_variant");
+    case "comment":
+      return t("shelf_child_role_comment");
+    case "tag":
+      return t("shelf_child_role_tag");
+    case "annotation":
+      return t("shelf_child_role_annotation");
+    default:
+      return t("shelf_child_role_review");
+  }
 }
 
 function NestedRootCard({
@@ -213,12 +253,7 @@ function NestedRootCard({
   const { t } = useTranslation("entity");
   const [tab, setTab] = useState("0");
   const primary = renderUnit(root, "nested");
-  const tabChildren = attachedChildren.filter(
-    (c) =>
-      c.unit.parentRole === "review" ||
-      c.unit.parentRole === "variant" ||
-      c.unit.kind === "review",
-  );
+  const tabChildren = attachedChildren;
 
   if (tabChildren.length === 0) {
     return <>{primary}</>;
@@ -234,10 +269,10 @@ function NestedRootCard({
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="overflow-x-auto">
             {tabChildren.map((c, idx) => {
-              // Resolve tab label from the child's role.
-              // 根据子项的角色解析标签页名称。
-              const labelPrefix =
-                c.unit.parentRole === "variant" ? t("variant") : t("review");
+              // Tabs expose every supported one-level child role; deeper graph
+              // traversal is intentionally not rendered in nested mode.
+              // tabs 展示每个受支持的一层 child role；nested 模式有意不递归渲染更深图关系。
+              const labelPrefix = childRoleLabel(c.unit.parentRole, t);
               return (
                 <TabsTrigger
                   key={shelfItemIdentity(c.unit)}

@@ -91,6 +91,7 @@ import {
 } from "@/unit";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
+import { normalizeShelfViewMode } from "../models/shelfViewMode";
 import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
 
 interface ShelfEditPageProps {
@@ -103,6 +104,10 @@ const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
     label: getI18nRuntime().i18n.t("entity:shelf_view_nested"),
   },
   { value: "flat", label: getI18nRuntime().i18n.t("entity:shelf_view_flat") },
+  {
+    value: "bookshelf",
+    label: getI18nRuntime().i18n.t("entity:shelf_view_bookshelf"),
+  },
   // { value: "masonry", label: "Masonry" },
 ];
 
@@ -234,7 +239,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     useState<ShelfView>("nested");
 
   useEffect(() => {
-    const saved = normalizeViewMode(
+    const saved = normalizeShelfViewMode(
       (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
     );
     setDefaultViewMode(saved);
@@ -243,7 +248,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
 
   const metadataDirty = useMemo(() => {
     if (!shelf) return false;
-    const savedViewMode = normalizeViewMode(
+    const savedViewMode = normalizeShelfViewMode(
       (shelf.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
     );
     return defaultViewMode !== savedViewMode;
@@ -511,9 +516,4 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
       />
     </div>
   );
-}
-
-function normalizeViewMode(raw: unknown): ShelfView {
-  if (raw === "flat" || raw === "nested" || raw === "masonry") return raw;
-  return "nested";
 }

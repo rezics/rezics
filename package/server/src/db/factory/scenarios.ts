@@ -4,6 +4,7 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LANGUAGES,
   markdownContentDoc,
+  type ShelfItemParentRole,
   withCoverUrl,
   type ZoneBoundary,
   type ZoneNav,
@@ -279,9 +280,27 @@ async function createScenarioBookUnit(
   return unitId;
 }
 
-async function getWorkIds(ctx: SeedCtx): Promise<string[]> {
+interface ScenarioWorkRef {
+  id: string;
+  type: UnitType;
+}
+
+function unitTypeToShelfKind(type: UnitType): "book" | "game" | "media" {
+  switch (type) {
+    case UnitType.GAME:
+      return "game";
+    case UnitType.MEDIA:
+      return "media";
+    case UnitType.BOOK:
+      return "book";
+    default:
+      throw new Error(`Complex shelf requires a catalog work, got ${type}.`);
+  }
+}
+
+async function getWorkRefs(ctx: SeedCtx): Promise<ScenarioWorkRef[]> {
   const rows = await ctx.db
-    .select({ id: Unit.id })
+    .select({ id: Unit.id, type: Unit.type })
     .from(Unit)
     .where(
       and(
@@ -290,7 +309,91 @@ async function getWorkIds(ctx: SeedCtx): Promise<string[]> {
       ),
     )
     .limit(80);
-  return rows.map((row) => row.id);
+  return rows.map((row) => ({ id: row.id, type: row.type as UnitType }));
+}
+
+interface ComplexShelfSourceItem {
+  itemType?: string;
+  itemId: string;
+  kind: string;
+}
+
+interface ComplexShelfItemRow {
+  shelfId: string;
+  itemType: string;
+  itemId: string;
+  kind: string;
+  position: string;
+  parentItemType: string | null;
+  parentItemId: string | null;
+  parentRole: ShelfItemParentRole | null;
+}
+
+export function buildComplexShelfItemRows(input: {
+  shelfId: string;
+  roots: ComplexShelfSourceItem[];
+  variants: ComplexShelfSourceItem[];
+  reviews: ComplexShelfSourceItem[];
+  tags: ComplexShelfSourceItem[];
+  comments: ComplexShelfSourceItem[];
+  annotations: ComplexShelfSourceItem[];
+}): ComplexShelfItemRow[] {
+  const rows: ComplexShelfItemRow[] = [];
+  let prev: string | undefined;
+  let reviewIndex = 0;
+  let variantIndex = 0;
+  let tagIndex = 0;
+  let commentIndex = 0;
+  let annotationIndex = 0;
+
+  const append = (
+    item: ComplexShelfSourceItem,
+    parent?: { itemId: string; role: ShelfItemParentRole },
+  ) => {
+    const position = generateBetween(prev, undefined);
+    prev = position;
+    rows.push({
+      shelfId: input.shelfId,
+      itemType: item.itemType ?? "unit",
+      itemId: item.itemId,
+      kind: item.kind,
+      position,
+      parentItemType: parent ? "unit" : null,
+      parentItemId: parent?.itemId ?? null,
+      parentRole: parent?.role ?? null,
+    });
+  };
+
+  for (const [index, root] of input.roots.entries()) {
+    append(root);
+    const review = input.reviews[reviewIndex];
+    if (review && index % 2 === 0) {
+      append(review, { itemId: root.itemId, role: "review" });
+      reviewIndex += 1;
+    }
+    const variant = input.variants[variantIndex];
+    if (variant && index % 3 === 0) {
+      append(variant, { itemId: root.itemId, role: "variant" });
+      variantIndex += 1;
+    }
+    const tag = input.tags[tagIndex];
+    if (tag && index % 5 === 0) {
+      append(tag, { itemId: root.itemId, role: "tag" });
+      tagIndex += 1;
+    }
+    const comment = input.comments[commentIndex];
+    if (comment && index % 6 === 0) {
+      append(comment, { itemId: root.itemId, role: "comment" });
+      commentIndex += 1;
+    }
+    const annotation = input.annotations[annotationIndex];
+    if (annotation && index % 8 === 0) {
+      append(annotation, { itemId: root.itemId, role: "annotation" });
+      annotationIndex += 1;
+    }
+  }
+
+  return rows;
 }
 
 interface ShowcaseFeedWorkPlan {
@@ -780,14 +883,171 @@ async function runLargeHistory(ctx: SeedCtx): Promise<SeedResult> {
   return result;
 }
 
+async function createComplexShelfReview(
+  ctx: SeedCtx,
+  input: {
+    userId: string;
+    targetUnitId: string;
+    index: number;
+  },
+): Promise<string> {
+  const postUnitId = randomUUID();
+  const baseTime = new Date("2026-06-05T12:00:00.000Z").getTime();
+  const publishedAt = new Date(baseTime - input.index * 60 * 60 * 1000);
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: postUnitId,
+      type: UnitType.POST,
+      userId: input.userId,
+      slugScope: input.userId,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      targetUnitId: input.targetUnitId,
+      publishedAt,
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      language: DEFAULT_LANGUAGE,
+      title: `Complex Shelf Review ${input.index + 1}`,
+      summary: `Review fixture ${input.index + 1} for the complex shelf scenario.`,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
+  await ctx.db.insert(ContentTranslation).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      language: DEFAULT_LANGUAGE,
+      content: markdownContentDoc(
+        `Review fixture ${input.index + 1} attached to a complex shelf root.`,
+      ) as never,
+      status: "PUBLISHED" as const,
+      authorUserId: input.userId,
+      provenance: { importedFrom: "factory-complex-shelf-scenario" },
+    }),
+  );
+  await ctx.db.insert(Post).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      authorUserId: input.userId,
+      kind: PostKind.REVIEW,
+      createdAt: publishedAt,
+    }),
+  );
+  await ctx.sync.post(postUnitId);
+  return postUnitId;
+}
+
+async function createComplexShelfAnnotation(
+  ctx: SeedCtx,
+  input: {
+    userId: string;
+    targetUnitId: string;
+    index: number;
+  },
+): Promise<string> {
+  const postUnitId = randomUUID();
+  const baseTime = new Date("2026-06-05T06:00:00.000Z").getTime();
+  const publishedAt = new Date(baseTime - input.index * 60 * 60 * 1000);
+  await ctx.db.insert(Unit).values(
+    withUpdatedAt({
+      id: postUnitId,
+      type: UnitType.POST,
+      userId: input.userId,
+      slugScope: input.userId,
+      status: UnitStatus.PUBLISHED,
+      visibility: UnitVisibility.PUBLIC,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+      defaultLanguage: DEFAULT_LANGUAGE,
+      targetUnitId: input.targetUnitId,
+      publishedAt,
+    }),
+  );
+  await ctx.db.insert(UnitTranslation).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      language: DEFAULT_LANGUAGE,
+      title: `Complex Shelf Annotation ${input.index + 1}`,
+      summary: `Annotation fixture ${input.index + 1} for the complex shelf scenario.`,
+    }),
+  );
+  await ctx.db.insert(UnitSupportLanguage).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      language: DEFAULT_LANGUAGE,
+      isPrimary: true,
+    }),
+  );
+  await ctx.db.insert(ContentTranslation).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      language: DEFAULT_LANGUAGE,
+      content: markdownContentDoc(
+        `Annotation fixture ${input.index + 1} attached to a complex shelf root.`,
+      ) as never,
+      status: "PUBLISHED" as const,
+      authorUserId: input.userId,
+      provenance: { importedFrom: "factory-complex-shelf-scenario" },
+    }),
+  );
+  await ctx.db.insert(Post).values(
+    withUpdatedAt({
+      unitId: postUnitId,
+      authorUserId: input.userId,
+      kind: PostKind.REMARK,
+      createdAt: publishedAt,
+    }),
+  );
+  await ctx.sync.post(postUnitId);
+  return postUnitId;
+}
+
+async function createComplexShelfComment(
+  ctx: SeedCtx,
+  input: {
+    userId: string;
+    rootUnitId: string;
+    index: number;
+  },
+): Promise<string> {
+  const commentId = randomUUID();
+  const baseTime = new Date("2026-06-05T09:00:00.000Z").getTime();
+  await ctx.db.insert(Comment).values(
+    withUpdatedAt({
+      id: commentId,
+      rootUnitId: input.rootUnitId,
+      parentCommentId: null,
+      authorUserId: input.userId,
+      content: markdownContentDoc(
+        `Comment fixture ${input.index + 1} attached to a complex shelf root.`,
+      ) as never,
+      depth: 1,
+      createdAt: new Date(baseTime - input.index * 60 * 60 * 1000),
+    }),
+  );
+  return commentId;
+}
+
 async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
   const result = createSeedResult();
   const user = await getScenarioUser(ctx);
-  const workIds = await getWorkIds(ctx);
-  if (workIds.length < 4) {
-    throw new Error(
-      "complex-shelf requires at least four published work Units.",
+  const workRefs = await getWorkRefs(ctx);
+  for (let index = workRefs.length; index < 72; index++) {
+    const id = await createNamedBook(
+      ctx,
+      user.userId,
+      `Factory Scenario: Complex Shelf Work ${index + 1}`,
     );
+    workRefs.push({ id, type: UnitType.BOOK });
   }
 
   const shelfId = randomUUID();
@@ -806,7 +1066,7 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
   await ctx.db.insert(Shelf).values(
     withUpdatedAt({
       unitId: shelfId,
-      extra: { viewMode: "nested", sortBy: "manual" },
+      extra: { viewMode: "nested", sortBy: "manual", scenario: "complex" },
     }),
   );
   await ctx.db.insert(UnitTranslation).values(
@@ -824,26 +1084,62 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
     }),
   );
 
-  let prev: string | undefined;
-  const selected = workIds.slice(0, Math.min(workIds.length, 48));
-  const shelfRows = selected.map((unitId, index) => {
-    const position = generateBetween(prev, undefined);
-    prev = position;
-    return {
-      shelfId,
-      itemType: "unit",
-      itemId: unitId,
-      kind: index % 3 === 0 ? "book" : index % 3 === 1 ? "game" : "media",
-      position,
-      parentItemType: index > 0 && index < 20 ? "unit" : null,
-      parentItemId: index > 0 && index < 20 ? selected[index - 1]! : null,
-      parentRole:
-        index > 0 && index < 20
-          ? index % 2 === 0
-            ? "sequel"
-            : "related"
-          : null,
-    };
+  const roots = workRefs.slice(0, 48).map((work) => ({
+    itemId: work.id,
+    kind: unitTypeToShelfKind(work.type),
+  }));
+  const variants = workRefs.slice(48, 64).map((work) => ({
+    itemId: work.id,
+    kind: unitTypeToShelfKind(work.type),
+  }));
+  const reviewIds = await Promise.all(
+    roots.slice(0, 24).map((root, index) =>
+      createComplexShelfReview(ctx, {
+        userId: user.userId,
+        targetUnitId: root.itemId,
+        index,
+      }),
+    ),
+  );
+  const reviews = reviewIds.map((itemId) => ({ itemId, kind: "review" }));
+  const commentIds = await Promise.all(
+    reviewIds.slice(0, 8).map((rootUnitId, index) =>
+      createComplexShelfComment(ctx, {
+        userId: user.userId,
+        rootUnitId,
+        index,
+      }),
+    ),
+  );
+  const comments = commentIds.map((itemId) => ({
+    itemType: "comment",
+    itemId,
+    kind: "comment",
+  }));
+  const annotationIds = await Promise.all(
+    roots.slice(0, 6).map((root, index) =>
+      createComplexShelfAnnotation(ctx, {
+        userId: user.userId,
+        targetUnitId: root.itemId,
+        index,
+      }),
+    ),
+  );
+  const annotations = annotationIds.map((itemId) => ({ itemId, kind: "post" }));
+  const tagIds = await Promise.all(
+    Array.from({ length: 10 }, (_, index) =>
+      createScenarioTag(ctx, `Complex Shelf: Tag ${index + 1}`),
+    ),
+  );
+  const tags = tagIds.map((itemId) => ({ itemId, kind: "tag" }));
+  const shelfRows = buildComplexShelfItemRows({
+    shelfId,
+    roots,
+    variants,
+    reviews,
+    tags,
+    comments,
+    annotations,
   });
   await ctx.db
     .insert(ShelfItem)

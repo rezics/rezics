@@ -107,7 +107,9 @@ export function UnitCard({
           {attachments && (
             <>
               {(author || addedAt) && <span aria-hidden="true">·</span>}
-              <span className="shrink-0">{attachments}</span>
+              <span className="min-w-0 truncate" title={attachments}>
+                {attachments}
+              </span>
             </>
           )}
           {!isCompact && translationMeta && (
@@ -165,11 +167,25 @@ function renderAttachmentCounts(
   const counts = summary.attachmentCounts;
   if (!counts) return null;
   const parts: string[] = [];
-  if (counts.reviews > 0) {
+  if ((counts.reviews ?? 0) > 0) {
     parts.push(t("entity:unit_review_count", { count: counts.reviews }));
   }
-  if (counts.tags > 0) {
+  if ((counts.variants ?? 0) > 0) {
+    parts.push(t("entity:unit_variant_count", { count: counts.variants }));
+  }
+  if ((counts.comments ?? 0) > 0) {
+    parts.push(t("entity:unit_comment_count", { count: counts.comments }));
+  }
+  if ((counts.tags ?? 0) > 0) {
     parts.push(t("entity:unit_tag_count", { count: counts.tags }));
+  }
+  if ((counts.annotations ?? 0) > 0) {
+    parts.push(
+      t("entity:unit_annotation_count", { count: counts.annotations }),
+    );
+  }
+  if (parts.length === 0 && (counts.total ?? 0) > 0) {
+    parts.push(t("entity:unit_attachment_count", { count: counts.total }));
   }
   return parts.length > 0 ? parts.join(" · ") : null;
 }

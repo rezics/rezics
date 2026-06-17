@@ -12,6 +12,8 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("entity:shelf_sort_title_za"),
   shelf_view_nested: () => getI18nRuntime().i18n.t("entity:shelf_view_nested"),
   shelf_view_list: () => getI18nRuntime().i18n.t("entity:shelf_view_list"),
+  shelf_view_bookshelf: () =>
+    getI18nRuntime().i18n.t("entity:shelf_view_bookshelf"),
 } as const;
 
 import { useCanEdit } from "@rezics/api/hooks";
@@ -26,6 +28,7 @@ import {
 } from "@rezics/api/shelf";
 import {
   contentDocMarkdownFallback,
+  isLibraryKind,
   type ShelfItemChildDTO,
   shelfCoverImageSpec,
   shelfItemIdentity,
@@ -61,23 +64,11 @@ import {
   deriveShelfStream,
   type ShelfStreamEntry,
 } from "../models/shelfStream";
+import { normalizeShelfViewMode } from "../models/shelfViewMode";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
 
 interface ShelfPageProps {
   unitId: string;
-}
-
-/**
- * Legacy view-mode values map forward (review to nested, list to flat, grid to
- * masonry); unknown to nested. No data migration — the legacy value is
- * overwritten on next write.
- * 旧的 view-mode 值向前映射（review 映射为 nested、list 映射为 flat、grid 映射为
- * masonry）；未知值映射为 nested。不做数据迁移 —— 旧值会在下次写入时被覆盖。
- */
-function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
-  if (typeof raw !== "string") return undefined;
-  if (raw === "nested" || raw === "flat" || raw === "masonry") return raw;
-  return undefined;
 }
 
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
@@ -104,6 +95,7 @@ const SORT_OPTIONS: ShelfSortChoice[] = [
 const VIEW_OPTIONS: ShelfViewChoice[] = [
   { value: "nested", label: i18nMessages.shelf_view_nested },
   { value: "flat", label: i18nMessages.shelf_view_list },
+  { value: "bookshelf", label: i18nMessages.shelf_view_bookshelf },
   // { value: "masonry", label: "Grid" },
 ];
 
@@ -181,12 +173,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const title = shelf?.title ?? t("entity:shelf_title");
   const description = contentDocMarkdownFallback(shelf?.description);
 
-  const savedViewMode = normalizePersistedViewMode(
+  const savedViewMode = normalizeShelfViewMode(
     (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
   );
   const selectedViewMode =
     viewModeOverride.unitId === unitId ? viewModeOverride.value : undefined;
-  const effectiveViewMode = selectedViewMode ?? savedViewMode ?? "nested";
+  const effectiveViewMode = selectedViewMode ?? savedViewMode;
 
   const hydration = useHydratedShelfItems(units);
   const currentUser = useUserProfileStore((s) => s.user);
@@ -225,37 +217,53 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     () => filterReadableEntries(filteredStream, readableOnly),
     [filteredStream, readableOnly],
   );
-  const totalItemCount = Math.max(readableStream.length, shelf?.itemCount ?? 0);
-  const totalPages = Math.max(1, Math.ceil(totalItemCount / PAGE_SIZE));
+  const displayStream = useMemo(
+    () =>
+      effectiveViewMode === "bookshelf"
+        ? readableStream.filter((entry) => isLibraryKind(entry.unit.unit.kind))
+        : readableStream,
+    [effectiveViewMode, readableStream],
+  );
+  const bookshelfFilteredCount =
+    effectiveViewMode === "bookshelf"
+      ? readableStream.length - displayStream.length
+      : 0;
+  const loadedPages = Math.max(1, Math.ceil(displayStream.length / PAGE_SIZE));
+  const finalPageCount = hasNextPage ? null : loadedPages;
   const page = pageState.unitId === unitId ? pageState.page : 1;
   const pageStart = (page - 1) * PAGE_SIZE;
-  const visibleStream = readableStream.slice(pageStart, pageStart + PAGE_SIZE);
+  const visibleStream = displayStream.slice(pageStart, pageStart + PAGE_SIZE);
   const waitingForPageData =
     hasNextPage &&
-    pageStart >= readableStream.length &&
-    readableStream.length > 0;
+    pageStart >= displayStream.length &&
+    displayStream.length > 0;
+  const canPageBackward = page > 1;
+  const canPageForward = page < loadedPages || Boolean(hasNextPage);
 
   useEffect(() => {
     setPageState((current) => {
       const currentPage = current.unitId === unitId ? current.page : 1;
-      const nextPage = Math.min(currentPage, totalPages);
+      const nextPage = finalPageCount
+        ? Math.min(currentPage, finalPageCount)
+        : currentPage;
       if (current.unitId === unitId && current.page === nextPage) {
         return current;
       }
       return { unitId, page: nextPage };
     });
-  }, [totalPages, unitId]);
+  }, [finalPageCount, unitId]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: the normalized search text intentionally resets pagination when it changes.
   useEffect(() => {
     setPageState({ unitId, page: 1 });
-  }, [normalizedItemSearchText, unitId]);
-
-  // Reset to first page when item search text changes.
-  // 当搜索文本变化时重置到第一页。
-  useEffect(() => {
-    setPageState({ unitId, page: 1 });
-  }, [unitId]);
+  }, [
+    normalizedItemSearchText,
+    readableOnly,
+    sortPrimeOnly,
+    sortState,
+    effectiveViewMode,
+    unitId,
+  ]);
 
   useEffect(() => {
     if (waitingForPageData && !isFetchingNextPage) {
@@ -538,7 +546,18 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         </div>
 
-        {isItemsLoading || waitingForPageData || isFetchingNextPage ? (
+        {bookshelfFilteredCount > 0 && (
+          <p className="text-xs leading-dense text-text-secondary">
+            {t("entity:shelf_bookshelf_filtered_count", {
+              count: bookshelfFilteredCount,
+            })}
+          </p>
+        )}
+
+        {isItemsLoading ||
+        hydration.isLoading ||
+        waitingForPageData ||
+        isFetchingNextPage ? (
           <div className="flex justify-center py-8">
             <Spinner size="sm" />
           </div>
@@ -550,10 +569,22 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <p className="py-8 text-center text-text-secondary">
             {normalizedItemSearchText
               ? t("entity:shelf_item_no_search_matches")
-              : t("entity:shelf_empty_items")}
+              : effectiveViewMode === "bookshelf" && readableStream.length > 0
+                ? t("entity:shelf_bookshelf_empty")
+                : t("entity:shelf_empty_items")}
           </p>
         ) : effectiveViewMode === "masonry" ? (
           <div className={MASONRY_COLUMN_CLASS}>
+            {visibleStream.map((entry) => (
+              <ShelfItemRenderer
+                key={streamEntryKey(streamKeyPrefix, entry)}
+                entry={entry}
+                viewMode={effectiveViewMode}
+              />
+            ))}
+          </div>
+        ) : effectiveViewMode === "bookshelf" ? (
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {visibleStream.map((entry) => (
               <ShelfItemRenderer
                 key={streamEntryKey(streamKeyPrefix, entry)}
@@ -574,12 +605,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         )}
 
-        {totalPages > 1 && (
+        {(canPageBackward || canPageForward) && (
           <div className="flex items-center justify-center gap-2 py-2">
             <Button
               size="sm"
               variant="ghost"
-              disabled={page === 1}
+              disabled={!canPageBackward}
               onClick={() =>
                 setPageState((current) => ({
                   unitId,
@@ -593,19 +624,18 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               {t("common:prev")}
             </Button>
             <span className="text-sm text-text-secondary">
-              {page} / {totalPages}
+              {finalPageCount
+                ? `${page} / ${finalPageCount}`
+                : `${page} / ${loadedPages}+`}
             </span>
             <Button
               size="sm"
               variant="ghost"
-              disabled={page === totalPages}
+              disabled={!canPageForward}
               onClick={() =>
                 setPageState((current) => ({
                   unitId,
-                  page: Math.min(
-                    totalPages,
-                    (current.unitId === unitId ? current.page : page) + 1,
-                  ),
+                  page: (current.unitId === unitId ? current.page : page) + 1,
                 }))
               }
             >

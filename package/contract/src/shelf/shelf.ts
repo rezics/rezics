@@ -369,9 +369,9 @@ export type ShelfItemsQuery = (typeof shelfItemsQuerySchema)["static"];
 
 export const shelfItemsResponseSchema = t.Object({
   items: t.Array(shelfItemDTOSchema),
-  units: t.Optional(t.Array(shelfItemDTOSchema)),
   relations: t.Optional(t.Array(shelfItemChildDTOSchema)),
   hasMore: t.Boolean(),
+  nextCursor: t.Nullable(t.String()),
 });
 
 export type ShelfItemsResponse = (typeof shelfItemsResponseSchema)["static"];

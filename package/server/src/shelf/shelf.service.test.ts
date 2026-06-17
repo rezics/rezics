@@ -432,7 +432,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
 
           return [];
         },
-        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
         ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
@@ -504,7 +504,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
           }
           return [];
         },
-        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
         ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
@@ -556,7 +556,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
           if (table === ShelfItem) await query.returning();
           return [];
         },
-        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
         ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
@@ -612,7 +612,7 @@ function createFakeDrizzleDb(oldTx?: any): any {
           if (table === ShelfItem) await query.returning();
           return [];
         },
-        // biome-ignore lint/suspicious/noThenProperty: Drizzle test double must be awaitable.
+        // biome-ignore lint/suspicious/noThenProperty lint/complexity/useLiteralKeys: Drizzle test double must be awaitable.
         ["then"](
           resolve: (value: unknown[]) => unknown,
           reject?: (error: unknown) => unknown,
@@ -1177,6 +1177,47 @@ describe("ShelfService", () => {
         (relation: { parentItemId: string }) => relation.parentItemId,
       ),
     ).toEqual(["book-b", "book-a"]);
+    expect(result.hasMore).toBe(false);
+    expect(result.nextCursor).toBeNull();
+    expect(calls).toHaveLength(2);
+  });
+
+  test("getShelfItems returns the last visible root as nextCursor, never an appended child", async () => {
+    const calls: any[] = [];
+    Object.assign(legacyDbMock, {
+      shelfItem: {
+        findMany: async (args: any) => {
+          calls.push(args);
+          if (calls.length === 1) {
+            return [
+              makeShelfItemRow({ unitId: "book-a", position: "a0" }),
+              makeShelfItemRow({ unitId: "book-b", position: "b0" }),
+              makeShelfItemRow({ unitId: "book-c", position: "c0" }),
+            ];
+          }
+          return [
+            makeShelfItemRow({
+              unitId: "review-b",
+              kind: "review",
+              parentItemId: "book-b",
+              parentRole: "review",
+              position: "z0",
+            }),
+          ];
+        },
+      },
+    });
+
+    const { shelfService } = await import(
+      "./shelf.service.ts?shelf-service-test-actual" as string
+    );
+    const result = await shelfService.getShelfItems("shelf-1", { limit: 2 });
+
+    expect(result.items.map((item: { itemId: string }) => item.itemId)).toEqual(
+      ["book-a", "book-b", "review-b"],
+    );
+    expect(result.hasMore).toBe(true);
+    expect(result.nextCursor).toBe("book-b");
     expect(calls).toHaveLength(2);
   });
 

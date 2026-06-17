@@ -13,6 +13,7 @@ import {
 import { Value } from "@sinclair/typebox/value";
 import { OFFICIAL_ZONE_DEFINITIONS } from "../seed/infra/seed-official-zones";
 import {
+  buildComplexShelfItemRows,
   buildLargePostTreePlan,
   buildShowcaseFeedPlan,
   buildToaruZoneConfig,
@@ -144,6 +145,63 @@ describe("factory scenarios", () => {
   });
 });
 
+describe("buildComplexShelfItemRows", () => {
+  test("builds paginated roots with contract-valid child roles", () => {
+    const rows = buildComplexShelfItemRows({
+      shelfId: "shelf-complex",
+      roots: Array.from({ length: 48 }, (_, index) => ({
+        itemId: `root-${index}`,
+        kind: "book",
+      })),
+      variants: Array.from({ length: 8 }, (_, index) => ({
+        itemId: `variant-${index}`,
+        kind: "book",
+      })),
+      reviews: Array.from({ length: 24 }, (_, index) => ({
+        itemId: `review-${index}`,
+        kind: "review",
+      })),
+      tags: Array.from({ length: 10 }, (_, index) => ({
+        itemId: `tag-${index}`,
+        kind: "tag",
+      })),
+      comments: Array.from({ length: 8 }, (_, index) => ({
+        itemType: "comment",
+        itemId: `comment-${index}`,
+        kind: "comment",
+      })),
+      annotations: Array.from({ length: 6 }, (_, index) => ({
+        itemId: `annotation-${index}`,
+        kind: "post",
+      })),
+    });
+
+    const roots = rows.filter((row) => !row.parentItemId);
+    const itemKeys = rows.map((row) => `${row.itemType}:${row.itemId}`);
+    const childRoles = new Set(
+      rows
+        .map((row) => row.parentRole)
+        .filter((role): role is NonNullable<typeof role> => Boolean(role)),
+    );
+
+    expect(roots).toHaveLength(48);
+    expect(rows.length).toBeGreaterThan(90);
+    expect(new Set(itemKeys).size).toBe(rows.length);
+    expect(childRoles).toEqual(
+      new Set(["review", "variant", "comment", "tag", "annotation"]),
+    );
+    expect(
+      rows.every((row) =>
+        row.parentRole
+          ? ["review", "variant", "comment", "tag", "annotation"].includes(
+              row.parentRole,
+            )
+          : true,
+      ),
+    ).toBe(true);
+  });
+});
+
 describe("buildToaruZoneConfig", () => {
   function buildIds(): ToaruZoneConfigIds {
     return {
@@ -180,12 +238,12 @@ describe("buildToaruZoneConfig", () => {
       "actions",
       "collection",
       "columns",
-      "feed",
       "query",
       "richText",
       "sources",
       "stage",
       "stats",
+      "stream",
       "tabs",
       "zoneInfo",
     ]);
@@ -255,10 +313,10 @@ describe("zone fixture configs", () => {
     expect([...kinds].toSorted()).toEqual([
       "collection",
       "columns",
-      "feed",
       "query",
       "stage",
       "stats",
+      "stream",
       "tabs",
       "zoneInfo",
     ]);
