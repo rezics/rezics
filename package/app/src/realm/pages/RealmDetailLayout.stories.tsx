@@ -86,16 +86,16 @@ function makeRealm(): RealmDTO {
       },
     ],
     dock: {
-      schema: "rezics/realm-dock",
+      schema: "rezics/dock",
       version: 1,
       placements: {
         main: [
-          { slot: "builtin", id: "description", maxLines: 4 },
-          { slot: "builtin", id: "subscriptionStat" },
-          { slot: "builtin", id: "realmFacts" },
-          { slot: "builtin", id: "bookmarks", items: [] },
-          { slot: "builtin", id: "rules", mode: "summary" },
-          { slot: "builtin", id: "moderators", limit: 5 },
+          { kind: "unitDescription", nodeId: "description", maxLines: 4 },
+          { kind: "unitSubscriptionStat", nodeId: "subscription-stat" },
+          { kind: "realmInfo", nodeId: "realm-info" },
+          { kind: "links", nodeId: "links", items: [] },
+          { kind: "realmRules", nodeId: "rules", mode: "summary" },
+          { kind: "realmModerators", nodeId: "moderators", limit: 5 },
         ],
       },
     },

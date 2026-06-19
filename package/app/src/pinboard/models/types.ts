@@ -6,13 +6,13 @@
  * Unit's translations.
  */
 
-import type { PinboardKey } from "@rezics/contract";
+import type { RealmPinboardPlacement } from "@rezics/contract";
 
 /**
- * Pinboard key this feature renders. The current product surface manages only
- * the realm home Pinboard; homepage notices are presentation, not a data key.
+ * Pinboard placement this feature renders. The current product surface manages only
+ * the realm home Pinboard; homepage notices are presentation, not a data placement.
  */
-export type PinboardListKey = PinboardKey;
+export type PinboardListPlacement = RealmPinboardPlacement;
 
 /**
  * Resolved entry passed to the presentation layer. Derived at read time from

@@ -1,0 +1,2 @@
+ALTER TABLE "Pinboard" RENAME COLUMN "key" TO "placement";--> statement-breakpoint
+ALTER TABLE "Pinboard" RENAME CONSTRAINT "Pinboard_realmUnitId_key_unique" TO "Pinboard_realmUnitId_placement_unique";

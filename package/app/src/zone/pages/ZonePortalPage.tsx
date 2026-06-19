@@ -10,7 +10,7 @@ import { ZoneSectionList } from "../components/sections/ZoneSectionList";
 import { ZoneHeader } from "../components/ZoneHeader";
 import { useZonePortal } from "../hooks/useZone";
 import { canManageZone } from "../models/canManageZone";
-import { selectZoneDynamicTags } from "../models/zoneDynamicTags";
+import { selectPageDynamicTags } from "../models/zoneDynamicTags";
 import {
   type ZoneRouteLocation,
   zoneManageHref,
@@ -161,7 +161,7 @@ export const ZonePortalPage: React.FC<ZonePortalPageProps> = ({
   const [dynamicTagSeed] = useState(() => `${Date.now()}:${Math.random()}`);
   const dynamicTagSelections = useMemo(
     () =>
-      page ? selectZoneDynamicTags(page.config.sections, dynamicTagSeed) : {},
+      page ? selectPageDynamicTags(page.config.sections, dynamicTagSeed) : {},
     [dynamicTagSeed, page],
   );
   const permission = useServerPermission();

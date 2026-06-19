@@ -1,16 +1,16 @@
 import type {
   ContentLanguage,
+  Page,
+  PageDynamicTags,
+  PageSection,
+  PageSectionQuery,
+  PageSectionQueryFilterField,
+  PageSectionQuerySortField,
+  PageStageChildSection,
   ZoneBoundary,
-  ZoneDynamicTags,
   ZoneMenu,
   ZoneMenuNode,
   ZoneNav,
-  ZonePage,
-  ZonePageSection,
-  ZoneSectionQuery,
-  ZoneSectionQueryFilterField,
-  ZoneSectionQuerySortField,
-  ZoneStageChildSection,
   ZoneTheme,
   ZoneTranslation,
 } from "@rezics/contract";
@@ -21,15 +21,15 @@ import {
   ZONE_MENU_MAX_DEPTH,
   ZONE_NAV_SCHEMA,
   ZONE_NAV_V1_VERSION,
-  ZONE_PAGE_SCHEMA,
-  ZONE_PAGE_V1_VERSION,
-  ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
-  ZONE_SECTION_QUERY_SORT_FIELDS,
+  PAGE_SCHEMA,
+  PAGE_SECTION_QUERY_FILTERABLE_FIELDS,
+  PAGE_SECTION_QUERY_SORT_FIELDS,
+  PAGE_V1_VERSION,
   ZONE_THEME_SCHEMA,
   ZONE_THEME_V1_VERSION,
+  pageV1Schema,
   zoneBoundaryV1Schema,
   zoneNavV1Schema,
-  zonePageV1Schema,
   zoneThemeV1Schema,
 } from "@rezics/contract";
 import { Value } from "@sinclair/typebox/value";
@@ -47,7 +47,7 @@ import { Value } from "@sinclair/typebox/value";
  * 校验过的内容。
  */
 export type ZonePageId = string;
-export type ZonePages = Record<string, { sections: ZonePageSection[] }>;
+export type ZonePages = Record<string, { sections: PageSection[] }>;
 
 export type ZoneManageDraft = Omit<ZoneBoundary, "schema" | "version"> &
   Omit<ZoneNav, "schema" | "version"> & {
@@ -106,7 +106,7 @@ export function zoneShellToDraft(input: {
   boundary: ZoneBoundary;
   nav: ZoneNav;
   theme: ZoneTheme;
-  page?: ZonePage;
+  page?: Page;
   pageId?: ZonePageId;
 }): ZoneManageDraft {
   const {
@@ -163,10 +163,10 @@ export function zoneManageDraftToTheme(draft: ZoneManageDraft): ZoneTheme {
 export function zoneManageDraftToPage(
   draft: ZoneManageDraft,
   pageId: ZonePageId,
-): ZonePage {
+): Page {
   return {
-    schema: "rezics/zone-page",
-    version: 1,
+    schema: PAGE_SCHEMA,
+    version: PAGE_V1_VERSION,
     sections: deepClone(draft.pages[pageId]?.sections ?? []),
   };
 }
@@ -184,7 +184,7 @@ function stripEnvelopeMetadata(value: unknown): Record<string, unknown> {
 function zoneManageJsonEnvelope(
   target: ZoneManageJsonTarget,
   body: unknown,
-): ZoneBoundary | ZoneNav | ZoneTheme | ZonePage {
+): ZoneBoundary | ZoneNav | ZoneTheme | Page {
   const stripped = stripEnvelopeMetadata(body);
   switch (target.kind) {
     case "boundary":
@@ -207,10 +207,10 @@ function zoneManageJsonEnvelope(
       } as ZoneTheme;
     case "page":
       return {
-        schema: ZONE_PAGE_SCHEMA,
-        version: ZONE_PAGE_V1_VERSION,
+        schema: PAGE_SCHEMA,
+        version: PAGE_V1_VERSION,
         ...stripped,
-      } as ZonePage;
+      } as Page;
   }
 }
 
@@ -223,7 +223,7 @@ function zoneManageJsonSchema(target: ZoneManageJsonTarget) {
     case "theme":
       return zoneThemeV1Schema;
     case "page":
-      return zonePageV1Schema;
+      return pageV1Schema;
   }
 }
 
@@ -327,10 +327,10 @@ export function applyZoneManageJsonBody(
     case "page":
       return {
         ...draft,
-        pages: updateZonePageSections(
+        pages: updatePageSections(
           draft.pages,
           target.pageId,
-          () => deepClone(body.sections) as ZonePageSection[],
+          () => deepClone(body.sections) as PageSection[],
         ),
       };
   }
@@ -364,7 +364,7 @@ export const ZONE_PAGE_SECTION_KINDS = [
   "columns",
 ] as const;
 
-export type ZoneEditableSection = ZonePageSection | ZoneStageChildSection;
+export type ZoneEditableSection = PageSection | PageStageChildSection;
 
 export type ZoneSectionSlot = "page" | "stage" | "tabs" | "columns";
 
@@ -410,17 +410,19 @@ export function canInsertZoneSectionKind(
  */
 export function createZoneSection(
   kind: ZoneEditableSection["kind"],
-  id: string,
-  existingIds: readonly string[] = [],
+  slug: string,
+  _existingIds: readonly string[] = [],
 ): ZoneEditableSection {
+  const nodeId = crypto.randomUUID();
+  const withSlug = { nodeId, slug };
   switch (kind) {
     case "stage":
       return {
-        id,
+        ...withSlug,
         kind: "stage",
         sections: [
           {
-            id: nextZoneId(`${id}-info`, existingIds),
+            nodeId: crypto.randomUUID(),
             kind: "zoneInfo",
             showTitle: true,
             showDescription: true,
@@ -429,22 +431,22 @@ export function createZoneSection(
       };
     case "zoneInfo":
       return {
-        id,
+        ...withSlug,
         kind: "zoneInfo",
         showTitle: true,
         showDescription: true,
       };
     case "image":
-      return { id, kind: "image", url: "https://", variant: "inline" };
+      return { ...withSlug, kind: "image", url: "https://", variant: "inline" };
     case "actions":
-      return { id, kind: "actions", items: [] };
+      return { ...withSlug, kind: "actions", items: [] };
     case "richText":
-      return { id, kind: "richText", contentUnitId: "" };
+      return { ...withSlug, kind: "richText", contentUnitId: "" };
     case "collection":
-      return { id, kind: "collection", items: [], display: "list" };
+      return { ...withSlug, kind: "collection", items: [], display: "list" };
     case "query":
       return {
-        id,
+        ...withSlug,
         kind: "query",
         query: {
           target: "unit",
@@ -453,20 +455,20 @@ export function createZoneSection(
         display: "list",
       };
     case "stream":
-      return { id, kind: "stream" };
+      return { ...withSlug, kind: "stream" };
     case "stats":
-      return { id, kind: "stats", metrics: ["articles", "members"] };
+      return { ...withSlug, kind: "stats", metrics: ["articles", "members"] };
     case "sources":
-      return { id, kind: "sources" };
+      return { ...withSlug, kind: "sources" };
     case "tabs":
-      return { id, kind: "tabs", tabs: [] };
+      return { ...withSlug, kind: "tabs", tabs: [] };
     case "columns":
       return {
-        id,
+        ...withSlug,
         kind: "columns",
         columns: [
-          { id: "main", ratio: 3, sections: [] },
-          { id: "side", ratio: 1, sections: [] },
+          { ratio: 3, sections: [] },
+          { ratio: 1, sections: [] },
         ],
       };
   }
@@ -494,21 +496,21 @@ function* iterateSections(
 function pageSections(
   pages: ZonePages,
   pageId: ZonePageId,
-): readonly ZonePageSection[] {
+): readonly PageSection[] {
   return pages[pageId]?.sections ?? [];
 }
 
 /**
- * Every section id across the loaded page draft, containers and nested
- * sections included. Section ids are page-local in the split ZonePage model.
- * 已加载页面草稿中的每个分区 id，包含容器与嵌套分区。拆分后的
- * ZonePage 模型中，分区 id 的唯一性是页面局部的。
+ * Every section node id across the loaded page draft, containers and nested
+ * sections included. Section node ids are page-local in the split Page model.
+ * 已加载页面草稿中的每个分区 node id，包含容器与嵌套分区。拆分后的
+ * Page 模型中，分区 node id 的唯一性是页面局部的。
  */
 export function collectZoneSectionIds(pages: ZonePages): string[] {
   const ids: string[] = [];
   for (const pageId of Object.keys(pages)) {
     for (const section of iterateSections(pageSections(pages, pageId))) {
-      ids.push(section.id);
+      ids.push(section.nodeId);
     }
   }
   return ids;
@@ -544,7 +546,7 @@ export function moveListItem<T>(
 export function addZonePageDraftIfMissing(
   draft: ZoneManageDraft,
   pageId: ZonePageId,
-  page: ZonePage,
+  page: Page,
 ): ZoneManageDraft {
   if (draft.pages[pageId]) return draft;
   return {
@@ -565,19 +567,19 @@ export function addZonePageDraftIfMissing(
  * 查询构建器词汇表由契约拥有，避免应用端编辑器与服务端编译器在新增
  * `zone` 等目标时漂移。
  */
-export type ZoneQueryFilterField = ZoneSectionQueryFilterField;
-export type ZoneQuerySortField = ZoneSectionQuerySortField;
+export type ZoneQueryFilterField = PageSectionQueryFilterField;
+export type ZoneQuerySortField = PageSectionQuerySortField;
 export const ZONE_QUERY_FILTERABLE_FIELDS =
-  ZONE_SECTION_QUERY_FILTERABLE_FIELDS;
-export const ZONE_QUERY_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS;
+  PAGE_SECTION_QUERY_FILTERABLE_FIELDS;
+export const ZONE_QUERY_SORT_FIELDS = PAGE_SECTION_QUERY_SORT_FIELDS;
 
-export function zoneQueryUnsupportedFields(query: ZoneSectionQuery): string[] {
-  const filterable: readonly ZoneSectionQueryFilterField[] =
+export function zoneQueryUnsupportedFields(query: PageSectionQuery): string[] {
+  const filterable: readonly PageSectionQueryFilterField[] =
     ZONE_QUERY_FILTERABLE_FIELDS[query.target];
-  const sortable: readonly ZoneSectionQuerySortField[] =
+  const sortable: readonly PageSectionQuerySortField[] =
     ZONE_QUERY_SORT_FIELDS[query.target];
   const unsupported: string[] = [];
-  for (const key of Object.keys(query) as (keyof ZoneSectionQuery)[]) {
+  for (const key of Object.keys(query) as (keyof PageSectionQuery)[]) {
     if (key === "target" || key === "sort") continue;
     if (query[key] === undefined) continue;
     if (!filterable.includes(key as ZoneQueryFilterField)) {
@@ -593,7 +595,7 @@ export function zoneQueryUnsupportedFields(query: ZoneSectionQuery): string[] {
 const ZONE_DYNAMIC_TAG_PROBABILITY_EPSILON = 0.000001;
 
 export function zoneDynamicTagsProbabilityTotal(
-  dynamicTags: ZoneDynamicTags,
+  dynamicTags: PageDynamicTags,
 ): number {
   return dynamicTags.options.reduce(
     (sum, option) => sum + option.probability,
@@ -602,13 +604,13 @@ export function zoneDynamicTagsProbabilityTotal(
 }
 
 export function zoneDynamicTagsFallbackProbability(
-  dynamicTags: ZoneDynamicTags,
+  dynamicTags: PageDynamicTags,
 ): number {
   return Math.max(0, 1 - zoneDynamicTagsProbabilityTotal(dynamicTags));
 }
 
 export function zoneDynamicTagsProbabilityValid(
-  dynamicTags: ZoneDynamicTags,
+  dynamicTags: PageDynamicTags,
 ): boolean {
   const total = zoneDynamicTagsProbabilityTotal(dynamicTags);
   if (dynamicTags.fallback) {
@@ -624,15 +626,15 @@ export function zoneDynamicTagsProbabilityValid(
  * 服务端失败。
  */
 export function coerceZoneQueryTarget(
-  query: ZoneSectionQuery,
-  target: ZoneSectionQuery["target"],
-): ZoneSectionQuery {
+  query: PageSectionQuery,
+  target: PageSectionQuery["target"],
+): PageSectionQuery {
   if (query.target === target) return query;
   const filterable: readonly ZoneQueryFilterField[] =
     ZONE_QUERY_FILTERABLE_FIELDS[target];
   const sortable: readonly ZoneQuerySortField[] =
     ZONE_QUERY_SORT_FIELDS[target];
-  const next: ZoneSectionQuery = { target, sort: { ...query.sort } };
+  const next: PageSectionQuery = { target, sort: { ...query.sort } };
   for (const key of filterable) {
     const value = query[key];
     if (value !== undefined) {
@@ -716,8 +718,8 @@ export function updateZoneMenuAtIndex(
   return {
     ...draft,
     header:
-      draft.header.menuId === previousMenu.id
-        ? { ...draft.header, menuId: menu.id }
+      draft.header.menuSlug === previousMenu.slug
+        ? { ...draft.header, menuSlug: menu.slug }
         : draft.header,
     menus: draft.menus.map((current, currentIndex) =>
       currentIndex === index ? menu : current,
@@ -735,8 +737,8 @@ export function removeZoneMenuAtIndex(
   return {
     ...draft,
     header:
-      draft.header.menuId === removed.id
-        ? { ...draft.header, menuId: menus[0]?.id ?? "" }
+      draft.header.menuSlug === removed.slug
+        ? { ...draft.header, menuSlug: menus[0]?.slug ?? "" }
         : draft.header,
     menus,
   };
@@ -871,28 +873,35 @@ export function outdentZoneMenuNodeAtPath(
  * 执行点。
  */
 export type ZoneManageIssue =
-  | { code: "section_id_duplicate"; id: string }
-  | { code: "tab_id_duplicate"; sectionId: string }
-  | { code: "tab_default_invalid"; sectionId: string }
-  | { code: "query_field_unsupported"; sectionId: string; fields: string[] }
-  | { code: "dynamic_tags_target_unsupported"; sectionId: string }
+  | { code: "section_node_id_duplicate"; nodeId: string }
+  | { code: "tab_node_id_duplicate"; sectionNodeId: string }
+  | { code: "tab_default_invalid"; sectionNodeId: string }
+  | {
+      code: "query_field_unsupported";
+      sectionNodeId: string;
+      fields: string[];
+    }
+  | { code: "dynamic_tags_target_unsupported"; sectionNodeId: string }
   | {
       code: "dynamic_tags_probability_invalid";
-      sectionId: string;
+      sectionNodeId: string;
       total: number;
     }
-  | { code: "menu_id_duplicate"; id: string }
-  | { code: "menu_too_deep"; menuId: string }
-  | { code: "menu_leaf_missing_target"; menuId: string; nodeId: string }
-  | { code: "menu_group_missing_label"; menuId: string; nodeId: string }
-  | { code: "header_menu_invalid"; menuId: string };
+  | { code: "menu_slug_duplicate"; slug: string }
+  | { code: "menu_too_deep"; menuSlug: string }
+  | { code: "menu_leaf_missing_target"; menuSlug: string; path: number[] }
+  | { code: "menu_group_missing_label"; menuSlug: string; path: number[] }
+  | { code: "header_menu_invalid"; menuSlug: string };
 
-function* iterateMenuNodes(
+function* iterateMenuNodesWithPath(
   nodes: readonly ZoneMenuNode[],
-): Generator<ZoneMenuNode> {
-  for (const node of nodes) {
-    yield node;
-    if (node.children) yield* iterateMenuNodes(node.children);
+  basePath: readonly number[] = [],
+): Generator<{ node: ZoneMenuNode; path: number[] }> {
+  for (let index = 0; index < nodes.length; index += 1) {
+    const node = nodes[index] as ZoneMenuNode;
+    const path = [...basePath, index];
+    yield { node, path };
+    if (node.children) yield* iterateMenuNodesWithPath(node.children, path);
   }
 }
 
@@ -904,17 +913,26 @@ export function validateZoneManageDraft(
   const sectionIds = new Set<string>();
   for (const pageId of Object.keys(draft.pages)) {
     for (const section of iterateSections(pageSections(draft.pages, pageId))) {
-      if (sectionIds.has(section.id)) {
-        issues.push({ code: "section_id_duplicate", id: section.id });
+      if (sectionIds.has(section.nodeId)) {
+        issues.push({
+          code: "section_node_id_duplicate",
+          nodeId: section.nodeId,
+        });
       }
-      sectionIds.add(section.id);
+      sectionIds.add(section.nodeId);
       if (section.kind === "tabs") {
-        const tabIds = new Set(section.tabs.map((tab) => tab.id));
+        const tabIds = new Set(section.tabs.map((tab) => tab.nodeId));
         if (tabIds.size !== section.tabs.length) {
-          issues.push({ code: "tab_id_duplicate", sectionId: section.id });
+          issues.push({
+            code: "tab_node_id_duplicate",
+            sectionNodeId: section.nodeId,
+          });
         }
-        if (section.defaultTabId && !tabIds.has(section.defaultTabId)) {
-          issues.push({ code: "tab_default_invalid", sectionId: section.id });
+        if (section.defaultTabNodeId && !tabIds.has(section.defaultTabNodeId)) {
+          issues.push({
+            code: "tab_default_invalid",
+            sectionNodeId: section.nodeId,
+          });
         }
       }
       if (section.kind === "query") {
@@ -922,7 +940,7 @@ export function validateZoneManageDraft(
         if (fields.length > 0) {
           issues.push({
             code: "query_field_unsupported",
-            sectionId: section.id,
+            sectionNodeId: section.nodeId,
             fields,
           });
         }
@@ -930,13 +948,13 @@ export function validateZoneManageDraft(
           if (section.query.target !== "unit") {
             issues.push({
               code: "dynamic_tags_target_unsupported",
-              sectionId: section.id,
+              sectionNodeId: section.nodeId,
             });
           }
           if (!zoneDynamicTagsProbabilityValid(section.dynamicTags)) {
             issues.push({
               code: "dynamic_tags_probability_invalid",
-              sectionId: section.id,
+              sectionNodeId: section.nodeId,
               total: zoneDynamicTagsProbabilityTotal(section.dynamicTags),
             });
           }
@@ -945,35 +963,38 @@ export function validateZoneManageDraft(
     }
   }
 
-  const menuIds = new Set<string>();
+  const menuSlugs = new Set<string>();
   for (const menu of draft.menus) {
-    if (menuIds.has(menu.id)) {
-      issues.push({ code: "menu_id_duplicate", id: menu.id });
+    if (menuSlugs.has(menu.slug)) {
+      issues.push({ code: "menu_slug_duplicate", slug: menu.slug });
     }
-    menuIds.add(menu.id);
+    menuSlugs.add(menu.slug);
     if (zoneMenuDepth(menu.nodes) > ZONE_MENU_MAX_DEPTH) {
-      issues.push({ code: "menu_too_deep", menuId: menu.id });
+      issues.push({ code: "menu_too_deep", menuSlug: menu.slug });
     }
-    for (const node of iterateMenuNodes(menu.nodes)) {
+    for (const { node, path } of iterateMenuNodesWithPath(menu.nodes)) {
       const isGroup = (node.children?.length ?? 0) > 0;
       if (!isGroup && !node.target) {
         issues.push({
           code: "menu_leaf_missing_target",
-          menuId: menu.id,
-          nodeId: node.id,
+          menuSlug: menu.slug,
+          path,
         });
       }
       if (isGroup && !node.labelUnitId && !node.target) {
         issues.push({
           code: "menu_group_missing_label",
-          menuId: menu.id,
-          nodeId: node.id,
+          menuSlug: menu.slug,
+          path,
         });
       }
     }
   }
-  if (!menuIds.has(draft.header.menuId)) {
-    issues.push({ code: "header_menu_invalid", menuId: draft.header.menuId });
+  if (!menuSlugs.has(draft.header.menuSlug)) {
+    issues.push({
+      code: "header_menu_invalid",
+      menuSlug: draft.header.menuSlug,
+    });
   }
 
   return issues;
@@ -1059,30 +1080,29 @@ export function removeZoneTranslationRow(
 // ANCHOR: Page helpers
 // ANCHOR: 页面辅助
 
-export function updateZonePageSections(
+export function updatePageSections(
   pages: ZonePages,
   pageId: ZonePageId,
-  updater: (sections: readonly ZonePageSection[]) => ZonePageSection[],
+  updater: (sections: readonly PageSection[]) => PageSection[],
 ): ZonePages {
   const page = pages[pageId];
   if (!page) return pages;
   return { ...pages, [pageId]: { sections: updater(page.sections) } };
 }
 
-export function addZonePage(pages: ZonePages, pageId: ZonePageId): ZonePages {
+export const updateZonePageSections = updatePageSections;
+
+export function addPage(pages: ZonePages, pageId: ZonePageId): ZonePages {
   if (pages[pageId]) return pages;
   return { ...pages, [pageId]: { sections: [] } };
 }
 
-export function removeZonePage(
-  pages: ZonePages,
-  pageId: ZonePageId,
-): ZonePages {
+export function removePage(pages: ZonePages, pageId: ZonePageId): ZonePages {
   const next = { ...pages };
   delete next[pageId];
   return next;
 }
 
-export function zonePageToDraftPage(page: ZonePage): ZonePages[string] {
+export function zonePageToDraftPage(page: Page): ZonePages[string] {
   return deepClone({ sections: page.sections });
 }

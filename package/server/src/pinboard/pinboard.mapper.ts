@@ -13,7 +13,7 @@ export function mapPinboardReadResponse(input: {
 }): PinboardReadResponse {
   return {
     realmId: input.pinboard.realmUnitId,
-    key: input.pinboard.key,
+    placement: input.pinboard.placement,
     kind: "list",
     unitIds: input.entries.map((entry) => entry.unitId),
   };
@@ -26,7 +26,7 @@ export function mapPinboardAdminReadResponse(input: {
 }): PinboardAdminReadResponse {
   return {
     realmId: input.pinboard.realmUnitId,
-    key: input.pinboard.key,
+    placement: input.pinboard.placement,
     kind: "list",
     unitIds: input.entries.map((entry) => entry.unitId),
     staleIds: input.staleIds,

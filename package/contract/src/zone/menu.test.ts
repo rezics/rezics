@@ -6,22 +6,19 @@ describe("zone menu contract", () => {
   test("accepts a recursive tree with unit, zonePage, and external targets", () => {
     expect(
       Value.Check(zoneMenuSchema, {
-        id: "main",
+        slug: "main",
         nodes: [
           {
-            id: "characters",
             labelUnitId: "label-1",
             children: [
-              { id: "kamijou", target: { kind: "unit", unitId: "unit-1" } },
+              { target: { kind: "unit", unitId: "unit-1" } },
               {
-                id: "search",
                 labelUnitId: "label-2",
                 target: { kind: "zonePage", pageId: "search" },
               },
             ],
           },
           {
-            id: "qq",
             target: {
               kind: "external",
               url: "https://example.com",
@@ -36,7 +33,6 @@ describe("zone menu contract", () => {
   test("a unit-targeted node needs no label config at all", () => {
     expect(
       Value.Check(zoneMenuNodeSchema, {
-        id: "n1",
         target: { kind: "unit", unitId: "unit-1" },
       }),
     ).toBe(true);
@@ -45,14 +41,12 @@ describe("zone menu contract", () => {
   test("rejects inline label text on nodes (zero-inline-text)", () => {
     expect(
       Value.Check(zoneMenuNodeSchema, {
-        id: "n1",
         label: "Characters",
         target: { kind: "unit", unitId: "unit-1" },
       }),
     ).toBe(false);
     expect(
       Value.Check(zoneMenuNodeSchema, {
-        id: "n1",
         title: { en: "Characters" },
         target: { kind: "unit", unitId: "unit-1" },
       }),
@@ -62,12 +56,26 @@ describe("zone menu contract", () => {
   test("rejects unknown external-target shapes", () => {
     expect(
       Value.Check(zoneMenuNodeSchema, {
-        id: "n1",
         target: {
           kind: "external",
           url: "https://example.com",
           text: { en: "translated map" },
         },
+      }),
+    ).toBe(false);
+  });
+
+  test("rejects legacy menu and node id fields", () => {
+    expect(
+      Value.Check(zoneMenuSchema, {
+        id: "main",
+        nodes: [],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(zoneMenuNodeSchema, {
+        id: "node-1",
+        target: { kind: "unit", unitId: "unit-1" },
       }),
     ).toBe(false);
   });

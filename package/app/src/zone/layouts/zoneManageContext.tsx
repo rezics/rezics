@@ -1,4 +1,4 @@
-import type { ZoneDTO, ZonePage } from "@rezics/contract";
+import type { ZoneDTO, Page } from "@rezics/contract";
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import type { ReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
@@ -11,7 +11,7 @@ export type ZoneManageContextValue = {
   refUnits: ZoneRefUnitMap;
   readQuery: Pick<ReadLanguageContext, "languages" | "appLocale">;
   homePageId: string;
-  homePageConfig: ZonePage;
+  homePageConfig: Page;
 };
 
 const ZoneManageContext = createContext<ZoneManageContextValue | null>(null);

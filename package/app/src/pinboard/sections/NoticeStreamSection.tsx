@@ -44,7 +44,7 @@ export const NoticeStreamSection: React.FC<NoticeStreamSectionProps> = ({
   const resolvedRealmUnitId = realmUnitId ?? getDefaultRealmId() ?? "";
   const { entries, isLoading } = usePinboardList({
     realmUnitId: resolvedRealmUnitId,
-    pinboardKey: "home",
+    pinboardPlacement: "home",
     enabled: resolvedRealmUnitId.length > 0,
   });
 

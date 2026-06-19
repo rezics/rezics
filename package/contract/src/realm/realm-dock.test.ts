@@ -7,12 +7,14 @@ import {
   parseRealmDock,
   realmDockItemSchema,
   realmDockPlacementSchema,
-  realmDockWidgetSchema,
   realmDockV1Schema,
+  realmDockWidgetSchema,
 } from "./realm-dock";
 
+const nodeId = "01972fd3-05e7-76cc-8ed9-41aa7d24a983";
+
 describe("RealmDock", () => {
-  test("accepts v1 main/wiki placements with ordered items", () => {
+  test("accepts generic rezics/dock main/wiki placements with direct widgets", () => {
     expect(Value.Check(realmDockPlacementSchema, "main")).toBe(true);
     expect(Value.Check(realmDockPlacementSchema, "wiki")).toBe(true);
     expect(Value.Check(realmDockPlacementSchema, "home")).toBe(false);
@@ -20,79 +22,64 @@ describe("RealmDock", () => {
 
     expect(
       Value.Check(realmDockV1Schema, {
-        schema: "rezics/realm-dock",
+        schema: "rezics/dock",
         version: 1,
         placements: {
           main: [
-            { slot: "builtin", id: "description" },
-            { slot: "builtin", id: "subscriptionStat" },
-            { slot: "builtin", id: "realmFacts" },
-            { slot: "builtin", id: "bookmarks", items: [] },
-            { slot: "builtin", id: "rules", mode: "summary" },
-            { slot: "builtin", id: "moderators", limit: 5 },
+            { kind: "unitDescription", nodeId },
+            { kind: "unitSubscriptionStat", nodeId },
+            { kind: "realmInfo", nodeId },
+            { kind: "links", nodeId, items: [] },
+            { kind: "realmRules", nodeId, mode: "summary" },
+            { kind: "realmModerators", nodeId, limit: 5 },
             {
-              slot: "widget",
-              id: "text",
-              widget: {
-                kind: "text",
-                titleOverrideUnitId: "label-1",
-                contentUnitId: "post-1",
-              },
+              kind: "richText",
+              nodeId,
+              titleOverrideUnitId: "label-1",
+              contentUnitId: "post-1",
             },
           ],
-          wiki: [
-            {
-              slot: "widget",
-              id: "nav",
-              widget: { kind: "zoneNav", zoneUnitId: "zone-1" },
-            },
-          ],
+          wiki: [{ kind: "zoneNav", nodeId, zoneUnitId: "zone-1" }],
         },
       }),
     ).toBe(true);
   });
 
-  test("parses only docks with all required main builtins and unique item ids", () => {
+  test("parses only docks with all required main widgets and host placements", () => {
     expect(parseRealmDock(emptyRealmDock())).not.toBeNull();
     expect(
       parseRealmDock({
-        schema: "rezics/realm-dock",
+        schema: "rezics/dock",
         version: 1,
         placements: {
           main: [
-            { slot: "builtin", id: "description" },
-            { slot: "builtin", id: "subscriptionStat" },
-            { slot: "builtin", id: "realmFacts" },
-            { slot: "builtin", id: "bookmarks", items: [] },
-            { slot: "builtin", id: "rules" },
+            { kind: "unitDescription", nodeId },
+            { kind: "unitSubscriptionStat", nodeId },
+            { kind: "realmInfo", nodeId },
+            { kind: "links", nodeId, items: [] },
+            { kind: "realmRules", nodeId },
           ],
         },
       }),
     ).toBeNull();
     expect(
       parseRealmDock({
-        schema: "rezics/realm-dock",
+        schema: "rezics/dock",
         version: 1,
         placements: {
-          main: [
-            { slot: "builtin", id: "description" },
-            { slot: "builtin", id: "description" },
-            { slot: "builtin", id: "subscriptionStat" },
-            { slot: "builtin", id: "realmFacts" },
-            { slot: "builtin", id: "bookmarks", items: [] },
-            { slot: "builtin", id: "rules" },
-            { slot: "builtin", id: "moderators" },
-          ],
+          sidebar: [],
+          main: emptyRealmDock().placements.main,
         },
       }),
     ).toBeNull();
   });
 
-  test("accepts active custom widget variants with override references only", () => {
+  test("accepts active widget variants with override references only", () => {
     const widgets = [
-      { kind: "text", contentUnitId: "post-1" },
+      { kind: "richText", nodeId, contentUnitId: "post-1" },
       {
-        kind: "buttons",
+        kind: "buttonLinks",
+        nodeId,
         items: [
           {
             labelOverrideUnitId: "label-1",
@@ -101,43 +88,53 @@ describe("RealmDock", () => {
         ],
       },
       {
-        kind: "images",
+        kind: "imageLinks",
+        nodeId,
         items: [{ imageUrl: "https://img.example/a.png" }],
       },
       {
-        kind: "communityList",
-        realmUnitIds: ["realm-1"],
+        kind: "featuredUnit",
+        nodeId,
+        unitId: "realm-1",
+        unitType: "REALM",
       },
-      { kind: "calendar", source: "realmPosts" },
-      { kind: "featuredZone", zoneUnitId: "zone-1" },
-      { kind: "zoneNav", zoneUnitId: "zone-1", menuId: "main" },
-      { kind: "stats", metrics: ["members", "posts"] },
-      { kind: "pinboard", pinboardKey: "home" },
+      { kind: "realmCalendar", nodeId, source: "realmPosts" },
+      { kind: "zoneNav", nodeId, zoneUnitId: "zone-1", menuSlug: "main" },
+      { kind: "realmStats", nodeId, metrics: ["members", "posts"] },
+      { kind: "pinboard", nodeId, placement: "home" },
     ];
 
     for (const widget of widgets) {
       expect(Value.Check(realmDockWidgetSchema, widget)).toBe(true);
-      expect(
-        Value.Check(realmDockItemSchema, {
-          slot: "widget",
-          id: widget.kind,
-          widget,
-        }),
-      ).toBe(true);
+      expect(Value.Check(realmDockItemSchema, widget)).toBe(true);
     }
   });
 
-  test("rejects persisted app i18n keys and unknown widget kinds", () => {
+  test("rejects old wrappers, ids, keys, and unknown widget kinds", () => {
     expect(
       Value.Check(realmDockWidgetSchema, {
-        kind: "text",
-        labelKeyDefault: "entity:realm_dock_widget_text",
+        kind: "richText",
+        id: "text",
         contentUnitId: "post-1",
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(realmDockItemSchema, {
+        slot: "widget",
+        id: "text",
+        widget: { kind: "richText", nodeId, contentUnitId: "post-1" },
       }),
     ).toBe(false);
     expect(
       Value.Check(realmDockWidgetSchema, {
         kind: "legacyNotice",
+        pinboardKey: "home",
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(realmDockWidgetSchema, {
+        kind: "pinboard",
+        nodeId,
         pinboardKey: "home",
       }),
     ).toBe(false);
@@ -147,7 +144,7 @@ describe("RealmDock", () => {
     expect(
       Value.Check(disabledRealmDockInsightWeightsDraftSchema, {
         kind: "insightWeights",
-        items: [{ id: "active", metricKey: "activeNow" }],
+        items: [{ metricKey: "activeNow" }],
       }),
     ).toBe(true);
     expect(
@@ -159,7 +156,7 @@ describe("RealmDock", () => {
     expect(
       Value.Check(realmDockWidgetSchema, {
         kind: "insightWeights",
-        items: [{ id: "active", metricKey: "activeNow" }],
+        items: [{ metricKey: "activeNow" }],
       }),
     ).toBe(false);
     expect(

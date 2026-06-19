@@ -10,9 +10,9 @@ const httpsUrlSchema = t.String({ pattern: "^https://" });
 
 export const zoneHeaderSchema = t.Object(
   {
-    menuId: t.String(),
+    menuSlug: t.String({ minLength: 1 }),
     logoImageUrl: t.Optional(httpsUrlSchema),
-    searchPlaceholderKey: t.Optional(t.String()),
+    searchPlaceholderLabelUnitId: t.Optional(t.String({ minLength: 1 })),
   },
   { additionalProperties: false },
 );
@@ -21,7 +21,7 @@ export type ZoneHeader = Static<typeof zoneHeaderSchema>;
 
 /**
  * Navigation remains JSON because menus are recursive whole-tree documents,
- * capped at three levels, and never queried by node. `header.menuId`
+ * capped at three levels, and never queried by node. `header.menuSlug`
  * validation stays in-envelope with the menu tree it references.
  */
 export const zoneNavV1Schema = t.Object(

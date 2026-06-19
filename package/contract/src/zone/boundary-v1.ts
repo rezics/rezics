@@ -1,7 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { createVersionedEnvelopeParser } from "../envelope/envelope";
-import { zoneSectionQuerySchema } from "./section";
+import { pageSectionQuerySchema } from "../pages";
 
 export const ZONE_BOUNDARY_SCHEMA = "rezics/zone-boundary" as const;
 export const ZONE_BOUNDARY_V1_VERSION = 1 as const;
@@ -24,21 +24,21 @@ export const zoneContextSchema = t.Union([
 export type ZoneContext = Static<typeof zoneContextSchema>;
 
 /**
- * The `ZoneSectionQuery` filter vocabulary minus `sort` and `target`. An
+ * The `PageSectionQuery` filter vocabulary minus `sort` and `target`. An
  * unremovable boundary intersected with every zone query section, zone search,
  * and zone streams; section queries and user filters only narrow within it.
  */
 export const zoneBoundaryFilterSchema = t.Object(
   {
-    types: zoneSectionQuerySchema.properties.types,
-    postKinds: zoneSectionQuerySchema.properties.postKinds,
-    realm: zoneSectionQuerySchema.properties.realm,
-    tagUnitIds: zoneSectionQuerySchema.properties.tagUnitIds,
-    realmTagUnitIds: zoneSectionQuerySchema.properties.realmTagUnitIds,
-    subjects: zoneSectionQuerySchema.properties.subjects,
-    targetUnitId: zoneSectionQuerySchema.properties.targetUnitId,
-    languages: zoneSectionQuerySchema.properties.languages,
-    ratings: zoneSectionQuerySchema.properties.ratings,
+    types: pageSectionQuerySchema.properties.types,
+    postKinds: pageSectionQuerySchema.properties.postKinds,
+    realm: pageSectionQuerySchema.properties.realm,
+    tagUnitIds: pageSectionQuerySchema.properties.tagUnitIds,
+    realmTagUnitIds: pageSectionQuerySchema.properties.realmTagUnitIds,
+    subjects: pageSectionQuerySchema.properties.subjects,
+    targetUnitId: pageSectionQuerySchema.properties.targetUnitId,
+    languages: pageSectionQuerySchema.properties.languages,
+    ratings: pageSectionQuerySchema.properties.ratings,
   },
   { additionalProperties: false },
 );

@@ -1,17 +1,13 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 
-export const pinboardKindValues = ["list"] as const;
-
 export const pinboardKindSchema = t.Literal("list");
 
-export type PinboardKind = Static<typeof pinboardKindSchema>;
+export type PinboardKind = "list";
 
-export const pinboardHomeKey = "home" as const;
+export const realmPinboardPlacementSchema = t.Literal("home");
 
-export const pinboardKeySchema = t.Literal(pinboardHomeKey);
-
-export type PinboardKey = Static<typeof pinboardKeySchema>;
+export type RealmPinboardPlacement = "home";
 
 export const pinboardEntryDTOSchema = t.Object(
   {
@@ -29,7 +25,7 @@ export const pinboardDTOSchema = t.Object(
   {
     id: t.String(),
     realmUnitId: t.String(),
-    key: pinboardKeySchema,
+    placement: realmPinboardPlacementSchema,
     kind: pinboardKindSchema,
     entries: t.Array(pinboardEntryDTOSchema),
     createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -42,14 +38,14 @@ export type PinboardDTO = Static<typeof pinboardDTOSchema>;
 
 export const pinboardPathParamsSchema = t.Object({
   realmId: t.String(),
-  key: pinboardKeySchema,
+  placement: realmPinboardPlacementSchema,
 });
 
 export type PinboardPathParams = Static<typeof pinboardPathParamsSchema>;
 
 export const pinboardEntryPathParamsSchema = t.Object({
   realmId: t.String(),
-  key: pinboardKeySchema,
+  placement: realmPinboardPlacementSchema,
   unitId: t.String(),
 });
 
@@ -71,7 +67,7 @@ export type PinboardReorderBody = Static<typeof pinboardReorderBodySchema>;
 
 export const pinboardReadResponseSchema = t.Object({
   realmId: t.String(),
-  key: pinboardKeySchema,
+  placement: realmPinboardPlacementSchema,
   kind: pinboardKindSchema,
   unitIds: t.Array(t.String()),
 });
@@ -80,7 +76,7 @@ export type PinboardReadResponse = Static<typeof pinboardReadResponseSchema>;
 
 export const pinboardAdminReadResponseSchema = t.Object({
   realmId: t.String(),
-  key: pinboardKeySchema,
+  placement: realmPinboardPlacementSchema,
   kind: pinboardKindSchema,
   unitIds: t.Array(t.String()),
   staleIds: t.Array(t.String()),

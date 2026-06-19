@@ -30,11 +30,11 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-import type { PinboardEntryView, PinboardListKey } from "../models/types";
+import type { PinboardEntryView, PinboardListPlacement } from "../models/types";
 
 export interface UsePinboardListInput {
   realmUnitId: string;
-  pinboardKey: PinboardListKey;
+  pinboardPlacement: PinboardListPlacement;
   language?: string;
   adminView?: boolean;
   enabled?: boolean;
@@ -61,11 +61,11 @@ export function usePinboardList(
   const enabled = input.enabled ?? true;
 
   const adminQuery = useQuery({
-    ...pinboardAdminReadQuery(input.realmUnitId, input.pinboardKey),
+    ...pinboardAdminReadQuery(input.realmUnitId, input.pinboardPlacement),
     enabled: enabled && adminView && Boolean(input.realmUnitId),
   });
   const publicQuery = useQuery({
-    ...pinboardReadQuery(input.realmUnitId, input.pinboardKey),
+    ...pinboardReadQuery(input.realmUnitId, input.pinboardPlacement),
     enabled: enabled && !adminView && Boolean(input.realmUnitId),
   });
 

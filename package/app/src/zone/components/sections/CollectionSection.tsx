@@ -77,7 +77,7 @@ export function CollectionSection({
         : undefined;
     return [
       {
-        key: `${section.id}:${index}`,
+        key: `${section.nodeId}:${index}`,
         unitId: ref?.unitId,
         href,
         label,

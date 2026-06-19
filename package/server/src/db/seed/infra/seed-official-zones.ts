@@ -1,12 +1,14 @@
 import {
   DEFAULT_LANGUAGE,
+  PAGE_SCHEMA,
+  PAGE_V1_VERSION,
   markdownContentDoc,
+  type Page,
+  type PageSection,
   type TagGroupIds,
   type ZoneBoundary,
   type ZoneBoundaryFilter,
   type ZoneNav,
-  type ZonePage as ZonePageConfig,
-  type ZonePageSection,
   type ZoneTheme,
 } from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
@@ -47,12 +49,12 @@ export type OfficialZoneConfig = {
     id: string;
     slug: string;
     position: string;
-    config: ZonePageConfig;
+    config: Page;
   }>;
   homePageId: string;
 };
 
-const MAIN_MENU_ID = "main";
+const MAIN_MENU_SLUG = "main";
 const BOOK_DYNAMIC_TAG_GROUP_ID = "official-book-topics";
 const DEFAULT_BOOK_DYNAMIC_TAG_UNIT_IDS = [
   "official-book-topic-science-fiction",
@@ -217,6 +219,16 @@ export const OFFICIAL_SECTION_LABELS = {
   }
 >;
 
+function officialSectionNodeId(slug: string): string {
+  let hash = 0x811c9dc5;
+  for (const char of slug) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  const suffix = hash.toString(16).padStart(12, "0");
+  return `00000000-0000-7001-8000-${suffix}`;
+}
+
 /**
  * Seeds bypass the zone service write path, so every shell/page envelope
  * written here must already satisfy its contract schema: the read path throws
@@ -226,7 +238,7 @@ export const OFFICIAL_SECTION_LABELS = {
  */
 function officialConfig(input: {
   filters: ZoneBoundaryFilter;
-  homeSections: ZonePageSection[];
+  homeSections: PageSection[];
   accent: string;
   density: "compact" | "comfortable";
   pageIds: { home: string; search: string; feed: string };
@@ -247,20 +259,17 @@ function officialConfig(input: {
       version: 1,
       menus: [
         {
-          id: MAIN_MENU_ID,
+          slug: MAIN_MENU_SLUG,
           // Leaf nodes need only a target; zonePage labels resolve through
           // the frontend's default i18n keys.
           nodes: [
-            { id: "home", target: { kind: "zonePage", pageId: pageIds.home } },
-            {
-              id: "search",
-              target: { kind: "zonePage", pageId: pageIds.search },
-            },
-            { id: "feed", target: { kind: "zonePage", pageId: pageIds.feed } },
+            { target: { kind: "zonePage", pageId: pageIds.home } },
+            { target: { kind: "zonePage", pageId: pageIds.search } },
+            { target: { kind: "zonePage", pageId: pageIds.feed } },
           ],
         },
       ],
-      header: { menuId: MAIN_MENU_ID },
+      header: { menuSlug: MAIN_MENU_SLUG },
     },
     pages: [
       {
@@ -268,8 +277,8 @@ function officialConfig(input: {
         slug: "home",
         position: pagePositions[0]!,
         config: {
-          schema: "rezics/zone-page",
-          version: 1,
+          schema: PAGE_SCHEMA,
+          version: PAGE_V1_VERSION,
           sections: input.homeSections,
         },
       },
@@ -277,17 +286,23 @@ function officialConfig(input: {
         id: pageIds.search,
         slug: "search",
         position: pagePositions[1]!,
-        config: { schema: "rezics/zone-page", version: 1, sections: [] },
+        config: { schema: PAGE_SCHEMA, version: PAGE_V1_VERSION, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
         position: pagePositions[2]!,
         config: {
-          schema: "rezics/zone-page",
-          version: 1,
+          schema: PAGE_SCHEMA,
+          version: PAGE_V1_VERSION,
           sections: [
-            { id: "feed", kind: "stream", streamKind: "all", limit: 20 },
+            {
+              nodeId: officialSectionNodeId("feed"),
+              slug: "feed",
+              kind: "stream",
+              streamKind: "all",
+              limit: 20,
+            },
           ],
         },
       },
@@ -322,12 +337,16 @@ function buildBookConfig(
     filters: { types: ["BOOK"] },
     homeSections: [
       {
-        id: "stage",
+        nodeId: officialSectionNodeId("stage"),
+        slug: "stage",
         kind: "stage",
-        sections: [{ id: "zone-info", kind: "zoneInfo" }],
+        sections: [
+          { nodeId: officialSectionNodeId("zone-info"), kind: "zoneInfo" },
+        ],
       },
       {
-        id: "latest-books",
+        nodeId: officialSectionNodeId("latest-books"),
+        slug: "latest-books",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookLatest.id,
         display: "carousel",
@@ -341,7 +360,8 @@ function buildBookConfig(
         },
       },
       {
-        id: "topic-books-a",
+        nodeId: officialSectionNodeId("topic-books-a"),
+        slug: "topic-books-a",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicOne.id,
         display: "carousel",
@@ -356,7 +376,8 @@ function buildBookConfig(
         dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
       },
       {
-        id: "topic-books-b",
+        nodeId: officialSectionNodeId("topic-books-b"),
+        slug: "topic-books-b",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicTwo.id,
         display: "carousel",
@@ -371,7 +392,8 @@ function buildBookConfig(
         dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
       },
       {
-        id: "topic-books-c",
+        nodeId: officialSectionNodeId("topic-books-c"),
+        slug: "topic-books-c",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicThree.id,
         display: "carousel",
@@ -386,7 +408,8 @@ function buildBookConfig(
         dynamicTags: bookDynamicTags(bookDynamicTagUnitIds),
       },
       {
-        id: "hot-books",
+        nodeId: officialSectionNodeId("hot-books"),
+        slug: "hot-books",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
         display: "stream",
@@ -412,12 +435,16 @@ const realmsConfig = officialConfig({
   filters: { types: ["REALM"] },
   homeSections: [
     {
-      id: "stage",
+      nodeId: officialSectionNodeId("stage"),
+      slug: "stage",
       kind: "stage",
-      sections: [{ id: "zone-info", kind: "zoneInfo" }],
+      sections: [
+        { nodeId: officialSectionNodeId("zone-info"), kind: "zoneInfo" },
+      ],
     },
     {
-      id: "latest-realms",
+      nodeId: officialSectionNodeId("latest-realms"),
+      slug: "latest-realms",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsLatest.id,
       display: "carousel",
@@ -431,7 +458,8 @@ const realmsConfig = officialConfig({
       },
     },
     {
-      id: "browse-realms",
+      nodeId: officialSectionNodeId("browse-realms"),
+      slug: "browse-realms",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsBrowse.id,
       display: "tiles",
@@ -445,7 +473,8 @@ const realmsConfig = officialConfig({
       },
     },
     {
-      id: "realm-updates",
+      nodeId: officialSectionNodeId("realm-updates"),
+      slug: "realm-updates",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsUpdates.id,
       display: "list",
@@ -468,12 +497,16 @@ const zonesConfig = officialConfig({
   filters: { types: ["ZONE"] },
   homeSections: [
     {
-      id: "stage",
+      nodeId: officialSectionNodeId("stage"),
+      slug: "stage",
       kind: "stage",
-      sections: [{ id: "zone-info", kind: "zoneInfo" }],
+      sections: [
+        { nodeId: officialSectionNodeId("zone-info"), kind: "zoneInfo" },
+      ],
     },
     {
-      id: "latest-zones",
+      nodeId: officialSectionNodeId("latest-zones"),
+      slug: "latest-zones",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesLatest.id,
       display: "carousel",
@@ -487,7 +520,8 @@ const zonesConfig = officialConfig({
       },
     },
     {
-      id: "all-zones",
+      nodeId: officialSectionNodeId("all-zones"),
+      slug: "all-zones",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
       display: "tiles",
@@ -501,7 +535,8 @@ const zonesConfig = officialConfig({
       },
     },
     {
-      id: "zone-updates",
+      nodeId: officialSectionNodeId("zone-updates"),
+      slug: "zone-updates",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesUpdates.id,
       display: "list",
@@ -524,12 +559,16 @@ const popularConfig = officialConfig({
   filters: {},
   homeSections: [
     {
-      id: "stage",
+      nodeId: officialSectionNodeId("stage"),
+      slug: "stage",
       kind: "stage",
-      sections: [{ id: "zone-info", kind: "zoneInfo" }],
+      sections: [
+        { nodeId: officialSectionNodeId("zone-info"), kind: "zoneInfo" },
+      ],
     },
     {
-      id: "popular-now",
+      nodeId: officialSectionNodeId("popular-now"),
+      slug: "popular-now",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.popularNow.id,
       display: "grid",
@@ -542,7 +581,8 @@ const popularConfig = officialConfig({
       },
     },
     {
-      id: "latest-content",
+      nodeId: officialSectionNodeId("latest-content"),
+      slug: "latest-content",
       kind: "query",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.popularLatest.id,
       display: "list",
@@ -555,7 +595,8 @@ const popularConfig = officialConfig({
       },
     },
     {
-      id: "popular-feed",
+      nodeId: officialSectionNodeId("popular-feed"),
+      slug: "popular-feed",
       kind: "stream",
       titleLabelUnitId: OFFICIAL_SECTION_LABELS.popularFeed.id,
       streamKind: "all",

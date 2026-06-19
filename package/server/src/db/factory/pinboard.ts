@@ -24,9 +24,9 @@ export async function seedPinboard(
     const pinned = pickN(postIds, pinCount);
     const [pinboard] = await ctx.db
       .insert(Pinboard)
-      .values({ realmUnitId: realm.id, key: "home", kind: "list" })
+      .values({ realmUnitId: realm.id, placement: "home", kind: "list" })
       .onConflictDoUpdate({
-        target: [Pinboard.realmUnitId, Pinboard.key],
+        target: [Pinboard.realmUnitId, Pinboard.placement],
         set: { kind: "list", updatedAt: new Date() },
       })
       .returning();

@@ -1,8 +1,8 @@
 ---
 title: Schema Component System Redesign
-status: active
+status: completed
 created: 2026-06-19
-completed:
+completed: 2026-06-20
 supersededBy:
 tags: [contract, schema, component, page, dock, zone, pinboard, ui]
 ---
@@ -93,12 +93,14 @@ implementation.
   object with named fields, for example `{ kind: "dockSlot", slot: "main" }`,
   not a weak `{ type: "...", value: "..." }` pair. Prefer a plain string
   placement when the envelope already fixes the placement domain.
-- `(type)` All closed string vocabularies expose `*Values`, `*Schema`, and
-  `*Kind`/`*Placement`/specific type aliases. Single-value vocabularies are
-  arrays too, for example `["home"] as const`.
+- `(type)` Multi-value closed string vocabularies expose `*Values`, `*Schema`,
+  and `*Kind`/`*Placement`/specific type aliases. Single-value vocabularies stay
+  direct `t.Literal("...")` schemas with direct string type aliases so they do
+  not create one-item vocabulary arrays.
 - `(type)` Public enum-like schema must be generated from or tested against its
-  `*Values` source. A naked exported `t.Literal("...")` is allowed only inside a
-  concrete discriminated object member, not as the public vocabulary source.
+  `*Values` source when it has multiple values. A naked exported
+  `t.Literal("...")` is allowed for single-value public vocabularies and inside
+  concrete discriminated object members.
 - `(type)` A generic schema node vocabulary is a trait vocabulary, not a single
   all-fields base object. Do not force `{ nodeId, slug, kind, children }` on
   every node. Compose only the traits a node actually needs.
@@ -304,16 +306,11 @@ Pinboard is a first-class DB table, not dock JSON. Its row `id` remains a real
 resource identity. Its former `key` becomes `placement`.
 
 ```ts
-export const realmPinboardPlacementValues = ["home"] as const;
-export type RealmPinboardPlacement =
-  (typeof realmPinboardPlacementValues)[number];
-export const realmPinboardPlacementSchema = literalSchemaFromValues(
-  realmPinboardPlacementValues,
-);
+export const realmPinboardPlacementSchema = t.Literal("home");
+export type RealmPinboardPlacement = "home";
 
-export const pinboardKindValues = ["list"] as const;
-export type PinboardKind = (typeof pinboardKindValues)[number];
-export const pinboardKindSchema = literalSchemaFromValues(pinboardKindValues);
+export const pinboardKindSchema = t.Literal("list");
+export type PinboardKind = "list";
 
 export const pinboardDTOSchema = t.Object(
   {
@@ -716,16 +713,15 @@ package/contract/src/schema/
   node.ts              # schemaNodeIdSchema and shared node trait helpers
   index.ts
 
-package/contract/src/page/
+package/contract/src/pages/
   page.ts              # rezics/page envelope, parser, defaults
   sections.ts          # section values, schemas, unions
-  section-info.ts      # static component info for page components
   index.ts
 
 package/contract/src/dock/
   dock.ts              # rezics/dock envelope, parser, defaults
   widgets.ts           # widget values, schemas, unions
-  widget-info.ts       # static component info for dock widgets
+  section-info.ts      # static component info for page and dock components
   host-policy.ts       # realm/catalog placement policies
   index.ts
 
@@ -761,164 +757,164 @@ package/app/src/realm-dock/            # realm-specific assembly/policy wiring
 
 ## 1. Replace old proposal assumptions in contract vocabulary
 
-- [ ] 1.1 Add `package/contract/src/schema/vocabulary.ts` documenting the
+- [x] 1.1 Add `package/contract/src/schema/vocabulary.ts` documenting the
   durable vocabulary for `id`, `nodeId`, `slug`, `kind`, `placement`,
   `schema`, and `version`.
-- [ ] 1.2 Add `package/contract/src/schema/literal-values.ts` or equivalent and
+- [x] 1.2 Add `package/contract/src/schema/literal-values.ts` or equivalent and
   tests for single-value and multi-value vocabularies.
-- [ ] 1.3 Add `schemaNodeIdSchema` and shared node trait helpers only where they
+- [x] 1.3 Add `schemaNodeIdSchema` and shared node trait helpers only where they
   reduce duplication; avoid one all-fields base object.
-- [ ] 1.4 Export the new schema helpers from `package/contract/src/index.ts` only
+- [x] 1.4 Export the new schema helpers from `package/contract/src/index.ts` only
   if downstream packages need public access.
 
 ## 2. Cut page schema from Zone-specific to generic page
 
-- [ ] 2.1 Add `package/contract/src/page/page.ts` with `PAGE_SCHEMA =
+- [x] 2.1 Add `package/contract/src/pages/page.ts` with `PAGE_SCHEMA =
   "rezics/page"`, `PAGE_V1_VERSION`, envelope parser, and empty/default helpers.
-- [ ] 2.2 Move Zone section schemas from `package/contract/src/zone/section.ts`
-  to `package/contract/src/page/sections.ts`, renaming `zone*Section*` public
+- [x] 2.2 Move Zone section schemas from `package/contract/src/zone/section.ts`
+  to `package/contract/src/pages/sections.ts`, renaming `zone*Section*` public
   schema exports to `page*Section*` unless a shape is truly zone-only.
-- [ ] 2.3 Rename section variant discriminants from any remaining `type` fields
+- [x] 2.3 Rename section variant discriminants from any remaining `type` fields
   to `kind`, and expose `pageSectionKindValues` /
   `pageSectionKindSchema` / `PageSectionKind`.
-- [ ] 2.4 Replace section bare `id` with `nodeId` where stable editor/API target
+- [x] 2.4 Replace section bare `id` with `nodeId` where stable editor/API target
   identity is required.
-- [ ] 2.5 Keep section `slug` optional and use it only for anchors/public local
+- [x] 2.5 Keep section `slug` optional and use it only for anchors/public local
   locators; do not use it as React key or editor identity.
-- [ ] 2.6 Change tabs from `defaultTabId` / tab `id` to
+- [x] 2.6 Change tabs from `defaultTabId` / tab `id` to
   `defaultTabNodeId` / `nodeId` if default selection targets identity, or
   `defaultTabSlug` / `slug` if default selection is author-facing. Pick one
   based on current UX and lock it with tests.
-- [ ] 2.7 Remove `ZoneColumn.id`; columns are layout children ordered by array
+- [x] 2.7 Remove `ZoneColumn.id`; columns are layout children ordered by array
   unless a real editor patch target requires `nodeId`.
-- [ ] 2.8 Delete the old `package/contract/src/zone/page-v1.ts` schema shape and
+- [x] 2.8 Delete the old `package/contract/src/zone/page-v1.ts` schema shape and
   move callers directly to the generic `rezics/page` v1 schema; do not keep
   compatibility exports for the old `rezics/zone-page` envelope.
-- [ ] 2.9 Update contract tests for page sections, nesting rules, unknown kinds,
+- [x] 2.9 Update contract tests for page sections, nesting rules, unknown kinds,
   extra properties, node identity rules, and slug rules.
 
 ## 3. Cut Zone nav/menu naming
 
-- [ ] 3.1 Rename `zoneMenu.id` to `slug` and `zoneHeader.menuId` to `menuSlug`
+- [x] 3.1 Rename `zoneMenu.id` to `slug` and `zoneHeader.menuId` to `menuSlug`
   in `package/contract/src/zone/menu.ts` and `nav-v1.ts`.
-- [ ] 3.2 Decide whether `ZoneMenuNode` needs `nodeId`; if yes, make it
+- [x] 3.2 Decide whether `ZoneMenuNode` needs `nodeId`; if yes, make it
   system-minted and update recursive schema/tests; if no, remove persistent node
   identity and validate whole-tree writes.
-- [ ] 3.3 Rename `searchPlaceholderKey` to `searchPlaceholderLabelUnitId` if it
+- [x] 3.3 Rename `searchPlaceholderKey` to `searchPlaceholderLabelUnitId` if it
   references a label Unit; otherwise introduce a clearer non-persisted i18n
   concept.
-- [ ] 3.4 Update server-side nav validators to enforce menu slug uniqueness,
+- [x] 3.4 Update server-side nav validators to enforce menu slug uniqueness,
   header menu existence, depth limits, and leaf/group target requirements.
-- [ ] 3.5 Update app zone nav renderers/editors and tests for slug/nodeId naming.
+- [x] 3.5 Update app zone nav renderers/editors and tests for slug/nodeId naming.
 
 ## 4. Add generic Dock contract
 
-- [ ] 4.1 Add `package/contract/src/dock/dock.ts` with `DOCK_SCHEMA =
+- [x] 4.1 Add `package/contract/src/dock/dock.ts` with `DOCK_SCHEMA =
   "rezics/dock"`, versioned envelope parser, and direct `placements` shape.
-- [ ] 4.2 Add `package/contract/src/dock/widgets.ts` with
+- [x] 4.2 Add `package/contract/src/dock/widgets.ts` with
   `dockWidgetKindValues`, `dockWidgetKindSchema`, concrete widget schemas, and
   object-first `dockWidgetSchemas`.
-- [ ] 4.3 Cut Realm Dock builtins/custom widgets from `slot + id + widget` to
+- [x] 4.3 Cut Realm Dock builtins/custom widgets from `slot + id + widget` to
   direct widget objects with `kind`.
-- [ ] 4.4 Replace persisted dock item `id` with `nodeId` where stable widget
+- [x] 4.4 Replace persisted dock item `id` with `nodeId` where stable widget
   identity is required.
-- [ ] 4.5 Rename legacy widget kinds to generic names:
+- [x] 4.5 Rename legacy widget kinds to generic names:
   `text -> richText`, `buttons -> buttonLinks`, `images -> imageLinks`,
   `featuredZone -> featuredUnit`, `communityList -> featuredUnit` with
   `unitType: REALM`, `calendar -> realmCalendar`, `stats -> realmStats`.
-- [ ] 4.6 Change `zoneNav.menuId` to `menuSlug`.
-- [ ] 4.7 Change pinboard widget `pinboardKey` to `placement`.
-- [ ] 4.8 Add tests that direct widget configs accept valid examples and reject
+- [x] 4.6 Change `zoneNav.menuId` to `menuSlug`.
+- [x] 4.7 Change pinboard widget `pinboardKey` to `placement`.
+- [x] 4.8 Add tests that direct widget configs accept valid examples and reject
   nested `widget`, `slot`, old `id`, old `key`, unknown `kind`, and extra
   properties.
 
 ## 5. Add component registry and host policy
 
-- [ ] 5.1 Add page/dock component info maps keyed by kind, using static metadata
+- [x] 5.1 Add page/dock component info maps keyed by kind, using static metadata
   only: supported surfaces, supported Unit types, reference fields, and query
   behavior.
-- [ ] 5.2 Add host-specific Dock placement values:
-  `realmDockPlacementValues`, future-ready `catalogDockPlacementValues`, and
-  aggregate helpers only for read/tooling paths.
-- [ ] 5.3 Add `package/contract/src/dock/host-policy.ts` with realm main/wiki
+- [x] 5.2 Add host-specific Dock placement vocabularies:
+  `realmDockPlacementValues` and direct single-value `catalogDockPlacementSchema`.
+- [x] 5.3 Add `package/contract/src/dock/host-policy.ts` with realm main/wiki
   widget schemas, required/locked kind lists, max widget counts, and
   host-specific placement validation.
-- [ ] 5.4 Add policy tests proving registry support does not bypass host
+- [x] 5.4 Add policy tests proving registry support does not bypass host
   placement restrictions.
-- [ ] 5.5 Add tests proving REALM main placement keeps required/locked widgets.
-- [ ] 5.6 Ensure list/query/stream widget support is policy-gated and not
+- [x] 5.5 Add tests proving REALM main placement keeps required/locked widgets.
+- [x] 5.6 Ensure list/query/stream widget support is policy-gated and not
   implicitly allowed in every Dock placement.
 
 ## 6. Cut Pinboard key to placement
 
-- [ ] 6.1 Rename `pinboardHomeKey` / `pinboardKeySchema` /
-  `PinboardKey` exports to `realmPinboardPlacementValues` /
-  `realmPinboardPlacementSchema` / `RealmPinboardPlacement`.
-- [ ] 6.2 Rename Pinboard DTO fields, path params, response fields, API keys,
+- [x] 6.1 Rename `pinboardHomeKey` / `pinboardKeySchema` /
+  `PinboardKey` exports to `realmPinboardPlacementSchema` /
+  `RealmPinboardPlacement`.
+- [x] 6.2 Rename Pinboard DTO fields, path params, response fields, API keys,
   and frontend calls from `key` to `placement`.
-- [ ] 6.3 Rename `Pinboard.key` DB column and unique index to `placement` in
+- [x] 6.3 Rename `Pinboard.key` DB column and unique index to `placement` in
   `package/server/src/db/schema/pinboard.ts`; generate the Drizzle migration.
-- [ ] 6.4 Update server Pinboard service/API/mapper tests and route params from
+- [x] 6.4 Update server Pinboard service/API/mapper tests and route params from
   `:key` to `:placement`.
-- [ ] 6.5 Update app Pinboard editor/list usage and tests.
+- [x] 6.5 Update app Pinboard editor/list usage and tests.
 
 ## 7. Update server and API integration
 
-- [ ] 7.1 Update `package/server/src/zone/` mappers/services to parse and
+- [x] 7.1 Update `package/server/src/zone/` mappers/services to parse and
   validate generic `rezics/page` configs while preserving ZonePage row fields.
-- [ ] 7.2 Update zone section data APIs to use `sectionNodeId` where they target
+- [x] 7.2 Update zone section data APIs to use `sectionNodeId` where they target
   persisted section identity, and `sectionSlug` only where the route is
   author-facing.
-- [ ] 7.3 Update ref-unit collection to traverse generic page sections and dock
+- [x] 7.3 Update ref-unit collection to traverse generic page sections and dock
   widgets using registry/ref metadata where practical.
-- [ ] 7.4 Update seed factories and official zone seeds to generate `nodeId`
+- [x] 7.4 Update seed factories and official zone seeds to generate `nodeId`
   values where required and no longer hand-author semantic `id` fields.
-- [ ] 7.5 Update `package/api/src/zone/`, `package/api/src/realm/realm-dock*`,
+- [x] 7.5 Update `package/api/src/zone/`, `package/api/src/realm/realm-dock*`,
   and Pinboard query keys/mutations for the new names.
 
 ## 8. Update frontend renderers and editors
 
-- [ ] 8.1 Add or refactor shared page section shells so every rendered section
+- [x] 8.1 Add or refactor shared page section shells so every rendered section
   exposes the required `rezics-page*` classes and `data-rezics-*` attributes.
-- [ ] 8.2 Update Zone section lists/renderers to key React elements by `nodeId`
+- [x] 8.2 Update Zone section lists/renderers to key React elements by `nodeId`
   where present, not `slug`.
-- [ ] 8.3 Add or refactor shared Dock/DockWidget shells so every rendered widget
+- [x] 8.3 Add or refactor shared Dock/DockWidget shells so every rendered widget
   exposes the required `rezics-dock*` classes and `data-rezics-*` attributes.
-- [ ] 8.4 Keep all visual styling token-first; do not move colors/spacing into
+- [x] 8.4 Keep all visual styling token-first; do not move colors/spacing into
   hardcoded custom theme CSS.
-- [ ] 8.5 Update realm dock editor to edit direct widget configs, host policy
+- [x] 8.5 Update realm dock editor to edit direct widget configs, host policy
   locks/requirements, and `nodeId` generation.
-- [ ] 8.6 Update zone manage page editors for generic page section names,
+- [x] 8.6 Update zone manage page editors for generic page section names,
   `nodeId`, optional `slug`, menu slug, and no bare IDs.
-- [ ] 8.7 Add focused app tests for editor reorder/rename behavior to prove
+- [x] 8.7 Add focused app tests for editor reorder/rename behavior to prove
   `nodeId` and `slug` do not collapse into one concept.
 
 ## 9. Add convention enforcement
 
-- [ ] 9.1 Extend `tool/src/commands/convention/check.ts` to reject new persisted
+- [x] 9.1 Extend `tool/src/commands/convention/check.ts` to reject new persisted
   contract schema fields named bare `key`.
-- [ ] 9.2 Reject new JSON config node fields named bare `id` unless an inline
+- [x] 9.2 Reject new JSON config node fields named bare `id` unless an inline
   exemption proves it is a real external/resource identity.
-- [ ] 9.3 Reject new persisted component discriminants named bare `type` in
+- [x] 9.3 Reject new persisted component discriminants named bare `type` in
   `package/contract/src/`, except documented external protocol/domain DTOs.
-- [ ] 9.4 Require every exported `*KindSchema` and `*PlacementSchema` to have a
-  same-prefix `*Values` export.
-- [ ] 9.5 Reject exported single-value enum constants that should be `*Values`
-  arrays.
-- [ ] 9.6 Reject public UI class prefixes `rz-` and `re-`; require `rezics-` for
+- [x] 9.4 Require every exported multi-value `*KindSchema` and
+  `*PlacementSchema` to have a same-prefix `*Values` export, while allowing
+  direct literals for single-value vocabularies.
+- [x] 9.5 Reject exported one-item `*Values` arrays that should be direct
+  literal schemas.
+- [x] 9.6 Reject public UI class prefixes `rz-` and `re-`; require `rezics-` for
   new public structural hooks.
 
 ## 10. Validation
 
-- [ ] 10.1 Run affected contract tests for schema helpers, page sections, dock
+- [x] 10.1 Run affected contract tests for schema helpers, page sections, dock
   widgets, host policy, zone nav/menu, and pinboard.
-- [ ] 10.2 Run affected server tests for Zone, Realm Dock, Pinboard, seed
+- [x] 10.2 Run affected server tests for Zone, Realm Dock, Pinboard, seed
   factories, and route params.
-- [ ] 10.3 Run affected API tests for Zone, Realm Dock, and Pinboard query keys.
-- [ ] 10.4 Run affected app tests for Zone portal/manage editors, Realm Dock
+- [x] 10.3 Run affected API tests for Zone, Realm Dock, and Pinboard query keys.
+- [x] 10.4 Run affected app tests for Zone portal/manage editors, Realm Dock
   renderer/editor, and Pinboard UI.
-- [ ] 10.5 Run `task check:convention`.
-- [ ] 10.6 Run `task check:i18n` if any user-facing copy changes during editor
+- [x] 10.5 Run `task check:convention`.
+- [x] 10.6 Run `task check:i18n` if any user-facing copy changes during editor
   updates.
 
 ## Out of scope

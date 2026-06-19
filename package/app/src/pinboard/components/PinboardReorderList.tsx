@@ -22,12 +22,12 @@ import { Button } from "@rezics/ui/shadcn";
 import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import type { PinboardEntryView, PinboardListKey } from "../models/types";
+import type { PinboardEntryView, PinboardListPlacement } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";
 
 interface PinboardReorderListProps {
   realmUnitId: string;
-  pinboardKey: PinboardListKey;
+  pinboardPlacement: PinboardListPlacement;
   entries: PinboardEntryView[];
   staleIds?: string[];
   onDelete?: (entry: PinboardEntryView) => void;
@@ -37,7 +37,7 @@ interface PinboardReorderListProps {
 
 export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
   realmUnitId,
-  pinboardKey,
+  pinboardPlacement,
   entries,
   staleIds,
   onDelete,
@@ -75,7 +75,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
     reorder.mutate(
       {
         realmId: realmUnitId,
-        key: pinboardKey,
+        placement: pinboardPlacement,
         unitIds: next,
       },
       {

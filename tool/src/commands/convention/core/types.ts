@@ -10,7 +10,8 @@ export type Rule =
   | "R12"
   | "R13"
   | "R14"
-  | "R15";
+  | "R15"
+  | "R16";
 
 export interface Violation {
   rule: Rule;

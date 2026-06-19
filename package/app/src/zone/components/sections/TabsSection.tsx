@@ -1,4 +1,4 @@
-import type { ZoneTabsSection } from "@rezics/contract";
+import type { PageTabsSection } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import {
@@ -19,13 +19,13 @@ export function TabsSection({
   section,
   ctx,
 }: {
-  section: ZoneTabsSection;
+  section: PageTabsSection;
   ctx: ZonePortalContext;
 }) {
   const { t } = useTranslation(["zone"]);
   const title = useZoneSectionTitle(section, ctx.refUnits);
   if (section.tabs.length === 0) return null;
-  const defaultTab = section.defaultTabId ?? section.tabs[0]?.id;
+  const defaultTab = section.defaultTabNodeId ?? section.tabs[0]?.nodeId;
 
   const tabLabel = (tab: { titleLabelUnitId?: string }) =>
     (tab.titleLabelUnitId ? ctx.refUnits[tab.titleLabelUnitId]?.title : null) ??
@@ -36,13 +36,13 @@ export function TabsSection({
       <Tabs defaultValue={defaultTab}>
         <TabsList className="mb-4">
           {section.tabs.map((tab) => (
-            <TabsTrigger key={tab.id} value={tab.id}>
+            <TabsTrigger key={tab.nodeId} value={tab.nodeId}>
               {tabLabel(tab)}
             </TabsTrigger>
           ))}
         </TabsList>
         {section.tabs.map((tab) => (
-          <TabsContent key={tab.id} value={tab.id}>
+          <TabsContent key={tab.nodeId} value={tab.nodeId}>
             <ZoneContentSectionList sections={tab.sections} ctx={ctx} />
           </TabsContent>
         ))}

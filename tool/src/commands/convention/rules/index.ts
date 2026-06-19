@@ -6,6 +6,7 @@ import { localeParityRule } from "./locale-parity";
 import { queryKeysRule } from "./query-keys";
 import { routePrefixRule } from "./route-prefix";
 import { safeLinkRule } from "./safe-link";
+import { schemaComponentSystemRule } from "./schema-component-system";
 import { tokenConsumptionRule } from "./token-consumption";
 import { uiAutonomyRule } from "./ui-autonomy";
 
@@ -19,6 +20,7 @@ export const ALL_RULES: RuleScanner[] = [
   i18nInvariantsRule,
   localeParityRule,
   jsonPolicyRule,
+  schemaComponentSystemRule,
 ];
 
 export { scanI18nSourceForTest } from "./i18n-invariants";

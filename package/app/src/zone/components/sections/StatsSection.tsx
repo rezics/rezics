@@ -1,5 +1,5 @@
 import { zoneSectionInfiniteQuery } from "@rezics/api";
-import type { ZoneStatsSection } from "@rezics/contract";
+import type { PageStatsSection } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Skeleton } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -46,13 +46,13 @@ export function StatsSection({
   section,
   ctx,
 }: {
-  section: ZoneStatsSection;
+  section: PageStatsSection;
   ctx: ZonePortalContext;
 }) {
   const { t } = useTranslation(["zone"]);
   const title = useZoneSectionTitle(section, ctx.refUnits);
   const query = useInfiniteQuery(
-    zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.id, {
+    zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.nodeId, {
       languages: ctx.languages,
       appLocale: ctx.appLocale,
     }),

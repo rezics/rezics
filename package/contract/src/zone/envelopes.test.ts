@@ -6,11 +6,7 @@ import {
   type ZoneBoundary,
 } from "./boundary-v1";
 import { parseZoneNav, zoneNavEnvelopeSchema, type ZoneNav } from "./nav-v1";
-import {
-  parseZonePage,
-  zonePageEnvelopeSchema,
-  type ZonePage,
-} from "./page-v1";
+import { parsePage, pageEnvelopeSchema, type Page } from "../pages";
 import {
   parseZoneTheme,
   zoneThemeEnvelopeSchema,
@@ -32,15 +28,15 @@ const nav: ZoneNav = {
   version: 1,
   menus: [
     {
-      id: "main",
+      slug: "main",
       nodes: [
-        { id: "home", target: { kind: "zonePage", pageId: "page-home" } },
-        { id: "book", target: { kind: "unit", unitId: "book-1" } },
+        { target: { kind: "zonePage", pageId: "page-home" } },
+        { target: { kind: "unit", unitId: "book-1" } },
       ],
     },
   ],
   header: {
-    menuId: "main",
+    menuSlug: "main",
     logoImageUrl: "https://cdn.example.test/logo.png",
   },
 };
@@ -62,18 +58,20 @@ const theme: ZoneTheme = {
   },
 };
 
-const page: ZonePage = {
-  schema: "rezics/zone-page",
+const nodeId = "01972fd2-0ed8-7b7b-97f5-a4fc0e4d6b8d";
+
+const page: Page = {
+  schema: "rezics/page",
   version: 1,
   sections: [
     {
-      id: "stage",
+      nodeId,
       kind: "stage",
       background: { imageUrl: "https://cdn.example.test/hero.png" },
       sections: [
-        { id: "zone-info", kind: "zoneInfo" },
+        { nodeId, kind: "zoneInfo" },
         {
-          id: "actions",
+          nodeId,
           kind: "actions",
           items: [
             {
@@ -85,7 +83,7 @@ const page: ZonePage = {
       ],
     },
     {
-      id: "characters",
+      nodeId,
       kind: "collection",
       display: "avatar-wall",
       items: [
@@ -103,19 +101,19 @@ describe("zone split envelopes", () => {
     expect(Value.Check(zoneBoundaryEnvelopeSchema, boundary)).toBe(true);
     expect(Value.Check(zoneNavEnvelopeSchema, nav)).toBe(true);
     expect(Value.Check(zoneThemeEnvelopeSchema, theme)).toBe(true);
-    expect(Value.Check(zonePageEnvelopeSchema, page)).toBe(true);
+    expect(Value.Check(pageEnvelopeSchema, page)).toBe(true);
   });
 
   test("parsers normalize valid envelopes and reject wrong schema names", () => {
     expect(parseZoneBoundary(structuredClone(boundary))).toEqual(boundary);
     expect(parseZoneNav(structuredClone(nav))).toEqual(nav);
     expect(parseZoneTheme(structuredClone(theme))).toEqual(theme);
-    expect(parseZonePage(structuredClone(page))).toEqual(page);
+    expect(parsePage(structuredClone(page))).toEqual(page);
 
     expect(
       parseZoneBoundary({ ...boundary, schema: "rezics/zone-config" }),
     ).toBeNull();
-    expect(parseZonePage({ ...page, version: 99 })).toBeNull();
+    expect(parsePage({ ...page, version: 99 })).toBeNull();
   });
 
   test("theme image fields use mediaUrlSchema (server-side validation)", () => {
@@ -139,11 +137,11 @@ describe("zone split envelopes", () => {
       }),
     ).toBe(false);
     expect(
-      Value.Check(zonePageEnvelopeSchema, {
+      Value.Check(pageEnvelopeSchema, {
         ...page,
         sections: [
           {
-            id: "stage",
+            nodeId,
             kind: "stage",
             background: { imageUrl: "http://cdn.example.test/hero.png" },
             sections: [],

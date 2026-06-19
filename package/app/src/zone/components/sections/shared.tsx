@@ -1,8 +1,8 @@
 import type {
   Language,
+  PageSectionEmptyState,
+  PageSectionKind,
   ZoneDTO,
-  ZoneSectionEmptyState,
-  ZoneSectionKind,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
@@ -39,7 +39,7 @@ export type ZonePortalContext = {
  * 字面量，以通过静态 i18n 检查。
  */
 export function useZoneSectionTitle(
-  section: { kind: ZoneSectionKind; titleLabelUnitId?: string },
+  section: { kind: PageSectionKind; titleLabelUnitId?: string },
   refUnits: ZoneRefUnitMap,
 ): string | null {
   const { t } = useTranslation(["zone"]);
@@ -115,7 +115,7 @@ export function ZoneSectionEmpty({
   emptyState,
 }: {
   title: string | null;
-  emptyState: ZoneSectionEmptyState | undefined;
+  emptyState: PageSectionEmptyState | undefined;
 }) {
   const { t } = useTranslation(["zone"]);
   if (emptyState === "hide") return null;

@@ -27,8 +27,8 @@ const boundary: ZoneBoundary = {
 const nav: ZoneNav = {
   schema: "rezics/zone-nav",
   version: 1,
-  menus: [{ id: "main", nodes: [] }],
-  header: { menuId: "main" },
+  menus: [{ slug: "main", nodes: [] }],
+  header: { menuSlug: "main" },
 };
 
 const theme: ZoneTheme = {
@@ -37,7 +37,7 @@ const theme: ZoneTheme = {
 };
 
 const homePage: ZonePage = {
-  schema: "rezics/zone-page",
+  schema: "rezics/page",
   version: 1,
   sections: [],
 };
@@ -122,7 +122,7 @@ describe("zoneApi", () => {
       boundary: { schema: "rezics/zone-boundary", version: 1 },
       nav: { schema: "rezics/zone-nav", version: 1 },
       theme: { schema: "rezics/zone-theme", version: 1 },
-      homePage: { schema: "rezics/zone-page", version: 1 },
+      homePage: { schema: "rezics/page", version: 1 },
     });
     expect(fetchMock.mock.calls[1]?.[0]).toBe(
       "http://api.example/zone/zone-1/boundary",

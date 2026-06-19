@@ -80,7 +80,7 @@ export function ZoneHeader({ zone, refUnits, routeLocation }: ZoneHeaderProps) {
   }, []);
 
   const { header, menus } = zone.nav;
-  const menu = findZoneMenu(menus, header.menuId);
+  const menu = findZoneMenu(menus, header.menuSlug);
   const nodes = menu
     ? resolveZoneMenuNodes(menu.nodes, {
         routeLocation,
@@ -89,11 +89,10 @@ export function ZoneHeader({ zone, refUnits, routeLocation }: ZoneHeaderProps) {
       })
     : [];
   const logoUrl = header.logoImageUrl ?? zone.theme.images?.logoUrl ?? null;
-  const searchPlaceholder = header.searchPlaceholderKey
-    ? t(header.searchPlaceholderKey, {
-        defaultValue: t("zone:search_placeholder"),
-      })
-    : t("zone:search_placeholder");
+  const searchPlaceholder =
+    (header.searchPlaceholderLabelUnitId
+      ? refUnits[header.searchPlaceholderLabelUnitId]?.title
+      : null) ?? t("zone:search_placeholder");
   const contentStyle = {
     maxWidth: `var(--zone-content-max-width, ${ZONE_CONTENT_MAX_WIDTH_DEFAULT}px)`,
   } satisfies CSSProperties;

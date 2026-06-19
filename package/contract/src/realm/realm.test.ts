@@ -19,16 +19,35 @@ describe("RealmDTO", () => {
         isOfficial: false,
         memberCount: 12,
         dock: {
-          schema: "rezics/realm-dock",
+          schema: "rezics/dock",
           version: 1,
           placements: {
             main: [
-              { slot: "builtin", id: "description" },
-              { slot: "builtin", id: "subscriptionStat" },
-              { slot: "builtin", id: "realmFacts" },
-              { slot: "builtin", id: "bookmarks", items: [] },
-              { slot: "builtin", id: "rules" },
-              { slot: "builtin", id: "moderators" },
+              {
+                kind: "unitDescription",
+                nodeId: "01972fd3-05e7-76cc-8ed9-41aa7d24a983",
+              },
+              {
+                kind: "unitSubscriptionStat",
+                nodeId: "01972fd3-1d2f-77f9-a453-d872c6848ebf",
+              },
+              {
+                kind: "realmInfo",
+                nodeId: "01972fd3-2d2f-77f9-a453-d872c6848ebf",
+              },
+              {
+                kind: "links",
+                nodeId: "01972fd3-3d2f-77f9-a453-d872c6848ebf",
+                items: [],
+              },
+              {
+                kind: "realmRules",
+                nodeId: "01972fd3-4d2f-77f9-a453-d872c6848ebf",
+              },
+              {
+                kind: "realmModerators",
+                nodeId: "01972fd3-5d2f-77f9-a453-d872c6848ebf",
+              },
             ],
           },
         },

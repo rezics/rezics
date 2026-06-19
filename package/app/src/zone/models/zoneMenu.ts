@@ -6,7 +6,7 @@ import type {
   ZonePageId,
   ZonePageSummary,
   ZoneRefUnitSummary,
-  ZoneSectionKind,
+  PageSectionKind,
 } from "@rezics/contract";
 import { ZONE_MENU_MAX_DEPTH } from "@rezics/contract";
 import { unitHref } from "@rezics/ui/primitive/link";
@@ -216,41 +216,45 @@ export function resolveZoneMenuNodes(
   nodes: ZoneMenuNode[],
   ctx: ZoneLinkContext,
   depth = 1,
+  basePath: readonly number[] = [],
 ): ResolvedZoneMenuNode[] {
   if (depth > ZONE_MENU_MAX_DEPTH) return [];
-  return nodes.map((node) => ({
-    id: node.id,
-    label: zoneLinkLabel(node, ctx.refUnits),
-    labelKey:
-      node.target?.kind === "zonePage"
-        ? zonePageFallbackKey(node.target.pageId, ctx.pages)
-        : zoneLinkFallbackKey(node.target),
-    href: node.target ? zoneLinkHref(node.target, ctx) : null,
-    isExternal: node.target?.kind === "external",
-    children: resolveZoneMenuNodes(node.children ?? [], ctx, depth + 1),
-  }));
+  return nodes.map((node, index) => {
+    const path = [...basePath, index];
+    return {
+      id: path.join("."),
+      label: zoneLinkLabel(node, ctx.refUnits),
+      labelKey:
+        node.target?.kind === "zonePage"
+          ? zonePageFallbackKey(node.target.pageId, ctx.pages)
+          : zoneLinkFallbackKey(node.target),
+      href: node.target ? zoneLinkHref(node.target, ctx) : null,
+      isExternal: node.target?.kind === "external",
+      children: resolveZoneMenuNodes(node.children ?? [], ctx, depth + 1, path),
+    };
+  });
 }
 
 export function findZoneMenu(
   menus: ZoneMenu[],
-  menuId: string,
+  menuSlug: string,
 ): ZoneMenu | null {
-  return menus.find((menu) => menu.id === menuId) ?? null;
+  return menus.find((menu) => menu.slug === menuSlug) ?? null;
 }
 
 export function pickZoneMenu(
-  nav: { menus: ZoneMenu[]; header: { menuId: string } },
-  menuId?: string | null,
+  nav: { menus: ZoneMenu[]; header: { menuSlug: string } },
+  menuSlug?: string | null,
 ): ZoneMenu | null {
-  const explicit = menuId ? findZoneMenu(nav.menus, menuId) : null;
+  const explicit = menuSlug ? findZoneMenu(nav.menus, menuSlug) : null;
   if (explicit) return explicit;
-  return findZoneMenu(nav.menus, nav.header.menuId);
+  return findZoneMenu(nav.menus, nav.header.menuSlug);
 }
 
 // ANCHOR: Section titles
 // ANCHOR: 分区标题
 
-const SECTION_TITLE_KEYS: Partial<Record<ZoneSectionKind, string>> = {
+const SECTION_TITLE_KEYS: Partial<Record<PageSectionKind, string>> = {
   query: "zone:section_title_query",
   collection: "zone:section_title_collection",
   stream: "zone:section_title_stream",
@@ -274,7 +278,7 @@ export function zoneSectionTitleText(
   return refUnits[section.titleLabelUnitId]?.title ?? null;
 }
 
-export function zoneSectionTitleKey(kind: ZoneSectionKind): string | null {
+export function zoneSectionTitleKey(kind: PageSectionKind): string | null {
   return SECTION_TITLE_KEYS[kind] ?? null;
 }
 

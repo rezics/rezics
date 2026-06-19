@@ -3,12 +3,14 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LANGUAGES,
+  PAGE_SCHEMA,
+  PAGE_V1_VERSION,
   markdownContentDoc,
+  type Page as ZonePageConfig,
   type ShelfItemParentRole,
   withCoverUrl,
   type ZoneBoundary,
   type ZoneNav,
-  type ZonePage as ZonePageConfig,
   type ZoneTheme,
 } from "@rezics/contract";
 import { and, asc, eq, inArray } from "drizzle-orm";
@@ -1908,17 +1910,26 @@ export type ToaruZoneConfig = {
  * filters, and theme tokens. The factory writes this straight to Zone and
  * ZonePage rows (bypassing service validation) while the read path throws on
  * invalid envelopes, so the output must always satisfy the contract schemas
- * and structural invariants (page-local section ids, menu depth ≤ 3, header
+ * and structural invariants (page-local section node ids, menu depth ≤ 3, header
  * menu reference); tests assert both.
  * /z/toaru 专区拆分信封的纯构造器，演练所有专区原语：带行动的 stage、
  * columns、richText 片段、collection、按目标查询的 tabs、feed、stats、
  * 标签驱动的菜单、header、边界过滤与主题 token。工厂将其直接写入 Zone 与
  * ZonePage 行（绕过 service 校验），而读取路径会对非法信封抛错，因此输出
- * 必须始终满足契约 schema 与结构不变量（页面内分区 id 唯一、菜单深度 ≤ 3、
+ * 必须始终满足契约 schema 与结构不变量（页面内分区 node id 唯一、菜单深度 ≤ 3、
  * header 菜单引用）；测试对两者均有断言。
  */
 export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
   const { labels, entities, fragments } = ids;
+  const nodeId = (slug: string) => {
+    let hash = 0x811c9dc5;
+    for (const char of slug) {
+      hash ^= char.charCodeAt(0);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    const suffix = hash.toString(16).padStart(12, "0");
+    return `00000000-0000-7003-8000-${suffix}`;
+  };
   const unitTarget = (unitId: string) => ({ kind: "unit", unitId }) as const;
   const bookTarget = (index: number) =>
     ({
@@ -1945,78 +1956,63 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
       version: 1,
       menus: [
         {
-          id: "main",
+          slug: "main",
           nodes: [
             {
-              id: "nav-classification",
               labelUnitId: labels.classification,
               children: [
                 {
-                  id: "nav-characters",
                   labelUnitId: labels.characters,
                   target: { kind: "zonePage", pageId: pageIds.characters },
                 },
                 {
-                  id: "nav-terms",
                   labelUnitId: labels.terms,
                   target: { kind: "zonePage", pageId: pageIds.search },
                 },
                 {
-                  id: "nav-factions",
                   labelUnitId: labels.factions,
                   target: unitTarget(entities.anglicanChurch),
                 },
                 {
-                  id: "nav-locations",
                   labelUnitId: labels.locations,
                   target: unitTarget(entities.academyCity),
                 },
                 {
-                  id: "nav-events",
                   labelUnitId: labels.events,
                   target: unitTarget(entities.daihasei),
                 },
                 {
-                  id: "nav-timeline",
                   labelUnitId: labels.timeline,
                   target: { kind: "zonePage", pageId: pageIds.feed },
                 },
               ],
             },
             {
-              id: "nav-world",
               labelUnitId: labels.world,
               children: [
                 {
-                  id: "nav-magic",
                   labelUnitId: labels.magicSide,
                   target: unitTarget(entities.index),
                   children: [
                     {
-                      id: "nav-magic-index",
                       target: unitTarget(entities.index),
                     },
                     {
-                      id: "nav-magic-anglican",
                       target: unitTarget(entities.anglicanChurch),
                     },
                   ],
                 },
                 {
-                  id: "nav-science",
                   labelUnitId: labels.scienceSide,
                   target: unitTarget(entities.academyCity),
                   children: [
                     {
-                      id: "nav-science-misaka",
                       target: unitTarget(entities.misaka),
                     },
                     {
-                      id: "nav-science-accelerator",
                       target: unitTarget(entities.accelerator),
                     },
                     {
-                      id: "nav-science-academy-city",
                       target: unitTarget(entities.academyCity),
                     },
                   ],
@@ -2024,65 +2020,56 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
               ],
             },
             {
-              id: "nav-series",
               labelUnitId: labels.series,
               children: [
-                { id: "nav-index-series", target: bookTarget(4) },
-                { id: "nav-railgun-series", target: bookTarget(3) },
-                { id: "nav-mental-out-series", target: bookTarget(2) },
-                { id: "nav-dark-side-series", target: bookTarget(1) },
+                { target: bookTarget(4) },
+                { target: bookTarget(3) },
+                { target: bookTarget(2) },
+                { target: bookTarget(1) },
               ],
             },
             {
-              id: "nav-carrier",
               labelUnitId: labels.carrier,
               children: [
-                { id: "nav-light-novel", target: bookTarget(0) },
-                { id: "nav-comic", target: bookTarget(3) },
-                { id: "nav-spinoff", target: bookTarget(1) },
+                { target: bookTarget(0) },
+                { target: bookTarget(3) },
+                { target: bookTarget(1) },
               ],
             },
             {
-              id: "nav-edit-guide",
               labelUnitId: labels.editGuide,
               children: [
                 {
-                  id: "nav-page-style",
                   labelUnitId: labels.pageStyle,
                   target: { kind: "zonePage", pageId: pageIds.characters },
                 },
                 {
-                  id: "nav-citation-guide",
                   labelUnitId: labels.citationGuide,
                   target: { kind: "zonePage", pageId: pageIds.search },
                 },
               ],
             },
             {
-              id: "nav-wiki-build",
               labelUnitId: labels.wikiBuild,
               children: [
                 {
-                  id: "nav-recent-changes",
                   labelUnitId: labels.recentChanges,
                   target: { kind: "zonePage", pageId: pageIds.feed },
                 },
                 {
-                  id: "nav-wanted-pages",
                   labelUnitId: labels.wantedPages,
                   target: { kind: "zonePage", pageId: pageIds.search },
                 },
               ],
             },
             {
-              id: "nav-watch-order",
               labelUnitId: labels.watchOrder,
               target: { kind: "zonePage", pageId: pageIds.feed },
             },
           ],
         },
       ],
-      header: { menuId: "main" },
+      header: { menuSlug: "main" },
     },
     pages: [
       {
@@ -2090,16 +2077,18 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
         slug: "home",
         position: pagePositions[0]!,
         config: {
-          schema: "rezics/zone-page",
-          version: 1,
+          schema: PAGE_SCHEMA,
+          version: PAGE_V1_VERSION,
           sections: [
             {
-              id: "stage",
+              nodeId: nodeId("stage"),
+              slug: "stage",
               kind: "stage",
               sections: [
-                { id: "zone-info", kind: "zoneInfo" },
+                { nodeId: nodeId("zone-info"), kind: "zoneInfo" },
                 {
-                  id: "stage-actions",
+                  nodeId: nodeId("stage-actions"),
+                  slug: "stage-actions",
                   kind: "actions",
                   items: [
                     // `external.text` is the single sanctioned inline-text
@@ -2124,25 +2113,28 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
               ],
             },
             {
-              id: "layout",
+              nodeId: nodeId("layout"),
+              slug: "layout",
               kind: "columns",
               columns: [
                 {
-                  id: "main",
                   ratio: 3,
                   sections: [
                     {
-                      id: "welcome",
+                      nodeId: nodeId("welcome"),
+                      slug: "welcome",
                       kind: "richText",
                       contentUnitId: fragments.welcome,
                     },
                     {
-                      id: "spoiler-notice",
+                      nodeId: nodeId("spoiler-notice"),
+                      slug: "spoiler-notice",
                       kind: "richText",
                       contentUnitId: fragments.spoilerNotice,
                     },
                     {
-                      id: "featured-characters",
+                      nodeId: nodeId("featured-characters"),
+                      slug: "featured-characters",
                       kind: "collection",
                       display: "tiles",
                       titleLabelUnitId: labels.characters,
@@ -2155,16 +2147,19 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                       ].map((unitId) => ({ target: unitTarget(unitId) })),
                     },
                     {
-                      id: "activity",
+                      nodeId: nodeId("activity"),
+                      slug: "activity",
                       kind: "tabs",
-                      defaultTabId: "latest-edits",
+                      defaultTabNodeId: nodeId("latest-edits"),
                       tabs: [
                         {
-                          id: "latest-edits",
+                          nodeId: nodeId("latest-edits"),
+                          slug: "latest-edits",
                           titleLabelUnitId: labels.latestEdits,
                           sections: [
                             {
-                              id: "latest-edits-feed",
+                              nodeId: nodeId("latest-edits-feed"),
+                              slug: "latest-edits-feed",
                               kind: "stream",
                               streamKind: "updates",
                               limit: 12,
@@ -2172,11 +2167,13 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                           ],
                         },
                         {
-                          id: "hot-discussions",
+                          nodeId: nodeId("hot-discussions"),
+                          slug: "hot-discussions",
                           titleLabelUnitId: labels.hotDiscussions,
                           sections: [
                             {
-                              id: "hot-discussions-query",
+                              nodeId: nodeId("hot-discussions-query"),
+                              slug: "hot-discussions-query",
                               kind: "query",
                               display: "list",
                               limit: 12,
@@ -2191,11 +2188,13 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                           ],
                         },
                         {
-                          id: "new-releases",
+                          nodeId: nodeId("new-releases"),
+                          slug: "new-releases",
                           titleLabelUnitId: labels.newReleases,
                           sections: [
                             {
-                              id: "new-releases-query",
+                              nodeId: nodeId("new-releases-query"),
+                              slug: "new-releases-query",
                               kind: "query",
                               display: "covers",
                               limit: 8,
@@ -2215,23 +2214,25 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                       ],
                     },
                     {
-                      id: "wiki-stats",
+                      nodeId: nodeId("wiki-stats"),
+                      slug: "wiki-stats",
                       kind: "stats",
                       metrics: ["articles", "members"],
                     },
                   ],
                 },
                 {
-                  id: "side",
                   ratio: 1,
                   sections: [
                     {
-                      id: "external-sources",
+                      nodeId: nodeId("external-sources"),
+                      slug: "external-sources",
                       kind: "sources",
                       limit: 6,
                     },
                     {
-                      id: "quick-links",
+                      nodeId: nodeId("quick-links"),
+                      slug: "quick-links",
                       kind: "collection",
                       display: "list",
                       items: [
@@ -2257,7 +2258,8 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                       ],
                     },
                     {
-                      id: "book-covers",
+                      nodeId: nodeId("book-covers"),
+                      slug: "book-covers",
                       kind: "collection",
                       display: "covers",
                       titleLabelUnitId: labels.newReleases,
@@ -2266,12 +2268,14 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
                       })),
                     },
                     {
-                      id: "news",
+                      nodeId: nodeId("news"),
+                      slug: "news",
                       kind: "richText",
                       contentUnitId: fragments.news,
                     },
                     {
-                      id: "did-you-know",
+                      nodeId: nodeId("did-you-know"),
+                      slug: "did-you-know",
                       kind: "richText",
                       contentUnitId: fragments.didYouKnow,
                     },
@@ -2287,11 +2291,12 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
         slug: "characters",
         position: pagePositions[1]!,
         config: {
-          schema: "rezics/zone-page",
-          version: 1,
+          schema: PAGE_SCHEMA,
+          version: PAGE_V1_VERSION,
           sections: [
             {
-              id: "characters",
+              nodeId: nodeId("characters"),
+              slug: "characters",
               kind: "collection",
               display: "avatar-wall",
               titleLabelUnitId: labels.characters,
@@ -2313,17 +2318,23 @@ export function buildToaruZoneConfig(ids: ToaruZoneConfigIds): ToaruZoneConfig {
         id: pageIds.search,
         slug: "search",
         position: pagePositions[2]!,
-        config: { schema: "rezics/zone-page", version: 1, sections: [] },
+        config: { schema: PAGE_SCHEMA, version: PAGE_V1_VERSION, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
         position: pagePositions[3]!,
         config: {
-          schema: "rezics/zone-page",
-          version: 1,
+          schema: PAGE_SCHEMA,
+          version: PAGE_V1_VERSION,
           sections: [
-            { id: "feed", kind: "stream", streamKind: "all", limit: 20 },
+            {
+              nodeId: nodeId("feed"),
+              slug: "feed",
+              kind: "stream",
+              streamKind: "all",
+              limit: 20,
+            },
           ],
         },
       },

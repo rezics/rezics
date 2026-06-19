@@ -3,6 +3,7 @@ import type {
   UpdateZonePageInput,
   ZoneDTO,
 } from "@rezics/contract";
+import { PAGE_SCHEMA, PAGE_V1_VERSION } from "@rezics/contract";
 import { positionForNewBottomPin } from "@rezics/api/shared/fractional-index";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Card, CardContent, Input, Label } from "@rezics/ui/shadcn";
@@ -19,7 +20,7 @@ import { ZoneManageJsonFrame } from "./ZoneManageJsonFrame";
 type ZonePageSummary = ZoneDTO["pages"][number];
 
 function emptyPageConfig(): CreateZonePageInput["config"] {
-  return { schema: "rezics/zone-page", version: 1, sections: [] };
+  return { schema: PAGE_SCHEMA, version: PAGE_V1_VERSION, sections: [] };
 }
 
 function pageSort(a: ZonePageSummary, b: ZonePageSummary) {

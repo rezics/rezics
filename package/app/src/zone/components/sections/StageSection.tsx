@@ -1,7 +1,7 @@
 import type {
-  ZoneContentSection,
-  ZoneStageChildSection,
-  ZoneStageSection,
+  PageContentSection,
+  PageStageSection,
+  PageStageChildSection,
 } from "@rezics/contract";
 import type { CSSProperties } from "react";
 import { ColumnsSection } from "./ColumnsSection";
@@ -13,7 +13,7 @@ function ZoneInfo({
   section,
   ctx,
 }: {
-  section: Extract<ZoneStageChildSection, { kind: "zoneInfo" }>;
+  section: Extract<PageStageChildSection, { kind: "zoneInfo" }>;
   ctx: ZonePortalContext;
 }) {
   const showTitle = section.showTitle !== false;
@@ -39,7 +39,7 @@ function StageChildView({
   section,
   ctx,
 }: {
-  section: ZoneStageChildSection;
+  section: PageStageChildSection;
   ctx: ZonePortalContext;
 }) {
   if (section.kind === "zoneInfo") {
@@ -52,11 +52,11 @@ function StageChildView({
     return <TabsSection section={section} ctx={ctx} />;
   }
   return (
-    <ZoneContentSectionView section={section as ZoneContentSection} ctx={ctx} />
+    <ZoneContentSectionView section={section as PageContentSection} ctx={ctx} />
   );
 }
 
-function stageStyle(section: ZoneStageSection): CSSProperties {
+function stageStyle(section: PageStageSection): CSSProperties {
   return {
     backgroundColor: section.background?.color ?? "var(--zone-color-surface)",
   };
@@ -85,7 +85,7 @@ export function StageSection({
   section,
   ctx,
 }: {
-  section: ZoneStageSection;
+  section: PageStageSection;
   ctx: ZonePortalContext;
 }) {
   const backgroundFit = section.background?.fit ?? "cover";
@@ -119,7 +119,7 @@ export function StageSection({
       ) : null}
       <div className="flex flex-col gap-10 px-6 py-12 md:px-12 md:py-16">
         {section.sections.map((child) => (
-          <StageChildView key={child.id} section={child} ctx={ctx} />
+          <StageChildView key={child.nodeId} section={child} ctx={ctx} />
         ))}
       </div>
     </section>

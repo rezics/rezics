@@ -2,24 +2,29 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 import { contentLanguageSchema } from "../language";
 import { postKindLiterals } from "../post/post";
+import {
+  literalSchemaFromValues,
+  schemaNodeIdSchema,
+  schemaSlugSchema,
+} from "../schema";
 import { contentRatingSchema, unitTypeSchema } from "../unit/unit";
-import { zoneLinkTargetSchema } from "./link-target";
+import { zoneLinkTargetSchema } from "../zone/link-target";
 
-// ANCHOR: Zone section query
-// ANCHOR: 专区分区查询
+// ANCHOR: Page section query
+// ANCHOR: 页面分区查询
 
 /**
- * `ZoneSectionQuery` compiles only to fields the Meilisearch `content`,
+ * `PageSectionQuery` compiles only to fields the Meilisearch `content`,
  * `posts`, `realms`, or `zones` indexes can filter or sort; the server-side compiler rejects
  * combinations outside that vocabulary (e.g. `tagUnitIds` on the posts
  * index). Semantic section variants ("latest", "popular", "recent wiki")
  * are query presets plus default-title i18n keys, never new section kinds.
- * `ZoneSectionQuery` 只编译为 Meilisearch `content`、`posts`、`realms` 或 `zones` 索引可
+ * `PageSectionQuery` 只编译为 Meilisearch `content`、`posts`、`realms` 或 `zones` 索引可
  * 过滤或排序的字段；服务端编译器会拒绝词汇表之外的组合（例如 posts
  * 索引上的 `tagUnitIds`）。语义化的分区变体（“最新”“热门”“最近 wiki”）
  * 是查询预设加默认标题 i18n key，绝不是新的分区 kind。
  */
-export const zoneSectionQueryRealmSchema = t.Union([
+export const pageSectionQueryRealmSchema = t.Union([
   // "context" resolves to `boundary.context` at execution time.
   // "context" 在执行时解析为 `boundary.context`。
   t.Literal("context"),
@@ -31,23 +36,23 @@ export const zoneSectionQueryRealmSchema = t.Union([
   ),
 ]);
 
-export type ZoneSectionQueryRealm = Static<typeof zoneSectionQueryRealmSchema>;
+export type PageSectionQueryRealm = Static<typeof pageSectionQueryRealmSchema>;
 
 /**
  * "viewer" resolves to the reader's language candidate chain at execution
  * time.
  * "viewer" 在执行时解析为读者的语言候选链。
  */
-export const zoneSectionQueryLanguagesSchema = t.Union([
+export const pageSectionQueryLanguagesSchema = t.Union([
   t.Literal("viewer"),
   t.Array(contentLanguageSchema),
 ]);
 
-export type ZoneSectionQueryLanguages = Static<
-  typeof zoneSectionQueryLanguagesSchema
+export type PageSectionQueryLanguages = Static<
+  typeof pageSectionQueryLanguagesSchema
 >;
 
-export const zoneSectionQuerySortFieldSchema = t.Union([
+export const pageSectionQuerySortFieldSchema = t.Union([
   t.Literal("createdAt"),
   t.Literal("updatedAt"),
   t.Literal("publishedAt"),
@@ -62,21 +67,21 @@ export const zoneSectionQuerySortFieldSchema = t.Union([
   t.Literal("memberCount"),
 ]);
 
-export type ZoneSectionQuerySortField = Static<
-  typeof zoneSectionQuerySortFieldSchema
+export type PageSectionQuerySortField = Static<
+  typeof pageSectionQuerySortFieldSchema
 >;
 
-export const zoneSectionQuerySortSchema = t.Object(
+export const pageSectionQuerySortSchema = t.Object(
   {
-    field: zoneSectionQuerySortFieldSchema,
+    field: pageSectionQuerySortFieldSchema,
     direction: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
   },
   { additionalProperties: false },
 );
 
-export type ZoneSectionQuerySort = Static<typeof zoneSectionQuerySortSchema>;
+export type PageSectionQuerySort = Static<typeof pageSectionQuerySortSchema>;
 
-export const zoneSectionQuerySubjectsSchema = t.Object(
+export const pageSectionQuerySubjectsSchema = t.Object(
   {
     entityUnitIds: t.Optional(t.Array(t.String())),
     roles: t.Optional(t.Array(t.String())),
@@ -84,11 +89,11 @@ export const zoneSectionQuerySubjectsSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneSectionQuerySubjects = Static<
-  typeof zoneSectionQuerySubjectsSchema
+export type PageSectionQuerySubjects = Static<
+  typeof pageSectionQuerySubjectsSchema
 >;
 
-export const zoneSectionQuerySchema = t.Object(
+export const pageSectionQuerySchema = t.Object(
   {
     target: t.Union([
       t.Literal("unit"),
@@ -98,33 +103,33 @@ export const zoneSectionQuerySchema = t.Object(
     ]),
     types: t.Optional(t.Array(unitTypeSchema)),
     postKinds: t.Optional(t.Array(postKindLiterals)),
-    realm: t.Optional(zoneSectionQueryRealmSchema),
+    realm: t.Optional(pageSectionQueryRealmSchema),
     tagUnitIds: t.Optional(t.Array(t.String())),
     realmTagUnitIds: t.Optional(t.Array(t.String())),
-    subjects: t.Optional(zoneSectionQuerySubjectsSchema),
+    subjects: t.Optional(pageSectionQuerySubjectsSchema),
     targetUnitId: t.Optional(t.String()),
-    languages: t.Optional(zoneSectionQueryLanguagesSchema),
+    languages: t.Optional(pageSectionQueryLanguagesSchema),
     ratings: t.Optional(t.Array(contentRatingSchema)),
-    sort: zoneSectionQuerySortSchema,
+    sort: pageSectionQuerySortSchema,
   },
   { additionalProperties: false },
 );
 
-export type ZoneSectionQuery = Static<typeof zoneSectionQuerySchema>;
-export type ZoneSectionQueryTarget = ZoneSectionQuery["target"];
-export type ZoneSectionQueryFilterField = keyof Omit<
-  ZoneSectionQuery,
+export type PageSectionQuery = Static<typeof pageSectionQuerySchema>;
+export type PageSectionQueryTarget = PageSectionQuery["target"];
+export type PageSectionQueryFilterField = keyof Omit<
+  PageSectionQuery,
   "target" | "sort"
 >;
 
 /**
- * Per-target Meilisearch field vocabulary for zone query sections. The
+ * Per-target Meilisearch field vocabulary for page query sections. The
  * contract owns this table because server compilation and app-side management
  * editors must stay in lockstep when a query target is added.
  * 专区查询分区按目标划分的 Meilisearch 字段词汇表。契约拥有此表，因为
  * 服务端编译与应用端管理编辑器在新增查询目标时必须保持同步。
  */
-export const ZONE_SECTION_QUERY_FILTERABLE_FIELDS = {
+export const PAGE_SECTION_QUERY_FILTERABLE_FIELDS = {
   unit: [
     "types",
     "postKinds",
@@ -140,11 +145,11 @@ export const ZONE_SECTION_QUERY_FILTERABLE_FIELDS = {
   realm: ["types", "languages"],
   zone: ["types", "realm", "languages"],
 } as const satisfies Record<
-  ZoneSectionQueryTarget,
-  readonly ZoneSectionQueryFilterField[]
+  PageSectionQueryTarget,
+  readonly PageSectionQueryFilterField[]
 >;
 
-export const ZONE_SECTION_QUERY_SORT_FIELDS = {
+export const PAGE_SECTION_QUERY_SORT_FIELDS = {
   unit: [
     "createdAt",
     "updatedAt",
@@ -172,14 +177,14 @@ export const ZONE_SECTION_QUERY_SORT_FIELDS = {
   realm: ["createdAt", "updatedAt", "memberCount"],
   zone: ["createdAt", "updatedAt"],
 } as const satisfies Record<
-  ZoneSectionQueryTarget,
-  readonly ZoneSectionQuerySortField[]
+  PageSectionQueryTarget,
+  readonly PageSectionQuerySortField[]
 >;
 
-// ANCHOR: Zone section primitives
-// ANCHOR: 专区分区原语
+// ANCHOR: Page section primitives
+// ANCHOR: 页面分区原语
 
-export const zoneDynamicTagOptionSchema = t.Object(
+export const pageDynamicTagOptionSchema = t.Object(
   {
     tagUnitIds: t.Array(t.String(), { minItems: 1 }),
     probability: t.Number({ minimum: 0, maximum: 1 }),
@@ -187,7 +192,7 @@ export const zoneDynamicTagOptionSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneDynamicTagOption = Static<typeof zoneDynamicTagOptionSchema>;
+export type PageDynamicTagOption = Static<typeof pageDynamicTagOptionSchema>;
 
 /**
  * Dynamic tags are a query-section modifier, not a section kind. Random
@@ -196,25 +201,25 @@ export type ZoneDynamicTagOption = Static<typeof zoneDynamicTagOptionSchema>;
  * 动态标签是 query 分区的修饰项，而不是新的分区类型。随机选择由前端负责；
  * 持久化配置只保存规范化后的 tag unit id 与概率。
  */
-export const zoneDynamicTagsSchema = t.Object(
+export const pageDynamicTagsSchema = t.Object(
   {
     groupId: t.Optional(t.String()),
     fallback: t.Optional(t.Boolean()),
-    options: t.Array(zoneDynamicTagOptionSchema),
+    options: t.Array(pageDynamicTagOptionSchema),
   },
   { additionalProperties: false },
 );
 
-export type ZoneDynamicTags = Static<typeof zoneDynamicTagsSchema>;
+export type PageDynamicTags = Static<typeof pageDynamicTagsSchema>;
 
-export const zoneSectionEmptyStateSchema = t.Union([
+export const pageSectionEmptyStateSchema = t.Union([
   t.Literal("hide"),
   t.Literal("show-empty"),
 ]);
 
-export type ZoneSectionEmptyState = Static<typeof zoneSectionEmptyStateSchema>;
+export type PageSectionEmptyState = Static<typeof pageSectionEmptyStateSchema>;
 
-export const zoneSectionDisplaySchema = t.Union([
+export const pageSectionDisplaySchema = t.Union([
   t.Literal("tiles"),
   t.Literal("grid"),
   t.Literal("list"),
@@ -225,9 +230,30 @@ export const zoneSectionDisplaySchema = t.Union([
   t.Literal("avatar-wall"),
 ]);
 
-export type ZoneSectionDisplay = Static<typeof zoneSectionDisplaySchema>;
+export type PageSectionDisplay = Static<typeof pageSectionDisplaySchema>;
 
 const httpsUrlSchema = t.String({ pattern: "^https://" });
+
+export const pageSectionKindValues = [
+  "stage",
+  "zoneInfo",
+  "image",
+  "actions",
+  "richText",
+  "collection",
+  "query",
+  "stream",
+  "stats",
+  "sources",
+  "tabs",
+  "columns",
+] as const;
+
+export const pageSectionKindSchema = literalSchemaFromValues(
+  pageSectionKindValues,
+);
+
+export type PageSectionKind = (typeof pageSectionKindValues)[number];
 
 /**
  * Section title resolution chain: `titleLabelUnitId` (LABEL unit) →
@@ -235,17 +261,18 @@ const httpsUrlSchema = t.String({ pattern: "^https://" });
  * 分区标题解析链：`titleLabelUnitId`（LABEL Unit）→ 按 kind 的默认前端
  * i18n key。不存在内联标题文本。
  */
-const zoneSectionBaseSchema = t.Object(
+const pageSectionBaseSchema = t.Object(
   {
-    id: t.String(),
+    nodeId: schemaNodeIdSchema,
+    slug: t.Optional(schemaSlugSchema),
     titleLabelUnitId: t.Optional(t.String()),
     limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
-    emptyState: t.Optional(zoneSectionEmptyStateSchema),
+    emptyState: t.Optional(pageSectionEmptyStateSchema),
   },
   { additionalProperties: false },
 );
 
-export const zoneCollectionItemSchema = t.Object(
+export const pageCollectionItemSchema = t.Object(
   {
     target: zoneLinkTargetSchema,
     labelUnitId: t.Optional(t.String()),
@@ -257,7 +284,7 @@ export const zoneCollectionItemSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneCollectionItem = Static<typeof zoneCollectionItemSchema>;
+export type PageCollectionItem = Static<typeof pageCollectionItemSchema>;
 
 /**
  * `zoneInfo` is stage-only profile chrome: it makes zone title/description
@@ -268,9 +295,9 @@ export type ZoneCollectionItem = Static<typeof zoneCollectionItemSchema>;
  * 而不是让容器隐式读取 profile 字段。编辑器可以在新增 stage 时默认插入
  * 一个，但契约不强制要求。
  */
-export const zoneInfoSectionSchema = t.Object(
+export const pageZoneInfoSectionSchema = t.Object(
   {
-    id: t.String(),
+    nodeId: schemaNodeIdSchema,
     kind: t.Literal("zoneInfo"),
     showTitle: t.Optional(t.Boolean()),
     showDescription: t.Optional(t.Boolean()),
@@ -278,15 +305,15 @@ export const zoneInfoSectionSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneInfoSection = Static<typeof zoneInfoSectionSchema>;
+export type PageZoneInfoSection = Static<typeof pageZoneInfoSectionSchema>;
 
-export const zoneImageVariantSchema = t.Union([
+export const pageImageVariantSchema = t.Union([
   t.Literal("inline"),
   t.Literal("banner"),
   t.Literal("logo"),
 ]);
 
-export type ZoneImageVariant = Static<typeof zoneImageVariantSchema>;
+export type PageImageVariant = Static<typeof pageImageVariantSchema>;
 
 /**
  * Images are first-class ordered sections, not hidden banner/logo fields on a
@@ -295,39 +322,39 @@ export type ZoneImageVariant = Static<typeof zoneImageVariantSchema>;
  * 图片是一等可排序分区，不再是 stage 上隐藏的横幅/标识字段。带 target
  * 时图片可交互；没有 target 时只做展示。
  */
-export const zoneImageSectionSchema = t.Object(
+export const pageImageSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("image"),
     url: httpsUrlSchema,
-    variant: t.Optional(zoneImageVariantSchema),
+    variant: t.Optional(pageImageVariantSchema),
     altLabelUnitId: t.Optional(t.String()),
     target: t.Optional(zoneLinkTargetSchema),
   },
   { additionalProperties: false },
 );
 
-export type ZoneImageSection = Static<typeof zoneImageSectionSchema>;
+export type PageImageSection = Static<typeof pageImageSectionSchema>;
 
-export const zoneActionBuiltInSchema = t.Union([
+export const pageActionBuiltInSchema = t.Union([
   t.Literal("joinRealm"),
   t.Literal("createWiki"),
   t.Literal("createPost"),
 ]);
 
-export type ZoneActionBuiltIn = Static<typeof zoneActionBuiltInSchema>;
+export type PageActionBuiltIn = Static<typeof pageActionBuiltInSchema>;
 
-export const zoneActionsSectionSchema = t.Object(
+export const pageActionsSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("actions"),
-    items: t.Optional(t.Array(zoneCollectionItemSchema)),
-    builtIns: t.Optional(t.Array(zoneActionBuiltInSchema)),
+    items: t.Optional(t.Array(pageCollectionItemSchema)),
+    builtIns: t.Optional(t.Array(pageActionBuiltInSchema)),
   },
   { additionalProperties: false },
 );
 
-export type ZoneActionsSection = Static<typeof zoneActionsSectionSchema>;
+export type PageActionsSection = Static<typeof pageActionsSectionSchema>;
 
 /**
  * `contentUnitId` references a "zone fragment": a POST unit with
@@ -339,46 +366,46 @@ export type ZoneActionsSection = Static<typeof zoneActionsSectionSchema>;
  * `ContentTranslation` 工作流编辑。UNLISTED 使片段不出现在 wiki 列表、
  * 查询分区与搜索中，但仍在此处渲染。
  */
-export const zoneRichTextSectionSchema = t.Object(
+export const pageRichTextSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("richText"),
     contentUnitId: t.String(),
   },
   { additionalProperties: false },
 );
 
-export type ZoneRichTextSection = Static<typeof zoneRichTextSectionSchema>;
+export type PageRichTextSection = Static<typeof pageRichTextSectionSchema>;
 
-export const zoneCollectionSectionSchema = t.Object(
+export const pageCollectionSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("collection"),
-    items: t.Array(zoneCollectionItemSchema),
-    display: zoneSectionDisplaySchema,
+    items: t.Array(pageCollectionItemSchema),
+    display: pageSectionDisplaySchema,
   },
   { additionalProperties: false },
 );
 
-export type ZoneCollectionSection = Static<typeof zoneCollectionSectionSchema>;
+export type PageCollectionSection = Static<typeof pageCollectionSectionSchema>;
 
-export const zoneQuerySectionSchema = t.Object(
+export const pageQuerySectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("query"),
-    query: zoneSectionQuerySchema,
-    display: zoneSectionDisplaySchema,
+    query: pageSectionQuerySchema,
+    display: pageSectionDisplaySchema,
     loadMore: t.Optional(t.Boolean()),
-    dynamicTags: t.Optional(zoneDynamicTagsSchema),
+    dynamicTags: t.Optional(pageDynamicTagsSchema),
   },
   { additionalProperties: false },
 );
 
-export type ZoneQuerySection = Static<typeof zoneQuerySectionSchema>;
+export type PageQuerySection = Static<typeof pageQuerySectionSchema>;
 
-export const zoneStreamSectionSchema = t.Object(
+export const pageStreamSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("stream"),
     streamKind: t.Optional(
       t.Union([t.Literal("all"), t.Literal("updates"), t.Literal("reviews")]),
@@ -387,25 +414,25 @@ export const zoneStreamSectionSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneStreamSection = Static<typeof zoneStreamSectionSchema>;
+export type PageStreamSection = Static<typeof pageStreamSectionSchema>;
 
-export const zoneStatsMetricSchema = t.Union([
+export const pageStatsMetricSchema = t.Union([
   t.Literal("articles"),
   t.Literal("members"),
 ]);
 
-export type ZoneStatsMetric = Static<typeof zoneStatsMetricSchema>;
+export type PageStatsMetric = Static<typeof pageStatsMetricSchema>;
 
-export const zoneStatsSectionSchema = t.Object(
+export const pageStatsSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("stats"),
-    metrics: t.Array(zoneStatsMetricSchema),
+    metrics: t.Array(pageStatsMetricSchema),
   },
   { additionalProperties: false },
 );
 
-export type ZoneStatsSection = Static<typeof zoneStatsSectionSchema>;
+export type PageStatsSection = Static<typeof pageStatsSectionSchema>;
 
 /**
  * `sources` renders external presences attached to the zone Unit itself:
@@ -416,15 +443,15 @@ export type ZoneStatsSection = Static<typeof zoneStatsSectionSchema>;
  * 其 `UnitExternalLink` 表示“这个门户在其他地方的对应站点”。这里刻意
  * 没有分区级 `unitId`；读取方始终查询所属专区 Unit。
  */
-export const zoneSourcesSectionSchema = t.Object(
+export const pageSourcesSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("sources"),
   },
   { additionalProperties: false },
 );
 
-export type ZoneSourcesSection = Static<typeof zoneSourcesSectionSchema>;
+export type PageSourcesSection = Static<typeof pageSourcesSectionSchema>;
 
 /**
  * Content primitives own their own rendered content and data needs. Container
@@ -436,30 +463,31 @@ export type ZoneSourcesSection = Static<typeof zoneSourcesSectionSchema>;
  * 中：`tabs` 面板只容纳内容分区；`columns` 面板容纳内容分区或 `tabs`；
  * `stage` 面板容纳内容分区、`tabs` 或 `columns`，但不能再套 `stage`。
  */
-export const zoneContentSectionSchema = t.Union([
-  zoneImageSectionSchema,
-  zoneActionsSectionSchema,
-  zoneRichTextSectionSchema,
-  zoneCollectionSectionSchema,
-  zoneQuerySectionSchema,
-  zoneStreamSectionSchema,
-  zoneStatsSectionSchema,
-  zoneSourcesSectionSchema,
+export const pageContentSectionSchema = t.Union([
+  pageImageSectionSchema,
+  pageActionsSectionSchema,
+  pageRichTextSectionSchema,
+  pageCollectionSectionSchema,
+  pageQuerySectionSchema,
+  pageStreamSectionSchema,
+  pageStatsSectionSchema,
+  pageSourcesSectionSchema,
 ]);
 
-export type ZoneContentSection = Static<typeof zoneContentSectionSchema>;
+export type PageContentSection = Static<typeof pageContentSectionSchema>;
 
-export const zoneTabsSectionSchema = t.Object(
+export const pageTabsSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("tabs"),
-    defaultTabId: t.Optional(t.String()),
+    defaultTabNodeId: t.Optional(schemaNodeIdSchema),
     tabs: t.Array(
       t.Object(
         {
-          id: t.String(),
+          nodeId: schemaNodeIdSchema,
+          slug: t.Optional(schemaSlugSchema),
           titleLabelUnitId: t.Optional(t.String()),
-          sections: t.Array(zoneContentSectionSchema),
+          sections: t.Array(pageContentSectionSchema),
         },
         { additionalProperties: false },
       ),
@@ -468,33 +496,32 @@ export const zoneTabsSectionSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneTabsSection = Static<typeof zoneTabsSectionSchema>;
+export type PageTabsSection = Static<typeof pageTabsSectionSchema>;
 
-export const zoneColumnSchema = t.Object(
+export const pageColumnSchema = t.Object(
   {
-    id: t.String(),
     ratio: t.Integer({ minimum: 1, maximum: 12 }),
     sections: t.Array(
-      t.Union([zoneContentSectionSchema, zoneTabsSectionSchema]),
+      t.Union([pageContentSectionSchema, pageTabsSectionSchema]),
     ),
   },
   { additionalProperties: false },
 );
 
-export type ZoneColumn = Static<typeof zoneColumnSchema>;
+export type PageColumn = Static<typeof pageColumnSchema>;
 
-export const zoneColumnsSectionSchema = t.Object(
+export const pageColumnsSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("columns"),
-    columns: t.Array(zoneColumnSchema, { minItems: 2, maxItems: 4 }),
+    columns: t.Array(pageColumnSchema, { minItems: 2, maxItems: 4 }),
   },
   { additionalProperties: false },
 );
 
-export type ZoneColumnsSection = Static<typeof zoneColumnsSectionSchema>;
+export type PageColumnsSection = Static<typeof pageColumnsSectionSchema>;
 
-export const zoneStageBackgroundSchema = t.Object(
+export const pageStageBackgroundSchema = t.Object(
   {
     color: t.Optional(t.String()),
     imageUrl: t.Optional(httpsUrlSchema),
@@ -504,9 +531,9 @@ export const zoneStageBackgroundSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneStageBackground = Static<typeof zoneStageBackgroundSchema>;
+export type PageStageBackground = Static<typeof pageStageBackgroundSchema>;
 
-export const zoneStageMaskSchema = t.Object(
+export const pageStageMaskSchema = t.Object(
   {
     color: t.Optional(t.String()),
     opacity: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
@@ -514,16 +541,16 @@ export const zoneStageMaskSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ZoneStageMask = Static<typeof zoneStageMaskSchema>;
+export type PageStageMask = Static<typeof pageStageMaskSchema>;
 
-export const zoneStageChildSectionSchema = t.Union([
-  zoneInfoSectionSchema,
-  zoneContentSectionSchema,
-  zoneTabsSectionSchema,
-  zoneColumnsSectionSchema,
+export const pageStageChildSectionSchema = t.Union([
+  pageZoneInfoSectionSchema,
+  pageContentSectionSchema,
+  pageTabsSectionSchema,
+  pageColumnsSectionSchema,
 ]);
 
-export type ZoneStageChildSection = Static<typeof zoneStageChildSectionSchema>;
+export type PageStageChildSection = Static<typeof pageStageChildSectionSchema>;
 
 /**
  * A stage is decorated page chrome: background, mask, and an ordered child
@@ -532,28 +559,24 @@ export type ZoneStageChildSection = Static<typeof zoneStageChildSectionSchema>;
  * stage 是带装饰的页面容器：背景、蒙板与有序子分区列表。它不拥有独立布局
  * 词汇；组合仍使用已有的 `columns`/`tabs` 子分区。stage 不能嵌套。
  */
-export const zoneStageSectionSchema = t.Object(
+export const pageStageSectionSchema = t.Object(
   {
-    ...zoneSectionBaseSchema.properties,
+    ...pageSectionBaseSchema.properties,
     kind: t.Literal("stage"),
-    background: t.Optional(zoneStageBackgroundSchema),
-    mask: t.Optional(zoneStageMaskSchema),
-    sections: t.Array(zoneStageChildSectionSchema),
+    background: t.Optional(pageStageBackgroundSchema),
+    mask: t.Optional(pageStageMaskSchema),
+    sections: t.Array(pageStageChildSectionSchema),
   },
   { additionalProperties: false },
 );
 
-export type ZoneStageSection = Static<typeof zoneStageSectionSchema>;
+export type PageStageSection = Static<typeof pageStageSectionSchema>;
 
-export const zonePageSectionSchema = t.Union([
-  zoneStageSectionSchema,
-  zoneContentSectionSchema,
-  zoneTabsSectionSchema,
-  zoneColumnsSectionSchema,
+export const pageSectionSchema = t.Union([
+  pageStageSectionSchema,
+  pageContentSectionSchema,
+  pageTabsSectionSchema,
+  pageColumnsSectionSchema,
 ]);
 
-export type ZonePageSection = Static<typeof zonePageSectionSchema>;
-
-export type ZoneSection = ZonePageSection;
-
-export type ZoneSectionKind = ZonePageSection["kind"];
+export type PageSection = Static<typeof pageSectionSchema>;

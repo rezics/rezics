@@ -4,25 +4,25 @@ import {
   markdownContentDoc,
   parseZoneBoundary,
   parseZoneNav,
-  parseZonePage,
+  parsePage,
   parseZoneTheme,
   resolveReadLanguage,
   type StreamRow,
   type UnitType,
   ZONE_MENU_MAX_DEPTH,
   type ZoneBoundary,
-  type ZoneCollectionItem,
-  type ZoneContentSection,
-  type ZoneDynamicTags,
   type ZoneListView,
   type ZoneMenuNode,
   type ZoneNav,
-  type ZonePage as ZonePageConfig,
-  type ZonePageSection,
   type ZoneSectionData,
   type ZoneSectionItem,
-  type ZoneSectionQuery,
-  type ZoneStageChildSection,
+  type Page as ZonePageConfig,
+  type PageCollectionItem as ZoneCollectionItem,
+  type PageContentSection as ZoneContentSection,
+  type PageDynamicTags as ZoneDynamicTags,
+  type PageSection as ZonePageSection,
+  type PageSectionQuery,
+  type PageStageChildSection as ZoneStageChildSection,
   type ZoneTheme,
   type ZoneTranslation,
 } from "@rezics/contract";
@@ -39,7 +39,7 @@ import {
 } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import {
-  compileZoneSectionQuery,
+  compilePageSectionQuery,
   zoneSectionQueryUnsupportedFields,
 } from "@/meili/search/filters";
 import { unitService } from "@/unit";
@@ -356,7 +356,7 @@ function collectLinkTargetRefs(
   if (target?.kind === "unit") refs.targetUnitIds.add(target.unitId);
 }
 
-function collectQueryRefs(query: ZoneSectionQuery, refs: ZoneRefAccumulator) {
+function collectQueryRefs(query: PageSectionQuery, refs: ZoneRefAccumulator) {
   if (query.realm && query.realm !== "context") {
     for (const id of query.realm.unitIds) refs.realmUnitIds.add(id);
   }
@@ -592,7 +592,7 @@ function findSectionById(
   sectionId: string,
 ): LocatedSection | null {
   for (const { section, container } of iteratePageSections(page)) {
-    if (section.id !== sectionId) continue;
+    if (section.nodeId !== sectionId) continue;
     return container
       ? { kind: "container", section: section as ZonePageSection }
       : { kind: "content", section: section as ZoneContentSection };
@@ -608,32 +608,35 @@ function menuDepth(nodes: readonly ZoneMenuNode[]): number {
   return depth;
 }
 
-function* iterateMenuNodes(
+function* iterateMenuNodesWithPath(
   nodes: readonly ZoneMenuNode[],
-): Generator<ZoneMenuNode> {
-  for (const node of nodes) {
-    yield node;
-    if (node.children) yield* iterateMenuNodes(node.children);
+  basePath: readonly number[] = [],
+): Generator<{ node: ZoneMenuNode; path: number[] }> {
+  for (let index = 0; index < nodes.length; index += 1) {
+    const node = nodes[index] as ZoneMenuNode;
+    const path = [...basePath, index];
+    yield { node, path };
+    if (node.children) yield* iterateMenuNodesWithPath(node.children, path);
   }
 }
 
 function findNavPageReferences(nav: ZoneNav, pageId: string) {
-  const references: Array<{ menuId: string; nodeId: string; path: string[] }> =
-    [];
+  const references: Array<{ menuSlug: string; path: number[] }> = [];
   const visit = (
-    menuId: string,
+    menuSlug: string,
     nodes: readonly ZoneMenuNode[],
-    path: string[],
+    path: readonly number[],
   ) => {
-    for (const node of nodes) {
-      const nextPath = [...path, node.id];
+    for (let index = 0; index < nodes.length; index += 1) {
+      const node = nodes[index] as ZoneMenuNode;
+      const nextPath = [...path, index];
       if (node.target?.kind === "zonePage" && node.target.pageId === pageId) {
-        references.push({ menuId, nodeId: node.id, path: nextPath });
+        references.push({ menuSlug, path: nextPath });
       }
-      if (node.children) visit(menuId, node.children, nextPath);
+      if (node.children) visit(menuSlug, node.children, nextPath);
     }
   };
-  for (const menu of nav.menus) visit(menu.id, menu.nodes, []);
+  for (const menu of nav.menus) visit(menu.slug, menu.nodes, []);
   return references;
 }
 
@@ -718,10 +721,10 @@ export function parseZoneRowShell(
   return { boundary, nav, theme };
 }
 
-export function parseZonePageRowConfig(
+export function parsePageRowConfig(
   page: Pick<typeof ZonePage.$inferSelect, "id" | "config">,
 ): ZonePageConfig {
-  const config = parseZonePage(page.config);
+  const config = parsePage(page.config);
   if (!config) {
     throw new AppError(500, "Zone page failed envelope validation", {
       code: "ZONE_PAGE_INVALID",
@@ -754,7 +757,7 @@ async function hydrateZone(
     ...shell,
     pages: pages.map((page) => ({
       ...page,
-      config: parseZonePageRowConfig(page),
+      config: parsePageRowConfig(page),
     })),
     unit: unit ? ({ ...unit } as unknown as ZoneWithRelations["unit"]) : null,
   };
@@ -885,7 +888,7 @@ function createDrizzleZoneRepository(): ZoneRepository {
           and(eq(ZonePage.zoneUnitId, zoneUnitId), eq(ZonePage.slug, slug)),
         )
         .limit(1);
-      return page ? { ...page, config: parseZonePageRowConfig(page) } : null;
+      return page ? { ...page, config: parsePageRowConfig(page) } : null;
     },
     async getPage(zoneUnitId, pageId) {
       const db = await getServerDb();
@@ -896,7 +899,7 @@ function createDrizzleZoneRepository(): ZoneRepository {
           and(eq(ZonePage.zoneUnitId, zoneUnitId), eq(ZonePage.id, pageId)),
         )
         .limit(1);
-      return page ? { ...page, config: parseZonePageRowConfig(page) } : null;
+      return page ? { ...page, config: parsePageRowConfig(page) } : null;
     },
     async findUnitBySlug(slugScope, slug) {
       const db = await getServerDb();
@@ -1250,31 +1253,38 @@ export class ZoneService {
       throw new AppError(400, message, { code, details });
     };
 
-    // Section ids are page-local because section data routes include pageId.
+    // Section node ids are page-local because section data routes include pageId.
     const sectionIds = new Set<string>();
     for (const { section } of iteratePageSections(page)) {
-      if (sectionIds.has(section.id)) {
+      if (sectionIds.has(section.nodeId)) {
         fail(
-          "ZONE_SECTION_ID_DUPLICATE",
-          "Zone page section ids must be unique",
+          "ZONE_SECTION_NODE_ID_DUPLICATE",
+          "Zone page section nodeIds must be unique",
           {
-            id: section.id,
+            nodeId: section.nodeId,
           },
         );
       }
-      sectionIds.add(section.id);
+      sectionIds.add(section.nodeId);
       if (section.kind === "tabs") {
-        const tabIds = new Set(section.tabs.map((tab) => tab.id));
+        const tabIds = new Set(section.tabs.map((tab) => tab.nodeId));
         if (tabIds.size !== section.tabs.length) {
-          fail("ZONE_TAB_ID_DUPLICATE", "Zone tab ids must be unique", {
-            sectionId: section.id,
-          });
+          fail(
+            "ZONE_TAB_NODE_ID_DUPLICATE",
+            "Zone tab nodeIds must be unique",
+            {
+              sectionNodeId: section.nodeId,
+            },
+          );
         }
-        if (section.defaultTabId && !tabIds.has(section.defaultTabId)) {
+        if (section.defaultTabNodeId && !tabIds.has(section.defaultTabNodeId)) {
           fail(
             "ZONE_TAB_DEFAULT_INVALID",
-            "defaultTabId must reference one of the tabs",
-            { sectionId: section.id, defaultTabId: section.defaultTabId },
+            "defaultTabNodeId must reference one of the tabs",
+            {
+              sectionNodeId: section.nodeId,
+              defaultTabNodeId: section.defaultTabNodeId,
+            },
           );
         }
       }
@@ -1284,7 +1294,7 @@ export class ZoneService {
           fail(
             "ZONE_QUERY_FIELD_UNSUPPORTED",
             "Zone section query uses fields the target index cannot filter or sort",
-            { sectionId: section.id, fields: unsupported },
+            { sectionNodeId: section.nodeId, fields: unsupported },
           );
         }
         if (section.dynamicTags) {
@@ -1292,7 +1302,7 @@ export class ZoneService {
             fail(
               "ZONE_DYNAMIC_TAG_TARGET_UNSUPPORTED",
               "Dynamic tag filters require a unit query",
-              { sectionId: section.id },
+              { sectionNodeId: section.nodeId },
             );
           }
           if (!dynamicTagsProbabilityValid(section.dynamicTags)) {
@@ -1300,7 +1310,7 @@ export class ZoneService {
               "ZONE_DYNAMIC_TAG_PROBABILITY_INVALID",
               "Dynamic tag probabilities must resolve to 1",
               {
-                sectionId: section.id,
+                sectionNodeId: section.nodeId,
                 total: dynamicTagsProbabilityTotal(section.dynamicTags),
               },
             );
@@ -1319,20 +1329,20 @@ export class ZoneService {
       throw new AppError(400, message, { code, details });
     };
 
-    const menuIds = new Set<string>();
+    const menuSlugs = new Set<string>();
     for (const menu of nav.menus) {
-      if (menuIds.has(menu.id)) {
-        fail("ZONE_MENU_ID_DUPLICATE", "Zone menu ids must be unique", {
-          id: menu.id,
+      if (menuSlugs.has(menu.slug)) {
+        fail("ZONE_MENU_SLUG_DUPLICATE", "Zone menu slugs must be unique", {
+          slug: menu.slug,
         });
       }
-      menuIds.add(menu.id);
+      menuSlugs.add(menu.slug);
       if (menuDepth(menu.nodes) > ZONE_MENU_MAX_DEPTH) {
         fail("ZONE_MENU_TOO_DEEP", "Zone menu trees are capped at depth 3", {
-          menuId: menu.id,
+          menuSlug: menu.slug,
         });
       }
-      for (const node of iterateMenuNodes(menu.nodes)) {
+      for (const { node, path } of iterateMenuNodesWithPath(menu.nodes)) {
         const isGroup = (node.children?.length ?? 0) > 0;
         // Leaves need a target; groups need something to resolve a label
         // from (labelUnitId or a unit target).
@@ -1340,23 +1350,27 @@ export class ZoneService {
         // unit target）。
         if (!isGroup && !node.target) {
           fail("ZONE_MENU_NODE_INVALID", "Leaf menu nodes require a target", {
-            menuId: menu.id,
-            nodeId: node.id,
+            menuSlug: menu.slug,
+            path,
           });
         }
         if (isGroup && !node.labelUnitId && !node.target) {
           fail(
             "ZONE_MENU_NODE_INVALID",
             "Group menu nodes require a labelUnitId or target to resolve a label",
-            { menuId: menu.id, nodeId: node.id },
+            { menuSlug: menu.slug, path },
           );
         }
       }
     }
-    if (!menuIds.has(nav.header.menuId)) {
-      fail("ZONE_HEADER_MENU_INVALID", "header.menuId must reference a menu", {
-        menuId: nav.header.menuId,
-      });
+    if (!menuSlugs.has(nav.header.menuSlug)) {
+      fail(
+        "ZONE_HEADER_MENU_INVALID",
+        "header.menuSlug must reference a menu",
+        {
+          menuSlug: nav.header.menuSlug,
+        },
+      );
     }
   }
 
@@ -1727,7 +1741,7 @@ export class ZoneService {
 
   private streamSectionQuery(
     streamKind: "all" | "updates" | "reviews" | undefined,
-  ): ZoneSectionQuery {
+  ): PageSectionQuery {
     // Stream sections are query presets over the posts index. They share the
     // compiled-query execution path so zone sections use one renderer and one
     // boundary intersection model.
@@ -1763,7 +1777,7 @@ export class ZoneService {
     zone: ZoneWithRelations;
     pageId: string;
     sectionId: string;
-    query: ZoneSectionQuery;
+    query: PageSectionQuery;
     output?: "items" | "stream";
     limit: number;
     cursor?: string | null;
@@ -1789,7 +1803,7 @@ export class ZoneService {
         ],
       };
     }
-    const compiled = compileZoneSectionQuery(query, boundary.filters, {
+    const compiled = compilePageSectionQuery(query, boundary.filters, {
       contextRealmUnitId:
         boundary.context.kind === "realm" ? boundary.context.realmUnitId : null,
     });
@@ -1833,7 +1847,7 @@ export class ZoneService {
   private async mapSectionItemsToStreamRows(input: {
     ids: string[];
     items: ZoneSectionItem[];
-    query: ZoneSectionQuery;
+    query: PageSectionQuery;
     preferredLanguages?: string[];
   }): Promise<StreamRow[]> {
     if (input.ids.length === 0 || input.items.length === 0) return [];

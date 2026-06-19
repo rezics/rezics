@@ -15,6 +15,7 @@
  * - R13 — core @rezics/ui cannot import host runtime deps
  * - R14 — contract / Paraglide / catalogs share the same locale set with exact key parity
  * - R15 — persisted JSON columns are classified and never mutated in-database
+ * - R16 — schema component JSON uses nodeId/slug/kind/placement conventions
  *
  * Usage:
  *   bun run check:convention               # full scan

@@ -9,7 +9,7 @@ import { resolveSlugRef, resolveSlugRefs } from "../../shared/slug-ref";
 import { searchClient } from "../search-client";
 import { federatedSearch } from "./federated.service";
 import type { FilterContext } from "./filters";
-import { compileZoneSectionQuery } from "./filters";
+import { compilePageSectionQuery } from "./filters";
 
 // ANCHOR: POST /meili/search/federated
 // ANCHOR: POST /meili/search/federated（联邦搜索接口）
@@ -85,12 +85,12 @@ export const federatedSearchApi = new Elysia({ prefix: "/meili" }).post(
               : null,
         };
         const sort = { field: "createdAt" } as const;
-        ctx.zoneBoundaryContentFilter = compileZoneSectionQuery(
+        ctx.zoneBoundaryContentFilter = compilePageSectionQuery(
           { target: "unit", sort },
           zone.boundary.filters,
           zoneCtx,
         ).filter;
-        ctx.zoneBoundaryPostFilter = compileZoneSectionQuery(
+        ctx.zoneBoundaryPostFilter = compilePageSectionQuery(
           { target: "post", sort },
           zone.boundary.filters,
           zoneCtx,

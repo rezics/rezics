@@ -3,9 +3,9 @@ import type {
   Language,
   PostKind,
   UnitType,
-  ZoneDynamicTags,
-  ZoneSectionQuery,
-  ZoneSectionQuerySortField,
+  PageDynamicTags,
+  PageSectionQuery,
+  PageSectionQuerySortField,
 } from "@rezics/contract";
 import {
   contentRatingValues,
@@ -46,13 +46,13 @@ const LANG_VIEWER = "viewer";
 const LANG_LIST = "__list__";
 
 /**
- * Query builder over the `ZoneSectionQuery` vocabulary. The visible filter
+ * Query builder over the `PageSectionQuery` vocabulary. The visible filter
  * controls and the sortable field list follow the per-target vocabulary in
  * `models/zoneManageDraft.ts` (client mirror of the server compiler), so
  * the builder cannot produce a query the server would reject. Empty
  * multi-selects clear the field (absent = unfiltered) rather than storing
  * empty arrays.
- * 基于 `ZoneSectionQuery` 词汇表的查询构建器。可见的过滤控件与可排序
+ * 基于 `PageSectionQuery` 词汇表的查询构建器。可见的过滤控件与可排序
  * 字段列表遵循 `models/zoneManageDraft.ts` 中按目标划分的词汇表（服务端
  * 编译器的客户端镜像），因此构建器不会产出服务端会拒绝的查询。空的多选
  * 会清除字段（缺省 = 不过滤），而不是存储空数组。
@@ -64,10 +64,10 @@ export function ZoneQueryEditor({
   onDynamicTagsChange,
   refUnits,
 }: {
-  query: ZoneSectionQuery;
-  dynamicTags?: ZoneDynamicTags;
-  onChange: (query: ZoneSectionQuery) => void;
-  onDynamicTagsChange?: (dynamicTags: ZoneDynamicTags | undefined) => void;
+  query: PageSectionQuery;
+  dynamicTags?: PageDynamicTags;
+  onChange: (query: PageSectionQuery) => void;
+  onDynamicTagsChange?: (dynamicTags: PageDynamicTags | undefined) => void;
   refUnits: ZoneRefUnitMap;
 }) {
   const { t } = useTranslation(["zone", "common"]);
@@ -75,9 +75,9 @@ export function ZoneQueryEditor({
     ZONE_QUERY_FILTERABLE_FIELDS[query.target];
   const has = (field: ZoneQueryFilterField) => filterable.includes(field);
 
-  const setField = <K extends keyof ZoneSectionQuery>(
+  const setField = <K extends keyof PageSectionQuery>(
     key: K,
-    value: ZoneSectionQuery[K] | undefined,
+    value: PageSectionQuery[K] | undefined,
   ) => {
     const next = { ...query };
     if (value === undefined) delete next[key];
@@ -132,7 +132,7 @@ export function ZoneQueryEditor({
               onChange(
                 coerceZoneQueryTarget(
                   query,
-                  target as ZoneSectionQuery["target"],
+                  target as PageSectionQuery["target"],
                 ),
               )
             }
@@ -163,7 +163,7 @@ export function ZoneQueryEditor({
             onValueChange={(field) =>
               setField("sort", {
                 ...query.sort,
-                field: field as ZoneSectionQuerySortField,
+                field: field as PageSectionQuerySortField,
               })
             }
           >

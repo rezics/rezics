@@ -1,7 +1,7 @@
 import type {
-  ZoneDynamicTags,
-  ZonePageSection,
-  ZoneStageChildSection,
+  PageDynamicTags,
+  PageSection,
+  PageStageChildSection,
 } from "@rezics/contract";
 
 export type ZoneDynamicTagSelection = {
@@ -34,7 +34,7 @@ export function normalizeDynamicTagUnitIds(tagUnitIds: readonly string[]) {
   return [...tagUnitIds].sort().join("|");
 }
 
-function dynamicTagCandidates(dynamicTags: ZoneDynamicTags): Candidate[] {
+function dynamicTagCandidates(dynamicTags: PageDynamicTags): Candidate[] {
   const candidates = dynamicTags.options
     .filter((option) => option.probability > 0)
     .map((option) => ({
@@ -75,10 +75,10 @@ function weightedPick(candidates: readonly Candidate[], seed: string) {
 }
 
 function* orderedQuerySections(
-  sections: readonly (ZonePageSection | ZoneStageChildSection)[],
+  sections: readonly (PageSection | PageStageChildSection)[],
   parentPath = "",
 ): Generator<{
-  section: Extract<ZoneStageChildSection, { kind: "query" }>;
+  section: Extract<PageStageChildSection, { kind: "query" }>;
   path: string;
 }> {
   for (const [index, section] of sections.entries()) {
@@ -107,8 +107,8 @@ function* orderedQuerySections(
  * by page config position, not async request completion, so sections sharing a
  * group id see a stable non-repeating pool for the whole page visit.
  */
-export function selectZoneDynamicTags(
-  sections: readonly ZonePageSection[],
+export function selectPageDynamicTags(
+  sections: readonly PageSection[],
   seed: string,
 ): ZoneDynamicTagSelectionMap {
   const usedByGroup = new Map<string, Set<string>>();
@@ -129,10 +129,10 @@ export function selectZoneDynamicTags(
       used && used.size < candidates.length
         ? candidates.filter((candidate) => !used.has(candidate.key))
         : candidates;
-    const picked = weightedPick(available, `${seed}:${path}:${section.id}`);
+    const picked = weightedPick(available, `${seed}:${path}:${section.nodeId}`);
     if (!picked) continue;
 
-    selections[section.id] = picked.tagUnitIds;
+    selections[section.nodeId] = picked.tagUnitIds;
     if (groupId) {
       used?.add(picked.key);
       usedByGroup.set(groupId, used ?? new Set([picked.key]));

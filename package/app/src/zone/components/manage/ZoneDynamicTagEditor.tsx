@@ -1,6 +1,6 @@
 import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { tagApi } from "@rezics/api/tag/tag";
-import type { TagSearchDocument, ZoneDynamicTags } from "@rezics/contract";
+import type { TagSearchDocument, PageDynamicTags } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Checkbox, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -84,8 +84,8 @@ export function ZoneDynamicTagEditor({
   onChange,
   refUnits,
 }: {
-  value: ZoneDynamicTags | undefined;
-  onChange: (value: ZoneDynamicTags | undefined) => void;
+  value: PageDynamicTags | undefined;
+  onChange: (value: PageDynamicTags | undefined) => void;
   refUnits: ZoneRefUnitMap;
 }) {
   const { t } = useTranslation(["zone", "common"]);
@@ -112,7 +112,7 @@ export function ZoneDynamicTagEditor({
 
   const setOption = (
     index: number,
-    option: ZoneDynamicTags["options"][number],
+    option: PageDynamicTags["options"][number],
   ) => {
     onChange({
       ...value,
@@ -242,9 +242,9 @@ function DynamicTagOptionRow({
   onChange,
   onRemove,
 }: {
-  option: ZoneDynamicTags["options"][number];
+  option: PageDynamicTags["options"][number];
   refUnits: ZoneRefUnitMap;
-  onChange: (option: ZoneDynamicTags["options"][number]) => void;
+  onChange: (option: PageDynamicTags["options"][number]) => void;
   onRemove: () => void;
 }) {
   const { t } = useTranslation(["zone"]);

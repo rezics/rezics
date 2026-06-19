@@ -1,13 +1,13 @@
 import type {
-  ZoneCollectionItem,
-  ZoneColumn,
-  ZoneColumnsSection,
-  ZoneContentSection,
-  ZoneSectionDisplay,
-  ZoneStageChildSection,
-  ZoneStageSection,
-  ZoneStatsMetric,
-  ZoneTabsSection,
+  PageCollectionItem,
+  PageColumn,
+  PageColumnsSection,
+  PageContentSection,
+  PageSectionDisplay,
+  PageStageChildSection,
+  PageStageSection,
+  PageStatsMetric,
+  PageTabsSection,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
@@ -72,9 +72,9 @@ const DISPLAY_KEYS = {
   covers: "zone:manage_display_covers",
   featured: "zone:manage_display_featured",
   "avatar-wall": "zone:manage_display_avatar_wall",
-} as const satisfies Record<ZoneSectionDisplay, `zone:${string}`>;
+} as const satisfies Record<PageSectionDisplay, `zone:${string}`>;
 
-const DISPLAY_OPTIONS = Object.keys(DISPLAY_KEYS) as ZoneSectionDisplay[];
+const DISPLAY_OPTIONS = Object.keys(DISPLAY_KEYS) as PageSectionDisplay[];
 
 const STREAM_KIND_KEYS = {
   all: "zone:manage_stream_all",
@@ -85,7 +85,7 @@ const STREAM_KIND_KEYS = {
 const STATS_METRIC_KEYS = {
   articles: "zone:stats_articles",
   members: "zone:stats_members",
-} as const satisfies Record<ZoneStatsMetric, `zone:${string}`>;
+} as const satisfies Record<PageStatsMetric, `zone:${string}`>;
 
 const NONE = "__none__";
 const ZONE_COLUMNS_MIN = 2;
@@ -330,7 +330,7 @@ function ZoneSectionEditor({
                   {t(KIND_KEYS[section.kind])}
                 </span>
                 <span className="min-w-0 truncate font-mono text-xs leading-dense text-text-tertiary">
-                  {section.id}
+                  {section.nodeId}
                 </span>
               </span>
             </span>
@@ -378,10 +378,12 @@ function SectionBaseFields({
 
   if (!hasSectionChrome(section)) {
     return (
-      <ManageField label={t("zone:manage_section_id")}>
+      <ManageField label={t("zone:manage_section_node_id")}>
         <Input
-          value={section.id}
-          onChange={(event) => onChange({ ...section, id: event.target.value })}
+          value={section.nodeId}
+          onChange={(event) =>
+            onChange({ ...section, nodeId: event.target.value })
+          }
           className="font-mono text-sm"
         />
       </ManageField>
@@ -391,11 +393,11 @@ function SectionBaseFields({
   return (
     <>
       <div className="grid gap-4 md:grid-cols-3">
-        <ManageField label={t("zone:manage_section_id")}>
+        <ManageField label={t("zone:manage_section_node_id")}>
           <Input
-            value={section.id}
+            value={section.nodeId}
             onChange={(event) =>
-              onChange({ ...section, id: event.target.value })
+              onChange({ ...section, nodeId: event.target.value })
             }
             className="font-mono text-sm"
           />
@@ -475,7 +477,7 @@ function ZoneSectionKindFields({
   switch (section.kind) {
     case "stage":
       return (
-        <ZoneStageSectionFields
+        <PageStageSectionFields
           section={section}
           ctx={ctx}
           onChange={onChange}
@@ -530,7 +532,7 @@ function ZoneSectionKindFields({
           />
           <div className="flex flex-col gap-2">
             <ManageGroupHeading>{t("zone:manage_items")}</ManageGroupHeading>
-            <ZoneCollectionItemsEditor
+            <PageCollectionItemsEditor
               items={section.items}
               onChange={(items) => onChange({ ...section, items })}
               ctx={ctx}
@@ -623,7 +625,7 @@ function ZoneSectionKindFields({
 
     case "tabs":
       return (
-        <ZoneTabsSectionFields
+        <PageTabsSectionFields
           section={section}
           ctx={ctx}
           onChange={onChange}
@@ -641,12 +643,12 @@ function ZoneSectionKindFields({
   }
 }
 
-function ZoneStageSectionFields({
+function PageStageSectionFields({
   section,
   ctx,
   onChange,
 }: {
-  section: ZoneStageSection;
+  section: PageStageSection;
   ctx: ZoneManageEditorContext;
   onChange: (section: ZoneEditableSection) => void;
 }) {
@@ -773,7 +775,7 @@ function ZoneStageSectionFields({
           onChange={(sections) =>
             onChange({
               ...section,
-              sections: sections as ZoneStageChildSection[],
+              sections: sections as PageStageChildSection[],
             })
           }
           slot="stage"
@@ -789,7 +791,7 @@ function ZoneInfoSectionFields({
   ctx,
   onChange,
 }: {
-  section: Extract<ZoneStageChildSection, { kind: "zoneInfo" }>;
+  section: Extract<PageStageChildSection, { kind: "zoneInfo" }>;
   ctx: ZoneManageEditorContext;
   onChange: (section: ZoneEditableSection) => void;
 }) {
@@ -859,7 +861,7 @@ function ZoneImageSectionFields({
   ctx,
   onChange,
 }: {
-  section: Extract<ZoneContentSection, { kind: "image" }>;
+  section: Extract<PageContentSection, { kind: "image" }>;
   ctx: ZoneManageEditorContext;
   onChange: (section: ZoneEditableSection) => void;
 }) {
@@ -936,7 +938,7 @@ function ZoneActionsSectionFields({
   ctx,
   onChange,
 }: {
-  section: Extract<ZoneContentSection, { kind: "actions" }>;
+  section: Extract<PageContentSection, { kind: "actions" }>;
   ctx: ZoneManageEditorContext;
   onChange: (section: ZoneEditableSection) => void;
 }) {
@@ -957,7 +959,7 @@ function ZoneActionsSectionFields({
       />
       <div className="flex flex-col gap-2">
         <ManageGroupHeading>{t("zone:manage_items")}</ManageGroupHeading>
-        <ZoneCollectionItemsEditor
+        <PageCollectionItemsEditor
           items={section.items ?? []}
           onChange={(items) => {
             const next = { ...section };
@@ -976,15 +978,15 @@ function ZoneDisplaySelect({
   value,
   onChange,
 }: {
-  value: ZoneSectionDisplay;
-  onChange: (display: ZoneSectionDisplay) => void;
+  value: PageSectionDisplay;
+  onChange: (display: PageSectionDisplay) => void;
 }) {
   const { t } = useTranslation(["zone"]);
   return (
     <ManageField label={t("zone:manage_display")}>
       <Select
         value={value}
-        onValueChange={(display) => onChange(display as ZoneSectionDisplay)}
+        onValueChange={(display) => onChange(display as PageSectionDisplay)}
       >
         <SelectTrigger className="w-48">
           <SelectValue />
@@ -1002,20 +1004,20 @@ function ZoneDisplaySelect({
 }
 
 /**
- * Shared editor for `ZoneCollectionItem[]` (collection and action items):
+ * Shared editor for `PageCollectionItem[]` (collection and action items):
  * link target plus optional LABEL override. Uses a stable counter
- * to key items since `ZoneCollectionItem` has no id field.
- * `ZoneCollectionItem[]` 的共享编辑器（集合与行动条目）：链接目标
- * 加可选的 LABEL 覆盖。由于 `ZoneCollectionItem` 没有 id 字段，使用
+ * to key items since `PageCollectionItem` has no id field.
+ * `PageCollectionItem[]` 的共享编辑器（集合与行动条目）：链接目标
+ * 加可选的 LABEL 覆盖。由于 `PageCollectionItem` 没有 id 字段，使用
  * 稳定计数器为条目分配 key。
  */
-function ZoneCollectionItemsEditor({
+function PageCollectionItemsEditor({
   items,
   onChange,
   ctx,
 }: {
-  items: readonly ZoneCollectionItem[];
-  onChange: (items: ZoneCollectionItem[]) => void;
+  items: readonly PageCollectionItem[];
+  onChange: (items: PageCollectionItem[]) => void;
   ctx: ZoneManageEditorContext;
 }) {
   const { t } = useTranslation(["zone", "common"]);
@@ -1138,12 +1140,12 @@ function ZoneCollectionItemsEditor({
   );
 }
 
-function ZoneTabsSectionFields({
+function PageTabsSectionFields({
   section,
   ctx,
   onChange,
 }: {
-  section: ZoneTabsSection;
+  section: PageTabsSection;
   ctx: ZoneManageEditorContext;
   onChange: (section: ZoneEditableSection) => void;
 }) {
@@ -1151,7 +1153,7 @@ function ZoneTabsSectionFields({
 
   const updateTab = (
     index: number,
-    patch: Partial<ZoneTabsSection["tabs"][number]>,
+    patch: Partial<PageTabsSection["tabs"][number]>,
   ) => {
     onChange({
       ...section,
@@ -1165,11 +1167,11 @@ function ZoneTabsSectionFields({
     <div className="flex flex-col gap-4">
       <ManageField label={t("zone:manage_default_tab")}>
         <Select
-          value={section.defaultTabId ?? NONE}
+          value={section.defaultTabNodeId ?? NONE}
           onValueChange={(value) => {
             const next = { ...section };
-            if (value === NONE) delete next.defaultTabId;
-            else next.defaultTabId = value;
+            if (value === NONE) delete next.defaultTabNodeId;
+            else next.defaultTabNodeId = value;
             onChange(next);
           }}
         >
@@ -1179,8 +1181,12 @@ function ZoneTabsSectionFields({
           <SelectContent>
             <SelectItem value={NONE}>{t("common:none")}</SelectItem>
             {section.tabs.map((tab) => (
-              <SelectItem key={tab.id} value={tab.id} className="font-mono">
-                {tab.id}
+              <SelectItem
+                key={tab.nodeId}
+                value={tab.nodeId}
+                className="font-mono"
+              >
+                {tab.nodeId}
               </SelectItem>
             ))}
           </SelectContent>
@@ -1189,16 +1195,16 @@ function ZoneTabsSectionFields({
 
       {section.tabs.map((tab, index) => (
         <div
-          key={tab.id}
+          key={tab.nodeId}
           className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3"
         >
           <div className="flex items-end justify-between gap-3">
-            <ManageField label={t("zone:manage_tab_id")}>
+            <ManageField label={t("zone:manage_tab_node_id")}>
               <Input
-                value={tab.id}
+                value={tab.nodeId}
                 className="font-mono text-sm"
                 onChange={(event) =>
-                  updateTab(index, { id: event.target.value })
+                  updateTab(index, { nodeId: event.target.value })
                 }
               />
             </ManageField>
@@ -1247,7 +1253,7 @@ function ZoneTabsSectionFields({
           <ZoneSectionListEditor
             sections={tab.sections}
             onChange={(sections) =>
-              updateTab(index, { sections: sections as ZoneContentSection[] })
+              updateTab(index, { sections: sections as PageContentSection[] })
             }
             slot="tabs"
             ctx={ctx}
@@ -1266,9 +1272,9 @@ function ZoneTabsSectionFields({
               tabs: [
                 ...section.tabs,
                 {
-                  id: nextZoneId(
+                  nodeId: nextZoneId(
                     "tab",
-                    section.tabs.map((tab) => tab.id),
+                    section.tabs.map((tab) => tab.nodeId),
                   ),
                   sections: [],
                 },
@@ -1289,19 +1295,19 @@ function ZoneColumnsSectionFields({
   ctx,
   onChange,
 }: {
-  section: ZoneColumnsSection;
+  section: PageColumnsSection;
   ctx: ZoneManageEditorContext;
   onChange: (section: ZoneEditableSection) => void;
 }) {
   const { t } = useTranslation(["zone"]);
-  const updateColumns = (columns: ZoneColumn[]) =>
+  const updateColumns = (columns: PageColumn[]) =>
     onChange({ ...section, columns });
 
   return (
     <div className="flex flex-col gap-4">
       {section.columns.map((column, index) => (
         <div
-          key={column.id}
+          key={index}
           className="flex flex-col gap-4 rounded-md bg-surface-subtle p-4"
         >
           <div className="flex items-center justify-between gap-3">
@@ -1336,21 +1342,7 @@ function ZoneColumnsSectionFields({
             />
           </div>
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_8rem]">
-            <ManageField label={t("zone:manage_column_id")}>
-              <Input
-                value={column.id}
-                onChange={(event) =>
-                  updateColumns(
-                    section.columns.map((current, currentIndex) =>
-                      currentIndex === index
-                        ? { ...current, id: event.target.value }
-                        : current,
-                    ),
-                  )
-                }
-                className="font-mono text-sm"
-              />
-            </ManageField>
+            <div className="hidden md:block" />
             <ManageField label={t("zone:manage_column_ratio")}>
               <Input
                 type="number"
@@ -1382,7 +1374,7 @@ function ZoneColumnsSectionFields({
                   currentIndex === index
                     ? {
                         ...current,
-                        sections: sections as ZoneColumn["sections"],
+                        sections: sections as PageColumn["sections"],
                       }
                     : current,
                 ),
@@ -1404,10 +1396,6 @@ function ZoneColumnsSectionFields({
             updateColumns([
               ...section.columns,
               {
-                id: nextZoneId(
-                  "column",
-                  section.columns.map((column) => column.id),
-                ),
                 ratio: 1,
                 sections: [],
               },

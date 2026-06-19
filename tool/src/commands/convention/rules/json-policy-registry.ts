@@ -63,9 +63,9 @@ export const jsonColumnRegistry = [
     column: "config",
     category: "enveloped",
     contractSchema: {
-      symbol: "zonePageEnvelopeSchema",
-      path: "package/contract/src/zone/page-v1.ts",
-      supportingPaths: ["package/contract/src/zone/section.ts"],
+      symbol: "pageEnvelopeSchema",
+      path: "package/contract/src/pages/page.ts",
+      supportingPaths: ["package/contract/src/pages/sections.ts"],
     },
   },
   {
@@ -74,8 +74,9 @@ export const jsonColumnRegistry = [
     column: "dock",
     category: "enveloped",
     contractSchema: {
-      symbol: "realmDockEnvelopeSchema",
-      path: "package/contract/src/realm/realm-dock.ts",
+      symbol: "dockEnvelopeSchema",
+      path: "package/contract/src/dock/dock.ts",
+      supportingPaths: ["package/contract/src/dock/widgets.ts"],
     },
   },
   {

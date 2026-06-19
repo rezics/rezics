@@ -3,17 +3,17 @@ import { Value } from "@sinclair/typebox/value";
 import {
   pinboardAdminReadResponseSchema,
   pinboardDTOSchema,
-  pinboardKeySchema,
   pinboardKindSchema,
   pinboardReadResponseSchema,
+  realmPinboardPlacementSchema,
 } from "./pinboard";
 
 describe("Pinboard contract", () => {
-  test("locks v1 kind and key", () => {
+  test("locks v1 kind and placement", () => {
     expect(Value.Check(pinboardKindSchema, "list")).toBe(true);
     expect(Value.Check(pinboardKindSchema, "grid")).toBe(false);
-    expect(Value.Check(pinboardKeySchema, "home")).toBe(true);
-    expect(Value.Check(pinboardKeySchema, "notice")).toBe(false);
+    expect(Value.Check(realmPinboardPlacementSchema, "home")).toBe(true);
+    expect(Value.Check(realmPinboardPlacementSchema, "notice")).toBe(false);
   });
 
   test("accepts ordered Unit entry DTOs", () => {
@@ -21,7 +21,7 @@ describe("Pinboard contract", () => {
       Value.Check(pinboardDTOSchema, {
         id: "pinboard-1",
         realmUnitId: "realm-1",
-        key: "home",
+        placement: "home",
         kind: "list",
         entries: [
           { unitId: "post-1", position: "a0" },
@@ -29,13 +29,22 @@ describe("Pinboard contract", () => {
         ],
       }),
     ).toBe(true);
+    expect(
+      Value.Check(pinboardDTOSchema, {
+        id: "pinboard-1",
+        realmUnitId: "realm-1",
+        key: "home",
+        kind: "list",
+        entries: [],
+      }),
+    ).toBe(false);
   });
 
   test("read responses expose ordered ids and admin stale ids", () => {
     expect(
       Value.Check(pinboardReadResponseSchema, {
         realmId: "realm-1",
-        key: "home",
+        placement: "home",
         kind: "list",
         unitIds: ["post-1", "post-2"],
       }),
@@ -43,7 +52,7 @@ describe("Pinboard contract", () => {
     expect(
       Value.Check(pinboardAdminReadResponseSchema, {
         realmId: "realm-1",
-        key: "home",
+        placement: "home",
         kind: "list",
         unitIds: ["post-1"],
         staleIds: ["deleted-post"],

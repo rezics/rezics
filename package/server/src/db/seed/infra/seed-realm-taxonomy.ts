@@ -380,7 +380,7 @@ async function ensureCommunityRealm(
     });
     const [pinboard] = await tx
       .insert(Pinboard)
-      .values({ realmUnitId: realm.id, key: "home", title: "Home" })
+      .values({ realmUnitId: realm.id, placement: "home", kind: "list" })
       .onConflictDoNothing()
       .returning({ id: Pinboard.id });
     if (pinboard) {

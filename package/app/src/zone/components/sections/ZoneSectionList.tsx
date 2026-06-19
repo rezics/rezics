@@ -1,4 +1,4 @@
-import type { ZonePageSection } from "@rezics/contract";
+import type { PageSection } from "@rezics/contract";
 import { ColumnsSection } from "./ColumnsSection";
 import type { ZonePortalContext } from "./shared";
 import { StageSection } from "./StageSection";
@@ -9,7 +9,7 @@ function ZoneSectionView({
   section,
   ctx,
 }: {
-  section: ZonePageSection;
+  section: PageSection;
   ctx: ZonePortalContext;
 }) {
   if (section.kind === "stage") {
@@ -33,13 +33,13 @@ export function ZoneSectionList({
   sections,
   ctx,
 }: {
-  sections: ZonePageSection[];
+  sections: PageSection[];
   ctx: ZonePortalContext;
 }) {
   return (
     <div className="flex flex-col gap-12">
       {sections.map((section) => (
-        <ZoneSectionView key={section.id} section={section} ctx={ctx} />
+        <ZoneSectionView key={section.nodeId} section={section} ctx={ctx} />
       ))}
     </div>
   );

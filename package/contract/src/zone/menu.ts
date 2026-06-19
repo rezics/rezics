@@ -21,7 +21,6 @@ export const zoneMenuNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
   (self) =>
     t.Object(
       {
-        id: t.String(),
         labelUnitId: t.Optional(t.String()),
         target: t.Optional(zoneLinkTargetSchema),
         children: t.Optional(t.Array(self)),
@@ -31,7 +30,6 @@ export const zoneMenuNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
 );
 
 export interface ZoneMenuNode {
-  id: string;
   labelUnitId?: string;
   target?: ZoneLinkTarget;
   children?: ZoneMenuNode[];
@@ -52,13 +50,13 @@ export const ZONE_MENU_MAX_DEPTH = 3;
 
 export const zoneMenuSchema = t.Object(
   {
-    id: t.String(),
+    slug: t.String({ minLength: 1 }),
     nodes: t.Array(zoneMenuNodeSchema),
   },
   { additionalProperties: false },
 );
 
 export interface ZoneMenu {
-  id: string;
+  slug: string;
   nodes: ZoneMenuNode[];
 }

@@ -36,7 +36,7 @@ export const Zone = pgTable(
     // owns an independent versioned envelope and upgrade chain.
     boundary: jsonData().notNull(),
     // Menus stay JSON: recursive trees are loaded whole, capped at three
-    // levels, and never queried by node. `header.menuId` remains validated in
+    // levels, and never queried by node. `header.menuSlug` remains validated in
     // the same nav envelope as the menu tree.
     nav: jsonData().notNull(),
     // Decorative theme images are external HTTPS URLs, not IMAGE units. IMAGE
@@ -72,7 +72,7 @@ export const ZonePage = pgTable(
         onUpdate: "cascade",
       }),
     slug: text().notNull(),
-    // Pages own their section tree. Section ids are unique within one page, not
+    // Pages own their section tree. Section node ids are unique within one page, not
     // across the whole zone, because data execution addresses
     // `(zoneId, pageId, sectionId)`.
     config: jsonData().notNull(),

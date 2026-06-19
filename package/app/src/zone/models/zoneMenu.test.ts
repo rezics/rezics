@@ -190,12 +190,10 @@ describe("resolveZoneMenuNodes", () => {
   it("projects labels, hrefs, and children", () => {
     const nodes: ZoneMenuNode[] = [
       {
-        id: "group",
         labelUnitId: "label-1",
         children: [
-          { id: "leaf", target: { kind: "unit", unitId: "wiki-1" } },
+          { target: { kind: "unit", unitId: "wiki-1" } },
           {
-            id: "page",
             target: { kind: "zonePage", pageId: "search" },
           },
         ],
@@ -204,14 +202,14 @@ describe("resolveZoneMenuNodes", () => {
     const resolved = resolveZoneMenuNodes(nodes, ctx);
     expect(resolved).toEqual([
       {
-        id: "group",
+        id: "0",
         label: "人物角色",
         labelKey: null,
         href: null,
         isExternal: false,
         children: [
           {
-            id: "leaf",
+            id: "0.0",
             label: "上條當麻",
             labelKey: null,
             href: "/z/toaru/wiki/wiki-1",
@@ -219,7 +217,7 @@ describe("resolveZoneMenuNodes", () => {
             children: [],
           },
           {
-            id: "page",
+            id: "0.1",
             label: null,
             labelKey: "zone:page_search",
             href: "/z/toaru/page/search",
@@ -233,7 +231,7 @@ describe("resolveZoneMenuNodes", () => {
 
   it("uses page slugs rather than opaque page ids for built-in page labels", () => {
     const resolved = resolveZoneMenuNodes(
-      [{ id: "home-node", target: { kind: "zonePage", pageId: "page-home" } }],
+      [{ target: { kind: "zonePage", pageId: "page-home" } }],
       {
         ...ctx,
         pages: [{ id: "page-home", slug: "home", position: "a" }],
@@ -246,17 +244,14 @@ describe("resolveZoneMenuNodes", () => {
   it("clamps the tree at depth 3", () => {
     const nodes: ZoneMenuNode[] = [
       {
-        id: "d1",
         labelUnitId: "label-1",
         children: [
           {
-            id: "d2",
             labelUnitId: "label-1",
             children: [
               {
-                id: "d3",
                 labelUnitId: "label-1",
-                children: [{ id: "d4", labelUnitId: "label-1" }],
+                children: [{ labelUnitId: "label-1" }],
               },
             ],
           },
@@ -265,7 +260,7 @@ describe("resolveZoneMenuNodes", () => {
     ];
     const resolved = resolveZoneMenuNodes(nodes, ctx);
     const d3 = resolved[0]?.children[0]?.children[0];
-    expect(d3?.id).toBe("d3");
+    expect(d3?.id).toBe("0.0.0");
     expect(d3?.children).toEqual([]);
   });
 });
@@ -274,28 +269,28 @@ describe("pickZoneMenu", () => {
   const nav = {
     schema: "rezics/zone-nav" as const,
     version: 1 as const,
-    header: { menuId: "main" },
+    header: { menuSlug: "main" },
     menus: [
-      { id: "main", nodes: [] },
-      { id: "sidebar", nodes: [] },
+      { slug: "main", nodes: [] },
+      { slug: "sidebar", nodes: [] },
     ],
   };
 
-  it("uses an explicit menu id when present", () => {
-    expect(pickZoneMenu(nav, "sidebar")?.id).toBe("sidebar");
+  it("uses an explicit menu slug when present", () => {
+    expect(pickZoneMenu(nav, "sidebar")?.slug).toBe("sidebar");
   });
 
   it("falls back to the header menu when no explicit menu is selected", () => {
-    expect(pickZoneMenu(nav)?.id).toBe("main");
+    expect(pickZoneMenu(nav)?.slug).toBe("main");
   });
 
-  it("falls back to the header menu when the explicit id is unknown", () => {
-    expect(pickZoneMenu(nav, "missing")?.id).toBe("main");
+  it("falls back to the header menu when the explicit slug is unknown", () => {
+    expect(pickZoneMenu(nav, "missing")?.slug).toBe("main");
   });
 
   it("returns null when neither explicit nor header menu resolves", () => {
     expect(
-      pickZoneMenu({ ...nav, header: { menuId: "missing" } }, "unknown"),
+      pickZoneMenu({ ...nav, header: { menuSlug: "missing" } }, "unknown"),
     ).toBeNull();
   });
 });

@@ -76,7 +76,7 @@ export const PinnedStreamSection: React.FC<PinnedStreamSectionProps> = ({
   const [open, setOpen] = useState(true);
   const { entries, isLoading, isError, refetch } = usePinboardList({
     realmUnitId,
-    pinboardKey: "home",
+    pinboardPlacement: "home",
   });
 
   if (isLoading) {

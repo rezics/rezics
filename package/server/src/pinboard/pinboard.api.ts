@@ -16,12 +16,12 @@ import { PinboardError, pinboardService } from "./pinboard.service";
 
 const paramsSchema = t.Object({
   unitId: t.String(),
-  key: t.String(),
+  placement: t.String(),
 });
 
 const entryParamsSchema = t.Object({
   unitId: t.String(),
-  key: t.String(),
+  placement: t.String(),
   contentUnitId: t.String(),
 });
 
@@ -38,7 +38,7 @@ function handleError(error: unknown): never {
 async function assertPinboardPolicy(input: {
   identity: any;
   realmUnitId: string;
-  key: string;
+  placement: string;
 }) {
   const actorMember = await realmService.getMember(
     input.realmUnitId,
@@ -56,7 +56,7 @@ async function assertPinboardPolicy(input: {
       : null,
     target: {
       kind: "realm-content-list",
-      id: `${input.realmUnitId}:pinboard:${input.key}`,
+      id: `${input.realmUnitId}:pinboard:${input.placement}`,
       realmUnitId: input.realmUnitId,
     },
   });
@@ -71,7 +71,7 @@ async function assertPinboardPolicy(input: {
 export const pinboardApi = new Elysia()
   .use(authMacro)
   .get(
-    "/realm/:unitId/pinboards/:key",
+    "/realm/:unitId/pinboards/:placement",
     async ({ params, headers }): Promise<PinboardReadResponse> => {
       const identity = await tryResolveIdentity(
         headers["authorization"],
@@ -81,7 +81,7 @@ export const pinboardApi = new Elysia()
         return await pinboardService.readPublic(
           identity,
           params.unitId,
-          params.key,
+          params.placement,
         );
       } catch (error) {
         handleError(error);
@@ -97,15 +97,15 @@ export const pinboardApi = new Elysia()
     },
   )
   .get(
-    "/realm/:unitId/pinboards/:key/admin",
+    "/realm/:unitId/pinboards/:placement/admin",
     async ({ params, identity }): Promise<PinboardAdminReadResponse> => {
       await assertPinboardPolicy({
         identity,
         realmUnitId: params.unitId,
-        key: params.key,
+        placement: params.placement,
       });
       try {
-        return await pinboardService.readAdmin(params.unitId, params.key);
+        return await pinboardService.readAdmin(params.unitId, params.placement);
       } catch (error) {
         handleError(error);
       }
@@ -121,18 +121,18 @@ export const pinboardApi = new Elysia()
     },
   )
   .post(
-    "/realm/:unitId/pinboards/:key",
+    "/realm/:unitId/pinboards/:placement",
     async ({ params, body, identity }): Promise<PinboardOkResponse> => {
       await assertPinboardPolicy({
         identity,
         realmUnitId: params.unitId,
-        key: params.key,
+        placement: params.placement,
       });
       try {
         return await pinboardService.append({
           caller: identity,
           realmUnitId: params.unitId,
-          key: params.key,
+          placement: params.placement,
           unitId: body.unitId,
         });
       } catch (error) {
@@ -151,18 +151,18 @@ export const pinboardApi = new Elysia()
     },
   )
   .post(
-    "/realm/:unitId/pinboards/:key/reorder",
+    "/realm/:unitId/pinboards/:placement/reorder",
     async ({ params, body, identity }): Promise<PinboardOkResponse> => {
       await assertPinboardPolicy({
         identity,
         realmUnitId: params.unitId,
-        key: params.key,
+        placement: params.placement,
       });
       try {
         return await pinboardService.reorder({
           caller: identity,
           realmUnitId: params.unitId,
-          key: params.key,
+          placement: params.placement,
           unitIds: body.unitIds,
         });
       } catch (error) {
@@ -181,18 +181,18 @@ export const pinboardApi = new Elysia()
     },
   )
   .delete(
-    "/realm/:unitId/pinboards/:key/:contentUnitId",
+    "/realm/:unitId/pinboards/:placement/:contentUnitId",
     async ({ params, identity }): Promise<PinboardOkResponse> => {
       await assertPinboardPolicy({
         identity,
         realmUnitId: params.unitId,
-        key: params.key,
+        placement: params.placement,
       });
       try {
         return await pinboardService.remove({
           caller: identity,
           realmUnitId: params.unitId,
-          key: params.key,
+          placement: params.placement,
           unitId: params.contentUnitId,
         });
       } catch (error) {

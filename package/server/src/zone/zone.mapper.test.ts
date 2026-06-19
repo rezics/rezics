@@ -18,8 +18,8 @@ const boundary: ZoneBoundary = {
 const nav: ZoneNav = {
   schema: "rezics/zone-nav",
   version: 1,
-  menus: [{ id: "main", nodes: [] }],
-  header: { menuId: "main" },
+  menus: [{ slug: "main", nodes: [] }],
+  header: { menuSlug: "main" },
 };
 
 const theme: ZoneTheme = {
@@ -28,7 +28,7 @@ const theme: ZoneTheme = {
 };
 
 const homePageConfig: ZonePage = {
-  schema: "rezics/zone-page",
+  schema: "rezics/page",
   version: 1,
   sections: [],
 };

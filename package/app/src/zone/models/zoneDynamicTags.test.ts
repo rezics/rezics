@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import type { ZonePageSection } from "@rezics/contract";
+import type { PageSection } from "@rezics/contract";
 import {
   normalizeDynamicTagUnitIds,
-  selectZoneDynamicTags,
+  selectPageDynamicTags,
 } from "./zoneDynamicTags";
 
 function dynamicSection(
@@ -10,9 +10,10 @@ function dynamicSection(
   options: Array<{ tagUnitIds: string[]; probability: number }>,
   groupId = "topics",
   fallback = false,
-): ZonePageSection {
+): PageSection {
   return {
-    id,
+    nodeId: id,
+    slug: id,
     kind: "query",
     query: {
       target: "unit",
@@ -41,8 +42,8 @@ describe("zone dynamic tags", () => {
       ]),
     ];
 
-    expect(selectZoneDynamicTags(sections, "visit-1")).toEqual(
-      selectZoneDynamicTags(sections, "visit-1"),
+    expect(selectPageDynamicTags(sections, "visit-1")).toEqual(
+      selectPageDynamicTags(sections, "visit-1"),
     );
   });
 
@@ -51,7 +52,7 @@ describe("zone dynamic tags", () => {
       { tagUnitIds: ["tag-a"], probability: 0.5 },
       { tagUnitIds: ["tag-b"], probability: 0.5 },
     ];
-    const selections = selectZoneDynamicTags(
+    const selections = selectPageDynamicTags(
       [
         dynamicSection("a", options),
         dynamicSection("b", options),
@@ -68,7 +69,7 @@ describe("zone dynamic tags", () => {
   });
 
   it("can select fallback as a no-tag option", () => {
-    const selections = selectZoneDynamicTags(
+    const selections = selectPageDynamicTags(
       [
         dynamicSection(
           "a",

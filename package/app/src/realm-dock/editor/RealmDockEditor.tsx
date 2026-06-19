@@ -1,4 +1,5 @@
 import {
+  contentSearchQueryOptions,
   meiliLabelSearchQueryOptions,
   postSearchQueryOptions,
   realmSearchQueryOptions,
@@ -7,25 +8,26 @@ import {
 import { realmDockQuery } from "@rezics/api/realm/realm-dock.queries";
 import { useUpdateRealmDockMutation } from "@rezics/api/realm/realm-dock.mutations";
 import type {
+  DockButtonLinkItem,
+  DockImageLinkItem,
+  DockLinkListItem,
+  ContentSearchDocument,
   LabelSearchDocument,
   PostSearchDocument,
   RealmDock,
-  RealmDockBookmarkItem,
-  RealmDockButtonItem,
-  RealmDockCustomWidgetItem,
-  RealmDockImageItem,
   RealmDockItem,
   RealmDockPlacement,
-  RealmDockStatsMetric,
   RealmDockWidget,
+  RealmDockWidgetKind,
   RealmSearchDocument,
+  RealmStatsMetric,
   ZoneSearchDocument,
   ZoneLinkTarget,
 } from "@rezics/contract";
 import {
   defaultRealmDockMainItems,
   emptyRealmDock,
-  realmDockMainRequiredBuiltinIds,
+  realmDockMainLockedWidgetKinds,
   realmDockPlacementValues,
 } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
@@ -57,23 +59,30 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
-const widgetKinds = [
-  "text",
-  "buttons",
-  "images",
-  "communityList",
-  "calendar",
-  "featuredZone",
-  "zoneNav",
-  "stats",
+const mainWidgetKinds = [
+  "links",
+  "richText",
+  "buttonLinks",
+  "imageLinks",
+  "featuredUnit",
+  "realmStats",
+  "realmCalendar",
   "pinboard",
-] as const satisfies readonly RealmDockWidget["kind"][];
+] as const satisfies readonly RealmDockWidgetKind[];
+
+const wikiWidgetKinds = [
+  "zoneNav",
+  "links",
+  "richText",
+  "buttonLinks",
+  "imageLinks",
+] as const satisfies readonly RealmDockWidgetKind[];
 
 const statMetrics = [
   "members",
   "posts",
   "wikiPages",
-] as const satisfies readonly RealmDockStatsMetric[];
+] as const satisfies readonly RealmStatsMetric[];
 
 function copyDock(dock: RealmDock | undefined): RealmDock {
   return normalizeDock(structuredClone(dock ?? emptyRealmDock()));
@@ -81,11 +90,9 @@ function copyDock(dock: RealmDock | undefined): RealmDock {
 
 function normalizeDock(dock: RealmDock): RealmDock {
   const main = dock.placements.main ?? [];
-  const present = new Set(
-    main.flatMap((item) => (item.slot === "builtin" ? [item.id] : [])),
-  );
+  const present = new Set(main.map((item) => item.kind));
   const missing = defaultRealmDockMainItems().filter(
-    (item) => !present.has(item.id),
+    (item) => !present.has(item.kind),
   );
   return {
     ...dock,
@@ -96,65 +103,74 @@ function normalizeDock(dock: RealmDock): RealmDock {
   };
 }
 
-function itemId(kind: string) {
-  return `dock-${kind}-${Date.now().toString(36)}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}`;
+function newNodeId() {
+  return crypto.randomUUID();
 }
 
-function newWidget(kind: RealmDockWidget["kind"]): RealmDockCustomWidgetItem {
+function newWidget(kind: RealmDockWidgetKind): RealmDockWidget {
   switch (kind) {
-    case "text":
+    case "unitDescription":
+      return { kind, nodeId: newNodeId(), maxLines: 4 };
+    case "unitSubscriptionStat":
+      return { kind, nodeId: newNodeId() };
+    case "realmInfo":
+      return { kind, nodeId: newNodeId() };
+    case "links":
+      return { kind, nodeId: newNodeId(), items: [] };
+    case "richText":
       return {
-        slot: "widget",
-        id: itemId(kind),
-        widget: { kind, contentUnitId: "" },
+        kind,
+        nodeId: newNodeId(),
+        contentUnitId: "",
       };
-    case "buttons":
-      return { slot: "widget", id: itemId(kind), widget: { kind, items: [] } };
-    case "images":
-      return { slot: "widget", id: itemId(kind), widget: { kind, items: [] } };
-    case "communityList":
+    case "buttonLinks":
+      return { kind, nodeId: newNodeId(), items: [] };
+    case "imageLinks":
+      return { kind, nodeId: newNodeId(), items: [] };
+    case "realmRules":
       return {
-        slot: "widget",
-        id: itemId(kind),
-        widget: { kind, realmUnitIds: [] },
+        kind,
+        nodeId: newNodeId(),
+        mode: "summary",
       };
-    case "calendar":
+    case "realmModerators":
+      return { kind, nodeId: newNodeId(), limit: 5 };
+    case "realmStats":
       return {
-        slot: "widget",
-        id: itemId(kind),
-        widget: { kind, source: "realmPosts" },
+        kind,
+        nodeId: newNodeId(),
+        metrics: ["members"],
       };
-    case "featuredZone":
+    case "realmCalendar":
       return {
-        slot: "widget",
-        id: itemId(kind),
-        widget: { kind, zoneUnitId: "" },
+        kind,
+        nodeId: newNodeId(),
+        source: "realmPosts",
+      };
+    case "featuredUnit":
+      return {
+        kind,
+        nodeId: newNodeId(),
+        unitId: "",
       };
     case "zoneNav":
       return {
-        slot: "widget",
-        id: itemId(kind),
-        widget: { kind, zoneUnitId: "" },
-      };
-    case "stats":
-      return {
-        slot: "widget",
-        id: itemId(kind),
-        widget: { kind, metrics: ["members"] },
+        kind,
+        nodeId: newNodeId(),
+        zoneUnitId: "",
       };
     case "pinboard":
       return {
-        slot: "widget",
-        id: itemId(kind),
-        widget: { kind, pinboardKey: "home" },
+        kind,
+        nodeId: newNodeId(),
+        placement: "home",
       };
   }
 }
 
 function docTitle(
   doc:
+    | ContentSearchDocument
     | LabelSearchDocument
     | PostSearchDocument
     | RealmSearchDocument
@@ -176,63 +192,52 @@ function placementLabel(placement: RealmDockPlacement) {
   }
 }
 
-function builtinLabel(id: RealmDockItem["id"]) {
-  switch (id) {
-    case "description":
+function widgetKindLabel(kind: RealmDockWidgetKind) {
+  switch (kind) {
+    case "unitDescription":
       return getI18nRuntime().i18n.t(
         "entity:realm_dock_widget_description_title",
       );
-    case "subscriptionStat":
+    case "unitSubscriptionStat":
       return getI18nRuntime().i18n.t(
         "entity:realm_dock_widget_subscriptionStat_title",
       );
-    case "realmFacts":
+    case "realmInfo":
       return getI18nRuntime().i18n.t(
         "entity:realm_dock_widget_realmFacts_title",
       );
-    case "bookmarks":
+    case "links":
       return getI18nRuntime().i18n.t(
         "entity:realm_dock_widget_bookmarks_title",
       );
-    case "rules":
+    case "richText":
+      return getI18nRuntime().i18n.t("entity:realm_dock_widget_text_title");
+    case "buttonLinks":
+      return getI18nRuntime().i18n.t("entity:realm_dock_widget_buttons_title");
+    case "imageLinks":
+      return getI18nRuntime().i18n.t("entity:realm_dock_widget_images_title");
+    case "realmRules":
       return getI18nRuntime().i18n.t("entity:realm_dock_widget_rules_title");
-    case "moderators":
+    case "realmModerators":
       return getI18nRuntime().i18n.t(
         "entity:realm_dock_widget_moderators_title",
       );
-    default:
-      return id;
-  }
-}
-
-function widgetKindLabel(kind: RealmDockWidget["kind"]) {
-  switch (kind) {
-    case "text":
-      return getI18nRuntime().i18n.t("entity:realm_dock_widget_text_title");
-    case "buttons":
-      return getI18nRuntime().i18n.t("entity:realm_dock_widget_buttons_title");
-    case "images":
-      return getI18nRuntime().i18n.t("entity:realm_dock_widget_images_title");
-    case "communityList":
-      return getI18nRuntime().i18n.t(
-        "entity:realm_dock_widget_communityList_title",
-      );
-    case "calendar":
+    case "realmStats":
+      return getI18nRuntime().i18n.t("entity:realm_dock_widget_stats_title");
+    case "realmCalendar":
       return getI18nRuntime().i18n.t("entity:realm_dock_widget_calendar_title");
-    case "featuredZone":
+    case "featuredUnit":
       return getI18nRuntime().i18n.t(
         "entity:realm_dock_widget_featuredZone_title",
       );
     case "zoneNav":
       return getI18nRuntime().i18n.t("entity:realm_dock_widget_zoneNav_title");
-    case "stats":
-      return getI18nRuntime().i18n.t("entity:realm_dock_widget_stats_title");
     case "pinboard":
       return getI18nRuntime().i18n.t("entity:realm_dock_widget_pinboard_title");
   }
 }
 
-function metricLabel(metric: RealmDockStatsMetric) {
+function metricLabel(metric: RealmStatsMetric) {
   switch (metric) {
     case "members":
       return getI18nRuntime().i18n.t("entity:realm_dock_metric_members");
@@ -248,20 +253,19 @@ function externalTarget(url = ""): ZoneLinkTarget {
 }
 
 function isComplete(item: RealmDockItem) {
-  if (item.slot === "builtin") return true;
-  const widget = item.widget;
-  switch (widget.kind) {
-    case "text":
-      return Boolean(widget.contentUnitId);
-    case "featuredZone":
+  switch (item.kind) {
+    case "richText":
+      return Boolean(item.contentUnitId);
+    case "featuredUnit":
+      return Boolean(item.unitId);
     case "zoneNav":
-      return Boolean(widget.zoneUnitId);
-    case "buttons":
-      return widget.items.every(
+      return Boolean(item.zoneUnitId);
+    case "buttonLinks":
+      return item.items.every(
         (button) => button.target.kind !== "external" || button.target.url,
       );
-    case "images":
-      return widget.items.every((image) => image.imageUrl);
+    case "imageLinks":
+      return item.items.every((image) => image.imageUrl);
     default:
       return true;
   }
@@ -307,14 +311,15 @@ function upsertPlacement(
  * | Parent layout constrains width           |
  * +------------------------------------------+
  *
- * Dock 編輯器按 Main/Wiki placement 管理 item。Main 內建項只能排序，不能刪
- * 除；自訂 widget 可增刪改。預設文案由 app i18n 推導，LABEL Unit 只作
- * optional override，不要求使用者為明顯預設文案建立 label。
+ * Dock 編輯器按 Main/Wiki placement 管理 direct widget。Main 的系統必備
+ * widget 只能排序，不能刪除；其他 widget 可增刪改。預設文案由 app i18n
+ * 推導，LABEL Unit 只作 optional override，不要求使用者为明显默认文案建立
+ * label。
  */
 export function RealmDockEditor({ realmId }: { realmId: string }) {
   const [placement, setPlacement] = useState<RealmDockPlacement>("main");
   const [draft, setDraft] = useState<RealmDock>(() => emptyRealmDock());
-  const [addKind, setAddKind] = useState<RealmDockWidget["kind"]>("text");
+  const [addKind, setAddKind] = useState<RealmDockWidgetKind>("richText");
   const [error, setError] = useState<string | null>(null);
   const { data } = useQuery(realmDockQuery(realmId));
   const updateDock = useUpdateRealmDockMutation();
@@ -325,21 +330,26 @@ export function RealmDockEditor({ realmId }: { realmId: string }) {
 
   const items = draft.placements[placement] ?? [];
   const incomplete = items.find((item) => !isComplete(item));
+  const availableWidgetKinds =
+    placement === "main" ? mainWidgetKinds : wikiWidgetKinds;
 
   const setItems = (nextItems: RealmDockItem[]) => {
     setDraft((current) => upsertPlacement(current, placement, nextItems));
   };
 
-  const updateItem = (id: string, nextItem: RealmDockItem) => {
-    setItems(items.map((item) => (item.id === id ? nextItem : item)));
+  const updateItem = (nodeId: string, nextItem: RealmDockItem) => {
+    setItems(items.map((item) => (item.nodeId === nodeId ? nextItem : item)));
   };
 
   const addWidget = () => {
-    setItems([...items, newWidget(addKind)]);
+    const kind = (availableWidgetKinds as readonly string[]).includes(addKind)
+      ? addKind
+      : availableWidgetKinds[0];
+    setItems([...items, newWidget(kind)]);
   };
 
-  const moveItem = (id: string, direction: -1 | 1) => {
-    const index = items.findIndex((item) => item.id === id);
+  const moveItem = (nodeId: string, direction: -1 | 1) => {
+    const index = items.findIndex((item) => item.nodeId === nodeId);
     const target = index + direction;
     if (index < 0 || target < 0 || target >= items.length) return;
     const next = [...items];
@@ -347,8 +357,8 @@ export function RealmDockEditor({ realmId }: { realmId: string }) {
     setItems(next);
   };
 
-  const removeItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
+  const removeItem = (nodeId: string) => {
+    setItems(items.filter((item) => item.nodeId !== nodeId));
   };
 
   const save = async () => {
@@ -388,15 +398,13 @@ export function RealmDockEditor({ realmId }: { realmId: string }) {
           </Label>
           <Select
             value={addKind}
-            onValueChange={(value) =>
-              setAddKind(value as RealmDockWidget["kind"])
-            }
+            onValueChange={(value) => setAddKind(value as RealmDockWidgetKind)}
           >
             <SelectTrigger id="realm-dock-kind">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {widgetKinds.map((kind) => (
+              {availableWidgetKinds.map((kind) => (
                 <SelectItem key={kind} value={kind}>
                   {widgetKindLabel(kind)}
                 </SelectItem>
@@ -414,13 +422,17 @@ export function RealmDockEditor({ realmId }: { realmId: string }) {
         {items.length ? (
           items.map((item, index) => (
             <DockItemEditorCard
-              key={item.id}
+              key={item.nodeId}
               item={item}
               index={index}
               count={items.length}
-              onChange={(nextItem) => updateItem(item.id, nextItem)}
+              locked={
+                placement === "main" &&
+                realmDockMainLockedWidgetKinds.includes(item.kind)
+              }
+              onChange={(nextItem) => updateItem(item.nodeId, nextItem)}
               onMove={moveItem}
-              onRemove={() => removeItem(item.id)}
+              onRemove={() => removeItem(item.nodeId)}
             />
           ))
         ) : (
@@ -447,6 +459,7 @@ function DockItemEditorCard({
   item,
   index,
   count,
+  locked,
   onChange,
   onMove,
   onRemove,
@@ -454,25 +467,23 @@ function DockItemEditorCard({
   item: RealmDockItem;
   index: number;
   count: number;
+  locked: boolean;
   onChange: (item: RealmDockItem) => void;
-  onMove: (id: string, direction: -1 | 1) => void;
+  onMove: (nodeId: string, direction: -1 | 1) => void;
   onRemove: () => void;
 }) {
-  const builtin = item.slot === "builtin";
-  const lockedBuiltin =
-    builtin && realmDockMainRequiredBuiltinIds.includes(item.id as any);
   return (
     <div className="grid gap-4 rounded-md bg-surface-base p-4">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <p className="mr-auto min-w-0 truncate text-sm font-medium leading-ui text-text-primary">
-          {builtin ? builtinLabel(item.id) : widgetKindLabel(item.widget.kind)}
+          {widgetKindLabel(item.kind)}
         </p>
         <Button
           type="button"
           size="icon"
           variant="ghost"
           disabled={index === 0}
-          onClick={() => onMove(item.id, -1)}
+          onClick={() => onMove(item.nodeId, -1)}
           aria-label={getI18nRuntime().i18n.t(
             "entity:realm_dock_editor_move_up",
           )}
@@ -484,114 +495,32 @@ function DockItemEditorCard({
           size="icon"
           variant="ghost"
           disabled={index === count - 1}
-          onClick={() => onMove(item.id, 1)}
+          onClick={() => onMove(item.nodeId, 1)}
           aria-label={getI18nRuntime().i18n.t(
             "entity:realm_dock_editor_move_down",
           )}
         >
           <ArrowDown className="size-4" />
         </Button>
-        {!lockedBuiltin ? (
+        {!locked ? (
           <Button type="button" size="icon" variant="ghost" onClick={onRemove}>
             <Trash2 className="size-4" />
           </Button>
         ) : null}
       </div>
-      {item.slot === "builtin" ? (
-        <BuiltinFields item={item} onChange={onChange} />
-      ) : (
-        <CustomWidgetFields item={item} onChange={onChange} />
-      )}
+      <WidgetFields widget={item} onChange={onChange} />
     </div>
   );
 }
 
-function BuiltinFields({
-  item,
+function WidgetFields({
+  widget,
   onChange,
 }: {
-  item: Extract<RealmDockItem, { slot: "builtin" }>;
+  widget: RealmDockWidget;
   onChange: (item: RealmDockItem) => void;
 }) {
-  switch (item.id) {
-    case "description":
-      return (
-        <NumberField
-          id={`${item.id}-max-lines`}
-          label={getI18nRuntime().i18n.t("entity:realm_dock_editor_max_lines")}
-          value={item.maxLines ?? 4}
-          onChange={(maxLines) => onChange({ ...item, maxLines })}
-        />
-      );
-    case "subscriptionStat":
-      return (
-        <LabelPicker
-          value={item.labelOverrideUnitId ?? ""}
-          label={getI18nRuntime().i18n.t(
-            "entity:realm_dock_editor_label_override",
-          )}
-          optional
-          onSelect={(labelOverrideUnitId) =>
-            onChange(
-              labelOverrideUnitId
-                ? { ...item, labelOverrideUnitId }
-                : (({ labelOverrideUnitId: _label, ...rest }) => rest)(item),
-            )
-          }
-        />
-      );
-    case "bookmarks":
-      return (
-        <BookmarkItemsEditor
-          items={item.items}
-          onChange={(items) => onChange({ ...item, items })}
-        />
-      );
-    case "rules":
-      return (
-        <Select
-          value={item.mode ?? "summary"}
-          onValueChange={(mode) =>
-            onChange({ ...item, mode: mode as "summary" | "full" })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="summary">
-              {getI18nRuntime().i18n.t("entity:realm_dock_editor_rule_summary")}
-            </SelectItem>
-            <SelectItem value="full">
-              {getI18nRuntime().i18n.t("entity:realm_dock_editor_rule_full")}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      );
-    case "moderators":
-      return (
-        <NumberField
-          id={`${item.id}-limit`}
-          label={getI18nRuntime().i18n.t("entity:realm_dock_editor_limit")}
-          value={item.limit ?? 5}
-          onChange={(limit) => onChange({ ...item, limit })}
-        />
-      );
-    case "realmFacts":
-      return null;
-  }
-}
-
-function CustomWidgetFields({
-  item,
-  onChange,
-}: {
-  item: RealmDockCustomWidgetItem;
-  onChange: (item: RealmDockItem) => void;
-}) {
-  const widget = item.widget;
-  const updateWidget = (widget: RealmDockWidget) =>
-    onChange({ ...item, widget });
+  const updateWidget = (widget: RealmDockWidget) => onChange(widget);
   return (
     <div className="grid gap-3">
       <LabelPicker
@@ -622,7 +551,43 @@ function WidgetSpecificFields({
   onChange: (widget: RealmDockWidget) => void;
 }) {
   switch (widget.kind) {
-    case "text":
+    case "unitDescription":
+      return (
+        <NumberField
+          id={`${widget.nodeId}-max-lines`}
+          label={getI18nRuntime().i18n.t("entity:realm_dock_editor_max_lines")}
+          value={widget.maxLines ?? 4}
+          onChange={(maxLines) => onChange({ ...widget, maxLines })}
+        />
+      );
+    case "unitSubscriptionStat":
+      return (
+        <LabelPicker
+          value={widget.labelOverrideUnitId ?? ""}
+          label={getI18nRuntime().i18n.t(
+            "entity:realm_dock_editor_label_override",
+          )}
+          optional
+          onSelect={(labelOverrideUnitId) =>
+            onChange(
+              labelOverrideUnitId
+                ? { ...widget, labelOverrideUnitId }
+                : (({ labelOverrideUnitId: _label, ...rest }) =>
+                    rest as RealmDockWidget)(widget),
+            )
+          }
+        />
+      );
+    case "realmInfo":
+      return null;
+    case "links":
+      return (
+        <BookmarkItemsEditor
+          items={widget.items}
+          onChange={(items) => onChange({ ...widget, items })}
+        />
+      );
+    case "richText":
       return (
         <PostPicker
           value={widget.contentUnitId}
@@ -632,39 +597,26 @@ function WidgetSpecificFields({
           onSelect={(contentUnitId) => onChange({ ...widget, contentUnitId })}
         />
       );
-    case "buttons":
+    case "buttonLinks":
       return (
         <ButtonItemsEditor
           items={widget.items}
           onChange={(items) => onChange({ ...widget, items })}
         />
       );
-    case "images":
+    case "imageLinks":
       return (
         <ImageItemsEditor
           items={widget.items}
           onChange={(items) => onChange({ ...widget, items })}
         />
       );
-    case "communityList":
+    case "featuredUnit":
       return (
-        <RealmListPicker
-          value={widget.realmUnitIds}
-          onChange={(realmUnitIds) => onChange({ ...widget, realmUnitIds })}
-        />
-      );
-    case "calendar":
-      return (
-        <p className="text-sm leading-body text-text-secondary">
-          {getI18nRuntime().i18n.t("entity:realm_dock_editor_calendar_note")}
-        </p>
-      );
-    case "featuredZone":
-      return (
-        <ZonePicker
-          value={widget.zoneUnitId}
-          label={getI18nRuntime().i18n.t("entity:realm_dock_editor_zone")}
-          onSelect={(zoneUnitId) => onChange({ ...widget, zoneUnitId })}
+        <UnitPicker
+          value={widget.unitId}
+          label={getI18nRuntime().i18n.t("entity:realm_dock_editor_unit")}
+          onSelect={(unitId) => onChange({ ...widget, unitId })}
         />
       );
     case "zoneNav":
@@ -677,22 +629,52 @@ function WidgetSpecificFields({
           />
           <div className="flex flex-col gap-1">
             <Label htmlFor={`${widget.kind}-menu`}>
-              {getI18nRuntime().i18n.t("entity:realm_dock_editor_menu_id")}
+              {getI18nRuntime().i18n.t("entity:realm_dock_editor_menu_slug")}
             </Label>
             <Input
               id={`${widget.kind}-menu`}
-              value={widget.menuId ?? ""}
+              value={widget.menuSlug ?? ""}
               onChange={(event) =>
                 onChange({
                   ...widget,
-                  menuId: event.target.value.trim() || undefined,
+                  menuSlug: event.target.value.trim() || undefined,
                 })
               }
             />
           </div>
         </div>
       );
-    case "stats":
+    case "realmRules":
+      return (
+        <Select
+          value={widget.mode ?? "summary"}
+          onValueChange={(mode) =>
+            onChange({ ...widget, mode: mode as "summary" | "full" })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="summary">
+              {getI18nRuntime().i18n.t("entity:realm_dock_editor_rule_summary")}
+            </SelectItem>
+            <SelectItem value="full">
+              {getI18nRuntime().i18n.t("entity:realm_dock_editor_rule_full")}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    case "realmModerators":
+      return (
+        <NumberField
+          id={`${widget.nodeId}-limit`}
+          label={getI18nRuntime().i18n.t("entity:realm_dock_editor_limit")}
+          value={widget.limit ?? 5}
+          onChange={(limit) => onChange({ ...widget, limit })}
+        />
+      );
+    case "realmStats":
       return (
         <div className="flex flex-wrap gap-2">
           {statMetrics.map((metric) => {
@@ -717,6 +699,12 @@ function WidgetSpecificFields({
             );
           })}
         </div>
+      );
+    case "realmCalendar":
+      return (
+        <p className="text-sm leading-body text-text-secondary">
+          {getI18nRuntime().i18n.t("entity:realm_dock_editor_calendar_note")}
+        </p>
       );
     case "pinboard":
       return (
@@ -763,7 +751,7 @@ function SearchPicker<TDoc extends { id: string }>({
   value: string;
   label: string;
   optional?: boolean;
-  searchKind: "post" | "label" | "realm" | "zone";
+  searchKind: "content" | "post" | "label" | "realm" | "zone";
   onSelect: (id: string) => void;
   getId?: (doc: TDoc) => string;
 }) {
@@ -776,6 +764,11 @@ function SearchPicker<TDoc extends { id: string }>({
     appLocale: readContext.appLocale,
     limit: 6,
   };
+  const contentQuery = useQuery({
+    ...contentSearchQueryOptions(common),
+    enabled:
+      searchKind === "content" && readContext.ready && Boolean(searchTerm),
+  });
   const postQuery = useQuery({
     ...postSearchQueryOptions(common),
     enabled: searchKind === "post" && readContext.ready && Boolean(searchTerm),
@@ -794,11 +787,13 @@ function SearchPicker<TDoc extends { id: string }>({
   });
 
   const results = useMemo(() => {
+    if (searchKind === "content") return contentQuery.data?.items ?? [];
     if (searchKind === "post") return postQuery.data?.items ?? [];
     if (searchKind === "label") return labelQuery.data?.items ?? [];
     if (searchKind === "realm") return realmQuery.data?.items ?? [];
     return zoneQuery.data?.items ?? [];
   }, [
+    contentQuery.data?.items,
     labelQuery.data?.items,
     postQuery.data?.items,
     realmQuery.data?.items,
@@ -883,45 +878,17 @@ function ZonePicker(props: {
   return <SearchPicker<ZoneSearchDocument> {...props} searchKind="zone" />;
 }
 
-function RealmListPicker({
-  value,
-  onChange,
-}: {
-  value: string[];
-  onChange: (ids: string[]) => void;
+function UnitPicker(props: {
+  value: string;
+  label: string;
+  onSelect: (id: string) => void;
 }) {
-  const addRealm = (realmUnitId: string) => {
-    if (!realmUnitId || value.includes(realmUnitId)) return;
-    onChange([...value, realmUnitId]);
-  };
-
   return (
-    <div className="flex flex-col gap-3">
-      <SearchPicker<RealmSearchDocument>
-        value=""
-        label={getI18nRuntime().i18n.t("entity:realm_dock_editor_community")}
-        searchKind="realm"
-        onSelect={addRealm}
-      />
-      {value.length ? (
-        <div className="flex flex-wrap gap-2">
-          {value.map((realmUnitId) => (
-            <Button
-              key={realmUnitId}
-              type="button"
-              size="sm"
-              variant="secondary"
-              onClick={() =>
-                onChange(value.filter((item) => item !== realmUnitId))
-              }
-            >
-              <Trash2 className="size-4" />
-              {getI18nRuntime().i18n.t("entity:realm_dock_editor_selected")}
-            </Button>
-          ))}
-        </div>
-      ) : null}
-    </div>
+    <SearchPicker<ContentSearchDocument>
+      {...props}
+      searchKind="content"
+      getId={(doc) => doc.unitId || doc.id}
+    />
   );
 }
 
@@ -929,8 +896,8 @@ function ButtonItemsEditor({
   items,
   onChange,
 }: {
-  items: RealmDockButtonItem[];
-  onChange: (items: RealmDockButtonItem[]) => void;
+  items: DockButtonLinkItem[];
+  onChange: (items: DockButtonLinkItem[]) => void;
 }) {
   const addItem = () => onChange([...items, { target: externalTarget() }]);
 
@@ -982,8 +949,8 @@ function ImageItemsEditor({
   items,
   onChange,
 }: {
-  items: RealmDockImageItem[];
-  onChange: (items: RealmDockImageItem[]) => void;
+  items: DockImageLinkItem[];
+  onChange: (items: DockImageLinkItem[]) => void;
 }) {
   const addItem = () => onChange([...items, { imageUrl: "" }]);
 
@@ -1042,25 +1009,18 @@ function BookmarkItemsEditor({
   items,
   onChange,
 }: {
-  items: RealmDockBookmarkItem[];
-  onChange: (items: RealmDockBookmarkItem[]) => void;
+  items: DockLinkListItem[];
+  onChange: (items: DockLinkListItem[]) => void;
 }) {
   const addLink = () =>
-    onChange([
-      ...items,
-      { id: itemId("bookmark"), kind: "link", target: externalTarget() },
-    ]);
-  const addGroup = () =>
-    onChange([
-      ...items,
-      { id: itemId("bookmark-group"), kind: "group", items: [] },
-    ]);
+    onChange([...items, { kind: "link", target: externalTarget() }]);
+  const addGroup = () => onChange([...items, { kind: "group", items: [] }]);
 
   return (
     <div className="flex flex-col gap-3">
       {items.map((item, index) => (
         <div
-          key={item.id}
+          key={index}
           className="grid gap-3 rounded-md bg-surface-subtle p-3"
         >
           <LabelPicker
@@ -1124,30 +1084,24 @@ function BookmarkGroupLinksEditor({
   onChange,
 }: {
   items: Array<{
-    id: string;
+    kind: "link";
     labelOverrideUnitId?: string;
     target: ZoneLinkTarget;
   }>;
   onChange: (
     items: Array<{
-      id: string;
+      kind: "link";
       labelOverrideUnitId?: string;
       target: ZoneLinkTarget;
     }>,
   ) => void;
 }) {
   const addLink = () =>
-    onChange([
-      ...items,
-      { id: itemId("bookmark-link"), target: externalTarget() },
-    ]);
+    onChange([...items, { kind: "link", target: externalTarget() }]);
   return (
     <div className="grid gap-2">
       {items.map((item, index) => (
-        <div
-          key={item.id}
-          className="grid gap-2 rounded-md bg-surface-base p-2"
-        >
+        <div key={index} className="grid gap-2 rounded-md bg-surface-base p-2">
           <LabelPicker
             value={item.labelOverrideUnitId ?? ""}
             label={getI18nRuntime().i18n.t(

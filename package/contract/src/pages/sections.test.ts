@@ -1,16 +1,18 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  zoneColumnsSectionSchema,
-  zoneContentSectionSchema,
-  zoneDynamicTagsSchema,
-  zonePageSectionSchema,
-  ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
-  ZONE_SECTION_QUERY_SORT_FIELDS,
-  zoneSectionQuerySchema,
-  zoneSourcesSectionSchema,
-  zoneTabsSectionSchema,
-} from "./section";
+  pageColumnsSectionSchema,
+  pageContentSectionSchema,
+  pageDynamicTagsSchema,
+  pageSectionSchema,
+  PAGE_SECTION_QUERY_FILTERABLE_FIELDS,
+  PAGE_SECTION_QUERY_SORT_FIELDS,
+  pageSectionQuerySchema,
+  pageSourcesSectionSchema,
+  pageTabsSectionSchema,
+} from "./sections";
+
+const nodeId = "01972fd2-0ed8-7b7b-97f5-a4fc0e4d6b8d";
 
 const latestWikiQuery = {
   target: "post",
@@ -19,10 +21,10 @@ const latestWikiQuery = {
   sort: { field: "updatedAt", direction: "desc" },
 } as const;
 
-describe("zone section query", () => {
+describe("page section query", () => {
   test("accepts the filter vocabulary with context realm and viewer languages", () => {
     expect(
-      Value.Check(zoneSectionQuerySchema, {
+      Value.Check(pageSectionQuerySchema, {
         target: "unit",
         types: ["BOOK", "SERIES"],
         realm: { unitIds: ["realm-1"] },
@@ -33,9 +35,9 @@ describe("zone section query", () => {
         sort: { field: "publishedAt" },
       }),
     ).toBe(true);
-    expect(Value.Check(zoneSectionQuerySchema, latestWikiQuery)).toBe(true);
+    expect(Value.Check(pageSectionQuerySchema, latestWikiQuery)).toBe(true);
     expect(
-      Value.Check(zoneSectionQuerySchema, {
+      Value.Check(pageSectionQuerySchema, {
         target: "realm",
         types: ["REALM"],
         languages: ["en"],
@@ -43,7 +45,7 @@ describe("zone section query", () => {
       }),
     ).toBe(true);
     expect(
-      Value.Check(zoneSectionQuerySchema, {
+      Value.Check(pageSectionQuerySchema, {
         target: "zone",
         types: ["ZONE"],
         realm: "context",
@@ -54,27 +56,27 @@ describe("zone section query", () => {
   });
 
   test("publishes per-target filter and sort vocabularies", () => {
-    expect(ZONE_SECTION_QUERY_FILTERABLE_FIELDS.zone).toEqual([
+    expect(PAGE_SECTION_QUERY_FILTERABLE_FIELDS.zone).toEqual([
       "types",
       "realm",
       "languages",
     ]);
-    expect(ZONE_SECTION_QUERY_SORT_FIELDS.zone).toEqual([
+    expect(PAGE_SECTION_QUERY_SORT_FIELDS.zone).toEqual([
       "createdAt",
       "updatedAt",
     ]);
   });
 
   test("requires a sort and rejects unknown fields", () => {
-    expect(Value.Check(zoneSectionQuerySchema, { target: "post" })).toBe(false);
+    expect(Value.Check(pageSectionQuerySchema, { target: "post" })).toBe(false);
     expect(
-      Value.Check(zoneSectionQuerySchema, {
+      Value.Check(pageSectionQuerySchema, {
         ...latestWikiQuery,
         keyword: "search text",
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneSectionQuerySchema, {
+      Value.Check(pageSectionQuerySchema, {
         ...latestWikiQuery,
         sort: { field: "viewCount" },
       }),
@@ -82,7 +84,7 @@ describe("zone section query", () => {
   });
 });
 
-describe("zone dynamic tags", () => {
+describe("page dynamic tags", () => {
   test("accepts weighted canonical tag unit id options on query sections", () => {
     const dynamicTags = {
       groupId: "book-home-topics",
@@ -93,10 +95,10 @@ describe("zone dynamic tags", () => {
       ],
     };
 
-    expect(Value.Check(zoneDynamicTagsSchema, dynamicTags)).toBe(true);
+    expect(Value.Check(pageDynamicTagsSchema, dynamicTags)).toBe(true);
     expect(
-      Value.Check(zoneContentSectionSchema, {
-        id: "s-dynamic",
+      Value.Check(pageContentSectionSchema, {
+        nodeId,
         kind: "query",
         query: {
           target: "unit",
@@ -111,23 +113,23 @@ describe("zone dynamic tags", () => {
 
   test("rejects option ids, empty tag rows, and non-query placement", () => {
     expect(
-      Value.Check(zoneDynamicTagsSchema, {
+      Value.Check(pageDynamicTagsSchema, {
         options: [{ id: "x", tagUnitIds: ["tag-1"], probability: 1 }],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneDynamicTagsSchema, {
+      Value.Check(pageDynamicTagsSchema, {
         options: [{ tagUnitIds: [], probability: 1 }],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneDynamicTagsSchema, {
+      Value.Check(pageDynamicTagsSchema, {
         options: [{ tagUnitIds: ["tag-1"], probability: 1.2 }],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneContentSectionSchema, {
-        id: "s-feed",
+      Value.Check(pageContentSectionSchema, {
+        nodeId,
         kind: "stream",
         dynamicTags: { options: [{ tagUnitIds: ["tag-1"], probability: 1 }] },
       }),
@@ -135,9 +137,9 @@ describe("zone dynamic tags", () => {
   });
 });
 
-describe("zone section nesting rules", () => {
+describe("page section nesting rules", () => {
   const querySection = {
-    id: "s-query",
+    nodeId,
     kind: "query",
     query: latestWikiQuery,
     display: "list",
@@ -145,7 +147,7 @@ describe("zone section nesting rules", () => {
 
   test("query sections can opt into stream display", () => {
     expect(
-      Value.Check(zoneContentSectionSchema, {
+      Value.Check(pageContentSectionSchema, {
         ...querySection,
         display: "stream",
       }),
@@ -153,96 +155,96 @@ describe("zone section nesting rules", () => {
   });
 
   const tabsSection = {
-    id: "s-tabs",
+    nodeId,
     kind: "tabs",
-    tabs: [{ id: "tab-1", sections: [querySection] }],
+    tabs: [{ nodeId, sections: [querySection] }],
   };
 
   test("tabs panes hold content sections only", () => {
-    expect(Value.Check(zoneTabsSectionSchema, tabsSection)).toBe(true);
+    expect(Value.Check(pageTabsSectionSchema, tabsSection)).toBe(true);
     expect(
-      Value.Check(zoneTabsSectionSchema, {
+      Value.Check(pageTabsSectionSchema, {
         ...tabsSection,
-        tabs: [{ id: "tab-1", sections: [tabsSection] }],
+        tabs: [{ nodeId, sections: [tabsSection] }],
       }),
     ).toBe(false);
   });
 
   test("columns hold content sections or tabs, never columns", () => {
     const columnsSection = {
-      id: "s-columns",
+      nodeId,
       kind: "columns",
       columns: [
-        { id: "main", ratio: 3, sections: [tabsSection] },
-        { id: "side", ratio: 1, sections: [querySection] },
+        { ratio: 3, sections: [tabsSection] },
+        { ratio: 1, sections: [querySection] },
       ],
     };
-    expect(Value.Check(zoneColumnsSectionSchema, columnsSection)).toBe(true);
-    expect(Value.Check(zonePageSectionSchema, columnsSection)).toBe(true);
+    expect(Value.Check(pageColumnsSectionSchema, columnsSection)).toBe(true);
+    expect(Value.Check(pageSectionSchema, columnsSection)).toBe(true);
     expect(
-      Value.Check(zoneColumnsSectionSchema, {
+      Value.Check(pageColumnsSectionSchema, {
         ...columnsSection,
         columns: [
-          { id: "nested", ratio: 1, sections: [columnsSection] },
-          { id: "ok", ratio: 1, sections: [] },
+          { ratio: 1, sections: [columnsSection] },
+          { ratio: 1, sections: [] },
         ],
       }),
     ).toBe(false);
     // columns is not a content section, so it can never nest below page level
-    expect(Value.Check(zoneContentSectionSchema, columnsSection)).toBe(false);
+    expect(Value.Check(pageContentSectionSchema, columnsSection)).toBe(false);
   });
 
   test("columns validate count, ratio bounds, and reject legacy fields", () => {
-    const column = { id: "a", ratio: 1, sections: [querySection] };
+    const column = { ratio: 1, sections: [querySection] };
     expect(
-      Value.Check(zoneColumnsSectionSchema, {
-        id: "s-columns",
+      Value.Check(pageColumnsSectionSchema, {
+        nodeId,
         kind: "columns",
         columns: [
-          { id: "a", ratio: 7, sections: [querySection] },
-          { id: "b", ratio: 3, sections: [tabsSection] },
-          { id: "c", ratio: 2, sections: [] },
-          { id: "d", ratio: 1, sections: [] },
+          { ratio: 7, sections: [querySection] },
+          { ratio: 3, sections: [tabsSection] },
+          { ratio: 2, sections: [] },
+          { ratio: 1, sections: [] },
         ],
       }),
     ).toBe(true);
     expect(
-      Value.Check(zoneColumnsSectionSchema, {
-        id: "s-columns",
+      Value.Check(pageColumnsSectionSchema, {
+        nodeId,
         kind: "columns",
         columns: [column],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneColumnsSectionSchema, {
-        id: "s-columns",
+      Value.Check(pageColumnsSectionSchema, {
+        nodeId,
         kind: "columns",
         columns: [column, column, column, column, column],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneColumnsSectionSchema, {
-        id: "s-columns",
+      Value.Check(pageColumnsSectionSchema, {
+        nodeId,
         kind: "columns",
         columns: [
-          { id: "a", ratio: 0, sections: [] },
-          { id: "b", ratio: 1, sections: [] },
+          { ratio: 0, sections: [] },
+          { ratio: 1, sections: [] },
         ],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneColumnsSectionSchema, {
-        id: "s-columns",
+      Value.Check(pageColumnsSectionSchema, {
+        nodeId,
         kind: "columns",
         columns: [
-          { id: "a", ratio: 13, sections: [] },
-          { id: "b", ratio: 1, sections: [] },
+          { ratio: 13, sections: [] },
+          { ratio: 1, sections: [] },
         ],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zoneColumnsSectionSchema, {
-        id: "s-columns",
+      Value.Check(pageColumnsSectionSchema, {
+        nodeId,
         kind: "columns",
         sidePosition: "right",
         side: [querySection],
@@ -253,8 +255,8 @@ describe("zone section nesting rules", () => {
 
   test("stage composes explicit profile, image, actions, and columns", () => {
     expect(
-      Value.Check(zonePageSectionSchema, {
-        id: "s-stage",
+      Value.Check(pageSectionSchema, {
+        nodeId,
         kind: "stage",
         background: {
           color: "var(--colors-surface-subtle)",
@@ -264,16 +266,16 @@ describe("zone section nesting rules", () => {
         },
         mask: { color: "black", opacity: 0.35 },
         sections: [
-          { id: "zone-info", kind: "zoneInfo", showDescription: true },
+          { nodeId, kind: "zoneInfo", showDescription: true },
           {
-            id: "logo",
+            nodeId,
             kind: "image",
             url: "https://cdn.example/logo.png",
             variant: "logo",
             altLabelUnitId: "label-logo",
           },
           {
-            id: "actions",
+            nodeId,
             kind: "actions",
             builtIns: ["joinRealm", "createWiki"],
             items: [
@@ -285,27 +287,27 @@ describe("zone section nesting rules", () => {
             ],
           },
           {
-            id: "stage-columns",
+            nodeId,
             kind: "columns",
             columns: [
-              { id: "main", ratio: 2, sections: [querySection] },
-              { id: "side", ratio: 1, sections: [] },
+              { ratio: 2, sections: [querySection] },
+              { ratio: 1, sections: [] },
             ],
           },
         ],
       }),
     ).toBe(true);
     expect(
-      Value.Check(zonePageSectionSchema, {
-        id: "s-stage",
+      Value.Check(pageSectionSchema, {
+        nodeId,
         kind: "stage",
         background: { imageUrl: "http://cdn.example/banner.png" },
         sections: [],
       }),
     ).toBe(false);
     expect(
-      Value.Check(zonePageSectionSchema, {
-        id: "s-hero",
+      Value.Check(pageSectionSchema, {
+        nodeId,
         kind: "hero",
       }),
     ).toBe(false);
@@ -313,23 +315,23 @@ describe("zone section nesting rules", () => {
 
   test("collection and stats validate strictly", () => {
     expect(
-      Value.Check(zonePageSectionSchema, {
-        id: "s-collection",
+      Value.Check(pageSectionSchema, {
+        nodeId,
         kind: "collection",
         display: "covers",
         items: [{ target: { kind: "unit", unitId: "book-1" } }],
       }),
     ).toBe(true);
     expect(
-      Value.Check(zonePageSectionSchema, {
-        id: "s-stats",
+      Value.Check(pageSectionSchema, {
+        nodeId,
         kind: "stats",
         metrics: ["articles", "members"],
       }),
     ).toBe(true);
     expect(
-      Value.Check(zonePageSectionSchema, {
-        id: "s-stats",
+      Value.Check(pageSectionSchema, {
+        nodeId,
         kind: "stats",
         metrics: ["edits"],
       }),
@@ -338,22 +340,22 @@ describe("zone section nesting rules", () => {
 
   test("sources section owns no target unit field", () => {
     expect(
-      Value.Check(zoneSourcesSectionSchema, {
-        id: "s-sources",
+      Value.Check(pageSourcesSectionSchema, {
+        nodeId,
         kind: "sources",
       }),
     ).toBe(true);
     expect(
-      Value.Check(zonePageSectionSchema, {
-        id: "s-sources",
+      Value.Check(pageSectionSchema, {
+        nodeId,
         kind: "sources",
         titleLabelUnitId: "label-1",
         emptyState: "show-empty",
       }),
     ).toBe(true);
     expect(
-      Value.Check(zoneSourcesSectionSchema, {
-        id: "s-sources",
+      Value.Check(pageSourcesSectionSchema, {
+        nodeId,
         kind: "sources",
         unitId: "other-unit",
       }),

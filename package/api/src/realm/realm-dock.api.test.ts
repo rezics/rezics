@@ -4,6 +4,8 @@ import { configureApi } from "../config";
 import { realmDockApi } from "./realm-dock.api";
 
 const fetchMock = mock();
+const dockNodeId = (suffix: number) =>
+  `00000000-0000-4000-8000-${String(suffix).padStart(12, "0")}`;
 
 configureApi({
   apiBaseUrl: "http://api.example",
@@ -12,16 +14,16 @@ configureApi({
 });
 
 const dock: RealmDock = {
-  schema: "rezics/realm-dock",
+  schema: "rezics/dock",
   version: 1,
   placements: {
     main: [
-      { slot: "builtin", id: "description", maxLines: 4 },
-      { slot: "builtin", id: "subscriptionStat" },
-      { slot: "builtin", id: "realmFacts" },
-      { slot: "builtin", id: "bookmarks", items: [] },
-      { slot: "builtin", id: "rules", mode: "summary" },
-      { slot: "builtin", id: "moderators", limit: 5 },
+      { kind: "unitDescription", nodeId: dockNodeId(1), maxLines: 4 },
+      { kind: "unitSubscriptionStat", nodeId: dockNodeId(2) },
+      { kind: "realmInfo", nodeId: dockNodeId(3) },
+      { kind: "links", nodeId: dockNodeId(4), items: [] },
+      { kind: "realmRules", nodeId: dockNodeId(5), mode: "summary" },
+      { kind: "realmModerators", nodeId: dockNodeId(6), limit: 5 },
     ],
   },
 };

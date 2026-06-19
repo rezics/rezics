@@ -13,14 +13,17 @@ export const Pinboard = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    key: varchar({ length: 64 }).notNull(),
-    // Pinboard kind is a render mode. V1 is fixed to `list`; purpose lives in `key`.
+    placement: varchar({ length: 64 }).notNull(),
+    // Pinboard kind is a render mode. V1 is fixed to `list`; purpose lives in `placement`.
     kind: varchar({ length: 32 }).default("list").notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (table) => [
-    unique("Pinboard_realmUnitId_key_unique").on(table.realmUnitId, table.key),
+    unique("Pinboard_realmUnitId_placement_unique").on(
+      table.realmUnitId,
+      table.placement,
+    ),
     index("Pinboard_realmUnitId_idx").using(
       "btree",
       table.realmUnitId.asc().nullsLast(),

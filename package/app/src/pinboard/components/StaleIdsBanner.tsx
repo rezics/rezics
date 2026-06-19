@@ -4,18 +4,18 @@ import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
 import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { PinboardListKey } from "../models/types";
+import type { PinboardListPlacement } from "../models/types";
 
 interface StaleIdsBannerProps {
   realmUnitId: string;
-  pinboardKey: PinboardListKey;
+  pinboardPlacement: PinboardListPlacement;
   staleIds: string[];
   onCleaned?: () => void;
 }
 
 export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   realmUnitId,
-  pinboardKey,
+  pinboardPlacement,
   staleIds,
   onCleaned,
 }) => {
@@ -33,7 +33,7 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
       try {
         await remove.mutateAsync({
           realmId: realmUnitId,
-          key: pinboardKey,
+          placement: pinboardPlacement,
           unitId,
         });
       } catch {

@@ -11,10 +11,14 @@ import { pinboardKeys } from "./pinboard.keys";
 function invalidatePinboard(
   queryClient: ReturnType<typeof useQueryClient>,
   realmId: string,
-  key: string,
+  placement: string,
 ) {
-  queryClient.invalidateQueries({ queryKey: pinboardKeys.list(realmId, key) });
-  queryClient.invalidateQueries({ queryKey: pinboardKeys.admin(realmId, key) });
+  queryClient.invalidateQueries({
+    queryKey: pinboardKeys.list(realmId, placement),
+  });
+  queryClient.invalidateQueries({
+    queryKey: pinboardKeys.admin(realmId, placement),
+  });
   queryClient.invalidateQueries({ queryKey: realmKeys.detail(realmId) });
 }
 
@@ -23,18 +27,18 @@ export function useAppendPinboardMutation(
     UseMutationOptions<
       PinboardOkResponse,
       Error,
-      { realmId: string; key: string; unitId: string }
+      { realmId: string; placement: string; unitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ realmId, key, unitId }) =>
-      pinboardApi.append(realmId, key, unitId),
+    mutationFn: ({ realmId, placement, unitId }) =>
+      pinboardApi.append(realmId, placement, unitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidatePinboard(queryClient, variables.realmId, variables.key);
+      invalidatePinboard(queryClient, variables.realmId, variables.placement);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -45,18 +49,18 @@ export function useReorderPinboardMutation(
     UseMutationOptions<
       PinboardOkResponse,
       Error,
-      { realmId: string; key: string; unitIds: string[] }
+      { realmId: string; placement: string; unitIds: string[] }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ realmId, key, unitIds }) =>
-      pinboardApi.reorder(realmId, key, unitIds),
+    mutationFn: ({ realmId, placement, unitIds }) =>
+      pinboardApi.reorder(realmId, placement, unitIds),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidatePinboard(queryClient, variables.realmId, variables.key);
+      invalidatePinboard(queryClient, variables.realmId, variables.placement);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -67,18 +71,18 @@ export function useRemovePinboardMutation(
     UseMutationOptions<
       PinboardOkResponse,
       Error,
-      { realmId: string; key: string; unitId: string }
+      { realmId: string; placement: string; unitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ realmId, key, unitId }) =>
-      pinboardApi.remove(realmId, key, unitId),
+    mutationFn: ({ realmId, placement, unitId }) =>
+      pinboardApi.remove(realmId, placement, unitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidatePinboard(queryClient, variables.realmId, variables.key);
+      invalidatePinboard(queryClient, variables.realmId, variables.placement);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

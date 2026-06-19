@@ -7,8 +7,8 @@ import type {
   ZoneTheme,
 } from "@rezics/contract";
 import {
-  addZonePage,
   addZonePageDraftIfMissing,
+  addPage,
   addZoneTranslationRow,
   applyZoneManageJsonBody,
   canAddZoneMenuChild,
@@ -25,7 +25,7 @@ import {
   parseZoneManageJsonText,
   removeZoneMenuAtIndex,
   removeZoneMenuNodeAtPath,
-  removeZonePage,
+  removePage,
   removeZoneTranslationRow,
   updateZoneManageJsonProblems,
   updateZoneMenuAtIndex,
@@ -48,6 +48,9 @@ import {
   zoneTranslationsToRows,
 } from "./zoneManageDraft";
 
+const testNodeId = (suffix: number) =>
+  `00000000-0000-4000-8000-${String(suffix).padStart(12, "0")}`;
+
 function sampleBoundary(): ZoneBoundary {
   return {
     schema: "rezics/zone-boundary",
@@ -63,15 +66,13 @@ function sampleNav(): ZoneNav {
     version: 1,
     menus: [
       {
-        id: "main",
+        slug: "main",
         nodes: [
-          { id: "n-1", target: { kind: "zonePage", pageId: "page-home" } },
+          { target: { kind: "zonePage", pageId: "page-home" } },
           {
-            id: "n-2",
             labelUnitId: "label-1",
             children: [
               {
-                id: "n-2-1",
                 target: { kind: "unit", unitId: "unit-1" },
               },
             ],
@@ -79,7 +80,7 @@ function sampleNav(): ZoneNav {
         ],
       },
     ],
-    header: { menuId: "main" },
+    header: { menuSlug: "main" },
   };
 }
 
@@ -94,32 +95,36 @@ function sampleTheme(): ZoneTheme {
 
 function samplePage(): ZonePage {
   return {
-    schema: "rezics/zone-page",
+    schema: "rezics/page",
     version: 1,
     sections: [
       {
-        id: "stage",
+        nodeId: testNodeId(1),
+        slug: "stage",
         kind: "stage",
-        sections: [{ id: "zone-info", kind: "zoneInfo" }],
+        sections: [{ nodeId: testNodeId(2), kind: "zoneInfo" }],
       },
       {
-        id: "cols",
+        nodeId: testNodeId(3),
+        slug: "cols",
         kind: "columns",
         columns: [
           {
-            id: "main",
             ratio: 3,
             sections: [
               {
-                id: "tabs",
+                nodeId: testNodeId(4),
+                slug: "tabs",
                 kind: "tabs",
-                defaultTabId: "t-1",
+                defaultTabNodeId: testNodeId(5),
                 tabs: [
                   {
-                    id: "t-1",
+                    nodeId: testNodeId(5),
+                    slug: "t-1",
                     sections: [
                       {
-                        id: "q-1",
+                        nodeId: testNodeId(6),
+                        slug: "q-1",
                         kind: "query",
                         query: {
                           target: "unit",
@@ -135,9 +140,15 @@ function samplePage(): ZonePage {
             ],
           },
           {
-            id: "side",
             ratio: 1,
-            sections: [{ id: "stats", kind: "stats", metrics: ["members"] }],
+            sections: [
+              {
+                nodeId: testNodeId(7),
+                slug: "stats",
+                kind: "stats",
+                metrics: ["members"],
+              },
+            ],
           },
         ],
       },
@@ -171,8 +182,8 @@ describe("zoneManageDraft split round-trip", () => {
       theme: sampleTheme(),
       page: samplePage(),
     });
-    draft.menus[0]!.id = "changed";
-    expect(nav.menus[0]!.id).toBe("main");
+    draft.menus[0]!.slug = "changed";
+    expect(nav.menus[0]!.slug).toBe("main");
   });
 });
 
@@ -299,22 +310,23 @@ describe("section nesting guards", () => {
 describe("section ids", () => {
   it("collects nested ids across the managed page and containers", () => {
     expect(collectZoneSectionIds(sampleDraft().pages)).toEqual([
-      "stage",
-      "zone-info",
-      "cols",
-      "tabs",
-      "q-1",
-      "stats",
+      testNodeId(1),
+      testNodeId(2),
+      testNodeId(3),
+      testNodeId(4),
+      testNodeId(6),
+      testNodeId(7),
     ]);
   });
 
   it("creates a stage with zoneInfo by default", () => {
     expect(createZoneSection("stage", "stage", ["stage"])).toEqual({
-      id: "stage",
+      nodeId: expect.any(String),
+      slug: "stage",
       kind: "stage",
       sections: [
         {
-          id: "stage-info-1",
+          nodeId: expect.any(String),
           kind: "zoneInfo",
           showTitle: true,
           showDescription: true,
@@ -325,18 +337,20 @@ describe("section ids", () => {
 
   it("creates a valid two-column section by default", () => {
     expect(createZoneSection("columns", "cols")).toEqual({
-      id: "cols",
+      nodeId: expect.any(String),
+      slug: "cols",
       kind: "columns",
       columns: [
-        { id: "main", ratio: 3, sections: [] },
-        { id: "side", ratio: 1, sections: [] },
+        { ratio: 3, sections: [] },
+        { ratio: 1, sections: [] },
       ],
     });
   });
 
   it("creates a minimal sources section by default", () => {
     expect(createZoneSection("sources", "sources-1")).toEqual({
-      id: "sources-1",
+      nodeId: expect.any(String),
+      slug: "sources-1",
       kind: "sources",
     });
   });
@@ -345,11 +359,16 @@ describe("section ids", () => {
     const draft = sampleDraft();
     draft.pages = updateZonePageSections(draft.pages, "home", () => [
       ...draft.pages.home.sections,
-      createZoneSection("stats", "stats"),
+      {
+        nodeId: testNodeId(7),
+        slug: "duplicate-stats",
+        kind: "stats",
+        metrics: ["posts"],
+      },
     ]);
     expect(validateZoneManageDraft(draft)).toContainEqual({
-      code: "section_id_duplicate",
-      id: "stats",
+      code: "section_node_id_duplicate",
+      nodeId: testNodeId(7),
     });
   });
 
@@ -363,20 +382,24 @@ describe("tabs invariants", () => {
     const draft = sampleDraft();
     draft.pages = updateZonePageSections(draft.pages, "home", () => [
       {
-        id: "t",
+        nodeId: "t",
+        slug: "t",
         kind: "tabs",
-        defaultTabId: "missing",
+        defaultTabNodeId: "missing",
         tabs: [
-          { id: "a", sections: [] },
-          { id: "a", sections: [] },
+          { nodeId: "a", slug: "a", sections: [] },
+          { nodeId: "a", slug: "a", sections: [] },
         ],
       },
     ]);
     const issues = validateZoneManageDraft(draft);
-    expect(issues).toContainEqual({ code: "tab_id_duplicate", sectionId: "t" });
+    expect(issues).toContainEqual({
+      code: "tab_node_id_duplicate",
+      sectionNodeId: "t",
+    });
     expect(issues).toContainEqual({
       code: "tab_default_invalid",
-      sectionId: "t",
+      sectionNodeId: "t",
     });
   });
 });
@@ -484,7 +507,8 @@ describe("query vocabulary", () => {
     const draft = sampleDraft();
     draft.pages = updateZonePageSections(draft.pages, "home", () => [
       {
-        id: "dynamic",
+        nodeId: "dynamic",
+        slug: "dynamic",
         kind: "query",
         query: {
           target: "unit",
@@ -517,7 +541,8 @@ describe("query vocabulary", () => {
     const draft = sampleDraft();
     draft.pages = updateZonePageSections(draft.pages, "home", () => [
       {
-        id: "dynamic-overfull",
+        nodeId: "dynamic-overfull",
+        slug: "dynamic-overfull",
         kind: "query",
         query: {
           target: "unit",
@@ -533,7 +558,8 @@ describe("query vocabulary", () => {
         },
       },
       {
-        id: "dynamic-post",
+        nodeId: "dynamic-post",
+        slug: "dynamic-post",
         kind: "query",
         query: {
           target: "post",
@@ -549,41 +575,46 @@ describe("query vocabulary", () => {
     const issues = validateZoneManageDraft(draft);
     expect(issues).toContainEqual({
       code: "dynamic_tags_probability_invalid",
-      sectionId: "dynamic-overfull",
+      sectionNodeId: "dynamic-overfull",
       total: 1.1,
     });
     expect(issues).toContainEqual({
       code: "dynamic_tags_target_unsupported",
-      sectionId: "dynamic-post",
+      sectionNodeId: "dynamic-post",
     });
   });
 });
 
 describe("menu tree path operations", () => {
   const nodes = (): ZoneMenuNode[] => [
-    { id: "a", target: { kind: "zonePage", pageId: "page-home" } },
+    { target: { kind: "zonePage", pageId: "page-home" } },
     {
-      id: "b",
       labelUnitId: "label-1",
       children: [
-        { id: "b-1", target: { kind: "zonePage", pageId: "page-search" } },
-        { id: "b-2", target: { kind: "zonePage", pageId: "page-feed" } },
+        { target: { kind: "zonePage", pageId: "page-search" } },
+        { target: { kind: "zonePage", pageId: "page-feed" } },
       ],
     },
   ];
 
   it("reads nodes at paths", () => {
-    expect(zoneMenuNodeAtPath(nodes(), [1, 0])?.id).toBe("b-1");
+    expect(zoneMenuNodeAtPath(nodes(), [1, 0])?.target).toEqual({
+      kind: "zonePage",
+      pageId: "page-search",
+    });
     expect(zoneMenuNodeAtPath(nodes(), [2])).toBeNull();
   });
 
   it("inserts at root and under parents", () => {
     const inserted = insertZoneMenuNode(nodes(), [1], {
-      id: "b-3",
       target: { kind: "external", url: "https://example.com", text: "QQ" },
     });
     expect(inserted).not.toBeNull();
-    expect(zoneMenuNodeAtPath(inserted!, [1, 2])?.id).toBe("b-3");
+    expect(zoneMenuNodeAtPath(inserted!, [1, 2])?.target).toEqual({
+      kind: "external",
+      url: "https://example.com",
+      text: "QQ",
+    });
   });
 
   it("guards inserts beyond depth 3", () => {
@@ -592,83 +623,91 @@ describe("menu tree path operations", () => {
     const deep = insertZoneMenuNode(
       [
         {
-          id: "a",
-          children: [{ id: "a-1", children: [{ id: "a-1-1" }] }],
+          children: [{ children: [{}] }],
         },
       ],
       [0, 0, 0],
-      { id: "too-deep" },
+      {},
     );
     expect(deep).toBeNull();
   });
 
   it("removes and reorders by path", () => {
     const removed = removeZoneMenuNodeAtPath(nodes(), [1, 0]);
-    expect(zoneMenuNodeAtPath(removed, [1, 0])?.id).toBe("b-2");
+    expect(zoneMenuNodeAtPath(removed, [1, 0])?.target).toEqual({
+      kind: "zonePage",
+      pageId: "page-feed",
+    });
     const moved = moveZoneMenuNodeAtPath(nodes(), [1, 1], "up");
-    expect(zoneMenuNodeAtPath(moved, [1, 0])?.id).toBe("b-2");
+    expect(zoneMenuNodeAtPath(moved, [1, 0])?.target).toEqual({
+      kind: "zonePage",
+      pageId: "page-feed",
+    });
     const unmoved = moveZoneMenuNodeAtPath(nodes(), [0], "up");
-    expect(zoneMenuNodeAtPath(unmoved, [0])?.id).toBe("a");
+    expect(zoneMenuNodeAtPath(unmoved, [0])?.target).toEqual({
+      kind: "zonePage",
+      pageId: "page-home",
+    });
   });
 
   it("indents into the previous sibling with a depth guard", () => {
     const indented = indentZoneMenuNodeAtPath(nodes(), [1, 1]);
     expect(indented).not.toBeNull();
-    expect(zoneMenuNodeAtPath(indented!, [1, 0, 0])?.id).toBe("b-2");
-    const tall: ZoneMenuNode[] = [
-      { id: "x" },
-      { id: "y", children: [{ id: "y-1", children: [{ id: "y-1-1" }] }] },
-    ];
+    expect(zoneMenuNodeAtPath(indented!, [1, 0, 0])?.target).toEqual({
+      kind: "zonePage",
+      pageId: "page-feed",
+    });
+    const tall: ZoneMenuNode[] = [{}, { children: [{ children: [{}] }] }];
     expect(indentZoneMenuNodeAtPath(tall, [1])).toBeNull();
   });
 
   it("outdents to the parent level", () => {
     const outdented = outdentZoneMenuNodeAtPath(nodes(), [1, 0]);
     expect(outdented).not.toBeNull();
-    expect(zoneMenuNodeAtPath(outdented!, [2])?.id).toBe("b-1");
+    expect(zoneMenuNodeAtPath(outdented!, [2])?.target).toEqual({
+      kind: "zonePage",
+      pageId: "page-search",
+    });
     expect(outdentZoneMenuNodeAtPath(nodes(), [0])).toBeNull();
   });
 });
 
 describe("menu validation", () => {
-  it("keeps header.menuId aligned when the referenced menu id changes", () => {
+  it("keeps header.menuSlug aligned when the referenced menu slug changes", () => {
     const draft = sampleDraft();
     const renamed = updateZoneMenuAtIndex(draft, 0, {
       ...draft.menus[0]!,
-      id: "renamed",
+      slug: "renamed",
     });
-    expect(renamed.header.menuId).toBe("renamed");
-    expect(renamed.menus[0]?.id).toBe("renamed");
+    expect(renamed.header.menuSlug).toBe("renamed");
+    expect(renamed.menus[0]?.slug).toBe("renamed");
   });
 
-  it("falls header.menuId back when the referenced menu is removed", () => {
+  it("falls header.menuSlug back when the referenced menu is removed", () => {
     const draft = sampleDraft();
     draft.menus = [
-      { id: "main", nodes: [] },
-      { id: "secondary", nodes: [] },
+      { slug: "main", nodes: [] },
+      { slug: "secondary", nodes: [] },
     ];
-    draft.header = { menuId: "main" };
+    draft.header = { menuSlug: "main" };
     const removed = removeZoneMenuAtIndex(draft, 0);
-    expect(removed.header.menuId).toBe("secondary");
-    expect(removed.menus).toEqual([{ id: "secondary", nodes: [] }]);
+    expect(removed.header.menuSlug).toBe("secondary");
+    expect(removed.menus).toEqual([{ slug: "secondary", nodes: [] }]);
   });
 
   it("flags depth, leaf, group, and header issues", () => {
     const draft = sampleDraft();
     draft.menus = [
       {
-        id: "main",
+        slug: "main",
         nodes: [
           {
-            id: "n-1",
             children: [
               {
-                id: "n-2",
                 labelUnitId: "label-1",
                 children: [
                   {
-                    id: "n-3",
-                    children: [{ id: "n-4" }],
+                    children: [{}],
                   },
                 ],
               },
@@ -676,25 +715,28 @@ describe("menu validation", () => {
           },
         ],
       },
-      { id: "main", nodes: [] },
+      { slug: "main", nodes: [] },
     ];
-    draft.header = { menuId: "missing" };
+    draft.header = { menuSlug: "missing" };
     const issues = validateZoneManageDraft(draft);
-    expect(issues).toContainEqual({ code: "menu_too_deep", menuId: "main" });
-    expect(issues).toContainEqual({ code: "menu_id_duplicate", id: "main" });
+    expect(issues).toContainEqual({ code: "menu_too_deep", menuSlug: "main" });
+    expect(issues).toContainEqual({
+      code: "menu_slug_duplicate",
+      slug: "main",
+    });
     expect(issues).toContainEqual({
       code: "menu_group_missing_label",
-      menuId: "main",
-      nodeId: "n-1",
+      menuSlug: "main",
+      path: [0],
     });
     expect(issues).toContainEqual({
       code: "menu_leaf_missing_target",
-      menuId: "main",
-      nodeId: "n-4",
+      menuSlug: "main",
+      path: [0, 0, 0, 0],
     });
     expect(issues).toContainEqual({
       code: "header_menu_invalid",
-      menuId: "missing",
+      menuSlug: "missing",
     });
   });
 
@@ -746,12 +788,14 @@ describe("page helpers", () => {
   it("adds fetched page drafts without overwriting local page edits", () => {
     const draft = sampleDraft();
     draft.pages.home = {
-      sections: [{ id: "local", kind: "stage", sections: [] }],
+      sections: [
+        { nodeId: "local", slug: "local", kind: "stage", sections: [] },
+      ],
     };
     const samePage = addZonePageDraftIfMissing(draft, "home", samplePage());
     expect(samePage).toBe(draft);
     expect(samePage.pages.home.sections).toEqual([
-      { id: "local", kind: "stage", sections: [] },
+      { nodeId: "local", slug: "local", kind: "stage", sections: [] },
     ]);
 
     const nextPage = addZonePageDraftIfMissing(
@@ -766,11 +810,11 @@ describe("page helpers", () => {
 
   it("adds and removes open page draft entries", () => {
     const draft = sampleDraft();
-    const withCharacters = addZonePage(draft.pages, "page-characters");
+    const withCharacters = addPage(draft.pages, "page-characters");
     expect(withCharacters["page-characters"]).toEqual({ sections: [] });
-    expect(removeZonePage(withCharacters, "home").home).toBeUndefined();
+    expect(removePage(withCharacters, "home").home).toBeUndefined();
     expect(
-      removeZonePage(withCharacters, "page-characters")["page-characters"],
+      removePage(withCharacters, "page-characters")["page-characters"],
     ).toBeUndefined();
   });
 

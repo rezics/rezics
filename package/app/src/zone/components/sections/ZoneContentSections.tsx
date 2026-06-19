@@ -1,4 +1,4 @@
-import type { ZoneContentSection } from "@rezics/contract";
+import type { PageContentSection } from "@rezics/contract";
 import { ActionsSection } from "./ActionsSection";
 import { CollectionSection } from "./CollectionSection";
 import { ImageSection } from "./ImageSection";
@@ -20,7 +20,7 @@ export function ZoneContentSectionView({
   section,
   ctx,
 }: {
-  section: ZoneContentSection;
+  section: PageContentSection;
   ctx: ZonePortalContext;
 }) {
   switch (section.kind) {
@@ -47,13 +47,17 @@ export function ZoneContentSectionList({
   sections,
   ctx,
 }: {
-  sections: ZoneContentSection[];
+  sections: PageContentSection[];
   ctx: ZonePortalContext;
 }) {
   return (
     <div className="flex flex-col gap-10">
       {sections.map((section) => (
-        <ZoneContentSectionView key={section.id} section={section} ctx={ctx} />
+        <ZoneContentSectionView
+          key={section.nodeId}
+          section={section}
+          ctx={ctx}
+        />
       ))}
     </div>
   );

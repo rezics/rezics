@@ -114,8 +114,8 @@ const zoneBoundaryStub = {
 const zoneNavStub = {
   schema: "rezics/zone-nav",
   version: 1,
-  menus: [{ id: "main", nodes: [] }],
-  header: { menuId: "main" },
+  menus: [{ slug: "main", nodes: [] }],
+  header: { menuSlug: "main" },
 };
 
 const zoneThemeStub = {
@@ -124,7 +124,7 @@ const zoneThemeStub = {
 };
 
 const zonePageStub = {
-  schema: "rezics/zone-page",
+  schema: "rezics/page",
   version: 1,
   sections: [],
 };

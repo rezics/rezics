@@ -5,13 +5,13 @@ import type {
   SearchQuery,
   SearchScope,
   ZoneBoundaryFilter,
-  ZoneSectionQuery,
-  ZoneSectionQueryFilterField,
-  ZoneSectionQuerySortField,
+  PageSectionQuery,
+  PageSectionQueryFilterField,
+  PageSectionQuerySortField,
 } from "@rezics/contract";
 import {
-  ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
-  ZONE_SECTION_QUERY_SORT_FIELDS,
+  PAGE_SECTION_QUERY_FILTERABLE_FIELDS,
+  PAGE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
 
 // ANCHOR: shared filter builders for federated search
@@ -53,10 +53,10 @@ export interface FilterContext {
   // 条目备注。
   viewerUserId?: string | null;
   // Zone scope only: the zone's unremovable `boundary.filters` boundary,
-  // pre-compiled per index by the caller (see `compileZoneSectionQuery`).
+  // pre-compiled per index by the caller (see `compilePageSectionQuery`).
   // User filters only narrow within it.
   // 仅 zone 作用域：专区不可移除的 `boundary.filters` 边界，由调用方按索引
-  // 预编译（见 `compileZoneSectionQuery`）。用户过滤只能在其内部收窄。
+  // 预编译（见 `compilePageSectionQuery`）。用户过滤只能在其内部收窄。
   zoneBoundaryContentFilter?: string[];
   zoneBoundaryPostFilter?: string[];
   zoneBoundaryZoneFilter?: string[];
@@ -464,16 +464,16 @@ export function buildShelfItemFilter(
   return filter;
 }
 
-// ANCHOR: compileZoneSectionQuery
-// ANCHOR: compileZoneSectionQuery（编译专区分区查询）
-// Compiles a typed `ZoneSectionQuery` (intersected with the zone-level
+// ANCHOR: compilePageSectionQuery
+// ANCHOR: compilePageSectionQuery（编译专区分区查询）
+// Compiles a typed `PageSectionQuery` (intersected with the zone-level
 // `ZoneBoundaryFilter`) into content/posts/realms/zones index filter + sort expressions.
 // Only fields the target index can actually filter/sort are accepted —
 // `zoneSectionQueryUnsupportedFields` is the shared validation surface used
 // both here and by zone config validation. The sync layer indexes PUBLIC
 // units only, so UNLISTED zone fragments never appear in query results; the
 // explicit content visibility filter below documents that boundary.
-// 将类型化的 `ZoneSectionQuery`（与专区级 `ZoneBoundaryFilter` 取交集）
+// 将类型化的 `PageSectionQuery`（与专区级 `ZoneBoundaryFilter` 取交集）
 // 编译为 content/posts/realms/zones 索引的过滤 + 排序表达式。只接受目标索引实际可
 // 过滤/排序的字段——`zoneSectionQueryUnsupportedFields` 是这里与专区配置
 // 校验共用的校验面。同步层只索引 PUBLIC Unit，因此 UNLISTED 专区片段
@@ -485,24 +485,24 @@ export interface ZoneQueryCompileContext {
   contextRealmUnitId?: string | null;
 }
 
-export interface CompiledZoneSectionQuery {
+export interface CompiledPageSectionQuery {
   index: "content" | "posts" | "realms" | "zones";
   filter: string[];
   sort: string[];
 }
 
 export function zoneSectionQueryUnsupportedFields(
-  query: ZoneSectionQuery,
+  query: PageSectionQuery,
 ): string[] {
-  const filterable: readonly ZoneSectionQueryFilterField[] =
-    ZONE_SECTION_QUERY_FILTERABLE_FIELDS[query.target];
-  const sortable: readonly ZoneSectionQuerySortField[] =
-    ZONE_SECTION_QUERY_SORT_FIELDS[query.target];
+  const filterable: readonly PageSectionQueryFilterField[] =
+    PAGE_SECTION_QUERY_FILTERABLE_FIELDS[query.target];
+  const sortable: readonly PageSectionQuerySortField[] =
+    PAGE_SECTION_QUERY_SORT_FIELDS[query.target];
   const unsupported: string[] = [];
-  for (const key of Object.keys(query) as (keyof ZoneSectionQuery)[]) {
+  for (const key of Object.keys(query) as (keyof PageSectionQuery)[]) {
     if (key === "target" || key === "sort") continue;
     if (query[key] === undefined) continue;
-    if (!filterable.includes(key as ZoneSectionQueryFilterField)) {
+    if (!filterable.includes(key as PageSectionQueryFilterField)) {
       unsupported.push(key);
     }
   }
@@ -538,7 +538,7 @@ function unionLists(
 }
 
 function resolveZoneRealmIds(
-  realm: ZoneSectionQuery["realm"],
+  realm: PageSectionQuery["realm"],
   ctx: ZoneQueryCompileContext,
 ): string[] | undefined {
   if (realm === undefined) return undefined;
@@ -551,7 +551,7 @@ function resolveZoneRealmIds(
 }
 
 function resolveZoneLanguages(
-  languages: ZoneSectionQuery["languages"],
+  languages: PageSectionQuery["languages"],
   ctx: ZoneQueryCompileContext,
 ): string[] | undefined {
   void ctx;
@@ -565,15 +565,15 @@ function resolveZoneLanguages(
   return [...languages];
 }
 
-export function compileZoneSectionQuery(
-  query: ZoneSectionQuery,
+export function compilePageSectionQuery(
+  query: PageSectionQuery,
   boundary: ZoneBoundaryFilter | undefined,
   ctx: ZoneQueryCompileContext = {},
-): CompiledZoneSectionQuery {
+): CompiledPageSectionQuery {
   const unsupported = zoneSectionQueryUnsupportedFields(query);
   if (unsupported.length > 0) {
     throw new Error(
-      `ZoneSectionQuery uses fields unsupported on the ${query.target} index: ${unsupported.join(", ")}`,
+      `PageSectionQuery uses fields unsupported on the ${query.target} index: ${unsupported.join(", ")}`,
     );
   }
 

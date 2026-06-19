@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import {
   parseZoneBoundary,
   parseZoneNav,
-  parseZonePage,
+  parsePage,
   parseZoneTheme,
 } from "@rezics/contract";
 import {
@@ -96,9 +96,9 @@ describe("seedOfficialZones", () => {
 
     expect(book?.config.boundary.filters).toEqual({ types: ["BOOK"] });
     expect(book?.config.pages[0]?.config.sections).toMatchObject([
-      { id: "stage", kind: "stage" },
+      { slug: "stage", kind: "stage" },
       {
-        id: "latest-books",
+        slug: "latest-books",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookLatest.id,
         display: "carousel",
@@ -109,7 +109,7 @@ describe("seedOfficialZones", () => {
         },
       },
       {
-        id: "topic-books-a",
+        slug: "topic-books-a",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicOne.id,
         display: "carousel",
@@ -129,21 +129,21 @@ describe("seedOfficialZones", () => {
         },
       },
       {
-        id: "topic-books-b",
+        slug: "topic-books-b",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicTwo.id,
         display: "carousel",
         dynamicTags: { groupId: "official-book-topics" },
       },
       {
-        id: "topic-books-c",
+        slug: "topic-books-c",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookTopicThree.id,
         display: "carousel",
         dynamicTags: { groupId: "official-book-topics" },
       },
       {
-        id: "hot-books",
+        slug: "hot-books",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.bookPopular.id,
         display: "stream",
@@ -165,9 +165,9 @@ describe("seedOfficialZones", () => {
     );
     expect(realms?.config.boundary.filters).toEqual({ types: ["REALM"] });
     expect(realms?.config.pages[0]?.config.sections).toMatchObject([
-      { id: "stage", kind: "stage" },
+      { slug: "stage", kind: "stage" },
       {
-        id: "latest-realms",
+        slug: "latest-realms",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsLatest.id,
         display: "carousel",
@@ -178,7 +178,7 @@ describe("seedOfficialZones", () => {
         },
       },
       {
-        id: "browse-realms",
+        slug: "browse-realms",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsBrowse.id,
         display: "tiles",
@@ -190,7 +190,7 @@ describe("seedOfficialZones", () => {
         },
       },
       {
-        id: "realm-updates",
+        slug: "realm-updates",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.realmsUpdates.id,
         display: "list",
@@ -210,9 +210,9 @@ describe("seedOfficialZones", () => {
     expect(zones?.slug).toBe("zones");
     expect(zones?.config.boundary.filters).toEqual({ types: ["ZONE"] });
     expect(zones?.config.pages[0]?.config.sections).toMatchObject([
-      { id: "stage", kind: "stage" },
+      { slug: "stage", kind: "stage" },
       {
-        id: "latest-zones",
+        slug: "latest-zones",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesLatest.id,
         display: "carousel",
@@ -223,7 +223,7 @@ describe("seedOfficialZones", () => {
         },
       },
       {
-        id: "all-zones",
+        slug: "all-zones",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesAll.id,
         display: "tiles",
@@ -235,7 +235,7 @@ describe("seedOfficialZones", () => {
         },
       },
       {
-        id: "zone-updates",
+        slug: "zone-updates",
         kind: "query",
         titleLabelUnitId: OFFICIAL_SECTION_LABELS.zonesUpdates.id,
         display: "list",
@@ -311,7 +311,7 @@ describe("seedOfficialZones", () => {
     expect(
       pageInserts.every(
         (call: InsertCall) =>
-          call.value.config?.schema === "rezics/zone-page" &&
+          call.value.config?.schema === "rezics/page" &&
           call.value.config?.version === 1,
       ),
     ).toBe(true);
@@ -329,7 +329,7 @@ describe("seedOfficialZones", () => {
         definition.config.theme,
       );
       for (const page of definition.config.pages) {
-        expect(parseZonePage(page.config)).toEqual(page.config);
+        expect(parsePage(page.config)).toEqual(page.config);
       }
     }
   });

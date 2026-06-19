@@ -1,5 +1,5 @@
 import { zoneSectionInfiniteQuery } from "@rezics/api";
-import type { ZoneQuerySection } from "@rezics/contract";
+import type { PageQuerySection } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button, Skeleton } from "@rezics/ui/shadcn";
@@ -30,19 +30,19 @@ export function QuerySection({
   section,
   ctx,
 }: {
-  section: ZoneQuerySection;
+  section: PageQuerySection;
   ctx: ZonePortalContext;
 }) {
   const { t } = useTranslation(["zone"]);
   const { zone, refUnits } = ctx;
   const routeLocation = zoneRouteLocationFromZone(zone);
   const title = useZoneSectionTitle(section, refUnits);
-  const dynamicTagUnitIds = ctx.dynamicTagSelections?.[section.id] ?? [];
+  const dynamicTagUnitIds = ctx.dynamicTagSelections?.[section.nodeId] ?? [];
   const query = useInfiniteQuery(
     zoneSectionInfiniteQuery(
       zone.unitId,
       ctx.pageId,
-      section.id,
+      section.nodeId,
       {
         languages: ctx.languages,
         appLocale: ctx.appLocale,

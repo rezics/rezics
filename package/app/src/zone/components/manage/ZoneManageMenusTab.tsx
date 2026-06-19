@@ -39,14 +39,6 @@ import {
 } from "./ZoneLinkTargetField";
 import { ManageField, RowActions } from "./ZoneManageFields";
 
-function collectNodeIds(nodes: readonly ZoneMenuNode[], out: string[] = []) {
-  for (const node of nodes) {
-    out.push(node.id);
-    if (node.children) collectNodeIds(node.children, out);
-  }
-  return out;
-}
-
 /**
  * Menus tab: menu list with per-menu node trees. Tree restructuring is
  * path-based (`models/zoneManageDraft.ts`, adapted from the tree-edit
@@ -88,11 +80,11 @@ export function ZoneManageMenusTab({
         <CardContent className="p-4">
           <ManageField label={t("zone:manage_header_menu")}>
             <Select
-              value={draft.header.menuId}
-              onValueChange={(menuId) =>
+              value={draft.header.menuSlug}
+              onValueChange={(menuSlug) =>
                 onDraftChange({
                   ...draft,
-                  header: { ...draft.header, menuId },
+                  header: { ...draft.header, menuSlug },
                 })
               }
             >
@@ -102,11 +94,11 @@ export function ZoneManageMenusTab({
               <SelectContent>
                 {draft.menus.map((menu) => (
                   <SelectItem
-                    key={menu.id}
-                    value={menu.id}
+                    key={menu.slug}
+                    value={menu.slug}
                     className="font-mono"
                   >
-                    {menu.id}
+                    {menu.slug}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -123,12 +115,12 @@ export function ZoneManageMenusTab({
         >
           <CardContent className="flex flex-col gap-4 p-4">
             <div className="flex items-end justify-between gap-3">
-              <ManageField label={t("zone:manage_menu_id")}>
+              <ManageField label={t("zone:manage_menu_slug")}>
                 <Input
-                  value={menu.id}
+                  value={menu.slug}
                   className="w-56 font-mono text-sm"
                   onChange={(event) =>
-                    updateMenu(index, { ...menu, id: event.target.value })
+                    updateMenu(index, { ...menu, slug: event.target.value })
                   }
                 />
               </ManageField>
@@ -163,9 +155,9 @@ export function ZoneManageMenusTab({
               menus: [
                 ...draft.menus,
                 {
-                  id: nextZoneId(
+                  slug: nextZoneId(
                     "menu",
-                    draft.menus.map((menu) => menu.id),
+                    draft.menus.map((menu) => menu.slug),
                   ),
                   nodes: [],
                 },
@@ -201,9 +193,7 @@ function ZoneMenuNodeList({
   const { t } = useTranslation(["zone", "common"]);
 
   const addNode = () => {
-    const id = nextZoneId("item", collectNodeIds(rootNodes));
     const inserted = insertZoneMenuNode(rootNodes, parentPath, {
-      id,
       target: { kind: "zonePage", pageId: defaultPageId },
     });
     if (inserted) onNodesChange(inserted);
@@ -275,20 +265,9 @@ function ZoneMenuNodeEditor({
   return (
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3">
       <div className="flex items-end justify-between gap-3">
-        <ManageField label={t("zone:manage_node_id")}>
-          <Input
-            value={node.id}
-            className="w-44 font-mono text-sm"
-            onChange={(event) =>
-              onNodesChange(
-                updateZoneMenuNodeAtPath(rootNodes, path, (current) => ({
-                  ...current,
-                  id: event.target.value,
-                })),
-              )
-            }
-          />
-        </ManageField>
+        <div className="min-w-0 text-sm font-medium leading-ui text-text-primary">
+          {t("zone:manage_menu_node")}
+        </div>
         <RowActions
           onMoveUp={
             index > 0

@@ -29,7 +29,7 @@ import { PinboardReorderList } from "../components/PinboardReorderList";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { StaleIdsBanner } from "../components/StaleIdsBanner";
 import { usePinboardList } from "../hooks/usePinboard";
-import type { PinboardEntryView, PinboardListKey } from "../models/types";
+import type { PinboardEntryView, PinboardListPlacement } from "../models/types";
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;
@@ -49,25 +49,25 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
       <h2 className="text-lg font-semibold mb-2">
         {t("entity:pinboard_admin_title")}
       </h2>
-      <PinboardAdminBoard realmUnitId={realmUnitId} pinboardKey="home" />
+      <PinboardAdminBoard realmUnitId={realmUnitId} pinboardPlacement="home" />
     </div>
   );
 };
 
 interface PinboardAdminBoardProps {
   realmUnitId: string;
-  pinboardKey: PinboardListKey;
+  pinboardPlacement: PinboardListPlacement;
 }
 
 const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   realmUnitId,
-  pinboardKey,
+  pinboardPlacement,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
   const { entries, staleIds, isLoading, isError, error, refetch } =
     usePinboardList({
       realmUnitId,
-      pinboardKey,
+      pinboardPlacement,
       adminView: true,
     });
 
@@ -94,7 +94,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     try {
       await removeMut.mutateAsync({
         realmId: realmUnitId,
-        key: pinboardKey,
+        placement: pinboardPlacement,
         unitId: pendingRemove.unitId,
       });
       toast.success(t("entity:pinboard_admin_delete_done"));
@@ -132,7 +132,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
       });
       await append.mutateAsync({
         realmId: realmUnitId,
-        key: pinboardKey,
+        placement: pinboardPlacement,
         unitId: created.id,
       });
       toast.success(t("entity:pinboard_editor_created"));
@@ -158,7 +158,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
       {staleIds.length > 0 ? (
         <StaleIdsBanner
           realmUnitId={realmUnitId}
-          pinboardKey={pinboardKey}
+          pinboardPlacement={pinboardPlacement}
           staleIds={staleIds}
           onCleaned={() => refetch()}
         />
@@ -176,7 +176,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
       ) : (
         <PinboardReorderList
           realmUnitId={realmUnitId}
-          pinboardKey={pinboardKey}
+          pinboardPlacement={pinboardPlacement}
           entries={entries}
           staleIds={staleIds}
           onDelete={(entry) => setPendingRemove(entry)}

@@ -1,4 +1,4 @@
-import type { ZoneDynamicTags } from "@rezics/contract";
+import type { PageDynamicTags } from "@rezics/contract";
 
 export function parseDynamicTagInputTokens(raw: string): string[] {
   const trimmed = raw.trim();
@@ -49,8 +49,8 @@ export function addUniqueDynamicTagUnitIds(
 }
 
 export function removeDynamicTagOptionAt(
-  options: readonly ZoneDynamicTags["options"][number][],
+  options: readonly PageDynamicTags["options"][number][],
   index: number,
-): ZoneDynamicTags["options"] {
+): PageDynamicTags["options"] {
   return options.filter((_, current) => current !== index);
 }

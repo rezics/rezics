@@ -25,6 +25,9 @@ const postKinds = new Map<string, string>([
   ["post-1", "REMARK"],
 ]);
 
+const testNodeId = (suffix: number) =>
+  `00000000-0000-4000-8000-${String(suffix).padStart(12, "0")}`;
+
 const hydratedUnits = new Map<string, any>([
   [
     "book-1",
@@ -206,19 +209,16 @@ function baseNav(): ZoneNav {
     version: 1,
     menus: [
       {
-        id: "main",
+        slug: "main",
         nodes: [
           {
-            id: "group-characters",
             labelUnitId: "label-1",
-            children: [
-              { id: "entity", target: { kind: "unit", unitId: "entity-1" } },
-            ],
+            children: [{ target: { kind: "unit", unitId: "entity-1" } }],
           },
         ],
       },
     ],
-    header: { menuId: "main" },
+    header: { menuSlug: "main" },
   };
 }
 
@@ -231,36 +231,50 @@ function baseTheme(): ZoneTheme {
 
 function basePage(): ZonePageConfig {
   return {
-    schema: "rezics/zone-page",
+    schema: "rezics/page",
     version: 1,
     sections: [
       {
-        id: "s-stage",
+        nodeId: testNodeId(1),
+        slug: "stage",
         kind: "stage",
         background: { imageUrl: "https://example.com/a.jpg" },
         sections: [
-          { id: "s-zone-info", kind: "zoneInfo" },
-          { id: "s-image", kind: "image", url: "https://example.com/logo.jpg" },
+          { nodeId: testNodeId(2), kind: "zoneInfo" },
+          {
+            nodeId: testNodeId(3),
+            slug: "image",
+            kind: "image",
+            url: "https://example.com/logo.jpg",
+          },
         ],
       },
       {
-        id: "s-columns",
+        nodeId: testNodeId(4),
+        slug: "columns",
         kind: "columns",
         columns: [
           {
-            id: "main",
             ratio: 3,
             sections: [
-              { id: "s-notice", kind: "richText", contentUnitId: "fragment-1" },
               {
-                id: "s-tabs",
+                nodeId: testNodeId(5),
+                slug: "notice",
+                kind: "richText",
+                contentUnitId: "fragment-1",
+              },
+              {
+                nodeId: testNodeId(6),
+                slug: "tabs",
                 kind: "tabs",
                 tabs: [
                   {
-                    id: "tab-new",
+                    nodeId: testNodeId(7),
+                    slug: "new",
                     sections: [
                       {
-                        id: "s-new",
+                        nodeId: testNodeId(8),
+                        slug: "new-books",
                         kind: "query",
                         display: "covers",
                         limit: 2,
@@ -275,9 +289,15 @@ function basePage(): ZonePageConfig {
                     ],
                   },
                   {
-                    id: "tab-hot",
+                    nodeId: testNodeId(9),
+                    slug: "hot",
                     sections: [
-                      { id: "s-feed", kind: "stream", streamKind: "all" },
+                      {
+                        nodeId: testNodeId(10),
+                        slug: "feed",
+                        kind: "stream",
+                        streamKind: "all",
+                      },
                     ],
                   },
                 ],
@@ -285,16 +305,17 @@ function basePage(): ZonePageConfig {
             ],
           },
           {
-            id: "side",
             ratio: 1,
             sections: [
               {
-                id: "s-stats",
+                nodeId: testNodeId(11),
+                slug: "stats",
                 kind: "stats",
                 metrics: ["articles", "members"],
               },
               {
-                id: "s-collection",
+                nodeId: testNodeId(12),
+                slug: "collection",
                 kind: "collection",
                 display: "list",
                 items: [
@@ -540,19 +561,14 @@ describe("zone split validation", () => {
     const nav = baseNav();
     nav.menus[0]!.nodes = [
       {
-        id: "l1",
         labelUnitId: "label-1",
         children: [
           {
-            id: "l2",
             labelUnitId: "label-1",
             children: [
               {
-                id: "l3",
                 labelUnitId: "label-1",
-                children: [
-                  { id: "l4", target: { kind: "unit", unitId: "entity-1" } },
-                ],
+                children: [{ target: { kind: "unit", unitId: "entity-1" } }],
               },
             ],
           },
@@ -571,7 +587,7 @@ describe("zone split validation", () => {
 
   test("rejects missing menu labels, missing header refs, and bad realm refs", async () => {
     const nav = baseNav();
-    nav.menus[0]!.nodes.push({ id: "dangling" });
+    nav.menus[0]!.nodes.push({});
     await expectValidationCode(
       service.validateZoneShell({
         boundary: baseBoundary(),
@@ -582,7 +598,7 @@ describe("zone split validation", () => {
     );
 
     const missingHeaderNav = baseNav();
-    missingHeaderNav.header.menuId = "missing";
+    missingHeaderNav.header.menuSlug = "missing";
     await expectValidationCode(
       service.validateZoneShell({
         boundary: baseBoundary(),
@@ -606,7 +622,11 @@ describe("zone split validation", () => {
 
   test("validates page-local section ids and nested tab defaults", async () => {
     const duplicate = basePage();
-    duplicate.sections.push({ id: "s-new", kind: "stream" });
+    duplicate.sections.push({
+      nodeId: testNodeId(8),
+      slug: "duplicate-new",
+      kind: "stream",
+    });
     await expectValidationCode(
       service.validateZonePage({
         boundary: baseBoundary(),
@@ -614,7 +634,7 @@ describe("zone split validation", () => {
         theme: baseTheme(),
         page: duplicate,
       }),
-      "ZONE_SECTION_ID_DUPLICATE",
+      "ZONE_SECTION_NODE_ID_DUPLICATE",
     );
 
     const badTab = basePage();
@@ -626,7 +646,7 @@ describe("zone split validation", () => {
       (typeof columns.columns)[number]["sections"][number],
       { kind: "tabs" }
     >;
-    tabs.defaultTabId = "missing-tab";
+    tabs.defaultTabNodeId = testNodeId(99);
     await expectValidationCode(
       service.validateZonePage({
         boundary: baseBoundary(),
@@ -659,7 +679,8 @@ describe("zone split validation", () => {
 
     const badQuery = basePage();
     badQuery.sections.push({
-      id: "s-bad-query",
+      nodeId: testNodeId(13),
+      slug: "bad-query",
       kind: "query",
       display: "list",
       query: {
@@ -696,9 +717,9 @@ describe("zone update", () => {
 
   test("validates nav before persisting shell updates", async () => {
     const nav = baseNav();
-    nav.header.menuId = "missing";
+    nav.header.menuSlug = "missing";
     expect(service.updateNav("zone-1", nav)).rejects.toThrow(
-      "header.menuId must reference a menu",
+      "header.menuSlug must reference a menu",
     );
     expect(updateZoneDataMock).not.toHaveBeenCalled();
   });
@@ -744,9 +765,14 @@ describe("zone user lists", () => {
 
 describe("section data execution", () => {
   test("query sections compile through the boundary and hydrate items", async () => {
-    const data = await service.getSectionData("zone-1", "page-home", "s-new", {
-      preferredLanguages: ["zh-hant"],
-    });
+    const data = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      testNodeId(8),
+      {
+        preferredLanguages: ["zh-hant"],
+      },
+    );
     expect(searchSectionMock).toHaveBeenCalledTimes(1);
     const input = searchSectionMock.mock.calls[0]![0];
     expect(input.index).toBe("content");
@@ -766,7 +792,7 @@ describe("section data execution", () => {
   });
 
   test("query sections apply dynamic tag overrides without mutating config", async () => {
-    await service.getSectionData("zone-1", "page-home", "s-new", {
+    await service.getSectionData("zone-1", "page-home", testNodeId(8), {
       dynamicTagUnitIds: ["tag-dynamic"],
     });
 
@@ -792,7 +818,7 @@ describe("section data execution", () => {
     boundary.filters = { types: ["SERIES"], ratings: ["GENERAL"] };
     currentZone = zoneRow({ boundary, page: currentPage.config });
 
-    await service.getSectionData("zone-1", "page-home", "s-new");
+    await service.getSectionData("zone-1", "page-home", testNodeId(8));
     const input = searchSectionMock.mock.calls[0]![0];
     expect(
       input.filter.some((clause: string) =>
@@ -806,7 +832,8 @@ describe("section data execution", () => {
     searchSectionMock.mockResolvedValueOnce({ ids: ["realm-2"], total: 1 });
     const page = basePage();
     page.sections.push({
-      id: "s-realms",
+      nodeId: testNodeId(14),
+      slug: "realms",
       kind: "query",
       display: "tiles",
       limit: 12,
@@ -822,7 +849,7 @@ describe("section data execution", () => {
     const data = await service.getSectionData(
       "zone-1",
       "page-home",
-      "s-realms",
+      testNodeId(14),
     );
     const input = searchSectionMock.mock.calls[0]![0];
     expect(input.index).toBe("realms");
@@ -840,7 +867,8 @@ describe("section data execution", () => {
     searchSectionMock.mockResolvedValueOnce({ ids: ["zone-2"], total: 1 });
     const page = basePage();
     page.sections.push({
-      id: "s-zones",
+      nodeId: testNodeId(15),
+      slug: "zones",
       kind: "query",
       display: "grid",
       limit: 12,
@@ -853,7 +881,11 @@ describe("section data execution", () => {
     currentPage = pageRow(page);
     currentZone = zoneRow({ page });
 
-    const data = await service.getSectionData("zone-1", "page-home", "s-zones");
+    const data = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      testNodeId(15),
+    );
     const input = searchSectionMock.mock.calls[0]![0];
     expect(input.index).toBe("zones");
     expect(input.filter).toContain('visibility = "PUBLIC"');
@@ -869,11 +901,12 @@ describe("section data execution", () => {
 
   test("stream query sections return renderable rows", async () => {
     const page = {
-      schema: "rezics/zone-page",
+      schema: "rezics/page",
       version: 1,
       sections: [
         {
-          id: "s-stream",
+          nodeId: testNodeId(16),
+          slug: "stream",
           kind: "query",
           display: "stream",
           query: {
@@ -903,7 +936,7 @@ describe("section data execution", () => {
     const data = await service.getSectionData(
       "zone-1",
       "page-home",
-      "s-stream",
+      testNodeId(16),
     );
 
     expect(data?.items).toEqual([]);
@@ -923,7 +956,11 @@ describe("section data execution", () => {
 
   test("feed, collection, stats, and richText sections execute by page id", async () => {
     searchSectionMock.mockResolvedValueOnce({ ids: ["post-1"], total: 1 });
-    const feed = await service.getSectionData("zone-1", "page-home", "s-feed");
+    const feed = await service.getSectionData(
+      "zone-1",
+      "page-home",
+      testNodeId(10),
+    );
     expect(searchSectionMock.mock.calls[0]![0].index).toBe("posts");
     expect(feed?.items).toEqual([]);
     expect(feed?.rows?.[0]).toMatchObject({
@@ -935,21 +972,21 @@ describe("section data execution", () => {
     const collection = await service.getSectionData(
       "zone-1",
       "page-home",
-      "s-collection",
+      testNodeId(12),
     );
     expect(collection?.items.map((item) => item.unitId)).toEqual(["book-1"]);
 
     const stats = await service.getSectionData(
       "zone-1",
       "page-home",
-      "s-stats",
+      testNodeId(11),
     );
     expect(stats?.stats).toEqual({ articles: 42, members: 7 });
 
     const richText = await service.getSectionData(
       "zone-1",
       "page-home",
-      "s-notice",
+      testNodeId(5),
       { preferredLanguages: ["zh-hant"] },
     );
     expect(richText?.docLanguage).toBe("zh-hant");
@@ -958,13 +995,13 @@ describe("section data execution", () => {
 
   test("container and display sections expose no data endpoint", async () => {
     expect(
-      service.getSectionData("zone-1", "page-home", "s-tabs"),
+      service.getSectionData("zone-1", "page-home", testNodeId(6)),
     ).rejects.toThrow("Container sections have no section data");
     expect(
-      service.getSectionData("zone-1", "page-home", "s-stage"),
+      service.getSectionData("zone-1", "page-home", testNodeId(1)),
     ).rejects.toThrow("Container sections have no section data");
     expect(
-      service.getSectionData("zone-1", "page-home", "s-image"),
+      service.getSectionData("zone-1", "page-home", testNodeId(3)),
     ).rejects.toThrow("Display sections have no section data");
   });
 });

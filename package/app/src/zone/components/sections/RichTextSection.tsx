@@ -1,5 +1,5 @@
 import { zoneSectionInfiniteQuery } from "@rezics/api";
-import { mainMarkdownSource, type ZoneRichTextSection } from "@rezics/contract";
+import { mainMarkdownSource, type PageRichTextSection } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Skeleton } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -21,12 +21,12 @@ export function RichTextSection({
   section,
   ctx,
 }: {
-  section: ZoneRichTextSection;
+  section: PageRichTextSection;
   ctx: ZonePortalContext;
 }) {
   const title = useZoneSectionTitle(section, ctx.refUnits);
   const query = useInfiniteQuery(
-    zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.id, {
+    zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.nodeId, {
       languages: ctx.languages,
       appLocale: ctx.appLocale,
     }),

@@ -3,12 +3,12 @@ import { t } from "elysia";
 import { contentDocSchema } from "../content/doc-v1";
 import { contentLanguageSchema } from "../language";
 import { readLanguageGetQueryBase } from "../list-query-base";
+import { type Page, pageV1Schema } from "../pages";
 import { paginationLimitSchema } from "../pagination";
 import { streamRowSchema, type StreamRow } from "../stream/stream";
 import { unitTypeSchema } from "../unit/unit";
 import { type ZoneBoundary, zoneBoundaryV1Schema } from "./boundary-v1";
 import { type ZoneNav, zoneNavV1Schema } from "./nav-v1";
-import { type ZonePage, zonePageV1Schema } from "./page-v1";
 import { type ZoneTheme, zoneThemeV1Schema } from "./theme-v1";
 
 // ANCHOR: Zone DTO
@@ -104,7 +104,7 @@ export const createZoneInputSchema = t.Object(
     boundary: zoneBoundaryV1Schema,
     nav: zoneNavV1Schema,
     theme: zoneThemeV1Schema,
-    homePage: zonePageV1Schema,
+    homePage: pageV1Schema,
     homePageSlug: t.Optional(t.String({ minLength: 1 })),
     startsAt: t.Optional(t.Nullable(t.String())),
     endsAt: t.Optional(t.Nullable(t.String())),
@@ -119,7 +119,7 @@ export type CreateZoneInput = Omit<
   boundary: ZoneBoundary;
   nav: ZoneNav;
   theme: ZoneTheme;
-  homePage: ZonePage;
+  homePage: Page;
 };
 
 /**
@@ -175,7 +175,7 @@ export const createZonePageInputSchema = t.Object(
   {
     slug: t.String({ minLength: 1 }),
     position: t.Optional(t.String()), // Fractional Indexing
-    config: zonePageV1Schema,
+    config: pageV1Schema,
   },
   { additionalProperties: false },
 );
@@ -183,13 +183,13 @@ export const createZonePageInputSchema = t.Object(
 export type CreateZonePageInput = Omit<
   Static<typeof createZonePageInputSchema>,
   "config"
-> & { config: ZonePage };
+> & { config: Page };
 
 export const updateZonePageInputSchema = t.Object(
   {
     slug: t.Optional(t.String({ minLength: 1 })),
     position: t.Optional(t.String()), // Fractional Indexing
-    config: t.Optional(zonePageV1Schema),
+    config: t.Optional(pageV1Schema),
   },
   { additionalProperties: false },
 );
@@ -197,7 +197,7 @@ export const updateZonePageInputSchema = t.Object(
 export type UpdateZonePageInput = Omit<
   Static<typeof updateZonePageInputSchema>,
   "config"
-> & { config?: ZonePage };
+> & { config?: Page };
 
 // ANCHOR: Zone portal read shapes
 // ANCHOR: 专区门户读取形态
@@ -230,7 +230,7 @@ export const zonePortalResponseSchema = t.Object({
       id: t.String(),
       slug: t.String(),
       position: t.String(), // Fractional Indexing
-      config: zonePageV1Schema,
+      config: pageV1Schema,
     },
     { additionalProperties: false },
   ),
@@ -242,7 +242,7 @@ export type ZonePortalResponse = Omit<
   "zone" | "page"
 > & {
   zone: ZoneDTO;
-  page: ZonePageSummary & { config: ZonePage };
+  page: ZonePageSummary & { config: Page };
 };
 
 // ANCHOR: Zone section data

@@ -18,7 +18,7 @@ export class PinboardError extends Error {
     public code:
       | "REALM_NOT_FOUND"
       | "PINBOARD_NOT_FOUND"
-      | "INVALID_KEY"
+      | "INVALID_PLACEMENT"
       | "INVALID_REORDER",
     message: string,
     public httpStatus: 400 | 404,
@@ -38,9 +38,13 @@ async function getServerDb() {
   return db;
 }
 
-function assertPinboardKey(key: string) {
-  if (key !== "home") {
-    throw new PinboardError("INVALID_KEY", "Pinboard key must be home", 400);
+function assertRealmPinboardPlacement(placement: string) {
+  if (placement !== "home") {
+    throw new PinboardError(
+      "INVALID_PLACEMENT",
+      "Pinboard placement must be home",
+      400,
+    );
   }
 }
 
@@ -77,8 +81,8 @@ async function liveUnitIdSet(ids: string[]): Promise<Set<string>> {
 }
 
 export class PinboardService {
-  async ensure(realmUnitId: string, key = "home") {
-    assertPinboardKey(key);
+  async ensure(realmUnitId: string, placement = "home") {
+    assertRealmPinboardPlacement(placement);
     const db = await getServerDb();
     const [realm] = await db
       .select({ unitId: Realm.unitId })
@@ -92,13 +96,18 @@ export class PinboardService {
     const [existing] = await db
       .select()
       .from(Pinboard)
-      .where(and(eq(Pinboard.realmUnitId, realmUnitId), eq(Pinboard.key, key)))
+      .where(
+        and(
+          eq(Pinboard.realmUnitId, realmUnitId),
+          eq(Pinboard.placement, placement),
+        ),
+      )
       .limit(1);
     if (existing) return existing;
 
     const [created] = await db
       .insert(Pinboard)
-      .values({ realmUnitId, key, kind: "list" })
+      .values({ realmUnitId, placement, kind: "list" })
       .onConflictDoNothing()
       .returning();
     if (created) return created;
@@ -106,7 +115,12 @@ export class PinboardService {
     const [afterConflict] = await db
       .select()
       .from(Pinboard)
-      .where(and(eq(Pinboard.realmUnitId, realmUnitId), eq(Pinboard.key, key)))
+      .where(
+        and(
+          eq(Pinboard.realmUnitId, realmUnitId),
+          eq(Pinboard.placement, placement),
+        ),
+      )
       .limit(1);
     if (!afterConflict) {
       throw new PinboardError(
@@ -121,9 +135,9 @@ export class PinboardService {
   async readPublic(
     caller: RezicsSessionClaims | null,
     realmUnitId: string,
-    key = "home",
+    placement = "home",
   ): Promise<PinboardReadResponse> {
-    const pinboard = await this.ensure(realmUnitId, key);
+    const pinboard = await this.ensure(realmUnitId, placement);
     const entries = await this.entries(pinboard.id);
     const visible = await visibleUnitIdSet(
       entries.map((entry) => entry.unitId),
@@ -137,9 +151,9 @@ export class PinboardService {
 
   async readAdmin(
     realmUnitId: string,
-    key = "home",
+    placement = "home",
   ): Promise<PinboardAdminReadResponse> {
-    const pinboard = await this.ensure(realmUnitId, key);
+    const pinboard = await this.ensure(realmUnitId, placement);
     const entries = await this.entries(pinboard.id);
     const live = await liveUnitIdSet(entries.map((entry) => entry.unitId));
     return mapPinboardAdminReadResponse({
@@ -154,10 +168,13 @@ export class PinboardService {
   async append(input: {
     caller: RezicsSessionClaims;
     realmUnitId: string;
-    key?: string;
+    placement?: string;
     unitId: string;
   }): Promise<PinboardOkResponse> {
-    const pinboard = await this.ensure(input.realmUnitId, input.key ?? "home");
+    const pinboard = await this.ensure(
+      input.realmUnitId,
+      input.placement ?? "home",
+    );
     const db = await getServerDb();
     const entries = await this.entries(pinboard.id);
     const existing = entries.find((entry) => entry.unitId === input.unitId);
@@ -180,10 +197,13 @@ export class PinboardService {
   async remove(input: {
     caller: RezicsSessionClaims;
     realmUnitId: string;
-    key?: string;
+    placement?: string;
     unitId: string;
   }): Promise<PinboardOkResponse> {
-    const pinboard = await this.ensure(input.realmUnitId, input.key ?? "home");
+    const pinboard = await this.ensure(
+      input.realmUnitId,
+      input.placement ?? "home",
+    );
     const db = await getServerDb();
     await db
       .delete(PinboardEntry)
@@ -204,10 +224,13 @@ export class PinboardService {
   async reorder(input: {
     caller: RezicsSessionClaims;
     realmUnitId: string;
-    key?: string;
+    placement?: string;
     unitIds: string[];
   }): Promise<PinboardOkResponse> {
-    const pinboard = await this.ensure(input.realmUnitId, input.key ?? "home");
+    const pinboard = await this.ensure(
+      input.realmUnitId,
+      input.placement ?? "home",
+    );
     const entries = await this.entries(pinboard.id);
     const current = entries.map((entry) => entry.unitId);
     const currentSet = new Set(current);
@@ -265,11 +288,11 @@ export class PinboardService {
       action: realmPolicyActions.contentPin,
       targetKind: "pinboard",
       targetId: pinboard.id,
-      reason: `Pinboard ${pinboard.key} ${operation}`,
+      reason: `Pinboard ${pinboard.placement} ${operation}`,
       correlationId: crypto.randomUUID(),
       metadata: {
         realmUnitId: pinboard.realmUnitId,
-        key: pinboard.key,
+        placement: pinboard.placement,
         operation,
         ...metadata,
       },

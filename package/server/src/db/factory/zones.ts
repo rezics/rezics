@@ -2,17 +2,19 @@ import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
   DEFAULT_LANGUAGE,
-  ZONE_SECTION_QUERY_SORT_FIELDS,
+  PAGE_SCHEMA,
+  PAGE_SECTION_QUERY_SORT_FIELDS,
+  PAGE_V1_VERSION,
+  type Page,
+  type PageCollectionItem,
+  type PageContentSection,
+  type PageDynamicTags,
+  type PageSection,
+  type PageSectionQuery,
   type ZoneBoundary,
   type ZoneBoundaryFilter,
-  type ZoneCollectionItem,
-  type ZoneContentSection,
-  type ZoneDynamicTags,
   type ZoneMenu,
   type ZoneNav,
-  type ZonePage as ZonePageConfig,
-  type ZonePageSection,
-  type ZoneSectionQuery,
   type ZoneTheme,
 } from "@rezics/contract";
 import { rebalance } from "../../shelf/fractional-index.js";
@@ -65,7 +67,7 @@ export type ZoneFixtureConfig = {
     id: string;
     slug: string;
     position: string;
-    config: ZonePageConfig;
+    config: Page;
   }>;
   homePageId: string;
 };
@@ -78,14 +80,24 @@ type ZoneFixturePageIds = {
 
 const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 
-const UNIT_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.unit;
-const POST_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.post;
-const REALM_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.realm;
-const ZONE_SORT_FIELDS = ZONE_SECTION_QUERY_SORT_FIELDS.zone;
+const UNIT_SORT_FIELDS = PAGE_SECTION_QUERY_SORT_FIELDS.unit;
+const POST_SORT_FIELDS = PAGE_SECTION_QUERY_SORT_FIELDS.post;
+const REALM_SORT_FIELDS = PAGE_SECTION_QUERY_SORT_FIELDS.realm;
+const ZONE_SORT_FIELDS = PAGE_SECTION_QUERY_SORT_FIELDS.zone;
 
 interface ZoneTemporalState {
   startsAt: Date | null;
   endsAt: Date | null;
+}
+
+function fixtureNodeId(slug: string): string {
+  let hash = 0x811c9dc5;
+  for (const char of slug) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  const suffix = hash.toString(16).padStart(12, "0");
+  return `00000000-0000-7002-8000-${suffix}`;
 }
 
 function pickTemporalState(): ZoneTemporalState {
@@ -107,7 +119,7 @@ function pickTemporalState(): ZoneTemporalState {
   return { startsAt, endsAt };
 }
 
-function unitItems(unitIds: string[], max: number): ZoneCollectionItem[] {
+function unitItems(unitIds: string[], max: number): PageCollectionItem[] {
   const picked =
     unitIds.length > 0 ? pickN(unitIds, Math.min(max, unitIds.length)) : [];
   return picked.map((unitId) => ({ target: { kind: "unit", unitId } }));
@@ -118,9 +130,9 @@ function fixtureMenus(
   pageIds: ZoneFixturePageIds,
 ): ZoneMenu[] {
   const nodes: ZoneMenu["nodes"] = [
-    { id: "home", target: { kind: "zonePage", pageId: pageIds.home } },
-    { id: "search", target: { kind: "zonePage", pageId: pageIds.search } },
-    { id: "feed", target: { kind: "zonePage", pageId: pageIds.feed } },
+    { target: { kind: "zonePage", pageId: pageIds.home } },
+    { target: { kind: "zonePage", pageId: pageIds.search } },
+    { target: { kind: "zonePage", pageId: pageIds.feed } },
   ];
   // A unit-target group node resolves its label from the target unit, so it
   // is valid without a labelUnitId.
@@ -129,15 +141,13 @@ function fixtureMenus(
   if (groupChildren.length > 1) {
     const [head, ...rest] = groupChildren;
     nodes.push({
-      id: "related",
       target: head!.target,
       children: rest.map((item, index) => ({
-        id: `related-${index}`,
         target: item.target,
       })),
     });
   }
-  return [{ id: "main", nodes }];
+  return [{ slug: "main", nodes }];
 }
 
 function fixtureTheme(): ZoneTheme {
@@ -183,7 +193,7 @@ function fixtureBoundary(
 
 function fixtureBookDynamicTags(
   tagUnitIds: readonly string[],
-): ZoneDynamicTags {
+): PageDynamicTags {
   const options = pickN(tagUnitIds, Math.min(8, tagUnitIds.length)).map(
     (tagUnitId) => ({
       tagUnitIds: [tagUnitId],
@@ -200,12 +210,13 @@ function fixtureBookDynamicTags(
 
 function unitQuerySection(input: {
   id: string;
-  types?: ZoneSectionQuery["types"];
+  types?: PageSectionQuery["types"];
   tagUnitIds?: string[];
   limit: number;
-}): ZoneContentSection {
+}): PageContentSection {
   return {
-    id: input.id,
+    nodeId: fixtureNodeId(input.id),
+    slug: input.id,
     kind: "query",
     display: faker.helpers.arrayElement(["grid", "covers", "tiles", "list"]),
     limit: input.limit,
@@ -228,9 +239,10 @@ function unitQuerySection(input: {
 function postQuerySection(input: {
   id: string;
   limit: number;
-}): ZoneContentSection {
+}): PageContentSection {
   return {
-    id: input.id,
+    nodeId: fixtureNodeId(input.id),
+    slug: input.id,
     kind: "query",
     display: "list",
     limit: input.limit,
@@ -250,9 +262,10 @@ function postQuerySection(input: {
 function realmQuerySection(input: {
   id: string;
   limit: number;
-}): ZoneContentSection {
+}): PageContentSection {
   return {
-    id: input.id,
+    nodeId: fixtureNodeId(input.id),
+    slug: input.id,
     kind: "query",
     display: faker.helpers.arrayElement(["tiles", "list", "avatar-wall"]),
     limit: input.limit,
@@ -272,9 +285,10 @@ function realmQuerySection(input: {
 function zoneQuerySection(input: {
   id: string;
   limit: number;
-}): ZoneContentSection {
+}): PageContentSection {
   return {
-    id: input.id,
+    nodeId: fixtureNodeId(input.id),
+    slug: input.id,
     kind: "query",
     display: faker.helpers.arrayElement(["tiles", "list"]),
     limit: input.limit,
@@ -294,17 +308,19 @@ function zoneQuerySection(input: {
 function fixtureHomeSections(
   kind: ZoneFixtureKind,
   refs: ZoneFixtureRefs,
-): ZonePageSection[] {
+): PageSection[] {
   switch (kind) {
     case "book-portal": {
       return [
         {
-          id: "stage",
+          nodeId: fixtureNodeId("stage"),
+          slug: "stage",
           kind: "stage",
-          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+          sections: [{ nodeId: fixtureNodeId("zone-info"), kind: "zoneInfo" }],
         },
         {
-          id: "latest",
+          nodeId: fixtureNodeId("latest"),
+          slug: "latest",
           kind: "query",
           display: "carousel",
           limit: 24,
@@ -317,7 +333,8 @@ function fixtureHomeSections(
           },
         },
         {
-          id: "topic-a",
+          nodeId: fixtureNodeId("topic-a"),
+          slug: "topic-a",
           kind: "query",
           display: "carousel",
           limit: 18,
@@ -331,7 +348,8 @@ function fixtureHomeSections(
           dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
         },
         {
-          id: "topic-b",
+          nodeId: fixtureNodeId("topic-b"),
+          slug: "topic-b",
           kind: "query",
           display: "carousel",
           limit: 18,
@@ -345,7 +363,8 @@ function fixtureHomeSections(
           dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
         },
         {
-          id: "topic-c",
+          nodeId: fixtureNodeId("topic-c"),
+          slug: "topic-c",
           kind: "query",
           display: "carousel",
           limit: 18,
@@ -359,7 +378,8 @@ function fixtureHomeSections(
           dynamicTags: fixtureBookDynamicTags(refs.tagUnitIds),
         },
         {
-          id: "hot-feed",
+          nodeId: fixtureNodeId("hot-feed"),
+          slug: "hot-feed",
           kind: "query",
           display: "stream",
           limit: 24,
@@ -377,7 +397,8 @@ function fixtureHomeSections(
       return [
         postQuerySection({ id: "pulse", limit: 30 }),
         {
-          id: "home-feed",
+          nodeId: fixtureNodeId("home-feed"),
+          slug: "home-feed",
           kind: "stream",
           streamKind: faker.helpers.arrayElement(["all", "updates", "reviews"]),
           limit: 30,
@@ -386,28 +407,34 @@ function fixtureHomeSections(
     case "tabbed-portal":
       return [
         {
-          id: "stage",
+          nodeId: fixtureNodeId("stage"),
+          slug: "stage",
           kind: "stage",
-          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+          sections: [{ nodeId: fixtureNodeId("zone-info"), kind: "zoneInfo" }],
         },
         {
-          id: "portal-tabs",
+          nodeId: fixtureNodeId("portal-tabs"),
+          slug: "portal-tabs",
           kind: "tabs",
-          defaultTabId: "works",
+          defaultTabNodeId: fixtureNodeId("works"),
           tabs: [
             {
-              id: "works",
+              nodeId: fixtureNodeId("works"),
+              slug: "works",
               sections: [unitQuerySection({ id: "tab-works", limit: 12 })],
             },
             {
-              id: "posts",
+              nodeId: fixtureNodeId("posts"),
+              slug: "posts",
               sections: [postQuerySection({ id: "tab-posts", limit: 12 })],
             },
             {
-              id: "activity",
+              nodeId: fixtureNodeId("activity"),
+              slug: "activity",
               sections: [
                 {
-                  id: "tab-feed",
+                  nodeId: fixtureNodeId("tab-feed"),
+                  slug: "tab-feed",
                   kind: "stream",
                   streamKind: "updates",
                   limit: 12,
@@ -420,34 +447,39 @@ function fixtureHomeSections(
     case "columns-portal":
       return [
         {
-          id: "stage",
+          nodeId: fixtureNodeId("stage"),
+          slug: "stage",
           kind: "stage",
-          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+          sections: [{ nodeId: fixtureNodeId("zone-info"), kind: "zoneInfo" }],
         },
         {
-          id: "layout",
+          nodeId: fixtureNodeId("layout"),
+          slug: "layout",
           kind: "columns",
           columns: [
             {
-              id: "main",
               ratio: 3,
               sections: [
                 unitQuerySection({ id: "main-works", limit: 18 }),
                 {
-                  id: "main-tabs",
+                  nodeId: fixtureNodeId("main-tabs"),
+                  slug: "main-tabs",
                   kind: "tabs",
                   tabs: [
                     {
-                      id: "hot",
+                      nodeId: fixtureNodeId("hot"),
+                      slug: "hot",
                       sections: [
                         postQuerySection({ id: "main-hot", limit: 10 }),
                       ],
                     },
                     {
-                      id: "recent",
+                      nodeId: fixtureNodeId("recent"),
+                      slug: "recent",
                       sections: [
                         {
-                          id: "main-feed",
+                          nodeId: fixtureNodeId("main-feed"),
+                          slug: "main-feed",
                           kind: "stream",
                           streamKind: "all",
                           limit: 10,
@@ -459,17 +491,18 @@ function fixtureHomeSections(
               ],
             },
             {
-              id: "side",
               ratio: 1,
               sections: [
                 {
-                  id: "side-picks",
+                  nodeId: fixtureNodeId("side-picks"),
+                  slug: "side-picks",
                   kind: "collection",
                   display: "list",
                   items: unitItems(refs.workUnitIds, 6),
                 },
                 {
-                  id: "side-stats",
+                  nodeId: fixtureNodeId("side-stats"),
+                  slug: "side-stats",
                   kind: "stats",
                   metrics: ["articles", "members"],
                 },
@@ -481,12 +514,14 @@ function fixtureHomeSections(
     case "realm-directory":
       return [
         {
-          id: "stage",
+          nodeId: fixtureNodeId("stage"),
+          slug: "stage",
           kind: "stage",
-          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+          sections: [{ nodeId: fixtureNodeId("zone-info"), kind: "zoneInfo" }],
         },
         {
-          id: "featured",
+          nodeId: fixtureNodeId("featured"),
+          slug: "featured",
           kind: "collection",
           display: "tiles",
           items: unitItems(refs.realmUnitIds, 12),
@@ -496,13 +531,15 @@ function fixtureHomeSections(
     case "zone-directory":
       return [
         {
-          id: "stage",
+          nodeId: fixtureNodeId("stage"),
+          slug: "stage",
           kind: "stage",
-          sections: [{ id: "zone-info", kind: "zoneInfo" }],
+          sections: [{ nodeId: fixtureNodeId("zone-info"), kind: "zoneInfo" }],
         },
         zoneQuerySection({ id: "latest-zones", limit: 24 }),
         {
-          id: "featured-realms",
+          nodeId: fixtureNodeId("featured-realms"),
+          slug: "featured-realms",
           kind: "collection",
           display: "tiles",
           items: unitItems(refs.realmUnitIds, 12),
@@ -543,7 +580,7 @@ export function buildZoneFixtureConfig(
       schema: "rezics/zone-nav",
       version: 1,
       menus: fixtureMenus(refs, pageIds),
-      header: { menuId: "main" },
+      header: { menuSlug: "main" },
     },
     pages: [
       {
@@ -551,8 +588,8 @@ export function buildZoneFixtureConfig(
         slug: "home",
         position: pagePositions[0]!,
         config: {
-          schema: "rezics/zone-page",
-          version: 1,
+          schema: PAGE_SCHEMA,
+          version: PAGE_V1_VERSION,
           sections: fixtureHomeSections(kind, refs),
         },
       },
@@ -560,17 +597,23 @@ export function buildZoneFixtureConfig(
         id: pageIds.search,
         slug: "search",
         position: pagePositions[1]!,
-        config: { schema: "rezics/zone-page", version: 1, sections: [] },
+        config: { schema: PAGE_SCHEMA, version: PAGE_V1_VERSION, sections: [] },
       },
       {
         id: pageIds.feed,
         slug: "feed",
         position: pagePositions[2]!,
         config: {
-          schema: "rezics/zone-page",
-          version: 1,
+          schema: PAGE_SCHEMA,
+          version: PAGE_V1_VERSION,
           sections: [
-            { id: "feed", kind: "stream", streamKind: "all", limit: 30 },
+            {
+              nodeId: fixtureNodeId("feed"),
+              slug: "feed",
+              kind: "stream",
+              streamKind: "all",
+              limit: 30,
+            },
           ],
         },
       },

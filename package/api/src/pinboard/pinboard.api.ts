@@ -5,34 +5,34 @@ import type {
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
-const HOME_PINBOARD_KEY = "home";
+const HOME_PINBOARD_PLACEMENT = "home";
 
 export const pinboardApi = {
   read: async (
     realmId: string,
-    key = HOME_PINBOARD_KEY,
+    placement = HOME_PINBOARD_PLACEMENT,
   ): Promise<PinboardReadResponse> => {
     return apiFetch<PinboardReadResponse>(
-      `/realm/${realmId}/pinboards/${encodeURIComponent(key)}`,
+      `/realm/${realmId}/pinboards/${encodeURIComponent(placement)}`,
     );
   },
 
   readAdmin: async (
     realmId: string,
-    key = HOME_PINBOARD_KEY,
+    placement = HOME_PINBOARD_PLACEMENT,
   ): Promise<PinboardAdminReadResponse> => {
     return apiFetch<PinboardAdminReadResponse>(
-      `/realm/${realmId}/pinboards/${encodeURIComponent(key)}/admin`,
+      `/realm/${realmId}/pinboards/${encodeURIComponent(placement)}/admin`,
     );
   },
 
   append: async (
     realmId: string,
-    key: string,
+    placement: string,
     unitId: string,
   ): Promise<PinboardOkResponse> => {
     return apiFetch<PinboardOkResponse>(
-      `/realm/${realmId}/pinboards/${encodeURIComponent(key)}`,
+      `/realm/${realmId}/pinboards/${encodeURIComponent(placement)}`,
       {
         method: "POST",
         body: JSON.stringify({ unitId }),
@@ -42,11 +42,11 @@ export const pinboardApi = {
 
   reorder: async (
     realmId: string,
-    key: string,
+    placement: string,
     unitIds: string[],
   ): Promise<PinboardOkResponse> => {
     return apiFetch<PinboardOkResponse>(
-      `/realm/${realmId}/pinboards/${encodeURIComponent(key)}/reorder`,
+      `/realm/${realmId}/pinboards/${encodeURIComponent(placement)}/reorder`,
       {
         method: "POST",
         body: JSON.stringify({ unitIds }),
@@ -56,11 +56,11 @@ export const pinboardApi = {
 
   remove: async (
     realmId: string,
-    key: string,
+    placement: string,
     unitId: string,
   ): Promise<PinboardOkResponse> => {
     return apiFetch<PinboardOkResponse>(
-      `/realm/${realmId}/pinboards/${encodeURIComponent(key)}/${unitId}`,
+      `/realm/${realmId}/pinboards/${encodeURIComponent(placement)}/${unitId}`,
       { method: "DELETE" },
     );
   },

@@ -1,7 +1,7 @@
 import type {
-  ZoneColumnsSection,
-  ZoneContentSection,
-  ZoneTabsSection,
+  PageColumnsSection,
+  PageContentSection,
+  PageTabsSection,
 } from "@rezics/contract";
 import type { CSSProperties } from "react";
 import { zoneColumnsGridTemplate } from "../../models/zoneColumns";
@@ -13,17 +13,17 @@ function PaneSectionList({
   sections,
   ctx,
 }: {
-  sections: (ZoneContentSection | ZoneTabsSection)[];
+  sections: (PageContentSection | PageTabsSection)[];
   ctx: ZonePortalContext;
 }) {
   return (
     <div className="flex flex-col gap-10">
       {sections.map((section) =>
         section.kind === "tabs" ? (
-          <TabsSection key={section.id} section={section} ctx={ctx} />
+          <TabsSection key={section.nodeId} section={section} ctx={ctx} />
         ) : (
           <ZoneContentSectionView
-            key={section.id}
+            key={section.nodeId}
             section={section}
             ctx={ctx}
           />
@@ -44,7 +44,7 @@ export function ColumnsSection({
   section,
   ctx,
 }: {
-  section: ZoneColumnsSection;
+  section: PageColumnsSection;
   ctx: ZonePortalContext;
 }) {
   const columnsTemplate = zoneColumnsGridTemplate(section.columns);
@@ -58,8 +58,8 @@ export function ColumnsSection({
         } as CSSProperties
       }
     >
-      {section.columns.map((column) => (
-        <div key={column.id} className="min-w-0">
+      {section.columns.map((column, columnIndex) => (
+        <div key={columnIndex} className="min-w-0">
           <PaneSectionList sections={column.sections} ctx={ctx} />
         </div>
       ))}

@@ -7,7 +7,7 @@ import {
   buildRealmFilter,
   buildShelfItemFilter,
   buildUserFilter,
-  compileZoneSectionQuery,
+  compilePageSectionQuery,
   zoneSectionQueryUnsupportedFields,
 } from "./filters";
 
@@ -301,9 +301,9 @@ describe("buildShelfItemFilter", () => {
   });
 });
 
-describe("compileZoneSectionQuery", () => {
+describe("compilePageSectionQuery", () => {
   test("compiles a unit query with context realm and viewer languages for display only", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "unit",
         types: ["BOOK"],
@@ -328,7 +328,7 @@ describe("compileZoneSectionQuery", () => {
     // Viewer language is a display preference; explicit arrays remain filters.
     // viewer 语言是展示偏好；显式配置的数组才是过滤条件。
     expect(
-      compileZoneSectionQuery(
+      compilePageSectionQuery(
         {
           target: "unit",
           languages: ["zh-hant", "en"],
@@ -344,7 +344,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("compiles a post query with kind and lock defaults", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "post",
         postKinds: ["WIKI"],
@@ -361,7 +361,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("compiles a realm query against the realms index", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "realm",
         types: ["REALM"],
@@ -378,7 +378,7 @@ describe("compileZoneSectionQuery", () => {
       compiled.filter.some((clause) => clause.includes("languages IN")),
     ).toBe(false);
     expect(
-      compileZoneSectionQuery(
+      compilePageSectionQuery(
         {
           target: "realm",
           types: ["REALM"],
@@ -397,7 +397,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("realm queries cannot widen an incompatible zone boundary", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "realm",
         types: ["REALM"],
@@ -416,7 +416,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("compiles a zone query against the zones index", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "zone",
         types: ["ZONE"],
@@ -437,7 +437,7 @@ describe("compileZoneSectionQuery", () => {
       compiled.filter.some((clause) => clause.includes("languages IN")),
     ).toBe(false);
     expect(
-      compileZoneSectionQuery(
+      compilePageSectionQuery(
         {
           target: "zone",
           types: ["ZONE"],
@@ -452,7 +452,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("viewer languages never filter zone sections", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "zone",
         types: ["ZONE"],
@@ -469,7 +469,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("zone queries cannot widen an incompatible zone boundary", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "zone",
         types: ["ZONE"],
@@ -488,7 +488,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("context realm resolves to unscoped for global-context zones", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "unit",
         realm: "context",
@@ -503,7 +503,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("the boundary narrows the query and never widens it", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "unit",
         types: ["BOOK", "SERIES"],
@@ -528,7 +528,7 @@ describe("compileZoneSectionQuery", () => {
   });
 
   test("an empty boundary intersection matches nothing", () => {
-    const compiled = compileZoneSectionQuery(
+    const compiled = compilePageSectionQuery(
       {
         target: "unit",
         types: ["BOOK"],
@@ -580,7 +580,7 @@ describe("compileZoneSectionQuery", () => {
     ).toEqual(["tagUnitIds", "sort.memberCount"]);
 
     expect(() =>
-      compileZoneSectionQuery(
+      compilePageSectionQuery(
         {
           target: "post",
           tagUnitIds: ["tag-1"],

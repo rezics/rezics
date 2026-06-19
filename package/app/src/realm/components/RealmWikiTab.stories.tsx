@@ -33,16 +33,15 @@ const wikiZonePortal: ZonePortalResponse = {
       version: 1,
       menus: [
         {
-          id: "main",
+          slug: "main",
           nodes: [
             {
-              id: "home",
               target: { kind: "zonePage", pageId: "home" },
             },
           ],
         },
       ],
-      header: { menuId: "main" },
+      header: { menuSlug: "main" },
     },
     theme: { schema: "rezics/zone-theme", version: 1 },
     homePageId: "wiki-home-page",
@@ -53,7 +52,7 @@ const wikiZonePortal: ZonePortalResponse = {
     slug: "home",
     position: "a",
     config: {
-      schema: "rezics/zone-page",
+      schema: "rezics/page",
       version: 1,
       sections: [],
     },
@@ -78,7 +77,7 @@ const baseRealm: RealmDTO = {
   isOfficial: false,
   memberCount: 12,
   dock: {
-    schema: "rezics/realm-dock",
+    schema: "rezics/dock",
     version: 1,
     placements: {},
   },
@@ -140,14 +139,14 @@ export const DockText: Story = {
     realm: {
       ...baseRealm,
       dock: {
-        schema: "rezics/realm-dock",
+        schema: "rezics/dock",
         version: 1,
         placements: {
           wiki: [
             {
-              slot: "widget",
-              id: "wiki-text",
-              widget: { kind: "text", contentUnitId: "wiki-post-1" },
+              kind: "richText",
+              nodeId: "wiki-text",
+              contentUnitId: "wiki-post-1",
             },
           ],
         },
@@ -166,14 +165,14 @@ export const ZoneNavigation: Story = {
     realm: {
       ...baseRealm,
       dock: {
-        schema: "rezics/realm-dock",
+        schema: "rezics/dock",
         version: 1,
         placements: {
           wiki: [
             {
-              slot: "widget",
-              id: "wiki-nav",
-              widget: { kind: "zoneNav", zoneUnitId: WIKI_ZONE_ID },
+              kind: "zoneNav",
+              nodeId: "wiki-nav",
+              zoneUnitId: WIKI_ZONE_ID,
             },
           ],
         },

@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import {
   ZONE_MENU_MAX_DEPTH,
+  pageEnvelopeSchema,
+  type Page as ZonePageConfig,
+  type PageSection,
+  type PageStageChildSection,
   type ZoneMenuNode,
-  type ZonePage as ZonePageConfig,
-  type ZonePageSection,
-  type ZoneStageChildSection,
   zoneBoundaryEnvelopeSchema,
   zoneNavEnvelopeSchema,
-  zonePageEnvelopeSchema,
   zoneThemeEnvelopeSchema,
 } from "@rezics/contract";
 import { Value } from "@sinclair/typebox/value";
@@ -41,8 +41,8 @@ import {
 // service 强制的结构不变量（页面内分区 id、菜单引用、深度）。
 function collectSectionEntries(
   page: ZonePageConfig,
-): Array<ZonePageSection | ZoneStageChildSection> {
-  const entries: Array<ZonePageSection | ZoneStageChildSection> = [];
+): Array<PageSection | PageStageChildSection> {
+  const entries: Array<PageSection | PageStageChildSection> = [];
   for (const section of page.sections) {
     entries.push(section);
     if (section.kind === "stage") {
@@ -96,8 +96,8 @@ function menuDepth(nodes: readonly ZoneMenuNode[]): number {
 function expectValidZoneConfig(config: {
   boundary: unknown;
   nav: {
-    menus: { id: string; nodes: ZoneMenuNode[] }[];
-    header: { menuId: string };
+    menus: { slug: string; nodes: ZoneMenuNode[] }[];
+    header: { menuSlug: string };
   };
   theme: unknown;
   pages: Array<{ config: ZonePageConfig }>;
@@ -109,18 +109,18 @@ function expectValidZoneConfig(config: {
   expect(config.pages.some((page) => page.config === undefined)).toBe(false);
 
   for (const page of config.pages) {
-    expect(Value.Check(zonePageEnvelopeSchema, page.config)).toBe(true);
-    const sectionIds = collectSectionEntries(page.config).map(
-      (entry) => entry.id,
+    expect(Value.Check(pageEnvelopeSchema, page.config)).toBe(true);
+    const sectionNodeIds = collectSectionEntries(page.config).map(
+      (entry) => entry.nodeId,
     );
-    expect(new Set(sectionIds).size).toBe(sectionIds.length);
+    expect(new Set(sectionNodeIds).size).toBe(sectionNodeIds.length);
   }
 
   expect(config.pages.map((page) => page.config).length).toBeGreaterThan(0);
 
-  const menuIds = config.nav.menus.map((menu) => menu.id);
-  expect(new Set(menuIds).size).toBe(menuIds.length);
-  expect(menuIds).toContain(config.nav.header.menuId);
+  const menuSlugs = config.nav.menus.map((menu) => menu.slug);
+  expect(new Set(menuSlugs).size).toBe(menuSlugs.length);
+  expect(menuSlugs).toContain(config.nav.header.menuSlug);
   for (const menu of config.nav.menus) {
     expect(menuDepth(menu.nodes)).toBeLessThanOrEqual(ZONE_MENU_MAX_DEPTH);
   }

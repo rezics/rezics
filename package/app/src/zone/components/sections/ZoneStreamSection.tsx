@@ -1,5 +1,5 @@
 import { zoneSectionInfiniteQuery } from "@rezics/api";
-import type { ZoneStreamSection as ZoneStreamSectionConfig } from "@rezics/contract";
+import type { PageStreamSection as ZoneStreamSectionConfig } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
@@ -28,7 +28,7 @@ export function ZoneStreamSection({
   const { t } = useTranslation(["common", "zone"]);
   const title = useZoneSectionTitle(section, ctx.refUnits);
   const query = useInfiniteQuery(
-    zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.id, {
+    zoneSectionInfiniteQuery(ctx.zone.unitId, ctx.pageId, section.nodeId, {
       languages: ctx.languages,
       appLocale: ctx.appLocale,
     }),

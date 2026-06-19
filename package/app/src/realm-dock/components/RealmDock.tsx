@@ -4,8 +4,6 @@ import { zonePortalQueryOptions } from "@rezics/api/zone/zone";
 import { postQueries } from "@rezics/api/post/post";
 import {
   mainMarkdownSource,
-  type RealmDockBuiltinItem,
-  type RealmDockCustomWidgetItem,
   type RealmDockItem,
   type RealmDockPlacement,
   type RealmDockWidget,
@@ -51,7 +49,6 @@ import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
-import { FeaturedZoneSection } from "@/realm/sections/FeaturedZoneSection";
 import { RuleSection } from "@/realm/sections/RuleSection";
 import { pickZoneMenu, ZoneNavTree } from "@/zone";
 
@@ -124,15 +121,24 @@ export function RealmDock({
   if (items.length === 0) return null;
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div
+      className={`rezics-dock rezics-dock--${placement} flex min-w-0 flex-col gap-4`}
+      data-rezics-dock-placement={placement}
+    >
       {items.map((item) => (
-        <RealmDockItemView
-          key={item.id}
-          realm={realm}
-          item={item}
-          labels={labels}
-          variant={variant}
-        />
+        <div
+          key={item.nodeId}
+          className={`rezics-dock-widget rezics-dock-widget--${item.kind}`}
+          data-rezics-dock-widget-kind={item.kind}
+          data-rezics-dock-node-id={item.nodeId}
+        >
+          <RealmDockItemView
+            realm={realm}
+            item={item}
+            labels={labels}
+            variant={variant}
+          />
+        </div>
       ))}
     </div>
   );
@@ -149,45 +155,64 @@ function RealmDockItemView({
   labels: Map<string, string>;
   variant: "rail" | "page" | "wiki";
 }) {
-  if (item.slot === "builtin") {
-    return (
-      <RealmDockBuiltinView
-        realm={realm}
-        item={item}
-        labels={labels}
-        variant={variant}
-      />
-    );
-  }
-  return (
-    <RealmDockCustomWidgetView realm={realm} item={item} labels={labels} />
-  );
-}
-
-function RealmDockBuiltinView({
-  realm,
-  item,
-  labels,
-  variant,
-}: {
-  realm: RealmDTO;
-  item: RealmDockBuiltinItem;
-  labels: Map<string, string>;
-  variant: "rail" | "page" | "wiki";
-}) {
-  switch (item.id) {
-    case "description":
+  const { t } = useTranslation("entity");
+  switch (item.kind) {
+    case "unitDescription":
       return <DockDescription realm={realm} item={item} variant={variant} />;
-    case "subscriptionStat":
+    case "unitSubscriptionStat":
       return <DockSubscriptionStat realm={realm} item={item} labels={labels} />;
-    case "realmFacts":
+    case "realmInfo":
       return <DockRealmFacts realm={realm} />;
-    case "bookmarks":
-      return <DockBookmarks item={item} labels={labels} />;
-    case "rules":
+    case "links":
+      return <DockLinks item={item} labels={labels} />;
+    case "realmRules":
       return <RuleSection realmUnitId={realm.unitId} empty="hidden" />;
-    case "moderators":
+    case "realmModerators":
       return <DockModerators realmId={realm.unitId} item={item} />;
+    case "richText":
+      return (
+        <DockTextWidget widget={item} title={widgetTitle(item, labels, t)} />
+      );
+    case "featuredUnit":
+      return <DockFeaturedUnitWidget widget={item} />;
+    case "zoneNav":
+      return (
+        <DockZoneNavWidget widget={item} title={widgetTitle(item, labels, t)} />
+      );
+    case "buttonLinks":
+      return (
+        <DockButtonsWidget
+          widget={item}
+          labels={labels}
+          title={widgetTitle(item, labels, t)}
+        />
+      );
+    case "imageLinks":
+      return (
+        <DockImagesWidget
+          widget={item}
+          labels={labels}
+          title={widgetTitle(item, labels, t)}
+        />
+      );
+    case "realmStats":
+      return (
+        <DockStatsWidget
+          realm={realm}
+          widget={item}
+          title={widgetTitle(item, labels, t)}
+        />
+      );
+    case "pinboard":
+      return (
+        <DockPinboardWidget
+          realm={realm}
+          widget={item}
+          title={widgetTitle(item, labels, t)}
+        />
+      );
+    case "realmCalendar":
+      return null;
   }
 }
 
@@ -197,7 +222,7 @@ function DockDescription({
   variant,
 }: {
   realm: RealmDTO;
-  item: Extract<RealmDockBuiltinItem, { id: "description" }>;
+  item: Extract<RealmDockItem, { kind: "unitDescription" }>;
   variant: "rail" | "page" | "wiki";
 }) {
   const { t } = useTranslation("entity");
@@ -217,8 +242,8 @@ function DockDescription({
 
   return (
     <Card surface="contained">
-      <CardContent className="p-4">
-        <h2 className="text-sm font-medium leading-ui text-text-primary">
+      <CardContent className="rezics-dock-widget-body p-4">
+        <h2 className="rezics-dock-widget-title text-sm font-medium leading-ui text-text-primary">
           {t("realm_dock_widget_description_title")}
         </h2>
         <div
@@ -266,7 +291,7 @@ function DockSubscriptionStat({
   labels,
 }: {
   realm: RealmDTO;
-  item: Extract<RealmDockBuiltinItem, { id: "subscriptionStat" }>;
+  item: Extract<RealmDockItem, { kind: "unitSubscriptionStat" }>;
   labels: Map<string, string>;
 }) {
   const { t } = useTranslation("entity");
@@ -342,11 +367,11 @@ function DockRealmFacts({ realm }: { realm: RealmDTO }) {
   );
 }
 
-function DockBookmarks({
+function DockLinks({
   item,
   labels,
 }: {
-  item: Extract<RealmDockBuiltinItem, { id: "bookmarks" }>;
+  item: Extract<RealmDockItem, { kind: "links" }>;
   labels: Map<string, string>;
 }) {
   const { t } = useTranslation("entity");
@@ -358,9 +383,9 @@ function DockBookmarks({
           {t("realm_dock_widget_bookmarks_title")}
         </h2>
         <div className="flex flex-col gap-2">
-          {item.items.map((bookmark) =>
+          {item.items.map((bookmark, index) =>
             bookmark.kind === "group" ? (
-              <DropdownMenu key={bookmark.id}>
+              <DropdownMenu key={index}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     type="button"
@@ -378,11 +403,11 @@ function DockBookmarks({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="min-w-[16rem]">
-                  {bookmark.items.map((link) => {
+                  {bookmark.items.map((link, linkIndex) => {
                     const href = hrefForTarget(link.target);
                     if (!href) return null;
                     return (
-                      <DropdownMenuItem key={link.id} asChild>
+                      <DropdownMenuItem key={linkIndex} asChild>
                         <SafeLink href={href}>
                           {labelFromOverride(
                             link.labelOverrideUnitId,
@@ -397,7 +422,7 @@ function DockBookmarks({
               </DropdownMenu>
             ) : (
               <BookmarkButton
-                key={bookmark.id}
+                key={index}
                 href={hrefForTarget(bookmark.target)}
                 label={labelFromOverride(
                   bookmark.labelOverrideUnitId,
@@ -441,7 +466,7 @@ function DockModerators({
   item,
 }: {
   realmId: string;
-  item: Extract<RealmDockBuiltinItem, { id: "moderators" }>;
+  item: Extract<RealmDockItem, { kind: "realmModerators" }>;
 }) {
   const { t } = useTranslation("entity");
   const limit = item.limit ?? 5;
@@ -488,83 +513,11 @@ function DockModerators({
   );
 }
 
-function RealmDockCustomWidgetView({
-  realm,
-  item,
-  labels,
-}: {
-  realm: RealmDTO;
-  item: RealmDockCustomWidgetItem;
-  labels: Map<string, string>;
-}) {
-  const { t } = useTranslation("entity");
-  const widget = item.widget;
-  switch (widget.kind) {
-    case "text":
-      return (
-        <DockTextWidget
-          widget={widget}
-          title={widgetTitle(widget, labels, t)}
-        />
-      );
-    case "featuredZone":
-      return <FeaturedZoneSection zoneUnitId={widget.zoneUnitId} />;
-    case "zoneNav":
-      return (
-        <DockZoneNavWidget
-          widget={widget}
-          title={widgetTitle(widget, labels, t)}
-        />
-      );
-    case "buttons":
-      return (
-        <DockButtonsWidget
-          widget={widget}
-          labels={labels}
-          title={widgetTitle(widget, labels, t)}
-        />
-      );
-    case "images":
-      return (
-        <DockImagesWidget
-          widget={widget}
-          labels={labels}
-          title={widgetTitle(widget, labels, t)}
-        />
-      );
-    case "communityList":
-      return (
-        <DockCommunityListWidget
-          widget={widget}
-          title={widgetTitle(widget, labels, t)}
-        />
-      );
-    case "stats":
-      return (
-        <DockStatsWidget
-          realm={realm}
-          widget={widget}
-          title={widgetTitle(widget, labels, t)}
-        />
-      );
-    case "pinboard":
-      return (
-        <DockPinboardWidget
-          realm={realm}
-          widget={widget}
-          title={widgetTitle(widget, labels, t)}
-        />
-      );
-    case "calendar":
-      return null;
-  }
-}
-
 function DockTextWidget({
   widget,
   title,
 }: {
-  widget: Extract<RealmDockWidget, { kind: "text" }>;
+  widget: Extract<RealmDockWidget, { kind: "richText" }>;
   title: string;
 }) {
   const readContext = useReadLanguageContext();
@@ -591,6 +544,44 @@ function DockTextWidget({
   );
 }
 
+function DockFeaturedUnitWidget({
+  widget,
+}: {
+  widget: Extract<RealmDockWidget, { kind: "featuredUnit" }>;
+}) {
+  const { t } = useTranslation("entity");
+  const readContext = useReadLanguageContext();
+  const unitQuery = useQuery({
+    ...unitDetailQuery(widget.unitId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready,
+  });
+  const unit = unitQuery.data;
+  if (unitQuery.isError) return <DockWidgetError />;
+  if (!unit) return null;
+  return (
+    <Card surface="contained">
+      <CardContent className="flex flex-col gap-2 p-4">
+        <DockWidgetTitle>
+          {t("realm_dock_widget_featuredZone_title")}
+        </DockWidgetTitle>
+        <SafeLink
+          href={unitHref({
+            type: unit.type,
+            unitId: unit.id,
+            slug: unit.slug,
+          })}
+          className="block truncate rounded-md px-2 py-1.5 text-sm leading-ui text-text-secondary transition-colors hover:bg-surface-sunken hover:text-text-primary"
+        >
+          {unitTitle(unit) ?? t("pinboard_entry_untitled")}
+        </SafeLink>
+      </CardContent>
+    </Card>
+  );
+}
+
 function DockZoneNavWidget({
   widget,
   title,
@@ -609,7 +600,7 @@ function DockZoneNavWidget({
   const data = zoneQuery.data;
   if (zoneQuery.isError) return <DockWidgetError />;
   if (!data) return null;
-  const menu = pickZoneMenu(data.zone.nav, widget.menuId);
+  const menu = pickZoneMenu(data.zone.nav, widget.menuSlug);
   if (!menu) return null;
   return (
     <Card surface="contained">
@@ -631,7 +622,7 @@ function DockButtonsWidget({
   labels,
   title,
 }: {
-  widget: Extract<RealmDockWidget, { kind: "buttons" }>;
+  widget: Extract<RealmDockWidget, { kind: "buttonLinks" }>;
   labels: Map<string, string>;
   title: string;
 }) {
@@ -670,7 +661,7 @@ function DockImagesWidget({
   labels,
   title,
 }: {
-  widget: Extract<RealmDockWidget, { kind: "images" }>;
+  widget: Extract<RealmDockWidget, { kind: "imageLinks" }>;
   labels: Map<string, string>;
   title: string;
 }) {
@@ -707,64 +698,13 @@ function DockImagesWidget({
   );
 }
 
-function DockCommunityListWidget({
-  widget,
-  title,
-}: {
-  widget: Extract<RealmDockWidget, { kind: "communityList" }>;
-  title: string;
-}) {
-  const { t } = useTranslation("entity");
-  const readContext = useReadLanguageContext();
-  const realmQueries = useQueries({
-    queries: widget.realmUnitIds.map((id) => ({
-      ...unitDetailQuery(id, {
-        languages: readContext.languages,
-        appLocale: readContext.appLocale,
-      }),
-      enabled: readContext.ready,
-    })),
-  });
-  const realms = realmQueries.flatMap((query) =>
-    query.data ? [query.data] : [],
-  );
-  const hasError = realmQueries.some((query) => query.isError);
-  if (hasError && realms.length === 0) return <DockWidgetError />;
-  if (realms.length === 0) return null;
-  return (
-    <Card surface="contained">
-      <CardContent className="flex flex-col gap-3 p-4">
-        <DockWidgetTitle>
-          {title || t("realm_dock_widget_communityList_title")}
-        </DockWidgetTitle>
-        <ul className="flex flex-col gap-1">
-          {realms.map((unit) => (
-            <li key={unit.id}>
-              <SafeLink
-                href={unitHref({
-                  type: unit.type,
-                  unitId: unit.id,
-                  slug: unit.slug,
-                })}
-                className="block truncate rounded-md px-2 py-1.5 text-sm leading-ui text-text-secondary transition-colors hover:bg-surface-sunken hover:text-text-primary"
-              >
-                {unitTitle(unit) ?? t("pinboard_entry_untitled")}
-              </SafeLink>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
-  );
-}
-
 function DockStatsWidget({
   realm,
   widget,
   title,
 }: {
   realm: RealmDTO;
-  widget: Extract<RealmDockWidget, { kind: "stats" }>;
+  widget: Extract<RealmDockWidget, { kind: "realmStats" }>;
   title: string;
 }) {
   const { t } = useTranslation("entity");
@@ -809,10 +749,10 @@ function DockPinboardWidget({
   const { t } = useTranslation("entity");
   const { entries } = usePinboardList({
     realmUnitId: realm.unitId,
-    pinboardKey: "home",
-    enabled: widget.pinboardKey === "home",
+    pinboardPlacement: widget.placement,
+    enabled: widget.placement === "home",
   });
-  if (widget.pinboardKey !== "home" || entries.length === 0) return null;
+  if (widget.placement !== "home" || entries.length === 0) return null;
   return (
     <Card surface="contained">
       <CardContent className="flex flex-col gap-3 p-4">
@@ -839,7 +779,7 @@ function DockPinboardWidget({
 function DockWidgetTitle({ children }: { children: string }) {
   if (!children) return null;
   return (
-    <h2 className="mb-2 text-sm font-medium leading-ui text-text-primary">
+    <h2 className="rezics-dock-widget-title mb-2 text-sm font-medium leading-ui text-text-primary">
       {children}
     </h2>
   );
@@ -859,32 +799,29 @@ function DockWidgetError() {
 function collectOverrideLabelIds(items: readonly RealmDockItem[]) {
   const ids = new Set<string>();
   for (const item of items) {
-    if (item.slot === "builtin") {
-      if (item.id === "subscriptionStat" && item.labelOverrideUnitId) {
-        ids.add(item.labelOverrideUnitId);
-      }
-      if (item.id === "bookmarks") {
-        for (const bookmark of item.items) {
-          if (bookmark.labelOverrideUnitId)
-            ids.add(bookmark.labelOverrideUnitId);
-          if (bookmark.kind === "group") {
-            for (const link of bookmark.items) {
-              if (link.labelOverrideUnitId) ids.add(link.labelOverrideUnitId);
-            }
+    if (item.titleOverrideUnitId) ids.add(item.titleOverrideUnitId);
+    if (item.kind === "unitSubscriptionStat" && item.labelOverrideUnitId) {
+      ids.add(item.labelOverrideUnitId);
+    }
+    if (item.kind === "links") {
+      for (const linkItem of item.items) {
+        if (linkItem.labelOverrideUnitId) {
+          ids.add(linkItem.labelOverrideUnitId);
+        }
+        if (linkItem.kind === "group") {
+          for (const link of linkItem.items) {
+            if (link.labelOverrideUnitId) ids.add(link.labelOverrideUnitId);
           }
         }
       }
-      continue;
     }
-    const widget = item.widget;
-    if (widget.titleOverrideUnitId) ids.add(widget.titleOverrideUnitId);
-    if (widget.kind === "buttons") {
-      for (const button of widget.items) {
+    if (item.kind === "buttonLinks") {
+      for (const button of item.items) {
         if (button.labelOverrideUnitId) ids.add(button.labelOverrideUnitId);
       }
     }
-    if (widget.kind === "images") {
-      for (const image of widget.items) {
+    if (item.kind === "imageLinks") {
+      for (const image of item.items) {
         if (image.altOverrideUnitId) ids.add(image.altOverrideUnitId);
       }
     }
@@ -907,22 +844,32 @@ function defaultWidgetTitle(
   t: (key: string, options?: Record<string, unknown>) => string,
 ): string {
   switch (widget.kind) {
-    case "text":
+    case "unitDescription":
+      return t("realm_dock_widget_description_title");
+    case "unitSubscriptionStat":
+      return t("realm_dock_widget_subscriptionStat_title");
+    case "realmInfo":
+      return t("realm_dock_widget_realmFacts_title");
+    case "links":
+      return t("realm_dock_widget_bookmarks_title");
+    case "richText":
       return t("realm_dock_widget_text_title");
-    case "buttons":
+    case "buttonLinks":
       return t("realm_dock_widget_buttons_title");
-    case "images":
+    case "imageLinks":
       return t("realm_dock_widget_images_title");
-    case "communityList":
-      return t("realm_dock_widget_communityList_title");
-    case "calendar":
+    case "realmRules":
+      return t("realm_dock_widget_rules_title");
+    case "realmModerators":
+      return t("realm_dock_widget_moderators_title");
+    case "realmStats":
+      return t("realm_dock_widget_stats_title");
+    case "realmCalendar":
       return t("realm_dock_widget_calendar_title");
-    case "featuredZone":
+    case "featuredUnit":
       return t("realm_dock_widget_featuredZone_title");
     case "zoneNav":
       return t("realm_dock_widget_zoneNav_title");
-    case "stats":
-      return t("realm_dock_widget_stats_title");
     case "pinboard":
       return t("realm_dock_widget_pinboard_title");
   }
