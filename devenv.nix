@@ -1,6 +1,10 @@
 { pkgs, inputs, ... }:
 
 {
+  devcontainer = {
+    enable = true;  
+  };
+
   languages.javascript = {
     enable = true;
     nodejs.enable = true;
