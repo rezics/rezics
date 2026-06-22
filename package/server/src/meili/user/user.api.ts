@@ -29,9 +29,6 @@ export async function searchUsersRaw(
   const offset = options?.offset ?? 0;
   const limit = options?.limit ?? 20;
 
-  // eslint-disable-next-line no-console
-  console.log("searchUsersRaw", q, options);
-
   return searchClient.userIndex.search<UserSearchDocument>(q, {
     offset,
     limit,

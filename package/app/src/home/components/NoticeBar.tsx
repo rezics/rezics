@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/shared/utils/css-util";
 import {
   Megaphone as CampaignRoundedIcon,
   Pin as PushPinRoundedIcon,
@@ -62,7 +62,7 @@ export function NoticeBar({
             <Wrapper
               key={item.id}
               to={item.link as any}
-              className={clsx(
+              className={cn(
                 "absolute left-0 top-0 w-full h-full flex items-center gap-2 transition-all duration-500",
                 item.link && "cursor-pointer",
               )}

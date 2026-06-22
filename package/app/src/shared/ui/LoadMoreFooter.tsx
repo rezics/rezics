@@ -1,7 +1,7 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
-import clsx from "clsx";
+import { cn } from "@/shared/utils/css-util";
 import { useInfiniteScrollSentinel } from "../hooks/useInfiniteScrollSentinel";
 
 interface LoadMoreFooterProps {
@@ -38,7 +38,7 @@ export function LoadMoreFooter({
     return (
       <div
         ref={autoLoad ? sentinelRef : undefined}
-        className={clsx("flex justify-center", className)}
+        className={cn("flex justify-center", className)}
       >
         <Button
           type="button"
@@ -62,7 +62,7 @@ export function LoadMoreFooter({
   if (showEndOfList) {
     return (
       <p
-        className={clsx(
+        className={cn(
           "text-center text-xs leading-dense text-text-tertiary",
           className,
         )}

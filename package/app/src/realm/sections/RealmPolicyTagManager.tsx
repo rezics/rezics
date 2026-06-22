@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
-import { useDebouncedValue } from "@/entity-picker";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { cn } from "@/shared/utils/css-util";
 

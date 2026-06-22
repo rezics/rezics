@@ -2,7 +2,8 @@ import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitResponse } from "@rezics/contract";
 import { useQueries } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import type {
   GetMatchedRoutes,
@@ -25,15 +26,6 @@ export interface UseUnitCandidatesResult {
 }
 
 const DEBOUNCE_MS = 150;
-
-function useDebouncedValue<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-  return debounced;
-}
 
 /**
  * Resolve a free-form URL input into URL-derived unit candidates and fetch

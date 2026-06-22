@@ -4,7 +4,7 @@ import { Spinner } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useDebouncedValue } from "@/entity-picker";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 type ZonePickedRealm = {

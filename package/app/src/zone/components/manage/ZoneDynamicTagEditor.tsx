@@ -6,7 +6,7 @@ import { Badge, Button, Checkbox, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, X } from "lucide-react";
 import { useId, useMemo, useState } from "react";
-import { useDebouncedValue } from "@/entity-picker";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import {
   addUniqueDynamicTagUnitIds,
   parseDynamicTagInputTokens,

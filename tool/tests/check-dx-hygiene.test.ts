@@ -1,0 +1,74 @@
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, test } from "bun:test";
+
+const appSrc = join(import.meta.dir, "../../package/app/src");
+const serverSrc = join(import.meta.dir, "../../package/server/src");
+
+function walk(dir: string): string[] {
+  const entries: string[] = [];
+  for (const d of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, d.name);
+    if (d.isDirectory()) entries.push(...walk(full));
+    else if (/\.(tsx?)$/.test(d.name)) entries.push(full);
+  }
+  return entries;
+}
+
+const appFiles = walk(appSrc).filter(
+  (f) =>
+    !f.includes(".gen.") && !f.includes(".test.") && !f.includes("/shadcn/"),
+);
+
+const serverFiles = walk(serverSrc).filter(
+  (f) =>
+    !f.includes(".gen.") &&
+    !f.includes(".test.") &&
+    !f.includes("node_modules"),
+);
+
+describe("DX hygiene", () => {
+  test("no raw clsx import in app code (use cn() from css-util)", () => {
+    const raw = /from\s+["']clsx["']/;
+    const violations: string[] = [];
+    for (const file of appFiles) {
+      if (file.endsWith("css-util.ts")) continue;
+      const src = readFileSync(file, "utf-8");
+      if (raw.test(src)) violations.push(file.replace(appSrc, "app/src"));
+    }
+    expect(violations).toEqual([]);
+  });
+
+  test("useDebouncedValue has single canonical source in shared/hooks", () => {
+    const fnDef = /^export function useDebouncedValue/m;
+    const sources: string[] = [];
+    for (const file of appFiles) {
+      const src = readFileSync(file, "utf-8");
+      if (fnDef.test(src)) sources.push(file.replace(appSrc, "app/src"));
+    }
+    expect(sources).toEqual(["app/src/shared/hooks/useDebouncedValue.ts"]);
+  });
+
+  test("no inline useDebouncedValue reimplementations", () => {
+    // Detect the pattern: function useDebouncedValue (non-exported)
+    const inlineDef = /^function useDebouncedValue/m;
+    const violations: string[] = [];
+    for (const file of appFiles) {
+      const src = readFileSync(file, "utf-8");
+      if (inlineDef.test(src)) violations.push(file.replace(appSrc, "app/src"));
+    }
+    expect(violations).toEqual([]);
+  });
+
+  test("no debug console.log in server meili API files", () => {
+    const meiliDir = join(serverSrc, "meili");
+    const meiliFiles = walk(meiliDir).filter((f) => f.endsWith(".api.ts"));
+    const violations: string[] = [];
+    for (const file of meiliFiles) {
+      const src = readFileSync(file, "utf-8");
+      if (/console\.log\(/.test(src))
+        violations.push(file.replace(serverSrc, "server/src"));
+    }
+    expect(violations).toEqual([]);
+  });
+});

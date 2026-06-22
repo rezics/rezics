@@ -1,6 +1,6 @@
 import { SafeLink, type SafeLinkProps } from "@rezics/ui";
 import { createLink, Link as RouterLink } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/shared/utils/css-util";
 import * as React from "react";
 
 export {
@@ -51,7 +51,7 @@ const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
     return (
       <a
         ref={ref}
-        className={clsx(
+        className={cn(
           "text-link transition-colors",
           underlineClass,
           variantClass,

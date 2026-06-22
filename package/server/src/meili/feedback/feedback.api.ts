@@ -29,8 +29,6 @@ export async function searchFeedbacksRaw(
   const offset = options?.offset ?? 0;
   const limit = options?.limit ?? 20;
 
-  // eslint-disable-next-line no-console
-  console.log("searchFeedbacksRaw", q, options);
   return searchClient.feedbackIndex.search<FeedbackSearchDocument>(q, {
     offset,
     limit,

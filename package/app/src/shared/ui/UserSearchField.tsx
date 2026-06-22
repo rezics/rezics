@@ -4,7 +4,7 @@ import { Spinner } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { X } from "lucide-react";
 import { useId, useState } from "react";
-import { useDebouncedValue } from "@/entity-picker";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 
 type PickedUser = {
   unitId: string;

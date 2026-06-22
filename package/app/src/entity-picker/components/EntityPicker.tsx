@@ -28,7 +28,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { EntityInlineCreateForm } from "./EntityInlineCreateForm";
 import { EntityResultRow } from "./EntityResultRow";
 

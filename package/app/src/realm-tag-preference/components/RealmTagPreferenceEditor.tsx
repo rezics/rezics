@@ -28,7 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import { GripVerticalIcon, PlusIcon, XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useDebouncedValue } from "@/entity-picker";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useSaveRealmTagPreferences } from "../hooks/useSaveRealmTagPreferences";
 import {

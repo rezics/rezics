@@ -28,8 +28,6 @@ export async function getBookApproxCount() {
   try {
     result = await query();
   } catch (error) {
-    // const isDivisionByZero = error === '22012';
-    console.log(error);
     await db.execute(sql`ANALYZE "Book";`);
     result = await query();
   }

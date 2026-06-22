@@ -23,7 +23,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { useDebouncedValue } from "@/entity-picker";
+import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import {
   addZoneTranslationRow,
   removeZoneTranslationRow,
