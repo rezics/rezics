@@ -5,13 +5,11 @@ import type {
   SeriesResponse,
   UpdateSeriesInput,
 } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { seriesApi } from "./series.api";
 import { seriesKeys } from "./series.keys";
+
+const invalidates = [seriesKeys.all()];
 
 export function useCreateSeriesMutation(
   options?: Omit<
@@ -19,14 +17,10 @@ export function useCreateSeriesMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: seriesApi.create,
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: seriesKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -40,17 +34,10 @@ export function useUpdateSeriesMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, input }) => seriesApi.update(unitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: seriesKeys.detail(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: seriesKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -64,21 +51,11 @@ export function useUpdateSeriesContentStructureMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, nodes }) =>
       seriesApi.updateContentStructure(unitId, nodes),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: seriesKeys.detail(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: seriesKeys.contentIndex(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: seriesKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 

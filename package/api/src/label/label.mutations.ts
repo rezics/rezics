@@ -1,9 +1,5 @@
 import type { CreateLabelInput, LabelDTO } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { labelApi } from "./label.api";
 import { labelKeys } from "./label.keys";
 
@@ -13,14 +9,10 @@ export function useCreateLabel(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateLabelInput) => labelApi.create(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: labelKeys.all() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: [labelKeys.all()] },
   });
 }
 

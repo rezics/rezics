@@ -1,11 +1,10 @@
 import type { ScoreEntryDTO, UpsertScoreInput } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { scoreApi } from "./score.api";
 import { scoreKeys } from "./score.keys";
+
+// ponytail: root prefix invalidates all score queries; per-unit granularity if perf matters
+const invalidates = [scoreKeys.all()];
 
 export function useUpsertScoreMutation(
   options?: Omit<
@@ -13,23 +12,10 @@ export function useUpsertScoreMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: UpsertScoreInput) => scoreApi.upsertScore(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: scoreKeys.aggregatesByUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: scoreKeys.aggregate(variables.unitId, variables.realm),
-      });
-      queryClient.invalidateQueries({
-        queryKey: scoreKeys.userScores(),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -43,20 +29,10 @@ export function useDeleteScoreMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ id }) => scoreApi.deleteScore(id),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: scoreKeys.aggregatesByUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: scoreKeys.userScores(),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 

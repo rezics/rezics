@@ -4,15 +4,17 @@ import type {
   CreditAttributionRole,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { bookKeys } from "../book/book.keys";
 import { entityKeys } from "../entity/entity.keys";
 import { creditAttributionApi } from "./credit-attribution.api";
 import { creditAttributionKeys } from "./credit-attribution.keys";
+
+const invalidates = [
+  creditAttributionKeys.all(),
+  bookKeys.all(),
+  entityKeys.all(),
+];
 
 export function useLinkCreditAttributionMutation(
   options?: Omit<
@@ -20,24 +22,11 @@ export function useLinkCreditAttributionMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: LinkCreditAttributionInput) =>
       creditAttributionApi.link(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: creditAttributionKeys.byUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: bookKeys.detail(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
-      queryClient.invalidateQueries({
-        queryKey: entityKeys.detail(variables.entityId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -51,24 +40,11 @@ export function useUnlinkCreditAttributionMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, entityId, role }) =>
       creditAttributionApi.unlink(unitId, entityId, role),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: creditAttributionKeys.byUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: bookKeys.detail(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
-      queryClient.invalidateQueries({
-        queryKey: entityKeys.detail(variables.entityId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -82,20 +58,11 @@ export function useCreateCreditAttributionEvidenceMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateCreditAttributionEvidenceInput) =>
       creditAttributionApi.createEvidence(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: creditAttributionKeys.byUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: bookKeys.detail(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 

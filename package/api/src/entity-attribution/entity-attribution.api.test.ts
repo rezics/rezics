@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "../config";
 import { entityAttributionApi } from "./entity-attribution.api";
 import { entityAttributionKeys } from "./entity-attribution.keys";
-import { invalidateEntityAttributionBatchQueries } from "./entity-attribution.mutations";
 
 const fetchMock = mock();
 
@@ -62,29 +61,6 @@ describe("entityAttributionApi", () => {
       "entity-attribution",
       "editor",
       "book-1",
-    ]);
-  });
-
-  test("invalidates credit subject and shared editor queries", () => {
-    const queryClient = {
-      invalidateQueries: mock(async () => undefined),
-    };
-
-    invalidateEntityAttributionBatchQueries(queryClient, "book-1");
-
-    expect(
-      (queryClient.invalidateQueries.mock.calls as any[]).map(
-        (call) => call[0],
-      ),
-    ).toEqual([
-      { queryKey: ["credit-attribution", "by-unit", "book-1"] },
-      {
-        queryKey: ["subject-attribution", "by-unit", "book-1", undefined],
-      },
-      {
-        queryKey: ["entity-attribution", "editor", "book-1"],
-      },
-      { queryKey: ["books", "detail", "book-1"] },
     ]);
   });
 });

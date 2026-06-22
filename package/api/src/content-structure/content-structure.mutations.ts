@@ -2,13 +2,12 @@ import type {
   ContentStructureItem,
   ContentStructureResponse,
 } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { contentStructureApi } from "./content-structure.api";
 import { contentStructureKeys } from "./content-structure.keys";
+
+// ponytail: root prefix; per-owner granularity if perf matters
+const invalidates = [contentStructureKeys.all()];
 
 export function useUpdateContentStructureMutation(
   options?: Omit<
@@ -20,18 +19,11 @@ export function useUpdateContentStructureMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ ownerUnitId, nodes }) =>
       contentStructureApi.update(ownerUnitId, nodes),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: contentStructureKeys.detail(variables.ownerUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -42,18 +34,11 @@ export function useRestoreContentStructureNodes(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (nodeIds: string[]) =>
       contentStructureApi.restore(ownerUnitId, nodeIds),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: contentStructureKeys.detail(ownerUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 

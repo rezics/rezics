@@ -8,6 +8,5 @@ export { entityAttributionKeys } from "./entity-attribution.keys";
 export {
   type EntityAttributionBatchMutationInput,
   entityAttributionMutations,
-  invalidateEntityAttributionBatchQueries,
   useEntityAttributionBatchMutation,
 } from "./entity-attribution.mutations";

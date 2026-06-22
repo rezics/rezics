@@ -1,11 +1,9 @@
 import type { CreateBlock } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { blockApi } from "./block.api";
 import { blockKeys } from "./block.keys";
+
+const invalidates = [blockKeys.list()];
 
 export function useBlockUserMutation(
   options?: Omit<
@@ -13,14 +11,10 @@ export function useBlockUserMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateBlock) => blockApi.add(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      qc.invalidateQueries({ queryKey: blockKeys.list() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -30,14 +24,10 @@ export function useUnblockUserMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => blockApi.remove(userId),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      qc.invalidateQueries({ queryKey: blockKeys.list() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 

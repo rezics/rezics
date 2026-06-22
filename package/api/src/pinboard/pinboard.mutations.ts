@@ -1,22 +1,11 @@
 import type { PinboardOkResponse } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { realmKeys } from "../realm/realm.keys";
 import { pinboardApi } from "./pinboard.api";
 import { pinboardKeys } from "./pinboard.keys";
 
-function invalidatePinboard(
-  queryClient: ReturnType<typeof useQueryClient>,
-  realmId: string,
-  key: string,
-) {
-  queryClient.invalidateQueries({ queryKey: pinboardKeys.list(realmId, key) });
-  queryClient.invalidateQueries({ queryKey: pinboardKeys.admin(realmId, key) });
-  queryClient.invalidateQueries({ queryKey: realmKeys.detail(realmId) });
-}
+// ponytail: root prefixes; per-realm/key granularity if perf matters
+const invalidates = [pinboardKeys.all(), realmKeys.all()];
 
 export function useAppendPinboardMutation(
   options?: Omit<
@@ -28,15 +17,11 @@ export function useAppendPinboardMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ realmId, key, unitId }) =>
       pinboardApi.append(realmId, key, unitId),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidatePinboard(queryClient, variables.realmId, variables.key);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -50,15 +35,11 @@ export function useReorderPinboardMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ realmId, key, unitIds }) =>
       pinboardApi.reorder(realmId, key, unitIds),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidatePinboard(queryClient, variables.realmId, variables.key);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -72,14 +53,10 @@ export function useRemovePinboardMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ realmId, key, unitId }) =>
       pinboardApi.remove(realmId, key, unitId),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidatePinboard(queryClient, variables.realmId, variables.key);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
