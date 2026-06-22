@@ -45,8 +45,17 @@ export const realmKeys = {
    */
   members: (realmUnitId: string) =>
     [...realmKeys.all(), "members", realmUnitId] as const,
-  memberList: (realmUnitId: string, cursor?: string | null) =>
-    [...realmKeys.members(realmUnitId), "list", cursor ?? null] as const,
+  memberList: (
+    realmUnitId: string,
+    cursor?: string | null,
+    roles?: readonly string[] | null,
+  ) =>
+    [
+      ...realmKeys.members(realmUnitId),
+      "list",
+      cursor ?? null,
+      roles ?? null,
+    ] as const,
 
   /**
    * Keys for realm rule policy reads

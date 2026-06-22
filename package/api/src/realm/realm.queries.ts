@@ -83,7 +83,11 @@ export const realmMembersQuery = (
   query?: RealmMemberListQuery,
 ) =>
   queryOptions({
-    queryKey: realmKeys.memberList(realmUnitId, query?.cursor ?? null),
+    queryKey: realmKeys.memberList(
+      realmUnitId,
+      query?.cursor ?? null,
+      query?.roles ?? null,
+    ),
     queryFn: () => realmApi.listMembers(realmUnitId, query),
     staleTime: 1000 * 60 * 2,
   });

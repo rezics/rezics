@@ -446,11 +446,9 @@ function DockModerators({
 }) {
   const { t } = useTranslation("entity");
   const limit = item.limit ?? 5;
-  const query = useQuery(realmMembersQuery(realmId, { limit }));
-  const moderators =
-    query.data?.members.filter((member) =>
-      ["owner", "admin", "moderator"].includes(member.roleKey),
-    ) ?? [];
+  const roles = ["owner", "admin", "moderator"];
+  const query = useQuery(realmMembersQuery(realmId, { limit, roles }));
+  const moderators = query.data?.members ?? [];
 
   if (query.isError) return null;
   if (moderators.length === 0) return null;

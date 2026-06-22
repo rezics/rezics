@@ -60,6 +60,19 @@ describe("DX hygiene", () => {
     expect(violations).toEqual([]);
   });
 
+  test("no client-side role filtering on member list queries", () => {
+    // Member role filtering must use the server-side `roles` query param,
+    // not client-side .filter() on roleKey after fetch.
+    // 成员角色过滤必须使用服务端 roles 查询参数，禁止 fetch 后客户端 .filter()。
+    const pattern = /\.filter\([^)]*roleKey/;
+    const violations: string[] = [];
+    for (const file of appFiles) {
+      const src = readFileSync(file, "utf-8");
+      if (pattern.test(src)) violations.push(file.replace(appSrc, "app/src"));
+    }
+    expect(violations).toEqual([]);
+  });
+
   test("no debug console.log in server meili API files", () => {
     const meiliDir = join(serverSrc, "meili");
     const meiliFiles = walk(meiliDir).filter((f) => f.endsWith(".api.ts"));

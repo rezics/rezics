@@ -166,6 +166,7 @@ export type RealmMemberDTO = (typeof realmMemberDTOSchema)["static"];
 export const realmMemberListQuerySchema = t.Object({
   cursor: t.Optional(t.String()),
   limit: paginationLimitSchema,
+  roles: t.Optional(t.Array(t.String())),
 });
 
 export type RealmMemberListQuery =

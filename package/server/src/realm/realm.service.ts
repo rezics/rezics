@@ -637,6 +637,9 @@ export class RealmService {
           cursorDate && !Number.isNaN(cursorDate.getTime())
             ? sql`${RealmMember.joinedAt} < ${cursorDate}`
             : undefined,
+          options.roles?.length
+            ? inArray(RealmMember.roleKey, options.roles)
+            : undefined,
         ),
       )
       .orderBy(desc(RealmMember.joinedAt), RealmMember.userId)
