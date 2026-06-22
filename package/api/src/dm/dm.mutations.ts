@@ -7,21 +7,18 @@ import {
 import { dmApi } from "./dm.api";
 import { dmKeys } from "./dm.keys";
 
+const dmInvalidates = [dmKeys.all()];
+
 export function useSendDmMutation(
   options?: Omit<
     UseMutationOptions<{ success: true }, Error, DmSendBody>,
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: DmSendBody) => dmApi.send(input),
+    meta: { invalidates: dmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      qc.invalidateQueries({ queryKey: dmKeys.conversations() });
-      qc.invalidateQueries({ queryKey: dmKeys.all() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -37,15 +34,11 @@ export function useMarkDmReadMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ conversationId, upToMessageId }) =>
       dmApi.markRead(conversationId, upToMessageId),
+    meta: { invalidates: dmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      qc.invalidateQueries({ queryKey: dmKeys.conversations() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -62,10 +55,10 @@ export function useSetDmBlockMutation(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ peerId, blocked }) => dmApi.setBlock(peerId, blocked),
+    meta: { invalidates: dmInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(dmKeys.blockState(variables.peerId), data);
-      qc.invalidateQueries({ queryKey: dmKeys.conversations() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

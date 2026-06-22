@@ -11,6 +11,8 @@ import {
 import { userTagApplicationApi } from "./user-tag-application.api";
 import { userTagApplicationKeys } from "./user-tag-application.keys";
 
+const utaInvalidates = [userTagApplicationKeys.all()];
+
 export function useSetUserTagApplicationsMutation(
   options?: Omit<
     UseMutationOptions<
@@ -25,6 +27,7 @@ export function useSetUserTagApplicationsMutation(
   return useMutation({
     mutationFn: ({ unitId, ...input }) =>
       userTagApplicationApi.setForUnit(unitId, input),
+    meta: { invalidates: utaInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(
@@ -46,17 +49,11 @@ export function useReorderUserTagApplicationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, tagUnitId, ...input }) =>
       userTagApplicationApi.reorder(unitId, tagUnitId, input),
+    meta: { invalidates: utaInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: userTagApplicationKeys.unit(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -70,17 +67,11 @@ export function useDeleteUserTagApplicationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, tagUnitId }) =>
       userTagApplicationApi.deleteOne(unitId, tagUnitId),
+    meta: { invalidates: utaInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: userTagApplicationKeys.unit(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 

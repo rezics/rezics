@@ -17,6 +17,8 @@ import {
 import { pollApi } from "./poll.api";
 import { pollKeys } from "./poll.keys";
 
+const pollInvalidates = [pollKeys.all()];
+
 /**
  * Create a poll with options.
  */
@@ -26,15 +28,10 @@ export function useCreatePollMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CreatePollInput) => pollApi.create(input),
+    meta: { invalidates: pollInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: pollKeys.detail(data.unitId) });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -53,10 +50,10 @@ export function useCastPollVoteMutation(
 
   return useMutation({
     mutationFn: (input: CastPollVoteInput) => pollApi.vote(pollUnitId, input),
+    meta: { invalidates: pollInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(pollKeys.detail(pollUnitId), data);
-      queryClient.invalidateQueries({ queryKey: pollKeys.detail(pollUnitId) });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -77,10 +74,10 @@ export function useWithdrawPollVoteMutation(
   return useMutation({
     mutationFn: (input?: WithdrawPollVoteInput | void) =>
       pollApi.withdraw(pollUnitId, input ?? undefined),
+    meta: { invalidates: pollInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(pollKeys.detail(pollUnitId), data);
-      queryClient.invalidateQueries({ queryKey: pollKeys.detail(pollUnitId) });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

@@ -23,6 +23,11 @@ import {
 import { tagApi } from "./tag.api";
 import { tagKeys } from "./tag.keys";
 
+// ponytail: root prefix — all tag sub-keys (lists, detail, forUnit, context,
+// lowScore) live under ["tags"], so one prefix covers every pure-invalidation hook
+// ponytail: 根前缀——所有 tag 子键都在 ["tags"] 下，一个前缀覆盖所有纯失效 hook
+const tagInvalidates = [tagKeys.all()];
+
 /**
  * Mutation for creating a tag
  * 创建标签的 mutation
@@ -33,15 +38,10 @@ export function useCreateTagMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CreateTagInput) => tagApi.create(input),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -63,10 +63,10 @@ export function useUpdateTagMutation(
 
   return useMutation({
     mutationFn: ({ unitId, input }) => tagApi.update(unitId, input),
+    meta: { invalidates: tagInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(tagKeys.detail(variables.unitId), data);
-      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -86,10 +86,10 @@ export function useDeleteTagMutation(
 
   return useMutation({
     mutationFn: (unitId: string) => tagApi.remove(unitId),
+    meta: { invalidates: tagInvalidates },
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({ queryKey: tagKeys.detail(unitId) });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });
@@ -105,24 +105,10 @@ export function useAttachTagMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: AttachTagInput) => tagApi.attach(input),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.detail(variables.tagUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -136,24 +122,10 @@ export function useDetachTagMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: DetachTagInput) => tagApi.detach(input),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.detail(variables.tagUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -167,25 +139,10 @@ export function useCastTagVoteMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CastTagVoteInput) => tagApi.vote(input),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      // Invalidate the tag's scored association for the unit
-      // 让该 unit 的标签计分关联失效
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.detail(variables.tagUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -203,21 +160,10 @@ export function useCreateUnitTagMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CreateUnitTagInput) => tagApi.createUnitTag(input),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -236,22 +182,11 @@ export function usePatchUnitTagMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ unitId, tagUnitId, input }) =>
       tagApi.patchUnitTag(unitId, tagUnitId, input),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -270,22 +205,11 @@ export function useDeleteUnitTagMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ unitId, tagUnitId }) =>
       tagApi.deleteUnitTag(unitId, tagUnitId),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -304,19 +228,11 @@ export function useWithdrawUnitTagVoteMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ unitId, tagUnitId }) =>
       tagApi.withdrawUnitTagVote(unitId, tagUnitId),
+    meta: { invalidates: tagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forUnit(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
