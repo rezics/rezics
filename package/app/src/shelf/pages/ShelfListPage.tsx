@@ -5,6 +5,7 @@ import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { QueryErrorDisplay } from "@/core";
+import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { ShelfCard } from "../components/ShelfCard";
 
 /**
@@ -119,19 +120,12 @@ export function ShelfListPage() {
               <ShelfCard key={shelf.unitId} shelf={shelf} />
             ))}
           </div>
-          {hasNextPage && (
-            <div className="mt-6 flex justify-center">
-              <Button
-                variant="ghost"
-                disabled={isFetchingNextPage}
-                onClick={() => void fetchNextPage()}
-              >
-                {isFetchingNextPage
-                  ? t("common:loading")
-                  : t("common:load_more")}
-              </Button>
-            </div>
-          )}
+          <LoadMoreFooter
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            className="mt-6"
+          />
         </>
       )}
     </div>

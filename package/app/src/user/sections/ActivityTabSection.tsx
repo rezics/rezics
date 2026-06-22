@@ -2,8 +2,8 @@ import { useActivityInfinite } from "@rezics/api/activity";
 import type { ActivityKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
 import type { FC } from "react";
+import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { Link } from "@/shared/ui/link";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
@@ -60,19 +60,11 @@ export const ActivityTabSection: FC = () => {
           </li>
         ))}
       </ul>
-      {query.hasNextPage ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="self-start"
-          onClick={() => query.fetchNextPage()}
-          disabled={query.isFetchingNextPage}
-        >
-          {query.isFetchingNextPage
-            ? t("common:loading")
-            : t("common:load_more")}
-        </Button>
-      ) : null}
+      <LoadMoreFooter
+        hasNextPage={query.hasNextPage}
+        isFetchingNextPage={query.isFetchingNextPage}
+        fetchNextPage={query.fetchNextPage}
+      />
     </div>
   );
 };

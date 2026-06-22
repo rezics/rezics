@@ -1,10 +1,10 @@
 import { zoneSectionInfiniteQuery } from "@rezics/api";
 import type { ZoneStreamSection as ZoneStreamSectionConfig } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core";
+import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { StreamRenderer } from "@/stream";
 import {
   useZoneSectionTitle,
@@ -57,33 +57,14 @@ export function ZoneStreamSection({
           </Button>
         </div>
       ) : null}
-      {!query.isLoading && !query.isError && query.hasNextPage ? (
-        <div className="flex justify-center">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={query.isFetchingNextPage}
-            onClick={() => void query.fetchNextPage()}
-          >
-            {query.isFetchingNextPage ? (
-              <span className="inline-flex items-center gap-2">
-                <Spinner size="sm" />
-                {t("common:loading")}
-              </span>
-            ) : (
-              t("common:load_more")
-            )}
-          </Button>
-        </div>
-      ) : null}
-      {!query.isLoading &&
-      !query.isError &&
-      rows.length > 0 &&
-      !query.hasNextPage ? (
-        <p className="text-center text-xs leading-dense text-text-tertiary">
-          {t("common:end_of_list")}
-        </p>
-      ) : null}
+      {!query.isLoading && !query.isError && rows.length > 0 && (
+        <LoadMoreFooter
+          hasNextPage={query.hasNextPage}
+          isFetchingNextPage={query.isFetchingNextPage}
+          fetchNextPage={query.fetchNextPage}
+          showEndOfList
+        />
+      )}
     </ZoneSectionShell>
   );
 }

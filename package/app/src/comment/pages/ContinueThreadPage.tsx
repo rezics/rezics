@@ -7,6 +7,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { QueryErrorDisplay } from "@/core";
+import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { Pencil } from "lucide-react";
@@ -124,21 +125,12 @@ export const ContinueThreadPage: React.FC = () => {
           baseDepth={rootComment?.depth ?? 0}
         />
       )}
-      {commentSubtreeQuery.hasNextPage ? (
-        <div className="flex justify-center pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={commentSubtreeQuery.isFetchingNextPage}
-            onClick={() => void commentSubtreeQuery.fetchNextPage()}
-          >
-            {commentSubtreeQuery.isFetchingNextPage
-              ? t("common:loading")
-              : t("common:load_more")}
-          </Button>
-        </div>
-      ) : null}
+      <LoadMoreFooter
+        hasNextPage={commentSubtreeQuery.hasNextPage}
+        isFetchingNextPage={commentSubtreeQuery.isFetchingNextPage}
+        fetchNextPage={commentSubtreeQuery.fetchNextPage}
+        className="pt-2"
+      />
     </div>
   );
 };

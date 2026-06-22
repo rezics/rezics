@@ -24,7 +24,6 @@ import { useTranslation } from "@rezics/i18n/react";
 import { ConfirmDialog, Spinner } from "@rezics/ui";
 import {
   Badge,
-  Button,
   DropdownMenuItem,
   Select,
   SelectContent,
@@ -40,6 +39,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 import { PostEditDialog } from "@/post";
+import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { hasGovernanceCapabilityHint, useAuthSessionStore } from "@/user";
 import { CommentContextSelect } from "../components/parts/CommentContextSelect";
 import { CommentPromotionControls } from "../components/parts/CommentPromotionControls";
@@ -508,21 +508,12 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
         renderOverflowContent={renderOverflowContent}
         renderContextBadge={renderContextBadge}
       />
-      {commentThreadQuery.hasNextPage ? (
-        <div className="flex justify-center pt-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={commentThreadQuery.isFetchingNextPage}
-            onClick={() => void commentThreadQuery.fetchNextPage()}
-          >
-            {commentThreadQuery.isFetchingNextPage
-              ? t("common:loading")
-              : t("common:load_more")}
-          </Button>
-        </div>
-      ) : null}
+      <LoadMoreFooter
+        hasNextPage={commentThreadQuery.hasNextPage}
+        isFetchingNextPage={commentThreadQuery.isFetchingNextPage}
+        fetchNextPage={commentThreadQuery.fetchNextPage}
+        className="pt-3"
+      />
       {editingPost ? (
         <PostEditDialog
           post={editingPost}

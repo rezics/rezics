@@ -5,12 +5,12 @@ import {
   streamRowsInfiniteQuery,
 } from "@rezics/api/stream/stream";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core";
+import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { StreamRenderer } from "../components/StreamRenderer";
 
 interface StreamSectionProps {
@@ -116,30 +116,14 @@ export const StreamSectionContent: React.FC<StreamSectionContentProps> = ({
           </Button>
         </div>
       ) : null}
-      {!loading && !isError && hasNextPage ? (
-        <div className="flex justify-center">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isFetchingNextPage}
-            onClick={() => void fetchNextPage()}
-          >
-            {isFetchingNextPage ? (
-              <span className="inline-flex items-center gap-2">
-                <Spinner size="sm" />
-                {t("common:loading")}
-              </span>
-            ) : (
-              t("common:load_more")
-            )}
-          </Button>
-        </div>
-      ) : null}
-      {!loading && !isError && rows.length > 0 && !hasNextPage ? (
-        <p className="text-center text-xs leading-dense text-text-tertiary">
-          {t("common:end_of_list")}
-        </p>
-      ) : null}
+      {!loading && !isError && rows.length > 0 && (
+        <LoadMoreFooter
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          showEndOfList
+        />
+      )}
     </div>
   );
 };

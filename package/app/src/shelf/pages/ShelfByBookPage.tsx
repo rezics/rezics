@@ -2,13 +2,13 @@ import { bookQueries } from "@rezics/api/book/book";
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   resolveCatalogEntryInteractionContext,
   shelfListFiltersForCatalogEntry,
 } from "@/book-library";
 import { QueryErrorDisplay } from "@/core";
+import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ShelfCard } from "../components/ShelfCard";
 
@@ -125,19 +125,12 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
               <ShelfCard key={shelf.unitId} shelf={shelf} />
             ))}
           </div>
-          {hasNextPage && (
-            <div className="mt-6 flex justify-center">
-              <Button
-                variant="ghost"
-                disabled={isFetchingNextPage}
-                onClick={() => void fetchNextPage()}
-              >
-                {isFetchingNextPage
-                  ? t("common:loading")
-                  : t("common:load_more")}
-              </Button>
-            </div>
-          )}
+          <LoadMoreFooter
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            className="mt-6"
+          />
         </>
       )}
     </div>
