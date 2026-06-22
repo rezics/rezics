@@ -6,28 +6,27 @@ import type {
   UserSubscriptionListEntryPinBody,
   UserSubscriptionListEntryReorderBody,
 } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
+import { cacheDomainKeys } from "../react-query/cache-coherence";
 import { subscriptionApi } from "./subscription.api";
 import { subscriptionKeys } from "./subscription.keys";
 
-function invalidateForTarget(
-  qc: ReturnType<typeof useQueryClient>,
-  subscribedUnitId: string,
-) {
-  qc.invalidateQueries({ queryKey: subscriptionKeys.check(subscribedUnitId) });
-  qc.invalidateQueries({ queryKey: subscriptionKeys.count(subscribedUnitId) });
-  qc.invalidateQueries({ queryKey: subscriptionKeys.all() });
-  void invalidateForCacheDomain(qc, "follow");
-}
-
-function invalidateEntries(qc: ReturnType<typeof useQueryClient>) {
-  qc.invalidateQueries({ queryKey: subscriptionKeys.all() });
-}
+// Invalidation is declared via `meta.invalidates` (see `react-query/tsr.ts`):
+// the global MutationCache handler refreshes these prefixes on success, so no
+// mutation here needs `useQueryClient()` or a hand-wired `onSuccess`. The
+// caller's own `onSuccess` therefore passes through untouched.
+// 失效通过 `meta.invalidates` 声明（见 `react-query/tsr.ts`）：全局 MutationCache
+// handler 在成功时刷新这些前缀，因此这里没有 mutation 需要 `useQueryClient()`
+// 或手写 `onSuccess`。调用方自己的 `onSuccess` 因此原样透传。
+//
+// `follow` covers the subscribed target's check/count plus the follower's
+// detail/profile surfaces; `entries` is the user's own subscription list. Both
+// are prefix roots — `["subscription"]` already nests check/count/entries/mine.
+// `follow` 覆盖被订阅目标的 check/count 以及关注者的 detail/profile 面；
+// `entries` 是用户自己的订阅列表。两者都是前缀根——`["subscription"]` 已
+// 嵌套 check/count/entries/mine。
+const followInvalidates = cacheDomainKeys("follow");
+const entriesInvalidates = [subscriptionKeys.all()];
 
 export function useSubscribeMutation(
   options?: Omit<
@@ -35,15 +34,11 @@ export function useSubscribeMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: SubscriptionCreateBody) =>
       subscriptionApi.subscribe(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateForTarget(qc, variables.subscribedUnitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: followInvalidates },
   });
 }
 
@@ -53,15 +48,11 @@ export function useUnsubscribeMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (subscribedUnitId: string) =>
       subscriptionApi.unsubscribe(subscribedUnitId),
     ...options,
-    onSuccess: (data, subscribedUnitId, onMutateResult, context) => {
-      invalidateForTarget(qc, subscribedUnitId);
-      options?.onSuccess?.(data, subscribedUnitId, onMutateResult, context);
-    },
+    meta: { invalidates: followInvalidates },
   });
 }
 
@@ -75,15 +66,11 @@ export function useUpdateSubscriptionChannelsMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ subscribedUnitId, channels }) =>
       subscriptionApi.updateChannels(subscribedUnitId, { channels }),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateForTarget(qc, variables.subscribedUnitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: followInvalidates },
   });
 }
 
@@ -97,15 +84,11 @@ export function usePinSubscriptionListEntryMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ subscribedUnitId, input }) =>
       subscriptionApi.pinEntry(subscribedUnitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateEntries(qc);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: entriesInvalidates },
   });
 }
 
@@ -119,15 +102,11 @@ export function useReorderSubscriptionListEntryMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ subscribedUnitId, input }) =>
       subscriptionApi.reorderEntry(subscribedUnitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateEntries(qc);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: entriesInvalidates },
   });
 }
 
@@ -141,15 +120,11 @@ export function useReorderSubscriptionListEntriesMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: UserSubscriptionListEntryBatchReorderBody) =>
       subscriptionApi.reorderEntries(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateEntries(qc);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: entriesInvalidates },
   });
 }
 
@@ -159,15 +134,11 @@ export function useRemoveSubscriptionListEntryMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (subscribedUnitId: string) =>
       subscriptionApi.removeEntry(subscribedUnitId),
     ...options,
-    onSuccess: (data, subscribedUnitId, onMutateResult, context) => {
-      invalidateEntries(qc);
-      options?.onSuccess?.(data, subscribedUnitId, onMutateResult, context);
-    },
+    meta: { invalidates: entriesInvalidates },
   });
 }
 
@@ -177,15 +148,11 @@ export function useRecoverSubscriptionListEntryMutation(
     "mutationFn"
   >,
 ) {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (subscribedUnitId: string) =>
       subscriptionApi.recoverEntry(subscribedUnitId),
     ...options,
-    onSuccess: (data, subscribedUnitId, onMutateResult, context) => {
-      invalidateForTarget(qc, subscribedUnitId);
-      options?.onSuccess?.(data, subscribedUnitId, onMutateResult, context);
-    },
+    meta: { invalidates: followInvalidates },
   });
 }
 

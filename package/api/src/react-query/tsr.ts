@@ -1,5 +1,37 @@
-import { MutationCache, QueryClient } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryClient,
+  type QueryKey,
+} from "@tanstack/react-query";
 import { ApiError } from "./errors";
+
+// Declarative cache invalidation. A mutation lists the query-key prefixes it
+// must invalidate via `meta.invalidates`; one global handler runs them all on
+// success. This replaces per-mutation `useQueryClient()` + hand-wired
+// `onSuccess` invalidation (and the easy-to-forget manual re-chaining of the
+// caller's `onSuccess`), so a write that forgets to refresh stale UI becomes
+// impossible by construction. This is the TanStack Query `MutationCache.meta`
+// pattern — the single, canonical place mutations declare what they touch.
+// 声明式缓存失效。mutation 通过 `meta.invalidates` 列出它必须失效的 query-key
+// 前缀，一个全局 handler 在成功时统一执行。它取代了每个 mutation 各自的
+// `useQueryClient()` + 手写 `onSuccess` 失效（以及极易遗忘的、对调用方
+// `onSuccess` 的手动重链），使「写入后忘记刷新陈旧 UI」在结构上不可能发生。
+// 这是 TanStack Query 的 `MutationCache.meta` 正典模式——mutation 声明它触及
+// 哪些缓存的唯一、规范的落点。
+declare module "@tanstack/react-query" {
+  interface Register {
+    mutationMeta: {
+      /**
+       * Query-key prefixes to invalidate after this mutation succeeds.
+       * Invalidation is by prefix (the default `invalidateQueries` behavior),
+       * so listing a root key refreshes every query nested under it.
+       * 此 mutation 成功后要失效的 query-key 前缀。按前缀失效（`invalidateQueries`
+       * 的默认行为），因此列出一个根键即可刷新其下嵌套的所有查询。
+       */
+      invalidates?: readonly QueryKey[];
+    };
+  }
+}
 
 export interface CreateQueryClientOptions {
   onMutationError?: (error: Error) => void;
@@ -7,8 +39,20 @@ export interface CreateQueryClientOptions {
 
 // === 基础 QueryClient（必选） ===
 export function createQueryClient(options?: CreateQueryClientOptions) {
-  return new QueryClient({
+  const queryClient: QueryClient = new QueryClient({
     mutationCache: new MutationCache({
+      onSuccess(_data, _variables, _onMutateResult, mutation) {
+        // Run the mutation's declared invalidations. Mutations that need
+        // optimistic patches or `removeQueries` still do that in their own
+        // `onSuccess`; this only owns the declarative invalidate step.
+        // 执行 mutation 声明的失效。需要乐观更新或 `removeQueries` 的
+        // mutation 仍在自身 `onSuccess` 里处理；这里只负责声明式失效这一步。
+        const invalidates = mutation.meta?.invalidates;
+        if (!invalidates) return;
+        for (const queryKey of invalidates) {
+          void queryClient.invalidateQueries({ queryKey });
+        }
+      },
       onError(error, _variables, _context, mutation) {
         // Skip if the callsite already handles errors via its own onError
         // 如果调用点已通过自身 onError 处理错误，则跳过
@@ -45,4 +89,5 @@ export function createQueryClient(options?: CreateQueryClientOptions) {
       },
     },
   });
+  return queryClient;
 }

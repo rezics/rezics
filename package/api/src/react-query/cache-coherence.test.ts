@@ -4,6 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import {
   CACHE_COHERENCE_MAP,
   CACHE_NAMESPACE_ROOTS,
+  cacheDomainKeys,
   invalidateForCacheDomain,
   patchTranslationDetailQueries,
   preserveCachedTranslations,
@@ -188,5 +189,31 @@ describe("mutation → query namespace coherence map", () => {
     for (const ns of CACHE_COHERENCE_MAP["node-completion"]) {
       expect(invalidated).toContainEqual(CACHE_NAMESPACE_ROOTS[ns]);
     }
+  });
+
+  test("cacheDomainKeys returns the namespace roots a domain must invalidate", () => {
+    // The single source for the domain → query-key mapping that mutations now
+    // declare via `meta: { invalidates: cacheDomainKeys(domain) }`.
+    // mutation 现在通过 `meta: { invalidates: cacheDomainKeys(domain) }` 声明的
+    // domain → query-key 映射的唯一来源。
+    const keys = cacheDomainKeys("follow");
+    for (const ns of CACHE_COHERENCE_MAP.follow) {
+      expect(keys).toContainEqual(CACHE_NAMESPACE_ROOTS[ns]);
+    }
+    expect(keys).toHaveLength(CACHE_COHERENCE_MAP.follow.length);
+  });
+
+  test("invalidateForCacheDomain delegates to cacheDomainKeys (one source)", () => {
+    const invalidated: unknown[] = [];
+    const fakeClient = {
+      invalidateQueries: ({ queryKey }: { queryKey: unknown }) => {
+        invalidated.push(queryKey);
+        return Promise.resolve();
+      },
+    } as unknown as QueryClient;
+
+    invalidateForCacheDomain(fakeClient, "follow");
+
+    expect(invalidated).toEqual(cacheDomainKeys("follow"));
   });
 });

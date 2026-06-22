@@ -16,11 +16,15 @@ import {
 import { zoneApi } from "./zone.api";
 import { zoneKeys } from "./zone.keys";
 
-export function invalidateZoneQueries(
-  queryClient: Pick<ReturnType<typeof useQueryClient>, "invalidateQueries">,
-) {
-  queryClient.invalidateQueries({ queryKey: zoneKeys.details() });
-}
+// Every zone write refreshes all zone-shaped queries (detail, portal,
+// sections) — a config change can touch any section's data. Declared once via
+// `meta.invalidates` (see `react-query/tsr.ts`); the global MutationCache
+// handler runs it, so no mutation hand-wires `useQueryClient()`/`onSuccess`.
+// 每次专区写入都刷新所有专区形态的查询（详情、门户、分区）——配置更新可能
+// 触及任何分区的数据。通过 `meta.invalidates` 声明一次（见 `react-query/tsr.ts`），
+// 全局 MutationCache handler 执行它，因此没有 mutation 手写
+// `useQueryClient()`/`onSuccess`。
+const zoneInvalidates = { invalidates: [zoneKeys.details()] };
 
 export function useCreateZone(
   options?: Omit<
@@ -28,14 +32,10 @@ export function useCreateZone(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateZoneInput) => zoneApi.create(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateZoneQueries(queryClient);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: zoneInvalidates,
   });
 }
 
@@ -49,33 +49,10 @@ export function useUpdateZone(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, input }) => zoneApi.update(unitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      // Invalidate everything zone-shaped (detail, portal, sections) — a
-      // config update can change any section's data.
-      // 使所有专区形态的查询（详情、门户、分区）失效——配置更新可能改变
-      // 任何分区的数据。
-      invalidateZoneQueries(queryClient);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-function useZoneInvalidatingMutation<TInput>(
-  mutationFn: (input: TInput) => Promise<ZoneDTO>,
-  options?: Omit<UseMutationOptions<ZoneDTO, Error, TInput>, "mutationFn">,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn,
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateZoneQueries(queryClient);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: zoneInvalidates,
   });
 }
 
@@ -89,10 +66,11 @@ export function useUpdateZoneBoundary(
     "mutationFn"
   >,
 ) {
-  return useZoneInvalidatingMutation(
-    ({ unitId, input }) => zoneApi.updateBoundary(unitId, input),
-    options,
-  );
+  return useMutation({
+    mutationFn: ({ unitId, input }) => zoneApi.updateBoundary(unitId, input),
+    ...options,
+    meta: zoneInvalidates,
+  });
 }
 
 export function useUpdateZoneNav(
@@ -105,10 +83,11 @@ export function useUpdateZoneNav(
     "mutationFn"
   >,
 ) {
-  return useZoneInvalidatingMutation(
-    ({ unitId, input }) => zoneApi.updateNav(unitId, input),
-    options,
-  );
+  return useMutation({
+    mutationFn: ({ unitId, input }) => zoneApi.updateNav(unitId, input),
+    ...options,
+    meta: zoneInvalidates,
+  });
 }
 
 export function useUpdateZoneTheme(
@@ -121,10 +100,11 @@ export function useUpdateZoneTheme(
     "mutationFn"
   >,
 ) {
-  return useZoneInvalidatingMutation(
-    ({ unitId, input }) => zoneApi.updateTheme(unitId, input),
-    options,
-  );
+  return useMutation({
+    mutationFn: ({ unitId, input }) => zoneApi.updateTheme(unitId, input),
+    ...options,
+    meta: zoneInvalidates,
+  });
 }
 
 export function useCreateZonePage(
@@ -137,10 +117,11 @@ export function useCreateZonePage(
     "mutationFn"
   >,
 ) {
-  return useZoneInvalidatingMutation(
-    ({ unitId, input }) => zoneApi.createPage(unitId, input),
-    options,
-  );
+  return useMutation({
+    mutationFn: ({ unitId, input }) => zoneApi.createPage(unitId, input),
+    ...options,
+    meta: zoneInvalidates,
+  });
 }
 
 export function useUpdateZonePage(
@@ -153,10 +134,12 @@ export function useUpdateZonePage(
     "mutationFn"
   >,
 ) {
-  return useZoneInvalidatingMutation(
-    ({ unitId, pageId, input }) => zoneApi.updatePage(unitId, pageId, input),
-    options,
-  );
+  return useMutation({
+    mutationFn: ({ unitId, pageId, input }) =>
+      zoneApi.updatePage(unitId, pageId, input),
+    ...options,
+    meta: zoneInvalidates,
+  });
 }
 
 export function useDeleteZonePage(
@@ -165,10 +148,11 @@ export function useDeleteZonePage(
     "mutationFn"
   >,
 ) {
-  return useZoneInvalidatingMutation(
-    ({ unitId, pageId }) => zoneApi.deletePage(unitId, pageId),
-    options,
-  );
+  return useMutation({
+    mutationFn: ({ unitId, pageId }) => zoneApi.deletePage(unitId, pageId),
+    ...options,
+    meta: zoneInvalidates,
+  });
 }
 
 export function useDeleteZone(
@@ -177,13 +161,18 @@ export function useDeleteZone(
     "mutationFn"
   >,
 ) {
+  // Delete also drops the removed zone's exact cache entry, which is
+  // variable-dependent and cannot be declared statically — so this one keeps
+  // an `onSuccess` for `removeQueries` while the invalidate runs from meta.
+  // 删除还会丢弃被删专区的精确缓存项，这依赖变量、无法静态声明——因此这一个
+  // 保留 `onSuccess` 处理 `removeQueries`，而失效仍由 meta 执行。
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (unitId: string) => zoneApi.remove(unitId),
     ...options,
+    meta: zoneInvalidates,
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({ queryKey: zoneKeys.byUnitId(unitId) });
-      invalidateZoneQueries(queryClient);
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });

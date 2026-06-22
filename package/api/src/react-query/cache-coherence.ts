@@ -83,21 +83,37 @@ export const CACHE_COHERENCE_MAP = {
 } as const satisfies Record<CacheMutationDomain, readonly CacheNamespace[]>;
 
 /**
- * Invalidate every query namespace declared for `domain`. Call from a
- * mutation's `onSuccess`. Over-invalidation by prefix is intentional: it
- * keeps the declared surfaces fresh without per-key bookkeeping.
- * 失效 `domain` 声明的每个 query 命名空间。从 mutation 的 `onSuccess`
- * 调用。按前缀的过度失效是有意为之：它在无需逐 key 记账的情况下保持
+ * The query-key roots a mutation `domain` must invalidate, as a flat list of
+ * prefixes. Mutations declare `meta: { invalidates: cacheDomainKeys(domain) }`
+ * (see `tsr.ts`) so the global MutationCache handler refreshes every declared
+ * surface — no `useQueryClient()` or hand-wired `onSuccess` per mutation.
+ * 一个 mutation `domain` 必须失效的 query-key 根，扁平的前缀列表。mutation
+ * 声明 `meta: { invalidates: cacheDomainKeys(domain) }`（见 `tsr.ts`），全局
+ * MutationCache handler 即刷新每个已声明的面——无需每个 mutation 各写
+ * `useQueryClient()` 或手工 `onSuccess`。
+ */
+export function cacheDomainKeys(domain: CacheMutationDomain): QueryKey[] {
+  return CACHE_COHERENCE_MAP[domain].map((ns) => CACHE_NAMESPACE_ROOTS[ns]);
+}
+
+/**
+ * Imperative form of {@link cacheDomainKeys} for callsites not yet on the
+ * declarative `meta.invalidates` path (optimistic mutations that already own
+ * an `onSuccess`). Delegates to the same map so there is one source of truth.
+ * Over-invalidation by prefix is intentional: it keeps the declared surfaces
+ * fresh without per-key bookkeeping.
+ * {@link cacheDomainKeys} 的命令式形式，供尚未切到声明式 `meta.invalidates`
+ * 的调用点使用（已自带 `onSuccess` 的乐观 mutation）。委托同一个 map，因此
+ * 只有一个事实来源。按前缀的过度失效是有意为之：无需逐 key 记账即可保持
  * 已声明的面新鲜。
  */
 export function invalidateForCacheDomain(
   queryClient: QueryClient,
   domain: CacheMutationDomain,
 ): Promise<void> {
-  const namespaces = CACHE_COHERENCE_MAP[domain];
   return Promise.all(
-    namespaces.map((ns) =>
-      queryClient.invalidateQueries({ queryKey: CACHE_NAMESPACE_ROOTS[ns] }),
+    cacheDomainKeys(domain).map((queryKey) =>
+      queryClient.invalidateQueries({ queryKey }),
     ),
   ).then(() => undefined);
 }
