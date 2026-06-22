@@ -76,6 +76,43 @@ describe("realm mappers", () => {
     expect(dto.title).toBeNull();
   });
 
+  test("translations run through the canonical mapper (DB null → undefined)", () => {
+    // A raw `as unknown as UnitTranslationDTO[]` cast would leak DB nulls to
+    // the wire (`"title": null` instead of an omitted field); the canonical
+    // mapper normalizes them to undefined.
+    // 原始 `as unknown as UnitTranslationDTO[]` 强转会把 DB null 泄漏到
+    // wire（`"title": null` 而非省略字段）；规范 mapper 把它们规范为 undefined。
+    const dto = mapRealmToDTO(
+      realmRow({
+        unit: {
+          ...realmRow().unit,
+          translations: [
+            {
+              unitId: "realm-1",
+              language: "en",
+              title: null,
+              subtitle: null,
+              summary: null,
+              description: null,
+              extra: null,
+              sourceUnitId: null,
+              createdAt: new Date("2026-06-03T00:00:00.000Z"),
+              updatedAt: new Date("2026-06-03T00:00:00.000Z"),
+            },
+          ],
+        },
+      }),
+      ["en"],
+    );
+
+    const [translation] = dto.translations;
+    expect(translation.title).toBeUndefined();
+    expect(translation.subtitle).toBeUndefined();
+    expect(translation.summary).toBeUndefined();
+    expect(translation.sourceUnitId).toBeUndefined();
+    expect(translation.extra).toBeUndefined();
+  });
+
   test("app locale outranks read fallback candidates", () => {
     const dto = mapRealmToDTO(
       realmRow({

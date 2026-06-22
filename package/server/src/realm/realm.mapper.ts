@@ -6,7 +6,6 @@ import type {
   RealmTagContextDTO,
   SupportLanguageLike,
   UnitRealmDTO,
-  UnitTranslationDTO,
 } from "@rezics/contract";
 import {
   emptyRealmDock,
@@ -14,6 +13,7 @@ import {
   resolveReadLanguage,
 } from "@rezics/contract";
 import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
+import { mapTranslationToDTO } from "@/unit/mapper";
 import type {
   RealmMember,
   RealmTagApplication,
@@ -83,8 +83,7 @@ export function mapRealmToDTO(
     title: translation?.title ?? null,
     description:
       (translation?.description as RealmDTO["description"] | undefined) ?? null,
-    translations: (row.unit?.translations ??
-      []) as unknown as UnitTranslationDTO[],
+    translations: (row.unit?.translations ?? []).map(mapTranslationToDTO),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -113,8 +112,7 @@ export function mapRealmListRowToDTO(
     title: translation?.title ?? null,
     description:
       (translation?.description as RealmDTO["description"] | undefined) ?? null,
-    translations: (row.unit?.translations ??
-      []) as unknown as UnitTranslationDTO[],
+    translations: (row.unit?.translations ?? []).map(mapTranslationToDTO),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
