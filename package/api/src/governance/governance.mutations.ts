@@ -15,79 +15,32 @@ import type {
   TriageModerationCaseInput,
   UnblockAccountEnforcementInput,
 } from "@rezics/contract";
-import {
-  type QueryClient,
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { postKeys } from "../post/post.keys";
 import { realmKeys } from "../realm/realm.keys";
 import { governanceApi } from "./governance.api";
 import { governanceKeys } from "./governance.keys";
 
-export function invalidateGovernanceCaseQueries(
-  queryClient: Pick<QueryClient, "invalidateQueries">,
-  caseId?: string,
-) {
-  queryClient.invalidateQueries({ queryKey: governanceKeys.cases() });
-  if (caseId) {
-    queryClient.invalidateQueries({
-      queryKey: governanceKeys.caseDetail(caseId),
-    });
-  }
-}
-
-export function invalidateGovernanceEnforcementQueries(
-  queryClient: Pick<QueryClient, "invalidateQueries">,
-  targetUserId: string,
-) {
-  queryClient.invalidateQueries({
-    queryKey: governanceKeys.enforcementList(targetUserId),
-  });
-  queryClient.invalidateQueries({
-    queryKey: governanceKeys.enforcementActive(targetUserId),
-  });
-}
-
-export function invalidateRealmCapabilityQueries(
-  queryClient: Pick<QueryClient, "invalidateQueries">,
-  realmUnitId: string,
-) {
-  queryClient.invalidateQueries({ queryKey: governanceKeys.capabilityHints() });
-  queryClient.invalidateQueries({ queryKey: realmKeys.members(realmUnitId) });
-}
-
-export function invalidateRealmCaseQueries(
-  queryClient: Pick<QueryClient, "invalidateQueries">,
-  realmUnitId: string,
-  caseId?: string,
-) {
-  queryClient.invalidateQueries({
-    queryKey: governanceKeys.realmCases(realmUnitId),
-  });
-  if (caseId) {
-    queryClient.invalidateQueries({
-      queryKey: [...governanceKeys.realmCases(realmUnitId), "detail", caseId],
-    });
-  }
-}
-
-export function invalidateRealmUnitStateQueries(
-  queryClient: Pick<QueryClient, "invalidateQueries">,
-  realmUnitId: string,
-  targetUnitId: string,
-) {
-  queryClient.invalidateQueries({
-    queryKey: governanceKeys.realmUnitState(realmUnitId, targetUnitId),
-  });
-  queryClient.invalidateQueries({
-    queryKey: postKeys.byRealms(realmUnitId),
-  });
-  queryClient.invalidateQueries({
-    queryKey: postKeys.moderationOverlays(realmUnitId, [targetUnitId]),
-  });
-}
+// Shared invalidation key sets — each group covers a governance write domain.
+// ponytail: category-level prefixes eliminate per-entity dynamic keys.
+// 共享的失效 key 集——每组覆盖一个治理写域。
+// ponytail: 类别级前缀消除了每实体的动态 key。
+const invalidatesEnforcement = [governanceKeys.enforcement()];
+const invalidatesCases = [governanceKeys.cases()];
+// ponytail: realmKeys.all() broadened from realmKeys.members(realmUnitId)
+const invalidatesCapabilities = [
+  governanceKeys.capabilityHints(),
+  realmKeys.all(),
+];
+// ponytail: governanceKeys.all() covers both realmCases and global cases
+// (escalation conditional on data.parentCaseId becomes unnecessary)
+// ponytail: governanceKeys.all() 同时覆盖 realmCases 和全局 cases
+// （基于 data.parentCaseId 的条件失效变得不再必要）
+const invalidatesRealmCases = [governanceKeys.all()];
+// ponytail: content moderation affects governance state + post feeds;
+// postKeys.all() broadened from per-realm post keys
+// ponytail: 内容审核影响治理状态和帖子流；postKeys.all() 从 per-realm 拓宽
+const invalidatesContentModeration = [governanceKeys.all(), postKeys.all()];
 
 export function useApplyAccountEnforcementMutation(
   options?: Omit<
@@ -99,19 +52,11 @@ export function useApplyAccountEnforcementMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ targetUserId, input }) =>
       governanceApi.applyEnforcement(targetUserId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceEnforcementQueries(
-        queryClient,
-        variables.targetUserId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesEnforcement },
   });
 }
 
@@ -125,19 +70,11 @@ export function useUnblockAccountEnforcementMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ targetUserId, input }) =>
       governanceApi.unblockEnforcement(targetUserId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceEnforcementQueries(
-        queryClient,
-        variables.targetUserId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesEnforcement },
   });
 }
 
@@ -151,16 +88,11 @@ export function useGrantRealmCapabilityMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, userId, input }) =>
       governanceApi.grantRealmCapability(realmUnitId, userId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCapabilityQueries(queryClient, variables.realmUnitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesCapabilities },
   });
 }
 
@@ -174,16 +106,11 @@ export function useRevokeRealmCapabilityMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, userId, capability }) =>
       governanceApi.revokeRealmCapability(realmUnitId, userId, capability),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCapabilityQueries(queryClient, variables.realmUnitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesCapabilities },
   });
 }
 
@@ -197,16 +124,11 @@ export function useCreateModerationCaseFromFeedbackMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ feedbackId, input }) =>
       governanceApi.createCaseFromFeedback(feedbackId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceCaseQueries(queryClient, data.id);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesCases },
   });
 }
 
@@ -220,17 +142,11 @@ export function useDuplicateModerationCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ caseId, input }) =>
       governanceApi.duplicateCase(caseId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceCaseQueries(queryClient, variables.caseId);
-      invalidateGovernanceCaseQueries(queryClient, data.id);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesCases },
   });
 }
 
@@ -244,15 +160,10 @@ export function useAssignModerationCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ caseId, input }) => governanceApi.assignCase(caseId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceCaseQueries(queryClient, variables.caseId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    mutationFn: ({ caseId, input }) => governanceApi.assignCase(caseId, input),
+    meta: { invalidates: invalidatesCases },
   });
 }
 
@@ -266,15 +177,10 @@ export function useTriageModerationCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ caseId, input }) => governanceApi.triageCase(caseId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceCaseQueries(queryClient, variables.caseId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    mutationFn: ({ caseId, input }) => governanceApi.triageCase(caseId, input),
+    meta: { invalidates: invalidatesCases },
   });
 }
 
@@ -288,15 +194,10 @@ export function useDecideModerationCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ caseId, input }) => governanceApi.decideCase(caseId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceCaseQueries(queryClient, variables.caseId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    mutationFn: ({ caseId, input }) => governanceApi.decideCase(caseId, input),
+    meta: { invalidates: invalidatesCases },
   });
 }
 
@@ -310,15 +211,10 @@ export function useAppealModerationCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ caseId, input }) => governanceApi.appealCase(caseId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateGovernanceCaseQueries(queryClient, variables.caseId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    mutationFn: ({ caseId, input }) => governanceApi.appealCase(caseId, input),
+    meta: { invalidates: invalidatesCases },
   });
 }
 
@@ -332,16 +228,11 @@ export function useCreateRealmCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, input }) =>
       governanceApi.createRealmCase(realmUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCaseQueries(queryClient, variables.realmUnitId, data.id);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesRealmCases },
   });
 }
 
@@ -359,16 +250,11 @@ export function useCreateRealmCaseFromFeedbackMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, feedbackId, input }) =>
       governanceApi.createRealmCaseFromFeedback(realmUnitId, feedbackId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCaseQueries(queryClient, variables.realmUnitId, data.id);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesRealmCases },
   });
 }
 
@@ -386,23 +272,11 @@ export function useDecideRealmCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, caseId, input }) =>
       governanceApi.decideRealmCase(realmUnitId, caseId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCaseQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.caseId,
-      );
-      if (data.parentCaseId) {
-        invalidateGovernanceCaseQueries(queryClient, data.parentCaseId);
-      }
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesRealmCases },
   });
 }
 
@@ -420,23 +294,11 @@ export function useEscalateRealmCaseMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, caseId, input }) =>
       governanceApi.escalateRealmCase(realmUnitId, caseId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCaseQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.caseId,
-      );
-      if (data.parentCaseId) {
-        invalidateGovernanceCaseQueries(queryClient, data.parentCaseId);
-      }
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesRealmCases },
   });
 }
 
@@ -454,20 +316,11 @@ export function useRestoreRealmContentMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.restoreRealmContent(realmUnitId, targetUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmUnitStateQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.targetUnitId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesContentModeration },
   });
 }
 
@@ -485,20 +338,11 @@ export function useApproveRealmContentMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.approveRealmContent(realmUnitId, targetUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmUnitStateQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.targetUnitId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesContentModeration },
   });
 }
 
@@ -516,20 +360,11 @@ export function useRemoveRealmContentMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.removeRealmContent(realmUnitId, targetUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmUnitStateQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.targetUnitId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesContentModeration },
   });
 }
 
@@ -548,9 +383,8 @@ export function useSetRealmContentLockMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, targetUnitId, isLocked, input }) =>
       governanceApi.setRealmContentLock(
         realmUnitId,
@@ -558,15 +392,7 @@ export function useSetRealmContentLockMutation(
         isLocked,
         input,
       ),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmUnitStateQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.targetUnitId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesContentModeration },
   });
 }
 
@@ -586,20 +412,15 @@ export function useRequestRealmContentOwnerDelegationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.requestRealmContentOwnerDelegation(
         realmUnitId,
         targetUnitId,
         input,
       ),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmCaseQueries(queryClient, variables.realmUnitId, data.id);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesRealmCases },
   });
 }
 

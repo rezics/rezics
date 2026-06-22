@@ -2,13 +2,6 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "../config";
 import { governanceApi } from "./governance.api";
 import { governanceKeys } from "./governance.keys";
-import {
-  invalidateGovernanceCaseQueries,
-  invalidateGovernanceEnforcementQueries,
-  invalidateRealmCapabilityQueries,
-  invalidateRealmCaseQueries,
-  invalidateRealmUnitStateQueries,
-} from "./governance.mutations";
 
 const fetchMock = mock();
 
@@ -148,7 +141,7 @@ describe("governanceApi", () => {
     );
   });
 
-  test("exposes stable governance keys and invalidation helpers", () => {
+  test("exposes stable governance keys", () => {
     expect(governanceKeys.caseDetail("case-1")).toEqual([
       "governance",
       "cases",
@@ -167,52 +160,6 @@ describe("governanceApi", () => {
       "realm",
       "escalated",
       { limit: 8 },
-    ]);
-
-    const queryClient = {
-      invalidateQueries: mock(async () => undefined),
-    };
-
-    invalidateGovernanceCaseQueries(queryClient, "case-1");
-    invalidateGovernanceEnforcementQueries(queryClient, "user-1");
-    invalidateRealmCapabilityQueries(queryClient, "realm-1");
-    invalidateRealmCaseQueries(queryClient, "realm-1", "case-1");
-    invalidateRealmUnitStateQueries(queryClient, "realm-1", "post-1");
-
-    expect(
-      (queryClient.invalidateQueries.mock.calls as any[]).map(
-        (call) => call[0],
-      ),
-    ).toEqual([
-      { queryKey: ["governance", "cases"] },
-      { queryKey: ["governance", "cases", "detail", "case-1"] },
-      { queryKey: ["governance", "enforcement", "list", "user-1", undefined] },
-      { queryKey: ["governance", "enforcement", "active", "user-1"] },
-      { queryKey: ["governance", "capability-hints"] },
-      { queryKey: ["realms", "members", "realm-1"] },
-      { queryKey: ["governance", "realms", "realm-1", "cases"] },
-      {
-        queryKey: [
-          "governance",
-          "realms",
-          "realm-1",
-          "cases",
-          "detail",
-          "case-1",
-        ],
-      },
-      {
-        queryKey: [
-          "governance",
-          "realms",
-          "realm-1",
-          "content",
-          "post-1",
-          "moderation",
-        ],
-      },
-      { queryKey: ["posts", "realm", "realm-1"] },
-      { queryKey: ["posts", "moderation-overlays", "realm-1", ["post-1"]] },
     ]);
   });
 });

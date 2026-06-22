@@ -23,6 +23,7 @@ const FULLY_MIGRATED = [
   "unit/authority.mutations.ts",
   "realm/realm-extra.mutations.ts",
   "auth/auth.mutations.ts",
+  "governance/governance.mutations.ts",
 ];
 
 // Files using meta.invalidates but retaining useQueryClient for
