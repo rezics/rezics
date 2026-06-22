@@ -338,6 +338,16 @@ async function federatedSingle(
       processingTimeMs = resp.processingTimeMs;
       break;
     }
+    case "all":
+    case "mixed":
+      // Handled by caller via federatedGrouped; no-op if reached directly.
+      // 由调用方通过 federatedGrouped 处理；直达此处则空操作。
+      break;
+    default: {
+      const _exhaustive: never = category;
+      void _exhaustive;
+      break;
+    }
   }
 
   return {

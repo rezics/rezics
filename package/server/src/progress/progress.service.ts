@@ -1019,10 +1019,9 @@ export class ProgressService {
     }
 
     return {
-      rows: page.rows.map((row): ProgressLibraryRow => {
-        const unit = row.unit as unknown as UnitDisplay & {
-          targetUnit?: UnitDisplay | null;
-        };
+      rows: page.rows.flatMap((row): ProgressLibraryRow[] => {
+        const unit = row.unit;
+        if (!unit) return [];
         const lastReadNode =
           "lastReadNode" in row
             ? (row.lastReadNode as { isDeleted?: boolean } | null)
@@ -1030,27 +1029,29 @@ export class ProgressService {
         const lastReadNodeId =
           lastReadNode && !lastReadNode.isDeleted ? row.lastReadNodeId : null;
 
-        return {
-          progress: mapProgressToDTO(row),
-          progressUnit: unitSummary(row.unitId, unit, query),
-          mainUnitContext:
-            unit.catalogEntryKind === "VARIANT" &&
-            unit.targetUnitId &&
-            unit.targetUnit
-              ? unitSummary(unit.targetUnitId, unit.targetUnit, query)
-              : null,
-          // Progress rows are anchored to the exact unit the user touched.
-          // Even when that unit is a VARIANT, resume routes keep that id.
-          // 进度行锚定到用户实际操作的那个 unit。
-          // 即使该 unit 是 VARIANT，恢复阅读的路由仍保留该 id。
-          resumeRoute:
-            unit.type === "BOOK"
-              ? lastReadNodeId
-                ? { kind: "node", bookId: row.unitId, nodeId: lastReadNodeId }
-                : { kind: "book", bookId: row.unitId }
-              : undefined,
-          shelves: shelvesByUnit.get(row.unitId) ?? [],
-        };
+        return [
+          {
+            progress: mapProgressToDTO(row),
+            progressUnit: unitSummary(row.unitId, unit, query),
+            mainUnitContext:
+              unit.catalogEntryKind === "VARIANT" &&
+              unit.targetUnitId &&
+              unit.targetUnit
+                ? unitSummary(unit.targetUnitId, unit.targetUnit, query)
+                : null,
+            // Progress rows are anchored to the exact unit the user touched.
+            // Even when that unit is a VARIANT, resume routes keep that id.
+            // 进度行锚定到用户实际操作的那个 unit。
+            // 即使该 unit 是 VARIANT，恢复阅读的路由仍保留该 id。
+            resumeRoute:
+              unit.type === "BOOK"
+                ? lastReadNodeId
+                  ? { kind: "node", bookId: row.unitId, nodeId: lastReadNodeId }
+                  : { kind: "book", bookId: row.unitId }
+                : undefined,
+            shelves: shelvesByUnit.get(row.unitId) ?? [],
+          },
+        ];
       }),
       nextCursor: page.nextCursor,
     };
