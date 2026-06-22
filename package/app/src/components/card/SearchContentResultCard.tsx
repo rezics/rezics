@@ -2,13 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage, Card } from "@rezics/ui/shadcn";
 import { FileText } from "lucide-react";
 import type * as React from "react";
 import { Link } from "@/shared/ui/link";
-import { cn } from "@/shared/utils/css-util";
+import { clampStyle, cn } from "@/shared/utils/css-util";
 import { UserHoverPreview, type UserHoverPreviewUser } from "@/user";
-
-type ClampStyle = React.CSSProperties & {
-  WebkitBoxOrient?: "vertical";
-  WebkitLineClamp?: number;
-};
 
 export interface SearchContentResultCardProps
   extends Omit<React.ComponentProps<typeof Card>, "children" | "title"> {
@@ -240,11 +235,3 @@ export function SearchContentResultCard({
   );
 }
 
-function clampStyle(lines: number): ClampStyle {
-  return {
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: lines,
-    overflow: "hidden",
-  };
-}

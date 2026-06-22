@@ -4,7 +4,7 @@ import { realmDetailQuery } from "@rezics/api/realm/realm";
 import {
   CONTENT_LANGUAGE_SLUGS,
   type CommentDTO,
-  LANGUAGE_META,
+  languageLabel,
   markdownContentDoc,
   markdownContentDocWithPoll,
   type PollDTO,
@@ -539,9 +539,3 @@ export function useBlurRetain(body: string) {
   return () => body.trim().length > 0;
 }
 
-function languageLabel(language: string): string {
-  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[
-    language
-  ];
-  return meta?.nativeName ? `${meta.nativeName} (${language})` : language;
-}

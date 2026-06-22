@@ -8,7 +8,7 @@ import type { CommentDTO, PostDTO } from "@rezics/contract";
 import {
   type ContentLanguage,
   CONTENT_LANGUAGE_SLUGS,
-  LANGUAGE_META,
+  languageLabel,
   mainMarkdownSource,
   markdownContentDoc,
   normalizeContentLanguage,
@@ -239,9 +239,3 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   );
 };
 
-function languageLabel(language: string): string {
-  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[
-    language
-  ];
-  return meta?.nativeName ? `${meta.nativeName} (${language})` : language;
-}

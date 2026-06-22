@@ -11,6 +11,7 @@ export {
   DEFAULT_LANGUAGE,
   FALLBACK_LANGUAGE,
   francMinLanguageToContentLanguage,
+  languageLabel,
   LANGUAGE_META,
   LANGUAGES,
   type Language,

@@ -1,5 +1,5 @@
 import type { BookDTO } from "@rezics/contract";
-import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
+import { languageLabel, LANGUAGES } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -82,10 +82,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               <SelectContent>
                 {available.map((l) => (
                   <SelectItem key={l} value={l}>
-                    {(LANGUAGE_META as Record<string, { nativeName?: string }>)[
-                      l
-                    ]?.nativeName ?? l}{" "}
-                    ({l})
+                    {languageLabel(l)}
                   </SelectItem>
                 ))}
               </SelectContent>

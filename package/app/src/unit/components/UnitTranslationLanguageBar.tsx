@@ -1,4 +1,4 @@
-import { CONTENT_LANGUAGE_SLUGS, LANGUAGE_META } from "@rezics/contract";
+import { CONTENT_LANGUAGE_SLUGS, languageLabel } from "@rezics/contract";
 import {
   Button,
   Select,
@@ -84,7 +84,3 @@ export const UnitTranslationLanguageBar: React.FC<
   );
 };
 
-function languageLabel(lang: string): string {
-  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[lang];
-  return meta?.nativeName ? `${meta.nativeName} (${lang})` : lang;
-}

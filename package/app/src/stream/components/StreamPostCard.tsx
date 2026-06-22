@@ -42,13 +42,8 @@ import {
 } from "@/post";
 import { reviewCardActions, reviewPolicy } from "@/review";
 import { TextLink } from "@/shared/ui/link";
-import { cn } from "@/shared/utils/css-util";
+import { clampStyle, cn } from "@/shared/utils/css-util";
 import { VariantContextLink } from "@/unit";
-
-type ClampStyle = React.CSSProperties & {
-  WebkitBoxOrient?: "vertical";
-  WebkitLineClamp?: number;
-};
 
 const EMPTY_REACTION_TARGET_IDS: readonly string[] = [];
 
@@ -396,15 +391,6 @@ function postDetailHref(post: PostDTO): string {
     default:
       return `/post/${post.unitId}`;
   }
-}
-
-function clampStyle(lines: number): ClampStyle {
-  return {
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: lines,
-    overflow: "hidden",
-  };
 }
 
 function StreamReviewRating({ post }: { post: PostDTO }) {

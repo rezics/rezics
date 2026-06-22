@@ -1,7 +1,7 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import {
   CONTENT_LANGUAGE_SLUGS,
-  LANGUAGE_META,
+  languageLabel,
   markdownContentDoc,
   PostKind,
   SCORE_MAX,
@@ -203,9 +203,3 @@ export const RemarkInlineForm = forwardRef<
 
 RemarkInlineForm.displayName = "RemarkInlineForm";
 
-function languageLabel(language: string): string {
-  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[
-    language
-  ];
-  return meta?.nativeName ? `${meta.nativeName} (${language})` : language;
-}

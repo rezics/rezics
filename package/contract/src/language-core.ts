@@ -740,6 +740,13 @@ export const LANGUAGE_META: Record<
   ]),
 ) as Record<ContentLanguage, { name: string; nativeName: string }>;
 
+// Display label for a language code: "nativeName (code)" or just the code.
+// 语言代码的显示标签："本地名称 (code)"或仅代码。
+export function languageLabel(code: string): string {
+  const meta = (LANGUAGE_META as Record<string, { nativeName?: string }>)[code];
+  return meta?.nativeName ? `${meta.nativeName} (${code})` : code;
+}
+
 // ============================================================
 // DEFAULTS
 // 默认值

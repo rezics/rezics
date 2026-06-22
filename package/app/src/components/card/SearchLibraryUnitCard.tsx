@@ -2,12 +2,7 @@ import { Card } from "@rezics/ui/shadcn";
 import { BookOpen } from "lucide-react";
 import type * as React from "react";
 import { Link } from "@/shared/ui/link";
-import { cn } from "@/shared/utils/css-util";
-
-type ClampStyle = React.CSSProperties & {
-  WebkitBoxOrient?: "vertical";
-  WebkitLineClamp?: number;
-};
+import { clampStyle, cn } from "@/shared/utils/css-util";
 
 export interface SearchLibraryUnitCardProps
   extends Omit<React.ComponentProps<typeof Card>, "children" | "title"> {
@@ -119,11 +114,3 @@ export function SearchLibraryUnitCard({
   );
 }
 
-function clampStyle(lines: number): ClampStyle {
-  return {
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: lines,
-    overflow: "hidden",
-  };
-}
