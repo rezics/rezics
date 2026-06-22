@@ -408,6 +408,16 @@ export function createUnoConfig() {
       // shadcn 的 32 个颜色 + rezics 扩展在此作为单一、统一的结构存在。wind4 将每个
       // 叶子节点生成为 `:root, :host` 下扁平的 `--colors-<path>` 自定义属性；dark
       // 覆盖由上面的 preflight 生成。
+      // Custom line-height tokens from typography.ts. Without this mapping,
+      // `leading-ui` / `leading-dense` / `leading-body` generate zero CSS.
+      // typography.ts 中的自定义行高 token。缺少此映射时，leading-ui /
+      // leading-dense / leading-body 将不生成任何 CSS。
+      lineHeight: {
+        reader: "1.6",
+        body: "1.55",
+        ui: "1.4",
+        dense: "1.3",
+      },
       colors: lightColors as unknown as Record<string, unknown>,
     },
   });
