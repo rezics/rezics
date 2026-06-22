@@ -22,16 +22,23 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { cacheDomainKeys } from "../react-query/cache-coherence";
 import { shelfItemActionApi, shelfApi } from "./shelf.api";
 import { shelfItemStatusKeys, shelfKeys } from "./shelf.keys";
+
+// ponytail: cacheDomainKeys("shelf-item") covers ["books"], ["users"],
+// ["search"], ["shelves"], ["shelf-item-status"] — the ["shelves"] root
+// subsumes shelfKeys.lists()/mine()
+// ponytail: cacheDomainKeys("shelf-item") 覆盖 ["books"]、["users"]、
+// ["search"]、["shelves"]、["shelf-item-status"]——["shelves"] 根前缀涵盖了
+// shelfKeys.lists()/mine()
+const invalidatesShelfItem = cacheDomainKeys("shelf-item");
 
 function invalidateShelfSurfaces(
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
   queryClient.invalidateQueries({ queryKey: shelfKeys.lists() });
   queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
-  void invalidateForCacheDomain(queryClient, "shelf-item");
 }
 
 function invalidateShelfDetail(
@@ -57,6 +64,7 @@ export function useCreateShelfMutation(
       queryClient.setQueryData(shelfKeys.detail(data.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -79,6 +87,7 @@ export function useUpdateShelfMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -97,6 +106,7 @@ export function useDeleteShelfMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -119,6 +129,7 @@ export function useAddShelfItemMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -147,6 +158,7 @@ export function useReorderShelfItemMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -170,6 +182,7 @@ export function useRemoveShelfItemMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -198,6 +211,7 @@ export function useAttachReviewMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -226,6 +240,7 @@ export function useDetachReviewMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -254,6 +269,7 @@ export function useSetShelfItemChildrenMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -276,6 +292,7 @@ export function useBatchUpdateShelfItemsMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -298,6 +315,7 @@ export function useSetShelfPinnedTagsMutation(
       invalidateShelfSurfaces(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 
@@ -341,6 +359,7 @@ export function useAddToShelvesMutation(
       }
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesShelfItem },
   });
 }
 

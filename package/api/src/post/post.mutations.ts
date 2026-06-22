@@ -16,8 +16,11 @@ import {
 } from "@tanstack/react-query";
 import { commentKeys } from "../comment/comment.keys";
 import { streamKeys } from "../stream/stream.keys";
-import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { cacheDomainKeys } from "../react-query/cache-coherence";
 import { unitKeys } from "../unit/unit.keys";
+
+// ponytail: cacheDomainKeys("draft") = [["drafts"]]
+const invalidatesDraft = cacheDomainKeys("draft");
 import { postApi } from "./post.api";
 import { postKeys } from "./post.keys";
 import type { CreateRootPostInput } from "./post.types";
@@ -143,15 +146,9 @@ export function useCreatePostMutation(
         realmUnitIds: variables.realmUnitIds,
       });
 
-      // A draft create adds to the drafts list; route through the draft cache
-      // domain so draft readers refresh.
-      // 创建草稿会将其加入草稿列表；通过 draft 缓存域路由，使草稿读取方刷新。
-      if (variables.status === "DRAFT") {
-        await invalidateForCacheDomain(queryClient, "draft");
-      }
-
       await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesDraft },
   });
 }
 
@@ -179,13 +176,9 @@ export function useCreateWikiPostMutation(
         variantUnitIds: [variables.variantUnitId],
         realmUnitIds: variables.realmUnitIds,
       });
-      // A draft wiki create surfaces in the drafts list.
-      // 创建 wiki 草稿会出现在草稿列表中。
-      if (variables.status === "DRAFT") {
-        await invalidateForCacheDomain(queryClient, "draft");
-      }
       await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesDraft },
   });
 }
 
@@ -298,16 +291,14 @@ export function useSetPostPublicationMutation(
       postApi.setPublication(unitId, { publish }),
     ...options,
     onSuccess: async (data, variables, onMutateResult, context) => {
-      await Promise.all([
-        syncPostMutationCache({
-          queryClient,
-          unitId: variables.unitId,
-          data,
-        }),
-        invalidateForCacheDomain(queryClient, "draft"),
-      ]);
+      await syncPostMutationCache({
+        queryClient,
+        unitId: variables.unitId,
+        data,
+      });
       await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesDraft },
   });
 }
 
@@ -327,17 +318,15 @@ export function useSubmitPostToRealmMutation(
     mutationFn: ({ unitId, input }) => postApi.submitToRealm(unitId, input),
     ...options,
     onSuccess: async (data, variables, onMutateResult, context) => {
-      await Promise.all([
-        syncPostMutationCache({
-          queryClient,
-          unitId: variables.unitId,
-          data,
-          realmUnitIds: [variables.input.realmUnitId],
-        }),
-        invalidateForCacheDomain(queryClient, "draft"),
-      ]);
+      await syncPostMutationCache({
+        queryClient,
+        unitId: variables.unitId,
+        data,
+        realmUnitIds: [variables.input.realmUnitId],
+      });
       await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesDraft },
   });
 }
 

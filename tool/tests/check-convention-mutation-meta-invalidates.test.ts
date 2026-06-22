@@ -29,7 +29,14 @@ const FULLY_MIGRATED = [
 // Files using meta.invalidates but retaining useQueryClient for
 // removeQueries/setQueryData (hybrid).
 // 使用 meta.invalidates 但保留 useQueryClient 做 removeQueries/setQueryData 的文件。
-const HYBRID_MIGRATED = ["zone/zone.mutations.ts"];
+const HYBRID_MIGRATED = [
+  "zone/zone.mutations.ts",
+  "progress/progress.mutations.ts",
+  "shelf/shelf.mutations.ts",
+  "realm/realm.mutations.ts",
+  "reaction/reaction.mutations.ts",
+  "post/post.mutations.ts",
+];
 
 const ALL_MIGRATED = [...FULLY_MIGRATED, ...HYBRID_MIGRATED];
 

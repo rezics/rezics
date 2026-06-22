@@ -11,9 +11,16 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { cacheDomainKeys } from "../react-query/cache-coherence";
 import { progressApi } from "./progress.api";
 import { progressKeys } from "./progress.keys";
+
+// ponytail: cacheDomainKeys("progress") covers ["books"], ["users"],
+// ["progress"] — the last root subsumes progressKeys.unitPosts(unitId)
+// ponytail: cacheDomainKeys("progress") 覆盖 ["books"]、["users"]、
+// ["progress"]——最后的根前缀涵盖了 progressKeys.unitPosts(unitId)
+const invalidatesProgress = cacheDomainKeys("progress");
+const invalidatesNodeCompletion = cacheDomainKeys("node-completion");
 
 export function useUpdateUnitProgress(
   unitId: string,
@@ -25,14 +32,14 @@ export function useUpdateUnitProgress(
   const queryClient = useQueryClient();
 
   return useMutation({
+    ...options,
     mutationFn: (input: UnitProgressUpsertBody) =>
       progressApi.updateUnitProgress(unitId, input),
-    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(progressKeys.unit(unitId), data);
-      void invalidateForCacheDomain(queryClient, "progress");
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesProgress },
   });
 }
 
@@ -46,22 +53,14 @@ export function useDeleteUnitProgress(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => progressApi.deleteUnitProgress(unitId),
     ...options,
+    mutationFn: () => progressApi.deleteUnitProgress(unitId),
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(progressKeys.unit(unitId), null);
-      void invalidateForCacheDomain(queryClient, "progress");
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesProgress },
   });
-}
-
-function invalidateProgressPosts(
-  queryClient: ReturnType<typeof useQueryClient>,
-  unitId: string,
-) {
-  queryClient.invalidateQueries({ queryKey: progressKeys.unitPosts(unitId) });
-  void invalidateForCacheDomain(queryClient, "progress");
 }
 
 export function useLinkProgressPost(
@@ -71,16 +70,11 @@ export function useLinkProgressPost(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: (input: LinkProgressPostBody) =>
       progressApi.linkProgressPost(unitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateProgressPosts(queryClient, unitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesProgress },
   });
 }
 
@@ -95,16 +89,11 @@ export function useUpdateProgressPostLink(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: ({ postUnitId, input }) =>
       progressApi.updateProgressPostLink(unitId, postUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateProgressPosts(queryClient, unitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesProgress },
   });
 }
 
@@ -115,16 +104,11 @@ export function useUnlinkProgressPost(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: (postUnitId: string) =>
       progressApi.unlinkProgressPost(unitId, postUnitId),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateProgressPosts(queryClient, unitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesProgress },
   });
 }
 
@@ -135,16 +119,11 @@ export function useToggleNodeCompletion(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
+    ...options,
     mutationFn: (input: NodeCompletionToggleBody) =>
       progressApi.toggleNodeCompletion(unitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      void invalidateForCacheDomain(queryClient, "node-completion");
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: invalidatesNodeCompletion },
   });
 }
 

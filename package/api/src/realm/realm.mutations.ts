@@ -33,11 +33,17 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { cacheDomainKeys } from "../react-query/cache-coherence";
 import { subscriptionKeys } from "../subscription/subscription.keys";
 import { tagKeys } from "../tag/tag.keys";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
+
+// ponytail: cacheDomainKeys("realm-membership") covers ["users"], ["realms"],
+// ["realms"] — the ["realms"] root subsumes members/detail/mine
+// ponytail: cacheDomainKeys("realm-membership") 覆盖 ["users"]、["realms"]、
+// ["realms"]——["realms"] 根前缀涵盖了 members/detail/mine
+const invalidatesRealmMembership = cacheDomainKeys("realm-membership");
 
 export async function syncRealmMembershipMutationCache({
   queryClient,
@@ -56,7 +62,6 @@ export async function syncRealmMembershipMutationCache({
     queryClient.invalidateQueries({
       queryKey: realmKeys.mine(),
     }),
-    invalidateForCacheDomain(queryClient, "realm-membership"),
   ]);
 }
 
@@ -168,6 +173,7 @@ export function useJoinRealmMutation(
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesRealmMembership },
   });
 }
 
@@ -204,6 +210,7 @@ export function useLeaveRealmMutation(
       await syncRealmMembershipMutationCache({ queryClient, realmUnitId });
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesRealmMembership },
   });
 }
 
@@ -422,16 +429,13 @@ export function useRemoveMemberMutation(
       realmApi.removeMember(realmUnitId, userId),
     ...options,
     onSuccess: async (data, variables, onMutateResult, context) => {
-      // Reuse the shared helper to invalidate members, detail, mine, and
-      // the realm-membership cache domain — symmetric with join/leave.
-      // 复用共享辅助函数来使 members、detail、mine 和 realm-membership
-      // 缓存域失效——与 join/leave 对称。
       await syncRealmMembershipMutationCache({
         queryClient,
         realmUnitId: variables.realmUnitId,
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: invalidatesRealmMembership },
   });
 }
 

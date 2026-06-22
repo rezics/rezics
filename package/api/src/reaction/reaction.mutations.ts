@@ -18,9 +18,15 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { invalidateForCacheDomain } from "../react-query/cache-coherence";
+import { cacheDomainKeys } from "../react-query/cache-coherence";
 import { reactionApi } from "./reaction.api";
 import { reactionKeys } from "./reaction.keys";
+
+// ponytail: cacheDomainKeys("reaction") covers ["books"], ["users"],
+// ["realms"], ["search"] — cross-cutting surfaces for reaction writes
+// ponytail: cacheDomainKeys("reaction") 覆盖 ["books"]、["users"]、
+// ["realms"]、["search"]——reaction 写入的横切面
+const invalidatesReaction = cacheDomainKeys("reaction");
 import type {
   ReactionCreateInput,
   ReactionDeleteQuery,
@@ -241,8 +247,6 @@ export async function syncShareMutationCache({
   for (const snap of snapshots) {
     queryClient.setQueryData(snap.key, reconcileShareCount(snap.data, data));
   }
-
-  await invalidateForCacheDomain(queryClient, "reaction");
 }
 
 export function useCreateReactionMutation(
@@ -298,16 +302,9 @@ export function useCreateReactionMutation(
       options?.onError?.(error, variables, context, mutationCtx);
     },
     onSuccess: (data, variables, context, mutationCtx) => {
-      // The optimistic delta already landed in every affected reaction batch
-      // cache, so reaction summaries are not invalidated here. Cross-cutting
-      // surfaces (detail/profile/realm-feed/search) still refresh
-      // through the coherence map so activity and counts stay consistent.
-      // 乐观增量已写入每个受影响的 reaction batch 缓存，因此这里不会使
-      // reaction summaries 失效。横切面（detail/profile/realm-feed/search）
-      // 仍通过一致性映射刷新，以保持活动和计数一致。
-      void invalidateForCacheDomain(queryClient, "reaction");
       options?.onSuccess?.(data, variables, context, mutationCtx);
     },
+    meta: { invalidates: invalidatesReaction },
   });
 }
 
@@ -369,13 +366,9 @@ export function useDeleteReactionMutation(
       options?.onError?.(error, variables, context, mutationCtx);
     },
     onSuccess: (data, variables, context, mutationCtx) => {
-      // Mirror create-reaction: flush cross-cutting surfaces (detail/profile/
-      // realm-feed/search) so counts and badges stay consistent after removal.
-      // 与 create-reaction 镜像：刷新横切面（detail/profile/realm-feed/search），
-      // 使计数和徽章在删除后保持一致。
-      void invalidateForCacheDomain(queryClient, "reaction");
       options?.onSuccess?.(data, variables, context, mutationCtx);
     },
+    meta: { invalidates: invalidatesReaction },
   });
 }
 
@@ -416,6 +409,7 @@ export function useRecordShareMutation(
       void syncShareMutationCache({ queryClient, data, context });
       options?.onSuccess?.(data, variables, context, mutationCtx);
     },
+    meta: { invalidates: invalidatesReaction },
   });
 }
 
