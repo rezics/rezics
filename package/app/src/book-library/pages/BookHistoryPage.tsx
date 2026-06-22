@@ -5,6 +5,7 @@ import type {
   UnitRevisionDTO,
 } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { formatDateTime } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import {
   Link,
@@ -343,7 +344,7 @@ export function RevisionTimeline({
             </div>
             <FieldChips keys={revision.changedFieldKeys} />
             <p className="text-xs leading-dense text-text-tertiary">
-              {formatDate(revision.createdAt)} ·{" "}
+              {formatDateTime(revision.createdAt)} ·{" "}
               {actorLabel(actors[revision.actorUserId], revision.actorUserId)}
             </p>
           </li>
@@ -407,7 +408,7 @@ export function StructureTimeline({
               </ol>
             </details>
             <p className="text-xs leading-dense text-text-tertiary">
-              {formatDate(event.createdAt)} ·{" "}
+              {formatDateTime(event.createdAt)} ·{" "}
               {actorLabel(actors[event.actorUserId], event.actorUserId)}
             </p>
           </li>
@@ -478,7 +479,7 @@ export function BookRevisionPage() {
           })}
         </h2>
         <p className="text-sm leading-ui text-text-secondary">
-          {formatDate(revision.createdAt)} ·{" "}
+          {formatDateTime(revision.createdAt)} ·{" "}
           {actorLabel(actors[revision.actorUserId], revision.actorUserId)}
         </p>
         <FieldChips keys={revision.changedFieldKeys} />
@@ -1267,13 +1268,4 @@ function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
   );
-}
-
-function formatDate(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }

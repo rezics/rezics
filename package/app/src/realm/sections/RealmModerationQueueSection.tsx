@@ -5,7 +5,7 @@ import {
 } from "@rezics/api/governance/governance";
 import type { ModerationCaseDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { EmptyState, Spinner } from "@rezics/ui";
+import { EmptyState, Spinner, formatDateTime } from "@rezics/ui";
 import {
   Badge,
   Button,
@@ -248,7 +248,7 @@ export function RealmModerationQueueSection({
                     {entry.action}
                   </div>
                   <p className="mt-1 text-xs leading-ui text-text-tertiary">
-                    {formatDate(entry.createdAt)}
+                    {entry.createdAt && formatDateTime(entry.createdAt)}
                   </p>
                   <p className="mt-2 text-sm leading-body text-text-secondary">
                     {entry.reason}
@@ -269,13 +269,6 @@ function caseStateVariant(state: string) {
   return "outline";
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString();
-}
-
 function RealmCaseCard({
   item,
   realmUnitId,
@@ -286,7 +279,7 @@ function RealmCaseCard({
   const { t } = useTranslation(["community", "common"]);
   const summary =
     item.reason ?? item.safeSummary ?? t("community:moderation_no_summary");
-  const updatedAt = formatDate(item.updatedAt);
+  const updatedAt = item.updatedAt ? formatDateTime(item.updatedAt) : "";
   const decideCase = useDecideRealmCaseMutation({
     onSuccess: () => toast.success(t("community:moderation_case_updated")),
   });

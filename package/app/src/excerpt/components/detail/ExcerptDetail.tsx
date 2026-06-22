@@ -5,6 +5,7 @@ import {
   type UnitDTO,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Quote as FormatQuoteIcon } from "lucide-react";
@@ -34,9 +35,7 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
     | ExcerptSource
     | string
     | undefined;
-  const dateStr = excerpt.createdAt
-    ? new Date(String(excerpt.createdAt)).toLocaleDateString()
-    : "";
+  const dateStr = excerpt.createdAt ? formatDate(excerpt.createdAt) : "";
 
   const reactionPost: ReactionBarPost = {
     unitId: excerpt.id,

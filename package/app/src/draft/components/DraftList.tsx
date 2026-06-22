@@ -1,5 +1,6 @@
 import type { DraftKind, DraftMetadata } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import { FileText } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
@@ -41,7 +42,7 @@ export const DraftList: React.FC<DraftListProps> = ({ drafts }) => {
                 </p>
               ) : null}
               <p className="mt-1 text-xs text-text-tertiary">
-                {formatUpdatedAt(draft.updatedAt)}
+                {formatDate(draft.updatedAt)}
               </p>
             </div>
           </Link>
@@ -68,12 +69,4 @@ function draftKindLabel(t: (key: string) => string, kind: DraftKind): string {
     case "shelf-description":
       return t("page:draft_kind_shelf_description");
   }
-}
-
-function formatUpdatedAt(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
-    date,
-  );
 }

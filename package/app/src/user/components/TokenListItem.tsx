@@ -1,5 +1,6 @@
 import type { ApiTokenDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Key as KeyIcon } from "lucide-react";
 import type { FC } from "react";
@@ -34,12 +35,12 @@ export const TokenListItem: FC<TokenListItemProps> = ({
         )}
         <p className="mt-1 block text-xs text-text-secondary">
           {t("settings:tokens_created_date", {
-            date: formatDate(t, token.createdAt),
+            date: formatDate(token.createdAt),
           })}
           {token.expiresAt &&
-            ` · ${t("settings:tokens_expires_date", { date: formatDate(t, token.expiresAt) })}`}
+            ` · ${t("settings:tokens_expires_date", { date: formatDate(token.expiresAt) })}`}
           {token.lastUsedAt &&
-            ` · ${t("settings:tokens_last_used_date", { date: formatDate(t, token.lastUsedAt) })}`}
+            ` · ${t("settings:tokens_last_used_date", { date: formatDate(token.lastUsedAt) })}`}
           {token.lastIP &&
             ` ${t("settings:tokens_last_used_from_ip", { ip: token.lastIP })}`}
         </p>
@@ -59,20 +60,6 @@ export const TokenListItem: FC<TokenListItemProps> = ({
     </div>
   );
 };
-
-type TranslationT = ReturnType<typeof useTranslation>["t"];
-
-function formatDate(
-  t: TranslationT,
-  date: string | Date | null | undefined,
-): string {
-  if (!date) return t("settings:tokens_never_used");
-  return new Date(date).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 function formatScopes(scopes?: Record<string, string[]>): string[] {
   if (!scopes) return [];

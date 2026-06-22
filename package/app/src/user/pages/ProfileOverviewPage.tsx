@@ -52,6 +52,7 @@ import {
   contentDocMarkdownFallback,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import type { FC } from "react";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { DescriptionBox } from "@/user/components/DescriptionBox";
@@ -137,9 +138,7 @@ export const ProfileOverviewPage: FC = () => {
                 item={item}
                 untitledLabel={t("common:untitled")}
                 dateLabel={
-                  item.updatedAt
-                    ? new Date(item.updatedAt).toLocaleDateString()
-                    : undefined
+                  item.updatedAt ? formatDate(item.updatedAt) : undefined
                 }
               />
             ))}

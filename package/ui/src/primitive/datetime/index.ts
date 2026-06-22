@@ -1,3 +1,4 @@
+export { formatDate, formatDateTime } from "./formatDate";
 export { RelativeTime, type RelativeTimeProps } from "./RelativeTime";
 export {
   type RelativeTimeInput,

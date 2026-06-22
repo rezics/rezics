@@ -3,6 +3,7 @@ import type {
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import {
   Award,
@@ -40,7 +41,7 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
   const { t } = useTranslation(["community"]);
   const { mode, item } = props;
   const Icon = reactionIconFor(item.reaction);
-  const timestamp = formatTimestamp(item.createdAt);
+  const timestamp = formatDate(item.createdAt);
   const target = item.target;
 
   return (
@@ -89,16 +90,6 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
 
 function reactionIconFor(reaction: string): LucideIcon {
   return REACTION_ICONS[reaction] ?? Sparkles;
-}
-
-function formatTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 const ReceivedActor: FC<{

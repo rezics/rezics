@@ -1,5 +1,6 @@
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDateTime } from "@rezics/ui";
 import { BookOpen } from "lucide-react";
 import { useId } from "react";
 import { cn } from "@/shared/utils/css-util";
@@ -25,7 +26,7 @@ export function UnitCard({
   const { t } = useTranslation(["book", "entity"]);
   const titleId = useId();
   const isCompact = variant === "compact";
-  const addedAt = formatAddedAt(summary.addedAt);
+  const addedAt = summary.addedAt ? formatDateTime(summary.addedAt) : null;
   const communityCatalogLabel = t("entity:community_catalog");
   const author = authorSlot ?? renderAuthor(summary, communityCatalogLabel);
   const translationMeta = renderTranslationMeta(summary, t);
@@ -206,16 +207,6 @@ function renderTranslationMeta(
       : undefined,
   ].filter((part): part is string => Boolean(part));
   return parts.length > 0 ? parts.join(" · ") : null;
-}
-
-function formatAddedAt(value: string | Date | null | undefined): string | null {
-  if (!value) return null;
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }
 
 function toDateTime(

@@ -1,5 +1,6 @@
 import type { PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import {
   Tooltip,
   TooltipContent,
@@ -30,9 +31,7 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
   const { t } = useTranslation(["page"]);
   const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
-  const dateStr = remark.createdAt
-    ? new Date(String(remark.createdAt)).toLocaleDateString()
-    : "";
+  const dateStr = remark.createdAt ? formatDate(remark.createdAt) : "";
 
   return (
     <TooltipProvider>

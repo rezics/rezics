@@ -1,4 +1,5 @@
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Monitor as ComputerIcon } from "lucide-react";
 import type { FC } from "react";
@@ -29,13 +30,7 @@ export const SessionListItem: FC<SessionListItemProps> = ({
     session.userAgent,
     t("settings:security_unknown_device"),
   );
-  const createdAt = session.createdAt
-    ? new Date(session.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
+  const createdAt = session.createdAt ? formatDate(session.createdAt) : null;
 
   return (
     <div className="flex items-center gap-3 py-3">

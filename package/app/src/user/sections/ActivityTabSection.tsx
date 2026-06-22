@@ -1,7 +1,7 @@
 import { useActivityInfinite } from "@rezics/api/activity";
 import type { ActivityKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
+import { Spinner, formatDate } from "@rezics/ui";
 import type { FC } from "react";
 import { LoadMoreFooter } from "@/shared/ui/LoadMoreFooter";
 import { Link } from "@/shared/ui/link";
@@ -54,7 +54,7 @@ export const ActivityTabSection: FC = () => {
                 {item.title || activityKindLabel(t, item.kind)}
               </span>
               <time className="flex-none text-xs text-text-tertiary">
-                {formatAt(item.at)}
+                {formatDate(item.at)}
               </time>
             </Link>
           </li>
@@ -90,12 +90,4 @@ function activityKindLabel(
     default:
       return t("settings:activity_kind_post");
   }
-}
-
-function formatAt(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
-    date,
-  );
 }

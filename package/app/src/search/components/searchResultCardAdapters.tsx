@@ -12,6 +12,7 @@ import type {
 } from "@rezics/contract";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { formatDate } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import { SearchContentResultCard, SearchLibraryUnitCard } from "@/components";
@@ -73,11 +74,6 @@ function firstText(
     if (typeof value === "string" && value.trim() !== "") return value;
   }
   return "";
-}
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString();
 }
 
 function compactParts(

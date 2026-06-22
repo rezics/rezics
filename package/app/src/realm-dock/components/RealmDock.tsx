@@ -14,6 +14,7 @@ import {
   type ZoneLinkTarget,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import {
   Avatar,
   AvatarFallback,
@@ -301,7 +302,7 @@ function DockRealmFacts({ realm }: { realm: RealmDTO }) {
           key: "created",
           icon: CalendarDays,
           label: t("realm_dock_fact_created", {
-            date: new Date(realm.createdAt).toLocaleDateString(),
+            date: formatDate(realm.createdAt),
           }),
         }
       : null,

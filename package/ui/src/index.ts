@@ -7,6 +7,8 @@ export {
   type RelativeTimeInput,
   type RelativeTimeParts,
   type RelativeTimeProps,
+  formatDate,
+  formatDateTime,
   relativeTimeFromNow,
 } from "./primitive/datetime";
 export { RatingInput, type RatingInputProps } from "./primitive/control";

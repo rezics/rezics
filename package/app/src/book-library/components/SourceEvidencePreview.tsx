@@ -1,5 +1,6 @@
 import type { CreditAttributionEvidenceSummary } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDateTime } from "@rezics/ui";
 import {
   Button,
   Popover,
@@ -96,7 +97,7 @@ export function SourceEvidencePreview({
           ) : null}
           <div className="mt-1">
             {t("source_evidence_observed", {
-              date: new Date(firstEvidence.observedAt).toLocaleString(),
+              date: formatDateTime(firstEvidence.observedAt),
             })}
           </div>
         </div>

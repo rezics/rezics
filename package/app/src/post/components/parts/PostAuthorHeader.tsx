@@ -4,6 +4,7 @@ import {
   type PostDTO,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
 import { UserHoverPreview } from "@/user";
@@ -30,9 +31,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
   avatarClassName,
 }) => {
   const { t } = useTranslation(["community"]);
-  const dateStr = post.createdAt
-    ? new Date(String(post.createdAt)).toLocaleDateString()
-    : "";
+  const dateStr = post.createdAt ? formatDate(post.createdAt) : "";
   const nameClass =
     size === "compact" ? "text-xs font-semibold" : "text-sm font-semibold";
   const author = post.author?.unitId ? post.author : undefined;

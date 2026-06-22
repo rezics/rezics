@@ -6,6 +6,7 @@ import type {
 } from "@rezics/api/feedback/feedback.types";
 import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { formatDateTime } from "@rezics/ui";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -326,7 +327,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
                       {getI18nRuntime().i18n.t(
                         "community:feedback_created_time",
                         {
-                          value: new Date(item.createdAt).toLocaleString(),
+                          value: formatDateTime(item.createdAt),
                         },
                       )}
                     </span>
@@ -334,7 +335,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
                       {getI18nRuntime().i18n.t(
                         "community:feedback_updated_time",
                         {
-                          value: new Date(item.updatedAt).toLocaleString(),
+                          value: formatDateTime(item.updatedAt),
                         },
                       )}
                     </span>
@@ -343,7 +344,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
                         {getI18nRuntime().i18n.t(
                           "community:feedback_resolved_time",
                           {
-                            value: new Date(item.resolvedAt).toLocaleString(),
+                            value: formatDateTime(item.resolvedAt),
                           },
                         )}
                       </span>

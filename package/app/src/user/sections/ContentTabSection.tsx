@@ -1,4 +1,5 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { formatDate } from "@rezics/ui";
 
 /**
  * ContentTabSection — 用户资料页内容标签页，支持评论/短评/摘录分类与搜索排序，
@@ -232,7 +233,7 @@ export const ContentTabSection: FC = () => {
 const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
   const { t } = useTranslation(["community", "settings"]);
   const targetTitle = post.targetTitles?.[0];
-  const date = new Date(post.createdAt).toLocaleDateString();
+  const date = formatDate(post.createdAt);
   const scoreDisplay =
     post.scoreValue != null
       ? `${"★".repeat(Math.round(post.scoreValue / 2))}${"☆".repeat(5 - Math.round(post.scoreValue / 2))}`

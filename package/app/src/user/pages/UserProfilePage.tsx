@@ -1,6 +1,7 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { formatDate } from "@rezics/ui";
 import {
   Avatar,
   AvatarFallback,
@@ -87,7 +88,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                 {user.joinDate && (
                   <p className="text-sm text-text-secondary">
                     {t("settings:user_joined_on", {
-                      date: new Date(user.joinDate).toLocaleDateString(),
+                      date: formatDate(user.joinDate),
                     })}
                   </p>
                 )}
