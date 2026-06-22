@@ -42,6 +42,14 @@ export type ActionPolicy = {
  */
 export type EngagementSize = "sm" | "md" | "lg";
 
+// Canonical icon pixel sizes for engagement atoms — single source of truth.
+// engagement 原子的标准图标像素尺寸——唯一来源。
+export const ENGAGEMENT_ICON_PX: Record<EngagementSize, number> = {
+  sm: 16,
+  md: 18,
+  lg: 22,
+};
+
 /**
  * Visual treatment for `ReactionBar`.
  *

@@ -13,7 +13,7 @@ import { Copy, FilePenLine, Send, Share2 } from "lucide-react";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import { useShareMenu } from "../hooks/useShareMenu";
-import type { EngagementSize } from "../types";
+import { ENGAGEMENT_ICON_PX, type EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ShareActionProps = {
@@ -88,7 +88,7 @@ export const ShareAction: React.FC<ShareActionProps> = ({
                 !isPill && "hover:bg-black/10 dark:hover:bg-white/10",
               )}
             >
-              <Share2 size={sizeToIconPx(size)} strokeWidth={2} />
+              <Share2 size={ENGAGEMENT_ICON_PX[size]} strokeWidth={2} />
               <span>{t("common:share")}</span>
               {shareCount > 0 ? (
                 <span className="tabular-nums text-text-tertiary">
@@ -134,14 +134,3 @@ export const ShareAction: React.FC<ShareActionProps> = ({
     </>
   );
 };
-
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 22;
-    default:
-      return 18;
-  }
-}

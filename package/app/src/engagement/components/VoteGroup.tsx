@@ -5,7 +5,7 @@ import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import { useVoteController } from "../hooks/useVoteController";
-import type { EngagementSize } from "../types";
+import { ENGAGEMENT_ICON_PX, type EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type VoteGroupProps = {
@@ -57,7 +57,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
     toggleDown();
   };
 
-  const iconPx = sizeToIconPx(size);
+  const iconPx = ENGAGEMENT_ICON_PX[size];
   const textClass = sizeToTextClass(size);
   const buttonSizeClass = size === "sm" ? "p-0.5" : "p-1";
 
@@ -133,17 +133,6 @@ function formatScore(score: number): string {
   const sign = score < 0 ? "-" : "";
   const k = abs / 1000;
   return `${sign}${k.toFixed(k < 10 ? 1 : 0).replace(/\.0$/, "")}K`;
-}
-
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 24;
-    default:
-      return 20;
-  }
 }
 
 function sizeToTextClass(size: EngagementSize): string {

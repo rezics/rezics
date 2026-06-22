@@ -3,7 +3,7 @@ import { Button } from "@rezics/ui/shadcn";
 import { MessageSquare } from "lucide-react";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
-import type { EngagementSize } from "../types";
+import { ENGAGEMENT_ICON_PX, type EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ReplyActionProps = {
@@ -57,19 +57,8 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
         !isPill && "hover:bg-black/10 dark:hover:bg-white/10",
       )}
     >
-      <MessageSquare size={sizeToIconPx(size)} strokeWidth={2} />
+      <MessageSquare size={ENGAGEMENT_ICON_PX[size]} strokeWidth={2} />
       {label}
     </Button>
   );
 };
-
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 22;
-    default:
-      return 18;
-  }
-}

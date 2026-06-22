@@ -6,7 +6,7 @@ import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import { AddToShelfDialog } from "@/shelf";
 import { useShelfTrigger } from "../hooks/useShelfTrigger";
-import type { EngagementSize } from "../types";
+import { ENGAGEMENT_ICON_PX, type EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ShelfActionProps = {
@@ -57,7 +57,7 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
           !isPill && "hover:bg-black/10 dark:hover:bg-white/10",
         )}
       >
-        <BookmarkPlus size={sizeToIconPx(size)} strokeWidth={2} />
+        <BookmarkPlus size={ENGAGEMENT_ICON_PX[size]} strokeWidth={2} />
         {t("shelf_title")}
       </Button>
       {isAuthenticated ? (
@@ -76,14 +76,3 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
     </>
   );
 };
-
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 22;
-    default:
-      return 18;
-  }
-}

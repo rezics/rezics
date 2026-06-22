@@ -21,7 +21,7 @@ import {
   Share2,
 } from "lucide-react";
 import type React from "react";
-import type { Action, EngagementSize } from "../types";
+import { ENGAGEMENT_ICON_PX, type Action, type EngagementSize } from "../types";
 
 export type OverflowMenuProps = {
   items: Action[];
@@ -46,17 +46,6 @@ const DESCRIPTORS: Partial<Record<Action, MenuDescriptor>> = {
     icon: <BookmarkPlus size={18} strokeWidth={2} />,
   },
 };
-
-function sizeToIconPx(size: EngagementSize): number {
-  switch (size) {
-    case "sm":
-      return 16;
-    case "lg":
-      return 22;
-    default:
-      return 18;
-  }
-}
 
 export const OverflowMenu: React.FC<OverflowMenuProps> = ({
   items,
@@ -84,7 +73,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
             onClick={(event) => event.stopPropagation()}
             {...props}
           >
-            <MoreHorizontal size={sizeToIconPx(size)} strokeWidth={2} />
+            <MoreHorizontal size={ENGAGEMENT_ICON_PX[size]} strokeWidth={2} />
           </Button>
         )}
       />
