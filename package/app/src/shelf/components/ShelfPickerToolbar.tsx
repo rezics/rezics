@@ -1,6 +1,10 @@
 import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
-import type { TagSearchDocument } from "@rezics/contract";
+import {
+  type SearchTagOption,
+  tagOptionLabel,
+  tagSearchOptionFromDoc,
+} from "@/tag/models/tagSearchOption";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
@@ -34,23 +38,6 @@ interface ShelfPickerToolbarProps {
   onSortChange: (sort: ShelfPickerSortValue) => void;
 }
 
-type SearchTagOption = {
-  unitId: string;
-  label?: string | null;
-  slug?: string | null;
-};
-
-function tagSearchOptionFromDoc(doc: TagSearchDocument): SearchTagOption {
-  return {
-    unitId: doc.unitId,
-    label: doc.title ?? doc.titles[0] ?? null,
-    slug: doc.slug ?? null,
-  };
-}
-
-function tagOptionLabel(option: SearchTagOption): string {
-  return option.label ?? option.slug ?? option.unitId;
-}
 
 /**
  * Shelf picker controls.

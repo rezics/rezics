@@ -56,7 +56,11 @@ import {
   userShelfItemSearchMineQuery,
   userShelfItemSearchUserQuery,
 } from "@rezics/api";
-import type { TagSearchDocument, UserShelfItemDTO } from "@rezics/contract";
+import type { UserShelfItemDTO } from "@rezics/contract";
+import {
+  tagOptionLabel,
+  tagSearchOptionFromDoc,
+} from "@/tag/models/tagSearchOption";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -65,19 +69,6 @@ import { ArrowLeft, Plus, Search, X } from "lucide-react";
 import { type FC, useMemo, useState } from "react";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
-type SearchTagOption = {
-  unitId: string;
-  label?: string | null;
-  slug?: string | null;
-};
-
-function tagSearchOptionFromDoc(doc: TagSearchDocument): SearchTagOption {
-  return {
-    unitId: doc.unitId,
-    label: doc.title ?? doc.titles[0] ?? null,
-    slug: doc.slug ?? null,
-  };
-}
 
 export const ShelfContentsSearchSection: FC = () => {
   const locale = useLocale();
@@ -260,10 +251,6 @@ export const ShelfContentsSearchSection: FC = () => {
     </div>
   );
 };
-
-function tagOptionLabel(option: SearchTagOption): string {
-  return option.label ?? option.slug ?? option.unitId;
-}
 
 function ShelfContentsUnitRow({
   unit,

@@ -6,7 +6,10 @@ import {
   userShelfItemForUnitQuery,
   useSetUserTagApplicationsMutation,
 } from "@rezics/api";
-import type { TagSearchDocument } from "@rezics/contract";
+import {
+  tagOptionLabel,
+  tagSearchOptionFromDoc,
+} from "@/tag/models/tagSearchOption";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
@@ -28,23 +31,6 @@ interface ShelfItemMetadataDialogProps {
   unitId: string;
 }
 
-type SearchTagOption = {
-  unitId: string;
-  label?: string | null;
-  slug?: string | null;
-};
-
-function tagSearchOptionFromDoc(doc: TagSearchDocument): SearchTagOption {
-  return {
-    unitId: doc.unitId,
-    label: doc.title ?? doc.titles[0] ?? null,
-    slug: doc.slug ?? null,
-  };
-}
-
-function tagOptionLabel(option: SearchTagOption): string {
-  return option.label ?? option.slug ?? option.unitId;
-}
 
 function ShelfItemMetadataDialogContent({
   unitId,
