@@ -140,7 +140,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
               </div>
 
               {/* Divider — 分隔线 */}
-              <div className="h-auto border-l border-gray-300 mx-4" />
+              <div className="h-auto border-l border-border-defined mx-4" />
 
               {/* Right text — 右侧文本 */}
               <div className="flex-1 !text-md">

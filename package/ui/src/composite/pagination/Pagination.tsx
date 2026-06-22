@@ -205,7 +205,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
         </Button>
       </div>
       {tipsLabel ? (
-        <div className="text-sm text-gray-500 text-center">{tipsLabel}</div>
+        <div className="text-sm text-text-secondary text-center">{tipsLabel}</div>
       ) : null}
     </div>
   );

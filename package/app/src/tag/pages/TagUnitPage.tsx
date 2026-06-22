@@ -44,7 +44,7 @@ export function TagUnitPage() {
   if (isLoading) {
     return (
       <div className="w-full px-4 mt-16">
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-text-secondary">
           {t("community:tag_loading")}
         </div>
       </div>

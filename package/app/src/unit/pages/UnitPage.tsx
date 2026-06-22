@@ -133,7 +133,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   // 加载中或查询尚未启用时显示加载状态
   if (isLoading || !readContext.ready) {
     return (
-      <div className="mt-8 text-center text-sm text-gray-500">
+      <div className="mt-8 text-center text-sm text-text-secondary">
         {t("common:loading")}
       </div>
     );

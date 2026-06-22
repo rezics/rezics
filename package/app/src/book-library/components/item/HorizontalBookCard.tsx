@@ -75,13 +75,13 @@ export function HorizontalBookCard({
           <div className="text-sm font-semibold line-clamp-1 mb-1">{title}</div>
 
           {author ? (
-            <div className="text-xs text-gray-400 line-clamp-1 mb-1">
+            <div className="text-xs text-text-disabled line-clamp-1 mb-1">
               {author}
             </div>
           ) : null}
 
           {description ? (
-            <div className="text-xs text-gray-500 line-clamp-2 leading-snug">
+            <div className="text-xs text-text-secondary line-clamp-2 leading-snug">
               {description}
             </div>
           ) : null}

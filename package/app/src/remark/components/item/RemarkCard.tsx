@@ -79,7 +79,7 @@ export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
   return (
     <div
       className={cn(
-        "py-4 border-b border-gray-200 dark:border-gray-700",
+        "py-4 border-b border-border",
         remark.unitId && "cursor-pointer",
       )}
     >

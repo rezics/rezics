@@ -74,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="absolute top-4 right-4 p-1 rounded-md transition-colors"
               aria-label={t("shell:app_close_sidebar_aria_label")}
             >
-              <X size={20} className="text-slate-500" />
+              <X size={20} className="text-text-secondary" />
             </button>
             {children}
           </div>

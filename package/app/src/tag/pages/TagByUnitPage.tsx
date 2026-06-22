@@ -141,7 +141,7 @@ export function TagByBookFullPage() {
         </div>
       )}
 
-      <div className="mt-2 text-xs text-gray-500">
+      <div className="mt-2 text-xs text-text-secondary">
         total: {total} {details?.length ? `(details: ${details.length})` : ""}
       </div>
     </div>

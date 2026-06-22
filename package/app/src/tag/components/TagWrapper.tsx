@@ -46,7 +46,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   if (isLoading) {
     return (
       <div className={className}>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-text-secondary">
           {t("community:tag_loading")}
         </div>
       </div>
