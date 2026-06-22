@@ -1,7 +1,6 @@
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { routeBoundaries } from "@/core";
 import {
   FederatedSearchPage,
   isSearchCategory,
@@ -61,5 +60,4 @@ export const Route = createFileRoute("/_mainLayout/search/")({
         : undefined,
   }),
   component: GlobalSearchPage,
-  ...routeBoundaries(),
 });

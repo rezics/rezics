@@ -16,5 +16,4 @@ export {
   type EditConsoleLayoutProps,
 } from "./layouts/EditConsoleLayout";
 export { createMinimalEditConsoleConfig } from "./layouts/editConsoleConfig";
-export { routeBoundaries } from "./routing/routeBoundaries";
 export { useCurrentBreakpoint } from "./hooks/useCurrentBreakpoint";

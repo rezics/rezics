@@ -4,7 +4,6 @@ import {
   lazyRouteComponent,
   useNavigate,
 } from "@tanstack/react-router";
-import { routeBoundaries } from "@/core";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
 const ProgressLibraryPage = lazyRouteComponent(
@@ -56,5 +55,4 @@ export const Route = createFileRoute(
     cols: typeof search.cols === "string" ? search.cols : undefined,
   }),
   component: ProgressRoute,
-  ...routeBoundaries(),
 });

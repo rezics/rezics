@@ -1,17 +1,16 @@
 // Shared route-level boundary states.
 //
-// Feature routes should not redefine loading / error / not-found / denied /
-// unauthenticated chrome. Use `routeBoundaries()` to spread the common
-// `pendingComponent` / `errorComponent` / `notFoundComponent` into a route, and
-// render `RouteDenied` / `RouteUnauthenticated` from a route component when a
+// The router (router.tsx) sets defaultErrorComponent / defaultPendingComponent /
+// defaultNotFoundComponent so every route inherits them automatically. Routes
+// that need a custom override can still set the property explicitly.
+// Render `RouteDenied` / `RouteUnauthenticated` from a route component when a
 // policy or session check fails.
 //
 // 共享的路由级边界状态。
 //
-// 功能路由不应重新定义 loading / error / not-found / denied / unauthenticated
-// 这些框架性界面。使用 `routeBoundaries()` 将通用的 `pendingComponent` /
-// `errorComponent` / `notFoundComponent` 展开到路由中，并在策略或会话检查失败时，
-// 从路由组件中渲染 `RouteDenied` / `RouteUnauthenticated`。
+// 路由器 (router.tsx) 设置 defaultErrorComponent / defaultPendingComponent /
+// defaultNotFoundComponent，每条路由自动继承。需要自定义覆盖的路由仍可显式设置。
+// 策略或会话检查失败时，从路由组件中渲染 `RouteDenied` / `RouteUnauthenticated`。
 
 import { useTranslation } from "@rezics/i18n/react";
 import {
@@ -169,21 +168,3 @@ export const RouteUnauthenticated: React.FC<{
 
 /** Not-found state. Re-exported so routes share a single source. 未找到状态。重新导出以便各路由共用同一来源。 */
 export const RouteNotFound = NotFoundContainer;
-
-/**
- * Common route boundary components to spread into a `createFileRoute(...)`
- * definition so feature routes don't redefine them:
- *
- * 可展开到 `createFileRoute(...)` 定义中的通用路由边界组件，使功能路由无需重复定义：
- *
- * ```ts
- * createFileRoute("/_mainLayout/x")({ component: X, ...routeBoundaries() });
- * ```
- */
-export function routeBoundaries() {
-  return {
-    pendingComponent: RouteLoading,
-    errorComponent: RouteError,
-    notFoundComponent: RouteNotFound,
-  };
-}

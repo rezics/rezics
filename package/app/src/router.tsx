@@ -4,6 +4,11 @@ import {
   type ParsedLocation,
 } from "@tanstack/react-router";
 import { qc } from "@/app/providers/reactQueryUtil";
+import {
+  RouteError,
+  RouteLoading,
+  RouteNotFound,
+} from "@/core/routing/routeBoundaries";
 import { routeTree } from "./routeTree.gen";
 
 export const router = createRouter({
@@ -12,6 +17,9 @@ export const router = createRouter({
     qc,
   },
   defaultPreload: "intent",
+  defaultErrorComponent: RouteError,
+  defaultPendingComponent: RouteLoading,
+  defaultNotFoundComponent: RouteNotFound,
   // Since we're using React Query, we don't want loader calls to ever be stale
   // This will ensure that the loader is always called when the route is preloaded or visited
   // 由于我们使用 React Query，不希望 loader 调用出现过期数据
