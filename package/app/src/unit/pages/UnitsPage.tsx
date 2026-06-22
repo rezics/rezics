@@ -23,7 +23,7 @@ import { KeywordInput, useSearchQuery } from "@/search";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
-import { buildUnitUrl } from "@/shared/utils/build-url";
+import { unitHrefFromPartial } from "@/shared/ui/link";
 import { mapContentSearchDocToUnitDTO } from "../models/contentSearchDocToUnitDTO";
 
 type Unit = UnitDTO;
@@ -317,7 +317,7 @@ function defaultChildren(units: Unit[], t: (key: string) => string) {
                 <Tooltip>
                   <TooltipTrigger
                     render={(props) => (
-                      <Link to={buildUnitUrl(item)} {...props}>
+                      <Link to={unitHrefFromPartial(item.type, item.id, item.slug)} {...props}>
                         <Badge variant="outline" className="text-[11px]">
                           {item.type || "UNKNOWN"}
                         </Badge>

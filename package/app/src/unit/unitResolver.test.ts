@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { UnitDTO } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
-import { buildUnitUrl } from "@/shared/utils/build-url";
+import { unitHrefFromPartial } from "@/shared/ui/link";
 import {
   isUuidSegment,
   resolveUnitRoute,
@@ -17,32 +17,34 @@ function unit(type: string, overrides: Partial<UnitDTO> = {}): UnitDTO {
   } as UnitDTO;
 }
 
-describe("unit resolver — buildUnitUrl coverage", () => {
-  test.each(
-    Object.values(UnitType),
-  )("%s resolves without using /unit/:id", (type) => {
-    const typedUrl = buildUnitUrl(unit(type));
-    expect(typedUrl).not.toBe("/unit/fixture-id");
+const ROUTABLE_TYPES = [
+  "BOOK", "POST", "QUOTE", "POLL", "SHELF",
+  "USER", "REALM", "TAG", "ZONE", "ENTITY",
+] as const;
+
+describe("unitHrefFromPartial coverage", () => {
+  test.each(ROUTABLE_TYPES)("%s resolves without /unit/:id fallback", (type) => {
+    const url = unitHrefFromPartial(type, "fixture-id");
+    expect(url).not.toBe("/unit/fixture-id");
   });
 
-  test("generic fallback prefers public Unit slug routes", () => {
-    expect(buildUnitUrl(unit("LINK", { slug: "linked-source" }))).toBe(
-      "/unit/linked-source",
-    );
+  test("unknown type falls back to /unit/:id", () => {
+    expect(unitHrefFromPartial("LINK", "fixture-id")).toBe("/unit/fixture-id");
   });
 
-  test("generic fallback keeps id route for Units without slugs", () => {
-    expect(buildUnitUrl(unit("LINK"))).toBe("/unit/id/fixture-id");
+  test("slug-bearing types with slug prefer the short-prefix slug URL", () => {
+    expect(unitHrefFromPartial("REALM", "fixture-id", "realm-a")).toBe("/r/realm-a");
+    expect(unitHrefFromPartial("TAG", "fixture-id", "tag-a")).toBe("/t/tag-a");
   });
 
-  test("typed routes with a slug prefer the short-prefix slug URL", () => {
-    expect(buildUnitUrl(unit("REALM", { slug: "realm-a" }))).toBe("/r/realm-a");
-    expect(buildUnitUrl(unit("TAG", { slug: "tag-a" }))).toBe("/t/tag-a");
+  test("slug-bearing types without slug fall back to long-prefix unitId URLs", () => {
+    expect(unitHrefFromPartial("REALM", "fixture-id")).toBe("/realm/fixture-id");
+    expect(unitHrefFromPartial("TAG", "fixture-id")).toBe("/tag/fixture-id");
   });
 
-  test("typed routes without a slug fall back to long-prefix unitId URLs", () => {
-    expect(buildUnitUrl(unit("REALM"))).toBe("/realm/fixture-id");
-    expect(buildUnitUrl(unit("TAG"))).toBe("/tag/fixture-id");
+  test("ID-only types always use their prefix", () => {
+    expect(unitHrefFromPartial("BOOK", "fixture-id")).toBe("/book/fixture-id");
+    expect(unitHrefFromPartial("POST", "fixture-id")).toBe("/post/fixture-id");
   });
 });
 

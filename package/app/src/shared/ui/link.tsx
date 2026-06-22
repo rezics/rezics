@@ -8,6 +8,7 @@ export {
   type SlugBearingTopType,
   type UnitHrefInput,
   unitHref,
+  unitHrefFromPartial,
   useUnitHref,
 } from "@rezics/ui/primitive/link";
 

@@ -4,7 +4,7 @@ import {
   type UnitDTO,
 } from "@rezics/contract";
 import { notFound, redirect } from "@tanstack/react-router";
-import { buildUnitUrl } from "@/shared/utils/build-url";
+import { unitHrefFromPartial } from "@/shared/ui/link";
 import { canAccessUnit } from "@/unit/canAccessUnit";
 
 type ViewerRef = Parameters<typeof canAccessUnit>[1];
@@ -52,7 +52,7 @@ export function resolveUnitRoute({
     return { unit };
   }
 
-  const target = buildUnitUrl(unit);
+  const target = unitHrefFromPartial(unit.type, unit.id, unit.slug);
   if (target && target !== `/unit/${unit.id}`) {
     throw redirect({ to: target });
   }

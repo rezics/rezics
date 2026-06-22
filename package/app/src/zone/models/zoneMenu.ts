@@ -11,7 +11,7 @@ import {
   type ZoneRefUnitSummary,
   type ZoneSectionKind,
 } from "@rezics/contract";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHrefFromPartial } from "@rezics/ui/primitive/link";
 import {
   type ZoneDetailKind,
   type ZoneRouteLocation,
@@ -84,25 +84,7 @@ export function zoneUnitHref(
     }).href;
   }
 
-  switch (item.type) {
-    case "BOOK":
-    case "QUOTE":
-    case "POLL":
-    case "SHELF":
-      return unitHref({ type: item.type, unitId: item.unitId });
-    case "USER":
-    case "REALM":
-    case "TAG":
-    case "ZONE":
-    case "ENTITY":
-      return unitHref({
-        type: item.type,
-        unitId: item.unitId,
-        slug: item.slug ?? null,
-      });
-    default:
-      return `/unit/${item.unitId}`;
-  }
+  return unitHrefFromPartial(item.type ?? "", item.unitId, item.slug);
 }
 
 export function zoneSectionItemHref(

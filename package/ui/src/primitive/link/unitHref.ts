@@ -67,6 +67,24 @@ const SHELF_OWNER_SHORT: Record<SlugBearingShelfInput["ownerType"], string> = {
   REALM: "r",
 };
 
+/**
+ * Loose dispatcher: accept a flat { type, unitId, slug? } and route to the
+ * correct `unitHref` overload. Falls back to `/unit/:unitId` for unknown types.
+ * 宽松调度：接受扁平 { type, unitId, slug? }，按 type 路由到正确的
+ * unitHref 重载。未知类型回退到 `/unit/:unitId`。
+ */
+export function unitHrefFromPartial(
+  type: string,
+  unitId: string,
+  slug?: string | null,
+): string {
+  if (type in ID_ONLY_PREFIX)
+    return unitHref({ type: type as IdOnlyType, unitId });
+  if (type in SHORT_PREFIX)
+    return unitHref({ type: type as SlugBearingTopType, unitId, slug });
+  return `/unit/${unitId}`;
+}
+
 export function unitHref(input: UnitHrefInput): string {
   // Rich shelf with owner context
   // 带 owner 上下文的书架路由

@@ -1,5 +1,5 @@
 import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHrefFromPartial } from "@rezics/ui/primitive/link";
 
 const OFFICIAL_RECOVERY_TARGETS = new Set([
   "REALM:rezics",
@@ -46,27 +46,9 @@ export function groupRecoveryEntries(
 export function subscriptionRecoveryTargetHref(
   entry: UserSubscriptionListEntryDTO,
 ) {
-  const targetType = String(entry.subscribedType);
-  switch (targetType) {
-    case "BOOK":
-    case "POST":
-    case "QUOTE":
-    case "POLL":
-    case "SHELF":
-      return unitHref({ type: targetType, unitId: entry.subscribedUnitId });
-    case "USER":
-    case "REALM":
-    case "TAG":
-    case "ZONE":
-    case "ENTITY":
-      return unitHref({
-        type: targetType,
-        unitId: entry.subscribedUnitId,
-        slug: entry.subscribedSlug ?? null,
-      });
-    default:
-      return entry.subscribedSlug
-        ? `/unit/${entry.subscribedSlug}`
-        : `/unit/id/${entry.subscribedUnitId}`;
-  }
+  return unitHrefFromPartial(
+    entry.subscribedType,
+    entry.subscribedUnitId,
+    entry.subscribedSlug,
+  );
 }
