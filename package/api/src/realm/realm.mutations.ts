@@ -28,7 +28,6 @@ import type {
   UpdateRealmTagContextInput,
 } from "@rezics/contract";
 import {
-  type QueryClient,
   type UseMutationOptions,
   useMutation,
   useQueryClient,
@@ -39,31 +38,21 @@ import { tagKeys } from "../tag/tag.keys";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
 
-// ponytail: cacheDomainKeys("realm-membership") covers ["users"], ["realms"],
-// ["realms"] — the ["realms"] root subsumes members/detail/mine
-// ponytail: cacheDomainKeys("realm-membership") 覆盖 ["users"]、["realms"]、
-// ["realms"]——["realms"] 根前缀涵盖了 members/detail/mine
+// ponytail: root prefix — all realm sub-keys live under ["realms"]
+// ponytail: 根前缀——所有 realm 子键都在 ["realms"] 下
+const realmInvalidates = [realmKeys.all()];
+
+// ponytail: cacheDomainKeys("realm-membership") covers ["users"], ["realms"]
+// ponytail: cacheDomainKeys("realm-membership") 覆盖 ["users"]、["realms"]
 const invalidatesRealmMembership = cacheDomainKeys("realm-membership");
 
-export async function syncRealmMembershipMutationCache({
-  queryClient,
-  realmUnitId,
-}: {
-  queryClient: QueryClient;
-  realmUnitId: string;
-}) {
-  await Promise.all([
-    queryClient.invalidateQueries({
-      queryKey: realmKeys.members(realmUnitId),
-    }),
-    queryClient.invalidateQueries({
-      queryKey: realmKeys.detail(realmUnitId),
-    }),
-    queryClient.invalidateQueries({
-      queryKey: realmKeys.mine(),
-    }),
-  ]);
-}
+// ponytail: realm+subscription — mute/unmute affects both domains
+// ponytail: realm+subscription——mute/unmute 影响两个域
+const realmSubscriptionInvalidates = [realmKeys.all(), subscriptionKeys.all()];
+
+// ponytail: realm+tag — tag application mutations affect both domains
+// ponytail: realm+tag——tag application mutations 影响两个域
+const realmTagInvalidates = [realmKeys.all(), tagKeys.all()];
 
 // ---- CRUD mutations ----
 
@@ -80,13 +69,10 @@ export function useCreateRealmMutation(
 
   return useMutation({
     mutationFn: (input: CreateRealmInput) => realmApi.create(input),
+    meta: { invalidates: realmInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: realmKeys.lists() });
       queryClient.setQueryData(realmKeys.detail(data.unitId), data);
-      // The creator is auto-joined, so "my realms" must refresh.
-      // 创建者被自动加入，因此"我的 realm"列表必须刷新。
-      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -109,13 +95,10 @@ export function useUpdateRealmMutation(
 
   return useMutation({
     mutationFn: ({ unitId, input }) => realmApi.update(unitId, input),
+    meta: { invalidates: realmInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(realmKeys.detail(variables.unitId), data);
-      queryClient.invalidateQueries({ queryKey: realmKeys.lists() });
-      // Realm metadata (name/slug/avatar) shown in "my realms" may have changed.
-      // "我的 realm"列表中显示的 realm 元数据（名称/slug/头像）可能已更改。
-      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -134,13 +117,10 @@ export function useDeleteRealmMutation(
 
   return useMutation({
     mutationFn: (unitId: string) => realmApi.remove(unitId),
+    meta: { invalidates: realmInvalidates },
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({ queryKey: realmKeys.detail(unitId) });
-      queryClient.invalidateQueries({ queryKey: realmKeys.lists() });
-      // Deleted realm must leave "my realms" — symmetric with create/update.
-      // 已删除的 realm 必须从"我的 realm"列表中移除——与 create/update 对称。
-      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });
@@ -161,19 +141,10 @@ export function useJoinRealmMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, input }) => realmApi.join(realmUnitId, input),
-    ...options,
-    onSuccess: async (data, variables, onMutateResult, context) => {
-      await syncRealmMembershipMutationCache({
-        queryClient,
-        realmUnitId: variables.realmUnitId,
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
     meta: { invalidates: invalidatesRealmMembership },
+    ...options,
   });
 }
 
@@ -190,8 +161,9 @@ export function useLeaveRealmMutation(
 
   return useMutation({
     mutationFn: (realmUnitId: string) => realmApi.leave(realmUnitId),
+    meta: { invalidates: invalidatesRealmMembership },
     ...options,
-    onSuccess: async (data, realmUnitId, onMutateResult, context) => {
+    onSuccess: (data, realmUnitId, onMutateResult, context) => {
       queryClient.setQueryData<RealmMembershipMeDTO | undefined>(
         realmKeys.members(realmUnitId),
         (current) =>
@@ -207,18 +179,14 @@ export function useLeaveRealmMutation(
               }
             : current,
       );
-      await syncRealmMembershipMutationCache({ queryClient, realmUnitId });
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
-    meta: { invalidates: invalidatesRealmMembership },
   });
 }
 
 /**
  * Mutation for muting a realm — removes the Subscription edge while
  * keeping `RealmMember` intact.
- * Invalidates the same membership/detail keys as join/leave so any
- * "is subscribed" derived state re-fetches.
  */
 export function useMuteRealmMutation(
   options?: Omit<
@@ -226,31 +194,16 @@ export function useMuteRealmMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (realmUnitId: string) => realmApi.mute(realmUnitId),
+    meta: { invalidates: realmSubscriptionInvalidates },
     ...options,
-    onSuccess: (data, realmUnitId, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(realmUnitId),
-      });
-      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
-      queryClient.invalidateQueries({
-        queryKey: subscriptionKeys.check(realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: subscriptionKeys.mine(),
-      });
-      options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
-    },
   });
 }
 
 /**
  * Mutation for unmuting a realm — re-adds the Subscription edge with
- * `channels=['*']`. Idempotent server-side (no-op if a subscription
- * already exists).
+ * `channels=['*']`. Idempotent server-side.
  */
 export function useUnmuteRealmMutation(
   options?: Omit<
@@ -258,24 +211,10 @@ export function useUnmuteRealmMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (realmUnitId: string) => realmApi.unmute(realmUnitId),
+    meta: { invalidates: realmSubscriptionInvalidates },
     ...options,
-    onSuccess: (data, realmUnitId, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(realmUnitId),
-      });
-      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
-      queryClient.invalidateQueries({
-        queryKey: subscriptionKeys.check(realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: subscriptionKeys.mine(),
-      });
-      options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
-    },
   });
 }
 
@@ -289,21 +228,11 @@ export function useAcknowledgeRealmRulesMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, input }) =>
       realmApi.acknowledgeRules(realmUnitId, input),
+    meta: { invalidates: realmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.members(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -311,34 +240,17 @@ export function useUpdateRealmRulePolicyMutation(
   options?: Omit<
     UseMutationOptions<
       RealmRulePolicyDTO,
-      RealmRuleResolvedDTO,
       Error,
       { realmUnitId: string; input: UpdateRealmRulePolicyInput }
     >,
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, input }) =>
       realmApi.updateRulePolicy(realmUnitId, input),
+    meta: { invalidates: realmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.rules(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.ruleResolveds(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.members(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -352,27 +264,11 @@ export function useCreateRealmRuleRevisionMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, input }) =>
       realmApi.createRuleRevision(realmUnitId, input),
+    meta: { invalidates: realmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.rules(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.ruleResolveds(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.members(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -389,23 +285,11 @@ export function useUpdateMemberRoleMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, userId, input }) =>
       realmApi.updateMemberRole(realmUnitId, userId, input),
+    meta: { invalidates: realmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.members(variables.realmUnitId),
-      });
-      // Realm detail may surface role counts or admin badges — refresh it.
-      // Realm 详情可能展示角色计数或管理员徽章——刷新它。
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -422,20 +306,11 @@ export function useRemoveMemberMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, userId }) =>
       realmApi.removeMember(realmUnitId, userId),
-    ...options,
-    onSuccess: async (data, variables, onMutateResult, context) => {
-      await syncRealmMembershipMutationCache({
-        queryClient,
-        realmUnitId: variables.realmUnitId,
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
     meta: { invalidates: invalidatesRealmMembership },
+    ...options,
   });
 }
 
@@ -454,18 +329,11 @@ export function useAddUnitRealmMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, input }) =>
       realmApi.addUnit(realmUnitId, input),
+    meta: { invalidates: realmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.units(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -482,18 +350,11 @@ export function useRemoveUnitRealmMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, unitId }) =>
       realmApi.removeUnit(realmUnitId, unitId),
+    meta: { invalidates: realmInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.units(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -512,18 +373,11 @@ export function useAddRealmTagApplicationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, input }) =>
       realmApi.addTagApplication(realmUnitId, input),
+    meta: { invalidates: realmTagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplications(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -540,18 +394,11 @@ export function useRemoveRealmTagApplicationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, tagUnitId, contentUnitId }) =>
       realmApi.removeTagApplication(realmUnitId, tagUnitId, contentUnitId),
+    meta: { invalidates: realmTagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplications(variables.realmUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -571,28 +418,11 @@ export function useCreateRealmTagApplicationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CreateRealmTagApplicationInput) =>
       realmApi.createRealmTagApplication(input),
+    meta: { invalidates: realmTagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplications(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplicationsForUnit(
-          variables.realmUnitId,
-          variables.unitId,
-        ),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -615,28 +445,11 @@ export function usePatchRealmTagApplicationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, unitId, tagUnitId, input }) =>
       realmApi.patchRealmTagApplication(realmUnitId, unitId, tagUnitId, input),
+    meta: { invalidates: realmTagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplications(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplicationsForUnit(
-          variables.realmUnitId,
-          variables.unitId,
-        ),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -654,28 +467,11 @@ export function useDeleteRealmTagApplicationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, unitId, tagUnitId }) =>
       realmApi.deleteRealmTagApplication(realmUnitId, unitId, tagUnitId),
+    meta: { invalidates: realmTagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplications(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplicationsForUnit(
-          variables.realmUnitId,
-          variables.unitId,
-        ),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
@@ -693,33 +489,16 @@ export function useCastRealmTagApplicationVoteMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CastRealmTagApplicationVoteInput) =>
       realmApi.castRealmTagApplicationVote(input),
+    meta: { invalidates: realmTagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplications(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplicationsForUnit(
-          variables.realmUnitId,
-          variables.unitId,
-        ),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
 /**
- * Withdraw the current member's own RealmTagApplicationVote. The server removes
- * the RealmTagApplication aggregate row when this leaves no votes.
+ * Withdraw the current member's own RealmTagApplicationVote.
  * 撤回当前成员自己的 RealmTagApplicationVote；若没有剩余投票，服务端会删除聚合行。
  */
 export function useWithdrawRealmTagApplicationVoteMutation(
@@ -732,28 +511,11 @@ export function useWithdrawRealmTagApplicationVoteMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ realmUnitId, unitId, tagUnitId }) =>
       realmApi.withdrawRealmTagApplicationVote(realmUnitId, unitId, tagUnitId),
+    meta: { invalidates: realmTagInvalidates },
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplications(variables.realmUnitId),
-      });
-      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.tagApplicationsForUnit(
-          variables.realmUnitId,
-          variables.unitId,
-        ),
-      });
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.context(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
   });
 }
 
