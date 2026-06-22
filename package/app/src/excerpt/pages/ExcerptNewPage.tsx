@@ -1,6 +1,6 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
+import { toast } from "sonner";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import { markdownContentDoc } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -38,21 +38,20 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   const [excerptData, setExcerptData] = useState<UnitFormData>(
     {} as UnitFormData,
   );
-  const { show } = useAlertStore();
   const userId = useCurrentUserId();
 
   const { mutate, isPending } = useCreateUnitMutation({
     onSuccess: () => {
-      show(t("community:excerpt_created_success"));
+      toast.success(t("community:excerpt_created_success"));
     },
     onError: (error) => {
-      show(t("community:excerpt_create_failed", { error: String(error) }));
+      toast.error(t("community:excerpt_create_failed", { error: String(error) }));
     },
   });
 
   function handleSave() {
     if (!userId) {
-      show(t("auth:flow_onboarding_sign_in_first"));
+      toast.warning(t("auth:flow_onboarding_sign_in_first"));
       return;
     }
     const translation = excerptData.translations?.[0];

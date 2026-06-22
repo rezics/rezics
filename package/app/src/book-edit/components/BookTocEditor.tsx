@@ -1,4 +1,3 @@
-import { useAlertStore } from "@app/states/windowAlertStore.ts";
 import { bookMutations } from "@rezics/api/book/book.mutations";
 import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter.queries";
@@ -277,7 +276,6 @@ export const BookTocEditor = forwardRef<
   const updateChapterMutation = chapterMutations.useUpdate();
   const ensureChapterUnit = useEnsureChapterUnit(bookUnitId);
   const queryClient = useQueryClient();
-  const { show: showAlert } = useAlertStore();
   const navigate = useNavigate();
 
   useImperativeHandle(ref, () => ({
@@ -341,7 +339,7 @@ export const BookTocEditor = forwardRef<
       setSavedTreeData(data);
       setOpLog((current) => clearTreeEditOpLog(current));
     } catch (error) {
-      showAlert(t("book:toc_save_failed", { error: String(error) }));
+      toast.error(t("book:toc_save_failed", { error: String(error) }));
     }
   }
 
@@ -396,7 +394,7 @@ export const BookTocEditor = forwardRef<
     async (chapter: Chapter) => {
       const contentUnitId = contentUnitIdForNode(chapter);
       if (!contentUnitId && !chapter.nodeId) {
-        showAlert(t("book:toc_chapter_unsaved_warning"));
+        toast.warning(t("book:toc_chapter_unsaved_warning"));
         return;
       }
       const targetContentUnitId = await ensureChapterUnit({
@@ -409,7 +407,7 @@ export const BookTocEditor = forwardRef<
         params: { bookId: bookUnitId, chapterId: targetContentUnitId },
       });
     },
-    [ensureChapterUnit, navigate, bookUnitId, showAlert, t],
+    [ensureChapterUnit, navigate, bookUnitId, t],
   );
 
   /**

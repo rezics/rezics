@@ -1,4 +1,3 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
 import { bookQueries } from "@rezics/api/book/book";
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
@@ -64,7 +63,6 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     _editRating: 0,
     extra: {},
   });
-  const { show } = useAlertStore();
   const kind =
     searchParams.get("tab") === "remark" ? PostKind.REMARK : PostKind.REVIEW;
   const catalogContext = bookInfo
@@ -82,14 +80,14 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const scoreMutation = useUpsertScoreMutation();
   const postMutation = useCreatePostMutation({
     onSuccess: (data) => {
-      show(t("community:review_messages_create_success"));
+      toast.success(t("community:review_messages_create_success"));
       navigate({ to: "/review/$reviewId", params: { reviewId: data.unitId } });
     },
     onError: (error) => {
       // A recognized policy denial renders inline below; other errors toast.
       // 已识别的策略拒绝会在下方内联渲染；其他错误则以 toast 提示。
       if (!policyDenialFromError(error)) {
-        show(
+        toast.error(
           t("community:review_messages_create_failed", {
             error: String(error),
           }),
@@ -100,11 +98,11 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
 
   async function handleSave(status: "DRAFT" | "PUBLISHED") {
     if (!userId) {
-      show(t("common:please_login_first"));
+      toast.warning(t("common:please_login_first"));
       return;
     }
     if (!reviewData._editTitle.trim()) {
-      show(t("community:review_messages_title_required"));
+      toast.warning(t("community:review_messages_title_required"));
       return;
     }
 
@@ -115,7 +113,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       kind === PostKind.REVIEW &&
       (reviewData.contentSource?.length ?? 0) < 200
     ) {
-      show(t("community:review_validation_min_chars"));
+      toast.warning(t("community:review_validation_min_chars"));
       return;
     }
 

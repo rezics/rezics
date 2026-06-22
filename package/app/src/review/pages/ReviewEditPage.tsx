@@ -1,4 +1,4 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
+import { toast } from "sonner";
 import {
   postQueries,
   useDeletePostMutation,
@@ -77,11 +77,9 @@ export function ReviewEditPageContainer() {
     initializedUnitId.current = data.unitId;
   }, [data, languageContent, locale]);
 
-  const { show } = useAlertStore();
-
   const { mutate, isPending } = useUpdatePostMutation({
     onSuccess: () => {
-      show(t("community:review_messages_update_success"));
+      toast.success(t("community:review_messages_update_success"));
       // Navigate back to the review detail page after successful update.
       // 更新成功后导航回评论详情页。
       navigate({
@@ -90,28 +88,28 @@ export function ReviewEditPageContainer() {
       });
     },
     onError: (error) => {
-      show(String(error));
+      toast.error(String(error));
     },
   });
 
   const { mutate: deletePostMutation } = useDeletePostMutation({
     onSuccess: () => {
-      show(t("community:review_messages_delete_success"));
+      toast.success(t("community:review_messages_delete_success"));
     },
     onError: (error) => {
-      show(String(error));
+      toast.error(String(error));
     },
   });
 
   function handleSave() {
     if ((reviewData.contentSource?.length ?? 0) < 200) {
-      show(t("community:review_validation_min_chars"));
+      toast.warning(t("community:review_validation_min_chars"));
       return;
     }
 
     if (reviewData._editRating) {
       if (reviewData._editRating > 10 || reviewData._editRating < 0) {
-        show(t("community:review_messages_rating_range_error"));
+        toast.warning(t("community:review_messages_rating_range_error"));
         return;
       }
     }
@@ -136,14 +134,14 @@ export function ReviewEditPageContainer() {
   function handleDelete() {
     deletePostMutation(reviewId, {
       onSuccess: () => {
-        show(t("community:review_messages_delete_success"));
+        toast.success(t("community:review_messages_delete_success"));
         navigate({
           to: "/review/book/$bookId",
           params: { bookId: reviewData.targetUnitId ?? "" },
         });
       },
       onError: () => {
-        show(t("community:review_messages_delete_failed"));
+        toast.error(t("community:review_messages_delete_failed"));
       },
     });
   }

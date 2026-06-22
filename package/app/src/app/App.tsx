@@ -13,7 +13,6 @@ import { type ReactNode, StrictMode, Suspense, useEffect, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Toaster } from "sonner";
 import { router } from "@/router";
-import { WindowAlert } from "./components/WindowAlert";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
 import "./providers/i18n";
 import { ReactQueryProvider } from "./providers/react-query";
@@ -57,7 +56,6 @@ function AppProviders({ children }: { children: ReactNode }) {
         <ReactQueryProvider>
           <AppInit>
             <AuthProvider />
-            <WindowAlert />
             <ExternalLinkModal />
             <Toaster position="bottom-right" richColors />
             {children}

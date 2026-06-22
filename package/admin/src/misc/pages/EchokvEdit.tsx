@@ -1,5 +1,5 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvApi, echoKvKeyListQuery } from "@rezics/api/echokv/echokv";
+import { toast } from "sonner";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -10,8 +10,6 @@ import { useState } from "react";
 import { Page } from "@/core/layouts/Page";
 
 export const EchokvEditPage: React.FC = () => {
-  const { show: showAlert } = useAlertStore();
-
   const [currentKey, setCurrentKey] = useState("key_name");
   const [searchKey, setSearchKey] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +21,7 @@ export const EchokvEditPage: React.FC = () => {
   );
 
   const handleLoad = async () => {
-    if (!currentKey.trim()) return showAlert("请输入 key");
+    if (!currentKey.trim()) return toast.warning("请输入 key");
 
     setLoading(true);
     try {
@@ -42,9 +40,9 @@ export const EchokvEditPage: React.FC = () => {
       }
 
       setEditorValue(JSON.stringify(parsed, null, 2));
-      showAlert("加载成功");
+      toast.success("加载成功");
     } catch (err) {
-      showAlert(`加载失败：${String(err)}`);
+      toast.error(`加载失败：${String(err)}`);
     } finally {
       setLoading(false);
     }
@@ -55,7 +53,7 @@ export const EchokvEditPage: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!currentKey.trim()) return showAlert("请输入 key");
+    if (!currentKey.trim()) return toast.warning("请输入 key");
 
     setSaving(true);
     try {
@@ -64,9 +62,9 @@ export const EchokvEditPage: React.FC = () => {
 
       const result = await echoKvApi.set(currentKey.trim(), value);
 
-      showAlert(`已保存: ${JSON.stringify(result)}`);
+      toast.success(`已保存: ${JSON.stringify(result)}`);
     } catch (err) {
-      showAlert(`当前 JSON 非法：${String(err)}`);
+      toast.error(`当前 JSON 非法：${String(err)}`);
     } finally {
       setSaving(false);
     }

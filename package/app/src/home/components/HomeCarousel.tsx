@@ -1,4 +1,4 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
+import { toast } from "sonner";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
 import { useTranslation } from "@rezics/i18n/react";
@@ -157,7 +157,6 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   };
 
   const [products, setProducts] = useState<CarouselProduct[]>([]);
-  const { show: showAlert } = useAlertStore();
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(
     null,
   );
@@ -166,11 +165,11 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
     try {
       setProducts(parseEchoKVResponse<CarouselProduct[]>(data) ?? []);
     } catch (error) {
-      showAlert(
+      toast.error(
         t("page:home_carousel_alert_parse_failed", { error: String(error) }),
       );
     }
-  }, [data, showAlert, t]);
+  }, [data, t]);
 
   useEmblaAutoplay(carouselApi, {
     interval: autoplayIntervalNum,

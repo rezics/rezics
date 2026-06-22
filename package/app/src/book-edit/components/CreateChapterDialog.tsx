@@ -1,6 +1,6 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { useCurrentUserId } from "@rezics/api/hooks";
+import { toast } from "sonner";
 import { type ContentRating, markdownContentDoc } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
@@ -41,8 +41,6 @@ export function CreateChapterDialog({
 }: CreateChapterDialogProps) {
   const { t } = useTranslation(["book", "common"]);
   const userId = useCurrentUserId();
-  const { show } = useAlertStore();
-
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [rating, setRating] = useState<ContentRating>(bookRating ?? "GENERAL");
@@ -57,7 +55,7 @@ export function CreateChapterDialog({
 
   const createMutation = useCreateChapterMutation({
     onError: (error) => {
-      show(
+      toast.error(
         t("book:chapter_create_failed", {
           error: error instanceof Error ? error.message : String(error),
         }),
@@ -74,12 +72,12 @@ export function CreateChapterDialog({
     if (!open) return;
     if (createMutation.isPending) return;
     if (isInvalid) {
-      show(t("book:chapter_title_content_required"));
+      toast.warning(t("book:chapter_title_content_required"));
       return;
     }
 
     if (!userId) {
-      show(t("common:route_unauthenticated_title"));
+      toast.warning(t("common:route_unauthenticated_title"));
       return;
     }
 

@@ -1,6 +1,6 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
 import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
+import { toast } from "sonner";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import {
   contentDocMarkdownFallback,
@@ -56,17 +56,16 @@ export function ExcerptEditPage({
   setData,
 }: ExcerptEditPageProps) {
   const { t } = useTranslation(["common", "community"]);
-  const { show } = useAlertStore();
   const translation = data.translations?.[0];
   const extra = (data.extra as Record<string, any>) ?? {};
   const source = extra.source as ExcerptSource | undefined;
 
   const { mutate } = useUpdateUnitMutation({
     onSuccess: () => {
-      show(t("community:excerpt_updated_success"));
+      toast.success(t("community:excerpt_updated_success"));
     },
     onError: (error) => {
-      show(
+      toast.error(
         t("community:excerpt_messages_update_failed", { error: String(error) }),
       );
     },

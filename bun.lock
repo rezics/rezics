@@ -80,6 +80,7 @@
         "react-dom": "^19",
         "react-error-boundary": "^6.0.0",
         "react-helmet-async": "^2.0.5",
+        "sonner": "^2.0.7",
         "tailwind-merge": "^3.4.0",
         "unocss-preset-scrollbar-hide": "^1.0.1",
       },

@@ -1,5 +1,5 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
 import { useSetFeedbackResolvedMutation } from "@rezics/api/feedback/feedback.mutations";
+import { toast } from "sonner";
 import type {
   FeedbackDTO,
   FeedbackType,
@@ -79,7 +79,6 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
   const [startAll, setStartAll] = useState<number>(0);
   const [startMine, setStartMine] = useState<number>(0);
   const [startUser, setStartUser] = useState<number>(0);
-  const { show: showAlert } = useAlertStore();
   const queryClient = useQueryClient();
   const paginatorRef = useRef<UniversalPaginatorHandle | null>(null);
 
@@ -113,7 +112,7 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
       { id, resolved: true },
       {
         onSuccess: () =>
-          showAlert(
+          toast.success(
             getI18nRuntime().i18n.t("community:feedback_resolve_success"),
           ),
       },

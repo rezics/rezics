@@ -12,7 +12,7 @@ import { type ReactNode, StrictMode, Suspense, useEffect, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
 import { router } from "@/router";
-import { WindowAlert } from "./components/WindowAlert";
+import { Toaster } from "sonner";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
 import "./providers/i18n";
 import { ReactQueryProvider } from "./providers/react-query";
@@ -40,7 +40,7 @@ function AppProviders({ children }: { children: ReactNode }) {
           <PersistentSettingsLoader />
           <ReactQueryProvider>
             <AuthProvider />
-            <WindowAlert />
+            <Toaster position="bottom-right" richColors />
             <ExternalLinkModal />
             {children}
           </ReactQueryProvider>
