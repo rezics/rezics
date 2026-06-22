@@ -1,3 +1,4 @@
+import type { GameSystemRequirementHardware } from "@rezics/contract";
 import {
   boolean,
   index,
@@ -48,7 +49,7 @@ export const GameSystemRequirement = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    hardware: jsonData().notNull(),
+    hardware: jsonData<GameSystemRequirementHardware>().notNull(),
     rawText: text(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

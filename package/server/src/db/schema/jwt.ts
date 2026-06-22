@@ -1,3 +1,4 @@
+import type { JwtPrivateJwk, JwtPublicJwk } from "@rezics/jwt";
 import {
   boolean,
   index,
@@ -24,9 +25,9 @@ export const Jwks = pgTable(
         onUpdate: "cascade",
       }),
     // Exempt JSON: JOSE/JWK owns the key object shape.
-    publicJwk: jsonData().notNull(),
+    publicJwk: jsonData<JwtPublicJwk>().notNull(),
     // Exempt JSON: JOSE/JWK owns the key object shape.
-    privateJwk: jsonData().notNull(),
+    privateJwk: jsonData<JwtPrivateJwk>().notNull(),
     alg: text(),
     createdAt: createdAt(),
     expiresAt: nullableTimestamp(),

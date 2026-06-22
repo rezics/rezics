@@ -17,13 +17,11 @@ export function resolveInitialBookLanguage(
   bookInfo: BookDTO | null | undefined,
 ): string {
   const available: string[] = (bookInfo?.translations ?? [])
-    .map((tr) => tr.language as unknown as string)
+    .map((tr) => tr.language)
     .filter(Boolean);
 
   if (available.length === 0) {
-    return (
-      (bookInfo?.defaultLanguage as unknown as string) ?? FALLBACK_LANGUAGE
-    );
+    return bookInfo?.defaultLanguage ?? FALLBACK_LANGUAGE;
   }
 
   if (appLocale && available.includes(appLocale)) return appLocale;
@@ -32,9 +30,7 @@ export function resolveInitialBookLanguage(
     if (available.includes(lang)) return lang;
   }
 
-  const unitDefault = bookInfo?.defaultLanguage as unknown as
-    | string
-    | undefined;
+  const unitDefault = bookInfo?.defaultLanguage;
   if (unitDefault && available.includes(unitDefault)) {
     return unitDefault;
   }
@@ -48,7 +44,7 @@ function availableBookLanguages(
   bookInfo: BookDTO | null | undefined,
 ): string[] {
   return (bookInfo?.translations ?? [])
-    .map((tr) => tr.language as unknown as string)
+    .map((tr) => tr.language)
     .filter(Boolean);
 }
 

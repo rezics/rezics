@@ -64,8 +64,8 @@ export async function fetchJwtService(
     isActive: record.isActive,
     jwks: jwks.map((row) => ({
       kid: row.id,
-      publicJwk: row.publicJwk as unknown as JwtPublicJwk,
-      privateJwk: row.privateJwk as unknown as JwtPrivateJwk,
+      publicJwk: row.publicJwk,
+      privateJwk: row.privateJwk,
       alg: row.alg,
       createdAt: row.createdAt,
       expiresAt: row.expiresAt,

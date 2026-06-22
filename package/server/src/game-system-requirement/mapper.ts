@@ -11,7 +11,7 @@ export function mapGameSystemRequirementToDTO(
     tier: row.tier as GameSystemRequirementDTO["tier"],
     language: row.language as GameSystemRequirementDTO["language"],
     sourceExternalLinkId: row.sourceExternalLinkId,
-    hardware: row.hardware as unknown as GameSystemRequirementDTO["hardware"],
+    hardware: row.hardware,
     rawText: row.rawText,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

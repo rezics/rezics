@@ -2,13 +2,7 @@ import type {
   RezicsProfileSetupClaims,
   RezicsSessionClaims,
 } from "@rezics/contract";
-import {
-  createLocalJWKSet,
-  importJWK,
-  type JWK,
-  jwtVerify,
-  SignJWT,
-} from "jose";
+import { createLocalJWKSet, importJWK, jwtVerify, SignJWT } from "jose";
 import { env } from "@/env";
 import { getJwtService } from "@/jwt/jwtServiceCache";
 
@@ -63,7 +57,7 @@ export async function verifyRezicsSessionToken(
     const raw = token.startsWith("Bearer ") ? token.slice(7) : token;
     const service = await getJwtService("server-local");
     const jwks = createLocalJWKSet({
-      keys: service.jwks.map((k) => k.publicJwk as unknown as JWK),
+      keys: service.jwks.map((k) => k.publicJwk),
     });
 
     const { payload } = await jwtVerify(raw, jwks, {
@@ -120,7 +114,7 @@ export async function verifyRezicsProfileSetupToken(
     const raw = token.startsWith("Bearer ") ? token.slice(7) : token;
     const service = await getJwtService("server-local");
     const jwks = createLocalJWKSet({
-      keys: service.jwks.map((k) => k.publicJwk as unknown as JWK),
+      keys: service.jwks.map((k) => k.publicJwk),
     });
 
     const { payload } = await jwtVerify(raw, jwks, {

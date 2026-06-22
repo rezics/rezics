@@ -26,7 +26,7 @@ export const timestamps = () => ({
  * `task check:convention` rejects unregistered JSON columns and in-database
  * JSON mutation helpers.
  */
-export const jsonData = () => jsonb();
+export const jsonData = <T = unknown>() => jsonb().$type<T>();
 
 export const textArray = () => text().array();
 

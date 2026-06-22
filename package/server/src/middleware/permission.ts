@@ -38,14 +38,11 @@ function resolveSessionToken(
 export const authMacro = new Elysia({ name: "macro/auth" })
   .macro("requireLogin", {
     async resolve(ctx) {
-      const { headers } = ctx as unknown as {
-        headers: Record<string, string | undefined>;
-      };
-
-      const authorization = headers["authorization"];
+      const authorization =
+        ctx.request.headers.get("authorization") ?? undefined;
       const sessionToken = resolveSessionToken(
         authorization,
-        headers["cookie"],
+        ctx.request.headers.get("cookie") ?? undefined,
       );
       if (!sessionToken) {
         return status(401, "Unauthorized: No session token provided");
@@ -63,12 +60,11 @@ export const authMacro = new Elysia({ name: "macro/auth" })
   })
   .macro("requireProfileSetup", {
     async resolve(ctx) {
-      const { headers } = ctx as unknown as {
-        headers: Record<string, string | undefined>;
-      };
-
       const setupToken =
-        readCookie(headers["cookie"], PROFILE_SETUP_COOKIE_NAME) ?? undefined;
+        readCookie(
+          ctx.request.headers.get("cookie") ?? undefined,
+          PROFILE_SETUP_COOKIE_NAME,
+        ) ?? undefined;
       if (!setupToken) {
         return status(401, "Unauthorized: No profile setup token provided");
       }
