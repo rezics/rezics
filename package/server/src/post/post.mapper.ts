@@ -7,16 +7,12 @@ import type {
 import { resolveReadLanguage } from "@rezics/contract";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { variantContextForRow } from "@/unit/variant-context";
+import { optionalCount } from "@/utils/queryUtils";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { CommentPromotion } from "../db/schema";
 import type { PostWithRelations } from "./types";
 
 type CommentPromotionRow = typeof CommentPromotion.$inferSelect;
-
-function optionalCount(row: unknown, key: string): number | undefined {
-  const value = (row as Record<string, unknown> | null | undefined)?.[key];
-  return typeof value === "number" ? value : undefined;
-}
 
 function moderationStatus(post: PostWithRelations) {
   return post.unit.moderationStatus.toLowerCase() as

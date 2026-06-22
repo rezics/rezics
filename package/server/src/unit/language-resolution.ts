@@ -31,6 +31,16 @@ export type EffectiveReadLanguageInput = {
   appLocale?: string | null;
 };
 
+// Normalize the overloaded read-language arg to the canonical object form.
+// 将重载的 read-language 参数归一化为规范对象形式。
+export function normalizeReadLanguageInput(
+  readLanguage: EffectiveReadLanguageInput | readonly string[],
+): EffectiveReadLanguageInput {
+  return Array.isArray(readLanguage)
+    ? { languages: readLanguage as readonly string[] }
+    : (readLanguage as EffectiveReadLanguageInput);
+}
+
 export function resolveUnitAuthoringLanguage(input: {
   explicitLanguage?: string | null;
   actorSettings?: ActorLanguageSettings | null;

@@ -12,7 +12,10 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra, resolveReadLanguage } from "@rezics/contract";
-import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
+import {
+  normalizeReadLanguageInput,
+  type EffectiveReadLanguageInput,
+} from "@/unit/language-resolution";
 import { resolveStoredLicenseSlug } from "../unit/publication-policy";
 import { mapPublicUser } from "../utils/sanitizeUser";
 import type {
@@ -33,14 +36,6 @@ type ShelfDisplayInput = {
   supportLanguages?: readonly SupportLanguageLike[] | null;
   translations?: readonly ShelfTranslationLike[] | null;
 };
-
-function normalizeReadLanguageInput(
-  readLanguage: EffectiveReadLanguageInput | readonly string[],
-): EffectiveReadLanguageInput {
-  return Array.isArray(readLanguage)
-    ? { languages: readLanguage as readonly string[] }
-    : (readLanguage as EffectiveReadLanguageInput);
-}
 
 /**
  * Resolve shelf display at the language-row level, not per field.

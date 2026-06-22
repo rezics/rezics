@@ -5,22 +5,13 @@ import type {
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
 import { mapPublicUser } from "@/utils/sanitizeUser";
-import type { EffectiveReadLanguageInput } from "./language-resolution";
+import {
+  normalizeReadLanguageInput,
+  type EffectiveReadLanguageInput,
+} from "./language-resolution";
 import { resolveStoredLicenseSlug } from "./publication-policy";
+import { optionalCount } from "@/utils/queryUtils";
 import type { UnitWithRelations } from "./types";
-
-function optionalCount(row: unknown, key: string): number | undefined {
-  const value = (row as Record<string, unknown> | null | undefined)?.[key];
-  return typeof value === "number" ? value : undefined;
-}
-
-function normalizeReadLanguageInput(
-  readLanguage: EffectiveReadLanguageInput | readonly string[],
-): EffectiveReadLanguageInput {
-  return Array.isArray(readLanguage)
-    ? { languages: readLanguage as readonly string[] }
-    : (readLanguage as EffectiveReadLanguageInput);
-}
 
 /**
  * Map internal Unit model to UnitDTO

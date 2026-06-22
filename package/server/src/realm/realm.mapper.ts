@@ -12,7 +12,10 @@ import {
   parseRealmDock,
   resolveReadLanguage,
 } from "@rezics/contract";
-import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
+import {
+  normalizeReadLanguageInput,
+  type EffectiveReadLanguageInput,
+} from "@/unit/language-resolution";
 import { mapTranslationToDTO } from "@/unit/mapper";
 import type {
   RealmMember,
@@ -32,14 +35,6 @@ function lower<T extends string>(
   value: string | null | undefined,
 ): T | undefined {
   return value?.toLowerCase() as T | undefined;
-}
-
-function normalizeReadLanguageInput(
-  readLanguage: EffectiveReadLanguageInput | readonly string[],
-): EffectiveReadLanguageInput {
-  return Array.isArray(readLanguage)
-    ? { languages: readLanguage as readonly string[] }
-    : (readLanguage as EffectiveReadLanguageInput);
 }
 
 function resolvedRealmTranslation(

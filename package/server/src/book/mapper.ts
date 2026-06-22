@@ -5,23 +5,14 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra, resolveReadLanguage } from "@rezics/contract";
-import type { EffectiveReadLanguageInput } from "@/unit/language-resolution";
+import {
+  normalizeReadLanguageInput,
+  type EffectiveReadLanguageInput,
+} from "@/unit/language-resolution";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
+import { optionalCount } from "@/utils/queryUtils";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { BookWithRelations } from "./types";
-
-function optionalCount(row: unknown, key: string): number | undefined {
-  const value = (row as Record<string, unknown> | null | undefined)?.[key];
-  return typeof value === "number" ? value : undefined;
-}
-
-function normalizeReadLanguageInput(
-  readLanguage: EffectiveReadLanguageInput | readonly string[],
-): EffectiveReadLanguageInput {
-  return Array.isArray(readLanguage)
-    ? { languages: readLanguage as readonly string[] }
-    : (readLanguage as EffectiveReadLanguageInput);
-}
 
 function pickCoverUrl(
   book: BookWithRelations,
