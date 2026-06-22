@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { PickerRow } from "@/shared/ui/PickerRow";
 import type { ZoneRefUnitMap } from "../../models/zoneMenu";
 import { ManageField } from "./ZoneManageFields";
 
@@ -114,17 +115,12 @@ function ZoneUnitPickerDialog({
             </div>
           ) : null}
           {results.map((result) => (
-            <button
+            <PickerRow
               key={result.id}
-              type="button"
-              className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
+              label={result.titles[0] ?? result.id}
+              meta={result.type}
               onClick={() => onPick(result.id, result.titles[0] ?? null)}
-            >
-              <span className="truncate">{result.titles[0] ?? result.id}</span>
-              <span className="shrink-0 font-mono text-xs text-text-tertiary">
-                {result.type}
-              </span>
-            </button>
+            />
           ))}
         </div>
       </DialogContent>

@@ -5,6 +5,7 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { X } from "lucide-react";
 import { useId, useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { PickerRow } from "@/shared/ui/PickerRow";
 
 type PickedUser = {
   unitId: string;
@@ -122,13 +123,13 @@ export function UserSearchField({
               className="flex flex-col rounded-md border border-border-whisper bg-surface-canvas shadow-sm"
             >
               {results.map((user, index) => (
-                <button
+                <PickerRow
                   key={user.unitId}
                   id={`${autoId}-option-${index}`}
-                  type="button"
                   role="option"
                   aria-selected={activeIndex === index}
-                  className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
+                  label={user.name ?? user.slug ?? user.unitId}
+                  meta={user.slug ?? undefined}
                   onClick={() =>
                     handlePick({
                       unitId: user.unitId,
@@ -138,16 +139,7 @@ export function UserSearchField({
                   }
                   onMouseEnter={() => setActiveIndex(index)}
                   onMouseLeave={() => setActiveIndex(-1)}
-                >
-                  <span className="truncate">
-                    {user.name ?? user.slug ?? user.unitId}
-                  </span>
-                  {user.slug ? (
-                    <span className="shrink-0 font-mono text-xs text-text-tertiary">
-                      {user.slug}
-                    </span>
-                  ) : null}
-                </button>
+                />
               ))}
             </div>
           ) : null}

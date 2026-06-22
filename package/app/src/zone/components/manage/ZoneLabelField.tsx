@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { PickerRow } from "@/shared/ui/PickerRow";
 import {
   addZoneTranslationRow,
   removeZoneTranslationRow,
@@ -177,17 +178,12 @@ function ZoneLabelPickerDialog({
             </div>
           ) : null}
           {results.map((result) => (
-            <button
+            <PickerRow
               key={result.unitId}
-              type="button"
-              className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
+              label={labelTitle(result)}
+              meta={result.unitId.slice(0, 8)}
               onClick={() => onPick(result.unitId, labelTitle(result))}
-            >
-              <span className="truncate">{labelTitle(result)}</span>
-              <span className="shrink-0 font-mono text-xs text-text-tertiary">
-                {result.unitId.slice(0, 8)}
-              </span>
-            </button>
+            />
           ))}
         </div>
         <div className="border-t border-border-whisper p-3">

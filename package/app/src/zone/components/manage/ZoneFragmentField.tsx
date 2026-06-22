@@ -12,6 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, Search } from "lucide-react";
 import { useState } from "react";
+import { PickerRow } from "@/shared/ui/PickerRow";
 import { AppSafeLink } from "@/shared/ui/link";
 import type { ZoneRefUnitMap } from "../../models/zoneMenu";
 import { ManageField } from "./ZoneManageFields";
@@ -136,17 +137,12 @@ function ZoneFragmentPickerDialog({
             </p>
           ) : null}
           {posts.map((post) => (
-            <button
+            <PickerRow
               key={post.unitId}
-              type="button"
-              className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
+              label={post.title ?? post.unitId}
+              meta={post.unitId.slice(0, 8)}
               onClick={() => onPick(post.unitId)}
-            >
-              <span className="truncate">{post.title ?? post.unitId}</span>
-              <span className="shrink-0 font-mono text-xs text-text-tertiary">
-                {post.unitId.slice(0, 8)}
-              </span>
-            </button>
+            />
           ))}
         </div>
       </DialogContent>

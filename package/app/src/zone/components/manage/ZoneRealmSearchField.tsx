@@ -5,6 +5,7 @@ import { Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { PickerRow } from "@/shared/ui/PickerRow";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 type ZonePickedRealm = {
@@ -54,10 +55,10 @@ export function ZoneRealmSearchField({
       {results.length > 0 ? (
         <div className="flex flex-col">
           {results.map((realm) => (
-            <button
+            <PickerRow
               key={realm.id}
-              type="button"
-              className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
+              label={realm.title ?? realm.id}
+              meta={realm.id.slice(0, 8)}
               onClick={() => {
                 setQuery("");
                 onPick({
@@ -66,12 +67,7 @@ export function ZoneRealmSearchField({
                   slug: null,
                 });
               }}
-            >
-              <span className="truncate">{realm.title ?? realm.id}</span>
-              <span className="shrink-0 font-mono text-xs text-text-tertiary">
-                {realm.id.slice(0, 8)}
-              </span>
-            </button>
+            />
           ))}
         </div>
       ) : null}

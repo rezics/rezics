@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useId, useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { PickerRow } from "@/shared/ui/PickerRow";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 type PickedRealm = {
@@ -132,13 +133,13 @@ export function RealmSearchField({
               className="flex flex-col rounded-md border border-border-whisper bg-surface-canvas shadow-sm"
             >
               {results.map((realm, index) => (
-                <button
+                <PickerRow
                   key={realm.id}
                   id={`${autoId}-option-${index}`}
-                  type="button"
                   role="option"
                   aria-selected={activeIndex === index}
-                  className="flex w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
+                  label={realm.title ?? realm.id}
+                  meta={realm.id.slice(0, 8)}
                   onClick={() =>
                     handlePick({
                       unitId: realm.id,
@@ -148,12 +149,7 @@ export function RealmSearchField({
                   }
                   onMouseEnter={() => setActiveIndex(index)}
                   onMouseLeave={() => setActiveIndex(-1)}
-                >
-                  <span className="truncate">{realm.title ?? realm.id}</span>
-                  <span className="shrink-0 font-mono text-xs text-text-tertiary">
-                    {realm.id.slice(0, 8)}
-                  </span>
-                </button>
+                />
               ))}
             </div>
           ) : null}

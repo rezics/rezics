@@ -46,6 +46,7 @@ import type React from "react";
 import { useMemo, useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { PickerRow } from "@/shared/ui/PickerRow";
 import { cn } from "@/shared/utils/css-util";
 
 function tagLabel(tag: TagSearchDocument): string {
@@ -613,25 +614,3 @@ function PickerDialog({
   );
 }
 
-function PickerRow({
-  label,
-  meta,
-  onClick,
-}: {
-  label: string;
-  meta: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className="flex w-full min-w-0 items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm leading-ui text-text-primary hover:bg-surface-subtle"
-      onClick={onClick}
-    >
-      <span className="min-w-0 flex-1 truncate">{label}</span>
-      <span className="shrink-0 truncate font-mono text-xs text-text-tertiary">
-        {meta}
-      </span>
-    </button>
-  );
-}
