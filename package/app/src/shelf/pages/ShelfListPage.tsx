@@ -125,6 +125,7 @@ export function ShelfListPage() {
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
             className="mt-6"
+            autoLoad
           />
         </>
       )}

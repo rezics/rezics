@@ -63,6 +63,7 @@ export function ZoneStreamSection({
           isFetchingNextPage={query.isFetchingNextPage}
           fetchNextPage={query.fetchNextPage}
           showEndOfList
+          autoLoad
         />
       )}
     </ZoneSectionShell>

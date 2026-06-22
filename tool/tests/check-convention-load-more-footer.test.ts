@@ -8,7 +8,11 @@ function collectTsxFiles(dir: string, acc: string[] = []): string[] {
     if (entry === "node_modules" || entry.includes(".gen.")) continue;
     if (statSync(full).isDirectory()) {
       collectTsxFiles(full, acc);
-    } else if (full.endsWith(".tsx") && !entry.includes(".test.") && !entry.includes(".stories.")) {
+    } else if (
+      full.endsWith(".tsx") &&
+      !entry.includes(".test.") &&
+      !entry.includes(".stories.")
+    ) {
       acc.push(full);
     }
   }
@@ -20,6 +24,11 @@ function collectTsxFiles(dir: string, acc: string[] = []): string[] {
 const INLINE_LOAD_MORE_PATTERN =
   /isFetchingNextPage[\s\S]{0,80}common:load(?:ing|_more)/;
 
+// Detects inline IntersectionObserver for infinite scroll (fetchNextPage nearby).
+// 检测用于无限滚动的内联 IntersectionObserver（附近有 fetchNextPage）。
+const INLINE_IO_SCROLL_PATTERN =
+  /IntersectionObserver[\s\S]{0,200}fetchNextPage|fetchNextPage[\s\S]{0,200}IntersectionObserver/;
+
 describe("LoadMoreFooter convergence", () => {
   const appSrc = join(import.meta.dir, "../../package/app/src");
   const allTsx = collectTsxFiles(appSrc);
@@ -27,6 +36,18 @@ describe("LoadMoreFooter convergence", () => {
   test("LoadMoreFooter.tsx exists", () => {
     const exists = allTsx.some((f) => f.includes("LoadMoreFooter.tsx"));
     expect(exists).toBe(true);
+  });
+
+  test("no inline IntersectionObserver for infinite scroll", () => {
+    const violations: string[] = [];
+    for (const file of allTsx) {
+      if (file.includes("LoadMoreFooter.tsx")) continue;
+      const content = readFileSync(file, "utf-8");
+      if (INLINE_IO_SCROLL_PATTERN.test(content)) {
+        violations.push(file.replace(appSrc, ""));
+      }
+    }
+    expect(violations).toEqual([]);
   });
 
   test("no page/section duplicates the inline load-more button pattern", () => {

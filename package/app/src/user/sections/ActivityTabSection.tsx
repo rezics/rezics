@@ -64,6 +64,7 @@ export const ActivityTabSection: FC = () => {
         hasNextPage={query.hasNextPage}
         isFetchingNextPage={query.isFetchingNextPage}
         fetchNextPage={query.fetchNextPage}
+        autoLoad
       />
     </div>
   );

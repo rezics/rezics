@@ -512,6 +512,7 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
         isFetchingNextPage={commentThreadQuery.isFetchingNextPage}
         fetchNextPage={commentThreadQuery.fetchNextPage}
         className="pt-3"
+        autoLoad
       />
       {editingPost ? (
         <PostEditDialog

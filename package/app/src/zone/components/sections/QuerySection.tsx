@@ -100,6 +100,7 @@ export function QuerySection({
           hasNextPage={query.hasNextPage}
           isFetchingNextPage={query.isFetchingNextPage}
           fetchNextPage={query.fetchNextPage}
+          autoLoad
         />
       )}
     </ZoneSectionShell>

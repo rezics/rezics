@@ -130,6 +130,7 @@ export const ContinueThreadPage: React.FC = () => {
         isFetchingNextPage={commentSubtreeQuery.isFetchingNextPage}
         fetchNextPage={commentSubtreeQuery.fetchNextPage}
         className="pt-2"
+        autoLoad
       />
     </div>
   );

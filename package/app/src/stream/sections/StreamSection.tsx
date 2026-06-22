@@ -122,6 +122,7 @@ export const StreamSectionContent: React.FC<StreamSectionContentProps> = ({
           isFetchingNextPage={isFetchingNextPage}
           fetchNextPage={fetchNextPage}
           showEndOfList
+          autoLoad
         />
       )}
     </div>

@@ -130,6 +130,7 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
             className="mt-6"
+            autoLoad
           />
         </>
       )}
