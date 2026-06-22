@@ -3,29 +3,14 @@ import type {
   UnitExternalLinkDTO,
   UpdateUnitExternalLinkInput,
 } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { creditAttributionKeys } from "../credit-attribution/credit-attribution.keys";
 import { unitExternalLinkApi } from "./unit-external-link.api";
 import { unitExternalLinkKeys } from "./unit-external-link.keys";
 
-export function invalidateUnitExternalLinkQueries(
-  queryClient: Pick<ReturnType<typeof useQueryClient>, "invalidateQueries">,
-  unitId?: string,
-) {
-  queryClient.invalidateQueries({ queryKey: unitExternalLinkKeys.lists() });
-  if (unitId) {
-    queryClient.invalidateQueries({
-      queryKey: unitExternalLinkKeys.links(unitId),
-    });
-    queryClient.invalidateQueries({
-      queryKey: creditAttributionKeys.byUnit(unitId),
-    });
-  }
-}
+// ponytail: root prefix; per-unit granularity if perf matters
+// ponytail：根前缀；如需按 unit 精细化再拆
+const invalidates = [unitExternalLinkKeys.all(), creditAttributionKeys.all()];
 
 export function useCreateUnitExternalLink(
   options?: Omit<
@@ -33,15 +18,11 @@ export function useCreateUnitExternalLink(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateUnitExternalLinkInput) =>
       unitExternalLinkApi.create(input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateUnitExternalLinkQueries(queryClient, data.unitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -55,14 +36,10 @@ export function useUpdateUnitExternalLink(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }) => unitExternalLinkApi.update(id, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateUnitExternalLinkQueries(queryClient, data.unitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -76,14 +53,10 @@ export function useDeleteUnitExternalLink(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id }) => unitExternalLinkApi.remove(id),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateUnitExternalLinkQueries(queryClient, variables.unitId);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 

@@ -4,11 +4,7 @@ import type {
   UnitCollaboratorDTO,
   UnitFieldLockDTO,
 } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { unitAuthorityApi } from "./authority.api";
 import { unitAuthorityKeys } from "./authority.keys";
 
@@ -32,6 +28,10 @@ export type RemoveUnitFieldLockVariables = {
   path: string;
 };
 
+// ponytail: root prefix; per-unit granularity if perf matters
+// ponytail：根前缀；如需按 unit 精细化再拆
+const invalidates = [unitAuthorityKeys.all];
+
 export function useUpsertUnitCollaboratorMutation(
   options?: Omit<
     UseMutationOptions<
@@ -42,17 +42,11 @@ export function useUpsertUnitCollaboratorMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, userId, roleKey }) =>
       unitAuthorityApi.upsertCollaborator(unitId, { userId, roleKey }),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: unitAuthorityKeys.collaborators(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -66,17 +60,11 @@ export function useRemoveUnitCollaboratorMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, userId }) =>
       unitAuthorityApi.removeCollaborator(unitId, userId),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: unitAuthorityKeys.collaborators(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -86,17 +74,11 @@ export function useUpsertUnitFieldLockMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, path, reason }) =>
       unitAuthorityApi.upsertFieldLock(unitId, { path, reason }),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: unitAuthorityKeys.fieldLocks(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 
@@ -110,17 +92,11 @@ export function useRemoveUnitFieldLockMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ unitId, path }) =>
       unitAuthorityApi.removeFieldLock(unitId, path),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: unitAuthorityKeys.fieldLocks(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates },
   });
 }
 

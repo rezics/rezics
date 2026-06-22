@@ -16,6 +16,13 @@ const FULLY_MIGRATED = [
   "subject-attribution/subject-attribution.mutations.ts",
   "realm-tag-tree/realm-tag-tree.mutations.ts",
   "pinboard/pinboard.mutations.ts",
+  "account-operation/account-operation.mutations.ts",
+  "notification/notification.mutations.ts",
+  "policy-tag/policy-tag.mutations.ts",
+  "unit-external-link/unit-external-link.mutations.ts",
+  "unit/authority.mutations.ts",
+  "realm/realm-extra.mutations.ts",
+  "auth/auth.mutations.ts",
 ];
 
 // Files using meta.invalidates but retaining useQueryClient for

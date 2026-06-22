@@ -1,9 +1,5 @@
 import type { MarkReadBody } from "@rezics/contract";
-import {
-  type UseMutationOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { notificationApi } from "./notification.api";
 import { notificationKeys } from "./notification.keys";
 
@@ -13,16 +9,11 @@ export function useMarkAsReadMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: MarkReadBody) => notificationApi.markAsRead(input),
-    // Spread caller options first so our onSuccess is not overwritten.
-    // 先展开调用方选项，确保自定义 onSuccess 不会被覆盖。
     ...options,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
-      options?.onSuccess?.(...args);
-    },
+    mutationFn: (input: MarkReadBody) => notificationApi.markAsRead(input),
+    // ponytail: root prefix; covers list + unreadCount
+    meta: { invalidates: [notificationKeys.all()] },
   });
 }
 
@@ -32,16 +23,11 @@ export function useMarkAllAsReadMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => notificationApi.markAllAsRead(),
-    // Spread caller options first so our onSuccess is not overwritten.
-    // 先展开调用方选项，确保自定义 onSuccess 不会被覆盖。
     ...options,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
-      options?.onSuccess?.(...args);
-    },
+    mutationFn: () => notificationApi.markAllAsRead(),
+    // ponytail: root prefix; covers list + unreadCount
+    meta: { invalidates: [notificationKeys.all()] },
   });
 }
 
@@ -51,16 +37,11 @@ export function useDeleteNotificationMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => notificationApi.remove(id),
-    // Spread caller options first so our onSuccess is not overwritten.
-    // 先展开调用方选项，确保自定义 onSuccess 不会被覆盖。
     ...options,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
-      options?.onSuccess?.(...args);
-    },
+    mutationFn: (id: string) => notificationApi.remove(id),
+    // ponytail: root prefix; covers list + unreadCount
+    meta: { invalidates: [notificationKeys.all()] },
   });
 }
 

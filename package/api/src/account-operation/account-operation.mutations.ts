@@ -1,31 +1,20 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { accountOperationsApi } from "./account-operation.api";
 import { accountOperationsKeys } from "./account-operation.keys";
 
 export function useRevokeAuthUserSessionMutation() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: accountOperationsApi.revokeAuthUserSession,
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({
-        queryKey: accountOperationsKeys.authUserSessions(variables.authUserId),
-      });
-    },
+    // ponytail: root prefix; covers authUserSessions for any authUserId
+    meta: { invalidates: [accountOperationsKeys.all()] },
   });
 }
 
 export function useRevokeAuthUserSessionsMutation() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: accountOperationsApi.revokeAuthUserSessions,
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({
-        queryKey: accountOperationsKeys.authUserSessions(variables.authUserId),
-      });
-      qc.invalidateQueries({
-        queryKey: accountOperationsKeys.authUserSummary([variables.authUserId]),
-      });
-    },
+    // ponytail: root prefix; covers authUserSessions + authUserSummary for any authUserId
+    meta: { invalidates: [accountOperationsKeys.all()] },
   });
 }
 
