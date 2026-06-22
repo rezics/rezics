@@ -19,6 +19,7 @@ import {
   notInArray,
   or,
   sql,
+  getTableColumns,
 } from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/json-write";
 import { pickSlugScope } from "@/infra/slug-scopes";
@@ -433,9 +434,11 @@ function createDrizzleUnitRepository(): UnitRepository {
       const db = await getServerDb();
       const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
       const skipNum = options.cursor?.unitId ? 1 : (options.start ?? 0);
+      const unitColumns = getTableColumns(Unit);
+      const sortKey = options.sort?.field;
       const sortField =
-        options.sort?.field && options.sort.field in Unit
-          ? (Unit as unknown as Record<string, any>)[options.sort.field]
+        sortKey && sortKey in unitColumns
+          ? unitColumns[sortKey as keyof typeof unitColumns]
           : Unit.createdAt;
       const sortOrder =
         options.sort?.order?.toLowerCase() === "asc" ? "asc" : "desc";

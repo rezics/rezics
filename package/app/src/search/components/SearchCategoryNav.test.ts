@@ -1,22 +1,11 @@
+import { SEARCH_CATEGORIES } from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
 import { permittedCategoriesForScope } from "./permittedCategories";
 
 describe("permittedCategoriesForScope", () => {
   test("global scope permits every category", () => {
     expect(permittedCategoriesForScope({ kind: "global" })).toEqual([
-      "all",
-      "mixed",
-      "books",
-      "reviews",
-      "excerpts",
-      "remarks",
-      "posts",
-      "comments",
-      "shelves",
-      "realms",
-      "zones",
-      "users",
-      "entities",
+      ...SEARCH_CATEGORIES,
     ]);
   });
 
