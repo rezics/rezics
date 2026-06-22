@@ -5,7 +5,7 @@ import { DeleteButton, DeleteWrapper } from "./DeleteWrapper";
 const deleteButton = (
   <button
     type="button"
-    className="rounded-md bg-error-fill px-4 py-2 text-sm font-medium text-on-brand"
+    className="rounded-md bg-error-fill px-4 py-2 text-sm font-medium text-destructive-foreground"
   >
     Delete shelf
   </button>

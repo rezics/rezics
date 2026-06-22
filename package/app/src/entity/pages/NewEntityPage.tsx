@@ -130,7 +130,7 @@ export function NewEntityPage() {
           label={t("entity:avatar_url")}
         />
 
-        {error ? <p className="text-sm text-text-error">{error}</p> : null}
+        {error ? <p className="text-sm text-error-text">{error}</p> : null}
 
         <div className="flex justify-end gap-2">
           <Button

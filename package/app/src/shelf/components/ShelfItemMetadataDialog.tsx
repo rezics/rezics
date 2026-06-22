@@ -193,7 +193,7 @@ function ShelfItemMetadataDialogContent({
         </div>
 
         {(loadError || saveError) && (
-          <p className="text-sm text-text-error">
+          <p className="text-sm text-error-text">
             {(loadError ?? saveError)?.message}
           </p>
         )}

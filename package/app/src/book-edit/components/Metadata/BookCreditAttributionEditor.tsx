@@ -164,7 +164,7 @@ export function BookCreditAttributionEditor({
       )}
 
       {queue.saveStatus === "error" && queue.error ? (
-        <p className="text-sm text-text-error">{queue.error.message}</p>
+        <p className="text-sm text-error-text">{queue.error.message}</p>
       ) : null}
 
       <EntityPicker

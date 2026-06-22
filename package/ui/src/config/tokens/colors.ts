@@ -120,12 +120,31 @@ export interface ColorTokens {
     border: string;
     ring: string;
   };
+  // Top-level shortcuts for `text-error-text`, `bg-success-fill`, etc.
+  // Aliases for `semantic.*` that match the shorthand convention used across
+  // app/ and admin/. The `text` key maps to `text-light` in light mode and
+  // `text-dark` in dark mode so the shade auto-adapts.
+  // 顶层快捷方式，匹配 app/ 和 admin/ 中的简写约定。`text` 键在亮色模式
+  // 映射到 `text-light`，暗色模式映射到 `text-dark`，自动适配色调。
+  error: SemanticShortcut;
+  success: SemanticShortcut;
+  warning: SemanticShortcut;
+  info: SemanticShortcut;
 }
 
 export interface SemanticColor {
   fill: string;
   "text-light": string;
   "text-dark": string;
+  container: string;
+  "on-container": string;
+}
+
+// Shorthand consumed as `text-error-text`, `bg-success-fill`, etc.
+// 简写形式，用作 `text-error-text`、`bg-success-fill` 等。
+export interface SemanticShortcut {
+  fill: string;
+  text: string;
   container: string;
   "on-container": string;
 }
@@ -256,6 +275,10 @@ export const lightColors: ColorTokens = {
     border: "rgba(0, 0, 0, 0.10)",
     ring: brandShared.fill,
   },
+  error: { fill: "#cf2d56", text: "#cf2d56", container: "#fbe1e8", "on-container": "#4a0e22" },
+  success: { fill: "#157352", text: "#157352", container: "#d4edd9", "on-container": "#0e3a26" },
+  warning: { fill: "#9c5e22", text: "#8a5520", container: "#f4e4c8", "on-container": "#4a2c0a" },
+  info: { fill: "#1a73e8", text: "#1a73e8", container: "#d8e9fb", "on-container": "#0a2540" },
 };
 
 export const darkColors: ColorTokens = {
@@ -376,6 +399,10 @@ export const darkColors: ColorTokens = {
     border: "rgba(255, 255, 255, 0.12)",
     ring: brandShared.fill,
   },
+  error: { fill: "#e34c75", text: "#e34c75", container: "#4a0e22", "on-container": "#fbe1e8" },
+  success: { fill: "#3da884", text: "#3da884", container: "#0e3a26", "on-container": "#d4edd9" },
+  warning: { fill: "#d8943e", text: "#d8943e", container: "#42270f", "on-container": "#f4e4c8" },
+  info: { fill: "#1a73e8", text: "#1a73e8", container: "#09294f", "on-container": "#d8e9fb" },
 };
 
 export const colors: Record<ColorScheme, ColorTokens> = {

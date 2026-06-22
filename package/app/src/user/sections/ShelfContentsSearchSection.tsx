@@ -220,7 +220,7 @@ export const ShelfContentsSearchSection: FC = () => {
           {t("common:loading")}
         </p>
       ) : shelfItems.error ? (
-        <p className="py-12 text-center text-sm text-text-error">
+        <p className="py-12 text-center text-sm text-error-text">
           {shelfItems.error.message}
         </p>
       ) : units.length === 0 ? (

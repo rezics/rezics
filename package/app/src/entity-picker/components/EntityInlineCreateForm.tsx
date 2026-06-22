@@ -195,7 +195,7 @@ export function EntityInlineCreateForm({
           )
         }
       />
-      {error ? <p className="text-xs text-text-error">{error}</p> : null}
+      {error ? <p className="text-xs text-error-text">{error}</p> : null}
       <div className="flex justify-end gap-2">
         {onCancel ? (
           <Button type="button" variant="ghost" onClick={onCancel}>
