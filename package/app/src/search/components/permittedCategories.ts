@@ -1,20 +1,14 @@
-import type { SearchCategory, SearchScope } from "@rezics/contract";
+import {
+  SEARCH_CATEGORIES,
+  type SearchCategory,
+  type SearchScope,
+} from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
-export const ALL_CATEGORIES: readonly SearchCategory[] = [
-  "all",
-  "mixed",
-  "books",
-  "reviews",
-  "excerpts",
-  "remarks",
-  "posts",
-  "comments",
-  "shelves",
-  "realms",
-  "zones",
-  "users",
-  "entities",
-];
+
+// Single source of truth from the contract — the scope filters below subtract
+// from this, never re-list it.
+// 单一事实来源来自契约——下方的作用域过滤只在此基础上做减法，绝不重列。
+export const ALL_CATEGORIES = SEARCH_CATEGORIES;
 
 export const CATEGORY_LABELS = {
   all: () => getI18nRuntime().i18n.t("search:category_all"),

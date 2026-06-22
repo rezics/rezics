@@ -1,23 +1,11 @@
-import type { SearchCategory } from "@rezics/contract";
+import { SEARCH_CATEGORIES, type SearchCategory } from "@rezics/contract";
 
-const SEARCH_CATEGORIES: SearchCategory[] = [
-  "all",
-  "mixed",
-  "books",
-  "reviews",
-  "excerpts",
-  "remarks",
-  "posts",
-  "comments",
-  "shelves",
-  "realms",
-  "zones",
-  "users",
-  "entities",
-];
-
+// The category list comes straight from the contract (`SEARCH_CATEGORIES`),
+// so this guard can never disagree with the canonical union.
+// 分类列表直接来自契约（`SEARCH_CATEGORIES`），因此此守卫永远不会与规范
+// union 不一致。
 export function isSearchCategory(
   value: string | undefined,
 ): value is SearchCategory {
-  return !!value && (SEARCH_CATEGORIES as string[]).includes(value);
+  return !!value && SEARCH_CATEGORIES.some((category) => category === value);
 }
