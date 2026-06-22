@@ -4,6 +4,7 @@ import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import {
+  UnitStatus,
   markdownContentDoc,
   normalizeContentLanguage,
   PostKind,
@@ -109,7 +110,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     // Drafts may be incomplete; only enforce the length floor on publish.
     // 草稿可能不完整；仅在发布时强制执行长度下限。
     if (
-      status === "PUBLISHED" &&
+      status === UnitStatus.PUBLISHED &&
       kind === PostKind.REVIEW &&
       (reviewData.contentSource?.length ?? 0) < 200
     ) {

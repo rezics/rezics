@@ -1,16 +1,17 @@
-import type {
-  CommentSearchDocument,
-  ContentSearchDocument,
-  EntitySearchDocument,
-  FederatedSingleItem,
-  PostSearchDocument,
-  RealmSearchDocument,
-  SearchCategory,
-  ShelfItemShelfGroup,
-  UserSearchDocument,
-  ZoneSearchDocument,
+import {
+  type CommentSearchDocument,
+  type ContentSearchDocument,
+  contentDocMarkdownFallback,
+  type EntitySearchDocument,
+  type FederatedSingleItem,
+  type PostSearchDocument,
+  type RealmSearchDocument,
+  type SearchCategory,
+  type ShelfItemShelfGroup,
+  UnitType,
+  type UserSearchDocument,
+  type ZoneSearchDocument,
 } from "@rezics/contract";
-import { contentDocMarkdownFallback } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { formatDate } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
@@ -89,9 +90,9 @@ function compactParts(
 
 function targetHref(item: PostSearchDocument): string | undefined {
   if (!item.targetUnitId) return undefined;
-  if (item.targetType === "BOOK") return `/book/${item.targetUnitId}`;
-  if (item.targetType === "SHELF") return `/shelf/${item.targetUnitId}`;
-  if (item.targetType === "REALM") return `/realm/${item.targetUnitId}`;
+  if (item.targetType === UnitType.BOOK) return `/book/${item.targetUnitId}`;
+  if (item.targetType === UnitType.SHELF) return `/shelf/${item.targetUnitId}`;
+  if (item.targetType === UnitType.REALM) return `/realm/${item.targetUnitId}`;
   return `/unit/${item.targetUnitId}`;
 }
 
@@ -143,13 +144,13 @@ export function renderContentSearchCard(
   ]);
   const href = contentHref(item);
   const source =
-    item.type === "SHELF"
+    item.type === UnitType.SHELF
       ? (shelfMatchedSource(
           (item as ShelfSearchDocument).matchedShelfItemGroup,
         ) ?? subtitle)
       : subtitle;
 
-  if (item.type === "BOOK") {
+  if (item.type === UnitType.BOOK) {
     return (
       <SearchLibraryUnitCard
         title={title}

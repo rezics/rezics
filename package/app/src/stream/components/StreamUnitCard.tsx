@@ -1,6 +1,7 @@
 import type { StreamUnitRow } from "@rezics/api/stream/stream";
 import {
   CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
+  UnitType,
   isCatalogUnitType,
   mainMarkdownSource,
 } from "@rezics/contract";
@@ -105,7 +106,7 @@ export function StreamUnitCard({ row, className }: StreamUnitCardProps) {
     row.unit.summary ?? mainMarkdownSource(row.unit.description);
   const typeLabel = unitTypeLabel(row.unit.type, t);
   const Icon = UNIT_TYPE_ICONS[row.unit.type] ?? Boxes;
-  const isBook = row.unit.type === "BOOK";
+  const isBook = row.unit.type === UnitType.BOOK;
   const coverUrl = unitCoverUrl(row);
   const catalogCoverAspectRatio = isCatalogUnitType(row.unit.type)
     ? CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE[row.unit.type]

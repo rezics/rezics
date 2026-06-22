@@ -1,5 +1,5 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
-import type { PollDTO, PostDTO } from "@rezics/contract";
+import { UnitStatus, type PollDTO, type PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -56,7 +56,7 @@ export function RealmPollPostCreateForm({
       {
         onSuccess: (post) => {
           onCreated?.(post);
-          if (status === "PUBLISHED") {
+          if (status === UnitStatus.PUBLISHED) {
             toast.success(t("community:post_published"));
             navigate({ to: postHref(post.unitId) });
           } else {
@@ -90,7 +90,7 @@ export function RealmPollPostCreateForm({
             type="single"
             value={status}
             onValueChange={(value) => {
-              if (value === "DRAFT" || value === "PUBLISHED") setStatus(value);
+              if (value === UnitStatus.DRAFT || value === UnitStatus.PUBLISHED) setStatus(value);
             }}
           >
             <ToggleGroupItem value="DRAFT">
@@ -113,7 +113,7 @@ export function RealmPollPostCreateForm({
         <div className="rounded-md bg-surface-subtle p-4">
           <PollComposer
             submitLabel={
-              status === "DRAFT"
+              status === UnitStatus.DRAFT
                 ? t("common:save_draft")
                 : t("community:poll_attach_submit")
             }

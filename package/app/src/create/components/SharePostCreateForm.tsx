@@ -1,4 +1,5 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
+import { UnitStatus } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Input } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -48,7 +49,7 @@ export function SharePostCreateForm({
       }),
       {
         onSuccess: (post) => {
-          if (status === "DRAFT") {
+          if (status === UnitStatus.DRAFT) {
             toast.success(t("common:save_draft"));
             return;
           }

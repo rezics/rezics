@@ -1,6 +1,6 @@
 import { mySubscriptionListEntriesQuery } from "@rezics/api/subscription/subscription";
 import { userQueries } from "@rezics/api/user/user.queries";
-import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
+import { UnitType, type UserSubscriptionListEntryDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
@@ -97,7 +97,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       unitId: entry.subscribedUnitId,
       title: entry.subscribedTitle ?? entry.subscribedUnitId,
       subscribedType:
-        entry.subscribedType === "ZONE" || entry.subscribedType === "REALM"
+        entry.subscribedType === UnitType.ZONE || entry.subscribedType === UnitType.REALM
           ? entry.subscribedType
           : undefined,
       pinned: entry.pinned,

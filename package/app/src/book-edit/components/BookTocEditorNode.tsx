@@ -1,4 +1,4 @@
-import type { ContentRating } from "@rezics/contract";
+import { UnitStatus, type ContentRating } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingBadge } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
@@ -229,9 +229,9 @@ export const createBookTocEditorNode = ({
     const status = mockPublishStatus(node.id);
     const views = mockViewCount(node.id);
     const statusLabel =
-      status === "PUBLISHED"
+      status === UnitStatus.PUBLISHED
         ? t("book:chapter_status_published")
-        : status === "DRAFT"
+        : status === UnitStatus.DRAFT
           ? t("book:chapter_status_draft")
           : t("book:chapter_status_archived");
     const chapterMeta = (
@@ -239,7 +239,7 @@ export const createBookTocEditorNode = ({
         <Badge
           variant="outline"
           className={`h-5 text-[0.675rem] ${
-            status === "PUBLISHED"
+            status === UnitStatus.PUBLISHED
               ? "border-success-fill text-success-text"
               : ""
           }`}

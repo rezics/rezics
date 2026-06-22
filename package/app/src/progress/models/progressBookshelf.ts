@@ -1,15 +1,15 @@
-import type {
-  LibraryKind,
-  ProgressLibraryRow,
+import {
+  type LibraryKind,
+  type ProgressLibraryRow,
   UnitType,
 } from "@rezics/contract";
 import type { BookshelfItem } from "@/bookshelf-view";
 import { resumeRouteToHref } from "./resumeRoute";
 
 function libraryKindFromUnitType(unitType: UnitType): LibraryKind | null {
-  if (unitType === "BOOK") return "book";
-  if (unitType === "GAME") return "game";
-  if (unitType === "MEDIA") return "media";
+  if (unitType === UnitType.BOOK) return "book";
+  if (unitType === UnitType.GAME) return "game";
+  if (unitType === UnitType.MEDIA) return "media";
   return null;
 }
 

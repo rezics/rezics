@@ -6,7 +6,7 @@ import {
 import {
   CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
   isCatalogUnitType,
-  type UnitType,
+  UnitType,
   type ZoneSectionDisplay,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -39,7 +39,7 @@ export type ZoneListEntry = {
 };
 
 function isCommunityEntry(entry: ZoneListEntry): boolean {
-  return entry.type === "REALM" || entry.type === "ZONE";
+  return entry.type === UnitType.REALM || entry.type === UnitType.ZONE;
 }
 
 function catalogCoverAspectRatioForEntry(entry: ZoneListEntry): number {
@@ -107,10 +107,10 @@ function ZoneSubscriptionButton({ zoneUnitId }: { zoneUnitId: string }) {
 
 function CommunityEntryAction({ entry }: { entry: ZoneListEntry }) {
   if (!entry.unitId) return null;
-  if (entry.type === "REALM") {
+  if (entry.type === UnitType.REALM) {
     return <JoinButton realmId={entry.unitId} />;
   }
-  if (entry.type === "ZONE") {
+  if (entry.type === UnitType.ZONE) {
     return <ZoneSubscriptionButton zoneUnitId={entry.unitId} />;
   }
   return null;
@@ -125,7 +125,7 @@ function CommunityEntryCard({
 }) {
   const { t } = useTranslation(["common"]);
   const kindLabel =
-    entry.type === "ZONE" ? t("common:zone") : t("common:realm");
+    entry.type === UnitType.ZONE ? t("common:zone") : t("common:realm");
   const summary = entry.summary?.trim() || t("common:no_description");
   const action = <CommunityEntryAction entry={entry} />;
 

@@ -1,11 +1,12 @@
-import type {
-  ContentSearchDocument,
-  FederatedRankedHit,
-  FederatedSearchResult,
-  FederatedSingleItem,
-  PostSearchDocument,
-  SearchCategory,
-  SearchScope,
+import {
+  UnitType,
+  type ContentSearchDocument,
+  type FederatedRankedHit,
+  type FederatedSearchResult,
+  type FederatedSingleItem,
+  type PostSearchDocument,
+  type SearchCategory,
+  type SearchScope,
 } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { EmptyState } from "@rezics/ui";
@@ -165,7 +166,7 @@ function originBadge(hit: FederatedRankedHit): string {
   const origin = hit._origin;
   if (origin.indexUid === "content") {
     const doc = hit as ContentSearchDocument & { _origin: typeof origin };
-    return doc.type === "SHELF"
+    return doc.type === UnitType.SHELF
       ? getI18nRuntime().i18n.t("search:category_shelves")
       : getI18nRuntime().i18n.t("search:origin_book");
   }

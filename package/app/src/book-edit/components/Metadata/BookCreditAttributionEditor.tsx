@@ -1,6 +1,7 @@
 import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
 import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
 import {
+  UnitType,
   creditAttributionRoleRegistry,
   creditAttributionRoles,
 } from "@rezics/contract";
@@ -30,7 +31,7 @@ interface BookCreditAttributionEditorProps {
 
 const bookCreditRoles = creditAttributionRoles.filter((role) =>
   creditAttributionRoleRegistry[role].appliesToUnitTypes.some(
-    (unitType) => unitType === "BOOK",
+    (unitType) => unitType === UnitType.BOOK,
   ),
 );
 

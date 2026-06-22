@@ -1,5 +1,6 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import {
+  UnitStatus,
   markdownContentDocWithPoll,
   type PollDTO,
   type PostDTO,
@@ -101,7 +102,7 @@ export function RealmPostCreateForm({
       {
         onSuccess: (post) => {
           onCreated?.(post);
-          if (status === "DRAFT") {
+          if (status === UnitStatus.DRAFT) {
             toast.success(t("common:save_draft"));
             return;
           }

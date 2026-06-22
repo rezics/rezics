@@ -1,14 +1,16 @@
-import type {
-  ZoneBoundary,
-  ZoneLinkTarget,
-  ZoneMenu,
-  ZoneMenuNode,
-  ZonePageId,
-  ZonePageSummary,
-  ZoneRefUnitSummary,
-  ZoneSectionKind,
+import {
+  PostKind,
+  ZONE_MENU_MAX_DEPTH,
+  UnitType,
+  type ZoneBoundary,
+  type ZoneLinkTarget,
+  type ZoneMenu,
+  type ZoneMenuNode,
+  type ZonePageId,
+  type ZonePageSummary,
+  type ZoneRefUnitSummary,
+  type ZoneSectionKind,
 } from "@rezics/contract";
-import { ZONE_MENU_MAX_DEPTH } from "@rezics/contract";
 import { unitHref } from "@rezics/ui/primitive/link";
 import {
   type ZoneDetailKind,
@@ -51,8 +53,8 @@ function normalizeZoneRouteLocation(
 export function zoneDetailKindForRef(
   ref: { type?: string | null; postKind?: string | null } | undefined,
 ): ZoneDetailKind {
-  if (ref?.type !== "POST") return "unit";
-  return ref.postKind === "WIKI" ? "wiki" : "post";
+  if (ref?.type !== UnitType.POST) return "unit";
+  return ref.postKind === PostKind.WIKI ? "wiki" : "post";
 }
 
 /**
@@ -74,7 +76,7 @@ export function zoneUnitHref(
   const routeLocation = normalizeZoneRouteLocation(location);
   // POST stays in the zone presentation frame
   // POST 保留在专区展示框架内
-  if (item.type === "POST") {
+  if (item.type === UnitType.POST) {
     return zoneDetailRoute({
       location: routeLocation,
       kind: zoneDetailKindForRef(item),

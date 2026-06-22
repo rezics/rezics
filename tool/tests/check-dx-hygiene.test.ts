@@ -73,6 +73,28 @@ describe("DX hygiene", () => {
     expect(violations).toEqual([]);
   });
 
+  test("no bare enum string literals in === / !== comparisons", () => {
+    // Contract enums (UnitType, UnitStatus, UnitVisibility, PostKind) must be
+    // referenced via the constant, not as bare string literals.
+    // 契约枚举必须通过常量引用，禁止裸字符串字面量比较。
+    const enumValues = [
+      "BOOK", "GAME", "MEDIA", "POST", "SHELF", "REALM", "ZONE",
+      "ENTITY", "TAG", "USER",
+      "DRAFT", "PUBLISHED", "ARCHIVED",
+      "PUBLIC", "UNLISTED", "PRIVATE",
+      "REVIEW", "REMARK", "EXCERPT", "CHAPTER", "WIKI",
+    ];
+    const pattern = new RegExp(
+      `[!=]==\\s*"(${enumValues.join("|")})"`,
+    );
+    const violations: string[] = [];
+    for (const file of appFiles) {
+      const src = readFileSync(file, "utf-8");
+      if (pattern.test(src)) violations.push(file.replace(appSrc, "app/src"));
+    }
+    expect(violations).toEqual([]);
+  });
+
   test("no debug console.log in server meili API files", () => {
     const meiliDir = join(serverSrc, "meili");
     const meiliFiles = walk(meiliDir).filter((f) => f.endsWith(".api.ts"));
