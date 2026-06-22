@@ -95,11 +95,14 @@ export function useUpdateRealmMutation(
 
   return useMutation({
     mutationFn: ({ unitId, input }) => realmApi.update(unitId, input),
-    meta: { invalidates: realmInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(realmKeys.detail(variables.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    meta: {
+      invalidates: realmInvalidates,
+      successToast: "community:realm_settings_saved",
     },
   });
 }
@@ -288,7 +291,10 @@ export function useUpdateMemberRoleMutation(
   return useMutation({
     mutationFn: ({ realmUnitId, userId, input }) =>
       realmApi.updateMemberRole(realmUnitId, userId, input),
-    meta: { invalidates: realmInvalidates },
+    meta: {
+      invalidates: realmInvalidates,
+      successToast: "community:member_role_updated",
+    },
     ...options,
   });
 }
@@ -309,7 +315,10 @@ export function useRemoveMemberMutation(
   return useMutation({
     mutationFn: ({ realmUnitId, userId }) =>
       realmApi.removeMember(realmUnitId, userId),
-    meta: { invalidates: invalidatesRealmMembership },
+    meta: {
+      invalidates: invalidatesRealmMembership,
+      successToast: "community:member_removed",
+    },
     ...options,
   });
 }

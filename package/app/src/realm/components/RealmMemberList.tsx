@@ -26,7 +26,6 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 
 interface RealmMemberListProps {
@@ -44,12 +43,8 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
   const { data, error, isError, isLoading } = useQuery(
     realmMembersQuery(realmId, { cursor, limit: 50 }),
   );
-  const updateRole = useUpdateMemberRoleMutation({
-    onSuccess: () => toast.success(t("community:member_role_updated")),
-  });
-  const removeMember = useRemoveMemberMutation({
-    onSuccess: () => toast.success(t("community:member_removed")),
-  });
+  const updateRole = useUpdateMemberRoleMutation();
+  const removeMember = useRemoveMemberMutation();
   const [pendingRemove, setPendingRemove] = useState<RealmMemberDTO | null>(
     null,
   );

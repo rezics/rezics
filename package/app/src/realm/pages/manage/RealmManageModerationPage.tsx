@@ -1,7 +1,6 @@
 import { useUpdateRealmMutation } from "@rezics/api/realm/realm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Card, CardContent, Checkbox, Label } from "@rezics/ui/shadcn";
-import { toast } from "sonner";
 import { useRealmManage } from "../../layouts/realmManageContext";
 import { RealmModerationQueueSection } from "../../sections/RealmModerationQueueSection";
 
@@ -34,9 +33,7 @@ import { RealmModerationQueueSection } from "../../sections/RealmModerationQueue
 export function RealmManageModerationPage() {
   const { t } = useTranslation(["community"]);
   const { realmId, realm } = useRealmManage();
-  const updateRealm = useUpdateRealmMutation({
-    onSuccess: () => toast.success(t("community:realm_settings_saved")),
-  });
+  const updateRealm = useUpdateRealmMutation();
 
   return (
     <div className="flex flex-col gap-4">

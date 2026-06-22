@@ -32,15 +32,9 @@ export function RealmContentModerationActions({
   const { t } = useTranslation(["community", "common"]);
   const moderationStatus = unitRealm?.moderationStatus ?? "approved";
   const isLocked = unitRealm?.isLocked ?? false;
-  const approve = useApproveRealmContentMutation({
-    onSuccess: () => toast.success(t("community:moderation_approve_success")),
-  });
-  const remove = useRemoveRealmContentMutation({
-    onSuccess: () => toast.success(t("community:moderation_remove_success")),
-  });
-  const restore = useRestoreRealmContentMutation({
-    onSuccess: () => toast.success(t("community:moderation_restore_success")),
-  });
+  const approve = useApproveRealmContentMutation();
+  const remove = useRemoveRealmContentMutation();
+  const restore = useRestoreRealmContentMutation();
   const setLock = useSetRealmContentLockMutation({
     onSuccess: (_data, variables) =>
       toast.success(

@@ -49,9 +49,7 @@ export function ZoneManageMenusPage() {
   const [draft, setDraft] = useState<ZoneManageDraft | null>(null);
   const [jsonProblemsByKey, setJsonProblemsByKey] =
     useState<ZoneManageJsonProblemsByKey>({});
-  const updateNav = useUpdateZoneNav({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
+  const updateNav = useUpdateZoneNav();
 
   useEffect(() => {
     setDraft(

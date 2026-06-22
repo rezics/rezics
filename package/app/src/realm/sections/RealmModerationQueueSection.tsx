@@ -24,7 +24,6 @@ import {
   UserRoundCheck,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
-import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 
 /**
@@ -280,9 +279,7 @@ function RealmCaseCard({
   const summary =
     item.reason ?? item.safeSummary ?? t("community:moderation_no_summary");
   const updatedAt = item.updatedAt ? formatDateTime(item.updatedAt) : "";
-  const decideCase = useDecideRealmCaseMutation({
-    onSuccess: () => toast.success(t("community:moderation_case_updated")),
-  });
+  const decideCase = useDecideRealmCaseMutation();
   const isPendingReview = item.target.kind === "unit" && item.state === "new";
   const decide = (actionKind: "approve" | "remove", reason: string) =>
     decideCase.mutate({

@@ -25,6 +25,10 @@ import { zoneKeys } from "./zone.keys";
 // 全局 MutationCache handler 执行它，因此没有 mutation 手写
 // `useQueryClient()`/`onSuccess`。
 const zoneInvalidates = { invalidates: [zoneKeys.details()] };
+const zoneManageMeta = {
+  invalidates: [zoneKeys.details()],
+  successToast: "zone:manage_saved",
+};
 
 export function useCreateZone(
   options?: Omit<
@@ -52,7 +56,7 @@ export function useUpdateZone(
   return useMutation({
     mutationFn: ({ unitId, input }) => zoneApi.update(unitId, input),
     ...options,
-    meta: zoneInvalidates,
+    meta: zoneManageMeta,
   });
 }
 
@@ -69,7 +73,7 @@ export function useUpdateZoneBoundary(
   return useMutation({
     mutationFn: ({ unitId, input }) => zoneApi.updateBoundary(unitId, input),
     ...options,
-    meta: zoneInvalidates,
+    meta: zoneManageMeta,
   });
 }
 
@@ -86,7 +90,7 @@ export function useUpdateZoneNav(
   return useMutation({
     mutationFn: ({ unitId, input }) => zoneApi.updateNav(unitId, input),
     ...options,
-    meta: zoneInvalidates,
+    meta: zoneManageMeta,
   });
 }
 
@@ -103,7 +107,7 @@ export function useUpdateZoneTheme(
   return useMutation({
     mutationFn: ({ unitId, input }) => zoneApi.updateTheme(unitId, input),
     ...options,
-    meta: zoneInvalidates,
+    meta: zoneManageMeta,
   });
 }
 
@@ -120,7 +124,7 @@ export function useCreateZonePage(
   return useMutation({
     mutationFn: ({ unitId, input }) => zoneApi.createPage(unitId, input),
     ...options,
-    meta: zoneInvalidates,
+    meta: zoneManageMeta,
   });
 }
 
@@ -138,7 +142,7 @@ export function useUpdateZonePage(
     mutationFn: ({ unitId, pageId, input }) =>
       zoneApi.updatePage(unitId, pageId, input),
     ...options,
-    meta: zoneInvalidates,
+    meta: zoneManageMeta,
   });
 }
 
@@ -151,7 +155,7 @@ export function useDeleteZonePage(
   return useMutation({
     mutationFn: ({ unitId, pageId }) => zoneApi.deletePage(unitId, pageId),
     ...options,
-    meta: zoneInvalidates,
+    meta: zoneManageMeta,
   });
 }
 

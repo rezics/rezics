@@ -56,7 +56,10 @@ export function useDeleteUnitExternalLink(
   return useMutation({
     mutationFn: ({ id }) => unitExternalLinkApi.remove(id),
     ...options,
-    meta: { invalidates },
+    meta: {
+      invalidates,
+      successToast: "common:external_links_remove_success",
+    },
   });
 }
 

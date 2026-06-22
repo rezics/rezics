@@ -276,7 +276,10 @@ export function useDecideRealmCaseMutation(
     ...options,
     mutationFn: ({ realmUnitId, caseId, input }) =>
       governanceApi.decideRealmCase(realmUnitId, caseId, input),
-    meta: { invalidates: invalidatesRealmCases },
+    meta: {
+      invalidates: invalidatesRealmCases,
+      successToast: "community:moderation_case_updated",
+    },
   });
 }
 
@@ -320,7 +323,10 @@ export function useRestoreRealmContentMutation(
     ...options,
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.restoreRealmContent(realmUnitId, targetUnitId, input),
-    meta: { invalidates: invalidatesContentModeration },
+    meta: {
+      invalidates: invalidatesContentModeration,
+      successToast: "community:moderation_restore_success",
+    },
   });
 }
 
@@ -342,7 +348,10 @@ export function useApproveRealmContentMutation(
     ...options,
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.approveRealmContent(realmUnitId, targetUnitId, input),
-    meta: { invalidates: invalidatesContentModeration },
+    meta: {
+      invalidates: invalidatesContentModeration,
+      successToast: "community:moderation_approve_success",
+    },
   });
 }
 
@@ -364,7 +373,10 @@ export function useRemoveRealmContentMutation(
     ...options,
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.removeRealmContent(realmUnitId, targetUnitId, input),
-    meta: { invalidates: invalidatesContentModeration },
+    meta: {
+      invalidates: invalidatesContentModeration,
+      successToast: "community:moderation_remove_success",
+    },
   });
 }
 

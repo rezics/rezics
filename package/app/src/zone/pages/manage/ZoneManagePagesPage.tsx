@@ -85,15 +85,9 @@ export function ZoneManagePagesPage() {
     ...zonePortalQueryOptions(zone.unitId, selectedPageSlug, readQuery),
     enabled: !!zone.unitId && !!selectedPageSlug,
   });
-  const createPage = useCreateZonePage({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
-  const updatePage = useUpdateZonePage({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
-  const deletePage = useDeleteZonePage({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
+  const createPage = useCreateZonePage();
+  const updatePage = useUpdateZonePage();
+  const deletePage = useDeleteZonePage();
 
   useEffect(() => {
     if (sortedPages.length === 0) return;

@@ -154,9 +154,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     isError,
     error,
   } = useQuery(shelfDetailQuery(shelfId));
-  const updateMutation = useUpdateShelfMutation({
-    onSuccess: () => toast.success(getI18nRuntime().i18n.t("common:saved")),
-  });
+  const updateMutation = useUpdateShelfMutation();
   const setPinnedTagsMutation = useSetShelfPinnedTagsMutation();
   const upsertTranslationMutation = useUpsertTranslationMutation({
     affectedDetailKeys: () => [shelfKeys.detail(shelfId)],

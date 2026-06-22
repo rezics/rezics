@@ -64,7 +64,7 @@ export function useUpdateShelfMutation(
       queryClient.setQueryData(shelfKeys.detail(variables.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    meta: { invalidates: invalidatesShelfItem },
+    meta: { invalidates: invalidatesShelfItem, successToast: "common:saved" },
   });
 }
 

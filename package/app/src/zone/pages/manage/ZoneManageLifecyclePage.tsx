@@ -1,7 +1,6 @@
 import { useUpdateZone } from "@rezics/api";
 import { useTranslation } from "@rezics/i18n/react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { ZoneManageLifecycleTab } from "../../components/manage/ZoneManageLifecycleTab";
 import { useZoneManage } from "../../layouts/zoneManageContext";
 
@@ -37,9 +36,7 @@ export function ZoneManageLifecyclePage() {
   const { zone } = useZoneManage();
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
-  const updateZone = useUpdateZone({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
+  const updateZone = useUpdateZone();
 
   useEffect(() => {
     setStartsAt(zone.startsAt ?? "");

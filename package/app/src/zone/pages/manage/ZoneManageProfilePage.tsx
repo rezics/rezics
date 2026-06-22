@@ -54,12 +54,8 @@ export function ZoneManageProfilePage() {
   const [rows, setRows] = useState<ZoneTranslationRow[]>([]);
   const [jsonProblemsByKey, setJsonProblemsByKey] =
     useState<ZoneManageJsonProblemsByKey>({});
-  const updateZone = useUpdateZone({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
-  const updateBoundary = useUpdateZoneBoundary({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
+  const updateZone = useUpdateZone();
+  const updateBoundary = useUpdateZoneBoundary();
 
   useEffect(() => {
     setDraft(

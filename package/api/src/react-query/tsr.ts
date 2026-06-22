@@ -29,12 +29,20 @@ declare module "@tanstack/react-query" {
        * 的默认行为），因此列出一个根键即可刷新其下嵌套的所有查询。
        */
       invalidates?: readonly QueryKey[];
+      /**
+       * i18n key for a success toast shown by the global MutationCache handler.
+       * Use for mutations that always show the same success feedback.
+       * 全局 MutationCache handler 显示成功提示的 i18n key。
+       * 用于始终显示相同成功反馈的 mutation。
+       */
+      successToast?: string;
     };
   }
 }
 
 export interface CreateQueryClientOptions {
   onMutationError?: (error: Error) => void;
+  onMutationSuccess?: (toastKey: string) => void;
 }
 
 // === 基础 QueryClient（必选） ===
@@ -47,10 +55,14 @@ export function createQueryClient(options?: CreateQueryClientOptions) {
         // `onSuccess`; this only owns the declarative invalidate step.
         // 执行 mutation 声明的失效。需要乐观更新或 `removeQueries` 的
         // mutation 仍在自身 `onSuccess` 里处理；这里只负责声明式失效这一步。
-        const invalidates = mutation.meta?.invalidates;
-        if (!invalidates) return;
-        for (const queryKey of invalidates) {
-          void queryClient.invalidateQueries({ queryKey });
+        const { invalidates, successToast } = mutation.meta ?? {};
+        if (invalidates) {
+          for (const queryKey of invalidates) {
+            void queryClient.invalidateQueries({ queryKey });
+          }
+        }
+        if (successToast) {
+          options?.onMutationSuccess?.(successToast);
         }
       },
       onError(error, _variables, _context, mutation) {

@@ -51,12 +51,8 @@ export function ZoneManageThemePage() {
   const [draft, setDraft] = useState<ZoneManageDraft | null>(null);
   const [jsonProblemsByKey, setJsonProblemsByKey] =
     useState<ZoneManageJsonProblemsByKey>({});
-  const updateNav = useUpdateZoneNav({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
-  const updateTheme = useUpdateZoneTheme({
-    onSuccess: () => toast.success(t("zone:manage_saved")),
-  });
+  const updateNav = useUpdateZoneNav();
+  const updateTheme = useUpdateZoneTheme();
 
   useEffect(() => {
     setDraft(

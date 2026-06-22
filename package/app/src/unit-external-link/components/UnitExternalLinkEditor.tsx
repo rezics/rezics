@@ -93,7 +93,6 @@ export function UnitExternalLinkEditor({
     },
   });
   const deleteMutation = useDeleteUnitExternalLink({
-    onSuccess: () => toast.success(t("common:external_links_remove_success")),
     onError: (error) => {
       toast.error(
         error instanceof Error
