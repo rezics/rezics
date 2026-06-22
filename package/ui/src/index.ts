@@ -14,6 +14,7 @@ export {
 export { RatingInput, type RatingInputProps } from "./primitive/control";
 export { Spinner, type SpinnerProps } from "./primitive/feedback";
 export {
+  type IdOnlyType,
   type SlugBearingTopType,
   type UnitHrefInput,
   unitHref,

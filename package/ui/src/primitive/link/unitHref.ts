@@ -1,21 +1,17 @@
 /**
- * Single sanctioned helper for building hrefs to slug-bearing Unit types.
- *
- * Returns the short-prefix slug URL when a slug is known, falls back to the
- * long-prefix unitId URL otherwise. short=slug is the canonical browser-facing
- * identity; long-prefix unitId URLs must not be rendered when a slug is known.
- *
- * For USER units this returns the user-space root (`/u/:slug`), not the profile
- * surface. App code that specifically links to profile should use the app-level
- * user profile route helper so `/profile` is explicit and never reached via
- * root redirects.
- *
- * Pure and synchronous — usable from route loaders, prefetchers, search-result
- * generators, and tests. Use {@link useUnitHref} for the React-side ergonomic
- * wrapper.
+ * Canonical href builder for all routable Unit types. Three tiers:
+ * 1. Slug-bearing types: short-prefix slug URL, long-prefix unitId fallback.
+ * 2. Shelf with owner context: owner-scoped slug URL, bare /shelf/:id fallback.
+ * 3. ID-only types: fixed path prefix + unitId.
+ * 所有可路由 Unit 类型的规范 href 构建器。三层：
+ * 1. 带 slug 类型：短前缀 slug URL，长前缀 unitId 回退。
+ * 2. 带 owner 的书架：owner 作用域 slug URL，裸 /shelf/:id 回退。
+ * 3. 纯 ID 类型：固定路径前缀 + unitId。
  */
 
 export type SlugBearingTopType = "USER" | "REALM" | "TAG" | "ZONE" | "ENTITY";
+
+export type IdOnlyType = "BOOK" | "POST" | "QUOTE" | "POLL" | "SHELF";
 
 type SlugBearingTopInput = {
   type: SlugBearingTopType;
@@ -32,7 +28,15 @@ type SlugBearingShelfInput = {
   slug: string | null | undefined;
 };
 
-export type UnitHrefInput = SlugBearingTopInput | SlugBearingShelfInput;
+type IdOnlyInput = {
+  type: IdOnlyType;
+  unitId: string;
+};
+
+export type UnitHrefInput =
+  | SlugBearingTopInput
+  | SlugBearingShelfInput
+  | IdOnlyInput;
 
 const SHORT_PREFIX: Record<SlugBearingTopType, string> = {
   USER: "u",
@@ -50,22 +54,43 @@ const LONG_PREFIX: Record<SlugBearingTopType, string> = {
   ENTITY: "entity",
 };
 
+const ID_ONLY_PREFIX: Record<IdOnlyType, string> = {
+  BOOK: "book",
+  POST: "post",
+  QUOTE: "excerpt",
+  POLL: "poll",
+  SHELF: "shelf",
+};
+
 const SHELF_OWNER_SHORT: Record<SlugBearingShelfInput["ownerType"], string> = {
   USER: "u",
   REALM: "r",
 };
 
 export function unitHref(input: UnitHrefInput): string {
-  if (input.type === "SHELF") {
-    const ownerPrefix = SHELF_OWNER_SHORT[input.ownerType];
-    if (input.ownerSlug && input.slug) {
-      return `/${ownerPrefix}/${input.ownerSlug}/shelf/${input.slug}`;
+  // Rich shelf with owner context
+  // 带 owner 上下文的书架路由
+  if (input.type === "SHELF" && "ownerType" in input) {
+    const shelf = input as SlugBearingShelfInput;
+    const ownerPrefix = SHELF_OWNER_SHORT[shelf.ownerType];
+    if (shelf.ownerSlug && shelf.slug) {
+      return `/${ownerPrefix}/${shelf.ownerSlug}/shelf/${shelf.slug}`;
     }
-    return `/shelf/${input.unitId}`;
+    return `/shelf/${shelf.unitId}`;
   }
 
-  if (input.slug) {
-    return `/${SHORT_PREFIX[input.type]}/${input.slug}`;
+  // ID-only types (BOOK, POST, QUOTE, POLL, bare SHELF)
+  // 纯 ID 类型（BOOK、POST、QUOTE、POLL、裸 SHELF）
+  const idPrefix = ID_ONLY_PREFIX[input.type as IdOnlyType];
+  if (idPrefix) {
+    return `/${idPrefix}/${input.unitId}`;
   }
-  return `/${LONG_PREFIX[input.type]}/${input.unitId}`;
+
+  // Slug-bearing types — short prefix with slug, long prefix with unitId
+  // 带 slug 类型 —— 有 slug 用短前缀，否则用长前缀 + unitId
+  const top = input as SlugBearingTopInput;
+  if (top.slug) {
+    return `/${SHORT_PREFIX[top.type]}/${top.slug}`;
+  }
+  return `/${LONG_PREFIX[top.type]}/${top.unitId}`;
 }

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import * as React from "react";
 
 export {
+  type IdOnlyType,
   type SlugBearingTopType,
   type UnitHrefInput,
   unitHref,

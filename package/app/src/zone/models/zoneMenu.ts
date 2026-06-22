@@ -72,6 +72,8 @@ export function zoneUnitHref(
   location: ZoneRouteLocation | string,
 ): string {
   const routeLocation = normalizeZoneRouteLocation(location);
+  // POST stays in the zone presentation frame
+  // POST 保留在专区展示框架内
   if (item.type === "POST") {
     return zoneDetailRoute({
       location: routeLocation,
@@ -82,13 +84,10 @@ export function zoneUnitHref(
 
   switch (item.type) {
     case "BOOK":
-      return `/book/${item.unitId}`;
     case "QUOTE":
-      return `/excerpt/${item.unitId}`;
     case "POLL":
-      return `/poll/${item.unitId}`;
     case "SHELF":
-      return `/shelf/${item.unitId}`;
+      return unitHref({ type: item.type, unitId: item.unitId });
     case "USER":
     case "REALM":
     case "TAG":

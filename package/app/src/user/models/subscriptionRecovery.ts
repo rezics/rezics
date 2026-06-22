@@ -1,4 +1,5 @@
 import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
+import { unitHref } from "@rezics/ui/primitive/link";
 
 const OFFICIAL_RECOVERY_TARGETS = new Set([
   "REALM:rezics",
@@ -7,14 +8,6 @@ const OFFICIAL_RECOVERY_TARGETS = new Set([
   "ZONE:zones",
   "ZONE:popular",
 ]);
-
-const SLUG_TARGET_PREFIX = {
-  USER: { short: "u", long: "user" },
-  REALM: { short: "r", long: "realm" },
-  TAG: { short: "t", long: "tag" },
-  ZONE: { short: "z", long: "zone" },
-  ENTITY: { short: "e", long: "entity" },
-} as const;
 
 export type RecoveryEntryGroup = {
   official: UserSubscriptionListEntryDTO[];
@@ -56,25 +49,21 @@ export function subscriptionRecoveryTargetHref(
   const targetType = String(entry.subscribedType);
   switch (targetType) {
     case "BOOK":
-      return `/book/${entry.subscribedUnitId}`;
     case "POST":
-      return `/post/${entry.subscribedUnitId}`;
     case "QUOTE":
-      return `/excerpt/${entry.subscribedUnitId}`;
     case "POLL":
-      return `/poll/${entry.subscribedUnitId}`;
     case "SHELF":
-      return `/shelf/${entry.subscribedUnitId}`;
+      return unitHref({ type: targetType, unitId: entry.subscribedUnitId });
     case "USER":
     case "REALM":
     case "TAG":
     case "ZONE":
-    case "ENTITY": {
-      const prefix = SLUG_TARGET_PREFIX[targetType];
-      return entry.subscribedSlug
-        ? `/${prefix.short}/${entry.subscribedSlug}`
-        : `/${prefix.long}/${entry.subscribedUnitId}`;
-    }
+    case "ENTITY":
+      return unitHref({
+        type: targetType,
+        unitId: entry.subscribedUnitId,
+        slug: entry.subscribedSlug ?? null,
+      });
     default:
       return entry.subscribedSlug
         ? `/unit/${entry.subscribedSlug}`
