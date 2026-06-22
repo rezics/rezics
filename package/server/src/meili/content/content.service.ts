@@ -1,6 +1,7 @@
-import type {
-  ContentSearchOptions,
-  ContentSearchResult,
+import {
+  CATALOG_UNIT_TYPES,
+  type ContentSearchOptions,
+  type ContentSearchResult,
 } from "@rezics/contract";
 import { resolveSlugRefs } from "../../shared/slug-ref";
 import { resolveContentHitDisplay } from "../search/read-language";
@@ -44,7 +45,7 @@ function groupReleaseHits(items: any[]): any[] {
   });
 }
 
-const EDITION_CATALOG_TYPES = new Set(["BOOK", "GAME", "MEDIA"]);
+const EDITION_CATALOG_TYPES = new Set<string>(CATALOG_UNIT_TYPES);
 
 function shouldDefaultToMainCatalogEntry(opts: ContentSearchOptions): boolean {
   if (opts.catalogEntryKind || opts.targetUnitId) return false;

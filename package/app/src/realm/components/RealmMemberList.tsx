@@ -4,7 +4,7 @@ import {
   useRemoveMemberMutation,
   useUpdateMemberRoleMutation,
 } from "@rezics/api/realm/realm";
-import type { RealmMemberDTO } from "@rezics/contract";
+import { type RealmMemberDTO, realmMemberRoles } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
@@ -33,7 +33,7 @@ interface RealmMemberListProps {
   realmId: string;
 }
 
-const ROLE_OPTIONS = ["owner", "admin", "moderator", "member"] as const;
+const ROLE_OPTIONS = realmMemberRoles;
 
 export const RealmMemberList: React.FC<RealmMemberListProps> = ({
   realmId,

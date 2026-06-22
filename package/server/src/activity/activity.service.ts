@@ -1,4 +1,4 @@
-import type { ActivityItem } from "@rezics/contract";
+import type { ActivityItem, PostKind } from "@rezics/contract";
 import { and, desc, eq, inArray, lt } from "drizzle-orm";
 import { profileReactionHistoryService } from "@/profile-reaction-history/profile-reaction-history.service";
 import { db } from "../db/client";
@@ -17,7 +17,11 @@ import {
   shelfActivityHref,
 } from "./activity.mapper";
 
-const ACTIVITY_POST_KINDS = ["POST", "REVIEW", "REMARK"] as const;
+const ACTIVITY_POST_KINDS = [
+  "POST",
+  "REVIEW",
+  "REMARK",
+] as const satisfies readonly PostKind[];
 const PUBLIC_UNIT_STATUS = "PUBLISHED";
 const PUBLIC_UNIT_VISIBILITY = "PUBLIC";
 const PUBLIC_UNIT_MODERATION_STATUS = "APPROVED";

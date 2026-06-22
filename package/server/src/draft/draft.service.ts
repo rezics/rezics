@@ -2,6 +2,7 @@ import {
   contentDocMarkdownFallback,
   type DraftMetadata,
   mainMarkdownSource,
+  type PostKind,
 } from "@rezics/contract";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import {
@@ -15,7 +16,12 @@ import { postKindToDraftKind, toDraftMetadata } from "./draft.mapper";
 
 /** Draft-eligible post kinds (reply/excerpt/chapter never become drafts).
  * 可作为草稿的 post 类型（reply/excerpt/chapter 永远不会成为草稿）。 */
-const DRAFT_POST_KINDS = ["REVIEW", "REMARK", "POST", "WIKI"] as const;
+const DRAFT_POST_KINDS = [
+  "REVIEW",
+  "REMARK",
+  "POST",
+  "WIKI",
+] as const satisfies readonly PostKind[];
 const DRAFT_UNIT_STATUS = "DRAFT";
 
 type DraftPostRow = {

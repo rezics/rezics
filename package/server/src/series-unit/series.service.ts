@@ -1,11 +1,12 @@
-import type {
-  ContentStructureItem,
-  CreateSeriesInput,
-  SeriesContentIndexDTO,
-  SeriesDetailDTO,
-  SeriesDiagnosticsDTO,
-  SeriesListQuery,
-  UpdateSeriesInput,
+import {
+  CATALOG_UNIT_TYPES,
+  type ContentStructureItem,
+  type CreateSeriesInput,
+  type SeriesContentIndexDTO,
+  type SeriesDetailDTO,
+  type SeriesDiagnosticsDTO,
+  type SeriesListQuery,
+  type UpdateSeriesInput,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
@@ -30,8 +31,7 @@ import {
 import { mapSeriesContentIndexToDTO, mapSeriesToDTO } from "./series.mapper";
 import type { SeriesWithRelations } from "./series.types";
 
-const RELEASE_UNIT_TYPES = ["BOOK", "GAME", "MEDIA"] as const;
-const RELEASE_UNIT_TYPE_SET: ReadonlySet<string> = new Set(RELEASE_UNIT_TYPES);
+const RELEASE_UNIT_TYPE_SET: ReadonlySet<string> = new Set(CATALOG_UNIT_TYPES);
 
 type SeriesProjectionTx = any;
 
@@ -431,7 +431,7 @@ function createDrizzleSeriesRepository(): SeriesRepository {
           where: {
             ownerUnitId: seriesUnitId,
             isDeleted: false,
-            contentUnit: { type: { in: [...RELEASE_UNIT_TYPES] } },
+            contentUnit: { type: { in: [...CATALOG_UNIT_TYPES] } },
           },
           select: { id: true, contentUnitId: true },
           orderBy: [{ position: "asc" }, { id: "asc" }],
@@ -472,7 +472,7 @@ function createDrizzleSeriesRepository(): SeriesRepository {
             and(
               eq(ContentStructureNode.ownerUnitId, seriesUnitId),
               eq(ContentStructureNode.isDeleted, false),
-              inArray(Unit.type, [...RELEASE_UNIT_TYPES] as never),
+              inArray(Unit.type, [...CATALOG_UNIT_TYPES] as never),
             ),
           )
           .orderBy(ContentStructureNode.position, ContentStructureNode.id);

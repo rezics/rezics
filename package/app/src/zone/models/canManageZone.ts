@@ -1,6 +1,10 @@
-import type { Permission } from "@rezics/contract";
+import type { Permission, RealmMemberRole } from "@rezics/contract";
 
-const ZONE_OWNER_REALM_MANAGE_ROLES = ["owner", "admin", "moderator"];
+const ZONE_OWNER_REALM_MANAGE_ROLES: readonly RealmMemberRole[] = [
+  "owner",
+  "admin",
+  "moderator",
+];
 
 export function canManageZone({
   permission,
@@ -12,7 +16,9 @@ export function canManageZone({
   if (permission?.role === "ADMIN" || permission?.role === "ROOT") return true;
   if (
     ownerRealmMemberRoleKey &&
-    ZONE_OWNER_REALM_MANAGE_ROLES.includes(ownerRealmMemberRoleKey)
+    (ZONE_OWNER_REALM_MANAGE_ROLES as readonly string[]).includes(
+      ownerRealmMemberRoleKey,
+    )
   ) {
     return true;
   }

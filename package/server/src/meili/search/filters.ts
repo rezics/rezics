@@ -10,6 +10,7 @@ import type {
   ZoneSectionQuerySortField,
 } from "@rezics/contract";
 import {
+  CATALOG_UNIT_TYPES,
   ZONE_SECTION_QUERY_FILTERABLE_FIELDS,
   ZONE_SECTION_QUERY_SORT_FIELDS,
 } from "@rezics/contract";
@@ -108,7 +109,7 @@ function quoteList(values: readonly string[]): string {
   return values.map((v) => `"${v}"`).join(", ");
 }
 
-const BOOK_CONTENT_TYPES = ["BOOK", "GAME", "MEDIA", "LINK", "SERIES"];
+const BOOK_CONTENT_TYPES = [...CATALOG_UNIT_TYPES, "LINK", "SERIES"] as const;
 
 const BOOK_CONTENT_CATALOG_FILTER = [
   '(type = "BOOK" AND catalogEntryKind = "MAIN")',

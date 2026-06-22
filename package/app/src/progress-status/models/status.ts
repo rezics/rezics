@@ -1,14 +1,11 @@
-import type { UserUnitProgressStatus } from "@rezics/contract";
+import {
+  type UserUnitProgressStatus,
+  userUnitProgressStatusValues,
+} from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type ReadStatus = UserUnitProgressStatus;
 
-export const READ_STATUS_VALUES = [
-  "BACKLOG",
-  "ACTIVE",
-  "PAUSED",
-  "COMPLETED",
-  "DROPPED",
-] as const satisfies readonly ReadStatus[];
+export const READ_STATUS_VALUES = userUnitProgressStatusValues;
 
 const READ_STATUS_MESSAGE = {
   BACKLOG: () => getI18nRuntime().i18n.t("book:hero_actions_want_to_read"),
