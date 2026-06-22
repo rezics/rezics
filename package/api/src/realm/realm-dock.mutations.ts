@@ -8,6 +8,8 @@ import { realmDockApi } from "./realm-dock.api";
 import { realmDockKeys } from "./realm-dock.keys";
 import { realmKeys } from "./realm.keys";
 
+const realmDockInvalidates = [realmKeys.all()];
+
 export function useUpdateRealmDockMutation(
   options?: Omit<
     UseMutationOptions<RealmDock, Error, { realmId: string; dock: RealmDock }>,
@@ -17,12 +19,10 @@ export function useUpdateRealmDockMutation(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ realmId, dock }) => realmDockApi.update(realmId, dock),
+    meta: { invalidates: realmDockInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(realmDockKeys.detail(variables.realmId), data);
-      queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(variables.realmId),
-      });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

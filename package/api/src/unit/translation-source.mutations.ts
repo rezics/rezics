@@ -12,6 +12,8 @@ import { patchTranslationDetailQueries } from "../react-query/cache-coherence";
 import { translationSourceApi } from "./translation-source.api";
 import { unitKeys } from "./unit.keys";
 
+const translationSourceInvalidates = [unitKeys.all()];
+
 type SetTranslationSourceVariables = {
   unitId: string;
   lang: string;
@@ -42,14 +44,12 @@ export function useSetTranslationSourceMutation(
     mutationFn: ({ unitId, lang, body }) =>
       translationSourceApi.patch(unitId, lang, body),
     ...mutationOptions,
+    meta: { invalidates: translationSourceInvalidates },
     onSuccess: async (data, variables, onMutateResult, context) => {
       await patchTranslationDetailQueries({
         queryClient,
         detailKeys: affectedDetailKeys?.(variables, data) ?? [],
         translation: data,
-      });
-      queryClient.invalidateQueries({
-        queryKey: unitKeys.detail(variables.unitId),
       });
       await options?.onSuccess?.(data, variables, onMutateResult, context);
     },

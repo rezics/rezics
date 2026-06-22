@@ -18,24 +18,18 @@ import {
 import { userApi } from "./user.api";
 import { userKeys } from "./user.keys";
 
+const userInvalidates = [userKeys.all()];
+
 export function useUpdateMeMutation(
   options?: Omit<UseMutationOptions<UserDTO, Error, UpdateUser>, "mutationFn">,
 ) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: UpdateUser) => userApi.updateMe(input),
+    meta: { invalidates: userInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.meDetail(), data);
-      qc.invalidateQueries({ queryKey: userKeys.lists() });
-      // Profile changes (display name, avatar, slug) make slug-based and
-      // ID-based detail caches stale — invalidate broadly by prefix.
-      // 个人资料变更（显示名、头像、slug）会使基于 slug 和基于 ID 的
-      // 详情缓存过时——按前缀广泛失效。
-      qc.invalidateQueries({
-        queryKey: [...userKeys.all(), "by-slug"],
-      });
-      qc.invalidateQueries({ queryKey: userKeys.details() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -60,10 +54,10 @@ export function useAdminCreateUserMutation(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: AdminCreateUserInput) => userApi.adminCreate(input),
+    meta: { invalidates: userInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.adminDetail(data.unitId), data);
-      qc.invalidateQueries({ queryKey: userKeys.adminLists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -79,10 +73,10 @@ export function useAdminUpdateUserMutation(
   return useMutation({
     mutationFn: ({ userId, input }) =>
       userApi.adminUpdate(userId, input as any),
+    meta: { invalidates: userInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.adminDetail(variables.userId), data);
-      qc.invalidateQueries({ queryKey: userKeys.adminLists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -97,10 +91,10 @@ export function useDeleteMeMutation(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => userApi.deleteMe(),
+    meta: { invalidates: userInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.removeQueries({ queryKey: userKeys.meDetail() });
-      qc.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -170,9 +164,9 @@ export function useVerifyEmailContractMutation(
     mutationFn: (input: UserEmailVerificationConfirmBody) =>
       userApi.verifyEmailContract(input),
     ...options,
+    meta: { invalidates: userInvalidates },
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.emailVerification(), data.state);
-      qc.invalidateQueries({ queryKey: userKeys.meDetail() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -196,10 +190,10 @@ export function useDeleteAccountMutation(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: DeleteAccountBody) => userApi.deleteAccount(input),
+    meta: { invalidates: userInvalidates },
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.removeQueries({ queryKey: userKeys.meDetail() });
-      qc.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
