@@ -11,12 +11,7 @@ import {
 import { entityApi } from "./entity.api";
 import { entityKeys } from "./entity.keys";
 
-function invalidateEntityQueryGroups(
-  queryClient: ReturnType<typeof useQueryClient>,
-) {
-  queryClient.invalidateQueries({ queryKey: entityKeys.lists() });
-  queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
-}
+const entityInvalidates = [entityKeys.all()];
 
 export function useCreateEntity(
   options?: Omit<
@@ -29,10 +24,10 @@ export function useCreateEntity(
     mutationFn: (input: CreateEntityInput) => entityApi.create(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateEntityQueryGroups(queryClient);
       queryClient.setQueryData(entityKeys.detail(data.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: entityInvalidates },
   });
 }
 
@@ -55,9 +50,9 @@ export function useUpdateEntity(
       if (data.slug) {
         queryClient.setQueryData(entityKeys.bySlug(data.slug), data);
       }
-      invalidateEntityQueryGroups(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: entityInvalidates },
   });
 }
 
@@ -73,9 +68,9 @@ export function useDeleteEntity(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({ queryKey: entityKeys.detail(unitId) });
-      invalidateEntityQueryGroups(queryClient);
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
+    meta: { invalidates: entityInvalidates },
   });
 }
 

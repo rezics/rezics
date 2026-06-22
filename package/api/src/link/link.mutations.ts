@@ -11,6 +11,8 @@ import {
 import { linkApi } from "./link.api";
 import { linkKeys } from "./link.keys";
 
+const linkInvalidates = [linkKeys.all()];
+
 export function useCreateLinkMutation(
   options?: Omit<
     UseMutationOptions<LinkDTO, Error, CreateLinkInput>,
@@ -22,10 +24,10 @@ export function useCreateLinkMutation(
     mutationFn: (input: CreateLinkInput) => linkApi.create(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: linkKeys.lists() });
       queryClient.setQueryData(linkKeys.detail(data.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: linkInvalidates },
   });
 }
 
@@ -45,9 +47,9 @@ export function useUpdateLinkMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(linkKeys.detail(variables.unitId), data);
-      queryClient.invalidateQueries({ queryKey: linkKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: linkInvalidates },
   });
 }
 
@@ -63,9 +65,9 @@ export function useDeleteLinkMutation(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({ queryKey: linkKeys.detail(unitId) });
-      queryClient.invalidateQueries({ queryKey: linkKeys.lists() });
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
+    meta: { invalidates: linkInvalidates },
   });
 }
 

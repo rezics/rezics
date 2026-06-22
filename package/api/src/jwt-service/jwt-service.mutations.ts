@@ -11,6 +11,8 @@ import {
 import { jwtServiceApi } from "./jwt-service.api";
 import { jwtServiceKeys } from "./jwt-service.keys";
 
+const jwtServiceInvalidates = [jwtServiceKeys.all()];
+
 export function useCreateJwtServiceMutation(
   options?: Omit<
     UseMutationOptions<JwtServiceDTO, Error, CreateJwtServiceInput>,
@@ -18,15 +20,14 @@ export function useCreateJwtServiceMutation(
   >,
 ) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CreateJwtServiceInput) => jwtServiceApi.create(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
       queryClient.setQueryData(jwtServiceKeys.detail(data.serviceKey), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: jwtServiceInvalidates },
   });
 }
 
@@ -41,7 +42,6 @@ export function useUpdateJwtServiceMutation(
   >,
 ) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ serviceKey, input }) =>
       jwtServiceApi.update(serviceKey, input),
@@ -51,9 +51,9 @@ export function useUpdateJwtServiceMutation(
         jwtServiceKeys.detail(variables.serviceKey),
         data,
       );
-      queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: jwtServiceInvalidates },
   });
 }
 
@@ -64,15 +64,14 @@ export function useActivateJwtServiceMutation(
   >,
 ) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (serviceKey: string) => jwtServiceApi.activate(serviceKey),
     ...options,
     onSuccess: (data, serviceKey, onMutateResult, context) => {
       queryClient.setQueryData(jwtServiceKeys.detail(serviceKey), data);
-      queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
       options?.onSuccess?.(data, serviceKey, onMutateResult, context);
     },
+    meta: { invalidates: jwtServiceInvalidates },
   });
 }
 
@@ -83,15 +82,14 @@ export function useDeactivateJwtServiceMutation(
   >,
 ) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (serviceKey: string) => jwtServiceApi.deactivate(serviceKey),
     ...options,
     onSuccess: (data, serviceKey, onMutateResult, context) => {
       queryClient.setQueryData(jwtServiceKeys.detail(serviceKey), data);
-      queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
       options?.onSuccess?.(data, serviceKey, onMutateResult, context);
     },
+    meta: { invalidates: jwtServiceInvalidates },
   });
 }
 
@@ -102,15 +100,14 @@ export function useRotateJwtServiceMutation(
   >,
 ) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (serviceKey: string) => jwtServiceApi.rotate(serviceKey),
     ...options,
     onSuccess: (data, serviceKey, onMutateResult, context) => {
       queryClient.setQueryData(jwtServiceKeys.detail(serviceKey), data);
-      queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
       options?.onSuccess?.(data, serviceKey, onMutateResult, context);
     },
+    meta: { invalidates: jwtServiceInvalidates },
   });
 }
 
