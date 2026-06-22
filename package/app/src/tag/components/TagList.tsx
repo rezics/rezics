@@ -12,7 +12,7 @@ interface SingleTagChipProps {
   className?: string;
   autoSelectFirst?: boolean;
   activeId?: string | null;
-  handleClick?: (e: React.MouseEvent, tag: UnitTagDTO) => void;
+  handleClick?: (e: React.MouseEvent | React.KeyboardEvent, tag: UnitTagDTO) => void;
 }
 
 export function SingleTagChip({
@@ -23,7 +23,7 @@ export function SingleTagChip({
   const [activeId, setActiveId] = useState<string | null>(
     autoSelectFirst ? tag.tagUnitId : null,
   );
-  const handleClick = (e: React.MouseEvent, tag: UnitTagDTO) => {
+  const handleClick = (e: React.MouseEvent | React.KeyboardEvent, tag: UnitTagDTO) => {
     if (e.ctrlKey) {
       window.open(
         unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
@@ -48,7 +48,7 @@ export function SingleTagChip({
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            handleClick(e as unknown as React.MouseEvent, tag);
+            handleClick(e, tag);
           }
         }}
       >
@@ -74,7 +74,7 @@ export const TagList: React.FC<{
   );
   const activeTag = tags.find((t) => t.tagUnitId === activeId) || null;
 
-  const handleClick = (e: React.MouseEvent, tag: UnitTagDTO) => {
+  const handleClick = (e: React.MouseEvent | React.KeyboardEvent, tag: UnitTagDTO) => {
     if (e.ctrlKey) {
       window.open(
         unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
@@ -112,7 +112,7 @@ export const TagList: React.FC<{
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    handleClick(e as unknown as React.MouseEvent, tag);
+                    handleClick(e, tag);
                   }
                 }}
               >

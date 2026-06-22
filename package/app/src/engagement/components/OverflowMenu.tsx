@@ -71,11 +71,6 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
 
   if (visible.length === 0 && !children) return null;
 
-  const handleSelect = (event: Event | React.MouseEvent, action: Action) => {
-    if ("stopPropagation" in event) event.stopPropagation();
-    onInvoke(action);
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -103,9 +98,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
           return (
             <DropdownMenuItem
               key={token}
-              onSelect={(event) =>
-                handleSelect(event as unknown as Event, token)
-              }
+              onSelect={() => onInvoke(token)}
               className="gap-2"
             >
               {descriptor.icon}

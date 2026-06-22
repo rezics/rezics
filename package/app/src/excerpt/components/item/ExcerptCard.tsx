@@ -54,7 +54,6 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
 
   const reactionPost: ReactionBarPost = {
     unitId: excerptId ?? "",
-    replyCount: (excerpt as unknown as { replyCount?: number }).replyCount,
   };
 
   return (

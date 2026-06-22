@@ -40,7 +40,6 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
 
   const reactionPost: ReactionBarPost = {
     unitId: excerpt.id,
-    replyCount: (excerpt as unknown as { replyCount?: number }).replyCount,
   };
   const hydrationIds = useMemo(
     () => (excerpt.id ? [excerpt.id] : []),
