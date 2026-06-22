@@ -2,13 +2,45 @@ import type {
   RezicsProfileSetupClaims,
   RezicsSessionClaims,
 } from "@rezics/contract";
-import { createLocalJWKSet, importJWK, jwtVerify, SignJWT } from "jose";
+import {
+  type JWTPayload,
+  createLocalJWKSet,
+  importJWK,
+  jwtVerify,
+  SignJWT,
+} from "jose";
 import { env } from "@/env";
 import { getJwtService } from "@/jwt/jwtServiceCache";
 
 const ISSUER = "rezics-server";
 const DEFAULT_TTL_SECONDS = 900;
 const DEFAULT_PROFILE_SETUP_TTL_SECONDS = 900;
+
+// Type predicates: narrow jose JWTPayload (index-sig `unknown`) to our contract claims.
+// 类型谓词：将 jose JWTPayload（索引签名 `unknown`）窄化为契约 claims 类型。
+function isSessionClaims(p: JWTPayload): p is JWTPayload & RezicsSessionClaims {
+  const perm = p.permission;
+  return (
+    p.tokenType === "member-session" &&
+    typeof p.sub === "string" &&
+    typeof p.userId === "string" &&
+    typeof perm === "object" &&
+    perm !== null &&
+    "role" in perm &&
+    typeof perm.role === "string"
+  );
+}
+
+function isProfileSetupClaims(
+  p: JWTPayload,
+): p is JWTPayload & RezicsProfileSetupClaims {
+  return (
+    p.tokenType === "profile-setup" &&
+    p.purpose === "profile-setup" &&
+    typeof p.sub === "string" &&
+    typeof p.userId === "string"
+  );
+}
 
 export async function getMainSessionPublicJwks() {
   const service = await getJwtService("server-local").catch(() => null);
@@ -65,16 +97,11 @@ export async function verifyRezicsSessionToken(
       clockTolerance: 5,
     });
 
-    if (
-      payload.tokenType !== "member-session" ||
-      !payload.sub ||
-      !payload.userId ||
-      !payload.permission
-    ) {
+    if (!isSessionClaims(payload)) {
       return null;
     }
 
-    return payload as unknown as RezicsSessionClaims;
+    return payload;
   } catch {
     return null;
   }
@@ -122,16 +149,11 @@ export async function verifyRezicsProfileSetupToken(
       clockTolerance: 5,
     });
 
-    if (
-      payload.tokenType !== "profile-setup" ||
-      payload.purpose !== "profile-setup" ||
-      !payload.sub ||
-      !payload.userId
-    ) {
+    if (!isProfileSetupClaims(payload)) {
       return null;
     }
 
-    return payload as unknown as RezicsProfileSetupClaims;
+    return payload;
   } catch {
     return null;
   }
