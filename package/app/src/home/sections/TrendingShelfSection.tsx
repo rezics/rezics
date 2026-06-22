@@ -1,16 +1,15 @@
 import type { ShelfDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
-import { buttonVariants } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
+import { buttonVariants } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core";
 import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import {
   HorizontalShelfCarousel,
   mapContentSearchDocToShelfDTO,
 } from "@/shelf";
+import { HomeSectionShell } from "./HomeSectionShell";
 
 export type TrendingShelfSectionProps = {
   title?: string;
@@ -92,29 +91,18 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
     [data],
   );
 
-  if (error) {
-    return (
-      <div className="w-full">
-        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
-        <QueryErrorDisplay error={error} />
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full @container">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">{resolvedTitle}</h2>
+    <HomeSectionShell
+      title={resolvedTitle}
+      isLoading={isLoading}
+      error={error}
+      more={
         <Link to="/shelf" className={buttonVariants({ variant: "ghost" })}>
           {t("common:more")}
         </Link>
-      </div>
-
-      {isLoading && <Spinner size="sm" />}
-
-      <div>
-        <HorizontalShelfCarousel shelves={items} />
-      </div>
-    </div>
+      }
+    >
+      <HorizontalShelfCarousel shelves={items} />
+    </HomeSectionShell>
   );
 };

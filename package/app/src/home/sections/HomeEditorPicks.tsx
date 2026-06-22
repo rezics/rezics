@@ -1,18 +1,17 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core";
 import {
   getBookAuthorName,
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import { HomeSectionShell } from "./HomeSectionShell";
 
 type Book = BookDTO;
 
@@ -33,21 +32,8 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   );
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
 
-  if (error) {
-    return (
-      <div className="w-full">
-        <h2 className="text-base font-semibold mb-3">{resolvedTitle}</h2>
-        <QueryErrorDisplay error={error} />
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold m-0">{resolvedTitle}</h2>
-        {isLoading && <Spinner size="sm" />}
-      </div>
+    <HomeSectionShell title={resolvedTitle} isLoading={isLoading} error={error}>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
         {books.map((book) => {
           const title = getBookTitle(book);
@@ -74,6 +60,6 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
           );
         })}
       </div>
-    </div>
+    </HomeSectionShell>
   );
 };

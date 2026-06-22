@@ -1,10 +1,9 @@
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { QueryErrorDisplay } from "@/core";
 import { HorizontalExcerptCarousel } from "@/excerpt";
+import { HomeSectionShell } from "./HomeSectionShell";
 import { useHomeExcerpts } from "./hooks/hooks";
 
 export type TrendingExcerptSectionProps = {
@@ -89,35 +88,23 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
     navigate({ to: "/review" });
   };
 
-  if (error) {
-    return (
-      <div className="w-full">
-        <h2 className="text-base font-semibold mb-3">{resolvedTitle}</h2>
-        <QueryErrorDisplay error={error instanceof Error ? error : null} />
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">{resolvedTitle}</h2>
+    <HomeSectionShell
+      title={resolvedTitle}
+      isLoading={isLoading}
+      error={error}
+      more={
         <Button variant="ghost" onClick={handleMoreClick}>
           {t("page:home_sections_trending_excerpt_more")}
         </Button>
-      </div>
-
-      {isLoading && <Spinner size="sm" />}
-
+      }
+    >
       {!isLoading && !items.length && (
         <p className="text-sm text-text-secondary">
           {t("page:home_sections_trending_excerpt_empty")}
         </p>
       )}
-
-      <div>
-        <HorizontalExcerptCarousel excerptList={items} />
-      </div>
-    </div>
+      <HorizontalExcerptCarousel excerptList={items} />
+    </HomeSectionShell>
   );
 };

@@ -1,13 +1,12 @@
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { QueryErrorDisplay } from "@/core";
 import { AppSafeLink } from "@/shared/ui/link";
 import { officialZoneSearchHref } from "@/zone";
+import { HomeSectionShell } from "./HomeSectionShell";
 
 export type HomeTagExploreProps = {
   title?: string;
@@ -33,21 +32,8 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
     tagQueries.batchTranslations(tagUnitIds, locale),
   );
 
-  if (error) {
-    return (
-      <div className="w-full">
-        <h2 className="text-base font-semibold mb-3">{resolvedTitle}</h2>
-        <QueryErrorDisplay error={error} />
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold m-0">{resolvedTitle}</h2>
-        {isLoading && <Spinner size="sm" />}
-      </div>
+    <HomeSectionShell title={resolvedTitle} isLoading={isLoading} error={error}>
       <div className="flex flex-wrap gap-2">
         {tagUnitIds.map((id) => {
           const label = translations?.[id]?.name ?? id;
@@ -66,6 +52,6 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
           );
         })}
       </div>
-    </div>
+    </HomeSectionShell>
   );
 };

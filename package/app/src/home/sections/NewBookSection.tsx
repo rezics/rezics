@@ -1,8 +1,7 @@
 import { useTranslation } from "@rezics/i18n/react";
-import { buttonVariants, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
+import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import React from "react";
 import { HorizontalBookCarousel } from "@/book-library";
-import { AppSafeLink } from "@/shared/ui/link";
 import {
   getBookAuthorName,
   getBookCoverUrl,
@@ -10,6 +9,7 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 import { officialZoneHref } from "@/zone";
+import { HomeSectionShell } from "./HomeSectionShell";
 import { useHomeBooks } from "./hooks/hooks";
 
 type TabKey = "latest" | "new" | "completed";
@@ -93,19 +93,13 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
   }
 
   return (
-    <section className={className}>
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold">
-          {t("page:home_sections_new_book_title")}
-        </h2>
-        <AppSafeLink
-          href={officialZoneHref("book")}
-          className={buttonVariants({ variant: "ghost" })}
-        >
-          {t("page:home_sections_new_book_more")}
-        </AppSafeLink>
-      </div>
-
+    <HomeSectionShell
+      title={t("page:home_sections_new_book_title")}
+      moreHref={officialZoneHref("book")}
+      moreLabel={t("page:home_sections_new_book_more")}
+      isLoading={isLoading}
+      className={className}
+    >
       <div className="mb-4 max-w-full overflow-hidden">
         <Tabs
           value={tab}
@@ -125,16 +119,7 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
           </TabsList>
         </Tabs>
       </div>
-
-      <div>
-        {isLoading ? (
-          <div className="text-slate-400 text-sm">
-            {t("page:home_sections_trending_book_loading")}
-          </div>
-        ) : (
-          <HorizontalBookCarousel bookList={bookList} />
-        )}
-      </div>
-    </section>
+      {isLoading ? null : <HorizontalBookCarousel bookList={bookList} />}
+    </HomeSectionShell>
   );
 };

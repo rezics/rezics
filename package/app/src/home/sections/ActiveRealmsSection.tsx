@@ -1,15 +1,12 @@
 import { realmListQuery } from "@rezics/api/realm/realm";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
-import { buttonVariants } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { QueryErrorDisplay } from "@/core";
 import { RealmCard } from "@/realm";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
-import { AppSafeLink } from "@/shared/ui/link";
 import { officialZoneHref } from "@/zone";
+import { HomeSectionShell } from "./HomeSectionShell";
 
 /**
  * Home section displaying top 5 public realms sorted by member count.
@@ -73,26 +70,15 @@ export const ActiveRealmsSection: React.FC = () => {
 
   const realms = data?.realms ?? [];
 
-  if (error) {
-    return <QueryErrorDisplay error={error} />;
-  }
-
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">
-          {t("page:home_sections_active_realms_title")}
-        </h2>
-        <AppSafeLink
-          href={officialZoneHref("realms")}
-          className={buttonVariants({ variant: "ghost" })}
-        >
-          {t("page:home_sections_active_realms_more")}
-        </AppSafeLink>
-      </div>
-      {isLoading ? (
-        <Spinner size="sm" />
-      ) : (
+    <HomeSectionShell
+      title={t("page:home_sections_active_realms_title")}
+      moreHref={officialZoneHref("realms")}
+      moreLabel={t("page:home_sections_active_realms_more")}
+      isLoading={isLoading}
+      error={error}
+    >
+      {isLoading ? null : (
         <>
           <div className="sm:hidden">
             <DomainCarousel
@@ -112,6 +98,6 @@ export const ActiveRealmsSection: React.FC = () => {
           </div>
         </>
       )}
-    </div>
+    </HomeSectionShell>
   );
 };

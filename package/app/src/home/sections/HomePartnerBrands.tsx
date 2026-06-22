@@ -1,6 +1,7 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
+import { HomeSectionShell } from "./HomeSectionShell";
 
 export type HomePartnerBrandsProps = {
   logos?: string[];
@@ -22,10 +23,7 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
   const { t } = useTranslation(["page"]);
   const resolvedTitle = title ?? t("page:home_sections_partner_brands");
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-3">
-        <span className="font-semibold">{resolvedTitle}</span>
-      </div>
+    <HomeSectionShell title={resolvedTitle}>
       <div className="flex flex-wrap gap-8 items-center">
         {logos.map((src, i) => (
           <LazyLoadImage
@@ -37,6 +35,6 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
           />
         ))}
       </div>
-    </div>
+    </HomeSectionShell>
   );
 };
