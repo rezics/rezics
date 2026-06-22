@@ -1,8 +1,13 @@
 {
   "includeCoAuthoredBy": false,
-  "showThinkingSummaries": true,
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
-  "enabledMcpjsonServers": ["playwright"]
+  "enabledMcpjsonServers": [
+    "playwright"
+  ],
+  "showThinkingSummaries": true,
+  "enabledPlugins": {
+    "ponytail@ponytail": true
+  }
 }
