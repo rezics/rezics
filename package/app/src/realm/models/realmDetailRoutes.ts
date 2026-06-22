@@ -65,5 +65,9 @@ export function realmDetailBaseHref(
       return `/r/${location.realmSlug}`;
     case "unitId":
       return `/realm/${location.realmId}`;
+    default: {
+      const _exhaustive: never = location;
+      return _exhaustive;
+    }
   }
 }

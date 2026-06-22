@@ -66,7 +66,10 @@ const getFeedbackTypeLabel = (type: FeedbackDTO["type"]) => {
       return getI18nRuntime().i18n.t("community:feedback_type_report");
     case "OTHER":
       return getI18nRuntime().i18n.t("community:feedback_type_other");
-  }
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
 };
 
 export const FeedbackList: React.FC<FeedbackListProps> = ({

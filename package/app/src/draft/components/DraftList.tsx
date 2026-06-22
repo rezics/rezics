@@ -68,5 +68,8 @@ function draftKindLabel(t: (key: string) => string, kind: DraftKind): string {
       return t("page:draft_kind_wiki");
     case "shelf-description":
       return t("page:draft_kind_shelf_description");
-  }
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
 }

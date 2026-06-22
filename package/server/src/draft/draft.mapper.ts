@@ -32,6 +32,10 @@ export function draftResumeRoute(kind: DraftKind, unitId: string): string {
       return `/post/${unitId}`;
     case "shelf-description":
       return `/shelf/${unitId}/edit`;
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
   }
 }
 

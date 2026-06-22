@@ -40,7 +40,10 @@ export function ZoneContentSectionView({
       return <StatsSection section={section} ctx={ctx} />;
     case "sources":
       return <SourcesSection section={section} ctx={ctx} />;
-  }
+    default: {
+      const _exhaustive: never = section;
+      return _exhaustive;
+    }
 }
 
 export function ZoneContentSectionList({

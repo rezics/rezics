@@ -393,6 +393,10 @@ function collectContentSectionRefs(
     case "stats":
     case "sources":
       break;
+    default: {
+      const _exhaustive: never = section;
+      throw _exhaustive;
+    }
   }
 }
 

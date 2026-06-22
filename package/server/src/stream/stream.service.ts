@@ -55,6 +55,10 @@ function postSortForStream(sort: StreamSort): PostListQuery["sort"] {
     case "hot":
     case "best":
       return "hot";
+    default: {
+      const _exhaustive: never = sort;
+      return _exhaustive;
+    }
   }
 }
 

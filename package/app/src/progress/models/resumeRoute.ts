@@ -14,5 +14,8 @@ export function resumeRouteToHref(route: ResumeRoute): string {
       return `/book/${route.bookId}/read/${route.chapterId}`;
     case "book":
       return `/book/${route.bookId}`;
-  }
+    default: {
+      const _exhaustive: never = route;
+      return _exhaustive;
+    }
 }

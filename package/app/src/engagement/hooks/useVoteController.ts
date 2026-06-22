@@ -84,7 +84,10 @@ export function useVoteController({
         runDelete(action.remove);
         runCreate(action.add);
         return;
-    }
+      default: {
+        const _exhaustive: never = action;
+        throw _exhaustive;
+      }
   };
 
   return {
