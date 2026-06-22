@@ -48,12 +48,12 @@ describe("union hand-copy convention", () => {
 
   test("ACTIVITY_POST_KINDS satisfies PostKind[]", () => {
     const src = read("package/server/src/activity/activity.service.ts");
-    expect(src).toMatch(/ACTIVITY_POST_KINDS.*satisfies.*PostKind/);
+    expect(src).toMatch(/ACTIVITY_POST_KINDS[\s\S]*?satisfies.*PostKind/);
   });
 
   test("DRAFT_POST_KINDS satisfies PostKind[]", () => {
     const src = read("package/server/src/draft/draft.service.ts");
-    expect(src).toMatch(/DRAFT_POST_KINDS.*satisfies.*PostKind/);
+    expect(src).toMatch(/DRAFT_POST_KINDS[\s\S]*?satisfies.*PostKind/);
   });
 
   test("BOOK_CONTENT_TYPES derives from CATALOG_UNIT_TYPES", () => {

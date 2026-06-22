@@ -112,23 +112,11 @@ export function useMaterializeChapterMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ bookUnitId, input }) =>
       chapterApi.materializeNode(bookUnitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: bookKeys.contentStructure(variables.bookUnitId),
-      });
-      queryClient.invalidateQueries({ queryKey: chapterKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: chapterKeys.byTargetUnit(variables.bookUnitId),
-      });
-
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: [bookKeys.all(), chapterKeys.all()] },
   });
 }
 

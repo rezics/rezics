@@ -130,21 +130,11 @@ export function useUpdateContentStructureMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ bookUnitId, nodes }) =>
       bookApi.updateContentStructure(bookUnitId, nodes),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      // Invalidate the cached content structure for this book
-      // 使该 book 已缓存的内容结构失效
-      queryClient.invalidateQueries({
-        queryKey: bookKeys.contentStructure(variables.bookUnitId),
-      });
-
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: [bookKeys.all()] },
   });
 }
 

@@ -15,6 +15,8 @@ import { postKeys } from "../post/post.keys";
 import { commentApi } from "./comment.api";
 import { commentKeys } from "./comment.keys";
 
+const commentInvalidates = [commentKeys.all(), postKeys.all()];
+
 export function invalidateCommentModerationQueries(
   queryClient: Pick<QueryClient, "invalidateQueries">,
   comment: Pick<CommentResponse, "id" | "rootUnitId" | "realmUnitId">,
@@ -42,21 +44,10 @@ export function useCreateCommentMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: commentApi.create,
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: commentKeys.all() });
-      // Invalidate the parent post so replyCount stays in sync.
-      // 使父帖失效以保持 replyCount 同步。
-      if (data.rootUnitId) {
-        queryClient.invalidateQueries({
-          queryKey: postKeys.detail(data.rootUnitId),
-        });
-      }
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: commentInvalidates },
   });
 }
 
@@ -76,9 +67,9 @@ export function useUpdateCommentMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(commentKeys.detail(variables.id), data);
-      queryClient.invalidateQueries({ queryKey: commentKeys.all() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
+    meta: { invalidates: commentInvalidates },
   });
 }
 
@@ -98,8 +89,10 @@ export function useModerateCommentMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(commentKeys.detail(variables.id), data);
-      invalidateCommentModerationQueries(queryClient, data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    meta: {
+      invalidates: [commentKeys.all(), postKeys.all(), governanceKeys.all()],
     },
   });
 }
@@ -110,17 +103,10 @@ export function useDeleteCommentMutation(
     "mutationFn"
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id }) => commentApi.delete(id),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: commentKeys.all() });
-      queryClient.invalidateQueries({
-        queryKey: commentKeys.detail(variables.id),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
+    meta: { invalidates: commentInvalidates },
   });
 }
 
