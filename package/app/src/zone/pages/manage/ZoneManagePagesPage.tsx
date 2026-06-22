@@ -87,15 +87,12 @@ export function ZoneManagePagesPage() {
   });
   const createPage = useCreateZonePage({
     onSuccess: () => toast.success(t("zone:manage_saved")),
-    onError: (mutationError) => toast.error(mutationError.message),
   });
   const updatePage = useUpdateZonePage({
     onSuccess: () => toast.success(t("zone:manage_saved")),
-    onError: (mutationError) => toast.error(mutationError.message),
   });
   const deletePage = useDeleteZonePage({
     onSuccess: () => toast.success(t("zone:manage_saved")),
-    onError: (mutationError) => toast.error(mutationError.message),
   });
 
   useEffect(() => {

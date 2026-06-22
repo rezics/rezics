@@ -309,7 +309,6 @@ export const CommentThreadSection: React.FC<CommentThreadSectionProps> = ({
           : t("community:comment_remove_success"),
       );
     },
-    onError: (error) => toast.error(error.message),
   });
   const canModerateComments = Boolean(
     actorUserId &&

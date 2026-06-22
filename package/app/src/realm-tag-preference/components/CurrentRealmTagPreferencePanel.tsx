@@ -74,7 +74,6 @@ export function CurrentRealmTagPreferencePanel({
   }, [initialDraft]);
   const save = useSaveRealmTagPreferences({
     onSuccess: () => toast.success(t("settings:realm_tag_preference_saved")),
-    onError: (error) => toast.error(error.message),
   });
 
   const handleSave = () => {

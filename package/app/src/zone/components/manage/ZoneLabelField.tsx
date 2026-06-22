@@ -23,7 +23,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useDebouncedValue } from "@/entity-picker";
 import {
   addZoneTranslationRow,
@@ -239,9 +238,7 @@ function ZoneLabelCreateForm({
       description: "",
     },
   ]);
-  const createLabel = useCreateLabel({
-    onError: (error) => toast.error(error.message),
-  });
+  const createLabel = useCreateLabel();
 
   const submit = () => {
     const translations = rows

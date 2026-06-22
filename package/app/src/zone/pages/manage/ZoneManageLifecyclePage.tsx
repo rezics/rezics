@@ -39,7 +39,6 @@ export function ZoneManageLifecyclePage() {
   const [endsAt, setEndsAt] = useState("");
   const updateZone = useUpdateZone({
     onSuccess: () => toast.success(t("zone:manage_saved")),
-    onError: (mutationError) => toast.error(mutationError.message),
   });
 
   useEffect(() => {

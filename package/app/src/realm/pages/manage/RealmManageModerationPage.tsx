@@ -36,7 +36,6 @@ export function RealmManageModerationPage() {
   const { realmId, realm } = useRealmManage();
   const updateRealm = useUpdateRealmMutation({
     onSuccess: () => toast.success(t("community:realm_settings_saved")),
-    onError: (error) => toast.error(error.message),
   });
 
   return (

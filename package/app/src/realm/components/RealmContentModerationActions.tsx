@@ -34,15 +34,12 @@ export function RealmContentModerationActions({
   const isLocked = unitRealm?.isLocked ?? false;
   const approve = useApproveRealmContentMutation({
     onSuccess: () => toast.success(t("community:moderation_approve_success")),
-    onError: (error) => toast.error(error.message),
   });
   const remove = useRemoveRealmContentMutation({
     onSuccess: () => toast.success(t("community:moderation_remove_success")),
-    onError: (error) => toast.error(error.message),
   });
   const restore = useRestoreRealmContentMutation({
     onSuccess: () => toast.success(t("community:moderation_restore_success")),
-    onError: (error) => toast.error(error.message),
   });
   const setLock = useSetRealmContentLockMutation({
     onSuccess: (_data, variables) =>
@@ -51,11 +48,9 @@ export function RealmContentModerationActions({
           ? t("community:moderation_lock_success")
           : t("community:moderation_unlock_success"),
       ),
-    onError: (error) => toast.error(error.message),
   });
   const pin = useAppendPinboardMutation({
     onSuccess: () => toast.success(t("community:moderation_pin_success")),
-    onError: (error) => toast.error(error.message),
   });
 
   const relationInput = { reason: "moderator_action" };

@@ -46,11 +46,9 @@ export const RealmMemberList: React.FC<RealmMemberListProps> = ({
   );
   const updateRole = useUpdateMemberRoleMutation({
     onSuccess: () => toast.success(t("community:member_role_updated")),
-    onError: (error) => toast.error(error.message),
   });
   const removeMember = useRemoveMemberMutation({
     onSuccess: () => toast.success(t("community:member_removed")),
-    onError: (error) => toast.error(error.message),
   });
   const [pendingRemove, setPendingRemove] = useState<RealmMemberDTO | null>(
     null,

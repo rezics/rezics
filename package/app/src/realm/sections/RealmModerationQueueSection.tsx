@@ -289,7 +289,6 @@ function RealmCaseCard({
   const updatedAt = formatDate(item.updatedAt);
   const decideCase = useDecideRealmCaseMutation({
     onSuccess: () => toast.success(t("community:moderation_case_updated")),
-    onError: (error) => toast.error(error.message),
   });
   const isPendingReview = item.target.kind === "unit" && item.state === "new";
   const decide = (actionKind: "approve" | "remove", reason: string) =>

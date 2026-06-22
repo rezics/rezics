@@ -87,19 +87,16 @@ export function RealmMembershipSettingsDialog({
   const mute = useMuteRealmMutation({
     onSuccess: () =>
       toast.success(t("settings:realm_membership_notifications_none_saved")),
-    onError: (error) => toast.error(error.message),
   });
   const unmute = useUnmuteRealmMutation({
     onSuccess: () =>
       toast.success(t("settings:realm_membership_notifications_all_saved")),
-    onError: (error) => toast.error(error.message),
   });
   const leave = useLeaveRealmMutation({
     onSuccess: () => {
       toast.success(t("settings:realm_membership_left"));
       setOpen(false);
     },
-    onError: (error) => toast.error(error.message),
   });
   const subscribed = subscription?.subscribed ?? false;
   const notificationPending =
