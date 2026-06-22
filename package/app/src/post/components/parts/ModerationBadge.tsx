@@ -4,6 +4,7 @@ import type {
   PostDTO,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { relativeTimeFromNow } from "@rezics/ui";
 import {
   Avatar,
   AvatarFallback,
@@ -35,13 +36,13 @@ export function ModerationBadge({
   post: PostDTO;
   status?: ModerationStatus;
 }) {
-  const { t } = useTranslation(["common", "community"]);
+  const { t, i18n } = useTranslation(["common", "community"]);
   if (!status) return null;
 
   const label = badgeLabel(t, status, latestAction);
   const relativeTime = latestAction
-    ? formatRelativeTime(t, latestAction.createdAt)
-    : formatRelativeTime(t, at);
+    ? formatRelativeTime(i18n.language, latestAction.createdAt)
+    : formatRelativeTime(i18n.language, at);
   const showActorAvatar = Boolean(latestAction);
 
   return (
@@ -98,25 +99,12 @@ function statusDotClass(tone: StatusTone) {
 }
 
 /**
- * Format a date as a human-readable relative time string.
- * 将日期格式化为可读的相对时间字符串。
+ * Format a date as a human-readable relative time string via the shared
+ * Intl-backed source of truth. 经共享的 Intl 单一来源格式化相对时间。
  */
-function formatRelativeTime(t: TranslationT, value?: string | Date | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
-  if (seconds < 60) return t("common:relative_time_just_now");
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60)
-    return t("common:relative_time_minutes_ago", { value: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t("common:relative_time_hours_ago", { value: hours });
-  const days = Math.floor(hours / 24);
-  if (days < 7) return t("common:relative_time_days_ago", { value: days });
-  const weeks = Math.floor(days / 7);
-  if (weeks < 5) return t("common:relative_time_weeks_ago", { value: weeks });
-  return date.toLocaleDateString();
+function formatRelativeTime(locale: string, value?: string | Date | null) {
+  if (value == null) return null;
+  return relativeTimeFromNow(value, { locale })?.relative ?? null;
 }
 
 function moderationActionLabel(t: TranslationT, action: ModerationActionDTO) {
@@ -214,12 +202,12 @@ function ModerationActionListItem({
   action?: ModerationActionDTO | null;
   post: PostDTO;
 }) {
-  const { t } = useTranslation(["common", "community"]);
+  const { t, i18n } = useTranslation(["common", "community"]);
   const label = action
     ? moderationActionLabel(t, action)
     : t("community:moderation_auto_approved");
   const actor = action ? moderationActorLabel(t, action) : null;
-  const time = formatRelativeTime(t, action?.createdAt);
+  const time = formatRelativeTime(i18n.language, action?.createdAt);
   const reason = action?.reasonText ?? action?.publicMessage ?? null;
 
   return (

@@ -1,5 +1,6 @@
 import type { NotificationItem } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { RelativeTime } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
 import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
@@ -55,9 +56,10 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
             {extra.unitTitle}
           </p>
         )}
-        <p className="mt-1 text-xs text-text-secondary">
-          {relativeTime(t, item.latestAt)}
-        </p>
+        <RelativeTime
+          value={item.latestAt}
+          className="mt-1 block text-xs text-text-secondary"
+        />
       </div>
       {!item.read && (
         <>
@@ -117,20 +119,4 @@ function kindLabel(t: Translate, kind: string): string {
     default:
       return t("community:notification_kind_system");
   }
-}
-
-function relativeTime(t: Translate, iso: string): string {
-  const date = new Date(iso);
-  // Bail out on unparseable timestamps. 无法解析的时间戳直接返回空字符串。
-  if (Number.isNaN(date.getTime())) return "";
-  const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
-  if (minutes < 1) return t("community:notification_time_now");
-  if (minutes < 60)
-    return t("community:notification_time_minutes", { value: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24)
-    return t("community:notification_time_hours", { value: hours });
-  const days = Math.floor(hours / 24);
-  if (days < 7) return t("community:notification_time_days", { value: days });
-  return date.toLocaleDateString();
 }

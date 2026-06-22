@@ -9,6 +9,10 @@ export { StreamShelfCard } from "./components/StreamShelfCard";
 export { StreamUnitCard } from "./components/StreamUnitCard";
 export { StreamLayout } from "./layouts/StreamLayout";
 export {
+  STREAM_SORT_I18N_KEY,
+  STREAM_SORT_OPTIONS,
+} from "./models/streamSort";
+export {
   StreamSection,
   StreamSectionContent,
   useStreamRows,

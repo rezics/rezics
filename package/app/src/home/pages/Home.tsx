@@ -12,20 +12,17 @@ import {
 import type React from "react";
 import { useMemo, useState } from "react";
 import { MainContentContainer } from "@/core";
-import { StreamLayout, StreamSection } from "@/stream";
+import {
+  STREAM_SORT_I18N_KEY,
+  STREAM_SORT_OPTIONS,
+  StreamLayout,
+  StreamSection,
+} from "@/stream";
 
 export type HomeProps = object;
 
 type HomeStreamSort = NonNullable<StreamQuery["sort"]>;
 type HomeStreamType = NonNullable<StreamQuery["filterType"]>;
-
-const HOME_STREAM_SORT_OPTIONS: readonly HomeStreamSort[] = [
-  "best",
-  "hot",
-  "new",
-  "top",
-  "rising",
-];
 
 const HOME_STREAM_TYPE_OPTIONS: readonly HomeStreamType[] = [
   "all",
@@ -37,14 +34,6 @@ const HOME_STREAM_TYPE_OPTIONS: readonly HomeStreamType[] = [
   "realm",
   "zone",
 ];
-
-const SORT_I18N_KEYS: Record<HomeStreamSort, string> = {
-  best: "entity:stream_sort_best",
-  hot: "entity:stream_sort_hot",
-  new: "entity:stream_sort_new",
-  top: "entity:stream_sort_top",
-  rising: "entity:stream_sort_rising",
-};
 
 const TYPE_I18N_KEYS: Record<HomeStreamType, string> = {
   all: "page:home_stream_type_all",
@@ -101,14 +90,14 @@ export const Home: React.FC<HomeProps> = () => {
               className="w-full sm:w-40"
               aria-label={t("entity:stream_sort_label")}
             >
-              <SelectValue>{t(SORT_I18N_KEYS[sort])}</SelectValue>
+              <SelectValue>{t(STREAM_SORT_I18N_KEY[sort])}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>{t("entity:stream_sort_label")}</SelectLabel>
-                {HOME_STREAM_SORT_OPTIONS.map((option) => (
+                {STREAM_SORT_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {t(SORT_I18N_KEYS[option])}
+                    {t(STREAM_SORT_I18N_KEY[option])}
                   </SelectItem>
                 ))}
               </SelectGroup>

@@ -1,4 +1,5 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { RelativeTime } from "@rezics/ui";
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { Bell as NotificationsRoundedIcon } from "lucide-react";
 import type React from "react";
@@ -146,9 +147,10 @@ function NoticeBoardItem({ item }: { item: PinboardNoticeItem }) {
                 {item.content}
               </p>
             )}
-            <p className="text-xs text-text-secondary opacity-60 mt-1 block">
-              {formatRelative(item.date)}
-            </p>
+            <RelativeTime
+              value={item.date}
+              className="text-xs text-text-secondary opacity-60 mt-1 block"
+            />
           </div>
           <p
             className={`text-sm text-text-secondary opacity-60 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ${item.link ? "visible" : "invisible"}`}
@@ -159,26 +161,4 @@ function NoticeBoardItem({ item }: { item: PinboardNoticeItem }) {
       </a>
     </div>
   );
-}
-
-function formatRelative(dateIso: string): string {
-  const ms = Date.now() - new Date(dateIso).getTime();
-  const h = Math.floor(ms / 36e5);
-  if (h < 1)
-    return getI18nRuntime().i18n.t("page:home_noticeboard_time_just_now");
-  if (h < 24)
-    return getI18nRuntime().i18n.t(
-      "page:home_noticeboard_time_hours_ago_other",
-      { count: h },
-    );
-  const d = Math.floor(h / 24);
-  if (d < 7)
-    return getI18nRuntime().i18n.t(
-      "page:home_noticeboard_time_days_ago_other",
-      { count: d },
-    );
-  const w = Math.floor(d / 7);
-  return getI18nRuntime().i18n.t("page:home_noticeboard_time_weeks_ago_other", {
-    count: w,
-  });
 }

@@ -1,3 +1,4 @@
+import type { StreamSort } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Select,
@@ -9,24 +10,11 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type React from "react";
+import { STREAM_SORT_I18N_KEY, STREAM_SORT_OPTIONS } from "@/stream";
 
-export type RealmStreamSort = "best" | "hot" | "new" | "top" | "rising";
-
-const SORT_KEYS: readonly RealmStreamSort[] = [
-  "best",
-  "hot",
-  "new",
-  "top",
-  "rising",
-] as const;
-
-const SORT_I18N_KEY: Record<RealmStreamSort, string> = {
-  best: "stream_sort_best",
-  hot: "stream_sort_hot",
-  new: "stream_sort_new",
-  top: "stream_sort_top",
-  rising: "stream_sort_rising",
-};
+/** Realm-facing name for the stream sort, anchored to the contract `StreamSort`. */
+/** realm 侧的流排序类型名，锚定契约 `StreamSort`。 */
+export type RealmStreamSort = StreamSort;
 
 export interface RealmStreamSortSwitcherProps {
   value: RealmStreamSort;
@@ -47,14 +35,14 @@ export const RealmStreamSortSwitcher: React.FC<
           className="w-full sm:w-52"
           aria-label={t("stream_sort_label")}
         >
-          <SelectValue>{t(SORT_I18N_KEY[value])}</SelectValue>
+          <SelectValue>{t(STREAM_SORT_I18N_KEY[value])}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             <SelectLabel>{t("stream_sort_label")}</SelectLabel>
-            {SORT_KEYS.map((key) => (
+            {STREAM_SORT_OPTIONS.map((key) => (
               <SelectItem key={key} value={key}>
-                {t(SORT_I18N_KEY[key])}
+                {t(STREAM_SORT_I18N_KEY[key])}
               </SelectItem>
             ))}
           </SelectGroup>
