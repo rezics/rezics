@@ -60,19 +60,20 @@ export default function NewPostPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button asChild size="icon-sm" variant="ghost">
-            <Link href="/">
+            <Link aria-label="Back" href="/">
               <ArrowLeftIcon />
             </Link>
           </Button>
-          <h1 className="text-lg font-semibold">{t.nav.createPost}</h1>
+          <h1 className="text-lg font-semibold">{t.newPost.heading}</h1>
         </div>
-        <Button size="sm">Publish</Button>
+        <Button size="sm">{t.newPost.publish}</Button>
       </div>
 
       <div className="space-y-4">
         <Input
+          aria-label="Post title"
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Post title"
+          placeholder={t.newPost.titlePlaceholder}
           value={title}
         />
         <div className="border-input min-h-64 rounded-md border p-4">

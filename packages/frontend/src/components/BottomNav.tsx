@@ -5,7 +5,8 @@ import { authClient } from "@/lib/auth-client";
 import { useT } from "@/lib/i18n/locale";
 import { useAtomSet } from "@effect/atom-react";
 import { BellIcon, BookOpenIcon, HomeIcon, PlusIcon, UserIcon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * Mobile (<640px)
@@ -37,15 +38,17 @@ import { usePathname, useRouter } from "next/navigation";
  */
 export function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const [t] = useT();
   const { data: session } = authClient.useSession();
   const setAuthDialog = useAtomSet(authDialogAtom);
 
-  const items = [
+  const linkItems = [
     { key: "home", href: "/", icon: HomeIcon, label: t.nav.home },
     { key: "books", href: "/book", icon: BookOpenIcon, label: t.library.title },
     { key: "create", href: "/create", icon: PlusIcon, label: t.nav.createPost },
+  ] as const;
+
+  const authItems = [
     { key: "inbox", href: "/inbox", icon: BellIcon, label: t.nav.inbox },
     { key: "profile", href: "/user/me", icon: UserIcon, label: t.nav.profile },
   ] as const;
@@ -55,28 +58,48 @@ export function BottomNav() {
     return pathname.startsWith(href);
   }
 
-  function handleClick(key: string, href: string) {
-    if ((key === "inbox" || key === "profile") && !session) {
+  function handleAuthClick(_href: string) {
+    if (!session) {
       setAuthDialog({ open: true, mode: "login" });
-      return;
     }
-    router.push(href);
   }
 
   return (
     <nav className="bg-background/90 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur lg:hidden">
       <div className="flex h-14 items-center justify-around">
-        {items.map(({ key, href, icon: Icon, label }) => (
-          <button
+        {linkItems.map(({ key, href, icon: Icon, label }) => (
+          <Link
             className={`flex flex-1 flex-col items-center gap-0.5 py-1 text-xs ${isActive(href) ? "text-primary" : "text-muted-foreground"}`}
+            href={href}
             key={key}
-            onClick={() => handleClick(key, href)}
-            type="button"
           >
             <Icon className="size-5" />
             <span>{label}</span>
-          </button>
+          </Link>
         ))}
+        {authItems.map(({ key, href, icon: Icon, label }) =>
+          session ? (
+            <Link
+              className={`flex flex-1 flex-col items-center gap-0.5 py-1 text-xs ${isActive(href) ? "text-primary" : "text-muted-foreground"}`}
+              href={href}
+              key={key}
+            >
+              <Icon className="size-5" />
+              <span>{label}</span>
+            </Link>
+          ) : (
+            <button
+              aria-label={label}
+              className={`flex flex-1 flex-col items-center gap-0.5 py-1 text-xs text-muted-foreground`}
+              key={key}
+              onClick={() => handleAuthClick(href)}
+              type="button"
+            >
+              <Icon className="size-5" />
+              <span>{label}</span>
+            </button>
+          ),
+        )}
       </div>
     </nav>
   );

@@ -43,7 +43,7 @@ function LoginForm({ onSwitchMode }: { readonly onSwitchMode: () => void }) {
       <DialogHeader description={t.auth.signInSubtitle} title={t.auth.signInTitle} />
       <DialogBody>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          {error && <p className="text-destructive text-sm" role="alert">{error}</p>}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium" htmlFor="auth-email">
               {t.auth.email}
@@ -105,7 +105,7 @@ function RegisterForm({ onSwitchMode }: { readonly onSwitchMode: () => void }) {
       <DialogHeader description={t.auth.signUpSubtitle} title={t.auth.signUpTitle} />
       <DialogBody>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          {error && <p className="text-destructive text-sm" role="alert">{error}</p>}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium" htmlFor="auth-name">
               {t.auth.name}

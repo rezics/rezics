@@ -72,7 +72,7 @@ export default function AppLayout({ children }: { readonly children: ReactNode }
       <Header />
       <div className="mx-auto flex w-full max-w-6xl">
         <Sidebar />
-        <main className="min-w-0 flex-1 px-4 py-6 max-lg:pb-20">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-6 max-lg:pb-20" id="skip-nav-content">{children}</main>
       </div>
       <BottomNav />
       <Toaster />

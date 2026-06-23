@@ -22,35 +22,35 @@ export default function EditProfilePage() {
     <div className="mx-auto w-full max-w-xl space-y-6">
       <div className="flex items-center gap-3">
         <Button asChild size="icon-sm" variant="ghost">
-          <Link href="/user/me">
+          <Link aria-label="Back" href="/user/me">
             <ArrowLeftIcon />
           </Link>
         </Button>
-        <h1 className="text-lg font-semibold">{t.common.edit} Profile</h1>
+        <h1 className="text-lg font-semibold">{t.editProfile.heading}</h1>
       </div>
 
       <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
         <div className="space-y-1.5">
           <label className="text-sm font-medium" htmlFor="edit-name">
-            Display Name
+            {t.editProfile.displayName}
           </label>
           <Input
             id="edit-name"
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your display name"
+            placeholder={t.editProfile.displayNamePlaceholder}
             value={name}
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium" htmlFor="edit-bio">
-            Bio
+            {t.editProfile.bio}
           </label>
           <Textarea
             className="min-h-24"
             id="edit-bio"
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell us about yourself..."
+            placeholder={t.editProfile.bioPlaceholder}
             value={bio}
           />
         </div>

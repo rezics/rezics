@@ -50,7 +50,7 @@ export function ServiceUnavailableOverlay() {
   if (!isUnavailable) return null;
 
   return (
-    <div className="bg-background/60 fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md">
+    <div className="bg-background/60 fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md" role="alert">
       <p className="text-foreground text-2xl font-semibold">Service temporarily unavailable</p>
     </div>
   );

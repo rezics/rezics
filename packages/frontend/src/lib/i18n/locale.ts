@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type en from "./languages/en";
 
 type Messages = typeof en;
@@ -53,5 +53,11 @@ export function useT(): [Messages] {
 export function LocaleSync() {
   // Sync locale from cookie/localStorage on mount
   // 挂载时从 cookie/localStorage 同步语言设置
+  const messages = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  useEffect(() => {
+    document.documentElement.lang = currentLocale;
+  }, [messages]);
+
   return null;
 }

@@ -94,7 +94,7 @@ export function PostCard({ post, hideRealm: _hideRealm }: PostCardProps) {
   const isEdited = post.updatedAt !== post.createdAt;
 
   return (
-    <Link className="block outline-none" href={`/post/${post.unitId}`}>
+    <Link className="block focus-visible:outline-2 focus-visible:outline-primary" href={`/post/${post.unitId}`}>
       <Card className="transition-colors hover:bg-accent/50 [--space:--spacing(3)]">
         <CardContent className="flex min-w-0 flex-col gap-1.5">
           {/* Title row / 标题行 */}
