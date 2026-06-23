@@ -1,11 +1,26 @@
 import { SectionBoundary } from "@/components/SectionBoundary";
+import { ExcerptDetailContent } from "./content";
 
-export default function ExcerptDetailPage() {
+/**
+ * Mobile-Ultra-wide: max-w-2xl mx-auto。
+ *
+ * +-----------------------------+
+ * | "Quoted passage text..."    |
+ * |                             |
+ * | — Book Title, Chapter Name  |
+ * | by Author Name              |
+ * |-----------------------------|
+ * | Context / notes             |
+ * |-----------------------------|
+ * | [Comments section]          |
+ * +-----------------------------+
+ *
+ * 书摘/引用详情：引文 + 来源 + 评注 + 评论。
+ */
+export default function ExcerptDetailPage({ params }: { readonly params: Promise<{ id: string }> }) {
   return (
     <SectionBoundary>
-      <div className="py-8">
-        <h1 className="text-2xl font-bold">ExcerptDetail</h1>
-      </div>
+      <ExcerptDetailContent paramsPromise={params} />
     </SectionBoundary>
   );
 }
