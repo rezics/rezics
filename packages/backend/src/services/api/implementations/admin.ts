@@ -128,9 +128,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           .where(eq(User.authUserId, currentUser.id))
           .limit(1);
         if (!rows[0])
-          return yield* new HttpApiError.InternalServerError({
-            message: "Not implemented",
-          });
+          return yield* new HttpApiError.InternalServerError();
         return rows[0].unitId;
       });
 
@@ -173,7 +171,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   sessionCount: 0,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── authUsersSessions — list sessions for a user ───────────
@@ -215,7 +213,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   expiresAt: s.expiresAt,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── authUsersRevoke — revoke session(s) for a user ─────────
@@ -256,7 +254,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   Effect.catchTag("Unknown", () => Effect.void),
                 );
             }
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── authUsersImpersonate — generate an impersonation token ─
@@ -277,7 +275,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             // 根据 auth user ID 生成占位符模拟令牌
             const token = `imp_${userRows[0].authUserId}_${Date.now()}`;
             return { token };
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -303,7 +301,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             };
             repairJobs.set(job.id, job);
             return repairJobToDTO(job);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── repairCreate — create and execute a repair job ─────────
@@ -325,7 +323,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             };
             repairJobs.set(job.id, job);
             return repairJobToDTO(job);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── repairRetry — retry a failed repair job ────────────────
@@ -350,7 +348,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             };
             repairJobs.set(updated.id, updated);
             return repairJobToDTO(updated);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── repairCancel — cancel a pending repair job ─────────────
@@ -371,7 +369,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             };
             repairJobs.set(updated.id, updated);
             return repairJobToDTO(updated);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -396,7 +394,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               units: unitsAgg[0]?.total ?? 0,
               realms: realmsAgg[0]?.total ?? 0,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── dashboardSummary — stats plus recent activity ──────────
@@ -438,7 +436,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                 createdAt: u.createdAt.toISOString(),
               })),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -466,7 +464,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   createdAt: r.createdAt,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── createJwtService — register a new JWT service ──────────
@@ -503,7 +501,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               active: row.isActive,
               createdAt: row.createdAt,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── updateJwtService — update a JWT service name ───────────
@@ -540,7 +538,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               active: row.isActive,
               createdAt: row.createdAt,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── activateJwtService — activate a JWT service ────────────
@@ -573,7 +571,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               active: row[0]!.isActive,
               createdAt: row[0]!.createdAt,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── deactivateJwtService — deactivate a JWT service ────────
@@ -606,7 +604,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               active: row[0]!.isActive,
               createdAt: row[0]!.createdAt,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── rotateJwtService — rotate keys for a JWT service ───────
@@ -640,7 +638,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               active: existing[0].isActive,
               createdAt: existing[0].createdAt,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -665,7 +663,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               .returning({ id: HistoryOutbox.id });
 
             return { retried: result.length };
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -707,7 +705,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                 },
               },
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -732,7 +730,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               key: rows[0].key,
               value: rows[0].value,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── echokvPut — set a value by key ─────────────────────────
@@ -759,7 +757,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               key: rows[0]!.key,
               value: rows[0]!.value,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -792,7 +790,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               unitId: rows[0].id,
               kind: rows[0].type,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -811,7 +809,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   result: r.result,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -857,7 +855,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             });
 
             return { id: unitRows[0]!.id };
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -899,7 +897,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   color: undefined,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── labelCreate — create a new label ───────────────────────
@@ -952,7 +950,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               name: payload.name,
               color: payload.color,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -1006,7 +1004,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               title: payload.title,
               kind: payload.kind,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── linkList — list links for a unit ───────────────────────
@@ -1057,7 +1055,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   kind: undefined,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── linkUpdate — update a link ─────────────────────────────
@@ -1104,7 +1102,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               title: payload.title,
               kind: payload.kind,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── linkDelete — delete a link ─────────────────────────────
@@ -1122,7 +1120,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             if (!existing[0]) return yield* new AdminNotFound();
 
             yield* database.delete(Unit).where(eq(Unit.id, params.linkId));
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -1157,7 +1155,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   expiresAt: r.expiresAt ?? null,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── tokenCreate — create an API token ──────────────────────
@@ -1208,7 +1206,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               createdAt: row.createdAt,
               expiresAt: row.expiresAt ?? null,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── tokenUpdate — update an API token ──────────────────────
@@ -1257,7 +1255,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               createdAt: row.createdAt,
               expiresAt: row.expiresAt ?? null,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── tokenDelete — revoke an API token ──────────────────────
@@ -1278,7 +1276,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               .update(ApiToken)
               .set({ revoked: true, revokedAt: new Date() })
               .where(eq(ApiToken.id, params.id));
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -1316,7 +1314,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   status: r.status,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── tokenBooksCreate — create a book entry ─────────────────
@@ -1350,7 +1348,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               title: payload.title,
               status: unitRows[0]!.status,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── tokenBooksUpdate — update a book entry ─────────────────
@@ -1412,7 +1410,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               title: updated[0]?.title ?? params.id,
               status: updated[0]?.status ?? "DRAFT",
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -1443,7 +1441,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   email: r.email ?? "",
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── tokenUsersCreate — create a user entry ─────────────────
@@ -1473,7 +1471,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               name: payload.name,
               email: payload.email,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── tokenUsersUpdate — update a user entry ─────────────────
@@ -1511,7 +1509,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               name: updated[0]?.name ?? "",
               email: updated[0]?.email ?? "",
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ================================================================
@@ -1551,7 +1549,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   requirements: r.hardware,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── gameSystemRequirementCreate — create a requirement ─────
@@ -1577,7 +1575,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               platform: row.tier,
               requirements: row.hardware,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── gameSystemRequirementUpdate — update a requirement ─────
@@ -1617,7 +1615,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               platform: row.tier,
               requirements: row.hardware,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── gameSystemRequirementDelete — delete a requirement ─────
@@ -1637,7 +1635,7 @@ export const AdminHandlers = HttpApiBuilder.group(
             yield* database
               .delete(GameSystemRequirement)
               .where(eq(GameSystemRequirement.id, params.id));
-          }),
+          }).pipe(Effect.orDie),
         )
     );
   }),

@@ -204,7 +204,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             zones: deduped.map((r) => zoneToDTO(r.Unit, r.Zone, (r.title ?? null) satisfies string | null)),
             total,
           });
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── getByUser — list zones for a specific user ────────────────
@@ -220,7 +220,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             zones: deduped.map((r) => zoneToDTO(r.Unit, r.Zone, (r.title ?? null) satisfies string | null)),
             total,
           });
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── getBySlug — find zone by slug ─────────────────────────────
@@ -230,7 +230,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           const found = yield* fetchZoneBySlug(params.slug);
           if (!found) return yield* new ZoneNotFound();
           return zoneToDTO(found.unit, found.zone, found.title);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── getPortal — zone portal page data ─────────────────────────
@@ -249,7 +249,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             zone: zoneToDTO(found.unit, found.zone, found.title),
             page: pageToDTO(pages[0]),
           };
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── getSectionData — zone section data ────────────────────────
@@ -271,7 +271,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             page: pageToDTO(pages[0]),
             sectionId: params.sectionId,
           };
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── create — create a new zone ────────────────────────────────
@@ -324,7 +324,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
               .returning();
 
           return zoneToDTO(unit, zones[0]!, payload.name ?? payload.slug);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── update — update zone metadata ─────────────────────────────
@@ -367,7 +367,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
           return zoneToDTO(refreshed!.unit, refreshed!.zone, refreshed!.title);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── updateBoundary — update zone boundary config ──────────────
@@ -386,7 +386,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
           return zoneToDTO(refreshed!.unit, refreshed!.zone, refreshed!.title);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── updateNav — update zone navigation config ─────────────────
@@ -405,7 +405,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
           return zoneToDTO(refreshed!.unit, refreshed!.zone, refreshed!.title);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── updateTheme — update zone theme config ────────────────────
@@ -424,7 +424,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
           return zoneToDTO(refreshed!.unit, refreshed!.zone, refreshed!.title);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── remove — delete zone ──────────────────────────────────────
@@ -441,7 +441,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
 
           return { message: "Zone deleted" };
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── createPage — create a zone page ───────────────────────────
@@ -464,7 +464,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
               .returning();
 
           return pageToDTO(pages[0]!);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── updatePage — update a zone page ───────────────────────────
@@ -500,7 +500,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
               .limit(1);
 
           return pageToDTO(refreshed[0]!);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── deletePage — delete a zone page ───────────────────────────
@@ -524,7 +524,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)));
 
           return { message: "Page deleted" };
-        }),
+        }).pipe(Effect.orDie),
       );
   }),
 );

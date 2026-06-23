@@ -135,7 +135,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             const row = yield* fetchBook(params.unitId);
             if (!row) return yield* new BookNotFound();
             return bookToDTO(row.Unit, row.Book);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("createBook", ({ payload }) =>
@@ -174,7 +174,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               .insert(ContentStructure)
               .values({ ownerUnitId: unit.id });
             return bookToDTO(unit, books[0]!);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("updateBook", ({ params, payload }) =>
@@ -211,7 +211,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             }
             const updated = yield* fetchBook(params.unitId);
             return bookToDTO(updated!.Unit, updated!.Book);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("deleteBook", ({ params }) =>
@@ -221,7 +221,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             if (!row) return yield* new BookNotFound();
             if (row.Unit.userId !== user.id) return yield* new BookForbidden();
             yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Book rating ───────────────────────────────────────────
@@ -239,7 +239,7 @@ export const BooksHandlers = HttpApiBuilder.group(
                   count: r.totalCount,
                 }),
             );
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Content structure ─────────────────────────────────────
@@ -259,7 +259,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               ownerUnitId: params.unitId,
               nodes: nodes.map(nodeToDTO),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("updateBookContentStructure", ({ params, payload }) =>
@@ -312,13 +312,13 @@ export const BooksHandlers = HttpApiBuilder.group(
               ownerUnitId: params.unitId,
               nodes: nodes.map(nodeToDTO),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Book list ──────────────────────────────────────────────
-        .handle("listBooks", ({ query }) => listBooksShared(query))
+        .handle("listBooks", ({ query }) => listBooksShared(query).pipe(Effect.orDie))
 
-        .handle("listBooksByBody", ({ payload }) => listBooksShared(payload))
+        .handle("listBooksByBody", ({ payload }) => listBooksShared(payload).pipe(Effect.orDie))
 
         // ── Chapters ───────────────────────────────────────────────
         .handle("getChapter", ({ params }) =>
@@ -357,7 +357,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("createChapter", ({ payload }) =>
@@ -400,7 +400,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("updateChapter", ({ params, payload }) =>
@@ -485,7 +485,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: updated[0]!.createdAt.toISOString(),
               updatedAt: updated[0]!.updatedAt.toISOString(),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("deleteChapter", ({ params }) =>
@@ -499,7 +499,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             if (units[0].userId !== user.id)
               return yield* new ChapterForbidden();
             yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("materializeChapter", ({ params, payload }) =>
@@ -552,7 +552,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               nodeId: node.id,
               created: true,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Series ─────────────────────────────────────────────────
@@ -591,7 +591,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("createSeries", ({ payload }) =>
@@ -630,7 +630,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("updateSeries", ({ params, payload }) =>
@@ -674,7 +674,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: updated[0]!.createdAt.toISOString(),
               updatedAt: updated[0]!.updatedAt.toISOString(),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("updateSeriesContentStructure", ({ params, payload }) =>
@@ -718,7 +718,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               ownerUnitId: params.unitId,
               nodes: nodes.map(nodeToDTO),
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         .handle("getSeriesContentIndex", ({ params }) =>
@@ -748,7 +748,7 @@ export const BooksHandlers = HttpApiBuilder.group(
                   }),
               ),
             };
-          }),
+          }).pipe(Effect.orDie),
         )
     );
   }),

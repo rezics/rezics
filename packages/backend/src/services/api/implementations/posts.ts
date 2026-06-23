@@ -104,7 +104,7 @@ export const PostsHandlers = HttpApiBuilder.group(
 
     return handlers
       // ── Get post / 获取帖子 ────────────────────────────────────
-      .handle("get", ({ params }) => fetchPost(params.unitId))
+      .handle("get", ({ params }) => fetchPost(params.unitId).pipe(Effect.orDie))
 
       // ── Create post / 创建帖子 ─────────────────────────────────
       .handle("create", ({ payload }) =>
@@ -154,7 +154,7 @@ export const PostsHandlers = HttpApiBuilder.group(
           }
 
           return yield* fetchPost(unit.id);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Update post / 更新帖子 ─────────────────────────────────
@@ -196,7 +196,7 @@ export const PostsHandlers = HttpApiBuilder.group(
 
           yield* database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId));
           return yield* fetchPost(params.unitId);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Delete post / 删除帖子 ─────────────────────────────────
@@ -207,7 +207,7 @@ export const PostsHandlers = HttpApiBuilder.group(
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
           yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── List posts (GET query string) / 列表帖子（查询字符串） ──
@@ -243,7 +243,7 @@ export const PostsHandlers = HttpApiBuilder.group(
           });
 
           return new PostListResult({ items, total: agg[0]?.total ?? 0 });
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── List posts (POST body) / 列表帖子（请求体） ────────────
@@ -279,7 +279,7 @@ export const PostsHandlers = HttpApiBuilder.group(
           });
 
           return new PostListResult({ items, total: agg[0]?.total ?? 0 });
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Moderation overlays / 审核覆盖数据 ─────────────────────
@@ -294,7 +294,7 @@ export const PostsHandlers = HttpApiBuilder.group(
             }
           }
           return new ModerationOverlayResult({ overlays });
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Publish / 发布 ─────────────────────────────────────────
@@ -309,7 +309,7 @@ export const PostsHandlers = HttpApiBuilder.group(
               .set({ status: "PUBLISHED", publishedAt: new Date(), updatedAt: new Date() })
               .where(eq(Unit.id, params.unitId));
           return yield* fetchPost(params.unitId);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Submit to realm / 提交到 realm ─────────────────────────
@@ -324,7 +324,7 @@ export const PostsHandlers = HttpApiBuilder.group(
               .values({ realmUnitId: payload.realmUnitId, unitId: params.unitId })
               .onConflictDoNothing();
           return yield* fetchPost(params.unitId);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Set state / 设置状态 ───────────────────────────────────
@@ -336,7 +336,7 @@ export const PostsHandlers = HttpApiBuilder.group(
           if (units[0].userId !== user.id) return yield* new PostForbidden();
           yield* database.update(Post).set({ state: payload.state, updatedAt: new Date() }).where(eq(Post.unitId, params.unitId));
           return yield* fetchPost(params.unitId);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Create pin / 置顶 ─────────────────────────────────────
@@ -356,7 +356,7 @@ export const PostsHandlers = HttpApiBuilder.group(
               })
               .onConflictDoNothing();
           return yield* fetchPost(payload.unitId);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Delete pin / 取消置顶 ──────────────────────────────────
@@ -368,7 +368,7 @@ export const PostsHandlers = HttpApiBuilder.group(
               .where(
                 and(eq(CommentPromotion.scopeUnitId, payload.unitId), eq(CommentPromotion.commentId, payload.unitId)),
               );
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Accept answer / 采纳回答 ───────────────────────────────
@@ -389,7 +389,7 @@ export const PostsHandlers = HttpApiBuilder.group(
               })
               .onConflictDoNothing();
           return yield* fetchPost(payload.postUnitId);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Remove accepted answer / 移除采纳回答 ──────────────────
@@ -408,7 +408,7 @@ export const PostsHandlers = HttpApiBuilder.group(
                   eq(CommentPromotion.kind, "ACCEPTED_ANSWER"),
                 ),
               );
-        }),
+        }).pipe(Effect.orDie),
       );
   }),
 );

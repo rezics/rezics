@@ -143,7 +143,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             })),
           ];
           return new CapabilityHintsResult({ capabilities });
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── grantRealmCapability — grant realm capability to member ────
@@ -172,7 +172,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Capability granted",
           });
           return rows[0]!;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── revokeRealmCapability — revoke realm capability from member ──
@@ -204,7 +204,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: `Revoked capability ${params.capability}`,
           });
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── policyDecide — evaluate governance policy decision ─────────
@@ -230,7 +230,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             action,
             grants: grants.map((g) => g.capability),
           };
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listModerationActions — list moderation actions for a target ──
@@ -254,7 +254,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listModerationOverlays — batch-read moderation overlays ───
@@ -290,7 +290,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             }
           }
           return deduped;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── contentApprove — global content approval ──────────────────
@@ -325,7 +325,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Content approved",
           });
           return [action];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── contentRemove — global content removal ────────────────────
@@ -360,7 +360,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Content removed",
           });
           return [action];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── contentRestore — global content restoration ───────────────
@@ -395,7 +395,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Content restored",
           });
           return [action];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── realmContentApprove — realm-scoped content approval ───────
@@ -428,7 +428,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return action;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── realmContentRemove — realm-scoped content removal ─────────
@@ -461,7 +461,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return action;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── realmContentRestore — realm-scoped content restoration ────
@@ -494,7 +494,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return action;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── realmContentLock — realm-scoped content lock ──────────────
@@ -527,7 +527,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return action;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── realmContentUnlock — realm-scoped content unlock ──────────
@@ -560,7 +560,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return action;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── realmContentOwnerDelegation — realm content owner delegation ──
@@ -590,7 +590,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Owner delegation recorded",
           });
           return action;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── getActiveEnforcement — active enforcement summary ─────────
@@ -615,7 +615,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             active: rows,
             count: rows.length,
           };
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listEnforcements — list enforcement records ───────────────
@@ -639,7 +639,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── applyEnforcement — apply enforcement to user ──────────────
@@ -692,7 +692,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason,
           });
           return rows[0]!;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── unblockEnforcement — revoke active enforcements ───────────
@@ -741,7 +741,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason,
           });
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listCases — list global moderation cases ──────────────────
@@ -765,7 +765,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── getCase — fetch single case ───────────────────────────────
@@ -778,7 +778,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             database.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1);
           if (!rows[0]) return yield* new GovernanceForbidden();
           return rows[0];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listCaseActions — list moderation actions linked to a case ──
@@ -796,7 +796,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── createCaseFromFeedback — create case from feedback report ──
@@ -833,7 +833,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Case created from feedback",
           });
           return rows[0]!;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── duplicateCase — mark case as duplicate of another ─────────
@@ -860,7 +860,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: `Marked as duplicate of ${duplicateOfCaseId}`,
           });
           return rows[0];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── assignCase — assign case to a user ────────────────────────
@@ -887,7 +887,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: `Assigned to ${assignedToUserId}`,
           });
           return rows[0];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── triageCase — triage case (set severity + state) ───────────
@@ -917,7 +917,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Case triaged",
           });
           return rows[0];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── decideCase — record a decision on a case ──────────────────
@@ -955,7 +955,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Decision recorded",
           });
           return rows[0];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── appealCase — register an appeal on a case ─────────────────
@@ -1003,7 +1003,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Appeal submitted",
           });
           return rows[0]!;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listRealmCases — list realm-scoped cases ──────────────────
@@ -1029,7 +1029,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── createRealmCase — create a realm-scoped case ──────────────
@@ -1065,7 +1065,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case created",
           });
           return rows[0]!;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── createRealmCaseFromFeedback — realm case from feedback ────
@@ -1103,7 +1103,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case created from feedback",
           });
           return rows[0]!;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listRealmCaseActions — list actions for a realm case ──────
@@ -1126,7 +1126,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── decideRealmCase — decide a realm-scoped case ──────────────
@@ -1170,7 +1170,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case decision recorded",
           });
           return rows[0];
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── escalateRealmCase — escalate realm case to platform level ──
@@ -1234,7 +1234,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case escalated to platform",
           });
           return escalatedRows[0]!;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── listAuditLogs — list staff audit log entries ──────────────
@@ -1260,7 +1260,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── getAuditLog — fetch a single audit log entry ──────────────
@@ -1273,7 +1273,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             database.select().from(StaffAuditLog).where(eq(StaffAuditLog.id, params.auditLogId)).limit(1);
           if (!rows[0]) return yield* new GovernanceNotFound();
           return rows[0];
-        }),
+        }).pipe(Effect.orDie),
       );
   }),
 );

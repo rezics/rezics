@@ -68,7 +68,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
     return (
       handlers
         // ── Get comment / 获取评论 ────────────────────────────────────
-        .handle("get", ({ params }) => fetchComment(params.id))
+        .handle("get", ({ params }) => fetchComment(params.id).pipe(Effect.orDie))
 
         // ── List comments (GET query string) / 列表评论（查询字符串） ──
         .handle("list", ({ query }) =>
@@ -105,7 +105,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
               items,
               total: agg[0]?.total ?? 0,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── List comments (POST body) / 列表评论（请求体） ────────────
@@ -148,7 +148,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
               items,
               total: agg[0]?.total ?? 0,
             });
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Create comment / 创建评论 ─────────────────────────────────
@@ -235,7 +235,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
               .where(eq(Comment.id, commentId));
             if (!rows[0]) return yield* new HttpApiError.InternalServerError();
             return commentToDTO(rows[0]);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Update comment / 更新评论 ─────────────────────────────────
@@ -264,7 +264,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
               .where(eq(Comment.id, params.id));
 
             return yield* fetchComment(params.id);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Moderate comment / 审核评论 ────────────────────────────────
@@ -293,7 +293,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
               .where(eq(Comment.id, params.id));
 
             return yield* fetchComment(params.id);
-          }),
+          }).pipe(Effect.orDie),
         )
 
         // ── Delete comment / 删除评论 ─────────────────────────────────
@@ -318,7 +318,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
                 updatedAt: new Date(),
               })
               .where(eq(Comment.id, params.id));
-          }),
+          }).pipe(Effect.orDie),
         )
     );
   }),

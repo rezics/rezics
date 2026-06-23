@@ -235,7 +235,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchUsers", ({ query }) =>
@@ -244,7 +244,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           ids: query.ids ? query.ids.split(",") : undefined,
           limit: query.limit,
           offset: query.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchEntities", ({ payload }) =>
@@ -253,7 +253,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchPosts", ({ payload }) =>
@@ -262,7 +262,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchPolls", ({ payload }) =>
@@ -271,7 +271,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchComments", ({ payload }) => {
@@ -321,7 +321,7 @@ export const SearchHandlers = HttpApiBuilder.group(
             })),
             total: agg[0]?.total ?? 0,
           };
-        });
+        }).pipe(Effect.orDie);
       })
 
       .handle("searchRealms", ({ payload }) =>
@@ -330,7 +330,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchZones", ({ payload }) =>
@@ -339,7 +339,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchTags", ({ payload }) =>
@@ -348,7 +348,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchLabels", ({ payload }) =>
@@ -357,11 +357,11 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }),
+        }).pipe(Effect.orDie),
       )
 
       .handle("searchFederated", ({ payload }) =>
-        federatedSearch({ q: payload.q, limit: payload.limit }),
+        federatedSearch({ q: payload.q, limit: payload.limit }).pipe(Effect.orDie),
       )
 
       // ── Admin — index init (stubs) ───────────────────────────

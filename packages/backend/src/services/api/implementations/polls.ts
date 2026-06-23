@@ -228,7 +228,7 @@ export const PollsHandlers = HttpApiBuilder.group(
             );
 
           return yield* fetchPollOrDie(unit.id, user.id);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Get poll / 获取投票 ────────────────────────────────────
@@ -239,7 +239,7 @@ export const PollsHandlers = HttpApiBuilder.group(
             ? userOption.value.id
             : undefined;
           return yield* fetchPollOrNotFound(params.pollUnitId, userId);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Cast vote / 投票 ───────────────────────────────────────
@@ -348,7 +348,7 @@ export const PollsHandlers = HttpApiBuilder.group(
           }
 
           return yield* fetchPollOrNotFound(pollUnitId, user.id);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Retract vote / 撤回投票 ───────────────────────────────
@@ -391,7 +391,7 @@ export const PollsHandlers = HttpApiBuilder.group(
                   ),
                 );
           }
-        }),
+        }).pipe(Effect.orDie),
       );
   }),
 );

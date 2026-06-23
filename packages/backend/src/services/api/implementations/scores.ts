@@ -397,7 +397,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           yield* doUpdateAggregate(payload.unitId, payload.realm, oldValue, payload.value, oldFields, newFields);
 
           return entryToDTO(entry);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Delete score / 删除评分 ────────────────────────────────
@@ -443,7 +443,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           // Update the aggregate / 更新聚合
           const oldFields = entry.fields ?? null;
           yield* doUpdateAggregate(entry.unitId, entry.realm, entry.value, null, oldFields, null);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Aggregates by unit / 某个 unit 的所有 realm 聚合数据 ────
@@ -452,7 +452,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const rows = yield* 
             database.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId));
           return rows.map(aggregateToDTO);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── User scores for a unit / 用户对某个 unit 的评分条目 ─────
@@ -464,7 +464,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .from(ScoreEntry)
               .where(and(eq(ScoreEntry.userId, params.userId), eq(ScoreEntry.unitId, params.unitId)));
           return rows.map(entryToDTO);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Recalculate aggregate (admin) / 管理员触发重算 ──────────
@@ -527,7 +527,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .returning();
 
           return aggRows[0] ? aggregateToDTO(aggRows[0]) : null;
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── List realm fields / 列出 realm 的评分字段 ───────────────
@@ -540,7 +540,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .where(eq(ScoreRealmField.realm, params.realmId))
               .orderBy(asc(ScoreRealmField.position), asc(ScoreRealmField.key));
           return rows.map(realmFieldToDTO);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Add realm field (admin) / 新增 realm 字段（管理员） ─────
@@ -582,7 +582,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .returning();
 
           return realmFieldToDTO(fieldRows[0]!);
-        }),
+        }).pipe(Effect.orDie),
       )
 
       // ── Remove realm field (admin) / 移除 realm 字段（管理员） ──
@@ -614,7 +614,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
             database
               .delete(ScoreRealmField)
               .where(and(eq(ScoreRealmField.realm, params.realmId), eq(ScoreRealmField.key, params.key)));
-        }),
+        }).pipe(Effect.orDie),
       );
   }),
 );
