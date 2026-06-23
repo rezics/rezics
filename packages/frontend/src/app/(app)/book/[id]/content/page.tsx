@@ -1,11 +1,12 @@
-import { SectionBoundary } from "@/components/SectionBoundary";
+import { redirect } from "next/navigation";
 
-export default function BookContentPage() {
-  return (
-    <SectionBoundary>
-      <div className="py-8">
-        <h1 className="text-2xl font-bold">BookContent</h1>
-      </div>
-    </SectionBoundary>
-  );
+// Redirect /book/[id]/content to /book/[id] (content is the default tab)
+// 将 /book/[id]/content 重定向到 /book/[id]（内容为默认标签页）
+export default async function BookContentRedirect({
+  params,
+}: {
+  readonly params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  redirect(`/book/${id}`);
 }

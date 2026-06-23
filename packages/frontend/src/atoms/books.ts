@@ -20,5 +20,11 @@ export const bookListQuery = (args: { offset?: number; limit?: number }) =>
     reactivityKeys: [Keys.units],
   });
 
+export const bookContentStructureQuery = (unitId: string) =>
+  ApiClient.query("books", "getBookContentStructure", {
+    params: { unitId },
+    reactivityKeys: [Keys.unit(unitId)],
+  });
+
 export const createBookAtom = ApiClient.mutation("books", "createBook");
 export const updateBookAtom = ApiClient.mutation("books", "updateBook");

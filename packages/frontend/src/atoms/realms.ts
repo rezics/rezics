@@ -33,6 +33,14 @@ export const myRealmsQuery = ApiClient.query("realms", "listMine", {
   reactivityKeys: [Keys.realms],
 });
 
+// Query: realms a specific user belongs to
+// 查询：指定用户加入的 realm 列表
+export const userRealmsQuery = (userId: string) =>
+  ApiClient.query("realms", "listByMember", {
+    params: { userId },
+    reactivityKeys: [Keys.realms],
+  });
+
 // Query: current user's membership in a realm
 // 查询：当前用户在某个 realm 的成员信息
 export const realmMembershipQuery = (unitId: string) =>
