@@ -1,33 +1,38 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { AdminNav } from "./nav";
 
-const sections = [
-  { href: "/admin/stats", label: "Dashboard" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/realms", label: "Realms" },
-  { href: "/admin/books", label: "Books" },
-  { href: "/admin/tags", label: "Tags" },
-  { href: "/admin/governance", label: "Governance" },
-] as const;
-
+/**
+ * Mobile (<640px):
+ * +-----------------------------+
+ * | Admin                       |
+ * | [Dashboard|Users|Realms...] |
+ * |  ^tabs, overflow-x-auto    |
+ * |-----------------------------|
+ * | {children}                  |
+ * +-----------------------------+
+ * 移动端无侧边导航。
+ *
+ * Tablet (640-1023px):
+ * 同移动端。
+ *
+ * Desktop (1024-1535px):
+ * +------------------------------------------+
+ * | ADMIN                                    |
+ * | [sidebar w-48] | {children, flex-1}      |
+ * |  Dashboard     |                         |
+ * |  Users         |                         |
+ * |  Realms        |                         |
+ * |  Books         |                         |
+ * |  Tags          |                         |
+ * |  Governance    |                         |
+ * +------------------------------------------+
+ *
+ * Ultra-wide (>=1536px): 与 Desktop 一致。
+ */
 export default function AdminLayout({ children }: { readonly children: ReactNode }) {
   return (
     <div className="flex gap-8">
-      <nav className="hidden w-48 shrink-0 lg:block">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Admin</h2>
-        <ul className="space-y-1">
-          {sections.map((s) => (
-            <li key={s.href}>
-              <Link
-                className="text-muted-foreground hover:text-foreground block rounded-md px-3 py-2 text-sm"
-                href={s.href}
-              >
-                {s.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <AdminNav />
       <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
