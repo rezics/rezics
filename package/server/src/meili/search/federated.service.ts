@@ -1,18 +1,24 @@
 import type {
   CommentSearchDocument,
   ContentSearchDocument,
+  ContentSearchOptions,
   EntitySearchDocument,
+  FederatedGroupedSections,
   FederatedSearchOptions,
   FederatedSearchResult,
   PostSearchDocument,
+  PostSearchOptions,
   RealmSearchDocument,
+  RealmSearchOptions,
   SearchCategory,
   SearchScope,
   ShelfItemSearchDocument,
   ShelfItemShelfGroup,
   UserSearchDocument,
   ZoneSearchDocument,
+  ZoneSearchOptions,
 } from "@rezics/contract";
+import type { Hit, MultiSearchResult, RecordAny } from "meilisearch";
 import type { SearchClient } from "@rezics/search";
 import {
   DEFAULT_GROUPED_SECTION_LIMIT,
@@ -127,20 +133,41 @@ function resolveFederatedHitDisplay(
   indexUid: string,
   hit: unknown,
   query: FederatedSearchOptions["query"],
-): unknown {
+): Record<string, unknown> {
+  // Domain-specific resolve functions accept full options objects but only read
+  // `languages` and `appLocale` (both present on FederatedSearchOptions.query
+  // via readLanguageBodyBase). The double-cast through `unknown` is intentional:
+  // we supply a structurally compatible subset and only the two relevant fields
+  // are accessed at runtime. No behavior change.
+  // 特定域 resolve 函数接受完整选项对象，但仅读取 `languages` 与 `appLocale`
+  // （两者均通过 readLanguageBodyBase 存在于 FederatedSearchOptions.query）。
+  // 经由 `unknown` 的双重转换是有意为之：我们提供结构兼容的子集，运行时
+  // 只访问这两个相关字段，无任何行为变化。
   if (indexUid === "content") {
-    return resolveContentHitDisplay(hit as ContentSearchDocument, query as any);
+    return resolveContentHitDisplay(
+      hit as ContentSearchDocument,
+      query as unknown as ContentSearchOptions,
+    );
   }
   if (indexUid === "posts") {
-    return resolvePostHitDisplay(hit as PostSearchDocument, query as any);
+    return resolvePostHitDisplay(
+      hit as PostSearchDocument,
+      query as unknown as PostSearchOptions,
+    );
   }
   if (indexUid === "realms") {
-    return resolveRealmHitDisplay(hit as RealmSearchDocument, query as any);
+    return resolveRealmHitDisplay(
+      hit as RealmSearchDocument,
+      query as unknown as RealmSearchOptions,
+    );
   }
   if (indexUid === "zones") {
-    return resolveZoneHitDisplay(hit as ZoneSearchDocument, query as any);
+    return resolveZoneHitDisplay(
+      hit as ZoneSearchDocument,
+      query as unknown as ZoneSearchOptions,
+    );
   }
-  return hit;
+  return hit as Record<string, unknown>;
 }
 
 interface BuiltQuery {
@@ -230,7 +257,7 @@ async function federatedSingle(
         limit: hitsPerPage,
       });
       items = resp.hits.map((hit) =>
-        resolveContentHitDisplay(hit, query as any),
+        resolveContentHitDisplay(hit, query as unknown as ContentSearchOptions),
       );
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
@@ -265,7 +292,9 @@ async function federatedSingle(
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits.map((hit) => resolvePostHitDisplay(hit, query as any));
+      items = resp.hits.map((hit) =>
+        resolvePostHitDisplay(hit, query as unknown as PostSearchOptions),
+      );
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;
@@ -306,7 +335,9 @@ async function federatedSingle(
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits.map((hit) => resolveZoneHitDisplay(hit, query as any));
+      items = resp.hits.map((hit) =>
+        resolveZoneHitDisplay(hit, query as unknown as ZoneSearchOptions),
+      );
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;
@@ -336,16 +367,6 @@ async function federatedSingle(
       items = resp.hits;
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
-      break;
-    }
-    case "all":
-    case "mixed":
-      // Handled by caller via federatedGrouped; no-op if reached directly.
-      // 由调用方通过 federatedGrouped 处理；直达此处则空操作。
-      break;
-    default: {
-      const _exhaustive: never = category;
-      void _exhaustive;
       break;
     }
   }
@@ -403,10 +424,14 @@ async function federatedRanked(
     })),
   });
 
-  const hits = (resp.hits ?? []).map((h: any) => {
+  // FederatedMultiSearchParams makes multiSearch return SearchResponse<T>,
+  // whose hits are Hit<T>. _federation is typed on Hit<RecordAny> by the SDK.
+  // FederatedMultiSearchParams 使 multiSearch 返回 SearchResponse<T>，
+  // 其 hits 为 Hit<T>。SDK 在 Hit<RecordAny> 上声明了 _federation 字段。
+  const hits = (resp.hits ?? []).map((h: Hit<RecordAny>) => {
     const indexUid: string = h._federation?.indexUid ?? "";
     const category = mapIndexToCategory(indexUid, h);
-    const resolved = resolveFederatedHitDisplay(indexUid, h, query) as any;
+    const resolved = resolveFederatedHitDisplay(indexUid, h, query);
     return { ...resolved, _origin: { indexUid, category } };
   });
 
@@ -419,7 +444,9 @@ async function federatedRanked(
     }
       ? H
       : never,
-    totalHits: (resp as any).estimatedTotalHits ?? hits.length,
+    // estimatedTotalHits is typed as Partial<InfinitePagination> on SearchResponse.
+    // estimatedTotalHits 在 SearchResponse 上以 Partial<InfinitePagination> 类型声明。
+    totalHits: resp.estimatedTotalHits ?? hits.length,
     processingTimeMs: resp.processingTimeMs ?? 0,
     page,
     hitsPerPage,
@@ -439,7 +466,7 @@ async function federatedGrouped(
   const built = buildAllSubQueries(query, scope, ctx, "all");
   const permitted = permittedFor(scope);
   if (built.length === 0) {
-    const sections: any = {};
+    const sections: FederatedGroupedSections = {};
     if (permitted.contentShelves) {
       sections.shelves = await searchShelfSection(client, {
         query,
@@ -463,18 +490,22 @@ async function federatedGrouped(
     })),
   });
 
-  const sections: any = {};
-  resp.results.forEach((r: any, idx: number) => {
+  const sections: FederatedGroupedSections = {};
+  // MultiSearchResult<RecordAny> is SearchResponse<RecordAny> & { indexUid }.
+  // totalHits/estimatedTotalHits are both optional (finite vs. infinite pagination).
+  // MultiSearchResult<RecordAny> 是 SearchResponse<RecordAny> & { indexUid }。
+  // totalHits/estimatedTotalHits 均为可选（有限分页与无限分页两种模式）。
+  resp.results.forEach((r: MultiSearchResult<RecordAny>, idx: number) => {
     const meta = built[idx]!;
     const sectionKey = meta.sectionKey;
     if (!sectionKey) return;
     sections[sectionKey] = {
       totalHits: r.totalHits ?? r.estimatedTotalHits ?? r.hits.length,
-      items: r.hits.map((hit: unknown) =>
+      items: r.hits.map((hit) =>
         resolveFederatedHitDisplay(meta.indexUid, hit, query),
       ),
       processingTimeMs: r.processingTimeMs,
-    };
+    } as FederatedGroupedSections[typeof sectionKey];
   });
 
   if (permitted.contentShelves) {
@@ -521,7 +552,7 @@ async function searchShelfSection(
         limit,
       });
   const directItems = directResp.hits.map((hit) =>
-    resolveContentHitDisplay(hit, query as any),
+    resolveContentHitDisplay(hit, query as unknown as ContentSearchOptions),
   ) as Array<
     ContentSearchDocument & { matchedShelfItemGroup?: ShelfItemShelfGroup }
   >;
@@ -561,7 +592,7 @@ async function searchShelfSection(
   const hydratedItems = (hydratedResp?.hits ?? []).map((hit) => {
     const resolved = resolveContentHitDisplay(
       hit,
-      query as any,
+      query as unknown as ContentSearchOptions,
     ) as ContentSearchDocument & {
       matchedShelfItemGroup?: ShelfItemShelfGroup;
     };
@@ -597,14 +628,18 @@ async function searchShelfItemGroups(
   const includePrivate =
     (scope.kind === "user" || scope.kind === "saved") &&
     ctx.viewerUserId === scope.userId;
+  // attributesToSearchOn accepts string[] | null; the spread converts the
+  // readonly tuple constants to plain mutable string[] that the SDK accepts.
+  // attributesToSearchOn 接受 string[] | null；展开操作将只读元组常量
+  // 转换为 SDK 接受的普通可变 string[]。
   const resp = await client.shelfItemIndex.search<ShelfItemSearchDocument>(q, {
     filter: joinFilter(filter),
     offset,
     limit: Math.max(limit * 4, limit),
     attributesToSearchOn: includePrivate
-      ? [...SHELF_ITEM_OWNER_ATTRIBUTES]
-      : [...SHELF_ITEM_PUBLIC_ATTRIBUTES],
-  } as any);
+      ? ([...SHELF_ITEM_OWNER_ATTRIBUTES] as string[])
+      : ([...SHELF_ITEM_PUBLIC_ATTRIBUTES] as string[]),
+  });
   const groupMap = new Map<string, ShelfItemShelfGroup>();
   for (const hit of resp.hits) {
     const groupId = scope.kind === "saved" ? hit.itemId : hit.shelfId;
@@ -796,7 +831,10 @@ function buildAllSubQueries(
 // 逐查询元数据。将 index → 粗粒度 category 映射；对 post 索引的命中，
 // 在可用时通过 document.kind 进一步细化。
 
-function mapIndexToCategory(indexUid: string, hit: any): SearchCategory {
+function mapIndexToCategory(
+  indexUid: string,
+  hit: Hit<RecordAny>,
+): SearchCategory {
   if (indexUid === "posts") {
     const k = (hit?.kind ?? "").toString().toLowerCase();
     if (k === "review") return "reviews";

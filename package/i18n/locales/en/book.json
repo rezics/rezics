@@ -234,6 +234,7 @@
   "toc_new_chapter_title": "New Chapter",
   "toc_resync_failed": "Failed to resync overrides: {error}",
   "toc_save_failed": "Failed to save: {error}",
+  "toc_save_success": "Table of contents saved",
   "toc_chapter_unsaved_warning": "Cannot open a chapter before the table of contents is saved.",
   "chapter_load_failed": "Failed to load chapter",
   "chapter_metadata_saved": "Chapter settings saved",

@@ -234,6 +234,7 @@
   "toc_new_chapter_title": "新章节",
   "toc_resync_failed": "重新同步覆盖项失败：{error}",
   "toc_save_failed": "保存失败：{error}",
+  "toc_save_success": "目录已保存",
   "toc_chapter_unsaved_warning": "目录保存前无法打开章节。",
   "chapter_load_failed": "加载章节失败",
   "chapter_metadata_saved": "章节设置已保存",

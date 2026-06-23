@@ -7,6 +7,7 @@ import type {
   ShelfItemChildDTO,
   ShelfItemDTO,
   ShelfItemsResponse,
+  ShelfListQuery,
   ShelfListResponse,
 } from "@rezics/contract";
 import {
@@ -64,9 +65,12 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .get(
     "/me",
     async ({ query, identity }): Promise<ShelfListResponse> => {
+      // Elysia's inferred query type is validated against shelfListQuerySchema;
+      // cast narrows to the canonical contract type without losing safety.
+      // Elysia 推断的 query 类型已经过 shelfListQuerySchema 验证，断言为合约类型安全。
       const { shelves, total } = await shelfService.listMine(
         identity.userId,
-        query as any,
+        query as ShelfListQuery,
       );
       return { shelves, total };
     },
@@ -184,7 +188,11 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .get(
     "/list",
     async ({ query }): Promise<ShelfListResponse> => {
-      const { shelves, total } = await shelfService.list(query as any);
+      // Elysia validates query against shelfListQuerySchema; cast to canonical contract type.
+      // Elysia 已对 query 进行 shelfListQuerySchema 验证，断言为合约类型安全。
+      const { shelves, total } = await shelfService.list(
+        query as ShelfListQuery,
+      );
       return { shelves, total };
     },
     {
@@ -199,10 +207,12 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .post(
     "/list",
     async ({ body }): Promise<ShelfListResponse> => {
+      // Convert ids from string[] (POST body) to CSV string (service expects ShelfListQuery.ids).
+      // 将 POST body 中的 ids string[] 转为 CSV string（服务层期望 ShelfListQuery.ids 格式）。
       const { shelves, total } = await shelfService.list({
         ...body,
         ids: body.ids?.join(","),
-      } as any);
+      } as ShelfListQuery);
       return { shelves, total };
     },
     {
@@ -243,7 +253,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -276,7 +286,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -310,7 +320,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToDeleteShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -362,7 +372,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -391,7 +401,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -426,7 +436,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -459,7 +469,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -493,7 +503,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -526,7 +536,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -567,7 +577,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -598,7 +608,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         !hasPermissionToUpdateShelf(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;

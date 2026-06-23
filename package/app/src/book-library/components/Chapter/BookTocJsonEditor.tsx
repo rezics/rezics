@@ -1,11 +1,11 @@
-import { bookQueries } from "@rezics/api/book/book";
+import { bookMutations, bookQueries } from "@rezics/api/book/book";
 import type { BookContentStructureItem } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
-import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core";
 
 interface BookTocJsonEditorProps {
@@ -27,9 +27,6 @@ type BookTocJsonData = {
 /**
  * Raw JSON editor for the table of contents.
  * 目录的原始 JSON 编辑器。
- *
- * Note: This feature is currently disabled.
- * 注意：此功能目前处于禁用状态。
  */
 export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
   bookId,
@@ -47,9 +44,24 @@ export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
     });
   }, [data]);
 
-  function onChange(_value: BookTocJsonData) {
-    // TODO: persist updated TOC structure
-    // TODO：持久化更新后的目录结构
+  const updateContentStructure = bookMutations.useUpdateContentStructure();
+
+  async function onChange(value: BookTocJsonData) {
+    // Persist the edited TOC structure to the server.
+    // 将编辑后的目录结构持久化到服务器。
+    try {
+      await updateContentStructure.mutateAsync({
+        bookUnitId: bookId,
+        nodes: value.nodes,
+      });
+      toast.success(t("book:toc_save_success"));
+    } catch (err) {
+      toast.error(
+        t("book:toc_save_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+    }
   }
 
   if (isLoading) return <div>{t("common:loading")}</div>;
@@ -57,9 +69,6 @@ export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
 
   return (
     <div>
-      <Alert variant="destructive" className="mb-2">
-        <AlertDescription>{t("book:toc_disabled")}</AlertDescription>
-      </Alert>
       <RezicsJsonEditor
         value={JSON.stringify(jsonData, null, 2)}
         onChange={(text) => {

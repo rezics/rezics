@@ -17,11 +17,7 @@ import {
   toCommentWriteRealmUnitId,
   useFocusReplyFromQuery,
 } from "@/comment";
-import {
-  isApiNotFoundError,
-  QueryErrorDisplay,
-  ResourceNotFoundState,
-} from "@/core";
+import { QueryBoundary } from "@/core";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink } from "@/shared/ui/link";
 import type { UnitPresentationContext } from "@/unit";
@@ -42,9 +38,9 @@ export type PostThreadPageProps = {
 };
 
 /**
- * 帖子线程页面：单个帖子的详情视图，包含帖子详情、回复编辑器和评论线程
  * Post thread page — displays a single post with its detail, reply composer,
  * and nested comment thread. Max-width container with centered column layout.
+ * 帖子线程页面：单个帖子的详情视图，包含帖子详情、回复编辑器和评论线程。
  *
  * Layout Structure:
  *
@@ -128,12 +124,10 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     | undefined;
   const composerRef = useFocusReplyFromQuery();
   const readContext = useReadLanguageContext();
-  const {
-    data: root,
-    isLoading: isRootLoading,
-    isError: isRootError,
-    error: rootError,
-  } = useQuery({
+
+  // Primary post query — drives the QueryBoundary loading/error/not-found states.
+  // 主帖子查询 —— 驱动 QueryBoundary 的加载/错误/未找到状态。
+  const rootQuery = useQuery({
     ...postQueries.detail(rootPostUnitId, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
@@ -155,122 +149,109 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     userContextUnitId: reactionContextUnitId,
   });
   const focusPostUnitId = search?.focusPostUnitId ?? undefined;
+
+  // editorEntry depends on root data; evaluated with optional chaining while
+  // the query is pending, becomes fully resolved inside the render-prop.
+  // editorEntry 依赖 root 数据；查询挂起时使用可选链安全求值，
+  // 在渲染 prop 内部时已完全解析。
   const editorEntry = useEditorEntry({
-    surface: root?.kind === PostKind.WIKI ? "wikiPost" : "post",
-    ownerUnit: { user: root?.author },
-    capabilities: root?.kind === PostKind.WIKI ? ["content", "tag"] : undefined,
+    surface: rootQuery.data?.kind === PostKind.WIKI ? "wikiPost" : "post",
+    ownerUnit: { user: rootQuery.data?.author },
+    capabilities:
+      rootQuery.data?.kind === PostKind.WIKI ? ["content", "tag"] : undefined,
   });
 
-  // Post detail query failed — show error before any content
-  // 帖子详情查询失败 —— 在任何内容之前显示错误
-  if (isRootError) {
-    return (
-      <div className="w-full max-w-3xl mx-auto mt-8 px-4">
-        {isApiNotFoundError(rootError) ? (
-          <ResourceNotFoundState variant="section" />
-        ) : (
-          <QueryErrorDisplay error={rootError} />
-        )}
-      </div>
-    );
-  }
-  if (!isRootLoading && !root) {
-    return (
-      <div className="w-full max-w-3xl mx-auto mt-8 px-4">
-        <ResourceNotFoundState variant="section" />
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full max-w-3xl mx-auto mt-8 px-4 flex flex-col gap-4">
-      {context.kind === "realm" ? (
-        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-border-whisper pb-3">
-          <TextLink
-            to="/realm/$realmId"
-            params={{ realmId: context.realmUnitId }}
-            underline="none"
-            className="inline-flex min-w-0 items-center gap-2 text-sm leading-ui text-text-secondary hover:text-text-primary"
-          >
-            <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-            <span className="truncate">
-              {realm?.title ?? context.realmUnitId}
-            </span>
-          </TextLink>
-        </div>
-      ) : null}
-      {root && (
-        <div className="flex flex-col gap-2">
-          {editorEntry.canEnter ? (
-            <div className="self-end">
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                aria-label={t("common:edit")}
-                onClick={() =>
-                  context.kind === "realm"
-                    ? navigate({
-                        to: "/realm/$realmId/post/$postUnitId/edit",
-                        params: {
-                          realmId: context.realmUnitId,
-                          postUnitId: rootPostUnitId,
-                        },
-                      })
-                    : navigate({
-                        to: "/post/$rootPostUnitId/edit",
-                        params: { rootPostUnitId },
-                      })
+    <div className="mx-auto mt-8 w-full max-w-3xl px-4">
+      <QueryBoundary query={rootQuery}>
+        {(root) => (
+          <div className="flex flex-col gap-4">
+            {context.kind === "realm" ? (
+              <div className="flex min-w-0 items-center justify-between gap-3 border-b border-border-whisper pb-3">
+                <TextLink
+                  to="/realm/$realmId"
+                  params={{ realmId: context.realmUnitId }}
+                  underline="none"
+                  className="inline-flex min-w-0 items-center gap-2 text-sm leading-ui text-text-secondary hover:text-text-primary"
+                >
+                  <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+                  <span className="truncate">
+                    {realm?.title ?? context.realmUnitId}
+                  </span>
+                </TextLink>
+              </div>
+            ) : null}
+            <div className="flex flex-col gap-2">
+              {editorEntry.canEnter ? (
+                <div className="self-end">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    aria-label={t("common:edit")}
+                    onClick={() =>
+                      context.kind === "realm"
+                        ? navigate({
+                            to: "/realm/$realmId/post/$postUnitId/edit",
+                            params: {
+                              realmId: context.realmUnitId,
+                              postUnitId: rootPostUnitId,
+                            },
+                          })
+                        : navigate({
+                            to: "/post/$rootPostUnitId/edit",
+                            params: { rootPostUnitId },
+                          })
+                    }
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : null}
+              <PostDetail
+                post={root}
+                summaryContextUnitId={reactionContextUnitId}
+                reactionContextUnitId={reactionContextUnitId}
+                onReplyInvoke={() =>
+                  navigate({
+                    to:
+                      context.kind === "realm"
+                        ? "/realm/$realmId/post/$postUnitId"
+                        : "/post/$rootPostUnitId",
+                    params:
+                      context.kind === "realm"
+                        ? {
+                            realmId: context.realmUnitId,
+                            postUnitId: rootPostUnitId,
+                          }
+                        : { rootPostUnitId },
+                    search: { focus: "reply" },
+                  })
                 }
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
+              />
             </div>
-          ) : null}
-          <PostDetail
-            post={root}
-            summaryContextUnitId={reactionContextUnitId}
-            reactionContextUnitId={reactionContextUnitId}
-            onReplyInvoke={() =>
-              navigate({
-                to:
-                  context.kind === "realm"
-                    ? "/realm/$realmId/post/$postUnitId"
-                    : "/post/$rootPostUnitId",
-                params:
-                  context.kind === "realm"
-                    ? {
-                        realmId: context.realmUnitId,
-                        postUnitId: rootPostUnitId,
-                      }
-                    : { rootPostUnitId },
-                search: { focus: "reply" },
-              })
-            }
-          />
-        </div>
-      )}
-      {root && (
-        <ReplyComposer
-          ref={composerRef}
-          mode="progressive"
-          targetUnitId={root.targetUnitId ?? root.unitId}
-          rootUnitId={root.unitId}
-          realmUnitId={toCommentWriteRealmUnitId(commentContext)}
-          parentCommentId={root.unitId}
-        />
-      )}
-      <CommentThreadSection
-        rootUnitId={rootPostUnitId}
-        defaultContext={defaultContext}
-        availableRealmUnitIds={[contextRealmUnitId, root?.realmUnitId]}
-        onContextChange={setPickedCommentContext}
-        rootAuthorUserId={root?.author?.unitId ?? root?.authorUserId}
-        summaryContextUnitId={reactionContextUnitId}
-        reactionContextUnitId={reactionContextUnitId}
-        focusPostUnitId={focusPostUnitId}
-        highlightFocusedPost={Boolean(focusPostUnitId)}
-      />
+            <ReplyComposer
+              ref={composerRef}
+              mode="progressive"
+              targetUnitId={root.targetUnitId ?? root.unitId}
+              rootUnitId={root.unitId}
+              realmUnitId={toCommentWriteRealmUnitId(commentContext)}
+              parentCommentId={root.unitId}
+            />
+            <CommentThreadSection
+              rootUnitId={rootPostUnitId}
+              defaultContext={defaultContext}
+              availableRealmUnitIds={[contextRealmUnitId, root.realmUnitId]}
+              onContextChange={setPickedCommentContext}
+              rootAuthorUserId={root.author?.unitId ?? root.authorUserId}
+              summaryContextUnitId={reactionContextUnitId}
+              reactionContextUnitId={reactionContextUnitId}
+              focusPostUnitId={focusPostUnitId}
+              highlightFocusedPost={Boolean(focusPostUnitId)}
+            />
+          </div>
+        )}
+      </QueryBoundary>
     </div>
   );
 };

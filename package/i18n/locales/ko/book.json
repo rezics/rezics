@@ -234,6 +234,7 @@
   "toc_new_chapter_title": "새 챕터",
   "toc_resync_failed": "인덱스 오버라이드 재동기화 실패: {error}",
   "toc_save_failed": "저장 실패: {error}",
+  "toc_save_success": "목차가 저장되었습니다",
   "toc_chapter_unsaved_warning": "목차가 저장되기 전에는 챕터를 열 수 없습니다.",
   "chapter_load_failed": "챕터를 불러오지 못했습니다",
   "chapter_metadata_saved": "챕터 설정이 저장되었습니다",

@@ -7,12 +7,12 @@ import {
 import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
 import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
+import { QueryBoundary } from "@/core";
 import { RealmMembershipSettingsDialog } from "@/realm-tag-preference";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
@@ -49,16 +49,16 @@ export function RealmDetailLayout({
   realmId,
   // Public realm routes may be slug-based while API calls still use the
   // resolved realm unit id.
+  // 公开 realm 路由可能基于 slug，而 API 调用仍使用已解析的 realm unit id。
   routeLocation = { kind: "unitId", realmId },
   children,
 }: RealmDetailLayoutProps) {
   const { t } = useTranslation(["common", "entity"]);
   const readContext = useReadLanguageContext();
-  const {
-    data: realm,
-    isLoading,
-    error,
-  } = useQuery({
+
+  // Primary realm query — QueryBoundary owns loading/error/not-found states.
+  // 主 realm 查询 —— QueryBoundary 持有加载/错误/未找到状态。
+  const realmQuery = useQuery({
     ...realmDetailQuery(realmId, {
       languages: readContext.languages,
       appLocale: readContext.appLocale,
@@ -89,104 +89,95 @@ export function RealmDetailLayout({
   );
   const permission = useServerPermission();
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <p className="py-8 text-center text-destructive">
-        {t("common:error_generic")}
-      </p>
-    );
-  }
-
-  if (!realm) {
-    return (
-      <p className="py-8 text-text-secondary">{t("entity:realm_not_found")}</p>
-    );
-  }
-
-  const title = realm.title ?? t("entity:realm_untitled");
-  const avatarUrl =
-    realm.extra?.avatar?.kind === "url" ? realm.extra.avatar.url : undefined;
-  const showManage = canManageRealm({
-    permission,
-    memberRoleKey: membership?.roleKey,
-  });
-  const isMember = Boolean(membership?.member);
-
   return (
-    <RealmDetailProvider
-      value={{
-        realmId,
-        routeLocation,
-        realm,
-        membership,
-        isMember,
-        showManage,
-        tagTree,
-        tagTreeDisplayNames,
-        description: "",
-      }}
-    >
-      <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        <BannerSection banner={realm.extra?.banner ?? null} />
-        <div className="mb-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 flex-row items-center gap-3">
-              <Avatar className="size-14 rounded-md bg-surface-subtle">
-                <AvatarImage src={avatarUrl} alt="" />
-                <AvatarFallback className="rounded-md text-lg leading-ui">
-                  {title.trim().slice(0, 1).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex min-w-0 flex-row items-center gap-2">
-                <h1 className="truncate text-2xl font-semibold">{title}</h1>
-                {showManage && (
-                  <Link to={realmManageHref(routeLocation)}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t("entity:realm_manage")}
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {isMember ? (
-                <Link to={realmCreateHref(routeLocation)}>
-                  <Button size="sm" className="gap-1 rounded-full px-2 md:px-4">
-                    <Plus className="h-4 w-4" />
-                    {t("common:create")}
-                  </Button>
-                </Link>
-              ) : (
-                <Button size="sm" variant="outline" disabled>
-                  {t("entity:realm_join_to_post")}
-                </Button>
-              )}
-              {isMember ? (
-                <RealmMembershipSettingsDialog
-                  realmId={realmId}
-                  realmTitle={title}
-                />
-              ) : (
-                <JoinButton realmId={realmId} />
-              )}
-            </div>
-          </div>
-        </div>
+    <QueryBoundary query={realmQuery}>
+      {(realm) => {
+        const title = realm.title ?? t("entity:realm_untitled");
+        const avatarUrl =
+          realm.extra?.avatar?.kind === "url"
+            ? realm.extra.avatar.url
+            : undefined;
+        const showManage = canManageRealm({
+          permission,
+          memberRoleKey: membership?.roleKey,
+        });
+        const isMember = Boolean(membership?.member);
 
-        <RealmDetailShell>{children}</RealmDetailShell>
-      </div>
-    </RealmDetailProvider>
+        return (
+          <RealmDetailProvider
+            value={{
+              realmId,
+              routeLocation,
+              realm,
+              membership,
+              isMember,
+              showManage,
+              tagTree,
+              tagTreeDisplayNames,
+              description: "",
+            }}
+          >
+            <div className="mx-auto w-full max-w-5xl px-4 py-6">
+              <BannerSection banner={realm.extra?.banner ?? null} />
+              <div className="mb-6 flex flex-col gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 flex-row items-center gap-3">
+                    <Avatar className="size-14 rounded-md bg-surface-subtle">
+                      <AvatarImage src={avatarUrl} alt="" />
+                      <AvatarFallback className="rounded-md text-lg leading-ui">
+                        {title.trim().slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex min-w-0 flex-row items-center gap-2">
+                      <h1 className="truncate text-2xl font-semibold">
+                        {title}
+                      </h1>
+                      {showManage && (
+                        <Link to={realmManageHref(routeLocation)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t("entity:realm_manage")}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isMember ? (
+                      <Link to={realmCreateHref(routeLocation)}>
+                        <Button
+                          size="sm"
+                          className="gap-1 rounded-full px-2 md:px-4"
+                        >
+                          <Plus className="h-4 w-4" />
+                          {t("common:create")}
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button size="sm" variant="outline" disabled>
+                        {t("entity:realm_join_to_post")}
+                      </Button>
+                    )}
+                    {isMember ? (
+                      <RealmMembershipSettingsDialog
+                        realmId={realmId}
+                        realmTitle={title}
+                      />
+                    ) : (
+                      <JoinButton realmId={realmId} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <RealmDetailShell>{children}</RealmDetailShell>
+            </div>
+          </RealmDetailProvider>
+        );
+      }}
+    </QueryBoundary>
   );
 }

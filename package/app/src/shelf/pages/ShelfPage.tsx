@@ -47,11 +47,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  isApiNotFoundError,
-  QueryErrorDisplay,
-  ResourceNotFoundState,
-} from "@/core";
+import { QueryBoundary } from "@/core";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
@@ -126,6 +122,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
   const readContext = useReadLanguageContext();
 
+  // Primary shelf detail query — drives QueryBoundary loading/error/not-found states.
+  // 主书架详情查询 —— 驱动 QueryBoundary 的加载/错误/未找到状态。
   const detailQuery = useQuery({
     ...shelfDetailQuery(unitId, {
       languages: readContext.languages.join(",") || undefined,
@@ -155,6 +153,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     isLoading: isItemsLoading,
   } = itemsQuery;
 
+  // shelf may be undefined while the query is pending — all derived state below
+  // uses optional chaining and resolves to safe defaults in that window.
+  // shelf 在查询挂起期间可能为 undefined ——以下所有派生状态均使用可选链并解析为安全默认值。
   const shelf = detailQuery.data;
   const units = useMemo(
     () => itemsData?.pages.flatMap((page) => page.items) ?? [],
@@ -294,354 +295,358 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     sortState.order
   }:${sortPrimeOnly ? "prime" : "all"}`;
 
-  const handleEditShelf = () => {
-    if (!shelf?.unitId) return;
+  const handleEditShelf = (shelfUnitId: string) => {
     navigate({
       to: "/shelf/$shelfId/edit",
-      params: { shelfId: shelf.unitId },
+      params: { shelfId: shelfUnitId },
     });
   };
 
-  // Shelf detail query failed — show error before content
-  // 书架详情查询失败 —— 在内容之前显示错误
-  if (detailQuery.isError) {
-    return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        {isApiNotFoundError(detailQuery.error) ? (
-          <ResourceNotFoundState variant="section" />
-        ) : (
-          <QueryErrorDisplay error={detailQuery.error} />
-        )}
-      </div>
-    );
-  }
-
-  if (detailQuery.isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner />
-      </div>
-    );
-  }
-  if (!shelf) {
-    return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        <ResourceNotFoundState variant="section" />
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full">
-      {shelf?.coverUrl && (
-        <div
-          className="relative mx-auto w-full max-w-5xl overflow-hidden"
-          style={{ aspectRatio: shelfCoverImageSpec.aspectRatio }}
-        >
-          <img
-            src={shelf.coverUrl}
-            alt={t("entity:shelf_cover_alt", { title })}
-            className="h-full w-full object-cover"
-          />
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--colors-surface-canvas) 58%, transparent) 45%, var(--colors-surface-canvas) 88%)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
-            style={{
-              background:
-                "linear-gradient(to bottom, transparent, var(--colors-surface-canvas))",
-            }}
-          />
-          <div className="absolute inset-0 z-10 flex flex-col justify-end gap-4 p-4 sm:p-6 md:flex-row md:items-end md:justify-between md:gap-5 md:p-8">
-            <div className="min-w-0 flex-1">
-              <h1 className="line-clamp-2 text-2xl font-semibold leading-[1.3] text-text-primary">
-                {title}
-              </h1>
-              {description && (
-                <p className="mt-2 line-clamp-2 max-w-2xl text-base text-text-secondary">
-                  {description}
-                </p>
-              )}
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
-                <span>
-                  {t("entity:shelf_items_count", {
-                    count: shelf?.itemCount ?? 0,
-                  })}
-                </span>
-                {shelf?.user?.name && (
-                  <span>
-                    {t("entity:shelf_by_author", { name: shelf.user.name })}
+    <QueryBoundary query={detailQuery}>
+      {(resolvedShelf) => (
+        <div className="w-full">
+          {resolvedShelf.coverUrl && (
+            <div
+              className="relative mx-auto w-full max-w-5xl overflow-hidden"
+              style={{ aspectRatio: shelfCoverImageSpec.aspectRatio }}
+            >
+              <img
+                src={resolvedShelf.coverUrl}
+                alt={t("entity:shelf_cover_alt", { title })}
+                className="h-full w-full object-cover"
+              />
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--colors-surface-canvas) 58%, transparent) 45%, var(--colors-surface-canvas) 88%)",
+                }}
+              />
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, transparent, var(--colors-surface-canvas))",
+                }}
+              />
+              <div className="absolute inset-0 z-10 flex flex-col justify-end gap-4 p-4 sm:p-6 md:flex-row md:items-end md:justify-between md:gap-5 md:p-8">
+                <div className="min-w-0 flex-1">
+                  <h1 className="line-clamp-2 text-2xl font-semibold leading-[1.3] text-text-primary">
+                    {title}
+                  </h1>
+                  {description && (
+                    <p className="mt-2 line-clamp-2 max-w-2xl text-base text-text-secondary">
+                      {description}
+                    </p>
+                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+                    <span>
+                      {t("entity:shelf_items_count", {
+                        count: resolvedShelf.itemCount ?? 0,
+                      })}
+                    </span>
+                    {resolvedShelf.user?.name && (
+                      <span>
+                        {t("entity:shelf_by_author", {
+                          name: resolvedShelf.user.name,
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {(reactionPost || (canEditShelf && resolvedShelf.unitId)) && (
+                  <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end md:self-end">
+                    {canEditShelf &&
+                      resolvedShelf.unitId &&
+                      !isCompactLayout && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1.5 text-text-secondary hover:text-text-primary"
+                          onClick={() =>
+                            handleEditShelf(resolvedShelf.unitId ?? "")
+                          }
+                        >
+                          <EditIcon className="h-4 w-4" />
+                          {t("entity:shelf_edit_action")}
+                        </Button>
+                      )}
+                    {reactionPost && (
+                      <ReactionBar
+                        post={reactionPost}
+                        policy={shelfPolicy}
+                        actions={shelfDetailActions}
+                        className="flex-nowrap md:justify-end"
+                        overflowContent={
+                          isCompactLayout &&
+                          canEditShelf &&
+                          resolvedShelf.unitId ? (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleEditShelf(resolvedShelf.unitId ?? "")
+                              }
+                              className="gap-2"
+                            >
+                              <EditIcon className="h-4 w-4" />
+                              <span>{t("entity:shelf_edit_action")}</span>
+                            </DropdownMenuItem>
+                          ) : null
+                        }
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
+            {!resolvedShelf.coverUrl && (
+              <div className="flex flex-col gap-5 border-b border-border-whisper pb-5 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-2xl font-semibold leading-[1.3]">
+                    {title}
+                  </h1>
+                  {description && (
+                    <p className="mt-2 max-w-2xl text-base text-text-secondary">
+                      {description}
+                    </p>
+                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+                    <span>
+                      {t("entity:shelf_items_count", {
+                        count: resolvedShelf.itemCount ?? 0,
+                      })}
+                    </span>
+                    {resolvedShelf.user?.name && (
+                      <span>
+                        {t("entity:shelf_by_author", {
+                          name: resolvedShelf.user.name,
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {(reactionPost || (canEditShelf && resolvedShelf.unitId)) && (
+                  <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end">
+                    {canEditShelf &&
+                      resolvedShelf.unitId &&
+                      !isCompactLayout && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1.5 text-text-secondary hover:text-text-primary"
+                          onClick={() =>
+                            handleEditShelf(resolvedShelf.unitId ?? "")
+                          }
+                        >
+                          <EditIcon className="h-4 w-4" />
+                          {t("entity:shelf_edit_action")}
+                        </Button>
+                      )}
+                    {reactionPost && (
+                      <ReactionBar
+                        post={reactionPost}
+                        policy={shelfPolicy}
+                        actions={shelfDetailActions}
+                        className="flex-nowrap md:justify-end"
+                        overflowContent={
+                          isCompactLayout &&
+                          canEditShelf &&
+                          resolvedShelf.unitId ? (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleEditShelf(resolvedShelf.unitId ?? "")
+                              }
+                              className="gap-2"
+                            >
+                              <EditIcon className="h-4 w-4" />
+                              <span>{t("entity:shelf_edit_action")}</span>
+                            </DropdownMenuItem>
+                          ) : null
+                        }
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <div className="relative min-w-[min(100%,16rem)] flex-1 sm:flex-none">
+                  <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 h-4 w-4 text-text-tertiary" />
+                  <Input
+                    value={itemSearchText}
+                    onChange={(event) => setItemSearchText(event.target.value)}
+                    placeholder={t("entity:shelf_item_search_placeholder")}
+                    aria-label={t("common:search")}
+                    className="h-9 pl-9"
+                  />
+                </div>
+                <ShelfSortViewPicker
+                  sort={sortState}
+                  sortOptions={SORT_OPTIONS}
+                  view={effectiveViewMode}
+                  viewOptions={VIEW_OPTIONS}
+                  onSortChange={setSortState}
+                  onViewChange={(value) =>
+                    setViewModeOverride({ unitId, value })
+                  }
+                  sortHeading={t("entity:shelf_controls_sort_by")}
+                  viewHeading={t("entity:shelf_controls_view")}
+                />
+                {showSortScopeToggle && (
+                  <Label className="flex min-w-0 items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={sortPrimeOnly}
+                      onCheckedChange={(checked) =>
+                        setSortPrimeOnly(checked === true)
+                      }
+                    />
+                    <span className="whitespace-nowrap">
+                      {t("entity:shelf_sort_prime_only")}
+                    </span>
+                  </Label>
+                )}
+                <Label className="flex min-w-0 items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={readableOnly}
+                    onCheckedChange={(checked) =>
+                      setReadableOnly(checked === true)
+                    }
+                  />
+                  <span className="whitespace-nowrap">
+                    {t("entity:shelf_readable_only")}
                   </span>
+                </Label>
+                {hydration.orphanUnitIds.length > 0 && (
+                  <>
+                    <span className="text-xs text-warning-text">
+                      {t("entity:shelf_orphan_count", {
+                        count: hydration.orphanUnitIds.length,
+                      })}
+                    </span>
+                    {isOwner && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={cleanupMutation.isPending}
+                        onClick={() =>
+                          cleanupMutation.mutate({
+                            shelfId: unitId,
+                            input: { orphanItemIds: hydration.orphanUnitIds },
+                          })
+                        }
+                      >
+                        {t("entity:shelf_cleanup_orphans")}
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
 
-            {(reactionPost || (canEditShelf && shelf?.unitId)) && (
-              <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end md:self-end">
-                {canEditShelf && shelf?.unitId && !isCompactLayout && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5 text-text-secondary hover:text-text-primary"
-                    onClick={handleEditShelf}
-                  >
-                    <EditIcon className="h-4 w-4" />
-                    {t("entity:shelf_edit_action")}
-                  </Button>
-                )}
-                {reactionPost && (
-                  <ReactionBar
-                    post={reactionPost}
-                    policy={shelfPolicy}
-                    actions={shelfDetailActions}
-                    className="flex-nowrap md:justify-end"
-                    overflowContent={
-                      isCompactLayout && canEditShelf && shelf?.unitId ? (
-                        <DropdownMenuItem
-                          onClick={handleEditShelf}
-                          className="gap-2"
-                        >
-                          <EditIcon className="h-4 w-4" />
-                          <span>{t("entity:shelf_edit_action")}</span>
-                        </DropdownMenuItem>
-                      ) : null
-                    }
-                  />
-                )}
+            {bookshelfFilteredCount > 0 && (
+              <p className="text-xs leading-dense text-text-secondary">
+                {t("entity:shelf_bookshelf_filtered_count", {
+                  count: bookshelfFilteredCount,
+                })}
+              </p>
+            )}
+
+            {isItemsLoading ||
+            hydration.isLoading ||
+            waitingForPageData ||
+            isFetchingNextPage ? (
+              <div className="flex justify-center py-8">
+                <Spinner size="sm" />
               </div>
+            ) : isItemsError ? (
+              <p className="py-8 text-center text-error">
+                {t("entity:shelf_items_load_failed")}
+              </p>
+            ) : visibleStream.length === 0 ? (
+              <p className="py-8 text-center text-text-secondary">
+                {normalizedItemSearchText
+                  ? t("entity:shelf_item_no_search_matches")
+                  : effectiveViewMode === "bookshelf" &&
+                      readableStream.length > 0
+                    ? t("entity:shelf_bookshelf_empty")
+                    : t("entity:shelf_empty_items")}
+              </p>
+            ) : effectiveViewMode === "bookshelf" ? (
+              <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+                {visibleStream.map((entry) => (
+                  <ShelfItemRenderer
+                    key={streamEntryKey(streamKeyPrefix, entry)}
+                    entry={entry}
+                    viewMode={effectiveViewMode}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {visibleStream.map((entry) => (
+                  <ShelfItemRenderer
+                    key={streamEntryKey(streamKeyPrefix, entry)}
+                    entry={entry}
+                    viewMode={effectiveViewMode}
+                  />
+                ))}
+              </div>
+            )}
+
+            {(canPageBackward || canPageForward) && (
+              <div className="flex items-center justify-center gap-2 py-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={!canPageBackward}
+                  onClick={() =>
+                    setPageState((current) => ({
+                      unitId,
+                      page: Math.max(
+                        1,
+                        (current.unitId === unitId ? current.page : page) - 1,
+                      ),
+                    }))
+                  }
+                >
+                  {t("common:prev")}
+                </Button>
+                <span className="text-sm text-text-secondary">
+                  {finalPageCount
+                    ? `${page} / ${finalPageCount}`
+                    : `${page} / ${loadedPages}+`}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={!canPageForward}
+                  onClick={() =>
+                    setPageState((current) => ({
+                      unitId,
+                      page:
+                        (current.unitId === unitId ? current.page : page) + 1,
+                    }))
+                  }
+                >
+                  {t("common:next")}
+                </Button>
+              </div>
+            )}
+
+            {resolvedShelf.unitId && (
+              <ShelfDiscussionSection shelfItemId={resolvedShelf.unitId} />
             )}
           </div>
         </div>
       )}
-
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
-        {!shelf?.coverUrl && (
-          <div className="flex flex-col gap-5 border-b border-border-whisper pb-5 md:flex-row md:items-start md:justify-between">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-2xl font-semibold leading-[1.3]">{title}</h1>
-              {description && (
-                <p className="mt-2 max-w-2xl text-base text-text-secondary">
-                  {description}
-                </p>
-              )}
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
-                <span>
-                  {t("entity:shelf_items_count", {
-                    count: shelf?.itemCount ?? 0,
-                  })}
-                </span>
-                {shelf?.user?.name && (
-                  <span>
-                    {t("entity:shelf_by_author", { name: shelf.user.name })}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {(reactionPost || (canEditShelf && shelf?.unitId)) && (
-              <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end">
-                {canEditShelf && shelf?.unitId && !isCompactLayout && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5 text-text-secondary hover:text-text-primary"
-                    onClick={handleEditShelf}
-                  >
-                    <EditIcon className="h-4 w-4" />
-                    {t("entity:shelf_edit_action")}
-                  </Button>
-                )}
-                {reactionPost && (
-                  <ReactionBar
-                    post={reactionPost}
-                    policy={shelfPolicy}
-                    actions={shelfDetailActions}
-                    className="flex-nowrap md:justify-end"
-                    overflowContent={
-                      isCompactLayout && canEditShelf && shelf?.unitId ? (
-                        <DropdownMenuItem
-                          onClick={handleEditShelf}
-                          className="gap-2"
-                        >
-                          <EditIcon className="h-4 w-4" />
-                          <span>{t("entity:shelf_edit_action")}</span>
-                        </DropdownMenuItem>
-                      ) : null
-                    }
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <div className="relative min-w-[min(100%,16rem)] flex-1 sm:flex-none">
-              <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 h-4 w-4 text-text-tertiary" />
-              <Input
-                value={itemSearchText}
-                onChange={(event) => setItemSearchText(event.target.value)}
-                placeholder={t("entity:shelf_item_search_placeholder")}
-                aria-label={t("common:search")}
-                className="h-9 pl-9"
-              />
-            </div>
-            <ShelfSortViewPicker
-              sort={sortState}
-              sortOptions={SORT_OPTIONS}
-              view={effectiveViewMode}
-              viewOptions={VIEW_OPTIONS}
-              onSortChange={setSortState}
-              onViewChange={(value) => setViewModeOverride({ unitId, value })}
-              sortHeading={t("entity:shelf_controls_sort_by")}
-              viewHeading={t("entity:shelf_controls_view")}
-            />
-            {showSortScopeToggle && (
-              <Label className="flex min-w-0 items-center gap-2 text-sm">
-                <Checkbox
-                  checked={sortPrimeOnly}
-                  onCheckedChange={(checked) =>
-                    setSortPrimeOnly(checked === true)
-                  }
-                />
-                <span className="whitespace-nowrap">
-                  {t("entity:shelf_sort_prime_only")}
-                </span>
-              </Label>
-            )}
-            <Label className="flex min-w-0 items-center gap-2 text-sm">
-              <Checkbox
-                checked={readableOnly}
-                onCheckedChange={(checked) => setReadableOnly(checked === true)}
-              />
-              <span className="whitespace-nowrap">
-                {t("entity:shelf_readable_only")}
-              </span>
-            </Label>
-            {hydration.orphanUnitIds.length > 0 && (
-              <>
-                <span className="text-xs text-warning-text">
-                  {t("entity:shelf_orphan_count", {
-                    count: hydration.orphanUnitIds.length,
-                  })}
-                </span>
-                {isOwner && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={cleanupMutation.isPending}
-                    onClick={() =>
-                      cleanupMutation.mutate({
-                        shelfId: unitId,
-                        input: { orphanItemIds: hydration.orphanUnitIds },
-                      })
-                    }
-                  >
-                    {t("entity:shelf_cleanup_orphans")}
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {bookshelfFilteredCount > 0 && (
-          <p className="text-xs leading-dense text-text-secondary">
-            {t("entity:shelf_bookshelf_filtered_count", {
-              count: bookshelfFilteredCount,
-            })}
-          </p>
-        )}
-
-        {isItemsLoading ||
-        hydration.isLoading ||
-        waitingForPageData ||
-        isFetchingNextPage ? (
-          <div className="flex justify-center py-8">
-            <Spinner size="sm" />
-          </div>
-        ) : isItemsError ? (
-          <p className="py-8 text-center text-error">
-            {t("entity:shelf_items_load_failed")}
-          </p>
-        ) : visibleStream.length === 0 ? (
-          <p className="py-8 text-center text-text-secondary">
-            {normalizedItemSearchText
-              ? t("entity:shelf_item_no_search_matches")
-              : effectiveViewMode === "bookshelf" && readableStream.length > 0
-                ? t("entity:shelf_bookshelf_empty")
-                : t("entity:shelf_empty_items")}
-          </p>
-        ) : effectiveViewMode === "bookshelf" ? (
-          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-            {visibleStream.map((entry) => (
-              <ShelfItemRenderer
-                key={streamEntryKey(streamKeyPrefix, entry)}
-                entry={entry}
-                viewMode={effectiveViewMode}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {visibleStream.map((entry) => (
-              <ShelfItemRenderer
-                key={streamEntryKey(streamKeyPrefix, entry)}
-                entry={entry}
-                viewMode={effectiveViewMode}
-              />
-            ))}
-          </div>
-        )}
-
-        {(canPageBackward || canPageForward) && (
-          <div className="flex items-center justify-center gap-2 py-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={!canPageBackward}
-              onClick={() =>
-                setPageState((current) => ({
-                  unitId,
-                  page: Math.max(
-                    1,
-                    (current.unitId === unitId ? current.page : page) - 1,
-                  ),
-                }))
-              }
-            >
-              {t("common:prev")}
-            </Button>
-            <span className="text-sm text-text-secondary">
-              {finalPageCount
-                ? `${page} / ${finalPageCount}`
-                : `${page} / ${loadedPages}+`}
-            </span>
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={!canPageForward}
-              onClick={() =>
-                setPageState((current) => ({
-                  unitId,
-                  page: (current.unitId === unitId ? current.page : page) + 1,
-                }))
-              }
-            >
-              {t("common:next")}
-            </Button>
-          </div>
-        )}
-
-        {shelf?.unitId && <ShelfDiscussionSection shelfItemId={shelf.unitId} />}
-      </div>
-    </div>
+    </QueryBoundary>
   );
 }
 
