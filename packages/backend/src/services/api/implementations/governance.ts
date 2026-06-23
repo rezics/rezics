@@ -239,7 +239,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          const targetKind = params.targetKind as typeof ModerationAction.$inferSelect["targetKind"];
+          const targetKind = params.targetKind;
           const rows = yield*
             database
               .select()
@@ -627,7 +627,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const conditions: ReturnType<typeof eq>[] = [eq(AccountEnforcement.targetUserId, params.targetUserId)];
           if (query.state) {
             conditions.push(
-              eq(AccountEnforcement.state, query.state as typeof AccountEnforcement.state.enumValues[number]),
+              eq(AccountEnforcement.state, query.state),
             );
           }
           const rows = yield*
@@ -652,8 +652,8 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const reason = payload.reason ?? "Enforcement applied";
           const decisionCode = payload.decisionCode ?? "ENFORCED";
           const expiresAt = payload.expiresAt ? new Date(payload.expiresAt) : null;
-          const enforcementKind = kind as typeof AccountEnforcement.kind.enumValues[number];
-          const actionKind = kind as typeof ModerationAction.$inferInsert["actionKind"];
+          const enforcementKind = kind;
+          const actionKind = kind;
           // Insert moderation action first for reference
           // 先插入审核动作以供引用
           const action = yield* insertAction({
@@ -753,7 +753,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const conditions: ReturnType<typeof eq>[] = [eq(ModerationCase.scope, "PLATFORM")];
           if (query.state) {
             conditions.push(
-              eq(ModerationCase.state, query.state as typeof ModerationCase.state.enumValues[number]),
+              eq(ModerationCase.state, query.state),
             );
           }
           const rows = yield*
@@ -941,7 +941,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             targetId: rows[0].targetId,
             actorKind: "USER",
             actorUserId: user.id,
-            actionKind: (payload.actionKind ?? "NOTE") as typeof ModerationAction.$inferInsert["actionKind"],
+            actionKind: payload.actionKind ?? "NOTE",
             reasonCode: decisionCode,
             reasonText: payload.reason ?? null,
             caseId: params.caseId,
@@ -1017,7 +1017,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           ];
           if (query.state) {
             conditions.push(
-              eq(ModerationCase.state, query.state as typeof ModerationCase.state.enumValues[number]),
+              eq(ModerationCase.state, query.state),
             );
           }
           const rows = yield*
@@ -1039,7 +1039,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
           const targetKind =
-            (payload.targetKind ?? "UNIT") as typeof ModerationCase.$inferInsert["targetKind"];
+            payload.targetKind ?? "UNIT";
           const rows = yield*
             database
               .insert(ModerationCase)
@@ -1156,7 +1156,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             targetId: rows[0].targetId,
             actorKind: "USER",
             actorUserId: user.id,
-            actionKind: (payload.actionKind ?? "NOTE") as typeof ModerationAction.$inferInsert["actionKind"],
+            actionKind: payload.actionKind ?? "NOTE",
             reasonCode: decisionCode,
             reasonText: payload.reason ?? null,
             caseId: params.caseId,
