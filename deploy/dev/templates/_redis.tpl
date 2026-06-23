@@ -8,6 +8,7 @@
 
     network {
       port "redis" {
+        static       = 6379
         to           = 6379
         host_network = "loopback"
       }

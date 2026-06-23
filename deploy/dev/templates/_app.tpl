@@ -2,7 +2,7 @@
   group "app" {
     network {
       port "server" {
-        static       = 3000
+        static       = 30000
         host_network = "loopback"
       }
       port "app" {
@@ -66,6 +66,7 @@
 
       env {
         NODE_ENV = "development"
+        PORT     = "35001"
       }
 
       resources {

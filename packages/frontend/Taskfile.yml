@@ -3,12 +3,12 @@ version: "3"
 tasks:
   dev:
     desc: Start frontend dev server
-    cmd: next dev --turbopack
+    cmd: npx next dev --turbopack -p ${PORT:-35001}
 
   build:
     desc: Build frontend for production
-    cmd: next build
+    cmd: npx next build
 
   start:
     desc: Start production server
-    cmd: next start
+    cmd: npx next start

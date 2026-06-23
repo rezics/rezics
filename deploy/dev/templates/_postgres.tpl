@@ -8,6 +8,7 @@
 
     network {
       port "db" {
+        static       = 5432
         to           = 5432
         host_network = "loopback"
       }
