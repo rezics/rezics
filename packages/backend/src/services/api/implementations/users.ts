@@ -4,7 +4,7 @@ import { and, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
 import { Database } from "../../database/index.ts";
-import { Unit, User } from "../../database/schema/all.ts";
+import { Subscription, Unit, User, UserPreference } from "../../database/schema/all.ts";
 import { Api } from "../interfaces/index.ts";
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 import {
@@ -246,19 +246,198 @@ export const UsersHandlers = HttpApiBuilder.group(
         }),
       )
 
-      // ── Stubs — remaining endpoints not yet implemented ────────
-      // 桩 —— 尚未实现的其余端点
-      .handle("getSettings", () => Effect.die("TODO: not implemented"))
-      .handle("updateSettings", () => Effect.die("TODO: not implemented"))
-      .handle("getEmailVerification", () => Effect.die("TODO: not implemented"))
+      // ── getSettings — current user preference row ────────────
+      // 获取当前用户的偏好设置行
+      .handle("getSettings", () =>
+        Effect.gen(function* () {
+          const currentUser = yield* CurrentUser;
+          const row = yield* fetchUserByAuthId(currentUser.id);
+          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
+          const prefs = yield* Effect.orDie(
+            db
+              .select()
+              .from(UserPreference)
+              .where(eq(UserPreference.userId, row.User.unitId))
+              .limit(1),
+          );
+          const pref = prefs[0];
+          return {
+            defaultLicenseSlug: pref?.defaultLicenseSlug ?? null,
+            realmManageModeDefault: pref?.realmManageModeDefault ?? null,
+            bookshelfConfig: pref?.bookshelfConfig ?? null,
+          };
+        }),
+      )
+
+      // ── updateSettings — upsert current user preferences ──────
+      // 更新/插入当前用户偏好设置
+      .handle("updateSettings", ({ payload }) =>
+        Effect.gen(function* () {
+          const currentUser = yield* CurrentUser;
+          const row = yield* fetchUserByAuthId(currentUser.id);
+          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
+          const userId = row.User.unitId;
+          const patch = payload as Record<string, unknown>;
+          const set: typeof UserPreference.$inferInsert = {
+            userId,
+            updatedAt: new Date(),
+          };
+          if ("defaultLicenseSlug" in patch)
+            set.defaultLicenseSlug = patch["defaultLicenseSlug"] as string | null;
+          if ("realmManageModeDefault" in patch)
+            set.realmManageModeDefault = patch["realmManageModeDefault"] as boolean | null;
+          if ("bookshelfConfig" in patch)
+            set.bookshelfConfig = patch["bookshelfConfig"];
+          yield* Effect.orDie(
+            db
+              .insert(UserPreference)
+              .values(set)
+              .onConflictDoUpdate({
+                target: UserPreference.userId,
+                set: {
+                  defaultLicenseSlug: set.defaultLicenseSlug,
+                  realmManageModeDefault: set.realmManageModeDefault,
+                  bookshelfConfig: set.bookshelfConfig,
+                  updatedAt: new Date(),
+                },
+              }),
+          );
+          const prefs = yield* Effect.orDie(
+            db
+              .select()
+              .from(UserPreference)
+              .where(eq(UserPreference.userId, userId))
+              .limit(1),
+          );
+          const pref = prefs[0];
+          return {
+            defaultLicenseSlug: pref?.defaultLicenseSlug ?? null,
+            realmManageModeDefault: pref?.realmManageModeDefault ?? null,
+            bookshelfConfig: pref?.bookshelfConfig ?? null,
+          };
+        }),
+      )
+
+      // ── getEmailVerification — check email verification status ─
+      // 检查邮件验证状态
+      .handle("getEmailVerification", () =>
+        Effect.gen(function* () {
+          const currentUser = yield* CurrentUser;
+          const row = yield* fetchUserByAuthId(currentUser.id);
+          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
+          return {
+            email: row.User.email ?? currentUser.email,
+            emailVerified: currentUser.emailVerified,
+          };
+        }),
+      )
+
+      // ── getFollowers — paginated list of users who follow this user ─
+      // 获取关注该用户的用户分页列表
+      .handle("getFollowers", ({ params, query }) =>
+        Effect.gen(function* () {
+          const page = query.page ?? 1;
+          const limit = lim(query.limit);
+          const offset = (page - 1) * limit;
+
+          // Find subscriptions where subscribedUnitId = target user,
+          // join to get subscriber user info, filtered to USER units only.
+          // 查找 subscribedUnitId = 目标用户 的订阅记录，
+          // 连接获取订阅者用户信息，仅筛选 USER 类型。
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(Subscription)
+              .innerJoin(User, eq(Subscription.subscriberUnitId, User.unitId))
+              .innerJoin(Unit, eq(User.unitId, Unit.id))
+              .where(
+                and(
+                  eq(Subscription.subscribedUnitId, params.userId),
+                  eq(Unit.type, "USER"),
+                ),
+              )
+              .orderBy(desc(Subscription.createdAt))
+              .limit(limit)
+              .offset(offset),
+          );
+
+          const agg = yield* Effect.orDie(
+            db
+              .select({ total: count() })
+              .from(Subscription)
+              .innerJoin(Unit, eq(Subscription.subscriberUnitId, Unit.id))
+              .where(
+                and(
+                  eq(Subscription.subscribedUnitId, params.userId),
+                  eq(Unit.type, "USER"),
+                ),
+              ),
+          );
+
+          return new UserListResult({
+            users: rows.map((r) => userToDTO(r.Unit, r.User)),
+            total: agg[0]?.total ?? 0,
+          });
+        }),
+      )
+
+      // ── getFollowings — paginated list of users this user follows ─
+      // 获取该用户关注的用户分页列表
+      .handle("getFollowings", ({ params, query }) =>
+        Effect.gen(function* () {
+          const page = query.page ?? 1;
+          const limit = lim(query.limit);
+          const offset = (page - 1) * limit;
+
+          // Find subscriptions where subscriberUnitId = target user,
+          // join to get subscribed user info, filtered to USER units only.
+          // 查找 subscriberUnitId = 目标用户 的订阅记录，
+          // 连接获取被关注用户信息，仅筛选 USER 类型。
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(Subscription)
+              .innerJoin(User, eq(Subscription.subscribedUnitId, User.unitId))
+              .innerJoin(Unit, eq(User.unitId, Unit.id))
+              .where(
+                and(
+                  eq(Subscription.subscriberUnitId, params.userId),
+                  eq(Unit.type, "USER"),
+                ),
+              )
+              .orderBy(desc(Subscription.createdAt))
+              .limit(limit)
+              .offset(offset),
+          );
+
+          const agg = yield* Effect.orDie(
+            db
+              .select({ total: count() })
+              .from(Subscription)
+              .innerJoin(Unit, eq(Subscription.subscribedUnitId, Unit.id))
+              .where(
+                and(
+                  eq(Subscription.subscriberUnitId, params.userId),
+                  eq(Unit.type, "USER"),
+                ),
+              ),
+          );
+
+          return new UserListResult({
+            users: rows.map((r) => userToDTO(r.Unit, r.User)),
+            total: agg[0]?.total ?? 0,
+          });
+        }),
+      )
+
+      // ── Stubs — admin + account management, not yet implemented ─
+      // 桩 —— 管理员 + 账号管理，尚未实现
       .handle("requestEmailVerification", () => Effect.die("TODO: not implemented"))
       .handle("exportData", () => Effect.die("TODO: not implemented"))
       .handle("deleteAccount", () => Effect.die("TODO: not implemented"))
       .handle("adminGet", () => Effect.die("TODO: not implemented"))
       .handle("adminUpdate", () => Effect.die("TODO: not implemented"))
-      .handle("adminDelete", () => Effect.die("TODO: not implemented"))
-      .handle("getFollowers", () => Effect.die("TODO: not implemented"))
-      .handle("getFollowings", () => Effect.die("TODO: not implemented"));
+      .handle("adminDelete", () => Effect.die("TODO: not implemented"));
   }),
 );
 
