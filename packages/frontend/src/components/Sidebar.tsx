@@ -1,8 +1,11 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { myRealmsQuery } from "@/atoms/realms";
 import { Separator } from "@/components/ui/separator";
+import { useT } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
+import { useAtomValue } from "@effect/atom-react";
+import * as AsyncResult from "effect/unstable/reactivity/AsyncResult";
 import { BookOpenIcon, CompassIcon, HomeIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,6 +35,50 @@ function NavLink({
   );
 }
 
+// Joined realms list — renders inline, non-blocking (useAtomValue, not Suspense)
+// 已加入 realm 列表 — 内联渲染、不阻塞（useAtomValue 而非 Suspense）
+function JoinedRealms() {
+  const [t] = useT();
+  const result = useAtomValue(myRealmsQuery);
+
+  // Don't render anything while loading or on error (anonymous users get 401)
+  // 加载中或出错时不渲染（匿名用户会得到 401）
+  if (!AsyncResult.isSuccess(result) || result.value.length === 0) {
+    return null;
+  }
+
+  const realms = result.value;
+
+  return (
+    <>
+      <Separator className="mx-3" />
+      <div className="flex flex-col gap-0.5">
+        <span className="text-muted-foreground px-3 py-1 text-xs font-medium uppercase tracking-wider">
+          {t.realms.title}
+        </span>
+        {realms.map((realm) => (
+          <Link
+            className="hover:bg-accent flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors"
+            href={`/r/${realm.slug}`}
+            key={realm.id}
+          >
+            <div className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full">
+              <UsersIcon className="text-muted-foreground size-3" />
+            </div>
+            <span className="truncate">{realm.name}</span>
+          </Link>
+        ))}
+        <Link
+          className="text-muted-foreground hover:text-foreground px-3 py-1.5 text-xs transition-colors"
+          href="/r"
+        >
+          {t.nav.allRealms}
+        </Link>
+      </div>
+    </>
+  );
+}
+
 /**
  * Mobile (<640px)
  *
@@ -53,8 +100,8 @@ function NavLink({
  * | [Explore]           |
  * |---------------------|
  * | REALMS              |
- * | (av) LongRealmNam.. |  <- name truncate, avatar shrink-0
- * | (av) Realm B        |
+ * | (ic) LongRealmNam.. |  <- name truncate, icon shrink-0
+ * | (ic) Realm B        |
  * | View all realms     |
  * +---------------------+
  * w-56, sticky top-14
@@ -70,8 +117,8 @@ function NavLink({
  * | [Explore]           |
  * |---------------------|
  * | REALMS              |
- * | (av) LongRealmNam.. |  <- name truncate, avatar shrink-0
- * | (av) Realm B        |
+ * | (ic) LongRealmNam.. |  <- name truncate, icon shrink-0
+ * | (ic) Realm B        |
  * | View all realms     |
  * +---------------------+
  * w-56, sticky top-14
@@ -82,8 +129,9 @@ function NavLink({
  *
  * 紧贴 header 下方（top-14 = 3.5rem），sticky 定位占满剩余视口高度。
  * shrink-0 防止被 flex 压缩。右侧边框分隔。独立滚动（overflow-y-auto）。
- * 当前版本不显示已加入 realm 列表（需要后端 API 联通后启用）。
+ * 已加入 realm 列表使用 useAtomValue（不阻塞渲染）；查询失败或无数据时分隔线和列表完全隐藏。
  * 边界：0 个已加入 realm → 分隔线和列表完全隐藏。
+ *       未登录 → myRealmsQuery 401 → 不渲染。
  */
 export function Sidebar() {
   const pathname = usePathname();
@@ -111,6 +159,7 @@ export function Sidebar() {
           label="Explore"
         />
       </div>
+      <JoinedRealms />
     </nav>
   );
 }
