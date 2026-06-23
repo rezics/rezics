@@ -15,6 +15,7 @@ import {
   updatedAt,
   uuidv7PrimaryKey,
 } from "./columns.ts";
+import { User } from "./identity.ts";
 import { ModerationTargetKind } from "./moderation.ts";
 import { Unit, UnitType } from "./unit.ts";
 
@@ -159,6 +160,47 @@ export const UserSubscriptionListEntry = pgTable(
       "btree",
       table.userUnitId.asc().nullsLast(),
       table.subscribedUnitId.asc().nullsLast(),
+    ),
+  ],
+);
+
+/**
+ * Generic reaction edge from a user to any target entity.
+ * 从用户到任意目标实体的通用反应边。
+ */
+export const Reaction = pgTable(
+  "Reaction",
+  {
+    id: uuidv7PrimaryKey(),
+    userId: uuid()
+      .notNull()
+      .references(() => User.unitId, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    targetId: uuid().notNull(),
+    reaction: varchar({ length: 64 }).notNull(),
+    contextUnitId: uuid().references(() => Unit.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    uniqueIndex("Reaction_userId_targetId_reaction_key").using(
+      "btree",
+      table.userId.asc().nullsLast(),
+      table.targetId.asc().nullsLast(),
+      table.reaction.asc().nullsLast(),
+    ),
+    index("Reaction_targetId_reaction_idx").using(
+      "btree",
+      table.targetId.asc().nullsLast(),
+      table.reaction.asc().nullsLast(),
+    ),
+    index("Reaction_userId_idx").using(
+      "btree",
+      table.userId.asc().nullsLast(),
     ),
   ],
 );
