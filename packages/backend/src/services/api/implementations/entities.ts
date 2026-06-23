@@ -282,14 +282,14 @@ export const EntitiesHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const input = payload as Record<string, any>;
-          const language = (input.translations?.[0]?.language as string) ?? "en";
+          const language = (input["translations"]?.[0]?.language as string) ?? "en";
 
           const unitRows = yield* Effect.orDie(
             db
               .insert(Unit)
               .values({
                 type: "ENTITY",
-                slug: (input.slug as string) ?? undefined,
+                slug: (input["slug"] as string) ?? undefined,
                 slugScope: user.id,
                 status: "PUBLISHED",
                 visibility: "PUBLIC",
@@ -303,37 +303,37 @@ export const EntitiesHandlers = HttpApiBuilder.group(
           yield* Effect.orDie(
             db.insert(Entity).values({
               unitId: unit.id,
-              kind: (input.kind as string) ?? undefined,
-              avatar: (input.avatar as string) ?? undefined,
-              verified: (input.verified as boolean) ?? false,
-              eligibleCreditRoles: (input.eligibleCreditRoles as string[]) ?? [],
-              eligibleSubjectRoles: (input.eligibleSubjectRoles as string[]) ?? [],
+              kind: (input["kind"] as string) ?? undefined,
+              avatar: (input["avatar"] as string) ?? undefined,
+              verified: (input["verified"] as boolean) ?? false,
+              eligibleCreditRoles: (input["eligibleCreditRoles"] as string[]) ?? [],
+              eligibleSubjectRoles: (input["eligibleSubjectRoles"] as string[]) ?? [],
             }),
           );
 
           // Insert translations / 插入翻译
-          const translations = (input.translations ?? []) as Array<Record<string, any>>;
+          const translations = (input["translations"] ?? []) as Array<Record<string, any>>;
           for (const tr of translations) {
             yield* Effect.orDie(
               db.insert(UnitTranslation).values({
                 unitId: unit.id,
-                language: tr.language as string,
-                title: (tr.title as string) ?? undefined,
-                subtitle: (tr.subtitle as string) ?? undefined,
-                summary: (tr.summary as string) ?? undefined,
-                description: tr.description ?? undefined,
+                language: tr["language"] as string,
+                title: (tr["title"] as string) ?? undefined,
+                subtitle: (tr["subtitle"] as string) ?? undefined,
+                summary: (tr["summary"] as string) ?? undefined,
+                description: tr["description"] ?? undefined,
               }),
             );
           }
 
-          return yield* hydrateEntity(unit.id);
+          return yield* Effect.orDie(hydrateEntity(unit.id));
         }),
       )
 
       // ---- PATCH /entity/:unitId — update entity / 更新实体 ----
       .handle("update", ({ params, payload }) =>
         Effect.gen(function* () {
-          const user = yield* CurrentUser;
+          yield* CurrentUser;
           const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new EntityNotFound();
 
@@ -341,50 +341,50 @@ export const EntitiesHandlers = HttpApiBuilder.group(
 
           // Update Entity fields / 更新 Entity 字段
           const entityUpdate: Partial<typeof Entity.$inferInsert> = {};
-          if (input.kind !== undefined) entityUpdate.kind = input.kind ?? null;
-          if (input.avatar !== undefined) entityUpdate.avatar = input.avatar ?? null;
-          if (input.verified !== undefined) entityUpdate.verified = input.verified;
-          if (input.eligibleCreditRoles !== undefined) {
-            entityUpdate.eligibleCreditRoles = input.eligibleCreditRoles;
+          if (input["kind"] !== undefined) entityUpdate.kind = input["kind"] ?? null;
+          if (input["avatar"] !== undefined) entityUpdate.avatar = input["avatar"] ?? null;
+          if (input["verified"] !== undefined) entityUpdate.verified = input["verified"];
+          if (input["eligibleCreditRoles"] !== undefined) {
+            entityUpdate.eligibleCreditRoles = input["eligibleCreditRoles"];
           }
-          if (input.eligibleSubjectRoles !== undefined) {
-            entityUpdate.eligibleSubjectRoles = input.eligibleSubjectRoles;
+          if (input["eligibleSubjectRoles"] !== undefined) {
+            entityUpdate.eligibleSubjectRoles = input["eligibleSubjectRoles"];
           }
           if (Object.keys(entityUpdate).length > 0) {
             yield* Effect.orDie(db.update(Entity).set(entityUpdate).where(eq(Entity.unitId, params.unitId)));
           }
 
           // Update Unit slug / 更新 Unit slug
-          if (input.slug !== undefined) {
+          if (input["slug"] !== undefined) {
             yield* Effect.orDie(
               db
                 .update(Unit)
-                .set({ slug: input.slug ?? null, updatedAt: new Date() })
+                .set({ slug: input["slug"] ?? null, updatedAt: new Date() })
                 .where(eq(Unit.id, params.unitId)),
             );
           }
 
           // Update/insert translations / 更新/插入翻译
-          const translations = (input.translations ?? []) as Array<Record<string, any>>;
+          const translations = (input["translations"] ?? []) as Array<Record<string, any>>;
           for (const tr of translations) {
             yield* Effect.orDie(
               db
                 .insert(UnitTranslation)
                 .values({
                   unitId: params.unitId,
-                  language: tr.language as string,
-                  title: (tr.title as string) ?? undefined,
-                  subtitle: (tr.subtitle as string) ?? undefined,
-                  summary: (tr.summary as string) ?? undefined,
-                  description: tr.description ?? undefined,
+                  language: tr["language"] as string,
+                  title: (tr["title"] as string) ?? undefined,
+                  subtitle: (tr["subtitle"] as string) ?? undefined,
+                  summary: (tr["summary"] as string) ?? undefined,
+                  description: tr["description"] ?? undefined,
                 })
                 .onConflictDoUpdate({
                   target: [UnitTranslation.unitId, UnitTranslation.language],
                   set: {
-                    title: (tr.title as string) ?? undefined,
-                    subtitle: (tr.subtitle as string) ?? undefined,
-                    summary: (tr.summary as string) ?? undefined,
-                    description: tr.description ?? undefined,
+                    title: (tr["title"] as string) ?? undefined,
+                    subtitle: (tr["subtitle"] as string) ?? undefined,
+                    summary: (tr["summary"] as string) ?? undefined,
+                    description: tr["description"] ?? undefined,
                     updatedAt: new Date(),
                   },
                 }),
@@ -427,16 +427,16 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
       Effect.gen(function* () {
         yield* CurrentUser;
         const input = payload as Record<string, any>;
-        const ops = (input.ops ?? []) as Array<Record<string, any>>;
+        const ops = (input["ops"] ?? []) as Array<Record<string, any>>;
         const unitId = params.unitId;
 
         for (const op of ops) {
-          const role = op.role as string;
-          const entries = (op.entries ?? []) as Array<Record<string, any>>;
+          const role = op["role"] as string;
+          const entries = (op["entries"] ?? []) as Array<Record<string, any>>;
 
-          if (op.op === "setCredits") {
+          if (op["op"] === "setCredits") {
             // Remove credits for this role not in new set / 移除此角色中不在新集合中的创作归属
-            const keepEntityIds = entries.map((e) => e.entityId as string);
+            const keepEntityIds = entries.map((e) => e["entityId"] as string);
             yield* Effect.orDie(
               db
                 .delete(CreditAttribution)
@@ -452,13 +452,13 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
             );
             // Upsert remaining / 更新或插入剩余条目
             for (const entry of entries) {
-              const position = (entry.position as string) ?? "V";
+              const position = (entry["position"] as string) ?? "V";
               yield* Effect.orDie(
                 db
                   .insert(CreditAttribution)
                   .values({
                     unitId,
-                    entityId: entry.entityId as string,
+                    entityId: entry["entityId"] as string,
                     role,
                     position,
                   })
@@ -470,7 +470,7 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
             }
           } else {
             // setSubjects / 设置主题归属
-            const keepEntityIds = entries.map((e) => e.entityId as string);
+            const keepEntityIds = entries.map((e) => e["entityId"] as string);
             yield* Effect.orDie(
               db
                 .delete(SubjectAttribution)
@@ -485,14 +485,14 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
                 ),
             );
             for (const entry of entries) {
-              const position = (entry.position as string) ?? "V";
-              const weight = (entry.weight as number) ?? null;
+              const position = (entry["position"] as string) ?? "V";
+              const weight = (entry["weight"] as number) ?? null;
               yield* Effect.orDie(
                 db
                   .insert(SubjectAttribution)
                   .values({
                     unitId,
-                    entityId: entry.entityId as string,
+                    entityId: entry["entityId"] as string,
                     role,
                     position,
                     weight,
@@ -592,10 +592,10 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* CurrentUser;
           const input = payload as Record<string, any>;
-          const unitId = input.unitId as string;
-          const entityId = input.entityId as string;
-          const role = input.role as string;
-          const position = (input.position as string) ?? "V";
+          const unitId = input["unitId"] as string;
+          const entityId = input["entityId"] as string;
+          const role = input["role"] as string;
+          const position = (input["position"] as string) ?? "V";
 
           const [row] = yield* Effect.orDie(
             db
@@ -632,10 +632,10 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* CurrentUser;
           const input = payload as Record<string, any>;
-          const unitId = input.unitId as string;
-          const entityId = input.entityId as string;
-          const role = input.role as string;
-          const sourceExternalLinkId = input.sourceExternalLinkId as string;
+          const unitId = input["unitId"] as string;
+          const entityId = input["entityId"] as string;
+          const role = input["role"] as string;
+          const sourceExternalLinkId = input["sourceExternalLinkId"] as string;
 
           // Verify CreditAttribution exists / 验证创作归属存在
           const existing = yield* Effect.orDie(
@@ -669,10 +669,10 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
               entityId,
               role,
               sourceExternalLinkId,
-              claimPath: (input.claimPath as string) ?? undefined,
-              observedUrl: (input.observedUrl as string) ?? undefined,
-              observedAt: input.observedAt ? new Date(input.observedAt as string) : new Date(),
-              confidence: (input.confidence as number) ?? undefined,
+              claimPath: (input["claimPath"] as string) ?? undefined,
+              observedUrl: (input["observedUrl"] as string) ?? undefined,
+              observedAt: input["observedAt"] ? new Date(input["observedAt"] as string) : new Date(),
+              confidence: (input["confidence"] as number) ?? undefined,
             }),
           );
 
@@ -750,11 +750,11 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* CurrentUser;
           const input = payload as Record<string, any>;
-          const unitId = input.unitId as string;
-          const entityId = input.entityId as string;
-          const role = input.role as string;
-          const position = (input.position as string) ?? "V";
-          const weight = (input.weight as number) ?? null;
+          const unitId = input["unitId"] as string;
+          const entityId = input["entityId"] as string;
+          const role = input["role"] as string;
+          const position = (input["position"] as string) ?? "V";
+          const weight = (input["weight"] as number) ?? null;
 
           const [row] = yield* Effect.orDie(
             db
