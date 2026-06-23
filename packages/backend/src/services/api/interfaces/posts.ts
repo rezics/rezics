@@ -79,7 +79,7 @@ export class PostsGroup extends HttpApiGroup.make("posts")
         variantUnitId: Schema.optional(Schema.String),
       }),
       success: PostDTO,
-      error: HttpApiError.InternalServerError,
+      error: [PostNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.patch("update", "/:unitId", {

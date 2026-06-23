@@ -8,24 +8,17 @@ import { useAtomSuspense } from "@effect/atom-react";
 import { ChevronRightIcon, FileTextIcon, FolderIcon } from "lucide-react";
 import { use, useMemo } from "react";
 
-interface ContentNode {
-  readonly id: string;
-  readonly parentId: string | null;
-  readonly position: string;
-  readonly contentUnitId: string | null;
-  readonly title: string;
-  readonly noContent: boolean;
-}
+import type { ContentStructureNodeDTO } from "@rezics/backend/api";
 
-interface TreeNode extends ContentNode {
+interface TreeNode extends ContentStructureNodeDTO {
   readonly children: TreeNode[];
   readonly depth: number;
 }
 
 // Build a tree from flat node list, sorted by position within each level
 // 从扁平节点列表构建树，每层按 position 排序
-function buildTree(nodes: readonly ContentNode[]): TreeNode[] {
-  const byParent = new Map<string | null, ContentNode[]>();
+function buildTree(nodes: readonly ContentStructureNodeDTO[]): TreeNode[] {
+  const byParent = new Map<string | null, ContentStructureNodeDTO[]>();
   for (const node of nodes) {
     const list = byParent.get(node.parentId) ?? [];
     list.push(node);
@@ -60,7 +53,7 @@ function flattenTree(nodes: TreeNode[]): TreeNode[] {
 function ContentTreeInner({ bookId }: { readonly bookId: string }) {
   const [t] = useT();
   const result = useAtomSuspense(bookContentStructureQuery(bookId));
-  const nodes = result.value.nodes as readonly ContentNode[];
+  const nodes = result.value.nodes;
 
   const flatList = useMemo(() => {
     const tree = buildTree(nodes);

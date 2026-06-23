@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/unstable/httpapi";
 
 import { AuthMiddleware, OptionalAuthMiddleware, Unauthorized } from "./middlewares/auth.ts";
 
@@ -140,7 +140,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
     HttpApiEndpoint.get("getMyZones", "/me", {
       query: ZoneListQuery,
       success: ZoneListResult,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // GET /zone/user/:userId — zones for user
@@ -149,6 +149,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { userId: Schema.String },
       query: ZoneListQuery,
       success: ZoneListResult,
+      error: HttpApiError.InternalServerError,
     }).middleware(OptionalAuthMiddleware),
 
     // GET /zone/by-slug/:slug — zone by slug
@@ -157,7 +158,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { slug: Schema.String },
       query: ReadLanguageQuery,
       success: ZoneDTO,
-      error: ZoneNotFound,
+      error: [ZoneNotFound, HttpApiError.InternalServerError],
     }),
 
     // GET /zone/:unitId/portal/:pageSlug — zone portal page
@@ -166,7 +167,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { unitId: Schema.String, pageSlug: Schema.String },
       query: ReadLanguageQuery,
       success: ZonePortalResult,
-      error: ZoneNotFound,
+      error: [ZoneNotFound, HttpApiError.InternalServerError],
     }),
 
     // GET /zone/:unitId/page/:pageId/section/:sectionId — zone section data
@@ -180,7 +181,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
         dynamicTagUnitIds: Schema.optional(Schema.String),
       }),
       success: ZoneSectionDataResult,
-      error: ZoneNotFound,
+      error: [ZoneNotFound, HttpApiError.InternalServerError],
     }),
   )
   // --- Write endpoints ---
@@ -191,7 +192,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
     HttpApiEndpoint.post("create", "/", {
       payload: CreateZonePayload,
       success: ZoneDTO,
-      error: [Unauthorized, ZoneForbidden],
+      error: [Unauthorized, ZoneForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PATCH /zone/:unitId — update zone
@@ -200,7 +201,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { unitId: Schema.String },
       payload: UpdateZonePayload,
       success: ZoneDTO,
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PATCH /zone/:unitId/boundary — update zone boundary
@@ -209,7 +210,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { unitId: Schema.String },
       payload: Schema.Unknown,
       success: ZoneDTO,
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PATCH /zone/:unitId/nav — update zone nav
@@ -218,7 +219,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { unitId: Schema.String },
       payload: Schema.Unknown,
       success: ZoneDTO,
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PATCH /zone/:unitId/theme — update zone theme
@@ -227,7 +228,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { unitId: Schema.String },
       payload: Schema.Unknown,
       success: ZoneDTO,
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // DELETE /zone/:unitId — delete zone
@@ -235,7 +236,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
     HttpApiEndpoint.delete("remove", "/:unitId", {
       params: { unitId: Schema.String },
       success: Schema.Struct({ message: Schema.String }),
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Pages ---
@@ -247,7 +248,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { unitId: Schema.String },
       payload: CreatePagePayload,
       success: ZonePageDTO,
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PATCH /zone/:unitId/pages/:pageId — update page
@@ -256,7 +257,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
       params: { unitId: Schema.String, pageId: Schema.String },
       payload: UpdatePagePayload,
       success: ZonePageDTO,
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // DELETE /zone/:unitId/pages/:pageId — delete page
@@ -264,7 +265,7 @@ export class ZonesGroup extends HttpApiGroup.make("zones")
     HttpApiEndpoint.delete("deletePage", "/:unitId/pages/:pageId", {
       params: { unitId: Schema.String, pageId: Schema.String },
       success: Schema.Struct({ message: Schema.String }),
-      error: [Unauthorized, ZoneForbidden, ZoneNotFound],
+      error: [Unauthorized, ZoneForbidden, ZoneNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .prefix("/zone") {}

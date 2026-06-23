@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/unstable/httpapi";
 
 import { AuthMiddleware, OptionalAuthMiddleware, Unauthorized } from "./middlewares/auth.ts";
 
@@ -132,6 +132,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
         sort: Schema.optional(Schema.String),
       }),
       success: UserListResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /user/list — list users via POST body
@@ -145,6 +146,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
         sort: Schema.optional(Schema.String),
       }),
       success: UserListResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // GET /user/by-slug/:slug — look up user by slug
@@ -152,14 +154,14 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.get("getBySlug", "/by-slug/:slug", {
       params: { slug: Schema.String },
       success: UserDTO,
-      error: UserNotFound,
+      error: [UserNotFound, HttpApiError.InternalServerError],
     }),
 
     // GET /user/me — current authenticated user
     // 当前登录用户
     HttpApiEndpoint.get("getMe", "/me", {
       success: UserDTO,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PUT /user/me — update current user profile
@@ -167,7 +169,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.put("updateMe", "/me", {
       payload: UpdateMePayload,
       success: UserDTO,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // GET /user/:userId — look up user by unit ID
@@ -175,7 +177,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.get("getById", "/:userId", {
       params: { userId: Schema.String },
       success: UserDTO,
-      error: UserNotFound,
+      error: [UserNotFound, HttpApiError.InternalServerError],
     }),
 
     // GET /user/batch — batch fetch user info
@@ -185,6 +187,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
         ids: Schema.String,
       }),
       success: Schema.Array(UserDTO),
+      error: HttpApiError.InternalServerError,
     }),
   )
   .add(
@@ -192,7 +195,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 获取当前用户设置
     HttpApiEndpoint.get("getSettings", "/me/settings", {
       success: UserSettingsDTO,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PUT /user/me/settings — update current user settings
@@ -200,7 +203,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.put("updateSettings", "/me/settings", {
       payload: UpdateSettingsPayload,
       success: UserSettingsDTO,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .add(
@@ -208,7 +211,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 获取邮件验证状态
     HttpApiEndpoint.get("getEmailVerification", "/me/email-verification", {
       success: EmailVerificationDTO,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // POST /user/me/email-verification — request email verification
@@ -216,7 +219,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.post("requestEmailVerification", "/me/email-verification", {
       payload: Schema.Struct({ email: Schema.String }),
       success: EmailVerificationRequestResult,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .add(
@@ -224,7 +227,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 导出用户数据
     HttpApiEndpoint.post("exportData", "/me/export", {
       success: ExportDataResult,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // POST /user/me/delete-account — delete account
@@ -232,7 +235,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.post("deleteAccount", "/me/delete-account", {
       payload: Schema.Struct({ confirmation: Schema.String }),
       success: DeleteAccountResult,
-      error: [Unauthorized, UserBadRequest],
+      error: [Unauthorized, UserBadRequest, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .add(
@@ -241,7 +244,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.get("adminGet", "/admin/:userId", {
       params: { userId: Schema.String },
       success: UserDTO,
-      error: [Unauthorized, UserForbidden],
+      error: [Unauthorized, UserForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PUT /user/admin/:userId — admin update user
@@ -250,7 +253,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
       params: { userId: Schema.String },
       payload: AdminUpdatePayload,
       success: UserDTO,
-      error: [Unauthorized, UserForbidden],
+      error: [Unauthorized, UserForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // DELETE /user/admin/:userId — admin delete user
@@ -258,7 +261,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.delete("adminDelete", "/admin/:userId", {
       params: { userId: Schema.String },
       success: Schema.Struct({ message: Schema.String }),
-      error: [Unauthorized, UserForbidden],
+      error: [Unauthorized, UserForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .add(
@@ -271,6 +274,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
         limit: Schema.optional(Schema.NumberFromString),
       }),
       success: UserListResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // GET /user/:userId/followings — list followings
@@ -282,6 +286,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
         limit: Schema.optional(Schema.NumberFromString),
       }),
       success: UserListResult,
+      error: HttpApiError.InternalServerError,
     }),
   )
   .add(
@@ -290,7 +295,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     HttpApiEndpoint.get("getBrief", "/brief/:userId", {
       params: { userId: Schema.String },
       success: UserBriefDTO,
-      error: UserNotFound,
+      error: [UserNotFound, HttpApiError.InternalServerError],
     }),
 
     // POST /user/brief — batch fetch user briefs
@@ -300,6 +305,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
         unitIds: Schema.Array(Schema.String),
       }),
       success: UserBriefBatchResult,
+      error: HttpApiError.InternalServerError,
     }),
   )
   .prefix("/user") {}
@@ -321,6 +327,7 @@ export class ProfileGroup extends HttpApiGroup.make("profile")
         limit: Schema.optional(Schema.NumberFromString),
       }),
       success: ReactionHistoryDTO,
+      error: HttpApiError.InternalServerError,
     }).middleware(OptionalAuthMiddleware),
 
     // GET /profile/:userId/reaction/received — list received reactions
@@ -333,6 +340,7 @@ export class ProfileGroup extends HttpApiGroup.make("profile")
         limit: Schema.optional(Schema.NumberFromString),
       }),
       success: ReactionHistoryDTO,
+      error: HttpApiError.InternalServerError,
     }).middleware(OptionalAuthMiddleware),
   )
   .prefix("/profile") {}

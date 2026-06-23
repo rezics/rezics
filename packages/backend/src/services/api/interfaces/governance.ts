@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/unstable/httpapi";
 
 import { AuthMiddleware, Unauthorized } from "./middlewares/auth.ts";
 
@@ -290,7 +290,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 解析当前用户的能力提示
     HttpApiEndpoint.get("capabilityHintsMe", "/capability-hints/me", {
       success: CapabilityHintsResult,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Realm capabilities ---
@@ -302,7 +302,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { realmUnitId: Schema.String, userId: Schema.String },
       payload: GrantRealmCapabilityPayload,
       success: RealmCapabilityGrantDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // DELETE /governance/realms/:realmUnitId/members/:userId/capabilities/:capability — revoke
@@ -310,7 +310,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.delete("revokeRealmCapability", "/realms/:realmUnitId/members/:userId/capabilities/:capability", {
       params: { realmUnitId: Schema.String, userId: Schema.String, capability: Schema.String },
       success: Schema.Array(RealmCapabilityGrantDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Policy decide ---
@@ -321,7 +321,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.post("policyDecide", "/policy/decide", {
       payload: PolicyDecidePayload,
       success: PolicyDecisionResult,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Moderation actions & overlays ---
@@ -333,7 +333,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { targetKind: Schema.Literals(["UNIT", "UNIT_REALM", "COMMENT", "UNIT_FIELD", "ACCOUNT", "REALM_MEMBER", "FEEDBACK"]), targetId: Schema.String },
       query: ListQuery,
       success: Schema.Array(ModerationActionDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // POST /governance/moderation/overlays — read moderation overlays
@@ -341,7 +341,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.post("listModerationOverlays", "/moderation/overlays", {
       payload: ModerationOverlaysPayload,
       success: Schema.Array(ModerationActionDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Global content moderation ---
@@ -351,21 +351,21 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: Schema.Array(ModerationActionDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("contentRemove", "/content/:targetUnitId/remove", {
       params: { targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: Schema.Array(ModerationActionDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("contentRestore", "/content/:targetUnitId/restore", {
       params: { targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: Schema.Array(ModerationActionDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Realm-scoped content moderation ---
@@ -375,42 +375,42 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: ModerationActionDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentRemove", "/realms/:realmUnitId/content/:targetUnitId/remove", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: ModerationActionDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentRestore", "/realms/:realmUnitId/content/:targetUnitId/restore", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: ModerationActionDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentLock", "/realms/:realmUnitId/content/:targetUnitId/lock", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: ModerationActionDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentUnlock", "/realms/:realmUnitId/content/:targetUnitId/unlock", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: ModerationActionDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentOwnerDelegation", "/realms/:realmUnitId/content/:targetUnitId/owner-delegation", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
       success: ModerationActionDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Enforcement ---
@@ -421,7 +421,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.get("getActiveEnforcement", "/enforcement/:targetUserId/active", {
       params: { targetUserId: Schema.String },
       success: ActiveEnforcementResult,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // GET /governance/enforcement/:targetUserId — list enforcement records
@@ -430,7 +430,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { targetUserId: Schema.String },
       query: ListQuery,
       success: Schema.Array(AccountEnforcementDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // POST /governance/enforcement/:targetUserId — apply enforcement
@@ -439,7 +439,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { targetUserId: Schema.String },
       payload: ApplyEnforcementPayload,
       success: AccountEnforcementDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // POST /governance/enforcement/:targetUserId/unblock — unblock account
@@ -448,7 +448,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { targetUserId: Schema.String },
       payload: UnblockEnforcementPayload,
       success: Schema.Array(AccountEnforcementDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Cases — global ---
@@ -457,62 +457,62 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.get("listCases", "/cases", {
       query: ListQuery,
       success: Schema.Array(ModerationCaseDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.get("getCase", "/cases/:caseId", {
       params: { caseId: Schema.String },
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.get("listCaseActions", "/cases/:caseId/actions", {
       params: { caseId: Schema.String },
       query: ListQuery,
       success: Schema.Array(ModerationActionDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("createCaseFromFeedback", "/cases/from-feedback/:feedbackId", {
       params: { feedbackId: Schema.String },
       payload: CreateCaseFromFeedbackPayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("duplicateCase", "/cases/:caseId/duplicate", {
       params: { caseId: Schema.String },
       payload: DuplicateCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("assignCase", "/cases/:caseId/assign", {
       params: { caseId: Schema.String },
       payload: AssignCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("triageCase", "/cases/:caseId/triage", {
       params: { caseId: Schema.String },
       payload: TriageCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("decideCase", "/cases/:caseId/decision", {
       params: { caseId: Schema.String },
       payload: DecideCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("appealCase", "/cases/:caseId/appeal", {
       params: { caseId: Schema.String },
       payload: AppealCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Cases — realm-scoped ---
@@ -522,42 +522,42 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
       params: { realmUnitId: Schema.String },
       query: ListQuery,
       success: Schema.Array(ModerationCaseDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("createRealmCase", "/realms/:realmUnitId/cases", {
       params: { realmUnitId: Schema.String },
       payload: CreateRealmCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("createRealmCaseFromFeedback", "/realms/:realmUnitId/cases/from-feedback/:feedbackId", {
       params: { realmUnitId: Schema.String, feedbackId: Schema.String },
       payload: CreateCaseFromFeedbackPayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.get("listRealmCaseActions", "/realms/:realmUnitId/cases/:caseId/actions", {
       params: { realmUnitId: Schema.String, caseId: Schema.String },
       query: ListQuery,
       success: Schema.Array(ModerationActionDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("decideRealmCase", "/realms/:realmUnitId/cases/:caseId/decision", {
       params: { realmUnitId: Schema.String, caseId: Schema.String },
       payload: DecideCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("escalateRealmCase", "/realms/:realmUnitId/cases/:caseId/escalate", {
       params: { realmUnitId: Schema.String, caseId: Schema.String },
       payload: EscalateRealmCasePayload,
       success: ModerationCaseDTO,
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   // --- Audit ---
@@ -568,7 +568,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.get("listAuditLogs", "/audit", {
       query: AuditListQuery,
       success: Schema.Array(StaffAuditLogDTO),
-      error: [Unauthorized, GovernanceForbidden],
+      error: [Unauthorized, GovernanceForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // GET /governance/audit/:auditLogId — read single audit record
@@ -576,7 +576,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.get("getAuditLog", "/audit/:auditLogId", {
       params: { auditLogId: Schema.String },
       success: StaffAuditLogDTO,
-      error: [Unauthorized, GovernanceForbidden, GovernanceNotFound],
+      error: [Unauthorized, GovernanceForbidden, GovernanceNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .prefix("/governance") {}

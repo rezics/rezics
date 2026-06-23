@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -133,7 +133,9 @@ export const ContentHandlers = HttpApiBuilder.group(
       handlers
         // ── Get content structure / 获取内容结构 ────────────────────
         .handle("getStructure", ({ params }) =>
-          reloadStructure(params.ownerUnitId).pipe(Effect.orDie),
+          reloadStructure(params.ownerUnitId).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Put content structure / 更新内容结构 ───────────────────
@@ -274,7 +276,9 @@ export const ContentHandlers = HttpApiBuilder.group(
               .where(eq(ContentStructureTable.ownerUnitId, params.ownerUnitId));
 
             return yield* reloadStructure(params.ownerUnitId);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Restore soft-deleted nodes / 恢复软删除的节点 ──────────
@@ -345,7 +349,9 @@ export const ContentHandlers = HttpApiBuilder.group(
             }
 
             return yield* reloadStructure(params.ownerUnitId);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Get content translation / 获取内容翻译 ─────────────────
@@ -369,7 +375,9 @@ export const ContentHandlers = HttpApiBuilder.group(
               body: rows[0].content,
               updatedAt: rows[0].updatedAt,
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Put content translation / 更新内容翻译 ─────────────────
@@ -437,7 +445,9 @@ export const ContentHandlers = HttpApiBuilder.group(
               body: row.content,
               updatedAt: row.updatedAt,
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Delete content translation / 删除内容翻译 ──────────────
@@ -477,7 +487,9 @@ export const ContentHandlers = HttpApiBuilder.group(
                   eq(ContentTranslationTable.language, params.language),
                 ),
               );
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── List revisions (from HistoryOutbox) / 列出修订记录 ─────
@@ -510,7 +522,9 @@ export const ContentHandlers = HttpApiBuilder.group(
                   meta: r.payload ?? undefined,
                 }),
             );
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Compare revisions / 比较修订 ──────────────────────────
@@ -548,7 +562,9 @@ export const ContentHandlers = HttpApiBuilder.group(
                 toSequence: toRows[0].sequence,
               },
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Get single revision / 获取单条修订 ─────────────────────
@@ -582,7 +598,9 @@ export const ContentHandlers = HttpApiBuilder.group(
               timestamp: rows[0].createdAt,
               meta: rows[0].payload ?? undefined,
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── List structure events / 列出结构事件 ───────────────────
@@ -616,7 +634,9 @@ export const ContentHandlers = HttpApiBuilder.group(
                   meta: r.payload ?? undefined,
                 }),
             );
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Resolve actors / 解析操作者 ────────────────────────────
@@ -642,7 +662,9 @@ export const ContentHandlers = HttpApiBuilder.group(
                   image: u.avatar ?? null,
                 }),
             );
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Resolve units / 解析 Unit 引用 ─────────────────────────
@@ -691,7 +713,9 @@ export const ContentHandlers = HttpApiBuilder.group(
                   kind: r.type,
                 }),
             );
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
     );
   }),

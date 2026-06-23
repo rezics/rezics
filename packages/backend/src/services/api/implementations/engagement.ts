@@ -190,7 +190,9 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
               })
               .returning();
           return subscriptionToEntry(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // GET /subscription/me — list my subscriptions
@@ -207,7 +209,9 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
               .where(eq(Subscription.subscriberUnitId, user.id))
               .orderBy(desc(Subscription.createdAt));
           return { subscriptions: rows.map(subscriptionToEntry) };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // PATCH /subscription/:subscribedUnitId — update channels
@@ -228,7 +232,9 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
               .returning();
           if (!rows[0]) return yield* new EngagementNotFound();
           return subscriptionToEntry(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // DELETE /subscription/:subscribedUnitId — unsubscribe
@@ -247,7 +253,9 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
               )
               .returning();
           return { unsubscribed: rows.length > 0 };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // GET /subscription/check/:subscribedUnitId — check status
@@ -272,7 +280,9 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
             subscribed: true,
             channels: row.channels ?? undefined,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // GET /subscription/count/:subscribedUnitId — subscriber count (public)
@@ -285,7 +295,9 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
               .from(Subscription)
               .where(eq(Subscription.subscribedUnitId, params.subscribedUnitId));
           return new SubscriberCountResult({ count: agg[0]?.total ?? 0 });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -337,7 +349,9 @@ export const ReactionHandlers = HttpApiBuilder.group(
             return reactionToEntry(existing[0]!);
           }
           return reactionToEntry(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // DELETE /reaction/ — remove reaction
@@ -355,7 +369,9 @@ export const ReactionHandlers = HttpApiBuilder.group(
                   eq(Reaction.reaction, query.reaction),
                 ),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // POST /reaction/share — record a share intent (idempotent)
@@ -394,7 +410,9 @@ export const ReactionHandlers = HttpApiBuilder.group(
             return new ShareResult({ id: existing[0]!.id, created: false });
           }
           return new ShareResult({ id: rows[0].id, created: true });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -437,7 +455,9 @@ export const FeedbackHandlers = HttpApiBuilder.group(
               })
               .returning();
           return feedbackToEntry(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // GET /feedback/my — list my feedbacks
@@ -476,7 +496,9 @@ export const FeedbackHandlers = HttpApiBuilder.group(
             items: rows.map(feedbackToEntry),
             total: totalRows[0]?.total ?? 0,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // GET /feedback/list — list all feedbacks (admin)
@@ -526,7 +548,9 @@ export const FeedbackHandlers = HttpApiBuilder.group(
             items: rows.map(feedbackToEntry),
             total: totalRows[0]?.total ?? 0,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // PATCH /feedback/:id/resolve — set resolved state (admin)
@@ -556,7 +580,9 @@ export const FeedbackHandlers = HttpApiBuilder.group(
               .returning();
           if (!rows[0]) return yield* new EngagementNotFound();
           return feedbackToEntry(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -584,7 +610,9 @@ export const BlockHandlers = HttpApiBuilder.group(
               .where(eq(UserBlock.blockerId, user.id))
               .orderBy(desc(UserBlock.createdAt));
           return { items: rows.map(blockToEntry) };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // POST /block/ — block a user
@@ -601,7 +629,9 @@ export const BlockHandlers = HttpApiBuilder.group(
                 target: [UserBlock.blockerId, UserBlock.blockedId],
               });
           return { success: true };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // DELETE /block/:userId — unblock a user
@@ -619,7 +649,9 @@ export const BlockHandlers = HttpApiBuilder.group(
                 ),
               );
           return { success: true };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -653,7 +685,9 @@ export const ProgressHandlers = HttpApiBuilder.group(
               )
               .limit(1);
           return rows[0] ? progressToEntry(rows[0]) : null;
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // PUT /me/units/:unitId/progress — upsert my unit progress
@@ -690,7 +724,9 @@ export const ProgressHandlers = HttpApiBuilder.group(
               })
               .returning();
           return progressToEntry(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // DELETE /me/units/:unitId/progress — soft-delete my unit progress
@@ -708,7 +744,9 @@ export const ProgressHandlers = HttpApiBuilder.group(
                   eq(UserUnitProgress.unitId, params.unitId),
                 ),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // GET /me/progress — list my unit progress
@@ -747,7 +785,9 @@ export const ProgressHandlers = HttpApiBuilder.group(
             items: rows.map(progressToEntry),
             total: totalRows[0]?.total ?? 0,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // POST /me/units/:unitId/node-completion — toggle node completion
@@ -792,7 +832,9 @@ export const ProgressHandlers = HttpApiBuilder.group(
                   ),
                 );
           }
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -868,7 +910,9 @@ export const DraftHandlers = HttpApiBuilder.group(
                 }),
             ),
           };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -968,7 +1012,9 @@ export const ActivityHandlers = HttpApiBuilder.group(
             .slice(0, limit);
 
           return items;
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -1077,7 +1123,9 @@ export const StreamHandlers = HttpApiBuilder.group(
             ),
             hasMore: posts.length > limit,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );

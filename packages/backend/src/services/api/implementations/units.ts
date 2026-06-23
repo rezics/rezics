@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -106,7 +106,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const rows = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!rows[0]) return yield* new UnitNotFound();
           return unitToDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("createUnit", ({ payload }) =>
@@ -124,7 +126,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               })
               .returning();
           return unitToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("updateUnit", ({ params, payload }) =>
@@ -140,7 +144,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           if (payload.defaultLanguage) set["defaultLanguage"] = payload.defaultLanguage;
           const rows = yield* database.update(Unit).set(set).where(eq(Unit.id, params.unitId)).returning();
           return unitToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("deleteUnit", ({ params }) =>
@@ -150,7 +156,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           if (!existing[0]) return yield* new UnitNotFound();
           if (existing[0].userId !== user.id) return yield* new UnitForbidden();
           yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("listUnits", ({ payload }) =>
@@ -172,7 +180,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               .offset(payload.offset ?? 0);
           const agg = yield* database.select({ total: count() }).from(Unit).where(where);
           return new UnitListResult({ units: rows.map(unitToDTO), total: agg[0]?.total ?? 0 });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Slug ───────────────────────────────────────────────────
@@ -189,7 +199,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               .where(eq(Unit.id, params.unitId))
               .returning();
           return unitToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Translations ──────────────────────────────────────────
@@ -201,7 +213,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language)));
           if (!rows[0]) return yield* new TranslationNotFound();
           return transToDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("upsertTranslation", ({ params, payload }) =>
@@ -223,7 +237,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               })
               .returning();
           return transToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("deleteTranslation", ({ params }) =>
@@ -237,7 +253,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           yield* database
               .delete(UnitTranslation)
               .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language)));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("setTranslationSource", ({ params, payload }) =>
@@ -254,7 +272,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
             language: rows[0].language,
             sourceUnitId: rows[0].sourceUnitId ?? null,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Collaborators ─────────────────────────────────────────
@@ -263,7 +283,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
           const rows = yield* database.select().from(UnitCollaborator).where(eq(UnitCollaborator.unitId, params.unitId));
           return { collaborators: rows.map(collabToDTO) };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("upsertCollaborator", ({ params, payload }) =>
@@ -283,7 +305,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               })
               .returning();
           return collabToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("removeCollaborator", ({ params }) =>
@@ -292,7 +316,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           yield* database
               .delete(UnitCollaborator)
               .where(and(eq(UnitCollaborator.unitId, params.unitId), eq(UnitCollaborator.userId, params.userId)));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Field locks ───────────────────────────────────────────
@@ -301,7 +327,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
           const rows = yield* database.select().from(UnitFieldLock).where(eq(UnitFieldLock.unitId, params.unitId));
           return { locks: rows.map(lockToDTO) };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("upsertFieldLock", ({ params, payload }) =>
@@ -316,7 +344,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               })
               .returning();
           return lockToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("deleteFieldLock", ({ params }) =>
@@ -325,7 +355,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           yield* database
               .delete(UnitFieldLock)
               .where(and(eq(UnitFieldLock.unitId, params.unitId), eq(UnitFieldLock.path, params.path)));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Aliases ────────────────────────────────────────────────
@@ -343,7 +375,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               .offset(query.offset ?? 0);
           const agg = yield* database.select({ total: count() }).from(UnitAlias).where(where);
           return new AliasListResult({ aliases: rows.map(aliasToDTO), total: agg[0]?.total ?? 0 });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("createAlias", ({ payload }) =>
@@ -361,7 +395,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               })
               .returning();
           return aliasToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("updateAlias", ({ params, payload }) =>
@@ -376,7 +412,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const rows = yield* database.update(UnitAlias).set(set).where(eq(UnitAlias.id, params.aliasId)).returning();
           if (!rows[0]) return yield* new AliasNotFound();
           return aliasToDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("deleteAlias", ({ params }) =>
@@ -384,7 +422,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
           const deleted = yield* database.delete(UnitAlias).where(eq(UnitAlias.id, params.aliasId)).returning();
           if (deleted.length === 0) return yield* new AliasNotFound();
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("castAliasVote", ({ payload }) =>
@@ -409,7 +449,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const rows = yield* database.select().from(UnitAlias).where(eq(UnitAlias.id, payload.aliasId));
           if (!rows[0]) return yield* new AliasNotFound();
           return aliasToDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── External links ────────────────────────────────────────
@@ -429,7 +471,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               .offset(query.offset ?? 0);
           const agg = yield* database.select({ total: count() }).from(UnitExternalLink).where(where);
           return new ExternalLinkListResult({ links: rows.map(extLinkToDTO), total: agg[0]?.total ?? 0 });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("getExternalLinksForUnit", ({ params, query }) =>
@@ -439,7 +483,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
             conditions.push(eq(UnitExternalLink.sourceEntityUnitId, query.sourceEntityUnitId));
           const rows = yield* database.select().from(UnitExternalLink).where(and(...conditions)).orderBy(UnitExternalLink.position);
           return { links: rows.map(extLinkToDTO) };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("batchExternalLinks", ({ payload }) =>
@@ -457,7 +503,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           for (const r of rows) (grouped[r.unitId] ??= []).push(extLinkToDTO(r));
           for (const id of payload.unitIds) grouped[id] ??= [];
           return grouped;
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("createExternalLink", ({ payload }) =>
@@ -474,7 +522,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
               })
               .returning();
           return extLinkToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("updateExternalLink", ({ params, payload }) =>
@@ -486,7 +536,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const rows = yield* database.update(UnitExternalLink).set(set).where(eq(UnitExternalLink.id, params.id)).returning();
           if (!rows[0]) return yield* new ExternalLinkNotFound();
           return extLinkToDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("deleteExternalLink", ({ params }) =>
@@ -494,7 +546,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
           const deleted = yield* database.delete(UnitExternalLink).where(eq(UnitExternalLink.id, params.id)).returning();
           if (deleted.length === 0) return yield* new ExternalLinkNotFound();
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );

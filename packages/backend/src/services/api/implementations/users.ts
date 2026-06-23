@@ -118,7 +118,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           const row = yield* fetchUserByAuthId(currentUser.id);
           if (!row) return yield* new HttpApiError.InternalServerError();
           return userToDTO(row.Unit, row.User);
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── getById — look up user by unit ID ──────────────────────
@@ -128,7 +128,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           const row = yield* fetchUserByUnitId(params.userId);
           if (!row) return yield* new UserNotFound();
           return userToDTO(row.Unit, row.User);
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── getBySlug — look up user by slug ───────────────────────
@@ -143,7 +143,7 @@ export const UsersHandlers = HttpApiBuilder.group(
               .limit(1);
           if (!rows[0]) return yield* new UserNotFound();
           return userToDTO(rows[0].Unit, rows[0].User);
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── updateMe — update current user profile ─────────────────
@@ -163,7 +163,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           const updated = yield* fetchUserByUnitId(row.User.unitId);
           if (!updated) return yield* new HttpApiError.InternalServerError();
           return userToDTO(updated.Unit, updated.User);
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── listGet — paginated user list via query params ─────────
@@ -174,7 +174,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           ids: query.ids ? query.ids.split(",") : undefined,
           limit: query.limit,
           offset: query.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── listPost — paginated user list via POST body ───────────
@@ -185,7 +185,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           ids: payload.ids ? [...payload.ids] : undefined,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── getBrief — lightweight user data for cards/avatars ─────
@@ -195,7 +195,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           const row = yield* fetchUserByUnitId(params.userId);
           if (!row) return yield* new UserNotFound();
           return userToBriefDTO(row.Unit, row.User);
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── batchBriefs — batch fetch multiple user briefs ─────────
@@ -211,7 +211,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           return new UserBriefBatchResult({
             users: rows.map((r) => userToBriefDTO(r.Unit, r.User)),
           });
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── batch — batch fetch user info via query string IDs ─────
@@ -226,7 +226,7 @@ export const UsersHandlers = HttpApiBuilder.group(
               .innerJoin(Unit, eq(User.unitId, Unit.id))
               .where(and(eq(Unit.type, "USER"), inArray(User.unitId, ids)));
           return rows.map((r) => userToDTO(r.Unit, r.User));
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── getSettings — current user preference row ────────────
@@ -247,7 +247,7 @@ export const UsersHandlers = HttpApiBuilder.group(
             realmManageModeDefault: pref?.realmManageModeDefault ?? null,
             bookshelfConfig: pref?.bookshelfConfig ?? null,
           };
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── updateSettings — upsert current user preferences ──────
@@ -294,7 +294,7 @@ export const UsersHandlers = HttpApiBuilder.group(
             realmManageModeDefault: pref?.realmManageModeDefault ?? null,
             bookshelfConfig: pref?.bookshelfConfig ?? null,
           };
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── getEmailVerification — check email verification status ─
@@ -308,7 +308,7 @@ export const UsersHandlers = HttpApiBuilder.group(
             email: row.User.email ?? currentUser.email,
             emailVerified: currentUser.emailVerified,
           };
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── getFollowers — paginated list of users who follow this user ─
@@ -353,7 +353,7 @@ export const UsersHandlers = HttpApiBuilder.group(
             users: rows.map((r) => userToDTO(r.Unit, r.User)),
             total: agg[0]?.total ?? 0,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── getFollowings — paginated list of users this user follows ─
@@ -398,7 +398,7 @@ export const UsersHandlers = HttpApiBuilder.group(
             users: rows.map((r) => userToDTO(r.Unit, r.User)),
             total: agg[0]?.total ?? 0,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
 
       // ── Stubs — admin + account management, not yet implemented ─
@@ -406,32 +406,32 @@ export const UsersHandlers = HttpApiBuilder.group(
       .handle("requestEmailVerification", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       )
       .handle("exportData", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       )
       .handle("deleteAccount", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       )
       .handle("adminGet", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       )
       .handle("adminUpdate", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       )
       .handle("adminDelete", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       );
   }),
 );
@@ -444,12 +444,12 @@ export const ProfileHandlers = HttpApiBuilder.group(
       .handle("reactionGiven", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       )
       .handle("reactionReceived", () =>
         Effect.gen(function* () {
           return yield* new HttpApiError.InternalServerError();
-        }).pipe(Effect.orDie),
+        }),
       );
   }),
 );

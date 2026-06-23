@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -135,7 +135,9 @@ export const BooksHandlers = HttpApiBuilder.group(
             const row = yield* fetchBook(params.unitId);
             if (!row) return yield* new BookNotFound();
             return bookToDTO(row.Unit, row.Book);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("createBook", ({ payload }) =>
@@ -174,7 +176,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               .insert(ContentStructure)
               .values({ ownerUnitId: unit.id });
             return bookToDTO(unit, books[0]!);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("updateBook", ({ params, payload }) =>
@@ -211,7 +215,9 @@ export const BooksHandlers = HttpApiBuilder.group(
             }
             const updated = yield* fetchBook(params.unitId);
             return bookToDTO(updated!.Unit, updated!.Book);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("deleteBook", ({ params }) =>
@@ -221,7 +227,9 @@ export const BooksHandlers = HttpApiBuilder.group(
             if (!row) return yield* new BookNotFound();
             if (row.Unit.userId !== user.id) return yield* new BookForbidden();
             yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Book rating ───────────────────────────────────────────
@@ -239,7 +247,9 @@ export const BooksHandlers = HttpApiBuilder.group(
                   count: r.totalCount,
                 }),
             );
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Content structure ─────────────────────────────────────
@@ -259,7 +269,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               ownerUnitId: params.unitId,
               nodes: nodes.map(nodeToDTO),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("updateBookContentStructure", ({ params, payload }) =>
@@ -312,13 +324,23 @@ export const BooksHandlers = HttpApiBuilder.group(
               ownerUnitId: params.unitId,
               nodes: nodes.map(nodeToDTO),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Book list ──────────────────────────────────────────────
-        .handle("listBooks", ({ query }) => listBooksShared(query).pipe(Effect.orDie))
+        .handle("listBooks", ({ query }) =>
+          listBooksShared(query).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
+        )
 
-        .handle("listBooksByBody", ({ payload }) => listBooksShared(payload).pipe(Effect.orDie))
+        .handle("listBooksByBody", ({ payload }) =>
+          listBooksShared(payload).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
+        )
 
         // ── Chapters ───────────────────────────────────────────────
         .handle("getChapter", ({ params }) =>
@@ -357,7 +379,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("createChapter", ({ payload }) =>
@@ -400,7 +424,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("updateChapter", ({ params, payload }) =>
@@ -485,7 +511,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: updated[0]!.createdAt.toISOString(),
               updatedAt: updated[0]!.updatedAt.toISOString(),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("deleteChapter", ({ params }) =>
@@ -499,7 +527,9 @@ export const BooksHandlers = HttpApiBuilder.group(
             if (units[0].userId !== user.id)
               return yield* new ChapterForbidden();
             yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("materializeChapter", ({ params, payload }) =>
@@ -552,7 +582,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               nodeId: node.id,
               created: true,
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Series ─────────────────────────────────────────────────
@@ -591,7 +623,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("createSeries", ({ payload }) =>
@@ -630,7 +664,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("updateSeries", ({ params, payload }) =>
@@ -674,7 +710,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               createdAt: updated[0]!.createdAt.toISOString(),
               updatedAt: updated[0]!.updatedAt.toISOString(),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("updateSeriesContentStructure", ({ params, payload }) =>
@@ -718,7 +756,9 @@ export const BooksHandlers = HttpApiBuilder.group(
               ownerUnitId: params.unitId,
               nodes: nodes.map(nodeToDTO),
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         .handle("getSeriesContentIndex", ({ params }) =>
@@ -748,7 +788,9 @@ export const BooksHandlers = HttpApiBuilder.group(
                   }),
               ),
             };
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
     );
   }),

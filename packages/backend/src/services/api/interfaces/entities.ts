@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/unstable/httpapi";
 
 import { AuthMiddleware, Unauthorized } from "./middlewares/auth.ts";
 
@@ -116,7 +116,7 @@ export class EntitiesGroup extends HttpApiGroup.make("entities")
     HttpApiEndpoint.get("getBySlug", "/by-slug/:slug", {
       params: { slug: Schema.String },
       success: EntityDTO,
-      error: EntityNotFound,
+      error: [EntityNotFound, HttpApiError.InternalServerError],
     }),
 
     // GET /entity/ — list entities with filters
@@ -132,6 +132,7 @@ export class EntitiesGroup extends HttpApiGroup.make("entities")
         limit: Schema.optional(Schema.NumberFromString),
       },
       success: EntityListResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // GET /entity/:unitId — look up entity by unitId
@@ -139,7 +140,7 @@ export class EntitiesGroup extends HttpApiGroup.make("entities")
     HttpApiEndpoint.get("getById", "/:unitId", {
       params: { unitId: Schema.String },
       success: EntityDTO,
-      error: EntityNotFound,
+      error: [EntityNotFound, HttpApiError.InternalServerError],
     }),
 
     // POST /entity/ — create entity
@@ -155,7 +156,7 @@ export class EntitiesGroup extends HttpApiGroup.make("entities")
         translations: Schema.optional(Schema.Array(TranslationInput)),
       }),
       success: EntityDTO,
-      error: Unauthorized,
+      error: [Unauthorized, EntityNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // PATCH /entity/:unitId — update entity
@@ -172,7 +173,7 @@ export class EntitiesGroup extends HttpApiGroup.make("entities")
         translations: Schema.optional(Schema.Array(TranslationInput)),
       }),
       success: EntityDTO,
-      error: [Unauthorized, EntityNotFound],
+      error: [Unauthorized, EntityNotFound, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // DELETE /entity/:unitId — delete entity (admin only)
@@ -180,7 +181,7 @@ export class EntitiesGroup extends HttpApiGroup.make("entities")
     HttpApiEndpoint.delete("remove", "/:unitId", {
       params: { unitId: Schema.String },
       success: Schema.Struct({ message: Schema.String }),
-      error: [Unauthorized, EntityForbidden],
+      error: [Unauthorized, EntityForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .prefix("/entity") {}
@@ -240,7 +241,7 @@ export class EntityAttributionGroup extends HttpApiGroup.make("entityAttribution
         ops: Schema.optional(Schema.Array(BatchOp)),
       }),
       success: BatchUpdateResult,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .prefix("/unit") {}
@@ -262,7 +263,7 @@ export class CreditAttributionGroup extends HttpApiGroup.make("creditAttribution
         position: Schema.optional(Schema.String),
       }),
       success: CreditAttributionDTO,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // GET /credit-attribution/by-unit/:unitId — list by unit
@@ -270,6 +271,7 @@ export class CreditAttributionGroup extends HttpApiGroup.make("creditAttribution
     HttpApiEndpoint.get("listByUnit", "/by-unit/:unitId", {
       params: { unitId: Schema.String },
       success: Schema.Array(CreditAttributionDTO),
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /credit-attribution/evidence — create evidence (admin)
@@ -286,7 +288,7 @@ export class CreditAttributionGroup extends HttpApiGroup.make("creditAttribution
         confidence: Schema.optional(Schema.Number),
       }),
       success: CreditAttributionDTO,
-      error: [Unauthorized, EntityForbidden],
+      error: [Unauthorized, EntityForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // DELETE /credit-attribution/:unitId/:entityId/:role — unlink
@@ -294,7 +296,7 @@ export class CreditAttributionGroup extends HttpApiGroup.make("creditAttribution
     HttpApiEndpoint.delete("unlink", "/:unitId/:entityId/:role", {
       params: { unitId: Schema.String, entityId: Schema.String, role: Schema.String },
       success: Schema.Struct({ message: Schema.String }),
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .prefix("/credit-attribution") {}
@@ -317,7 +319,7 @@ export class SubjectAttributionGroup extends HttpApiGroup.make("subjectAttributi
         weight: Schema.optional(Schema.NullOr(Schema.Number)),
       }),
       success: SubjectAttributionDTO,
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
 
     // GET /subject-attribution/by-unit/:unitId — list by unit
@@ -328,6 +330,7 @@ export class SubjectAttributionGroup extends HttpApiGroup.make("subjectAttributi
         role: Schema.optional(Schema.String),
       },
       success: Schema.Array(SubjectAttributionDTO),
+      error: HttpApiError.InternalServerError,
     }),
 
     // GET /subject-attribution/by-subject/:entityId — list by subject entity
@@ -338,6 +341,7 @@ export class SubjectAttributionGroup extends HttpApiGroup.make("subjectAttributi
         role: Schema.optional(Schema.String),
       },
       success: Schema.Array(SubjectAttributionDTO),
+      error: HttpApiError.InternalServerError,
     }),
 
     // DELETE /subject-attribution/:unitId/:entityId/:role — unlink
@@ -345,7 +349,7 @@ export class SubjectAttributionGroup extends HttpApiGroup.make("subjectAttributi
     HttpApiEndpoint.delete("unlink", "/:unitId/:entityId/:role", {
       params: { unitId: Schema.String, entityId: Schema.String, role: Schema.String },
       success: Schema.Struct({ message: Schema.String }),
-      error: Unauthorized,
+      error: [Unauthorized, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
   )
   .prefix("/subject-attribution") {}

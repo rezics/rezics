@@ -68,7 +68,11 @@ export const CommentsHandlers = HttpApiBuilder.group(
     return (
       handlers
         // ── Get comment / 获取评论 ────────────────────────────────────
-        .handle("get", ({ params }) => fetchComment(params.id).pipe(Effect.orDie))
+        .handle("get", ({ params }) =>
+          fetchComment(params.id).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
+        )
 
         // ── List comments (GET query string) / 列表评论（查询字符串） ──
         .handle("list", ({ query }) =>
@@ -105,7 +109,9 @@ export const CommentsHandlers = HttpApiBuilder.group(
               items,
               total: agg[0]?.total ?? 0,
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── List comments (POST body) / 列表评论（请求体） ────────────
@@ -148,7 +154,9 @@ export const CommentsHandlers = HttpApiBuilder.group(
               items,
               total: agg[0]?.total ?? 0,
             });
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Create comment / 创建评论 ─────────────────────────────────
@@ -235,7 +243,10 @@ export const CommentsHandlers = HttpApiBuilder.group(
               .where(eq(Comment.id, commentId));
             if (!rows[0]) return yield* new HttpApiError.InternalServerError();
             return commentToDTO(rows[0]);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+            Effect.catchTag("SqlError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Update comment / 更新评论 ─────────────────────────────────
@@ -264,7 +275,9 @@ export const CommentsHandlers = HttpApiBuilder.group(
               .where(eq(Comment.id, params.id));
 
             return yield* fetchComment(params.id);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Moderate comment / 审核评论 ────────────────────────────────
@@ -293,7 +306,9 @@ export const CommentsHandlers = HttpApiBuilder.group(
               .where(eq(Comment.id, params.id));
 
             return yield* fetchComment(params.id);
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
 
         // ── Delete comment / 删除评论 ─────────────────────────────────
@@ -318,7 +333,9 @@ export const CommentsHandlers = HttpApiBuilder.group(
                 updatedAt: new Date(),
               })
               .where(eq(Comment.id, params.id));
-          }).pipe(Effect.orDie),
+          }).pipe(
+            Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+          ),
         )
     );
   }),

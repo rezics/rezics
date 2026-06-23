@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -104,7 +104,9 @@ export const PostsHandlers = HttpApiBuilder.group(
 
     return handlers
       // ── Get post / 获取帖子 ────────────────────────────────────
-      .handle("get", ({ params }) => fetchPost(params.unitId).pipe(Effect.orDie))
+      .handle("get", ({ params }) => fetchPost(params.unitId).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ))
 
       // ── Create post / 创建帖子 ─────────────────────────────────
       .handle("create", ({ payload }) =>
@@ -154,7 +156,9 @@ export const PostsHandlers = HttpApiBuilder.group(
           }
 
           return yield* fetchPost(unit.id);
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Update post / 更新帖子 ─────────────────────────────────
@@ -196,7 +200,9 @@ export const PostsHandlers = HttpApiBuilder.group(
 
           yield* database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId));
           return yield* fetchPost(params.unitId);
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Delete post / 删除帖子 ─────────────────────────────────
@@ -207,7 +213,9 @@ export const PostsHandlers = HttpApiBuilder.group(
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
           yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── List posts (GET query string) / 列表帖子（查询字符串） ──
@@ -243,7 +251,9 @@ export const PostsHandlers = HttpApiBuilder.group(
           });
 
           return new PostListResult({ items, total: agg[0]?.total ?? 0 });
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── List posts (POST body) / 列表帖子（请求体） ────────────
@@ -279,7 +289,9 @@ export const PostsHandlers = HttpApiBuilder.group(
           });
 
           return new PostListResult({ items, total: agg[0]?.total ?? 0 });
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Moderation overlays / 审核覆盖数据 ─────────────────────
@@ -294,7 +306,9 @@ export const PostsHandlers = HttpApiBuilder.group(
             }
           }
           return new ModerationOverlayResult({ overlays });
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Publish / 发布 ─────────────────────────────────────────
@@ -309,7 +323,9 @@ export const PostsHandlers = HttpApiBuilder.group(
               .set({ status: "PUBLISHED", publishedAt: new Date(), updatedAt: new Date() })
               .where(eq(Unit.id, params.unitId));
           return yield* fetchPost(params.unitId);
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Submit to realm / 提交到 realm ─────────────────────────
@@ -324,7 +340,9 @@ export const PostsHandlers = HttpApiBuilder.group(
               .values({ realmUnitId: payload.realmUnitId, unitId: params.unitId })
               .onConflictDoNothing();
           return yield* fetchPost(params.unitId);
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Set state / 设置状态 ───────────────────────────────────
@@ -336,7 +354,9 @@ export const PostsHandlers = HttpApiBuilder.group(
           if (units[0].userId !== user.id) return yield* new PostForbidden();
           yield* database.update(Post).set({ state: payload.state, updatedAt: new Date() }).where(eq(Post.unitId, params.unitId));
           return yield* fetchPost(params.unitId);
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Create pin / 置顶 ─────────────────────────────────────
@@ -356,7 +376,9 @@ export const PostsHandlers = HttpApiBuilder.group(
               })
               .onConflictDoNothing();
           return yield* fetchPost(payload.unitId);
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Delete pin / 取消置顶 ──────────────────────────────────
@@ -368,7 +390,9 @@ export const PostsHandlers = HttpApiBuilder.group(
               .where(
                 and(eq(CommentPromotion.scopeUnitId, payload.unitId), eq(CommentPromotion.commentId, payload.unitId)),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Accept answer / 采纳回答 ───────────────────────────────
@@ -389,7 +413,9 @@ export const PostsHandlers = HttpApiBuilder.group(
               })
               .onConflictDoNothing();
           return yield* fetchPost(payload.postUnitId);
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       )
 
       // ── Remove accepted answer / 移除采纳回答 ──────────────────
@@ -408,7 +434,9 @@ export const PostsHandlers = HttpApiBuilder.group(
                   eq(CommentPromotion.kind, "ACCEPTED_ANSWER"),
                 ),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+    Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+  ),
       );
   }),
 );

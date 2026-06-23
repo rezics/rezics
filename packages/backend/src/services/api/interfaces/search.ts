@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, HttpApiError, HttpApiGroup } from "effect/unstable/httpapi";
 
 import { AuthMiddleware, OptionalAuthMiddleware, Unauthorized } from "./middlewares/auth.ts";
 
@@ -145,6 +145,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // GET /meili/users/search — user search
@@ -158,6 +159,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         sort: Schema.optional(Schema.String),
       }),
       success: UserSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/entities/search — entity search
@@ -169,6 +171,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/posts/search — post search
@@ -180,6 +183,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/polls/search — poll search
@@ -191,6 +195,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/comments/search — comment search
@@ -202,6 +207,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: CommentSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/realms/search — realm search
@@ -213,6 +219,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/zones/search — zone search
@@ -224,6 +231,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/tags/search — tag search
@@ -235,6 +243,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/labels/search — label search
@@ -246,6 +255,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         offset: Schema.optional(Schema.Number),
       }),
       success: UnitSearchResult,
+      error: HttpApiError.InternalServerError,
     }),
 
     // POST /meili/search/federated — federated cross-index search
@@ -256,6 +266,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
       }),
       success: FederatedSearchResult,
+      error: HttpApiError.InternalServerError,
     }).middleware(OptionalAuthMiddleware),
   )
   // --- Admin — index init ---

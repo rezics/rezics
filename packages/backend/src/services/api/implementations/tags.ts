@@ -1,5 +1,5 @@
 import { Effect, Option } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, asc, count, desc, eq, gt, ilike, inArray, sql } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -252,7 +252,9 @@ export const TagsHandlers = HttpApiBuilder.group(
           name: query.name,
           limit: query.limit,
           offset: query.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── List tags (POST body) / 列出标签（请求体） ────────────
@@ -263,7 +265,9 @@ export const TagsHandlers = HttpApiBuilder.group(
           ids: payload.ids,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Batch translations / 批量翻译 ────────────────────────
@@ -315,7 +319,9 @@ export const TagsHandlers = HttpApiBuilder.group(
             });
           }
           return result;
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Get tag by slug / 按 slug 获取标签 ──────────────────
@@ -333,7 +339,9 @@ export const TagsHandlers = HttpApiBuilder.group(
 
           const trans = yield* resolveTranslation(units[0].id);
           return tagUnitToEntry(units[0], trans);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Get tag by ID / 按 ID 获取标签 ─────────────────────
@@ -347,7 +355,9 @@ export const TagsHandlers = HttpApiBuilder.group(
           if (!units[0]) return yield* new TagNotFound();
           const trans = yield* resolveTranslation(units[0].id);
           return tagUnitToEntry(units[0], trans);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Create tag / 创建标签 ──────────────────────────────
@@ -392,7 +402,9 @@ export const TagsHandlers = HttpApiBuilder.group(
 
           const trans = yield* resolveTranslation(unit.id);
           return tagUnitToEntry(unit, trans);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Update tag / 更新标签 ──────────────────────────────
@@ -443,7 +455,9 @@ export const TagsHandlers = HttpApiBuilder.group(
           const updated = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId)).limit(1);
           const trans = yield* resolveTranslation(params.unitId, language);
           return tagUnitToEntry(updated[0]!, trans);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Delete tag / 删除标签 ──────────────────────────────
@@ -457,7 +471,9 @@ export const TagsHandlers = HttpApiBuilder.group(
               .limit(1);
           if (!units[0]) return yield* new TagNotFound();
           yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Attach tag to unit (admin) / 将标签附加到 unit（管理员） ──
@@ -483,7 +499,9 @@ export const TagsHandlers = HttpApiBuilder.group(
 
           const agg = yield* aggregateVotes(payload.unitId, payload.tagUnitId);
           yield* upsertUnitTagRow(payload.unitId, payload.tagUnitId, agg);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Detach tag from unit (admin) / 从 unit 解除标签（管理员） ──
@@ -506,7 +524,9 @@ export const TagsHandlers = HttpApiBuilder.group(
           yield* database
               .delete(UnitTag)
               .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId)));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Cast tag vote / 对标签投票 ────────────────────────
@@ -533,7 +553,9 @@ export const TagsHandlers = HttpApiBuilder.group(
               .update(UnitTag)
               .set({ score: agg.score, voteCount: agg.voteCount, updatedAt: new Date() })
               .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId)));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Get tags for a unit / 获取特定 unit 的标签 ──────────
@@ -583,7 +605,9 @@ export const TagsHandlers = HttpApiBuilder.group(
             }),
           );
           return { tags };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -643,7 +667,9 @@ export const UnitTagHandlers = HttpApiBuilder.group(
           const agg = yield* aggregateVotes(payload.unitId, payload.tagUnitId);
           const row = yield* upsertRow(payload.unitId, payload.tagUnitId, agg);
           return unitTagToEntry(row);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Patch unit tag (pin/position) / 修改 UnitTag（置顶/排序） ──
@@ -666,7 +692,9 @@ export const UnitTagHandlers = HttpApiBuilder.group(
               .returning();
           if (!updated[0]) return yield* new TagNotFound();
           return unitTagToEntry(updated[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Delete unit tag / 删除 UnitTag ────────────────────
@@ -683,7 +711,9 @@ export const UnitTagHandlers = HttpApiBuilder.group(
               .where(and(eq(UnitTag.unitId, params.unitId), eq(UnitTag.tagUnitId, params.tagUnitId)))
               .returning();
           if (!deleted[0]) return yield* new TagNotFound();
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -733,7 +763,9 @@ export const TagVoteHandlers = HttpApiBuilder.group(
               .update(UnitTag)
               .set({ score, voteCount, updatedAt: new Date() })
               .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId)));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -782,7 +814,9 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
             rules: rows.map((r) => policyRuleToEntry(r)),
             total: totalAgg[0]?.total ?? 0,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Create policy tag rule / 创建策略标签规则 ───────────
@@ -817,7 +851,9 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
               .returning();
           if (!rows[0]) return yield* new TagConflict();
           return policyRuleToEntry(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Update policy tag rule / 更新策略标签规则 ───────────
@@ -839,7 +875,9 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
           const updated = yield* database.update(PolicyTagRule).set(sets).where(eq(PolicyTagRule.id, params.ruleId)).returning();
           if (!updated[0]) return yield* new TagNotFound();
           return policyRuleToEntry(updated[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── List policy tag applications / 列出策略标签应用 ─────
@@ -868,7 +906,9 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
             applications: rows.map((r) => policyApplicationToEntry(r)),
             total: totalAgg[0]?.total ?? 0,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Create/upsert policy tag application / 创建/更新策略标签应用 ──
@@ -904,7 +944,9 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
               .returning();
           if (!rows[0]) return yield* new TagNotFound();
           return policyApplicationToEntry(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Patch policy tag application / 修补策略标签应用 ──────
@@ -936,7 +978,9 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
               .returning();
           if (!updated[0]) return yield* new TagNotFound();
           return policyApplicationToEntry(updated[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Delete policy tag application / 删除策略标签应用 ────
@@ -954,7 +998,9 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
               )
               .returning();
           if (!deleted[0]) return yield* new TagNotFound();
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -985,7 +1031,9 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
           yield* CurrentUserOption;
           const rows = yield* listForUnit(params.userId, params.unitId);
           return rows.map((r) => userTagAppToEntry(r));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── List my tags for a unit / 列出我对某个 unit 的标签 ──
@@ -994,7 +1042,9 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const rows = yield* listForUnit(user.id, params.unitId);
           return rows.map((r) => userTagAppToEntry(r));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Replace my tags for a unit / 替换我对某个 unit 的标签 ──
@@ -1024,7 +1074,9 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
 
           const rows = yield* listForUnit(user.id, params.unitId);
           return rows.map((r) => userTagAppToEntry(r));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Reorder one user tag application / 重新排序一个用户标签应用 ──
@@ -1081,7 +1133,9 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
               .returning();
           if (!updated[0]) return yield* new TagNotFound();
           return userTagAppToEntry(updated[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Delete one user tag application / 删除一个用户标签应用 ──
@@ -1097,7 +1151,9 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
                   eq(UserTagApplication.tagUnitId, params.tagUnitId),
                 ),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );

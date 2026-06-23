@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, count, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -235,7 +235,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchUsers", ({ query }) =>
@@ -244,7 +246,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           ids: query.ids ? query.ids.split(",") : undefined,
           limit: query.limit,
           offset: query.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchEntities", ({ payload }) =>
@@ -253,7 +257,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchPosts", ({ payload }) =>
@@ -262,7 +268,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchPolls", ({ payload }) =>
@@ -271,7 +279,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchComments", ({ payload }) => {
@@ -321,7 +331,9 @@ export const SearchHandlers = HttpApiBuilder.group(
             })),
             total: agg[0]?.total ?? 0,
           };
-        }).pipe(Effect.orDie);
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        );
       })
 
       .handle("searchRealms", ({ payload }) =>
@@ -330,7 +342,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchZones", ({ payload }) =>
@@ -339,7 +353,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchTags", ({ payload }) =>
@@ -348,7 +364,9 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchLabels", ({ payload }) =>
@@ -357,11 +375,15 @@ export const SearchHandlers = HttpApiBuilder.group(
           q: payload.q,
           limit: payload.limit,
           offset: payload.offset,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("searchFederated", ({ payload }) =>
-        federatedSearch({ q: payload.q, limit: payload.limit }).pipe(Effect.orDie),
+        federatedSearch({ q: payload.q, limit: payload.limit }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── Admin — index init (stubs) ───────────────────────────

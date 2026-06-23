@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -177,14 +177,18 @@ export const RealmsHandlers = HttpApiBuilder.group(
         listRealmsWithTranslation({
           limit: lim(query.limit),
           offset: query.offset ?? 0,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       .handle("listByFilter", ({ payload }) =>
         listRealmsWithTranslation({
           limit: lim(payload.limit),
           offset: payload.offset ?? 0,
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getBySlug — find realm by slug ─────────────────────────
@@ -206,7 +210,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .where(eq(UnitTranslation.unitId, rows[0].Unit.id))
               .limit(1);
           return realmToDTO(rows[0].Unit, trans[0]?.title ?? null);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getById — find realm by unit ID ────────────────────────
@@ -215,7 +221,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const found = yield* requireRealm(params.unitId);
           return realmToDTO(found.unit, found.title);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listMine — list realms the current user belongs to ─────
@@ -251,7 +259,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
             }
           }
           return deduped.map((r) => realmToDTO(r.Unit, r.title ?? null));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listByMember — list realms a specific user belongs to ──
@@ -286,7 +296,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
             }
           }
           return deduped.map((r) => realmToDTO(r.Unit, r.title ?? null));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── create — create a new realm ────────────────────────────
@@ -356,7 +368,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
             });
 
           return realmToDTO({ ...unit, slugScope: unit.id }, payload.name);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── update — update realm name/slug/description ────────────
@@ -412,7 +426,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // 重新获取以返回最新状态
           const updated = yield* requireRealm(params.unitId);
           return realmToDTO(updated.unit, updated.title);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── delete — delete realm (cascades via Unit FK)  ──────────
@@ -426,7 +442,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Deleting the Unit cascades to Realm, RealmMember, UnitRealm, etc.
           // 删除 Unit 会级联到 Realm、RealmMember、UnitRealm 等
           yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getMyMembership — check current user's membership ──────
@@ -443,7 +461,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .limit(1);
           if (!rows[0]) return null;
           return memberToDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listMembers — list members of a realm ──────────────────
@@ -460,7 +480,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(memberToDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── addMember — join a realm ───────────────────────────────
@@ -530,7 +552,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               )
               .limit(1);
           return memberToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── updateMember — update member role ──────────────────────
@@ -575,7 +599,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               )
               .limit(1);
           return memberToDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── removeMember — leave/remove from realm ─────────────────
@@ -610,7 +636,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .update(RealmTable)
               .set({ memberCount: sql`GREATEST(${RealmTable.memberCount} - 1, 0)` })
               .where(eq(RealmTable.unitId, params.unitId));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getResolvedRules — return rules for a realm (flat list of current revision items) ──
@@ -659,7 +687,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                 title: titleMap.get(item.rulePostUnitId) ?? item.rulePostUnitId,
               }),
           );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listRules — list rule policies for a realm ─────────────
@@ -683,7 +713,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                 title: p.id, // Policy title is the id; enriched by client via getResolvedRules
               }),
           );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── createRule — create a new rule policy for a realm ──────
@@ -754,7 +786,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
             realmUnitId: params.unitId,
             title: payload.title,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── createRuleRevision — create a new revision for an existing rule ──
@@ -802,7 +836,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .where(eq(RealmRulePolicy.id, payload.ruleId));
 
           return new RealmRuleRevisionDTO({ id: revision.id, ruleId: payload.ruleId });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── acknowledgeRules — record that the user has acknowledged current rules ──
@@ -845,7 +881,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                 })
                 .onConflictDoNothing();
           }
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── mute — mute a realm (set member state to MUTED) ───────
@@ -866,7 +904,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                   eq(RealmMemberTable.state, "ACTIVE"),
                 ),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── unmute — unmute a realm (restore member state to ACTIVE) ──
@@ -887,7 +927,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                   eq(RealmMemberTable.state, "MUTED"),
                 ),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── addContent — add a unit to a realm's content feed ──────
@@ -917,7 +959,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
             realmUnitId: params.unitId,
             contentUnitId: payload.contentUnitId,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── removeContent — remove a unit from a realm's content feed ──
@@ -936,7 +980,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               )
               .returning();
           if (!deleted[0]) return yield* new RealmContentNotFound();
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── addTags — add tags to a realm's own UnitTag set ────────
@@ -954,7 +1000,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                 .values({ unitId: params.unitId, tagUnitId, updatedAt: new Date() })
                 .onConflictDoNothing();
           }
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── removeTags — remove tags from a realm's own UnitTag set ──
@@ -973,7 +1021,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                   and(eq(UnitTag.unitId, params.unitId), inArray(UnitTag.tagUnitId, [...payload.tagUnitIds])),
                 );
           }
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getDock — get realm dock (structured sidebar/nav data) ─
@@ -982,7 +1032,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* requireRealm(params.unitId);
           return new RealmDockDTO({ realmUnitId: params.unitId });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── updateDock — update realm dock ─────────────────────────
@@ -1002,7 +1054,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .where(eq(RealmTable.unitId, params.unitId));
 
           return new RealmDockDTO({ realmUnitId: params.unitId });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── setExtra — set a key-value pair in realm extra JSON ────
@@ -1023,7 +1077,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                 updatedAt: new Date(),
               })
               .where(eq(RealmTable.unitId, params.unitId));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── deleteExtra — remove a key from realm extra JSON ───────
@@ -1042,7 +1098,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                 updatedAt: new Date(),
               })
               .where(eq(RealmTable.unitId, params.unitId));
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getTagTree — get the realm's tag tree structure ────────
@@ -1061,7 +1119,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .limit(1);
 
           return new RealmTagTreeDTO({ realmUnitId: params.unitId });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── updateTagTree — update the realm's tag tree structure ──
@@ -1082,7 +1142,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               });
 
           return new RealmTagTreeDTO({ realmUnitId: params.unitId });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getPinboard — get a pinboard by key ────────────────────
@@ -1106,7 +1168,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
             realmUnitId: params.unitId,
             key: params.key,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── addPinboardEntry — add an entry to a pinboard ──────────
@@ -1178,7 +1242,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
             realmUnitId: params.unitId,
             key: params.key,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── reorderPinboard — reorder pinboard entries ─────────────
@@ -1211,7 +1277,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
                   and(eq(PinboardEntryTable.id, entryId), eq(PinboardEntryTable.pinboardId, boards[0].id)),
                 );
           }
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── deletePinboardEntry — delete a pinboard entry ──────────
@@ -1240,7 +1308,9 @@ export const RealmsHandlers = HttpApiBuilder.group(
               )
               .returning();
           if (!deleted[0]) return yield* new PinboardNotFound();
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -1336,7 +1406,9 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
             unitId: payload.unitId,
             tagUnitId: payload.tagUnitId,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listForUnit — list tag applications for a unit within a realm ──
@@ -1363,7 +1435,9 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
                 tagUnitId: r.tagUnitId,
               }),
           );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── update — update a tag application (pin/position) ───────
@@ -1398,7 +1472,9 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
             unitId: params.unitId,
             tagUnitId: params.tagUnitId,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── delete — delete a tag application and its votes ────────
@@ -1432,7 +1508,9 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
               )
               .returning();
           if (!deleted[0]) return yield* new RealmTagApplicationNotFound();
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -1530,7 +1608,9 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           return new RealmTagApplicationVoteDTO({
             id: `${payload.realmUnitId}:${payload.tagUnitId}:${payload.unitId}:${user.id}`,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── delete — retract a vote ────────────────────────────────
@@ -1599,7 +1679,9 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
                   eq(RealmTagApplicationTable.unitId, payload.unitId),
                 ),
               );
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -1638,7 +1720,9 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
             realmUnitId: params.realmUnitId,
             tagUnitId: params.tagUnitId,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── update — upsert the tag context for a (realm, tag) pair ──
@@ -1663,7 +1747,9 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
             realmUnitId: params.realmUnitId,
             tagUnitId: params.tagUnitId,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── materialize — create a context Unit for the (realm, tag) pair ──
@@ -1728,7 +1814,9 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
             realmUnitId: params.realmUnitId,
             tagUnitId: params.tagUnitId,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );

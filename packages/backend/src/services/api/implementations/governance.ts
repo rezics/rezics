@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, desc, eq, sql } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -45,11 +45,11 @@ import {
 // ---------------------------------------------------------------------------
 
 function isAccountEnforcementState(s: string): s is AccountEnforcementStateStorage {
-  return (accountEnforcementStateStorageValues as readonly string[]).includes(s);
+  return accountEnforcementStateStorageValues.some((v) => v === s);
 }
 
 function isModerationCaseState(s: string): s is ModerationCaseStateStorage {
-  return (moderationCaseStateStorageValues as readonly string[]).includes(s);
+  return moderationCaseStateStorageValues.some((v) => v === s);
 }
 
 // ---------------------------------------------------------------------------
@@ -271,7 +271,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             })),
           ];
           return new CapabilityHintsResult({ capabilities });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── grantRealmCapability — grant realm capability to member ────
@@ -300,7 +302,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Capability granted",
           });
           return toRealmCapabilityGrantDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── revokeRealmCapability — revoke realm capability from member ──
@@ -332,7 +336,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: `Revoked capability ${params.capability}`,
           });
           return rows.map(toRealmCapabilityGrantDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── policyDecide — evaluate governance policy decision ─────────
@@ -358,7 +364,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             action,
             grants: grants.map((g) => g.capability),
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listModerationActions — list moderation actions for a target ──
@@ -382,7 +390,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(toModerationActionDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listModerationOverlays — batch-read moderation overlays ───
@@ -418,7 +428,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             }
           }
           return deduped.map(toModerationActionDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── contentApprove — global content approval ──────────────────
@@ -453,7 +465,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Content approved",
           });
           return [toModerationActionDTO(action)];
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── contentRemove — global content removal ────────────────────
@@ -488,7 +502,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Content removed",
           });
           return [toModerationActionDTO(action)];
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── contentRestore — global content restoration ───────────────
@@ -523,7 +539,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Content restored",
           });
           return [toModerationActionDTO(action)];
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── realmContentApprove — realm-scoped content approval ───────
@@ -556,7 +574,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return toModerationActionDTO(action);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── realmContentRemove — realm-scoped content removal ─────────
@@ -589,7 +609,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return toModerationActionDTO(action);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── realmContentRestore — realm-scoped content restoration ────
@@ -622,7 +644,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return toModerationActionDTO(action);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── realmContentLock — realm-scoped content lock ──────────────
@@ -655,7 +679,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return toModerationActionDTO(action);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── realmContentUnlock — realm-scoped content unlock ──────────
@@ -688,7 +714,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             caseId: payload.caseId ?? null,
           });
           return toModerationActionDTO(action);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── realmContentOwnerDelegation — realm content owner delegation ──
@@ -718,7 +746,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Owner delegation recorded",
           });
           return toModerationActionDTO(action);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getActiveEnforcement — active enforcement summary ─────────
@@ -743,7 +773,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             active: rows.map(toAccountEnforcementDTO),
             count: rows.length,
           });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listEnforcements — list enforcement records ───────────────
@@ -767,7 +799,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(toAccountEnforcementDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── applyEnforcement — apply enforcement to user ──────────────
@@ -820,7 +854,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason,
           });
           return toAccountEnforcementDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── unblockEnforcement — revoke active enforcements ───────────
@@ -869,7 +905,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason,
           });
           return rows.map(toAccountEnforcementDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listCases — list global moderation cases ──────────────────
@@ -893,7 +931,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(toModerationCaseDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getCase — fetch single case ───────────────────────────────
@@ -906,7 +946,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             database.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1);
           if (!rows[0]) return yield* new GovernanceForbidden();
           return toModerationCaseDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listCaseActions — list moderation actions linked to a case ──
@@ -924,7 +966,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(toModerationActionDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── createCaseFromFeedback — create case from feedback report ──
@@ -961,7 +1005,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Case created from feedback",
           });
           return toModerationCaseDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── duplicateCase — mark case as duplicate of another ─────────
@@ -988,7 +1034,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: `Marked as duplicate of ${duplicateOfCaseId}`,
           });
           return toModerationCaseDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── assignCase — assign case to a user ────────────────────────
@@ -1015,7 +1063,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: `Assigned to ${assignedToUserId}`,
           });
           return toModerationCaseDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── triageCase — triage case (set severity + state) ───────────
@@ -1045,7 +1095,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Case triaged",
           });
           return toModerationCaseDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── decideCase — record a decision on a case ──────────────────
@@ -1083,7 +1135,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Decision recorded",
           });
           return toModerationCaseDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── appealCase — register an appeal on a case ─────────────────
@@ -1131,7 +1185,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Appeal submitted",
           });
           return toModerationCaseDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listRealmCases — list realm-scoped cases ──────────────────
@@ -1157,7 +1213,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(toModerationCaseDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── createRealmCase — create a realm-scoped case ──────────────
@@ -1193,7 +1251,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case created",
           });
           return toModerationCaseDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── createRealmCaseFromFeedback — realm case from feedback ────
@@ -1231,7 +1291,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case created from feedback",
           });
           return toModerationCaseDTO(rows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listRealmCaseActions — list actions for a realm case ──────
@@ -1254,7 +1316,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(toModerationActionDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── decideRealmCase — decide a realm-scoped case ──────────────
@@ -1298,7 +1362,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case decision recorded",
           });
           return toModerationCaseDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── escalateRealmCase — escalate realm case to platform level ──
@@ -1362,7 +1428,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reason: payload.reason ?? "Realm case escalated to platform",
           });
           return toModerationCaseDTO(escalatedRows[0]!);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── listAuditLogs — list staff audit log entries ──────────────
@@ -1388,7 +1456,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
           return rows.map(toStaffAuditLogDTO);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ── getAuditLog — fetch a single audit log entry ──────────────
@@ -1401,7 +1471,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             database.select().from(StaffAuditLog).where(eq(StaffAuditLog.id, params.auditLogId)).limit(1);
           if (!rows[0]) return yield* new GovernanceNotFound();
           return toStaffAuditLogDTO(rows[0]);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );

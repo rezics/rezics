@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { type SQL, and, asc, count, desc, eq, inArray, notInArray, sql } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -191,7 +191,9 @@ export const EntitiesHandlers = HttpApiBuilder.group(
               .limit(1);
           if (!unitRows[0]) return yield* new EntityNotFound();
           return yield* hydrateEntity(unitRows[0].id);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- GET /entity/ — list entities / 列出实体 ----
@@ -267,11 +269,17 @@ export const EntitiesHandlers = HttpApiBuilder.group(
           });
 
           return new EntityListResult({ entities: items, total: agg[0]?.total ?? 0 });
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- GET /entity/:unitId — look up by unitId / 通过 unitId 查找实体 ----
-      .handle("getById", ({ params }) => hydrateEntity(params.unitId).pipe(Effect.orDie))
+      .handle("getById", ({ params }) =>
+        hydrateEntity(params.unitId).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
+      )
 
       // ---- POST /entity/ — create entity / 创建实体 ----
       .handle("create", ({ payload }) =>
@@ -319,7 +327,9 @@ export const EntitiesHandlers = HttpApiBuilder.group(
           }
 
           return yield* hydrateEntity(unit.id);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- PATCH /entity/:unitId — update entity / 更新实体 ----
@@ -381,7 +391,9 @@ export const EntitiesHandlers = HttpApiBuilder.group(
 
           yield* database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId));
           return yield* hydrateEntity(params.unitId);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- DELETE /entity/:unitId — delete entity / 删除实体 ----
@@ -395,7 +407,9 @@ export const EntitiesHandlers = HttpApiBuilder.group(
           if (units[0].userId !== user.id) return yield* new EntityForbidden();
           yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
           return { message: "Entity deleted successfully" };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -520,7 +534,9 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
             weight: s.weight ?? null,
           })),
         };
-      }).pipe(Effect.orDie),
+      }).pipe(
+        Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+      ),
     );
   }),
 );
@@ -586,7 +602,9 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
 
           const hydrated = yield* hydrateCreditRows([row!]);
           return hydrated[0]!;
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- GET /credit-attribution/by-unit/:unitId — list / 列出 ----
@@ -603,7 +621,9 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
                 asc(CreditAttribution.entityId),
               );
           return yield* hydrateCreditRows(rows);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- POST /credit-attribution/evidence — create evidence / 创建证据 ----
@@ -649,7 +669,9 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
 
           const hydrated = yield* hydrateCreditRows([existing[0]]);
           return hydrated[0]!;
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- DELETE /credit-attribution/:unitId/:entityId/:role — unlink / 解除关联 ----
@@ -667,7 +689,9 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
                 ),
               );
           return { message: "Credit attribution unlinked" };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
@@ -735,7 +759,9 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
 
           const hydrated = yield* hydrateSubjectRows([row!]);
           return hydrated[0]!;
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- GET /subject-attribution/by-unit/:unitId — list by unit / 按 unit 列出 ----
@@ -755,7 +781,9 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
                 asc(SubjectAttribution.entityId),
               );
           return yield* hydrateSubjectRows(rows);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- GET /subject-attribution/by-subject/:entityId — list by subject / 按主题列出 ----
@@ -781,7 +809,9 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
                 asc(SubjectAttribution.unitId),
               );
           return yield* hydrateSubjectRows(rows);
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       )
 
       // ---- DELETE /subject-attribution/:unitId/:entityId/:role — unlink / 解除关联 ----
@@ -799,7 +829,9 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
                 ),
               );
           return { message: "Subject attribution unlinked" };
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError()),
+        ),
       );
   }),
 );
