@@ -35,6 +35,7 @@
       env {
         NODE_ENV     = "development"
         DATABASE_URL = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@127.0.0.1:5432/rezics_server"
+        CORS_ORIGINS = "http://localhost:35001"
       }
 
       resources {
@@ -65,8 +66,9 @@
       }
 
       env {
-        NODE_ENV = "development"
-        PORT     = "35001"
+        NODE_ENV    = "development"
+        PORT        = "35001"
+        BACKEND_URL = "http://localhost:30000"
       }
 
       resources {
