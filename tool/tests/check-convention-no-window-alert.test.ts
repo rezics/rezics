@@ -39,9 +39,7 @@ describe("WindowAlert legacy system fully removed", () => {
   });
 
   test("windowAlertStore.ts files do not exist", () => {
-    const storeFiles = allFiles.filter((f) =>
-      f.includes("windowAlertStore"),
-    );
+    const storeFiles = allFiles.filter((f) => f.includes("windowAlertStore"));
     expect(storeFiles).toEqual([]);
   });
 

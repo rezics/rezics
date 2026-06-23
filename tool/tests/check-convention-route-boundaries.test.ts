@@ -8,7 +8,11 @@ function collectTsxFiles(dir: string, acc: string[] = []): string[] {
     if (entry === "node_modules" || entry.includes(".gen.")) continue;
     if (statSync(full).isDirectory()) {
       collectTsxFiles(full, acc);
-    } else if (full.endsWith(".tsx") && !entry.includes(".test.") && !entry.includes(".stories.")) {
+    } else if (
+      full.endsWith(".tsx") &&
+      !entry.includes(".test.") &&
+      !entry.includes(".stories.")
+    ) {
       acc.push(full);
     }
   }

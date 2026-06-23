@@ -11,16 +11,16 @@ import { describe, expect, test } from "bun:test";
 const appSrc = join(import.meta.dir, "../../package/app/src");
 
 describe("no raw onError toast.error bypass", () => {
-	test("no mutation callsite uses raw toast.error(error.message) as onError", () => {
-		const raw = execSync(
-			`grep -rn "onError.*toast\\.error" "${appSrc}" --include="*.tsx" --include="*.ts" || true`,
-			{ encoding: "utf-8" },
-		);
-		const violations = raw
-			.split("\n")
-			.filter((l) => l.trim())
-			.filter((l) => !l.includes(".test.") && !l.includes(".stories."))
-			.map((l) => l.replace(appSrc + "/", ""));
-		expect(violations).toEqual([]);
-	});
+  test("no mutation callsite uses raw toast.error(error.message) as onError", () => {
+    const raw = execSync(
+      `grep -rn "onError.*toast\\.error" "${appSrc}" --include="*.tsx" --include="*.ts" || true`,
+      { encoding: "utf-8" },
+    );
+    const violations = raw
+      .split("\n")
+      .filter((l) => l.trim())
+      .filter((l) => !l.includes(".test.") && !l.includes(".stories."))
+      .map((l) => l.replace(appSrc + "/", ""));
+    expect(violations).toEqual([]);
+  });
 });

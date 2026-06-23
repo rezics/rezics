@@ -20,10 +20,7 @@ describe("engagement icon size convergence", () => {
   });
 
   test("types.ts exports ENGAGEMENT_ICON_PX", () => {
-    const src = readFileSync(
-      join(engagementDir, "../types.ts"),
-      "utf-8",
-    );
+    const src = readFileSync(join(engagementDir, "../types.ts"), "utf-8");
     expect(src).toContain("export const ENGAGEMENT_ICON_PX");
   });
 });

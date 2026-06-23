@@ -48,10 +48,7 @@ const META_TOAST_HOOKS = [
 describe("meta.successToast coverage", () => {
   test("tsr.ts Register.mutationMeta declares successToast", () => {
     const tsr = readFileSync(
-      join(
-        import.meta.dir,
-        "../../package/api/src/react-query/tsr.ts",
-      ),
+      join(import.meta.dir, "../../package/api/src/react-query/tsr.ts"),
       "utf-8",
     );
     expect(tsr).toContain("successToast");

@@ -1,63 +1,57 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
-import type en from "./languages/en";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import { Atom } from "effect/unstable/reactivity";
+import { useCallback, useEffect } from "react";
 
-type Messages = typeof en;
+import { useTranslation } from "./i18n";
 
-const languages: Record<string, () => Promise<{ default: Messages }>> = {
-  en: () => import("./languages/en"),
-  // Cast needed: zh-hans has the same shape but different literal string types
-  // 需要类型转换：zh-hans 结构相同但字符串字面量类型不同
-  "zh-hans": () => import("./languages/zh-hans") as unknown as Promise<{ default: Messages }>,
+export const locales = ["en-US", "zh-CN"] as const;
+export type Locale = (typeof locales)[number];
+export type LocalePreference = Locale | "auto";
+
+const STORAGE_KEY = "rezics.locale";
+
+export const localeAtom = Atom.make<LocalePreference>("auto");
+
+const isLocalePreference = (value: string): value is LocalePreference =>
+  value === "auto" || locales.some((locale) => locale === value);
+
+const TAGS: Record<Locale, Array<string>> = {
+  "en-US": ["en-US"],
+  "zh-CN": ["zh-CN"],
 };
 
-let current: Messages | null = null;
-let currentLocale = "en";
-const listeners = new Set<() => void>();
+export const useT = () => {
+  const preference = useAtomValue(localeAtom);
+  return useTranslation(preference === "auto" ? undefined : TAGS[preference]);
+};
 
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-function getSnapshot(): Messages {
-  if (!current) {
-    // Synchronously load English as default
-    // 同步加载英文作为默认语言
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    current = require("./languages/en").default;
-  }
-  return current!;
-}
-
-export function setLocale(locale: string) {
-  const loader = languages[locale];
-  if (!loader) return;
-  currentLocale = locale;
-  loader().then((mod) => {
-    current = mod.default;
-    listeners.forEach((l) => l());
-  });
-}
-
-export function getLocale() {
-  return currentLocale;
-}
-
-export function useT(): [Messages] {
-  const messages = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  return [messages];
-}
+export const useSetLocale = () => {
+  const set = useAtomSet(localeAtom);
+  return useCallback(
+    (preference: LocalePreference) => {
+      localStorage.setItem(STORAGE_KEY, preference);
+      set(preference);
+    },
+    [set],
+  );
+};
 
 export function LocaleSync() {
-  // Sync locale from cookie/localStorage on mount
-  // 挂载时从 cookie/localStorage 同步语言设置
-  const messages = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const setLocale = useAtomSet(localeAtom);
+  const [, tag] = useT();
 
   useEffect(() => {
-    document.documentElement.lang = currentLocale;
-  }, [messages]);
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored !== null && isLocalePreference(stored)) {
+      setLocale(stored);
+    }
+  }, [setLocale]);
+
+  useEffect(() => {
+    document.documentElement.lang = tag;
+  }, [tag]);
 
   return null;
 }
