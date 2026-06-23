@@ -175,7 +175,7 @@ const ModerationOverlaysPayload = Schema.Struct({
 });
 
 const ApplyEnforcementPayload = Schema.Struct({
-  kind: Schema.optional(Schema.Literal("WARNING", "SILENCE", "SUSPENSION", "BAN", "RATE_LIMIT", "TRUST_RESTRICTION")),
+  kind: Schema.optional(Schema.Literals(["WARNING", "SILENCE", "SUSPENSION", "BAN", "RATE_LIMIT", "TRUST_RESTRICTION"])),
   reason: Schema.optional(Schema.String),
   decisionCode: Schema.optional(Schema.String),
   expiresAt: Schema.optional(Schema.String),
@@ -208,7 +208,7 @@ const TriageCasePayload = Schema.Struct({
 
 const DecideCasePayload = Schema.Struct({
   decisionCode: Schema.optional(Schema.String),
-  actionKind: Schema.optional(Schema.Literal("APPROVE", "REMOVE", "RESTORE", "LOCK", "UNLOCK", "FIELD_LOCK", "FIELD_UNLOCK", "WARNING", "SILENCE", "SUSPENSION", "BAN", "RATE_LIMIT", "TRUST_RESTRICTION", "REVOKE_ENFORCEMENT", "MUTE_MEMBER", "REMOVE_MEMBER", "BAN_MEMBER", "RESTORE_MEMBER", "ESCALATE", "REVERSE", "NOTE")),
+  actionKind: Schema.optional(Schema.Literals(["APPROVE", "REMOVE", "RESTORE", "LOCK", "UNLOCK", "FIELD_LOCK", "FIELD_UNLOCK", "WARNING", "SILENCE", "SUSPENSION", "BAN", "RATE_LIMIT", "TRUST_RESTRICTION", "REVOKE_ENFORCEMENT", "MUTE_MEMBER", "REMOVE_MEMBER", "BAN_MEMBER", "RESTORE_MEMBER", "ESCALATE", "REVERSE", "NOTE"])),
   reason: Schema.optional(Schema.String),
 });
 
@@ -218,7 +218,7 @@ const AppealCasePayload = Schema.Struct({
 });
 
 const CreateRealmCasePayload = Schema.Struct({
-  targetKind: Schema.optional(Schema.Literal("UNIT", "UNIT_REALM", "COMMENT", "UNIT_FIELD", "ACCOUNT", "REALM_MEMBER", "FEEDBACK")),
+  targetKind: Schema.optional(Schema.Literals(["UNIT", "UNIT_REALM", "COMMENT", "UNIT_FIELD", "ACCOUNT", "REALM_MEMBER", "FEEDBACK"])),
   targetId: Schema.optional(Schema.String),
   addressedUnitId: Schema.optional(Schema.String),
   subjectUserId: Schema.optional(Schema.String),
@@ -257,7 +257,7 @@ const ListQuery = Schema.Struct({
   limit: Schema.optional(Schema.NumberFromString),
   scope: Schema.optional(Schema.String),
   state: Schema.optional(
-    Schema.Literal("NEW", "TRIAGED", "ASSIGNED", "ACTIONED", "RESOLVED", "DUPLICATE", "REJECTED", "ESCALATED", "REVIEWING", "ACTIVE", "EXPIRED", "REVOKED"),
+    Schema.Literals(["NEW", "TRIAGED", "ASSIGNED", "ACTIONED", "RESOLVED", "DUPLICATE", "REJECTED", "ESCALATED", "REVIEWING", "ACTIVE", "EXPIRED", "REVOKED"]),
   ),
 });
 
@@ -330,7 +330,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // GET /governance/moderation/:targetKind/:targetId/actions — list moderation actions
     // 列出审核动作
     HttpApiEndpoint.get("listModerationActions", "/moderation/:targetKind/:targetId/actions", {
-      params: { targetKind: Schema.Literal("UNIT", "UNIT_REALM", "COMMENT", "UNIT_FIELD", "ACCOUNT", "REALM_MEMBER", "FEEDBACK"), targetId: Schema.String },
+      params: { targetKind: Schema.Literals(["UNIT", "UNIT_REALM", "COMMENT", "UNIT_FIELD", "ACCOUNT", "REALM_MEMBER", "FEEDBACK"]), targetId: Schema.String },
       query: ListQuery,
       success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
