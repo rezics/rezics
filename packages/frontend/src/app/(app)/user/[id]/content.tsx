@@ -13,8 +13,8 @@ type TabKind = (typeof TABS)[number];
 
 // Runtime membership guard for Ark UI string callback
 // Ark UI 字符串回调的运行时成员守卫
-const isTabKind = (v: string): v is TabKind =>
-  (TABS as readonly string[]).includes(v);
+const tabSet: ReadonlySet<string> = new Set(TABS);
+const isTabKind = (v: string): v is TabKind => tabSet.has(v);
 
 export function UserProfileContent({
   paramsPromise,

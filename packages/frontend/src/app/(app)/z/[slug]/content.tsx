@@ -8,6 +8,11 @@ import { use } from "react";
 const TABS = ["pages", "posts", "wiki", "search"] as const;
 type TabKind = (typeof TABS)[number];
 
+// Runtime membership guard for Ark UI string callback
+// Ark UI 字符串回调的运行时成员守卫
+const tabSet: ReadonlySet<string> = new Set(TABS);
+const isTabKind = (v: string): v is TabKind => tabSet.has(v);
+
 export function ZoneDetailContent({
   paramsPromise,
 }: {
@@ -29,7 +34,7 @@ export function ZoneDetailContent({
       </div>
 
       <Tabs
-        onValueChange={(details) => setTab(details.value as TabKind)}
+        onValueChange={(details) => { if (isTabKind(details.value)) setTab(details.value); }}
         value={tab}
       >
         <TabsList className="overflow-x-auto">

@@ -9,6 +9,11 @@ import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 const CATEGORIES = ["all", "books", "realms", "posts", "users", "tags"] as const;
 type Category = (typeof CATEGORIES)[number];
 
+// Runtime membership guard for Ark UI string callback
+// Ark UI 字符串回调的运行时成员守卫
+const categorySet: ReadonlySet<string> = new Set(CATEGORIES);
+const isCategory = (v: string): v is Category => categorySet.has(v);
+
 export function SearchContent() {
   const [t] = useT();
   const [{ q, category }, setParams] = useQueryStates({
@@ -30,7 +35,7 @@ export function SearchContent() {
       </div>
 
       <Tabs
-        onValueChange={(details) => setParams({ category: details.value as Category })}
+        onValueChange={(details) => { if (isCategory(details.value)) setParams({ category: details.value }); }}
         value={category}
       >
         <TabsList className="overflow-x-auto">

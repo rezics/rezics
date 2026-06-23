@@ -10,6 +10,11 @@ import { use } from "react";
 const TABS = ["info", "reviews", "discussion"] as const;
 type TabKind = (typeof TABS)[number];
 
+// Runtime membership guard for Ark UI string callback
+// Ark UI 字符串回调的运行时成员守卫
+const tabSet: ReadonlySet<string> = new Set(TABS);
+const isTabKind = (v: string): v is TabKind => tabSet.has(v);
+
 export function GameDetailContent({
   paramsPromise,
 }: {
@@ -38,7 +43,7 @@ export function GameDetailContent({
       </div>
 
       <Tabs
-        onValueChange={(details) => setTab(details.value as TabKind)}
+        onValueChange={(details) => { if (isTabKind(details.value)) setTab(details.value); }}
         value={tab}
       >
         <TabsList>

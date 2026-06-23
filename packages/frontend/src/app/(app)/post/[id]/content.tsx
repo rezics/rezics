@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useT } from "@/lib/i18n/locale";
 import { useAtomSuspense } from "@effect/atom-react";
-import type { PortableTextBlock } from "@portabletext/editor";
 import { ArrowLeftIcon, LockIcon, MessageSquareIcon, Share2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -48,10 +47,7 @@ function PostDetailInner({ id }: { readonly id: string }) {
 
   const displayTitle = post.title ?? t.post.untitled;
   const isEdited = post.updatedAt !== post.createdAt;
-  const portableContent =
-    post.content !== null && post.content !== undefined
-      ? (post.content as ReadonlyArray<PortableTextBlock>)
-      : null;
+  const portableContent = post.content ?? null;
 
   function handleShare() {
     navigator.clipboard.writeText(`${window.location.origin}/post/${post.unitId}`);
@@ -93,7 +89,7 @@ function PostDetailInner({ id }: { readonly id: string }) {
 
           {/* Body / 正文 */}
           {portableContent !== null && (
-            <PortableTextView value={portableContent as PortableTextBlock[]} />
+            <PortableTextView value={portableContent} />
           )}
           {portableContent === null && post.summary !== null && (
             <p className="text-sm leading-relaxed">{post.summary}</p>

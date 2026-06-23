@@ -15,10 +15,10 @@ type SortKind = (typeof SORTS)[number];
 
 // Runtime membership guards for Ark UI string callbacks
 // Ark UI 字符串回调的运行时成员守卫
-const isFeedKind = (v: string): v is FeedKind =>
-  (FEEDS as readonly string[]).includes(v);
-const isSortKind = (v: string): v is SortKind =>
-  (SORTS as readonly string[]).includes(v);
+const feedSet: ReadonlySet<string> = new Set(FEEDS);
+const isFeedKind = (v: string): v is FeedKind => feedSet.has(v);
+const sortSet: ReadonlySet<string> = new Set(SORTS);
+const isSortKind = (v: string): v is SortKind => sortSet.has(v);
 
 export function HomeContent() {
   const [t] = useT();

@@ -1,7 +1,7 @@
 "use client";
 
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
-import type { PortableTextBlock } from "@portabletext/editor";
+import type { ArbitraryTypedObject } from "@portabletext/types";
 
 const components: PortableTextComponents = {
   block: {
@@ -33,7 +33,28 @@ const components: PortableTextComponents = {
   },
 };
 
-export function PortableTextView({ value }: { readonly value: PortableTextBlock[] }) {
+function isTypedObject(item: unknown): item is ArbitraryTypedObject {
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "_type" in item &&
+    typeof item._type === "string"
+  );
+}
+
+// Runtime guard: every element must carry `_type: string` (TypedObject contract).
+// 运行时守卫：每个元素必须携带 `_type: string`（TypedObject 契约）。
+function isPortableTextArray(v: unknown): v is ArbitraryTypedObject[] {
+  return Array.isArray(v) && v.every(isTypedObject);
+}
+
+// Accept unknown content and render only when it is a valid PortableText array.
+// The API may return structured ContentDoc envelopes or other shapes; this guard
+// ensures we never pass incompatible data to @portabletext/react.
+// 接受 unknown 内容，仅当其为有效的 PortableText 数组时才渲染。
+// API 可能返回结构化 ContentDoc 信封或其他形态；此守卫确保不会将不兼容数据传给 @portabletext/react。
+export function PortableTextView({ value }: { readonly value: unknown }) {
+  if (!isPortableTextArray(value)) return null;
   return (
     <div className="prose prose-sm max-w-none">
       <PortableText components={components} value={value} />

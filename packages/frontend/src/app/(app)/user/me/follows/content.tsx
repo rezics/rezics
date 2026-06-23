@@ -6,6 +6,12 @@ import { useT } from "@/lib/i18n/locale";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 const TABS = ["following", "followers"] as const;
+type TabKind = (typeof TABS)[number];
+
+// Runtime membership guard for Ark UI string callback
+// Ark UI 字符串回调的运行时成员守卫
+const tabSet: ReadonlySet<string> = new Set(TABS);
+const isTabKind = (v: string): v is TabKind => tabSet.has(v);
 
 export function FollowsContent() {
   const [t] = useT();
@@ -17,7 +23,7 @@ export function FollowsContent() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4">
       <h1 className="text-2xl font-bold">{t.follows.title}</h1>
-      <Tabs onValueChange={(d) => setTab(d.value as (typeof TABS)[number])} value={tab}>
+      <Tabs onValueChange={(d) => { if (isTabKind(d.value)) setTab(d.value); }} value={tab}>
         <TabsList>
           <TabsTrigger value="following">{t.follows.following}</TabsTrigger>
           <TabsTrigger value="followers">{t.follows.followers}</TabsTrigger>

@@ -8,6 +8,11 @@ import { parseAsStringLiteral, useQueryState } from "nuqs";
 const TABS = ["notifications", "messages"] as const;
 type TabKind = (typeof TABS)[number];
 
+// Runtime membership guard for Ark UI string callback
+// Ark UI 字符串回调的运行时成员守卫
+const tabSet: ReadonlySet<string> = new Set(TABS);
+const isTabKind = (v: string): v is TabKind => tabSet.has(v);
+
 export function InboxContent() {
   const [t] = useT();
   const [tab, setTab] = useQueryState(
@@ -20,7 +25,7 @@ export function InboxContent() {
       <h1 className="text-2xl font-bold">{t.nav.inbox}</h1>
 
       <Tabs
-        onValueChange={(details) => setTab(details.value as TabKind)}
+        onValueChange={(details) => { if (isTabKind(details.value)) setTab(details.value); }}
         value={tab}
       >
         <TabsList>
