@@ -1,11 +1,18 @@
-import { SectionBoundary } from "@/components/SectionBoundary";
+import { ClientOnly } from "@/components/ClientOnly";
+import { PostDetailContent } from "./content";
 
-export default function PostDetailPage() {
+interface PostDetailPageProps {
+  readonly params: Promise<{ id: string }>;
+}
+
+export default async function PostDetailPage({ params }: PostDetailPageProps) {
+  const { id } = await params;
+
   return (
-    <SectionBoundary>
-      <div className="py-8">
-        <h1 className="text-2xl font-bold">PostDetail</h1>
-      </div>
-    </SectionBoundary>
+    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+      <ClientOnly>
+        <PostDetailContent id={id} />
+      </ClientOnly>
+    </div>
   );
 }
