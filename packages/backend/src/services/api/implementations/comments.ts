@@ -48,7 +48,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
   Api,
   "comments",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const { pagination } = yield* Config;
     const lim = (n?: number) =>
       Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
@@ -58,7 +58,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
     const fetchComment = (id: string) =>
       Effect.gen(function* () {
         const rows = yield* Effect.orDie(
-          db.select().from(Comment).where(eq(Comment.id, id)),
+          database.select().from(Comment).where(eq(Comment.id, id)),
         );
         if (!rows[0]) return yield* new CommentNotFound();
         return commentToDTO(rows[0]);
@@ -86,7 +86,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           const where = and(...conditions);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Comment)
               .where(where)
@@ -96,7 +96,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           );
 
           const agg = yield* Effect.orDie(
-            db.select({ total: count() }).from(Comment).where(where),
+            database.select({ total: count() }).from(Comment).where(where),
           );
 
           const items = rows.map(commentToDTO);
@@ -130,7 +130,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           const where = and(...conditions);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Comment)
               .where(where)
@@ -140,7 +140,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           );
 
           const agg = yield* Effect.orDie(
-            db.select({ total: count() }).from(Comment).where(where),
+            database.select({ total: count() }).from(Comment).where(where),
           );
 
           const items = rows.map(commentToDTO);
@@ -163,7 +163,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           const depth = yield* Effect.gen(function* () {
             if (!payload.parentCommentId) return 1;
             const parents = yield* Effect.orDie(
-              db
+              database
                 .select({ depth: Comment.depth })
                 .from(Comment)
                 .where(eq(Comment.id, payload.parentCommentId)),
@@ -175,7 +175,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           // Insert comment and update counters in a transaction
           // 在事务中插入评论并更新计数器
           const createdRows = yield* Effect.orDie(
-            db.transaction((tx) =>
+            database.transaction((tx) =>
               Effect.gen(function* () {
                 const inserted = yield* Effect.orDie(
                   tx
@@ -239,7 +239,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           // Fetch the full comment row for the response
           // 获取完整评论行用于响应
           const rows = yield* Effect.orDie(
-            db.select().from(Comment).where(eq(Comment.id, commentId)),
+            database.select().from(Comment).where(eq(Comment.id, commentId)),
           );
           if (!rows[0]) return yield* new HttpApiError.InternalServerError();
           return commentToDTO(rows[0]);
@@ -251,7 +251,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db.select().from(Comment).where(eq(Comment.id, params.id)),
+            database.select().from(Comment).where(eq(Comment.id, params.id)),
           );
           if (!rows[0]) return yield* new CommentNotFound();
           if (rows[0].authorUserId !== user.id)
@@ -266,7 +266,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
             setClause["language"] = payload["language"];
 
           yield* Effect.orDie(
-            db
+            database
               .update(Comment)
               .set(setClause)
               .where(eq(Comment.id, params.id)),
@@ -281,7 +281,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db.select().from(Comment).where(eq(Comment.id, params.id)),
+            database.select().from(Comment).where(eq(Comment.id, params.id)),
           );
           if (!rows[0]) return yield* new CommentNotFound();
 
@@ -289,7 +289,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
             payload.status as (typeof Comment.$inferInsert)["moderationStatus"];
 
           yield* Effect.orDie(
-            db
+            database
               .update(Comment)
               .set({
                 moderationStatus: status,
@@ -307,7 +307,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db.select().from(Comment).where(eq(Comment.id, params.id)),
+            database.select().from(Comment).where(eq(Comment.id, params.id)),
           );
           if (!rows[0]) return yield* new CommentNotFound();
           if (rows[0].authorUserId !== user.id)
@@ -316,7 +316,7 @@ export const CommentsHandlers = HttpApiBuilder.group(
           // Soft-delete: clear content and set deletedAt
           // 软删除：清空内容并设置 deletedAt
           yield* Effect.orDie(
-            db
+            database
               .update(Comment)
               .set({
                 content: null,

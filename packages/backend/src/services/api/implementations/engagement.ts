@@ -122,7 +122,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
   Api,
   "subscriptions",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // POST /subscription/ — create subscription
@@ -131,7 +131,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(Subscription)
               .values({
                 subscriberUnitId: user.id,
@@ -159,7 +159,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
           // TODO: filter by subscribedType via Unit join when needed
           // TODO: 需要时通过 Unit join 按 subscribedType 过滤
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Subscription)
               .where(eq(Subscription.subscriberUnitId, user.id))
@@ -175,7 +175,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .update(Subscription)
               .set({ channels: [...payload.channels], updatedAt: new Date() })
               .where(
@@ -197,7 +197,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .delete(Subscription)
               .where(
                 and(
@@ -217,7 +217,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Subscription)
               .where(
@@ -242,7 +242,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
       .handle("count", ({ params }) =>
         Effect.gen(function* () {
           const agg = yield* Effect.orDie(
-            db
+            database
               .select({ total: count() })
               .from(Subscription)
               .where(eq(Subscription.subscribedUnitId, params.subscribedUnitId)),
@@ -261,7 +261,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
   Api,
   "reactions",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // POST /reaction/ — create reaction (idempotent upsert)
@@ -270,7 +270,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(Reaction)
               .values({
                 userId: user.id,
@@ -287,7 +287,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
           // 如果冲突（已存在），获取已有行
           if (!rows[0]) {
             const existing = yield* Effect.orDie(
-              db
+              database
                 .select()
                 .from(Reaction)
                 .where(
@@ -311,7 +311,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* Effect.orDie(
-            db
+            database
               .delete(Reaction)
               .where(
                 and(
@@ -332,7 +332,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
           // Create a reaction with "share" type to track the share intent
           // 创建一个 "share" 类型的 reaction 来追踪分享意图
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(Reaction)
               .values({
                 userId: user.id,
@@ -347,7 +347,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
           if (!rows[0]) {
             // Already shared — fetch existing / 已分享过——获取已有记录
             const existing = yield* Effect.orDie(
-              db
+              database
                 .select()
                 .from(Reaction)
                 .where(
@@ -375,7 +375,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
   Api,
   "feedback",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // POST /feedback/ — create feedback
@@ -384,7 +384,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(Feedback)
               .values({
                 userId: user.id,
@@ -425,7 +425,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
           const where = and(...conditions);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Feedback)
               .where(where)
@@ -434,7 +434,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
               .limit(limit),
           );
           const totalRows = yield* Effect.orDie(
-            db.select({ total: count() }).from(Feedback).where(where),
+            database.select({ total: count() }).from(Feedback).where(where),
           );
 
           return new FeedbackListResult({
@@ -452,7 +452,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
 
           // Admin check / 管理员检查
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
@@ -477,7 +477,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Feedback)
               .where(where)
@@ -486,7 +486,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
               .limit(limit),
           );
           const totalRows = yield* Effect.orDie(
-            db.select({ total: count() }).from(Feedback).where(where),
+            database.select({ total: count() }).from(Feedback).where(where),
           );
 
           return new FeedbackListResult({
@@ -504,7 +504,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
 
           // Admin check / 管理员检查
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
@@ -513,7 +513,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
           if (!isAdmin(userRows[0]?.permission)) return yield* new EngagementForbidden();
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .update(Feedback)
               .set({
                 resolved: payload.resolved,
@@ -538,7 +538,7 @@ export const BlockHandlers = HttpApiBuilder.group(
   Api,
   "blocks",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // GET /block/list — list my blocked users
@@ -547,7 +547,7 @@ export const BlockHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UserBlock)
               .where(eq(UserBlock.blockerId, user.id))
@@ -564,7 +564,7 @@ export const BlockHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           if (payload.userId === user.id) return yield* new EngagementBadRequest();
           yield* Effect.orDie(
-            db
+            database
               .insert(UserBlock)
               .values({ blockerId: user.id, blockedId: payload.userId })
               .onConflictDoNothing({
@@ -581,7 +581,7 @@ export const BlockHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* Effect.orDie(
-            db
+            database
               .delete(UserBlock)
               .where(
                 and(
@@ -604,7 +604,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
   Api,
   "progress",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // GET /me/units/:unitId/progress — get my unit progress
@@ -613,7 +613,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UserUnitProgress)
               .where(
@@ -641,7 +641,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
             : "BACKLOG";
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(UserUnitProgress)
               .values({
                 userId: user.id,
@@ -671,7 +671,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* Effect.orDie(
-            db
+            database
               .update(UserUnitProgress)
               .set({ isDeleted: true, lastSeenAt: new Date() })
               .where(
@@ -708,7 +708,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
           const where = and(...conditions);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UserUnitProgress)
               .where(where)
@@ -717,7 +717,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
               .limit(limit),
           );
           const totalRows = yield* Effect.orDie(
-            db.select({ total: count() }).from(UserUnitProgress).where(where),
+            database.select({ total: count() }).from(UserUnitProgress).where(where),
           );
 
           return new UnitProgressListResult({
@@ -735,7 +735,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
 
           // Verify node exists and belongs to the specified unit / 验证节点存在并属于指定的 unit
           const nodeRows = yield* Effect.orDie(
-            db
+            database
               .select({
                 ownerUnitId: ContentStructureNode.ownerUnitId,
                 isDeleted: ContentStructureNode.isDeleted,
@@ -755,14 +755,14 @@ export const ProgressHandlers = HttpApiBuilder.group(
 
           if (payload.isCompleted) {
             yield* Effect.orDie(
-              db
+              database
                 .insert(UserContentNodeProgress)
                 .values({ userId: user.id, nodeId: payload.nodeId })
                 .onConflictDoNothing(),
             );
           } else {
             yield* Effect.orDie(
-              db
+              database
                 .delete(UserContentNodeProgress)
                 .where(
                   and(
@@ -788,7 +788,7 @@ export const DraftHandlers = HttpApiBuilder.group(
   Api,
   "drafts",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // GET /me/drafts — list my drafts
@@ -799,7 +799,7 @@ export const DraftHandlers = HttpApiBuilder.group(
           const limit = Math.max(1, Math.min(query.limit ?? 50, MAX_LIMIT));
 
           const posts = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: Post.unitId,
                 kind: Post.kind,
@@ -822,7 +822,7 @@ export const DraftHandlers = HttpApiBuilder.group(
 
           const unitIds = posts.map((p) => p.unitId);
           const translations = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: UnitTranslation.unitId,
                 title: UnitTranslation.title,
@@ -867,7 +867,7 @@ export const ActivityHandlers = HttpApiBuilder.group(
   Api,
   "activity",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // GET /profile/:userId/activity/ — list public activity timeline
@@ -890,7 +890,7 @@ export const ActivityHandlers = HttpApiBuilder.group(
           }
 
           const posts = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: Post.unitId,
                 kind: Post.kind,
@@ -915,7 +915,7 @@ export const ActivityHandlers = HttpApiBuilder.group(
           }
 
           const shelves = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: Shelf.unitId,
                 updatedAt: Shelf.updatedAt,
@@ -968,7 +968,7 @@ export const StreamHandlers = HttpApiBuilder.group(
   Api,
   "stream",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // GET /stream/rows — list stream rows
@@ -1000,7 +1000,7 @@ export const StreamHandlers = HttpApiBuilder.group(
             // Use UnitTranslation to filter by realm context via the post's target
             // 使用 UnitTranslation 通过帖子的目标按 realm 上下文过滤
             const posts = yield* Effect.orDie(
-              db
+              database
                 .select({
                   unitId: Post.unitId,
                   kind: Post.kind,
@@ -1038,7 +1038,7 @@ export const StreamHandlers = HttpApiBuilder.group(
           }
 
           const posts = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: Post.unitId,
                 kind: Post.kind,

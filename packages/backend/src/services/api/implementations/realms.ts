@@ -79,7 +79,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
   Api,
   "realms",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const { pagination } = yield* Config;
     const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
 
@@ -88,7 +88,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
     const fetchRealmByUnitId = (unitId: string) =>
       Effect.gen(function* () {
         const rows = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(RealmTable)
             .innerJoin(Unit, eq(RealmTable.unitId, Unit.id))
@@ -97,7 +97,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
         );
         if (!rows[0]) return null;
         const trans = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(UnitTranslation)
             .where(eq(UnitTranslation.unitId, unitId))
@@ -120,7 +120,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
     const requireRealmAdmin = (realmUnitId: string, userId: string) =>
       Effect.gen(function* () {
         const membership = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(RealmMemberTable)
             .where(
@@ -145,7 +145,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
         const baseConditions = [eq(Unit.type, "REALM")];
         const where = opts.conditions ? and(...baseConditions, ...opts.conditions) : and(...baseConditions);
         const rows = yield* Effect.orDie(
-          db
+          database
             .select({
               Unit,
               Realm: RealmTable,
@@ -196,7 +196,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
       .handle("getBySlug", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Unit)
               .innerJoin(RealmTable, eq(RealmTable.unitId, Unit.id))
@@ -205,7 +205,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           );
           if (!rows[0]) return yield* new RealmNotFound();
           const trans = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UnitTranslation)
               .where(eq(UnitTranslation.unitId, rows[0].Unit.id))
@@ -230,7 +230,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const memberships = yield* Effect.orDie(
-            db
+            database
               .select({ realmUnitId: RealmMemberTable.realmUnitId })
               .from(RealmMemberTable)
               .where(and(eq(RealmMemberTable.userId, user.id), eq(RealmMemberTable.state, "ACTIVE"))),
@@ -238,7 +238,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           if (memberships.length === 0) return [];
           const realmIds = memberships.map((m) => m.realmUnitId);
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({
                 Unit,
                 Realm: RealmTable,
@@ -267,7 +267,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
       .handle("listByMember", ({ params }) =>
         Effect.gen(function* () {
           const memberships = yield* Effect.orDie(
-            db
+            database
               .select({ realmUnitId: RealmMemberTable.realmUnitId })
               .from(RealmMemberTable)
               .where(and(eq(RealmMemberTable.userId, params.userId), eq(RealmMemberTable.state, "ACTIVE"))),
@@ -275,7 +275,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           if (memberships.length === 0) return [];
           const realmIds = memberships.map((m) => m.realmUnitId);
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({
                 Unit,
                 Realm: RealmTable,
@@ -308,7 +308,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Check slug uniqueness among realm-type units
           // 检查 slug 在 realm 类型 unit 中的唯一性
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ id: Unit.id })
               .from(Unit)
               .where(and(eq(Unit.slug, payload.slug), eq(Unit.type, "REALM")))
@@ -319,7 +319,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Create Unit with type REALM; realms are self-scoped (slugScope = own id).
           // 创建 type=REALM 的 Unit；realm 以自身为 slug 作用域。
           const units = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "REALM",
@@ -336,12 +336,12 @@ export const RealmsHandlers = HttpApiBuilder.group(
 
           // Self-scope the slug now that we have the ID
           // 现在有了 ID，将 slug 作用域设为自身
-          yield* Effect.orDie(db.update(Unit).set({ slugScope: unit.id }).where(eq(Unit.id, unit.id)));
+          yield* Effect.orDie(database.update(Unit).set({ slugScope: unit.id }).where(eq(Unit.id, unit.id)));
 
           // Create UnitTranslation for the realm name
           // 创建 UnitTranslation 存储 realm 名称
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: "en",
               title: payload.name,
@@ -352,7 +352,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Create the Realm row
           // 创建 Realm 行
           yield* Effect.orDie(
-            db.insert(RealmTable).values({
+            database.insert(RealmTable).values({
               unitId: unit.id,
               isPublic: true,
               memberCount: 1,
@@ -362,7 +362,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Auto-join creator as owner
           // 自动将创建者加入为 owner
           yield* Effect.orDie(
-            db.insert(RealmMemberTable).values({
+            database.insert(RealmMemberTable).values({
               realmUnitId: unit.id,
               userId: user.id,
               roleKey: "owner",
@@ -386,7 +386,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // 如果 slug 正在被更改，检查唯一性
           if (payload.slug !== undefined && payload.slug !== found.unit.slug) {
             const conflict = yield* Effect.orDie(
-              db
+              database
                 .select({ id: Unit.id })
                 .from(Unit)
                 .where(and(eq(Unit.slug, payload.slug), eq(Unit.type, "REALM")))
@@ -399,7 +399,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // 更新 Unit slug（如果提供了）
           if (payload.slug !== undefined) {
             yield* Effect.orDie(
-              db.update(Unit).set({ slug: payload.slug, updatedAt: new Date() }).where(eq(Unit.id, params.unitId)),
+              database.update(Unit).set({ slug: payload.slug, updatedAt: new Date() }).where(eq(Unit.id, params.unitId)),
             );
           }
 
@@ -410,7 +410,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             if (payload.name !== undefined) translationSets.title = payload.name;
             if (payload.description !== undefined) translationSets.summary = payload.description;
             yield* Effect.orDie(
-              db
+              database
                 .insert(UnitTranslation)
                 .values({
                   unitId: params.unitId,
@@ -443,7 +443,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
 
           // Deleting the Unit cascades to Realm, RealmMember, UnitRealm, etc.
           // 删除 Unit 会级联到 Realm、RealmMember、UnitRealm 等
-          yield* Effect.orDie(db.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
         }),
       )
 
@@ -454,7 +454,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           yield* requireRealm(params.unitId);
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmMemberTable)
               .where(and(eq(RealmMemberTable.realmUnitId, params.unitId), eq(RealmMemberTable.userId, user.id)))
@@ -471,7 +471,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* requireRealm(params.unitId);
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmMemberTable)
               .where(and(eq(RealmMemberTable.realmUnitId, params.unitId), eq(RealmMemberTable.state, "ACTIVE")))
@@ -497,7 +497,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Check for existing membership
           // 检查现有成员关系
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmMemberTable)
               .where(
@@ -516,7 +516,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             // Re-activate a previously removed/banned member
             // 重新激活之前被移除/封禁的成员
             yield* Effect.orDie(
-              db
+              database
                 .update(RealmMemberTable)
                 .set({ state: initialState, roleKey: "member", updatedAt: new Date() })
                 .where(
@@ -525,7 +525,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             );
           } else {
             yield* Effect.orDie(
-              db.insert(RealmMemberTable).values({
+              database.insert(RealmMemberTable).values({
                 realmUnitId: params.unitId,
                 userId: targetUserId,
                 roleKey: "member",
@@ -538,7 +538,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // 更新成员计数
           if (memberCountDelta > 0) {
             yield* Effect.orDie(
-              db
+              database
                 .update(RealmTable)
                 .set({ memberCount: sql`${RealmTable.memberCount} + 1` })
                 .where(eq(RealmTable.unitId, params.unitId)),
@@ -546,7 +546,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           }
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmMemberTable)
               .where(
@@ -567,7 +567,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealmAdmin(params.unitId, user.id);
 
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmMemberTable)
               .where(
@@ -585,7 +585,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           if (payload.role !== undefined) sets.roleKey = payload.role;
 
           yield* Effect.orDie(
-            db
+            database
               .update(RealmMemberTable)
               .set(sets)
               .where(
@@ -594,7 +594,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           );
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmMemberTable)
               .where(
@@ -614,7 +614,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealm(params.unitId);
 
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmMemberTable)
               .where(
@@ -625,7 +625,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           if (!existing[0] || existing[0].state !== "ACTIVE") return yield* new RealmMemberNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .update(RealmMemberTable)
               .set({ state: "REMOVED", updatedAt: new Date() })
               .where(
@@ -636,7 +636,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Decrement member count
           // 递减成员计数
           yield* Effect.orDie(
-            db
+            database
               .update(RealmTable)
               .set({ memberCount: sql`GREATEST(${RealmTable.memberCount} - 1, 0)` })
               .where(eq(RealmTable.unitId, params.unitId)),
@@ -653,7 +653,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Fetch the realm's rule policy with its current revision, then load items
           // 获取 realm 的规则策略及其当前修订版本，然后加载条目
           const policies = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmRulePolicy)
               .where(eq(RealmRulePolicy.realmUnitId, params.unitId)),
@@ -665,7 +665,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           if (policyIds.length === 0) return [];
 
           const items = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmRuleItem)
               .where(inArray(RealmRuleItem.revisionId, policyIds))
@@ -678,7 +678,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           const translations =
             ruleUnitIds.length > 0
               ? yield* Effect.orDie(
-                  db.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, ruleUnitIds)),
+                  database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, ruleUnitIds)),
                 )
               : [];
           const titleMap = new Map<string, string>();
@@ -704,7 +704,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealm(params.unitId);
 
           const policies = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmRulePolicy)
               .where(eq(RealmRulePolicy.realmUnitId, params.unitId))
@@ -733,7 +733,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Create a post Unit to hold the rule text
           // 创建一个帖子 Unit 来存放规则文本
           const postUnits = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "POST",
@@ -746,7 +746,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           const postUnit = postUnits[0]!;
 
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: postUnit.id,
               language: "en",
               title: payload.title,
@@ -757,14 +757,14 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Create the policy
           // 创建策略
           const policyRows = yield* Effect.orDie(
-            db.insert(RealmRulePolicy).values({ realmUnitId: params.unitId }).returning(),
+            database.insert(RealmRulePolicy).values({ realmUnitId: params.unitId }).returning(),
           );
           const policy = policyRows[0]!;
 
           // Create the first revision
           // 创建第一个修订版本
           const revisionRows = yield* Effect.orDie(
-            db
+            database
               .insert(RealmRuleRevisionTable)
               .values({ policyId: policy.id, version: 1, createdByUserId: user.id })
               .returning(),
@@ -774,7 +774,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Link the revision as current
           // 将此修订版本设为当前版本
           yield* Effect.orDie(
-            db
+            database
               .update(RealmRulePolicy)
               .set({ currentRevisionId: revision.id, updatedAt: new Date() })
               .where(eq(RealmRulePolicy.id, policy.id)),
@@ -783,7 +783,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Create the rule item referencing the post
           // 创建引用帖子的规则条目
           yield* Effect.orDie(
-            db.insert(RealmRuleItem).values({
+            database.insert(RealmRuleItem).values({
               policyId: policy.id,
               revisionId: revision.id,
               rulePostUnitId: postUnit.id,
@@ -810,7 +810,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Verify the rule policy exists in this realm
           // 验证此 realm 中存在该规则策略
           const policies = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmRulePolicy)
               .where(
@@ -823,7 +823,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Find max version
           // 查找最大版本号
           const maxVersionAgg = yield* Effect.orDie(
-            db
+            database
               .select({ maxVersion: sql<number>`coalesce(max(${RealmRuleRevisionTable.version}), 0)` })
               .from(RealmRuleRevisionTable)
               .where(eq(RealmRuleRevisionTable.policyId, payload.ruleId)),
@@ -831,7 +831,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           const nextVersion = Number(maxVersionAgg[0]?.maxVersion ?? 0) + 1;
 
           const revisionRows = yield* Effect.orDie(
-            db
+            database
               .insert(RealmRuleRevisionTable)
               .values({ policyId: payload.ruleId, version: nextVersion, createdByUserId: user.id })
               .returning(),
@@ -841,7 +841,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Update the policy's current revision
           // 更新策略的当前修订版本
           yield* Effect.orDie(
-            db
+            database
               .update(RealmRulePolicy)
               .set({ currentRevisionId: revision.id, updatedAt: new Date() })
               .where(eq(RealmRulePolicy.id, payload.ruleId)),
@@ -861,7 +861,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Get all policies with current revisions
           // 获取所有有当前修订版本的策略
           const policies = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmRulePolicy)
               .where(eq(RealmRulePolicy.realmUnitId, params.unitId)),
@@ -873,7 +873,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             // Fetch revision version
             // 获取修订版本号
             const revisions = yield* Effect.orDie(
-              db
+              database
                 .select()
                 .from(RealmRuleRevisionTable)
                 .where(eq(RealmRuleRevisionTable.id, policy.currentRevisionId))
@@ -882,7 +882,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             if (!revisions[0]) continue;
 
             yield* Effect.orDie(
-              db
+              database
                 .insert(RealmRuleAcknowledgement)
                 .values({
                   realmUnitId: params.unitId,
@@ -905,7 +905,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealm(params.unitId);
 
           yield* Effect.orDie(
-            db
+            database
               .update(RealmMemberTable)
               .set({ state: "MUTED", updatedAt: new Date() })
               .where(
@@ -927,7 +927,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealm(params.unitId);
 
           yield* Effect.orDie(
-            db
+            database
               .update(RealmMemberTable)
               .set({ state: "ACTIVE", updatedAt: new Date() })
               .where(
@@ -954,7 +954,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           const moderationStatus = found.realm.contentRequiresApproval ? "PENDING" : "APPROVED";
 
           yield* Effect.orDie(
-            db
+            database
               .insert(UnitRealm)
               .values({
                 realmUnitId: params.unitId,
@@ -981,7 +981,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealmAdmin(params.unitId, user.id);
 
           const deleted = yield* Effect.orDie(
-            db
+            database
               .delete(UnitRealm)
               .where(
                 and(eq(UnitRealm.realmUnitId, params.unitId), eq(UnitRealm.unitId, params.contentUnitId)),
@@ -1002,7 +1002,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
 
           for (const tagUnitId of payload.tagUnitIds) {
             yield* Effect.orDie(
-              db
+              database
                 .insert(UnitTag)
                 .values({ unitId: params.unitId, tagUnitId, updatedAt: new Date() })
                 .onConflictDoNothing(),
@@ -1021,7 +1021,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
 
           if (payload.tagUnitIds.length > 0) {
             yield* Effect.orDie(
-              db
+              database
                 .delete(UnitTag)
                 .where(
                   and(eq(UnitTag.unitId, params.unitId), inArray(UnitTag.tagUnitId, [...payload.tagUnitIds])),
@@ -1051,7 +1051,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Store dock data as JSON in the Realm.dock column
           // 将 dock 数据作为 JSON 存储在 Realm.dock 列中
           yield* Effect.orDie(
-            db
+            database
               .update(RealmTable)
               .set({ dock: payload.items, updatedAt: new Date() })
               .where(eq(RealmTable.unitId, params.unitId)),
@@ -1072,7 +1072,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Merge the key into existing extra JSON using jsonb_set
           // 使用 jsonb_set 将键合并到现有 extra JSON 中
           yield* Effect.orDie(
-            db
+            database
               .update(RealmTable)
               .set({
                 extra: sql`jsonb_set(coalesce(${RealmTable.extra}, '{}'::jsonb), ${sql.raw(`'{${params.key}}'`)}, ${JSON.stringify(payload.value)}::jsonb)`,
@@ -1092,7 +1092,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealmAdmin(params.unitId, user.id);
 
           yield* Effect.orDie(
-            db
+            database
               .update(RealmTable)
               .set({
                 extra: sql`coalesce(${RealmTable.extra}, '{}'::jsonb) - ${params.key}`,
@@ -1112,7 +1112,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Query is issued to verify the table is reachable; DTO is a thin envelope.
           // 发出查询以验证表可达；DTO 是一个薄信封。
           yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmTagTreeTable)
               .where(eq(RealmTagTreeTable.realmUnitId, params.unitId))
@@ -1132,7 +1132,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealmAdmin(params.unitId, user.id);
 
           yield* Effect.orDie(
-            db
+            database
               .insert(RealmTagTreeTable)
               .values({ realmUnitId: params.unitId, tree: payload.tree })
               .onConflictDoUpdate({
@@ -1152,7 +1152,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealm(params.unitId);
 
           const boards = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(PinboardTable)
               .where(
@@ -1181,7 +1181,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Find or create the pinboard
           // 查找或创建钉板
           const boards = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(PinboardTable)
               .where(
@@ -1194,7 +1194,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             ? boards[0].id
             : (yield* Effect.gen(function* () {
                 const created = yield* Effect.orDie(
-                  db
+                  database
                     .insert(PinboardTable)
                     .values({ realmUnitId: params.unitId, key: params.key })
                     .returning(),
@@ -1205,7 +1205,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           // Find the max position to append at the end
           // 查找最大位置以追加到末尾
           const maxPosAgg = yield* Effect.orDie(
-            db
+            database
               .select({ maxPos: sql<string>`coalesce(max(${PinboardEntryTable.position}), 'V')` })
               .from(PinboardEntryTable)
               .where(eq(PinboardEntryTable.pinboardId, pinboardId)),
@@ -1213,7 +1213,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           const nextPosition = (maxPosAgg[0]?.maxPos ?? "V") + "V";
 
           const entryRows = yield* Effect.orDie(
-            db
+            database
               .insert(PinboardEntryTable)
               .values({ pinboardId, unitId: payload.unitId, position: nextPosition })
               .onConflictDoNothing()
@@ -1225,7 +1225,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           const entry = entryRows[0]
             ?? (yield* Effect.gen(function* () {
                 const rows = yield* Effect.orDie(
-                  db
+                  database
                     .select()
                     .from(PinboardEntryTable)
                     .where(
@@ -1256,7 +1256,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealmAdmin(params.unitId, user.id);
 
           const boards = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(PinboardTable)
               .where(
@@ -1271,7 +1271,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           for (const [index, entryId] of payload.orderedIds.entries()) {
             const position = String(index).padStart(8, "0");
             yield* Effect.orDie(
-              db
+              database
                 .update(PinboardEntryTable)
                 .set({ position, updatedAt: new Date() })
                 .where(
@@ -1291,7 +1291,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           yield* requireRealmAdmin(params.unitId, user.id);
 
           const boards = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(PinboardTable)
               .where(
@@ -1302,7 +1302,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
           if (!boards[0]) return yield* new PinboardNotFound();
 
           const deleted = yield* Effect.orDie(
-            db
+            database
               .delete(PinboardEntryTable)
               .where(
                 and(eq(PinboardEntryTable.id, payload.entryId), eq(PinboardEntryTable.pinboardId, boards[0].id)),
@@ -1324,14 +1324,14 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
   Api,
   "realmTagApplications",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     // Shared: aggregate votes for a realm tag application
     // 共享: 聚合 realm 标签申请的投票
     const aggregateVotes = (realmUnitId: string, tagUnitId: string, unitId: string) =>
       Effect.gen(function* () {
         const agg = yield* Effect.orDie(
-          db
+          database
             .select({
               score: sql<number>`coalesce(sum(${RealmTagApplicationVoteTable.value}), 0)`,
               voteCount: count(RealmTagApplicationVoteTable.value),
@@ -1361,14 +1361,14 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
           // Verify realm exists
           // 验证 realm 存在
           const realms = yield* Effect.orDie(
-            db.select().from(RealmTable).where(eq(RealmTable.unitId, payload.realmUnitId)).limit(1),
+            database.select().from(RealmTable).where(eq(RealmTable.unitId, payload.realmUnitId)).limit(1),
           );
           if (!realms[0]) return yield* new RealmNotFound();
 
           // Insert the user's +1 vote via upsert
           // 通过 upsert 插入用户的 +1 投票
           yield* Effect.orDie(
-            db
+            database
               .insert(RealmTagApplicationVoteTable)
               .values({
                 realmUnitId: payload.realmUnitId,
@@ -1385,7 +1385,7 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
           const agg = yield* aggregateVotes(payload.realmUnitId, payload.tagUnitId, payload.unitId);
 
           yield* Effect.orDie(
-            db
+            database
               .insert(RealmTagApplicationTable)
               .values({
                 realmUnitId: payload.realmUnitId,
@@ -1418,7 +1418,7 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
       .handle("listForUnit", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmTagApplicationTable)
               .where(
@@ -1455,7 +1455,7 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
           }
 
           const updated = yield* Effect.orDie(
-            db
+            database
               .update(RealmTagApplicationTable)
               .set(sets)
               .where(
@@ -1486,7 +1486,7 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
           // Votes cascade via FK, but delete explicitly for clarity
           // 投票通过 FK 级联，但为清晰起见显式删除
           yield* Effect.orDie(
-            db
+            database
               .delete(RealmTagApplicationVoteTable)
               .where(
                 and(
@@ -1498,7 +1498,7 @@ export const RealmTagApplicationsHandlers = HttpApiBuilder.group(
           );
 
           const deleted = yield* Effect.orDie(
-            db
+            database
               .delete(RealmTagApplicationTable)
               .where(
                 and(
@@ -1524,7 +1524,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
   Api,
   "realmTagApplicationVotes",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // ── create — cast a vote on a tag application ──────────────
@@ -1537,7 +1537,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           // Verify the application exists
           // 验证申请存在
           const apps = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmTagApplicationTable)
               .where(
@@ -1554,7 +1554,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           // Upsert the vote
           // upsert 投票
           yield* Effect.orDie(
-            db
+            database
               .insert(RealmTagApplicationVoteTable)
               .values({
                 realmUnitId: payload.realmUnitId,
@@ -1577,7 +1577,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           // Recompute and update aggregates on the application
           // 重新计算并更新申请上的聚合值
           const agg = yield* Effect.orDie(
-            db
+            database
               .select({
                 score: sql<number>`coalesce(sum(${RealmTagApplicationVoteTable.value}), 0)`,
                 voteCount: count(RealmTagApplicationVoteTable.value),
@@ -1593,7 +1593,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           );
 
           yield* Effect.orDie(
-            db
+            database
               .update(RealmTagApplicationTable)
               .set({
                 score: Number(agg[0]?.score ?? 0),
@@ -1624,7 +1624,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           // Verify the application exists
           // 验证申请存在
           const apps = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmTagApplicationTable)
               .where(
@@ -1639,7 +1639,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           if (!apps[0]) return yield* new RealmTagApplicationNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .delete(RealmTagApplicationVoteTable)
               .where(
                 and(
@@ -1654,7 +1654,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           // Recompute aggregates
           // 重新计算聚合值
           const agg = yield* Effect.orDie(
-            db
+            database
               .select({
                 score: sql<number>`coalesce(sum(${RealmTagApplicationVoteTable.value}), 0)`,
                 voteCount: count(RealmTagApplicationVoteTable.value),
@@ -1670,7 +1670,7 @@ export const RealmTagApplicationVotesHandlers = HttpApiBuilder.group(
           );
 
           yield* Effect.orDie(
-            db
+            database
               .update(RealmTagApplicationTable)
               .set({
                 score: Number(agg[0]?.score ?? 0),
@@ -1699,7 +1699,7 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
   Api,
   "realmTagContexts",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     return handlers
       // ── get — fetch the tag context for a (realm, tag) pair ────
@@ -1709,7 +1709,7 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
           // Query issued for reachability; DTO is a thin envelope.
           // 发出查询以验证可达性；DTO 是一个薄信封。
           yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmTagContextTable)
               .where(
@@ -1735,7 +1735,7 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
 
           yield* Effect.orDie(
-            db
+            database
               .insert(RealmTagContextTable)
               .values({
                 realmUnitId: params.realmUnitId,
@@ -1763,7 +1763,7 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
           // Check if a context already exists with a contextUnitId
           // 检查是否已存在带 contextUnitId 的上下文
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(RealmTagContextTable)
               .where(
@@ -1787,7 +1787,7 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
           // Create a POST unit to serve as the context page
           // 创建一个 POST unit 作为上下文页面
           const contextUnits = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "POST",
@@ -1802,7 +1802,7 @@ export const RealmTagContextsHandlers = HttpApiBuilder.group(
           // Upsert the context row with the new contextUnitId
           // upsert 上下文行并设置新的 contextUnitId
           yield* Effect.orDie(
-            db
+            database
               .insert(RealmTagContextTable)
               .values({
                 realmUnitId: params.realmUnitId,

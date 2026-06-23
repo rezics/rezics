@@ -75,13 +75,13 @@ export const BooksHandlers = HttpApiBuilder.group(
   Api,
   "books",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const { pagination } = yield* Config;
     const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
 
     const fetchBook = (unitId: string) =>
       Effect.orDie(
-        db
+        database
           .select()
           .from(Book)
           .innerJoin(Unit, eq(Book.unitId, Unit.id))
@@ -104,7 +104,7 @@ export const BooksHandlers = HttpApiBuilder.group(
         if (opts.search) conditions.push(ilike(Unit.slug, `%${opts.search}%`));
         const where = and(...conditions);
         const rows = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(Book)
             .innerJoin(Unit, eq(Book.unitId, Unit.id))
@@ -114,7 +114,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             .offset(opts.offset ?? 0),
         );
         const agg = yield* Effect.orDie(
-          db.select({ total: count() }).from(Book).innerJoin(Unit, eq(Book.unitId, Unit.id)).where(where),
+          database.select({ total: count() }).from(Book).innerJoin(Unit, eq(Book.unitId, Unit.id)).where(where),
         );
         return new BookListResult({
           books: rows.map((r) => bookToDTO(r.Unit, r.Book)),
@@ -137,7 +137,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const lang = payload.defaultLanguage ?? "en";
           const units = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "BOOK",
@@ -151,7 +151,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           );
           const unit = units[0]!;
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: lang,
               title: payload.title,
@@ -159,12 +159,12 @@ export const BooksHandlers = HttpApiBuilder.group(
             }),
           );
           const books = yield* Effect.orDie(
-            db
+            database
               .insert(Book)
               .values({ unitId: unit.id, isbn13: payload.isbn13, pageCount: payload.pageCount })
               .returning(),
           );
-          yield* Effect.orDie(db.insert(ContentStructure).values({ ownerUnitId: unit.id }));
+          yield* Effect.orDie(database.insert(ContentStructure).values({ ownerUnitId: unit.id }));
           return bookToDTO(unit, books[0]!);
         }),
       )
@@ -187,10 +187,10 @@ export const BooksHandlers = HttpApiBuilder.group(
           if ("formatKey" in patch) bookSet["formatKey"] = patch["formatKey"];
           if ("isLicensed" in patch) bookSet["isLicensed"] = patch["isLicensed"];
           if (Object.keys(unitSet).length > 1) {
-            yield* Effect.orDie(db.update(Unit).set(unitSet).where(eq(Unit.id, params.unitId)));
+            yield* Effect.orDie(database.update(Unit).set(unitSet).where(eq(Unit.id, params.unitId)));
           }
           if (Object.keys(bookSet).length > 1) {
-            yield* Effect.orDie(db.update(Book).set(bookSet).where(eq(Book.unitId, params.unitId)));
+            yield* Effect.orDie(database.update(Book).set(bookSet).where(eq(Book.unitId, params.unitId)));
           }
           const updated = yield* fetchBook(params.unitId);
           return bookToDTO(updated!.Unit, updated!.Book);
@@ -203,7 +203,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           const row = yield* fetchBook(params.unitId);
           if (!row) return yield* new BookNotFound();
           if (row.Unit.userId !== user.id) return yield* new BookForbidden();
-          yield* Effect.orDie(db.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
         }),
       )
 
@@ -211,7 +211,7 @@ export const BooksHandlers = HttpApiBuilder.group(
       .handle("getBookRating", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId)),
+            database.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId)),
           );
           return rows.map(
             (r) =>
@@ -228,7 +228,7 @@ export const BooksHandlers = HttpApiBuilder.group(
       .handle("getBookContentStructure", ({ params }) =>
         Effect.gen(function* () {
           const nodes = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -254,10 +254,10 @@ export const BooksHandlers = HttpApiBuilder.group(
             noContent?: boolean;
             contentUnitId?: string | null;
           }>;
-          yield* Effect.orDie(db.delete(ContentStructureNode).where(eq(ContentStructureNode.ownerUnitId, params.unitId)));
+          yield* Effect.orDie(database.delete(ContentStructureNode).where(eq(ContentStructureNode.ownerUnitId, params.unitId)));
           if (incoming.length > 0) {
             yield* Effect.orDie(
-              db.insert(ContentStructureNode).values(
+              database.insert(ContentStructureNode).values(
                 incoming.map((n) => ({
                   id: n.id,
                   ownerUnitId: params.unitId,
@@ -271,7 +271,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             );
           }
           const agg = yield* Effect.orDie(
-            db
+            database
               .select({ cnt: count() })
               .from(ContentStructureNode)
               .where(
@@ -283,13 +283,13 @@ export const BooksHandlers = HttpApiBuilder.group(
               ),
           );
           yield* Effect.orDie(
-            db
+            database
               .update(Book)
               .set({ chapterCount: agg[0]?.cnt ?? 0, updatedAt: new Date() })
               .where(eq(Book.unitId, params.unitId)),
           );
           const nodes = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -309,18 +309,18 @@ export const BooksHandlers = HttpApiBuilder.group(
       // ── Chapters ───────────────────────────────────────────────
       .handle("getChapter", ({ params }) =>
         Effect.gen(function* () {
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ChapterNotFound();
           const unit = units[0];
           const lang = unit.defaultLanguage ?? "en";
           const trans = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UnitTranslation)
               .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
           );
           const ct = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentTranslation)
               .where(and(eq(ContentTranslation.unitId, params.unitId), eq(ContentTranslation.language, lang))),
@@ -342,7 +342,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const lang = "en";
           const units = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "POST",
@@ -356,7 +356,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           );
           const unit = units[0]!;
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: lang,
               title: payload.title,
@@ -365,7 +365,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           );
           if (payload.content) {
             yield* Effect.orDie(
-              db.insert(ContentTranslation).values({
+              database.insert(ContentTranslation).values({
                 unitId: unit.id,
                 language: lang,
                 content: JSON.parse(payload.content),
@@ -387,13 +387,13 @@ export const BooksHandlers = HttpApiBuilder.group(
       .handle("updateChapter", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ChapterNotFound();
           if (units[0].userId !== user.id) return yield* new ChapterForbidden();
           const lang = units[0].defaultLanguage ?? "en";
           if (payload.status) {
             yield* Effect.orDie(
-              db
+              database
                 .update(Unit)
                 .set({ status: payload.status as (typeof Unit.$inferInsert)["status"], updatedAt: new Date() })
                 .where(eq(Unit.id, params.unitId)),
@@ -403,7 +403,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           if (payload.title) transSet["title"] = payload.title;
           if (payload.coverUrl !== undefined) transSet["extra"] = payload.coverUrl ? { coverUrl: payload.coverUrl } : null;
           yield* Effect.orDie(
-            db
+            database
               .update(UnitTranslation)
               .set(transSet)
               .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
@@ -411,7 +411,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           if (payload.content !== undefined) {
             const contentVal = payload.content ? JSON.parse(payload.content) : {};
             yield* Effect.orDie(
-              db
+              database
                 .insert(ContentTranslation)
                 .values({ unitId: params.unitId, language: lang, content: contentVal })
                 .onConflictDoUpdate({
@@ -420,15 +420,15 @@ export const BooksHandlers = HttpApiBuilder.group(
                 }),
             );
           }
-          const updated = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const updated = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           const trans = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UnitTranslation)
               .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
           );
           const ct = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentTranslation)
               .where(and(eq(ContentTranslation.unitId, params.unitId), eq(ContentTranslation.language, lang))),
@@ -448,10 +448,10 @@ export const BooksHandlers = HttpApiBuilder.group(
       .handle("deleteChapter", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ChapterNotFound();
           if (units[0].userId !== user.id) return yield* new ChapterForbidden();
-          yield* Effect.orDie(db.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
         }),
       )
 
@@ -462,7 +462,7 @@ export const BooksHandlers = HttpApiBuilder.group(
           if (!row) return yield* new BookNotFound();
           if (row.Unit.userId !== user.id) return yield* new BookForbidden();
           const nodes = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -482,7 +482,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             });
           }
           const units = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "POST",
@@ -496,14 +496,14 @@ export const BooksHandlers = HttpApiBuilder.group(
           );
           const unit = units[0]!;
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: unit.defaultLanguage ?? "en",
               title: node.title,
             }),
           );
           yield* Effect.orDie(
-            db
+            database
               .update(ContentStructureNode)
               .set({ contentUnitId: unit.id, updatedAt: new Date() })
               .where(eq(ContentStructureNode.id, payload.nodeId)),
@@ -515,11 +515,11 @@ export const BooksHandlers = HttpApiBuilder.group(
       // ── Series ─────────────────────────────────────────────────
       .handle("getSeries", ({ params }) =>
         Effect.gen(function* () {
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
           const unit = units[0];
           const nodes = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -548,15 +548,15 @@ export const BooksHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const lang = payload.defaultLanguage ?? "en";
           const units = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({ type: "SERIES", userId: user.id, slugScope: user.id, defaultLanguage: lang, status: "DRAFT" })
               .returning(),
           );
           const unit = units[0]!;
-          yield* Effect.orDie(db.insert(UnitTranslation).values({ unitId: unit.id, language: lang, title: payload.title }));
-          yield* Effect.orDie(db.insert(Series).values({ unitId: unit.id, kindKey: "default" }));
-          yield* Effect.orDie(db.insert(ContentStructure).values({ ownerUnitId: unit.id }));
+          yield* Effect.orDie(database.insert(UnitTranslation).values({ unitId: unit.id, language: lang, title: payload.title }));
+          yield* Effect.orDie(database.insert(Series).values({ unitId: unit.id, kindKey: "default" }));
+          yield* Effect.orDie(database.insert(ContentStructure).values({ ownerUnitId: unit.id }));
           return new SeriesDTO({
             unitId: unit.id,
             type: unit.type,
@@ -571,13 +571,13 @@ export const BooksHandlers = HttpApiBuilder.group(
       .handle("updateSeries", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
           if (units[0].userId !== user.id) return yield* new SeriesForbidden();
           const lang = units[0].defaultLanguage ?? "en";
           if (payload.title) {
             yield* Effect.orDie(
-              db
+              database
                 .update(UnitTranslation)
                 .set({ title: payload.title, updatedAt: new Date() })
                 .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
@@ -585,13 +585,13 @@ export const BooksHandlers = HttpApiBuilder.group(
           }
           if (payload.status) {
             yield* Effect.orDie(
-              db
+              database
                 .update(Unit)
                 .set({ status: payload.status as (typeof Unit.$inferInsert)["status"], updatedAt: new Date() })
                 .where(eq(Unit.id, params.unitId)),
             );
           }
-          const updated = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const updated = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           return new SeriesDTO({
             unitId: updated[0]!.id,
             type: updated[0]!.type,
@@ -606,7 +606,7 @@ export const BooksHandlers = HttpApiBuilder.group(
       .handle("updateSeriesContentStructure", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
           if (units[0].userId !== user.id) return yield* new SeriesForbidden();
           const incoming = payload as Array<{
@@ -617,10 +617,10 @@ export const BooksHandlers = HttpApiBuilder.group(
             noContent?: boolean;
             contentUnitId?: string | null;
           }>;
-          yield* Effect.orDie(db.delete(ContentStructureNode).where(eq(ContentStructureNode.ownerUnitId, params.unitId)));
+          yield* Effect.orDie(database.delete(ContentStructureNode).where(eq(ContentStructureNode.ownerUnitId, params.unitId)));
           if (incoming.length > 0) {
             yield* Effect.orDie(
-              db.insert(ContentStructureNode).values(
+              database.insert(ContentStructureNode).values(
                 incoming.map((n) => ({
                   id: n.id,
                   ownerUnitId: params.unitId,
@@ -634,7 +634,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             );
           }
           const nodes = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -648,10 +648,10 @@ export const BooksHandlers = HttpApiBuilder.group(
 
       .handle("getSeriesContentIndex", ({ params }) =>
         Effect.gen(function* () {
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(SeriesContentIndex)
               .innerJoin(ContentStructureNode, eq(SeriesContentIndex.contentNodeId, ContentStructureNode.id))

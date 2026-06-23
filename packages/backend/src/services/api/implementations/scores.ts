@@ -230,9 +230,9 @@ export const ScoresHandlers = HttpApiBuilder.group(
   Api,
   "scores",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
-    // Aggregate update helper (captures db from scope) / 聚合更新辅助函数（从作用域捕获 db）
+    // Aggregate update helper (captures database from scope) / 聚合更新辅助函数（从作用域捕获 database）
     const doUpdateAggregate = (
       unitId: string,
       realm: string,
@@ -243,7 +243,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
     ) =>
       Effect.gen(function* () {
         const existing = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(ScoreAggregate)
             .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm)))
@@ -256,7 +256,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const nextCount = row.totalCount - 1;
           if (nextCount <= 0) {
             yield* Effect.orDie(
-              db
+              database
                 .delete(ScoreAggregate)
                 .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm))),
             );
@@ -267,7 +267,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const fields = applyFieldsDelta(row.fields as FieldsAggregate | null, oldFields, null);
 
           yield* Effect.orDie(
-            db
+            database
               .update(ScoreAggregate)
               .set({
                 totalScore: row.totalScore - (oldValue ?? 0),
@@ -294,7 +294,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
             : null;
 
           yield* Effect.orDie(
-            db.insert(ScoreAggregate).values({
+            database.insert(ScoreAggregate).values({
               unitId,
               realm,
               totalScore: newValue,
@@ -316,7 +316,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const fields = applyFieldsDelta(row.fields as FieldsAggregate | null, oldFields, newFields);
 
           yield* Effect.orDie(
-            db
+            database
               .update(ScoreAggregate)
               .set({
                 totalScore: row.totalScore + deltaScore,
@@ -347,7 +347,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           // Validate fields against realm field registry / 根据 realm 字段注册表校验各字段
           if (newFields) {
             const realmFields = yield* Effect.orDie(
-              db
+              database
                 .select({ key: ScoreRealmField.key })
                 .from(ScoreRealmField)
                 .where(eq(ScoreRealmField.realm, payload.realm)),
@@ -365,7 +365,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Look up existing entry for delta computation / 查询已有条目以计算增量
           const existingRows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ScoreEntry)
               .where(
@@ -383,7 +383,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Upsert the score entry / 写入或更新评分条目
           const entryRows = yield* Effect.orDie(
-            db
+            database
               .insert(ScoreEntry)
               .values({
                 userId: user.id,
@@ -417,19 +417,19 @@ export const ScoresHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
 
-          const rows = yield* Effect.orDie(db.select().from(ScoreEntry).where(eq(ScoreEntry.id, params.id)).limit(1));
+          const rows = yield* Effect.orDie(database.select().from(ScoreEntry).where(eq(ScoreEntry.id, params.id)).limit(1));
           const entry = rows[0];
           if (!entry) return yield* new ScoreNotFound();
 
           // Check for linked posts (reviews/remarks) / 检查关联的 post（评论/短评）
           const linkedPosts = yield* Effect.orDie(
-            db.select({ unitId: Post.unitId }).from(Post).where(eq(Post.scoreEntryId, params.id)),
+            database.select({ unitId: Post.unitId }).from(Post).where(eq(Post.scoreEntryId, params.id)),
           );
 
           if (linkedPosts.length > 0) {
             // Check if user is admin / 检查用户是否为管理员
             const userRows = yield* Effect.orDie(
-              db
+              database
                 .select({ permission: User.permission })
                 .from(User)
                 .where(eq(User.unitId, user.id))
@@ -441,9 +441,9 @@ export const ScoresHandlers = HttpApiBuilder.group(
             if (!isAdmin) return yield* new ScoreConflict();
 
             // Admin: delete linked posts first / 管理员：先删除关联的 post
-            yield* Effect.orDie(db.delete(Post).where(eq(Post.scoreEntryId, params.id)));
+            yield* Effect.orDie(database.delete(Post).where(eq(Post.scoreEntryId, params.id)));
             yield* Effect.orDie(
-              db.delete(Unit).where(
+              database.delete(Unit).where(
                 inArray(
                   Unit.id,
                   linkedPosts.map((p) => p.unitId),
@@ -453,7 +453,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           }
 
           // Delete the entry / 删除条目
-          yield* Effect.orDie(db.delete(ScoreEntry).where(eq(ScoreEntry.id, params.id)));
+          yield* Effect.orDie(database.delete(ScoreEntry).where(eq(ScoreEntry.id, params.id)));
 
           // Update the aggregate / 更新聚合
           const oldFields = (entry.fields as Record<string, number>) ?? null;
@@ -465,7 +465,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
       .handle("aggregatesByUnit", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId)),
+            database.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId)),
           );
           return rows.map(aggregateToDTO);
         }),
@@ -475,7 +475,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
       .handle("userScores", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ScoreEntry)
               .where(and(eq(ScoreEntry.userId, params.userId), eq(ScoreEntry.unitId, params.unitId))),
@@ -491,7 +491,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Admin check / 管理员检查
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
@@ -503,7 +503,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Fetch all entries for the unit+realm / 获取该 unit+realm 的所有条目
           const entries = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ScoreEntry)
               .where(and(eq(ScoreEntry.unitId, payload.unitId), eq(ScoreEntry.realm, payload.realm))),
@@ -512,7 +512,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           // No entries: delete aggregate and return null / 无条目：删除聚合并返回 null
           if (entries.length === 0) {
             yield* Effect.orDie(
-              db
+              database
                 .delete(ScoreAggregate)
                 .where(
                   and(eq(ScoreAggregate.unitId, payload.unitId), eq(ScoreAggregate.realm, payload.realm)),
@@ -525,7 +525,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const computed = computeAggregateFromEntries(entries);
 
           const aggRows = yield* Effect.orDie(
-            db
+            database
               .insert(ScoreAggregate)
               .values({
                 unitId: payload.unitId,
@@ -555,7 +555,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
       .handle("listRealmFields", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ScoreRealmField)
               .where(eq(ScoreRealmField.realm, params.realmId))
@@ -572,7 +572,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Admin check / 管理员检查
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
@@ -584,7 +584,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Compute position: after the last existing field / 计算 position：排在最后一个已有字段之后
           const lastRows = yield* Effect.orDie(
-            db
+            database
               .select({ position: ScoreRealmField.position })
               .from(ScoreRealmField)
               .where(eq(ScoreRealmField.realm, params.realmId))
@@ -594,7 +594,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const position = payload.position ?? generateAfter(lastRows[0]?.position);
 
           const fieldRows = yield* Effect.orDie(
-            db
+            database
               .insert(ScoreRealmField)
               .values({
                 realm: params.realmId,
@@ -617,7 +617,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Admin check / 管理员检查
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
@@ -629,7 +629,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Check field exists / 检查字段是否存在
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ScoreRealmField)
               .where(and(eq(ScoreRealmField.realm, params.realmId), eq(ScoreRealmField.key, params.key)))
@@ -638,7 +638,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           if (!existing[0]) return yield* new ScoreNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .delete(ScoreRealmField)
               .where(and(eq(ScoreRealmField.realm, params.realmId), eq(ScoreRealmField.key, params.key))),
           );

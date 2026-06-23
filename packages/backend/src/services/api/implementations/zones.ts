@@ -68,7 +68,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
   Api,
   "zones",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const { pagination } = yield* Config;
     const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
 
@@ -77,7 +77,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
     const fetchZoneByUnitId = (unitId: string) =>
       Effect.gen(function* () {
         const rows = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(ZoneTable)
             .innerJoin(Unit, eq(ZoneTable.unitId, Unit.id))
@@ -86,7 +86,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
         );
         if (!rows[0]) return null;
         const trans = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(UnitTranslation)
             .where(eq(UnitTranslation.unitId, unitId))
@@ -104,7 +104,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
     const fetchZoneBySlug = (slug: string) =>
       Effect.gen(function* () {
         const rows = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(Unit)
             .innerJoin(ZoneTable, eq(ZoneTable.unitId, Unit.id))
@@ -113,7 +113,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
         );
         if (!rows[0]) return null;
         const trans = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(UnitTranslation)
             .where(eq(UnitTranslation.unitId, rows[0].Unit.id))
@@ -131,7 +131,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
     const requireZoneAdmin = (ownerRealmUnitId: string, userId: string) =>
       Effect.gen(function* () {
         const rows = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(RealmMemberTable)
             .where(
@@ -160,7 +160,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
         const baseConditions = [eq(Unit.type, "ZONE")];
         const where = opts.conditions ? and(...baseConditions, ...opts.conditions) : and(...baseConditions);
         const rows = yield* Effect.orDie(
-          db
+          database
             .select({
               Unit,
               Zone: ZoneTable,
@@ -194,7 +194,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
         const baseConditions = [eq(Unit.type, "ZONE")];
         const where = conditions ? and(...baseConditions, ...conditions) : and(...baseConditions);
         const rows = yield* Effect.orDie(
-          db
+          database
             .select({ count: sql<number>`count(*)::int` })
             .from(ZoneTable)
             .innerJoin(Unit, eq(ZoneTable.unitId, Unit.id))
@@ -254,7 +254,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           const found = yield* fetchZoneByUnitId(params.unitId);
           if (!found) return yield* new ZoneNotFound();
           const pages = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.slug, params.pageSlug)))
@@ -275,7 +275,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           const found = yield* fetchZoneByUnitId(params.unitId);
           if (!found) return yield* new ZoneNotFound();
           const pages = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
@@ -306,7 +306,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           // Create the Unit row with type ZONE
           // 创建 type=ZONE 的 Unit 行
           const units = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "ZONE",
@@ -324,7 +324,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           // Create UnitTranslation for the zone name
           // 创建 UnitTranslation 存储 zone 名称
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: "en",
               title: payload.name ?? payload.slug,
@@ -335,7 +335,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           // Create the Zone row
           // 创建 Zone 行
           const zones = yield* Effect.orDie(
-            db
+            database
               .insert(ZoneTable)
               .values({
                 unitId: unit.id,
@@ -367,7 +367,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             if (payload.slug) unitUpdates["slug"] = payload.slug;
             if (payload.status) unitUpdates["status"] = payload.status;
             if (payload.visibility) unitUpdates["visibility"] = payload.visibility;
-            yield* Effect.orDie(db.update(Unit).set(unitUpdates).where(eq(Unit.id, params.unitId)));
+            yield* Effect.orDie(database.update(Unit).set(unitUpdates).where(eq(Unit.id, params.unitId)));
           }
 
           // Update translation if name/description provided
@@ -377,7 +377,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             if (payload.name) transUpdates["title"] = payload.name;
             if (payload.description !== undefined) transUpdates["summary"] = payload.description;
             yield* Effect.orDie(
-              db.update(UnitTranslation).set(transUpdates).where(eq(UnitTranslation.unitId, params.unitId)),
+              database.update(UnitTranslation).set(transUpdates).where(eq(UnitTranslation.unitId, params.unitId)),
             );
           }
 
@@ -388,7 +388,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             if (payload.homePageId !== undefined) zoneUpdates["homePageId"] = payload.homePageId;
             if (payload.startsAt !== undefined) zoneUpdates["startsAt"] = payload.startsAt ? new Date(payload.startsAt) : null;
             if (payload.endsAt !== undefined) zoneUpdates["endsAt"] = payload.endsAt ? new Date(payload.endsAt) : null;
-            yield* Effect.orDie(db.update(ZoneTable).set(zoneUpdates).where(eq(ZoneTable.unitId, params.unitId)));
+            yield* Effect.orDie(database.update(ZoneTable).set(zoneUpdates).where(eq(ZoneTable.unitId, params.unitId)));
           }
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
@@ -406,7 +406,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
           yield* Effect.orDie(
-            db
+            database
               .update(ZoneTable)
               .set({ boundary: payload, updatedAt: new Date() })
               .where(eq(ZoneTable.unitId, params.unitId)),
@@ -427,7 +427,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
           yield* Effect.orDie(
-            db
+            database
               .update(ZoneTable)
               .set({ nav: payload, updatedAt: new Date() })
               .where(eq(ZoneTable.unitId, params.unitId)),
@@ -448,7 +448,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
           yield* Effect.orDie(
-            db
+            database
               .update(ZoneTable)
               .set({ theme: payload, updatedAt: new Date() })
               .where(eq(ZoneTable.unitId, params.unitId)),
@@ -470,7 +470,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
 
           // Cascade: deleting the Unit cascades to Zone + ZonePage + UnitTranslation
           // 级联: 删除 Unit 会级联删除 Zone + ZonePage + UnitTranslation
-          yield* Effect.orDie(db.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
 
           return { message: "Zone deleted" };
         }),
@@ -486,7 +486,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
           const pages = yield* Effect.orDie(
-            db
+            database
               .insert(ZonePageTable)
               .values({
                 zoneUnitId: params.unitId,
@@ -511,7 +511,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
@@ -525,14 +525,14 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (payload.position) updates["position"] = payload.position;
 
           yield* Effect.orDie(
-            db
+            database
               .update(ZonePageTable)
               .set(updates)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId))),
           );
 
           const refreshed = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
@@ -553,7 +553,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
@@ -562,7 +562,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (!existing[0]) return yield* new ZoneNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .delete(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId))),
           );

@@ -51,7 +51,7 @@ export const UsersHandlers = HttpApiBuilder.group(
   Api,
   "users",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const { pagination } = yield* Config;
     const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
 
@@ -59,7 +59,7 @@ export const UsersHandlers = HttpApiBuilder.group(
     // 共享辅助函数: 通过 unitId 获取 User + 其 USER Unit
     const fetchUserByUnitId = (unitId: string) =>
       Effect.orDie(
-        db
+        database
           .select()
           .from(User)
           .innerJoin(Unit, eq(User.unitId, Unit.id))
@@ -71,7 +71,7 @@ export const UsersHandlers = HttpApiBuilder.group(
     // 共享辅助函数: 通过 authUserId 获取 User + 其 USER Unit
     const fetchUserByAuthId = (authUserId: string) =>
       Effect.orDie(
-        db
+        database
           .select()
           .from(User)
           .innerJoin(Unit, eq(User.unitId, Unit.id))
@@ -93,7 +93,7 @@ export const UsersHandlers = HttpApiBuilder.group(
         if (opts.search) conditions.push(ilike(User.name, `%${opts.search}%`));
         const where = and(...conditions);
         const rows = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(User)
             .innerJoin(Unit, eq(User.unitId, Unit.id))
@@ -103,7 +103,7 @@ export const UsersHandlers = HttpApiBuilder.group(
             .offset(opts.offset ?? 0),
         );
         const agg = yield* Effect.orDie(
-          db.select({ total: count() }).from(User).innerJoin(Unit, eq(User.unitId, Unit.id)).where(where),
+          database.select({ total: count() }).from(User).innerJoin(Unit, eq(User.unitId, Unit.id)).where(where),
         );
         return new UserListResult({
           users: rows.map((r) => userToDTO(r.Unit, r.User)),
@@ -142,7 +142,7 @@ export const UsersHandlers = HttpApiBuilder.group(
       .handle("getBySlug", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(User)
               .innerJoin(Unit, eq(User.unitId, Unit.id))
@@ -168,10 +168,10 @@ export const UsersHandlers = HttpApiBuilder.group(
           if ("summary" in patch) userSet["summary"] = patch["summary"];
           if ("description" in patch) userSet["description"] = patch["description"];
           yield* Effect.orDie(
-            db.update(User).set(userSet).where(eq(User.unitId, row.User.unitId)),
+            database.update(User).set(userSet).where(eq(User.unitId, row.User.unitId)),
           );
           yield* Effect.orDie(
-            db.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, row.User.unitId)),
+            database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, row.User.unitId)),
           );
           const updated = yield* fetchUserByUnitId(row.User.unitId);
           if (!updated) return yield* Effect.die(new Error(`User row vanished during update for ${row.User.unitId}`));
@@ -217,7 +217,7 @@ export const UsersHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           if (payload.unitIds.length === 0) return new UserBriefBatchResult({ users: [] });
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(User)
               .innerJoin(Unit, eq(User.unitId, Unit.id))
@@ -236,7 +236,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           const ids = query.ids.split(",").filter(Boolean);
           if (ids.length === 0) return [];
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(User)
               .innerJoin(Unit, eq(User.unitId, Unit.id))
@@ -254,7 +254,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           const row = yield* fetchUserByAuthId(currentUser.id);
           if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
           const prefs = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UserPreference)
               .where(eq(UserPreference.userId, row.User.unitId))
@@ -289,7 +289,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           if ("bookshelfConfig" in patch)
             set.bookshelfConfig = patch["bookshelfConfig"];
           yield* Effect.orDie(
-            db
+            database
               .insert(UserPreference)
               .values(set)
               .onConflictDoUpdate({
@@ -303,7 +303,7 @@ export const UsersHandlers = HttpApiBuilder.group(
               }),
           );
           const prefs = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(UserPreference)
               .where(eq(UserPreference.userId, userId))
@@ -345,7 +345,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           // 查找 subscribedUnitId = 目标用户 的订阅记录，
           // 连接获取订阅者用户信息，仅筛选 USER 类型。
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Subscription)
               .innerJoin(User, eq(Subscription.subscriberUnitId, User.unitId))
@@ -362,7 +362,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           );
 
           const agg = yield* Effect.orDie(
-            db
+            database
               .select({ total: count() })
               .from(Subscription)
               .innerJoin(Unit, eq(Subscription.subscriberUnitId, Unit.id))
@@ -394,7 +394,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           // 查找 subscriberUnitId = 目标用户 的订阅记录，
           // 连接获取被关注用户信息，仅筛选 USER 类型。
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(Subscription)
               .innerJoin(User, eq(Subscription.subscribedUnitId, User.unitId))
@@ -411,7 +411,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           );
 
           const agg = yield* Effect.orDie(
-            db
+            database
               .select({ total: count() })
               .from(Subscription)
               .innerJoin(Unit, eq(Subscription.subscribedUnitId, Unit.id))

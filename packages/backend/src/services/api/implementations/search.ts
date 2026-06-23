@@ -42,7 +42,7 @@ export const SearchHandlers = HttpApiBuilder.group(
   Api,
   "search",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const { pagination } = yield* Config;
     const lim = (n: number | undefined) =>
       clampLimit(n, Math.min(MAX_LIMIT, pagination.maxLimit));
@@ -68,7 +68,7 @@ export const SearchHandlers = HttpApiBuilder.group(
         const where = and(...conditions);
 
         const rows = yield* Effect.orDie(
-          db
+          database
             .select({
               id: Unit.id,
               type: Unit.type,
@@ -87,7 +87,7 @@ export const SearchHandlers = HttpApiBuilder.group(
         );
 
         const agg = yield* Effect.orDie(
-          db
+          database
             .select({ total: count() })
             .from(Unit)
             .leftJoin(UnitTranslation, eq(Unit.id, UnitTranslation.unitId))
@@ -134,7 +134,7 @@ export const SearchHandlers = HttpApiBuilder.group(
         const where = conditions.length > 0 ? and(...conditions) : undefined;
 
         const rows = yield* Effect.orDie(
-          db
+          database
             .select({
               unitId: User.unitId,
               name: User.name,
@@ -151,7 +151,7 @@ export const SearchHandlers = HttpApiBuilder.group(
         );
 
         const agg = yield* Effect.orDie(
-          db.select({ total: count() }).from(User).where(where),
+          database.select({ total: count() }).from(User).where(where),
         );
 
         return {
@@ -302,7 +302,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           if (!q) return { hits: [], total: 0 };
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({
                 id: Comment.id,
                 rootUnitId: Comment.rootUnitId,
@@ -322,7 +322,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           );
 
           const agg = yield* Effect.orDie(
-            db
+            database
               .select({ total: count() })
               .from(Comment)
               .where(

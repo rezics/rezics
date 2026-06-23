@@ -93,7 +93,7 @@ export const PollsHandlers = HttpApiBuilder.group(
   Api,
   "polls",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
 
     // Shared core: fetch poll row, options, user votes, and build DTO.
     // Returns `undefined` when the poll does not exist.
@@ -101,13 +101,13 @@ export const PollsHandlers = HttpApiBuilder.group(
     const fetchPollCore = (pollUnitId: string, userId: string | undefined) =>
       Effect.gen(function* () {
         const polls = yield* Effect.orDie(
-          db.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
+          database.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
         );
         if (!polls[0]) return undefined;
         const poll = polls[0];
 
         const options = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(PollOption)
             .where(eq(PollOption.pollUnitId, pollUnitId))
@@ -119,7 +119,7 @@ export const PollsHandlers = HttpApiBuilder.group(
         const closed = isPollClosed(poll);
         const ownerRows = userId
           ? yield* Effect.orDie(
-              db
+              database
                 .select({ userId: Unit.userId })
                 .from(Unit)
                 .where(eq(Unit.id, pollUnitId)),
@@ -134,7 +134,7 @@ export const PollsHandlers = HttpApiBuilder.group(
         const myVoteContexts: PollVoteContext[] = [];
         if (userId) {
           const votes = yield* Effect.orDie(
-            db
+            database
               .select({
                 optionId: PollVote.optionId,
                 realmUnitId: PollVote.realmUnitId,
@@ -197,7 +197,7 @@ export const PollsHandlers = HttpApiBuilder.group(
 
           // Create the Unit row / 创建 Unit 行
           const unitRows = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "POLL",
@@ -213,7 +213,7 @@ export const PollsHandlers = HttpApiBuilder.group(
 
           // Store the question as UnitTranslation title / 将问题存为 UnitTranslation 标题
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: "en",
               title: payload.question,
@@ -222,7 +222,7 @@ export const PollsHandlers = HttpApiBuilder.group(
 
           // Create the Poll extension row / 创建 Poll 扩展行
           yield* Effect.orDie(
-            db.insert(Poll).values({
+            database.insert(Poll).values({
               unitId: unit.id,
               voteMode,
               resultVisibility: "LIVE",
@@ -234,7 +234,7 @@ export const PollsHandlers = HttpApiBuilder.group(
           // Create PollOption rows / 创建 PollOption 行
           const positions = generatePositions(payload.options.length);
           yield* Effect.orDie(
-            db.insert(PollOption).values(
+            database.insert(PollOption).values(
               payload.options.map((label, i) => ({
                 pollUnitId: unit.id,
                 position: positions[i]!,
@@ -266,7 +266,7 @@ export const PollsHandlers = HttpApiBuilder.group(
 
           // Validate poll exists and is open / 校验投票存在且未关闭
           const polls = yield* Effect.orDie(
-            db.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
+            database.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
           );
           if (!polls[0]) return yield* new PollNotFound();
           const poll = polls[0];
@@ -278,7 +278,7 @@ export const PollsHandlers = HttpApiBuilder.group(
           for (const optionId of payload.optionIds) {
             // Validate option belongs to this poll / 校验选项属于此投票
             const optionRows = yield* Effect.orDie(
-              db
+              database
                 .select()
                 .from(PollOption)
                 .where(
@@ -294,7 +294,7 @@ export const PollsHandlers = HttpApiBuilder.group(
               // SINGLE mode: remove existing vote first, then insert new one
               // SINGLE 模式：先移除现有投票，再插入新投票
               const existingVotes = yield* Effect.orDie(
-                db
+                database
                   .select()
                   .from(PollVote)
                   .where(
@@ -308,7 +308,7 @@ export const PollsHandlers = HttpApiBuilder.group(
                 if (existingVotes[0].optionId === optionId) continue;
                 // Decrement old option's vote count / 递减旧选项的投票计数
                 yield* Effect.orDie(
-                  db
+                  database
                     .update(PollOption)
                     .set({
                       voteCount: sql`${PollOption.voteCount} - 1`,
@@ -323,7 +323,7 @@ export const PollsHandlers = HttpApiBuilder.group(
                 );
                 // Remove the old vote row / 移除旧投票行
                 yield* Effect.orDie(
-                  db
+                  database
                     .delete(PollVote)
                     .where(
                       and(
@@ -338,7 +338,7 @@ export const PollsHandlers = HttpApiBuilder.group(
               // MULTI mode: skip if already voted for this option
               // MULTI 模式：若已对该选项投过票则跳过
               const existingVote = yield* Effect.orDie(
-                db
+                database
                   .select()
                   .from(PollVote)
                   .where(
@@ -354,7 +354,7 @@ export const PollsHandlers = HttpApiBuilder.group(
 
             // Insert new vote / 插入新投票
             yield* Effect.orDie(
-              db.insert(PollVote).values({
+              database.insert(PollVote).values({
                 pollUnitId,
                 userId: user.id,
                 optionId,
@@ -364,7 +364,7 @@ export const PollsHandlers = HttpApiBuilder.group(
 
             // Increment option's vote count / 递增选项的投票计数
             yield* Effect.orDie(
-              db
+              database
                 .update(PollOption)
                 .set({
                   voteCount: sql`${PollOption.voteCount} + 1`,
@@ -391,13 +391,13 @@ export const PollsHandlers = HttpApiBuilder.group(
 
           // Validate poll exists / 校验投票存在
           const polls = yield* Effect.orDie(
-            db.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
+            database.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
           );
           if (!polls[0]) return yield* new PollNotFound();
 
           // Find all votes by this user on this poll / 查找此用户在此投票上的所有投票
           const votes = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(PollVote)
               .where(
@@ -412,12 +412,12 @@ export const PollsHandlers = HttpApiBuilder.group(
           // 移除每条投票并递减对应选项的计数
           for (const vote of votes) {
             yield* Effect.orDie(
-              db
+              database
                 .delete(PollVote)
                 .where(eq(PollVote.id, vote.id)),
             );
             yield* Effect.orDie(
-              db
+              database
                 .update(PollOption)
                 .set({
                   voteCount: sql`${PollOption.voteCount} - 1`,

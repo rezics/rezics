@@ -80,7 +80,7 @@ export const AdminHandlers = HttpApiBuilder.group(
   Api,
   "admin",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const config = yield* Config;
     const auth = yield* Auth;
     const lim = (n?: number) =>
@@ -91,7 +91,7 @@ export const AdminHandlers = HttpApiBuilder.group(
     const requireAdmin = (userId: string) =>
       Effect.gen(function* () {
         const rows = yield* Effect.orDie(
-          db
+          database
             .select({ permission: User.permission })
             .from(User)
             .where(eq(User.unitId, userId))
@@ -108,7 +108,7 @@ export const AdminHandlers = HttpApiBuilder.group(
       Effect.gen(function* () {
         const currentUser = yield* CurrentUser;
         const rows = yield* Effect.orDie(
-          db
+          database
             .select({ unitId: User.unitId })
             .from(User)
             .where(eq(User.authUserId, currentUser.id))
@@ -137,7 +137,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(User)
               .innerJoin(Unit, eq(User.unitId, Unit.id))
@@ -170,7 +170,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Look up the auth user ID from the target user's main DB row
           // 从目标用户的 main DB 行查找 auth user ID
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ authUserId: User.authUserId })
               .from(User)
               .where(eq(User.unitId, payload.userId))
@@ -219,7 +219,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ authUserId: User.authUserId })
               .from(User)
               .where(eq(User.unitId, payload.userId))
@@ -262,7 +262,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const userRows = yield* Effect.orDie(
-            db
+            database
               .select({ authUserId: User.authUserId })
               .from(User)
               .where(eq(User.unitId, payload.userId))
@@ -376,9 +376,9 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const [usersAgg, unitsAgg, realmsAgg] = yield* Effect.all([
-            Effect.orDie(db.select({ total: count() }).from(User)),
-            Effect.orDie(db.select({ total: count() }).from(Unit)),
-            Effect.orDie(db.select({ total: count() }).from(Realm)),
+            Effect.orDie(database.select({ total: count() }).from(User)),
+            Effect.orDie(database.select({ total: count() }).from(Unit)),
+            Effect.orDie(database.select({ total: count() }).from(Realm)),
           ]);
 
           return new AdminStats({
@@ -397,15 +397,15 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const [usersAgg, unitsAgg, realmsAgg] = yield* Effect.all([
-            Effect.orDie(db.select({ total: count() }).from(User)),
-            Effect.orDie(db.select({ total: count() }).from(Unit)),
-            Effect.orDie(db.select({ total: count() }).from(Realm)),
+            Effect.orDie(database.select({ total: count() }).from(User)),
+            Effect.orDie(database.select({ total: count() }).from(Unit)),
+            Effect.orDie(database.select({ total: count() }).from(Realm)),
           ]);
 
           // Recent activity: latest 10 units created
           // 近期活动：最新创建的 10 个 unit
           const recentUnits = yield* Effect.orDie(
-            db
+            database
               .select({
                 id: Unit.id,
                 type: Unit.type,
@@ -445,7 +445,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const rows = yield* Effect.orDie(
-            db.select().from(JwtService).orderBy(desc(JwtService.createdAt)),
+            database.select().from(JwtService).orderBy(desc(JwtService.createdAt)),
           );
 
           return rows.map(
@@ -470,7 +470,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Check for duplicate service key
           // 检查服务 key 是否重复
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ id: JwtService.id })
               .from(JwtService)
               .where(eq(JwtService.serviceKey, payload.name))
@@ -479,7 +479,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           if (existing[0]) return yield* new AdminConflict();
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(JwtService)
               .values({
                 serviceKey: payload.name,
@@ -509,7 +509,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
+            database.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
           );
           if (!existing[0]) return yield* new AdminNotFound();
 
@@ -517,11 +517,11 @@ export const AdminHandlers = HttpApiBuilder.group(
           if (payload.name !== undefined) set["serviceKey"] = payload.name;
 
           yield* Effect.orDie(
-            db.update(JwtService).set(set).where(eq(JwtService.id, params.id)),
+            database.update(JwtService).set(set).where(eq(JwtService.id, params.id)),
           );
 
           const updated = yield* Effect.orDie(
-            db.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
+            database.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
           );
           const row = updated[0]!;
           return new JwtServiceEntry({
@@ -541,19 +541,19 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
+            database.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
           );
           if (!existing[0]) return yield* new AdminNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .update(JwtService)
               .set({ isActive: true, updatedAt: new Date() })
               .where(eq(JwtService.id, params.id)),
           );
 
           const row = yield* Effect.orDie(
-            db.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
+            database.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
           );
           return new JwtServiceEntry({
             id: row[0]!.id,
@@ -572,19 +572,19 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
+            database.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
           );
           if (!existing[0]) return yield* new AdminNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .update(JwtService)
               .set({ isActive: false, updatedAt: new Date() })
               .where(eq(JwtService.id, params.id)),
           );
 
           const row = yield* Effect.orDie(
-            db.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
+            database.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
           );
           return new JwtServiceEntry({
             id: row[0]!.id,
@@ -603,18 +603,18 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
+            database.select().from(JwtService).where(eq(JwtService.id, params.id)).limit(1),
           );
           if (!existing[0]) return yield* new AdminNotFound();
 
           // Delete old JWKS entries for this service, triggering re-generation
           // 删除该服务的旧 JWKS 条目，触发重新生成
           yield* Effect.orDie(
-            db.delete(Jwks).where(eq(Jwks.jwtServiceId, params.id)),
+            database.delete(Jwks).where(eq(Jwks.jwtServiceId, params.id)),
           );
 
           yield* Effect.orDie(
-            db
+            database
               .update(JwtService)
               .set({ updatedAt: new Date() })
               .where(eq(JwtService.id, params.id)),
@@ -641,7 +641,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const result = yield* Effect.orDie(
-            db
+            database
               .update(HistoryOutbox)
               .set({
                 status: "pending",
@@ -669,12 +669,12 @@ export const AdminHandlers = HttpApiBuilder.group(
 
           // Check database connectivity
           // 检查数据库连接
-          yield* Effect.orDie(db.execute(sql`SELECT 1 as ok`));
+          yield* Effect.orDie(database.execute(sql`SELECT 1 as ok`));
 
           // Count pending history outbox entries
           // 统计待处理的历史发件箱条目
           const outboxPending = yield* Effect.orDie(
-            db
+            database
               .select({ total: count() })
               .from(HistoryOutbox)
               .where(eq(HistoryOutbox.status, "pending")),
@@ -683,7 +683,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Count failed history outbox entries
           // 统计失败的历史发件箱条目
           const outboxFailed = yield* Effect.orDie(
-            db
+            database
               .select({ total: count() })
               .from(HistoryOutbox)
               .where(eq(HistoryOutbox.status, "failed")),
@@ -714,7 +714,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const rows = yield* Effect.orDie(
-            db.select().from(EchoKV).where(eq(EchoKV.key, params.key)).limit(1),
+            database.select().from(EchoKV).where(eq(EchoKV.key, params.key)).limit(1),
           );
           if (!rows[0]) return yield* new AdminNotFound();
 
@@ -733,7 +733,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(EchoKV)
               .values({
                 key: params.key,
@@ -771,7 +771,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           }
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({ id: Unit.id, slug: Unit.slug, type: Unit.type })
               .from(Unit)
               .where(and(...conditions))
@@ -820,7 +820,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Verify recipient exists
           // 验证收件人是否存在
           const recipientRows = yield* Effect.orDie(
-            db
+            database
               .select({ unitId: User.unitId })
               .from(User)
               .where(eq(User.unitId, payload.recipientId))
@@ -831,7 +831,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Create a POST unit to represent the DM
           // 创建一个 POST unit 来表示私信
           const unitRows = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "POST",
@@ -846,7 +846,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Store message content as a translation
           // 将消息内容存储为翻译
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unitRows[0]!.id,
               language: "en",
               title: payload.subject ?? "Direct Message",
@@ -870,7 +870,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({
                 id: Unit.id,
                 slug: Unit.slug,
@@ -909,7 +909,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Check for duplicate label name
           // 检查标签名是否重复
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ id: Unit.id })
               .from(Unit)
               .innerJoin(
@@ -922,7 +922,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           if (existing[0]) return yield* new AdminConflict();
 
           const unitRows = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "LABEL",
@@ -935,7 +935,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           );
 
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unitRows[0]!.id,
               language: "en",
               title: payload.name,
@@ -964,14 +964,14 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Verify unit exists
           // 验证 unit 是否存在
           const parentUnit = yield* Effect.orDie(
-            db.select({ id: Unit.id }).from(Unit).where(eq(Unit.id, params.unitId)).limit(1),
+            database.select({ id: Unit.id }).from(Unit).where(eq(Unit.id, params.unitId)).limit(1),
           );
           if (!parentUnit[0]) return yield* new AdminNotFound();
 
           // Create a LINK unit
           // 创建一个 LINK unit
           const linkUnitRows = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "LINK",
@@ -988,7 +988,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // 将标题存储为翻译
           if (payload.title) {
             yield* Effect.orDie(
-              db.insert(UnitTranslation).values({
+              database.insert(UnitTranslation).values({
                 unitId: linkUnitRows[0]!.id,
                 language: "en",
                 title: payload.title,
@@ -1016,12 +1016,12 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Verify parent unit exists
           // 验证父 unit 是否存在
           const parentRows = yield* Effect.orDie(
-            db.select({ id: Unit.id }).from(Unit).where(eq(Unit.id, params.unitId)).limit(1),
+            database.select({ id: Unit.id }).from(Unit).where(eq(Unit.id, params.unitId)).limit(1),
           );
           if (!parentRows[0]) return yield* new AdminNotFound();
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({
                 id: Unit.id,
                 targetUnitId: Unit.targetUnitId,
@@ -1059,7 +1059,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // Verify link unit exists
           // 验证链接 unit 是否存在
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ id: Unit.id, targetUnitId: Unit.targetUnitId })
               .from(Unit)
               .where(and(eq(Unit.id, params.linkId), eq(Unit.type, "LINK")))
@@ -1071,7 +1071,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           // 如果提供了标题则更新翻译
           if (payload.title !== undefined) {
             yield* Effect.orDie(
-              db
+              database
                 .insert(UnitTranslation)
                 .values({
                   unitId: params.linkId,
@@ -1086,7 +1086,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           }
 
           yield* Effect.orDie(
-            db.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.linkId)),
+            database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.linkId)),
           );
 
           return new LinkEntry({
@@ -1107,7 +1107,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ id: Unit.id })
               .from(Unit)
               .where(and(eq(Unit.id, params.linkId), eq(Unit.type, "LINK")))
@@ -1115,7 +1115,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           );
           if (!existing[0]) return yield* new AdminNotFound();
 
-          yield* Effect.orDie(db.delete(Unit).where(eq(Unit.id, params.linkId)));
+          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.linkId)));
         }),
       )
 
@@ -1131,7 +1131,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ApiToken)
               .where(eq(ApiToken.revoked, false))
@@ -1179,7 +1179,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           const tokenHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(ApiToken)
               .values({
                 userId: unitId,
@@ -1211,7 +1211,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db.select().from(ApiToken).where(eq(ApiToken.id, params.id)).limit(1),
+            database.select().from(ApiToken).where(eq(ApiToken.id, params.id)).limit(1),
           );
           if (!existing[0]) return yield* new AdminNotFound();
 
@@ -1227,12 +1227,12 @@ export const AdminHandlers = HttpApiBuilder.group(
 
           if (Object.keys(set).length > 0) {
             yield* Effect.orDie(
-              db.update(ApiToken).set(set).where(eq(ApiToken.id, params.id)),
+              database.update(ApiToken).set(set).where(eq(ApiToken.id, params.id)),
             );
           }
 
           const updated = yield* Effect.orDie(
-            db.select().from(ApiToken).where(eq(ApiToken.id, params.id)).limit(1),
+            database.select().from(ApiToken).where(eq(ApiToken.id, params.id)).limit(1),
           );
           const row = updated[0]!;
 
@@ -1255,12 +1255,12 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db.select({ id: ApiToken.id }).from(ApiToken).where(eq(ApiToken.id, params.id)).limit(1),
+            database.select({ id: ApiToken.id }).from(ApiToken).where(eq(ApiToken.id, params.id)).limit(1),
           );
           if (!existing[0]) return yield* new AdminNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .update(ApiToken)
               .set({ revoked: true, revokedAt: new Date() })
               .where(eq(ApiToken.id, params.id)),
@@ -1277,7 +1277,7 @@ export const AdminHandlers = HttpApiBuilder.group(
       .handle("tokenBooksList", ({ query }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: Book.unitId,
                 status: Unit.status,
@@ -1314,7 +1314,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           const scopeId = crypto.randomUUID();
 
           const unitRows = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "BOOK",
@@ -1326,11 +1326,11 @@ export const AdminHandlers = HttpApiBuilder.group(
           );
 
           yield* Effect.orDie(
-            db.insert(Book).values({ unitId: unitRows[0]!.id }),
+            database.insert(Book).values({ unitId: unitRows[0]!.id }),
           );
 
           yield* Effect.orDie(
-            db.insert(UnitTranslation).values({
+            database.insert(UnitTranslation).values({
               unitId: unitRows[0]!.id,
               language: "en",
               title: payload.title,
@@ -1350,7 +1350,7 @@ export const AdminHandlers = HttpApiBuilder.group(
       .handle("tokenBooksUpdate", ({ params, payload }) =>
         Effect.gen(function* () {
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ unitId: Book.unitId })
               .from(Book)
               .innerJoin(Unit, eq(Book.unitId, Unit.id))
@@ -1361,7 +1361,7 @@ export const AdminHandlers = HttpApiBuilder.group(
 
           if (payload.status !== undefined) {
             yield* Effect.orDie(
-              db
+              database
                 .update(Unit)
                 .set({
                   status: payload.status as typeof Unit.status.enumValues[number],
@@ -1373,7 +1373,7 @@ export const AdminHandlers = HttpApiBuilder.group(
 
           if (payload.title !== undefined) {
             yield* Effect.orDie(
-              db
+              database
                 .insert(UnitTranslation)
                 .values({
                   unitId: params.id,
@@ -1388,7 +1388,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           }
 
           const updated = yield* Effect.orDie(
-            db
+            database
               .select({ unitId: Book.unitId, status: Unit.status, title: UnitTranslation.title })
               .from(Book)
               .innerJoin(Unit, eq(Book.unitId, Unit.id))
@@ -1417,7 +1417,7 @@ export const AdminHandlers = HttpApiBuilder.group(
       .handle("tokenUsersList", ({ query }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: User.unitId,
                 name: User.name,
@@ -1448,7 +1448,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           const scopeId = crypto.randomUUID();
 
           const unitRows = yield* Effect.orDie(
-            db
+            database
               .insert(Unit)
               .values({
                 type: "USER",
@@ -1460,7 +1460,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           );
 
           yield* Effect.orDie(
-            db.insert(User).values({
+            database.insert(User).values({
               unitId: unitRows[0]!.id,
               name: payload.name,
               email: payload.email,
@@ -1480,7 +1480,7 @@ export const AdminHandlers = HttpApiBuilder.group(
       .handle("tokenUsersUpdate", ({ params, payload }) =>
         Effect.gen(function* () {
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ unitId: User.unitId })
               .from(User)
               .where(eq(User.unitId, params.id))
@@ -1493,11 +1493,11 @@ export const AdminHandlers = HttpApiBuilder.group(
           if (payload.email !== undefined) set["email"] = payload.email;
 
           yield* Effect.orDie(
-            db.update(User).set(set).where(eq(User.unitId, params.id)),
+            database.update(User).set(set).where(eq(User.unitId, params.id)),
           );
 
           const updated = yield* Effect.orDie(
-            db
+            database
               .select({ unitId: User.unitId, name: User.name, email: User.email })
               .from(User)
               .where(eq(User.unitId, params.id))
@@ -1530,7 +1530,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(GameSystemRequirement)
               .where(where)
@@ -1559,7 +1559,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .insert(GameSystemRequirement)
               .values({
                 gameUnitId: payload.unitId,
@@ -1587,7 +1587,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(GameSystemRequirement)
               .where(eq(GameSystemRequirement.id, params.id))
@@ -1600,14 +1600,14 @@ export const AdminHandlers = HttpApiBuilder.group(
           if (payload.requirements !== undefined) set["hardware"] = payload.requirements;
 
           yield* Effect.orDie(
-            db
+            database
               .update(GameSystemRequirement)
               .set(set)
               .where(eq(GameSystemRequirement.id, params.id)),
           );
 
           const updated = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(GameSystemRequirement)
               .where(eq(GameSystemRequirement.id, params.id))
@@ -1632,7 +1632,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           yield* requireAdmin(unitId);
 
           const existing = yield* Effect.orDie(
-            db
+            database
               .select({ id: GameSystemRequirement.id })
               .from(GameSystemRequirement)
               .where(eq(GameSystemRequirement.id, params.id))
@@ -1641,7 +1641,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           if (!existing[0]) return yield* new AdminNotFound();
 
           yield* Effect.orDie(
-            db.delete(GameSystemRequirement).where(eq(GameSystemRequirement.id, params.id)),
+            database.delete(GameSystemRequirement).where(eq(GameSystemRequirement.id, params.id)),
           );
         }),
       );

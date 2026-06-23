@@ -91,7 +91,7 @@ export const ContentHandlers = HttpApiBuilder.group(
   Api,
   "content",
   Effect.fn(function* (handlers) {
-    const db = yield* Database;
+    const database = yield* Database;
     const { pagination } = yield* Config;
     const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
 
@@ -102,14 +102,14 @@ export const ContentHandlers = HttpApiBuilder.group(
     const reloadStructure = (ownerUnitId: string) =>
       Effect.gen(function* () {
         const containers = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(ContentStructureTable)
             .where(eq(ContentStructureTable.ownerUnitId, ownerUnitId)),
         );
         if (!containers[0]) return yield* new ContentNotFound();
         const nodes = yield* Effect.orDie(
-          db
+          database
             .select()
             .from(ContentStructureNode)
             .where(
@@ -138,14 +138,14 @@ export const ContentHandlers = HttpApiBuilder.group(
 
           // Verify the owner unit exists and the user has permission
           // 验证所有者 unit 存在且用户有权限
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.ownerUnitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.ownerUnitId)));
           if (!units[0]) return yield* new ContentNotFound();
           if (units[0].userId !== user.id) return yield* new ContentForbidden();
 
           // Ensure the content structure container exists (upsert)
           // 确保内容结构容器存在（upsert）
           yield* Effect.orDie(
-            db
+            database
               .insert(ContentStructureTable)
               .values({ ownerUnitId: params.ownerUnitId, updatedAt: new Date() })
               .onConflictDoNothing(),
@@ -157,7 +157,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           // Fetch all existing nodes for this owner (including deleted)
           // 获取此所有者的所有现有节点（包括已删除的）
           const allExisting = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentStructureNode)
               .where(eq(ContentStructureNode.ownerUnitId, params.ownerUnitId))
@@ -178,7 +178,7 @@ export const ContentHandlers = HttpApiBuilder.group(
             // Promote children of removed nodes to root
             // 将已移除节点的子节点提升到根级
             yield* Effect.orDie(
-              db
+              database
                 .update(ContentStructureNode)
                 .set({ parentId: null, updatedAt: new Date() })
                 .where(
@@ -190,7 +190,7 @@ export const ContentHandlers = HttpApiBuilder.group(
                 ),
             );
             yield* Effect.orDie(
-              db
+              database
                 .update(ContentStructureNode)
                 .set({ isDeleted: true, deletedAt: new Date(), updatedAt: new Date() })
                 .where(
@@ -209,7 +209,7 @@ export const ContentHandlers = HttpApiBuilder.group(
             const existing = existingById.get(plan.id);
             if (!existing) {
               yield* Effect.orDie(
-                db.insert(ContentStructureNode).values({
+                database.insert(ContentStructureNode).values({
                   id: plan.id,
                   ownerUnitId: params.ownerUnitId,
                   parentId: plan.parentId,
@@ -232,7 +232,7 @@ export const ContentHandlers = HttpApiBuilder.group(
               (existing.rating ?? null) !== (plan.rating ?? null)
             ) {
               yield* Effect.orDie(
-                db
+                database
                   .update(ContentStructureNode)
                   .set({
                     parentId: plan.parentId,
@@ -251,7 +251,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           // Bump container timestamp
           // 更新容器时间戳
           yield* Effect.orDie(
-            db
+            database
               .update(ContentStructureTable)
               .set({ updatedAt: new Date() })
               .where(eq(ContentStructureTable.ownerUnitId, params.ownerUnitId)),
@@ -266,14 +266,14 @@ export const ContentHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
 
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.ownerUnitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.ownerUnitId)));
           if (!units[0]) return yield* new ContentNotFound();
           if (units[0].userId !== user.id) return yield* new ContentForbidden();
 
           // Find all soft-deleted nodes for this owner
           // 查找此所有者的所有软删除节点
           const deletedNodes = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -288,7 +288,7 @@ export const ContentHandlers = HttpApiBuilder.group(
             // Check which parents are still alive; if parent is deleted, reparent to root
             // 检查哪些父级仍然存活；如果父级已删除，则重新设置为根级
             const activeNodes = yield* Effect.orDie(
-              db
+              database
                 .select()
                 .from(ContentStructureNode)
                 .where(
@@ -304,7 +304,7 @@ export const ContentHandlers = HttpApiBuilder.group(
               const parentIsAlive = node.parentId === null || activeIds.has(node.parentId);
               const restoredParentId = parentIsAlive ? node.parentId : null;
               yield* Effect.orDie(
-                db
+                database
                   .update(ContentStructureNode)
                   .set({
                     isDeleted: false,
@@ -322,7 +322,7 @@ export const ContentHandlers = HttpApiBuilder.group(
             // Bump container timestamp
             // 更新容器时间戳
             yield* Effect.orDie(
-              db
+              database
                 .update(ContentStructureTable)
                 .set({ updatedAt: new Date() })
                 .where(eq(ContentStructureTable.ownerUnitId, params.ownerUnitId)),
@@ -337,7 +337,7 @@ export const ContentHandlers = HttpApiBuilder.group(
       .handle("getTranslation", ({ params }) =>
         Effect.gen(function* () {
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentTranslationTable)
               .where(
@@ -366,7 +366,7 @@ export const ContentHandlers = HttpApiBuilder.group(
 
           // Verify the unit exists and user has permission
           // 验证 unit 存在且用户有权限
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ContentNotFound();
           if (units[0].userId !== user.id) return yield* new ContentForbidden();
 
@@ -375,7 +375,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           // Upsert the content translation
           // 更新或插入内容翻译
           const upserted = yield* Effect.orDie(
-            db
+            database
               .insert(ContentTranslationTable)
               .values({
                 unitId: params.unitId,
@@ -399,7 +399,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           // Ensure the support language record exists
           // 确保支持语言记录存在
           yield* Effect.orDie(
-            db
+            database
               .insert(UnitSupportLanguage)
               .values({
                 unitId: params.unitId,
@@ -428,14 +428,14 @@ export const ContentHandlers = HttpApiBuilder.group(
 
           // Verify the unit exists and user has permission
           // 验证 unit 存在且用户有权限
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ContentNotFound();
           if (units[0].userId !== user.id) return yield* new ContentForbidden();
 
           // Check the translation actually exists
           // 检查翻译确实存在
           const existing = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(ContentTranslationTable)
               .where(
@@ -449,7 +449,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           if (!existing[0]) return yield* new ContentNotFound();
 
           yield* Effect.orDie(
-            db
+            database
               .delete(ContentTranslationTable)
               .where(
                 and(
@@ -466,11 +466,11 @@ export const ContentHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           // Verify the unit exists
           // 验证 unit 存在
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ContentNotFound();
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(HistoryOutbox)
               .where(eq(HistoryOutbox.unitId, params.unitId))
@@ -498,16 +498,16 @@ export const ContentHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           // Verify the unit exists
           // 验证 unit 存在
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ContentNotFound();
 
           // Fetch both revisions by ID
           // 通过 ID 获取两个修订
           const fromRows = yield* Effect.orDie(
-            db.select().from(HistoryOutbox).where(eq(HistoryOutbox.id, query.from)).limit(1),
+            database.select().from(HistoryOutbox).where(eq(HistoryOutbox.id, query.from)).limit(1),
           );
           const toRows = yield* Effect.orDie(
-            db.select().from(HistoryOutbox).where(eq(HistoryOutbox.id, query.to)).limit(1),
+            database.select().from(HistoryOutbox).where(eq(HistoryOutbox.id, query.to)).limit(1),
           );
           if (!fromRows[0] || !toRows[0]) return yield* new ContentNotFound();
 
@@ -529,11 +529,11 @@ export const ContentHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           // Verify the unit exists
           // 验证 unit 存在
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ContentNotFound();
 
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(HistoryOutbox)
               .where(
@@ -562,13 +562,13 @@ export const ContentHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           // Verify the unit exists
           // 验证 unit 存在
-          const units = yield* Effect.orDie(db.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
           if (!units[0]) return yield* new ContentNotFound();
 
           // Structure events are HistoryOutbox rows with structure-related categories
           // 结构事件是具有结构相关类别的 HistoryOutbox 行
           const rows = yield* Effect.orDie(
-            db
+            database
               .select()
               .from(HistoryOutbox)
               .where(eq(HistoryOutbox.unitId, params.unitId))
@@ -597,7 +597,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           if (ids.length === 0) return [];
 
           const users = yield* Effect.orDie(
-            db
+            database
               .select({ unitId: User.unitId, name: User.name, avatar: User.avatar })
               .from(User)
               .where(inArray(User.unitId, ids)),
@@ -621,7 +621,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           if (ids.length === 0) return [];
 
           const unitRows = yield* Effect.orDie(
-            db
+            database
               .select({ id: Unit.id, type: Unit.type, slug: Unit.slug, defaultLanguage: Unit.defaultLanguage })
               .from(Unit)
               .where(inArray(Unit.id, ids)),
@@ -633,7 +633,7 @@ export const ContentHandlers = HttpApiBuilder.group(
           // 获取翻译以获得标题
           const unitIds = unitRows.map((r) => r.id);
           const translations = yield* Effect.orDie(
-            db
+            database
               .select({
                 unitId: UnitTranslation.unitId,
                 title: UnitTranslation.title,
