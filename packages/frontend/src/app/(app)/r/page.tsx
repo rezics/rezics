@@ -1,3 +1,4 @@
+import { ClientOnly } from "@/components/ClientOnly";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { RealmsContent } from "./content";
 
@@ -57,7 +58,9 @@ import { RealmsContent } from "./content";
 export default function RealmsPage() {
   return (
     <SectionBoundary>
-      <RealmsContent />
+      <ClientOnly>
+        <RealmsContent />
+      </ClientOnly>
     </SectionBoundary>
   );
 }
