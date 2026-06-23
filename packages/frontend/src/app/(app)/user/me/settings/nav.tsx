@@ -1,31 +1,23 @@
 "use client";
 
+import { useT } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const sections = [
-  { href: "/user/me/settings/account", key: "account" },
-  { href: "/user/me/settings/security", key: "security" },
-  { href: "/user/me/settings/preferences", key: "preferences" },
-  { href: "/user/me/settings/notifications", key: "notifications" },
-  { href: "/user/me/settings/connections", key: "connections" },
-  { href: "/user/me/settings/library", key: "library" },
-  { href: "/user/me/settings/tokens", key: "tokens" },
-] as const;
-
-const labels: Record<string, string> = {
-  account: "Account",
-  security: "Security",
-  preferences: "Preferences",
-  notifications: "Notifications",
-  connections: "Connections",
-  library: "Library",
-  tokens: "API Tokens",
-};
-
 export function SettingsNav() {
   const pathname = usePathname();
+  const [t] = useT();
+
+  const sections = [
+    { href: "/user/me/settings/account", label: t.settings.account },
+    { href: "/user/me/settings/security", label: t.settings.security },
+    { href: "/user/me/settings/preferences", label: t.settings.preferences },
+    { href: "/user/me/settings/notifications", label: t.settings.notifications },
+    { href: "/user/me/settings/connections", label: t.settings.connections },
+    { href: "/user/me/settings/library", label: t.settings.libraryPreferences },
+    { href: "/user/me/settings/tokens", label: t.settings.tokens },
+  ];
 
   return (
     <nav className="hidden w-48 shrink-0 md:block">
@@ -43,7 +35,7 @@ export function SettingsNav() {
                 )}
                 href={s.href}
               >
-                {labels[s.key]}
+                {s.label}
               </Link>
             </li>
           );

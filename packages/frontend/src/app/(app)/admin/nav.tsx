@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
 import {
   BarChart3Icon,
@@ -12,22 +13,23 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const sections = [
-  { href: "/admin/stats", label: "Dashboard", icon: BarChart3Icon },
-  { href: "/admin/users", label: "Users", icon: UsersIcon },
-  { href: "/admin/realms", label: "Realms", icon: GlobeIcon },
-  { href: "/admin/books", label: "Books", icon: BookOpenIcon },
-  { href: "/admin/tags", label: "Tags", icon: TagIcon },
-  { href: "/admin/governance", label: "Governance", icon: ShieldIcon },
-] as const;
-
 export function AdminNav() {
   const pathname = usePathname();
+  const [t] = useT();
+
+  const sections = [
+    { href: "/admin/stats", label: t.admin.dashboard, icon: BarChart3Icon },
+    { href: "/admin/users", label: t.admin.users, icon: UsersIcon },
+    { href: "/admin/realms", label: t.admin.realms, icon: GlobeIcon },
+    { href: "/admin/books", label: t.admin.books, icon: BookOpenIcon },
+    { href: "/admin/tags", label: t.admin.tags, icon: TagIcon },
+    { href: "/admin/governance", label: t.admin.governance, icon: ShieldIcon },
+  ];
 
   return (
     <nav className="hidden w-48 shrink-0 lg:block">
       <h2 className="text-muted-foreground mb-3 px-3 text-xs font-medium tracking-wider uppercase">
-        Admin
+        {t.admin.title}
       </h2>
       <ul className="space-y-0.5">
         {sections.map((s) => {

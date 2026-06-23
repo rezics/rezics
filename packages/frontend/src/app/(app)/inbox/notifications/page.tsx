@@ -88,18 +88,18 @@ export default function NotificationsPage() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  const getNotificationText = (item: NotificationItem): string => {
-    switch (item.type) {
-      case "reply":
-        return t.inbox.notificationReply(item.actorName);
-      case "mention":
-        return t.inbox.notificationMention(item.actorName);
-      case "follow":
-        return t.inbox.notificationFollow(item.actorName);
-      case "realm_invite":
-        return t.inbox.notificationRealmInvite(item.targetName ?? "");
-    }
+  const NOTIFICATION_TEXT_MAP: Record<
+    NotificationItem["type"],
+    (item: NotificationItem) => string
+  > = {
+    reply: (item) => t.inbox.notificationReply(item.actorName),
+    mention: (item) => t.inbox.notificationMention(item.actorName),
+    follow: (item) => t.inbox.notificationFollow(item.actorName),
+    realm_invite: (item) => t.inbox.notificationRealmInvite(item.targetName ?? ""),
   };
+
+  const getNotificationText = (item: NotificationItem): string =>
+    NOTIFICATION_TEXT_MAP[item.type](item);
 
   if (notifications.length === 0) {
     return (

@@ -1,4 +1,7 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useT } from "@/lib/i18n/locale";
 import {
   BookOpenIcon,
   FileTextIcon,
@@ -48,50 +51,52 @@ import Link from "next/link";
  * 每个卡片包含图标 + 标题 + 简短描述。
  */
 export default function CreatePage() {
+  const [t] = useT();
+
   const items = [
     {
       href: "/post/new",
       icon: MessageSquareIcon,
-      title: "Post",
-      description: "Share a thought or start a discussion",
+      title: t.create.postTitle,
+      description: t.create.postDescription,
     },
     {
       href: "/review/new",
       icon: NotebookPenIcon,
-      title: "Review",
-      description: "Write an in-depth review of a work",
+      title: t.create.reviewTitle,
+      description: t.create.reviewDescription,
     },
     {
       href: "/excerpt/new",
       icon: QuoteIcon,
-      title: "Excerpt",
-      description: "Share a passage from a book",
+      title: t.create.excerptTitle,
+      description: t.create.excerptDescription,
     },
     {
       href: "/remark/new",
       icon: FileTextIcon,
-      title: "Remark",
-      description: "Write a short note or comment",
+      title: t.create.remarkTitle,
+      description: t.create.remarkDescription,
     },
     {
       href: "/poll/new",
       icon: BarChart3Icon,
-      title: "Poll",
-      description: "Create a community poll",
+      title: t.create.pollTitle,
+      description: t.create.pollDescription,
     },
     {
       href: "/book/new",
       icon: BookOpenIcon,
-      title: "Book",
-      description: "Add a new book to the catalog",
+      title: t.create.bookTitle,
+      description: t.create.bookDescription,
     },
-  ] as const;
+  ];
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6 py-4">
       <div>
-        <h1 className="text-2xl font-bold">Create</h1>
-        <p className="text-muted-foreground text-sm">What would you like to share?</p>
+        <h1 className="text-2xl font-bold">{t.create.heading}</h1>
+        <p className="text-muted-foreground text-sm">{t.create.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

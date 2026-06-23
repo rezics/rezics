@@ -1,3 +1,6 @@
+"use client";
+
+import { useT } from "@/lib/i18n/locale";
 import type { ReactNode } from "react";
 import { SettingsNav } from "./nav";
 
@@ -39,9 +42,11 @@ import { SettingsNav } from "./nav";
  * 与 Desktop 一致。
  */
 export default function SettingsLayout({ children }: { readonly children: ReactNode }) {
+  const [t] = useT();
+
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-bold">{t.nav.settings}</h1>
       <div className="flex gap-8">
         <SettingsNav />
         <div className="min-w-0 flex-1">{children}</div>

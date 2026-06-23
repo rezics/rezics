@@ -1,26 +1,29 @@
+"use client";
+
+import { useT } from "@/lib/i18n/locale";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 
-const sections = [
-  { suffix: "profile", label: "Profile" },
-  { suffix: "theme", label: "Theme" },
-  { suffix: "pages", label: "Pages" },
-  { suffix: "menus", label: "Menus" },
-] as const;
-
-export default async function ManageZoneLayout({
+export default function ManageZoneLayout({
   children,
-  params,
 }: {
   readonly children: ReactNode;
-  readonly params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug } = useParams<{ slug: string }>();
+  const [t] = useT();
+
+  const sections = [
+    { suffix: "profile", label: t.zone.manageProfile },
+    { suffix: "theme", label: t.zone.manageTheme },
+    { suffix: "pages", label: t.zone.managePages },
+    { suffix: "menus", label: t.zone.manageMenus },
+  ];
 
   return (
     <div className="flex gap-8">
       <nav className="hidden w-44 shrink-0 md:block">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">Manage Zone</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider">{t.manage.title}</h2>
         <ul className="space-y-1">
           {sections.map((s) => (
             <li key={s.suffix}>
