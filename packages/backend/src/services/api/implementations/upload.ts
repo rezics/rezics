@@ -89,7 +89,7 @@ export const UploadHandlers = HttpApiBuilder.group(
             "cache-control": cacheControl,
           },
         });
-      }),
+      }).pipe(Effect.orDie),
     );
   }),
 );

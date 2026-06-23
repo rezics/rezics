@@ -4,8 +4,8 @@ import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
 import { AuthMiddleware, OptionalAuthMiddleware, Unauthorized } from "./middlewares/auth.ts";
 
 // ---------------------------------------------------------------------------
-// Response schemas — minimal placeholders; flesh out when implementing handlers
-// 响应 schema —— 最小占位；实现 handler 时再细化
+// Response schemas — typed DTOs matching handler return shapes
+// 响应 schema —— 匹配 handler 返回结构的类型化 DTO
 // ---------------------------------------------------------------------------
 
 export class MeiliHealthResult extends Schema.Class<MeiliHealthResult>("MeiliHealthResult")({
@@ -14,6 +14,95 @@ export class MeiliHealthResult extends Schema.Class<MeiliHealthResult>("MeiliHea
 
 export class AdminMessageResult extends Schema.Class<AdminMessageResult>("AdminMessageResult")({
   message: Schema.String,
+}) {}
+
+/** Status endpoint response. / 状态端点响应。 */
+export class MeiliStatusResult extends Schema.Class<MeiliStatusResult>("MeiliStatusResult")({
+  status: Schema.String,
+  meili: Schema.String,
+}) {}
+
+/** Single unit search hit. / 单个 Unit 搜索命中。 */
+export class UnitSearchHitDTO extends Schema.Class<UnitSearchHitDTO>("UnitSearchHitDTO")({
+  id: Schema.String,
+  type: Schema.String,
+  slug: Schema.NullOr(Schema.String),
+  title: Schema.NullOr(Schema.String),
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+}) {}
+
+/** Paginated unit search result. / 分页 Unit 搜索结果。 */
+export class UnitSearchResult extends Schema.Class<UnitSearchResult>("UnitSearchResult")({
+  hits: Schema.Array(UnitSearchHitDTO),
+  total: Schema.Number,
+}) {}
+
+/** Single user search hit. / 单个用户搜索命中。 */
+export class UserSearchHitDTO extends Schema.Class<UserSearchHitDTO>("UserSearchHitDTO")({
+  unitId: Schema.String,
+  name: Schema.NullOr(Schema.String),
+  email: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(Schema.String),
+  summary: Schema.NullOr(Schema.String),
+  createdAt: Schema.String,
+}) {}
+
+/** Paginated user search result. / 分页用户搜索结果。 */
+export class UserSearchResult extends Schema.Class<UserSearchResult>("UserSearchResult")({
+  users: Schema.Array(UserSearchHitDTO),
+  total: Schema.Number,
+}) {}
+
+/** Single comment search hit. / 单个评论搜索命中。 */
+export class CommentSearchHitDTO extends Schema.Class<CommentSearchHitDTO>("CommentSearchHitDTO")({
+  id: Schema.String,
+  rootUnitId: Schema.String,
+  authorUserId: Schema.String,
+  createdAt: Schema.String,
+}) {}
+
+/** Paginated comment search result. / 分页评论搜索结果。 */
+export class CommentSearchResult extends Schema.Class<CommentSearchResult>("CommentSearchResult")({
+  hits: Schema.Array(CommentSearchHitDTO),
+  total: Schema.Number,
+}) {}
+
+/** Federated search hit (union of unit and user results). / 联邦搜索命中（Unit 与用户结果的联合）。 */
+export class FederatedHitDTO extends Schema.Class<FederatedHitDTO>("FederatedHitDTO")({
+  id: Schema.String,
+  type: Schema.String,
+  slug: Schema.NullOr(Schema.String),
+  title: Schema.NullOr(Schema.String),
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+  _index: Schema.String,
+}) {}
+
+/** Federated search totals breakdown. / 联邦搜索各索引计数。 */
+export class FederatedTotalsDTO extends Schema.Class<FederatedTotalsDTO>("FederatedTotalsDTO")({
+  content: Schema.Number,
+  realms: Schema.Number,
+  posts: Schema.Number,
+  tags: Schema.Number,
+  users: Schema.Number,
+}) {}
+
+/** Federated search result. / 联邦搜索结果。 */
+export class FederatedSearchResult extends Schema.Class<FederatedSearchResult>("FederatedSearchResult")({
+  hits: Schema.Array(FederatedHitDTO),
+  totals: FederatedTotalsDTO,
+}) {}
+
+/** Meilisearch sync task reference (null while Meilisearch is not connected). / Meilisearch 同步任务引用（未连接时为 null）。 */
+export class SyncTaskResult extends Schema.Class<SyncTaskResult>("SyncTaskResult")({
+  task: Schema.NullOr(Schema.Unknown),
+}) {}
+
+/** Admin key creation / listing result. / 管理员密钥创建/列出结果。 */
+export class MeiliKeyResult extends Schema.Class<MeiliKeyResult>("MeiliKeyResult")({
+  message: Schema.optional(Schema.String),
+  keys: Schema.optional(Schema.Array(Schema.Unknown)),
 }) {}
 
 // ---------------------------------------------------------------------------
@@ -40,7 +129,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
     }),
 
     HttpApiEndpoint.get("status", "/status", {
-      success: Schema.Any,
+      success: MeiliStatusResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -55,7 +144,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // GET /meili/users/search — user search
@@ -68,7 +157,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.NumberFromString),
         sort: Schema.optional(Schema.String),
       }),
-      success: Schema.Struct({ users: Schema.Array(Schema.Any), total: Schema.Number }),
+      success: UserSearchResult,
     }),
 
     // POST /meili/entities/search — entity search
@@ -79,7 +168,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // POST /meili/posts/search — post search
@@ -90,7 +179,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // POST /meili/polls/search — poll search
@@ -101,7 +190,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // POST /meili/comments/search — comment search
@@ -112,7 +201,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: CommentSearchResult,
     }),
 
     // POST /meili/realms/search — realm search
@@ -123,7 +212,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // POST /meili/zones/search — zone search
@@ -134,7 +223,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // POST /meili/tags/search — tag search
@@ -145,7 +234,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // POST /meili/labels/search — label search
@@ -156,7 +245,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         limit: Schema.optional(Schema.Number),
         offset: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: UnitSearchResult,
     }),
 
     // POST /meili/search/federated — federated cross-index search
@@ -166,7 +255,7 @@ export class SearchGroup extends HttpApiGroup.make("search")
         q: Schema.optional(Schema.String),
         limit: Schema.optional(Schema.Number),
       }),
-      success: Schema.Any,
+      success: FederatedSearchResult,
     }).middleware(OptionalAuthMiddleware),
   )
   // --- Admin — index init ---
@@ -231,52 +320,52 @@ export class SearchGroup extends HttpApiGroup.make("search")
   // --- 管理员 — 全量同步 ---
   .add(
     HttpApiEndpoint.post("syncContent", "/content/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncUsers", "/users/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncPosts", "/posts/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncPolls", "/polls/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncRealms", "/realms/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncZones", "/zones/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncTags", "/tags/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncLabels", "/labels/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncEntities", "/entities/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("syncFeedbacks", "/feedbacks/sync", {
-      success: Schema.Struct({ task: Schema.Any }),
+      success: SyncTaskResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -332,12 +421,12 @@ export class SearchGroup extends HttpApiGroup.make("search")
   // --- 管理员 — 密钥管理 ---
   .add(
     HttpApiEndpoint.post("createAdminKey", "/keys/admin", {
-      success: Schema.Any,
+      success: MeiliKeyResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.get("listKeys", "/keys", {
-      success: Schema.Any,
+      success: MeiliKeyResult,
       error: [Unauthorized, SearchForbidden],
     }).middleware(AuthMiddleware),
 

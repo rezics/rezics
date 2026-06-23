@@ -16,7 +16,14 @@ import {
   Unit,
   UnitRealm,
 } from "../../database/schema/all.ts";
-import type { ModerationCaseStateStorage } from "../../database/schema/moderation.ts";
+import {
+  type AccountEnforcementStateStorage,
+  accountEnforcementStateStorageValues,
+} from "../../database/schema/governance.ts";
+import {
+  type ModerationCaseStateStorage,
+  moderationCaseStateStorageValues,
+} from "../../database/schema/moderation.ts";
 import { Api } from "../interfaces/index.ts";
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 import {
@@ -31,6 +38,19 @@ import {
   RealmCapabilityGrantDTO,
   StaffAuditLogDTO,
 } from "../interfaces/governance.ts";
+
+// ---------------------------------------------------------------------------
+// Type guards — narrow the shared ListQuery.state union to domain-specific enums
+// 类型守卫 — 将共享 ListQuery.state 联合类型收窄为领域专用枚举
+// ---------------------------------------------------------------------------
+
+function isAccountEnforcementState(s: string): s is AccountEnforcementStateStorage {
+  return (accountEnforcementStateStorageValues as readonly string[]).includes(s);
+}
+
+function isModerationCaseState(s: string): s is ModerationCaseStateStorage {
+  return (moderationCaseStateStorageValues as readonly string[]).includes(s);
+}
 
 // ---------------------------------------------------------------------------
 // Handlers — governance domain
@@ -733,9 +753,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
           const conditions: ReturnType<typeof eq>[] = [eq(AccountEnforcement.targetUserId, params.targetUserId)];
-          if (query.state) {
+          if (query.state && isAccountEnforcementState(query.state)) {
             conditions.push(
-              eq(AccountEnforcement.state, query.state as "ACTIVE" | "EXPIRED" | "REVOKED"),
+              eq(AccountEnforcement.state, query.state),
             );
           }
           const rows = yield*
@@ -859,9 +879,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
           const conditions: ReturnType<typeof eq>[] = [eq(ModerationCase.scope, "PLATFORM")];
-          if (query.state) {
+          if (query.state && isModerationCaseState(query.state)) {
             conditions.push(
-              eq(ModerationCase.state, query.state as ModerationCaseStateStorage),
+              eq(ModerationCase.state, query.state),
             );
           }
           const rows = yield*
@@ -1123,9 +1143,9 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const conditions: ReturnType<typeof eq>[] = [
             eq(ModerationCase.realmUnitId, params.realmUnitId),
           ];
-          if (query.state) {
+          if (query.state && isModerationCaseState(query.state)) {
             conditions.push(
-              eq(ModerationCase.state, query.state as ModerationCaseStateStorage),
+              eq(ModerationCase.state, query.state),
             );
           }
           const rows = yield*

@@ -1,16 +1,9 @@
 import { Effect, Layer } from "effect";
 import { HttpRouter } from "effect/unstable/http";
 import { HttpApiBuilder, HttpApiScalar } from "effect/unstable/httpapi";
-
 import { Auth } from "../auth/index.ts";
 import { Config } from "../config/index.ts";
 import { Database, DatabasePool } from "../database/index.ts";
-
-// ponytail: self-contained DB layer for handlers / 自包含的 DB 层供处理器使用
-const DBLayer = Database.layer.pipe(
-  Layer.provide(DatabasePool.layer),
-  Layer.provide(Config.layer),
-);
 import { AdminHandlers } from "./implementations/admin.ts";
 import { BooksHandlers } from "./implementations/books.ts";
 import { CommentsHandlers } from "./implementations/comments.ts";
@@ -38,17 +31,17 @@ import { NotificationsHandlers } from "./implementations/notifications.ts";
 import { PollsHandlers } from "./implementations/polls.ts";
 import { PostsHandlers } from "./implementations/posts.ts";
 import {
-  RealmTagApplicationVotesHandlers,
-  RealmTagApplicationsHandlers,
-  RealmTagContextsHandlers,
   RealmsHandlers,
+  RealmTagApplicationsHandlers,
+  RealmTagApplicationVotesHandlers,
+  RealmTagContextsHandlers,
 } from "./implementations/realms.ts";
 import { ScoresHandlers } from "./implementations/scores.ts";
 import { SearchHandlers } from "./implementations/search.ts";
 import {
   PolicyTagHandlers,
-  TagVoteHandlers,
   TagsHandlers,
+  TagVoteHandlers,
   UnitTagHandlers,
   UserTagApplicationHandlers,
 } from "./implementations/tags.ts";
@@ -58,6 +51,8 @@ import { ProfileHandlers, UsersHandlers } from "./implementations/users.ts";
 import { ZonesHandlers } from "./implementations/zones.ts";
 import { Api as Interfaces } from "./interfaces/index.ts";
 import { AuthRoutes } from "./routes/auth.ts";
+
+const DBLayer = Database.layer.pipe(Layer.provide(DatabasePool.layer), Layer.provide(Config.layer));
 
 export const Api = HttpApiBuilder.layer(Interfaces, {
   openapiPath: "/api/openapi.json",
@@ -105,7 +100,11 @@ export const Api = HttpApiBuilder.layer(Interfaces, {
     // Auth & infrastructure / 认证与基础设施
     AuthRoutes.pipe(Layer.provide(Auth.layer), Layer.provide(DatabasePool.layer), Layer.provide(Config.layer)),
     AuthMiddlewareLive.pipe(Layer.provide(Auth.layer), Layer.provide(DatabasePool.layer), Layer.provide(Config.layer)),
-    OptionalAuthMiddlewareLive.pipe(Layer.provide(Auth.layer), Layer.provide(DatabasePool.layer), Layer.provide(Config.layer)),
+    OptionalAuthMiddlewareLive.pipe(
+      Layer.provide(Auth.layer),
+      Layer.provide(DatabasePool.layer),
+      Layer.provide(Config.layer),
+    ),
     HttpApiScalar.layer(Interfaces, { path: "/api/docs" }),
     Layer.unwrap(
       Effect.gen(function* () {

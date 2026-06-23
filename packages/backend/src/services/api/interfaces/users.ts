@@ -20,7 +20,7 @@ export class UserDTO extends Schema.Class<UserDTO>("UserDTO")({
 }) {}
 
 export class UserListResult extends Schema.Class<UserListResult>("UserListResult")({
-  users: Schema.Array(Schema.Any),
+  users: Schema.Array(UserDTO),
   total: Schema.Number,
 }) {}
 
@@ -38,6 +38,58 @@ export class UserBriefBatchResult extends Schema.Class<UserBriefBatchResult>("Us
 
 export class DeleteAccountResult extends Schema.Class<DeleteAccountResult>("DeleteAccountResult")({
   deleted: Schema.Boolean,
+}) {}
+
+/** Payload for updating the current user profile. / 更新当前用户资料的请求体。 */
+const UpdateMePayload = Schema.Struct({
+  name: Schema.optional(Schema.NullOr(Schema.String)),
+  avatar: Schema.optional(Schema.NullOr(Schema.String)),
+  summary: Schema.optional(Schema.NullOr(Schema.String)),
+  description: Schema.optional(Schema.NullOr(Schema.String)),
+});
+
+/** Payload for updating user settings. / 更新用户设置的请求体。 */
+const UpdateSettingsPayload = Schema.Struct({
+  defaultLicenseSlug: Schema.optional(Schema.NullOr(Schema.String)),
+  realmManageModeDefault: Schema.optional(Schema.NullOr(Schema.Boolean)),
+  bookshelfConfig: Schema.optional(Schema.Unknown),
+});
+
+/** User settings response. / 用户设置响应。 */
+export class UserSettingsDTO extends Schema.Class<UserSettingsDTO>("UserSettingsDTO")({
+  defaultLicenseSlug: Schema.NullOr(Schema.String),
+  realmManageModeDefault: Schema.NullOr(Schema.Boolean),
+  bookshelfConfig: Schema.NullOr(Schema.Unknown),
+}) {}
+
+/** Email verification status. / 邮件验证状态。 */
+export class EmailVerificationDTO extends Schema.Class<EmailVerificationDTO>("EmailVerificationDTO")({
+  email: Schema.NullOr(Schema.String),
+  emailVerified: Schema.Boolean,
+}) {}
+
+/** Email verification request result. / 邮件验证请求结果。 */
+export class EmailVerificationRequestResult extends Schema.Class<EmailVerificationRequestResult>("EmailVerificationRequestResult")({
+  message: Schema.String,
+}) {}
+
+/** User data export result. / 用户数据导出结果。 */
+export class ExportDataResult extends Schema.Class<ExportDataResult>("ExportDataResult")({
+  message: Schema.String,
+}) {}
+
+/** Payload for admin update of a user. / 管理员更新用户的请求体。 */
+const AdminUpdatePayload = Schema.Struct({
+  name: Schema.optional(Schema.NullOr(Schema.String)),
+  avatar: Schema.optional(Schema.NullOr(Schema.String)),
+  summary: Schema.optional(Schema.NullOr(Schema.String)),
+  description: Schema.optional(Schema.NullOr(Schema.String)),
+});
+
+/** Reaction history entry. / 反应历史条目。 */
+export class ReactionHistoryDTO extends Schema.Class<ReactionHistoryDTO>("ReactionHistoryDTO")({
+  items: Schema.Array(Schema.Unknown),
+  nextCursor: Schema.NullOr(Schema.String),
 }) {}
 
 // ---------------------------------------------------------------------------
@@ -99,22 +151,22 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 通过 slug 查找用户
     HttpApiEndpoint.get("getBySlug", "/by-slug/:slug", {
       params: { slug: Schema.String },
-      success: Schema.Any,
+      success: UserDTO,
       error: UserNotFound,
     }),
 
     // GET /user/me — current authenticated user
     // 当前登录用户
     HttpApiEndpoint.get("getMe", "/me", {
-      success: Schema.Any,
+      success: UserDTO,
       error: Unauthorized,
     }).middleware(AuthMiddleware),
 
     // PUT /user/me — update current user profile
     // 更新当前用户资料
     HttpApiEndpoint.put("updateMe", "/me", {
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: UpdateMePayload,
+      success: UserDTO,
       error: Unauthorized,
     }).middleware(AuthMiddleware),
 
@@ -122,7 +174,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 通过 unitId 查找用户
     HttpApiEndpoint.get("getById", "/:userId", {
       params: { userId: Schema.String },
-      success: Schema.Any,
+      success: UserDTO,
       error: UserNotFound,
     }),
 
@@ -132,22 +184,22 @@ export class UsersGroup extends HttpApiGroup.make("users")
       query: Schema.Struct({
         ids: Schema.String,
       }),
-      success: Schema.Any,
+      success: Schema.Array(UserDTO),
     }),
   )
   .add(
     // GET /user/me/settings — get current user settings
     // 获取当前用户设置
     HttpApiEndpoint.get("getSettings", "/me/settings", {
-      success: Schema.Any,
+      success: UserSettingsDTO,
       error: Unauthorized,
     }).middleware(AuthMiddleware),
 
     // PUT /user/me/settings — update current user settings
     // 更新当前用户设置
     HttpApiEndpoint.put("updateSettings", "/me/settings", {
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: UpdateSettingsPayload,
+      success: UserSettingsDTO,
       error: Unauthorized,
     }).middleware(AuthMiddleware),
   )
@@ -155,7 +207,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // GET /user/me/email-verification — email verification state
     // 获取邮件验证状态
     HttpApiEndpoint.get("getEmailVerification", "/me/email-verification", {
-      success: Schema.Any,
+      success: EmailVerificationDTO,
       error: Unauthorized,
     }).middleware(AuthMiddleware),
 
@@ -163,7 +215,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 请求邮件验证
     HttpApiEndpoint.post("requestEmailVerification", "/me/email-verification", {
       payload: Schema.Struct({ email: Schema.String }),
-      success: Schema.Any,
+      success: EmailVerificationRequestResult,
       error: Unauthorized,
     }).middleware(AuthMiddleware),
   )
@@ -171,7 +223,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // POST /user/me/export — export user data
     // 导出用户数据
     HttpApiEndpoint.post("exportData", "/me/export", {
-      success: Schema.Any,
+      success: ExportDataResult,
       error: Unauthorized,
     }).middleware(AuthMiddleware),
 
@@ -188,7 +240,7 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 管理员获取用户
     HttpApiEndpoint.get("adminGet", "/admin/:userId", {
       params: { userId: Schema.String },
-      success: Schema.Any,
+      success: UserDTO,
       error: [Unauthorized, UserForbidden],
     }).middleware(AuthMiddleware),
 
@@ -196,8 +248,8 @@ export class UsersGroup extends HttpApiGroup.make("users")
     // 管理员更新用户
     HttpApiEndpoint.put("adminUpdate", "/admin/:userId", {
       params: { userId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: AdminUpdatePayload,
+      success: UserDTO,
       error: [Unauthorized, UserForbidden],
     }).middleware(AuthMiddleware),
 
@@ -268,7 +320,7 @@ export class ProfileGroup extends HttpApiGroup.make("profile")
         cursor: Schema.optional(Schema.String),
         limit: Schema.optional(Schema.NumberFromString),
       }),
-      success: Schema.Any,
+      success: ReactionHistoryDTO,
     }).middleware(OptionalAuthMiddleware),
 
     // GET /profile/:userId/reaction/received — list received reactions
@@ -280,7 +332,7 @@ export class ProfileGroup extends HttpApiGroup.make("profile")
         cursor: Schema.optional(Schema.String),
         limit: Schema.optional(Schema.NumberFromString),
       }),
-      success: Schema.Any,
+      success: ReactionHistoryDTO,
     }).middleware(OptionalAuthMiddleware),
   )
   .prefix("/profile") {}
