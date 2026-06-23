@@ -1,9 +1,9 @@
 import { useDrafts } from "@rezics/api/draft";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import type React from "react";
 import { DraftList } from "../components/DraftList";
 import { useRequireAuth } from "@/user/pages/useAuth";
+import { QueryBoundary } from "@/core";
 
 /**
  * `u/me/drafts` — the unified cross-type draft inbox. Drafts are not part of
@@ -44,8 +44,7 @@ import { useRequireAuth } from "@/user/pages/useAuth";
 export const DraftsPage: React.FC = () => {
   useRequireAuth();
   const { t } = useTranslation(["page", "common"]);
-  const { data, isLoading, isError } = useDrafts();
-  const drafts = data?.drafts ?? [];
+  const draftQuery = useDrafts();
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
@@ -58,17 +57,13 @@ export const DraftsPage: React.FC = () => {
         </p>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center gap-2 text-text-secondary">
-          <Spinner size="sm" /> {t("common:loading")}
-        </div>
-      ) : isError ? (
-        <p className="text-sm text-error-text">{t("common:error")}</p>
-      ) : drafts.length === 0 ? (
-        <p className="text-sm text-text-secondary">{t("page:drafts_empty")}</p>
-      ) : (
-        <DraftList drafts={drafts} />
-      )}
+      <QueryBoundary
+        query={draftQuery}
+        isEmpty={(data) => (data?.drafts ?? []).length === 0}
+        emptyTitle={t("page:drafts_empty")}
+      >
+        {(data) => <DraftList drafts={data.drafts ?? []} />}
+      </QueryBoundary>
     </div>
   );
 };

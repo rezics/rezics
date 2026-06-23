@@ -68,7 +68,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Plus, Search, X } from "lucide-react";
 import { type FC, useMemo, useState } from "react";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-
+import { QueryBoundary } from "@/core";
 
 export const ShelfContentsSearchSection: FC = () => {
   const locale = useLocale();
@@ -107,7 +107,6 @@ export const ShelfContentsSearchSection: FC = () => {
     .filter((tag) => !selectedTags.has(tag.unitId))
     .slice(0, 8);
   const tagLabels = tagTranslations.data ?? {};
-  const units = shelfItems.data?.units ?? [];
 
   function addTag(tagUnitId: string) {
     setSelectedTagIds((current) =>
@@ -215,39 +214,33 @@ export const ShelfContentsSearchSection: FC = () => {
         )}
       </div>
 
-      {shelfItems.isLoading ? (
-        <p className="py-12 text-center text-sm text-text-secondary">
-          {t("common:loading")}
-        </p>
-      ) : shelfItems.error ? (
-        <p className="py-12 text-center text-sm text-error-text">
-          {shelfItems.error.message}
-        </p>
-      ) : units.length === 0 ? (
-        <p className="py-12 text-center text-sm text-text-secondary">
-          {t("entity:shelf_contents_search_empty")}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {units.map((unit) => (
-            <ShelfContentsUnitRow
-              key={unit.unitId}
-              unit={unit}
-              showPrivateText={isCurrentUser}
-            />
-          ))}
-          {/* This profile summary intentionally stays non-paginated; full shelf
-              browsing happens on the shelf detail page where root-safe cursors
-              and local view pagination are available.
-              这个个人页摘要有意不做分页；完整书架浏览在 shelf 详情页完成，
-              那里具备 root-safe cursor 与本地视图分页。 */}
-          {shelfItems.data?.hasMore && (
-            <p className="py-2 text-center text-sm text-text-secondary">
-              {t("entity:shelf_contents_search_has_more")}
-            </p>
-          )}
-        </div>
-      )}
+      <QueryBoundary
+        query={shelfItems}
+        isEmpty={(data) => (data?.units ?? []).length === 0}
+        emptyTitle={t("entity:shelf_contents_search_empty")}
+      >
+        {(data) => (
+          <div className="flex flex-col gap-2">
+            {(data.units ?? []).map((unit) => (
+              <ShelfContentsUnitRow
+                key={unit.unitId}
+                unit={unit}
+                showPrivateText={isCurrentUser}
+              />
+            ))}
+            {/* This profile summary intentionally stays non-paginated; full shelf
+                browsing happens on the shelf detail page where root-safe cursors
+                and local view pagination are available.
+                这个个人页摘要有意不做分页；完整书架浏览在 shelf 详情页完成，
+                那里具备 root-safe cursor 与本地视图分页。 */}
+            {data.hasMore && (
+              <p className="py-2 text-center text-sm text-text-secondary">
+                {t("entity:shelf_contents_search_has_more")}
+              </p>
+            )}
+          </div>
+        )}
+      </QueryBoundary>
     </div>
   );
 };

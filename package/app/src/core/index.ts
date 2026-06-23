@@ -1,4 +1,6 @@
 export { QueryErrorDisplay } from "./components/QueryErrorDisplay";
+export { QueryBoundary } from "./components/QueryBoundary";
+export type { QueryBoundaryProps, QueryLike } from "./components/QueryBoundary";
 export { ResourceNotFoundState } from "./components/ResourceNotFoundState";
 export type {
   ResourceNotFoundStateProps,

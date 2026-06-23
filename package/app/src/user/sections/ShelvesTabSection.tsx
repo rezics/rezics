@@ -66,10 +66,11 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Card } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Search } from "lucide-react";
-import { type FC, useMemo, useState } from "react";
+import { type FC, useState } from "react";
 import { Link } from "@/shared/ui/link";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { QueryBoundary } from "@/core";
 
 const SORT_OPTION_LABEL = {
   "createdAt:desc": i18nMessages.shelf_sort_newest,
@@ -88,23 +89,7 @@ export const ShelvesTabSection: FC = () => {
     sort: { field: sortField, order: sortOrder },
   };
 
-  const { data, isLoading } = useQuery(
-    shelfQueries.byUser(userId, shelfFilters),
-  );
-
-  const shelves: ShelfDTO[] = (data as any)?.shelves ?? data ?? [];
-
-  const filtered = useMemo(() => {
-    let result = shelves;
-    if (filters.q) {
-      const q = filters.q.toLowerCase();
-      result = result.filter((s) => {
-        const title = s.translations?.[0]?.title ?? "";
-        return title.toLowerCase().includes(q);
-      });
-    }
-    return orderFavoritesFirst(result);
-  }, [shelves, filters.q]);
+  const shelfQuery = useQuery(shelfQueries.byUser(userId, shelfFilters));
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,
@@ -133,23 +118,37 @@ export const ShelvesTabSection: FC = () => {
         }
       />
 
-      {isLoading ? (
-        <p className="text-sm text-text-secondary py-12 text-center">
-          {t("common:loading")}
-        </p>
-      ) : filtered.length === 0 ? (
-        <p className="text-sm text-text-secondary py-12 text-center">
-          {filters.q
+      <QueryBoundary
+        query={shelfQuery}
+        isEmpty={(rawData) => {
+          const shelves: ShelfDTO[] =
+            (rawData as any)?.shelves ?? rawData ?? [];
+          const filtered = applyShelfFilter(shelves, filters.q);
+          return filtered.length === 0;
+        }}
+        emptyTitle={
+          filters.q
             ? t("entity:shelf_no_search_matches")
-            : t("entity:shelf_empty_yet")}
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {filtered.map((shelf) => (
-            <ShelfCard key={shelf.unitId} shelf={shelf} userSlug={user.slug} />
-          ))}
-        </div>
-      )}
+            : t("entity:shelf_empty_yet")
+        }
+      >
+        {(rawData) => {
+          const shelves: ShelfDTO[] =
+            (rawData as any)?.shelves ?? rawData ?? [];
+          const filtered = applyShelfFilter(shelves, filters.q);
+          return (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {filtered.map((shelf) => (
+                <ShelfCard
+                  key={shelf.unitId}
+                  shelf={shelf}
+                  userSlug={user.slug}
+                />
+              ))}
+            </div>
+          );
+        }}
+      </QueryBoundary>
     </div>
   );
 };
@@ -203,6 +202,22 @@ function orderFavoritesFirst(shelves: ShelfDTO[]): ShelfDTO[] {
     (shelf) => shelf.slug !== FAVORITES_SHELF_SLUG,
   );
   return [...favorites, ...ordinary];
+}
+
+/**
+ * Apply client-side text filter + favorites-first ordering.
+ * 应用客户端文本过滤并将收藏架置顶。
+ */
+function applyShelfFilter(shelves: ShelfDTO[], q?: string): ShelfDTO[] {
+  let result = shelves;
+  if (q) {
+    const lower = q.toLowerCase();
+    result = result.filter((s) => {
+      const title = s.translations?.[0]?.title ?? "";
+      return title.toLowerCase().includes(lower);
+    });
+  }
+  return orderFavoritesFirst(result);
 }
 
 const ShelfCard: FC<{

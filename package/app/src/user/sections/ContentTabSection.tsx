@@ -72,7 +72,6 @@ const i18nMessages = {
 
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { EmptyState } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useState } from "react";
@@ -84,6 +83,7 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { QueryBoundary } from "@/core";
 
 const KIND_CHIP_LABEL = {
   REVIEW: i18nMessages.search_category_reviews,
@@ -128,7 +128,7 @@ export const ContentTabSection: FC = () => {
     limit,
   };
 
-  const { data, isLoading } = useLocalizedPostSearch(searchOpts);
+  const postQuery = useLocalizedPostSearch(searchOpts);
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,
@@ -161,11 +161,6 @@ export const ContentTabSection: FC = () => {
     setOffset(0);
   };
 
-  const posts = data?.items ?? [];
-  const total = data?.total ?? 0;
-  const totalPages = Math.ceil(total / limit);
-  const currentPage = Math.floor(offset / limit);
-
   return (
     <div className="flex flex-col gap-4 py-4">
       <InnerFilterPanel
@@ -180,52 +175,56 @@ export const ContentTabSection: FC = () => {
         />
       </InnerFilterPanel>
 
-      {isLoading ? (
-        <p className="text-sm text-text-secondary py-12 text-center">
-          {t("common:loading")}
-        </p>
-      ) : posts.length === 0 ? (
-        <EmptyState
-          title={filters.q ? t("search:empty_title") : t("common:no_data")}
-        />
-      ) : (
-        <>
-          <div className="flex flex-col gap-2">
-            {posts.map((post: PostSearchDocument) => (
-              <PostListItem key={post.id} post={post} />
-            ))}
-          </div>
+      <QueryBoundary
+        query={postQuery}
+        isEmpty={(data) => (data?.items ?? []).length === 0}
+        emptyTitle={filters.q ? t("search:empty_title") : t("common:no_data")}
+      >
+        {(data) => {
+          const posts = data?.items ?? [];
+          const total = data?.total ?? 0;
+          const totalPages = Math.ceil(total / limit);
+          const currentPage = Math.floor(offset / limit);
+          return (
+            <>
+              <div className="flex flex-col gap-2">
+                {posts.map((post: PostSearchDocument) => (
+                  <PostListItem key={post.id} post={post} />
+                ))}
+              </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setOffset(Math.max(0, offset - limit))}
-                disabled={offset === 0}
-              >
-                {t("common:previous_page")}
-              </Button>
-              <span className="text-sm text-text-secondary">
-                {t("common:page_of", {
-                  page: currentPage + 1,
-                  total: totalPages,
-                })}
-              </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setOffset(offset + limit)}
-                disabled={currentPage + 1 >= totalPages}
-              >
-                {t("common:next_page")}
-              </Button>
-            </div>
-          )}
-        </>
-      )}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOffset(Math.max(0, offset - limit))}
+                    disabled={offset === 0}
+                  >
+                    {t("common:previous_page")}
+                  </Button>
+                  <span className="text-sm text-text-secondary">
+                    {t("common:page_of", {
+                      page: currentPage + 1,
+                      total: totalPages,
+                    })}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOffset(offset + limit)}
+                    disabled={currentPage + 1 >= totalPages}
+                  >
+                    {t("common:next_page")}
+                  </Button>
+                </div>
+              )}
+            </>
+          );
+        }}
+      </QueryBoundary>
     </div>
   );
 };

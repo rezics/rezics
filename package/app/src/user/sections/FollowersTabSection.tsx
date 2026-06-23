@@ -60,6 +60,7 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { QueryBoundary } from "@/core";
 
 export const FollowersTabSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
@@ -91,16 +92,9 @@ export const FollowersTabSection: FC = () => {
     enabled: filter === "following",
   });
 
-  const isLoading =
-    filter === "followers"
-      ? followersQuery.isLoading
-      : followingsQuery.isLoading;
-
-  const rawData: any =
-    filter === "followers" ? followersQuery.data : followingsQuery.data;
-  const users: UserDTO[] = rawData?.users ?? rawData ?? [];
-  const total: number = rawData?.total ?? 0;
-  const totalPages = Math.ceil(total / limit);
+  // Select the active query; both are always mounted but only one is enabled.
+  // 选择当前激活的查询；两个都挂载，但只有一个 enabled。
+  const activeQuery = filter === "followers" ? followersQuery : followingsQuery;
 
   const handleFilterChange = (value: string) => {
     setFilter(value);
@@ -115,55 +109,63 @@ export const FollowersTabSection: FC = () => {
         onChipChange={handleFilterChange}
       />
 
-      {isLoading ? (
-        <p className="text-sm text-text-secondary py-12 text-center">
-          {t("common:loading")}
-        </p>
-      ) : users.length === 0 ? (
-        <p className="text-sm text-text-secondary py-12 text-center">
-          {filter === "followers"
+      <QueryBoundary
+        query={activeQuery}
+        isEmpty={(rawData) => {
+          const users: UserDTO[] = (rawData as any)?.users ?? rawData ?? [];
+          return users.length === 0;
+        }}
+        emptyTitle={
+          filter === "followers"
             ? t("settings:profile_no_followers")
-            : t("settings:profile_no_following")}
-        </p>
-      ) : (
-        <>
-          <div className="flex flex-col gap-2">
-            {users.map((u: UserDTO) => (
-              <UserListItem
-                key={u.unitId}
-                user={u}
-                showFollowButton={isCurrentUser}
-              />
-            ))}
-          </div>
+            : t("settings:profile_no_following")
+        }
+      >
+        {(rawData) => {
+          const users: UserDTO[] = (rawData as any)?.users ?? rawData ?? [];
+          const total: number = (rawData as any)?.total ?? 0;
+          const totalPages = Math.ceil(total / limit);
+          return (
+            <>
+              <div className="flex flex-col gap-2">
+                {users.map((u: UserDTO) => (
+                  <UserListItem
+                    key={u.unitId}
+                    user={u}
+                    showFollowButton={isCurrentUser}
+                  />
+                ))}
+              </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                {t("common:previous_page")}
-              </Button>
-              <span className="text-sm text-text-secondary">
-                {t("common:page_of", { page, total: totalPages })}
-              </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page >= totalPages}
-              >
-                {t("common:next_page")}
-              </Button>
-            </div>
-          )}
-        </>
-      )}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    {t("common:previous_page")}
+                  </Button>
+                  <span className="text-sm text-text-secondary">
+                    {t("common:page_of", { page, total: totalPages })}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page >= totalPages}
+                  >
+                    {t("common:next_page")}
+                  </Button>
+                </div>
+              )}
+            </>
+          );
+        }}
+      </QueryBoundary>
     </div>
   );
 };

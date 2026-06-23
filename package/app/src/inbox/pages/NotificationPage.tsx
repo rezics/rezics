@@ -9,6 +9,7 @@ import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { InboxTabBar } from "../components/InboxTabBar.tsx";
 import { NotificationCard } from "../components/NotificationCard.tsx";
+import { QueryBoundary } from "@/core";
 
 /**
  * 通知页面 —— 显示用户通知列表，支持全部标记为已读操作。
@@ -55,11 +56,11 @@ import { NotificationCard } from "../components/NotificationCard.tsx";
  */
 export const NotificationPage: React.FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-  const { data, isLoading, isError } = useNotifications(1, 50);
+  const notifQuery = useNotifications(1, 50);
   const markAsRead = useMarkAsReadMutation();
   const markAllAsRead = useMarkAllAsReadMutation();
 
-  const items = data?.items ?? [];
+  const items = notifQuery.data?.items ?? [];
 
   return (
     <div className="mx-auto mt-16 w-full px-4 max-w-3xl">
@@ -79,35 +80,29 @@ export const NotificationPage: React.FC = () => {
       <InboxTabBar active="notifications" />
       <div className="mt-4" />
 
-      {isLoading && (
-        <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
-      )}
-      {isError && (
-        <p className="text-sm text-destructive">
-          {t("settings:notifications_load_failed")}
-        </p>
-      )}
-      {!isLoading && !isError && items.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          {t("settings:notifications_empty")}
-        </p>
-      )}
-
-      <ul className="flex flex-col gap-1">
-        {items.map((item) => (
-          <li key={item.id}>
-            <NotificationCard
-              item={item}
-              onClick={() =>
-                markAsRead.mutate({
-                  kind: item.kind,
-                  sourceUnitId: item.sourceUnitId,
-                })
-              }
-            />
-          </li>
-        ))}
-      </ul>
+      <QueryBoundary
+        query={notifQuery}
+        isEmpty={(data) => (data?.items ?? []).length === 0}
+        emptyTitle={t("settings:notifications_empty")}
+      >
+        {(data) => (
+          <ul className="flex flex-col gap-1">
+            {(data.items ?? []).map((item) => (
+              <li key={item.id}>
+                <NotificationCard
+                  item={item}
+                  onClick={() =>
+                    markAsRead.mutate({
+                      kind: item.kind,
+                      sourceUnitId: item.sourceUnitId,
+                    })
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </QueryBoundary>
     </div>
   );
 };
