@@ -1,16 +1,8 @@
 {
   "files": [],
   "references": [
-    { "path": "./package/admin" },
-    { "path": "./package/api" },
-    { "path": "./package/app" },
-    { "path": "./package/contract" },
-    { "path": "./package/i18n" },
-    { "path": "./package/preview" },
-    { "path": "./package/search" },
-    { "path": "./package/server" },
-    { "path": "./package/ui" },
-    { "path": "./package/utils" },
-    { "path": "./tool" }
+    { "path": "./packages/backend" },
+    { "path": "./packages/frontend" },
+    { "path": "./packages/core" }
   ]
 }

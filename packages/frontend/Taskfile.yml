@@ -1,0 +1,14 @@
+version: "3"
+
+tasks:
+  dev:
+    desc: Start frontend dev server
+    cmd: next dev --turbopack
+
+  build:
+    desc: Build frontend for production
+    cmd: next build
+
+  start:
+    desc: Start production server
+    cmd: next start

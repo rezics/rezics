@@ -1,29 +1,10 @@
 version: "3"
 
 includes:
-  app: { taskfile: ./package/app/Taskfile.yml, dir: ./package/app }
-  admin: { taskfile: ./package/admin/Taskfile.yml, dir: ./package/admin }
-  about: { taskfile: ./package/about/Taskfile.yml, dir: ./package/about }
-  api: { taskfile: ./package/api/Taskfile.yml, dir: ./package/api }
-  auth: { taskfile: ./package/auth/Taskfile.yml, dir: ./package/auth }
-  contract:
-    { taskfile: ./package/contract/Taskfile.yml, dir: ./package/contract }
-  edge: { taskfile: ./package/edge/Taskfile.yml, dir: ./package/edge }
-  editor: { taskfile: ./package/editor/Taskfile.yml, dir: ./package/editor }
-  folio: { taskfile: ./package/folio/Taskfile.yml, dir: ./package/folio }
-  history: { taskfile: ./package/history/Taskfile.yml, dir: ./package/history }
-  job: { taskfile: ./package/job/Taskfile.yml, dir: ./package/job }
-  job-runner:
-    { taskfile: ./package/job-runner/Taskfile.yml, dir: ./package/job-runner }
-  notify: { taskfile: ./package/notify/Taskfile.yml, dir: ./package/notify }
-  preview: { taskfile: ./package/preview/Taskfile.yml, dir: ./package/preview }
-  ranking: { taskfile: ./package/ranking/Taskfile.yml, dir: ./package/ranking }
-  reaction:
-    { taskfile: ./package/reaction/Taskfile.yml, dir: ./package/reaction }
-  search: { taskfile: ./package/search/Taskfile.yml, dir: ./package/search }
-  server: { taskfile: ./package/server/Taskfile.yml, dir: ./package/server }
-  ui: { taskfile: ./package/ui/Taskfile.yml, dir: ./package/ui }
-  utils: { taskfile: ./package/utils/Taskfile.yml, dir: ./package/utils }
+  backend:
+    { taskfile: ./packages/backend/Taskfile.yml, dir: ./packages/backend }
+  frontend:
+    { taskfile: ./packages/frontend/Taskfile.yml, dir: ./packages/frontend }
 
 tasks:
   default:

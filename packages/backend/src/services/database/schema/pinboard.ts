@@ -1,0 +1,62 @@
+import { index, pgTable, unique, uuid, varchar } from "drizzle-orm/pg-core";
+import { createdAt, updatedAt, uuidv7PrimaryKey } from "./columns.ts";
+import { Realm } from "./realm.ts";
+import { Unit } from "./unit.ts";
+
+export const Pinboard = pgTable(
+  "Pinboard",
+  {
+    id: uuidv7PrimaryKey(),
+    realmUnitId: uuid()
+      .notNull()
+      .references(() => Realm.unitId, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    key: varchar({ length: 64 }).notNull(),
+    kind: varchar({ length: 32 }).default("list").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    unique("Pinboard_realmUnitId_key_unique").on(table.realmUnitId, table.key),
+    index("Pinboard_realmUnitId_idx").using(
+      "btree",
+      table.realmUnitId.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const PinboardEntry = pgTable(
+  "PinboardEntry",
+  {
+    id: uuidv7PrimaryKey(),
+    pinboardId: uuid()
+      .notNull()
+      .references(() => Pinboard.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    unitId: uuid()
+      .notNull()
+      .references(() => Unit.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    position: varchar({ length: 64 }).notNull().default("V"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    unique("PinboardEntry_pinboardId_unitId_unique").on(
+      table.pinboardId,
+      table.unitId,
+    ),
+    index("PinboardEntry_pinboardId_position_unitId_idx").using(
+      "btree",
+      table.pinboardId.asc().nullsLast(),
+      table.position.asc().nullsLast(),
+      table.unitId.asc().nullsLast(),
+    ),
+  ],
+);

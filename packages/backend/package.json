@@ -1,0 +1,24 @@
+{
+  "name": "@rezics/backend",
+  "type": "module",
+  "exports": {
+    "./api": "./src/services/api/interfaces/index.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1066.0",
+    "@aws-sdk/s3-request-presigner": "3.1066.0",
+    "@effect/platform-node": "4.0.0-beta.86",
+    "@effect/sql-pg": "4.0.0-beta.86",
+    "better-auth": "^1.6.15",
+    "drizzle-orm": "1.0.0-rc.3",
+    "effect": "4.0.0-beta.86",
+    "pg": "^8.21.0",
+    "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "@better-auth/cli": "1.4.21",
+    "@types/pg": "^8",
+    "drizzle-kit": "1.0.0-rc.3",
+    "rolldown": "^1.1.1"
+  }
+}

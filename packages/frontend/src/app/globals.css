@@ -1,0 +1,618 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  --font-mono: var(--font-mono, ui-monospace, monospace);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-xs: calc(var(--radius) * 0.5);
+  --radius-sm: calc(var(--radius) * 0.75);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+  --radius-2xl: calc(var(--radius) * 2.5);
+  --radius-3xl: calc(var(--radius) * 3);
+  --radius-4xl: calc(var(--radius) * 4);
+  --animate-slide-up: slideUp 0.2s ease-out;
+  --animate-slide-down: slideDown 0.2s ease-out;
+  --animate-expand: expand 0.2s ease-out;
+  --animate-collapse: collapse 0.2s ease-out;
+  --animate-marquee-x: marqueeX var(--marquee-duration) linear infinite var(--marquee-delay);
+  --animate-marquee-y: marqueeY var(--marquee-duration) linear infinite var(--marquee-delay);
+  --animate-flip-in: flip-in 0.2s ease-out;
+  --animate-flip-out: flip-out 0.2s ease-out;
+  --animate-indeterminate: indeterminate 1.5s ease-in-out infinite;
+  @keyframes slideUp {
+  from {
+    height: var(--height);
+    }
+  to {
+    height: 0;
+    }
+  }
+  @keyframes slideDown {
+  from {
+    height: 0;
+    }
+  to {
+    height: var(--height);
+    }
+  }
+  @keyframes expand {
+  from {
+    height: var(--collapsed-height, 0);
+    }
+  to {
+    height: var(--height);
+    }
+  }
+  @keyframes collapse {
+  from {
+    height: var(--height);
+    }
+  to {
+    height: var(--collapsed-height, 0);
+    }
+  }
+  @keyframes marqueeX {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(var(--marquee-translate));
+    }
+  }
+  @keyframes marqueeY {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(var(--marquee-translate));
+    }
+  }
+  @keyframes flip-in {
+  from {
+    transform: rotateY(180deg);
+    }
+  to {
+    transform: rotateY(0deg);
+    }
+  }
+  @keyframes flip-out {
+  from {
+    transform: rotateY(0deg);
+    }
+  to {
+    transform: rotateY(180deg);
+    }
+  }
+  @keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+    }
+  100% {
+    transform: translateX(400%);
+    }
+  }
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: var(--color-neutral-50);
+  --foreground: var(--color-neutral-800);
+  --card: var(--color-neutral-50);
+  --card-foreground: var(--color-neutral-800);
+  --popover: var(--color-neutral-50);
+  --popover-foreground: var(--color-neutral-800);
+  --primary: var(--color-neutral-800);
+  --primary-foreground: var(--color-neutral-50);
+  --secondary: color-mix(in srgb, var(--color-neutral-950) 6%, var(--background));
+  --secondary-foreground: var(--color-neutral-800);
+  --muted: color-mix(in srgb, var(--color-neutral-950) 6%, var(--background));
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 80%, var(--color-neutral-950));
+  --accent: color-mix(in srgb, var(--color-neutral-950) 6%, var(--background));
+  --accent-foreground: var(--color-neutral-800);
+  --destructive: var(--color-red-500);
+  --destructive-foreground: var(--color-red-700);
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-700);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-700);
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-700);
+  --border: color-mix(in srgb, var(--color-neutral-950) 12%, var(--background));
+  --input: color-mix(in srgb, var(--color-neutral-950) 13%, var(--background));
+  --ring: var(--color-neutral-400);
+  --sidebar: var(--color-neutral-50);
+  --sidebar-foreground: color-mix(in srgb, var(--color-neutral-800) 64%, var(--sidebar));
+  --sidebar-primary: var(--color-neutral-800);
+  --sidebar-primary-foreground: var(--color-neutral-50);
+  --sidebar-accent: color-mix(in srgb, var(--color-neutral-950) 6%, var(--sidebar));
+  --sidebar-accent-foreground: var(--color-neutral-800);
+  --sidebar-border: color-mix(in srgb, var(--color-neutral-950) 11%, var(--sidebar));
+  --sidebar-ring: var(--color-neutral-400);
+  --chart-1: var(--color-orange-600);
+  --chart-2: var(--color-teal-600);
+  --chart-3: var(--color-cyan-900);
+  --chart-4: var(--color-amber-400);
+  --chart-5: var(--color-amber-500);
+}
+
+.dark {
+  --background: var(--color-neutral-950);
+  --foreground: var(--color-neutral-100);
+  --card: color-mix(in srgb, var(--background) 98%, var(--color-neutral-50));
+  --card-foreground: var(--color-neutral-100);
+  --popover: color-mix(in srgb, var(--background) 96%, var(--color-neutral-50));
+  --popover-foreground: var(--color-neutral-100);
+  --primary: var(--color-neutral-100);
+  --primary-foreground: var(--color-neutral-800);
+  --secondary: color-mix(in srgb, var(--color-white) 10%, var(--background));
+  --secondary-foreground: var(--color-neutral-100);
+  --muted: color-mix(in srgb, var(--color-neutral-50) 10%, var(--background));
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 70%, var(--color-neutral-50));
+  --accent: color-mix(in srgb, var(--color-neutral-50) 10%, var(--background));
+  --accent-foreground: var(--color-neutral-100);
+  --destructive: color-mix(in srgb, var(--color-red-600) 90%, var(--color-neutral-50));
+  --destructive-foreground: var(--color-red-400);
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-400);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-400);
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-400);
+  --border: color-mix(in srgb, var(--color-neutral-50) 8%, var(--background));
+  --input: color-mix(in srgb, var(--color-neutral-50) 10%, var(--background));
+  --ring: var(--color-neutral-500);
+  --sidebar: color-mix(in srgb, var(--color-neutral-950) 97%, var(--color-neutral-50));
+  --sidebar-foreground: color-mix(in srgb, var(--color-neutral-100) 64%, var(--sidebar));
+  --sidebar-primary: var(--color-neutral-100);
+  --sidebar-primary-foreground: var(--color-neutral-800);
+  --sidebar-accent: color-mix(in srgb, var(--color-neutral-50) 10%, var(--sidebar));
+  --sidebar-accent-foreground: var(--color-neutral-100);
+  --sidebar-border: color-mix(in srgb, var(--color-neutral-50) 11%, var(--sidebar));
+  --sidebar-ring: var(--color-neutral-400);
+  --chart-1: var(--color-blue-700);
+  --chart-2: var(--color-emerald-500);
+  --chart-3: var(--color-amber-500);
+  --chart-4: var(--color-purple-500);
+  --chart-5: var(--color-rose-500);
+}
+
+@layer base {
+  ::selection {
+    @apply bg-primary/80 text-primary-foreground;
+  }
+
+  * {
+    @apply border-border outline-ring/50 ring-ring;
+  }
+
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-background text-foreground flex min-h-svh flex-col font-sans;
+  }
+
+  main {
+    @apply flex flex-1 flex-col;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility hitbox-debug {
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+    @apply border border-dashed border-info bg-info/10;
+  }
+  &:hover::before {
+    @apply border border-dashed border-success bg-success/10;
+  }
+}
+
+@utility hitbox {
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@utility hitbox-* {
+    --hitbox-t: calc(--value([*]) * -1);
+    --hitbox-b: calc(--value([*]) * -1);
+    --hitbox-l: calc(--value([*]) * -1);
+    --hitbox-r: calc(--value([*]) * -1);
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@utility hitbox-l-* {
+    --hitbox-l: calc(--value([*]) * -1);
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@utility hitbox-r-* {
+    --hitbox-r: calc(--value([*]) * -1);
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@utility hitbox-t-* {
+    --hitbox-t: calc(--value([*]) * -1);
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@utility hitbox-b-* {
+    --hitbox-b: calc(--value([*]) * -1);
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@utility hitbox-x-* {
+    --hitbox-l: calc(--value([*]) * -1);
+    --hitbox-r: calc(--value([*]) * -1);
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@utility hitbox-y-* {
+    --hitbox-t: calc(--value([*]) * -1);
+    --hitbox-b: calc(--value([*]) * -1);
+    position: relative;
+  &::before {
+    position: absolute;
+    top: var(--hitbox-t, 0px);
+    right: var(--hitbox-r, 0px);
+    bottom: var(--hitbox-b, 0px);
+    left: var(--hitbox-l, 0px);
+    pointer-events: inherit;
+    content: "";
+  }
+}
+
+@layer components {
+  .prose h1:not(.not-prose h1) {
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    line-height: var(--text-2xl--line-height);
+    letter-spacing: var(--tracking-tight);
+    scroll-margin: calc(var(--spacing) * 20);
+  }
+  .prose h2:not(.not-prose h2) {
+    padding-bottom: calc(var(--spacing) * 2);
+    margin-top: calc(var(--spacing) * 8);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: var(--text-xl--line-height);
+    letter-spacing: var(--tracking-tight);
+    scroll-margin: calc(var(--spacing) * 20);
+  }
+  .prose h2:not(.not-prose h2):first-child {
+    margin-top: 0;
+  }
+  .prose h3:not(.not-prose h3) {
+    margin-top: calc(var(--spacing) * 8);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: var(--text-lg--line-height);
+    letter-spacing: var(--tracking-tight);
+    scroll-margin: calc(var(--spacing) * 20);
+  }
+  .prose h3:not(.not-prose h3):first-child {
+    margin-top: 0;
+  }
+  .prose h4:not(.not-prose h4) {
+    margin-top: calc(var(--spacing) * 8);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: var(--text-lg--line-height);
+    letter-spacing: var(--tracking-tight);
+    scroll-margin: calc(var(--spacing) * 20);
+  }
+  .prose h4:not(.not-prose h4):first-child {
+    margin-top: 0;
+  }
+  .prose h5:not(.not-prose h5) {
+    margin-top: calc(var(--spacing) * 8);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: var(--text-lg--line-height);
+    letter-spacing: var(--tracking-tight);
+    scroll-margin: calc(var(--spacing) * 20);
+  }
+  .prose h5:not(.not-prose h5):first-child {
+    margin-top: 0;
+  }
+  .prose h6:not(.not-prose h6) {
+    margin-top: calc(var(--spacing) * 8);
+    font-size: var(--text-base);
+    font-weight: 600;
+    line-height: var(--text-base--line-height);
+    letter-spacing: var(--tracking-tight);
+    scroll-margin: calc(var(--spacing) * 20);
+  }
+  .prose h6:not(.not-prose h6):first-child {
+    margin-top: 0;
+  }
+  .prose h1:not(.not-prose h1) + p, .prose h2:not(.not-prose h2) + p, .prose h3:not(.not-prose h3) + p, .prose h4:not(.not-prose h4) + p, .prose h5:not(.not-prose h5) + p, .prose h6:not(.not-prose h6) + p {
+    margin-top: 0;
+  }
+  .prose p:not(.not-prose p) {
+    line-height: 1.75;
+  }
+  .prose p:not(.not-prose p):not(:first-child) {
+    margin-top: calc(var(--spacing) * 6);
+  }
+  .prose li:not(.not-prose li) {
+    line-height: 1.75;
+  }
+  .prose a:not(.not-prose a) {
+    font-weight: 500;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: var(--spacing);
+  }
+  .prose blockquote:not(.not-prose blockquote) {
+    padding-left: calc(var(--spacing) * 6);
+    margin-top: calc(var(--spacing) * 6);
+    font-style: italic;
+    border-left: 2px solid var(--color-border);
+  }
+  .prose table:not(.not-prose table) {
+    width: 100%;
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: calc(var(--spacing) * 6);
+    overflow-y: auto;
+  }
+  .prose table:not(.not-prose table) thead tr {
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .prose table:not(.not-prose table) thead tr:nth-child(even) {
+    background-color: var(--color-muted);
+  }
+  .prose table:not(.not-prose table) th {
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+    font-weight: 700;
+    text-align: left;
+    border: 1px solid var(--color-border);
+  }
+  .prose table:not(.not-prose table) th[align="center"] {
+    text-align: center;
+  }
+  .prose table:not(.not-prose table) th[align="right"] {
+    text-align: right;
+  }
+  .prose table:not(.not-prose table) tbody tr {
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .prose table:not(.not-prose table) tbody tr:nth-child(even) {
+    background-color: var(--color-muted);
+  }
+  .prose table:not(.not-prose table) td {
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+    text-align: left;
+    border: 1px solid var(--color-border);
+  }
+  .prose table:not(.not-prose table) td[align="center"] {
+    text-align: center;
+  }
+  .prose table:not(.not-prose table) td[align="right"] {
+    text-align: right;
+  }
+  .prose ul:not(.not-prose ul) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-left: calc(var(--spacing) * 6);
+    list-style: disc;
+  }
+  .prose ul:not(.not-prose ul) > li {
+    margin-top: calc(var(--spacing) * 2);
+  }
+  .prose ul:not(.not-prose ul) p {
+    display: inline;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .prose ol:not(.not-prose ol) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-left: calc(var(--spacing) * 6);
+    list-style: decimal;
+  }
+  .prose ol:not(.not-prose ol) > li {
+    margin-top: calc(var(--spacing) * 2);
+  }
+  .prose ol:not(.not-prose ol) p {
+    display: inline;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .prose img:not(.not-prose img), .prose picture:not(.not-prose picture), .prose video:not(.not-prose video) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: calc(var(--spacing) * 6);
+  }
+  .prose picture > img:not(.not-prose picture > img) {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .prose kbd:not(.not-prose kbd) {
+    padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    line-height: var(--text-xs--line-height);
+    background-color: var(--color-muted);
+    border-radius: calc(var(--radius) - 2px);
+  }
+  .prose hr {
+    margin-top: calc(var(--spacing) * 10);
+    margin-bottom: calc(var(--spacing) * 10);
+  }
+  .prose dl:not(.not-prose dl) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: calc(var(--spacing) * 6);
+  }
+  .prose dl:not(.not-prose dl) dt {
+    margin-top: calc(var(--spacing) * 6);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+  .prose dl:not(.not-prose dl) dt:first-child {
+    margin-top: 0;
+  }
+  .prose details:not(.not-prose details) {
+    margin-top: calc(var(--spacing) * 6);
+  }
+  .prose details:not(.not-prose details) summary {
+    margin-top: calc(var(--spacing) * 6);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+    cursor: pointer;
+  }
+  .prose details:not(.not-prose details) p:first-of-type {
+    margin-top: calc(var(--spacing) * 2);
+  }
+  .prose mark:not(.not-prose mark) {
+    background-color: var(--color-yellow-300);
+  }
+  .prose small:not(.not-prose small) {
+    font-size: var(--text-xs);
+    line-height: 1;
+  }
+  .prose figure:not(.not-prose figure) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: calc(var(--spacing) * 6);
+  }
+  .prose figure:not(.not-prose figure) img {
+    margin-top: 0;
+    margin-bottom: 0;
+    border-radius: var(--radius);
+  }
+  .prose figure:not(.not-prose figure) figcaption {
+    margin-top: calc(var(--spacing) * 2);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: var(--text-sm--line-height);
+    color: var(--color-muted-foreground);
+  }
+  .prose code:not(.not-prose code) {
+    padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    line-height: var(--text-xs--line-height);
+    color: var(--color-muted-foreground);
+    background-color: var(--color-muted);
+    border-radius: var(--radius-sm);
+  }
+}

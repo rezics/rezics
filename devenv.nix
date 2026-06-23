@@ -9,6 +9,10 @@
     enable = true;
     nodejs.enable = true;
     bun.enable = true;
+    yarn = {
+      enable = true;
+      package = pkgs.yarn-berry;
+    };
   };
 
   packages = [

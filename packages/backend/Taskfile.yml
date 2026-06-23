@@ -1,0 +1,30 @@
+version: "3"
+
+tasks:
+  dev:
+    desc: Start backend dev server
+    cmd: tsx watch src/index.ts
+
+  build:
+    desc: Build backend for production
+    cmd: rolldown -c
+
+  database:generate:
+    desc: Generate Drizzle migrations
+    cmd: drizzle-kit generate
+
+  database:migrate:
+    desc: Apply Drizzle migrations
+    cmd: drizzle-kit migrate
+
+  database:push:
+    desc: Push schema directly (dev only)
+    cmd: drizzle-kit push
+
+  database:studio:
+    desc: Open Drizzle Studio
+    cmd: drizzle-kit studio
+
+  auth:gen:
+    desc: Generate better-auth schema
+    cmd: npx @better-auth/cli generate --config ./src/services/auth/static.ts --output ./src/services/database/schema/auth.ts

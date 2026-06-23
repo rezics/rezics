@@ -21,6 +21,8 @@ out/
 *.exe
 storybook-static/
 **/storybook-static/
+.next/
+**/.next/
 
 # Prisma generated clients
 **/prisma/generated/
