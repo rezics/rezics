@@ -15,7 +15,7 @@ const dynamicTranslateKeyPattern = /\bt\(\s*[A-Za-z_]\w*\s*[,)]/;
 const dynamicTemplateKeyPattern = /\bt\(\s*`[^`]*\$\{[^`]*`/;
 const contractI18nKeyPattern = /\bi18nKey\s*:/;
 const frontendSourcePattern =
-  /^package\/(?:app|admin|ui|editor|folio)\/src\/.*\.(?:ts|tsx)$/;
+  /^packages\/frontend\/src\/.*\.(?:ts|tsx)$/;
 const fallbackTranslatePattern =
   /\bt\s*\(\s*["'][^"']*:[^"']+["']\s*,\s*["'][^"']+["']\s*\)/;
 
@@ -23,7 +23,7 @@ function shouldScan(relPath: string): boolean {
   if (/\.(?:test|spec)\.tsx?$/.test(relPath)) return false;
   return (
     frontendSourcePattern.test(relPath) ||
-    relPath.startsWith("package/contract/src/")
+    relPath.startsWith("packages/backend/src/")
   );
 }
 
@@ -67,7 +67,7 @@ export function scanI18nSourceForTest(
   }
 
   if (
-    relPath.startsWith("package/contract/src/") &&
+    relPath.startsWith("packages/backend/src/") &&
     contractI18nKeyPattern.test(source)
   ) {
     violations.push({

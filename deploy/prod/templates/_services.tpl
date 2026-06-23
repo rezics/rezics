@@ -33,7 +33,7 @@
         image        = "[[ var "image_server_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo/package/server && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
+        args         = ["until cd /repo/packages/backend && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
       }
 
       env {
@@ -131,7 +131,7 @@
         image        = "[[ var "image_auth_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo/package/auth && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
+        args         = ["until cd /repo/packages/backend && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
       }
 
       env {
@@ -223,7 +223,7 @@
         image        = "[[ var "image_notify_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo/package/notify && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
+        args         = ["until cd /repo/packages/backend && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
       }
 
       env {
@@ -303,7 +303,7 @@
         image        = "[[ var "image_reaction_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo/package/reaction && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
+        args         = ["until cd /repo/packages/backend && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
       }
 
       env {
@@ -380,7 +380,7 @@
         image        = "[[ var "image_history_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo/package/history && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
+        args         = ["until cd /repo/packages/backend && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
       }
 
       env {
@@ -456,7 +456,7 @@
         image        = "[[ var "image_ranking_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo/package/ranking && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
+        args         = ["until cd /repo/packages/backend && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
       }
 
       env {

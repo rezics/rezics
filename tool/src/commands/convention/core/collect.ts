@@ -10,7 +10,7 @@ import {
 const ANY_SCANNABLE = /\.(tsx?|jsx?|mdx|css)$/;
 
 export function collectContext({ staged }: { staged: boolean }): ScanContext {
-  const packagesRoot = join(REPO_ROOT, "package");
+  const packagesRoot = join(REPO_ROOT, "packages");
   const inputFiles = staged
     ? getStagedFilePaths()
     : [...walkFilesByExtension(packagesRoot, ANY_SCANNABLE)];
@@ -33,7 +33,7 @@ export function collectContext({ staged }: { staged: boolean }): ScanContext {
       tsAndTsxFiles.push(filePath);
     }
     if (
-      /^package\/(server|auth)\/src\/db\/schema\/.*\.ts$/.test(toRel(filePath))
+      /^packages\/backend\/src\/services\/database\/schema\/.*\.ts$/.test(toRel(filePath))
     ) {
       schemaFiles.push(filePath);
     }

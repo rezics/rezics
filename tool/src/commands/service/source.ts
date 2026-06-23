@@ -12,7 +12,7 @@ const REPO_ROOT = path.resolve(TOOL_DIR, "..");
 
 loadDotenv({ path: path.join(TOOL_DIR, ".env"), override: false, quiet: true });
 loadDotenv({
-  path: path.join(REPO_ROOT, "package/job-runner/.env"),
+  path: path.join(REPO_ROOT, "packages/backend/.env"),
   override: false,
   quiet: true,
 });

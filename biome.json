@@ -14,8 +14,6 @@
       "!**/*.d.ts",
       "!.agents",
       "!.claude",
-      "!package/admin/src/routeTree.gen.ts",
-      "!package/app/src/routeTree.gen.ts",
       "!!**/dist",
       "!!**/build",
       "!!**/coverage",
@@ -104,7 +102,7 @@
       }
     },
     {
-      "includes": ["package/ui/src/shared/lib/tw-animate.css"],
+      "includes": ["packages/frontend/src/components/ui/**/*.css"],
       "formatter": {
         "enabled": false
       },

@@ -11,16 +11,14 @@ media, posts, shelves, tags, community `realm`s — is modeled as a unified
 `Unit`, so the same catalog, classification, attribution, and social layers work
 across content types and languages. Communities (`realm`s) collectively classify
 and discuss works, co-locating a work's index, discussion, and collaborative
-knowledge. Runtime and package manager: Bun. Workspaces live under `package/*`.
+knowledge. Runtime: Bun. Package manager: Yarn 4 (node-modules linker).
+Workspaces live under `packages/*`.
 
 ## Commands
 
-The command surface is [go-task](https://taskfile.dev). Every workspace under
-`package/*` owns a `Taskfile.yml`; the root `Taskfile.yml` aggregates them via
-`includes`, so package tasks are namespaced (`task server:dev`, `task
-app:build`). `bun` stays under the hood only — runtime (it executes the `tool/`
-CLI), package manager (`bun install`), and bundler (`bun build`). Run `task` to
-list everything.
+The command surface is [go-task](https://taskfile.dev). Workspace tasks are
+namespaced via `includes` (`task backend:dev`, `task frontend:build`). Run
+`task` to list everything.
 
 ```bash
 task                     # list every task (task --list)
@@ -28,9 +26,8 @@ task dev                 # start full dev environment (Nomad: infra + app)
 task dev:stop            # stop all services
 task dev:status          # show service status
 task dev:logs -- server  # follow logs for a specific task
-task app:dev             # frontend app, Vite
-task server:dev          # main Elysia API
-task auth:dev            # auth service
+task frontend:dev        # frontend (Next.js + Turbopack)
+task backend:dev         # backend API server
 
 task test                # all tests (bun test)
 task format              # Biome format
@@ -43,23 +40,24 @@ task db:generate         # generate migrations (all schema units)
 task db:migrate          # apply migrations (all schema units)
 task seed:factory        # synthetic data — realistic preset
 task seed:factory:fast   # synthetic data — fast preset
-
-task storybook           # all Storybooks
-task ui:storybook        # UI Storybook, port 6007
 ```
 
 ## Architecture Rules
 
-- Backend domains use `{domain}.api.ts`, `.service.ts`, `.mapper.ts`, `.types.ts`.
-  Mount domain APIs from `package/server/src/index.ts`.
-- API types are contract-first in `@rezics/contract`; frontend access belongs in
-  `@rezics/api`. Do not duplicate API DTOs in app code.
-- `@rezics/server` and `@rezics/auth` use separate Drizzle schemas and databases.
-- `package/app` features follow the layered structure in
-  `package/app/docs/feature standard.md`. `models/` must not import React,
-  hooks, or state modules; external consumers go through the feature `index.ts`.
-- Runtime env validation uses `@t3-oss/env-core` + Valibot. Keep env dependencies
-  isolated from module exports.
+- Backend: Effect HttpApiGroup + HttpApiBuilder. Interfaces in
+  `packages/backend/src/services/api/interfaces/`, implementations in
+  `packages/backend/src/services/api/implementations/`. One file per API group,
+  one-to-one mapping between interfaces and implementations.
+- Database schema: Drizzle ORM in `packages/backend/src/services/database/schema/`.
+- Config service: `packages/backend/src/services/config/index.ts` (all constants).
+- Frontend: Next.js 16 App Router. State via `@effect/atom-react`. API client
+  via `packages/frontend/src/lib/api-client.ts`.
+- i18n: `@nmnmcc/intee` with `useTranslation`. Languages in
+  `packages/frontend/src/lib/i18n/languages/`.
+- UI: Shark UI (`@shark` registry, Ark UI based). Generated files in
+  `packages/frontend/src/components/ui/` — never hand-edit.
+- Runtime env validation uses `@t3-oss/env-core` + Valibot. Keep env
+  dependencies isolated from module exports.
 
 ## Workflows
 
@@ -77,30 +75,28 @@ task ui:storybook        # UI Storybook, port 6007
   `docs/guide/database-workflow.md`; do not hand-author ordinary schema
   migrations. Edit migration SQL only for custom SQL or documented
   Drizzle-generated SQL defects while keeping schema source in sync.
-- Do not create, update, or sync root docs/ translations unless the user explicitly
-  asks for that exact translation scope.
+- Do not create, update, or sync root docs/ translations unless the user
+  explicitly asks for that exact translation scope.
 - Dirty working trees are normal. The maintainer may be editing in parallel, so
-ignore unrelated unstaged/untracked changes and never revert, stash, clean, or
-flag them.
+  ignore unrelated unstaged/untracked changes and never revert, stash, clean, or
+  flag them.
 - Stage only task-owned files by explicit path; never use `git add -A` or
-`git add .`.
-- Commit only when the index contains this task’s staged files. If unrelated staged files are staged, retry briefly; if still blocked, report them and stop.
+  `git add .`.
+- Commit only when the index contains this task's staged files. If unrelated
+  staged files are staged, retry briefly; if still blocked, report them and stop.
 
 ## UI Work
 
-- Load the `rezics-design` skill before editing or reviewing JSX, CSS, UnoCSS
-  classes, tokens, typography, spacing, component selection, icons, or copy.
-- Frontend user-facing product copy must go through `@rezics/i18n`; do not
+- Frontend user-facing product copy must go through `@nmnmcc/intee`; do not
   hard-code display strings in React components. Add or reuse locale keys under
-  `package/i18n/locales/` and validate with `task check:i18n`.
-- Authoritative UI rules live in `rezics-design`, the `@rezics/ui` Storybook, and
-  the `check:convention` / `check:tokens` rules; do not duplicate those details
-  here.
+  `packages/frontend/src/lib/i18n/languages/` and validate with `task check:i18n`.
+- Authoritative UI rules live in the OpenWorks AGENTS.md frontend sections and the
+  `check:convention` / `check:tokens` rules; do not duplicate those details here.
 - For browser verification, prefer giving the user the exact URLs to verify
   after they run `task dev` from the repo root. Do not download browsers or
   run heavyweight browser automation unless the user explicitly asks.
 
-## 前端交互铁律（`package/app/`）
+## 前端交互铁律（`packages/frontend/`）
 
 - **永远不要求用户手动操作 ID**。任何需要用户指定实体（用户、realm、
   作品等）的交互，一律提供搜索/选择界面（搜索弹窗、combobox、自动补
@@ -128,10 +124,9 @@ flag them.
   按钮），全局入口须在该页面隐藏或降级，二者必须有行为差异才允许共存。
   每新增一个动作入口前，必须先检查当前页面已有入口并说明差异。
 
-## 前端布局铁律（`package/app/`）
+## 前端布局铁律（`packages/frontend/`）
 
 > 以下规则没有例外，违反任何一条即视为任务未完成。
-> 具体的代码模式与示例见 `rezics-design` skill `patterns.md`。
 
 - **先认上下文，后写样式**。写或改任何涉及宽度/居中/拉伸的 class
   前，必须先确认元素实际所处的格式化上下文（父级的 display 与
@@ -169,7 +164,7 @@ flag them.
   `main` 占满分配宽度、无水平溢出。只在单一常用宽度下看过不算验证；无
   法实测时必须如实声明未验证，不得宣称完成。
 
-## 前端组件设计文档（`package/app/`）
+## 前端组件设计文档（`packages/frontend/`）
 
 - **每个有视觉设计的页面/组件必须在导出前用 TSDoc 注释描述预期设
   计**。注释体的 ASCII art 使用纯英文（保证等宽字体对齐），其余说明文
@@ -190,4 +185,3 @@ flag them.
 - `CONTRIBUTING.md` - route, folder, seed, Storybook, and convention details.
 - Authoritative behavior lives in code: types/schemas, tests, and the
   `check:convention` rules. `plan/` holds in-flight planning.
-- `.agents/skills/` and `.claude/skills/` - task-specific agent guidance.

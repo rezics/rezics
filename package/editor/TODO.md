@@ -1,4 +1,0 @@
-- [ ] scroll in preview panel, will effect outside, This causes the parent component to scroll as well.
-
-## Major 
-- [ ] rich text editor

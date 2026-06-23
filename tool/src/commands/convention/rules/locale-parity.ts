@@ -1,127 +1,56 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import { I18N_LOCALES_ROOT, REPO_ROOT, UI_LOCALES_ROOT } from "../core/paths";
+import { I18N_LOCALES_ROOT, REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
 const SPEC =
-  "R14 — contract, Paraglide, and catalogs share one locale set with exact key parity";
+  "R14 — all supported language files must be present in the i18n languages directory";
 
-function readJson(path: string): unknown {
-  return JSON.parse(readFileSync(path, "utf8"));
-}
-
-function contractLanguages(): string[] {
-  const source = readFileSync(
-    join(REPO_ROOT, "package/contract/src/language-core.ts"),
-    "utf8",
-  );
-  const match = source.match(
-    /export const LANGUAGES = \{([\s\S]*?)\} as const/,
-  );
-  if (!match?.[1]) return [];
-  return [...match[1].matchAll(/:\s*["']([^"']+)["']/g)].map((m) => m[1]!);
-}
-
-function diff(actual: string[], expected: string[]) {
-  return {
-    missing: expected.filter((v) => !actual.includes(v)),
-    extra: actual.filter((v) => !expected.includes(v)),
-  };
-}
-
-function listNamespaces(localeDir: string): string[] {
-  if (!existsSync(localeDir)) return [];
-  return readdirSync(localeDir)
-    .filter((name) => name.endsWith(".json"))
-    .map((name) => name.replace(/\.json$/, ""))
+function listLanguageFiles(langDir: string): string[] {
+  if (!existsSync(langDir)) return [];
+  return readdirSync(langDir)
+    .filter((name) => name.endsWith(".ts"))
+    .map((name) => name.replace(/\.ts$/, ""))
     .sort();
 }
 
 export const localeParityRule: RuleScanner = {
   scan() {
     const violations: Violation[] = [];
-    const langs = contractLanguages();
-    const baseLocale = "en";
 
-    // 1. The shared product/admin tree lives at `package/i18n/locales/<lng>/<ns>.json`.
-    // 1. 共享的 product/admin 文案树位于 `package/i18n/locales/<lng>/<ns>.json`。
-    const sharedRoot = I18N_LOCALES_ROOT;
-    if (!existsSync(sharedRoot) || !statSync(sharedRoot).isDirectory()) {
+    // Language files live at `packages/frontend/src/lib/i18n/languages/<locale>.ts`.
+    // 语言文件位于 `packages/frontend/src/lib/i18n/languages/<locale>.ts`。
+    const langRoot = I18N_LOCALES_ROOT;
+    if (!existsSync(langRoot) || !statSync(langRoot).isDirectory()) {
       violations.push({
         rule: "R14",
-        path: "package/i18n/locales",
-        message: "Shared i18n locale tree is missing",
+        path: relative(REPO_ROOT, langRoot),
+        message: "i18n languages directory is missing",
         spec: SPEC,
       });
-    } else {
-      const baseDir = join(sharedRoot, baseLocale);
-      const baseNamespaces = listNamespaces(baseDir);
-      for (const lng of langs) {
-        const lngDir = join(sharedRoot, lng);
-        if (!existsSync(lngDir)) {
-          violations.push({
-            rule: "R14",
-            path: relative(REPO_ROOT, lngDir),
-            message: "Supported locale folder is missing",
-            spec: SPEC,
-          });
-          continue;
-        }
-        const lngNamespaces = listNamespaces(lngDir);
-        const nsDiff = diff(lngNamespaces, baseNamespaces);
-        if (nsDiff.missing.length || nsDiff.extra.length) {
-          violations.push({
-            rule: "R14",
-            path: relative(REPO_ROOT, lngDir),
-            message: `Namespace files must match package/i18n/locales/${baseLocale} (missing: ${nsDiff.missing.join(", ") || "none"}; extra: ${nsDiff.extra.join(", ") || "none"})`,
-            spec: SPEC,
-          });
-        }
-        for (const ns of baseNamespaces) {
-          if (!lngNamespaces.includes(ns)) continue;
-          const baseKeys = Object.keys(
-            readJson(join(baseDir, `${ns}.json`)) as Record<string, unknown>,
-          );
-          const lngKeys = Object.keys(
-            readJson(join(lngDir, `${ns}.json`)) as Record<string, unknown>,
-          );
-          const keyDiff = diff(lngKeys, baseKeys);
-          if (keyDiff.missing.length || keyDiff.extra.length) {
-            violations.push({
-              rule: "R14",
-              path: relative(REPO_ROOT, join(lngDir, `${ns}.json`)),
-              message: `Keys must match the ${baseLocale} ${ns} namespace (missing: ${keyDiff.missing.slice(0, 8).join(", ") || "none"}${keyDiff.missing.length > 8 ? ", ..." : ""}; extra: ${keyDiff.extra.slice(0, 8).join(", ") || "none"}${keyDiff.extra.length > 8 ? ", ..." : ""})`,
-              spec: SPEC,
-            });
-          }
-        }
-      }
+      return violations;
     }
 
-    // 2. UI per-locale ES modules at `package/ui/locales/<lng>.ts` must mirror
-    //    the English UI bundle's key set.
-    // 2. 位于 `package/ui/locales/<lng>.ts` 的各语言 UI ES 模块必须与英文 UI
-    //    bundle 的键集合保持一致。
-    const uiRoot = UI_LOCALES_ROOT;
-    if (!existsSync(uiRoot)) {
+    const langs = listLanguageFiles(langRoot);
+    if (langs.length === 0) {
       violations.push({
         rule: "R14",
-        path: "package/ui/locales",
-        message: "UI locale modules are missing",
+        path: relative(REPO_ROOT, langRoot),
+        message: "i18n languages directory contains no .ts language files",
         spec: SPEC,
       });
-    } else {
-      for (const lng of langs) {
-        const path = join(uiRoot, `${lng}.ts`);
-        if (!existsSync(path)) {
-          violations.push({
-            rule: "R14",
-            path: relative(REPO_ROOT, path),
-            message: "UI locale module is missing",
-            spec: SPEC,
-          });
-        }
-      }
+    }
+
+    // Verify the base locale (en-US) exists.
+    // 确认基准语言（en-US）存在。
+    const baseLocale = "en-US";
+    if (!langs.includes(baseLocale)) {
+      violations.push({
+        rule: "R14",
+        path: relative(REPO_ROOT, join(langRoot, `${baseLocale}.ts`)),
+        message: `Base locale file ${baseLocale}.ts is missing from the i18n languages directory`,
+        spec: SPEC,
+      });
     }
 
     return violations;

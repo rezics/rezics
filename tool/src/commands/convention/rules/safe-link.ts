@@ -7,9 +7,9 @@ const SPEC =
   "R5 — no raw <a href> outside the SafeLink/Link primitives (rel/target safety + outbound interstitial)";
 
 const ALLOWLIST = new Set([
-  "package/ui/src/link/SafeLink.tsx",
-  "package/ui/src/primitive/link/Link.tsx",
-  "package/ui/src/primitive/link/TextLink.tsx",
+  "packages/frontend/src/components/link/SafeLink.tsx",
+  "packages/frontend/src/components/primitive/link/Link.tsx",
+  "packages/frontend/src/components/primitive/link/TextLink.tsx",
 ]);
 
 const RAW_ANCHOR_PATTERN = /<a\s[^>]*href=/g;

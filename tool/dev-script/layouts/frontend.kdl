@@ -1,11 +1,5 @@
-tab name="app" {
-    pane command="task" cwd="../../../package/app" start_suspended=false {
-        args "dev"
-    }
-}
-
-tab name="admin" {
-    pane command="task" cwd="../../../package/admin" start_suspended=false {
+tab name="frontend" {
+    pane command="task" cwd="../../../packages/frontend" start_suspended=false {
         args "dev"
     }
 }

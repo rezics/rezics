@@ -1,13 +1,13 @@
 #!/usr/bin/env bun
 /**
- * Read `package/i18n/messages/en.json` and group keys by identical value.
+ * Read the English language file and group keys by identical value.
  * Emit `tool/src/commands/i18n/dedup-report.json` listing each duplicate group
  * with its English value, member keys, and per-package call-site counts.
  *
  * Classification defaults to `accidental` when call sites span ≥3 distinct
  * underscore prefixes; reviewers can override by editing the report.
  *
- * 读取 `package/i18n/messages/en.json`，并按相同值将键分组。
+ * 读取英文语言文件，并按相同值将键分组。
  * 生成 `tool/src/commands/i18n/dedup-report.json`，列出每个重复组及其英文值、
  * 成员键，以及按包统计的调用点计数。
  *
@@ -32,14 +32,10 @@ type DuplicateGroup = {
 };
 
 const REPO_ROOT = new URL("../../../..", import.meta.url).pathname;
-const EN_PATH = join(REPO_ROOT, "package/i18n/messages/en.json");
+const EN_PATH = join(REPO_ROOT, "packages/frontend/src/lib/i18n/languages/en-US.ts");
 const REPORT_PATH = join(REPO_ROOT, "tool/src/commands/i18n/dedup-report.json");
 const SCAN_ROOTS = [
-  "package/app/src",
-  "package/admin/src",
-  "package/ui/src",
-  "package/editor/src",
-  "package/folio/src",
+  "packages/frontend/src",
 ];
 
 async function walk(root: string): Promise<string[]> {

@@ -1,7 +1,0 @@
-# @rezics/contract — shared API contract. Aggregated as `contract:*`.
-version: '3'
-
-tasks:
-  test:
-    desc: Run tests
-    cmd: bun test src

@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const base = "package/i18n/locales";
-const enDir = join(base, "en");
-const zhDir = join(base, "zh-Hant");
+const base = "packages/frontend/src/lib/i18n/languages";
+const enDir = join(base, "en-US");
+const zhDir = join(base, "zh-CN");
 
 function flatten(obj: unknown, prefix = ""): string[] {
   if (obj === null || typeof obj !== "object") return [prefix];

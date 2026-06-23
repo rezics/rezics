@@ -1,5 +1,0 @@
-# Cloudflare Pages config for the admin SPA (static Vite output).
-# Deploy: build with VITE_* set, then `wrangler pages deploy dist`.
-name = "rezics-admin"
-pages_build_output_dir = "dist"
-compatibility_date = "2026-05-29"

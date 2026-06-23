@@ -34,16 +34,10 @@ import {
   I18N_LOCALES_ROOT,
   REPO_ROOT,
   toRepoRelPath,
-  UI_LOCALES_ROOT,
 } from "../core/paths";
 
 const SCAN_ROOTS = [
-  "package/app/src",
-  "package/admin/src",
-  "package/ui/src",
-  "package/editor/src",
-  "package/folio/src",
-  "package/i18n/src",
+  "packages/frontend/src",
 ];
 const SKIP_DIRS = new Set(["node_modules", "dist", ".turbo", ".storybook"]);
 const TARGET_EXT = /\.(tsx?|jsx?)$/;
@@ -95,23 +89,8 @@ async function loadCatalog(): Promise<{
       catalog[lng][ns] = JSON.parse(raw) as Record<string, string>;
     }
   }
-  // UI namespace lives in `package/ui/locales/{locale}.ts`.
-  // UI 命名空间位于 `package/ui/locales/{locale}.ts`。
-  try {
-    for (const lng of locales) {
-      const path = join(UI_LOCALES_ROOT, `${lng}.ts`);
-      try {
-        const mod = (await import(path)) as { default: Record<string, string> };
-        catalog[lng]!.ui = mod.default;
-        namespaces.add("ui");
-      } catch {
-        catalog[lng]!.ui = catalog[lng]!.ui ?? {};
-      }
-    }
-  } catch {
-    // ignore
-    // 忽略
-  }
+  // UI namespace is no longer a separate locale tree in the new structure.
+  // 新结构中 UI 命名空间不再是独立的语言包树。
   return { catalog, locales, namespaces: Array.from(namespaces).sort() };
 }
 

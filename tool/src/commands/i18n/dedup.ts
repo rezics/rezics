@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const base = "package/i18n/locales";
+const base = "packages/frontend/src/lib/i18n/languages";
 const apply = process.argv.includes("--apply");
 
 function countTopLevelDuplicates(raw: string): Map<string, number> {

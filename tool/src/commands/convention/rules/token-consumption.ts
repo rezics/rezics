@@ -9,19 +9,19 @@ const SPEC =
 // Match any `--rezics-*` CSS variable reference. That whole namespace is
 // retired; the flat
 // `--colors-*` / `--radius-*` / `--shadow-*` / `--font-*` / `--duration-*` /
-// `--easing-*` surface emitted by `package/ui/src/config/uno-config.ts` is the
+// `--easing-*` surface emitted by `packages/frontend/src/config/uno-config.ts` is the
 // only sanctioned form.
 // 匹配任何 `--rezics-*` CSS 变量引用。整个命名空间已废弃；唯一被认可的形式是
-// `package/ui/src/config/uno-config.ts` 输出的扁平
+// `packages/frontend/src/config/uno-config.ts` 输出的扁平
 // `--colors-*` / `--radius-*` / `--shadow-*` / `--font-*` / `--duration-*` /
 // `--easing-*` 变量集。
 const REZICS_VAR_PATTERN = /var\(\s*--rezics-[a-zA-Z0-9_-]+/;
 
-// `package/ui/src/config/tokens.css` SHALL NOT exist — the tokens TS source is
+// `packages/frontend/src/config/tokens.css` SHALL NOT exist — the tokens TS source is
 // authoritative and uno-config.ts emits the runtime CSS variables.
-// `package/ui/src/config/tokens.css` 不应存在——tokens 的 TS 源才是权威，
+// `packages/frontend/src/config/tokens.css` 不应存在——tokens 的 TS 源才是权威，
 // 由 uno-config.ts 输出运行时 CSS 变量。
-const TOKENS_CSS_PATH = join(REPO_ROOT, "package/ui/src/config/tokens.css");
+const TOKENS_CSS_PATH = join(REPO_ROOT, "packages/frontend/src/config/tokens.css");
 
 // SVG-inline / chart-fill exceptions. Each entry SHALL include a comment
 // explaining why a UnoCSS shortcut cannot yet replace it. Reviewed quarterly;
@@ -32,7 +32,7 @@ const FILE_ALLOWLIST = new Set<string>([]);
 
 function isTarget(absPath: string): boolean {
   const relPath = relative(REPO_ROOT, absPath).replace(/\\/g, "/");
-  if (!/^package\/[^/]+\/src\//.test(relPath)) return false;
+  if (!/^packages\/[^/]+\/src\//.test(relPath)) return false;
   if (!/\.(tsx?|jsx?|mdx|css)$/.test(relPath)) return false;
   if (/\.fixture\.[tj]sx?$/.test(relPath)) return false;
   return true;
@@ -45,9 +45,9 @@ export const tokenConsumptionRule: RuleScanner = {
     if (existsSync(TOKENS_CSS_PATH)) {
       violations.push({
         rule: "R9",
-        path: "package/ui/src/config/tokens.css",
+        path: "packages/frontend/src/config/tokens.css",
         message:
-          "`tokens.css` is forbidden — design tokens live in `package/ui/src/config/tokens/*.ts` and are emitted as flat CSS variables by `uno-config.ts`. Delete this file.",
+          "`tokens.css` is forbidden — design tokens live in `packages/frontend/src/config/tokens/*.ts` and are emitted as flat CSS variables by `uno-config.ts`. Delete this file.",
         spec: SPEC,
       });
     }
