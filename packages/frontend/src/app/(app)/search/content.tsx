@@ -39,12 +39,12 @@ export function SearchContent() {
         value={category}
       >
         <TabsList className="overflow-x-auto">
-          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="all">{t.search.all}</TabsTrigger>
           <TabsTrigger value="books">{t.library.title}</TabsTrigger>
           <TabsTrigger value="realms">{t.nav.realms}</TabsTrigger>
-          <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="tags">Tags</TabsTrigger>
+          <TabsTrigger value="posts">{t.search.posts}</TabsTrigger>
+          <TabsTrigger value="users">{t.search.users}</TabsTrigger>
+          <TabsTrigger value="tags">{t.search.tags}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -60,12 +60,11 @@ export function SearchContent() {
 }
 
 function SearchResults({ query, category }: { readonly query: string; readonly category: Category }) {
+  const [t] = useT();
   return (
     <div className="text-muted-foreground space-y-2 py-8 text-center text-sm">
-      <p>
-        Searching for &ldquo;{query}&rdquo; in {category}...
-      </p>
-      <p>Search results will appear here once Meilisearch is connected.</p>
+      <p>{t.search.searching(query, category)}</p>
+      <p>{t.search.connectingPlaceholder}</p>
     </div>
   );
 }

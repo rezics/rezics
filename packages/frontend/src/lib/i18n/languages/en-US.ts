@@ -200,6 +200,14 @@ const translation = {
   library: {
     title: "Books",
   },
+  search: {
+    all: "All",
+    posts: "Posts",
+    users: "Users",
+    tags: "Tags",
+    searching: (query: string, category: string) => `Searching for "${query}" in ${category}...`,
+    connectingPlaceholder: "Search results will appear here once Meilisearch is connected.",
+  },
   settings: {
     // Account
     // 账号

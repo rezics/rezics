@@ -201,6 +201,14 @@ export default {
   library: {
     title: "图书",
   },
+  search: {
+    all: "全部",
+    posts: "帖子",
+    users: "用户",
+    tags: "标签",
+    searching: (query: string, category: string) => `正在搜索"${query}"（${category}）…`,
+    connectingPlaceholder: "Meilisearch 连接后将在此显示搜索结果。",
+  },
   admin: {
     title: "管理后台",
     dashboard: "仪表板",
