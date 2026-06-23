@@ -172,6 +172,7 @@ const translation = {
     details: "Details",
     detailsPlaceholder: "Describe in detail...",
     submit: "Submit Feedback",
+    submitted: "Feedback submitted — thank you!",
   },
   time: {
     justNow: "just now",

@@ -69,6 +69,7 @@ export function BottomNav() {
       <div className="flex h-14 items-center justify-around">
         {linkItems.map(({ key, href, icon: Icon, label }) => (
           <Link
+            aria-label={label}
             className={`flex flex-1 flex-col items-center gap-0.5 py-1 text-xs ${isActive(href) ? "text-primary" : "text-muted-foreground"}`}
             href={href}
             key={key}
@@ -80,6 +81,7 @@ export function BottomNav() {
         {authItems.map(({ key, href, icon: Icon, label }) =>
           session ? (
             <Link
+              aria-label={label}
               className={`flex flex-1 flex-col items-center gap-0.5 py-1 text-xs ${isActive(href) ? "text-primary" : "text-muted-foreground"}`}
               href={href}
               key={key}

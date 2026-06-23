@@ -1,3 +1,5 @@
+"use client";
+
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { FollowsContent } from "./content";
 

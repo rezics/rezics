@@ -173,6 +173,7 @@ export default {
     details: "详情",
     detailsPlaceholder: "请详细描述…",
     submit: "提交反馈",
+    submitted: "反馈已提交，感谢你的意见！",
   },
   time: {
     justNow: "刚刚",

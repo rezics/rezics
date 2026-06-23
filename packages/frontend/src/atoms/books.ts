@@ -1,6 +1,8 @@
 import { ApiClient } from "@/lib/api-client";
 import { Keys } from "./keys";
 
+export const PAGE_SIZE = 25;
+
 export const bookQuery = (unitId: string) =>
   ApiClient.query("books", "getBook", {
     params: { unitId },

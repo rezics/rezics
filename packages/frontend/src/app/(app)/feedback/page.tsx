@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
 import { useState } from "react";
 
@@ -37,7 +38,15 @@ export default function FeedbackPage() {
         </p>
       </div>
 
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          toast.success({ title: t.feedback.submitted });
+          setSubject("");
+          setDetails("");
+        }}
+      >
         <div className="space-y-1.5">
           <label className="text-sm font-medium" htmlFor="feedback-subject">
             {t.feedback.subject}
