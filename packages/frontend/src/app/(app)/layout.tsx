@@ -1,6 +1,7 @@
 import { BottomNav } from "@/components/BottomNav";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
+import { AuthDialog } from "@/components/shared/AuthDialog";
 import { Toaster } from "@/components/ui/toast";
 import type { ReactNode } from "react";
 
@@ -76,6 +77,7 @@ export default function AppLayout({ children }: { readonly children: ReactNode }
       </div>
       <BottomNav />
       <Toaster />
+      <AuthDialog />
     </>
   );
 }

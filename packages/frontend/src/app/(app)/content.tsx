@@ -72,11 +72,10 @@ export function HomeContent() {
   );
 }
 
-function HomeFeed({ feed, sort }: { readonly feed: FeedKind; readonly sort: SortKind }) {
+function HomeFeed(_: { readonly feed: FeedKind; readonly sort: SortKind }) {
   const [t] = useT();
   return (
     <div className="text-muted-foreground space-y-4 py-8 text-center text-sm">
-      <p>Feed: {feed} / Sort: {sort}</p>
       <p>{t.feed.connecting}</p>
     </div>
   );
