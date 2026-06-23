@@ -76,14 +76,20 @@ function ContentTreeInner({ bookId }: { readonly bookId: string }) {
     );
   }
 
-  // Assign sequential numbers only to content nodes (skip section groups)
-  // 仅对内容节点编号（跳过分组标题）
-  let contentIndex = 0;
+  // Pre-compute sequential numbers for content nodes (skip section groups)
+  // 预计算内容节点的序号（跳过分组标题）
+  const contentIndices = new Map<string, number>();
+  flatList.reduce((idx, node) => {
+    if (!node.noContent) {
+      contentIndices.set(node.id, idx + 1);
+      return idx + 1;
+    }
+    return idx;
+  }, 0);
 
   return (
     <ul className="divide-border divide-y">
       {flatList.map((node) => {
-        if (!node.noContent) contentIndex++;
         return (
           <li
             key={node.id}
@@ -98,7 +104,7 @@ function ContentTreeInner({ bookId }: { readonly bookId: string }) {
             <span className="min-w-0 truncate text-sm">
               {!node.noContent && (
                 <span className="text-muted-foreground mr-1.5 tabular-nums">
-                  {contentIndex}.
+                  {contentIndices.get(node.id)}.
                 </span>
               )}
               {node.title}
