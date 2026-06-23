@@ -1,14 +1,22 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import { Suspense, type ReactNode } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
-function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+interface SectionBoundaryProps {
+  readonly children: ReactNode;
+  readonly fallback?: ReactNode;
+}
+
+function PageError({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <div className="flex flex-col items-center gap-3 py-12">
-      <p className="text-destructive text-sm">{error instanceof Error ? error.message : "Something went wrong"}</p>
+      <p className="text-muted-foreground text-sm">
+        {error instanceof Error ? error.message : "Something went wrong"}
+      </p>
       <button
-        className="bg-primary text-primary-foreground rounded-md px-3 py-1.5 text-sm font-medium"
+        className="text-primary text-sm underline underline-offset-4"
         onClick={resetErrorBoundary}
         type="button"
       >
@@ -18,20 +26,26 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   );
 }
 
-export function SectionBoundary({
-  children,
-  fallback,
-}: {
-  readonly children: ReactNode;
-  readonly fallback?: ReactNode;
-}) {
+/**
+ * Mobile / Tablet / Desktop / Ultra-wide (all identical):
+ *
+ * Loading state:
+ * +-------------------------------+
+ * |          [Spinner]            |
+ * |          (py-12)              |
+ * +-------------------------------+
+ *
+ * ErrorBoundary + Suspense 包裹层。
+ * 加载中显示居中 spinner，出错显示错误信息 + 重试按钮。
+ */
+export function SectionBoundary({ children, fallback }: SectionBoundaryProps) {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary FallbackComponent={PageError}>
       <Suspense
         fallback={
           fallback ?? (
             <div className="flex justify-center py-12">
-              <div className="border-primary size-6 animate-spin rounded-full border-2 border-t-transparent" />
+              <Spinner />
             </div>
           )
         }
