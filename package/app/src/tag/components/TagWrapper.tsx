@@ -1,10 +1,10 @@
 import type { TagFilters } from "@rezics/api/tag/tag";
 import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
+import { QueryBoundary } from "@/core/components/QueryBoundary";
 import { RealmTagHighlights } from "./RealmTagHighlights";
 import { TagList } from "./TagList";
 
@@ -25,9 +25,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   domainIds: _domainIds,
   className,
 }) => {
-  const { t } = useTranslation(["community"]);
-  const { data, isLoading, error } = useQuery(tagQueries.list(filters));
-  const tags: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
+  const query = useQuery(tagQueries.list(filters));
 
   const unitId = filters?.unitId;
   const { data: contextData } = useQuery({
@@ -43,36 +41,19 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     [contextData],
   );
 
-  if (isLoading) {
-    return (
-      <div className={className}>
-        <div className="text-sm text-text-secondary">
-          {t("community:tag_loading")}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={className}>
-        <div className="text-sm text-red-600">
-          {t("community:tag_load_failed", {
-            error: String((error as any)?.message ?? error),
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // For grouped mode, score-based grouping (no domain concept in new model)
-  // Render as flat list for now
-  // 分组模式下采用基于分数的分组（新模型中没有 domain 概念）
-  // 目前先以扁平列表渲染
   return (
     <div className={className}>
-      <TagList tags={tags} />
-      <RealmTagHighlights realmHighlights={realmHighlights} />
+      <QueryBoundary query={query}>
+        {(data) => {
+          const tags: UnitTagDTO[] = data?.tags ?? [];
+          return (
+            <>
+              <TagList tags={tags} />
+              <RealmTagHighlights realmHighlights={realmHighlights} />
+            </>
+          );
+        }}
+      </QueryBoundary>
     </div>
   );
 };

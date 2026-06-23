@@ -211,7 +211,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   );
 };
 
-interface UniversalPaginatorProps<T> extends SortControlsProps {
+interface UniversalPaginatorProps<T> {
   ref: React.Ref<UniversalPaginatorHandle>;
   data: T[];
   totalExternalItems: number;
@@ -231,6 +231,11 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   paginationTipsLabel?: string;
+  // Optional sort props — only needed when sort controls are enabled.
+  // 可选的排序属性——仅在启用排序控件时需要。
+  sortType?: string;
+  sortOrder?: "asc" | "desc";
+  onSortChange?: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
 }
 
 export type UniversalPaginatorHandle = {
@@ -394,13 +399,14 @@ export const UniversalPaginator = <T,>({
   return (
     <div>
       {!disableSortControl &&
-        (sortControl || (
-          <SortControls
-            sortType={sortType}
-            sortOrder={sortOrder}
-            onSortChange={onSortChange}
-          />
-        ))}
+        (sortControl ||
+          (sortType && sortOrder && onSortChange && (
+            <SortControls
+              sortType={sortType}
+              sortOrder={sortOrder}
+              onSortChange={onSortChange}
+            />
+          )))}
 
       <div className="min-h-[300px] relative">
         {isLoading && (

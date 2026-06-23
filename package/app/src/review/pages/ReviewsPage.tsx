@@ -108,9 +108,6 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
         totalExternalItems={totalItems}
         itemsPerPage={10}
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
-        sortType={undefined as any}
-        sortOrder={undefined as any}
-        onSortChange={() => {}}
         requestData={handleNeedMoreData}
         isLoading={isLoading && baseReviews.length === 0}
         currentPage={currentPage}

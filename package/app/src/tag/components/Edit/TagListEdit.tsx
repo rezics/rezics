@@ -17,6 +17,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useState } from "react";
+import { QueryBoundary } from "@/core/components/QueryBoundary";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { SingleTagChip } from "../TagList";
 
 /**
@@ -36,20 +38,21 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
 }) => {
   const { t } = useTranslation(["common", "community", "entity"]);
   const locale = useLocale();
-  const { data, isLoading, error, refetch } = useQuery(
-    tagQueries.forUnit(objectUnitId),
+  const tagQuery = useQuery(tagQueries.forUnit(objectUnitId));
+  const list: UnitTagDTO[] = useMemo(
+    () => tagQuery.data?.tags ?? [],
+    [tagQuery.data],
   );
-  const list: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
 
   const [view, setView] = useState<"list" | "grouped">("list");
   const [search, setSearch] = useState("");
 
   const detachMutation = useDetachTagMutation({
-    onSuccess: () => refetch(),
+    onSuccess: () => tagQuery.refetch(),
   });
   const attachMutation = useAttachTagMutation({
     onSuccess: () => {
-      refetch();
+      tagQuery.refetch();
     },
   });
 
@@ -133,24 +136,13 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         </ToggleGroup>
       </div>
 
-      {isLoading && (
-        <div className="flex items-center gap-2 text-sm text-text-secondary">
-          <Spinner size="sm" /> {t("common:loading")}
-        </div>
-      )}
-      {error && (
-        <div className="text-sm text-error-text">
-          {t("common:error")}: {String((error as any)?.message ?? error)}
-        </div>
-      )}
-
-      {!isLoading && !error && list.length === 0 && (
-        <div className="text-sm text-text-secondary">
-          {t("community:tag_empty")}
-        </div>
-      )}
-
-      {!isLoading && !error && renderListView()}
+      <QueryBoundary
+        query={tagQuery}
+        isEmpty={(d) => (d.tags ?? []).length === 0}
+        emptyTitle={t("community:tag_empty")}
+      >
+        {() => renderListView()}
+      </QueryBoundary>
 
       {/* Search and attach existing tags — 搜索并关联已有标签 */}
       <div className="mt-8 pt-4 border-t border-border-whisper">
@@ -166,12 +158,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
           />
           {isSearching && <Spinner size="sm" />}
         </div>
-        {searchError && (
-          <div className="text-xs text-error-text mb-2">
-            {t("common:search_failed")}:{" "}
-            {String((searchError as any)?.message ?? searchError)}
-          </div>
-        )}
+        <QueryErrorDisplay error={searchError} className="mb-2" />
         {searchTerm && !isSearching && searchResults.length === 0 && (
           <div className="text-xs text-text-secondary">
             {t("community:tag_no_matching")}

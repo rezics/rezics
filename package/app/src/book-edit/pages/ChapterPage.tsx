@@ -11,6 +11,7 @@ import {
   type BookContentStructureItem,
   mainMarkdownSource,
   markdownContentDoc,
+  type UpdateChapterInput,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { ConfirmDialog, Spinner } from "@rezics/ui";
@@ -150,8 +151,8 @@ export const BookEditChapterPage: React.FC = () => {
   // 从获取的数据初始化表单状态
   useEffect(() => {
     if (data) {
-      setTitle((data as any).title || "");
-      setContent(mainMarkdownSource((data as any).content) ?? "");
+      setTitle(data.title || "");
+      setContent(mainMarkdownSource(data.content) ?? "");
     }
   }, [data]);
 
@@ -162,8 +163,8 @@ export const BookEditChapterPage: React.FC = () => {
 
   const isDirty = useMemo(() => {
     if (!data) return false;
-    const initialTitle = (data as any).title || "";
-    const initialContent = mainMarkdownSource((data as any).content) ?? "";
+    const initialTitle = data.title || "";
+    const initialContent = mainMarkdownSource(data.content) ?? "";
     return initialTitle !== title || initialContent !== content;
   }, [data, title, content]);
 
@@ -188,8 +189,8 @@ export const BookEditChapterPage: React.FC = () => {
         unitId: contentUnitId,
         input: {
           title,
-          content: markdownContentDoc(content),
-        } as any,
+          content: markdownContentDoc(content) as UpdateChapterInput["content"],
+        },
       });
       const contentStructure = await queryClient.fetchQuery(
         bookContentStructureQuery(bookId),
@@ -342,10 +343,21 @@ export const BookEditChapterPage: React.FC = () => {
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
         chapter={data ? { id: contentUnitId, title, children: [] } : null}
-        onSave={({ title: newTitle, status: _status }) => {
+        onSave={async ({ title: newTitle, status, rating }) => {
           setTitle(newTitle);
-          // TODO: persist status change via API
-          // TODO: 通过 API 持久化状态变更
+          try {
+            await updateMutation.mutateAsync({
+              unitId: contentUnitId,
+              input: { title: newTitle, status, rating },
+            });
+            toast.success(t("book:chapter_metadata_saved"));
+          } catch (err) {
+            toast.error(
+              t("book:chapter_save_failed", {
+                error: err instanceof Error ? err.message : String(err),
+              }),
+            );
+          }
         }}
       />
       <MoveToParentDialog
@@ -364,9 +376,38 @@ export const BookEditChapterPage: React.FC = () => {
               }
             : null
         }
-        onConfirm={(_targetParentId) => {
-          // TODO: move chapter to new parent via API
-          // TODO: 通过 API 将章节移动到新的父节点
+        onConfirm={async (targetOccurrenceId) => {
+          try {
+            // Resolve the selected occurrence id to a contentUnitId
+            // 将选中的 occurrence id 解析为 contentUnitId
+            const targetCuid =
+              targetOccurrenceId != null
+                ? findContentUnitIdByOccurrenceId(
+                    bookTocTree,
+                    String(targetOccurrenceId),
+                  )
+                : null;
+            const structure = await queryClient.fetchQuery(
+              bookContentStructureQuery(bookId),
+            );
+            if (!structure) return;
+            const updated = moveNodeInTree(
+              structure.nodes,
+              contentUnitId,
+              targetCuid ?? null,
+            );
+            await updateContentStructureMutation.mutateAsync({
+              bookUnitId: bookId,
+              nodes: updated,
+            });
+            toast.success(t("book:chapter_moved"));
+          } catch (err) {
+            toast.error(
+              t("book:chapter_save_failed", {
+                error: err instanceof Error ? err.message : String(err),
+              }),
+            );
+          }
         }}
       />
       <ConfirmDialog
@@ -381,6 +422,83 @@ export const BookEditChapterPage: React.FC = () => {
     </div>
   );
 };
+
+/** Resolve a tree occurrence id (e.g. `path:0.1`) to its `contentUnitId`. 将树 occurrence id（如 `path:0.1`）解析为其 `contentUnitId`。 */
+interface OccurrenceNode {
+  id: string | number;
+  contentUnitId?: string;
+  children?: OccurrenceNode[];
+}
+function findContentUnitIdByOccurrenceId(
+  nodes: OccurrenceNode[],
+  targetId: string,
+): string | undefined {
+  for (const node of nodes) {
+    if (String(node.id) === targetId) return node.contentUnitId;
+    if (node.children) {
+      const found = findContentUnitIdByOccurrenceId(node.children, targetId);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Move a node (identified by contentUnitId) to a new parent in the content
+ * structure tree. Returns a new tree with the node removed from its original
+ * position and appended as the last child of the target parent. When
+ * targetParentId is null the node is moved to the root level.
+ * 在内容结构树中将节点（按 contentUnitId 标识）移到新的父节点下。返回新树，
+ * 节点从原位置移除并附加为目标父节点的最后一个子节点。当 targetParentId 为
+ * null 时，节点被移到根层级。
+ */
+function moveNodeInTree(
+  nodes: BookContentStructureItem[],
+  movingContentUnitId: string,
+  targetParentId: string | null,
+): BookContentStructureItem[] {
+  // Extract the moving node from the tree
+  // 从树中提取要移动的节点
+  let movingNode: BookContentStructureItem | null = null;
+  function extractNode(
+    items: BookContentStructureItem[],
+  ): BookContentStructureItem[] {
+    return items.reduce<BookContentStructureItem[]>((acc, item) => {
+      if (contentUnitIdForNode(item) === movingContentUnitId) {
+        movingNode = item;
+        return acc;
+      }
+      const filtered = item.children ? extractNode(item.children) : undefined;
+      acc.push({ ...item, ...(filtered ? { children: filtered } : {}) });
+      return acc;
+    }, []);
+  }
+  const treeWithout = extractNode(nodes);
+  if (!movingNode) return nodes;
+
+  // Insert the node under the target parent (or root)
+  // 将节点插入目标父节点下（或根层级）
+  if (targetParentId == null) {
+    return [...treeWithout, movingNode];
+  }
+  function insertUnder(
+    items: BookContentStructureItem[],
+  ): BookContentStructureItem[] {
+    return items.map((item) => {
+      if (contentUnitIdForNode(item) === targetParentId) {
+        return {
+          ...item,
+          children: [...(item.children ?? []), movingNode!],
+        };
+      }
+      if (item.children) {
+        return { ...item, children: insertUnder(item.children) };
+      }
+      return item;
+    });
+  }
+  return insertUnder(treeWithout);
+}
 
 function updateContentStructureNodeTitle(
   nodes: BookContentStructureItem[],

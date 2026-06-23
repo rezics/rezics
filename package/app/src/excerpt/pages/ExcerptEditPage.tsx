@@ -1,4 +1,7 @@
-import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
+import {
+  useUpdateUnitMutation,
+  useUpsertTranslationMutation,
+} from "@rezics/api/unit/unit.mutations";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import { toast } from "sonner";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
@@ -71,6 +74,14 @@ export function ExcerptEditPage({
     },
   });
 
+  const { mutate: upsertTranslation } = useUpsertTranslationMutation({
+    onError: (error) => {
+      toast.error(
+        t("community:excerpt_messages_update_failed", { error: String(error) }),
+      );
+    },
+  });
+
   function handleSave() {
     mutate({
       unitId,
@@ -79,8 +90,17 @@ export function ExcerptEditPage({
         status: data.status || undefined,
       },
     });
-    // TODO: update translation (title, description) via translation API
-    // TODO：通过翻译 API 更新译文（title、description）。
+
+    if (translation) {
+      upsertTranslation({
+        unitId,
+        language: translation.language || "en",
+        input: {
+          title: translation.title,
+          description: translation.description,
+        },
+      });
+    }
   }
 
   function handleSourceChange(next: ExcerptSource | undefined) {

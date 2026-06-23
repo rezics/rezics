@@ -221,9 +221,6 @@ export const FeedbackList: React.FC<FeedbackListProps> = ({
         totalExternalItems={currentData?.totalItems ?? 0}
         itemsPerPage={10}
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
-        sortType={undefined as any}
-        sortOrder={undefined as any}
-        onSortChange={() => {}}
         requestData={handleNeedMoreData}
         preRequestData={handlePreRequestData}
         isLoading={isLoading && (currentData?.items?.length ?? 0) === 0}

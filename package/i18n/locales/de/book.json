@@ -235,5 +235,7 @@
   "toc_resync_failed": "Neusynchronisierung der Überschreibungen fehlgeschlagen: {error}",
   "toc_save_failed": "Speichern fehlgeschlagen: {error}",
   "toc_chapter_unsaved_warning": "Ein Kapitel kann erst geöffnet werden, wenn das Inhaltsverzeichnis gespeichert wurde.",
-  "chapter_load_failed": "Kapitel konnte nicht geladen werden"
+  "chapter_load_failed": "Kapitel konnte nicht geladen werden",
+  "chapter_metadata_saved": "Kapiteleinstellungen gespeichert",
+  "chapter_moved": "Kapitel verschoben"
 }

@@ -235,5 +235,7 @@
   "toc_resync_failed": "Failed to resync overrides: {error}",
   "toc_save_failed": "Failed to save: {error}",
   "toc_chapter_unsaved_warning": "Cannot open a chapter before the table of contents is saved.",
-  "chapter_load_failed": "Failed to load chapter"
+  "chapter_load_failed": "Failed to load chapter",
+  "chapter_metadata_saved": "Chapter settings saved",
+  "chapter_moved": "Chapter moved"
 }

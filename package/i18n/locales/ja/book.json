@@ -235,5 +235,7 @@
   "toc_resync_failed": "インデックスオーバーライドの再同期に失敗しました: {error}",
   "toc_save_failed": "保存に失敗しました: {error}",
   "toc_chapter_unsaved_warning": "目次が保存されるまで章を開くことはできません。",
-  "chapter_load_failed": "章の読み込みに失敗しました"
+  "chapter_load_failed": "章の読み込みに失敗しました",
+  "chapter_metadata_saved": "章の設定を保存しました",
+  "chapter_moved": "章を移動しました"
 }

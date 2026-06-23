@@ -44,7 +44,7 @@ const PUBLISH_STATUS_LABEL = {
 interface EditChapterDialogProps {
   open: boolean;
   onClose: () => void;
-  chapter: Chapter | null;
+  chapter: (Chapter & { status?: string }) | null;
   onSave: (update: {
     title: string;
     status: PublishStatus;
@@ -66,9 +66,7 @@ export function EditChapterDialog({
   useEffect(() => {
     if (open && chapter) {
       setTitle(chapter.title);
-      // Mock: read status from chapter metadata if available, default DRAFT
-      // Mock：如有则从章节元数据读取状态，默认 DRAFT
-      setStatus((chapter as any).status ?? "DRAFT");
+      setStatus((chapter.status as PublishStatus) ?? "DRAFT");
       setRating(chapter.rating ?? "GENERAL");
     }
   }, [open, chapter]);

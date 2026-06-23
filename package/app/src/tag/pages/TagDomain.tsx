@@ -2,6 +2,7 @@ import { tagQueries } from "@rezics/api/tag/tag";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
+import { QueryBoundary } from "@/core/components/QueryBoundary";
 import { Route as tagDomainRoute } from "@/routes/_mainLayout/tag/domain/$unitId/route";
 import { Route as tagDomainTitleRoute } from "@/routes/_mainLayout/tag/domain/$unitId/title/$title";
 import { TagWrapper } from "../components/TagWrapper";
@@ -15,33 +16,16 @@ export function TagDomainPage() {
   const unitId =
     withTitleMatch?.params.unitId ?? baseMatch?.params.unitId ?? "";
   const title = withTitleMatch?.params.title;
-  const { data, isLoading, error } = useQuery(tagQueries.list({ unitId }));
-  if (isLoading) {
-    return (
-      <div className="w-full px-4 mt-16">
-        <div className="text-sm text-text-secondary">
-          {t("community:tag_loading")}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full px-4 mt-16">
-        <div className="text-sm text-red-600">
-          {t("common:load_failed")}: {String((error as any)?.message ?? error)}
-        </div>
-      </div>
-    );
-  }
+  const query = useQuery(tagQueries.list({ unitId }));
 
   return (
     <div className="w-full px-4 mt-16">
       <AccentBarWithText
         text={title ?? t("community:tag_domain_title", { id: unitId })}
       />
-      <TagWrapper filters={{ unitId }} mode="flat" />
+      <QueryBoundary query={query}>
+        {() => <TagWrapper filters={{ unitId }} mode="flat" />}
+      </QueryBoundary>
     </div>
   );
 }

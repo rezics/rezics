@@ -262,9 +262,6 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         totalExternalItems={totalItems}
         itemsPerPage={10}
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
-        sortType={undefined as any}
-        sortOrder={undefined as any}
-        onSortChange={() => {}}
         requestData={handleNeedMoreData}
         preRequestData={handlePreRequestData}
         isLoading={isLoading && units.length === 0}
