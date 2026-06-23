@@ -11,6 +11,11 @@ import { use } from "react";
 const TABS = ["posts", "reviews", "shelves", "realms"] as const;
 type TabKind = (typeof TABS)[number];
 
+// Runtime membership guard for Ark UI string callback
+// Ark UI 字符串回调的运行时成员守卫
+const isTabKind = (v: string): v is TabKind =>
+  (TABS as readonly string[]).includes(v);
+
 export function UserProfileContent({
   paramsPromise,
 }: {
@@ -34,10 +39,10 @@ export function UserProfileContent({
           <h1 className="truncate text-xl font-bold sm:text-2xl">User</h1>
           <p className="text-muted-foreground truncate text-sm">@{id}</p>
           <p className="text-muted-foreground text-sm">
-            Profile details will load once API is connected.
+            {t.user.profilePlaceholder}
           </p>
           <div className="flex items-center gap-2 pt-2">
-            <Button size="sm">Follow</Button>
+            <Button size="sm">{t.user.follow}</Button>
             <Button size="sm" variant="outline">
               {t.nav.messages}
             </Button>
@@ -46,12 +51,12 @@ export function UserProfileContent({
       </div>
 
       <Tabs
-        onValueChange={(details) => setTab(details.value as TabKind)}
+        onValueChange={(details) => { if (isTabKind(details.value)) setTab(details.value); }}
         value={tab}
       >
         <TabsList className="overflow-x-auto">
-          <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          <TabsTrigger value="posts">{t.user.posts}</TabsTrigger>
+          <TabsTrigger value="reviews">{t.user.reviews}</TabsTrigger>
           <TabsTrigger value="shelves">{t.nav.shelves}</TabsTrigger>
           <TabsTrigger value="realms">{t.nav.realms}</TabsTrigger>
         </TabsList>
@@ -88,9 +93,10 @@ function UserTabPlaceholder({
   readonly tab: string;
   readonly userId: string;
 }) {
+  const [t] = useT();
   return (
     <div className="text-muted-foreground py-8 text-center text-sm">
-      {tab} for user {userId} — connecting to API...
+      {t.user.tabPlaceholder(tab, userId)}
     </div>
   );
 }

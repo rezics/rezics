@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
 import { BookOpenIcon } from "lucide-react";
 import Link from "next/link";
@@ -14,13 +15,14 @@ export function BookLayoutShell({
   readonly children: ReactNode;
 }) {
   const pathname = usePathname();
+  const [t] = useT();
   const base = `/book/${bookId}`;
 
   const tabs = [
-    { href: base, label: "Content", exact: true },
-    { href: `${base}/discussion`, label: "Discussion" },
-    { href: `${base}/review`, label: "Reviews" },
-    { href: `${base}/info`, label: "Info" },
+    { href: base, label: t.book.content, exact: true },
+    { href: `${base}/discussion`, label: t.book.discussion },
+    { href: `${base}/review`, label: t.book.reviews },
+    { href: `${base}/info`, label: t.book.info },
   ] as const;
 
   return (
@@ -30,9 +32,9 @@ export function BookLayoutShell({
           <BookOpenIcon className="text-muted-foreground size-8" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
-          <h1 className="truncate text-xl font-bold sm:text-2xl">Book</h1>
+          <h1 className="truncate text-xl font-bold sm:text-2xl">{t.nav.books}</h1>
           <p className="text-muted-foreground truncate text-sm">
-            Book details will load once API is connected.
+            {t.book.placeholder}
           </p>
         </div>
       </div>

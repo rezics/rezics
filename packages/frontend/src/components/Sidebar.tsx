@@ -135,28 +135,29 @@ function JoinedRealms() {
  */
 export function Sidebar() {
   const pathname = usePathname();
+  const [t] = useT();
 
   return (
     <nav className="sticky top-14 flex h-[calc(100svh-3.5rem)] w-56 shrink-0 flex-col gap-2 overflow-y-auto border-r py-3 pr-2 max-lg:hidden">
       <div className="flex flex-col gap-0.5">
-        <NavLink active={pathname === "/"} href="/" icon={<HomeIcon className="size-4" />} label="Home" />
+        <NavLink active={pathname === "/"} href="/" icon={<HomeIcon className="size-4" />} label={t.nav.home} />
         <NavLink
           active={pathname.startsWith("/r")}
           href="/r"
           icon={<UsersIcon className="size-4" />}
-          label="Realms"
+          label={t.nav.realms}
         />
         <NavLink
           active={pathname.startsWith("/book")}
           href="/book"
           icon={<BookOpenIcon className="size-4" />}
-          label="Books"
+          label={t.nav.books}
         />
         <NavLink
           active={pathname === "/search"}
           href="/search"
           icon={<CompassIcon className="size-4" />}
-          label="Explore"
+          label={t.nav.explore}
         />
       </div>
       <JoinedRealms />

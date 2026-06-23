@@ -64,6 +64,65 @@ export default {
     rules: "Rules",
     notFound: "Realm not found",
   },
+  feed: {
+    all: "All",
+    hot: "Hot",
+    new: "New",
+    top: "Top",
+    connecting: "Posts will appear here once the API is connected.",
+  },
+  book: {
+    content: "Content",
+    discussion: "Discussion",
+    reviews: "Reviews",
+    info: "Info",
+    placeholder: "Book details will load once API is connected.",
+  },
+  user: {
+    posts: "Posts",
+    reviews: "Reviews",
+    follow: "Follow",
+    profilePlaceholder: "Profile details will load once API is connected.",
+    tabPlaceholder: (tab: string, userId: string) =>
+      `${tab} for user ${userId} — connecting to API...`,
+  },
+  follows: {
+    title: "Follows",
+    following: "Following",
+    followers: "Followers",
+    emptyPlaceholder: (tab: string) => `Your ${tab} will appear here.`,
+  },
+  entity: {
+    works: "Works",
+    credits: "Credits",
+    about: "About",
+    person: "Person",
+    placeholder: "Entity details will load once API is connected.",
+    tabPlaceholder: (tab: string, slug: string) =>
+      `${tab} for entity “${slug}” — connecting to API...`,
+  },
+  inbox: {
+    noNotifications: "No notifications yet.",
+    noMessages: "No messages yet.",
+  },
+  feedback: {
+    title: "Feedback",
+    subtitle:
+      "Help us improve rezics. Share your thoughts, report bugs, or suggest features.",
+    subject: "Subject",
+    subjectPlaceholder: "Brief summary",
+    details: "Details",
+    detailsPlaceholder: "Describe in detail...",
+    submit: "Submit Feedback",
+  },
+  time: {
+    justNow: "just now",
+    minutesAgo: (n: number) => `${n}m ago`,
+    hoursAgo: (n: number) => `${n}h ago`,
+    daysAgo: (n: number) => `${n}d ago`,
+    monthsAgo: (n: number) => `${n}mo ago`,
+    yearsAgo: (n: number) => `${n}y ago`,
+  },
   post: {
     empty: "No posts yet",
     emptyHint: "Be the first to start a discussion.",
@@ -77,6 +136,7 @@ export default {
     copied: "Link copied",
     back: "Back",
     edited: "edited",
+    untitled: "Untitled",
   },
   library: {
     title: "Books",

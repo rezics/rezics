@@ -64,6 +64,64 @@ export default {
     rules: "规则",
     notFound: "未找到该社区",
   },
+  feed: {
+    all: "全部",
+    hot: "热门",
+    new: "最新",
+    top: "精华",
+    connecting: "帖子将在 API 连接后显示。",
+  },
+  book: {
+    content: "目录",
+    discussion: "讨论",
+    reviews: "书评",
+    info: "详情",
+    placeholder: "图书详情将在 API 连接后加载。",
+  },
+  user: {
+    posts: "帖子",
+    reviews: "评论",
+    follow: "关注",
+    profilePlaceholder: "个人资料将在 API 连接后加载。",
+    tabPlaceholder: (tab: string, userId: string) =>
+      `${userId} 的${tab} — 正在连接 API…`,
+  },
+  follows: {
+    title: "关注",
+    following: "正在关注",
+    followers: "粉丝",
+    emptyPlaceholder: (tab: string) => `你的${tab}将显示在这里。`,
+  },
+  entity: {
+    works: "作品",
+    credits: "参与作品",
+    about: "简介",
+    person: "人物",
+    placeholder: "实体详情将在 API 连接后加载。",
+    tabPlaceholder: (tab: string, slug: string) =>
+      `"${slug}" 的${tab} — 正在连接 API…`,
+  },
+  inbox: {
+    noNotifications: "暂无通知。",
+    noMessages: "暂无消息。",
+  },
+  feedback: {
+    title: "反馈",
+    subtitle: "帮助我们改进 rezics。分享你的想法、报告错误或建议新功能。",
+    subject: "主题",
+    subjectPlaceholder: "简要概述",
+    details: "详情",
+    detailsPlaceholder: "请详细描述…",
+    submit: "提交反馈",
+  },
+  time: {
+    justNow: "刚刚",
+    minutesAgo: (n: number) => `${n} 分钟前`,
+    hoursAgo: (n: number) => `${n} 小时前`,
+    daysAgo: (n: number) => `${n} 天前`,
+    monthsAgo: (n: number) => `${n} 个月前`,
+    yearsAgo: (n: number) => `${n} 年前`,
+  },
   post: {
     empty: "还没有帖子",
     emptyHint: "成为第一个发起讨论的人。",
@@ -77,6 +135,7 @@ export default {
     copied: "链接已复制",
     back: "返回",
     edited: "已编辑",
+    untitled: "无标题",
   },
   library: {
     title: "图书",

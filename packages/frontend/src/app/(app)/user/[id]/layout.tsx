@@ -1,21 +1,24 @@
+"use client";
+
+import { useT } from "@/lib/i18n/locale";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 
-const tabs = [
-  { href: "", label: "Posts" },
-  { href: "/reviews", label: "Reviews" },
-  { href: "/shelves", label: "Shelves" },
-  { href: "/realms", label: "Realms" },
-] as const;
-
-export default async function UserLayout({
+export default function UserLayout({
   children,
-  params,
 }: {
   readonly children: ReactNode;
-  readonly params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id } = useParams<{ id: string }>();
+  const [t] = useT();
+
+  const tabs = [
+    { href: "", label: t.user.posts },
+    { href: "/reviews", label: t.user.reviews },
+    { href: "/shelves", label: t.nav.shelves },
+    { href: "/realms", label: t.nav.realms },
+  ] as const;
 
   return (
     <div className="space-y-6">

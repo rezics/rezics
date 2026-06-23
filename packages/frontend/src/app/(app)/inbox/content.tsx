@@ -36,13 +36,13 @@ export function InboxContent() {
 
         <TabsContent className="py-4" value="notifications">
           <div className="text-muted-foreground py-12 text-center text-sm">
-            No notifications yet.
+            {t.inbox.noNotifications}
           </div>
         </TabsContent>
 
         <TabsContent className="py-4" value="messages">
           <div className="text-muted-foreground py-12 text-center text-sm">
-            No messages yet.
+            {t.inbox.noMessages}
           </div>
         </TabsContent>
       </Tabs>

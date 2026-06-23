@@ -14,20 +14,30 @@ import { useRouter } from "next/navigation";
 
 // Format a date string as relative time (e.g. "3h ago", "2d ago")
 // 将日期字符串格式化为相对时间
-function formatRelativeTime(iso: string): string {
+function formatRelativeTime(
+  iso: string,
+  time: {
+    readonly justNow: string;
+    readonly minutesAgo: (n: number) => string;
+    readonly hoursAgo: (n: number) => string;
+    readonly daysAgo: (n: number) => string;
+    readonly monthsAgo: (n: number) => string;
+    readonly yearsAgo: (n: number) => string;
+  },
+): string {
   const now = Date.now();
   const then = new Date(iso).getTime();
   const diffMs = now - then;
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 1) return time.justNow;
+  if (diffMin < 60) return time.minutesAgo(diffMin);
   const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return time.hoursAgo(diffHours);
   const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
+  if (diffDays < 30) return time.daysAgo(diffDays);
   const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths < 12) return `${diffMonths}mo ago`;
-  return `${Math.floor(diffMonths / 12)}y ago`;
+  if (diffMonths < 12) return time.monthsAgo(diffMonths);
+  return time.yearsAgo(Math.floor(diffMonths / 12));
 }
 
 function PostDetailInner({ id }: { readonly id: string }) {
@@ -36,7 +46,7 @@ function PostDetailInner({ id }: { readonly id: string }) {
   const result = useAtomSuspense(postQuery(id));
   const post = result.value;
 
-  const displayTitle = post.title ?? "Untitled";
+  const displayTitle = post.title ?? t.post.untitled;
   const isEdited = post.updatedAt !== post.createdAt;
   const portableContent =
     post.content !== null && post.content !== undefined
@@ -76,7 +86,7 @@ function PostDetailInner({ id }: { readonly id: string }) {
             <span className="truncate">{post.authorUserId}</span>
             <span className="shrink-0" aria-hidden>·</span>
             <time className="shrink-0" dateTime={post.createdAt}>
-              {formatRelativeTime(post.createdAt)}
+              {formatRelativeTime(post.createdAt, t.time)}
             </time>
             {isEdited && <span className="shrink-0 italic">({t.post.edited})</span>}
           </div>

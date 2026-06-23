@@ -4,11 +4,17 @@ import { ClientOnly } from "@/components/ClientOnly";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useT } from "@/lib/i18n/locale";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { use } from "react";
 
 const TABS = ["works", "credits", "about"] as const;
 type TabKind = (typeof TABS)[number];
+
+// Runtime membership guard for Ark UI string callback
+// Ark UI 字符串回调的运行时成员守卫
+const isTabKind = (v: string): v is TabKind =>
+  (TABS as readonly string[]).includes(v);
 
 export function EntityDetailContent({
   paramsPromise,
@@ -16,6 +22,7 @@ export function EntityDetailContent({
   readonly paramsPromise: Promise<{ slug: string }>;
 }) {
   const { slug } = use(paramsPromise);
+  const [t] = useT();
   const [tab, setTab] = useQueryState(
     "tab",
     parseAsStringLiteral(TABS).withDefault("works"),
@@ -32,22 +39,22 @@ export function EntityDetailContent({
           <h1 className="truncate text-xl font-bold sm:text-2xl">{slug}</h1>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground truncate text-sm">@{slug}</span>
-            <Badge variant="outline">Person</Badge>
+            <Badge variant="outline">{t.entity.person}</Badge>
           </div>
           <p className="text-muted-foreground text-sm">
-            Entity details will load once API is connected.
+            {t.entity.placeholder}
           </p>
         </div>
       </div>
 
       <Tabs
-        onValueChange={(details) => setTab(details.value as TabKind)}
+        onValueChange={(details) => { if (isTabKind(details.value)) setTab(details.value); }}
         value={tab}
       >
         <TabsList className="overflow-x-auto">
-          <TabsTrigger value="works">Works</TabsTrigger>
-          <TabsTrigger value="credits">Credits</TabsTrigger>
-          <TabsTrigger value="about">About</TabsTrigger>
+          <TabsTrigger value="works">{t.entity.works}</TabsTrigger>
+          <TabsTrigger value="credits">{t.entity.credits}</TabsTrigger>
+          <TabsTrigger value="about">{t.entity.about}</TabsTrigger>
         </TabsList>
 
         <TabsContent className="py-4" value="works">
@@ -77,9 +84,10 @@ function EntityTabPlaceholder({
   readonly tab: string;
   readonly slug: string;
 }) {
+  const [t] = useT();
   return (
     <div className="text-muted-foreground py-8 text-center text-sm">
-      {tab} for entity &ldquo;{slug}&rdquo; — connecting to API...
+      {t.entity.tabPlaceholder(tab, slug)}
     </div>
   );
 }
