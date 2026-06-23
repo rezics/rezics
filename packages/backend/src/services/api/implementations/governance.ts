@@ -16,12 +16,20 @@ import {
   Unit,
   UnitRealm,
 } from "../../database/schema/all.ts";
+import type { ModerationCaseStateStorage } from "../../database/schema/moderation.ts";
 import { Api } from "../interfaces/index.ts";
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 import {
+  AccountEnforcementDTO,
+  ActiveEnforcementResult,
   CapabilityHintsResult,
   GovernanceForbidden,
   GovernanceNotFound,
+  ModerationActionDTO,
+  ModerationCaseDTO,
+  PolicyDecisionResult,
+  RealmCapabilityGrantDTO,
+  StaffAuditLogDTO,
 } from "../interfaces/governance.ts";
 
 // ---------------------------------------------------------------------------
@@ -111,6 +119,106 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         return rows[0]!;
       });
 
+    // -- DTO mapping helpers -- raw Drizzle rows → typed Schema.Class DTOs --
+    // DTO 映射辅助函数 — 原始 Drizzle 行 → 类型化 Schema.Class DTO
+
+    const toRealmCapabilityGrantDTO = (r: typeof RealmCapabilityGrant.$inferSelect) =>
+      new RealmCapabilityGrantDTO({
+        id: r.id,
+        realmUnitId: r.realmUnitId,
+        userId: r.userId,
+        capability: r.capability,
+        state: r.state,
+        grantedById: r.grantedById,
+        revokedById: r.revokedById,
+        expiresAt: r.expiresAt?.toISOString() ?? null,
+        revokedAt: r.revokedAt?.toISOString() ?? null,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+      });
+
+    const toModerationActionDTO = (r: typeof ModerationAction.$inferSelect) =>
+      new ModerationActionDTO({
+        id: r.id,
+        authority: r.authority,
+        realmUnitId: r.realmUnitId,
+        targetKind: r.targetKind,
+        targetId: r.targetId,
+        targetPath: r.targetPath,
+        actorKind: r.actorKind,
+        actorUserId: r.actorUserId,
+        actionKind: r.actionKind,
+        resultingStatus: r.resultingStatus,
+        resultingLocked: r.resultingLocked,
+        reasonCode: r.reasonCode,
+        reasonText: r.reasonText,
+        publicMessage: r.publicMessage,
+        caseId: r.caseId,
+        reversesActionId: r.reversesActionId,
+        requestId: r.requestId,
+        idempotencyKey: r.idempotencyKey,
+        importedFrom: r.importedFrom,
+        createdAt: r.createdAt.toISOString(),
+      });
+
+    const toAccountEnforcementDTO = (r: typeof AccountEnforcement.$inferSelect) =>
+      new AccountEnforcementDTO({
+        id: r.id,
+        targetUserId: r.targetUserId,
+        kind: r.kind,
+        state: r.state,
+        reason: r.reason,
+        safeMessage: r.safeMessage,
+        decidedById: r.decidedById,
+        decisionCode: r.decisionCode,
+        startsAt: r.startsAt.toISOString(),
+        expiresAt: r.expiresAt?.toISOString() ?? null,
+        revokedAt: r.revokedAt?.toISOString() ?? null,
+        revokedById: r.revokedById,
+        metadata: r.metadata,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+        decisionActionId: r.decisionActionId,
+        revocationActionId: r.revocationActionId,
+      });
+
+    const toModerationCaseDTO = (r: typeof ModerationCase.$inferSelect) =>
+      new ModerationCaseDTO({
+        id: r.id,
+        state: r.state,
+        severity: r.severity,
+        reporterUserId: r.reporterUserId,
+        subjectUserId: r.subjectUserId,
+        targetKind: r.targetKind,
+        targetId: r.targetId,
+        addressedUnitId: r.addressedUnitId,
+        realmUnitId: r.realmUnitId,
+        sourceFeedbackId: r.sourceFeedbackId,
+        assignedToUserId: r.assignedToUserId,
+        duplicateOfCaseId: r.duplicateOfCaseId,
+        reason: r.reason,
+        safeSummary: r.safeSummary,
+        metadata: r.metadata,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+        parentCaseId: r.parentCaseId,
+        scope: r.scope,
+      });
+
+    const toStaffAuditLogDTO = (r: typeof StaffAuditLog.$inferSelect) =>
+      new StaffAuditLogDTO({
+        id: r.id,
+        actorUserId: r.actorUserId,
+        action: r.action,
+        targetKind: r.targetKind,
+        targetId: r.targetId,
+        decisionCode: r.decisionCode,
+        requestId: r.requestId,
+        reason: r.reason,
+        metadata: r.metadata,
+        createdAt: r.createdAt.toISOString(),
+      });
+
     return handlers
       // ── capabilityHintsMe — resolve current user capability hints ──
       // 解析当前用户的能力提示
@@ -171,7 +279,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "GRANTED",
             reason: payload.reason ?? "Capability granted",
           });
-          return rows[0]!;
+          return toRealmCapabilityGrantDTO(rows[0]!);
         }).pipe(Effect.orDie),
       )
 
@@ -203,7 +311,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "REVOKED",
             reason: `Revoked capability ${params.capability}`,
           });
-          return rows;
+          return rows.map(toRealmCapabilityGrantDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -224,12 +332,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const hasCapability = grants.some(
             (g) => g.capability === action || g.capability === "*",
           );
-          return {
+          return new PolicyDecisionResult({
             allowed: hasCapability,
             actor: user.id,
             action,
             grants: grants.map((g) => g.capability),
-          };
+          });
         }).pipe(Effect.orDie),
       )
 
@@ -253,7 +361,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .orderBy(desc(ModerationAction.createdAt))
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
-          return rows;
+          return rows.map(toModerationActionDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -289,7 +397,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               deduped.push(row);
             }
           }
-          return deduped;
+          return deduped.map(toModerationActionDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -324,7 +432,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "APPROVED",
             reason: payload.reason ?? "Content approved",
           });
-          return [action];
+          return [toModerationActionDTO(action)];
         }).pipe(Effect.orDie),
       )
 
@@ -359,7 +467,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "REMOVED",
             reason: payload.reason ?? "Content removed",
           });
-          return [action];
+          return [toModerationActionDTO(action)];
         }).pipe(Effect.orDie),
       )
 
@@ -394,7 +502,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "RESTORED",
             reason: payload.reason ?? "Content restored",
           });
-          return [action];
+          return [toModerationActionDTO(action)];
         }).pipe(Effect.orDie),
       )
 
@@ -427,7 +535,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reasonText: payload.reason ?? null,
             caseId: payload.caseId ?? null,
           });
-          return action;
+          return toModerationActionDTO(action);
         }).pipe(Effect.orDie),
       )
 
@@ -460,7 +568,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reasonText: payload.reason ?? null,
             caseId: payload.caseId ?? null,
           });
-          return action;
+          return toModerationActionDTO(action);
         }).pipe(Effect.orDie),
       )
 
@@ -493,7 +601,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reasonText: payload.reason ?? null,
             caseId: payload.caseId ?? null,
           });
-          return action;
+          return toModerationActionDTO(action);
         }).pipe(Effect.orDie),
       )
 
@@ -526,7 +634,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reasonText: payload.reason ?? null,
             caseId: payload.caseId ?? null,
           });
-          return action;
+          return toModerationActionDTO(action);
         }).pipe(Effect.orDie),
       )
 
@@ -559,7 +667,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reasonText: payload.reason ?? null,
             caseId: payload.caseId ?? null,
           });
-          return action;
+          return toModerationActionDTO(action);
         }).pipe(Effect.orDie),
       )
 
@@ -589,7 +697,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "DELEGATED",
             reason: payload.reason ?? "Owner delegation recorded",
           });
-          return action;
+          return toModerationActionDTO(action);
         }).pipe(Effect.orDie),
       )
 
@@ -610,11 +718,11 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 ),
               )
               .orderBy(desc(AccountEnforcement.createdAt));
-          return {
+          return new ActiveEnforcementResult({
             targetUserId: params.targetUserId,
-            active: rows,
+            active: rows.map(toAccountEnforcementDTO),
             count: rows.length,
-          };
+          });
         }).pipe(Effect.orDie),
       )
 
@@ -627,7 +735,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const conditions: ReturnType<typeof eq>[] = [eq(AccountEnforcement.targetUserId, params.targetUserId)];
           if (query.state) {
             conditions.push(
-              eq(AccountEnforcement.state, query.state),
+              eq(AccountEnforcement.state, query.state as "ACTIVE" | "EXPIRED" | "REVOKED"),
             );
           }
           const rows = yield*
@@ -638,7 +746,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .orderBy(desc(AccountEnforcement.createdAt))
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
-          return rows;
+          return rows.map(toAccountEnforcementDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -691,7 +799,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode,
             reason,
           });
-          return rows[0]!;
+          return toAccountEnforcementDTO(rows[0]!);
         }).pipe(Effect.orDie),
       )
 
@@ -740,7 +848,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "UNBLOCKED",
             reason,
           });
-          return rows;
+          return rows.map(toAccountEnforcementDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -753,7 +861,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const conditions: ReturnType<typeof eq>[] = [eq(ModerationCase.scope, "PLATFORM")];
           if (query.state) {
             conditions.push(
-              eq(ModerationCase.state, query.state),
+              eq(ModerationCase.state, query.state as ModerationCaseStateStorage),
             );
           }
           const rows = yield*
@@ -764,7 +872,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .orderBy(desc(ModerationCase.createdAt))
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
-          return rows;
+          return rows.map(toModerationCaseDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -777,7 +885,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const rows = yield*
             database.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1);
           if (!rows[0]) return yield* new GovernanceForbidden();
-          return rows[0];
+          return toModerationCaseDTO(rows[0]);
         }).pipe(Effect.orDie),
       )
 
@@ -795,7 +903,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .orderBy(desc(ModerationAction.createdAt))
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
-          return rows;
+          return rows.map(toModerationActionDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -832,7 +940,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "CREATED",
             reason: payload.reason ?? "Case created from feedback",
           });
-          return rows[0]!;
+          return toModerationCaseDTO(rows[0]!);
         }).pipe(Effect.orDie),
       )
 
@@ -859,7 +967,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "DUPLICATE",
             reason: `Marked as duplicate of ${duplicateOfCaseId}`,
           });
-          return rows[0];
+          return toModerationCaseDTO(rows[0]);
         }).pipe(Effect.orDie),
       )
 
@@ -886,7 +994,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "ASSIGNED",
             reason: `Assigned to ${assignedToUserId}`,
           });
-          return rows[0];
+          return toModerationCaseDTO(rows[0]);
         }).pipe(Effect.orDie),
       )
 
@@ -916,7 +1024,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "TRIAGED",
             reason: payload.reason ?? "Case triaged",
           });
-          return rows[0];
+          return toModerationCaseDTO(rows[0]);
         }).pipe(Effect.orDie),
       )
 
@@ -954,7 +1062,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode,
             reason: payload.reason ?? "Decision recorded",
           });
-          return rows[0];
+          return toModerationCaseDTO(rows[0]);
         }).pipe(Effect.orDie),
       )
 
@@ -1002,7 +1110,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "APPEALED",
             reason: payload.reason ?? "Appeal submitted",
           });
-          return rows[0]!;
+          return toModerationCaseDTO(rows[0]!);
         }).pipe(Effect.orDie),
       )
 
@@ -1017,7 +1125,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           ];
           if (query.state) {
             conditions.push(
-              eq(ModerationCase.state, query.state),
+              eq(ModerationCase.state, query.state as ModerationCaseStateStorage),
             );
           }
           const rows = yield*
@@ -1028,7 +1136,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .orderBy(desc(ModerationCase.createdAt))
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
-          return rows;
+          return rows.map(toModerationCaseDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -1064,7 +1172,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "CREATED",
             reason: payload.reason ?? "Realm case created",
           });
-          return rows[0]!;
+          return toModerationCaseDTO(rows[0]!);
         }).pipe(Effect.orDie),
       )
 
@@ -1102,7 +1210,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "CREATED",
             reason: payload.reason ?? "Realm case created from feedback",
           });
-          return rows[0]!;
+          return toModerationCaseDTO(rows[0]!);
         }).pipe(Effect.orDie),
       )
 
@@ -1125,7 +1233,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .orderBy(desc(ModerationAction.createdAt))
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
-          return rows;
+          return rows.map(toModerationActionDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -1169,7 +1277,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode,
             reason: payload.reason ?? "Realm case decision recorded",
           });
-          return rows[0];
+          return toModerationCaseDTO(rows[0]);
         }).pipe(Effect.orDie),
       )
 
@@ -1233,7 +1341,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             decisionCode: "ESCALATED",
             reason: payload.reason ?? "Realm case escalated to platform",
           });
-          return escalatedRows[0]!;
+          return toModerationCaseDTO(escalatedRows[0]!);
         }).pipe(Effect.orDie),
       )
 
@@ -1259,7 +1367,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               .orderBy(desc(StaffAuditLog.createdAt))
               .limit(lim(query.limit))
               .offset(query.offset ?? 0);
-          return rows;
+          return rows.map(toStaffAuditLogDTO);
         }).pipe(Effect.orDie),
       )
 
@@ -1272,7 +1380,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const rows = yield*
             database.select().from(StaffAuditLog).where(eq(StaffAuditLog.id, params.auditLogId)).limit(1);
           if (!rows[0]) return yield* new GovernanceNotFound();
-          return rows[0];
+          return toStaffAuditLogDTO(rows[0]);
         }).pipe(Effect.orDie),
       );
   }),
