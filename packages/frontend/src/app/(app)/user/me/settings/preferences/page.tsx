@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { type FormEvent, useState } from "react";
+import { createListCollection } from "@ark-ui/react/select";
+import { type FormEvent, useMemo, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -44,22 +45,40 @@ export default function SettingsPreferencesPage() {
   const [contentRating, setContentRating] = useState(["general"]);
   const [saving, setSaving] = useState(false);
 
-  const languageItems = [
-    { label: "English", value: "en" },
-    { label: "简体中文", value: "zh-hans" },
-  ];
+  const languageCollection = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: "English", value: "en" },
+          { label: "简体中文", value: "zh-hans" },
+        ],
+      }),
+    [],
+  );
 
-  const themeItems = [
-    { label: t.settings.themeLight, value: "light" },
-    { label: t.settings.themeDark, value: "dark" },
-    { label: t.settings.themeSystem, value: "system" },
-  ];
+  const themeCollection = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: t.settings.themeLight, value: "light" },
+          { label: t.settings.themeDark, value: "dark" },
+          { label: t.settings.themeSystem, value: "system" },
+        ],
+      }),
+    [t],
+  );
 
-  const ratingItems = [
-    { label: t.settings.contentRatingGeneral, value: "general" },
-    { label: t.settings.contentRatingTeen, value: "teen" },
-    { label: t.settings.contentRatingMature, value: "mature" },
-  ];
+  const ratingCollection = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: t.settings.contentRatingGeneral, value: "general" },
+          { label: t.settings.contentRatingTeen, value: "teen" },
+          { label: t.settings.contentRatingMature, value: "mature" },
+        ],
+      }),
+    [t],
+  );
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
@@ -93,7 +112,7 @@ export default function SettingsPreferencesPage() {
                 {t.settings.language}
               </label>
               <Select
-                items={languageItems}
+                collection={languageCollection}
                 onValueChange={(detail) => setLanguage(detail.value)}
                 value={language}
               >
@@ -101,7 +120,7 @@ export default function SettingsPreferencesPage() {
                   <SelectValue placeholder={t.settings.language} />
                 </SelectTrigger>
                 <SelectContent>
-                  {languageItems.map((item) => (
+                  {languageCollection.items.map((item) => (
                     <SelectItem item={item} key={item.value}>
                       {item.label}
                     </SelectItem>
@@ -114,7 +133,7 @@ export default function SettingsPreferencesPage() {
                 {t.settings.theme}
               </label>
               <Select
-                items={themeItems}
+                collection={themeCollection}
                 onValueChange={(detail) => setTheme(detail.value)}
                 value={theme}
               >
@@ -122,7 +141,7 @@ export default function SettingsPreferencesPage() {
                   <SelectValue placeholder={t.settings.theme} />
                 </SelectTrigger>
                 <SelectContent>
-                  {themeItems.map((item) => (
+                  {themeCollection.items.map((item) => (
                     <SelectItem item={item} key={item.value}>
                       {item.label}
                     </SelectItem>
@@ -138,7 +157,7 @@ export default function SettingsPreferencesPage() {
                 {t.settings.contentRatingDescription}
               </p>
               <Select
-                items={ratingItems}
+                collection={ratingCollection}
                 onValueChange={(detail) => setContentRating(detail.value)}
                 value={contentRating}
               >
@@ -146,7 +165,7 @@ export default function SettingsPreferencesPage() {
                   <SelectValue placeholder={t.settings.contentRating} />
                 </SelectTrigger>
                 <SelectContent>
-                  {ratingItems.map((item) => (
+                  {ratingCollection.items.map((item) => (
                     <SelectItem item={item} key={item.value}>
                       {item.label}
                     </SelectItem>

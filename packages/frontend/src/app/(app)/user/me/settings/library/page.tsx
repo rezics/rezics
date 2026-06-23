@@ -12,7 +12,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { type FormEvent, useState } from "react";
+import { createListCollection } from "@ark-ui/react/select";
+import { type FormEvent, useMemo, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -49,16 +50,28 @@ export default function SettingsLibraryPage() {
   const [showProgress, setShowProgress] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const viewItems = [
-    { label: t.settings.viewGrid, value: "grid" },
-    { label: t.settings.viewList, value: "list" },
-  ];
+  const viewCollection = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: t.settings.viewGrid, value: "grid" },
+          { label: t.settings.viewList, value: "list" },
+        ],
+      }),
+    [t],
+  );
 
-  const sortItems = [
-    { label: t.settings.sortTitle, value: "title" },
-    { label: t.settings.sortDateAdded, value: "date-added" },
-    { label: t.settings.sortRating, value: "rating" },
-  ];
+  const sortCollection = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: t.settings.sortTitle, value: "title" },
+          { label: t.settings.sortDateAdded, value: "date-added" },
+          { label: t.settings.sortRating, value: "rating" },
+        ],
+      }),
+    [t],
+  );
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
@@ -92,7 +105,7 @@ export default function SettingsLibraryPage() {
                 {t.settings.defaultView}
               </label>
               <Select
-                items={viewItems}
+                collection={viewCollection}
                 onValueChange={(detail) => setDefaultView(detail.value)}
                 value={defaultView}
               >
@@ -100,7 +113,7 @@ export default function SettingsLibraryPage() {
                   <SelectValue placeholder={t.settings.defaultView} />
                 </SelectTrigger>
                 <SelectContent>
-                  {viewItems.map((item) => (
+                  {viewCollection.items.map((item) => (
                     <SelectItem item={item} key={item.value}>
                       {item.label}
                     </SelectItem>
@@ -113,7 +126,7 @@ export default function SettingsLibraryPage() {
                 {t.settings.sortBy}
               </label>
               <Select
-                items={sortItems}
+                collection={sortCollection}
                 onValueChange={(detail) => setSortBy(detail.value)}
                 value={sortBy}
               >
@@ -121,7 +134,7 @@ export default function SettingsLibraryPage() {
                   <SelectValue placeholder={t.settings.sortBy} />
                 </SelectTrigger>
                 <SelectContent>
-                  {sortItems.map((item) => (
+                  {sortCollection.items.map((item) => (
                     <SelectItem item={item} key={item.value}>
                       {item.label}
                     </SelectItem>
