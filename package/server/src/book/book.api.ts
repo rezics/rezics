@@ -304,7 +304,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
           identity.permission,
           identity.userId,
           undefined,
-          targetBookUnit as any,
+          targetBookUnit,
         )
       ) {
         set.status = 403;

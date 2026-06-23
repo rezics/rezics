@@ -189,11 +189,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     async ({ params, body, identity, set }): Promise<UnitResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          identity.permission,
-          identity.userId,
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity.permission, identity.userId, target)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -221,11 +217,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToDeleteUnit(
-          identity.permission,
-          identity.userId,
-          target as any,
-        )
+        !hasPermissionToDeleteUnit(identity.permission, identity.userId, target)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -284,11 +276,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       // Permission: must own the unit or be admin
       // 权限：必须拥有该 unit 或为管理员。
       if (
-        !hasPermissionToUpdateUnit(
-          identity.permission,
-          identity.userId,
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity.permission, identity.userId, target)
       ) {
         set.status = 403;
         return {
@@ -423,11 +411,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          identity.permission,
-          identity.userId,
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity.permission, identity.userId, target)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");

@@ -1,11 +1,11 @@
-import type { UnitDTO } from "../unit/unit";
 import type { Permission } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
+import type { UnitOwnershipRef } from "./unit";
 
 export function hasPermissionToUpdateChapter(
   permission: Permission,
   actorUserId: string,
-  unit?: UnitDTO,
+  unit?: UnitOwnershipRef,
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
@@ -16,7 +16,7 @@ export function hasPermissionToUpdateChapter(
 export function hasPermissionToDeleteChapter(
   permission: Permission,
   actorUserId: string,
-  unit?: UnitDTO,
+  unit?: UnitOwnershipRef,
 ): boolean {
   return hasPermissionToUpdateChapter(permission, actorUserId, unit);
 }

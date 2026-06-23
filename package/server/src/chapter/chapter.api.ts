@@ -54,7 +54,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
           identity.permission,
           identity.userId,
           undefined,
-          targetBookUnit as any,
+          targetBookUnit,
         )
       ) {
         set.status = 403;
@@ -197,7 +197,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         !hasPermissionToUpdateChapter(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
@@ -231,7 +231,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         !hasPermissionToDeleteChapter(
           identity.permission,
           identity.userId,
-          target as any,
+          target,
         )
       ) {
         set.status = 403;
