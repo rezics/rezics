@@ -1,14 +1,13 @@
-import Link from "next/link";
+import { RealmDetailContent } from "./content";
 import type { ReactNode } from "react";
 
-const tabs = [
-  { href: "", label: "Posts" },
-  { href: "/shelves", label: "Shelves" },
-  { href: "/tags", label: "Tags" },
-  { href: "/wiki", label: "Wiki" },
-  { href: "/rules", label: "Rules" },
-] as const;
-
+/**
+ * Realm layout — shared header (icon, name, slug, join/leave) and tab navigation.
+ * Realm 布局 — 共享页头（图标、名称、slug、加入/离开）和 tab 导航。
+ *
+ * Server component that delegates rendering to the client RealmDetailContent.
+ * 服务端组件，将渲染委托给客户端 RealmDetailContent。
+ */
 export default async function RealmLayout({
   children,
   params,
@@ -18,23 +17,5 @@ export default async function RealmLayout({
 }) {
   const { slug } = await params;
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">{slug}</h1>
-      </div>
-      <nav className="border-border flex gap-1 border-b">
-        {tabs.map((tab) => (
-          <Link
-            className="text-muted-foreground hover:text-foreground border-b-2 border-transparent px-3 py-2 text-sm font-medium"
-            href={`/r/${slug}${tab.href}`}
-            key={tab.label}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </nav>
-      {children}
-    </div>
-  );
+  return <RealmDetailContent slug={slug}>{children}</RealmDetailContent>;
 }
