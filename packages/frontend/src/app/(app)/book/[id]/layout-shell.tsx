@@ -39,7 +39,7 @@ export function BookLayoutShell({
 
       <nav className="border-border flex gap-1 overflow-x-auto border-b">
         {tabs.map((tab) => {
-          const isActive = tab.exact
+          const isActive = ("exact" in tab && tab.exact)
             ? pathname === tab.href
             : pathname.startsWith(tab.href);
           return (

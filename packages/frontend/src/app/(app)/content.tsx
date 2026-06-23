@@ -2,8 +2,9 @@
 
 import { ClientOnly } from "@/components/ClientOnly";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValueText } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useT } from "@/lib/i18n/locale";
+import { createListCollection } from "@ark-ui/react/select";
 import { parseAsStringLiteral, useQueryStates } from "nuqs";
 
 const FEEDS = ["home", "all"] as const;
@@ -25,22 +26,23 @@ export function HomeContent() {
         <Tabs onValueChange={(details) => setParams({ feed: details.value as FeedKind })} value={feed}>
           <TabsList>
             <TabsTrigger value="home">{t.nav.home}</TabsTrigger>
-            <TabsTrigger value="all">{t.common.all ?? "All"}</TabsTrigger>
+            <TabsTrigger value="all">{"All"}</TabsTrigger>
           </TabsList>
         </Tabs>
 
         <Select
-          className="h-9 w-32 shrink-0 sm:h-8"
-          items={[
-            { value: "hot", label: "Hot" },
-            { value: "new", label: "New" },
-            { value: "top", label: "Top" },
-          ]}
+          collection={createListCollection({
+            items: [
+              { value: "hot", label: "Hot" },
+              { value: "new", label: "New" },
+              { value: "top", label: "Top" },
+            ],
+          })}
           onValueChange={(details) => setParams({ sort: details.value[0] as SortKind })}
           value={[sort]}
         >
-          <SelectTrigger>
-            <SelectValueText />
+          <SelectTrigger className="h-9 w-32 shrink-0 sm:h-8">
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {[

@@ -26,8 +26,6 @@ interface RealmCardProps {
  * 成员数行 text-xs text-muted-foreground。
  */
 export function RealmCard({ realm }: RealmCardProps) {
-  const [t] = useT();
-
   return (
     <Card className="flex-row items-center gap-3 p-3 [--space:--spacing(3)]">
       <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-full">

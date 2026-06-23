@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValueText } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { createListCollection } from "@ark-ui/react/select";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -41,9 +42,9 @@ export default function NewEntityPage() {
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium">Kind</label>
-          <Select items={ENTITY_KINDS} value={["person"]}>
+          <Select collection={createListCollection({ items: [...ENTITY_KINDS] })} value={["person"]}>
             <SelectTrigger>
-              <SelectValueText />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {ENTITY_KINDS.map((k) => (

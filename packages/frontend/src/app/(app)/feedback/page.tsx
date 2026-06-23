@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useT } from "@/lib/i18n/locale";
 import { useState } from "react";
 
 /**
@@ -24,7 +23,6 @@ import { useState } from "react";
  * 用户反馈提交页面：标题 + 详情 + 提交按钮。
  */
 export default function FeedbackPage() {
-  const [t] = useT();
   const [subject, setSubject] = useState("");
   const [details, setDetails] = useState("");
 

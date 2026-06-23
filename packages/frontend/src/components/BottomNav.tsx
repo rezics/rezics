@@ -5,7 +5,6 @@ import { authClient } from "@/lib/auth-client";
 import { useT } from "@/lib/i18n/locale";
 import { useAtomSet } from "@effect/atom-react";
 import { BellIcon, BookOpenIcon, HomeIcon, PlusIcon, UserIcon } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
 import { ClientOnly } from "@/components/ClientOnly";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
@@ -24,7 +24,7 @@ export function EntityDetailContent({
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="flex items-start gap-4 sm:gap-6">
-        <Avatar size="2xl">
+        <Avatar size="lg">
           <AvatarFallback>{slug.slice(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
 

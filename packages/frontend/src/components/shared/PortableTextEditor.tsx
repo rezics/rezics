@@ -1,19 +1,27 @@
 "use client";
 
-// ponytail: Portable Text editor — wire up when @portabletext/editor API stabilizes
+
 // Placeholder that renders a textarea until PT editor is integrated
-import { useCallback, type ChangeEvent } from "react";
+// PT 编辑器集成前的占位 textarea
+import { useCallback, useState, type ChangeEvent } from "react";
+
+export { PortableTextEditorComponent as PortableTextEditor };
 
 export function PortableTextEditorComponent({
-  value,
+  value: controlledValue,
   onChange,
 }: {
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-}) {
+  readonly value?: string;
+  readonly onChange?: (value: string) => void;
+} = {}) {
+  const [internal, setInternal] = useState("");
+  const value = controlledValue ?? internal;
+
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
-      onChange(e.target.value);
+      const v = e.target.value;
+      setInternal(v);
+      onChange?.(v);
     },
     [onChange],
   );

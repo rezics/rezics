@@ -7,7 +7,9 @@ type Messages = typeof en;
 
 const languages: Record<string, () => Promise<{ default: Messages }>> = {
   en: () => import("./languages/en"),
-  "zh-hans": () => import("./languages/zh-hans"),
+  // Cast needed: zh-hans has the same shape but different literal string types
+  // 需要类型转换：zh-hans 结构相同但字符串字面量类型不同
+  "zh-hans": () => import("./languages/zh-hans") as unknown as Promise<{ default: Messages }>,
 };
 
 let current: Messages | null = null;
