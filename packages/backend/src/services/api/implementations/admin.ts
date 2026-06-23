@@ -43,6 +43,23 @@ import {
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 
 // ---------------------------------------------------------------------------
+// Session shape returned by better-auth / better-auth 返回的会话形状
+// ---------------------------------------------------------------------------
+
+interface BetterAuthSession {
+  id: string;
+  userId: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+function isBetterAuthSessionArray(v: unknown): v is BetterAuthSession[] {
+  return Array.isArray(v);
+}
+
+// ---------------------------------------------------------------------------
 // In-memory repair job store (simplified — no persistent table)
 // 内存中的修复任务存储（简化版 —— 无持久化表）
 // ---------------------------------------------------------------------------
@@ -95,7 +112,7 @@ export const AdminHandlers = HttpApiBuilder.group(
           .from(User)
           .where(eq(User.unitId, userId))
           .limit(1);
-        const perm = rows[0]?.permission as { role?: string } | null;
+        const perm = rows[0]?.permission ?? null;
         const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
         if (!isAdmin) return yield* new AdminForbidden();
       });
@@ -185,18 +202,9 @@ export const AdminHandlers = HttpApiBuilder.group(
                 Effect.catchTag("Unknown", () => Effect.succeed(null)),
               );
 
-            if (!sessions) return [];
+            if (!sessions || !isBetterAuthSessionArray(sessions)) return [];
 
-            return (
-              sessions as Array<{
-                id: string;
-                userId: string;
-                ipAddress?: string | null;
-                userAgent?: string | null;
-                createdAt: Date;
-                expiresAt: Date;
-              }>
-            ).map(
+            return sessions.map(
               (s) =>
                 new AuthUserSession({
                   id: s.id,
@@ -336,7 +344,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               status: "retried",
               updatedAt: now,
               result: {
-                ...((existing.result ?? {}) as object),
+                ...(typeof existing.result === "object" && existing.result !== null ? existing.result : {}),
                 retriedAt: now.toISOString(),
               },
             };
@@ -769,12 +777,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               eq(Unit.slug, payload.slug),
             ];
             if (payload.kind) {
-              conditions.push(
-                eq(
-                  Unit.type,
-                  payload.kind as (typeof Unit.type.enumValues)[number],
-                ),
-              );
+              conditions.push(eq(Unit.type, payload.kind));
             }
 
             const rows = yield* database
@@ -800,17 +803,11 @@ export const AdminHandlers = HttpApiBuilder.group(
         // 接收调度结果
         .handle("dispatchResults", ({ payload }) =>
           Effect.gen(function* () {
-            return (
-              payload.results as Array<{
-                id?: string;
-                status?: string;
-                result?: unknown;
-              }>
-            ).map(
+            return payload.results.map(
               (r) =>
                 new DispatchResult({
-                  id: (r.id as string) ?? crypto.randomUUID(),
-                  status: (r.status as string) ?? "accepted",
+                  id: r.id ?? crypto.randomUUID(),
+                  status: r.status ?? "accepted",
                   result: r.result,
                 }),
             );
@@ -1154,7 +1151,7 @@ export const AdminHandlers = HttpApiBuilder.group(
                   name: r.name,
                   token: undefined,
                   permissions: Object.keys(
-                    (r.scopes ?? {}) as Record<string, unknown>,
+                    r.scopes ?? {},
                   ),
                   createdAt: r.createdAt,
                   expiresAt: r.expiresAt ?? null,
@@ -1256,9 +1253,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               id: row.id,
               name: row.name,
               token: undefined,
-              permissions: Object.keys(
-                (row.scopes ?? {}) as Record<string, unknown>,
-              ),
+              permissions: Object.keys(row.scopes),
               createdAt: row.createdAt,
               expiresAt: row.expiresAt ?? null,
             });
@@ -1337,8 +1332,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               .values({
                 type: "BOOK",
                 slugScope: scopeId,
-                status: (payload.status ??
-                  "DRAFT") as (typeof Unit.status.enumValues)[number],
+                status: payload.status ?? "DRAFT",
                 visibility: "PUBLIC",
               })
               .returning({ id: Unit.id, status: Unit.status });
@@ -1375,8 +1369,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               yield* database
                 .update(Unit)
                 .set({
-                  status:
-                    payload.status as (typeof Unit.status.enumValues)[number],
+                  status: payload.status,
                   updatedAt: new Date(),
                 })
                 .where(eq(Unit.id, params.id));
@@ -1573,7 +1566,7 @@ export const AdminHandlers = HttpApiBuilder.group(
               .values({
                 gameUnitId: payload.unitId,
                 tier: payload.platform,
-                hardware: payload.requirements as Record<string, unknown>,
+                hardware: payload.requirements,
               })
               .returning();
             const row = rows[0]!;

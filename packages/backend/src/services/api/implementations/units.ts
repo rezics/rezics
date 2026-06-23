@@ -54,9 +54,9 @@ function transToDTO(r: typeof UnitTranslation.$inferSelect) {
   return new TranslationDTO({
     unitId: r.unitId,
     language: r.language,
-    title: (r.title as string) ?? null,
-    subtitle: (r.subtitle as string) ?? null,
-    summary: (r.summary as string) ?? null,
+    title: r.title ?? null,
+    subtitle: r.subtitle ?? null,
+    summary: r.summary ?? null,
   });
 }
 
@@ -83,7 +83,7 @@ function extLinkToDTO(r: typeof UnitExternalLink.$inferSelect) {
     id: r.id,
     unitId: r.unitId,
     url: r.url,
-    label: (r.fallbackText as string) ?? null,
+    label: r.fallbackText ?? null,
   });
 }
 
@@ -115,7 +115,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const rows = yield* database
               .insert(Unit)
               .values({
-                type: payload.type as (typeof Unit.$inferInsert)["type"],
+                type: payload.type,
                 userId: user.id,
                 slugScope: user.id,
                 slug: payload.slug,
@@ -156,10 +156,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("listUnits", ({ payload }) =>
         Effect.gen(function* () {
           const conditions: ReturnType<typeof eq>[] = [];
-          if (payload.type) conditions.push(eq(Unit.type, payload.type as (typeof Unit.type.enumValues)[number]));
-          if (payload.status) conditions.push(eq(Unit.status, payload.status as (typeof Unit.status.enumValues)[number]));
-          if (payload.visibility)
-            conditions.push(eq(Unit.visibility, payload.visibility as (typeof Unit.visibility.enumValues)[number]));
+          if (payload.type) conditions.push(eq(Unit.type, payload.type));
+          if (payload.status) conditions.push(eq(Unit.status, payload.status));
+          if (payload.visibility) conditions.push(eq(Unit.visibility, payload.visibility));
           if (payload.userId) conditions.push(eq(Unit.userId, payload.userId));
           if (payload.ids && payload.ids.length > 0) conditions.push(inArray(Unit.id, [...payload.ids]));
           if (payload.search) conditions.push(ilike(Unit.slug, `%${payload.search}%`));
@@ -208,7 +207,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("upsertTranslation", ({ params, payload }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const patch = payload.patch as Record<string, unknown>;
+          const patch = payload.patch;
           const set: Record<string, unknown> = { updatedAt: new Date() };
           if ("title" in patch) set["title"] = patch["title"];
           if ("subtitle" in patch) set["subtitle"] = patch["subtitle"];
@@ -253,7 +252,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
           return new TranslationSourceDTO({
             unitId: rows[0].unitId,
             language: rows[0].language,
-            sourceUnitId: (rows[0].sourceUnitId as string) ?? null,
+            sourceUnitId: rows[0].sourceUnitId ?? null,
           });
         }),
       )
@@ -445,7 +444,10 @@ export const UnitsHandlers = HttpApiBuilder.group(
 
       .handle("batchExternalLinks", ({ payload }) =>
         Effect.gen(function* () {
-          if (payload.unitIds.length === 0) return {} as Record<string, ExternalLinkDTO[]>;
+          if (payload.unitIds.length === 0) {
+            const empty: Record<string, ExternalLinkDTO[]> = {};
+            return empty;
+          }
           const rows = yield* database
               .select()
               .from(UnitExternalLink)

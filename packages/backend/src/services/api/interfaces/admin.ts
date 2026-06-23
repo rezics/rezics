@@ -279,7 +279,13 @@ export class AdminGroup extends HttpApiGroup.make("admin")
     HttpApiEndpoint.post("slugResolve", "/slug/resolve", {
       payload: Schema.Struct({
         slug: Schema.String,
-        kind: Schema.optional(Schema.String),
+        kind: Schema.optional(
+          Schema.Literals([
+            "BOOK", "GAME", "MEDIA", "POST", "TAG", "REALM", "SHELF",
+            "IMAGE", "VIDEO", "QUOTE", "LINK", "ENTITY", "ZONE", "USER",
+            "SCOPE", "SERIES", "LABEL", "POLL", "COMMENT",
+          ]),
+        ),
       }),
       success: SlugResolution,
       error: [AdminForbidden, AdminNotFound, HttpApiError.InternalServerError],
@@ -288,7 +294,13 @@ export class AdminGroup extends HttpApiGroup.make("admin")
     // -- Dispatch 调度 (token auth) --
     HttpApiEndpoint.post("dispatchResults", "/dispatch/results", {
       payload: Schema.Struct({
-        results: Schema.Array(Schema.Unknown),
+        results: Schema.Array(
+          Schema.Struct({
+            id: Schema.optional(Schema.String),
+            status: Schema.optional(Schema.String),
+            result: Schema.optional(Schema.Unknown),
+          }),
+        ),
       }),
       success: Schema.Array(DispatchResult),
       error: HttpApiError.InternalServerError,
@@ -400,7 +412,9 @@ export class AdminGroup extends HttpApiGroup.make("admin")
     HttpApiEndpoint.post("tokenBooksCreate", "/token/books", {
       payload: Schema.Struct({
         title: Schema.String,
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(
+          Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"]),
+        ),
       }),
       success: TokenBookEntry,
       error: HttpApiError.InternalServerError,
@@ -409,7 +423,9 @@ export class AdminGroup extends HttpApiGroup.make("admin")
       params: { id: Schema.String },
       payload: Schema.Struct({
         title: Schema.optional(Schema.String),
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(
+          Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"]),
+        ),
       }),
       success: TokenBookEntry,
       error: [AdminNotFound, HttpApiError.InternalServerError],
@@ -456,7 +472,7 @@ export class AdminGroup extends HttpApiGroup.make("admin")
       payload: Schema.Struct({
         unitId: Schema.String,
         platform: Schema.String,
-        requirements: Schema.Unknown,
+        requirements: Schema.Record(Schema.String, Schema.Unknown),
       }),
       success: GameSystemRequirement,
       error: [AdminForbidden, HttpApiError.InternalServerError],

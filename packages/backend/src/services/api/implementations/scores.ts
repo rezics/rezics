@@ -4,6 +4,7 @@ import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { Database } from "../../database/index.ts";
 import { Post, ScoreAggregate, ScoreEntry, ScoreRealmField, Unit, User } from "../../database/schema/all.ts";
+import type { ScoreDistribution, ScoreFieldAggregate, ScoreFieldsAggregate } from "../../database/schema/score.ts";
 import { Api } from "../interfaces/index.ts";
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 import {
@@ -23,18 +24,13 @@ const SCORE_MIN = 1;
 const SCORE_MAX = 10;
 
 // ---------------------------------------------------------------------------
-// Types / 类型
+// Type aliases — re-exported from schema for local convenience
+// 类型别名 —— 从 schema 重新导出以便局部使用
 // ---------------------------------------------------------------------------
 
-type Distribution = Record<string, number>;
+type Distribution = ScoreDistribution;
+type FieldsAggregate = ScoreFieldsAggregate;
 
-interface FieldAggregate {
-  total: number;
-  count: number;
-  dist: Distribution;
-}
-
-type FieldsAggregate = Record<string, FieldAggregate>;
 
 // ---------------------------------------------------------------------------
 // Validation / 校验
@@ -86,7 +82,7 @@ function applyFieldsDelta(
 
     if (oldVal === null && newVal === null) continue;
 
-    const current: FieldAggregate = result[key]
+    const current: ScoreFieldAggregate = result[key]
       ? { ...result[key], dist: { ...result[key].dist } }
       : { total: 0, count: 0, dist: {} };
 
@@ -132,7 +128,7 @@ function computeAggregateFromEntries(entries: (typeof ScoreEntry.$inferSelect)[]
     const distKey = String(entry.value);
     distribution[distKey] = (distribution[distKey] ?? 0) + 1;
 
-    const entryFields = entry.fields as Record<string, number> | null;
+    const entryFields = entry.fields ?? null;
     if (entryFields) {
       for (const [key, val] of Object.entries(entryFields)) {
         if (!fields[key]) {
@@ -193,7 +189,7 @@ function entryToDTO(row: typeof ScoreEntry.$inferSelect): ScoreEntryResult {
     unitId: row.unitId,
     realm: row.realm,
     value: row.value,
-    fields: (row.fields as Record<string, number>) ?? null,
+    fields: row.fields ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
@@ -205,8 +201,8 @@ function aggregateToDTO(row: typeof ScoreAggregate.$inferSelect): ScoreAggregate
     realm: row.realm,
     totalScore: row.totalScore,
     totalCount: row.totalCount,
-    distribution: row.distribution as Distribution,
-    fields: (row.fields as FieldsAggregate) ?? null,
+    distribution: row.distribution,
+    fields: row.fields ?? null,
     updatedAt: row.updatedAt,
   });
 }
@@ -261,8 +257,8 @@ export const ScoresHandlers = HttpApiBuilder.group(
             return;
           }
 
-          const distribution = applyDistributionDelta(row.distribution as Distribution, oldValue, null);
-          const fields = applyFieldsDelta(row.fields as FieldsAggregate | null, oldFields, null);
+          const distribution = applyDistributionDelta(row.distribution, oldValue, null);
+          const fields = applyFieldsDelta(row.fields ?? null, oldFields, null);
 
           yield* 
             database
@@ -308,8 +304,8 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const deltaScore = newValue - (oldValue ?? 0);
           const deltaCount = oldValue === null ? 1 : 0;
 
-          const distribution = applyDistributionDelta(row.distribution as Distribution, oldValue, newValue);
-          const fields = applyFieldsDelta(row.fields as FieldsAggregate | null, oldFields, newFields);
+          const distribution = applyDistributionDelta(row.distribution, oldValue, newValue);
+          const fields = applyFieldsDelta(row.fields ?? null, oldFields, newFields);
 
           yield* 
             database
@@ -336,7 +332,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
             return yield* new HttpApiError.InternalServerError();
           }
 
-          const entryFields = (payload.fields as Record<string, number>) ?? null;
+          const entryFields = payload.fields ?? null;
           const newFields = entryFields && Object.keys(entryFields).length > 0 ? entryFields : null;
 
           // Validate fields against realm field registry / 根据 realm 字段注册表校验各字段
@@ -372,7 +368,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .limit(1);
           const existing = existingRows[0];
           const oldValue = existing?.value ?? null;
-          const oldFields = (existing?.fields as Record<string, number>) ?? null;
+          const oldFields = existing?.fields ?? null;
 
           // Upsert the score entry / 写入或更新评分条目
           const entryRows = yield* 
@@ -425,7 +421,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
                 .from(User)
                 .where(eq(User.unitId, user.id))
                 .limit(1);
-            const perm = userRows[0]?.permission as { role?: string } | null;
+            const perm = userRows[0]?.permission ?? null;
             const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
 
             if (!isAdmin) return yield* new ScoreConflict();
@@ -445,7 +441,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           yield* database.delete(ScoreEntry).where(eq(ScoreEntry.id, params.id));
 
           // Update the aggregate / 更新聚合
-          const oldFields = (entry.fields as Record<string, number>) ?? null;
+          const oldFields = entry.fields ?? null;
           yield* doUpdateAggregate(entry.unitId, entry.realm, entry.value, null, oldFields, null);
         }),
       )
@@ -483,7 +479,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .from(User)
               .where(eq(User.unitId, user.id))
               .limit(1);
-          const perm = userRows[0]?.permission as { role?: string } | null;
+          const perm = userRows[0]?.permission ?? null;
           const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
           if (!isAdmin) return yield* new ScoreForbidden();
 
@@ -559,7 +555,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .from(User)
               .where(eq(User.unitId, user.id))
               .limit(1);
-          const perm = userRows[0]?.permission as { role?: string } | null;
+          const perm = userRows[0]?.permission ?? null;
           const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
           if (!isAdmin) return yield* new ScoreForbidden();
 
@@ -601,7 +597,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               .from(User)
               .where(eq(User.unitId, user.id))
               .limit(1);
-          const perm = userRows[0]?.permission as { role?: string } | null;
+          const perm = userRows[0]?.permission ?? null;
           const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
           if (!isAdmin) return yield* new ScoreForbidden();
 

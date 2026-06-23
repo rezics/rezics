@@ -4,7 +4,7 @@ import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
 import { Database } from "../../database/index.ts";
-import { Comment, Post } from "../../database/schema/all.ts";
+import { Comment, ModerationStatus, Post } from "../../database/schema/all.ts";
 import { Api } from "../interfaces/index.ts";
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 import {
@@ -277,13 +277,17 @@ export const CommentsHandlers = HttpApiBuilder.group(
               .where(eq(Comment.id, params.id));
             if (!rows[0]) return yield* new CommentNotFound();
 
-            const status =
-              payload.status as (typeof Comment.$inferInsert)["moderationStatus"];
+            const isModerationStatus = (v: string): v is (typeof ModerationStatus.enumValues)[number] =>
+              new Set<string>(ModerationStatus.enumValues).has(v);
+
+            if (!isModerationStatus(payload.status)) {
+              return yield* new CommentNotFound();
+            }
 
             yield* database
               .update(Comment)
               .set({
-                moderationStatus: status,
+                moderationStatus: payload.status,
                 updatedAt: new Date(),
               })
               .where(eq(Comment.id, params.id));

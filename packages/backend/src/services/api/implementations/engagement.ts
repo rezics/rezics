@@ -6,6 +6,7 @@ import { Database } from "../../database/index.ts";
 import {
   ContentStructureNode,
   Feedback,
+  FeedbackType,
   Post,
   Reaction,
   Shelf,
@@ -16,7 +17,9 @@ import {
   UserBlock,
   UserContentNodeProgress,
   UserUnitProgress,
+  UserUnitProgressStatus,
 } from "../../database/schema/all.ts";
+import { ModerationTargetKind } from "../../database/schema/moderation.ts";
 import { Api } from "../interfaces/index.ts";
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 import {
@@ -107,8 +110,48 @@ function progressToEntry(row: typeof UserUnitProgress.$inferSelect) {
 // ---------------------------------------------------------------------------
 
 function isAdmin(permission: unknown): boolean {
-  const perm = permission as { role?: string } | null;
-  return perm?.role === "ADMIN" || perm?.role === "ROOT";
+  if (
+    permission === null ||
+    permission === undefined ||
+    typeof permission !== "object" ||
+    !("role" in permission)
+  )
+    return false;
+  return permission.role === "ADMIN" || permission.role === "ROOT";
+}
+
+/**
+ * Check if a string is included in a readonly tuple (widening the receiver type).
+ * Uses a Set for O(1) lookup and avoids the `includes` parameter-type constraint.
+ * 检查字符串是否包含在只读元组中（拓宽接收类型）。
+ * 使用 Set 进行 O(1) 查找，避免 `includes` 参数类型约束。
+ */
+function enumIncludes<T extends string>(values: readonly T[], candidate: string): candidate is T {
+  return new Set<string>(values).has(candidate);
+}
+
+/**
+ * Type-guard: is the string a valid FeedbackType enum value?
+ * 类型守卫：字符串是否为有效的 FeedbackType 枚举值？
+ */
+function isFeedbackType(raw: string): raw is (typeof FeedbackType.enumValues)[number] {
+  return enumIncludes(FeedbackType.enumValues, raw);
+}
+
+/**
+ * Type-guard: is the string a valid ModerationTargetKind enum value?
+ * 类型守卫：字符串是否为有效的 ModerationTargetKind 枚举值？
+ */
+function isTargetKind(raw: string): raw is (typeof ModerationTargetKind.enumValues)[number] {
+  return enumIncludes(ModerationTargetKind.enumValues, raw);
+}
+
+/**
+ * Type-guard: is the string a valid UserUnitProgressStatus enum value?
+ * 类型守卫：字符串是否为有效的 UserUnitProgressStatus 枚举值？
+ */
+function isProgressStatus(raw: string): raw is (typeof UserUnitProgressStatus.enumValues)[number] {
+  return enumIncludes(UserUnitProgressStatus.enumValues, raw);
 }
 
 const DEFAULT_LIMIT = 20;
@@ -378,13 +421,18 @@ export const FeedbackHandlers = HttpApiBuilder.group(
               .values({
                 userId: user.id,
                 content: payload.content,
-                type: (payload.type?.toUpperCase() ?? "REPORT") as typeof Feedback.$inferInsert.type,
+                type: (() => {
+                  const raw = payload.type?.toUpperCase() ?? "REPORT";
+                  return isFeedbackType(raw) ? raw : "REPORT";
+                })(),
                 url: payload.url ?? null,
                 addressedUnitId: payload.addressedUnitId ?? null,
                 targetId: payload.targetId ?? null,
-                targetKind: payload.targetKind
-                  ? (payload.targetKind.toUpperCase() as typeof Feedback.$inferInsert.targetKind)
-                  : null,
+                targetKind: (() => {
+                  if (!payload.targetKind) return null;
+                  const raw = payload.targetKind.toUpperCase();
+                  return isTargetKind(raw) ? raw : null;
+                })(),
                 updatedAt: new Date(),
               })
               .returning();
@@ -402,7 +450,8 @@ export const FeedbackHandlers = HttpApiBuilder.group(
 
           const conditions: SQL[] = [eq(Feedback.userId, user.id)];
           if (query.type) {
-            conditions.push(eq(Feedback.type, query.type.toUpperCase() as typeof Feedback.$inferSelect.type));
+            const upper = query.type.toUpperCase();
+            if (isFeedbackType(upper)) conditions.push(eq(Feedback.type, upper));
           }
           if (query.resolved === "true") {
             conditions.push(eq(Feedback.resolved, true));
@@ -451,7 +500,8 @@ export const FeedbackHandlers = HttpApiBuilder.group(
           const conditions: SQL[] = [];
           if (query.userId) conditions.push(eq(Feedback.userId, query.userId));
           if (query.type) {
-            conditions.push(eq(Feedback.type, query.type.toUpperCase() as typeof Feedback.$inferSelect.type));
+            const upper = query.type.toUpperCase();
+            if (isFeedbackType(upper)) conditions.push(eq(Feedback.type, upper));
           }
           if (query.resolved === "true") {
             conditions.push(eq(Feedback.resolved, true));
@@ -613,9 +663,11 @@ export const ProgressHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const now = new Date();
 
-          const status = payload.status
-            ? (payload.status.toUpperCase() as typeof UserUnitProgress.$inferInsert.status)
-            : "BACKLOG";
+          const status = (() => {
+            if (!payload.status) return "BACKLOG" satisfies (typeof UserUnitProgressStatus.enumValues)[number];
+            const raw = payload.status.toUpperCase();
+            return isProgressStatus(raw) ? raw : "BACKLOG";
+          })();
 
           const rows = yield* 
             database
@@ -672,12 +724,10 @@ export const ProgressHandlers = HttpApiBuilder.group(
             eq(UserUnitProgress.isDeleted, false),
           ];
           if (query.status) {
-            conditions.push(
-              eq(
-                UserUnitProgress.status,
-                query.status.toUpperCase() as typeof UserUnitProgress.$inferSelect.status,
-              ),
-            );
+            const upper = query.status.toUpperCase();
+            if (isProgressStatus(upper)) {
+              conditions.push(eq(UserUnitProgress.status, upper));
+            }
           }
 
           const where = and(...conditions);

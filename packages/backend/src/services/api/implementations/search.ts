@@ -229,15 +229,14 @@ export const SearchHandlers = HttpApiBuilder.group(
       )
 
       // ── Public search ─────────────────────────────────────────
-      .handle("searchContent", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "BOOK", q, limit, offset });
-      })
+      .handle("searchContent", ({ payload }) =>
+        searchUnitsByType({
+          type: "BOOK",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
       .handle("searchUsers", ({ query }) =>
         searchUsersQuery({
@@ -248,45 +247,37 @@ export const SearchHandlers = HttpApiBuilder.group(
         }),
       )
 
-      .handle("searchEntities", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "ENTITY", q, limit, offset });
-      })
+      .handle("searchEntities", ({ payload }) =>
+        searchUnitsByType({
+          type: "ENTITY",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
-      .handle("searchPosts", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "POST", q, limit, offset });
-      })
+      .handle("searchPosts", ({ payload }) =>
+        searchUnitsByType({
+          type: "POST",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
-      .handle("searchPolls", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "POLL", q, limit, offset });
-      })
+      .handle("searchPolls", ({ payload }) =>
+        searchUnitsByType({
+          type: "POLL",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
       .handle("searchComments", ({ payload }) => {
         // Comments use Comment table, not Unit+Translation. Return stub shape.
         // 评论使用 Comment 表，而非 Unit+Translation。返回占位结构。
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
+        const { q, limit, offset } = payload;
 
         return Effect.gen(function* () {
           // Comment.content is JSON; fall back to empty when no query
@@ -333,53 +324,45 @@ export const SearchHandlers = HttpApiBuilder.group(
         });
       })
 
-      .handle("searchRealms", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "REALM", q, limit, offset });
-      })
+      .handle("searchRealms", ({ payload }) =>
+        searchUnitsByType({
+          type: "REALM",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
-      .handle("searchZones", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "ZONE", q, limit, offset });
-      })
+      .handle("searchZones", ({ payload }) =>
+        searchUnitsByType({
+          type: "ZONE",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
-      .handle("searchTags", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "TAG", q, limit, offset });
-      })
+      .handle("searchTags", ({ payload }) =>
+        searchUnitsByType({
+          type: "TAG",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
-      .handle("searchLabels", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        const offset =
-          typeof body["offset"] === "number" ? body["offset"] : undefined;
-        return searchUnitsByType({ type: "LABEL", q, limit, offset });
-      })
+      .handle("searchLabels", ({ payload }) =>
+        searchUnitsByType({
+          type: "LABEL",
+          q: payload.q,
+          limit: payload.limit,
+          offset: payload.offset,
+        }),
+      )
 
-      .handle("searchFederated", ({ payload }) => {
-        const body = payload as Record<string, unknown>;
-        const q = typeof body["q"] === "string" ? body["q"] : undefined;
-        const limit =
-          typeof body["limit"] === "number" ? body["limit"] : undefined;
-        return federatedSearch({ q, limit });
-      })
+      .handle("searchFederated", ({ payload }) =>
+        federatedSearch({ q: payload.q, limit: payload.limit }),
+      )
 
       // ── Admin — index init (stubs) ───────────────────────────
       .handle("initContentIndex", () => adminStub("initContentIndex"))

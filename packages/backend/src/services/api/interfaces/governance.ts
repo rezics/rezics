@@ -4,13 +4,232 @@ import { HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
 import { AuthMiddleware, Unauthorized } from "./middlewares/auth.ts";
 
 // ---------------------------------------------------------------------------
-// Response schemas — minimal placeholders; flesh out when implementing handlers
-// 响应 schema —— 最小占位；实现 handler 时再细化
+// DTO schemas — typed representations of database rows returned by handlers
+// DTO schema —— handler 返回的数据库行的类型化表示
 // ---------------------------------------------------------------------------
 
-export class CapabilityHintsResult extends Schema.Class<CapabilityHintsResult>("CapabilityHintsResult")({
-  capabilities: Schema.Array(Schema.Any),
+/**
+ * Single capability hint entry (staff or realm grant).
+ * 单个能力提示条目（staff 或 realm 授权）。
+ */
+export class CapabilityHintEntry extends Schema.Class<CapabilityHintEntry>("CapabilityHintEntry")({
+  kind: Schema.String,
+  capability: Schema.String,
+  scopeKind: Schema.optional(Schema.String),
+  realmUnitId: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}
+
+export class CapabilityHintsResult extends Schema.Class<CapabilityHintsResult>("CapabilityHintsResult")({
+  capabilities: Schema.Array(CapabilityHintEntry),
+}) {}
+
+/**
+ * Realm capability grant row returned after grant/revoke.
+ * 授予/撤销后返回的 Realm 能力授权行。
+ */
+export class RealmCapabilityGrantDTO extends Schema.Class<RealmCapabilityGrantDTO>("RealmCapabilityGrantDTO")({
+  id: Schema.String,
+  realmUnitId: Schema.String,
+  userId: Schema.String,
+  capability: Schema.String,
+  state: Schema.String,
+  grantedById: Schema.String,
+  revokedById: Schema.NullOr(Schema.String),
+  expiresAt: Schema.NullOr(Schema.String),
+  revokedAt: Schema.NullOr(Schema.String),
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+}) {}
+
+/**
+ * Policy decision result.
+ * 策略决策结果。
+ */
+export class PolicyDecisionResult extends Schema.Class<PolicyDecisionResult>("PolicyDecisionResult")({
+  allowed: Schema.Boolean,
+  actor: Schema.String,
+  action: Schema.String,
+  grants: Schema.Array(Schema.String),
+}) {}
+
+/**
+ * Moderation action row.
+ * 审核动作行。
+ */
+export class ModerationActionDTO extends Schema.Class<ModerationActionDTO>("ModerationActionDTO")({
+  id: Schema.String,
+  authority: Schema.String,
+  realmUnitId: Schema.NullOr(Schema.String),
+  targetKind: Schema.String,
+  targetId: Schema.String,
+  targetPath: Schema.NullOr(Schema.String),
+  actorKind: Schema.String,
+  actorUserId: Schema.NullOr(Schema.String),
+  actionKind: Schema.String,
+  resultingStatus: Schema.NullOr(Schema.String),
+  resultingLocked: Schema.NullOr(Schema.Boolean),
+  reasonCode: Schema.String,
+  reasonText: Schema.NullOr(Schema.String),
+  publicMessage: Schema.NullOr(Schema.String),
+  caseId: Schema.NullOr(Schema.String),
+  reversesActionId: Schema.NullOr(Schema.String),
+  requestId: Schema.NullOr(Schema.String),
+  idempotencyKey: Schema.NullOr(Schema.String),
+  importedFrom: Schema.NullOr(Schema.String),
+  createdAt: Schema.String,
+}) {}
+
+/**
+ * Account enforcement row.
+ * 账户执行措施行。
+ */
+export class AccountEnforcementDTO extends Schema.Class<AccountEnforcementDTO>("AccountEnforcementDTO")({
+  id: Schema.String,
+  targetUserId: Schema.String,
+  kind: Schema.String,
+  state: Schema.String,
+  reason: Schema.String,
+  safeMessage: Schema.NullOr(Schema.String),
+  decidedById: Schema.String,
+  decisionCode: Schema.String,
+  startsAt: Schema.String,
+  expiresAt: Schema.NullOr(Schema.String),
+  revokedAt: Schema.NullOr(Schema.String),
+  revokedById: Schema.NullOr(Schema.String),
+  metadata: Schema.NullOr(Schema.Unknown),
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+  decisionActionId: Schema.NullOr(Schema.String),
+  revocationActionId: Schema.NullOr(Schema.String),
+}) {}
+
+/**
+ * Active enforcement summary.
+ * 活跃执行措施摘要。
+ */
+export class ActiveEnforcementResult extends Schema.Class<ActiveEnforcementResult>("ActiveEnforcementResult")({
+  targetUserId: Schema.String,
+  active: Schema.Array(AccountEnforcementDTO),
+  count: Schema.Number,
+}) {}
+
+/**
+ * Moderation case row.
+ * 审核案例行。
+ */
+export class ModerationCaseDTO extends Schema.Class<ModerationCaseDTO>("ModerationCaseDTO")({
+  id: Schema.String,
+  state: Schema.String,
+  severity: Schema.NullOr(Schema.String),
+  reporterUserId: Schema.NullOr(Schema.String),
+  subjectUserId: Schema.NullOr(Schema.String),
+  targetKind: Schema.String,
+  targetId: Schema.String,
+  addressedUnitId: Schema.NullOr(Schema.String),
+  realmUnitId: Schema.NullOr(Schema.String),
+  sourceFeedbackId: Schema.NullOr(Schema.String),
+  assignedToUserId: Schema.NullOr(Schema.String),
+  duplicateOfCaseId: Schema.NullOr(Schema.String),
+  reason: Schema.NullOr(Schema.String),
+  safeSummary: Schema.NullOr(Schema.String),
+  metadata: Schema.NullOr(Schema.Unknown),
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+  parentCaseId: Schema.NullOr(Schema.String),
+  scope: Schema.String,
+}) {}
+
+/**
+ * Staff audit log row.
+ * Staff 审计日志行。
+ */
+export class StaffAuditLogDTO extends Schema.Class<StaffAuditLogDTO>("StaffAuditLogDTO")({
+  id: Schema.String,
+  actorUserId: Schema.String,
+  action: Schema.String,
+  targetKind: Schema.String,
+  targetId: Schema.String,
+  decisionCode: Schema.String,
+  requestId: Schema.NullOr(Schema.String),
+  reason: Schema.String,
+  metadata: Schema.NullOr(Schema.Unknown),
+  createdAt: Schema.String,
+}) {}
+
+// ---------------------------------------------------------------------------
+// Payload schemas — typed request bodies for each endpoint
+// 请求体 schema —— 每个端点的类型化请求体
+// ---------------------------------------------------------------------------
+
+const GrantRealmCapabilityPayload = Schema.Struct({
+  capability: Schema.String,
+  reason: Schema.optional(Schema.String),
+});
+
+const PolicyDecidePayload = Schema.Struct({
+  action: Schema.optional(Schema.String),
+});
+
+const ModerationOverlaysPayload = Schema.Struct({
+  unitIds: Schema.Array(Schema.String),
+});
+
+const ApplyEnforcementPayload = Schema.Struct({
+  kind: Schema.optional(Schema.String),
+  reason: Schema.optional(Schema.String),
+  decisionCode: Schema.optional(Schema.String),
+  expiresAt: Schema.optional(Schema.String),
+  caseId: Schema.optional(Schema.String),
+  safeMessage: Schema.optional(Schema.String),
+  metadata: Schema.optional(Schema.Unknown),
+});
+
+const UnblockEnforcementPayload = Schema.Struct({
+  reason: Schema.optional(Schema.String),
+});
+
+const CreateCaseFromFeedbackPayload = Schema.Struct({
+  reason: Schema.optional(Schema.String),
+  severity: Schema.optional(Schema.String),
+});
+
+const DuplicateCasePayload = Schema.Struct({
+  duplicateOfCaseId: Schema.String,
+});
+
+const AssignCasePayload = Schema.Struct({
+  assignedToUserId: Schema.optional(Schema.String),
+});
+
+const TriageCasePayload = Schema.Struct({
+  severity: Schema.optional(Schema.String),
+  reason: Schema.optional(Schema.String),
+});
+
+const DecideCasePayload = Schema.Struct({
+  decisionCode: Schema.optional(Schema.String),
+  actionKind: Schema.optional(Schema.String),
+  reason: Schema.optional(Schema.String),
+});
+
+const AppealCasePayload = Schema.Struct({
+  reason: Schema.optional(Schema.String),
+  severity: Schema.optional(Schema.String),
+});
+
+const CreateRealmCasePayload = Schema.Struct({
+  targetKind: Schema.optional(Schema.String),
+  targetId: Schema.optional(Schema.String),
+  addressedUnitId: Schema.optional(Schema.String),
+  subjectUserId: Schema.optional(Schema.String),
+  reason: Schema.optional(Schema.String),
+  severity: Schema.optional(Schema.String),
+});
+
+const EscalateRealmCasePayload = Schema.Struct({
+  reason: Schema.optional(Schema.String),
+  severity: Schema.optional(Schema.String),
+});
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -79,8 +298,8 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 授予 Realm 成员能力
     HttpApiEndpoint.post("grantRealmCapability", "/realms/:realmUnitId/members/:userId/capabilities", {
       params: { realmUnitId: Schema.String, userId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: GrantRealmCapabilityPayload,
+      success: RealmCapabilityGrantDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
@@ -88,7 +307,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 撤销 Realm 成员能力
     HttpApiEndpoint.delete("revokeRealmCapability", "/realms/:realmUnitId/members/:userId/capabilities/:capability", {
       params: { realmUnitId: Schema.String, userId: Schema.String, capability: Schema.String },
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(RealmCapabilityGrantDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -98,8 +317,8 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // POST /governance/policy/decide — evaluate a governance policy decision
     // 评估治理策略决策
     HttpApiEndpoint.post("policyDecide", "/policy/decide", {
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: PolicyDecidePayload,
+      success: PolicyDecisionResult,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -111,15 +330,15 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.get("listModerationActions", "/moderation/:targetKind/:targetId/actions", {
       params: { targetKind: Schema.String, targetId: Schema.String },
       query: ListQuery,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     // POST /governance/moderation/overlays — read moderation overlays
     // 读取审核叠加层
     HttpApiEndpoint.post("listModerationOverlays", "/moderation/overlays", {
-      payload: Schema.Any,
-      success: Schema.Array(Schema.Any),
+      payload: ModerationOverlaysPayload,
+      success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -129,21 +348,21 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.post("contentApprove", "/content/:targetUnitId/approve", {
       params: { targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("contentRemove", "/content/:targetUnitId/remove", {
       params: { targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("contentRestore", "/content/:targetUnitId/restore", {
       params: { targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -153,42 +372,42 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.post("realmContentApprove", "/realms/:realmUnitId/content/:targetUnitId/approve", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Any,
+      success: ModerationActionDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentRemove", "/realms/:realmUnitId/content/:targetUnitId/remove", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Any,
+      success: ModerationActionDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentRestore", "/realms/:realmUnitId/content/:targetUnitId/restore", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Any,
+      success: ModerationActionDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentLock", "/realms/:realmUnitId/content/:targetUnitId/lock", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Any,
+      success: ModerationActionDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentUnlock", "/realms/:realmUnitId/content/:targetUnitId/unlock", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Any,
+      success: ModerationActionDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("realmContentOwnerDelegation", "/realms/:realmUnitId/content/:targetUnitId/owner-delegation", {
       params: { realmUnitId: Schema.String, targetUnitId: Schema.String },
       payload: ContentModerationBody,
-      success: Schema.Any,
+      success: ModerationActionDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -199,7 +418,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 获取活跃执行措施摘要
     HttpApiEndpoint.get("getActiveEnforcement", "/enforcement/:targetUserId/active", {
       params: { targetUserId: Schema.String },
-      success: Schema.Any,
+      success: ActiveEnforcementResult,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
@@ -208,7 +427,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.get("listEnforcements", "/enforcement/:targetUserId", {
       params: { targetUserId: Schema.String },
       query: ListQuery,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(AccountEnforcementDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
@@ -216,8 +435,8 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 应用执行措施
     HttpApiEndpoint.post("applyEnforcement", "/enforcement/:targetUserId", {
       params: { targetUserId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: ApplyEnforcementPayload,
+      success: AccountEnforcementDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
@@ -225,8 +444,8 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 解除账户封禁
     HttpApiEndpoint.post("unblockEnforcement", "/enforcement/:targetUserId/unblock", {
       params: { targetUserId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Array(Schema.Any),
+      payload: UnblockEnforcementPayload,
+      success: Schema.Array(AccountEnforcementDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -235,62 +454,62 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
   .add(
     HttpApiEndpoint.get("listCases", "/cases", {
       query: ListQuery,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationCaseDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.get("getCase", "/cases/:caseId", {
       params: { caseId: Schema.String },
-      success: Schema.Any,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.get("listCaseActions", "/cases/:caseId/actions", {
       params: { caseId: Schema.String },
       query: ListQuery,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("createCaseFromFeedback", "/cases/from-feedback/:feedbackId", {
       params: { feedbackId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: CreateCaseFromFeedbackPayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("duplicateCase", "/cases/:caseId/duplicate", {
       params: { caseId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: DuplicateCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("assignCase", "/cases/:caseId/assign", {
       params: { caseId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: AssignCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("triageCase", "/cases/:caseId/triage", {
       params: { caseId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: TriageCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("decideCase", "/cases/:caseId/decision", {
       params: { caseId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: DecideCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("appealCase", "/cases/:caseId/appeal", {
       params: { caseId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: AppealCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -300,42 +519,42 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     HttpApiEndpoint.get("listRealmCases", "/realms/:realmUnitId/cases", {
       params: { realmUnitId: Schema.String },
       query: ListQuery,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationCaseDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("createRealmCase", "/realms/:realmUnitId/cases", {
       params: { realmUnitId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: CreateRealmCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("createRealmCaseFromFeedback", "/realms/:realmUnitId/cases/from-feedback/:feedbackId", {
       params: { realmUnitId: Schema.String, feedbackId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: CreateCaseFromFeedbackPayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.get("listRealmCaseActions", "/realms/:realmUnitId/cases/:caseId/actions", {
       params: { realmUnitId: Schema.String, caseId: Schema.String },
       query: ListQuery,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(ModerationActionDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("decideRealmCase", "/realms/:realmUnitId/cases/:caseId/decision", {
       params: { realmUnitId: Schema.String, caseId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: DecideCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
     HttpApiEndpoint.post("escalateRealmCase", "/realms/:realmUnitId/cases/:caseId/escalate", {
       params: { realmUnitId: Schema.String, caseId: Schema.String },
-      payload: Schema.Any,
-      success: Schema.Any,
+      payload: EscalateRealmCasePayload,
+      success: ModerationCaseDTO,
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
   )
@@ -346,7 +565,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 列出审计记录
     HttpApiEndpoint.get("listAuditLogs", "/audit", {
       query: AuditListQuery,
-      success: Schema.Array(Schema.Any),
+      success: Schema.Array(StaffAuditLogDTO),
       error: [Unauthorized, GovernanceForbidden],
     }).middleware(AuthMiddleware),
 
@@ -354,7 +573,7 @@ export class GovernanceGroup extends HttpApiGroup.make("governance")
     // 读取单条审计记录
     HttpApiEndpoint.get("getAuditLog", "/audit/:auditLogId", {
       params: { auditLogId: Schema.String },
-      success: Schema.Any,
+      success: StaffAuditLogDTO,
       error: [Unauthorized, GovernanceForbidden, GovernanceNotFound],
     }).middleware(AuthMiddleware),
   )

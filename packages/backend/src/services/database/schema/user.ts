@@ -41,7 +41,8 @@ const NOTIFICATION_PREFERENCE_KEYS = [
 function pgEnumValues<T extends string>(
   values: readonly [T, ...T[]],
 ): [T, ...T[]] {
-  return [...values] as [T, ...T[]];
+  const [first, ...rest] = values;
+  return [first, ...rest];
 }
 
 export const UserSubscriptionListPreferenceKind = pgEnum(

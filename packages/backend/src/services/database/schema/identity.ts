@@ -47,7 +47,7 @@ export const User = pgTable(
      */
     description: jsonData(),
     joinDate: nullableTimestamp(),
-    permission: jsonData(),
+    permission: jsonData<{ role?: string } | null>(),
     followersCount: integer().default(0).notNull(),
     followingsCount: integer().default(0).notNull(),
     extra: jsonData(),
@@ -75,7 +75,7 @@ export const ApiToken = pgTable(
       }),
     name: text().notNull(),
     tokenHash: text().notNull(),
-    scopes: jsonData().default({}).notNull(),
+    scopes: jsonData<Record<string, unknown>>().default({}).notNull(),
     createdAt: createdAt(),
     expiresAt: nullableTimestamp(),
     lastUsedAt: nullableTimestamp(),

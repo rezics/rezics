@@ -101,7 +101,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             .from(UnitTranslation)
             .where(eq(UnitTranslation.unitId, unitId))
             .limit(1);
-        return { unit: rows[0].Unit, realm: rows[0].Realm, title: (trans[0]?.title as string) ?? null };
+        return { unit: rows[0].Unit, realm: rows[0].Realm, title: trans[0]?.title ?? null };
       });
 
     // Shared helper: require realm exists or yield RealmNotFound
@@ -167,7 +167,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
             deduped.push(row);
           }
         }
-        return deduped.map((r) => realmToDTO(r.Unit, (r.title as string) ?? null));
+        return deduped.map((r) => realmToDTO(r.Unit, r.title ?? null));
       });
 
     return handlers
@@ -205,7 +205,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
               .from(UnitTranslation)
               .where(eq(UnitTranslation.unitId, rows[0].Unit.id))
               .limit(1);
-          return realmToDTO(rows[0].Unit, (trans[0]?.title as string) ?? null);
+          return realmToDTO(rows[0].Unit, trans[0]?.title ?? null);
         }),
       )
 
@@ -250,7 +250,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
               deduped.push(row);
             }
           }
-          return deduped.map((r) => realmToDTO(r.Unit, (r.title as string) ?? null));
+          return deduped.map((r) => realmToDTO(r.Unit, r.title ?? null));
         }),
       )
 
@@ -285,7 +285,7 @@ export const RealmsHandlers = HttpApiBuilder.group(
               deduped.push(row);
             }
           }
-          return deduped.map((r) => realmToDTO(r.Unit, (r.title as string) ?? null));
+          return deduped.map((r) => realmToDTO(r.Unit, r.title ?? null));
         }),
       )
 

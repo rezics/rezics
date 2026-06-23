@@ -183,7 +183,7 @@ export const ContentHandlers = HttpApiBuilder.group(
             // Plan submitted tree into flat node list
             // 将提交的树规划为扁平节点列表
             const planned = flattenSubmittedTree(
-              submittedTree as unknown[],
+              submittedTree,
               null,
               existingActive,
               deletedById,
@@ -702,6 +702,14 @@ export const ContentHandlers = HttpApiBuilder.group(
 // ---------------------------------------------------------------------------
 
 /**
+ * Type-guard: is the value a non-null, non-array object suitable for property access?
+ * 类型守卫：值是否为非 null、非数组的对象，可安全访问属性？
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
  * Deduplicate and cap a list of IDs (max 100).
  * 去重并限制 ID 列表（最多 100 个）。
  */
@@ -723,10 +731,9 @@ function flattenSubmittedTree(
   const out: PlannedNode[] = [];
 
   for (const [i, raw] of siblings.entries()) {
-    const node = raw as Record<string, unknown> | undefined;
-    if (!node || typeof node !== "object") continue;
+    if (!isRecord(raw)) continue;
 
-    const rawId = node["id"];
+    const rawId = raw["id"];
     const nodeId =
       typeof rawId === "string" && rawId ? rawId : crypto.randomUUID();
 
@@ -740,22 +747,22 @@ function flattenSubmittedTree(
     const position =
       existing?.parentId === parentId ? existing.position : generatePosition(i);
 
-    const rawTitle = node["title"];
-    const rawRating = node["rating"];
-    const rawContentUnitId = node["contentUnitId"];
+    const rawTitle = raw["title"];
+    const rawRating = raw["rating"];
+    const rawContentUnitId = raw["contentUnitId"];
 
     out.push({
       id: nodeId,
       parentId,
       position,
       title: typeof rawTitle === "string" ? rawTitle : "",
-      noContent: node["noContent"] === true,
+      noContent: raw["noContent"] === true,
       rating: isValidRating(rawRating) ? rawRating : null,
       contentUnitId:
         typeof rawContentUnitId === "string" ? rawContentUnitId : null,
     });
 
-    const children = node["children"];
+    const children = raw["children"];
     if (Array.isArray(children) && children.length > 0) {
       out.push(
         ...flattenSubmittedTree(children, nodeId, existingActive, deletedById),

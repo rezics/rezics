@@ -50,8 +50,8 @@ function bookToDTO(
     slug: unit.slug ?? null,
     status: unit.status,
     visibility: unit.visibility,
-    isbn13: (book.isbn13 as string) ?? null,
-    pageCount: (book.pageCount as number) ?? null,
+    isbn13: book.isbn13 ?? null,
+    pageCount: book.pageCount ?? null,
     textLength: book.textLength,
     chapterCount: book.chapterCount,
     createdAt: unit.createdAt.toISOString(),
@@ -62,9 +62,9 @@ function bookToDTO(
 function nodeToDTO(n: typeof ContentStructureNode.$inferSelect) {
   return new ContentStructureNodeDTO({
     id: n.id,
-    parentId: (n.parentId as string) ?? null,
+    parentId: n.parentId ?? null,
     position: n.position,
-    contentUnitId: (n.contentUnitId as string) ?? null,
+    contentUnitId: n.contentUnitId ?? null,
     title: n.title,
     noContent: n.noContent,
   });
@@ -93,7 +93,7 @@ export const BooksHandlers = HttpApiBuilder.group(
 
     const listBooksShared = (opts: {
       userId?: string;
-      status?: string;
+      status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" | "DELETED";
       search?: string;
       ids?: readonly string[];
       limit?: number;
@@ -103,12 +103,7 @@ export const BooksHandlers = HttpApiBuilder.group(
         const conditions: ReturnType<typeof eq>[] = [eq(Unit.type, "BOOK")];
         if (opts.userId) conditions.push(eq(Unit.userId, opts.userId));
         if (opts.status)
-          conditions.push(
-            eq(
-              Unit.status,
-              opts.status as (typeof Unit.status.enumValues)[number],
-            ),
-          );
+          conditions.push(eq(Unit.status, opts.status));
         if (opts.ids && opts.ids.length > 0)
           conditions.push(inArray(Book.unitId, [...opts.ids]));
         if (opts.search) conditions.push(ilike(Unit.slug, `%${opts.search}%`));
@@ -154,9 +149,7 @@ export const BooksHandlers = HttpApiBuilder.group(
                 userId: user.id,
                 slugScope: user.id,
                 defaultLanguage: lang,
-                status:
-                  (payload.status as (typeof Unit.$inferInsert)["status"]) ??
-                  "DRAFT",
+                status: payload.status ?? "DRAFT",
                 visibility: "PUBLIC",
               })
               .returning();
@@ -190,7 +183,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             const row = yield* fetchBook(params.unitId);
             if (!row) return yield* new BookNotFound();
             if (row.Unit.userId !== user.id) return yield* new BookForbidden();
-            const patch = payload.patch as Record<string, unknown>;
+            const patch = payload.patch;
             const unitSet: Record<string, unknown> = { updatedAt: new Date() };
             const bookSet: Record<string, unknown> = { updatedAt: new Date() };
             if ("status" in patch) unitSet["status"] = patch["status"];
@@ -275,20 +268,12 @@ export const BooksHandlers = HttpApiBuilder.group(
             const row = yield* fetchBook(params.unitId);
             if (!row) return yield* new BookNotFound();
             if (row.Unit.userId !== user.id) return yield* new BookForbidden();
-            const incoming = payload as Array<{
-              id?: string;
-              parentId?: string | null;
-              position: string;
-              title: string;
-              noContent?: boolean;
-              contentUnitId?: string | null;
-            }>;
             yield* database
               .delete(ContentStructureNode)
               .where(eq(ContentStructureNode.ownerUnitId, params.unitId));
-            if (incoming.length > 0) {
+            if (payload.length > 0) {
               yield* database.insert(ContentStructureNode).values(
-                incoming.map((n) => ({
+                payload.map((n) => ({
                   id: n.id,
                   ownerUnitId: params.unitId,
                   parentId: n.parentId ?? null,
@@ -365,10 +350,10 @@ export const BooksHandlers = HttpApiBuilder.group(
               );
             return new ChapterDTO({
               unitId: unit.id,
-              title: (trans[0]?.title as string) ?? "",
+              title: trans[0]?.title ?? "",
               content: ct[0] ? JSON.stringify(ct[0].content) : null,
               status: unit.status,
-              targetUnitId: (unit.targetUnitId as string) ?? null,
+              targetUnitId: unit.targetUnitId ?? null,
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
@@ -386,9 +371,7 @@ export const BooksHandlers = HttpApiBuilder.group(
                 userId: user.id,
                 slugScope: user.id,
                 defaultLanguage: lang,
-                status:
-                  (payload.status as (typeof Unit.$inferInsert)["status"]) ??
-                  "DRAFT",
+                status: payload.status ?? "DRAFT",
                 targetUnitId: payload.targetUnitId,
               })
               .returning();
@@ -413,7 +396,7 @@ export const BooksHandlers = HttpApiBuilder.group(
               title: payload.title,
               content: payload.content ?? null,
               status: unit.status,
-              targetUnitId: (unit.targetUnitId as string) ?? null,
+              targetUnitId: unit.targetUnitId ?? null,
               createdAt: unit.createdAt.toISOString(),
               updatedAt: unit.updatedAt.toISOString(),
             });
@@ -434,11 +417,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             if (payload.status) {
               yield* database
                 .update(Unit)
-                .set({
-                  status:
-                    payload.status as (typeof Unit.$inferInsert)["status"],
-                  updatedAt: new Date(),
-                })
+                .set({ status: payload.status, updatedAt: new Date() })
                 .where(eq(Unit.id, params.unitId));
             }
             const transSet: Record<string, unknown> = { updatedAt: new Date() };
@@ -499,10 +478,10 @@ export const BooksHandlers = HttpApiBuilder.group(
               );
             return new ChapterDTO({
               unitId: updated[0]!.id,
-              title: (trans[0]?.title as string) ?? "",
+              title: trans[0]?.title ?? "",
               content: ct[0] ? JSON.stringify(ct[0].content) : null,
               status: updated[0]!.status,
-              targetUnitId: (updated[0]!.targetUnitId as string) ?? null,
+              targetUnitId: updated[0]!.targetUnitId ?? null,
               createdAt: updated[0]!.createdAt.toISOString(),
               updatedAt: updated[0]!.updatedAt.toISOString(),
             });
@@ -680,11 +659,7 @@ export const BooksHandlers = HttpApiBuilder.group(
             if (payload.status) {
               yield* database
                 .update(Unit)
-                .set({
-                  status:
-                    payload.status as (typeof Unit.$inferInsert)["status"],
-                  updatedAt: new Date(),
-                })
+                .set({ status: payload.status, updatedAt: new Date() })
                 .where(eq(Unit.id, params.unitId));
             }
             const updated = yield* database
@@ -713,20 +688,12 @@ export const BooksHandlers = HttpApiBuilder.group(
               return yield* new SeriesNotFound();
             if (units[0].userId !== user.id)
               return yield* new SeriesForbidden();
-            const incoming = payload as Array<{
-              id?: string;
-              parentId?: string | null;
-              position: string;
-              title: string;
-              noContent?: boolean;
-              contentUnitId?: string | null;
-            }>;
             yield* database
               .delete(ContentStructureNode)
               .where(eq(ContentStructureNode.ownerUnitId, params.unitId));
-            if (incoming.length > 0) {
+            if (payload.length > 0) {
               yield* database.insert(ContentStructureNode).values(
-                incoming.map((n) => ({
+                payload.map((n) => ({
                   id: n.id,
                   ownerUnitId: params.unitId,
                   parentId: n.parentId ?? null,
@@ -775,8 +742,7 @@ export const BooksHandlers = HttpApiBuilder.group(
                 (r) =>
                   new SeriesContentIndexRow({
                     nodeId: r.ContentStructureNode.id,
-                    contentUnitId:
-                      (r.ContentStructureNode.contentUnitId as string) ?? null,
+                    contentUnitId: r.ContentStructureNode.contentUnitId ?? null,
                     position: r.ContentStructureNode.position,
                     title: r.ContentStructureNode.title,
                   }),

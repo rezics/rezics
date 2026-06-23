@@ -175,7 +175,7 @@ export class BooksGroup extends HttpApiGroup.make("books")
         isbn13: Schema.optional(Schema.String),
         pageCount: Schema.optional(Schema.Number),
         coverUrl: Schema.optional(Schema.NullOr(Schema.String)),
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"])),
       }),
       success: BookDTO,
       error: HttpApiError.InternalServerError,
@@ -224,7 +224,14 @@ export class BooksGroup extends HttpApiGroup.make("books")
     // 更新内容结构
     HttpApiEndpoint.put("updateBookContentStructure", "/book/:unitId/content-structure", {
       params: { unitId: Schema.String },
-      payload: Schema.Unknown,
+      payload: Schema.Array(Schema.Struct({
+        id: Schema.optional(Schema.String),
+        parentId: Schema.optional(Schema.NullOr(Schema.String)),
+        position: Schema.String,
+        title: Schema.String,
+        noContent: Schema.optional(Schema.Boolean),
+        contentUnitId: Schema.optional(Schema.NullOr(Schema.String)),
+      })),
       success: ContentStructureDTO,
       error: [BookNotFound, BookForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),
@@ -236,7 +243,7 @@ export class BooksGroup extends HttpApiGroup.make("books")
     HttpApiEndpoint.get("listBooks", "/book/list", {
       query: {
         userId: Schema.optional(Schema.String),
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"])),
         search: Schema.optional(Schema.String),
         languages: Schema.optional(Schema.String),
         appLocale: Schema.optional(Schema.String),
@@ -252,7 +259,7 @@ export class BooksGroup extends HttpApiGroup.make("books")
     HttpApiEndpoint.post("listBooksByBody", "/book/list", {
       payload: Schema.Struct({
         userId: Schema.optional(Schema.String),
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"])),
         search: Schema.optional(Schema.String),
         ids: Schema.optional(Schema.Array(Schema.String)),
         languages: Schema.optional(Schema.String),
@@ -283,7 +290,7 @@ export class BooksGroup extends HttpApiGroup.make("books")
         content: Schema.optional(Schema.NullOr(Schema.String)),
         targetUnitId: Schema.optional(Schema.String),
         coverUrl: Schema.optional(Schema.NullOr(Schema.String)),
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"])),
       }),
       success: ChapterDTO,
       error: HttpApiError.InternalServerError,
@@ -297,7 +304,7 @@ export class BooksGroup extends HttpApiGroup.make("books")
         title: Schema.optional(Schema.String),
         content: Schema.optional(Schema.NullOr(Schema.String)),
         coverUrl: Schema.optional(Schema.NullOr(Schema.String)),
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"])),
       }),
       success: ChapterDTO,
       error: [ChapterNotFound, ChapterForbidden, HttpApiError.InternalServerError],
@@ -350,7 +357,7 @@ export class BooksGroup extends HttpApiGroup.make("books")
       params: { unitId: Schema.String },
       payload: Schema.Struct({
         title: Schema.optional(Schema.String),
-        status: Schema.optional(Schema.String),
+        status: Schema.optional(Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"])),
       }),
       success: SeriesDTO,
       error: [SeriesNotFound, SeriesForbidden, HttpApiError.InternalServerError],
@@ -360,7 +367,14 @@ export class BooksGroup extends HttpApiGroup.make("books")
     // 更新系列内容结构
     HttpApiEndpoint.put("updateSeriesContentStructure", "/series-unit/:unitId/content-structure", {
       params: { unitId: Schema.String },
-      payload: Schema.Array(Schema.Unknown),
+      payload: Schema.Array(Schema.Struct({
+        id: Schema.optional(Schema.String),
+        parentId: Schema.optional(Schema.NullOr(Schema.String)),
+        position: Schema.String,
+        title: Schema.String,
+        noContent: Schema.optional(Schema.Boolean),
+        contentUnitId: Schema.optional(Schema.NullOr(Schema.String)),
+      })),
       success: ContentStructureDTO,
       error: [SeriesNotFound, SeriesForbidden, HttpApiError.InternalServerError],
     }).middleware(AuthMiddleware),

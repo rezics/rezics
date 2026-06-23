@@ -10,6 +10,28 @@ import {
 } from "drizzle-orm/pg-core";
 import { createdAt, jsonData, updatedAt, uuidv7PrimaryKey } from "./columns.ts";
 
+/**
+ * Per-bucket vote distribution: key = string-ified score, value = count.
+ * 每桶投票分布：key = 字符串化的分数，value = 计数。
+ */
+export type ScoreDistribution = Record<string, number>;
+
+/**
+ * Per-field aggregate: total sum, count, and distribution.
+ * 每字段聚合：总和、计数和分布。
+ */
+export interface ScoreFieldAggregate {
+  total: number;
+  count: number;
+  dist: ScoreDistribution;
+}
+
+/**
+ * Map of field key to its aggregate.
+ * 字段键到其聚合的映射。
+ */
+export type ScoreFieldsAggregate = Record<string, ScoreFieldAggregate>;
+
 export const ScoreAggregate = pgTable(
   "ScoreAggregate",
   {
@@ -17,8 +39,8 @@ export const ScoreAggregate = pgTable(
     realm: uuid().notNull(),
     totalScore: integer().default(0).notNull(),
     totalCount: integer().default(0).notNull(),
-    distribution: jsonData().notNull(),
-    fields: jsonData(),
+    distribution: jsonData<ScoreDistribution>().notNull(),
+    fields: jsonData<ScoreFieldsAggregate | null>(),
     updatedAt: updatedAt(),
   },
   (table) => [
@@ -37,7 +59,7 @@ export const ScoreEntry = pgTable(
     unitId: uuid().notNull(),
     realm: uuid().notNull(),
     value: integer().notNull(),
-    fields: jsonData(),
+    fields: jsonData<Record<string, number> | null>(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

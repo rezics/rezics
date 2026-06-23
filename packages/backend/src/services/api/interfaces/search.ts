@@ -50,7 +50,11 @@ export class SearchGroup extends HttpApiGroup.make("search")
     // POST /meili/content/search — unified content search
     // 统一内容搜索
     HttpApiEndpoint.post("searchContent", "/content/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
@@ -70,63 +74,98 @@ export class SearchGroup extends HttpApiGroup.make("search")
     // POST /meili/entities/search — entity search
     // 实体搜索
     HttpApiEndpoint.post("searchEntities", "/entities/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/posts/search — post search
     // 帖子搜索
     HttpApiEndpoint.post("searchPosts", "/posts/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/polls/search — poll search
     // 投票搜索
     HttpApiEndpoint.post("searchPolls", "/polls/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/comments/search — comment search
     // 评论搜索
     HttpApiEndpoint.post("searchComments", "/comments/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/realms/search — realm search
     // Realm 搜索
     HttpApiEndpoint.post("searchRealms", "/realms/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/zones/search — zone search
     // 专区搜索
     HttpApiEndpoint.post("searchZones", "/zones/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/tags/search — tag search
     // 标签搜索
     HttpApiEndpoint.post("searchTags", "/tags/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/labels/search — label search
     // 标签项搜索
     HttpApiEndpoint.post("searchLabels", "/labels/search", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+        offset: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }),
 
     // POST /meili/search/federated — federated cross-index search
     // 跨索引联邦搜索
     HttpApiEndpoint.post("searchFederated", "/search/federated", {
-      payload: Schema.Any,
+      payload: Schema.Struct({
+        q: Schema.optional(Schema.String),
+        limit: Schema.optional(Schema.Number),
+      }),
       success: Schema.Any,
     }).middleware(OptionalAuthMiddleware),
   )

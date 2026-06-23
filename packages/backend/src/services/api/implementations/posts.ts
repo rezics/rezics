@@ -8,6 +8,8 @@ import {
   CommentPromotion,
   ContentTranslation,
   Post,
+  PostKind,
+  PinKind,
   Unit,
   UnitRealm,
   UnitTranslation,
@@ -15,6 +17,26 @@ import {
 import { Api } from "../interfaces/index.ts";
 import { CurrentUser } from "../interfaces/middlewares/auth.ts";
 import { ModerationOverlayResult, PostDTO, PostForbidden, PostListResult, PostNotFound } from "../interfaces/posts.ts";
+
+// ---------------------------------------------------------------------------
+// Type guards / 类型守卫
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if a string is included in a readonly enum tuple.
+ * 检查字符串是否包含在只读枚举元组中。
+ */
+function enumIncludes<T extends string>(values: readonly T[], candidate: string): candidate is T {
+  return new Set<string>(values).has(candidate);
+}
+
+function isPostKind(raw: string | undefined): raw is (typeof PostKind.enumValues)[number] {
+  return typeof raw === "string" && enumIncludes(PostKind.enumValues, raw);
+}
+
+function isPinKind(raw: string | undefined): raw is (typeof PinKind.enumValues)[number] {
+  return typeof raw === "string" && enumIncludes(PinKind.enumValues, raw);
+}
 
 // ---------------------------------------------------------------------------
 // Mappers / 映射函数
@@ -36,8 +58,8 @@ function postToDTO(
     isLocked: post.isLocked,
     state: post.state ?? null,
     variantUnitId: post.variantUnitId ?? null,
-    title: (translation?.title as string) ?? null,
-    summary: (translation?.summary as string) ?? null,
+    title: translation?.title ?? null,
+    summary: translation?.summary ?? null,
     content: content?.content ?? null,
     slug: unit.slug ?? null,
     status: unit.status,
@@ -104,7 +126,7 @@ export const PostsHandlers = HttpApiBuilder.group(
           yield* database.insert(Post).values({
               unitId: unit.id,
               authorUserId: user.id,
-              kind: (payload.kind as (typeof Post.$inferInsert)["kind"]) ?? "POST",
+              kind: isPostKind(payload.kind) ? payload.kind : "POST",
               variantUnitId: payload.variantUnitId ?? undefined,
             });
 
@@ -193,7 +215,7 @@ export const PostsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const conditions: ReturnType<typeof eq>[] = [];
           if (query.authorUserId) conditions.push(eq(Post.authorUserId, query.authorUserId));
-          if (query.kind) conditions.push(eq(Post.kind, query.kind as (typeof Post.kind.enumValues)[number]));
+          if (query.kind && isPostKind(query.kind)) conditions.push(eq(Post.kind, query.kind));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
           const rows = yield* database
@@ -229,7 +251,7 @@ export const PostsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const conditions: ReturnType<typeof eq>[] = [];
           if (payload.authorUserId) conditions.push(eq(Post.authorUserId, payload.authorUserId));
-          if (payload.kind) conditions.push(eq(Post.kind, payload.kind as (typeof Post.kind.enumValues)[number]));
+          if (payload.kind && isPostKind(payload.kind)) conditions.push(eq(Post.kind, payload.kind));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
           const rows = yield* database
@@ -328,7 +350,7 @@ export const PostsHandlers = HttpApiBuilder.group(
               .values({
                 scopeUnitId: payload.unitId,
                 commentId: payload.unitId,
-                kind: (payload.kind as (typeof CommentPromotion.$inferInsert)["kind"]) ?? "PINNED",
+                kind: isPinKind(payload.kind) ? payload.kind : "PINNED",
                 position: "V",
                 byUserId: user.id,
               })

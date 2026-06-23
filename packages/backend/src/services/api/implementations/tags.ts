@@ -273,13 +273,13 @@ export const TagsHandlers = HttpApiBuilder.group(
             .split(",")
             .map((s) => s.trim())
             .filter(Boolean);
-          if (unitIds.length === 0) return {} as Record<string, BatchTagTranslationEntry>;
+          if (unitIds.length === 0) return {} satisfies Record<string, BatchTagTranslationEntry>;
 
           const language = query.lang ?? "en";
 
           // Fetch tag units / 获取标签 unit
           const tagUnits = yield* database.select().from(Unit).where(and(inArray(Unit.id, unitIds), eq(Unit.type, "TAG")));
-          if (tagUnits.length === 0) return {} as Record<string, BatchTagTranslationEntry>;
+          if (tagUnits.length === 0) return {} satisfies Record<string, BatchTagTranslationEntry>;
 
           const tagIds = tagUnits.map((t) => t.id);
           const translations = yield* database
@@ -886,7 +886,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
               .values({
                 ruleId: params.ruleId,
                 unitId: payload.unitId,
-                position: (payload.position as string | undefined) ?? null,
+                position: payload.position ?? null,
                 metadata: payload.metadata ?? null,
                 appliedByUserId: user.id,
                 updatedByUserId: user.id,
@@ -895,7 +895,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
               .onConflictDoUpdate({
                 target: [PolicyTagApplication.ruleId, PolicyTagApplication.unitId],
                 set: {
-                  position: (payload.position as string | undefined) ?? null,
+                  position: payload.position ?? null,
                   metadata: payload.metadata ?? null,
                   updatedByUserId: user.id,
                   updatedAt: new Date(),
@@ -1035,7 +1035,7 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
           // Look up before/after positions for fractional index generation
           // 查找前后位置以生成分数索引
           const getPosition = (tagUnitId: string | null | undefined) => {
-            if (!tagUnitId) return Effect.succeed(null as string | null);
+            if (!tagUnitId) return Effect.succeed<string | null>(null);
             return Effect.map(
               database
                   .select({ position: UserTagApplication.position })

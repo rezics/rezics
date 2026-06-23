@@ -142,7 +142,11 @@ export class UnitsGroup extends HttpApiGroup.make("units")
     // 创建 Unit
     HttpApiEndpoint.post("createUnit", "/unit", {
       payload: Schema.Struct({
-        type: Schema.String,
+        type: Schema.Literals([
+          "BOOK", "GAME", "MEDIA", "POST", "TAG", "REALM", "SHELF",
+          "IMAGE", "VIDEO", "QUOTE", "LINK", "ENTITY", "ZONE", "USER",
+          "SCOPE", "SERIES", "LABEL", "POLL", "COMMENT",
+        ]),
         defaultLanguage: Schema.optional(Schema.String),
         slug: Schema.optional(Schema.String),
       }),
@@ -178,9 +182,19 @@ export class UnitsGroup extends HttpApiGroup.make("units")
     // 列出 Unit（body 过滤，管理员限定）
     HttpApiEndpoint.post("listUnits", "/unit/list", {
       payload: Schema.Struct({
-        type: Schema.optional(Schema.String),
-        status: Schema.optional(Schema.String),
-        visibility: Schema.optional(Schema.String),
+        type: Schema.optional(
+          Schema.Literals([
+            "BOOK", "GAME", "MEDIA", "POST", "TAG", "REALM", "SHELF",
+            "IMAGE", "VIDEO", "QUOTE", "LINK", "ENTITY", "ZONE", "USER",
+            "SCOPE", "SERIES", "LABEL", "POLL", "COMMENT",
+          ]),
+        ),
+        status: Schema.optional(
+          Schema.Literals(["DRAFT", "PUBLISHED", "ARCHIVED", "DELETED"]),
+        ),
+        visibility: Schema.optional(
+          Schema.Literals(["PUBLIC", "UNLISTED", "PRIVATE"]),
+        ),
         userId: Schema.optional(Schema.String),
         ids: Schema.optional(Schema.Array(Schema.String)),
         search: Schema.optional(Schema.String),

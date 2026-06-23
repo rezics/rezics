@@ -66,7 +66,7 @@ export class ScoresGroup extends HttpApiGroup.make("scores")
         unitId: Schema.String,
         realm: Schema.String,
         value: Schema.Number,
-        fields: Schema.optional(Schema.Unknown),
+        fields: Schema.optional(Schema.Record(Schema.String, Schema.Number)),
       }),
       success: ScoreEntryResult,
       error: HttpApiError.InternalServerError,

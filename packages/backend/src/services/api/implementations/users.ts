@@ -16,6 +16,28 @@ import {
 } from "../interfaces/users.ts";
 
 // ---------------------------------------------------------------------------
+// Helpers / 辅助函数
+// ---------------------------------------------------------------------------
+
+/**
+ * Type-guard: is the value a non-null, non-array object usable as a property bag?
+ * 类型守卫：值是否为非 null、非数组对象，可用作属性包？
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Safely treat an unknown payload as a string-keyed record for property inspection.
+ * Effect Schema.Any payloads are pre-validated objects at runtime.
+ * 将未知 payload 安全视为字符串键 record 以进行属性检查。
+ * Effect Schema.Any payload 在运行时已是预验证的对象。
+ */
+function toRecord(value: unknown): Record<string, unknown> {
+  return isRecord(value) ? value : {};
+}
+
+// ---------------------------------------------------------------------------
 // Mappers — convert DB rows to DTOs
 // 映射函数 —— 将 DB 行转换为 DTO
 // ---------------------------------------------------------------------------
@@ -153,7 +175,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           const currentUser = yield* CurrentUser;
           const row = yield* fetchUserByAuthId(currentUser.id);
           if (!row) return yield* new HttpApiError.InternalServerError();
-          const patch = payload as Record<string, unknown>;
+          const patch = toRecord(payload);
           const userSet: Record<string, unknown> = { updatedAt: new Date() };
           if ("name" in patch) userSet["name"] = patch["name"];
           if ("avatar" in patch) userSet["avatar"] = patch["avatar"];
@@ -259,15 +281,19 @@ export const UsersHandlers = HttpApiBuilder.group(
           const row = yield* fetchUserByAuthId(currentUser.id);
           if (!row) return yield* new HttpApiError.InternalServerError();
           const userId = row.User.unitId;
-          const patch = payload as Record<string, unknown>;
+          const patch = toRecord(payload);
           const set: typeof UserPreference.$inferInsert = {
             userId,
             updatedAt: new Date(),
           };
-          if ("defaultLicenseSlug" in patch)
-            set.defaultLicenseSlug = patch["defaultLicenseSlug"] as string | null;
-          if ("realmManageModeDefault" in patch)
-            set.realmManageModeDefault = patch["realmManageModeDefault"] as boolean | null;
+          if ("defaultLicenseSlug" in patch) {
+            const v = patch["defaultLicenseSlug"];
+            set.defaultLicenseSlug = typeof v === "string" ? v : null;
+          }
+          if ("realmManageModeDefault" in patch) {
+            const v = patch["realmManageModeDefault"];
+            set.realmManageModeDefault = typeof v === "boolean" ? v : null;
+          }
           if ("bookshelfConfig" in patch)
             set.bookshelfConfig = patch["bookshelfConfig"];
           yield* database
