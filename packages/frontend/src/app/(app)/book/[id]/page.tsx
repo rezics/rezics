@@ -1,11 +1,10 @@
 import { SectionBoundary } from "@/components/SectionBoundary";
+import { BookContentTab } from "./content-tab";
 
-export default function BookDetailPage() {
+export default function BookContentPage({ params }: { readonly params: Promise<{ id: string }> }) {
   return (
     <SectionBoundary>
-      <div className="py-8">
-        <h1 className="text-2xl font-bold">BookDetail</h1>
-      </div>
+      <BookContentTab paramsPromise={params} />
     </SectionBoundary>
   );
 }

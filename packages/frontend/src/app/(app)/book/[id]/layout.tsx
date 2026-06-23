@@ -1,13 +1,49 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { BookLayoutShell } from "./layout-shell";
 
-const tabs = [
-  { href: "", label: "Content" },
-  { href: "/discussion", label: "Discussion" },
-  { href: "/review", label: "Reviews" },
-  { href: "/info", label: "Info" },
-] as const;
-
+/**
+ * Mobile (<640px):
+ * +-----------------------------+
+ * | [Cover 120x160]             |
+ * | Book Title                  |
+ * | Author Name · Status        |
+ * |-----------------------------|
+ * | [Content|Discussion|Review] |
+ * |  ^tabs, overflow-x-auto    |
+ * |-----------------------------|
+ * | {children}                  |
+ * +-----------------------------+
+ * w-full, cover + info stacked.
+ *
+ * Tablet (640-1023px):
+ * +--------------------------------------+
+ * | [Cover] Book Title                   |
+ * | 120x160 Author Name · Status         |
+ * |        [Shelf v] [Rate]              |
+ * |--------------------------------------|
+ * | [Content | Discussion | Reviews | Info]
+ * |--------------------------------------|
+ * | {children}                           |
+ * +--------------------------------------+
+ * max-w-3xl mx-auto，cover 与信息横排。
+ *
+ * Desktop (1024-1535px):
+ * +------------------------------------------+
+ * | [Cover] Book Title                       |
+ * | 120x160 Author Name · Published · Rating |
+ * |        [Add to Shelf v] [Rate] [Share]   |
+ * |------------------------------------------|
+ * | [Content | Discussion | Reviews | Info ] |
+ * |------------------------------------------|
+ * | {children}                               |
+ * +------------------------------------------+
+ * max-w-3xl mx-auto。
+ *
+ * Ultra-wide (>=1536px): 与 Desktop 一致。
+ *
+ * 书籍详情布局：封面 + 元数据 + tabs + 子页面。
+ * tabs 高亮当前路由。
+ */
 export default async function BookLayout({
   children,
   params,
@@ -18,19 +54,8 @@ export default async function BookLayout({
   const { id } = await params;
 
   return (
-    <div className="space-y-6">
-      <nav className="border-border flex gap-1 border-b">
-        {tabs.map((tab) => (
-          <Link
-            className="text-muted-foreground hover:text-foreground border-b-2 border-transparent px-3 py-2 text-sm font-medium"
-            href={`/book/${id}${tab.href}`}
-            key={tab.label}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </nav>
-      {children}
+    <div className="mx-auto w-full max-w-3xl space-y-6">
+      <BookLayoutShell bookId={id}>{children}</BookLayoutShell>
     </div>
   );
 }
