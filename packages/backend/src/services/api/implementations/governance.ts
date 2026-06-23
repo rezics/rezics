@@ -1,50 +1,1340 @@
 import { Effect } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { and, desc, eq, sql } from "drizzle-orm";
 
+import { Config } from "../../config/index.ts";
+import { Database } from "../../database/index.ts";
+import {
+  AccountEnforcement,
+  Feedback,
+  ModerationAction,
+  ModerationCase,
+  RealmCapabilityGrant,
+  RealmMember,
+  StaffAuditLog,
+  StaffGrant,
+  Unit,
+  UnitRealm,
+} from "../../database/schema/all.ts";
 import { Api } from "../interfaces/index.ts";
+import { CurrentUser } from "../interfaces/middlewares/auth.ts";
+import {
+  CapabilityHintsResult,
+  GovernanceForbidden,
+  GovernanceNotFound,
+} from "../interfaces/governance.ts";
 
-// ponytail: stub — implement when porting domain logic
-// ponytail: 桩——迁入领域逻辑时实现
+// ---------------------------------------------------------------------------
+// Handlers — governance domain
+// 处理器 — 治理领域
+// ---------------------------------------------------------------------------
+
 export const GovernanceHandlers = HttpApiBuilder.group(
   Api,
   "governance",
   Effect.fn(function* (handlers) {
+    const db = yield* Database;
+    const { pagination } = yield* Config;
+    const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
+
+    // ── Shared helpers (close over db) ──────────────────────────────
+    // 共享辅助函数（闭包引用 db）
+
+    /**
+     * Require the caller has at least one active StaffGrant capability.
+     * 要求调用者拥有至少一个活跃的 StaffGrant 能力。
+     */
+    const requireStaff = (userId: string) =>
+      Effect.gen(function* () {
+        const grants = yield* Effect.orDie(
+          db
+            .select()
+            .from(StaffGrant)
+            .where(and(eq(StaffGrant.userId, userId), eq(StaffGrant.state, "ACTIVE")))
+            .limit(1),
+        );
+        if (!grants[0]) return yield* new GovernanceForbidden();
+        return grants;
+      });
+
+    /**
+     * Require the caller is an owner/moderator of the realm, or has a staff grant.
+     * 要求调用者是 realm 的 owner/moderator，或拥有 staff 权限。
+     */
+    const requireRealmMod = (realmUnitId: string, userId: string) =>
+      Effect.gen(function* () {
+        const membership = yield* Effect.orDie(
+          db
+            .select()
+            .from(RealmMember)
+            .where(
+              and(
+                eq(RealmMember.realmUnitId, realmUnitId),
+                eq(RealmMember.userId, userId),
+                eq(RealmMember.state, "ACTIVE"),
+              ),
+            )
+            .limit(1),
+        );
+        if (membership[0] && (membership[0].roleKey === "owner" || membership[0].roleKey === "moderator")) {
+          return membership[0];
+        }
+        // Fall back to staff grant check
+        // 回退到 staff 权限检查
+        const staffGrants = yield* Effect.orDie(
+          db
+            .select()
+            .from(StaffGrant)
+            .where(and(eq(StaffGrant.userId, userId), eq(StaffGrant.state, "ACTIVE")))
+            .limit(1),
+        );
+        if (!staffGrants[0]) return yield* new GovernanceForbidden();
+        return membership[0] ?? null;
+      });
+
+    /**
+     * Insert a ModerationAction audit row and return its id.
+     * 插入一条 ModerationAction 审计行并返回其 id。
+     */
+    const insertAction = (values: typeof ModerationAction.$inferInsert) =>
+      Effect.gen(function* () {
+        const rows = yield* Effect.orDie(
+          db.insert(ModerationAction).values(values).returning(),
+        );
+        return rows[0]!;
+      });
+
+    /**
+     * Insert a StaffAuditLog entry.
+     * 插入 StaffAuditLog 条目。
+     */
+    const insertAudit = (values: typeof StaffAuditLog.$inferInsert) =>
+      Effect.gen(function* () {
+        const rows = yield* Effect.orDie(
+          db.insert(StaffAuditLog).values(values).returning(),
+        );
+        return rows[0]!;
+      });
+
     return handlers
-      .handle("capabilityHintsMe", () => Effect.die("TODO: not implemented"))
-      .handle("grantRealmCapability", () => Effect.die("TODO: not implemented"))
-      .handle("revokeRealmCapability", () => Effect.die("TODO: not implemented"))
-      .handle("policyDecide", () => Effect.die("TODO: not implemented"))
-      .handle("listModerationActions", () => Effect.die("TODO: not implemented"))
-      .handle("listModerationOverlays", () => Effect.die("TODO: not implemented"))
-      .handle("contentApprove", () => Effect.die("TODO: not implemented"))
-      .handle("contentRemove", () => Effect.die("TODO: not implemented"))
-      .handle("contentRestore", () => Effect.die("TODO: not implemented"))
-      .handle("realmContentApprove", () => Effect.die("TODO: not implemented"))
-      .handle("realmContentRemove", () => Effect.die("TODO: not implemented"))
-      .handle("realmContentRestore", () => Effect.die("TODO: not implemented"))
-      .handle("realmContentLock", () => Effect.die("TODO: not implemented"))
-      .handle("realmContentUnlock", () => Effect.die("TODO: not implemented"))
-      .handle("realmContentOwnerDelegation", () => Effect.die("TODO: not implemented"))
-      .handle("getActiveEnforcement", () => Effect.die("TODO: not implemented"))
-      .handle("listEnforcements", () => Effect.die("TODO: not implemented"))
-      .handle("applyEnforcement", () => Effect.die("TODO: not implemented"))
-      .handle("unblockEnforcement", () => Effect.die("TODO: not implemented"))
-      .handle("listCases", () => Effect.die("TODO: not implemented"))
-      .handle("getCase", () => Effect.die("TODO: not implemented"))
-      .handle("listCaseActions", () => Effect.die("TODO: not implemented"))
-      .handle("createCaseFromFeedback", () => Effect.die("TODO: not implemented"))
-      .handle("duplicateCase", () => Effect.die("TODO: not implemented"))
-      .handle("assignCase", () => Effect.die("TODO: not implemented"))
-      .handle("triageCase", () => Effect.die("TODO: not implemented"))
-      .handle("decideCase", () => Effect.die("TODO: not implemented"))
-      .handle("appealCase", () => Effect.die("TODO: not implemented"))
-      .handle("listRealmCases", () => Effect.die("TODO: not implemented"))
-      .handle("createRealmCase", () => Effect.die("TODO: not implemented"))
-      .handle("createRealmCaseFromFeedback", () => Effect.die("TODO: not implemented"))
-      .handle("listRealmCaseActions", () => Effect.die("TODO: not implemented"))
-      .handle("decideRealmCase", () => Effect.die("TODO: not implemented"))
-      .handle("escalateRealmCase", () => Effect.die("TODO: not implemented"))
-      .handle("listAuditLogs", () => Effect.die("TODO: not implemented"))
-      .handle("getAuditLog", () => Effect.die("TODO: not implemented"));
+      // ── capabilityHintsMe — resolve current user capability hints ──
+      // 解析当前用户的能力提示
+      .handle("capabilityHintsMe", () =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          const staffRows = yield* Effect.orDie(
+            db
+              .select()
+              .from(StaffGrant)
+              .where(and(eq(StaffGrant.userId, user.id), eq(StaffGrant.state, "ACTIVE"))),
+          );
+          const realmRows = yield* Effect.orDie(
+            db
+              .select()
+              .from(RealmCapabilityGrant)
+              .where(
+                and(eq(RealmCapabilityGrant.userId, user.id), eq(RealmCapabilityGrant.state, "ACTIVE")),
+              ),
+          );
+          const capabilities = [
+            ...staffRows.map((r) => ({
+              kind: "staff" as const,
+              capability: r.capability,
+              scopeKind: r.scopeKind,
+              realmUnitId: r.realmUnitId,
+            })),
+            ...realmRows.map((r) => ({
+              kind: "realm" as const,
+              capability: r.capability,
+              realmUnitId: r.realmUnitId,
+            })),
+          ];
+          return new CapabilityHintsResult({ capabilities });
+        }),
+      )
+
+      // ── grantRealmCapability — grant realm capability to member ────
+      // 授予 Realm 成员能力
+      .handle("grantRealmCapability", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const body = payload as Record<string, unknown>;
+          const rows = yield* Effect.orDie(
+            db
+              .insert(RealmCapabilityGrant)
+              .values({
+                realmUnitId: params.realmUnitId,
+                userId: params.userId,
+                capability: body["capability"] as string,
+                grantedById: user.id,
+                state: "ACTIVE",
+              })
+              .returning(),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "GRANT_REALM_CAPABILITY",
+            targetKind: "REALM_MEMBER",
+            targetId: `${params.realmUnitId}:${params.userId}`,
+            decisionCode: "GRANTED",
+            reason: (body["reason"] as string) ?? "Capability granted",
+          });
+          return rows[0]!;
+        }),
+      )
+
+      // ── revokeRealmCapability — revoke realm capability from member ──
+      // 撤销 Realm 成员能力
+      .handle("revokeRealmCapability", ({ params }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const now = new Date();
+          const rows = yield* Effect.orDie(
+            db
+              .update(RealmCapabilityGrant)
+              .set({ state: "REVOKED", revokedById: user.id, revokedAt: now, updatedAt: now })
+              .where(
+                and(
+                  eq(RealmCapabilityGrant.realmUnitId, params.realmUnitId),
+                  eq(RealmCapabilityGrant.userId, params.userId),
+                  eq(RealmCapabilityGrant.capability, params.capability),
+                  eq(RealmCapabilityGrant.state, "ACTIVE"),
+                ),
+              )
+              .returning(),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "REVOKE_REALM_CAPABILITY",
+            targetKind: "REALM_MEMBER",
+            targetId: `${params.realmUnitId}:${params.userId}`,
+            decisionCode: "REVOKED",
+            reason: `Revoked capability ${params.capability}`,
+          });
+          return rows;
+        }),
+      )
+
+      // ── policyDecide — evaluate governance policy decision ─────────
+      // 评估治理策略决策
+      .handle("policyDecide", ({ payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          // Policy evaluation: check staff grants for the requested action
+          // 策略评估：检查请求动作对应的 staff 权限
+          const body = payload as Record<string, unknown>;
+          const action = (body["action"] as string) ?? "unknown";
+          const grants = yield* Effect.orDie(
+            db
+              .select()
+              .from(StaffGrant)
+              .where(and(eq(StaffGrant.userId, user.id), eq(StaffGrant.state, "ACTIVE"))),
+          );
+          const hasCapability = grants.some(
+            (g) => g.capability === action || g.capability === "*",
+          );
+          return {
+            allowed: hasCapability,
+            actor: user.id,
+            action,
+            grants: grants.map((g) => g.capability),
+          };
+        }),
+      )
+
+      // ── listModerationActions — list moderation actions for a target ──
+      // 列出目标的审核动作
+      .handle("listModerationActions", ({ params, query }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const targetKind = params.targetKind as typeof ModerationAction.$inferSelect["targetKind"];
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(ModerationAction)
+              .where(
+                and(
+                  eq(ModerationAction.targetKind, targetKind),
+                  eq(ModerationAction.targetId, params.targetId),
+                ),
+              )
+              .orderBy(desc(ModerationAction.createdAt))
+              .limit(lim(query.limit))
+              .offset(query.offset ?? 0),
+          );
+          return rows;
+        }),
+      )
+
+      // ── listModerationOverlays — batch-read moderation overlays ───
+      // 批量读取审核叠加层
+      .handle("listModerationOverlays", ({ payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const body = payload as Record<string, unknown>;
+          const unitIds = (body["unitIds"] as string[]) ?? [];
+          if (unitIds.length === 0) return [];
+          // Return the latest ModerationAction per unit (target) for overlay state
+          // 返回每个 unit（目标）的最新 ModerationAction 作为叠加层状态
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(ModerationAction)
+              .where(
+                and(
+                  eq(ModerationAction.targetKind, "UNIT"),
+                  sql`${ModerationAction.targetId} = ANY(${unitIds})`,
+                ),
+              )
+              .orderBy(desc(ModerationAction.createdAt))
+              .limit(unitIds.length * 5),
+          );
+          // Deduplicate: keep latest action per targetId
+          // 去重：每个 targetId 保留最新动作
+          const seen = new Set<string>();
+          const deduped: typeof rows = [];
+          for (const row of rows) {
+            if (!seen.has(row.targetId)) {
+              seen.add(row.targetId);
+              deduped.push(row);
+            }
+          }
+          return deduped;
+        }),
+      )
+
+      // ── contentApprove — global content approval ──────────────────
+      // 全局内容批准
+      .handle("contentApprove", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          yield* Effect.orDie(
+            db
+              .update(Unit)
+              .set({ moderationStatus: "APPROVED" })
+              .where(eq(Unit.id, params.targetUnitId)),
+          );
+          const action = yield* insertAction({
+            authority: "PLATFORM",
+            targetKind: "UNIT",
+            targetId: params.targetUnitId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "APPROVE",
+            resultingStatus: "APPROVED",
+            reasonCode: "CONTENT_APPROVED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CONTENT_APPROVE",
+            targetKind: "UNIT",
+            targetId: params.targetUnitId,
+            decisionCode: "APPROVED",
+            reason: payload.reason ?? "Content approved",
+          });
+          return [action];
+        }),
+      )
+
+      // ── contentRemove — global content removal ────────────────────
+      // 全局内容移除
+      .handle("contentRemove", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          yield* Effect.orDie(
+            db
+              .update(Unit)
+              .set({ moderationStatus: "REMOVED" })
+              .where(eq(Unit.id, params.targetUnitId)),
+          );
+          const action = yield* insertAction({
+            authority: "PLATFORM",
+            targetKind: "UNIT",
+            targetId: params.targetUnitId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "REMOVE",
+            resultingStatus: "REMOVED",
+            reasonCode: "CONTENT_REMOVED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CONTENT_REMOVE",
+            targetKind: "UNIT",
+            targetId: params.targetUnitId,
+            decisionCode: "REMOVED",
+            reason: payload.reason ?? "Content removed",
+          });
+          return [action];
+        }),
+      )
+
+      // ── contentRestore — global content restoration ───────────────
+      // 全局内容恢复
+      .handle("contentRestore", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          yield* Effect.orDie(
+            db
+              .update(Unit)
+              .set({ moderationStatus: "APPROVED" })
+              .where(eq(Unit.id, params.targetUnitId)),
+          );
+          const action = yield* insertAction({
+            authority: "PLATFORM",
+            targetKind: "UNIT",
+            targetId: params.targetUnitId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "RESTORE",
+            resultingStatus: "APPROVED",
+            reasonCode: "CONTENT_RESTORED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CONTENT_RESTORE",
+            targetKind: "UNIT",
+            targetId: params.targetUnitId,
+            decisionCode: "RESTORED",
+            reason: payload.reason ?? "Content restored",
+          });
+          return [action];
+        }),
+      )
+
+      // ── realmContentApprove — realm-scoped content approval ───────
+      // Realm 范围内容批准
+      .handle("realmContentApprove", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          yield* Effect.orDie(
+            db
+              .update(UnitRealm)
+              .set({ moderationStatus: "APPROVED" })
+              .where(
+                and(
+                  eq(UnitRealm.realmUnitId, params.realmUnitId),
+                  eq(UnitRealm.unitId, params.targetUnitId),
+                ),
+              ),
+          );
+          const action = yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: "UNIT_REALM",
+            targetId: `${params.realmUnitId}:${params.targetUnitId}`,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "APPROVE",
+            resultingStatus: "APPROVED",
+            reasonCode: "REALM_CONTENT_APPROVED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          return action;
+        }),
+      )
+
+      // ── realmContentRemove — realm-scoped content removal ─────────
+      // Realm 范围内容移除
+      .handle("realmContentRemove", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          yield* Effect.orDie(
+            db
+              .update(UnitRealm)
+              .set({ moderationStatus: "REMOVED" })
+              .where(
+                and(
+                  eq(UnitRealm.realmUnitId, params.realmUnitId),
+                  eq(UnitRealm.unitId, params.targetUnitId),
+                ),
+              ),
+          );
+          const action = yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: "UNIT_REALM",
+            targetId: `${params.realmUnitId}:${params.targetUnitId}`,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "REMOVE",
+            resultingStatus: "REMOVED",
+            reasonCode: "REALM_CONTENT_REMOVED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          return action;
+        }),
+      )
+
+      // ── realmContentRestore — realm-scoped content restoration ────
+      // Realm 范围内容恢复
+      .handle("realmContentRestore", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          yield* Effect.orDie(
+            db
+              .update(UnitRealm)
+              .set({ moderationStatus: "APPROVED" })
+              .where(
+                and(
+                  eq(UnitRealm.realmUnitId, params.realmUnitId),
+                  eq(UnitRealm.unitId, params.targetUnitId),
+                ),
+              ),
+          );
+          const action = yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: "UNIT_REALM",
+            targetId: `${params.realmUnitId}:${params.targetUnitId}`,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "RESTORE",
+            resultingStatus: "APPROVED",
+            reasonCode: "REALM_CONTENT_RESTORED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          return action;
+        }),
+      )
+
+      // ── realmContentLock — realm-scoped content lock ──────────────
+      // Realm 范围内容锁定
+      .handle("realmContentLock", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          yield* Effect.orDie(
+            db
+              .update(UnitRealm)
+              .set({ isLocked: true })
+              .where(
+                and(
+                  eq(UnitRealm.realmUnitId, params.realmUnitId),
+                  eq(UnitRealm.unitId, params.targetUnitId),
+                ),
+              ),
+          );
+          const action = yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: "UNIT_REALM",
+            targetId: `${params.realmUnitId}:${params.targetUnitId}`,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "LOCK",
+            resultingLocked: true,
+            reasonCode: "REALM_CONTENT_LOCKED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          return action;
+        }),
+      )
+
+      // ── realmContentUnlock — realm-scoped content unlock ──────────
+      // Realm 范围内容解锁
+      .handle("realmContentUnlock", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          yield* Effect.orDie(
+            db
+              .update(UnitRealm)
+              .set({ isLocked: false })
+              .where(
+                and(
+                  eq(UnitRealm.realmUnitId, params.realmUnitId),
+                  eq(UnitRealm.unitId, params.targetUnitId),
+                ),
+              ),
+          );
+          const action = yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: "UNIT_REALM",
+            targetId: `${params.realmUnitId}:${params.targetUnitId}`,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "UNLOCK",
+            resultingLocked: false,
+            reasonCode: "REALM_CONTENT_UNLOCKED",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          return action;
+        }),
+      )
+
+      // ── realmContentOwnerDelegation — realm content owner delegation ──
+      // Realm 内容所有者委托
+      .handle("realmContentOwnerDelegation", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const action = yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: "UNIT_REALM",
+            targetId: `${params.realmUnitId}:${params.targetUnitId}`,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "NOTE",
+            reasonCode: "OWNER_DELEGATION",
+            reasonText: payload.reason ?? null,
+            caseId: payload.caseId ?? null,
+          });
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "REALM_OWNER_DELEGATION",
+            targetKind: "UNIT_REALM",
+            targetId: `${params.realmUnitId}:${params.targetUnitId}`,
+            decisionCode: "DELEGATED",
+            reason: payload.reason ?? "Owner delegation recorded",
+          });
+          return action;
+        }),
+      )
+
+      // ── getActiveEnforcement — active enforcement summary ─────────
+      // 获取活跃执行措施摘要
+      .handle("getActiveEnforcement", ({ params }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(AccountEnforcement)
+              .where(
+                and(
+                  eq(AccountEnforcement.targetUserId, params.targetUserId),
+                  eq(AccountEnforcement.state, "ACTIVE"),
+                ),
+              )
+              .orderBy(desc(AccountEnforcement.createdAt)),
+          );
+          return {
+            targetUserId: params.targetUserId,
+            active: rows,
+            count: rows.length,
+          };
+        }),
+      )
+
+      // ── listEnforcements — list enforcement records ───────────────
+      // 列出执行措施记录
+      .handle("listEnforcements", ({ params, query }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const conditions: ReturnType<typeof eq>[] = [eq(AccountEnforcement.targetUserId, params.targetUserId)];
+          if (query.state) {
+            conditions.push(
+              eq(AccountEnforcement.state, query.state as typeof AccountEnforcement.state.enumValues[number]),
+            );
+          }
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(AccountEnforcement)
+              .where(and(...conditions))
+              .orderBy(desc(AccountEnforcement.createdAt))
+              .limit(lim(query.limit))
+              .offset(query.offset ?? 0),
+          );
+          return rows;
+        }),
+      )
+
+      // ── applyEnforcement — apply enforcement to user ──────────────
+      // 应用执行措施
+      .handle("applyEnforcement", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const body = payload as Record<string, unknown>;
+          const kind = (body["kind"] as string) ?? "WARNING";
+          const reason = (body["reason"] as string) ?? "Enforcement applied";
+          const decisionCode = (body["decisionCode"] as string) ?? "ENFORCED";
+          const expiresAt = body["expiresAt"] ? new Date(body["expiresAt"] as string) : null;
+          const enforcementKind = kind as typeof AccountEnforcement.kind.enumValues[number];
+          const actionKind = kind as typeof ModerationAction.$inferInsert["actionKind"];
+          // Insert moderation action first for reference
+          // 先插入审核动作以供引用
+          const action = yield* insertAction({
+            authority: "PLATFORM",
+            targetKind: "ACCOUNT",
+            targetId: params.targetUserId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind,
+            reasonCode: decisionCode,
+            reasonText: reason,
+            caseId: (body["caseId"] as string) ?? null,
+          });
+          const rows = yield* Effect.orDie(
+            db
+              .insert(AccountEnforcement)
+              .values({
+                targetUserId: params.targetUserId,
+                kind: enforcementKind,
+                state: "ACTIVE",
+                reason,
+                safeMessage: (body["safeMessage"] as string) ?? null,
+                decidedById: user.id,
+                decisionCode,
+                expiresAt,
+                decisionActionId: action.id,
+                metadata: (body["metadata"] as Record<string, unknown>) ?? null,
+              })
+              .returning(),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: `ENFORCEMENT_${kind}`,
+            targetKind: "ACCOUNT",
+            targetId: params.targetUserId,
+            decisionCode,
+            reason,
+          });
+          return rows[0]!;
+        }),
+      )
+
+      // ── unblockEnforcement — revoke active enforcements ───────────
+      // 解除账户封禁
+      .handle("unblockEnforcement", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const body = payload as Record<string, unknown>;
+          const reason = (body["reason"] as string) ?? "Enforcement revoked";
+          const now = new Date();
+          // Insert a reversal moderation action
+          // 插入一条撤销审核动作
+          const action = yield* insertAction({
+            authority: "PLATFORM",
+            targetKind: "ACCOUNT",
+            targetId: params.targetUserId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "REVOKE_ENFORCEMENT",
+            reasonCode: "UNBLOCKED",
+            reasonText: reason,
+          });
+          const rows = yield* Effect.orDie(
+            db
+              .update(AccountEnforcement)
+              .set({
+                state: "REVOKED",
+                revokedAt: now,
+                revokedById: user.id,
+                revocationActionId: action.id,
+                updatedAt: now,
+              })
+              .where(
+                and(
+                  eq(AccountEnforcement.targetUserId, params.targetUserId),
+                  eq(AccountEnforcement.state, "ACTIVE"),
+                ),
+              )
+              .returning(),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "ENFORCEMENT_REVOKE",
+            targetKind: "ACCOUNT",
+            targetId: params.targetUserId,
+            decisionCode: "UNBLOCKED",
+            reason,
+          });
+          return rows;
+        }),
+      )
+
+      // ── listCases — list global moderation cases ──────────────────
+      // 列出全局审核案例
+      .handle("listCases", ({ query }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const conditions: ReturnType<typeof eq>[] = [eq(ModerationCase.scope, "PLATFORM")];
+          if (query.state) {
+            conditions.push(
+              eq(ModerationCase.state, query.state as typeof ModerationCase.state.enumValues[number]),
+            );
+          }
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(ModerationCase)
+              .where(and(...conditions))
+              .orderBy(desc(ModerationCase.createdAt))
+              .limit(lim(query.limit))
+              .offset(query.offset ?? 0),
+          );
+          return rows;
+        }),
+      )
+
+      // ── getCase — fetch single case ───────────────────────────────
+      // 获取单条案例
+      .handle("getCase", ({ params }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const rows = yield* Effect.orDie(
+            db.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1),
+          );
+          if (!rows[0]) return yield* new GovernanceForbidden();
+          return rows[0];
+        }),
+      )
+
+      // ── listCaseActions — list moderation actions linked to a case ──
+      // 列出链接到案例的审核动作
+      .handle("listCaseActions", ({ params, query }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(ModerationAction)
+              .where(eq(ModerationAction.caseId, params.caseId))
+              .orderBy(desc(ModerationAction.createdAt))
+              .limit(lim(query.limit))
+              .offset(query.offset ?? 0),
+          );
+          return rows;
+        }),
+      )
+
+      // ── createCaseFromFeedback — create case from feedback report ──
+      // 从反馈报告创建案例
+      .handle("createCaseFromFeedback", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const feedbackRows = yield* Effect.orDie(
+            db.select().from(Feedback).where(eq(Feedback.id, params.feedbackId)).limit(1),
+          );
+          if (!feedbackRows[0]) return yield* new GovernanceForbidden();
+          const fb = feedbackRows[0];
+          const body = payload as Record<string, unknown>;
+          const rows = yield* Effect.orDie(
+            db
+              .insert(ModerationCase)
+              .values({
+                scope: "PLATFORM",
+                state: "NEW",
+                reporterUserId: fb.userId,
+                targetKind: fb.targetKind ?? "UNIT",
+                targetId: fb.targetId ?? fb.addressedUnitId ?? params.feedbackId,
+                addressedUnitId: fb.addressedUnitId ?? null,
+                sourceFeedbackId: fb.id,
+                reason: (body["reason"] as string) ?? fb.content,
+                severity: (body["severity"] as string) ?? null,
+              })
+              .returning(),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CASE_CREATE_FROM_FEEDBACK",
+            targetKind: "FEEDBACK",
+            targetId: params.feedbackId,
+            decisionCode: "CREATED",
+            reason: (body["reason"] as string) ?? "Case created from feedback",
+          });
+          return rows[0]!;
+        }),
+      )
+
+      // ── duplicateCase — mark case as duplicate of another ─────────
+      // 标记案例为另一案例的副本
+      .handle("duplicateCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const body = payload as Record<string, unknown>;
+          const duplicateOfCaseId = body["duplicateOfCaseId"] as string;
+          const now = new Date();
+          const rows = yield* Effect.orDie(
+            db
+              .update(ModerationCase)
+              .set({ state: "DUPLICATE", duplicateOfCaseId, updatedAt: now })
+              .where(eq(ModerationCase.id, params.caseId))
+              .returning(),
+          );
+          if (!rows[0]) return yield* new GovernanceForbidden();
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CASE_DUPLICATE",
+            targetKind: "CASE",
+            targetId: params.caseId,
+            decisionCode: "DUPLICATE",
+            reason: `Marked as duplicate of ${duplicateOfCaseId}`,
+          });
+          return rows[0];
+        }),
+      )
+
+      // ── assignCase — assign case to a user ────────────────────────
+      // 将案例分配给用户
+      .handle("assignCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const body = payload as Record<string, unknown>;
+          const assignedToUserId = (body["assignedToUserId"] as string) ?? user.id;
+          const now = new Date();
+          const rows = yield* Effect.orDie(
+            db
+              .update(ModerationCase)
+              .set({ state: "ASSIGNED", assignedToUserId, updatedAt: now })
+              .where(eq(ModerationCase.id, params.caseId))
+              .returning(),
+          );
+          if (!rows[0]) return yield* new GovernanceForbidden();
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CASE_ASSIGN",
+            targetKind: "CASE",
+            targetId: params.caseId,
+            decisionCode: "ASSIGNED",
+            reason: `Assigned to ${assignedToUserId}`,
+          });
+          return rows[0];
+        }),
+      )
+
+      // ── triageCase — triage case (set severity + state) ───────────
+      // 对案例进行分类（设置严重性 + 状态）
+      .handle("triageCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const body = payload as Record<string, unknown>;
+          const now = new Date();
+          const rows = yield* Effect.orDie(
+            db
+              .update(ModerationCase)
+              .set({
+                state: "TRIAGED",
+                severity: (body["severity"] as string) ?? null,
+                updatedAt: now,
+              })
+              .where(eq(ModerationCase.id, params.caseId))
+              .returning(),
+          );
+          if (!rows[0]) return yield* new GovernanceForbidden();
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CASE_TRIAGE",
+            targetKind: "CASE",
+            targetId: params.caseId,
+            decisionCode: "TRIAGED",
+            reason: (body["reason"] as string) ?? "Case triaged",
+          });
+          return rows[0];
+        }),
+      )
+
+      // ── decideCase — record a decision on a case ──────────────────
+      // 对案例记录决策
+      .handle("decideCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const body = payload as Record<string, unknown>;
+          const decisionCode = (body["decisionCode"] as string) ?? "ACTIONED";
+          const now = new Date();
+          const rows = yield* Effect.orDie(
+            db
+              .update(ModerationCase)
+              .set({ state: "ACTIONED", updatedAt: now })
+              .where(eq(ModerationCase.id, params.caseId))
+              .returning(),
+          );
+          if (!rows[0]) return yield* new GovernanceForbidden();
+          yield* insertAction({
+            authority: "PLATFORM",
+            targetKind: rows[0].targetKind,
+            targetId: rows[0].targetId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: (body["actionKind"] as typeof ModerationAction.$inferInsert["actionKind"]) ?? "NOTE",
+            reasonCode: decisionCode,
+            reasonText: (body["reason"] as string) ?? null,
+            caseId: params.caseId,
+          });
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CASE_DECIDE",
+            targetKind: "CASE",
+            targetId: params.caseId,
+            decisionCode,
+            reason: (body["reason"] as string) ?? "Decision recorded",
+          });
+          return rows[0];
+        }),
+      )
+
+      // ── appealCase — register an appeal on a case ─────────────────
+      // 对案例提交申诉
+      .handle("appealCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          const body = payload as Record<string, unknown>;
+          const now = new Date();
+          // Check the case exists
+          // 检查案例是否存在
+          const caseRows = yield* Effect.orDie(
+            db.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1),
+          );
+          if (!caseRows[0]) return yield* new GovernanceForbidden();
+          // Create a child case for the appeal
+          // 为申诉创建子案例
+          const rows = yield* Effect.orDie(
+            db
+              .insert(ModerationCase)
+              .values({
+                scope: caseRows[0].scope,
+                state: "NEW",
+                reporterUserId: user.id,
+                targetKind: caseRows[0].targetKind,
+                targetId: caseRows[0].targetId,
+                addressedUnitId: caseRows[0].addressedUnitId,
+                realmUnitId: caseRows[0].realmUnitId,
+                parentCaseId: params.caseId,
+                reason: (body["reason"] as string) ?? "Appeal submitted",
+                severity: (body["severity"] as string) ?? null,
+              })
+              .returning(),
+          );
+          // Update the parent case state to REVIEWING if it was ACTIONED/RESOLVED
+          // 如果父案例状态为 ACTIONED/RESOLVED，则更新为 REVIEWING
+          yield* Effect.orDie(
+            db
+              .update(ModerationCase)
+              .set({ state: "REVIEWING", updatedAt: now })
+              .where(eq(ModerationCase.id, params.caseId)),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "CASE_APPEAL",
+            targetKind: "CASE",
+            targetId: params.caseId,
+            decisionCode: "APPEALED",
+            reason: (body["reason"] as string) ?? "Appeal submitted",
+          });
+          return rows[0]!;
+        }),
+      )
+
+      // ── listRealmCases — list realm-scoped cases ──────────────────
+      // 列出 Realm 范围案例
+      .handle("listRealmCases", ({ params, query }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const conditions: ReturnType<typeof eq>[] = [
+            eq(ModerationCase.realmUnitId, params.realmUnitId),
+          ];
+          if (query.state) {
+            conditions.push(
+              eq(ModerationCase.state, query.state as typeof ModerationCase.state.enumValues[number]),
+            );
+          }
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(ModerationCase)
+              .where(and(...conditions))
+              .orderBy(desc(ModerationCase.createdAt))
+              .limit(lim(query.limit))
+              .offset(query.offset ?? 0),
+          );
+          return rows;
+        }),
+      )
+
+      // ── createRealmCase — create a realm-scoped case ──────────────
+      // 创建 Realm 范围案例
+      .handle("createRealmCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const body = payload as Record<string, unknown>;
+          const targetKind =
+            (body["targetKind"] as typeof ModerationCase.$inferInsert["targetKind"]) ?? "UNIT";
+          const rows = yield* Effect.orDie(
+            db
+              .insert(ModerationCase)
+              .values({
+                scope: "REALM",
+                state: "NEW",
+                realmUnitId: params.realmUnitId,
+                reporterUserId: user.id,
+                targetKind,
+                targetId: (body["targetId"] as string) ?? "",
+                addressedUnitId: (body["addressedUnitId"] as string) ?? null,
+                subjectUserId: (body["subjectUserId"] as string) ?? null,
+                reason: (body["reason"] as string) ?? null,
+                severity: (body["severity"] as string) ?? null,
+              })
+              .returning(),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "REALM_CASE_CREATE",
+            targetKind: "CASE",
+            targetId: rows[0]!.id,
+            decisionCode: "CREATED",
+            reason: (body["reason"] as string) ?? "Realm case created",
+          });
+          return rows[0]!;
+        }),
+      )
+
+      // ── createRealmCaseFromFeedback — realm case from feedback ────
+      // 从反馈创建 Realm 案例
+      .handle("createRealmCaseFromFeedback", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const feedbackRows = yield* Effect.orDie(
+            db.select().from(Feedback).where(eq(Feedback.id, params.feedbackId)).limit(1),
+          );
+          if (!feedbackRows[0]) return yield* new GovernanceForbidden();
+          const fb = feedbackRows[0];
+          const body = payload as Record<string, unknown>;
+          const rows = yield* Effect.orDie(
+            db
+              .insert(ModerationCase)
+              .values({
+                scope: "REALM",
+                state: "NEW",
+                realmUnitId: params.realmUnitId,
+                reporterUserId: fb.userId,
+                targetKind: fb.targetKind ?? "UNIT",
+                targetId: fb.targetId ?? fb.addressedUnitId ?? params.feedbackId,
+                addressedUnitId: fb.addressedUnitId ?? null,
+                sourceFeedbackId: fb.id,
+                reason: (body["reason"] as string) ?? fb.content,
+                severity: (body["severity"] as string) ?? null,
+              })
+              .returning(),
+          );
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "REALM_CASE_CREATE_FROM_FEEDBACK",
+            targetKind: "FEEDBACK",
+            targetId: params.feedbackId,
+            decisionCode: "CREATED",
+            reason: (body["reason"] as string) ?? "Realm case created from feedback",
+          });
+          return rows[0]!;
+        }),
+      )
+
+      // ── listRealmCaseActions — list actions for a realm case ──────
+      // 列出 Realm 案例的动作
+      .handle("listRealmCaseActions", ({ params, query }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(ModerationAction)
+              .where(
+                and(
+                  eq(ModerationAction.caseId, params.caseId),
+                  eq(ModerationAction.realmUnitId, params.realmUnitId),
+                ),
+              )
+              .orderBy(desc(ModerationAction.createdAt))
+              .limit(lim(query.limit))
+              .offset(query.offset ?? 0),
+          );
+          return rows;
+        }),
+      )
+
+      // ── decideRealmCase — decide a realm-scoped case ──────────────
+      // 对 Realm 案例作出决策
+      .handle("decideRealmCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const body = payload as Record<string, unknown>;
+          const decisionCode = (body["decisionCode"] as string) ?? "ACTIONED";
+          const now = new Date();
+          const rows = yield* Effect.orDie(
+            db
+              .update(ModerationCase)
+              .set({ state: "ACTIONED", updatedAt: now })
+              .where(
+                and(
+                  eq(ModerationCase.id, params.caseId),
+                  eq(ModerationCase.realmUnitId, params.realmUnitId),
+                ),
+              )
+              .returning(),
+          );
+          if (!rows[0]) return yield* new GovernanceForbidden();
+          yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: rows[0].targetKind,
+            targetId: rows[0].targetId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: (body["actionKind"] as typeof ModerationAction.$inferInsert["actionKind"]) ?? "NOTE",
+            reasonCode: decisionCode,
+            reasonText: (body["reason"] as string) ?? null,
+            caseId: params.caseId,
+          });
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "REALM_CASE_DECIDE",
+            targetKind: "CASE",
+            targetId: params.caseId,
+            decisionCode,
+            reason: (body["reason"] as string) ?? "Realm case decision recorded",
+          });
+          return rows[0];
+        }),
+      )
+
+      // ── escalateRealmCase — escalate realm case to platform level ──
+      // 将 Realm 案例升级到平台级别
+      .handle("escalateRealmCase", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireRealmMod(params.realmUnitId, user.id);
+          const body = payload as Record<string, unknown>;
+          const now = new Date();
+          // Update realm case state to ESCALATED
+          // 将 Realm 案例状态更新为 ESCALATED
+          const caseRows = yield* Effect.orDie(
+            db
+              .update(ModerationCase)
+              .set({ state: "ESCALATED", updatedAt: now })
+              .where(
+                and(
+                  eq(ModerationCase.id, params.caseId),
+                  eq(ModerationCase.realmUnitId, params.realmUnitId),
+                ),
+              )
+              .returning(),
+          );
+          if (!caseRows[0]) return yield* new GovernanceForbidden();
+          // Create a platform-scoped case referencing the realm case
+          // 创建引用 Realm 案例的平台级案例
+          const escalatedRows = yield* Effect.orDie(
+            db
+              .insert(ModerationCase)
+              .values({
+                scope: "PLATFORM",
+                state: "NEW",
+                realmUnitId: params.realmUnitId,
+                reporterUserId: user.id,
+                targetKind: caseRows[0].targetKind,
+                targetId: caseRows[0].targetId,
+                addressedUnitId: caseRows[0].addressedUnitId,
+                subjectUserId: caseRows[0].subjectUserId,
+                parentCaseId: params.caseId,
+                reason: (body["reason"] as string) ?? `Escalated from realm case ${params.caseId}`,
+                severity: (body["severity"] as string) ?? caseRows[0].severity,
+              })
+              .returning(),
+          );
+          yield* insertAction({
+            authority: "REALM",
+            realmUnitId: params.realmUnitId,
+            targetKind: caseRows[0].targetKind,
+            targetId: caseRows[0].targetId,
+            actorKind: "USER",
+            actorUserId: user.id,
+            actionKind: "ESCALATE",
+            reasonCode: "ESCALATED",
+            reasonText: (body["reason"] as string) ?? null,
+            caseId: params.caseId,
+          });
+          yield* insertAudit({
+            actorUserId: user.id,
+            action: "REALM_CASE_ESCALATE",
+            targetKind: "CASE",
+            targetId: params.caseId,
+            decisionCode: "ESCALATED",
+            reason: (body["reason"] as string) ?? "Realm case escalated to platform",
+          });
+          return escalatedRows[0]!;
+        }),
+      )
+
+      // ── listAuditLogs — list staff audit log entries ──────────────
+      // 列出 staff 审计日志条目
+      .handle("listAuditLogs", ({ query }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const conditions: ReturnType<typeof eq>[] = [];
+          if (query.actorUserId) conditions.push(eq(StaffAuditLog.actorUserId, query.actorUserId));
+          if (query.action) conditions.push(eq(StaffAuditLog.action, query.action));
+          if (query.targetKind) conditions.push(eq(StaffAuditLog.targetKind, query.targetKind));
+          if (query.targetId) conditions.push(eq(StaffAuditLog.targetId, query.targetId));
+          if (query.decisionCode) conditions.push(eq(StaffAuditLog.decisionCode, query.decisionCode));
+          if (query.requestId) conditions.push(eq(StaffAuditLog.requestId, query.requestId));
+          const where = conditions.length > 0 ? and(...conditions) : undefined;
+          const rows = yield* Effect.orDie(
+            db
+              .select()
+              .from(StaffAuditLog)
+              .where(where)
+              .orderBy(desc(StaffAuditLog.createdAt))
+              .limit(lim(query.limit))
+              .offset(query.offset ?? 0),
+          );
+          return rows;
+        }),
+      )
+
+      // ── getAuditLog — fetch a single audit log entry ──────────────
+      // 获取单条审计日志条目
+      .handle("getAuditLog", ({ params }) =>
+        Effect.gen(function* () {
+          const user = yield* CurrentUser;
+          yield* requireStaff(user.id);
+          const rows = yield* Effect.orDie(
+            db.select().from(StaffAuditLog).where(eq(StaffAuditLog.id, params.auditLogId)).limit(1),
+          );
+          if (!rows[0]) return yield* new GovernanceNotFound();
+          return rows[0];
+        }),
+      );
   }),
 );
